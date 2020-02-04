@@ -21,12 +21,15 @@ import {
 } from './saved_objects';
 import { ServerFacade } from './types';
 
-export { CoreSetup, Logger, PluginInitializerContext, ServerFacade };
+export { CoreSetup, Logger, PluginInitializerContext };
 
 export interface SetupPlugins {
   features: FeaturesSetup;
   security: SecuritySetup;
 }
+
+export type SetupServices = CoreSetup & SetupPlugins;
+export type LegacySetupServices = SetupServices & ServerFacade;
 
 export class Plugin {
   readonly name = 'siem';
@@ -115,6 +118,6 @@ export class Plugin {
 
     const libs = compose(core, plugins, this.context.env);
     initServer(libs);
-    initRoutes(core, plugins, __legacy);
+    initRoutes({ ...core, ...plugins, ...__legacy });
   }
 }

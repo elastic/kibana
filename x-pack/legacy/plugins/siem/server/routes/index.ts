@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CoreSetup, SetupPlugins, ServerFacade } from '../plugin';
+import { LegacySetupServices } from '../plugin';
 
 import { createRulesRoute } from '../lib/detection_engine/routes/rules/create_rules_route';
 import { createIndexRoute } from '../lib/detection_engine/routes/index/create_index_route';
@@ -27,41 +27,41 @@ import { exportRulesRoute } from '../lib/detection_engine/routes/rules/export_ru
 import { findRulesStatusesRoute } from '../lib/detection_engine/routes/rules/find_rules_status_route';
 import { getPrepackagedRulesStatusRoute } from '../lib/detection_engine/routes/rules/get_prepackaged_rules_status_route';
 
-export const initRoutes = (core: CoreSetup, plugins: SetupPlugins, __legacy: ServerFacade) => {
+export const initRoutes = (services: LegacySetupServices) => {
   // Detection Engine Rule routes that have the REST endpoints of /api/detection_engine/rules
   // All REST rule creation, deletion, updating, etc......
-  createRulesRoute(__legacy);
-  readRulesRoute(__legacy);
-  updateRulesRoute(__legacy);
-  deleteRulesRoute(__legacy);
-  findRulesRoute(__legacy);
+  createRulesRoute(services);
+  readRulesRoute(services);
+  updateRulesRoute(services);
+  deleteRulesRoute(services);
+  findRulesRoute(services);
 
-  addPrepackedRulesRoute(__legacy);
-  getPrepackagedRulesStatusRoute(__legacy);
-  createRulesBulkRoute(__legacy);
-  updateRulesBulkRoute(__legacy);
-  deleteRulesBulkRoute(__legacy);
+  addPrepackedRulesRoute(services);
+  getPrepackagedRulesStatusRoute(services);
+  createRulesBulkRoute(services);
+  updateRulesBulkRoute(services);
+  deleteRulesBulkRoute(services);
 
-  importRulesRoute(__legacy);
-  exportRulesRoute(__legacy);
+  importRulesRoute(services);
+  exportRulesRoute(services);
 
-  findRulesStatusesRoute(__legacy);
+  findRulesStatusesRoute(services);
 
   // Detection Engine Signals routes that have the REST endpoints of /api/detection_engine/signals
   // POST /api/detection_engine/signals/status
   // Example usage can be found in siem/server/lib/detection_engine/scripts/signals
-  setSignalsStatusRoute(__legacy);
-  querySignalsRoute(__legacy);
+  setSignalsStatusRoute(services);
+  querySignalsRoute(services);
 
   // Detection Engine index routes that have the REST endpoints of /api/detection_engine/index
   // All REST index creation, policy management for spaces
-  createIndexRoute(__legacy);
-  readIndexRoute(__legacy);
-  deleteIndexRoute(__legacy);
+  createIndexRoute(services);
+  readIndexRoute(services);
+  deleteIndexRoute(services);
 
   // Detection Engine tags routes that have the REST endpoints of /api/detection_engine/tags
-  readTagsRoute(__legacy);
+  readTagsRoute(services);
 
   // Privileges API to get the generic user privileges
-  readPrivilegesRoute(__legacy);
+  readPrivilegesRoute(services);
 };
