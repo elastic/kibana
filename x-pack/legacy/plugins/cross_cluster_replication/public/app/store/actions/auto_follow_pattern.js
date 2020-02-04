@@ -208,7 +208,7 @@ export const resumeAutoFollowPattern = id =>
     handler: () => resumeAutoFollowPatternRequest(id),
     onSuccess: response => {
       /**
-       * We can have 1 or more auto-follow pattern pause operations
+       * We can have 1 or more auto-follow pattern resume operations
        * that can fail or succeed. We will show 1 toast notification for each.
        */
       if (response.errors.length) {
