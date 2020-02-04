@@ -10,7 +10,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import {
   OptInExampleFlyout,
   PRIVACY_STATEMENT_URL,
-  TelemetryPluginStart,
+  TelemetryPluginSetup,
 } from '../../lib/telemetry';
 
 interface State {
@@ -22,7 +22,7 @@ interface Props {
   onOptInChange: (isOptingInToTelemetry: boolean) => void;
   isOptingInToTelemetry: boolean;
   isStartTrial: boolean;
-  telemetry: TelemetryPluginStart;
+  telemetry: TelemetryPluginSetup;
 }
 
 export class TelemetryOptIn extends React.Component<Props, State> {

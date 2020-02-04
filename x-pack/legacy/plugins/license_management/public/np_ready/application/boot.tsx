@@ -11,8 +11,8 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import * as history from 'history';
 import { DocLinksStart, HttpSetup, ToastsSetup, ChromeStart } from 'src/core/public';
 
-// @ts-ignore
 import { TelemetryPluginSetup } from 'src/plugins/telemetry/public';
+// @ts-ignore
 import { App } from './app.container';
 // @ts-ignore
 import { licenseManagementStore } from './store';
