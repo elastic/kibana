@@ -145,7 +145,7 @@ class ResolverSearchHandler {
       throw new Error('Unable to find origin information');
     }
     const pagination = await this.buildPagination(
-      // total is an object in object in kibana >=7.0
+      // total is an object in kibana >=7.0
       // see https://github.com/elastic/kibana/issues/56694
       (esResponse.hits.total as unknown) as Total
     );

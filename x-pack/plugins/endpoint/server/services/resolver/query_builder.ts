@@ -148,8 +148,6 @@ async function buildSearchBody(
 ) {
   const { pageSize: size, from } = await getPagination(endpointAppContext, paginationInfo);
   // Need to address https://github.com/elastic/endpoint-app-team/issues/147 here
-  // use the default value of 10k here and if it results in a gte perform a count if need be
-  const trackTotal = 10000;
 
   return {
     body: {
@@ -158,9 +156,6 @@ async function buildSearchBody(
     },
     from,
     size,
-    // check to see if there is more than the client is requesting so we can indicate they should request the next
-    // page
-    track_total_hits: trackTotal,
   };
 }
 
