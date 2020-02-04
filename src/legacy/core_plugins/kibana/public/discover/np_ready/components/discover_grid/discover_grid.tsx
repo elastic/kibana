@@ -68,14 +68,23 @@ interface Props {
   onAddColumn: (column: string) => void;
 }
 
-const cellPopoverRenderer = (
-  value: string | ReactNode,
-  positiveFilterClick: () => void,
-  negativeFilterClick: () => void
-) => {
+function CellPopover({
+  value,
+  onPositiveFilterClick,
+  onNegativeFilterClick,
+}: {
+  value: string | ReactNode;
+  onPositiveFilterClick: () => void;
+  onNegativeFilterClick: () => void;
+}) {
+  const node = useMemo(() => <>{value}!</>, [value]);
+  const placeholder = i18n.translate('kbn.discover.grid.filterValuePlaceholder', {
+    defaultMessage: 'value',
+  });
+  const text = useRenderToText(node, placeholder);
   return (
     <>
-      <span id="foo">{value}</span>
+      {value}
       <EuiSpacer size="m" />
       <EuiFlexGroup gutterSize="none">
         <EuiFlexItem>
@@ -83,11 +92,9 @@ const cellPopoverRenderer = (
             iconType="magnifyWithPlus"
             aria-label={i18n.translate('kbn.discover.grid.ariaFilterOn', {
               defaultMessage: 'Filter on {value}',
-              // @ts-ignore // TODO@myasonik value renders as [object Object]
-              values: { value },
+              values: { value: text },
             })}
-            aria-describedby="foo"
-            onClick={positiveFilterClick}
+            onClick={onPositiveFilterClick}
           >
             {i18n.translate('kbn.discover.grid.filterOn', {
               defaultMessage: 'Filter on value',
@@ -99,11 +106,10 @@ const cellPopoverRenderer = (
             iconType="magnifyWithMinus"
             aria-label={i18n.translate('kbn.discover.grid.ariaFilterOut', {
               defaultMessage: 'Filter without {value}',
-              // @ts-ignore // TODO@myasonik value renders as [object Object]
-              values: { value },
+              values: { value: text },
             })}
             color="danger"
-            onClick={negativeFilterClick}
+            onClick={onNegativeFilterClick}
           >
             {i18n.translate('kbn.discover.grid.filterOut', {
               defaultMessage: 'Filter without value',
@@ -113,7 +119,7 @@ const cellPopoverRenderer = (
       </EuiFlexGroup>
     </>
   );
-};
+}
 
 export function DiscoverGrid({
   rows,
@@ -269,10 +275,12 @@ export function DiscoverGrid({
       value = formattedField(row, fieldName);
 
       if (showFilterActions(isDetails, fieldName)) {
-        return cellPopoverRenderer(
-          value,
-          () => createFilter(fieldName, rows[rowIndex], '+'),
-          () => createFilter(fieldName, rows[rowIndex], '-')
+        return (
+          <CellPopover
+            value={value}
+            onPositiveFilterClick={() => createFilter(fieldName, rows[rowIndex], '+')}
+            onNegativeFilterClick={() => createFilter(fieldName, rows[rowIndex], '-')}
+          />
         );
       }
 
