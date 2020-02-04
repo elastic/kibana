@@ -138,8 +138,7 @@ export function jobRoutes({ xpackMainPlugin, router }: RouteInitialization) {
    *
    * @api {put} /api/ml/anomaly_detectors/:jobId Instantiate an anomaly detection job
    * @apiName CreateAnomalyDetectors
-   * @apiDescription This API creates an anomaly detection job that performs an analysis
-   *                 on the source index and stores the outcome in a destination index.
+   * @apiDescription Creates an anomaly detection job.
    *
    * @apiParam {String} jobId Job ID.
    */
@@ -172,9 +171,9 @@ export function jobRoutes({ xpackMainPlugin, router }: RouteInitialization) {
   /**
    * @apiGroup AnomalyDetectors
    *
-   * @api {put} /api/ml/anomaly_detectors/:jobId/_update Update an anomaly detection job
+   * @api {post} /api/ml/anomaly_detectors/:jobId/_update Update an anomaly detection job
    * @apiName UpdateAnomalyDetectors
-   * @apiDescription This API updates an anomaly detection job
+   * @apiDescription Updates certain properties of an anomaly detection job.
    *
    * @apiParam {String} jobId Job ID.
    */
@@ -346,7 +345,7 @@ export function jobRoutes({ xpackMainPlugin, router }: RouteInitialization) {
    *
    * @api {post} /api/ml/anomaly_detectors/:jobId/_forecast Create forecast for specified job
    * @apiName ForecastAnomalyDetector
-   * @apiDescription Creates forecast for specified anomaly detection job.
+   * @apiDescription Creates a forecast for the specified anomaly detection job, predicting the future behavior of a time series by using its historical behavior.
    *
    * @apiParam {String} jobId Job ID.
    */
@@ -381,8 +380,8 @@ export function jobRoutes({ xpackMainPlugin, router }: RouteInitialization) {
    * @apiGroup AnomalyDetectors
    *
    * @api {post} /api/ml/anomaly_detectors/:jobId/results/overall_buckets  Obtain overall bucket scores for the specified job ID
-   * @apiName ForecastAnomalyDetector
-   * @apiDescription Creates forecast for specified anomaly detection job.
+   * @apiName GetOverallBuckets
+   * @apiDescription Retrieves overall bucket results that summarize the bucket results of multiple anomaly detection jobs.
    *
    * @apiParam {String} jobId Job ID.
    *
@@ -425,9 +424,9 @@ export function jobRoutes({ xpackMainPlugin, router }: RouteInitialization) {
   /**
    * @apiGroup AnomalyDetectors
    *
-   * @api {get} /api/ml/anomaly_detectors/:jobId/results/categories/{categoryId} Get results category data by job id and category id
-   * @apiName GetCategoryByJobId
-   * @apiDescription Returns the categories results for the specified id and category id.
+   * @api {get} /api/ml/anomaly_detectors/:jobId/results/categories/:categoryId Get results category data by job id and category id
+   * @apiName GetCategories
+   * @apiDescription Returns the categories results for the specified job ID and category ID.
    *
    * @apiParam {String} jobId Job ID.
    * @apiParam {String} categoryId Category ID.
