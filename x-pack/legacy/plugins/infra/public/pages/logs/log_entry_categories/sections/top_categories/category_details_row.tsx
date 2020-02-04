@@ -6,20 +6,27 @@
 
 import React, { useEffect } from 'react';
 
+import euiStyled from '../../../../../../../../common/eui_styled_components';
 import { TimeRange } from '../../../../../../common/http_api/shared';
 import { useLogEntryCategoryExamples } from '../../use_log_entry_category_examples';
 import { CategoryExampleMessage, useExampleColumnWidths } from './category_example_message';
-import euiStyled from '../../../../../../../../common/eui_styled_components';
+import { CategoryExampleMessagesLoadingIndicator } from './category_example_messages_loading_indicator';
+
+const exampleCount = 5;
 
 export const CategoryDetailsRow: React.FunctionComponent<{
   categoryId: number;
   timeRange: TimeRange;
   sourceId: string;
 }> = ({ categoryId, timeRange, sourceId }) => {
-  const { getLogEntryCategoryExamples, logEntryCategoryExamples } = useLogEntryCategoryExamples({
+  const {
+    getLogEntryCategoryExamples,
+    isLoadingLogEntryCategoryExamples,
+    logEntryCategoryExamples,
+  } = useLogEntryCategoryExamples({
     categoryId,
     endTime: timeRange.endTime,
-    exampleCount: 5,
+    exampleCount,
     sourceId,
     startTime: timeRange.startTime,
   });
@@ -34,14 +41,18 @@ export const CategoryDetailsRow: React.FunctionComponent<{
     <>
       <CharacterDimensionsProbe />
       <CategoryExampleMessages>
-        {logEntryCategoryExamples.map((categoryExample, categoryExampleIndex) => (
-          <CategoryExampleMessage
-            columnWidths={columnWidths}
-            key={categoryExampleIndex}
-            message={categoryExample.message}
-            timestamp={categoryExample.timestamp}
-          />
-        ))}
+        {isLoadingLogEntryCategoryExamples ? (
+          <CategoryExampleMessagesLoadingIndicator exampleCount={exampleCount} />
+        ) : (
+          logEntryCategoryExamples.map((categoryExample, categoryExampleIndex) => (
+            <CategoryExampleMessage
+              columnWidths={columnWidths}
+              key={categoryExampleIndex}
+              message={categoryExample.message}
+              timestamp={categoryExample.timestamp}
+            />
+          ))
+        )}
       </CategoryExampleMessages>
     </>
   );
@@ -49,7 +60,7 @@ export const CategoryDetailsRow: React.FunctionComponent<{
 
 const CategoryExampleMessages = euiStyled.div`
   align-items: stretch;
-  flex-direction: row;
+  flex-direction: column;
   flex: 1 0 0%;
   overflow: hidden;
 `;
