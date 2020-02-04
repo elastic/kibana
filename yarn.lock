@@ -1980,6 +1980,33 @@
     tabbable "^3.0.0"
     uuid "^3.1.0"
 
+"@elastic/eui@18.3.0":
+  version "18.3.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-18.3.0.tgz#e21c6246624f694e2ae1c7c1f1a11b612faf260a"
+  integrity sha512-Rkj1rTtDa6iZMUF7pxYRojku1sLXzTU0FK1D9i0XE3H//exy3VyTV6qUlbdkiKXjO7emrgQqfzKDeXT+ZYztgg==
+  dependencies:
+    "@types/chroma-js" "^1.4.3"
+    "@types/lodash" "^4.14.116"
+    "@types/numeral" "^0.0.25"
+    "@types/react-beautiful-dnd" "^10.1.0"
+    chroma-js "^2.0.4"
+    classnames "^2.2.5"
+    highlight.js "^9.12.0"
+    html "^1.0.0"
+    keymirror "^0.1.1"
+    lodash "^4.17.11"
+    numeral "^2.0.6"
+    prop-types "^15.6.0"
+    react-ace "^7.0.5"
+    react-beautiful-dnd "^10.1.0"
+    react-focus-lock "^1.17.7"
+    react-input-autosize "^2.2.2"
+    react-is "~16.3.0"
+    react-virtualized "^9.21.2"
+    resize-observer-polyfill "^1.5.0"
+    tabbable "^3.0.0"
+    uuid "^3.1.0"
+
 "@elastic/filesaver@1.1.2":
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/@elastic/filesaver/-/filesaver-1.1.2.tgz#1998ffb3cd89c9da4ec12a7793bfcae10e30c77a"
@@ -12592,6 +12619,11 @@ eslint-plugin-react-hooks@^2.3.0:
   version "2.3.0"
   resolved "https://registry.yarnpkg.com/eslint-plugin-react-hooks/-/eslint-plugin-react-hooks-2.3.0.tgz#53e073961f1f5ccf8dd19558036c1fac8c29d99a"
   integrity sha512-gLKCa52G4ee7uXzdLiorca7JIQZPPXRAQDXV83J4bUEeUuc5pIEyZYAZ45Xnxe5IuupxEqHS+hUhSLIimK1EMw==
+
+eslint-plugin-react-perf@^3.2.3:
+  version "3.2.3"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-react-perf/-/eslint-plugin-react-perf-3.2.3.tgz#e28d42d3a1f7ec3c8976a94735d8e17e7d652a45"
+  integrity sha512-bMiPt7uywwS1Ly25n752NE3Ei0XBZ3igplTkZ8GPJKyZVVUd3cHgzILGeQW2HIeAkzQ9zwk9HM6EcYDipdFk3Q==
 
 eslint-plugin-react@^7.17.0:
   version "7.17.0"

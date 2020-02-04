@@ -55,9 +55,9 @@ export const useUpdateKueryString = (
       const elasticsearchQuery = esKuery.toElasticsearchQuery(ast, indexPattern);
 
       esFilters = JSON.stringify(elasticsearchQuery);
-
-      updateEsQueryForFilterGroup(filterQueryString, indexPattern);
     }
+    updateEsQueryForFilterGroup(filterQueryString, indexPattern);
+
     return [esFilters];
   } catch (err) {
     return [urlFilters, err];

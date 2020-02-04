@@ -9,6 +9,8 @@
     "kbn:watch": "node scripts/build --watch"
   },
   "devDependencies": {
+    "abort-controller": "^3.0.0",
+    "@elastic/eui": "18.3.0",
     "@elastic/charts": "^16.1.0",
     "@elastic/eui": "18.2.1",
     "@kbn/dev-utils": "1.0.0",
