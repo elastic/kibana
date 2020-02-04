@@ -30,7 +30,7 @@ export class SearchProfilerUIPlugin implements Plugin<void, void, AppPublicPlugi
         defaultMessage: 'Quickly check the performance of any Elasticsearch query.',
       }),
       icon: 'searchProfilerApp',
-      path: '/app/kibana#/devTools/searchprofiler',
+      path: '/app/kibana#/dev_tools/searchprofiler',
       showOnHomePage: false,
       category: FeatureCatalogueCategory.ADMIN,
     });

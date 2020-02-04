@@ -172,7 +172,7 @@ export default function({ getService }) {
               {
                 feature: {
                   dashboard: ['read'],
-                  devTools: ['all'],
+                  dev_tools: ['all'],
                 },
                 spaces: ['*'],
               },
@@ -198,7 +198,7 @@ export default function({ getService }) {
             applications: [
               {
                 application: 'kibana-.kibana',
-                privileges: ['feature_dashboard.read', 'feature_devTools.all'],
+                privileges: ['feature_dashboard.read', 'feature_dev_tools.all'],
                 resources: ['*'],
               },
               {

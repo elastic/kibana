@@ -24,7 +24,7 @@ npSetup.plugins.devTools.register({
     };
     if (!licenseCheck.showPage) {
       npStart.core.notifications.toasts.addDanger(licenseCheck.message);
-      window.location.hash = '/devTools';
+      window.location.hash = '/dev_tools';
       return () => {};
     }
     const { renderApp } = await import('./render_app');

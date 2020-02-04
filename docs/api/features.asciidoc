@@ -173,7 +173,7 @@ The API returns the following:
     "id": "devTools",
     "name": "Dev Tools",
     "icon": "devToolsApp",
-    "navLinkId": "kibana:devTools",
+    "navLinkId": "kibana:dev_tools",
     "app": [
       "kibana"
     ],

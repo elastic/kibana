@@ -123,11 +123,11 @@ export default async function({ readConfigFile }) {
       },
       grokDebugger: {
         pathname: '/app/kibana',
-        hash: '/devTools/grokdebugger',
+        hash: '/dev_tools/grokdebugger',
       },
       searchProfiler: {
         pathname: '/app/kibana',
-        hash: '/devTools/searchprofiler',
+        hash: '/dev_tools/searchprofiler',
       },
       spaceSelector: {
         pathname: '/',

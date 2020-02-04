@@ -87,7 +87,7 @@ export default async function({ readConfigFile }) {
       },
       console: {
         pathname: '/app/kibana',
-        hash: '/devTools/console',
+        hash: '/dev_tools/console',
       },
       account: {
         pathname: '/app/kibana',

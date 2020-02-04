@@ -99,7 +99,7 @@ export default function({ getService }: FtrProviderContext) {
             'discover',
             'visualize',
             'dashboard',
-            'devTools',
+            'dev_tools',
             'advancedSettings',
             'indexPatterns',
             'timelion',

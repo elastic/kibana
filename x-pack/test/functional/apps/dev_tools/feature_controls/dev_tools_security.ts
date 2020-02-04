@@ -28,28 +28,28 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       await PageObjects.security.forceLogout();
     });
 
-    describe('global devTools all privileges', () => {
+    describe('global dev_tools all privileges', () => {
       before(async () => {
-        await security.role.create('global_devTools_all_role', {
+        await security.role.create('global_dev_tools_all_role', {
           kibana: [
             {
               feature: {
-                devTools: ['all'],
+                dev_tools: ['all'],
               },
               spaces: ['*'],
             },
           ],
         });
 
-        await security.user.create('global_devTools_all_user', {
-          password: 'global_devTools_all_user-password',
-          roles: ['global_devTools_all_role'],
+        await security.user.create('global_dev_tools_all_user', {
+          password: 'global_dev_tools_all_user-password',
+          roles: ['global_dev_tools_all_role'],
           full_name: 'test user',
         });
 
         await PageObjects.security.login(
-          'global_devTools_all_user',
-          'global_devTools_all_user-password',
+          'global_dev_tools_all_user',
+          'global_dev_tools_all_user-password',
           {
             expectSpaceSelector: false,
           }
@@ -57,8 +57,8 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       after(async () => {
-        await security.role.delete('global_devTools_all_role');
-        await security.user.delete('global_devTools_all_user');
+        await security.role.delete('global_dev_tools_all_role');
+        await security.user.delete('global_dev_tools_all_user');
       });
 
       it('shows Dev Tools navlink', async () => {
@@ -109,28 +109,28 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('global devTools read-only privileges', () => {
+    describe('global dev_tools read-only privileges', () => {
       before(async () => {
-        await security.role.create('global_devTools_read_role', {
+        await security.role.create('global_dev_tools_read_role', {
           kibana: [
             {
               feature: {
-                devTools: ['read'],
+                dev_tools: ['read'],
               },
               spaces: ['*'],
             },
           ],
         });
 
-        await security.user.create('global_devTools_read_user', {
-          password: 'global_devTools_read_user-password',
-          roles: ['global_devTools_read_role'],
+        await security.user.create('global_dev_tools_read_user', {
+          password: 'global_dev_tools_read_user-password',
+          roles: ['global_dev_tools_read_role'],
           full_name: 'test user',
         });
 
         await PageObjects.security.login(
-          'global_devTools_read_user',
-          'global_devTools_read_user-password',
+          'global_dev_tools_read_user',
+          'global_dev_tools_read_user-password',
           {
             expectSpaceSelector: false,
           }
@@ -138,8 +138,8 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       after(async () => {
-        await security.role.delete('global_devTools_read_role');
-        await security.user.delete('global_devTools_read_user');
+        await security.role.delete('global_dev_tools_read_role');
+        await security.user.delete('global_dev_tools_read_user');
       });
 
       it(`shows 'Dev Tools' navlink`, async () => {
@@ -190,9 +190,9 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('no devTools privileges', () => {
+    describe('no dev_tools privileges', () => {
       before(async () => {
-        await security.role.create('no_devTools_privileges_role', {
+        await security.role.create('no_dev_tools_privileges_role', {
           kibana: [
             {
               feature: {
@@ -203,15 +203,15 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           ],
         });
 
-        await security.user.create('no_devTools_privileges_user', {
-          password: 'no_devTools_privileges_user-password',
-          roles: ['no_devTools_privileges_role'],
+        await security.user.create('no_dev_tools_privileges_user', {
+          password: 'no_dev_tools_privileges_user-password',
+          roles: ['no_dev_tools_privileges_role'],
           full_name: 'test user',
         });
 
         await PageObjects.security.login(
-          'no_devTools_privileges_user',
-          'no_devTools_privileges_user-password',
+          'no_dev_tools_privileges_user',
+          'no_dev_tools_privileges_user-password',
           {
             expectSpaceSelector: false,
           }
@@ -219,8 +219,8 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       after(async () => {
-        await security.role.delete('no_devTools_privileges_role');
-        await security.user.delete('no_devTools_privileges_user');
+        await security.role.delete('no_dev_tools_privileges_role');
+        await security.user.delete('no_dev_tools_privileges_user');
       });
 
       it(`doesn't show 'Dev Tools' navLink`, async () => {

@@ -67,12 +67,12 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('space with devTools disabled', () => {
+    describe('space with dev_tools disabled', () => {
       before(async () => {
         await spacesService.create({
           id: 'custom_space',
           name: 'custom_space',
-          disabledFeatures: ['devTools'],
+          disabledFeatures: ['dev_tools'],
         });
       });
 

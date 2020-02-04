@@ -53,7 +53,7 @@ export const EmptyPrompt: React.FunctionComponent<Props> = ({ isAdmin, docLinks 
       </Fragment>
     }
     actions={
-      <EuiButton type="primary" href="#/devTools">
+      <EuiButton type="primary" href="#/dev_tools">
         <FormattedMessage
           id="xpack.security.management.apiKeys.table.emptyPromptConsoleButtonMessage"
           defaultMessage="Go to Console"

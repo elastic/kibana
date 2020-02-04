@@ -24,7 +24,7 @@ export default function({ getService }: FtrProviderContext) {
               discover: ['all', 'read'],
               visualize: ['all', 'read'],
               dashboard: ['all', 'read'],
-              devTools: ['all', 'read'],
+              dev_tools: ['all', 'read'],
               advancedSettings: ['all', 'read'],
               indexPatterns: ['all', 'read'],
               savedObjectsManagement: ['all', 'read'],
