@@ -17,9 +17,15 @@ export const createHandler = ({
   const result = await client.find({
     type: TEXT_OBJECT.type,
     search: username,
-    fields: ['userId'],
+    searchFields: ['userId'],
   });
-  return response.ok({ body: result });
+
+  return response.ok({
+    body: result.saved_objects.map(({ id, attributes: { userId, ...restOfAttributes } }) => ({
+      id,
+      ...restOfAttributes,
+    })),
+  });
 };
 
 export const registerGetAllRoute = ({
@@ -31,7 +37,7 @@ export const registerGetAllRoute = ({
     { path: `${APP.apiPathBase}/text_objects/get_all`, validate: false },
     withCurrentUsername({
       authc,
-      otherDeps: { getInternalSavedObjectsClient },
+      passThroughDeps: { getInternalSavedObjectsClient },
       userHandler: createHandler,
     })
   );

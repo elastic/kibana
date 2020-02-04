@@ -22,5 +22,5 @@ export const withCurrentUsername = ({
   if (!username) {
     return response.forbidden({ body: 'Could not find current username' });
   }
-  return userHandler({ username, ...passThroughDeps })(ctx, request, response);
+  return userHandler({ username: username.username, ...passThroughDeps })(ctx, request, response);
 };

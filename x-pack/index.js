@@ -42,6 +42,7 @@ import { actions } from './legacy/plugins/actions';
 import { alerting } from './legacy/plugins/alerting';
 import { lens } from './legacy/plugins/lens';
 import { triggersActionsUI } from './legacy/plugins/triggers_actions_ui';
+import { consoleExtensions } from './legacy/plugins/console_extensions';
 
 module.exports = function(kibana) {
   return [
@@ -83,5 +84,6 @@ module.exports = function(kibana) {
     actions(kibana),
     alerting(kibana),
     triggersActionsUI(kibana),
+    consoleExtensions(kibana),
   ];
 };

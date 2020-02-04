@@ -4,5 +4,5 @@
   "kibanaVersion": "kibana",
   "requiredPlugins": ["console", "features", "security"],
   "server": true,
-  "ui": false
+  "ui": true
 }

@@ -10,6 +10,7 @@ import { APP } from '../../../../common/constants';
 import { TEXT_OBJECT } from './constants';
 import { RouteDependencies, AuthcHandlerArgs } from './types';
 import { withCurrentUsername } from './with_current_username';
+import { TextObject } from '../../../../../../../src/plugins/console/common/text_object';
 
 const routeValidation = {
   body: schema.object({
@@ -30,11 +31,14 @@ export const createHandler = ({
   response
 ) => {
   const client = getInternalSavedObjectsClient();
-  const result = await client.create(TEXT_OBJECT.type, {
+  const {
+    attributes: { userId, ...restOfAttributes },
+    id,
+  } = await client.create(TEXT_OBJECT.type, {
     userId: username,
     ...request.body,
   });
-  return response.ok({ body: result });
+  return response.ok({ body: { id, ...restOfAttributes } });
 };
 
 export const registerCreateRoute = ({

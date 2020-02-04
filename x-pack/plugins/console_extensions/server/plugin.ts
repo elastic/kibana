@@ -11,7 +11,8 @@ import {
   PluginInitializerContext,
   SavedObjectsClientContract,
   SavedObjectsClient,
-} from 'kibana/server';
+} from '../../../../src/core/server';
+
 import { APP } from '../common/constants';
 
 import { ConsoleSetup } from '../../../../src/plugins/console/server';

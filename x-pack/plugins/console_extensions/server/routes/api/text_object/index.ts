@@ -6,7 +6,7 @@
 
 import { RouteDependencies } from './types';
 
-import { registerGetAllRoute } from './get';
+import { registerGetAllRoute } from './get_all';
 import { registerCreateRoute } from './create';
 import { registerUpdateRoute } from './update';
 

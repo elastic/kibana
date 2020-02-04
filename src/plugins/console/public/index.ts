@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import { ConsoleUIPlugin } from './plugin';
+import { ConsoleUIPlugin, ConsoleSetup } from './plugin';
 
-export { ConsoleUIPlugin as Plugin };
+export { ConsoleUIPlugin as Plugin, ConsoleSetup };
 
-export { ObjectStorageClient, IdObject } from './types';
+export { ObjectStorageClient, IdObject, ObjectStorage } from './types';
 
 export function plugin() {
   return new ConsoleUIPlugin();

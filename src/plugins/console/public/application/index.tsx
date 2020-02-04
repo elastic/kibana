@@ -26,6 +26,7 @@ import { createStorage, createHistory, createSettings, Settings } from '../servi
 import * as localStorageObjectClient from '../lib/local_storage_object_client';
 import { createUsageTracker } from '../services/tracker';
 import { UsageCollectionSetup } from '../../../usage_collection/public';
+import { ObjectStorageClient } from '../types';
 
 let settingsRef: Settings;
 export function legacyBackDoorToSettings() {
@@ -39,6 +40,7 @@ export interface BootDependencies {
   elasticsearchUrl: string;
   usageCollection?: UsageCollectionSetup;
   element: HTMLElement;
+  getObjectStorageClient: () => ObjectStorageClient;
 }
 
 export function renderApp({
@@ -48,6 +50,7 @@ export function renderApp({
   elasticsearchUrl,
   usageCollection,
   element,
+  getObjectStorageClient,
 }: BootDependencies) {
   const trackUiMetric = createUsageTracker(usageCollection);
   trackUiMetric.load('opened_app');
@@ -58,7 +61,7 @@ export function renderApp({
   });
   const history = createHistory({ storage });
   const settings = createSettings({ storage });
-  const objectStorageClient = localStorageObjectClient.create(storage);
+  const objectStorageClient = getObjectStorageClient() ?? localStorageObjectClient.create(storage);
   settingsRef = settings;
 
   render(

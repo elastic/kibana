@@ -23,10 +23,14 @@ import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
 
 import { FeatureCatalogueCategory } from '../../home/public';
 
-import { AppSetupUIPluginDependencies } from './types';
+import { AppSetupUIPluginDependencies, ObjectStorageClient } from './types';
 
-export class ConsoleUIPlugin implements Plugin<void, void, AppSetupUIPluginDependencies> {
-  constructor() {}
+export interface ConsoleSetup {
+  setObjectStorageClient: (client: ObjectStorageClient) => void;
+}
+
+export class ConsoleUIPlugin implements Plugin<ConsoleSetup, void, AppSetupUIPluginDependencies> {
+  private objectStorageClientOverride: ObjectStorageClient | null = null;
 
   async setup(
     { notifications, getStartServices }: CoreSetup,
@@ -61,6 +65,7 @@ export class ConsoleUIPlugin implements Plugin<void, void, AppSetupUIPluginDepen
           'http://localhost:9200'
         ) as string;
         return renderApp({
+          getObjectStorageClient: () => this.objectStorageClientOverride,
           docLinkVersion: docLinks.DOC_LINK_VERSION,
           I18nContext: i18nDep.Context,
           notifications,
@@ -70,7 +75,16 @@ export class ConsoleUIPlugin implements Plugin<void, void, AppSetupUIPluginDepen
         });
       },
     });
+
+    return {
+      setObjectStorageClient: client => {
+        if (this.objectStorageClientOverride) {
+          throw new Error('Object storage client has already been set');
+        }
+        this.objectStorageClientOverride = client;
+      },
+    };
   }
 
-  async start(core: CoreStart) {}
+  start(core: CoreStart) {}
 }

@@ -48,7 +48,7 @@ export const registerUpdateRoute = ({
   authc,
   getInternalSavedObjectsClient,
 }: RouteDependencies) => {
-  router.post(
+  router.put(
     { path: `${APP.apiPathBase}/text_objects/update`, validate: routeValidation },
     withCurrentUsername({
       authc,
