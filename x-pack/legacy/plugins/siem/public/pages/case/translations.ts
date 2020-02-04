@@ -39,6 +39,14 @@ export const OPTIONAL = i18n.translate('xpack.siem.case.casePage.optional', {
   defaultMessage: 'Optional',
 });
 
-export const SUBMIT = i18n.translate('xpack.siem.case.casePage.optional', {
+export const SUBMIT = i18n.translate('xpack.siem.case.casePage.submit', {
   defaultMessage: 'Submit',
+});
+
+export const DESCRIPTION = i18n.translate('xpack.siem.case.casePage.description', {
+  defaultMessage: 'Description',
+});
+
+export const PREVIEW = i18n.translate('xpack.siem.case.casePage.preview', {
+  defaultMessage: 'Preview',
 });

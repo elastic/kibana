@@ -20,8 +20,9 @@ import { usePostCase } from '../../../../containers/case/use_post_case';
 import { schema } from './schema';
 import * as i18n from '../../translations';
 import { SiemPageName } from '../../../home/types';
+import { DescriptionMarkdown } from '../description_md_editor';
 
-const CommonUseField = getUseField({ component: Field });
+export const CommonUseField = getUseField({ component: Field });
 
 const TagContainer = styled.div`
   margin-top: 16px;
@@ -76,13 +77,11 @@ export const Create = React.memo(() => {
             isDisabled: isLoading,
           }}
         />
-        <CommonUseField
-          path="description"
-          componentProps={{
-            idAria: 'caseDescription',
-            'data-test-subj': 'caseDescription',
-            isDisabled: isLoading,
-          }}
+        <DescriptionMarkdown
+          descriptionInputHeight={200}
+          initialDescription={data.description}
+          isLoading={isLoading}
+          onChange={description => setFormData({ ...data, description })}
         />
         <CommonUseField
           path="case_type"

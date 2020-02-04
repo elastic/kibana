@@ -29,9 +29,6 @@ export const schema: FormSchema = {
   },
   description: {
     type: FIELD_TYPES.TEXTAREA,
-    label: i18n.translate('xpack.siem.case.createCase.fieldDescriptionLabel', {
-      defaultMessage: 'Description',
-    }),
     validations: [
       {
         validator: emptyField(

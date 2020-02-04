@@ -22,7 +22,6 @@ import React, { FC, memo, useState, useEffect, ComponentType } from 'react';
 import styled from 'styled-components';
 
 import { AuthTableColumns } from '../page/hosts/authentications_table';
-import { CasesColumns } from '../page/case/all_cases/columns';
 import { HostsTableColumns } from '../page/hosts/hosts_table';
 import { NetworkDnsColumns } from '../page/network/network_dns_table/columns';
 import { NetworkHttpColumns } from '../page/network/network_http_table/columns';
@@ -73,7 +72,6 @@ declare type HostsTableColumnsTest = [
 
 declare type BasicTableColumns =
   | AuthTableColumns
-  | CasesColumns
   | HostsTableColumns
   | HostsTableColumnsTest
   | NetworkDnsColumns

@@ -53,23 +53,28 @@ export function wrapError(error: any): CustomHttpResponseOptions<ResponseError> 
 export const formatSavedOptionsFind = (
   savedObjectsFindOptions: SavedObjectsFindOptionsType
 ): SavedObjectsFindOptionsTypeFormatted => {
-  let options = { ...savedObjectsFindOptions };
+  let options: SavedObjectsFindOptionsTypeFormatted = {
+    defaultSearchOperator: savedObjectsFindOptions.defaultSearchOperator,
+    filter: savedObjectsFindOptions.filter,
+    page: savedObjectsFindOptions.page,
+    perPage: savedObjectsFindOptions.perPage,
+    search: savedObjectsFindOptions.search,
+    sortField: savedObjectsFindOptions.sortField,
+    sortOrder: savedObjectsFindOptions.sortOrder,
+    searchFields: undefined,
+    fields: undefined,
+  };
   if (savedObjectsFindOptions.fields && savedObjectsFindOptions.fields.length > 0) {
     options = {
       ...options,
-      fields: JSON.parse(savedObjectsFindOptions.fields),
+      fields: JSON.parse(savedObjectsFindOptions.fields) as string[],
     };
-  } else {
-    delete options.fields;
   }
   if (savedObjectsFindOptions.searchFields && savedObjectsFindOptions.searchFields.length > 0) {
     options = {
       ...options,
-      searchFields: JSON.parse(savedObjectsFindOptions.searchFields),
+      searchFields: JSON.parse(savedObjectsFindOptions.searchFields) as string[],
     };
-  } else {
-    delete options.searchFields;
   }
-  // wtf ts
   return options;
 };

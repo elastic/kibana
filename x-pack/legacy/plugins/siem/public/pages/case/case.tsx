@@ -6,11 +6,10 @@
 
 import React from 'react';
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup } from '@elastic/eui';
 import { HeaderPage } from '../../components/header_page';
 import { WrapperPage } from '../../components/wrapper_page';
 import { AllCases } from './components/all_cases';
-import { CasesSearchBar } from './components/search_bar';
 import { SpyRoute } from '../../utils/route/spy_routes';
 import * as i18n from './translations';
 import { getCreateCaseUrl } from '../../components/link_to';
@@ -33,7 +32,6 @@ export const CasesPage = React.memo(() => (
           </EuiButton>
         </EuiFlexGroup>
       </HeaderPage>
-      {/* <CasesSearchBar /> */}
       <AllCases />
     </WrapperPage>
     <SpyRoute />

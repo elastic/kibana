@@ -8,10 +8,12 @@ import React, { Fragment } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
+import { Markdown } from '../../../../components/markdown';
 import { HeaderPage } from '../../../../components/header_page';
 import * as i18n from '../../translations';
 import { getCaseUrl } from '../../../../components/link_to';
 import { useGetCase } from '../../../../containers/case/use_get_case';
+import { FormattedRelativePreferenceDate } from '../../../../components/formatted_date';
 
 interface Props {
   caseId: string;
@@ -37,7 +39,7 @@ export const CaseView = React.memo(({ caseId }: Props) => {
   const caseDetailsDefinitions = [
     {
       title: <FormattedMessage id="xpack.siem.caseView.description" defaultMessage="Description" />,
-      definition: data.description,
+      definition: <Markdown raw={data.description} />,
     },
     {
       title: <FormattedMessage id="xpack.siem.caseView.case_type" defaultMessage="Case type" />,
@@ -49,11 +51,11 @@ export const CaseView = React.memo(({ caseId }: Props) => {
     },
     {
       title: <FormattedMessage id="xpack.siem.caseView.updated_at" defaultMessage="Last updated" />,
-      definition: data.updated_at,
+      definition: <FormattedRelativePreferenceDate value={data.updated_at} />,
     },
     {
       title: <FormattedMessage id="xpack.siem.caseView.created_at" defaultMessage="Created at" />,
-      definition: data.created_at,
+      definition: <FormattedRelativePreferenceDate value={data.created_at} />,
     },
     {
       title: <FormattedMessage id="xpack.siem.caseView.created_by" defaultMessage="Created by" />,
