@@ -19,13 +19,14 @@
 
 import React, { useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { Subscription } from 'rxjs';
 import { CoreStart } from 'src/core/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { KibanaContextProvider } from '../../../../kibana_react/public';
 import { DataPublicPluginStart, esFilters, Query, TimeRange, SavedQuery } from '../..';
 import { QueryStart } from '../../query';
 import { SearchBarOwnProps, SearchBar } from './search_bar';
+import { useFilterManager } from './lib/use_filter_manager';
+import { useTimefilter } from './lib/use_timefilter';
 
 interface StatefulSearchBarDeps {
   core: CoreStart;
@@ -186,10 +187,11 @@ export function createSearchBar({ core, storage, data }: StatefulSearchBarDeps) 
   return (props: StatefulSearchBarProps) => {
     const { appName, savedQueryId, onQuerySubmit } = props;
     const { filterManager, timefilter, savedQueries } = data.query;
-    const tfRefreshInterval = timefilter.timefilter.getRefreshInterval();
-    const [refreshInterval, setRefreshInterval] = useState(tfRefreshInterval.value);
-    const [refreshPaused, setRefreshPaused] = useState(tfRefreshInterval.pause);
-    const [timeRange, setTimerange] = useState(timefilter.timefilter.getTime());
+
+    // handle service state updates.
+    // i.e. filters being added from a visualization directly to filterManager.
+    const { filters } = useFilterManager({ filterManager });
+    const { timeRange, refreshInterval } = useTimefilter({ timefilter: timefilter.timefilter });
 
     // Handle queries
     const [query, setQuery] = useState<Query>(
@@ -201,7 +203,8 @@ export function createSearchBar({ core, storage, data }: StatefulSearchBarDeps) 
 
     // Fire onQuerySubmit on query or timerange change
     useEffect(() => {
-      if (props.useDefaultBehaviors && onQuerySubmit)
+      if (!props.useDefaultBehaviors) return;
+      if (onQuerySubmit)
         onQuerySubmit(
           {
             dateRange: timeRange,
@@ -240,52 +243,6 @@ export function createSearchBar({ core, storage, data }: StatefulSearchBarDeps) 
       fetchSavedQuery();
     }, [savedQueryId, savedQueries]);
 
-    // timerange
-    useEffect(() => {
-      const subscriptions = new Subscription();
-
-      subscriptions.add(
-        timefilter.timefilter.getRefreshIntervalUpdate$().subscribe({
-          next: () => {
-            const newRefreshInterval = timefilter.timefilter.getRefreshInterval();
-            setRefreshInterval(newRefreshInterval.value);
-            setRefreshPaused(newRefreshInterval.pause);
-          },
-        })
-      );
-
-      subscriptions.add(
-        timefilter.timefilter.getTimeUpdate$().subscribe({
-          next: () => {
-            setTimerange(timefilter.timefilter.getTime());
-          },
-        })
-      );
-
-      return () => {
-        subscriptions.unsubscribe();
-      };
-    }, [timefilter.timefilter]);
-
-    // filters
-    const [filters, setFilters] = useState(filterManager.getFilters());
-    useEffect(() => {
-      const subscriptions = new Subscription();
-
-      subscriptions.add(
-        filterManager.getUpdates$().subscribe({
-          next: () => {
-            const newFilters = filterManager.getFilters();
-            setFilters(newFilters);
-          },
-        })
-      );
-
-      return () => {
-        subscriptions.unsubscribe();
-      };
-    }, [filterManager]);
-
     return (
       <KibanaContextProvider
         services={{
@@ -307,8 +264,8 @@ export function createSearchBar({ core, storage, data }: StatefulSearchBarDeps) 
           timeHistory={timefilter.history}
           dateRangeFrom={timeRange.from}
           dateRangeTo={timeRange.to}
-          refreshInterval={refreshInterval}
-          isRefreshPaused={refreshPaused}
+          refreshInterval={refreshInterval.value}
+          isRefreshPaused={refreshInterval.pause}
           filters={filters}
           query={query}
           onFiltersUpdated={defaultFiltersUpdated(data.query)}
