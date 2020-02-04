@@ -13,6 +13,7 @@ import { Provider } from 'react-redux';
 import { Store } from 'redux';
 import { appStoreFactory } from './store';
 import { AlertIndex } from './view/alerts';
+import { PolicyList } from './view/policy';
 
 /**
  * This module will be loaded asynchronously to reduce the bundle size of your plugin's main bundle.
@@ -66,6 +67,7 @@ const AppRoot: React.FunctionComponent<RouterProps> = React.memo(({ basename, st
             }}
           />
           <Route path="/alerts" component={AlertIndex} />
+          <Route path="/policy" exact component={PolicyList} />
           <Route
             render={() => (
               <FormattedMessage id="xpack.endpoint.notFound" defaultMessage="Page Not Found" />
