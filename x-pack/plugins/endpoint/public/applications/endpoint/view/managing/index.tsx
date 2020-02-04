@@ -18,6 +18,8 @@ import {
   EuiTitle,
   EuiBasicTable,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   endpointListData,
   endpointListPageIndex,
@@ -62,48 +64,66 @@ export const EndpointList = () => {
   const columns = [
     {
       field: 'host.hostname',
-      name: 'Host',
+      name: i18n.translate('management.list.host', {
+        defaultMessage: 'Host',
+      }),
     },
     {
       field: 'host.os.name',
-      name: 'Operating System',
+      name: i18n.translate('management.list.os', {
+        defaultMessage: 'Operating System',
+      }),
     },
     {
       field: 'endpoint.policy.name',
-      name: 'Policy',
+      name: i18n.translate('management.list.policy', {
+        defaultMessage: 'Policy',
+      }),
     },
     {
       field: 'host.hostname',
-      name: 'Policy Status',
+      name: i18n.translate('management.list.policyStatus', {
+        defaultMessage: 'Policy Status',
+      }),
       render: () => {
         return <span>Policy Status</span>;
       },
     },
     {
       field: 'endpoint',
-      name: 'Alerts',
+      name: i18n.translate('management.list.alerts', {
+        defaultMessage: 'Alerts',
+      }),
       render: () => {
         return <span>0</span>;
       },
     },
     {
       field: 'endpoint.domain',
-      name: 'Domain',
+      name: i18n.translate('management.list.domain', {
+        defaultMessage: 'Domain',
+      }),
     },
     {
       field: 'host.ip',
-      name: 'IP Address',
+      name: i18n.translate('management.list.ip', {
+        defaultMessage: 'IP Address',
+      }),
     },
     {
       field: 'endpoint.sensor',
-      name: 'Sensor Version',
+      name: i18n.translate('management.list.sensorVersion', {
+        defaultMessage: 'Sensor Version',
+      }),
       render: () => {
         return <span>version</span>;
       },
     },
     {
       field: 'host.hostname',
-      name: 'Last Active',
+      name: i18n.translate('management.list.lastActive', {
+        defaultMessage: 'Last Active',
+      }),
       render: () => {
         return <span>xxxx</span>;
       },
@@ -124,7 +144,9 @@ export const EndpointList = () => {
           <EuiPageContentHeader>
             <EuiPageContentHeaderSection>
               <EuiTitle>
-                <h2>Hosts</h2>
+                <h2>
+                  <FormattedMessage id="management.list.hosts" defaultMessage="Hosts" />
+                </h2>
               </EuiTitle>
             </EuiPageContentHeaderSection>
           </EuiPageContentHeader>
