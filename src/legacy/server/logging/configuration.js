@@ -47,7 +47,7 @@ export default function loggingConfiguration(config) {
     });
   }
 
-  const loggerStream = getLoggerStream({
+  const loggerStreamOptions = {
     config: {
       json: config.get('logging.json'),
       dest: config.get('logging.dest'),
@@ -70,7 +70,7 @@ export default function loggingConfiguration(config) {
       },
       {}
     ),
-  });
+  };
 
   const options = {
     ops: {
@@ -80,7 +80,7 @@ export default function loggingConfiguration(config) {
       request: ['headers', 'payload'],
     },
     reporters: {
-      logReporter: loggerStream,
+      logReporter: () => getLoggerStream(loggerStreamOptions),
     },
   };
   return options;
