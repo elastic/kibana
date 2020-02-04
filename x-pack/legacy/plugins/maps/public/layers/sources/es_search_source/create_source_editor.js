@@ -49,7 +49,6 @@ export class CreateSourceEditor extends Component {
   state = {
     isLoadingIndexPattern: false,
     noGeoIndexPatternsExist: false,
-    filterByMapBounds: DEFAULT_FILTER_BY_MAP_BOUNDS,
     ...RESET_INDEX_PATTERN_STATE,
   };
 
