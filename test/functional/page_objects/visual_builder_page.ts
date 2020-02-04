@@ -414,6 +414,19 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
+    public async setIntervalValue(value: string) {
+      const el = await testSubjects.find('metricsIndexPatternInterval');
+      await el.clearValue();
+      await el.type(value);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+
+    public async setDropLastBucket(value: boolean) {
+      const option = await testSubjects.find(`metricsDropLastBucket-${value ? 'yes' : 'no'}`);
+      (await option.findByCssSelector('label')).click();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+
     public async selectIndexPatternTimeField(timeField: string) {
       await retry.try(async () => {
         await comboBox.clearInputField('metricsIndexPatternFieldsSelect');

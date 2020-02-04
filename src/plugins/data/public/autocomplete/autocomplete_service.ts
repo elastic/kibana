@@ -75,3 +75,9 @@ export class AutocompleteService {
     this.querySuggestionProviders.clear();
   }
 }
+
+/** @public **/
+export type AutocompleteSetup = ReturnType<AutocompleteService['setup']>;
+
+/** @public **/
+export type AutocompleteStart = ReturnType<AutocompleteService['start']>;
