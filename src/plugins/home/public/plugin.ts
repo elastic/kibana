@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import { CoreStart, Plugin } from 'src/core/public';
+import { CoreStart, Plugin, PluginInitializerContext } from 'kibana/public';
+
 import {
   EnvironmentService,
   EnvironmentServiceSetup,
@@ -26,19 +27,23 @@ import {
   FeatureCatalogueRegistrySetup,
   FeatureCatalogueRegistryStart,
 } from './services';
+import { ConfigSchema } from '../config';
 
 export class HomePublicPlugin implements Plugin<HomePublicPluginSetup, HomePublicPluginStart> {
   private readonly featuresCatalogueRegistry = new FeatureCatalogueRegistry();
   private readonly environmentService = new EnvironmentService();
 
-  public async setup() {
+  constructor(private readonly initializerContext: PluginInitializerContext<ConfigSchema>) {}
+
+  public setup(): HomePublicPluginSetup {
     return {
       featureCatalogue: { ...this.featuresCatalogueRegistry.setup() },
       environment: { ...this.environmentService.setup() },
+      config: this.initializerContext.config.get(),
     };
   }
 
-  public async start(core: CoreStart) {
+  public start(core: CoreStart): HomePublicPluginStart {
     return {
       featureCatalogue: {
         ...this.featuresCatalogueRegistry.start({
@@ -71,6 +76,7 @@ export interface HomePublicPluginSetup {
    * @deprecated
    */
   environment: EnvironmentSetup;
+  config: ConfigSchema;
 }
 
 /** @public */
