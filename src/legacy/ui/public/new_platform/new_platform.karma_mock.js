@@ -119,6 +119,9 @@ export const npSetup = {
     kibanaLegacy: {
       registerLegacyApp: () => {},
       forwardApp: () => {},
+      config: {
+        defaultAppId: 'home',
+      },
     },
     inspector: {
       registerView: () => undefined,
@@ -139,6 +142,9 @@ export const npSetup = {
       },
       environment: {
         update: sinon.fake(),
+      },
+      config: {
+        disableWelcomeScreen: false,
       },
     },
     charts: {
@@ -196,6 +202,9 @@ export const npStart = {
     kibanaLegacy: {
       getApps: () => [],
       getForwards: () => [],
+      config: {
+        defaultAppId: 'home',
+      },
     },
     data: {
       autocomplete: {
@@ -296,6 +305,9 @@ export const npStart = {
       },
       environment: {
         get: sinon.fake(),
+      },
+      config: {
+        disableWelcomeScreen: false,
       },
     },
     navigation: {
