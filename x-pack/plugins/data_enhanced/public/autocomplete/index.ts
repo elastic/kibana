@@ -4,9 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PluginInitializerContext } from 'src/core/public';
-import { KueryAutocompletePlugin as Plugin } from './plugin';
-
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new Plugin(initializerContext);
-}
+export {
+  setupKqlQuerySuggestionProvider,
+  KUERY_LANGUAGE_NAME,
+} from './providers/kql_query_suggestion';

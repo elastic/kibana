@@ -5,8 +5,8 @@
  */
 
 import { setupGetConjunctionSuggestions } from './conjunction';
-import { autocomplete, esKuery } from '../../../../../../src/plugins/data/public';
-import { coreMock } from '../../../../../../src/core/public/mocks';
+import { autocomplete, esKuery } from '../../../../../../../src/plugins/data/public';
+import { coreMock } from '../../../../../../../src/core/public/mocks';
 
 const mockKueryNode = (kueryNode: Partial<esKuery.KueryNode>) =>
   (kueryNode as unknown) as esKuery.KueryNode;
