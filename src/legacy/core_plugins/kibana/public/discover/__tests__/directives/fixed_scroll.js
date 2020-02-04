@@ -18,8 +18,8 @@
  */
 
 import expect from '@kbn/expect';
+import { pluginInstance } from 'plugins/kibana/discover/legacy';
 import ngMock from 'ng_mock';
-import '../../fixed_scroll';
 import $ from 'jquery';
 import sinon from 'sinon';
 
@@ -29,8 +29,9 @@ describe('FixedScroll directive', function() {
   let compile;
   let flushPendingTasks;
   const trash = [];
-
-  beforeEach(ngMock.module('kibana'));
+  beforeEach(() => pluginInstance.initializeServices());
+  beforeEach(() => pluginInstance.initializeInnerAngular());
+  beforeEach(ngMock.module('app/discover'));
   beforeEach(
     ngMock.inject(function($compile, $rootScope, $timeout) {
       flushPendingTasks = function flushPendingTasks() {

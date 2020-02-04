@@ -21,52 +21,52 @@ import { i18n } from '@kbn/i18n';
 export function getFieldTypeName(type: string) {
   switch (type) {
     case 'boolean':
-      return i18n.translate('common.ui.directives.fieldNameIcons.booleanAriaLabel', {
+      return i18n.translate('kbn.discover.fieldNameIcons.booleanAriaLabel', {
         defaultMessage: 'Boolean field',
       });
     case 'conflict':
-      return i18n.translate('common.ui.directives.fieldNameIcons.conflictFieldAriaLabel', {
+      return i18n.translate('kbn.discover.fieldNameIcons.conflictFieldAriaLabel', {
         defaultMessage: 'Conflicting field',
       });
     case 'date':
-      return i18n.translate('common.ui.directives.fieldNameIcons.dateFieldAriaLabel', {
+      return i18n.translate('kbn.discover.fieldNameIcons.dateFieldAriaLabel', {
         defaultMessage: 'Date field',
       });
     case 'geo_point':
-      return i18n.translate('common.ui.directives.fieldNameIcons.geoPointFieldAriaLabel', {
+      return i18n.translate('kbn.discover.fieldNameIcons.geoPointFieldAriaLabel', {
         defaultMessage: 'Geo point field',
       });
     case 'geo_shape':
-      return i18n.translate('common.ui.directives.fieldNameIcons.geoShapeFieldAriaLabel', {
+      return i18n.translate('kbn.discover.fieldNameIcons.geoShapeFieldAriaLabel', {
         defaultMessage: 'Geo shape field',
       });
     case 'ip':
-      return i18n.translate('common.ui.directives.fieldNameIcons.ipAddressFieldAriaLabel', {
+      return i18n.translate('kbn.discover.fieldNameIcons.ipAddressFieldAriaLabel', {
         defaultMessage: 'IP address field',
       });
     case 'murmur3':
-      return i18n.translate('common.ui.directives.fieldNameIcons.murmur3FieldAriaLabel', {
+      return i18n.translate('kbn.discover.fieldNameIcons.murmur3FieldAriaLabel', {
         defaultMessage: 'Murmur3 field',
       });
     case 'number':
-      return i18n.translate('common.ui.directives.fieldNameIcons.numberFieldAriaLabel', {
+      return i18n.translate('kbn.discover.fieldNameIcons.numberFieldAriaLabel', {
         defaultMessage: 'Number field',
       });
     case 'source':
       // Note that this type is currently not provided, type for _source is undefined
-      return i18n.translate('common.ui.directives.fieldNameIcons.sourceFieldAriaLabel', {
+      return i18n.translate('kbn.discover.fieldNameIcons.sourceFieldAriaLabel', {
         defaultMessage: 'Source field',
       });
     case 'string':
-      return i18n.translate('common.ui.directives.fieldNameIcons.stringFieldAriaLabel', {
+      return i18n.translate('kbn.discover.fieldNameIcons.stringFieldAriaLabel', {
         defaultMessage: 'String field',
       });
     case 'nested':
-      return i18n.translate('common.ui.directives.fieldNameIcons.nestedFieldAriaLabel', {
+      return i18n.translate('kbn.discover.fieldNameIcons.nestedFieldAriaLabel', {
         defaultMessage: 'Nested field',
       });
     default:
-      return i18n.translate('common.ui.directives.fieldNameIcons.unknownFieldAriaLabel', {
+      return i18n.translate('kbn.discover.fieldNameIcons.unknownFieldAriaLabel', {
         defaultMessage: 'Unknown field',
       });
   }
