@@ -6,7 +6,6 @@
 
 import {
   createMockServer,
-  createMockServerWithoutAlertClientDecoration,
   getMockEmptyIndex,
   getMockNonEmptyIndex,
 } from '../__mocks__/_mock_server';
@@ -48,14 +47,14 @@ import { addPrepackedRulesRoute } from './add_prepackaged_rules_route';
 import { PrepackagedRules } from '../../types';
 
 describe('add_prepackaged_rules_route', () => {
-  let { server, alertsClient, actionsClient, elasticsearch } = createMockServer();
+  let { services, inject, alertsClient, actionsClient, elasticsearch } = createMockServer();
 
   beforeEach(() => {
     jest.resetAllMocks();
-    ({ server, alertsClient, actionsClient, elasticsearch } = createMockServer());
+    ({ services, inject, alertsClient, actionsClient, elasticsearch } = createMockServer());
     elasticsearch.getCluster = getMockNonEmptyIndex();
 
-    addPrepackedRulesRoute(server);
+    addPrepackedRulesRoute(services);
   });
 
   describe('status codes with actionClient and alertClient', () => {
@@ -64,14 +63,14 @@ describe('add_prepackaged_rules_route', () => {
       alertsClient.get.mockResolvedValue(getResult());
       actionsClient.create.mockResolvedValue(createActionResult());
       alertsClient.create.mockResolvedValue(getResult());
-      const { statusCode } = await server.inject(addPrepackagedRulesRequest());
+      const { statusCode } = await inject(addPrepackagedRulesRequest());
       expect(statusCode).toBe(200);
     });
 
     test('returns 404 if alertClient is not available on the route', async () => {
-      const { serverWithoutAlertClient } = createMockServerWithoutAlertClientDecoration();
-      createRulesRoute(serverWithoutAlertClient);
-      const { statusCode } = await serverWithoutAlertClient.inject(addPrepackagedRulesRequest());
+      const { services: _services, inject: _inject } = createMockServer(false);
+      createRulesRoute(_services);
+      const { statusCode } = await _inject(addPrepackagedRulesRequest());
       expect(statusCode).toBe(404);
     });
   });
@@ -83,7 +82,7 @@ describe('add_prepackaged_rules_route', () => {
       alertsClient.get.mockResolvedValue(getResult());
       actionsClient.create.mockResolvedValue(createActionResult());
       alertsClient.create.mockResolvedValue(getResult());
-      const { payload } = await server.inject(addPrepackagedRulesRequest());
+      const { payload } = await inject(addPrepackagedRulesRequest());
       expect(JSON.parse(payload)).toEqual({
         error: 'Bad Request',
         message:
@@ -99,7 +98,7 @@ describe('add_prepackaged_rules_route', () => {
       alertsClient.get.mockResolvedValue(getResult());
       actionsClient.create.mockResolvedValue(createActionResult());
       alertsClient.create.mockResolvedValue(getResult());
-      const { payload } = await server.inject(addPrepackagedRulesRequest());
+      const { payload } = await inject(addPrepackagedRulesRequest());
       expect(JSON.parse(payload)).toEqual({
         rules_installed: 1,
         rules_updated: 0,
@@ -111,7 +110,7 @@ describe('add_prepackaged_rules_route', () => {
       alertsClient.get.mockResolvedValue(getResult());
       actionsClient.create.mockResolvedValue(createActionResult());
       alertsClient.create.mockResolvedValue(getResult());
-      const { payload } = await server.inject(addPrepackagedRulesRequest());
+      const { payload } = await inject(addPrepackagedRulesRequest());
       expect(JSON.parse(payload)).toEqual({
         rules_installed: 0,
         rules_updated: 1,

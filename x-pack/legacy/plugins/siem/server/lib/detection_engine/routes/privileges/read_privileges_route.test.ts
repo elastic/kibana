@@ -10,15 +10,15 @@ import { readPrivilegesRoute } from './read_privileges_route';
 import * as myUtils from '../utils';
 
 describe('read_privileges', () => {
-  let { server, elasticsearch } = createMockServer();
+  let { inject, services, elasticsearch } = createMockServer();
 
   beforeEach(() => {
     jest.spyOn(myUtils, 'getIndex').mockReturnValue('fakeindex');
-    ({ server, elasticsearch } = createMockServer());
+    ({ inject, services, elasticsearch } = createMockServer());
     elasticsearch.getCluster = jest.fn(() => ({
       callWithRequest: jest.fn(() => getMockPrivileges()),
     }));
-    readPrivilegesRoute(server);
+    readPrivilegesRoute(services);
   });
 
   afterEach(() => {
@@ -27,12 +27,12 @@ describe('read_privileges', () => {
 
   describe('normal status codes', () => {
     test('returns 200 when doing a normal request', async () => {
-      const { statusCode } = await server.inject(getPrivilegeRequest());
+      const { statusCode } = await inject(getPrivilegeRequest());
       expect(statusCode).toBe(200);
     });
 
     test('returns the payload when doing a normal request', async () => {
-      const { payload } = await server.inject(getPrivilegeRequest());
+      const { payload } = await inject(getPrivilegeRequest());
       expect(JSON.parse(payload)).toEqual(getMockPrivileges());
     });
   });

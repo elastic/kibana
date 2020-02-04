@@ -4,10 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  createMockServer,
-  createMockServerWithoutAlertClientDecoration,
-} from '../__mocks__/_mock_server';
+import { createMockServer } from '../__mocks__/_mock_server';
 
 import { updateRulesRoute } from './update_rules_route';
 import { ServerInjectOptions } from 'hapi';
@@ -25,12 +22,12 @@ import { updateRulesBulkRoute } from './update_rules_bulk_route';
 import { BulkError } from '../utils';
 
 describe('update_rules_bulk', () => {
-  let { server, alertsClient, actionsClient } = createMockServer();
+  let { services, inject, alertsClient, actionsClient } = createMockServer();
 
   beforeEach(() => {
     jest.resetAllMocks();
-    ({ server, alertsClient, actionsClient } = createMockServer());
-    updateRulesBulkRoute(server);
+    ({ services, inject, alertsClient, actionsClient } = createMockServer());
+    updateRulesBulkRoute(services);
   });
 
   describe('status codes with actionClient and alertClient', () => {
@@ -39,7 +36,7 @@ describe('update_rules_bulk', () => {
       alertsClient.get.mockResolvedValue(getResult());
       actionsClient.update.mockResolvedValue(updateActionResult());
       alertsClient.update.mockResolvedValue(getResult());
-      const { statusCode } = await server.inject(getUpdateBulkRequest());
+      const { statusCode } = await inject(getUpdateBulkRequest());
       expect(statusCode).toBe(200);
     });
 
@@ -48,7 +45,7 @@ describe('update_rules_bulk', () => {
       alertsClient.get.mockResolvedValue(getResult());
       actionsClient.update.mockResolvedValue(updateActionResult());
       alertsClient.update.mockResolvedValue(getResult());
-      const { statusCode } = await server.inject(getUpdateBulkRequest());
+      const { statusCode } = await inject(getUpdateBulkRequest());
       expect(statusCode).toBe(200);
     });
 
@@ -57,7 +54,7 @@ describe('update_rules_bulk', () => {
       alertsClient.get.mockResolvedValue(getResult());
       actionsClient.update.mockResolvedValue(updateActionResult());
       alertsClient.update.mockResolvedValue(getResult());
-      const { payload } = await server.inject(getUpdateBulkRequest());
+      const { payload } = await inject(getUpdateBulkRequest());
       const parsed: BulkError[] = JSON.parse(payload);
       const expected: BulkError[] = [
         {
@@ -69,9 +66,9 @@ describe('update_rules_bulk', () => {
     });
 
     test('returns 404 if alertClient is not available on the route', async () => {
-      const { serverWithoutAlertClient } = createMockServerWithoutAlertClientDecoration();
-      updateRulesRoute(serverWithoutAlertClient);
-      const { statusCode } = await serverWithoutAlertClient.inject(getUpdateBulkRequest());
+      const { services: _services, inject: _inject } = createMockServer(false);
+      updateRulesRoute(_services);
+      const { statusCode } = await _inject(getUpdateBulkRequest());
       expect(statusCode).toBe(404);
     });
   });
@@ -86,7 +83,7 @@ describe('update_rules_bulk', () => {
         url: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
         payload: [noId],
       };
-      const { statusCode } = await server.inject(request);
+      const { statusCode } = await inject(request);
       expect(statusCode).toBe(400);
     });
 
@@ -99,7 +96,7 @@ describe('update_rules_bulk', () => {
         url: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
         payload: [typicalPayload()],
       };
-      const { statusCode } = await server.inject(request);
+      const { statusCode } = await inject(request);
       expect(statusCode).toEqual(200);
     });
 
@@ -112,7 +109,7 @@ describe('update_rules_bulk', () => {
         url: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
         payload: [typicalPayload()],
       };
-      const { payload } = await server.inject(request);
+      const { payload } = await inject(request);
       const parsed: BulkError[] = JSON.parse(payload);
       const expected: BulkError[] = [
         {
@@ -133,7 +130,7 @@ describe('update_rules_bulk', () => {
         url: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
         payload: [typicalPayload()],
       };
-      const { statusCode } = await server.inject(request);
+      const { statusCode } = await inject(request);
       expect(statusCode).toBe(200);
     });
 
@@ -153,7 +150,7 @@ describe('update_rules_bulk', () => {
           },
         ],
       };
-      const { statusCode } = await server.inject(request);
+      const { statusCode } = await inject(request);
       expect(statusCode).toBe(400);
     });
   });

@@ -19,27 +19,27 @@ import {
 import { DETECTION_ENGINE_SIGNALS_STATUS_URL } from '../../../../../common/constants';
 
 describe('set signal status', () => {
-  let { server, elasticsearch } = createMockServer();
+  let { inject, services, elasticsearch } = createMockServer();
 
   beforeEach(() => {
     jest.resetAllMocks();
     jest.spyOn(myUtils, 'getIndex').mockReturnValue('fakeindex');
-    ({ server, elasticsearch } = createMockServer());
+    ({ inject, services, elasticsearch } = createMockServer());
     elasticsearch.getCluster = jest.fn(() => ({
       callWithRequest: jest.fn(() => true),
     }));
-    setSignalsStatusRoute(server);
+    setSignalsStatusRoute(services);
   });
 
   describe('status on signal', () => {
     test('returns 200 when setting a status on a signal by ids', async () => {
-      const { statusCode } = await server.inject(getSetSignalStatusByIdsRequest());
+      const { statusCode } = await inject(getSetSignalStatusByIdsRequest());
       expect(statusCode).toBe(200);
       expect(myUtils.getIndex).toHaveReturnedWith('fakeindex');
     });
 
     test('returns 200 when setting a status on a signal by query', async () => {
-      const { statusCode } = await server.inject(getSetSignalStatusByQueryRequest());
+      const { statusCode } = await inject(getSetSignalStatusByQueryRequest());
       expect(statusCode).toBe(200);
     });
   });
@@ -51,7 +51,7 @@ describe('set signal status', () => {
         url: DETECTION_ENGINE_SIGNALS_STATUS_URL,
         payload: typicalSetStatusSignalByIdsPayload(),
       };
-      const { statusCode } = await server.inject(request);
+      const { statusCode } = await inject(request);
       expect(statusCode).toBe(200);
     });
 
@@ -61,7 +61,7 @@ describe('set signal status', () => {
         url: DETECTION_ENGINE_SIGNALS_STATUS_URL,
         payload: typicalSetStatusSignalByQueryPayload(),
       };
-      const { statusCode } = await server.inject(request);
+      const { statusCode } = await inject(request);
       expect(statusCode).toBe(200);
     });
 
@@ -71,7 +71,7 @@ describe('set signal status', () => {
         url: DETECTION_ENGINE_SIGNALS_STATUS_URL,
         payload: setStatusSignalMissingIdsAndQueryPayload(),
       };
-      const { statusCode } = await server.inject(request);
+      const { statusCode } = await inject(request);
       expect(statusCode).toBe(400);
     });
 
@@ -82,7 +82,7 @@ describe('set signal status', () => {
         url: DETECTION_ENGINE_SIGNALS_STATUS_URL,
         payload: justIds,
       };
-      const { statusCode } = await server.inject(request);
+      const { statusCode } = await inject(request);
       expect(statusCode).toBe(400);
     });
 
@@ -93,7 +93,7 @@ describe('set signal status', () => {
         url: DETECTION_ENGINE_SIGNALS_STATUS_URL,
         payload: justTheQuery,
       };
-      const { statusCode } = await server.inject(request);
+      const { statusCode } = await inject(request);
       expect(statusCode).toBe(400);
     });
 
@@ -108,7 +108,7 @@ describe('set signal status', () => {
         url: DETECTION_ENGINE_SIGNALS_STATUS_URL,
         payload: queryAndSignalIdsNoStatus,
       };
-      const { statusCode } = await server.inject(request);
+      const { statusCode } = await inject(request);
       expect(statusCode).toBe(400);
     });
   });

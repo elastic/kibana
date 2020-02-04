@@ -4,10 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  createMockServer,
-  createMockServerWithoutAlertClientDecoration,
-} from '../__mocks__/_mock_server';
+import { createMockServer } from '../__mocks__/_mock_server';
 
 import { updateRulesRoute } from './update_rules_route';
 import { ServerInjectOptions } from 'hapi';
@@ -24,12 +21,12 @@ import {
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 
 describe('update_rules', () => {
-  let { server, alertsClient, actionsClient, savedObjectsClient } = createMockServer();
+  let { services, inject, alertsClient, actionsClient, savedObjectsClient } = createMockServer();
 
   beforeEach(() => {
     jest.resetAllMocks();
-    ({ server, alertsClient, actionsClient, savedObjectsClient } = createMockServer());
-    updateRulesRoute(server);
+    ({ services, inject, alertsClient, actionsClient, savedObjectsClient } = createMockServer());
+    updateRulesRoute(services);
   });
 
   describe('status codes with actionClient and alertClient', () => {
@@ -39,7 +36,7 @@ describe('update_rules', () => {
       actionsClient.update.mockResolvedValue(updateActionResult());
       alertsClient.update.mockResolvedValue(getResult());
       savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
-      const { statusCode } = await server.inject(getUpdateRequest());
+      const { statusCode } = await inject(getUpdateRequest());
       expect(statusCode).toBe(200);
     });
 
@@ -49,14 +46,14 @@ describe('update_rules', () => {
       actionsClient.update.mockResolvedValue(updateActionResult());
       alertsClient.update.mockResolvedValue(getResult());
       savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
-      const { statusCode } = await server.inject(getUpdateRequest());
+      const { statusCode } = await inject(getUpdateRequest());
       expect(statusCode).toBe(404);
     });
 
     test('returns 404 if alertClient is not available on the route', async () => {
-      const { serverWithoutAlertClient } = createMockServerWithoutAlertClientDecoration();
-      updateRulesRoute(serverWithoutAlertClient);
-      const { statusCode } = await serverWithoutAlertClient.inject(getUpdateRequest());
+      const { services: _services, inject: _inject } = createMockServer(false);
+      updateRulesRoute(_services);
+      const { statusCode } = await _inject(getUpdateRequest());
       expect(statusCode).toBe(404);
     });
   });
@@ -74,7 +71,7 @@ describe('update_rules', () => {
           payload: noId,
         },
       };
-      const { statusCode } = await server.inject(request);
+      const { statusCode } = await inject(request);
       expect(statusCode).toBe(400);
     });
 
@@ -88,7 +85,7 @@ describe('update_rules', () => {
         url: DETECTION_ENGINE_RULES_URL,
         payload: typicalPayload(),
       };
-      const { statusCode } = await server.inject(request);
+      const { statusCode } = await inject(request);
       expect(statusCode).toBe(404);
     });
 
@@ -103,7 +100,7 @@ describe('update_rules', () => {
         url: DETECTION_ENGINE_RULES_URL,
         payload: typicalPayload(),
       };
-      const { statusCode } = await server.inject(request);
+      const { statusCode } = await inject(request);
       expect(statusCode).toBe(200);
     });
 
@@ -122,7 +119,7 @@ describe('update_rules', () => {
           type: 'something-made-up',
         },
       };
-      const { statusCode } = await server.inject(request);
+      const { statusCode } = await inject(request);
       expect(statusCode).toBe(400);
     });
   });

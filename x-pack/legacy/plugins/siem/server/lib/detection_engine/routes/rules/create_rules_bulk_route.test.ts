@@ -4,11 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  createMockServer,
-  createMockServerWithoutAlertClientDecoration,
-  getMockEmptyIndex,
-} from '../__mocks__/_mock_server';
+import { createMockServer, getMockEmptyIndex } from '../__mocks__/_mock_server';
 import { createRulesRoute } from './create_rules_route';
 import { ServerInjectOptions } from 'hapi';
 import {
@@ -22,12 +18,12 @@ import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { createRulesBulkRoute } from './create_rules_bulk_route';
 
 describe('create_rules_bulk', () => {
-  let { server, alertsClient, actionsClient, elasticsearch } = createMockServer();
+  let { services, inject, alertsClient, actionsClient, elasticsearch } = createMockServer();
 
   beforeEach(() => {
     jest.resetAllMocks();
-    ({ server, alertsClient, actionsClient, elasticsearch } = createMockServer());
-    createRulesBulkRoute(server);
+    ({ services, inject, alertsClient, actionsClient, elasticsearch } = createMockServer());
+    createRulesBulkRoute(services);
   });
 
   describe('status codes with actionClient and alertClient', () => {
@@ -36,14 +32,14 @@ describe('create_rules_bulk', () => {
       alertsClient.get.mockResolvedValue(getResult());
       actionsClient.create.mockResolvedValue(createActionResult());
       alertsClient.create.mockResolvedValue(getResult());
-      const { statusCode } = await server.inject(getReadBulkRequest());
+      const { statusCode } = await inject(getReadBulkRequest());
       expect(statusCode).toBe(200);
     });
 
     test('returns 404 if alertClient is not available on the route', async () => {
-      const { serverWithoutAlertClient } = createMockServerWithoutAlertClientDecoration();
-      createRulesRoute(serverWithoutAlertClient);
-      const { statusCode } = await serverWithoutAlertClient.inject(getReadBulkRequest());
+      const { services: _services, inject: _inject } = createMockServer(false);
+      createRulesRoute(_services);
+      const { statusCode } = await _inject(getReadBulkRequest());
       expect(statusCode).toBe(404);
     });
   });
@@ -55,7 +51,7 @@ describe('create_rules_bulk', () => {
       alertsClient.get.mockResolvedValue(getResult());
       actionsClient.create.mockResolvedValue(createActionResult());
       alertsClient.create.mockResolvedValue(getResult());
-      const { payload } = await server.inject(getReadBulkRequest());
+      const { payload } = await inject(getReadBulkRequest());
       expect(JSON.parse(payload)).toEqual([
         {
           error: {
@@ -80,7 +76,7 @@ describe('create_rules_bulk', () => {
         url: `${DETECTION_ENGINE_RULES_URL}/_bulk_create`,
         payload: [noRuleId],
       };
-      const { statusCode } = await server.inject(request);
+      const { statusCode } = await inject(request);
       expect(statusCode).toBe(200);
     });
 
@@ -100,7 +96,7 @@ describe('create_rules_bulk', () => {
           },
         ],
       };
-      const { statusCode } = await server.inject(request);
+      const { statusCode } = await inject(request);
       expect(statusCode).toBe(200);
     });
 
@@ -120,7 +116,7 @@ describe('create_rules_bulk', () => {
           },
         ],
       };
-      const { statusCode } = await server.inject(request);
+      const { statusCode } = await inject(request);
       expect(statusCode).toBe(400);
     });
   });

@@ -4,10 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  createMockServer,
-  createMockServerWithoutAlertClientDecoration,
-} from '../__mocks__/_mock_server';
+import { createMockServer } from '../__mocks__/_mock_server';
 
 import { readRulesRoute } from './read_rules_route';
 import { ServerInjectOptions } from 'hapi';
@@ -22,11 +19,11 @@ import {
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 
 describe('read_signals', () => {
-  let { server, alertsClient, savedObjectsClient } = createMockServer();
+  let { services, inject, alertsClient, savedObjectsClient } = createMockServer();
 
   beforeEach(() => {
-    ({ server, alertsClient, savedObjectsClient } = createMockServer());
-    readRulesRoute(server);
+    ({ services, inject, alertsClient, savedObjectsClient } = createMockServer());
+    readRulesRoute(services);
   });
 
   afterEach(() => {
@@ -38,14 +35,14 @@ describe('read_signals', () => {
       alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
       alertsClient.get.mockResolvedValue(getResult());
       savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
-      const { statusCode } = await server.inject(getReadRequest());
+      const { statusCode } = await inject(getReadRequest());
       expect(statusCode).toBe(200);
     });
 
     test('returns 404 if alertClient is not available on the route', async () => {
-      const { serverWithoutAlertClient } = createMockServerWithoutAlertClientDecoration();
-      readRulesRoute(serverWithoutAlertClient);
-      const { statusCode } = await serverWithoutAlertClient.inject(getReadRequest());
+      const { services: _services, inject: _inject } = createMockServer(false);
+      readRulesRoute(_services);
+      const { statusCode } = await _inject(getReadRequest());
       expect(statusCode).toBe(404);
     });
   });
@@ -60,7 +57,7 @@ describe('read_signals', () => {
         method: 'GET',
         url: DETECTION_ENGINE_RULES_URL,
       };
-      const { statusCode } = await server.inject(request);
+      const { statusCode } = await inject(request);
       expect(statusCode).toBe(400);
     });
   });

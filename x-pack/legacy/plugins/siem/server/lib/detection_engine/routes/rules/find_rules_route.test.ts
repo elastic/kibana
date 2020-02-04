@@ -4,10 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  createMockServer,
-  createMockServerWithoutAlertClientDecoration,
-} from '../__mocks__/_mock_server';
+import { createMockServer } from '../__mocks__/_mock_server';
 
 import { findRulesRoute } from './find_rules_route';
 import { ServerInjectOptions } from 'hapi';
@@ -16,11 +13,11 @@ import { getFindResult, getResult, getFindRequest } from '../__mocks__/request_r
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 
 describe('find_rules', () => {
-  let { server, alertsClient, actionsClient } = createMockServer();
+  let { services, inject, alertsClient, actionsClient } = createMockServer();
 
   beforeEach(() => {
-    ({ server, alertsClient, actionsClient } = createMockServer());
-    findRulesRoute(server);
+    ({ services, inject, alertsClient, actionsClient } = createMockServer());
+    findRulesRoute(services);
   });
 
   afterEach(() => {
@@ -37,14 +34,14 @@ describe('find_rules', () => {
         data: [],
       });
       alertsClient.get.mockResolvedValue(getResult());
-      const { statusCode } = await server.inject(getFindRequest());
+      const { statusCode } = await inject(getFindRequest());
       expect(statusCode).toBe(200);
     });
 
     test('returns 404 if alertClient is not available on the route', async () => {
-      const { serverWithoutAlertClient } = createMockServerWithoutAlertClientDecoration();
-      findRulesRoute(serverWithoutAlertClient);
-      const { statusCode } = await serverWithoutAlertClient.inject(getFindRequest());
+      const { services: _services, inject: _inject } = createMockServer(false);
+      findRulesRoute(_services);
+      const { statusCode } = await _inject(getFindRequest());
       expect(statusCode).toBe(404);
     });
   });
@@ -57,7 +54,7 @@ describe('find_rules', () => {
         method: 'GET',
         url: `${DETECTION_ENGINE_RULES_URL}/_find?invalid_value=500`,
       };
-      const { statusCode } = await server.inject(request);
+      const { statusCode } = await inject(request);
       expect(statusCode).toBe(400);
     });
 
@@ -68,7 +65,7 @@ describe('find_rules', () => {
         method: 'GET',
         url: `${DETECTION_ENGINE_RULES_URL}/_find?page=2&per_page=20&sort_field=timestamp&fields=["field-1","field-2","field-3]`,
       };
-      const { statusCode } = await server.inject(request);
+      const { statusCode } = await inject(request);
       expect(statusCode).toBe(200);
     });
   });

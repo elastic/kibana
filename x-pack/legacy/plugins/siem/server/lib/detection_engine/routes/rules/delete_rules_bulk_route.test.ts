@@ -4,10 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  createMockServer,
-  createMockServerWithoutAlertClientDecoration,
-} from '../__mocks__/_mock_server';
+import { createMockServer } from '../__mocks__/_mock_server';
 
 import { ServerInjectOptions } from 'hapi';
 import {
@@ -26,11 +23,11 @@ import { deleteRulesBulkRoute } from './delete_rules_bulk_route';
 import { BulkError } from '../utils';
 
 describe('delete_rules', () => {
-  let { server, alertsClient, savedObjectsClient } = createMockServer();
+  let { services, inject, alertsClient, savedObjectsClient } = createMockServer();
 
   beforeEach(() => {
-    ({ server, alertsClient, savedObjectsClient } = createMockServer());
-    deleteRulesBulkRoute(server);
+    ({ services, inject, alertsClient, savedObjectsClient } = createMockServer());
+    deleteRulesBulkRoute(services);
   });
 
   afterEach(() => {
@@ -42,7 +39,7 @@ describe('delete_rules', () => {
       alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
       alertsClient.get.mockResolvedValue(getResult());
       alertsClient.delete.mockResolvedValue({});
-      const { statusCode } = await server.inject(getDeleteBulkRequest());
+      const { statusCode } = await inject(getDeleteBulkRequest());
       expect(statusCode).toBe(200);
     });
 
@@ -50,7 +47,7 @@ describe('delete_rules', () => {
       alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
       alertsClient.get.mockResolvedValue(getResult());
       alertsClient.delete.mockResolvedValue({});
-      const { statusCode } = await server.inject(getDeleteAsPostBulkRequest());
+      const { statusCode } = await inject(getDeleteAsPostBulkRequest());
       expect(statusCode).toBe(200);
     });
 
@@ -58,7 +55,7 @@ describe('delete_rules', () => {
       alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
       alertsClient.get.mockResolvedValue(getResult());
       alertsClient.delete.mockResolvedValue({});
-      const { statusCode } = await server.inject(getDeleteBulkRequestById());
+      const { statusCode } = await inject(getDeleteBulkRequestById());
       expect(statusCode).toBe(200);
     });
 
@@ -66,7 +63,7 @@ describe('delete_rules', () => {
       alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
       alertsClient.get.mockResolvedValue(getResult());
       alertsClient.delete.mockResolvedValue({});
-      const { statusCode } = await server.inject(getDeleteAsPostBulkRequestById());
+      const { statusCode } = await inject(getDeleteAsPostBulkRequestById());
       expect(statusCode).toBe(200);
     });
 
@@ -74,7 +71,7 @@ describe('delete_rules', () => {
       alertsClient.find.mockResolvedValue(getFindResult());
       alertsClient.get.mockResolvedValue(getResult());
       alertsClient.delete.mockResolvedValue({});
-      const { statusCode } = await server.inject(getDeleteBulkRequest());
+      const { statusCode } = await inject(getDeleteBulkRequest());
       expect(statusCode).toBe(200);
     });
 
@@ -84,7 +81,7 @@ describe('delete_rules', () => {
       alertsClient.delete.mockResolvedValue({});
       savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
       savedObjectsClient.delete.mockResolvedValue({});
-      const { payload } = await server.inject(getDeleteBulkRequest());
+      const { payload } = await inject(getDeleteBulkRequest());
       const parsed: BulkError[] = JSON.parse(payload);
       const expected: BulkError[] = [
         {
@@ -96,9 +93,9 @@ describe('delete_rules', () => {
     });
 
     test('returns 404 if alertClient is not available on the route', async () => {
-      const { serverWithoutAlertClient } = createMockServerWithoutAlertClientDecoration();
-      deleteRulesBulkRoute(serverWithoutAlertClient);
-      const { statusCode } = await serverWithoutAlertClient.inject(getDeleteBulkRequest());
+      const { services: _services, inject: _inject } = createMockServer(false);
+      deleteRulesBulkRoute(_services);
+      const { statusCode } = await _inject(getDeleteBulkRequest());
       expect(statusCode).toBe(404);
     });
   });
@@ -112,7 +109,7 @@ describe('delete_rules', () => {
         method: 'DELETE',
         url: `${DETECTION_ENGINE_RULES_URL}/_bulk_delete`,
       };
-      const { statusCode } = await server.inject(request);
+      const { statusCode } = await inject(request);
       expect(statusCode).toBe(400);
     });
   });

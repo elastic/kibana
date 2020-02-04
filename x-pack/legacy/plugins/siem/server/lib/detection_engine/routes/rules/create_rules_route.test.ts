@@ -6,7 +6,6 @@
 
 import {
   createMockServer,
-  createMockServerWithoutAlertClientDecoration,
   getMockNonEmptyIndex,
   getMockEmptyIndex,
 } from '../__mocks__/_mock_server';
@@ -25,7 +24,8 @@ import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 
 describe('create_rules', () => {
   let {
-    server,
+    services,
+    inject,
     alertsClient,
     actionsClient,
     elasticsearch,
@@ -35,14 +35,15 @@ describe('create_rules', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     ({
-      server,
+      services,
+      inject,
       alertsClient,
       actionsClient,
       elasticsearch,
       savedObjectsClient,
     } = createMockServer());
     elasticsearch.getCluster = getMockNonEmptyIndex();
-    createRulesRoute(server);
+    createRulesRoute(services);
   });
 
   describe('status codes with actionClient and alertClient', () => {
@@ -52,14 +53,14 @@ describe('create_rules', () => {
       actionsClient.create.mockResolvedValue(createActionResult());
       alertsClient.create.mockResolvedValue(getResult());
       savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
-      const { statusCode } = await server.inject(getCreateRequest());
+      const { statusCode } = await inject(getCreateRequest());
       expect(statusCode).toBe(200);
     });
 
     test('returns 404 if alertClient is not available on the route', async () => {
-      const { serverWithoutAlertClient } = createMockServerWithoutAlertClientDecoration();
-      createRulesRoute(serverWithoutAlertClient);
-      const { statusCode } = await serverWithoutAlertClient.inject(getCreateRequest());
+      const { services: _services, inject: _inject } = createMockServer(false);
+      createRulesRoute(_services);
+      const { statusCode } = await _inject(getCreateRequest());
       expect(statusCode).toBe(404);
     });
   });
@@ -71,7 +72,7 @@ describe('create_rules', () => {
       alertsClient.get.mockResolvedValue(getResult());
       actionsClient.create.mockResolvedValue(createActionResult());
       alertsClient.create.mockResolvedValue(getResult());
-      const { payload } = await server.inject(getCreateRequest());
+      const { payload } = await inject(getCreateRequest());
       expect(JSON.parse(payload)).toEqual({
         error: 'Bad Request',
         message: 'To create a rule, the index must exist first. Index .siem-signals does not exist',
@@ -92,7 +93,7 @@ describe('create_rules', () => {
         url: DETECTION_ENGINE_RULES_URL,
         payload: noRuleId,
       };
-      const { statusCode } = await server.inject(request);
+      const { statusCode } = await inject(request);
       expect(statusCode).toBe(200);
     });
 
@@ -111,7 +112,7 @@ describe('create_rules', () => {
           type: 'query',
         },
       };
-      const { statusCode } = await server.inject(request);
+      const { statusCode } = await inject(request);
       expect(statusCode).toBe(200);
     });
 
@@ -130,7 +131,7 @@ describe('create_rules', () => {
           type: 'something-made-up',
         },
       };
-      const { statusCode } = await server.inject(request);
+      const { statusCode } = await inject(request);
       expect(statusCode).toBe(400);
     });
   });

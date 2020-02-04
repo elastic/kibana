@@ -6,7 +6,6 @@
 
 import Hapi from 'hapi';
 import { KibanaConfig } from 'src/legacy/server/kbn_server';
-import { ElasticsearchPlugin } from 'src/legacy/core_plugins/elasticsearch';
 import { savedObjectsClientMock } from '../../../../../../../../../src/core/server/mocks';
 import { alertsClientMock } from '../../../../../../alerting/server/alerts_client.mock';
 import { actionsClientMock } from '../../../../../../../../plugins/actions/server/mocks';
@@ -28,7 +27,7 @@ const assertNever = (): never => {
   throw new Error('Unexpected object');
 };
 
-const createMockKibanaConfig = (config: Record<string, string>): KibanaConfig => {
+const createMockKibanaConfig = (config: Record<string, string> = defaultConfig): KibanaConfig => {
   const returnConfig = {
     get(key: string) {
       return config[key];
@@ -44,62 +43,45 @@ const createMockKibanaConfig = (config: Record<string, string>): KibanaConfig =>
   }
 };
 
-export const createMockServer = (config: Record<string, string> = defaultConfig) => {
-  const server = new Hapi.Server({
-    port: 0,
-  });
-
-  server.config = () => createMockKibanaConfig(config);
-
+export const createMockServer = (hasAlertsClient = true) => {
   const actionsClient = actionsClientMock.create();
   const alertsClient = alertsClientMock.create();
   const savedObjectsClient = savedObjectsClientMock.create();
-  const spaces = spacesServiceMock.createSetupContract();
+  const spacesService = spacesServiceMock.createSetupContract();
   const elasticsearch = {
     getCluster: jest.fn().mockImplementation(() => ({
       callWithRequest: jest.fn(),
     })),
   };
-  server.decorate('request', 'getAlertsClient', () => alertsClient);
-  server.plugins.elasticsearch = (elasticsearch as unknown) as ElasticsearchPlugin;
-  server.plugins.actions = {
-    getActionsClientWithRequest: () => actionsClient,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } as any; // The types have really bad conflicts at the moment so I have to use any
+
+  const server = new Hapi.Server({ port: 0 });
+
   server.decorate('request', 'getSavedObjectsClient', () => savedObjectsClient);
+  if (hasAlertsClient) server.decorate('request', 'getAlertsClient', () => alertsClient);
+
+  const npServices = { spaces: { spacesService } };
+  const legacyServices = {
+    config: createMockKibanaConfig,
+    plugins: {
+      elasticsearch,
+      actions: {
+        getActionsClientWithRequest: () => actionsClient,
+      },
+    },
+    route: server.route.bind(server),
+  };
+  const services = ({
+    ...npServices,
+    ...legacyServices,
+  } as unknown) as LegacySetupServices;
 
   return {
-    server,
-    spaces,
+    inject: server.inject.bind(server),
+    services,
     alertsClient,
     actionsClient,
     elasticsearch,
     savedObjectsClient,
-  };
-};
-
-export const createMockServerWithoutAlertClientDecoration = (
-  config: Record<string, string> = defaultConfig
-) => {
-  const serverWithoutAlertClient = new Hapi.Server({
-    port: 0,
-  });
-
-  const savedObjectsClient = savedObjectsClientMock.create();
-  serverWithoutAlertClient.config = () => createMockKibanaConfig(config);
-  serverWithoutAlertClient.decorate('request', 'getSavedObjectsClient', () => savedObjectsClient);
-  serverWithoutAlertClient.plugins.actions = {
-    getActionsClientWithRequest: () => actionsClient,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } as any; // The types have really bad conflicts at the moment so I have to use any
-
-  const actionsClient = actionsClientMock.create();
-  const spaces = spacesServiceMock.createSetupContract();
-
-  return {
-    serverWithoutAlertClient,
-    actionsClient,
-    spaces,
   };
 };
 

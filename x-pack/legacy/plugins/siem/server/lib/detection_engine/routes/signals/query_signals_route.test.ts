@@ -18,16 +18,16 @@ import {
 import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '../../../../../common/constants';
 
 describe('query for signal', () => {
-  let { server, elasticsearch } = createMockServer();
+  let { inject, services, elasticsearch } = createMockServer();
 
   beforeEach(() => {
     jest.resetAllMocks();
     jest.spyOn(myUtils, 'getIndex').mockReturnValue('fakeindex');
-    ({ server, elasticsearch } = createMockServer());
+    ({ inject, services, elasticsearch } = createMockServer());
     elasticsearch.getCluster = jest.fn(() => ({
       callWithRequest: jest.fn(() => true),
     }));
-    querySignalsRoute(server);
+    querySignalsRoute(services);
   });
 
   describe('query and agg on signals index', () => {
@@ -40,7 +40,7 @@ describe('query for signal', () => {
           }
         ),
       }));
-      const { statusCode } = await server.inject(getSignalsAggsQueryRequest());
+      const { statusCode } = await inject(getSignalsAggsQueryRequest());
       expect(statusCode).toBe(200);
       expect(myUtils.getIndex).toHaveReturnedWith('fakeindex');
     });
@@ -54,7 +54,7 @@ describe('query for signal', () => {
           }
         ),
       }));
-      const { statusCode } = await server.inject(getSignalsAggsQueryRequest());
+      const { statusCode } = await inject(getSignalsAggsQueryRequest());
       expect(statusCode).toBe(200);
       expect(myUtils.getIndex).toHaveReturnedWith('fakeindex');
     });
@@ -73,7 +73,7 @@ describe('query for signal', () => {
           }
         ),
       }));
-      const { statusCode } = await server.inject(allTogether);
+      const { statusCode } = await inject(allTogether);
       expect(statusCode).toBe(200);
       expect(myUtils.getIndex).toHaveReturnedWith('fakeindex');
     });
@@ -81,7 +81,7 @@ describe('query for signal', () => {
     test('returns 400 when missing aggs and query', async () => {
       const allTogether = getSignalsQueryRequest();
       allTogether.payload = {};
-      const { statusCode } = await server.inject(allTogether);
+      const { statusCode } = await inject(allTogether);
       expect(statusCode).toBe(400);
     });
   });
@@ -93,7 +93,7 @@ describe('query for signal', () => {
         url: DETECTION_ENGINE_QUERY_SIGNALS_URL,
         payload: typicalSignalsQuery(),
       };
-      const { statusCode } = await server.inject(request);
+      const { statusCode } = await inject(request);
       expect(statusCode).toBe(200);
     });
 
@@ -103,7 +103,7 @@ describe('query for signal', () => {
         url: DETECTION_ENGINE_QUERY_SIGNALS_URL,
         payload: typicalSignalsQueryAggs(),
       };
-      const { statusCode } = await server.inject(request);
+      const { statusCode } = await inject(request);
       expect(statusCode).toBe(200);
     });
 
@@ -113,7 +113,7 @@ describe('query for signal', () => {
         url: DETECTION_ENGINE_QUERY_SIGNALS_URL,
         payload: { ...typicalSignalsQueryAggs(), ...typicalSignalsQuery() },
       };
-      const { statusCode } = await server.inject(request);
+      const { statusCode } = await inject(request);
       expect(statusCode).toBe(200);
     });
 
@@ -123,7 +123,7 @@ describe('query for signal', () => {
         url: DETECTION_ENGINE_QUERY_SIGNALS_URL,
         payload: {},
       };
-      const { statusCode } = await server.inject(request);
+      const { statusCode } = await inject(request);
       expect(statusCode).toBe(400);
     });
   });
