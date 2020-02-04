@@ -68,7 +68,7 @@ import { Logger } from '../../../logging';
 import { SavedObjectUnsanitizedDoc } from '../../serialization';
 import { SavedObjectsMigrationVersion } from '../../types';
 import { MigrationLogger } from './migration_logger';
-import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
+import { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { SavedObjectMigrationFn } from '../types';
 
 export type TransformFn = (doc: SavedObjectUnsanitizedDoc) => SavedObjectUnsanitizedDoc;
@@ -77,7 +77,7 @@ type ValidateDoc = (doc: SavedObjectUnsanitizedDoc) => void;
 
 interface DocumentMigratorOptions {
   kibanaVersion: string;
-  typeRegistry: SavedObjectTypeRegistry;
+  typeRegistry: ISavedObjectTypeRegistry;
   validateDoc: ValidateDoc;
   log: Logger;
 }
@@ -162,7 +162,7 @@ export class DocumentMigrator implements VersionedTransformer {
  * language. So, this is just to provide a little developer-friendly error messaging. Joi was
  * giving weird errors, so we're just doing manual validation.
  */
-function validateMigrationDefinition(registry: SavedObjectTypeRegistry) {
+function validateMigrationDefinition(registry: ISavedObjectTypeRegistry) {
   function assertObject(obj: any, prefix: string) {
     if (!obj || typeof obj !== 'object') {
       throw new Error(`${prefix} Got ${obj}.`);
@@ -204,7 +204,7 @@ function validateMigrationDefinition(registry: SavedObjectTypeRegistry) {
  * To:   { type: { latestVersion: string, transforms: [{ version: string, transform: fn }] } }
  */
 function buildActiveMigrations(
-  typeRegistry: SavedObjectTypeRegistry,
+  typeRegistry: ISavedObjectTypeRegistry,
   log: Logger
 ): ActiveMigrations {
   return typeRegistry

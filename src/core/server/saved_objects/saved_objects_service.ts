@@ -41,7 +41,7 @@ import {
 } from './service/lib/scoped_client_provider';
 import { Logger } from '../logging';
 import { convertLegacyTypes } from './utils';
-import { SavedObjectTypeRegistry } from './saved_objects_type_registry';
+import { SavedObjectTypeRegistry, ISavedObjectTypeRegistry } from './saved_objects_type_registry';
 import { PropertyValidators } from './validation';
 import { SavedObjectsSerializer } from './serialization';
 
@@ -167,7 +167,7 @@ export interface InternalSavedObjectsServiceStart extends SavedObjectsServiceSta
   /**
    * @deprecated Exposed only for injecting into Legacy
    */
-  typeRegistry: SavedObjectTypeRegistry;
+  typeRegistry: ISavedObjectTypeRegistry;
 }
 
 /**

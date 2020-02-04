@@ -31,12 +31,12 @@ import { buildActiveMappings, CallCluster, IndexMigrator } from '../core';
 import { DocumentMigrator, VersionedTransformer } from '../core/document_migrator';
 import { createIndexMap } from '../core/build_index_map';
 import { SavedObjectsConfigType } from '../../saved_objects_config';
-import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
+import { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { SavedObjectsType } from '../../types';
 
 export interface KibanaMigratorOptions {
   callCluster: CallCluster;
-  typeRegistry: SavedObjectTypeRegistry;
+  typeRegistry: ISavedObjectTypeRegistry;
   savedObjectsConfig: SavedObjectsConfigType;
   kibanaConfig: KibanaConfigType;
   kibanaVersion: string;
@@ -56,7 +56,7 @@ export class KibanaMigrator {
   private readonly kibanaConfig: KibanaConfigType;
   private readonly log: Logger;
   private readonly mappingProperties: SavedObjectsTypeMappingDefinitions;
-  private readonly typeRegistry: SavedObjectTypeRegistry;
+  private readonly typeRegistry: ISavedObjectTypeRegistry;
   private readonly serializer: SavedObjectsSerializer;
   private migrationResult?: Promise<Array<{ status: string }>>;
 

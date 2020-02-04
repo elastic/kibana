@@ -24,7 +24,7 @@ import { getQueryParams } from './query_params';
 import { getSortingParams } from './sorting_params';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { esKuery } from '../../../../../../plugins/data/server';
-import { SavedObjectTypeRegistry } from '../../../saved_objects_type_registry';
+import { ISavedObjectTypeRegistry } from '../../../saved_objects_type_registry';
 
 interface GetSearchDslOptions {
   type: string | string[];
@@ -43,7 +43,7 @@ interface GetSearchDslOptions {
 
 export function getSearchDsl(
   mappings: IndexMapping,
-  registry: SavedObjectTypeRegistry,
+  registry: ISavedObjectTypeRegistry,
   options: GetSearchDslOptions
 ) {
   const {

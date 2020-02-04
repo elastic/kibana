@@ -18,11 +18,11 @@
  */
 
 import { SavedObjectsTypeMappingDefinitions } from '../../mappings';
-import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
+import { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 
 export interface CreateIndexMapOptions {
   kibanaIndexName: string;
-  registry: SavedObjectTypeRegistry;
+  registry: ISavedObjectTypeRegistry;
   indexMap: SavedObjectsTypeMappingDefinitions;
 }
 

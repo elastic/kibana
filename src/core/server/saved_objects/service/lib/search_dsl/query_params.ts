@@ -20,7 +20,7 @@
 import { esKuery } from '../../../../../../plugins/data/server';
 
 import { getRootPropertiesObjects, IndexMapping } from '../../../mappings';
-import { SavedObjectTypeRegistry } from '../../../saved_objects_type_registry';
+import { ISavedObjectTypeRegistry } from '../../../saved_objects_type_registry';
 
 /**
  * Gets the types based on the type. Uses mappings to support
@@ -62,7 +62,7 @@ function getFieldsForTypes(types: string[], searchFields?: string[]) {
  *  Some types are namespace agnostic, so they must be treated differently.
  */
 function getClauseForType(
-  registry: SavedObjectTypeRegistry,
+  registry: ISavedObjectTypeRegistry,
   namespace: string | undefined,
   type: string
 ) {
@@ -89,7 +89,7 @@ interface HasReferenceQueryParams {
 
 interface QueryParams {
   mappings: IndexMapping;
-  registry: SavedObjectTypeRegistry;
+  registry: ISavedObjectTypeRegistry;
   namespace?: string;
   type?: string | string[];
   search?: string;

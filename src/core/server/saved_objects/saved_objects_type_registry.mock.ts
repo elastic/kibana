@@ -17,11 +17,9 @@
  * under the License.
  */
 
-import { SavedObjectTypeRegistry } from './saved_objects_type_registry';
+import { ISavedObjectTypeRegistry } from './saved_objects_type_registry';
 
-type RegistryMock = jest.Mocked<SavedObjectTypeRegistry>;
-
-const createRegistryMock = (): RegistryMock => {
+const createRegistryMock = (): jest.Mocked<ISavedObjectTypeRegistry> => {
   const mock = {
     registerType: jest.fn(),
     getType: jest.fn(),
@@ -35,7 +33,7 @@ const createRegistryMock = (): RegistryMock => {
   mock.isHidden.mockReturnValue(false);
   mock.isNamespaceAgnostic.mockImplementation((type: string) => type === 'global');
 
-  return mock as any;
+  return mock;
 };
 
 export const typeRegistryMock = {

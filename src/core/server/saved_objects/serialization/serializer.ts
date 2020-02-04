@@ -21,7 +21,7 @@
 
 import uuid from 'uuid';
 import { decodeVersion, encodeVersion } from '../version';
-import { SavedObjectTypeRegistry } from '../saved_objects_type_registry';
+import { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
 import { SavedObjectsRawDoc, SavedObjectSanitizedDoc } from './types';
 
 /**
@@ -33,12 +33,12 @@ import { SavedObjectsRawDoc, SavedObjectSanitizedDoc } from './types';
  * @public
  */
 export class SavedObjectsSerializer {
-  private readonly registry: SavedObjectTypeRegistry;
+  private readonly registry: ISavedObjectTypeRegistry;
 
   /**
    * @internal
    */
-  constructor(registry: SavedObjectTypeRegistry) {
+  constructor(registry: ISavedObjectTypeRegistry) {
     this.registry = registry;
   }
   /**
