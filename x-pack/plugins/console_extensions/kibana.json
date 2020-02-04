@@ -2,7 +2,7 @@
   "id": "consoleExtensions",
   "version": "1.0.0",
   "kibanaVersion": "kibana",
-  "requiredPlugins": ["console"],
+  "requiredPlugins": ["console", "features", "security"],
   "server": true,
   "ui": false
 }

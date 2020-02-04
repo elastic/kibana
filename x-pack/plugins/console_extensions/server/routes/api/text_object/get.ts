@@ -1,0 +1,38 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+import { RequestHandler } from 'kibana/server';
+import { APP } from '../../../../common/constants';
+import { RouteDependencies, AuthcHandlerArgs } from './types';
+import { TEXT_OBJECT } from './constants';
+import { withCurrentUsername } from './with_current_username';
+
+export const createHandler = ({
+  getInternalSavedObjectsClient,
+  username,
+}: AuthcHandlerArgs): RequestHandler<any, unknown> => async (ctx, request, response) => {
+  const client = getInternalSavedObjectsClient();
+  const result = await client.find({
+    type: TEXT_OBJECT.type,
+    search: username,
+    fields: ['userId'],
+  });
+  return response.ok({ body: result });
+};
+
+export const registerGetAllRoute = ({
+  router,
+  authc,
+  getInternalSavedObjectsClient,
+}: RouteDependencies) => {
+  router.get(
+    { path: `${APP.apiPathBase}/text_objects/get_all`, validate: false },
+    withCurrentUsername({
+      authc,
+      otherDeps: { getInternalSavedObjectsClient },
+      userHandler: createHandler,
+    })
+  );
+};

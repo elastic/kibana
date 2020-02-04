@@ -1,0 +1,18 @@
+{
+  "textObject": {
+    "properties": {
+      "createdAt": {
+        "type": "long"
+      },
+      "updatedAt": {
+        "type": "long"
+      },
+      "text": {
+        "type": "text"
+      },
+      "userId": {
+        "type": "keyword"
+      }
+    }
+  }
+}
