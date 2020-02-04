@@ -14,15 +14,14 @@ import {
   EuiTitle
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useMemo, useState } from 'react';
-import { matchPath } from 'react-router-dom';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/useFetcher';
 import { useLocation } from '../../../hooks/useLocation';
 import { fontSize, pct, px, units } from '../../../style/variables';
 import { ElasticDocsLink } from '../../shared/Links/ElasticDocsLink';
 import { SetupInstructionsLink } from '../../shared/Links/SetupInstructionsLink';
-import { routes } from '../Main/route_config';
+import { useMatchedRoutes } from '../../../hooks/useMatchedRoutes';
 
 export const Permission: React.FC = ({ children }) => {
   const [isPermissionPageEnabled, setIsPermissionsPageEnabled] = useState(true);
@@ -38,7 +37,7 @@ export const Permission: React.FC = ({ children }) => {
     return null;
   }
   // When the user doenst have permission and he didnt escape, show the Permission page
-  if (!data?.hasPermission && isPermissionPageEnabled) {
+  if (data?.hasPermission === false && isPermissionPageEnabled) {
     return (
       <PermissionPage
         onEscapeHatchClick={() => setIsPermissionsPageEnabled(false)}
@@ -68,17 +67,19 @@ interface Props {
 }
 
 const PermissionPage: React.FC<Props> = ({ onEscapeHatchClick }) => {
-  const { pathname } = useLocation();
-  const route = useMemo(
-    () =>
-      routes.filter(({ path }) =>
-        matchPath(pathname, {
-          path,
-          exact: true
-        })
-      ),
-    [pathname]
-  );
+  const location = useLocation();
+  const { routes, matchPath } = useMatchedRoutes();
+  const [route] = routes;
+
+  let pageName = '';
+  if (typeof route?.breadcrumb === 'string') {
+    pageName = route.breadcrumb;
+  } else if (typeof route?.breadcrumb === 'function' && matchPath) {
+    pageName = route.breadcrumb({
+      location,
+      match: matchPath
+    });
+  }
 
   return (
     <div style={{ height: pct(95) }}>
@@ -140,12 +141,7 @@ const PermissionPage: React.FC<Props> = ({ onEscapeHatchClick }) => {
                     >
                       {i18n.translate('xpack.apm.permission.escapeHatch', {
                         defaultMessage: 'Skip and go to {pageName} overview',
-                        values: {
-                          pageName:
-                            typeof route[0]?.breadcrumb === 'string'
-                              ? route[0]?.breadcrumb
-                              : ''
-                        }
+                        values: { pageName }
                       })}
                     </EuiLink>
                   </EscapeHatch>

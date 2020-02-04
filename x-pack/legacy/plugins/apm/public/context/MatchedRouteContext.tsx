@@ -4,11 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { useMemo, ReactChild } from 'react';
-import { matchPath } from 'react-router-dom';
+import { matchPath, match } from 'react-router-dom';
 import { useLocation } from '../hooks/useLocation';
-import { BreadcrumbRoute } from '../components/app/Main/ProvideBreadcrumbs';
+import {
+  BreadcrumbRoute,
+  LocationMatch
+} from '../components/app/Main/ProvideBreadcrumbs';
 
-export const MatchedRouteContext = React.createContext<BreadcrumbRoute[]>([]);
+export const MatchedRouteContext = React.createContext<{
+  routes: BreadcrumbRoute[];
+  matchPath?: LocationMatch['match'];
+}>({ routes: [] });
 
 interface MatchedRouteProviderProps {
   children: ReactChild;
@@ -21,11 +27,18 @@ export function MatchedRouteProvider({
   const { pathname } = useLocation();
 
   const contextValue = useMemo(() => {
-    return routes.filter(route => {
-      return matchPath(pathname, {
-        path: route.path
+    let matchedPath: LocationMatch['match'] | undefined;
+    const routesFound = routes.filter(route => {
+      const path: match<{}> | null = matchPath(pathname, {
+        path: route.path,
+        exact: true
       });
+      if (path) {
+        matchedPath = path;
+      }
+      return path;
     });
+    return { routes: routesFound, matchPath: matchedPath };
   }, [pathname, routes]);
 
   return (
