@@ -61,13 +61,13 @@ const LogEntriesStateProvider: React.FC = ({ children }) => {
 
 const LogHighlightsStateProvider: React.FC = ({ children }) => {
   const { sourceId, version } = useContext(Source.Context);
-  const [{ entriesStart, entriesEnd }] = useContext(LogEntriesState.Context);
+  const [{ topCursor, bottomCursor }] = useContext(LogEntriesState.Context);
   const { filterQuery } = useContext(LogFilterState.Context);
   const highlightsProps = {
     sourceId,
     sourceVersion: version,
-    entriesStart,
-    entriesEnd,
+    entriesStart: topCursor,
+    entriesEnd: bottomCursor,
     filterQuery,
   };
   return <LogHighlightsState.Provider {...highlightsProps}>{children}</LogHighlightsState.Provider>;

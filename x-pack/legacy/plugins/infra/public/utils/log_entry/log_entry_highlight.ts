@@ -5,6 +5,7 @@
  */
 
 import { InfraLogEntryHighlightFields } from '../../graphql/types';
+import { LogEntry } from '../../../common/http_api';
 
 export type LogEntryHighlight = InfraLogEntryHighlightFields.Fragment;
 
@@ -16,7 +17,7 @@ export type LogEntryHighlightMessageSegment = InfraLogEntryHighlightFields.Messa
 export type LogEntryHighlightFieldMessageSegment = InfraLogEntryHighlightFields.InfraLogMessageFieldSegmentInlineFragment;
 
 export interface LogEntryHighlightsMap {
-  [entryId: string]: LogEntryHighlight[];
+  [entryId: string]: LogEntry[];
 }
 
 export const isHighlightMessageColumn = (

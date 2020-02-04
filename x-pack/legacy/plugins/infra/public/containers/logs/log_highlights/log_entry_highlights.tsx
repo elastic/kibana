@@ -7,13 +7,9 @@
 import { useEffect, useMemo, useState } from 'react';
 
 import { getNextTimeKey, getPreviousTimeKey, TimeKey } from '../../../../common/time';
-import { LogEntryHighlightsQuery } from '../../../graphql/types';
-import { DependencyError, useApolloClient } from '../../../utils/apollo_context';
-import { LogEntryHighlightsMap } from '../../../utils/log_entry';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
-import { logEntryHighlightsQuery } from './log_entry_highlights.gql_query';
-
-export type LogEntryHighlights = LogEntryHighlightsQuery.Query['source']['logEntryHighlights'];
+import { fetchLogEntriesHighlights } from './api/fetch_log_entries_highlights';
+import { LogEntry, LogEntriesHighlightsResponse } from '../../../../common/http_api';
 
 export const useLogEntryHighlights = (
   sourceId: string,
@@ -23,45 +19,30 @@ export const useLogEntryHighlights = (
   filterQuery: string | null,
   highlightTerms: string[]
 ) => {
-  const apolloClient = useApolloClient();
-  const [logEntryHighlights, setLogEntryHighlights] = useState<LogEntryHighlights>([]);
+  const [logEntryHighlights, setLogEntryHighlights] = useState<
+    LogEntriesHighlightsResponse['data']
+  >([]);
   const [loadLogEntryHighlightsRequest, loadLogEntryHighlights] = useTrackedPromise(
     {
       cancelPreviousOn: 'resolution',
       createPromise: async () => {
-        if (!apolloClient) {
-          throw new DependencyError('Failed to load source: No apollo client available.');
-        }
         if (!startKey || !endKey || !highlightTerms.length) {
           throw new Error('Skipping request: Insufficient parameters');
         }
 
-        return await apolloClient.query<
-          LogEntryHighlightsQuery.Query,
-          LogEntryHighlightsQuery.Variables
-        >({
-          fetchPolicy: 'no-cache',
-          query: logEntryHighlightsQuery,
-          variables: {
-            sourceId,
-            startKey: getPreviousTimeKey(startKey), // interval boundaries are exclusive
-            endKey: getNextTimeKey(endKey), // interval boundaries are exclusive
-            filterQuery,
-            highlights: [
-              {
-                query: highlightTerms[0],
-                countBefore: 1,
-                countAfter: 1,
-              },
-            ],
-          },
+        return await fetchLogEntriesHighlights({
+          sourceId,
+          startDate: getPreviousTimeKey(startKey).time,
+          endDate: getNextTimeKey(endKey).time,
+          query: filterQuery || undefined,
+          highlightTerms,
         });
       },
       onResolve: response => {
-        setLogEntryHighlights(response.data.source.logEntryHighlights);
+        setLogEntryHighlights(response.data);
       },
     },
-    [apolloClient, sourceId, startKey, endKey, filterQuery, highlightTerms]
+    [sourceId, startKey, endKey, filterQuery, highlightTerms]
   );
 
   useEffect(() => {
@@ -82,13 +63,13 @@ export const useLogEntryHighlights = (
 
   const logEntryHighlightsById = useMemo(
     () =>
-      logEntryHighlights.reduce<LogEntryHighlightsMap>(
-        (accumulatedLogEntryHighlightsById, { entries }) => {
-          return entries.reduce<LogEntryHighlightsMap>((singleHighlightLogEntriesById, entry) => {
-            const highlightsForId = singleHighlightLogEntriesById[entry.gid] || [];
+      logEntryHighlights.reduce<Record<string, LogEntry[]>>(
+        (accumulatedLogEntryHighlightsById, highlightData) => {
+          return highlightData.entries.reduce((singleHighlightLogEntriesById, entry) => {
+            const highlightsForId = singleHighlightLogEntriesById[entry.id] || [];
             return {
               ...singleHighlightLogEntriesById,
-              [entry.gid]: [...highlightsForId, entry],
+              [entry.id]: [...highlightsForId, entry],
             };
           }, accumulatedLogEntryHighlightsById);
         },
