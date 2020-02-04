@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import React, { useContext, useEffect, useRef } from 'react';
 import * as d3 from 'd3';
 import { i18n } from '@kbn/i18n';
+import styled from 'styled-components';
 import { DonutChartLegend } from './donut_chart_legend';
 import { UptimeThemeContext } from '../../../contexts';
 
@@ -17,6 +18,15 @@ interface DonutChartProps {
   up: number;
   width: number;
 }
+
+export const GreenCheckIcon = styled(EuiIcon)`
+  height: 42px;
+  width: 42px;
+  color: #017d73;
+  top: 51px;
+  left: 51px;
+  position: absolute;
+`;
 
 export const DonutChart = ({ height, down, up, width }: DonutChartProps) => {
   const chartElement = useRef<SVGSVGElement | null>(null);
@@ -71,7 +81,7 @@ export const DonutChart = ({ height, down, up, width }: DonutChartProps) => {
   }, [danger, down, gray, height, upCount, width]);
   return (
     <EuiFlexGroup alignItems="center" responsive={false}>
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem grow={false} style={{ position: 'relative' }}>
         <svg
           aria-label={i18n.translate('xpack.uptime.snapshot.donutChart.ariaLabel', {
             defaultMessage:
@@ -82,6 +92,7 @@ export const DonutChart = ({ height, down, up, width }: DonutChartProps) => {
           width={width}
           height={height}
         />
+        {down === 0 && <GreenCheckIcon className="greenCheckIcon" type="checkInCircleFilled" />}
       </EuiFlexItem>
       <EuiFlexItem>
         <DonutChartLegend down={down} up={up} />
