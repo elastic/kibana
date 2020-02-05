@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ensureMinimumTime } from '../ensure_minimum_time';
+import { ensureMinimumTime } from './ensure_minimum_time';
 
 describe('ensureMinimumTime', () => {
   it('resolves single promise', async done => {
