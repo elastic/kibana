@@ -10,15 +10,18 @@ import { getManagedTemplatePrefix } from '../../../lib/get_managed_templates';
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../index';
 
-export function registerGetAllRoute({ router }: RouteDependencies) {
-  router.get({ path: addBasePath('/templates'), validate: false }, async (ctx, req, res) => {
-    const { callAsCurrentUser } = ctx.core.elasticsearch.dataClient;
-    const managedTemplatePrefix = await getManagedTemplatePrefix(callAsCurrentUser);
+export function registerGetAllRoute({ router, license }: RouteDependencies) {
+  router.get(
+    { path: addBasePath('/templates'), validate: false },
+    license.guardApiRoute(async (ctx, req, res) => {
+      const { callAsCurrentUser } = ctx.core.elasticsearch.dataClient;
+      const managedTemplatePrefix = await getManagedTemplatePrefix(callAsCurrentUser);
 
-    const indexTemplatesByName = await callAsCurrentUser('indices.getTemplate');
+      const indexTemplatesByName = await callAsCurrentUser('indices.getTemplate');
 
-    return res.ok({ body: deserializeTemplateList(indexTemplatesByName, managedTemplatePrefix) });
-  });
+      return res.ok({ body: deserializeTemplateList(indexTemplatesByName, managedTemplatePrefix) });
+    })
+  );
 }
 
 const paramsSchema = schema.object({
