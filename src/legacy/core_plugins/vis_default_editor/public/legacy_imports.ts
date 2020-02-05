@@ -54,4 +54,3 @@ export { getDocLink } from 'ui/documentation_links';
 export { documentationLinks } from 'ui/documentation_links/documentation_links';
 export { move } from 'ui/utils/collection';
 export * from 'ui/vis/lib';
-export * from 'ui/vis/config';
