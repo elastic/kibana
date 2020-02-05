@@ -32,7 +32,7 @@ export const metricsRequestHandler = async ({
   const config = getUISettings();
   const timezone = timezoneProvider(config)();
   const uiStateObj = uiState.get(visParams.type, {});
-  const parsedTimeRange = getDataStart().query.timefilter.calculateBounds(timeRange);
+  const parsedTimeRange = getDataStart().query.timefilter.timefilter.calculateBounds(timeRange);
   const scaledDataFormat = config.get('dateFormat:scaled');
   const dateFormat = config.get('dateFormat');
 
