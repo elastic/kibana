@@ -5,23 +5,19 @@
  */
 
 import { UMKibanaBackendFrameworkAdapter } from '../adapters/framework';
-import { elasticsearchMonitorsAdapter } from '../adapters/monitors';
-import { elasticsearchPingsAdapter } from '../adapters/pings';
+import * as requests from '../requests';
 import { licenseCheck } from '../domains';
 import { UMDomainLibs, UMServerLibs } from '../lib';
-import { elasticsearchMonitorStatesAdapter } from '../adapters/monitor_states';
-import { stubIndexPatternAdapter } from '../adapters/stub_index_pattern';
 import { UptimeCorePlugins, UptimeCoreSetup } from '../adapters/framework';
 
 export function compose(server: UptimeCoreSetup, plugins: UptimeCorePlugins): UMServerLibs {
   const framework = new UMKibanaBackendFrameworkAdapter(server);
 
   const domainLibs: UMDomainLibs = {
+    requests: {
+      ...requests,
+    },
     license: licenseCheck,
-    monitors: elasticsearchMonitorsAdapter,
-    monitorStates: elasticsearchMonitorStatesAdapter,
-    pings: elasticsearchPingsAdapter,
-    stubIndexPattern: stubIndexPatternAdapter,
   };
 
   return {

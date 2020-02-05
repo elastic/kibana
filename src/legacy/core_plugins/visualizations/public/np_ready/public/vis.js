@@ -21,7 +21,7 @@
  * @name Vis
  *
  * @description This class consists of aggs, params, listeners, title, and type.
- *  - Aggs: Instances of AggConfig.
+ *  - Aggs: Instances of IAggConfig.
  *  - Params: The settings in the Options tab.
  *
  * Not to be confused with vislib/vis.js.

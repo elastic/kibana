@@ -11,6 +11,7 @@ import {
   IClusterClient,
   Headers,
 } from '../../../../../../src/core/server';
+import { deepFreeze } from '../../../../../../src/core/utils';
 import { AuthenticatedUser } from '../../../common/model';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
@@ -35,6 +36,11 @@ export type AuthenticationProviderSpecificOptions = Record<string, unknown>;
  * Base class that all authentication providers should extend.
  */
 export abstract class BaseAuthenticationProvider {
+  /**
+   * Type of the provider.
+   */
+  static readonly type: string;
+
   /**
    * Logger instance bound to a specific provider context.
    */
@@ -85,8 +91,13 @@ export abstract class BaseAuthenticationProvider {
    * @param [authHeaders] Optional `Headers` dictionary to send with the request.
    */
   protected async getUser(request: KibanaRequest, authHeaders: Headers = {}) {
-    return (await this.options.client
-      .asScoped({ headers: { ...request.headers, ...authHeaders } })
-      .callAsCurrentUser('shield.authenticate')) as AuthenticatedUser;
+    return deepFreeze({
+      ...(await this.options.client
+        .asScoped({ headers: { ...request.headers, ...authHeaders } })
+        .callAsCurrentUser('shield.authenticate')),
+      // We use `this.constructor` trick to get access to the static `type` field of the specific
+      // `BaseAuthenticationProvider` subclass.
+      authentication_provider: (this.constructor as any).type,
+    } as AuthenticatedUser);
   }
 }
