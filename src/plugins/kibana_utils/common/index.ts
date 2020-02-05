@@ -19,5 +19,6 @@
 
 export * from './defer';
 export * from './of';
+export * from './ui';
 export * from './state_containers';
 export { distinctUntilChangedWithInitialValue } from './distinct_until_changed_with_initial_value';
