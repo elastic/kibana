@@ -18,12 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-
-// todo this should probably live somewhere else
-interface Field {
-  type: string;
-  name: string;
-}
+import { Field } from '../types';
 
 export function extractTimeFields(fields: Field[]) {
   const dateFields = fields.filter(field => field.type === 'date');
