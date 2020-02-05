@@ -69,8 +69,8 @@ export default function({ getService }: FtrProviderContext) {
             .send(
               logEntriesHighlightsRequestRT.encode({
                 sourceId: 'default',
-                startDate: KEY_BEFORE_START.time,
-                endDate: KEY_AFTER_END.time,
+                startTimestamp: KEY_BEFORE_START.time,
+                endTimestamp: KEY_AFTER_END.time,
                 highlightTerms: ['message of document 0'],
               })
             )
@@ -119,8 +119,8 @@ export default function({ getService }: FtrProviderContext) {
             .send(
               logEntriesHighlightsRequestRT.encode({
                 sourceId: 'default',
-                startDate: KEY_BEFORE_START.time,
-                endDate: KEY_AFTER_END.time,
+                startTimestamp: KEY_BEFORE_START.time,
+                endTimestamp: KEY_AFTER_END.time,
                 highlightTerms: ['generate_test_data/simple_logs'],
               })
             )
@@ -155,8 +155,8 @@ export default function({ getService }: FtrProviderContext) {
             .send(
               logEntriesHighlightsRequestRT.encode({
                 sourceId: 'default',
-                startDate: KEY_BEFORE_START.time,
-                endDate: KEY_AFTER_END.time,
+                startTimestamp: KEY_BEFORE_START.time,
+                endTimestamp: KEY_AFTER_END.time,
                 query: JSON.stringify({
                   multi_match: { query: 'host-a', type: 'phrase', lenient: true },
                 }),

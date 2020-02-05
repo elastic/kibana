@@ -92,9 +92,9 @@ export default function({ getService }: FtrProviderContext) {
     });
 
     it('logSummaryBetween should return non-empty buckets', async () => {
-      const startDate = EARLIEST_KEY_WITH_DATA.time;
-      const endDate = LATEST_KEY_WITH_DATA.time + 1; // the interval end is exclusive
-      const bucketSize = Math.ceil((endDate - startDate) / 10);
+      const startTimestamp = EARLIEST_KEY_WITH_DATA.time;
+      const endTimestamp = LATEST_KEY_WITH_DATA.time + 1; // the interval end is exclusive
+      const bucketSize = Math.ceil((endTimestamp - startTimestamp) / 10);
 
       const { body } = await supertest
         .post(LOG_ENTRIES_SUMMARY_PATH)
@@ -102,8 +102,8 @@ export default function({ getService }: FtrProviderContext) {
         .send(
           logEntriesSummaryRequestRT.encode({
             sourceId: 'default',
-            startDate,
-            endDate,
+            startTimestamp,
+            endTimestamp,
             bucketSize,
             query: null,
           })

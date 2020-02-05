@@ -12,8 +12,8 @@ export const LOG_ENTRIES_PATH = '/api/log_entries/entries';
 export const logEntriesBaseRequestRT = rt.intersection([
   rt.type({
     sourceId: rt.string,
-    startDate: rt.number,
-    endDate: rt.number,
+    startTimestamp: rt.number,
+    endTimestamp: rt.number,
   }),
   rt.partial({
     query: rt.string,

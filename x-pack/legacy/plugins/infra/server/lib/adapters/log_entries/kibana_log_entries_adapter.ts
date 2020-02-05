@@ -91,7 +91,7 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
     fields: string[],
     params: LogEntriesParams
   ): Promise<LogEntryDocument[]> {
-    const { startDate, endDate, query, cursor, size, highlightTerm } = params;
+    const { startTimestamp, endTimestamp, query, cursor, size, highlightTerm } = params;
 
     const { sortDirection, searchAfterClause } = processCursor(cursor);
 
@@ -137,8 +137,8 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
               {
                 range: {
                   [sourceConfiguration.fields.timestamp]: {
-                    gte: startDate,
-                    lte: endDate,
+                    gte: startTimestamp,
+                    lte: endTimestamp,
                     format: TIMESTAMP_FORMAT,
                   },
                 },
@@ -190,12 +190,16 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
   public async getContainedLogSummaryBuckets(
     requestContext: RequestHandlerContext,
     sourceConfiguration: InfraSourceConfiguration,
-    start: number,
-    end: number,
+    startTimestamp: number,
+    endTimestamp: number,
     bucketSize: number,
     filterQuery?: LogEntryQuery
   ): Promise<LogSummaryBucket[]> {
-    const bucketIntervalStarts = timeMilliseconds(new Date(start), new Date(end), bucketSize);
+    const bucketIntervalStarts = timeMilliseconds(
+      new Date(startTimestamp),
+      new Date(endTimestamp),
+      bucketSize
+    );
 
     const query = {
       allowNoIndices: true,
@@ -233,8 +237,8 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
               {
                 range: {
                   [sourceConfiguration.fields.timestamp]: {
-                    gte: start,
-                    lte: end,
+                    gte: startTimestamp,
+                    lte: endTimestamp,
                     format: TIMESTAMP_FORMAT,
                   },
                 },

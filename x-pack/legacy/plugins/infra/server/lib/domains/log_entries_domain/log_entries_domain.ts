@@ -36,16 +36,16 @@ import {
 } from './message';
 
 export interface LogEntriesParams {
-  startDate: number;
-  endDate: number;
+  startTimestamp: number;
+  endTimestamp: number;
   size?: number;
   query?: JsonObject;
   cursor?: { before: LogEntriesCursor | 'last' } | { after: LogEntriesCursor | 'first' };
   highlightTerm?: string;
 }
 export interface LogEntriesAroundParams {
-  startDate: number;
-  endDate: number;
+  startTimestamp: number;
+  endTimestamp: number;
   size?: number;
   center: LogEntriesCursor;
   query?: JsonObject;
@@ -67,7 +67,7 @@ export class InfraLogEntriesDomain {
     sourceId: string,
     params: LogEntriesAroundParams
   ) {
-    const { startDate, endDate, center, query, size, highlightTerm } = params;
+    const { startTimestamp, endTimestamp, center, query, size, highlightTerm } = params;
 
     /*
      * For odd sizes we will round this value down for the first half, and up
@@ -80,8 +80,8 @@ export class InfraLogEntriesDomain {
     const halfSize = (size || LOG_ENTRIES_PAGE_SIZE) / 2;
 
     const entriesBefore = await this.getLogEntries(requestContext, sourceId, {
-      startDate,
-      endDate,
+      startTimestamp,
+      endTimestamp,
       query,
       cursor: { before: center },
       size: Math.floor(halfSize),
@@ -101,8 +101,8 @@ export class InfraLogEntriesDomain {
         : { time: center.time - 1, tiebreaker: 0 };
 
     const entriesAfter = await this.getLogEntries(requestContext, sourceId, {
-      startDate,
-      endDate,
+      startTimestamp,
+      endTimestamp,
       query,
       cursor: { after: cursorAfter },
       size: Math.ceil(halfSize),
@@ -368,8 +368,8 @@ export class InfraLogEntriesDomain {
   public async getLogSummaryHighlightBucketsBetween(
     requestContext: RequestHandlerContext,
     sourceId: string,
-    start: number,
-    end: number,
+    startTimestamp: number,
+    endTimestamp: number,
     bucketSize: number,
     highlightQueries: string[],
     filterQuery?: LogEntryQuery
@@ -396,8 +396,8 @@ export class InfraLogEntriesDomain {
         const summaryBuckets = await this.adapter.getContainedLogSummaryBuckets(
           requestContext,
           configuration,
-          start,
-          end,
+          startTimestamp,
+          endTimestamp,
           bucketSize,
           query
         );
@@ -476,8 +476,8 @@ export interface LogEntriesAdapter {
   getContainedLogSummaryBuckets(
     requestContext: RequestHandlerContext,
     sourceConfiguration: InfraSourceConfiguration,
-    start: number,
-    end: number,
+    startTimestamp: number,
+    endTimestamp: number,
     bucketSize: number,
     filterQuery?: LogEntryQuery
   ): Promise<LogSummaryBucket[]>;

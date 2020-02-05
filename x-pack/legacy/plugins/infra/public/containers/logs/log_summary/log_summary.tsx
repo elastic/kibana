@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 
 import { useCancellableEffect } from '../../../utils/cancellable_effect';
 import { fetchLogSummary } from './api/fetch_log_summary';
@@ -32,8 +32,8 @@ export const useLogSummary = (
 
       fetchLogSummary({
         sourceId,
-        startDate: startTimestamp,
-        endDate: endTimestamp,
+        startTimestamp,
+        endTimestamp,
         bucketSize,
         query: filterQuery,
       }).then(response => {

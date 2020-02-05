@@ -129,8 +129,8 @@ export default function({ getService }: FtrProviderContext) {
             .send(
               logEntriesRequestRT.encode({
                 sourceId: 'default',
-                startDate: EARLIEST_KEY_WITH_DATA.time,
-                endDate: KEY_WITHIN_DATA_RANGE.time,
+                startTimestamp: EARLIEST_KEY_WITH_DATA.time,
+                endTimestamp: KEY_WITHIN_DATA_RANGE.time,
               })
             )
             .expect(200);
@@ -164,8 +164,8 @@ export default function({ getService }: FtrProviderContext) {
             .send(
               logEntriesRequestRT.encode({
                 sourceId: 'default',
-                startDate: EARLIEST_KEY_WITH_DATA.time,
-                endDate: KEY_WITHIN_DATA_RANGE.time,
+                startTimestamp: EARLIEST_KEY_WITH_DATA.time,
+                endTimestamp: KEY_WITHIN_DATA_RANGE.time,
                 size: 10,
               })
             );
@@ -180,8 +180,8 @@ export default function({ getService }: FtrProviderContext) {
             .send(
               logEntriesRequestRT.encode({
                 sourceId: 'default',
-                startDate: EARLIEST_KEY_WITH_DATA.time,
-                endDate: KEY_WITHIN_DATA_RANGE.time,
+                startTimestamp: EARLIEST_KEY_WITH_DATA.time,
+                endTimestamp: KEY_WITHIN_DATA_RANGE.time,
                 after: firstPage.data.bottomCursor!,
                 size: 10,
               })
@@ -197,8 +197,8 @@ export default function({ getService }: FtrProviderContext) {
             .send(
               logEntriesRequestRT.encode({
                 sourceId: 'default',
-                startDate: EARLIEST_KEY_WITH_DATA.time,
-                endDate: KEY_WITHIN_DATA_RANGE.time,
+                startTimestamp: EARLIEST_KEY_WITH_DATA.time,
+                endTimestamp: KEY_WITHIN_DATA_RANGE.time,
                 size: 20,
               })
             );
@@ -223,8 +223,8 @@ export default function({ getService }: FtrProviderContext) {
             .send(
               logEntriesRequestRT.encode({
                 sourceId: 'default',
-                startDate: KEY_WITHIN_DATA_RANGE.time,
-                endDate: LATEST_KEY_WITH_DATA.time,
+                startTimestamp: KEY_WITHIN_DATA_RANGE.time,
+                endTimestamp: LATEST_KEY_WITH_DATA.time,
                 before: 'last',
                 size: 10,
               })
@@ -240,8 +240,8 @@ export default function({ getService }: FtrProviderContext) {
             .send(
               logEntriesRequestRT.encode({
                 sourceId: 'default',
-                startDate: KEY_WITHIN_DATA_RANGE.time,
-                endDate: LATEST_KEY_WITH_DATA.time,
+                startTimestamp: KEY_WITHIN_DATA_RANGE.time,
+                endTimestamp: LATEST_KEY_WITH_DATA.time,
                 before: lastPage.data.topCursor!,
                 size: 10,
               })
@@ -257,8 +257,8 @@ export default function({ getService }: FtrProviderContext) {
             .send(
               logEntriesRequestRT.encode({
                 sourceId: 'default',
-                startDate: KEY_WITHIN_DATA_RANGE.time,
-                endDate: LATEST_KEY_WITH_DATA.time,
+                startTimestamp: KEY_WITHIN_DATA_RANGE.time,
+                endTimestamp: LATEST_KEY_WITH_DATA.time,
                 before: 'last',
                 size: 20,
               })
@@ -284,8 +284,8 @@ export default function({ getService }: FtrProviderContext) {
             .send(
               logEntriesRequestRT.encode({
                 sourceId: 'default',
-                startDate: EARLIEST_KEY_WITH_DATA.time,
-                endDate: LATEST_KEY_WITH_DATA.time,
+                startTimestamp: EARLIEST_KEY_WITH_DATA.time,
+                endTimestamp: LATEST_KEY_WITH_DATA.time,
                 center: KEY_WITHIN_DATA_RANGE,
               })
             )
@@ -305,8 +305,8 @@ export default function({ getService }: FtrProviderContext) {
         });
 
         it('Handles empty responses', async () => {
-          const startDate = Date.now() + 1000;
-          const endDate = Date.now() + 5000;
+          const startTimestamp = Date.now() + 1000;
+          const endTimestamp = Date.now() + 5000;
 
           const { body } = await supertest
             .post(LOG_ENTRIES_PATH)
@@ -314,8 +314,8 @@ export default function({ getService }: FtrProviderContext) {
             .send(
               logEntriesRequestRT.encode({
                 sourceId: 'default',
-                startDate,
-                endDate,
+                startTimestamp,
+                endTimestamp,
               })
             )
             .expect(200);

@@ -38,8 +38,8 @@ export const useLogSummaryHighlights = (
 
         return await fetchLogSummaryHighlights({
           sourceId,
-          startDate: startTimestamp,
-          endDate: endTimestamp,
+          startTimestamp,
+          endTimestamp,
           bucketSize,
           query: filterQuery,
           highlightTerms,

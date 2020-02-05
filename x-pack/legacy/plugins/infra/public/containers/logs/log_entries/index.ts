@@ -151,8 +151,8 @@ const useFetchEntriesEffect = (
     try {
       const fetchArgs: LogEntriesRequest = {
         sourceId: overrides.sourceId || props.sourceId,
-        startDate: overrides.startTimestamp || props.startTimestamp,
-        endDate: overrides.endTimestamp || props.endTimestamp,
+        startTimestamp: overrides.startTimestamp || props.startTimestamp,
+        endTimestamp: overrides.endTimestamp || props.endTimestamp,
         query: overrides.filterQuery || props.filterQuery || undefined, // FIXME
       };
 
@@ -195,8 +195,8 @@ const useFetchEntriesEffect = (
     try {
       const fetchArgs: LogEntriesRequest = {
         sourceId: props.sourceId,
-        startDate: props.startTimestamp,
-        endDate: props.endTimestamp,
+        startTimestamp: props.startTimestamp,
+        endTimestamp: props.endTimestamp,
         query: props.filterQuery || undefined, // FIXME
       };
 

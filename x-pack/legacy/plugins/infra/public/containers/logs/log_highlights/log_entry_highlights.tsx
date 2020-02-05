@@ -32,8 +32,8 @@ export const useLogEntryHighlights = (
 
         return await fetchLogEntriesHighlights({
           sourceId,
-          startDate: getPreviousTimeKey(startKey).time,
-          endDate: getNextTimeKey(endKey).time,
+          startTimestamp: getPreviousTimeKey(startKey).time,
+          endTimestamp: getNextTimeKey(endKey).time,
           query: filterQuery || undefined,
           highlightTerms,
         });

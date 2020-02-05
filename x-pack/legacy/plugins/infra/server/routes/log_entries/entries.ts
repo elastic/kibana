@@ -38,13 +38,19 @@ export const initLogEntriesRoute = ({ framework, logEntries }: InfraBackendLibs)
           fold(throwErrors(Boom.badRequest), identity)
         );
 
-        const { startDate, endDate, sourceId, query, size } = payload;
+        const {
+          startTimestamp: startTimestamp,
+          endTimestamp: endTimestamp,
+          sourceId,
+          query,
+          size,
+        } = payload;
 
         let entries;
         if ('center' in payload) {
           entries = await logEntries.getLogEntriesAround__new(requestContext, sourceId, {
-            startDate,
-            endDate,
+            startTimestamp,
+            endTimestamp,
             query: parseFilterQuery(query),
             center: payload.center,
             size,
@@ -58,8 +64,8 @@ export const initLogEntriesRoute = ({ framework, logEntries }: InfraBackendLibs)
           }
 
           entries = await logEntries.getLogEntries(requestContext, sourceId, {
-            startDate,
-            endDate,
+            startTimestamp,
+            endTimestamp,
             query: parseFilterQuery(query),
             cursor,
             size,
