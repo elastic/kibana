@@ -14,6 +14,9 @@ import {
   LogTimestampColumn,
   LogFieldColumn,
   LogMessageColumn,
+  LogMessagePart,
+  LogMessagePartField,
+  LogMessagePartConstant,
 } from '../../../common/http_api';
 
 export type LogEntryMessageSegment = InfraLogEntryFields.Message;
@@ -48,10 +51,8 @@ export const isMessageColumn = (column: LogColumn): column is LogMessageColumn =
 export const isFieldColumn = (column: LogColumn): column is LogFieldColumn =>
   column != null && 'field' in column;
 
-export const isConstantSegment = (
-  segment: LogEntryMessageSegment
-): segment is LogEntryConstantMessageSegment => 'constant' in segment;
+export const isConstantSegment = (segment: LogMessagePart): segment is LogMessagePartConstant =>
+  'constant' in segment;
 
-export const isFieldSegment = (
-  segment: LogEntryMessageSegment
-): segment is LogEntryFieldMessageSegment => 'field' in segment && 'value' in segment;
+export const isFieldSegment = (segment: LogMessagePart): segment is LogMessagePartField =>
+  'field' in segment && 'value' in segment;

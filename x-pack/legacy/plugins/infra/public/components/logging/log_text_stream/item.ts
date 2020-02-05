@@ -7,7 +7,6 @@
 import { bisector } from 'd3-array';
 
 import { compareToTimeKey, TimeKey } from '../../../../common/time';
-import { LogEntryHighlight } from '../../../utils/log_entry';
 import { LogEntry } from '../../../../common/http_api';
 
 export type StreamItem = LogEntryStreamItem;
@@ -15,7 +14,7 @@ export type StreamItem = LogEntryStreamItem;
 export interface LogEntryStreamItem {
   kind: 'logEntry';
   logEntry: LogEntry;
-  highlights: LogEntryHighlight[];
+  highlights: LogEntry[];
 }
 
 export function getStreamItemTimeKey(item: StreamItem) {

@@ -9,18 +9,14 @@ import { darken, transparentize } from 'polished';
 import React, { useMemo } from 'react';
 
 import euiStyled, { css } from '../../../../../../common/eui_styled_components';
-import {
-  isFieldColumn,
-  isHighlightFieldColumn,
-  LogEntryHighlightColumn,
-} from '../../../utils/log_entry';
+import { isFieldColumn, isHighlightFieldColumn } from '../../../utils/log_entry';
 import { ActiveHighlightMarker, highlightFieldValue, HighlightMarker } from './highlighting';
 import { LogEntryColumnContent } from './log_entry_column';
 import { LogColumn } from '../../../../common/http_api';
 
 interface LogEntryFieldColumnProps {
   columnValue: LogColumn;
-  highlights: LogEntryHighlightColumn[];
+  highlights: LogColumn[];
   isActiveHighlight: boolean;
   isHighlighted: boolean;
   isHovered: boolean;
@@ -37,12 +33,7 @@ export const LogEntryFieldColumn: React.FunctionComponent<LogEntryFieldColumnPro
 }) => {
   const value = useMemo(() => {
     if (isFieldColumn(columnValue)) {
-      // FIXME
-      try {
-        return JSON.parse(columnValue.value as string);
-      } catch (e) {
-        return columnValue.value;
-      }
+      return columnValue.value;
     }
     return null;
   }, [columnValue]);
@@ -60,7 +51,7 @@ export const LogEntryFieldColumn: React.FunctionComponent<LogEntryFieldColumnPro
     </ul>
   ) : (
     highlightFieldValue(
-      typeof value === 'object' && value != null ? stringify(value) : value,
+      typeof value === 'string' ? value : stringify(value),
       isHighlightFieldColumn(firstHighlight) ? firstHighlight.highlights : [],
       isActiveHighlight ? ActiveHighlightMarker : HighlightMarker
     )

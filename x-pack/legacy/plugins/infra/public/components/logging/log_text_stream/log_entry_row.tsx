@@ -8,11 +8,7 @@
 import React, { useState, useCallback, useMemo } from 'react';
 
 import euiStyled from '../../../../../../common/eui_styled_components';
-import {
-  LogEntryHighlight,
-  LogEntryHighlightColumn,
-  isTimestampColumn,
-} from '../../../utils/log_entry';
+import { isTimestampColumn } from '../../../utils/log_entry';
 import {
   LogColumnConfiguration,
   isTimestampLogColumnConfiguration,
@@ -26,13 +22,13 @@ import { LogEntryDetailsIconColumn } from './log_entry_icon_column';
 import { LogEntryMessageColumn } from './log_entry_message_column';
 import { LogEntryTimestampColumn } from './log_entry_timestamp_column';
 import { monospaceTextStyle } from './text_styles';
-import { LogEntry } from '../../../../common/http_api';
+import { LogEntry, LogColumn } from '../../../../common/http_api';
 
 interface LogEntryRowProps {
   boundingBoxRef?: React.Ref<Element>;
   columnConfigurations: LogColumnConfiguration[];
   columnWidths: LogEntryColumnWidths;
-  highlights: LogEntryHighlight[];
+  highlights: LogEntry[];
   isActiveHighlight: boolean;
   isHighlighted: boolean;
   logEntry: LogEntry;
@@ -85,7 +81,7 @@ export const LogEntryRow = ({
   const highlightsByColumnId = useMemo(
     () =>
       highlights.reduce<{
-        [columnId: string]: LogEntryHighlightColumn[];
+        [columnId: string]: LogColumn[];
       }>(
         (columnsById, highlight) =>
           highlight.columns.reduce(

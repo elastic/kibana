@@ -6,7 +6,6 @@
 
 import { useContext, useMemo } from 'react';
 import { StreamItem, LogEntryStreamItem } from '../../components/logging/log_text_stream/item';
-import { LogEntryHighlight } from '../../utils/log_entry';
 import { RendererFunction } from '../../utils/typed_react';
 // deep inporting to avoid a circular import problem
 import { LogHighlightsState } from './log_highlights/log_highlights';
@@ -47,7 +46,7 @@ export const WithStreamItems: React.FunctionComponent<{
 
 const createLogEntryStreamItem = (
   logEntry: LogEntry,
-  highlights: LogEntryHighlight[]
+  highlights: LogEntry[]
 ): LogEntryStreamItem => ({
   kind: 'logEntry' as 'logEntry',
   logEntry,

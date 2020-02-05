@@ -5,6 +5,7 @@
  */
 
 import React, { memo, useMemo } from 'react';
+import stringify from 'json-stable-stringify';
 
 import euiStyled, { css } from '../../../../../../common/eui_styled_components';
 import {
@@ -12,17 +13,16 @@ import {
   isFieldSegment,
   isHighlightMessageColumn,
   isMessageColumn,
-  LogEntryHighlightColumn,
-  LogEntryMessageSegment,
+  isHighlightFieldSegment,
 } from '../../../utils/log_entry';
 import { ActiveHighlightMarker, highlightFieldValue, HighlightMarker } from './highlighting';
 import { LogEntryColumnContent } from './log_entry_column';
 import { hoveredContentStyle } from './text_styles';
-import { LogColumn } from '../../../../common/http_api';
+import { LogColumn, LogMessagePart } from '../../../../common/http_api';
 
 interface LogEntryMessageColumnProps {
   columnValue: LogColumn;
-  highlights: LogEntryHighlightColumn[];
+  highlights: LogColumn[];
   isActiveHighlight: boolean;
   isHighlighted: boolean;
   isHovered: boolean;
@@ -77,28 +77,39 @@ const MessageColumnContent = euiStyled(LogEntryColumnContent)<MessageColumnConte
 `;
 
 const formatMessageSegments = (
-  messageSegments: LogEntryMessageSegment[],
-  highlights: LogEntryHighlightColumn[],
+  messageSegments: LogMessagePart[],
+  highlights: LogColumn[],
   isActiveHighlight: boolean
 ) =>
   messageSegments.map((messageSegment, index) =>
     formatMessageSegment(
       messageSegment,
-      highlights.map(highlight =>
-        isHighlightMessageColumn(highlight) ? highlight.message[index].highlights : []
-      ),
+      highlights.map(highlight => {
+        if (isHighlightMessageColumn(highlight)) {
+          const segment = highlight.message[index];
+          if (isHighlightFieldSegment(segment)) {
+            return segment.highlights;
+          }
+        }
+        return [];
+      }),
       isActiveHighlight
     )
   );
 
 const formatMessageSegment = (
-  messageSegment: LogEntryMessageSegment,
+  messageSegment: LogMessagePart,
   [firstHighlight = []]: string[][], // we only support one highlight for now
   isActiveHighlight: boolean
 ): React.ReactNode => {
   if (isFieldSegment(messageSegment)) {
+    const value =
+      typeof messageSegment.value === 'string'
+        ? messageSegment.value
+        : stringify(messageSegment.value);
+
     return highlightFieldValue(
-      messageSegment.value,
+      value,
       firstHighlight,
       isActiveHighlight ? ActiveHighlightMarker : HighlightMarker
     );

@@ -5,9 +5,14 @@
  */
 
 import { InfraLogEntryHighlightFields } from '../../graphql/types';
-import { LogEntry } from '../../../common/http_api';
-
-export type LogEntryHighlight = InfraLogEntryHighlightFields.Fragment;
+import {
+  LogEntry,
+  LogColumn,
+  LogMessageColumn,
+  LogFieldColumn,
+  LogMessagePart,
+  LogMessagePartField,
+} from '../../../common/http_api';
 
 export type LogEntryHighlightColumn = InfraLogEntryHighlightFields.Columns;
 export type LogEntryHighlightMessageColumn = InfraLogEntryHighlightFields.InfraLogEntryMessageColumnInlineFragment;
@@ -20,15 +25,11 @@ export interface LogEntryHighlightsMap {
   [entryId: string]: LogEntry[];
 }
 
-export const isHighlightMessageColumn = (
-  column: LogEntryHighlightColumn
-): column is LogEntryHighlightMessageColumn => column != null && 'message' in column;
+export const isHighlightMessageColumn = (column: LogColumn): column is LogMessageColumn =>
+  column != null && 'message' in column;
 
-export const isHighlightFieldColumn = (
-  column: LogEntryHighlightColumn
-): column is LogEntryHighlightFieldColumn => column != null && 'field' in column;
+export const isHighlightFieldColumn = (column: LogColumn): column is LogFieldColumn =>
+  column != null && 'field' in column;
 
-export const isHighlightFieldSegment = (
-  segment: LogEntryHighlightMessageSegment
-): segment is LogEntryHighlightFieldMessageSegment =>
+export const isHighlightFieldSegment = (segment: LogMessagePart): segment is LogMessagePartField =>
   segment && 'field' in segment && 'highlights' in segment;
