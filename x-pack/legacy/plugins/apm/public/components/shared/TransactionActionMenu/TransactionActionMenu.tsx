@@ -68,17 +68,21 @@ export const TransactionActionMenu: FunctionComponent<Props> = ({
       button={<ActionMenuButton onClick={() => setIsOpen(!isOpen)} />}
     >
       {sections.map((section, idx) => (
-        <div>
+        <div key={idx}>
           <Section>
             {section.map(item => (
-              <SectionContainer>
+              <SectionContainer key={item.key}>
                 {item.title && <SectionTitle>{item.title}</SectionTitle>}
                 {item.subtitle && (
                   <SectionSubtitle>{item.subtitle}</SectionSubtitle>
                 )}
                 <SectionLinks>
                   {item.actions.map(action => (
-                    <SectionLink label={action.label} href={action.href} />
+                    <SectionLink
+                      key={action.key}
+                      label={action.label}
+                      href={action.href}
+                    />
                   ))}
                 </SectionLinks>
               </SectionContainer>

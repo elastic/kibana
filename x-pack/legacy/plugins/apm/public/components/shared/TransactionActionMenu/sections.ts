@@ -4,16 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { i18n } from '@kbn/i18n';
-import { AppMountContext } from 'kibana/public';
 import { Location } from 'history';
+import { AppMountContext } from 'kibana/public';
+import { pick, isEmpty } from 'lodash';
 import url from 'url';
-import { pick } from 'lodash';
 import { Transaction } from '../../../../typings/es_schemas/ui/Transaction';
-import { getInfraHref } from '../Links/InfraLink';
-import { getDiscoverQuery } from '../Links/DiscoverLinks/DiscoverTransactionLink';
-import { getDiscoveryHref } from '../Links/DiscoverLinks/DiscoverLink';
-import { fromQuery } from '../Links/url_helpers';
 import { IUrlParams } from '../../../context/UrlParamsContext/types';
+import { getDiscoveryHref } from '../Links/DiscoverLinks/DiscoverLink';
+import { getDiscoverQuery } from '../Links/DiscoverLinks/DiscoverTransactionLink';
+import { getInfraHref } from '../Links/InfraLink';
+import { fromQuery } from '../Links/url_helpers';
 
 function getInfraMetricsQuery(transaction: Transaction) {
   const plus5 = new Date(transaction['@timestamp']);
@@ -29,12 +29,14 @@ function getInfraMetricsQuery(transaction: Transaction) {
 }
 
 interface Action {
+  key: string;
   label: string;
   href: string;
   condition: boolean;
 }
 
 interface SectionItem {
+  key: string;
   title?: string;
   subtitle?: string;
   actions: Action[];
@@ -66,13 +68,14 @@ export const getSections = (
           dateRangeEnd: urlParams.rangeTo,
           search: `url.domain:"${transaction.url?.domain}"`
         },
-        (val: string) => !!val
+        (val: string) => !isEmpty(val)
       )
     )}`
   });
 
   const podActions: Action[] = [
     {
+      key: 'podLogs',
       label: i18n.translate(
         'xpack.apm.transactionActionMenu.showPodLogsLinkLabel',
         { defaultMessage: 'Pod logs' }
@@ -85,6 +88,7 @@ export const getSections = (
       condition: !!podId
     },
     {
+      key: 'podMetrics',
       label: i18n.translate(
         'xpack.apm.transactionActionMenu.showPodMetricsLinkLabel',
         { defaultMessage: 'Pod metrics' }
@@ -100,6 +104,7 @@ export const getSections = (
 
   const containerActions: Action[] = [
     {
+      key: 'containerLogs',
       label: i18n.translate(
         'xpack.apm.transactionActionMenu.showContainerLogsLinkLabel',
         { defaultMessage: 'Container logs' }
@@ -112,6 +117,7 @@ export const getSections = (
       condition: !!containerId
     },
     {
+      key: 'containerMetrics',
       label: i18n.translate(
         'xpack.apm.transactionActionMenu.showContainerMetricsLinkLabel',
         { defaultMessage: 'Container metrics' }
@@ -127,6 +133,7 @@ export const getSections = (
 
   const hostActions: Action[] = [
     {
+      key: 'hostLogs',
       label: i18n.translate(
         'xpack.apm.transactionActionMenu.showHostLogsLinkLabel',
         { defaultMessage: 'Host logs' }
@@ -139,6 +146,7 @@ export const getSections = (
       condition: !!hostName
     },
     {
+      key: 'hostMetrics',
       label: i18n.translate(
         'xpack.apm.transactionActionMenu.showHostMetricsLinkLabel',
         { defaultMessage: 'Host metrics' }
@@ -154,6 +162,7 @@ export const getSections = (
 
   const traceActions: Action[] = [
     {
+      key: 'traceLogs',
       label: i18n.translate(
         'xpack.apm.transactionActionMenu.showTraceLogsLinkLabel',
         { defaultMessage: 'Trace logs' }
@@ -172,6 +181,7 @@ export const getSections = (
 
   const kibanaActions: Action[] = [
     {
+      key: 'sampleDocument',
       label: i18n.translate(
         'xpack.apm.transactionActionMenu.viewSampleDocumentLinkLabel',
         {
@@ -186,6 +196,7 @@ export const getSections = (
       condition: true
     },
     {
+      key: 'monitorStatus',
       label: i18n.translate('xpack.apm.transactionActionMenu.viewInUptime', {
         defaultMessage: 'View monitor status'
       }),
@@ -197,6 +208,7 @@ export const getSections = (
   const sections: Section = {
     observability: [
       {
+        key: 'podDetails',
         title: i18n.translate('xpack.apm.transactionActionMenu.pod.title', {
           defaultMessage: 'Pod details'
         }),
@@ -210,6 +222,7 @@ export const getSections = (
         actions: podActions
       },
       {
+        key: 'containerDetails',
         title: i18n.translate(
           'xpack.apm.transactionActionMenu.container.title',
           {
@@ -226,6 +239,7 @@ export const getSections = (
         actions: containerActions
       },
       {
+        key: 'hostDetails',
         title: i18n.translate('xpack.apm.transactionActionMenu.host.title', {
           defaultMessage: 'Host details'
         }),
@@ -238,6 +252,7 @@ export const getSections = (
         actions: hostActions
       },
       {
+        key: 'traceDetails',
         title: i18n.translate('xpack.apm.transactionActionMenu.trace.title', {
           defaultMessage: 'Trace details'
         }),
@@ -250,7 +265,7 @@ export const getSections = (
         actions: traceActions
       }
     ],
-    kibana: [{ actions: kibanaActions }]
+    kibana: [{ key: 'kibana', actions: kibanaActions }]
   };
 
   // Filter out actions that shouldnt be shown and sections without any actions.
