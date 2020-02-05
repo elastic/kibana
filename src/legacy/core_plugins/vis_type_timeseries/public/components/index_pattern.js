@@ -203,6 +203,7 @@ export const IndexPattern = ({ fields, prefix, onChange, disabled, model: _model
             })}
           >
             <EuiFieldText
+              data-test-subj="metricsIndexPatternInterval"
               isInvalid={!intervalValidation.isValid}
               disabled={disabled || isEntireTimeRangeActive(model, isTimeSeries)}
               onChange={handleTextChange(intervalName, AUTO_INTERVAL)}
@@ -219,6 +220,7 @@ export const IndexPattern = ({ fields, prefix, onChange, disabled, model: _model
             })}
           >
             <YesNo
+              data-test-subj="metricsDropLastBucket"
               value={model[dropBucketName]}
               name={dropBucketName}
               onChange={onChange}
