@@ -10393,8 +10393,6 @@
     "xpack.rollupJobs.detailPanel.jobActionMenu.buttonLabel": "管理",
     "xpack.rollupJobs.detailPanel.loadingLabel": "正在加载汇总/打包作业……",
     "xpack.rollupJobs.detailPanel.notFoundLabel": "未找到汇总/打包作业",
-    "xpack.rollupJobs.editorConfig.dateHistogram.customInterval.helpText": "必须是汇总/打包配置时间间隔的倍数：{interval}",
-    "xpack.rollupJobs.editorConfig.histogram.interval.helpText": "必须是汇总/打包配置时间间隔的倍数：{interval}",
     "xpack.rollupJobs.editRollupIndexPattern.createIndex.defaultButtonDescription": "针对汇总数据执行有限聚合",
     "xpack.rollupJobs.editRollupIndexPattern.createIndex.defaultButtonText": "汇总/打包索引模式",
     "xpack.rollupJobs.editRollupIndexPattern.createIndex.defaultTypeName": "汇总/打包索引模式",
