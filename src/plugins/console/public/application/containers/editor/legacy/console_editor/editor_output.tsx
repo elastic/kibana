@@ -19,7 +19,6 @@
 
 import React, { useEffect, useRef } from 'react';
 
-import { NetworkRequestStatusBar } from '../../../../components';
 import { createReadOnlyAceEditor, CustomAceEditor } from '../../../../models/legacy_core_editor';
 import {
   useServicesContext,
