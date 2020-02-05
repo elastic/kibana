@@ -4,11 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ESSearchRequest, ESSearchBody } from '../../typings/elasticsearch';
+import {
+  ESSearchRequest,
+  ESSearchBody
+} from '../../../../../plugins/apm/typings/elasticsearch';
 import {
   AggregationOptionsByType,
   AggregationInputMap
-} from '../../typings/elasticsearch/aggregations';
+} from '../../../../../plugins/apm/typings/elasticsearch/aggregations';
 
 export type Projection = Omit<ESSearchRequest, 'body'> & {
   body: Omit<ESSearchBody, 'aggs'> & {
