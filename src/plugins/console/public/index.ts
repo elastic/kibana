@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import './index.scss';
+
 import { ConsoleUIPlugin } from './plugin';
 
 export { ConsoleUIPlugin as Plugin };

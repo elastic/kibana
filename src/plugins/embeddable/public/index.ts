@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import './_index.scss';
+import './index.scss';
 
 import { PluginInitializerContext } from 'src/core/public';
 import { EmbeddablePublicPlugin } from './plugin';

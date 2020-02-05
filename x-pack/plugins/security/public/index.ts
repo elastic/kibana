@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './_index.scss';
+import './index.scss';
 import { PluginInitializer } from 'src/core/public';
 import { SecurityPlugin, SecurityPluginSetup, SecurityPluginStart } from './plugin';
 

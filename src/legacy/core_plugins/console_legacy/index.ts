@@ -19,7 +19,6 @@
 
 import { first } from 'rxjs/operators';
 import { head } from 'lodash';
-import { resolve } from 'path';
 import url from 'url';
 
 // TODO: Remove this hack once we can get the ES config we need for Console proxy a better way.
@@ -40,7 +39,6 @@ export default function(kibana: any) {
     },
 
     uiExports: {
-      styleSheetPaths: resolve(__dirname, 'public/styles/index.scss'),
       injectDefaultVars: () => ({
         elasticsearchUrl: url.format(
           Object.assign(url.parse(head(_legacyEsConfig.hosts)), { auth: false })

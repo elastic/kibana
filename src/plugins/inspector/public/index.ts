@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import './views/_index.scss';
+import './index.scss';
 
 import { PluginInitializerContext } from '../../../core/public';
 import { InspectorPublicPlugin } from './plugin';
