@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { schema } from '@kbn/config-schema';
-import { DEFAULT_REGISTRY_URL } from '../';
 
 export const PLUGIN_ID = 'ingestManager';
 
@@ -17,7 +16,7 @@ export const config = {
     enabled: schema.boolean({ defaultValue: false }),
     epm: schema.object({
       enabled: schema.boolean({ defaultValue: false }),
-      registryUrl: schema.maybe(schema.uri({ defaultValue: DEFAULT_REGISTRY_URL })),
+      registryUrl: schema.uri({ defaultValue: 'https://epr-staging.elastic.co' }),
     }),
     fleet: schema.object({
       enabled: schema.boolean({ defaultValue: false }),

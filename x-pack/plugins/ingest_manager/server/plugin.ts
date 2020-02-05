@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Observable } from 'rxjs';
-import { first } from 'rxjs/operators';
 import {
   CoreSetup,
   CoreStart,
@@ -18,12 +17,7 @@ import { SecurityPluginSetup } from '../../security/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import { PLUGIN_ID } from './constants';
 import { licenseService, configService, appContextService } from './services';
-import {
-  registerEPMRoutes,
-  registerDatasourceRoutes,
-  registerAgentConfigRoutes,
-  registerFleetSetupRoutes,
-} from './routes';
+import { registerDatasourceRoutes, registerAgentConfigRoutes } from './routes';
 import { IngestManagerConfigType } from '../common';
 
 export interface IngestManagerSetupDeps {
@@ -90,9 +84,10 @@ export class IngestManagerPlugin implements Plugin {
     registerDatasourceRoutes(router);
 
     // Optional route registration depending on Kibana config
-    const config = await this.config$.pipe(first()).toPromise();
-    if (config.epm.enabled) registerEPMRoutes(router);
-    if (config.fleet.enabled) registerFleetSetupRoutes(router);
+    // restore when EPM & Fleet features are added
+    // const config = await this.config$.pipe(first()).toPromise();
+    // if (config.epm.enabled) registerEPMRoutes(router);
+    // if (config.fleet.enabled) registerFleetSetupRoutes(router);
   }
 
   public async start(

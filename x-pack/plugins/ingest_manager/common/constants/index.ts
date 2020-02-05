@@ -9,5 +9,3 @@ export * from './routes';
 export * from './agent_config';
 export * from './datasource';
 export * from './output';
-
-export const DEFAULT_REGISTRY_URL = 'https://epr-staging.elastic.co';

@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 export {
-  // Registry
-  DEFAULT_REGISTRY_URL,
   // Routes
   PLUGIN_ID,
   EPM_API_ROUTES,

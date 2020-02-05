@@ -51,11 +51,12 @@ const IngestManagerRoutes = ({ ...rest }) => {
               <FleetApp />
             </DefaultLayout>
           </ProtectedRoute>
-          <Route path="/">
+          <Route exact path="/">
             <DefaultLayout section="overview">
               <IngestManagerOverview />
             </DefaultLayout>
           </Route>
+          <Redirect to="/" />
         </Switch>
       </Router>
     </EuiErrorBoundary>
