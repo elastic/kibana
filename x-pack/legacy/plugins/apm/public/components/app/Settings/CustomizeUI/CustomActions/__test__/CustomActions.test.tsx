@@ -11,6 +11,8 @@ import { expectTextsInDocument } from '../../../../../../utils/testHelpers';
 import * as hooks from '../../../../../../hooks/useFetcher';
 
 describe('CustomActions', () => {
+  afterEach(() => jest.restoreAllMocks());
+
   describe('empty prompt', () => {
     it('shows when any actions are available', () => {
       // TODO: mock return items
