@@ -36,12 +36,12 @@ export const parseAndPopulate = buildNumber => srcFile => destFile => log => {
   const historicalItems = [];
   const mutateHistorical = onLineRead(historicalItems)
   const onErr = x => log.error(`!!! ${x}`);
-  const mutateInital = onComplete(initialData);
+  const mutateInitial = onComplete(initialData);
 
   const rl = readline.createInterface({ input: fs.createReadStream(resolvedSrcFile) });
   fromEvent(rl, 'line')
     .pipe(takeUntil(fromEvent(rl, 'close')))
-    .subscribe(mutateHistorical, onErr, () => mutateInital(historicalItems, log));
+    .subscribe(mutateHistorical, onErr, () => mutateInitial(historicalItems, log));
 
 };
 
