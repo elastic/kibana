@@ -5,7 +5,7 @@
  */
 
 import { CoreSetup } from 'kibana/public';
-import { esKuery, autocomplete } from '../../../../../../src/plugins/data/public';
+import { esKuery, autocomplete } from '../../../../../../../src/plugins/data/public';
 
 export type KqlQuerySuggestionProvider<T = autocomplete.BasicQuerySuggestion> = (
   core: CoreSetup

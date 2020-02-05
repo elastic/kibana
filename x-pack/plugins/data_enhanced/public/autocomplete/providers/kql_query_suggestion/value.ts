@@ -7,8 +7,8 @@
 import { flatten } from 'lodash';
 import { escapeQuotes } from './lib/escape_kuery';
 import { KqlQuerySuggestionProvider } from './types';
-import { getAutocompleteService } from '../services';
-import { autocomplete } from '../../../../../../src/plugins/data/public';
+import { getAutocompleteService } from '../../../services';
+import { autocomplete } from '../../../../../../../src/plugins/data/public';
 
 const wrapAsSuggestions = (start: number, end: number, query: string, values: string[]) =>
   values

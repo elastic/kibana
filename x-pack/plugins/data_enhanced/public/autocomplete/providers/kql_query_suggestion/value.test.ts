@@ -5,9 +5,9 @@
  */
 import { setupGetValueSuggestions } from './value';
 import indexPatternResponse from './__fixtures__/index_pattern_response.json';
-import { coreMock } from '../../../../../../src/core/public/mocks';
-import { autocomplete, esKuery } from '../../../../../../src/plugins/data/public';
-import { setAutocompleteService } from '../services';
+import { coreMock } from '../../../../../../../src/core/public/mocks';
+import { autocomplete, esKuery } from '../../../../../../../src/plugins/data/public';
+import { setAutocompleteService } from '../../../services';
 
 const mockKueryNode = (kueryNode: Partial<esKuery.KueryNode>) =>
   (kueryNode as unknown) as esKuery.KueryNode;
