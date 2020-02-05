@@ -424,7 +424,7 @@ exports[`should render a Welcome screen with the telemetry disclaimer when optIn
               />
             </EuiLink>
             <FormattedMessage
-              defaultMessage="To stop collection, "
+              defaultMessage=" To stop collection, "
               id="kbn.home.dataManagementDisableCollection"
               values={Object {}}
             />

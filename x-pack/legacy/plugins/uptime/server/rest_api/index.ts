@@ -17,6 +17,7 @@ import {
   createGetMonitorLocationsRoute,
   createGetStatusBarRoute,
 } from './monitors';
+import { createGetPingHistogramRoute } from './pings/get_ping_histogram';
 
 export * from './types';
 export { createRouteWithAuth } from './create_route_with_auth';
@@ -34,4 +35,5 @@ export const restApiRoutes: UMRestApiRouteFactory[] = [
   createGetSnapshotCount,
   createLogMonitorPageRoute,
   createLogOverviewPageRoute,
+  createGetPingHistogramRoute,
 ];

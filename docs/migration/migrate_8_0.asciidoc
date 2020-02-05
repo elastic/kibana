@@ -75,9 +75,41 @@ specified explicitly.
 *Impact:* Define `xpack.security.authc.saml.realm` when using the SAML authentication provider instead.
 
 [float]
+==== `/api/security/v1/saml` endpoint is no longer supported
+*Details:* The deprecated `/api/security/v1/saml` endpoint is no longer supported. 
+
+*Impact:* Rely on `/api/security/saml/callback` endpoint when using SAML instead. This change should be reflected in Kibana `server.xsrf.whitelist` config as well as in Elasticsearch and Identity Provider SAML settings.
+
+[float]
 === `optimize` directory is now in the `data` folder
 *Details:* Generated bundles have moved to the configured `path.data` folder.
 
 *Impact:* Any workflow that involved manually clearing generated bundles will have to be updated with the new path.
+
+[float]
+[[breaking_80_user_role_changes]]
+=== User role changes
+
+[float]
+==== `kibana_user` role has been removed and `kibana_admin` has been added.
+
+*Details:* The `kibana_user` role has been removed and `kibana_admin` has been added to better
+reflect its intended use. This role continues to grant all access to every
+{kib} feature. If you wish to restrict access to specific features, create
+custom roles with {kibana-ref}/kibana-privileges.html[{kib} privileges].
+
+*Impact:* Any users currently assigned the `kibana_user` role will need to
+instead be assigned the `kibana_admin` role to maintain their current
+access level.
+
+[float]
+[[breaking_80_reporting_changes]]
+=== Reporting changes
+
+[float]
+==== Legacy job parameters are no longer supported
+*Details:* POST URL snippets that were copied in Kibana 6.2 or below are no longer supported. These logs have
+been deprecated with warnings that have been logged throughout 7.x. Please use Kibana UI to re-generate the
+POST URL snippets if you depend on these for automated PDF reports.
 
 // end::notable-breaking-changes[]

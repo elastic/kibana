@@ -6,7 +6,7 @@
 
 import React, { FC } from 'react';
 import { Route, Switch } from 'react-router-dom';
-import { MonitorPage, OverviewPage, NotFoundPage, SettingsPage } from './pages';
+import { MonitorPage, NotFoundPage, OverviewPage, SettingsPage } from './pages';
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 import { UMUpdateBreadcrumbs } from './lib/lib';
 

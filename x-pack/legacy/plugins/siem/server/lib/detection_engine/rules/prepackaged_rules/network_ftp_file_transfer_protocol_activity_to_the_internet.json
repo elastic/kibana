@@ -1,20 +1,25 @@
 {
-  "description": "This signal detects events that may indicate the use of FTP network connections.\nThe File Transfer Protocol (FTP) has been around in its current form since the\n1980's. It can be an efficient and normal procedure on your network to send and\nreceive files. Because it is common and efficient, adversaries will also often\nuse this protocol to exfiltrate data from your network or download new tools.\nAdditionally, FTP is a plaintext protocol which may expose your username and\npassword, if intercepted.\n",
+  "description": "This rule detects events that may indicate the use of FTP network connections to the Internet.\nThe File Transfer Protocol (FTP) has been around in its current form since the\n1980s. It can be a common and efficient procedure on your network to send and\nreceive files. Because of this, adversaries will also often use this protocol\nto exfiltrate data from your network or download new tools. Additionally, FTP\nis a plain-text protocol which, if intercepted, may expose usernames and\npasswords. FTP activity involving servers subject to regulations or compliance\nstandards may be unauthorized.\n",
+  "false_positives": [
+    "FTP servers should be excluded from this rule as this is expected behavior. Some business workflows may use FTP for data exchange. These workflows often have expected characteristics such as users, sources, and destinations. FTP activity involving an unusual source or destination may be more suspicious. FTP activity involving a production server that has no known associated FTP workflow or business requirement is often suspicious."
+  ],
   "index": [
-    "apm-*-transaction*",
     "auditbeat-*",
-    "endgame-*",
     "filebeat-*",
     "packetbeat-*",
     "winlogbeat-*"
   ],
   "language": "kuery",
+  "max_signals": 100,
   "name": "FTP (File Transfer Protocol) Activity to the Internet",
   "query": "network.transport: tcp and destination.port: (20 or 21) and (\n    network.direction: outbound or (\n        source.ip: (10.0.0.0/8 or 172.16.0.0/12 or 192.168.0.0/16) and\n        not destination.ip: (10.0.0.0/8 or 172.16.0.0/12 or 192.168.0.0/16)\n    )\n)\n",
-  "risk_score": 25,
+  "risk_score": 21,
   "rule_id": "87ec6396-9ac4-4706-bcf0-2ebb22002f43",
   "severity": "low",
-  "tags": ["Elastic", "network"],
+  "tags": [
+    "Elastic",
+    "Network"
+  ],
   "threat": [
     {
       "framework": "MITRE ATT&CK",
@@ -36,11 +41,11 @@
       "tactic": {
         "id": "TA0010",
         "name": "Exfiltration",
-        "reference": "https://attack.mitre.org/tactics/TA0011/"
+        "reference": "https://attack.mitre.org/tactics/TA0010/"
       },
       "technique": [
         {
-          "id": "T1043",
+          "id": "T1048",
           "name": "Exfiltration Over Alternative Protocol",
           "reference": "https://attack.mitre.org/techniques/T1048/"
         }

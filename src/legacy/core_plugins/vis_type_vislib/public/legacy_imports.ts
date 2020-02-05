@@ -17,12 +17,7 @@
  * under the License.
  */
 
-export { AggGroupNames, VisOptionsProps } from 'ui/vis/editors/default';
-export { Schemas } from 'ui/vis/editors/default/schemas';
-export { RangeValues, RangesParamEditor } from 'ui/vis/editors/default/controls/ranges';
-export { ColorSchema, ColorSchemas, colorSchemas, getHeatmapColors } from 'ui/color_maps';
-export { AggConfig, Vis, VisParams } from 'ui/vis';
-export { AggType } from 'ui/agg_types';
+export { AggType, AggGroupNames, IAggConfig, IAggType, Schemas } from 'ui/agg_types';
 // @ts-ignore
 export { SimpleEmitter } from 'ui/utils/simple_emitter';
 // @ts-ignore

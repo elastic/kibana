@@ -42,9 +42,7 @@ export default function(kibana) {
     config: function(Joi) {
       return Joi.object({
         enabled: Joi.boolean().default(true),
-        defaultAppId: Joi.string().default('home'),
         index: Joi.string().default('.kibana'),
-        disableWelcomeScreen: Joi.boolean().default(false),
         autocompleteTerminateAfter: Joi.number()
           .integer()
           .min(1)
@@ -64,7 +62,6 @@ export default function(kibana) {
         'plugins/kibana/visualize/legacy',
         'plugins/kibana/dashboard/legacy',
       ],
-      savedObjectTypes: ['plugins/kibana/dashboard/saved_dashboard/saved_dashboard_register'],
       app: {
         id: 'kibana',
         title: 'Kibana',

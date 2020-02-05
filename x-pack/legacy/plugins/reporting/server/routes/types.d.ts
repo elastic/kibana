@@ -5,7 +5,7 @@
  */
 
 import { Legacy } from 'kibana';
-import { RequestFacade, ReportingResponseToolkit, JobDocPayload } from '../../types';
+import { JobDocPayload, ReportingResponseToolkit } from '../../types';
 
 export type HandlerFunction = (
   exportType: string,

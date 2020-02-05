@@ -1,0 +1,21 @@
+{
+  "description": "Elastic Endpoint detected Ransomware. Click the Elastic Endpoint icon in the event.module column or the link in the rule.reference column in the External Alerts tab of the SIEM Detections page for additional information.",
+  "from": "now-660s",
+  "index": [
+    "endgame-*"
+  ],
+  "interval": "10m",
+  "language": "kuery",
+  "max_signals": 100,
+  "name": "Ransomware - Detected - Elastic Endpoint",
+  "query": "event.kind:alert and event.module:endgame and event.action:ransomware_event and endgame.metadata.type:detection",
+  "risk_score": 99,
+  "rule_id": "8cb4f625-7743-4dfb-ae1b-ad92be9df7bd",
+  "severity": "critical",
+  "tags": [
+    "Elastic",
+    "Endpoint"
+  ],
+  "type": "query",
+  "version": 1
+}

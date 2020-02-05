@@ -18,15 +18,15 @@
  */
 
 export { PersistedState } from '../../../ui/public/persisted_state';
-export { AggConfig } from '../../../ui/public/agg_types/agg_config';
-export { AggConfigs } from '../../../ui/public/agg_types/agg_configs';
 export {
+  AggConfigs,
+  IAggConfig,
+  IAggConfigs,
   isDateHistogramBucketAggConfig,
   setBounds,
-} from '../../../ui/public/agg_types/buckets/date_histogram';
+} from '../../../ui/public/agg_types';
 export { createFormat } from '../../../ui/public/visualize/loader/pipeline_helpers/utilities';
 export { I18nContext } from '../../../ui/public/i18n';
-export { DefaultEditorController } from '../../../ui/public/vis/editors/default/default_editor_controller';
 import chrome from '../../../ui/public/chrome';
 export { chrome as legacyChrome };
 import '../../../ui/public/directives/bind';

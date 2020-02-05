@@ -5,24 +5,9 @@
  */
 
 import { UMSavedObjectsAdapter } from './types';
-import uptimeIndexPattern from './heartbeat_index_pattern.json';
 import { umDynamicSettings, UMDynamicSettingsType } from '../../sources';
 
 export const savedObjectsAdapter: UMSavedObjectsAdapter = {
-  getUptimeIndexPattern: async client => {
-    try {
-      return await client.get('index-pattern', uptimeIndexPattern.id);
-    } catch (error) {
-      return await client.create(
-        'index-pattern',
-        {
-          ...uptimeIndexPattern.attributes,
-          title: 'UptimeIndexPattern',
-        },
-        { id: uptimeIndexPattern.id, overwrite: false }
-      );
-    }
-  },
   getUptimeDynamicSettings: async (client): Promise<UMDynamicSettingsType> => {
     try {
       return (await client.get(umDynamicSettings.type, umDynamicSettings.id)).attributes;

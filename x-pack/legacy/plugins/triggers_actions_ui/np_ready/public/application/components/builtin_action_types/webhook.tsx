@@ -27,10 +27,10 @@ import { i18n } from '@kbn/i18n';
 import {
   ActionTypeModel,
   ActionConnectorFieldsProps,
-  ActionConnector,
   ValidationResult,
   ActionParamsProps,
 } from '../../../types';
+import { WebhookActionParams, WebhookActionConnector } from './types';
 
 const HTTP_VERBS = ['post', 'put'];
 
@@ -44,7 +44,7 @@ export function getActionType(): ActionTypeModel {
         defaultMessage: 'Send a request to a web service.',
       }
     ),
-    validateConnector: (action: ActionConnector): ValidationResult => {
+    validateConnector: (action: WebhookActionConnector): ValidationResult => {
       const validationResult = { errors: {} };
       const errors = {
         url: new Array<string>(),
@@ -95,13 +95,13 @@ export function getActionType(): ActionTypeModel {
       }
       return validationResult;
     },
-    validateParams: (actionParams: any): ValidationResult => {
+    validateParams: (actionParams: WebhookActionParams): ValidationResult => {
       const validationResult = { errors: {} };
       const errors = {
         body: new Array<string>(),
       };
       validationResult.errors = errors;
-      if (!actionParams.body || actionParams.body.length === 0) {
+      if (!actionParams.body?.length) {
         errors.body.push(
           i18n.translate(
             'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredWebhookBodyText',
@@ -118,12 +118,9 @@ export function getActionType(): ActionTypeModel {
   };
 }
 
-const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({
-  action,
-  editActionConfig,
-  editActionSecrets,
-  errors,
-}) => {
+const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps<
+  WebhookActionConnector
+>> = ({ action, editActionConfig, editActionSecrets, errors }) => {
   const [httpHeaderKey, setHttpHeaderKey] = useState<string>('');
   const [httpHeaderValue, setHttpHeaderValue] = useState<string>('');
   const [hasHeaders, setHasHeaders] = useState<boolean>(false);
@@ -453,14 +450,13 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
   );
 };
 
-const WebhookParamsFields: React.FunctionComponent<ActionParamsProps> = ({
-  action,
+const WebhookParamsFields: React.FunctionComponent<ActionParamsProps<WebhookActionParams>> = ({
+  actionParams,
   editAction,
   index,
   errors,
-  hasErrors,
 }) => {
-  const { body } = action;
+  const { body } = actionParams;
 
   return (
     <Fragment>
@@ -472,13 +468,13 @@ const WebhookParamsFields: React.FunctionComponent<ActionParamsProps> = ({
             defaultMessage: 'Body',
           }
         )}
-        isInvalid={hasErrors === true}
+        isInvalid={errors.body.length > 0 && body !== undefined}
         fullWidth
         error={errors.body}
       >
         <EuiCodeEditor
           fullWidth
-          isInvalid={hasErrors === true}
+          isInvalid={errors.body.length > 0 && body !== undefined}
           mode="json"
           width="100%"
           height="200px"
