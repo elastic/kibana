@@ -134,19 +134,16 @@ Management::
 * Allows User to Cleanup Repository from UI  {pull}53047[#53047]
 * Updates advanced settings text for usage data {pull}52657[#52657]
 Maps::
-* Data load event handlers {pull}49373[#49373]
 * Makes grid rectangles the default symbolization for geo grid source {pull}50169[#50169]
 * Focuses inputs when editor opens popovers {pull}51487[#51487]
 * Uses style metadata to calculate symbolization bands {pull}51713[#51713]
 * Better style defaults {pull}52420[#52420]
-* MapEmbeddable setLayerList {pull}52573[#52573]
 * Vector style UI redesign {pull}53946[#53946]
 * Allows editing EMS basemap selection {pull}53631[#53631]
 * Adds text halo color and width style properties {pull}53827[#53827]
 * Adds labels to sample data maps {pull}54671[#54671]
 * Adds categorical styling {pull}54408[#54408]
 * Hides map visualization types with default kibana.yml settings {pull}49103[#49103]
-* Feature/hide view/layer control in embeddable {pull}53469[#53469]
 * Hides header panel in embeddable panel {pull}50728[#50728]
 Metrics::
 * Calculates interval based on the dataset's period {pull}50194[#50194]
@@ -154,13 +151,12 @@ Metrics::
 * Adds ability to filter snapshot view by account and region {pull}53307[#53307]
 * Adds inventory metadata api with regions and accounts {pull}52660[#52660]
 * Removes graphql types {pull}54176[#54176]
+* Adds AWS Metricsets to Inventory Models {pull}49983[#49983]
 Monitoring::
 * Fetches shard data more efficiently {pull}54028[#54028]
 * Displays APM server memory in bytes {pull}54275[#54275]
 Operations::
 * Adds support for log rotation  {pull}49750[#49750]
-Metrics::
-* Adds AWS Metricsets to Inventory Models {pull}49983[#49983]
 Monitoring::
 * h1 elements for accessibility {pull}52276[#52276]
 Platform::
@@ -172,6 +168,10 @@ Reporting::
 * Converts main Reporting index to TS {pull}49129[#49129]
 * Removes any types and references to Hapi {pull}49250[#49250]
 * Updates some runtime validations {pull}53975[#53975]
+Security::
+* Role Mappings UI {pull}53620[#53620]
+* Adds message to login page {pull}51557[#51557]
+* Updates Node.js to version 10.18.0 {pull}52865[#52865]
 SIEM::
 * New Overview Page {pull}54783[#54783]
 * Adds DNS histogram {pull}50409[#50409]
@@ -213,10 +213,6 @@ SIEM::
 * From signals to timeline {pull}54769[#54769]
 * Detections create prepackage rules {pull}55403[#55403]
 * Feedback to user about generated encryption key {pull}56464[#56464]
-Security::
-* Role Mappings UI {pull}53620[#53620]
-* Adds message to login page {pull}51557[#51557]
-* Updates Node.js to version 10.18.0 {pull}52865[#52865]
 Uptime::
 * Updates snapshot counts {pull}48035[#48035]
 * Migrates Uptime server routing to new platform {pull}51125[#51125]
@@ -260,6 +256,8 @@ Discover::
 * Fixes filter pill label for filters with negated alias {pull}50743[#50743]
 * Filters scripted fields preview field list to source fields {pull}53826[#53826]
 * Fixes operator overflowing out popover {pull}50030[#50030]
+Graph::
+* Only show explorable fields {pull}54101[#54101]
 Lens::
 * Modifies merge tables to use the same logic as auto date {pull}52931[#52931]
 * Selects Records field when count operation is chosen {pull}53911[#53911]
@@ -267,8 +265,6 @@ Lens::
 * Fixes sorting crash when removing a Y axis that is being used for sorting {pull}52694[#52694]
 * Shows fields when using index pattern without time field {pull}54804[#54804]
 * Fixes bugs in Lens filters {pull}56441[#56441]
-Graph::
-* Only show explorable fields {pull}54101[#54101]
 Logs::
 * Adds missing headers in Logs &amp; metrics {pull}52405[#52405]
 * Uses the correct icons and labels in the feature cont… {pull}55292[#55292]
@@ -359,18 +355,18 @@ Reporting::
 * Do not fail the report if request is aborted {pull}52344[#52344]
 * Fixes map tiles not loading by using Chrome's Remote Protocol {pull}55137[#55137]
 * Corrects the docvalue_fields params in the search query Download CSV from Dashboard Panel {pull}52833[#52833]
-SIEM::
-* Fixes Empty `Source` / `Destination` shown when only ports are populated {pull}50843[#50843]
-* Removes placeholder from pinned event tooltips {pull}52361[#52361]
-* Adds filter feature and fixes misc bugs around false values {pull}50999[#50999]
-* Fixes a bug to allow empty query string when filters are set {pull}51398[#51398]
-* Adds signal to ECS event.kind and fixes status in signals  {pull}51772[#51772]
 Security::
 * Uses the server's basePath when building the SAML ACS {pull}51391[#51391]
 * Fixes elasticsearch.ssl.alwaysPresentCertificate default {pull}52242[#52242]
 * Forces line-break if username is a solid long string {pull}50807[#50807]
 * Fixes infinite redirect loop when multiple cookies are sent {pull}50452[#50452]
 * Honors configured base path when logging out {pull}50946[#50946]
+SIEM::
+* Fixes Empty `Source` / `Destination` shown when only ports are populated {pull}50843[#50843]
+* Removes placeholder from pinned event tooltips {pull}52361[#52361]
+* Adds filter feature and fixes misc bugs around false values {pull}50999[#50999]
+* Fixes a bug to allow empty query string when filters are set {pull}51398[#51398]
+* Adds signal to ECS event.kind and fixes status in signals  {pull}51772[#51772]
 Uptime::
 * Removes react-router-dom warning in browse {pull}52008[#52008]
 * Fixes broken functional tests in `master` {pull}54395[#54395]
