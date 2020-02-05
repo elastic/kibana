@@ -10,6 +10,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiFlexItem,
   EuiFlexGroup,
+  EuiFormLabel,
   EuiExpression,
   EuiPopover,
   EuiPopoverTitle,
@@ -446,7 +447,15 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
           <EuiSpacer />
         </Fragment>
       ) : null}
-      <EuiFlexGroup gutterSize="s" wrap>
+      <EuiSpacer size="l" />
+      <EuiFormLabel>
+        <FormattedMessage
+          defaultMessage="Select Index to query:"
+          id="xpack.triggersActionsUI.sections.alertAdd.selectIndex"
+        />
+      </EuiFormLabel>
+      <EuiSpacer size="m" />
+      <EuiFlexGroup wrap>
         <EuiFlexItem grow={false}>
           <EuiPopover
             id="indexPopover"
@@ -489,6 +498,8 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
             </div>
           </EuiPopover>
         </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiFlexGroup>
         <EuiFlexItem grow={false}>
           <EuiPopover
             id="aggTypePopover"
@@ -549,6 +560,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
           <EuiFlexItem grow={false}>
             <EuiPopover
               id="aggFieldPopover"
+              ownFocus
               button={
                 <EuiExpression
                   description={i18n.translate(
@@ -618,6 +630,8 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
             </EuiPopover>
           </EuiFlexItem>
         ) : null}
+      </EuiFlexGroup>
+      <EuiFlexGroup>
         <EuiFlexItem grow={false}>
           <EuiPopover
             id="groupByPopover"
@@ -737,6 +751,16 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
             </div>
           </EuiPopover>
         </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="xl" />
+      <EuiFormLabel>
+        <FormattedMessage
+          defaultMessage="Define the alert condition:"
+          id="xpack.triggersActionsUI.sections.alertAdd.conditionPrompt"
+        />
+      </EuiFormLabel>
+      <EuiSpacer size="m" />
+      <EuiFlexGroup>
         <EuiFlexItem grow={false}>
           <EuiPopover
             id="alertThresholdPopover"
