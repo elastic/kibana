@@ -297,7 +297,7 @@ Machine Learning::
 * Fixes loading of Data Visualizer with KQL saved search {pull}51882[#51882]
 * Corrects URL of the create job tips docs page {pull}53576[#53576]
 * Displays anomaly actual in chart tooltip when model plot enabled {pull}54364[#54364]
-* Fixes permissions checks for data visualizer create job links {pull}55431[#55431]
+* Fixes permissions checks for Data Visualizer create job links {pull}55431[#55431]
 * Fixes empty table header cell and duplicate ID accessibility issues {pull}54917[#54917]
 * Accessibility fix for structural markup on table rows {pull}55075[#55075]
 Management::
