@@ -39,6 +39,11 @@ run(
       throw createFlagError('expected --oss to have no value');
     }
 
+    const cache = flags.cache ?? true;
+    if (typeof cache !== 'boolean') {
+      throw createFlagError('expected --cache to have no value');
+    }
+
     const dist = flags.dist ?? false;
     if (typeof dist !== 'boolean') {
       throw createFlagError('expected --dist to have no value');
@@ -77,21 +82,25 @@ run(
       maxWorkerCount,
       oss,
       dist,
+      cache,
       examples,
       profileWebpack,
       extraPluginScanDirs,
       inspectWorkers,
     });
 
-    const state$ = await new Optimizer(config).run();
-    await state$.pipe(logOptimizerState(log, config)).toPromise();
+    await new Optimizer(config)
+      .run()
+      .pipe(logOptimizerState(log, config))
+      .toPromise();
   },
   {
     flags: {
-      boolean: ['watch', 'oss', 'examples', 'dist', 'profile', 'inspect-workers'],
+      boolean: ['watch', 'oss', 'examples', 'dist', 'cache', 'profile', 'inspect-workers'],
       string: ['workers', 'scan-dir'],
       default: {
         examples: true,
+        cache: true,
         'inspect-workers': true,
       },
       help: `
@@ -99,6 +108,7 @@ run(
         --workers          max number of workers to use
         --oss              only build oss plugins
         --profile          profile the webpack builds and write stats.json files to build outputs
+        --no-cache         disable the cache
         --no-examples      don't build the example plugins
         --dist             build new platform plugins in a way that is suitable for inclusion in the Kibana distributable
         --scan-dir         add a directory to the list of directories scanned for plugins (specify as many times as necessary)
