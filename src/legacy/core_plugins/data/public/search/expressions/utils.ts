@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import { AggConfig } from 'ui/agg_types/agg_config';
-import { AggConfigs } from '../../../../../ui/public/agg_types/agg_configs';
+import { AggConfigs } from '../aggs';
+import { IAggConfig } from '../aggs/types';
 import { KibanaDatatableColumnMeta } from '../../../../../../plugins/expressions/common/expression_types';
 import { IndexPattern } from '../../../../../../plugins/data/public';
 
-export const serializeAggConfig = (aggConfig: AggConfig): KibanaDatatableColumnMeta => {
+export const serializeAggConfig = (aggConfig: IAggConfig): KibanaDatatableColumnMeta => {
   return {
     type: aggConfig.type.name,
     indexPatternId: aggConfig.getIndexPattern().id,
