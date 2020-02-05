@@ -55,6 +55,7 @@ export function Synopsis({
       className={classes}
       layout="horizontal"
       icon={optionalImg}
+      titleSize="xs"
       title={title}
       description={description}
       onClick={onClick}

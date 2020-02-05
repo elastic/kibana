@@ -19,7 +19,7 @@
 
 import { Field } from 'src/plugins/data/public';
 import { VisState } from 'src/legacy/core_plugins/visualizations/public';
-import { AggConfig, AggParam } from '../legacy_imports';
+import { IAggConfig, AggParam } from '../legacy_imports';
 import { ComboBoxGroupedOptions } from '../utils';
 import { EditorConfig } from './utils';
 
@@ -28,7 +28,7 @@ import { EditorConfig } from './utils';
 // https://github.com/babel/babel/issues/7641
 //
 export interface AggParamCommonProps<T, P = AggParam> {
-  agg: AggConfig;
+  agg: IAggConfig;
   aggParam: P;
   disabled?: boolean;
   editorConfig: EditorConfig;
@@ -37,7 +37,7 @@ export interface AggParamCommonProps<T, P = AggParam> {
   showValidation: boolean;
   state: VisState;
   value?: T;
-  metricAggs: AggConfig[];
+  metricAggs: IAggConfig[];
 }
 
 export interface AggParamEditorProps<T, P = AggParam> extends AggParamCommonProps<T, P> {

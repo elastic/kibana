@@ -19,7 +19,13 @@
 
 import { IndexPattern, Field } from 'src/plugins/data/public';
 import { VisState } from 'src/legacy/core_plugins/visualizations/public';
-import { AggConfig, AggType, AggGroupNames, BUCKET_TYPES, IndexedArray } from '../legacy_imports';
+import {
+  IAggConfig,
+  IAggType,
+  AggGroupNames,
+  BUCKET_TYPES,
+  IndexedArray,
+} from '../legacy_imports';
 import {
   getAggParamsToRender,
   getAggTypeOptions,
@@ -36,10 +42,10 @@ jest.mock('ui/new_platform');
 
 describe('DefaultEditorAggParams helpers', () => {
   describe('getAggParamsToRender', () => {
-    let agg: AggConfig;
+    let agg: IAggConfig;
     let editorConfig: EditorConfig;
     const state = {} as VisState;
-    const metricAggs: AggConfig[] = [];
+    const metricAggs: IAggConfig[] = [];
     const emptyParams = {
       basic: [],
       advanced: [],
@@ -51,14 +57,14 @@ describe('DefaultEditorAggParams helpers', () => {
           params: [{ name: 'interval' }],
         },
         schema: {},
-      } as AggConfig;
+      } as IAggConfig;
       const params = getAggParamsToRender({ agg, editorConfig, metricAggs, state });
 
       expect(params).toEqual(emptyParams);
     });
 
     it('should not create any param if there is no agg type', () => {
-      agg = {} as AggConfig;
+      agg = {} as IAggConfig;
       const params = getAggParamsToRender({ agg, editorConfig, metricAggs, state });
 
       expect(params).toEqual(emptyParams);
@@ -69,7 +75,7 @@ describe('DefaultEditorAggParams helpers', () => {
         type: {
           params: [{ name: 'interval' }],
         },
-      } as AggConfig;
+      } as IAggConfig;
       editorConfig = {
         interval: {
           hidden: true,
@@ -88,7 +94,7 @@ describe('DefaultEditorAggParams helpers', () => {
         schema: {
           hideCustomLabel: true,
         },
-      } as AggConfig;
+      } as IAggConfig;
       const params = getAggParamsToRender({ agg, editorConfig, metricAggs, state });
 
       expect(params).toEqual(emptyParams);
@@ -125,7 +131,7 @@ describe('DefaultEditorAggParams helpers', () => {
           orderBy: 'orderBy',
           field: 'field',
         },
-      } as any) as AggConfig;
+      } as any) as IAggConfig;
       const params = getAggParamsToRender({ agg, editorConfig, metricAggs, state });
 
       expect(params).toEqual({
@@ -160,14 +166,14 @@ describe('DefaultEditorAggParams helpers', () => {
   describe('getAggTypeOptions', () => {
     it('should return agg type options grouped by subtype', () => {
       const indexPattern = {} as IndexPattern;
-      const aggs = getAggTypeOptions({} as AggConfig, indexPattern, 'metrics');
+      const aggs = getAggTypeOptions({} as IAggConfig, indexPattern, 'metrics');
 
       expect(aggs).toEqual(['indexedFields']);
     });
   });
 
   describe('isInvalidParamsTouched', () => {
-    let aggType: AggType;
+    let aggType: IAggType;
     const aggTypeState = {
       touched: false,
       valid: true,

@@ -23,7 +23,10 @@ import { i18n } from '@kbn/i18n';
 import useUnmount from 'react-use/lib/useUnmount';
 
 import { IndexPattern } from 'src/plugins/data/public';
-import { AggConfig, AggGroupNames } from '../legacy_imports';
+import {
+  IAggConfig,
+  AggGroupNames,
+} from '../legacy_imports';
 
 import { DefaultEditorAggSelect } from './agg_select';
 import { DefaultEditorAggParam } from './agg_param';
@@ -48,7 +51,7 @@ type EditorParamConfigType = EditorParamConfig & {
 };
 
 export interface DefaultEditorAggParamsProps extends DefaultEditorCommonProps {
-  agg: AggConfig;
+  agg: IAggConfig;
   aggError?: string;
   aggIndex?: number;
   aggIsTooLow?: boolean;
