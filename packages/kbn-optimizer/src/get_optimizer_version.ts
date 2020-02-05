@@ -24,7 +24,7 @@ import execa from 'execa';
 import { REPO_ROOT } from '@kbn/dev-utils';
 import { getMtimes } from './get_mtimes';
 import { getChanges } from './get_changes';
-import { ascending } from './common';
+import { OptimizerConfig } from './optimizer_config';
 
 const OPTIMIZER_DIR = Path.dirname(require.resolve('../package.json'));
 const RELATIVE_DIR = Path.relative(REPO_ROOT, OPTIMIZER_DIR);
@@ -41,10 +41,11 @@ async function getLastCommit() {
   return stdout.trim() || undefined;
 }
 
-export async function getOptimizerVersion() {
-  const cacheLines: string[] = [];
-
-  cacheLines.push(`lastCommit:${await getLastCommit()}`);
+export async function getOptimizerVersion(config: OptimizerConfig) {
+  const cacheLines: string[] = [
+    `lastCommit:${await getLastCommit()}`,
+    `workerConfig:${JSON.stringify(config.getWorkerConfig('-'))}`,
+  ];
 
   const changes = (await getChanges(REPO_ROOT, [OPTIMIZER_DIR])).get(OPTIMIZER_DIR);
   if (changes) {

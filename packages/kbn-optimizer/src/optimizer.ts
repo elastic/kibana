@@ -150,7 +150,7 @@ export class Optimizer {
     return Rx.defer(
       async (): Promise<OptimizerStateSummary> => {
         const startTime = Date.now();
-        const version = await getOptimizerVersion();
+        const version = await getOptimizerVersion(this.config);
         const offlineBundles = this.config.cache ? await this.getCachedBundles(version) : [];
         const onlineBundles = this.config.bundles.filter(b => !offlineBundles.includes(b));
 
