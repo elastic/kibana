@@ -156,7 +156,6 @@ export const siem = (kibana: any) => {
         plugins: {
           alerting: plugins.alerting,
           actions: newPlatform.start.plugins.actions,
-          savedObjects: server.savedObjects.SavedObjectsClient,
         },
         route: route.bind(server),
       };
