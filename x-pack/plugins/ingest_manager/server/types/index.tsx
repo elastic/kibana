@@ -36,6 +36,7 @@ export {
   GetFleetSetupRequestSchema,
   CreateFleetSetupRequestSchema,
   CreateFleetSetupResponse,
+  GetPackagesRequestSchema,
 } from '../../common';
 
 export type AgentConfigUpdateHandler = (

@@ -5,7 +5,7 @@
  */
 import { IRouter } from 'kibana/server';
 import { PLUGIN_ID, EPM_API_ROUTES } from '../../constants';
-import { getCategoriesHandler } from './handlers';
+import { getCategoriesHandler, getListHandler } from './handlers';
 
 export const registerRoutes = (router: IRouter) => {
   router.get(
@@ -23,9 +23,7 @@ export const registerRoutes = (router: IRouter) => {
       validate: false,
       options: { tags: [`access:${PLUGIN_ID}`] },
     },
-    async (context, req, res) => {
-      return res.ok({ body: { hello: 'world' } });
-    }
+    getListHandler
   );
 
   router.get(

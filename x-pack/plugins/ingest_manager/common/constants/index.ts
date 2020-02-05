@@ -8,4 +8,5 @@ export * from './routes';
 
 export * from './agent_config';
 export * from './datasource';
+export * from './epm';
 export * from './output';
