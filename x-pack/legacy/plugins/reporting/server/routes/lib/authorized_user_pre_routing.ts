@@ -22,7 +22,7 @@ export const authorizedUserPreRoutingFactory = function authorizedUserPreRouting
   plugins: ReportingSetupDeps,
   logger: Logger
 ) {
-  const getUser = getUserFactory(server, plugins.security, logger);
+  const getUser = getUserFactory(server, plugins.security);
   const config = server.config();
 
   return async function authorizedUserPreRouting(request: Legacy.Request) {

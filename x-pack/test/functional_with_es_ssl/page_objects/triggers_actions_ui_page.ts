@@ -18,11 +18,21 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
     async getSectionHeadingText() {
       return await testSubjects.getVisibleText('appTitle');
     },
+    async clickCreateFirstConnectorButton() {
+      const createBtn = await find.byCssSelector('[data-test-subj="createFirstActionButton"]');
+      const createBtnIsVisible = await createBtn.isDisplayed();
+      if (createBtnIsVisible) {
+        await createBtn.click();
+      }
+    },
     async clickCreateConnectorButton() {
-      const createBtn = await find.byCssSelector(
-        '[data-test-subj="createActionButton"],[data-test-subj="createFirstActionButton"]'
-      );
-      await createBtn.click();
+      const createBtn = await find.byCssSelector('[data-test-subj="createActionButton"]');
+      const createBtnIsVisible = await createBtn.isDisplayed();
+      if (createBtnIsVisible) {
+        await createBtn.click();
+      } else {
+        await this.clickCreateFirstConnectorButton();
+      }
     },
     async searchConnectors(searchText: string) {
       const searchBox = await find.byCssSelector('[data-test-subj="actionsList"] .euiFieldSearch');
@@ -108,6 +118,12 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
         const valueAfter = await switchBtnAfter.getAttribute('aria-checked');
         expect(valueAfter).not.to.eql(valueBefore);
       });
+    },
+    async clickCreateAlertButton() {
+      const createBtn = await find.byCssSelector(
+        '[data-test-subj="createAlertButton"],[data-test-subj="createFirstAlertButton"]'
+      );
+      await createBtn.click();
     },
   };
 }

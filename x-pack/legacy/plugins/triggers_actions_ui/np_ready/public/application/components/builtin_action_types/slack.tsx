@@ -3,25 +3,26 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { Fragment } from 'react';
+import React, { Fragment, useState, useEffect } from 'react';
 import {
   EuiFieldText,
   EuiTextArea,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiButtonIcon,
   EuiFormRow,
   EuiLink,
+  EuiPopover,
+  EuiContextMenuPanel,
+  EuiContextMenuItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   ActionTypeModel,
   ActionConnectorFieldsProps,
-  ActionConnector,
   ValidationResult,
   ActionParamsProps,
 } from '../../../types';
+import { SlackActionParams, SlackActionConnector } from './types';
 
 export function getActionType(): ActionTypeModel {
   return {
@@ -33,7 +34,13 @@ export function getActionType(): ActionTypeModel {
         defaultMessage: 'Send a message to a Slack channel or user.',
       }
     ),
-    validateConnector: (action: ActionConnector): ValidationResult => {
+    actionTypeTitle: i18n.translate(
+      'xpack.triggersActionsUI.components.builtinActionTypes.slackAction.actionTypeTitle',
+      {
+        defaultMessage: 'Send to Slack',
+      }
+    ),
+    validateConnector: (action: SlackActionConnector): ValidationResult => {
       const validationResult = { errors: {} };
       const errors = {
         webhookUrl: new Array<string>(),
@@ -51,13 +58,13 @@ export function getActionType(): ActionTypeModel {
       }
       return validationResult;
     },
-    validateParams: (actionParams: any): ValidationResult => {
+    validateParams: (actionParams: SlackActionParams): ValidationResult => {
       const validationResult = { errors: {} };
       const errors = {
         message: new Array<string>(),
       };
       validationResult.errors = errors;
-      if (!actionParams.message || actionParams.message.length === 0) {
+      if (!actionParams.message?.length) {
         errors.message.push(
           i18n.translate(
             'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredSlackMessageText',
@@ -74,11 +81,9 @@ export function getActionType(): ActionTypeModel {
   };
 }
 
-const SlackActionFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({
-  action,
-  editActionSecrets,
-  errors,
-}) => {
+const SlackActionFields: React.FunctionComponent<ActionConnectorFieldsProps<
+  SlackActionConnector
+>> = ({ action, editActionSecrets, errors }) => {
   const { webhookUrl } = action.secrets;
 
   return (
@@ -127,46 +132,86 @@ const SlackActionFields: React.FunctionComponent<ActionConnectorFieldsProps> = (
   );
 };
 
-const SlackParamsFields: React.FunctionComponent<ActionParamsProps> = ({
-  action,
+const SlackParamsFields: React.FunctionComponent<ActionParamsProps<SlackActionParams>> = ({
+  actionParams,
   editAction,
   index,
   errors,
-  hasErrors,
+  messageVariables,
+  defaultMessage,
 }) => {
-  const { message } = action;
-
+  const { message } = actionParams;
+  const [isVariablesPopoverOpen, setIsVariablesPopoverOpen] = useState<boolean>(false);
+  useEffect(() => {
+    if (defaultMessage && defaultMessage.length > 0) {
+      editAction('message', defaultMessage, index);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  const messageVariablesItems = messageVariables?.map((variable: string, i: number) => (
+    <EuiContextMenuItem
+      key={variable}
+      data-test-subj={`variableMenuButton-${i}`}
+      icon="empty"
+      onClick={() => {
+        editAction('message', (message ?? '').concat(` {{${variable}}}`), index);
+        setIsVariablesPopoverOpen(false);
+      }}
+    >
+      {`{{${variable}}}`}
+    </EuiContextMenuItem>
+  ));
   return (
     <Fragment>
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiButtonIcon
-            onClick={() => window.alert('Button clicked')}
-            iconType="indexOpen"
-            aria-label="Add variable"
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
       <EuiFormRow
         id="slackMessage"
         fullWidth
         error={errors.message}
-        isInvalid={hasErrors && message !== undefined}
+        isInvalid={errors.message.length > 0 && message !== undefined}
         label={i18n.translate(
           'xpack.triggersActionsUI.components.builtinActionTypes.slackAction.messageTextAreaFieldLabel',
           {
             defaultMessage: 'Message',
           }
         )}
+        labelAppend={
+          <EuiPopover
+            id="singlePanel"
+            button={
+              <EuiButtonIcon
+                data-test-subj="slackAddVariableButton"
+                onClick={() => setIsVariablesPopoverOpen(true)}
+                iconType="indexOpen"
+                aria-label={i18n.translate(
+                  'xpack.triggersActionsUI.components.builtinActionTypes.slackAction.addVariablePopoverButton',
+                  {
+                    defaultMessage: 'Add variable',
+                  }
+                )}
+              />
+            }
+            isOpen={isVariablesPopoverOpen}
+            closePopover={() => setIsVariablesPopoverOpen(false)}
+            panelPaddingSize="none"
+            anchorPosition="downLeft"
+          >
+            <EuiContextMenuPanel items={messageVariablesItems} />
+          </EuiPopover>
+        }
       >
         <EuiTextArea
           fullWidth
-          isInvalid={hasErrors && message !== undefined}
+          isInvalid={errors.message.length > 0 && message !== undefined}
           name="message"
-          value={message}
-          data-test-subj="slackMessageTextarea"
+          value={message || ''}
+          data-test-subj="slackMessageTextArea"
           onChange={e => {
             editAction('message', e.target.value, index);
+          }}
+          onBlur={() => {
+            if (!message) {
+              editAction('message', '', index);
+            }
           }}
         />
       </EuiFormRow>
