@@ -64,6 +64,7 @@ exports[`BasicLoginForm renders as expected 1`] = `
       >
         <EuiFieldText
           aria-required={true}
+          autoComplete="off"
           data-test-subj="loginPassword"
           disabled={false}
           id="password"
