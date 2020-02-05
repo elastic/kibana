@@ -36382,15 +36382,24 @@ var spawn = childProcess.spawn;
 var exec = childProcess.exec;
 
 module.exports = function (pid, signal, callback) {
+    if (typeof signal === 'function' && callback === undefined) {
+        callback = signal;
+        signal = undefined;
+    }
+
+    pid = parseInt(pid);
+    if (Number.isNaN(pid)) {
+        if (callback) {
+            return callback(new Error("pid must be a number"));
+        } else {
+            throw new Error("pid must be a number");
+        }
+    }
+
     var tree = {};
     var pidsToProcess = {};
     tree[pid] = [];
     pidsToProcess[pid] = 1;
-    
-    if (typeof signal === 'function' && callback === undefined) {
-      callback = signal;
-      signal = undefined;
-    }
 
     switch (process.platform) {
     case 'win32':
