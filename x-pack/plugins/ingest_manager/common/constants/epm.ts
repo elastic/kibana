@@ -6,3 +6,4 @@
 
 export const SAVED_OBJECT_TYPE_PACKAGES = 'epm-package';
 export const SAVED_OBJECT_TYPE_INDEX_PATTERN = 'index-pattern';
+export const registryUrl = 'https://epr-staging.elastic.co';

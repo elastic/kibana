@@ -15,7 +15,7 @@ import {
   RegistryPackage,
   RegistrySearchResults,
 } from '../../../../common/types';
-import { epmConfigStore } from '../config';
+import { registryUrl } from '../../../../common/constants/epm';
 import { cacheGet, cacheSet } from './cache';
 import { ArchiveEntry, untarBuffer } from './extract';
 import { fetchUrl, getResponse, getResponseStream } from './requests';
@@ -30,7 +30,6 @@ export interface SearchParams {
 export const pkgToPkgKey = ({ name, version }: RegistryPackage) => `${name}-${version}`;
 
 export async function fetchList(params?: SearchParams): Promise<RegistrySearchResults> {
-  const { registryUrl } = epmConfigStore.getConfig();
   const url = new URL(`${registryUrl}/search`);
   if (params && params.category) {
     url.searchParams.set('category', params.category);
@@ -40,17 +39,14 @@ export async function fetchList(params?: SearchParams): Promise<RegistrySearchRe
 }
 
 export async function fetchInfo(key: string): Promise<RegistryPackage> {
-  const { registryUrl } = epmConfigStore.getConfig();
   return fetchUrl(`${registryUrl}/package/${key}`).then(JSON.parse);
 }
 
 export async function fetchFile(filePath: string): Promise<Response> {
-  const { registryUrl } = epmConfigStore.getConfig();
   return getResponse(`${registryUrl}${filePath}`);
 }
 
 export async function fetchCategories(): Promise<CategorySummaryList> {
-  const { registryUrl } = epmConfigStore.getConfig();
   return fetchUrl(`${registryUrl}/categories`).then(JSON.parse);
 }
 
@@ -131,7 +127,6 @@ async function getOrFetchArchiveBuffer(pkgkey: string): Promise<Buffer> {
 }
 
 async function fetchArchiveBuffer(key: string): Promise<Buffer> {
-  const { registryUrl } = epmConfigStore.getConfig();
   const { download: archivePath } = await fetchInfo(key);
 
   return getResponseStream(`${registryUrl}${archivePath}`).then(streamToBuffer);
