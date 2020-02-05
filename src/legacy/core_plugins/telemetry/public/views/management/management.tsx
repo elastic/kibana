@@ -18,25 +18,31 @@
  */
 import React from 'react';
 import routes from 'ui/routes';
-import { registerSettingsComponent, PAGE_FOOTER_COMPONENT } from 'ui/management';
-import { npStart } from 'ui/new_platform';
+import { npStart, npSetup } from 'ui/new_platform';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { TelemetryManagementSection } from '../../../../../../plugins/telemetry/public/components';
 
 routes.defaults(/\/management/, {
   resolve: {
     telemetryManagementSection() {
-      if ((npStart.plugins as any).telemetry) {
-        const { telemetryService } = (npStart.plugins as any).telemetry;
+      const { telemetry } = npStart.plugins as any;
+      const { advancedSettings } = npSetup.plugins as any;
+
+      if (telemetry && advancedSettings) {
+        const componentRegistry = advancedSettings.component;
         const Component = (props: any) => (
           <TelemetryManagementSection
             showAppliesSettingMessage={true}
-            telemetryService={telemetryService}
+            telemetryService={telemetry.telemetryService}
             {...props}
           />
         );
 
-        registerSettingsComponent(PAGE_FOOTER_COMPONENT, Component, true);
+        componentRegistry.register(
+          componentRegistry.componentType.PAGE_FOOTER_COMPONENT,
+          Component,
+          true
+        );
       }
     },
   },

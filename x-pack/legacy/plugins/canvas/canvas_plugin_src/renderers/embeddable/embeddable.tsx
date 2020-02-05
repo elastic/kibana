@@ -70,7 +70,9 @@ const embeddable = () => ({
     { input, embeddableType }: EmbeddableExpression<EmbeddableInput>,
     handlers: RendererHandlers
   ) => {
-    if (!embeddablesRegistry[input.id]) {
+    const uniqueId = handlers.getElementId();
+
+    if (!embeddablesRegistry[uniqueId]) {
       const factory = Array.from(start.getEmbeddableFactories()).find(
         embeddableFactory => embeddableFactory.type === embeddableType
       ) as EmbeddableFactory<EmbeddableInput>;
@@ -82,7 +84,7 @@ const embeddable = () => ({
 
       const embeddableObject = await factory.createFromSavedObject(input.id, input);
 
-      embeddablesRegistry[input.id] = embeddableObject;
+      embeddablesRegistry[uniqueId] = embeddableObject;
       ReactDOM.unmountComponentAtNode(domNode);
 
       const subscription = embeddableObject.getInput$().subscribe(function(updatedInput) {
@@ -100,12 +102,12 @@ const embeddable = () => ({
         subscription.unsubscribe();
         handlers.onEmbeddableDestroyed();
 
-        delete embeddablesRegistry[input.id];
+        delete embeddablesRegistry[uniqueId];
 
         return ReactDOM.unmountComponentAtNode(domNode);
       });
     } else {
-      embeddablesRegistry[input.id].updateInput(input);
+      embeddablesRegistry[uniqueId].updateInput(input);
     }
   },
 });

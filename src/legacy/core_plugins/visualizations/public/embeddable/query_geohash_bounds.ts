@@ -21,7 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import { toastNotifications } from 'ui/notify';
 
-import { AggConfig } from 'ui/agg_types';
+import { IAggConfig } from 'ui/agg_types';
 import { timefilter } from 'ui/timefilter';
 import { Vis } from '../np_ready/public';
 import { esFilters, Query, SearchSource, ISearchSource } from '../../../../../plugins/data/public';
@@ -42,7 +42,7 @@ interface QueryGeohashBoundsParams {
  * TODO: Remove this as a part of elastic/kibana#30593
  */
 export async function queryGeohashBounds(vis: Vis, params: QueryGeohashBoundsParams) {
-  const agg = vis.getAggConfig().aggs.find((a: AggConfig) => {
+  const agg = vis.getAggConfig().aggs.find((a: IAggConfig) => {
     return get(a, 'type.dslName') === 'geohash_grid';
   });
 
