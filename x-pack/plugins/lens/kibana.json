@@ -4,5 +4,5 @@
   "kibanaVersion": "kibana",
   "server": true,
   "ui": false,
-  "requiredPlugins": ["usageCollection", "taskManager"]
+  "optionalPlugins": ["usageCollection", "taskManager"]
 }

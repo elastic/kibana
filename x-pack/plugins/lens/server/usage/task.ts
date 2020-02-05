@@ -27,13 +27,9 @@ export function initializeLensTelemetry(
   logger: Logger,
   core: CoreSetup,
   config: Observable<{ kibana: { index: string } }>,
-  taskManager?: TaskManagerSetupContract
+  taskManager: TaskManagerSetupContract
 ) {
-  if (!taskManager) {
-    logger.debug(`Task manager is not available`);
-  } else {
-    registerLensTelemetryTask(logger, core, config, taskManager);
-  }
+  registerLensTelemetryTask(logger, core, config, taskManager);
 }
 
 export function scheduleLensTelemetry(logger: Logger, taskManager?: TaskManagerStartContract) {
