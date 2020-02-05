@@ -19,13 +19,14 @@
 
 import { IndexPattern } from 'src/plugins/data/public';
 import { VisState } from 'src/legacy/core_plugins/visualizations/public';
-import { IAggConfig, IAggType, AggGroupNames, BUCKET_TYPES, EditorConfig } from '../legacy_imports';
+import { IAggConfig, IAggType, AggGroupNames, BUCKET_TYPES } from '../legacy_imports';
 import {
   getAggParamsToRender,
   getAggTypeOptions,
   isInvalidParamsTouched,
 } from './agg_params_helper';
 import { FieldParamEditor, OrderByParamEditor } from './controls';
+import { EditorConfig } from './utils';
 
 jest.mock('../utils', () => ({
   groupAndSortBy: jest.fn(() => ['indexedFields']),

@@ -47,4 +47,10 @@ export const indexPatterns = {
 export { Field, FieldList } from './fields';
 
 // TODO: figure out how to replace IndexPatterns in get_inner_angular.
-export { IndexPattern, IndexPatterns, IndexPatternsContract } from './index_patterns';
+export {
+  IndexPattern,
+  IndexPatterns,
+  IndexPatternsContract,
+  TypeMeta,
+  AggregationRestrictions,
+} from './index_patterns';

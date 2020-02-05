@@ -17,6 +17,4 @@
  * under the License.
  */
 
-export { CollectorSet } from './collector_set';
-export { Collector } from './collector';
-export { UsageCollector } from './usage_collector';
+export * from './editor_config';
