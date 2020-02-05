@@ -48,6 +48,11 @@ export async function getIndices(
     return [];
   }
 
+  // We need to always provide a limit and not rely on the default
+  if (!limit) {
+    throw new Error('`getIndices()` was called without the required `limit` parameter.');
+  }
+
   const params = {
     ignoreUnavailable: true,
     index: pattern,
@@ -79,7 +84,7 @@ export async function getIndices(
         .map((indexName: string) => {
           return {
             name: indexName,
-            tags: indexPatternCreationType.getIndexTags(indexName), // todo just returns empty array
+            tags: indexPatternCreationType.getIndexTags(indexName),
           };
         }),
       'name'

@@ -17,16 +17,26 @@
  * under the License.
  */
 
-import { containsIllegalCharacters } from '../contains_illegal_characters';
+import { canAppendWildcard } from './can_append_wildcard';
 
-describe('containsIllegalCharacters', () => {
-  it('returns true with illegal characters', () => {
-    const isInvalid = containsIllegalCharacters('abc', ['a']);
-    expect(isInvalid).toBe(true);
+describe('canAppendWildcard', () => {
+  test('ignores symbols', () => {
+    expect(canAppendWildcard('%')).toBeFalsy();
   });
 
-  it('returns false with no illegal characters', () => {
-    const isInvalid = containsIllegalCharacters('abc', ['%']);
-    expect(isInvalid).toBe(false);
+  test('accepts numbers', () => {
+    expect(canAppendWildcard('1')).toBeTruthy();
+  });
+
+  test('accepts letters', () => {
+    expect(canAppendWildcard('b')).toBeTruthy();
+  });
+
+  test('accepts uppercase letters', () => {
+    expect(canAppendWildcard('B')).toBeTruthy();
+  });
+
+  test('ignores if more than one key pressed', () => {
+    expect(canAppendWildcard('ab')).toBeFalsy();
   });
 });

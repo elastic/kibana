@@ -21,8 +21,3 @@ export interface MatchedIndex {
   name: string;
   tags: string[];
 }
-
-export interface Field {
-  type: string;
-  name: string;
-}

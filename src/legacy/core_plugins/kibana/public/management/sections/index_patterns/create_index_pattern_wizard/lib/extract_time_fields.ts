@@ -18,9 +18,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Field } from '../types';
+import { IFieldType } from '../../../../../../../../../plugins/data/public';
 
-export function extractTimeFields(fields: Field[]) {
+export function extractTimeFields(fields: IFieldType[]) {
   const dateFields = fields.filter(field => field.type === 'date');
   const label = i18n.translate('kbn.management.createIndexPattern.stepTime.noTimeFieldsLabel', {
     defaultMessage: "The indices which match this index pattern don't contain any time fields.",

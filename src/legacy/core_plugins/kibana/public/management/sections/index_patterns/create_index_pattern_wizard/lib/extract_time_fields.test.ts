@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { extractTimeFields } from '../extract_time_fields';
+import { extractTimeFields } from './extract_time_fields';
 
 describe('extractTimeFields', () => {
   it('should handle no date fields', () => {

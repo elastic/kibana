@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { getMatchedIndices } from '../get_matched_indices';
+import { getMatchedIndices } from './get_matched_indices';
 
-jest.mock('../../constants', () => ({
+jest.mock('./../constants', () => ({
   MAX_NUMBER_OF_MATCHING_INDICES: 6,
 }));
 
@@ -51,7 +51,7 @@ describe('getMatchedIndices', () => {
       exactMatchedIndices,
       partialMatchedIndices,
       visibleIndices,
-    } = getMatchedIndices(indices, partialIndices, exactIndices, '*', true);
+    } = getMatchedIndices(indices, partialIndices, exactIndices, true);
 
     expect(allIndices).toEqual([
       { name: 'kibana', tags },
@@ -85,7 +85,7 @@ describe('getMatchedIndices', () => {
       exactMatchedIndices,
       partialMatchedIndices,
       visibleIndices,
-    } = getMatchedIndices(indices, partialIndices, exactIndices, '*', false);
+    } = getMatchedIndices(indices, partialIndices, exactIndices, false);
 
     expect(allIndices).toEqual([
       { name: 'kibana', tags },
@@ -106,7 +106,7 @@ describe('getMatchedIndices', () => {
   });
 
   it('should return partial matches as visible if there are no exact', () => {
-    const { visibleIndices } = getMatchedIndices(indices, partialIndices, [], '*', true);
+    const { visibleIndices } = getMatchedIndices(indices, partialIndices, [], true);
 
     expect(visibleIndices).toEqual([
       { name: 'kibana', tags },
@@ -116,7 +116,7 @@ describe('getMatchedIndices', () => {
   });
 
   it('should return all indices as visible if there are no exact or partial', () => {
-    const { visibleIndices } = getMatchedIndices(indices, [], [], '*', true);
+    const { visibleIndices } = getMatchedIndices(indices, [], [], true);
 
     expect(visibleIndices).toEqual(indices);
   });

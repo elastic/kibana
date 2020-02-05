@@ -17,9 +17,65 @@
  * under the License.
  */
 
-import { getIndices } from '../get_indices';
-import { successfulResponse, errorResponse, exceptionResponse } from './api/get_indices';
-import { IndexPatternCreationConfig } from '../../../../../../../../management/public';
+import { getIndices } from './get_indices';
+import { IndexPatternCreationConfig } from './../../../../../../../management/public';
+
+export const successfulResponse = {
+  hits: {
+    total: 1,
+    max_score: 0.0,
+    hits: [],
+  },
+  aggregations: {
+    indices: {
+      doc_count_error_upper_bound: 0,
+      sum_other_doc_count: 0,
+      buckets: [
+        {
+          key: '1',
+          doc_count: 1,
+        },
+        {
+          key: '2',
+          doc_count: 1,
+        },
+      ],
+    },
+  },
+};
+
+export const exceptionResponse = {
+  body: {
+    error: {
+      root_cause: [
+        {
+          type: 'index_not_found_exception',
+          reason: 'no such index',
+          index_uuid: '_na_',
+          'resource.type': 'index_or_alias',
+          'resource.id': 't',
+          index: 't',
+        },
+      ],
+      type: 'transport_exception',
+      reason: 'unable to communicate with remote cluster [cluster_one]',
+      caused_by: {
+        type: 'index_not_found_exception',
+        reason: 'no such index',
+        index_uuid: '_na_',
+        'resource.type': 'index_or_alias',
+        'resource.id': 't',
+        index: 't',
+      },
+    },
+  },
+  status: 500,
+};
+
+export const errorResponse = {
+  statusCode: 400,
+  error: 'Bad Request',
+};
 
 const mockIndexPatternCreationType = new IndexPatternCreationConfig({
   type: 'default',
