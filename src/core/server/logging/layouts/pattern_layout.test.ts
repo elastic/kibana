@@ -126,7 +126,7 @@ test('`format()` correctly formats record with highlighting.', () => {
   }
 });
 
-test('`format()` allows specifying the PID.', () => {
+test('allows specifying the PID in custom pattern', () => {
   const layout = new PatternLayout('{pid}-{context}-{message}');
 
   for (const record of records) {
