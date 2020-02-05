@@ -40,7 +40,7 @@ import {
   stopReportManager,
   trackUiEvent,
 } from '../lens_ui_telemetry';
-import { NOT_INTERNATIONALIZED_PRODUCT_NAME } from '../../common';
+import { NOT_INTERNATIONALIZED_PRODUCT_NAME } from '../../../../../plugins/lens/common';
 import { KibanaLegacySetup } from '../../../../../../src/plugins/kibana_legacy/public';
 import { EditorFrameStart } from '../types';
 import {
