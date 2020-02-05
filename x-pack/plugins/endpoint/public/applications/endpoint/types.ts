@@ -36,3 +36,12 @@ export interface GlobalState {
 
 export type AlertListData = AlertResultList;
 export type AlertListState = AlertResultList;
+export type CreateStructuredSelector = <
+  SelectorMap extends { [key: string]: (...args: never[]) => unknown }
+>(
+  selectorMap: SelectorMap
+) => (
+  state: SelectorMap[keyof SelectorMap] extends (state: infer State) => unknown ? State : never
+) => {
+  [Key in keyof SelectorMap]: ReturnType<SelectorMap[Key]>;
+};

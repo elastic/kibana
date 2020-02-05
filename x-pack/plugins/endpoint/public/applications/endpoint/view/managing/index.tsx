@@ -20,25 +20,24 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import {
-  endpointListData,
-  endpointListPageIndex,
-  endpointListPageSize,
-  endpointTotalHits,
-  isLoading,
-} from '../../store/endpoint_list/selectors';
+import { createStructuredSelector } from 'reselect';
+import * as selectors from '../../store/endpoint_list/selectors';
 import { EndpointListAction } from '../../store/endpoint_list/action';
 import { useEndpointListSelector } from './hooks';
 import { usePageId } from '../use_page_id';
+import { CreateStructuredSelector } from '../../types';
 
+const selector = (createStructuredSelector as CreateStructuredSelector)(selectors);
 export const EndpointList = () => {
   usePageId('managementPage');
   const dispatch = useDispatch<(a: EndpointListAction) => void>();
-  const endpointListResults = useEndpointListSelector(endpointListData);
-  const pageIndex = useEndpointListSelector(endpointListPageIndex);
-  const pageSize = useEndpointListSelector(endpointListPageSize);
-  const totalItemCount = useEndpointListSelector(endpointTotalHits);
-  const loading = useEndpointListSelector(isLoading);
+  const {
+    listData,
+    pageIndex,
+    pageSize,
+    totalHits: totalItemCount,
+    isLoading,
+  } = useEndpointListSelector(selector);
 
   const paginationSetup = useMemo(() => {
     return {
@@ -69,27 +68,30 @@ export const EndpointList = () => {
       }),
     },
     {
-      field: 'endpoint.policy.name',
+      field: '',
       name: i18n.translate('xpack.endpoint.management.list.policy', {
         defaultMessage: 'Policy',
       }),
+      render: () => {
+        return 'Policy Name';
+      },
     },
     {
-      field: 'host.hostname',
+      field: '',
       name: i18n.translate('xpack.endpoint.management.list.policyStatus', {
         defaultMessage: 'Policy Status',
       }),
       render: () => {
-        return <span>Policy Status</span>;
+        return 'Policy Status';
       },
     },
     {
-      field: 'endpoint',
+      field: '',
       name: i18n.translate('xpack.endpoint.management.list.alerts', {
         defaultMessage: 'Alerts',
       }),
       render: () => {
-        return <span>0</span>;
+        return '0';
       },
     },
     {
@@ -105,21 +107,21 @@ export const EndpointList = () => {
       }),
     },
     {
-      field: 'endpoint.sensor',
+      field: '',
       name: i18n.translate('xpack.endpoint.management.list.sensorVersion', {
         defaultMessage: 'Sensor Version',
       }),
       render: () => {
-        return <span>version</span>;
+        return 'version';
       },
     },
     {
-      field: 'host.hostname',
+      field: '',
       name: i18n.translate('xpack.endpoint.management.list.lastActive', {
         defaultMessage: 'Last Active',
       }),
       render: () => {
-        return <span>xxxx</span>;
+        return 'xxxx';
       },
     },
   ];
@@ -127,13 +129,6 @@ export const EndpointList = () => {
   return (
     <EuiPage>
       <EuiPageBody>
-        <EuiPageHeader>
-          <EuiPageHeaderSection>
-            <EuiTitle size="xs">
-              <h1>Endpoints</h1>
-            </EuiTitle>
-          </EuiPageHeaderSection>
-        </EuiPageHeader>
         <EuiPageContent>
           <EuiPageContentHeader>
             <EuiPageContentHeaderSection>
@@ -150,9 +145,9 @@ export const EndpointList = () => {
           <EuiPageContentBody>
             <EuiBasicTable
               data-test-subj="managementListTable"
-              items={endpointListResults}
+              items={listData}
               columns={columns}
-              loading={loading}
+              loading={isLoading}
               pagination={paginationSetup}
               onChange={onTableChange}
             />
