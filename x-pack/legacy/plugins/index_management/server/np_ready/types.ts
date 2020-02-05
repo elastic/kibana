@@ -3,9 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { IRouter } from 'src/core/server';
+import { ScopedClusterClient, IRouter } from 'src/core/server';
 import { LicensingPluginSetup } from '../../../../../plugins/licensing/server';
-import { License } from './services/license';
+import { License, IndexDataEnricher } from './services';
 
 export interface Dependencies {
   licensing: LicensingPluginSetup;
@@ -14,4 +14,21 @@ export interface Dependencies {
 export interface RouteDependencies {
   router: IRouter;
   license: License;
+  indexDataEnricher: IndexDataEnricher;
 }
+
+export interface Index {
+  health: string;
+  status: string;
+  name: string;
+  uuid: string;
+  primary: string;
+  replica: string;
+  documents: any;
+  size: any;
+  isFrozen: boolean;
+  aliases: string | string[];
+  [key: string]: any;
+}
+
+export type CallAsCurrentUser = ScopedClusterClient['callAsCurrentUser'];

@@ -5,3 +5,5 @@
  */
 
 export { License } from './license';
+
+export { IndexDataEnricher, Enricher } from './index_data_enricher';

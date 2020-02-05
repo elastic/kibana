@@ -8,11 +8,14 @@ import { fetchIndices } from '../../../lib/fetch_indices';
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../index';
 
-export function registerListRoute({ router, license }: RouteDependencies) {
+export function registerListRoute({ router, license, indexDataEnricher }: RouteDependencies) {
   router.get(
     { path: addBasePath('/indices'), validate: false },
     license.guardApiRoute(async (ctx, req, res) => {
-      const indices = await fetchIndices(ctx.core.elasticsearch.dataClient.callAsCurrentUser);
+      const indices = await fetchIndices(
+        ctx.core.elasticsearch.dataClient.callAsCurrentUser,
+        indexDataEnricher
+      );
       return res.ok({ body: indices });
     })
   );

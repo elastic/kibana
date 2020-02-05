@@ -8,24 +8,26 @@ import { CoreSetup, Plugin, Logger, PluginInitializerContext } from 'src/core/se
 
 import { PLUGIN } from '../../common';
 import { Dependencies } from './types';
-
-import { addIndexManagementDataEnricher } from './index_management_data';
 import { ApiRoutes } from './routes';
-import { License } from './services';
+import { License, IndexDataEnricher } from './services';
 
 export interface IndexMgmtSetup {
-  addIndexManagementDataEnricher: (enricher: any) => void;
+  indexDataEnricher: {
+    add: IndexDataEnricher['add'];
+  };
 }
 
 export class IndexMgmtServerPlugin implements Plugin<IndexMgmtSetup, void, any, any> {
   private readonly apiRoutes: ApiRoutes;
   private readonly license: License;
-  private log: Logger;
+  private logger: Logger;
+  private indexDataEnricher: IndexDataEnricher;
 
   constructor({ logger }: PluginInitializerContext) {
-    this.log = logger.get();
+    this.logger = logger.get();
     this.apiRoutes = new ApiRoutes();
     this.license = new License();
+    this.indexDataEnricher = new IndexDataEnricher();
   }
 
   setup({ http }: CoreSetup, { licensing }: Dependencies): IndexMgmtSetup {
@@ -41,17 +43,20 @@ export class IndexMgmtServerPlugin implements Plugin<IndexMgmtSetup, void, any, 
       },
       {
         licensing,
-        logger: this.log,
+        logger: this.logger,
       }
     );
 
     this.apiRoutes.setup({
       router,
       license: this.license,
+      indexDataEnricher: this.indexDataEnricher,
     });
 
     return {
-      addIndexManagementDataEnricher,
+      indexDataEnricher: {
+        add: this.indexDataEnricher.add.bind(this.indexDataEnricher),
+      },
     };
   }
 

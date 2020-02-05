@@ -6,14 +6,14 @@
 import { schema } from '@kbn/config-schema';
 
 import { RouteDependencies } from '../../../types';
-import { addBasePath } from '../index';
 import { fetchIndices } from '../../../lib/fetch_indices';
+import { addBasePath } from '../index';
 
 const bodySchema = schema.object({
   indexNames: schema.arrayOf(schema.string()),
 });
 
-export function registerReloadRoute({ router, license }: RouteDependencies) {
+export function registerReloadRoute({ router, license, indexDataEnricher }: RouteDependencies) {
   router.post(
     { path: addBasePath('/indices/reload'), validate: { body: bodySchema } },
     license.guardApiRoute(async (ctx, req, res) => {
@@ -21,6 +21,7 @@ export function registerReloadRoute({ router, license }: RouteDependencies) {
 
       const indices = await fetchIndices(
         ctx.core.elasticsearch.dataClient.callAsCurrentUser,
+        indexDataEnricher,
         indexNames
       );
       return res.ok({ body: indices });
