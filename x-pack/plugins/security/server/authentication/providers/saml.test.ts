@@ -635,7 +635,7 @@ describe('SAMLAuthenticationProvider', () => {
       expect(request.headers).not.toHaveProperty('authorization');
       expect(authenticationResult.succeeded()).toBe(true);
       expect(authenticationResult.authHeaders).toEqual({ authorization });
-      expect(authenticationResult.user).toBe(user);
+      expect(authenticationResult.user).toEqual({ ...user, authentication_provider: 'saml' });
       expect(authenticationResult.state).toBeUndefined();
     });
 
@@ -696,7 +696,7 @@ describe('SAMLAuthenticationProvider', () => {
       expect(authenticationResult.authHeaders).toEqual({
         authorization: 'Bearer new-access-token',
       });
-      expect(authenticationResult.user).toBe(user);
+      expect(authenticationResult.user).toEqual({ ...user, authentication_provider: 'saml' });
       expect(authenticationResult.state).toEqual({
         username: 'user',
         accessToken: 'new-access-token',
@@ -756,82 +756,6 @@ describe('SAMLAuthenticationProvider', () => {
       expect(authenticationResult.error).toEqual(
         Boom.badRequest('Both access and refresh tokens are expired.')
       );
-    });
-
-    it('re-capture URL for non-AJAX requests if access token document is missing.', async () => {
-      const request = httpServerMock.createKibanaRequest({ path: '/s/foo/some-path' });
-      const state = {
-        username: 'user',
-        accessToken: 'expired-token',
-        refreshToken: 'expired-refresh-token',
-      };
-
-      mockScopedClusterClient(
-        mockOptions.client,
-        sinon.match({ headers: { authorization: `Bearer ${state.accessToken}` } })
-      )
-        .callAsCurrentUser.withArgs('shield.authenticate')
-        .rejects({
-          statusCode: 500,
-          body: { error: { reason: 'token document is missing and must be present' } },
-        });
-
-      mockOptions.tokens.refresh.withArgs(state.refreshToken).resolves(null);
-
-      const authenticationResult = await provider.authenticate(request, state);
-
-      sinon.assert.notCalled(mockOptions.client.callAsInternalUser);
-
-      expect(authenticationResult.redirected()).toBe(true);
-      expect(authenticationResult.redirectURL).toBe(
-        '/mock-server-basepath/api/security/saml/capture-url-fragment'
-      );
-      expect(authenticationResult.state).toEqual({ redirectURL: '/base-path/s/foo/some-path' });
-    });
-
-    it('initiates SAML handshake for non-AJAX requests if access token document is missing and request path is too large.', async () => {
-      const request = httpServerMock.createKibanaRequest({
-        path: `/s/foo/${'some-path'.repeat(10)}`,
-      });
-      const state = {
-        username: 'user',
-        accessToken: 'expired-token',
-        refreshToken: 'expired-refresh-token',
-      };
-
-      mockOptions.client.callAsInternalUser.withArgs('shield.samlPrepare').resolves({
-        id: 'some-request-id',
-        redirect: 'https://idp-host/path/login?SAMLRequest=some%20request%20',
-      });
-
-      mockScopedClusterClient(
-        mockOptions.client,
-        sinon.match({ headers: { authorization: `Bearer ${state.accessToken}` } })
-      )
-        .callAsCurrentUser.withArgs('shield.authenticate')
-        .rejects({
-          statusCode: 500,
-          body: { error: { reason: 'token document is missing and must be present' } },
-        });
-
-      mockOptions.tokens.refresh.withArgs(state.refreshToken).resolves(null);
-
-      const authenticationResult = await provider.authenticate(request, state);
-
-      sinon.assert.calledWithExactly(mockOptions.client.callAsInternalUser, 'shield.samlPrepare', {
-        body: { realm: 'test-realm' },
-      });
-
-      expect(mockOptions.logger.warn).toHaveBeenCalledTimes(1);
-      expect(mockOptions.logger.warn).toHaveBeenCalledWith(
-        'Max URL path size should not exceed 100b but it was 107b. URL is not captured.'
-      );
-
-      expect(authenticationResult.redirected()).toBe(true);
-      expect(authenticationResult.redirectURL).toBe(
-        'https://idp-host/path/login?SAMLRequest=some%20request%20'
-      );
-      expect(authenticationResult.state).toEqual({ requestId: 'some-request-id', redirectURL: '' });
     });
 
     it('re-capture URL for non-AJAX requests if refresh token is expired.', async () => {
@@ -918,7 +842,7 @@ describe('SAMLAuthenticationProvider', () => {
       expect(request.headers.authorization).toBe('Bearer some-valid-token');
       expect(authenticationResult.succeeded()).toBe(true);
       expect(authenticationResult.authHeaders).toBeUndefined();
-      expect(authenticationResult.user).toBe(user);
+      expect(authenticationResult.user).toEqual({ ...user, authentication_provider: 'saml' });
       expect(authenticationResult.state).toBeUndefined();
     });
 
