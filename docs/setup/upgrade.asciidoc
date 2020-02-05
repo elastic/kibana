@@ -1,23 +1,21 @@
 [[upgrade]]
-== Upgrading Kibana
+== Upgrading {kib}
+
+The upgrade process varies, depending on the version you're currently using.
 
 [IMPORTANT]
 ===========================================
-Before upgrading Kibana:
+Before you upgrade:
 
-* Consult the <<breaking-changes,breaking changes>> docs.
-* Test upgrades in a dev environment before upgrading your production servers.
-* Backup your data using the Elasticsearch
-  {ref}/modules-snapshots.html[snapshots] feature.
-  You **cannot roll back** to an earlier version unless you have a backup of
-  your data.
+* Consult the <<breaking-changes,breaking changes>>.
+* Before you upgrade production servers, test upgrades in a dev environment.
+* Back up your data with Elasticsearch {ref}/modules-snapshots.html[snapshots]. To roll back to an earlier version, you **must** have a backup of your data.
 * If you are using custom plugins, check that a compatible version is
   available.
+* Shut down all {kib} nodes. Running more than one version against the same {es} index is unsupported. If you upgrade while older {kib} nodes are running, the upgrade can fail.
 ===========================================
 
-Depending on which version of Kibana you're upgrading from, the upgrade process
-will vary. Please consult the following table to determine which process you
-should follow:
+To determine the upgrade process to follow, refer to the table.
 
 [cols="<1m,<1m,3",options="header"]
 |=======================================================================
@@ -31,8 +29,7 @@ should follow:
 |6.x            |6.y            |<<upgrade-standard,Standard upgrade>> (where `y > x`)
 |=======================================================================
 
-NOTE: Saved searches, visualizations, and dashboards created in Kibana 4.x or 5.x
-can be generally imported into 6.x.
+NOTE: Saved searches, visualizations, and dashboards created in {kib} 4.x or 5.x can be generally imported into 6.x.
 
 include::upgrade/upgrade-standard.asciidoc[]
 
