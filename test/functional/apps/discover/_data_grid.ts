@@ -31,6 +31,7 @@ export default function({
     const PageObjects = getPageObjects(['common', 'discover', 'timePicker']);
     const kibanaServer = getService('kibanaServer');
     const defaultSettings = { defaultIndex: 'logstash-*' };
+    const testSubjects = getService('testSubjects');
 
     before(async function() {
       await esArchiver.load('discover');
@@ -41,10 +42,22 @@ export default function({
     });
 
     it('can add fields to the table', async function() {
-      const defaultColumnsCount = await PageObjects.discover.getDataGridHeaders();
+      const getTitles = async () =>
+        (await testSubjects.getVisibleText('dataGridHeader')).replace(/\s|\r?\n|\r/g, ' ');
+
+      expect(await getTitles()).to.be('Time _source');
+
       await PageObjects.discover.clickFieldListItemAdd('bytes');
-      const updatedColumnsCount = await PageObjects.discover.getDataGridHeaders();
-      expect(defaultColumnsCount.length + 1).to.be(updatedColumnsCount.length);
+      expect(await getTitles()).to.be('Time bytes');
+
+      await PageObjects.discover.clickFieldListItemAdd('agent');
+      expect(await getTitles()).to.be('Time bytes agent');
+
+      await PageObjects.discover.clickFieldListItemAdd('bytes');
+      expect(await getTitles()).to.be('Time agent');
+
+      await PageObjects.discover.clickFieldListItemAdd('agent');
+      expect(await getTitles()).to.be('Time _source');
     });
   });
 }

@@ -28,14 +28,15 @@ const TEST_FILTER_COLUMN_NAMES = [
 export default function({ getService, getPageObjects }) {
   const docTable = getService('docTable');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['common', 'discover', 'timePicker', 'settings']);
+  const PageObjects = getPageObjects(['common', 'discover', 'timePicker']);
   const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
 
   describe('doc link in discover', function contextSize() {
     this.tags('smoke');
     before(async function() {
       await esArchiver.loadIfNeeded('logstash_functional');
-      await PageObjects.settings.setLegacyDiscoverTable();
+      await kibanaServer.uiSettings.replace({ 'doc_table:legacyTable': true });
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.timePicker.setDefaultAbsoluteRange();
       await Promise.all(
