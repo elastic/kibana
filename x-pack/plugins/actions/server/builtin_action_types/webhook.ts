@@ -107,7 +107,7 @@ export async function executor(
 
   const secrets: ActionTypeSecretsType = execOptions.secrets as ActionTypeSecretsType;
   const basicAuth =
-    secrets?.user && secrets?.password
+    secrets.user && secrets.password
       ? { auth: { username: secrets.user, password: secrets.password } }
       : {};
 
