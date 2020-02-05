@@ -215,7 +215,6 @@ export {
   SavedObjectsComplexFieldMapping,
   SavedObjectsCoreFieldMapping,
   SavedObjectsFieldMapping,
-  SavedObjectsTypeMappingDefinitions,
   SavedObjectsTypeMappingDefinition,
   SavedObjectsMappingProperties,
   SavedObjectTypeRegistry,

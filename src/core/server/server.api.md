@@ -1986,12 +1986,6 @@ export interface SavedObjectsTypeMappingDefinition {
     properties: SavedObjectsMappingProperties;
 }
 
-// @internal
-export interface SavedObjectsTypeMappingDefinitions {
-    // (undocumented)
-    [type: string]: SavedObjectsTypeMappingDefinition;
-}
-
 // @public (undocumented)
 export interface SavedObjectsUpdateOptions extends SavedObjectsBaseOptions {
     references?: SavedObjectReference[];
