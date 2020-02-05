@@ -17,56 +17,35 @@
  * under the License.
  */
 
-import Hapi from 'hapi';
-import { createMockServer } from './_mock_server';
-import { createBulkUpdateRoute } from './bulk_update';
+import supertest from 'supertest';
+import { UnwrapPromise } from '@kbn/utility-types';
+import { registerBulkUpdateRoute } from './bulk_update';
 import { savedObjectsClientMock } from '../../../../core/server/mocks';
+import { setupServer } from './test_utils';
+
+type setupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 
 describe('PUT /api/saved_objects/_bulk_update', () => {
-  let server: Hapi.Server;
-  const savedObjectsClient = savedObjectsClientMock.create();
+  let server: setupServerReturn['server'];
+  let httpSetup: setupServerReturn['httpSetup'];
+  let handlerContext: setupServerReturn['handlerContext'];
+  let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
 
-  beforeEach(() => {
-    server = createMockServer();
+  beforeEach(async () => {
+    ({ server, httpSetup, handlerContext } = await setupServer());
+    savedObjectsClient = handlerContext.savedObjects.client;
 
-    const prereqs = {
-      getSavedObjectsClient: {
-        assign: 'savedObjectsClient',
-        method() {
-          return savedObjectsClient;
-        },
-      },
-    };
+    const router = httpSetup.createRouter('');
+    registerBulkUpdateRoute(router);
 
-    server.route(createBulkUpdateRoute(prereqs));
+    await server.start();
   });
 
-  afterEach(() => {
-    savedObjectsClient.bulkUpdate.mockReset();
+  afterEach(async () => {
+    await server.stop();
   });
 
   it('formats successful response', async () => {
-    const request = {
-      method: 'PUT',
-      url: '/api/saved_objects/_bulk_update',
-      payload: [
-        {
-          type: 'visualization',
-          id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
-          attributes: {
-            title: 'An existing visualization',
-          },
-        },
-        {
-          type: 'dashboard',
-          id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
-          attributes: {
-            title: 'An existing dashboard',
-          },
-        },
-      ],
-    };
-
     const time = Date.now().toLocaleString();
     const clientResponse = [
       {
@@ -90,23 +69,11 @@ describe('PUT /api/saved_objects/_bulk_update', () => {
         },
       },
     ];
+    savedObjectsClient.bulkUpdate.mockResolvedValue({ saved_objects: clientResponse });
 
-    savedObjectsClient.bulkUpdate.mockImplementation(() =>
-      Promise.resolve({ saved_objects: clientResponse })
-    );
-
-    const { payload, statusCode } = await server.inject(request);
-    const response = JSON.parse(payload);
-
-    expect(statusCode).toBe(200);
-    expect(response).toEqual({ saved_objects: clientResponse });
-  });
-
-  it('calls upon savedObjectClient.bulkUpdate', async () => {
-    const request = {
-      method: 'PUT',
-      url: '/api/saved_objects/_bulk_update',
-      payload: [
+    const result = await supertest(httpSetup.server.listener)
+      .put('/api/saved_objects/_bulk_update')
+      .send([
         {
           type: 'visualization',
           id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
@@ -121,13 +88,36 @@ describe('PUT /api/saved_objects/_bulk_update', () => {
             title: 'An existing dashboard',
           },
         },
-      ],
-    };
+      ])
+      .expect(200);
 
-    savedObjectsClient.bulkUpdate.mockImplementation(() => Promise.resolve({ saved_objects: [] }));
+    expect(result.body).toEqual({ saved_objects: clientResponse });
+  });
 
-    await server.inject(request);
+  it('calls upon savedObjectClient.bulkUpdate', async () => {
+    savedObjectsClient.bulkUpdate.mockResolvedValue({ saved_objects: [] });
 
+    await supertest(httpSetup.server.listener)
+      .put('/api/saved_objects/_bulk_update')
+      .send([
+        {
+          type: 'visualization',
+          id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
+          attributes: {
+            title: 'An existing visualization',
+          },
+        },
+        {
+          type: 'dashboard',
+          id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
+          attributes: {
+            title: 'An existing dashboard',
+          },
+        },
+      ])
+      .expect(200);
+
+    expect(savedObjectsClient.bulkUpdate).toHaveBeenCalledTimes(1);
     expect(savedObjectsClient.bulkUpdate).toHaveBeenCalledWith([
       {
         type: 'visualization',

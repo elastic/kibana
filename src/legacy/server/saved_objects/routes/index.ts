@@ -20,5 +20,4 @@
 export { createImportRoute } from './import';
 export { createLogLegacyImportRoute } from './log_legacy_import';
 export { createResolveImportErrorsRoute } from './resolve_import_errors';
-export { createBulkUpdateRoute } from './bulk_update';
 export { createExportRoute } from './export';

@@ -32,7 +32,6 @@ import { getRootPropertiesObjects } from '../../../core/server/saved_objects/map
 import { SavedObjectsManagement } from '../../../core/server/saved_objects/management';
 
 import {
-  createBulkUpdateRoute,
   createExportRoute,
   createImportRoute,
   createResolveImportErrorsRoute,
@@ -80,7 +79,6 @@ export function savedObjectsMixin(kbnServer, server) {
     },
   };
 
-  server.route(createBulkUpdateRoute(prereqs));
   server.route(createExportRoute(prereqs, server, importableAndExportableTypes));
   server.route(createImportRoute(prereqs, server, importableAndExportableTypes));
   server.route(createResolveImportErrorsRoute(prereqs, server, importableAndExportableTypes));

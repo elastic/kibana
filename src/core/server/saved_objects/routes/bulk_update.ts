@@ -20,21 +20,17 @@
 import { schema } from '@kbn/config-schema';
 import { IRouter } from '../../http';
 
-export const registerBulkCreateRoute = (router: IRouter) => {
-  router.post(
+export const registerBulkUpdateRoute = (router: IRouter) => {
+  router.put(
     {
-      path: '/api/saved_objects/_bulk_create',
+      path: '/api/saved_objects/_bulk_update',
       validate: {
-        query: schema.object({
-          overwrite: schema.boolean({ defaultValue: false }),
-        }),
         body: schema.arrayOf(
           schema.object({
             type: schema.string(),
-            id: schema.maybe(schema.string()),
+            id: schema.string(),
             attributes: schema.recordOf(schema.string(), schema.any()),
             version: schema.maybe(schema.string()),
-            migrationVersion: schema.maybe(schema.recordOf(schema.string(), schema.string())),
             references: schema.maybe(
               schema.arrayOf(
                 schema.object({
@@ -49,9 +45,8 @@ export const registerBulkCreateRoute = (router: IRouter) => {
       },
     },
     router.handleLegacyErrors(async (context, req, res) => {
-      const { overwrite } = req.query;
-      const result = await context.core.savedObjects.client.bulkCreate(req.body, { overwrite });
-      return res.ok({ body: result });
+      const savedObject = await context.core.savedObjects.client.bulkUpdate(req.body);
+      return res.ok({ body: savedObject });
     })
   );
 };

@@ -25,6 +25,7 @@ import { registerFindRoute } from './find';
 import { registerUpdateRoute } from './update';
 import { registerBulkGetRoute } from './bulk_get';
 import { registerBulkCreateRoute } from './bulk_create';
+import { registerBulkUpdateRoute } from './bulk_update';
 
 export function registerRoutes(http: InternalHttpServiceSetup) {
   const router = http.createRouter('');
@@ -36,4 +37,5 @@ export function registerRoutes(http: InternalHttpServiceSetup) {
   registerUpdateRoute(router);
   registerBulkGetRoute(router);
   registerBulkCreateRoute(router);
+  registerBulkUpdateRoute(router);
 }

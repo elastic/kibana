@@ -32,13 +32,14 @@ export const registerUpdateRoute = (router: IRouter) => {
         body: schema.object({
           attributes: schema.recordOf(schema.string(), schema.any()),
           version: schema.maybe(schema.string()),
-          references: schema.arrayOf(
-            schema.object({
-              name: schema.string(),
-              type: schema.string(),
-              id: schema.string(),
-            }),
-            { defaultValue: [] }
+          references: schema.maybe(
+            schema.arrayOf(
+              schema.object({
+                name: schema.string(),
+                type: schema.string(),
+                id: schema.string(),
+              })
+            )
           ),
         }),
       },
