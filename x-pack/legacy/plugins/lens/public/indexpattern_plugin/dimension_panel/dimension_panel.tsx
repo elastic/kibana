@@ -19,7 +19,7 @@ import { changeColumn, deleteColumn } from '../state_helpers';
 import { isDraggedField, hasField } from '../utils';
 import { IndexPatternPrivateState, IndexPatternField } from '../types';
 import { trackUiEvent } from '../../lens_ui_telemetry';
-import { DateRange } from '../../../common';
+import { DateRange } from '../../../../../../plugins/lens/common';
 
 export type IndexPatternDimensionPanelProps = DatasourceDimensionPanelProps & {
   state: IndexPatternPrivateState;
