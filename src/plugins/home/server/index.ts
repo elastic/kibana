@@ -20,8 +20,19 @@
 export { HomeServerPluginSetup, HomeServerPluginStart } from './plugin';
 export { TutorialProvider } from './services';
 export { SampleDatasetProvider, SampleDataRegistrySetup } from './services';
-import { PluginInitializerContext } from 'src/core/server';
+import { PluginInitializerContext, PluginConfigDescriptor } from 'kibana/server';
 import { HomeServerPlugin } from './plugin';
+import { configSchema, ConfigSchema } from '../config';
+
+export const config: PluginConfigDescriptor<ConfigSchema> = {
+  exposeToBrowser: {
+    disableWelcomeScreen: true,
+  },
+  schema: configSchema,
+  deprecations: ({ renameFromRoot }) => [
+    renameFromRoot('kibana.disableWelcomeScreen', 'home.disableWelcomeScreen'),
+  ],
+};
 
 export const plugin = (initContext: PluginInitializerContext) => new HomeServerPlugin(initContext);
 

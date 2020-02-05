@@ -17,8 +17,9 @@
  * under the License.
  */
 
-import { App, AppBase, AppUpdatableFields } from 'kibana/public';
+import { App, AppBase, PluginInitializerContext, AppUpdatableFields } from 'kibana/public';
 import { Observable } from 'rxjs';
+import { ConfigSchema } from '../config';
 
 interface ForwardDefinition {
   legacyAppId: string;
@@ -47,6 +48,8 @@ export interface AngularRenderedApp extends App {
 export class KibanaLegacyPlugin {
   private apps: AngularRenderedApp[] = [];
   private forwards: ForwardDefinition[] = [];
+
+  constructor(private readonly initializerContext: PluginInitializerContext<ConfigSchema>) {}
 
   public setup() {
     return {
@@ -96,6 +99,8 @@ export class KibanaLegacyPlugin {
       ) => {
         this.forwards.push({ legacyAppId, newAppId, ...options });
       },
+
+      config: this.initializerContext.config.get(),
     };
   }
 
@@ -111,6 +116,7 @@ export class KibanaLegacyPlugin {
        * Just exported for wiring up with legacy platform, should not be used.
        */
       getForwards: () => this.forwards,
+      config: this.initializerContext.config.get(),
     };
   }
 }

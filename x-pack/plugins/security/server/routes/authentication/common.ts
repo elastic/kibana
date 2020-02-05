@@ -59,7 +59,7 @@ export function defineCommonRoutes({ router, authc, basePath, logger }: RouteDef
   for (const path of ['/internal/security/me', '/api/security/v1/me']) {
     router.get(
       { path, validate: false },
-      createLicensedRouteHandler(async (context, request, response) => {
+      createLicensedRouteHandler((context, request, response) => {
         if (path === '/api/security/v1/me') {
           logger.warn(
             `The "${basePath.serverBasePath}${path}" endpoint is deprecated and will be removed in the next major version.`,
@@ -67,11 +67,7 @@ export function defineCommonRoutes({ router, authc, basePath, logger }: RouteDef
           );
         }
 
-        try {
-          return response.ok({ body: (await authc.getCurrentUser(request)) as any });
-        } catch (error) {
-          return response.customError(wrapIntoCustomErrorResponse(error));
-        }
+        return response.ok({ body: authc.getCurrentUser(request)! });
       })
     );
   }
