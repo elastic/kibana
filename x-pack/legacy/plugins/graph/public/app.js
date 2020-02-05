@@ -388,6 +388,7 @@ export function initGraphApp(angularModule, deps) {
         title: i18n.translate('xpack.graph.leaveWorkspace.modalTitle', {
           defaultMessage: 'Unsaved changes',
         }),
+        'data-test-subj': 'confirmModal',
         ...options,
       };
 
