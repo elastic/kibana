@@ -6,6 +6,7 @@
 
 import { renameColumns } from './rename_columns';
 import { KibanaDatatable } from '../../../../../../src/plugins/expressions/public';
+import { createMockExecutionContext } from '../../../../../../src/plugins/expressions/common/mocks';
 
 describe('rename_columns', () => {
   it('should rename columns of a given datatable', () => {
@@ -34,8 +35,11 @@ describe('rename_columns', () => {
       },
     };
 
-    // eslint-disable-next-line
-    const result = renameColumns.fn(input, { idMap: JSON.stringify(idMap) }, {} as any);
+    const result = renameColumns.fn(
+      input,
+      { idMap: JSON.stringify(idMap) },
+      createMockExecutionContext()
+    );
 
     expect(result).toMatchInlineSnapshot(`
       Object {
@@ -86,8 +90,11 @@ describe('rename_columns', () => {
       },
     };
 
-    // eslint-disable-next-line
-    const result = renameColumns.fn(input, { idMap: JSON.stringify(idMap) }, {} as any);
+    const result = renameColumns.fn(
+      input,
+      { idMap: JSON.stringify(idMap) },
+      createMockExecutionContext()
+    );
 
     expect(result.rows[0].a).toEqual('(empty)');
   });
@@ -111,8 +118,11 @@ describe('rename_columns', () => {
       b: { id: 'c', label: 'Catamaran' },
     };
 
-    // eslint-disable-next-line
-    const result = renameColumns.fn(input, { idMap: JSON.stringify(idMap) }, {} as any);
+    const result = renameColumns.fn(
+      input,
+      { idMap: JSON.stringify(idMap) },
+      createMockExecutionContext()
+    );
 
     expect(result).toMatchInlineSnapshot(`
       Object {
@@ -168,8 +178,11 @@ describe('rename_columns', () => {
       b: { id: 'c', label: 'Apple', operationType: 'date_histogram', sourceField: 'banana' },
     };
 
-    // eslint-disable-next-line
-    const result = renameColumns.fn(input, { idMap: JSON.stringify(idMap) }, {} as any);
+    const result = renameColumns.fn(
+      input,
+      { idMap: JSON.stringify(idMap) },
+      createMockExecutionContext()
+    );
 
     expect(result).toMatchInlineSnapshot(`
       Object {

@@ -10,6 +10,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { MetricConfig } from './types';
 import { fieldFormats } from '../../../../../../src/plugins/data/public';
+import { createMockExecutionContext } from '../../../../../../src/plugins/expressions/common/mocks';
 
 function sampleArgs() {
   const data: LensMultiTable = {
@@ -41,9 +42,7 @@ describe('metric_expression', () => {
   describe('metricChart', () => {
     test('it renders with the specified data and args', () => {
       const { data, args } = sampleArgs();
-
-      // eslint-disable-next-line
-      const result = metricChart.fn(data, args, {} as any);
+      const result = metricChart.fn(data, args, createMockExecutionContext());
 
       expect(result).toEqual({
         type: 'render',

@@ -11,6 +11,7 @@ import { LensMultiTable } from '../types';
 import React from 'react';
 import { shallow } from 'enzyme';
 import { XYArgs, LegendConfig, legendConfig, layerConfig, LayerArgs } from './types';
+import { createMockExecutionContext } from '../../../../../../src/plugins/expressions/common/mocks';
 
 function sampleArgs() {
   const data: LensMultiTable = {
@@ -69,8 +70,7 @@ describe('xy_expression', () => {
         position: Position.Left,
       };
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const result = legendConfig.fn(null, args, {} as any);
+      const result = legendConfig.fn(null, args, createMockExecutionContext());
 
       expect(result).toEqual({
         type: 'lens_xy_legendConfig',
@@ -90,8 +90,7 @@ describe('xy_expression', () => {
         isHistogram: false,
       };
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const result = layerConfig.fn(null, args, {} as any);
+      const result = layerConfig.fn(null, args, createMockExecutionContext());
 
       expect(result).toEqual({
         type: 'lens_xy_layer',
@@ -103,9 +102,7 @@ describe('xy_expression', () => {
   describe('xyChart', () => {
     test('it renders with the specified data and args', () => {
       const { data, args } = sampleArgs();
-
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const result = xyChart.fn(data, args, {} as any);
+      const result = xyChart.fn(data, args, createMockExecutionContext());
 
       expect(result).toEqual({
         type: 'render',
