@@ -234,7 +234,7 @@ export class SavedObjectsService
     this.schemas = savedObjectsSchemasDefinition;
     this.validations = savedObjectValidations;
 
-    registerRoutes(setupDeps.http);
+    registerRoutes(setupDeps.http, this.logger);
 
     return {
       setClientFactoryProvider: provider => {

@@ -17,18 +17,18 @@
  * under the License.
  */
 
-import Hapi from 'hapi';
+import { IRouter } from '../../http';
+import { Logger } from '../../logging';
 
-export const createLogLegacyImportRoute = () => ({
-  path: '/api/saved_objects/_log_legacy_import',
-  method: 'POST',
-  options: {
-    handler(request: Hapi.Request) {
-      request.server.log(
-        ['warning'],
-        'Importing saved objects from a .json file has been deprecated'
-      );
-      return { success: true };
+export const registerLogLegacyImportRoute = (router: IRouter, logger: Logger) => {
+  router.post(
+    {
+      path: '/api/saved_objects/_log_legacy_import',
+      validate: false,
     },
-  },
-});
+    async (context, req, res) => {
+      logger.warn('Importing saved objects from a .json file has been deprecated');
+      return res.ok({ body: { success: true } });
+    }
+  );
+};

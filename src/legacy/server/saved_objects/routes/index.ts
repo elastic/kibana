@@ -18,6 +18,5 @@
  */
 
 export { createImportRoute } from './import';
-export { createLogLegacyImportRoute } from './log_legacy_import';
 export { createResolveImportErrorsRoute } from './resolve_import_errors';
 export { createExportRoute } from './export';

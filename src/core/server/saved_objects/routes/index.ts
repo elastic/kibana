@@ -18,6 +18,8 @@
  */
 
 import { InternalHttpServiceSetup } from '../../http';
+import { Logger } from '../../logging';
+
 import { registerGetRoute } from './get';
 import { registerCreateRoute } from './create';
 import { registerDeleteRoute } from './delete';
@@ -26,8 +28,9 @@ import { registerUpdateRoute } from './update';
 import { registerBulkGetRoute } from './bulk_get';
 import { registerBulkCreateRoute } from './bulk_create';
 import { registerBulkUpdateRoute } from './bulk_update';
+import { registerLogLegacyImportRoute } from './log_legacy_import';
 
-export function registerRoutes(http: InternalHttpServiceSetup) {
+export function registerRoutes(http: InternalHttpServiceSetup, logger: Logger) {
   const router = http.createRouter('');
 
   registerGetRoute(router);
@@ -38,4 +41,5 @@ export function registerRoutes(http: InternalHttpServiceSetup) {
   registerBulkGetRoute(router);
   registerBulkCreateRoute(router);
   registerBulkUpdateRoute(router);
+  registerLogLegacyImportRoute(router, logger);
 }

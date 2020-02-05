@@ -31,12 +31,7 @@ import {
 import { getRootPropertiesObjects } from '../../../core/server/saved_objects/mappings';
 import { SavedObjectsManagement } from '../../../core/server/saved_objects/management';
 
-import {
-  createExportRoute,
-  createImportRoute,
-  createResolveImportErrorsRoute,
-  createLogLegacyImportRoute,
-} from './routes';
+import { createExportRoute, createImportRoute, createResolveImportErrorsRoute } from './routes';
 
 function getImportableAndExportableTypes({ kbnServer, visibleTypes }) {
   const { savedObjectsManagement = {} } = kbnServer.uiExports;
@@ -82,7 +77,6 @@ export function savedObjectsMixin(kbnServer, server) {
   server.route(createExportRoute(prereqs, server, importableAndExportableTypes));
   server.route(createImportRoute(prereqs, server, importableAndExportableTypes));
   server.route(createResolveImportErrorsRoute(prereqs, server, importableAndExportableTypes));
-  server.route(createLogLegacyImportRoute());
 
   const serializer = new SavedObjectsSerializer(schema);
 
