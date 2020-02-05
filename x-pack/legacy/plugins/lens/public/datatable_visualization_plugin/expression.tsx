@@ -23,6 +23,7 @@ export interface DatatableColumns {
 }
 
 interface Args {
+  title: string;
   columns: DatatableColumns;
 }
 
@@ -42,7 +43,7 @@ export const datatable: ExpressionFunctionDefinition<
   KibanaDatatable,
   Args,
   DatatableRender
-> = ({
+> = {
   name: 'lens_datatable',
   type: 'render',
   help: i18n.translate('xpack.lens.datatable.expressionHelpLabel', {
@@ -56,30 +57,28 @@ export const datatable: ExpressionFunctionDefinition<
       }),
     },
     columns: {
-      types: ['lens_datatable_columns'],
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      types: ['lens_datatable_columns'] as any,
       help: '',
     },
   },
-  context: {
-    types: ['lens_multitable'],
-  },
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  inputTypes: ['lens_multitable'] as any,
   fn(data: KibanaDatatable, args: Args) {
     return {
       type: 'render',
       as: 'lens_datatable_renderer',
       value: {
-        data,
+        data: {
+          ...data,
+          type: 'lens_multitable',
+          tables: {},
+        },
         args,
       },
     };
   },
-  // TODO the typings currently don't support custom type args. As soon as they do, this can be removed
-} as unknown) as ExpressionFunctionDefinition<
-  'lens_datatable',
-  KibanaDatatable,
-  Args,
-  DatatableRender
->;
+};
 
 type DatatableColumnsResult = DatatableColumns & { type: 'lens_datatable_columns' };
 
@@ -93,9 +92,7 @@ export const datatableColumns: ExpressionFunctionDefinition<
   aliases: [],
   type: 'lens_datatable_columns',
   help: '',
-  context: {
-    types: ['null'],
-  },
+  inputTypes: ['null'],
   args: {
     columnIds: {
       types: ['string'],
@@ -103,7 +100,7 @@ export const datatableColumns: ExpressionFunctionDefinition<
       help: '',
     },
   },
-  fn: function fn(_context: unknown, args: DatatableColumns) {
+  fn: function fn(input: unknown, args: DatatableColumns) {
     return {
       type: 'lens_datatable_columns',
       ...args,

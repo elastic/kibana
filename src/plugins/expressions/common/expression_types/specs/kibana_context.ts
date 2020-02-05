@@ -17,24 +17,24 @@
  * under the License.
  */
 
-import { TimeRange, Query, esFilters } from 'src/plugins/data/common';
+import { ExpressionValueBoxed } from '../types';
+import { ExecutionContextSearch } from '../../execution/types';
 
-const name = 'kibana_context';
+export type ExpressionValueSearchContext = ExpressionValueBoxed<
+  'kibana_context',
+  ExecutionContextSearch
+>;
+
+// TODO: These two are exported for legacy reasons - remove them eventually.
 export type KIBANA_CONTEXT_NAME = 'kibana_context';
-
-export interface KibanaContext {
-  type: typeof name;
-  query?: Query | Query[];
-  filters?: esFilters.Filter[];
-  timeRange?: TimeRange;
-}
+export type KibanaContext = ExpressionValueSearchContext;
 
 export const kibanaContext = {
-  name,
+  name: 'kibana_context',
   from: {
     null: () => {
       return {
-        type: name,
+        type: 'kibana_context',
       };
     },
   },

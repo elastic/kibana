@@ -26,6 +26,7 @@ const toArray = <T>(query: undefined | T | T[]): T[] =>
 
 export type ExpressionFunctionKibana = ExpressionFunctionDefinition<
   'kibana',
+  // TODO: Get rid of the `null` type below.
   ExpressionValueSearchContext | null,
   object,
   ExpressionValueSearchContext

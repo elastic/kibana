@@ -54,9 +54,7 @@ export const metricChart: ExpressionFunctionDefinition<
         'The display mode of the chart - reduced will only show the metric itself without min size',
     },
   },
-  context: {
-    types: ['lens_multitable'],
-  },
+  inputTypes: ['lens_multitable'],
   fn(data, args) {
     return {
       type: 'render',

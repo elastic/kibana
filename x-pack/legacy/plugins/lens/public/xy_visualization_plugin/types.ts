@@ -34,9 +34,7 @@ export const legendConfig: ExpressionFunctionDefinition<
   aliases: [],
   type: 'lens_xy_legendConfig',
   help: `Configure the xy chart's legend`,
-  context: {
-    types: ['null'],
-  },
+  inputTypes: ['null'],
   args: {
     isVisible: {
       types: ['boolean'],
@@ -52,7 +50,7 @@ export const legendConfig: ExpressionFunctionDefinition<
       }),
     },
   },
-  fn: function fn(_context: unknown, args: LegendConfig) {
+  fn: function fn(input: unknown, args: LegendConfig) {
     return {
       type: 'lens_xy_legendConfig',
       ...args,
@@ -99,9 +97,7 @@ export const xConfig: ExpressionFunctionDefinition<
   aliases: [],
   type: 'lens_xy_xConfig',
   help: `Configure the xy chart's x axis`,
-  context: {
-    types: ['null'],
-  },
+  inputTypes: ['null'],
   args: {
     ...axisConfig,
     accessor: {
@@ -109,7 +105,7 @@ export const xConfig: ExpressionFunctionDefinition<
       help: 'The column to display on the x axis.',
     },
   },
-  fn: function fn(_context: unknown, args: XConfig) {
+  fn: function fn(input: unknown, args: XConfig) {
     return {
       type: 'lens_xy_xConfig',
       ...args,
@@ -129,9 +125,7 @@ export const layerConfig: ExpressionFunctionDefinition<
   aliases: [],
   type: 'lens_xy_layer',
   help: `Configure a layer in the xy chart`,
-  context: {
-    types: ['null'],
-  },
+  inputTypes: ['null'],
   args: {
     ...axisConfig,
     layerId: {
@@ -177,7 +171,7 @@ export const layerConfig: ExpressionFunctionDefinition<
       help: 'JSON key-value pairs of column ID to label',
     },
   },
-  fn: function fn(_context: unknown, args: LayerArgs) {
+  fn: function fn(input: unknown, args: LayerArgs) {
     return {
       type: 'lens_xy_layer',
       ...args,

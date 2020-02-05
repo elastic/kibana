@@ -86,10 +86,8 @@ export const xyChart: ExpressionFunctionDefinition<
       multi: true,
     },
   },
-  context: {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    types: ['lens_multitable', 'kibana_context', 'null'] as any,
-  },
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  inputTypes: ['lens_multitable', 'kibana_context', 'null'] as any,
   fn(data: LensMultiTable, args: XYArgs) {
     return {
       type: 'render',

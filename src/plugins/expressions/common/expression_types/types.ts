@@ -17,18 +17,11 @@
  * under the License.
  */
 
-import { ExecutionContextSearch } from '../execution';
-
 export type ExpressionValueUnboxed = any;
 
 export type ExpressionValueBoxed<Type extends string = string, Value extends object = object> = {
   type: Type;
 } & Value;
-
-export type ExpressionValueSearchContext = ExpressionValueBoxed<
-  'kibana_context',
-  ExecutionContextSearch
->;
 
 export type ExpressionValue = ExpressionValueUnboxed | ExpressionValueBoxed;
 

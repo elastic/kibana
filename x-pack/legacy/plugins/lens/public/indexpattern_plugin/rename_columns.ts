@@ -38,10 +38,8 @@ export const renameColumns: ExpressionFunctionDefinition<
       }),
     },
   },
-  context: {
-    types: ['kibana_datatable'],
-  },
-  fn(data: KibanaDatatable, { idMap: encodedIdMap }: RemapArgs) {
+  inputTypes: ['kibana_datatable'],
+  fn(data, { idMap: encodedIdMap }) {
     const idMap = JSON.parse(encodedIdMap) as Record<string, OriginalColumn>;
 
     return {
