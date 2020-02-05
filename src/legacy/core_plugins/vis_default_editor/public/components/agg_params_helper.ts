@@ -73,9 +73,7 @@ function getAggParamsToRender({ agg, editorConfig, metricAggs, state }: ParamIns
     }
     // if field param exists, compute allowed fields
     if (param.type === 'field') {
-      const availableFields: Field[] = (param as IFieldParamType).getAvailableFields(
-        agg.getIndexPattern().fields
-      );
+      const availableFields: Field[] = (param as IFieldParamType).getAvailableFields(agg);
       fields = aggTypeFieldFilters.filter(availableFields, agg);
       indexedFields = groupAndSortBy(fields, 'type', 'name');
 
