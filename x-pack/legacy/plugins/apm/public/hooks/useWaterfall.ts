@@ -11,7 +11,7 @@ import { getWaterfall } from '../components/app/TransactionDetails/WaterfallWith
 
 const INITIAL_DATA = {
   root: undefined,
-  trace: { items: [], exceedsMax: false },
+  trace: { items: [], exceedsMax: false, errorDocs: [] },
   errorsPerTransaction: {}
 };
 

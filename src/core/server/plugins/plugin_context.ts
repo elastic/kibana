@@ -164,6 +164,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       auth: { get: deps.http.auth.get, isAuthenticated: deps.http.auth.isAuthenticated },
       csp: deps.http.csp,
       isTlsEnabled: deps.http.isTlsEnabled,
+      getServerInfo: deps.http.getServerInfo,
     },
     savedObjects: {
       setClientFactoryProvider: deps.savedObjects.setClientFactoryProvider,
