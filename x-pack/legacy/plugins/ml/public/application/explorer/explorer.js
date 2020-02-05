@@ -356,7 +356,7 @@ export class Explorer extends React.Component {
     return (
       <ExplorerPage jobSelectorProps={jobSelectorProps} resizeRef={this.resizeRef}>
         <div className="results-container">
-          {/* Make sure ChartTooltip is inside this plain wrapping div so positioning can be infered correctly. */}
+          {/* Make sure ChartTooltip is inside wrapping div with 0px left/right padding so positioning can be inferred correctly. */}
           <ChartTooltip />
 
           {noInfluencersConfigured === false && influencers !== undefined && (
