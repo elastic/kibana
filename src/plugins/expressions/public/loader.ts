@@ -66,8 +66,11 @@ export class ExpressionLoader {
     this.update$ = this.renderHandler.update$;
     this.events$ = this.renderHandler.events$;
 
-    this.update$.subscribe(({ newExpression, newParams }) => {
-      this.update(newExpression, newParams);
+    this.update$.subscribe(value => {
+      if (value) {
+        const { newExpression, newParams } = value;
+        this.update(newExpression, newParams);
+      }
     });
 
     this.data$.subscribe(data => {

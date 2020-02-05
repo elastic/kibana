@@ -20,10 +20,10 @@
 import * as Rx from 'rxjs';
 import { Observable } from 'rxjs';
 import { filter } from 'rxjs/operators';
-import { RenderError, RenderErrorHandlerFnType } from './types';
+import { RenderError, RenderErrorHandlerFnType, IExpressionLoaderParams } from './types';
 import { getRenderersRegistry } from './services';
 import { renderErrorHandler as defaultRenderErrorHandler } from './render_error_handler';
-import { IInterpreterRenderHandlers } from '../common';
+import { IInterpreterRenderHandlers, ExpressionAstExpression } from '../common';
 
 export type IExpressionRendererExtraHandlers = Record<string, any>;
 
@@ -36,17 +36,22 @@ interface Event {
   data: any;
 }
 
+interface UpdateValue {
+  newExpression?: string | ExpressionAstExpression;
+  newParams: IExpressionLoaderParams;
+}
+
 export class ExpressionRenderHandler {
-  render$: Observable<any>;
-  update$: Observable<any>;
+  render$: Observable<number>;
+  update$: Observable<UpdateValue | null>;
   events$: Observable<Event>;
 
   private element: HTMLElement;
   private destroyFn?: any;
   private renderCount: number = 0;
-  private renderSubject: Rx.BehaviorSubject<any | null>;
+  private renderSubject: Rx.BehaviorSubject<number | null>;
   private eventsSubject: Rx.Subject<unknown>;
-  private updateSubject: Rx.Subject<unknown>;
+  private updateSubject: Rx.Subject<UpdateValue | null>;
   private handlers: IInterpreterRenderHandlers;
   private onRenderError: RenderErrorHandlerFnType;
 
