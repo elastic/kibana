@@ -27,7 +27,7 @@ import './table_vis.mock';
 import StubIndexPattern from 'test_utils/stub_index_pattern';
 import { getAngularModule } from './get_inner_angular';
 import { initTableVisLegacyModule } from './table_vis_legacy_module';
-import { npStart, AggConfig, tabifyAggResponse } from './legacy_imports';
+import { npStart, IAggConfig, tabifyAggResponse } from './legacy_imports';
 import { tableVisTypeDefinition } from './table_vis_type';
 import { Vis } from '../../visualizations/public';
 import { setup as visualizationsSetup } from '../../visualizations/public/np_ready/public/legacy';
@@ -148,7 +148,7 @@ describe('Table Vis - Controller', () => {
 
   // basically a parameterized beforeEach
   function initController(vis: Vis) {
-    vis.aggs.aggs.forEach((agg: AggConfig, i: number) => {
+    vis.aggs.aggs.forEach((agg: IAggConfig, i: number) => {
       agg.id = 'agg_' + (i + 1);
     });
 

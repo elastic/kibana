@@ -41,6 +41,7 @@ async function getAngularDependencies(): Promise<LegacyAngularInjectedDependenci
   const instance = plugin({} as PluginInitializerContext);
   instance.setup(npSetup.core, {
     ...npSetup.plugins,
+    npData: npSetup.plugins.data,
     __LEGACY: {
       getAngularDependencies,
     },
