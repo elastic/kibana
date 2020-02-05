@@ -17,13 +17,9 @@
  * under the License.
  */
 
-import { canAppendWildcard } from '../can_append_wildcard';
+import { canAppendWildcard } from './can_append_wildcard';
 
 describe('canAppendWildcard', () => {
-  test('ignores no data', () => {
-    expect(canAppendWildcard({})).toBeFalsy();
-  });
-
   test('ignores symbols', () => {
     expect(canAppendWildcard('%')).toBeFalsy();
   });
