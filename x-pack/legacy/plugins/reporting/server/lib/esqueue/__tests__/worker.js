@@ -1100,6 +1100,13 @@ describe('Get Doc Path from ES Response', () => {
       _type: '_doc',
       _id: 'booId',
     };
-    expect(getUpdatedDocPath(responseMock)).equal('/foo/booId');
+    expect(getUpdatedDocPath(responseMock)).equal('/foo/_doc/booId');
+  });
+  it('returns the same formatted string even if there is no _doc provided', function() {
+    const responseMock = {
+      _index: 'foo',
+      _id: 'booId',
+    };
+    expect(getUpdatedDocPath(responseMock)).equal('/foo/_doc/booId');
   });
 });
