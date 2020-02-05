@@ -34,6 +34,7 @@ expect.addSnapshotSerializer(createAbsolutePathSerializer());
 
 beforeEach(() => {
   delete process.env.KBN_OPTIMIZER_MAX_WORKERS;
+  delete process.env.KBN_OPTIMIZER_NO_CACHE;
   jest.clearAllMocks();
 });
 
@@ -199,6 +200,88 @@ describe('OptimizerConfig::parseOptions()', () => {
       OptimizerConfig.parseOptions({
         repoRoot: REPO_ROOT,
         pluginScanDirs: [],
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "cache": true,
+        "dist": false,
+        "inspectWorkers": false,
+        "maxWorkerCount": 100,
+        "pluginPaths": Array [],
+        "pluginScanDirs": Array [],
+        "profileWebpack": false,
+        "repoRoot": <absolute path>,
+        "watch": false,
+      }
+    `);
+
+    process.env.KBN_OPTIMIZER_NO_CACHE = '0';
+    expect(
+      OptimizerConfig.parseOptions({
+        repoRoot: REPO_ROOT,
+        pluginScanDirs: [],
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "cache": false,
+        "dist": false,
+        "inspectWorkers": false,
+        "maxWorkerCount": 100,
+        "pluginPaths": Array [],
+        "pluginScanDirs": Array [],
+        "profileWebpack": false,
+        "repoRoot": <absolute path>,
+        "watch": false,
+      }
+    `);
+
+    process.env.KBN_OPTIMIZER_NO_CACHE = '1';
+    expect(
+      OptimizerConfig.parseOptions({
+        repoRoot: REPO_ROOT,
+        pluginScanDirs: [],
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "cache": false,
+        "dist": false,
+        "inspectWorkers": false,
+        "maxWorkerCount": 100,
+        "pluginPaths": Array [],
+        "pluginScanDirs": Array [],
+        "profileWebpack": false,
+        "repoRoot": <absolute path>,
+        "watch": false,
+      }
+    `);
+
+    process.env.KBN_OPTIMIZER_NO_CACHE = '1';
+    expect(
+      OptimizerConfig.parseOptions({
+        repoRoot: REPO_ROOT,
+        pluginScanDirs: [],
+        cache: true,
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "cache": false,
+        "dist": false,
+        "inspectWorkers": false,
+        "maxWorkerCount": 100,
+        "pluginPaths": Array [],
+        "pluginScanDirs": Array [],
+        "profileWebpack": false,
+        "repoRoot": <absolute path>,
+        "watch": false,
+      }
+    `);
+
+    delete process.env.KBN_OPTIMIZER_NO_CACHE;
+    expect(
+      OptimizerConfig.parseOptions({
+        repoRoot: REPO_ROOT,
+        pluginScanDirs: [],
+        cache: true,
       })
     ).toMatchInlineSnapshot(`
       Object {

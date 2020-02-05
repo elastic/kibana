@@ -72,7 +72,7 @@ export class OptimizerConfig {
     const examples = !!options.examples;
     const profileWebpack = !!options.profileWebpack;
     const inspectWorkers = !!options.inspectWorkers;
-    const cache = options.cache !== false;
+    const cache = options.cache !== false && !process.env.KBN_OPTIMIZER_NO_CACHE;
 
     const repoRoot = options.repoRoot;
     if (!Path.isAbsolute(repoRoot)) {

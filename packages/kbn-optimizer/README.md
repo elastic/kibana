@@ -18,15 +18,17 @@ To make front-end code easier to debug the optimizer uses the `BROWSERSLIST_ENV=
 
 The `@kbn/optimizer` is automatically executed from the dev cli, the Kibana build scripts, and in CI. If you're running Kibana locally in some other way you might need to build the plugins manually, which you can do by running `node scripts/build_new_platform_plugins` (pass `--help` for options).
 
-You can limit the number of workers the optimizer uses in all of these places by setting the `KBN_OPTIMIZER_MAX_WORKERS` environment variable. You might want to do this if your system struggles to keep up while the optimizer is getting started and building all plugins as fast as possible. Setting `KBN_OPTIMIZER_MAX_WORKERS=1` will cause the optimizer to take the longest amount of time but will have the smallest impact on other components of your system.
+### Worker count
 
-## Caching
+You can limit the number of workers the optimizer uses by setting the `KBN_OPTIMIZER_MAX_WORKERS` environment variable. You might want to do this if your system struggles to keep up while the optimizer is getting started and building all plugins as fast as possible. Setting `KBN_OPTIMIZER_MAX_WORKERS=1` will cause the optimizer to take the longest amount of time but will have the smallest impact on other components of your system.
 
-Bundles built by the the optimizer include a cache file which describes the information needed to determine if the bundle needs to be rebuilt when the optimizer is restarted. Caching is enabled by default and is very aggressive about invalidating the cache output, but if you need to disable caching you can specify the `--optimize.useBundleCache=false` flag to the dev cli, or `--no-cache` to `node scripts/build_new_platform_plugins`.
+We only limit the number of workers we will start at any given time. If we start more workers later we will limit the number of workers we start at that time by the maximum, but we don't take into account the number of workers already started because it is assumed that those workers are doing very little work. This greatly simplifies the logic as we don't ever have to reallocate workers and provides the best performance in most cases.
+
+### Caching
+
+Bundles built by the the optimizer include a cache file which describes the information needed to determine if the bundle needs to be rebuilt when the optimizer is restarted. Caching is enabled by default and is very aggressive about invalidating the cache output, but if you need to disable caching you can pass the `--optimize.useBundleCache=false` flag to the dev cli, `--no-cache` to `node scripts/build_new_platform_plugins`, or set the `KBN_OPTIMIZER_NO_CACHE` environment variable to anything (env overrides other settings).
 
 When a bundle is determined to be up-to-date a worker is not started for the bundle. If running the optimizer with the `--dev/--watch` flag, then all the files referenced by cached bundles are watched for changes. Once a change is detected in any of the files referenced by the built bundle a worker is started. If a file is changed that is referenced by several bundles then workers will be started for each bundle, combining workers together to respect the worker limit.
-
-The worker maximum is only enforced when workers are started, when subsequent workers are started the number of workers to start will behave as though there are no workers running. This greatly simplifies the logic as we don't ever have to reallocate bundles to workers and provides the best performance in most cases.
 
 ## API
 
@@ -75,7 +77,7 @@ Each worker communicates state back to the main process by sending [`WorkerMsg`]
 
 The Optimizer captures all of these messages and produces a stream of [`OptimizerMsg`][Optimizer] objects.
 
-Optimizer state phases:
+Optimizer phases:
 <dl>
   <dt><code>'initialized'</code></dt>
   <dd>Initial event emitted by the optimizer once it's don't initializing its internal state.</dd>
