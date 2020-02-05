@@ -102,7 +102,7 @@ describe('IndexPattern Field Item', () => {
       '/api/lens/index_stats/my-fake-index-pattern/field',
       expect.anything()
     );
-    // Argment functions not detected correctly (https://github.com/microsoft/TypeScript/issues/26591)
+    // Function argument types not detected correctly (https://github.com/microsoft/TypeScript/issues/26591)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { body } = (core.http.post.mock.calls[0] as any)[1];
     expect(JSON.parse(body)).not.toHaveProperty('timeFieldName');
