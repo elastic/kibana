@@ -14,7 +14,7 @@ import {
 } from 'react-router-dom';
 import { RouteName } from './route_config/route_names';
 
-export type LocationMatch = Pick<
+type LocationMatch = Pick<
   RouteComponentProps<Record<string, string>>,
   'location' | 'match'
 >;

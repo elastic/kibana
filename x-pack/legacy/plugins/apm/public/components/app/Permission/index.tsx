@@ -36,7 +36,8 @@ export const Permission: React.FC = ({ children }) => {
   if (status === FETCH_STATUS.LOADING || status === FETCH_STATUS.PENDING) {
     return null;
   }
-  // When the user doenst have permission and he didnt escape, show the Permission page
+  // When the user doesn't have the appropriate permissions and they
+  // did not use the escape hatch, show the missing permissions page
   if (data?.hasPermission === false && isPermissionPageEnabled) {
     return (
       <PermissionPage
@@ -66,19 +67,15 @@ interface Props {
   onEscapeHatchClick: () => void;
 }
 
-const PermissionPage: React.FC<Props> = ({ onEscapeHatchClick }) => {
+const PermissionPage = ({ onEscapeHatchClick }: Props) => {
   const location = useLocation();
-  const { routes, matchPath } = useMatchedRoutes();
-  const [route] = routes;
+  const { matchedRoute, matchedPath } = useMatchedRoutes();
 
   let pageName = '';
-  if (typeof route?.breadcrumb === 'string') {
-    pageName = route.breadcrumb;
-  } else if (typeof route?.breadcrumb === 'function' && matchPath) {
-    pageName = route.breadcrumb({
-      location,
-      match: matchPath
-    });
+  if (typeof matchedRoute?.breadcrumb === 'string') {
+    pageName = matchedRoute.breadcrumb;
+  } else if (typeof matchedRoute?.breadcrumb === 'function' && matchedPath) {
+    pageName = matchedRoute.breadcrumb({ location, match: matchedPath });
   }
 
   return (

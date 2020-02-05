@@ -52,7 +52,7 @@ const App = () => {
     <MainContainer data-test-subj="apmMainContainer" role="main">
       <UpdateBreadcrumbs routes={routes} />
       <Route component={ScrollToTopOnPathChange} />
-      {/* Check if user has permission to read from apm index. */}
+      {/* Check if user has the appropriate permissions to use the APM UI. */}
       <Permission>
         <Switch>
           {routes.map((route, i) => (
