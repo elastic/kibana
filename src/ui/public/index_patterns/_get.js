@@ -37,7 +37,7 @@ export function IndexPatternsGetProvider(Private) {
 
     const promise = savedObjectsClient.find({
       type: 'index-pattern',
-      fields: [field],
+      fields: ['title'],
       perPage: 10000
     }).then(resp => {
       return resp.savedObjects.map(obj => _.get(obj, field));
