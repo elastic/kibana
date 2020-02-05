@@ -35,6 +35,7 @@ import {
   UtilityBarSection,
   UtilityBarText,
 } from '../../../../components/detection_engine/utility_bar';
+import { getCreateCaseUrl } from '../../../../components/link_to';
 
 export const AllCases = React.memo(() => {
   const [{ data, isLoading, pagination, filterOptions }, doFetch, setFilters] = useGetCases();
@@ -110,7 +111,7 @@ export const AllCases = React.memo(() => {
                 titleSize="xs"
                 body={i18n.NO_CASES_BODY}
                 actions={
-                  <EuiButton fill size="s" href={`#`} iconType="plusInCircle">
+                  <EuiButton fill size="s" href={getCreateCaseUrl()} iconType="plusInCircle">
                     {i18n.ADD_NEW_CASE}
                   </EuiButton>
                 }

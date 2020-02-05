@@ -6,16 +6,18 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const ALL_CASES = i18n.translate('xpack.siem.caseTable.title', {
+export * from '../../translations';
+
+export const ALL_CASES = i18n.translate('xpack.siem.case.caseTable.title', {
   defaultMessage: 'All Cases',
 });
-export const NO_CASES = i18n.translate('xpack.siem.caseTable.noCases.title', {
+export const NO_CASES = i18n.translate('xpack.siem.case.caseTable.noCases.title', {
   defaultMessage: 'No Cases',
 });
-export const NO_CASES_BODY = i18n.translate('xpack.siem.caseTable.noCases.body', {
+export const NO_CASES_BODY = i18n.translate('xpack.siem.case.caseTable.noCases.body', {
   defaultMessage: 'Create a new case to see it displayed in the case workflow table.',
 });
-export const ADD_NEW_CASE = i18n.translate('xpack.siem.caseTable.addNewCase', {
+export const ADD_NEW_CASE = i18n.translate('xpack.siem.case.caseTable.addNewCase', {
   defaultMessage: 'Add New Case',
 });
 
@@ -30,30 +32,6 @@ export const UNIT = (totalCount: number) =>
     values: { totalCount },
     defaultMessage: `{totalCount, plural, =1 {case} other {cases}}`,
   });
-
-export const CASE_TITLE = i18n.translate('xpack.siem.case.caseTable.columnHeader.caseTitle', {
-  defaultMessage: 'Case Title',
-});
-
-export const TAGS = i18n.translate('xpack.siem.case.caseTable.columnHeader.tags', {
-  defaultMessage: 'Tags',
-});
-
-export const CREATED_AT = i18n.translate('xpack.siem.case.caseTable.columnHeader.caseTitle', {
-  defaultMessage: 'Created at',
-});
-
-export const CREATED_BY = i18n.translate('xpack.siem.case.caseTable.columnHeader.caseTitle', {
-  defaultMessage: 'Created by',
-});
-
-export const LAST_UPDATED = i18n.translate('xpack.siem.case.caseTable.columnHeader.caseTitle', {
-  defaultMessage: 'Last updated',
-});
-
-export const STATE = i18n.translate('xpack.siem.case.caseTable.columnHeader.caseTitle', {
-  defaultMessage: 'State',
-});
 
 export const SEARCH_CASES = i18n.translate(
   'xpack.siem.detectionEngine.case.caseTable.searchAriaLabel',

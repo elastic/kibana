@@ -21,6 +21,7 @@ import { schema } from './schema';
 import * as i18n from '../../translations';
 import { SiemPageName } from '../../../home/types';
 import { DescriptionMarkdown } from '../description_md_editor';
+import { caseTypeOptions } from './form_options';
 
 export const CommonUseField = getUseField({ component: Field });
 
@@ -32,17 +33,6 @@ const MySpinner = styled(EuiLoadingSpinner)`
   top: 50%;
   left: 50%;
 `;
-
-const caseTypeOptions = [
-  {
-    value: 'security',
-    inputDisplay: 'Security',
-  },
-  {
-    value: 'other',
-    inputDisplay: 'Other',
-  },
-];
 
 export const Create = React.memo(() => {
   const [{ data, isLoading, newCase }, setFormData] = usePostCase();
