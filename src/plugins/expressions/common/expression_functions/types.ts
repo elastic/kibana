@@ -39,9 +39,17 @@ export interface ExpressionFunctionDefinition<
   name: Name;
 
   /**
-   * A string identifier that identifies the type of value this function returns.
+   * Name of type of value this function outputs.
    */
   type?: TypeToString<UnwrapPromiseOrReturn<Output>>;
+
+  /**
+   * List of allowed type names for input value of this function. If this
+   * property is set the input of function will be cast to the first possible
+   * type in this list. If this property is missing the input will be provided
+   * to the function as-is.
+   */
+  inputTypes?: Array<TypeToString<Input>>;
 
   /**
    * Specification of arguments that function supports. This list will also be
@@ -53,24 +61,6 @@ export interface ExpressionFunctionDefinition<
    * @todo What is this?
    */
   aliases?: string[];
-
-  /**
-   * List of type names this function supports as type of its input. If this
-   * property is set the input of function will be cast to the first possible
-   * type in this list. If this property is missing the input will be provided
-   * to function as-is.
-   */
-  inputTypes?: Array<TypeToString<Input>>;
-
-  /**
-   * @deprecated Use `inputTypes` instead.
-   */
-  context?: {
-    /**
-     * @deprecated This is alias for `inputTypes`, use `inputTypes` instead.
-     */
-    types: AnyExpressionFunctionDefinition['inputTypes'];
-  };
 
   /**
    * Help text displayed in the Expression editor. This text should be
@@ -88,6 +78,16 @@ export interface ExpressionFunctionDefinition<
    *     same for all functions in expression chain.
    */
   fn(input: Input, args: Arguments, context: Context): Output;
+
+  /**
+   * @deprecated Use `inputTypes` instead.
+   */
+  context?: {
+    /**
+     * @deprecated This is alias for `inputTypes`, use `inputTypes` instead.
+     */
+    types: AnyExpressionFunctionDefinition['inputTypes'];
+  };
 }
 
 /**

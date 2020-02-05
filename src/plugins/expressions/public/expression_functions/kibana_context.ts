@@ -39,9 +39,7 @@ export type ExpressionFunctionKibanaContext = ExpressionFunctionDefinition<
 export const kibanaContext = (): ExpressionFunctionKibanaContext => ({
   name: 'kibana_context',
   type: 'kibana_context',
-  context: {
-    types: ['kibana_context', 'null'],
-  },
+  inputTypes: ['kibana_context', 'null'],
   help: i18n.translate('expressions.functions.kibana_context.help', {
     defaultMessage: 'Updates kibana global context',
   }),

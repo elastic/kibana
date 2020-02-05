@@ -20,7 +20,7 @@
 import { Required } from '@kbn/utility-types';
 
 import { getFormat } from './legacy_imports';
-import { Context } from './table_vis_fn';
+import { Input } from './table_vis_fn';
 
 export interface TableContext {
   tables: Array<TableGroup | Table>;
@@ -29,7 +29,7 @@ export interface TableContext {
 
 export interface TableGroup {
   $parent: TableContext;
-  table: Context;
+  table: Input;
   tables: Table[];
   title: string;
   name: string;
@@ -40,11 +40,11 @@ export interface TableGroup {
 
 export interface Table {
   $parent?: TableGroup;
-  columns: Context['columns'];
-  rows: Context['rows'];
+  columns: Input['columns'];
+  rows: Input['rows'];
 }
 
-export function tableVisResponseHandler(table: Context, dimensions: any): TableContext {
+export function tableVisResponseHandler(table: Input, dimensions: any): TableContext {
   const converted: TableContext = {
     tables: [],
   };
@@ -63,8 +63,7 @@ export function tableVisResponseHandler(table: Context, dimensions: any): TableC
       const splitValue: any = row[splitColumn.id];
 
       if (!splitMap.hasOwnProperty(splitValue as any)) {
-        // @ts-ignore
-        splitMap[splitValue] = splitIndex++;
+        (splitMap as any)[splitValue] = splitIndex++;
         const tableGroup: Required<TableGroup, 'tables'> = {
           $parent: converted,
           title: `${splitColumnFormatter.convert(splitValue)}: ${splitColumn.name}`,
@@ -85,10 +84,8 @@ export function tableVisResponseHandler(table: Context, dimensions: any): TableC
         converted.tables.push(tableGroup);
       }
 
-      // @ts-ignore
-      const tableIndex = splitMap[splitValue];
-      // @ts-ignore
-      converted.tables[tableIndex].tables[0].rows.push(row);
+      const tableIndex = (splitMap as any)[splitValue];
+      (converted.tables[tableIndex] as any).tables[0].rows.push(row);
     });
   } else {
     converted.tables.push({

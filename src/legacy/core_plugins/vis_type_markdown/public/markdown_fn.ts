@@ -21,28 +21,20 @@ import { i18n } from '@kbn/i18n';
 import { ExpressionFunctionDefinition, Render } from '../../../../plugins/expressions/public';
 import { Arguments, MarkdownVisParams } from './types';
 
-const name = 'markdownVis';
-
-type Context = undefined;
-
 interface RenderValue {
   visType: 'markdown';
   visConfig: MarkdownVisParams;
 }
 
-type Return = Promise<Render<RenderValue>>;
-
 export const createMarkdownVisFn = (): ExpressionFunctionDefinition<
-  typeof name,
-  Context,
+  'markdownVis',
+  unknown,
   Arguments,
-  Return
+  Render<RenderValue>
 > => ({
-  name,
+  name: 'markdownVis',
   type: 'render',
-  context: {
-    types: [],
-  },
+  inputTypes: [],
   help: i18n.translate('visTypeMarkdown.function.help', {
     defaultMessage: 'Markdown visualization',
   }),
@@ -70,7 +62,7 @@ export const createMarkdownVisFn = (): ExpressionFunctionDefinition<
       }),
     },
   },
-  async fn(context, args) {
+  fn(input, args) {
     return {
       type: 'render',
       as: 'visualization',

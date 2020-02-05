@@ -18,7 +18,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-
 import {
   ExpressionFunctionDefinition,
   KibanaDatatable,
@@ -26,10 +25,6 @@ import {
 } from '../../../../plugins/expressions/public';
 // @ts-ignore
 import { vislibSlicesResponseHandler } from './vislib/response_handler';
-
-const name = 'kibana_pie';
-
-type Context = KibanaDatatable;
 
 interface Arguments {
   visConfig: string;
@@ -41,19 +36,15 @@ interface RenderValue {
   visConfig: VisParams;
 }
 
-type Return = Render<RenderValue>;
-
 export const createPieVisFn = (): ExpressionFunctionDefinition<
-  typeof name,
-  Context,
+  'kibana_pie',
+  KibanaDatatable,
   Arguments,
-  Return
+  Render<RenderValue>
 > => ({
   name: 'kibana_pie',
   type: 'render',
-  context: {
-    types: ['kibana_datatable'],
-  },
+  inputTypes: ['kibana_datatable'],
   help: i18n.translate('visTypeVislib.functions.pie.help', {
     defaultMessage: 'Pie visualization',
   }),
@@ -64,9 +55,9 @@ export const createPieVisFn = (): ExpressionFunctionDefinition<
       help: '',
     },
   },
-  fn(context, args) {
+  fn(input, args) {
     const visConfig = JSON.parse(args.visConfig);
-    const convertedData = vislibSlicesResponseHandler(context, visConfig.dimensions);
+    const convertedData = vislibSlicesResponseHandler(input, visConfig.dimensions);
 
     return {
       type: 'render',

@@ -19,7 +19,6 @@
 
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
-
 import {
   ExpressionFunctionDefinition,
   KibanaContext,
@@ -28,8 +27,8 @@ import {
 import { VegaVisualizationDependencies } from './plugin';
 import { createVegaRequestHandler } from './vega_request_handler';
 
-const name = 'vega';
-type Context = KibanaContext | null;
+type Input = KibanaContext | null;
+type Output = Promise<Render<RenderValue>>;
 
 interface Arguments {
   spec: string;
@@ -38,21 +37,17 @@ interface Arguments {
 export type VisParams = Required<Arguments>;
 
 interface RenderValue {
-  visData: Context;
-  visType: typeof name;
+  visData: Input;
+  visType: 'vega';
   visConfig: VisParams;
 }
 
-type Return = Promise<Render<RenderValue>>;
-
 export const createVegaFn = (
   dependencies: VegaVisualizationDependencies
-): ExpressionFunctionDefinition<typeof name, Context, Arguments, Return> => ({
-  name,
+): ExpressionFunctionDefinition<'vega', Input, Arguments, Output> => ({
+  name: 'vega',
   type: 'render',
-  context: {
-    types: ['kibana_context', 'null'],
-  },
+  inputTypes: ['kibana_context', 'null'],
   help: i18n.translate('visTypeVega.function.help', {
     defaultMessage: 'Vega visualization',
   }),
@@ -63,13 +58,13 @@ export const createVegaFn = (
       help: '',
     },
   },
-  async fn(context, args) {
+  async fn(input, args) {
     const vegaRequestHandler = createVegaRequestHandler(dependencies);
 
     const response = await vegaRequestHandler({
-      timeRange: get(context, 'timeRange'),
-      query: get(context, 'query'),
-      filters: get(context, 'filters'),
+      timeRange: get(input, 'timeRange'),
+      query: get(input, 'query'),
+      filters: get(input, 'filters'),
       visParams: { spec: args.spec },
     });
 

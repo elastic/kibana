@@ -18,11 +18,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ExpressionFunctionDefinition, KibanaDatatable } from '../../../expressions/public';
-
-const name = 'visdimension';
-
-type Context = KibanaDatatable | null;
+import {
+  ExpressionFunctionDefinition,
+  ExpressionValueBoxed,
+  KibanaDatatable,
+  KibanaDatatableColumn,
+} from '../../../expressions/public';
 
 interface Arguments {
   accessor: string | number;
@@ -30,22 +31,29 @@ interface Arguments {
   formatParams?: string;
 }
 
-type Return = any;
+type ExpressionValueVisDimension = ExpressionValueBoxed<
+  'vis_dimension',
+  {
+    accessor: number | KibanaDatatableColumn;
+    format: {
+      id?: string;
+      params: unknown;
+    };
+  }
+>;
 
 export const visDimension = (): ExpressionFunctionDefinition<
-  typeof name,
-  Context,
+  'visdimension',
+  KibanaDatatable,
   Arguments,
-  Return
+  ExpressionValueVisDimension
 > => ({
   name: 'visdimension',
   help: i18n.translate('visualizations.function.visDimension.help', {
     defaultMessage: 'Generates visConfig dimension object',
   }),
   type: 'vis_dimension',
-  context: {
-    types: ['kibana_datatable'],
-  },
+  inputTypes: ['kibana_datatable'],
   args: {
     accessor: {
       types: ['string', 'number'],
@@ -69,11 +77,12 @@ export const visDimension = (): ExpressionFunctionDefinition<
       }),
     },
   },
-  fn: (context, args) => {
+  fn: (input, args) => {
     const accessor =
       typeof args.accessor === 'number'
         ? args.accessor
-        : context!.columns.find(c => c.id === args.accessor);
+        : input.columns.find(c => c.id === args.accessor);
+
     if (accessor === undefined) {
       throw new Error(
         i18n.translate('visualizations.function.visDimension.error.accessor', {
