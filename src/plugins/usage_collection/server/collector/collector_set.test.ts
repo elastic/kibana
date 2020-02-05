@@ -18,58 +18,62 @@
  */
 
 import { noop } from 'lodash';
-import sinon from 'sinon';
-import expect from '@kbn/expect';
-import { Collector } from '../collector';
-import { CollectorSet } from '../collector_set';
-import { UsageCollector } from '../usage_collector';
+import { Collector } from './collector';
+import { CollectorSet } from './collector_set';
+import { UsageCollector } from './usage_collector';
+import { loggingServiceMock } from '../../../../core/server/mocks';
 
-const mockLogger = () => ({
-  debug: sinon.spy(),
-  warn: sinon.spy(),
-});
+const logger = loggingServiceMock.createLogger();
+
+const loggerSpies = {
+  debug: jest.spyOn(logger, 'debug'),
+  warn: jest.spyOn(logger, 'warn'),
+};
 
 describe('CollectorSet', () => {
   describe('registers a collector set and runs lifecycle events', () => {
-    let init;
-    let fetch;
+    let init: Function;
+    let fetch: Function;
     beforeEach(() => {
       init = noop;
       fetch = noop;
+      loggerSpies.debug.mockRestore();
+      loggerSpies.warn.mockRestore();
     });
 
+    const mockCallCluster = () => Promise.resolve({ passTest: 1000 });
+
     it('should throw an error if non-Collector type of object is registered', () => {
-      const logger = mockLogger();
       const collectors = new CollectorSet({ logger });
       const registerPojo = () => {
         collectors.registerCollector({
           type: 'type_collector_test',
           init,
           fetch,
-        });
+        } as any); // We are intentionally sending it wrong.
       };
 
-      expect(registerPojo).to.throwException(({ message }) => {
-        expect(message).to.be('CollectorSet can only have Collector instances registered');
-      });
+      expect(registerPojo).toThrowError(
+        'CollectorSet can only have Collector instances registered'
+      );
     });
 
     it('should log debug status of fetching from the collector', async () => {
-      const mockCallCluster = () => Promise.resolve({ passTest: 1000 });
-      const logger = mockLogger();
       const collectors = new CollectorSet({ logger });
       collectors.registerCollector(
         new Collector(logger, {
           type: 'MY_TEST_COLLECTOR',
-          fetch: caller => caller(),
+          fetch: (caller: any) => caller(),
+          isReady: () => true,
         })
       );
 
-      const result = await collectors.bulkFetch(mockCallCluster);
-      const calls = logger.debug.getCalls();
-      expect(calls.length).to.be(1);
-      expect(calls[0].args).to.eql(['Fetching data from MY_TEST_COLLECTOR collector']);
-      expect(result).to.eql([
+      const result = await collectors.bulkFetch(mockCallCluster as any);
+      expect(loggerSpies.debug).toHaveBeenCalledTimes(1);
+      expect(loggerSpies.debug).toHaveBeenCalledWith(
+        'Fetching data from MY_TEST_COLLECTOR collector'
+      );
+      expect(result).toStrictEqual([
         {
           type: 'MY_TEST_COLLECTOR',
           result: { passTest: 1000 },
@@ -78,32 +82,90 @@ describe('CollectorSet', () => {
     });
 
     it('should gracefully handle a collector fetch method throwing an error', async () => {
-      const mockCallCluster = () => Promise.resolve({ passTest: 1000 });
-      const logger = mockLogger();
       const collectors = new CollectorSet({ logger });
       collectors.registerCollector(
         new Collector(logger, {
           type: 'MY_TEST_COLLECTOR',
           fetch: () => new Promise((_resolve, reject) => reject()),
+          isReady: () => true,
         })
       );
 
       let result;
       try {
-        result = await collectors.bulkFetch(mockCallCluster);
+        result = await collectors.bulkFetch(mockCallCluster as any);
       } catch (err) {
         // Do nothing
       }
       // This must return an empty object instead of null/undefined
-      expect(result).to.eql([]);
+      expect(result).toStrictEqual([]);
+    });
+
+    it('should not break if isReady is not a function', async () => {
+      const collectors = new CollectorSet({ logger });
+      collectors.registerCollector(
+        new Collector(logger, {
+          type: 'MY_TEST_COLLECTOR',
+          fetch: () => ({ test: 1 }),
+          isReady: true as any,
+        })
+      );
+
+      const result = await collectors.bulkFetch(mockCallCluster as any);
+      expect(result).toStrictEqual([
+        {
+          type: 'MY_TEST_COLLECTOR',
+          result: { test: 1 },
+        },
+      ]);
+    });
+
+    it('should not break if isReady is not provided', async () => {
+      const collectors = new CollectorSet({ logger });
+      collectors.registerCollector(
+        new Collector(logger, {
+          type: 'MY_TEST_COLLECTOR',
+          fetch: () => ({ test: 1 }),
+        } as any)
+      );
+
+      const result = await collectors.bulkFetch(mockCallCluster as any);
+      expect(result).toStrictEqual([
+        {
+          type: 'MY_TEST_COLLECTOR',
+          result: { test: 1 },
+        },
+      ]);
+    });
+
+    it('should infer the types from the implementations of fetch and formatForBulkUpload', async () => {
+      const collectors = new CollectorSet({ logger });
+      collectors.registerCollector(
+        new Collector(logger, {
+          type: 'MY_TEST_COLLECTOR',
+          fetch: () => ({ test: 1 }),
+          formatForBulkUpload: result => ({
+            type: 'MY_TEST_COLLECTOR',
+            payload: { test: result.test * 2 },
+          }),
+          isReady: () => true,
+        })
+      );
+
+      const result = await collectors.bulkFetch(mockCallCluster as any);
+      expect(result).toStrictEqual([
+        {
+          type: 'MY_TEST_COLLECTOR',
+          result: { test: 1 }, // It matches the return of `fetch`. `formatForBulkUpload` is used later on
+        },
+      ]);
     });
   });
 
   describe('toApiFieldNames', () => {
-    let collectorSet;
+    let collectorSet: CollectorSet;
 
     beforeEach(() => {
-      const logger = mockLogger();
       collectorSet = new CollectorSet({ logger });
     });
 
@@ -126,7 +188,7 @@ describe('CollectorSet', () => {
       };
 
       const result = collectorSet.toApiFieldNames(apiData);
-      expect(result).to.eql({
+      expect(result).toStrictEqual({
         os: {
           load: { '15m': 2.3525390625, '1m': 2.22412109375, '5m': 2.4462890625 },
           memory: { free_bytes: 458280960, total_bytes: 17179869184, used_bytes: 16721588224 },
@@ -155,7 +217,7 @@ describe('CollectorSet', () => {
       };
 
       const result = collectorSet.toApiFieldNames(apiData);
-      expect(result).to.eql({
+      expect(result).toStrictEqual({
         days_of_the_week: [
           { day_index: 1, day_name: 'monday' },
           { day_index: 2, day_name: 'tuesday' },
@@ -166,21 +228,20 @@ describe('CollectorSet', () => {
   });
 
   describe('isUsageCollector', () => {
-    const collectorOptions = { type: 'MY_TEST_COLLECTOR', fetch: () => {} };
+    const collectorOptions = { type: 'MY_TEST_COLLECTOR', fetch: () => {}, isReady: () => true };
 
     it('returns true only for UsageCollector instances', () => {
-      const logger = mockLogger();
       const collectors = new CollectorSet({ logger });
       const usageCollector = new UsageCollector(logger, collectorOptions);
       const collector = new Collector(logger, collectorOptions);
       const randomClass = new (class Random {})();
-      expect(collectors.isUsageCollector(usageCollector)).to.be(true);
-      expect(collectors.isUsageCollector(collector)).to.be(false);
-      expect(collectors.isUsageCollector(randomClass)).to.be(false);
-      expect(collectors.isUsageCollector({})).to.be(false);
-      expect(collectors.isUsageCollector(null)).to.be(false);
-      expect(collectors.isUsageCollector('')).to.be(false);
-      expect(collectors.isUsageCollector()).to.be(false);
+      expect(collectors.isUsageCollector(usageCollector)).toEqual(true);
+      expect(collectors.isUsageCollector(collector)).toEqual(false);
+      expect(collectors.isUsageCollector(randomClass)).toEqual(false);
+      expect(collectors.isUsageCollector({})).toEqual(false);
+      expect(collectors.isUsageCollector(null)).toEqual(false);
+      expect(collectors.isUsageCollector('')).toEqual(false);
+      expect(collectors.isUsageCollector(void 0)).toEqual(false);
     });
   });
 });

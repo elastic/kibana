@@ -17,6 +17,21 @@
  * under the License.
  */
 
-export { CollectorSet } from './collector_set';
-export { Collector } from './collector';
-export { UsageCollector } from './usage_collector';
+import { KIBANA_STATS_TYPE } from '../../common/constants';
+import { Collector } from './collector';
+
+export class UsageCollector<T = unknown, U = { usage: { [key: string]: T } }> extends Collector<
+  T,
+  U
+> {
+  protected defaultUsageFormatterForBulkUpload(result: T) {
+    return {
+      type: KIBANA_STATS_TYPE,
+      payload: {
+        usage: {
+          [this.type]: result,
+        },
+      },
+    };
+  }
+}
