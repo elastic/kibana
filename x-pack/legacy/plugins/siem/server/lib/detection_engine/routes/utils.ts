@@ -5,6 +5,7 @@
  */
 
 import Boom from 'boom';
+import { CallAPIOptions } from '../../../../../../../../src/core/server';
 import { APP_ID, SIGNALS_INDEX_KEY } from '../../../../common/constants';
 import { LegacySetupServices, RequestFacade } from '../../../plugin';
 
@@ -164,8 +165,8 @@ export const getIndex = (request: RequestFacade, services: LegacySetupServices):
 };
 
 export const callWithRequestFactory = (request: RequestFacade, services: LegacySetupServices) => {
-  const { callWithRequest } = services.plugins.elasticsearch.getCluster('data');
-  return <T, U>(endpoint: string, params: T, options?: U) => {
-    return callWithRequest(request, endpoint, params, options);
-  };
+  const { callAsCurrentUser } = services.elasticsearch.dataClient.asScoped(request);
+
+  return <T, V>(endpoint: string, params: T, options?: CallAPIOptions): Promise<V> =>
+    callAsCurrentUser(endpoint, params, options);
 };

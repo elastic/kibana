@@ -9,7 +9,7 @@ import { DETECTION_ENGINE_SIGNALS_STATUS_URL } from '../../../../../common/const
 import { SignalsStatusRequest } from '../../signals/types';
 import { setSignalsStatusSchema } from '../schemas/set_signal_status_schema';
 import { LegacySetupServices } from '../../../../plugin';
-import { transformError, getIndex } from '../utils';
+import { transformError, getIndex, callWithRequestFactory } from '../utils';
 
 export const setSignalsStatusRouteDef = (services: LegacySetupServices): Hapi.ServerRoute => {
   return {
@@ -27,7 +27,7 @@ export const setSignalsStatusRouteDef = (services: LegacySetupServices): Hapi.Se
     async handler(request: SignalsStatusRequest) {
       const { signal_ids: signalIds, query, status } = request.payload;
       const index = getIndex(request, services);
-      const { callWithRequest } = services.plugins.elasticsearch.getCluster('data');
+      const callWithRequest = callWithRequestFactory(request, services);
       let queryObject;
       if (signalIds) {
         queryObject = { ids: { values: signalIds } };
@@ -40,7 +40,7 @@ export const setSignalsStatusRouteDef = (services: LegacySetupServices): Hapi.Se
         };
       }
       try {
-        return callWithRequest(request, 'updateByQuery', {
+        return callWithRequest('updateByQuery', {
           index,
           body: {
             script: {
