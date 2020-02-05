@@ -4,11 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  createMockServer,
-  getMockNonEmptyIndex,
-  getMockEmptyIndex,
-} from '../__mocks__/_mock_server';
+import { createMockServer } from '../__mocks__/_mock_server';
 import { createRulesRoute } from './create_rules_route';
 import { ServerInjectOptions } from 'hapi';
 
@@ -19,6 +15,8 @@ import {
   getCreateRequest,
   typicalPayload,
   getFindResultStatus,
+  getNonEmptyIndex,
+  getEmptyIndex,
 } from '../__mocks__/request_responses';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 
@@ -28,7 +26,7 @@ describe('create_rules', () => {
     inject,
     alertsClient,
     actionsClient,
-    elasticsearch,
+    callClusterMock,
     savedObjectsClient,
   } = createMockServer();
 
@@ -39,10 +37,10 @@ describe('create_rules', () => {
       inject,
       alertsClient,
       actionsClient,
-      elasticsearch,
+      callClusterMock,
       savedObjectsClient,
     } = createMockServer());
-    elasticsearch.getCluster = getMockNonEmptyIndex();
+    callClusterMock.mockImplementation(getNonEmptyIndex);
     createRulesRoute(services);
   });
 
@@ -67,7 +65,7 @@ describe('create_rules', () => {
 
   describe('validation', () => {
     test('it returns a 400 if the index does not exist', async () => {
-      elasticsearch.getCluster = getMockEmptyIndex();
+      callClusterMock.mockImplementation(getEmptyIndex);
       alertsClient.find.mockResolvedValue(getFindResult());
       alertsClient.get.mockResolvedValue(getResult());
       actionsClient.create.mockResolvedValue(createActionResult());

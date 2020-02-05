@@ -18,42 +18,36 @@ import {
 import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '../../../../../common/constants';
 
 describe('query for signal', () => {
-  let { inject, services, elasticsearch } = createMockServer();
+  let { inject, services, callClusterMock } = createMockServer();
 
   beforeEach(() => {
     jest.resetAllMocks();
     jest.spyOn(myUtils, 'getIndex').mockReturnValue('fakeindex');
-    ({ inject, services, elasticsearch } = createMockServer());
-    elasticsearch.getCluster = jest.fn(() => ({
-      callWithRequest: jest.fn(() => true),
-    }));
+    ({ inject, services, callClusterMock } = createMockServer());
+    callClusterMock.mockImplementation(() => true);
     querySignalsRoute(services);
   });
 
   describe('query and agg on signals index', () => {
     test('returns 200 when using single query', async () => {
-      elasticsearch.getCluster = jest.fn(() => ({
-        callWithRequest: jest.fn(
-          (_req, _type: string, queryBody: { index: string; body: object }) => {
-            expect(queryBody.body).toMatchObject({ ...typicalSignalsQueryAggs() });
-            return true;
-          }
-        ),
-      }));
+      callClusterMock.mockImplementation(
+        (endpoint: string, params: { index: string; body: object }) => {
+          expect(params.body).toMatchObject({ ...typicalSignalsQueryAggs() });
+          return true;
+        }
+      );
       const { statusCode } = await inject(getSignalsAggsQueryRequest());
       expect(statusCode).toBe(200);
       expect(myUtils.getIndex).toHaveReturnedWith('fakeindex');
     });
 
     test('returns 200 when using single agg', async () => {
-      elasticsearch.getCluster = jest.fn(() => ({
-        callWithRequest: jest.fn(
-          (_req, _type: string, queryBody: { index: string; body: object }) => {
-            expect(queryBody.body).toMatchObject({ ...typicalSignalsQueryAggs() });
-            return true;
-          }
-        ),
-      }));
+      callClusterMock.mockImplementation(
+        (endpoint: string, params: { index: string; body: object }) => {
+          expect(params.body).toMatchObject({ ...typicalSignalsQueryAggs() });
+          return true;
+        }
+      );
       const { statusCode } = await inject(getSignalsAggsQueryRequest());
       expect(statusCode).toBe(200);
       expect(myUtils.getIndex).toHaveReturnedWith('fakeindex');
@@ -62,17 +56,15 @@ describe('query for signal', () => {
     test('returns 200 when using aggs and query together', async () => {
       const allTogether = getSignalsQueryRequest();
       allTogether.payload = { ...typicalSignalsQueryAggs(), ...typicalSignalsQuery() };
-      elasticsearch.getCluster = jest.fn(() => ({
-        callWithRequest: jest.fn(
-          (_req, _type: string, queryBody: { index: string; body: object }) => {
-            expect(queryBody.body).toMatchObject({
-              ...typicalSignalsQueryAggs(),
-              ...typicalSignalsQuery(),
-            });
-            return true;
-          }
-        ),
-      }));
+      callClusterMock.mockImplementation(
+        (endpoint: string, params: { index: string; body: object }) => {
+          expect(params.body).toMatchObject({
+            ...typicalSignalsQueryAggs(),
+            ...typicalSignalsQuery(),
+          });
+          return true;
+        }
+      );
       const { statusCode } = await inject(allTogether);
       expect(statusCode).toBe(200);
       expect(myUtils.getIndex).toHaveReturnedWith('fakeindex');

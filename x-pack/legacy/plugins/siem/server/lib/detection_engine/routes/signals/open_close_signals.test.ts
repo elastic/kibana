@@ -19,15 +19,13 @@ import {
 import { DETECTION_ENGINE_SIGNALS_STATUS_URL } from '../../../../../common/constants';
 
 describe('set signal status', () => {
-  let { inject, services, elasticsearch } = createMockServer();
+  let { inject, services, callClusterMock } = createMockServer();
 
   beforeEach(() => {
     jest.resetAllMocks();
     jest.spyOn(myUtils, 'getIndex').mockReturnValue('fakeindex');
-    ({ inject, services, elasticsearch } = createMockServer());
-    elasticsearch.getCluster = jest.fn(() => ({
-      callWithRequest: jest.fn(() => true),
-    }));
+    ({ inject, services, callClusterMock } = createMockServer());
+    callClusterMock.mockImplementation(() => true);
     setSignalsStatusRoute(services);
   });
 

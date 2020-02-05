@@ -4,11 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  createMockServer,
-  getMockEmptyIndex,
-  getMockNonEmptyIndex,
-} from '../__mocks__/_mock_server';
+import { createMockServer } from '../__mocks__/_mock_server';
 import { createRulesRoute } from './create_rules_route';
 import {
   getFindResult,
@@ -16,6 +12,8 @@ import {
   createActionResult,
   addPrepackagedRulesRequest,
   getFindResultWithSingleHit,
+  getEmptyIndex,
+  getNonEmptyIndex,
 } from '../__mocks__/request_responses';
 
 jest.mock('../../rules/get_prepackaged_rules', () => {
@@ -47,12 +45,12 @@ import { addPrepackedRulesRoute } from './add_prepackaged_rules_route';
 import { PrepackagedRules } from '../../types';
 
 describe('add_prepackaged_rules_route', () => {
-  let { services, inject, alertsClient, actionsClient, elasticsearch } = createMockServer();
+  let { services, inject, alertsClient, actionsClient, callClusterMock } = createMockServer();
 
   beforeEach(() => {
     jest.resetAllMocks();
-    ({ services, inject, alertsClient, actionsClient, elasticsearch } = createMockServer());
-    elasticsearch.getCluster = getMockNonEmptyIndex();
+    ({ services, inject, alertsClient, actionsClient, callClusterMock } = createMockServer());
+    callClusterMock.mockImplementation(getNonEmptyIndex);
 
     addPrepackedRulesRoute(services);
   });
@@ -77,7 +75,7 @@ describe('add_prepackaged_rules_route', () => {
 
   describe('validation', () => {
     test('it returns a 400 if the index does not exist', async () => {
-      elasticsearch.getCluster = getMockEmptyIndex();
+      callClusterMock.mockImplementation(getEmptyIndex);
       alertsClient.find.mockResolvedValue(getFindResult());
       alertsClient.get.mockResolvedValue(getResult());
       actionsClient.create.mockResolvedValue(createActionResult());

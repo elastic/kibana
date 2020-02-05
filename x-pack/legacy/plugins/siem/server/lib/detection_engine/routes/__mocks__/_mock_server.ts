@@ -6,7 +6,10 @@
 
 import Hapi from 'hapi';
 import { KibanaConfig } from 'src/legacy/server/kbn_server';
-import { savedObjectsClientMock } from '../../../../../../../../../src/core/server/mocks';
+import {
+  elasticsearchServiceMock,
+  savedObjectsClientMock,
+} from '../../../../../../../../../src/core/server/mocks';
 import { alertsClientMock } from '../../../../../../alerting/server/alerts_client.mock';
 import { actionsClientMock } from '../../../../../../../../plugins/actions/server/mocks';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
@@ -46,24 +49,19 @@ const createMockKibanaConfig = (config: Record<string, string> = defaultConfig):
 export const createMockServer = (hasAlertsClient = true) => {
   const actionsClient = actionsClientMock.create();
   const alertsClient = alertsClientMock.create();
+  const elasticsearch = elasticsearchServiceMock.createSetup();
   const savedObjectsClient = savedObjectsClientMock.create();
   const spacesService = spacesServiceMock.createSetupContract();
-  const elasticsearch = {
-    getCluster: jest.fn().mockImplementation(() => ({
-      callWithRequest: jest.fn(),
-    })),
-  };
 
   const server = new Hapi.Server({ port: 0 });
 
   server.decorate('request', 'getSavedObjectsClient', () => savedObjectsClient);
   if (hasAlertsClient) server.decorate('request', 'getAlertsClient', () => alertsClient);
 
-  const npServices = { spaces: { spacesService } };
+  const npServices = { elasticsearch, spaces: { spacesService } };
   const legacyServices = {
     config: createMockKibanaConfig,
     plugins: {
-      elasticsearch,
       actions: {
         getActionsClientWithRequest: () => actionsClient,
       },
@@ -78,24 +76,19 @@ export const createMockServer = (hasAlertsClient = true) => {
   return {
     inject: server.inject.bind(server),
     services,
+    callClusterMock: createCallClusterMock(elasticsearch),
     alertsClient,
     actionsClient,
-    elasticsearch,
     savedObjectsClient,
   };
 };
 
-export const getMockIndexName = () =>
-  jest.fn().mockImplementation(() => ({
-    callWithRequest: jest.fn().mockImplementationOnce(() => 'index-name'),
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const createCallClusterMock = (elasticMock: any) => {
+  const mock = jest.fn();
+  elasticMock.dataClient.asScoped.mockImplementation(() => ({
+    callAsCurrentUser: mock,
   }));
 
-export const getMockEmptyIndex = () =>
-  jest.fn().mockImplementation(() => ({
-    callWithRequest: jest.fn().mockImplementation(() => ({ _shards: { total: 0 } })),
-  }));
-
-export const getMockNonEmptyIndex = () =>
-  jest.fn().mockImplementation(() => ({
-    callWithRequest: jest.fn().mockImplementation(() => ({ _shards: { total: 1 } })),
-  }));
+  return mock;
+};

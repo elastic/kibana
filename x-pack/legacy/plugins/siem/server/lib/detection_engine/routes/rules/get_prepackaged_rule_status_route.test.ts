@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createMockServer, getMockNonEmptyIndex } from '../__mocks__/_mock_server';
+import { createMockServer } from '../__mocks__/_mock_server';
 import { createRulesRoute } from './create_rules_route';
 import {
   getFindResult,
@@ -12,6 +12,7 @@ import {
   createActionResult,
   getFindResultWithSingleHit,
   getPrepackagedRulesStatusRequest,
+  getNonEmptyIndex,
 } from '../__mocks__/request_responses';
 
 jest.mock('../../rules/get_prepackaged_rules', () => {
@@ -40,12 +41,12 @@ jest.mock('../../rules/get_prepackaged_rules', () => {
 import { getPrepackagedRulesStatusRoute } from './get_prepackaged_rules_status_route';
 
 describe('get_prepackaged_rule_status_route', () => {
-  let { services, inject, alertsClient, actionsClient, elasticsearch } = createMockServer();
+  let { services, inject, alertsClient, actionsClient, callClusterMock } = createMockServer();
 
   beforeEach(() => {
     jest.resetAllMocks();
-    ({ services, inject, alertsClient, actionsClient, elasticsearch } = createMockServer());
-    elasticsearch.getCluster = getMockNonEmptyIndex();
+    ({ services, inject, alertsClient, actionsClient, callClusterMock } = createMockServer());
+    callClusterMock.mockImplementation(getNonEmptyIndex);
     getPrepackagedRulesStatusRoute(services);
   });
 

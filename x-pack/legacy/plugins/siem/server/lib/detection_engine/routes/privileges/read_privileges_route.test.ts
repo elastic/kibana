@@ -10,14 +10,12 @@ import { readPrivilegesRoute } from './read_privileges_route';
 import * as myUtils from '../utils';
 
 describe('read_privileges', () => {
-  let { inject, services, elasticsearch } = createMockServer();
+  let { inject, services, callClusterMock } = createMockServer();
 
   beforeEach(() => {
     jest.spyOn(myUtils, 'getIndex').mockReturnValue('fakeindex');
-    ({ inject, services, elasticsearch } = createMockServer());
-    elasticsearch.getCluster = jest.fn(() => ({
-      callWithRequest: jest.fn(() => getMockPrivileges()),
-    }));
+    ({ inject, services, callClusterMock } = createMockServer());
+    callClusterMock.mockImplementation(getMockPrivileges);
     readPrivilegesRoute(services);
   });
 
