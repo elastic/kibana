@@ -6,7 +6,7 @@
 import { isEqual } from 'lodash';
 
 interface CommandType {
-  type: 'setProperty' | 'setConfigProperty' | 'setSecretsProperty';
+  type: 'setConnector' | 'setProperty' | 'setConfigProperty' | 'setSecretsProperty';
 }
 
 export interface ActionState {
@@ -26,6 +26,17 @@ export const connectorReducer = (state: ActionState, action: ReducerAction) => {
   const { connector } = state;
 
   switch (command.type) {
+    case 'setConnector': {
+      const { key, value } = payload;
+      if (key === 'connector') {
+        return {
+          ...state,
+          connector: value,
+        };
+      } else {
+        return state;
+      }
+    }
     case 'setProperty': {
       const { key, value } = payload;
       if (isEqual(connector[key], value)) {
