@@ -56273,12 +56273,18 @@ function runScriptInPackageStreaming(script, args, pkg) {
   });
 }
 async function yarnWorkspacesInfo(directory) {
-  const workspacesInfo = await Object(_child_process__WEBPACK_IMPORTED_MODULE_0__["spawn"])('yarn', ['workspaces', 'info', '--json'], {
+  const {
+    stdout
+  } = await Object(_child_process__WEBPACK_IMPORTED_MODULE_0__["spawn"])('yarn', ['--json', 'workspaces', 'info'], {
     cwd: directory,
     stdio: 'pipe'
   });
-  const stdout = JSON.parse(workspacesInfo.stdout);
-  return JSON.parse(stdout.data);
+
+  try {
+    return JSON.parse(JSON.parse(stdout).data);
+  } catch (error) {
+    throw new Error(`'yarn workspaces info --json' produced unexpected output: \n${stdout}`);
+  }
 }
 
 /***/ }),
