@@ -19,6 +19,7 @@
 
 import { getIndices } from './get_indices';
 import { IndexPatternCreationConfig } from './../../../../../../../management/public';
+import { LegacyApiCaller } from '../../../../../../../../../plugins/data/public';
 
 export const successfulResponse = {
   hits: {
@@ -85,10 +86,13 @@ const mockIndexPatternCreationType = new IndexPatternCreationConfig({
   isBeta: false,
 });
 
-function esClientFactory(search: (params: any) => any) {
+function esClientFactory(search: (params: any) => any): LegacyApiCaller {
   return {
     search,
-    msearch: () => ({} as any),
+    msearch: () => ({
+      abort: () => {},
+      ...new Promise(resolve => resolve({})),
+    }),
   };
 }
 
