@@ -17,9 +17,27 @@
  * under the License.
  */
 
-import { get, omit } from 'lodash';
+import { omit } from 'lodash';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 
-export function handleKibanaStats(server, response) {
+export interface KibanaUsageStats {
+  kibana: {
+    index: string;
+  };
+  kibana_stats: {
+    os: {
+      platform: string;
+      platformRelease: string;
+      distro?: string;
+      distroRelease?: string;
+    };
+  };
+
+  [plugin: string]: any;
+}
+
+export function handleKibanaStats(server: any, response?: KibanaUsageStats) {
   if (!response) {
     server.log(
       ['warning', 'telemetry', 'local-stats'],
@@ -30,8 +48,17 @@ export function handleKibanaStats(server, response) {
 
   const { kibana, kibana_stats: kibanaStats, ...plugins } = response;
 
-  const platform = get(kibanaStats, 'os.platform', 'unknown');
-  const platformRelease = get(kibanaStats, 'os.platformRelease', 'unknown');
+  const os = {
+    platform: 'unknown',
+    platformRelease: 'unknown',
+    ...kibanaStats.os,
+  };
+  const formattedOsStats = Object.entries(os).reduce((acc, [key, value]) => {
+    return {
+      ...acc,
+      [`${key}s`]: [{ [key]: value, count: 1 }],
+    };
+  }, {});
 
   const version = server
     .config()
@@ -44,16 +71,16 @@ export function handleKibanaStats(server, response) {
     ...omit(kibana, 'index'), // discard index
     count: 1,
     indices: 1,
-    os: {
-      platforms: [{ platform, count: 1 }],
-      platformReleases: [{ platformRelease, count: 1 }],
-    },
+    os: formattedOsStats,
     versions: [{ version, count: 1 }],
     plugins,
   };
 }
 
-export async function getKibana(usageCollection, callWithInternalUser) {
+export async function getKibana(
+  usageCollection: UsageCollectionSetup,
+  callWithInternalUser: CallCluster
+): Promise<KibanaUsageStats> {
   const usage = await usageCollection.bulkFetch(callWithInternalUser);
   return usageCollection.toObject(usage);
 }
