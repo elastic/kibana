@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import * as Rx from 'rxjs';
+import { fromEvent, interval } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import * as readline from 'readline';
 import * as fs from 'fs';
 import { resolve } from 'path';
@@ -36,16 +37,17 @@ export const parseAndPopulate = buildNumber => srcFile => destFile => log => {
   log.verbose(`\n### resolvedSrcFile: \n\t${resolvedSrcFile}`);
   log.verbose(`\n### resolvedDestFile: \n\t${resolvedDestFile}`);
 
-  // const input = fs.createReadStream(srcFile)
-  // const rl = readline.createInterface({ input });
-  //
-  //
-  // const lines$ = Rx.Observable.fromEvent(rl, 'line')
-  //   .takeUntil(Rx.Observable.fromEvent(rl, 'close'))
-  //   .subscribe(
-  //     console.log,
-  //     err => console.log("Error: %s", err),
-  //     () => console.log("Completed"));
+  const input = fs.createReadStream(resolvedSrcFile)
+  const rl = readline.createInterface({ input });
+
+
+  const lines$ = fromEvent(rl, 'line');
+  lines$.pipe(takeUntil(fromEvent(rl, 'close')))
+    .subscribe(
+      console.log,
+      err => console.log("Error: %s", err),
+      () => console.log("Completed"));
+
 };
 
 function initPrint(...args) {
