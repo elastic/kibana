@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { DynamicSettings } from '../../../../common/runtime_types';
 import { UMSavedObjectsQueryFn } from '../framework';
-import { UMDynamicSettingsType } from '../../sources';
 
 export interface UMSavedObjectsAdapter {
-  getUptimeDynamicSettings: UMSavedObjectsQueryFn<UMDynamicSettingsType>;
-  setUptimeDynamicSettings: UMSavedObjectsQueryFn<void, UMDynamicSettingsType>;
+  getUptimeDynamicSettings: UMSavedObjectsQueryFn<DynamicSettings>;
+  setUptimeDynamicSettings: UMSavedObjectsQueryFn<void, DynamicSettings>;
 }

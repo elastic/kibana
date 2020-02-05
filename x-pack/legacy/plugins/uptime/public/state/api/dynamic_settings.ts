@@ -48,6 +48,9 @@ export const fetchPostDynamicSettings = async ({
   const url = getApiPath(plainApiPath, basePath);
   const response = await fetch(url, {
     method: 'POST',
+    headers: {
+      'kbn-xsrf': 'kibana',
+    },
     body: JSON.stringify(settings),
   });
   if (!response.ok) {

@@ -31,7 +31,7 @@ export const selectMonitorStatus = (state: AppState) => {
 
 export const selectDynamicSettings = (state: AppState) => {
   return state.dynamicSettings;
-}
+};
 
 export const selectIndexPattern = ({ indexPattern }: AppState) => {
   return indexPattern.index_pattern;

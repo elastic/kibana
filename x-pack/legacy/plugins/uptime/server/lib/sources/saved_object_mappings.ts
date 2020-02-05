@@ -4,10 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface UMDynamicSettingsType {
-  heartbeatIndexName: string;
-}
-
 const type = 'uptime-dynamic-settings';
 
 export const umDynamicSettings = {
