@@ -20,8 +20,8 @@ export interface IndexMgmtSetup {
 export class IndexMgmtServerPlugin implements Plugin<IndexMgmtSetup, void, any, any> {
   private readonly apiRoutes: ApiRoutes;
   private readonly license: License;
-  private logger: Logger;
-  private indexDataEnricher: IndexDataEnricher;
+  private readonly logger: Logger;
+  private readonly indexDataEnricher: IndexDataEnricher;
 
   constructor({ logger }: PluginInitializerContext) {
     this.logger = logger.get();
