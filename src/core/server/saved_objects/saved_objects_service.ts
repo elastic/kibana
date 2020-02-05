@@ -383,10 +383,7 @@ function getImportableAndExportableTypes({
   savedObjectsManagement = {},
 }: SavedObjectsLegacyUiExports) {
   const visibleTypes = savedObjectMappings.reduce(
-    (types, mapping) => ({
-      ...types,
-      ...Object.keys(mapping.properties),
-    }),
+    (types, mapping) => [...types, ...Object.keys(mapping.properties)],
     [] as string[]
   );
   return visibleTypes.filter(
