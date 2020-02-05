@@ -18,6 +18,7 @@
  */
 
 import { SearchCache } from './search_cache';
+jest.mock('../services');
 
 describe(`SearchCache`, () => {
   class FauxEs {

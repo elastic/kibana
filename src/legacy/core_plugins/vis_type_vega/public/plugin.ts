@@ -25,9 +25,7 @@ import {
   setNotifications,
   setData,
   setSavedObjects,
-  setEsShardTimeout,
-  setEnableExternalUrls,
-  setEmsTileLayerId,
+  setInjectedVars,
   setUISettings,
 } from './services';
 
@@ -67,9 +65,11 @@ export class VegaPlugin implements Plugin<Promise<void>, void> {
     core: CoreSetup,
     { data, expressions, visualizations, __LEGACY }: VegaPluginSetupDependencies
   ) {
-    setEsShardTimeout(core.injectedMetadata.getInjectedVar('esShardTimeout') as number);
-    setEnableExternalUrls(core.injectedMetadata.getInjectedVar('enableExternalUrls') as boolean);
-    setEmsTileLayerId(core.injectedMetadata.getInjectedVar('emsTileLayerId', true));
+    setInjectedVars({
+      esShardTimeout: core.injectedMetadata.getInjectedVar('esShardTimeout') as number,
+      enableExternalUrls: core.injectedMetadata.getInjectedVar('enableExternalUrls') as boolean,
+      emsTileLayerId: core.injectedMetadata.getInjectedVar('emsTileLayerId', true),
+    });
     setUISettings(core.uiSettings);
 
     const visualizationDependencies: Readonly<VegaVisualizationDependencies> = {

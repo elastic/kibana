@@ -26,6 +26,10 @@ jest.mock('plugins/data', () => {
   };
 });
 
+jest.mock('../lib/get_default_query_language', () => ({
+  getDefaultQueryLanguage: () => 'kuery',
+}));
+
 import { GaugePanelConfig } from './gauge';
 
 describe('GaugePanelConfig', () => {
