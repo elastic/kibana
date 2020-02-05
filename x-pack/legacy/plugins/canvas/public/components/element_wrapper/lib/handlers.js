@@ -36,6 +36,8 @@ export const createHandlers = dispatch => {
         completeFn = fn;
       },
 
+      getElementId: () => element.id,
+
       onEmbeddableInputChange(embeddableExpression) {
         dispatch(updateEmbeddableExpression({ elementId: element.id, embeddableExpression }));
       },
