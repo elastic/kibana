@@ -283,9 +283,14 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
           const agg = this.vis.getAggConfig().aggs.find((a: any) => {
             return get(a, 'type.dslName') === 'geohash_grid';
           });
-          agg.params.boundingBox = event.boundingBox;
-          agg.params.precision = event.precision;
-          this.reload();
+          if (
+            agg.params.precision !== event.precision ||
+            !_.isEqual(agg.params.boundingBox, event.boundingBox)
+          ) {
+            agg.params.boundingBox = event.boundingBox;
+            agg.params.precision = event.precision;
+            this.reload();
+          }
           return;
         }
 
