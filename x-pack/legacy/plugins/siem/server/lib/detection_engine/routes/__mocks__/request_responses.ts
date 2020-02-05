@@ -84,7 +84,7 @@ export const typicalSetStatusSignalByIdsPayload = (): Partial<SignalsStatusRestP
 });
 
 export const typicalSetStatusSignalByQueryPayload = (): Partial<SignalsStatusRestParams> => ({
-  query: { range: { '@timestamp': { gte: 'now-2M', lte: 'now/M' } } },
+  query: { bool: { filter: { range: { '@timestamp': { gte: 'now-2M', lte: 'now/M' } } } } },
   status: 'closed',
 });
 
@@ -390,6 +390,7 @@ export const getMockPrivileges = () => ({
   },
   application: {},
   is_authenticated: false,
+  has_encryption_key: true,
 });
 
 export const getFindResultStatus = (): SavedObjectsFindResponse<IRuleSavedAttributesSavedObjectAttributes> => ({

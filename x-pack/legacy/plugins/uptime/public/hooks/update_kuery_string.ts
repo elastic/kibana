@@ -6,19 +6,7 @@
 
 import { combineFiltersAndUserSearch, stringifyKueries } from '../lib/helper';
 import { esKuery } from '../../../../../../src/plugins/data/common/es_query';
-import { store } from '../state';
-import { setEsKueryString } from '../state/actions';
 import { IIndexPattern } from '../../../../../../src/plugins/data/common/index_patterns';
-
-const updateEsQueryForFilterGroup = (filterQueryString: string, indexPattern: IIndexPattern) => {
-  // Update EsQuery in Redux to be used in FilterGroup
-  const searchDSL: string = filterQueryString
-    ? JSON.stringify(
-        esKuery.toElasticsearchQuery(esKuery.fromKueryExpression(filterQueryString), indexPattern)
-      )
-    : '';
-  store.dispatch(setEsKueryString(searchDSL));
-};
 
 const getKueryString = (urlFilters: string): string => {
   let kueryString = '';
@@ -55,8 +43,6 @@ export const useUpdateKueryString = (
       const elasticsearchQuery = esKuery.toElasticsearchQuery(ast, indexPattern);
 
       esFilters = JSON.stringify(elasticsearchQuery);
-
-      updateEsQueryForFilterGroup(filterQueryString, indexPattern);
     }
     return [esFilters];
   } catch (err) {

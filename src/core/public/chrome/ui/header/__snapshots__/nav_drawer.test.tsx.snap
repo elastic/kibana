@@ -25,6 +25,7 @@ exports[`NavDrawer Advanced setting set to grouped renders grouped items 1`] = `
       Object {
         "baseUrl": "http://localhost:5601/app/siem",
         "category": Object {
+          "euiIconType": "logoSecurity",
           "label": "Security",
           "order": 3000,
         },
@@ -36,6 +37,7 @@ exports[`NavDrawer Advanced setting set to grouped renders grouped items 1`] = `
       Object {
         "baseUrl": "http://localhost:5601/app/metrics",
         "category": Object {
+          "euiIconType": "logoObservability",
           "label": "Observability",
           "order": 2000,
         },
@@ -90,6 +92,7 @@ exports[`NavDrawer Advanced setting set to grouped renders grouped items 1`] = `
       Object {
         "baseUrl": "http://localhost:5601/app/logs",
         "category": Object {
+          "euiIconType": "logoObservability",
           "label": "Observability",
           "order": 2000,
         },
@@ -120,6 +123,7 @@ exports[`NavDrawer Advanced setting set to grouped renders grouped items 1`] = `
       },
       Object {
         "category": Object {
+          "euiIconType": "logoSecurity",
           "label": "Security",
           "order": 3000,
         },
@@ -136,6 +140,7 @@ exports[`NavDrawer Advanced setting set to grouped renders grouped items 1`] = `
       },
       Object {
         "category": Object {
+          "euiIconType": "logoObservability",
           "label": "Observability",
           "order": 2000,
         },
@@ -215,6 +220,7 @@ exports[`NavDrawer Advanced setting set to grouped renders grouped items 1`] = `
       },
       Object {
         "category": Object {
+          "euiIconType": "logoObservability",
           "label": "Observability",
           "order": 2000,
         },
@@ -390,7 +396,7 @@ exports[`NavDrawer Advanced setting set to grouped renders grouped items 1`] = `
                             "listItems": Array [],
                             "title": "Recent items",
                           },
-                          "iconType": "clock",
+                          "iconType": "recentlyViewedApp",
                           "isDisabled": true,
                           "label": "Recently viewed",
                         },
@@ -408,7 +414,7 @@ exports[`NavDrawer Advanced setting set to grouped renders grouped items 1`] = `
                             "aria-label": "Recently viewed",
                             "className": "euiNavDrawerGroup__item",
                             "data-name": "Recently viewed",
-                            "iconType": "clock",
+                            "iconType": "recentlyViewedApp",
                             "isDisabled": true,
                             "label": "Recently viewed",
                             "onClick": [Function],
@@ -427,7 +433,7 @@ exports[`NavDrawer Advanced setting set to grouped renders grouped items 1`] = `
                           aria-label="Recently viewed"
                           className="euiNavDrawerGroup__item"
                           data-name="Recently viewed"
-                          iconType="clock"
+                          iconType="recentlyViewedApp"
                           isDisabled={true}
                           key="title-0"
                           label="Recently viewed"
@@ -463,18 +469,18 @@ exports[`NavDrawer Advanced setting set to grouped renders grouped items 1`] = `
                                 >
                                   <EuiIcon
                                     className="euiListGroupItem__icon"
-                                    type="clock"
+                                    type="recentlyViewedApp"
                                   >
                                     <EuiIconEmpty
                                       aria-hidden={true}
-                                      className="euiIcon euiIcon--medium euiIcon-isLoading euiListGroupItem__icon"
+                                      className="euiIcon euiIcon--medium euiIcon--app euiIcon-isLoading euiListGroupItem__icon"
                                       focusable="false"
                                       role="img"
                                       style={null}
                                     >
                                       <svg
                                         aria-hidden={true}
-                                        className="euiIcon euiIcon--medium euiIcon-isLoading euiListGroupItem__icon"
+                                        className="euiIcon euiIcon--medium euiIcon--app euiIcon-isLoading euiListGroupItem__icon"
                                         focusable="false"
                                         height={16}
                                         role="img"
@@ -577,6 +583,7 @@ exports[`NavDrawer Advanced setting set to grouped renders grouped items 1`] = `
                             "listItems": Array [
                               Object {
                                 "category": Object {
+                                  "euiIconType": "logoObservability",
                                   "label": "Observability",
                                   "order": 2000,
                                 },
@@ -593,6 +600,7 @@ exports[`NavDrawer Advanced setting set to grouped renders grouped items 1`] = `
                               },
                               Object {
                                 "category": Object {
+                                  "euiIconType": "logoObservability",
                                   "label": "Observability",
                                   "order": 2000,
                                 },
@@ -610,18 +618,19 @@ exports[`NavDrawer Advanced setting set to grouped renders grouped items 1`] = `
                             ],
                             "title": "Observability",
                           },
-                          "iconType": undefined,
+                          "iconType": "logoObservability",
                           "label": "Observability",
                         },
                         Object {
                           "category": Object {
+                            "euiIconType": "logoSecurity",
                             "label": "Security",
                             "order": 3000,
                           },
                           "data-test-subj": "navDrawerAppsMenuLink",
                           "href": "http://localhost:5601/app/siem",
                           "icon": undefined,
-                          "iconType": undefined,
+                          "iconType": "logoSecurity",
                           "isActive": false,
                           "isDisabled": undefined,
                           "key": "siem",
@@ -676,12 +685,7 @@ exports[`NavDrawer Advanced setting set to grouped renders grouped items 1`] = `
                             "className": "euiNavDrawerGroup__item",
                             "data-name": "Observability",
                             "data-test-subj": "navDrawerCategory",
-                            "icon": <span
-                              className="euiNavDrawerGroup__itemDefaultIcon"
-                            >
-                              O
-                            </span>,
-                            "iconType": undefined,
+                            "iconType": "logoObservability",
                             "label": "Observability",
                             "onClick": [Function],
                             "size": "s",
@@ -689,6 +693,7 @@ exports[`NavDrawer Advanced setting set to grouped renders grouped items 1`] = `
                           Object {
                             "aria-label": "Security",
                             "category": Object {
+                              "euiIconType": "logoSecurity",
                               "label": "Security",
                               "order": 3000,
                             },
@@ -696,12 +701,8 @@ exports[`NavDrawer Advanced setting set to grouped renders grouped items 1`] = `
                             "data-name": "Security",
                             "data-test-subj": "navDrawerAppsMenuLink",
                             "href": "http://localhost:5601/app/siem",
-                            "icon": <span
-                              className="euiNavDrawerGroup__itemDefaultIcon"
-                            >
-                              S
-                            </span>,
-                            "iconType": undefined,
+                            "icon": undefined,
+                            "iconType": "logoSecurity",
                             "isActive": false,
                             "isDisabled": undefined,
                             "key": "siem",
@@ -809,13 +810,7 @@ exports[`NavDrawer Advanced setting set to grouped renders grouped items 1`] = `
                           className="euiNavDrawerGroup__item"
                           data-name="Observability"
                           data-test-subj="navDrawerCategory"
-                          icon={
-                            <span
-                              className="euiNavDrawerGroup__itemDefaultIcon"
-                            >
-                              O
-                            </span>
-                          }
+                          iconType="logoObservability"
                           key="title-1"
                           label="Observability"
                           onClick={[Function]}
@@ -849,11 +844,30 @@ exports[`NavDrawer Advanced setting set to grouped renders grouped items 1`] = `
                                   onFocus={[Function]}
                                   type="button"
                                 >
-                                  <span
-                                    className="euiListGroupItem__icon euiNavDrawerGroup__itemDefaultIcon"
+                                  <EuiIcon
+                                    className="euiListGroupItem__icon"
+                                    type="logoObservability"
                                   >
-                                    O
-                                  </span>
+                                    <EuiIconEmpty
+                                      aria-hidden={true}
+                                      className="euiIcon euiIcon--medium euiIcon-isLoading euiListGroupItem__icon"
+                                      focusable="false"
+                                      role="img"
+                                      style={null}
+                                    >
+                                      <svg
+                                        aria-hidden={true}
+                                        className="euiIcon euiIcon--medium euiIcon-isLoading euiListGroupItem__icon"
+                                        focusable="false"
+                                        height={16}
+                                        role="img"
+                                        style={null}
+                                        viewBox="0 0 16 16"
+                                        width={16}
+                                        xmlns="http://www.w3.org/2000/svg"
+                                      />
+                                    </EuiIconEmpty>
+                                  </EuiIcon>
                                   <span
                                     className="euiListGroupItem__label"
                                   >
@@ -868,6 +882,7 @@ exports[`NavDrawer Advanced setting set to grouped renders grouped items 1`] = `
                           aria-label="Security"
                           category={
                             Object {
+                              "euiIconType": "logoSecurity",
                               "label": "Security",
                               "order": 3000,
                             }
@@ -876,13 +891,7 @@ exports[`NavDrawer Advanced setting set to grouped renders grouped items 1`] = `
                           data-name="Security"
                           data-test-subj="navDrawerAppsMenuLink"
                           href="http://localhost:5601/app/siem"
-                          icon={
-                            <span
-                              className="euiNavDrawerGroup__itemDefaultIcon"
-                            >
-                              S
-                            </span>
-                          }
+                          iconType="logoSecurity"
                           isActive={false}
                           key="siem"
                           label="Security"
@@ -910,6 +919,7 @@ exports[`NavDrawer Advanced setting set to grouped renders grouped items 1`] = `
                                   aria-label="Security"
                                   category={
                                     Object {
+                                      "euiIconType": "logoSecurity",
                                       "label": "Security",
                                       "order": 3000,
                                     }
@@ -923,11 +933,30 @@ exports[`NavDrawer Advanced setting set to grouped renders grouped items 1`] = `
                                   onFocus={[Function]}
                                   order={500}
                                 >
-                                  <span
-                                    className="euiListGroupItem__icon euiNavDrawerGroup__itemDefaultIcon"
+                                  <EuiIcon
+                                    className="euiListGroupItem__icon"
+                                    type="logoSecurity"
                                   >
-                                    S
-                                  </span>
+                                    <EuiIconEmpty
+                                      aria-hidden={true}
+                                      className="euiIcon euiIcon--medium euiIcon-isLoading euiListGroupItem__icon"
+                                      focusable="false"
+                                      role="img"
+                                      style={null}
+                                    >
+                                      <svg
+                                        aria-hidden={true}
+                                        className="euiIcon euiIcon--medium euiIcon-isLoading euiListGroupItem__icon"
+                                        focusable="false"
+                                        height={16}
+                                        role="img"
+                                        style={null}
+                                        viewBox="0 0 16 16"
+                                        width={16}
+                                        xmlns="http://www.w3.org/2000/svg"
+                                      />
+                                    </EuiIconEmpty>
+                                  </EuiIcon>
                                   <span
                                     className="euiListGroupItem__label"
                                   >
@@ -1222,6 +1251,7 @@ exports[`NavDrawer Advanced setting set to grouped renders individual items if t
       Object {
         "baseUrl": "http://localhost:5601/app/siem",
         "category": Object {
+          "euiIconType": "logoSecurity",
           "label": "Security",
           "order": 3000,
         },
@@ -1233,6 +1263,7 @@ exports[`NavDrawer Advanced setting set to grouped renders individual items if t
       Object {
         "baseUrl": "http://localhost:5601/app/metrics",
         "category": Object {
+          "euiIconType": "logoObservability",
           "label": "Observability",
           "order": 2000,
         },
@@ -1285,6 +1316,7 @@ exports[`NavDrawer Advanced setting set to grouped renders individual items if t
       },
       Object {
         "category": Object {
+          "euiIconType": "logoSecurity",
           "label": "Security",
           "order": 3000,
         },
@@ -1301,6 +1333,7 @@ exports[`NavDrawer Advanced setting set to grouped renders individual items if t
       },
       Object {
         "category": Object {
+          "euiIconType": "logoObservability",
           "label": "Observability",
           "order": 2000,
         },
@@ -1508,7 +1541,7 @@ exports[`NavDrawer Advanced setting set to grouped renders individual items if t
                             "listItems": Array [],
                             "title": "Recent items",
                           },
-                          "iconType": "clock",
+                          "iconType": "recentlyViewedApp",
                           "isDisabled": true,
                           "label": "Recently viewed",
                         },
@@ -1526,7 +1559,7 @@ exports[`NavDrawer Advanced setting set to grouped renders individual items if t
                             "aria-label": "Recently viewed",
                             "className": "euiNavDrawerGroup__item",
                             "data-name": "Recently viewed",
-                            "iconType": "clock",
+                            "iconType": "recentlyViewedApp",
                             "isDisabled": true,
                             "label": "Recently viewed",
                             "onClick": [Function],
@@ -1545,7 +1578,7 @@ exports[`NavDrawer Advanced setting set to grouped renders individual items if t
                           aria-label="Recently viewed"
                           className="euiNavDrawerGroup__item"
                           data-name="Recently viewed"
-                          iconType="clock"
+                          iconType="recentlyViewedApp"
                           isDisabled={true}
                           key="title-0"
                           label="Recently viewed"
@@ -1581,18 +1614,18 @@ exports[`NavDrawer Advanced setting set to grouped renders individual items if t
                                 >
                                   <EuiIcon
                                     className="euiListGroupItem__icon"
-                                    type="clock"
+                                    type="recentlyViewedApp"
                                   >
                                     <EuiIconEmpty
                                       aria-hidden={true}
-                                      className="euiIcon euiIcon--medium euiIcon-isLoading euiListGroupItem__icon"
+                                      className="euiIcon euiIcon--medium euiIcon--app euiIcon-isLoading euiListGroupItem__icon"
                                       focusable="false"
                                       role="img"
                                       style={null}
                                     >
                                       <svg
                                         aria-hidden={true}
-                                        className="euiIcon euiIcon--medium euiIcon-isLoading euiListGroupItem__icon"
+                                        className="euiIcon euiIcon--medium euiIcon--app euiIcon-isLoading euiListGroupItem__icon"
                                         focusable="false"
                                         height={16}
                                         role="img"
@@ -1649,6 +1682,7 @@ exports[`NavDrawer Advanced setting set to grouped renders individual items if t
                         },
                         Object {
                           "category": Object {
+                            "euiIconType": "logoSecurity",
                             "label": "Security",
                             "order": 3000,
                           },
@@ -1665,6 +1699,7 @@ exports[`NavDrawer Advanced setting set to grouped renders individual items if t
                         },
                         Object {
                           "category": Object {
+                            "euiIconType": "logoObservability",
                             "label": "Observability",
                             "order": 2000,
                           },
@@ -1748,6 +1783,7 @@ exports[`NavDrawer Advanced setting set to grouped renders individual items if t
                           Object {
                             "aria-label": "siem",
                             "category": Object {
+                              "euiIconType": "logoSecurity",
                               "label": "Security",
                               "order": 3000,
                             },
@@ -1772,6 +1808,7 @@ exports[`NavDrawer Advanced setting set to grouped renders individual items if t
                           Object {
                             "aria-label": "metrics",
                             "category": Object {
+                              "euiIconType": "logoObservability",
                               "label": "Observability",
                               "order": 2000,
                             },
@@ -1928,6 +1965,7 @@ exports[`NavDrawer Advanced setting set to grouped renders individual items if t
                           aria-label="siem"
                           category={
                             Object {
+                              "euiIconType": "logoSecurity",
                               "label": "Security",
                               "order": 3000,
                             }
@@ -1970,6 +2008,7 @@ exports[`NavDrawer Advanced setting set to grouped renders individual items if t
                                   aria-label="siem"
                                   category={
                                     Object {
+                                      "euiIconType": "logoSecurity",
                                       "label": "Security",
                                       "order": 3000,
                                     }
@@ -2002,6 +2041,7 @@ exports[`NavDrawer Advanced setting set to grouped renders individual items if t
                           aria-label="metrics"
                           category={
                             Object {
+                              "euiIconType": "logoObservability",
                               "label": "Observability",
                               "order": 2000,
                             }
@@ -2044,6 +2084,7 @@ exports[`NavDrawer Advanced setting set to grouped renders individual items if t
                                   aria-label="metrics"
                                   category={
                                     Object {
+                                      "euiIconType": "logoObservability",
                                       "label": "Observability",
                                       "order": 2000,
                                     }
@@ -2651,7 +2692,7 @@ exports[`NavDrawer Advanced setting set to grouped renders individual items if t
                             "listItems": Array [],
                             "title": "Recent items",
                           },
-                          "iconType": "clock",
+                          "iconType": "recentlyViewedApp",
                           "isDisabled": true,
                           "label": "Recently viewed",
                         },
@@ -2669,7 +2710,7 @@ exports[`NavDrawer Advanced setting set to grouped renders individual items if t
                             "aria-label": "Recently viewed",
                             "className": "euiNavDrawerGroup__item",
                             "data-name": "Recently viewed",
-                            "iconType": "clock",
+                            "iconType": "recentlyViewedApp",
                             "isDisabled": true,
                             "label": "Recently viewed",
                             "onClick": [Function],
@@ -2688,7 +2729,7 @@ exports[`NavDrawer Advanced setting set to grouped renders individual items if t
                           aria-label="Recently viewed"
                           className="euiNavDrawerGroup__item"
                           data-name="Recently viewed"
-                          iconType="clock"
+                          iconType="recentlyViewedApp"
                           isDisabled={true}
                           key="title-0"
                           label="Recently viewed"
@@ -2724,18 +2765,18 @@ exports[`NavDrawer Advanced setting set to grouped renders individual items if t
                                 >
                                   <EuiIcon
                                     className="euiListGroupItem__icon"
-                                    type="clock"
+                                    type="recentlyViewedApp"
                                   >
                                     <EuiIconEmpty
                                       aria-hidden={true}
-                                      className="euiIcon euiIcon--medium euiIcon-isLoading euiListGroupItem__icon"
+                                      className="euiIcon euiIcon--medium euiIcon--app euiIcon-isLoading euiListGroupItem__icon"
                                       focusable="false"
                                       role="img"
                                       style={null}
                                     >
                                       <svg
                                         aria-hidden={true}
-                                        className="euiIcon euiIcon--medium euiIcon-isLoading euiListGroupItem__icon"
+                                        className="euiIcon euiIcon--medium euiIcon--app euiIcon-isLoading euiListGroupItem__icon"
                                         focusable="false"
                                         height={16}
                                         role="img"
@@ -3769,6 +3810,7 @@ exports[`NavDrawer Advanced setting set to individual renders individual items 1
       Object {
         "baseUrl": "http://localhost:5601/app/siem",
         "category": Object {
+          "euiIconType": "logoSecurity",
           "label": "Security",
           "order": 3000,
         },
@@ -3780,6 +3822,7 @@ exports[`NavDrawer Advanced setting set to individual renders individual items 1
       Object {
         "baseUrl": "http://localhost:5601/app/metrics",
         "category": Object {
+          "euiIconType": "logoObservability",
           "label": "Observability",
           "order": 2000,
         },
@@ -3834,6 +3877,7 @@ exports[`NavDrawer Advanced setting set to individual renders individual items 1
       Object {
         "baseUrl": "http://localhost:5601/app/logs",
         "category": Object {
+          "euiIconType": "logoObservability",
           "label": "Observability",
           "order": 2000,
         },
@@ -3864,6 +3908,7 @@ exports[`NavDrawer Advanced setting set to individual renders individual items 1
       },
       Object {
         "category": Object {
+          "euiIconType": "logoSecurity",
           "label": "Security",
           "order": 3000,
         },
@@ -3880,6 +3925,7 @@ exports[`NavDrawer Advanced setting set to individual renders individual items 1
       },
       Object {
         "category": Object {
+          "euiIconType": "logoObservability",
           "label": "Observability",
           "order": 2000,
         },
@@ -3959,6 +4005,7 @@ exports[`NavDrawer Advanced setting set to individual renders individual items 1
       },
       Object {
         "category": Object {
+          "euiIconType": "logoObservability",
           "label": "Observability",
           "order": 2000,
         },
@@ -4134,7 +4181,7 @@ exports[`NavDrawer Advanced setting set to individual renders individual items 1
                             "listItems": Array [],
                             "title": "Recent items",
                           },
-                          "iconType": "clock",
+                          "iconType": "recentlyViewedApp",
                           "isDisabled": true,
                           "label": "Recently viewed",
                         },
@@ -4152,7 +4199,7 @@ exports[`NavDrawer Advanced setting set to individual renders individual items 1
                             "aria-label": "Recently viewed",
                             "className": "euiNavDrawerGroup__item",
                             "data-name": "Recently viewed",
-                            "iconType": "clock",
+                            "iconType": "recentlyViewedApp",
                             "isDisabled": true,
                             "label": "Recently viewed",
                             "onClick": [Function],
@@ -4171,7 +4218,7 @@ exports[`NavDrawer Advanced setting set to individual renders individual items 1
                           aria-label="Recently viewed"
                           className="euiNavDrawerGroup__item"
                           data-name="Recently viewed"
-                          iconType="clock"
+                          iconType="recentlyViewedApp"
                           isDisabled={true}
                           key="title-0"
                           label="Recently viewed"
@@ -4207,18 +4254,18 @@ exports[`NavDrawer Advanced setting set to individual renders individual items 1
                                 >
                                   <EuiIcon
                                     className="euiListGroupItem__icon"
-                                    type="clock"
+                                    type="recentlyViewedApp"
                                   >
                                     <EuiIconEmpty
                                       aria-hidden={true}
-                                      className="euiIcon euiIcon--medium euiIcon-isLoading euiListGroupItem__icon"
+                                      className="euiIcon euiIcon--medium euiIcon--app euiIcon-isLoading euiListGroupItem__icon"
                                       focusable="false"
                                       role="img"
                                       style={null}
                                     >
                                       <svg
                                         aria-hidden={true}
-                                        className="euiIcon euiIcon--medium euiIcon-isLoading euiListGroupItem__icon"
+                                        className="euiIcon euiIcon--medium euiIcon--app euiIcon-isLoading euiListGroupItem__icon"
                                         focusable="false"
                                         height={16}
                                         role="img"
@@ -4275,6 +4322,7 @@ exports[`NavDrawer Advanced setting set to individual renders individual items 1
                         },
                         Object {
                           "category": Object {
+                            "euiIconType": "logoSecurity",
                             "label": "Security",
                             "order": 3000,
                           },
@@ -4291,6 +4339,7 @@ exports[`NavDrawer Advanced setting set to individual renders individual items 1
                         },
                         Object {
                           "category": Object {
+                            "euiIconType": "logoObservability",
                             "label": "Observability",
                             "order": 2000,
                           },
@@ -4370,6 +4419,7 @@ exports[`NavDrawer Advanced setting set to individual renders individual items 1
                         },
                         Object {
                           "category": Object {
+                            "euiIconType": "logoObservability",
                             "label": "Observability",
                             "order": 2000,
                           },
@@ -4421,6 +4471,7 @@ exports[`NavDrawer Advanced setting set to individual renders individual items 1
                           Object {
                             "aria-label": "siem",
                             "category": Object {
+                              "euiIconType": "logoSecurity",
                               "label": "Security",
                               "order": 3000,
                             },
@@ -4445,6 +4496,7 @@ exports[`NavDrawer Advanced setting set to individual renders individual items 1
                           Object {
                             "aria-label": "metrics",
                             "category": Object {
+                              "euiIconType": "logoObservability",
                               "label": "Observability",
                               "order": 2000,
                             },
@@ -4564,6 +4616,7 @@ exports[`NavDrawer Advanced setting set to individual renders individual items 1
                           Object {
                             "aria-label": "logs",
                             "category": Object {
+                              "euiIconType": "logoObservability",
                               "label": "Observability",
                               "order": 2000,
                             },
@@ -4672,6 +4725,7 @@ exports[`NavDrawer Advanced setting set to individual renders individual items 1
                           aria-label="siem"
                           category={
                             Object {
+                              "euiIconType": "logoSecurity",
                               "label": "Security",
                               "order": 3000,
                             }
@@ -4714,6 +4768,7 @@ exports[`NavDrawer Advanced setting set to individual renders individual items 1
                                   aria-label="siem"
                                   category={
                                     Object {
+                                      "euiIconType": "logoSecurity",
                                       "label": "Security",
                                       "order": 3000,
                                     }
@@ -4746,6 +4801,7 @@ exports[`NavDrawer Advanced setting set to individual renders individual items 1
                           aria-label="metrics"
                           category={
                             Object {
+                              "euiIconType": "logoObservability",
                               "label": "Observability",
                               "order": 2000,
                             }
@@ -4788,6 +4844,7 @@ exports[`NavDrawer Advanced setting set to individual renders individual items 1
                                   aria-label="metrics"
                                   category={
                                     Object {
+                                      "euiIconType": "logoObservability",
                                       "label": "Observability",
                                       "order": 2000,
                                     }
@@ -5114,6 +5171,7 @@ exports[`NavDrawer Advanced setting set to individual renders individual items 1
                           aria-label="logs"
                           category={
                             Object {
+                              "euiIconType": "logoObservability",
                               "label": "Observability",
                               "order": 2000,
                             }
@@ -5156,6 +5214,7 @@ exports[`NavDrawer Advanced setting set to individual renders individual items 1
                                   aria-label="logs"
                                   category={
                                     Object {
+                                      "euiIconType": "logoObservability",
                                       "label": "Observability",
                                       "order": 2000,
                                     }
