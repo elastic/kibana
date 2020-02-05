@@ -9,7 +9,8 @@ import expect from '@kbn/expect';
 export default function({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['common', 'discover', 'timePicker']);
+  const browser = getService('browser');
+  const PageObjects = getPageObjects(['common', 'discover', 'timePicker', 'header']);
 
   describe('check packetbeat', function() {
     before(function() {
@@ -17,7 +18,13 @@ export default function({ getService, getPageObjects }) {
     });
 
     it('packetbeat- should have hit count GT 0', async function() {
-      await PageObjects.common.navigateToApp('discover');
+      const url = await browser.getCurrentUrl();
+      log.debug(url);
+      if (!url.includes('kibana')) {
+        await PageObjects.common.navigateToApp('discover');
+      } else if (!url.includes('discover')) {
+        await PageObjects.header.clickDiscover();
+      }
       await PageObjects.discover.selectIndexPattern('packetbeat-*');
       await PageObjects.timePicker.setCommonlyUsedTime('superDatePickerCommonlyUsed_Today');
       await retry.try(async function() {

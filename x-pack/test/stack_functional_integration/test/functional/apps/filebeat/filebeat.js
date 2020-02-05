@@ -10,13 +10,20 @@ export default function({ getService, getPageObjects }) {
   describe('check filebeat', function() {
     const log = getService('log');
     const retry = getService('retry');
-    const PageObjects = getPageObjects(['common', 'discover', 'timePicker']);
+    const browser = getService('browser');
+    const PageObjects = getPageObjects(['common', 'discover', 'timePicker', 'header']);
 
     it('filebeat- should have hit count GT 0', async function() {
-      log.debug('navigateToApp Discover');
-      await PageObjects.common.navigateToApp('discover');
+      const url = await browser.getCurrentUrl();
+      log.debug(url);
+      if (!url.includes('kibana')) {
+        await PageObjects.common.navigateToApp('discover');
+      } else if (!url.includes('discover')) {
+        await PageObjects.header.clickDiscover();
+      }
+
       await PageObjects.discover.selectIndexPattern('filebeat-*');
-      await PageObjects.timePicker.setCommonlyUsedTime('superDatePickerCommonlyUsed_Today');
+      await PageObjects.timePicker.setCommonlyUsedTime('superDatePickerCommonlyUsed_Last_30 days');
       await retry.try(async () => {
         const hitCount = parseInt(await PageObjects.discover.getHitCount());
         expect(hitCount).to.be.greaterThan(0);

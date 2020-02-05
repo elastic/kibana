@@ -9,13 +9,15 @@ import expect from '@kbn/expect';
 export default ({ getService, getPageObjects }) => {
   const log = getService('log');
   const browser = getService('browser');
-  const PageObjects = getPageObjects(['common', 'monitoring']);
+  const appsMenu = getService('appsMenu');
+  const PageObjects = getPageObjects(['common', 'monitoring', 'header']);
 
   describe('telemetry', function() {
     before(async () => {
       log.debug('monitoring');
       await browser.setWindowSize(1200, 800);
-      await PageObjects.common.navigateToApp('monitoring');
+      await appsMenu.clickLink('Stack Monitoring');
+      // await PageObjects.common.navigateToApp('monitoring');
     });
 
     it('should show banner Help us improve Kibana and Elasticsearch', async () => {

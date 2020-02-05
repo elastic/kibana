@@ -7,19 +7,20 @@
 import expect from '@kbn/expect';
 
 export default function({ getService, getPageObjects }) {
-  const PageObjects = getPageObjects([
-    'header',
-    'discover',
-    'common',
-    'settings',
-    'visualize',
-    'visChart',
-  ]);
+  const log = getService('log');
+  const browser = getService('browser');
+  const PageObjects = getPageObjects(['common', 'discover', 'timePicker', 'header']);
   const retry = getService('retry');
 
   describe('check winlogbeat', function() {
     it('winlogbeat- should have hit count GT 0', async function() {
-      await PageObjects.common.navigateToApp('discover');
+      const url = await browser.getCurrentUrl();
+      log.debug(url);
+      if (!url.includes('kibana')) {
+        await PageObjects.common.navigateToApp('discover');
+      } else if (!url.includes('discover')) {
+        await PageObjects.header.clickDiscover();
+      }
       await PageObjects.discover.selectIndexPattern('winlogbeat-*');
       await PageObjects.timePicker.setCommonlyUsedTime('superDatePickerCommonlyUsed_Today');
       await retry.try(async function() {
