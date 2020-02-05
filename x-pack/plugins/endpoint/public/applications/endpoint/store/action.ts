@@ -7,5 +7,6 @@
 import { EndpointListAction } from './endpoint_list';
 import { AlertAction } from './alerts';
 import { RoutingAction } from './routing';
+import { PolicyListAction } from './policy_list/action';
 
-export type AppAction = EndpointListAction | AlertAction | RoutingAction;
+export type AppAction = EndpointListAction | AlertAction | RoutingAction | PolicyListAction;

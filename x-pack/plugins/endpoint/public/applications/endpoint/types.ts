@@ -20,7 +20,22 @@ export type AlertListState = Immutable<{
   alerts: AlertData[];
 }>;
 
+/**
+ * Policy list store state
+ */
+export interface PolicyListState {
+  /** Array of policy items  */
+  policyItems: object[];
+  /** total number of policies */
+  total: number;
+  /** Number of policies per page */
+  pageSize: number;
+  /** page number (zero based) */
+  pageIndex: number;
+}
+
 export interface GlobalState {
   readonly endpointList: EndpointListState;
   readonly alertList: AlertListState;
+  readonly policyList: PolicyListState;
 }

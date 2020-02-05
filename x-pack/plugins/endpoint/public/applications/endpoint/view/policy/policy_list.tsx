@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
   EuiPage,
   EuiPageBody,
@@ -17,17 +17,30 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { useDispatch } from 'react-redux';
 import { usePageId } from '../use_page_id';
+import {
+  selectPageIndex,
+  selectPageSize,
+  selectPolicyItems,
+  selectTotal,
+} from '../../store/policy_list/selectors';
+import { usePolicyListSelector } from './policy_hooks';
+import { PolicyListAction } from '../../store/policy_list';
+
+interface TTableChangeCallbackArguments {
+  page: { index: number; size: number };
+}
 
 export const PolicyList = React.memo(() => {
   usePageId('policyListPage');
 
-  // const dispatch = useDispatch<(a: EndpointListAction) => void>();
-  const policyItems: object[] = []; // useEndpointListSelector(endpointListData);
-  const pageIndex = 0; // useEndpointListSelector(endpointListPageIndex);
-  const pageSize = 10; // useEndpointListSelector(endpointListPageSize);
-  const totalItemCount = 0; // useEndpointListSelector(endpointTotalHits);
-  const loading = true; // useEndpointListSelector(isLoading);
+  const dispatch = useDispatch<(action: PolicyListAction) => void>();
+  const policyItems = usePolicyListSelector(selectPolicyItems);
+  const pageIndex = usePolicyListSelector(selectPageIndex);
+  const pageSize = usePolicyListSelector(selectPageSize);
+  const totalItemCount = usePolicyListSelector(selectTotal);
+  const loading = true;
 
   const paginationSetup = useMemo(() => {
     return {
@@ -39,18 +52,18 @@ export const PolicyList = React.memo(() => {
     };
   }, [pageIndex, pageSize, totalItemCount]);
 
-  const handleTableChange = () => {};
-
-  // const handleTableChange = useCallback(
-  //   ({ page }: { page: { index: number; size: number } }) => {
-  //     const { index, size } = page;
-  //     dispatch({
-  //       type: 'userPaginatedEndpointListTable',
-  //       payload: { pageIndex: index, pageSize: size },
-  //     });
-  //   },
-  //   [dispatch]
-  // );
+  const handleTableChange = useCallback(
+    ({ page: { index, size } }: TTableChangeCallbackArguments) => {
+      dispatch({
+        type: 'userPaginatedPolicyListTable',
+        payload: {
+          pageIndex: index,
+          pageSize: size,
+        },
+      });
+    },
+    [dispatch]
+  );
 
   const columns = useMemo(
     () => [
@@ -113,7 +126,7 @@ export const PolicyList = React.memo(() => {
           <EuiPageContentHeader>
             <EuiPageContentHeaderSection>
               <EuiTitle>
-                <h2>
+                <h2 data-test-subj="policyViewTitle">
                   <FormattedMessage
                     id="xpack.endpoint.policyList.viewTitle"
                     defaultMessage="Policies"
