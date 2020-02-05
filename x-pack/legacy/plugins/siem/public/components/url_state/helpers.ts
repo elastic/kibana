@@ -189,11 +189,13 @@ export const makeMapStateToProps = () => {
 export const updateTimerangeUrl = (timeRange: UrlInputsModel): UrlInputsModel => {
   if (timeRange.global.timerange.kind === 'relative') {
     timeRange.global.timerange.from = formatDate(timeRange.global.timerange.fromStr);
-    timeRange.global.timerange.to = formatDate(timeRange.global.timerange.toStr);
+    timeRange.global.timerange.to = formatDate(timeRange.global.timerange.toStr, { roundUp: true });
   }
   if (timeRange.timeline.timerange.kind === 'relative') {
     timeRange.timeline.timerange.from = formatDate(timeRange.timeline.timerange.fromStr);
-    timeRange.timeline.timerange.to = formatDate(timeRange.timeline.timerange.toStr);
+    timeRange.timeline.timerange.to = formatDate(timeRange.timeline.timerange.toStr, {
+      roundUp: true,
+    });
   }
   return timeRange;
 };
