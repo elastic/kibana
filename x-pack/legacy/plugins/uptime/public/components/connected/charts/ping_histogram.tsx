@@ -5,7 +5,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { connect, ConnectedProps } from 'react-redux';
+import { connect } from 'react-redux';
 import { AppState } from '../../../state';
 import {
   PingHistogramComponent,
@@ -14,12 +14,12 @@ import {
 import { getPingHistogram } from '../../../state/actions';
 import { selectPingHistogram } from '../../../state/selectors';
 import { withResponsiveWrapper, ResponsiveWrapperProps } from '../../higher_order';
-import { GetPingHistogramParams } from '../../../../common/types';
+import { GetPingHistogramParams, HistogramResult } from '../../../../common/types';
 import { useUrlParams } from '../../../hooks';
 
 type Props = ResponsiveWrapperProps &
   Pick<PingHistogramComponentProps, 'height' | 'data' | 'loading'> &
-  PropsFromRedux;
+  DispatchProps & { lastRefresh: number; monitorId?: string; esKuery?: string };
 
 const PingHistogramContainer: React.FC<Props> = ({
   data,
@@ -28,6 +28,7 @@ const PingHistogramContainer: React.FC<Props> = ({
   lastRefresh,
   height,
   loading,
+  esKuery,
 }) => {
   const [getUrlParams] = useUrlParams();
   const {
@@ -36,12 +37,11 @@ const PingHistogramContainer: React.FC<Props> = ({
     dateRangeStart: dateStart,
     dateRangeEnd: dateEnd,
     statusFilter,
-    filters,
   } = getUrlParams();
 
   useEffect(() => {
-    loadData({ monitorId, dateStart, dateEnd, statusFilter, filters });
-  }, [loadData, dateStart, dateEnd, monitorId, filters, statusFilter, lastRefresh]);
+    loadData({ monitorId, dateStart, dateEnd, statusFilter, filters: esKuery });
+  }, [loadData, dateStart, dateEnd, monitorId, statusFilter, lastRefresh, esKuery]);
   return (
     <PingHistogramComponent
       data={data}
@@ -53,21 +53,31 @@ const PingHistogramContainer: React.FC<Props> = ({
   );
 };
 
-const mapStateToProps = (state: AppState) => ({ ...selectPingHistogram(state) });
+interface StateProps {
+  data: HistogramResult | null;
+  loading: boolean;
+  lastRefresh: number;
+  esKuery: string;
+}
 
-const mapDispatchToProps = (dispatch: any) => ({
+interface DispatchProps {
+  loadData: typeof getPingHistogram;
+}
+
+const mapStateToProps = (state: AppState): StateProps => ({ ...selectPingHistogram(state) });
+
+const mapDispatchToProps = (dispatch: any): DispatchProps => ({
   loadData: (params: GetPingHistogramParams) => {
     return dispatch(getPingHistogram(params));
   },
 });
 
-const connector = connect<
+export const PingHistogram = connect<
   StateProps,
   DispatchProps,
   Pick<PingHistogramComponentProps, 'height'>,
   AppState
->(mapStateToProps, mapDispatchToProps);
-
-type PropsFromRedux = ConnectedProps<typeof connector>;
-
-export const PingHistogram = connector(withResponsiveWrapper(PingHistogramContainer));
+>(
+  mapStateToProps,
+  mapDispatchToProps
+)(withResponsiveWrapper(PingHistogramContainer));

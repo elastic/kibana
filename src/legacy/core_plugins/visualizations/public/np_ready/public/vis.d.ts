@@ -18,7 +18,7 @@
  */
 
 import { VisType } from './types';
-import { AggConfigs } from '../../legacy_imports';
+import { IAggConfigs } from '../../legacy_imports';
 import { Status } from './legacy/update_status';
 
 export interface Vis {
@@ -39,7 +39,7 @@ export interface VisState {
   title: string;
   type: VisType;
   params: VisParams;
-  aggs: AggConfigs;
+  aggs: IAggConfigs;
 }
 
 export declare class VisualizationController {

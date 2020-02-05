@@ -9,7 +9,7 @@ exports[`EventDetails rendering should match snapshot 1`] = `
     onTabClick={[Function]}
     selectedTab={
       Object {
-        "content": <UNDEFINED
+        "content": <Memo(EventFieldsBrowser)
           browserFields={
             Object {
               "agent": Object {
@@ -701,7 +701,7 @@ In other use cases the message field can be used to concatenate different values
     tabs={
       Array [
         Object {
-          "content": <UNDEFINED
+          "content": <Memo(EventFieldsBrowser)
             browserFields={
               Object {
                 "agent": Object {
@@ -1390,7 +1390,7 @@ In other use cases the message field can be used to concatenate different values
           "name": "Table",
         },
         Object {
-          "content": <UNDEFINED
+          "content": <Memo(JsonView)
             data={
               Array [
                 Object {

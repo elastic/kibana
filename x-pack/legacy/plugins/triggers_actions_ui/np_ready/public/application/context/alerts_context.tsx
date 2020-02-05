@@ -7,8 +7,9 @@
 import React, { useContext, createContext } from 'react';
 
 export interface AlertsContextValue {
-  alertFlyoutVisible: boolean;
-  setAlertFlyoutVisibility: React.Dispatch<React.SetStateAction<boolean>>;
+  addFlyoutVisible: boolean;
+  setAddFlyoutVisibility: React.Dispatch<React.SetStateAction<boolean>>;
+  reloadAlerts: () => Promise<void>;
 }
 
 const AlertsContext = createContext<AlertsContextValue>(null as any);
