@@ -52,7 +52,7 @@ function onLineRead(xs) {
 }
 
 function onComplete(initData) {
-  return function mutateInitalData(xs, log) {
+  return function mutateInitialData(xs, log) {
     initData.historicalItems = xs;
     log.debug(pretty(initData));
     log.debug('### Completed');
