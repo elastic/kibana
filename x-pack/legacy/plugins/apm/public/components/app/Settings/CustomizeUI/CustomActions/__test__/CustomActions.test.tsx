@@ -9,7 +9,6 @@ import { fireEvent, render } from '@testing-library/react';
 import { CustomActions } from '../';
 import { expectTextsInDocument } from '../../../../../../utils/testHelpers';
 import * as hooks from '../../../../../../hooks/useFetcher';
-// import * as hooks from '../../../../hooks/useFetcher';
 
 describe('CustomActions', () => {
   describe('empty prompt', () => {
