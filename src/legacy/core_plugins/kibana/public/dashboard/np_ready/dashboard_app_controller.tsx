@@ -19,6 +19,7 @@
 
 import _, { uniq } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { EuiConfirmModalProps } from '@elastic/eui';
 import React from 'react';
 import angular from 'angular';
 
@@ -28,7 +29,6 @@ import { History } from 'history';
 import { DashboardEmptyScreen, DashboardEmptyScreenProps } from './dashboard_empty_screen';
 
 import {
-  ConfirmationButtonTypes,
   migrateLegacyQuery,
   SavedObjectSaveOpts,
   SaveResult,
@@ -638,7 +638,7 @@ export class DashboardAppController {
               'kbn.dashboard.changeViewModeConfirmModal.cancelButtonLabel',
               { defaultMessage: 'Continue editing' }
             ),
-            defaultFocusedButton: ConfirmationButtonTypes.CANCEL,
+            defaultFocusedButton: EuiConfirmModalProps.defaultFocusedButton.CANCEL,
             title: i18n.translate('kbn.dashboard.changeViewModeConfirmModal.discardChangesTitle', {
               defaultMessage: 'Discard changes to dashboard?',
             }),
