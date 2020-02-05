@@ -72,7 +72,6 @@ interface MessageColumnContentProps {
 }
 
 const MessageColumnContent = euiStyled(LogEntryColumnContent)<MessageColumnContentProps>`
-  background-color: ${props => props.theme.eui.euiColorEmptyShade};
   text-overflow: ellipsis;
 
   ${props => (props.isHovered || props.isHighlighted ? hoveredContentStyle : '')};
