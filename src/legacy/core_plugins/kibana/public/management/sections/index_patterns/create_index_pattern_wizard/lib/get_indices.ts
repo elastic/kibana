@@ -18,8 +18,16 @@
  */
 
 import { get, sortBy } from 'lodash';
+import { IndexPatternCreationConfig } from '../../../../../../../management/public';
+import { DataPublicPluginStart } from '../../../../../../../../../plugins/data/public';
+import { MatchedIndex } from '../types';
 
-export async function getIndices(es, indexPatternCreationType, rawPattern, limit) {
+export async function getIndices(
+  es: DataPublicPluginStart['search']['__LEGACY']['esClient'],
+  indexPatternCreationType: IndexPatternCreationConfig,
+  rawPattern: string,
+  limit: number
+): Promise<MatchedIndex[]> {
   const pattern = rawPattern.trim();
 
   // Searching for `*:` fails for CCS environments. The search request
@@ -70,10 +78,10 @@ export async function getIndices(es, indexPatternCreationType, rawPattern, limit
 
     return sortBy(
       response.aggregations.indices.buckets
-        .map(bucket => {
+        .map((bucket: { key: string; doc_count: number }) => {
           return bucket.key;
         })
-        .map(indexName => {
+        .map((indexName: string) => {
           return {
             name: indexName,
             tags: indexPatternCreationType.getIndexTags(indexName),
