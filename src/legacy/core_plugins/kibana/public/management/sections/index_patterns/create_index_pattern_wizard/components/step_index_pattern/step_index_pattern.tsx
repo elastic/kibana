@@ -26,7 +26,7 @@ import {
   indexPatterns,
   DataPublicPluginStart,
 } from '../../../../../../../../../../plugins/data/public';
-import { SavedObjectsClient } from '../../../../../../../../../../core/public/saved_objects';
+import { SavedObjectsClient } from '../../../../../../../../../../core/public';
 import { MAX_SEARCH_SIZE } from '../../constants';
 import {
   getIndices,
@@ -305,13 +305,12 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
 
   render() {
     const { isIncludingSystemIndices, allIndices } = this.props;
-    const { query, partialMatchedIndices, exactMatchedIndices } = this.state;
+    const { partialMatchedIndices, exactMatchedIndices } = this.state;
 
     const matchedIndices = getMatchedIndices(
       allIndices,
       partialMatchedIndices,
       exactMatchedIndices,
-      query,
       isIncludingSystemIndices
     );
 

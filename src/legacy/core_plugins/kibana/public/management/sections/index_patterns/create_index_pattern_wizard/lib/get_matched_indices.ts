@@ -71,7 +71,6 @@ export function getMatchedIndices(
   unfilteredAllIndices: MatchedIndex[],
   unfilteredPartialMatchedIndices: MatchedIndex[],
   unfilteredExactMatchedIndices: MatchedIndex[],
-  query: string, // todo apears unused
   isIncludingSystemIndices: boolean = false
 ) {
   const allIndices = filterSystemIndices(unfilteredAllIndices, isIncludingSystemIndices);

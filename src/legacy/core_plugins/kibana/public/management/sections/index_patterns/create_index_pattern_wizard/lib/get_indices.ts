@@ -20,13 +20,14 @@
 import { get, sortBy } from 'lodash';
 import { IndexPatternCreationConfig } from '../../../../../../../management/public';
 import { DataPublicPluginStart } from '../../../../../../../../../plugins/data/public';
+import { MatchedIndex } from '../types';
 
 export async function getIndices(
   es: DataPublicPluginStart['search']['__LEGACY']['esClient'], // todo consider move to new platform api
   indexPatternCreationType: IndexPatternCreationConfig,
   rawPattern: string,
   limit: number
-) {
+): Promise<MatchedIndex[]> {
   const pattern = rawPattern.trim();
 
   // Searching for `*:` fails for CCS environments. The search request
@@ -72,7 +73,6 @@ export async function getIndices(
 
     return sortBy(
       response.aggregations.indices.buckets
-        // todo find shared type
         .map((bucket: { key: string; doc_count: number }) => {
           return bucket.key;
         })
