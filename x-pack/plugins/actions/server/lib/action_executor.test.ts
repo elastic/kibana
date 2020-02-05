@@ -12,7 +12,7 @@ import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/serv
 import { savedObjectsClientMock, loggingServiceMock } from '../../../../../src/core/server/mocks';
 import { createEventLoggerMock } from '../../../event_log/server/event_logger.mock';
 
-const actionExecutor = new ActionExecutor();
+const actionExecutor = new ActionExecutor({ isESOUsingEphemeralEncryptionKey: false });
 const savedObjectsClient = savedObjectsClientMock.create();
 
 function getServices() {
@@ -218,4 +218,23 @@ test('returns an error if actionType is not enabled', async () => {
       "status": "error",
     }
   `);
+});
+
+test('throws an error when passing isESOUsingEphemeralEncryptionKey with value of true', async () => {
+  const customActionExecutor = new ActionExecutor({ isESOUsingEphemeralEncryptionKey: true });
+  customActionExecutor.initialize({
+    logger: loggingServiceMock.create().get(),
+    spaces: {
+      getSpaceId: () => 'some-namespace',
+    } as any,
+    getServices,
+    actionTypeRegistry,
+    encryptedSavedObjectsPlugin,
+    eventLogger: createEventLoggerMock(),
+  });
+  await expect(
+    customActionExecutor.execute(executeParams)
+  ).rejects.toThrowErrorMatchingInlineSnapshot(
+    `"Unable to execute action due to the Encrypted Saved Objects plugin using an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in kibana.yml"`
+  );
 });

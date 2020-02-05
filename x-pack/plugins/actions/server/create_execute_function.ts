@@ -12,6 +12,7 @@ interface CreateExecuteFunctionOptions {
   taskManager: TaskManagerStartContract;
   getScopedSavedObjectsClient: (request: any) => SavedObjectsClientContract;
   getBasePath: GetBasePathFunction;
+  isESOUsingEphemeralEncryptionKey: boolean;
 }
 
 export interface ExecuteOptions {
@@ -25,8 +26,15 @@ export function createExecuteFunction({
   getBasePath,
   taskManager,
   getScopedSavedObjectsClient,
+  isESOUsingEphemeralEncryptionKey,
 }: CreateExecuteFunctionOptions) {
   return async function execute({ id, params, spaceId, apiKey }: ExecuteOptions) {
+    if (isESOUsingEphemeralEncryptionKey === true) {
+      throw new Error(
+        `Unable to execute action due to the Encrypted Saved Objects plugin using an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in kibana.yml`
+      );
+    }
+
     const requestHeaders: Record<string, string> = {};
 
     if (apiKey) {

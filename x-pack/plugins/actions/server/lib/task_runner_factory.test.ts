@@ -78,14 +78,18 @@ beforeEach(() => {
 });
 
 test(`throws an error if factory isn't initialized`, () => {
-  const factory = new TaskRunnerFactory(new ActionExecutor());
+  const factory = new TaskRunnerFactory(
+    new ActionExecutor({ isESOUsingEphemeralEncryptionKey: false })
+  );
   expect(() =>
     factory.create({ taskInstance: mockedTaskInstance })
   ).toThrowErrorMatchingInlineSnapshot(`"TaskRunnerFactory not initialized"`);
 });
 
 test(`throws an error if factory is already initialized`, () => {
-  const factory = new TaskRunnerFactory(new ActionExecutor());
+  const factory = new TaskRunnerFactory(
+    new ActionExecutor({ isESOUsingEphemeralEncryptionKey: false })
+  );
   factory.initialize(taskRunnerFactoryInitializerParams);
   expect(() =>
     factory.initialize(taskRunnerFactoryInitializerParams)

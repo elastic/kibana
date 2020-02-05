@@ -7,9 +7,11 @@
 import { PluginInitializerContext } from '../../../../src/core/server';
 import { ActionsPlugin } from './plugin';
 import { configSchema } from './config';
+import { ActionsClient as ActionsClientClass } from './actions_client';
+
+export type ActionsClient = PublicMethodsOf<ActionsClientClass>;
 
 export { ActionsPlugin, ActionResult, ActionTypeExecutorOptions, ActionType } from './types';
-export { ActionsClient } from './actions_client';
 export { PluginSetupContract, PluginStartContract } from './plugin';
 
 export const plugin = (initContext: PluginInitializerContext) => new ActionsPlugin(initContext);
