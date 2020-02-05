@@ -76,17 +76,6 @@
   z-index: $euiZLevel1;
 }
 
-.conApp__networkRequestContainer {
-  position: absolute;
-  min-width: 200px;
-  width: 100%;
-
-  height: 30px;
-  top: -30px;
-
-  right: 0;
-}
-
 // SASSTODO: This component seems to not be used anymore?
 // Possibly replaced by the Ace version
 .conApp__autoComplete {

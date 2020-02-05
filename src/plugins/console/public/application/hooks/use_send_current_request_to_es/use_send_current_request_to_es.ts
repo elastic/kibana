@@ -41,7 +41,7 @@ export const useSendCurrentRequestToES = () => {
         notifications.toasts.add(
           i18n.translate('console.notification.noReqeustSelectedTitle', {
             defaultMessage:
-              'It looks like your cursor is not on a request. Please select a request by placing your cursor on it.',
+              'No request selected. Select a request by placing the cursor inside it.',
           })
         );
         return;
