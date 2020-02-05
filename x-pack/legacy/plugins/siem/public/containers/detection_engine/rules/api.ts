@@ -246,6 +246,7 @@ export const importRules = async ({
     `${DETECTION_ENGINE_RULES_URL}/_import`,
     {
       method: 'POST',
+      headers: { 'Content-Type': undefined },
       query: { overwrite },
       body: formData,
       asResponse: true,
