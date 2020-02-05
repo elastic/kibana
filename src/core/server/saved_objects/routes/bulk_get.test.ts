@@ -17,50 +17,38 @@
  * under the License.
  */
 
-import Hapi from 'hapi';
-import { createMockServer } from './_mock_server';
-import { createBulkGetRoute } from './bulk_get';
+import supertest from 'supertest';
+import { UnwrapPromise } from '@kbn/utility-types';
+import { registerBulkGetRoute } from './bulk_get';
 import { savedObjectsClientMock } from '../../../../core/server/mocks';
+import { setupServer } from './test_utils';
+
+type setupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 
 describe('POST /api/saved_objects/_bulk_get', () => {
-  let server: Hapi.Server;
-  const savedObjectsClient = savedObjectsClientMock.create();
+  let server: setupServerReturn['server'];
+  let httpSetup: setupServerReturn['httpSetup'];
+  let handlerContext: setupServerReturn['handlerContext'];
+  let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
 
-  beforeEach(() => {
-    savedObjectsClient.bulkGet.mockImplementation(() =>
-      Promise.resolve({
-        saved_objects: [],
-      })
-    );
-    server = createMockServer();
-    const prereqs = {
-      getSavedObjectsClient: {
-        assign: 'savedObjectsClient',
-        method() {
-          return savedObjectsClient;
-        },
-      },
-    };
+  beforeEach(async () => {
+    ({ server, httpSetup, handlerContext } = await setupServer());
+    savedObjectsClient = handlerContext.savedObjects.client;
 
-    server.route(createBulkGetRoute(prereqs));
+    savedObjectsClient.bulkGet.mockResolvedValue({
+      saved_objects: [],
+    });
+    const router = httpSetup.createRouter('');
+    registerBulkGetRoute(router);
+
+    await server.start();
   });
 
-  afterEach(() => {
-    savedObjectsClient.bulkGet.mockReset();
+  afterEach(async () => {
+    await server.stop();
   });
 
   it('formats successful response', async () => {
-    const request = {
-      method: 'POST',
-      url: '/api/saved_objects/_bulk_get',
-      payload: [
-        {
-          id: 'abc123',
-          type: 'index-pattern',
-        },
-      ],
-    };
-
     const clientResponse = {
       saved_objects: [
         {
@@ -73,14 +61,19 @@ describe('POST /api/saved_objects/_bulk_get', () => {
         },
       ],
     };
-
     savedObjectsClient.bulkGet.mockImplementation(() => Promise.resolve(clientResponse));
 
-    const { payload, statusCode } = await server.inject(request);
-    const response = JSON.parse(payload);
+    const result = await supertest(httpSetup.server.listener)
+      .post('/api/saved_objects/_bulk_get')
+      .send([
+        {
+          id: 'abc123',
+          type: 'index-pattern',
+        },
+      ])
+      .expect(200);
 
-    expect(statusCode).toBe(200);
-    expect(response).toEqual(clientResponse);
+    expect(result.body).toEqual(clientResponse);
   });
 
   it('calls upon savedObjectClient.bulkGet', async () => {
@@ -91,14 +84,12 @@ describe('POST /api/saved_objects/_bulk_get', () => {
       },
     ];
 
-    const request = {
-      method: 'POST',
-      url: '/api/saved_objects/_bulk_get',
-      payload: docs,
-    };
+    await supertest(httpSetup.server.listener)
+      .post('/api/saved_objects/_bulk_get')
+      .send(docs)
+      .expect(200);
 
-    await server.inject(request);
-
+    expect(savedObjectsClient.bulkGet).toHaveBeenCalledTimes(1);
     expect(savedObjectsClient.bulkGet).toHaveBeenCalledWith(docs);
   });
 });
