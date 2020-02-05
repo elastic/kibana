@@ -385,10 +385,7 @@ export class Explorer extends React.Component {
           )}
 
           {noInfluencersConfigured === false && (
-            <div
-              className="column col-xs-2 euiText"
-              data-test-subj="mlAnomalyExplorerInfluencerList"
-            >
+            <div className="column col-xs-2" data-test-subj="mlAnomalyExplorerInfluencerList">
               <EuiTitle className="panel-title">
                 <h2>
                   <FormattedMessage

@@ -5,7 +5,7 @@
  */
 
 import React, { FC } from 'react';
-import { EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiIcon, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 // @ts-ignore
 import { formatDate } from '@elastic/eui/lib/services/format';
 
@@ -57,12 +57,14 @@ export const KeywordContent: FC<FieldDataCardProps> = ({ config }) => {
       <EuiSpacer size="m" />
 
       <div>
-        <EuiText className="mlFieldDataCard__valuesTitle">
-          <FormattedMessage
-            id="xpack.ml.fieldDataCard.cardKeyword.topValuesLabel"
-            defaultMessage="Top values"
-          />
-        </EuiText>
+        <EuiTitle size="xxxs" className="mlFieldDataCard__valuesTitle">
+          <span>
+            <FormattedMessage
+              id="xpack.ml.fieldDataCard.cardKeyword.topValuesLabel"
+              defaultMessage="Top values"
+            />
+          </span>
+        </EuiTitle>
         <EuiSpacer size="xs" />
         <TopValues stats={stats} fieldFormat={fieldFormat} barColor="secondary" />
       </div>

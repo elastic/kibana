@@ -5,7 +5,7 @@
  */
 
 import React, { FC } from 'react';
-import { EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiIcon, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { Axis, BarSeries, Chart, Settings } from '@elastic/charts';
 
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -50,12 +50,14 @@ export const BooleanContent: FC<FieldDataCardProps> = ({ config }) => {
       <EuiSpacer size="m" />
 
       <div>
-        <EuiText className="mlFieldDataCard__valuesTitle">
-          <FormattedMessage
-            id="xpack.ml.fieldDataCard.cardBoolean.valuesLabel"
-            defaultMessage="Values"
-          />
-        </EuiText>
+        <EuiTitle size="xxxs" className="mlFieldDataCard__valuesTitle">
+          <span>
+            <FormattedMessage
+              id="xpack.ml.fieldDataCard.cardBoolean.valuesLabel"
+              defaultMessage="Values"
+            />
+          </span>
+        </EuiTitle>
         <EuiSpacer size="xs" />
         <Chart renderer="canvas" className="story-chart" size={{ height: 200 }}>
           <Axis id="bottom" position="bottom" showOverlappingTicks />

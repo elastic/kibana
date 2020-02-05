@@ -6,7 +6,7 @@
 
 import React, { FC } from 'react';
 
-import { EuiListGroup, EuiListGroupItem, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiListGroup, EuiListGroupItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -32,15 +32,17 @@ export const ExamplesList: FC<Props> = ({ examples }) => {
 
   return (
     <div>
-      <EuiText className="mlFieldDataCard__valuesTitle">
-        <FormattedMessage
-          id="xpack.ml.fieldDataCard.cardText.examplesTitle"
-          defaultMessage="{numExamples, plural, one {value} other {examples}}"
-          values={{
-            numExamples: examples.length,
-          }}
-        />
-      </EuiText>
+      <EuiTitle size="xxxs" className="mlFieldDataCard__valuesTitle">
+        <span>
+          <FormattedMessage
+            id="xpack.ml.fieldDataCard.cardText.examplesTitle"
+            defaultMessage="{numExamples, plural, one {value} other {examples}}"
+            values={{
+              numExamples: examples.length,
+            }}
+          />
+        </span>
+      </EuiTitle>
       <EuiSpacer size="s" />
       <EuiListGroup flush={true} showToolTips={true}>
         {examplesContent}

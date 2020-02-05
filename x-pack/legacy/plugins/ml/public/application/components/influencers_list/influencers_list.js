@@ -114,11 +114,7 @@ function InfluencersByName({ influencerFieldName, influencerFilter, fieldValues 
 
   return (
     <React.Fragment key={influencerFieldName}>
-      <EuiTitle
-        size="xs"
-        className="influencer-title"
-        data-test-subj={`mlInfluencerFieldName ${influencerFieldName}`}
-      >
+      <EuiTitle size="xs" data-test-subj={`mlInfluencerFieldName ${influencerFieldName}`}>
         <h3>{influencerFieldName}</h3>
       </EuiTitle>
       <EuiSpacer size="xs" />

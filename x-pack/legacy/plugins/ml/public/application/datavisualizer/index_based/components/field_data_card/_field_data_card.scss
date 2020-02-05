@@ -102,8 +102,6 @@
   }
 
   .mlFieldDataCard__valuesTitle {
-    @include fontSize($euiFontSizeXS - 1px);
-    font-weight: 700;
     text-transform: uppercase;
   }
 }
