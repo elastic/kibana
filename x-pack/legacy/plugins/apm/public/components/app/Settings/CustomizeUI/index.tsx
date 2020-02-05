@@ -6,13 +6,18 @@
 
 import React from 'react';
 import { EuiTitle, EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { CustomActions } from './CustomActions';
 
 export const CustomizeUI = () => {
   return (
     <>
       <EuiTitle size="l">
-        <h1>Customize UI</h1>
+        <h1>
+          {i18n.translate('xpack.apm.settings.customizeUI', {
+            defaultMessage: 'Customize UI'
+          })}
+        </h1>
       </EuiTitle>
       <EuiSpacer size="l" />
       <CustomActions />
