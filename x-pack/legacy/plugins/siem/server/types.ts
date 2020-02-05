@@ -9,7 +9,6 @@ import { LegacyRequest } from '../../../../../src/core/server';
 
 export interface ServerFacade {
   config: Legacy.Server['config'];
-  usingEphemeralEncryptionKey: boolean;
   plugins: {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     actions: any; // We have to do this at the moment because the types are not compatible

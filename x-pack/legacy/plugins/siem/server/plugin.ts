@@ -8,6 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { CoreSetup, PluginInitializerContext, Logger } from '../../../../../src/core/server';
 import { SecurityPluginSetup as SecuritySetup } from '../../../../plugins/security/server';
 import { PluginSetupContract as FeaturesSetup } from '../../../../plugins/features/server';
+import { EncryptedSavedObjectsPluginSetup as EncryptedSavedObjectsSetup } from '../../../../plugins/encrypted_saved_objects/server';
 import { SpacesPluginSetup as SpacesSetup } from '../../../../plugins/spaces/server';
 import { initServer } from './init_server';
 import { compose } from './lib/compose/kibana';
@@ -25,6 +26,7 @@ import { RequestFacade, ServerFacade } from './types';
 export { CoreSetup, Logger, PluginInitializerContext, RequestFacade };
 
 export interface SetupPlugins {
+  encryptedSavedObjects: EncryptedSavedObjectsSetup;
   features: FeaturesSetup;
   security: SecuritySetup;
   spaces: SpacesSetup;

@@ -29,7 +29,8 @@ export const createReadPrivilegesRulesRoute = (services: LegacySetupServices): H
         const callWithRequest = callWithRequestFactory(request, services);
         const index = getIndex(request, services);
         const permissions = await readPrivileges(callWithRequest, index);
-        const usingEphemeralEncryptionKey = services.usingEphemeralEncryptionKey;
+        const usingEphemeralEncryptionKey =
+          services.encryptedSavedObjects?.usingEphemeralEncryptionKey ?? false;
         return merge(permissions, {
           is_authenticated: request?.auth?.isAuthenticated ?? false,
           has_encryption_key: !usingEphemeralEncryptionKey,
