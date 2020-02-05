@@ -19,15 +19,15 @@
 
 import { i18n } from '@kbn/i18n';
 import { identity } from 'lodash';
-import { AggConfig } from 'ui/agg_types';
+import { IAggConfig } from 'ui/agg_types';
 import { npStart } from 'ui/new_platform';
 import { SerializedFieldFormat } from 'src/plugins/expressions/public';
 import { fieldFormats } from '../../../../../../plugins/data/public';
 import { Vis } from '../../../../../core_plugins/visualizations/public';
 
 import { tabifyGetColumns } from '../../../agg_response/tabify/_get_columns';
-import { DateRangeKey, convertDateRangeToString } from '../../../agg_types/buckets/date_range';
-import { IpRangeKey, convertIPRangeToString } from '../../../agg_types/buckets/ip_range';
+import { DateRangeKey, convertDateRangeToString } from '../../../agg_types';
+import { IpRangeKey, convertIPRangeToString } from '../../../agg_types';
 
 interface TermsFieldFormatParams {
   otherBucketLabel: string;
@@ -62,7 +62,7 @@ const getFieldFormat = (
   return new DefaultFieldFormat();
 };
 
-export const createFormat = (agg: AggConfig): SerializedFieldFormat => {
+export const createFormat = (agg: IAggConfig): SerializedFieldFormat => {
   const format: SerializedFieldFormat = agg.params.field ? agg.params.field.format.toJSON() : {};
   const formats: Record<string, () => SerializedFieldFormat> = {
     date_range: () => ({ id: 'date_range', params: format }),
@@ -106,7 +106,7 @@ export const getFormat: FormatFactory = mapping => {
       const format = getFieldFormat(id, mapping.params);
       const gte = '\u2265';
       const lt = '\u003c';
-      return i18n.translate('common.ui.aggTypes.buckets.ranges.rangesFormatMessage', {
+      return i18n.translate('common.ui.aggTypes.rangesFormatMessage', {
         defaultMessage: '{gte} {from} and {lt} {to}',
         values: {
           gte,
@@ -155,7 +155,7 @@ export const getFormat: FormatFactory = mapping => {
   }
 };
 
-export const getTableAggs = (vis: Vis): AggConfig[] => {
+export const getTableAggs = (vis: Vis): IAggConfig[] => {
   if (!vis.aggs || !vis.aggs.getResponseAggs) {
     return [];
   }

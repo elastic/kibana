@@ -130,7 +130,7 @@ export const security = kibana =>
         );
 
       server.expose({
-        getUser: request => securityPlugin.authc.getCurrentUser(KibanaRequest.from(request)),
+        getUser: async request => securityPlugin.authc.getCurrentUser(KibanaRequest.from(request)),
       });
 
       initLoginView(securityPlugin, server);

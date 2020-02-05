@@ -40,7 +40,7 @@ export default function({ getService }: FtrProviderContext) {
         expect(body.request_page_index).to.eql(0);
       });
 
-      it('endpoints api should return page based on params passed.', async () => {
+      it('endpoints api should return page based on paging properties passed.', async () => {
         const { body } = await supertest
           .post('/api/endpoint/endpoints')
           .set('kbn-xsrf', 'xxx')
@@ -101,6 +101,46 @@ export default function({ getService }: FtrProviderContext) {
           })
           .expect(400);
         expect(body.message).to.contain('Value is [0] but it must be equal to or greater than [1]');
+      });
+
+      it('endpoints api should return page based on filters passed.', async () => {
+        const { body } = await supertest
+          .post('/api/endpoint/endpoints')
+          .set('kbn-xsrf', 'xxx')
+          .send({ filter: 'not host.ip:10.101.149.26' })
+          .expect(200);
+        expect(body.total).to.eql(2);
+        expect(body.endpoints.length).to.eql(2);
+        expect(body.request_page_size).to.eql(10);
+        expect(body.request_page_index).to.eql(0);
+      });
+
+      it('endpoints api should return page based on filters and paging passed.', async () => {
+        const notIncludedIp = '10.101.149.26';
+        const { body } = await supertest
+          .post('/api/endpoint/endpoints')
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            paging_properties: [
+              {
+                page_size: 10,
+              },
+              {
+                page_index: 0,
+              },
+            ],
+            filter: `not host.ip:${notIncludedIp}`,
+          })
+          .expect(200);
+        expect(body.total).to.eql(2);
+        const resultIps: string[] = [].concat(
+          ...body.endpoints.map((metadata: Record<string, any>) => metadata.host.ip)
+        );
+        expect(resultIps).to.eql(['10.192.213.130', '10.70.28.129', '10.46.229.234']);
+        expect(resultIps).not.include.eql(notIncludedIp);
+        expect(body.endpoints.length).to.eql(2);
+        expect(body.request_page_size).to.eql(10);
+        expect(body.request_page_index).to.eql(0);
       });
     });
   });

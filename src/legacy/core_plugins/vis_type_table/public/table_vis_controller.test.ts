@@ -26,7 +26,8 @@ import $ from 'jquery';
 import StubIndexPattern from 'test_utils/stub_index_pattern';
 import { getAngularModule } from './get_inner_angular';
 import { initTableVisLegacyModule } from './table_vis_legacy_module';
-import { Vis } from '../../visualizations/public/np_ready/public/vis';
+import { tableVisTypeDefinition } from './table_vis_type';
+import { Vis } from '../../visualizations/public';
 // eslint-disable-next-line
 import { stubFields } from '../../../../plugins/data/public/stubs';
 // eslint-disable-next-line
@@ -35,7 +36,7 @@ import { coreMock } from '../../../../core/public/mocks';
 import { tableVisTypeDefinition } from './table_vis_type';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { AggConfigs } from 'ui/agg_types';
-import { tabifyAggResponse } from './legacy_imports';
+import { tabifyAggResponse, IAggConfig } from './legacy_imports';
 
 jest.mock('ui/new_platform');
 jest.mock('ui/legacy_compat', () => ({
@@ -150,7 +151,7 @@ describe('Table Vis - Controller', () => {
 
   // basically a parameterized beforeEach
   function initController(vis: Vis) {
-    vis.aggs.aggs.forEach((agg: any, i: number) => {
+    vis.aggs.aggs.forEach((agg: IAggConfig, i: number) => {
       agg.id = 'agg_' + (i + 1);
     });
 
