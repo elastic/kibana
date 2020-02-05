@@ -43,6 +43,8 @@ describe('alert_details', () => {
     const alertType = {
       id: '.noop',
       name: 'No Op',
+      actionGroups: ['default'],
+      actionVariables: [],
     };
 
     expect(
@@ -61,6 +63,8 @@ describe('alert_details', () => {
     const alertType = {
       id: '.noop',
       name: 'No Op',
+      actionGroups: ['default'],
+      actionVariables: [],
     };
 
     expect(
@@ -86,6 +90,8 @@ describe('alert_details', () => {
       const alertType = {
         id: '.noop',
         name: 'No Op',
+        actionGroups: ['default'],
+        actionVariables: [],
       };
 
       const actionTypes: ActionType[] = [
@@ -133,6 +139,8 @@ describe('alert_details', () => {
       const alertType = {
         id: '.noop',
         name: 'No Op',
+        actionGroups: ['default'],
+        actionVariables: [],
       };
       const actionTypes: ActionType[] = [
         {
@@ -181,6 +189,8 @@ describe('alert_details', () => {
       const alertType = {
         id: '.noop',
         name: 'No Op',
+        actionGroups: ['default'],
+        actionVariables: [],
       };
 
       expect(
@@ -203,6 +213,8 @@ describe('alert_details', () => {
       const alertType = {
         id: '.noop',
         name: 'No Op',
+        actionGroups: ['default'],
+        actionVariables: [],
       };
 
       expect(
@@ -225,6 +237,8 @@ describe('alert_details', () => {
       const alertType = {
         id: '.noop',
         name: 'No Op',
+        actionGroups: ['default'],
+        actionVariables: [],
       };
 
       expect(
@@ -252,6 +266,8 @@ describe('enable button', () => {
     const alertType = {
       id: '.noop',
       name: 'No Op',
+      actionGroups: ['default'],
+      actionVariables: [],
     };
 
     const enableButton = shallow(
@@ -275,6 +291,8 @@ describe('enable button', () => {
     const alertType = {
       id: '.noop',
       name: 'No Op',
+      actionGroups: ['default'],
+      actionVariables: [],
     };
 
     const enableButton = shallow(
@@ -298,6 +316,8 @@ describe('enable button', () => {
     const alertType = {
       id: '.noop',
       name: 'No Op',
+      actionGroups: ['default'],
+      actionVariables: [],
     };
 
     const disableAlert = jest.fn();
@@ -330,6 +350,8 @@ describe('enable button', () => {
     const alertType = {
       id: '.noop',
       name: 'No Op',
+      actionGroups: ['default'],
+      actionVariables: [],
     };
 
     const enableAlert = jest.fn();
@@ -365,6 +387,8 @@ describe('mute button', () => {
     const alertType = {
       id: '.noop',
       name: 'No Op',
+      actionGroups: ['default'],
+      actionVariables: [],
     };
 
     const enableButton = shallow(
@@ -389,6 +413,8 @@ describe('mute button', () => {
     const alertType = {
       id: '.noop',
       name: 'No Op',
+      actionGroups: ['default'],
+      actionVariables: [],
     };
 
     const enableButton = shallow(
@@ -413,6 +439,8 @@ describe('mute button', () => {
     const alertType = {
       id: '.noop',
       name: 'No Op',
+      actionGroups: ['default'],
+      actionVariables: [],
     };
 
     const muteAlert = jest.fn();
@@ -446,6 +474,8 @@ describe('mute button', () => {
     const alertType = {
       id: '.noop',
       name: 'No Op',
+      actionGroups: ['default'],
+      actionVariables: [],
     };
 
     const unmuteAlert = jest.fn();
@@ -479,6 +509,8 @@ describe('mute button', () => {
     const alertType = {
       id: '.noop',
       name: 'No Op',
+      actionGroups: ['default'],
+      actionVariables: [],
     };
 
     const enableButton = shallow(

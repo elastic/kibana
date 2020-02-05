@@ -17,7 +17,16 @@
  * under the License.
  */
 
-export { defer, Defer, of, createGetterSetter, Get, Set } from '../common';
+export {
+  defer,
+  Defer,
+  of,
+  createGetterSetter,
+  Get,
+  Set,
+  UiComponent,
+  UiComponentInstance,
+} from '../common';
 export * from './core';
 export * from './errors';
 export * from './field_mapping';
@@ -40,6 +49,7 @@ export {
   unhashUrl,
   unhashQuery,
   createUrlTracker,
+  createKbnUrlTracker,
   createKbnUrlControls,
   getStateFromKbnUrl,
   getStatesFromKbnUrl,
