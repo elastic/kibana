@@ -22,7 +22,7 @@ import { EuiForm, EuiButtonIcon, EuiFieldText, EuiFormRow, EuiSpacer } from '@el
 import { i18n } from '@kbn/i18n';
 
 import { Query, QueryStringInput } from '../../../../../../plugins/data/public';
-import { AggConfig } from '../../legacy_imports';
+import { IAggConfig } from '../../legacy_imports';
 
 interface FilterRowProps {
   id: string;
@@ -34,7 +34,7 @@ interface FilterRowProps {
   dataTestSubj: string;
   onChangeValue(id: string, query: Query, label: string): void;
   onRemoveFilter(id: string): void;
-  agg: AggConfig;
+  agg: IAggConfig;
 }
 
 function FilterRow({
