@@ -18,7 +18,7 @@ import { OBSERVER_VERSION_MAJOR } from '../../../common/elasticsearch_fieldnames
 import {
   ESSearchResponse,
   ESSearchRequest
-} from '../../../typings/elasticsearch';
+} from '../../../../../../plugins/apm/typings/elasticsearch';
 import { APMRequestHandlerContext } from '../../routes/typings';
 import { pickKeys } from '../../../public/utils/pickKeys';
 import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
