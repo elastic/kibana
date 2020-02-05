@@ -21,7 +21,7 @@ import _ from 'lodash';
 import moment from 'moment';
 import expect from '@kbn/expect';
 
-jest.mock('../../../../../ui/public/agg_types/agg_configs', () => ({
+jest.mock('../../search/aggs', () => ({
   AggConfigs: function AggConfigs() {
     return {
       createAggConfig: ({ params }) => ({

@@ -24,20 +24,20 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { IndexPattern } from 'src/plugins/data/public';
-import { AggType, documentationLinks } from '../legacy_imports';
+import { IAggType, documentationLinks } from '../legacy_imports';
 import { ComboBoxGroupedOptions } from '../utils';
 import { AGG_TYPE_ACTION_KEYS, AggTypeAction } from './agg_params_state';
 
 interface DefaultEditorAggSelectProps {
   aggError?: string;
-  aggTypeOptions: ComboBoxGroupedOptions<AggType>;
+  aggTypeOptions: ComboBoxGroupedOptions<IAggType>;
   id: string;
   indexPattern: IndexPattern;
   showValidation: boolean;
   isSubAggregation: boolean;
-  value: AggType;
+  value: IAggType;
   onChangeAggType: React.Dispatch<AggTypeAction>;
-  setValue: (aggType: AggType) => void;
+  setValue: (aggType: IAggType) => void;
 }
 
 function DefaultEditorAggSelect({
@@ -51,7 +51,7 @@ function DefaultEditorAggSelect({
   isSubAggregation,
   onChangeAggType,
 }: DefaultEditorAggSelectProps) {
-  const selectedOptions: ComboBoxGroupedOptions<AggType> = value
+  const selectedOptions: ComboBoxGroupedOptions<IAggType> = value
     ? [{ label: value.title, target: value }]
     : [];
 
@@ -104,7 +104,7 @@ function DefaultEditorAggSelect({
     (options: EuiComboBoxOptionProps[]) => {
       const selectedOption = get(options, '0.target');
       if (selectedOption) {
-        setValue(selectedOption as AggType);
+        setValue(selectedOption as IAggType);
       }
     },
     [setValue]

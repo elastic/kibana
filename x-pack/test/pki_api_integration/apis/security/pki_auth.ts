@@ -90,6 +90,7 @@ export default function({ getService }: FtrProviderContext) {
 
       expect(user.username).to.eql(username);
       expect(user.authentication_realm).to.eql({ name: 'reserved', type: 'reserved' });
+      expect(user.authentication_provider).to.eql('basic');
     });
 
     it('should properly set cookie and authenticate user', async () => {
@@ -118,6 +119,7 @@ export default function({ getService }: FtrProviderContext) {
         },
         authentication_realm: { name: 'pki1', type: 'pki' },
         lookup_realm: { name: 'pki1', type: 'pki' },
+        authentication_provider: 'pki',
       });
 
       // Cookie should be accepted.
@@ -160,6 +162,7 @@ export default function({ getService }: FtrProviderContext) {
           },
           authentication_realm: { name: 'pki1', type: 'pki' },
           lookup_realm: { name: 'pki1', type: 'pki' },
+          authentication_provider: 'pki',
         });
 
       checkCookieIsSet(request.cookie(response.headers['set-cookie'][0])!);
