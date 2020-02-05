@@ -5,7 +5,7 @@
  */
 
 import { createGetOverviewFilters } from './overview_filters';
-import { createGetAllRoute } from './pings';
+import { createGetPingsRoute } from './pings';
 import { createGetIndexPatternRoute } from './index_pattern';
 import { createLogMonitorPageRoute, createLogOverviewPageRoute } from './telemetry';
 import { createGetSnapshotCount } from './snapshot';
@@ -23,7 +23,7 @@ export { createRouteWithAuth } from './create_route_with_auth';
 export { uptimeRouteWrapper } from './uptime_route_wrapper';
 export const restApiRoutes: UMRestApiRouteFactory[] = [
   createGetOverviewFilters,
-  createGetAllRoute,
+  createGetPingsRoute,
   createGetIndexPatternRoute,
   createGetMonitorRoute,
   createGetMonitorDetailsRoute,
