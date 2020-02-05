@@ -26,7 +26,7 @@ import { registerFeatures } from './register_feature';
 import { HomePublicPluginSetup, HomePublicPluginStart } from '../../../../src/plugins/home/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
-import { setupKqlQuerySuggestionProvider } from '../../../legacy/plugins/kuery_autocomplete/public/kql_query_suggestion';
+import { DataEnhancedSetup, DataEnhancedStart } from '../../data_enhanced';
 
 export type ClientSetup = void;
 export type ClientStart = void;
@@ -35,11 +35,13 @@ export interface ClientPluginsSetup {
   home: HomePublicPluginSetup;
   data: DataPublicPluginSetup;
   usageCollection: UsageCollectionSetup;
+  dataEnhanced: DataEnhancedSetup;
 }
 
 export interface ClientPluginsStart {
   home: HomePublicPluginStart;
   data: DataPublicPluginStart;
+  dataEnhanced: DataEnhancedStart;
 }
 
 export type InfraPlugins = ClientPluginsSetup & ClientPluginsStart;
@@ -54,9 +56,6 @@ export class Plugin
 
   setup(core: CoreSetup, pluginsSetup: ClientPluginsSetup) {
     registerFeatures(pluginsSetup.home);
-
-    const kueryProvider = setupKqlQuerySuggestionProvider(core);
-    pluginsSetup.data.autocomplete.addQuerySuggestionProvider('kuery', kueryProvider);
 
     core.application.register({
       id: 'logs',
