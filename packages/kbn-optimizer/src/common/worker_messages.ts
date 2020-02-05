@@ -18,31 +18,31 @@
  */
 
 import {
-  CompilerRunningMessage,
-  CompilerIssueMessage,
-  CompilerSuccessMessage,
-  CompilerErrorMessage,
+  CompilerRunningMsg,
+  CompilerIssueMsg,
+  CompilerSuccessMsg,
+  CompilerErrorMsg,
 } from './compiler_messages';
 
-export type WorkerMessage =
-  | CompilerRunningMessage
-  | CompilerIssueMessage
-  | CompilerSuccessMessage
-  | CompilerErrorMessage
-  | WorkerErrorMessage;
+export type WorkerMsg =
+  | CompilerRunningMsg
+  | CompilerIssueMsg
+  | CompilerSuccessMsg
+  | CompilerErrorMsg
+  | WorkerErrorMsg;
 
 /**
  * Message sent when the worker encounters an error that it can't
  * recover from, no more messages will be sent and the worker
  * will exit after this message.
  */
-export interface WorkerErrorMessage {
+export interface WorkerErrorMsg {
   type: 'worker error';
-  errorMessage: string;
+  errorMsg: string;
   errorStack?: string;
 }
 
-const WORKER_STATE_TYPES: ReadonlyArray<WorkerMessage['type']> = [
+const WORKER_STATE_TYPES: ReadonlyArray<WorkerMsg['type']> = [
   'running',
   'compiler issue',
   'compiler success',
@@ -50,14 +50,14 @@ const WORKER_STATE_TYPES: ReadonlyArray<WorkerMessage['type']> = [
   'worker error',
 ];
 
-export const isWorkerMessage = (value: any): value is WorkerMessage =>
+export const isWorkerMsg = (value: any): value is WorkerMsg =>
   typeof value === 'object' && value && WORKER_STATE_TYPES.includes(value.type);
 
-export class WorkerMessages {
-  error(error: Error): WorkerErrorMessage {
+export class WorkerMsgs {
+  error(error: Error): WorkerErrorMsg {
     return {
       type: 'worker error',
-      errorMessage: error.message,
+      errorMsg: error.message,
       errorStack: error.stack,
     };
   }

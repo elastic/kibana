@@ -24,7 +24,7 @@ import { inspect } from 'util';
 import * as Rx from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
 
-import { isWorkerMessage, WorkerConfig, WorkerMessage, Bundle } from './common';
+import { isWorkerMsg, WorkerConfig, WorkerMsg, Bundle } from './common';
 import { OptimizerConfig } from './optimizer_config';
 
 export interface WorkerStdio {
@@ -130,9 +130,9 @@ export function observeWorker(
   config: OptimizerConfig,
   workerConfig: WorkerConfig,
   bundles: Bundle[]
-): Rx.Observable<WorkerMessage | WorkerStatus> {
+): Rx.Observable<WorkerMsg | WorkerStatus> {
   return usingWorkerProc(config, workerConfig, bundles, proc => {
-    let lastMessage: WorkerMessage;
+    let lastMsg: WorkerMsg;
 
     return Rx.merge(
       Rx.of({
@@ -145,11 +145,11 @@ export function observeWorker(
         .pipe(
           // validate the messages from the process
           map(([msg]) => {
-            if (!isWorkerMessage(msg)) {
+            if (!isWorkerMsg(msg)) {
               throw new Error(`unexpected message from worker: ${JSON.stringify(msg)}`);
             }
 
-            lastMessage = msg;
+            lastMsg = msg;
             return msg;
           })
         )
@@ -166,7 +166,7 @@ export function observeWorker(
               // throw into stream on unexpected exits, or emit to trigger the stream to close
               Rx.fromEvent<[number | void]>(proc, 'exit').pipe(
                 map(([code]) => {
-                  const terminalMsgTypes: Array<WorkerMessage['type']> = [
+                  const terminalMsgTypes: Array<WorkerMsg['type']> = [
                     'compiler error',
                     'worker error',
                   ];
@@ -176,14 +176,14 @@ export function observeWorker(
                   }
 
                   // verify that this is an expected exit state
-                  if (code === 0 && lastMessage && terminalMsgTypes.includes(lastMessage.type)) {
+                  if (code === 0 && lastMsg && terminalMsgTypes.includes(lastMsg.type)) {
                     // emit undefined so that takeUntil completes the observable
                     return;
                   }
 
                   throw new Error(
                     `worker exitted unexpectedly with code ${code} [last message: ${inspect(
-                      lastMessage
+                      lastMsg
                     )}]`
                   );
                 })

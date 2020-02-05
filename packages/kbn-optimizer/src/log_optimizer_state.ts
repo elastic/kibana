@@ -24,43 +24,46 @@ import * as Rx from 'rxjs';
 import { tap } from 'rxjs/operators';
 
 import { OptimizerConfig } from './optimizer_config';
-import { OptimizerStateSummary } from './optimizer';
+import { OptimizerMsg } from './optimizer';
 import { CompilerState, pipeClosure } from './common';
 
 export function logOptimizerState(log: ToolingLog, config: OptimizerConfig) {
-  return pipeClosure((state$: Rx.Observable<OptimizerStateSummary>) => {
+  return pipeClosure((msg$: Rx.Observable<OptimizerMsg>) => {
     const bundleStates = new Map<string, CompilerState['type']>();
+    let loggedInit = false;
 
-    return state$.pipe(
-      tap(s => {
-        if (s.event?.type === 'worker stdio') {
-          const chunk = s.event.chunk.toString('utf8');
+    return msg$.pipe(
+      tap(msg => {
+        const { event, state } = msg;
+
+        if (state.phase === 'initialized' && !loggedInit) {
+          loggedInit = true;
+          log.debug(`initialized after ${state.durSec} sec`);
+          log.debug(`  version: ${state.version}`);
+          log.debug(`  cached: ${state.offlineBundles.map(b => b.id)}`);
+        }
+
+        if (event?.type === 'worker stdio') {
+          const chunk = event.chunk.toString('utf8');
           log.warning(
             '⚙️  worker',
-            s.event.stream,
+            event.stream,
             chunk.slice(0, chunk.length - (chunk.endsWith('\n') ? 1 : 0))
           );
           return;
         }
 
-        if (s.event?.type === 'worker started') {
-          log.debug(`worker started for bundles ${s.event.bundles.map(b => b.id).join(', ')}`);
+        if (event?.type === 'worker started') {
+          log.debug(`worker started for bundles ${event.bundles.map(b => b.id).join(', ')}`);
           return;
         }
 
-        if (s.event?.type === 'changes detected') {
+        if (event?.type === 'changes detected') {
           log.debug(`changes detected...`);
           return;
         }
 
-        if (s.summary === 'initialized') {
-          log.debug(`initialized after ${s.durSec} sec`);
-          log.debug(`  version: ${s.version}`);
-          log.debug(`  cached: ${s.offlineBundles.map(b => b.id)}`);
-          return;
-        }
-
-        for (const { bundleId: id, type } of s.compilerStates) {
+        for (const { bundleId: id, type } of state.compilerStates) {
           const prevBundleState = bundleStates.get(id);
 
           if (type === prevBundleState) {
@@ -69,18 +72,18 @@ export function logOptimizerState(log: ToolingLog, config: OptimizerConfig) {
 
           bundleStates.set(id, type);
           log.debug(
-            `[${id}] state = "${type}"${type !== 'running' ? ` after ${s.durSec} sec` : ''}`
+            `[${id}] state = "${type}"${type !== 'running' ? ` after ${state.durSec} sec` : ''}`
           );
         }
 
-        if (s.summary === 'running') {
+        if (state.phase === 'running') {
           return true;
         }
 
-        if (s.summary === 'issue') {
+        if (state.phase === 'issue') {
           log.error('⚙️  webpack compile errors');
           log.indent(4);
-          for (const b of s.compilerStates) {
+          for (const b of state.compilerStates) {
             if (b.type === 'compiler issue') {
               log.error(`[${b.bundleId}] build`);
               log.indent(4);
@@ -92,16 +95,16 @@ export function logOptimizerState(log: ToolingLog, config: OptimizerConfig) {
           return true;
         }
 
-        if (s.summary === 'success') {
+        if (state.phase === 'success') {
           log.success(
             config.watch
-              ? `⚙️  watching for changes in all bundles after ${s.durSec} sec`
-              : `⚙️  all bundles compiled successfully after ${s.durSec} sec`
+              ? `⚙️  watching for changes in all bundles after ${state.durSec} sec`
+              : `⚙️  all bundles compiled successfully after ${state.durSec} sec`
           );
           return true;
         }
 
-        throw new Error(`unhandled optimizer state: ${inspect(s)}`);
+        throw new Error(`unhandled optimizer message: ${inspect(msg)}`);
       })
     );
   });

@@ -29,15 +29,15 @@ import * as Rx from 'rxjs';
 import { mergeMap, map, mapTo, takeUntil } from 'rxjs/operators';
 
 import {
-  CompilerMessages,
-  WorkerMessages,
+  CompilerMsgs,
+  WorkerMsgs,
   maybeMap,
   parseWorkerConfig,
   Bundle,
   parseBundles,
   WorkerConfig,
-  isWorkerMessage,
-  WorkerMessage,
+  isWorkerMsg,
+  WorkerMsg,
   ascending,
 } from '../common';
 import { getWebpackConfig } from './webpack.config';
@@ -52,12 +52,12 @@ import {
 } from './webpack_helpers';
 
 const PLUGIN_NAME = '@kbn/optimizer';
-const workerMsgs = new WorkerMessages();
+const workerMsgs = new WorkerMsgs();
 if (!process.send) {
   throw new Error('worker process was not started with an IPC channel');
 }
 
-const send = (msg: WorkerMessage) => {
+const send = (msg: WorkerMsg) => {
   if (!process.send) {
     // parent is gone
     process.exit(0);
@@ -113,7 +113,7 @@ const observeCompiler = (
   bundle: Bundle,
   compiler: webpack.Compiler
 ) => {
-  const compilerMsgs = new CompilerMessages(bundle.id);
+  const compilerMsgs = new CompilerMsgs(bundle.id);
   const done$ = new Rx.Subject();
   const { beforeRun, watchRun, done } = compiler.hooks;
 
@@ -263,7 +263,7 @@ Rx.defer(() => {
       send(msg);
     },
     error => {
-      if (isWorkerMessage(error)) {
+      if (isWorkerMsg(error)) {
         send(error);
       } else {
         send(workerMsgs.error(error));

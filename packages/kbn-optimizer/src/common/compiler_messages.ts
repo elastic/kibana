@@ -21,10 +21,10 @@
  * Message sent when a compiler encouters an unresolvable error.
  * The worker will be shut down following this message.
  */
-export interface CompilerErrorMessage {
+export interface CompilerErrorMsg {
   type: 'compiler error';
   id: string;
-  errorMessage: string;
+  errorMsg: string;
   errorStack?: string;
 }
 
@@ -32,7 +32,7 @@ export interface CompilerErrorMessage {
  * Message sent when a compiler starts running, either for the first
  * time or because of changes detected when watching.
  */
-export interface CompilerRunningMessage {
+export interface CompilerRunningMsg {
   type: 'running';
   bundleId: string;
 }
@@ -43,7 +43,7 @@ export interface CompilerRunningMessage {
  * watch mode these issues can be fixed by the user.
  * (ie. unresolved import, syntax error, etc.)
  */
-export interface CompilerIssueMessage {
+export interface CompilerIssueMsg {
   type: 'compiler issue';
   bundleId: string;
   failure: string;
@@ -53,25 +53,25 @@ export interface CompilerIssueMessage {
  * Message sent when a compiler completes successfully and
  * the bundle has been written to disk or updated on disk.
  */
-export interface CompilerSuccessMessage {
+export interface CompilerSuccessMsg {
   type: 'compiler success';
   bundleId: string;
   moduleCount: number;
 }
 
-export type CompilerState = CompilerRunningMessage | CompilerIssueMessage | CompilerSuccessMessage;
+export type CompilerState = CompilerRunningMsg | CompilerIssueMsg | CompilerSuccessMsg;
 
-export class CompilerMessages {
+export class CompilerMsgs {
   constructor(private bundle: string) {}
 
-  running(): CompilerRunningMessage {
+  running(): CompilerRunningMsg {
     return {
       bundleId: this.bundle,
       type: 'running',
     };
   }
 
-  compilerFailure(options: { failure: string }): CompilerIssueMessage {
+  compilerFailure(options: { failure: string }): CompilerIssueMsg {
     return {
       bundleId: this.bundle,
       type: 'compiler issue',
@@ -79,7 +79,7 @@ export class CompilerMessages {
     };
   }
 
-  compilerSuccess(options: { moduleCount: number }): CompilerSuccessMessage {
+  compilerSuccess(options: { moduleCount: number }): CompilerSuccessMsg {
     return {
       bundleId: this.bundle,
       type: 'compiler success',
@@ -87,11 +87,11 @@ export class CompilerMessages {
     };
   }
 
-  error(error: Error): CompilerErrorMessage {
+  error(error: Error): CompilerErrorMsg {
     return {
       id: this.bundle,
       type: 'compiler error',
-      errorMessage: error.message,
+      errorMsg: error.message,
       errorStack: error.stack,
     };
   }

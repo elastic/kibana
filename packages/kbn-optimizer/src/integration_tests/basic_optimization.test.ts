@@ -25,7 +25,7 @@ import del from 'del';
 
 import { toArray, tap } from 'rxjs/operators';
 import { createAbsolutePathSerializer } from '@kbn/dev-utils';
-import { Optimizer, OptimizerConfig, OptimizerStateSummary } from '@kbn/optimizer';
+import { Optimizer, OptimizerConfig, OptimizerMsg } from '@kbn/optimizer';
 
 const TMP_DIR = Path.resolve(__dirname, '../__fixtures__/__tmp__');
 const MOCK_REPO_SRC = Path.resolve(__dirname, '../__fixtures__/mock_repo');
@@ -57,7 +57,7 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
 
   const optimizer = new Optimizer(config);
 
-  const states = await optimizer
+  const msgs = await optimizer
     .run()
     .pipe(
       tap(state => {
@@ -70,10 +70,10 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
     )
     .toPromise();
 
-  const assert = (statement: string, truth: boolean, altStates?: OptimizerStateSummary[]) => {
+  const assert = (statement: string, truth: boolean, altStates?: OptimizerMsg[]) => {
     if (!truth) {
       throw new Error(
-        `expected optimizer to ${statement}, states: ${inspect(altStates || states, {
+        `expected optimizer to ${statement}, states: ${inspect(altStates || msgs, {
           colors: true,
           depth: Infinity,
         })}`
@@ -81,26 +81,29 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
     }
   };
 
-  const initializedStates = states.filter(s => s.summary === 'initialized' && !s.event);
-  assert('produce one raw initialized event', initializedStates.length === 1);
+  const initializedStates = msgs.filter(msg => msg.state.phase === 'initialized');
+  assert('produce at least one initialized event', initializedStates.length >= 1);
 
-  const workerStarted = states.filter(s => s.event?.type === 'worker started');
-  assert('produce one worker started state', workerStarted.length === 1);
+  const workerStarted = msgs.filter(msg => msg.event?.type === 'worker started');
+  assert('produce one worker started event', workerStarted.length === 1);
 
-  const runningStates = states.filter(s => s.summary === 'running');
+  const runningStates = msgs.filter(msg => msg.state.phase === 'running');
   assert(
     'produce two or three "running" states',
     runningStates.length === 2 || runningStates.length === 3
   );
 
-  const successStates = states.filter(s => s.summary === 'success');
+  const successStates = msgs.filter(msg => msg.state.phase === 'success');
   assert(
-    'produce one "compiler success" states',
+    'produce one or two "compiler success" states',
     successStates.length === 1 || successStates.length === 2
   );
 
-  const otherStates = states.filter(
-    s => s.summary !== 'success' && s.summary !== 'running' && s.summary !== 'initialized'
+  const otherStates = msgs.filter(
+    msg =>
+      msg.state.phase !== 'success' &&
+      msg.state.phase !== 'running' &&
+      msg.state.phase !== 'initialized'
   );
   assert('produce zero unexpected states', otherStates.length === 0, otherStates);
 
