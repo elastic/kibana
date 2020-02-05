@@ -20,7 +20,7 @@
 import { cloneDeep } from 'lodash';
 
 import { Vis, VisState } from 'src/legacy/core_plugins/visualizations/public';
-import { AggConfigs, AggConfig, AggGroupNames, move } from '../../../legacy_imports';
+import { AggConfigs, IAggConfig, AggGroupNames, move } from '../../../legacy_imports';
 import { EditorStateActionTypes } from './constants';
 import { getEnabledMetricAggsCount } from '../../agg_group_helper';
 import { EditorAction } from './actions';
@@ -32,7 +32,7 @@ function initEditorState(vis: Vis) {
 function editorStateReducer(state: VisState, action: EditorAction): VisState {
   switch (action.type) {
     case EditorStateActionTypes.ADD_NEW_AGG: {
-      const aggConfig = state.aggs.createAggConfig(action.payload as AggConfig, {
+      const aggConfig = state.aggs.createAggConfig(action.payload as IAggConfig, {
         addToAggConfigs: false,
       });
       aggConfig.brandNew = true;
