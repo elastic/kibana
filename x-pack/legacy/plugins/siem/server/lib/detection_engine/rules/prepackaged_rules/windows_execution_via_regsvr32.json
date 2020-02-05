@@ -4,7 +4,7 @@
     "winlogbeat-*"
   ],
   "language": "kuery",
-  "max_signals": 33,
+  "max_signals": 100,
   "name": "Suspicious Script Object Execution",
   "query": "event.code: 1 and scrobj.dll and (process.name:certutil.exe or process.name:regsvr32.exe or process.name:rundll32.exe)",
   "risk_score": 21,
