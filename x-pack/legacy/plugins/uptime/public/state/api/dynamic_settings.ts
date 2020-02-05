@@ -41,7 +41,7 @@ export const fetchDynamicSettings = async ({
   throw new Error('`getDynamicSettings` response did not correspond to expected type');
 };
 
-export const setDynamicSettings = async ({
+export const fetchPostDynamicSettings = async ({
   basePath,
   settings,
 }: SaveApiRequest): Promise<DynamicSettingsSaveResponse> => {

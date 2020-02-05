@@ -37,7 +37,7 @@ interface DispatchProps {
   saveDynamicSettings: typeof setDynamicSettings;
 }
 
-export const SettingsPageContainer = ({
+export const SettingsPageComponent = ({
   dynamicSettingsState: dss,
   loadDynamicSettings,
   saveDynamicSettings,
@@ -46,19 +46,6 @@ export const SettingsPageContainer = ({
     loadDynamicSettings({});
   }, [loadDynamicSettings]);
 
-  return (
-    <SettingsPagePresentation
-      dynamicSettingsState={dss}
-      loadDynamicSettings={loadDynamicSettings}
-      saveDynamicSettings={saveDynamicSettings}
-    />
-  );
-};
-
-export const SettingsPagePresentation = ({
-  dynamicSettingsState: dss,
-  saveDynamicSettings,
-}: Props & DispatchProps) => {
   const [formFields, setFormFields] = useState<{ [key: string]: any }>(dss.settings || {});
   if (dss.settings && Object.entries(formFields).length === 0) {
     setFormFields({ ...dss.settings });
@@ -199,4 +186,4 @@ const mapDispatchToProps = (dispatch: any) => ({
   },
 });
 
-export const SettingsPage = connect(mapStateToProps, mapDispatchToProps)(SettingsPageContainer);
+export const SettingsPage = connect(mapStateToProps, mapDispatchToProps)(SettingsPageComponent);
