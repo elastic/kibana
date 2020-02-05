@@ -49,9 +49,7 @@ export { AggParamOption } from 'ui/agg_types';
 export { CidrMask } from 'ui/agg_types';
 
 export { PersistedState } from 'ui/persisted_state';
-export { IndexedArray } from 'ui/indexed_array';
 export { getDocLink } from 'ui/documentation_links';
 export { documentationLinks } from 'ui/documentation_links/documentation_links';
 export { move } from 'ui/utils/collection';
 export * from 'ui/vis/lib';
-export * from 'ui/vis/config';

@@ -9,7 +9,7 @@ import { APICaller, CoreSetup } from 'kibana/server';
 import { getNextMidnight } from '../../get_next_midnight';
 import { VisState } from '../../../../../../../../src/legacy/core_plugins/visualizations/public';
 import { TaskInstance } from '../../../../../../../plugins/task_manager/server';
-import { ESSearchHit } from '../../../../../apm/typings/elasticsearch';
+import { ESSearchHit } from '../../../../../../../plugins/apm/typings/elasticsearch';
 import { LegacyConfig } from '../../../plugin';
 
 interface VisSummary {
