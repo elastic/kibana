@@ -15,7 +15,7 @@ import {
   RegistryPackage,
   RegistrySearchResults,
 } from '../../../../common/types';
-import { registryUrl } from '../../../../common/constants/epm';
+import { configService } from '../../';
 import { cacheGet, cacheSet } from './cache';
 import { ArchiveEntry, untarBuffer } from './extract';
 import { fetchUrl, getResponse, getResponseStream } from './requests';
@@ -30,7 +30,7 @@ export interface SearchParams {
 export const pkgToPkgKey = ({ name, version }: RegistryPackage) => `${name}-${version}`;
 
 export async function fetchList(params?: SearchParams): Promise<RegistrySearchResults> {
-  const url = new URL(`${registryUrl}/search`);
+  const url = new URL(`${configService.getConfig()?.epm.registryUrl}/search`);
   if (params && params.category) {
     url.searchParams.set('category', params.category);
   }
@@ -39,15 +39,15 @@ export async function fetchList(params?: SearchParams): Promise<RegistrySearchRe
 }
 
 export async function fetchInfo(key: string): Promise<RegistryPackage> {
-  return fetchUrl(`${registryUrl}/package/${key}`).then(JSON.parse);
+  return fetchUrl(`${configService.getConfig()?.epm.registryUrl}/package/${key}`).then(JSON.parse);
 }
 
 export async function fetchFile(filePath: string): Promise<Response> {
-  return getResponse(`${registryUrl}${filePath}`);
+  return getResponse(`${configService.getConfig()?.epm.registryUrl}${filePath}`);
 }
 
 export async function fetchCategories(): Promise<CategorySummaryList> {
-  return fetchUrl(`${registryUrl}/categories`).then(JSON.parse);
+  return fetchUrl(`${configService.getConfig()?.epm.registryUrl}/categories`).then(JSON.parse);
 }
 
 export async function getArchiveInfo(
@@ -129,7 +129,9 @@ async function getOrFetchArchiveBuffer(pkgkey: string): Promise<Buffer> {
 async function fetchArchiveBuffer(key: string): Promise<Buffer> {
   const { download: archivePath } = await fetchInfo(key);
 
-  return getResponseStream(`${registryUrl}${archivePath}`).then(streamToBuffer);
+  return getResponseStream(`${configService.getConfig()?.epm.registryUrl}${archivePath}`).then(
+    streamToBuffer
+  );
 }
 
 export function getAsset(key: string) {
