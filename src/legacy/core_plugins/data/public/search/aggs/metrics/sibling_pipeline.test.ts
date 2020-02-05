@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { spy } from 'sinon';
 import { bucketSumMetricAgg } from './bucket_sum';
 import { bucketAvgMetricAgg } from './bucket_avg';
 import { bucketMinMetricAgg } from './bucket_min';
@@ -162,8 +161,8 @@ describe('sibling pipeline aggs', () => {
         init();
 
         const searchSource: any = {};
-        const customMetricSpy = spy();
-        const customBucketSpy = spy();
+        const customMetricSpy = jest.fn();
+        const customBucketSpy = jest.fn();
         const { customMetric, customBucket } = aggConfig.params;
 
         // Attach a modifyAggConfigOnSearchRequestStart with a spy to the first parameter
@@ -171,11 +170,11 @@ describe('sibling pipeline aggs', () => {
         customBucket.type.params[0].modifyAggConfigOnSearchRequestStart = customBucketSpy;
 
         aggConfig.type.params.forEach(param => {
-          param.modifyAggConfigOnSearchRequestStart(aggConfig, searchSource);
+          param.modifyAggConfigOnSearchRequestStart(aggConfig, searchSource, {});
         });
 
-        expect(customMetricSpy.calledWith(customMetric, searchSource)).toBe(true);
-        expect(customBucketSpy.calledWith(customBucket, searchSource)).toBe(true);
+        expect(customMetricSpy.mock.calls[0]).toEqual([customMetric, searchSource, {}]);
+        expect(customBucketSpy.mock.calls[0]).toEqual([customBucket, searchSource, {}]);
       });
     });
   });

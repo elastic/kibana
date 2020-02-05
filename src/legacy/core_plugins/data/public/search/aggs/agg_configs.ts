@@ -17,15 +17,6 @@
  * under the License.
  */
 
-/**
- * @name AggConfig
- *
- * @extends IndexedArray
- *
- * @description A "data structure"-like class with methods for indexing and
- * accessing instances of AggConfig.
- */
-
 import _ from 'lodash';
 import { AggConfig, AggConfigOptions, IAggConfig } from './agg_config';
 import { Schema } from './schemas';
@@ -54,6 +45,13 @@ function parseParentAggs(dslLvlCursor: any, dsl: any) {
     });
   }
 }
+
+/**
+ * @name AggConfig
+ *
+ * @description A "data structure"-like class with methods for indexing and
+ * accessing instances of AggConfig.
+ */
 
 // TODO need to make a more explicit interface for this
 export type IAggConfigs = AggConfigs;

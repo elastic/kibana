@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import { createFilterFilters } from './filters';
 import { AggConfigs } from '../../agg_configs';
 import { IBucketAggConfig } from '../_bucket_agg_type';
