@@ -7,11 +7,15 @@
 import { PluginInitializerContext } from '../../../../src/core/server';
 import { Plugin } from './plugin';
 import { configSchema } from './config';
+// @ts-ignore
+import { getKibanaInfoForStats } from './kibana_monitoring/lib';
 
 export const plugin = (initContext: PluginInitializerContext) => new Plugin(initContext);
 export const config = {
   schema: configSchema,
 };
+
+export { getKibanaInfoForStats };
 
 /**
  * Invokes plugin modules to instantiate the Monitoring plugin for Kibana

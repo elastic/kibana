@@ -6,7 +6,7 @@
 import { sortByOrder } from 'lodash';
 
 export function sortNodes(nodes, sort) {
-  if (!sort) {
+  if (!sort || !sort.field) {
     return nodes;
   }
 

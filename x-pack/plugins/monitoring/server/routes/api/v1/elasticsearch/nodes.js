@@ -35,12 +35,10 @@ export function esNodesRoute(server) {
             index: schema.number(),
             size: schema.number(),
           }),
-          sort: schema.maybe(
-            schema.object({
-              field: schema.string(),
-              direction: schema.string(),
-            })
-          ),
+          sort: schema.object({
+            field: schema.string({ defaultValue: '' }),
+            direction: schema.string({ defaultValue: '' }),
+          }),
           queryText: schema.string({ defaultValue: '' }),
         }),
       },

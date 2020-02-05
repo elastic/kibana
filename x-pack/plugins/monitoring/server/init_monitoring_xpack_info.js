@@ -23,7 +23,7 @@ export const initMonitoringXpackInfo = async ({ config, xpackMainPlugin, log }) 
   // check if X-Pack is installed on Monitoring Cluster
   const xpackInfoTest = await xpackInfo.refreshNow();
   if (!xpackInfoTest.isAvailable()) {
-    log.warning(
+    log.warn(
       `X-Pack Monitoring Cluster Alerts will not be available: ${xpackInfoTest.unavailableReason()}`
     );
   }

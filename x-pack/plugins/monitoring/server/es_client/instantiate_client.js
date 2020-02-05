@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { bindKey, once } from 'lodash';
+import { once } from 'lodash';
 import { monitoringBulk } from '../kibana_monitoring/lib/monitoring_bulk';
-import { LOGGING_TAG } from '../../common/constants';
 
 /* Provide a dedicated Elasticsearch client for Monitoring
  * The connection options can be customized for the Monitoring application
@@ -14,7 +13,7 @@ import { LOGGING_TAG } from '../../common/constants';
  * Kibana itself is connected to a production cluster.
  */
 
-export function exposeClient({ elasticsearchConfig, events, log, elasticsearchPlugin }) {
+export function exposeClient({ elasticsearchConfig, log, elasticsearchPlugin }) {
   const isMonitoringCluster = hasMonitoringCluster(elasticsearchConfig);
   const cluster = elasticsearchPlugin.createCluster('monitoring', {
     ...(isMonitoringCluster ? elasticsearchConfig : {}),

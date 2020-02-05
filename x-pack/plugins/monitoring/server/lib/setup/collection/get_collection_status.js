@@ -19,8 +19,8 @@ import { getLivesNodes } from '../../elasticsearch/nodes/get_nodes/get_live_node
 const NUMBER_OF_SECONDS_AGO_TO_LOOK = 30;
 
 const getRecentMonitoringDocuments = async (req, indexPatterns, clusterUuid, nodeUuid) => {
-  const start = get(req.payload, 'timeRange.min', `now-${NUMBER_OF_SECONDS_AGO_TO_LOOK}s`);
-  const end = get(req.payload, 'timeRange.max', 'now');
+  const start = get(req.payload, 'timeRange.min') || `now-${NUMBER_OF_SECONDS_AGO_TO_LOOK}s`;
+  const end = get(req.payload, 'timeRange.max') || 'now';
 
   const filters = [
     {

@@ -15,7 +15,6 @@ import {
   KibanaRequest,
   KibanaResponseFactory,
   CoreSetup,
-  IRouter,
   ICustomClusterClient,
 } from '../../../../src/core/server';
 import { MonitoringConfig } from './config';
@@ -87,6 +86,12 @@ export class Plugin {
     this.getLogger = (...scopes: string[]) => initializerContext.logger.get(LOGGING_TAG, ...scopes);
   }
 
+  // TODO: NP
+  // postInit(server) {
+  //   const serverConfig = server.config();
+  //   initInfraSource(serverConfig, server.plugins.infra);
+  // },
+
   async setup(core: CoreSetup, plugins: PluginsSetup) {
     this.core = core;
     this.plugins = plugins;
@@ -120,51 +125,69 @@ export class Plugin {
       log: this.log,
       xpackInfo: null,
       route: (options: any) => {
-        const method = options.method.toLowerCase();
-        const handler = async (
-          context: RequestHandlerContext,
-          req: KibanaRequest<any, any, any, any>,
-          res: KibanaResponseFactory
-        ) => {
-          const legacyRequest = {
-            ...req,
-            // TODO: NP
-            logger: this.log,
-            getLogger: this.getLogger,
-            payload: req.body,
-            getUiSettingsService: () => context.core.uiSettings.client,
-            server: {
-              config: monitoringCore.config,
-              newPlatform: {
-                setup: {
-                  plugins,
+        const method = options.method;
+        const handler = router.handleLegacyErrors(
+          async (
+            context: RequestHandlerContext,
+            req: KibanaRequest<any, any, any, any>,
+            res: KibanaResponseFactory
+          ) => {
+            const legacyRequest = {
+              ...req,
+              // TODO: NP
+              logger: this.log,
+              getLogger: this.getLogger,
+              payload: req.body,
+              getUiSettingsService: () => context.core.uiSettings.client,
+              server: {
+                config: monitoringCore.config,
+                newPlatform: {
+                  setup: {
+                    plugins,
+                  },
+                },
+                plugins: {
+                  monitoring: {
+                    info: this.monitoringCore.xpackInfo,
+                  },
+                  elasticsearch: {
+                    getCluster: (name: string) => ({
+                      callWithRequest: async (_req: any, endpoint: string, params: any) => {
+                        const client =
+                          name === 'monitoring' ? this.cluster : core.elasticsearch.dataClient;
+                        return client?.asScoped(req).callAsCurrentUser(endpoint, params);
+                      },
+                    }),
+                  },
                 },
               },
-              plugins: {
-                monitoring: {
-                  info: this.monitoringCore.xpackInfo,
-                },
-                elasticsearch: {
-                  getCluster: () => ({
-                    callWithRequest: (_req: any, endpoint: string, params: any) =>
-                      this.cluster?.asScoped(req).callAsCurrentUser(endpoint, params),
-                  }),
-                },
-              },
-            },
-          };
-          const result = await options.handler(legacyRequest);
-          return res.ok({ body: result });
-        };
+            };
+            const result = await options.handler(legacyRequest);
+            return res.ok({ body: result });
+          }
+        );
         const validate: any = get(options, 'config.validate', false);
         if (validate && validate.payload) {
           validate.body = validate.payload;
         }
         options.validate = validate;
-        const route: RouteRegistar<method> = router[method];
-        route(options, handler);
+
+        if (method === 'POST') {
+          router.post(options, handler);
+        } else if (method === 'GET') {
+          router.get(options, handler);
+        } else if (method === 'PUT') {
+          router.put(options, handler);
+        } else {
+          throw new Error('Unsupport API method: ' + method);
+        }
       },
     });
+
+    const uiEnabled = get(config, 'ui.enabled');
+    if (uiEnabled) {
+      await requireUIRoutes(this.monitoringCore);
+    }
 
     // core.injectUiAppVars('monitoring', () => {
     //   return {
@@ -203,6 +226,7 @@ export class Plugin {
     // first time xpack_main turns green
     const uiEnabled = config.get('monitoring.ui.enabled');
     if (uiEnabled) {
+      // Instantiate the dedicated ES client
       const elasticsearchConfig = parseElasticsearchConfig(config);
       this.cluster = await instantiateClient({
         log: this.log,
@@ -211,17 +235,15 @@ export class Plugin {
         elasticsearchPlugin: {
           createCluster: this.core?.elasticsearch.createClient,
         },
-      }); // Instantiate the dedicated ES client
+      });
 
       // Route handlers depend on this for xpackInfo
-      const xpackInfo = await initMonitoringXpackInfo({
+      this.monitoringCore.xpackInfo = await initMonitoringXpackInfo({
         config,
         log: this.getLogger(LOGGING_TAG),
         xpackMainPlugin: legacyApi.xpackMain,
         // expose: core.expose,
       });
-      this.monitoringCore.xpackInfo = xpackInfo;
-      await requireUIRoutes(this.monitoringCore);
     }
     // });
 
