@@ -10,7 +10,7 @@ import {
   ExpressionFunction,
   KibanaContext,
 } from '../../../../../../src/plugins/expressions/public';
-import { DateRange } from '../../common';
+import { DateRange } from '../../../../../plugins/lens/common';
 
 interface LensAutoDateProps {
   aggConfigs: string;
