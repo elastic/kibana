@@ -28,6 +28,11 @@ describe('projectionMatrix', () => {
       expect(rasterY).toBeCloseTo(expectedRasterPosition[1]);
     };
   });
+  describe('when the raster size is 0 x 0 pixels (unpainted)', () => {
+    it('should convert 0,0 (center) in world space to 0,0 in raster space', () => {
+      compare([0, 0], [0, 0]);
+    });
+  });
   describe('when the raster size is 300 x 200 pixels', () => {
     beforeEach(() => {
       const action: CameraAction = { type: 'userSetRasterSize', payload: [300, 200] };

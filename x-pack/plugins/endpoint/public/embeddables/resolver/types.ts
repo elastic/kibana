@@ -45,6 +45,7 @@ export interface CameraAnimationState {
 /**
  * Redux state for the virtual 'camera' used by Resolver.
  * CameraState can be panning or animating or neither, but not both at the same time.
+ * TODO remove all this goofy stuff
  */
 export type CameraState =
   | CameraStateWhenAnimating
