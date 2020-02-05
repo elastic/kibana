@@ -41,6 +41,8 @@ const secretSchemaProps = {
 };
 const SecretsSchema = schema.object(secretSchemaProps, {
   validate: secrets => {
+    // user and password must be set together (or not at all)
+    if (!secrets.password && !secrets.user) return;
     if (secrets.password && secrets.user) return;
     return i18n.translate('xpack.actions.builtin.webhook.invalidUsernamePassword', {
       defaultMessage: 'both user and password must be specified',
