@@ -24,7 +24,7 @@ import useUnmount from 'react-use/lib/useUnmount';
 
 import { IndexPattern } from 'src/plugins/data/public';
 import {
-  AggConfig,
+  IAggConfig,
   AggGroupNames,
   editorConfigProviders,
   FixedParam,
@@ -54,7 +54,7 @@ type EditorParamConfigType = EditorParamConfig & {
 };
 
 export interface DefaultEditorAggParamsProps extends DefaultEditorCommonProps {
-  agg: AggConfig;
+  agg: IAggConfig;
   aggError?: string;
   aggIndex?: number;
   aggIsTooLow?: boolean;
