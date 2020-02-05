@@ -176,7 +176,7 @@
     "@elastic/apm-rum-react": "^0.3.2",
     "@elastic/datemath": "5.0.2",
     "@elastic/ems-client": "7.6.0",
-    "@elastic/eui": "18.2.1",
+    "@elastic/eui": "18.3.0",
     "@elastic/filesaver": "1.1.2",
     "@elastic/maki": "6.1.0",
     "@elastic/node-crypto": "^1.0.0",
@@ -351,7 +351,7 @@
     "xregexp": "4.2.4"
   },
   "engines": {
-    "yarn": "^1.21.1"
+    "yarn": "1.21.1"
   },
   "workspaces": {
     "nohoist": [

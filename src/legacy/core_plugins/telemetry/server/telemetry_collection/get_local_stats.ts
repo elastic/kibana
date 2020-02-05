@@ -22,18 +22,25 @@ import { get, omit } from 'lodash';
 import { getClusterInfo } from './get_cluster_info';
 import { getClusterStats } from './get_cluster_stats';
 // @ts-ignore
-import { getKibana, handleKibanaStats } from './get_kibana';
+import { getKibana, handleKibanaStats, KibanaUsageStats } from './get_kibana';
 import { StatsGetter } from '../collection_manager';
 
 /**
  * Handle the separate local calls by combining them into a single object response that looks like the
  * "cluster_stats" document from X-Pack monitoring.
  *
+ * @param {Object} server ??
  * @param {Object} clusterInfo Cluster info (GET /)
  * @param {Object} clusterStats Cluster stats (GET /_cluster/stats)
+ * @param {Object} kibana The Kibana Usage stats
  * @return {Object} A combined object containing the different responses.
  */
-export function handleLocalStats(server: any, clusterInfo: any, clusterStats: any, kibana: any) {
+export function handleLocalStats(
+  server: any,
+  clusterInfo: any,
+  clusterStats: any,
+  kibana: KibanaUsageStats
+) {
   return {
     timestamp: new Date().toISOString(),
     cluster_uuid: get(clusterInfo, 'cluster_uuid'),

@@ -108,8 +108,7 @@ if [[ "$installNode" == "true" || ! $(which yarn) ]]; then
   ###
   ### downloading yarn
   ###
-  yarnVersion="$(node -e "console.log(String(require('./package.json').engines.yarn || '').replace(/^[^\d]+/,''))")"
-  npm install -g "yarn@^${yarnVersion}"
+  npm install -g "yarn@$(node -e "console.log(require('./package.json').engines.yarn)")"
 fi
 
 ###

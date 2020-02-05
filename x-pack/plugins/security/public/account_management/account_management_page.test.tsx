@@ -10,6 +10,7 @@ import { AuthenticatedUser } from '../../common/model';
 import { AccountManagementPage } from './account_management_page';
 
 import { coreMock } from 'src/core/public/mocks';
+import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
 import { securityMock } from '../mocks';
 import { userAPIClientMock } from '../management/users/index.mock';
 
@@ -19,11 +20,10 @@ interface Options {
   realm?: string;
 }
 const createUser = ({ withFullName = true, withEmail = true, realm = 'native' }: Options = {}) => {
-  return {
+  return mockAuthenticatedUser({
     full_name: withFullName ? 'Casey Smith' : '',
     username: 'csmith',
     email: withEmail ? 'csmith@domain.com' : '',
-    enabled: true,
     roles: [],
     authentication_realm: {
       type: realm,
@@ -33,7 +33,7 @@ const createUser = ({ withFullName = true, withEmail = true, realm = 'native' }:
       type: realm,
       name: realm,
     },
-  };
+  });
 };
 
 function getSecuritySetupMock({ currentUser }: { currentUser: AuthenticatedUser }) {

@@ -24,7 +24,7 @@ export const createGetSnapshotCount: UMRestApiRouteFactory = (libs: UMServerLibs
   },
   handler: async ({ callES }, _context, request, response): Promise<any> => {
     const { dateRangeStart, dateRangeEnd, filters, statusFilter } = request.query;
-    const result = await libs.monitorStates.getSnapshotCount({
+    const result = await libs.requests.getSnapshotCount({
       callES,
       dateRangeStart,
       dateRangeEnd,
