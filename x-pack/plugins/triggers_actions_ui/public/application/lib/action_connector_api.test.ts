@@ -24,6 +24,7 @@ describe('loadActionTypes', () => {
       {
         id: 'test',
         name: 'Test',
+        enabled: true,
       },
     ];
     http.get.mockResolvedValueOnce(resolvedValue);

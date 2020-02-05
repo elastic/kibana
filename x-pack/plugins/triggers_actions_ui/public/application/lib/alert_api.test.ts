@@ -8,15 +8,22 @@ import { Alert, AlertType } from '../../types';
 import { httpServiceMock } from '../../../../../../src/core/public/mocks';
 import {
   createAlert,
+  deleteAlert,
   deleteAlerts,
   disableAlerts,
   enableAlerts,
+  disableAlert,
+  enableAlert,
+  loadAlert,
   loadAlerts,
   loadAlertTypes,
   muteAlerts,
   unmuteAlerts,
+  muteAlert,
+  unmuteAlert,
   updateAlert,
 } from './alert_api';
+import uuid from 'uuid';
 
 const http = httpServiceMock.createStartContract();
 
@@ -28,6 +35,8 @@ describe('loadAlertTypes', () => {
       {
         id: 'test',
         name: 'Test',
+        actionVariables: ['var1'],
+        actionGroups: ['default'],
       },
     ];
     http.get.mockResolvedValueOnce(resolvedValue);
@@ -39,6 +48,31 @@ describe('loadAlertTypes', () => {
         "/api/alert/types",
       ]
     `);
+  });
+});
+
+describe('loadAlert', () => {
+  test('should call get API with base parameters', async () => {
+    const alertId = uuid.v4();
+    const resolvedValue = {
+      id: alertId,
+      name: 'name',
+      tags: [],
+      enabled: true,
+      alertTypeId: '.noop',
+      schedule: { interval: '1s' },
+      actions: [],
+      params: {},
+      createdBy: null,
+      updatedBy: null,
+      throttle: null,
+      muteAll: false,
+      mutedInstanceIds: [],
+    };
+    http.get.mockResolvedValueOnce(resolvedValue);
+
+    expect(await loadAlert({ http, alertId })).toEqual(resolvedValue);
+    expect(http.get).toHaveBeenCalledWith(`/api/alert/${alertId}`);
   });
 });
 
@@ -230,6 +264,19 @@ describe('loadAlerts', () => {
   });
 });
 
+describe('deleteAlert', () => {
+  test('should call delete API for alert', async () => {
+    const id = '1';
+    const result = await deleteAlert({ http, id });
+    expect(result).toEqual(undefined);
+    expect(http.delete.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        "/api/alert/1",
+      ]
+    `);
+  });
+});
+
 describe('deleteAlerts', () => {
   test('should call delete API for each alert', async () => {
     const ids = ['1', '2', '3'];
@@ -255,6 +302,7 @@ describe('createAlert', () => {
   test('should call create alert API', async () => {
     const alertToCreate = {
       name: 'test',
+      consumer: 'alerting',
       tags: ['foo'],
       enabled: true,
       alertTypeId: 'test',
@@ -264,7 +312,6 @@ describe('createAlert', () => {
       actions: [],
       params: {},
       throttle: null,
-      consumer: '',
       createdAt: new Date('1970-01-01T00:00:00.000Z'),
       updatedAt: new Date('1970-01-01T00:00:00.000Z'),
       apiKey: null,
@@ -286,7 +333,7 @@ describe('createAlert', () => {
       Array [
         "/api/alert",
         Object {
-          "body": "{\\"name\\":\\"test\\",\\"tags\\":[\\"foo\\"],\\"enabled\\":true,\\"alertTypeId\\":\\"test\\",\\"schedule\\":{\\"interval\\":\\"1m\\"},\\"actions\\":[],\\"params\\":{},\\"throttle\\":null,\\"consumer\\":\\"\\",\\"createdAt\\":\\"1970-01-01T00:00:00.000Z\\",\\"updatedAt\\":\\"1970-01-01T00:00:00.000Z\\",\\"apiKey\\":null,\\"apiKeyOwner\\":null}",
+          "body": "{\\"name\\":\\"test\\",\\"consumer\\":\\"alerting\\",\\"tags\\":[\\"foo\\"],\\"enabled\\":true,\\"alertTypeId\\":\\"test\\",\\"schedule\\":{\\"interval\\":\\"1m\\"},\\"actions\\":[],\\"params\\":{},\\"throttle\\":null,\\"createdAt\\":\\"1970-01-01T00:00:00.000Z\\",\\"updatedAt\\":\\"1970-01-01T00:00:00.000Z\\",\\"apiKey\\":null,\\"apiKeyOwner\\":null}",
         },
       ]
     `);
@@ -297,6 +344,7 @@ describe('updateAlert', () => {
   test('should call alert update API', async () => {
     const alertToUpdate = {
       throttle: '1m',
+      consumer: 'alerting',
       name: 'test',
       tags: ['foo'],
       schedule: {
@@ -304,7 +352,6 @@ describe('updateAlert', () => {
       },
       params: {},
       actions: [],
-      consumer: '',
       createdAt: new Date('1970-01-01T00:00:00.000Z'),
       updatedAt: new Date('1970-01-01T00:00:00.000Z'),
       apiKey: null,
@@ -328,8 +375,64 @@ describe('updateAlert', () => {
       Array [
         "/api/alert/123",
         Object {
-          "body": "{\\"throttle\\":\\"1m\\",\\"name\\":\\"test\\",\\"tags\\":[\\"foo\\"],\\"schedule\\":{\\"interval\\":\\"1m\\"},\\"params\\":{},\\"actions\\":[],\\"consumer\\":\\"\\",\\"createdAt\\":\\"1970-01-01T00:00:00.000Z\\",\\"updatedAt\\":\\"1970-01-01T00:00:00.000Z\\",\\"apiKey\\":null,\\"apiKeyOwner\\":null}",
+          "body": "{\\"throttle\\":\\"1m\\",\\"consumer\\":\\"alerting\\",\\"name\\":\\"test\\",\\"tags\\":[\\"foo\\"],\\"schedule\\":{\\"interval\\":\\"1m\\"},\\"params\\":{},\\"actions\\":[],\\"createdAt\\":\\"1970-01-01T00:00:00.000Z\\",\\"updatedAt\\":\\"1970-01-01T00:00:00.000Z\\",\\"apiKey\\":null,\\"apiKeyOwner\\":null}",
         },
+      ]
+    `);
+  });
+});
+
+describe('enableAlert', () => {
+  test('should call enable alert API', async () => {
+    const result = await enableAlert({ http, id: '1' });
+    expect(result).toEqual(undefined);
+    expect(http.post.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          "/api/alert/1/_enable",
+        ],
+      ]
+    `);
+  });
+});
+
+describe('disableAlert', () => {
+  test('should call disable alert API', async () => {
+    const result = await disableAlert({ http, id: '1' });
+    expect(result).toEqual(undefined);
+    expect(http.post.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          "/api/alert/1/_disable",
+        ],
+      ]
+    `);
+  });
+});
+
+describe('muteAlert', () => {
+  test('should call mute alert API', async () => {
+    const result = await muteAlert({ http, id: '1' });
+    expect(result).toEqual(undefined);
+    expect(http.post.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          "/api/alert/1/_mute_all",
+        ],
+      ]
+    `);
+  });
+});
+
+describe('unmuteAlert', () => {
+  test('should call unmute alert API', async () => {
+    const result = await unmuteAlert({ http, id: '1' });
+    expect(result).toEqual(undefined);
+    expect(http.post.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          "/api/alert/1/_unmute_all",
+        ],
       ]
     `);
   });

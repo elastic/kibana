@@ -6,20 +6,19 @@
 import * as React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
-import { ReactWrapper } from 'enzyme';
-import { act } from 'react-dom/test-utils';
 import { ConnectorAddFlyout } from './connector_add_flyout';
 import { ActionsConnectorsContextProvider } from '../../context/actions_connectors_context';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { ValidationResult } from '../../../types';
 import { AppContextProvider } from '../../app_context';
+import { AppDeps } from '../../app';
 import { chartPluginMock } from '../../../../../../../src/plugins/charts/public/mocks';
 import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
 
 const actionTypeRegistry = actionTypeRegistryMock.create();
 
 describe('connector_add_flyout', () => {
-  let wrapper: ReactWrapper<any>;
+  let deps: AppDeps | null;
 
   beforeAll(async () => {
     const mockes = coreMock.createSetup();
@@ -30,7 +29,7 @@ describe('connector_add_flyout', () => {
         application: { capabilities },
       },
     ] = await mockes.getStartServices();
-    const deps = {
+    deps = {
       chrome,
       docLinks,
       dataPlugin: dataPluginMock.createStartContract(),
@@ -51,29 +50,6 @@ describe('connector_add_flyout', () => {
       actionTypeRegistry: actionTypeRegistry as any,
       alertTypeRegistry: {} as any,
     };
-
-    await act(async () => {
-      wrapper = mountWithIntl(
-        <AppContextProvider appDeps={deps}>
-          <ActionsConnectorsContextProvider
-            value={{
-              addFlyoutVisible: true,
-              setAddFlyoutVisibility: state => {},
-              editFlyoutVisible: false,
-              setEditFlyoutVisibility: state => {},
-              actionTypesIndex: { 'my-action-type': { id: 'my-action-type', name: 'test' } },
-              reloadConnectors: () => {
-                return new Promise<void>(() => {});
-              },
-            }}
-          >
-            <ConnectorAddFlyout />
-          </ActionsConnectorsContextProvider>
-        </AppContextProvider>
-      );
-    });
-
-    await waitForRender(wrapper);
   });
 
   it('renders action type menu on flyout open', () => {
@@ -94,13 +70,27 @@ describe('connector_add_flyout', () => {
     actionTypeRegistry.get.mockReturnValueOnce(actionType);
     actionTypeRegistry.has.mockReturnValue(true);
 
+    const wrapper = mountWithIntl(
+      <AppContextProvider appDeps={deps}>
+        <ActionsConnectorsContextProvider
+          value={{
+            addFlyoutVisible: true,
+            setAddFlyoutVisibility: state => {},
+            editFlyoutVisible: false,
+            setEditFlyoutVisibility: state => {},
+            actionTypesIndex: {
+              'my-action-type': { id: 'my-action-type', name: 'test', enabled: true },
+            },
+            reloadConnectors: () => {
+              return new Promise<void>(() => {});
+            },
+          }}
+        >
+          <ConnectorAddFlyout />
+        </ActionsConnectorsContextProvider>
+      </AppContextProvider>
+    );
     expect(wrapper.find('ActionTypeMenu')).toHaveLength(1);
     expect(wrapper.find('[data-test-subj="my-action-type-card"]').exists()).toBeTruthy();
   });
 });
-
-async function waitForRender(wrapper: ReactWrapper<any, any>) {
-  await Promise.resolve();
-  await Promise.resolve();
-  wrapper.update();
-}

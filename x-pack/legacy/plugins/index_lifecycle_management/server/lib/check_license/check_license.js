@@ -5,7 +5,7 @@
  */
 import { i18n } from '@kbn/i18n';
 export function checkLicense(xpackLicenseInfo) {
-  const pluginName = 'Index Management';
+  const pluginName = 'Index Lifecycle Policies';
 
   // If, for some reason, we cannot get the license information
   // from Elasticsearch, assume worst case and disable

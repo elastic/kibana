@@ -20,7 +20,7 @@
 import React from 'react';
 import { mount, shallow } from 'enzyme';
 
-import { AggConfig } from '../../legacy_imports';
+import { IAggConfig } from '../../legacy_imports';
 import { DEFAULT_OPTIONS, aggFilter, MetricAggParamEditor } from './metric_agg';
 
 jest.mock('./utils', () => ({
@@ -44,7 +44,7 @@ const agg = {
   makeLabel() {
     return 'cumulative_sum';
   },
-} as AggConfig;
+} as IAggConfig;
 
 const metricAggs = [
   agg,
@@ -69,7 +69,7 @@ const metricAggs = [
       return 'max';
     },
   },
-] as AggConfig[];
+] as IAggConfig[];
 
 describe('MetricAggParamEditor', () => {
   let defaultProps: Partial<AggParamEditorProps<string>>;
