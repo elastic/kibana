@@ -10,7 +10,7 @@ import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../index';
 import { wrapEsError } from '../../helpers';
 
-import { Template } from '../../../../../common/types';
+import { Template } from '../../../../common/types';
 
 const paramsSchema = schema.object({
   names: schema.string(),

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { ScopedClusterClient, IRouter } from 'src/core/server';
-import { LicensingPluginSetup } from '../../../../../plugins/licensing/server';
+import { LicensingPluginSetup } from '../../../../plugins/licensing/server';
 import { License, IndexDataEnricher } from './services';
 
 export interface Dependencies {

@@ -5,7 +5,7 @@
  */
 import { schema } from '@kbn/config-schema';
 
-import { deserializeTemplate, deserializeTemplateList } from '../../../../../common/lib';
+import { deserializeTemplate, deserializeTemplateList } from '../../../../common/lib';
 import { getManagedTemplatePrefix } from '../../../lib/get_managed_templates';
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../index';

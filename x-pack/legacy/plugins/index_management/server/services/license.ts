@@ -11,9 +11,9 @@ import {
   RequestHandlerContext,
 } from 'kibana/server';
 
-import { LicensingPluginSetup } from '../../../../../../plugins/licensing/server';
-import { LicenseType } from '../../../../../../plugins/licensing/common/types';
-import { LICENSE_CHECK_STATE } from '../../../../../../plugins/licensing/common/types';
+import { LicensingPluginSetup } from '../../../../../plugins/licensing/server';
+import { LicenseType } from '../../../../../plugins/licensing/common/types';
+import { LICENSE_CHECK_STATE } from '../../../../../plugins/licensing/common/types';
 
 export interface LicenseStatus {
   isValid: boolean;

@@ -6,7 +6,7 @@
 import { i18n } from '@kbn/i18n';
 import { CoreSetup, Plugin, Logger, PluginInitializerContext } from 'src/core/server';
 
-import { PLUGIN } from '../../common';
+import { PLUGIN } from '../common';
 import { Dependencies } from './types';
 import { ApiRoutes } from './routes';
 import { License, IndexDataEnricher } from './services';

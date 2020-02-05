@@ -7,7 +7,7 @@
 import { resolve } from 'path';
 import { Legacy } from 'kibana';
 import { PLUGIN } from './common/constants';
-import { plugin as initServerPlugin, Dependencies } from './server/np_ready';
+import { plugin as initServerPlugin, Dependencies } from './server';
 
 export type ServerFacade = Legacy.Server;
 
@@ -25,33 +25,15 @@ export function indexManagement(kibana: any) {
 
     init(server: ServerFacade) {
       const coreSetup = server.newPlatform.setup.core;
-
-      const pluginDependencies: Dependencies = {
-        licensing: {
-          license$: {
-            subscribe(handler: any) {
-              return handler({
-                check() {
-                  return {
-                    state: 'VALID',
-                  };
-                },
-              });
-            },
-          },
-        } as any,
+      const coreInitializerContext = server.newPlatform.coreContext;
+      const pluginsSetup: Dependencies = {
+        licensing: server.newPlatform.setup.plugins.licensing as any,
       };
 
-      const mockLogger = {
-        get: () => ({
-          info() {},
-        }),
-      };
+      const serverPlugin = initServerPlugin(coreInitializerContext as any);
+      const serverPublicApi = serverPlugin.setup(coreSetup, pluginsSetup);
 
-      const serverPlugin = initServerPlugin({ logger: mockLogger } as any);
-      const indexMgmtPublicApi = serverPlugin.setup(coreSetup, pluginDependencies);
-
-      server.expose('addIndexManagementDataEnricher', indexMgmtPublicApi.indexDataEnricher.add);
+      server.expose('addIndexManagementDataEnricher', serverPublicApi.indexDataEnricher.add);
     },
   });
 }

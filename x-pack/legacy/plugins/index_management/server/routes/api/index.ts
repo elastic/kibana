@@ -4,6 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { API_BASE_PATH } from '../../../../common';
+import { API_BASE_PATH } from '../../../common';
 
 export const addBasePath = (uri: string): string => API_BASE_PATH + uri;

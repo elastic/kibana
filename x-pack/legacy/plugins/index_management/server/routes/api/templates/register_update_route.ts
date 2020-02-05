@@ -5,8 +5,8 @@
  */
 import { schema } from '@kbn/config-schema';
 
-import { Template, TemplateEs } from '../../../../../common/types';
-import { serializeTemplate } from '../../../../../common/lib';
+import { Template, TemplateEs } from '../../../../common/types';
+import { serializeTemplate } from '../../../../common/lib';
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../index';
 import { templateSchema } from './validate_schemas';
