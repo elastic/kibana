@@ -19,11 +19,11 @@ describe.skip('get_all_stats', () => {
       get: sinon
         .stub()
         .withArgs('xpack.monitoring.elasticsearch.index_pattern')
-        .returns('.monitoring-es-N-*,monitoring-es-N-*')
+        .returns('.monitoring-es-N-*')
         .withArgs('xpack.monitoring.kibana.index_pattern')
-        .returns('.monitoring-kibana-N-*,monitoring-kibana-N-*')
+        .returns('.monitoring-kibana-N-*')
         .withArgs('xpack.monitoring.logstash.index_pattern')
-        .returns('.monitoring-logstash-N-*,monitoring-logstash-N-*')
+        .returns('.monitoring-logstash-N-*')
         .withArgs('xpack.monitoring.max_bucket_size')
         .returns(size),
     }),
