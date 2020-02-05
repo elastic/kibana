@@ -9,17 +9,17 @@ import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { RequestHandler } from 'src/core/server';
 
-import { API_BASE_PATH } from '../../../common';
-import { serializeCluster, deserializeCluster } from '../../../common/cluster_serialization';
+import { API_BASE_PATH } from '../../../common/constants';
+import { serializeCluster, deserializeCluster } from '../../../common/lib';
 import { doesClusterExist } from '../../lib/does_cluster_exist';
-import { RouteDependencies, ServerShim } from '../../types';
+import { RouteDependencies } from '../../types';
 import { licensePreRoutingFactory } from '../../lib/license_pre_routing_factory';
 import { isEsError } from '../../lib/is_es_error';
 import { callWithRequestFactory } from '../../lib/call_with_request_factory';
 
-export const register = (deps: RouteDependencies, legacy: ServerShim): void => {
+export const register = (deps: RouteDependencies): void => {
   // TODO there are other settings that can be specified for a remote cluster via console/API that I think might cause issues when editing
-  const getUpdateHandler: RequestHandler<any, any, any> = async (ctx, request, response) => {
+  const updateHandler: RequestHandler<any, any, any> = async (ctx, request, response) => {
     try {
       const callWithRequest = callWithRequestFactory(deps.elasticsearchService, request);
 
@@ -99,6 +99,6 @@ export const register = (deps: RouteDependencies, legacy: ServerShim): void => {
         }),
       },
     },
-    licensePreRoutingFactory(legacy, getUpdateHandler)
+    licensePreRoutingFactory(deps, updateHandler)
   );
 };

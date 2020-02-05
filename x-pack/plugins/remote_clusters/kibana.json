@@ -2,8 +2,8 @@
   "id": "remote_clusters",
   "version": "kibana",
   "requiredPlugins": [
-    "home"
+    "licensing"
   ],
   "server": true,
-  "ui": true
+  "ui": false
 }

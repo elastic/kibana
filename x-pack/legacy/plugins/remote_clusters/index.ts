@@ -7,7 +7,6 @@
 import { Legacy } from 'kibana';
 import { resolve } from 'path';
 import { PLUGIN } from './common';
-import { plugin } from './server';
 
 export function remoteClusters(kibana: any) {
   return new kibana.Plugin({
@@ -42,20 +41,6 @@ export function remoteClusters(kibana: any) {
         config.get('xpack.remote_clusters.enabled') && config.get('xpack.index_management.enabled')
       );
     },
-    init(server: any) {
-      const { core: coreSetup } = server.newPlatform.setup;
-
-      const remoteClustersPluginInstance = plugin();
-
-      remoteClustersPluginInstance.setup(coreSetup, {
-        __LEGACY: {
-          route: server.route.bind(server),
-          plugins: {
-            xpack_main: server.plugins.xpack_main,
-            remote_clusters: server.plugins[PLUGIN.ID],
-          },
-        },
-      });
-    },
+    init(server: any) {},
   });
 }

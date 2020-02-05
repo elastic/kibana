@@ -7,15 +7,15 @@
 import { get } from 'lodash';
 
 import { RequestHandler } from 'src/core/server';
-import { deserializeCluster } from '../../../common/cluster_serialization';
-import { API_BASE_PATH } from '../../../common';
+import { deserializeCluster } from '../../../common/lib';
+import { API_BASE_PATH } from '../../../common/constants';
 import { licensePreRoutingFactory } from '../../lib/license_pre_routing_factory';
 import { callWithRequestFactory } from '../../lib/call_with_request_factory';
 import { isEsError } from '../../lib/is_es_error';
-import { RouteDependencies, ServerShim } from '../../types';
+import { RouteDependencies } from '../../types';
 
-export const register = (deps: RouteDependencies, legacy: ServerShim): void => {
-  const getAllHandler: RequestHandler<any, any, any> = async (ctx, request, response) => {
+export const register = (deps: RouteDependencies): void => {
+  const allHandler: RequestHandler<any, any, any> = async (ctx, request, response) => {
     try {
       const callWithRequest = callWithRequestFactory(deps.elasticsearchService, request);
       const clusterSettings = await callWithRequest('cluster.getSettings');
@@ -58,6 +58,6 @@ export const register = (deps: RouteDependencies, legacy: ServerShim): void => {
       path: API_BASE_PATH,
       validate: false,
     },
-    licensePreRoutingFactory(legacy, getAllHandler)
+    licensePreRoutingFactory(deps, allHandler)
   );
 };

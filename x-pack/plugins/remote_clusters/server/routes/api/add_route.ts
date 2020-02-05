@@ -9,16 +9,16 @@ import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { RequestHandler } from 'src/core/server';
 
-import { serializeCluster } from '../../../common/cluster_serialization';
+import { serializeCluster } from '../../../common/lib';
 import { doesClusterExist } from '../../lib/does_cluster_exist';
-import { API_BASE_PATH } from '../../../common';
+import { API_BASE_PATH } from '../../../common/constants';
 import { licensePreRoutingFactory } from '../../lib/license_pre_routing_factory';
 import { callWithRequestFactory } from '../../lib/call_with_request_factory';
 import { isEsError } from '../../lib/is_es_error';
-import { RouteDependencies, ServerShim } from '../../types';
+import { RouteDependencies } from '../../types';
 
-export const register = (deps: RouteDependencies, legacy: ServerShim): void => {
-  const getAddHandler: RequestHandler<any, any, any> = async (ctx, request, response) => {
+export const register = (deps: RouteDependencies): void => {
+  const addHandler: RequestHandler<any, any, any> = async (ctx, request, response) => {
     try {
       const callWithRequest = callWithRequestFactory(deps.elasticsearchService, request);
 
@@ -86,6 +86,6 @@ export const register = (deps: RouteDependencies, legacy: ServerShim): void => {
         }),
       },
     },
-    licensePreRoutingFactory(legacy, getAddHandler)
+    licensePreRoutingFactory(deps, addHandler)
   );
 };
