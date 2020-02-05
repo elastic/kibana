@@ -22,7 +22,7 @@ describe('DeleteSpacesButton', () => {
   it('renders as expected', () => {
     const spacesManager = spacesManagerMock.create();
 
-    const notificatons = (notificationServiceMock.create().start as unknown) as NotificationsStart;
+    const notifications = notificationServiceMock.createStartContract();
 
     const wrapper = shallowWithIntl(
       <DeleteSpacesButton.WrappedComponent

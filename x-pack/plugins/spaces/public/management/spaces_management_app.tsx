@@ -51,7 +51,7 @@ export const spacesManagementApp = Object.freeze({
               http={http}
               notifications={notifications}
               spacesManager={spacesManager}
-              securityEnabled={Boolean(securityLicense && securityLicense.getFeatures().showLinks)}
+              securityEnabled={securityLicense?.getFeatures().showLinks ?? false}
             />
           );
         };

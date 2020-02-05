@@ -16,7 +16,7 @@ describe('CopySavedObjectsToSpaceService', () => {
     it('registers the CopyToSpaceSavedObjectsManagementAction', () => {
       const deps = {
         spacesManager: spacesManagerMock.create(),
-        notificationsSetup: (notificationServiceMock.create()
+        notificationsSetup: notificationServiceMock.createSetupContract()
           .setup as unknown) as NotificationsSetup,
         // we don't have a proper NP mock for this yet
         managementSetup: ({
