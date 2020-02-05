@@ -11,7 +11,6 @@ import React, { useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { CytoscapeContext } from './Cytoscape';
 import { animationOptions, nodeHeight } from './cytoscapeOptions';
-import { FullscreenPanel } from './FullscreenPanel';
 
 const ControlsContainer = styled('div')`
   left: ${theme.gutterTypes.gutterMedium};
@@ -87,7 +86,6 @@ export function Controls() {
   const minZoom = cy.minZoom();
   const isMinZoom = zoom === minZoom;
   const increment = (maxZoom - minZoom) / steps;
-  const mapDomElement = cy.container();
   const zoomInLabel = i18n.translate('xpack.apm.serviceMap.zoomIn', {
     defaultMessage: 'Zoom in'
   });
@@ -127,7 +125,6 @@ export function Controls() {
           title={centerLabel}
         />
       </EuiPanel>
-      <FullscreenPanel element={mapDomElement} />
     </ControlsContainer>
   );
 }
