@@ -7,11 +7,11 @@
 import axios from 'axios';
 import axiosXhrAdapter from 'axios/lib/adapters/xhr';
 import { init as initHttpRequests } from './http_requests';
-import { httpService } from '../../../public/app/services/http';
-import { breadcrumbService } from '../../../public/app/services/breadcrumbs';
-import { documentationService } from '../../../public/app/services/documentation';
-import { notificationService } from '../../../public/app/services/notification';
-import { uiMetricService } from '../../../public/app/services/ui_metric';
+import { httpService } from '../../../public/application/services/http';
+import { breadcrumbService } from '../../../public/application/services/breadcrumbs';
+import { documentationService } from '../../../public/application/services/documentation';
+import { notificationService } from '../../../public/application/services/notification';
+import { uiMetricService } from '../../../public/application/services/ui_metric';
 import { createUiStatsReporter } from '../../../../../../../src/legacy/core_plugins/ui_metric/public';
 
 /* eslint-disable @kbn/eslint/no-restricted-paths */

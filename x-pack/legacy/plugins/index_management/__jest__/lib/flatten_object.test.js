@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { flattenObject } from '../../public/app/lib/flatten_object';
+import { flattenObject } from '../../public/application/lib/flatten_object';
 describe('flatten_object', () => {
   test('it flattens an object', () => {
     const obj = {

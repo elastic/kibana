@@ -7,13 +7,13 @@ import routes from 'ui/routes';
 
 import { CoreStart } from '../../../../../src/core/public';
 
-import { mountReactApp, unmountReactApp } from './app';
-import { REACT_ROOT_ID } from './app/constants';
+import { mountReactApp, unmountReactApp } from './application';
+import { REACT_ROOT_ID } from './application/constants';
 import { BASE_PATH } from '../common/constants';
-import { setHttpClient } from './app/services/api';
+import { setHttpClient } from './application/services/api';
 
 import template from './index.html';
-import { manageAngularLifecycle } from './app/lib/manage_angular_lifecycle';
+import { manageAngularLifecycle } from './application/lib/manage_angular_lifecycle';
 
 let elem: HTMLElement | null;
 
