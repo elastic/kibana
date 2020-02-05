@@ -16,7 +16,7 @@ import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 import { IEmbeddableStart } from '../../../../../src/plugins/embeddable/public';
 import { Start as NewsfeedStart } from '../../../../../src/plugins/newsfeed/public';
 import { Start as InspectorStart } from '../../../../../src/plugins/inspector/public';
-import { IUiActionsStart } from '../../../../../src/plugins/ui_actions/public';
+import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
 import { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/public';
 import { initTelemetry } from './lib/telemetry';
 import { KibanaServices } from './lib/kibana';
@@ -32,7 +32,7 @@ export interface StartPlugins {
   embeddable: IEmbeddableStart;
   inspector: InspectorStart;
   newsfeed?: NewsfeedStart;
-  uiActions: IUiActionsStart;
+  uiActions: UiActionsStart;
 }
 export type StartServices = CoreStart & StartPlugins;
 

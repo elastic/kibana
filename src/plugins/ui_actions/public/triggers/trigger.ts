@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export interface ITrigger {
+export interface Trigger {
   id: string;
   title?: string;
   description?: string;
