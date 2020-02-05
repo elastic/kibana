@@ -36,13 +36,6 @@ export function logOptimizerState(log: ToolingLog, config: OptimizerConfig) {
       tap(msg => {
         const { event, state } = msg;
 
-        if (state.phase === 'initialized' && !loggedInit) {
-          loggedInit = true;
-          log.debug(`initialized after ${state.durSec} sec`);
-          log.debug(`  version: ${state.version}`);
-          log.debug(`  cached: ${state.offlineBundles.map(b => b.id)}`);
-        }
-
         if (event?.type === 'worker stdio') {
           const chunk = event.chunk.toString('utf8');
           log.warning(
@@ -50,16 +43,24 @@ export function logOptimizerState(log: ToolingLog, config: OptimizerConfig) {
             event.stream,
             chunk.slice(0, chunk.length - (chunk.endsWith('\n') ? 1 : 0))
           );
-          return;
         }
 
         if (event?.type === 'worker started') {
           log.debug(`worker started for bundles ${event.bundles.map(b => b.id).join(', ')}`);
-          return;
         }
 
         if (event?.type === 'changes detected') {
           log.debug(`changes detected...`);
+        }
+
+        if (state.phase === 'initialized') {
+          if (!loggedInit) {
+            loggedInit = true;
+            log.debug(`initialized after ${state.durSec} sec`);
+            log.debug(`  version: ${state.version}`);
+            log.debug(`  cached: ${state.offlineBundles.map(b => b.id)}`);
+          }
+
           return;
         }
 
