@@ -147,15 +147,16 @@ export const EndpointList = () => {
               </EuiTitle>
             </EuiPageContentHeaderSection>
           </EuiPageContentHeader>
-          <EuiBasicTable
-            data-test-subj="managementListTable"
-            items={endpointListResults}
-            columns={columns}
-            loading={loading}
-            pagination={paginationSetup}
-            onChange={onTableChange}
-          />
-          <EuiPageContentBody />
+          <EuiPageContentBody>
+            <EuiBasicTable
+              data-test-subj="managementListTable"
+              items={endpointListResults}
+              columns={columns}
+              loading={loading}
+              pagination={paginationSetup}
+              onChange={onTableChange}
+            />
+          </EuiPageContentBody>
         </EuiPageContent>
       </EuiPageBody>
     </EuiPage>
