@@ -19,23 +19,37 @@
 
 export interface ExpressionRenderDefinition<Config = unknown> {
   /**
-   * Name of the renderer.
+   * Technical name of the renderer, used as ID to identify renderer in
+   * expression renderer registry. This must match the name of the expression
+   * function that is used to create the `type: render` object.
    */
   name: string;
 
   /**
-   * Name of the renderer as will be displayed to user.
+   * A user friendly name of the renderer as will be displayed to user in UI.
    */
   displayName: string;
 
   /**
-   * Help text as will be displayed to user.
+   * Help text as will be displayed to user. A sentence or few about what this
+   * element does.
    */
   help?: string;
 
+  /**
+   * Used to validate the data before calling the render function.
+   */
   validate?: () => undefined | Error;
+
+  /**
+   * Tell the renderer if the dom node should be reused, it's recreated each
+   * time by default.
+   */
   reuseDomNode: boolean;
 
+  /**
+   * The function called to render the output data of an expression.
+   */
   render: (
     domNode: HTMLElement,
     config: Config,

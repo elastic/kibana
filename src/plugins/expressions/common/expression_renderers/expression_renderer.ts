@@ -20,35 +20,12 @@
 import { ExpressionRenderDefinition } from './types';
 
 export class ExpressionRenderer<Config = unknown> {
-  /**
-   * This must match the name of the function that is used to create the `type: render` object.
-   */
-  name: string;
-
-  /**
-   * Use this to set a more friendly name.
-   */
-  displayName: string;
-
-  /**
-   * A sentence or few about what this element does.
-   */
-  help: string;
-
-  /**
-   * Used to validate the data before calling the render function.
-   */
-  validate: () => void | Error;
-
-  /**
-   * Tell the renderer if the dom node should be reused, it's recreated each time by default.
-   */
-  reuseDomNode: boolean;
-
-  /**
-   * The function called to render the data.
-   */
-  render: ExpressionRenderDefinition<Config>['render'];
+  public readonly name: string;
+  public readonly displayName: string;
+  public readonly help: string;
+  public readonly validate: () => void | Error;
+  public readonly reuseDomNode: boolean;
+  public readonly render: ExpressionRenderDefinition<Config>['render'];
 
   constructor(config: ExpressionRenderDefinition<Config>) {
     const { name, displayName, help, validate, reuseDomNode, render } = config;
