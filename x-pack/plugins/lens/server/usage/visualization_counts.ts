@@ -4,22 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KibanaConfig } from 'src/legacy/server/kbn_server';
-import { CallClusterOptions } from 'src/legacy/core_plugins/elasticsearch';
-import { SearchParams, SearchResponse } from 'elasticsearch';
+import { APICaller } from 'kibana/server';
 import { LensVisualizationUsage } from './types';
 
-type ClusterSearchType = (
-  endpoint: 'search',
-  params: SearchParams & {
-    rest_total_hits_as_int: boolean;
-  },
-  options?: CallClusterOptions
-) => Promise<SearchResponse<unknown>>;
-
 export async function getVisualizationCounts(
-  callCluster: ClusterSearchType,
-  config: KibanaConfig
+  callCluster: APICaller,
+  kibanaIndex: string
 ): Promise<LensVisualizationUsage> {
   const scriptedMetric = {
     scripted_metric: {
@@ -53,7 +43,7 @@ export async function getVisualizationCounts(
   };
 
   const results = await callCluster('search', {
-    index: config.get('kibana.index'),
+    index: kibanaIndex,
     rest_total_hits_as_int: true,
     body: {
       query: {
