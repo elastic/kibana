@@ -145,7 +145,9 @@ export class CreateIndexPatternWizard extends Component {
       });
 
       const isConfirmed = await services.openConfirm(confirmMessage, {
-        confirmButtonText: 'Go to existing pattern',
+        confirmButtonText: i18n.translate('kbn.management.indexPattern.goToPatternButtonLabel', {
+          defaultMessage: 'Go to existing pattern',
+        }),
       });
 
       if (isConfirmed) {

@@ -293,6 +293,7 @@ uiModules
           defaultMessage: 'Refresh field list?',
         }),
       };
+
       npStart.core.overlays
         .openConfirm(confirmMessage, confirmModalOptions)
         .then(async isConfirmed => {
@@ -328,6 +329,7 @@ uiModules
           defaultMessage: 'Delete index pattern?',
         }),
       };
+
       npStart.core.overlays.openConfirm('', confirmModalOptions).then(isConfirmed => {
         if (isConfirmed) {
           doRemove();

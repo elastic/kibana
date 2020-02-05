@@ -19,7 +19,7 @@
 
 import _, { uniq } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { EuiConfirmModalProps } from '@elastic/eui';
+import { EUI_MODAL_CANCEL_BUTTON } from '@elastic/eui';
 import React from 'react';
 import angular from 'angular';
 
@@ -638,7 +638,7 @@ export class DashboardAppController {
               'kbn.dashboard.changeViewModeConfirmModal.cancelButtonLabel',
               { defaultMessage: 'Continue editing' }
             ),
-            defaultFocusedButton: EuiConfirmModalProps.defaultFocusedButton.CANCEL,
+            defaultFocusedButton: EUI_MODAL_CANCEL_BUTTON,
             title: i18n.translate('kbn.dashboard.changeViewModeConfirmModal.discardChangesTitle', {
               defaultMessage: 'Discard changes to dashboard?',
             }),
