@@ -29,8 +29,13 @@ import { registerBulkGetRoute } from './bulk_get';
 import { registerBulkCreateRoute } from './bulk_create';
 import { registerBulkUpdateRoute } from './bulk_update';
 import { registerLogLegacyImportRoute } from './log_legacy_import';
+import { registerExportRoute } from './export';
 
-export function registerRoutes(http: InternalHttpServiceSetup, logger: Logger) {
+export function registerRoutes(
+  http: InternalHttpServiceSetup,
+  logger: Logger,
+  importableExportableTypes: string[]
+) {
   const router = http.createRouter('');
 
   registerGetRoute(router);
@@ -42,4 +47,5 @@ export function registerRoutes(http: InternalHttpServiceSetup, logger: Logger) {
   registerBulkCreateRoute(router);
   registerBulkUpdateRoute(router);
   registerLogLegacyImportRoute(router, logger);
+  registerExportRoute(router, importableExportableTypes);
 }

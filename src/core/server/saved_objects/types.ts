@@ -217,4 +217,15 @@ export interface SavedObjectsLegacyUiExports {
   savedObjectMigrations: MigrationDefinition;
   savedObjectSchemas: SavedObjectsSchemaDefinition;
   savedObjectValidations: PropertyValidators;
+  savedObjectsManagement: Record<string, SavedObjectsLegacyTypeManagement>;
+}
+
+/**
+ * @internal
+ * @deprecated
+ */
+export interface SavedObjectsLegacyTypeManagement {
+  icon?: string;
+  defaultSearchField?: string;
+  isImportableAndExportable?: boolean;
 }

@@ -57,18 +57,11 @@ export const registerFindRoute = (router: IRouter) => {
         type: Array.isArray(query.type) ? query.type : [query.type],
         search: query.search,
         defaultSearchOperator: query.default_search_operator,
-        searchFields: Array.isArray(query.search_fields)
-          ? query.search_fields
-          : query.search_fields
-          ? [query.search_fields]
-          : undefined,
+        searchFields:
+          typeof query.search_fields === 'string' ? [query.search_fields] : query.search_fields,
         sortField: query.sort_field,
         // hasReference: query.has_reference,
-        fields: Array.isArray(query.fields)
-          ? query.fields
-          : query.fields
-          ? [query.fields]
-          : undefined,
+        fields: typeof query.fields === 'string' ? [query.fields] : query.fields,
         filter: query.filter,
       });
 

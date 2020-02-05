@@ -34,7 +34,7 @@ import { KibanaConfigType } from '../kibana_config';
 import { migrationsRetryCallCluster } from '../elasticsearch/retry_call_cluster';
 import { SavedObjectsConfigType } from './saved_objects_config';
 import { InternalHttpServiceSetup, KibanaRequest } from '../http';
-import { SavedObjectsClientContract } from './types';
+import { SavedObjectsClientContract, SavedObjectsLegacyUiExports } from './types';
 import { ISavedObjectsRepository, SavedObjectsRepository } from './service/lib/repository';
 import {
   SavedObjectsClientFactoryProvider,
@@ -234,7 +234,11 @@ export class SavedObjectsService
     this.schemas = savedObjectsSchemasDefinition;
     this.validations = savedObjectValidations;
 
-    registerRoutes(setupDeps.http, this.logger);
+    const importableExportableTypes = getImportableAndExportableTypes(
+      setupDeps.legacyPlugins.uiExports
+    );
+
+    registerRoutes(setupDeps.http, this.logger, importableExportableTypes);
 
     return {
       setClientFactoryProvider: provider => {
@@ -372,4 +376,17 @@ export class SavedObjectsService
       ),
     });
   }
+}
+
+function getImportableAndExportableTypes(uiExports: SavedObjectsLegacyUiExports) {
+  const visibleTypes = uiExports.savedObjectMappings.reduce(
+    (types, mapping) => ({
+      ...types,
+      ...Object.keys(mapping.properties),
+    }),
+    [] as string[]
+  );
+  return visibleTypes.filter(
+    type => uiExports.savedObjectsManagement[type]?.isImportableAndExportable === true ?? false
+  );
 }
