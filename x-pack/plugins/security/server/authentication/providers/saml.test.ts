@@ -819,7 +819,7 @@ describe('SAMLAuthenticationProvider', () => {
       expect(request.headers).not.toHaveProperty('authorization');
       expect(authenticationResult.succeeded()).toBe(true);
       expect(authenticationResult.authHeaders).toEqual({ authorization });
-      expect(authenticationResult.user).toBe(user);
+      expect(authenticationResult.user).toEqual({ ...user, authentication_provider: 'saml' });
       expect(authenticationResult.state).toBeUndefined();
     });
 
@@ -880,7 +880,7 @@ describe('SAMLAuthenticationProvider', () => {
       expect(authenticationResult.authHeaders).toEqual({
         authorization: 'Bearer new-access-token',
       });
-      expect(authenticationResult.user).toBe(user);
+      expect(authenticationResult.user).toEqual({ ...user, authentication_provider: 'saml' });
       expect(authenticationResult.state).toEqual({
         username: 'user',
         accessToken: 'new-access-token',
@@ -1028,7 +1028,7 @@ describe('SAMLAuthenticationProvider', () => {
       expect(request.headers.authorization).toBe('Bearer some-valid-token');
       expect(authenticationResult.succeeded()).toBe(true);
       expect(authenticationResult.authHeaders).toBeUndefined();
-      expect(authenticationResult.user).toBe(user);
+      expect(authenticationResult.user).toEqual({ ...user, authentication_provider: 'saml' });
       expect(authenticationResult.state).toBeUndefined();
     });
 

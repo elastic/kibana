@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { errors } from 'elasticsearch';
 import { ObjectType } from '@kbn/config-schema';
 import {
   IClusterClient,
@@ -13,6 +14,7 @@ import {
   RequestHandler,
   RequestHandlerContext,
   RouteConfig,
+  ScopeableRequest,
 } from '../../../../../../src/core/server';
 import { LICENSE_CHECK_STATE } from '../../../../licensing/server';
 import { Authentication, AuthenticationResult } from '../../authentication';
@@ -38,10 +40,7 @@ describe('Change password', () => {
   let routeConfig: RouteConfig<any, any, any, any>;
   let mockContext: RequestHandlerContext;
 
-  function checkPasswordChangeAPICall(
-    username: string,
-    request: ReturnType<typeof httpServerMock.createKibanaRequest>
-  ) {
+  function checkPasswordChangeAPICall(username: string, request: ScopeableRequest) {
     expect(mockClusterClient.asScoped).toHaveBeenCalledTimes(1);
     expect(mockClusterClient.asScoped).toHaveBeenCalledWith(request);
     expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledTimes(1);
@@ -55,8 +54,14 @@ describe('Change password', () => {
     router = httpServiceMock.createRouter();
     authc = authenticationMock.create();
 
-    authc.getCurrentUser.mockResolvedValue(mockAuthenticatedUser({ username: 'user' }));
+    authc.getCurrentUser.mockReturnValue(mockAuthenticatedUser({ username: 'user' }));
     authc.login.mockResolvedValue(AuthenticationResult.succeeded(mockAuthenticatedUser()));
+    authc.getSessionInfo.mockResolvedValue({
+      now: Date.now(),
+      idleTimeoutExpiration: null,
+      lifespanExpiration: null,
+      provider: 'basic',
+    });
 
     mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
     mockClusterClient = elasticsearchServiceMock.createClusterClient();
@@ -122,14 +127,24 @@ describe('Change password', () => {
     });
 
     it('returns 403 if old password is wrong.', async () => {
-      const loginFailureReason = new Error('Something went wrong.');
-      authc.login.mockResolvedValue(AuthenticationResult.failed(loginFailureReason));
+      const changePasswordFailure = new (errors.AuthenticationException as any)('Unauthorized', {
+        body: { error: { header: { 'WWW-Authenticate': 'Negotiate' } } },
+      });
+      mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(changePasswordFailure);
 
       const response = await routeHandler(mockContext, mockRequest, kibanaResponseFactory);
 
       expect(response.status).toBe(403);
-      expect(response.payload).toEqual(loginFailureReason);
-      expect(mockScopedClusterClient.callAsCurrentUser).not.toHaveBeenCalled();
+      expect(response.payload).toEqual(changePasswordFailure);
+
+      expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledTimes(1);
+      expect(mockClusterClient.asScoped).toHaveBeenCalledTimes(1);
+      expect(mockClusterClient.asScoped).toHaveBeenCalledWith({
+        headers: {
+          ...mockRequest.headers,
+          authorization: `Basic ${Buffer.from(`${username}:old-password`).toString('base64')}`,
+        },
+      });
     });
 
     it(`returns 401 if user can't authenticate with new password.`, async () => {
@@ -148,10 +163,15 @@ describe('Change password', () => {
       expect(response.status).toBe(401);
       expect(response.payload).toEqual(loginFailureReason);
 
-      checkPasswordChangeAPICall(username, mockRequest);
+      checkPasswordChangeAPICall(username, {
+        headers: {
+          ...mockRequest.headers,
+          authorization: `Basic ${Buffer.from(`${username}:old-password`).toString('base64')}`,
+        },
+      });
     });
 
-    it('returns 500 if password update request fails.', async () => {
+    it('returns 500 if password update request fails with non-401 error.', async () => {
       const failureReason = new Error('Request failed.');
       mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(failureReason);
 
@@ -160,7 +180,12 @@ describe('Change password', () => {
       expect(response.status).toBe(500);
       expect(response.payload).toEqual(failureReason);
 
-      checkPasswordChangeAPICall(username, mockRequest);
+      checkPasswordChangeAPICall(username, {
+        headers: {
+          ...mockRequest.headers,
+          authorization: `Basic ${Buffer.from(`${username}:old-password`).toString('base64')}`,
+        },
+      });
     });
 
     it('successfully changes own password if provided old password is correct.', async () => {
@@ -169,7 +194,62 @@ describe('Change password', () => {
       expect(response.status).toBe(204);
       expect(response.payload).toBeUndefined();
 
-      checkPasswordChangeAPICall(username, mockRequest);
+      checkPasswordChangeAPICall(username, {
+        headers: {
+          ...mockRequest.headers,
+          authorization: `Basic ${Buffer.from(`${username}:old-password`).toString('base64')}`,
+        },
+      });
+
+      expect(authc.login).toHaveBeenCalledTimes(1);
+      expect(authc.login).toHaveBeenCalledWith(mockRequest, {
+        provider: 'basic',
+        value: { username, password: 'new-password' },
+      });
+    });
+
+    it('successfully changes own password if provided old password is correct for non-basic provider.', async () => {
+      const mockUser = mockAuthenticatedUser({
+        username: 'user',
+        authentication_provider: 'token',
+      });
+      authc.getCurrentUser.mockReturnValue(mockUser);
+      authc.login.mockResolvedValue(AuthenticationResult.succeeded(mockUser));
+
+      const response = await routeHandler(mockContext, mockRequest, kibanaResponseFactory);
+
+      expect(response.status).toBe(204);
+      expect(response.payload).toBeUndefined();
+
+      checkPasswordChangeAPICall(username, {
+        headers: {
+          ...mockRequest.headers,
+          authorization: `Basic ${Buffer.from(`${username}:old-password`).toString('base64')}`,
+        },
+      });
+
+      expect(authc.login).toHaveBeenCalledTimes(1);
+      expect(authc.login).toHaveBeenCalledWith(mockRequest, {
+        provider: 'token',
+        value: { username, password: 'new-password' },
+      });
+    });
+
+    it('successfully changes own password but does not re-login if current session does not exist.', async () => {
+      authc.getSessionInfo.mockResolvedValue(null);
+      const response = await routeHandler(mockContext, mockRequest, kibanaResponseFactory);
+
+      expect(response.status).toBe(204);
+      expect(response.payload).toBeUndefined();
+
+      checkPasswordChangeAPICall(username, {
+        headers: {
+          ...mockRequest.headers,
+          authorization: `Basic ${Buffer.from(`${username}:old-password`).toString('base64')}`,
+        },
+      });
+
+      expect(authc.login).not.toHaveBeenCalled();
     });
   });
 

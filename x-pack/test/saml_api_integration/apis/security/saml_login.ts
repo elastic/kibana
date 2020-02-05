@@ -56,6 +56,7 @@ export default function({ getService }: FtrProviderContext) {
       'enabled',
       'authentication_realm',
       'lookup_realm',
+      'authentication_provider',
     ]);
 
     expect(apiResponse.body.username).to.be('a@b.c');
@@ -88,6 +89,7 @@ export default function({ getService }: FtrProviderContext) {
 
       expect(user.username).to.eql(username);
       expect(user.authentication_realm).to.eql({ name: 'reserved', type: 'reserved' });
+      expect(user.authentication_provider).to.eql('basic');
     });
 
     describe('capture URL fragment', () => {
