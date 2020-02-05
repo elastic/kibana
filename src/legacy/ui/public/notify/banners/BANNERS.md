@@ -300,9 +300,9 @@ Banner objects are sorted in descending order based on their `priority`, in the 
 
 ```js
 {
-  'banner-123',
-  component;: <EuiCallOut />,
-  priority;: 12,
+  id: 'banner-123',
+  component: <EuiCallOut />,
+  priority: 12,
 }
 ```
 
@@ -339,8 +339,8 @@ banners.add({
       title="Look at me!"
     />
   ),
-  data-test-subj;: 'my-tested-banner',
-})
+  data-test-subj: 'my-tested-banner',
+});
 ```
 
 This will apply the `data-test-subj` to the element containing the `component`, so the inner HTML of that element
