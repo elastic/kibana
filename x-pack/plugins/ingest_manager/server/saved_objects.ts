@@ -31,8 +31,12 @@ export const savedObjectMappings = {
       policy_id: { type: 'keyword' },
       last_updated: { type: 'date' },
       last_checkin: { type: 'date' },
+      config_updated_at: { type: 'date' },
+      // FIXME_INGEST https://github.com/elastic/kibana/issues/56554
+      default_api_key: { type: 'keyword' },
       updated_at: { type: 'date' },
       current_error_events: { type: 'text' },
+      // FIXME_INGEST https://github.com/elastic/kibana/issues/56554
       actions: {
         type: 'nested',
         properties: {

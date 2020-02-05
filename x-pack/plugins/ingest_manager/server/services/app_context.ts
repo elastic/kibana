@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { ICustomClusterClient } from 'kibana/server';
+import { ICustomClusterClient, SavedObjectsClientContract } from 'kibana/server';
 import { IngestManagerAppContext } from '../plugin';
 import { EncryptedSavedObjectsPluginStart } from '../../../encrypted_saved_objects/server';
 import { SecurityPluginSetup } from '../../../security/server';
@@ -12,6 +12,7 @@ class AppContextService {
   private clusterClient: ICustomClusterClient | undefined;
   private encryptedSavedObjects: EncryptedSavedObjectsPluginStart | undefined;
   private security: SecurityPluginSetup | undefined;
+  private internalSavedObjectsClient: SavedObjectsClientContract | undefined;
 
   public start(appContext: IngestManagerAppContext) {
     this.clusterClient = appContext.clusterClient;
@@ -35,6 +36,17 @@ class AppContextService {
 
   public getSecurity() {
     return this.security;
+  }
+
+  public getInternalSavedObjectsClient() {
+    if (!this.internalSavedObjectsClient) {
+      throw new Error('No internal savedObjectsClient');
+    }
+    return this.internalSavedObjectsClient;
+  }
+
+  public setInternalSavedObjectsClient(internalSavedObjectsClient: SavedObjectsClientContract) {
+    this.internalSavedObjectsClient = internalSavedObjectsClient;
   }
 }
 

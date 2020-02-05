@@ -12,8 +12,11 @@ import {
   UpdateAgentRequestSchema,
   DeleteAgentRequestSchema,
   GetOneAgentEventsRequestSchema,
+  PostAgentCheckinRequestSchema,
 } from '../../types';
 import * as AgentService from '../../services/agents';
+import { appContextService } from '../../services/app_context';
+import { verifyAccessApiKey } from '../../services/api_keys';
 
 export const getAgentHandler: RequestHandler<TypeOf<
   typeof GetOneAgentRequestSchema.params
@@ -128,6 +131,54 @@ export const updateAgentHandler: RequestHandler<
         // status: AgentStatusHelper.getAgentStatus(agent),
       },
       success: true,
+    };
+
+    return response.ok({ body });
+  } catch (e) {
+    if (e.isBoom && e.output.statusCode === 404) {
+      return response.notFound({
+        body: { message: `Agent ${request.params.agentId} not found` },
+      });
+    }
+
+    return response.customError({
+      statusCode: 500,
+      body: { message: e.message },
+    });
+  }
+};
+
+export const postAgentCheckinHandler: RequestHandler<
+  TypeOf<typeof PostAgentCheckinRequestSchema.params>,
+  undefined,
+  TypeOf<typeof PostAgentCheckinRequestSchema.body>
+> = async (context, request, response) => {
+  try {
+    const soClient = appContextService.getInternalSavedObjectsClient();
+    const res = await verifyAccessApiKey(request.headers);
+    if (!res.valid) {
+      return response.unauthorized({
+        body: { message: 'Invalid Access API Key' },
+      });
+    }
+    const agent = await AgentService.getAgentByAccessAPIKeyId(
+      soClient,
+      res.accessApiKeyId as string
+    );
+    const { actions } = await AgentService.agentCheckin(
+      soClient,
+      agent,
+      [], // TODO events
+      request.body.local_metadata
+    );
+    const body = {
+      action: 'checkin',
+      success: true,
+      actions: actions.map(a => ({
+        type: a.type,
+        data: a.data ? JSON.parse(a.data) : a.data,
+        id: a.id,
+      })),
     };
 
     return response.ok({ body });

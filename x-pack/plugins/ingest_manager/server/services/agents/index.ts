@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import Boom from 'boom';
 import { SavedObjectsClientContract, SavedObject } from 'kibana/server';
 import { AGENT_SAVED_OBJECT_TYPE } from '../../constants';
 import { Agent, AgentSOAttributes } from '../../types';
@@ -13,11 +14,34 @@ const AGENT_POLLING_THRESHOLD_MS = 30 * 1000;
 const AGENT_TYPE_EPHEMERAL = 'ephemeral';
 
 export * from './events';
+export * from './checkin';
 
 export async function getAgent(soClient: SavedObjectsClientContract, agentId: string) {
   const response = await soClient.get<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, agentId);
 
   return _savedObjectToAgent(response);
+}
+
+export async function getAgentByAccessAPIKeyId(
+  soClient: SavedObjectsClientContract,
+  accessAPIKeyId: string
+) {
+  const response = await soClient.find<AgentSOAttributes>({
+    type: AGENT_SAVED_OBJECT_TYPE,
+    searchFields: ['access_api_key_id'],
+    search: accessAPIKeyId,
+  });
+
+  const [agent] = response.saved_objects.map(_savedObjectToAgent);
+
+  if (!agent) {
+    throw Boom.notFound('Agent not found');
+  }
+  if (!agent.active) {
+    throw Boom.forbidden('Agent inactive');
+  }
+
+  return agent;
 }
 
 export async function updateAgent(

@@ -15,6 +15,9 @@ export const initServerWithKibana = (hapiServer: any) => {
   } = shim(hapiServer);
   const libs = compose(hapiServer, pluginsStart);
 
+  hapiServer.newPlatform.setup.plugins.ingestManager.__legacyCompat.registerLegacyAPI({
+    savedObjects: hapiServer.savedObjects,
+  });
   // TODO enable when this is fixed https://github.com/elastic/kibana/pull/42762
   // pluginsSetup.encryptedSavedObjects.registerType({
   //   type: 'outputs',

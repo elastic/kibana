@@ -21,6 +21,15 @@ export const GetOneAgentRequestSchema = {
   }),
 };
 
+export const PostAgentCheckinRequestSchema = {
+  params: schema.object({
+    agentId: schema.string(),
+  }),
+  body: schema.object({
+    local_metadata: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+  }),
+};
+
 export const GetOneAgentEventsRequestSchema = {
   params: schema.object({
     agentId: schema.string(),

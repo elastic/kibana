@@ -17,6 +17,7 @@ import {
   GetOneAgentEventsRequestSchema,
   UpdateAgentRequestSchema,
   DeleteAgentRequestSchema,
+  PostAgentCheckinRequestSchema,
 } from '../../types';
 import {
   getAgentsHandler,
@@ -24,6 +25,7 @@ import {
   updateAgentHandler,
   deleteAgentHandler,
   getAgentEventsHandler,
+  postAgentCheckinHandler,
 } from './handlers';
 
 export const registerRoutes = (router: IRouter) => {
@@ -62,6 +64,16 @@ export const registerRoutes = (router: IRouter) => {
       options: { tags: [`access:${PLUGIN_ID}`] },
     },
     getAgentsHandler
+  );
+
+  // Agent checkin
+  router.post(
+    {
+      path: AGENT_API_ROUTES.CHECKIN_PATTERN,
+      validate: PostAgentCheckinRequestSchema,
+      options: { tags: [], authRequired: false },
+    },
+    postAgentCheckinHandler
   );
 
   // Get agent events

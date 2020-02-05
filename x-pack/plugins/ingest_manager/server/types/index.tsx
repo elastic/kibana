@@ -9,6 +9,7 @@ export {
   AgentSOAttributes,
   AgentEvent,
   AgentEventSOAttributes,
+  AgentAction,
   Datasource,
   NewDatasource,
   AgentConfig,
@@ -31,6 +32,7 @@ export {
   GetOneAgentEventsRequestSchema,
   UpdateAgentRequestSchema,
   DeleteAgentRequestSchema,
+  PostAgentCheckinRequestSchema,
   // Agent config schemas
   GetAgentConfigsRequestSchema,
   GetAgentConfigsResponse,

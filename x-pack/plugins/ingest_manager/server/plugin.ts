@@ -10,6 +10,7 @@ import {
   Plugin,
   PluginInitializerContext,
   ICustomClusterClient,
+  SavedObjectsLegacyService,
 } from 'kibana/server';
 import { LicensingPluginSetup, ILicense } from '../../licensing/server';
 import { EncryptedSavedObjectsPluginStart } from '../../encrypted_saved_objects/server';
@@ -38,13 +39,35 @@ export interface IngestManagerAppContext {
   security?: SecurityPluginSetup;
 }
 
-export class IngestManagerPlugin implements Plugin {
+/**
+ * Describes a set of APIs that is available in the legacy platform only and required by this plugin
+ * to function properly.
+ */
+export interface LegacyAPI {
+  savedObjects: SavedObjectsLegacyService;
+}
+
+export interface IngestManagerPluginSetup {
+  __legacyCompat: {
+    registerLegacyAPI: (legacyAPI: LegacyAPI) => void;
+  };
+}
+
+export class IngestManagerPlugin implements Plugin<IngestManagerPluginSetup> {
   private licensing$!: Observable<ILicense>;
   private config$!: Observable<IngestManagerConfigType>;
   private clusterClient!: ICustomClusterClient;
   private security: SecurityPluginSetup | undefined;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {}
+
+  private legacyAPI?: LegacyAPI;
+  private readonly getLegacyAPI = () => {
+    if (!this.legacyAPI) {
+      throw new Error('Legacy API is not registered!');
+    }
+    return this.legacyAPI;
+  };
 
   public async setup(core: CoreSetup, deps: IngestManagerSetupDeps) {
     this.licensing$ = deps.licensing.license$;
@@ -94,6 +117,23 @@ export class IngestManagerPlugin implements Plugin {
     registerEPMRoutes(router);
     registerFleetSetupRoutes(router);
     registerAgentRoutes(router);
+
+    return {
+      __legacyCompat: {
+        registerLegacyAPI: (legacyAPI: LegacyAPI) => {
+          this.legacyAPI = legacyAPI;
+          const {
+            SavedObjectsClient,
+            getSavedObjectsRepository,
+          } = this.getLegacyAPI().savedObjects;
+          const { callAsInternalUser } = this.clusterClient;
+          const internalRepository = getSavedObjectsRepository(callAsInternalUser);
+
+          const internalSavedObjectsClient = new SavedObjectsClient(internalRepository);
+          appContextService.setInternalSavedObjectsClient(internalSavedObjectsClient);
+        },
+      },
+    };
   }
 
   public async start(
