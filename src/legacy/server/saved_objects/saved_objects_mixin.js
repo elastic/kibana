@@ -34,7 +34,6 @@ import { SavedObjectsManagement } from '../../../core/server/saved_objects/manag
 import {
   createBulkCreateRoute,
   createBulkGetRoute,
-  createUpdateRoute,
   createBulkUpdateRoute,
   createExportRoute,
   createImportRoute,
@@ -85,7 +84,6 @@ export function savedObjectsMixin(kbnServer, server) {
   server.route(createBulkCreateRoute(prereqs));
   server.route(createBulkGetRoute(prereqs));
   server.route(createBulkUpdateRoute(prereqs));
-  server.route(createUpdateRoute(prereqs));
   server.route(createExportRoute(prereqs, server, importableAndExportableTypes));
   server.route(createImportRoute(prereqs, server, importableAndExportableTypes));
   server.route(createResolveImportErrorsRoute(prereqs, server, importableAndExportableTypes));

@@ -17,16 +17,21 @@
  * under the License.
  */
 
-import Hapi from 'hapi';
-import { createMockServer } from './_mock_server';
-import { createUpdateRoute } from './update';
+import supertest from 'supertest';
+import { UnwrapPromise } from '@kbn/utility-types';
+import { registerUpdateRoute } from './update';
 import { savedObjectsClientMock } from '../../../../core/server/mocks';
+import { setupServer } from './test_utils';
+
+type setupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 
 describe('PUT /api/saved_objects/{type}/{id?}', () => {
-  let server: Hapi.Server;
-  const savedObjectsClient = savedObjectsClientMock.create();
+  let server: setupServerReturn['server'];
+  let httpSetup: setupServerReturn['httpSetup'];
+  let handlerContext: setupServerReturn['handlerContext'];
+  let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     const clientResponse = {
       id: 'logstash-*',
       title: 'logstash-*',
@@ -36,73 +41,60 @@ describe('PUT /api/saved_objects/{type}/{id?}', () => {
       notExpandable: true,
       references: [],
     };
-    savedObjectsClient.update.mockImplementation(() => Promise.resolve(clientResponse));
-    server = createMockServer();
 
-    const prereqs = {
-      getSavedObjectsClient: {
-        assign: 'savedObjectsClient',
-        method() {
-          return savedObjectsClient;
-        },
-      },
-    };
+    ({ server, httpSetup, handlerContext } = await setupServer());
+    savedObjectsClient = handlerContext.savedObjects.client;
+    savedObjectsClient.update.mockResolvedValue(clientResponse);
 
-    server.route(createUpdateRoute(prereqs));
+    const router = httpSetup.createRouter('');
+    registerUpdateRoute(router);
+
+    await server.start();
   });
 
-  afterEach(() => {
-    savedObjectsClient.update.mockReset();
+  afterEach(async () => {
+    await server.stop();
   });
 
   it('formats successful response', async () => {
-    const request = {
-      method: 'PUT',
-      url: '/api/saved_objects/index-pattern/logstash-*',
-      payload: {
+    const clientResponse = {
+      id: 'logstash-*',
+      title: 'logstash-*',
+      type: 'logstash-type',
+      timeFieldName: '@timestamp',
+      notExpandable: true,
+      attributes: {},
+      references: [],
+    };
+    savedObjectsClient.update.mockResolvedValue(clientResponse);
+
+    const result = await supertest(httpSetup.server.listener)
+      .put('/api/saved_objects/index-pattern/logstash-*')
+      .send({
         attributes: {
           title: 'Testing',
         },
         references: [],
-      },
-    };
+      })
+      .expect(200);
 
-    const clientResponse = {
-      id: 'logstash-*',
-      title: 'logstash-*',
-      type: 'logstash-type',
-      timeFieldName: '@timestamp',
-      notExpandable: true,
-      attributes: {},
-      references: [],
-    };
-
-    savedObjectsClient.update.mockImplementation(() => Promise.resolve(clientResponse));
-
-    const { payload, statusCode } = await server.inject(request);
-    const response = JSON.parse(payload);
-
-    expect(statusCode).toBe(200);
-    expect(response).toEqual(clientResponse);
+    expect(result.body).toEqual(clientResponse);
   });
 
   it('calls upon savedObjectClient.update', async () => {
-    const request = {
-      method: 'PUT',
-      url: '/api/saved_objects/index-pattern/logstash-*',
-      payload: {
+    await supertest(httpSetup.server.listener)
+      .put('/api/saved_objects/index-pattern/logstash-*')
+      .send({
         attributes: { title: 'Testing' },
         version: 'foo',
-      },
-    };
-
-    await server.inject(request);
+      })
+      .expect(200);
 
     expect(savedObjectsClient.update).toHaveBeenCalledWith(
       'index-pattern',
       'logstash-*',
       { title: 'Testing' },
-      { version: 'foo' }
+      { version: 'foo', references: [] }
     );
   });
 });
