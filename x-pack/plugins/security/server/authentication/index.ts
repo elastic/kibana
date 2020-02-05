@@ -55,14 +55,12 @@ export async function setupAuthentication({
    * Retrieves currently authenticated user associated with the specified request.
    * @param request
    */
-  const getCurrentUser = async (request: KibanaRequest) => {
+  const getCurrentUser = (request: KibanaRequest) => {
     if (!license.isEnabled()) {
       return null;
     }
 
-    return (await clusterClient
-      .asScoped(request)
-      .callAsCurrentUser('shield.authenticate')) as AuthenticatedUser;
+    return (http.auth.get(request).state ?? null) as AuthenticatedUser | null;
   };
 
   const isValid = (sessionValue: ProviderSession) => {
@@ -180,18 +178,6 @@ export async function setupAuthentication({
       apiKeys.create(request, params),
     invalidateAPIKey: (request: KibanaRequest, params: InvalidateAPIKeyParams) =>
       apiKeys.invalidate(request, params),
-    isAuthenticated: async (request: KibanaRequest) => {
-      try {
-        await getCurrentUser(request);
-      } catch (err) {
-        // Don't swallow server errors.
-        if (getErrorStatusCode(err) !== 401) {
-          throw err;
-        }
-        return false;
-      }
-
-      return true;
-    },
+    isAuthenticated: (request: KibanaRequest) => http.auth.isAuthenticated(request),
   };
 }

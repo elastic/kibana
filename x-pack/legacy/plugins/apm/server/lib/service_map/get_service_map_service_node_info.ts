@@ -5,7 +5,7 @@
  */
 
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
-import { ESFilter } from '../../../typings/elasticsearch';
+import { ESFilter } from '../../../../../../plugins/apm/typings/elasticsearch';
 import { rangeFilter } from '../helpers/range_filter';
 import {
   PROCESSOR_EVENT,
