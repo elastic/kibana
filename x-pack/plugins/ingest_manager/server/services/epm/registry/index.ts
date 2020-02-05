@@ -30,7 +30,8 @@ export interface SearchParams {
 export const pkgToPkgKey = ({ name, version }: RegistryPackage) => `${name}-${version}`;
 
 export async function fetchList(params?: SearchParams): Promise<RegistrySearchResults> {
-  const url = new URL(`${configService.getConfig()?.epm.registryUrl}/search`);
+  const registryUrl = configService.getConfig()?.epm.registryUrl;
+  const url = new URL(`${registryUrl}/search`);
   if (params && params.category) {
     url.searchParams.set('category', params.category);
   }
@@ -39,15 +40,18 @@ export async function fetchList(params?: SearchParams): Promise<RegistrySearchRe
 }
 
 export async function fetchInfo(key: string): Promise<RegistryPackage> {
-  return fetchUrl(`${configService.getConfig()?.epm.registryUrl}/package/${key}`).then(JSON.parse);
+  const registryUrl = configService.getConfig()?.epm.registryUrl;
+  return fetchUrl(`${registryUrl}/package/${key}`).then(JSON.parse);
 }
 
 export async function fetchFile(filePath: string): Promise<Response> {
-  return getResponse(`${configService.getConfig()?.epm.registryUrl}${filePath}`);
+  const registryUrl = configService.getConfig()?.epm.registryUrl;
+  return getResponse(`${registryUrl}${filePath}`);
 }
 
 export async function fetchCategories(): Promise<CategorySummaryList> {
-  return fetchUrl(`${configService.getConfig()?.epm.registryUrl}/categories`).then(JSON.parse);
+  const registryUrl = configService.getConfig()?.epm.registryUrl;
+  return fetchUrl(`${registryUrl}/categories`).then(JSON.parse);
 }
 
 export async function getArchiveInfo(
@@ -128,10 +132,8 @@ async function getOrFetchArchiveBuffer(pkgkey: string): Promise<Buffer> {
 
 async function fetchArchiveBuffer(key: string): Promise<Buffer> {
   const { download: archivePath } = await fetchInfo(key);
-
-  return getResponseStream(`${configService.getConfig()?.epm.registryUrl}${archivePath}`).then(
-    streamToBuffer
-  );
+  const registryUrl = configService.getConfig()?.epm.registryUrl;
+  return getResponseStream(`${registryUrl}${archivePath}`).then(streamToBuffer);
 }
 
 export function getAsset(key: string) {
