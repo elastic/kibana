@@ -23,10 +23,8 @@ export function formatdate(): ExpressionFunctionDefinition<
   return {
     name: 'formatdate',
     type: 'string',
+    inputTypes: ['number', 'string'],
     help,
-    context: {
-      types: ['number', 'string'],
-    },
     args: {
       format: {
         aliases: ['_'],
@@ -35,11 +33,11 @@ export function formatdate(): ExpressionFunctionDefinition<
         help: argHelp.format,
       },
     },
-    fn: (context, args) => {
+    fn: (input, args) => {
       if (!args.format) {
-        return moment.utc(new Date(context)).toISOString();
+        return moment.utc(new Date(input)).toISOString();
       }
-      return moment.utc(new Date(context)).format(args.format);
+      return moment.utc(new Date(input)).format(args.format);
     },
   };
 }

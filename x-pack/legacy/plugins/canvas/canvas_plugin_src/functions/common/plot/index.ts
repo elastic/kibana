@@ -36,10 +36,8 @@ export function plot(): ExpressionFunctionDefinition<'plot', PointSeries, Argume
     name: 'plot',
     aliases: [],
     type: 'render',
+    inputTypes: ['pointseries'],
     help,
-    context: {
-      types: ['pointseries'],
-    },
     args: {
       defaultStyle: {
         multi: false,
@@ -79,12 +77,12 @@ export function plot(): ExpressionFunctionDefinition<'plot', PointSeries, Argume
         default: true,
       },
     },
-    fn: (context, args) => {
+    fn: (input, args) => {
       const seriesStyles: { [key: string]: SeriesStyle } =
         keyBy(args.seriesStyle || [], 'label') || {};
 
-      const sortedRows = sortBy(context.rows, ['x', 'y', 'color', 'size', 'text']);
-      const ticks = getTickHash(context.columns, sortedRows);
+      const sortedRows = sortBy(input.rows, ['x', 'y', 'color', 'size', 'text']);
+      const ticks = getTickHash(input.columns, sortedRows);
       const font = args.font ? getFontSpec(args.font) : {};
 
       const data = map(groupBy(sortedRows, 'color'), (series, label) => {
@@ -104,8 +102,8 @@ export function plot(): ExpressionFunctionDefinition<'plot', PointSeries, Argume
               text?: string;
             } = {};
 
-            const x = get(context.columns, 'x.type') === 'string' ? ticks.x.hash[point.x] : point.x;
-            const y = get(context.columns, 'y.type') === 'string' ? ticks.y.hash[point.y] : point.y;
+            const x = get(input.columns, 'x.type') === 'string' ? ticks.x.hash[point.x] : point.x;
+            const y = get(input.columns, 'y.type') === 'string' ? ticks.y.hash[point.y] : point.y;
 
             if (point.size != null) {
               attrs.size = point.size;
@@ -136,7 +134,7 @@ export function plot(): ExpressionFunctionDefinition<'plot', PointSeries, Argume
         },
       };
 
-      const result = {
+      const output = {
         type: 'render',
         as: 'plot',
         value: {
@@ -148,12 +146,12 @@ export function plot(): ExpressionFunctionDefinition<'plot', PointSeries, Argume
             legend: getLegendConfig(args.legend, data.length),
             grid: gridConfig,
             xaxis: getFlotAxisConfig('x', args.xaxis, {
-              columns: context.columns,
+              columns: input.columns,
               ticks,
               font,
             }),
             yaxis: getFlotAxisConfig('y', args.yaxis, {
-              columns: context.columns,
+              columns: input.columns,
               ticks,
               font,
             }),
@@ -169,7 +167,7 @@ export function plot(): ExpressionFunctionDefinition<'plot', PointSeries, Argume
       // TODO: holy hell, why does this work?! the working theory is that some values become undefined
       // and serializing the result here causes them to be dropped off, and this makes flot react differently.
       // It's also possible that something else ends up mutating this object, but that seems less likely.
-      return JSON.parse(JSON.stringify(result));
+      return JSON.parse(JSON.stringify(output));
     },
   };
 }

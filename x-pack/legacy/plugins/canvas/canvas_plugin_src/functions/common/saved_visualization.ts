@@ -19,13 +19,13 @@ interface Arguments {
   id: string;
 }
 
-type Return = EmbeddableExpression<VisualizeInput>;
+type Output = EmbeddableExpression<VisualizeInput>;
 
 export function savedVisualization(): ExpressionFunctionDefinition<
   'savedVisualization',
   Filter | null,
   Arguments,
-  Return
+  Output
 > {
   const { help, args: argHelp } = getFunctionHelp().savedVisualization;
   return {
@@ -39,8 +39,8 @@ export function savedVisualization(): ExpressionFunctionDefinition<
       },
     },
     type: EmbeddableExpressionType,
-    fn: (context, { id }) => {
-      const filters = context ? context.and : [];
+    fn: (input, { id }) => {
+      const filters = input ? input.and : [];
 
       return {
         type: EmbeddableExpressionType,

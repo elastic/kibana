@@ -31,10 +31,8 @@ export function render(): ExpressionFunctionDefinition<
     name: 'render',
     aliases: [],
     type: 'render',
+    inputTypes: ['render'],
     help,
-    context: {
-      types: ['render'],
-    },
     args: {
       as: {
         types: ['string'],
@@ -69,10 +67,10 @@ export function render(): ExpressionFunctionDefinition<
         default: '{containerStyle}',
       },
     },
-    fn: (context, args) => {
+    fn: (input, args) => {
       return {
-        ...context,
-        as: args.as || context.as,
+        ...input,
+        as: args.as || input.as,
         css: args.css || DEFAULT_ELEMENT_CSS,
         containerStyle: args.containerStyle,
       };

@@ -6,21 +6,19 @@
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { getFunctionHelp } from '../../../i18n';
 
-type Context = number | string;
+type Input = number | string;
 
 interface Arguments {
-  value: Context;
+  value: Input;
 }
 
-export function gt(): ExpressionFunctionDefinition<'gt', Context, Arguments, boolean> {
+export function gt(): ExpressionFunctionDefinition<'gt', Input, Arguments, boolean> {
   const { help, args: argHelp } = getFunctionHelp().gt;
 
   return {
     name: 'gt',
     type: 'boolean',
-    context: {
-      types: ['number', 'string'],
-    },
+    inputTypes: ['number', 'string'],
     help,
     args: {
       value: {
@@ -30,14 +28,14 @@ export function gt(): ExpressionFunctionDefinition<'gt', Context, Arguments, boo
         help: argHelp.value,
       },
     },
-    fn: (context, args) => {
+    fn: (input, args) => {
       const { value } = args;
 
-      if (typeof context !== typeof value) {
+      if (typeof input !== typeof value) {
         return false;
       }
 
-      return context > value;
+      return input > value;
     },
   };
 }

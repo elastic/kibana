@@ -34,21 +34,19 @@ interface Arguments {
   maintainAspect: boolean;
 }
 
-interface Return extends Arguments {
+interface Output extends Arguments {
   type: 'shape';
 }
 
-export function shape(): ExpressionFunctionDefinition<'shape', null, Arguments, Return> {
+export function shape(): ExpressionFunctionDefinition<'shape', null, Arguments, Output> {
   const { help, args: argHelp } = getFunctionHelp().shape;
 
   return {
     name: 'shape',
     aliases: [],
     type: 'shape',
+    inputTypes: ['null'],
     help,
-    context: {
-      types: ['null'],
-    },
     args: {
       shape: {
         types: ['string'],
@@ -80,7 +78,7 @@ export function shape(): ExpressionFunctionDefinition<'shape', null, Arguments, 
         options: [true, false],
       },
     },
-    fn: (_context, args) => ({
+    fn: (input, args) => ({
       type: 'shape',
       ...args,
     }),

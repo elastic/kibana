@@ -22,10 +22,8 @@ export function essql(): ExpressionFunctionDefinition<'essql', Filter, Arguments
   return {
     name: 'essql',
     type: 'datatable',
+    inputTypes: ['filter'],
     help,
-    context: {
-      types: ['filter'],
-    },
     args: {
       query: {
         aliases: ['_', 'q'],
@@ -44,10 +42,10 @@ export function essql(): ExpressionFunctionDefinition<'essql', Filter, Arguments
         help: argHelp.timezone,
       },
     },
-    fn: (context, args, handlers) =>
-      queryEsSQL(((handlers as any) as { elasticsearchClient: any }).elasticsearchClient, {
+    fn: (input, args, context) =>
+      queryEsSQL(((context as any) as { elasticsearchClient: any }).elasticsearchClient, {
         ...args,
-        filter: context.and,
+        filter: input.and,
       }),
   };
 }

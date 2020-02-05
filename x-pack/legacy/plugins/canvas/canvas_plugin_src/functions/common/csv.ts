@@ -22,10 +22,8 @@ export function csv(): ExpressionFunctionDefinition<'csv', null, Arguments, Data
   return {
     name: 'csv',
     type: 'datatable',
+    inputTypes: ['null'],
     help,
-    context: {
-      types: ['null'],
-    },
     args: {
       data: {
         aliases: ['_'],
@@ -42,7 +40,7 @@ export function csv(): ExpressionFunctionDefinition<'csv', null, Arguments, Data
         help: argHelp.newline,
       },
     },
-    fn(_context, args) {
+    fn(input, args) {
       const { data: csvString, delimiter, newline } = args;
 
       const config: Papa.ParseConfig = {

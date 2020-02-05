@@ -24,10 +24,8 @@ export function mapColumn(): ExpressionFunctionDefinition<
     name: 'mapColumn',
     aliases: ['mc'], // midnight commander. So many times I've launched midnight commander instead of moving a file.
     type: 'datatable',
+    inputTypes: ['datatable'],
     help,
-    context: {
-      types: ['datatable'],
-    },
     args: {
       name: {
         types: ['string'],
@@ -43,11 +41,11 @@ export function mapColumn(): ExpressionFunctionDefinition<
         required: true,
       },
     },
-    fn: (context, args) => {
+    fn: (input, args) => {
       const expression = args.expression || (() => Promise.resolve(null));
 
-      const columns = [...context.columns];
-      const rowPromises = context.rows.map(row => {
+      const columns = [...input.columns];
+      const rowPromises = input.rows.map(row => {
         return expression({
           type: 'datatable',
           columns,

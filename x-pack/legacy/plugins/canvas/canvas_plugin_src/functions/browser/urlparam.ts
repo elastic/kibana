@@ -26,9 +26,7 @@ export function urlparam(): ExpressionFunctionDefinition<
     aliases: [],
     type: 'string',
     help,
-    context: {
-      types: ['null'],
-    },
+    inputTypes: ['null'],
     args: {
       param: {
         types: ['string'],
@@ -43,7 +41,7 @@ export function urlparam(): ExpressionFunctionDefinition<
         help: argHelp.default,
       },
     },
-    fn: (_context, args) => {
+    fn: (input, args) => {
       const query = parse(window.location.href, true).query;
       return query[args.param] || args.default;
     },

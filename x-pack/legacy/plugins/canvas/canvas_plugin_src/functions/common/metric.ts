@@ -8,7 +8,7 @@ import { openSans } from '../../../common/lib/fonts';
 import { Render, Style, ExpressionFunctionDefinition } from '../../../types';
 import { getFunctionHelp } from '../../../i18n';
 
-type Context = number | string | null;
+type Input = number | string | null;
 
 interface Arguments {
   label: string;
@@ -19,7 +19,7 @@ interface Arguments {
 
 export function metric(): ExpressionFunctionDefinition<
   'metric',
-  Context,
+  Input,
   Arguments,
   Render<Arguments>
 > {
@@ -29,10 +29,8 @@ export function metric(): ExpressionFunctionDefinition<
     name: 'metric',
     aliases: [],
     type: 'render',
+    inputTypes: ['number', 'string', 'null'],
     help,
-    context: {
-      types: ['number', 'string', 'null'],
-    },
     args: {
       label: {
         types: ['string'],
@@ -56,12 +54,12 @@ export function metric(): ExpressionFunctionDefinition<
         help: argHelp.metricFormat,
       },
     },
-    fn: (context, { label, labelFont, metricFont, metricFormat }) => {
+    fn: (input, { label, labelFont, metricFont, metricFormat }) => {
       return {
         type: 'render',
         as: 'metric',
         value: {
-          metric: context === null ? '?' : context,
+          metric: input === null ? '?' : input,
           label,
           labelFont,
           metricFont,

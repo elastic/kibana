@@ -50,9 +50,7 @@ export function filters(): ExpressionFunctionDefinition<'filters', null, Argumen
     name: 'filters',
     type: 'filter',
     help,
-    context: {
-      types: ['null'],
-    },
+    inputTypes: ['null'],
     args: {
       group: {
         aliases: ['_'],
@@ -67,7 +65,7 @@ export function filters(): ExpressionFunctionDefinition<'filters', null, Argumen
         default: false,
       },
     },
-    fn: (_context, { group, ungrouped }) => {
+    fn: (input, { group, ungrouped }) => {
       const filterList = getFiltersByGroup(getGlobalFilters(getState()), group, ungrouped);
 
       if (filterList && filterList.length) {

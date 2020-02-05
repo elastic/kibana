@@ -20,13 +20,13 @@ interface Arguments {
   id: string;
 }
 
-type Return = EmbeddableExpression<Partial<SearchInput> & { id: SearchInput['id'] }>;
+type Output = EmbeddableExpression<Partial<SearchInput> & { id: SearchInput['id'] }>;
 
 export function savedSearch(): ExpressionFunctionDefinition<
   'savedSearch',
   Filter | null,
   Arguments,
-  Return
+  Output
 > {
   const { help, args: argHelp } = getFunctionHelp().savedSearch;
   return {
@@ -40,8 +40,8 @@ export function savedSearch(): ExpressionFunctionDefinition<
       },
     },
     type: EmbeddableExpressionType,
-    fn: (context, { id }) => {
-      const filters = context ? context.and : [];
+    fn: (input, { id }) => {
+      const filters = input ? input.and : [];
       return {
         type: EmbeddableExpressionType,
         input: {

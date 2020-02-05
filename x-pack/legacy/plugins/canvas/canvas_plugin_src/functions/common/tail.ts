@@ -19,10 +19,8 @@ export function tail(): ExpressionFunctionDefinition<'tail', Datatable, Argument
     name: 'tail',
     aliases: [],
     type: 'datatable',
+    inputTypes: ['datatable'],
     help,
-    context: {
-      types: ['datatable'],
-    },
     args: {
       count: {
         aliases: ['_'],
@@ -30,9 +28,9 @@ export function tail(): ExpressionFunctionDefinition<'tail', Datatable, Argument
         help: argHelp.count,
       },
     },
-    fn: (context, args) => ({
-      ...context,
-      rows: takeRight(context.rows, args.count),
+    fn: (input, args) => ({
+      ...input,
+      rows: takeRight(input.rows, args.count),
     }),
   };
 }

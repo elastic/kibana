@@ -27,10 +27,8 @@ export function table(): ExpressionFunctionDefinition<
     name: 'table',
     aliases: [],
     type: 'render',
+    inputTypes: ['datatable'],
     help,
-    context: {
-      types: ['datatable'],
-    },
     args: {
       font: {
         types: ['style'],
@@ -55,12 +53,12 @@ export function table(): ExpressionFunctionDefinition<
         options: [true, false],
       },
     },
-    fn: (context, args) => {
+    fn: (input, args) => {
       return {
         type: 'render',
         as: 'table',
         value: {
-          datatable: context,
+          datatable: input,
           ...args,
         },
       };

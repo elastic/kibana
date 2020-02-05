@@ -24,9 +24,7 @@ export function formatnumber(): ExpressionFunctionDefinition<
     name: 'formatnumber',
     type: 'string',
     help,
-    context: {
-      types: ['number'],
-    },
+    inputTypes: ['number'],
     args: {
       format: {
         aliases: ['_'],
@@ -35,11 +33,11 @@ export function formatnumber(): ExpressionFunctionDefinition<
         required: true,
       },
     },
-    fn: (context, args) => {
+    fn: (input, args) => {
       if (!args.format) {
-        return String(context);
+        return String(input);
       }
-      return numeral(context).format(args.format);
+      return numeral(input).format(args.format);
     },
   };
 }

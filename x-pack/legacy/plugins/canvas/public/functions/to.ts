@@ -31,12 +31,12 @@ export function to(): ExpressionFunctionDefinition<'to', any, Arguments, any> {
         multi: true,
       },
     },
-    fn: (context, args) => {
+    fn: (input, args) => {
       if (!args.type) {
         throw errors.missingType();
       }
 
-      return castProvider(registries.types.toJS())(context, args.type);
+      return castProvider(registries.types.toJS())(input, args.type);
     },
   };
 }

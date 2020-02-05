@@ -11,17 +11,15 @@ interface Arguments {
   name: string;
 }
 
-type Context = string | boolean | number | null;
+type Input = string | boolean | number | null;
 
-export function asFn(): ExpressionFunctionDefinition<'as', Context, Arguments, Datatable> {
+export function asFn(): ExpressionFunctionDefinition<'as', Input, Arguments, Datatable> {
   const { help, args: argHelp } = getFunctionHelp().as;
 
   return {
     name: 'as',
     type: 'datatable',
-    context: {
-      types: ['string', 'boolean', 'number', 'null'],
-    },
+    inputTypes: ['string', 'boolean', 'number', 'null'],
     help,
     args: {
       name: {
@@ -31,18 +29,18 @@ export function asFn(): ExpressionFunctionDefinition<'as', Context, Arguments, D
         default: 'value',
       },
     },
-    fn: (context, args) => {
+    fn: (input, args) => {
       return {
         type: 'datatable',
         columns: [
           {
             name: args.name,
-            type: getType(context),
+            type: getType(input),
           },
         ],
         rows: [
           {
-            [args.name]: context,
+            [args.name]: input,
           },
         ],
       };

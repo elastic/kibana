@@ -26,10 +26,8 @@ export function esdocs(): ExpressionFunctionDefinition<'esdocs', Filter, Argumen
   return {
     name: 'esdocs',
     type: 'datatable',
+    inputTypes: ['filter'],
     help,
-    context: {
-      types: ['filter'],
-    },
     args: {
       query: {
         types: ['string'],
@@ -62,10 +60,10 @@ export function esdocs(): ExpressionFunctionDefinition<'esdocs', Filter, Argumen
         help: argHelp.sort,
       },
     },
-    fn: (context, args, handlers) => {
+    fn: (input, args, context) => {
       const { count, index, fields, sort } = args;
 
-      context.and = context.and.concat([
+      input.and = input.and.concat([
         {
           type: 'luceneQueryString',
           query: args.query,
@@ -96,10 +94,10 @@ export function esdocs(): ExpressionFunctionDefinition<'esdocs', Filter, Argumen
         }
       }
 
-      return queryEsSQL(((handlers as any) as { elasticsearchClient: any }).elasticsearchClient, {
+      return queryEsSQL(((context as any) as { elasticsearchClient: any }).elasticsearchClient, {
         count,
         query: query.toString(),
-        filter: context.and,
+        filter: input.and,
       });
     },
   };

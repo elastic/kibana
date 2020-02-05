@@ -20,9 +20,7 @@ export function location(): ExpressionFunctionDefinition<'location', null, {}, P
   return {
     name: 'location',
     type: 'datatable',
-    context: {
-      types: ['null'],
-    },
+    inputTypes: ['null'],
     args: {},
     help,
     fn: () => {

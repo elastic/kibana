@@ -25,10 +25,8 @@ export function staticColumn(): ExpressionFunctionDefinition<
   return {
     name: 'staticColumn',
     type: 'datatable',
+    inputTypes: ['datatable'],
     help,
-    context: {
-      types: ['datatable'],
-    },
     args: {
       name: {
         types: ['string'],
@@ -42,10 +40,10 @@ export function staticColumn(): ExpressionFunctionDefinition<
         default: null,
       },
     },
-    fn: (context, args) => {
-      const rows = context.rows.map(row => ({ ...row, [args.name]: args.value }));
+    fn: (input, args) => {
+      const rows = input.rows.map(row => ({ ...row, [args.name]: args.value }));
       const type = getType(args.value);
-      const columns = [...context.columns];
+      const columns = [...input.columns];
       const existingColumnIndex = columns.findIndex(({ name }) => name === args.name);
       const newColumn = { name: args.name, type };
 

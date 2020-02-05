@@ -31,10 +31,8 @@ export function repeatImage(): ExpressionFunctionDefinition<
     name: 'repeatImage',
     aliases: [],
     type: 'render',
+    inputTypes: ['number'],
     help,
-    context: {
-      types: ['number'],
-    },
     args: {
       emptyImage: {
         types: ['string', 'null'],

@@ -19,9 +19,7 @@ export function rounddate(): ExpressionFunctionDefinition<'rounddate', number, A
     name: 'rounddate',
     type: 'number',
     help,
-    context: {
-      types: ['number'],
-    },
+    inputTypes: ['number'],
     args: {
       format: {
         aliases: ['_'],
@@ -29,11 +27,11 @@ export function rounddate(): ExpressionFunctionDefinition<'rounddate', number, A
         help: argHelp.format,
       },
     },
-    fn: (context, args) => {
+    fn: (input, args) => {
       if (!args.format) {
-        return context;
+        return input;
       }
-      return moment.utc(moment.utc(context).format(args.format), args.format).valueOf();
+      return moment.utc(moment.utc(input).format(args.format), args.format).valueOf();
     },
   };
 }

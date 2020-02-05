@@ -44,10 +44,8 @@ export function progress(): ExpressionFunctionDefinition<
     name: 'progress',
     aliases: [],
     type: 'render',
+    inputTypes: ['number'],
     help,
-    context: {
-      types: ['number'],
-    },
     args: {
       shape: {
         aliases: ['_'],

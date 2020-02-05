@@ -15,11 +15,9 @@ export function rowCount(): ExpressionFunctionDefinition<'rowCount', Datatable, 
     name: 'rowCount',
     aliases: [],
     type: 'number',
+    inputTypes: ['datatable'],
     help,
-    context: {
-      types: ['datatable'],
-    },
     args: {},
-    fn: context => context.rows.length,
+    fn: input => input.rows.length,
   };
 }

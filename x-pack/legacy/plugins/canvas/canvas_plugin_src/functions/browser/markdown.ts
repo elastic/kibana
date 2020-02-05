@@ -39,9 +39,7 @@ export function markdown(): ExpressionFunctionDefinition<
     aliases: [],
     type: 'render',
     help,
-    context: {
-      types: ['datatable', 'null'],
-    },
+    inputTypes: ['datatable', 'null'],
     args: {
       content: {
         aliases: ['_', 'expression'],
@@ -56,7 +54,7 @@ export function markdown(): ExpressionFunctionDefinition<
         default: '{font}',
       },
     },
-    fn: (context, args) => {
+    fn: (input, args) => {
       const compileFunctions = args.content.map(str =>
         Handlebars.compile(String(str), { knownHelpersOnly: true })
       );
@@ -64,7 +62,7 @@ export function markdown(): ExpressionFunctionDefinition<
         columns: [],
         rows: [],
         type: null,
-        ...context,
+        ...input,
       };
 
       return {

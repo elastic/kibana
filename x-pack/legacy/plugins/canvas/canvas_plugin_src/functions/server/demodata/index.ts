@@ -24,9 +24,7 @@ export function demodata(): ExpressionFunctionDefinition<'demodata', Filter, Arg
     aliases: [],
     type: 'datatable',
     help,
-    context: {
-      types: ['filter'],
-    },
+    inputTypes: ['filter'],
     args: {
       type: {
         types: ['string'],
@@ -36,7 +34,7 @@ export function demodata(): ExpressionFunctionDefinition<'demodata', Filter, Arg
         options: ['ci', 'shirts'],
       },
     },
-    fn: (context, args) => {
+    fn: (input, args) => {
       const demoRows = getDemoRows(args.type);
 
       let set = {} as { columns: DatatableColumn[]; rows: DatatableRow[] };
@@ -76,7 +74,7 @@ export function demodata(): ExpressionFunctionDefinition<'demodata', Filter, Arg
           columns,
           rows,
         },
-        context
+        input
       );
     },
   };

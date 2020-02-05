@@ -23,10 +23,8 @@ export function filterrows(): ExpressionFunctionDefinition<
     name: 'filterrows',
     aliases: [],
     type: 'datatable',
+    inputTypes: ['datatable'],
     help,
-    context: {
-      types: ['datatable'],
-    },
     args: {
       fn: {
         resolve: false,
@@ -36,20 +34,20 @@ export function filterrows(): ExpressionFunctionDefinition<
         help: argHelp.fn,
       },
     },
-    fn(context, { fn }) {
-      const checks = context.rows.map(row =>
+    fn(input, { fn }) {
+      const checks = input.rows.map(row =>
         fn({
-          ...context,
+          ...input,
           rows: [row],
         })
       );
 
       return Promise.all(checks)
-        .then(results => context.rows.filter((row, i) => results[i]))
+        .then(results => input.rows.filter((row, i) => results[i]))
         .then(
           rows =>
             ({
-              ...context,
+              ...input,
               rows,
             } as Datatable)
         );

@@ -12,7 +12,7 @@ interface Arguments {
   else: () => Promise<any>;
 }
 
-export function ifFn(): ExpressionFunctionDefinition<'if', any, Arguments, any> {
+export function ifFn(): ExpressionFunctionDefinition<'if', unknown, Arguments, unknown> {
   const { help, args: argHelp } = getFunctionHelp().if;
 
   return {
@@ -33,15 +33,15 @@ export function ifFn(): ExpressionFunctionDefinition<'if', any, Arguments, any> 
         help: argHelp.else,
       },
     },
-    fn: async (context, args) => {
+    fn: async (input, args) => {
       if (args.condition) {
         if (typeof args.then === 'undefined') {
-          return context;
+          return input;
         }
         return await args.then();
       } else {
         if (typeof args.else === 'undefined') {
-          return context;
+          return input;
         }
         return await args.else();
       }

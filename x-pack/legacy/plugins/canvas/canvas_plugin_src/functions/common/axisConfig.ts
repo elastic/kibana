@@ -34,10 +34,8 @@ export function axisConfig(): ExpressionFunctionDefinition<
     name: 'axisConfig',
     aliases: [],
     type: 'axisConfig',
+    inputTypes: ['null'],
     help,
-    context: {
-      types: ['null'],
-    },
     args: {
       max: {
         types: ['number', 'string', 'null'],
@@ -63,7 +61,7 @@ export function axisConfig(): ExpressionFunctionDefinition<
         help: argHelp.tickSize,
       },
     },
-    fn: (_context, args) => {
+    fn: (input, args) => {
       const { position, min, max, ...rest } = args;
 
       if (!Object.values(Position).includes(position)) {

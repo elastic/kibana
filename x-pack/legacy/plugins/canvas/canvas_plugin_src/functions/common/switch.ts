@@ -13,7 +13,7 @@ interface Arguments {
   default: () => any;
 }
 
-export function switchFn(): ExpressionFunctionDefinition<'switch', any, Arguments, any> {
+export function switchFn(): ExpressionFunctionDefinition<'switch', unknown, Arguments, unknown> {
   const { help, args: argHelp } = getFunctionHelp().switch;
 
   return {
@@ -33,7 +33,7 @@ export function switchFn(): ExpressionFunctionDefinition<'switch', any, Argument
         help: argHelp.default,
       },
     },
-    fn: async (context, args) => {
+    fn: async (input, args) => {
       const cases = args.case || [];
 
       for (let i = 0; i < cases.length; i++) {
@@ -48,7 +48,7 @@ export function switchFn(): ExpressionFunctionDefinition<'switch', any, Argument
         return await args.default();
       }
 
-      return context;
+      return input;
     },
   };
 }

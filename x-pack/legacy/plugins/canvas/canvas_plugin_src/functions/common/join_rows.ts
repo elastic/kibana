@@ -30,9 +30,7 @@ export function joinRows(): ExpressionFunctionDefinition<'joinRows', Datatable, 
     name: 'joinRows',
     type: 'string',
     help,
-    context: {
-      types: ['datatable'],
-    },
+    inputTypes: ['datatable'],
     args: {
       column: {
         aliases: ['_'],
@@ -57,14 +55,14 @@ export function joinRows(): ExpressionFunctionDefinition<'joinRows', Datatable, 
         default: ',',
       },
     },
-    fn: (context, { column, separator, quote, distinct }) => {
-      const columnMatch = context.columns.find(col => col.name === column);
+    fn: (input, { column, separator, quote, distinct }) => {
+      const columnMatch = input.columns.find(col => col.name === column);
 
       if (!columnMatch) {
         throw errors.columnNotFound(column);
       }
 
-      return context.rows
+      return input.rows
         .reduce((acc, row) => {
           const value = row[column];
           if (distinct && acc.includes(value)) return acc;

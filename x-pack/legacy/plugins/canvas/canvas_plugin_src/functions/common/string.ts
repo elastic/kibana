@@ -15,9 +15,7 @@ export function string(): ExpressionFunctionDefinition<'string', null, Arguments
 
   return {
     name: 'string',
-    context: {
-      types: ['null'],
-    },
+    inputTypes: ['null'],
     aliases: [],
     type: 'string',
     help,
@@ -29,6 +27,6 @@ export function string(): ExpressionFunctionDefinition<'string', null, Arguments
         help: argHelp.value,
       },
     },
-    fn: (_context, args) => args.value.join(''),
+    fn: (input, args) => args.value.join(''),
   };
 }

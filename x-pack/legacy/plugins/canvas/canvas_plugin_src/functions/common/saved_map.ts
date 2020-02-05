@@ -50,13 +50,13 @@ const defaultTimeRange = {
   to: 'now',
 };
 
-type Return = EmbeddableExpression<SavedMapInput>;
+type Output = EmbeddableExpression<SavedMapInput>;
 
 export function savedMap(): ExpressionFunctionDefinition<
   'savedMap',
   Filter | null,
   Arguments,
-  Return
+  Output
 > {
   const { help, args: argHelp } = getFunctionHelp().savedMap;
   return {
@@ -91,8 +91,8 @@ export function savedMap(): ExpressionFunctionDefinition<
       },
     },
     type: EmbeddableExpressionType,
-    fn: (context, args) => {
-      const filters = context ? context.and : [];
+    fn: (input, args) => {
+      const filters = input ? input.and : [];
 
       const center = args.center
         ? {

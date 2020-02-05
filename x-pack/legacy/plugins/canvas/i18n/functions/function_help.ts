@@ -111,9 +111,9 @@ import { help as urlparam } from './dict/urlparam';
  */
 export type FunctionHelp<T> = T extends ExpressionFunctionDefinition<
   infer Name,
-  infer Context,
+  infer Input,
   infer Arguments,
-  infer Return
+  infer Output
 >
   ? {
       help: string;
@@ -139,9 +139,9 @@ export type FunctionHelp<T> = T extends ExpressionFunctionDefinition<
 //
 type FunctionHelpMap<T> = T extends ExpressionFunctionDefinition<
   infer Name,
-  infer Context,
+  infer Input,
   infer Arguments,
-  infer Return
+  infer Output
 >
   ? { [key in Name]: FunctionHelp<T> }
   : never;

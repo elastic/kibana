@@ -19,9 +19,7 @@ export function getCell(): ExpressionFunctionDefinition<'getCell', Datatable, Ar
   return {
     name: 'getCell',
     help,
-    context: {
-      types: ['datatable'],
-    },
+    inputTypes: ['datatable'],
     args: {
       column: {
         types: ['string'],
@@ -35,13 +33,13 @@ export function getCell(): ExpressionFunctionDefinition<'getCell', Datatable, Ar
         default: 0,
       },
     },
-    fn: (context, args) => {
-      const row = context.rows[args.row];
+    fn: (input, args) => {
+      const row = input.rows[args.row];
       if (!row) {
         throw errors.rowNotFound(args.row);
       }
 
-      const { column = context.columns[0].name } = args;
+      const { column = input.columns[0].name } = args;
       const value = row[column];
 
       if (typeof value === 'undefined') {

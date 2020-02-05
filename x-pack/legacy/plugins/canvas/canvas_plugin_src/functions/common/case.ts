@@ -41,9 +41,9 @@ export function caseFn(): ExpressionFunctionDefinition<'case', any, Arguments, P
         help: argHelp.then,
       },
     },
-    fn: async (context, args) => {
-      const matches = await doesMatch(context, args);
-      const result = matches ? await getResult(context, args) : null;
+    fn: async (input, args) => {
+      const matches = await doesMatch(input, args);
+      const result = matches ? await getResult(input, args) : null;
       return { type: 'case', matches, result };
     },
   };

@@ -36,10 +36,8 @@ export function image(): ExpressionFunctionDefinition<'image', null, Arguments, 
     name: 'image',
     aliases: [],
     type: 'image',
+    inputTypes: ['null'],
     help,
-    context: {
-      types: ['null'],
-    },
     args: {
       dataurl: {
         // This was accepting dataurl, but there was no facility in fn for checking type and handling a dataurl type.
@@ -55,7 +53,7 @@ export function image(): ExpressionFunctionDefinition<'image', null, Arguments, 
         options: Object.values(ImageMode),
       },
     },
-    fn: (_context, { dataurl, mode }) => {
+    fn: (input, { dataurl, mode }) => {
       if (!mode || !Object.values(ImageMode).includes(mode)) {
         throw errors.invalidImageMode();
       }

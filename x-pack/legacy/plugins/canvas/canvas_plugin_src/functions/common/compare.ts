@@ -32,9 +32,7 @@ export function compare(): ExpressionFunctionDefinition<'compare', Context, Argu
     help,
     aliases: ['condition'],
     type: 'boolean',
-    context: {
-      types: ['string', 'number', 'boolean', 'null'],
-    },
+    inputTypes: ['string', 'number', 'boolean', 'null'],
     args: {
       op: {
         aliases: ['_'],
@@ -48,8 +46,8 @@ export function compare(): ExpressionFunctionDefinition<'compare', Context, Argu
         help: argHelp.to,
       },
     },
-    fn: (context, args) => {
-      const a = context;
+    fn: (input, args) => {
+      const a = input;
       const { to: b, op } = args;
       const typesMatch = typeof a === typeof b;
 

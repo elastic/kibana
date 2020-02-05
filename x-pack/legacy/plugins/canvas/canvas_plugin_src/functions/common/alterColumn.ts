@@ -27,10 +27,8 @@ export function alterColumn(): ExpressionFunctionDefinition<
   return {
     name: 'alterColumn',
     type: 'datatable',
+    inputTypes: ['datatable'],
     help,
-    context: {
-      types: ['datatable'],
-    },
     args: {
       column: {
         aliases: ['_'],
@@ -48,12 +46,12 @@ export function alterColumn(): ExpressionFunctionDefinition<
         options: ['null', 'boolean', 'number', 'string', 'date'],
       },
     },
-    fn: (context, args) => {
+    fn: (input, args) => {
       if (!args.column || (!args.type && !args.name)) {
-        return context;
+        return input;
       }
 
-      const column = context.columns.find(col => col.name === args.column);
+      const column = input.columns.find(col => col.name === args.column);
       if (!column) {
         throw errors.columnNotFound(args.column);
       }
@@ -61,7 +59,7 @@ export function alterColumn(): ExpressionFunctionDefinition<
       const name = args.name || column.name;
       const type = args.type || column.type;
 
-      const columns = context.columns.reduce((all: DatatableColumn[], col) => {
+      const columns = input.columns.reduce((all: DatatableColumn[], col) => {
         if (col.name !== args.name) {
           if (col.name !== column.name) {
             all.push(col);
@@ -96,7 +94,7 @@ export function alterColumn(): ExpressionFunctionDefinition<
         })();
       }
 
-      const rows = context.rows.map(row => ({
+      const rows = input.rows.map(row => ({
         ...omit(row, column.name),
         [name]: handler(row[column.name]),
       }));

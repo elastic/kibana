@@ -7,13 +7,13 @@
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { getFunctionHelp } from '../../../i18n';
 
-type Context = boolean | number | string | null;
+type Input = boolean | number | string | null;
 
 interface Arguments {
-  value: Context;
+  value: Input;
 }
 
-export function neq(): ExpressionFunctionDefinition<'neq', Context, Arguments, boolean> {
+export function neq(): ExpressionFunctionDefinition<'neq', Input, Arguments, boolean> {
   const { help, args: argHelp } = getFunctionHelp().neq;
 
   return {
@@ -28,8 +28,8 @@ export function neq(): ExpressionFunctionDefinition<'neq', Context, Arguments, b
         help: argHelp.value,
       },
     },
-    fn: (context, args) => {
-      return context !== args.value;
+    fn: (input, args) => {
+      return input !== args.value;
     },
   };
 }

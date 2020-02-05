@@ -88,8 +88,8 @@ type ValuesOfUnion<T> = T extends any ? valueof<T> : never;
  * in Kibana and Canvas.
  */
 // prettier-ignore
-export type ExpressionFunctionFactory<Name extends string, Context, Arguments, Return> = 
-() => ExpressionFunctionDefinition<Name, Context, Arguments, Return>;
+export type ExpressionFunctionFactory<Name extends string, Input, Arguments, Output> = 
+() => ExpressionFunctionDefinition<Name, Input, Arguments, Output>;
 
 /**
  * `FunctionFactory` exists as a name shim between the `ExpressionFunction` type and
@@ -99,8 +99,8 @@ export type ExpressionFunctionFactory<Name extends string, Context, Arguments, R
  */
 // prettier-ignore
 export type FunctionFactory<FnFactory> = 
-  FnFactory extends ExpressionFunctionFactory<infer Name, infer Context, infer Arguments, infer Return> ?
-  ExpressionFunctionDefinition<Name, Context, Arguments, Return> :
+  FnFactory extends ExpressionFunctionFactory<infer Name, infer Input, infer Arguments, infer Output> ?
+  ExpressionFunctionDefinition<Name, Input, Arguments, Output> :
     never;
 
 type CommonFunction = FunctionFactory<typeof commonFunctions[number]>;

@@ -21,9 +21,7 @@ export function date(): ExpressionFunctionDefinition<'date', null, Arguments, nu
     name: 'date',
     type: 'number',
     help,
-    context: {
-      types: ['null'],
-    },
+    inputTypes: ['null'],
     args: {
       value: {
         aliases: ['_'],
@@ -35,7 +33,7 @@ export function date(): ExpressionFunctionDefinition<'date', null, Arguments, nu
         help: argHelp.format,
       },
     },
-    fn: (_context, args) => {
+    fn: (input, args) => {
       const { value: argDate, format } = args;
 
       const outputDate =

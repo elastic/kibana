@@ -19,10 +19,8 @@ export function head(): ExpressionFunctionDefinition<'head', Datatable, Argument
     name: 'head',
     aliases: [],
     type: 'datatable',
+    inputTypes: ['datatable'],
     help,
-    context: {
-      types: ['datatable'],
-    },
     args: {
       count: {
         aliases: ['_'],
@@ -31,9 +29,9 @@ export function head(): ExpressionFunctionDefinition<'head', Datatable, Argument
         default: 1,
       },
     },
-    fn: (context, args) => ({
-      ...context,
-      rows: take(context.rows, args.count),
+    fn: (input, args) => ({
+      ...input,
+      rows: take(input.rows, args.count),
     }),
   };
 }

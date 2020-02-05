@@ -22,10 +22,8 @@ export function asset(): ExpressionFunctionDefinition<'asset', null, Arguments, 
     name: 'asset',
     aliases: [],
     type: 'string',
+    inputTypes: ['null'],
     help,
-    context: {
-      types: ['null'],
-    },
     args: {
       id: {
         aliases: ['_'],
@@ -34,7 +32,7 @@ export function asset(): ExpressionFunctionDefinition<'asset', null, Arguments, 
         required: true,
       },
     },
-    fn: (_context, args) => {
+    fn: (input, args) => {
       const assetId = args.id;
       const storedAsset = getAssetById(getState(), assetId);
       if (storedAsset !== undefined) {

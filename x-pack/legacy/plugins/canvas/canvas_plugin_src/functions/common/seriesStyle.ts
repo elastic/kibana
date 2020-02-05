@@ -20,7 +20,7 @@ interface Arguments {
   stack: number | null;
 }
 
-interface Return extends Arguments {
+interface Output extends Arguments {
   type: 'seriesStyle';
 }
 
@@ -28,7 +28,7 @@ export function seriesStyle(): ExpressionFunctionDefinition<
   'seriesStyle',
   null,
   Arguments,
-  Return
+  Output
 > {
   const { help, args: argHelp } = getFunctionHelp().seriesStyle;
 
@@ -36,9 +36,7 @@ export function seriesStyle(): ExpressionFunctionDefinition<
     name,
     help,
     type: 'seriesStyle',
-    context: {
-      types: ['null'],
-    },
+    inputTypes: ['null'],
     args: {
       bars: {
         types: ['number'],
@@ -76,6 +74,6 @@ export function seriesStyle(): ExpressionFunctionDefinition<
         help: argHelp.stack,
       },
     },
-    fn: (_context, args) => ({ type: name, ...args }),
+    fn: (input, args) => ({ type: name, ...args }),
   };
 }

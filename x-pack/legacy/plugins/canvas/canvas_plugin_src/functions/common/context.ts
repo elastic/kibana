@@ -7,7 +7,7 @@
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { getFunctionHelp } from '../../../i18n';
 
-export function context(): ExpressionFunctionDefinition<'context', any, {}, any> {
+export function context(): ExpressionFunctionDefinition<'context', unknown, {}, unknown> {
   const { help } = getFunctionHelp().context;
 
   return {

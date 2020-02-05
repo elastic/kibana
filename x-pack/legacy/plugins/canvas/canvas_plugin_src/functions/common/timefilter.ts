@@ -28,9 +28,7 @@ export function timefilter(): ExpressionFunctionDefinition<
     name: 'timefilter',
     aliases: [],
     type: 'filter',
-    context: {
-      types: ['filter'],
-    },
+    inputTypes: ['filter'],
     help,
     args: {
       column: {
@@ -54,9 +52,9 @@ export function timefilter(): ExpressionFunctionDefinition<
         help: 'The group name for the filter',
       },
     },
-    fn: (context, args) => {
+    fn: (input, args) => {
       if (!args.from && !args.to) {
-        return context;
+        return input;
       }
 
       const { from, to, column } = args;
@@ -84,7 +82,7 @@ export function timefilter(): ExpressionFunctionDefinition<
         (filter as any).from = parseAndValidate(from);
       }
 
-      return { ...context, and: [...context.and, filter] };
+      return { ...input, and: [...input.and, filter] };
     },
   };
 }

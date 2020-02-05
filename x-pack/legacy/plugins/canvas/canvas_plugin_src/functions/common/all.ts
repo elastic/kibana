@@ -18,9 +18,7 @@ export function all(): ExpressionFunctionDefinition<'all', null, Arguments, bool
     name: 'all',
     type: 'boolean',
     help,
-    context: {
-      types: ['null'],
-    },
+    inputTypes: ['null'],
     args: {
       condition: {
         aliases: ['_'],
@@ -30,7 +28,7 @@ export function all(): ExpressionFunctionDefinition<'all', null, Arguments, bool
         multi: true,
       },
     },
-    fn: (_context, args) => {
+    fn: (input, args) => {
       const conditions = args.condition || [];
       return conditions.every(Boolean);
     },

@@ -18,9 +18,7 @@ export function lt(): ExpressionFunctionDefinition<'lt', Context, Arguments, boo
   return {
     name: 'lt',
     type: 'boolean',
-    context: {
-      types: ['number', 'string'],
-    },
+    inputTypes: ['number', 'string'],
     help,
     args: {
       value: {
@@ -30,14 +28,14 @@ export function lt(): ExpressionFunctionDefinition<'lt', Context, Arguments, boo
         help: argHelp.value,
       },
     },
-    fn: (context, args) => {
+    fn: (input, args) => {
       const { value } = args;
 
-      if (typeof context !== typeof value) {
+      if (typeof input !== typeof value) {
         return false;
       }
 
-      return context < value;
+      return input < value;
     },
   };
 }

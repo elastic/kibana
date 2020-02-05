@@ -24,10 +24,8 @@ export function columns(): ExpressionFunctionDefinition<
   return {
     name: 'columns',
     type: 'datatable',
+    inputTypes: ['datatable'],
     help,
-    context: {
-      types: ['datatable'],
-    },
     args: {
       include: {
         aliases: ['_'],
@@ -39,10 +37,10 @@ export function columns(): ExpressionFunctionDefinition<
         help: argHelp.exclude,
       },
     },
-    fn: (context, args) => {
+    fn: (input, args) => {
       const { include, exclude } = args;
-      const { columns: contextColumns, rows: contextRows, ...rest } = context;
-      let result = { ...context };
+      const { columns: contextColumns, rows: contextRows, ...rest } = input;
+      let result = { ...input };
 
       if (exclude) {
         const fields = exclude.split(',').map(field => field.trim());

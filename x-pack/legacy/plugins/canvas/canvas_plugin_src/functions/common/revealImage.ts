@@ -37,10 +37,8 @@ export function revealImage(): ExpressionFunctionDefinition<
     name: 'revealImage',
     aliases: [],
     type: 'render',
+    inputTypes: ['number'],
     help,
-    context: {
-      types: ['number'],
-    },
     args: {
       image: {
         types: ['string', 'null'],

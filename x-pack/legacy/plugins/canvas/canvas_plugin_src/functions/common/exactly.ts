@@ -21,9 +21,7 @@ export function exactly(): ExpressionFunctionDefinition<'exactly', Filter, Argum
     aliases: [],
     type: 'filter',
     help,
-    context: {
-      types: ['filter'],
-    },
+    inputTypes: ['filter'],
     args: {
       column: {
         types: ['string'],
@@ -42,7 +40,7 @@ export function exactly(): ExpressionFunctionDefinition<'exactly', Filter, Argum
         help: argHelp.filterGroup,
       },
     },
-    fn: (context, args) => {
+    fn: (input, args) => {
       const { value, column } = args;
 
       const filter = {
@@ -52,7 +50,7 @@ export function exactly(): ExpressionFunctionDefinition<'exactly', Filter, Argum
         and: [],
       };
 
-      return { ...context, and: [...context.and, filter] };
+      return { ...input, and: [...input.and, filter] };
     },
   };
 }

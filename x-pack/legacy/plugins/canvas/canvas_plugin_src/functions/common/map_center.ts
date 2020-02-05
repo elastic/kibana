@@ -20,9 +20,7 @@ export function mapCenter(): ExpressionFunctionDefinition<'mapCenter', null, Arg
     name: 'mapCenter',
     help,
     type: 'mapCenter',
-    context: {
-      types: ['null'],
-    },
+    inputTypes: ['null'],
     args: {
       lat: {
         types: ['number'],
@@ -40,7 +38,7 @@ export function mapCenter(): ExpressionFunctionDefinition<'mapCenter', null, Arg
         help: argHelp.zoom,
       },
     },
-    fn: (context, args) => {
+    fn: (input, args) => {
       return {
         type: 'mapCenter',
         ...args,

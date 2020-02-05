@@ -31,9 +31,7 @@ export function dropdownControl(): ExpressionFunctionDefinition<
     name: 'dropdownControl',
     aliases: [],
     type: 'render',
-    context: {
-      types: ['datatable'],
-    },
+    inputTypes: ['datatable'],
     help,
     args: {
       filterColumn: {
@@ -51,11 +49,11 @@ export function dropdownControl(): ExpressionFunctionDefinition<
         help: argHelp.filterGroup,
       },
     },
-    fn: (context, { valueColumn, filterColumn, filterGroup }) => {
+    fn: (input, { valueColumn, filterColumn, filterGroup }) => {
       let choices = [];
 
-      if (context.rows[0][valueColumn]) {
-        choices = uniq(context.rows.map(row => row[valueColumn])).sort();
+      if (input.rows[0][valueColumn]) {
+        choices = uniq(input.rows.map(row => row[valueColumn])).sort();
       }
 
       const column = filterColumn || valueColumn;

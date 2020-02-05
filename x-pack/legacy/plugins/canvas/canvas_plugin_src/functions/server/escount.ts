@@ -20,10 +20,8 @@ export function escount(): ExpressionFunctionDefinition<'escount', Filter, Argum
   return {
     name: 'escount',
     type: 'number',
+    inputTypes: ['filter'],
     help,
-    context: {
-      types: ['filter'],
-    },
     args: {
       query: {
         types: ['string'],
@@ -37,8 +35,8 @@ export function escount(): ExpressionFunctionDefinition<'escount', Filter, Argum
         help: argHelp.index,
       },
     },
-    fn: (context, args, handlers) => {
-      context.and = context.and.concat([
+    fn: (input, args, handlers) => {
+      input.and = input.and.concat([
         {
           type: 'luceneQueryString',
           query: args.query,
@@ -57,7 +55,7 @@ export function escount(): ExpressionFunctionDefinition<'escount', Filter, Argum
             },
           },
         },
-        context
+        input
       );
 
       return ((handlers as any) as { elasticsearchClient: any })

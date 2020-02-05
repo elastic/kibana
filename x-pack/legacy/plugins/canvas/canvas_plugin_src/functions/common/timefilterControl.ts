@@ -25,9 +25,7 @@ export function timefilterControl(): ExpressionFunctionDefinition<
     name: 'timefilterControl',
     aliases: [],
     type: 'render',
-    context: {
-      types: ['null'],
-    },
+    inputTypes: ['null'],
     help,
     args: {
       column: {
@@ -47,7 +45,7 @@ export function timefilterControl(): ExpressionFunctionDefinition<
         help: argHelp.filterGroup,
       },
     },
-    fn: (_context, args) => {
+    fn: (input, args) => {
       return {
         type: 'render',
         as: 'time_filter',

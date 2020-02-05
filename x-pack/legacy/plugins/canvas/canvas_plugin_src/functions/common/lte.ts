@@ -6,21 +6,19 @@
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions';
 import { getFunctionHelp } from '../../../i18n';
 
-type Context = number | string;
+type Input = number | string;
 
 interface Arguments {
-  value: Context;
+  value: Input;
 }
 
-export function lte(): ExpressionFunctionDefinition<'lte', Context, Arguments, boolean> {
+export function lte(): ExpressionFunctionDefinition<'lte', Input, Arguments, boolean> {
   const { help, args: argHelp } = getFunctionHelp().lte;
 
   return {
     name: 'lte',
     type: 'boolean',
-    context: {
-      types: ['number', 'string'],
-    },
+    inputTypes: ['number', 'string'],
     help,
     args: {
       value: {
@@ -30,14 +28,14 @@ export function lte(): ExpressionFunctionDefinition<'lte', Context, Arguments, b
         help: argHelp.value,
       },
     },
-    fn: (context, args) => {
+    fn: (input, args) => {
       const { value } = args;
 
-      if (typeof context !== typeof value) {
+      if (typeof input !== typeof value) {
         return false;
       }
 
-      return context <= value;
+      return input <= value;
     },
   };
 }

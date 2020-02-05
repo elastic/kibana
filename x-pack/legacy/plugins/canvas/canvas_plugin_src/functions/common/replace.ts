@@ -19,9 +19,7 @@ export function replace(): ExpressionFunctionDefinition<'replace', string, Argum
     name: 'replace',
     type: 'string',
     help,
-    context: {
-      types: ['string'],
-    },
+    inputTypes: ['string'],
     args: {
       pattern: {
         aliases: ['_', 'regex'],
@@ -40,6 +38,6 @@ export function replace(): ExpressionFunctionDefinition<'replace', string, Argum
         default: '""',
       },
     },
-    fn: (context, args) => context.replace(new RegExp(args.pattern, args.flags), args.replacement),
+    fn: (input, args) => input.replace(new RegExp(args.pattern, args.flags), args.replacement),
   };
 }

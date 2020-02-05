@@ -19,9 +19,7 @@ export function timerange(): ExpressionFunctionDefinition<'timerange', null, Arg
     name: 'timerange',
     help,
     type: 'timerange',
-    context: {
-      types: ['null'],
-    },
+    inputTypes: ['null'],
     args: {
       from: {
         types: ['string'],
@@ -34,7 +32,7 @@ export function timerange(): ExpressionFunctionDefinition<'timerange', null, Arg
         help: argHelp.to,
       },
     },
-    fn: (context, args) => {
+    fn: (input, args) => {
       return {
         type: 'timerange',
         ...args,

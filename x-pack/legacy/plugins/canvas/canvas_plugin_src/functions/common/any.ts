@@ -17,9 +17,7 @@ export function any(): ExpressionFunctionDefinition<'any', null, Arguments, bool
   return {
     name: 'any',
     type: 'boolean',
-    context: {
-      types: ['null'],
-    },
+    inputTypes: ['null'],
     help,
     args: {
       condition: {
@@ -30,7 +28,7 @@ export function any(): ExpressionFunctionDefinition<'any', null, Arguments, bool
         help: argHelp.condition,
       },
     },
-    fn: (_context, args) => {
+    fn: (input, args) => {
       const conditions = args.condition || [];
       return conditions.some(Boolean);
     },

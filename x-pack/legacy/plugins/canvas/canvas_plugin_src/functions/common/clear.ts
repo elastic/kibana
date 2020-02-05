@@ -12,10 +12,8 @@ export function clear(): ExpressionFunctionDefinition<'clear', any, {}, null> {
   return {
     name: 'clear',
     type: 'null',
+    inputTypes: ['null'],
     help,
-    context: {
-      types: ['null'],
-    },
     args: {},
     fn: () => null,
   };
