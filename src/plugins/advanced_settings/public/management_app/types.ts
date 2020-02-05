@@ -17,16 +17,38 @@
  * under the License.
  */
 
-import { MANAGEMENT_BREADCRUMB } from 'ui/management';
-import { i18n } from '@kbn/i18n';
+import {
+  UiSettingsType,
+  StringValidation,
+  ImageValidation,
+  SavedObjectAttribute,
+} from '../../../../core/public';
 
-export function getBreadcrumbs() {
-  return [
-    MANAGEMENT_BREADCRUMB,
-    {
-      text: i18n.translate('kbn.management.settings.breadcrumb', {
-        defaultMessage: 'Advanced settings',
-      }),
-    },
-  ];
+export interface FieldSetting {
+  displayName: string;
+  name: string;
+  value: SavedObjectAttribute;
+  description?: string;
+  options?: string[];
+  optionLabels?: Record<string, string>;
+  requiresPageReload: boolean;
+  type: UiSettingsType;
+  category: string[];
+  ariaName: string;
+  isOverridden: boolean;
+  defVal: SavedObjectAttribute;
+  isCustom: boolean;
+  validation?: StringValidation | ImageValidation;
+  readOnly?: boolean;
+  deprecation?: {
+    message: string;
+    docLinksKey: string;
+  };
+}
+
+// until eui searchbar and query are typed
+export interface IQuery {
+  ast: any; // incomplete
+  text: string;
+  syntax: any; // incomplete
 }

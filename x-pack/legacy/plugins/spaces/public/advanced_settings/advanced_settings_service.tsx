@@ -6,7 +6,7 @@
 import React from 'react';
 import { Space } from '../../common/model/space';
 import { AdvancedSettingsTitle, AdvancedSettingsSubtitle } from './components';
-import { AdvancedSettingsStart } from '../../../../../../src/plugins/advanced_settings/public';
+import { AdvancedSettingsSetup } from '../../../../../../src/plugins/advanced_settings/public';
 
 interface SetupDeps {
   getActiveSpace: () => Promise<Space>;

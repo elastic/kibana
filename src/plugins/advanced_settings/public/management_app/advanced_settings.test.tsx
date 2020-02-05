@@ -21,15 +21,16 @@ import React from 'react';
 import { Observable } from 'rxjs';
 import { shallow } from 'enzyme';
 import dedent from 'dedent';
-import {
-  UiSettingsParams,
-  UserProvidedValues,
-  UiSettingsType,
-} from '../../../../../../../core/public';
+import { UiSettingsParams, UserProvidedValues, UiSettingsType } from '../../../../core/public';
 import { FieldSetting } from './types';
-
 import { AdvancedSettings } from './advanced_settings';
-jest.mock('ui/new_platform');
+import {
+  notificationServiceMock,
+  docLinksServiceMock,
+  uiSettingsServiceMock,
+} from '../../../../core/public/mocks';
+
+import { advancedSettingsMock } from '../mocks';
 
 jest.mock('ui/new_platform', () => ({
   npStart: mockConfig(),
@@ -219,13 +220,8 @@ function mockConfig() {
     },
     plugins: {
       advancedSettings: {
-        component: {
-          register: jest.fn(),
-          get: () => {
-            const foo: React.ComponentType = () => <div>Hello</div>;
-            foo.displayName = 'foo_component';
-            return foo;
-          },
+        componentRegistry: {
+          get: () => <div>Hello</div>,
           componentType: {
             PAGE_TITLE_COMPONENT: 'page_title_component',
             PAGE_SUBTITLE_COMPONENT: 'page_subtitle_component',
@@ -239,7 +235,14 @@ function mockConfig() {
 describe('AdvancedSettings', () => {
   it('should render specific setting if given setting key', async () => {
     const component = shallow(
-      <AdvancedSettings queryText="test:string:setting" enableSaving={true} />
+      <AdvancedSettings
+        queryText="test:string:setting"
+        enableSaving={true}
+        toasts={notificationServiceMock.createStartContract().toasts}
+        dockLinks={docLinksServiceMock.createStartContract().links}
+        uiSettings={uiSettingsServiceMock.createStartContract()}
+        componentRegistry={advancedSettingsMock.createStartContract()}
+      />
     );
 
     expect(component).toMatchSnapshot();
@@ -247,7 +250,14 @@ describe('AdvancedSettings', () => {
 
   it('should render read-only when saving is disabled', async () => {
     const component = shallow(
-      <AdvancedSettings queryText="test:string:setting" enableSaving={false} />
+      <AdvancedSettings
+        queryText="test:string:setting"
+        enableSaving={false}
+        toasts={notificationServiceMock.createStartContract().toasts}
+        dockLinks={docLinksServiceMock.createStartContract().links}
+        uiSettings={uiSettingsServiceMock.createStartContract()}
+        componentRegistry={advancedSettingsMock.createStartContract()}
+      />
     );
 
     expect(component).toMatchSnapshot();

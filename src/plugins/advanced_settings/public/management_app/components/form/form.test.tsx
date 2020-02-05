@@ -19,7 +19,8 @@
 
 import React from 'react';
 import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
-import { UiSettingsType } from '../../../../../../../../../core/public';
+import { UiSettingsType } from '../../../../../../core/public';
+import { notificationServiceMock, docLinksServiceMock } from '../../../../../../core/public/mocks';
 
 import { Form } from './form';
 
@@ -101,6 +102,8 @@ describe('Form', () => {
         clearQuery={clearQuery}
         showNoResultsMessage={true}
         enableSaving={true}
+        toasts={notificationServiceMock.createStartContract().toasts}
+        dockLinks={docLinksServiceMock.createStartContract().links}
       />
     );
 
@@ -118,6 +121,8 @@ describe('Form', () => {
         clearQuery={clearQuery}
         showNoResultsMessage={true}
         enableSaving={false}
+        toasts={notificationServiceMock.createStartContract().toasts}
+        dockLinks={docLinksServiceMock.createStartContract().links}
       />
     );
 
@@ -135,6 +140,8 @@ describe('Form', () => {
         clearQuery={clearQuery}
         showNoResultsMessage={true}
         enableSaving={true}
+        toasts={notificationServiceMock.createStartContract().toasts}
+        dockLinks={docLinksServiceMock.createStartContract().links}
       />
     );
 
@@ -152,6 +159,8 @@ describe('Form', () => {
         clearQuery={clearQuery}
         showNoResultsMessage={false}
         enableSaving={true}
+        toasts={notificationServiceMock.createStartContract().toasts}
+        dockLinks={docLinksServiceMock.createStartContract().links}
       />
     );
 

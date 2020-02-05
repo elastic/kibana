@@ -1,0 +1,1241 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Form should not render no settings message when instructed not to 1`] = `<Fragment />`;
+
+exports[`Form should render no settings message when there are no settings 1`] = `
+<Fragment>
+  <EuiPanel
+    paddingSize="l"
+  >
+    <FormattedMessage
+      defaultMessage="No settings found {clearSearch}"
+      id="kbn.management.settings.form.noSearchResultText"
+      values={
+        Object {
+          "clearSearch": <ForwardRef
+            onClick={[Function]}
+          >
+            <FormattedMessage
+              defaultMessage="(clear search)"
+              id="kbn.management.settings.form.clearNoSearchResultText"
+              values={Object {}}
+            />
+          </ForwardRef>,
+        }
+      }
+    />
+  </EuiPanel>
+</Fragment>
+`;
+
+exports[`Form should render normally 1`] = `
+<Fragment>
+  <EuiPanel
+    paddingSize="l"
+  >
+    <EuiForm>
+      <EuiText>
+        <EuiFlexGroup
+          alignItems="baseline"
+        >
+          <EuiFlexItem
+            grow={false}
+          >
+            <h2>
+              General
+            </h2>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiText>
+      <EuiSpacer
+        size="m"
+      />
+      <Field
+        clear={[Function]}
+        dockLinks={
+          Object {
+            "aggs": Object {
+              "avg": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-avg-aggregation.html",
+              "avg_bucket": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-avg-bucket-aggregation.html",
+              "cardinality": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-cardinality-aggregation.html",
+              "count": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-valuecount-aggregation.html",
+              "cumulative_sum": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-sum-aggregation.html",
+              "date_histogram": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-datehistogram-aggregation.html",
+              "date_range": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-daterange-aggregation.html",
+              "derivative": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-derivative-aggregation.html",
+              "filter": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-filter-aggregation.html",
+              "filters": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-filters-aggregation.html",
+              "geo_bounds": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-geobounds-aggregation.html",
+              "geo_centroid": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-geocentroid-aggregation.html",
+              "geohash_grid": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-geohashgrid-aggregation.html",
+              "histogram": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-histogram-aggregation.html",
+              "ip_range": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-iprange-aggregation.html",
+              "max": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-max-aggregation.html",
+              "max_bucket": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-max-bucket-aggregation.html",
+              "median": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-percentile-aggregation.html",
+              "min": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-min-aggregation.html",
+              "min_bucket": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-min-bucket-aggregation.html",
+              "moving_avg": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-movavg-aggregation.html",
+              "percentile_ranks": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-percentile-rank-aggregation.html",
+              "range": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-range-aggregation.html",
+              "serial_diff": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-serialdiff-aggregation.html",
+              "significant_terms": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-significantterms-aggregation.html",
+              "std_dev": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-extendedstats-aggregation.html",
+              "sum": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-sum-aggregation.html",
+              "sum_bucket": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-sum-bucket-aggregation.html",
+              "terms": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-terms-aggregation.html",
+              "top_hits": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-top-hits-aggregation.html",
+            },
+            "auditbeat": Object {
+              "base": "https://www.elastic.co/guide/en/beats/auditbeat/mocked-test-branch",
+            },
+            "date": Object {
+              "dateMath": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/common-options.html#date-math",
+            },
+            "filebeat": Object {
+              "base": "https://www.elastic.co/guide/en/beats/filebeat/mocked-test-branch",
+              "configuration": "https://www.elastic.co/guide/en/beats/filebeat/mocked-test-branch/filebeat-configuration.html",
+              "elasticsearchOutput": "https://www.elastic.co/guide/en/beats/filebeat/mocked-test-branch/elasticsearch-output.html",
+              "exportedFields": "https://www.elastic.co/guide/en/beats/filebeat/mocked-test-branch/exported-fields.html",
+              "installation": "https://www.elastic.co/guide/en/beats/filebeat/mocked-test-branch/filebeat-installation.html",
+              "startup": "https://www.elastic.co/guide/en/beats/filebeat/mocked-test-branch/filebeat-starting.html",
+            },
+            "functionbeat": Object {
+              "base": "https://www.elastic.co/guide/en/beats/functionbeat/mocked-test-branch",
+            },
+            "heartbeat": Object {
+              "base": "https://www.elastic.co/guide/en/beats/heartbeat/mocked-test-branch",
+            },
+            "indexPatterns": Object {
+              "introduction": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/index-patterns.html",
+              "loadingData": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/tutorial-load-dataset.html",
+            },
+            "kibana": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/index.html",
+            "logstash": Object {
+              "base": "https://www.elastic.co/guide/en/logstash/mocked-test-branch",
+            },
+            "management": Object {
+              "kibanaSearchSettings": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/advanced-options.html#kibana-search-settings",
+            },
+            "metricbeat": Object {
+              "base": "https://www.elastic.co/guide/en/beats/metricbeat/mocked-test-branch",
+            },
+            "query": Object {
+              "kueryQuerySyntax": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/kuery-query.html",
+              "luceneQuerySyntax": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/query-dsl-query-string-query.html#query-string-syntax",
+              "queryDsl": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/query-dsl.html",
+            },
+            "scriptedFields": Object {
+              "luceneExpressions": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-expression.html",
+              "painless": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-painless.html",
+              "painlessApi": "https://www.elastic.co/guide/en/elasticsearch/painless/mocked-test-branch/painless-api-reference.html",
+              "painlessSyntax": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-painless-syntax.html",
+              "scriptAggs": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations.html#_values_source",
+              "scriptFields": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-request-script-fields.html",
+            },
+            "siem": Object {
+              "gettingStarted": "https://www.elastic.co/guide/en/siem/guide/mocked-test-branch/install-siem.html",
+              "guide": "https://www.elastic.co/guide/en/siem/guide/mocked-test-branch/index.html",
+            },
+            "winlogbeat": Object {
+              "base": "https://www.elastic.co/guide/en/beats/winlogbeat/mocked-test-branch",
+            },
+          }
+        }
+        enableSaving={true}
+        key="general:test:date"
+        save={[Function]}
+        setting={
+          Object {
+            "ariaName": "general test date",
+            "category": Array [
+              "general",
+            ],
+            "defVal": "defVal",
+            "description": "description",
+            "displayName": "Test date",
+            "isCustom": false,
+            "isOverridden": false,
+            "name": "general:test:date",
+            "readOnly": false,
+            "requiresPageReload": false,
+            "type": "string",
+            "value": "value",
+          }
+        }
+        toasts={
+          Object {
+            "add": [MockFunction],
+            "addDanger": [MockFunction],
+            "addError": [MockFunction],
+            "addSuccess": [MockFunction],
+            "addWarning": [MockFunction],
+            "get$": [MockFunction],
+            "remove": [MockFunction],
+          }
+        }
+      />
+      <Field
+        clear={[Function]}
+        dockLinks={
+          Object {
+            "aggs": Object {
+              "avg": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-avg-aggregation.html",
+              "avg_bucket": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-avg-bucket-aggregation.html",
+              "cardinality": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-cardinality-aggregation.html",
+              "count": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-valuecount-aggregation.html",
+              "cumulative_sum": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-sum-aggregation.html",
+              "date_histogram": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-datehistogram-aggregation.html",
+              "date_range": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-daterange-aggregation.html",
+              "derivative": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-derivative-aggregation.html",
+              "filter": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-filter-aggregation.html",
+              "filters": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-filters-aggregation.html",
+              "geo_bounds": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-geobounds-aggregation.html",
+              "geo_centroid": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-geocentroid-aggregation.html",
+              "geohash_grid": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-geohashgrid-aggregation.html",
+              "histogram": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-histogram-aggregation.html",
+              "ip_range": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-iprange-aggregation.html",
+              "max": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-max-aggregation.html",
+              "max_bucket": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-max-bucket-aggregation.html",
+              "median": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-percentile-aggregation.html",
+              "min": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-min-aggregation.html",
+              "min_bucket": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-min-bucket-aggregation.html",
+              "moving_avg": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-movavg-aggregation.html",
+              "percentile_ranks": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-percentile-rank-aggregation.html",
+              "range": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-range-aggregation.html",
+              "serial_diff": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-serialdiff-aggregation.html",
+              "significant_terms": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-significantterms-aggregation.html",
+              "std_dev": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-extendedstats-aggregation.html",
+              "sum": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-sum-aggregation.html",
+              "sum_bucket": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-sum-bucket-aggregation.html",
+              "terms": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-terms-aggregation.html",
+              "top_hits": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-top-hits-aggregation.html",
+            },
+            "auditbeat": Object {
+              "base": "https://www.elastic.co/guide/en/beats/auditbeat/mocked-test-branch",
+            },
+            "date": Object {
+              "dateMath": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/common-options.html#date-math",
+            },
+            "filebeat": Object {
+              "base": "https://www.elastic.co/guide/en/beats/filebeat/mocked-test-branch",
+              "configuration": "https://www.elastic.co/guide/en/beats/filebeat/mocked-test-branch/filebeat-configuration.html",
+              "elasticsearchOutput": "https://www.elastic.co/guide/en/beats/filebeat/mocked-test-branch/elasticsearch-output.html",
+              "exportedFields": "https://www.elastic.co/guide/en/beats/filebeat/mocked-test-branch/exported-fields.html",
+              "installation": "https://www.elastic.co/guide/en/beats/filebeat/mocked-test-branch/filebeat-installation.html",
+              "startup": "https://www.elastic.co/guide/en/beats/filebeat/mocked-test-branch/filebeat-starting.html",
+            },
+            "functionbeat": Object {
+              "base": "https://www.elastic.co/guide/en/beats/functionbeat/mocked-test-branch",
+            },
+            "heartbeat": Object {
+              "base": "https://www.elastic.co/guide/en/beats/heartbeat/mocked-test-branch",
+            },
+            "indexPatterns": Object {
+              "introduction": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/index-patterns.html",
+              "loadingData": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/tutorial-load-dataset.html",
+            },
+            "kibana": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/index.html",
+            "logstash": Object {
+              "base": "https://www.elastic.co/guide/en/logstash/mocked-test-branch",
+            },
+            "management": Object {
+              "kibanaSearchSettings": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/advanced-options.html#kibana-search-settings",
+            },
+            "metricbeat": Object {
+              "base": "https://www.elastic.co/guide/en/beats/metricbeat/mocked-test-branch",
+            },
+            "query": Object {
+              "kueryQuerySyntax": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/kuery-query.html",
+              "luceneQuerySyntax": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/query-dsl-query-string-query.html#query-string-syntax",
+              "queryDsl": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/query-dsl.html",
+            },
+            "scriptedFields": Object {
+              "luceneExpressions": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-expression.html",
+              "painless": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-painless.html",
+              "painlessApi": "https://www.elastic.co/guide/en/elasticsearch/painless/mocked-test-branch/painless-api-reference.html",
+              "painlessSyntax": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-painless-syntax.html",
+              "scriptAggs": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations.html#_values_source",
+              "scriptFields": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-request-script-fields.html",
+            },
+            "siem": Object {
+              "gettingStarted": "https://www.elastic.co/guide/en/siem/guide/mocked-test-branch/install-siem.html",
+              "guide": "https://www.elastic.co/guide/en/siem/guide/mocked-test-branch/index.html",
+            },
+            "winlogbeat": Object {
+              "base": "https://www.elastic.co/guide/en/beats/winlogbeat/mocked-test-branch",
+            },
+          }
+        }
+        enableSaving={true}
+        key="setting:test"
+        save={[Function]}
+        setting={
+          Object {
+            "ariaName": "setting test",
+            "category": Array [
+              "general",
+            ],
+            "defVal": "defVal",
+            "description": "description",
+            "displayName": "Test setting",
+            "isCustom": false,
+            "isOverridden": false,
+            "name": "setting:test",
+            "readOnly": false,
+            "requiresPageReload": false,
+            "type": "string",
+            "value": "value",
+          }
+        }
+        toasts={
+          Object {
+            "add": [MockFunction],
+            "addDanger": [MockFunction],
+            "addError": [MockFunction],
+            "addSuccess": [MockFunction],
+            "addWarning": [MockFunction],
+            "get$": [MockFunction],
+            "remove": [MockFunction],
+          }
+        }
+      />
+    </EuiForm>
+  </EuiPanel>
+  <EuiSpacer
+    size="l"
+  />
+  <EuiPanel
+    paddingSize="l"
+  >
+    <EuiForm>
+      <EuiText>
+        <EuiFlexGroup
+          alignItems="baseline"
+        >
+          <EuiFlexItem
+            grow={false}
+          >
+            <h2>
+              Dashboard
+            </h2>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiText>
+      <EuiSpacer
+        size="m"
+      />
+      <Field
+        clear={[Function]}
+        dockLinks={
+          Object {
+            "aggs": Object {
+              "avg": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-avg-aggregation.html",
+              "avg_bucket": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-avg-bucket-aggregation.html",
+              "cardinality": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-cardinality-aggregation.html",
+              "count": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-valuecount-aggregation.html",
+              "cumulative_sum": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-sum-aggregation.html",
+              "date_histogram": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-datehistogram-aggregation.html",
+              "date_range": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-daterange-aggregation.html",
+              "derivative": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-derivative-aggregation.html",
+              "filter": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-filter-aggregation.html",
+              "filters": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-filters-aggregation.html",
+              "geo_bounds": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-geobounds-aggregation.html",
+              "geo_centroid": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-geocentroid-aggregation.html",
+              "geohash_grid": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-geohashgrid-aggregation.html",
+              "histogram": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-histogram-aggregation.html",
+              "ip_range": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-iprange-aggregation.html",
+              "max": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-max-aggregation.html",
+              "max_bucket": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-max-bucket-aggregation.html",
+              "median": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-percentile-aggregation.html",
+              "min": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-min-aggregation.html",
+              "min_bucket": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-min-bucket-aggregation.html",
+              "moving_avg": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-movavg-aggregation.html",
+              "percentile_ranks": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-percentile-rank-aggregation.html",
+              "range": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-range-aggregation.html",
+              "serial_diff": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-serialdiff-aggregation.html",
+              "significant_terms": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-significantterms-aggregation.html",
+              "std_dev": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-extendedstats-aggregation.html",
+              "sum": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-sum-aggregation.html",
+              "sum_bucket": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-sum-bucket-aggregation.html",
+              "terms": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-terms-aggregation.html",
+              "top_hits": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-top-hits-aggregation.html",
+            },
+            "auditbeat": Object {
+              "base": "https://www.elastic.co/guide/en/beats/auditbeat/mocked-test-branch",
+            },
+            "date": Object {
+              "dateMath": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/common-options.html#date-math",
+            },
+            "filebeat": Object {
+              "base": "https://www.elastic.co/guide/en/beats/filebeat/mocked-test-branch",
+              "configuration": "https://www.elastic.co/guide/en/beats/filebeat/mocked-test-branch/filebeat-configuration.html",
+              "elasticsearchOutput": "https://www.elastic.co/guide/en/beats/filebeat/mocked-test-branch/elasticsearch-output.html",
+              "exportedFields": "https://www.elastic.co/guide/en/beats/filebeat/mocked-test-branch/exported-fields.html",
+              "installation": "https://www.elastic.co/guide/en/beats/filebeat/mocked-test-branch/filebeat-installation.html",
+              "startup": "https://www.elastic.co/guide/en/beats/filebeat/mocked-test-branch/filebeat-starting.html",
+            },
+            "functionbeat": Object {
+              "base": "https://www.elastic.co/guide/en/beats/functionbeat/mocked-test-branch",
+            },
+            "heartbeat": Object {
+              "base": "https://www.elastic.co/guide/en/beats/heartbeat/mocked-test-branch",
+            },
+            "indexPatterns": Object {
+              "introduction": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/index-patterns.html",
+              "loadingData": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/tutorial-load-dataset.html",
+            },
+            "kibana": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/index.html",
+            "logstash": Object {
+              "base": "https://www.elastic.co/guide/en/logstash/mocked-test-branch",
+            },
+            "management": Object {
+              "kibanaSearchSettings": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/advanced-options.html#kibana-search-settings",
+            },
+            "metricbeat": Object {
+              "base": "https://www.elastic.co/guide/en/beats/metricbeat/mocked-test-branch",
+            },
+            "query": Object {
+              "kueryQuerySyntax": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/kuery-query.html",
+              "luceneQuerySyntax": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/query-dsl-query-string-query.html#query-string-syntax",
+              "queryDsl": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/query-dsl.html",
+            },
+            "scriptedFields": Object {
+              "luceneExpressions": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-expression.html",
+              "painless": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-painless.html",
+              "painlessApi": "https://www.elastic.co/guide/en/elasticsearch/painless/mocked-test-branch/painless-api-reference.html",
+              "painlessSyntax": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-painless-syntax.html",
+              "scriptAggs": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations.html#_values_source",
+              "scriptFields": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-request-script-fields.html",
+            },
+            "siem": Object {
+              "gettingStarted": "https://www.elastic.co/guide/en/siem/guide/mocked-test-branch/install-siem.html",
+              "guide": "https://www.elastic.co/guide/en/siem/guide/mocked-test-branch/index.html",
+            },
+            "winlogbeat": Object {
+              "base": "https://www.elastic.co/guide/en/beats/winlogbeat/mocked-test-branch",
+            },
+          }
+        }
+        enableSaving={true}
+        key="dashboard:test:setting"
+        save={[Function]}
+        setting={
+          Object {
+            "ariaName": "dashboard test setting",
+            "category": Array [
+              "dashboard",
+            ],
+            "defVal": "defVal",
+            "description": "description",
+            "displayName": "Dashboard test setting",
+            "isCustom": false,
+            "isOverridden": false,
+            "name": "dashboard:test:setting",
+            "readOnly": false,
+            "requiresPageReload": false,
+            "type": "string",
+            "value": "value",
+          }
+        }
+        toasts={
+          Object {
+            "add": [MockFunction],
+            "addDanger": [MockFunction],
+            "addError": [MockFunction],
+            "addSuccess": [MockFunction],
+            "addWarning": [MockFunction],
+            "get$": [MockFunction],
+            "remove": [MockFunction],
+          }
+        }
+      />
+    </EuiForm>
+  </EuiPanel>
+  <EuiSpacer
+    size="l"
+  />
+  <EuiPanel
+    paddingSize="l"
+  >
+    <EuiForm>
+      <EuiText>
+        <EuiFlexGroup
+          alignItems="baseline"
+        >
+          <EuiFlexItem
+            grow={false}
+          >
+            <h2>
+              X-pack
+            </h2>
+          </EuiFlexItem>
+          <EuiFlexItem
+            grow={false}
+          >
+            <em>
+              <FormattedMessage
+                defaultMessage="Search terms are hiding {settingsCount} settings {clearSearch}"
+                id="kbn.management.settings.form.searchResultText"
+                values={
+                  Object {
+                    "clearSearch": <ForwardRef
+                      onClick={[Function]}
+                    >
+                      <em>
+                        <FormattedMessage
+                          defaultMessage="(clear search)"
+                          id="kbn.management.settings.form.clearSearchResultText"
+                          values={Object {}}
+                        />
+                      </em>
+                    </ForwardRef>,
+                    "settingsCount": 9,
+                  }
+                }
+              />
+            </em>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiText>
+      <EuiSpacer
+        size="m"
+      />
+      <Field
+        clear={[Function]}
+        dockLinks={
+          Object {
+            "aggs": Object {
+              "avg": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-avg-aggregation.html",
+              "avg_bucket": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-avg-bucket-aggregation.html",
+              "cardinality": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-cardinality-aggregation.html",
+              "count": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-valuecount-aggregation.html",
+              "cumulative_sum": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-sum-aggregation.html",
+              "date_histogram": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-datehistogram-aggregation.html",
+              "date_range": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-daterange-aggregation.html",
+              "derivative": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-derivative-aggregation.html",
+              "filter": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-filter-aggregation.html",
+              "filters": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-filters-aggregation.html",
+              "geo_bounds": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-geobounds-aggregation.html",
+              "geo_centroid": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-geocentroid-aggregation.html",
+              "geohash_grid": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-geohashgrid-aggregation.html",
+              "histogram": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-histogram-aggregation.html",
+              "ip_range": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-iprange-aggregation.html",
+              "max": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-max-aggregation.html",
+              "max_bucket": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-max-bucket-aggregation.html",
+              "median": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-percentile-aggregation.html",
+              "min": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-min-aggregation.html",
+              "min_bucket": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-min-bucket-aggregation.html",
+              "moving_avg": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-movavg-aggregation.html",
+              "percentile_ranks": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-percentile-rank-aggregation.html",
+              "range": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-range-aggregation.html",
+              "serial_diff": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-serialdiff-aggregation.html",
+              "significant_terms": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-significantterms-aggregation.html",
+              "std_dev": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-extendedstats-aggregation.html",
+              "sum": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-sum-aggregation.html",
+              "sum_bucket": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-sum-bucket-aggregation.html",
+              "terms": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-terms-aggregation.html",
+              "top_hits": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-top-hits-aggregation.html",
+            },
+            "auditbeat": Object {
+              "base": "https://www.elastic.co/guide/en/beats/auditbeat/mocked-test-branch",
+            },
+            "date": Object {
+              "dateMath": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/common-options.html#date-math",
+            },
+            "filebeat": Object {
+              "base": "https://www.elastic.co/guide/en/beats/filebeat/mocked-test-branch",
+              "configuration": "https://www.elastic.co/guide/en/beats/filebeat/mocked-test-branch/filebeat-configuration.html",
+              "elasticsearchOutput": "https://www.elastic.co/guide/en/beats/filebeat/mocked-test-branch/elasticsearch-output.html",
+              "exportedFields": "https://www.elastic.co/guide/en/beats/filebeat/mocked-test-branch/exported-fields.html",
+              "installation": "https://www.elastic.co/guide/en/beats/filebeat/mocked-test-branch/filebeat-installation.html",
+              "startup": "https://www.elastic.co/guide/en/beats/filebeat/mocked-test-branch/filebeat-starting.html",
+            },
+            "functionbeat": Object {
+              "base": "https://www.elastic.co/guide/en/beats/functionbeat/mocked-test-branch",
+            },
+            "heartbeat": Object {
+              "base": "https://www.elastic.co/guide/en/beats/heartbeat/mocked-test-branch",
+            },
+            "indexPatterns": Object {
+              "introduction": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/index-patterns.html",
+              "loadingData": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/tutorial-load-dataset.html",
+            },
+            "kibana": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/index.html",
+            "logstash": Object {
+              "base": "https://www.elastic.co/guide/en/logstash/mocked-test-branch",
+            },
+            "management": Object {
+              "kibanaSearchSettings": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/advanced-options.html#kibana-search-settings",
+            },
+            "metricbeat": Object {
+              "base": "https://www.elastic.co/guide/en/beats/metricbeat/mocked-test-branch",
+            },
+            "query": Object {
+              "kueryQuerySyntax": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/kuery-query.html",
+              "luceneQuerySyntax": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/query-dsl-query-string-query.html#query-string-syntax",
+              "queryDsl": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/query-dsl.html",
+            },
+            "scriptedFields": Object {
+              "luceneExpressions": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-expression.html",
+              "painless": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-painless.html",
+              "painlessApi": "https://www.elastic.co/guide/en/elasticsearch/painless/mocked-test-branch/painless-api-reference.html",
+              "painlessSyntax": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-painless-syntax.html",
+              "scriptAggs": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations.html#_values_source",
+              "scriptFields": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-request-script-fields.html",
+            },
+            "siem": Object {
+              "gettingStarted": "https://www.elastic.co/guide/en/siem/guide/mocked-test-branch/install-siem.html",
+              "guide": "https://www.elastic.co/guide/en/siem/guide/mocked-test-branch/index.html",
+            },
+            "winlogbeat": Object {
+              "base": "https://www.elastic.co/guide/en/beats/winlogbeat/mocked-test-branch",
+            },
+          }
+        }
+        enableSaving={true}
+        key="xpack:test:setting"
+        save={[Function]}
+        setting={
+          Object {
+            "ariaName": "xpack test setting",
+            "category": Array [
+              "x-pack",
+            ],
+            "defVal": "defVal",
+            "description": "description",
+            "displayName": "X-Pack test setting",
+            "isCustom": false,
+            "isOverridden": false,
+            "name": "xpack:test:setting",
+            "readOnly": false,
+            "requiresPageReload": false,
+            "type": "string",
+            "value": "value",
+          }
+        }
+        toasts={
+          Object {
+            "add": [MockFunction],
+            "addDanger": [MockFunction],
+            "addError": [MockFunction],
+            "addSuccess": [MockFunction],
+            "addWarning": [MockFunction],
+            "get$": [MockFunction],
+            "remove": [MockFunction],
+          }
+        }
+      />
+    </EuiForm>
+  </EuiPanel>
+  <EuiSpacer
+    size="l"
+  />
+</Fragment>
+`;
+
+exports[`Form should render read-only when saving is disabled 1`] = `
+<Fragment>
+  <EuiPanel
+    paddingSize="l"
+  >
+    <EuiForm>
+      <EuiText>
+        <EuiFlexGroup
+          alignItems="baseline"
+        >
+          <EuiFlexItem
+            grow={false}
+          >
+            <h2>
+              General
+            </h2>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiText>
+      <EuiSpacer
+        size="m"
+      />
+      <Field
+        clear={[Function]}
+        dockLinks={
+          Object {
+            "aggs": Object {
+              "avg": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-avg-aggregation.html",
+              "avg_bucket": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-avg-bucket-aggregation.html",
+              "cardinality": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-cardinality-aggregation.html",
+              "count": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-valuecount-aggregation.html",
+              "cumulative_sum": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-sum-aggregation.html",
+              "date_histogram": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-datehistogram-aggregation.html",
+              "date_range": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-daterange-aggregation.html",
+              "derivative": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-derivative-aggregation.html",
+              "filter": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-filter-aggregation.html",
+              "filters": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-filters-aggregation.html",
+              "geo_bounds": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-geobounds-aggregation.html",
+              "geo_centroid": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-geocentroid-aggregation.html",
+              "geohash_grid": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-geohashgrid-aggregation.html",
+              "histogram": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-histogram-aggregation.html",
+              "ip_range": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-iprange-aggregation.html",
+              "max": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-max-aggregation.html",
+              "max_bucket": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-max-bucket-aggregation.html",
+              "median": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-percentile-aggregation.html",
+              "min": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-min-aggregation.html",
+              "min_bucket": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-min-bucket-aggregation.html",
+              "moving_avg": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-movavg-aggregation.html",
+              "percentile_ranks": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-percentile-rank-aggregation.html",
+              "range": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-range-aggregation.html",
+              "serial_diff": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-serialdiff-aggregation.html",
+              "significant_terms": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-significantterms-aggregation.html",
+              "std_dev": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-extendedstats-aggregation.html",
+              "sum": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-sum-aggregation.html",
+              "sum_bucket": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-sum-bucket-aggregation.html",
+              "terms": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-terms-aggregation.html",
+              "top_hits": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-top-hits-aggregation.html",
+            },
+            "auditbeat": Object {
+              "base": "https://www.elastic.co/guide/en/beats/auditbeat/mocked-test-branch",
+            },
+            "date": Object {
+              "dateMath": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/common-options.html#date-math",
+            },
+            "filebeat": Object {
+              "base": "https://www.elastic.co/guide/en/beats/filebeat/mocked-test-branch",
+              "configuration": "https://www.elastic.co/guide/en/beats/filebeat/mocked-test-branch/filebeat-configuration.html",
+              "elasticsearchOutput": "https://www.elastic.co/guide/en/beats/filebeat/mocked-test-branch/elasticsearch-output.html",
+              "exportedFields": "https://www.elastic.co/guide/en/beats/filebeat/mocked-test-branch/exported-fields.html",
+              "installation": "https://www.elastic.co/guide/en/beats/filebeat/mocked-test-branch/filebeat-installation.html",
+              "startup": "https://www.elastic.co/guide/en/beats/filebeat/mocked-test-branch/filebeat-starting.html",
+            },
+            "functionbeat": Object {
+              "base": "https://www.elastic.co/guide/en/beats/functionbeat/mocked-test-branch",
+            },
+            "heartbeat": Object {
+              "base": "https://www.elastic.co/guide/en/beats/heartbeat/mocked-test-branch",
+            },
+            "indexPatterns": Object {
+              "introduction": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/index-patterns.html",
+              "loadingData": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/tutorial-load-dataset.html",
+            },
+            "kibana": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/index.html",
+            "logstash": Object {
+              "base": "https://www.elastic.co/guide/en/logstash/mocked-test-branch",
+            },
+            "management": Object {
+              "kibanaSearchSettings": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/advanced-options.html#kibana-search-settings",
+            },
+            "metricbeat": Object {
+              "base": "https://www.elastic.co/guide/en/beats/metricbeat/mocked-test-branch",
+            },
+            "query": Object {
+              "kueryQuerySyntax": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/kuery-query.html",
+              "luceneQuerySyntax": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/query-dsl-query-string-query.html#query-string-syntax",
+              "queryDsl": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/query-dsl.html",
+            },
+            "scriptedFields": Object {
+              "luceneExpressions": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-expression.html",
+              "painless": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-painless.html",
+              "painlessApi": "https://www.elastic.co/guide/en/elasticsearch/painless/mocked-test-branch/painless-api-reference.html",
+              "painlessSyntax": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-painless-syntax.html",
+              "scriptAggs": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations.html#_values_source",
+              "scriptFields": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-request-script-fields.html",
+            },
+            "siem": Object {
+              "gettingStarted": "https://www.elastic.co/guide/en/siem/guide/mocked-test-branch/install-siem.html",
+              "guide": "https://www.elastic.co/guide/en/siem/guide/mocked-test-branch/index.html",
+            },
+            "winlogbeat": Object {
+              "base": "https://www.elastic.co/guide/en/beats/winlogbeat/mocked-test-branch",
+            },
+          }
+        }
+        enableSaving={false}
+        key="general:test:date"
+        save={[Function]}
+        setting={
+          Object {
+            "ariaName": "general test date",
+            "category": Array [
+              "general",
+            ],
+            "defVal": "defVal",
+            "description": "description",
+            "displayName": "Test date",
+            "isCustom": false,
+            "isOverridden": false,
+            "name": "general:test:date",
+            "readOnly": false,
+            "requiresPageReload": false,
+            "type": "string",
+            "value": "value",
+          }
+        }
+        toasts={
+          Object {
+            "add": [MockFunction],
+            "addDanger": [MockFunction],
+            "addError": [MockFunction],
+            "addSuccess": [MockFunction],
+            "addWarning": [MockFunction],
+            "get$": [MockFunction],
+            "remove": [MockFunction],
+          }
+        }
+      />
+      <Field
+        clear={[Function]}
+        dockLinks={
+          Object {
+            "aggs": Object {
+              "avg": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-avg-aggregation.html",
+              "avg_bucket": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-avg-bucket-aggregation.html",
+              "cardinality": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-cardinality-aggregation.html",
+              "count": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-valuecount-aggregation.html",
+              "cumulative_sum": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-sum-aggregation.html",
+              "date_histogram": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-datehistogram-aggregation.html",
+              "date_range": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-daterange-aggregation.html",
+              "derivative": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-derivative-aggregation.html",
+              "filter": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-filter-aggregation.html",
+              "filters": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-filters-aggregation.html",
+              "geo_bounds": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-geobounds-aggregation.html",
+              "geo_centroid": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-geocentroid-aggregation.html",
+              "geohash_grid": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-geohashgrid-aggregation.html",
+              "histogram": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-histogram-aggregation.html",
+              "ip_range": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-iprange-aggregation.html",
+              "max": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-max-aggregation.html",
+              "max_bucket": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-max-bucket-aggregation.html",
+              "median": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-percentile-aggregation.html",
+              "min": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-min-aggregation.html",
+              "min_bucket": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-min-bucket-aggregation.html",
+              "moving_avg": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-movavg-aggregation.html",
+              "percentile_ranks": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-percentile-rank-aggregation.html",
+              "range": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-range-aggregation.html",
+              "serial_diff": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-serialdiff-aggregation.html",
+              "significant_terms": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-significantterms-aggregation.html",
+              "std_dev": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-extendedstats-aggregation.html",
+              "sum": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-sum-aggregation.html",
+              "sum_bucket": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-sum-bucket-aggregation.html",
+              "terms": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-terms-aggregation.html",
+              "top_hits": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-top-hits-aggregation.html",
+            },
+            "auditbeat": Object {
+              "base": "https://www.elastic.co/guide/en/beats/auditbeat/mocked-test-branch",
+            },
+            "date": Object {
+              "dateMath": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/common-options.html#date-math",
+            },
+            "filebeat": Object {
+              "base": "https://www.elastic.co/guide/en/beats/filebeat/mocked-test-branch",
+              "configuration": "https://www.elastic.co/guide/en/beats/filebeat/mocked-test-branch/filebeat-configuration.html",
+              "elasticsearchOutput": "https://www.elastic.co/guide/en/beats/filebeat/mocked-test-branch/elasticsearch-output.html",
+              "exportedFields": "https://www.elastic.co/guide/en/beats/filebeat/mocked-test-branch/exported-fields.html",
+              "installation": "https://www.elastic.co/guide/en/beats/filebeat/mocked-test-branch/filebeat-installation.html",
+              "startup": "https://www.elastic.co/guide/en/beats/filebeat/mocked-test-branch/filebeat-starting.html",
+            },
+            "functionbeat": Object {
+              "base": "https://www.elastic.co/guide/en/beats/functionbeat/mocked-test-branch",
+            },
+            "heartbeat": Object {
+              "base": "https://www.elastic.co/guide/en/beats/heartbeat/mocked-test-branch",
+            },
+            "indexPatterns": Object {
+              "introduction": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/index-patterns.html",
+              "loadingData": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/tutorial-load-dataset.html",
+            },
+            "kibana": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/index.html",
+            "logstash": Object {
+              "base": "https://www.elastic.co/guide/en/logstash/mocked-test-branch",
+            },
+            "management": Object {
+              "kibanaSearchSettings": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/advanced-options.html#kibana-search-settings",
+            },
+            "metricbeat": Object {
+              "base": "https://www.elastic.co/guide/en/beats/metricbeat/mocked-test-branch",
+            },
+            "query": Object {
+              "kueryQuerySyntax": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/kuery-query.html",
+              "luceneQuerySyntax": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/query-dsl-query-string-query.html#query-string-syntax",
+              "queryDsl": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/query-dsl.html",
+            },
+            "scriptedFields": Object {
+              "luceneExpressions": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-expression.html",
+              "painless": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-painless.html",
+              "painlessApi": "https://www.elastic.co/guide/en/elasticsearch/painless/mocked-test-branch/painless-api-reference.html",
+              "painlessSyntax": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-painless-syntax.html",
+              "scriptAggs": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations.html#_values_source",
+              "scriptFields": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-request-script-fields.html",
+            },
+            "siem": Object {
+              "gettingStarted": "https://www.elastic.co/guide/en/siem/guide/mocked-test-branch/install-siem.html",
+              "guide": "https://www.elastic.co/guide/en/siem/guide/mocked-test-branch/index.html",
+            },
+            "winlogbeat": Object {
+              "base": "https://www.elastic.co/guide/en/beats/winlogbeat/mocked-test-branch",
+            },
+          }
+        }
+        enableSaving={false}
+        key="setting:test"
+        save={[Function]}
+        setting={
+          Object {
+            "ariaName": "setting test",
+            "category": Array [
+              "general",
+            ],
+            "defVal": "defVal",
+            "description": "description",
+            "displayName": "Test setting",
+            "isCustom": false,
+            "isOverridden": false,
+            "name": "setting:test",
+            "readOnly": false,
+            "requiresPageReload": false,
+            "type": "string",
+            "value": "value",
+          }
+        }
+        toasts={
+          Object {
+            "add": [MockFunction],
+            "addDanger": [MockFunction],
+            "addError": [MockFunction],
+            "addSuccess": [MockFunction],
+            "addWarning": [MockFunction],
+            "get$": [MockFunction],
+            "remove": [MockFunction],
+          }
+        }
+      />
+    </EuiForm>
+  </EuiPanel>
+  <EuiSpacer
+    size="l"
+  />
+  <EuiPanel
+    paddingSize="l"
+  >
+    <EuiForm>
+      <EuiText>
+        <EuiFlexGroup
+          alignItems="baseline"
+        >
+          <EuiFlexItem
+            grow={false}
+          >
+            <h2>
+              Dashboard
+            </h2>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiText>
+      <EuiSpacer
+        size="m"
+      />
+      <Field
+        clear={[Function]}
+        dockLinks={
+          Object {
+            "aggs": Object {
+              "avg": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-avg-aggregation.html",
+              "avg_bucket": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-avg-bucket-aggregation.html",
+              "cardinality": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-cardinality-aggregation.html",
+              "count": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-valuecount-aggregation.html",
+              "cumulative_sum": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-sum-aggregation.html",
+              "date_histogram": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-datehistogram-aggregation.html",
+              "date_range": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-daterange-aggregation.html",
+              "derivative": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-derivative-aggregation.html",
+              "filter": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-filter-aggregation.html",
+              "filters": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-filters-aggregation.html",
+              "geo_bounds": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-geobounds-aggregation.html",
+              "geo_centroid": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-geocentroid-aggregation.html",
+              "geohash_grid": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-geohashgrid-aggregation.html",
+              "histogram": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-histogram-aggregation.html",
+              "ip_range": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-iprange-aggregation.html",
+              "max": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-max-aggregation.html",
+              "max_bucket": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-max-bucket-aggregation.html",
+              "median": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-percentile-aggregation.html",
+              "min": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-min-aggregation.html",
+              "min_bucket": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-min-bucket-aggregation.html",
+              "moving_avg": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-movavg-aggregation.html",
+              "percentile_ranks": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-percentile-rank-aggregation.html",
+              "range": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-range-aggregation.html",
+              "serial_diff": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-serialdiff-aggregation.html",
+              "significant_terms": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-significantterms-aggregation.html",
+              "std_dev": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-extendedstats-aggregation.html",
+              "sum": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-sum-aggregation.html",
+              "sum_bucket": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-sum-bucket-aggregation.html",
+              "terms": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-terms-aggregation.html",
+              "top_hits": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-top-hits-aggregation.html",
+            },
+            "auditbeat": Object {
+              "base": "https://www.elastic.co/guide/en/beats/auditbeat/mocked-test-branch",
+            },
+            "date": Object {
+              "dateMath": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/common-options.html#date-math",
+            },
+            "filebeat": Object {
+              "base": "https://www.elastic.co/guide/en/beats/filebeat/mocked-test-branch",
+              "configuration": "https://www.elastic.co/guide/en/beats/filebeat/mocked-test-branch/filebeat-configuration.html",
+              "elasticsearchOutput": "https://www.elastic.co/guide/en/beats/filebeat/mocked-test-branch/elasticsearch-output.html",
+              "exportedFields": "https://www.elastic.co/guide/en/beats/filebeat/mocked-test-branch/exported-fields.html",
+              "installation": "https://www.elastic.co/guide/en/beats/filebeat/mocked-test-branch/filebeat-installation.html",
+              "startup": "https://www.elastic.co/guide/en/beats/filebeat/mocked-test-branch/filebeat-starting.html",
+            },
+            "functionbeat": Object {
+              "base": "https://www.elastic.co/guide/en/beats/functionbeat/mocked-test-branch",
+            },
+            "heartbeat": Object {
+              "base": "https://www.elastic.co/guide/en/beats/heartbeat/mocked-test-branch",
+            },
+            "indexPatterns": Object {
+              "introduction": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/index-patterns.html",
+              "loadingData": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/tutorial-load-dataset.html",
+            },
+            "kibana": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/index.html",
+            "logstash": Object {
+              "base": "https://www.elastic.co/guide/en/logstash/mocked-test-branch",
+            },
+            "management": Object {
+              "kibanaSearchSettings": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/advanced-options.html#kibana-search-settings",
+            },
+            "metricbeat": Object {
+              "base": "https://www.elastic.co/guide/en/beats/metricbeat/mocked-test-branch",
+            },
+            "query": Object {
+              "kueryQuerySyntax": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/kuery-query.html",
+              "luceneQuerySyntax": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/query-dsl-query-string-query.html#query-string-syntax",
+              "queryDsl": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/query-dsl.html",
+            },
+            "scriptedFields": Object {
+              "luceneExpressions": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-expression.html",
+              "painless": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-painless.html",
+              "painlessApi": "https://www.elastic.co/guide/en/elasticsearch/painless/mocked-test-branch/painless-api-reference.html",
+              "painlessSyntax": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-painless-syntax.html",
+              "scriptAggs": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations.html#_values_source",
+              "scriptFields": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-request-script-fields.html",
+            },
+            "siem": Object {
+              "gettingStarted": "https://www.elastic.co/guide/en/siem/guide/mocked-test-branch/install-siem.html",
+              "guide": "https://www.elastic.co/guide/en/siem/guide/mocked-test-branch/index.html",
+            },
+            "winlogbeat": Object {
+              "base": "https://www.elastic.co/guide/en/beats/winlogbeat/mocked-test-branch",
+            },
+          }
+        }
+        enableSaving={false}
+        key="dashboard:test:setting"
+        save={[Function]}
+        setting={
+          Object {
+            "ariaName": "dashboard test setting",
+            "category": Array [
+              "dashboard",
+            ],
+            "defVal": "defVal",
+            "description": "description",
+            "displayName": "Dashboard test setting",
+            "isCustom": false,
+            "isOverridden": false,
+            "name": "dashboard:test:setting",
+            "readOnly": false,
+            "requiresPageReload": false,
+            "type": "string",
+            "value": "value",
+          }
+        }
+        toasts={
+          Object {
+            "add": [MockFunction],
+            "addDanger": [MockFunction],
+            "addError": [MockFunction],
+            "addSuccess": [MockFunction],
+            "addWarning": [MockFunction],
+            "get$": [MockFunction],
+            "remove": [MockFunction],
+          }
+        }
+      />
+    </EuiForm>
+  </EuiPanel>
+  <EuiSpacer
+    size="l"
+  />
+  <EuiPanel
+    paddingSize="l"
+  >
+    <EuiForm>
+      <EuiText>
+        <EuiFlexGroup
+          alignItems="baseline"
+        >
+          <EuiFlexItem
+            grow={false}
+          >
+            <h2>
+              X-pack
+            </h2>
+          </EuiFlexItem>
+          <EuiFlexItem
+            grow={false}
+          >
+            <em>
+              <FormattedMessage
+                defaultMessage="Search terms are hiding {settingsCount} settings {clearSearch}"
+                id="kbn.management.settings.form.searchResultText"
+                values={
+                  Object {
+                    "clearSearch": <ForwardRef
+                      onClick={[Function]}
+                    >
+                      <em>
+                        <FormattedMessage
+                          defaultMessage="(clear search)"
+                          id="kbn.management.settings.form.clearSearchResultText"
+                          values={Object {}}
+                        />
+                      </em>
+                    </ForwardRef>,
+                    "settingsCount": 9,
+                  }
+                }
+              />
+            </em>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiText>
+      <EuiSpacer
+        size="m"
+      />
+      <Field
+        clear={[Function]}
+        dockLinks={
+          Object {
+            "aggs": Object {
+              "avg": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-avg-aggregation.html",
+              "avg_bucket": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-avg-bucket-aggregation.html",
+              "cardinality": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-cardinality-aggregation.html",
+              "count": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-valuecount-aggregation.html",
+              "cumulative_sum": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-sum-aggregation.html",
+              "date_histogram": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-datehistogram-aggregation.html",
+              "date_range": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-daterange-aggregation.html",
+              "derivative": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-derivative-aggregation.html",
+              "filter": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-filter-aggregation.html",
+              "filters": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-filters-aggregation.html",
+              "geo_bounds": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-geobounds-aggregation.html",
+              "geo_centroid": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-geocentroid-aggregation.html",
+              "geohash_grid": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-geohashgrid-aggregation.html",
+              "histogram": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-histogram-aggregation.html",
+              "ip_range": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-iprange-aggregation.html",
+              "max": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-max-aggregation.html",
+              "max_bucket": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-max-bucket-aggregation.html",
+              "median": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-percentile-aggregation.html",
+              "min": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-min-aggregation.html",
+              "min_bucket": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-min-bucket-aggregation.html",
+              "moving_avg": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-movavg-aggregation.html",
+              "percentile_ranks": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-percentile-rank-aggregation.html",
+              "range": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-range-aggregation.html",
+              "serial_diff": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-serialdiff-aggregation.html",
+              "significant_terms": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-significantterms-aggregation.html",
+              "std_dev": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-extendedstats-aggregation.html",
+              "sum": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-sum-aggregation.html",
+              "sum_bucket": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-pipeline-sum-bucket-aggregation.html",
+              "terms": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-bucket-terms-aggregation.html",
+              "top_hits": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations-metrics-top-hits-aggregation.html",
+            },
+            "auditbeat": Object {
+              "base": "https://www.elastic.co/guide/en/beats/auditbeat/mocked-test-branch",
+            },
+            "date": Object {
+              "dateMath": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/common-options.html#date-math",
+            },
+            "filebeat": Object {
+              "base": "https://www.elastic.co/guide/en/beats/filebeat/mocked-test-branch",
+              "configuration": "https://www.elastic.co/guide/en/beats/filebeat/mocked-test-branch/filebeat-configuration.html",
+              "elasticsearchOutput": "https://www.elastic.co/guide/en/beats/filebeat/mocked-test-branch/elasticsearch-output.html",
+              "exportedFields": "https://www.elastic.co/guide/en/beats/filebeat/mocked-test-branch/exported-fields.html",
+              "installation": "https://www.elastic.co/guide/en/beats/filebeat/mocked-test-branch/filebeat-installation.html",
+              "startup": "https://www.elastic.co/guide/en/beats/filebeat/mocked-test-branch/filebeat-starting.html",
+            },
+            "functionbeat": Object {
+              "base": "https://www.elastic.co/guide/en/beats/functionbeat/mocked-test-branch",
+            },
+            "heartbeat": Object {
+              "base": "https://www.elastic.co/guide/en/beats/heartbeat/mocked-test-branch",
+            },
+            "indexPatterns": Object {
+              "introduction": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/index-patterns.html",
+              "loadingData": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/tutorial-load-dataset.html",
+            },
+            "kibana": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/index.html",
+            "logstash": Object {
+              "base": "https://www.elastic.co/guide/en/logstash/mocked-test-branch",
+            },
+            "management": Object {
+              "kibanaSearchSettings": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/advanced-options.html#kibana-search-settings",
+            },
+            "metricbeat": Object {
+              "base": "https://www.elastic.co/guide/en/beats/metricbeat/mocked-test-branch",
+            },
+            "query": Object {
+              "kueryQuerySyntax": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/kuery-query.html",
+              "luceneQuerySyntax": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/query-dsl-query-string-query.html#query-string-syntax",
+              "queryDsl": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/query-dsl.html",
+            },
+            "scriptedFields": Object {
+              "luceneExpressions": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-expression.html",
+              "painless": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-painless.html",
+              "painlessApi": "https://www.elastic.co/guide/en/elasticsearch/painless/mocked-test-branch/painless-api-reference.html",
+              "painlessSyntax": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-painless-syntax.html",
+              "scriptAggs": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations.html#_values_source",
+              "scriptFields": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-request-script-fields.html",
+            },
+            "siem": Object {
+              "gettingStarted": "https://www.elastic.co/guide/en/siem/guide/mocked-test-branch/install-siem.html",
+              "guide": "https://www.elastic.co/guide/en/siem/guide/mocked-test-branch/index.html",
+            },
+            "winlogbeat": Object {
+              "base": "https://www.elastic.co/guide/en/beats/winlogbeat/mocked-test-branch",
+            },
+          }
+        }
+        enableSaving={false}
+        key="xpack:test:setting"
+        save={[Function]}
+        setting={
+          Object {
+            "ariaName": "xpack test setting",
+            "category": Array [
+              "x-pack",
+            ],
+            "defVal": "defVal",
+            "description": "description",
+            "displayName": "X-Pack test setting",
+            "isCustom": false,
+            "isOverridden": false,
+            "name": "xpack:test:setting",
+            "readOnly": false,
+            "requiresPageReload": false,
+            "type": "string",
+            "value": "value",
+          }
+        }
+        toasts={
+          Object {
+            "add": [MockFunction],
+            "addDanger": [MockFunction],
+            "addError": [MockFunction],
+            "addSuccess": [MockFunction],
+            "addWarning": [MockFunction],
+            "get$": [MockFunction],
+            "remove": [MockFunction],
+          }
+        }
+      />
+    </EuiForm>
+  </EuiPanel>
+  <EuiSpacer
+    size="l"
+  />
+</Fragment>
+`;

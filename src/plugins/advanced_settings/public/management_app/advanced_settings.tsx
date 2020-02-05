@@ -20,12 +20,12 @@
 import React, { Component } from 'react';
 import { Comparators, EuiFlexGroup, EuiFlexItem, EuiSpacer, Query } from '@elastic/eui';
 
-import { npStart } from 'ui/new_platform';
 import { CallOuts } from './components/call_outs';
 import { Search } from './components/search';
 import { Form } from './components/form';
 import { AdvancedSettingsVoiceAnnouncement } from './components/advanced_settings_voice_announcement';
-import { IUiSettingsClient } from '../../../../../../../core/public/';
+import { IUiSettingsClient, DocLinksStart, ToastsStart } from '../../../../core/public/';
+import { ComponentRegistry } from '../';
 
 import { getAriaName, toEditableConfig, DEFAULT_CATEGORY } from './lib';
 
@@ -34,6 +34,10 @@ import { FieldSetting, IQuery } from './types';
 interface AdvancedSettingsProps {
   queryText: string;
   enableSaving: boolean;
+  uiSettings: IUiSettingsClient;
+  dockLinks: DocLinksStart['links'];
+  toasts: ToastsStart;
+  componentRegistry: ComponentRegistry['start'];
 }
 
 interface AdvancedSettingsState {
@@ -45,7 +49,6 @@ interface AdvancedSettingsState {
 type GroupedSettings = Record<string, FieldSetting[]>;
 
 export class AdvancedSettings extends Component<AdvancedSettingsProps, AdvancedSettingsState> {
-  private config: IUiSettingsClient;
   private settings: FieldSetting[];
   private groupedSettings: GroupedSettings;
   private categoryCounts: Record<string, number>;
@@ -56,8 +59,7 @@ export class AdvancedSettings extends Component<AdvancedSettingsProps, AdvancedS
     const { queryText } = this.props;
     const parsedQuery = Query.parse(queryText ? `ariaName:"${getAriaName(queryText)}"` : '');
 
-    this.config = npStart.core.uiSettings;
-    this.settings = this.initSettings(this.config);
+    this.settings = this.initSettings(this.props.uiSettings);
     this.groupedSettings = this.initGroupedSettings(this.settings);
     this.categories = this.initCategories(this.groupedSettings);
     this.categoryCounts = this.initCategoryCounts(this.groupedSettings);
@@ -97,9 +99,9 @@ export class AdvancedSettings extends Component<AdvancedSettingsProps, AdvancedS
   }
 
   componentDidMount() {
-    this.config.getUpdate$().subscribe(() => {
+    this.props.uiSettings.getUpdate$().subscribe(() => {
       const { query } = this.state;
-      this.init(this.config);
+      this.init(this.props.uiSettings);
       this.setState({
         filteredSettings: this.mapSettings(Query.execute(query, this.settings)),
       });
@@ -156,7 +158,7 @@ export class AdvancedSettings extends Component<AdvancedSettingsProps, AdvancedS
 
   render() {
     const { filteredSettings, query, footerQueryMatched } = this.state;
-    const componentRegistry = npStart.plugins.advancedSettings.component;
+    const componentRegistry = this.props.componentRegistry;
 
     const PageTitle = componentRegistry.get(componentRegistry.componentType.PAGE_TITLE_COMPONENT);
     const PageSubtitle = componentRegistry.get(
@@ -186,10 +188,12 @@ export class AdvancedSettings extends Component<AdvancedSettingsProps, AdvancedS
           categories={this.categories}
           categoryCounts={this.categoryCounts}
           clearQuery={this.clearQuery}
-          save={this.config.set.bind(this.config)}
-          clear={this.config.remove.bind(this.config)}
+          save={this.props.uiSettings.set.bind(this.props.uiSettings)}
+          clear={this.props.uiSettings.remove.bind(this.props.uiSettings)}
           showNoResultsMessage={!footerQueryMatched}
           enableSaving={this.props.enableSaving}
+          dockLinks={this.props.dockLinks}
+          toasts={this.props.toasts}
         />
         <PageFooter
           query={query}

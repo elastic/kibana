@@ -22,7 +22,8 @@ import { I18nProvider } from '@kbn/i18n/react';
 import { shallowWithI18nProvider, mountWithI18nProvider } from 'test_utils/enzyme_helpers';
 import { mount } from 'enzyme';
 import { FieldSetting } from '../../types';
-import { UiSettingsType, StringValidation } from '../../../../../../../../../core/public';
+import { UiSettingsType, StringValidation } from '../../../../../../core/public';
+import { notificationServiceMock, docLinksServiceMock } from '../../../../../../core/public/mocks';
 
 // @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
@@ -34,8 +35,6 @@ jest.mock('ui/notify', () => ({
     add: jest.fn(),
   },
 }));
-
-import { toastNotifications } from 'ui/notify';
 
 jest.mock('brace/theme/textmate', () => 'brace/theme/textmate');
 jest.mock('brace/mode/markdown', () => 'brace/mode/markdown');
@@ -196,7 +195,14 @@ describe('Field', () => {
     describe(`for ${type} setting`, () => {
       it('should render default value if there is no user value set', async () => {
         const component = shallowWithI18nProvider(
-          <Field setting={setting} save={save} clear={clear} enableSaving={true} />
+          <Field
+            setting={setting}
+            save={save}
+            clear={clear}
+            enableSaving={true}
+            toasts={notificationServiceMock.createStartContract().toasts}
+            dockLinks={docLinksServiceMock.createStartContract().links}
+          />
         );
 
         expect(component).toMatchSnapshot();
@@ -214,6 +220,8 @@ describe('Field', () => {
             save={save}
             clear={clear}
             enableSaving={true}
+            toasts={notificationServiceMock.createStartContract().toasts}
+            dockLinks={docLinksServiceMock.createStartContract().links}
           />
         );
 
@@ -222,7 +230,14 @@ describe('Field', () => {
 
       it('should render as read only if saving is disabled', async () => {
         const component = shallowWithI18nProvider(
-          <Field setting={setting} save={save} clear={clear} enableSaving={false} />
+          <Field
+            setting={setting}
+            save={save}
+            clear={clear}
+            enableSaving={false}
+            toasts={notificationServiceMock.createStartContract().toasts}
+            dockLinks={docLinksServiceMock.createStartContract().links}
+          />
         );
 
         expect(component).toMatchSnapshot();
@@ -239,6 +254,8 @@ describe('Field', () => {
             save={save}
             clear={clear}
             enableSaving={true}
+            toasts={notificationServiceMock.createStartContract().toasts}
+            dockLinks={docLinksServiceMock.createStartContract().links}
           />
         );
 
@@ -255,6 +272,8 @@ describe('Field', () => {
             save={save}
             clear={clear}
             enableSaving={true}
+            toasts={notificationServiceMock.createStartContract().toasts}
+            dockLinks={docLinksServiceMock.createStartContract().links}
           />
         );
 
@@ -273,6 +292,8 @@ describe('Field', () => {
             save={save}
             clear={clear}
             enableSaving={true}
+            toasts={notificationServiceMock.createStartContract().toasts}
+            dockLinks={docLinksServiceMock.createStartContract().links}
           />
         );
         const select = findTestSubject(component, `advancedSetting-editField-${setting.name}`);
@@ -291,6 +312,8 @@ describe('Field', () => {
             save={save}
             clear={clear}
             enableSaving={true}
+            toasts={notificationServiceMock.createStartContract().toasts}
+            dockLinks={docLinksServiceMock.createStartContract().links}
           />
         );
         const select = findTestSubject(component, `advancedSetting-editField-${setting.name}`);
@@ -303,7 +326,15 @@ describe('Field', () => {
     const setup = () => {
       const Wrapper = (props: Record<string, any>) => (
         <I18nProvider>
-          <Field setting={setting} save={save} clear={clear} enableSaving={true} {...props} />
+          <Field
+            setting={setting}
+            save={save}
+            clear={clear}
+            enableSaving={true}
+            toasts={notificationServiceMock.createStartContract().toasts}
+            dockLinks={docLinksServiceMock.createStartContract().links}
+            {...props}
+          />
         </I18nProvider>
       );
       const wrapper = mount(<Wrapper />);
@@ -489,15 +520,23 @@ describe('Field', () => {
       ...settings.string,
       requiresPageReload: true,
     };
+    const toasts = notificationServiceMock.createStartContract().toasts;
     const wrapper = mountWithI18nProvider(
-      <Field setting={setting} save={save} clear={clear} enableSaving={true} />
+      <Field
+        setting={setting}
+        save={save}
+        clear={clear}
+        enableSaving={true}
+        toasts={toasts}
+        dockLinks={docLinksServiceMock.createStartContract().links}
+      />
     );
     (wrapper.instance() as Field).onFieldChange({ target: { value: 'a new value' } });
     const updated = wrapper.update();
     findTestSubject(updated, `advancedSetting-saveEditField-${setting.name}`).simulate('click');
     expect(save).toHaveBeenCalled();
     await save();
-    expect(toastNotifications.add).toHaveBeenCalledWith(
+    expect(toasts.add).toHaveBeenCalledWith(
       expect.objectContaining({
         title: expect.stringContaining('Please reload the page'),
       })

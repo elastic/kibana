@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 import { isDefaultValue } from './is_default_value';
-import { UiSettingsType } from '../../../../../../../../core/public';
+import { UiSettingsType } from '../../../../../core/public';
 
 describe('Settings', function() {
   describe('Advanced', function() {

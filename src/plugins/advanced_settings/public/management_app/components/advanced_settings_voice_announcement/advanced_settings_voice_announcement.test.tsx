@@ -19,7 +19,7 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { UiSettingsType } from '../../../../../../../../../core/public';
+import { UiSettingsType } from '../../../../../../core/public';
 
 import { AdvancedSettingsVoiceAnnouncement } from './advanced_settings_voice_announcement';
 

@@ -17,20 +17,63 @@
  * under the License.
  */
 
-import { management } from 'ui/management';
-import uiRoutes from 'ui/routes';
-import { uiModules } from 'ui/modules';
-import { capabilities } from 'ui/capabilities';
-import { I18nContext } from 'ui/i18n';
-import indexTemplate from './index.html';
-import {
-  FeatureCatalogueRegistryProvider,
-  FeatureCatalogueCategory,
-} from 'ui/registry/feature_catalogue';
-
 import React from 'react';
-import { AdvancedSettings } from './advanced_settings';
+import ReactDOM from 'react-dom';
 import { i18n } from '@kbn/i18n';
+import { I18nProvider } from '@kbn/i18n/react';
+import { AdvancedSettings } from './advanced_settings';
+import { ManagementSetup } from '../../../management/public';
+import { CoreSetup } from '../../../../core/public';
+import { ComponentRegistry } from '../types';
+
+export function registerAdvSettingsMgmntApp({
+  management,
+  getStartServices,
+  componentRegistry,
+}: {
+  management: ManagementSetup;
+  getStartServices: CoreSetup['getStartServices'];
+  componentRegistry: ComponentRegistry['start'];
+}) {
+  const kibanaSection = management.sections.getSection('kibana');
+  const title = i18n.translate('kbn.management.settings.advancedSettingsLabel', {
+    defaultMessage: 'Advanced Settings',
+  });
+
+  if (!kibanaSection) {
+    throw new Error('`kibana` management section not found.');
+  }
+
+  kibanaSection.registerApp({
+    id: 'advanced_settings',
+    title,
+    order: 20,
+    async mount(params) {
+      params.setBreadcrumbs([{ text: title }]);
+      const [{ uiSettings, notifications, docLinks }] = await getStartServices();
+      ReactDOM.render(
+        <I18nProvider>
+          <AdvancedSettings
+            queryText={''}
+            // todo
+            // enableSaving={application.capabilities.management}
+            // enableSaving={uiSettings.get().advancedSettings.save}
+            enableSaving={true}
+            toasts={notifications.toasts}
+            dockLinks={docLinks.links}
+            uiSettings={uiSettings}
+            componentRegistry={componentRegistry}
+          />
+        </I18nProvider>,
+        params.element
+      );
+      return () => {
+        ReactDOM.unmountComponentAtNode(params.element);
+      };
+    },
+  });
+}
+/*
 import { getBreadcrumbs } from './breadcrumbs';
 
 uiRoutes.when('/management/kibana/settings/:setting?', {
@@ -99,3 +142,4 @@ FeatureCatalogueRegistryProvider.register(() => {
     category: FeatureCatalogueCategory.ADMIN,
   };
 });
+*/

@@ -29,6 +29,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { DocLinksStart, ToastsStart } from '../../../../../../core/public';
 
 import { getCategoryName } from '../../lib';
 import { Field } from '../field';
@@ -45,6 +46,8 @@ interface FormProps {
   clear: (key: string) => Promise<boolean>;
   showNoResultsMessage: boolean;
   enableSaving: boolean;
+  dockLinks: DocLinksStart['links'];
+  toasts: ToastsStart;
 }
 
 export class Form extends PureComponent<FormProps> {
@@ -102,6 +105,8 @@ export class Form extends PureComponent<FormProps> {
                   save={this.props.save}
                   clear={this.props.clear}
                   enableSaving={this.props.enableSaving}
+                  dockLinks={this.props.dockLinks}
+                  toasts={this.props.toasts}
                 />
               );
             })}

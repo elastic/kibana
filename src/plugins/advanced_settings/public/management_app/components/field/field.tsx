@@ -19,19 +19,19 @@
 
 import React, { PureComponent, Fragment } from 'react';
 import ReactDOM from 'react-dom';
-import { npStart } from 'ui/new_platform';
 
 import 'brace/theme/textmate';
 import 'brace/mode/markdown';
 
-import { toastNotifications } from 'ui/notify';
 import {
   EuiBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiCode,
   EuiCodeBlock,
+  // @ts-ignore
   EuiCodeEditor,
+  // @ts-ignore
   EuiDescribedFormGroup,
   EuiFieldNumber,
   EuiFieldText,
@@ -59,13 +59,17 @@ import {
   UiSettingsType,
   ImageValidation,
   StringValidationRegex,
-} from '../../../../../../../../../core/public';
+  DocLinksStart,
+  ToastsStart,
+} from '../../../../../../core/public';
 
 interface FieldProps {
   setting: FieldSetting;
   save: (name: string, value: string) => Promise<boolean>;
   clear: (name: string) => Promise<boolean>;
   enableSaving: boolean;
+  dockLinks: DocLinksStart['links'];
+  toasts: ToastsStart;
 }
 
 interface FieldState {
@@ -278,7 +282,7 @@ export class Field extends PureComponent<FieldProps, FieldState> {
         unsavedValue: base64Image,
       });
     } catch (err) {
-      toastNotifications.addDanger(
+      this.props.toasts.addDanger(
         i18n.translate('kbn.management.settings.field.imageChangeErrorMessage', {
           defaultMessage: 'Image could not be saved',
         })
@@ -331,7 +335,7 @@ export class Field extends PureComponent<FieldProps, FieldState> {
 
   showPageReloadToast = () => {
     if (this.props.setting.requiresPageReload) {
-      toastNotifications.add({
+      this.props.toasts.add({
         title: i18n.translate('kbn.management.settings.field.requiresPageReloadToastDescription', {
           defaultMessage: 'Please reload the page for the "{settingName}" setting to take effect.',
           values: {
@@ -398,7 +402,7 @@ export class Field extends PureComponent<FieldProps, FieldState> {
         this.cancelChangeImage();
       }
     } catch (e) {
-      toastNotifications.addDanger(
+      this.props.toasts.addDanger(
         i18n.translate('kbn.management.settings.field.saveFieldErrorMessage', {
           defaultMessage: 'Unable to save {name}',
           values: { name },
@@ -417,7 +421,7 @@ export class Field extends PureComponent<FieldProps, FieldState> {
       this.cancelChangeImage();
       this.clearError();
     } catch (e) {
-      toastNotifications.addDanger(
+      this.props.toasts.addDanger(
         i18n.translate('kbn.management.settings.field.resetFieldErrorMessage', {
           defaultMessage: 'Unable to reset {name}',
           values: { name },
@@ -606,7 +610,7 @@ export class Field extends PureComponent<FieldProps, FieldState> {
     let deprecation;
 
     if (setting.deprecation) {
-      const { links } = npStart.core.docLinks;
+      const links = this.props.dockLinks;
 
       deprecation = (
         <>
