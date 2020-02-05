@@ -277,7 +277,7 @@ Logs::
 Machine Learning::
 * Fixes escape special characters for Lucene query language   {pull}50494[#50494]
 * Keeps rule editor flyout open on refresh {pull}53458[#53458]
-* Fixes counters and percentages for array fields on the Data visualizer page {pull}55209[#55209]
+* Fixes counters and percentages for array fields on the Data Visualizer page {pull}55209[#55209]
 * Fixes tooltip's persistence on mouse leave {pull}55694[#55694]
 * Fixes Anomaly Explorer swimlane tooltip issue  {pull}55827[#55827]
 * Fixes the annotation area tooltip offset {pull}55955[#55955]
