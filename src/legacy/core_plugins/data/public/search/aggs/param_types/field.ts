@@ -17,24 +17,27 @@
  * under the License.
  */
 
-// @ts-ignore
 import { i18n } from '@kbn/i18n';
+import { isFunction } from 'lodash';
 import { npStart } from 'ui/new_platform';
-import { AggConfig } from '../agg_config';
+import { IAggConfig } from '../agg_config';
 import { SavedObjectNotFound } from '../../../../../../../plugins/kibana_utils/public';
 import { BaseParamType } from './base';
 import { propFilter } from '../filter';
-import { Field, IFieldList, isNestedField } from '../../../../../../../plugins/data/public';
+import { IMetricAggConfig } from '../metrics/metric_agg_type';
+import { Field, isNestedField, KBN_FIELD_TYPES } from '../../../../../../../plugins/data/public';
 
 const filterByType = propFilter('type');
 
+type FieldTypes = KBN_FIELD_TYPES | KBN_FIELD_TYPES[] | '*';
+export type FilterFieldTypes = ((aggConfig: IMetricAggConfig) => FieldTypes) | FieldTypes;
 // TODO need to make a more explicit interface for this
 export type IFieldParamType = FieldParamType;
 
 export class FieldParamType extends BaseParamType {
   required = true;
   scriptable = true;
-  filterFieldTypes: string;
+  filterFieldTypes: FilterFieldTypes;
   onlyAggregatable: boolean;
 
   constructor(config: Record<string, any>) {
@@ -44,7 +47,7 @@ export class FieldParamType extends BaseParamType {
     this.onlyAggregatable = config.onlyAggregatable !== false;
 
     if (!config.write) {
-      this.write = (aggConfig: AggConfig, output: Record<string, any>) => {
+      this.write = (aggConfig: IAggConfig, output: Record<string, any>) => {
         const field = aggConfig.getField();
 
         if (!field) {
@@ -73,7 +76,7 @@ export class FieldParamType extends BaseParamType {
       return field.name;
     };
 
-    this.deserialize = (fieldName: string, aggConfig?: AggConfig) => {
+    this.deserialize = (fieldName: string, aggConfig?: IAggConfig) => {
       if (!aggConfig) {
         throw new Error('aggConfig was not provided to FieldParamType deserialize function');
       }
@@ -84,9 +87,7 @@ export class FieldParamType extends BaseParamType {
       }
 
       // @ts-ignore
-      const validField = this.getAvailableFields(aggConfig.getIndexPattern().fields).find(
-        (f: any) => f.name === fieldName
-      );
+      const validField = this.getAvailableFields(aggConfig).find((f: any) => f.name === fieldName);
       if (!validField) {
         npStart.core.notifications.toasts.addDanger(
           i18n.translate(
@@ -109,7 +110,8 @@ export class FieldParamType extends BaseParamType {
   /**
    * filter the fields to the available ones
    */
-  getAvailableFields = (fields: IFieldList) => {
+  getAvailableFields = (aggConfig: IAggConfig) => {
+    const fields = aggConfig.getIndexPattern().fields;
     const filteredFields = fields.filter((field: Field) => {
       const { onlyAggregatable, scriptable, filterFieldTypes } = this;
 
@@ -120,8 +122,10 @@ export class FieldParamType extends BaseParamType {
         return false;
       }
 
-      if (!filterFieldTypes) {
-        return true;
+      if (isFunction(filterFieldTypes)) {
+        const filter = filterFieldTypes(aggConfig as IMetricAggConfig);
+
+        return filterByType([field], filter).length !== 0;
       }
 
       return filterByType([field], filterFieldTypes).length !== 0;

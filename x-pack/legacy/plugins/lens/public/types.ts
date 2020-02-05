@@ -11,7 +11,7 @@ import { SavedQuery } from 'src/legacy/core_plugins/data/public';
 import { KibanaDatatable } from '../../../../../src/plugins/expressions/public';
 import { DragContextState } from './drag_drop';
 import { Document } from './persistence';
-import { DateRange } from '../common';
+import { DateRange } from '../../../../plugins/lens/common';
 import { Query, esFilters } from '../../../../../src/plugins/data/public';
 
 // eslint-disable-next-line
