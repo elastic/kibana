@@ -1,7 +1,7 @@
 {
   "description": "A request to a web application server contained no identifying user agent string.",
   "false_positives": [
-    "Some normal applications and scripts may contain no user agent. Most legitimate web requests from the Internet contain a user agent string. Requests from web browsers almost always contain a user agent string. If the source is unexpected, or the user is unauthorized, or the request is unusual, these may be suspicious or malicious activity."
+    "Some normal applications and scripts may contain no user agent. Most legitimate web requests from the Internet contain a user agent string. Requests from web browsers almost always contain a user agent string. If the source is unexpected, the user unauthorized, or the request unusual, these may indicate suspicious or malicious activity."
   ],
   "filters": [
     {
@@ -25,7 +25,7 @@
     "apm-*-transaction*"
   ],
   "language": "kuery",
-  "max_signals": 33,
+  "max_signals": 100,
   "name": "Web Application Suspicious Activity: No User Agent",
   "query": "url.path: *",
   "references": [

@@ -7,9 +7,9 @@
     "winlogbeat-*"
   ],
   "language": "kuery",
-  "max_signals": 33,
+  "max_signals": 100,
   "name": "PsExec Network Connection",
-  "query": "process.name:psexec.exe and event.action:\"Network connection detected (rule: NetworkConnect)\" ",
+  "query": "process.name:PsExec.exe and event.action:\"Network connection detected (rule: NetworkConnect)\" ",
   "risk_score": 21,
   "rule_id": "55d551c6-333b-4665-ab7e-5d14a59715ce",
   "severity": "low",
