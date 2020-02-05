@@ -1,11 +1,11 @@
 import React from "react";
 import TestRunnerItem from './test_runner_item';
 
-export default function TestRunnerItemList({items}) {
+export default function TestRunnerItemList({testRunnerTypes}) {
 
   return (
     <ul>
-      {items.map(renderTestRunnerItem)}
+      {testRunnerTypes.map(renderTestRunnerItem)}
     </ul>
   );
 }

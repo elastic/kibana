@@ -24,12 +24,12 @@ import App from './app';
 import * as serviceWorker from './service_worker';
 
 const initialData = window.initialData;
-const { items, buildStats, historicalItems } = initialData;
+const { testRunnerTypes, buildStats, historicalItems } = initialData;
 
 initialPrint();
 
 ReactDOM.render(
-  <App items={items} buildStats={buildStats} historicalItems={historicalItems} />,
+  <App testRunnerTypes={testRunnerTypes} buildStats={buildStats} historicalItems={historicalItems} />,
   document.getElementById('root')
 );
 

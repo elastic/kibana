@@ -17,23 +17,36 @@
  * under the License.
  */
 
-import React from 'react';
-import './app.css';
-import Header from './header';
-import TestRunnerItemList from './test_runner_item_list';
-import HistoricalList from './historical_list';
-import Footer from './footer';
+const initialData = {
+  testRunnerTypes: [
+    {
+      id: 1,
+      type: 'jest',
+    },
+    {
+      id: 2,
+      type: 'mocha',
+    },
+    {
+      id: 3,
+      type: 'functional',
+    },
+  ],
+  buildStats: {
+    url: `
+https://build-stats.elastic.co/app/kibana#/dashboard/02b9d310-9513-11e8-a9c0-db5f285c257f?_g=
+(refreshInterval%3A(pause%3A!f%2Cvalue%3A10000)%2Ctime%3A(from%3Anow%2Fd%2Cmode%3Aquick%2Cto%3Anow%2Fd))
+`,
+  },
+  historicalItems: [],
+};
 
-export default function App({ testRunnerTypes, buildStats, historicalItems }) {
-  const { url } = buildStats;
-  return (
-    <div>
-      <Header url={url} />
-      <div>
-        <TestRunnerItemList testRunnerTypes={testRunnerTypes} />
-        <HistoricalList historicalItems={historicalItems} />
-      </div>
-      <Footer />
-    </div>
-  );
+if (!isInBrowser()) {
+  module.exports.default = {}
+  module.exports.default = initialData
 }
+
+function isInBrowser() {
+  return !!(typeof window !== 'undefined');
+}
+

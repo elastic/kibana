@@ -22,34 +22,52 @@ import { takeUntil } from 'rxjs/operators';
 import * as readline from 'readline';
 import * as fs from 'fs';
 import { resolve } from 'path';
+import * as rawData from '../../cc_app/public/initial_data_raw.js'
 
-const KIBANA_ROOT_PATH = '../../../../..';
-const KIBANA_ROOT = resolve(__dirname, KIBANA_ROOT_PATH);
-const resolvePaths = (...xs) => xs.map(x => resolve(KIBANA_ROOT, x));
-
-const verbose = log => obj =>
-  Object.entries(obj).forEach(xs => log.verbose(`### ${xs[0]} -> ${xs[1]}`));
 
 export const parseAndPopulate = buildNumber => srcFile => destFile => log => {
   const logV = verbose(log);
   logV({ 'buildNumber': buildNumber, 'srcFile': srcFile, 'destFile': destFile });
-
   const [resolvedSrcFile, resolvedDestFile] = resolvePaths(srcFile, destFile);
   logV({ 'resolvedSrcFile': resolvedSrcFile, 'resolvedDestFile': resolvedDestFile });
 
-  const input = fs.createReadStream(resolvedSrcFile);
-  const rl = readline.createInterface({ input });
+  const initialData = dedupe(rawData);
+  const mutateInitialData = mutate(initialData);
 
-  const prok = x => {
-    console.log(`\n### x: \n\t${x}`);
-  };
-
+  const rl = readline.createInterface({ input: fs.createReadStream(resolvedSrcFile) });
   const lines$ = fromEvent(rl, 'line');
   lines$.pipe(takeUntil(fromEvent(rl, 'close')))
     .subscribe(
-      prok,
+      mutateInitialData,
       err => console.log('Error: %s', err),
-      () => console.log('Completed'));
+      () => {
+        console.log(`\n### initialData.historicalItems: \n\t${initialData.historicalItems}`);
+
+        console.log('Completed')
+      });
 
 };
+function mutate(obj) {
+  return function mutateInner(x) {
+    obj.historicalItems.push(x);
+  }
+}
 
+function dedupe(obj) {
+  return obj.default.default;
+}
+
+function resolvePaths(...xs) {
+  return xs.map(x => resolve(kibanaRoot(), x));
+}
+
+function kibanaRoot() {
+  const KIBANA_ROOT_PATH = '../../../../..';
+  return  resolve(__dirname, KIBANA_ROOT_PATH);
+}
+
+function verbose(log) {
+  return function verboseInner(obj) {
+    return  Object.entries(obj).forEach(xs => log.verbose(`### ${xs[0]} -> ${xs[1]}`));
+  }
+}
