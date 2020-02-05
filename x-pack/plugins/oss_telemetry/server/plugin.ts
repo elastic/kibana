@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Observable, Subject } from 'rxjs';
-import { first } from 'rxjs/operators';
+import { Observable } from 'rxjs';
 import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from 'kibana/server';
 import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
 import { registerCollectors } from './lib/collectors';
@@ -23,14 +22,16 @@ export interface OssTelemetryStartDependencies {
 export class OssTelemetryPlugin implements Plugin {
   private readonly logger: Logger;
   private readonly config: Observable<{ kibana: { index: string } }>;
-  private readonly taskManagerStartContract$ = new Subject<TaskManagerStartContract>();
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get('oss_telemetry');
     this.config = initializerContext.config.legacy.globalConfig$;
   }
 
-  public setup(core: CoreSetup, deps: OssTelemetrySetupDependencies) {
+  public setup(
+    core: CoreSetup<OssTelemetryStartDependencies>,
+    deps: OssTelemetrySetupDependencies
+  ) {
     registerTasks({
       taskManager: deps.taskManager,
       logger: this.logger,
@@ -39,14 +40,11 @@ export class OssTelemetryPlugin implements Plugin {
     });
     registerCollectors(
       deps.usageCollection,
-      this.taskManagerStartContract$.pipe(first()).toPromise()
+      core.getStartServices().then(([_, { taskManager }]) => taskManager)
     );
   }
 
   public start(core: CoreStart, deps: OssTelemetryStartDependencies) {
-    this.taskManagerStartContract$.next(deps.taskManager);
-    this.taskManagerStartContract$.complete();
-
     scheduleTasks({
       taskManager: deps.taskManager,
       logger: this.logger,
