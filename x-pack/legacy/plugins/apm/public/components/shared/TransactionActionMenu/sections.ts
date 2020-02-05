@@ -5,15 +5,15 @@
  */
 import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
-import { AppMountContext } from 'kibana/public';
 import { pick, isEmpty } from 'lodash';
 import url from 'url';
 import { Transaction } from '../../../../typings/es_schemas/ui/Transaction';
 import { IUrlParams } from '../../../context/UrlParamsContext/types';
-import { getDiscoveryHref } from '../Links/DiscoverLinks/DiscoverLink';
+import { getDiscoverHref } from '../Links/DiscoverLinks/DiscoverLink';
 import { getDiscoverQuery } from '../Links/DiscoverLinks/DiscoverTransactionLink';
 import { getInfraHref } from '../Links/InfraLink';
 import { fromQuery } from '../Links/url_helpers';
+import { AppMountContextBasePath } from '../../../context/ApmPluginContext';
 
 function getInfraMetricsQuery(transaction: Transaction) {
   const plus5 = new Date(transaction['@timestamp']);
@@ -42,16 +42,21 @@ interface SectionItem {
   actions: Action[];
 }
 
-interface Section {
+interface SectionRecord {
   [key: string]: SectionItem[];
 }
 
-export const getSections = (
-  transaction: Transaction,
-  basePath: AppMountContext['core']['http']['basePath'],
-  location: Location,
-  urlParams: IUrlParams
-) => {
+export const getSections = ({
+  transaction,
+  basePath,
+  location,
+  urlParams
+}: {
+  transaction: Transaction;
+  basePath: AppMountContextBasePath;
+  location: Location;
+  urlParams: IUrlParams;
+}) => {
   const hostName = transaction.host?.hostname;
   const podId = transaction.kubernetes?.pod.uid;
   const containerId = transaction.container?.id;
@@ -160,7 +165,7 @@ export const getSections = (
     }
   ];
 
-  const traceActions: Action[] = [
+  const logActions: Action[] = [
     {
       key: 'traceLogs',
       label: i18n.translate(
@@ -179,6 +184,17 @@ export const getSections = (
     }
   ];
 
+  const uptimeActions: Action[] = [
+    {
+      key: 'monitorStatus',
+      label: i18n.translate('xpack.apm.transactionActionMenu.viewInUptime', {
+        defaultMessage: 'Status'
+      }),
+      href: uptimeLink,
+      condition: !!transaction.url?.domain
+    }
+  ];
+
   const kibanaActions: Action[] = [
     {
       key: 'sampleDocument',
@@ -188,24 +204,16 @@ export const getSections = (
           defaultMessage: 'View sample document'
         }
       ),
-      href: getDiscoveryHref({
+      href: getDiscoverHref({
         basePath,
         query: getDiscoverQuery(transaction),
         location
       }),
       condition: true
-    },
-    {
-      key: 'monitorStatus',
-      label: i18n.translate('xpack.apm.transactionActionMenu.viewInUptime', {
-        defaultMessage: 'View monitor status'
-      }),
-      href: uptimeLink,
-      condition: !!transaction.url?.domain
     }
   ];
 
-  const sections: Section = {
+  const sectionRecord: SectionRecord = {
     observability: [
       {
         key: 'podDetails',
@@ -262,22 +270,34 @@ export const getSections = (
             defaultMessage: 'View the trace logs to get further details.'
           }
         ),
-        actions: traceActions
+        actions: logActions
+      },
+      {
+        key: 'statusDetails',
+        title: i18n.translate('xpack.apm.transactionActionMenu.status.title', {
+          defaultMessage: 'Status details'
+        }),
+        subtitle: i18n.translate(
+          'xpack.apm.transactionActionMenu.status.subtitle',
+          {
+            defaultMessage: 'View the status to get further details.'
+          }
+        ),
+        actions: uptimeActions
       }
     ],
     kibana: [{ key: 'kibana', actions: kibanaActions }]
   };
 
   // Filter out actions that shouldnt be shown and sections without any actions.
-  return Object.values(sections).map(items =>
-    items
-      .reduce((acc: SectionItem[], curr: SectionItem) => {
-        const actions = curr.actions.filter(
+  return Object.values(sectionRecord).map(sections =>
+    sections
+      .map(sectionItem => {
+        const actions = sectionItem.actions.filter(
           (action: Action) => action.condition
         );
-        acc.push({ ...curr, actions });
-        return acc;
-      }, [])
-      .filter(section => section.actions.length > 0)
+        return { ...sectionItem, actions };
+      })
+      .filter(sectionItem => sectionItem.actions.length > 0)
   );
 };

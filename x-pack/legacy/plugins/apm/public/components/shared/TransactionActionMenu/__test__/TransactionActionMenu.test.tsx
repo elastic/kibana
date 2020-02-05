@@ -98,7 +98,7 @@ describe('TransactionActionMenu component', () => {
       Transactions.transactionWithMinimalData
     );
 
-    expect(queryByText('View monitor status')).toBeNull();
+    expect(queryByText('Status')).toBeNull();
   });
 
   it('should not render the uptime link if there is no domain available', async () => {
@@ -106,7 +106,7 @@ describe('TransactionActionMenu component', () => {
       Transactions.transactionWithUrlWithoutDomain
     );
 
-    expect(queryByText('View monitor status')).toBeNull();
+    expect(queryByText('Status')).toBeNull();
   });
 
   it('should render the uptime link if there is a url with a domain', async () => {
@@ -114,7 +114,7 @@ describe('TransactionActionMenu component', () => {
       Transactions.transactionWithUrlAndDomain
     );
 
-    expect(queryByText('View monitor status')).not.toBeNull();
+    expect(queryByText('Status')).not.toBeNull();
   });
 
   it('should match the snapshot', async () => {

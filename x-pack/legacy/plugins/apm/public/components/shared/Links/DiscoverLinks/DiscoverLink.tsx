@@ -6,7 +6,6 @@
 
 import { EuiLink } from '@elastic/eui';
 import { Location } from 'history';
-import { AppMountContext } from 'kibana/public';
 import React from 'react';
 import url from 'url';
 import rison, { RisonValue } from 'rison-node';
@@ -14,6 +13,7 @@ import { useLocation } from '../../../../hooks/useLocation';
 import { getTimepickerRisonData } from '../rison_helpers';
 import { APM_STATIC_INDEX_PATTERN_ID } from '../../../../../common/index_pattern_constants';
 import { useApmPluginContext } from '../../../../hooks/useApmPluginContext';
+import { AppMountContextBasePath } from '../../../../context/ApmPluginContext';
 
 interface Props {
   query: {
@@ -32,12 +32,12 @@ interface Props {
   children: React.ReactNode;
 }
 
-export const getDiscoveryHref = ({
+export const getDiscoverHref = ({
   basePath,
   location,
   query
 }: {
-  basePath: AppMountContext['core']['http']['basePath'];
+  basePath: AppMountContextBasePath;
   location: Location;
   query: Props['query'];
 }) => {
@@ -62,7 +62,7 @@ export function DiscoverLink({ query = {}, ...rest }: Props) {
   const { core } = useApmPluginContext();
   const location = useLocation();
 
-  const href = getDiscoveryHref({
+  const href = getDiscoverHref({
     basePath: core.http.basePath,
     query,
     location

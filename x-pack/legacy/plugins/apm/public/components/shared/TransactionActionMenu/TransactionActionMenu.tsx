@@ -52,12 +52,12 @@ export const TransactionActionMenu: FunctionComponent<Props> = ({
 
   const [isOpen, setIsOpen] = useState(false);
 
-  const sections = getSections(
+  const sections = getSections({
     transaction,
-    core.http.basePath,
+    basePath: core.http.basePath,
     location,
     urlParams
-  );
+  });
 
   return (
     <ActionMenu

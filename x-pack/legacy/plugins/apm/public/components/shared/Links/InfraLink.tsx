@@ -8,9 +8,9 @@ import { EuiLink, EuiLinkAnchorProps } from '@elastic/eui';
 import { compact } from 'lodash';
 import React from 'react';
 import url from 'url';
-import { AppMountContext } from 'kibana/public';
 import { fromQuery } from './url_helpers';
 import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
+import { AppMountContextBasePath } from '../../../context/ApmPluginContext';
 
 interface InfraQueryParams {
   time?: number;
@@ -30,7 +30,7 @@ export const getInfraHref = ({
   query,
   path
 }: {
-  basePath: AppMountContext['core']['http']['basePath'];
+  basePath: AppMountContextBasePath;
   query: InfraQueryParams;
   path?: string;
 }) => {
