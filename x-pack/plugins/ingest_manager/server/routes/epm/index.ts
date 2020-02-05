@@ -6,6 +6,7 @@
 import { IRouter } from 'kibana/server';
 import { PLUGIN_ID, EPM_API_ROUTES } from '../../constants';
 import { getCategoriesHandler, getListHandler } from './handlers';
+import { GetPackagesRequestSchema } from '../../types';
 
 export const registerRoutes = (router: IRouter) => {
   router.get(
@@ -20,7 +21,7 @@ export const registerRoutes = (router: IRouter) => {
   router.get(
     {
       path: EPM_API_ROUTES.LIST_PATTERN,
-      validate: false,
+      validate: GetPackagesRequestSchema,
       options: { tags: [`access:${PLUGIN_ID}`] },
     },
     getListHandler
