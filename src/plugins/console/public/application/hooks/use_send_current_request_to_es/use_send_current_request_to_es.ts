@@ -19,7 +19,7 @@
 import { i18n } from '@kbn/i18n';
 import { useCallback } from 'react';
 import { instance as registry } from '../../contexts/editor_context/editor_registry';
-import { useRequestActionContext, useServicesContext, useRequestReadContext } from '../../contexts';
+import { useRequestActionContext, useServicesContext } from '../../contexts';
 import { sendRequestToES } from './send_request_to_es';
 import { track } from './track';
 
@@ -31,43 +31,23 @@ export const useSendCurrentRequestToES = () => {
     services: { history, settings, notifications, trackUiMetric },
   } = useServicesContext();
 
-  const { requestInFlight } = useRequestReadContext();
   const dispatch = useRequestActionContext();
 
   return useCallback(async () => {
-    if (requestInFlight) {
-      notifications.toasts.addWarning({
-        title: i18n.translate('console.requestAlreadyInFlightTitle', {
-          defaultMessage: 'Cannot send request right now.',
-        }),
-        toastLifeTimeMs: 3000,
-      });
-      return;
-    }
-    dispatch({ type: 'sendRequest', payload: undefined });
     try {
       const editor = registry.getInputEditor();
       const requests = await editor.getRequestsInRange();
       if (!requests.length) {
-        dispatch({
-          type: 'requestFail',
-          payload: {
-            response: {
-              value: 'No requests in range',
-              contentType: 'text/plain',
-              statusCode: 0,
-              statusText: 'None',
-              timeMs: 0,
-            },
-            request: {
-              data: null,
-              method: '',
-              path: '',
-            },
-          },
-        });
+        notifications.toasts.add(
+          i18n.translate('console.notification.noReqeustSelectedTitle', {
+            defaultMessage:
+              'It looks like your cursor is not on a request. Please select a request by placing your cursor on it.',
+          })
+        );
         return;
       }
+
+      dispatch({ type: 'sendRequest', payload: undefined });
 
       // Fire and forget
       setTimeout(() => track(requests, editor, trackUiMetric), 0);
@@ -101,11 +81,11 @@ export const useSendCurrentRequestToES = () => {
         });
       } else {
         notifications.toasts.addError(e, {
-          title: i18n.translate('console.unknownRequestErrorTitle', {
+          title: i18n.translate('console.notification.unknownRequestErrorTitle', {
             defaultMessage: 'Unknown Request Error',
           }),
         });
       }
     }
-  }, [dispatch, settings, history, notifications, trackUiMetric, requestInFlight]);
+  }, [dispatch, settings, history, notifications, trackUiMetric]);
 };

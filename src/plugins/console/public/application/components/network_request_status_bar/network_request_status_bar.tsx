@@ -17,16 +17,28 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiBadge, EuiText, EuiToolTip } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 
 export interface Props {
-  statusCode: number;
-  statusText: string;
-  method: string;
-  endpoint: string;
-  timeElapsedMs: number;
+  requestInProgress: boolean;
+  requestResult?: {
+    // Status code of the request, e.g., 200
+    statusCode: number;
+
+    // Status text of the request, e.g., OK
+    statusText: string;
+
+    // Method of the request, e.g., GET
+    method: string;
+
+    // The path of endpoint that was called, e.g., /_search
+    endpoint: string;
+
+    // The time, in milliseconds, that the last request took
+    timeElapsedMs: number;
+  };
 }
 
 const mapStatusCodeToBadgeColor = (statusCode: number) => {
@@ -50,55 +62,72 @@ const mapStatusCodeToBadgeColor = (statusCode: number) => {
 };
 
 export const NetworkRequestStatusBar: FunctionComponent<Props> = ({
-  endpoint,
-  statusCode,
-  statusText,
-  timeElapsedMs,
-  method,
-}) => (
-  <EuiFlexGroup
-    justifyContent="flexEnd"
-    alignItems="center"
-    direction="row"
-    gutterSize="none"
-    responsive={false}
-  >
-    <EuiFlexItem
-      grow={false}
-      className="conApp__outputNetworkRequestStatusBar__item conApp__outputNetworkRequestStatusBar__badge"
-    >
-      <EuiToolTip
-        position="top"
-        content={
-          <EuiText size="s">{`${method} ${
-            endpoint.startsWith('/') ? endpoint : '/' + endpoint
-          }`}</EuiText>
-        }
-      >
-        <EuiBadge color={mapStatusCodeToBadgeColor(statusCode)}>
-          {/*  Use &nbsp; to ensure that no matter the width we don't allow line breaks */}
-          {statusCode}&nbsp;-&nbsp;{statusText}
-        </EuiBadge>
-      </EuiToolTip>
-    </EuiFlexItem>
+  requestInProgress,
+  requestResult,
+}) => {
+  let content: React.ReactNode = null;
 
-    <EuiFlexItem grow={false} className="conApp__outputNetworkRequestStatusBar__item">
-      <EuiToolTip
-        position="top"
-        content={
-          <EuiText size="s">
-            {i18n.translate('console.requestTimeElapasedBadgeTooltipContent', {
-              defaultMessage: 'Time Elapsed',
-            })}
-          </EuiText>
-        }
-      >
-        <EuiText size="s">
-          <EuiBadge color="default">
-            {timeElapsedMs}&nbsp;{'ms'}
-          </EuiBadge>
-        </EuiText>
-      </EuiToolTip>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
+  if (requestInProgress) {
+    content = (
+      <EuiFlexItem grow={false}>
+        <EuiBadge color="hollow">
+          {i18n.translate('console.requestInProgressBadgeText', {
+            defaultMessage: 'Request in progress',
+          })}
+        </EuiBadge>
+      </EuiFlexItem>
+    );
+  } else if (requestResult) {
+    const { endpoint, method, statusCode, statusText, timeElapsedMs } = requestResult;
+
+    content = (
+      <>
+        <EuiFlexItem grow={false}>
+          <EuiToolTip
+            position="top"
+            content={
+              <EuiText size="s">{`${method} ${
+                endpoint.startsWith('/') ? endpoint : '/' + endpoint
+              }`}</EuiText>
+            }
+          >
+            <EuiBadge color={mapStatusCodeToBadgeColor(statusCode)}>
+              {/*  Use &nbsp; to ensure that no matter the width we don't allow line breaks */}
+              {statusCode}&nbsp;-&nbsp;{statusText}
+            </EuiBadge>
+          </EuiToolTip>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiToolTip
+            position="top"
+            content={
+              <EuiText size="s">
+                {i18n.translate('console.requestTimeElapasedBadgeTooltipContent', {
+                  defaultMessage: 'Time Elapsed',
+                })}
+              </EuiText>
+            }
+          >
+            <EuiText size="s">
+              <EuiBadge color="default">
+                {timeElapsedMs}&nbsp;{'ms'}
+              </EuiBadge>
+            </EuiText>
+          </EuiToolTip>
+        </EuiFlexItem>
+      </>
+    );
+  }
+
+  return (
+    <EuiFlexGroup
+      justifyContent="flexEnd"
+      alignItems="center"
+      direction="row"
+      gutterSize="s"
+      responsive={false}
+    >
+      {content}
+    </EuiFlexGroup>
+  );
+};

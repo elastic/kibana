@@ -83,22 +83,8 @@ function EditorOutputUI() {
     applyCurrentSettings(editorInstanceRef.current!, readOnlySettings);
   }, [readOnlySettings]);
 
-  const lastDatum = data?.[data.length - 1] ?? error;
-
   return (
     <>
-      {lastDatum ? (
-        <div className="conApp__networkRequestContainer">
-          <NetworkRequestStatusBar
-            method={lastDatum.request.method.toUpperCase()}
-            endpoint={lastDatum.request.path}
-            statusCode={lastDatum.response.statusCode}
-            statusText={lastDatum.response.statusText}
-            timeElapsedMs={lastDatum.response.timeMs}
-          />
-        </div>
-      ) : null}
-
       <div ref={editorRef} className="conApp__output" data-test-subj="response-editor">
         {/* Axe complains about Ace's textarea element missing a label, which interferes with our
       automated a11y tests per #52136. This wrapper does nothing to address a11y but it does

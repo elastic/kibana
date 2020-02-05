@@ -59,7 +59,7 @@ export const Editor = memo(({ loading }: Props) => {
   return (
     <>
       {requestInFlight ? (
-        <div style={{ position: 'relative', zIndex: 2000 }}>
+        <div className="conApp__requestProgressBarContainer">
           <EuiProgress size="xs" color="accent" position="absolute" />
         </div>
       ) : null}
