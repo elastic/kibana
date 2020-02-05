@@ -41,6 +41,7 @@ export type Start = ReturnType<Plugin['start']>;
 export class Plugin implements IPlugin<Setup, Start> {
   public id = 'siem';
   public name = 'SIEM';
+
   constructor(
     // @ts-ignore this is added to satisfy the New Platform typing constraint,
     // but we're not leveraging any of its functionality yet.

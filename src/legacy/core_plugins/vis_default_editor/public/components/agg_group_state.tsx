@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { AggConfig } from '../legacy_imports';
+import { IAggConfig } from '../legacy_imports';
 
 export enum AGGS_ACTION_KEYS {
   TOUCHED = 'aggsTouched',
@@ -52,7 +52,7 @@ function aggGroupReducer(state: AggsState, action: AggsAction): AggsState {
   }
 }
 
-function initAggsState(group: AggConfig[]): AggsState {
+function initAggsState(group: IAggConfig[]): AggsState {
   return group.reduce((state, agg) => {
     state[agg.id] = { touched: false, valid: true };
     return state;

@@ -4,7 +4,7 @@
     "winlogbeat-*"
   ],
   "language": "kuery",
-  "max_signals": 33,
+  "max_signals": 100,
   "name": "Unusual Parent-Child Relationship ",
   "query": "   event.action:\"Process Create (rule: ProcessCreate)\" and process.parent.executable:* and   (      (process.name:\"smss.exe\" and not process.parent.name:(\"System\" or \"smss.exe\")) or       (process.name:\"csrss.exe\" and not process.parent.name:(\"smss.exe\" or \"svchost.exe\")) or       (process.name:\"wininit.exe\" and not process.parent.name:\"smss.exe\") or       (process.name:\"winlogon.exe\" and not process.parent.name:\"smss.exe\") or       (process.name:\"lsass.exe\" and not process.parent.name:\"wininit.exe\") or       (process.name:\"LogonUI.exe\" and not process.parent.name:(\"winlogon.exe\" or \"wininit.exe\")) or       (process.name:\"services.exe\" and not process.parent.name:\"wininit.exe\") or       (process.name:\"svchost.exe\" and not process.parent.name:(\"services.exe\" or \"MsMpEng.exe\")) or      (process.name:\"spoolsv.exe\" and not process.parent.name:\"services.exe\") or       (process.name:\"taskhost.exe\" and not process.parent.name:(\"services.exe\" or \"svchost.exe\")) or       (process.name:\"taskhostw.exe\" and not process.parent.name:(\"services.exe\" or \"svchost.exe\")) or       (process.name:\"userinit.exe\" and not process.parent.name:(\"dwm.exe\" or \"winlogon.exe\"))    )",
   "risk_score": 47,
