@@ -153,7 +153,7 @@ function createInternalCoreSetupMock() {
     elasticsearch: elasticsearchServiceMock.createInternalSetup(),
     http: httpServiceMock.createSetupContract(),
     uiSettings: uiSettingsServiceMock.createSetupContract(),
-    savedObjects: savedObjectsServiceMock.createSetupContract(),
+    savedObjects: savedObjectsServiceMock.createInternalSetupContract(),
     uuid: uuidServiceMock.createSetupContract(),
   };
   return setupDeps;
@@ -162,7 +162,7 @@ function createInternalCoreSetupMock() {
 function createInternalCoreStartMock() {
   const startDeps: InternalCoreStart = {
     capabilities: capabilitiesServiceMock.createStartContract(),
-    savedObjects: savedObjectsServiceMock.createStartContract(),
+    savedObjects: savedObjectsServiceMock.createInternalStartContract(),
     uiSettings: uiSettingsServiceMock.createStartContract(),
   };
   return startDeps;

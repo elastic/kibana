@@ -83,7 +83,7 @@ beforeEach(() => {
           getAuthHeaders: () => undefined,
         } as any,
       },
-      savedObjects: savedObjectsServiceMock.createSetupContract(),
+      savedObjects: savedObjectsServiceMock.createInternalSetupContract(),
       plugins: {
         contracts: new Map([['plugin-id', 'plugin-value']]),
         uiPlugins: {
@@ -101,7 +101,7 @@ beforeEach(() => {
   startDeps = {
     core: {
       capabilities: capabilitiesServiceMock.createStartContract(),
-      savedObjects: savedObjectsServiceMock.createStartContract(),
+      savedObjects: savedObjectsServiceMock.createInternalStartContract(),
       uiSettings: uiSettingsServiceMock.createStartContract(),
       plugins: { contracts: new Map() },
     },
