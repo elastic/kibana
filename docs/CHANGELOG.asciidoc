@@ -98,7 +98,7 @@ Machine Learning::
 * Indicates missing required privileges for import in File Data Visualizer {pull}50147[#50147]
 * Stats bar for data frame analytics {pull}49464[#49464]
 * Adds the job message tab to data frame analytics {pull}50468[#50468]
-* Reactive time-range selection in SMV {pull}51008[#51008]
+* Reactive time-range selection in Single Metric Viewer {pull}51008[#51008]
 * Adds Custom URLs and Calendars to the Job wizards {pull}51281[#51281]
 * Performs cardinality check on enabling the model plot {pull}51915[#51915]
 * Fetches the latest job messages and enable sorting by time {pull}52388[#52388]
