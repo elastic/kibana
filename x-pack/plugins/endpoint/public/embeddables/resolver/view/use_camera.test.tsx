@@ -167,19 +167,18 @@ describe('useCamera on an unpainted element', () => {
     element = await findByTestId(testID);
     expect(element).toBeInTheDocument();
   });
-  test('returns a busted projectionMatrix', async () => {
-    // TODO fix
+  test('returns a projectionMatrix that changes everything to 0', async () => {
     expect(projectionMatrix).toMatchInlineSnapshot(`
       Array [
-        NaN,
-        NaN,
-        NaN,
-        NaN,
-        NaN,
-        NaN,
-        NaN,
-        NaN,
-        NaN,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
       ]
     `);
   });

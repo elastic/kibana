@@ -434,13 +434,6 @@ export const viewableBoundingBox: (state: CameraState) => (time: Date) => AABB =
   }
 );
 
-// prettier-ignore
-const fromNDCtoZeroToTwo: Matrix3 = [
-  0, 0, 1,
-  0, 0, 1,
-  0, 0, 0
-]
-
 /**
  * A matrix that when applied to a Vector2 will convert it from world coordinates to screen coordinates.
  * See https://en.wikipedia.org/wiki/Orthographic_projection
@@ -458,28 +451,52 @@ export const projectionMatrix: (state: CameraState) => (time: Date) => Matrix3 =
         clippingPlaneLeft,
         clippingPlaneBottom,
       } = clippingPlanesAtTime(time);
+
+      /**
+       * 1. adjust for camera by subtracting its translation. The closer the camera is to a point, the closer that point
+       * should be to the center of the screen.
+       */
+      const adjustForCameraPosition = translationTransformation(
+        vector2.scale(translationAtTime(time), -1)
+      );
+
+      /**
+       * 2. Scale the values to match the dimensions of the Resolver component.
+       */
+      const scaleToClippingPlane = orthographicProjection(
+        clippingPlaneTop,
+        clippingPlaneRight,
+        clippingPlaneBottom,
+        clippingPlaneLeft
+      );
+      /**
+       * 3. invert y since CSS has inverted y
+       */
+      const invertY = scalingTransformation([1, -1]);
+
+      /**
+       * 3. Convert values from the scale of -1<=n<=1 to 0<=n<=2
+       */
+      // prettier-ignore
+      const fromNDCtoZeroToTwo: Matrix3 = [
+        0, 0, 1,
+        0, 0, 1,
+        0, 0, 0
+      ]
+
+      /**
+       * 4. convert from 0->2 to 0->rasterDimension by multiplying by rasterDimension/2
+       */
+      const fromZeroToTwoToRasterDimensions = scalingTransformation([
+        renderWidth / 2,
+        renderHeight / 2,
+      ]);
+
       return multiply(
-        // 5. convert from 0->2 to 0->rasterWidth (or height)
-        scalingTransformation([renderWidth / 2, renderHeight / 2]),
+        fromZeroToTwoToRasterDimensions,
         addMatrix(
-          // 4. add one to change range from -1->1 to 0->2
           fromNDCtoZeroToTwo,
-          multiply(
-            // 3. invert y since CSS has inverted y
-            scalingTransformation([1, -1]),
-            multiply(
-              // 2. scale to clipping plane
-              orthographicProjection(
-                clippingPlaneTop,
-                clippingPlaneRight,
-                clippingPlaneBottom,
-                clippingPlaneLeft
-              ),
-              // 1. adjust for camera by subtracting its translation. The closer the camera is to a point, the closer that point
-              // should be to the center of the screen.
-              translationTransformation(vector2.scale(translationAtTime(time), -1))
-            )
-          )
+          multiply(invertY, multiply(scaleToClippingPlane, adjustForCameraPosition))
         )
       );
     });
