@@ -29,9 +29,7 @@ import { StateProvider } from 'ui/state_management/state';
 // @ts-ignore
 import { EventsProvider } from 'ui/events';
 import { PersistedState } from 'ui/persisted_state';
-
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
-
 import { CoreStart, LegacyCoreStart, IUiSettingsClient } from 'kibana/public';
 // @ts-ignore
 import { AppStateProvider } from 'ui/state_management/app_state';
@@ -43,7 +41,6 @@ import { StateManagementConfigProvider } from 'ui/state_management/config_provid
 import { KbnUrlProvider, RedirectWhenMissingProvider } from 'ui/url';
 // @ts-ignore
 import { createTopNavDirective, createTopNavHelper } from 'ui/kbn_top_nav/kbn_top_nav';
-import { configureAppAngularModule } from 'ui/legacy_compat';
 import { IndexPatterns, DataPublicPluginStart } from '../../../../../plugins/data/public';
 import { Storage } from '../../../../../plugins/kibana_utils/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../../plugins/navigation/public';
@@ -75,11 +72,12 @@ import { FixedScrollProvider } from './np_ready/angular/directives/fixed_scroll'
 import { DebounceProviderTimeout } from './np_ready/angular/directives/debounce/debounce';
 import { createRenderCompleteDirective } from './np_ready/angular/directives/render_complete';
 import {
-  watchMultiDecorator,
-  PromiseServiceCreator,
+  configureAppAngularModule,
   KbnAccessibleClickProvider,
   PrivateProvider,
+  PromiseServiceCreator,
   registerListenEventListener,
+  watchMultiDecorator,
 } from '../../../../../plugins/kibana_legacy/public';
 
 /**

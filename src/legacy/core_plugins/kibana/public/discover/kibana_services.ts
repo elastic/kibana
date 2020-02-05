@@ -62,11 +62,13 @@ export { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 export { timezoneProvider } from 'ui/vis/lib/timezone';
 // @ts-ignore
 export { tabifyAggResponse } from 'ui/agg_response/tabify';
-export { ensureDefaultIndexPattern } from 'ui/legacy_compat';
 export { unhashUrl } from '../../../../../plugins/kibana_utils/public';
-export { formatMsg, formatStack } from '../../../../../plugins/kibana_legacy/public';
-// @ts-ignore
-export { migrateLegacyQuery } from '../../../../../plugins/kibana_legacy/public';
+export {
+  migrateLegacyQuery,
+  ensureDefaultIndexPattern,
+  formatMsg,
+  formatStack,
+} from '../../../../../plugins/kibana_legacy/public';
 
 // EXPORT types
 export {

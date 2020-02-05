@@ -37,20 +37,20 @@ export { ConfirmationButtonTypes } from 'ui/modals/confirm_modal';
 export { showSaveModal, SaveResult } from 'ui/saved_objects/show_saved_object_save_modal';
 export { KbnUrl } from 'ui/url/kbn_url';
 // @ts-ignore
-
-// @ts-ignore
 export { createTopNavDirective, createTopNavHelper } from 'ui/kbn_top_nav/kbn_top_nav';
-// @ts-ignore
-export { PromiseServiceCreator } from '../../../../../plugins/kibana_legacy/public';
 // @ts-ignore
 export { KbnUrlProvider, RedirectWhenMissingProvider } from 'ui/url/index';
 // @ts-ignore
 export { confirmModalFactory } from 'ui/modals/confirm_modal';
-export { configureAppAngularModule } from 'ui/legacy_compat';
-export { ensureDefaultIndexPattern } from 'ui/legacy_compat';
 export { IInjector } from 'ui/chrome';
 export { SavedObjectLoader } from 'ui/saved_objects';
 export { VISUALIZE_EMBEDDABLE_TYPE } from '../../../visualizations/public/embeddable';
 export { registerTimefilterWithGlobalStateFactory } from 'ui/timefilter/setup_router';
 export { absoluteToParsedUrl } from 'ui/url/absolute_to_parsed_url';
-export { migrateLegacyQuery, PrivateProvider } from '../../../../../plugins/kibana_legacy/public';
+export {
+  migrateLegacyQuery,
+  PrivateProvider,
+  PromiseServiceCreator,
+  configureAppAngularModule,
+  ensureDefaultIndexPattern,
+} from '../../../../../plugins/kibana_legacy/public';
