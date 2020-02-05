@@ -17,5 +17,8 @@
  * under the License.
  */
 
-export { OnSaveProps, SavedObjectSaveModal, SaveResult, showSaveModal } from './save_modal';
-export { getSavedObjectFinder, SavedObjectFinderUi, SavedObjectMetaData } from './finder';
+export {
+  SavedObjectMetaData,
+  SavedObjectFinderUi,
+  getSavedObjectFinder,
+} from './saved_object_finder';
