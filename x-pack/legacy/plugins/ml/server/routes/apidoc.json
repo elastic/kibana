@@ -19,6 +19,20 @@
     "GetDataFrameAnalyticsMessages",
     "DataVisualizer",
     "GetOverallStats",
-    "GetStatsForFields"
+    "GetStatsForFields",
+    "AnomalyDetectors",
+    "GetAnomalyDetectors",
+    "GetAnomalyDetectorsById",
+    "GetAnomalyDetectorsStats",
+    "GetAnomalyDetectorsStatsById",
+    "CreateAnomalyDetectors",
+    "UpdateAnomalyDetectors",
+    "OpenAnomalyDetectorsJob",
+    "CloseAnomalyDetectorsJob",
+    "DeleteAnomalyDetectorsJob",
+    "ValidateAnomalyDetector",
+    "ForecastAnomalyDetector",
+    "GetOverallBuckets",
+    "GetCategories"
   ]
 }
