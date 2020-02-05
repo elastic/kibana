@@ -19,13 +19,7 @@
 
 import { IndexPattern, Field } from 'src/plugins/data/public';
 import { VisState } from 'src/legacy/core_plugins/visualizations/public';
-import {
-  IAggConfig,
-  IAggType,
-  AggGroupNames,
-  BUCKET_TYPES,
-  IndexedArray,
-} from '../legacy_imports';
+import { IAggConfig, IAggType, AggGroupNames, BUCKET_TYPES, IndexedArray } from '../legacy_imports';
 import {
   getAggParamsToRender,
   getAggTypeOptions,
