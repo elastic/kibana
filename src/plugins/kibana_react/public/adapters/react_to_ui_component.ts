@@ -21,6 +21,11 @@ import { ComponentType, createElement as h } from 'react';
 import { render as renderReact, unmountComponentAtNode } from 'react-dom';
 import { UiComponent, UiComponentInstance } from '../../../kibana_utils/common';
 
+/**
+ * Transform a React component into a `UiComponent`.
+ *
+ * @param ReactComp A React component.
+ */
 export const reactToUiComponent = <Props extends object>(
   ReactComp: ComponentType<Props>
 ): UiComponent<Props> => () => {

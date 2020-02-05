@@ -20,6 +20,9 @@
 import { FC, createElement as h, useRef, useLayoutEffect, useMemo } from 'react';
 import { UiComponent, UiComponentInstance } from '../../../kibana_utils/common';
 
+/**
+ * Transforms `UiComponent` into a React component.
+ */
 export const uiToReactComponent = <Props extends object>(
   Comp: UiComponent<Props>,
   as: string = 'div'
