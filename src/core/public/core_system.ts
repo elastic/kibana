@@ -311,9 +311,11 @@ export class CoreSystem {
           timestamp: new Date().toISOString(),
           id: element.attr('id'),
           class: element.attr('class'),
+          dataTestSubj: element.attr('data-test-subj'),
+          dataName: element.attr('data-name'),
           app: currentAppId,
           sequence: ++sequence,
-          sessionHash: 'foo',
+          sessionHash: '72bbFXAB23Ct1v3Qvzje',
         });
       }
 

@@ -35,6 +35,8 @@ export const registerBehaviorRoutes: RegisterRoute = (
               timestamp: schema.string(),
               id: schema.maybe(schema.string()),
               class: schema.maybe(schema.string()),
+              dataTestSubj: schema.maybe(schema.string()),
+              dataName: schema.maybe(schema.string()),
               app: schema.string(),
               sequence: schema.number(),
               sessionHash: schema.string(),
@@ -51,7 +53,7 @@ export const registerBehaviorRoutes: RegisterRoute = (
       const clickEvents = clicks.map(click => generateClickEvent({
         ...click,
         deploymentId: '123'
-      }));
+      }, request.headers['user-agent']));
 
       await Promise.all(clickEvents.map(clickEvent => {
         return es.callAsInternalUser('index', {
@@ -65,7 +67,7 @@ export const registerBehaviorRoutes: RegisterRoute = (
   );
 };
 
-function generateClickEvent(clickData: any) {
+function generateClickEvent(clickData: any, userAgent: any) {
   return {
     '@timestamp': clickData.timestamp,
     ecs: {
@@ -74,7 +76,9 @@ function generateClickEvent(clickData: any) {
     labels: {
       deployment_id: clickData.deploymentId,
       elementId: clickData.id,
-      elementRef: clickData.ref,
+      elementClass: clickData.class,
+      elementDataTestSubj: clickData.dataTestSubj,
+      elementDataName: clickData.dataName,
       application: clickData.app,
     },
     event: {
@@ -87,6 +91,9 @@ function generateClickEvent(clickData: any) {
     },
     user: {
       hash: clickData.sessionHash,
+    },
+    user_agent: {
+      original: userAgent
     },
   };
 }
