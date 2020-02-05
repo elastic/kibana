@@ -49,9 +49,9 @@ export function indexManagement(kibana: any) {
       };
 
       const serverPlugin = initServerPlugin({ logger: mockLogger } as any);
-      const indexMgmtSetup = serverPlugin.setup(coreSetup, pluginDependencies);
+      const indexMgmtPublicApi = serverPlugin.setup(coreSetup, pluginDependencies);
 
-      server.expose('addIndexManagementDataEnricher', indexMgmtSetup.indexDataEnricher.add);
+      server.expose('addIndexManagementDataEnricher', indexMgmtPublicApi.indexDataEnricher.add);
     },
   });
 }
