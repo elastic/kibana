@@ -21,18 +21,13 @@ import { run } from '@kbn/dev-utils';
 
 const description = 'Populate the initial data for the code coverage static site.';
 
-const exec = ({ log }) => {
-  log.info(`### ${description}`);
-  // Grab the data file
+const exec = buildNumber => outFile => ({ log }) => {
+  log.info(`### Job Num: ${buildNumber}`);
+  log.info(`### Dat file: ${outFile}`);
   // Parse it
   // Populate cc_app/public/inital_data.js
 
-}
+};
 
-
-export function populate(buildNumber, outFile) {
-  console.log(`\n### buildNumber: \n\t${buildNumber}`);
-  console.log(`\n### outFile: \n\t${outFile}`);
-
-  run(exec, { description });
-}
+export const populate = (buildNumber, outFile) =>
+  run(exec(buildNumber)(outFile), { description });
