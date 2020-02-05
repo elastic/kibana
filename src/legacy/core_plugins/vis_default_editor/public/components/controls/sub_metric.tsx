@@ -21,7 +21,7 @@ import React, { useEffect } from 'react';
 import { EuiFormLabel, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { AggParamType, AggConfig, AggGroupNames } from '../../legacy_imports';
+import { AggParamType, IAggConfig, AggGroupNames } from '../../legacy_imports';
 import { useSubAggParamsHandlers } from './utils';
 import { AggParamEditorProps } from '../agg_param_props';
 import { DefaultEditorAggParams } from '../agg_params';
@@ -35,7 +35,7 @@ function SubMetricParamEditor({
   setValue,
   setValidity,
   setTouched,
-}: AggParamEditorProps<AggConfig, AggParamType>) {
+}: AggParamEditorProps<IAggConfig, AggParamType>) {
   const metricTitle = i18n.translate('visDefaultEditor.controls.metrics.metricTitle', {
     defaultMessage: 'Metric',
   });
