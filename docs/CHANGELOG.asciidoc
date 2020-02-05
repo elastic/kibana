@@ -95,7 +95,7 @@ Logs::
 Machine Learning::
 * Updates Anomaly Detection job wizard button styles, page panel and titles {pull}53340[#53340]
 * Improves processing of groups in data recognizer wizard {pull}49310[#49310]
-* Indicates missing required privileges for import in File Data Viz {pull}50147[#50147]
+* Indicates missing required privileges for import in File Data Visualizer {pull}50147[#50147]
 * Stats bar for data frame analytics {pull}49464[#49464]
 * Adds the job message tab to data frame analytics {pull}50468[#50468]
 * Reactive time-range selection in SMV {pull}51008[#51008]
