@@ -67,6 +67,7 @@ describe('endpoint_list store concerns', () => {
         pageSize: 10,
         pageIndex: 0,
         total: 0,
+        loading: false,
       });
     });
 

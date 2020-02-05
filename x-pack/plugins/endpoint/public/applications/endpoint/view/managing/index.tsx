@@ -64,25 +64,19 @@ export const EndpointList = () => {
   const columns = [
     {
       field: 'host.hostname',
-      name: i18n.translate('management.list.host', {
-        defaultMessage: 'Host',
-      }),
-    },
-    {
-      field: 'host.os.name',
-      name: i18n.translate('management.list.os', {
-        defaultMessage: 'Operating System',
+      name: i18n.translate('xpack.endpoint.management.list.host', {
+        defaultMessage: 'Hostname',
       }),
     },
     {
       field: 'endpoint.policy.name',
-      name: i18n.translate('management.list.policy', {
+      name: i18n.translate('xpack.endpoint.management.list.policy', {
         defaultMessage: 'Policy',
       }),
     },
     {
       field: 'host.hostname',
-      name: i18n.translate('management.list.policyStatus', {
+      name: i18n.translate('xpack.endpoint.management.list.policyStatus', {
         defaultMessage: 'Policy Status',
       }),
       render: () => {
@@ -91,7 +85,7 @@ export const EndpointList = () => {
     },
     {
       field: 'endpoint',
-      name: i18n.translate('management.list.alerts', {
+      name: i18n.translate('xpack.endpoint.management.list.alerts', {
         defaultMessage: 'Alerts',
       }),
       render: () => {
@@ -99,20 +93,20 @@ export const EndpointList = () => {
       },
     },
     {
-      field: 'endpoint.domain',
-      name: i18n.translate('management.list.domain', {
-        defaultMessage: 'Domain',
+      field: 'host.os.name',
+      name: i18n.translate('xpack.endpoint.management.list.os', {
+        defaultMessage: 'Operating System',
       }),
     },
     {
       field: 'host.ip',
-      name: i18n.translate('management.list.ip', {
+      name: i18n.translate('xpack.endpoint.management.list.ip', {
         defaultMessage: 'IP Address',
       }),
     },
     {
       field: 'endpoint.sensor',
-      name: i18n.translate('management.list.sensorVersion', {
+      name: i18n.translate('xpack.endpoint.management.list.sensorVersion', {
         defaultMessage: 'Sensor Version',
       }),
       render: () => {
@@ -121,7 +115,7 @@ export const EndpointList = () => {
     },
     {
       field: 'host.hostname',
-      name: i18n.translate('management.list.lastActive', {
+      name: i18n.translate('xpack.endpoint.management.list.lastActive', {
         defaultMessage: 'Last Active',
       }),
       render: () => {
@@ -144,13 +138,17 @@ export const EndpointList = () => {
           <EuiPageContentHeader>
             <EuiPageContentHeaderSection>
               <EuiTitle>
-                <h2>
-                  <FormattedMessage id="management.list.hosts" defaultMessage="Hosts" />
+                <h2 data-test-subj="managementViewTitle">
+                  <FormattedMessage
+                    id="xpack.endpoint.management.list.hosts"
+                    defaultMessage="Hosts"
+                  />
                 </h2>
               </EuiTitle>
             </EuiPageContentHeaderSection>
           </EuiPageContentHeader>
           <EuiBasicTable
+            data-test-subj="managementListTable"
             items={endpointListResults}
             columns={columns}
             loading={loading}
