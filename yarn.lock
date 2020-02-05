@@ -1870,9 +1870,9 @@
     lodash.once "^4.1.1"
 
 "@elastic/charts@^16.1.0":
-  version "16.1.0"
-  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-16.1.0.tgz#67cf11625dcd7e1c2cf16ef53349e6a68a73f5b1"
-  integrity sha512-0jZ7thhGmYC0ZdEVkxfg6M66epCD7k7BfYIi12FnrmIK+mUD2IPhR8b2TJXvaojPryN4YTNreGRncQ9R58fOoQ==
+  version "16.1.1"
+  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-16.1.1.tgz#9bfd47af236fb7227276b7dbeda54f88d97bd251"
+  integrity sha512-rDvahXgVEvKBMDzojy99ewrzKJeZWgjMKVTV00lbxCrsRCJ8DWYMZVBN1gnzO9Mme0XB99Uw5E22g3MW+x+FrA==
   dependencies:
     "@types/d3-shape" "^1.3.1"
     classnames "^2.2.6"
@@ -1880,6 +1880,7 @@
     d3-collection "^1.0.7"
     d3-scale "^1.0.7"
     d3-shape "^1.3.4"
+    fast-deep-equal "^3.1.1"
     konva "^4.0.18"
     newtype-ts "^0.2.4"
     prop-types "^15.7.2"
