@@ -257,15 +257,7 @@ Current public contracts owned by the legacy service:
 ```js
 // ui/management/index
 interface API {
-  PAGE_TITLE_COMPONENT: string; // actually related to advanced settings?
-  PAGE_SUBTITLE_COMPONENT: string; // actually related to advanced settings?
-  PAGE_FOOTER_COMPONENT: string; // actually related to advanced settings?
   SidebarNav: React.FC<any>;
-  registerSettingsComponent: (
-    id: string,
-    component: string | React.FC<any>,
-    allowOverride: boolean
-  ) => void;
   management: new ManagementSection();
   MANAGEMENT_BREADCRUMB: {
     text: string;

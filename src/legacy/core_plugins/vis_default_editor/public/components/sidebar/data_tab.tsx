@@ -23,11 +23,11 @@ import { EuiSpacer } from '@elastic/eui';
 
 import { VisState } from 'src/legacy/core_plugins/visualizations/public';
 import {
-  AggConfig,
+  IAggConfig,
   AggGroupNames,
   ISchemas,
   parentPipelineType,
-  MetricAggType,
+  IMetricAggType,
 } from '../../legacy_imports';
 import { DefaultEditorAggGroup } from '../agg_group';
 import {
@@ -45,7 +45,7 @@ export interface DefaultEditorDataTabProps {
   dispatch: React.Dispatch<EditorAction>;
   formIsTouched: boolean;
   isTabSelected: boolean;
-  metricAggs: AggConfig[];
+  metricAggs: IAggConfig[];
   schemas: ISchemas;
   state: VisState;
   setTouched(isTouched: boolean): void;
@@ -67,7 +67,7 @@ function DefaultEditorDataTab({
     () =>
       findLast(
         metricAggs,
-        ({ type }: { type: MetricAggType }) => type.subtype === parentPipelineType
+        ({ type }: { type: IMetricAggType }) => type.subtype === parentPipelineType
       ),
     [metricAggs]
   );

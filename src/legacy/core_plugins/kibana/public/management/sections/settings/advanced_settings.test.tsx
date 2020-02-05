@@ -27,7 +27,9 @@ import {
   UiSettingsType,
 } from '../../../../../../../core/public';
 import { FieldSetting } from './types';
+
 import { AdvancedSettings } from './advanced_settings';
+jest.mock('ui/new_platform');
 
 jest.mock('ui/new_platform', () => ({
   npStart: mockConfig(),
@@ -214,6 +216,22 @@ function mockConfig() {
   return {
     core: {
       uiSettings: config,
+    },
+    plugins: {
+      advancedSettings: {
+        component: {
+          register: jest.fn(),
+          get: () => {
+            const foo: React.ComponentType = () => <div>Hello</div>;
+            foo.displayName = 'foo_component';
+            return foo;
+          },
+          componentType: {
+            PAGE_TITLE_COMPONENT: 'page_title_component',
+            PAGE_SUBTITLE_COMPONENT: 'page_subtitle_component',
+          },
+        },
+      },
     },
   };
 }
