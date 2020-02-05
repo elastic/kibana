@@ -40,10 +40,7 @@ function esClientFactory(search: (params: any) => any) {
   };
 }
 
-const es = {
-  search: () => getLegacyApiCallerResponse(successfulResponse),
-  msearch: () => getLegacyApiCallerResponse({}),
-};
+const es = esClientFactory(() => successfulResponse);
 
 describe('getIndices', () => {
   it('should work in a basic case', async () => {
@@ -77,33 +74,26 @@ describe('getIndices', () => {
 
   it('should use the limit', async () => {
     let limit;
-    const esClient = {
-      search: jest.fn().mockImplementation(params => {
+    const esClient = esClientFactory(
+      jest.fn().mockImplementation(params => {
         limit = params.body.aggs.indices.terms.size;
-      }),
-      msearch: () => getLegacyApiCallerResponse({}),
-    };
+      })
+    );
     await getIndices(esClient, mockIndexPatternCreationType, 'kibana', 10);
     expect(limit).toBe(10);
   });
 
   describe('errors', () => {
     it('should handle errors gracefully', async () => {
-      const esClient = {
-        search: () => getLegacyApiCallerResponse(errorResponse),
-        msearch: () => getLegacyApiCallerResponse({}),
-      };
+      const esClient = esClientFactory(() => getLegacyApiCallerResponse(errorResponse));
       const result = await getIndices(esClient, mockIndexPatternCreationType, 'kibana', 1);
       expect(result.length).toBe(0);
     });
 
     it('should throw exceptions', async () => {
-      const esClient = {
-        search: () => {
-          throw new Error('Fail');
-        },
-        msearch: () => getLegacyApiCallerResponse({}),
-      };
+      const esClient = esClientFactory(() => {
+        throw new Error('Fail');
+      });
 
       await expect(
         getIndices(esClient, mockIndexPatternCreationType, 'kibana', 1)
@@ -111,10 +101,9 @@ describe('getIndices', () => {
     });
 
     it('should handle index_not_found_exception errors gracefully', async () => {
-      const esClient = {
-        search: () => new Promise((resolve, reject) => reject(exceptionResponse)),
-      };
-      // @ts-ignore
+      const esClient = esClientFactory(
+        () => new Promise((resolve, reject) => reject(exceptionResponse))
+      );
       const result = await getIndices(esClient, mockIndexPatternCreationType, 'kibana', 1);
       expect(result.length).toBe(0);
     });
