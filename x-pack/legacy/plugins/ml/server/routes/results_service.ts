@@ -68,7 +68,17 @@ function getPartitionFieldsValues(context: RequestHandlerContext, payload: any) 
   return rs.getPartitionFieldsValues(jobId, searchTerm, criteriaFields, earliestMs, latestMs);
 }
 
+/**
+ * Routes for results service
+ */
 export function resultsServiceRoutes({ xpackMainPlugin, router }: RouteInitialization) {
+  /**
+   * @apiGroup ResultsService
+   *
+   * @api {post} /api/ml/results/anomalies_table_data Prepare anomalies records for table display
+   * @apiName GetAnomaliesTableData
+   * @apiDescription Retrieves anomaly records for an anomaly detection job and formats them for anomalies table display
+   */
   router.post(
     {
       path: '/api/ml/results/anomalies_table_data',
@@ -89,6 +99,13 @@ export function resultsServiceRoutes({ xpackMainPlugin, router }: RouteInitializ
     })
   );
 
+  /**
+   * @apiGroup ResultsService
+   *
+   * @api {post} /api/ml/results/category_definition Returns category definition
+   * @apiName GetCategoryDefinition
+   * @apiDescription Returns the definition of the category with the specified ID and job ID
+   */
   router.post(
     {
       path: '/api/ml/results/category_definition',
@@ -112,6 +129,13 @@ export function resultsServiceRoutes({ xpackMainPlugin, router }: RouteInitializ
     })
   );
 
+  /**
+   * @apiGroup ResultsService
+   *
+   * @api {post} /api/ml/results/max_anomaly_score Returns the maximum anomaly_score
+   * @apiName GetMaxAnomalyScore
+   * @apiDescription Returns the maximum anomaly_score for result_type:bucket over jobIds for the interval passed in
+   */
   router.post(
     {
       path: '/api/ml/results/max_anomaly_score',
@@ -136,6 +160,13 @@ export function resultsServiceRoutes({ xpackMainPlugin, router }: RouteInitializ
     })
   );
 
+  /**
+   * @apiGroup ResultsService
+   *
+   * @api {post} /api/ml/results/category_examples Returns the maximum anomaly_score
+   * @apiName GetCategoryExamples
+   * @apiDescription Returns the categorization examples for the categories with the specified IDs from the given index and job ID
+   */
   router.post(
     {
       path: '/api/ml/results/category_examples',
@@ -160,6 +191,13 @@ export function resultsServiceRoutes({ xpackMainPlugin, router }: RouteInitializ
     })
   );
 
+  /**
+   * @apiGroup ResultsService
+   *
+   * @api {post} /api/ml/results/partition_fields_values Returns partition fields
+   * @apiName GetPartitionFieldsValues
+   * @apiDescription Returns the record of partition fields with possible values that fit the provided queries.
+   */
   router.post(
     {
       path: '/api/ml/results/partition_fields_values',
