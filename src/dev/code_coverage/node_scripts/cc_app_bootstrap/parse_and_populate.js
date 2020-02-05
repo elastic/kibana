@@ -22,9 +22,8 @@ import { takeUntil } from 'rxjs/operators';
 import * as readline from 'readline';
 import * as fs from 'fs';
 import { resolve } from 'path';
-import { pretty } from './utils'
-import * as rawData from '../../cc_app/public/initial_data_raw.js'
-
+import { pretty } from './utils';
+import * as rawData from '../../cc_app/public/initial_data_raw.js';
 
 export const parseAndPopulate = buildNumber => srcFile => destFile => log => {
   const logV = verbose(log);
@@ -33,26 +32,30 @@ export const parseAndPopulate = buildNumber => srcFile => destFile => log => {
   logV({ 'resolvedSrcFile': resolvedSrcFile, 'resolvedDestFile': resolvedDestFile });
 
   const initialData = dedupe(rawData);
-  console.log(`\n### initialData: \n\t${pretty(initialData)}`);
-  const mutateInitialData = mutate(initialData);
-  const logErr = x => log.error(`!!! ${x}`)
+
+  const historicalItems = [];
+  const mutateHistorical = onLineRead(historicalItems)
+  const onErr = x => log.error(`!!! ${x}`);
+  const mutateInital = onComplete(initialData);
 
   const rl = readline.createInterface({ input: fs.createReadStream(resolvedSrcFile) });
-  const onSrcFileReadComplete = onComplete(initialData);
   fromEvent(rl, 'line')
     .pipe(takeUntil(fromEvent(rl, 'close')))
-    .subscribe(mutateInitialData, logErr, onSrcFileReadComplete);
+    .subscribe(mutateHistorical, onErr, () => mutateInital(historicalItems, log));
 
 };
 
-function onComplete(initData) {
-
-  console.log('Completed')
+function onLineRead(xs) {
+  return function pushOntoHistoricalItems(x) {
+    xs.push(x);
+  }
 }
 
-function mutate(obj) {
-  return function mutateInner(x) {
-    obj.historicalItems.push(x);
+function onComplete(initData) {
+  return function mutateInitalData(xs, log) {
+    initData.historicalItems = xs;
+    log.debug(pretty(initData));
+    log.debug('### Completed');
   }
 }
 
@@ -66,11 +69,11 @@ function resolvePaths(...xs) {
 
 function kibanaRoot() {
   const KIBANA_ROOT_PATH = '../../../../..';
-  return  resolve(__dirname, KIBANA_ROOT_PATH);
+  return resolve(__dirname, KIBANA_ROOT_PATH);
 }
 
 function verbose(log) {
   return function verboseInner(obj) {
-    return  Object.entries(obj).forEach(xs => log.verbose(`### ${xs[0]} -> ${xs[1]}`));
-  }
+    return Object.entries(obj).forEach(xs => log.verbose(`### ${xs[0]} -> ${xs[1]}`));
+  };
 }
