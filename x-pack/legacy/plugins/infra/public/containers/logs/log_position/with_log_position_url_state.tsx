@@ -27,12 +27,12 @@ export const WithLogPositionUrlState = () => {
     visibleMidpoint,
     isStreaming,
     jumpToTargetPosition,
-    jumpToTargetPositionTime,
     startLiveStreaming,
     stopLiveStreaming,
     startDate,
     endDate,
     updateDateRange,
+    initialize,
   } = useContext(LogPositionState.Context);
   const urlState = useMemo(
     () => ({
@@ -68,24 +68,21 @@ export const WithLogPositionUrlState = () => {
         }
       }}
       onInitialize={(initialUrlState: LogPositionUrlState | undefined) => {
-        if (!initialUrlState) {
-          jumpToTargetPositionTime(Date.now());
-          return;
+        if (initialUrlState) {
+          if (initialUrlState.start || initialUrlState.end) {
+            updateDateRange({ startDate: initialUrlState.start, endDate: initialUrlState.end });
+          }
+
+          if (initialUrlState.position) {
+            jumpToTargetPosition(initialUrlState.position);
+          }
+
+          if (initialUrlState.streamLive) {
+            startLiveStreaming();
+          }
         }
 
-        if (initialUrlState.start || initialUrlState.end) {
-          updateDateRange({ startDate: initialUrlState.start, endDate: initialUrlState.end });
-        }
-
-        if (initialUrlState.position) {
-          jumpToTargetPosition(initialUrlState.position);
-        } else {
-          jumpToTargetPositionTime(Date.now());
-        }
-
-        if (initialUrlState.streamLive) {
-          startLiveStreaming();
-        }
+        initialize();
       }}
     />
   );

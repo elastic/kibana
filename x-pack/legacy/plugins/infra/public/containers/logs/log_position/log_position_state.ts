@@ -25,6 +25,7 @@ interface VisiblePositions {
 }
 
 export interface LogPositionStateParams {
+  initialized: boolean;
   targetPosition: TimeKeyOrNull;
   isStreaming: boolean;
   liveStreamingInterval: number;
@@ -41,6 +42,7 @@ export interface LogPositionStateParams {
 }
 
 export interface LogPositionCallbacks {
+  initialize: () => void;
   jumpToTargetPosition: (pos: TimeKeyOrNull) => void;
   jumpToTargetPositionTime: (time: number) => void;
   reportVisiblePositions: (visPos: VisiblePositions) => void;
@@ -75,6 +77,16 @@ const useVisibleMidpoint = (middleKey: TimeKeyOrNull, targetPosition: TimeKeyOrN
 };
 
 export const useLogPositionState: () => LogPositionStateParams & LogPositionCallbacks = () => {
+  // Flag to determine if `LogPositionState` has been fully initialized.
+  //
+  // When the page loads, there might be initial state in the URL. We want to
+  // prevent the entries from showing until we have processed that initial
+  // state. That prevents double fetching.
+  const [initialized, setInitialized] = useState<boolean>(false);
+  const initialize = useCallback(() => {
+    setInitialized(true);
+  }, [setInitialized]);
+
   const [targetPosition, jumpToTargetPosition] = useState<TimeKey | null>(null);
   const [isStreaming, setIsStreaming] = useState(false);
   const [liveStreamingInterval, setLiveStreamingInterval] = useState(10000);
@@ -134,6 +146,7 @@ export const useLogPositionState: () => LogPositionStateParams & LogPositionCall
   const endTimestamp = useMemo(() => datemathToEpochMillis(dateRange.endDate), [endTimestampDep]);
 
   const state = {
+    initialized,
     targetPosition,
     isStreaming,
     firstVisiblePosition: startKey,
@@ -149,6 +162,7 @@ export const useLogPositionState: () => LogPositionStateParams & LogPositionCall
   };
 
   const callbacks = {
+    initialize,
     jumpToTargetPosition,
     jumpToTargetPositionTime: useCallback(
       (time: number) => jumpToTargetPosition({ tiebreaker: 0, time }),

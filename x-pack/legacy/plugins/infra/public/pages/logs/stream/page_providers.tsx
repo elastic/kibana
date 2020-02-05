@@ -39,6 +39,7 @@ const LogEntriesStateProvider: React.FC = ({ children }) => {
     isStreaming,
     jumpToTargetPosition,
     liveStreamingInterval,
+    initialized,
   } = useContext(LogPositionState.Context);
   const { filterQuery } = useContext(LogFilterState.Context);
 
@@ -56,6 +57,13 @@ const LogEntriesStateProvider: React.FC = ({ children }) => {
     isStreaming,
     jumpToTargetPosition,
   };
+
+  // Don't initialize the entries until the position has been fully intialized.
+  // See `<WithLogPositionUrlState />`
+  if (!initialized) {
+    return null;
+  }
+
   return <LogEntriesState.Provider {...entriesProps}>{children}</LogEntriesState.Provider>;
 };
 

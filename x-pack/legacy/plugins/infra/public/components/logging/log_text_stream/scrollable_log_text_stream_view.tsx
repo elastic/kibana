@@ -96,7 +96,7 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
         targetId: getStreamItemId(getStreamItemBeforeTimeKey(nextProps.items, nextProps.target!)),
         items: nextItems,
       };
-    } else if (!nextProps.target || !hasItems) {
+    } else if (!hasItems) {
       return {
         target: null,
         targetId: null,

@@ -106,13 +106,14 @@ const shouldFetchNewEntries = ({
   bottomCursor,
   startDate,
   endDate,
-}: FetchEntriesParams & LogEntriesStateParams & { prevParams: FetchEntriesParams }) => {
-  const shouldLoadWithNewDates =
-    startDate !== prevParams.startDate || endDate !== prevParams.endDate;
-
-  const shouldLoadWithNewFilter = filterQuery !== prevParams.filterQuery;
+}: FetchEntriesParams & LogEntriesStateParams & { prevParams: FetchEntriesParams | undefined }) => {
+  const shouldLoadWithNewDates = prevParams
+    ? startDate !== prevParams.startDate || endDate !== prevParams.endDate
+    : true;
+  const shouldLoadWithNewFilter = prevParams ? filterQuery !== prevParams.filterQuery : true;
   const shouldLoadAroundNewPosition =
     timeKey && (!topCursor || !bottomCursor || !timeKeyIsBetween(topCursor, bottomCursor, timeKey));
+
   return shouldLoadWithNewDates || shouldLoadWithNewFilter || shouldLoadAroundNewPosition;
 };
 
@@ -137,11 +138,11 @@ const useFetchEntriesEffect = (
   dispatch: Dispatch,
   props: LogEntriesProps
 ) => {
-  const [prevParams, cachePrevParams] = useState(props);
+  const [prevParams, cachePrevParams] = useState<LogEntriesProps | undefined>();
   const [startedStreaming, setStartedStreaming] = useState(false);
 
   const runFetchNewEntriesRequest = async (overrides: Partial<LogEntriesProps> = {}) => {
-    if (!props.startTimestamp || !props.endTimestamp || !props.timeKey) {
+    if (!props.startTimestamp || !props.endTimestamp) {
       return;
     }
 
@@ -163,6 +164,14 @@ const useFetchEntriesEffect = (
 
       const { data: payload } = await fetchLogEntries(fetchArgs);
       dispatch({ type: Action.ReceiveNewEntries, payload });
+
+      // Move position to the bottom if it's the first load.
+      // Do it in the next tick to allow the `dispatch` to fire
+      if (!props.timeKey && payload.bottomCursor) {
+        setTimeout(() => {
+          props.jumpToTargetPosition(payload.bottomCursor!);
+        });
+      }
     } catch (e) {
       dispatch({ type: Action.ErrorOnNewEntries });
     }
