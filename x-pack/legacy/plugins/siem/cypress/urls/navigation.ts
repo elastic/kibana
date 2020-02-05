@@ -5,3 +5,4 @@
  */
 
 export const TIMELINES_PAGE = '/app/siem#/timelines';
+export const OVERVIEW_PAGE = '/app/siem#/overview';
