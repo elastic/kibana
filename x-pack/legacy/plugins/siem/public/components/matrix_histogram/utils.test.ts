@@ -85,16 +85,14 @@ describe('utils', () => {
         ],
       ];
       const result = formatToChartDataItem(data);
-      expect(result).toEqual([
-        {
-          key: 'g1',
-          value: [
-            { x: 1, y: 2, g: 'g1' },
-            { x: 2, y: 4, g: 'g1' },
-            { x: 3, y: 6, g: 'g1' },
-          ],
-        },
-      ]);
+      expect(result).toEqual({
+        key: 'g1',
+        value: [
+          { x: 1, y: 2, g: 'g1' },
+          { x: 2, y: 4, g: 'g1' },
+          { x: 3, y: 6, g: 'g1' },
+        ],
+      });
     });
   });
 
