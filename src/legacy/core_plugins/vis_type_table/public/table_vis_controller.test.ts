@@ -33,7 +33,6 @@ import { stubFields } from '../../../../plugins/data/public/stubs';
 // eslint-disable-next-line
 import { tableVisResponseHandler } from './table_vis_response_handler';
 import { coreMock } from '../../../../core/public/mocks';
-import { tableVisTypeDefinition } from './table_vis_type';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { AggConfigs } from 'ui/agg_types';
 import { tabifyAggResponse, IAggConfig } from './legacy_imports';
