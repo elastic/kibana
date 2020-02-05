@@ -10,7 +10,6 @@ import { DeleteSpacesButton } from './delete_spaces_button';
 import { spacesManagerMock } from '../../spaces_manager/mocks';
 import { SpacesManager } from '../../spaces_manager';
 import { notificationServiceMock } from 'src/core/public/mocks';
-import { NotificationsStart } from 'src/core/public';
 
 const space = {
   id: 'my-space',
@@ -30,7 +29,7 @@ describe('DeleteSpacesButton', () => {
         spacesManager={(spacesManager as unknown) as SpacesManager}
         onDelete={jest.fn()}
         intl={null as any}
-        notifications={notificatons}
+        notifications={notifications}
       />
     );
     expect(wrapper).toMatchSnapshot();

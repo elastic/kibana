@@ -9,15 +9,13 @@ import { CopyToSpaceSavedObjectsManagementAction } from './copy_saved_objects_to
 import { spacesManagerMock } from '../spaces_manager/mocks';
 import { CopySavedObjectsToSpaceService } from '.';
 import { notificationServiceMock } from 'src/core/public/mocks';
-import { NotificationsSetup } from 'src/core/public';
 
 describe('CopySavedObjectsToSpaceService', () => {
   describe('#setup', () => {
     it('registers the CopyToSpaceSavedObjectsManagementAction', () => {
       const deps = {
         spacesManager: spacesManagerMock.create(),
-        notificationsSetup: notificationServiceMock.createSetupContract()
-          .setup as unknown) as NotificationsSetup,
+        notificationsSetup: notificationServiceMock.createSetupContract(),
         // we don't have a proper NP mock for this yet
         managementSetup: ({
           savedObjects: {

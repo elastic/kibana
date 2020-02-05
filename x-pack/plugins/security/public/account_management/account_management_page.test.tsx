@@ -11,7 +11,6 @@ import { AccountManagementPage } from './account_management_page';
 import { coreMock } from 'src/core/public/mocks';
 import { securityMock } from '../mocks';
 import { userAPIClientMock } from '../management/users/index.mock';
-import { SecurityPluginSetup } from '..';
 
 interface Options {
   withFullName?: boolean;
@@ -39,7 +38,7 @@ const createUser = ({ withFullName = true, withEmail = true, realm = 'native' }:
 function getSecuritySetupMock({ currentUser }: { currentUser: AuthenticatedUser }) {
   const securitySetupMock = securityMock.createSetup();
   securitySetupMock.authc.getCurrentUser.mockResolvedValue(currentUser);
-  return (securitySetupMock as unknown) as SecurityPluginSetup;
+  return securitySetupMock;
 }
 
 describe('<AccountManagementPage>', () => {

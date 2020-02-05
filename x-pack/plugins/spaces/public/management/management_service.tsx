@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ManagementSetup, ManagementSection } from 'src/plugins/management/public';
+import { ManagementSetup, ManagementApp } from 'src/plugins/management/public';
 import { CoreSetup, Capabilities } from 'src/core/public';
 import { SecurityPluginSetup } from '../../../security/public';
 import { SpacesManager } from '../spaces_manager';
@@ -22,12 +22,12 @@ interface StartDeps {
   capabilities: Capabilities;
 }
 export class ManagementService {
-  private kibanaSection?: ManagementSection;
+  private registeredSpacesManagementApp?: ManagementApp;
 
   public setup({ getStartServices, management, spacesManager, securityLicense }: SetupDeps) {
-    this.kibanaSection = management.sections.getSection('kibana');
-    if (this.kibanaSection) {
-      this.kibanaSection.registerApp(
+    const kibanaSection = management.sections.getSection('kibana');
+    if (kibanaSection) {
+      this.registeredSpacesManagementApp = kibanaSection.registerApp(
         spacesManagementApp.create({ getStartServices, spacesManager, securityLicense })
       );
     }
@@ -44,11 +44,8 @@ export class ManagementService {
   }
 
   private disableSpacesApp() {
-    if (this.kibanaSection) {
-      const spacesApp = this.kibanaSection.getApp(spacesManagementApp.id);
-      if (spacesApp) {
-        spacesApp.disable();
-      }
+    if (this.registeredSpacesManagementApp) {
+      this.registeredSpacesManagementApp.disable();
     }
   }
 }

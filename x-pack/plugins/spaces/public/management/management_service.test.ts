@@ -23,10 +23,7 @@ describe('ManagementService', () => {
         spacesManager: spacesManagerMock.create(),
       };
 
-      deps.management.sections.getSection.mockImplementation(id => {
-        if (id === 'kibana') return mockKibanaSection;
-        throw new Error(`unexpected getSection call: ${id}`);
-      });
+      deps.management.sections.getSection.mockReturnValue(mockKibanaSection);
 
       const service = new ManagementService();
       service.setup(deps);
@@ -59,10 +56,7 @@ describe('ManagementService', () => {
     it('disables the spaces management page if the user is not authorized', () => {
       const mockSpacesManagementPage = { disable: jest.fn() };
       const mockKibanaSection = ({
-        registerApp: jest.fn(),
-        getApp: jest
-          .fn()
-          .mockImplementation(id => (id === 'spaces' ? mockSpacesManagementPage : undefined)),
+        registerApp: jest.fn().mockReturnValue(mockSpacesManagementPage),
       } as unknown) as ManagementSection;
 
       const deps = {
@@ -89,10 +83,7 @@ describe('ManagementService', () => {
     it('does not disable the spaces management page if the user is authorized', () => {
       const mockSpacesManagementPage = { disable: jest.fn() };
       const mockKibanaSection = ({
-        registerApp: jest.fn(),
-        getApp: jest
-          .fn()
-          .mockImplementation(id => (id === 'spaces' ? mockSpacesManagementPage : undefined)),
+        registerApp: jest.fn().mockReturnValue(mockSpacesManagementPage),
       } as unknown) as ManagementSection;
 
       const deps = {
@@ -121,10 +112,7 @@ describe('ManagementService', () => {
     it('disables the spaces management page', () => {
       const mockSpacesManagementPage = { disable: jest.fn() };
       const mockKibanaSection = ({
-        registerApp: jest.fn(),
-        getApp: jest
-          .fn()
-          .mockImplementation(id => (id === 'spaces' ? mockSpacesManagementPage : undefined)),
+        registerApp: jest.fn().mockReturnValue(mockSpacesManagementPage),
       } as unknown) as ManagementSection;
 
       const deps = {

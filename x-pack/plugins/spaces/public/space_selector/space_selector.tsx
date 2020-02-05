@@ -22,6 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component, Fragment } from 'react';
 import ReactDOM from 'react-dom';
+import { CoreStart } from 'src/core/public';
 import { Space } from '../../common/model/space';
 import { SpaceCards } from './components';
 import { SPACE_SEARCH_COUNT_THRESHOLD } from '../../common/constants';
@@ -184,7 +185,12 @@ export class SpaceSelector extends Component<Props, State> {
   };
 }
 
-export const renderSpaceSelectorApp = (el: Element, props: Props) => {
-  ReactDOM.render(<SpaceSelector {...props} />, el);
+export const renderSpaceSelectorApp = (i18nStart: CoreStart['i18n'], el: Element, props: Props) => {
+  ReactDOM.render(
+    <i18nStart.Context>
+      <SpaceSelector {...props} />
+    </i18nStart.Context>,
+    el
+  );
   return () => ReactDOM.unmountComponentAtNode(el);
 };

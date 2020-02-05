@@ -15,7 +15,6 @@ import { mockAuthenticatedUser } from '../../../../common/model/authenticated_us
 import { securityMock } from '../../../mocks';
 import { rolesAPIClientMock } from '../../roles/index.mock';
 import { userAPIClientMock } from '../index.mock';
-import { SecurityPluginSetup } from '../../..';
 
 const createUser = (username: string) => {
   const user: User = {
@@ -71,7 +70,7 @@ function buildSecuritySetup() {
   securitySetupMock.authc.getCurrentUser.mockResolvedValue(
     mockAuthenticatedUser(createUser('current_user'))
   );
-  return (securitySetupMock as unknown) as SecurityPluginSetup;
+  return securitySetupMock;
 }
 
 function expectSaveButton(wrapper: ReactWrapper<any, any>) {

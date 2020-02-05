@@ -28,6 +28,11 @@ const createSetupContract = () => ({
 
 const createStartContract = () => ({
   legacy: {},
+  sections: {
+    getSection: jest.fn(),
+    getAllSections: jest.fn(),
+    navigateToApp: jest.fn(),
+  },
 });
 
 export const managementPluginMock = {

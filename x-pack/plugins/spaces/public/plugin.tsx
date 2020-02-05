@@ -43,7 +43,7 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
   private managementService?: ManagementService;
 
   public setup(core: CoreSetup, plugins: PluginsSetup) {
-    const serverBasePath = core.injectedMetadata.getInjectedVar('serverBasePath') as string;
+    const serverBasePath = core.http.basePath.get();
     this.spacesManager = new SpacesManager(serverBasePath, core.http);
 
     if (plugins.home) {
@@ -68,7 +68,11 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
       });
     }
 
-    spaceSelectorApp.create({ application: core.application, spacesManager: this.spacesManager });
+    spaceSelectorApp.create({
+      getStartServices: core.getStartServices,
+      application: core.application,
+      spacesManager: this.spacesManager,
+    });
 
     return {
       registerLegacyAPI: (legacyAPI: LegacyAPI) => {

@@ -11,11 +11,12 @@ import { SpacesManager } from '../spaces_manager';
 interface CreateDeps {
   application: CoreSetup['application'];
   spacesManager: SpacesManager;
+  getStartServices: CoreSetup['getStartServices'];
 }
 
 export const spaceSelectorApp = Object.freeze({
   id: 'space_selector',
-  create({ application, spacesManager }: CreateDeps) {
+  create({ application, getStartServices, spacesManager }: CreateDeps) {
     application.register({
       id: this.id,
       title: i18n.translate('xpack.spaces.spaceSelector.appTitle', {
@@ -24,8 +25,11 @@ export const spaceSelectorApp = Object.freeze({
       chromeless: true,
       appRoute: '/spaces/space_selector',
       mount: async (params: AppMountParameters) => {
-        const { renderSpaceSelectorApp } = await import('./space_selector');
-        return renderSpaceSelectorApp(params.element, { spacesManager });
+        const [[coreStart], { renderSpaceSelectorApp }] = await Promise.all([
+          getStartServices(),
+          import('./space_selector'),
+        ]);
+        return renderSpaceSelectorApp(coreStart.i18n, params.element, { spacesManager });
       },
     });
   },
