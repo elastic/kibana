@@ -17,27 +17,22 @@
  * under the License.
  */
 
+import { run } from '@kbn/dev-utils';
 
-import { createFlagError, run } from '@kbn/dev-utils';
-import { resolve } from "path";
+const description = 'Populate the initial data for the code coverage static site.';
 
-const about = 'Populate the initial data for the code coverage static site.';
+const exec = ({ log }) => {
+  log.info(`### ${description}`);
+  // Grab the data file
+  // Parse it
+  // Populate cc_app/public/inital_data.js
 
-export function populate(buildNumber) {
+}
+
+
+export function populate(buildNumber, outFile) {
   console.log(`\n### buildNumber: \n\t${buildNumber}`);
+  console.log(`\n### outFile: \n\t${outFile}`);
 
-  run(
-    ({ log }) => {
-      log.info(`### ${about}`);
-      // Grab the data file
-      // Parse it
-      // Populate cc_app/public/inital_data.js
-
-    },
-    {
-      description: `
-${about}
-      `,
-    }
-  );
+  run(exec, { description });
 }

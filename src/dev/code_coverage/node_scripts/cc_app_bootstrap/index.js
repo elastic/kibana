@@ -1,5 +1,5 @@
 require('../../../../../src/setup_node_env');
 
-const buildNumber = process.argv[2];
+const [ , , buildNumber, outFile ] = process.argv;
 
-require('./bootstrap_app_initial_data').populate(buildNumber);
+require('./bootstrap_app_initial_data').populate(buildNumber, outFile);
