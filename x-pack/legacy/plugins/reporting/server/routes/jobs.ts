@@ -5,25 +5,26 @@
  */
 
 import Boom from 'boom';
-import { Legacy } from 'kibana';
 import { ResponseObject } from 'hapi';
+import { Legacy } from 'kibana';
 import { API_BASE_URL } from '../../common/constants';
 import {
-  ServerFacade,
   ExportTypesRegistry,
-  Logger,
-  ReportingResponseToolkit,
   JobDocOutput,
   JobSource,
   ListQuery,
+  Logger,
+  ReportingResponseToolkit,
+  ServerFacade,
 } from '../../types';
 import { jobsQueryFactory } from '../lib/jobs_query';
+import { ReportingSetupDeps } from '../plugin';
 import { jobResponseHandlerFactory } from './lib/job_response_handler';
+import { makeRequestFacade } from './lib/make_request_facade';
 import {
   getRouteConfigFactoryDownloadPre,
   getRouteConfigFactoryManagementPre,
 } from './lib/route_config_factories';
-import { makeRequestFacade } from './lib/make_request_facade';
 
 const MAIN_ENTRY = `${API_BASE_URL}/jobs`;
 
@@ -33,12 +34,14 @@ function isResponse(response: Boom<null> | ResponseObject): response is Response
 
 export function registerJobInfoRoutes(
   server: ServerFacade,
+  plugins: ReportingSetupDeps,
   exportTypesRegistry: ExportTypesRegistry,
   logger: Logger
 ) {
-  const jobsQuery = jobsQueryFactory(server);
-  const getRouteConfig = getRouteConfigFactoryManagementPre(server, logger);
-  const getRouteConfigDownload = getRouteConfigFactoryDownloadPre(server, logger);
+  const { elasticsearch } = plugins;
+  const jobsQuery = jobsQueryFactory(server, elasticsearch);
+  const getRouteConfig = getRouteConfigFactoryManagementPre(server, plugins, logger);
+  const getRouteConfigDownload = getRouteConfigFactoryDownloadPre(server, plugins, logger);
 
   // list jobs in the queue, paginated
   server.route({
@@ -135,7 +138,7 @@ export function registerJobInfoRoutes(
   });
 
   // trigger a download of the output from a job
-  const jobResponseHandler = jobResponseHandlerFactory(server, exportTypesRegistry);
+  const jobResponseHandler = jobResponseHandlerFactory(server, elasticsearch, exportTypesRegistry);
   server.route({
     path: `${MAIN_ENTRY}/download/{docId}`,
     method: 'GET',

@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { Fragment } from 'react';
+import { isEmpty } from 'lodash';
+import chrome from 'ui/chrome';
 import { i18n } from '@kbn/i18n';
 import uiRoutes from 'ui/routes';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
@@ -12,7 +14,11 @@ import { MonitoringViewBaseController } from '../../';
 import { Overview } from 'plugins/monitoring/components/cluster/overview';
 import { I18nContext } from 'ui/i18n';
 import { SetupModeRenderer } from '../../../components/renderers';
-import { CODE_PATH_ALL } from '../../../../common/constants';
+import {
+  CODE_PATH_ALL,
+  MONITORING_CONFIG_ALERTING_EMAIL_ADDRESS,
+  KIBANA_ALERTING_ENABLED,
+} from '../../../../common/constants';
 
 const CODE_PATHS = [CODE_PATH_ALL];
 
@@ -31,6 +37,7 @@ uiRoutes.when('/overview', {
       const monitoringClusters = $injector.get('monitoringClusters');
       const globalState = $injector.get('globalState');
       const showLicenseExpiration = $injector.get('showLicenseExpiration');
+      const config = $injector.get('config');
 
       super({
         title: i18n.translate('xpack.monitoring.cluster.overviewTitle', {
@@ -58,7 +65,16 @@ uiRoutes.when('/overview', {
 
       $scope.$watch(
         () => this.data,
-        data => {
+        async data => {
+          if (isEmpty(data)) {
+            return;
+          }
+
+          let emailAddress = chrome.getInjected('monitoringLegacyEmailAddress') || '';
+          if (KIBANA_ALERTING_ENABLED) {
+            emailAddress = config.get(MONITORING_CONFIG_ALERTING_EMAIL_ADDRESS) || emailAddress;
+          }
+
           this.renderReact(
             <I18nContext>
               <SetupModeRenderer
@@ -69,6 +85,7 @@ uiRoutes.when('/overview', {
                     {flyoutComponent}
                     <Overview
                       cluster={data}
+                      emailAddress={emailAddress}
                       setupMode={setupMode}
                       changeUrl={changeUrl}
                       showLicenseExpiration={showLicenseExpiration}

@@ -27,7 +27,7 @@
     "clean": {
       "extraPatterns": [
         "build",
-        "optimize",
+        "data/optimize",
         "built_assets",
         ".eslintcache",
         ".node_binaries"
@@ -120,7 +120,7 @@
     "@elastic/charts": "^16.1.0",
     "@elastic/datemath": "5.0.2",
     "@elastic/ems-client": "7.6.0",
-    "@elastic/eui": "18.2.1",
+    "@elastic/eui": "18.3.0",
     "@elastic/filesaver": "1.1.2",
     "@elastic/good": "8.1.1-kibana2",
     "@elastic/numeral": "2.3.3",
@@ -144,7 +144,7 @@
     "@types/react-grid-layout": "^0.16.7",
     "@types/recompose": "^0.30.5",
     "JSONStream": "1.3.5",
-    "abortcontroller-polyfill": "^1.3.0",
+    "abort-controller": "^3.0.0",
     "angular": "^1.7.9",
     "angular-aria": "^1.7.8",
     "angular-elastic": "^2.5.1",
@@ -414,6 +414,7 @@
     "eslint-plugin-prettier": "^3.1.2",
     "eslint-plugin-react": "^7.17.0",
     "eslint-plugin-react-hooks": "^2.3.0",
+    "eslint-plugin-react-perf": "^3.2.3",
     "exit-hook": "^2.2.0",
     "faker": "1.1.0",
     "fetch-mock": "^7.3.9",
@@ -454,7 +455,7 @@
     "murmurhash3js": "3.0.1",
     "mutation-observer": "^1.0.3",
     "nock": "10.0.6",
-    "node-sass": "^4.9.4",
+    "node-sass": "^4.13.1",
     "normalize-path": "^3.0.0",
     "nyc": "^14.1.1",
     "pixelmatch": "^5.1.0",

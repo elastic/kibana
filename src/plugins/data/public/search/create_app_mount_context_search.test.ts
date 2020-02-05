@@ -51,7 +51,7 @@ describe('Create app mount search context', () => {
     });
   });
 
-  it(`Search fn is callsed with the passed in request object`, done => {
+  it(`Search fn is called with the passed in request object`, done => {
     const context = createAppMountSearchContext({
       mysearch: search => {
         return Promise.resolve({

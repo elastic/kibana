@@ -19,8 +19,10 @@ interface SearchAfterAndBulkCreateParams {
   id: string;
   signalsIndex: string;
   name: string;
+  createdAt: string;
   createdBy: string;
   updatedBy: string;
+  updatedAt: string;
   interval: string;
   enabled: boolean;
   pageSize: number;
@@ -38,8 +40,10 @@ export const searchAfterAndBulkCreate = async ({
   signalsIndex,
   filter,
   name,
+  createdAt,
   createdBy,
   updatedBy,
+  updatedAt,
   interval,
   enabled,
   pageSize,
@@ -58,7 +62,9 @@ export const searchAfterAndBulkCreate = async ({
     id,
     signalsIndex,
     name,
+    createdAt,
     createdBy,
+    updatedAt,
     updatedBy,
     interval,
     enabled,
@@ -118,7 +124,9 @@ export const searchAfterAndBulkCreate = async ({
         id,
         signalsIndex,
         name,
+        createdAt,
         createdBy,
+        updatedAt,
         updatedBy,
         interval,
         enabled,
