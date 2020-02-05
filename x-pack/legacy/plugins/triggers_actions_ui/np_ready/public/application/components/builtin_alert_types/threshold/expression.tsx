@@ -259,8 +259,6 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
                 // reset time field and expression fields if indices are deleted
                 if (indices.length === 0) {
                   setTimeFieldOptions([firstFieldOption]);
-                  setAlertParams('timeFields', []);
-
                   setDefaultExpressionValues();
                   return;
                 }
@@ -268,7 +266,6 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
                 const timeFields = getTimeFieldOptions(currentEsFields as any);
 
                 setEsFields(currentEsFields);
-                setAlertParams('timeFields', timeFields);
                 setTimeFieldOptions([firstFieldOption, ...timeFields]);
               }}
               onSearchChange={async search => {
@@ -374,8 +371,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <WhenExpression
-            aggType={aggType}
-            defaultAggType={DEFAULT_VALUES.AGGREGATION_TYPE}
+            aggType={aggType ?? DEFAULT_VALUES.AGGREGATION_TYPE}
             onChangeSelectedAggType={(selectedAggType: string) =>
               setAlertParams('aggType', selectedAggType)
             }
@@ -412,9 +408,8 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <ThresholdExpression
-            thresholdComparator={thresholdComparator || DEFAULT_VALUES.THRESHOLD_COMPARATOR}
+            thresholdComparator={thresholdComparator ?? DEFAULT_VALUES.THRESHOLD_COMPARATOR}
             threshold={threshold}
-            defaultThresholdComparator={DEFAULT_VALUES.THRESHOLD_COMPARATOR}
             errors={errors}
             onChangeSelectedThreshold={selectedThresholds =>
               setAlertParams('threshold', selectedThresholds)

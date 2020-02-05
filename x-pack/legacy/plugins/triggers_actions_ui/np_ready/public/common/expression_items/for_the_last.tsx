@@ -27,6 +27,19 @@ interface ForLastExpressionProps {
   errors: { [key: string]: string[] };
   onChangeWindowSize: (selectedWindowSize: number | '') => void;
   onChangeWindowUnit: (selectedWindowUnit: string) => void;
+  popupPosition?:
+    | 'upCenter'
+    | 'upLeft'
+    | 'upRight'
+    | 'downCenter'
+    | 'downLeft'
+    | 'downRight'
+    | 'leftCenter'
+    | 'leftUp'
+    | 'leftDown'
+    | 'rightCenter'
+    | 'rightUp'
+    | 'rightDown';
 }
 
 export const ForLastExpression = ({
@@ -35,16 +48,16 @@ export const ForLastExpression = ({
   errors,
   onChangeWindowSize,
   onChangeWindowUnit,
+  popupPosition,
 }: ForLastExpressionProps) => {
   const [alertDurationPopoverOpen, setAlertDurationPopoverOpen] = useState(false);
 
   return (
     <EuiPopover
-      id="watchDurationPopover"
       button={
         <EuiExpression
           description={i18n.translate(
-            'xpack.triggersActionsUI.sections.alertAdd.threshold.forTheLastLabel',
+            'xpack.triggersActionsUI.common.expressionItems.forTheLast.descriptionLabel',
             {
               defaultMessage: 'for the last',
             }
@@ -66,12 +79,12 @@ export const ForLastExpression = ({
       }}
       ownFocus
       withTitle
-      anchorPosition="downLeft"
+      anchorPosition={popupPosition ?? 'downLeft'}
     >
       <div>
         <EuiPopoverTitle>
           <FormattedMessage
-            id="xpack.triggersActionsUI.sections.alertAdd.threshold.forTheLastButtonLabel"
+            id="xpack.triggersActionsUI.common.expressionItems.forTheLast.popoverTitle"
             defaultMessage="For the last"
           />
         </EuiPopoverTitle>

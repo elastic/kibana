@@ -22,7 +22,6 @@ import { Comparator } from '../types';
 
 interface ThresholdExpressionProps {
   thresholdComparator: string;
-  defaultThresholdComparator: string;
   errors: { [key: string]: string[] };
   onChangeSelectedThresholdComparator: (selectedThresholdComparator?: string) => void;
   onChangeSelectedThreshold: (selectedThreshold?: number[]) => void;
@@ -30,22 +29,35 @@ interface ThresholdExpressionProps {
     [key: string]: Comparator;
   };
   threshold?: number[];
+  popupPosition?:
+    | 'upCenter'
+    | 'upLeft'
+    | 'upRight'
+    | 'downCenter'
+    | 'downLeft'
+    | 'downRight'
+    | 'leftCenter'
+    | 'leftUp'
+    | 'leftDown'
+    | 'rightCenter'
+    | 'rightUp'
+    | 'rightDown';
 }
 
 export const ThresholdExpression = ({
   thresholdComparator,
-  defaultThresholdComparator,
   errors,
   onChangeSelectedThresholdComparator,
   onChangeSelectedThreshold,
   customComparators,
   threshold = [],
+  popupPosition,
 }: ThresholdExpressionProps) => {
   const comparators = customComparators ?? builtInComparators;
   const [alertThresholdPopoverOpen, setAlertThresholdPopoverOpen] = useState(false);
 
   const andThresholdText = i18n.translate(
-    'xpack.triggersActionsUI.sections.alertAdd.threshold.andLabel',
+    'xpack.triggersActionsUI.common.expressionItems.threshold.andLabel',
     {
       defaultMessage: 'AND',
     }
@@ -53,13 +65,12 @@ export const ThresholdExpression = ({
 
   return (
     <EuiPopover
-      id="thresholdPopover"
       button={
         <EuiExpression
           data-test-subj="thresholdPopover"
-          description={comparators[thresholdComparator || defaultThresholdComparator].text}
+          description={comparators[thresholdComparator].text}
           value={(threshold || [])
-            .slice(0, comparators[thresholdComparator || defaultThresholdComparator].requiredValues)
+            .slice(0, comparators[thresholdComparator].requiredValues)
             .join(` ${andThresholdText} `)}
           isActive={Boolean(
             alertThresholdPopoverOpen ||
@@ -83,12 +94,10 @@ export const ThresholdExpression = ({
       }}
       ownFocus
       withTitle
-      anchorPosition="downLeft"
+      anchorPosition={popupPosition ?? 'downLeft'}
     >
       <div>
-        <EuiPopoverTitle>
-          {comparators[thresholdComparator || defaultThresholdComparator].text}
-        </EuiPopoverTitle>
+        <EuiPopoverTitle>{comparators[thresholdComparator].text}</EuiPopoverTitle>
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <EuiSelect
@@ -102,13 +111,14 @@ export const ThresholdExpression = ({
               })}
             />
           </EuiFlexItem>
-          {Array.from(
-            Array(comparators[thresholdComparator || defaultThresholdComparator].requiredValues)
-          ).map((_notUsed, i) => {
+          {Array.from(Array(comparators[thresholdComparator].requiredValues)).map((_notUsed, i) => {
             return (
               <Fragment key={`threshold${i}`}>
                 {i > 0 ? (
-                  <EuiFlexItem grow={false} className="alertThresholdWatchInBetweenComparatorText">
+                  <EuiFlexItem
+                    grow={false}
+                    className="watcherThresholdWatchInBetweenComparatorText"
+                  >
                     <EuiText>{andThresholdText}</EuiText>
                   </EuiFlexItem>
                 ) : null}

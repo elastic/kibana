@@ -31,6 +31,19 @@ interface GroupByExpressionProps {
   customGroupByTypes?: {
     [key: string]: GroupByType;
   };
+  popupPosition?:
+    | 'upCenter'
+    | 'upLeft'
+    | 'upRight'
+    | 'downCenter'
+    | 'downLeft'
+    | 'downRight'
+    | 'leftCenter'
+    | 'leftUp'
+    | 'leftDown'
+    | 'rightCenter'
+    | 'rightUp'
+    | 'rightDown';
 }
 
 export const GroupByExpression = ({
@@ -43,30 +56,39 @@ export const GroupByExpression = ({
   termSize,
   termField,
   customGroupByTypes,
+  popupPosition,
 }: GroupByExpressionProps) => {
   const groupByTypes = customGroupByTypes ?? builtInGroupByTypes;
   const [groupByPopoverOpen, setGroupByPopoverOpen] = useState(false);
   const MIN_TERM_SIZE = 1;
   const firstFieldOption = {
-    text: i18n.translate('xpack.triggersActionsUI.common.groupByType.timeFieldOptionLabel', {
-      defaultMessage: 'Select a field',
-    }),
+    text: i18n.translate(
+      'xpack.triggersActionsUI.common.expressionItems.groupByType.timeFieldOptionLabel',
+      {
+        defaultMessage: 'Select a field',
+      }
+    ),
     value: '',
   };
 
   return (
     <EuiPopover
-      id="groupByPopover"
       button={
         <EuiExpression
           description={`${
             groupByTypes[groupBy].sizeRequired
-              ? i18n.translate('xpack.triggersActionsUI.common.groupByType.groupedOverLabel', {
-                  defaultMessage: 'grouped over',
-                })
-              : i18n.translate('xpack.triggersActionsUI.common.groupByType.overLabel', {
-                  defaultMessage: 'over',
-                })
+              ? i18n.translate(
+                  'xpack.triggersActionsUI.common.expressionItems.groupByType.groupedOverLabel',
+                  {
+                    defaultMessage: 'grouped over',
+                  }
+                )
+              : i18n.translate(
+                  'xpack.triggersActionsUI.common.expressionItems.groupByType.overLabel',
+                  {
+                    defaultMessage: 'over',
+                  }
+                )
           }`}
           value={`${groupByTypes[groupBy].text} ${
             groupByTypes[groupBy].sizeRequired
@@ -86,13 +108,16 @@ export const GroupByExpression = ({
       }}
       ownFocus
       withTitle
-      anchorPosition="downRight"
+      anchorPosition={popupPosition ?? 'downRight'}
     >
       <div>
         <EuiPopoverTitle>
-          {i18n.translate('xpack.triggersActionsUI.common.groupByType.overButtonLabel', {
-            defaultMessage: 'over',
-          })}
+          {i18n.translate(
+            'xpack.triggersActionsUI.common.expressionItems.groupByType.overButtonLabel',
+            {
+              defaultMessage: 'over',
+            }
+          )}
         </EuiPopoverTitle>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>

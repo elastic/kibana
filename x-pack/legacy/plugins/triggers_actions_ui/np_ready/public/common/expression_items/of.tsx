@@ -27,6 +27,19 @@ interface OfExpressionProps {
   customAggTypesOptions?: {
     [key: string]: AggregationType;
   };
+  popupPosition?:
+    | 'upCenter'
+    | 'upLeft'
+    | 'upRight'
+    | 'downCenter'
+    | 'downLeft'
+    | 'downRight'
+    | 'leftCenter'
+    | 'leftUp'
+    | 'leftDown'
+    | 'rightCenter'
+    | 'rightUp'
+    | 'rightDown';
 }
 
 export const OfExpression = ({
@@ -36,6 +49,7 @@ export const OfExpression = ({
   onChangeSelectedAggField,
   fields,
   customAggTypesOptions,
+  popupPosition,
 }: OfExpressionProps) => {
   const [aggFieldPopoverOpen, setAggFieldPopoverOpen] = useState(false);
   const firstFieldOption = {
@@ -63,9 +77,12 @@ export const OfExpression = ({
       id="aggFieldPopover"
       button={
         <EuiExpression
-          description={i18n.translate('xpack.triggersActionsUI.common.of.ofLabel', {
-            defaultMessage: 'of',
-          })}
+          description={i18n.translate(
+            'xpack.triggersActionsUI.common.expressionItems.of.buttonLabel',
+            {
+              defaultMessage: 'of',
+            }
+          )}
           value={aggField || firstFieldOption.text}
           isActive={aggFieldPopoverOpen || !aggField}
           onClick={() => {
@@ -78,40 +95,43 @@ export const OfExpression = ({
       closePopover={() => {
         setAggFieldPopoverOpen(false);
       }}
-      ownFocus
       withTitle
-      anchorPosition="upRight"
+      anchorPosition={popupPosition ?? 'downRight'}
+      zIndex={8000}
     >
-      <EuiPopoverTitle>
-        {i18n.translate('xpack.triggersActionsUI.common.of.ofButtonLabel', {
-          defaultMessage: 'of',
-        })}
-      </EuiPopoverTitle>
-      <EuiFlexGroup justifyContent="spaceBetween">
-        <EuiFlexItem>
-          <EuiFormRow
-            fullWidth
-            isInvalid={errors.aggField.length > 0 && aggField !== undefined}
-            error={errors.aggField}
-          >
-            <EuiComboBox
+      <div>
+        <EuiPopoverTitle>
+          {i18n.translate('xpack.triggersActionsUI.common.expressionItems.of.popoverTitle', {
+            defaultMessage: 'of',
+          })}
+        </EuiPopoverTitle>
+        <EuiFlexGroup>
+          <EuiFlexItem grow={false} className="watcherThresholdAlertAggFieldContainer">
+            <EuiFormRow
               fullWidth
-              singleSelection={{ asPlainText: true }}
-              data-test-subj="availablefieldsOptionsComboBox"
               isInvalid={errors.aggField.length > 0 && aggField !== undefined}
-              placeholder={firstFieldOption.text}
-              options={availablefieldsOptions}
-              selectedOptions={aggField ? [{ label: aggField }] : []}
-              onChange={selectedOptions => {
-                onChangeSelectedAggField(
-                  selectedOptions.length === 1 ? selectedOptions[0].label : undefined
-                );
-                setAggFieldPopoverOpen(false);
-              }}
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+              error={errors.aggField}
+            >
+              <EuiComboBox
+                fullWidth
+                singleSelection={{ asPlainText: true }}
+                data-test-subj="availablefieldsOptionsComboBox"
+                isInvalid={errors.aggField.length > 0 && aggField !== undefined}
+                placeholder={firstFieldOption.text}
+                options={availablefieldsOptions}
+                noSuggestions={!availablefieldsOptions.length}
+                selectedOptions={aggField ? [{ label: aggField }] : []}
+                onChange={selectedOptions => {
+                  onChangeSelectedAggField(
+                    selectedOptions.length === 1 ? selectedOptions[0].label : undefined
+                  );
+                  setAggFieldPopoverOpen(false);
+                }}
+              />
+            </EuiFormRow>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </div>
     </EuiPopover>
   );
 };

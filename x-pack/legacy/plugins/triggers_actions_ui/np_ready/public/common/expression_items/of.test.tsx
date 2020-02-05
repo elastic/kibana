@@ -25,9 +25,10 @@ describe('of expression', () => {
       <EuiComboBox
         compressed={false}
         data-test-subj="availablefieldsOptionsComboBox"
-        fullWidth={false}
+        fullWidth={true}
         isClearable={true}
         isInvalid={false}
+        noSuggestions={true}
         onChange={[Function]}
         options={Array []}
         placeholder="Select a field"
@@ -77,9 +78,10 @@ describe('of expression', () => {
     <EuiComboBox
       compressed={false}
       data-test-subj="availablefieldsOptionsComboBox"
-      fullWidth={false}
+      fullWidth={true}
       isClearable={true}
       isInvalid={false}
+      noSuggestions={false}
       onChange={[Function]}
       options={
         Array [

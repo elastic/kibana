@@ -12,11 +12,7 @@ describe('when expression', () => {
   it('renders with builtin aggregation types', () => {
     const onChangeSelectedAggType = jest.fn();
     const wrapper = shallow(
-      <WhenExpression
-        aggType={'count'}
-        defaultAggType={'count'}
-        onChangeSelectedAggType={onChangeSelectedAggType}
-      />
+      <WhenExpression aggType={'count'} onChangeSelectedAggType={onChangeSelectedAggType} />
     );
     expect(wrapper.find('[data-test-subj="whenExpressionSelect"]')).toMatchInlineSnapshot(`
     <EuiSelect
@@ -57,7 +53,6 @@ describe('when expression', () => {
     const wrapper = shallow(
       <WhenExpression
         aggType={'count'}
-        defaultAggType={'count'}
         onChangeSelectedAggType={onChangeSelectedAggType}
         customAggTypesOptions={{
           count: {
@@ -98,10 +93,10 @@ describe('when expression', () => {
     `);
   });
 
-  it('renders with default aggreagation type preselected if no aggType was set', () => {
+  it('renders when popover title', () => {
     const onChangeSelectedAggType = jest.fn();
     const wrapper = shallow(
-      <WhenExpression defaultAggType={'avg'} onChangeSelectedAggType={onChangeSelectedAggType} />
+      <WhenExpression aggType={'avg'} onChangeSelectedAggType={onChangeSelectedAggType} />
     );
     wrapper.simulate('click');
     expect(wrapper.find('[value="avg"]').length > 0).toBeTruthy();

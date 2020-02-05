@@ -42,9 +42,8 @@ describe('for the last expression', () => {
       wrapper.contains(
         <EuiPopoverTitle>
           <FormattedMessage
+            id="xpack.triggersActionsUI.common.expressionItems.forTheLast.popoverTitle"
             defaultMessage="For the last"
-            id="xpack.triggersActionsUI.sections.alertAdd.threshold.forTheLastButtonLabel"
-            values={{}}
           />
         </EuiPopoverTitle>
       )

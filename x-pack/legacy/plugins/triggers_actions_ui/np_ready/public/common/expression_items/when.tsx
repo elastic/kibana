@@ -11,37 +11,44 @@ import { builtInAggregationTypes } from '../constants';
 import { AggregationType } from '../types';
 
 interface WhenExpressionProps {
-  aggType?: string;
-  defaultAggType: string;
+  aggType: string;
   customAggTypesOptions?: { [key: string]: AggregationType };
   onChangeSelectedAggType: (selectedAggType: string) => void;
+  popupPosition?:
+    | 'upCenter'
+    | 'upLeft'
+    | 'upRight'
+    | 'downCenter'
+    | 'downLeft'
+    | 'downRight'
+    | 'leftCenter'
+    | 'leftUp'
+    | 'leftDown'
+    | 'rightCenter'
+    | 'rightUp'
+    | 'rightDown';
 }
 
 export const WhenExpression = ({
   aggType,
-  defaultAggType,
   customAggTypesOptions,
   onChangeSelectedAggType,
+  popupPosition,
 }: WhenExpressionProps) => {
   const [aggTypePopoverOpen, setAggTypePopoverOpen] = useState(false);
   const aggregationTypes = customAggTypesOptions ?? builtInAggregationTypes;
   return (
     <EuiPopover
-      id="aggTypePopover"
       button={
         <EuiExpression
           data-test-subj="whenExpression"
           description={i18n.translate(
-            'xpack.triggersActionsUI.sections.alertAdd.threshold.whenLabel',
+            'xpack.triggersActionsUI.common.expressionItems.threshold.descriptionLabel',
             {
               defaultMessage: 'when',
             }
           )}
-          value={
-            aggregationTypes[aggType ?? '']
-              ? aggregationTypes[aggType ?? ''].text
-              : aggregationTypes[defaultAggType].text
-          }
+          value={aggregationTypes[aggType].text}
           isActive={aggTypePopoverOpen}
           onClick={() => {
             setAggTypePopoverOpen(true);
@@ -54,17 +61,17 @@ export const WhenExpression = ({
       }}
       ownFocus
       withTitle
-      anchorPosition="downLeft"
+      anchorPosition={popupPosition ?? 'downLeft'}
     >
       <div>
         <EuiPopoverTitle>
-          {i18n.translate('xpack.triggersActionsUI.sections.alertAdd.threshold.whenButtonLabel', {
+          {i18n.translate('xpack.triggersActionsUI.common.expressionItems.threshold.popoverTitle', {
             defaultMessage: 'when',
           })}
         </EuiPopoverTitle>
         <EuiSelect
           data-test-subj="whenExpressionSelect"
-          value={aggType || defaultAggType}
+          value={aggType}
           fullWidth
           onChange={e => {
             onChangeSelectedAggType(e.target.value);

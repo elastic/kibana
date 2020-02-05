@@ -63,6 +63,7 @@ describe('group by expression', () => {
         <EuiSelect
           data-test-subj="fieldsExpressionSelect"
           isInvalid={false}
+          onBlur={[Function]}
           onChange={[Function]}
           options={
             Array [
@@ -76,7 +77,6 @@ describe('group by expression', () => {
               },
             ]
           }
-          value=""
         />
     `);
   });
