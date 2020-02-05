@@ -4,14 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import { useContext } from 'react';
+import { CoreContext } from '../contexts/core';
 
-import { Home } from './screens/home';
-
-export const EPMApp: React.FC = () => {
-  return (
-    <div>
-      <Home />
-    </div>
-  );
-};
+export function useCore() {
+  return useContext(CoreContext);
+}
