@@ -938,6 +938,14 @@
         ],
       },
       {
+        groupSlug: 'watchpack',
+        groupName: 'watchpack related packages',
+        packageNames: [
+          'watchpack',
+          '@types/watchpack',
+        ],
+      },
+      {
         groupSlug: 'webpack',
         groupName: 'webpack related packages',
         packagePatterns: [
