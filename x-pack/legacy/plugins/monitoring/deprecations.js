@@ -5,7 +5,7 @@
  */
 
 import { get } from 'lodash';
-import { CLUSTER_ALERTS_ADDRESS_CONFIG_KEY } from './common/constants';
+import { CLUSTER_ALERTS_ADDRESS_CONFIG_KEY, KIBANA_ALERTING_ENABLED } from './common/constants';
 
 /**
  * Re-writes deprecated user-defined config settings and logs warnings as a
@@ -21,14 +21,24 @@ export const deprecations = () => {
       const clusterAlertsEnabled = get(settings, 'cluster_alerts.enabled');
       const emailNotificationsEnabled =
         clusterAlertsEnabled && get(settings, 'cluster_alerts.email_notifications.enabled');
-      if (emailNotificationsEnabled && !get(settings, CLUSTER_ALERTS_ADDRESS_CONFIG_KEY)) {
-        log(
-          `Config key "${CLUSTER_ALERTS_ADDRESS_CONFIG_KEY}" will be required for email notifications to work in 7.0."`
-        );
+      if (emailNotificationsEnabled) {
+        if (KIBANA_ALERTING_ENABLED) {
+          if (get(settings, CLUSTER_ALERTS_ADDRESS_CONFIG_KEY)) {
+            log(
+              `Config key "${CLUSTER_ALERTS_ADDRESS_CONFIG_KEY}" is deprecated. Please configure the email adddress through the Stack Monitoring UI instead."`
+            );
+          }
+        } else {
+          if (!get(settings, CLUSTER_ALERTS_ADDRESS_CONFIG_KEY)) {
+            log(
+              `Config key "${CLUSTER_ALERTS_ADDRESS_CONFIG_KEY}" will be required for email notifications to work in 7.0."`
+            );
+          }
+        }
       }
     },
     (settings, log) => {
-      const fromPath = 'xpack.monitoring.elasticsearch';
+      const fromPath = 'monitoring.elasticsearch';
       const es = get(settings, 'elasticsearch');
       if (es) {
         if (es.username === 'elastic') {
@@ -39,7 +49,7 @@ export const deprecations = () => {
       }
     },
     (settings, log) => {
-      const fromPath = 'xpack.monitoring.elasticsearch.ssl';
+      const fromPath = 'monitoring.elasticsearch.ssl';
       const ssl = get(settings, 'elasticsearch.ssl');
       if (ssl) {
         if (ssl.key !== undefined && ssl.certificate === undefined) {

@@ -155,7 +155,7 @@ describe('KerberosAuthenticationProvider', () => {
 
       expect(request.headers.authorization).toBe('negotiate spnego');
       expect(authenticationResult.succeeded()).toBe(true);
-      expect(authenticationResult.user).toBe(user);
+      expect(authenticationResult.user).toEqual({ ...user, authentication_provider: 'kerberos' });
       expect(authenticationResult.authHeaders).toEqual({ authorization: 'Bearer some-token' });
       expect(authenticationResult.authResponseHeaders).toBeUndefined();
       expect(authenticationResult.state).toEqual({
@@ -193,7 +193,7 @@ describe('KerberosAuthenticationProvider', () => {
 
       expect(request.headers.authorization).toBe('negotiate spnego');
       expect(authenticationResult.succeeded()).toBe(true);
-      expect(authenticationResult.user).toBe(user);
+      expect(authenticationResult.user).toEqual({ ...user, authentication_provider: 'kerberos' });
       expect(authenticationResult.authHeaders).toEqual({ authorization: 'Bearer some-token' });
       expect(authenticationResult.authResponseHeaders).toEqual({
         'WWW-Authenticate': 'Negotiate response-token',
@@ -337,7 +337,7 @@ describe('KerberosAuthenticationProvider', () => {
       expect(request.headers).not.toHaveProperty('authorization');
       expect(authenticationResult.succeeded()).toBe(true);
       expect(authenticationResult.authHeaders).toEqual({ authorization });
-      expect(authenticationResult.user).toBe(user);
+      expect(authenticationResult.user).toEqual({ ...user, authentication_provider: 'kerberos' });
       expect(authenticationResult.state).toBeUndefined();
     });
 
@@ -370,7 +370,7 @@ describe('KerberosAuthenticationProvider', () => {
 
       expect(authenticationResult.succeeded()).toBe(true);
       expect(authenticationResult.authHeaders).toEqual({ authorization: 'Bearer newfoo' });
-      expect(authenticationResult.user).toEqual(user);
+      expect(authenticationResult.user).toEqual({ ...user, authentication_provider: 'kerberos' });
       expect(authenticationResult.state).toEqual({ accessToken: 'newfoo', refreshToken: 'newbar' });
       expect(request.headers).not.toHaveProperty('authorization');
     });
@@ -419,44 +419,6 @@ describe('KerberosAuthenticationProvider', () => {
       expect(authenticationResult.authResponseHeaders).toEqual({ 'WWW-Authenticate': 'Negotiate' });
     });
 
-    it('fails with `Negotiate` challenge if both access and refresh token documents are missing and backend supports Kerberos.', async () => {
-      const request = httpServerMock.createKibanaRequest({ headers: {} });
-      const tokenPair = { accessToken: 'missing-token', refreshToken: 'missing-refresh-token' };
-
-      mockScopedClusterClient(
-        mockOptions.client,
-        sinon.match({ headers: { authorization: `Bearer ${tokenPair.accessToken}` } })
-      )
-        .callAsCurrentUser.withArgs('shield.authenticate')
-        .rejects({
-          statusCode: 500,
-          body: { error: { reason: 'token document is missing and must be present' } },
-        });
-
-      mockScopedClusterClient(
-        mockOptions.client,
-        sinon.match({
-          headers: { authorization: `Negotiate ${Buffer.from('__fake__').toString('base64')}` },
-        })
-      )
-        .callAsCurrentUser.withArgs('shield.authenticate')
-        .rejects(
-          ElasticsearchErrorHelpers.decorateNotAuthorizedError(
-            new (errors.AuthenticationException as any)('Unauthorized', {
-              body: { error: { header: { 'WWW-Authenticate': 'Negotiate' } } },
-            })
-          )
-        );
-
-      mockOptions.tokens.refresh.withArgs(tokenPair.refreshToken).resolves(null);
-
-      const authenticationResult = await provider.authenticate(request, tokenPair);
-
-      expect(authenticationResult.failed()).toBe(true);
-      expect(authenticationResult.error).toHaveProperty('output.statusCode', 401);
-      expect(authenticationResult.authResponseHeaders).toEqual({ 'WWW-Authenticate': 'Negotiate' });
-    });
-
     it('succeeds if `authorization` contains a valid token.', async () => {
       const user = mockAuthenticatedUser();
       const request = httpServerMock.createKibanaRequest({
@@ -475,7 +437,7 @@ describe('KerberosAuthenticationProvider', () => {
       expect(request.headers.authorization).toBe('Bearer some-valid-token');
       expect(authenticationResult.succeeded()).toBe(true);
       expect(authenticationResult.authHeaders).toBeUndefined();
-      expect(authenticationResult.user).toBe(user);
+      expect(authenticationResult.user).toEqual({ ...user, authentication_provider: 'kerberos' });
       expect(authenticationResult.state).toBeUndefined();
     });
 

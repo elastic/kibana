@@ -4,7 +4,7 @@
     "winlogbeat-*"
   ],
   "language": "kuery",
-  "max_signals": 33,
+  "max_signals": 100,
   "name": "Windows Script Executing PowerShell",
   "query": "event.action:\"Process Create (rule: ProcessCreate)\" and process.parent.name:(\"wscript.exe\" or \"cscript.exe\") and process.name:\"powershell.exe\"",
   "risk_score": 21,

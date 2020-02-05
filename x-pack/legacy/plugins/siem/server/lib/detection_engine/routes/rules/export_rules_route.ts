@@ -36,28 +36,32 @@ export const createExportRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
         return headers.response().code(404);
       }
 
-      const exportSizeLimit = server.config().get<number>('savedObjects.maxImportExportSize');
-      if (request.payload?.objects != null && request.payload.objects.length > exportSizeLimit) {
-        return Boom.badRequest(`Can't export more than ${exportSizeLimit} rules`);
-      } else {
-        const nonPackagedRulesCount = await getNonPackagedRulesCount({ alertsClient });
-        if (nonPackagedRulesCount > exportSizeLimit) {
+      try {
+        const exportSizeLimit = server.config().get<number>('savedObjects.maxImportExportSize');
+        if (request.payload?.objects != null && request.payload.objects.length > exportSizeLimit) {
           return Boom.badRequest(`Can't export more than ${exportSizeLimit} rules`);
+        } else {
+          const nonPackagedRulesCount = await getNonPackagedRulesCount({ alertsClient });
+          if (nonPackagedRulesCount > exportSizeLimit) {
+            return Boom.badRequest(`Can't export more than ${exportSizeLimit} rules`);
+          }
         }
+
+        const exported =
+          request.payload?.objects != null
+            ? await getExportByObjectIds(alertsClient, request.payload.objects)
+            : await getExportAll(alertsClient);
+
+        const response = request.query.exclude_export_details
+          ? headers.response(exported.rulesNdjson)
+          : headers.response(`${exported.rulesNdjson}${exported.exportDetails}`);
+
+        return response
+          .header('Content-Disposition', `attachment; filename="${request.query.file_name}"`)
+          .header('Content-Type', 'application/ndjson');
+      } catch {
+        return Boom.badRequest(`Sorry, something went wrong to export rules`);
       }
-
-      const exported =
-        request.payload?.objects != null
-          ? await getExportByObjectIds(alertsClient, request.payload.objects)
-          : await getExportAll(alertsClient);
-
-      const response = request.query.exclude_export_details
-        ? headers.response(exported.rulesNdjson)
-        : headers.response(`${exported.rulesNdjson}${exported.exportDetails}`);
-
-      return response
-        .header('Content-Disposition', `attachment; filename="${request.query.file_name}"`)
-        .header('Content-Type', 'application/ndjson');
     },
   };
 };
