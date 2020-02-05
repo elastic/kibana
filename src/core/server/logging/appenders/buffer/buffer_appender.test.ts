@@ -34,12 +34,14 @@ test('`flush()` returns all appended records and cleans internal buffer.', () =>
       level: LogLevel.All,
       message: 'message-1',
       timestamp: new Date(),
+      pid: 5355,
     },
     {
       context: 'context-2',
       level: LogLevel.Trace,
       message: 'message-2',
       timestamp: new Date(),
+      pid: 5355,
     },
   ];
 
@@ -64,6 +66,7 @@ test('`dispose()` flushes internal buffer.', async () => {
     level: LogLevel.All,
     message: 'message-1',
     timestamp: new Date(),
+    pid: 5355,
   });
 
   await appender.dispose();

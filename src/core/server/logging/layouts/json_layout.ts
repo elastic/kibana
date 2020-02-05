@@ -58,6 +58,7 @@ export class JsonLayout implements Layout {
       level: record.level.id.toUpperCase(),
       message: record.message,
       meta: record.meta,
+      pid: record.pid,
     });
   }
 }

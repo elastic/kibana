@@ -70,6 +70,7 @@ test('file stream is created only once and only after first `append()` is called
     level: LogLevel.All,
     message: 'message-1',
     timestamp: new Date(),
+    pid: 5355,
   });
 
   expect(mockCreateWriteStream).toHaveBeenCalledTimes(1);
@@ -84,6 +85,7 @@ test('file stream is created only once and only after first `append()` is called
     level: LogLevel.All,
     message: 'message-2',
     timestamp: new Date(),
+    pid: 5355,
   });
 
   expect(mockCreateWriteStream).not.toHaveBeenCalled();
@@ -99,12 +101,14 @@ test('`append()` correctly formats records and pushes them to the file.', () => 
       level: LogLevel.All,
       message: 'message-1',
       timestamp: new Date(),
+      pid: 5355,
     },
     {
       context: 'context-2',
       level: LogLevel.Trace,
       message: 'message-2',
       timestamp: new Date(),
+      pid: 5355,
     },
     {
       context: 'context-3',
@@ -112,6 +116,7 @@ test('`append()` correctly formats records and pushes them to the file.', () => 
       level: LogLevel.Fatal,
       message: 'message-3',
       timestamp: new Date(),
+      pid: 5355,
     },
   ];
 
@@ -160,6 +165,7 @@ test('`dispose()` closes stream.', async () => {
     level: LogLevel.All,
     message: 'message-1',
     timestamp: new Date(),
+    pid: 5355,
   });
 
   await appender.dispose();
