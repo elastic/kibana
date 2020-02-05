@@ -162,31 +162,6 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
     return mapHitsToLogEntryDocuments(hits, sourceConfiguration.fields.timestamp, fields);
   }
 
-  /** @deprecated */
-  public async getContainedLogEntryDocuments(
-    requestContext: RequestHandlerContext,
-    sourceConfiguration: InfraSourceConfiguration,
-    fields: string[],
-    start: TimeKey,
-    end: TimeKey,
-    filterQuery?: LogEntryQuery,
-    highlightQuery?: LogEntryQuery
-  ): Promise<LogEntryDocument[]> {
-    const documents = await this.getLogEntryDocumentsBetween(
-      requestContext,
-      sourceConfiguration,
-      fields,
-      start.time,
-      end.time,
-      start,
-      10000,
-      filterQuery,
-      highlightQuery
-    );
-
-    return documents.filter(document => compareTimeKeys(document.key, end) < 0);
-  }
-
   public async getContainedLogSummaryBuckets(
     requestContext: RequestHandlerContext,
     sourceConfiguration: InfraSourceConfiguration,
@@ -430,28 +405,6 @@ function mapHitsToLogEntryDocuments(
     };
   });
 }
-
-/** @deprecated */
-const convertHitToLogEntryDocument = (fields: string[]) => (
-  hit: SortedSearchHit
-): LogEntryDocument => ({
-  gid: hit._id,
-  fields: fields.reduce(
-    (flattenedFields, fieldName) =>
-      has(fieldName, hit._source)
-        ? {
-            ...flattenedFields,
-            [fieldName]: get(fieldName, hit._source),
-          }
-        : flattenedFields,
-    {} as { [fieldName: string]: string | number | boolean | null }
-  ),
-  highlights: hit.highlight || {},
-  key: {
-    time: hit.sort[0],
-    tiebreaker: hit.sort[1],
-  },
-});
 
 const convertDateRangeBucketToSummaryBucket = (
   bucket: LogSummaryDateRangeBucket
