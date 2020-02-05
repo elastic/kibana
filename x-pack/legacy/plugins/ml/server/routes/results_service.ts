@@ -13,7 +13,6 @@ import {
   anomaliesTableDataSchema,
   partitionFieldValuesSchema,
 } from '../new_platform/results_service_schema';
-// @ts-ignore // TODO: fix
 import { resultsServiceProvider } from '../models/results_service';
 
 function getAnomaliesTableData(context: RequestHandlerContext, payload: any) {

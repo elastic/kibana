@@ -6,12 +6,13 @@
 
 import _ from 'lodash';
 import moment from 'moment';
+import { SearchResponse } from 'elasticsearch';
 import { RequestHandlerContext } from 'kibana/server';
-// @ts-ignore
-import { buildAnomalyTableItems } from './build_anomaly_table_items';
+import { buildAnomalyTableItems, AnomaliesTableRecord } from './build_anomaly_table_items';
 import { ML_RESULTS_INDEX_PATTERN } from '../../../common/constants/index_patterns';
 import { ANOMALIES_TABLE_DEFAULT_QUERY_SIZE } from '../../../common/constants/search';
 import { getPartitionFieldsValuesFactory } from './get_partition_fields_values';
+import { AnomalyRecordDoc } from '../../../common/types/anomalies';
 
 // Service for carrying out Elasticsearch queries to obtain data for the
 // ML Results dashboards.
@@ -20,6 +21,11 @@ const DEFAULT_MAX_EXAMPLES = 500;
 
 export interface CriteriaField {
   fieldType?: string;
+  fieldName: string;
+  fieldValue: any;
+}
+
+interface Influencer {
   fieldName: string;
   fieldValue: any;
 }
@@ -36,7 +42,7 @@ export function resultsServiceProvider(client: RequestHandlerContext | (() => an
   async function getAnomaliesTableData(
     jobIds: string[],
     criteriaFields: CriteriaField[],
-    influencers: any[],
+    influencers: Influencer[],
     aggregationInterval: string,
     threshold: number,
     earliestMs: number,
@@ -48,7 +54,7 @@ export function resultsServiceProvider(client: RequestHandlerContext | (() => an
   ) {
     // Build the query to return the matching anomaly record results.
     // Add criteria for the time range, record score, plus any specified job IDs.
-    const boolCriteria: any = [
+    const boolCriteria: object[] = [
       {
         range: {
           timestamp: {
@@ -129,7 +135,7 @@ export function resultsServiceProvider(client: RequestHandlerContext | (() => an
       });
     }
 
-    const resp: any = await callAsCurrentUser('search', {
+    const resp: SearchResponse<any> = await callAsCurrentUser('search', {
       index: ML_RESULTS_INDEX_PATTERN,
       rest_total_hits_as_int: true,
       size: maxRecords,
@@ -155,10 +161,17 @@ export function resultsServiceProvider(client: RequestHandlerContext | (() => an
       },
     });
 
-    const tableData: any = { anomalies: [], interval: 'second' };
+    const tableData: {
+      anomalies: AnomaliesTableRecord[];
+      interval: string;
+      examplesByJobId?: { [key: string]: any };
+    } = {
+      anomalies: [],
+      interval: 'second',
+    };
     if (resp.hits.total !== 0) {
-      let records: any = [];
-      resp.hits.hits.forEach((hit: any) => {
+      let records: AnomalyRecordDoc[] = [];
+      resp.hits.hits.forEach(hit => {
         records.push(hit._source);
       });
 
@@ -177,14 +190,14 @@ export function resultsServiceProvider(client: RequestHandlerContext | (() => an
       tableData.anomalies = buildAnomalyTableItems(records, tableData.interval, dateFormatTz);
 
       // Load examples for any categorization anomalies.
-      const categoryAnomalies: any = tableData.anomalies.filter(
+      const categoryAnomalies = tableData.anomalies.filter(
         (item: any) => item.entityName === 'mlcategory'
       );
       if (categoryAnomalies.length > 0) {
         tableData.examplesByJobId = {};
 
-        const categoryIdsByJobId: any = {};
-        categoryAnomalies.forEach((anomaly: any) => {
+        const categoryIdsByJobId: { [key: string]: any } = {};
+        categoryAnomalies.forEach(anomaly => {
           if (!_.has(categoryIdsByJobId, anomaly.jobId)) {
             categoryIdsByJobId[anomaly.jobId] = [];
           }
@@ -201,7 +214,9 @@ export function resultsServiceProvider(client: RequestHandlerContext | (() => an
               categoryIdsByJobId[jobId],
               maxExamples
             );
-            tableData.examplesByJobId[jobId] = examplesByCategoryId;
+            if (tableData.examplesByJobId !== undefined) {
+              tableData.examplesByJobId[jobId] = examplesByCategoryId;
+            }
           })
         );
       }
@@ -214,7 +229,7 @@ export function resultsServiceProvider(client: RequestHandlerContext | (() => an
   async function getMaxAnomalyScore(jobIds: string[] = [], earliestMs: number, latestMs: number) {
     // Build the criteria to use in the bool filter part of the request.
     // Adds criteria for the time range plus any specified job IDs.
-    const boolCriteria: any = [
+    const boolCriteria: object[] = [
       {
         range: {
           timestamp: {
@@ -284,7 +299,7 @@ export function resultsServiceProvider(client: RequestHandlerContext | (() => an
   // Returns data over all jobs unless an optional list of job IDs of interest is supplied.
   // Returned response consists of latest bucket timestamps (ms since Jan 1 1970) against job ID
   async function getLatestBucketTimestampByJob(jobIds = []) {
-    const filter: any = [
+    const filter: object[] = [
       {
         term: {
           result_type: 'bucket',
@@ -339,10 +354,13 @@ export function resultsServiceProvider(client: RequestHandlerContext | (() => an
       },
     });
 
-    const bucketsByJobId = _.get(resp, ['aggregations', 'byJobId', 'buckets'], []);
-    const timestampByJobId: any = {};
+    const bucketsByJobId: Array<{ key: string; maxTimestamp: { value?: number } }> = _.get(
+      resp,
+      ['aggregations', 'byJobId', 'buckets'],
+      []
+    );
+    const timestampByJobId: { [key: string]: number | undefined } = {};
     bucketsByJobId.forEach(bucket => {
-      // @ts-ignore
       timestampByJobId[bucket.key] = bucket.maxTimestamp.value;
     });
 
@@ -366,7 +384,7 @@ export function resultsServiceProvider(client: RequestHandlerContext | (() => an
       },
     });
 
-    const examplesByCategoryId: any = {};
+    const examplesByCategoryId: { [key: string]: any } = {};
     if (resp.hits.total !== 0) {
       resp.hits.hits.forEach((hit: any) => {
         if (maxExamples) {
