@@ -32,15 +32,6 @@ beforeEach(() => {
     info: {
       protocol: 'http',
     },
-    plugins: {
-      elasticsearch: {
-        getCluster: memoize(() => {
-          return {
-            callWithRequest: jest.fn(),
-          };
-        }),
-      },
-    },
     savedObjects: {
       getScopedSavedObjectsClient: jest.fn(),
     },
@@ -57,6 +48,11 @@ beforeEach(() => {
 afterEach(() => generatePdfObservableFactory.mockReset());
 
 const getMockLogger = () => new LevelLogger();
+const mockElasticsearch = {
+  dataClient: {
+    asScoped: () => ({ callAsCurrentUser: jest.fn() }),
+  },
+};
 
 const encryptHeaders = async headers => {
   const crypto = cryptoFactory(mockServer);
@@ -69,7 +65,9 @@ test(`passes browserTimezone to generatePdf`, async () => {
   const generatePdfObservable = generatePdfObservableFactory();
   generatePdfObservable.mockReturnValue(Rx.of(Buffer.from('')));
 
-  const executeJob = executeJobFactory(mockServer, getMockLogger(), { browserDriverFactory: {} });
+  const executeJob = executeJobFactory(mockServer, mockElasticsearch, getMockLogger(), {
+    browserDriverFactory: {},
+  });
   const browserTimezone = 'UTC';
   await executeJob(
     'pdfJobId',
@@ -90,7 +88,9 @@ test(`passes browserTimezone to generatePdf`, async () => {
 });
 
 test(`returns content_type of application/pdf`, async () => {
-  const executeJob = executeJobFactory(mockServer, getMockLogger(), { browserDriverFactory: {} });
+  const executeJob = executeJobFactory(mockServer, mockElasticsearch, getMockLogger(), {
+    browserDriverFactory: {},
+  });
   const encryptedHeaders = await encryptHeaders({});
 
   const generatePdfObservable = generatePdfObservableFactory();
@@ -110,7 +110,9 @@ test(`returns content of generatePdf getBuffer base64 encoded`, async () => {
   const generatePdfObservable = generatePdfObservableFactory();
   generatePdfObservable.mockReturnValue(Rx.of(Buffer.from(testContent)));
 
-  const executeJob = executeJobFactory(mockServer, getMockLogger(), { browserDriverFactory: {} });
+  const executeJob = executeJobFactory(mockServer, mockElasticsearch, getMockLogger(), {
+    browserDriverFactory: {},
+  });
   const encryptedHeaders = await encryptHeaders({});
   const { content } = await executeJob(
     'pdfJobId',
