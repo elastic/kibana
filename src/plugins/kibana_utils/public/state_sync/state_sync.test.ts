@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { BaseState, BaseStateContainer, createStateContainer } from '../state_containers';
+import { BaseState, BaseStateContainer, createStateContainer } from '../../common/state_containers';
 import {
   defaultState,
   pureTransitions,

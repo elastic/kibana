@@ -6,9 +6,9 @@
 
 import Boom from 'boom';
 import type from 'type-detect';
-import { canRedirectRequest } from '../';
 import { KibanaRequest } from '../../../../../../src/core/server';
 import { AuthenticationResult } from '../authentication_result';
+import { canRedirectRequest } from '../can_redirect_request';
 import { DeauthenticationResult } from '../deauthentication_result';
 import { Tokens, TokenPair } from '../tokens';
 import {
@@ -62,6 +62,11 @@ interface ProviderState extends Partial<TokenPair> {
  * Provider that supports authentication using an OpenID Connect realm in Elasticsearch.
  */
 export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
+  /**
+   * Type of the provider.
+   */
+  static readonly type = 'oidc';
+
   /**
    * Specifies Elasticsearch OIDC realm name that Kibana should use.
    */

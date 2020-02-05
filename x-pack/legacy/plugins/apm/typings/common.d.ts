@@ -22,6 +22,10 @@ type AllowUnknownObjectProperties<T> = T extends object
     }
   : T;
 
+export type PromiseValueType<Value> = Value extends Promise<infer Value>
+  ? Value
+  : Value;
+
 export type PromiseReturnType<Func> = Func extends (
   ...args: any[]
 ) => Promise<infer Value>

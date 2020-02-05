@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { Fragment, useEffect, useState } from 'react';
+import React, { useEffect, useState, Fragment } from 'react';
 import {
   EuiBasicTable,
   EuiButton,
@@ -15,6 +15,7 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiSpacer,
+  EuiEmptyPrompt,
   EuiLink,
 } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
@@ -245,100 +246,149 @@ export const AlertsList: React.FunctionComponent = () => {
     );
   }
 
+  const emptyPrompt = (
+    <EuiEmptyPrompt
+      iconType="watchesApp"
+      data-test-subj="createFirstAlertEmptyPrompt"
+      title={
+        <h2>
+          <FormattedMessage
+            id="xpack.triggersActionsUI.sections.alertsList.emptyTitle"
+            defaultMessage="Create your first alert"
+          />
+        </h2>
+      }
+      body={
+        <p>
+          <FormattedMessage
+            id="xpack.triggersActionsUI.sections.alertsList.emptyDesc"
+            defaultMessage="Recieve an alert through email, slack or other connectors when a certain trigger is hit"
+          />
+        </p>
+      }
+      actions={
+        <EuiButton
+          data-test-subj="createFirstAlertButton"
+          key="create-action"
+          fill
+          iconType="plusInCircle"
+          iconSide="left"
+          onClick={() => setAlertFlyoutVisibility(true)}
+        >
+          <FormattedMessage
+            id="xpack.triggersActionsUI.sections.alertsList.emptyButton"
+            defaultMessage="Create alert"
+          />
+        </EuiButton>
+      }
+    />
+  );
+
+  const table = (
+    <Fragment>
+      <EuiFlexGroup gutterSize="s">
+        {selectedIds.length > 0 && canDelete && (
+          <EuiFlexItem grow={false}>
+            <BulkOperationPopover>
+              <AlertQuickEditButtons
+                selectedItems={convertAlertsToTableItems(
+                  filterAlertsById(alertsState.data, selectedIds),
+                  alertTypesState.data
+                )}
+                onPerformingAction={() => setIsPerformingAction(true)}
+                onActionPerformed={() => {
+                  loadAlertsData();
+                  setIsPerformingAction(false);
+                }}
+              />
+            </BulkOperationPopover>
+          </EuiFlexItem>
+        )}
+        <EuiFlexItem>
+          <EuiFieldText
+            fullWidth
+            data-test-subj="alertSearchField"
+            prepend={<EuiIcon type="search" />}
+            onChange={e => setInputText(e.target.value)}
+            onKeyUp={e => {
+              if (e.keyCode === ENTER_KEY) {
+                setSearchText(inputText);
+              }
+            }}
+            placeholder={i18n.translate(
+              'xpack.triggersActionsUI.sections.alertsList.searchPlaceholderTitle',
+              { defaultMessage: 'Search' }
+            )}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup gutterSize="s">
+            {toolsRight.map((tool, index: number) => (
+              <EuiFlexItem key={index} grow={false}>
+                {tool}
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      {/* Large to remain consistent with ActionsList table spacing */}
+      <EuiSpacer size="l" />
+
+      <EuiBasicTable
+        loading={alertsState.isLoading || alertTypesState.isLoading || isPerformingAction}
+        /* Don't display alerts until we have the alert types initialized */
+        items={
+          alertTypesState.isInitialized === false
+            ? []
+            : convertAlertsToTableItems(alertsState.data, alertTypesState.data)
+        }
+        itemId="id"
+        columns={alertsTableColumns}
+        rowProps={() => ({
+          'data-test-subj': 'alert-row',
+        })}
+        cellProps={() => ({
+          'data-test-subj': 'cell',
+        })}
+        data-test-subj="alertsList"
+        pagination={{
+          pageIndex: page.index,
+          pageSize: page.size,
+          /* Don't display alert count until we have the alert types initialized */
+          totalItemCount: alertTypesState.isInitialized === false ? 0 : alertsState.totalItemCount,
+        }}
+        selection={
+          canDelete
+            ? {
+                onSelectionChange(updatedSelectedItemsList: AlertTableItem[]) {
+                  setSelectedIds(updatedSelectedItemsList.map(item => item.id));
+                },
+              }
+            : undefined
+        }
+        onChange={({ page: changedPage }: { page: Pagination }) => {
+          setPage(changedPage);
+        }}
+      />
+    </Fragment>
+  );
+
   return (
     <section data-test-subj="alertsList">
-      <Fragment>
-        <EuiSpacer size="m" />
-        <AlertsContextProvider value={{ alertFlyoutVisible, setAlertFlyoutVisibility }}>
-          <EuiFlexGroup>
-            {selectedIds.length > 0 && canDelete && (
-              <EuiFlexItem grow={false}>
-                <BulkOperationPopover>
-                  <AlertQuickEditButtons
-                    selectedItems={convertAlertsToTableItems(
-                      filterAlertsById(alertsState.data, selectedIds),
-                      alertTypesState.data
-                    )}
-                    onPerformingAction={() => setIsPerformingAction(true)}
-                    onActionPerformed={() => {
-                      loadAlertsData();
-                      setIsPerformingAction(false);
-                    }}
-                  />
-                </BulkOperationPopover>
-              </EuiFlexItem>
-            )}
-            <EuiFlexItem>
-              <EuiFieldText
-                fullWidth
-                data-test-subj="alertSearchField"
-                prepend={<EuiIcon type="search" />}
-                onChange={e => setInputText(e.target.value)}
-                onKeyUp={e => {
-                  if (e.keyCode === ENTER_KEY) {
-                    setSearchText(inputText);
-                  }
-                }}
-                placeholder={i18n.translate(
-                  'xpack.triggersActionsUI.sections.alertsList.searchPlaceholderTitle',
-                  { defaultMessage: 'Search...' }
-                )}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup>
-                {toolsRight.map((tool, index: number) => (
-                  <EuiFlexItem key={index} grow={false}>
-                    {tool}
-                  </EuiFlexItem>
-                ))}
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-
-          {/* Large to remain consistent with ActionsList table spacing */}
-          <EuiSpacer size="l" />
-
-          <EuiBasicTable
-            loading={alertsState.isLoading || alertTypesState.isLoading || isPerformingAction}
-            /* Don't display alerts until we have the alert types initialized */
-            items={
-              alertTypesState.isInitialized === false
-                ? []
-                : convertAlertsToTableItems(alertsState.data, alertTypesState.data)
-            }
-            itemId="id"
-            columns={alertsTableColumns}
-            rowProps={() => ({
-              'data-test-subj': 'alert-row',
-            })}
-            cellProps={() => ({
-              'data-test-subj': 'cell',
-            })}
-            data-test-subj="alertsList"
-            pagination={{
-              pageIndex: page.index,
-              pageSize: page.size,
-              /* Don't display alert count until we have the alert types initialized */
-              totalItemCount:
-                alertTypesState.isInitialized === false ? 0 : alertsState.totalItemCount,
-            }}
-            selection={
-              canDelete
-                ? {
-                    onSelectionChange(updatedSelectedItemsList: AlertTableItem[]) {
-                      setSelectedIds(updatedSelectedItemsList.map(item => item.id));
-                    },
-                  }
-                : undefined
-            }
-            onChange={({ page: changedPage }: { page: Pagination }) => {
-              setPage(changedPage);
-            }}
-          />
-          <AlertAdd refreshList={loadAlertsData} />
-        </AlertsContextProvider>
-      </Fragment>
+      <EuiSpacer size="m" />
+      {convertAlertsToTableItems(alertsState.data, alertTypesState.data).length !== 0 && table}
+      {convertAlertsToTableItems(alertsState.data, alertTypesState.data).length === 0 &&
+        emptyPrompt}
+      <AlertsContextProvider
+        value={{
+          addFlyoutVisible: alertFlyoutVisible,
+          setAddFlyoutVisibility: setAlertFlyoutVisibility,
+          reloadAlerts: loadAlertsData,
+        }}
+      >
+        <AlertAdd />
+      </AlertsContextProvider>
     </section>
   );
 };
