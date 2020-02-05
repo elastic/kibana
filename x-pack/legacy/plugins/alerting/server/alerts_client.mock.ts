@@ -12,6 +12,7 @@ const createAlertsClientMock = () => {
   const mocked: jest.Mocked<Schema> = {
     create: jest.fn(),
     get: jest.fn(),
+    getAlertState: jest.fn(),
     find: jest.fn(),
     delete: jest.fn(),
     update: jest.fn(),

@@ -46,7 +46,7 @@ export class TaskRunner {
     this.context = context;
     this.logger = context.logger;
     this.alertType = alertType;
-    this.taskInstance = taskInstanceToAlertTaskInstance(alertType, taskInstance);
+    this.taskInstance = taskInstanceToAlertTaskInstance(taskInstance);
   }
 
   async getApiKeyForAlertPermissions(alertId: string, spaceId: string) {

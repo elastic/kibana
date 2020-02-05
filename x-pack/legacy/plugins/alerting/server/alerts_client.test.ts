@@ -1356,6 +1356,120 @@ describe('get()', () => {
   });
 });
 
+describe('getAlertState()', () => {
+  test('calls saved objects client with given params', async () => {
+    const alertsClient = new AlertsClient(alertsClientParams);
+    savedObjectsClient.get.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        alertTypeId: '123',
+        schedule: { interval: '10s' },
+        params: {
+          bar: true,
+        },
+        actions: [
+          {
+            group: 'default',
+            actionRef: 'action_0',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+      },
+      references: [
+        {
+          name: 'action_0',
+          type: 'action',
+          id: '1',
+        },
+      ],
+    });
+
+    taskManager.get.mockResolvedValueOnce({
+      id: '1',
+      taskType: 'alerting:123',
+      scheduledAt: new Date(),
+      attempts: 1,
+      status: TaskStatus.Idle,
+      runAt: new Date(),
+      startedAt: null,
+      retryAt: null,
+      state: {},
+      params: {},
+      ownerId: null,
+    });
+
+    await alertsClient.getAlertState({ id: '1' });
+    expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
+    expect(savedObjectsClient.get.mock.calls[0]).toMatchInlineSnapshot(`
+                                                                                                                  Array [
+                                                                                                                    "alert",
+                                                                                                                    "1",
+                                                                                                                  ]
+                                                                            `);
+  });
+
+  test('gets the underlying task from TaskManager', async () => {
+    const alertsClient = new AlertsClient(alertsClientParams);
+
+    const scheduledTaskId = 'task-123';
+
+    savedObjectsClient.get.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        alertTypeId: '123',
+        schedule: { interval: '10s' },
+        params: {
+          bar: true,
+        },
+        actions: [
+          {
+            group: 'default',
+            actionRef: 'action_0',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+        enabled: true,
+        scheduledTaskId,
+        mutedInstanceIds: [],
+        muteAll: true,
+      },
+      references: [
+        {
+          name: 'action_0',
+          type: 'action',
+          id: '1',
+        },
+      ],
+    });
+
+    taskManager.get.mockResolvedValueOnce({
+      id: scheduledTaskId,
+      taskType: 'alerting:123',
+      scheduledAt: new Date(),
+      attempts: 1,
+      status: TaskStatus.Idle,
+      runAt: new Date(),
+      startedAt: null,
+      retryAt: null,
+      state: {},
+      params: {
+        alertId: '1',
+      },
+      ownerId: null,
+    });
+
+    await alertsClient.getAlertState({ id: '1' });
+    expect(taskManager.get).toHaveBeenCalledTimes(1);
+    expect(taskManager.get).toHaveBeenCalledWith(scheduledTaskId);
+  });
+});
+
 describe('find()', () => {
   test('calls saved objects client with given params', async () => {
     const alertsClient = new AlertsClient(alertsClientParams);

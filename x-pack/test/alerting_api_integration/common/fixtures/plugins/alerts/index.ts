@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import { times } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { AlertExecutorOptions, AlertType } from '../../../../../../legacy/plugins/alerting';
 import { ActionTypeExecutorOptions, ActionType } from '../../../../../../plugins/actions/server';
@@ -249,6 +249,29 @@ export default function(kibana: any) {
           };
         },
       };
+      // Alert types
+      const cumulativeFiringAlertType: AlertType = {
+        id: 'test.cumulative-firing',
+        name: 'Test: Cumulative Firing',
+        actionGroups: ['default', 'other'],
+        async executor(alertExecutorOptions: AlertExecutorOptions) {
+          const { services, state } = alertExecutorOptions;
+          const group = 'default';
+
+          const runCount = (state.runCount || 0) + 1;
+
+          times(runCount, index => {
+            services
+              .alertInstanceFactory(`instance-${index}`)
+              .replaceState({ instanceStateValue: true })
+              .scheduleActions(group);
+          });
+
+          return {
+            runCount,
+          };
+        },
+      };
       const neverFiringAlertType: AlertType = {
         id: 'test.never-firing',
         name: 'Test: Never firing',
@@ -364,6 +387,7 @@ export default function(kibana: any) {
         async executor({ services, params, state }: AlertExecutorOptions) {},
       };
       server.plugins.alerting.setup.registerType(alwaysFiringAlertType);
+      server.plugins.alerting.setup.registerType(cumulativeFiringAlertType);
       server.plugins.alerting.setup.registerType(neverFiringAlertType);
       server.plugins.alerting.setup.registerType(failingAlertType);
       server.plugins.alerting.setup.registerType(validationAlertType);
