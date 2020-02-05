@@ -55,8 +55,6 @@ export { EventsProvider } from 'ui/events';
 export { createTopNavDirective, createTopNavHelper } from 'ui/kbn_top_nav/kbn_top_nav';
 // @ts-ignore
 export { PromiseServiceCreator } from 'ui/promises/promises';
-// @ts-ignore
-export { confirmModalFactory } from 'ui/modals/confirm_modal';
 export { configureAppAngularModule, ensureDefaultIndexPattern } from 'ui/legacy_compat';
 export { registerTimefilterWithGlobalStateFactory } from 'ui/timefilter/setup_router';
 
