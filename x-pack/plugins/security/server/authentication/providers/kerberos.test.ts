@@ -155,7 +155,7 @@ describe('KerberosAuthenticationProvider', () => {
 
       expect(request.headers.authorization).toBe('negotiate spnego');
       expect(authenticationResult.succeeded()).toBe(true);
-      expect(authenticationResult.user).toBe(user);
+      expect(authenticationResult.user).toEqual({ ...user, authentication_provider: 'kerberos' });
       expect(authenticationResult.authHeaders).toEqual({ authorization: 'Bearer some-token' });
       expect(authenticationResult.authResponseHeaders).toBeUndefined();
       expect(authenticationResult.state).toEqual({
@@ -193,7 +193,7 @@ describe('KerberosAuthenticationProvider', () => {
 
       expect(request.headers.authorization).toBe('negotiate spnego');
       expect(authenticationResult.succeeded()).toBe(true);
-      expect(authenticationResult.user).toBe(user);
+      expect(authenticationResult.user).toEqual({ ...user, authentication_provider: 'kerberos' });
       expect(authenticationResult.authHeaders).toEqual({ authorization: 'Bearer some-token' });
       expect(authenticationResult.authResponseHeaders).toEqual({
         'WWW-Authenticate': 'Negotiate response-token',
@@ -337,7 +337,7 @@ describe('KerberosAuthenticationProvider', () => {
       expect(request.headers).not.toHaveProperty('authorization');
       expect(authenticationResult.succeeded()).toBe(true);
       expect(authenticationResult.authHeaders).toEqual({ authorization });
-      expect(authenticationResult.user).toBe(user);
+      expect(authenticationResult.user).toEqual({ ...user, authentication_provider: 'kerberos' });
       expect(authenticationResult.state).toBeUndefined();
     });
 
@@ -370,7 +370,7 @@ describe('KerberosAuthenticationProvider', () => {
 
       expect(authenticationResult.succeeded()).toBe(true);
       expect(authenticationResult.authHeaders).toEqual({ authorization: 'Bearer newfoo' });
-      expect(authenticationResult.user).toEqual(user);
+      expect(authenticationResult.user).toEqual({ ...user, authentication_provider: 'kerberos' });
       expect(authenticationResult.state).toEqual({ accessToken: 'newfoo', refreshToken: 'newbar' });
       expect(request.headers).not.toHaveProperty('authorization');
     });
@@ -437,7 +437,7 @@ describe('KerberosAuthenticationProvider', () => {
       expect(request.headers.authorization).toBe('Bearer some-valid-token');
       expect(authenticationResult.succeeded()).toBe(true);
       expect(authenticationResult.authHeaders).toBeUndefined();
-      expect(authenticationResult.user).toBe(user);
+      expect(authenticationResult.user).toEqual({ ...user, authentication_provider: 'kerberos' });
       expect(authenticationResult.state).toBeUndefined();
     });
 

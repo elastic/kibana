@@ -58,6 +58,11 @@ const unknownSchema: Schema = {
   defaults: {},
   editor: false,
   group: AggGroupNames.Metrics,
+  aggSettings: {
+    top_hits: {
+      allowStrings: true,
+    },
+  },
 };
 
 const getTypeFromRegistry = (type: string): IAggType => {
@@ -438,7 +443,7 @@ export class AggConfig {
 
     if (fieldParam) {
       // @ts-ignore
-      availableFields = fieldParam.getAvailableFields(this.getIndexPattern().fields);
+      availableFields = fieldParam.getAvailableFields(this);
     }
 
     // clear out the previous params except for a few special ones
