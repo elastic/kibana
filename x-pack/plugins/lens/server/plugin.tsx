@@ -6,8 +6,7 @@
 
 import { Plugin, CoreSetup, CoreStart, PluginInitializerContext, Logger } from 'src/core/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { Observable, Subject } from 'rxjs';
-import { first } from 'rxjs/operators';
+import { Observable } from 'rxjs';
 import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
 import { setupRoutes } from './routes';
 import {
