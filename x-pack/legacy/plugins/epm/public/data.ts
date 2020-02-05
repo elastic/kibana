@@ -9,10 +9,8 @@ import {
   getCategoriesPath,
   getFilePath,
   getInfoPath,
-  getInstallDatasourcePath,
   getInstallPath,
   getListPath,
-  getListPoliciesPath,
   getRemovePath,
   ListParams,
 } from '../common/routes';
@@ -22,7 +20,6 @@ import {
   PackageInfo,
   PackageList,
   PackagesGroupedByStatus,
-  DatasourcePayload,
 } from '../common/types';
 
 const defaultClient = (path: string, options?: HttpFetchOptions) =>
@@ -82,16 +79,5 @@ export async function removePackage(pkgkey: string): Promise<AssetReference[]> {
 
 export async function getFileByPath(filePath: string): Promise<string> {
   const path = getFilePath(filePath);
-  return _fetch(path);
-}
-
-export async function installDatasource(datasource: DatasourcePayload): Promise<AssetReference[]> {
-  const path = getInstallDatasourcePath();
-  const body = JSON.stringify(datasource);
-  return _fetch(path, { body, method: 'POST' });
-}
-
-export async function getPolicies(): Promise<any> {
-  const path = getListPoliciesPath();
   return _fetch(path);
 }

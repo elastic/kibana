@@ -169,10 +169,3 @@ export type NotInstalled<T = {}> = T & {
 export type AssetReference = Pick<SavedObjectReference, 'id'> & {
   type: AssetType | IngestAssetType;
 };
-
-export interface DatasourcePayload {
-  pkgkey: string;
-  datasourceName: string;
-  datasets: Dataset[];
-  policyIds: string[];
-}

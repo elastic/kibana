@@ -5,7 +5,7 @@
  */
 
 import React, { Fragment } from 'react';
-import { EuiTitle, EuiButton, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import { EuiTitle } from '@elastic/eui';
 import { Redirect } from 'react-router-dom';
 import { useLinks, useGetPackageInstallStatus } from '../../hooks';
 import { InstallStatus } from '../../types';
@@ -15,8 +15,7 @@ interface DataSourcesPanelProps {
   version: string;
 }
 export const DataSourcesPanel = ({ name, version }: DataSourcesPanelProps) => {
-  const { toAddDataSourceView, toDetailView } = useLinks();
-  const packageDataSourceUrl = toAddDataSourceView({ name, version });
+  const { toDetailView } = useLinks();
   const getPackageInstallStatus = useGetPackageInstallStatus();
   const packageInstallStatus = getPackageInstallStatus(name);
   // if they arrive at this page and the package is not installed, send them to overview
@@ -36,13 +35,6 @@ export const DataSourcesPanel = ({ name, version }: DataSourcesPanelProps) => {
       <EuiTitle size="xs">
         <span>Data Sources</span>
       </EuiTitle>
-      <EuiFlexGroup gutterSize="s" alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiButton href={packageDataSourceUrl} size="s">
-            Add data source
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
     </Fragment>
   );
 };

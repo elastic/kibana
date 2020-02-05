@@ -11,6 +11,5 @@ export default function({ loadTestFile }) {
     loadTestFile(require.resolve('./file'));
     loadTestFile(require.resolve('./template'));
     loadTestFile(require.resolve('./ilm'));
-    loadTestFile(require.resolve('./data_sources'));
   });
 }
