@@ -19,6 +19,22 @@ export const alertMiddlewareFactory: MiddlewareFactory = coreStart => {
         query: qp as HttpFetchQuery,
       });
       api.dispatch({ type: 'serverReturnedAlertsData', payload: response });
+    } else if (action.type === 'userChangedAlertPageIndex') {
+      const response = await coreStart.http.post(`/api/endpoint/alerts`, {
+        body: JSON.stringify({
+          page_index: action.payload,
+          page_size: api.getState().alertList.request_page_size,
+        }),
+      });
+      api.dispatch({ type: 'serverReturnedAlertsData', payload: response });
+    } else if (action.type === 'userChangedAlertPageSize') {
+      const response = await coreStart.http.post(`/api/endpoint/alerts`, {
+        body: JSON.stringify({
+          page_index: api.getState().alertList.request_page_index,
+          page_size: action.payload,
+        }),
+      });
+      api.dispatch({ type: 'serverReturnedAlertsData', payload: response });
     }
   };
 };

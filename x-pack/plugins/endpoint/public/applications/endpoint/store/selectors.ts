@@ -12,6 +12,11 @@ export const alertListData = composeSelectors(
   alertListSelectors.alertListData
 );
 
+export const alertListPagination = composeSelectors(
+  alertListStateSelector,
+  alertListSelectors.alertListPagination
+);
+
 /**
  * Returns the alert list state from within Global State
  */

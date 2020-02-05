@@ -4,16 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { memo, useState, useMemo } from 'react';
+import { memo, useState, useMemo, useCallback } from 'react';
 import React from 'react';
 import { EuiDataGrid } from '@elastic/eui';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import * as selectors from '../../store/selectors';
 import { usePageId } from '../use_page_id';
+import { AlertAction } from '../../store/alerts';
 
 export const AlertIndex = memo(() => {
   usePageId('alertsPage');
+  const dispatch: (action: AlertAction) => unknown = useDispatch();
 
   const columns: Array<{ id: string }> = useMemo(() => {
     return [
@@ -28,17 +30,29 @@ export const AlertIndex = memo(() => {
     ];
   }, []);
 
+  const { pageIndex, pageSize, total } = useSelector(selectors.alertListPagination);
+
+  const onChangeItemsPerPage = useCallback(
+    newPageSize => dispatch({ type: 'userChangedAlertPageSize', payload: newPageSize }),
+    [dispatch]
+  );
+
+  const onChangePage = useCallback(
+    newPageIndex => dispatch({ type: 'userChangedAlertPageIndex', payload: newPageIndex }),
+    [dispatch]
+  );
+
   const [visibleColumns, setVisibleColumns] = useState(() => columns.map(({ id }) => id));
 
   const json = useSelector(selectors.alertListData);
 
   const renderCellValue = useMemo(() => {
     return ({ rowIndex, columnId }: { rowIndex: number; columnId: string }) => {
-      if (rowIndex > json.length) {
+      if (rowIndex > total) {
         return null;
       }
 
-      const row = json[rowIndex];
+      const row = json[rowIndex % pageSize];
 
       if (columnId === 'alert_type') {
         return i18n.translate(
@@ -64,12 +78,12 @@ export const AlertIndex = memo(() => {
       }
       return null;
     };
-  }, [json]);
+  }, [json, pageSize, total]);
 
   return (
     <EuiDataGrid
       aria-label="Alert List"
-      rowCount={json.length}
+      rowCount={total}
       // Required. Sets up three columns, the last of which has a custom schema we later define down below.
       // The second column B won't allow clicking in to see the content in a popup.
       // The first column defines an starting width of 150px and prevents the user from resizing it
@@ -81,6 +95,13 @@ export const AlertIndex = memo(() => {
       }}
       // Often used in combination with useEffect() to dynamically change the render.
       renderCellValue={renderCellValue}
+      pagination={{
+        pageIndex,
+        pageSize,
+        pageSizeOptions: [10, 50, 100],
+        onChangeItemsPerPage,
+        onChangePage,
+      }}
     />
   );
 });
