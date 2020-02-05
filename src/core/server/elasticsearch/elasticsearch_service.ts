@@ -18,7 +18,7 @@
  */
 
 import { ConnectableObservable, Observable, Subscription } from 'rxjs';
-import { filter, first, map, publishReplay, switchMap, take } from 'rxjs/operators';
+import { filter, first, map, publishReplay, switchMap, take, shareReplay } from 'rxjs/operators';
 
 import { CoreService } from '../../types';
 import { merge } from '../../utils';
@@ -164,18 +164,7 @@ export class ElasticsearchService implements CoreService<InternalElasticsearchSe
       ignoreVersionMismatch: config.ignoreVersionMismatch,
       esVersionCheckInterval: config.healthCheckDelay.asMilliseconds(),
       kibanaVersion: this.kibanaVersion,
-    }).pipe(publishReplay(1));
-
-    this.subscriptions.esNodesCompatibility = (esNodesCompatibility$ as ConnectableObservable<
-      unknown
-    >).connect();
-
-    // TODO: Move to Status Service https://github.com/elastic/kibana/issues/41983
-    esNodesCompatibility$.subscribe(({ isCompatible, message }) => {
-      if (!isCompatible && message) {
-        this.log.error(message);
-      }
-    });
+    }).pipe(shareReplay({ refCount: true, bufferSize: 1 }));
 
     return {
       legacy: { config$: clients$.pipe(map(clients => clients.config)) },
