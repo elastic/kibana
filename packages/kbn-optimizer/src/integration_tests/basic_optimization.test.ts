@@ -25,13 +25,13 @@ import del from 'del';
 
 import { toArray, tap } from 'rxjs/operators';
 import { createAbsolutePathSerializer } from '@kbn/dev-utils';
-import { Optimizer, OptimizerConfig, OptimizerState } from '@kbn/optimizer';
-
-expect.addSnapshotSerializer(createAbsolutePathSerializer());
+import { Optimizer, OptimizerConfig, OptimizerStateSummary } from '@kbn/optimizer';
 
 const TMP_DIR = Path.resolve(__dirname, '../__fixtures__/__tmp__');
 const MOCK_REPO_SRC = Path.resolve(__dirname, '../__fixtures__/mock_repo');
 const MOCK_REPO_DIR = Path.resolve(TMP_DIR, 'mock_repo');
+
+expect.addSnapshotSerializer(createAbsolutePathSerializer(MOCK_REPO_DIR));
 
 beforeEach(async () => {
   await del(TMP_DIR);
@@ -61,16 +61,16 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
     .run()
     .pipe(
       tap(state => {
-        if (state.type === 'worker stdio') {
+        if (state.event?.type === 'worker stdio') {
           // eslint-disable-next-line no-console
-          console.log('worker', state.stream, state.chunk.toString('utf8'));
+          console.log('worker', state.event.stream, state.event.chunk.toString('utf8'));
         }
       }),
       toArray()
     )
     .toPromise();
 
-  const assert = (statement: string, truth: boolean, altStates?: OptimizerState[]) => {
+  const assert = (statement: string, truth: boolean, altStates?: OptimizerStateSummary[]) => {
     if (!truth) {
       throw new Error(
         `expected optimizer to ${statement}, states: ${inspect(altStates || states, {
@@ -81,19 +81,27 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
     }
   };
 
-  const runningStates = states.filter(s => s.type === 'running');
+  const initializedStates = states.filter(s => s.summary === 'initialized' && !s.event);
+  assert('produce one raw initialized event', initializedStates.length === 1);
+
+  const workerStarted = states.filter(s => s.event?.type === 'worker started');
+  assert('produce one worker started state', workerStarted.length === 1);
+
+  const runningStates = states.filter(s => s.summary === 'running');
   assert(
     'produce two or three "running" states',
     runningStates.length === 2 || runningStates.length === 3
   );
 
-  const successStates = states.filter(s => s.type === 'compiler success');
+  const successStates = states.filter(s => s.summary === 'success');
   assert(
     'produce one "compiler success" states',
     successStates.length === 1 || successStates.length === 2
   );
 
-  const otherStates = states.filter(s => s.type !== 'compiler success' && s.type !== 'running');
+  const otherStates = states.filter(
+    s => s.summary !== 'success' && s.summary !== 'running' && s.summary !== 'initialized'
+  );
   assert('produce zero unexpected states', otherStates.length === 0, otherStates);
 
   expect(
@@ -108,7 +116,13 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
   expect(foo).toBeTruthy();
   foo.cache.refresh();
   expect(foo.getModuleCount()).toBe(3);
-  expect(foo.cache.getReferencedFiles()).toMatchInlineSnapshot(`Array []`);
+  expect(foo.cache.getReferencedFiles()).toMatchInlineSnapshot(`
+    Array [
+      <absolute path>/plugins/foo/public/ext.ts,
+      <absolute path>/plugins/foo/public/index.ts,
+      <absolute path>/plugins/foo/public/lib.ts,
+    ]
+  `);
 
   const bar = config.bundles.find(b => b.id === 'bar')!;
   expect(bar).toBeTruthy();
@@ -116,9 +130,11 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
   expect(bar.getModuleCount()).toBe(5);
   expect(bar.cache.getReferencedFiles()).toMatchInlineSnapshot(`
     Array [
-      <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo/public/ext.ts,
-      <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo/public/index.ts,
-      <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo/public/lib.ts,
+      <absolute path>/plugins/foo/public/ext.ts,
+      <absolute path>/plugins/foo/public/index.ts,
+      <absolute path>/plugins/foo/public/lib.ts,
+      <absolute path>/plugins/bar/public/index.ts,
+      <absolute path>/plugins/bar/public/lib.ts,
     ]
   `);
 });
