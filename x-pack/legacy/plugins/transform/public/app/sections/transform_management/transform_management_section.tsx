@@ -16,7 +16,6 @@ import {
   EuiFlexItem,
   EuiModal,
   EuiOverlayMask,
-  EuiPageBody,
   EuiPageContent,
   EuiPageContentBody,
   EuiSpacer,
@@ -74,68 +73,66 @@ export const TransformManagement: FC = () => {
 
   return (
     <Fragment>
-      <EuiPageBody data-test-subj="transformPageTransformList">
-        <EuiPageContent>
-          <EuiTitle size="l">
-            <EuiFlexGroup alignItems="center">
-              <EuiFlexItem grow={true}>
-                <h1 data-test-subj="transformAppTitle">
-                  <FormattedMessage
-                    id="xpack.transform.transformList.transformTitle"
-                    defaultMessage="Transforms"
-                  />
-                  <span>&nbsp;</span>
-                  <EuiBetaBadge
-                    label={i18n.translate('xpack.transform.transformList.betaBadgeLabel', {
-                      defaultMessage: `Beta`,
-                    })}
-                    tooltipContent={i18n.translate(
-                      'xpack.transform.transformList.betaBadgeTooltipContent',
-                      {
-                        defaultMessage: `Transforms are a beta feature. We'd love to hear your feedback.`,
-                      }
-                    )}
-                  />
-                </h1>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  href={documentationLinksService.getTransformsDocUrl()}
-                  target="_blank"
-                  iconType="help"
-                  data-test-subj="documentationLink"
-                >
-                  <FormattedMessage
-                    id="xpack.transform.transformList.transformDocsLinkText"
-                    defaultMessage="Transform docs"
-                  />
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiTitle>
-          <EuiSpacer size="s" />
-          <EuiTitle size="s">
-            <EuiText color="subdued">
-              <FormattedMessage
-                id="xpack.transform.transformList.transformDescription"
-                defaultMessage="Use transforms to pivot existing Elasticsearch indices into summarized or entity-centric indices."
-              />
-            </EuiText>
-          </EuiTitle>
-          <EuiPageContentBody>
-            <EuiSpacer size="l" />
-            <TransformStatsBar transformsList={transforms} />
-            <EuiSpacer size="s" />
-            <TransformList
-              errorMessage={errorMessage}
-              isInitialized={isInitialized}
-              onCreateTransform={onOpenModal}
-              transforms={transforms}
-              transformsLoading={transformsLoading}
+      <EuiPageContent data-test-subj="transformPageTransformList">
+        <EuiTitle size="l">
+          <EuiFlexGroup alignItems="center">
+            <EuiFlexItem grow={true}>
+              <h1 data-test-subj="transformAppTitle">
+                <FormattedMessage
+                  id="xpack.transform.transformList.transformTitle"
+                  defaultMessage="Transforms"
+                />
+                <span>&nbsp;</span>
+                <EuiBetaBadge
+                  label={i18n.translate('xpack.transform.transformList.betaBadgeLabel', {
+                    defaultMessage: `Beta`,
+                  })}
+                  tooltipContent={i18n.translate(
+                    'xpack.transform.transformList.betaBadgeTooltipContent',
+                    {
+                      defaultMessage: `Transforms are a beta feature. We'd love to hear your feedback.`,
+                    }
+                  )}
+                />
+              </h1>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                href={documentationLinksService.getTransformsDocUrl()}
+                target="_blank"
+                iconType="help"
+                data-test-subj="documentationLink"
+              >
+                <FormattedMessage
+                  id="xpack.transform.transformList.transformDocsLinkText"
+                  defaultMessage="Transform docs"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiTitle>
+        <EuiSpacer size="s" />
+        <EuiTitle size="s">
+          <EuiText color="subdued">
+            <FormattedMessage
+              id="xpack.transform.transformList.transformDescription"
+              defaultMessage="Use transforms to pivot existing Elasticsearch indices into summarized or entity-centric indices."
             />
-          </EuiPageContentBody>
-        </EuiPageContent>
-      </EuiPageBody>
+          </EuiText>
+        </EuiTitle>
+        <EuiPageContentBody>
+          <EuiSpacer size="l" />
+          <TransformStatsBar transformsList={transforms} />
+          <EuiSpacer size="s" />
+          <TransformList
+            errorMessage={errorMessage}
+            isInitialized={isInitialized}
+            onCreateTransform={onOpenModal}
+            transforms={transforms}
+            transformsLoading={transformsLoading}
+          />
+        </EuiPageContentBody>
+      </EuiPageContent>
       {isSearchSelectionVisible && (
         <EuiOverlayMask>
           <EuiModal
