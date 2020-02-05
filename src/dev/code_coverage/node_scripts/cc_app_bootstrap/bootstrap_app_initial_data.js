@@ -18,16 +18,13 @@
  */
 
 import { run } from '@kbn/dev-utils';
+import { parseAndPopulate } from './parse_and_populate';
 
 const description = 'Populate the initial data for the code coverage static site.';
 
-const exec = buildNumber => outFile => ({ log }) => {
-  log.info(`### Job Num: ${buildNumber}`);
-  log.info(`### Dat file: ${outFile}`);
-  // Parse it
-  // Populate cc_app/public/inital_data.js
+const exec = buildNumber => srcFile => destFile => ({ log }) =>
+  parseAndPopulate(buildNumber)(srcFile)(destFile)(log);
 
-};
 
-export const populate = (buildNumber, outFile) =>
-  run(exec(buildNumber)(outFile), { description });
+export const populate = (buildNumber, srcFile, destFile) =>
+  run(exec(buildNumber)(srcFile)(destFile), { description });

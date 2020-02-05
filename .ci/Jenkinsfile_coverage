@@ -85,7 +85,9 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
                   # Check my work :)
                   cat src/dev/code_coverage/shell_scripts/bootstrapped.txt
 
-                  node src/dev/code_coverage/node_scripts/cc_app_bootstrap/index.js ${BUILD_NUMBER} src/dev/code_coverage/shell_scripts/bootstrapped.txt
+                  node src/dev/code_coverage/node_scripts/cc_app_bootstrap/index.js ${BUILD_NUMBER} \
+src/dev/code_coverage/shell_scripts/bootstrapped.txt \
+src/dev/code_coverage/cc_app/public/initial_data.js
 
 
                 """,
