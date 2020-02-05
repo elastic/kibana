@@ -12,13 +12,48 @@ import {
   getCustomChartData,
 } from './utils';
 import { UpdateDateRange } from '../charts/common';
-import { Position } from '@elastic/charts';
+import { Position, ScaleType, TickFormatter } from '@elastic/charts';
 import { MatrixOverTimeHistogramData } from '../../graphql/types';
 
 describe('utils', () => {
   describe('getBarchartConfigs', () => {
+    interface BarchartConfigs {
+      series: {
+        xScaleType: ScaleType;
+        yScaleType: ScaleType;
+        stackAccessors: string[];
+      };
+      axis: {
+        xTickFormatter: TickFormatter;
+        yTickFormatter: TickFormatter;
+        tickSize: number;
+      };
+      settings: {
+        legendPosition: Position;
+        onBrushEnd: UpdateDateRange;
+        showLegend: boolean;
+        theme: {
+          scales: {
+            barsPadding: number;
+          };
+          chartMargins: {
+            left: number;
+            right: number;
+            top: number;
+            bottom: number;
+          };
+          chartPaddings: {
+            left: number;
+            right: number;
+            top: number;
+            bottom: number;
+          };
+        };
+      };
+      customHeight: number;
+    }
     describe('it should get correct default values', () => {
-      let configs;
+      let configs: BarchartConfigs;
       beforeAll(() => {
         configs = getBarchartConfigs({
           from: 0,
@@ -45,7 +80,7 @@ describe('utils', () => {
     });
 
     describe('it should set custom configs', () => {
-      let configs;
+      let configs: BarchartConfigs;
       const mockYTickFormatter = jest.fn();
       const mockChartHeight = 100;
 
