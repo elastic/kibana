@@ -47,6 +47,9 @@ See {siem-guide}/detection-engine-overview.html[Detections] in the SIEM
 Guide for information on managing detection rules and signals via the UI 
 or the Detections API.
 
+[role="screenshot"]
+image::siem/images/detections-ui.png[]
+
 [float]
 [[timelines-ui]]
 === Timeline
