@@ -151,7 +151,7 @@ export class Optimizer {
       async (): Promise<OptimizerStateSummary> => {
         const startTime = Date.now();
         const version = await getOptimizerVersion();
-        const offlineBundles = await this.getCachedBundles(version);
+        const offlineBundles = this.config.cache ? await this.getCachedBundles(version) : [];
         const onlineBundles = this.config.bundles.filter(b => !offlineBundles.includes(b));
 
         return {

@@ -31,6 +31,7 @@ export function runKbnOptimizer(opts: Record<string, any>, config: LegacyConfig)
     oss: !!opts.oss,
     examples: !!opts.runExamples,
     pluginPaths: config.get('plugins.paths'),
+    cache: config.get('optimize.useBundleCache') !== false,
   });
 
   const dim = Chalk.dim('np bld');

@@ -32,7 +32,7 @@ interface Options {
   /** the maximum number of workers that will be created */
   maxWorkerCount?: number;
   /** set to false to disabling writing/reading of caches */
-  cache?: false;
+  cache?: boolean;
   /** build assets suitable for use in the distributable */
   dist?: boolean;
   /** enable webpack profiling, writes stats.json files to the root of each plugin's output dir */
