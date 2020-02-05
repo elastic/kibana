@@ -29,7 +29,7 @@ export class ConsoleUIPlugin implements Plugin<void, void, AppSetupUIPluginDepen
   constructor() {}
 
   async setup(
-    { notifications, getStartServices }: CoreSetup,
+    { notifications, getStartServices, pulse }: CoreSetup,
     { dev_tools, home, usageCollection }: AppSetupUIPluginDependencies
   ) {
     home.featureCatalogue.register({
@@ -67,6 +67,7 @@ export class ConsoleUIPlugin implements Plugin<void, void, AppSetupUIPluginDepen
           elasticsearchUrl,
           usageCollection,
           element,
+          pulse,
         });
       },
     });

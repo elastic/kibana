@@ -17,11 +17,24 @@
  * under the License.
  */
 
+import { PulseServiceSetup } from 'kibana/public';
 import { SenseEditor } from '../../models/sense_editor';
 import { getEndpointFromPosition } from '../../../lib/autocomplete/get_endpoint_from_position';
 import { MetricsTracker } from '../../../types';
 
-export const track = (requests: any[], editor: SenseEditor, trackUiMetric: MetricsTracker) => {
+function getSize(request: any) {
+  try {
+    return request.data.reduce((acc: number, str: string) => acc + str.length * 8, 0);
+  } catch (err) {
+    return undefined;
+  }
+}
+export const track = (
+  requests: any[],
+  editor: SenseEditor,
+  trackUiMetric: MetricsTracker,
+  pulse: PulseServiceSetup
+) => {
   const coreEditor = editor.getCoreEditor();
   // `getEndpointFromPosition` gets values from the server-side generated JSON files which
   // are a combination of JS, automatically generated JSON and manual overrides. That means
@@ -35,6 +48,21 @@ export const track = (requests: any[], editor: SenseEditor, trackUiMetric: Metri
 
   if (requests[0] && endpointDescription) {
     const eventName = `${requests[0].method}_${endpointDescription.id ?? 'unknown'}`;
+
+    pulse.getChannel('console').sendPulse({
+      hash: eventName,
+      request: {
+        method: requests[0].method,
+        size: getSize(requests[0]),
+      },
+      endpointDescription: {
+        url_params: endpointDescription.url_params,
+        methods: endpointDescription.methods,
+        patterns: endpointDescription.patterns,
+        endpoint_id: endpointDescription.id,
+      },
+    });
+
     trackUiMetric.count(eventName);
   }
 };

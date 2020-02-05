@@ -24,17 +24,26 @@ export interface Payload {
   deploymentId: string;
 }
 
+export interface DescriptionDocLink {
+  type: 'docLink';
+  text: string;
+}
+
+export interface DescriptionText {
+  type: 'text';
+  text: string;
+}
+
+export interface Action {
+  text: string;
+  href: string;
+}
+
 export interface ConsoleInstruction {
   hash: string;
-  title: string;
-  status: 'new' | 'seen';
-  description: string;
-  linkUrl: string;
-  linkText: string;
-  badge: string;
-  publishOn: string;
-  expireOn: string;
-  seenOn: string;
+  endpoint_id: string;
+  action?: Action;
+  description: Array<DescriptionText | DescriptionDocLink>;
 }
 
 function flatMap<T, X>(arr: T[], foldMethod: (x: T) => X | X[]): X[] {
@@ -45,6 +54,7 @@ export class Collector extends PulseCollector {
   private readonly channelName = 'console';
   private readonly indexName = '.kibana_pulse_local_console';
   public async putRecord(payload: Payload) {
+    console.log('payload::', payload);
     if (this.rawElasticsearch) {
       await this.rawElasticsearch.callAsInternalUser<any>('bulk', {
         // index: this.indexName,
@@ -62,9 +72,7 @@ export class Collector extends PulseCollector {
     await super.setup(setupContext);
     if (this.elasticsearch?.createIndexIfNotExist) {
       const mappings = {
-        properties: {
-          publishOn: { type: 'date' },
-        },
+        properties: {},
       };
       await this.elasticsearch!.createIndexIfNotExist(this.channelName, mappings);
     }
@@ -75,15 +83,6 @@ export class Collector extends PulseCollector {
       const result = await this.rawElasticsearch.callAsInternalUser<ConsoleInstruction>('search', {
         index: this.indexName,
         ignoreUnavailable: true,
-        body: {
-          sort: [
-            {
-              publishOn: {
-                order: 'desc',
-              },
-            },
-          ],
-        },
       });
 
       return result.hits.hits.map(hit => {

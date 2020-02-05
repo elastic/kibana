@@ -18,4 +18,4 @@
  */
 
 // channels for which we want a public service for.
-export const channelNames = ['default', 'notifications', 'errors', 'deployment'];
+export const channelNames = ['default', 'notifications', 'errors', 'deployment', 'console'];

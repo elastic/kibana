@@ -39,6 +39,7 @@ export interface BootDependencies {
   elasticsearchUrl: string;
   usageCollection?: UsageCollectionSetup;
   element: HTMLElement;
+  pulse: any;
 }
 
 export function renderApp({
@@ -48,6 +49,7 @@ export function renderApp({
   elasticsearchUrl,
   usageCollection,
   element,
+  pulse,
 }: BootDependencies) {
   const trackUiMetric = createUsageTracker(usageCollection);
   trackUiMetric.load('opened_app');
@@ -74,6 +76,7 @@ export function renderApp({
             notifications,
             trackUiMetric,
             objectStorageClient,
+            pulse,
           },
         }}
       >

@@ -32,7 +32,6 @@ import {
   EuiPopover,
   EuiButtonIcon,
   EuiToolTip,
-  EuiPopoverFooter,
   EuiSpacer,
   EuiPopoverTitle,
   EuiButton,
@@ -41,6 +40,7 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 
+import { ConsoleInstruction } from 'src/core/server/pulse/collectors/console';
 import { getEndpointFromPosition } from '../../../../../lib/autocomplete/get_endpoint_from_position';
 
 import { useServicesContext, useEditorReadContext } from '../../../../contexts';
@@ -65,8 +65,13 @@ import { subscribeResizeChecker } from '../subscribe_console_resize_checker';
 
 export interface EditorProps {
   initialTextValue: string;
+  pulseInstructions: ConsoleInstruction[];
 }
 
+interface InstructionWithEndpoint extends ConsoleInstruction {
+  docLink?: string;
+  takeMeThereHref: string;
+}
 const abs: CSSProperties = {
   position: 'absolute',
   top: '0',
@@ -82,12 +87,16 @@ const DEFAULT_INPUT_VALUE = `GET _search
   }
 }`;
 
-function EditorUI({ initialTextValue }: EditorProps) {
+function EditorUI({ initialTextValue, pulseInstructions }: EditorProps) {
   const {
     services: { history, notifications },
     docLinkVersion,
     elasticsearchUrl,
   } = useServicesContext();
+
+  const [pulseNotificationIsOpen, setPulseNotificationIsOpen] = useState(false);
+  const [pulseNotificationShowBell, setPulseNotificationShowBell] = useState(false);
+  const [pulseInstruction, setPulseInstruction] = useState<InstructionWithEndpoint | undefined>();
 
   const { settings } = useEditorReadContext();
   const setInputEditor = useSetInputEditor();
@@ -165,6 +174,7 @@ function EditorUI({ initialTextValue }: EditorProps) {
       const saveDelay = 500;
 
       editor.getCoreEditor().on('change', () => {
+        updatePulse();
         if (timer) {
           clearTimeout(timer);
         }
@@ -172,18 +182,59 @@ function EditorUI({ initialTextValue }: EditorProps) {
       });
     }
 
+    window.setInterval(() => {
+      updatePulse();
+    }, 300);
+    let updating = false;
+    function updatePulse() {
+      if (updating) {
+        return;
+      }
+      updating = true;
+      const coreEditor = editor.getCoreEditor();
+      const endpointDescription = getEndpointFromPosition(
+        coreEditor,
+        coreEditor.getCurrentPosition(),
+        editor.parser
+      );
+      if (endpointDescription) {
+        const instruction = pulseInstructions.find(instruction => {
+          return instruction.endpoint_id === endpointDescription.id;
+        });
+        if (instruction) {
+          if (pulseInstruction?.endpoint_id === instruction?.endpoint_id) {
+            return;
+          }
+          if (!pulseNotificationShowBell) {
+            setPulseNotificationShowBell(true);
+          }
+          setPulseInstruction({
+            docLink: endpointDescription.documentation,
+            takeMeThereHref: `http://localhost:5601/app/kibana#${instruction.action?.href}`,
+            ...instruction,
+          });
+        } else {
+          setPulseInstruction(undefined);
+          setPulseNotificationShowBell(false);
+        }
+      }
+      updating = false;
+    }
+
     function saveCurrentState() {
       try {
-        const content = editor.getCoreEditor().getValue();
+        const coreEditor = editor.getCoreEditor();
+        const content = coreEditor.getValue();
         saveCurrentTextObject(content);
       } catch (e) {
         // Ignoring saving error
+        setPulseInstruction(undefined);
+        setPulseNotificationShowBell(false);
       }
     }
 
     setInputEditor(editor);
     setTextArea(editorRef.current!.querySelector('textarea'));
-
     mappings.retrieveAutoCompleteInfo();
 
     const unsubscribeResizer = subscribeResizeChecker(editorRef.current!, editor);
@@ -194,7 +245,15 @@ function EditorUI({ initialTextValue }: EditorProps) {
       mappings.clearSubscriptions();
       window.removeEventListener('hashchange', onHashChange);
     };
-  }, [saveCurrentTextObject, initialTextValue, history, setInputEditor]);
+  }, [
+    saveCurrentTextObject,
+    initialTextValue,
+    history,
+    setInputEditor,
+    pulseInstructions,
+    pulseInstruction,
+    pulseNotificationShowBell,
+  ]);
 
   useEffect(() => {
     const { current: editor } = editorInstanceRef;
@@ -213,23 +272,6 @@ function EditorUI({ initialTextValue }: EditorProps) {
       openDocumentation,
     });
   }, [sendCurrentRequestToES, openDocumentation]);
-  const [pulseNotificationIsOpen, setPulseNotificationIsOpen] = useState(false);
-  const [pulseNotificationShowBell, setPulseNotificationShowBell] = useState(false);
-
-  useEffect(() => {
-    const { current: editor } = editorInstanceRef;
-    if (!editor) return;
-    const coreEditor = editor.getCoreEditor();
-    const endpointDescription = getEndpointFromPosition(
-      coreEditor,
-      coreEditor.getCurrentPosition(),
-      editor.parser
-    );
-    if (endpointDescription) {
-      // eslint-disable-next-line
-      console.log('endpointDescription!231231::', endpointDescription);
-    }
-  });
 
   const pulseButton = (
     <EuiButtonIcon
@@ -237,15 +279,12 @@ function EditorUI({ initialTextValue }: EditorProps) {
       style={{ minHeight: '18px', paddingRight: '2px' }}
       className="animate-ring conApp__editorActionButton conApp__editorActionButton--success"
       iconType="bell"
+      aria-label="pulse notification"
       onClick={() => {
         setPulseNotificationIsOpen(true);
       }}
     />
   );
-
-  if (!pulseNotificationShowBell) {
-    setPulseNotificationShowBell(true);
-  }
 
   return (
     <div style={abs} className="conApp">
@@ -258,7 +297,7 @@ function EditorUI({ initialTextValue }: EditorProps) {
           responsive={false}
         >
           <EuiFlexItem>
-            {pulseNotificationShowBell && (
+            {pulseNotificationShowBell && !!pulseInstruction && (
               <EuiPopover
                 id="pulse_popover"
                 button={pulseButton}
@@ -271,23 +310,40 @@ function EditorUI({ initialTextValue }: EditorProps) {
                 <div style={{ width: '300px' }}>
                   <EuiText size="s">
                     <p>
-                      You can now use the{' '}
-                      <EuiLink
-                        href="https://www.elastic.co/guide/en/elasticsearch/reference/master/modules-snapshots.html"
-                        target="_blank"
-                      >
-                        Snapshot and Restore
-                      </EuiLink>{' '}
-                      UI to manage taking snapshots.
+                      {pulseInstruction.description.map((item, key) => {
+                        switch (item.type) {
+                          case 'text':
+                            return item.text;
+                          case 'docLink':
+                            return (
+                              <EuiLink
+                                key={`${key}_item.text`}
+                                href={pulseInstruction.docLink}
+                                target="_blank"
+                              >
+                                {item.text}
+                              </EuiLink>
+                            );
+                        }
+                      })}
                     </p>
                   </EuiText>
                 </div>
                 <EuiSpacer />
                 <div style={{ textAlign: 'right' }}>
                   <EuiButtonEmpty size="s">disable</EuiButtonEmpty>
-                  <EuiButton size="s" fill color="primary" style={{ marginLeft: '10px' }}>
-                    Take me there!
-                  </EuiButton>
+                  {!!pulseInstruction.action && (
+                    <EuiButton
+                      size="s"
+                      fill
+                      color="primary"
+                      style={{ marginLeft: '10px' }}
+                      target="_blank"
+                      href={pulseInstruction.takeMeThereHref}
+                    >
+                      Take me there!
+                    </EuiButton>
+                  )}
                 </div>
               </EuiPopover>
             )}
