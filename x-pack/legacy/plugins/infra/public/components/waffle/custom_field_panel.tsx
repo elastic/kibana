@@ -30,7 +30,7 @@ export const CustomFieldPanel = class extends React.PureComponent<Props, State> 
   public static displayName = 'CustomFieldPanel';
   public readonly state: State = initialState;
   public render() {
-    const { fields, currentOptions, disableSubmit } = this.props;
+    const { fields, currentOptions } = this.props;
     const options = fields
       .filter(
         f =>
