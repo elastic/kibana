@@ -22,7 +22,7 @@ import PropTypes from 'prop-types';
 import { Instruction } from './instruction';
 import { ParameterForm } from './parameter_form';
 import { Content } from './content';
-import { getDisplayText } from '../../../../../../../../plugins/home/server/tutorials/instructions/instruction_variant';
+import { getDisplayText } from '../../../../../../../../plugins/home/public';
 import {
   EuiTabs,
   EuiTab,

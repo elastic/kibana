@@ -6,11 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
-import {
-  EditorConfigProviderRegistry,
-  AggTypeFilters,
-  AggTypeFieldFilters,
-} from './legacy_imports';
+import { AggTypeFilters, AggTypeFieldFilters } from './legacy_imports';
 import { SearchStrategyProvider } from '../../../../../src/plugins/data/public';
 import { ManagementSetup as ManagementSetupLegacy } from '../../../../../src/legacy/core_plugins/management/public/np_ready';
 import { rollupBadgeExtension, rollupToggleExtension } from './extend_index_management';
@@ -23,8 +19,6 @@ import { getRollupSearchStrategy } from './search/rollup_search_strategy';
 import { initAggTypeFilter } from './visualize/agg_type_filter';
 // @ts-ignore
 import { initAggTypeFieldFilter } from './visualize/agg_type_field_filter';
-// @ts-ignore
-import { initEditorConfig } from './visualize/editor_config';
 import { CONFIG_ROLLUPS } from '../common';
 import {
   FeatureCatalogueCategory,
@@ -42,7 +36,6 @@ export interface RollupPluginSetupDependencies {
   __LEGACY: {
     aggTypeFilters: AggTypeFilters;
     aggTypeFieldFilters: AggTypeFieldFilters;
-    editorConfigProviders: EditorConfigProviderRegistry;
     addSearchStrategy: (searchStrategy: SearchStrategyProvider) => void;
     managementLegacy: ManagementSetupLegacy;
     addBadgeExtension: (badgeExtension: any) => void;
@@ -59,7 +52,6 @@ export class RollupPlugin implements Plugin {
       __LEGACY: {
         aggTypeFilters,
         aggTypeFieldFilters,
-        editorConfigProviders,
         addSearchStrategy,
         managementLegacy,
         addBadgeExtension,
@@ -81,7 +73,6 @@ export class RollupPlugin implements Plugin {
       addSearchStrategy(getRollupSearchStrategy(core.http.fetch));
       initAggTypeFilter(aggTypeFilters);
       initAggTypeFieldFilter(aggTypeFieldFilters);
-      initEditorConfig(editorConfigProviders);
     }
 
     if (home) {

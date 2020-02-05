@@ -23,7 +23,7 @@ import { InspectButtonContainer } from '../../../../components/inspect';
 import { useQuerySignals } from '../../../../containers/detection_engine/signals/use_query';
 import { MatrixLoader } from '../../../../components/matrix_histogram/matrix_loader';
 
-import { formatSignalsData, getSignalsHistogramQuery } from './helpers';
+import { formatSignalsData, getSignalsHistogramQuery, showInitialLoadingSpinner } from './helpers';
 import * as i18n from './translations';
 
 const DEFAULT_PANEL_HEIGHT = 300;
@@ -54,7 +54,6 @@ interface SignalsHistogramPanelProps {
   from: number;
   query?: Query;
   legendPosition?: Position;
-  loadingInitial?: boolean;
   panelHeight?: number;
   signalIndexName: string | null;
   setQuery: (params: RegisterQuery) => void;
@@ -75,7 +74,6 @@ export const SignalsHistogramPanel = memo<SignalsHistogramPanelProps>(
     query,
     from,
     legendPosition = 'right',
-    loadingInitial = false,
     panelHeight = DEFAULT_PANEL_HEIGHT,
     setQuery,
     signalIndexName,
@@ -86,7 +84,7 @@ export const SignalsHistogramPanel = memo<SignalsHistogramPanelProps>(
     title = i18n.HISTOGRAM_HEADER,
     updateDateRange,
   }) => {
-    const [isInitialLoading, setIsInitialLoading] = useState(loadingInitial || true);
+    const [isInitialLoading, setIsInitialLoading] = useState(true);
     const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
     const [totalSignalsObj, setTotalSignalsObj] = useState<SignalsTotal>(defaultTotalSignalsObj);
     const [selectedStackByOption, setSelectedStackByOption] = useState<SignalsHistogramOption>(
@@ -124,10 +122,16 @@ export const SignalsHistogramPanel = memo<SignalsHistogramPanelProps>(
     const formattedSignalsData = useMemo(() => formatSignalsData(signalsData), [signalsData]);
 
     useEffect(() => {
-      if (!loadingInitial && isInitialLoading && !isLoadingSignals && signalsData) {
+      let canceled = false;
+
+      if (!canceled && !showInitialLoadingSpinner({ isInitialLoading, isLoadingSignals })) {
         setIsInitialLoading(false);
       }
-    }, [loadingInitial, isLoadingSignals, signalsData]);
+
+      return () => {
+        canceled = true; // prevent long running data fetches from updating state after unmounting
+      };
+    }, [isInitialLoading, isLoadingSignals, setIsInitialLoading]);
 
     useEffect(() => {
       return () => {

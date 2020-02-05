@@ -46,6 +46,7 @@ import { IEmbeddableStart } from '../../../../../../plugins/embeddable/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../../../plugins/navigation/public';
 import { DataPublicPluginStart as NpDataStart } from '../../../../../../plugins/data/public';
 import { SharePluginStart } from '../../../../../../plugins/share/public';
+import { KibanaLegacyStart } from '../../../../../../plugins/kibana_legacy/public';
 
 export interface RenderDeps {
   core: LegacyCoreStart;
@@ -62,6 +63,7 @@ export interface RenderDeps {
   embeddables: IEmbeddableStart;
   localStorage: Storage;
   share: SharePluginStart;
+  config: KibanaLegacyStart['config'];
 }
 
 let angularModuleInstance: IModule | null = null;
@@ -71,7 +73,6 @@ export const renderApp = (element: HTMLElement, appBasePath: string, deps: Rende
     angularModuleInstance = createLocalAngularModule(deps.core, deps.navigation);
     // global routing stuff
     configureAppAngularModule(angularModuleInstance, deps.core as LegacyCoreStart, true);
-    // custom routing stuff
     initDashboardApp(angularModuleInstance, deps);
   }
 

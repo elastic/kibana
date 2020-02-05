@@ -7,7 +7,7 @@
     "winlogbeat-*"
   ],
   "language": "kuery",
-  "max_signals": 33,
+  "max_signals": 100,
   "name": "Network Connection via Regsvr",
   "query": "(process.name:regsvr32.exe or process.name:regsvr64.exe) and event.action:\"Network connection detected (rule: NetworkConnect)\" and not destination.ip:169.254.169.254/32 and not destination.ip:10.0.0.0/8 and not destination.ip:172.16.0.0/12 and not destination.ip:192.168.0.0/16",
   "risk_score": 21,
