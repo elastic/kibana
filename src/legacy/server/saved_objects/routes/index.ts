@@ -17,7 +17,6 @@
  * under the License.
  */
 
-export { createBulkCreateRoute } from './bulk_create';
 export { createImportRoute } from './import';
 export { createLogLegacyImportRoute } from './log_legacy_import';
 export { createResolveImportErrorsRoute } from './resolve_import_errors';

@@ -17,52 +17,36 @@
  * under the License.
  */
 
-import Hapi from 'hapi';
-import { createMockServer } from './_mock_server';
-import { createBulkCreateRoute } from './bulk_create';
-// Disable lint errors for imports from src/core/* until SavedObjects migration is complete
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { savedObjectsClientMock } from '../../../../core/server/saved_objects/service/saved_objects_client.mock';
+import supertest from 'supertest';
+import { UnwrapPromise } from '@kbn/utility-types';
+import { registerBulkCreateRoute } from './bulk_create';
+import { savedObjectsClientMock } from '../../../../core/server/mocks';
+import { setupServer } from './test_utils';
+
+type setupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 
 describe('POST /api/saved_objects/_bulk_create', () => {
-  let server: Hapi.Server;
-  const savedObjectsClient = savedObjectsClientMock.create();
+  let server: setupServerReturn['server'];
+  let httpSetup: setupServerReturn['httpSetup'];
+  let handlerContext: setupServerReturn['handlerContext'];
+  let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
 
-  beforeEach(() => {
-    savedObjectsClient.bulkCreate.mockImplementation(() => Promise.resolve('' as any));
-    server = createMockServer();
+  beforeEach(async () => {
+    ({ server, httpSetup, handlerContext } = await setupServer());
+    savedObjectsClient = handlerContext.savedObjects.client;
+    savedObjectsClient.bulkCreate.mockResolvedValue({ saved_objects: [] });
 
-    const prereqs = {
-      getSavedObjectsClient: {
-        assign: 'savedObjectsClient',
-        method() {
-          return savedObjectsClient;
-        },
-      },
-    };
+    const router = httpSetup.createRouter('');
+    registerBulkCreateRoute(router);
 
-    server.route(createBulkCreateRoute(prereqs));
+    await server.start();
   });
 
-  afterEach(() => {
-    savedObjectsClient.bulkCreate.mockReset();
+  afterEach(async () => {
+    await server.stop();
   });
 
   it('formats successful response', async () => {
-    const request = {
-      method: 'POST',
-      url: '/api/saved_objects/_bulk_create',
-      payload: [
-        {
-          id: 'abc123',
-          type: 'index-pattern',
-          attributes: {
-            title: 'my_title',
-          },
-        },
-      ],
-    };
-
     const clientResponse = {
       saved_objects: [
         {
@@ -75,14 +59,22 @@ describe('POST /api/saved_objects/_bulk_create', () => {
         },
       ],
     };
+    savedObjectsClient.bulkCreate.mockResolvedValue(clientResponse);
 
-    savedObjectsClient.bulkCreate.mockImplementation(() => Promise.resolve(clientResponse));
+    const result = await supertest(httpSetup.server.listener)
+      .post('/api/saved_objects/_bulk_create')
+      .send([
+        {
+          id: 'abc123',
+          type: 'index-pattern',
+          attributes: {
+            title: 'my_title',
+          },
+        },
+      ])
+      .expect(200);
 
-    const { payload, statusCode } = await server.inject(request);
-    const response = JSON.parse(payload);
-
-    expect(statusCode).toBe(200);
-    expect(response).toEqual(clientResponse);
+    expect(result.body).toEqual(clientResponse);
   });
 
   it('calls upon savedObjectClient.bulkCreate', async () => {
@@ -105,24 +97,20 @@ describe('POST /api/saved_objects/_bulk_create', () => {
       },
     ];
 
-    const request = {
-      method: 'POST',
-      url: '/api/saved_objects/_bulk_create',
-      payload: docs,
-    };
+    await supertest(httpSetup.server.listener)
+      .post('/api/saved_objects/_bulk_create')
+      .send(docs)
+      .expect(200);
 
-    await server.inject(request);
-    expect(savedObjectsClient.bulkCreate).toHaveBeenCalled();
-
+    expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
     const args = savedObjectsClient.bulkCreate.mock.calls[0];
     expect(args[0]).toEqual(docs);
   });
 
   it('passes along the overwrite option', async () => {
-    await server.inject({
-      method: 'POST',
-      url: '/api/saved_objects/_bulk_create?overwrite=true',
-      payload: [
+    await supertest(httpSetup.server.listener)
+      .post('/api/saved_objects/_bulk_create?overwrite=true')
+      .send([
         {
           id: 'abc1234',
           type: 'index-pattern',
@@ -131,11 +119,10 @@ describe('POST /api/saved_objects/_bulk_create', () => {
           },
           references: [],
         },
-      ],
-    });
+      ])
+      .expect(200);
 
-    expect(savedObjectsClient.bulkCreate).toHaveBeenCalled();
-
+    expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
     const args = savedObjectsClient.bulkCreate.mock.calls[0];
     expect(args[1]).toEqual({ overwrite: true });
   });
