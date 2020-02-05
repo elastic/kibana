@@ -105,7 +105,7 @@ Machine Learning::
 * Persists the time range brush when expanded to full width {pull}54020[#54020]
 * Supports search for partitions on Single Metric Viewer {pull}53879[#53879]
 * APM modules configs for RUM Javascript and NodeJS {pull}53792[#53792]
-* MML calculator enhancements for multi-metric job wizard  {pull}54573[#54573]
+* Model memory limit calculator enhancements for multi-metric job wizard  {pull}54573[#54573]
 * Data Visualizer redesign {pull}54358[#54358]
 * Formatting for additional timing and model size stats {pull}55062[#55062]
 * Adds ML node warning to overview and analytics pages {pull}50766[#50766]
