@@ -48,7 +48,7 @@ export class Home extends Component {
     super(props);
 
     const isWelcomeEnabled = !(
-      getServices().getInjected('disableWelcomeScreen') ||
+      getServices().homeConfig.disableWelcomeScreen ||
       props.localStorage.getItem(KEY_ENABLE_WELCOME) === 'false'
     );
     const currentOptInStatus = this.props.getOptInStatus();

@@ -31,14 +31,6 @@ import { getAriaName, toEditableConfig, DEFAULT_CATEGORY } from './lib';
 
 import { FieldSetting, IQuery } from './types';
 
-import {
-  registerDefaultComponents,
-  PAGE_TITLE_COMPONENT,
-  PAGE_SUBTITLE_COMPONENT,
-  PAGE_FOOTER_COMPONENT,
-} from './components/default_component_registry';
-import { getSettingsComponent } from './components/component_registry';
-
 interface AdvancedSettingsProps {
   queryText: string;
   enableSaving: boolean;
@@ -75,8 +67,6 @@ export class AdvancedSettings extends Component<AdvancedSettingsProps, AdvancedS
       footerQueryMatched: false,
       filteredSettings: this.mapSettings(Query.execute(parsedQuery, this.settings)),
     };
-
-    registerDefaultComponents();
   }
 
   init(config: IUiSettingsClient) {
@@ -166,10 +156,13 @@ export class AdvancedSettings extends Component<AdvancedSettingsProps, AdvancedS
 
   render() {
     const { filteredSettings, query, footerQueryMatched } = this.state;
+    const componentRegistry = npStart.plugins.advancedSettings.component;
 
-    const PageTitle = getSettingsComponent(PAGE_TITLE_COMPONENT);
-    const PageSubtitle = getSettingsComponent(PAGE_SUBTITLE_COMPONENT);
-    const PageFooter = getSettingsComponent(PAGE_FOOTER_COMPONENT);
+    const PageTitle = componentRegistry.get(componentRegistry.componentType.PAGE_TITLE_COMPONENT);
+    const PageSubtitle = componentRegistry.get(
+      componentRegistry.componentType.PAGE_SUBTITLE_COMPONENT
+    );
+    const PageFooter = componentRegistry.get(componentRegistry.componentType.PAGE_FOOTER_COMPONENT);
 
     return (
       <div>

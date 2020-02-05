@@ -17,7 +17,16 @@
  * under the License.
  */
 
-export { defer, Defer, of } from '../common';
+export {
+  defer,
+  Defer,
+  of,
+  createGetterSetter,
+  Get,
+  Set,
+  UiComponent,
+  UiComponentInstance,
+} from '../common';
 export * from './core';
 export * from './errors';
 export * from './field_mapping';
@@ -25,7 +34,7 @@ export * from './field_wildcard';
 export * from './parse';
 export * from './render_complete';
 export * from './resize_checker';
-export * from './state_containers';
+export * from '../common/state_containers';
 export * from './storage';
 export { hashedItemStore, HashedItemStore } from './storage/hashed_item_store';
 export {
@@ -40,6 +49,7 @@ export {
   unhashUrl,
   unhashQuery,
   createUrlTracker,
+  createKbnUrlTracker,
   createKbnUrlControls,
   getStateFromKbnUrl,
   getStatesFromKbnUrl,
