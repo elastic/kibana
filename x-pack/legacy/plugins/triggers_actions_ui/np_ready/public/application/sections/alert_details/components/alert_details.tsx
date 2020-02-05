@@ -28,6 +28,7 @@ import {
   ComponentOpts as BulkOperationsComponentOpts,
   withBulkAlertOperations,
 } from '../../common/components/with_bulk_alert_api_operations';
+import { AlertInstancesRouteWithApi } from './alert_instances_route';
 
 type AlertDetailsProps = {
   alert: Alert;
@@ -165,6 +166,9 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiFlexGroup>
+              <AlertInstancesRouteWithApi alert={alert} />
             </EuiFlexGroup>
           </EuiPageContentBody>
         </EuiPageContent>

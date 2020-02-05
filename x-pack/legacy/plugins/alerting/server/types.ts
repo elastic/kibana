@@ -8,9 +8,8 @@ import { AlertInstance } from './alert_instance';
 import { AlertTypeRegistry as OrigAlertTypeRegistry } from './alert_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
 import { SavedObjectAttributes, SavedObjectsClientContract } from '../../../../../src/core/server';
-import { Alert } from '../common';
-
-export * from '../common';
+import { Alert } from '../common/types';
+export * from '../common/types';
 
 export type State = Record<string, any>;
 export type Context = Record<string, any>;

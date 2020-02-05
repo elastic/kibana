@@ -76,6 +76,31 @@ describe('loadAlert', () => {
   });
 });
 
+describe('loadAlertState', () => {
+  test('should call get API with base parameters', async () => {
+    const alertId = uuid.v4();
+    const resolvedValue = {
+      id: alertId,
+      name: 'name',
+      tags: [],
+      enabled: true,
+      alertTypeId: '.noop',
+      schedule: { interval: '1s' },
+      actions: [],
+      params: {},
+      createdBy: null,
+      updatedBy: null,
+      throttle: null,
+      muteAll: false,
+      mutedInstanceIds: [],
+    };
+    http.get.mockResolvedValueOnce(resolvedValue);
+
+    expect(await loadAlert({ http, alertId })).toEqual(resolvedValue);
+    expect(http.get).toHaveBeenCalledWith(`/api/alert/${alertId}/state`);
+  });
+});
+
 describe('loadAlerts', () => {
   test('should call find API with base parameters', async () => {
     const resolvedValue = {

@@ -6,7 +6,7 @@
 
 import { HttpSetup } from 'kibana/public';
 import { BASE_ALERT_API_PATH } from '../constants';
-import { Alert, AlertType, AlertWithoutId } from '../../types';
+import { Alert, AlertType, AlertWithoutId, AlertTaskState } from '../../types';
 
 export async function loadAlertTypes({ http }: { http: HttpSetup }): Promise<AlertType[]> {
   return await http.get(`${BASE_ALERT_API_PATH}/types`);
@@ -20,6 +20,16 @@ export async function loadAlert({
   alertId: string;
 }): Promise<Alert> {
   return await http.get(`${BASE_ALERT_API_PATH}/${alertId}`);
+}
+
+export async function loadAlertState({
+  http,
+  alertId,
+}: {
+  http: HttpSetup;
+  alertId: string;
+}): Promise<AlertTaskState> {
+  return await http.get(`${BASE_ALERT_API_PATH}/${alertId}/state`);
 }
 
 export async function loadAlerts({

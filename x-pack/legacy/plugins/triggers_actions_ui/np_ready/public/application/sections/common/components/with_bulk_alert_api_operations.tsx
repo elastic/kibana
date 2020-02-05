@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-import { Alert, AlertType } from '../../../../types';
+import { Alert, AlertType, AlertTaskState } from '../../../../types';
 import { useAppDependencies } from '../../../app_context';
 import {
   deleteAlerts,
@@ -20,6 +20,7 @@ import {
   muteAlert,
   unmuteAlert,
   loadAlert,
+  loadAlertState,
   loadAlertTypes,
 } from '../../../lib/alert_api';
 
@@ -35,6 +36,7 @@ export interface ComponentOpts {
   disableAlert: (alert: Alert) => Promise<void>;
   deleteAlert: (alert: Alert) => Promise<void>;
   loadAlert: (id: Alert['id']) => Promise<Alert>;
+  loadAlertState: (id: Alert['id']) => Promise<AlertTaskState>;
   loadAlertTypes: () => Promise<AlertType[]>;
 }
 
@@ -88,6 +90,7 @@ export function withBulkAlertOperations<T>(
         }}
         deleteAlert={async (alert: Alert) => deleteAlert({ http, id: alert.id })}
         loadAlert={async (alertId: Alert['id']) => loadAlert({ http, alertId })}
+        loadAlertState={async (alertId: Alert['id']) => loadAlertState({ http, alertId })}
         loadAlertTypes={async () => loadAlertTypes({ http })}
       />
     );

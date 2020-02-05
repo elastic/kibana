@@ -5,8 +5,8 @@
  */
 import { ActionType } from '../../../../../plugins/actions/common';
 import { TypeRegistry } from './application/type_registry';
-import { SanitizedAlert as Alert, AlertAction } from '../../../alerting/common';
-export { Alert, AlertAction };
+import { SanitizedAlert as Alert, AlertAction, AlertTaskState } from '../../../alerting/common';
+export { Alert, AlertAction, AlertTaskState };
 export { ActionType };
 
 export type ActionTypeIndex = Record<string, ActionType>;

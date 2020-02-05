@@ -5,3 +5,4 @@
  */
 
 export * from './types';
+export { AlertTaskState } from '../server';

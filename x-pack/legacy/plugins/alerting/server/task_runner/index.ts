@@ -4,4 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export { AlertTaskState } from './alert_task_instance';
 export { TaskRunnerFactory } from './task_runner_factory';
