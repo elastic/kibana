@@ -16,7 +16,6 @@ import { LogHighlightsState } from '../../../containers/logs/log_highlights/log_
 import { LogMinimapScaleControls } from '../../../components/logging/log_minimap_scale_controls';
 import { LogTextScaleControls } from '../../../components/logging/log_text_scale_controls';
 import { LogTextWrapControls } from '../../../components/logging/log_text_wrap_controls';
-import { LogTimeControls } from '../../../components/logging/log_time_controls';
 import { LogFlyout } from '../../../containers/logs/log_flyout';
 import { LogViewConfiguration } from '../../../containers/logs/log_view_configuration';
 import { LogFilterState } from '../../../containers/logs/log_filter';
@@ -55,9 +54,7 @@ export const LogsToolbar = () => {
     goToNextHighlight,
   } = useContext(LogHighlightsState.Context);
   const {
-    visibleMidpointTime,
     isStreaming,
-    jumpToTargetPositionTime,
     startLiveStreaming,
     stopLiveStreaming,
     startDate,
@@ -152,16 +149,6 @@ export const LogsToolbar = () => {
               setLiveStreamingInterval(refreshInterval);
             }}
           />
-          {/* <LogTimeControls
-            currentTime={visibleMidpointTime}
-            isLiveStreaming={isAutoReloading}
-            jumpToTime={jumpToTargetPositionTime}
-            startLiveStreaming={() => {
-              startLiveStreaming();
-              setSurroundingLogsId(null);
-            }}
-            stopLiveStreaming={stopLiveStreaming}
-          /> */}
         </EuiFlexItem>
       </EuiFlexGroup>
     </Toolbar>

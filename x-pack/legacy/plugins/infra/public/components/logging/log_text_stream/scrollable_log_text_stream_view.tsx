@@ -135,7 +135,6 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
       isLoadingMore,
       isReloading,
       isStreaming,
-      lastLoadedTime,
       scale,
       wrap,
       startDate,
@@ -261,7 +260,6 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
                               rangeEdge={endDate}
                               onExtendRange={newDate => updateDateRange({ endDate: newDate })}
                               onStreamStart={() => startLiveStreaming()}
-                              // onLoadMore={this.handleLoadNewerItems}
                             />
                             {isScrollLocked && (
                               <LogTextStreamJumpToTail
@@ -293,14 +291,6 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
 
     if (reloadItems) {
       reloadItems();
-    }
-  };
-
-  private handleLoadNewerItems = () => {
-    const { loadNewerItems } = this.props;
-
-    if (loadNewerItems) {
-      loadNewerItems();
     }
   };
 

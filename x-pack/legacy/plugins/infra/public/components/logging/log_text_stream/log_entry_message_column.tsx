@@ -12,16 +12,16 @@ import {
   isFieldSegment,
   isHighlightMessageColumn,
   isMessageColumn,
-  LogEntryColumn,
   LogEntryHighlightColumn,
   LogEntryMessageSegment,
 } from '../../../utils/log_entry';
 import { ActiveHighlightMarker, highlightFieldValue, HighlightMarker } from './highlighting';
 import { LogEntryColumnContent } from './log_entry_column';
 import { hoveredContentStyle } from './text_styles';
+import { LogColumn } from '../../../../common/http_api';
 
 interface LogEntryMessageColumnProps {
-  columnValue: LogEntryColumn;
+  columnValue: LogColumn;
   highlights: LogEntryHighlightColumn[];
   isActiveHighlight: boolean;
   isHighlighted: boolean;
