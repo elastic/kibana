@@ -45,7 +45,7 @@ You can add and remove remote clusters, and check their connectivity.
 
 | <<data-rollups, *Rollup Jobs*>>
 
-Create a job that periodically aggregates data from one or more indices and
+Create a job that periodically aggregates data from one or more indices, and then
 rolls it into a new, compact index. Rollup indices are a good way to store months or
 years of historical data in combination with your raw data.
 
@@ -61,7 +61,7 @@ Use transforms to pivot existing {es} indices into summarized or entity-centric 
 | <<upgrade-assistant, *Upgrade Assistant*>>
 
 Identify the issues that you need to address before upgrading to the
-next major version of {es}, and reindex, if needed.
+next major version of {es}, and then reindex, if needed.
 
 | <<watcher-ui, *Watcher*>>
 

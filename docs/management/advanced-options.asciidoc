@@ -1,7 +1,7 @@
 [[advanced-options]]
 == Advanced Settings
 
-The *Advanced Settings* page enables you to directly edit settings that control the behavior of the Kibana application.
+The *Advanced Settings* UI enables you to edit settings that control the behavior of Kibana.
 For example, you can change the format used to display dates, specify the default index pattern, and set the precision
 for displayed decimal values.
 

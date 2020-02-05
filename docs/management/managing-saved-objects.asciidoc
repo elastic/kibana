@@ -1,7 +1,7 @@
 [[managing-saved-objects]]
 == Saved Objects
 
-*Saved Objects* helps you keep track of and manage your saved objects. These objects
+The *Saved Objects* UI helps you keep track of and manage your saved objects. These objects
 store data for later use, including dashboards, visualizations, maps, index patterns,
 Canvas workpads, and more.
 

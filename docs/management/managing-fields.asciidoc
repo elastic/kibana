@@ -1,7 +1,7 @@
 [[managing-fields]]
 == Index Patterns and Fields
 
-The *Index patterns* UI in *Management* helps you create and manage
+The *Index patterns* UI helps you create and manage
 the index patterns that retrieve your data from Elasticsearch.
 
 [role="screenshot"]

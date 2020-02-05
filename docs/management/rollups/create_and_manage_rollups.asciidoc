@@ -4,7 +4,7 @@
 
 
 A rollup job is a periodic task that aggregates data from indices specified
-by an index pattern and rolls it into a new index. Rollup indices are a good way to
+by an index pattern, and then rolls it into a new index. Rollup indices are a good way to
 compactly store months or years of historical
 data for use in visualizations and reports.
 
@@ -27,7 +27,7 @@ Before using this feature, you should be familiar with how rollups work.
 {kib} makes it easy for you to create a rollup job by walking you through
 the process. You fill in the name, data flow, and how often you want to roll
 up the data.  Then you define a date histogram aggregation for the rollup job
-and optionally terms, histogram, and metrics aggregations.
+and optionally define terms, histogram, and metrics aggregations.
 
 When defining the index pattern, you must enter a name that is different than
 the output rollup index. Otherwise, the job
