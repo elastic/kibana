@@ -8,16 +8,7 @@ import { get } from 'lodash';
 import { PLUGIN_ID, VIS_TELEMETRY_TASK, VIS_USAGE_TYPE } from '../../../../constants';
 import { TaskManagerStartContract } from '../../../../../task_manager/server';
 
-async function isTaskManagerReady(taskManager?: TaskManagerStartContract) {
-  const result = await fetch(taskManager);
-  return result !== null;
-}
-
-async function fetch(taskManager?: TaskManagerStartContract) {
-  if (!taskManager) {
-    return null;
-  }
-
+async function fetch(taskManager: TaskManagerStartContract) {
   let docs;
   try {
     ({ docs } = await taskManager.fetch({
@@ -39,24 +30,9 @@ async function fetch(taskManager?: TaskManagerStartContract) {
 }
 
 export function getUsageCollector(taskManager: Promise<TaskManagerStartContract>) {
-  let isCollectorReady = false;
-  async function determineIfTaskManagerIsReady() {
-    let isReady = false;
-    try {
-      isReady = await isTaskManagerReady(await taskManager);
-    } catch (err) {} // eslint-disable-line
-
-    if (isReady) {
-      isCollectorReady = true;
-    } else {
-      setTimeout(determineIfTaskManagerIsReady, 500);
-    }
-  }
-  determineIfTaskManagerIsReady();
-
   return {
     type: VIS_USAGE_TYPE,
-    isReady: () => isCollectorReady,
+    isReady: () => true,
     fetch: async () => {
       const docs = await fetch(await taskManager);
       // get the accumulated state from the recurring task
