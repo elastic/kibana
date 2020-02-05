@@ -367,48 +367,42 @@ export const inverseProjectionMatrix: (
         clippingPlaneBottom,
       } = clippingPlanesAtTime(time);
 
-      // prettier-ignore
       /**
-       * Scale by 1/renderSize to put it in range of 0->1
-       * Then multiply it by 2 and then subtract 1, putting it
-       * in the range of -1 -> 1
+       * 1. Convert from 0<=n<=screenDimension to -1<=n<=1
+       *    e.g. for x-axis, divide by renderWidth then multiply by 2 and subtract by one so the value is in range of -1->1
        */
-      const screenToNDC = [
-        2 / renderWidth, 0, -1,
-        0, 2 / renderHeight, -1,
+      // prettier-ignore
+      const screenToNDC: Matrix3 = [
+        renderWidth === 0 ? 0 : 2 / renderWidth, 0, -1,
+        0, renderHeight === 0 ? 0 : 2 / renderHeight, -1,
         0, 0, 0
-      ] as const;
+      ];
+
+      /**
+       * 2. Invert Y since DOM positioning has inverted Y axis
+       */
+      const invertY = scalingTransformation([1, -1]);
 
       const [translationX, translationY] = translationAtTime(time);
 
+      /**
+       * 3. Scale values to the clipping plane dimensions.
+       */
+      const scaleToClippingPlaneDimensions = inverseOrthographicProjection(
+        clippingPlaneTop,
+        clippingPlaneRight,
+        clippingPlaneBottom,
+        clippingPlaneLeft
+      );
+
+      /**
+       * Move the values to accomodate for the perspective of the camera (based on the camera's transform)
+       */
+      const translateForCamera: Matrix3 = [0, 0, translationX, 0, 0, translationY, 0, 0, 0];
+
       return addMatrix(
-        // 4. Translate for the 'camera'
-        // prettier-ignore
-        [
-          0, 0, translationX,
-          0, 0, translationY,
-          0, 0, 0
-        ] as const,
-        multiply(
-          /**
-           * 3. make values in range of clipping planes,
-           * so take it from range -1 -> 1 and put it in range of
-           * -length/2 -> length/2
-           */
-          inverseOrthographicProjection(
-            clippingPlaneTop,
-            clippingPlaneRight,
-            clippingPlaneBottom,
-            clippingPlaneLeft
-          ),
-          multiply(
-            // 2 Invert Y since CSS has inverted y
-            scalingTransformation([1, -1]),
-            // 1. convert screen coordinates to NDC
-            // e.g. for x-axis, divide by renderWidth then multiply by 2 and subtract by one so the value is in range of -1->1
-            screenToNDC
-          )
-        )
+        translateForCamera,
+        multiply(scaleToClippingPlaneDimensions, multiply(invertY, screenToNDC))
       );
     };
   }
@@ -461,14 +455,15 @@ export const projectionMatrix: (state: CameraState) => (time: Date) => Matrix3 =
       );
 
       /**
-       * 2. Scale the values to match the dimensions of the Resolver component.
+       * 2. Scale the values based on the dimsension of Resolver on the screen.
        */
-      const scaleToClippingPlane = orthographicProjection(
+      const screenToNDC = orthographicProjection(
         clippingPlaneTop,
         clippingPlaneRight,
         clippingPlaneBottom,
         clippingPlaneLeft
       );
+
       /**
        * 3. invert y since CSS has inverted y
        */
@@ -496,7 +491,7 @@ export const projectionMatrix: (state: CameraState) => (time: Date) => Matrix3 =
         fromZeroToTwoToRasterDimensions,
         addMatrix(
           fromNDCtoZeroToTwo,
-          multiply(invertY, multiply(scaleToClippingPlane, adjustForCameraPosition))
+          multiply(invertY, multiply(screenToNDC, adjustForCameraPosition))
         )
       );
     });

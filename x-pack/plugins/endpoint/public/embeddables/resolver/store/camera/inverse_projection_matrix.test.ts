@@ -28,6 +28,17 @@ describe('inverseProjectionMatrix', () => {
       expect(worldY).toBeCloseTo(expectedWorldPosition[1]);
     };
   });
+
+  describe('when the raster size is 0x0 pixels', () => {
+    beforeEach(() => {
+      const action: CameraAction = { type: 'userSetRasterSize', payload: [0, 0] };
+      store.dispatch(action);
+    });
+    it('should convert 0,0 in raster space to 0,0 (center) in world space', () => {
+      compare([10, 0], [0, 0]);
+    });
+  });
+
   describe('when the raster size is 300 x 200 pixels', () => {
     beforeEach(() => {
       const action: CameraAction = { type: 'userSetRasterSize', payload: [300, 200] };
