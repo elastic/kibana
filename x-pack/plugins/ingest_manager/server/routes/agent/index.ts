@@ -14,9 +14,17 @@ import { PLUGIN_ID, AGENT_API_ROUTES } from '../../constants';
 import {
   GetAgentsRequestSchema,
   GetOneAgentRequestSchema,
+  GetOneAgentEventsRequestSchema,
   UpdateAgentRequestSchema,
+  DeleteAgentRequestSchema,
 } from '../../types';
-import { getAgentsHandler, getAgentHandler } from './handlers';
+import {
+  getAgentsHandler,
+  getAgentHandler,
+  updateAgentHandler,
+  deleteAgentHandler,
+  getAgentEventsHandler,
+} from './handlers';
 
 export const registerRoutes = (router: IRouter) => {
   // Get one
@@ -37,6 +45,15 @@ export const registerRoutes = (router: IRouter) => {
     },
     updateAgentHandler
   );
+  // Delete
+  router.delete(
+    {
+      path: AGENT_API_ROUTES.DELETE_PATTERN,
+      validate: DeleteAgentRequestSchema,
+      options: { tags: [`access:${PLUGIN_ID}`] },
+    },
+    deleteAgentHandler
+  );
   // List
   router.get(
     {
@@ -45,5 +62,15 @@ export const registerRoutes = (router: IRouter) => {
       options: { tags: [`access:${PLUGIN_ID}`] },
     },
     getAgentsHandler
+  );
+
+  // Get agent events
+  router.get(
+    {
+      path: AGENT_API_ROUTES.EVENTS_PATTERN,
+      validate: GetOneAgentEventsRequestSchema,
+      options: { tags: [`access:${PLUGIN_ID}`] },
+    },
+    getAgentEventsHandler
   );
 };

@@ -7,6 +7,8 @@ export {
   // Object types
   Agent,
   AgentSOAttributes,
+  AgentEvent,
+  AgentEventSOAttributes,
   Datasource,
   NewDatasource,
   AgentConfig,
@@ -26,7 +28,9 @@ export {
   // Agent schemas
   GetAgentsRequestSchema,
   GetOneAgentRequestSchema,
+  GetOneAgentEventsRequestSchema,
   UpdateAgentRequestSchema,
+  DeleteAgentRequestSchema,
   // Agent config schemas
   GetAgentConfigsRequestSchema,
   GetAgentConfigsResponse,

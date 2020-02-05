@@ -41,3 +41,45 @@ const AgentSOAttributesSchema = schema.object({
 
 export type Agent = TypeOf<typeof AgentSchema>;
 export type AgentSOAttributes = TypeOf<typeof AgentSOAttributesSchema>;
+
+const AgentEventBase = {
+  type: schema.oneOf([
+    schema.literal('STATE'),
+    schema.literal('ERROR'),
+    schema.literal('ACTION_RESULT'),
+    schema.literal('ACTION'),
+  ]),
+  subtype: schema.oneOf([
+    // State
+    schema.literal('RUNNING'),
+    schema.literal('STARTING'),
+    schema.literal('IN_PROGRESS'),
+    schema.literal('CONFIG'),
+    schema.literal('FAILED'),
+    schema.literal('STOPPING'),
+    schema.literal('STOPPED'),
+    // Action results
+    schema.literal('DATA_DUMP'),
+    // Actions
+    schema.literal('ACKNOWLEDGED'),
+    schema.literal('UNKNOWN'),
+  ]),
+  timestamp: schema.string(),
+  message: schema.string(),
+  payload: schema.any(),
+  data: schema.maybe(schema.string()),
+  action_id: schema.maybe(schema.string()),
+  policy_id: schema.maybe(schema.string()),
+  stream_id: schema.maybe(schema.string()),
+};
+
+const AgentEventSchema = schema.object({
+  ...AgentEventBase,
+});
+
+const AgentEventSOAttributesSchema = schema.object({
+  ...AgentEventBase,
+});
+
+export type AgentEvent = TypeOf<typeof AgentEventSchema>;
+export type AgentEventSOAttributes = TypeOf<typeof AgentEventSOAttributesSchema>;

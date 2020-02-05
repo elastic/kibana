@@ -10,6 +10,8 @@ import {
   GetAgentsRequestSchema,
   GetOneAgentRequestSchema,
   UpdateAgentRequestSchema,
+  DeleteAgentRequestSchema,
+  GetOneAgentEventsRequestSchema,
 } from '../../types';
 import * as AgentService from '../../services/agents';
 
@@ -27,6 +29,69 @@ export const getAgentHandler: RequestHandler<TypeOf<
         // status: AgentStatusHelper.getAgentStatus(agent),
       },
       success: true,
+    };
+
+    return response.ok({ body });
+  } catch (e) {
+    if (e.isBoom && e.output.statusCode === 404) {
+      return response.notFound({
+        body: { message: `Agent ${request.params.agentId} not found` },
+      });
+    }
+
+    return response.customError({
+      statusCode: 500,
+      body: { message: e.message },
+    });
+  }
+};
+
+export const getAgentEventsHandler: RequestHandler<
+  TypeOf<typeof GetOneAgentEventsRequestSchema.params>,
+  TypeOf<typeof GetOneAgentEventsRequestSchema.query>
+> = async (context, request, response) => {
+  const soClient = context.core.savedObjects.client;
+  try {
+    const { page, perPage, kuery } = request.query;
+    const { items, total } = await AgentService.getAgentEvents(soClient, request.params.agentId, {
+      page,
+      perPage,
+      kuery,
+    });
+
+    return response.ok({
+      body: {
+        list: items,
+        total,
+        success: true,
+        page,
+        perPage,
+      },
+    });
+  } catch (e) {
+    if (e.isBoom && e.output.statusCode === 404) {
+      return response.notFound({
+        body: { message: `Agent ${request.params.agentId} not found` },
+      });
+    }
+
+    return response.customError({
+      statusCode: 500,
+      body: { message: e.message },
+    });
+  }
+};
+
+export const deleteAgentHandler: RequestHandler<TypeOf<
+  typeof DeleteAgentRequestSchema.params
+>> = async (context, request, response) => {
+  const soClient = context.core.savedObjects.client;
+  try {
+    await AgentService.deleteAgent(soClient, request.params.agentId);
+
+    const body = {
+      success: true,
+      action: 'deleted',
     };
 
     return response.ok({ body });

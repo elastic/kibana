@@ -21,6 +21,23 @@ export const GetOneAgentRequestSchema = {
   }),
 };
 
+export const GetOneAgentEventsRequestSchema = {
+  params: schema.object({
+    agentId: schema.string(),
+  }),
+  query: schema.object({
+    page: schema.number({ defaultValue: 1 }),
+    perPage: schema.number({ defaultValue: 20 }),
+    kuery: schema.maybe(schema.string()),
+  }),
+};
+
+export const DeleteAgentRequestSchema = {
+  params: schema.object({
+    agentId: schema.string(),
+  }),
+};
+
 export const UpdateAgentRequestSchema = {
   params: schema.object({
     agentId: schema.string(),

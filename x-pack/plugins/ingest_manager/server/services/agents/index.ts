@@ -12,6 +12,8 @@ import { Agent, AgentSOAttributes } from '../../types';
 const AGENT_POLLING_THRESHOLD_MS = 30 * 1000;
 const AGENT_TYPE_EPHEMERAL = 'ephemeral';
 
+export * from './events';
+
 export async function getAgent(soClient: SavedObjectsClientContract, agentId: string) {
   const response = await soClient.get<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, agentId);
 
@@ -27,6 +29,20 @@ export async function updateAgent(
 ) {
   await soClient.update<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, agentId, {
     user_provided_metadata: data.userProvidedMetatada,
+  });
+}
+
+export async function deleteAgent(soClient: SavedObjectsClientContract, agentId: string) {
+  const agent = await getAgent(soClient, agentId);
+  if (agent.type === 'EPHEMERAL') {
+    // TODO implements
+    // await this.agentEvents.deleteEventsForAgent(user, agent.id);
+    await soClient.delete(AGENT_SAVED_OBJECT_TYPE, agentId);
+    return;
+  }
+
+  await soClient.update<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, agentId, {
+    active: false,
   });
 }
 

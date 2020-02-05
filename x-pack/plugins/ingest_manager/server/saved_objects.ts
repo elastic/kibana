@@ -9,6 +9,7 @@ import {
   DATASOURCE_SAVED_OBJECT_TYPE,
   PACKAGES_SAVED_OBJECT_TYPE,
   AGENT_SAVED_OBJECT_TYPE,
+  AGENT_EVENT_SAVED_OBJECT_TYPE,
 } from './constants';
 
 /*
@@ -42,6 +43,20 @@ export const savedObjectMappings = {
           created_at: { type: 'date' },
         },
       },
+    },
+  },
+  [AGENT_EVENT_SAVED_OBJECT_TYPE]: {
+    properties: {
+      type: { type: 'keyword' },
+      subtype: { type: 'keyword' },
+      agent_id: { type: 'keyword' },
+      action_id: { type: 'keyword' },
+      policy_id: { type: 'keyword' },
+      stream_id: { type: 'keyword' },
+      timestamp: { type: 'date' },
+      message: { type: 'text' },
+      payload: { type: 'text' },
+      data: { type: 'text' },
     },
   },
   [AGENT_CONFIG_SAVED_OBJECT_TYPE]: {
