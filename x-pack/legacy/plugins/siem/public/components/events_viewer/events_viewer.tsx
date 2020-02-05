@@ -153,14 +153,10 @@ const EventsViewerComponent: React.FC<Props> = ({
                   refetch,
                   totalCount = 0,
                 }) => {
-                  const totalCountMinusDeleted =
-                    totalCount > 0 ? totalCount - deletedEventIds.length : 0;
-
                   const subtitle = `${
                     i18n.SHOWING
-                  }: ${totalCountMinusDeleted.toLocaleString()} ${timelineTypeContext.unit?.(
-                    totalCountMinusDeleted
-                  ) ?? i18n.UNIT(totalCountMinusDeleted)}`;
+                  }: ${totalCount.toLocaleString()} ${timelineTypeContext.unit?.(totalCount) ??
+                    i18n.UNIT(totalCount)}`;
 
                   // TODO: Reset eventDeletedIds/eventLoadingIds on refresh/loadmore (getUpdatedAt)
                   return (
@@ -173,7 +169,7 @@ const EventsViewerComponent: React.FC<Props> = ({
                         {headerFilterGroup}
                       </HeaderSection>
 
-                      {utilityBar?.(refetch, totalCountMinusDeleted)}
+                      {utilityBar?.(refetch, totalCount)}
 
                       <div
                         data-test-subj={`events-container-loading-${loading}`}
@@ -216,7 +212,7 @@ const EventsViewerComponent: React.FC<Props> = ({
                             onChangeItemsPerPage={onChangeItemsPerPage}
                             onLoadMore={loadMore}
                             nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
-                            serverSideEventCount={totalCountMinusDeleted}
+                            serverSideEventCount={totalCount}
                             tieBreaker={getOr(null, 'endCursor.tiebreaker', pageInfo)}
                           />
                         </ManageTimelineContext>
