@@ -4,7 +4,7 @@
 
 ## SavedObjectsType.namespaceAgnostic property
 
-Is the type global, or namespaced.
+Is the type global (true), or namespaced (false).
 
 <b>Signature:</b>
 

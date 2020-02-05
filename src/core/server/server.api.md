@@ -2001,19 +2001,13 @@ export interface SavedObjectsUpdateResponse<T extends SavedObjectAttributes = an
     references: SavedObjectReference[] | undefined;
 }
 
-// @internal (undocumented)
+// @internal
 export class SavedObjectTypeRegistry {
-    // (undocumented)
     getAllTypes(): SavedObjectsType[];
-    // (undocumented)
     getIndex(type: string): string | undefined;
-    // (undocumented)
     getType(type: string): SavedObjectsType | undefined;
-    // (undocumented)
     isHidden(type: string): boolean;
-    // (undocumented)
     isNamespaceAgnostic(type: string): boolean;
-    // (undocumented)
     registerType(type: SavedObjectsType): void;
     }
 

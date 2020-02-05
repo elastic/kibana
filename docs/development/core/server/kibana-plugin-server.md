@@ -107,7 +107,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [RouteValidatorOptions](./kibana-plugin-server.routevalidatoroptions.md) | Additional options for the RouteValidator class to modify its default behaviour. |
 |  [SavedObject](./kibana-plugin-server.savedobject.md) |  |
 |  [SavedObjectAttributes](./kibana-plugin-server.savedobjectattributes.md) | The data for a Saved Object is stored as an object in the <code>attributes</code> property. |
-|  [SavedObjectMigrationMap](./kibana-plugin-server.savedobjectmigrationmap.md) | A map of [migration functions](./kibana-plugin-server.savedobjectmigrationfn.md) to be used for a given type. The map's keys must be valid semver versions.<!-- -->Migrations will be executed in order, starting from the lowest matching an higher version that the document current version, and ending with the highest one. |
+|  [SavedObjectMigrationMap](./kibana-plugin-server.savedobjectmigrationmap.md) | A map of [migration functions](./kibana-plugin-server.savedobjectmigrationfn.md) to be used for a given type. The map's keys must be valid semver versions.<!-- -->For a given document, only migrations with a higher version number than that of the document will be applied. Migrations are executed in order, starting from the lowest version and ending with the highest one. |
 |  [SavedObjectReference](./kibana-plugin-server.savedobjectreference.md) | A reference to another saved object. |
 |  [SavedObjectsBaseOptions](./kibana-plugin-server.savedobjectsbaseoptions.md) |  |
 |  [SavedObjectsBulkCreateObject](./kibana-plugin-server.savedobjectsbulkcreateobject.md) |  |

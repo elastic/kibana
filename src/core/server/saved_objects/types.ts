@@ -226,7 +226,7 @@ export interface SavedObjectsType {
    */
   hidden: boolean;
   /**
-   * Is the type global, or namespaced.
+   * Is the type global (true), or namespaced (false).
    */
   namespaceAgnostic: boolean;
   /**
