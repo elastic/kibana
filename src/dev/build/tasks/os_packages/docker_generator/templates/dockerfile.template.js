@@ -67,12 +67,25 @@ function generator({
   RUN chmod -R g=u /usr/share/kibana
   RUN find /usr/share/kibana -type d -exec chmod g+s {} \\;
 
+  # "tini" is a tiny but valid init for containers. This is used to cleanly
+  # control how ES and any child processes are shut down.
+  #
+  # The tini GitHub page gives instructions for verifying the binary using
+  # gpg, but the keyservers are slow to return the key and this can fail the
+  # build. Instead, we check the binary against a checksum that we have
+  # computed.
+  ADD https://github.com/krallin/tini/releases/download/v0.18.0/tini /tini
+  COPY config/tini.sha512 /tini.sha512
+  RUN sha512sum -c /tini.sha512 && chmod +x /tini
+
   ################################################################################
   # Build stage 1
   # Copy prepared files from the previous stage and complete the image.
   ################################################################################
   FROM ${baseOSImage}
   EXPOSE 5601
+
+  COPY --from=builder /tini /tini
 
   # Add Reporting dependencies.
   RUN ${packageManager()} update -y && ${packageManager()} install -y fontconfig freetype shadow-utils && ${packageManager()} clean all
@@ -120,7 +133,7 @@ function generator({
     org.label-schema.build-date="${dockerBuildDate}" \\
     license="${license}"
 
-  ENTRYPOINT ["/usr/local/bin/dumb-init", "--"]
+  ENTRYPOINT ["/tini", "--", "/usr/local/bin/dumb-init", "--"]
 
   CMD ["/usr/local/bin/kibana-docker"]
   `);
