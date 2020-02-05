@@ -48,7 +48,7 @@ function generateDLL(config) {
     entry: dllEntry,
     context: dllContext,
     output: {
-      futureEmitAssets: true,
+      futureEmitAssets: true, // TODO: remove on webpack 5
       filename: dllBundleFilename,
       path: dllOutputPath,
       publicPath: dllPublicPath,
