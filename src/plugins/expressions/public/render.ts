@@ -31,10 +31,15 @@ export interface ExpressionRenderHandlerParams {
   onRenderError: RenderErrorHandlerFnType;
 }
 
+interface Event {
+  name: string;
+  data: any;
+}
+
 export class ExpressionRenderHandler {
   render$: Observable<any>;
   update$: Observable<any>;
-  events$: Observable<any>;
+  events$: Observable<Event>;
 
   private element: HTMLElement;
   private destroyFn?: any;
@@ -52,7 +57,7 @@ export class ExpressionRenderHandler {
     this.element = element;
 
     this.eventsSubject = new Rx.Subject();
-    this.events$ = this.eventsSubject.asObservable();
+    this.events$ = this.eventsSubject.asObservable() as Observable<Event>;
 
     this.onRenderError = onRenderError || defaultRenderErrorHandler;
 
