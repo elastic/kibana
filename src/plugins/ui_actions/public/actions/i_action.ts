@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { UiComponent } from 'src/plugins/kibana_utils/common';
+
 export interface IAction<ActionContext extends {} = {}> {
   /**
    * Determined the order when there is more than one action matched to a trigger.
@@ -38,6 +40,12 @@ export interface IAction<ActionContext extends {} = {}> {
    * @param context
    */
   getDisplayName(context: ActionContext): string;
+
+  /**
+   * `UiComponent` to render when displaying this action as a context menu item.
+   * If not provided, `getDisplayName` will be used instead.
+   */
+  MenuItem?: UiComponent<{ context: ActionContext }>;
 
   /**
    * Returns a promise that resolves to true if this action is compatible given the context,

@@ -20,6 +20,7 @@
 import sinon from 'sinon';
 import { getFieldFormatsRegistry } from '../../../../test_utils/public/stub_field_formats';
 import { METRIC_TYPE } from '@kbn/analytics';
+import { ComponentRegistry } from '../../../../../src/plugins/advanced_settings/public/';
 
 const mockObservable = () => {
   return {
@@ -58,6 +59,12 @@ const mockCore = {
 export const npSetup = {
   core: mockCore,
   plugins: {
+    advancedSettings: {
+      component: {
+        register: sinon.fake(),
+        componentType: ComponentRegistry.componentType,
+      },
+    },
     usageCollection: {
       allowTrackUserAgent: sinon.fake(),
       reportUiStats: sinon.fake(),
@@ -119,6 +126,9 @@ export const npSetup = {
     kibana_legacy: {
       registerLegacyApp: () => {},
       forwardApp: () => {},
+      config: {
+        defaultAppId: 'home',
+      },
     },
     inspector: {
       registerView: () => undefined,
@@ -139,6 +149,9 @@ export const npSetup = {
       },
       environment: {
         update: sinon.fake(),
+      },
+      config: {
+        disableWelcomeScreen: false,
       },
     },
     charts: {
@@ -196,6 +209,9 @@ export const npStart = {
     kibana_legacy: {
       getApps: () => [],
       getForwards: () => [],
+      config: {
+        defaultAppId: 'home',
+      },
     },
     data: {
       autocomplete: {
@@ -296,6 +312,9 @@ export const npStart = {
       },
       environment: {
         get: sinon.fake(),
+      },
+      config: {
+        disableWelcomeScreen: false,
       },
     },
     navigation: {

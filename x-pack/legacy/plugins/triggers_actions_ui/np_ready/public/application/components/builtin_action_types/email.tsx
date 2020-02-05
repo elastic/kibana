@@ -3,7 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { Fragment } from 'react';
+import React, { Fragment, useState, useEffect } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiFieldText,
   EuiFlexItem,
@@ -12,17 +13,22 @@ import {
   EuiFieldPassword,
   EuiComboBox,
   EuiTextArea,
+  EuiButtonEmpty,
   EuiSwitch,
   EuiFormRow,
+  EuiContextMenuItem,
+  EuiButtonIcon,
+  EuiContextMenuPanel,
+  EuiPopover,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
   ActionTypeModel,
   ActionConnectorFieldsProps,
-  ActionConnector,
   ValidationResult,
   ActionParamsProps,
 } from '../../../types';
+import { EmailActionParams, EmailActionConnector } from './types';
 
 export function getActionType(): ActionTypeModel {
   const mailformat = /^[^@\s]+@[^@\s]+$/;
@@ -35,11 +41,16 @@ export function getActionType(): ActionTypeModel {
         defaultMessage: 'Send email from your server.',
       }
     ),
-    validateConnector: (action: ActionConnector): ValidationResult => {
+    actionTypeTitle: i18n.translate(
+      'xpack.triggersActionsUI.components.builtinActionTypes.emailAction.actionTypeTitle',
+      {
+        defaultMessage: 'Send to email',
+      }
+    ),
+    validateConnector: (action: EmailActionConnector): ValidationResult => {
       const validationResult = { errors: {} };
       const errors = {
         from: new Array<string>(),
-        service: new Array<string>(),
         port: new Array<string>(),
         host: new Array<string>(),
         user: new Array<string>(),
@@ -66,7 +77,7 @@ export function getActionType(): ActionTypeModel {
           )
         );
       }
-      if (!action.config.port && !action.config.service) {
+      if (!action.config.port) {
         errors.port.push(
           i18n.translate(
             'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredPortText',
@@ -76,17 +87,7 @@ export function getActionType(): ActionTypeModel {
           )
         );
       }
-      if (!action.config.service && (!action.config.port || !action.config.host)) {
-        errors.service.push(
-          i18n.translate(
-            'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredServiceText',
-            {
-              defaultMessage: 'Service is required.',
-            }
-          )
-        );
-      }
-      if (!action.config.host && !action.config.service) {
+      if (!action.config.host) {
         errors.host.push(
           i18n.translate(
             'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredHostText',
@@ -118,7 +119,7 @@ export function getActionType(): ActionTypeModel {
       }
       return validationResult;
     },
-    validateParams: (actionParams: any): ValidationResult => {
+    validateParams: (actionParams: EmailActionParams): ValidationResult => {
       const validationResult = { errors: {} };
       const errors = {
         to: new Array<string>(),
@@ -143,7 +144,7 @@ export function getActionType(): ActionTypeModel {
         errors.cc.push(errorText);
         errors.bcc.push(errorText);
       }
-      if (!actionParams.message) {
+      if (!actionParams.message?.length) {
         errors.message.push(
           i18n.translate(
             'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredMessageText',
@@ -153,7 +154,7 @@ export function getActionType(): ActionTypeModel {
           )
         );
       }
-      if (!actionParams.subject) {
+      if (!actionParams.subject?.length) {
         errors.subject.push(
           i18n.translate(
             'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredSubjectText',
@@ -170,12 +171,9 @@ export function getActionType(): ActionTypeModel {
   };
 }
 
-const EmailActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({
-  action,
-  editActionConfig,
-  editActionSecrets,
-  errors,
-}) => {
+const EmailActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps<
+  EmailActionConnector
+>> = ({ action, editActionConfig, editActionSecrets, errors }) => {
   const { from, host, port, secure } = action.config;
   const { user, password } = action.secrets;
 
@@ -265,7 +263,7 @@ const EmailActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
                   isInvalid={errors.port.length > 0 && port !== undefined}
                   fullWidth
                   name="port"
-                  value={port || ''}
+                  value={port}
                   data-test-subj="emailPortInput"
                   onChange={e => {
                     editActionConfig('port', parseInt(e.target.value, 10));
@@ -365,34 +363,79 @@ const EmailActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
   );
 };
 
-const EmailParamsFields: React.FunctionComponent<ActionParamsProps> = ({
-  action,
+const EmailParamsFields: React.FunctionComponent<ActionParamsProps<EmailActionParams>> = ({
+  actionParams,
   editAction,
   index,
   errors,
-  hasErrors,
+  messageVariables,
+  defaultMessage,
 }) => {
-  const { to, cc, bcc, subject, message } = action;
+  const { to, cc, bcc, subject, message } = actionParams;
   const toOptions = to ? to.map((label: string) => ({ label })) : [];
   const ccOptions = cc ? cc.map((label: string) => ({ label })) : [];
   const bccOptions = bcc ? bcc.map((label: string) => ({ label })) : [];
+  const [addCC, setAddCC] = useState<boolean>(false);
+  const [addBCC, setAddBCC] = useState<boolean>(false);
 
+  const [isVariablesPopoverOpen, setIsVariablesPopoverOpen] = useState<boolean>(false);
+  useEffect(() => {
+    if (defaultMessage && defaultMessage.length > 0) {
+      editAction('message', defaultMessage, index);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  const messageVariablesItems = messageVariables?.map((variable: string) => (
+    <EuiContextMenuItem
+      key={variable}
+      icon="empty"
+      onClick={() => {
+        editAction('message', (message ?? '').concat(` {{${variable}}}`), index);
+        setIsVariablesPopoverOpen(false);
+      }}
+    >
+      {`{{${variable}}}`}
+    </EuiContextMenuItem>
+  ));
   return (
     <Fragment>
       <EuiFormRow
         fullWidth
         error={errors.to}
-        isInvalid={hasErrors && to !== undefined}
+        isInvalid={errors.to.length > 0 && to !== undefined}
         label={i18n.translate(
           'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.recipientTextFieldLabel',
           {
-            defaultMessage: 'To',
+            defaultMessage: 'To:',
           }
         )}
+        labelAppend={
+          <Fragment>
+            <span>
+              {!addCC ? (
+                <EuiButtonEmpty size="xs" onClick={() => setAddCC(true)}>
+                  <FormattedMessage
+                    defaultMessage="Add CC"
+                    id="xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.addCcButton"
+                  />
+                </EuiButtonEmpty>
+              ) : null}
+              {!addBCC ? (
+                <EuiButtonEmpty size="xs" onClick={() => setAddBCC(true)}>
+                  <FormattedMessage
+                    defaultMessage="{titleBcc}"
+                    id="xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.addBccButton"
+                    values={{ titleBcc: !addCC ? '/ BCC' : 'Add BCC' }}
+                  />
+                </EuiButtonEmpty>
+              ) : null}
+            </span>
+          </Fragment>
+        }
       >
         <EuiComboBox
           noSuggestions
-          isInvalid={hasErrors && to !== undefined}
+          isInvalid={errors.to.length > 0 && to !== undefined}
           fullWidth
           data-test-subj="toEmailAddressInput"
           selectedOptions={toOptions}
@@ -418,125 +461,163 @@ const EmailParamsFields: React.FunctionComponent<ActionParamsProps> = ({
           }}
         />
       </EuiFormRow>
-      <EuiFormRow
-        fullWidth
-        error={errors.cc}
-        isInvalid={hasErrors && cc !== undefined}
-        label={i18n.translate(
-          'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.recipientCopyTextFieldLabel',
-          {
-            defaultMessage: 'Cc',
-          }
-        )}
-      >
-        <EuiComboBox
-          noSuggestions
-          isInvalid={hasErrors && cc !== undefined}
+      {addCC ? (
+        <EuiFormRow
           fullWidth
-          data-test-subj="ccEmailAddressInput"
-          selectedOptions={ccOptions}
-          onCreateOption={(searchValue: string) => {
-            const newOptions = [...ccOptions, { label: searchValue }];
-            editAction(
-              'cc',
-              newOptions.map(newOption => newOption.label),
-              index
-            );
-          }}
-          onChange={(selectedOptions: Array<{ label: string }>) => {
-            editAction(
-              'cc',
-              selectedOptions.map(selectedOption => selectedOption.label),
-              index
-            );
-          }}
-          onBlur={() => {
-            if (!cc) {
-              editAction('cc', [], index);
+          error={errors.cc}
+          isInvalid={errors.cc.length > 0 && cc !== undefined}
+          label={i18n.translate(
+            'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.recipientCopyTextFieldLabel',
+            {
+              defaultMessage: 'Cc:',
             }
-          }}
-        />
-      </EuiFormRow>
-      <EuiFormRow
-        fullWidth
-        error={errors.bcc}
-        isInvalid={hasErrors && bcc !== undefined}
-        label={i18n.translate(
-          'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.recipientBccTextFieldLabel',
-          {
-            defaultMessage: 'Bcc',
-          }
-        )}
-      >
-        <EuiComboBox
-          noSuggestions
-          isInvalid={hasErrors && bcc !== undefined}
+          )}
+        >
+          <EuiComboBox
+            noSuggestions
+            isInvalid={errors.cc.length > 0 && cc !== undefined}
+            fullWidth
+            data-test-subj="ccEmailAddressInput"
+            selectedOptions={ccOptions}
+            onCreateOption={(searchValue: string) => {
+              const newOptions = [...ccOptions, { label: searchValue }];
+              editAction(
+                'cc',
+                newOptions.map(newOption => newOption.label),
+                index
+              );
+            }}
+            onChange={(selectedOptions: Array<{ label: string }>) => {
+              editAction(
+                'cc',
+                selectedOptions.map(selectedOption => selectedOption.label),
+                index
+              );
+            }}
+            onBlur={() => {
+              if (!cc) {
+                editAction('cc', [], index);
+              }
+            }}
+          />
+        </EuiFormRow>
+      ) : null}
+      {addBCC ? (
+        <EuiFormRow
           fullWidth
-          data-test-subj="bccEmailAddressInput"
-          selectedOptions={bccOptions}
-          onCreateOption={(searchValue: string) => {
-            const newOptions = [...bccOptions, { label: searchValue }];
-            editAction(
-              'bcc',
-              newOptions.map(newOption => newOption.label),
-              index
-            );
-          }}
-          onChange={(selectedOptions: Array<{ label: string }>) => {
-            editAction(
-              'bcc',
-              selectedOptions.map(selectedOption => selectedOption.label),
-              index
-            );
-          }}
-          onBlur={() => {
-            if (!bcc) {
-              editAction('bcc', [], index);
+          error={errors.bcc}
+          isInvalid={errors.bcc.length > 0 && bcc !== undefined}
+          label={i18n.translate(
+            'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.recipientBccTextFieldLabel',
+            {
+              defaultMessage: 'Bcc:',
             }
-          }}
-        />
-      </EuiFormRow>
+          )}
+        >
+          <EuiComboBox
+            noSuggestions
+            isInvalid={errors.bcc.length > 0 && bcc !== undefined}
+            fullWidth
+            data-test-subj="bccEmailAddressInput"
+            selectedOptions={bccOptions}
+            onCreateOption={(searchValue: string) => {
+              const newOptions = [...bccOptions, { label: searchValue }];
+              editAction(
+                'bcc',
+                newOptions.map(newOption => newOption.label),
+                index
+              );
+            }}
+            onChange={(selectedOptions: Array<{ label: string }>) => {
+              editAction(
+                'bcc',
+                selectedOptions.map(selectedOption => selectedOption.label),
+                index
+              );
+            }}
+            onBlur={() => {
+              if (!bcc) {
+                editAction('bcc', [], index);
+              }
+            }}
+          />
+        </EuiFormRow>
+      ) : null}
       <EuiFormRow
         fullWidth
         error={errors.subject}
-        isInvalid={hasErrors && message !== undefined}
+        isInvalid={errors.subject.length > 0 && subject !== undefined}
         label={i18n.translate(
           'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.subjectTextFieldLabel',
           {
-            defaultMessage: 'Subject',
+            defaultMessage: 'Subject:',
           }
         )}
       >
         <EuiFieldText
           fullWidth
-          isInvalid={hasErrors && message !== undefined}
+          isInvalid={errors.subject.length > 0 && subject !== undefined}
           name="subject"
           data-test-subj="emailSubjectInput"
           value={subject || ''}
+          placeholder="Text field (placeholder)"
           onChange={e => {
             editAction('subject', e.target.value, index);
+          }}
+          onBlur={() => {
+            if (!subject) {
+              editAction('subject', '', index);
+            }
           }}
         />
       </EuiFormRow>
       <EuiFormRow
         fullWidth
         error={errors.message}
-        isInvalid={hasErrors && message !== undefined}
+        isInvalid={errors.message.length > 0 && message !== undefined}
         label={i18n.translate(
           'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.messageTextAreaFieldLabel',
           {
-            defaultMessage: 'Message',
+            defaultMessage: 'Message:',
           }
         )}
+        labelAppend={
+          <EuiPopover
+            id="singlePanel"
+            button={
+              <EuiButtonIcon
+                onClick={() => setIsVariablesPopoverOpen(true)}
+                iconType="indexOpen"
+                aria-label={i18n.translate(
+                  'xpack.triggersActionsUI.components.builtinActionTypes.emailAction.addVariablePopoverButton',
+                  {
+                    defaultMessage: 'Add variable',
+                  }
+                )}
+              />
+            }
+            isOpen={isVariablesPopoverOpen}
+            closePopover={() => setIsVariablesPopoverOpen(false)}
+            panelPaddingSize="none"
+            anchorPosition="downLeft"
+          >
+            <EuiContextMenuPanel items={messageVariablesItems} />
+          </EuiPopover>
+        }
       >
         <EuiTextArea
           fullWidth
-          isInvalid={hasErrors && message !== undefined}
+          isInvalid={errors.message.length > 0 && message !== undefined}
           value={message || ''}
           name="message"
           data-test-subj="emailMessageInput"
           onChange={e => {
             editAction('message', e.target.value, index);
+          }}
+          onBlur={() => {
+            if (!message) {
+              editAction('message', '', index);
+            }
           }}
         />
       </EuiFormRow>
