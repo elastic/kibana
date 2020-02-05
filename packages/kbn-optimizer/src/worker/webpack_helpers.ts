@@ -148,6 +148,18 @@ export function isExternalModule(module: any): module is WebpackExternalModule {
   return module?.constructor?.name === 'ExternalModule';
 }
 
+/** module replacing imports for webpack externals */
+export interface WebpackConcatenatedModule {
+  type: string;
+  id: number;
+  dependencies: Dependency[];
+  usedExports: string[];
+}
+
+export function isConcatenatedModule(module: any): module is WebpackConcatenatedModule {
+  return module?.constructor?.name === 'ConcatenatedModule';
+}
+
 export function getModulePath(module: WebpackNormalModule) {
   const queryIndex = module.resource.indexOf('?');
   return queryIndex === -1 ? module.resource : module.resource.slice(0, queryIndex);

@@ -46,6 +46,7 @@ import {
   isExternalModule,
   isNormalModule,
   isIgnoredModule,
+  isConcatenatedModule,
   WebpackNormalModule,
   getModulePath,
 } from './webpack_helpers';
@@ -159,7 +160,7 @@ const observeCompiler = (
             return true;
           }
 
-          if (isExternalModule(module) || isIgnoredModule(module)) {
+          if (isExternalModule(module) || isIgnoredModule(module) || isConcatenatedModule(module)) {
             return false;
           }
 
