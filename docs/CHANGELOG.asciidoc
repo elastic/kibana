@@ -344,7 +344,7 @@ Monitoring::
 * Fixes Logstash pipelines page in multi-cluster environment {pull}50166[#50166]
 * Improves permissions required around setup mode {pull}50421[#50421]
 * Adds error state for unstructured logs {pull}53299[#53299]
-* Ensures setup mode work in a ccs environment {pull}54361[#54361]
+* Ensures setup mode work in a CCS environment {pull}54361[#54361]
 * Clarifies that these auth settings are for sending data {pull}48437[#48437]
 Operations::
 * Adds missing docker settings {pull}56411[#56411]
