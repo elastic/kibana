@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { AggConfig } from 'ui/agg_types';
+import { IAggConfig } from 'ui/agg_types';
 import { EditorConfigProviderRegistry } from './editor_config_providers';
 import { EditorParamConfig, FixedParam, NumericIntervalParam, TimeIntervalParam } from './types';
 
@@ -48,7 +48,7 @@ describe('EditorConfigProvider', () => {
     const provider = jest.fn<any, any>(() => ({}));
     registry.register(provider);
     expect(provider).not.toHaveBeenCalled();
-    const aggConfig = {} as AggConfig;
+    const aggConfig = {} as IAggConfig;
     registry.getConfigForAgg(indexPattern, aggConfig);
     expect(provider).toHaveBeenCalledWith(indexPattern, aggConfig);
   });
@@ -60,7 +60,7 @@ describe('EditorConfigProvider', () => {
     registry.register(provider2);
     expect(provider).not.toHaveBeenCalled();
     expect(provider2).not.toHaveBeenCalled();
-    const aggConfig = {} as AggConfig;
+    const aggConfig = {} as IAggConfig;
     registry.getConfigForAgg(indexPattern, aggConfig);
     expect(provider).toHaveBeenCalledWith(indexPattern, aggConfig);
     expect(provider2).toHaveBeenCalledWith(indexPattern, aggConfig);
@@ -72,7 +72,7 @@ describe('EditorConfigProvider', () => {
     }
 
     function getOutputConfig(reg: EditorConfigProviderRegistry) {
-      return reg.getConfigForAgg(indexPattern, {} as AggConfig).singleParam;
+      return reg.getConfigForAgg(indexPattern, {} as IAggConfig).singleParam;
     }
 
     it('should have hidden true if at least one config was hidden true', () => {

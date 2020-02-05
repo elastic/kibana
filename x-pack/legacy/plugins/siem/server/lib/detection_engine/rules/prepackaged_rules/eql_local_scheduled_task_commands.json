@@ -7,7 +7,7 @@
     "winlogbeat-*"
   ],
   "language": "kuery",
-  "max_signals": 33,
+  "max_signals": 100,
   "name": "Local Scheduled Task Commands",
   "query": " event.action:\"Process Create (rule: ProcessCreate)\" and process.name:schtasks.exe and process.args:(\"/create\" or \"-create\" or \"/S\" or \"-s\" or \"/run\" or \"-run\" or \"/change\" or \"-change\")",
   "risk_score": 21,

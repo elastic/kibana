@@ -42,21 +42,9 @@ import { registerListenEventListener } from 'ui/directives/listen/listen';
 // @ts-ignore
 import { KbnAccessibleClickProvider } from 'ui/accessibility/kbn_accessible_click';
 // @ts-ignore
-import { FieldNameDirectiveProvider } from 'ui/directives/field_name';
-// @ts-ignore
-import { CollapsibleSidebarProvider } from 'ui/collapsible_sidebar/collapsible_sidebar';
-// @ts-ignore
-import { CssTruncateProvide } from 'ui/directives/css_truncate';
-// @ts-ignore
-import { FixedScrollProvider } from 'ui/fixed_scroll';
-// @ts-ignore
-import { DebounceProviderTimeout } from 'ui/directives/debounce/debounce';
-// @ts-ignore
 import { AppStateProvider } from 'ui/state_management/app_state';
 // @ts-ignore
 import { GlobalStateProvider } from 'ui/state_management/global_state';
-// @ts-ignore
-import { createRenderCompleteDirective } from 'ui/render_complete/directive';
 // @ts-ignore
 import { StateManagementConfigProvider } from 'ui/state_management/config_provider';
 // @ts-ignore
@@ -81,11 +69,19 @@ import { createFieldSearchDirective } from './np_ready/components/field_chooser/
 import { createIndexPatternSelectDirective } from './np_ready/components/field_chooser/discover_index_pattern_directive';
 import { createStringFieldProgressBarDirective } from './np_ready/components/field_chooser/string_progress_bar';
 // @ts-ignore
+import { FieldNameDirectiveProvider } from './np_ready/angular/directives/field_name';
+// @ts-ignore
 import { createFieldChooserDirective } from './np_ready/components/field_chooser/field_chooser';
-
 // @ts-ignore
 import { createDiscoverFieldDirective } from './np_ready/components/field_chooser/discover_field';
+import { CollapsibleSidebarProvider } from './np_ready/angular/directives/collapsible_sidebar/collapsible_sidebar';
 import { DiscoverStartPlugins } from './plugin';
+import { createCssTruncateDirective } from './np_ready/angular/directives/css_truncate';
+// @ts-ignore
+import { FixedScrollProvider } from './np_ready/angular/directives/fixed_scroll';
+// @ts-ignore
+import { DebounceProviderTimeout } from './np_ready/angular/directives/debounce/debounce';
+import { createRenderCompleteDirective } from './np_ready/angular/directives/render_complete';
 
 /**
  * returns the main inner angular module, it contains all the parts of Angular Discover
@@ -181,7 +177,7 @@ export function initializeInnerAngularModule(
     .directive('kbnAccessibleClick', KbnAccessibleClickProvider)
     .directive('fieldName', FieldNameDirectiveProvider)
     .directive('collapsibleSidebar', CollapsibleSidebarProvider)
-    .directive('cssTruncate', CssTruncateProvide)
+    .directive('cssTruncate', createCssTruncateDirective)
     .directive('fixedScroll', FixedScrollProvider)
     .directive('renderComplete', createRenderCompleteDirective)
     .directive('discoverFieldSearch', createFieldSearchDirective)
