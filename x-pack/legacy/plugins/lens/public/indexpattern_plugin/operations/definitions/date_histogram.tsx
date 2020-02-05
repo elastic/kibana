@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 // TODO: make this new-platform compatible
-import { isValidInterval } from 'ui/agg_types/utils';
+import { isValidInterval } from 'ui/agg_types';
 
 import {
   EuiForm,
