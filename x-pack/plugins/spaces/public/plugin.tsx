@@ -56,7 +56,7 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
         management: plugins.management,
         getStartServices: core.getStartServices,
         spacesManager: this.spacesManager,
-        securityLicense: plugins.security && plugins.security.license,
+        securityLicense: plugins.security?.license,
       });
     }
 
