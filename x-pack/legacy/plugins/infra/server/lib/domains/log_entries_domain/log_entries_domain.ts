@@ -18,13 +18,10 @@ import {
   LogEntriesCursor,
   LogColumn,
 } from '../../../../common/http_api';
-import { InfraLogEntry, InfraLogMessageSegment } from '../../../graphql/types';
 import {
   InfraSourceConfiguration,
   InfraSources,
   SavedSourceConfigurationFieldColumnRuntimeType,
-  SavedSourceConfigurationMessageColumnRuntimeType,
-  SavedSourceConfigurationTimestampColumnRuntimeType,
 } from '../../sources';
 import { getBuiltinRules } from './builtin_rules';
 import { convertDocumentSourceToLogItemFields } from './convert_document_source_to_log_item_fields';
@@ -270,32 +267,11 @@ interface LogItemHit {
 }
 
 export interface LogEntriesAdapter {
-  getAdjacentLogEntryDocuments(
-    requestContext: RequestHandlerContext,
-    sourceConfiguration: InfraSourceConfiguration,
-    fields: string[],
-    start: TimeKey,
-    direction: 'asc' | 'desc',
-    maxCount: number,
-    filterQuery?: LogEntryQuery,
-    highlightQuery?: LogEntryQuery
-  ): Promise<LogEntryDocument[]>;
-
   getLogEntries(
     requestContext: RequestHandlerContext,
     sourceConfiguration: InfraSourceConfiguration,
     fields: string[],
     params: LogEntriesParams
-  ): Promise<LogEntryDocument[]>;
-
-  getContainedLogEntryDocuments(
-    requestContext: RequestHandlerContext,
-    sourceConfiguration: InfraSourceConfiguration,
-    fields: string[],
-    start: TimeKey,
-    end: TimeKey,
-    filterQuery?: LogEntryQuery,
-    highlightQuery?: LogEntryQuery
   ): Promise<LogEntryDocument[]>;
 
   getContainedLogSummaryBuckets(

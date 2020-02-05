@@ -12,12 +12,10 @@ import { compact } from 'lodash';
 import first from 'lodash/fp/first';
 import get from 'lodash/fp/get';
 import has from 'lodash/fp/has';
-import zip from 'lodash/fp/zip';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map, fold } from 'fp-ts/lib/Either';
 import { identity, constant } from 'fp-ts/lib/function';
 import { RequestHandlerContext } from 'src/core/server';
-import { compareTimeKeys, isTimeKey, TimeKey } from '../../../../common/time';
 import { JsonObject, JsonValue } from '../../../../common/typed_json';
 import {
   LogEntriesAdapter,
@@ -31,8 +29,6 @@ import { InfraSourceConfiguration } from '../../sources';
 import { SortedSearchHit } from '../framework';
 import { KibanaFramework } from '../framework/kibana_framework_adapter';
 
-const DAY_MILLIS = 24 * 60 * 60 * 1000;
-const LOOKUP_OFFSETS = [0, 1, 7, 30, 365, 10000, Infinity].map(days => days * DAY_MILLIS);
 const TIMESTAMP_FORMAT = 'epoch_millis';
 
 interface LogItemHit {
@@ -44,46 +40,6 @@ interface LogItemHit {
 
 export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
   constructor(private readonly framework: KibanaFramework) {}
-
-  public async getAdjacentLogEntryDocuments(
-    requestContext: RequestHandlerContext,
-    sourceConfiguration: InfraSourceConfiguration,
-    fields: string[],
-    start: TimeKey,
-    direction: 'asc' | 'desc',
-    maxCount: number,
-    filterQuery?: LogEntryQuery,
-    highlightQuery?: LogEntryQuery
-  ): Promise<LogEntryDocument[]> {
-    if (maxCount <= 0) {
-      return [];
-    }
-
-    const intervals = getLookupIntervals(start.time, direction);
-
-    let documents: LogEntryDocument[] = [];
-    for (const [intervalStart, intervalEnd] of intervals) {
-      if (documents.length >= maxCount) {
-        break;
-      }
-
-      const documentsInInterval = await this.getLogEntryDocumentsBetween(
-        requestContext,
-        sourceConfiguration,
-        fields,
-        intervalStart,
-        intervalEnd,
-        documents.length > 0 ? documents[documents.length - 1].key : start,
-        maxCount - documents.length,
-        filterQuery,
-        highlightQuery
-      );
-
-      documents = [...documents, ...documentsInInterval];
-    }
-
-    return direction === 'asc' ? documents : documents.reverse();
-  }
 
   public async getLogEntries(
     requestContext: RequestHandlerContext,
@@ -271,112 +227,6 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
     }
     return document;
   }
-
-  private async getLogEntryDocumentsBetween(
-    requestContext: RequestHandlerContext,
-    sourceConfiguration: InfraSourceConfiguration,
-    fields: string[],
-    start: number,
-    end: number,
-    after: TimeKey | null,
-    maxCount: number,
-    filterQuery?: LogEntryQuery,
-    highlightQuery?: LogEntryQuery
-  ): Promise<LogEntryDocument[]> {
-    if (maxCount <= 0) {
-      return [];
-    }
-
-    const sortDirection: 'asc' | 'desc' = start <= end ? 'asc' : 'desc';
-
-    const startRange = {
-      [sortDirection === 'asc' ? 'gte' : 'lte']: start,
-    };
-    const endRange =
-      end === Infinity
-        ? {}
-        : {
-            [sortDirection === 'asc' ? 'lte' : 'gte']: end,
-          };
-
-    const highlightClause = highlightQuery
-      ? {
-          highlight: {
-            boundary_scanner: 'word',
-            fields: fields.reduce(
-              (highlightFieldConfigs, fieldName) => ({
-                ...highlightFieldConfigs,
-                [fieldName]: {},
-              }),
-              {}
-            ),
-            fragment_size: 1,
-            number_of_fragments: 100,
-            post_tags: [''],
-            pre_tags: [''],
-            highlight_query: highlightQuery,
-          },
-        }
-      : {};
-
-    const searchAfterClause = isTimeKey(after)
-      ? {
-          search_after: [after.time, after.tiebreaker],
-        }
-      : {};
-
-    const query = {
-      allowNoIndices: true,
-      index: sourceConfiguration.logAlias,
-      ignoreUnavailable: true,
-      body: {
-        query: {
-          bool: {
-            filter: [
-              ...createQueryFilterClauses(filterQuery),
-              {
-                range: {
-                  [sourceConfiguration.fields.timestamp]: {
-                    ...startRange,
-                    ...endRange,
-                    format: TIMESTAMP_FORMAT,
-                  },
-                },
-              },
-            ],
-          },
-        },
-        ...highlightClause,
-        ...searchAfterClause,
-        _source: fields,
-        size: maxCount,
-        sort: [
-          { [sourceConfiguration.fields.timestamp]: sortDirection },
-          { [sourceConfiguration.fields.tiebreaker]: sortDirection },
-        ],
-        track_total_hits: false,
-      },
-    };
-
-    const response = await this.framework.callWithRequest<SortedSearchHit>(
-      requestContext,
-      'search',
-      query
-    );
-    const hits = response.hits.hits;
-    const documents = hits.map(convertHitToLogEntryDocument(fields));
-
-    return documents;
-  }
-}
-
-function getLookupIntervals(start: number, direction: 'asc' | 'desc'): Array<[number, number]> {
-  const offsetSign = direction === 'asc' ? 1 : -1;
-  const translatedOffsets = LOOKUP_OFFSETS.map(offset => start + offset * offsetSign);
-  const intervals = zip(translatedOffsets.slice(0, -1), translatedOffsets.slice(1)) as Array<
-    [number, number]
-  >;
-  return intervals;
 }
 
 function mapHitsToLogEntryDocuments(
