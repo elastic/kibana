@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export * from './create_kibana_utils_core';
+export { Get, Set, createGetterSetter } from '../common';
