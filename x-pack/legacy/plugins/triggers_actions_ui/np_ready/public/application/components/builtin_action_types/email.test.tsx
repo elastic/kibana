@@ -3,11 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React from 'react';
+import React, { FunctionComponent } from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { TypeRegistry } from '../../type_registry';
 import { registerBuiltInActionTypes } from './index';
-import { ActionTypeModel, ActionConnector } from '../../../types';
+import { ActionTypeModel, ActionParamsProps } from '../../../types';
+import { EmailActionParams, EmailActionConnector } from './types';
 
 const ACTION_TYPE_ID = '.email';
 let actionTypeModel: ActionTypeModel;
@@ -40,43 +41,15 @@ describe('connector validation', () => {
       name: 'email',
       config: {
         from: 'test@test.com',
-        port: '2323',
+        port: 2323,
         host: 'localhost',
         test: 'test',
       },
-    } as ActionConnector;
+    } as EmailActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
       errors: {
         from: [],
-        service: [],
-        port: [],
-        host: [],
-        user: [],
-        password: [],
-      },
-    });
-
-    delete actionConnector.config.test;
-    actionConnector.config.host = 'elastic.co';
-    actionConnector.config.port = 8080;
-    expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
-      errors: {
-        from: [],
-        service: [],
-        port: [],
-        host: [],
-        user: [],
-        password: [],
-      },
-    });
-    delete actionConnector.config.host;
-    delete actionConnector.config.port;
-    actionConnector.config.service = 'testService';
-    expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
-      errors: {
-        from: [],
-        service: [],
         port: [],
         host: [],
         user: [],
@@ -97,12 +70,11 @@ describe('connector validation', () => {
       config: {
         from: 'test@test.com',
       },
-    } as ActionConnector;
+    } as EmailActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
       errors: {
         from: [],
-        service: ['Service is required.'],
         port: ['Port is required.'],
         host: ['Host is required.'],
         user: [],
@@ -168,14 +140,13 @@ describe('EmailActionConnectorFields renders', () => {
       config: {
         from: 'test@test.com',
       },
-    } as ActionConnector;
+    } as EmailActionConnector;
     const wrapper = mountWithIntl(
       <ConnectorFields
         action={actionConnector}
-        errors={{ from: [], service: [], port: [], host: [], user: [], password: [] }}
+        errors={{ from: [], port: [], host: [], user: [], password: [] }}
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
-        hasErrors={false}
       />
     );
     expect(wrapper.find('[data-test-subj="emailFromInput"]').length > 0).toBeTruthy();
@@ -198,19 +169,22 @@ describe('EmailParamsFields renders', () => {
     if (!actionTypeModel.actionParamsFields) {
       return;
     }
-    const ParamsFields = actionTypeModel.actionParamsFields;
+    const ParamsFields = actionTypeModel.actionParamsFields as FunctionComponent<
+      ActionParamsProps<EmailActionParams>
+    >;
     const actionParams = {
+      cc: [],
+      bcc: [],
       to: ['test@test.com'],
       subject: 'test',
       message: 'test message',
     };
     const wrapper = mountWithIntl(
       <ParamsFields
-        action={actionParams}
-        errors={{}}
+        actionParams={actionParams}
+        errors={{ to: [], cc: [], bcc: [], subject: [], message: [] }}
         editAction={() => {}}
         index={0}
-        hasErrors={false}
       />
     );
     expect(wrapper.find('[data-test-subj="toEmailAddressInput"]').length > 0).toBeTruthy();
@@ -220,8 +194,6 @@ describe('EmailParamsFields renders', () => {
         .first()
         .prop('selectedOptions')
     ).toStrictEqual([{ label: 'test@test.com' }]);
-    expect(wrapper.find('[data-test-subj="ccEmailAddressInput"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="bccEmailAddressInput"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="emailSubjectInput"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="emailMessageInput"]').length > 0).toBeTruthy();
   });
