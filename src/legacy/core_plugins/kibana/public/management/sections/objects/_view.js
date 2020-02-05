@@ -46,13 +46,14 @@ uiRoutes.when('/management/kibana/objects/:service/:id', {
 
 uiModules
   .get('apps/management', ['monospaced.elastic'])
-  .directive('kbnManagementObjectsView', function(kbnIndex, confirmModal) {
+  .directive('kbnManagementObjectsView', function() {
     return {
       restrict: 'E',
       controller: function($scope, $routeParams, $location, $window, $rootScope, uiCapabilities) {
         const serviceObj = savedObjectManagementRegistry.get($routeParams.service);
         const service = serviceObj.service;
         const savedObjectsClient = npStart.core.savedObjects.client;
+        const { overlays } = npStart.core;
 
         /**
          * Creates a field definition and pushes it to the memo stack. This function
@@ -233,7 +234,6 @@ uiModules
               .catch(error => fatalError(error, location));
           }
           const confirmModalOptions = {
-            onConfirm: doDelete,
             confirmButtonText: i18n.translate(
               'kbn.management.objects.confirmModalOptions.deleteButtonLabel',
               {
@@ -244,12 +244,19 @@ uiModules
               defaultMessage: 'Delete saved Kibana object?',
             }),
           };
-          confirmModal(
-            i18n.translate('kbn.management.objects.confirmModalOptions.modalDescription', {
-              defaultMessage: "You can't recover deleted objects",
-            }),
-            confirmModalOptions
-          );
+
+          overlays
+            .openConfirm(
+              i18n.translate('kbn.management.objects.confirmModalOptions.modalDescription', {
+                defaultMessage: "You can't recover deleted objects",
+              }),
+              confirmModalOptions
+            )
+            .then(isConfirmed => {
+              if (isConfirmed) {
+                doDelete();
+              }
+            });
         };
 
         $scope.submit = function() {

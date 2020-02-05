@@ -198,8 +198,7 @@ uiModules
     $route,
     Promise,
     config,
-    Private,
-    confirmModal
+    Private
   ) {
     const {
       startSyncingState,
@@ -290,15 +289,18 @@ uiModules
         confirmButtonText: i18n.translate('kbn.management.editIndexPattern.refreshButton', {
           defaultMessage: 'Refresh',
         }),
-        onConfirm: async () => {
-          await $scope.indexPattern.init(true);
-          $scope.fields = $scope.indexPattern.getNonScriptedFields();
-        },
         title: i18n.translate('kbn.management.editIndexPattern.refreshHeader', {
           defaultMessage: 'Refresh field list?',
         }),
       };
-      confirmModal(confirmMessage, confirmModalOptions);
+      npStart.core.overlays
+        .openConfirm(confirmMessage, confirmModalOptions)
+        .then(async isConfirmed => {
+          if (isConfirmed) {
+            await $scope.indexPattern.init(true);
+            $scope.fields = $scope.indexPattern.getNonScriptedFields();
+          }
+        });
     };
 
     $scope.removePattern = function() {
@@ -322,12 +324,15 @@ uiModules
         confirmButtonText: i18n.translate('kbn.management.editIndexPattern.deleteButton', {
           defaultMessage: 'Delete',
         }),
-        onConfirm: doRemove,
         title: i18n.translate('kbn.management.editIndexPattern.deleteHeader', {
           defaultMessage: 'Delete index pattern?',
         }),
       };
-      confirmModal('', confirmModalOptions);
+      npStart.core.overlays.openConfirm('', confirmModalOptions).then(isConfirmed => {
+        if (isConfirmed) {
+          doRemove();
+        }
+      });
     };
 
     $scope.setDefaultPattern = function() {

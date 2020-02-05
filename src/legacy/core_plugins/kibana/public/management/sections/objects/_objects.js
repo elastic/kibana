@@ -38,7 +38,6 @@ function updateObjectsTable($scope, $injector) {
   const $http = $injector.get('$http');
   const kbnUrl = $injector.get('kbnUrl');
   const config = $injector.get('config');
-  const confirmModalPromise = $injector.get('confirmModalPromise');
 
   const savedObjectsClient = npStart.core.savedObjects.client;
   const services = savedObjectManagementRegistry.all().map(obj => obj.service);
@@ -54,7 +53,7 @@ function updateObjectsTable($scope, $injector) {
       <I18nContext>
         <ObjectsTable
           savedObjectsClient={savedObjectsClient}
-          confirmModalPromise={confirmModalPromise}
+          confirmModalPromise={npStart.core.overlays.openConfirm}
           services={services}
           indexPatterns={indexPatterns}
           $http={$http}
