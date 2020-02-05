@@ -101,7 +101,7 @@ Machine Learning::
 * Reactive time-range selection in Single Metric Viewer {pull}51008[#51008]
 * Adds Custom URLs and Calendars to the Job wizards {pull}51281[#51281]
 * Performs cardinality check on enabling the model plot {pull}51915[#51915]
-* Fetches the latest job messages and enable sorting by time {pull}52388[#52388]
+* Fetches the latest job messages and enables sorting by time {pull}52388[#52388]
 * Persists the time range brush when expanded to full width {pull}54020[#54020]
 * Supports search for partitions on Single Metric Viewer {pull}53879[#53879]
 * APM modules configs for RUM Javascript and NodeJS {pull}53792[#53792]
