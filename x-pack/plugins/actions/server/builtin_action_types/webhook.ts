@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { i18n } from '@kbn/i18n';
-import { curry } from 'lodash';
+import { curry, isString } from 'lodash';
 import axios, { AxiosError, AxiosResponse } from 'axios';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { pipe } from 'fp-ts/lib/pipeable';
@@ -36,8 +36,8 @@ type ActionTypeConfigType = TypeOf<typeof ConfigSchema>;
 // secrets definition
 export type ActionTypeSecretsType = TypeOf<typeof SecretsSchema>;
 const secretSchemaProps = {
-  user: schema.maybe(schema.string()),
-  password: schema.maybe(schema.string()),
+  user: schema.nullable(schema.string()),
+  password: schema.nullable(schema.string()),
 };
 const SecretsSchema = schema.object(secretSchemaProps, {
   validate: secrets => {
@@ -107,7 +107,7 @@ export async function executor(
 
   const secrets: ActionTypeSecretsType = execOptions.secrets as ActionTypeSecretsType;
   const basicAuth =
-    secrets.user && secrets.password
+    isString(secrets.user) && isString(secrets.password)
       ? { auth: { username: secrets.user, password: secrets.password } }
       : {};
 
