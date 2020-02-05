@@ -5,11 +5,11 @@
  */
 import { merge, isPlainObject, cloneDeep } from 'lodash';
 import { DeepPartial } from 'utility-types';
-import { AggregationInputMap } from '../../../../typings/elasticsearch/aggregations';
+import { AggregationInputMap } from '../../../../../../../plugins/apm/typings/elasticsearch/aggregations';
 import {
   ESSearchRequest,
   ESSearchBody
-} from '../../../../typings/elasticsearch';
+} from '../../../../../../../plugins/apm/typings/elasticsearch';
 import { Projection } from '../../typings';
 
 type PlainObject = Record<string | number | symbol, any>;

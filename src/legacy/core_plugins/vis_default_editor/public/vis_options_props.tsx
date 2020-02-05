@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import { AggConfigs, PersistedState } from './legacy_imports';
+import { IAggConfigs, PersistedState } from './legacy_imports';
 import { Vis } from '../../visualizations/public';
 
 export interface VisOptionsProps<VisParamType = unknown> {
-  aggs: AggConfigs;
+  aggs: IAggConfigs;
   hasHistogramAgg: boolean;
   isTabSelected: boolean;
   stateParams: VisParamType;

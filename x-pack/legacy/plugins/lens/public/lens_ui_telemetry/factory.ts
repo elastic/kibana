@@ -8,7 +8,7 @@ import moment from 'moment';
 import { HttpSetup } from 'src/core/public';
 
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
-import { BASE_API_URL } from '../../common';
+import { BASE_API_URL } from '../../../../../plugins/lens/common';
 
 const STORAGE_KEY = 'lens-ui-telemetry';
 

@@ -48,7 +48,7 @@ describe('TokenAuthenticationProvider', () => {
       const authenticationResult = await provider.login(request, credentials);
 
       expect(authenticationResult.succeeded()).toBe(true);
-      expect(authenticationResult.user).toEqual(user);
+      expect(authenticationResult.user).toEqual({ ...user, authentication_provider: 'token' });
       expect(authenticationResult.state).toEqual(tokenPair);
       expect(authenticationResult.authHeaders).toEqual({ authorization });
     });
@@ -140,7 +140,7 @@ describe('TokenAuthenticationProvider', () => {
       const authenticationResult = await provider.authenticate(request);
 
       expect(authenticationResult.succeeded()).toBe(true);
-      expect(authenticationResult.user).toEqual(user);
+      expect(authenticationResult.user).toEqual({ ...user, authentication_provider: 'token' });
       expect(authenticationResult.authHeaders).toBeUndefined();
       expect(authenticationResult.state).toBeUndefined();
     });
@@ -158,7 +158,7 @@ describe('TokenAuthenticationProvider', () => {
       const authenticationResult = await provider.authenticate(request, tokenPair);
 
       expect(authenticationResult.succeeded()).toBe(true);
-      expect(authenticationResult.user).toEqual(user);
+      expect(authenticationResult.user).toEqual({ ...user, authentication_provider: 'token' });
       expect(authenticationResult.state).toBeUndefined();
       expect(authenticationResult.authHeaders).toEqual({ authorization });
       expect(request.headers).not.toHaveProperty('authorization');
@@ -192,7 +192,7 @@ describe('TokenAuthenticationProvider', () => {
       sinon.assert.calledOnce(mockOptions.tokens.refresh);
 
       expect(authenticationResult.succeeded()).toBe(true);
-      expect(authenticationResult.user).toEqual(user);
+      expect(authenticationResult.user).toEqual({ ...user, authentication_provider: 'token' });
       expect(authenticationResult.state).toEqual({ accessToken: 'newfoo', refreshToken: 'newbar' });
       expect(authenticationResult.authHeaders).toEqual({ authorization: 'Bearer newfoo' });
       expect(request.headers).not.toHaveProperty('authorization');
@@ -231,7 +231,7 @@ describe('TokenAuthenticationProvider', () => {
       const authenticationResult = await provider.authenticate(request, tokenPair);
 
       expect(authenticationResult.succeeded()).toBe(true);
-      expect(authenticationResult.user).toEqual(user);
+      expect(authenticationResult.user).toEqual({ ...user, authentication_provider: 'token' });
       expect(authenticationResult.state).toBeUndefined();
       expect(authenticationResult.authHeaders).toBeUndefined();
       expect(request.headers.authorization).toEqual('Bearer foo-from-header');
