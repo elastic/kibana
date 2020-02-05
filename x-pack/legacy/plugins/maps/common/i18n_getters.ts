@@ -41,6 +41,7 @@ export function getEsSpatialRelationLabel(spatialRelation: $Values<typeof ES_SPA
       return i18n.translate('xpack.maps.common.esSpatialRelation.withinLabel', {
         defaultMessage: 'within',
       });
+    // @ts-ignore
     case ES_SPATIAL_RELATIONS.CONTAINS:
       return i18n.translate('xpack.maps.common.esSpatialRelation.containsLabel', {
         defaultMessage: 'contains',
