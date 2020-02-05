@@ -69,19 +69,19 @@ describe('UrlStateContainer', () => {
             mount(<HookWrapper hookProps={mockProps} hook={args => useUrlStateHooks(args)} />);
 
             expect(mockSetRelativeRangeDatePicker.mock.calls[1][0]).toEqual({
-              from: 1558591200000,
+              from: 11223344556677,
               fromStr: 'now-1d/d',
               kind: 'relative',
-              to: 1558677599999,
+              to: 11223344556677,
               toStr: 'now-1d/d',
               id: 'global',
             });
 
             expect(mockSetRelativeRangeDatePicker.mock.calls[0][0]).toEqual({
-              from: 1558732849370,
+              from: 11223344556677,
               fromStr: 'now-15m',
               kind: 'relative',
-              to: 1558733749370,
+              to: 11223344556677,
               toStr: 'now',
               id: 'timeline',
             });
@@ -189,7 +189,7 @@ describe('UrlStateContainer', () => {
         wrapper.update();
         await wait();
         if (CONSTANTS.hostsPage === page) {
-          // There is no change in url state, so that's expected
+          // There is no change in url state, so that's expected we only have two actions
           expect(mockSetRelativeRangeDatePicker.mock.calls.length).toEqual(2);
         } else {
           expect(mockSetRelativeRangeDatePicker.mock.calls[3][0]).toEqual({

@@ -45,11 +45,9 @@ export const getParamFromQueryString = (queryString: string, key: string): strin
   return Array.isArray(queryParam) ? queryParam[0] : queryParam;
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const replaceStateKeyInQueryString = <UrlState extends any>(
-  stateKey: string,
-  urlState: UrlState | undefined
-) => (queryString: string) => {
+export const replaceStateKeyInQueryString = <T>(stateKey: string, urlState: T) => (
+  queryString: string
+): string => {
   const previousQueryValues = QueryString.decode(queryString);
   if (urlState == null || (typeof urlState === 'string' && urlState === '')) {
     delete previousQueryValues[stateKey];

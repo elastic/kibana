@@ -68,19 +68,11 @@ export const useUrlStateHooks = ({
           search: mySearch,
           urlKey,
         });
-        if (isInitializing) {
-          urlStateToUpdate = [
-            ...urlStateToUpdate,
-            {
-              urlKey,
-              newUrlStateString,
-            },
-          ];
-        } else if (needUpdate) {
+        if (isInitializing || needUpdate) {
           const updatedUrlStateString =
             getParamFromQueryString(getQueryStringFromLocation(mySearch), urlKey) ??
             newUrlStateString;
-          if (!isEqual(updatedUrlStateString, newUrlStateString)) {
+          if (isInitializing || !isEqual(updatedUrlStateString, newUrlStateString)) {
             urlStateToUpdate = [
               ...urlStateToUpdate,
               {
@@ -206,7 +198,7 @@ export const useUrlStateHooks = ({
     } else if (pathName !== prevProps.pathName) {
       handleInitialize(type, true);
     }
-  }, [isInitializing, pathName, pageName, prevProps, urlState]);
+  }, [isInitializing, history, pathName, pageName, prevProps, urlState]);
 
   useEffect(() => {
     document.title = `${getTitle(pageName, detailName, navTabs)} - Kibana`;
