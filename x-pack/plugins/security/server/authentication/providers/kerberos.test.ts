@@ -419,44 +419,6 @@ describe('KerberosAuthenticationProvider', () => {
       expect(authenticationResult.authResponseHeaders).toEqual({ 'WWW-Authenticate': 'Negotiate' });
     });
 
-    it('fails with `Negotiate` challenge if both access and refresh token documents are missing and backend supports Kerberos.', async () => {
-      const request = httpServerMock.createKibanaRequest({ headers: {} });
-      const tokenPair = { accessToken: 'missing-token', refreshToken: 'missing-refresh-token' };
-
-      mockScopedClusterClient(
-        mockOptions.client,
-        sinon.match({ headers: { authorization: `Bearer ${tokenPair.accessToken}` } })
-      )
-        .callAsCurrentUser.withArgs('shield.authenticate')
-        .rejects({
-          statusCode: 500,
-          body: { error: { reason: 'token document is missing and must be present' } },
-        });
-
-      mockScopedClusterClient(
-        mockOptions.client,
-        sinon.match({
-          headers: { authorization: `Negotiate ${Buffer.from('__fake__').toString('base64')}` },
-        })
-      )
-        .callAsCurrentUser.withArgs('shield.authenticate')
-        .rejects(
-          ElasticsearchErrorHelpers.decorateNotAuthorizedError(
-            new (errors.AuthenticationException as any)('Unauthorized', {
-              body: { error: { header: { 'WWW-Authenticate': 'Negotiate' } } },
-            })
-          )
-        );
-
-      mockOptions.tokens.refresh.withArgs(tokenPair.refreshToken).resolves(null);
-
-      const authenticationResult = await provider.authenticate(request, tokenPair);
-
-      expect(authenticationResult.failed()).toBe(true);
-      expect(authenticationResult.error).toHaveProperty('output.statusCode', 401);
-      expect(authenticationResult.authResponseHeaders).toEqual({ 'WWW-Authenticate': 'Negotiate' });
-    });
-
     it('succeeds if `authorization` contains a valid token.', async () => {
       const user = mockAuthenticatedUser();
       const request = httpServerMock.createKibanaRequest({
