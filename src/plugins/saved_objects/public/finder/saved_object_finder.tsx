@@ -48,7 +48,7 @@ import {
   CoreStart,
   IUiSettingsClient,
   SavedObjectsStart,
-} from '../../../core/public';
+} from '../../../../core/public';
 
 export interface SavedObjectMetaData<T extends SavedObjectAttributes> {
   type: string;
