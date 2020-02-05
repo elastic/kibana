@@ -24,7 +24,6 @@ import { IpRangeKey, convertIPRangeToString } from './lib/ip_range';
 import { BucketAggType } from './_bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
 
-// @ts-ignore
 import { createFilterIpRange } from './create_filter/ip_range';
 import { KBN_FIELD_TYPES, fieldFormats } from '../../../../../../../plugins/data/public';
 export { IpRangeKey, convertIPRangeToString };

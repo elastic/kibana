@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import sinon from 'sinon';
 import { derivativeMetricAgg } from './derivative';
 import { cumulativeSumMetricAgg } from './cumulative_sum';
 import { movingAvgMetricAgg } from './moving_avg';
@@ -220,16 +219,16 @@ describe('parent pipeline aggs', function() {
         });
 
         const searchSource: any = {};
-        const customMetricSpy = sinon.spy();
+        const customMetricSpy = jest.fn();
         const customMetric = aggConfig.params.customMetric;
 
         // Attach a modifyAggConfigOnSearchRequestStart with a spy to the first parameter
         customMetric.type.params[0].modifyAggConfigOnSearchRequestStart = customMetricSpy;
 
         aggConfig.type.params.forEach(param => {
-          param.modifyAggConfigOnSearchRequestStart(aggConfig, searchSource);
+          param.modifyAggConfigOnSearchRequestStart(aggConfig, searchSource, {});
         });
-        expect(customMetricSpy.calledWith(customMetric, searchSource)).toBe(true);
+        expect(customMetricSpy.mock.calls[0]).toEqual([customMetric, searchSource, {}]);
       });
     });
   });

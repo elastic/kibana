@@ -21,13 +21,11 @@ import { i18n } from '@kbn/i18n';
 import { npStart } from 'ui/new_platform';
 import { MetricAggType } from './metric_agg_type';
 import { getResponseAggConfigClass, IResponseAggConfig } from './lib/get_response_agg_config_class';
-
 import { getPercentileValue } from './percentiles_get_value';
 import { METRIC_TYPES } from './metric_agg_types';
 import { fieldFormats, KBN_FIELD_TYPES } from '../../../../../../../plugins/data/public';
 
 // required by the values editor
-
 export type IPercentileRanksAggConfig = IResponseAggConfig;
 
 const getFieldFormats = () => npStart.plugins.data.fieldFormats;

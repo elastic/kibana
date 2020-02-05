@@ -17,13 +17,6 @@
  * under the License.
  */
 
-/**
- * @name AggConfig
- *
- * @description This class represents an aggregation, which is displayed in the left-hand nav of
- * the Visualize app.
- */
-
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { npStart } from 'ui/new_platform';
@@ -89,6 +82,13 @@ const getSchemaFromRegistry = (schemas: any, schema: string): Schema => {
 
   return registeredSchema;
 };
+
+/**
+ * @name AggConfig
+ *
+ * @description This class represents an aggregation, which is displayed in the left-hand nav of
+ * the Visualize app.
+ */
 
 // TODO need to make a more explicit interface for this
 export type IAggConfig = AggConfig;

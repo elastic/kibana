@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import { AggConfigs } from '../agg_configs';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { npStart } from 'ui/new_platform';
