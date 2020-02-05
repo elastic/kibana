@@ -25,8 +25,6 @@ export interface PluginStartContract {
   taskManager?: TaskManagerStartContract;
 }
 
-const taskManagerStartContract$ = new Subject<TaskManagerStartContract>();
-
 export class LensServerPlugin implements Plugin<{}, {}, {}, {}> {
   private readonly kibanaIndexConfig: Observable<{ kibana: { index: string } }>;
   private readonly telemetryLogger: Logger;
@@ -35,12 +33,14 @@ export class LensServerPlugin implements Plugin<{}, {}, {}, {}> {
     this.kibanaIndexConfig = initializerContext.config.legacy.globalConfig$;
     this.telemetryLogger = initializerContext.logger.get('telemetry');
   }
-  setup(core: CoreSetup, plugins: PluginSetupContract) {
+  setup(core: CoreSetup<PluginStartContract>, plugins: PluginSetupContract) {
     setupRoutes(core);
     if (plugins.usageCollection && plugins.taskManager) {
       registerLensUsageCollector(
         plugins.usageCollection,
-        taskManagerStartContract$.pipe(first()).toPromise()
+        core
+          .getStartServices()
+          .then(([_, { taskManager }]) => taskManager as TaskManagerStartContract)
       );
       initializeLensTelemetry(
         this.telemetryLogger,
@@ -55,8 +55,6 @@ export class LensServerPlugin implements Plugin<{}, {}, {}, {}> {
   start(core: CoreStart, plugins: PluginStartContract) {
     if (plugins.taskManager) {
       scheduleLensTelemetry(this.telemetryLogger, plugins.taskManager);
-      taskManagerStartContract$.next(plugins.taskManager);
-      taskManagerStartContract$.complete();
     }
     return {};
   }
