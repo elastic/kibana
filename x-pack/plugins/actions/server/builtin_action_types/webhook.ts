@@ -35,9 +35,17 @@ type ActionTypeConfigType = TypeOf<typeof ConfigSchema>;
 
 // secrets definition
 export type ActionTypeSecretsType = TypeOf<typeof SecretsSchema>;
-const SecretsSchema = schema.object({
+const secretSchemaProps = {
   user: schema.maybe(schema.string()),
   password: schema.maybe(schema.string()),
+};
+const SecretsSchema = schema.object(secretSchemaProps, {
+  validate: secrets => {
+    if (secrets.password && secrets.user) return;
+    return i18n.translate('xpack.actions.builtin.webhook.invalidUsernamePassword', {
+      defaultMessage: 'both user and password must be specified',
+    });
+  },
 });
 
 // params definition

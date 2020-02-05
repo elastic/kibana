@@ -55,7 +55,7 @@ describe('secrets validation', () => {
     expect(() => {
       validateSecrets(actionType, { user: 'bob' });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type secrets: [password]: expected value of type [string] but got [undefined]"`
+      `"error validating action type secrets: both user and password must be specified"`
     );
   });
 
