@@ -17,11 +17,12 @@
  * under the License.
  */
 
-import { fromEvent, interval } from 'rxjs';
+import { fromEvent } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import * as readline from 'readline';
 import * as fs from 'fs';
 import { resolve } from 'path';
+import { pretty } from './utils'
 import * as rawData from '../../cc_app/public/initial_data_raw.js'
 
 
@@ -32,21 +33,23 @@ export const parseAndPopulate = buildNumber => srcFile => destFile => log => {
   logV({ 'resolvedSrcFile': resolvedSrcFile, 'resolvedDestFile': resolvedDestFile });
 
   const initialData = dedupe(rawData);
+  console.log(`\n### initialData: \n\t${pretty(initialData)}`);
   const mutateInitialData = mutate(initialData);
+  const logErr = x => log.error(`!!! ${x}`)
 
   const rl = readline.createInterface({ input: fs.createReadStream(resolvedSrcFile) });
-  const lines$ = fromEvent(rl, 'line');
-  lines$.pipe(takeUntil(fromEvent(rl, 'close')))
-    .subscribe(
-      mutateInitialData,
-      err => console.log('Error: %s', err),
-      () => {
-        console.log(`\n### initialData.historicalItems: \n\t${initialData.historicalItems}`);
-
-        console.log('Completed')
-      });
+  const onSrcFileReadComplete = onComplete(initialData);
+  fromEvent(rl, 'line')
+    .pipe(takeUntil(fromEvent(rl, 'close')))
+    .subscribe(mutateInitialData, logErr, onSrcFileReadComplete);
 
 };
+
+function onComplete(initData) {
+
+  console.log('Completed')
+}
+
 function mutate(obj) {
   return function mutateInner(x) {
     obj.historicalItems.push(x);
