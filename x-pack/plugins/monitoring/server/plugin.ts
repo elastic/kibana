@@ -5,6 +5,7 @@
  */
 import { combineLatest } from 'rxjs';
 import { first } from 'rxjs/operators';
+import { i18n } from '@kbn/i18n';
 import { has, get } from 'lodash';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG } from '../common/constants';
@@ -216,6 +217,30 @@ export class Plugin {
     const legacyApi = this.getLegacyAPI();
     const config = this.monitoringCore.config ? this.monitoringCore.config() : { get: () => null };
     const log = this.getLogger(LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG);
+
+    legacyApi.xpackMain.registerFeature({
+      id: 'monitoring',
+      name: i18n.translate('xpack.monitoring.featureRegistry.monitoringFeatureName', {
+        defaultMessage: 'Stack Monitoring',
+      }),
+      icon: 'monitoringApp',
+      navLinkId: 'monitoring',
+      app: ['monitoring', 'kibana'],
+      catalogue: ['monitoring'],
+      privileges: {},
+      reserved: {
+        privilege: {
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: [],
+        },
+        description: i18n.translate('xpack.monitoring.feature.reserved.description', {
+          defaultMessage: 'To grant users access, you should also assign the monitoring_user role.',
+        }),
+      },
+    });
 
     /*
      * Instantiate and start the internal background task that calls collector
