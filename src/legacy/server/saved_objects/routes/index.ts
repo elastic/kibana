@@ -19,7 +19,6 @@
 
 export { createBulkCreateRoute } from './bulk_create';
 export { createBulkGetRoute } from './bulk_get';
-export { createFindRoute } from './find';
 export { createImportRoute } from './import';
 export { createLogLegacyImportRoute } from './log_legacy_import';
 export { createResolveImportErrorsRoute } from './resolve_import_errors';

@@ -21,6 +21,7 @@ import { InternalHttpServiceSetup } from '../../http';
 import { registerGetRoute } from './get';
 import { registerCreateRoute } from './create';
 import { registerDeleteRoute } from './delete';
+import { registerFindRoute } from './find';
 
 export function registerRoutes(http: InternalHttpServiceSetup) {
   const router = http.createRouter('');
@@ -28,4 +29,5 @@ export function registerRoutes(http: InternalHttpServiceSetup) {
   registerGetRoute(router);
   registerCreateRoute(router);
   registerDeleteRoute(router);
+  registerFindRoute(router);
 }

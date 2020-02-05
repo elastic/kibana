@@ -17,14 +17,19 @@
  * under the License.
  */
 
-import Hapi from 'hapi';
-import { createMockServer } from './_mock_server';
-import { createFindRoute } from './find';
+import supertest from 'supertest';
+import { UnwrapPromise } from '@kbn/utility-types';
+import { registerFindRoute } from './find';
 import { savedObjectsClientMock } from '../../../../core/server/mocks';
+import { setupServer } from './test_utils';
+
+type setupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 
 describe('GET /api/saved_objects/_find', () => {
-  let server: Hapi.Server;
-  const savedObjectsClient = savedObjectsClientMock.create();
+  let server: setupServerReturn['server'];
+  let httpSetup: setupServerReturn['httpSetup'];
+  let handlerContext: setupServerReturn['handlerContext'];
+  let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
 
   const clientResponse = {
     total: 0,
@@ -32,48 +37,34 @@ describe('GET /api/saved_objects/_find', () => {
     per_page: 0,
     page: 0,
   };
-  beforeEach(() => {
-    savedObjectsClient.find.mockImplementation(() => Promise.resolve(clientResponse));
-    server = createMockServer();
 
-    const prereqs = {
-      getSavedObjectsClient: {
-        assign: 'savedObjectsClient',
-        method() {
-          return savedObjectsClient;
-        },
-      },
-    };
+  beforeEach(async () => {
+    ({ server, httpSetup, handlerContext } = await setupServer());
+    savedObjectsClient = handlerContext.savedObjects.client;
 
-    server.route(createFindRoute(prereqs));
+    savedObjectsClient.find.mockResolvedValue(clientResponse);
+
+    const router = httpSetup.createRouter('');
+    registerFindRoute(router);
+
+    await server.start();
   });
 
-  afterEach(() => {
-    savedObjectsClient.find.mockReset();
+  afterEach(async () => {
+    await server.stop();
   });
 
   it('returns with status 400 when type is missing', async () => {
-    const request = {
-      method: 'GET',
-      url: '/api/saved_objects/_find',
-    };
+    const result = await supertest(httpSetup.server.listener)
+      .get('/api/saved_objects/_find')
+      .expect(400);
 
-    const { payload, statusCode } = await server.inject(request);
-
-    expect(statusCode).toEqual(400);
-    expect(JSON.parse(payload)).toMatchObject({
-      statusCode: 400,
-      error: 'Bad Request',
-      message: 'child "type" fails because ["type" is required]',
-    });
+    expect(result.body.message).toContain(
+      '[request query.type]: expected at least one defined value'
+    );
   });
 
   it('formats successful response', async () => {
-    const request = {
-      method: 'GET',
-      url: '/api/saved_objects/_find?type=index-pattern',
-    };
-
     const findResponse = {
       total: 2,
       per_page: 2,
@@ -99,23 +90,19 @@ describe('GET /api/saved_objects/_find', () => {
         },
       ],
     };
+    savedObjectsClient.find.mockResolvedValue(findResponse);
 
-    savedObjectsClient.find.mockImplementation(() => Promise.resolve(findResponse));
+    const result = await supertest(httpSetup.server.listener)
+      .get('/api/saved_objects/_find?type=index-pattern')
+      .expect(200);
 
-    const { payload, statusCode } = await server.inject(request);
-    const response = JSON.parse(payload);
-
-    expect(statusCode).toBe(200);
-    expect(response).toEqual(findResponse);
+    expect(result.body).toEqual(findResponse);
   });
 
   it('calls upon savedObjectClient.find with defaults', async () => {
-    const request = {
-      method: 'GET',
-      url: '/api/saved_objects/_find?type=foo&type=bar',
-    };
-
-    await server.inject(request);
+    await supertest(httpSetup.server.listener)
+      .get('/api/saved_objects/_find?type=foo&type=bar')
+      .expect(200);
 
     expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
 
@@ -129,12 +116,9 @@ describe('GET /api/saved_objects/_find', () => {
   });
 
   it('accepts the query parameter page/per_page', async () => {
-    const request = {
-      method: 'GET',
-      url: '/api/saved_objects/_find?type=foo&per_page=10&page=50',
-    };
-
-    await server.inject(request);
+    await supertest(httpSetup.server.listener)
+      .get('/api/saved_objects/_find?type=foo&per_page=10&page=50')
+      .expect(200);
 
     expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
 
@@ -143,12 +127,9 @@ describe('GET /api/saved_objects/_find', () => {
   });
 
   it('accepts the query parameter search_fields', async () => {
-    const request = {
-      method: 'GET',
-      url: '/api/saved_objects/_find?type=foo&search_fields=title',
-    };
-
-    await server.inject(request);
+    await supertest(httpSetup.server.listener)
+      .get('/api/saved_objects/_find?type=foo&search_fields=title')
+      .expect(200);
 
     expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
 
@@ -163,12 +144,9 @@ describe('GET /api/saved_objects/_find', () => {
   });
 
   it('accepts the query parameter fields as a string', async () => {
-    const request = {
-      method: 'GET',
-      url: '/api/saved_objects/_find?type=foo&fields=title',
-    };
-
-    await server.inject(request);
+    await supertest(httpSetup.server.listener)
+      .get('/api/saved_objects/_find?type=foo&fields=title')
+      .expect(200);
 
     expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
 
@@ -183,12 +161,9 @@ describe('GET /api/saved_objects/_find', () => {
   });
 
   it('accepts the query parameter fields as an array', async () => {
-    const request = {
-      method: 'GET',
-      url: '/api/saved_objects/_find?type=foo&fields=title&fields=description',
-    };
-
-    await server.inject(request);
+    await supertest(httpSetup.server.listener)
+      .get('/api/saved_objects/_find?type=foo&fields=title&fields=description')
+      .expect(200);
 
     expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
 
@@ -203,12 +178,9 @@ describe('GET /api/saved_objects/_find', () => {
   });
 
   it('accepts the query parameter type as a string', async () => {
-    const request = {
-      method: 'GET',
-      url: '/api/saved_objects/_find?type=index-pattern',
-    };
-
-    await server.inject(request);
+    await supertest(httpSetup.server.listener)
+      .get('/api/saved_objects/_find?type=index-pattern')
+      .expect(200);
 
     expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
 
@@ -222,12 +194,9 @@ describe('GET /api/saved_objects/_find', () => {
   });
 
   it('accepts the query parameter type as an array', async () => {
-    const request = {
-      method: 'GET',
-      url: '/api/saved_objects/_find?type=index-pattern&type=visualization',
-    };
-
-    await server.inject(request);
+    await supertest(httpSetup.server.listener)
+      .get('/api/saved_objects/_find?type=index-pattern&type=visualization')
+      .expect(200);
 
     expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
 
