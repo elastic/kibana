@@ -18,6 +18,7 @@ const REPORTS_FOLDER = path.resolve(__dirname, 'reports');
 export default function({ getService, getPageObjects }) {
   const retry = getService('retry');
   const config = getService('config');
+  //const security = getService('security');
   const PageObjects = getPageObjects([
     'reporting',
     'common',

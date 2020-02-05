@@ -33,5 +33,6 @@ export default async function({ readConfigFile }) {
     },
     esArchiver: functionalConfig.get('esArchiver'),
     esTestCluster: functionalConfig.get('esTestCluster'),
+    security: { disableTestUser: true },
   };
 }

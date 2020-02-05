@@ -106,7 +106,15 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
 
       if (loginPage && !wantedLoginPage) {
         log.debug('Found login page');
-        await PageObjects.shield.login('test_user', 'changeme');
+        if (config.get('security.disableTestUser')) {
+          await PageObjects.shield.login(
+            config.get('servers.kibana.username'),
+            config.get('servers.kibana.password')
+          );
+        } else {
+          await PageObjects.shield.login('test_user', 'changeme');
+        }
+
         await find.byCssSelector(
           '[data-test-subj="kibanaChrome"] nav:not(.ng-hide)',
           2 * defaultFindTimeout
