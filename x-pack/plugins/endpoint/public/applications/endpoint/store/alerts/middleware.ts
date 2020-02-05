@@ -19,6 +19,14 @@ export const alertMiddlewareFactory: MiddlewareFactory = coreStart => {
         query: qp as HttpFetchQuery,
       });
       api.dispatch({ type: 'serverReturnedAlertsData', payload: response });
+    } else if (action.type === 'userAppliedAlertsSearchFilter') {
+      const filterQuery = action.payload;
+      const response = await coreStart.http.post('/api/endpoint/alerts', {
+        body: JSON.stringify({
+          filters: filterQuery.query,
+        }),
+      });
+      api.dispatch({ type: 'serverReturnedAlertsData', payload: response });
     }
   };
 };

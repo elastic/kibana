@@ -4,13 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { memo, useState, useMemo } from 'react';
+import { memo, useState, useMemo, useContext } from 'react';
 import React from 'react';
 import { EuiDataGrid } from '@elastic/eui';
 import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import * as selectors from '../../store/selectors';
 import { usePageId } from '../use_page_id';
+import { AlertIndexSearchBar } from './index_search_bar';
 
 export const AlertIndex = memo(() => {
   usePageId('alertsPage');
@@ -67,20 +68,23 @@ export const AlertIndex = memo(() => {
   }, [json]);
 
   return (
-    <EuiDataGrid
-      aria-label="Alert List"
-      rowCount={json.length}
-      // Required. Sets up three columns, the last of which has a custom schema we later define down below.
-      // The second column B won't allow clicking in to see the content in a popup.
-      // The first column defines an starting width of 150px and prevents the user from resizing it
-      columns={columns}
-      // This allows you to initially hide columns. Users can still turn them on.
-      columnVisibility={{
-        visibleColumns,
-        setVisibleColumns,
-      }}
-      // Often used in combination with useEffect() to dynamically change the render.
-      renderCellValue={renderCellValue}
-    />
+    <div>
+      <AlertIndexSearchBar />
+      <EuiDataGrid
+        aria-label="Alert List"
+        rowCount={json.length}
+        // Required. Sets up three columns, the last of which has a custom schema we later define down below.
+        // The second column B won't allow clicking in to see the content in a popup.
+        // The first column defines an starting width of 150px and prevents the user from resizing it
+        columns={columns}
+        // This allows you to initially hide columns. Users can still turn them on.
+        columnVisibility={{
+          visibleColumns,
+          setVisibleColumns,
+        }}
+        // Often used in combination with useEffect() to dynamically change the render.
+        renderCellValue={renderCellValue}
+      />
+    </div>
   );
 });

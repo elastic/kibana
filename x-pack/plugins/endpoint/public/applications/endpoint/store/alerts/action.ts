@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Query } from 'src/plugins/data/public';
 import { AlertListData } from '../../types';
 
 interface ServerReturnedAlertsData {
@@ -11,4 +12,9 @@ interface ServerReturnedAlertsData {
   payload: AlertListData;
 }
 
-export type AlertAction = ServerReturnedAlertsData;
+interface UserAppliedAlertsSearchFilter {
+  type: 'userAppliedAlertsSearchFilter';
+  payload: Query;
+}
+
+export type AlertAction = ServerReturnedAlertsData | UserAppliedAlertsSearchFilter;
