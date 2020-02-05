@@ -18,7 +18,7 @@
  */
 
 import { IndexPattern } from 'src/plugins/data/public';
-import { AggConfig } from 'ui/agg_types';
+import { IAggConfig } from 'ui/agg_types';
 import { parseEsInterval } from '../../../../core_plugins/data/public';
 import {
   TimeIntervalParam,
@@ -29,7 +29,7 @@ import {
 } from './types';
 import { leastCommonInterval, leastCommonMultiple } from '../lib';
 
-type EditorConfigProvider = (indexPattern: IndexPattern, aggConfig: AggConfig) => EditorConfig;
+type EditorConfigProvider = (indexPattern: IndexPattern, aggConfig: IAggConfig) => EditorConfig;
 
 class EditorConfigProviderRegistry {
   private providers: Set<EditorConfigProvider> = new Set();
@@ -38,7 +38,7 @@ class EditorConfigProviderRegistry {
     this.providers.add(configProvider);
   }
 
-  public getConfigForAgg(indexPattern: IndexPattern, aggConfig: AggConfig): EditorConfig {
+  public getConfigForAgg(indexPattern: IndexPattern, aggConfig: IAggConfig): EditorConfig {
     const configs = Array.from(this.providers).map(provider => provider(indexPattern, aggConfig));
     return this.mergeConfigs(configs);
   }
