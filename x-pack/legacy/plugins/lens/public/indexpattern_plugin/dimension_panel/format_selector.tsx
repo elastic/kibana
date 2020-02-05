@@ -38,9 +38,12 @@ type FormatSelectorProps = Pick<IndexPatternDimensionPanelProps, 'data'> & {
 export function FormatSelector(props: FormatSelectorProps) {
   const { selectedColumn, onChange } = props;
 
-  const selectedFormat = selectedColumn.format?.id
-    ? supportedFormats[selectedColumn.format.id]
-    : undefined;
+  const currentFormat =
+    selectedColumn.params && 'format' in selectedColumn.params
+      ? selectedColumn.params.format
+      : undefined;
+
+  const selectedFormat = currentFormat?.id ? supportedFormats[currentFormat.id] : undefined;
 
   const defaultOption = {
     value: '',
@@ -49,7 +52,7 @@ export function FormatSelector(props: FormatSelectorProps) {
     }),
   };
 
-  const currentDecimals = selectedColumn.format?.params?.decimals;
+  const currentDecimals = currentFormat?.params?.decimals;
 
   return (
     <>
@@ -72,11 +75,11 @@ export function FormatSelector(props: FormatSelectorProps) {
             }))
           )}
           selectedOptions={
-            selectedColumn.format
+            currentFormat
               ? [
                   {
-                    value: selectedColumn.format.id || '',
-                    label: selectedFormat?.title || selectedColumn.format.id || '',
+                    value: currentFormat.id || '',
+                    label: selectedFormat?.title || currentFormat.id || '',
                   },
                 ]
               : [defaultOption]
@@ -98,7 +101,7 @@ export function FormatSelector(props: FormatSelectorProps) {
         />
       </EuiFormRow>
 
-      {selectedColumn?.format ? (
+      {currentFormat ? (
         <EuiFormRow
           label={i18n.translate('xpack.lens.indexPattern.decimalPlacesLabel', {
             defaultMessage: 'Decimals',
@@ -112,7 +115,7 @@ export function FormatSelector(props: FormatSelectorProps) {
             max={20}
             onChange={e => {
               onChange({
-                id: selectedColumn.format!.id,
+                id: (selectedColumn.params as { format: { id: string } })?.format!.id,
                 params: {
                   decimals: Number(e.target.value),
                 },

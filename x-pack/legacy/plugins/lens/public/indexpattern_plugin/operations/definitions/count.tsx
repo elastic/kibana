@@ -6,17 +6,19 @@
 
 import { i18n } from '@kbn/i18n';
 import { OperationDefinition } from '.';
-import { ParameterlessIndexPatternColumn, BaseIndexPatternColumn } from './column_types';
+import { BaseIndexPatternColumn } from './column_types';
 import { IndexPatternField } from '../../types';
 
 const countLabel = i18n.translate('xpack.lens.indexPattern.countOf', {
   defaultMessage: 'Count of records',
 });
 
-export type CountIndexPatternColumn = ParameterlessIndexPatternColumn<
-  'count',
-  BaseIndexPatternColumn
->;
+export type CountIndexPatternColumn = BaseIndexPatternColumn & {
+  operationType: 'count';
+  params?: {
+    format?: { id: string; params?: Record<string, unknown> };
+  };
+};
 
 export const countOperation: OperationDefinition<CountIndexPatternColumn> = {
   type: 'count',

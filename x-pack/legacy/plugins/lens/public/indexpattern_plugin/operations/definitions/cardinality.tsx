@@ -23,6 +23,9 @@ function ofName(name: string) {
 
 export interface CardinalityIndexPatternColumn extends FieldBasedIndexPatternColumn {
   operationType: 'cardinality';
+  params?: {
+    format?: { id: string; params?: Record<string, unknown> };
+  };
 }
 
 export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternColumn> = {

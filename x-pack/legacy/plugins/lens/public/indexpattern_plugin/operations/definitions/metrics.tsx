@@ -6,9 +6,16 @@
 
 import { i18n } from '@kbn/i18n';
 import { OperationDefinition } from '.';
-import { ParameterlessIndexPatternColumn } from './column_types';
+import { BaseIndexPatternColumn } from './column_types';
 
-function buildMetricOperation<T extends ParameterlessIndexPatternColumn<string>>({
+type MetricColumn<T> = BaseIndexPatternColumn & {
+  operationType: T;
+  params?: {
+    format?: { id: string; params?: Record<string, unknown> };
+  };
+};
+
+function buildMetricOperation<T extends MetricColumn<string>>({
   type,
   displayName,
   ofName,
@@ -75,10 +82,10 @@ function buildMetricOperation<T extends ParameterlessIndexPatternColumn<string>>
   } as OperationDefinition<T>;
 }
 
-export type SumIndexPatternColumn = ParameterlessIndexPatternColumn<'sum'>;
-export type AvgIndexPatternColumn = ParameterlessIndexPatternColumn<'avg'>;
-export type MinIndexPatternColumn = ParameterlessIndexPatternColumn<'min'>;
-export type MaxIndexPatternColumn = ParameterlessIndexPatternColumn<'max'>;
+export type SumIndexPatternColumn = MetricColumn<'sum'>;
+export type AvgIndexPatternColumn = MetricColumn<'avg'>;
+export type MinIndexPatternColumn = MetricColumn<'min'>;
+export type MaxIndexPatternColumn = MetricColumn<'max'>;
 
 export const minOperation = buildMetricOperation<MinIndexPatternColumn>({
   type: 'min',

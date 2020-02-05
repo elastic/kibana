@@ -41,14 +41,18 @@ function getExpressionForLayer(
     }, {} as Record<string, OriginalColumn>);
 
     const formatterOverrides = columnEntries
-      .filter(([id, col]) => !!col.format)
       .map(([id, col]) => {
-        const base = `| lens_format_column format="${col.format!.id}" columnId="${id}"`;
-        if (typeof col.format?.params?.decimals === 'number') {
-          return base + ` decimals=${col.format?.params?.decimals}`;
+        const format = col.params && 'format' in col.params ? col.params.format : undefined;
+        if (!format) {
+          return '';
+        }
+        const base = `| lens_format_column format="${format.id}" columnId="${id}"`;
+        if (typeof format.params?.decimals === 'number') {
+          return base + ` decimals=${format.params?.decimals}`;
         }
         return base;
       })
+      .filter(expr => !!expr)
       .join(' ');
 
     return `esaggs

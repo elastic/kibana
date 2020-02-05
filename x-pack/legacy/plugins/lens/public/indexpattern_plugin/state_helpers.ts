@@ -10,7 +10,7 @@ import { operationDefinitionMap, IndexPatternColumn } from './operations';
 import { IndexPattern, IndexPatternPrivateState, IndexPatternLayer } from './types';
 
 export function updateColumnParam<
-  C extends IndexPatternColumn & { params: object },
+  C extends IndexPatternColumn, // & { params?: object },
   K extends keyof C['params']
 >({
   state,
@@ -22,16 +22,12 @@ export function updateColumnParam<
   state: IndexPatternPrivateState;
   layerId: string;
   currentColumn: C;
-  paramName: K;
-  value: C['params'][K];
+  paramName: K | string;
+  value: unknown;
 }): IndexPatternPrivateState {
   const columnId = Object.entries(state.layers[layerId].columns).find(
     ([_columnId, column]) => column === currentColumn
   )![0];
-
-  if (!('params' in state.layers[layerId].columns[columnId])) {
-    throw new Error('Invariant: no params in this column');
-  }
 
   return {
     ...state,
