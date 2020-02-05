@@ -6,12 +6,12 @@
 
 import { ManagementState } from '../../types';
 
-export const endpointListData = (state: ManagementState) => state.endpoints;
+export const listData = (state: ManagementState) => state.endpoints;
 
-export const endpointListPageIndex = (state: ManagementState) => state.pageIndex;
+export const pageIndex = (state: ManagementState) => state.pageIndex;
 
-export const endpointListPageSize = (state: ManagementState) => state.pageSize;
+export const pageSize = (state: ManagementState) => state.pageSize;
 
-export const endpointTotalHits = (state: ManagementState) => state.total;
+export const totalHits = (state: ManagementState) => state.total;
 
 export const isLoading = (state: ManagementState) => state.loading;

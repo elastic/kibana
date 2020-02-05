@@ -7,7 +7,7 @@
 import { CoreStart } from 'kibana/public';
 import { SagaContext } from '../../lib';
 import { AppAction } from '../action';
-import { endpointListPageIndex, endpointListPageSize } from './selectors';
+import { pageIndex, pageSize } from './selectors';
 
 export const endpointListSaga = async (
   { actionsAndState, dispatch }: SagaContext<AppAction>,
@@ -20,15 +20,18 @@ export const endpointListSaga = async (
       (action.type === 'userNavigatedToPage' && action.payload === 'managementPage') ||
       action.type === 'userPaginatedEndpointListTable'
     ) {
-      const pageIndex = endpointListPageIndex(state.endpointList);
-      const pageSize = endpointListPageSize(state.endpointList);
+      const managementPageIndex = pageIndex(state.endpointList);
+      const managementPageSize = pageSize(state.endpointList);
       const response = await httpPost('/api/endpoint/endpoints', {
         body: JSON.stringify({
-          paging_properties: [{ page_index: pageIndex }, { page_size: pageSize }],
+          paging_properties: [
+            { page_index: managementPageIndex },
+            { page_size: managementPageSize },
+          ],
         }),
       });
       // temp: request_page_index to reflect user request page index, not es page index
-      response.request_page_index = pageIndex;
+      response.request_page_index = managementPageIndex;
       dispatch({
         type: 'serverReturnedEndpointList',
         payload: response,
