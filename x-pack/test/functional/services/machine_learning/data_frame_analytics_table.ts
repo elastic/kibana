@@ -92,7 +92,7 @@ export function MachineLearningDataFrameAnalyticsTableProvider({ getService }: F
     public async openResultsView() {
       await this.assertJobViewButtonExists();
       await testSubjects.click('mlAnalyticsJobViewButton');
-      await testSubjects.existOrFail('mlPageDataFrameAnalyticsExploration', { timeout: 5000 });
+      await testSubjects.existOrFail('mlPageDataFrameAnalyticsExploration', { timeout: 20 * 1000 });
     }
 
     public async filterWithSearchString(filter: string) {

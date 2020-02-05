@@ -45,6 +45,11 @@ function getRequestAuthenticationScheme(request: KibanaRequest) {
  */
 export class PKIAuthenticationProvider extends BaseAuthenticationProvider {
   /**
+   * Type of the provider.
+   */
+  static readonly type = 'pki';
+
+  /**
    * Performs PKI request authentication.
    * @param request Request instance.
    * @param [state] Optional state object associated with the provider.

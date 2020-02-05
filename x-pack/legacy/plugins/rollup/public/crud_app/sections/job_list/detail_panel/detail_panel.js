@@ -6,7 +6,8 @@
 
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiErrorBoundary,
@@ -62,7 +63,7 @@ const tabToUiMetricMap = {
   [JOB_DETAILS_TAB_JSON]: UIM_DETAIL_PANEL_JSON_TAB_CLICK,
 };
 
-export class DetailPanelUi extends Component {
+export class DetailPanel extends Component {
   static propTypes = {
     isOpen: PropTypes.bool.isRequired,
     isLoading: PropTypes.bool,
@@ -130,7 +131,7 @@ export class DetailPanelUi extends Component {
   }
 
   renderJob() {
-    const { panelType, job, intl } = this.props;
+    const { panelType, job } = this.props;
 
     const { status, documentsProcessed, pagesProcessed, rollupsIndexed, triggerCount, json } = job;
 
@@ -159,8 +160,7 @@ export class DetailPanelUi extends Component {
                 anchorPosition="upRight"
                 detailPanel={true}
                 iconType="arrowUp"
-                label={intl.formatMessage({
-                  id: 'xpack.rollupJobs.detailPanel.jobActionMenu.buttonLabel',
+                label={i18n.translate('xpack.rollupJobs.detailPanel.jobActionMenu.buttonLabel', {
                   defaultMessage: 'Manage',
                 })}
               />
@@ -232,7 +232,7 @@ export class DetailPanelUi extends Component {
         onClose={closeDetailPanel}
         aria-labelledby="rollupJobDetailsFlyoutTitle"
         size="m"
-        maxWidth={400}
+        maxWidth={550}
       >
         <EuiFlyoutHeader>
           <EuiTitle
@@ -251,5 +251,3 @@ export class DetailPanelUi extends Component {
     );
   }
 }
-
-export const DetailPanel = injectI18n(DetailPanelUi);
