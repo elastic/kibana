@@ -18,6 +18,8 @@ export default function({ getService }) {
         return typeof uuid === 'string' && uuid.length === 36;
       }
 
+      supertestNoAuth.auth(null, null);
+
       describe('no auth', () => {
         // depends on kibana.yml setting status.allowAnonymous
         // skip this test when running against a remote host, as we can't
