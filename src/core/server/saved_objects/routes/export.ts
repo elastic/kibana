@@ -28,7 +28,7 @@ import { IRouter } from '../../http';
 import { getSortedObjectsForExport } from '../export';
 
 export const registerExportRoute = (router: IRouter, supportedTypes: string[]) => {
-  const maxImportExportSize = 1000; // TODO: savedObjects.maxImportExportSize
+  const maxImportExportSize = 10000; // TODO: savedObjects.maxImportExportSize
 
   const typeSchema = schema.string({
     validate: (type: string) => {

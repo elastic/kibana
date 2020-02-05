@@ -84,6 +84,9 @@ async function fetchObjectsToExport({
   savedObjectsClient: SavedObjectsClientContract;
   namespace?: string;
 }) {
+  if ((types?.length ?? 0) > 0 && (objects?.length ?? 0) > 0) {
+    throw Boom.badRequest(`Can't specify both "types" and "objects" properties when exporting`);
+  }
   if (objects && objects.length > 0) {
     if (objects.length > exportSizeLimit) {
       throw Boom.badRequest(`Can't export more than ${exportSizeLimit} objects`);
