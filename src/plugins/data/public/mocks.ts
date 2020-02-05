@@ -101,6 +101,8 @@ const createStartContract = (): Start => {
   return startContract;
 };
 
+export { searchSourceMock } from './search/mocks';
+
 export const dataPluginMock = {
   createSetupContract,
   createStartContract,
