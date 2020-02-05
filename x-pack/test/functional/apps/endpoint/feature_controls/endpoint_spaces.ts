@@ -41,7 +41,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await testSubjects.existOrFail('welcomeTitle');
       });
 
-      // TODO: refactor this test
+      // refactor this test
       it.skip(`endpoint management shows 'Manage Endpoints'`, async () => {
         await pageObjects.common.navigateToUrlWithBrowserHistory('endpoint', '/management', {
           basePath: '/s/custom_space',
