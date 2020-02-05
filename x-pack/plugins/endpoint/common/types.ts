@@ -100,8 +100,8 @@ export interface ResolverPhase0Data {
     unique_pid: number;
     unique_ppid: number;
   };
-  labels: {
-    endpoint_id: string;
+  agent: {
+    id: string;
   };
 }
 
@@ -137,7 +137,7 @@ export interface ResolverNodeDetailsResponse extends Pagination {
   node: ResolverResponseNode;
 }
 
-interface Pagination {
+export interface Pagination {
   total: number;
   request_page_size: number;
   request_page_index: number;

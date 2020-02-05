@@ -4,157 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IRouter, RequestHandlerContext } from 'kibana/server';
-import { SearchResponse, CountResponse } from 'elasticsearch';
+import { IRouter } from 'kibana/server';
+import { SearchResponse } from 'elasticsearch';
 import { schema } from '@kbn/config-schema';
-import {
-  ResolverPhase0Data,
-  ResolverPhase1Data,
-  ResolverData,
-  ResolverChildrenResponse,
-  ResolverResponseNode,
-  ResolverNodeDetailsResponse,
-} from '../../common/types';
 import { EndpointAppContext } from '../types';
-import { ResolverNode } from '../services/resolver/common';
-import { ResolverPhase0Node } from '../services/resolver/phase0_node';
-import { ResolverPhase1Node } from '../services/resolver/phase1_node';
 import {
   getESChildrenQuery,
   getESNodeQuery,
-  getPagination,
-  PaginationInfo,
   getESChildrenCountQuery,
   getESNodeCountQuery,
+  PaginationInfo,
 } from '../services/resolver/query_builder';
-
-function isPhase0Data(data: ResolverPhase0Data | ResolverPhase1Data): data is ResolverPhase0Data {
-  return (data as ResolverPhase0Data).endgame?.unique_pid !== undefined;
-}
-
-interface ParentAndResolverData {
-  parentEntityID: string;
-  events: ResolverData[];
-}
-
-interface Total {
-  value: number;
-  relation: string;
-}
-
-class ResolverSearchHandler {
-  constructor(
-    private readonly reqContext: RequestHandlerContext,
-    private readonly endpointContext: EndpointAppContext,
-    private readonly pageInfo: PaginationInfo,
-    private readonly countQuery: any,
-    private readonly entityID: string
-  ) {}
-
-  private static nodeCreator(data: ResolverData): ResolverNode {
-    if (isPhase0Data(data)) {
-      return new ResolverPhase0Node(data);
-    }
-    return new ResolverPhase1Node(data);
-  }
-  private async buildPagination(total: Total) {
-    const { page, pageSize, from } = await getPagination(this.endpointContext, this.pageInfo);
-    let amount = total.value;
-    if (total.relation === 'gte') {
-      // perform count
-      try {
-        const response = (await this.reqContext.core.elasticsearch.dataClient.callAsCurrentUser(
-          'count',
-          this.countQuery
-        )) as CountResponse;
-        amount = response.count;
-      } catch (e) {
-        throw new Error(`Failed to retrieve count: ${e}`);
-      }
-    }
-    return {
-      total: amount,
-      request_page_index: page,
-      request_page_size: pageSize,
-      request_from_index: from,
-    };
-  }
-
-  public async buildChildrenResponse(
-    esResponse: SearchResponse<ResolverData>
-  ): Promise<ResolverChildrenResponse> {
-    const nodes = new Map<string, ParentAndResolverData>();
-    const originEvents: ResolverData[] = [];
-    // it is possible that at this position in the pagination we won't have any events for the origin
-    // yet so just return null for those related fields
-    let originParentEntityID: string | undefined;
-    for (const hit of esResponse.hits.hits) {
-      const node = ResolverSearchHandler.nodeCreator(hit._source);
-      const parentAndData = nodes.get(node.entityID) || {
-        parentEntityID: node.parentEntityID,
-        events: [],
-      };
-
-      parentAndData.events.push(node.esData);
-      nodes.set(node.entityID, parentAndData);
-      if (node.entityID === this.entityID) {
-        originEvents.push(node.esData);
-        originParentEntityID = node.parentEntityID;
-      }
-    }
-    const children: ResolverResponseNode[] = [];
-    for (const [entityID, parentAndData] of nodes) {
-      children.push({
-        entity_id: entityID,
-        parent_entity_id: parentAndData.parentEntityID,
-        events: parentAndData.events,
-      });
-    }
-
-    const pagination = await this.buildPagination(
-      // total is an object in kibana >=7.0
-      // see https://github.com/elastic/kibana/issues/56694
-      (esResponse.hits.total as unknown) as Total
-    );
-    return {
-      origin: {
-        parent_entity_id: originParentEntityID,
-        entity_id: this.entityID,
-        events: originEvents,
-      },
-      children,
-      ...pagination,
-    };
-  }
-
-  public async buildNodeResponse(
-    esResponse: SearchResponse<ResolverData>
-  ): Promise<ResolverNodeDetailsResponse> {
-    const events: ResolverData[] = [];
-    let parentEntityID: string | undefined;
-    // there could be multiple events for a single event id because process creation, termination etc will all have the
-    // same entity id
-    for (const hit of esResponse.hits.hits) {
-      const node = ResolverSearchHandler.nodeCreator(hit._source);
-      events.push(node.esData);
-      parentEntityID = node.parentEntityID;
-    }
-
-    const pagination = await this.buildPagination(
-      // total is an object in kibana >=7.0
-      // see https://github.com/elastic/kibana/issues/56694
-      (esResponse.hits.total as unknown) as Total
-    );
-    return {
-      node: {
-        parent_entity_id: parentEntityID,
-        entity_id: this.entityID,
-        events,
-      },
-      ...pagination,
-    };
-  }
-}
+import { ResolverSearchHandler, Total } from '../services/resolver/search_handler';
+import { ResolverData } from '../../common/types';
 
 export function registerResolverRoutes(router: IRouter, endpointAppContext: EndpointAppContext) {
   const validateObject = {
@@ -176,7 +38,7 @@ export function registerResolverRoutes(router: IRouter, endpointAppContext: Endp
       const paginationInfo = {
         page: req.query?.page_index,
         pageSize: req.query?.page_size,
-      };
+      } as PaginationInfo;
       try {
         const query = await getESChildrenQuery(endpointAppContext, entityID, paginationInfo);
         const response = (await context.core.elasticsearch.dataClient.callAsCurrentUser(
@@ -188,16 +50,22 @@ export function registerResolverRoutes(router: IRouter, endpointAppContext: Endp
           return res.notFound({ body: 'Nodes not found' });
         }
         const handler = new ResolverSearchHandler(
-          context,
+          context.core.elasticsearch.dataClient,
           endpointAppContext,
           paginationInfo,
           getESChildrenCountQuery(entityID),
           entityID
         );
         return res.ok({
-          body: await handler.buildChildrenResponse(response),
+          body: await handler.buildChildrenResponse(
+            response.hits.hits,
+            // total is an object in kibana >=7.0 so cast it to an object
+            // see https://github.com/elastic/kibana/issues/56694
+            (response.hits.total as unknown) as Total
+          ),
         });
       } catch (err) {
+        // TODO add boom?
         return res.internalError({ body: err });
       }
     }
@@ -225,16 +93,22 @@ export function registerResolverRoutes(router: IRouter, endpointAppContext: Endp
           return res.notFound({ body: 'Node not found' });
         }
         const handler = new ResolverSearchHandler(
-          context,
+          context.core.elasticsearch.dataClient,
           endpointAppContext,
           paginationInfo,
           getESNodeCountQuery(entityID),
           entityID
         );
         return res.ok({
-          body: await handler.buildNodeResponse(response),
+          body: await handler.buildNodeResponse(
+            response.hits.hits,
+            // total is an object in kibana >=7.0 so cast it to an object
+            // see https://github.com/elastic/kibana/issues/56694
+            (response.hits.total as unknown) as Total
+          ),
         });
       } catch (err) {
+        // TODO add boom?
         return res.internalError({ body: err });
       }
     }

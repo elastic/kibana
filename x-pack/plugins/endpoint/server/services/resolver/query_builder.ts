@@ -3,12 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { isPhase0EntityID, parsePhase0EntityID } from './common';
+import { isPhase0EntityID, parsePhase0EntityID, Query } from './common';
 import { EndpointAppContext } from '../../types';
 
 export interface PaginationInfo {
-  page: number;
-  pageSize: number;
+  page: number | undefined;
+  pageSize: number | undefined;
 }
 
 function buildPhase0ChildrenQuery(endpointID: string, uniquePID: string) {
@@ -76,20 +76,12 @@ export async function getESChildrenQuery(
   entityID: string,
   paginationInfo: PaginationInfo
 ) {
-  if (isPhase0EntityID(entityID)) {
-    const [endpointID, uniquePID] = parsePhase0EntityID(entityID);
-    return await buildSearchBody(
-      context,
-      buildPhase0ChildrenQuery(endpointID, uniquePID),
-      paginationInfo
-    );
-  }
-  return await buildSearchBody(context, buildPhase1ChildrenQuery(entityID), paginationInfo);
+  return await buildSearchBody(context, getESChildrenCountQuery(entityID), paginationInfo);
 }
 
 export function getESChildrenCountQuery(entityID: string) {
   if (isPhase0EntityID(entityID)) {
-    const [endpointID, uniquePID] = parsePhase0EntityID(entityID);
+    const { endpointID, uniquePID } = parsePhase0EntityID(entityID);
     return buildPhase0ChildrenQuery(endpointID, uniquePID);
   }
   return buildPhase1ChildrenQuery(entityID);
@@ -143,7 +135,7 @@ export async function getPagination(
 
 async function buildSearchBody(
   endpointAppContext: EndpointAppContext,
-  query: any,
+  query: Query,
   paginationInfo: PaginationInfo
 ) {
   const { pageSize: size, from } = await getPagination(endpointAppContext, paginationInfo);
@@ -164,20 +156,12 @@ export async function getESNodeQuery(
   entityID: string,
   paginationInfo: PaginationInfo
 ) {
-  if (isPhase0EntityID(entityID)) {
-    const [endpointID, uniquePID] = parsePhase0EntityID(entityID);
-    return await buildSearchBody(
-      context,
-      buildPhase0NodeQuery(endpointID, uniquePID),
-      paginationInfo
-    );
-  }
-  return await buildSearchBody(context, buildPhase1NodeQuery(entityID), paginationInfo);
+  return await buildSearchBody(context, getESNodeCountQuery(entityID), paginationInfo);
 }
 
 export function getESNodeCountQuery(entityID: string) {
   if (isPhase0EntityID(entityID)) {
-    const [endpointID, uniquePID] = parsePhase0EntityID(entityID);
+    const { endpointID, uniquePID } = parsePhase0EntityID(entityID);
     return buildPhase0NodeQuery(endpointID, uniquePID);
   }
   return buildPhase1NodeQuery(entityID);

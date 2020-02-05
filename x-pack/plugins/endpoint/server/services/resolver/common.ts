@@ -3,9 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { ResolverPhase0Data } from '../../common/types';
-import { ResolverPhase1Data } from '../../common/types';
-export const phase0EntityPrefix = 'endgame-';
+import { ResolverPhase0Data, ResolverPhase1Data, ResolverData } from '../../../common/types';
+
+export const phase0EntityIDDelimiter = '|';
+export const phase0EntityPrefix = 'endgame' + phase0EntityIDDelimiter;
 
 export interface ResolverNode {
   entityID: string;
@@ -13,16 +14,31 @@ export interface ResolverNode {
   esData: ResolverPhase0Data | ResolverPhase1Data;
 }
 
-export function parsePhase0EntityID(entityID: string): [string, string] {
-  const fields = entityID.split('-');
+export interface ResolverDataHit {
+  _source: ResolverData;
+}
+
+/**
+ * Defines a type for arbitrary elasticsearch query json objects
+ */
+export interface Query {
+  [key: string]: number | string | null | undefined | Query | Query[];
+}
+
+export function parsePhase0EntityID(entityID: string): { endpointID: string; uniquePID: string } {
+  const fields = entityID.split(phase0EntityIDDelimiter);
   if (fields.length !== 3) {
     throw Error(
       'Invalid entity_id received, must be in the format endgame-<endpoint id>-<unique_pid>'
     );
   }
-  return [fields[1], fields[2]];
+  return { endpointID: fields[1], uniquePID: fields[2] };
 }
 
 export function isPhase0EntityID(entityID: string) {
   return entityID.includes(phase0EntityPrefix);
+}
+
+export function buildPhase0EntityID(endpointID: string, uniquePID: number) {
+  return phase0EntityPrefix + endpointID + phase0EntityIDDelimiter + uniquePID;
 }
