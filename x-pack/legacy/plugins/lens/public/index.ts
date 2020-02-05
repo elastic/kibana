@@ -4,4 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { LensPlugin } from './plugin';
+
 export * from './types';
+
+export const plugin = () => new LensPlugin();

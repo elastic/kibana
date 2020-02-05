@@ -4,15 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import 'ui/autoload/all';
-// Used to run esaggs queries
-import 'uiExports/fieldFormats';
-import 'uiExports/search';
-import 'uiExports/visRequestHandlers';
-import 'uiExports/visResponseHandlers';
-// Used for kibana_context function
-import 'uiExports/savedObjectTypes';
-
 import React from 'react';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import { HashRouter, Route, RouteComponentProps, Switch } from 'react-router-dom';
@@ -21,33 +12,32 @@ import { CoreSetup, CoreStart, SavedObjectsClientContract } from 'src/core/publi
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import rison, { RisonObject, RisonValue } from 'rison-node';
 import { isObject } from 'lodash';
-import { DataStart } from '../../../../../../src/legacy/core_plugins/data/public';
-import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
-import { editorFrameSetup, editorFrameStart, editorFrameStop } from '../editor_frame_plugin';
-import { indexPatternDatasourceSetup, indexPatternDatasourceStop } from '../indexpattern_plugin';
-import { addHelpMenuToAppChrome } from '../help_menu_util';
-import { SavedObjectIndexStore } from '../persistence';
-import { xyVisualizationSetup, xyVisualizationStop } from '../xy_visualization_plugin';
-import { metricVisualizationSetup, metricVisualizationStop } from '../metric_visualization_plugin';
+import { Storage } from '../../../../../src/plugins/kibana_utils/public';
+import { editorFrameSetup, editorFrameStart, editorFrameStop } from './editor_frame_plugin';
+import { indexPatternDatasourceSetup, indexPatternDatasourceStop } from './indexpattern_plugin';
+import { addHelpMenuToAppChrome } from './help_menu_util';
+import { SavedObjectIndexStore } from './persistence';
+import { xyVisualizationSetup, xyVisualizationStop } from './xy_visualization_plugin';
+import { metricVisualizationSetup, metricVisualizationStop } from './metric_visualization_plugin';
 import {
   datatableVisualizationSetup,
   datatableVisualizationStop,
-} from '../datatable_visualization_plugin';
-import { App } from './app';
+} from './datatable_visualization_plugin';
+import { App } from './app_plugin';
 import {
   LensReportManager,
   setReportManager,
   stopReportManager,
   trackUiEvent,
-} from '../lens_ui_telemetry';
-import { NOT_INTERNATIONALIZED_PRODUCT_NAME } from '../../common';
-import { KibanaLegacySetup } from '../../../../../../src/plugins/kibana_legacy/public';
-import { EditorFrameStart } from '../types';
+} from './lens_ui_telemetry';
+import { NOT_INTERNATIONALIZED_PRODUCT_NAME } from '../common';
+import { KibanaLegacySetup } from '../../../../../src/plugins/kibana_legacy/public';
+import { EditorFrameStart } from './types';
 import {
   addEmbeddableToDashboardUrl,
   getUrlVars,
   getLensUrlFromDashboardAbsoluteUrl,
-} from '../../../../../../src/legacy/core_plugins/kibana/public/dashboard/np_ready/url_helper';
+} from '../../../../../src/legacy/core_plugins/kibana/public/dashboard/np_ready/url_helper';
 
 export interface LensPluginSetupDependencies {
   kibana_legacy: KibanaLegacySetup;
@@ -55,16 +45,14 @@ export interface LensPluginSetupDependencies {
 
 export interface LensPluginStartDependencies {
   data: DataPublicPluginStart;
-  dataShim: DataStart;
 }
 
 export const isRisonObject = (value: RisonValue): value is RisonObject => {
   return isObject(value);
 };
-export class AppPlugin {
+export class LensPlugin {
   private startDependencies: {
     data: DataPublicPluginStart;
-    dataShim: DataStart;
     savedObjectsClient: SavedObjectsClientContract;
     editorFrame: EditorFrameStart;
   } | null = null;
@@ -72,8 +60,6 @@ export class AppPlugin {
   constructor() {}
 
   setup(core: CoreSetup, { kibana_legacy }: LensPluginSetupDependencies) {
-    // TODO: These plugins should not be called from the top level, but since this is the
-    // entry point to the app we have no choice until the new platform is ready
     const indexPattern = indexPatternDatasourceSetup();
     const datatableVisualization = datatableVisualizationSetup();
     const xyVisualization = xyVisualizationSetup();
@@ -195,10 +181,9 @@ export class AppPlugin {
     });
   }
 
-  start({ savedObjects }: CoreStart, { data, dataShim }: LensPluginStartDependencies) {
+  start({ savedObjects }: CoreStart, { data }: LensPluginStartDependencies) {
     this.startDependencies = {
       data,
-      dataShim,
       savedObjectsClient: savedObjects.client,
       editorFrame: editorFrameStart(),
     };
@@ -207,7 +192,6 @@ export class AppPlugin {
   stop() {
     stopReportManager();
 
-    // TODO this will be handled by the plugin platform itself
     indexPatternDatasourceStop();
     xyVisualizationStop();
     metricVisualizationStop();

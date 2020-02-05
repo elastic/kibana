@@ -5,15 +5,11 @@
  */
 
 import { npSetup, npStart } from 'ui/new_platform';
-import { start as dataShimStart } from '../../../../../src/legacy/core_plugins/data/public/legacy';
 
 export * from './types';
 
-import { AppPlugin } from './app_plugin';
+import { plugin } from './index';
 
-const app = new AppPlugin();
-app.setup(npSetup.core, npSetup.plugins);
-app.start(npStart.core, {
-  ...npStart.plugins,
-  dataShim: dataShimStart,
-});
+const pluginInstance = plugin();
+pluginInstance.setup(npSetup.core, npSetup.plugins);
+pluginInstance.start(npStart.core, npStart.plugins);
