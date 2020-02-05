@@ -24,7 +24,7 @@ describe('get_high_level_stats', () => {
       get: sinon
         .stub()
         .withArgs(`xpack.monitoring.${product}.index_pattern`)
-        .returns(`.monitoring-${product}-N-*,monitoring-${product}-N-*`)
+        .returns(`.monitoring-${product}-N-*`)
         .withArgs('xpack.monitoring.max_bucket_size')
         .returns(size),
     }),
