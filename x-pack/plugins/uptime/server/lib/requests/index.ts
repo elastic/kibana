@@ -12,6 +12,7 @@ export { getMonitorCharts, GetMonitorChartsParams } from './get_monitor_charts';
 export { getMonitorDetails, GetMonitorDetailsParams } from './get_monitor_details';
 export { getMonitorLocations, GetMonitorLocationsParams } from './get_monitor_locations';
 export { getMonitorStates, GetMonitorStatesParams } from './get_monitor_states';
+export * from './get_monitor_status';
 export { getPings, GetPingsParams } from './get_pings';
 export { getPingHistogram, GetPingHistogramParams } from './get_ping_histogram';
 export { UptimeRequests } from './uptime_requests';

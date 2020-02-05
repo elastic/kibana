@@ -39,7 +39,7 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory = (server, libs) =>
   async executor(options) {
     const params = options.params as StatusCheckExecutorParams;
 
-    const monitors = await libs.monitors.getMonitorStatus({
+    const monitors = await libs.requests.getMonitorStatus({
       callES: options.services.callCluster,
       ...params,
     });
