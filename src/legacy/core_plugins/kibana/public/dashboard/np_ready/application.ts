@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { EuiConfirmModal, EuiIcon } from '@elastic/eui';
+import { EuiIcon } from '@elastic/eui';
 import angular, { IModule } from 'angular';
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
 import {
@@ -30,7 +30,6 @@ import {
 import { Storage } from '../../../../../../plugins/kibana_utils/public';
 import {
   configureAppAngularModule,
-  confirmModalFactory,
   createTopNavDirective,
   createTopNavHelper,
   IPrivate,
@@ -112,7 +111,6 @@ function createLocalAngularModule(core: AppMountContext['core'], navigation: Nav
   createLocalConfigModule(core);
   createLocalKbnUrlModule();
   createLocalTopNavModule(navigation);
-  createLocalConfirmModalModule();
   createLocalIconModule();
 
   const dashboardAngularModule = angular.module(moduleName, [
@@ -123,7 +121,6 @@ function createLocalAngularModule(core: AppMountContext['core'], navigation: Nav
     'app/dashboard/TopNav',
     'app/dashboard/KbnUrl',
     'app/dashboard/Promise',
-    'app/dashboard/ConfirmModal',
     'app/dashboard/icon',
   ]);
   return dashboardAngularModule;
@@ -133,13 +130,6 @@ function createLocalIconModule() {
   angular
     .module('app/dashboard/icon', ['react'])
     .directive('icon', reactDirective => reactDirective(EuiIcon));
-}
-
-function createLocalConfirmModalModule() {
-  angular
-    .module('app/dashboard/ConfirmModal', ['react'])
-    .factory('confirmModal', confirmModalFactory)
-    .directive('confirmModal', reactDirective => reactDirective(EuiConfirmModal));
 }
 
 function createLocalKbnUrlModule() {

@@ -100,7 +100,6 @@ function createLocalAngularModule(core: AppMountContext['core'], navigation: Nav
     'app/visualize/PersistedState',
     'app/visualize/TopNav',
     'app/visualize/State',
-    'app/visualize/ConfirmModal',
   ]);
   return visualizeAngularModule;
 }

@@ -124,7 +124,6 @@ function createLocalAngularModule(navigation: NavigationStart) {
     ...thirdPartyAngularDependencies,
     'graphI18n',
     'graphTopNav',
-    'graphConfirmModal',
   ]);
   return graphAngularModule;
 }
