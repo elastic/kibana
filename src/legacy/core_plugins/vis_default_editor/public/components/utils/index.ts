@@ -17,5 +17,4 @@
  * under the License.
  */
 
-export { editorConfigProviders, EditorConfigProviderRegistry } from './editor_config_providers';
-export * from './types';
+export * from './editor_config';
