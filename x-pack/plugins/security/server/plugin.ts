@@ -50,7 +50,7 @@ export interface LegacyAPI {
 /**
  * Describes public Security plugin contract returned at the `setup` stage.
  */
-export interface PluginSetupContract {
+export interface SecurityPluginSetup {
   authc: Authentication;
   authz: Pick<Authorization, 'actions' | 'checkPrivilegesWithRequest' | 'mode'>;
 
@@ -167,7 +167,7 @@ export class Plugin {
       csp: core.http.csp,
     });
 
-    return deepFreeze<PluginSetupContract>({
+    return deepFreeze<SecurityPluginSetup>({
       authc,
 
       authz: {

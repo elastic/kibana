@@ -10,15 +10,20 @@ import { deprecations } from './deprecations';
 import { getUiExports } from './ui_exports';
 import { Plugin } from './server/plugin';
 import { initInfraSource } from './server/lib/logs/init_infra_source';
+import { KIBANA_ALERTING_ENABLED } from './common/constants';
 
 /**
  * Invokes plugin modules to instantiate the Monitoring plugin for Kibana
  * @param kibana {Object} Kibana plugin instance
  * @return {Object} Monitoring UI Kibana plugin object
  */
+const deps = ['kibana', 'elasticsearch', 'xpack_main'];
+if (KIBANA_ALERTING_ENABLED) {
+  deps.push(...['alerting', 'actions']);
+}
 export const monitoring = kibana =>
   new kibana.Plugin({
-    require: ['kibana', 'elasticsearch', 'xpack_main'],
+    require: deps,
     id: 'monitoring',
     configPrefix: 'monitoring',
     publicDir: resolve(__dirname, 'public'),
@@ -60,6 +65,7 @@ export const monitoring = kibana =>
         }),
         injectUiAppVars: server.injectUiAppVars,
         log: (...args) => server.log(...args),
+        logger: server.newPlatform.coreContext.logger,
         getOSInfo: server.getOSInfo,
         events: {
           on: (...args) => server.events.on(...args),
@@ -74,11 +80,13 @@ export const monitoring = kibana =>
         xpack_main: server.plugins.xpack_main,
         elasticsearch: server.plugins.elasticsearch,
         infra: server.plugins.infra,
+        alerting: server.plugins.alerting,
         usageCollection,
         licensing,
       };
 
-      new Plugin().setup(serverFacade, plugins);
+      const plugin = new Plugin();
+      plugin.setup(serverFacade, plugins);
     },
     config,
     deprecations,

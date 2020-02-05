@@ -11,6 +11,7 @@ import { EuiBadge, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { UptimeThemeContext } from '../../../contexts';
 import { MonitorLocation } from '../../../../common/runtime_types';
+import { SHORT_TIMESPAN_LOCALE, SHORT_TS_LOCALE } from '../../../../common/constants';
 
 const TimeStampSpan = styled.span`
   display: inline-block;
@@ -23,13 +24,18 @@ const TextStyle = styled.div`
 
 const BadgeItem = styled.div`
   margin-bottom: 5px;
+  white-space: nowrap;
+  @media (max-width: 830px) {
+    display: inline-block;
+    margin-right: 16px;
+  }
 `;
 
 // Set height so that it remains within panel, enough height to display 7 locations tags
 const TagContainer = styled.div`
-  padding: 10px;
   max-height: 229px;
   overflow: hidden;
+  margin-top: auto;
 `;
 
 const OtherLocationsDiv = styled.div`
@@ -84,24 +90,11 @@ export const LocationStatusTags = ({ locations }: Props) => {
   const prevLocal: string = moment.locale() ?? 'en';
 
   const renderTags = () => {
-    moment.defineLocale('en-tag', {
-      relativeTime: {
-        future: 'in %s',
-        past: '%s ago',
-        s: '%ds',
-        ss: '%ss',
-        m: '%dm',
-        mm: '%dm',
-        h: '%dh',
-        hh: '%dh',
-        d: '%dd',
-        dd: '%dd',
-        M: '%d Mon',
-        MM: '%d Mon',
-        y: '%d Yr',
-        yy: '%d Yr',
-      },
-    });
+    const shortLocale = moment.locale(SHORT_TS_LOCALE) === SHORT_TS_LOCALE;
+    if (!shortLocale) {
+      moment.defineLocale(SHORT_TS_LOCALE, SHORT_TIMESPAN_LOCALE);
+    }
+
     const tags = (
       <TagContainer>
         <span>{downLocations.map((item, ind) => tagLabel(item, ind, danger))}</span>

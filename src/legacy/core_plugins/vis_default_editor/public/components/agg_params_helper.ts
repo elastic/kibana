@@ -29,17 +29,17 @@ import {
   aggTypeFilters,
   aggTypeFieldFilters,
   aggTypes,
-  AggConfig,
+  IAggConfig,
   AggParam,
-  FieldParamType,
-  AggType,
-  EditorConfig,
+  IFieldParamType,
+  IAggType,
 } from '../legacy_imports';
+import { EditorConfig } from './utils';
 
 interface ParamInstanceBase {
-  agg: AggConfig;
+  agg: IAggConfig;
   editorConfig: EditorConfig;
-  metricAggs: AggConfig[];
+  metricAggs: IAggConfig[];
   state: VisState;
 }
 
@@ -73,7 +73,7 @@ function getAggParamsToRender({ agg, editorConfig, metricAggs, state }: ParamIns
     }
     // if field param exists, compute allowed fields
     if (param.type === 'field') {
-      const availableFields: Field[] = (param as FieldParamType).getAvailableFields(
+      const availableFields: Field[] = (param as IFieldParamType).getAvailableFields(
         agg.getIndexPattern().fields
       );
       fields = aggTypeFieldFilters.filter(availableFields, agg);
@@ -117,10 +117,10 @@ function getAggParamsToRender({ agg, editorConfig, metricAggs, state }: ParamIns
 }
 
 function getAggTypeOptions(
-  agg: AggConfig,
+  agg: IAggConfig,
   indexPattern: IndexPattern,
   groupName: string
-): ComboBoxGroupedOptions<AggType> {
+): ComboBoxGroupedOptions<IAggType> {
   const aggTypeOptions = aggTypeFilters.filter((aggTypes as any)[groupName], indexPattern, agg);
   return groupAndSortBy(aggTypeOptions as any[], 'subtype', 'title');
 }
@@ -135,7 +135,7 @@ function getAggTypeOptions(
  * @param aggParams State of aggregation parameters.
  */
 function isInvalidParamsTouched(
-  aggType: AggType,
+  aggType: IAggType,
   aggTypeState: AggTypeState,
   aggParams: AggParamsState
 ) {

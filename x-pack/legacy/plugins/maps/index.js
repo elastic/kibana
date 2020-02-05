@@ -17,8 +17,7 @@ import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
 
 export function maps(kibana) {
   return new kibana.Plugin({
-    // task_manager could be required, but is only used for telemetry
-    require: ['kibana', 'elasticsearch', 'xpack_main'],
+    require: ['kibana', 'elasticsearch'],
     id: APP_ID,
     configPrefix: 'xpack.maps',
     publicDir: resolve(__dirname, 'public'),

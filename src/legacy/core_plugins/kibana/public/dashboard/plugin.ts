@@ -107,6 +107,7 @@ export class DashboardPlugin implements Plugin {
           chrome: contextCore.chrome,
           addBasePath: contextCore.http.basePath.prepend,
           uiSettings: contextCore.uiSettings,
+          config: kibana_legacy.config,
           savedQueryService: npDataStart.query.savedQueries,
           embeddables,
           dashboardCapabilities: contextCore.application.capabilities.dashboard,

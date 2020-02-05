@@ -254,9 +254,9 @@ export const removeElements = createThunk(
 
 export const setFilter = createThunk(
   'setFilter',
-  ({ dispatch }, filter, elementId, pageId, doRender = true) => {
+  ({ dispatch }, filter, elementId, doRender = true) => {
     const _setFilter = createAction('setFilter');
-    dispatch(_setFilter({ filter, elementId, pageId }));
+    dispatch(_setFilter({ filter, elementId }));
 
     if (doRender === true) {
       dispatch(fetchAllRenderables());
