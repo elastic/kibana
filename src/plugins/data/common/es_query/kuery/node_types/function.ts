@@ -18,9 +18,13 @@
  */
 
 import _ from 'lodash';
+// @ts-ignore
 import { functions } from '../functions';
+import { IIndexPattern } from '../../..';
+import { FunctionName, FunctionTypeBuildNode } from './types';
+import { JsonValue } from '..';
 
-export function buildNode(functionName, ...functionArgs) {
+export function buildNode(functionName: FunctionName, ...args: any[]) {
   const kueryFunction = functions[functionName];
   if (_.isUndefined(kueryFunction)) {
     throw new Error(`Unknown function "${functionName}"`);
@@ -29,12 +33,15 @@ export function buildNode(functionName, ...functionArgs) {
   return {
     type: 'function',
     function: functionName,
-    ...kueryFunction.buildNodeParams(...functionArgs),
+    ...kueryFunction.buildNodeParams(...args),
   };
 }
 
 // Mainly only useful in the grammar where we'll already have real argument nodes in hand
-export function buildNodeWithArgumentNodes(functionName, argumentNodes) {
+export function buildNodeWithArgumentNodes(
+  functionName: FunctionName,
+  ...args: any[]
+): FunctionTypeBuildNode {
   if (_.isUndefined(functions[functionName])) {
     throw new Error(`Unknown function "${functionName}"`);
   }
@@ -42,11 +49,16 @@ export function buildNodeWithArgumentNodes(functionName, argumentNodes) {
   return {
     type: 'function',
     function: functionName,
-    arguments: argumentNodes,
+    arguments: args,
   };
 }
 
-export function toElasticsearchQuery(node, indexPattern, config = {}, context = {}) {
+export function toElasticsearchQuery(
+  node: any,
+  indexPattern?: IIndexPattern,
+  config?: Record<string, any>,
+  context?: Record<string, any>
+): JsonValue {
   const kueryFunction = functions[node.function];
   return kueryFunction.toElasticsearchQuery(node, indexPattern, config, context);
 }

@@ -17,7 +17,14 @@
  * under the License.
  */
 
+import { Logger } from 'kibana/server';
+
 export class Collector {
+  log: Logger;
+  type: string;
+  init: Function;
+  fetch: Function;
+  private _formatForBulkUpload: any;
   /*
    * @param {Object} logger - logger object
    * @param {String} options.type - property name as the key for the data
@@ -27,8 +34,8 @@ export class Collector {
    * @param {Function} options.rest - optional other properties
    */
   constructor(
-    logger,
-    { type, init, fetch, formatForBulkUpload = null, isReady = null, ...options } = {}
+    logger: Logger,
+    { type, init, fetch, formatForBulkUpload = null, isReady = null, ...options }: any = {}
   ) {
     if (type === undefined) {
       throw new Error('Collector must be instantiated with a options.type string property');
@@ -50,7 +57,7 @@ export class Collector {
     this.init = init;
     this.fetch = fetch;
 
-    const defaultFormatterForBulkUpload = result => ({ type, payload: result });
+    const defaultFormatterForBulkUpload = (result: any) => ({ type, payload: result });
     this._formatForBulkUpload = formatForBulkUpload || defaultFormatterForBulkUpload;
     if (typeof isReady === 'function') {
       this.isReady = isReady;
@@ -60,7 +67,7 @@ export class Collector {
   /*
    * @param {Function} callCluster - callCluster function
    */
-  fetchInternal(callCluster) {
+  fetchInternal(callCluster: any) {
     if (typeof callCluster !== 'function') {
       throw new Error('A `callCluster` function must be passed to the fetch methods of collectors');
     }
@@ -72,11 +79,11 @@ export class Collector {
    * data model for internal bulk upload. See defaultFormatterForBulkUpload for
    * a generic example.
    */
-  formatForBulkUpload(result) {
+  formatForBulkUpload(result: any) {
     return this._formatForBulkUpload(result);
   }
 
-  isReady() {
-    throw `isReady() must be implemented in ${this.type} collector`;
+  isReady(): boolean {
+    throw new Error(`isReady() must be implemented in ${this.type} collector`);
   }
 }

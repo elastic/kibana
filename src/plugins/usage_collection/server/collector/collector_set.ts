@@ -20,7 +20,6 @@
 import { snakeCase } from 'lodash';
 import { Logger } from 'kibana/server';
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
-// @ts-ignore
 import { Collector } from './collector';
 // @ts-ignore
 import { UsageCollector } from './usage_collector';

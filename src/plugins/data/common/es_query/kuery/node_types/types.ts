@@ -22,9 +22,9 @@
  */
 
 import { IIndexPattern } from '../../../index_patterns';
-import { KueryNode, JsonValue } from '..';
+import { JsonValue } from '..';
 
-type FunctionName =
+export type FunctionName =
   | 'is'
   | 'and'
   | 'or'
@@ -46,7 +46,7 @@ interface FunctionType {
   ) => JsonValue;
 }
 
-interface FunctionTypeBuildNode {
+export interface FunctionTypeBuildNode {
   type: 'function';
   function: FunctionName;
   // TODO -> Need to define a better type for DSL query
@@ -58,17 +58,17 @@ interface LiteralType {
   toElasticsearchQuery: (node: any) => null | boolean | number | string;
 }
 
-interface LiteralTypeBuildNode {
+export interface LiteralTypeBuildNode {
   type: 'literal';
   value: null | boolean | number | string;
 }
 
 interface NamedArgType {
   buildNode: (name: string, value: any) => NamedArgTypeBuildNode;
-  toElasticsearchQuery: (node: any) => string;
+  toElasticsearchQuery: (node: any) => JsonValue;
 }
 
-interface NamedArgTypeBuildNode {
+export interface NamedArgTypeBuildNode {
   type: 'namedArg';
   name: string;
   value: any;
@@ -82,16 +82,14 @@ interface WildcardType {
   hasLeadingWildcard: (node: any) => boolean;
 }
 
-interface WildcardTypeBuildNode {
+export interface WildcardTypeBuildNode {
   type: 'wildcard';
   value: string;
 }
 
-interface NodeTypes {
+export interface NodeTypes {
   function: FunctionType;
   literal: LiteralType;
   namedArg: NamedArgType;
   wildcard: WildcardType;
 }
-
-export const nodeTypes: NodeTypes;
