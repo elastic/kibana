@@ -17,6 +17,7 @@ export const templateSchema = schema.object({
   ilmPolicy: schema.maybe(
     schema.object({
       name: schema.maybe(schema.string()),
+      rollover_alias: schema.maybe(schema.string()),
     })
   ),
   isManaged: schema.maybe(schema.boolean()),
