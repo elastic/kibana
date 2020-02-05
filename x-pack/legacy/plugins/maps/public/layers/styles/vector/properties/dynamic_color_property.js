@@ -102,7 +102,8 @@ export class DynamicColorProperty extends DynamicStyleProperty {
 
   _getMbColor() {
     const isDynamicConfigComplete =
-      _.has(this._options, 'field.name') && _.has(this._options, 'color');
+      _.has(this._options, 'field.name') &&
+      (_.has(this._options, 'color') || _.has(this._options, 'useCustomColorRamp'));
     if (!isDynamicConfigComplete) {
       return null;
     }
@@ -128,24 +129,30 @@ export class DynamicColorProperty extends DynamicStyleProperty {
     let propFieldName;
     if (this._style.isBackedByTileSource()) {
       const fieldMeta = this._getFieldMeta(fieldName);
-      if (!fieldMeta) {
-        return null;
+
+      if (this._options.useCustomColorRamp) {
+        getFunction = 'get';
+        propFieldName = fieldName;
+        colorStops = this._getMbOrdinalColorStops();
+
+      } else {
+        if (!fieldMeta) {
+          return null;
+        }
+
+        colorStops = this._getMbOrdinalColorStops(fieldMeta.max - fieldMeta.min, fieldMeta.min);
+        getFunction = 'get';
+        propFieldName = fieldName;
       }
-
-
-      colorStops = this._getMbOrdinalColorStops((fieldMeta.max - fieldMeta.min), fieldMeta.min);
-      getFunction = 'get';
-      propFieldName = fieldName;
     } else {
       colorStops = this._getMbOrdinalColorStops();
       getFunction = 'feature-state';
       propFieldName = targetName;
     }
 
-
-    if (!colorStops) {
-      return null;
-    }
+    // if (!colorStops) {
+    //   return null;
+    // }
 
     if (this._options.useCustomColorRamp) {
       const firstStopValue = colorStops[0];
@@ -157,16 +164,20 @@ export class DynamicColorProperty extends DynamicStyleProperty {
         'rgba(0,0,0,0)', // MB will assign the base value to any features that is below the first stop value
         ...colorStops,
       ];
+    } else {
+      if (!colorStops) {
+        return null;
+      }
+      return [
+        'interpolate',
+        ['linear'],
+        // ['coalesce', ['feature-state', targetName], -1],
+        ['coalesce', [getFunction, propFieldName], -1],
+        -1,
+        'rgba(0,0,0,0)',
+        ...colorStops,
+      ];
     }
-    return [
-      'interpolate',
-      ['linear'],
-      // ['coalesce', ['feature-state', targetName], -1],
-      ['coalesce', [getFunction, propFieldName], -1],
-      -1,
-      'rgba(0,0,0,0)',
-      ...colorStops,
-    ];
   }
 
   _getColorPaletteStops() {

@@ -179,6 +179,19 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
     const realFieldName = this._field.getESDocFieldName
       ? this._field.getESDocFieldName()
       : this._field.getName();
+
+    if (fieldMetaData.type_count && typeof fieldMetaData.type_count.value === 'number') {
+      const min = 0;
+      const max = Math.ceil(fieldMetaData.type_count.value / 1024);
+      return {
+        min: min,
+        max: max,
+        delta: max - min,
+        isMinOutsideStdRange: false,
+        isMaxOutsideStdRange: false,
+      };
+    }
+
     const stats = fieldMetaData[realFieldName];
     if (!stats) {
       return null;

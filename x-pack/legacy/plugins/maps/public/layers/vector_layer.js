@@ -411,9 +411,9 @@ export class VectorLayer extends AbstractLayer {
   }
 
   async _syncSourceStyleMeta(syncContext) {
-    if (this._style.constructor.type !== LAYER_STYLE_TYPE.VECTOR) {
-      return;
-    }
+    // if (this._style.constructor.type !== LAYER_STYLE_TYPE.VECTOR) {
+    //   return;
+    // }
 
     return this._syncStyleMeta({
       source: this._source,
@@ -460,6 +460,7 @@ export class VectorLayer extends AbstractLayer {
     onLoadError,
     registerCancelCallback,
   }) {
+
     if (!source.isESSource() || dynamicStyleProps.length === 0) {
       return;
     }

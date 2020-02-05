@@ -5,7 +5,7 @@
  */
 
 import { AbstractField } from './field';
-import { COUNT_AGG_TYPE } from '../../../common/constants';
+import { COUNT_AGG_TYPE, METRIC_TYPE } from '../../../common/constants';
 import { isMetricCountable } from '../util/is_metric_countable';
 import { ESAggMetricTooltipProperty } from '../tooltips/es_aggmetric_tooltip_property';
 
@@ -79,10 +79,23 @@ export class ESAggMetricField extends AbstractField {
 
   supportsFieldMeta() {
     // count and sum aggregations are not within field bounds so they do not support field meta.
-    return !isMetricCountable(this.getAggType());
+    // return !isMetricCountable(this.getAggType());
+    return ![METRIC_TYPE.SUM, METRIC_TYPE.UNIQUE_COUNT].includes(this.getAggType());
   }
 
   async getOrdinalFieldMetaRequest(config) {
-    return this._esDocField.getOrdinalFieldMetaRequest(config);
+    if (this._esDocField) {
+      return this._esDocField.getOrdinalFieldMetaRequest(config);
+    } else {
+      return {
+        type_count: {
+          value_count: {
+            script: {
+              source: '1',
+            },
+          },
+        },
+      };
+    }
   }
 }
