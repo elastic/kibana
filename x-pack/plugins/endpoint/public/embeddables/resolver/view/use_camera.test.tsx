@@ -7,7 +7,7 @@
 /**
  * This import must be hoisted as it uses `jest.mock`. Is there a better way? Mocking is not good.
  */
-import { mockedResizeObserverNamespace } from './simulate_element_resize';
+import { setup, clear, simulateElementResize } from './simulate_element_resize';
 import React from 'react';
 import { render, act } from '@testing-library/react';
 import { useCamera } from './use_camera';
@@ -15,21 +15,11 @@ import { Provider } from 'react-redux';
 import { storeFactory } from '../store';
 import { Matrix3 } from '../types';
 
-const {
-  simulateElementResize,
-  mockGetBoundingClientRectImplementation,
-  clear,
-} = mockedResizeObserverNamespace;
-
 describe('useCamera on an unpainted element', () => {
   let element: HTMLElement;
   let projectionMatrix: Matrix3;
   beforeEach(async () => {
-    clear();
-
-    jest
-      .spyOn(Element.prototype, 'getBoundingClientRect')
-      .mockImplementation(mockGetBoundingClientRectImplementation);
+    setup(Element);
 
     const testID = 'camera';
 
@@ -49,6 +39,9 @@ describe('useCamera on an unpainted element', () => {
     );
     element = await findByTestId(testID);
     expect(element).toBeInTheDocument();
+  });
+  afterEach(() => {
+    clear();
   });
   test('returns a projectionMatrix that changes everything to 0', async () => {
     expect(projectionMatrix).toMatchInlineSnapshot(`
