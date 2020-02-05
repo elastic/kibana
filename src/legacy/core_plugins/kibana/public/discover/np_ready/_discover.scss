@@ -1,14 +1,44 @@
-discover-app {
-  flex-grow: 1;
+.dscApp {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
 
   .sidebar-container {
     background-color: transparent;
   }
 }
 
+.dscApp__header {
+  border-bottom: $euiBorderThin;
+  margin-bottom: $euiSize;
+}
+
+.dscApp__frame {
+  position: relative;
+  flex-grow: 1;
+  display: flex;
+}
+
+.dscApp__sidebar {
+  flex-grow: 0;
+  flex-basis: auto;
+  min-width: 304px;
+  padding: 0 $euiSizeS;
+}
+
+.dscApp__content {
+  flex-grow: 1;
+}
+
 .dscHistogram {
   display: flex;
-  height: 200px;
+  height: $euiSize * 8;
   padding: $euiSizeS;
 }
 
