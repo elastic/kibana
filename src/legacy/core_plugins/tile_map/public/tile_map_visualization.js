@@ -74,7 +74,6 @@ export const createTileMapVisualization = ({ serviceSettings, $injector }) => {
       const uiState = this.vis.getUiState();
       uiState.on('change', prop => {
         if (prop === 'mapZoom' || prop === 'mapCenter') {
-          // todo: check if we are outside of map bounds
           this.updateGeohashAgg();
         }
       });
