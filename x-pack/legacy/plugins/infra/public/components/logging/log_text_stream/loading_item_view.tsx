@@ -60,7 +60,7 @@ export class LogTextStreamLoadingItemView extends React.PureComponent<
     const extra = (
       <EuiFlexGroup justifyContent="center" alignItems="center" gutterSize="m">
         {isLoading || isStreaming ? (
-          <ProgressSpinner />
+          <ProgressSpinner kind={isStreaming ? 'streaming' : 'loading'} />
         ) : shouldShowCta ? (
           <ProgressCta
             position={position}
@@ -111,17 +111,24 @@ const ProgressMessage: React.FC<{ timestamp?: number }> = ({ timestamp }) => {
   );
 };
 
-const ProgressSpinner: React.FC = () => (
+const ProgressSpinner: React.FC<{ kind: 'streaming' | 'loading' }> = ({ kind }) => (
   <>
     <EuiFlexItem grow={false}>
       <EuiLoadingSpinner size="l" />
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
       <EuiText size="s">
-        <FormattedMessage
-          id="xpack.infra.logs.loadingNewEntriesText"
-          defaultMessage="Loading new entries..."
-        />
+        {kind === 'streaming' ? (
+          <FormattedMessage
+            id="xpack.infra.logs.streamingNewEntriesText"
+            defaultMessage="Streaming new entries..."
+          />
+        ) : (
+          <FormattedMessage
+            id="xpack.infra.logs.loadingNewEntriesText"
+            defaultMessage="Loading new entries..."
+          />
+        )}
       </EuiText>
     </EuiFlexItem>
   </>
