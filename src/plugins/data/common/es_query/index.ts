@@ -16,8 +16,47 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import * as esQuery from './es_query';
-import * as esFilters from './filters';
-import * as esKuery from './kuery';
+// import * as esQueryUtils from './es_query';
+import {
+    Filter as Filter1,
+    FILTERS as FILTERS1,
+    FilterStateStore as FilterStateStore1,
+    buildPhraseFilter as buildPhraseFilter1,
+    buildRangeFilter as buildRangeFilter1,
+    buildPhrasesFilter as buildPhrasesFilter1,
+    buildExistsFilter as buildExistsFilter1,
 
-export { esFilters, esQuery, esKuery };
+} from './filters';
+import {
+    KueryNode as KueryNode1,
+    fromKueryExpression as fromKueryExpression1,
+    nodeTypes as nodeTypes1,
+    toElasticsearchQuery as toElasticsearchQuery1,
+} from './kuery';
+
+
+export namespace esFilters { 
+    export type Filter = Filter1;
+    export import FILTERS = FILTERS1;
+    export import FilterStateStore = FilterStateStore1;
+    export const buildPhraseFilter = buildPhraseFilter1;
+    export const buildRangeFilter = buildRangeFilter1;
+    export const buildPhrasesFilter = buildPhrasesFilter1;
+    export const buildExistsFilter = buildExistsFilter1;
+}
+
+export namespace esQuery { 
+}
+
+export namespace esKuery { 
+    export type KueryNode = KueryNode1;
+
+    export const fromKueryExpression = fromKueryExpression1;
+    export const nodeTypes = nodeTypes1;
+    export const toElasticsearchQuery = toElasticsearchQuery1;
+}
+
+
+
+
+// export { esFilters, esQuery, esKuery };

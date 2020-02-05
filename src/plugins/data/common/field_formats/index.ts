@@ -17,6 +17,4 @@
  * under the License.
  */
 
-import * as fieldFormats from './static';
-
-export { fieldFormats };
+export { fieldFormats } from './static';

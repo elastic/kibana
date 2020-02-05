@@ -33,18 +33,26 @@ import fs from 'fs';
 import path from 'path';
 import getopts from 'getopts';
 
+/*
+* Step 1: execute build:types
+* This users tsconfig.types.json to generate types in `target/types`
+* Step 2: run Api Extractor to detect API changes
+* Step 3: 
+*/
+
 const apiExtractorConfig = (folder: string): ExtractorConfig => {
+  const fname = folder.replace(/\//g, '_');
   const config: IConfigFile = {
     newlineKind: 'lf',
     compiler: {
       tsconfigFilePath: '<projectFolder>/tsconfig.json',
     },
     projectFolder: path.resolve('./'),
-    mainEntryPointFilePath: `target/types/core/${folder}/index.d.ts`,
+    mainEntryPointFilePath: `target/types/${folder}/index.d.ts`,
     apiReport: {
       enabled: true,
-      reportFileName: `${folder}.api.md`,
-      reportFolder: `<projectFolder>/src/core/${folder}/`,
+      reportFileName: `${fname}.api.md`,
+      reportFolder: `<projectFolder>/src/${folder}/`,
       reportTempFolder: `<projectFolder>/build/${folder}/`,
     },
     docModel: {
@@ -243,7 +251,7 @@ async function run(
     return false;
   }
 
-  const folders = ['public', 'server'];
+  const folders = [ 'plugins/data/server'];
   const results = await Promise.all(folders.map(folder => run(folder, { log, opts })));
 
   if (results.find(r => r === false) !== undefined) {
