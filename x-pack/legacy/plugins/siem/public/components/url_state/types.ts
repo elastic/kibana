@@ -138,9 +138,9 @@ export type DispatchSetInitialStateFromUrl = <TCache>({
   urlStateToUpdate,
 }: SetInitialStateFromUrl<TCache>) => () => void;
 
-export interface ReplaceStateInLocation {
+export interface ReplaceStateInLocation<T> {
   history?: H.History;
-  urlStateToReplace: UrlInputsModel | Query | esFilters.Filter[] | Timeline | string;
+  urlStateToReplace: T;
   urlStateKey: string;
   pathName: string;
   search: string;

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { decode, encode, RisonValue } from 'rison-node';
+import { decode, encode } from 'rison-node';
 import * as H from 'history';
 import { QueryString } from 'ui/utils/query_string';
 import { Query, esFilters } from 'src/plugins/data/public';
@@ -24,13 +24,12 @@ import {
   UpdateUrlStateString,
 } from './types';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const decodeRisonUrlState = (value: string | undefined): RisonValue | any | undefined => {
+export const decodeRisonUrlState = <T>(value: string | undefined): T | null => {
   try {
-    return value ? decode(value) : undefined;
+    return value ? ((decode(value) as unknown) as T) : null;
   } catch (error) {
     if (error instanceof Error && error.message.startsWith('rison decoder error')) {
-      return {};
+      return null;
     }
     throw error;
   }
@@ -207,60 +206,61 @@ export const updateUrlStateString = ({
   search,
   urlKey,
 }: UpdateUrlStateString): string => {
-  const queryState: Query | Timeline | esFilters.Filter[] | UrlInputsModel = decodeRisonUrlState(
-    newUrlStateString
-  );
-  if (urlKey === CONSTANTS.appQuery && queryState != null && (queryState as Query).query === '') {
-    return replaceStateInLocation({
-      history,
-      pathName,
-      search,
-      urlStateToReplace: '',
-      urlStateKey: urlKey,
-    });
-  } else if (
-    urlKey === CONSTANTS.timerange &&
-    queryState != null &&
-    (queryState as UrlInputsModel).global != null
-  ) {
-    return replaceStateInLocation({
-      history,
-      pathName,
-      search,
-      urlStateToReplace: updateTimerangeUrl(queryState as UrlInputsModel),
-      urlStateKey: urlKey,
-    });
-  } else if (urlKey === CONSTANTS.filters && isEmpty(queryState)) {
-    return replaceStateInLocation({
-      history,
-      pathName,
-      search,
-      urlStateToReplace: '',
-      urlStateKey: urlKey,
-    });
-  } else if (
-    urlKey === CONSTANTS.timeline &&
-    queryState != null &&
-    (queryState as Timeline).id === ''
-  ) {
-    return replaceStateInLocation({
-      history,
-      pathName,
-      search,
-      urlStateToReplace: '',
-      urlStateKey: urlKey,
-    });
+  if (urlKey === CONSTANTS.appQuery) {
+    const queryState = decodeRisonUrlState<Query>(newUrlStateString);
+    if (queryState != null && queryState.query === '') {
+      return replaceStateInLocation({
+        history,
+        pathName,
+        search,
+        urlStateToReplace: '',
+        urlStateKey: urlKey,
+      });
+    }
+  } else if (urlKey === CONSTANTS.timerange) {
+    const queryState = decodeRisonUrlState<UrlInputsModel>(newUrlStateString);
+    if (queryState != null && queryState.global != null) {
+      return replaceStateInLocation({
+        history,
+        pathName,
+        search,
+        urlStateToReplace: updateTimerangeUrl(queryState),
+        urlStateKey: urlKey,
+      });
+    }
+  } else if (urlKey === CONSTANTS.filters) {
+    const queryState = decodeRisonUrlState<esFilters.Filter[]>(newUrlStateString);
+    if (isEmpty(queryState)) {
+      return replaceStateInLocation({
+        history,
+        pathName,
+        search,
+        urlStateToReplace: '',
+        urlStateKey: urlKey,
+      });
+    }
+  } else if (urlKey === CONSTANTS.timeline) {
+    const queryState = decodeRisonUrlState<Timeline>(newUrlStateString);
+    if (queryState != null && queryState.id === '') {
+      return replaceStateInLocation({
+        history,
+        pathName,
+        search,
+        urlStateToReplace: '',
+        urlStateKey: urlKey,
+      });
+    }
   }
   return search;
 };
 
-export const replaceStateInLocation = ({
+export const replaceStateInLocation = <T>({
   history,
   urlStateToReplace,
   urlStateKey,
   pathName,
   search,
-}: ReplaceStateInLocation) => {
+}: ReplaceStateInLocation<T>) => {
   const newLocation = replaceQueryStringInLocation(
     {
       hash: '',
