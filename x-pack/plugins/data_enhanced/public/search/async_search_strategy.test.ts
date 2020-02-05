@@ -5,10 +5,10 @@
  */
 
 import { of } from 'rxjs';
+import { AbortController } from 'abort-controller';
 import { coreMock } from '../../../../../src/core/public/mocks';
 import { asyncSearchStrategyProvider } from './async_search_strategy';
 import { IAsyncSearchOptions } from './types';
-import { AbortController } from 'abort-controller';
 
 describe('Async search strategy', () => {
   let mockCoreSetup: ReturnType<typeof coreMock.createSetup>;

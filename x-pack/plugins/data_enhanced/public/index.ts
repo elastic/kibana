@@ -4,8 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { PluginInitializerContext } from '../../../../src/core/public';
 import { DataEnhancedPlugin, DataEnhancedSetup, DataEnhancedStart } from './plugin';
 
-export const plugin = () => new DataEnhancedPlugin();
+export const plugin = (initializerContext: PluginInitializerContext) =>
+  new DataEnhancedPlugin(initializerContext);
 
 export { DataEnhancedSetup, DataEnhancedStart };
+
+export { ASYNC_SEARCH_STRATEGY, IAsyncSearchRequest, IAsyncSearchOptions } from './search';
