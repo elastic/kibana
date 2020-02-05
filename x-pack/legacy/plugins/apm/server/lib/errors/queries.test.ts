@@ -6,7 +6,6 @@
 
 import { getErrorGroup } from './get_error_group';
 import { getErrorGroups } from './get_error_groups';
-import { getTraceErrorsPerTransaction } from './get_trace_errors_per_transaction';
 import {
   SearchParamsMock,
   inspectSearchParams
@@ -52,14 +51,6 @@ describe('error queries', () => {
         serviceName: 'serviceName',
         setup
       })
-    );
-
-    expect(mock.params).toMatchSnapshot();
-  });
-
-  it('fetches trace errors', async () => {
-    mock = await inspectSearchParams(setup =>
-      getTraceErrorsPerTransaction('foo', setup)
     );
 
     expect(mock.params).toMatchSnapshot();

@@ -4,8 +4,8 @@
     "winlogbeat-*"
   ],
   "language": "kuery",
-  "max_signals": 33,
-  "name": "PowerShell spawning cmd.exe",
+  "max_signals": 100,
+  "name": "PowerShell spawning Cmd",
   "query": "process.parent.name:powershell.exe and process.name:cmd.exe",
   "risk_score": 21,
   "rule_id": "0f616aee-8161-4120-857e-742366f5eeb3",
