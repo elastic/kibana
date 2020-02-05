@@ -6,7 +6,6 @@
 
 import { isEqual, difference, isEmpty } from 'lodash/fp';
 import { useEffect, useRef, useState } from 'react';
-import { Query } from 'src/plugins/data/public';
 
 import { useApolloClient } from '../../utils/apollo_context';
 import { CONSTANTS, UrlStateType } from './constants';
@@ -25,7 +24,6 @@ import {
   KeyUrlState,
   ALL_URL_STATE_KEYS,
   UrlStateToRedux,
-  Timeline,
 } from './types';
 
 function usePrevious(value: PreviousLocationUrlState) {
@@ -95,7 +93,7 @@ export const useUrlStateHooks = ({
       } else if (
         urlKey === CONSTANTS.appQuery &&
         urlState[urlKey] != null &&
-        (urlState[urlKey] as Query).query === ''
+        urlState[urlKey]?.query === ''
       ) {
         mySearch = replaceStateInLocation({
           history,
@@ -115,7 +113,7 @@ export const useUrlStateHooks = ({
       } else if (
         urlKey === CONSTANTS.timeline &&
         urlState[urlKey] != null &&
-        (urlState[urlKey] as Timeline).id === ''
+        urlState[urlKey].id === ''
       ) {
         mySearch = replaceStateInLocation({
           history,
@@ -166,7 +164,7 @@ export const useUrlStateHooks = ({
         if (
           urlKey === CONSTANTS.appQuery &&
           urlState[urlKey] != null &&
-          (urlState[urlKey] as Query).query === ''
+          urlState[urlKey]?.query === ''
         ) {
           mySearch = replaceStateInLocation({
             history,
@@ -186,7 +184,7 @@ export const useUrlStateHooks = ({
         } else if (
           urlKey === CONSTANTS.timeline &&
           urlState[urlKey] != null &&
-          (urlState[urlKey] as Timeline).id === ''
+          urlState[urlKey].id === ''
         ) {
           mySearch = replaceStateInLocation({
             history,
