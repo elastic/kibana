@@ -22,6 +22,8 @@ import {
   GetMonitorStatesParams,
   GetPingsParams,
   GetPingHistogramParams,
+  GetMonitorStatusParams,
+  GetMonitorStatusResult,
 } from '.';
 import {
   OverviewFilters,
@@ -45,6 +47,7 @@ export interface UptimeRequests {
   getMonitorDetails: ESQ<GetMonitorDetailsParams, MonitorDetails>;
   getMonitorLocations: ESQ<GetMonitorLocationsParams, MonitorLocations>;
   getMonitorStates: ESQ<GetMonitorStatesParams, GetMonitorStatesResult>;
+  getMonitorStatus: ESQ<GetMonitorStatusParams, GetMonitorStatusResult[]>;
   getPings: ESQ<GetPingsParams, PingResults>;
   getPingHistogram: ESQ<GetPingHistogramParams, HistogramResult>;
   getSnapshotCount: ESQ<GetSnapshotCountParams, Snapshot>;
