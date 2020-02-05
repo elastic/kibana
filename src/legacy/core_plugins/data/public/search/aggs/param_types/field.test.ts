@@ -21,7 +21,7 @@ import { get } from 'lodash';
 import { BaseParamType } from './base';
 import { FieldParamType } from './field';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '../../../../../../../plugins/data/public';
-import { AggConfig } from '../agg_config';
+import { IAggConfig } from '../agg_config';
 import { IMetricAggConfig } from '../metrics/metric_agg_type';
 import { Schema } from '../schemas';
 
@@ -53,7 +53,7 @@ describe('Field', () => {
 
   const agg = ({
     getIndexPattern: jest.fn(() => indexPattern),
-  } as unknown) as AggConfig;
+  } as unknown) as IAggConfig;
 
   describe('constructor', () => {
     it('it is an instance of BaseParamType', () => {

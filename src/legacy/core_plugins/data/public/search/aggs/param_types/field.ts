@@ -20,12 +20,12 @@
 import { i18n } from '@kbn/i18n';
 import { isFunction } from 'lodash';
 import { npStart } from 'ui/new_platform';
-import { AggConfig } from '../agg_config';
+import { IAggConfig } from '../agg_config';
 import { SavedObjectNotFound } from '../../../../../../../plugins/kibana_utils/public';
 import { BaseParamType } from './base';
 import { propFilter } from '../filter';
 import { IMetricAggConfig } from '../metrics/metric_agg_type';
-import { Field, IFieldList, isNestedField } from '../../../../../../../plugins/data/public';
+import { Field, isNestedField, KBN_FIELD_TYPES } from '../../../../../../../plugins/data/public';
 
 const filterByType = propFilter('type');
 
@@ -47,7 +47,7 @@ export class FieldParamType extends BaseParamType {
     this.onlyAggregatable = config.onlyAggregatable !== false;
 
     if (!config.write) {
-      this.write = (aggConfig: AggConfig, output: Record<string, any>) => {
+      this.write = (aggConfig: IAggConfig, output: Record<string, any>) => {
         const field = aggConfig.getField();
 
         if (!field) {
@@ -76,7 +76,7 @@ export class FieldParamType extends BaseParamType {
       return field.name;
     };
 
-    this.deserialize = (fieldName: string, aggConfig?: AggConfig) => {
+    this.deserialize = (fieldName: string, aggConfig?: IAggConfig) => {
       if (!aggConfig) {
         throw new Error('aggConfig was not provided to FieldParamType deserialize function');
       }
@@ -110,7 +110,7 @@ export class FieldParamType extends BaseParamType {
   /**
    * filter the fields to the available ones
    */
-  getAvailableFields = (aggConfig: AggConfig) => {
+  getAvailableFields = (aggConfig: IAggConfig) => {
     const fields = aggConfig.getIndexPattern().fields;
     const filteredFields = fields.filter((field: Field) => {
       const { onlyAggregatable, scriptable, filterFieldTypes } = this;
