@@ -63,6 +63,7 @@ const alertExecutorOptions: LicenseExpirationAlertExecutorOptions = {
   spaceId: '',
   name: '',
   tags: [],
+  previousStartedAt: null,
   createdBy: null,
   updatedBy: null,
 };
