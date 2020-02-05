@@ -18,20 +18,22 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
-import { componentRegistry } from './component_registry';
+import { ComponentRegistry } from './component_registry';
 import { AdvancedSettingsSetup, AdvancedSettingsStart } from './types';
+
+const component = new ComponentRegistry();
 
 export class AdvancedSettingsPlugin
   implements Plugin<AdvancedSettingsSetup, AdvancedSettingsStart> {
   public setup(core: CoreSetup) {
     return {
-      componentRegistry,
+      component: component.setup,
     };
   }
 
   public start(core: CoreStart) {
     return {
-      componentRegistry,
+      component: component.start,
     };
   }
 }

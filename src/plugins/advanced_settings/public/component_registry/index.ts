@@ -17,22 +17,4 @@
  * under the License.
  */
 
-import { registerSettingsComponent, getSettingsComponent } from './component_registry';
-import {
-  registerDefaultComponents,
-  PAGE_TITLE_COMPONENT,
-  PAGE_SUBTITLE_COMPONENT,
-  PAGE_FOOTER_COMPONENT,
-} from './default_component_registry';
-
-registerDefaultComponents();
-
-export const componentRegistry = {
-  register: registerSettingsComponent,
-  get: getSettingsComponent,
-  componentType: {
-    PAGE_TITLE_COMPONENT,
-    PAGE_SUBTITLE_COMPONENT,
-    PAGE_FOOTER_COMPONENT,
-  },
-};
+export { ComponentRegistry } from './component_registry';

@@ -46,10 +46,23 @@ const serviceIcons: { [key: string]: string } = {
 
 export const defaultIcon = getAvatarIcon();
 
+// IE 11 does not properly load some SVGs, which causes a runtime error and the
+// map to not work at all. We would prefer to do some kind of feature detection
+// rather than browser detection, but IE 11 does support SVG, just not well
+// enough for our use in loading icons.
+//
+// This method of detecting IE is from a Stack Overflow answer:
+// https://stackoverflow.com/a/21825207
+//
+// @ts-ignore `documentMode` is not recognized as a valid property of `document`.
+const isIE11 = !!window.MSInputMethodContext && !!document.documentMode;
+
 export function iconForNode(node: cytoscape.NodeSingular) {
   const type = node.data('type');
   if (type === 'service') {
     return serviceIcons[node.data('agentName') as string];
+  } else if (isIE11) {
+    return defaultIcon;
   } else {
     return icons[type];
   }

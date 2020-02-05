@@ -20,7 +20,7 @@
 import React, { useCallback } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 
-import { VisOptionsProps } from '../../../legacy_imports';
+import { VisOptionsProps } from '../../../../../vis_default_editor/public';
 import { GaugeVisParams } from '../../../gauge';
 import { RangesPanel } from './ranges_panel';
 import { StylePanel } from './style_panel';

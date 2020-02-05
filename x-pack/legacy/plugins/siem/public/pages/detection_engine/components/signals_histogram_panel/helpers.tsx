@@ -47,9 +47,14 @@ export const getSignalsHistogramQuery = (
       },
       aggs: {
         signals: {
-          auto_date_histogram: {
+          date_histogram: {
             field: '@timestamp',
-            buckets: 36,
+            fixed_interval: `${Math.floor((to - from) / 32)}ms`,
+            min_doc_count: 0,
+            extended_bounds: {
+              min: from,
+              max: to,
+            },
           },
         },
       },
@@ -71,3 +76,17 @@ export const getSignalsHistogramQuery = (
     },
   },
 });
+
+/**
+ * Returns `true` when the signals histogram initial loading spinner should be shown
+ *
+ * @param isInitialLoading The loading spinner will only be displayed if this value is `true`, because after initial load, a different, non-spinner loading indicator is displayed
+ * @param isLoadingSignals When `true`, IO is being performed to request signals (for rendering in the histogram)
+ */
+export const showInitialLoadingSpinner = ({
+  isInitialLoading,
+  isLoadingSignals,
+}: {
+  isInitialLoading: boolean;
+  isLoadingSignals: boolean;
+}): boolean => isInitialLoading && isLoadingSignals;

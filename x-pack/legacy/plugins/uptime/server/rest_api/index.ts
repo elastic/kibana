@@ -5,7 +5,7 @@
  */
 
 import { createGetOverviewFilters } from './overview_filters';
-import { createGetAllRoute } from './pings';
+import { createGetPingsRoute } from './pings';
 import { createGetIndexPatternRoute } from './index_pattern';
 import { createLogMonitorPageRoute, createLogOverviewPageRoute } from './telemetry';
 import { createGetSnapshotCount } from './snapshot';
@@ -16,13 +16,14 @@ import {
   createGetMonitorLocationsRoute,
   createGetStatusBarRoute,
 } from './monitors';
+import { createGetPingHistogramRoute } from './pings/get_ping_histogram';
 
 export * from './types';
 export { createRouteWithAuth } from './create_route_with_auth';
 export { uptimeRouteWrapper } from './uptime_route_wrapper';
 export const restApiRoutes: UMRestApiRouteFactory[] = [
   createGetOverviewFilters,
-  createGetAllRoute,
+  createGetPingsRoute,
   createGetIndexPatternRoute,
   createGetMonitorRoute,
   createGetMonitorDetailsRoute,
@@ -31,4 +32,5 @@ export const restApiRoutes: UMRestApiRouteFactory[] = [
   createGetSnapshotCount,
   createLogMonitorPageRoute,
   createLogOverviewPageRoute,
+  createGetPingHistogramRoute,
 ];

@@ -5,21 +5,16 @@
  */
 
 import { AdvancedSettingsService } from './advanced_settings_service';
+import { advancedSettingsMock } from '../../../../../../src/plugins/advanced_settings/public/mocks';
+
+const componentRegistryMock = advancedSettingsMock.createSetupContract();
 
 describe('Advanced Settings Service', () => {
   describe('#setup', () => {
     it('registers space-aware components to augment the advanced settings screen', () => {
       const deps = {
         getActiveSpace: jest.fn().mockResolvedValue({ id: 'foo', name: 'foo-space' }),
-        componentRegistry: {
-          register: jest.fn(),
-          get: jest.fn(),
-          componentType: {
-            PAGE_TITLE_COMPONENT: 'page_title_component',
-            PAGE_SUBTITLE_COMPONENT: 'page_subtitle_component',
-            PAGE_FOOTER_COMPONENT: 'page_footer_component',
-          },
-        },
+        componentRegistry: componentRegistryMock,
       };
 
       const advancedSettingsService = new AdvancedSettingsService();
@@ -27,13 +22,13 @@ describe('Advanced Settings Service', () => {
 
       expect(deps.componentRegistry.register).toHaveBeenCalledTimes(2);
       expect(deps.componentRegistry.register).toHaveBeenCalledWith(
-        'page_title_component',
+        componentRegistryMock.componentType.PAGE_TITLE_COMPONENT,
         expect.any(Function),
         true
       );
 
       expect(deps.componentRegistry.register).toHaveBeenCalledWith(
-        'page_subtitle_component',
+        componentRegistryMock.componentType.PAGE_SUBTITLE_COMPONENT,
         expect.any(Function),
         true
       );

@@ -14,7 +14,7 @@ import {
   SavedObjectsClientContract,
 } from 'kibana/server';
 import { SIGNALS_ID } from '../../../../common/constants';
-import { AlertsClient } from '../../../../../alerting/server/alerts_client';
+import { AlertsClient } from '../../../../../alerting/server';
 import { ActionsClient } from '../../../../../../../plugins/actions/server';
 import { RuleAlertParams, RuleTypeParams, RuleAlertParamsRest } from '../types';
 import { RequestFacade } from '../../../types';
@@ -163,7 +163,7 @@ export type DeleteRuleParams = Clients & {
   ruleId: string | undefined | null;
 };
 
-export type RuleParams = RuleAlertParams & Clients;
+export type CreateRuleParams = Omit<RuleAlertParams, 'ruleId'> & { ruleId: string } & Clients;
 
 export interface ReadRuleParams {
   alertsClient: AlertsClient;

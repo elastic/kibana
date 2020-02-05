@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ESFilter } from '../../../../typings/elasticsearch';
+import { ESFilter } from '../../../../../../../plugins/apm/typings/elasticsearch';
 import { PromiseReturnType } from '../../../../typings/common';
 import {
   PROCESSOR_EVENT,

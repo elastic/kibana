@@ -48,7 +48,7 @@ export class SpacesPlugin implements Plugin<void, SpacesPluginStart, PluginsSetu
     const advancedSettingsService = new AdvancedSettingsService();
     advancedSettingsService.setup({
       getActiveSpace: () => this.spacesManager.getActiveSpace(),
-      componentRegistry: plugins.advancedSettings.componentRegistry,
+      componentRegistry: plugins.advancedSettings.component,
     });
 
     if (plugins.home) {

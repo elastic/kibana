@@ -100,7 +100,7 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({ alert }
   const [error, setError] = useState<undefined | any>(undefined);
   const [visualizationData, setVisualizationData] = useState<Record<string, any>>([]);
 
-  const chartsTheme = npStart.plugins.eui_utils.useChartsTheme();
+  const chartsTheme = npStart.plugins.charts.theme.useChartsTheme();
   const {
     index,
     timeField,
@@ -280,17 +280,18 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({ alert }
           </Chart>
         ) : (
           <EuiCallOut
+            size="s"
             title={
               <FormattedMessage
                 id="xpack.triggersActionsUI.sections.alertAdd.thresholdPreviewChart.noDataTitle"
-                defaultMessage="No data"
+                defaultMessage="No data matches that query"
               />
             }
             color="warning"
           >
             <FormattedMessage
               id="xpack.triggersActionsUI.sections.alertAdd.thresholdPreviewChart.dataDoesNotExistTextMessage"
-              defaultMessage="Your index and condition did not return any data."
+              defaultMessage="Check your time range and filters to make sure they are correct"
             />
           </EuiCallOut>
         )}

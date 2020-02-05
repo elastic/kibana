@@ -20,6 +20,7 @@
 import sinon from 'sinon';
 import { getFieldFormatsRegistry } from '../../../../test_utils/public/stub_field_formats';
 import { METRIC_TYPE } from '@kbn/analytics';
+import { ComponentRegistry } from '../../../../../src/plugins/advanced_settings/public/';
 
 const mockObservable = () => {
   return {
@@ -59,12 +60,9 @@ export const npSetup = {
   core: mockCore,
   plugins: {
     advancedSettings: {
-      componentRegistry: {
+      component: {
         register: sinon.fake(),
-        componentType: {
-          PAGE_TITLE_COMPONENT: 'page_title_component',
-          PAGE_SUBTITLE_COMPONENT: 'page_subtitle_component',
-        },
+        componentType: ComponentRegistry.componentType,
       },
     },
     usageCollection: {
@@ -128,6 +126,9 @@ export const npSetup = {
     kibana_legacy: {
       registerLegacyApp: () => {},
       forwardApp: () => {},
+      config: {
+        defaultAppId: 'home',
+      },
     },
     inspector: {
       registerView: () => undefined,
@@ -148,6 +149,22 @@ export const npSetup = {
       },
       environment: {
         update: sinon.fake(),
+      },
+      config: {
+        disableWelcomeScreen: false,
+      },
+    },
+    charts: {
+      theme: {
+        chartsTheme$: mockObservable,
+        useChartsTheme: sinon.fake(),
+      },
+    },
+    management: {
+      sections: {
+        getSection: () => ({
+          registerApp: sinon.fake(),
+        }),
       },
     },
   },
@@ -170,6 +187,11 @@ export const npStart = {
           hasItem: sinon.fake(),
         }),
       },
+      sections: {
+        getSection: () => ({
+          registerApp: sinon.fake(),
+        }),
+      },
     },
     embeddable: {
       getEmbeddableFactory: sinon.fake(),
@@ -187,6 +209,9 @@ export const npStart = {
     kibana_legacy: {
       getApps: () => [],
       getForwards: () => [],
+      config: {
+        defaultAppId: 'home',
+      },
     },
     data: {
       autocomplete: {
@@ -285,10 +310,22 @@ export const npStart = {
       featureCatalogue: {
         register: sinon.fake(),
       },
+      environment: {
+        get: sinon.fake(),
+      },
+      config: {
+        disableWelcomeScreen: false,
+      },
     },
     navigation: {
       ui: {
         TopNavMenu: mockComponent,
+      },
+    },
+    charts: {
+      theme: {
+        chartsTheme$: mockObservable,
+        useChartsTheme: sinon.fake(),
       },
     },
   },

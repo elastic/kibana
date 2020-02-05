@@ -17,11 +17,11 @@
  * under the License.
  */
 import {
-  FieldFormatRegisty,
   Plugin,
   FieldFormatsStart,
   FieldFormatsSetup,
   IndexPatternsContract,
+  fieldFormats,
 } from '.';
 import { searchSetupMock } from './search/mocks';
 import { queryServiceMock } from './query/mocks';
@@ -35,9 +35,8 @@ const autocompleteMock: any = {
   hasQuerySuggestions: jest.fn(),
 };
 
-const fieldFormatsMock: PublicMethodsOf<FieldFormatRegisty> = {
+const fieldFormatsMock: PublicMethodsOf<fieldFormats.FieldFormatsRegistry> = {
   getByFieldType: jest.fn(),
-  getConfig: jest.fn(),
   getDefaultConfig: jest.fn(),
   getDefaultInstance: jest.fn() as any,
   getDefaultInstanceCacheResolver: jest.fn(),
@@ -101,6 +100,8 @@ const createStartContract = (): Start => {
   };
   return startContract;
 };
+
+export { searchSourceMock } from './search/mocks';
 
 export const dataPluginMock = {
   createSetupContract,

@@ -10,7 +10,7 @@ import { AdvancedSettingsStart } from '../../../../../../src/plugins/advanced_se
 
 interface SetupDeps {
   getActiveSpace: () => Promise<Space>;
-  componentRegistry: AdvancedSettingsStart['componentRegistry'];
+  componentRegistry: AdvancedSettingsSetup['component'];
 }
 
 export class AdvancedSettingsService {

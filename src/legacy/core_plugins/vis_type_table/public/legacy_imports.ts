@@ -19,10 +19,8 @@
 
 export { npSetup, npStart } from 'ui/new_platform';
 export { getFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
-export { AggConfig } from 'ui/vis';
-export { AggGroupNames, VisOptionsProps } from 'ui/vis/editors/default';
-// @ts-ignore
-export { Schemas } from 'ui/vis/editors/default/schemas';
+export { IAggConfig, AggGroupNames, Schemas } from 'ui/agg_types';
+
 // @ts-ignore
 export { PrivateProvider } from 'ui/private/private';
 // @ts-ignore

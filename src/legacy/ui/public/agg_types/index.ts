@@ -17,83 +17,69 @@
  * under the License.
  */
 
-import { countMetricAgg } from './metrics/count';
-import { avgMetricAgg } from './metrics/avg';
-import { sumMetricAgg } from './metrics/sum';
-import { medianMetricAgg } from './metrics/median';
-import { minMetricAgg } from './metrics/min';
-import { maxMetricAgg } from './metrics/max';
-import { topHitMetricAgg } from './metrics/top_hit';
-import { stdDeviationMetricAgg } from './metrics/std_deviation';
-import { cardinalityMetricAgg } from './metrics/cardinality';
-import { percentilesMetricAgg } from './metrics/percentiles';
-import { geoBoundsMetricAgg } from './metrics/geo_bounds';
-import { geoCentroidMetricAgg } from './metrics/geo_centroid';
-import { percentileRanksMetricAgg } from './metrics/percentile_ranks';
-import { derivativeMetricAgg } from './metrics/derivative';
-import { cumulativeSumMetricAgg } from './metrics/cumulative_sum';
-import { movingAvgMetricAgg } from './metrics/moving_avg';
-import { serialDiffMetricAgg } from './metrics/serial_diff';
-import { dateHistogramBucketAgg, setBounds } from './buckets/date_histogram';
-import { histogramBucketAgg } from './buckets/histogram';
-import { rangeBucketAgg } from './buckets/range';
-import { dateRangeBucketAgg } from './buckets/date_range';
-import { ipRangeBucketAgg } from './buckets/ip_range';
-import { termsBucketAgg } from './buckets/terms';
-import { filterBucketAgg } from './buckets/filter';
-import { filtersBucketAgg } from './buckets/filters';
-import { significantTermsBucketAgg } from './buckets/significant_terms';
-import { geoHashBucketAgg } from './buckets/geo_hash';
-import { geoTileBucketAgg } from './buckets/geo_tile';
-import { bucketSumMetricAgg } from './metrics/bucket_sum';
-import { bucketAvgMetricAgg } from './metrics/bucket_avg';
-import { bucketMinMetricAgg } from './metrics/bucket_min';
-import { bucketMaxMetricAgg } from './metrics/bucket_max';
+/**
+ * Nothing to see here!
+ *
+ * Agg Types have moved to the data plugin, and are being
+ * re-exported from ui/agg_types for backwards compatibility.
+ */
 
-export { AggType } from './agg_type';
+import { start as dataStart } from '../../../core_plugins/data/public/legacy';
 
-export const aggTypes = {
-  metrics: [
-    countMetricAgg,
-    avgMetricAgg,
-    sumMetricAgg,
-    medianMetricAgg,
-    minMetricAgg,
-    maxMetricAgg,
-    stdDeviationMetricAgg,
-    cardinalityMetricAgg,
-    percentilesMetricAgg,
-    percentileRanksMetricAgg,
-    topHitMetricAgg,
-    derivativeMetricAgg,
-    cumulativeSumMetricAgg,
-    movingAvgMetricAgg,
-    serialDiffMetricAgg,
-    bucketAvgMetricAgg,
-    bucketSumMetricAgg,
-    bucketMinMetricAgg,
-    bucketMaxMetricAgg,
-    geoBoundsMetricAgg,
-    geoCentroidMetricAgg,
-  ],
-  buckets: [
-    dateHistogramBucketAgg,
-    histogramBucketAgg,
-    rangeBucketAgg,
-    dateRangeBucketAgg,
-    ipRangeBucketAgg,
-    termsBucketAgg,
-    filterBucketAgg,
-    filtersBucketAgg,
-    significantTermsBucketAgg,
-    geoHashBucketAgg,
-    geoTileBucketAgg,
-  ],
-};
+// runtime contracts
+export const {
+  types: aggTypes,
+  AggConfig,
+  AggConfigs,
+  AggType,
+  aggTypeFieldFilters,
+  FieldParamType,
+  MetricAggType,
+  parentPipelineAggHelper,
+  siblingPipelineAggHelper,
+  setBounds,
+} = dataStart.search.aggs;
 
-export { AggParam } from './agg_params';
-export { AggConfig } from './agg_config';
-export { AggConfigs } from './agg_configs';
-export { FieldParamType } from './param_types';
+// types
+export {
+  IAggConfig,
+  IAggConfigs,
+  IAggType,
+  IFieldParamType,
+  IMetricAggType,
+  AggParam,
+  AggParamOption,
+  BUCKET_TYPES,
+  DateRangeKey,
+  IpRangeKey,
+  ISchemas,
+  METRIC_TYPES,
+  OptionedParamEditorProps,
+  OptionedValueProp,
+} from '../../../core_plugins/data/public';
 
-export { setBounds };
+// static code
+export {
+  AggParamType,
+  AggTypeFilters,
+  aggTypeFilters,
+  AggTypeFieldFilters,
+  AggGroupNames,
+  aggGroupNamesMap,
+  CidrMask,
+  convertDateRangeToString,
+  convertIPRangeToString,
+  intervalOptions,
+  isDateHistogramBucketAggConfig,
+  isStringType,
+  isType,
+  isValidInterval,
+  isValidJson,
+  OptionedParamType,
+  parentPipelineType,
+  propFilter,
+  Schema,
+  Schemas,
+  siblingPipelineType,
+  termsAggFilter,
+} from '../../../core_plugins/data/public';

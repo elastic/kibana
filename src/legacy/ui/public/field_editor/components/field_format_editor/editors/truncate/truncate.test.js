@@ -19,6 +19,7 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
+import { EuiFieldNumber } from '@elastic/eui';
 
 import { TruncateFormatEditor } from './truncate';
 
@@ -34,6 +35,11 @@ const onChange = jest.fn();
 const onError = jest.fn();
 
 describe('TruncateFormatEditor', () => {
+  beforeEach(() => {
+    onChange.mockClear();
+    onError.mockClear();
+  });
+
   it('should have a formatId', () => {
     expect(TruncateFormatEditor.formatId).toEqual('truncate');
   });
@@ -49,5 +55,55 @@ describe('TruncateFormatEditor', () => {
       />
     );
     expect(component).toMatchSnapshot();
+  });
+
+  it('should fire error, when input is invalid', async () => {
+    const component = shallow(
+      <TruncateFormatEditor
+        fieldType={fieldType}
+        format={format}
+        formatParams={formatParams}
+        onChange={onChange}
+        onError={onError}
+      />
+    );
+    const input = component.find(EuiFieldNumber);
+
+    const changeEvent = {
+      target: {
+        value: '123.3',
+        checkValidity: () => false,
+        validationMessage: 'Error!',
+      },
+    };
+    await input.invoke('onChange')(changeEvent);
+
+    expect(onError).toBeCalledWith(changeEvent.target.validationMessage);
+    expect(onChange).not.toBeCalled();
+  });
+
+  it('should fire change, when input changed and is valid', async () => {
+    const component = shallow(
+      <TruncateFormatEditor
+        fieldType={fieldType}
+        format={format}
+        formatParams={formatParams}
+        onChange={onChange}
+        onError={onError}
+      />
+    );
+    const input = component.find(EuiFieldNumber);
+
+    const changeEvent = {
+      target: {
+        value: '123',
+        checkValidity: () => true,
+        validationMessage: null,
+      },
+    };
+    onError.mockClear();
+    await input.invoke('onChange')(changeEvent);
+    expect(onError).not.toBeCalled();
+    expect(onChange).toBeCalledWith({ fieldLength: 123 });
   });
 });

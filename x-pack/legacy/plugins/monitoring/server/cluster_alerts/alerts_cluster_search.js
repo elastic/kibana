@@ -157,7 +157,7 @@ export function alertsClusterSearch(req, alertsIndex, cluster, checkLicense, opt
 
   if (prodLicenseInfo.clusterAlerts.enabled) {
     const config = req.server.config();
-    const size = options.size || config.get('xpack.monitoring.max_bucket_size');
+    const size = options.size || config.get('monitoring.ui.max_bucket_size');
 
     const params = {
       index: alertsIndex,
