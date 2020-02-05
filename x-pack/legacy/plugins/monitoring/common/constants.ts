@@ -159,8 +159,6 @@ export const INDEX_ALERTS = '.monitoring-alerts-6,.monitoring-alerts-7' + INDEX_
 export const INDEX_PATTERN_ELASTICSEARCH =
   '.monitoring-es-6-*,.monitoring-es-7-*' + INDEX_PATTERN_ELASTICSEARCH_NEW;
 
-export const INDEX_PATTERN_FILEBEAT = 'filebeat-*';
-
 // This is the unique token that exists in monitoring indices collected by metricbeat
 export const METRICBEAT_INDEX_NAME_UNIQUE_TOKEN = '-mb-';
 
