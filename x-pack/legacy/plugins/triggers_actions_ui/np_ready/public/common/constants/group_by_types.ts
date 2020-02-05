@@ -6,7 +6,7 @@
 import { i18n } from '@kbn/i18n';
 import { GroupByType } from '../types';
 
-export const buildinGroupByTypes: { [key: string]: GroupByType } = {
+export const builtInGroupByTypes: { [key: string]: GroupByType } = {
   all: {
     text: i18n.translate(
       'xpack.triggersActionsUI.sections.alertAdd.threshold.groupByLabel.allDocumentsLabel',

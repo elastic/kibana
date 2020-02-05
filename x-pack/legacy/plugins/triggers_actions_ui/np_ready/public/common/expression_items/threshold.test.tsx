@@ -9,7 +9,7 @@ import { EuiPopoverTitle } from '@elastic/eui';
 import { ThresholdExpression } from './threshold';
 
 describe('threshold expression', () => {
-  it('renders of buildin comparators', () => {
+  it('renders of builtin comparators', () => {
     const onChangeSelectedThreshold = jest.fn();
     const onChangeSelectedThresholdComparator = jest.fn();
     const wrapper = shallow(

@@ -9,7 +9,7 @@ import { EuiPopoverTitle } from '@elastic/eui';
 import { OfExpression } from './of';
 
 describe('of expression', () => {
-  it('renders of buildin aggregation types', () => {
+  it('renders of builtin aggregation types', () => {
     const onChangeSelectedAggField = jest.fn();
     const wrapper = shallow(
       <OfExpression

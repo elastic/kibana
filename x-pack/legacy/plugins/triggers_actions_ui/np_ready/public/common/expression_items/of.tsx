@@ -15,7 +15,7 @@ import {
   EuiFormRow,
   EuiComboBox,
 } from '@elastic/eui';
-import { buildinAggregationTypes } from '../constants';
+import { builtInAggregationTypes } from '../constants';
 import { AggregationType } from '../types';
 
 interface OfExpressionProps {
@@ -47,7 +47,7 @@ export const OfExpression = ({
     ),
     value: '',
   };
-  const aggregationTypes = customAggTypesOptions ?? buildinAggregationTypes;
+  const aggregationTypes = customAggTypesOptions ?? builtInAggregationTypes;
 
   const availablefieldsOptions = fields.reduce((esFieldOptions: any[], field: any) => {
     if (aggregationTypes[aggType].validNormalizedTypes.includes(field.normalizedType)) {
@@ -78,38 +78,40 @@ export const OfExpression = ({
       closePopover={() => {
         setAggFieldPopoverOpen(false);
       }}
-      anchorPosition="downLeft"
+      ownFocus
+      withTitle
+      anchorPosition="upRight"
     >
-      <div>
-        <EuiPopoverTitle>
-          {i18n.translate('xpack.triggersActionsUI.common.of.ofButtonLabel', {
-            defaultMessage: 'of',
-          })}
-        </EuiPopoverTitle>
-        <EuiFlexGroup>
-          <EuiFlexItem grow={false}>
-            <EuiFormRow
+      <EuiPopoverTitle>
+        {i18n.translate('xpack.triggersActionsUI.common.of.ofButtonLabel', {
+          defaultMessage: 'of',
+        })}
+      </EuiPopoverTitle>
+      <EuiFlexGroup justifyContent="spaceBetween">
+        <EuiFlexItem>
+          <EuiFormRow
+            fullWidth
+            isInvalid={errors.aggField.length > 0 && aggField !== undefined}
+            error={errors.aggField}
+          >
+            <EuiComboBox
+              fullWidth
+              singleSelection={{ asPlainText: true }}
+              data-test-subj="availablefieldsOptionsComboBox"
               isInvalid={errors.aggField.length > 0 && aggField !== undefined}
-              error={errors.aggField}
-            >
-              <EuiComboBox
-                singleSelection={{ asPlainText: true }}
-                data-test-subj="availablefieldsOptionsComboBox"
-                isInvalid={errors.aggField.length > 0 && aggField !== undefined}
-                placeholder={firstFieldOption.text}
-                options={availablefieldsOptions}
-                selectedOptions={aggField ? [{ label: aggField }] : []}
-                onChange={selectedOptions => {
-                  onChangeSelectedAggField(
-                    selectedOptions.length === 1 ? selectedOptions[0].label : undefined
-                  );
-                  setAggFieldPopoverOpen(false);
-                }}
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </div>
+              placeholder={firstFieldOption.text}
+              options={availablefieldsOptions}
+              selectedOptions={aggField ? [{ label: aggField }] : []}
+              onChange={selectedOptions => {
+                onChangeSelectedAggField(
+                  selectedOptions.length === 1 ? selectedOptions[0].label : undefined
+                );
+                setAggFieldPopoverOpen(false);
+              }}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiPopover>
   );
 };

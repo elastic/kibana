@@ -7,7 +7,7 @@ import { i18n } from '@kbn/i18n';
 import { AlertTypeModel, ValidationResult } from '../../../../types';
 import { IndexThresholdAlertTypeExpression } from './expression';
 import { IndexThresholdAlertParams } from '../types';
-import { buildinGroupByTypes, buildinAggregationTypes } from '../../../../common/constants';
+import { builtInGroupByTypes, builtInAggregationTypes } from '../../../../common/constants';
 
 export function getAlertType(): AlertTypeModel {
   return {
@@ -53,7 +53,7 @@ export function getAlertType(): AlertTypeModel {
           })
         );
       }
-      if (aggType && buildinAggregationTypes[aggType].fieldRequired && !aggField) {
+      if (aggType && builtInAggregationTypes[aggType].fieldRequired && !aggField) {
         errors.aggField.push(
           i18n.translate('xpack.triggersActionsUI.sections.addAlert.error.requiredAggFieldText', {
             defaultMessage: 'Aggregation field is required.',
@@ -67,7 +67,7 @@ export function getAlertType(): AlertTypeModel {
           })
         );
       }
-      if (groupBy && buildinGroupByTypes[groupBy].sizeRequired && !termField) {
+      if (!termField && groupBy && builtInGroupByTypes[groupBy].sizeRequired) {
         errors.termField.push(
           i18n.translate('xpack.triggersActionsUI.sections.addAlert.error.requiredtTermFieldText', {
             defaultMessage: 'Term field is required.',

@@ -20,7 +20,7 @@ import {
   EuiFormRow,
   EuiCallOut,
 } from '@elastic/eui';
-import { COMPARATORS, buildinComparators } from '../../../../common/constants';
+import { COMPARATORS, builtInComparators } from '../../../../common/constants';
 import {
   getMatchingIndicesForThresholdAlertType,
   getThresholdAlertTypeFields,
@@ -36,7 +36,7 @@ import {
   ForLastExpression,
   GroupByExpression,
 } from '../../../../common';
-import { buildinAggregationTypes } from '../../../../common/constants';
+import { builtInAggregationTypes } from '../../../../common/constants';
 import { IndexThresholdAlertParams } from '../types';
 
 const DEFAULT_VALUES = {
@@ -381,7 +381,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
             }
           />
         </EuiFlexItem>
-        {aggType && buildinAggregationTypes[aggType].fieldRequired ? (
+        {aggType && builtInAggregationTypes[aggType].fieldRequired ? (
           <EuiFlexItem grow={false}>
             <OfExpression
               aggField={aggField}
@@ -396,10 +396,9 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
         ) : null}
         <EuiFlexItem grow={false}>
           <GroupByExpression
-            groupBy={groupBy}
+            groupBy={groupBy || DEFAULT_VALUES.GROUP_BY}
             termField={termField}
             termSize={termSize}
-            defaultGroupBy={DEFAULT_VALUES.GROUP_BY}
             errors={errors}
             fields={esFields}
             onChangeSelectedGroupBy={selectedGroupBy => setAlertParams('groupBy', selectedGroupBy)}
@@ -413,7 +412,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <ThresholdExpression
-            thresholdComparator={thresholdComparator}
+            thresholdComparator={thresholdComparator || DEFAULT_VALUES.THRESHOLD_COMPARATOR}
             threshold={threshold}
             defaultThresholdComparator={DEFAULT_VALUES.THRESHOLD_COMPARATOR}
             errors={errors}
@@ -443,8 +442,8 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
         <Fragment>
           <ThresholdVisualization
             alertParams={alertParams}
-            aggregationTypes={buildinAggregationTypes}
-            comparators={buildinComparators}
+            aggregationTypes={builtInAggregationTypes}
+            comparators={builtInComparators}
           />
         </Fragment>
       )}

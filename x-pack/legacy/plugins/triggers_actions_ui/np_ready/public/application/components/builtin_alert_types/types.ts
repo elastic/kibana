@@ -6,14 +6,14 @@
 
 export interface IndexThresholdAlertParams {
   index: string[];
-  timeField: string;
+  timeField?: string;
   aggType: string;
   aggField?: string;
-  groupBy: string;
-  termSize: number;
-  termField: string;
-  thresholdComparator: string;
+  groupBy?: string;
+  termSize?: number;
+  termField?: string;
+  thresholdComparator?: string;
   threshold: number[];
-  timeWindowSize?: number;
-  timeWindowUnit?: string;
+  timeWindowSize: number;
+  timeWindowUnit: string;
 }

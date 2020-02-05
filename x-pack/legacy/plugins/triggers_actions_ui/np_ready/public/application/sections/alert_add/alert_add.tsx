@@ -63,7 +63,7 @@ export const AlertAdd = () => {
 
   const alertType = alertTypeRegistry.get(alert.alertTypeId);
   const errors = {
-    ...(alertType ? alertType.validate(alert).errors : []),
+    ...(alertType ? alertType.validate(alert.params).errors : []),
     ...validateBaseProperties(alert).errors,
   } as IErrorObject;
   const hasErrors = !!Object.keys(errors).find(errorKey => errors[errorKey].length >= 1);

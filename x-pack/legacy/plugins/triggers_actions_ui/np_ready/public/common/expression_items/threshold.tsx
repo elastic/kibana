@@ -17,7 +17,7 @@ import {
   EuiFieldNumber,
   EuiText,
 } from '@elastic/eui';
-import { buildinComparators } from '../constants';
+import { builtInComparators } from '../constants';
 import { Comparator } from '../types';
 
 interface ThresholdExpressionProps {
@@ -41,7 +41,7 @@ export const ThresholdExpression = ({
   customComparators,
   threshold = [],
 }: ThresholdExpressionProps) => {
-  const comparators = customComparators ?? buildinComparators;
+  const comparators = customComparators ?? builtInComparators;
   const [alertThresholdPopoverOpen, setAlertThresholdPopoverOpen] = useState(false);
 
   const andThresholdText = i18n.translate(

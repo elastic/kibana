@@ -208,10 +208,9 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
   }
 
   const getThreshold = () => {
-    return alertParams.threshold.slice(
-      0,
-      comparators[alertParams.thresholdComparator].requiredValues
-    );
+    return thresholdComparator
+      ? threshold.slice(0, comparators[thresholdComparator].requiredValues)
+      : [];
   };
 
   if (visualizationData) {

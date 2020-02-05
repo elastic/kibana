@@ -15,7 +15,7 @@ export enum COMPARATORS {
   LESS_THAN_OR_EQUALS = '<=',
 }
 
-export const buildinComparators: { [key: string]: Comparator } = {
+export const builtInComparators: { [key: string]: Comparator } = {
   [COMPARATORS.GREATER_THAN]: {
     text: i18n.translate(
       'xpack.triggersActionsUI.sections.alertAdd.threshold.comparators.isAboveLabel',

@@ -9,13 +9,12 @@ import { EuiPopoverTitle } from '@elastic/eui';
 import { GroupByExpression } from './group_by_over';
 
 describe('group by expression', () => {
-  it('renders with buildin group by types', () => {
+  it('renders with builtin group by types', () => {
     const onChangeSelectedTermField = jest.fn();
     const onChangeSelectedGroupBy = jest.fn();
     const onChangeSelectedTermSize = jest.fn();
     const wrapper = shallow(
       <GroupByExpression
-        defaultGroupBy={'all'}
         errors={{ termSize: [], termField: [] }}
         fields={[{}]}
         groupBy={'all'}
@@ -51,7 +50,6 @@ describe('group by expression', () => {
     const onChangeSelectedTermSize = jest.fn();
     const wrapper = shallow(
       <GroupByExpression
-        defaultGroupBy={'all'}
         errors={{ termSize: [], termField: [] }}
         fields={[{ normalizedType: 'number', name: 'test', text: 'test text' }]}
         groupBy={'top'}
@@ -89,7 +87,6 @@ describe('group by expression', () => {
     const onChangeSelectedTermSize = jest.fn();
     const wrapper = shallow(
       <GroupByExpression
-        defaultGroupBy={'all'}
         errors={{ termSize: [], termField: [] }}
         fields={[{}]}
         groupBy={'all'}

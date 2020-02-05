@@ -9,7 +9,7 @@ import { EuiPopoverTitle } from '@elastic/eui';
 import { WhenExpression } from './when';
 
 describe('when expression', () => {
-  it('renders with buildin aggregation types', () => {
+  it('renders with builtin aggregation types', () => {
     const onChangeSelectedAggType = jest.fn();
     const wrapper = shallow(
       <WhenExpression

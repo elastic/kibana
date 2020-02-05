@@ -16,12 +16,11 @@ import {
   EuiSelect,
   EuiFieldNumber,
 } from '@elastic/eui';
-import { buildinGroupByTypes } from '../constants';
+import { builtInGroupByTypes } from '../constants';
 import { GroupByType } from '../types';
 
 interface GroupByExpressionProps {
   groupBy: string;
-  defaultGroupBy: string;
   errors: { [key: string]: string[] };
   onChangeSelectedTermSize: (selectedTermSize?: number) => void;
   onChangeSelectedTermField: (selectedTermField?: string) => void;
@@ -36,19 +35,18 @@ interface GroupByExpressionProps {
 
 export const GroupByExpression = ({
   groupBy,
-  defaultGroupBy,
   errors,
   onChangeSelectedTermSize,
   onChangeSelectedTermField,
   onChangeSelectedGroupBy,
   fields,
-  termSize = 1,
+  termSize,
   termField,
   customGroupByTypes,
 }: GroupByExpressionProps) => {
-  const groupByTypes = customGroupByTypes ?? buildinGroupByTypes;
+  const groupByTypes = customGroupByTypes ?? builtInGroupByTypes;
   const [groupByPopoverOpen, setGroupByPopoverOpen] = useState(false);
-
+  const MIN_TERM_SIZE = 1;
   const firstFieldOption = {
     text: i18n.translate('xpack.triggersActionsUI.common.groupByType.timeFieldOptionLabel', {
       defaultMessage: 'Select a field',
@@ -62,7 +60,7 @@ export const GroupByExpression = ({
       button={
         <EuiExpression
           description={`${
-            groupByTypes[groupBy || defaultGroupBy].sizeRequired
+            groupByTypes[groupBy].sizeRequired
               ? i18n.translate('xpack.triggersActionsUI.common.groupByType.groupedOverLabel', {
                   defaultMessage: 'grouped over',
                 })
@@ -70,8 +68,8 @@ export const GroupByExpression = ({
                   defaultMessage: 'over',
                 })
           }`}
-          value={`${groupByTypes[groupBy || defaultGroupBy].text} ${
-            groupByTypes[groupBy || defaultGroupBy].sizeRequired
+          value={`${groupByTypes[groupBy].text} ${
+            groupByTypes[groupBy].sizeRequired
               ? `${termSize} ${termField ? `'${termField}'` : ''}`
               : ''
           }`}
@@ -88,7 +86,7 @@ export const GroupByExpression = ({
       }}
       ownFocus
       withTitle
-      anchorPosition="downLeft"
+      anchorPosition="downRight"
     >
       <div>
         <EuiPopoverTitle>
@@ -96,14 +94,19 @@ export const GroupByExpression = ({
             defaultMessage: 'over',
           })}
         </EuiPopoverTitle>
-        <EuiFlexGroup>
+        <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiSelect
               data-test-subj="overExpressionSelect"
-              value={groupBy || defaultGroupBy}
+              value={groupBy}
               onChange={e => {
-                onChangeSelectedTermSize(undefined);
-                onChangeSelectedTermField(undefined);
+                if (groupByTypes[e.target.value].sizeRequired) {
+                  onChangeSelectedTermSize(MIN_TERM_SIZE);
+                  onChangeSelectedTermField('');
+                } else {
+                  onChangeSelectedTermSize(undefined);
+                  onChangeSelectedTermField(undefined);
+                }
                 onChangeSelectedGroupBy(e.target.value);
               }}
               options={Object.values(groupByTypes).map(({ text, value }) => {
@@ -115,19 +118,22 @@ export const GroupByExpression = ({
             />
           </EuiFlexItem>
 
-          {groupByTypes[groupBy || defaultGroupBy].sizeRequired ? (
+          {groupByTypes[groupBy].sizeRequired ? (
             <Fragment>
               <EuiFlexItem grow={false}>
-                <EuiFormRow isInvalid={errors.termSize.length > 0} error={errors.termSize}>
+                <EuiFormRow
+                  isInvalid={errors.termSize.length > 0 && termSize !== undefined}
+                  error={errors.termSize}
+                >
                   <EuiFieldNumber
-                    isInvalid={errors.termSize.length > 0}
-                    value={termSize || 1}
+                    isInvalid={errors.termSize.length > 0 && termSize !== undefined}
+                    value={termSize}
                     onChange={e => {
                       const { value } = e.target;
-                      const termSizeVal = value !== '' ? parseFloat(value) : undefined;
+                      const termSizeVal = value !== '' ? parseFloat(value) : MIN_TERM_SIZE;
                       onChangeSelectedTermSize(termSizeVal);
                     }}
-                    min={1}
+                    min={MIN_TERM_SIZE}
                   />
                 </EuiFormRow>
               </EuiFlexItem>
@@ -138,17 +144,15 @@ export const GroupByExpression = ({
                 >
                   <EuiSelect
                     data-test-subj="fieldsExpressionSelect"
-                    value={termField || ''}
+                    value={termField}
                     isInvalid={errors.termField.length > 0 && termField !== undefined}
                     onChange={e => {
                       onChangeSelectedTermField(e.target.value);
                     }}
                     options={fields.reduce(
-                      (options: any, field: any) => {
+                      (options: any, field: { name: string; normalizedType: string }) => {
                         if (
-                          groupByTypes[groupBy || defaultGroupBy].validNormalizedTypes.includes(
-                            field.normalizedType
-                          )
+                          groupByTypes[groupBy].validNormalizedTypes.includes(field.normalizedType)
                         ) {
                           options.push({
                             text: field.name,
@@ -159,6 +163,11 @@ export const GroupByExpression = ({
                       },
                       [firstFieldOption]
                     )}
+                    onBlur={() => {
+                      if (termField === undefined) {
+                        onChangeSelectedTermField('');
+                      }
+                    }}
                   />
                 </EuiFormRow>
               </EuiFlexItem>
