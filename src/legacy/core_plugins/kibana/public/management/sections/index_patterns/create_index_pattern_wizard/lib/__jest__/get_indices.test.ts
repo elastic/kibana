@@ -29,14 +29,10 @@ const mockIndexPatternCreationType = new IndexPatternCreationConfig({
   isBeta: false,
 });
 
-function getLegacyApiCallerResponse(response: any) {
-  return { ...response };
-}
-
 function esClientFactory(search: (params: any) => any) {
   return {
     search,
-    msearch: () => getLegacyApiCallerResponse({}),
+    msearch: () => ({} as any),
   };
 }
 
@@ -85,7 +81,7 @@ describe('getIndices', () => {
 
   describe('errors', () => {
     it('should handle errors gracefully', async () => {
-      const esClient = esClientFactory(() => getLegacyApiCallerResponse(errorResponse));
+      const esClient = esClientFactory(() => errorResponse);
       const result = await getIndices(esClient, mockIndexPatternCreationType, 'kibana', 1);
       expect(result.length).toBe(0);
     });
