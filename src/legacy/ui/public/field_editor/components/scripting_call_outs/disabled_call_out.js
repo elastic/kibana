@@ -19,20 +19,21 @@
 
 import React, { Fragment } from 'react';
 
-import {
-  EuiCallOut,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
-export const ScriptingDisabledCallOut = ({
-  isVisible = false,
-}) => {
+export const ScriptingDisabledCallOut = ({ isVisible = false }) => {
   return isVisible ? (
     <Fragment>
       <EuiCallOut
-        title={<FormattedMessage id="common.ui.fieldEditor.disabledCallOutHeader" defaultMessage="Scripting disabled" />}
+        title={
+          <FormattedMessage
+            id="common.ui.fieldEditor.disabledCallOutHeader"
+            defaultMessage="Scripting disabled"
+            description="Showing the status that scripting is disabled in Elasticsearch. Not an update message, that it JUST got disabled."
+          />
+        }
         color="danger"
         iconType="alert"
       >

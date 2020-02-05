@@ -1,0 +1,240 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Logs should render a default message 1`] = `
+<EuiCallOut
+  color="warning"
+  iconType="help"
+  title="No log data found"
+>
+  <p>
+    <FormattedMessage
+      defaultMessage="We did not find any log data and we are unable to diagnose why. {link}"
+      id="xpack.monitoring.logs.reason.defaultMessage"
+      values={
+        Object {
+          "link": <ForwardRef
+            href="https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-installation.html"
+            target="_blank"
+          >
+            <FormattedMessage
+              defaultMessage="Please verify your setup is correct."
+              id="xpack.monitoring.logs.reason.defaultMessageLink"
+              values={Object {}}
+            />
+          </ForwardRef>,
+        }
+      }
+    />
+  </p>
+</EuiCallOut>
+`;
+
+exports[`Logs should render with a bad indices reason 1`] = `
+<EuiCallOut
+  color="warning"
+  iconType="help"
+  title="Corrupted filebeat index"
+>
+  <p>
+    <FormattedMessage
+      defaultMessage="There is an issue reading from your filebeat indices.  {link}."
+      id="xpack.monitoring.logs.reason.correctIndexNameMessage"
+      values={
+        Object {
+          "link": <ForwardRef
+            href="https://www.elastic.co/guide/en/kibana/current/monitor-troubleshooting.html"
+            target="_blank"
+          >
+            Click here for more information
+          </ForwardRef>,
+        }
+      }
+    />
+  </p>
+</EuiCallOut>
+`;
+
+exports[`Logs should render with a no cluster found reason 1`] = `
+<EuiCallOut
+  color="warning"
+  iconType="help"
+  title="No logs for this cluster"
+>
+  <p>
+    <FormattedMessage
+      defaultMessage="Check that your {link} is correct."
+      id="xpack.monitoring.logs.reason.noClusterMessage"
+      values={
+        Object {
+          "link": <ForwardRef
+            href="https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-module-elasticsearch.html"
+            target="_blank"
+          >
+            setup
+          </ForwardRef>,
+        }
+      }
+    />
+  </p>
+</EuiCallOut>
+`;
+
+exports[`Logs should render with a no index found reason 1`] = `
+<EuiCallOut
+  color="warning"
+  iconType="help"
+  title="No logs for this index"
+>
+  <p>
+    <FormattedMessage
+      defaultMessage="We found logs, but none for this index. If this problem continues, check that your {link} is correct."
+      id="xpack.monitoring.logs.reason.noIndexMessage"
+      values={
+        Object {
+          "link": <ForwardRef
+            href="https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-module-elasticsearch.html"
+            target="_blank"
+          >
+            setup
+          </ForwardRef>,
+        }
+      }
+    />
+  </p>
+</EuiCallOut>
+`;
+
+exports[`Logs should render with a no index pattern found reason 1`] = `
+<EuiCallOut
+  color="warning"
+  iconType="help"
+  title="No log data found"
+>
+  <p>
+    <FormattedMessage
+      defaultMessage="Set up {link}, then configure your Elasticsearch output to your monitoring cluster."
+      id="xpack.monitoring.logs.reason.noIndexPatternMessage"
+      values={
+        Object {
+          "link": <ForwardRef
+            href="https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-installation.html"
+            target="_blank"
+          >
+            Filebeat
+          </ForwardRef>,
+        }
+      }
+    />
+  </p>
+</EuiCallOut>
+`;
+
+exports[`Logs should render with a no node found reason 1`] = `
+<EuiCallOut
+  color="warning"
+  iconType="help"
+  title="No logs for this Elasticsearch node"
+>
+  <p>
+    <FormattedMessage
+      defaultMessage="Check that your {link} is correct."
+      id="xpack.monitoring.logs.reason.noNodeMessage"
+      values={
+        Object {
+          "link": <ForwardRef
+            href="https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-module-elasticsearch.html"
+            target="_blank"
+          >
+            setup
+          </ForwardRef>,
+        }
+      }
+    />
+  </p>
+</EuiCallOut>
+`;
+
+exports[`Logs should render with a no structured logs reason 1`] = `
+<EuiCallOut
+  color="warning"
+  iconType="help"
+  title="No structured logs found"
+>
+  <p>
+    <FormattedMessage
+      defaultMessage="Check if the {varPaths} setting {link}."
+      id="xpack.monitoring.logs.reason.notUsingStructuredLogsMessage"
+      values={
+        Object {
+          "link": <ForwardRef
+            href="https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-module-elasticsearch.html"
+            target="_blank"
+          >
+            points to JSON logs
+          </ForwardRef>,
+          "varPaths": <Monospace>
+            var.paths
+          </Monospace>,
+        }
+      }
+    />
+  </p>
+</EuiCallOut>
+`;
+
+exports[`Logs should render with a no type found reason 1`] = `
+<EuiCallOut
+  color="warning"
+  iconType="help"
+  title="No logs for Elasticsearch"
+>
+  <p>
+    <FormattedMessage
+      defaultMessage="Follow {link} to set up Elasticsearch."
+      id="xpack.monitoring.logs.reason.noTypeMessage"
+      values={
+        Object {
+          "link": <ForwardRef
+            href="https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-module-elasticsearch.html"
+            target="_blank"
+          >
+            these directions
+          </ForwardRef>,
+        }
+      }
+    />
+  </p>
+</EuiCallOut>
+`;
+
+exports[`Logs should render with a time period reason 1`] = `
+<EuiCallOut
+  color="warning"
+  iconType="help"
+  title="No logs for the selected time"
+>
+  <p>
+    <FormattedMessage
+      defaultMessage="Use the time filter to adjust your timeframe."
+      id="xpack.monitoring.logs.reason.noIndexPatternInTimePeriodMessage"
+      values={Object {}}
+    />
+  </p>
+</EuiCallOut>
+`;
+
+exports[`Logs should render with a time period reason for both scenarios 1`] = `
+<EuiCallOut
+  color="warning"
+  iconType="help"
+  title="No logs for the selected time"
+>
+  <p>
+    <FormattedMessage
+      defaultMessage="Use the time filter to adjust your timeframe."
+      id="xpack.monitoring.logs.reason.noIndexPatternInTimePeriodMessage"
+      values={Object {}}
+    />
+  </p>
+</EuiCallOut>
+`;

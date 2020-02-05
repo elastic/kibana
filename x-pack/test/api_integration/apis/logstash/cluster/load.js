@@ -4,19 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
-export default function ({ getService }) {
+export default function({ getService }) {
   const supertest = getService('supertest');
-  const es = getService('es');
+  const es = getService('legacyEs');
 
   describe('load', () => {
     it('should return the ES cluster info', async () => {
-      const { body } = await supertest
-        .get(
-          '/api/logstash/cluster'
-        )
-        .expect(200);
+      const { body } = await supertest.get('/api/logstash/cluster').expect(200);
 
       const responseFromES = await es.info();
       expect(body.cluster.uuid).to.eql(responseFromES.cluster_uuid);

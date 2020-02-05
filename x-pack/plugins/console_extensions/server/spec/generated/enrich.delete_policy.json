@@ -1,0 +1,10 @@
+{
+  "enrich.delete_policy": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "_enrich/policy/{name}"
+    ]
+  }
+}

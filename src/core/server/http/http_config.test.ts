@@ -17,42 +17,48 @@
  * under the License.
  */
 
-import { HttpConfig } from '.';
+import uuid from 'uuid';
+import { config } from '.';
+
+const validHostnames = ['www.example.com', '8.8.8.8', '::1', 'localhost'];
+const invalidHostname = 'asdf$%^';
+
+jest.mock('os', () => ({
+  ...jest.requireActual('os'),
+  hostname: () => 'kibana-hostname',
+}));
 
 test('has defaults for config', () => {
-  const httpSchema = HttpConfig.schema;
+  const httpSchema = config.schema;
   const obj = {};
   expect(httpSchema.validate(obj)).toMatchSnapshot();
 });
 
 test('accepts valid hostnames', () => {
-  const { host: host1 } = HttpConfig.schema.validate({ host: 'www.example.com' });
-  const { host: host2 } = HttpConfig.schema.validate({ host: '8.8.8.8' });
-  const { host: host3 } = HttpConfig.schema.validate({ host: '::1' });
-  const { host: host4 } = HttpConfig.schema.validate({ host: 'localhost' });
-
-  expect({ host1, host2, host3, host4 }).toMatchSnapshot('valid host names');
+  for (const val of validHostnames) {
+    const { host } = config.schema.validate({ host: val });
+    expect({ host }).toMatchSnapshot();
+  }
 });
 
 test('throws if invalid hostname', () => {
-  const httpSchema = HttpConfig.schema;
+  const httpSchema = config.schema;
   const obj = {
-    host: 'asdf$%^',
+    host: invalidHostname,
   };
   expect(() => httpSchema.validate(obj)).toThrowErrorMatchingSnapshot();
 });
 
 test('can specify max payload as string', () => {
-  const httpSchema = HttpConfig.schema;
   const obj = {
     maxPayload: '2mb',
   };
-  const config = httpSchema.validate(obj);
-  expect(config.maxPayload.getValueInBytes()).toBe(2 * 1024 * 1024);
+  const configValue = config.schema.validate(obj);
+  expect(configValue.maxPayload.getValueInBytes()).toBe(2 * 1024 * 1024);
 });
 
 test('throws if basepath is missing prepended slash', () => {
-  const httpSchema = HttpConfig.schema;
+  const httpSchema = config.schema;
   const obj = {
     basePath: 'foo',
   };
@@ -60,7 +66,7 @@ test('throws if basepath is missing prepended slash', () => {
 });
 
 test('throws if basepath appends a slash', () => {
-  const httpSchema = HttpConfig.schema;
+  const httpSchema = config.schema;
   const obj = {
     basePath: '/foo/',
   };
@@ -68,38 +74,42 @@ test('throws if basepath appends a slash', () => {
 });
 
 test('throws if basepath is not specified, but rewriteBasePath is set', () => {
-  const httpSchema = HttpConfig.schema;
+  const httpSchema = config.schema;
   const obj = {
     rewriteBasePath: true,
   };
   expect(() => httpSchema.validate(obj)).toThrowErrorMatchingSnapshot();
 });
 
+test('accepts only valid uuids for server.uuid', () => {
+  const httpSchema = config.schema;
+  expect(() => httpSchema.validate({ uuid: uuid.v4() })).not.toThrow();
+  expect(() => httpSchema.validate({ uuid: 'not an uuid' })).toThrowErrorMatchingInlineSnapshot(
+    `"[uuid]: must be a valid uuid"`
+  );
+});
+
+test('uses os.hostname() as default for server.name', () => {
+  const httpSchema = config.schema;
+  const validated = httpSchema.validate({});
+  expect(validated.name).toEqual('kibana-hostname');
+});
+
+test('throws if xsrf.whitelist element does not start with a slash', () => {
+  const httpSchema = config.schema;
+  const obj = {
+    xsrf: {
+      whitelist: ['/valid-path', 'invalid-path'],
+    },
+  };
+  expect(() => httpSchema.validate(obj)).toThrowErrorMatchingInlineSnapshot(
+    `"[xsrf.whitelist.1]: must start with a slash"`
+  );
+});
+
 describe('with TLS', () => {
-  test('throws if TLS is enabled but `key` is not specified', () => {
-    const httpSchema = HttpConfig.schema;
-    const obj = {
-      ssl: {
-        certificate: '/path/to/certificate',
-        enabled: true,
-      },
-    };
-    expect(() => httpSchema.validate(obj)).toThrowErrorMatchingSnapshot();
-  });
-
-  test('throws if TLS is enabled but `certificate` is not specified', () => {
-    const httpSchema = HttpConfig.schema;
-    const obj = {
-      ssl: {
-        enabled: true,
-        key: '/path/to/key',
-      },
-    };
-    expect(() => httpSchema.validate(obj)).toThrowErrorMatchingSnapshot();
-  });
-
   test('throws if TLS is enabled but `redirectHttpFromPort` is equal to `port`', () => {
-    const httpSchema = HttpConfig.schema;
+    const httpSchema = config.schema;
     const obj = {
       port: 1234,
       ssl: {
@@ -111,88 +121,55 @@ describe('with TLS', () => {
     };
     expect(() => httpSchema.validate(obj)).toThrowErrorMatchingSnapshot();
   });
+});
 
-  test('can specify single `certificateAuthority` as a string', () => {
-    const httpSchema = HttpConfig.schema;
+test('can specify socket timeouts', () => {
+  const obj = {
+    keepaliveTimeout: 1e5,
+    socketTimeout: 5e5,
+  };
+  const { keepaliveTimeout, socketTimeout } = config.schema.validate(obj);
+  expect(keepaliveTimeout).toBe(1e5);
+  expect(socketTimeout).toBe(5e5);
+});
+
+describe('with compression', () => {
+  test('accepts valid referrer whitelist', () => {
+    const {
+      compression: { referrerWhitelist },
+    } = config.schema.validate({
+      compression: {
+        referrerWhitelist: validHostnames,
+      },
+    });
+
+    expect(referrerWhitelist).toMatchSnapshot();
+  });
+
+  test('throws if invalid referrer whitelist', () => {
+    const httpSchema = config.schema;
+    const invalidHostnames = {
+      compression: {
+        referrerWhitelist: [invalidHostname],
+      },
+    };
+    const emptyArray = {
+      compression: {
+        referrerWhitelist: [],
+      },
+    };
+    expect(() => httpSchema.validate(invalidHostnames)).toThrowErrorMatchingSnapshot();
+    expect(() => httpSchema.validate(emptyArray)).toThrowErrorMatchingSnapshot();
+  });
+
+  test('throws if referrer whitelist is specified and compression is disabled', () => {
+    const httpSchema = config.schema;
     const obj = {
-      ssl: {
-        certificate: '/path/to/certificate',
-        certificateAuthorities: '/authority/',
-        enabled: true,
-        key: '/path/to/key',
+      compression: {
+        enabled: false,
+        referrerWhitelist: validHostnames,
       },
     };
-
-    const config = httpSchema.validate(obj);
-    expect(config.ssl.certificateAuthorities).toBe('/authority/');
-  });
-
-  test('can specify several `certificateAuthorities`', () => {
-    const httpSchema = HttpConfig.schema;
-    const obj = {
-      ssl: {
-        certificate: '/path/to/certificate',
-        certificateAuthorities: ['/authority/1', '/authority/2'],
-        enabled: true,
-        key: '/path/to/key',
-      },
-    };
-
-    const config = httpSchema.validate(obj);
-    expect(config.ssl.certificateAuthorities).toEqual(['/authority/1', '/authority/2']);
-  });
-
-  test('accepts known protocols`', () => {
-    const httpSchema = HttpConfig.schema;
-    const singleKnownProtocol = {
-      ssl: {
-        certificate: '/path/to/certificate',
-        enabled: true,
-        key: '/path/to/key',
-        supportedProtocols: ['TLSv1'],
-      },
-    };
-
-    const allKnownProtocols = {
-      ssl: {
-        certificate: '/path/to/certificate',
-        enabled: true,
-        key: '/path/to/key',
-        supportedProtocols: ['TLSv1', 'TLSv1.1', 'TLSv1.2'],
-      },
-    };
-
-    const singleKnownProtocolConfig = httpSchema.validate(singleKnownProtocol);
-    expect(singleKnownProtocolConfig.ssl.supportedProtocols).toEqual(['TLSv1']);
-
-    const allKnownProtocolsConfig = httpSchema.validate(allKnownProtocols);
-    expect(allKnownProtocolsConfig.ssl.supportedProtocols).toEqual(['TLSv1', 'TLSv1.1', 'TLSv1.2']);
-  });
-
-  test('should accept known protocols`', () => {
-    const httpSchema = HttpConfig.schema;
-
-    const singleUnknownProtocol = {
-      ssl: {
-        certificate: '/path/to/certificate',
-        enabled: true,
-        key: '/path/to/key',
-        supportedProtocols: ['SOMEv100500'],
-      },
-    };
-
-    const allKnownWithOneUnknownProtocols = {
-      ssl: {
-        certificate: '/path/to/certificate',
-        enabled: true,
-        key: '/path/to/key',
-        supportedProtocols: ['TLSv1', 'TLSv1.1', 'TLSv1.2', 'SOMEv100500'],
-      },
-    };
-
-    expect(() => httpSchema.validate(singleUnknownProtocol)).toThrowErrorMatchingSnapshot();
-    expect(() =>
-      httpSchema.validate(allKnownWithOneUnknownProtocols)
-    ).toThrowErrorMatchingSnapshot();
+    expect(() => httpSchema.validate(obj)).toThrowErrorMatchingSnapshot();
   });
 });

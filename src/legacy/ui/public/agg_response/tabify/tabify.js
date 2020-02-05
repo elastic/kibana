@@ -21,11 +21,21 @@ import _ from 'lodash';
 import { TabbedAggResponseWriter } from './_response_writer';
 import { TabifyBuckets } from './_buckets';
 
+/**
+ * Sets up the ResponseWriter and kicks off bucket collection.
+ *
+ * @param {AggConfigs} aggs - the agg configs object to which the aggregation response correlates
+ * @param {Object} esResponse - response that came back from Elasticsearch
+ * @param {Object} respOpts - options object for the ResponseWriter with params set by Courier
+ * @param {boolean} respOpts.metricsAtAllLevels - setting to true will produce metrics for every bucket
+ * @param {boolean} respOpts.partialRows - setting to true will not remove rows with missing values
+ * @param {Object} respOpts.timeRange - time range object, if provided
+ */
 export function tabifyAggResponse(aggs, esResponse, respOpts = {}) {
   const write = new TabbedAggResponseWriter(aggs, respOpts);
 
   const topLevelBucket = _.assign({}, esResponse.aggregations, {
-    doc_count: esResponse.hits.total
+    doc_count: esResponse.hits.total,
   });
 
   collectBucket(write, topLevelBucket, '', 1);
@@ -34,7 +44,7 @@ export function tabifyAggResponse(aggs, esResponse, respOpts = {}) {
 }
 
 /**
- * read an aggregation from a bucket, which is *might* be found at key (if
+ * read an aggregation from a bucket, which *might* be found at key (if
  * the response came in object form), and will recurse down the aggregation
  * tree and will pass the read values to the ResponseWriter.
  *
@@ -52,7 +62,7 @@ function collectBucket(write, bucket, key, aggScale) {
     case 'buckets':
       const buckets = new TabifyBuckets(bucket[agg.id], agg.params, write.timeRange);
       if (buckets.length) {
-        buckets.forEach(function (subBucket, key) {
+        buckets.forEach(function(subBucket, key) {
           // if the bucket doesn't have value don't add it to the row
           // we don't want rows like: { column1: undefined, column2: 10 }
           const bucketValue = agg.getKey(subBucket, key);
@@ -122,4 +132,3 @@ function passEmptyBuckets(write, bucket, key, aggScale) {
 
   write.aggStack.unshift(column);
 }
-

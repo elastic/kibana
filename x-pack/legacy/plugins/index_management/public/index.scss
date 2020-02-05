@@ -1,0 +1,29 @@
+// Import the EUI global scope so we can use EUI constants
+@import 'src/legacy/ui/public/styles/_styling_constants';
+
+// Index management plugin styles
+
+// Prefix all styles with "ind" to avoid conflicts.
+// Examples
+//   indChart
+//   indChart__legend
+//   indChart__legend--small
+//   indChart__legend-isLoading
+
+@import './app/components/mappings_editor/index';
+
+.indTable {
+  // The index table is a bespoke table and can't make use of EuiBasicTable's width settings
+  thead th.indTable__header--name {
+    width: 25%;
+  }
+
+  // The index name can't contain spaces, so this is a rare case of break being OK.
+  .indTable__cell--name {
+    word-break: break-all;
+  }
+}
+
+.indDetail__codeBlock {
+  background: transparent;
+}

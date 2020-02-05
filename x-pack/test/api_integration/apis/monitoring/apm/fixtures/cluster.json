@@ -29,8 +29,8 @@
       },
       "data": [
         [1535723880000, null],
-        [1535723910000, 0.0033333333333333335],
-        [1535723940000, 0.008888888888888887]
+        [1535723910000, 0.1],
+        [1535723940000, 0.26666666666666666]
       ]
     }],
     "apm_os_load": [{
@@ -301,7 +301,7 @@
         "field": "beats_stats.metrics.apm-server.server.response.count",
         "metricAgg": "max",
         "label": "Total",
-        "title": "Response Count",
+        "title": "Response Count Intake API",
         "description": "HTTP Requests responded to by server",
         "units": "/m",
         "format": "0,0.[00]",
@@ -371,7 +371,7 @@
         "field": "beats_stats.metrics.apm-server.server.response.errors.toolarge",
         "metricAgg": "max",
         "label": "Too large",
-        "title": "Response Errors",
+        "title": "Response Errors Intake API",
         "description": "HTTP Requests rejected due to excessive payload size",
         "units": "/m",
         "format": "0,0.[00]",
@@ -625,7 +625,7 @@
         "field": "beats_stats.metrics.apm-server.server.request.count",
         "metricAgg": "max",
         "label": "Requested",
-        "title": "Requests",
+        "title": "Request Count Intake API",
         "description": "HTTP Requests received by server",
         "units": "/m",
         "format": "0,0.[00]",

@@ -1,0 +1,57 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`timeseriesFetcher should make the correct query 1`] = `
+Array [
+  Array [
+    Object {
+      "body": Object {
+        "aggs": Object {
+          "distribution": Object {
+            "histogram": Object {
+              "extended_bounds": Object {
+                "max": 1528977600000,
+                "min": 1528113600000,
+              },
+              "field": "@timestamp",
+              "interval": 10,
+              "min_doc_count": 0,
+            },
+          },
+        },
+        "query": Object {
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "term": Object {
+                  "processor.event": "error",
+                },
+              },
+              Object {
+                "term": Object {
+                  "service.name": "myServiceName",
+                },
+              },
+              Object {
+                "range": Object {
+                  "@timestamp": Object {
+                    "format": "epoch_millis",
+                    "gte": 1528113600000,
+                    "lte": 1528977600000,
+                  },
+                },
+              },
+              Object {
+                "term": Object {
+                  "service.environment": "prod",
+                },
+              },
+            ],
+          },
+        },
+        "size": 0,
+      },
+      "index": "apm-*",
+    },
+  ],
+]
+`;

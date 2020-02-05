@@ -17,11 +17,10 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { shortenDottedString } from '../shorten_dotted_string';
 
 describe('shortenDottedString', () => {
-
   it('Convert a dot.notated.string into a short string', () => {
     expect(shortenDottedString('dot.notated.string')).to.equal('d.n.string');
   });
@@ -32,5 +31,4 @@ describe('shortenDottedString', () => {
     const obj = { key: 'val' };
     expect(shortenDottedString(obj)).to.equal(obj);
   });
-
 });

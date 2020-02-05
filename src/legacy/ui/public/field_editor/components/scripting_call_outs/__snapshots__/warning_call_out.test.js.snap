@@ -5,7 +5,6 @@ exports[`ScriptingWarningCallOut should render normally 1`] = `
   <EuiCallOut
     color="warning"
     iconType="alert"
-    size="m"
     title={
       <FormattedMessage
         defaultMessage="Proceed with caution"
@@ -20,11 +19,9 @@ exports[`ScriptingWarningCallOut should render normally 1`] = `
         id="common.ui.fieldEditor.warningCallOutLabel.callOutDetail"
         values={
           Object {
-            "scripFields": <EuiLink
-              color="primary"
+            "scripFields": <ForwardRef
               href="(docLink for scriptedFields.scriptFields)"
-              target="_window"
-              type="button"
+              target="_blank"
             >
               <FormattedMessage
                 defaultMessage="script fields"
@@ -33,15 +30,12 @@ exports[`ScriptingWarningCallOut should render normally 1`] = `
               />
                
               <EuiIcon
-                size="m"
                 type="link"
               />
-            </EuiLink>,
-            "scriptsInAggregation": <EuiLink
-              color="primary"
+            </ForwardRef>,
+            "scriptsInAggregation": <ForwardRef
               href="(docLink for scriptedFields.scriptAggs)"
-              target="_window"
-              type="button"
+              target="_blank"
             >
               <FormattedMessage
                 defaultMessage="scripts in aggregations"
@@ -50,10 +44,9 @@ exports[`ScriptingWarningCallOut should render normally 1`] = `
               />
                
               <EuiIcon
-                size="m"
                 type="link"
               />
-            </EuiLink>,
+            </ForwardRef>,
           }
         }
       />

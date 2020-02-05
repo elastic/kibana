@@ -1,0 +1,18 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SessionUserHostWorkingDir rendering it renders the default SessionUserHostWorkingDir 1`] = `
+<span
+  className="euiFlexItem euiFlexItem--flexGrowZero"
+>
+  <SessionUserHostWorkingDir
+    contextId="contextid-123"
+    eventId="eventid-123"
+    hostName="hostname-123"
+    primary="primary-123"
+    secondary="secondary-123"
+    session="session-123"
+    userName="username-123"
+    workingDirectory="workingdir-123"
+  />
+</span>
+`;

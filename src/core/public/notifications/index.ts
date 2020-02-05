@@ -17,5 +17,18 @@
  * under the License.
  */
 
-export { Toast, ToastInput, ToastsStartContract } from './toasts';
-export { NotificationsService, NotificationsStartContract } from './notifications_service';
+export {
+  ErrorToastOptions,
+  Toast,
+  ToastInput,
+  IToasts,
+  ToastsApi,
+  ToastInputFields,
+  ToastsSetup,
+  ToastsStart,
+} from './toasts';
+export {
+  NotificationsService,
+  NotificationsSetup,
+  NotificationsStart,
+} from './notifications_service';

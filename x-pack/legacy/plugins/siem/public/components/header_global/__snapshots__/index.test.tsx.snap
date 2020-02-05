@@ -1,0 +1,19 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`HeaderGlobal it renders 1`] = `
+<Wrapper
+  className="siemHeaderGlobal"
+>
+  <EuiFlexGroup
+    alignItems="center"
+    justifyContent="spaceBetween"
+    wrap={true}
+  >
+    <WithSource
+      sourceId="default"
+    >
+      <Component />
+    </WithSource>
+  </EuiFlexGroup>
+</Wrapper>
+`;

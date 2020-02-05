@@ -18,24 +18,27 @@
  */
 
 import { uiModules } from 'ui/modules';
-uiModules.get('kibana')
-  .provider('dashboardConfig', () => {
-    let hideWriteControls = false;
+import { capabilities } from 'ui/capabilities';
 
-    return {
-      /**
-       * Part of the exposed plugin API - do not remove without careful consideration.
-       * @type {boolean}
-       */
-      turnHideWriteControlsOn() {
-        hideWriteControls = true;
-      },
-      $get() {
-        return {
-          getHideWriteControls() {
-            return hideWriteControls;
-          }
-        };
-      }
-    };
-  });
+export function dashboardConfigProvider() {
+  let hideWriteControls = !capabilities.get().dashboard.showWriteControls;
+
+  return {
+    /**
+     * Part of the exposed plugin API - do not remove without careful consideration.
+     * @type {boolean}
+     */
+    turnHideWriteControlsOn() {
+      hideWriteControls = true;
+    },
+    $get() {
+      return {
+        getHideWriteControls() {
+          return hideWriteControls;
+        },
+      };
+    },
+  };
+}
+
+uiModules.get('kibana').provider('dashboardConfig', dashboardConfigProvider);

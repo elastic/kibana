@@ -1,0 +1,77 @@
+{
+  "kibana": {
+    "totalUniqueInstanceCount": 1,
+    "totalUniqueFullyMigratedCount": 1,
+    "totalUniquePartiallyMigratedCount": 0,
+    "totalUniqueInternallyCollectedCount": 0,
+    "detected": null,
+    "byUuid": {
+      "5b2de169-2785-441b-ae8c-186a1936b17d": {
+        "lastTimestamp": 1554821537079,
+        "isPrimary": true,
+        "isNetNewUser": false,
+        "isFullyMigrated": true
+      }
+    }
+  },
+  "beats": {
+    "totalUniqueInstanceCount": 1,
+    "totalUniqueFullyMigratedCount": 0,
+    "totalUniquePartiallyMigratedCount": 0,
+    "totalUniqueInternallyCollectedCount": 1,
+    "detected": null,
+    "byUuid": {
+      "8eba4902-df80-43b0-b6c2-ed8ca290984e": {
+        "beatType": "metricbeat",
+        "clusterUuid": "jJ9oySUPR8G0wuV82vG5-g",
+        "lastTimestamp": 1554821536716,
+        "isInternalCollector": true,
+        "isNetNewUser": false
+      }
+    }
+  },
+  "logstash": {
+    "totalUniqueInstanceCount": 1,
+    "totalUniqueFullyMigratedCount": 0,
+    "totalUniquePartiallyMigratedCount": 0,
+    "totalUniqueInternallyCollectedCount": 1,
+    "detected": null,
+    "byUuid": {
+      "4134a00e-89e4-4896-a3d4-c3a9aa03a594": {
+        "lastTimestamp": 1554821539784,
+        "clusterUuid": "jJ9oySUPR8G0wuV82vG5-g",
+        "isInternalCollector": true,
+        "isNetNewUser": false
+      }
+    }
+  },
+  "apm": {
+    "totalUniqueInstanceCount": 0,
+    "totalUniqueFullyMigratedCount": 0,
+    "totalUniquePartiallyMigratedCount": 0,
+    "totalUniqueInternallyCollectedCount": 0,
+    "detected": {
+      "mightExist": false
+    },
+    "byUuid": {}
+  },
+  "elasticsearch": {
+    "totalUniqueInstanceCount": 1,
+    "totalUniqueFullyMigratedCount": 0,
+    "totalUniquePartiallyMigratedCount": 1,
+    "totalUniqueInternallyCollectedCount": 0,
+    "detected": null,
+    "byUuid": {
+      "agI8JhXhShasvuDgq0VxRg": {
+        "isPartiallyMigrated": true,
+        "lastInternallyCollectedTimestamp": 1554821531545,
+        "isNetNewUser": false
+      }
+    }
+  },
+  "_meta": {
+    "secondsAgo": 30,
+    "liveClusterUuid": null,
+    "hasPermissions": true
+  }
+}

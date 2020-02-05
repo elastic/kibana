@@ -61,34 +61,43 @@ const createLoggerSchema = schema.object({
   level: createLevelSchema,
 });
 
-const loggingSchema = schema.object({
-  appenders: schema.mapOf(schema.string(), Appenders.configSchema, {
-    defaultValue: new Map<string, AppenderConfigType>(),
-  }),
-  loggers: schema.arrayOf(createLoggerSchema, {
-    defaultValue: [],
-  }),
-  root: schema.object({
-    appenders: schema.arrayOf(schema.string(), {
-      defaultValue: [DEFAULT_APPENDER_NAME],
-      minSize: 1,
-    }),
-    level: createLevelSchema,
-  }),
-});
-
 /** @internal */
 export type LoggerConfigType = TypeOf<typeof createLoggerSchema>;
+export const config = {
+  path: 'logging',
+  schema: schema.object({
+    appenders: schema.mapOf(schema.string(), Appenders.configSchema, {
+      defaultValue: new Map<string, AppenderConfigType>(),
+    }),
+    loggers: schema.arrayOf(createLoggerSchema, {
+      defaultValue: [],
+    }),
+    root: schema.object(
+      {
+        appenders: schema.arrayOf(schema.string(), {
+          defaultValue: [DEFAULT_APPENDER_NAME],
+          minSize: 1,
+        }),
+        level: createLevelSchema,
+      },
+      {
+        validate(rawConfig) {
+          if (!rawConfig.appenders.includes(DEFAULT_APPENDER_NAME)) {
+            return `"${DEFAULT_APPENDER_NAME}" appender required for migration period till the next major release`;
+          }
+        },
+      }
+    ),
+  }),
+};
 
-type LoggingConfigType = TypeOf<typeof loggingSchema>;
+export type LoggingConfigType = TypeOf<typeof config.schema>;
 
 /**
  * Describes the config used to fully setup logging subsystem.
  * @internal
  */
 export class LoggingConfig {
-  public static schema = loggingSchema;
-
   /**
    * Helper method that joins separate string context parts into single context string.
    * In case joined context is an empty string, `root` context name is returned.
@@ -118,10 +127,24 @@ export class LoggingConfig {
    */
   public readonly appenders: Map<string, AppenderConfigType> = new Map([
     [
-      DEFAULT_APPENDER_NAME,
+      'default',
       {
         kind: 'console',
         layout: { kind: 'pattern', highlight: true },
+      } as AppenderConfigType,
+    ],
+    [
+      'console',
+      {
+        kind: 'console',
+        layout: { kind: 'pattern', highlight: true },
+      } as AppenderConfigType,
+    ],
+    [
+      'file',
+      {
+        kind: 'file',
+        layout: { kind: 'pattern', highlight: false },
       } as AppenderConfigType,
     ],
   ]);

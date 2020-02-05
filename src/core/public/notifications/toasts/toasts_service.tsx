@@ -20,41 +20,64 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
-import { Toast } from '@elastic/eui';
-import { I18nStartContract } from '../../i18n';
+import { I18nStart } from '../../i18n';
+import { IUiSettingsClient } from '../../ui_settings';
 import { GlobalToastList } from './global_toast_list';
-import { ToastsStartContract } from './toasts_start_contract';
+import { ToastsApi, IToasts } from './toasts_api';
+import { OverlayStart } from '../../overlays';
 
-interface Params {
+interface SetupDeps {
+  uiSettings: IUiSettingsClient;
+}
+
+interface StartDeps {
+  i18n: I18nStart;
+  overlays: OverlayStart;
   targetDomElement: HTMLElement;
 }
 
-interface Deps {
-  i18n: I18nStartContract;
-}
+/**
+ * {@link IToasts}
+ * @public
+ */
+export type ToastsSetup = IToasts;
+
+/**
+ * {@link IToasts}
+ * @public
+ */
+export type ToastsStart = IToasts;
 
 export class ToastsService {
-  constructor(private readonly params: Params) {}
+  private api?: ToastsApi;
+  private targetDomElement?: HTMLElement;
 
-  public start({ i18n }: Deps) {
-    const toasts = new ToastsStartContract();
+  public setup({ uiSettings }: SetupDeps) {
+    this.api = new ToastsApi({ uiSettings });
+    return this.api!;
+  }
+
+  public start({ i18n, overlays, targetDomElement }: StartDeps) {
+    this.api!.start({ overlays, i18n });
+    this.targetDomElement = targetDomElement;
 
     render(
       <i18n.Context>
         <GlobalToastList
-          dismissToast={(toast: Toast) => toasts.remove(toast)}
-          toasts$={toasts.get$()}
+          dismissToast={(toastId: string) => this.api!.remove(toastId)}
+          toasts$={this.api!.get$()}
         />
       </i18n.Context>,
-      this.params.targetDomElement
+      targetDomElement
     );
 
-    return toasts;
+    return this.api!;
   }
 
   public stop() {
-    unmountComponentAtNode(this.params.targetDomElement);
-
-    this.params.targetDomElement.textContent = '';
+    if (this.targetDomElement) {
+      unmountComponentAtNode(this.targetDomElement);
+      this.targetDomElement.textContent = '';
+    }
   }
 }

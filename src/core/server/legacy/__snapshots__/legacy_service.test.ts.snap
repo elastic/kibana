@@ -1,0 +1,27 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`once LegacyService is set up with connection info reconfigures logging configuration if new config is received.: applyLoggingConfiguration params 1`] = `
+Array [
+  Array [
+    Object {
+      "logging": Object {
+        "verbose": true,
+      },
+      "path": Object {},
+    },
+  ],
+]
+`;
+
+exports[`once LegacyService is set up without connection info reconfigures logging configuration if new config is received.: applyLoggingConfiguration params 1`] = `
+Array [
+  Array [
+    Object {
+      "logging": Object {
+        "verbose": true,
+      },
+      "path": Object {},
+    },
+  ],
+]
+`;

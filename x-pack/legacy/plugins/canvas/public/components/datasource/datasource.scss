@@ -1,0 +1,36 @@
+.canvasDataSource {
+  background-color: $euiColorEmptyShade;
+  color: $euiTextColor;
+  border-radius: $euiBorderThin;
+  margin: $euiSizeS;
+  padding: 0 $euiSizeS;
+}
+
+.canvasDataSource__section {
+  padding: $euiSizeM;
+}
+
+.canvasDataSource__triggerButton {
+  @include euiTitle('xs');
+  line-height: $euiSizeXXL;
+}
+
+.canvasDataSource__triggerButtonIcon {
+  margin-right: $euiSizeS;
+}
+
+.canvasDataSource__list {
+  padding: $euiSizeM;
+}
+
+.canvasDataSource__card .euiCard__content {
+  padding-top: 0 !important; // sass-lint:disable-line no-important
+}
+
+.canvasDataSource__card + .canvasDataSource__card {
+  margin-top: $euiSizeS;
+}
+
+.canvasDataSource__card--isCurrent {
+  border-color: $euiColorSecondary;
+}

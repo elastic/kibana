@@ -1,0 +1,1066 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`UpgradeFailure component passes expected text for new pipeline 1`] = `
+<UpgradeFailure
+  intl={
+    Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
+  isManualUpgrade={true}
+  isNewPipeline={true}
+  onClose={[MockFunction]}
+  onRetry={[MockFunction]}
+>
+  <div
+    data-test-subj="pipelineEdit upgradeFailure"
+    style={
+      Object {
+        "minHeight": "100vh",
+      }
+    }
+  >
+    <EuiPageContent>
+      <EuiPanel
+        className="euiPageContent"
+        paddingSize="l"
+      >
+        <div
+          className="euiPanel euiPanel--paddingLarge euiPageContent"
+        >
+          <EuiEmptyPrompt
+            actions={
+              <UpgradeFailureActions
+                onClose={[MockFunction]}
+                onRetry={[MockFunction]}
+                upgradeButtonText="Try again"
+              />
+            }
+            body={
+              <p
+                style={
+                  Object {
+                    "textAlign": "left",
+                  }
+                }
+              >
+                Before you can add a pipeline, we need to upgrade your configuration.
+              </p>
+            }
+            title={
+              <UpgradeFailureTitle
+                titleText="Upgrade failed"
+              />
+            }
+          >
+            <div
+              className="euiEmptyPrompt"
+            >
+              <EuiTextColor
+                color="subdued"
+              >
+                <span
+                  className="euiTextColor euiTextColor--subdued"
+                >
+                  <EuiTitle>
+                    <UpgradeFailureTitle
+                      className="euiTitle euiTitle--medium"
+                      titleText="Upgrade failed"
+                    >
+                      <EuiFlexGroup>
+                        <div
+                          className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                        >
+                          <EuiFlexItem
+                            grow={false}
+                          >
+                            <div
+                              className="euiFlexItem euiFlexItem--flexGrowZero"
+                            >
+                              <EuiIcon
+                                size="xl"
+                                type="alert"
+                              >
+                                <EuiIconEmpty
+                                  aria-hidden={true}
+                                  className="euiIcon euiIcon--xLarge euiIcon-isLoading"
+                                  focusable="false"
+                                  role="img"
+                                  style={null}
+                                >
+                                  <svg
+                                    aria-hidden={true}
+                                    className="euiIcon euiIcon--xLarge euiIcon-isLoading"
+                                    focusable="false"
+                                    height={16}
+                                    role="img"
+                                    style={null}
+                                    viewBox="0 0 16 16"
+                                    width={16}
+                                    xmlns="http://www.w3.org/2000/svg"
+                                  />
+                                </EuiIconEmpty>
+                              </EuiIcon>
+                            </div>
+                          </EuiFlexItem>
+                          <EuiFlexItem
+                            grow={false}
+                          >
+                            <div
+                              className="euiFlexItem euiFlexItem--flexGrowZero"
+                            >
+                              <EuiTitle>
+                                <h2
+                                  className="euiTitle euiTitle--medium"
+                                >
+                                  Upgrade failed
+                                </h2>
+                              </EuiTitle>
+                            </div>
+                          </EuiFlexItem>
+                        </div>
+                      </EuiFlexGroup>
+                    </UpgradeFailureTitle>
+                  </EuiTitle>
+                  <EuiSpacer
+                    size="m"
+                  >
+                    <div
+                      className="euiSpacer euiSpacer--m"
+                    />
+                  </EuiSpacer>
+                  <EuiText>
+                    <div
+                      className="euiText euiText--medium"
+                    >
+                      <p
+                        style={
+                          Object {
+                            "textAlign": "left",
+                          }
+                        }
+                      >
+                        Before you can add a pipeline, we need to upgrade your configuration.
+                      </p>
+                    </div>
+                  </EuiText>
+                </span>
+              </EuiTextColor>
+              <EuiSpacer
+                size="l"
+              >
+                <div
+                  className="euiSpacer euiSpacer--l"
+                />
+              </EuiSpacer>
+              <EuiSpacer
+                size="s"
+              >
+                <div
+                  className="euiSpacer euiSpacer--s"
+                />
+              </EuiSpacer>
+              <UpgradeFailureActions
+                onClose={[MockFunction]}
+                onRetry={[MockFunction]}
+                upgradeButtonText="Try again"
+              >
+                <EuiFlexGroup
+                  justifyContent="flexStart"
+                >
+                  <div
+                    className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                  >
+                    <EuiFlexItem
+                      grow={false}
+                    >
+                      <div
+                        className="euiFlexItem euiFlexItem--flexGrowZero"
+                      >
+                        <EuiButton
+                          fill={true}
+                          onClick={[MockFunction]}
+                        >
+                          <button
+                            className="euiButton euiButton--primary euiButton--fill"
+                            onClick={[MockFunction]}
+                            type="button"
+                          >
+                            <span
+                              className="euiButton__content"
+                            >
+                              <span
+                                className="euiButton__text"
+                              >
+                                Try again
+                              </span>
+                            </span>
+                          </button>
+                        </EuiButton>
+                      </div>
+                    </EuiFlexItem>
+                    <EuiFlexItem
+                      grow={false}
+                    >
+                      <div
+                        className="euiFlexItem euiFlexItem--flexGrowZero"
+                      >
+                        <EuiButtonEmpty
+                          color="primary"
+                          onClick={[MockFunction]}
+                        >
+                          <button
+                            className="euiButtonEmpty euiButtonEmpty--primary"
+                            onClick={[MockFunction]}
+                            type="button"
+                          >
+                            <span
+                              className="euiButtonEmpty__content"
+                            >
+                              <span
+                                className="euiButtonEmpty__text"
+                              >
+                                <FormattedMessage
+                                  defaultMessage="Go back"
+                                  id="xpack.logstash.upgradeFailureActions.goBackButtonLabel"
+                                  values={Object {}}
+                                >
+                                  Go back
+                                </FormattedMessage>
+                              </span>
+                            </span>
+                          </button>
+                        </EuiButtonEmpty>
+                      </div>
+                    </EuiFlexItem>
+                  </div>
+                </EuiFlexGroup>
+              </UpgradeFailureActions>
+            </div>
+          </EuiEmptyPrompt>
+        </div>
+      </EuiPanel>
+    </EuiPageContent>
+  </div>
+</UpgradeFailure>
+`;
+
+exports[`UpgradeFailure component passes expected text for not manual upgrade 1`] = `
+<UpgradeFailure
+  intl={
+    Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
+  isManualUpgrade={false}
+  isNewPipeline={true}
+  onClose={[MockFunction]}
+  onRetry={[MockFunction]}
+>
+  <div
+    data-test-subj="pipelineEdit upgradeFailure"
+    style={
+      Object {
+        "minHeight": "100vh",
+      }
+    }
+  >
+    <EuiPageContent>
+      <EuiPanel
+        className="euiPageContent"
+        paddingSize="l"
+      >
+        <div
+          className="euiPanel euiPanel--paddingLarge euiPageContent"
+        >
+          <EuiEmptyPrompt
+            actions={
+              <UpgradeFailureActions
+                onClose={[MockFunction]}
+                onRetry={[MockFunction]}
+                upgradeButtonText="Upgrade"
+              />
+            }
+            body={
+              <p
+                style={
+                  Object {
+                    "textAlign": "left",
+                  }
+                }
+              >
+                Before you can add a pipeline, we need to upgrade your configuration.
+              </p>
+            }
+            title={
+              <UpgradeFailureTitle
+                titleText="Time for an upgrade!"
+              />
+            }
+          >
+            <div
+              className="euiEmptyPrompt"
+            >
+              <EuiTextColor
+                color="subdued"
+              >
+                <span
+                  className="euiTextColor euiTextColor--subdued"
+                >
+                  <EuiTitle>
+                    <UpgradeFailureTitle
+                      className="euiTitle euiTitle--medium"
+                      titleText="Time for an upgrade!"
+                    >
+                      <EuiFlexGroup>
+                        <div
+                          className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                        >
+                          <EuiFlexItem
+                            grow={false}
+                          >
+                            <div
+                              className="euiFlexItem euiFlexItem--flexGrowZero"
+                            >
+                              <EuiIcon
+                                size="xl"
+                                type="alert"
+                              >
+                                <EuiIconEmpty
+                                  aria-hidden={true}
+                                  className="euiIcon euiIcon--xLarge euiIcon-isLoading"
+                                  focusable="false"
+                                  role="img"
+                                  style={null}
+                                >
+                                  <svg
+                                    aria-hidden={true}
+                                    className="euiIcon euiIcon--xLarge euiIcon-isLoading"
+                                    focusable="false"
+                                    height={16}
+                                    role="img"
+                                    style={null}
+                                    viewBox="0 0 16 16"
+                                    width={16}
+                                    xmlns="http://www.w3.org/2000/svg"
+                                  />
+                                </EuiIconEmpty>
+                              </EuiIcon>
+                            </div>
+                          </EuiFlexItem>
+                          <EuiFlexItem
+                            grow={false}
+                          >
+                            <div
+                              className="euiFlexItem euiFlexItem--flexGrowZero"
+                            >
+                              <EuiTitle>
+                                <h2
+                                  className="euiTitle euiTitle--medium"
+                                >
+                                  Time for an upgrade!
+                                </h2>
+                              </EuiTitle>
+                            </div>
+                          </EuiFlexItem>
+                        </div>
+                      </EuiFlexGroup>
+                    </UpgradeFailureTitle>
+                  </EuiTitle>
+                  <EuiSpacer
+                    size="m"
+                  >
+                    <div
+                      className="euiSpacer euiSpacer--m"
+                    />
+                  </EuiSpacer>
+                  <EuiText>
+                    <div
+                      className="euiText euiText--medium"
+                    >
+                      <p
+                        style={
+                          Object {
+                            "textAlign": "left",
+                          }
+                        }
+                      >
+                        Before you can add a pipeline, we need to upgrade your configuration.
+                      </p>
+                    </div>
+                  </EuiText>
+                </span>
+              </EuiTextColor>
+              <EuiSpacer
+                size="l"
+              >
+                <div
+                  className="euiSpacer euiSpacer--l"
+                />
+              </EuiSpacer>
+              <EuiSpacer
+                size="s"
+              >
+                <div
+                  className="euiSpacer euiSpacer--s"
+                />
+              </EuiSpacer>
+              <UpgradeFailureActions
+                onClose={[MockFunction]}
+                onRetry={[MockFunction]}
+                upgradeButtonText="Upgrade"
+              >
+                <EuiFlexGroup
+                  justifyContent="flexStart"
+                >
+                  <div
+                    className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                  >
+                    <EuiFlexItem
+                      grow={false}
+                    >
+                      <div
+                        className="euiFlexItem euiFlexItem--flexGrowZero"
+                      >
+                        <EuiButton
+                          fill={true}
+                          onClick={[MockFunction]}
+                        >
+                          <button
+                            className="euiButton euiButton--primary euiButton--fill"
+                            onClick={[MockFunction]}
+                            type="button"
+                          >
+                            <span
+                              className="euiButton__content"
+                            >
+                              <span
+                                className="euiButton__text"
+                              >
+                                Upgrade
+                              </span>
+                            </span>
+                          </button>
+                        </EuiButton>
+                      </div>
+                    </EuiFlexItem>
+                    <EuiFlexItem
+                      grow={false}
+                    >
+                      <div
+                        className="euiFlexItem euiFlexItem--flexGrowZero"
+                      >
+                        <EuiButtonEmpty
+                          color="primary"
+                          onClick={[MockFunction]}
+                        >
+                          <button
+                            className="euiButtonEmpty euiButtonEmpty--primary"
+                            onClick={[MockFunction]}
+                            type="button"
+                          >
+                            <span
+                              className="euiButtonEmpty__content"
+                            >
+                              <span
+                                className="euiButtonEmpty__text"
+                              >
+                                <FormattedMessage
+                                  defaultMessage="Go back"
+                                  id="xpack.logstash.upgradeFailureActions.goBackButtonLabel"
+                                  values={Object {}}
+                                >
+                                  Go back
+                                </FormattedMessage>
+                              </span>
+                            </span>
+                          </button>
+                        </EuiButtonEmpty>
+                      </div>
+                    </EuiFlexItem>
+                  </div>
+                </EuiFlexGroup>
+              </UpgradeFailureActions>
+            </div>
+          </EuiEmptyPrompt>
+        </div>
+      </EuiPanel>
+    </EuiPageContent>
+  </div>
+</UpgradeFailure>
+`;
+
+exports[`UpgradeFailure component passes expected text for not new pipeline 1`] = `
+<UpgradeFailure
+  intl={
+    Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
+  isManualUpgrade={true}
+  isNewPipeline={false}
+  onClose={[MockFunction]}
+  onRetry={[MockFunction]}
+>
+  <div
+    data-test-subj="pipelineEdit upgradeFailure"
+    style={
+      Object {
+        "minHeight": "100vh",
+      }
+    }
+  >
+    <EuiPageContent>
+      <EuiPanel
+        className="euiPageContent"
+        paddingSize="l"
+      >
+        <div
+          className="euiPanel euiPanel--paddingLarge euiPageContent"
+        >
+          <EuiEmptyPrompt
+            actions={
+              <UpgradeFailureActions
+                onClose={[MockFunction]}
+                onRetry={[MockFunction]}
+                upgradeButtonText="Try again"
+              />
+            }
+            body={
+              <p
+                style={
+                  Object {
+                    "textAlign": "left",
+                  }
+                }
+              >
+                Before you can edit this pipeline, we need to upgrade your configuration.
+              </p>
+            }
+            title={
+              <UpgradeFailureTitle
+                titleText="Upgrade failed"
+              />
+            }
+          >
+            <div
+              className="euiEmptyPrompt"
+            >
+              <EuiTextColor
+                color="subdued"
+              >
+                <span
+                  className="euiTextColor euiTextColor--subdued"
+                >
+                  <EuiTitle>
+                    <UpgradeFailureTitle
+                      className="euiTitle euiTitle--medium"
+                      titleText="Upgrade failed"
+                    >
+                      <EuiFlexGroup>
+                        <div
+                          className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                        >
+                          <EuiFlexItem
+                            grow={false}
+                          >
+                            <div
+                              className="euiFlexItem euiFlexItem--flexGrowZero"
+                            >
+                              <EuiIcon
+                                size="xl"
+                                type="alert"
+                              >
+                                <EuiIconEmpty
+                                  aria-hidden={true}
+                                  className="euiIcon euiIcon--xLarge euiIcon-isLoading"
+                                  focusable="false"
+                                  role="img"
+                                  style={null}
+                                >
+                                  <svg
+                                    aria-hidden={true}
+                                    className="euiIcon euiIcon--xLarge euiIcon-isLoading"
+                                    focusable="false"
+                                    height={16}
+                                    role="img"
+                                    style={null}
+                                    viewBox="0 0 16 16"
+                                    width={16}
+                                    xmlns="http://www.w3.org/2000/svg"
+                                  />
+                                </EuiIconEmpty>
+                              </EuiIcon>
+                            </div>
+                          </EuiFlexItem>
+                          <EuiFlexItem
+                            grow={false}
+                          >
+                            <div
+                              className="euiFlexItem euiFlexItem--flexGrowZero"
+                            >
+                              <EuiTitle>
+                                <h2
+                                  className="euiTitle euiTitle--medium"
+                                >
+                                  Upgrade failed
+                                </h2>
+                              </EuiTitle>
+                            </div>
+                          </EuiFlexItem>
+                        </div>
+                      </EuiFlexGroup>
+                    </UpgradeFailureTitle>
+                  </EuiTitle>
+                  <EuiSpacer
+                    size="m"
+                  >
+                    <div
+                      className="euiSpacer euiSpacer--m"
+                    />
+                  </EuiSpacer>
+                  <EuiText>
+                    <div
+                      className="euiText euiText--medium"
+                    >
+                      <p
+                        style={
+                          Object {
+                            "textAlign": "left",
+                          }
+                        }
+                      >
+                        Before you can edit this pipeline, we need to upgrade your configuration.
+                      </p>
+                    </div>
+                  </EuiText>
+                </span>
+              </EuiTextColor>
+              <EuiSpacer
+                size="l"
+              >
+                <div
+                  className="euiSpacer euiSpacer--l"
+                />
+              </EuiSpacer>
+              <EuiSpacer
+                size="s"
+              >
+                <div
+                  className="euiSpacer euiSpacer--s"
+                />
+              </EuiSpacer>
+              <UpgradeFailureActions
+                onClose={[MockFunction]}
+                onRetry={[MockFunction]}
+                upgradeButtonText="Try again"
+              >
+                <EuiFlexGroup
+                  justifyContent="flexStart"
+                >
+                  <div
+                    className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                  >
+                    <EuiFlexItem
+                      grow={false}
+                    >
+                      <div
+                        className="euiFlexItem euiFlexItem--flexGrowZero"
+                      >
+                        <EuiButton
+                          fill={true}
+                          onClick={[MockFunction]}
+                        >
+                          <button
+                            className="euiButton euiButton--primary euiButton--fill"
+                            onClick={[MockFunction]}
+                            type="button"
+                          >
+                            <span
+                              className="euiButton__content"
+                            >
+                              <span
+                                className="euiButton__text"
+                              >
+                                Try again
+                              </span>
+                            </span>
+                          </button>
+                        </EuiButton>
+                      </div>
+                    </EuiFlexItem>
+                    <EuiFlexItem
+                      grow={false}
+                    >
+                      <div
+                        className="euiFlexItem euiFlexItem--flexGrowZero"
+                      >
+                        <EuiButtonEmpty
+                          color="primary"
+                          onClick={[MockFunction]}
+                        >
+                          <button
+                            className="euiButtonEmpty euiButtonEmpty--primary"
+                            onClick={[MockFunction]}
+                            type="button"
+                          >
+                            <span
+                              className="euiButtonEmpty__content"
+                            >
+                              <span
+                                className="euiButtonEmpty__text"
+                              >
+                                <FormattedMessage
+                                  defaultMessage="Go back"
+                                  id="xpack.logstash.upgradeFailureActions.goBackButtonLabel"
+                                  values={Object {}}
+                                >
+                                  Go back
+                                </FormattedMessage>
+                              </span>
+                            </span>
+                          </button>
+                        </EuiButtonEmpty>
+                      </div>
+                    </EuiFlexItem>
+                  </div>
+                </EuiFlexGroup>
+              </UpgradeFailureActions>
+            </div>
+          </EuiEmptyPrompt>
+        </div>
+      </EuiPanel>
+    </EuiPageContent>
+  </div>
+</UpgradeFailure>
+`;
+
+exports[`UpgradeFailure component renders component as expected 1`] = `
+<div
+  data-test-subj="pipelineEdit upgradeFailure"
+  style={
+    Object {
+      "minHeight": "100vh",
+    }
+  }
+>
+  <EuiPageContent>
+    <EuiEmptyPrompt
+      actions={
+        <UpgradeFailureActions
+          onClose={[MockFunction]}
+          onRetry={[MockFunction]}
+          upgradeButtonText="Try again"
+        />
+      }
+      body={
+        <p
+          style={
+            Object {
+              "textAlign": "left",
+            }
+          }
+        >
+          Before you can add a pipeline, we need to upgrade your configuration.
+        </p>
+      }
+      title={
+        <UpgradeFailureTitle
+          titleText="Upgrade failed"
+        />
+      }
+    />
+  </EuiPageContent>
+</div>
+`;

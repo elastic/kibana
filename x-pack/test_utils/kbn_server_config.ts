@@ -10,7 +10,7 @@ type Licenses = 'oss' | 'basic' | 'gold' | 'trial';
 
 export const TestKbnServerConfig = {
   kbn: {
-    plugins: { paths: [resolve(__dirname, '../../node_modules/x-pack')] },
+    plugins: { paths: [resolve(__dirname, '../../x-pack')] },
     xpack: {
       monitoring: {
         tests: {
@@ -26,9 +26,9 @@ export const TestKbnServerConfig = {
   },
   users: [
     {
-      username: 'kibana_user',
+      username: 'kibana_admin',
       password: 'x-pack-test-password',
-      roles: ['kibana_user'],
+      roles: ['kibana_admin'],
     },
   ],
 };

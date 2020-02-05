@@ -1,0 +1,94 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`BasicLoginForm renders as expected 1`] = `
+<Fragment>
+  <EuiText
+    size="s"
+  >
+    <ReactMarkdown
+      astPlugins={Array []}
+      escapeHtml={true}
+      plugins={Array []}
+      rawSourcePos={false}
+      renderers={Object {}}
+      skipHtml={false}
+      sourcePos={false}
+      transformLinkUri={[Function]}
+    />
+  </EuiText>
+  <EuiPanel>
+    <form
+      onSubmit={[Function]}
+    >
+      <EuiFormRow
+        describedByIds={Array []}
+        display="row"
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        label={
+          <FormattedMessage
+            defaultMessage="Username"
+            id="xpack.security.login.basicLoginForm.usernameFormRowLabel"
+            values={Object {}}
+          />
+        }
+        labelType="label"
+      >
+        <EuiFieldText
+          aria-required={true}
+          data-test-subj="loginUsername"
+          disabled={false}
+          id="username"
+          inputRef={[Function]}
+          isInvalid={false}
+          name="username"
+          onChange={[Function]}
+          value=""
+        />
+      </EuiFormRow>
+      <EuiFormRow
+        describedByIds={Array []}
+        display="row"
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        label={
+          <FormattedMessage
+            defaultMessage="Password"
+            id="xpack.security.login.basicLoginForm.passwordFormRowLabel"
+            values={Object {}}
+          />
+        }
+        labelType="label"
+      >
+        <EuiFieldText
+          aria-required={true}
+          data-test-subj="loginPassword"
+          disabled={false}
+          id="password"
+          isInvalid={false}
+          name="password"
+          onChange={[Function]}
+          type="password"
+          value=""
+        />
+      </EuiFormRow>
+      <EuiButton
+        color="primary"
+        data-test-subj="loginSubmit"
+        fill={true}
+        isLoading={false}
+        onClick={[Function]}
+        type="submit"
+      >
+        <FormattedMessage
+          defaultMessage="Log in"
+          id="xpack.security.login.basicLoginForm.logInButtonLabel"
+          values={Object {}}
+        />
+      </EuiButton>
+    </form>
+  </EuiPanel>
+</Fragment>
+`;

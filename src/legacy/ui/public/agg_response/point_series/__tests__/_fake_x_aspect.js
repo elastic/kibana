@@ -17,12 +17,11 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { makeFakeXAspect } from '../_fake_x_aspect';
 
-describe('makeFakeXAspect', function () {
-
-  it('creates an object that looks like an aspect', function () {
+describe('makeFakeXAspect', function() {
+  it('creates an object that looks like an aspect', function() {
     const aspect = makeFakeXAspect();
 
     expect(aspect)

@@ -18,15 +18,15 @@
  */
 
 module.exports = {
-  legacyKuery: {
-    src: 'packages/kbn-es-query/src/kuery/ast/legacy_kuery.peg',
-    dest: 'packages/kbn-es-query/src/kuery/ast/legacy_kuery.js'
-  },
   kuery: {
-    src: 'packages/kbn-es-query/src/kuery/ast/kuery.peg',
-    dest: 'packages/kbn-es-query/src/kuery/ast/kuery.js',
+    src: 'src/plugins/data/common/es_query/kuery/ast/kuery.peg',
+    dest: 'src/plugins/data/common/es_query/kuery/ast/_generated_/kuery.js',
     options: {
-      allowedStartRules: ['start', 'Literal']
-    }
-  }
+      allowedStartRules: ['start', 'Literal'],
+    },
+  },
+  timelion_chain: {
+    src: 'src/legacy/core_plugins/vis_type_timelion/public/chain.peg',
+    dest: 'src/legacy/core_plugins/vis_type_timelion/public/_generated_/chain.js',
+  },
 };

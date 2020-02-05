@@ -1,0 +1,94 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Footer Timeline Component rendering it renders the default timeline footer 1`] = `
+<Fragment>
+  <FooterContainer
+    data-test-subj="timeline-footer"
+    direction="column"
+    gutterSize="none"
+    height={100}
+    justifyContent="spaceAround"
+  >
+    <FooterFlexGroup
+      alignItems="center"
+      data-test-subj="footer-flex-group"
+      direction="row"
+      gutterSize="none"
+      justifyContent="spaceBetween"
+    >
+      <EuiFlexItem
+        data-test-subj="event-count-container"
+        grow={false}
+      >
+        <EuiFlexGroup
+          alignItems="center"
+          data-test-subj="events-count"
+          direction="row"
+          gutterSize="none"
+        >
+          <EventsCount
+            closePopover={[Function]}
+            isOpen={false}
+            items={
+              Array [
+                <EuiContextMenuItem
+                  icon="empty"
+                  onClick={[Function]}
+                >
+                  1 rows
+                </EuiContextMenuItem>,
+                <EuiContextMenuItem
+                  icon="empty"
+                  onClick={[Function]}
+                >
+                  5 rows
+                </EuiContextMenuItem>,
+                <EuiContextMenuItem
+                  icon="empty"
+                  onClick={[Function]}
+                >
+                  10 rows
+                </EuiContextMenuItem>,
+                <EuiContextMenuItem
+                  icon="empty"
+                  onClick={[Function]}
+                >
+                  20 rows
+                </EuiContextMenuItem>,
+              ]
+            }
+            itemsCount={2}
+            onClick={[Function]}
+            serverSideEventCount={15546}
+          />
+        </EuiFlexGroup>
+      </EuiFlexItem>
+      <EuiFlexItem
+        data-test-subj="paging-control-container"
+        grow={false}
+      >
+        <PagingControl
+          data-test-subj="paging-control"
+          hasNextPage={true}
+          isLoading={false}
+          loadMore={[Function]}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem
+        data-test-subj="last-updated-container"
+        grow={false}
+      >
+        <FixedWidthLastUpdated
+          compact={true}
+          data-test-subj="fixed-width-last-updated"
+        >
+          <LastUpdatedAt
+            compact={true}
+            updatedAt={1546878704036}
+          />
+        </FixedWidthLastUpdated>
+      </EuiFlexItem>
+    </FooterFlexGroup>
+  </FooterContainer>
+</Fragment>
+`;

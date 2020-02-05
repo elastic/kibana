@@ -4,7 +4,7 @@
 
 ### Description
 
-The tool is used to extract default messages from all `*.{js, ts, jsx, tsx, html, handlebars, hbs, pug}` files in provided plugins directories to a JSON file.
+The tool is used to extract default messages from all `*.{js, ts, jsx, tsx, html, pug}` files in provided plugins directories to a JSON file.
 
 It uses Babel to parse code and build an AST for each file or a single JS expression if whole file parsing is impossible. The tool is able to validate, extract and match IDs, default messages and descriptions only if they are defined statically and together, otherwise it will fail with detailed explanation. That means one can't define ID in one place and default message in another, or use function call to dynamically create default message etc.
 
@@ -128,15 +128,6 @@ The `description` is optional, `values` is optional too unless `defaultMessage` 
 
   * Expression in `#{...}` is parsed as a JS expression.
 
-* **Handlebars (.handlebars, .hbs)**
-
-  ```hbs
-  {{i18n 'pluginNamespace.messageId' '{"defaultMessage": "Default message string literal", "description": "Message context or description"}'}}
-  ```
-
-  * The `values` and `description` are optional.
-  * The third token (the second argument of i18n function call) should be a string literal that contains a valid JSON.
-
 ### Usage
 
 ```bash
@@ -184,11 +175,11 @@ The tool throws an exception if `formats` object is missing in locale file.
 ### Usage
 
 ```bash
-node scripts/i18n_integrate --source path/to/locale.json --target x-pack/plugins/translations/translations/locale.json
+node scripts/i18n_integrate --source path/to/locale.json --target x-pack/legacy/plugins/translations/translations/locale.json
 ```
 
 * `--source` path to the JSON file with translations that should be integrated.
-* `--target` defines a single path to the JSON file where translations should be integrated to, path mappings from 
+* `--target` defines a single path to the JSON file where translations should be integrated to, path mappings from
 [.i18nrc.json](../../../.i18nrc.json) are ignored in this case. It's currently used for integrating of Kibana built-in
 translations that are located in a single JSON file within `x-pack/translations` plugin.
 * `--dry-run` tells the tool to exit after verification phase and not write translations to the disk.
@@ -203,3 +194,36 @@ integrating translations to has changed and some translations are not needed any
 ### Output
 
 Unless `--target` is specified, the tool generates locale files in plugin folders and few other special locations based on namespaces and corresponding mappings defined in [.i18nrc.json](../../../.i18nrc.json).
+
+
+## Validation tool
+
+### Description
+
+The tool performs a number of checks on internationalized labels and verifies whether they don't conflict with the existing translations.
+
+### Notes
+
+We don't catch every possible misuse of i18n framework, but only the most common and critical ones.
+
+To perform translations compatibility checks tool relies on existing translations referenced in `translations` section of [.i18nrc.json](../../../.i18nrc.json).
+
+Currently auto-fixer (`--fix`) can only automatically fix two types of errors, and for both of them the fix is just removing of conflicting translation entries from JSON files:
+
+* incompatible translation - this error means that the value references in internationalized label differ from the ones
+in the existing translation
+
+* unused translation - this error means that the translations file includes label that doesn't exist anymore.
+
+### Usage
+
+```bash
+node scripts/i18n_check --fix
+```
+
+* `--fix` tells the tool to try to fix as much violations as possible. All errors that tool won't be able to fix will be reported.
+* `--ignore-incompatible` specifies whether tool should ignore incompatible translations.
+* `--ignore-missing` specifies whether tool should ignore missing translations.
+* `--ignore-unused` specifies whether tool should ignore unused translations.
+* `--include-config` specifies additional paths to `.i18nrc.json` files (may be useful for 3rd-party plugins)
+

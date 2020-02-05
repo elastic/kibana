@@ -1,20 +1,17 @@
 #!/usr/bin/env bash
 
-set -e
+source test/scripts/jenkins_test_setup.sh
 
-function report {
-  if [[ -z "$PR_SOURCE_BRANCH" ]]; then
-    node src/dev/failed_tests/cli
-  else
-    echo "Failure issues not created on pull requests"
-  fi
-}
-
-trap report EXIT
-
-source src/dev/ci_setup/checkout_sibling_es.sh
-
-export TEST_BROWSER_HEADLESS=1
-export TEST_ES_FROM=${TEST_ES_FROM:-source}
-
-"$(FORCE_COLOR=0 yarn bin)/grunt" jenkins:unit --from=source --dev;
+if [[ -z "$CODE_COVERAGE" ]] ; then
+  "$(FORCE_COLOR=0 yarn bin)/grunt" jenkins:unit --dev;
+else
+  echo "NODE_ENV=$NODE_ENV"
+  echo " -> Running jest tests with coverage"
+  node scripts/jest --ci --verbose --coverage
+  echo ""
+  echo ""
+  echo " -> Running mocha tests with coverage"
+  yarn run grunt "test:mochaCoverage";
+  echo ""
+  echo ""
+fi

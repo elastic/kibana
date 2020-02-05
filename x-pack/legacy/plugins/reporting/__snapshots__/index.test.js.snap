@@ -1,0 +1,363 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`config schema with context {"dev":false,"dist":false} produces correct config 1`] = `
+Object {
+  "capture": Object {
+    "browser": Object {
+      "autoDownload": true,
+      "chromium": Object {
+        "disableSandbox": "<platform dependent>",
+        "maxScreenshotDimension": 1950,
+        "proxy": Object {
+          "enabled": false,
+        },
+      },
+      "type": "chromium",
+    },
+    "concurrency": 4,
+    "loadDelay": 3000,
+    "maxAttempts": 1,
+    "networkPolicy": Object {
+      "enabled": true,
+      "rules": Array [
+        Object {
+          "allow": true,
+          "protocol": "http:",
+        },
+        Object {
+          "allow": true,
+          "protocol": "https:",
+        },
+        Object {
+          "allow": true,
+          "protocol": "ws:",
+        },
+        Object {
+          "allow": true,
+          "protocol": "wss:",
+        },
+        Object {
+          "allow": true,
+          "protocol": "data:",
+        },
+        Object {
+          "allow": false,
+        },
+      ],
+    },
+    "settleTime": 1000,
+    "timeout": 20000,
+    "viewport": Object {
+      "height": 1200,
+      "width": 1950,
+    },
+    "zoom": 2,
+  },
+  "csv": Object {
+    "checkForFormulas": true,
+    "enablePanelActionDownload": true,
+    "maxSizeBytes": 10485760,
+    "scroll": Object {
+      "duration": "30s",
+      "size": 500,
+    },
+  },
+  "enabled": true,
+  "encryptionKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "index": ".reporting",
+  "kibanaServer": Object {},
+  "poll": Object {
+    "jobCompletionNotifier": Object {
+      "interval": 10000,
+      "intervalErrorMultiplier": 5,
+    },
+    "jobsRefresh": Object {
+      "interval": 5000,
+      "intervalErrorMultiplier": 5,
+    },
+  },
+  "queue": Object {
+    "indexInterval": "week",
+    "pollEnabled": true,
+    "pollInterval": 3000,
+    "pollIntervalErrorMultiplier": 10,
+    "timeout": 120000,
+  },
+  "roles": Object {
+    "allow": Array [
+      "reporting_user",
+    ],
+  },
+}
+`;
+
+exports[`config schema with context {"dev":false,"dist":true} produces correct config 1`] = `
+Object {
+  "capture": Object {
+    "browser": Object {
+      "autoDownload": false,
+      "chromium": Object {
+        "disableSandbox": "<platform dependent>",
+        "maxScreenshotDimension": 1950,
+        "proxy": Object {
+          "enabled": false,
+        },
+      },
+      "type": "chromium",
+    },
+    "concurrency": 4,
+    "loadDelay": 3000,
+    "maxAttempts": 3,
+    "networkPolicy": Object {
+      "enabled": true,
+      "rules": Array [
+        Object {
+          "allow": true,
+          "protocol": "http:",
+        },
+        Object {
+          "allow": true,
+          "protocol": "https:",
+        },
+        Object {
+          "allow": true,
+          "protocol": "ws:",
+        },
+        Object {
+          "allow": true,
+          "protocol": "wss:",
+        },
+        Object {
+          "allow": true,
+          "protocol": "data:",
+        },
+        Object {
+          "allow": false,
+        },
+      ],
+    },
+    "settleTime": 1000,
+    "timeout": 20000,
+    "viewport": Object {
+      "height": 1200,
+      "width": 1950,
+    },
+    "zoom": 2,
+  },
+  "csv": Object {
+    "checkForFormulas": true,
+    "enablePanelActionDownload": true,
+    "maxSizeBytes": 10485760,
+    "scroll": Object {
+      "duration": "30s",
+      "size": 500,
+    },
+  },
+  "enabled": true,
+  "index": ".reporting",
+  "kibanaServer": Object {},
+  "poll": Object {
+    "jobCompletionNotifier": Object {
+      "interval": 10000,
+      "intervalErrorMultiplier": 5,
+    },
+    "jobsRefresh": Object {
+      "interval": 5000,
+      "intervalErrorMultiplier": 5,
+    },
+  },
+  "queue": Object {
+    "indexInterval": "week",
+    "pollEnabled": true,
+    "pollInterval": 3000,
+    "pollIntervalErrorMultiplier": 10,
+    "timeout": 120000,
+  },
+  "roles": Object {
+    "allow": Array [
+      "reporting_user",
+    ],
+  },
+}
+`;
+
+exports[`config schema with context {"dev":true,"dist":false} produces correct config 1`] = `
+Object {
+  "capture": Object {
+    "browser": Object {
+      "autoDownload": true,
+      "chromium": Object {
+        "disableSandbox": "<platform dependent>",
+        "maxScreenshotDimension": 1950,
+        "proxy": Object {
+          "enabled": false,
+        },
+      },
+      "type": "chromium",
+    },
+    "concurrency": 4,
+    "loadDelay": 3000,
+    "maxAttempts": 1,
+    "networkPolicy": Object {
+      "enabled": true,
+      "rules": Array [
+        Object {
+          "allow": true,
+          "protocol": "http:",
+        },
+        Object {
+          "allow": true,
+          "protocol": "https:",
+        },
+        Object {
+          "allow": true,
+          "protocol": "ws:",
+        },
+        Object {
+          "allow": true,
+          "protocol": "wss:",
+        },
+        Object {
+          "allow": true,
+          "protocol": "data:",
+        },
+        Object {
+          "allow": false,
+        },
+      ],
+    },
+    "settleTime": 1000,
+    "timeout": 20000,
+    "viewport": Object {
+      "height": 1200,
+      "width": 1950,
+    },
+    "zoom": 2,
+  },
+  "csv": Object {
+    "checkForFormulas": true,
+    "enablePanelActionDownload": true,
+    "maxSizeBytes": 10485760,
+    "scroll": Object {
+      "duration": "30s",
+      "size": 500,
+    },
+  },
+  "enabled": true,
+  "encryptionKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "index": ".reporting",
+  "kibanaServer": Object {},
+  "poll": Object {
+    "jobCompletionNotifier": Object {
+      "interval": 10000,
+      "intervalErrorMultiplier": 5,
+    },
+    "jobsRefresh": Object {
+      "interval": 5000,
+      "intervalErrorMultiplier": 5,
+    },
+  },
+  "queue": Object {
+    "indexInterval": "week",
+    "pollEnabled": true,
+    "pollInterval": 3000,
+    "pollIntervalErrorMultiplier": 10,
+    "timeout": 120000,
+  },
+  "roles": Object {
+    "allow": Array [
+      "reporting_user",
+    ],
+  },
+}
+`;
+
+exports[`config schema with context {"dev":true,"dist":true} produces correct config 1`] = `
+Object {
+  "capture": Object {
+    "browser": Object {
+      "autoDownload": false,
+      "chromium": Object {
+        "disableSandbox": "<platform dependent>",
+        "maxScreenshotDimension": 1950,
+        "proxy": Object {
+          "enabled": false,
+        },
+      },
+      "type": "chromium",
+    },
+    "concurrency": 4,
+    "loadDelay": 3000,
+    "maxAttempts": 3,
+    "networkPolicy": Object {
+      "enabled": true,
+      "rules": Array [
+        Object {
+          "allow": true,
+          "protocol": "http:",
+        },
+        Object {
+          "allow": true,
+          "protocol": "https:",
+        },
+        Object {
+          "allow": true,
+          "protocol": "ws:",
+        },
+        Object {
+          "allow": true,
+          "protocol": "wss:",
+        },
+        Object {
+          "allow": true,
+          "protocol": "data:",
+        },
+        Object {
+          "allow": false,
+        },
+      ],
+    },
+    "settleTime": 1000,
+    "timeout": 20000,
+    "viewport": Object {
+      "height": 1200,
+      "width": 1950,
+    },
+    "zoom": 2,
+  },
+  "csv": Object {
+    "checkForFormulas": true,
+    "enablePanelActionDownload": true,
+    "maxSizeBytes": 10485760,
+    "scroll": Object {
+      "duration": "30s",
+      "size": 500,
+    },
+  },
+  "enabled": true,
+  "index": ".reporting",
+  "kibanaServer": Object {},
+  "poll": Object {
+    "jobCompletionNotifier": Object {
+      "interval": 10000,
+      "intervalErrorMultiplier": 5,
+    },
+    "jobsRefresh": Object {
+      "interval": 5000,
+      "intervalErrorMultiplier": 5,
+    },
+  },
+  "queue": Object {
+    "indexInterval": "week",
+    "pollEnabled": true,
+    "pollInterval": 3000,
+    "pollIntervalErrorMultiplier": 10,
+    "timeout": 120000,
+  },
+  "roles": Object {
+    "allow": Array [
+      "reporting_user",
+    ],
+  },
+}
+`;

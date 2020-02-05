@@ -1,0 +1,104 @@
+[[space-rbac-tutorial]]
+=== Tutorial:  Use role-based access control to customize Kibana spaces
+
+With role-based access control (RBAC), you can provide users access to data, tools,
+and Kibana spaces.  In this tutorial, you will learn how to configure roles
+that provide the right users with the right access to the data, tools, and
+Kibana spaces.
+
+[float]
+==== Scenario
+
+Our user is a web developer working on a bank's
+online mortgage service.  The web developer has these 
+three requirements:
+
+* Have access to the data for that service 
+* Build visualizations and dashboards
+* Monitor the performance of the system
+
+You'll provide the web developer with the access and privileges to get the job done.
+
+[float]
+==== Prerequisites
+
+To complete this tutorial, you'll need the following:
+
+*  **Administrative privileges**: You must have a role that grants privileges to create a space, role, and user. This is any role which grants the `manage_security` cluster privilege. By default, the `superuser` role provides this access. See the {ref}/built-in-roles.html[built-in] roles.  
+*  **A space**: In this tutorial, use `Dev Mortgage` as the space 
+name. See <<spaces-managing, spaces management>> for
+details on creating a space.
+*  **Data**:  You can use <<tutorial-sample-data, sample data>> or 
+live data.  In the steps below, Filebeat and Metricbeat data are used.
+
+[float]
+==== Steps
+
+With the requirements in mind, here are the steps that you will work 
+through in this tutorial:
+
+* Create a role named `mortgage-developer`
+* Give the role permission to access the data in the relevant indices
+* Give the role permission to create visualizations and dashboards 
+* Create the web developer's user account with the proper roles
+
+[float]
+==== Create a role
+
+Go to **Management > Roles** 
+for an overview of your roles.  This view provides actions
+for you to create, edit, and delete roles.
+
+[role="screenshot"]
+image::security/images/role-management.png["Role management"]
+
+
+You can create as many roles as you like. Click *Create role* and 
+provide a name. Use `dev-mortgage` because this role is for a developer 
+working on the bank's mortgage application.
+
+
+[float]
+==== Give the role permission to access the data
+
+Access to data in indices is an index-level privilege, so in 
+*Index privileges*, add lines for the indices that contain the 
+data for this role.  Two privileges are required: `read` and 
+`view_index_metadata`.  All privileges are detailed in the 
+https://www.elastic.co/guide/en/elasticsearch/reference/current/security-privileges.html[security privileges] documentation.
+
+In the screenshots, Filebeat and Metricbeat data is used, but you 
+should use the index patterns for your indices.
+
+[role="screenshot"]
+image::security/images/role-index-privilege.png["Index privilege"]
+
+[float]
+==== Give the role permission to create visualizations and dashboards
+
+By default, roles do not give Kibana privileges.  Click **Add space 
+privilege** and associate this role with the `Dev Mortgage` space.
+
+To enable users with the `dev-mortgage` role to create visualizations 
+and dashboards, click *All* for *Visualize* and *Dashboard*. Also 
+assign *All* for *Discover* because it is common for developers 
+to create saved searches while designing visualizations.
+
+[role="screenshot"]
+image::security/images/role-space-visualization.png["Associate space"]
+
+[float]
+==== Create the developer's user account with the proper roles
+
+Go to **Management > Users** and click on **Create user** to create a 
+user.  Give the user the `dev-mortgage` role 
+and the `monitoring-user` role, which is required for users of **Stack Monitoring**.
+
+[role="screenshot"]
+image::security/images/role-new-user.png["Developer user"]
+
+Finally, have the developer log in and access the Dev Mortgage space 
+and create a new visualization.
+
+NOTE: If the user is assigned to only one space, they will automatically enter that space on login.
+

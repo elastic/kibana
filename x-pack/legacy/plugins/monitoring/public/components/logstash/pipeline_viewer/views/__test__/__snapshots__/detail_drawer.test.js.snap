@@ -1,0 +1,653 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DetailDrawer component If vertices shows basic info and no stats for if 1`] = `
+<EuiFlyout
+  closeButtonAriaLabel="Closes this dialog"
+  hideCloseButton={false}
+  maxWidth={false}
+  onClose={[MockFunction]}
+  ownFocus={false}
+  size="s"
+>
+  <EuiFlyoutHeader>
+    <EuiFlexGroup
+      alignItems="baseline"
+      gutterSize="s"
+    >
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiIcon
+          className="lspvDetailDrawerIcon"
+        />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiTitle>
+          <h2>
+            if
+          </h2>
+        </EuiTitle>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiFlyoutHeader>
+  <EuiFlyoutBody>
+    <EuiText>
+      <div>
+        <p>
+          <FormattedMessage
+            defaultMessage="This is a conditional statement in your pipeline."
+            id="xpack.monitoring.logstash.pipeline.detailDrawer.conditionalStatementDescription"
+            values={Object {}}
+          />
+        </p>
+        <EuiCodeBlock>
+          if ([type] == "apache_log") {
+  ...
+}
+        </EuiCodeBlock>
+        <EuiSpacer />
+      </div>
+      <p>
+        <FormattedMessage
+          defaultMessage="There are currently no metrics to show for this if condition."
+          id="xpack.monitoring.logstash.pipeline.detailDrawer.noMetricsForIfDescription"
+          values={Object {}}
+        />
+      </p>
+    </EuiText>
+  </EuiFlyoutBody>
+</EuiFlyout>
+`;
+
+exports[`DetailDrawer component Plugin vertices Plugin does not have explicit ID shows basic info and stats for plugin, suggesting that user set explicit ID 1`] = `
+<EuiFlyout
+  closeButtonAriaLabel="Closes this dialog"
+  hideCloseButton={false}
+  maxWidth={false}
+  onClose={[MockFunction]}
+  ownFocus={false}
+  size="s"
+>
+  <EuiFlyoutHeader>
+    <EuiFlexGroup
+      alignItems="baseline"
+      gutterSize="s"
+    >
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiIcon
+          className="lspvDetailDrawerIcon"
+        />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiTitle>
+          <h2>
+            grok filter
+          </h2>
+        </EuiTitle>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiFlyoutHeader>
+  <EuiFlyoutBody>
+    <EuiText>
+      <div>
+        <p>
+          <FormattedMessage
+            defaultMessage="This {vertexType} does not have an ID explicitly specified. Specifying an ID allows you to track differences across pipeline changes. You can explicitly specify an ID for this plugin like so:"
+            id="xpack.monitoring.logstash.pipeline.detailDrawer.specifyVertexIdDescription"
+            values={
+              Object {
+                "vertexType": "plugin",
+              }
+            }
+          />
+        </p>
+        <EuiCodeBlock>
+           
+          {
+  id =&gt; "mySpecialId"
+}
+        </EuiCodeBlock>
+        <EuiSpacer />
+      </div>
+      <EuiTable>
+        <EuiTableBody>
+          <EuiTableRow
+            key="events_latency"
+          >
+            <EuiTableRowCell>
+              <FormattedMessage
+                defaultMessage="Events Latency"
+                id="xpack.monitoring.logstash.pipeline.detailDrawer.eventsLatencyLabel"
+                values={Object {}}
+              />
+            </EuiTableRowCell>
+            <EuiTableRowCell>
+              <div
+                className="lspvDetailDrawerSparklineContainer"
+              >
+                <Sparkline
+                  options={
+                    Object {
+                      "xaxis": Object {
+                        "max": 1516135440463,
+                        "min": 1516131138639,
+                      },
+                    }
+                  }
+                  series={
+                    Array [
+                      Array [
+                        1516131120000,
+                        0.21,
+                      ],
+                      Array [
+                        1516131180000,
+                        0.23,
+                      ],
+                    ]
+                  }
+                  tooltip={
+                    Object {
+                      "enabled": true,
+                      "xValueFormatter": [MockFunction],
+                      "yValueFormatter": [Function],
+                    }
+                  }
+                />
+              </div>
+            </EuiTableRowCell>
+            <EuiTableRowCell>
+              0.23 ms/e
+            </EuiTableRowCell>
+          </EuiTableRow>
+          <EuiTableRow
+            key="events_out_rate"
+          >
+            <EuiTableRowCell>
+              <FormattedMessage
+                defaultMessage="Events Emitted Rate"
+                id="xpack.monitoring.logstash.pipeline.detailDrawer.eventsEmittedRateLabel"
+                values={Object {}}
+              />
+            </EuiTableRowCell>
+            <EuiTableRowCell>
+              <div
+                className="lspvDetailDrawerSparklineContainer"
+              >
+                <Sparkline
+                  options={
+                    Object {
+                      "xaxis": Object {
+                        "max": 1516135440463,
+                        "min": 1516131138639,
+                      },
+                    }
+                  }
+                  series={
+                    Array [
+                      Array [
+                        1516131120000,
+                        32,
+                      ],
+                      Array [
+                        1516131180000,
+                        36,
+                      ],
+                    ]
+                  }
+                  tooltip={
+                    Object {
+                      "enabled": true,
+                      "xValueFormatter": [MockFunction],
+                      "yValueFormatter": [Function],
+                    }
+                  }
+                />
+              </div>
+            </EuiTableRowCell>
+            <EuiTableRowCell>
+              N/A
+            </EuiTableRowCell>
+          </EuiTableRow>
+          <EuiTableRow
+            key="events_in"
+          >
+            <EuiTableRowCell>
+              <FormattedMessage
+                defaultMessage="Events Received"
+                id="xpack.monitoring.logstash.pipeline.detailDrawer.eventsReceivedLabel"
+                values={Object {}}
+              />
+            </EuiTableRowCell>
+            <EuiTableRowCell>
+              <div
+                className="lspvDetailDrawerSparklineContainer"
+              >
+                <Sparkline
+                  options={
+                    Object {
+                      "xaxis": Object {
+                        "max": 1516135440463,
+                        "min": 1516131138639,
+                      },
+                    }
+                  }
+                  series={
+                    Array [
+                      Array [
+                        1516131120000,
+                        200,
+                      ],
+                      Array [
+                        1516131180000,
+                        203,
+                      ],
+                    ]
+                  }
+                  tooltip={
+                    Object {
+                      "enabled": true,
+                      "xValueFormatter": [MockFunction],
+                      "yValueFormatter": [Function],
+                    }
+                  }
+                />
+              </div>
+            </EuiTableRowCell>
+            <EuiTableRowCell>
+              203 events
+            </EuiTableRowCell>
+          </EuiTableRow>
+          <EuiTableRow
+            key="events_out"
+          >
+            <EuiTableRowCell>
+              <FormattedMessage
+                defaultMessage="Events Emitted"
+                id="xpack.monitoring.logstash.pipeline.detailDrawer.eventsEmittedLabel"
+                values={Object {}}
+              />
+            </EuiTableRowCell>
+            <EuiTableRowCell>
+              <div
+                className="lspvDetailDrawerSparklineContainer"
+              >
+                <Sparkline
+                  options={
+                    Object {
+                      "xaxis": Object {
+                        "max": 1516135440463,
+                        "min": 1516131138639,
+                      },
+                    }
+                  }
+                  series={
+                    Array [
+                      Array [
+                        1516131120000,
+                        199,
+                      ],
+                      Array [
+                        1516131180000,
+                        200,
+                      ],
+                    ]
+                  }
+                  tooltip={
+                    Object {
+                      "enabled": true,
+                      "xValueFormatter": [MockFunction],
+                      "yValueFormatter": [Function],
+                    }
+                  }
+                />
+              </div>
+            </EuiTableRowCell>
+            <EuiTableRowCell>
+              200 events
+            </EuiTableRowCell>
+          </EuiTableRow>
+        </EuiTableBody>
+      </EuiTable>
+    </EuiText>
+  </EuiFlyoutBody>
+</EuiFlyout>
+`;
+
+exports[`DetailDrawer component Plugin vertices Plugin has explicit ID shows basic info and stats for plugin, including explicit ID 1`] = `
+<EuiFlyout
+  closeButtonAriaLabel="Closes this dialog"
+  hideCloseButton={false}
+  maxWidth={false}
+  onClose={[MockFunction]}
+  ownFocus={false}
+  size="s"
+>
+  <EuiFlyoutHeader>
+    <EuiFlexGroup
+      alignItems="baseline"
+      gutterSize="s"
+    >
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiIcon
+          className="lspvDetailDrawerIcon"
+        />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiTitle>
+          <h2>
+            grok filter
+          </h2>
+        </EuiTitle>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiFlyoutHeader>
+  <EuiFlyoutBody>
+    <EuiText>
+      <p>
+        <FormattedMessage
+          defaultMessage="This {vertexType}'s ID is {vertexId}."
+          id="xpack.monitoring.logstash.pipeline.detailDrawer.vertexIdDescription"
+          values={
+            Object {
+              "vertexId": <EuiBadge>
+                parse_apache_logline
+              </EuiBadge>,
+              "vertexType": "plugin",
+            }
+          }
+        />
+      </p>
+      <EuiTable>
+        <EuiTableBody>
+          <EuiTableRow
+            key="events_latency"
+          >
+            <EuiTableRowCell>
+              <FormattedMessage
+                defaultMessage="Events Latency"
+                id="xpack.monitoring.logstash.pipeline.detailDrawer.eventsLatencyLabel"
+                values={Object {}}
+              />
+            </EuiTableRowCell>
+            <EuiTableRowCell>
+              <div
+                className="lspvDetailDrawerSparklineContainer"
+              >
+                <Sparkline
+                  options={
+                    Object {
+                      "xaxis": Object {
+                        "max": 1516135440463,
+                        "min": 1516131138639,
+                      },
+                    }
+                  }
+                  series={
+                    Array [
+                      Array [
+                        1516131120000,
+                        0.21,
+                      ],
+                      Array [
+                        1516131180000,
+                        0.23,
+                      ],
+                    ]
+                  }
+                  tooltip={
+                    Object {
+                      "enabled": true,
+                      "xValueFormatter": [MockFunction],
+                      "yValueFormatter": [Function],
+                    }
+                  }
+                />
+              </div>
+            </EuiTableRowCell>
+            <EuiTableRowCell>
+              0.23 ms/e
+            </EuiTableRowCell>
+          </EuiTableRow>
+          <EuiTableRow
+            key="events_out_rate"
+          >
+            <EuiTableRowCell>
+              <FormattedMessage
+                defaultMessage="Events Emitted Rate"
+                id="xpack.monitoring.logstash.pipeline.detailDrawer.eventsEmittedRateLabel"
+                values={Object {}}
+              />
+            </EuiTableRowCell>
+            <EuiTableRowCell>
+              <div
+                className="lspvDetailDrawerSparklineContainer"
+              >
+                <Sparkline
+                  options={
+                    Object {
+                      "xaxis": Object {
+                        "max": 1516135440463,
+                        "min": 1516131138639,
+                      },
+                    }
+                  }
+                  series={
+                    Array [
+                      Array [
+                        1516131120000,
+                        32,
+                      ],
+                      Array [
+                        1516131180000,
+                        36,
+                      ],
+                    ]
+                  }
+                  tooltip={
+                    Object {
+                      "enabled": true,
+                      "xValueFormatter": [MockFunction],
+                      "yValueFormatter": [Function],
+                    }
+                  }
+                />
+              </div>
+            </EuiTableRowCell>
+            <EuiTableRowCell>
+              N/A
+            </EuiTableRowCell>
+          </EuiTableRow>
+          <EuiTableRow
+            key="events_in"
+          >
+            <EuiTableRowCell>
+              <FormattedMessage
+                defaultMessage="Events Received"
+                id="xpack.monitoring.logstash.pipeline.detailDrawer.eventsReceivedLabel"
+                values={Object {}}
+              />
+            </EuiTableRowCell>
+            <EuiTableRowCell>
+              <div
+                className="lspvDetailDrawerSparklineContainer"
+              >
+                <Sparkline
+                  options={
+                    Object {
+                      "xaxis": Object {
+                        "max": 1516135440463,
+                        "min": 1516131138639,
+                      },
+                    }
+                  }
+                  series={
+                    Array [
+                      Array [
+                        1516131120000,
+                        200,
+                      ],
+                      Array [
+                        1516131180000,
+                        203,
+                      ],
+                    ]
+                  }
+                  tooltip={
+                    Object {
+                      "enabled": true,
+                      "xValueFormatter": [MockFunction],
+                      "yValueFormatter": [Function],
+                    }
+                  }
+                />
+              </div>
+            </EuiTableRowCell>
+            <EuiTableRowCell>
+              203 events
+            </EuiTableRowCell>
+          </EuiTableRow>
+          <EuiTableRow
+            key="events_out"
+          >
+            <EuiTableRowCell>
+              <FormattedMessage
+                defaultMessage="Events Emitted"
+                id="xpack.monitoring.logstash.pipeline.detailDrawer.eventsEmittedLabel"
+                values={Object {}}
+              />
+            </EuiTableRowCell>
+            <EuiTableRowCell>
+              <div
+                className="lspvDetailDrawerSparklineContainer"
+              >
+                <Sparkline
+                  options={
+                    Object {
+                      "xaxis": Object {
+                        "max": 1516135440463,
+                        "min": 1516131138639,
+                      },
+                    }
+                  }
+                  series={
+                    Array [
+                      Array [
+                        1516131120000,
+                        199,
+                      ],
+                      Array [
+                        1516131180000,
+                        200,
+                      ],
+                    ]
+                  }
+                  tooltip={
+                    Object {
+                      "enabled": true,
+                      "xValueFormatter": [MockFunction],
+                      "yValueFormatter": [Function],
+                    }
+                  }
+                />
+              </div>
+            </EuiTableRowCell>
+            <EuiTableRowCell>
+              200 events
+            </EuiTableRowCell>
+          </EuiTableRow>
+        </EuiTableBody>
+      </EuiTable>
+    </EuiText>
+  </EuiFlyoutBody>
+</EuiFlyout>
+`;
+
+exports[`DetailDrawer component Queue vertices shows basic info and no stats for queue 1`] = `
+<EuiFlyout
+  closeButtonAriaLabel="Closes this dialog"
+  hideCloseButton={false}
+  maxWidth={false}
+  onClose={[MockFunction]}
+  ownFocus={false}
+  size="s"
+>
+  <EuiFlyoutHeader>
+    <EuiFlexGroup
+      alignItems="baseline"
+      gutterSize="s"
+    >
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiIcon
+          className="lspvDetailDrawerIcon"
+        />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiTitle>
+          <h2>
+            queue
+          </h2>
+        </EuiTitle>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiFlyoutHeader>
+  <EuiFlyoutBody>
+    <EuiText>
+      <p>
+        <FormattedMessage
+          defaultMessage="This is an internal structure used by Logstash to buffer events between inputs and the rest of the pipeline."
+          id="xpack.monitoring.logstash.pipeline.detailDrawer.structureDescription"
+          values={Object {}}
+        />
+      </p>
+      <p>
+        <FormattedMessage
+          defaultMessage="There are currently no metrics to show for the queue."
+          id="xpack.monitoring.logstash.pipeline.detailDrawer.noMetricsForQueueDescription"
+          values={Object {}}
+        />
+      </p>
+    </EuiText>
+  </EuiFlyoutBody>
+</EuiFlyout>
+`;
+
+exports[`DetailDrawer component shows vertex title 1`] = `
+<EuiFlyout
+  closeButtonAriaLabel="Closes this dialog"
+  hideCloseButton={false}
+  maxWidth={false}
+  onClose={[MockFunction]}
+  ownFocus={false}
+  size="s"
+>
+  <EuiFlyoutHeader>
+    <EuiFlexGroup
+      alignItems="baseline"
+      gutterSize="s"
+    >
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiIcon
+          className="lspvDetailDrawerIcon"
+        />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiTitle>
+          <h2 />
+        </EuiTitle>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiFlyoutHeader>
+  <EuiFlyoutBody>
+    <EuiText />
+  </EuiFlyoutBody>
+</EuiFlyout>
+`;

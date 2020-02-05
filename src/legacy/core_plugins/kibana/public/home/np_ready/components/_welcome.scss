@@ -1,0 +1,28 @@
+.homWelcome {
+  @include kibanaFullScreenGraphics($euiZLevel6);
+}
+
+.homWelcome__header {
+  position: relative;
+  padding: $euiSizeXL;
+  z-index: 10;
+}
+
+.homWelcome__logo {
+  margin-bottom: $euiSizeXL;
+  @include kibanaCircleLogo;
+  @include euiBottomShadowMedium;
+}
+
+.homWelcome__footerAction {
+  margin-right: $euiSizeS;
+}
+
+.homWelcome__content {
+  position: relative;
+  margin: auto;
+  max-width: 512px;
+  padding-left: $euiSizeXL;
+  padding-right: $euiSizeXL;
+  z-index: 10;
+}

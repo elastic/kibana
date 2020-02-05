@@ -2,13 +2,15 @@
   "extends": "../tsconfig.json",
   "compilerOptions": {
     "types": [
-      "expect.js",
       "mocha",
       "node"
     ]
   },
   "include": [
-      "**/*",
+    "**/*",
+    "../typings/**/*"
   ],
-  "exclude": [],
+  "exclude": [
+    "../typings/jest.d.ts"
+  ]
 }

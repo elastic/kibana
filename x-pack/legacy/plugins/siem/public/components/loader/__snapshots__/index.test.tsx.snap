@@ -1,0 +1,36 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`rendering renders correctly 1`] = `
+<Aside
+  overlay={true}
+  overlayBackground="#fff"
+>
+  <FlexGroup
+    overlay={
+      Object {
+        "overlay": true,
+      }
+    }
+  >
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiLoadingSpinner
+        size="xl"
+      />
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiText
+        color="subdued"
+        size="s"
+      >
+        <p>
+          Loading
+        </p>
+      </EuiText>
+    </EuiFlexItem>
+  </FlexGroup>
+</Aside>
+`;

@@ -1,0 +1,1496 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Storyshots arguments/ContainerStyle extended 1`] = `
+<div
+  style={
+    Object {
+      "background": "#fff",
+      "padding": "16px",
+      "width": "323px",
+    }
+  }
+>
+  <div>
+    <h6
+      className="euiTitle euiTitle--xxxsmall euiTitle--uppercase"
+    >
+      Appearance
+    </h6>
+    <div
+      className="euiSpacer euiSpacer--xs"
+    />
+    <div
+      className="euiSpacer euiSpacer--xs"
+    />
+    <div
+      className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive"
+      justify-content="spaceBetween"
+    >
+      <div
+        className="euiFlexItem euiFlexItem--flexGrow2"
+      >
+        <div
+          className="euiFormRow euiFormRow--compressed"
+          id="generated-id-row"
+        >
+          <div
+            className="euiFormRow__labelWrapper"
+          >
+            <label
+              className="euiFormLabel euiFormRow__label"
+              htmlFor="generated-id"
+            >
+              Padding
+            </label>
+          </div>
+          <div
+            className="euiFormRow__fieldWrapper"
+          >
+            <div
+              className="euiFormControlLayout euiFormControlLayout--compressed"
+            >
+              <div
+                className="euiFormControlLayout__childrenWrapper"
+              >
+                <input
+                  className="euiFieldNumber euiFieldNumber--compressed"
+                  id="generated-id"
+                  onBlur={[Function]}
+                  onChange={[Function]}
+                  onFocus={[Function]}
+                  type="number"
+                  value={0}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        className="euiFlexItem euiFlexItem--flexGrow3"
+      >
+        <div
+          className="euiFormRow euiFormRow--compressed"
+          id="generated-id-row"
+        >
+          <div
+            className="euiFormRow__labelWrapper"
+          >
+            <label
+              className="euiFormLabel euiFormRow__label"
+              htmlFor="generated-id"
+            >
+              Opacity
+            </label>
+          </div>
+          <div
+            className="euiFormRow__fieldWrapper"
+          >
+            <div
+              className="euiFormControlLayout euiFormControlLayout--compressed"
+            >
+              <div
+                className="euiFormControlLayout__childrenWrapper"
+              >
+                <select
+                  className="euiSelect euiSelect--compressed"
+                  id="generated-id"
+                  onBlur={[Function]}
+                  onChange={[Function]}
+                  onFocus={[Function]}
+                  onMouseUp={[Function]}
+                  value={1}
+                >
+                  <option
+                    value={1}
+                  >
+                    100%
+                  </option>
+                  <option
+                    value={0.9}
+                  >
+                    90%
+                  </option>
+                  <option
+                    value={0.7}
+                  >
+                    70%
+                  </option>
+                  <option
+                    value={0.5}
+                  >
+                    50%
+                  </option>
+                  <option
+                    value={0.3}
+                  >
+                    30%
+                  </option>
+                  <option
+                    value={0.1}
+                  >
+                    10%
+                  </option>
+                </select>
+                <div
+                  className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                >
+                  <span
+                    className="euiFormControlLayoutCustomIcon"
+                  >
+                    <svg
+                      aria-hidden={true}
+                      className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                      focusable="false"
+                      height={16}
+                      role="img"
+                      style={null}
+                      viewBox="0 0 16 16"
+                      width={16}
+                      xmlns="http://www.w3.org/2000/svg"
+                    />
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        className="euiFlexItem euiFlexItem--flexGrow3"
+      >
+        <div
+          className="euiFormRow euiFormRow--compressed"
+          id="generated-id-row"
+        >
+          <div
+            className="euiFormRow__labelWrapper"
+          >
+            <label
+              className="euiFormLabel euiFormRow__label"
+              htmlFor="generated-id"
+            >
+              Overflow
+            </label>
+          </div>
+          <div
+            className="euiFormRow__fieldWrapper"
+          >
+            <div
+              className="euiFormControlLayout euiFormControlLayout--compressed"
+            >
+              <div
+                className="euiFormControlLayout__childrenWrapper"
+              >
+                <select
+                  className="euiSelect euiSelect--compressed"
+                  id="generated-id"
+                  onBlur={[Function]}
+                  onChange={[Function]}
+                  onFocus={[Function]}
+                  onMouseUp={[Function]}
+                  value="visible"
+                >
+                  <option
+                    value="hidden"
+                  >
+                    Hidden
+                  </option>
+                  <option
+                    value="visible"
+                  >
+                    Visible
+                  </option>
+                </select>
+                <div
+                  className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                >
+                  <span
+                    className="euiFormControlLayoutCustomIcon"
+                  >
+                    <svg
+                      aria-hidden={true}
+                      className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                      focusable="false"
+                      height={16}
+                      role="img"
+                      style={null}
+                      viewBox="0 0 16 16"
+                      width={16}
+                      xmlns="http://www.w3.org/2000/svg"
+                    />
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      className="euiSpacer euiSpacer--m"
+    />
+    <h6
+      className="euiTitle euiTitle--xxxsmall euiTitle--uppercase"
+    >
+      Border
+    </h6>
+    <div
+      className="euiSpacer euiSpacer--xs"
+    />
+    <div
+      className="euiSpacer euiSpacer--xs"
+    />
+    <div
+      className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive"
+    >
+      <div
+        className="euiFlexItem euiFlexItem--flexGrow2"
+      >
+        <div
+          className="euiFormRow euiFormRow--compressed"
+          id="generated-id-row"
+        >
+          <div
+            className="euiFormRow__labelWrapper"
+          >
+            <label
+              className="euiFormLabel euiFormRow__label"
+              htmlFor="generated-id"
+            >
+              Thickness
+            </label>
+          </div>
+          <div
+            className="euiFormRow__fieldWrapper"
+          >
+            <div
+              className="euiFormControlLayout euiFormControlLayout--compressed"
+            >
+              <div
+                className="euiFormControlLayout__childrenWrapper"
+              >
+                <input
+                  className="euiFieldNumber euiFieldNumber--compressed"
+                  id="generated-id"
+                  onBlur={[Function]}
+                  onChange={[Function]}
+                  onFocus={[Function]}
+                  type="number"
+                  value={1}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        className="euiFlexItem euiFlexItem--flexGrow3"
+      >
+        <div
+          className="euiFormRow euiFormRow--compressed"
+          id="generated-id-row"
+        >
+          <div
+            className="euiFormRow__labelWrapper"
+          >
+            <label
+              className="euiFormLabel euiFormRow__label"
+              htmlFor="generated-id"
+            >
+              Style
+            </label>
+          </div>
+          <div
+            className="euiFormRow__fieldWrapper"
+          >
+            <div
+              className="euiPopover euiPopover--anchorDownCenter euiPopover--displayBlock euiSuperSelect"
+              onKeyDown={[Function]}
+              onMouseDown={[Function]}
+              onMouseUp={[Function]}
+              onTouchEnd={[Function]}
+              onTouchStart={[Function]}
+            >
+              <div
+                className="euiPopover__anchor"
+              >
+                <input
+                  id="generated-id"
+                  type="hidden"
+                  value="solid"
+                />
+                <div
+                  className="euiFormControlLayout euiFormControlLayout--compressed"
+                >
+                  <div
+                    className="euiFormControlLayout__childrenWrapper"
+                  >
+                    <span
+                      className="euiScreenReaderOnly"
+                      id="generated-id"
+                    >
+                      Select an option: 
+                      <div
+                        style={
+                          Object {
+                            "border": "4px solid",
+                            "height": 16,
+                          }
+                        }
+                      />
+                      , is selected
+                    </span>
+                    <button
+                      aria-haspopup="true"
+                      aria-labelledby="generated-id generated-id"
+                      aria-selected={true}
+                      className="euiSuperSelectControl euiSuperSelectControl--compressed"
+                      onBlur={[Function]}
+                      onClick={[Function]}
+                      onFocus={[Function]}
+                      onKeyDown={[Function]}
+                      role="option"
+                      type="button"
+                    >
+                      <div
+                        style={
+                          Object {
+                            "border": "4px solid",
+                            "height": 16,
+                          }
+                        }
+                      />
+                    </button>
+                    <div
+                      className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                    >
+                      <span
+                        className="euiFormControlLayoutCustomIcon"
+                      >
+                        <svg
+                          aria-hidden={true}
+                          className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                          focusable="false"
+                          height={16}
+                          role="img"
+                          style={null}
+                          viewBox="0 0 16 16"
+                          width={16}
+                          xmlns="http://www.w3.org/2000/svg"
+                        />
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        className="euiFlexItem euiFlexItem--flexGrow2"
+      >
+        <div
+          className="euiFormRow euiFormRow--compressed"
+          id="generated-id-row"
+        >
+          <div
+            className="euiFormRow__labelWrapper"
+          >
+            <label
+              className="euiFormLabel euiFormRow__label"
+              htmlFor="generated-id"
+            >
+              Radius
+            </label>
+          </div>
+          <div
+            className="euiFormRow__fieldWrapper"
+          >
+            <div
+              className="euiFormControlLayout euiFormControlLayout--compressed"
+            >
+              <div
+                className="euiFormControlLayout__childrenWrapper"
+              >
+                <input
+                  className="euiFieldNumber euiFieldNumber--compressed"
+                  id="generated-id"
+                  onBlur={[Function]}
+                  onChange={[Function]}
+                  onFocus={[Function]}
+                  type="number"
+                  value={0}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        className="euiFlexItem euiFlexItem--flexGrow1"
+      >
+        <div
+          className="euiFormRow euiFormRow--compressed"
+          id="generated-id-row"
+          style={
+            Object {
+              "fontSize": 0,
+            }
+          }
+        >
+          <div
+            className="euiFormRow__labelWrapper"
+          >
+            <label
+              className="euiFormLabel euiFormRow__label"
+              htmlFor="generated-id"
+            >
+              Color
+            </label>
+          </div>
+          <div
+            className="euiFormRow__fieldWrapper"
+          >
+            <div
+              className="euiPopover euiPopover--anchorUpCenter"
+              container={null}
+              id="color-picker-popover"
+              onKeyDown={[Function]}
+              onMouseDown={[Function]}
+              onMouseUp={[Function]}
+              onTouchEnd={[Function]}
+              onTouchStart={[Function]}
+            >
+              <div
+                className="euiPopover__anchor"
+              >
+                <button
+                  aria-label="Border white"
+                  className="euiLink euiLink--primary"
+                  onClick={[Function]}
+                  style={
+                    Object {
+                      "fontSize": 0,
+                    }
+                  }
+                  type="button"
+                >
+                  <div
+                    className="canvasColorDot"
+                  >
+                    <div
+                      className="canvasColorDot__background canvasCheckered"
+                    />
+                    <div
+                      className="canvasColorDot__foreground"
+                      style={
+                        Object {
+                          "background": "#fff",
+                        }
+                      }
+                    />
+                  </div>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Storyshots arguments/ContainerStyle/components appearance form 1`] = `
+<div
+  style={
+    Object {
+      "background": "#fff",
+      "padding": "16px",
+      "width": "323px",
+    }
+  }
+>
+  <div
+    className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive"
+    justify-content="spaceBetween"
+  >
+    <div
+      className="euiFlexItem euiFlexItem--flexGrow2"
+    >
+      <div
+        className="euiFormRow euiFormRow--compressed"
+        id="generated-id-row"
+      >
+        <div
+          className="euiFormRow__labelWrapper"
+        >
+          <label
+            className="euiFormLabel euiFormRow__label"
+            htmlFor="generated-id"
+          >
+            Padding
+          </label>
+        </div>
+        <div
+          className="euiFormRow__fieldWrapper"
+        >
+          <div
+            className="euiFormControlLayout euiFormControlLayout--compressed"
+          >
+            <div
+              className="euiFormControlLayout__childrenWrapper"
+            >
+              <input
+                className="euiFieldNumber euiFieldNumber--compressed"
+                id="generated-id"
+                onBlur={[Function]}
+                onChange={[Function]}
+                onFocus={[Function]}
+                type="number"
+                value={4}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      className="euiFlexItem euiFlexItem--flexGrow3"
+    >
+      <div
+        className="euiFormRow euiFormRow--compressed"
+        id="generated-id-row"
+      >
+        <div
+          className="euiFormRow__labelWrapper"
+        >
+          <label
+            className="euiFormLabel euiFormRow__label"
+            htmlFor="generated-id"
+          >
+            Opacity
+          </label>
+        </div>
+        <div
+          className="euiFormRow__fieldWrapper"
+        >
+          <div
+            className="euiFormControlLayout euiFormControlLayout--compressed"
+          >
+            <div
+              className="euiFormControlLayout__childrenWrapper"
+            >
+              <select
+                className="euiSelect euiSelect--compressed"
+                id="generated-id"
+                onBlur={[Function]}
+                onChange={[Function]}
+                onFocus={[Function]}
+                onMouseUp={[Function]}
+                value="1"
+              >
+                <option
+                  value={1}
+                >
+                  100%
+                </option>
+                <option
+                  value={0.9}
+                >
+                  90%
+                </option>
+                <option
+                  value={0.7}
+                >
+                  70%
+                </option>
+                <option
+                  value={0.5}
+                >
+                  50%
+                </option>
+                <option
+                  value={0.3}
+                >
+                  30%
+                </option>
+                <option
+                  value={0.1}
+                >
+                  10%
+                </option>
+              </select>
+              <div
+                className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+              >
+                <span
+                  className="euiFormControlLayoutCustomIcon"
+                >
+                  <svg
+                    aria-hidden={true}
+                    className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                    focusable="false"
+                    height={16}
+                    role="img"
+                    style={null}
+                    viewBox="0 0 16 16"
+                    width={16}
+                    xmlns="http://www.w3.org/2000/svg"
+                  />
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      className="euiFlexItem euiFlexItem--flexGrow3"
+    >
+      <div
+        className="euiFormRow euiFormRow--compressed"
+        id="generated-id-row"
+      >
+        <div
+          className="euiFormRow__labelWrapper"
+        >
+          <label
+            className="euiFormLabel euiFormRow__label"
+            htmlFor="generated-id"
+          >
+            Overflow
+          </label>
+        </div>
+        <div
+          className="euiFormRow__fieldWrapper"
+        >
+          <div
+            className="euiFormControlLayout euiFormControlLayout--compressed"
+          >
+            <div
+              className="euiFormControlLayout__childrenWrapper"
+            >
+              <select
+                className="euiSelect euiSelect--compressed"
+                id="generated-id"
+                onBlur={[Function]}
+                onChange={[Function]}
+                onFocus={[Function]}
+                onMouseUp={[Function]}
+                value="visible"
+              >
+                <option
+                  value="hidden"
+                >
+                  Hidden
+                </option>
+                <option
+                  value="visible"
+                >
+                  Visible
+                </option>
+              </select>
+              <div
+                className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+              >
+                <span
+                  className="euiFormControlLayoutCustomIcon"
+                >
+                  <svg
+                    aria-hidden={true}
+                    className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                    focusable="false"
+                    height={16}
+                    role="img"
+                    style={null}
+                    viewBox="0 0 16 16"
+                    width={16}
+                    xmlns="http://www.w3.org/2000/svg"
+                  />
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Storyshots arguments/ContainerStyle/components border form 1`] = `
+<div
+  style={
+    Object {
+      "background": "#fff",
+      "padding": "16px",
+      "width": "323px",
+    }
+  }
+>
+  <div
+    className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive"
+  >
+    <div
+      className="euiFlexItem euiFlexItem--flexGrow2"
+    >
+      <div
+        className="euiFormRow euiFormRow--compressed"
+        id="generated-id-row"
+      >
+        <div
+          className="euiFormRow__labelWrapper"
+        >
+          <label
+            className="euiFormLabel euiFormRow__label"
+            htmlFor="generated-id"
+          >
+            Thickness
+          </label>
+        </div>
+        <div
+          className="euiFormRow__fieldWrapper"
+        >
+          <div
+            className="euiFormControlLayout euiFormControlLayout--compressed"
+          >
+            <div
+              className="euiFormControlLayout__childrenWrapper"
+            >
+              <input
+                className="euiFieldNumber euiFieldNumber--compressed"
+                id="generated-id"
+                onBlur={[Function]}
+                onChange={[Function]}
+                onFocus={[Function]}
+                type="number"
+                value={1}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      className="euiFlexItem euiFlexItem--flexGrow3"
+    >
+      <div
+        className="euiFormRow euiFormRow--compressed"
+        id="generated-id-row"
+      >
+        <div
+          className="euiFormRow__labelWrapper"
+        >
+          <label
+            className="euiFormLabel euiFormRow__label"
+            htmlFor="generated-id"
+          >
+            Style
+          </label>
+        </div>
+        <div
+          className="euiFormRow__fieldWrapper"
+        >
+          <div
+            className="euiPopover euiPopover--anchorDownCenter euiPopover--displayBlock euiSuperSelect"
+            onKeyDown={[Function]}
+            onMouseDown={[Function]}
+            onMouseUp={[Function]}
+            onTouchEnd={[Function]}
+            onTouchStart={[Function]}
+          >
+            <div
+              className="euiPopover__anchor"
+            >
+              <input
+                id="generated-id"
+                type="hidden"
+                value="dotted"
+              />
+              <div
+                className="euiFormControlLayout euiFormControlLayout--compressed"
+              >
+                <div
+                  className="euiFormControlLayout__childrenWrapper"
+                >
+                  <span
+                    className="euiScreenReaderOnly"
+                    id="generated-id"
+                  >
+                    Select an option: 
+                    <div
+                      style={
+                        Object {
+                          "border": "4px dotted",
+                          "height": 16,
+                        }
+                      }
+                    />
+                    , is selected
+                  </span>
+                  <button
+                    aria-haspopup="true"
+                    aria-labelledby="generated-id generated-id"
+                    aria-selected={true}
+                    className="euiSuperSelectControl euiSuperSelectControl--compressed"
+                    onBlur={[Function]}
+                    onClick={[Function]}
+                    onFocus={[Function]}
+                    onKeyDown={[Function]}
+                    role="option"
+                    type="button"
+                  >
+                    <div
+                      style={
+                        Object {
+                          "border": "4px dotted",
+                          "height": 16,
+                        }
+                      }
+                    />
+                  </button>
+                  <div
+                    className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                  >
+                    <span
+                      className="euiFormControlLayoutCustomIcon"
+                    >
+                      <svg
+                        aria-hidden={true}
+                        className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                        focusable="false"
+                        height={16}
+                        role="img"
+                        style={null}
+                        viewBox="0 0 16 16"
+                        width={16}
+                        xmlns="http://www.w3.org/2000/svg"
+                      />
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      className="euiFlexItem euiFlexItem--flexGrow2"
+    >
+      <div
+        className="euiFormRow euiFormRow--compressed"
+        id="generated-id-row"
+      >
+        <div
+          className="euiFormRow__labelWrapper"
+        >
+          <label
+            className="euiFormLabel euiFormRow__label"
+            htmlFor="generated-id"
+          >
+            Radius
+          </label>
+        </div>
+        <div
+          className="euiFormRow__fieldWrapper"
+        >
+          <div
+            className="euiFormControlLayout euiFormControlLayout--compressed"
+          >
+            <div
+              className="euiFormControlLayout__childrenWrapper"
+            >
+              <input
+                className="euiFieldNumber euiFieldNumber--compressed"
+                id="generated-id"
+                onBlur={[Function]}
+                onChange={[Function]}
+                onFocus={[Function]}
+                type="number"
+                value={1}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      className="euiFlexItem euiFlexItem--flexGrow1"
+    >
+      <div
+        className="euiFormRow euiFormRow--compressed"
+        id="generated-id-row"
+        style={
+          Object {
+            "fontSize": 0,
+          }
+        }
+      >
+        <div
+          className="euiFormRow__labelWrapper"
+        >
+          <label
+            className="euiFormLabel euiFormRow__label"
+            htmlFor="generated-id"
+          >
+            Color
+          </label>
+        </div>
+        <div
+          className="euiFormRow__fieldWrapper"
+        >
+          <div
+            className="euiPopover euiPopover--anchorUpCenter"
+            container={null}
+            id="color-picker-popover"
+            onKeyDown={[Function]}
+            onMouseDown={[Function]}
+            onMouseUp={[Function]}
+            onTouchEnd={[Function]}
+            onTouchStart={[Function]}
+          >
+            <div
+              className="euiPopover__anchor"
+            >
+              <button
+                aria-label="Border black"
+                className="euiLink euiLink--primary"
+                onClick={[Function]}
+                style={
+                  Object {
+                    "fontSize": 0,
+                  }
+                }
+                type="button"
+              >
+                <div
+                  className="canvasColorDot"
+                >
+                  <div
+                    className="canvasColorDot__background canvasCheckered"
+                  />
+                  <div
+                    className="canvasColorDot__foreground"
+                    style={
+                      Object {
+                        "background": "#000",
+                      }
+                    }
+                  />
+                </div>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = `
+<div
+  style={
+    Object {
+      "background": "#fff",
+      "padding": "16px",
+      "width": "323px",
+    }
+  }
+>
+  <div>
+    <h6
+      className="euiTitle euiTitle--xxxsmall euiTitle--uppercase"
+    >
+      Appearance
+    </h6>
+    <div
+      className="euiSpacer euiSpacer--xs"
+    />
+    <div
+      className="euiSpacer euiSpacer--xs"
+    />
+    <div
+      className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive"
+      justify-content="spaceBetween"
+    >
+      <div
+        className="euiFlexItem euiFlexItem--flexGrow2"
+      >
+        <div
+          className="euiFormRow euiFormRow--compressed"
+          id="generated-id-row"
+        >
+          <div
+            className="euiFormRow__labelWrapper"
+          >
+            <label
+              className="euiFormLabel euiFormRow__label"
+              htmlFor="generated-id"
+            >
+              Padding
+            </label>
+          </div>
+          <div
+            className="euiFormRow__fieldWrapper"
+          >
+            <div
+              className="euiFormControlLayout euiFormControlLayout--compressed"
+            >
+              <div
+                className="euiFormControlLayout__childrenWrapper"
+              >
+                <input
+                  className="euiFieldNumber euiFieldNumber--compressed"
+                  id="generated-id"
+                  onBlur={[Function]}
+                  onChange={[Function]}
+                  onFocus={[Function]}
+                  type="number"
+                  value={0}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        className="euiFlexItem euiFlexItem--flexGrow3"
+      >
+        <div
+          className="euiFormRow euiFormRow--compressed"
+          id="generated-id-row"
+        >
+          <div
+            className="euiFormRow__labelWrapper"
+          >
+            <label
+              className="euiFormLabel euiFormRow__label"
+              htmlFor="generated-id"
+            >
+              Opacity
+            </label>
+          </div>
+          <div
+            className="euiFormRow__fieldWrapper"
+          >
+            <div
+              className="euiFormControlLayout euiFormControlLayout--compressed"
+            >
+              <div
+                className="euiFormControlLayout__childrenWrapper"
+              >
+                <select
+                  className="euiSelect euiSelect--compressed"
+                  id="generated-id"
+                  onBlur={[Function]}
+                  onChange={[Function]}
+                  onFocus={[Function]}
+                  onMouseUp={[Function]}
+                  value={1}
+                >
+                  <option
+                    value={1}
+                  >
+                    100%
+                  </option>
+                  <option
+                    value={0.9}
+                  >
+                    90%
+                  </option>
+                  <option
+                    value={0.7}
+                  >
+                    70%
+                  </option>
+                  <option
+                    value={0.5}
+                  >
+                    50%
+                  </option>
+                  <option
+                    value={0.3}
+                  >
+                    30%
+                  </option>
+                  <option
+                    value={0.1}
+                  >
+                    10%
+                  </option>
+                </select>
+                <div
+                  className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                >
+                  <span
+                    className="euiFormControlLayoutCustomIcon"
+                  >
+                    <svg
+                      aria-hidden={true}
+                      className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                      focusable="false"
+                      height={16}
+                      role="img"
+                      style={null}
+                      viewBox="0 0 16 16"
+                      width={16}
+                      xmlns="http://www.w3.org/2000/svg"
+                    />
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        className="euiFlexItem euiFlexItem--flexGrow3"
+      >
+        <div
+          className="euiFormRow euiFormRow--compressed"
+          id="generated-id-row"
+        >
+          <div
+            className="euiFormRow__labelWrapper"
+          >
+            <label
+              className="euiFormLabel euiFormRow__label"
+              htmlFor="generated-id"
+            >
+              Overflow
+            </label>
+          </div>
+          <div
+            className="euiFormRow__fieldWrapper"
+          >
+            <div
+              className="euiFormControlLayout euiFormControlLayout--compressed"
+            >
+              <div
+                className="euiFormControlLayout__childrenWrapper"
+              >
+                <select
+                  className="euiSelect euiSelect--compressed"
+                  id="generated-id"
+                  onBlur={[Function]}
+                  onChange={[Function]}
+                  onFocus={[Function]}
+                  onMouseUp={[Function]}
+                  value="visible"
+                >
+                  <option
+                    value="hidden"
+                  >
+                    Hidden
+                  </option>
+                  <option
+                    value="visible"
+                  >
+                    Visible
+                  </option>
+                </select>
+                <div
+                  className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                >
+                  <span
+                    className="euiFormControlLayoutCustomIcon"
+                  >
+                    <svg
+                      aria-hidden={true}
+                      className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                      focusable="false"
+                      height={16}
+                      role="img"
+                      style={null}
+                      viewBox="0 0 16 16"
+                      width={16}
+                      xmlns="http://www.w3.org/2000/svg"
+                    />
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      className="euiSpacer euiSpacer--m"
+    />
+    <h6
+      className="euiTitle euiTitle--xxxsmall euiTitle--uppercase"
+    >
+      Border
+    </h6>
+    <div
+      className="euiSpacer euiSpacer--xs"
+    />
+    <div
+      className="euiSpacer euiSpacer--xs"
+    />
+    <div
+      className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive"
+    >
+      <div
+        className="euiFlexItem euiFlexItem--flexGrow2"
+      >
+        <div
+          className="euiFormRow euiFormRow--compressed"
+          id="generated-id-row"
+        >
+          <div
+            className="euiFormRow__labelWrapper"
+          >
+            <label
+              className="euiFormLabel euiFormRow__label"
+              htmlFor="generated-id"
+            >
+              Thickness
+            </label>
+          </div>
+          <div
+            className="euiFormRow__fieldWrapper"
+          >
+            <div
+              className="euiFormControlLayout euiFormControlLayout--compressed"
+            >
+              <div
+                className="euiFormControlLayout__childrenWrapper"
+              >
+                <input
+                  className="euiFieldNumber euiFieldNumber--compressed"
+                  id="generated-id"
+                  onBlur={[Function]}
+                  onChange={[Function]}
+                  onFocus={[Function]}
+                  type="number"
+                  value={1}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        className="euiFlexItem euiFlexItem--flexGrow3"
+      >
+        <div
+          className="euiFormRow euiFormRow--compressed"
+          id="generated-id-row"
+        >
+          <div
+            className="euiFormRow__labelWrapper"
+          >
+            <label
+              className="euiFormLabel euiFormRow__label"
+              htmlFor="generated-id"
+            >
+              Style
+            </label>
+          </div>
+          <div
+            className="euiFormRow__fieldWrapper"
+          >
+            <div
+              className="euiPopover euiPopover--anchorDownCenter euiPopover--displayBlock euiSuperSelect"
+              onKeyDown={[Function]}
+              onMouseDown={[Function]}
+              onMouseUp={[Function]}
+              onTouchEnd={[Function]}
+              onTouchStart={[Function]}
+            >
+              <div
+                className="euiPopover__anchor"
+              >
+                <input
+                  id="generated-id"
+                  type="hidden"
+                  value="solid"
+                />
+                <div
+                  className="euiFormControlLayout euiFormControlLayout--compressed"
+                >
+                  <div
+                    className="euiFormControlLayout__childrenWrapper"
+                  >
+                    <span
+                      className="euiScreenReaderOnly"
+                      id="generated-id"
+                    >
+                      Select an option: 
+                      <div
+                        style={
+                          Object {
+                            "border": "4px solid",
+                            "height": 16,
+                          }
+                        }
+                      />
+                      , is selected
+                    </span>
+                    <button
+                      aria-haspopup="true"
+                      aria-labelledby="generated-id generated-id"
+                      aria-selected={true}
+                      className="euiSuperSelectControl euiSuperSelectControl--compressed"
+                      onBlur={[Function]}
+                      onClick={[Function]}
+                      onFocus={[Function]}
+                      onKeyDown={[Function]}
+                      role="option"
+                      type="button"
+                    >
+                      <div
+                        style={
+                          Object {
+                            "border": "4px solid",
+                            "height": 16,
+                          }
+                        }
+                      />
+                    </button>
+                    <div
+                      className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                    >
+                      <span
+                        className="euiFormControlLayoutCustomIcon"
+                      >
+                        <svg
+                          aria-hidden={true}
+                          className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+                          focusable="false"
+                          height={16}
+                          role="img"
+                          style={null}
+                          viewBox="0 0 16 16"
+                          width={16}
+                          xmlns="http://www.w3.org/2000/svg"
+                        />
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        className="euiFlexItem euiFlexItem--flexGrow2"
+      >
+        <div
+          className="euiFormRow euiFormRow--compressed"
+          id="generated-id-row"
+        >
+          <div
+            className="euiFormRow__labelWrapper"
+          >
+            <label
+              className="euiFormLabel euiFormRow__label"
+              htmlFor="generated-id"
+            >
+              Radius
+            </label>
+          </div>
+          <div
+            className="euiFormRow__fieldWrapper"
+          >
+            <div
+              className="euiFormControlLayout euiFormControlLayout--compressed"
+            >
+              <div
+                className="euiFormControlLayout__childrenWrapper"
+              >
+                <input
+                  className="euiFieldNumber euiFieldNumber--compressed"
+                  id="generated-id"
+                  onBlur={[Function]}
+                  onChange={[Function]}
+                  onFocus={[Function]}
+                  type="number"
+                  value={0}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        className="euiFlexItem euiFlexItem--flexGrow1"
+      >
+        <div
+          className="euiFormRow euiFormRow--compressed"
+          id="generated-id-row"
+          style={
+            Object {
+              "fontSize": 0,
+            }
+          }
+        >
+          <div
+            className="euiFormRow__labelWrapper"
+          >
+            <label
+              className="euiFormLabel euiFormRow__label"
+              htmlFor="generated-id"
+            >
+              Color
+            </label>
+          </div>
+          <div
+            className="euiFormRow__fieldWrapper"
+          >
+            <div
+              className="euiPopover euiPopover--anchorUpCenter"
+              container={null}
+              id="color-picker-popover"
+              onKeyDown={[Function]}
+              onMouseDown={[Function]}
+              onMouseUp={[Function]}
+              onTouchEnd={[Function]}
+              onTouchStart={[Function]}
+            >
+              <div
+                className="euiPopover__anchor"
+              >
+                <button
+                  aria-label="Border white"
+                  className="euiLink euiLink--primary"
+                  onClick={[Function]}
+                  style={
+                    Object {
+                      "fontSize": 0,
+                    }
+                  }
+                  type="button"
+                >
+                  <div
+                    className="canvasColorDot"
+                  >
+                    <div
+                      className="canvasColorDot__background canvasCheckered"
+                    />
+                    <div
+                      className="canvasColorDot__foreground"
+                      style={
+                        Object {
+                          "background": "#fff",
+                        }
+                      }
+                    />
+                  </div>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;

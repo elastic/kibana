@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
-export default function ({ getService }) {
+export default function({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
@@ -27,7 +27,7 @@ export default function ({ getService }) {
     before(() => esArchiver.load('index_patterns/conflicts'));
     after(() => esArchiver.unload('index_patterns/conflicts'));
 
-    it('flags fields with mismatched types as conflicting', () => (
+    it('flags fields with mismatched types as conflicting', () =>
       supertest
         .get('/api/index_patterns/_fields_for_wildcard')
         .query({ pattern: 'logs-*' })
@@ -38,6 +38,7 @@ export default function ({ getService }) {
               {
                 name: '@timestamp',
                 type: 'date',
+                esTypes: ['date'],
                 aggregatable: true,
                 searchable: true,
                 readFromDocValues: true,
@@ -45,6 +46,7 @@ export default function ({ getService }) {
               {
                 name: 'number_conflict',
                 type: 'number',
+                esTypes: ['integer', 'float'],
                 aggregatable: true,
                 searchable: true,
                 readFromDocValues: true,
@@ -52,6 +54,7 @@ export default function ({ getService }) {
               {
                 name: 'string_conflict',
                 type: 'string',
+                esTypes: ['text', 'keyword'],
                 aggregatable: true,
                 searchable: true,
                 readFromDocValues: false,
@@ -59,21 +62,17 @@ export default function ({ getService }) {
               {
                 name: 'success',
                 type: 'conflict',
+                esTypes: ['boolean', 'keyword'],
                 aggregatable: true,
                 searchable: true,
                 readFromDocValues: false,
                 conflictDescriptions: {
-                  boolean: [
-                    'logs-2017.01.02'
-                  ],
-                  keyword: [
-                    'logs-2017.01.01'
-                  ]
-                }
-              }
-            ]
+                  boolean: ['logs-2017.01.02'],
+                  keyword: ['logs-2017.01.01'],
+                },
+              },
+            ],
           });
-        })
-    ));
+        }));
   });
 }

@@ -59,6 +59,20 @@
         }
       },
       "status": "green"
+    },
+    "logs": {
+      "enabled": false,
+      "reason": {
+        "clusterExists": false,
+        "indexPatternExists": false,
+        "indexPatternInTimeRangeExists": false,
+        "nodeExists": null,
+        "indexExists": null,
+        "typeExists": false,
+        "typeExistsAtAnyTime": false,
+        "usingStructuredLogs": false
+      },
+      "types": []
     }
   },
   "logstash": {

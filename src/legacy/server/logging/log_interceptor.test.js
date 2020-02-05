@@ -27,7 +27,7 @@ function stubClientErrorEvent(errorMeta) {
     pid: 1234,
     timestamp: Date.now(),
     tags: ['connection', 'client', 'error'],
-    error
+    error,
   };
 }
 
@@ -136,14 +136,18 @@ describe('server logging LogInterceptor', () => {
 
     it('ignores non events', () => {
       const interceptor = new LogInterceptor();
-      const event = stubClientErrorEvent({ message: 'Parse Error', code: 'NOT_HPE_INVALID_METHOD' });
+      const event = stubClientErrorEvent({
+        message: 'Parse Error',
+        code: 'NOT_HPE_INVALID_METHOD',
+      });
       expect(interceptor.downgradeIfEcanceled(event)).toBe(null);
     });
   });
 
   describe('#downgradeIfHTTPWhenHTTPS', () => {
     it('transforms http requests when serving https errors', () => {
-      const message = '40735139278848:error:1407609C:SSL routines:SSL23_GET_CLIENT_HELLO:http request:../deps/openssl/openssl/ssl/s23_srvr.c:394'; // eslint-disable-line max-len
+      const message =
+        '40735139278848:error:1407609C:SSL routines:SSL23_GET_CLIENT_HELLO:http request:../deps/openssl/openssl/ssl/s23_srvr.c:394';
       const interceptor = new LogInterceptor();
       const event = stubClientErrorEvent({ message });
       assertDowngraded(interceptor.downgradeIfHTTPWhenHTTPS(event));

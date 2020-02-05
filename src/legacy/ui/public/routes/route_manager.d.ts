@@ -21,21 +21,27 @@
  * WARNING: these types are incomplete
  */
 
-import { Breadcrumb } from '../../../../core/public/chrome';
+import { ChromeBreadcrumb } from '../../../../core/public';
 
-interface RouteConfiguration {
+export interface RouteConfiguration {
   controller?: string | ((...args: any[]) => void);
   redirectTo?: string;
+  resolveRedirectTo?: (...args: any[]) => void;
   reloadOnSearch?: boolean;
+  reloadOnUrl?: boolean;
+  outerAngularWrapperRoute?: boolean;
   resolve?: object;
   template?: string;
-  k7Breadcrumbs?: (...args: any[]) => Breadcrumb[];
+  k7Breadcrumbs?: (...args: any[]) => ChromeBreadcrumb[];
+  requireUICapability?: string;
 }
 
 interface RouteManager {
+  addSetupWork(cb: (...args: any[]) => void): void;
   when(path: string, routeConfiguration: RouteConfiguration): RouteManager;
   otherwise(routeConfiguration: RouteConfiguration): RouteManager;
   defaults(path: string | RegExp, defaults: RouteConfiguration): RouteManager;
 }
 
+// eslint-disable-next-line import/no-default-export
 export default RouteManager;

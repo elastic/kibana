@@ -27,17 +27,13 @@ function normalizePath(path) {
 
 export class UiBundle {
   constructor(options) {
-    const {
-      id,
-      modules,
-      template,
-      controller,
-    } = options;
+    const { id, modules, template, controller, extendConfig } = options;
 
     this._id = id;
     this._modules = modules;
     this._template = template;
     this._controller = controller;
+    this._extendConfig = extendConfig;
   }
 
   getId() {
@@ -61,9 +57,7 @@ export class UiBundle {
   }
 
   getRequires() {
-    return this._modules.map(module => (
-      `require('${normalizePath(module)}');`
-    ));
+    return this._modules.map(module => `require('${normalizePath(module)}');`);
   }
 
   renderContent() {
@@ -74,22 +68,17 @@ export class UiBundle {
     try {
       const content = await fcb(cb => readFile(this.getEntryPath(), cb));
       return content.toString('utf8');
-    }
-    catch (e) {
+    } catch (e) {
       return null;
     }
   }
 
   async writeEntryFile() {
-    return await fcb(cb => (
-      writeFile(this.getEntryPath(), this.renderContent(), 'utf8', cb)
-    ));
+    return await fcb(cb => writeFile(this.getEntryPath(), this.renderContent(), 'utf8', cb));
   }
 
   async touchStyleFile() {
-    return await fcb(cb => (
-      writeFile(this.getStylePath(), '', 'utf8', cb)
-    ));
+    return await fcb(cb => writeFile(this.getStylePath(), '', 'utf8', cb));
   }
 
   /**
@@ -104,7 +93,7 @@ export class UiBundle {
    * this method and bundles are always recreated.
    */
   async isCacheValid() {
-    if (await this.readEntryFile() !== this.renderContent()) {
+    if ((await this.readEntryFile()) !== this.renderContent()) {
       return false;
     }
 
@@ -112,8 +101,7 @@ export class UiBundle {
       await fcb(cb => stat(this.getOutputPath(), cb));
       await fcb(cb => stat(this.getStylePath(), cb));
       return true;
-    }
-    catch (e) {
+    } catch (e) {
       return false;
     }
   }
@@ -123,7 +111,15 @@ export class UiBundle {
       id: this._id,
       modules: this._modules,
       entryPath: this.getEntryPath(),
-      outputPath: this.getOutputPath()
+      outputPath: this.getOutputPath(),
     };
+  }
+
+  getExtendedConfig(webpackConfig) {
+    if (!this._extendConfig) {
+      return webpackConfig;
+    }
+
+    return this._extendConfig(webpackConfig);
   }
 }

@@ -6,9 +6,7 @@
     "dataSize": 1604573,
     "nodesCount": 2,
     "upTime": 1126458,
-    "version": [
-      "7.0.0-alpha1"
-    ],
+    "version": ["7.0.0-alpha1"],
     "memUsed": 259061752,
     "memMax": 835321856,
     "unassignedShards": 0,
@@ -21,7 +19,7 @@
       "type": "master",
       "isOnline": true,
       "nodeTypeLabel": "Master Node",
-      "nodeTypeClass": "fa-star",
+      "nodeTypeClass": "starFilled",
       "shardCount": 6,
       "node_cgroup_quota": {
         "metric": {
@@ -50,7 +48,7 @@
           "metricAgg": "max",
           "label": "Cgroup Throttling",
           "title": "Cgroup CPU Performance",
-          "description": "The amount of throttled time, reported in nanoseconds, of the Cgroup.",
+          "description": "The amount of throttled time, reported in nanoseconds, of the cgroup.",
           "units": "ns",
           "format": "0,0.[0]a",
           "hasCalculation": false,
@@ -149,7 +147,7 @@
       "type": "node",
       "isOnline": true,
       "nodeTypeLabel": "Node",
-      "nodeTypeClass": "fa-server",
+      "nodeTypeClass": "storage",
       "shardCount": 6,
       "node_cgroup_throttled": {
         "metric": {
@@ -158,7 +156,7 @@
           "metricAgg": "max",
           "label": "Cgroup Throttling",
           "title": "Cgroup CPU Performance",
-          "description": "The amount of throttled time, reported in nanoseconds, of the Cgroup.",
+          "description": "The amount of throttled time, reported in nanoseconds, of the cgroup.",
           "units": "ns",
           "format": "0,0.[0]a",
           "hasCalculation": false,
@@ -251,5 +249,6 @@
       },
       "resolver": "DAiX7fFjS3Wii7g2HYKrOg"
     }
-  ]
+  ],
+  "totalNodeCount": 2
 }

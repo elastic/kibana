@@ -18,14 +18,14 @@
  */
 
 import sinon from 'sinon';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 import { appEntryTemplate } from '../app_entry_template';
 
 function createMockBundle() {
   return {
     getContext: sinon.stub().returns(''),
-    getRequires: sinon.stub().returns([])
+    getRequires: sinon.stub().returns([]),
   };
 }
 
@@ -38,11 +38,7 @@ describe('ui bundles / appEntryTemplate', () => {
 
   it('joins requires into list', () => {
     const bundle = createMockBundle();
-    const requires = [
-      'foo',
-      'bar',
-      'baz'
-    ];
+    const requires = ['foo', 'bar', 'baz'];
     bundle.getRequires.returns(requires);
     expect(appEntryTemplate(bundle)).to.contain(requires.join('\n  '));
   });

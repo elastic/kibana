@@ -1,0 +1,26 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`empty_column_renderer renders correctly against snapshot 1`] = `
+<span>
+  <DraggableWrapper
+    dataProvider={
+      Object {
+        "and": Array [],
+        "enabled": true,
+        "excluded": true,
+        "id": "empty-column-renderer-draggable-wrapper-test-source_ip-1-source_ip",
+        "kqlQuery": "",
+        "name": "source.ip: ",
+        "queryMatch": Object {
+          "displayValue": "—",
+          "field": "source.ip",
+          "operator": ":*",
+          "value": "",
+        },
+      }
+    }
+    key="empty-column-renderer-draggable-wrapper-test-source.ip-1-source.ip"
+    render={[Function]}
+  />
+</span>
+`;

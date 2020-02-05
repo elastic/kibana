@@ -42,11 +42,21 @@ afterAll(async () => {
   await del(TMP);
 });
 
-it('requires an absolute directory', async () => {
+it('requires absolute paths', async () => {
   await expect(
     scanDelete({
       directory: relative(process.cwd(), TMP),
       regularExpressions: [],
+    })
+  ).rejects.toMatchInlineSnapshot(
+    `[TypeError: Please use absolute paths to keep things explicit. You probably want to use \`build.resolvePath()\` or \`config.resolveFromRepo()\`.]`
+  );
+
+  await expect(
+    scanDelete({
+      directory: TMP,
+      regularExpressions: [],
+      excludePaths: ['foo'],
     })
   ).rejects.toMatchInlineSnapshot(
     `[TypeError: Please use absolute paths to keep things explicit. You probably want to use \`build.resolvePath()\` or \`config.resolveFromRepo()\`.]`
@@ -61,4 +71,25 @@ it('deletes files/folders matching regular expression', async () => {
   expect(readdirSync(resolve(TMP, 'foo'))).toEqual([]);
   expect(readdirSync(resolve(TMP, 'a'))).toEqual(['b']);
   expect(readdirSync(resolve(TMP, 'a/b'))).toEqual([]);
+});
+
+it('exludes directories mentioned in excludePaths', async () => {
+  await scanDelete({
+    directory: TMP,
+    regularExpressions: [/^.*[\/\\](bar|c)([\/\\]|$)/],
+    excludePaths: [resolve(TMP, 'foo')],
+  });
+  expect(readdirSync(resolve(TMP, 'foo'))).toEqual(['bar']);
+  expect(readdirSync(resolve(TMP, 'a'))).toEqual(['b']);
+  expect(readdirSync(resolve(TMP, 'a/b'))).toEqual([]);
+});
+
+it('exludes files mentioned in excludePaths', async () => {
+  await scanDelete({
+    directory: TMP,
+    regularExpressions: [/box/],
+    excludePaths: [resolve(TMP, 'foo/bar/box')],
+  });
+
+  expect(readdirSync(resolve(TMP, 'foo/bar'))).toEqual(['baz', 'box']);
 });

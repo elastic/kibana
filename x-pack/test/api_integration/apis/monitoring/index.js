@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export default function ({ loadTestFile }) {
+export default function({ loadTestFile }) {
   describe('Monitoring', () => {
     loadTestFile(require.resolve('./apm'));
     loadTestFile(require.resolve('./beats'));
@@ -15,5 +15,7 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./logstash'));
     loadTestFile(require.resolve('./common'));
     loadTestFile(require.resolve('./standalone_cluster'));
+    loadTestFile(require.resolve('./logs'));
+    loadTestFile(require.resolve('./setup'));
   });
 }

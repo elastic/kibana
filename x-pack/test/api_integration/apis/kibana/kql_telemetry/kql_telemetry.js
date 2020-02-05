@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
-export default function ({ getService }) {
+export default function({ getService }) {
   const supertestNoAuth = getService('supertestWithoutAuth');
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
@@ -39,7 +39,6 @@ export default function ({ getService }) {
             expect(body.success).to.be(true);
           });
       });
-
     });
   });
 }

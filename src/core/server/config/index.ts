@@ -17,16 +17,17 @@
  * under the License.
  */
 
-/** @internal */
-export { ConfigService } from './config_service';
-/** @internal */
-export { RawConfigService } from './raw_config_service';
-/** @internal */
-export { Config, ConfigPath, isConfigPath } from './config';
-/** @internal */
+export { ConfigService, IConfigService } from './config_service';
+export { RawConfigService, RawConfigurationProvider } from './raw_config_service';
+export { Config, ConfigPath, isConfigPath, hasConfigPathIntersection } from './config';
 export { ObjectToConfigAdapter } from './object_to_config_adapter';
-/** @internal */
-export { CliArgs } from './env';
+export { CliArgs, Env } from './env';
+export {
+  ConfigDeprecation,
+  ConfigDeprecationLogger,
+  ConfigDeprecationProvider,
+  ConfigDeprecationFactory,
+  coreDeprecationProvider,
+} from './deprecation';
 
-export { Env, EnvironmentMode, PackageInfo } from './env';
-export { ConfigWithSchema } from './config_with_schema';
+export { EnvironmentMode, PackageInfo } from './types';

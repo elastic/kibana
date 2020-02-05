@@ -17,28 +17,70 @@
  * under the License.
  */
 
-import { Observable } from 'rxjs';
-
-import { LoggerFactory } from '../logging';
-import { HttpConfig } from './http_config';
-import { HttpService, HttpServiceStartContract } from './http_service';
-import { Router } from './router';
-
-export { Router, KibanaRequest } from './router';
-export { HttpService, HttpServiceStartContract };
-export { HttpServerInfo } from './http_server';
+export { config, HttpConfig, HttpConfigType } from './http_config';
+export { HttpService } from './http_service';
+export { GetAuthHeaders } from './auth_headers_storage';
+export { AuthStatus, GetAuthState, IsAuthenticated } from './auth_state_storage';
+export {
+  CustomHttpResponseOptions,
+  IKibanaSocket,
+  isRealRequest,
+  HttpResponseOptions,
+  HttpResponsePayload,
+  ErrorHttpResponseOptions,
+  KibanaRequest,
+  KibanaRequestEvents,
+  KibanaRequestRoute,
+  KibanaRequestRouteOptions,
+  IKibanaResponse,
+  KnownHeaders,
+  LegacyRequest,
+  LifecycleResponseFactory,
+  RedirectResponseOptions,
+  RequestHandler,
+  ResponseError,
+  ResponseErrorAttributes,
+  ResponseHeaders,
+  kibanaResponseFactory,
+  KibanaResponseFactory,
+  RouteConfig,
+  IRouter,
+  RouteMethod,
+  RouteRegistrar,
+  RouteConfigOptions,
+  RouteConfigOptionsBody,
+  RouteContentType,
+  validBodyOutput,
+  RouteValidatorConfig,
+  RouteValidationSpec,
+  RouteValidationFunction,
+  RouteValidatorOptions,
+  RouteValidationError,
+  RouteValidatorFullConfig,
+  RouteValidationResultFactory,
+} from './router';
 export { BasePathProxyServer } from './base_path_proxy_server';
-
-export { HttpConfig };
-
-export class HttpModule {
-  public readonly service: HttpService;
-
-  constructor(readonly config$: Observable<HttpConfig>, logger: LoggerFactory) {
-    this.service = new HttpService(this.config$, logger);
-
-    const router = new Router('/core');
-    router.get({ path: '/', validate: false }, async (req, res) => res.ok({ version: '0.0.1' }));
-    this.service.registerRouter(router);
-  }
-}
+export { OnPreAuthHandler, OnPreAuthToolkit } from './lifecycle/on_pre_auth';
+export {
+  AuthenticationHandler,
+  AuthHeaders,
+  AuthResultParams,
+  AuthToolkit,
+  AuthResult,
+  Authenticated,
+  AuthResultType,
+} from './lifecycle/auth';
+export { OnPostAuthHandler, OnPostAuthToolkit } from './lifecycle/on_post_auth';
+export {
+  OnPreResponseHandler,
+  OnPreResponseToolkit,
+  OnPreResponseExtensions,
+  OnPreResponseInfo,
+} from './lifecycle/on_pre_response';
+export { SessionStorageFactory, SessionStorage } from './session_storage';
+export {
+  SessionStorageCookieOptions,
+  SessionCookieValidationResult,
+} from './cookie_session_storage';
+export * from './types';
+export { BasePath, IBasePath } from './base_path_service';

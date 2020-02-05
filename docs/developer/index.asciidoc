@@ -1,0 +1,27 @@
+[[development]]
+= Developer guide
+
+[partintro]
+--
+Contributing to Kibana can be daunting at first, but it doesn't have to be. If
+you're planning a pull request to the Kibana repository, you may want to start
+with <<core-development>>.
+
+If you'd prefer to use Kibana's internal plugin API, then check out
+<<plugin-development>>.
+--
+
+include::core-development.asciidoc[]
+
+include::plugin-development.asciidoc[]
+
+include::visualize/development-visualize-index.asciidoc[]
+
+include::add-data-guide.asciidoc[]
+
+include::security/index.asciidoc[]
+
+include::pr-review.asciidoc[]
+
+include::testing/interpreting-ci-failures.asciidoc[]
+

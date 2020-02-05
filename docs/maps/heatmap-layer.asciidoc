@@ -1,0 +1,18 @@
+[role="xpack"]
+[[heatmap-layer]]
+== Heat map layer
+
+In the heat map layer, point data is clustered to show locations with higher densities.
+
+[role="screenshot"]
+image::maps/images/heatmap_layer.png[]
+
+You can create a heat map layer from the following data source:
+
+*Grid aggregation*:: Geospatial data grouped in grids with metrics for each gridded cell.
+Set *Show as* to *heat map*.
+The index must contain at least one field mapped as {ref}/geo-point.html[geo_point].
+
+NOTE: Only count, sum, unique count metric aggregations are available with the grid aggregation source and heat map layers.
+Average, min, and max are turned off because the heat map will blend nearby values.
+Blending two average values would make the cluster more prominent, even though it just might literally mean that these nearby areas are average.

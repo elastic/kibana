@@ -17,24 +17,22 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
-export default function ({ getService, getPageObjects }) {
+export default function({ getService, getPageObjects }) {
   const appsMenu = getService('appsMenu');
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'header', 'home']);
 
   describe('app navigation', function describeIndexTests() {
-
     before(async () => {
       await PageObjects.common.navigateToApp('settings');
     });
 
-    it('should should nav link that navigates to the app', async () => {
+    it('should show nav link that navigates to the app', async () => {
       await appsMenu.clickLink('Test Plugin App');
       const pluginContent = await testSubjects.find('pluginContent');
       expect(await pluginContent.getVisibleText()).to.be('Super simple app plugin');
     });
   });
-
 }

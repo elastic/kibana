@@ -9,7 +9,7 @@ import { SPACES } from '../../common/lib/spaces';
 import { TestInvoker } from '../../common/lib/types';
 import { getAllTestSuiteFactory } from '../../common/suites/get_all';
 
-// tslint:disable:no-default-export
+// eslint-disable-next-line import/no-default-export
 export default function getAllSpacesTestSuite({ getService }: TestInvoker) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
@@ -32,9 +32,19 @@ export default function getAllSpacesTestSuite({ getService }: TestInvoker) {
           readAtSpace_1: AUTHENTICATION.KIBANA_RBAC_SPACE_1_READ_USER,
           allAtDefaultSpace: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_ALL_USER,
           readAtDefaultSpace: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_READ_USER,
+          readSavedObjectsAtDefaultSpace:
+            AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_SAVED_OBJECTS_READ_USER,
+          allSavedObjectsAtDefaultSpace:
+            AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_SAVED_OBJECTS_ALL_USER,
+          readSavedObjectsAtSpace_1: AUTHENTICATION.KIBANA_RBAC_SPACE_1_SAVED_OBJECTS_READ_USER,
+          allSavedObjectsAtSpace_1: AUTHENTICATION.KIBANA_RBAC_SPACE_1_SAVED_OBJECTS_ALL_USER,
           legacyAll: AUTHENTICATION.KIBANA_LEGACY_USER,
           dualAll: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER,
           dualRead: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER,
+          apmUser: AUTHENTICATION.APM_USER,
+          machineLearningAdmin: AUTHENTICATION.MACHINE_LEARING_ADMIN,
+          machineLearningUser: AUTHENTICATION.MACHINE_LEARNING_USER,
+          monitoringUser: AUTHENTICATION.MONITORING_USER,
         },
       },
       {
@@ -48,9 +58,19 @@ export default function getAllSpacesTestSuite({ getService }: TestInvoker) {
           readAtSpace_1: AUTHENTICATION.KIBANA_RBAC_SPACE_1_READ_USER,
           allAtDefaultSpace: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_ALL_USER,
           readAtDefaultSpace: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_READ_USER,
+          readSavedObjectsAtDefaultSpace:
+            AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_SAVED_OBJECTS_READ_USER,
+          allSavedObjectsAtDefaultSpace:
+            AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_SAVED_OBJECTS_ALL_USER,
+          readSavedObjectsAtSpace_1: AUTHENTICATION.KIBANA_RBAC_SPACE_1_SAVED_OBJECTS_READ_USER,
+          allSavedObjectsAtSpace_1: AUTHENTICATION.KIBANA_RBAC_SPACE_1_SAVED_OBJECTS_ALL_USER,
           legacyAll: AUTHENTICATION.KIBANA_LEGACY_USER,
           dualAll: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER,
           dualRead: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER,
+          apmUser: AUTHENTICATION.APM_USER,
+          machineLearningAdmin: AUTHENTICATION.MACHINE_LEARING_ADMIN,
+          machineLearningUser: AUTHENTICATION.MACHINE_LEARNING_USER,
+          monitoringUser: AUTHENTICATION.MONITORING_USER,
         },
       },
     ].forEach(scenario => {
@@ -59,6 +79,10 @@ export default function getAllSpacesTestSuite({ getService }: TestInvoker) {
         user: scenario.users.noAccess,
         tests: {
           exists: {
+            statusCode: 403,
+            response: expectRbacForbidden,
+          },
+          copySavedObjectsPurpose: {
             statusCode: 403,
             response: expectRbacForbidden,
           },
@@ -73,6 +97,10 @@ export default function getAllSpacesTestSuite({ getService }: TestInvoker) {
             statusCode: 200,
             response: createExpectResults('default', 'space_1', 'space_2'),
           },
+          copySavedObjectsPurpose: {
+            statusCode: 200,
+            response: createExpectResults('default', 'space_1', 'space_2'),
+          },
         },
       });
 
@@ -81,6 +109,10 @@ export default function getAllSpacesTestSuite({ getService }: TestInvoker) {
         user: scenario.users.allGlobally,
         tests: {
           exists: {
+            statusCode: 200,
+            response: createExpectResults('default', 'space_1', 'space_2'),
+          },
+          copySavedObjectsPurpose: {
             statusCode: 200,
             response: createExpectResults('default', 'space_1', 'space_2'),
           },
@@ -95,6 +127,10 @@ export default function getAllSpacesTestSuite({ getService }: TestInvoker) {
             statusCode: 200,
             response: createExpectResults('default', 'space_1', 'space_2'),
           },
+          copySavedObjectsPurpose: {
+            statusCode: 200,
+            response: createExpectResults('default', 'space_1', 'space_2'),
+          },
         },
       });
 
@@ -103,6 +139,10 @@ export default function getAllSpacesTestSuite({ getService }: TestInvoker) {
         user: scenario.users.legacyAll,
         tests: {
           exists: {
+            statusCode: 403,
+            response: expectRbacForbidden,
+          },
+          copySavedObjectsPurpose: {
             statusCode: 403,
             response: expectRbacForbidden,
           },
@@ -117,6 +157,10 @@ export default function getAllSpacesTestSuite({ getService }: TestInvoker) {
             statusCode: 200,
             response: createExpectResults('default', 'space_1', 'space_2'),
           },
+          copySavedObjectsPurpose: {
+            statusCode: 403,
+            response: expectRbacForbidden,
+          },
         },
       });
 
@@ -128,6 +172,10 @@ export default function getAllSpacesTestSuite({ getService }: TestInvoker) {
             statusCode: 200,
             response: createExpectResults('default', 'space_1', 'space_2'),
           },
+          copySavedObjectsPurpose: {
+            statusCode: 403,
+            response: expectRbacForbidden,
+          },
         },
       });
 
@@ -136,6 +184,10 @@ export default function getAllSpacesTestSuite({ getService }: TestInvoker) {
         user: scenario.users.allAtSpace_1,
         tests: {
           exists: {
+            statusCode: 200,
+            response: createExpectResults('space_1'),
+          },
+          copySavedObjectsPurpose: {
             statusCode: 200,
             response: createExpectResults('space_1'),
           },
@@ -150,6 +202,10 @@ export default function getAllSpacesTestSuite({ getService }: TestInvoker) {
             statusCode: 200,
             response: createExpectResults('space_1'),
           },
+          copySavedObjectsPurpose: {
+            statusCode: 403,
+            response: expectRbacForbidden,
+          },
         },
       });
 
@@ -160,6 +216,10 @@ export default function getAllSpacesTestSuite({ getService }: TestInvoker) {
           user: scenario.users.allAtDefaultSpace,
           tests: {
             exists: {
+              statusCode: 200,
+              response: createExpectResults('default'),
+            },
+            copySavedObjectsPurpose: {
               statusCode: 200,
               response: createExpectResults('default'),
             },
@@ -177,9 +237,145 @@ export default function getAllSpacesTestSuite({ getService }: TestInvoker) {
               statusCode: 200,
               response: createExpectResults('default'),
             },
+            copySavedObjectsPurpose: {
+              statusCode: 403,
+              response: expectRbacForbidden,
+            },
           },
         }
       );
+
+      getAllTest(
+        `rbac user with saved objects management all at default space can access default from ${scenario.spaceId}`,
+        {
+          spaceId: scenario.spaceId,
+          user: scenario.users.allSavedObjectsAtDefaultSpace,
+          tests: {
+            exists: {
+              statusCode: 200,
+              response: createExpectResults('default'),
+            },
+            copySavedObjectsPurpose: {
+              statusCode: 200,
+              response: createExpectResults('default'),
+            },
+          },
+        }
+      );
+
+      getAllTest(
+        `rbac user with saved objects management read at default space can access default from ${scenario.spaceId}`,
+        {
+          spaceId: scenario.spaceId,
+          user: scenario.users.readSavedObjectsAtDefaultSpace,
+          tests: {
+            exists: {
+              statusCode: 200,
+              response: createExpectResults('default'),
+            },
+            copySavedObjectsPurpose: {
+              statusCode: 403,
+              response: expectRbacForbidden,
+            },
+          },
+        }
+      );
+
+      getAllTest(
+        `rbac user with saved objects management all at space_1 space can access space_1 from ${scenario.spaceId}`,
+        {
+          spaceId: scenario.spaceId,
+          user: scenario.users.allSavedObjectsAtSpace_1,
+          tests: {
+            exists: {
+              statusCode: 200,
+              response: createExpectResults('space_1'),
+            },
+            copySavedObjectsPurpose: {
+              statusCode: 200,
+              response: createExpectResults('space_1'),
+            },
+          },
+        }
+      );
+
+      getAllTest(
+        `rbac user with saved objects management read at space_1 space can access space_1 from ${scenario.spaceId}`,
+        {
+          spaceId: scenario.spaceId,
+          user: scenario.users.readSavedObjectsAtSpace_1,
+          tests: {
+            exists: {
+              statusCode: 200,
+              response: createExpectResults('space_1'),
+            },
+            copySavedObjectsPurpose: {
+              statusCode: 403,
+              response: expectRbacForbidden,
+            },
+          },
+        }
+      );
+
+      getAllTest(`apm_user can't access any spaces from ${scenario.spaceId}`, {
+        spaceId: scenario.spaceId,
+        user: scenario.users.apmUser,
+        tests: {
+          exists: {
+            statusCode: 403,
+            response: expectRbacForbidden,
+          },
+          copySavedObjectsPurpose: {
+            statusCode: 403,
+            response: expectRbacForbidden,
+          },
+        },
+      });
+
+      getAllTest(`machine_learning_admin can't access any spaces from ${scenario.spaceId}`, {
+        spaceId: scenario.spaceId,
+        user: scenario.users.machineLearningAdmin,
+        tests: {
+          exists: {
+            statusCode: 403,
+            response: expectRbacForbidden,
+          },
+          copySavedObjectsPurpose: {
+            statusCode: 403,
+            response: expectRbacForbidden,
+          },
+        },
+      });
+
+      getAllTest(`machine_learning_user can't access any spaces from ${scenario.spaceId}`, {
+        spaceId: scenario.spaceId,
+        user: scenario.users.machineLearningUser,
+        tests: {
+          exists: {
+            statusCode: 403,
+            response: expectRbacForbidden,
+          },
+          copySavedObjectsPurpose: {
+            statusCode: 403,
+            response: expectRbacForbidden,
+          },
+        },
+      });
+
+      getAllTest(`monitoring_user can't access any spaces from ${scenario.spaceId}`, {
+        spaceId: scenario.spaceId,
+        user: scenario.users.monitoringUser,
+        tests: {
+          exists: {
+            statusCode: 403,
+            response: expectRbacForbidden,
+          },
+          copySavedObjectsPurpose: {
+            statusCode: 403,
+            response: expectRbacForbidden,
+          },
+        },
+      });
     });
   });
 }

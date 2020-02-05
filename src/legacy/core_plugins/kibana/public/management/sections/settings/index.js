@@ -20,86 +20,82 @@
 import { management } from 'ui/management';
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
+import { capabilities } from 'ui/capabilities';
 import { I18nContext } from 'ui/i18n';
 import indexTemplate from './index.html';
-import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
+import {
+  FeatureCatalogueRegistryProvider,
+  FeatureCatalogueCategory,
+} from 'ui/registry/feature_catalogue';
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
 import { AdvancedSettings } from './advanced_settings';
 import { i18n } from '@kbn/i18n';
 import { getBreadcrumbs } from './breadcrumbs';
 
-const REACT_ADVANCED_SETTINGS_DOM_ELEMENT_ID = 'reactAdvancedSettings';
-
-function updateAdvancedSettings($scope, config, query) {
-  $scope.$$postDigest(() => {
-    const node = document.getElementById(REACT_ADVANCED_SETTINGS_DOM_ELEMENT_ID);
-    if (!node) {
-      return;
+uiRoutes.when('/management/kibana/settings/:setting?', {
+  template: indexTemplate,
+  k7Breadcrumbs: getBreadcrumbs,
+  requireUICapability: 'management.kibana.settings',
+  badge: uiCapabilities => {
+    if (uiCapabilities.advancedSettings.save) {
+      return undefined;
     }
 
-    render(
-      <I18nContext>
-        <AdvancedSettings
-          config={config}
-          query={query}
-        />
-      </I18nContext>,
-      node,
-    );
-  });
-}
-
-function destroyAdvancedSettings() {
-  const node = document.getElementById(REACT_ADVANCED_SETTINGS_DOM_ELEMENT_ID);
-  node && unmountComponentAtNode(node);
-}
-
-uiRoutes
-  .when('/management/kibana/settings/:setting?', {
-    template: indexTemplate,
-    k7Breadcrumbs: getBreadcrumbs
-  });
-
-uiModules.get('apps/management')
-  .directive('kbnManagementAdvanced', function (config, $route) {
     return {
-      restrict: 'E',
-      link: function ($scope) {
-        config.watchAll(() => {
-          updateAdvancedSettings($scope, config, $route.current.params.setting || '');
-        }, $scope);
-
-        $scope.$on('$destroy', () => {
-          destroyAdvancedSettings();
-        });
-
-        $route.updateParams({ setting: null });
-      }
+      text: i18n.translate('kbn.management.advancedSettings.badge.readOnly.text', {
+        defaultMessage: 'Read only',
+      }),
+      tooltip: i18n.translate('kbn.management.advancedSettings.badge.readOnly.tooltip', {
+        defaultMessage: 'Unable to save advanced settings',
+      }),
+      iconType: 'glasses',
     };
-  });
+  },
+});
+
+uiModules.get('apps/management').directive('kbnManagementAdvanced', function($route) {
+  return {
+    restrict: 'E',
+    link: function($scope) {
+      $scope.query = $route.current.params.setting || '';
+      $route.updateParams({ setting: null });
+    },
+  };
+});
+
+const AdvancedSettingsApp = ({ query = '' }) => {
+  return (
+    <I18nContext>
+      <AdvancedSettings queryText={query} enableSaving={capabilities.get().advancedSettings.save} />
+    </I18nContext>
+  );
+};
+
+uiModules.get('apps/management').directive('kbnManagementAdvancedReact', function(reactDirective) {
+  return reactDirective(AdvancedSettingsApp, [['query', { watchDepth: 'reference' }]]);
+});
 
 management.getSection('kibana').register('settings', {
   display: i18n.translate('kbn.management.settings.sectionLabel', {
     defaultMessage: 'Advanced Settings',
   }),
   order: 20,
-  url: '#/management/kibana/settings'
+  url: '#/management/kibana/settings',
 });
 
-FeatureCatalogueRegistryProvider.register(i18n => {
+FeatureCatalogueRegistryProvider.register(() => {
   return {
     id: 'advanced_settings',
-    title: i18n('kbn.management.settings.advancedSettingsLabel', {
+    title: i18n.translate('kbn.management.settings.advancedSettingsLabel', {
       defaultMessage: 'Advanced Settings',
     }),
-    description: i18n('kbn.management.settings.advancedSettingsDescription', {
+    description: i18n.translate('kbn.management.settings.advancedSettingsDescription', {
       defaultMessage: 'Directly edit settings that control behavior in Kibana.',
     }),
     icon: 'advancedSettingsApp',
     path: '/app/kibana#/management/kibana/settings',
     showOnHomePage: false,
-    category: FeatureCatalogueCategory.ADMIN
+    category: FeatureCatalogueCategory.ADMIN,
   };
 });

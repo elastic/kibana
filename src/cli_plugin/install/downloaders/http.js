@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import Wreck from 'wreck';
+import Wreck from '@hapi/wreck';
 import Progress from '../progress';
 import { createWriteStream } from 'fs';
 import HttpProxyAgent from 'http-proxy-agent';
@@ -76,7 +76,7 @@ function downloadResponse({ resp, targetPath, progress }) {
     writeStream.on('error', reject);
 
     // report progress as we download
-    resp.on('data', (chunk) => {
+    resp.on('data', chunk => {
       progress.progress(chunk.length);
     });
 

@@ -32,15 +32,9 @@ export const OptimizeBuildTask = {
     const { extractDir } = getNodeDownloadInfo(config, platform);
     await copyAll(extractDir, tempNodeInstallDir);
 
-    const kibanaScript = platform.isWindows()
-      ? '.\\bin\\kibana.bat'
-      : './bin/kibana';
+    const kibanaScript = platform.isWindows() ? '.\\bin\\kibana.bat' : './bin/kibana';
 
-    const kibanaArgs = [
-      '--env.name=production',
-      '--logging.json=false',
-      '--optimize',
-    ];
+    const kibanaArgs = ['--env.name=production', '--logging.json=false', '--optimize'];
 
     log.info('Running bin/kibana to trigger the optimizer');
 
@@ -48,7 +42,8 @@ export const OptimizeBuildTask = {
       cwd: build.resolvePath('.'),
       env: {
         FORCE_DLL_CREATION: 'true',
-        NODE_OPTIONS: '--max-old-space-size=2048'
+        KBN_CACHE_LOADER_WRITABLE: 'true',
+        NODE_OPTIONS: '--max-old-space-size=4096',
       },
     });
 

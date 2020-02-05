@@ -1,0 +1,254 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`MonitorListStatusColumn can handle a non-numeric timestamp value 1`] = `
+<Styled(EuiFlexGroup)
+  alignItems="center"
+  gutterSize="none"
+  responsive={false}
+  wrap={false}
+>
+  <EuiFlexItem
+    grow={1}
+    style={
+      Object {
+        "flexBasis": 40,
+      }
+    }
+  >
+    <EuiHealth
+      color="success"
+      style={
+        Object {
+          "display": "block",
+        }
+      }
+    >
+      Up
+    </EuiHealth>
+    <styled.span>
+      <EuiToolTip
+        content={
+          <EuiText
+            color="ghost"
+            size="xs"
+          >
+            Thu May 09 2019 10:15:11 GMT-0400
+          </EuiText>
+        }
+        delay="regular"
+        position="top"
+      >
+        <EuiText
+          color="subdued"
+          size="xs"
+        >
+          a few seconds ago
+        </EuiText>
+      </EuiToolTip>
+    </styled.span>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={2}
+  >
+    <EuiText
+      size="s"
+    >
+      in 0/0 Location
+    </EuiText>
+  </EuiFlexItem>
+</Styled(EuiFlexGroup)>
+`;
+
+exports[`MonitorListStatusColumn provides expected tooltip and display times 1`] = `
+<Styled(EuiFlexGroup)
+  alignItems="center"
+  gutterSize="none"
+  responsive={false}
+  wrap={false}
+>
+  <EuiFlexItem
+    grow={1}
+    style={
+      Object {
+        "flexBasis": 40,
+      }
+    }
+  >
+    <EuiHealth
+      color="success"
+      style={
+        Object {
+          "display": "block",
+        }
+      }
+    >
+      Up
+    </EuiHealth>
+    <styled.span>
+      <EuiToolTip
+        content={
+          <EuiText
+            color="ghost"
+            size="xs"
+          >
+            Thu May 09 2019 10:15:11 GMT-0400
+          </EuiText>
+        }
+        delay="regular"
+        position="top"
+      >
+        <EuiText
+          color="subdued"
+          size="xs"
+        >
+          a few seconds ago
+        </EuiText>
+      </EuiToolTip>
+    </styled.span>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={2}
+  >
+    <EuiText
+      size="s"
+    >
+      in 0/0 Location
+    </EuiText>
+  </EuiFlexItem>
+</Styled(EuiFlexGroup)>
+`;
+
+exports[`MonitorListStatusColumn will display location status 1`] = `
+<Styled(EuiFlexGroup)
+  alignItems="center"
+  gutterSize="none"
+  responsive={false}
+  wrap={false}
+>
+  <EuiFlexItem
+    grow={1}
+    style={
+      Object {
+        "flexBasis": 40,
+      }
+    }
+  >
+    <EuiHealth
+      color="success"
+      style={
+        Object {
+          "display": "block",
+        }
+      }
+    >
+      Up
+    </EuiHealth>
+    <styled.span>
+      <EuiToolTip
+        content={
+          <EuiText
+            color="ghost"
+            size="xs"
+          >
+            Thu May 09 2019 10:15:11 GMT-0400
+          </EuiText>
+        }
+        delay="regular"
+        position="top"
+      >
+        <EuiText
+          color="subdued"
+          size="xs"
+        >
+          a few seconds ago
+        </EuiText>
+      </EuiToolTip>
+    </styled.span>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={2}
+  >
+    <EuiText
+      size="s"
+    >
+      in 1/3 Locations
+    </EuiText>
+  </EuiFlexItem>
+</Styled(EuiFlexGroup)>
+`;
+
+exports[`MonitorListStatusColumn will render display location status 1`] = `
+.c1 {
+  padding-left: 17px;
+}
+
+@media (max-width:574px) {
+  .c0 {
+    min-width: 230px;
+  }
+}
+
+<div
+  class="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow c0"
+>
+  <div
+    class="euiFlexItem euiFlexItem--flexGrow1"
+    style="flex-basis:40px"
+  >
+    <div
+      class="euiHealth"
+      style="display:block"
+    >
+      <div
+        class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+      >
+        <div
+          class="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <svg
+            aria-hidden="true"
+            class="euiIcon euiIcon--medium euiIcon--success euiIcon-isLoading"
+            focusable="false"
+            height="16"
+            role="img"
+            viewBox="0 0 16 16"
+            width="16"
+            xmlns="http://www.w3.org/2000/svg"
+          />
+        </div>
+        <div
+          class="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          Up
+        </div>
+      </div>
+    </div>
+    <span
+      class="c1"
+    >
+      <span
+        class="euiToolTipAnchor"
+      >
+        <div
+          class="euiText euiText--extraSmall"
+        >
+          <div
+            class="euiTextColor euiTextColor--subdued"
+          >
+            a few seconds ago
+          </div>
+        </div>
+      </span>
+    </span>
+  </div>
+  <div
+    class="euiFlexItem euiFlexItem--flexGrow2"
+  >
+    <div
+      class="euiText euiText--small"
+    >
+      in 1/3 Locations
+    </div>
+  </div>
+</div>
+`;

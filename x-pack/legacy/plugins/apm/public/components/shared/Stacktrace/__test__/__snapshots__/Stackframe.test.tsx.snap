@@ -1,0 +1,1581 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Stackframe when stackframe has source lines should render correctly 1`] = `
+.c0 {
+  color: #69707d;
+  padding: 8px 0;
+  font-family: "SFMono-Regular",Consolas,"Liberation Mono",Menlo,Courier,monospace;
+  font-size: 14px;
+}
+
+.c1 {
+  color: #000000;
+}
+
+.c3 {
+  position: relative;
+  border-radius: 4px;
+}
+
+.c4 {
+  position: absolute;
+  width: 100%;
+  height: 18px;
+  top: 36px;
+  pointer-events: none;
+  background-color: #fef6e5;
+}
+
+.c5 {
+  position: absolute;
+  top: 0;
+  left: 0;
+  border-radius: 4px;
+  background: #f5f7fa;
+}
+
+.c6 {
+  position: relative;
+  min-width: 42px;
+  padding-left: 8px;
+  padding-right: 4px;
+  color: #98a2b3;
+  line-height: 18px;
+  text-align: right;
+  border-right: 1px solid #d3dae6;
+}
+
+.c6:last-of-type {
+  border-radius: 0 0 0 4px;
+}
+
+.c7 {
+  position: relative;
+  min-width: 42px;
+  padding-left: 8px;
+  padding-right: 4px;
+  color: #98a2b3;
+  line-height: 18px;
+  text-align: right;
+  border-right: 1px solid #d3dae6;
+  background-color: #fef6e5;
+}
+
+.c7:last-of-type {
+  border-radius: 0 0 0 4px;
+}
+
+.c8 {
+  overflow: auto;
+  margin: 0 0 0 42px;
+  padding: 0;
+  background-color: #ffffff;
+}
+
+.c8:last-of-type {
+  border-radius: 0 0 4px 0;
+}
+
+.c9 {
+  margin: 0;
+  color: inherit;
+  background: inherit;
+  border: 0;
+  border-radius: 0;
+  overflow: initial;
+  padding: 0 18px;
+  line-height: 18px;
+}
+
+.c10 {
+  position: relative;
+  padding: 0;
+  margin: 0;
+  white-space: pre;
+  z-index: 2;
+}
+
+.c2 {
+  position: relative;
+  font-family: "SFMono-Regular",Consolas,"Liberation Mono",Menlo,Courier,monospace;
+  font-size: 14px;
+  border: 1px solid #d3dae6;
+  border-radius: 4px;
+  background: #f5f7fa;
+}
+
+<Stackframe
+  id="test"
+  stackframe={
+    Object {
+      "abs_path": "/app/server/routes.js",
+      "context": Object {
+        "post": Array [
+          "    req.body.lines.forEach(function (line) {",
+          "      client.query('SELECT id FROM products WHERE id=$1', [line.id], next())",
+        ],
+        "pre": Array [
+          "    })",
+          "",
+        ],
+      },
+      "exclude_from_grouping": false,
+      "filename": "server/routes.js",
+      "function": "<anonymous>",
+      "library_frame": false,
+      "line": Object {
+        "context": "    client.query('SELECT id FROM customers WHERE id=$1', [req.body.customer_id], next())",
+        "number": 307,
+      },
+    }
+  }
+>
+  <EuiAccordion
+    buttonContent={
+      <FrameHeading
+        isLibraryFrame={false}
+        stackframe={
+          Object {
+            "abs_path": "/app/server/routes.js",
+            "context": Object {
+              "post": Array [
+                "    req.body.lines.forEach(function (line) {",
+                "      client.query('SELECT id FROM products WHERE id=$1', [line.id], next())",
+              ],
+              "pre": Array [
+                "    })",
+                "",
+              ],
+            },
+            "exclude_from_grouping": false,
+            "filename": "server/routes.js",
+            "function": "<anonymous>",
+            "library_frame": false,
+            "line": Object {
+              "context": "    client.query('SELECT id FROM customers WHERE id=$1', [req.body.customer_id], next())",
+              "number": 307,
+            },
+          }
+        }
+      />
+    }
+    id="test"
+    initialIsOpen={false}
+    paddingSize="none"
+  >
+    <div
+      className="euiAccordion"
+    >
+      <div
+        className="euiAccordion__triggerWrapper"
+      >
+        <button
+          aria-controls="test"
+          aria-expanded={false}
+          className="euiAccordion__button"
+          onClick={[Function]}
+          type="button"
+        >
+          <span
+            className="euiAccordion__iconWrapper"
+          >
+            <EuiIcon
+              className="euiAccordion__icon"
+              size="m"
+              type="arrowRight"
+            >
+              <EuiIconEmpty
+                aria-hidden={true}
+                className="euiIcon euiIcon--medium euiIcon-isLoading euiAccordion__icon"
+                focusable="false"
+                role="img"
+                style={null}
+              >
+                <svg
+                  aria-hidden={true}
+                  className="euiIcon euiIcon--medium euiIcon-isLoading euiAccordion__icon"
+                  focusable="false"
+                  height={16}
+                  role="img"
+                  style={null}
+                  viewBox="0 0 16 16"
+                  width={16}
+                  xmlns="http://www.w3.org/2000/svg"
+                />
+              </EuiIconEmpty>
+            </EuiIcon>
+          </span>
+          <span>
+            <FrameHeading
+              isLibraryFrame={false}
+              stackframe={
+                Object {
+                  "abs_path": "/app/server/routes.js",
+                  "context": Object {
+                    "post": Array [
+                      "    req.body.lines.forEach(function (line) {",
+                      "      client.query('SELECT id FROM products WHERE id=$1', [line.id], next())",
+                    ],
+                    "pre": Array [
+                      "    })",
+                      "",
+                    ],
+                  },
+                  "exclude_from_grouping": false,
+                  "filename": "server/routes.js",
+                  "function": "<anonymous>",
+                  "library_frame": false,
+                  "line": Object {
+                    "context": "    client.query('SELECT id FROM customers WHERE id=$1', [req.body.customer_id], next())",
+                    "number": 307,
+                  },
+                }
+              }
+            >
+              <styled.div>
+                <div
+                  className="c0"
+                >
+                  <styled.span>
+                    <span
+                      className="c1"
+                    >
+                      server/routes.js
+                    </span>
+                  </styled.span>
+                   in
+                   
+                  <styled.span>
+                    <span
+                      className="c1"
+                    >
+                      &lt;anonymous&gt;
+                    </span>
+                  </styled.span>
+                   at 
+                  <styled.span>
+                    <span
+                      className="c1"
+                    >
+                      line 
+                      307
+                    </span>
+                  </styled.span>
+                </div>
+              </styled.div>
+            </FrameHeading>
+          </span>
+        </button>
+      </div>
+      <div
+        className="euiAccordion__childWrapper"
+        id="test"
+      >
+        <EuiMutationObserver
+          observerOptions={
+            Object {
+              "attributeFilter": Array [
+                "style",
+              ],
+              "childList": true,
+              "subtree": true,
+            }
+          }
+          onMutation={[Function]}
+        >
+          <div>
+            <div
+              className=""
+            >
+              <styled.div
+                isLibraryFrame={false}
+              >
+                <div
+                  className="c2"
+                >
+                  <Context
+                    isLibraryFrame={false}
+                    stackframe={
+                      Object {
+                        "abs_path": "/app/server/routes.js",
+                        "context": Object {
+                          "post": Array [
+                            "    req.body.lines.forEach(function (line) {",
+                            "      client.query('SELECT id FROM products WHERE id=$1', [line.id], next())",
+                          ],
+                          "pre": Array [
+                            "    })",
+                            "",
+                          ],
+                        },
+                        "exclude_from_grouping": false,
+                        "filename": "server/routes.js",
+                        "function": "<anonymous>",
+                        "library_frame": false,
+                        "line": Object {
+                          "context": "    client.query('SELECT id FROM customers WHERE id=$1', [req.body.customer_id], next())",
+                          "number": 307,
+                        },
+                      }
+                    }
+                  >
+                    <styled.div>
+                      <div
+                        className="c3"
+                      >
+                        <styled.div
+                          lineNumber={2}
+                        >
+                          <div
+                            className="c4"
+                          />
+                        </styled.div>
+                        <styled.div
+                          isLibraryFrame={false}
+                        >
+                          <div
+                            className="c5"
+                          >
+                            <styled.div
+                              highlight={false}
+                              key="    })0"
+                            >
+                              <div
+                                className="c6"
+                              >
+                                305
+                                .
+                              </div>
+                            </styled.div>
+                            <styled.div
+                              highlight={false}
+                              key="1"
+                            >
+                              <div
+                                className="c6"
+                              >
+                                306
+                                .
+                              </div>
+                            </styled.div>
+                            <styled.div
+                              highlight={true}
+                              key="    client.query('SELECT id FROM customers WHERE id=$1', [req.body.customer_id], next())2"
+                            >
+                              <div
+                                className="c7"
+                              >
+                                307
+                                .
+                              </div>
+                            </styled.div>
+                            <styled.div
+                              highlight={false}
+                              key="    req.body.lines.forEach(function (line) {3"
+                            >
+                              <div
+                                className="c6"
+                              >
+                                308
+                                .
+                              </div>
+                            </styled.div>
+                            <styled.div
+                              highlight={false}
+                              key="      client.query('SELECT id FROM products WHERE id=$1', [line.id], next())4"
+                            >
+                              <div
+                                className="c6"
+                              >
+                                309
+                                .
+                              </div>
+                            </styled.div>
+                          </div>
+                        </styled.div>
+                        <styled.div>
+                          <div
+                            className="c8"
+                          >
+                            <SyntaxHighlighter
+                              CodeTag={
+                                Object {
+                                  "$$typeof": Symbol(react.forward_ref),
+                                  "attrs": Array [],
+                                  "componentStyle": ComponentStyle {
+                                    "baseHash": 573909505,
+                                    "componentId": "sc-fzXfLO",
+                                    "isStatic": false,
+                                    "rules": Array [
+                                      "
+  position: relative;
+  padding: 0;
+  margin: 0;
+  white-space: pre;
+  z-index: 2;
+",
+                                    ],
+                                    "staticRulesId": "",
+                                  },
+                                  "displayName": "styled.code",
+                                  "foldedComponentIds": Array [],
+                                  "render": [Function],
+                                  "styledComponentId": "sc-fzXfLO",
+                                  "target": "code",
+                                  "toString": [Function],
+                                  "warnTooManyClasses": [Function],
+                                  "withComponent": [Function],
+                                }
+                              }
+                              PreTag={
+                                Object {
+                                  "$$typeof": Symbol(react.forward_ref),
+                                  "attrs": Array [],
+                                  "componentStyle": ComponentStyle {
+                                    "baseHash": 3487560131,
+                                    "componentId": "sc-AykKK",
+                                    "isStatic": false,
+                                    "rules": Array [
+                                      "
+  // Override all styles
+  margin: 0;
+  color: inherit;
+  background: inherit;
+  border: 0;
+  border-radius: 0;
+  overflow: initial;
+  padding: 0 ",
+                                      "18px",
+                                      ";
+  line-height: ",
+                                      "18px",
+                                      ";
+",
+                                    ],
+                                    "staticRulesId": "",
+                                  },
+                                  "displayName": "styled.pre",
+                                  "foldedComponentIds": Array [],
+                                  "render": [Function],
+                                  "styledComponentId": "sc-AykKK",
+                                  "target": "pre",
+                                  "toString": [Function],
+                                  "warnTooManyClasses": [Function],
+                                  "withComponent": [Function],
+                                }
+                              }
+                              customStyle={
+                                Object {
+                                  "overflowX": null,
+                                  "padding": null,
+                                }
+                              }
+                              key="    })0"
+                              language="javascript"
+                              style={
+                                Object {
+                                  "hljs": Object {
+                                    "background": "#fff",
+                                    "color": "black",
+                                    "display": "block",
+                                    "overflowX": "auto",
+                                    "padding": "0.5em",
+                                  },
+                                  "hljs-addition": Object {
+                                    "backgroundColor": "#baeeba",
+                                  },
+                                  "hljs-attr": Object {
+                                    "color": "#5c2699",
+                                  },
+                                  "hljs-attribute": Object {
+                                    "color": "#000",
+                                  },
+                                  "hljs-built_in": Object {
+                                    "color": "#5c2699",
+                                  },
+                                  "hljs-builtin-name": Object {
+                                    "color": "#5c2699",
+                                  },
+                                  "hljs-bullet": Object {
+                                    "color": "#1c00cf",
+                                  },
+                                  "hljs-class .hljs-title": Object {
+                                    "color": "#5c2699",
+                                  },
+                                  "hljs-comment": Object {
+                                    "color": "#006a00",
+                                  },
+                                  "hljs-deletion": Object {
+                                    "backgroundColor": "#ffc8bd",
+                                  },
+                                  "hljs-doctag": Object {
+                                    "fontWeight": "bold",
+                                  },
+                                  "hljs-emphasis": Object {
+                                    "fontStyle": "italic",
+                                  },
+                                  "hljs-formula": Object {
+                                    "backgroundColor": "#eee",
+                                    "fontStyle": "italic",
+                                  },
+                                  "hljs-keyword": Object {
+                                    "color": "#aa0d91",
+                                  },
+                                  "hljs-link": Object {
+                                    "color": "#080",
+                                  },
+                                  "hljs-literal": Object {
+                                    "color": "#aa0d91",
+                                  },
+                                  "hljs-meta": Object {
+                                    "color": "#1c00cf",
+                                  },
+                                  "hljs-name": Object {
+                                    "color": "#008",
+                                  },
+                                  "hljs-number": Object {
+                                    "color": "#1c00cf",
+                                  },
+                                  "hljs-params": Object {
+                                    "color": "#5c2699",
+                                  },
+                                  "hljs-quote": Object {
+                                    "color": "#006a00",
+                                  },
+                                  "hljs-regexp": Object {
+                                    "color": "#080",
+                                  },
+                                  "hljs-section": Object {
+                                    "color": "#5c2699",
+                                  },
+                                  "hljs-selector-class": Object {
+                                    "color": "#9b703f",
+                                  },
+                                  "hljs-selector-id": Object {
+                                    "color": "#9b703f",
+                                  },
+                                  "hljs-selector-tag": Object {
+                                    "color": "#aa0d91",
+                                  },
+                                  "hljs-string": Object {
+                                    "color": "#c41a16",
+                                  },
+                                  "hljs-strong": Object {
+                                    "fontWeight": "bold",
+                                  },
+                                  "hljs-subst": Object {
+                                    "color": "#000",
+                                  },
+                                  "hljs-symbol": Object {
+                                    "color": "#1c00cf",
+                                  },
+                                  "hljs-tag": Object {
+                                    "color": "#1c00cf",
+                                  },
+                                  "hljs-template-variable": Object {
+                                    "color": "#660",
+                                  },
+                                  "hljs-title": Object {
+                                    "color": "#1c00cf",
+                                  },
+                                  "hljs-type": Object {
+                                    "color": "#5c2699",
+                                  },
+                                  "hljs-variable": Object {
+                                    "color": "#660",
+                                  },
+                                }
+                              }
+                            >
+                              <styled.pre
+                                style={
+                                  Object {
+                                    "background": "#fff",
+                                    "color": "black",
+                                    "display": "block",
+                                    "overflowX": null,
+                                    "padding": null,
+                                  }
+                                }
+                              >
+                                <pre
+                                  className="c9"
+                                  style={
+                                    Object {
+                                      "background": "#fff",
+                                      "color": "black",
+                                      "display": "block",
+                                      "overflowX": null,
+                                      "padding": null,
+                                    }
+                                  }
+                                >
+                                  <styled.code>
+                                    <code
+                                      className="c10"
+                                    >
+                                          })
+                                    </code>
+                                  </styled.code>
+                                </pre>
+                              </styled.pre>
+                            </SyntaxHighlighter>
+                            <SyntaxHighlighter
+                              CodeTag={
+                                Object {
+                                  "$$typeof": Symbol(react.forward_ref),
+                                  "attrs": Array [],
+                                  "componentStyle": ComponentStyle {
+                                    "baseHash": 573909505,
+                                    "componentId": "sc-fzXfLO",
+                                    "isStatic": false,
+                                    "rules": Array [
+                                      "
+  position: relative;
+  padding: 0;
+  margin: 0;
+  white-space: pre;
+  z-index: 2;
+",
+                                    ],
+                                    "staticRulesId": "",
+                                  },
+                                  "displayName": "styled.code",
+                                  "foldedComponentIds": Array [],
+                                  "render": [Function],
+                                  "styledComponentId": "sc-fzXfLO",
+                                  "target": "code",
+                                  "toString": [Function],
+                                  "warnTooManyClasses": [Function],
+                                  "withComponent": [Function],
+                                }
+                              }
+                              PreTag={
+                                Object {
+                                  "$$typeof": Symbol(react.forward_ref),
+                                  "attrs": Array [],
+                                  "componentStyle": ComponentStyle {
+                                    "baseHash": 3487560131,
+                                    "componentId": "sc-AykKK",
+                                    "isStatic": false,
+                                    "rules": Array [
+                                      "
+  // Override all styles
+  margin: 0;
+  color: inherit;
+  background: inherit;
+  border: 0;
+  border-radius: 0;
+  overflow: initial;
+  padding: 0 ",
+                                      "18px",
+                                      ";
+  line-height: ",
+                                      "18px",
+                                      ";
+",
+                                    ],
+                                    "staticRulesId": "",
+                                  },
+                                  "displayName": "styled.pre",
+                                  "foldedComponentIds": Array [],
+                                  "render": [Function],
+                                  "styledComponentId": "sc-AykKK",
+                                  "target": "pre",
+                                  "toString": [Function],
+                                  "warnTooManyClasses": [Function],
+                                  "withComponent": [Function],
+                                }
+                              }
+                              customStyle={
+                                Object {
+                                  "overflowX": null,
+                                  "padding": null,
+                                }
+                              }
+                              key="1"
+                              language="javascript"
+                              style={
+                                Object {
+                                  "hljs": Object {
+                                    "background": "#fff",
+                                    "color": "black",
+                                    "display": "block",
+                                    "overflowX": "auto",
+                                    "padding": "0.5em",
+                                  },
+                                  "hljs-addition": Object {
+                                    "backgroundColor": "#baeeba",
+                                  },
+                                  "hljs-attr": Object {
+                                    "color": "#5c2699",
+                                  },
+                                  "hljs-attribute": Object {
+                                    "color": "#000",
+                                  },
+                                  "hljs-built_in": Object {
+                                    "color": "#5c2699",
+                                  },
+                                  "hljs-builtin-name": Object {
+                                    "color": "#5c2699",
+                                  },
+                                  "hljs-bullet": Object {
+                                    "color": "#1c00cf",
+                                  },
+                                  "hljs-class .hljs-title": Object {
+                                    "color": "#5c2699",
+                                  },
+                                  "hljs-comment": Object {
+                                    "color": "#006a00",
+                                  },
+                                  "hljs-deletion": Object {
+                                    "backgroundColor": "#ffc8bd",
+                                  },
+                                  "hljs-doctag": Object {
+                                    "fontWeight": "bold",
+                                  },
+                                  "hljs-emphasis": Object {
+                                    "fontStyle": "italic",
+                                  },
+                                  "hljs-formula": Object {
+                                    "backgroundColor": "#eee",
+                                    "fontStyle": "italic",
+                                  },
+                                  "hljs-keyword": Object {
+                                    "color": "#aa0d91",
+                                  },
+                                  "hljs-link": Object {
+                                    "color": "#080",
+                                  },
+                                  "hljs-literal": Object {
+                                    "color": "#aa0d91",
+                                  },
+                                  "hljs-meta": Object {
+                                    "color": "#1c00cf",
+                                  },
+                                  "hljs-name": Object {
+                                    "color": "#008",
+                                  },
+                                  "hljs-number": Object {
+                                    "color": "#1c00cf",
+                                  },
+                                  "hljs-params": Object {
+                                    "color": "#5c2699",
+                                  },
+                                  "hljs-quote": Object {
+                                    "color": "#006a00",
+                                  },
+                                  "hljs-regexp": Object {
+                                    "color": "#080",
+                                  },
+                                  "hljs-section": Object {
+                                    "color": "#5c2699",
+                                  },
+                                  "hljs-selector-class": Object {
+                                    "color": "#9b703f",
+                                  },
+                                  "hljs-selector-id": Object {
+                                    "color": "#9b703f",
+                                  },
+                                  "hljs-selector-tag": Object {
+                                    "color": "#aa0d91",
+                                  },
+                                  "hljs-string": Object {
+                                    "color": "#c41a16",
+                                  },
+                                  "hljs-strong": Object {
+                                    "fontWeight": "bold",
+                                  },
+                                  "hljs-subst": Object {
+                                    "color": "#000",
+                                  },
+                                  "hljs-symbol": Object {
+                                    "color": "#1c00cf",
+                                  },
+                                  "hljs-tag": Object {
+                                    "color": "#1c00cf",
+                                  },
+                                  "hljs-template-variable": Object {
+                                    "color": "#660",
+                                  },
+                                  "hljs-title": Object {
+                                    "color": "#1c00cf",
+                                  },
+                                  "hljs-type": Object {
+                                    "color": "#5c2699",
+                                  },
+                                  "hljs-variable": Object {
+                                    "color": "#660",
+                                  },
+                                }
+                              }
+                            >
+                              <styled.pre
+                                style={
+                                  Object {
+                                    "background": "#fff",
+                                    "color": "black",
+                                    "display": "block",
+                                    "overflowX": null,
+                                    "padding": null,
+                                  }
+                                }
+                              >
+                                <pre
+                                  className="c9"
+                                  style={
+                                    Object {
+                                      "background": "#fff",
+                                      "color": "black",
+                                      "display": "block",
+                                      "overflowX": null,
+                                      "padding": null,
+                                    }
+                                  }
+                                >
+                                  <styled.code>
+                                    <code
+                                      className="c10"
+                                    >
+                                      
+
+                                    </code>
+                                  </styled.code>
+                                </pre>
+                              </styled.pre>
+                            </SyntaxHighlighter>
+                            <SyntaxHighlighter
+                              CodeTag={
+                                Object {
+                                  "$$typeof": Symbol(react.forward_ref),
+                                  "attrs": Array [],
+                                  "componentStyle": ComponentStyle {
+                                    "baseHash": 573909505,
+                                    "componentId": "sc-fzXfLO",
+                                    "isStatic": false,
+                                    "rules": Array [
+                                      "
+  position: relative;
+  padding: 0;
+  margin: 0;
+  white-space: pre;
+  z-index: 2;
+",
+                                    ],
+                                    "staticRulesId": "",
+                                  },
+                                  "displayName": "styled.code",
+                                  "foldedComponentIds": Array [],
+                                  "render": [Function],
+                                  "styledComponentId": "sc-fzXfLO",
+                                  "target": "code",
+                                  "toString": [Function],
+                                  "warnTooManyClasses": [Function],
+                                  "withComponent": [Function],
+                                }
+                              }
+                              PreTag={
+                                Object {
+                                  "$$typeof": Symbol(react.forward_ref),
+                                  "attrs": Array [],
+                                  "componentStyle": ComponentStyle {
+                                    "baseHash": 3487560131,
+                                    "componentId": "sc-AykKK",
+                                    "isStatic": false,
+                                    "rules": Array [
+                                      "
+  // Override all styles
+  margin: 0;
+  color: inherit;
+  background: inherit;
+  border: 0;
+  border-radius: 0;
+  overflow: initial;
+  padding: 0 ",
+                                      "18px",
+                                      ";
+  line-height: ",
+                                      "18px",
+                                      ";
+",
+                                    ],
+                                    "staticRulesId": "",
+                                  },
+                                  "displayName": "styled.pre",
+                                  "foldedComponentIds": Array [],
+                                  "render": [Function],
+                                  "styledComponentId": "sc-AykKK",
+                                  "target": "pre",
+                                  "toString": [Function],
+                                  "warnTooManyClasses": [Function],
+                                  "withComponent": [Function],
+                                }
+                              }
+                              customStyle={
+                                Object {
+                                  "overflowX": null,
+                                  "padding": null,
+                                }
+                              }
+                              key="    client.query('SELECT id FROM customers WHERE id=$1', [req.body.customer_id], next())2"
+                              language="javascript"
+                              style={
+                                Object {
+                                  "hljs": Object {
+                                    "background": "#fff",
+                                    "color": "black",
+                                    "display": "block",
+                                    "overflowX": "auto",
+                                    "padding": "0.5em",
+                                  },
+                                  "hljs-addition": Object {
+                                    "backgroundColor": "#baeeba",
+                                  },
+                                  "hljs-attr": Object {
+                                    "color": "#5c2699",
+                                  },
+                                  "hljs-attribute": Object {
+                                    "color": "#000",
+                                  },
+                                  "hljs-built_in": Object {
+                                    "color": "#5c2699",
+                                  },
+                                  "hljs-builtin-name": Object {
+                                    "color": "#5c2699",
+                                  },
+                                  "hljs-bullet": Object {
+                                    "color": "#1c00cf",
+                                  },
+                                  "hljs-class .hljs-title": Object {
+                                    "color": "#5c2699",
+                                  },
+                                  "hljs-comment": Object {
+                                    "color": "#006a00",
+                                  },
+                                  "hljs-deletion": Object {
+                                    "backgroundColor": "#ffc8bd",
+                                  },
+                                  "hljs-doctag": Object {
+                                    "fontWeight": "bold",
+                                  },
+                                  "hljs-emphasis": Object {
+                                    "fontStyle": "italic",
+                                  },
+                                  "hljs-formula": Object {
+                                    "backgroundColor": "#eee",
+                                    "fontStyle": "italic",
+                                  },
+                                  "hljs-keyword": Object {
+                                    "color": "#aa0d91",
+                                  },
+                                  "hljs-link": Object {
+                                    "color": "#080",
+                                  },
+                                  "hljs-literal": Object {
+                                    "color": "#aa0d91",
+                                  },
+                                  "hljs-meta": Object {
+                                    "color": "#1c00cf",
+                                  },
+                                  "hljs-name": Object {
+                                    "color": "#008",
+                                  },
+                                  "hljs-number": Object {
+                                    "color": "#1c00cf",
+                                  },
+                                  "hljs-params": Object {
+                                    "color": "#5c2699",
+                                  },
+                                  "hljs-quote": Object {
+                                    "color": "#006a00",
+                                  },
+                                  "hljs-regexp": Object {
+                                    "color": "#080",
+                                  },
+                                  "hljs-section": Object {
+                                    "color": "#5c2699",
+                                  },
+                                  "hljs-selector-class": Object {
+                                    "color": "#9b703f",
+                                  },
+                                  "hljs-selector-id": Object {
+                                    "color": "#9b703f",
+                                  },
+                                  "hljs-selector-tag": Object {
+                                    "color": "#aa0d91",
+                                  },
+                                  "hljs-string": Object {
+                                    "color": "#c41a16",
+                                  },
+                                  "hljs-strong": Object {
+                                    "fontWeight": "bold",
+                                  },
+                                  "hljs-subst": Object {
+                                    "color": "#000",
+                                  },
+                                  "hljs-symbol": Object {
+                                    "color": "#1c00cf",
+                                  },
+                                  "hljs-tag": Object {
+                                    "color": "#1c00cf",
+                                  },
+                                  "hljs-template-variable": Object {
+                                    "color": "#660",
+                                  },
+                                  "hljs-title": Object {
+                                    "color": "#1c00cf",
+                                  },
+                                  "hljs-type": Object {
+                                    "color": "#5c2699",
+                                  },
+                                  "hljs-variable": Object {
+                                    "color": "#660",
+                                  },
+                                }
+                              }
+                            >
+                              <styled.pre
+                                style={
+                                  Object {
+                                    "background": "#fff",
+                                    "color": "black",
+                                    "display": "block",
+                                    "overflowX": null,
+                                    "padding": null,
+                                  }
+                                }
+                              >
+                                <pre
+                                  className="c9"
+                                  style={
+                                    Object {
+                                      "background": "#fff",
+                                      "color": "black",
+                                      "display": "block",
+                                      "overflowX": null,
+                                      "padding": null,
+                                    }
+                                  }
+                                >
+                                  <styled.code>
+                                    <code
+                                      className="c10"
+                                    >
+                                          client.query(
+                                      <span
+                                        key="code-segement1"
+                                        style={
+                                          Object {
+                                            "color": "#c41a16",
+                                          }
+                                        }
+                                      >
+                                        'SELECT id FROM customers WHERE id=$1'
+                                      </span>
+                                      , [req.body.customer_id], next())
+                                    </code>
+                                  </styled.code>
+                                </pre>
+                              </styled.pre>
+                            </SyntaxHighlighter>
+                            <SyntaxHighlighter
+                              CodeTag={
+                                Object {
+                                  "$$typeof": Symbol(react.forward_ref),
+                                  "attrs": Array [],
+                                  "componentStyle": ComponentStyle {
+                                    "baseHash": 573909505,
+                                    "componentId": "sc-fzXfLO",
+                                    "isStatic": false,
+                                    "rules": Array [
+                                      "
+  position: relative;
+  padding: 0;
+  margin: 0;
+  white-space: pre;
+  z-index: 2;
+",
+                                    ],
+                                    "staticRulesId": "",
+                                  },
+                                  "displayName": "styled.code",
+                                  "foldedComponentIds": Array [],
+                                  "render": [Function],
+                                  "styledComponentId": "sc-fzXfLO",
+                                  "target": "code",
+                                  "toString": [Function],
+                                  "warnTooManyClasses": [Function],
+                                  "withComponent": [Function],
+                                }
+                              }
+                              PreTag={
+                                Object {
+                                  "$$typeof": Symbol(react.forward_ref),
+                                  "attrs": Array [],
+                                  "componentStyle": ComponentStyle {
+                                    "baseHash": 3487560131,
+                                    "componentId": "sc-AykKK",
+                                    "isStatic": false,
+                                    "rules": Array [
+                                      "
+  // Override all styles
+  margin: 0;
+  color: inherit;
+  background: inherit;
+  border: 0;
+  border-radius: 0;
+  overflow: initial;
+  padding: 0 ",
+                                      "18px",
+                                      ";
+  line-height: ",
+                                      "18px",
+                                      ";
+",
+                                    ],
+                                    "staticRulesId": "",
+                                  },
+                                  "displayName": "styled.pre",
+                                  "foldedComponentIds": Array [],
+                                  "render": [Function],
+                                  "styledComponentId": "sc-AykKK",
+                                  "target": "pre",
+                                  "toString": [Function],
+                                  "warnTooManyClasses": [Function],
+                                  "withComponent": [Function],
+                                }
+                              }
+                              customStyle={
+                                Object {
+                                  "overflowX": null,
+                                  "padding": null,
+                                }
+                              }
+                              key="    req.body.lines.forEach(function (line) {3"
+                              language="javascript"
+                              style={
+                                Object {
+                                  "hljs": Object {
+                                    "background": "#fff",
+                                    "color": "black",
+                                    "display": "block",
+                                    "overflowX": "auto",
+                                    "padding": "0.5em",
+                                  },
+                                  "hljs-addition": Object {
+                                    "backgroundColor": "#baeeba",
+                                  },
+                                  "hljs-attr": Object {
+                                    "color": "#5c2699",
+                                  },
+                                  "hljs-attribute": Object {
+                                    "color": "#000",
+                                  },
+                                  "hljs-built_in": Object {
+                                    "color": "#5c2699",
+                                  },
+                                  "hljs-builtin-name": Object {
+                                    "color": "#5c2699",
+                                  },
+                                  "hljs-bullet": Object {
+                                    "color": "#1c00cf",
+                                  },
+                                  "hljs-class .hljs-title": Object {
+                                    "color": "#5c2699",
+                                  },
+                                  "hljs-comment": Object {
+                                    "color": "#006a00",
+                                  },
+                                  "hljs-deletion": Object {
+                                    "backgroundColor": "#ffc8bd",
+                                  },
+                                  "hljs-doctag": Object {
+                                    "fontWeight": "bold",
+                                  },
+                                  "hljs-emphasis": Object {
+                                    "fontStyle": "italic",
+                                  },
+                                  "hljs-formula": Object {
+                                    "backgroundColor": "#eee",
+                                    "fontStyle": "italic",
+                                  },
+                                  "hljs-keyword": Object {
+                                    "color": "#aa0d91",
+                                  },
+                                  "hljs-link": Object {
+                                    "color": "#080",
+                                  },
+                                  "hljs-literal": Object {
+                                    "color": "#aa0d91",
+                                  },
+                                  "hljs-meta": Object {
+                                    "color": "#1c00cf",
+                                  },
+                                  "hljs-name": Object {
+                                    "color": "#008",
+                                  },
+                                  "hljs-number": Object {
+                                    "color": "#1c00cf",
+                                  },
+                                  "hljs-params": Object {
+                                    "color": "#5c2699",
+                                  },
+                                  "hljs-quote": Object {
+                                    "color": "#006a00",
+                                  },
+                                  "hljs-regexp": Object {
+                                    "color": "#080",
+                                  },
+                                  "hljs-section": Object {
+                                    "color": "#5c2699",
+                                  },
+                                  "hljs-selector-class": Object {
+                                    "color": "#9b703f",
+                                  },
+                                  "hljs-selector-id": Object {
+                                    "color": "#9b703f",
+                                  },
+                                  "hljs-selector-tag": Object {
+                                    "color": "#aa0d91",
+                                  },
+                                  "hljs-string": Object {
+                                    "color": "#c41a16",
+                                  },
+                                  "hljs-strong": Object {
+                                    "fontWeight": "bold",
+                                  },
+                                  "hljs-subst": Object {
+                                    "color": "#000",
+                                  },
+                                  "hljs-symbol": Object {
+                                    "color": "#1c00cf",
+                                  },
+                                  "hljs-tag": Object {
+                                    "color": "#1c00cf",
+                                  },
+                                  "hljs-template-variable": Object {
+                                    "color": "#660",
+                                  },
+                                  "hljs-title": Object {
+                                    "color": "#1c00cf",
+                                  },
+                                  "hljs-type": Object {
+                                    "color": "#5c2699",
+                                  },
+                                  "hljs-variable": Object {
+                                    "color": "#660",
+                                  },
+                                }
+                              }
+                            >
+                              <styled.pre
+                                style={
+                                  Object {
+                                    "background": "#fff",
+                                    "color": "black",
+                                    "display": "block",
+                                    "overflowX": null,
+                                    "padding": null,
+                                  }
+                                }
+                              >
+                                <pre
+                                  className="c9"
+                                  style={
+                                    Object {
+                                      "background": "#fff",
+                                      "color": "black",
+                                      "display": "block",
+                                      "overflowX": null,
+                                      "padding": null,
+                                    }
+                                  }
+                                >
+                                  <styled.code>
+                                    <code
+                                      className="c10"
+                                    >
+                                          req.body.lines.forEach(
+                                      <span
+                                        key="code-segement1"
+                                        style={Object {}}
+                                      >
+                                        <span
+                                          key="code-segment-1-0"
+                                          style={
+                                            Object {
+                                              "color": "#aa0d91",
+                                            }
+                                          }
+                                        >
+                                          function
+                                        </span>
+                                         (
+                                        <span
+                                          key="code-segment-1-2"
+                                          style={
+                                            Object {
+                                              "color": "#5c2699",
+                                            }
+                                          }
+                                        >
+                                          line
+                                        </span>
+                                        ) 
+                                      </span>
+                                      {
+                                    </code>
+                                  </styled.code>
+                                </pre>
+                              </styled.pre>
+                            </SyntaxHighlighter>
+                            <SyntaxHighlighter
+                              CodeTag={
+                                Object {
+                                  "$$typeof": Symbol(react.forward_ref),
+                                  "attrs": Array [],
+                                  "componentStyle": ComponentStyle {
+                                    "baseHash": 573909505,
+                                    "componentId": "sc-fzXfLO",
+                                    "isStatic": false,
+                                    "rules": Array [
+                                      "
+  position: relative;
+  padding: 0;
+  margin: 0;
+  white-space: pre;
+  z-index: 2;
+",
+                                    ],
+                                    "staticRulesId": "",
+                                  },
+                                  "displayName": "styled.code",
+                                  "foldedComponentIds": Array [],
+                                  "render": [Function],
+                                  "styledComponentId": "sc-fzXfLO",
+                                  "target": "code",
+                                  "toString": [Function],
+                                  "warnTooManyClasses": [Function],
+                                  "withComponent": [Function],
+                                }
+                              }
+                              PreTag={
+                                Object {
+                                  "$$typeof": Symbol(react.forward_ref),
+                                  "attrs": Array [],
+                                  "componentStyle": ComponentStyle {
+                                    "baseHash": 3487560131,
+                                    "componentId": "sc-AykKK",
+                                    "isStatic": false,
+                                    "rules": Array [
+                                      "
+  // Override all styles
+  margin: 0;
+  color: inherit;
+  background: inherit;
+  border: 0;
+  border-radius: 0;
+  overflow: initial;
+  padding: 0 ",
+                                      "18px",
+                                      ";
+  line-height: ",
+                                      "18px",
+                                      ";
+",
+                                    ],
+                                    "staticRulesId": "",
+                                  },
+                                  "displayName": "styled.pre",
+                                  "foldedComponentIds": Array [],
+                                  "render": [Function],
+                                  "styledComponentId": "sc-AykKK",
+                                  "target": "pre",
+                                  "toString": [Function],
+                                  "warnTooManyClasses": [Function],
+                                  "withComponent": [Function],
+                                }
+                              }
+                              customStyle={
+                                Object {
+                                  "overflowX": null,
+                                  "padding": null,
+                                }
+                              }
+                              key="      client.query('SELECT id FROM products WHERE id=$1', [line.id], next())4"
+                              language="javascript"
+                              style={
+                                Object {
+                                  "hljs": Object {
+                                    "background": "#fff",
+                                    "color": "black",
+                                    "display": "block",
+                                    "overflowX": "auto",
+                                    "padding": "0.5em",
+                                  },
+                                  "hljs-addition": Object {
+                                    "backgroundColor": "#baeeba",
+                                  },
+                                  "hljs-attr": Object {
+                                    "color": "#5c2699",
+                                  },
+                                  "hljs-attribute": Object {
+                                    "color": "#000",
+                                  },
+                                  "hljs-built_in": Object {
+                                    "color": "#5c2699",
+                                  },
+                                  "hljs-builtin-name": Object {
+                                    "color": "#5c2699",
+                                  },
+                                  "hljs-bullet": Object {
+                                    "color": "#1c00cf",
+                                  },
+                                  "hljs-class .hljs-title": Object {
+                                    "color": "#5c2699",
+                                  },
+                                  "hljs-comment": Object {
+                                    "color": "#006a00",
+                                  },
+                                  "hljs-deletion": Object {
+                                    "backgroundColor": "#ffc8bd",
+                                  },
+                                  "hljs-doctag": Object {
+                                    "fontWeight": "bold",
+                                  },
+                                  "hljs-emphasis": Object {
+                                    "fontStyle": "italic",
+                                  },
+                                  "hljs-formula": Object {
+                                    "backgroundColor": "#eee",
+                                    "fontStyle": "italic",
+                                  },
+                                  "hljs-keyword": Object {
+                                    "color": "#aa0d91",
+                                  },
+                                  "hljs-link": Object {
+                                    "color": "#080",
+                                  },
+                                  "hljs-literal": Object {
+                                    "color": "#aa0d91",
+                                  },
+                                  "hljs-meta": Object {
+                                    "color": "#1c00cf",
+                                  },
+                                  "hljs-name": Object {
+                                    "color": "#008",
+                                  },
+                                  "hljs-number": Object {
+                                    "color": "#1c00cf",
+                                  },
+                                  "hljs-params": Object {
+                                    "color": "#5c2699",
+                                  },
+                                  "hljs-quote": Object {
+                                    "color": "#006a00",
+                                  },
+                                  "hljs-regexp": Object {
+                                    "color": "#080",
+                                  },
+                                  "hljs-section": Object {
+                                    "color": "#5c2699",
+                                  },
+                                  "hljs-selector-class": Object {
+                                    "color": "#9b703f",
+                                  },
+                                  "hljs-selector-id": Object {
+                                    "color": "#9b703f",
+                                  },
+                                  "hljs-selector-tag": Object {
+                                    "color": "#aa0d91",
+                                  },
+                                  "hljs-string": Object {
+                                    "color": "#c41a16",
+                                  },
+                                  "hljs-strong": Object {
+                                    "fontWeight": "bold",
+                                  },
+                                  "hljs-subst": Object {
+                                    "color": "#000",
+                                  },
+                                  "hljs-symbol": Object {
+                                    "color": "#1c00cf",
+                                  },
+                                  "hljs-tag": Object {
+                                    "color": "#1c00cf",
+                                  },
+                                  "hljs-template-variable": Object {
+                                    "color": "#660",
+                                  },
+                                  "hljs-title": Object {
+                                    "color": "#1c00cf",
+                                  },
+                                  "hljs-type": Object {
+                                    "color": "#5c2699",
+                                  },
+                                  "hljs-variable": Object {
+                                    "color": "#660",
+                                  },
+                                }
+                              }
+                            >
+                              <styled.pre
+                                style={
+                                  Object {
+                                    "background": "#fff",
+                                    "color": "black",
+                                    "display": "block",
+                                    "overflowX": null,
+                                    "padding": null,
+                                  }
+                                }
+                              >
+                                <pre
+                                  className="c9"
+                                  style={
+                                    Object {
+                                      "background": "#fff",
+                                      "color": "black",
+                                      "display": "block",
+                                      "overflowX": null,
+                                      "padding": null,
+                                    }
+                                  }
+                                >
+                                  <styled.code>
+                                    <code
+                                      className="c10"
+                                    >
+                                            client.query(
+                                      <span
+                                        key="code-segement1"
+                                        style={
+                                          Object {
+                                            "color": "#c41a16",
+                                          }
+                                        }
+                                      >
+                                        'SELECT id FROM products WHERE id=$1'
+                                      </span>
+                                      , [line.id], next())
+                                    </code>
+                                  </styled.code>
+                                </pre>
+                              </styled.pre>
+                            </SyntaxHighlighter>
+                          </div>
+                        </styled.div>
+                      </div>
+                    </styled.div>
+                  </Context>
+                </div>
+              </styled.div>
+              <Variables />
+            </div>
+          </div>
+        </EuiMutationObserver>
+      </div>
+    </div>
+  </EuiAccordion>
+</Stackframe>
+`;

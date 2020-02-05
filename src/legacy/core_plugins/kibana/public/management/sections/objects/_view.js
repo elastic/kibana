@@ -18,6 +18,7 @@
  */
 
 import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
 import angular from 'angular';
 import 'angular-elastic/elastic';
 import rison from 'rison-node';
@@ -27,43 +28,46 @@ import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 import { fatalError, toastNotifications } from 'ui/notify';
 import 'ui/accessibility/kbn_ui_ace_keyboard_mode';
-import { castEsToKbnFieldTypeName } from '../../../../../../../legacy/utils';
-import { SavedObjectsClientProvider } from 'ui/saved_objects';
-import { isNumeric } from 'ui/utils/numeric';
+import { isNumeric } from './lib/numeric';
+import { canViewInApp } from './lib/in_app_url';
+import { npStart } from 'ui/new_platform';
+
+import { castEsToKbnFieldTypeName } from '../../../../../../../plugins/data/public';
 
 import { getViewBreadcrumbs } from './breadcrumbs';
 
 const location = 'SavedObject view';
 
-uiRoutes
-  .when('/management/kibana/objects/:service/:id', {
-    template: objectViewHTML,
-    k7Breadcrumbs: getViewBreadcrumbs
-  });
+uiRoutes.when('/management/kibana/objects/:service/:id', {
+  template: objectViewHTML,
+  k7Breadcrumbs: getViewBreadcrumbs,
+  requireUICapability: 'management.kibana.objects',
+});
 
-uiModules.get('apps/management', ['monospaced.elastic'])
-  .directive('kbnManagementObjectsView', function (kbnIndex, confirmModal, i18n) {
+uiModules
+  .get('apps/management', ['monospaced.elastic'])
+  .directive('kbnManagementObjectsView', function(kbnIndex, confirmModal) {
     return {
       restrict: 'E',
-      controller: function ($scope, $injector, $routeParams, $location, $window, $rootScope, Private) {
+      controller: function($scope, $routeParams, $location, $window, $rootScope, uiCapabilities) {
         const serviceObj = savedObjectManagementRegistry.get($routeParams.service);
-        const service = $injector.get(serviceObj.service);
-        const savedObjectsClient = Private(SavedObjectsClientProvider);
+        const service = serviceObj.service;
+        const savedObjectsClient = npStart.core.savedObjects.client;
 
         /**
-       * Creates a field definition and pushes it to the memo stack. This function
-       * is designed to be used in conjunction with _.reduce(). If the
-       * values is plain object it will recurse through all the keys till it hits
-       * a string, number or an array.
-       *
-       * @param {array} memo The stack of fields
-       * @param {mixed} value The value of the field
-       * @param {string} key The key of the field
-       * @param {object} collection This is a reference the collection being reduced
-       * @param {array} parents The parent keys to the field
-       * @returns {array}
-       */
-        const createField = function (memo, val, key, collection, parents) {
+         * Creates a field definition and pushes it to the memo stack. This function
+         * is designed to be used in conjunction with _.reduce(). If the
+         * values is plain object it will recurse through all the keys till it hits
+         * a string, number or an array.
+         *
+         * @param {array} memo The stack of fields
+         * @param {mixed} value The value of the field
+         * @param {string} key The key of the field
+         * @param {object} collection This is a reference the collection being reduced
+         * @param {array} parents The parent keys to the field
+         * @returns {array}
+         */
+        const createField = function(memo, val, key, collection, parents) {
           if (Array.isArray(parents)) {
             parents.push(key);
           } else {
@@ -88,7 +92,7 @@ uiModules.get('apps/management', ['monospaced.elastic'])
             field.type = 'boolean';
             field.value = field.value;
           } else if (_.isPlainObject(field.value)) {
-          // do something recursive
+            // do something recursive
             return _.reduce(field.value, _.partialRight(createField, parents), memo);
           }
 
@@ -100,22 +104,26 @@ uiModules.get('apps/management', ['monospaced.elastic'])
           return memo;
         };
 
-        const readObjectClass = function (fields, Class) {
+        const readObjectClass = function(fields, Class) {
           const fieldMap = _.indexBy(fields, 'name');
 
-          _.forOwn(Class.mapping, function (esType, name) {
+          _.forOwn(Class.mapping, function(esType, name) {
             if (fieldMap[name]) return;
 
             fields.push({
               name: name,
-              type: (function () {
+              type: (function() {
                 switch (castEsToKbnFieldTypeName(esType)) {
-                  case 'string': return 'text';
-                  case 'number': return 'number';
-                  case 'boolean': return 'boolean';
-                  default: return 'json';
+                  case 'string':
+                    return 'text';
+                  case 'number':
+                    return 'number';
+                  case 'boolean':
+                    return 'boolean';
+                  default:
+                    return 'json';
                 }
-              }())
+              })(),
             });
           });
 
@@ -123,7 +131,7 @@ uiModules.get('apps/management', ['monospaced.elastic'])
             fields.push({
               name: 'kibanaSavedObjectMeta.searchSourceJSON',
               type: 'json',
-              value: '{}'
+              value: '{}',
             });
           }
 
@@ -136,12 +144,18 @@ uiModules.get('apps/management', ['monospaced.elastic'])
           }
         };
 
+        const { edit: canEdit, delete: canDelete } = uiCapabilities.savedObjectsManagement;
+        $scope.canEdit = canEdit;
+        $scope.canDelete = canDelete;
+        $scope.canViewInApp = canViewInApp(uiCapabilities, service.type);
+
         $scope.notFound = $routeParams.notFound;
 
         $scope.title = service.type;
 
-        savedObjectsClient.get(service.type, $routeParams.id)
-          .then(function (obj) {
+        savedObjectsClient
+          .get(service.type, $routeParams.id)
+          .then(function(obj) {
             $scope.obj = obj;
             $scope.link = service.urlFor(obj.id);
 
@@ -154,10 +168,15 @@ uiModules.get('apps/management', ['monospaced.elastic'])
             // sorts twice since we want numerical sort to prioritize over name,
             // and sortBy will do string comparison if trying to match against strings
             const nameSortedFields = _.sortBy(fields, 'name');
-            $scope.fields = _.sortBy(nameSortedFields, (field) => {
-              const orderIndex = service.Class.fieldOrder ? service.Class.fieldOrder.indexOf(field.name) : -1;
-              return (orderIndex > -1) ? orderIndex : Infinity;
+            $scope.$evalAsync(() => {
+              $scope.fields = _.sortBy(nameSortedFields, field => {
+                const orderIndex = service.Class.fieldOrder
+                  ? service.Class.fieldOrder.indexOf(field.name)
+                  : -1;
+                return orderIndex > -1 ? orderIndex : Infinity;
+              });
             });
+            $scope.$digest();
           })
           .catch(error => fatalError(error, location));
 
@@ -169,7 +188,7 @@ uiModules.get('apps/management', ['monospaced.elastic'])
         const loadedEditors = [];
         $scope.aceInvalidEditors = [];
 
-        $scope.aceLoaded = function (editor) {
+        $scope.aceLoaded = function(editor) {
           if (_.contains(loadedEditors, editor)) return;
           loadedEditors.push(editor);
 
@@ -180,7 +199,7 @@ uiModules.get('apps/management', ['monospaced.elastic'])
 
           session.setTabSize(2);
           session.setUseSoftTabs(true);
-          session.on('changeAnnotation', function () {
+          session.on('changeAnnotation', function() {
             const annotations = session.getAnnotations();
             if (_.some(annotations, { type: 'error' })) {
               if (!_.contains($scope.aceInvalidEditors, fieldName)) {
@@ -194,45 +213,49 @@ uiModules.get('apps/management', ['monospaced.elastic'])
           });
         };
 
-        $scope.cancel = function () {
+        $scope.cancel = function() {
           $window.history.back();
           return false;
         };
 
         /**
-       * Deletes an object and sets the notification
-       * @param {type} name description
-       * @returns {type} description
-       */
-        $scope.delete = function () {
+         * Deletes an object and sets the notification
+         * @param {type} name description
+         * @returns {type} description
+         */
+        $scope.delete = function() {
           function doDelete() {
-            savedObjectsClient.delete(service.type, $routeParams.id)
-              .then(function () {
+            savedObjectsClient
+              .delete(service.type, $routeParams.id)
+              .then(function() {
                 return redirectHandler('deleted');
               })
               .catch(error => fatalError(error, location));
           }
           const confirmModalOptions = {
             onConfirm: doDelete,
-            confirmButtonText: i18n('kbn.management.objects.confirmModalOptions.deleteButtonLabel', {
-              defaultMessage: 'Delete',
-            }),
-            title: i18n('kbn.management.objects.confirmModalOptions.modalTitle', {
-              defaultMessage: 'Delete saved Kibana object?'
+            confirmButtonText: i18n.translate(
+              'kbn.management.objects.confirmModalOptions.deleteButtonLabel',
+              {
+                defaultMessage: 'Delete',
+              }
+            ),
+            title: i18n.translate('kbn.management.objects.confirmModalOptions.modalTitle', {
+              defaultMessage: 'Delete saved Kibana object?',
             }),
           };
           confirmModal(
-            i18n('kbn.management.objects.confirmModalOptions.modalDescription', {
-              defaultMessage: 'You can\'t recover deleted objects',
+            i18n.translate('kbn.management.objects.confirmModalOptions.modalDescription', {
+              defaultMessage: "You can't recover deleted objects",
             }),
             confirmModalOptions
           );
         };
 
-        $scope.submit = function () {
+        $scope.submit = function() {
           const source = _.cloneDeep($scope.obj.attributes);
 
-          _.each($scope.fields, function (field) {
+          _.each($scope.fields, function(field) {
             let value = field.value;
 
             if (field.type === 'number') {
@@ -248,8 +271,9 @@ uiModules.get('apps/management', ['monospaced.elastic'])
 
           const { references, ...attributes } = source;
 
-          savedObjectsClient.update(service.type, $routeParams.id, attributes, { references })
-            .then(function () {
+          savedObjectsClient
+            .update(service.type, $routeParams.id, attributes, { references })
+            .then(function() {
               return redirectHandler('updated');
             })
             .catch(error => fatalError(error, location));
@@ -258,12 +282,16 @@ uiModules.get('apps/management', ['monospaced.elastic'])
         function redirectHandler(action) {
           $location.path('/management/kibana/objects').search({
             _a: rison.encode({
-              tab: serviceObj.title
-            })
+              tab: serviceObj.title,
+            }),
           });
 
-          toastNotifications.addSuccess(`${_.capitalize(action)} '${$scope.obj.attributes.title}' ${$scope.title.toLowerCase()} object`);
+          toastNotifications.addSuccess(
+            `${_.capitalize(action)} '${
+              $scope.obj.attributes.title
+            }' ${$scope.title.toLowerCase()} object`
+          );
         }
-      }
+      },
     };
   });

@@ -1,26 +1,8 @@
-/*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
- */
+/* eslint-disable @kbn/eslint/require-license-header */
 
 import { matches } from 'lodash';
 
-/**
- * @notice
+/* @notice
  *
  * This product has relied on ASTExplorer that is licensed under MIT.
  */
@@ -39,29 +21,29 @@ export function dependenciesVisitorsGenerator(dependenciesAcc) {
       // raw values on require + require.resolve
       CallExpression: ({ node }) => {
         // AST check for require expressions
-        const isRequire = (node) => {
+        const isRequire = node => {
           return matches({
             callee: {
               type: 'Identifier',
-              name: 'require'
-            }
+              name: 'require',
+            },
           })(node);
         };
 
         // AST check for require.resolve expressions
-        const isRequireResolve = (node) => {
+        const isRequireResolve = node => {
           return matches({
             callee: {
               type: 'MemberExpression',
               object: {
                 type: 'Identifier',
-                name: 'require'
+                name: 'require',
               },
               property: {
                 type: 'Identifier',
-                name: 'resolve'
-              }
-            }
+                name: 'resolve',
+              },
+            },
           })(node);
         };
 
@@ -84,12 +66,12 @@ export function dependenciesVisitorsGenerator(dependenciesAcc) {
       // raw values on import
       ImportDeclaration: ({ node }) => {
         // AST check for supported import expressions
-        const isImport = (node) => {
+        const isImport = node => {
           return matches({
             type: 'ImportDeclaration',
             source: {
-              type: 'StringLiteral'
-            }
+              type: 'StringLiteral',
+            },
           })(node);
         };
 
@@ -103,12 +85,12 @@ export function dependenciesVisitorsGenerator(dependenciesAcc) {
       // raw values on export from
       ExportNamedDeclaration: ({ node }) => {
         // AST check for supported export from expressions
-        const isExportFrom = (node) => {
+        const isExportFrom = node => {
           return matches({
             type: 'ExportNamedDeclaration',
             source: {
-              type: 'StringLiteral'
-            }
+              type: 'StringLiteral',
+            },
           })(node);
         };
 
@@ -122,12 +104,12 @@ export function dependenciesVisitorsGenerator(dependenciesAcc) {
       // raw values on export * from
       ExportAllDeclaration: ({ node }) => {
         // AST check for supported export * from expressions
-        const isExportAllFrom = (node) => {
+        const isExportAllFrom = node => {
           return matches({
             type: 'ExportAllDeclaration',
             source: {
-              type: 'StringLiteral'
-            }
+              type: 'StringLiteral',
+            },
           })(node);
         };
 
@@ -136,7 +118,7 @@ export function dependenciesVisitorsGenerator(dependenciesAcc) {
           const exportAllFromSource = node.source;
           dependenciesAcc.push(exportAllFromSource.value);
         }
-      }
+      },
     };
   })();
 }

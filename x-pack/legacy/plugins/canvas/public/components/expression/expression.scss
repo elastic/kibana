@@ -1,0 +1,48 @@
+.canvasExpressionInput {
+  // Hack needed because weird editor layout
+  .euiFormErrorText {
+    padding-left: $euiSize;
+  }
+}
+
+.canvasExpression--compactSize {
+  max-height: 480px;
+}
+
+.canvasExpressionInput__editor {
+  height: $euiSize * 16;
+  padding-top: $euiSize;
+  flex-grow: 1;
+}
+
+.canvasExpression--fullSize {
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: $euiZMask - 1;
+
+  .canvasExpressionInput {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .canvasExpressionInput__inner {
+    flex-grow: 1;
+    display: flex;
+  }
+
+  .canvasTextArea__code {
+    flex-grow: 1;
+    padding-right: $euiSizeXXL;
+  }
+}
+
+.canvasExpression__settings {
+  padding: $euiSizeM $euiSize;
+  border-top: $euiBorderThin;
+}

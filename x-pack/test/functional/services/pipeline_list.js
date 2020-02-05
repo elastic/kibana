@@ -4,23 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { readPipelineListRows } from './browser_exec_scripts/read_pipeline_list_rows';
-
 export function PipelineListProvider({ getService }) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
-  const browser = getService('browser');
   const random = getService('random');
 
   // test subject selectors
   const SUBJ_CONTAINER = `pipelineList`;
-  const SUBJ_BTN_ADD = `pipelineList btnAdd`;
-  const SUBJ_BTN_DELETE = `pipelineList btnDeletePipeline`;
-  const getCloneLinkSubjForId = id => `pipelineList lnkPipelineClone-${id}`;
-  const SUBJ_FILTER = `pipelineList filter`;
-  const SUBJ_SELECT_ALL = `pipelineList pipelineTable checkboxSelectAll`;
-  const getSelectCheckbox = id => `pipelineList pipelineTable checkboxSelectRow-${id}`;
-  const SUBJ_BTN_NEXT_PAGE = `pipelineList pagination-button-next`;
+  const SUBJ_BTN_ADD = `pipelineList > btnAdd`;
+  const SUBJ_BTN_DELETE = `pipelineList > btnDeletePipeline`;
+  const getCloneLinkSubjForId = id => `pipelineList > lnkPipelineClone-${id}`;
+  const SUBJ_FILTER = `pipelineList > filter`;
+  const SUBJ_SELECT_ALL = `pipelineList > pipelineTable > checkboxSelectAll`;
+  const getSelectCheckbox = id => `pipelineList > pipelineTable > checkboxSelectRow-${id}`;
+  const SUBJ_BTN_NEXT_PAGE = `pipelineList > pagination-button-next`;
 
   const INNER_SUBJ_ROW = `row`;
   const INNER_SUBJ_CELL_ID = `cellId`;
@@ -28,9 +25,9 @@ export function PipelineListProvider({ getService }) {
   const INNER_SUBJ_CELL_LAST_MODIFIED = `cellLastModified`;
   const INNER_SUBJ_CELL_USERNAME = `cellUsername`;
 
-  const SUBJ_CELL_ID = `${SUBJ_CONTAINER} ${INNER_SUBJ_ROW} ${INNER_SUBJ_CELL_ID}`;
+  const SUBJ_CELL_ID = `${SUBJ_CONTAINER} > ${INNER_SUBJ_ROW} > ${INNER_SUBJ_CELL_ID}`;
 
-  return new class PipelineList {
+  return new (class PipelineList {
     /**
      *  Set the text of the pipeline list filter
      *  @param  {string} value
@@ -102,9 +99,10 @@ export function PipelineListProvider({ getService }) {
       const rowToClick = await random.pickOne(rows.filter(r => !r.selected));
       await testSubjects.click(getSelectCheckbox(rowToClick.id));
 
-      await retry.waitFor('selected count to grow', async () => (
-        (await this.getRowCounts()).isSelected > initial.isSelected
-      ));
+      await retry.waitFor(
+        'selected count to grow',
+        async () => (await this.getRowCounts()).isSelected > initial.isSelected
+      );
     }
 
     /**
@@ -113,17 +111,27 @@ export function PipelineListProvider({ getService }) {
      *  @return {Promise<Array<Object>>}
      */
     async readRows() {
-      return await browser.execute(
-        readPipelineListRows,
-        await testSubjects.find(SUBJ_CONTAINER),
-        {
-          ROW: testSubjects.getCssSelector(INNER_SUBJ_ROW),
-          CELL_ID: testSubjects.getCssSelector(INNER_SUBJ_CELL_ID),
-          CELL_DESCRIPTION: testSubjects.getCssSelector(INNER_SUBJ_CELL_DESCRIPTION),
-          CELL_LAST_MODIFIED: testSubjects.getCssSelector(INNER_SUBJ_CELL_LAST_MODIFIED),
-          CELL_USERNAME: testSubjects.getCssSelector(INNER_SUBJ_CELL_USERNAME),
-        },
-      );
+      const pipelineTable = await testSubjects.find('pipelineTable');
+      const $ = await pipelineTable.parseDomContent();
+      return $.findTestSubjects(INNER_SUBJ_ROW)
+        .toArray()
+        .map(row => {
+          return {
+            selected: $(row).hasClass('euiTableRow-isSelected'),
+            id: $(row)
+              .findTestSubjects(INNER_SUBJ_CELL_ID)
+              .text(),
+            description: $(row)
+              .findTestSubjects(INNER_SUBJ_CELL_DESCRIPTION)
+              .text(),
+            lastModified: $(row)
+              .findTestSubjects(INNER_SUBJ_CELL_LAST_MODIFIED)
+              .text(),
+            username: $(row)
+              .findTestSubjects(INNER_SUBJ_CELL_USERNAME)
+              .text(),
+          };
+        });
     }
 
     /**
@@ -163,9 +171,12 @@ export function PipelineListProvider({ getService }) {
      *  @return {Promise<undefined>}
      */
     async assertExists() {
-      await retry.waitFor('pipline list visible on screen', async () => (
-        await testSubjects.exists(SUBJ_CONTAINER)
-      ));
+      await retry.waitFor('pipline list visible on screen', async () => {
+        const container = await testSubjects.find(SUBJ_CONTAINER);
+        const found = await container.findAllByCssSelector('table tbody');
+        const isLoading = await testSubjects.exists('loadingPipelines');
+        return found.length > 0 && isLoading === false;
+      });
     }
 
     /**
@@ -220,5 +231,5 @@ export function PipelineListProvider({ getService }) {
         throw new Error(`Expected next page button to be ${enabled ? 'enabled' : 'disabled'}`);
       }
     }
-  }();
+  })();
 }

@@ -17,11 +17,13 @@
  * under the License.
  */
 
+import { registerFind } from './saved_objects/find';
 import { registerRelationships } from './saved_objects/relationships';
 import { registerScrollForExportRoute, registerScrollForCountRoute } from './saved_objects/scroll';
 
 export function managementApi(server) {
   registerRelationships(server);
+  registerFind(server);
   registerScrollForExportRoute(server);
   registerScrollForCountRoute(server);
 }

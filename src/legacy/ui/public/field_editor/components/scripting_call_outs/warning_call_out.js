@@ -20,22 +20,20 @@
 import React, { Fragment } from 'react';
 import { getDocLink } from 'ui/documentation_links';
 
-import {
-  EuiCallOut,
-  EuiIcon,
-  EuiLink,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiCallOut, EuiIcon, EuiLink, EuiSpacer } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
-export const ScriptingWarningCallOut = ({
-  isVisible = false,
-}) => {
+export const ScriptingWarningCallOut = ({ isVisible = false }) => {
   return isVisible ? (
     <Fragment>
       <EuiCallOut
-        title={<FormattedMessage id="common.ui.fieldEditor.warningCallOutHeader" defaultMessage="Proceed with caution" />}
+        title={
+          <FormattedMessage
+            id="common.ui.fieldEditor.warningCallOutHeader"
+            defaultMessage="Proceed with caution"
+          />
+        }
         color="warning"
         iconType="alert"
       >
@@ -45,20 +43,25 @@ export const ScriptingWarningCallOut = ({
             defaultMessage="Please familiarize yourself with {scripFields} and with {scriptsInAggregation} before using scripted fields."
             values={{
               scripFields: (
-                <EuiLink target="_window" href={getDocLink('scriptedFields.scriptFields')}>
-                  <FormattedMessage id="common.ui.fieldEditor.warningCallOutLabel.scripFieldsLink" defaultMessage="script fields" />&nbsp;
+                <EuiLink target="_blank" href={getDocLink('scriptedFields.scriptFields')}>
+                  <FormattedMessage
+                    id="common.ui.fieldEditor.warningCallOutLabel.scripFieldsLink"
+                    defaultMessage="script fields"
+                  />
+                  &nbsp;
                   <EuiIcon type="link" />
                 </EuiLink>
               ),
               scriptsInAggregation: (
-                <EuiLink target="_window" href={getDocLink('scriptedFields.scriptAggs')}>
+                <EuiLink target="_blank" href={getDocLink('scriptedFields.scriptAggs')}>
                   <FormattedMessage
                     id="common.ui.fieldEditor.warningCallOutLabel.scriptsInAggregationLink"
                     defaultMessage="scripts in aggregations"
-                  />&nbsp;
+                  />
+                  &nbsp;
                   <EuiIcon type="link" />
                 </EuiLink>
-              )
+              ),
             }}
           />
         </p>

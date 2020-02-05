@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { ES_INDEX_NAME } from './constants';
 
-export default function ({ getService }) {
+export default function({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
-  const es = getService('es');
-  const chance = getService('chance');
+  const es = getService('legacyEs');
+  const randomness = getService('randomness');
 
   describe('assign_tags_to_beats', () => {
     const archive = 'beats/list';
@@ -28,7 +28,7 @@ export default function ({ getService }) {
         })
         .expect(200);
 
-      expect(apiResponse.assignments).to.eql([{ status: 200, result: 'updated' }]);
+      expect(apiResponse.results).to.eql([{ success: true, result: { message: 'updated' } }]);
 
       const esResponse = await es.get({
         index: ES_INDEX_NAME,
@@ -63,7 +63,7 @@ export default function ({ getService }) {
         })
         .expect(200);
 
-      expect(apiResponse.assignments).to.eql([{ status: 200, result: 'updated' }]);
+      expect(apiResponse.results).to.eql([{ success: true, result: { message: 'updated' } }]);
 
       // After adding the existing tag
       esResponse = await es.get({
@@ -87,9 +87,9 @@ export default function ({ getService }) {
         })
         .expect(200);
 
-      expect(apiResponse.assignments).to.eql([
-        { status: 200, result: 'updated' },
-        { status: 200, result: 'updated' },
+      expect(apiResponse.results).to.eql([
+        { success: true, result: { message: 'updated' } },
+        { success: true, result: { message: 'updated' } },
       ]);
 
       let esResponse;
@@ -126,9 +126,9 @@ export default function ({ getService }) {
         })
         .expect(200);
 
-      expect(apiResponse.assignments).to.eql([
-        { status: 200, result: 'updated' },
-        { status: 200, result: 'updated' },
+      expect(apiResponse.results).to.eql([
+        { success: true, result: { message: 'updated' } },
+        { success: true, result: { message: 'updated' } },
       ]);
 
       const esResponse = await es.get({
@@ -152,9 +152,9 @@ export default function ({ getService }) {
         })
         .expect(200);
 
-      expect(apiResponse.assignments).to.eql([
-        { status: 200, result: 'updated' },
-        { status: 200, result: 'updated' },
+      expect(apiResponse.results).to.eql([
+        { success: true, result: { message: 'updated' } },
+        { success: true, result: { message: 'updated' } },
       ]);
 
       let esResponse;
@@ -180,7 +180,7 @@ export default function ({ getService }) {
     });
 
     it('should return errors for non-existent beats', async () => {
-      const nonExistentBeatId = chance.word();
+      const nonExistentBeatId = randomness.word();
 
       const { body: apiResponse } = await supertest
         .post('/api/beats/agents_tags/assignments')
@@ -190,13 +190,13 @@ export default function ({ getService }) {
         })
         .expect(200);
 
-      expect(apiResponse.assignments).to.eql([
-        { status: 404, result: `Beat ${nonExistentBeatId} not found` },
+      expect(apiResponse.results).to.eql([
+        { success: false, error: { code: 404, message: `Beat ${nonExistentBeatId} not found` } },
       ]);
     });
 
     it('should return errors for non-existent tags', async () => {
-      const nonExistentTag = chance.word();
+      const nonExistentTag = randomness.word();
 
       const { body: apiResponse } = await supertest
         .post('/api/beats/agents_tags/assignments')
@@ -206,8 +206,8 @@ export default function ({ getService }) {
         })
         .expect(200);
 
-      expect(apiResponse.assignments).to.eql([
-        { status: 404, result: `Tag ${nonExistentTag} not found` },
+      expect(apiResponse.results).to.eql([
+        { success: false, error: { code: 404, message: `Tag ${nonExistentTag} not found` } },
       ]);
 
       const esResponse = await es.get({
@@ -220,8 +220,8 @@ export default function ({ getService }) {
     });
 
     it('should return errors for non-existent beats and tags', async () => {
-      const nonExistentBeatId = chance.word();
-      const nonExistentTag = chance.word();
+      const nonExistentBeatId = randomness.word();
+      const nonExistentTag = randomness.word();
 
       const { body: apiResponse } = await supertest
         .post('/api/beats/agents_tags/assignments')
@@ -231,8 +231,14 @@ export default function ({ getService }) {
         })
         .expect(200);
 
-      expect(apiResponse.assignments).to.eql([
-        { status: 404, result: `Beat ${nonExistentBeatId} and tag ${nonExistentTag} not found` },
+      expect(apiResponse.results).to.eql([
+        {
+          success: false,
+          error: {
+            code: 404,
+            message: `Beat ${nonExistentBeatId} and tag ${nonExistentTag} not found`,
+          },
+        },
       ]);
 
       const esResponse = await es.get({

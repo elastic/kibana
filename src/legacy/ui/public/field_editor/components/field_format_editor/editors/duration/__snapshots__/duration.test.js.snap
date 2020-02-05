@@ -4,8 +4,10 @@ exports[`DurationFormatEditor should render human readable output normally 1`] =
 <Fragment>
   <EuiFormRow
     describedByIds={Array []}
+    display="row"
     error={null}
     fullWidth={false}
+    hasChildLabel={true}
     hasEmptyLabelSpace={false}
     isInvalid={false}
     label={
@@ -15,13 +17,10 @@ exports[`DurationFormatEditor should render human readable output normally 1`] =
         values={Object {}}
       />
     }
+    labelType="label"
   >
     <EuiSelect
-      compressed={false}
-      fullWidth={false}
-      hasNoInitialSelection={false}
       isInvalid={false}
-      isLoading={false}
       onChange={[Function]}
       options={
         Array [
@@ -35,7 +34,9 @@ exports[`DurationFormatEditor should render human readable output normally 1`] =
   </EuiFormRow>
   <EuiFormRow
     describedByIds={Array []}
+    display="row"
     fullWidth={false}
+    hasChildLabel={true}
     hasEmptyLabelSpace={false}
     isInvalid={false}
     label={
@@ -45,13 +46,10 @@ exports[`DurationFormatEditor should render human readable output normally 1`] =
         values={Object {}}
       />
     }
+    labelType="label"
   >
     <EuiSelect
-      compressed={false}
-      fullWidth={false}
-      hasNoInitialSelection={false}
       isInvalid={false}
-      isLoading={false}
       onChange={[Function]}
       options={
         Array [
@@ -67,7 +65,8 @@ exports[`DurationFormatEditor should render human readable output normally 1`] =
       }
     />
   </EuiFormRow>
-  <InjectIntl(FormatEditorSamplesComponent)
+  <FormatEditorSamples
+    sampleType="text"
     samples={
       Array [
         Object {
@@ -116,8 +115,10 @@ exports[`DurationFormatEditor should render non-human readable output normally 1
 <Fragment>
   <EuiFormRow
     describedByIds={Array []}
+    display="row"
     error={null}
     fullWidth={false}
+    hasChildLabel={true}
     hasEmptyLabelSpace={false}
     isInvalid={false}
     label={
@@ -127,13 +128,10 @@ exports[`DurationFormatEditor should render non-human readable output normally 1
         values={Object {}}
       />
     }
+    labelType="label"
   >
     <EuiSelect
-      compressed={false}
-      fullWidth={false}
-      hasNoInitialSelection={false}
       isInvalid={false}
-      isLoading={false}
       onChange={[Function]}
       options={
         Array [
@@ -147,7 +145,9 @@ exports[`DurationFormatEditor should render non-human readable output normally 1
   </EuiFormRow>
   <EuiFormRow
     describedByIds={Array []}
+    display="row"
     fullWidth={false}
+    hasChildLabel={true}
     hasEmptyLabelSpace={false}
     isInvalid={false}
     label={
@@ -157,13 +157,10 @@ exports[`DurationFormatEditor should render non-human readable output normally 1
         values={Object {}}
       />
     }
+    labelType="label"
   >
     <EuiSelect
-      compressed={false}
-      fullWidth={false}
-      hasNoInitialSelection={false}
       isInvalid={false}
-      isLoading={false}
       onChange={[Function]}
       options={
         Array [
@@ -181,8 +178,10 @@ exports[`DurationFormatEditor should render non-human readable output normally 1
   </EuiFormRow>
   <EuiFormRow
     describedByIds={Array []}
+    display="row"
     error={null}
     fullWidth={false}
+    hasChildLabel={true}
     hasEmptyLabelSpace={false}
     isInvalid={false}
     label={
@@ -192,18 +191,17 @@ exports[`DurationFormatEditor should render non-human readable output normally 1
         values={Object {}}
       />
     }
+    labelType="label"
   >
     <EuiFieldNumber
-      compressed={false}
-      fullWidth={false}
       isInvalid={false}
-      isLoading={false}
       max={20}
       min={0}
       onChange={[Function]}
     />
   </EuiFormRow>
-  <InjectIntl(FormatEditorSamplesComponent)
+  <FormatEditorSamples
+    sampleType="text"
     samples={
       Array [
         Object {

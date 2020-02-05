@@ -4,7 +4,6 @@ exports[`Header should mark the input as invalid 1`] = `
 <div>
   <EuiTitle
     size="s"
-    textTransform="none"
   >
     <h2>
       <FormattedMessage
@@ -19,15 +18,9 @@ exports[`Header should mark the input as invalid 1`] = `
   />
   <EuiFlexGroup
     alignItems="flexEnd"
-    component="div"
-    direction="row"
-    gutterSize="l"
     justifyContent="spaceBetween"
-    responsive={true}
-    wrap={false}
   >
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiForm
@@ -35,12 +28,14 @@ exports[`Header should mark the input as invalid 1`] = `
       >
         <EuiFormRow
           describedByIds={Array []}
+          display="row"
           error={
             Array [
               "Input is invalid",
             ]
           }
           fullWidth={false}
+          hasChildLabel={true}
           hasEmptyLabelSpace={false}
           helpText={
             <div>
@@ -80,13 +75,11 @@ exports[`Header should mark the input as invalid 1`] = `
               values={Object {}}
             />
           }
+          labelType="label"
         >
           <EuiFieldText
-            compressed={false}
             data-test-subj="createIndexPatternNameInput"
-            fullWidth={false}
             isInvalid={true}
-            isLoading={false}
             name="indexPattern"
             onChange={[Function]}
             placeholder="index-name-*"
@@ -96,18 +89,13 @@ exports[`Header should mark the input as invalid 1`] = `
       </EuiForm>
     </EuiFlexItem>
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiButton
-        color="primary"
         data-test-subj="createIndexPatternGoToStep2Button"
-        fill={false}
-        iconSide="left"
         iconType="arrowRight"
         isDisabled={true}
         onClick={[Function]}
-        type="button"
       >
         <FormattedMessage
           defaultMessage="Next step"
@@ -124,7 +112,6 @@ exports[`Header should render normally 1`] = `
 <div>
   <EuiTitle
     size="s"
-    textTransform="none"
   >
     <h2>
       <FormattedMessage
@@ -139,15 +126,9 @@ exports[`Header should render normally 1`] = `
   />
   <EuiFlexGroup
     alignItems="flexEnd"
-    component="div"
-    direction="row"
-    gutterSize="l"
     justifyContent="spaceBetween"
-    responsive={true}
-    wrap={false}
   >
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiForm
@@ -155,8 +136,10 @@ exports[`Header should render normally 1`] = `
       >
         <EuiFormRow
           describedByIds={Array []}
+          display="row"
           error={Array []}
           fullWidth={false}
+          hasChildLabel={true}
           hasEmptyLabelSpace={false}
           helpText={
             <div>
@@ -196,13 +179,11 @@ exports[`Header should render normally 1`] = `
               values={Object {}}
             />
           }
+          labelType="label"
         >
           <EuiFieldText
-            compressed={false}
             data-test-subj="createIndexPatternNameInput"
-            fullWidth={false}
             isInvalid={false}
-            isLoading={false}
             name="indexPattern"
             onChange={[Function]}
             placeholder="index-name-*"
@@ -212,18 +193,13 @@ exports[`Header should render normally 1`] = `
       </EuiForm>
     </EuiFlexItem>
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiButton
-        color="primary"
         data-test-subj="createIndexPatternGoToStep2Button"
-        fill={false}
-        iconSide="left"
         iconType="arrowRight"
         isDisabled={false}
         onClick={[Function]}
-        type="button"
       >
         <FormattedMessage
           defaultMessage="Next step"

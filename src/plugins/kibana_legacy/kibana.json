@@ -1,0 +1,6 @@
+{
+  "id": "kibana_legacy",
+  "version": "kibana",
+  "server": true,
+  "ui": true
+}

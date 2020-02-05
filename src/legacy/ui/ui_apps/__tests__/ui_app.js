@@ -18,7 +18,7 @@
  */
 
 import sinon from 'sinon';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 import { UiApp } from '../ui_app';
 import { UiNavLink } from '../../ui_nav_links';
@@ -29,12 +29,11 @@ function createStubUiAppSpec(extraParams) {
     main: 'main.js',
     title: 'UIApp Test',
     order: 9000,
-    description: 'Test of UI App Constructor',
     icon: 'ui_app_test.svg',
     linkToLastSubUrl: true,
     hidden: false,
     listed: false,
-    ...extraParams
+    ...extraParams,
   };
 }
 
@@ -42,9 +41,10 @@ function createStubKbnServer(extraParams) {
   return {
     plugins: [],
     config: {
-      get: sinon.stub()
+      get: sinon
+        .stub()
         .withArgs('server.basePath')
-        .returns('')
+        .returns(''),
     },
     server: {},
     ...extraParams,
@@ -101,7 +101,7 @@ describe('ui apps / UiApp', () => {
             linkToLastSubUrl: true,
             hidden: false,
             disabled: false,
-            tooltip: ''
+            tooltip: '',
           },
         });
       });
@@ -139,7 +139,6 @@ describe('ui apps / UiApp', () => {
         expect(JSON.parse(JSON.stringify(app))).to.eql({
           id: spec.id,
           title: spec.title,
-          description: spec.description,
           icon: spec.icon,
           main: spec.main,
           linkToLastSubUrl: spec.linkToLastSubUrl,
@@ -149,12 +148,11 @@ describe('ui apps / UiApp', () => {
             order: 9000,
             url: '/app/uiapp-test',
             subUrlBase: '/app/uiapp-test',
-            description: 'Test of UI App Constructor',
             icon: 'ui_app_test.svg',
             linkToLastSubUrl: true,
             hidden: false,
             disabled: false,
-            tooltip: ''
+            tooltip: '',
           },
         });
       });
@@ -163,7 +161,7 @@ describe('ui apps / UiApp', () => {
     /*
      * The "hidden" and "listed" flags have an bound relationship. The "hidden"
      * flag gets cast to a boolean value, and the "listed" flag is dependent on
-      * "hidden"
+     * "hidden"
      */
     describe('hidden flag', () => {
       describe('is cast to boolean value', () => {
@@ -290,7 +288,7 @@ describe('ui apps / UiApp', () => {
       it('throws an error at instantiation', () => {
         expect(() => {
           createUiApp(createStubUiAppSpec({ pluginId: 'foo' }));
-        }).to.throwException((error) => {
+        }).to.throwException(error => {
           expect(error.message).to.match(/Unknown plugin id/);
         });
       });

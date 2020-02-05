@@ -1,0 +1,103 @@
+.mlFieldDataCard {
+  height: 420px;
+  box-shadow: none;
+  border-color: $euiBorderColor;
+
+  // Note the names of these styles need to match the type of the field they are displaying.
+  .boolean {
+    color: $euiColorVis5;
+    border-color: $euiColorVis5;
+
+    .field-type-icon-container {
+      background-color: rgba($euiColorVis5, 0.2);
+    }
+  }
+
+  .date {
+    color: $euiColorVis7;
+    border-color: $euiColorVis7;
+
+    .field-type-icon-container {
+      background-color: rgba($euiColorVis7, 0.2);
+    }
+  }
+
+  .document_count {
+    color: $euiColorVis2;
+    border-color: $euiColorVis2;
+
+    .field-type-icon-container {
+      background-color: rgba($euiColorVis2, 0.2);
+    }
+  }
+
+  .geo_point {
+    color: $euiColorVis8;
+    border-color: $euiColorVis8;
+
+    .field-type-icon-container {
+      background-color: rgba($euiColorVis8, 0.2);
+    }
+  }
+
+  .ip {
+    color: $euiColorVis3;
+    border-color: $euiColorVis3;
+
+    .field-type-icon-container {
+      background-color: rgba($euiColorVis3, 0.2);
+    }
+  }
+
+  .keyword {
+    color: $euiColorVis0;
+    border-color: $euiColorVis0;
+
+    .field-type-icon-container {
+      background-color: rgba($euiColorVis0, 0.2);
+    }
+  }
+
+  .number {
+    color: $euiColorVis1;
+    border-color: $euiColorVis1;
+
+    .field-type-icon-container {
+      background-color: rgba($euiColorVis1, 0.2);
+    }
+  }
+
+  .text {
+    color: $euiColorVis9;
+    border-color: $euiColorVis9;
+
+    .field-type-icon-container {
+      background-color: rgba($euiColorVis9, 0.2);
+    }
+  }
+
+  .type-other,
+  .unknown {
+    color: $euiColorVis6;
+    border-color: $euiColorVis6;
+
+    .field-type-icon-container {
+      background-color: rgba($euiColorVis6, 0.2);
+    }
+  }
+
+  .mlFieldDataCard__content {
+    @include euiFontSizeS;
+    height: 385px;
+    overflow: hidden;
+  }
+
+  .mlFieldDataCard__codeContent {
+    font-family: $euiCodeFontFamily;
+  }
+
+  .mlFieldDataCard__stats {
+    padding: $euiSizeS $euiSizeS 0px $euiSizeS;
+    text-align: center;
+  }
+}

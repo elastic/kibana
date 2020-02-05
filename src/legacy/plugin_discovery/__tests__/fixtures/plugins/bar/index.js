@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export default function (kibana) {
+export default function(kibana) {
   return [
     new kibana.Plugin({
       id: 'bar:one',

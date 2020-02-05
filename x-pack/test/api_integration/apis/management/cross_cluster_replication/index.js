@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export default function ({ loadTestFile }) {
-  describe('cross cluster replication', () => {
+export default function({ loadTestFile }) {
+  describe('cross-cluster replication', () => {
     loadTestFile(require.resolve('./auto_follow_pattern'));
     loadTestFile(require.resolve('./follower_indices'));
   });

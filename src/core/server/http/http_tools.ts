@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import { readFileSync } from 'fs';
 import { Lifecycle, Request, ResponseToolkit, Server, ServerOptions, Util } from 'hapi';
 import Hoek from 'hoek';
 import { ServerOptions as TLSOptions } from 'https';
 import { ValidationError } from 'joi';
 import { HttpConfig } from './http_config';
+import { validateObject } from './prototype_pollution';
 
 /**
  * Converts Kibana `HttpConfig` into `ServerOptions` that are accepted by the Hapi server.
@@ -45,6 +45,11 @@ export function getServerOptions(config: HttpConfig, { configureTLS = true } = {
         options: {
           abortEarly: false,
         },
+        // TODO: This payload validation can be removed once the legacy platform is completely removed.
+        // This is a default payload validation which applies to all LP routes which do not specify their own
+        // `validate.payload` handler, in order to reduce the likelyhood of prototype pollution vulnerabilities.
+        // (All NP routes are already required to specify their own validation in order to access the payload)
+        payload: value => Promise.resolve(validateObject(value)),
       },
     },
     state: {
@@ -60,16 +65,16 @@ export function getServerOptions(config: HttpConfig, { configureTLS = true } = {
     // TODO: Hapi types have a typo in `tls` property type definition: `https.RequestOptions` is used instead of
     // `https.ServerOptions`, and `honorCipherOrder` isn't presented in `https.RequestOptions`.
     const tlsOptions: TLSOptions = {
-      ca:
-        config.ssl.certificateAuthorities &&
-        config.ssl.certificateAuthorities.map(caFilePath => readFileSync(caFilePath)),
-      cert: readFileSync(ssl.certificate!),
+      ca: ssl.certificateAuthorities,
+      cert: ssl.certificate,
       ciphers: config.ssl.cipherSuites.join(':'),
       // We use the server's cipher order rather than the client's to prevent the BEAST attack.
       honorCipherOrder: true,
-      key: readFileSync(ssl.key!),
+      key: ssl.key,
       passphrase: ssl.keyPassphrase,
       secureOptions: ssl.getSecureOptions(),
+      requestCert: ssl.requestCert,
+      rejectUnauthorized: ssl.rejectUnauthorized,
     };
 
     options.tls = tlsOptions;
@@ -78,11 +83,26 @@ export function getServerOptions(config: HttpConfig, { configureTLS = true } = {
   return options;
 }
 
-export function createServer(options: ServerOptions) {
-  const server = new Server(options);
+export function getListenerOptions(config: HttpConfig) {
+  return {
+    keepaliveTimeout: config.keepaliveTimeout,
+    socketTimeout: config.socketTimeout,
+  };
+}
 
-  // Revert to previous 120 seconds keep-alive timeout in Node < 8.
-  server.listener.keepAliveTimeout = 120e3;
+interface ListenerOptions {
+  keepaliveTimeout: number;
+  socketTimeout: number;
+}
+
+export function createServer(serverOptions: ServerOptions, listenerOptions: ListenerOptions) {
+  const server = new Server(serverOptions);
+
+  server.listener.keepAliveTimeout = listenerOptions.keepaliveTimeout;
+  server.listener.setTimeout(listenerOptions.socketTimeout);
+  server.listener.on('timeout', socket => {
+    socket.destroy();
+  });
   server.listener.on('clientError', (err, socket) => {
     if (socket.writable) {
       socket.end(Buffer.from('HTTP/1.1 400 Bad Request\r\n\r\n', 'ascii'));

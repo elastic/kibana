@@ -1,21 +1,22 @@
 {
   "extends": "../tsconfig.json",
   "compilerOptions": {
-    "module": "commonjs",
-    "allowJs": true,
-    "outDir": "target",
-    "baseUrl": "./",
-    "paths": {
-      "*":[
-        "*"
-      ]
-    },
     "types": [
       "node",
       "mocha"
+    ],
+    "lib": [
+      "esnext",
+      "dom"
     ]
   },
   "include": [
-    "**/*.ts"
+    "**/*.ts",
+    "**/*.tsx",
+    "../typings/lodash.topath/*.ts",
+    "typings/**/*"
+  ],
+  "exclude": [
+    "plugin_functional/plugins/**/*"
   ]
 }

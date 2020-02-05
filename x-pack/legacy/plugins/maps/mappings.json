@@ -1,0 +1,85 @@
+{
+  "map": {
+    "properties": {
+      "description": {
+        "type": "text"
+      },
+      "title": {
+        "type": "text"
+      },
+      "version": {
+        "type": "integer"
+      },
+      "bounds": {
+        "type": "geo_shape"
+      },
+      "mapStateJSON": {
+        "type": "text"
+      },
+      "layerListJSON": {
+        "type": "text"
+      },
+      "uiStateJSON": {
+        "type": "text"
+      }
+    }
+  },
+  "maps-telemetry": {
+    "properties": {
+      "settings": {
+        "properties": {
+          "showMapVisualizationTypes": {
+            "type": "boolean"
+          }
+        }
+      },
+      "indexPatternsWithGeoFieldCount": {
+        "type": "long"
+      },
+      "mapsTotalCount": {
+        "type": "long"
+      },
+      "timeCaptured": {
+        "type": "date"
+      },
+      "attributesPerMap": {
+        "properties": {
+          "dataSourcesCount": {
+            "properties": {
+              "min": {
+                "type": "long"
+              },
+              "max": {
+                "type": "long"
+              },
+              "avg": {
+                "type": "long"
+              }
+            }
+          },
+          "layersCount": {
+            "properties": {
+              "min": {
+                "type": "long"
+              },
+              "max": {
+                "type": "long"
+              },
+              "avg": {
+                "type": "long"
+              }
+            }
+          },
+          "layerTypesCount": {
+            "dynamic": "true",
+            "properties": {}
+          },
+          "emsVectorLayersCount": {
+            "dynamic": "true",
+            "properties": {}
+          }
+        }
+      }
+    }
+  }
+}

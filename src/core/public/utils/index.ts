@@ -17,5 +17,6 @@
  * under the License.
  */
 
-export { modifyUrl } from './modify_url';
 export { shareWeakReplay } from './share_weak_replay';
+export { Sha256 } from './crypto';
+export { MountWrapper, mountReactNode } from './mount';

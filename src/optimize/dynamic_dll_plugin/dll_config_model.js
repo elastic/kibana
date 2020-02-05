@@ -17,11 +17,13 @@
  * under the License.
  */
 
-import { fromRoot, IS_KIBANA_DISTRIBUTABLE } from '../../legacy/utils';
+import { IS_KIBANA_DISTRIBUTABLE } from '../../legacy/utils';
+import { fromRoot } from '../../core/server/utils';
 import webpack from 'webpack';
 import webpackMerge from 'webpack-merge';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import TerserPlugin from 'terser-webpack-plugin';
+import * as UiSharedDeps from '@kbn/ui-shared-deps';
 
 function generateDLL(config) {
   const {
@@ -36,13 +38,11 @@ function generateDLL(config) {
     dllStyleFilename,
     dllManifestPath,
     babelLoaderCacheDir,
-    threadLoaderPoolConfig
+    threadLoaderPoolConfig,
   } = config;
 
   const BABEL_PRESET_PATH = require.resolve('@kbn/babel-preset/webpack_preset');
-  const BABEL_EXCLUDE_RE = [
-    /[\/\\](webpackShims|node_modules|bower_components)[\/\\]/,
-  ];
+  const BABEL_EXCLUDE_RE = [/[\/\\](webpackShims|node_modules|bower_components)[\/\\]/];
 
   return {
     entry: dllEntry,
@@ -52,23 +52,14 @@ function generateDLL(config) {
       filename: dllBundleFilename,
       path: dllOutputPath,
       publicPath: dllPublicPath,
-      library: dllBundleName
+      library: dllBundleName,
     },
     node: { fs: 'empty', child_process: 'empty', dns: 'empty', net: 'empty', tls: 'empty' },
     resolve: {
       extensions: ['.js', '.json'],
       mainFields: ['browser', 'browserify', 'main'],
-      alias: {
-        ...dllAlias,
-        'dll/set_csp_nonce$': require.resolve('./public/set_csp_nonce')
-      },
-      modules: [
-        'webpackShims',
-        fromRoot('webpackShims'),
-
-        'node_modules',
-        fromRoot('node_modules'),
-      ],
+      alias: dllAlias,
+      modules: ['webpackShims', fromRoot('webpackShims'), 'node_modules', fromRoot('node_modules')],
     },
     module: {
       rules: [
@@ -82,62 +73,60 @@ function generateDLL(config) {
               test: /\.js$/,
               include: /[\/\\]node_modules[\/\\]x-pack[\/\\]/,
               exclude: /[\/\\]node_modules[\/\\]x-pack[\/\\](.+?[\/\\])*node_modules[\/\\]/,
-            }
+            },
+            // TODO: remove when we drop support for IE11
+            // We need because normalize-url is distributed without
+            // any kind of transpilation
+            // More info: https://github.com/elastic/kibana/pull/35804
+            {
+              test: /\.js$/,
+              include: /[\/\\]node_modules[\/\\]normalize-url[\/\\]/,
+              exclude: /[\/\\]node_modules[\/\\]normalize-url[\/\\](.+?[\/\\])*node_modules[\/\\]/,
+            },
           ],
           // Self calling function with the equivalent logic
           // from maybeAddCacheLoader one from base optimizer
           use: ((babelLoaderCacheDirPath, loaders) => {
-            // Only deactivate cache-loader and thread-loader on
-            // distributable. It is valid when running from source
-            // both with dev or prod bundles or even when running
-            // kibana for dev only.
-            if (IS_KIBANA_DISTRIBUTABLE) {
-              return loaders;
-            }
-
             return [
               {
                 loader: 'cache-loader',
                 options: {
-                  cacheDirectory: babelLoaderCacheDirPath
-                }
+                  cacheContext: fromRoot('.'),
+                  cacheDirectory: babelLoaderCacheDirPath,
+                  readOnly: process.env.KBN_CACHE_LOADER_WRITABLE ? false : IS_KIBANA_DISTRIBUTABLE,
+                },
               },
-              ...loaders
+              ...loaders,
             ];
           })(babelLoaderCacheDir, [
             {
               loader: 'thread-loader',
-              options: threadLoaderPoolConfig
+              options: threadLoaderPoolConfig,
             },
             {
               loader: 'babel-loader',
               options: {
                 babelrc: false,
-                presets: [
-                  BABEL_PRESET_PATH,
-                ],
+                presets: [BABEL_PRESET_PATH],
               },
-            }
-          ])
+            },
+          ]),
         },
         {
           test: /\.(html|tmpl)$/,
-          loader: 'raw-loader'
+          loader: 'raw-loader',
         },
         {
           test: /\.css$/,
-          use: [
-            MiniCssExtractPlugin.loader,
-            'css-loader'
-          ],
+          use: [MiniCssExtractPlugin.loader, 'css-loader'],
         },
         {
           test: /\.png$/,
-          loader: 'url-loader'
+          loader: 'url-loader',
         },
         {
           test: /\.(woff|woff2|ttf|eot|svg|ico)(\?|$)/,
-          loader: 'file-loader'
+          loader: 'file-loader',
         },
       ],
       noParse: dllNoParseRules,
@@ -146,18 +135,28 @@ function generateDLL(config) {
       new webpack.DllPlugin({
         context: dllContext,
         name: dllBundleName,
-        path: dllManifestPath
+        path: dllManifestPath,
       }),
       new MiniCssExtractPlugin({
-        filename: dllStyleFilename
+        filename: dllStyleFilename,
       }),
     ],
+    // Single runtime for the dll bundles which assures that common transient dependencies won't be evaluated twice.
+    // The module cache will be shared, even when module code may be duplicated across chunks.
+    optimization: {
+      runtimeChunk: {
+        name: 'vendors_runtime',
+      },
+    },
     performance: {
       // NOTE: we are disabling this as those hints
       // are more tailored for the final bundles result
       // and not for the webpack compilations performance itself
-      hints: false
-    }
+      hints: false,
+    },
+    externals: {
+      ...UiSharedDeps.externals,
+    },
   };
 }
 
@@ -167,6 +166,7 @@ function extendRawConfig(rawConfig) {
   const dllNoParseRules = rawConfig.uiBundles.getWebpackNoParseRules();
   const dllDevMode = rawConfig.uiBundles.isDevMode();
   const dllContext = rawConfig.context;
+  const dllChunks = rawConfig.chunks;
   const dllEntry = {};
   const dllEntryName = rawConfig.entryName;
   const dllBundleName = rawConfig.dllName;
@@ -185,9 +185,12 @@ function extendRawConfig(rawConfig) {
   const threadLoaderPoolConfig = rawConfig.threadLoaderPoolConfig;
 
   // Create webpack entry object key with the provided dllEntryName
-  dllEntry[dllEntryName] = [
-    `${dllOutputPath}/${dllEntryName}${dllEntryExt}`
-  ];
+  dllChunks.reduce((dllEntryObj, chunk) => {
+    dllEntryObj[`${dllEntryName}${chunk}`] = [
+      `${dllOutputPath}/${dllEntryName}${chunk}${dllEntryExt}`,
+    ];
+    return dllEntryObj;
+  }, dllEntry);
 
   // Export dll config map
   return {
@@ -203,74 +206,70 @@ function extendRawConfig(rawConfig) {
     dllStyleFilename,
     dllManifestPath,
     babelLoaderCacheDir,
-    threadLoaderPoolConfig
+    threadLoaderPoolConfig,
   };
 }
 
 function common(config) {
-  return webpackMerge(
-    generateDLL(config)
-  );
+  return webpackMerge(generateDLL(config));
 }
 
 function optimized(config) {
-  return webpackMerge(
-    {
-      mode: 'production',
-      optimization: {
-        minimizer: [
-          new TerserPlugin({
-            // Apply the same logic used to calculate the
-            // threadLoaderPool workers number to spawn
-            // the parallel processes on terser
-            parallel: config.threadLoaderPoolConfig.workers,
-            sourceMap: false,
-            terserOptions: {
-              compress: {
-                // The following is required for dead-code the removal
-                // check in React DevTools
-                //
-                // default
-                unused: true,
-                dead_code: true,
-                conditionals: true,
-                evaluate: true,
+  return webpackMerge({
+    mode: 'production',
+    optimization: {
+      minimizer: [
+        new TerserPlugin({
+          // Apply the same logic used to calculate the
+          // threadLoaderPool workers number to spawn
+          // the parallel processes on terser
+          parallel: config.threadLoaderPoolConfig.workers,
+          sourceMap: false,
+          cache: false,
+          extractComments: false,
+          terserOptions: {
+            compress: {
+              // The following is required for dead-code the removal
+              // check in React DevTools
+              //
+              // default
+              unused: true,
+              dead_code: true,
+              conditionals: true,
+              evaluate: true,
 
-                // changed
-                keep_fnames: true,
-                keep_infinity: true,
-                comparisons: false,
-                sequences: false,
-                properties: false,
-                drop_debugger: false,
-                booleans: false,
-                loops: false,
-                toplevel: false,
-                top_retain: false,
-                hoist_funs: false,
-                if_return: false,
-                join_vars: false,
-                collapse_vars: false,
-                reduce_vars: false,
-                warnings: false,
-                negate_iife: false,
-                side_effects: false
-              },
-              mangle: false
-            }
-          }),
-        ]
-      }
-    }
-  );
+              // changed
+              keep_fnames: true,
+              keep_infinity: true,
+              comparisons: false,
+              sequences: false,
+              properties: false,
+              drop_debugger: false,
+              booleans: false,
+              loops: false,
+              toplevel: false,
+              top_retain: false,
+              hoist_funs: false,
+              if_return: false,
+              join_vars: false,
+              collapse_vars: false,
+              reduce_vars: false,
+              warnings: false,
+              negate_iife: false,
+              side_effects: false,
+            },
+            mangle: false,
+          },
+        }),
+      ],
+    },
+  });
 }
 
 function unoptimized() {
-  return webpackMerge(
-    {
-      mode: 'development'
-    }
-  );
+  return webpackMerge({
+    mode: 'development',
+  });
 }
 
 export function configModel(rawConfig = {}) {

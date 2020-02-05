@@ -21,6 +21,7 @@ import { RegistryFieldFormatEditorsProvider } from 'ui/registry/field_format_edi
 import { BytesFormatEditor } from './editors/bytes';
 import { ColorFormatEditor } from './editors/color';
 import { DateFormatEditor } from './editors/date';
+import { DateNanosFormatEditor } from './editors/date_nanos';
 import { DurationFormatEditor } from './editors/duration';
 import { NumberFormatEditor } from './editors/number';
 import { PercentFormatEditor } from './editors/percent';
@@ -32,6 +33,7 @@ import { UrlFormatEditor } from './editors/url/url';
 RegistryFieldFormatEditorsProvider.register(() => BytesFormatEditor);
 RegistryFieldFormatEditorsProvider.register(() => ColorFormatEditor);
 RegistryFieldFormatEditorsProvider.register(() => DateFormatEditor);
+RegistryFieldFormatEditorsProvider.register(() => DateNanosFormatEditor);
 RegistryFieldFormatEditorsProvider.register(() => DurationFormatEditor);
 RegistryFieldFormatEditorsProvider.register(() => NumberFormatEditor);
 RegistryFieldFormatEditorsProvider.register(() => PercentFormatEditor);

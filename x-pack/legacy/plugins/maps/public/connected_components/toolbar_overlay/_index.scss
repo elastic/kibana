@@ -1,0 +1,21 @@
+@import './tools_control/index';
+
+.mapToolbarOverlay {
+  position: absolute;
+  top: ($euiSizeM + $euiSizeS) + ($euiSizeXL * 2); // Position and height of mapbox controls plus margin
+  left: $euiSizeM;
+  z-index: 2; // Sit on top of mapbox controls shadow
+}
+
+.mapToolbarOverlay__button {
+  @include size($euiSizeXL);
+  // sass-lint:disable-block no-important
+  background-color: $euiColorEmptyShade !important;
+  pointer-events: all;
+
+  &:enabled,
+  &:enabled:hover,
+  &:enabled:focus {
+    @include euiBottomShadowLarge;
+  }
+}

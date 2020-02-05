@@ -1,0 +1,75 @@
+[role="xpack"]
+[[xpack-graph]]
+= Graph data connections
+
+[partintro]
+--
+The {graph-features} enable you to discover how items in an
+Elasticsearch index are related. You can explore the connections between
+indexed terms and see which connections are the most meaningful. This can be
+useful in a variety of applications, from fraud detection to recommendation
+engines.
+
+For example, graph exploration could help you uncover website vulnerabilities
+that hackers are targeting so you can harden your website. Or, you might
+provide graph-based personalized recommendations to your e-commerce customers.
+
+The {graph-features} provide a simple, yet powerful {ref}/graph-explore-api.html[graph exploration API],
+and an interactive graph visualization tool for Kibana. Both work out of the
+box with existing Elasticsearch indices--you don't need to store any
+additional data to use these features.
+
+[discrete]
+[[how-graph-works]]
+== How Graph works
+The graph API provides an alternative way to extract and summarize information
+about the documents and terms in your Elasticsearch index. A _graph_ is really
+just a network of related items. In our case, this means a network of related
+terms in the index.
+
+The terms you want to include in the graph are called _vertices_. The
+relationship between any two vertices is a _connection_. The connection
+summarizes the documents that contain both vertices' terms.
+
+[role="screenshot"]
+image::user/graph/images/graph-vertices-connections.jpg["Graph components"]
+
+NOTE: If you're into https://en.wikipedia.org/wiki/Graph_theory[graph theory],
+you might know vertices and connections as _nodes_ and _edges_. They're the
+same thing, we just want to use terminology that makes sense to people who
+aren't graph geeks and avoid any confusion with the nodes in an Elasticsearch
+cluster.
+
+The graph vertices are simply the terms that you've already indexed. The
+connections are derived on the fly using Elasticsearch aggregations. To
+identify the most _meaningful_ connections, the graph API leverages
+Elasticsearch relevance scoring. The same data structures and relevance ranking
+tools built into Elasticsearch to support text searches enable the graph API to
+separate useful signals from the noise that is typical of most connected data.
+
+This foundation lets you easily answer questions like:
+
+* What are the shared behaviors of people trying to hack my website?
+* If users bought this type of gardening glove, what other products might they
+be interested in?
+* Which people on Stack Overflow have expertise in both Hadoop-related
+technologies and Python-related tech?
+
+But what about performance, you ask? The Elasticsearch aggregation framework
+enables the graph API to quickly summarize millions of documents as a single
+super-connection. Instead of retrieving every banking transaction between
+accounts A and B, it derives a single connection that represents that
+relationship. And, of course, this summarization process works across
+multi-node clusters and scales with your Elasticsearch deployment.
+Advanced options let you control how your data is sampled and summarized.
+You can also set timeouts to prevent graph queries from adversely
+affecting the cluster.
+--
+
+include::getting-started.asciidoc[]
+
+include::configuring-graph.asciidoc[]
+
+include::troubleshooting.asciidoc[]
+
+include::limitations.asciidoc[]

@@ -1,0 +1,30 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AuthSsh rendering it renders against shallow snapshot 1`] = `
+<Fragment>
+  <TokensFlexItem
+    component="span"
+    grow={false}
+  >
+    <DraggableBadge
+      contextId="[context-123]"
+      eventId="[event-123]"
+      field="system.audit.package.name"
+      iconType="document"
+      value="[ssh-signature]"
+    />
+  </TokensFlexItem>
+  <TokensFlexItem
+    component="span"
+    grow={false}
+  >
+    <DraggableBadge
+      contextId="[context-123]"
+      eventId="[event-123]"
+      field="system.audit.package.version"
+      iconType="document"
+      value="[ssh-method]"
+    />
+  </TokensFlexItem>
+</Fragment>
+`;

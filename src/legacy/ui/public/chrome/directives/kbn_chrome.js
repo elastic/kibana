@@ -22,80 +22,79 @@ import ReactDOM from 'react-dom';
 import $ from 'jquery';
 
 import { uiModules } from '../../modules';
-import {
-  getUnhashableStatesProvider,
-  unhashUrl,
-} from '../../state_management/state_hashing';
-import {
-  notify,
-  GlobalBannerList,
-  banners,
-} from '../../notify';
-import { SubUrlRouteFilterProvider } from './sub_url_route_filter';
+import template from './kbn_chrome.html';
+
 import { I18nContext } from '../../i18n';
+import { npStart } from '../../new_platform';
+import {
+  chromeHeaderNavControlsRegistry,
+  NavControlSide,
+} from '../../registry/chrome_header_nav_controls';
+import { subscribeWithScope } from '../../utils/subscribe_with_scope';
 
 export function kbnChromeProvider(chrome, internals) {
+  uiModules.get('kibana').directive('kbnChrome', () => {
+    return {
+      template() {
+        const $content = $(template);
+        const $app = $content.find('.application');
 
-  uiModules
-    .get('kibana')
-    .directive('kbnChrome', () => {
-      return {
-        template() {
-          const $content = $(require('./kbn_chrome.html'));
-          const $app = $content.find('.application');
-
-          if (internals.rootController) {
-            $app.attr('ng-controller', internals.rootController);
-          }
-
-          if (internals.rootTemplate) {
-            $app.removeAttr('ng-view');
-            $app.html(internals.rootTemplate);
-          }
-
-          return $content;
-        },
-
-        controllerAs: 'chrome',
-        controller($scope, $rootScope, Private) {
-          const getUnhashableStates = Private(getUnhashableStatesProvider);
-          const subUrlRouteFilter = Private(SubUrlRouteFilterProvider);
-
-          function updateSubUrls() {
-            const urlWithHashes = window.location.href;
-            const urlWithStates = unhashUrl(urlWithHashes, getUnhashableStates());
-            internals.trackPossibleSubUrl(urlWithStates);
-          }
-
-          function onRouteChange($event) {
-            if (subUrlRouteFilter($event)) {
-              updateSubUrls();
-            }
-          }
-
-          $rootScope.$on('$routeChangeSuccess', onRouteChange);
-          $rootScope.$on('$routeUpdate', onRouteChange);
-          updateSubUrls(); // initialize sub urls
-
-          // Notifications
-          $scope.notifList = notify._notifs;
-
-          // Non-scope based code (e.g., React)
-
-          // Banners
-          ReactDOM.render(
-            <I18nContext>
-              <GlobalBannerList
-                banners={banners.list}
-                subscribe={banners.onChange}
-              />
-            </I18nContext>,
-            document.getElementById('globalBannerList')
-          );
-
-          return chrome;
+        if (internals.rootController) {
+          $app.attr('ng-controller', internals.rootController);
         }
-      };
-    });
 
+        if (internals.rootTemplate) {
+          $app.removeAttr('ng-view');
+          $app.html(internals.rootTemplate);
+        }
+
+        return $content;
+      },
+
+      controllerAs: 'chrome',
+      controller($scope, $location, Private) {
+        $scope.getFirstPathSegment = () => {
+          return $location.path().split('/')[1];
+        };
+
+        // Continue to support legacy nav controls not registered with the NP.
+        const navControls = Private(chromeHeaderNavControlsRegistry);
+        (navControls.bySide[NavControlSide.Left] || []).forEach(navControl =>
+          npStart.core.chrome.navControls.registerLeft({
+            order: navControl.order,
+            mount: navControl.render,
+          })
+        );
+        (navControls.bySide[NavControlSide.Right] || []).forEach(navControl =>
+          npStart.core.chrome.navControls.registerRight({
+            order: navControl.order,
+            mount: navControl.render,
+          })
+        );
+
+        // Non-scope based code (e.g., React)
+
+        // Banners
+        const bannerListContainer = document.getElementById('globalBannerList');
+        if (bannerListContainer) {
+          // This gets rendered manually by the legacy platform because this component must be inside the .app-wrapper
+          ReactDOM.render(
+            <I18nContext>{npStart.core.overlays.banners.getComponent()}</I18nContext>,
+            bannerListContainer
+          );
+        }
+
+        const chromeVisibility = subscribeWithScope($scope, chrome.visible$, {
+          next: () => {
+            // just makes sure change detection is triggered when chrome visibility changes
+          },
+        });
+        $scope.$on('$destroy', () => {
+          chromeVisibility.unsubscribe();
+        });
+
+        return chrome;
+      },
+    };
+  });
 }

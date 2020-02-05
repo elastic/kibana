@@ -1,0 +1,180 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Columns it renders the expected columns 1`] = `
+<styled.div
+  data-test-subj="data-driven-columns"
+>
+  <styled.div
+    key="message"
+    style={
+      Object {
+        "flexBasis": "180px",
+      }
+    }
+  >
+    <styled.div
+      data-test-subj="cell-container"
+    >
+      <DraggableWrapper
+        dataProvider={
+          Object {
+            "and": Array [],
+            "enabled": true,
+            "excluded": true,
+            "id": "empty-column-renderer-draggable-wrapper-test-message-1-message",
+            "kqlQuery": "",
+            "name": "message: ",
+            "queryMatch": Object {
+              "displayValue": "—",
+              "field": "message",
+              "operator": ":*",
+              "value": "",
+            },
+          }
+        }
+        key="empty-column-renderer-draggable-wrapper-test-message-1-message"
+        render={[Function]}
+        truncate={true}
+      />
+    </styled.div>
+  </styled.div>
+  <styled.div
+    key="event.category"
+    style={
+      Object {
+        "flexBasis": "180px",
+      }
+    }
+  >
+    <styled.div
+      data-test-subj="cell-container"
+    >
+      <Memo(FormattedFieldValueComponent)
+        contextId="plain-column-renderer-formatted-field-value-test"
+        eventId="1"
+        fieldFormat=""
+        fieldName="event.category"
+        fieldType=""
+        key="plain-column-renderer-formatted-field-value-test-event.category-1-event.category-Access"
+        truncate={true}
+        value="Access"
+      />
+    </styled.div>
+  </styled.div>
+  <styled.div
+    key="event.action"
+    style={
+      Object {
+        "flexBasis": "180px",
+      }
+    }
+  >
+    <styled.div
+      data-test-subj="cell-container"
+    >
+      <Memo(FormattedFieldValueComponent)
+        contextId="plain-column-renderer-formatted-field-value-test"
+        eventId="1"
+        fieldFormat=""
+        fieldName="event.action"
+        fieldType=""
+        key="plain-column-renderer-formatted-field-value-test-event.action-1-event.action-Action"
+        truncate={true}
+        value="Action"
+      />
+    </styled.div>
+  </styled.div>
+  <styled.div
+    key="host.name"
+    style={
+      Object {
+        "flexBasis": "180px",
+      }
+    }
+  >
+    <styled.div
+      data-test-subj="cell-container"
+    >
+      <Memo(FormattedFieldValueComponent)
+        contextId="plain-column-renderer-formatted-field-value-test"
+        eventId="1"
+        fieldFormat=""
+        fieldName="host.name"
+        fieldType=""
+        key="plain-column-renderer-formatted-field-value-test-host.name-1-host.name-apache"
+        truncate={true}
+        value="apache"
+      />
+    </styled.div>
+  </styled.div>
+  <styled.div
+    key="source.ip"
+    style={
+      Object {
+        "flexBasis": "180px",
+      }
+    }
+  >
+    <styled.div
+      data-test-subj="cell-container"
+    >
+      <Memo(FormattedFieldValueComponent)
+        contextId="plain-column-renderer-formatted-field-value-test"
+        eventId="1"
+        fieldFormat=""
+        fieldName="source.ip"
+        fieldType=""
+        key="plain-column-renderer-formatted-field-value-test-source.ip-1-source.ip-192.168.0.1"
+        truncate={true}
+        value="192.168.0.1"
+      />
+    </styled.div>
+  </styled.div>
+  <styled.div
+    key="destination.ip"
+    style={
+      Object {
+        "flexBasis": "180px",
+      }
+    }
+  >
+    <styled.div
+      data-test-subj="cell-container"
+    >
+      <Memo(FormattedFieldValueComponent)
+        contextId="plain-column-renderer-formatted-field-value-test"
+        eventId="1"
+        fieldFormat=""
+        fieldName="destination.ip"
+        fieldType=""
+        key="plain-column-renderer-formatted-field-value-test-destination.ip-1-destination.ip-192.168.0.3"
+        truncate={true}
+        value="192.168.0.3"
+      />
+    </styled.div>
+  </styled.div>
+  <styled.div
+    key="user.name"
+    style={
+      Object {
+        "flexBasis": "180px",
+      }
+    }
+  >
+    <styled.div
+      data-test-subj="cell-container"
+    >
+      <Memo(FormattedFieldValueComponent)
+        contextId="plain-column-renderer-formatted-field-value-test"
+        eventId="1"
+        fieldFormat=""
+        fieldName="user.name"
+        fieldType=""
+        key="plain-column-renderer-formatted-field-value-test-user.name-1-user.name-john.dee"
+        truncate={true}
+        value="john.dee"
+      />
+    </styled.div>
+  </styled.div>
+</styled.div>
+`;

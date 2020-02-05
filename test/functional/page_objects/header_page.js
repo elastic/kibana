@@ -21,7 +21,6 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
   const config = getService('config');
   const log = getService('log');
   const retry = getService('retry');
-  const find = getService('find');
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
   const globalNav = getService('globalNav');
@@ -60,24 +59,9 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
       await this.awaitGlobalLoadingIndicatorHidden();
     }
 
-    async clickManagement() {
-      await appsMenu.clickLink('Management');
+    async clickStackManagement() {
+      await appsMenu.clickLink('Stack Management');
       await this.awaitGlobalLoadingIndicatorHidden();
-    }
-
-    async getToastMessage(findTimeout = defaultFindTimeout) {
-      const toastMessage = await find.displayedByCssSelector(
-        'kbn-truncated.kbnToast__message',
-        findTimeout
-      );
-      const messageText = await toastMessage.getVisibleText();
-      log.debug(`getToastMessage: ${messageText}`);
-      return messageText;
-    }
-
-    async clickToastOK() {
-      log.debug('clickToastOK');
-      await find.clickByCssSelector('button[ng-if="notif.accept"]');
     }
 
     async waitUntilLoadingHasFinished() {
@@ -95,13 +79,13 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
 
     async isGlobalLoadingIndicatorVisible() {
       log.debug('isGlobalLoadingIndicatorVisible');
-      return await testSubjects.exists('globalLoadingIndicator');
+      return await testSubjects.exists('globalLoadingIndicator', { timeout: 1500 });
     }
 
     async awaitGlobalLoadingIndicatorHidden() {
       await testSubjects.existOrFail('globalLoadingIndicator-hidden', {
         allowHidden: true,
-        timeout: defaultFindTimeout * 10
+        timeout: defaultFindTimeout * 10,
       });
     }
 
@@ -109,7 +93,6 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
       log.debug('awaitKibanaChrome');
       await testSubjects.find('kibanaChrome', defaultFindTimeout * 10);
     }
-
   }
 
   return new HeaderPage();

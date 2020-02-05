@@ -1,0 +1,273 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`MonitorListPagination component renders a no items message when no data is provided 1`] = `
+<Fragment>
+  <EuiPanel>
+    <EuiTitle
+      size="xs"
+    >
+      <h5>
+        <FormattedMessage
+          defaultMessage="Monitor status"
+          id="xpack.uptime.monitorList.monitoringStatusTitle"
+          values={Object {}}
+        />
+      </h5>
+    </EuiTitle>
+    <EuiSpacer
+      size="s"
+    />
+    <EuiBasicTable
+      aria-label="Monitor Status table with columns for Status, Name, URL, IP, Downtime History and Integrations. The table is currently displaying 0 items."
+      columns={
+        Array [
+          Object {
+            "align": "left",
+            "field": "state.monitor.status",
+            "mobileOptions": Object {
+              "fullWidth": true,
+            },
+            "name": "Status",
+            "render": [Function],
+          },
+          Object {
+            "align": "left",
+            "field": "state.monitor.name",
+            "mobileOptions": Object {
+              "fullWidth": true,
+            },
+            "name": "Name",
+            "render": [Function],
+            "sortable": true,
+          },
+          Object {
+            "align": "left",
+            "field": "state.url.full",
+            "name": "Url",
+            "render": [Function],
+          },
+          Object {
+            "align": "center",
+            "field": "histogram.points",
+            "mobileOptions": Object {
+              "show": false,
+            },
+            "name": "Downtime history",
+            "render": [Function],
+          },
+          Object {
+            "align": "right",
+            "field": "monitor_id",
+            "isExpander": true,
+            "name": "",
+            "render": [Function],
+            "sortable": true,
+            "width": "24px",
+          },
+        ]
+      }
+      hasActions={true}
+      isExpandable={true}
+      itemId="monitor_id"
+      itemIdToExpandedRowMap={Object {}}
+      items={Array []}
+      loading={false}
+      noItemsMessage="No uptime monitors found"
+      responsive={true}
+      tableLayout="fixed"
+    />
+    <EuiSpacer
+      size="m"
+    />
+    <EuiFlexGroup
+      responsive={false}
+    >
+      <EuiFlexItem
+        grow={false}
+      >
+        <OverviewPageLink
+          dataTestSubj="xpack.uptime.monitorList.prevButton"
+          direction="prev"
+          pagination=""
+        />
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+        <OverviewPageLink
+          dataTestSubj="xpack.uptime.monitorList.nextButton"
+          direction="next"
+          pagination=""
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiPanel>
+</Fragment>
+`;
+
+exports[`MonitorListPagination component renders the monitor list 1`] = `
+<Fragment>
+  <EuiPanel>
+    <EuiTitle
+      size="xs"
+    >
+      <h5>
+        <FormattedMessage
+          defaultMessage="Monitor status"
+          id="xpack.uptime.monitorList.monitoringStatusTitle"
+          values={Object {}}
+        />
+      </h5>
+    </EuiTitle>
+    <EuiSpacer
+      size="s"
+    />
+    <EuiBasicTable
+      aria-label="Monitor Status table with columns for Status, Name, URL, IP, Downtime History and Integrations. The table is currently displaying 2 items."
+      columns={
+        Array [
+          Object {
+            "align": "left",
+            "field": "state.monitor.status",
+            "mobileOptions": Object {
+              "fullWidth": true,
+            },
+            "name": "Status",
+            "render": [Function],
+          },
+          Object {
+            "align": "left",
+            "field": "state.monitor.name",
+            "mobileOptions": Object {
+              "fullWidth": true,
+            },
+            "name": "Name",
+            "render": [Function],
+            "sortable": true,
+          },
+          Object {
+            "align": "left",
+            "field": "state.url.full",
+            "name": "Url",
+            "render": [Function],
+          },
+          Object {
+            "align": "center",
+            "field": "histogram.points",
+            "mobileOptions": Object {
+              "show": false,
+            },
+            "name": "Downtime history",
+            "render": [Function],
+          },
+          Object {
+            "align": "right",
+            "field": "monitor_id",
+            "isExpander": true,
+            "name": "",
+            "render": [Function],
+            "sortable": true,
+            "width": "24px",
+          },
+        ]
+      }
+      hasActions={true}
+      isExpandable={true}
+      itemId="monitor_id"
+      itemIdToExpandedRowMap={Object {}}
+      items={
+        Array [
+          Object {
+            "monitor_id": "foo",
+            "state": Object {
+              "checks": Array [
+                Object {
+                  "monitor": Object {
+                    "ip": "127.0.0.1",
+                    "status": "up",
+                  },
+                  "timestamp": "124",
+                },
+                Object {
+                  "monitor": Object {
+                    "ip": "127.0.0.2",
+                    "status": "down",
+                  },
+                  "timestamp": "125",
+                },
+                Object {
+                  "monitor": Object {
+                    "ip": "127.0.0.3",
+                    "status": "down",
+                  },
+                  "timestamp": "126",
+                },
+              ],
+              "summary": Object {
+                "down": 2,
+                "up": 1,
+              },
+              "timestamp": "123",
+            },
+          },
+          Object {
+            "monitor_id": "bar",
+            "state": Object {
+              "checks": Array [
+                Object {
+                  "monitor": Object {
+                    "ip": "127.0.0.1",
+                    "status": "up",
+                  },
+                  "timestamp": "125",
+                },
+                Object {
+                  "monitor": Object {
+                    "ip": "127.0.0.2",
+                    "status": "up",
+                  },
+                  "timestamp": "126",
+                },
+              ],
+              "summary": Object {
+                "down": 0,
+                "up": 2,
+              },
+              "timestamp": "125",
+            },
+          },
+        ]
+      }
+      loading={false}
+      noItemsMessage="No uptime monitors found"
+      responsive={true}
+      tableLayout="fixed"
+    />
+    <EuiSpacer
+      size="m"
+    />
+    <EuiFlexGroup
+      responsive={false}
+    >
+      <EuiFlexItem
+        grow={false}
+      >
+        <OverviewPageLink
+          dataTestSubj="xpack.uptime.monitorList.prevButton"
+          direction="prev"
+          pagination="{\\"cursorKey\\":{\\"monitor_id\\":123},\\"cursorDirection\\":\\"BEFORE\\",\\"sortOrder\\":\\"ASC\\"}"
+        />
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+        <OverviewPageLink
+          dataTestSubj="xpack.uptime.monitorList.nextButton"
+          direction="next"
+          pagination="{\\"cursorKey\\":{\\"monitor_id\\":456},\\"cursorDirection\\":\\"AFTER\\",\\"sortOrder\\":\\"ASC\\"}"
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiPanel>
+</Fragment>
+`;

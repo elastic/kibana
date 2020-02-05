@@ -1,0 +1,24 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`map nodes info should summarize the info 1`] = `
+Object {
+  "ENVgDIKRSdCVJo-YqY4kUQ": Object {
+    "isOnline": true,
+    "name": "node01",
+    "nodeTypeClass": "starFilled",
+    "nodeTypeLabel": "Master Node",
+    "shardCount": 57,
+    "transport_address": "127.0.0.1:9300",
+    "type": "master",
+  },
+  "t9J9jvHpQ2yDw9c1LJ0tHA": Object {
+    "isOnline": false,
+    "name": "node02",
+    "nodeTypeClass": "storage",
+    "nodeTypeLabel": "Node",
+    "shardCount": 0,
+    "transport_address": "127.0.0.1:9301",
+    "type": "node",
+  },
+}
+`;

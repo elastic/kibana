@@ -25,8 +25,8 @@ export const CreateEmptyDirsAndFilesTask = {
   async run(config, log, build) {
     await Promise.all([
       mkdirp(build.resolvePath('plugins')),
-      mkdirp(build.resolvePath('data')),
-      write(build.resolvePath('optimize/.babelcache.json'), '{}'),
+      mkdirp(build.resolvePath('data/optimize')),
+      write(build.resolvePath('data/optimize/.babel_register_cache.json'), '{}'),
     ]);
   },
 };

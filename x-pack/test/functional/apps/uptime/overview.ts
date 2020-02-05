@@ -4,23 +4,115 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
+import expect from '@kbn/expect';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-// tslint:disable-next-line:no-default-export
-export default ({ getPageObjects, getService }: KibanaFunctionalTestDefaultProviders) => {
-  const esArchiver = getService('esArchiver');
-  // TODO: add UI functional tests
-  // const pageObjects = getPageObjects(['uptime']);
-  const archive = 'uptime/full_heartbeat';
+export default ({ getPageObjects, getService }: FtrProviderContext) => {
+  const pageObjects = getPageObjects(['uptime']);
+  const retry = getService('retry');
 
-  describe('Overview page', () => {
-    describe('this is a simple test', () => {
-      beforeEach(async () => {
-        await esArchiver.load(archive);
+  describe('overview page', function() {
+    const DEFAULT_DATE_START = 'Sep 10, 2019 @ 12:40:08.078';
+    const DEFAULT_DATE_END = 'Sep 11, 2019 @ 19:40:08.078';
+    it('loads and displays uptime data based on date range', async () => {
+      await pageObjects.uptime.goToUptimeOverviewAndLoadData(
+        DEFAULT_DATE_START,
+        DEFAULT_DATE_END,
+        'monitor-page-link-0000-intermittent'
+      );
+    });
+
+    it('runs filter query without issues', async () => {
+      await pageObjects.uptime.inputFilterQuery(
+        'monitor.status:up and monitor.id:"0000-intermittent"'
+      );
+      await pageObjects.uptime.pageHasExpectedIds(['0000-intermittent']);
+    });
+
+    it('applies filters for multiple fields', async () => {
+      await pageObjects.uptime.goToUptimePageAndSetDateRange(DEFAULT_DATE_START, DEFAULT_DATE_END);
+      await pageObjects.uptime.selectFilterItems({
+        location: ['mpls'],
+        port: ['5678'],
+        scheme: ['http'],
       });
-      afterEach(async () => await esArchiver.unload(archive));
+      await pageObjects.uptime.pageHasExpectedIds([
+        '0000-intermittent',
+        '0001-up',
+        '0002-up',
+        '0003-up',
+        '0004-up',
+        '0005-up',
+        '0006-up',
+        '0007-up',
+        '0008-up',
+        '0009-up',
+      ]);
+    });
 
-      // TODO: add UI functional tests
+    it('pagination is cleared when filter criteria changes', async () => {
+      await pageObjects.uptime.goToUptimePageAndSetDateRange(DEFAULT_DATE_START, DEFAULT_DATE_END);
+      await pageObjects.uptime.changePage('next');
+      await pageObjects.uptime.pageHasExpectedIds([
+        '0010-down',
+        '0011-up',
+        '0012-up',
+        '0013-up',
+        '0014-up',
+        '0015-intermittent',
+        '0016-up',
+        '0017-up',
+        '0018-up',
+        '0019-up',
+      ]);
+      await retry.tryForTime(12000, async () => {
+        // there should now be pagination data in the URL
+        await pageObjects.uptime.pageUrlContains('pagination');
+      });
+      await pageObjects.uptime.setStatusFilter('up');
+      await pageObjects.uptime.pageHasExpectedIds([
+        '0000-intermittent',
+        '0001-up',
+        '0002-up',
+        '0003-up',
+        '0004-up',
+        '0005-up',
+        '0006-up',
+        '0007-up',
+        '0008-up',
+        '0009-up',
+      ]);
+      await retry.tryForTime(12000, async () => {
+        // ensure that pagination is removed from the URL
+        await pageObjects.uptime.pageUrlContains('pagination', false);
+      });
+    });
+
+    describe('snapshot counts', () => {
+      it('updates the snapshot count when status filter is set to down', async () => {
+        await pageObjects.uptime.goToUptimePageAndSetDateRange(
+          DEFAULT_DATE_START,
+          DEFAULT_DATE_END
+        );
+        await pageObjects.uptime.setStatusFilter('down');
+
+        await retry.tryForTime(12000, async () => {
+          const counts = await pageObjects.uptime.getSnapshotCount();
+          expect(counts).to.eql({ up: '0', down: '7' });
+        });
+      });
+
+      it('updates the snapshot count when status filter is set to up', async () => {
+        await pageObjects.uptime.goToUptimePageAndSetDateRange(
+          DEFAULT_DATE_START,
+          DEFAULT_DATE_END
+        );
+        await pageObjects.uptime.setStatusFilter('up');
+        await retry.tryForTime(12000, async () => {
+          const counts = await pageObjects.uptime.getSnapshotCount();
+          expect(counts).to.eql({ up: '93', down: '0' });
+        });
+      });
     });
   });
 };

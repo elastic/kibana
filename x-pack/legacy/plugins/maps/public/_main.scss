@@ -1,0 +1,25 @@
+@import '@elastic/eui/src/components/header/variables';
+
+// sass-lint:disable no-ids
+#maps-plugin {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - #{$euiHeaderChildSize});
+  width: 100%;
+  overflow: hidden;
+}
+
+.mapFullScreen {
+  // sass-lint:disable no-important
+  height: 100vh !important;
+}
+
+#react-maps-root {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.euiColorPicker__emptySwatch {
+  position: relative;
+}

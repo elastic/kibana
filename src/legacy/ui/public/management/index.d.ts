@@ -18,14 +18,10 @@
  */
 
 declare module 'ui/management' {
-  export const PAGE_TITLE_COMPONENT: string;
-  export const PAGE_SUBTITLE_COMPONENT: string;
-  export const PAGE_FOOTER_COMPONENT: string;
-  export const SidebarNav: React.SFC<any>;
-  export function registerSettingsComponent(
-    id: string,
-    component: string | React.SFC<any>,
-    allowOverride: boolean
-  ): void;
+  export const SidebarNav: React.FC<any>;
   export const management: any; // TODO - properly provide types
+  export const MANAGEMENT_BREADCRUMB: {
+    text: string;
+    href: string;
+  };
 }

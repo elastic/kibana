@@ -1,0 +1,53 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Args rendering it renders against shallow snapshot 1`] = `
+<Fragment>
+  <TokensFlexItem
+    component="span"
+    grow={false}
+    key="context-123-args-0-arg1"
+  >
+    <DraggableBadge
+      contextId="context-123-args-0-arg1"
+      eventId="event-123"
+      field="process.args"
+      value="arg1"
+    />
+  </TokensFlexItem>
+  <TokensFlexItem
+    component="span"
+    grow={false}
+    key="context-123-args-1-arg2"
+  >
+    <DraggableBadge
+      contextId="context-123-args-1-arg2"
+      eventId="event-123"
+      field="process.args"
+      value="arg2"
+    />
+  </TokensFlexItem>
+  <TokensFlexItem
+    component="span"
+    grow={false}
+    key="context-123-args-2-arg3"
+  >
+    <DraggableBadge
+      contextId="context-123-args-2-arg3"
+      eventId="event-123"
+      field="process.args"
+      value="arg3"
+    />
+  </TokensFlexItem>
+  <TokensFlexItem
+    component="span"
+    grow={false}
+  >
+    <DraggableBadge
+      contextId="context-123"
+      eventId="event-123"
+      field="process.title"
+      value="process-title-1"
+    />
+  </TokensFlexItem>
+</Fragment>
+`;

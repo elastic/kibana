@@ -18,32 +18,28 @@
  */
 
 import { distinctUntilChanged } from 'rxjs/operators';
+import { npStart } from 'ui/new_platform';
 import { uiModules } from '../../modules';
 
-let newPlatformChrome;
-export function __newPlatformInit__(instance) {
-  if (newPlatformChrome) {
-    throw new Error('ui/chrome/global_nav_state is already initialized');
-  }
+const newPlatformChrome = npStart.core.chrome;
 
-  newPlatformChrome = instance;
-}
-
-uiModules.get('kibana')
-  .service('globalNavState', ($rootScope) => {
-    let isOpen = false;
-    newPlatformChrome.getIsCollapsed$().pipe(distinctUntilChanged()).subscribe(isCollapsed => {
+uiModules.get('kibana').service('globalNavState', $rootScope => {
+  let isOpen = false;
+  newPlatformChrome
+    .getIsCollapsed$()
+    .pipe(distinctUntilChanged())
+    .subscribe(isCollapsed => {
       $rootScope.$evalAsync(() => {
         isOpen = !isCollapsed;
         $rootScope.$broadcast('globalNavState:change');
       });
     });
 
-    return {
-      isOpen: () => isOpen,
+  return {
+    isOpen: () => isOpen,
 
-      setOpen: newValue => {
-        newPlatformChrome.setIsCollapsed(!newValue);
-      }
-    };
-  });
+    setOpen: newValue => {
+      newPlatformChrome.setIsCollapsed(!newValue);
+    },
+  };
+});

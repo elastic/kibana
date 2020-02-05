@@ -26,16 +26,17 @@ import '../config';
 import '../notify';
 import '../private';
 import '../promises';
-import '../storage';
-import '../directives/kbn_src';
-import '../watch_multi';
+import '../directives/storage';
+import '../directives/watch_multi';
 import './services';
+import '../react_components';
 import '../i18n';
 
 import { initAngularApi } from './api/angular';
 import appsApi from './api/apps';
 import { initChromeControlsApi } from './api/controls';
 import { initChromeNavApi } from './api/nav';
+import { initChromeBadgeApi } from './api/badge';
 import { initBreadcrumbsApi } from './api/breadcrumbs';
 import templateApi from './api/template';
 import { initChromeThemeApi } from './api/theme';
@@ -46,22 +47,20 @@ import { initSavedObjectClient } from './api/saved_object_client';
 import { initChromeBasePathApi } from './api/base_path';
 import { initChromeInjectedVarsApi } from './api/injected_vars';
 import { initHelpExtensionApi } from './api/help_extension';
+import { npStart } from '../new_platform';
 
 export const chrome = {};
-const internals = _.defaults(
-  _.cloneDeep(metadata),
-  {
-    basePath: '',
-    rootController: null,
-    rootTemplate: null,
-    showAppsLink: null,
-    xsrfToken: null,
-    devMode: true,
-    brand: null,
-    nav: [],
-    applicationClasses: []
-  }
-);
+const internals = _.defaults(_.cloneDeep(metadata), {
+  basePath: '',
+  rootController: null,
+  rootTemplate: null,
+  showAppsLink: null,
+  xsrfToken: null,
+  devMode: true,
+  brand: null,
+  nav: [],
+  applicationClasses: [],
+});
 
 initUiSettingsApi(chrome);
 initSavedObjectClient(chrome);
@@ -70,6 +69,7 @@ initChromeXsrfApi(chrome, internals);
 initChromeBasePathApi(chrome);
 initChromeInjectedVarsApi(chrome);
 initChromeNavApi(chrome, internals);
+initChromeBadgeApi(chrome);
 initBreadcrumbsApi(chrome, internals);
 initLoadingCountApi(chrome, internals);
 initHelpExtensionApi(chrome, internals);
@@ -78,8 +78,10 @@ initChromeControlsApi(chrome);
 templateApi(chrome, internals);
 initChromeThemeApi(chrome);
 
+npStart.core.chrome.setAppTitle(chrome.getAppTitle());
+
 const waitForBootstrap = new Promise(resolve => {
-  chrome.bootstrap = function (targetDomElement) {
+  chrome.bootstrap = function(targetDomElement) {
     // import chrome nav controls and hacks now so that they are executed after
     // everything else, can safely import the chrome, and interact with services
     // and such setup by all other modules
@@ -90,8 +92,9 @@ const waitForBootstrap = new Promise(resolve => {
     document.body.setAttribute('id', `${internals.app.id}-app`);
 
     chrome.setupAngular();
-    targetDomElement.setAttribute('id', 'kibana-body');
     targetDomElement.setAttribute('kbn-chrome', 'true');
+    targetDomElement.setAttribute('ng-class', "{ 'hidden-chrome': !chrome.getVisible() }");
+    targetDomElement.className = 'app-wrapper';
     angular.bootstrap(targetDomElement, ['kibana']);
     resolve(targetDomElement);
   };
@@ -112,7 +115,7 @@ const waitForBootstrap = new Promise(resolve => {
  * tests. Look into 'src/test_utils/public/stub_get_active_injector' for more information.
  */
 chrome.dangerouslyGetActiveInjector = () => {
-  return waitForBootstrap.then((targetDomElement) => {
+  return waitForBootstrap.then(targetDomElement => {
     const $injector = angular.element(targetDomElement).injector();
     if (!$injector) {
       return Promise.reject('targetDomElement had no angular context after bootstrapping');

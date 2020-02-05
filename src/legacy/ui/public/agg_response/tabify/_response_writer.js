@@ -27,20 +27,24 @@ import { tabifyGetColumns } from './_get_columns';
  * @param {AggConfigs} aggs - the agg configs object to which the aggregation response correlates
  * @param {boolean} metricsAtAllLevels - setting to true will produce metrics for every bucket
  * @param {boolean} partialRows - setting to true will not remove rows with missing values
+ * @param {Object} timeRange - time range object, if provided
  */
-function TabbedAggResponseWriter(aggs, { metricsAtAllLevels = false, partialRows = false, timeRange } = {}) {
+function TabbedAggResponseWriter(
+  aggs,
+  { metricsAtAllLevels = false, partialRows = false, timeRange } = {}
+) {
+  // Private
+  this._removePartialRows = !partialRows;
+
+  // Public
   this.rowBuffer = {};
   this.bucketBuffer = [];
   this.metricBuffer = [];
-
-  this.metricsForAllBuckets = metricsAtAllLevels;
-  this.partialRows = partialRows;
   this.aggs = aggs;
+  this.partialRows = partialRows;
   this.columns = tabifyGetColumns(aggs.getResponseAggs(), !metricsAtAllLevels);
   this.aggStack = [...this.columns];
-
   this.rows = [];
-
   // Extract the time range object if provided
   if (timeRange) {
     const timeRangeKey = Object.keys(timeRange)[0];
@@ -51,14 +55,14 @@ function TabbedAggResponseWriter(aggs, { metricsAtAllLevels = false, partialRows
   }
 }
 
-TabbedAggResponseWriter.prototype.isPartialRow = function (row) {
-  return !this.columns.map(column => row.hasOwnProperty(column.id)).every(c => (c === true));
+TabbedAggResponseWriter.prototype.isPartialRow = function(row) {
+  return !this.columns.map(column => row.hasOwnProperty(column.id)).every(c => c === true);
 };
 
 /**
  * Create a new row by reading the row buffer and bucketBuffer
  */
-TabbedAggResponseWriter.prototype.row = function () {
+TabbedAggResponseWriter.prototype.row = function() {
   this.bucketBuffer.forEach(bucket => {
     this.rowBuffer[bucket.id] = bucket.value;
   });
@@ -67,7 +71,10 @@ TabbedAggResponseWriter.prototype.row = function () {
     this.rowBuffer[metric.id] = metric.value;
   });
 
-  if (!toArray(this.rowBuffer).length || (!this.partialRows && this.isPartialRow(this.rowBuffer))) {
+  if (
+    !toArray(this.rowBuffer).length ||
+    (this._removePartialRows && this.isPartialRow(this.rowBuffer))
+  ) {
     return;
   }
 
@@ -80,10 +87,10 @@ TabbedAggResponseWriter.prototype.row = function () {
  *
  * @return {object} - the final table
  */
-TabbedAggResponseWriter.prototype.response = function () {
+TabbedAggResponseWriter.prototype.response = function() {
   return {
     columns: this.columns,
-    rows: this.rows
+    rows: this.rows,
   };
 };
 

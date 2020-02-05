@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export function DashboardExpectProvider({ getService, getPageObjects }) {
   const log = getService('log');
@@ -26,9 +26,9 @@ export function DashboardExpectProvider({ getService, getPageObjects }) {
   const find = getService('find');
   const filterBar = getService('filterBar');
   const PageObjects = getPageObjects(['dashboard', 'visualize']);
+  const findTimeout = 2500;
 
-  return new class DashboardExpect {
-
+  return new (class DashboardExpect {
     async panelCount(expectedCount) {
       log.debug(`DashboardExpect.panelCount(${expectedCount})`);
       await retry.try(async () => {
@@ -37,10 +37,21 @@ export function DashboardExpectProvider({ getService, getPageObjects }) {
       });
     }
 
+    async visualizationsArePresent(vizList) {
+      log.debug('Checking all visualisations are present on dashsboard');
+      let notLoaded = await PageObjects.dashboard.getNotLoadedVisualizations(vizList);
+      // TODO: Determine issue occasionally preventing 'geo map' from loading
+      notLoaded = notLoaded.filter(x => x !== 'Rendering Test: geo map');
+      expect(notLoaded).to.be.empty();
+    }
+
     async selectedLegendColorCount(color, expectedCount) {
       log.debug(`DashboardExpect.selectedLegendColorCount(${color}, ${expectedCount})`);
       await retry.try(async () => {
-        const selectedLegendColor = await testSubjects.findAll(`legendSelectedColor-${color}`);
+        const selectedLegendColor = await testSubjects.findAll(
+          `legendSelectedColor-${color}`,
+          findTimeout
+        );
         expect(selectedLegendColor.length).to.be(expectedCount);
       });
     }
@@ -48,16 +59,8 @@ export function DashboardExpectProvider({ getService, getPageObjects }) {
     async docTableFieldCount(expectedCount) {
       log.debug(`DashboardExpect.docTableFieldCount(${expectedCount})`);
       await retry.try(async () => {
-        const docTableCells = await testSubjects.findAll('docTableField');
+        const docTableCells = await testSubjects.findAll('docTableField', findTimeout);
         expect(docTableCells.length).to.be(expectedCount);
-      });
-    }
-
-    async tsvbTimeSeriesLegendCount(expectedCount) {
-      log.debug(`DashboardExpect.tsvbTimeSeriesLegendCount(${expectedCount})`);
-      await retry.try(async () => {
-        const tsvbLegendItems = await testSubjects.findAll('tsvbLegendItem');
-        expect(tsvbLegendItems.length).to.be(expectedCount);
       });
     }
 
@@ -71,12 +74,14 @@ export function DashboardExpectProvider({ getService, getPageObjects }) {
 
     async legendValuesToExist(legendValues) {
       log.debug(`DashboardExpect.legendValuesToExist(${legendValues})`);
-      await Promise.all(legendValues.map(async legend => {
-        await retry.try(async () => {
-          const legendValueExists = await testSubjects.exists(`legend-${legend}`);
-          expect(legendValueExists).to.be(true);
-        });
-      }));
+      await Promise.all(
+        legendValues.map(async legend => {
+          await retry.try(async () => {
+            const legendValueExists = await testSubjects.exists(`legend-${legend}`);
+            expect(legendValueExists).to.be(true);
+          });
+        })
+      );
     }
 
     async textWithinElementsExists(texts, getElementsFn) {
@@ -84,9 +89,11 @@ export function DashboardExpectProvider({ getService, getPageObjects }) {
       await retry.try(async () => {
         const elements = await getElementsFn();
         const elementTexts = [];
-        await Promise.all(elements.map(async element => {
-          elementTexts.push(await element.getVisibleText());
-        }));
+        await Promise.all(
+          elements.map(async element => {
+            elementTexts.push(await element.getVisibleText());
+          })
+        );
         log.debug(`Found ${elements.length} elements with values: ${JSON.stringify(elementTexts)}`);
         texts.forEach(value => {
           const indexOfValue = elementTexts.indexOf(value);
@@ -113,9 +120,11 @@ export function DashboardExpectProvider({ getService, getPageObjects }) {
       await retry.try(async () => {
         const elements = await getElementsFn();
         const elementTexts = [];
-        await Promise.all(elements.map(async element => {
-          elementTexts.push(await element.getVisibleText());
-        }));
+        await Promise.all(
+          elements.map(async element => {
+            elementTexts.push(await element.getVisibleText());
+          })
+        );
         log.debug(`Found ${elements.length} elements with values: ${JSON.stringify(elementTexts)}`);
         texts.forEach(value => {
           const indexOfValue = elementTexts.indexOf(value);
@@ -126,13 +135,16 @@ export function DashboardExpectProvider({ getService, getPageObjects }) {
 
     async textWithinCssElementDoNotExist(texts, selector) {
       log.debug(`textWithinCssElementExists:(${JSON.stringify(texts)},${selector})`);
-      await this.textWithinElementsDoNotExist(texts, async () => await find.allByCssSelector(selector));
+      await this.textWithinElementsDoNotExist(
+        texts,
+        async () => await find.allByCssSelector(selector)
+      );
     }
 
     async timelionLegendCount(expectedCount) {
       log.debug(`DashboardExpect.timelionLegendCount(${expectedCount})`);
       await retry.try(async () => {
-        const flotLegendLabels = await testSubjects.findAll('flotLegendLabel');
+        const flotLegendLabels = await testSubjects.findAll('flotLegendLabel', findTimeout);
         expect(flotLegendLabels.length).to.be(expectedCount);
       });
     }
@@ -140,24 +152,28 @@ export function DashboardExpectProvider({ getService, getPageObjects }) {
     async emptyTagCloudFound() {
       log.debug(`DashboardExpect.emptyTagCloudFound()`);
       const tagCloudVisualizations = await testSubjects.findAll('tagCloudVisualization');
-      const tagCloudsHaveContent = await Promise.all(tagCloudVisualizations.map(async tagCloud => {
-        return await find.descendantExistsByCssSelector('text', tagCloud);
-      }));
+      const tagCloudsHaveContent = await Promise.all(
+        tagCloudVisualizations.map(async tagCloud => {
+          return await find.descendantExistsByCssSelector('text', tagCloud);
+        })
+      );
       expect(tagCloudsHaveContent.indexOf(false)).to.be.greaterThan(-1);
     }
 
     async tagCloudWithValuesFound(values) {
       log.debug(`DashboardExpect.tagCloudWithValuesFound(${values})`);
       const tagCloudVisualizations = await testSubjects.findAll('tagCloudVisualization');
-      const matches = await Promise.all(tagCloudVisualizations.map(async tagCloud => {
-        for (let i = 0; i < values.length; i++) {
-          const valueExists = await testSubjects.descendantExists(values[i], tagCloud);
-          if (!valueExists) {
-            return false;
+      const matches = await Promise.all(
+        tagCloudVisualizations.map(async tagCloud => {
+          for (let i = 0; i < values.length; i++) {
+            const valueExists = await testSubjects.descendantExists(values[i], tagCloud);
+            if (!valueExists) {
+              return false;
+            }
           }
-        }
-        return true;
-      }));
+          return true;
+        })
+      );
       expect(matches.indexOf(true)).to.be.greaterThan(-1);
     }
 
@@ -204,7 +220,10 @@ export function DashboardExpectProvider({ getService, getPageObjects }) {
     async savedSearchRowCount(expectedCount) {
       log.debug(`DashboardExpect.savedSearchRowCount(${expectedCount})`);
       await retry.try(async () => {
-        const savedSearchRows = await testSubjects.findAll('docTableExpandToggleColumn');
+        const savedSearchRows = await testSubjects.findAll(
+          'docTableExpandToggleColumn',
+          findTimeout
+        );
         expect(savedSearchRows.length).to.be(expectedCount);
       });
     }
@@ -212,8 +231,10 @@ export function DashboardExpectProvider({ getService, getPageObjects }) {
     async dataTableRowCount(expectedCount) {
       log.debug(`DashboardExpect.dataTableRowCount(${expectedCount})`);
       await retry.try(async () => {
-        const dataTableRows =
-          await find.allByCssSelector('[data-test-subj="paginated-table-body"] [data-cell-content]');
+        const dataTableRows = await find.allByCssSelector(
+          '[data-test-subj="paginated-table-body"] [data-cell-content]',
+          findTimeout
+        );
         expect(dataTableRows.length).to.be(expectedCount);
       });
     }
@@ -221,7 +242,7 @@ export function DashboardExpectProvider({ getService, getPageObjects }) {
     async seriesElementCount(expectedCount) {
       log.debug(`DashboardExpect.seriesElementCount(${expectedCount})`);
       await retry.try(async () => {
-        const seriesElements = await find.allByCssSelector('.series');
+        const seriesElements = await find.allByCssSelector('.series', findTimeout);
         expect(seriesElements.length).to.be(expectedCount);
       });
     }
@@ -237,7 +258,7 @@ export function DashboardExpectProvider({ getService, getPageObjects }) {
     async lineChartPointsCount(expectedCount) {
       log.debug(`DashboardExpect.lineChartPointsCount(${expectedCount})`);
       await retry.try(async () => {
-        const points = await find.allByCssSelector('.points');
+        const points = await find.allByCssSelector('.points', findTimeout);
         expect(points.length).to.be(expectedCount);
       });
     }
@@ -245,9 +266,9 @@ export function DashboardExpectProvider({ getService, getPageObjects }) {
     async tsvbTableCellCount(expectedCount) {
       log.debug(`DashboardExpect.tsvbTableCellCount(${expectedCount})`);
       await retry.try(async () => {
-        const tableCells = await testSubjects.findAll('tvbTableVis__value');
+        const tableCells = await testSubjects.findAll('tvbTableVis__value', findTimeout);
         expect(tableCells.length).to.be(expectedCount);
       });
     }
-  };
+  })();
 }

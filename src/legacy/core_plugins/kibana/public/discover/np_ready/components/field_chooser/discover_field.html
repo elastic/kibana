@@ -1,0 +1,26 @@
+<li
+  class="sidebar-item"
+  attr-field="{{::field.name}}"
+>
+  <div
+    data-test-subj="field-{{::field.name}}"
+    ng-click="onClickToggleDetails($event, field)"
+    kbn-accessible-click
+    class="sidebar-item-title dscSidebarItem"
+  >
+    <div class="dscField dscSidebarItem__label">
+      <field-name
+        field="field"
+      ></field-name>
+    </div>
+
+    <button
+      ng-if="field.name !== '_source'"
+      ng-click="toggleDisplay(field)"
+      ng-class="::field.display ? 'kuiButton--danger' : 'kuiButton--primary'"
+      ng-bind="::addRemoveButtonLabel"
+      class="dscSidebarItem__action kuiButton kuiButton--small"
+      data-test-subj="fieldToggle-{{::field.name}}"
+    ></button>
+  </div>
+</li>

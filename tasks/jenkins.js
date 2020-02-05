@@ -17,26 +17,26 @@
  * under the License.
  */
 
-module.exports = function (grunt) {
-  grunt.registerTask('jenkins:docs', [
-    'docker:docs'
-  ]);
+module.exports = function(grunt) {
+  grunt.registerTask('jenkins:docs', ['docker:docs']);
 
   grunt.registerTask('jenkins:unit', [
     'run:eslint',
-    'run:tslint',
     'run:sasslint',
+    'run:checkTsProjects',
+    'run:checkCoreApiChanges',
     'run:typeCheck',
     'run:i18nCheck',
     'run:checkFileCasing',
-    'licenses',
-    'verifyDependencyVersions',
+    'run:checkLockfileSymlinks',
+    'run:licenses',
+    'run:verifyDependencyVersions',
     'run:verifyNotice',
-    'test:server',
-    'test:jest',
-    'test:jest_integration',
-    'test:projects',
-    'test:browser-ci',
+    'run:mocha',
+    'run:test_jest',
+    'run:test_jest_integration',
+    'run:test_projects',
+    'run:test_browser_ci',
     'run:apiIntegrationTests',
   ]);
 };

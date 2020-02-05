@@ -1,0 +1,25 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`#scheme returns error when shorter string 1`] = `"expected URI with scheme [http|https] but got [ftp://elastic.co]."`;
+
+exports[`#scheme returns error when shorter string 2`] = `"expected URI with scheme [http|https] but got [file:///kibana.log]."`;
+
+exports[`#validate throws when returns string 1`] = `"validator failure"`;
+
+exports[`is required by default 1`] = `"expected value of type [string] but got [undefined]."`;
+
+exports[`returns error when not string 1`] = `"expected value of type [string] but got [number]."`;
+
+exports[`returns error when not string 2`] = `"expected value of type [string] but got [Array]."`;
+
+exports[`returns error when not string 3`] = `"expected value of type [string] but got [RegExp]."`;
+
+exports[`returns error when value is not a URI 1`] = `"value is [3domain.local] but it must be a valid URI (see RFC 3986)."`;
+
+exports[`returns error when value is not a URI 2`] = `"value is [http://8010:0:0:0:9:500:300C:200A] but it must be a valid URI (see RFC 3986)."`;
+
+exports[`returns error when value is not a URI 3`] = `"value is [-] but it must be a valid URI (see RFC 3986)."`;
+
+exports[`returns error when value is not a URI 4`] = `"value is [https://example.com?baz[]=foo&baz[]=bar] but it must be a valid URI (see RFC 3986)."`;
+
+exports[`returns error when value is not a URI 5`] = `"value is [http://aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa] but it must be a valid URI (see RFC 3986)."`;

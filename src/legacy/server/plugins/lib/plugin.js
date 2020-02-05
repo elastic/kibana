@@ -43,12 +43,14 @@ export class Plugin {
     this.requiredIds = spec.getRequiredPluginIds() || [];
     this.externalPreInit = spec.getPreInitHandler();
     this.externalInit = spec.getInitHandler();
+    this.externalPostInit = spec.getPostInitHandler();
     this.enabled = spec.isEnabled(kbnServer.config);
     this.configPrefix = spec.getConfigPrefix();
     this.publicDir = spec.getPublicDir();
 
     this.preInit = once(this.preInit);
     this.init = once(this.init);
+    this.postInit = once(this.postInit);
   }
 
   async preInit() {
@@ -67,7 +69,7 @@ export class Plugin {
       this._options = options;
 
       server.logWithMetadata(['plugins', 'debug'], `Initializing plugin ${this.toString()}`, {
-        plugin: this
+        plugin: this,
       });
 
       if (this.publicDir) {
@@ -86,13 +88,19 @@ export class Plugin {
 
     await kbnServer.server.register({
       plugin: { register, name: id, version },
-      options: config.has(configPrefix) ? config.get(configPrefix) : null
+      options: config.has(configPrefix) ? config.get(configPrefix) : null,
     });
 
     // Only change the plugin status to green if the
     // initial status has not been changed
     if (this.status && this.status.state === 'uninitialized') {
       this.status.green('Ready');
+    }
+  }
+
+  async postInit() {
+    if (this.externalPostInit) {
+      return await this.externalPostInit(this.kbnServer.server);
     }
   }
 

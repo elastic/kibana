@@ -1,0 +1,46 @@
+// EUITODO: Convert to EuiColorPicker
+
+@import 'node_modules/@elastic/eui/src/components/color_picker/index';
+
+.tvbColorPicker {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.tvbColorPicker__swatch-empty,
+.tvbColorPicker__swatch {
+  // SASSTODO: Replace with EUI component
+  // sass-lint:disable-block placeholder-in-extend
+  @extend .euiColorPickerSwatch;
+}
+
+.tvbColorPicker__swatch-empty {
+  background-color: transparent;
+  background-size: 22px 22px;
+  background-image: repeating-linear-gradient(
+    -45deg,
+    $euiColorDanger,
+    $euiColorDanger 2px,
+    transparent 2px,
+    transparent $euiSize
+  );
+}
+
+.tvbColorPicker__clear {
+  margin-left: $euiSizeXS;
+}
+
+.tvbColorPicker__popover {
+  position: absolute;
+  top: $euiSizeL;
+  z-index: 2;
+}
+
+.tvbColorPicker__cover {
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
+  bottom: 0;
+}

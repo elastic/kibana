@@ -1,0 +1,83 @@
+.canvasArg--expandable + .canvasArg--expandable {
+  margin-top: 0;
+
+  .canvasArg__accordion:before {
+    display: none;
+  }
+}
+
+.canvasSidebar__panel {
+  .canvasArg--expandable:last-child {
+    .canvasArg__accordion {
+      margin-bottom: (-$euiSizeS);
+    }
+
+    .canvasArg__accordion:after {
+      content: none;
+    }
+
+    .canvasArg__accordion.euiAccordion-isOpen:after {
+      display: none;
+    }
+  }
+}
+
+.canvasArg {
+  margin-top: $euiSizeS;
+}
+
+.canvasArg__remove {
+  min-width: $euiSize;
+  padding: $euiSizeXS 0;
+}
+
+.canvasArg__content {
+  padding-top: $euiSizeS;
+}
+
+.canvasArg__form {
+  position: relative;
+}
+
+.canvasArg__tooltip {
+  margin-left: -$euiSizeXL;
+}
+
+.canvasArg__accordion {
+  padding: $euiSizeS $euiSizeM;
+  margin: 0 (-$euiSizeM);
+  background: $euiColorLightestShade;
+  position: relative;
+
+  // don't let remove button position here if this is nested in an accordion
+  .canvasArg__form {
+    position: static;
+  }
+
+  &.euiAccordion-isOpen {
+    background: transparent;
+  }
+
+  &:before,
+  &:after {
+    content: '';
+    height: 1px;
+    position: absolute;
+    left: 0;
+    width: 100%;
+    background: $euiColorLightShade;
+  }
+
+  &:before {
+    top: 0;
+  }
+
+  &:after {
+    bottom: 0;
+  }
+}
+
+// this is a workaround since an EuiFormRow label cannot be passed in toggle.js
+.canvasArg__switch {
+  padding-top: calc(#{$euiSizeS} * .75);
+}

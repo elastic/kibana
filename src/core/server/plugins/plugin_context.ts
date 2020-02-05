@@ -17,28 +17,25 @@
  * under the License.
  */
 
-import { Type } from '@kbn/config-schema';
-import { Observable } from 'rxjs';
-import { CoreContext } from '../../types';
-import { ConfigWithSchema, EnvironmentMode } from '../config';
-import { LoggerFactory } from '../logging';
-import { Plugin, PluginManifest } from './plugin';
-
-export interface PluginInitializerContext {
-  env: { mode: EnvironmentMode };
-  logger: LoggerFactory;
-  config: {
-    create: <Schema extends Type<any>, Config>(
-      ConfigClass: ConfigWithSchema<Schema, Config>
-    ) => Observable<Config>;
-    createIfExists: <Schema extends Type<any>, Config>(
-      ConfigClass: ConfigWithSchema<Schema, Config>
-    ) => Observable<Config | undefined>;
-  };
-}
-
-// tslint:disable no-empty-interface
-export interface PluginStartContext {}
+import { map } from 'rxjs/operators';
+import { combineLatest } from 'rxjs';
+import { CoreContext } from '../core_context';
+import { PluginWrapper } from './plugin';
+import { PluginsServiceSetupDeps, PluginsServiceStartDeps } from './plugins_service';
+import {
+  PluginInitializerContext,
+  PluginManifest,
+  PluginOpaqueId,
+  SharedGlobalConfigKeys,
+} from './types';
+import { PathConfigType, config as pathConfig } from '../path';
+import { KibanaConfigType, config as kibanaConfig } from '../kibana_config';
+import {
+  ElasticsearchConfigType,
+  config as elasticsearchConfig,
+} from '../elasticsearch/elasticsearch_config';
+import { pick, deepFreeze } from '../../utils';
+import { CoreSetup, CoreStart } from '..';
 
 /**
  * This returns a facade for `CoreContext` that will be exposed to the plugin initializer.
@@ -55,13 +52,19 @@ export interface PluginStartContext {}
  */
 export function createPluginInitializerContext(
   coreContext: CoreContext,
+  opaqueId: PluginOpaqueId,
   pluginManifest: PluginManifest
 ): PluginInitializerContext {
   return {
+    opaqueId,
+
     /**
      * Environment information that is safe to expose to plugins and may be beneficial for them.
      */
-    env: { mode: coreContext.env.mode },
+    env: {
+      mode: coreContext.env.mode,
+      packageInfo: coreContext.env.packageInfo,
+    },
 
     /**
      * Plugin-scoped logger
@@ -76,6 +79,27 @@ export function createPluginInitializerContext(
      * Core configuration functionality, enables fetching a subset of the config.
      */
     config: {
+      legacy: {
+        /**
+         * Global configuration
+         * Note: naming not final here, it will be renamed in a near future (https://github.com/elastic/kibana/issues/46240)
+         * @deprecated
+         */
+        globalConfig$: combineLatest(
+          coreContext.configService.atPath<KibanaConfigType>(kibanaConfig.path),
+          coreContext.configService.atPath<ElasticsearchConfigType>(elasticsearchConfig.path),
+          coreContext.configService.atPath<PathConfigType>(pathConfig.path)
+        ).pipe(
+          map(([kibana, elasticsearch, path]) =>
+            deepFreeze({
+              kibana: pick(kibana, SharedGlobalConfigKeys.kibana),
+              elasticsearch: pick(elasticsearch, SharedGlobalConfigKeys.elasticsearch),
+              path: pick(path, SharedGlobalConfigKeys.path),
+            })
+          )
+        ),
+      },
+
       /**
        * Reads the subset of the config at the `configPath` defined in the plugin
        * manifest and validates it against the schema in the static `schema` on
@@ -83,13 +107,76 @@ export function createPluginInitializerContext(
        * @param ConfigClass A class (not an instance of a class) that contains a
        * static `schema` that we validate the config at the given `path` against.
        */
-      create(ConfigClass) {
-        return coreContext.configService.atPath(pluginManifest.configPath, ConfigClass);
+      create() {
+        return coreContext.configService.atPath(pluginManifest.configPath);
       },
-      createIfExists(ConfigClass) {
-        return coreContext.configService.optionalAtPath(pluginManifest.configPath, ConfigClass);
+      createIfExists() {
+        return coreContext.configService.optionalAtPath(pluginManifest.configPath);
       },
     },
+  };
+}
+
+/**
+ * This returns a facade for `CoreContext` that will be exposed to the plugin `setup` method.
+ * This facade should be safe to use only within `setup` itself.
+ *
+ * This is called for each plugin when it's set up, so each plugin gets its own
+ * version of these values.
+ *
+ * We should aim to be restrictive and specific in the APIs that we expose.
+ *
+ * @param coreContext Kibana core context
+ * @param plugin The plugin we're building these values for.
+ * @param deps Dependencies that Plugins services gets during setup.
+ * @internal
+ */
+export function createPluginSetupContext<TPlugin, TPluginDependencies>(
+  coreContext: CoreContext,
+  deps: PluginsServiceSetupDeps,
+  plugin: PluginWrapper<TPlugin, TPluginDependencies>
+): CoreSetup {
+  return {
+    capabilities: {
+      registerProvider: deps.capabilities.registerProvider,
+      registerSwitcher: deps.capabilities.registerSwitcher,
+    },
+    context: {
+      createContextContainer: deps.context.createContextContainer,
+    },
+    elasticsearch: {
+      adminClient: deps.elasticsearch.adminClient,
+      dataClient: deps.elasticsearch.dataClient,
+      createClient: deps.elasticsearch.createClient,
+    },
+    http: {
+      createCookieSessionStorageFactory: deps.http.createCookieSessionStorageFactory,
+      registerRouteHandlerContext: deps.http.registerRouteHandlerContext.bind(
+        null,
+        plugin.opaqueId
+      ),
+      createRouter: () => deps.http.createRouter('', plugin.opaqueId),
+      registerOnPreAuth: deps.http.registerOnPreAuth,
+      registerAuth: deps.http.registerAuth,
+      registerOnPostAuth: deps.http.registerOnPostAuth,
+      registerOnPreResponse: deps.http.registerOnPreResponse,
+      basePath: deps.http.basePath,
+      auth: { get: deps.http.auth.get, isAuthenticated: deps.http.auth.isAuthenticated },
+      csp: deps.http.csp,
+      isTlsEnabled: deps.http.isTlsEnabled,
+      getServerInfo: deps.http.getServerInfo,
+    },
+    savedObjects: {
+      setClientFactoryProvider: deps.savedObjects.setClientFactoryProvider,
+      addClientWrapper: deps.savedObjects.addClientWrapper,
+    },
+    uiSettings: {
+      register: deps.uiSettings.register,
+    },
+    uuid: {
+      getInstanceUuid: deps.uuid.getInstanceUuid,
+    },
+    getStartServices: () => plugin.startDependencies,
   };
 }
 
@@ -97,18 +184,30 @@ export function createPluginInitializerContext(
  * This returns a facade for `CoreContext` that will be exposed to the plugin `start` method.
  * This facade should be safe to use only within `start` itself.
  *
- * This is called for each plugin when it's started, so each plugin gets its own
+ * This is called for each plugin when it starts, so each plugin gets its own
  * version of these values.
- *
- * We should aim to be restrictive and specific in the APIs that we expose.
  *
  * @param coreContext Kibana core context
  * @param plugin The plugin we're building these values for.
+ * @param deps Dependencies that Plugins services gets during start.
  * @internal
  */
-export function createPluginStartContext<TPluginContract, TPluginDependencies>(
+export function createPluginStartContext<TPlugin, TPluginDependencies>(
   coreContext: CoreContext,
-  plugin: Plugin<TPluginContract, TPluginDependencies>
-): PluginStartContext {
-  return {};
+  deps: PluginsServiceStartDeps,
+  plugin: PluginWrapper<TPlugin, TPluginDependencies>
+): CoreStart {
+  return {
+    capabilities: {
+      resolveCapabilities: deps.capabilities.resolveCapabilities,
+    },
+    savedObjects: {
+      getScopedClient: deps.savedObjects.getScopedClient,
+      createInternalRepository: deps.savedObjects.createInternalRepository,
+      createScopedRepository: deps.savedObjects.createScopedRepository,
+    },
+    uiSettings: {
+      asScopedToClient: deps.uiSettings.asScopedToClient,
+    },
+  };
 }

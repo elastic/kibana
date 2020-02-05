@@ -1,0 +1,127 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ElasticsearchPingsAdapter class getPingHistogram handles simple_text_query without issues 1`] = `
+Object {
+  "histogram": Array [
+    Object {
+      "downCount": 1,
+      "upCount": 2,
+      "x": 1,
+      "y": 1,
+    },
+    Object {
+      "downCount": 2,
+      "upCount": 1,
+      "x": 2,
+      "y": 1,
+    },
+    Object {
+      "downCount": 1,
+      "upCount": 3,
+      "x": 3,
+      "y": 1,
+    },
+  ],
+  "interval": "1m",
+}
+`;
+
+exports[`ElasticsearchPingsAdapter class getPingHistogram handles status + additional user queries 1`] = `
+Object {
+  "histogram": Array [
+    Object {
+      "downCount": 1,
+      "upCount": 0,
+      "x": 1,
+      "y": 1,
+    },
+    Object {
+      "downCount": 2,
+      "upCount": 0,
+      "x": 2,
+      "y": 1,
+    },
+    Object {
+      "downCount": 1,
+      "upCount": 0,
+      "x": 3,
+      "y": 1,
+    },
+  ],
+  "interval": "1h",
+}
+`;
+
+exports[`ElasticsearchPingsAdapter class getPingHistogram returns a down-filtered array for when filtered by down status 1`] = `
+Object {
+  "histogram": Array [
+    Object {
+      "downCount": 1,
+      "upCount": 0,
+      "x": 1,
+      "y": 1,
+    },
+    Object {
+      "downCount": undefined,
+      "upCount": 0,
+      "x": 2,
+      "y": 1,
+    },
+  ],
+  "interval": "1d",
+}
+`;
+
+exports[`ElasticsearchPingsAdapter class getPingHistogram returns a down-filtered array for when filtered by up status 1`] = `
+Object {
+  "histogram": Array [
+    Object {
+      "downCount": 0,
+      "upCount": 2,
+      "x": 1,
+      "y": 1,
+    },
+    Object {
+      "downCount": 0,
+      "upCount": 2,
+      "x": 2,
+      "y": 1,
+    },
+  ],
+  "interval": "1s",
+}
+`;
+
+exports[`ElasticsearchPingsAdapter class getPingHistogram returns a single bucket if array has 1 1`] = `
+Object {
+  "histogram": Array [
+    Object {
+      "downCount": 1,
+      "upCount": 2,
+      "x": 1,
+      "y": 1,
+    },
+  ],
+  "interval": "10s",
+}
+`;
+
+exports[`ElasticsearchPingsAdapter class getPingHistogram returns expected result for no status filter 1`] = `
+Object {
+  "histogram": Array [
+    Object {
+      "downCount": 1,
+      "upCount": 2,
+      "x": 1,
+      "y": 1,
+    },
+    Object {
+      "downCount": undefined,
+      "upCount": 2,
+      "x": 2,
+      "y": 1,
+    },
+  ],
+  "interval": "1m",
+}
+`;

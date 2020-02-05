@@ -17,6 +17,8 @@
  * under the License.
  */
 
+jest.mock('ui/new_platform');
+
 import { INDEX_ILLEGAL_CHARACTERS_VISIBLE } from '../constants';
 
 import {
@@ -24,14 +26,6 @@ import {
   findIllegalCharactersInIndexName,
   indexNameContainsSpaces,
 } from './validate_index';
-
-jest.mock('ui/index_patterns/index_patterns.js', () => ({
-  IndexPatternsProvider: jest.fn(),
-}));
-
-jest.mock('ui/index_patterns/index_patterns_api_client_provider.js', () => ({
-  IndexPatternsApiClientProvider: jest.fn(),
-}));
 
 describe('Index name validation', () => {
   it('should not allow name to begin with a period', () => {
@@ -45,9 +39,9 @@ describe('Index name validation', () => {
   });
 
   it('should not allow illegal characters', () => {
-    INDEX_ILLEGAL_CHARACTERS_VISIBLE.forEach((char) => {
+    INDEX_ILLEGAL_CHARACTERS_VISIBLE.forEach(char => {
       const illegalCharacters = findIllegalCharactersInIndexName(`name${char}`);
-      expect(illegalCharacters).toEqual([ char ]);
+      expect(illegalCharacters).toEqual([char]);
     });
   });
 });

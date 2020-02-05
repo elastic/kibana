@@ -18,10 +18,24 @@
  */
 
 export function dllEntryTemplate(requirePaths = []) {
-  return [
-    `require('dll/set_csp_nonce');`,
-    ...requirePaths
-      .map(path => `require('${path}');`)
-      .sort()
-  ].join('\n');
+  return requirePaths
+    .map(path => `require('${path}');`)
+    .sort()
+    .join('\n');
+}
+
+export function dllEntryFileContentStringToArray(content = '') {
+  return content.split('\n');
+}
+
+export function dllEntryFileContentArrayToString(content = []) {
+  return content.join('\n');
+}
+
+export function dllMergeAllEntryFilesContent(content = []) {
+  return content
+    .join('\n')
+    .split('\n')
+    .sort()
+    .join('\n');
 }

@@ -1,29 +1,33 @@
 #!/usr/bin/env bash
 
-set -e
+source test/scripts/jenkins_test_setup_oss.sh
 
-function report {
-  if [[ -z "$PR_SOURCE_BRANCH" ]]; then
-    node src/dev/failed_tests/cli
-  else
-    echo "Failure issues not created on pull requests"
+if [[ -z "$CODE_COVERAGE" ]]; then
+  checks-reporter-with-killswitch "Functional tests / Group ${CI_GROUP}" yarn run grunt "run:functionalTests_ciGroup${CI_GROUP}";
 
+  if [ "$CI_GROUP" == "1" ]; then
+    source test/scripts/jenkins_build_kbn_tp_sample_panel_action.sh
+    yarn run grunt run:pluginFunctionalTestsRelease --from=source;
+    yarn run grunt run:exampleFunctionalTestsRelease --from=source;
+    yarn run grunt run:interpreterFunctionalTestsRelease;
   fi
-}
+else
+  echo " -> Running Functional tests with code coverage"
+  export NODE_OPTIONS=--max_old_space_size=8192
 
-trap report EXIT
+  echo " -> making hard link clones"
+  cd ..
+  cp -RlP kibana "kibana${CI_GROUP}"
+  cd "kibana${CI_GROUP}"
 
-source src/dev/ci_setup/checkout_sibling_es.sh
+  echo " -> running tests from the clone folder"
+  yarn run grunt "run:functionalTests_ciGroup${CI_GROUP}";
 
-"$(FORCE_COLOR=0 yarn bin)/grunt" functionalTests:ensureAllTestsInCiGroup;
-
-node scripts/build --debug --oss;
-
-export TEST_BROWSER_HEADLESS=1
-export TEST_ES_FROM=${TEST_ES_FROM:-source}
-
-"$(FORCE_COLOR=0 yarn bin)/grunt" "run:functionalTests_ciGroup${CI_GROUP}" --from=source;
-
-if [ "$CI_GROUP" == "1" ]; then
-  "$(FORCE_COLOR=0 yarn bin)/grunt" run:pluginFunctionalTestsRelease --from=source;
+  if [[ -d target/kibana-coverage/functional ]]; then
+    echo " -> replacing kibana${CI_GROUP} with kibana in json files"
+    sed -i "s|kibana${CI_GROUP}|kibana|g" target/kibana-coverage/functional/*.json
+    echo " -> copying coverage to the original folder"
+    mkdir -p ../kibana/target/kibana-coverage/functional
+    cp -R target/kibana-coverage/functional/. ../kibana/target/kibana-coverage/functional/
+  fi
 fi

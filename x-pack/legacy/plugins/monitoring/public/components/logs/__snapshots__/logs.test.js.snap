@@ -1,0 +1,300 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Logs should render a link to filter by cluster uuid 1`] = `
+<EuiCallOut
+  iconType="logsApp"
+  size="m"
+  title="Want to see more log entries?"
+>
+  <p>
+    <FormattedMessage
+      defaultMessage="Visit {link} to dive deeper."
+      id="xpack.monitoring.logs.listing.linkText"
+      values={
+        Object {
+          "link": <ForwardRef
+            href="/app/infra#/link-to/internal-stack-monitoring/logs?filter=elasticsearch.cluster.uuid:12345"
+          >
+            Logs
+          </ForwardRef>,
+        }
+      }
+    />
+  </p>
+</EuiCallOut>
+`;
+
+exports[`Logs should render a link to filter by cluster uuid and index uuid 1`] = `
+<EuiCallOut
+  iconType="logsApp"
+  size="m"
+  title="Want to see more log entries?"
+>
+  <p>
+    <FormattedMessage
+      defaultMessage="Visit {link} to dive deeper."
+      id="xpack.monitoring.logs.listing.linkText"
+      values={
+        Object {
+          "link": <ForwardRef
+            href="/app/infra#/link-to/internal-stack-monitoring/logs?filter=elasticsearch.cluster.uuid:12345 and elasticsearch.index.name:6789"
+          >
+            Logs
+          </ForwardRef>,
+        }
+      }
+    />
+  </p>
+</EuiCallOut>
+`;
+
+exports[`Logs should render a link to filter by cluster uuid and node uuid 1`] = `
+<EuiCallOut
+  iconType="logsApp"
+  size="m"
+  title="Want to see more log entries?"
+>
+  <p>
+    <FormattedMessage
+      defaultMessage="Visit {link} to dive deeper."
+      id="xpack.monitoring.logs.listing.linkText"
+      values={
+        Object {
+          "link": <ForwardRef
+            href="/app/infra#/link-to/internal-stack-monitoring/logs?filter=elasticsearch.cluster.uuid:12345 and elasticsearch.node.id:6789"
+          >
+            Logs
+          </ForwardRef>,
+        }
+      }
+    />
+  </p>
+</EuiCallOut>
+`;
+
+exports[`Logs should render a reason if the logs are disabled 1`] = `
+<div>
+  <EuiTitle>
+    <h1>
+      Recent Log Entries
+    </h1>
+  </EuiTitle>
+  <EuiText
+    size="s"
+  >
+    <p>
+      Showing the most recent log entries for this cluster, up to 15 total log entries.
+    </p>
+  </EuiText>
+  <EuiSpacer
+    size="m"
+  />
+  <Reason
+    reason={Object {}}
+  />
+  <EuiSpacer
+    size="m"
+  />
+</div>
+`;
+
+exports[`Logs should render fewer columns for node or index view 1`] = `
+Array [
+  Object {
+    "field": "timestamp",
+    "name": "Timestamp",
+    "render": [Function],
+    "width": "12%",
+  },
+  Object {
+    "field": "level",
+    "name": "Level",
+    "width": "5%",
+  },
+  Object {
+    "field": "type",
+    "name": "Type",
+    "render": [Function],
+    "width": "10%",
+  },
+  Object {
+    "field": "message",
+    "name": "Message",
+    "width": "55%",
+  },
+  Object {
+    "field": "component",
+    "name": "Component",
+    "width": "18%",
+  },
+]
+`;
+
+exports[`Logs should render normally 1`] = `
+<div>
+  <EuiTitle>
+    <h1>
+      Recent Log Entries
+    </h1>
+  </EuiTitle>
+  <EuiText
+    size="s"
+  >
+    <p>
+      Showing the most recent log entries for this cluster, up to 10 total log entries.
+    </p>
+  </EuiText>
+  <EuiSpacer
+    size="m"
+  />
+  <EuiBasicTable
+    columns={
+      Array [
+        Object {
+          "field": "timestamp",
+          "name": "Timestamp",
+          "render": [Function],
+          "width": "12%",
+        },
+        Object {
+          "field": "level",
+          "name": "Level",
+          "width": "5%",
+        },
+        Object {
+          "field": "type",
+          "name": "Type",
+          "render": [Function],
+          "width": "10%",
+        },
+        Object {
+          "field": "message",
+          "name": "Message",
+          "width": "45%",
+        },
+        Object {
+          "field": "component",
+          "name": "Component",
+          "width": "15%",
+        },
+        Object {
+          "field": "node",
+          "name": "Node",
+          "width": "13%",
+        },
+      ]
+    }
+    items={
+      Array [
+        Object {
+          "component": "o.e.d.x.m.r.a.RestMonitoringBulkAction",
+          "level": "WARN",
+          "message": "[POST /_xpack/monitoring/_bulk] is deprecated! Use [POST /_monitoring/bulk] instead.",
+          "node": "foobar",
+          "timestamp": "2019-03-18T12:49:33.783Z",
+          "type": "deprecation",
+        },
+        Object {
+          "component": "o.e.d.x.m.r.a.RestMonitoringBulkAction",
+          "level": "WARN",
+          "message": "[POST /_xpack/monitoring/_bulk] is deprecated! Use [POST /_monitoring/bulk] instead.",
+          "node": "foobar",
+          "timestamp": "2019-03-18T12:49:26.781Z",
+          "type": "deprecation",
+        },
+        Object {
+          "component": "o.e.c.r.a.DiskThresholdMonitor",
+          "level": "WARN",
+          "message": "high disk watermark [90%] exceeded on [-pH5RhfsRl6FDeTPwD5vEw][Elastic-MBP.local][/Users/chris/Development/repos/kibana/.es/8.0.0/data/nodes/0] free: 29.5gb[6.3%], shards will be relocated away from this node",
+          "node": "foobar2",
+          "timestamp": "2019-03-18T12:49:24.414Z",
+          "type": "server",
+        },
+        Object {
+          "component": "o.e.c.r.a.DiskThresholdMonitor",
+          "level": "INFO",
+          "message": "rerouting shards: [high disk watermark exceeded on one or more nodes]",
+          "node": "foobar",
+          "timestamp": "2019-03-18T12:49:24.414Z",
+          "type": "server",
+        },
+        Object {
+          "component": "o.e.d.x.m.r.a.RestMonitoringBulkAction",
+          "level": "WARN",
+          "message": "[POST /_xpack/monitoring/_bulk] is deprecated! Use [POST /_monitoring/bulk] instead.",
+          "node": "foobar",
+          "timestamp": "2019-03-18T12:49:11.776Z",
+          "type": "deprecation",
+        },
+        Object {
+          "component": "o.e.d.x.m.r.a.RestMonitoringBulkAction",
+          "level": "WARN",
+          "message": "[POST /_xpack/monitoring/_bulk] is deprecated! Use [POST /_monitoring/bulk] instead.",
+          "node": "foobar",
+          "timestamp": "2019-03-18T12:49:08.770Z",
+          "type": "deprecation",
+        },
+        Object {
+          "component": "o.e.c.r.a.DiskThresholdMonitor",
+          "level": "WARN",
+          "message": "high disk watermark [90%] exceeded on [-pH5RhfsRl6FDeTPwD5vEw][Elastic-MBP.local][/Users/chris/Development/repos/kibana/.es/8.0.0/data/nodes/0] free: 29.3gb[6.2%], shards will be relocated away from this node",
+          "node": "foobar",
+          "timestamp": "2019-03-18T12:48:59.409Z",
+          "type": "server",
+        },
+        Object {
+          "component": "o.e.d.x.m.r.a.RestMonitoringBulkAction",
+          "level": "WARN",
+          "message": "[POST /_xpack/monitoring/_bulk] is deprecated! Use [POST /_monitoring/bulk] instead.",
+          "node": "foobar",
+          "timestamp": "2019-03-18T12:48:53.753Z",
+          "type": "deprecation",
+        },
+        Object {
+          "component": "o.e.d.x.m.r.a.RestMonitoringBulkAction",
+          "level": "WARN",
+          "message": "[POST /_xpack/monitoring/_bulk] is deprecated! Use [POST /_monitoring/bulk] instead.",
+          "node": "foobar",
+          "timestamp": "2019-03-18T12:48:53.753Z",
+          "type": "deprecation",
+        },
+        Object {
+          "component": "o.e.d.x.m.r.a.RestMonitoringBulkAction",
+          "level": "WARN",
+          "message": "[POST /_xpack/monitoring/_bulk] is deprecated! Use [POST /_monitoring/bulk] instead.",
+          "node": "foobar2",
+          "timestamp": "2019-03-18T12:48:46.745Z",
+          "type": "deprecation",
+        },
+      ]
+    }
+    noItemsMessage="No items found"
+    responsive={true}
+    tableLayout="fixed"
+  />
+  <EuiSpacer
+    size="m"
+  />
+  <EuiCallOut
+    iconType="logsApp"
+    size="m"
+    title="Want to see more log entries?"
+  >
+    <p>
+      <FormattedMessage
+        defaultMessage="Visit {link} to dive deeper."
+        id="xpack.monitoring.logs.listing.linkText"
+        values={
+          Object {
+            "link": <ForwardRef
+              href="/app/infra#/link-to/internal-stack-monitoring/logs"
+            >
+              Logs
+            </ForwardRef>,
+          }
+        }
+      />
+    </p>
+  </EuiCallOut>
+</div>
+`;

@@ -1,0 +1,1730 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Storyshots shareables/Footer contextual: austin 1`] = `
+<div
+  className="kbnCanvas"
+  style={
+    Object {
+      "height": 172,
+      "overflow": "hidden",
+      "position": "relative",
+      "width": undefined,
+    }
+  }
+>
+  <div
+    className="root"
+    style={
+      Object {
+        "height": 48,
+      }
+    }
+  >
+    <div
+      className="root"
+    >
+      <div
+        className="slideContainer"
+      >
+        <div
+          className="root"
+          onClick={[Function]}
+          onKeyPress={[Function]}
+          style={
+            Object {
+              "height": 100,
+              "width": 177.77777777777777,
+            }
+          }
+        >
+          <div
+            className="preview"
+            style={
+              Object {
+                "height": 720,
+                "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
+                "width": 1280,
+              }
+            }
+          >
+            <div
+              className="root"
+              id="page-fda26a1f-c096-44e4-a149-cb99e1038a34"
+              style={
+                Object {
+                  "background": "#000000",
+                  "height": 720,
+                  "width": 1280,
+                }
+              }
+            >
+              RenderedElement
+              RenderedElement
+              RenderedElement
+            </div>
+          </div>
+        </div>
+        <div
+          className="root"
+          onClick={[Function]}
+          onKeyPress={[Function]}
+          style={
+            Object {
+              "height": 100,
+              "width": 177.77777777777777,
+            }
+          }
+        >
+          <div
+            className="preview"
+            style={
+              Object {
+                "height": 720,
+                "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
+                "width": 1280,
+              }
+            }
+          >
+            <div
+              className="root"
+              id="page-484d1552-e969-4ca9-ac44-dd90d2caac87"
+              style={
+                Object {
+                  "background": "#37988d",
+                  "height": 720,
+                  "width": 1280,
+                }
+              }
+            >
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+            </div>
+          </div>
+        </div>
+        <div
+          className="root"
+          onClick={[Function]}
+          onKeyPress={[Function]}
+          style={
+            Object {
+              "height": 100,
+              "width": 177.77777777777777,
+            }
+          }
+        >
+          <div
+            className="preview"
+            style={
+              Object {
+                "height": 720,
+                "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
+                "width": 1280,
+              }
+            }
+          >
+            <div
+              className="root"
+              id="page-025bcfd7-e633-4ae4-a9a8-86c92d8ae950"
+              style={
+                Object {
+                  "background": "#343842",
+                  "height": 720,
+                  "width": 1280,
+                }
+              }
+            >
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+            </div>
+          </div>
+        </div>
+        <div
+          className="root"
+          onClick={[Function]}
+          onKeyPress={[Function]}
+          style={
+            Object {
+              "height": 100,
+              "width": 177.77777777777777,
+            }
+          }
+        >
+          <div
+            className="preview"
+            style={
+              Object {
+                "height": 720,
+                "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
+                "width": 1280,
+              }
+            }
+          >
+            <div
+              className="root"
+              id="page-d8b39380-a8f5-4a52-afe7-c8f6a4eade7b"
+              style={
+                Object {
+                  "background": "#b83c6f",
+                  "height": 720,
+                  "width": 1280,
+                }
+              }
+            >
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+            </div>
+          </div>
+        </div>
+        <div
+          className="root"
+          onClick={[Function]}
+          onKeyPress={[Function]}
+          style={
+            Object {
+              "height": 100,
+              "width": 177.77777777777777,
+            }
+          }
+        >
+          <div
+            className="preview"
+            style={
+              Object {
+                "height": 720,
+                "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
+                "width": 1280,
+              }
+            }
+          >
+            <div
+              className="root"
+              id="page-4a1fd263-435a-4c85-9933-3748b8711cdd"
+              style={
+                Object {
+                  "background": "#37988d",
+                  "height": 720,
+                  "width": 1280,
+                }
+              }
+            >
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+            </div>
+          </div>
+        </div>
+        <div
+          className="root"
+          onClick={[Function]}
+          onKeyPress={[Function]}
+          style={
+            Object {
+              "height": 100,
+              "width": 177.77777777777777,
+            }
+          }
+        >
+          <div
+            className="preview"
+            style={
+              Object {
+                "height": 720,
+                "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
+                "width": 1280,
+              }
+            }
+          >
+            <div
+              className="root"
+              id="page-cec3eda8-0f38-446d-b898-777acb97bd0e"
+              style={
+                Object {
+                  "background": "#1785b0",
+                  "height": 720,
+                  "width": 1280,
+                }
+              }
+            >
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+            </div>
+          </div>
+        </div>
+        <div
+          className="root"
+          onClick={[Function]}
+          onKeyPress={[Function]}
+          style={
+            Object {
+              "height": 100,
+              "width": 177.77777777777777,
+            }
+          }
+        >
+          <div
+            className="preview"
+            style={
+              Object {
+                "height": 720,
+                "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
+                "width": 1280,
+              }
+            }
+          >
+            <div
+              className="root"
+              id="page-94ca7023-db93-49ad-a86f-e59647e1fa13"
+              style={
+                Object {
+                  "background": "#FFF",
+                  "height": 720,
+                  "width": 1280,
+                }
+              }
+            >
+              RenderedElement
+            </div>
+          </div>
+        </div>
+        <div
+          className="root"
+          onClick={[Function]}
+          onKeyPress={[Function]}
+          style={
+            Object {
+              "height": 100,
+              "width": 177.77777777777777,
+            }
+          }
+        >
+          <div
+            className="preview"
+            style={
+              Object {
+                "height": 720,
+                "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
+                "width": 1280,
+              }
+            }
+          >
+            <div
+              className="root"
+              id="page-d51edf0d-2827-4c41-8499-07758cc5a143"
+              style={
+                Object {
+                  "background": "#343842",
+                  "height": 720,
+                  "width": 1280,
+                }
+              }
+            >
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+            </div>
+          </div>
+        </div>
+        <div
+          className="root"
+          onClick={[Function]}
+          onKeyPress={[Function]}
+          style={
+            Object {
+              "height": 100,
+              "width": 177.77777777777777,
+            }
+          }
+        >
+          <div
+            className="preview"
+            style={
+              Object {
+                "height": 720,
+                "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
+                "width": 1280,
+              }
+            }
+          >
+            <div
+              className="root"
+              id="page-3d94125d-cf42-460b-b2b2-3498abcbb323"
+              style={
+                Object {
+                  "background": "#FFF",
+                  "height": 720,
+                  "width": 1280,
+                }
+              }
+            >
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+            </div>
+          </div>
+        </div>
+        <div
+          className="root"
+          onClick={[Function]}
+          onKeyPress={[Function]}
+          style={
+            Object {
+              "height": 100,
+              "width": 177.77777777777777,
+            }
+          }
+        >
+          <div
+            className="preview"
+            style={
+              Object {
+                "height": 720,
+                "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
+                "width": 1280,
+              }
+            }
+          >
+            <div
+              className="root"
+              id="page-f8f0b30d-2df4-465f-9dbe-bf5efee0f9da"
+              style={
+                Object {
+                  "background": "#000000",
+                  "height": 720,
+                  "width": 1280,
+                }
+              }
+            >
+              RenderedElement
+              RenderedElement
+              RenderedElement
+            </div>
+          </div>
+        </div>
+        <div
+          className="root"
+          onClick={[Function]}
+          onKeyPress={[Function]}
+          style={
+            Object {
+              "height": 100,
+              "width": 177.77777777777777,
+            }
+          }
+        >
+          <div
+            className="preview"
+            style={
+              Object {
+                "height": 720,
+                "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
+                "width": 1280,
+              }
+            }
+          >
+            <div
+              className="root"
+              id="page-b142e395-236d-42b1-a0c8-6626c9d78d5e"
+              style={
+                Object {
+                  "background": "#343842",
+                  "height": 720,
+                  "width": 1280,
+                }
+              }
+            >
+              RenderedElement
+            </div>
+          </div>
+        </div>
+        <div
+          className="root"
+          onClick={[Function]}
+          onKeyPress={[Function]}
+          style={
+            Object {
+              "height": 100,
+              "width": 177.77777777777777,
+            }
+          }
+        >
+          <div
+            className="preview"
+            style={
+              Object {
+                "height": 720,
+                "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
+                "width": 1280,
+              }
+            }
+          >
+            <div
+              className="root"
+              id="page-aaf3ddd0-21b0-492e-8a22-69bb989fb353"
+              style={
+                Object {
+                  "background": "#000000",
+                  "height": 720,
+                  "width": 1280,
+                }
+              }
+            >
+              RenderedElement
+              RenderedElement
+            </div>
+          </div>
+        </div>
+        <div
+          className="root"
+          onClick={[Function]}
+          onKeyPress={[Function]}
+          style={
+            Object {
+              "height": 100,
+              "width": 177.77777777777777,
+            }
+          }
+        >
+          <div
+            className="preview"
+            style={
+              Object {
+                "height": 720,
+                "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
+                "width": 1280,
+              }
+            }
+          >
+            <div
+              className="root"
+              id="page-e08e5d38-f751-46b8-abbd-922c5d0cad9c"
+              style={
+                Object {
+                  "background": "#b83c6f",
+                  "height": 720,
+                  "width": 1280,
+                }
+              }
+            >
+              RenderedElement
+              RenderedElement
+              RenderedElement
+            </div>
+          </div>
+        </div>
+        <div
+          className="root"
+          onClick={[Function]}
+          onKeyPress={[Function]}
+          style={
+            Object {
+              "height": 100,
+              "width": 177.77777777777777,
+            }
+          }
+        >
+          <div
+            className="preview"
+            style={
+              Object {
+                "height": 720,
+                "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
+                "width": 1280,
+              }
+            }
+          >
+            <div
+              className="root"
+              id="page-7177ee02-94f4-43f0-b144-7a814565d7b0"
+              style={
+                Object {
+                  "background": "#343842",
+                  "height": 720,
+                  "width": 1280,
+                }
+              }
+            >
+              RenderedElement
+              RenderedElement
+              RenderedElement
+            </div>
+          </div>
+        </div>
+        <div
+          className="root"
+          onClick={[Function]}
+          onKeyPress={[Function]}
+          style={
+            Object {
+              "height": 100,
+              "width": 177.77777777777777,
+            }
+          }
+        >
+          <div
+            className="preview"
+            style={
+              Object {
+                "height": 720,
+                "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
+                "width": 1280,
+              }
+            }
+          >
+            <div
+              className="root"
+              id="page-bb62180f-dad4-4623-9120-74ba4b7e975a"
+              style={
+                Object {
+                  "background": "#1785b0",
+                  "height": 720,
+                  "width": 1280,
+                }
+              }
+            >
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+            </div>
+          </div>
+        </div>
+        <div
+          className="root"
+          onClick={[Function]}
+          onKeyPress={[Function]}
+          style={
+            Object {
+              "height": 100,
+              "width": 177.77777777777777,
+            }
+          }
+        >
+          <div
+            className="preview"
+            style={
+              Object {
+                "height": 720,
+                "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
+                "width": 1280,
+              }
+            }
+          >
+            <div
+              className="root"
+              id="page-053b027e-7f4d-426b-bf03-ec34d8027dd0"
+              style={
+                Object {
+                  "background": "#37988d",
+                  "height": 720,
+                  "width": 1280,
+                }
+              }
+            >
+              RenderedElement
+              RenderedElement
+            </div>
+          </div>
+        </div>
+        <div
+          className="root"
+          onClick={[Function]}
+          onKeyPress={[Function]}
+          style={
+            Object {
+              "height": 100,
+              "width": 177.77777777777777,
+            }
+          }
+        >
+          <div
+            className="preview"
+            style={
+              Object {
+                "height": 720,
+                "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
+                "width": 1280,
+              }
+            }
+          >
+            <div
+              className="root"
+              id="page-fa6dec42-92b2-4c1c-aad6-756992c07107"
+              style={
+                Object {
+                  "background": "#b83c6f",
+                  "height": 720,
+                  "width": 1280,
+                }
+              }
+            >
+              RenderedElement
+              RenderedElement
+            </div>
+          </div>
+        </div>
+        <div
+          className="root"
+          onClick={[Function]}
+          onKeyPress={[Function]}
+          style={
+            Object {
+              "height": 100,
+              "width": 177.77777777777777,
+            }
+          }
+        >
+          <div
+            className="preview"
+            style={
+              Object {
+                "height": 720,
+                "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
+                "width": 1280,
+              }
+            }
+          >
+            <div
+              className="root"
+              id="page-f24d5ca0-f762-49f6-a75e-e1f9682d0681"
+              style={
+                Object {
+                  "background": "#343842",
+                  "height": 720,
+                  "width": 1280,
+                }
+              }
+            >
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+            </div>
+          </div>
+        </div>
+        <div
+          className="root"
+          onClick={[Function]}
+          onKeyPress={[Function]}
+          style={
+            Object {
+              "height": 100,
+              "width": 177.77777777777777,
+            }
+          }
+        >
+          <div
+            className="preview"
+            style={
+              Object {
+                "height": 720,
+                "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
+                "width": 1280,
+              }
+            }
+          >
+            <div
+              className="root"
+              id="page-f28a063b-0608-41cf-828a-937a731b8a75"
+              style={
+                Object {
+                  "background": "#1785b0",
+                  "height": 720,
+                  "width": 1280,
+                }
+              }
+            >
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+            </div>
+          </div>
+        </div>
+        <div
+          className="root"
+          onClick={[Function]}
+          onKeyPress={[Function]}
+          style={
+            Object {
+              "height": 100,
+              "width": 177.77777777777777,
+            }
+          }
+        >
+          <div
+            className="preview"
+            style={
+              Object {
+                "height": 720,
+                "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
+                "width": 1280,
+              }
+            }
+          >
+            <div
+              className="root"
+              id="page-2583c7e7-74fa-4da0-b903-28422c141ac4"
+              style={
+                Object {
+                  "background": "#37988d",
+                  "height": 720,
+                  "width": 1280,
+                }
+              }
+            >
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+            </div>
+          </div>
+        </div>
+        <div
+          className="root"
+          onClick={[Function]}
+          onKeyPress={[Function]}
+          style={
+            Object {
+              "height": 100,
+              "width": 177.77777777777777,
+            }
+          }
+        >
+          <div
+            className="preview"
+            style={
+              Object {
+                "height": 720,
+                "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
+                "width": 1280,
+              }
+            }
+          >
+            <div
+              className="root"
+              id="page-e125ca0b-f6b2-437c-bc4c-918c468fbd9f"
+              style={
+                Object {
+                  "background": "#000000",
+                  "height": 720,
+                  "width": 1280,
+                }
+              }
+            >
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+            </div>
+          </div>
+        </div>
+        <div
+          className="root"
+          onClick={[Function]}
+          onKeyPress={[Function]}
+          style={
+            Object {
+              "height": 100,
+              "width": 177.77777777777777,
+            }
+          }
+        >
+          <div
+            className="preview"
+            style={
+              Object {
+                "height": 720,
+                "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
+                "width": 1280,
+              }
+            }
+          >
+            <div
+              className="root"
+              id="page-261eb6da-4ab2-400d-b1be-b72cbbcf58ff"
+              style={
+                Object {
+                  "background": "#f4f4f4",
+                  "height": 720,
+                  "width": 1280,
+                }
+              }
+            >
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+            </div>
+          </div>
+        </div>
+        <div
+          className="root"
+          onClick={[Function]}
+          onKeyPress={[Function]}
+          style={
+            Object {
+              "height": 100,
+              "width": 177.77777777777777,
+            }
+          }
+        >
+          <div
+            className="preview"
+            style={
+              Object {
+                "height": 720,
+                "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
+                "width": 1280,
+              }
+            }
+          >
+            <div
+              className="root"
+              id="page-f7a61ad7-5f68-463a-8070-9cec0e383d43"
+              style={
+                Object {
+                  "background": "#b83c6f",
+                  "height": 720,
+                  "width": 1280,
+                }
+              }
+            >
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+            </div>
+          </div>
+        </div>
+        <div
+          className="root"
+          onClick={[Function]}
+          onKeyPress={[Function]}
+          style={
+            Object {
+              "height": 100,
+              "width": 177.77777777777777,
+            }
+          }
+        >
+          <div
+            className="preview"
+            style={
+              Object {
+                "height": 720,
+                "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
+                "width": 1280,
+              }
+            }
+          >
+            <div
+              className="root"
+              id="page-55b6ff27-5ed8-47bd-9201-4f4eb2489075"
+              style={
+                Object {
+                  "background": "#1785b0",
+                  "height": 720,
+                  "width": 1280,
+                }
+              }
+            >
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+            </div>
+          </div>
+        </div>
+        <div
+          className="root"
+          onClick={[Function]}
+          onKeyPress={[Function]}
+          style={
+            Object {
+              "height": 100,
+              "width": 177.77777777777777,
+            }
+          }
+        >
+          <div
+            className="preview"
+            style={
+              Object {
+                "height": 720,
+                "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
+                "width": 1280,
+              }
+            }
+          >
+            <div
+              className="root"
+              id="page-dabbb068-0b32-4855-a6da-755792e58834"
+              style={
+                Object {
+                  "background": "#37988d",
+                  "height": 720,
+                  "width": 1280,
+                }
+              }
+            >
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+            </div>
+          </div>
+        </div>
+        <div
+          className="root"
+          onClick={[Function]}
+          onKeyPress={[Function]}
+          style={
+            Object {
+              "height": 100,
+              "width": 177.77777777777777,
+            }
+          }
+        >
+          <div
+            className="preview"
+            style={
+              Object {
+                "height": 720,
+                "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
+                "width": 1280,
+              }
+            }
+          >
+            <div
+              className="root"
+              id="page-89a82fc4-8101-4c34-aa46-3c00bccb803b"
+              style={
+                Object {
+                  "background": "#FFFFFF",
+                  "height": 720,
+                  "width": 1280,
+                }
+              }
+            >
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+            </div>
+          </div>
+        </div>
+        <div
+          className="root"
+          onClick={[Function]}
+          onKeyPress={[Function]}
+          style={
+            Object {
+              "height": 100,
+              "width": 177.77777777777777,
+            }
+          }
+        >
+          <div
+            className="preview"
+            style={
+              Object {
+                "height": 720,
+                "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
+                "width": 1280,
+              }
+            }
+          >
+            <div
+              className="root"
+              id="page-1332ecd6-f61a-4fbd-a9ed-1cf4159883e2"
+              style={
+                Object {
+                  "background": "#b83c6f",
+                  "height": 720,
+                  "width": 1280,
+                }
+              }
+            >
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+              RenderedElement
+            </div>
+          </div>
+        </div>
+        <div
+          className="root"
+          onClick={[Function]}
+          onKeyPress={[Function]}
+          style={
+            Object {
+              "height": 100,
+              "width": 177.77777777777777,
+            }
+          }
+        >
+          <div
+            className="preview"
+            style={
+              Object {
+                "height": 720,
+                "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
+                "width": 1280,
+              }
+            }
+          >
+            <div
+              className="root"
+              id="page-5e878251-2a7c-44f8-af7b-9e22fbe9bd50"
+              style={
+                Object {
+                  "background": "#1785b0",
+                  "height": 720,
+                  "width": 1280,
+                }
+              }
+            >
+              RenderedElement
+              RenderedElement
+              RenderedElement
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      className="bar"
+      style={
+        Object {
+          "bottom": 0,
+        }
+      }
+    >
+      <div
+        className="euiFlexGroup euiFlexGroup--directionRow euiFlexGroup--responsive"
+      >
+        <div
+          className="euiFlexItem title"
+        >
+          <div
+            className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+          >
+            <div
+              className="euiFlexItem euiFlexItem--flexGrowZero"
+              style={
+                Object {
+                  "flexShrink": 0,
+                }
+              }
+            >
+              <a
+                className="euiLink euiLink--primary"
+                href="https://www.elastic.co"
+                rel=""
+                title="Powered by Elastic.co"
+              >
+                <svg
+                  aria-hidden={true}
+                  className="euiIcon euiIcon--large euiIcon-isLoading"
+                  focusable="false"
+                  height={16}
+                  role="img"
+                  style={null}
+                  viewBox="0 0 16 16"
+                  width={16}
+                  xmlns="http://www.w3.org/2000/svg"
+                />
+              </a>
+            </div>
+            <div
+              className="euiFlexItem euiFlexItem--flexGrowZero"
+              style={
+                Object {
+                  "cursor": "default",
+                  "minWidth": 0,
+                }
+              }
+            >
+              <div
+                className="euiText euiText--small"
+              >
+                <div
+                  className="euiTextColor euiTextColor--ghost"
+                >
+                  <div
+                    className="eui-textTruncate"
+                  >
+                    Elastic{ON} - Austin from Clint Andrew Hall with a title that just goes and goes and goes
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          className="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <div
+            className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive"
+          >
+            <div
+              className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+              style={
+                Object {
+                  "margin": "0 12px",
+                }
+              }
+            >
+              <div
+                className="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <button
+                  aria-label="Previous Page"
+                  className="euiButtonIcon euiButtonIcon--ghost"
+                  data-test-subj="pageControlsPrevPage"
+                  disabled={true}
+                  onClick={[Function]}
+                  type="button"
+                >
+                  <svg
+                    aria-hidden={true}
+                    className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
+                    focusable="false"
+                    height={16}
+                    role="img"
+                    style={null}
+                    viewBox="0 0 16 16"
+                    width={16}
+                    xmlns="http://www.w3.org/2000/svg"
+                  />
+                </button>
+              </div>
+              <div
+                className="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <button
+                  className="euiButtonEmpty euiButtonEmpty--ghost euiButtonEmpty--small"
+                  data-test-subj="pageControlsCurrentPage"
+                  onClick={[Function]}
+                  type="button"
+                >
+                  <span
+                    className="euiButtonEmpty__content"
+                  >
+                    <span
+                      className="euiButtonEmpty__text"
+                    >
+                      <div
+                        className="euiText euiText--small"
+                      >
+                        <div
+                          className="euiTextColor euiTextColor--ghost"
+                        >
+                          Page 
+                          1
+                           of 28
+                        </div>
+                      </div>
+                    </span>
+                  </span>
+                </button>
+              </div>
+              <div
+                className="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <button
+                  aria-label="Next Page"
+                  className="euiButtonIcon euiButtonIcon--ghost"
+                  data-test-subj="pageControlsNextPage"
+                  disabled={false}
+                  onClick={[Function]}
+                  type="button"
+                >
+                  <svg
+                    aria-hidden={true}
+                    className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
+                    focusable="false"
+                    height={16}
+                    role="img"
+                    style={null}
+                    viewBox="0 0 16 16"
+                    width={16}
+                    xmlns="http://www.w3.org/2000/svg"
+                  />
+                </button>
+              </div>
+            </div>
+            <div
+              className="euiFlexGroup euiFlexGroup--alignItemsFlexEnd euiFlexGroup--justifyContentCenter euiFlexGroup--directionColumn euiFlexGroup--responsive"
+            >
+              <div
+                className="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <div
+                  className="euiPopover euiPopover--anchorUpRight euiPopover--withTitle"
+                  id="settings"
+                  onKeyDown={[Function]}
+                  onMouseDown={[Function]}
+                  onMouseUp={[Function]}
+                  onTouchEnd={[Function]}
+                  onTouchStart={[Function]}
+                >
+                  <div
+                    className="euiPopover__anchor"
+                  >
+                    <button
+                      aria-label="Settings"
+                      className="euiButtonIcon euiButtonIcon--ghost"
+                      onClick={[Function]}
+                      type="button"
+                    >
+                      <svg
+                        aria-hidden={true}
+                        className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
+                        focusable="false"
+                        height={16}
+                        role="img"
+                        style={null}
+                        viewBox="0 0 16 16"
+                        width={16}
+                        xmlns="http://www.w3.org/2000/svg"
+                      />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Storyshots shareables/Footer contextual: hello 1`] = `
+<div
+  className="kbnCanvas"
+  style={
+    Object {
+      "height": 172,
+      "overflow": "hidden",
+      "position": "relative",
+      "width": undefined,
+    }
+  }
+>
+  <div
+    className="root"
+    style={
+      Object {
+        "height": 48,
+      }
+    }
+  >
+    <div
+      className="root"
+    >
+      <div
+        className="slideContainer"
+      >
+        <div
+          className="root"
+          onClick={[Function]}
+          onKeyPress={[Function]}
+          style={
+            Object {
+              "height": 100,
+              "width": 150,
+            }
+          }
+        >
+          <div
+            className="preview"
+            style={
+              Object {
+                "height": 720,
+                "transform": "scale3d(0.1388888888888889, 0.1388888888888889, 1)",
+                "width": 1080,
+              }
+            }
+          >
+            <div
+              className="root"
+              id="page-7186b301-f8a7-4c65-8b89-38d68d31cfc4"
+              style={
+                Object {
+                  "background": "#777777",
+                  "height": 720,
+                  "width": 1080,
+                }
+              }
+            >
+              RenderedElement
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      className="bar"
+      style={
+        Object {
+          "bottom": 0,
+        }
+      }
+    >
+      <div
+        className="euiFlexGroup euiFlexGroup--directionRow euiFlexGroup--responsive"
+      >
+        <div
+          className="euiFlexItem title"
+        >
+          <div
+            className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+          >
+            <div
+              className="euiFlexItem euiFlexItem--flexGrowZero"
+              style={
+                Object {
+                  "flexShrink": 0,
+                }
+              }
+            >
+              <a
+                className="euiLink euiLink--primary"
+                href="https://www.elastic.co"
+                rel=""
+                title="Powered by Elastic.co"
+              >
+                <svg
+                  aria-hidden={true}
+                  className="euiIcon euiIcon--large euiIcon-isLoading"
+                  focusable="false"
+                  height={16}
+                  role="img"
+                  style={null}
+                  viewBox="0 0 16 16"
+                  width={16}
+                  xmlns="http://www.w3.org/2000/svg"
+                />
+              </a>
+            </div>
+            <div
+              className="euiFlexItem euiFlexItem--flexGrowZero"
+              style={
+                Object {
+                  "cursor": "default",
+                  "minWidth": 0,
+                }
+              }
+            >
+              <div
+                className="euiText euiText--small"
+              >
+                <div
+                  className="euiTextColor euiTextColor--ghost"
+                >
+                  <div
+                    className="eui-textTruncate"
+                  >
+                    My Canvas Workpad
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          className="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <div
+            className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive"
+          >
+            <div
+              className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+              style={
+                Object {
+                  "margin": "0 12px",
+                }
+              }
+            >
+              <div
+                className="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <button
+                  aria-label="Previous Page"
+                  className="euiButtonIcon euiButtonIcon--ghost"
+                  data-test-subj="pageControlsPrevPage"
+                  disabled={true}
+                  onClick={[Function]}
+                  type="button"
+                >
+                  <svg
+                    aria-hidden={true}
+                    className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
+                    focusable="false"
+                    height={16}
+                    role="img"
+                    style={null}
+                    viewBox="0 0 16 16"
+                    width={16}
+                    xmlns="http://www.w3.org/2000/svg"
+                  />
+                </button>
+              </div>
+              <div
+                className="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <button
+                  className="euiButtonEmpty euiButtonEmpty--ghost euiButtonEmpty--small"
+                  data-test-subj="pageControlsCurrentPage"
+                  onClick={[Function]}
+                  type="button"
+                >
+                  <span
+                    className="euiButtonEmpty__content"
+                  >
+                    <span
+                      className="euiButtonEmpty__text"
+                    >
+                      <div
+                        className="euiText euiText--small"
+                      >
+                        <div
+                          className="euiTextColor euiTextColor--ghost"
+                        >
+                          Page 
+                          1
+                        </div>
+                      </div>
+                    </span>
+                  </span>
+                </button>
+              </div>
+              <div
+                className="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <button
+                  aria-label="Next Page"
+                  className="euiButtonIcon euiButtonIcon--ghost"
+                  data-test-subj="pageControlsNextPage"
+                  disabled={true}
+                  onClick={[Function]}
+                  type="button"
+                >
+                  <svg
+                    aria-hidden={true}
+                    className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
+                    focusable="false"
+                    height={16}
+                    role="img"
+                    style={null}
+                    viewBox="0 0 16 16"
+                    width={16}
+                    xmlns="http://www.w3.org/2000/svg"
+                  />
+                </button>
+              </div>
+            </div>
+            <div
+              className="euiFlexGroup euiFlexGroup--alignItemsFlexEnd euiFlexGroup--justifyContentCenter euiFlexGroup--directionColumn euiFlexGroup--responsive"
+            >
+              <div
+                className="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <div
+                  className="euiPopover euiPopover--anchorUpRight euiPopover--withTitle"
+                  id="settings"
+                  onKeyDown={[Function]}
+                  onMouseDown={[Function]}
+                  onMouseUp={[Function]}
+                  onTouchEnd={[Function]}
+                  onTouchStart={[Function]}
+                >
+                  <div
+                    className="euiPopover__anchor"
+                  >
+                    <button
+                      aria-label="Settings"
+                      className="euiButtonIcon euiButtonIcon--ghost"
+                      onClick={[Function]}
+                      type="button"
+                    >
+                      <svg
+                        aria-hidden={true}
+                        className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
+                        focusable="false"
+                        height={16}
+                        role="img"
+                        style={null}
+                        viewBox="0 0 16 16"
+                        width={16}
+                        xmlns="http://www.w3.org/2000/svg"
+                      />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;

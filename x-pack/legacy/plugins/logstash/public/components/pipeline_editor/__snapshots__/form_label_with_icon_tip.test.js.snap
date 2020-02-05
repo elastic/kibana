@@ -1,0 +1,15 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`FormLabelWithIconTip component renders as expected 1`] = `
+<div>
+  <span>
+    label text
+  </span>
+   
+  <EuiIconTip
+    content="tooltip text"
+    size="s"
+    type="questionInCircle"
+  />
+</div>
+`;

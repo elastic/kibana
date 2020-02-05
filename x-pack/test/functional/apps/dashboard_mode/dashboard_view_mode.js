@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
-export default function ({ getService, getPageObjects }) {
+export default function({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
@@ -25,29 +25,33 @@ export default function ({ getService, getPageObjects }) {
     'header',
     'settings',
     'timePicker',
+    'share',
   ]);
   const dashboardName = 'Dashboard View Mode Test Dashboard';
   const savedSearchName = 'Saved search for dashboard';
 
-  describe('Dashboard View Mode', () => {
+  describe('Dashboard View Mode', function() {
+    this.tags(['skipFirefox']);
 
     before('initialize tests', async () => {
       log.debug('Dashboard View Mode:initTests');
       await esArchiver.loadIfNeeded('logstash_functional');
       await esArchiver.load('dashboard_view_mode');
       await kibanaServer.uiSettings.replace({
-        'defaultIndex': 'logstash-*'
+        defaultIndex: 'logstash-*',
+        pageNavigation: 'individual',
       });
-      await kibanaServer.uiSettings.disableToastAutohide();
-      browser.setWindowSize(1600, 1000);
+      await browser.setWindowSize(1600, 1000);
 
       await PageObjects.common.navigateToApp('discover');
-      await PageObjects.dashboard.setTimepickerInHistoricalDataRange();
+      await PageObjects.timePicker.setHistoricalDataRange();
       await PageObjects.discover.saveSearch(savedSearchName);
 
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.clickNewDashboard();
-      await PageObjects.dashboard.addVisualizations(PageObjects.dashboard.getTestVisualizationNames());
+      await PageObjects.dashboard.addVisualizations(
+        PageObjects.dashboard.getTestVisualizationNames()
+      );
       await dashboardAddPanel.addSavedSearch(savedSearchName);
       await PageObjects.dashboard.saveDashboard(dashboardName);
     });
@@ -88,7 +92,7 @@ export default function ({ getService, getPageObjects }) {
         await testSubjects.setValue('userFormFullNameInput', 'mixeduser');
         await testSubjects.setValue('userFormEmailInput', 'example@example.com');
         await PageObjects.security.assignRoleToUser('kibana_dashboard_only_user');
-        await PageObjects.security.assignRoleToUser('kibana_user');
+        await PageObjects.security.assignRoleToUser('kibana_admin');
         await PageObjects.security.assignRoleToUser('logstash-data');
 
         await PageObjects.security.clickSaveEditUser();
@@ -109,11 +113,11 @@ export default function ({ getService, getPageObjects }) {
       });
 
       after('logout', async () => {
-        await PageObjects.security.logout();
+        await PageObjects.security.forceLogout();
       });
 
       it('shows only the dashboard app link', async () => {
-        await PageObjects.security.logout();
+        await PageObjects.security.forceLogout();
         await PageObjects.security.login('dashuser', '123456');
 
         const appLinks = await appsMenu.readLinks();
@@ -139,10 +143,15 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('can filter on a visualization', async () => {
-        await PageObjects.dashboard.setTimepickerInHistoricalDataRange();
+        await PageObjects.timePicker.setHistoricalDataRange();
         await pieChart.filterOnPieSlice();
         const filterCount = await filterBar.getFilterCount();
         expect(filterCount).to.equal(1);
+      });
+
+      it('shows the full screen menu item', async () => {
+        const fullScreenMenuItemExists = await testSubjects.exists('dashboardFullScreenMode');
+        expect(fullScreenMenuItemExists).to.be(true);
       });
 
       it('does not show the edit menu item', async () => {
@@ -160,9 +169,14 @@ export default function ({ getService, getPageObjects }) {
         expect(reportingMenuItemExists).to.be(false);
       });
 
-      it('does not show the sharing menu item', async () => {
+      it('shows the sharing menu item', async () => {
         const shareMenuItemExists = await testSubjects.exists('shareTopNavButton');
-        expect(shareMenuItemExists).to.be(false);
+        expect(shareMenuItemExists).to.be(true);
+      });
+
+      it(`Permalinks doesn't show create short-url button`, async () => {
+        await PageObjects.share.openShareMenuItem('Permalinks');
+        await PageObjects.share.createShortUrlMissingOrFail();
       });
 
       it('does not show the visualization edit icon', async () => {
@@ -183,23 +197,22 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('is loaded for a user who is assigned a non-dashboard mode role', async () => {
-        await PageObjects.security.logout();
+        await PageObjects.security.forceLogout();
         await PageObjects.security.login('mixeduser', '123456');
 
-        if (await appsMenu.linkExists('Management')) {
+        if (await appsMenu.linkExists('Stack Management')) {
           throw new Error('Expected management nav link to not be shown');
         }
       });
 
       it('is not loaded for a user who is assigned a superuser role', async () => {
-        await PageObjects.security.logout();
+        await PageObjects.security.forceLogout();
         await PageObjects.security.login('mysuperuser', '123456');
 
-        if (!await appsMenu.linkExists('Management')) {
+        if (!(await appsMenu.linkExists('Stack Management'))) {
           throw new Error('Expected management nav link to be shown');
         }
       });
-
     });
   });
 }

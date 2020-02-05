@@ -18,43 +18,15 @@
  */
 
 import * as Rx from 'rxjs';
+import { npSetup } from 'ui/new_platform';
 
-import { isSystemApiRequest } from '../../system_api';
+const newPlatformHttp = npSetup.core.http;
 
-let newPlatformHttp;
-
-export function __newPlatformInit__(instance) {
-  if (newPlatformHttp) {
-    throw new Error('ui/chrome/api/loading_count already initialized with new platform apis');
-  }
-  newPlatformHttp = instance;
-}
-
-export function initLoadingCountApi(chrome, internals) {
-  /**
-   * Injected into angular module by ui/chrome angular integration
-   * and adds a root-level watcher that will capture the count of
-   * active $http requests on each digest loop and expose the count to
-   * the core.loadingCount api
-   * @param  {Angular.Scope} $rootScope
-   * @param  {HttpService} $http
-   * @return {undefined}
-   */
-  internals.capture$httpLoadingCount = function ($rootScope, $http) {
-    newPlatformHttp.addLoadingCount(new Rx.Observable(observer => {
-      const unwatch = $rootScope.$watch(() => {
-        const reqs = $http.pendingRequests || [];
-        observer.next(reqs.filter(req => !isSystemApiRequest(req)).length);
-      });
-
-      return unwatch;
-    }));
-  };
-
+export function initLoadingCountApi(chrome) {
   const manualCount$ = new Rx.BehaviorSubject(0);
-  newPlatformHttp.addLoadingCount(manualCount$);
+  newPlatformHttp.addLoadingCountSource(manualCount$);
 
-  chrome.loadingCount = new class ChromeLoadingCountApi {
+  chrome.loadingCount = new (class ChromeLoadingCountApi {
     /**
      * Call to add a subscriber to for the loading count that
      * will be called every time the loading count changes.
@@ -66,7 +38,7 @@ export function initLoadingCountApi(chrome, internals) {
       const subscription = newPlatformHttp.getLoadingCount$().subscribe({
         next(count) {
           handler(count);
-        }
+        },
       });
 
       return () => {
@@ -89,5 +61,5 @@ export function initLoadingCountApi(chrome, internals) {
     decrement() {
       manualCount$.next(manualCount$.getValue() - 1);
     }
-  };
+  })();
 }

@@ -1,0 +1,99 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`NoServicesMessage status: failure and historicalDataFound: false 1`] = `<ErrorStatePrompt />`;
+
+exports[`NoServicesMessage status: failure and historicalDataFound: true 1`] = `<ErrorStatePrompt />`;
+
+exports[`NoServicesMessage status: loading and historicalDataFound: false 1`] = `<LoadingStatePrompt />`;
+
+exports[`NoServicesMessage status: loading and historicalDataFound: true 1`] = `<LoadingStatePrompt />`;
+
+exports[`NoServicesMessage status: pending and historicalDataFound: false 1`] = `
+<EuiEmptyPrompt
+  actions={
+    <SetupInstructionsLink
+      buttonFill={true}
+    />
+  }
+  body={
+    <React.Fragment>
+      <p>
+        Upgrading from a pre-7.x version? Make sure you've also upgraded
+              your APM server instance(s) to at least 7.0.
+      </p>
+      <p>
+        You may also have old data that needs to be migrated.
+         
+        <KibanaLink
+          path="/management/elasticsearch/upgrade_assistant"
+        >
+          Learn more by visiting the Kibana Upgrade Assistant
+        </KibanaLink>
+        .
+      </p>
+    </React.Fragment>
+  }
+  title={
+    <div>
+      Looks like you don't have any APM services installed. Let's add some!
+    </div>
+  }
+  titleSize="s"
+/>
+`;
+
+exports[`NoServicesMessage status: pending and historicalDataFound: true 1`] = `
+<EuiEmptyPrompt
+  title={
+    <div>
+      No services found
+    </div>
+  }
+  titleSize="s"
+/>
+`;
+
+exports[`NoServicesMessage status: success and historicalDataFound: false 1`] = `
+<EuiEmptyPrompt
+  actions={
+    <SetupInstructionsLink
+      buttonFill={true}
+    />
+  }
+  body={
+    <React.Fragment>
+      <p>
+        Upgrading from a pre-7.x version? Make sure you've also upgraded
+              your APM server instance(s) to at least 7.0.
+      </p>
+      <p>
+        You may also have old data that needs to be migrated.
+         
+        <KibanaLink
+          path="/management/elasticsearch/upgrade_assistant"
+        >
+          Learn more by visiting the Kibana Upgrade Assistant
+        </KibanaLink>
+        .
+      </p>
+    </React.Fragment>
+  }
+  title={
+    <div>
+      Looks like you don't have any APM services installed. Let's add some!
+    </div>
+  }
+  titleSize="s"
+/>
+`;
+
+exports[`NoServicesMessage status: success and historicalDataFound: true 1`] = `
+<EuiEmptyPrompt
+  title={
+    <div>
+      No services found
+    </div>
+  }
+  titleSize="s"
+/>
+`;

@@ -1,0 +1,576 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`TelemetryOptIn should display when telemetry not opted in 1`] = `
+<TelemetryOptIn
+  intl={
+    Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
+>
+  <EuiSpacer
+    size="s"
+  >
+    <div
+      className="euiSpacer euiSpacer--s"
+    />
+  </EuiSpacer>
+  <EuiTitle
+    size="s"
+  >
+    <h4
+      className="euiTitle euiTitle--small"
+    >
+      <FormattedMessage
+        defaultMessage="Help Elastic support provide better service"
+        id="xpack.licenseMgmt.telemetryOptIn.customersHelpSupportDescription"
+        values={Object {}}
+      >
+        Help Elastic support provide better service
+      </FormattedMessage>
+    </h4>
+  </EuiTitle>
+  <EuiSpacer
+    size="s"
+  >
+    <div
+      className="euiSpacer euiSpacer--s"
+    />
+  </EuiSpacer>
+  <EuiCheckbox
+    checked={false}
+    compressed={false}
+    disabled={false}
+    id="isOptingInToTelemetry"
+    indeterminate={false}
+    label={
+      <span>
+        <FormattedMessage
+          defaultMessage="Send basic feature usage statistics to Elastic periodically. {popover}"
+          id="xpack.licenseMgmt.telemetryOptIn.sendBasicFeatureStatisticsLabel"
+          values={
+            Object {
+              "popover": <EuiPopover
+                anchorPosition="downCenter"
+                button={
+                  <ForwardRef
+                    onClick={[Function]}
+                  >
+                    <FormattedMessage
+                      defaultMessage="Read more"
+                      id="xpack.licenseMgmt.telemetryOptIn.readMoreLinkText"
+                      values={Object {}}
+                    />
+                  </ForwardRef>
+                }
+                className="eui-AlignBaseline"
+                closePopover={[Function]}
+                display="inlineBlock"
+                hasArrow={true}
+                id="readMorePopover"
+                isOpen={false}
+                ownFocus={true}
+                panelPaddingSize="m"
+              >
+                <EuiText
+                  className="licManagement__narrowText"
+                >
+                  <p>
+                    <FormattedMessage
+                      defaultMessage="This feature periodically sends basic feature usage statistics. This information will not be shared outside of Elastic. See an {exampleLink} or read our {telemetryPrivacyStatementLink}. You can disable this feature any time."
+                      id="xpack.licenseMgmt.telemetryOptIn.featureUsageWarningMessage"
+                      values={
+                        Object {
+                          "exampleLink": <ForwardRef
+                            onClick={[Function]}
+                          >
+                            <FormattedMessage
+                              defaultMessage="example"
+                              id="xpack.licenseMgmt.telemetryOptIn.exampleLinkText"
+                              values={Object {}}
+                            />
+                          </ForwardRef>,
+                          "telemetryPrivacyStatementLink": <ForwardRef
+                            href="https://www.elastic.co/legal/privacy-statement"
+                            target="_blank"
+                          >
+                            <FormattedMessage
+                              defaultMessage="telemetry privacy statement"
+                              id="xpack.licenseMgmt.telemetryOptIn.telemetryPrivacyStatementLinkText"
+                              values={Object {}}
+                            />
+                          </ForwardRef>,
+                        }
+                      }
+                    />
+                  </p>
+                </EuiText>
+              </EuiPopover>,
+            }
+          }
+        />
+      </span>
+    }
+    onChange={[Function]}
+  >
+    <div
+      className="euiCheckbox"
+    >
+      <input
+        checked={false}
+        className="euiCheckbox__input"
+        disabled={false}
+        id="isOptingInToTelemetry"
+        onChange={[Function]}
+        type="checkbox"
+      />
+      <div
+        className="euiCheckbox__square"
+      />
+      <label
+        className="euiCheckbox__label"
+        htmlFor="isOptingInToTelemetry"
+      >
+        <span>
+          <FormattedMessage
+            defaultMessage="Send basic feature usage statistics to Elastic periodically. {popover}"
+            id="xpack.licenseMgmt.telemetryOptIn.sendBasicFeatureStatisticsLabel"
+            values={
+              Object {
+                "popover": <EuiPopover
+                  anchorPosition="downCenter"
+                  button={
+                    <ForwardRef
+                      onClick={[Function]}
+                    >
+                      <FormattedMessage
+                        defaultMessage="Read more"
+                        id="xpack.licenseMgmt.telemetryOptIn.readMoreLinkText"
+                        values={Object {}}
+                      />
+                    </ForwardRef>
+                  }
+                  className="eui-AlignBaseline"
+                  closePopover={[Function]}
+                  display="inlineBlock"
+                  hasArrow={true}
+                  id="readMorePopover"
+                  isOpen={false}
+                  ownFocus={true}
+                  panelPaddingSize="m"
+                >
+                  <EuiText
+                    className="licManagement__narrowText"
+                  >
+                    <p>
+                      <FormattedMessage
+                        defaultMessage="This feature periodically sends basic feature usage statistics. This information will not be shared outside of Elastic. See an {exampleLink} or read our {telemetryPrivacyStatementLink}. You can disable this feature any time."
+                        id="xpack.licenseMgmt.telemetryOptIn.featureUsageWarningMessage"
+                        values={
+                          Object {
+                            "exampleLink": <ForwardRef
+                              onClick={[Function]}
+                            >
+                              <FormattedMessage
+                                defaultMessage="example"
+                                id="xpack.licenseMgmt.telemetryOptIn.exampleLinkText"
+                                values={Object {}}
+                              />
+                            </ForwardRef>,
+                            "telemetryPrivacyStatementLink": <ForwardRef
+                              href="https://www.elastic.co/legal/privacy-statement"
+                              target="_blank"
+                            >
+                              <FormattedMessage
+                                defaultMessage="telemetry privacy statement"
+                                id="xpack.licenseMgmt.telemetryOptIn.telemetryPrivacyStatementLinkText"
+                                values={Object {}}
+                              />
+                            </ForwardRef>,
+                          }
+                        }
+                      />
+                    </p>
+                  </EuiText>
+                </EuiPopover>,
+              }
+            }
+          >
+            Send basic feature usage statistics to Elastic periodically. 
+            <EuiPopover
+              anchorPosition="downCenter"
+              button={
+                <ForwardRef
+                  onClick={[Function]}
+                >
+                  <FormattedMessage
+                    defaultMessage="Read more"
+                    id="xpack.licenseMgmt.telemetryOptIn.readMoreLinkText"
+                    values={Object {}}
+                  />
+                </ForwardRef>
+              }
+              className="eui-AlignBaseline"
+              closePopover={[Function]}
+              display="inlineBlock"
+              hasArrow={true}
+              id="readMorePopover"
+              isOpen={false}
+              ownFocus={true}
+              panelPaddingSize="m"
+            >
+              <EuiOutsideClickDetector
+                isDisabled={true}
+                onOutsideClick={[Function]}
+              >
+                <div
+                  className="euiPopover euiPopover--anchorDownCenter eui-AlignBaseline"
+                  id="readMorePopover"
+                  onKeyDown={[Function]}
+                  onMouseDown={[Function]}
+                  onMouseUp={[Function]}
+                  onTouchEnd={[Function]}
+                  onTouchStart={[Function]}
+                >
+                  <div
+                    className="euiPopover__anchor"
+                  >
+                    <EuiLink
+                      onClick={[Function]}
+                    >
+                      <button
+                        className="euiLink euiLink--primary"
+                        onClick={[Function]}
+                        type="button"
+                      >
+                        <FormattedMessage
+                          defaultMessage="Read more"
+                          id="xpack.licenseMgmt.telemetryOptIn.readMoreLinkText"
+                          values={Object {}}
+                        >
+                          Read more
+                        </FormattedMessage>
+                      </button>
+                    </EuiLink>
+                  </div>
+                </div>
+              </EuiOutsideClickDetector>
+            </EuiPopover>
+          </FormattedMessage>
+        </span>
+      </label>
+    </div>
+  </EuiCheckbox>
+</TelemetryOptIn>
+`;
+
+exports[`TelemetryOptIn should not display when telemetry is opted in 1`] = `
+<TelemetryOptIn
+  intl={
+    Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
+/>
+`;
+
+exports[`TelemetryOptIn shouldn't display when telemetry optIn status can't change 1`] = `
+<TelemetryOptIn
+  intl={
+    Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
+/>
+`;

@@ -65,4 +65,36 @@ export const AUTHENTICATION = {
     username: 'a_kibana_rbac_space_1_2_read_user',
     password: 'password',
   },
+  KIBANA_RBAC_DEFAULT_SPACE_SAVED_OBJECTS_ALL_USER: {
+    username: 'a_kibana_rbac_default_space_saved_objects_all_user',
+    password: 'password',
+  },
+  KIBANA_RBAC_DEFAULT_SPACE_SAVED_OBJECTS_READ_USER: {
+    username: 'a_kibana_rbac_default_space_saved_objects_read_user',
+    password: 'password',
+  },
+  KIBANA_RBAC_SPACE_1_SAVED_OBJECTS_ALL_USER: {
+    username: 'a_kibana_rbac_space_1_saved_objects_all_user',
+    password: 'password',
+  },
+  KIBANA_RBAC_SPACE_1_SAVED_OBJECTS_READ_USER: {
+    username: 'a_kibana_rbac_space_1_saved_objects_read_user',
+    password: 'password',
+  },
+  APM_USER: {
+    username: 'a_apm_user',
+    password: 'password',
+  },
+  MACHINE_LEARING_ADMIN: {
+    username: 'a_machine_learning_admin',
+    password: 'password',
+  },
+  MACHINE_LEARNING_USER: {
+    username: 'a_machine_learning_user',
+    password: 'password',
+  },
+  MONITORING_USER: {
+    username: 'a_monitoring_user',
+    password: 'password',
+  },
 };

@@ -1,0 +1,55 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`MarkdownHintComponent  rendering it renders the expected hints 1`] = `
+<MarkdownHintContainer
+  color="subdued"
+  data-test-subj="markdown-hint"
+  size="xs"
+  visibility="inline"
+>
+  <Heading
+    data-test-subj="heading-hint"
+  >
+    # heading
+  </Heading>
+  <Bold
+    data-test-subj="bold-hint"
+  >
+    **bold**
+  </Bold>
+  <Italic
+    data-test-subj="italic-hint"
+  >
+    _italics_
+  </Italic>
+  <Code
+    data-test-subj="code-hint"
+  >
+    \`code\`
+  </Code>
+  <TrailingWhitespace>
+    [link](url)
+  </TrailingWhitespace>
+  <TrailingWhitespace>
+    * bullet
+  </TrailingWhitespace>
+  <Code
+    data-test-subj="preformatted-hint"
+  >
+    \`\`\`preformatted\`\`\`
+  </Code>
+  <TrailingWhitespace>
+    &gt;quote
+  </TrailingWhitespace>
+  ~~
+  <Strikethrough
+    data-test-subj="strikethrough-hint"
+  >
+    strikethrough
+  </Strikethrough>
+  ~~
+  <ImageUrl>
+    ![image](url)
+  </ImageUrl>
+</MarkdownHintContainer>
+`;

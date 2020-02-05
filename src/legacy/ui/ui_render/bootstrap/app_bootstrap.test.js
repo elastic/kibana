@@ -20,11 +20,10 @@
 const mockTemplate = `
 {{appId}}
 {{regularBundlePath}}
-{{i18n 'foo' '{"defaultMessage": "bar"}'}}
 `;
 
 jest.mock('fs', () => ({
-  readFile: jest.fn().mockImplementation((path, encoding, cb) => cb(null, mockTemplate))
+  readFile: jest.fn().mockImplementation((path, encoding, cb) => cb(null, mockTemplate)),
 }));
 
 import { AppBootstrap } from './app_bootstrap';
@@ -94,8 +93,8 @@ describe('ui_render/AppBootstrap', () => {
         ...mockConfig(),
         templateData: {
           appId: 'not123',
-          regularBundlePath: 'not/foo/bar'
-        }
+          regularBundlePath: 'not/foo/bar',
+        },
       };
       const bootstrap2 = new AppBootstrap(config2);
       const hash2 = await bootstrap2.getJsFileHash();
@@ -115,7 +114,7 @@ function mockConfig() {
   return {
     templateData: {
       appId: 123,
-      regularBundlePath: '/foo/bar'
-    }
+      regularBundlePath: '/foo/bar',
+    },
   };
 }

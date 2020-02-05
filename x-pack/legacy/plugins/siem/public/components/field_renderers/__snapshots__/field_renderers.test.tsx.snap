@@ -1,0 +1,146 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Field Renderers #autonomousSystemRenderer it renders correctly against snapshot 1`] = `
+<div
+  className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <DefaultDraggable
+      field="source.as.organization.name"
+      id="autonomous-system-renderer-default-draggable-ip-overview-source.as.organization.name"
+      value="Test Org"
+    />
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  >
+    /
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  >
+    <DefaultDraggable
+      field="source.as.number"
+      id="autonomous-system-renderer-default-draggable-ip-overview-source.as.number"
+      value="12345"
+    />
+  </EuiFlexItem>
+</div>
+`;
+
+exports[`Field Renderers #dateRenderer it renders correctly against snapshot 1`] = `
+<LocalizedDateTooltip
+  date={2019-02-07T17:19:41.636Z}
+>
+  <PreferenceFormattedDate
+    data-test-subj="preference-time"
+    value={2019-02-07T17:19:41.636Z}
+  />
+</LocalizedDateTooltip>
+`;
+
+exports[`Field Renderers #hostIdRenderer it renders correctly against snapshot 1`] = `
+<DraggableWrapper
+  dataProvider={
+    Object {
+      "and": Array [],
+      "enabled": true,
+      "excluded": false,
+      "id": "host-name-renderer-default-draggable-ip-overview-host-name",
+      "kqlQuery": "",
+      "name": "raspberrypi",
+      "queryMatch": Object {
+        "field": "host.name",
+        "operator": ":",
+        "value": "raspberrypi",
+      },
+    }
+  }
+  render={[Function]}
+/>
+`;
+
+exports[`Field Renderers #hostNameRenderer it renders correctly against snapshot 1`] = `
+<DraggableWrapper
+  dataProvider={
+    Object {
+      "and": Array [],
+      "enabled": true,
+      "excluded": false,
+      "id": "host-name-renderer-default-draggable-ip-overview-host-name",
+      "kqlQuery": "",
+      "name": "raspberrypi",
+      "queryMatch": Object {
+        "field": "host.name",
+        "operator": ":",
+        "value": "raspberrypi",
+      },
+    }
+  }
+  render={[Function]}
+/>
+`;
+
+exports[`Field Renderers #locationRenderer it renders correctly against snapshot 1`] = `
+<div
+  className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+  data-test-subj="location-field"
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <DefaultDraggable
+      field="source.geo.city_name"
+      id="location-renderer-default-draggable-ip-overview-source.geo.city_name"
+      value={
+        Array [
+          "New York",
+        ]
+      }
+    />
+  </EuiFlexItem>
+  , 
+  <EuiFlexItem
+    grow={false}
+  >
+    <DefaultDraggable
+      field="source.geo.region_name"
+      id="location-renderer-default-draggable-ip-overview-source.geo.region_name"
+      value={
+        Array [
+          "New York",
+        ]
+      }
+    />
+  </EuiFlexItem>
+</div>
+`;
+
+exports[`Field Renderers #reputationRenderer it renders correctly against snapshot 1`] = `
+<DragDropContext
+  onDragEnd={[MockFunction]}
+>
+  <VirusTotalLink
+    link="10.10.10.10"
+  >
+    virustotal.com
+  </VirusTotalLink>
+  , 
+  <ReputationLink
+    domain="10.10.10.10"
+  >
+    talosIntelligence.com
+  </ReputationLink>
+</DragDropContext>
+`;
+
+exports[`Field Renderers #whoisRenderer it renders correctly against snapshot 1`] = `
+<EuiLink
+  href="https://www.iana.org/whois?q=10.10.10.10"
+  target="_blank"
+>
+  iana.org
+</EuiLink>
+`;

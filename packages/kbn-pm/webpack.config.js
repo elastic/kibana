@@ -44,15 +44,6 @@ module.exports = {
           {
             loader: 'babel-loader',
           },
-          {
-            loader: 'ts-loader',
-            options: {
-              compilerOptions: {
-                // enable esnext modules so webpack can do its thing better
-                module: 'esnext',
-              },
-            },
-          },
         ],
         exclude: /node_modules/,
       },
@@ -94,6 +85,12 @@ module.exports = {
     // Don't replace built-in globals
     __filename: false,
     __dirname: false,
+  },
+
+  externals: {
+    worker_threads: {
+      commonjs: 'worker_threads',
+    },
   },
 
   watchOptions: {

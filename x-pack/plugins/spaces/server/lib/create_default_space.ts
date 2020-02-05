@@ -5,16 +5,18 @@
  */
 
 import { i18n } from '@kbn/i18n';
-// @ts-ignore
-import { getClient } from '../../../../server/lib/get_client_shield';
+import { SavedObjectsLegacyService, IClusterClient } from 'src/core/server';
 import { DEFAULT_SPACE_ID } from '../../common/constants';
 
-export async function createDefaultSpace(server: any) {
-  const { callWithInternalUser: callCluster } = getClient(server);
+interface Deps {
+  esClient: IClusterClient;
+  savedObjects: SavedObjectsLegacyService;
+}
 
-  const { getSavedObjectsRepository, SavedObjectsClient } = server.savedObjects;
+export async function createDefaultSpace({ esClient, savedObjects }: Deps) {
+  const { getSavedObjectsRepository, SavedObjectsClient } = savedObjects;
 
-  const savedObjectsRepository = getSavedObjectsRepository(callCluster);
+  const savedObjectsRepository = getSavedObjectsRepository(esClient.callAsInternalUser, ['space']);
 
   const defaultSpaceExists = await doesDefaultSpaceExist(
     SavedObjectsClient,
@@ -40,6 +42,7 @@ export async function createDefaultSpace(server: any) {
           defaultMessage: 'This is your default space!',
         }),
         color: '#00bfb3',
+        disabledFeatures: [],
         _reserved: true,
       },
       options

@@ -1,9 +1,0 @@
-{
-  "monitorStatus": [
-    {
-      "timestamp": "2019-01-28T18:43:16.078Z",
-      "monitor": { "status": "up", "duration": { "us": 3328 } },
-      "url": { "full": "tcp://localhost:9200" }
-    }
-  ]
-}

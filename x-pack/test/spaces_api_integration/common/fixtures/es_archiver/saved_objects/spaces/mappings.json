@@ -24,6 +24,20 @@
             }
           }
         },
+        "references": {
+          "type": "nested",
+          "properties": {
+            "name": {
+              "type": "keyword"
+              },
+            "type": {
+              "type": "keyword"
+              },
+            "id": {
+              "type": "keyword"
+              }
+          }
+        },
         "dashboard": {
           "properties": {
             "description": {
@@ -78,6 +92,13 @@
             },
             "version": {
               "type": "integer"
+            }
+          }
+        },
+        "file-upload-telemetry": {
+          "properties": {
+            "filesUploadedTotalCount": {
+              "type": "long"
             }
           }
         },
@@ -184,6 +205,9 @@
             },
             "description": {
               "type": "text"
+            },
+            "disabledFeatures": {
+              "type": "keyword"
             },
             "initials": {
               "type": "keyword"

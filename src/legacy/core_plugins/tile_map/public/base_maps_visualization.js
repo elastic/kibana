@@ -18,32 +18,24 @@
  */
 
 import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
 import { KibanaMap } from 'ui/vis/map/kibana_map';
 import * as Rx from 'rxjs';
 import { filter, first } from 'rxjs/operators';
 import 'ui/vis/map/service_settings';
 import { toastNotifications } from 'ui/notify';
-import { uiModules } from 'ui/modules';
+import chrome from 'ui/chrome';
 
 const WMS_MINZOOM = 0;
-const WMS_MAXZOOM = 22;//increase this to 22. Better for WMS
+const WMS_MAXZOOM = 22; //increase this to 22. Better for WMS
 
-const emsServiceSettings = new Promise((resolve) => {
-  uiModules.get('kibana').run(($injector) => {
-    const serviceSttings = $injector.get('serviceSettings');
-    resolve(serviceSttings);
-  });
-});
-
-export function BaseMapsVisualizationProvider(serviceSettings, i18n) {
-
+export function BaseMapsVisualizationProvider(serviceSettings) {
   /**
    * Abstract base class for a visualization consisting of a map with a single baselayer.
    * @class BaseMapsVisualization
    * @constructor
    */
   return class BaseMapsVisualization {
-
     constructor(element, vis) {
       this.vis = vis;
       this._container = element;
@@ -71,7 +63,7 @@ export function BaseMapsVisualizationProvider(serviceSettings, i18n) {
      * @param status
      * @return {Promise}
      */
-    async render(esResponse, status) {
+    async render(esResponse, visParams, status) {
       if (!this._kibanaMap) {
         //the visualization has been destroyed;
         return;
@@ -83,6 +75,7 @@ export function BaseMapsVisualizationProvider(serviceSettings, i18n) {
         this._kibanaMap.resize();
       }
       if (status.params || status.aggs) {
+        this._params = visParams;
         await this._updateParams();
       }
 
@@ -110,8 +103,8 @@ export function BaseMapsVisualizationProvider(serviceSettings, i18n) {
       options.center = centerFromUIState ? centerFromUIState : this.vis.params.mapCenter;
 
       this._kibanaMap = new KibanaMap(this._container, options);
-      this._kibanaMap.setMinZoom(WMS_MINZOOM);//use a default
-      this._kibanaMap.setMaxZoom(WMS_MAXZOOM);//use a default
+      this._kibanaMap.setMinZoom(WMS_MINZOOM); //use a default
+      this._kibanaMap.setMaxZoom(WMS_MAXZOOM); //use a default
 
       this._kibanaMap.addLegendControl();
       this._kibanaMap.addFitControl();
@@ -125,7 +118,6 @@ export function BaseMapsVisualizationProvider(serviceSettings, i18n) {
       });
       await this._updateBaseLayer();
     }
-
 
     _tmsConfigured() {
       const { wms } = this._getMapsParams();
@@ -142,8 +134,7 @@ export function BaseMapsVisualizationProvider(serviceSettings, i18n) {
     }
 
     async _updateBaseLayer() {
-
-      const DEFAULT_EMS_BASEMAP = 'road_map';
+      const emsTileLayerId = chrome.getInjected('emsTileLayerId', true);
 
       if (!this._kibanaMap) {
         return;
@@ -156,8 +147,10 @@ export function BaseMapsVisualizationProvider(serviceSettings, i18n) {
           const userConfiguredTmsLayer = tmsServices[0];
           const initBasemapLayer = userConfiguredTmsLayer
             ? userConfiguredTmsLayer
-            : tmsServices.find(s => s.id === DEFAULT_EMS_BASEMAP);
-          if (initBasemapLayer) { this._setTmsLayer(initBasemapLayer); }
+            : tmsServices.find(s => s.id === emsTileLayerId.bright);
+          if (initBasemapLayer) {
+            this._setTmsLayer(initBasemapLayer);
+          }
         } catch (e) {
           toastNotifications.addWarning(e.message);
           return;
@@ -178,8 +171,8 @@ export function BaseMapsVisualizationProvider(serviceSettings, i18n) {
               minZoom: WMS_MINZOOM,
               maxZoom: WMS_MAXZOOM,
               url: mapParams.wms.url,
-              ...mapParams.wms.options
-            }
+              ...mapParams.wms.options,
+            },
           });
         } else if (this._tmsConfigured()) {
           const selectedTmsLayer = mapParams.wms.selectedTmsLayer;
@@ -196,21 +189,32 @@ export function BaseMapsVisualizationProvider(serviceSettings, i18n) {
       if (this._kibanaMap.getZoomLevel() > tmsLayer.maxZoom) {
         this._kibanaMap.setZoomLevel(tmsLayer.maxZoom);
       }
-      const url = await (await emsServiceSettings).getUrlTemplateForTMSLayer(tmsLayer);
+      let isDesaturated = this._getMapsParams().isDesaturated;
+      if (typeof isDesaturated !== 'boolean') {
+        isDesaturated = true;
+      }
+      const isDarkMode = chrome.getUiSettingsClient().get('theme:darkMode');
+      const meta = await serviceSettings.getAttributesForTMSLayer(
+        tmsLayer,
+        isDesaturated,
+        isDarkMode
+      );
       const showZoomMessage = serviceSettings.shouldShowZoomMessage(tmsLayer);
       const options = _.cloneDeep(tmsLayer);
       delete options.id;
-      delete options.url;
+      delete options.subdomains;
       this._kibanaMap.setBaseLayer({
         baseLayerType: 'tms',
-        options: { url, showZoomMessage, ...options }
+        options: { ...options, showZoomMessage, ...meta },
       });
     }
 
     async _updateData() {
-      throw new Error(i18n('tileMap.baseMapsVisualization.childShouldImplementMethodErrorMessage', {
-        defaultMessage: 'Child should implement this method to respond to data-update',
-      }));
+      throw new Error(
+        i18n.translate('tileMap.baseMapsVisualization.childShouldImplementMethodErrorMessage', {
+          defaultMessage: 'Child should implement this method to respond to data-update',
+        })
+      );
     }
 
     _hasESResponseChanged(data) {
@@ -233,12 +237,11 @@ export function BaseMapsVisualizationProvider(serviceSettings, i18n) {
         {},
         this.vis.type.visConfig.defaults,
         { type: this.vis.type.name },
-        this.vis.params
+        this._params
       );
     }
 
     _whenBaseLayerIsLoaded() {
-
       if (!this._tmsConfigured()) {
         return true;
       }
@@ -247,9 +250,9 @@ export function BaseMapsVisualizationProvider(serviceSettings, i18n) {
       const interval$ = Rx.interval(10).pipe(filter(() => !this._baseLayerDirty));
       const timer$ = Rx.timer(maxTimeForBaseLayer);
 
-      return Rx.race(interval$, timer$).pipe(first()).toPromise();
-
+      return Rx.race(interval$, timer$)
+        .pipe(first())
+        .toPromise();
     }
-
   };
 }

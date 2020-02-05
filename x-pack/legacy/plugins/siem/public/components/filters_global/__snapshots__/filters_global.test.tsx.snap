@@ -1,0 +1,13 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`rendering renders correctly 1`] = `
+<Sticky
+  bottomOffset={0}
+  disableCompensation={false}
+  disableHardwareAcceleration={false}
+  relative={false}
+  topOffset={-49}
+>
+  <Component />
+</Sticky>
+`;

@@ -18,7 +18,7 @@ export class ExecuteDetails {
   get upstreamJson() {
     const triggerData = {
       triggered_time: this.triggerData.triggeredTime,
-      scheduled_time: this.triggerData.scheduledTime
+      scheduled_time: this.triggerData.scheduledTime,
     };
 
     const result = {
@@ -26,7 +26,7 @@ export class ExecuteDetails {
       ignore_condition: this.ignoreCondition,
       alternative_input: this.alternativeInput,
       action_modes: this.actionModes,
-      record_execution: this.recordExecution
+      record_execution: this.recordExecution,
     };
 
     return omit(result, isUndefined);
@@ -37,4 +37,3 @@ export class ExecuteDetails {
     return new ExecuteDetails(downstreamJson);
   }
 }
-

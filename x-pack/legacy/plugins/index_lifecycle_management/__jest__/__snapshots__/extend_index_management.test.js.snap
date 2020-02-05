@@ -1,0 +1,882 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ilm banner extension should return extension when any index has lifecycle error 1`] = `
+Object {
+  "filter": Query {
+    "ast": _AST {
+      "_clauses": Array [
+        Object {
+          "field": "ilm.step",
+          "match": "must",
+          "operator": "eq",
+          "type": "field",
+          "value": "ERROR",
+        },
+      ],
+      "_indexedClauses": Object {
+        "field": Object {
+          "ilm.step": Array [
+            Object {
+              "field": "ilm.step",
+              "match": "must",
+              "operator": "eq",
+              "type": "field",
+              "value": "ERROR",
+            },
+          ],
+        },
+        "group": Array [],
+        "is": Object {},
+        "term": Array [],
+      },
+    },
+    "syntax": Object {
+      "parse": [Function],
+      "print": [Function],
+      "printClause": [Function],
+    },
+    "text": "ilm.step:ERROR",
+  },
+  "filterLabel": "Show errors",
+  "title": "1
+          index has
+          lifecycle errors",
+  "type": "warning",
+}
+`;
+
+exports[`ilm filter extension should return extension when any index has lifecycle policy 1`] = `
+Array [
+  Object {
+    "field": "ilm.managed",
+    "multiSelect": false,
+    "name": "Lifecycle status",
+    "options": Array [
+      Object {
+        "value": true,
+        "view": "Managed",
+      },
+      Object {
+        "value": false,
+        "view": "Unmanaged",
+      },
+    ],
+    "type": "field_value_selection",
+  },
+]
+`;
+
+exports[`ilm summary extension should return extension when index has lifecycle error 1`] = `
+<IndexLifecycleSummary
+  index={
+    Object {
+      "aliases": "none",
+      "documents": "2",
+      "documents_deleted": "0",
+      "health": "yellow",
+      "ilm": Object {
+        "action": "rollover",
+        "action_time_millis": 1544187775891,
+        "failed_step": "check-rollover-ready",
+        "index": "testy3",
+        "lifecycle_date_millis": 1544020872361,
+        "managed": true,
+        "phase": "hot",
+        "phase_execution": Object {
+          "modified_date_in_millis": 1544031699844,
+          "phase_definition": Object {
+            "actions": Object {
+              "rollover": Object {
+                "max_size": "1gb",
+              },
+            },
+            "min_age": "0s",
+          },
+          "policy": "testy",
+          "version": 1,
+        },
+        "phase_time_millis": 1544187775891,
+        "policy": "testy",
+        "step": "ERROR",
+        "step_info": Object {
+          "reason": "setting [index.lifecycle.rollover_alias] for index [testy3] is empty or not defined",
+          "stack_trace": "fakestacktrace",
+          "type": "illegal_argument_exception",
+        },
+        "step_time_millis": 1544187776208,
+      },
+      "name": "testy3",
+      "primary": "1",
+      "primary_size": "6.5kb",
+      "replica": "1",
+      "size": "6.5kb",
+      "status": "open",
+      "uuid": "XL11TLa3Tvq298_dMUzLHQ",
+    }
+  }
+  intl={
+    Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
+>
+  <EuiTitle
+    size="s"
+  >
+    <h3
+      className="euiTitle euiTitle--small"
+    >
+      <FormattedMessage
+        defaultMessage="Index lifecycle management"
+        id="xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.summaryTitle"
+        values={Object {}}
+      >
+        Index lifecycle management
+      </FormattedMessage>
+    </h3>
+  </EuiTitle>
+  <EuiSpacer
+    size="s"
+  >
+    <div
+      className="euiSpacer euiSpacer--s"
+    />
+  </EuiSpacer>
+  <EuiCallOut
+    color="danger"
+    iconType="cross"
+    title={
+      <FormattedMessage
+        defaultMessage="Index lifecycle error"
+        id="xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.summaryErrorMessage"
+        values={Object {}}
+      />
+    }
+  >
+    <div
+      className="euiCallOut euiCallOut--danger"
+    >
+      <div
+        className="euiCallOutHeader"
+      >
+        <EuiIcon
+          aria-hidden="true"
+          className="euiCallOutHeader__icon"
+          size="m"
+          type="cross"
+        >
+          <EuiIconEmpty
+            aria-hidden={true}
+            className="euiIcon euiIcon--medium euiIcon-isLoading euiCallOutHeader__icon"
+            focusable="false"
+            role="img"
+            style={null}
+          >
+            <svg
+              aria-hidden={true}
+              className="euiIcon euiIcon--medium euiIcon-isLoading euiCallOutHeader__icon"
+              focusable="false"
+              height={16}
+              role="img"
+              style={null}
+              viewBox="0 0 16 16"
+              width={16}
+              xmlns="http://www.w3.org/2000/svg"
+            />
+          </EuiIconEmpty>
+        </EuiIcon>
+        <span
+          className="euiCallOutHeader__title"
+        >
+          <FormattedMessage
+            defaultMessage="Index lifecycle error"
+            id="xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.summaryErrorMessage"
+            values={Object {}}
+          >
+            Index lifecycle error
+          </FormattedMessage>
+        </span>
+      </div>
+      <EuiText
+        size="s"
+      >
+        <div
+          className="euiText euiText--small"
+        >
+          illegal_argument_exception
+          : 
+          setting [index.lifecycle.rollover_alias] for index [testy3] is empty or not defined
+          <EuiSpacer
+            size="s"
+          >
+            <div
+              className="euiSpacer euiSpacer--s"
+            />
+          </EuiSpacer>
+        </div>
+      </EuiText>
+    </div>
+  </EuiCallOut>
+  <EuiSpacer
+    size="m"
+  >
+    <div
+      className="euiSpacer euiSpacer--m"
+    />
+  </EuiSpacer>
+  <EuiFlexGroup>
+    <div
+      className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+    >
+      <EuiFlexItem>
+        <div
+          className="euiFlexItem"
+        >
+          <EuiDescriptionList
+            type="column"
+          >
+            <dl
+              className="euiDescriptionList euiDescriptionList--column"
+            >
+              <EuiDescriptionListTitle
+                key="policy"
+              >
+                <dt
+                  className="euiDescriptionList__title"
+                >
+                  <strong>
+                    Lifecycle policy
+                  </strong>
+                </dt>
+              </EuiDescriptionListTitle>
+              <EuiDescriptionListDescription
+                key="policy_desc"
+              >
+                <dd
+                  className="euiDescriptionList__description"
+                >
+                  <EuiLink
+                    href="#/management/elasticsearch/index_lifecycle_management/policies/edit/testy"
+                  >
+                    <a
+                      className="euiLink euiLink--primary"
+                      href="#/management/elasticsearch/index_lifecycle_management/policies/edit/testy"
+                      rel="noreferrer"
+                    >
+                      testy
+                    </a>
+                  </EuiLink>
+                </dd>
+              </EuiDescriptionListDescription>
+              <EuiDescriptionListTitle
+                key="action"
+              >
+                <dt
+                  className="euiDescriptionList__title"
+                >
+                  <strong>
+                    Current action
+                  </strong>
+                </dt>
+              </EuiDescriptionListTitle>
+              <EuiDescriptionListDescription
+                key="action_desc"
+              >
+                <dd
+                  className="euiDescriptionList__description"
+                >
+                  rollover
+                </dd>
+              </EuiDescriptionListDescription>
+              <EuiDescriptionListTitle
+                key="failed_step"
+              >
+                <dt
+                  className="euiDescriptionList__title"
+                >
+                  <strong>
+                    Failed step
+                  </strong>
+                </dt>
+              </EuiDescriptionListTitle>
+              <EuiDescriptionListDescription
+                key="failed_step_desc"
+              >
+                <dd
+                  className="euiDescriptionList__description"
+                >
+                  check-rollover-ready
+                </dd>
+              </EuiDescriptionListDescription>
+            </dl>
+          </EuiDescriptionList>
+        </div>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <div
+          className="euiFlexItem"
+        >
+          <EuiDescriptionList
+            type="column"
+          >
+            <dl
+              className="euiDescriptionList euiDescriptionList--column"
+            >
+              <EuiDescriptionListTitle
+                key="phase"
+              >
+                <dt
+                  className="euiDescriptionList__title"
+                >
+                  <strong>
+                    Current phase
+                  </strong>
+                </dt>
+              </EuiDescriptionListTitle>
+              <EuiDescriptionListDescription
+                key="phase_desc"
+              >
+                <dd
+                  className="euiDescriptionList__description"
+                >
+                  hot
+                </dd>
+              </EuiDescriptionListDescription>
+              <EuiDescriptionListTitle
+                key="action_time_millis"
+              >
+                <dt
+                  className="euiDescriptionList__title"
+                >
+                  <strong>
+                    Current action time
+                  </strong>
+                </dt>
+              </EuiDescriptionListTitle>
+              <EuiDescriptionListDescription
+                key="action_time_millis_desc"
+              >
+                <dd
+                  className="euiDescriptionList__description"
+                >
+                  2018-12-07 13:02:55
+                </dd>
+              </EuiDescriptionListDescription>
+              <EuiDescriptionListTitle>
+                <dt
+                  className="euiDescriptionList__title"
+                >
+                  <strong>
+                    <FormattedMessage
+                      defaultMessage="Phase definition"
+                      id="xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.showPhaseDefinitionDescriptionTitle"
+                      values={Object {}}
+                    >
+                      Phase definition
+                    </FormattedMessage>
+                  </strong>
+                </dt>
+              </EuiDescriptionListTitle>
+              <EuiDescriptionListDescription
+                key="phaseDefinition_desc"
+              >
+                <dd
+                  className="euiDescriptionList__description"
+                >
+                  <EuiPopover
+                    anchorPosition="downCenter"
+                    button={
+                      <ForwardRef
+                        onClick={[Function]}
+                      >
+                        <FormattedMessage
+                          defaultMessage="Show definition"
+                          id="xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.showPhaseDefinitionButton"
+                          values={Object {}}
+                        />
+                      </ForwardRef>
+                    }
+                    closePopover={[Function]}
+                    display="inlineBlock"
+                    hasArrow={true}
+                    id="phaseExecutionPopover"
+                    isOpen={false}
+                    key="phaseExecutionPopover"
+                    ownFocus={false}
+                    panelPaddingSize="m"
+                    withTitle={true}
+                  >
+                    <EuiOutsideClickDetector
+                      isDisabled={true}
+                      onOutsideClick={[Function]}
+                    >
+                      <div
+                        className="euiPopover euiPopover--anchorDownCenter euiPopover--withTitle"
+                        id="phaseExecutionPopover"
+                        onKeyDown={[Function]}
+                        onMouseDown={[Function]}
+                        onMouseUp={[Function]}
+                        onTouchEnd={[Function]}
+                        onTouchStart={[Function]}
+                      >
+                        <div
+                          className="euiPopover__anchor"
+                        >
+                          <EuiLink
+                            onClick={[Function]}
+                          >
+                            <button
+                              className="euiLink euiLink--primary"
+                              onClick={[Function]}
+                              type="button"
+                            >
+                              <FormattedMessage
+                                defaultMessage="Show definition"
+                                id="xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.showPhaseDefinitionButton"
+                                values={Object {}}
+                              >
+                                Show definition
+                              </FormattedMessage>
+                            </button>
+                          </EuiLink>
+                        </div>
+                      </div>
+                    </EuiOutsideClickDetector>
+                  </EuiPopover>
+                </dd>
+              </EuiDescriptionListDescription>
+            </dl>
+          </EuiDescriptionList>
+        </div>
+      </EuiFlexItem>
+    </div>
+  </EuiFlexGroup>
+</IndexLifecycleSummary>
+`;
+
+exports[`ilm summary extension should return extension when index has lifecycle policy 1`] = `
+<IndexLifecycleSummary
+  index={
+    Object {
+      "aliases": "none",
+      "documents": "2",
+      "documents_deleted": "0",
+      "health": "yellow",
+      "ilm": Object {
+        "action": "complete",
+        "action_time_millis": 1544187775867,
+        "index": "testy3",
+        "lifecycle_date_millis": 1544020872361,
+        "managed": true,
+        "phase": "new",
+        "phase_time_millis": 1544187775867,
+        "policy": "testy",
+        "step": "complete",
+        "step_time_millis": 1544187775867,
+      },
+      "name": "testy3",
+      "primary": "1",
+      "primary_size": "6.5kb",
+      "replica": "1",
+      "size": "6.5kb",
+      "status": "open",
+      "uuid": "XL11TLa3Tvq298_dMUzLHQ",
+    }
+  }
+  intl={
+    Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
+>
+  <EuiTitle
+    size="s"
+  >
+    <h3
+      className="euiTitle euiTitle--small"
+    >
+      <FormattedMessage
+        defaultMessage="Index lifecycle management"
+        id="xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.summaryTitle"
+        values={Object {}}
+      >
+        Index lifecycle management
+      </FormattedMessage>
+    </h3>
+  </EuiTitle>
+  <EuiSpacer
+    size="m"
+  >
+    <div
+      className="euiSpacer euiSpacer--m"
+    />
+  </EuiSpacer>
+  <EuiFlexGroup>
+    <div
+      className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+    >
+      <EuiFlexItem>
+        <div
+          className="euiFlexItem"
+        >
+          <EuiDescriptionList
+            type="column"
+          >
+            <dl
+              className="euiDescriptionList euiDescriptionList--column"
+            >
+              <EuiDescriptionListTitle
+                key="policy"
+              >
+                <dt
+                  className="euiDescriptionList__title"
+                >
+                  <strong>
+                    Lifecycle policy
+                  </strong>
+                </dt>
+              </EuiDescriptionListTitle>
+              <EuiDescriptionListDescription
+                key="policy_desc"
+              >
+                <dd
+                  className="euiDescriptionList__description"
+                >
+                  <EuiLink
+                    href="#/management/elasticsearch/index_lifecycle_management/policies/edit/testy"
+                  >
+                    <a
+                      className="euiLink euiLink--primary"
+                      href="#/management/elasticsearch/index_lifecycle_management/policies/edit/testy"
+                      rel="noreferrer"
+                    >
+                      testy
+                    </a>
+                  </EuiLink>
+                </dd>
+              </EuiDescriptionListDescription>
+              <EuiDescriptionListTitle
+                key="action"
+              >
+                <dt
+                  className="euiDescriptionList__title"
+                >
+                  <strong>
+                    Current action
+                  </strong>
+                </dt>
+              </EuiDescriptionListTitle>
+              <EuiDescriptionListDescription
+                key="action_desc"
+              >
+                <dd
+                  className="euiDescriptionList__description"
+                >
+                  complete
+                </dd>
+              </EuiDescriptionListDescription>
+              <EuiDescriptionListTitle
+                key="failed_step"
+              >
+                <dt
+                  className="euiDescriptionList__title"
+                >
+                  <strong>
+                    Failed step
+                  </strong>
+                </dt>
+              </EuiDescriptionListTitle>
+              <EuiDescriptionListDescription
+                key="failed_step_desc"
+              >
+                <dd
+                  className="euiDescriptionList__description"
+                >
+                  -
+                </dd>
+              </EuiDescriptionListDescription>
+            </dl>
+          </EuiDescriptionList>
+        </div>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <div
+          className="euiFlexItem"
+        >
+          <EuiDescriptionList
+            type="column"
+          >
+            <dl
+              className="euiDescriptionList euiDescriptionList--column"
+            >
+              <EuiDescriptionListTitle
+                key="phase"
+              >
+                <dt
+                  className="euiDescriptionList__title"
+                >
+                  <strong>
+                    Current phase
+                  </strong>
+                </dt>
+              </EuiDescriptionListTitle>
+              <EuiDescriptionListDescription
+                key="phase_desc"
+              >
+                <dd
+                  className="euiDescriptionList__description"
+                >
+                  new
+                </dd>
+              </EuiDescriptionListDescription>
+              <EuiDescriptionListTitle
+                key="action_time_millis"
+              >
+                <dt
+                  className="euiDescriptionList__title"
+                >
+                  <strong>
+                    Current action time
+                  </strong>
+                </dt>
+              </EuiDescriptionListTitle>
+              <EuiDescriptionListDescription
+                key="action_time_millis_desc"
+              >
+                <dd
+                  className="euiDescriptionList__description"
+                >
+                  2018-12-07 13:02:55
+                </dd>
+              </EuiDescriptionListDescription>
+            </dl>
+          </EuiDescriptionList>
+        </div>
+      </EuiFlexItem>
+    </div>
+  </EuiFlexGroup>
+</IndexLifecycleSummary>
+`;
+
+exports[`remove lifecycle action extension should return extension when all indices have lifecycle policy 1`] = `
+Object {
+  "buttonLabel": "Remove lifecycle policy",
+  "icon": "stopFilled",
+  "indexNames": Array [
+    Array [
+      "testy3",
+      "testy3",
+    ],
+  ],
+  "renderConfirmModal": [Function],
+}
+`;
+
+exports[`retry lifecycle action extension should return extension when all indices have lifecycle errors 1`] = `
+Object {
+  "buttonLabel": "Retry lifecycle step",
+  "icon": "play",
+  "indexNames": Array [
+    Array [
+      "testy3",
+      "testy3",
+    ],
+  ],
+  "requestMethod": [Function],
+  "successMessage": "Called retry lifecycle step for: \\"testy3\\", \\"testy3\\"",
+}
+`;

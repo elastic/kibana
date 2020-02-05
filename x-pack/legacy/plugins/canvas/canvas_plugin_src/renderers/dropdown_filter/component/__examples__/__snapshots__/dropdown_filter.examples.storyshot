@@ -1,0 +1,203 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Storyshots renderers/DropdownFilter default 1`] = `
+<div
+  className="canvasDropdownFilter"
+>
+  <select
+    className="canvasDropdownFilter__select"
+    onChange={[Function]}
+  >
+    <option
+      aria-selected={false}
+      value="%%CANVAS_MATCH_ALL%%"
+    >
+      -- ANY --
+    </option>
+  </select>
+  <svg
+    aria-hidden={true}
+    className="euiIcon euiIcon--medium euiIcon-isLoading canvasDropdownFilter__icon"
+    focusable="false"
+    height={16}
+    role="img"
+    style={null}
+    viewBox="0 0 16 16"
+    width={16}
+    xmlns="http://www.w3.org/2000/svg"
+  />
+</div>
+`;
+
+exports[`Storyshots renderers/DropdownFilter with choices 1`] = `
+<div
+  className="canvasDropdownFilter"
+>
+  <select
+    className="canvasDropdownFilter__select"
+    onChange={[Function]}
+  >
+    <option
+      aria-selected={false}
+      value="%%CANVAS_MATCH_ALL%%"
+    >
+      -- ANY --
+    </option>
+    <option
+      aria-selected={false}
+      value="Item One"
+    >
+      Item One
+    </option>
+    <option
+      aria-selected={false}
+      value="Item Two"
+    >
+      Item Two
+    </option>
+    <option
+      aria-selected={false}
+      value="Item Three"
+    >
+      Item Three
+    </option>
+  </select>
+  <svg
+    aria-hidden={true}
+    className="euiIcon euiIcon--medium euiIcon-isLoading canvasDropdownFilter__icon"
+    focusable="false"
+    height={16}
+    role="img"
+    style={null}
+    viewBox="0 0 16 16"
+    width={16}
+    xmlns="http://www.w3.org/2000/svg"
+  />
+</div>
+`;
+
+exports[`Storyshots renderers/DropdownFilter with choices and new value 1`] = `
+<div
+  className="canvasDropdownFilter"
+>
+  <select
+    className="canvasDropdownFilter__select"
+    onChange={[Function]}
+    value="selectedValue"
+  >
+    <option
+      aria-selected={false}
+      value="%%CANVAS_MATCH_ALL%%"
+    >
+      -- ANY --
+    </option>
+    <option
+      aria-selected={false}
+      value="Item One"
+    >
+      Item One
+    </option>
+    <option
+      aria-selected={false}
+      value="Item Two"
+    >
+      Item Two
+    </option>
+    <option
+      aria-selected={false}
+      value="Item Three"
+    >
+      Item Three
+    </option>
+  </select>
+  <svg
+    aria-hidden={true}
+    className="euiIcon euiIcon--medium euiIcon-isLoading canvasDropdownFilter__icon"
+    focusable="false"
+    height={16}
+    role="img"
+    style={null}
+    viewBox="0 0 16 16"
+    width={16}
+    xmlns="http://www.w3.org/2000/svg"
+  />
+</div>
+`;
+
+exports[`Storyshots renderers/DropdownFilter with choices and value 1`] = `
+<div
+  className="canvasDropdownFilter"
+>
+  <select
+    className="canvasDropdownFilter__select"
+    onChange={[Function]}
+    value="Item Two"
+  >
+    <option
+      aria-selected={false}
+      value="%%CANVAS_MATCH_ALL%%"
+    >
+      -- ANY --
+    </option>
+    <option
+      aria-selected={false}
+      value="Item One"
+    >
+      Item One
+    </option>
+    <option
+      aria-selected={true}
+      value="Item Two"
+    >
+      Item Two
+    </option>
+    <option
+      aria-selected={false}
+      value="Item Three"
+    >
+      Item Three
+    </option>
+  </select>
+  <svg
+    aria-hidden={true}
+    className="euiIcon euiIcon--medium euiIcon-isLoading canvasDropdownFilter__icon"
+    focusable="false"
+    height={16}
+    role="img"
+    style={null}
+    viewBox="0 0 16 16"
+    width={16}
+    xmlns="http://www.w3.org/2000/svg"
+  />
+</div>
+`;
+
+exports[`Storyshots renderers/DropdownFilter with new value 1`] = `
+<div
+  className="canvasDropdownFilter"
+>
+  <select
+    className="canvasDropdownFilter__select"
+    onChange={[Function]}
+    value="selectedValue"
+  >
+    <option
+      aria-selected={false}
+      value="%%CANVAS_MATCH_ALL%%"
+    >
+      -- ANY --
+    </option>
+  </select>
+  <svg
+    aria-hidden={true}
+    className="euiIcon euiIcon--medium euiIcon-isLoading canvasDropdownFilter__icon"
+    focusable="false"
+    height={16}
+    role="img"
+    style={null}
+    viewBox="0 0 16 16"
+    width={16}
+    xmlns="http://www.w3.org/2000/svg"
+  />
+</div>
+`;

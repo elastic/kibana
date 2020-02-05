@@ -1,0 +1,112 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Authentication Table Component rendering it renders the authentication table 1`] = `
+<Connect(AuthenticationTableComponent)
+  data={
+    Array [
+      Object {
+        "cursor": Object {
+          "value": "98966fa2013c396155c460d35c0902be",
+        },
+        "node": Object {
+          "_id": "cPsuhGcB0WOhS6qyTKC0",
+          "failures": 10,
+          "lastFailure": Object {
+            "host": Object {
+              "id": Array [
+                "host-id-1",
+              ],
+              "name": Array [
+                "host-2",
+              ],
+            },
+            "source": Object {
+              "ip": Array [
+                "8.8.8.8",
+              ],
+            },
+            "timestamp": "2019-01-23T22:35:32.222Z",
+          },
+          "lastSuccess": Object {
+            "host": Object {
+              "id": Array [
+                "host-id-1",
+              ],
+              "name": Array [
+                "host-1",
+              ],
+            },
+            "source": Object {
+              "ip": Array [
+                "127.0.0.1",
+              ],
+            },
+            "timestamp": "2019-01-23T22:35:32.222Z",
+          },
+          "successes": 0,
+          "user": Object {
+            "name": Array [
+              "Evan Hassanabad",
+            ],
+          },
+        },
+      },
+      Object {
+        "cursor": Object {
+          "value": "aa7ca589f1b8220002f2fc61c64cfbf1",
+        },
+        "node": Object {
+          "_id": "KwQDiWcB0WOhS6qyXmrW",
+          "failures": 10,
+          "lastFailure": Object {
+            "host": Object {
+              "id": Array [
+                "host-id-1",
+              ],
+              "name": Array [
+                "host-2",
+              ],
+            },
+            "source": Object {
+              "ip": Array [
+                "8.8.8.8",
+              ],
+            },
+            "timestamp": "2019-01-23T22:35:32.222Z",
+          },
+          "lastSuccess": Object {
+            "host": Object {
+              "id": Array [
+                "host-id-1",
+              ],
+              "name": Array [
+                "host-1",
+              ],
+            },
+            "source": Object {
+              "ip": Array [
+                "127.0.0.1",
+              ],
+            },
+            "timestamp": "2019-01-23T22:35:32.222Z",
+          },
+          "successes": 0,
+          "user": Object {
+            "name": Array [
+              "Braden Hassanabad",
+            ],
+          },
+        },
+      },
+    ]
+  }
+  fakeTotalCount={50}
+  id="authentication"
+  isInspect={false}
+  loadPage={[MockFunction]}
+  loading={false}
+  showMorePagesIndicator={true}
+  totalCount={54}
+  type="page"
+/>
+`;

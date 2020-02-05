@@ -1,0 +1,57 @@
+{
+  "kibana": {
+    "totalUniqueInstanceCount": 0,
+    "totalUniqueFullyMigratedCount": 0,
+    "totalUniquePartiallyMigratedCount": 0,
+    "totalUniqueInternallyCollectedCount": 0,
+    "detected": {
+      "doesExist": true
+    },
+    "byUuid": {}
+  },
+  "beats": {
+    "totalUniqueInstanceCount": 0,
+    "totalUniqueFullyMigratedCount": 0,
+    "totalUniquePartiallyMigratedCount": 0,
+    "totalUniqueInternallyCollectedCount": 0,
+    "detected": {
+      "mightExist": true
+    },
+    "byUuid": {}
+  },
+  "logstash": {
+    "totalUniqueInstanceCount": 0,
+    "totalUniqueFullyMigratedCount": 0,
+    "totalUniquePartiallyMigratedCount": 0,
+    "totalUniqueInternallyCollectedCount": 0,
+    "detected": {
+      "mightExist": false
+    },
+    "byUuid": {}
+  },
+  "apm": {
+    "totalUniqueInstanceCount": 0,
+    "totalUniqueFullyMigratedCount": 0,
+    "totalUniquePartiallyMigratedCount": 0,
+    "totalUniqueInternallyCollectedCount": 0,
+    "detected": {
+      "mightExist": false
+    },
+    "byUuid": {}
+  },
+  "elasticsearch": {
+    "totalUniqueInstanceCount": 0,
+    "totalUniqueFullyMigratedCount": 0,
+    "totalUniquePartiallyMigratedCount": 0,
+    "totalUniqueInternallyCollectedCount": 0,
+    "detected": {
+      "doesExist": true
+    },
+    "byUuid": {}
+  },
+  "_meta": {
+    "secondsAgo": 30,
+    "liveClusterUuid": null,
+    "hasPermissions": true
+  }
+}

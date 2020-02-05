@@ -22,21 +22,49 @@ import { resolve } from 'path';
 import { promisify } from 'util';
 import { write, copyAll, mkdirp, exec } from '../../../lib';
 import * as dockerTemplates from './templates';
+import { bundleDockerFiles } from './bundle_dockerfiles';
 
 const accessAsync = promisify(access);
 const linkAsync = promisify(link);
 const unlinkAsync = promisify(unlink);
 const chmodAsync = promisify(chmod);
 
-export async function runDockerGenerator(config, log, build) {
+export async function runDockerGenerator(config, log, build, ubi = false) {
+  // UBI var config
+  const baseOSImage = ubi ? 'registry.access.redhat.com/ubi7/ubi-minimal:7.7' : 'centos:7';
+  const ubiVersionTag = 'ubi7';
+  const ubiImageFlavor = ubi ? `-${ubiVersionTag}` : '';
+
+  // General docker var config
   const license = build.isOss() ? 'ASL 2.0' : 'Elastic License';
   const imageFlavor = build.isOss() ? '-oss' : '';
   const imageTag = 'docker.elastic.co/kibana/kibana';
   const versionTag = config.getBuildVersion();
-  const artifactTarball = `kibana${ imageFlavor }-${ versionTag }-linux-x86_64.tar.gz`;
+  const artifactTarball = `kibana${imageFlavor}-${versionTag}-linux-x86_64.tar.gz`;
   const artifactsDir = config.resolveFromTarget('.');
-  const dockerBuildDir = config.resolveFromRepo('build', 'kibana-docker', build.isOss() ? 'oss' : 'default');
-  const dockerOutputDir = config.resolveFromTarget(`kibana${ imageFlavor }-${ versionTag }-docker.tar.gz`);
+  const dockerBuildDate = new Date().toISOString();
+  // That would produce oss, default and default-ubi7
+  const dockerBuildDir = config.resolveFromRepo(
+    'build',
+    'kibana-docker',
+    build.isOss() ? `oss` : `default${ubiImageFlavor}`
+  );
+  const dockerOutputDir = config.resolveFromTarget(
+    `kibana${imageFlavor}${ubiImageFlavor}-${versionTag}-docker.tar.gz`
+  );
+  const scope = {
+    artifactTarball,
+    imageFlavor,
+    versionTag,
+    license,
+    artifactsDir,
+    imageTag,
+    dockerBuildDir,
+    dockerOutputDir,
+    baseOSImage,
+    ubiImageFlavor,
+    dockerBuildDate,
+  };
 
   // Verify if we have the needed kibana target in order
   // to build the kibana docker image.
@@ -50,31 +78,17 @@ export async function runDockerGenerator(config, log, build) {
   } catch (e) {
     if (e && e.code === 'ENOENT' && e.syscall === 'access') {
       throw new Error(
-        `Kibana linux target (${ artifactTarball }) is needed in order to build ${''
-        }the docker image. None was found at ${ artifactsDir }`
+        `Kibana linux target (${artifactTarball}) is needed in order to build ${''}the docker image. None was found at ${artifactsDir}`
       );
     }
   }
 
   // Create the kibana linux target inside the
   // Kibana docker build
-  await linkAsync(
-    resolve(artifactsDir, artifactTarball),
-    resolve(dockerBuildDir, artifactTarball),
-  );
+  await linkAsync(resolve(artifactsDir, artifactTarball), resolve(dockerBuildDir, artifactTarball));
 
   // Write all the needed docker config files
   // into kibana-docker folder
-  const scope = {
-    artifactTarball,
-    imageFlavor,
-    versionTag,
-    license,
-    artifactsDir,
-    imageTag,
-    dockerOutputDir
-  };
-
   for (const [, dockerTemplate] of Object.entries(dockerTemplates)) {
     await write(resolve(dockerBuildDir, dockerTemplate.name), dockerTemplate.generator(scope));
   }
@@ -84,7 +98,7 @@ export async function runDockerGenerator(config, log, build) {
   // under templates/kibana_yml.template/js
   await copyAll(
     config.resolveFromRepo('src/dev/build/tasks/os_packages/docker_generator/resources'),
-    dockerBuildDir,
+    dockerBuildDir
   );
 
   // Build docker image into the target folder
@@ -96,4 +110,16 @@ export async function runDockerGenerator(config, log, build) {
     cwd: dockerBuildDir,
     level: 'info',
   });
+
+  // Pack Dockerfiles and create a target for them
+  await bundleDockerFiles(config, log, build, scope);
+}
+
+export async function runDockerGeneratorForUBI(config, log, build) {
+  // Only run ubi docker image build for default distribution
+  if (build.isOss()) {
+    return;
+  }
+
+  await runDockerGenerator(config, log, build, true);
 }

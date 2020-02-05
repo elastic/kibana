@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<testsuites>
+  <testsuite timestamp="2019-06-13T23:29:36" time="30.739" tests="1444" failures="2" skipped="3">
+    <testcase name="code in multiple nodes &quot;before all&quot; hook" classname="X-Pack Mocha Tests.x-pack/legacy/plugins/code/server/__tests__/multi_node·ts" time="0.121">
+      <system-out>
+        <![CDATA[]]>
+      </system-out>
+      <failure>
+        <![CDATA[Error: Unable to read artifact info from https://artifacts-api.elastic.co/v1/versions/8.0.0-SNAPSHOT/builds/latest/projects/elasticsearch: Service Temporarily Unavailable
+  <html>
+<head><title>503 Service Temporarily Unavailable</title></head>
+<body bgcolor="white">
+<center><h1>503 Service Temporarily Unavailable</h1></center>
+<hr><center>nginx/1.13.7</center>
+</body>
+</html>
+
+    at Function.getSnapshot (/var/lib/jenkins/workspace/elastic+kibana+master/JOB/x-pack-intake/node/immutable/kibana/packages/kbn-es/src/artifact.js:95:13)
+    at process._tickCallback (internal/process/next_tick.js:68:7)]]>
+      </failure>
+    </testcase>
+    <testcase name="code in multiple nodes &quot;after all&quot; hook" classname="X-Pack Mocha Tests.x-pack/legacy/plugins/code/server/__tests__/multi_node·ts" time="0.003">
+      <system-out>
+        <![CDATA[]]>
+      </system-out>
+      <failure>
+        <![CDATA[TypeError: Cannot read property 'shutdown' of undefined
+    at Context.shutdown (plugins/code/server/__tests__/multi_node.ts:125:23)
+    at process.topLevelDomainCallback (domain.js:120:23)]]>
+      </failure>
+    </testcase>
+    <testcase name="repository service test can not clone a repo by ssh without a key" classname="X-Pack Mocha Tests.x-pack/legacy/plugins/code/server/__tests__/repository_service·ts" time="0.005">
+      <system-out>
+        <![CDATA[]]>
+      </system-out>
+    </testcase>
+  </testsuite>
+</testsuites>

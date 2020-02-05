@@ -1,0 +1,14 @@
+{
+  "delete_by_query_rethrottle": {
+    "url_params": {
+      "requests_per_second": ""
+    },
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_delete_by_query/{task_id}/_rethrottle"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-delete-by-query.html"
+  }
+}

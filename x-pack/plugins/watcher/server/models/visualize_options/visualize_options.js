@@ -17,4 +17,3 @@ export class VisualizeOptions {
     return new VisualizeOptions(downstreamJson);
   }
 }
-

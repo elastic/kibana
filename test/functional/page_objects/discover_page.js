@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export function DiscoverPageProvider({ getService, getPageObjects }) {
   const log = getService('log');
@@ -28,18 +28,21 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['header', 'common']);
   const browser = getService('browser');
   const globalNav = getService('globalNav');
+  const config = getService('config');
+  const defaultFindTimeout = config.get('timeouts.find');
+  const elasticChart = getService('elasticChart');
 
   class DiscoverPage {
     async getQueryField() {
-      return await find.byCssSelector('input[ng-model=\'state.query\']');
+      return await find.byCssSelector("input[ng-model='state.query']");
     }
 
     async getQuerySearchButton() {
-      return await find.byCssSelector('button[aria-label=\'Search\']');
+      return await find.byCssSelector("button[aria-label='Search']");
     }
 
     async getChartTimespan() {
-      const el = await find.byCssSelector('.small > span:nth-child(1)');
+      const el = await find.byCssSelector('.small > label[for="dscResultsIntervalSelector"]');
       return await el.getVisibleText();
     }
 
@@ -60,9 +63,26 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       });
     }
 
+    async inputSavedSearchTitle(searchName) {
+      await testSubjects.setValue('savedObjectTitle', searchName);
+    }
+
+    async clickConfirmSavedSearch() {
+      await testSubjects.click('confirmSaveSavedObjectButton');
+    }
+
+    async openAddFilterPanel() {
+      await testSubjects.click('addFilter');
+    }
+
+    async waitUntilSearchingHasFinished() {
+      const spinner = await testSubjects.find('loadingSpinner');
+      await find.waitForElementHidden(spinner, defaultFindTimeout * 10);
+    }
+
     async getColumnHeaders() {
       const headerElements = await testSubjects.findAll('docTableHeaderField');
-      return await Promise.all(headerElements.map(async (el) => await el.getVisibleText()));
+      return await Promise.all(headerElements.map(async el => await el.getVisibleText()));
     }
 
     async openLoadSavedSearchPanel() {
@@ -86,13 +106,13 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     }
 
     async hasSavedSearch(searchName) {
-      const searchLink = await find.byPartialLinkText(searchName);
+      const searchLink = await find.byButtonText(searchName);
       return searchLink.isDisplayed();
     }
 
     async loadSavedSearch(searchName) {
       await this.openLoadSavedSearchPanel();
-      const searchLink = await find.byPartialLinkText(searchName);
+      const searchLink = await find.byButtonText(searchName);
       await searchLink.click();
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
@@ -109,16 +129,34 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       await testSubjects.click('discoverOpenButton');
     }
 
-    async clickHistogramBar(i) {
-      const bars = await find.allByCssSelector(`.series.histogram rect`);
-      await bars[i].click();
+    async closeLoadSavedSearchPanel() {
+      await testSubjects.click('euiFlyoutCloseButton');
     }
 
-    async brushHistogram(from, to) {
-      const bars = await find.allByCssSelector('.series.histogram rect');
+    async getChartCanvas() {
+      return await find.byCssSelector('.echChart canvas:last-of-type');
+    }
+
+    async chartCanvasExist() {
+      return await find.existsByCssSelector('.echChart canvas:last-of-type');
+    }
+
+    async clickHistogramBar() {
+      const el = await this.getChartCanvas();
+
+      await browser
+        .getActions()
+        .move({ x: 200, y: 20, origin: el._webElement })
+        .click()
+        .perform();
+    }
+
+    async brushHistogram() {
+      const el = await this.getChartCanvas();
+
       await browser.dragAndDrop(
-        { element: bars[from], xOffset: 0, yOffset: -5 },
-        { element: bars[to], xOffset: 0, yOffset: -5 }
+        { location: el, offset: { x: 200, y: 20 } },
+        { location: el, offset: { x: 400, y: 30 } }
       );
     }
 
@@ -126,17 +164,13 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       return await globalNav.getLastBreadcrumb();
     }
 
-    async getBarChartXTicks() {
-      const xAxis = await find.byCssSelector('.x.axis.CategoryAxis-1');
-      const $ = await xAxis.parseDomContent();
-      return $('.tick > text').toArray().map(tick => $(tick).text().trim());
-    }
-
     async getBarChartData() {
       let yAxisLabel = 0;
 
       await PageObjects.header.waitUntilLoadingHasFinished();
-      const y = await find.byCssSelector('div.visAxis__splitAxes--y > div > svg > g > g:last-of-type');
+      const y = await find.byCssSelector(
+        'div.visAxis__splitAxes--y > div > svg > g > g:last-of-type'
+      );
       const yLabel = await y.getVisibleText();
       yAxisLabel = yLabel.replace(',', '');
       log.debug('yAxisLabel = ' + yAxisLabel);
@@ -145,16 +179,18 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       const $ = await svg.parseDomContent();
       const yAxisHeight = $('rect.background').attr('height');
       log.debug('theHeight = ' + yAxisHeight);
-      const bars = $('g > g.series > rect').toArray().map(chart => {
-        const barHeight = $(chart).attr('height');
-        return Math.round(barHeight / yAxisHeight * yAxisLabel);
-      });
+      const bars = $('g > g.series > rect')
+        .toArray()
+        .map(chart => {
+          const barHeight = $(chart).attr('height');
+          return Math.round((barHeight / yAxisHeight) * yAxisLabel);
+        });
 
       return bars;
     }
 
     async getChartInterval() {
-      const selectedValue = await testSubjects.getProperty('discoverIntervalSelect', 'value');
+      const selectedValue = await testSubjects.getAttribute('discoverIntervalSelect', 'value');
       const selectedOption = await find.byCssSelector('option[value="' + selectedValue + '"]');
       return selectedOption.getVisibleText();
     }
@@ -182,8 +218,15 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     }
 
     async getDocTableIndex(index) {
-      const row = await find.byCssSelector('tr.kbnDocTable__row:nth-child(' + (index) + ')');
+      const row = await find.byCssSelector('tr.kbnDocTable__row:nth-child(' + index + ')');
       return await row.getVisibleText();
+    }
+
+    async getDocTableField(index) {
+      const field = await find.byCssSelector(
+        `tr.kbnDocTable__row:nth-child(${index}) > [data-test-subj='docTableField']`
+      );
+      return await field.getVisibleText();
     }
 
     async clickDocSortDown() {
@@ -196,7 +239,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
 
     async getMarks() {
       const marks = await find.allByCssSelector('mark');
-      return await Promise.all(marks.map((mark) => mark.getVisibleText()));
+      return await Promise.all(marks.map(mark => mark.getVisibleText()));
     }
 
     async toggleSidebarCollapse() {
@@ -205,12 +248,12 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
 
     async getAllFieldNames() {
       const items = await find.allByCssSelector('.sidebar-item');
-      return await Promise.all(items.map((item) => item.getVisibleText()));
+      return await Promise.all(items.map(item => item.getVisibleText()));
     }
 
     async getSidebarWidth() {
       const sidebar = await find.byCssSelector('.sidebar-list');
-      return await sidebar.getProperty('clientWidth');
+      return await sidebar.getAttribute('clientWidth');
     }
 
     async hasNoResults() {
@@ -236,6 +279,14 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       });
     }
 
+    async expectFieldListItemVisualize(field) {
+      await testSubjects.existOrFail(`fieldVisualize-${field}`);
+    }
+
+    async expectMissingFieldListItemVisualize(field) {
+      await testSubjects.missingOrFail(`fieldVisualize-${field}`, { allowHidden: true });
+    }
+
     async clickFieldListPlusFilter(field, value) {
       // this method requires the field details to be open from clickFieldListItem()
       // testSubjects.find doesn't handle spaces in the data-test-subj value
@@ -251,8 +302,10 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     }
 
     async selectIndexPattern(indexPattern) {
-      await find.clickByCssSelector('.index-pattern-selection');
-      await find.setValue('.ui-select-search', indexPattern + '\n');
+      await testSubjects.click('indexPattern-switch-link');
+      await find.clickByCssSelector(
+        `[data-test-subj="indexPattern-switcher"] [title="${indexPattern}"]`
+      );
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
@@ -262,21 +315,18 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     }
 
     async openSidebarFieldFilter() {
-      const fieldFilterFormExists = await testSubjects.exists('discoverFieldFilter');
-      if (!fieldFilterFormExists) {
-        await testSubjects.click('toggleFieldFilterButton');
-        await testSubjects.existOrFail('discoverFieldFilter');
-      }
+      await testSubjects.click('toggleFieldFilterButton');
+      await testSubjects.existOrFail('filterSelectionPanel');
     }
 
     async closeSidebarFieldFilter() {
-      const fieldFilterFormExists = await testSubjects.exists('discoverFieldFilter');
-      if (fieldFilterFormExists) {
-        await testSubjects.click('toggleFieldFilterButton');
-        await testSubjects.missingOrFail('discoverFieldFilter');
-      }
+      await testSubjects.click('toggleFieldFilterButton');
+      await testSubjects.missingOrFail('filterSelectionPanel', { allowHidden: true });
     }
 
+    async waitForChartLoadingComplete(renderCount) {
+      await elasticChart.waitForRenderingCount('discoverChart', renderCount);
+    }
   }
 
   return new DiscoverPage();

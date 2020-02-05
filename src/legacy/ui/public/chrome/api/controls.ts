@@ -18,17 +18,9 @@
  */
 
 import * as Rx from 'rxjs';
-import { ChromeStartContract } from '../../../../../core/public/chrome';
+import { npStart } from 'ui/new_platform';
 
-let newPlatformChrome: ChromeStartContract;
-
-export function __newPlatformInit__(instance: ChromeStartContract) {
-  if (newPlatformChrome) {
-    throw new Error('ui/chrome/api/controls is already initialized');
-  }
-
-  newPlatformChrome = instance;
-}
+const newPlatformChrome = npStart.core.chrome;
 
 export function initChromeControlsApi(chrome: { [key: string]: any }) {
   // cache of chrome visibility state
@@ -50,4 +42,6 @@ export function initChromeControlsApi(chrome: { [key: string]: any }) {
    * might be incorrect in the moments just before the UI is updated.
    */
   chrome.getVisible = () => visible$.getValue();
+
+  chrome.visible$ = visible$.asObservable();
 }

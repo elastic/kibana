@@ -1,0 +1,40 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Empty rendering renders correctly against snapshot 1`] = `
+<EmptyContainer
+  className="timeline-drop-area-empty"
+  data-test-subj="empty"
+  showSmallMsg={false}
+>
+  <NoWrap>
+    <Text
+      color="subdued"
+      size="s"
+    >
+      Drop anything
+    </Text>
+    <HighlightedBackground>
+      <BadgeHighlighted>
+        highlighted
+      </BadgeHighlighted>
+    </HighlightedBackground>
+  </NoWrap>
+  <NoWrap>
+    <Text
+      color="subdued"
+      size="s"
+    >
+      here to build an
+    </Text>
+    <AndOrBadge
+      type="or"
+    />
+    <Text
+      color="subdued"
+      size="s"
+    >
+      query
+    </Text>
+  </NoWrap>
+</EmptyContainer>
+`;

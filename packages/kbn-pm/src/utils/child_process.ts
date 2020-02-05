@@ -33,8 +33,9 @@ function generateColors() {
 
 export function spawn(command: string, args: string[], opts: execa.Options) {
   return execa(command, args, {
-    ...opts,
     stdio: 'inherit',
+    preferLocal: true,
+    ...opts,
   });
 }
 
@@ -47,8 +48,9 @@ export function spawnStreaming(
   { prefix }: { prefix: string }
 ) {
   const spawned = execa(command, args, {
-    ...opts,
     stdio: ['ignore', 'pipe', 'pipe'],
+    preferLocal: true,
+    ...opts,
   });
 
   const color = nextColor();

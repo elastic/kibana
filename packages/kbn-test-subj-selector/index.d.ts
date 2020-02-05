@@ -17,4 +17,5 @@
  * under the License.
  */
 
-export default function(selector: string): string;
+// eslint-disable-next-line import/no-default-export
+export default function kbnTestSubjSelector(selector: string): string;

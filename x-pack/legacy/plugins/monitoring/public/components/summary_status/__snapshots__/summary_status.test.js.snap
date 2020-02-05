@@ -1,0 +1,291 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Summary Status Component should allow label to be optional 1`] = `
+<div
+  class="monSummaryStatusNoWrap"
+  intl="[object Object]"
+>
+  <div
+    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+  >
+    <div
+      class="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <div
+        class="euiStat euiStat--leftAligned"
+      >
+        <div
+          class="euiText euiText--small euiStat__description"
+        >
+          <p
+            aria-hidden="true"
+          >
+            Status
+          </p>
+        </div>
+        <p
+          aria-hidden="true"
+          class="euiTitle euiTitle--xsmall euiStat__title"
+        >
+          Status: 
+          <svg
+            alt="Status: yellow"
+            aria-hidden="true"
+            class="euiIcon euiIcon--large euiIcon--warning euiIcon-isLoading"
+            data-test-subj="statusIcon"
+            focusable="false"
+            height="16"
+            role="img"
+            viewBox="0 0 16 16"
+            width="16"
+            xmlns="http://www.w3.org/2000/svg"
+          />
+           Yellow
+        </p>
+        <p
+          class="euiScreenReaderOnly"
+        >
+          Status [object Object]
+        </p>
+      </div>
+    </div>
+    <div
+      class="euiFlexItem euiFlexItem--flexGrowZero"
+      data-test-subj="transportAddress"
+    >
+      <div
+        class="euiStat euiStat--leftAligned"
+      >
+        <div
+          class="euiText euiText--small euiStat__description"
+        >
+          <p
+            aria-hidden="true"
+          />
+        </div>
+        <p
+          aria-hidden="true"
+          class="euiTitle euiTitle--xsmall euiStat__title"
+        >
+          127.0.0.1:9300
+        </p>
+        <p
+          class="euiScreenReaderOnly"
+        >
+           127.0.0.1:9300
+        </p>
+      </div>
+    </div>
+    <div
+      class="euiFlexItem euiFlexItem--flexGrowZero"
+      data-test-subj="documentCount"
+    >
+      <div
+        class="euiStat euiStat--leftAligned"
+      >
+        <div
+          class="euiText euiText--small euiStat__description"
+        >
+          <p
+            aria-hidden="true"
+          >
+            Documents
+          </p>
+        </div>
+        <p
+          aria-hidden="true"
+          class="euiTitle euiTitle--xsmall euiStat__title"
+        >
+          24.8k
+        </p>
+        <p
+          class="euiScreenReaderOnly"
+        >
+          Documents 24.8k
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Summary Status Component should allow status to be optional 1`] = `
+<div
+  class="monSummaryStatusNoWrap"
+  intl="[object Object]"
+>
+  <div
+    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+  >
+    <div
+      class="euiFlexItem euiFlexItem--flexGrowZero"
+      data-test-subj="freeDiskSpace"
+    >
+      <div
+        class="euiStat euiStat--leftAligned"
+      >
+        <div
+          class="euiText euiText--small euiStat__description"
+        >
+          <p
+            aria-hidden="true"
+          >
+            Free Disk Space
+          </p>
+        </div>
+        <p
+          aria-hidden="true"
+          class="euiTitle euiTitle--xsmall euiStat__title"
+        >
+          173.9 GB
+        </p>
+        <p
+          class="euiScreenReaderOnly"
+        >
+          Free Disk Space 173.9 GB
+        </p>
+      </div>
+    </div>
+    <div
+      class="euiFlexItem euiFlexItem--flexGrowZero"
+      data-test-subj="documentCount"
+    >
+      <div
+        class="euiStat euiStat--leftAligned"
+      >
+        <div
+          class="euiText euiText--small euiStat__description"
+        >
+          <p
+            aria-hidden="true"
+          >
+            Documents
+          </p>
+        </div>
+        <p
+          aria-hidden="true"
+          class="euiTitle euiTitle--xsmall euiStat__title"
+        >
+          24.8k
+        </p>
+        <p
+          class="euiScreenReaderOnly"
+        >
+          Documents 24.8k
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Summary Status Component should render metrics in a summary bar 1`] = `
+<div
+  class="monSummaryStatusNoWrap"
+  intl="[object Object]"
+>
+  <div
+    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+  >
+    <div
+      class="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <div
+        class="euiStat euiStat--leftAligned"
+      >
+        <div
+          class="euiText euiText--small euiStat__description"
+        >
+          <p
+            aria-hidden="true"
+          >
+            Status
+          </p>
+        </div>
+        <p
+          aria-hidden="true"
+          class="euiTitle euiTitle--xsmall euiStat__title"
+        >
+          Status: 
+          <svg
+            alt="Status: green"
+            aria-hidden="true"
+            class="euiIcon euiIcon--large euiIcon--success euiIcon-isLoading"
+            data-test-subj="statusIcon"
+            focusable="false"
+            height="16"
+            role="img"
+            viewBox="0 0 16 16"
+            width="16"
+            xmlns="http://www.w3.org/2000/svg"
+          />
+           Green
+        </p>
+        <p
+          class="euiScreenReaderOnly"
+        >
+          Status [object Object]
+        </p>
+      </div>
+    </div>
+    <div
+      class="euiFlexItem euiFlexItem--flexGrowZero"
+      data-test-subj="freeDiskSpace"
+    >
+      <div
+        class="euiStat euiStat--leftAligned"
+      >
+        <div
+          class="euiText euiText--small euiStat__description"
+        >
+          <p
+            aria-hidden="true"
+          >
+            Free Disk Space
+          </p>
+        </div>
+        <p
+          aria-hidden="true"
+          class="euiTitle euiTitle--xsmall euiStat__title"
+        >
+          173.9 GB
+        </p>
+        <p
+          class="euiScreenReaderOnly"
+        >
+          Free Disk Space 173.9 GB
+        </p>
+      </div>
+    </div>
+    <div
+      class="euiFlexItem euiFlexItem--flexGrowZero"
+      data-test-subj="documentCount"
+    >
+      <div
+        class="euiStat euiStat--leftAligned"
+      >
+        <div
+          class="euiText euiText--small euiStat__description"
+        >
+          <p
+            aria-hidden="true"
+          >
+            Documents
+          </p>
+        </div>
+        <p
+          aria-hidden="true"
+          class="euiTitle euiTitle--xsmall euiStat__title"
+        >
+          24.8k
+        </p>
+        <p
+          class="euiScreenReaderOnly"
+        >
+          Documents 24.8k
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+`;

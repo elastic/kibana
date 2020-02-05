@@ -1,0 +1,462 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ReportListing Report job listing with some items 1`] = `
+Array [
+  <EuiBasicTable
+    columns={
+      Array [
+        Object {
+          "field": "object_title",
+          "name": "Report",
+          "render": [Function],
+        },
+        Object {
+          "field": "created_at",
+          "name": "Created at",
+          "render": [Function],
+        },
+        Object {
+          "field": "status",
+          "name": "Status",
+          "render": [Function],
+        },
+        Object {
+          "actions": Array [
+            Object {
+              "render": [Function],
+            },
+          ],
+          "name": "Actions",
+        },
+      ]
+    }
+    data-test-subj="reportJobListing"
+    itemId="id"
+    items={Array []}
+    loading={true}
+    noItemsMessage="Loading reports"
+    onChange={[Function]}
+    pagination={
+      Object {
+        "hidePerPageOptions": true,
+        "pageIndex": 0,
+        "pageSize": 10,
+        "totalItemCount": 0,
+      }
+    }
+    responsive={true}
+    tableLayout="fixed"
+  >
+    <div
+      className="euiBasicTable euiBasicTable-loading"
+      data-test-subj="reportJobListing"
+    >
+      <div>
+        <EuiTableHeaderMobile>
+          <div
+            className="euiTableHeaderMobile"
+          >
+            <EuiFlexGroup
+              alignItems="baseline"
+              justifyContent="spaceBetween"
+              responsive={false}
+            >
+              <div
+                className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
+              >
+                <EuiFlexItem
+                  grow={false}
+                >
+                  <div
+                    className="euiFlexItem euiFlexItem--flexGrowZero"
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem
+                  grow={false}
+                >
+                  <div
+                    className="euiFlexItem euiFlexItem--flexGrowZero"
+                  />
+                </EuiFlexItem>
+              </div>
+            </EuiFlexGroup>
+          </div>
+        </EuiTableHeaderMobile>
+        <EuiTable
+          responsive={true}
+          tableLayout="fixed"
+        >
+          <table
+            className="euiTable euiTable--responsive"
+          >
+            <EuiScreenReaderOnly>
+              <caption
+                aria-live="polite"
+                aria-relevant="text"
+                className="euiScreenReaderOnly euiTableCaption"
+                role="status"
+              >
+                <EuiDelayRender
+                  delay={500}
+                />
+              </caption>
+            </EuiScreenReaderOnly>
+            <EuiTableHeader>
+              <thead>
+                <tr>
+                  <EuiTableHeaderCell
+                    align="left"
+                    data-test-subj="tableHeaderCell_object_title_0"
+                    key="_data_h_object_title_0"
+                  >
+                    <th
+                      className="euiTableHeaderCell"
+                      data-test-subj="tableHeaderCell_object_title_0"
+                      role="columnheader"
+                      scope="col"
+                      style={
+                        Object {
+                          "width": undefined,
+                        }
+                      }
+                    >
+                      <div
+                        className="euiTableCellContent"
+                      >
+                        <span
+                          className="euiTableCellContent__text"
+                        >
+                          Report
+                        </span>
+                      </div>
+                    </th>
+                  </EuiTableHeaderCell>
+                  <EuiTableHeaderCell
+                    align="left"
+                    data-test-subj="tableHeaderCell_created_at_1"
+                    key="_data_h_created_at_1"
+                  >
+                    <th
+                      className="euiTableHeaderCell"
+                      data-test-subj="tableHeaderCell_created_at_1"
+                      role="columnheader"
+                      scope="col"
+                      style={
+                        Object {
+                          "width": undefined,
+                        }
+                      }
+                    >
+                      <div
+                        className="euiTableCellContent"
+                      >
+                        <span
+                          className="euiTableCellContent__text"
+                        >
+                          Created at
+                        </span>
+                      </div>
+                    </th>
+                  </EuiTableHeaderCell>
+                  <EuiTableHeaderCell
+                    align="left"
+                    data-test-subj="tableHeaderCell_status_2"
+                    key="_data_h_status_2"
+                  >
+                    <th
+                      className="euiTableHeaderCell"
+                      data-test-subj="tableHeaderCell_status_2"
+                      role="columnheader"
+                      scope="col"
+                      style={
+                        Object {
+                          "width": undefined,
+                        }
+                      }
+                    >
+                      <div
+                        className="euiTableCellContent"
+                      >
+                        <span
+                          className="euiTableCellContent__text"
+                        >
+                          Status
+                        </span>
+                      </div>
+                    </th>
+                  </EuiTableHeaderCell>
+                  <EuiTableHeaderCell
+                    align="right"
+                    key="_actions_h_3"
+                  >
+                    <th
+                      className="euiTableHeaderCell"
+                      role="columnheader"
+                      scope="col"
+                      style={
+                        Object {
+                          "width": undefined,
+                        }
+                      }
+                    >
+                      <div
+                        className="euiTableCellContent euiTableCellContent--alignRight"
+                      >
+                        <span
+                          className="euiTableCellContent__text"
+                        >
+                          Actions
+                        </span>
+                      </div>
+                    </th>
+                  </EuiTableHeaderCell>
+                </tr>
+              </thead>
+            </EuiTableHeader>
+            <EuiTableBody>
+              <tbody>
+                <EuiTableRow>
+                  <tr
+                    className="euiTableRow"
+                  >
+                    <EuiTableRowCell
+                      align="center"
+                      colSpan={4}
+                      isMobileFullWidth={true}
+                    >
+                      <td
+                        className="euiTableRowCell euiTableRowCell--isMobileFullWidth"
+                        colSpan={4}
+                        style={
+                          Object {
+                            "width": undefined,
+                          }
+                        }
+                      >
+                        <div
+                          className="euiTableCellContent euiTableCellContent--alignCenter"
+                        >
+                          <span
+                            className="euiTableCellContent__text"
+                          >
+                            Loading reports
+                          </span>
+                        </div>
+                      </td>
+                    </EuiTableRowCell>
+                  </tr>
+                </EuiTableRow>
+              </tbody>
+            </EuiTableBody>
+          </table>
+        </EuiTable>
+      </div>
+    </div>
+  </EuiBasicTable>,
+  <div
+    className="euiBasicTable euiBasicTable-loading"
+    data-test-subj="reportJobListing"
+  >
+    <div>
+      <EuiTableHeaderMobile>
+        <div
+          className="euiTableHeaderMobile"
+        >
+          <EuiFlexGroup
+            alignItems="baseline"
+            justifyContent="spaceBetween"
+            responsive={false}
+          >
+            <div
+              className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
+            >
+              <EuiFlexItem
+                grow={false}
+              >
+                <div
+                  className="euiFlexItem euiFlexItem--flexGrowZero"
+                />
+              </EuiFlexItem>
+              <EuiFlexItem
+                grow={false}
+              >
+                <div
+                  className="euiFlexItem euiFlexItem--flexGrowZero"
+                />
+              </EuiFlexItem>
+            </div>
+          </EuiFlexGroup>
+        </div>
+      </EuiTableHeaderMobile>
+      <EuiTable
+        responsive={true}
+        tableLayout="fixed"
+      >
+        <table
+          className="euiTable euiTable--responsive"
+        >
+          <EuiScreenReaderOnly>
+            <caption
+              aria-live="polite"
+              aria-relevant="text"
+              className="euiScreenReaderOnly euiTableCaption"
+              role="status"
+            >
+              <EuiDelayRender
+                delay={500}
+              />
+            </caption>
+          </EuiScreenReaderOnly>
+          <EuiTableHeader>
+            <thead>
+              <tr>
+                <EuiTableHeaderCell
+                  align="left"
+                  data-test-subj="tableHeaderCell_object_title_0"
+                  key="_data_h_object_title_0"
+                >
+                  <th
+                    className="euiTableHeaderCell"
+                    data-test-subj="tableHeaderCell_object_title_0"
+                    role="columnheader"
+                    scope="col"
+                    style={
+                      Object {
+                        "width": undefined,
+                      }
+                    }
+                  >
+                    <div
+                      className="euiTableCellContent"
+                    >
+                      <span
+                        className="euiTableCellContent__text"
+                      >
+                        Report
+                      </span>
+                    </div>
+                  </th>
+                </EuiTableHeaderCell>
+                <EuiTableHeaderCell
+                  align="left"
+                  data-test-subj="tableHeaderCell_created_at_1"
+                  key="_data_h_created_at_1"
+                >
+                  <th
+                    className="euiTableHeaderCell"
+                    data-test-subj="tableHeaderCell_created_at_1"
+                    role="columnheader"
+                    scope="col"
+                    style={
+                      Object {
+                        "width": undefined,
+                      }
+                    }
+                  >
+                    <div
+                      className="euiTableCellContent"
+                    >
+                      <span
+                        className="euiTableCellContent__text"
+                      >
+                        Created at
+                      </span>
+                    </div>
+                  </th>
+                </EuiTableHeaderCell>
+                <EuiTableHeaderCell
+                  align="left"
+                  data-test-subj="tableHeaderCell_status_2"
+                  key="_data_h_status_2"
+                >
+                  <th
+                    className="euiTableHeaderCell"
+                    data-test-subj="tableHeaderCell_status_2"
+                    role="columnheader"
+                    scope="col"
+                    style={
+                      Object {
+                        "width": undefined,
+                      }
+                    }
+                  >
+                    <div
+                      className="euiTableCellContent"
+                    >
+                      <span
+                        className="euiTableCellContent__text"
+                      >
+                        Status
+                      </span>
+                    </div>
+                  </th>
+                </EuiTableHeaderCell>
+                <EuiTableHeaderCell
+                  align="right"
+                  key="_actions_h_3"
+                >
+                  <th
+                    className="euiTableHeaderCell"
+                    role="columnheader"
+                    scope="col"
+                    style={
+                      Object {
+                        "width": undefined,
+                      }
+                    }
+                  >
+                    <div
+                      className="euiTableCellContent euiTableCellContent--alignRight"
+                    >
+                      <span
+                        className="euiTableCellContent__text"
+                      >
+                        Actions
+                      </span>
+                    </div>
+                  </th>
+                </EuiTableHeaderCell>
+              </tr>
+            </thead>
+          </EuiTableHeader>
+          <EuiTableBody>
+            <tbody>
+              <EuiTableRow>
+                <tr
+                  className="euiTableRow"
+                >
+                  <EuiTableRowCell
+                    align="center"
+                    colSpan={4}
+                    isMobileFullWidth={true}
+                  >
+                    <td
+                      className="euiTableRowCell euiTableRowCell--isMobileFullWidth"
+                      colSpan={4}
+                      style={
+                        Object {
+                          "width": undefined,
+                        }
+                      }
+                    >
+                      <div
+                        className="euiTableCellContent euiTableCellContent--alignCenter"
+                      >
+                        <span
+                          className="euiTableCellContent__text"
+                        >
+                          Loading reports
+                        </span>
+                      </div>
+                    </td>
+                  </EuiTableRowCell>
+                </tr>
+              </EuiTableRow>
+            </tbody>
+          </EuiTableBody>
+        </table>
+      </EuiTable>
+    </div>
+  </div>,
+]
+`;

@@ -18,6 +18,7 @@
  */
 
 import _ from 'lodash';
+import { createDefer } from 'ui/promises';
 
 // Throw this inside of an Angular route resolver after calling `kbnUrl.change`
 // so that the $router can observe the $location update. Otherwise, the location
@@ -53,7 +54,6 @@ export class RouteSetupManager {
    * @return {[type]} [description]
    */
   doWork(Promise, $injector, userWork) {
-
     const invokeEach = (arr, locals) => {
       return Promise.map(arr, fn => {
         if (!fn) return;
@@ -69,13 +69,13 @@ export class RouteSetupManager {
       // clone so we don't discard handlers or loose them
       handlers = handlers.slice(0);
 
-      const next = (err) => {
+      const next = err => {
         if (!handlers.length) throw err;
 
         const handler = handlers.shift();
         if (!handler) return next(err);
 
-        return Promise.try(function () {
+        return Promise.try(function() {
           return $injector.invoke(handler, null, { err });
         }).catch(next);
       };
@@ -89,16 +89,16 @@ export class RouteSetupManager {
         err => callErrorHandlers(this.onSetupError, err)
       )
       .then(() => {
-      // wait for the queue to fill up, then do all the work
-        const defer = Promise.defer();
+        // wait for the queue to fill up, then do all the work
+        const defer = createDefer(Promise);
         userWork.resolveWhenFull(defer);
 
         return defer.promise.then(() => Promise.all(userWork.doWork()));
       })
       .catch(error => {
         if (error === WAIT_FOR_URL_CHANGE_TOKEN) {
-        // prevent moving forward, return a promise that never resolves
-        // so that the $router can observe the $location update
+          // prevent moving forward, return a promise that never resolves
+          // so that the $router can observe the $location update
           return Promise.halt();
         }
 

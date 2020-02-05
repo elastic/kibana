@@ -20,15 +20,20 @@
 import { ParsedUrlQuery } from 'querystring';
 import { format as formatUrl, parse as parseUrl, UrlObject } from 'url';
 
+/**
+ * We define our own typings because the current version of @types/node
+ * declares properties to be optional "hostname?: string".
+ * Although, parse call returns "hostname: null | string".
+ */
 export interface URLMeaningfulParts {
-  auth: string | null;
-  hash: string | null;
-  hostname: string | null;
-  pathname: string | null;
-  protocol: string | null;
-  slashes: boolean | null;
-  port: string | null;
-  query: ParsedUrlQuery | {};
+  auth?: string | null;
+  hash?: string | null;
+  hostname?: string | null;
+  pathname?: string | null;
+  protocol?: string | null;
+  slashes?: boolean | null;
+  port?: string | null;
+  query: ParsedUrlQuery;
 }
 
 /**
@@ -62,7 +67,7 @@ export interface URLMeaningfulParts {
  */
 export function modifyUrl(
   url: string,
-  urlModifier: (urlParts: URLMeaningfulParts) => Partial<URLMeaningfulParts> | undefined
+  urlModifier: (urlParts: URLMeaningfulParts) => Partial<URLMeaningfulParts> | void
 ) {
   const parsed = parseUrl(url, true) as URLMeaningfulParts;
 

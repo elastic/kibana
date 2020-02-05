@@ -4,13 +4,14 @@
 input.ng-invalid,
 textarea.ng-invalid,
 select.ng-invalid {
-  &.ng-dirty, &.ng-touched {
+  &.ng-dirty,
+  &.ng-touched {
     border-color: $euiColorDanger !important;
   }
 }
 
-input[type="radio"],
-input[type="checkbox"],
+input[type='radio'],
+input[type='checkbox'],
 .radio,
 .radio-inline,
 .checkbox,
@@ -18,7 +19,7 @@ input[type="checkbox"],
   &[disabled],
   fieldset[disabled] & {
     cursor: default;
-    opacity: .8;
+    opacity: 0.8;
   }
 }
 
@@ -27,7 +28,7 @@ input[type="checkbox"],
   align-items: center;
   padding-left: 0 !important;
 
-  input[type="checkbox"] {
+  input[type='checkbox'] {
     float: none;
     margin: 0 $euiSizeXS;
     position: static;
@@ -59,8 +60,8 @@ input[type="checkbox"],
     padding-bottom: $euiSizeS;
   }
 
-  > kbn-top-nav {
-    z-index: 5;
+  .globalQueryBar {
+    padding: 0px $euiSizeS $euiSizeS $euiSizeS;
   }
 
   > nav,
@@ -95,7 +96,6 @@ input[type="checkbox"],
   }
 }
 
-
 // Too overused in many places to be moved elsewhere
 
 .page-row {
@@ -108,10 +108,23 @@ input[type="checkbox"],
   font-size: $euiFontSizeS;
 }
 
-// EUITODO: Move to EUI to ensure this doesn't happen elsewhere
+// We apply brute force focus states to anything not coming from Eui
+// which has focus states designed at the component level.
+// You can also use "kbn-resetFocusState" to not apply the default focus
+// state. This is useful when you've already hand crafted your own
+// focus states in Kibana.
+:focus {
+  &:not([class^='eui']):not(.kbn-resetFocusState) {
+    @include euiFocusRing;
+  }
+}
+
+// A neccessary hack so that the above focus policy doesn't polute some EUI
+// entrenched inputs.
 .euiComboBox {
-  input:focus {
-    box-shadow: none;
+  // :not() specificity needed to override the above
+  input:not([class^='eui']):focus {
+    animation: none !important;
   }
 }
 

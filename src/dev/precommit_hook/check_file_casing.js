@@ -21,7 +21,7 @@ import { relative, basename } from 'path';
 
 import { dim } from 'chalk';
 
-import { createFailError } from '../run';
+import { createFailError } from '@kbn/dev-utils';
 import { matchesAnyGlob } from '../globs';
 
 import {
@@ -35,9 +35,7 @@ const NON_SNAKE_CASE_RE = /[A-Z \-]/;
 const NON_KEBAB_CASE_RE = /[A-Z \_]/;
 
 function listPaths(paths) {
-  return paths
-    .map(path => ` - ${path}`)
-    .join('\n');
+  return paths.map(path => ` - ${path}`).join('\n');
 }
 
 /**
@@ -78,13 +76,15 @@ async function checkForKebabCase(log, files) {
     .reduce((acc, file) => {
       const parents = file.getRelativeParentDirs();
 
-      return acc.concat(parents.filter(parent => (
-        matchesAnyGlob(parent, KEBAB_CASE_DIRECTORY_GLOBS) && NON_KEBAB_CASE_RE.test(basename(parent))
-      )));
+      return acc.concat(
+        parents.filter(
+          parent =>
+            matchesAnyGlob(parent, KEBAB_CASE_DIRECTORY_GLOBS) &&
+            NON_KEBAB_CASE_RE.test(basename(parent))
+        )
+      );
     }, [])
-    .reduce((acc, path) => (
-      acc.includes(path) ? acc : acc.concat(path)
-    ), []);
+    .reduce((acc, path) => (acc.includes(path) ? acc : acc.concat(path)), []);
 
   if (errorPaths.length) {
     throw createFailError(`These directories MUST use kebab-case.\n${listPaths(errorPaths)}`);
@@ -119,14 +119,14 @@ async function checkForSnakeCase(log, files) {
 
     const ignored = matchesAnyGlob(path, IGNORE_FILE_GLOBS);
     if (ignored) {
-      log.debug('%j ignored', file);
+      log.debug('[casing] %j ignored', file);
       return;
     }
 
     const pathToValidate = getPathWithoutIgnoredParents(file);
     const invalid = NON_SNAKE_CASE_RE.test(pathToValidate);
     if (!invalid) {
-      log.debug('%j uses valid casing', file);
+      log.debug('[casing] %j uses valid casing', file);
     } else {
       const ignoredParent = file.getRelativePath().slice(0, -pathToValidate.length);
       errorPaths.push(`${dim(ignoredParent)}${pathToValidate}`);

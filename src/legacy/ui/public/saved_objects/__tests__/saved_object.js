@@ -18,22 +18,22 @@
  */
 
 import ngMock from 'ng_mock';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import sinon from 'sinon';
-import BluebirdPromise from 'bluebird';
+import Bluebird from 'bluebird';
 
-import { SavedObjectProvider } from '../saved_object';
-import { IndexPatternProvider } from '../../index_patterns/_index_pattern';
-import { SavedObjectsClientProvider } from '../saved_objects_client_provider';
-import { StubIndexPatternsApiClientModule } from '../../index_patterns/__tests__/stub_index_patterns_api_client';
-import { InvalidJSONProperty } from '../../errors';
+import { createSavedObjectClass } from '../saved_object';
+import StubIndexPattern from 'test_utils/stub_index_pattern';
+import { npStart } from 'ui/new_platform';
+import { InvalidJSONProperty } from '../../../../../plugins/kibana_utils/public';
+import { npSetup } from '../../new_platform/new_platform.karma_mock';
 
-describe('Saved Object', function () {
+const getConfig = cfg => cfg;
+
+describe('Saved Object', function() {
   require('test_utils/no_digest_promises').activateForSuite();
 
   let SavedObject;
-  let IndexPattern;
-  let esDataStub;
   let savedObjectsClientStub;
   let window;
 
@@ -50,7 +50,7 @@ describe('Saved Object', function () {
       id: indexPatternId,
       _version: 'foo',
       attributes: {},
-      ...additionalOptions
+      ...additionalOptions,
     };
   }
 
@@ -60,11 +60,15 @@ describe('Saved Object', function () {
    */
   function stubESResponse(mockDocResponse) {
     // Stub out search for duplicate title:
-    sinon.stub(savedObjectsClientStub, 'get').returns(BluebirdPromise.resolve(mockDocResponse));
-    sinon.stub(savedObjectsClientStub, 'update').returns(BluebirdPromise.resolve(mockDocResponse));
+    sinon.stub(savedObjectsClientStub, 'get').returns(Bluebird.resolve(mockDocResponse));
+    sinon.stub(savedObjectsClientStub, 'update').returns(Bluebird.resolve(mockDocResponse));
 
-    sinon.stub(savedObjectsClientStub, 'find').returns(BluebirdPromise.resolve({ savedObjects: [], total: 0 }));
-    sinon.stub(savedObjectsClientStub, 'bulkGet').returns(BluebirdPromise.resolve({ savedObjects: [mockDocResponse] }));
+    sinon
+      .stub(savedObjectsClientStub, 'find')
+      .returns(Bluebird.resolve({ savedObjects: [], total: 0 }));
+    sinon
+      .stub(savedObjectsClientStub, 'bulkGet')
+      .returns(Bluebird.resolve({ savedObjects: [mockDocResponse] }));
   }
 
   /**
@@ -81,104 +85,55 @@ describe('Saved Object', function () {
     return savedObject.init();
   }
 
-  const mock409FetchError = {
-    res: { status: 409 }
-  };
+  function restoreIfWrapped(obj, fName) {
+    obj[fName].restore && obj[fName].restore();
+  }
 
-  beforeEach(ngMock.module(
-    'kibana',
-    StubIndexPatternsApiClientModule,
-    // Use the native window.confirm instead of our specialized version to make testing
-    // this easier.
-    function ($provide) {
-      const overrideConfirm = message => window.confirm(message) ? Promise.resolve() : Promise.reject();
-      $provide.decorator('confirmModalPromise', () => overrideConfirm);
+  beforeEach(
+    ngMock.module(
+      'kibana',
+      // Use the native window.confirm instead of our specialized version to make testing
+      // this easier.
+      function($provide) {
+        const overrideConfirm = message =>
+          window.confirm(message) ? Promise.resolve() : Promise.reject();
+        $provide.decorator('confirmModalPromise', () => overrideConfirm);
+      }
+    )
+  );
+
+  beforeEach(
+    ngMock.inject(function($window) {
+      savedObjectsClientStub = npStart.core.savedObjects.client;
+      SavedObject = createSavedObjectClass({ savedObjectsClient: savedObjectsClientStub });
+      window = $window;
     })
   );
 
-  beforeEach(ngMock.inject(function (es, Private, $window) {
-    SavedObject = Private(SavedObjectProvider);
-    IndexPattern = Private(IndexPatternProvider);
-    esDataStub = es;
-    savedObjectsClientStub = Private(SavedObjectsClientProvider);
-    window = $window;
-  }));
+  afterEach(
+    ngMock.inject(function() {
+      restoreIfWrapped(savedObjectsClientStub, 'create');
+      restoreIfWrapped(savedObjectsClientStub, 'get');
+      restoreIfWrapped(savedObjectsClientStub, 'update');
+      restoreIfWrapped(savedObjectsClientStub, 'find');
+      restoreIfWrapped(savedObjectsClientStub, 'bulkGet');
+    })
+  );
 
-  describe('save', function () {
-    describe('with confirmOverwrite', function () {
+  describe('save', function() {
+    describe('with confirmOverwrite', function() {
       function stubConfirmOverwrite() {
         window.confirm = sinon.stub().returns(true);
-        sinon.stub(esDataStub, 'create').returns(BluebirdPromise.reject(mock409FetchError));
       }
 
-      describe('when true', function () {
-        it('requests confirmation and updates on yes response', function () {
-          stubESResponse(getMockedDocResponse('myId'));
-          return createInitializedSavedObject({ type: 'dashboard', id: 'myId' }).then(savedObject => {
-            const createStub = sinon.stub(savedObjectsClientStub, 'create');
-            createStub.onFirstCall().returns(BluebirdPromise.reject(mock409FetchError));
-            createStub.onSecondCall().returns(BluebirdPromise.resolve({ id: 'myId' }));
-
-            stubConfirmOverwrite();
-
-            savedObject.lastSavedTitle = 'original title';
-            savedObject.title = 'new title';
-            return savedObject.save({ confirmOverwrite: true })
-              .then(() => {
-                expect(window.confirm.called).to.be(true);
-                expect(savedObject.id).to.be('myId');
-                expect(savedObject.isSaving).to.be(false);
-                expect(savedObject.lastSavedTitle).to.be('new title');
-                expect(savedObject.title).to.be('new title');
-              });
-          });
-        });
-
-        it('does not update on no response', function () {
-          stubESResponse(getMockedDocResponse('HI'));
-          return createInitializedSavedObject({ type: 'dashboard', id: 'HI' }).then(savedObject => {
-            window.confirm = sinon.stub().returns(false);
-
-            sinon.stub(savedObjectsClientStub, 'create').returns(BluebirdPromise.reject(mock409FetchError));
-
-            savedObject.lastSavedTitle = 'original title';
-            savedObject.title = 'new title';
-            return savedObject.save({ confirmOverwrite: true })
-              .then(() => {
-                expect(savedObject.id).to.be('HI');
-                expect(savedObject.isSaving).to.be(false);
-                expect(savedObject.lastSavedTitle).to.be('original title');
-                expect(savedObject.title).to.be('new title');
-              });
-          });
-        });
-
-        it('handles create failures', function () {
-          stubESResponse(getMockedDocResponse('myId'));
-          return createInitializedSavedObject({ type: 'dashboard', id: 'myId' }).then(savedObject => {
-            stubConfirmOverwrite();
-
-            sinon.stub(savedObjectsClientStub, 'create').returns(BluebirdPromise.reject(mock409FetchError));
-
-            return savedObject.save({ confirmOverwrite: true })
-              .then(() => {
-                expect(true).to.be(false); // Force failure, the save should not succeed.
-              })
-              .catch(() => {
-                expect(window.confirm.called).to.be(true);
-              });
-          });
-        });
-      });
-
-      it('when false does not request overwrite', function () {
+      it('when false does not request overwrite', function() {
         const mockDocResponse = getMockedDocResponse('myId');
         stubESResponse(mockDocResponse);
 
         return createInitializedSavedObject({ type: 'dashboard', id: 'myId' }).then(savedObject => {
           stubConfirmOverwrite();
 
-          sinon.stub(savedObjectsClientStub, 'create').returns(BluebirdPromise.resolve({ id: 'myId' }));
+          sinon.stub(savedObjectsClientStub, 'create').returns(Bluebird.resolve({ id: 'myId' }));
 
           return savedObject.save({ confirmOverwrite: false }).then(() => {
             expect(window.confirm.called).to.be(false);
@@ -187,40 +142,45 @@ describe('Saved Object', function () {
       });
     });
 
-    describe('with copyOnSave', function () {
-      it('as true creates a copy on save success', function () {
+    describe('with copyOnSave', function() {
+      it('as true creates a copy on save success', function() {
         const mockDocResponse = getMockedDocResponse('myId');
         stubESResponse(mockDocResponse);
         return createInitializedSavedObject({ type: 'dashboard', id: 'myId' }).then(savedObject => {
           sinon.stub(savedObjectsClientStub, 'create').callsFake(() => {
-            return BluebirdPromise.resolve({ type: 'dashboard', id: 'newUniqueId' });
+            return Bluebird.resolve({ type: 'dashboard', id: 'newUniqueId' });
           });
 
           savedObject.copyOnSave = true;
-          return savedObject.save().then((id) => {
+          return savedObject.save().then(id => {
             expect(id).to.be('newUniqueId');
           });
         });
       });
 
-      it('as true does not create a copy when save fails', function () {
+      it('as true does not create a copy when save fails', function() {
         const originalId = 'id1';
         const mockDocResponse = getMockedDocResponse(originalId);
         stubESResponse(mockDocResponse);
-        return createInitializedSavedObject({ type: 'dashboard', id: originalId }).then(savedObject => {
-          sinon.stub(savedObjectsClientStub, 'create').callsFake(() => {
-            return BluebirdPromise.reject('simulated error');
-          });
-          savedObject.copyOnSave = true;
-          return savedObject.save().then(() => {
-            throw new Error('Expected a rejection');
-          }).catch(() => {
-            expect(savedObject.id).to.be(originalId);
-          });
-        });
+        return createInitializedSavedObject({ type: 'dashboard', id: originalId }).then(
+          savedObject => {
+            sinon.stub(savedObjectsClientStub, 'create').callsFake(() => {
+              return Bluebird.reject('simulated error');
+            });
+            savedObject.copyOnSave = true;
+            return savedObject
+              .save()
+              .then(() => {
+                throw new Error('Expected a rejection');
+              })
+              .catch(() => {
+                expect(savedObject.id).to.be(originalId);
+              });
+          }
+        );
       });
 
-      it('as false does not create a copy', function () {
+      it('as false does not create a copy', function() {
         const id = 'myId';
         const mockDocResponse = getMockedDocResponse(id);
         stubESResponse(mockDocResponse);
@@ -228,24 +188,24 @@ describe('Saved Object', function () {
         return createInitializedSavedObject({ type: 'dashboard', id: id }).then(savedObject => {
           sinon.stub(savedObjectsClientStub, 'create').callsFake(() => {
             expect(savedObject.id).to.be(id);
-            return BluebirdPromise.resolve(id);
+            return Bluebird.resolve(id);
           });
           savedObject.copyOnSave = false;
-          return savedObject.save().then((id) => {
+          return savedObject.save().then(id => {
             expect(id).to.be(id);
           });
         });
       });
     });
 
-    it('returns id from server on success', function () {
+    it('returns id from server on success', function() {
       return createInitializedSavedObject({ type: 'dashboard' }).then(savedObject => {
         const mockDocResponse = getMockedDocResponse('myId');
         sinon.stub(savedObjectsClientStub, 'create').callsFake(() => {
-          return BluebirdPromise.resolve({
+          return Bluebird.resolve({
             type: 'dashboard',
             id: 'myId',
-            _version: 'foo'
+            _version: 'foo',
           });
         });
 
@@ -256,18 +216,18 @@ describe('Saved Object', function () {
       });
     });
 
-    describe('updates isSaving variable', function () {
-      it('on success', function () {
+    describe('updates isSaving variable', function() {
+      it('on success', function() {
         const id = 'id';
         stubESResponse(getMockedDocResponse(id));
 
         return createInitializedSavedObject({ type: 'dashboard', id: id }).then(savedObject => {
           sinon.stub(savedObjectsClientStub, 'create').callsFake(() => {
             expect(savedObject.isSaving).to.be(true);
-            return BluebirdPromise.resolve({
+            return Bluebird.resolve({
               type: 'dashboard',
               id,
-              version: 'foo'
+              version: 'foo',
             });
           });
           expect(savedObject.isSaving).to.be(false);
@@ -277,12 +237,12 @@ describe('Saved Object', function () {
         });
       });
 
-      it('on failure', function () {
+      it('on failure', function() {
         stubESResponse(getMockedDocResponse('id'));
         return createInitializedSavedObject({ type: 'dashboard' }).then(savedObject => {
           sinon.stub(savedObjectsClientStub, 'create').callsFake(() => {
             expect(savedObject.isSaving).to.be(true);
-            return BluebirdPromise.reject();
+            return Bluebird.reject();
           });
           expect(savedObject.isSaving).to.be(false);
           return savedObject.save().catch(() => {
@@ -304,111 +264,152 @@ describe('Saved Object', function () {
           });
           return { attributes, references };
         };
-        return createInitializedSavedObject({ type: 'dashboard', extractReferences })
-          .then((savedObject) => {
+        return createInitializedSavedObject({ type: 'dashboard', extractReferences }).then(
+          savedObject => {
             sinon.stub(savedObjectsClientStub, 'create').callsFake(() => {
-              return BluebirdPromise.resolve({
+              return Bluebird.resolve({
                 id,
                 version: 'foo',
                 type: 'dashboard',
               });
             });
-            return savedObject
-              .save()
-              .then(() => {
-                const { references } = savedObjectsClientStub.create.getCall(0).args[2];
-                expect(references).to.have.length(1);
-                expect(references[0]).to.eql({
-                  name: 'test',
-                  type: 'index-pattern',
-                  id: 'my-index',
-                });
+            return savedObject.save().then(() => {
+              const { references } = savedObjectsClientStub.create.getCall(0).args[2];
+              expect(references).to.have.length(1);
+              expect(references[0]).to.eql({
+                name: 'test',
+                type: 'index-pattern',
+                id: 'my-index',
               });
-          });
+            });
+          }
+        );
       });
 
       it('when index exists in searchSourceJSON', () => {
         const id = '123';
         stubESResponse(getMockedDocResponse(id));
-        return createInitializedSavedObject({ type: 'dashboard', searchSource: true })
-          .then((savedObject) => {
+        return createInitializedSavedObject({ type: 'dashboard', searchSource: true }).then(
+          savedObject => {
             sinon.stub(savedObjectsClientStub, 'create').callsFake(() => {
-              return BluebirdPromise.resolve({
+              return Bluebird.resolve({
                 id,
                 version: 2,
                 type: 'dashboard',
               });
             });
-            savedObject.searchSource.setField('index', new IndexPattern('my-index', null, []));
-            return savedObject
-              .save()
-              .then(() => {
-                expect(savedObjectsClientStub.create.getCall(0).args[1]).to.eql({
-                  kibanaSavedObjectMeta: {
-                    searchSourceJSON: JSON.stringify({
-                      indexRefName: 'kibanaSavedObjectMeta.searchSourceJSON.index',
-                    }),
-                  },
-                });
-                const { references } = savedObjectsClientStub.create.getCall(0).args[2];
-                expect(references).to.have.length(1);
-                expect(references[0]).to.eql({
-                  name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
-                  type: 'index-pattern',
-                  id: 'my-index',
-                });
+            const indexPattern = new StubIndexPattern(
+              'my-index',
+              getConfig,
+              null,
+              [],
+              npSetup.core
+            );
+            indexPattern.title = indexPattern.id;
+            savedObject.searchSource.setField('index', indexPattern);
+            return savedObject.save().then(() => {
+              expect(savedObjectsClientStub.create.getCall(0).args[1]).to.eql({
+                kibanaSavedObjectMeta: {
+                  searchSourceJSON: JSON.stringify({
+                    indexRefName: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+                  }),
+                },
               });
-          });
+              const { references } = savedObjectsClientStub.create.getCall(0).args[2];
+              expect(references).to.have.length(1);
+              expect(references[0]).to.eql({
+                name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+                type: 'index-pattern',
+                id: 'my-index',
+              });
+            });
+          }
+        );
+      });
+
+      it('when index in searchSourceJSON is not found', () => {
+        const id = '123';
+        stubESResponse(getMockedDocResponse(id));
+        return createInitializedSavedObject({ type: 'dashboard', searchSource: true }).then(
+          savedObject => {
+            sinon.stub(savedObjectsClientStub, 'create').callsFake(() => {
+              return Bluebird.resolve({
+                id,
+                version: 2,
+                type: 'dashboard',
+              });
+            });
+            savedObject.searchSource.setFields({ index: 'non-existant-index' });
+            return savedObject.save().then(() => {
+              expect(savedObjectsClientStub.create.getCall(0).args[1]).to.eql({
+                kibanaSavedObjectMeta: {
+                  searchSourceJSON: JSON.stringify({
+                    indexRefName: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+                  }),
+                },
+              });
+              const { references } = savedObjectsClientStub.create.getCall(0).args[2];
+              expect(references).to.have.length(1);
+              expect(references[0]).to.eql({
+                name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+                type: 'index-pattern',
+                id: 'non-existant-index',
+              });
+            });
+          }
+        );
       });
 
       it('when indexes exists in filter of searchSourceJSON', () => {
         const id = '123';
         stubESResponse(getMockedDocResponse(id));
-        return createInitializedSavedObject({ type: 'dashboard', searchSource: true })
-          .then((savedObject) => {
+        return createInitializedSavedObject({ type: 'dashboard', searchSource: true }).then(
+          savedObject => {
             sinon.stub(savedObjectsClientStub, 'create').callsFake(() => {
-              return BluebirdPromise.resolve({
+              return Bluebird.resolve({
                 id,
                 version: 2,
                 type: 'dashboard',
               });
             });
-            savedObject.searchSource.setField('filter', [{
-              meta: {
-                index: 'my-index',
-              }
-            }]);
-            return savedObject
-              .save()
-              .then(() => {
-                expect(savedObjectsClientStub.create.getCall(0).args[1]).to.eql({
-                  kibanaSavedObjectMeta: {
-                    searchSourceJSON: JSON.stringify({
-                      filter: [
-                        {
-                          meta: {
-                            indexRefName: 'kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index',
-                          }
-                        }
-                      ],
-                    }),
-                  },
-                });
-                const { references } = savedObjectsClientStub.create.getCall(0).args[2];
-                expect(references).to.have.length(1);
-                expect(references[0]).to.eql({
-                  name: 'kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index',
-                  type: 'index-pattern',
-                  id: 'my-index',
-                });
+            savedObject.searchSource.setField('filter', [
+              {
+                meta: {
+                  index: 'my-index',
+                },
+              },
+            ]);
+            return savedObject.save().then(() => {
+              expect(savedObjectsClientStub.create.getCall(0).args[1]).to.eql({
+                kibanaSavedObjectMeta: {
+                  searchSourceJSON: JSON.stringify({
+                    filter: [
+                      {
+                        meta: {
+                          indexRefName:
+                            'kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index',
+                        },
+                      },
+                    ],
+                  }),
+                },
               });
-          });
+              const { references } = savedObjectsClientStub.create.getCall(0).args[2];
+              expect(references).to.have.length(1);
+              expect(references[0]).to.eql({
+                name: 'kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index',
+                type: 'index-pattern',
+                id: 'my-index',
+              });
+            });
+          }
+        );
       });
     });
   });
 
-  describe('applyESResp', function () {
-    it('throws error if not found', function () {
+  describe('applyESResp', function() {
+    it('throws error if not found', function() {
       return createInitializedSavedObject({ type: 'dashboard' }).then(savedObject => {
         const response = {};
         try {
@@ -420,15 +421,18 @@ describe('Saved Object', function () {
       });
     });
 
-    it('throws error invalid JSON is detected', async function () {
-      const savedObject = await createInitializedSavedObject({ type: 'dashboard', searchSource: true });
+    it('throws error invalid JSON is detected', async function() {
+      const savedObject = await createInitializedSavedObject({
+        type: 'dashboard',
+        searchSource: true,
+      });
       const response = {
         found: true,
         _source: {
           kibanaSavedObjectMeta: {
-            searchSourceJSON: '\"{\\n  \\\"filter\\\": []\\n}\"'
-          }
-        }
+            searchSourceJSON: '"{\\n  \\"filter\\": []\\n}"',
+          },
+        },
       };
 
       try {
@@ -439,83 +443,88 @@ describe('Saved Object', function () {
       }
     });
 
-    it('preserves original defaults if not overridden', function () {
+    it('preserves original defaults if not overridden', function() {
       const id = 'anid';
       const preserveMeValue = 'here to stay!';
       const config = {
         defaults: {
-          preserveMe: preserveMeValue
+          preserveMe: preserveMeValue,
         },
         type: 'dashboard',
-        id: id
+        id: id,
       };
 
       const mockDocResponse = getMockedDocResponse(id);
       stubESResponse(mockDocResponse);
 
       const savedObject = new SavedObject(config);
-      return savedObject.init()
+      return savedObject
+        .init()
         .then(() => {
           expect(savedObject._source.preserveMe).to.equal(preserveMeValue);
           const response = { found: true, _source: {} };
           return savedObject.applyESResp(response);
-        }).then(() => {
+        })
+        .then(() => {
           expect(savedObject._source.preserveMe).to.equal(preserveMeValue);
         });
     });
 
-    it('overrides defaults', function () {
+    it('overrides defaults', function() {
       const id = 'anid';
       const config = {
         defaults: {
-          flower: 'rose'
+          flower: 'rose',
         },
         type: 'dashboard',
-        id: id
+        id: id,
       };
 
       const mockDocResponse = getMockedDocResponse(id);
       stubESResponse(mockDocResponse);
 
       const savedObject = new SavedObject(config);
-      return savedObject.init()
+      return savedObject
+        .init()
         .then(() => {
           expect(savedObject._source.flower).to.equal('rose');
           const response = {
             found: true,
             _source: {
-              flower: 'orchid'
-            }
+              flower: 'orchid',
+            },
           };
           return savedObject.applyESResp(response);
-        }).then(() => {
+        })
+        .then(() => {
           expect(savedObject._source.flower).to.equal('orchid');
         });
     });
 
-    it('overrides previous _source and default values', function () {
+    it('overrides previous _source and default values', function() {
       const id = 'anid';
       const config = {
         defaults: {
           dinosaurs: {
-            tRex: 'is the scariest'
-          }
+            tRex: 'is the scariest',
+          },
         },
         type: 'dashboard',
-        id: id
+        id: id,
       };
 
-      const mockDocResponse = getMockedDocResponse(
-        id,
-        { attributes: { dinosaurs: { tRex: 'is not so bad' }, } });
+      const mockDocResponse = getMockedDocResponse(id, {
+        attributes: { dinosaurs: { tRex: 'is not so bad' } },
+      });
       stubESResponse(mockDocResponse);
 
       const savedObject = new SavedObject(config);
-      return savedObject.init()
+      return savedObject
+        .init()
         .then(() => {
           const response = {
             found: true,
-            _source: { dinosaurs: { tRex: 'has big teeth' } }
+            _source: { dinosaurs: { tRex: 'has big teeth' } },
           };
 
           return savedObject.applyESResp(response);
@@ -532,7 +541,8 @@ describe('Saved Object', function () {
         injectReferences,
       };
       const savedObject = new SavedObject(config);
-      return savedObject.init()
+      return savedObject
+        .init()
         .then(() => {
           const response = {
             found: true,
@@ -554,7 +564,8 @@ describe('Saved Object', function () {
         injectReferences,
       };
       const savedObject = new SavedObject(config);
-      return savedObject.init()
+      return savedObject
+        .init()
         .then(() => {
           const response = {
             found: true,
@@ -577,7 +588,8 @@ describe('Saved Object', function () {
         injectReferences,
       };
       const savedObject = new SavedObject(config);
-      return savedObject.init()
+      return savedObject
+        .init()
         .then(() => {
           const response = {
             found: true,
@@ -595,60 +607,57 @@ describe('Saved Object', function () {
 
     it('injects references from searchSourceJSON', async () => {
       const savedObject = new SavedObject({ type: 'dashboard', searchSource: true });
-      return savedObject
-        .init()
-        .then(() => {
-          const response = {
-            found: true,
-            _source: {
-              kibanaSavedObjectMeta: {
-                searchSourceJSON: JSON.stringify({
-                  indexRefName: 'kibanaSavedObjectMeta.searchSourceJSON.index',
-                  filter: [
-                    {
-                      meta: {
-                        indexRefName: 'kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index',
-                      },
+      return savedObject.init().then(() => {
+        const response = {
+          found: true,
+          _source: {
+            kibanaSavedObjectMeta: {
+              searchSourceJSON: JSON.stringify({
+                indexRefName: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+                filter: [
+                  {
+                    meta: {
+                      indexRefName: 'kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index',
                     },
-                  ],
-                }),
+                  },
+                ],
+              }),
+            },
+          },
+          references: [
+            {
+              name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+              type: 'index-pattern',
+              id: 'my-index-1',
+            },
+            {
+              name: 'kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index',
+              type: 'index-pattern',
+              id: 'my-index-2',
+            },
+          ],
+        };
+        savedObject.applyESResp(response);
+        expect(savedObject.searchSource.getFields()).to.eql({
+          index: 'my-index-1',
+          filter: [
+            {
+              meta: {
+                index: 'my-index-2',
               },
             },
-            references: [
-              {
-                name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
-                type: 'index-pattern',
-                id: 'my-index-1',
-              },
-              {
-                name: 'kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index',
-                type: 'index-pattern',
-                id: 'my-index-2',
-              },
-            ],
-          };
-          savedObject.applyESResp(response);
-          expect(savedObject.searchSource.getFields()).to.eql({
-            index: 'my-index-1',
-            filter: [
-              {
-                meta: {
-                  index: 'my-index-2',
-                },
-              },
-            ],
-          });
+          ],
         });
+      });
     });
   });
 
-  describe ('config', function () {
-
-    it('afterESResp is called', function () {
+  describe('config', function() {
+    it('afterESResp is called', function() {
       const afterESRespCallback = sinon.spy();
       const config = {
         type: 'dashboard',
-        afterESResp: afterESRespCallback
+        afterESResp: afterESRespCallback,
       };
 
       return createInitializedSavedObject(config).then(() => {
@@ -656,20 +665,8 @@ describe('Saved Object', function () {
       });
     });
 
-    it('init is called', function () {
-      const initCallback = sinon.spy();
-      const config = {
-        type: 'dashboard',
-        init: initCallback
-      };
-
-      return createInitializedSavedObject(config).then(() => {
-        expect(initCallback.called).to.be(true);
-      });
-    });
-
-    describe('searchSource', function () {
-      it('when true, creates index', function () {
+    describe('searchSource', function() {
+      it('when true, creates index', function() {
         const indexPatternId = 'testIndexPattern';
         const afterESRespCallback = sinon.spy();
 
@@ -677,30 +674,42 @@ describe('Saved Object', function () {
           type: 'dashboard',
           afterESResp: afterESRespCallback,
           searchSource: true,
-          indexPattern: indexPatternId
+          indexPattern: indexPatternId,
         };
 
         stubESResponse({
           id: indexPatternId,
           type: 'dashboard',
           attributes: {
-            title: 'testIndexPattern'
+            title: 'testIndexPattern',
           },
-          _version: 'foo'
+          _version: 'foo',
         });
 
         const savedObject = new SavedObject(config);
+        sinon.stub(savedObject, 'hydrateIndexPattern').callsFake(() => {
+          const indexPattern = new StubIndexPattern(
+            indexPatternId,
+            getConfig,
+            null,
+            [],
+            npSetup.core
+          );
+          indexPattern.title = indexPattern.id;
+          savedObject.searchSource.setField('index', indexPattern);
+          return Promise.resolve(indexPattern);
+        });
         expect(!!savedObject.searchSource.getField('index')).to.be(false);
 
         return savedObject.init().then(() => {
           expect(afterESRespCallback.called).to.be(true);
           const index = savedObject.searchSource.getField('index');
-          expect(index instanceof IndexPattern).to.be(true);
+          expect(index instanceof StubIndexPattern).to.be(true);
           expect(index.id).to.equal(indexPatternId);
         });
       });
 
-      it('when false, does not create index', function () {
+      it('when false, does not create index', function() {
         const indexPatternId = 'testIndexPattern';
         const afterESRespCallback = sinon.spy();
 
@@ -708,7 +717,7 @@ describe('Saved Object', function () {
           type: 'dashboard',
           afterESResp: afterESRespCallback,
           searchSource: false,
-          indexPattern: indexPatternId
+          indexPattern: indexPatternId,
         };
 
         stubESResponse(getMockedDocResponse(indexPatternId));
@@ -723,8 +732,8 @@ describe('Saved Object', function () {
       });
     });
 
-    describe('type', function () {
-      it('that is not specified throws an error', function () {
+    describe('type', function() {
+      it('that is not specified throws an error', function() {
         const config = {};
 
         const savedObject = new SavedObject(config);
@@ -736,7 +745,7 @@ describe('Saved Object', function () {
         }
       });
 
-      it('that is invalid invalid throws an error', function () {
+      it('that is invalid invalid throws an error', function() {
         const config = { type: 'notypeexists' };
 
         const savedObject = new SavedObject(config);
@@ -748,48 +757,46 @@ describe('Saved Object', function () {
         }
       });
 
-      it('that is valid passes', function () {
+      it('that is valid passes', function() {
         const config = { type: 'dashboard' };
         return new SavedObject(config).init();
       });
     });
 
-    describe('defaults', function () {
-
+    describe('defaults', function() {
       function getTestDefaultConfig(extraOptions) {
         return {
           defaults: { testDefault: 'hi' },
           type: 'dashboard',
-          ...extraOptions
+          ...extraOptions,
         };
       }
 
       function expectDefaultApplied(config) {
-        return createInitializedSavedObject(config).then((savedObject) => {
+        return createInitializedSavedObject(config).then(savedObject => {
           expect(savedObject.defaults).to.be(config.defaults);
         });
       }
 
-      describe('applied to object when id', function () {
-
-        it('is not specified', function () {
+      describe('applied to object when id', function() {
+        it('is not specified', function() {
           expectDefaultApplied(getTestDefaultConfig());
         });
 
-        it('is undefined', function () {
+        it('is undefined', function() {
           expectDefaultApplied(getTestDefaultConfig({ id: undefined }));
         });
 
-        it('is 0', function () {
+        it('is 0', function() {
           expectDefaultApplied(getTestDefaultConfig({ id: 0 }));
         });
 
-        it('is false', function () {
+        it('is false', function() {
           expectDefaultApplied(getTestDefaultConfig({ id: false }));
         });
       });
 
-      it('applied to source if an id is given', function () {
+      it('applied to source if an id is given', function() {
         const myId = 'myid';
         const customDefault = 'hi';
         const initialOverwriteMeValue = 'this should get overwritten by the server response';
@@ -797,21 +804,21 @@ describe('Saved Object', function () {
         const config = {
           defaults: {
             overwriteMe: initialOverwriteMeValue,
-            customDefault: customDefault
+            customDefault: customDefault,
           },
           type: 'dashboard',
-          id: myId
+          id: myId,
         };
 
         const serverValue = 'this should override the initial default value given';
 
-        const mockDocResponse = getMockedDocResponse(
-          myId,
-          { attributes: { overwriteMe: serverValue } });
+        const mockDocResponse = getMockedDocResponse(myId, {
+          attributes: { overwriteMe: serverValue },
+        });
 
         stubESResponse(mockDocResponse);
 
-        return createInitializedSavedObject(config).then((savedObject) => {
+        return createInitializedSavedObject(config).then(savedObject => {
           expect(!!savedObject._source).to.be(true);
           expect(savedObject.defaults).to.be(config.defaults);
           expect(savedObject._source.overwriteMe).to.be(serverValue);

@@ -1,0 +1,86 @@
+[role="xpack"]
+[[maps-vector-style-properties]]
+=== Vector style properties
+
+Point, polygon, and line features support different styling properties.
+
+[float]
+[[point-style-properties]]
+==== Point style properties
+
+You can add text labels to your Point features by configuring label style properties.
+
+[cols="2*"]
+|===
+|*Label*
+|Specifies label content.
+|*Label color*
+|The text color.
+|*Label size*
+|The size of the text font, in pixels.
+|===
+
+You can symbolize Point features as *Circle markers* or *Icons*.
+
+Use *Circle marker* to symbolize Points as circles.
+
+[cols="2*"]
+|===
+|*Border color*
+|The border color of the point features.
+|*Border width*
+|The border width of the point features.
+|*Fill color*
+|The fill color of the point features.
+|*Symbol size*
+|The radius of the symbol size, in pixels.
+|===
+
+Use *Icon* to symbolize Points as icons.
+
+[cols="2*"]
+|===
+|*Border color*
+|The border color of the point features.
+|*Border width*
+|The border width of the point features.
+|*Fill color*
+|The fill color of the point features.
+|*Symbol orientation*
+|The symbol orientation rotating the icon clockwise.
+|*Symbol size*
+|The radius of the symbol size, in pixels.
+|===
+
+Available icons
+
+[role="screenshot"]
+image::maps/images/maki-icons.png[]
+
+
+[float]
+[[polygon-style-properties]]
+==== Polygon style properties
+
+[cols="2*"]
+|===
+|*Border color*
+|The border color of the polygon features.
+|*Border width*
+|The border width of the polygon features.
+|*Fill color*
+|The fill color of the polygon features.
+|===
+
+
+[float]
+[[line-style-properties]]
+==== Line style properties
+
+[cols="2*"]
+|===
+|*Border color*
+|The color of the line features.
+|*Border width*
+|The width of the line features.
+|===

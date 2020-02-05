@@ -17,14 +17,7 @@
  * under the License.
  */
 
-const mockWriteFileAsync = jest.fn();
-const mockMakeDirAsync = jest.fn();
-jest.mock('./utils', () => ({
-  // Jest typings don't define `requireActual` for some reason.
-  ...(jest as any).requireActual('./utils'),
-  writeFileAsync: mockWriteFileAsync,
-  makeDirAsync: mockMakeDirAsync,
-}));
+import { mockMakeDirAsync, mockWriteFileAsync } from './integrate_locale_files.test.mocks';
 
 import path from 'path';
 import { integrateLocaleFiles, verifyMessages } from './integrate_locale_files';
@@ -47,8 +40,8 @@ const defaultIntegrateOptions = {
   ignoreUnused: false,
   config: {
     paths: {
-      'plugin-1': 'src/dev/i18n/__fixtures__/integrate_locale_files/test_plugin_1',
-      'plugin-2': 'src/dev/i18n/__fixtures__/integrate_locale_files/test_plugin_2',
+      'plugin-1': ['src/dev/i18n/__fixtures__/integrate_locale_files/test_plugin_1'],
+      'plugin-2': ['src/dev/i18n/__fixtures__/integrate_locale_files/test_plugin_2'],
     },
     exclude: [],
     translations: [],

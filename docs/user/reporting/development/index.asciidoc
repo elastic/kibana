@@ -1,0 +1,27 @@
+[role="xpack"]
+[[reporting-integration]]
+== Reporting integration
+Integrating a {kib} application with {reporting} requires a minimum amount of code, and the goal is to not have to
+modify the Reporting code as we add additional applications. Instead, applications abide by a contract that Reporting
+uses to determine the information that is required to export CSVs and PDFs.
+
+[IMPORTANT]
+==============================================
+These pages document internal APIs and are not guaranteed to be supported across future versions of {kib}.
+However, these docs will be kept up-to-date to reflect the current implementation of Reporting integration in {kib}.
+==============================================
+
+[float]
+[[reporting-nav-bar-extensions]]
+=== Share menu extensions
+X-Pack uses the `share` plugin of the Kibana platform to register actions in the share menu.
+
+[float]
+=== Generate job URL
+To generate a new {reporting} job, different export types require different `jobParams` that are Rison encoded into a URL
+that abide by the following convention: `/api/reporting/generate?jobParams=${rison.encode(jobParams)}`. If you use the
+aforementioned <<reporting-nav-bar-extensions, nav bar extensions>> then this detail will be abstracted away, but if you
+provide a custom UI for generating the report, you will have to generate the URL and create a POST request to the URL.
+
+include::csv-integration.asciidoc[]
+include::pdf-integration.asciidoc[]

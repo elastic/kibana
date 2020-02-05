@@ -1,0 +1,91 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ZeekSignature rendering it renders the default Zeek 1`] = `
+<Fragment>
+  <EuiFlexGroup
+    gutterSize="none"
+    justifyContent="center"
+    wrap={true}
+  >
+    <DraggableZeekElement
+      field="zeek.session_id"
+      id="zeek-signature-draggable-zeek-element-test-14"
+      value="C8DRTq362Fios6hw16"
+    />
+    <DraggableZeekElement
+      field="event.dataset"
+      id="zeek-signature-draggable-zeek-element-test-14"
+      stringRenderer={[Function]}
+      value="zeek.connection"
+    />
+    <DraggableZeekElement
+      field="zeek.files.sha1"
+      id="zeek-signature-draggable-zeek-element-test-14"
+      stringRenderer={[Function]}
+    />
+    <DraggableZeekElement
+      field="zeek.files.md5"
+      id="zeek-signature-draggable-zeek-element-test-14"
+      stringRenderer={[Function]}
+    />
+    <DraggableZeekElement
+      field="zeek.notice.dropped"
+      id="zeek-signature-draggable-zeek-element-test-14"
+      stringRenderer={[Function]}
+      value={null}
+    />
+    <DraggableZeekElement
+      field="zeek.ssl.version"
+      id="zeek-signature-draggable-zeek-element-test-14"
+    />
+    <DraggableZeekElement
+      field="zeek.ssl.cipher"
+      id="zeek-signature-draggable-zeek-element-test-14"
+    />
+    <DraggableZeekElement
+      field="zeek.connection.state"
+      id="zeek-signature-draggable-zeek-element-test-14"
+      value="REJ"
+    />
+    <DraggableZeekElement
+      field="http.request.method"
+      id="zeek-signature-draggable-zeek-element-test-14"
+    />
+    <DraggableZeekElement
+      field="zeek.connection.history"
+      id="zeek-signature-draggable-zeek-element-test-14"
+      value="Sr"
+    />
+    <DraggableZeekElement
+      field="zeek.notice.note"
+      id="zeek-signature-draggable-zeek-element-test-14"
+    />
+    <DraggableZeekElement
+      field="zeek.dns.query"
+      id="zeek-signature-draggable-zeek-element-test-14"
+    />
+    <DraggableZeekElement
+      field="zeek.dns.qclass_name"
+      id="zeek-signature-draggable-zeek-element-test-14"
+    />
+    <DraggableZeekElement
+      field="http.response.status_code"
+      id="zeek-signature-draggable-zeek-element-test-14"
+    />
+  </EuiFlexGroup>
+  <EuiFlexGroup
+    gutterSize="none"
+    justifyContent="center"
+  >
+    <Link
+      link="REJ Connection attempt rejected"
+      value="Connection attempt rejected"
+    />
+    <Link />
+    <Link />
+    <Link />
+    <Link />
+    <TotalVirusLinkSha />
+  </EuiFlexGroup>
+</Fragment>
+`;

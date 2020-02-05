@@ -1,31 +1,34 @@
 [role="xpack"]
 [[xpack-infra]]
-= Infrastructure
+= Metrics
 
 [partintro]
 --
-beta[]
- 
-Use the interactive Infrastructure UI to monitor your infrastructure and
-identify problems in real time. You can explore metrics and logs for common
-servers, containers, and services. 
+The Metrics app enables you to monitor your infrastructure metrics and identify problems in real time.
+You start with a visual summary of your infrastructure where you can view basic metrics for common servers, containers, and services.
+Then you can drill down to view more detailed metrics or other information for that component.
+
+You can:
+
+* View your infrastructure metrics by hosts, Kubernetes pods or Docker containers.
+You can group and filter the data in various ways to help you identify the items that interest you.
+
+* View current and historic values for metrics such as CPU usage, memory usage, and network traffic for each component.
+The available metrics depend on the kind of component being inspected.
+
+* Use *Metrics Explorer* to group and visualize multiple customizable metrics for one or more components in a graphical format.
+You can optionally save these views and add them to {kibana-ref}/dashboard.html[dashboards].
+
+* Seamlessly switch to view the corresponding logs, application traces or uptime information for a component.
+
+To get started, you need to <<xpack-metrics-getting-started, start collecting metrics data from your infrastructure>>. Then you can <<infra-ui, use the Metrics application to inspect and analyze your data>>.
 
 [role="screenshot"]
-image::infrastructure/images/infra-sysmon.jpg[Infrastructure Overview in Kibana]
-
-
-[float]
-== Add data sources
-Kibana provides step-by-step instructions to help you add your data sources.
-The {infra-guide}[Infrastructure Monitoring Guide] is a good source for more detailed
-instructions and information.
-
-[float]
-== Configure data sources 
-
-By default the Infrastructure UI uses the `metricbeat-*` index pattern to query the data. If you configured Metricbeat to export data to a different set of indices, you will need to set `xpack.infra.sources.default.metricAlias` in `config/kibana.yml` to match your index pattern. You can also configure the timestamp field by overriding `xpack.infra.sources.default.fields.timestamp`. See <<infrastructure-ui-settings-kb>> for a complete list.
+image::infrastructure/images/infra-sysmon.png[Infrastructure Overview in Kibana]
 
 --
 
-include::monitor.asciidoc[]
+include::getting-started.asciidoc[]
 include::infra-ui.asciidoc[]
+include::view-metrics.asciidoc[]
+include::metrics-explorer.asciidoc[]

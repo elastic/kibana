@@ -1,0 +1,25 @@
+.mlOverviewPanel {
+  padding-top: 0;
+}
+
+.mlOverviewPanel__isLoading {
+  text-align: center;
+  padding: 10%;
+}
+
+.mlOverviewPanel__buttons {
+  float: right;
+}
+
+.mlOverviewPanel__spinner {
+  display: inline-block;
+}
+
+.mlOverviewPanel__refreshButton {
+  padding-right: $euiSizeM;
+}
+
+.mlOverviewPanel__statsBar {
+  margin-top: 0;
+  margin-right: 0
+}

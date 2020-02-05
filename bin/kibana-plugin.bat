@@ -14,7 +14,8 @@ If Not Exist "%NODE%" (
 )
 
 TITLE Kibana Server
-"%NODE%" %NODE_OPTIONS% --no-warnings "%DIR%\src\cli_plugin" %*
+
+set "NODE_OPTIONS=--no-warnings %NODE_OPTIONS%" && "%NODE%" "%DIR%\src\cli_plugin" %*
 
 :finally
 

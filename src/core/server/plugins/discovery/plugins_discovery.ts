@@ -19,17 +19,17 @@
 
 import { readdir, stat } from 'fs';
 import { resolve } from 'path';
-import { bindNodeCallback, from } from 'rxjs';
+import { bindNodeCallback, from, merge } from 'rxjs';
 import { catchError, filter, map, mergeMap, shareReplay } from 'rxjs/operators';
-import { CoreContext } from '../../../types';
+import { CoreContext } from '../../core_context';
 import { Logger } from '../../logging';
-import { Plugin } from '../plugin';
+import { PluginWrapper } from '../plugin';
 import { createPluginInitializerContext } from '../plugin_context';
 import { PluginsConfig } from '../plugins_config';
 import { PluginDiscoveryError } from './plugin_discovery_error';
 import { parseManifest } from './plugin_manifest_parser';
 
-const fsReadDir$ = bindNodeCallback(readdir);
+const fsReadDir$ = bindNodeCallback<string, string[]>(readdir);
 const fsStat$ = bindNodeCallback(stat);
 
 /**
@@ -46,7 +46,16 @@ export function discover(config: PluginsConfig, coreContext: CoreContext) {
   const log = coreContext.logger.get('plugins-discovery');
   log.debug('Discovering plugins...');
 
-  const discoveryResults$ = processPluginSearchPaths$(config.pluginSearchPaths, log).pipe(
+  if (config.additionalPluginPaths.length && coreContext.env.mode.dev) {
+    log.warn(
+      `Explicit plugin paths [${config.additionalPluginPaths}] should only be used in development. Relative imports may not work properly in production.`
+    );
+  }
+
+  const discoveryResults$ = merge(
+    from(config.additionalPluginPaths),
+    processPluginSearchPaths$(config.pluginSearchPaths, log)
+  ).pipe(
     mergeMap(pluginPathOrError => {
       return typeof pluginPathOrError === 'string'
         ? createPlugin$(pluginPathOrError, log, coreContext)
@@ -56,9 +65,11 @@ export function discover(config: PluginsConfig, coreContext: CoreContext) {
   );
 
   return {
-    plugin$: discoveryResults$.pipe(filter((entry): entry is Plugin => entry instanceof Plugin)),
+    plugin$: discoveryResults$.pipe(
+      filter((entry): entry is PluginWrapper => entry instanceof PluginWrapper)
+    ),
     error$: discoveryResults$.pipe(
-      filter((entry): entry is PluginDiscoveryError => !(entry instanceof Plugin))
+      filter((entry): entry is PluginDiscoveryError => !(entry instanceof PluginWrapper))
     ),
   };
 }
@@ -70,7 +81,7 @@ export function discover(config: PluginsConfig, coreContext: CoreContext) {
  * @param pluginDirs List of the top-level directories to process.
  * @param log Plugin discovery logger instance.
  */
-function processPluginSearchPaths$(pluginDirs: ReadonlyArray<string>, log: Logger) {
+function processPluginSearchPaths$(pluginDirs: readonly string[], log: Logger) {
   return from(pluginDirs).pipe(
     mergeMap(dir => {
       log.debug(`Scanning "${dir}" for plugin sub-directories...`);
@@ -101,10 +112,16 @@ function processPluginSearchPaths$(pluginDirs: ReadonlyArray<string>, log: Logge
  * @param coreContext Kibana core context.
  */
 function createPlugin$(path: string, log: Logger, coreContext: CoreContext) {
-  return from(parseManifest(path, coreContext.env.packageInfo)).pipe(
+  return from(parseManifest(path, coreContext.env.packageInfo, log)).pipe(
     map(manifest => {
       log.debug(`Successfully discovered plugin "${manifest.id}" at "${path}"`);
-      return new Plugin(path, manifest, createPluginInitializerContext(coreContext, manifest));
+      const opaqueId = Symbol(manifest.id);
+      return new PluginWrapper({
+        path,
+        manifest,
+        opaqueId,
+        initializerContext: createPluginInitializerContext(coreContext, opaqueId, manifest),
+      });
     }),
     catchError(err => [err])
   );

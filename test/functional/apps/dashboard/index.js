@@ -17,84 +17,91 @@
  * under the License.
  */
 
-export default function ({ getService, loadTestFile, getPageObjects }) {
+export default function({ getService, loadTestFile }) {
   const browser = getService('browser');
   const esArchiver = getService('esArchiver');
-  const PageObjects = getPageObjects(['dashboard']);
 
   async function loadCurrentData() {
     await browser.setWindowSize(1300, 900);
-    await PageObjects.dashboard.initTests({
-      kibanaIndex: 'dashboard/current/kibana',
-      dataIndex: 'dashboard/current/data',
-      defaultIndex: 'logstash-*',
-    });
-    await PageObjects.dashboard.preserveCrossAppState();
+    await esArchiver.loadIfNeeded('dashboard/current/data');
   }
 
   async function unloadCurrentData() {
-    await PageObjects.dashboard.clearSavedObjectsFromAppLinks();
-    await esArchiver.unload('dashboard/current/kibana');
     await esArchiver.unload('dashboard/current/data');
   }
 
-  describe('dashboard app', function () {
+  async function loadLogstash() {
+    await browser.setWindowSize(1200, 900);
+    await esArchiver.loadIfNeeded('logstash_functional');
+  }
+
+  async function unloadLogstash() {
+    await esArchiver.unload('logstash_functional');
+  }
+
+  describe('dashboard app', function() {
     // This has to be first since the other tests create some embeddables as side affects and our counting assumes
     // a fresh index.
-    describe('using current data', function () {
+    describe('using current data', function() {
       this.tags('ciGroup2');
       before(loadCurrentData);
       after(unloadCurrentData);
 
-      loadTestFile(require.resolve('./_empty_dashboard'));
-      loadTestFile(require.resolve('./_embeddable_rendering'));
-      loadTestFile(require.resolve('./_create_and_add_embeddables'));
-      loadTestFile(require.resolve('./_time_zones'));
-      loadTestFile(require.resolve('./_dashboard_options'));
-      loadTestFile(require.resolve('./_data_shared_attributes'));
-      loadTestFile(require.resolve('./_embed_mode'));
+      loadTestFile(require.resolve('./empty_dashboard'));
+      loadTestFile(require.resolve('./embeddable_rendering'));
+      loadTestFile(require.resolve('./create_and_add_embeddables'));
+      loadTestFile(require.resolve('./time_zones'));
+      loadTestFile(require.resolve('./dashboard_options'));
+      loadTestFile(require.resolve('./data_shared_attributes'));
+      loadTestFile(require.resolve('./embed_mode'));
 
       // Note: This one must be last because it unloads some data for one of its tests!
       // No, this isn't ideal, but loading/unloading takes so much time and these are all bunched
       // to improve efficiency...
-      loadTestFile(require.resolve('./_dashboard_query_bar'));
+      loadTestFile(require.resolve('./dashboard_query_bar'));
     });
 
-    describe('using current data', function () {
+    describe('using current data', function() {
       this.tags('ciGroup3');
       before(loadCurrentData);
       after(unloadCurrentData);
 
-      loadTestFile(require.resolve('./_full_screen_mode'));
-      loadTestFile(require.resolve('./_dashboard_filter_bar'));
-      loadTestFile(require.resolve('./_dashboard_filtering'));
-      loadTestFile(require.resolve('./_panel_expand_toggle'));
-      loadTestFile(require.resolve('./_dashboard_grid'));
-      loadTestFile(require.resolve('./_dashboard_snapshots'));
-      loadTestFile(require.resolve('./_view_edit'));
+      loadTestFile(require.resolve('./full_screen_mode'));
+      loadTestFile(require.resolve('./dashboard_filter_bar'));
+      loadTestFile(require.resolve('./dashboard_filtering'));
+      loadTestFile(require.resolve('./panel_expand_toggle'));
+      loadTestFile(require.resolve('./dashboard_grid'));
+      loadTestFile(require.resolve('./view_edit'));
+      // Order of test suites *shouldn't* be important but there's a bug for the view_edit test above
+      // https://github.com/elastic/kibana/issues/46752
+      // The dashboard_snapshot test below requires the timestamped URL which breaks the view_edit test.
+      // If we don't use the timestamp in the URL, the colors in the charts will be different.
+      loadTestFile(require.resolve('./dashboard_snapshots'));
     });
 
     // Each of these tests call initTests themselves, the way it was originally written.  The above tests only load
     // the data once to save on time. Eventually, all of these tests should just use current data and we can reserve
     // legacy data only for specifically testing BWC situations.
-    describe('using legacy data', function () {
+    describe('using legacy data', function() {
       this.tags('ciGroup4');
-      before(() => browser.setWindowSize(1200, 900));
+      before(loadLogstash);
+      after(unloadLogstash);
 
-      loadTestFile(require.resolve('./_dashboard_time_picker'));
-      loadTestFile(require.resolve('./_bwc_shared_urls'));
-      loadTestFile(require.resolve('./_panel_controls'));
-      loadTestFile(require.resolve('./_dashboard_state'));
+      loadTestFile(require.resolve('./dashboard_time_picker'));
+      loadTestFile(require.resolve('./bwc_shared_urls'));
+      loadTestFile(require.resolve('./panel_controls'));
+      loadTestFile(require.resolve('./dashboard_state'));
     });
 
-    describe('using legacy data', function () {
+    describe('using legacy data', function() {
       this.tags('ciGroup5');
-      before(() => browser.setWindowSize(1200, 900));
+      before(loadLogstash);
+      after(unloadLogstash);
 
-      loadTestFile(require.resolve('./_dashboard_save'));
-      loadTestFile(require.resolve('./_dashboard_time'));
-      loadTestFile(require.resolve('./_dashboard_listing'));
-      loadTestFile(require.resolve('./_dashboard_clone'));
+      loadTestFile(require.resolve('./dashboard_save'));
+      loadTestFile(require.resolve('./dashboard_time'));
+      loadTestFile(require.resolve('./dashboard_listing'));
+      loadTestFile(require.resolve('./dashboard_clone'));
     });
   });
 }

@@ -19,8 +19,6 @@
 
 import { dirname, extname, join, relative, resolve, sep } from 'path';
 
-import { REPO_ROOT } from './constants';
-
 export class File {
   private path: string;
   private relativePath: string;
@@ -28,7 +26,7 @@ export class File {
 
   constructor(path: string) {
     this.path = resolve(path);
-    this.relativePath = relative(REPO_ROOT, this.path);
+    this.relativePath = relative(process.cwd(), this.path);
     this.ext = extname(this.path);
   }
 
@@ -46,6 +44,10 @@ export class File {
 
   public isTypescript() {
     return this.ext === '.ts' || this.ext === '.tsx';
+  }
+
+  public isTypescriptAmbient() {
+    return this.path.endsWith('.d.ts');
   }
 
   public isSass() {

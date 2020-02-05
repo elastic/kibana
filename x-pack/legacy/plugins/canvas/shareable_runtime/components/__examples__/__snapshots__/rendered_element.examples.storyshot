@@ -1,0 +1,48 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Storyshots shareables/RenderedElement component 1`] = `
+<div
+  className="kbnCanvas"
+  style={
+    Object {
+      "height": 100,
+      "overflow": "hidden",
+      "position": "relative",
+      "width": 100,
+    }
+  }
+/>
+`;
+
+exports[`Storyshots shareables/RenderedElement contextual: austin 1`] = `
+<div
+  className="kbnCanvas"
+  style={
+    Object {
+      "background": "#000",
+      "height": 720,
+      "overflow": "hidden",
+      "position": "relative",
+      "width": undefined,
+    }
+  }
+>
+  RenderedElement
+</div>
+`;
+
+exports[`Storyshots shareables/RenderedElement contextual: hello 1`] = `
+<div
+  className="kbnCanvas"
+  style={
+    Object {
+      "height": 720,
+      "overflow": "hidden",
+      "position": "relative",
+      "width": undefined,
+    }
+  }
+>
+  RenderedElement
+</div>
+`;

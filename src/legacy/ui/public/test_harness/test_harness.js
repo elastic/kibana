@@ -18,28 +18,27 @@
  */
 
 // chrome expects to be loaded first, let it get its way
-import $ from 'jquery';
-import bindJqueryToFindTestSubject from 'ui/jquery/find_test_subject';
 import chrome from '../chrome';
 
 import { parse as parseUrl } from 'url';
+import { Subject } from 'rxjs';
 import sinon from 'sinon';
-import { Notifier } from '../notify';
 import { metadata } from '../metadata';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { UiSettingsClient } from '../../../../core/public/ui_settings';
 
 import './test_harness.css';
 import 'ng_mock';
 import { setupTestSharding } from './test_sharding';
 
-bindJqueryToFindTestSubject($);
-
 const { query } = parseUrl(window.location.href, true);
 if (query && query.mocha) {
   try {
     window.mocha.setup(JSON.parse(query.mocha));
   } catch (error) {
-    throw new Error(`'?mocha=${query.mocha}' query string param provided but it could not be parsed as json`);
+    throw new Error(
+      `'?mocha=${query.mocha}' query string param provided but it could not be parsed as json`
+    );
   }
 }
 
@@ -51,36 +50,30 @@ before(() => {
 });
 
 let stubUiSettings;
+let done$;
 function createStubUiSettings() {
   if (stubUiSettings) {
-    stubUiSettings.stop();
+    done$.complete();
   }
+  done$ = new Subject();
 
   stubUiSettings = new UiSettingsClient({
     api: {
       async batchSet() {
         return { settings: stubUiSettings.getAll() };
-      }
+      },
     },
     onUpdateError: () => {},
     defaults: metadata.uiSettings.defaults,
     initialSettings: {},
+    done$,
   });
 }
 
 createStubUiSettings();
 sinon.stub(chrome, 'getUiSettingsClient').callsFake(() => stubUiSettings);
 
-beforeEach(function () {
-  // ensure that notifications are not left in the notifiers
-  if (Notifier.prototype._notifs.length) {
-    const notifs = JSON.stringify(Notifier.prototype._notifs);
-    Notifier.prototype._notifs.length = 0;
-    throw new Error('notifications were left in the notifier: ' + notifs);
-  }
-});
-
-afterEach(function () {
+afterEach(function() {
   createStubUiSettings();
 });
 

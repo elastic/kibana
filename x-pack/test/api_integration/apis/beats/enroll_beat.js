@@ -4,15 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import moment from 'moment';
 
 import { ES_INDEX_NAME } from './constants';
 
-export default function ({ getService }) {
+export default function({ getService }) {
   const supertest = getService('supertest');
-  const chance = getService('chance');
-  const es = getService('es');
+  const randomness = getService('randomness');
+  const es = getService('legacyEs');
 
   describe('enroll_beat', () => {
     let validEnrollmentToken;
@@ -20,20 +20,20 @@ export default function ({ getService }) {
     let beat;
 
     beforeEach(async () => {
-      validEnrollmentToken = chance.word();
+      validEnrollmentToken = randomness.word();
 
-      beatId = chance.word();
+      beatId = randomness.word();
       const version =
-        chance.integer({ min: 1, max: 10 }) +
+        randomness.integer({ min: 1, max: 10 }) +
         '.' +
-        chance.integer({ min: 1, max: 10 }) +
+        randomness.integer({ min: 1, max: 10 }) +
         '.' +
-        chance.integer({ min: 1, max: 10 });
+        randomness.integer({ min: 1, max: 10 });
 
       beat = {
         type: 'filebeat',
         host_name: 'foo.bar.com',
-        name: chance.word(),
+        name: randomness.word(),
         version,
       };
 
@@ -58,7 +58,7 @@ export default function ({ getService }) {
         .set('kbn-xsrf', 'xxx')
         .set('kbn-beats-enrollment-token', validEnrollmentToken)
         .send(beat)
-        .expect(201);
+        .expect(200);
 
       const esResponse = await es.get({
         index: ES_INDEX_NAME,
@@ -75,9 +75,9 @@ export default function ({ getService }) {
         .set('kbn-xsrf', 'xxx')
         .set('kbn-beats-enrollment-token', validEnrollmentToken)
         .send(beat)
-        .expect(201);
+        .expect(200);
 
-      const accessTokenFromApi = apiResponse.access_token;
+      const accessTokenFromApi = apiResponse.item;
 
       const esResponse = await es.get({
         index: ES_INDEX_NAME,
@@ -94,11 +94,14 @@ export default function ({ getService }) {
       const { body: apiResponse } = await supertest
         .post(`/api/beats/agent/${beatId}`)
         .set('kbn-xsrf', 'xxx')
-        .set('kbn-beats-enrollment-token', chance.word())
+        .set('kbn-beats-enrollment-token', randomness.word())
         .send(beat)
         .expect(400);
 
-      expect(apiResponse).to.eql({ message: 'Invalid enrollment token' });
+      expect(apiResponse).to.eql({
+        success: false,
+        error: { code: 400, message: 'Invalid enrollment token' },
+      });
     });
 
     it('should reject an expired enrollment token', async () => {
@@ -128,7 +131,10 @@ export default function ({ getService }) {
         .send(beat)
         .expect(400);
 
-      expect(apiResponse).to.eql({ message: 'Expired enrollment token' });
+      expect(apiResponse).to.eql({
+        success: false,
+        error: { code: 400, message: 'Expired enrollment token' },
+      });
     });
 
     it('should delete the given enrollment token so it may not be reused', async () => {
@@ -137,7 +143,7 @@ export default function ({ getService }) {
         .set('kbn-xsrf', 'xxx')
         .set('kbn-beats-enrollment-token', validEnrollmentToken)
         .send(beat)
-        .expect(201);
+        .expect(200);
 
       const esResponse = await es.get({
         index: ES_INDEX_NAME,
@@ -154,7 +160,7 @@ export default function ({ getService }) {
         .set('kbn-xsrf', 'xxx')
         .set('kbn-beats-enrollment-token', validEnrollmentToken)
         .send(beat)
-        .expect(201);
+        .expect(200);
 
       await es.index({
         index: ES_INDEX_NAME,
@@ -175,7 +181,7 @@ export default function ({ getService }) {
         .set('kbn-xsrf', 'xxx')
         .set('kbn-beats-enrollment-token', validEnrollmentToken)
         .send(beat)
-        .expect(201);
+        .expect(200);
     });
   });
 }

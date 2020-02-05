@@ -19,7 +19,6 @@
 
 const path = require('path');
 const fs = require('fs');
-const mkdirp = require('mkdirp');
 
 /**
  * Copies config references to an absolute path to
@@ -55,14 +54,14 @@ exports.extractConfigFiles = function extractConfigFiles(config, dest, options =
 };
 
 function isFile(dest = '') {
-  return path.isAbsolute(dest) && path.extname(dest).length > 0;
+  return path.isAbsolute(dest) && path.extname(dest).length > 0 && fs.existsSync(dest);
 }
 
 function copyFileSync(src, dest) {
   const destPath = path.dirname(dest);
 
   if (!fs.existsSync(destPath)) {
-    mkdirp(destPath);
+    fs.mkdirSync(destPath, { recursive: true });
   }
 
   fs.writeFileSync(dest, fs.readFileSync(src));

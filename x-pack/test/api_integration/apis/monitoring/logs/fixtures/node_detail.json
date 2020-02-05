@@ -1,0 +1,79 @@
+{
+  "enabled": true,
+  "logs": [{
+    "timestamp": 1552670347365,
+    "component": "o.e.d.x.m.r.a.RestMonitoringBulkAction",
+    "node": "Elastic-MBP.local",
+    "level": "WARN",
+    "type": "deprecation",
+    "message": "[POST /_xpack/monitoring/_bulk] is deprecated! Use [POST /_monitoring/bulk] instead."
+  }, {
+    "timestamp": 1552670337366,
+    "component": "o.e.d.x.m.r.a.RestMonitoringBulkAction",
+    "node": "Elastic-MBP.local",
+    "level": "WARN",
+    "type": "deprecation",
+    "message": "[POST /_xpack/monitoring/_bulk] is deprecated! Use [POST /_monitoring/bulk] instead."
+  }, {
+    "timestamp": 1552670327400,
+    "component": "o.e.c.m.MetaDataCreateIndexService",
+    "node": "Elastic-MBP.local",
+    "index": ".monitoring-beats-7-2019.03.15",
+    "level": "INFO",
+    "type": "server",
+    "message": "creating index, cause [auto(bulk api)], templates [.monitoring-beats], shards [1]/[0], mappings [_doc]"
+  }, {
+    "timestamp": 1552670327387,
+    "component": "o.e.d.x.m.r.a.RestMonitoringBulkAction",
+    "node": "Elastic-MBP.local",
+    "level": "WARN",
+    "type": "deprecation",
+    "message": "[POST /_xpack/monitoring/_bulk] is deprecated! Use [POST /_monitoring/bulk] instead."
+  }, {
+    "timestamp": 1552670322084,
+    "component": "o.e.c.m.MetaDataMappingService",
+    "node": "Elastic-MBP.local",
+    "index": "filebeat-8.0.0-2019.03.15-000001",
+    "level": "INFO",
+    "type": "server",
+    "message": "update_mapping [_doc]"
+  }, {
+    "timestamp": 1552670321811,
+    "component": "o.e.c.m.MetaDataMappingService",
+    "node": "Elastic-MBP.local",
+    "index": "filebeat-8.0.0-2019.03.15-000001",
+    "level": "INFO",
+    "type": "server",
+    "message": "update_mapping [_doc]"
+  }, {
+    "timestamp": 1552670321447,
+    "component": "o.e.c.m.MetaDataCreateIndexService",
+    "node": "Elastic-MBP.local",
+    "index": "filebeat-8.0.0-2019.03.15-000001",
+    "level": "INFO",
+    "type": "server",
+    "message": "creating index, cause [api], templates [filebeat-8.0.0], shards [1]/[1], mappings [_doc]"
+  }, {
+    "timestamp": 1552670321385,
+    "component": "o.e.c.m.MetaDataIndexTemplateService",
+    "node": "Elastic-MBP.local",
+    "level": "INFO",
+    "type": "server",
+    "message": "adding template [filebeat-8.0.0] for index patterns [filebeat-8.0.0-*]"
+  }, {
+    "timestamp": 1552670321185,
+    "component": "o.e.x.i.a.TransportPutLifecycleAction",
+    "node": "Elastic-MBP.local",
+    "level": "INFO",
+    "type": "server",
+    "message": "adding index lifecycle policy [filebeat-8.0.0]"
+  }, {
+    "timestamp": 1552670316137,
+    "component": "o.e.c.r.a.AllocationService",
+    "node": "Elastic-MBP.local",
+    "level": "INFO",
+    "type": "server",
+    "message": "Cluster health status changed from [YELLOW] to [GREEN] (reason: [shards started [[.monitoring-es-7-2019.03.15][0]] ...])."
+  }],
+  "limit": 10
+}

@@ -1,0 +1,67 @@
+{
+  "config": {
+    "id": "fq_date_histogram_1m_1441",
+    "source": {
+      "index": [
+        "farequote-2019"
+      ],
+      "query": {
+        "match_all": { }
+      }
+    },
+    "dest": {
+      "index": "fq_date_histogram_1m_1441"
+    },
+    "pivot": {
+      "group_by": {
+        "@timestamp": {
+          "date_histogram": {
+            "field": "@timestamp",
+            "calendar_interval": "1m"
+          }
+        }
+      },
+      "aggregations": {
+        "responsetime.avg": {
+          "avg": {
+            "field": "responsetime"
+          }
+        }
+      }
+    },
+    "version": "8.0.0",
+    "create_time": 1564388146667
+  },
+  "id": "fq_date_histogram_1m_1441",
+  "checkpointing": {
+    "last": {
+      "checkpoint": 1,
+      "timestamp_millis": 1564388281199
+    },
+    "operations_behind": 0
+  },
+  "mode": "batch",
+  "stats": {
+    "id": "fq_date_histogram_1m_1441",
+    "state": "stopped",
+    "stats": {
+      "pages_processed": 16,
+      "documents_processed": 86274,
+      "documents_indexed": 7200,
+      "trigger_count": 1,
+      "index_time_in_ms": 1310,
+      "index_total": 15,
+      "index_failures": 0,
+      "search_time_in_ms": 463,
+      "search_total": 16,
+      "search_failures": 0
+    },
+    "checkpointing": {
+      "last": {
+        "checkpoint": 1,
+        "timestamp_millis": 1564388281199
+      },
+      "operations_behind": 0
+    }
+  }
+}

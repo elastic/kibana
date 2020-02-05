@@ -1,0 +1,1403 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ErrorGroupOverview -> List should render empty state 1`] = `
+<Memo(UnoptimizedManagedTable)
+  columns={
+    Array [
+      Object {
+        "field": "groupId",
+        "name": "Group ID",
+        "render": [Function],
+        "sortable": false,
+        "width": "96px",
+      },
+      Object {
+        "field": "message",
+        "name": "Error message and culprit",
+        "render": [Function],
+        "sortable": false,
+        "width": "50%",
+      },
+      Object {
+        "align": "right",
+        "field": "handled",
+        "name": "",
+        "render": [Function],
+        "sortable": false,
+      },
+      Object {
+        "dataType": "number",
+        "field": "occurrenceCount",
+        "name": "Occurrences",
+        "render": [Function],
+        "sortable": true,
+      },
+      Object {
+        "align": "right",
+        "field": "latestOccurrenceAt",
+        "name": "Latest occurrence",
+        "render": [Function],
+        "sortable": true,
+      },
+    ]
+  }
+  initialPageSize={25}
+  initialSortDirection="desc"
+  initialSortField="occurrenceCount"
+  items={Array []}
+  noItemsMessage="No errors were found"
+  sortItems={false}
+>
+  <div
+    className="euiBasicTable"
+  >
+    <div>
+      <div
+        className="euiTableHeaderMobile"
+      >
+        <EuiFlexGroup
+          alignItems="baseline"
+          justifyContent="spaceBetween"
+          responsive={false}
+        >
+          <div
+            className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
+          >
+            <div
+              className="euiFlexItem euiFlexItem--flexGrowZero"
+            />
+            <div
+              className="euiFlexItem euiFlexItem--flexGrowZero"
+            >
+              <div
+                className="euiTableSortMobile"
+              >
+                <div
+                  className="euiPopover euiPopover--anchorDownRight"
+                  onKeyDown={[Function]}
+                  onMouseDown={[Function]}
+                  onMouseUp={[Function]}
+                  onTouchEnd={[Function]}
+                  onTouchStart={[Function]}
+                >
+                  <div
+                    className="euiPopover__anchor"
+                  >
+                    <button
+                      className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--iconRight euiButtonEmpty--flushRight"
+                      onClick={[Function]}
+                      type="button"
+                    >
+                      <span
+                        className="euiButtonEmpty__content"
+                      >
+                        <svg
+                          aria-hidden={true}
+                          className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonEmpty__icon"
+                          focusable="false"
+                          height={16}
+                          role="img"
+                          style={null}
+                          viewBox="0 0 16 16"
+                          width={16}
+                          xmlns="http://www.w3.org/2000/svg"
+                        />
+                        <span
+                          className="euiButtonEmpty__text"
+                        >
+                          Sorting
+                        </span>
+                      </span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </EuiFlexGroup>
+      </div>
+      <table
+        className="euiTable euiTable--responsive"
+      >
+        <caption
+          aria-live="polite"
+          aria-relevant="text"
+          className="euiScreenReaderOnly euiTableCaption"
+          role="status"
+        />
+        <thead>
+          <tr>
+            <th
+              className="euiTableHeaderCell"
+              data-test-subj="tableHeaderCell_groupId_0"
+              role="columnheader"
+              scope="col"
+              style={
+                Object {
+                  "width": "96px",
+                }
+              }
+            >
+              <div
+                className="euiTableCellContent"
+              >
+                <span
+                  className="euiTableCellContent__text"
+                >
+                  Group ID
+                </span>
+              </div>
+            </th>
+            <th
+              className="euiTableHeaderCell"
+              data-test-subj="tableHeaderCell_message_1"
+              role="columnheader"
+              scope="col"
+              style={
+                Object {
+                  "width": "50%",
+                }
+              }
+            >
+              <div
+                className="euiTableCellContent"
+              >
+                <span
+                  className="euiTableCellContent__text"
+                >
+                  Error message and culprit
+                </span>
+              </div>
+            </th>
+            <th
+              className="euiTableHeaderCell"
+              data-test-subj="tableHeaderCell_handled_2"
+              role="columnheader"
+              scope="col"
+              style={
+                Object {
+                  "width": undefined,
+                }
+              }
+            >
+              <div
+                className="euiTableCellContent euiTableCellContent--alignRight"
+              >
+                <span
+                  className="euiTableCellContent__text"
+                />
+              </div>
+            </th>
+            <th
+              aria-live="polite"
+              aria-sort="descending"
+              className="euiTableHeaderCell"
+              data-test-subj="tableHeaderCell_occurrenceCount_3"
+              role="columnheader"
+              scope="col"
+              style={
+                Object {
+                  "width": undefined,
+                }
+              }
+            >
+              <button
+                className="euiTableHeaderButton euiTableHeaderButton-isSorted"
+                data-test-subj="tableHeaderSortButton"
+                onClick={[Function]}
+                type="button"
+              >
+                <span
+                  className="euiTableCellContent euiTableCellContent--alignRight"
+                >
+                  <span
+                    className="euiTableCellContent__text"
+                  >
+                    Occurrences
+                  </span>
+                  <svg
+                    aria-hidden={true}
+                    aria-label="Sorted in descending order"
+                    className="euiIcon euiIcon--medium euiIcon-isLoading euiTableSortIcon"
+                    focusable="false"
+                    height={16}
+                    role="img"
+                    style={null}
+                    viewBox="0 0 16 16"
+                    width={16}
+                    xmlns="http://www.w3.org/2000/svg"
+                  />
+                  <span
+                    className="euiScreenReaderOnly"
+                  >
+                    Click to sort in ascending order
+                  </span>
+                </span>
+              </button>
+            </th>
+            <th
+              aria-live="polite"
+              aria-sort="none"
+              className="euiTableHeaderCell"
+              data-test-subj="tableHeaderCell_latestOccurrenceAt_4"
+              role="columnheader"
+              scope="col"
+              style={
+                Object {
+                  "width": undefined,
+                }
+              }
+            >
+              <button
+                className="euiTableHeaderButton"
+                data-test-subj="tableHeaderSortButton"
+                onClick={[Function]}
+                type="button"
+              >
+                <span
+                  className="euiTableCellContent euiTableCellContent--alignRight"
+                >
+                  <span
+                    className="euiTableCellContent__text"
+                  >
+                    Latest occurrence
+                  </span>
+                  <span
+                    className="euiScreenReaderOnly"
+                  >
+                    Click to sort in ascending order
+                  </span>
+                </span>
+              </button>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            className="euiTableRow"
+          >
+            <td
+              className="euiTableRowCell euiTableRowCell--isMobileFullWidth"
+              colSpan={5}
+              style={
+                Object {
+                  "width": undefined,
+                }
+              }
+            >
+              <div
+                className="euiTableCellContent euiTableCellContent--alignCenter"
+              >
+                <span
+                  className="euiTableCellContent__text"
+                >
+                  No errors were found
+                </span>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</Memo(UnoptimizedManagedTable)>
+`;
+
+exports[`ErrorGroupOverview -> List should render with data 1`] = `
+.c0 {
+  font-family: "SFMono-Regular",Consolas,"Liberation Mono",Menlo,Courier,monospace;
+}
+
+.c1 {
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.c2 {
+  font-family: "SFMono-Regular",Consolas,"Liberation Mono",Menlo,Courier,monospace;
+  font-size: 16px;
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.c3 {
+  font-family: "SFMono-Regular",Consolas,"Liberation Mono",Menlo,Courier,monospace;
+}
+
+<Memo(UnoptimizedManagedTable)
+  columns={
+    Array [
+      Object {
+        "field": "groupId",
+        "name": "Group ID",
+        "render": [Function],
+        "sortable": false,
+        "width": "96px",
+      },
+      Object {
+        "field": "message",
+        "name": "Error message and culprit",
+        "render": [Function],
+        "sortable": false,
+        "width": "50%",
+      },
+      Object {
+        "align": "right",
+        "field": "handled",
+        "name": "",
+        "render": [Function],
+        "sortable": false,
+      },
+      Object {
+        "dataType": "number",
+        "field": "occurrenceCount",
+        "name": "Occurrences",
+        "render": [Function],
+        "sortable": true,
+      },
+      Object {
+        "align": "right",
+        "field": "latestOccurrenceAt",
+        "name": "Latest occurrence",
+        "render": [Function],
+        "sortable": true,
+      },
+    ]
+  }
+  initialPageSize={25}
+  initialSortDirection="desc"
+  initialSortField="occurrenceCount"
+  items={
+    Array [
+      Object {
+        "culprit": "elasticapm.contrib.django.client.capture",
+        "groupId": "a0ce2c8978ef92cdf2ff163ae28576ee",
+        "latestOccurrenceAt": "2018-01-10T10:06:37.561Z",
+        "message": "About to blow up!",
+        "occurrenceCount": 75,
+      },
+      Object {
+        "culprit": "opbeans.views.oopsie",
+        "groupId": "f3ac95493913cc7a3cfec30a19d2120a",
+        "latestOccurrenceAt": "2018-01-10T10:06:37.630Z",
+        "message": "AssertionError: ",
+        "occurrenceCount": 75,
+      },
+      Object {
+        "culprit": "opbeans.tasks.update_stats",
+        "groupId": "e90863d04b7a692435305f09bbe8c840",
+        "latestOccurrenceAt": "2018-01-10T10:06:36.859Z",
+        "message": "AssertionError: Bad luck!",
+        "occurrenceCount": 24,
+      },
+      Object {
+        "culprit": "opbeans.views.customer",
+        "groupId": "8673d8bf7a032e387c101bafbab0d2bc",
+        "latestOccurrenceAt": "2018-01-10T10:06:13.211Z",
+        "message": "Customer with ID 8517 not found",
+        "occurrenceCount": 15,
+      },
+    ]
+  }
+  noItemsMessage="No errors were found"
+  sortItems={false}
+>
+  <div
+    className="euiBasicTable"
+  >
+    <div>
+      <div
+        className="euiTableHeaderMobile"
+      >
+        <EuiFlexGroup
+          alignItems="baseline"
+          justifyContent="spaceBetween"
+          responsive={false}
+        >
+          <div
+            className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
+          >
+            <div
+              className="euiFlexItem euiFlexItem--flexGrowZero"
+            />
+            <div
+              className="euiFlexItem euiFlexItem--flexGrowZero"
+            >
+              <div
+                className="euiTableSortMobile"
+              >
+                <div
+                  className="euiPopover euiPopover--anchorDownRight"
+                  onKeyDown={[Function]}
+                  onMouseDown={[Function]}
+                  onMouseUp={[Function]}
+                  onTouchEnd={[Function]}
+                  onTouchStart={[Function]}
+                >
+                  <div
+                    className="euiPopover__anchor"
+                  >
+                    <button
+                      className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--iconRight euiButtonEmpty--flushRight"
+                      onClick={[Function]}
+                      type="button"
+                    >
+                      <span
+                        className="euiButtonEmpty__content"
+                      >
+                        <svg
+                          aria-hidden={true}
+                          className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonEmpty__icon"
+                          focusable="false"
+                          height={16}
+                          role="img"
+                          style={null}
+                          viewBox="0 0 16 16"
+                          width={16}
+                          xmlns="http://www.w3.org/2000/svg"
+                        />
+                        <span
+                          className="euiButtonEmpty__text"
+                        >
+                          Sorting
+                        </span>
+                      </span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </EuiFlexGroup>
+      </div>
+      <table
+        className="euiTable euiTable--responsive"
+      >
+        <caption
+          aria-live="polite"
+          aria-relevant="text"
+          className="euiScreenReaderOnly euiTableCaption"
+          role="status"
+        />
+        <thead>
+          <tr>
+            <th
+              className="euiTableHeaderCell"
+              data-test-subj="tableHeaderCell_groupId_0"
+              role="columnheader"
+              scope="col"
+              style={
+                Object {
+                  "width": "96px",
+                }
+              }
+            >
+              <div
+                className="euiTableCellContent"
+              >
+                <span
+                  className="euiTableCellContent__text"
+                >
+                  Group ID
+                </span>
+              </div>
+            </th>
+            <th
+              className="euiTableHeaderCell"
+              data-test-subj="tableHeaderCell_message_1"
+              role="columnheader"
+              scope="col"
+              style={
+                Object {
+                  "width": "50%",
+                }
+              }
+            >
+              <div
+                className="euiTableCellContent"
+              >
+                <span
+                  className="euiTableCellContent__text"
+                >
+                  Error message and culprit
+                </span>
+              </div>
+            </th>
+            <th
+              className="euiTableHeaderCell"
+              data-test-subj="tableHeaderCell_handled_2"
+              role="columnheader"
+              scope="col"
+              style={
+                Object {
+                  "width": undefined,
+                }
+              }
+            >
+              <div
+                className="euiTableCellContent euiTableCellContent--alignRight"
+              >
+                <span
+                  className="euiTableCellContent__text"
+                />
+              </div>
+            </th>
+            <th
+              aria-live="polite"
+              aria-sort="descending"
+              className="euiTableHeaderCell"
+              data-test-subj="tableHeaderCell_occurrenceCount_3"
+              role="columnheader"
+              scope="col"
+              style={
+                Object {
+                  "width": undefined,
+                }
+              }
+            >
+              <button
+                className="euiTableHeaderButton euiTableHeaderButton-isSorted"
+                data-test-subj="tableHeaderSortButton"
+                onClick={[Function]}
+                type="button"
+              >
+                <span
+                  className="euiTableCellContent euiTableCellContent--alignRight"
+                >
+                  <span
+                    className="euiTableCellContent__text"
+                  >
+                    Occurrences
+                  </span>
+                  <svg
+                    aria-hidden={true}
+                    aria-label="Sorted in descending order"
+                    className="euiIcon euiIcon--medium euiIcon-isLoading euiTableSortIcon"
+                    focusable="false"
+                    height={16}
+                    role="img"
+                    style={null}
+                    viewBox="0 0 16 16"
+                    width={16}
+                    xmlns="http://www.w3.org/2000/svg"
+                  />
+                  <span
+                    className="euiScreenReaderOnly"
+                  >
+                    Click to sort in ascending order
+                  </span>
+                </span>
+              </button>
+            </th>
+            <th
+              aria-live="polite"
+              aria-sort="none"
+              className="euiTableHeaderCell"
+              data-test-subj="tableHeaderCell_latestOccurrenceAt_4"
+              role="columnheader"
+              scope="col"
+              style={
+                Object {
+                  "width": undefined,
+                }
+              }
+            >
+              <button
+                className="euiTableHeaderButton"
+                data-test-subj="tableHeaderSortButton"
+                onClick={[Function]}
+                type="button"
+              >
+                <span
+                  className="euiTableCellContent euiTableCellContent--alignRight"
+                >
+                  <span
+                    className="euiTableCellContent__text"
+                  >
+                    Latest occurrence
+                  </span>
+                  <span
+                    className="euiScreenReaderOnly"
+                  >
+                    Click to sort in ascending order
+                  </span>
+                </span>
+              </button>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            className="euiTableRow"
+          >
+            <td
+              className="euiTableRowCell"
+              style={
+                Object {
+                  "width": "96px",
+                }
+              }
+            >
+              <div
+                className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+              >
+                Group ID
+              </div>
+              <div
+                className="euiTableCellContent euiTableCellContent--overflowingContent"
+              >
+                <Styled(ErrorDetailLink)
+                  className=""
+                  errorGroupId="a0ce2c8978ef92cdf2ff163ae28576ee"
+                  serviceName="opbeans-python"
+                >
+                  <EuiLink
+                    className="c0"
+                    href="#/services/opbeans-python/errors/a0ce2c8978ef92cdf2ff163ae28576ee?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
+                  >
+                    <a
+                      className="euiLink euiLink--primary c0"
+                      href="#/services/opbeans-python/errors/a0ce2c8978ef92cdf2ff163ae28576ee?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
+                      rel="noreferrer"
+                    >
+                      a0ce2
+                    </a>
+                  </EuiLink>
+                </Styled(ErrorDetailLink)>
+              </div>
+            </td>
+            <td
+              className="euiTableRowCell"
+              style={
+                Object {
+                  "width": "50%",
+                }
+              }
+            >
+              <div
+                className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+              >
+                Error message and culprit
+              </div>
+              <div
+                className="euiTableCellContent euiTableCellContent--overflowingContent"
+              >
+                <styled.div
+                  className=""
+                >
+                  <div
+                    className="c1"
+                  >
+                    <span
+                      className="euiToolTipAnchor"
+                      onMouseOut={[Function]}
+                      onMouseOver={[Function]}
+                    >
+                      <Styled(ErrorDetailLink)
+                        errorGroupId="a0ce2c8978ef92cdf2ff163ae28576ee"
+                        onBlur={[Function]}
+                        onFocus={[Function]}
+                        serviceName="opbeans-python"
+                      >
+                        <EuiLink
+                          className="c2"
+                          href="#/services/opbeans-python/errors/a0ce2c8978ef92cdf2ff163ae28576ee?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
+                          onBlur={[Function]}
+                          onFocus={[Function]}
+                        >
+                          <a
+                            className="euiLink euiLink--primary c2"
+                            href="#/services/opbeans-python/errors/a0ce2c8978ef92cdf2ff163ae28576ee?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
+                            onBlur={[Function]}
+                            onFocus={[Function]}
+                            rel="noreferrer"
+                          >
+                            About to blow up!
+                          </a>
+                        </EuiLink>
+                      </Styled(ErrorDetailLink)>
+                    </span>
+                    <br />
+                    <span
+                      className="euiToolTipAnchor"
+                      onMouseOut={[Function]}
+                      onMouseOver={[Function]}
+                    >
+                      <styled.div
+                        onBlur={[Function]}
+                        onFocus={[Function]}
+                      >
+                        <div
+                          className="c3"
+                          onBlur={[Function]}
+                          onFocus={[Function]}
+                        >
+                          elasticapm.contrib.django.client.capture
+                        </div>
+                      </styled.div>
+                    </span>
+                  </div>
+                </styled.div>
+              </div>
+            </td>
+            <td
+              className="euiTableRowCell"
+              style={
+                Object {
+                  "width": undefined,
+                }
+              }
+            >
+              <div
+                className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+              />
+            </td>
+            <td
+              className="euiTableRowCell"
+              style={
+                Object {
+                  "width": undefined,
+                }
+              }
+            >
+              <div
+                className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+              >
+                Occurrences
+              </div>
+              <div
+                className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+              >
+                75
+              </div>
+            </td>
+            <td
+              className="euiTableRowCell"
+              style={
+                Object {
+                  "width": undefined,
+                }
+              }
+            >
+              <div
+                className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+              >
+                Latest occurrence
+              </div>
+              <div
+                className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+              >
+                <span
+                  className="euiToolTipAnchor"
+                  onMouseOut={[Function]}
+                  onMouseOver={[Function]}
+                >
+                  1337 minutes ago (mocking 1515578797)
+                </span>
+              </div>
+            </td>
+          </tr>
+          <tr
+            className="euiTableRow"
+          >
+            <td
+              className="euiTableRowCell"
+              style={
+                Object {
+                  "width": "96px",
+                }
+              }
+            >
+              <div
+                className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+              >
+                Group ID
+              </div>
+              <div
+                className="euiTableCellContent euiTableCellContent--overflowingContent"
+              >
+                <Styled(ErrorDetailLink)
+                  className=""
+                  errorGroupId="f3ac95493913cc7a3cfec30a19d2120a"
+                  serviceName="opbeans-python"
+                >
+                  <EuiLink
+                    className="c0"
+                    href="#/services/opbeans-python/errors/f3ac95493913cc7a3cfec30a19d2120a?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
+                  >
+                    <a
+                      className="euiLink euiLink--primary c0"
+                      href="#/services/opbeans-python/errors/f3ac95493913cc7a3cfec30a19d2120a?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
+                      rel="noreferrer"
+                    >
+                      f3ac9
+                    </a>
+                  </EuiLink>
+                </Styled(ErrorDetailLink)>
+              </div>
+            </td>
+            <td
+              className="euiTableRowCell"
+              style={
+                Object {
+                  "width": "50%",
+                }
+              }
+            >
+              <div
+                className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+              >
+                Error message and culprit
+              </div>
+              <div
+                className="euiTableCellContent euiTableCellContent--overflowingContent"
+              >
+                <styled.div
+                  className=""
+                >
+                  <div
+                    className="c1"
+                  >
+                    <span
+                      className="euiToolTipAnchor"
+                      onMouseOut={[Function]}
+                      onMouseOver={[Function]}
+                    >
+                      <Styled(ErrorDetailLink)
+                        errorGroupId="f3ac95493913cc7a3cfec30a19d2120a"
+                        onBlur={[Function]}
+                        onFocus={[Function]}
+                        serviceName="opbeans-python"
+                      >
+                        <EuiLink
+                          className="c2"
+                          href="#/services/opbeans-python/errors/f3ac95493913cc7a3cfec30a19d2120a?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
+                          onBlur={[Function]}
+                          onFocus={[Function]}
+                        >
+                          <a
+                            className="euiLink euiLink--primary c2"
+                            href="#/services/opbeans-python/errors/f3ac95493913cc7a3cfec30a19d2120a?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
+                            onBlur={[Function]}
+                            onFocus={[Function]}
+                            rel="noreferrer"
+                          >
+                            AssertionError: 
+                          </a>
+                        </EuiLink>
+                      </Styled(ErrorDetailLink)>
+                    </span>
+                    <br />
+                    <span
+                      className="euiToolTipAnchor"
+                      onMouseOut={[Function]}
+                      onMouseOver={[Function]}
+                    >
+                      <styled.div
+                        onBlur={[Function]}
+                        onFocus={[Function]}
+                      >
+                        <div
+                          className="c3"
+                          onBlur={[Function]}
+                          onFocus={[Function]}
+                        >
+                          opbeans.views.oopsie
+                        </div>
+                      </styled.div>
+                    </span>
+                  </div>
+                </styled.div>
+              </div>
+            </td>
+            <td
+              className="euiTableRowCell"
+              style={
+                Object {
+                  "width": undefined,
+                }
+              }
+            >
+              <div
+                className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+              />
+            </td>
+            <td
+              className="euiTableRowCell"
+              style={
+                Object {
+                  "width": undefined,
+                }
+              }
+            >
+              <div
+                className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+              >
+                Occurrences
+              </div>
+              <div
+                className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+              >
+                75
+              </div>
+            </td>
+            <td
+              className="euiTableRowCell"
+              style={
+                Object {
+                  "width": undefined,
+                }
+              }
+            >
+              <div
+                className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+              >
+                Latest occurrence
+              </div>
+              <div
+                className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+              >
+                <span
+                  className="euiToolTipAnchor"
+                  onMouseOut={[Function]}
+                  onMouseOver={[Function]}
+                >
+                  1337 minutes ago (mocking 1515578797)
+                </span>
+              </div>
+            </td>
+          </tr>
+          <tr
+            className="euiTableRow"
+          >
+            <td
+              className="euiTableRowCell"
+              style={
+                Object {
+                  "width": "96px",
+                }
+              }
+            >
+              <div
+                className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+              >
+                Group ID
+              </div>
+              <div
+                className="euiTableCellContent euiTableCellContent--overflowingContent"
+              >
+                <Styled(ErrorDetailLink)
+                  className=""
+                  errorGroupId="e90863d04b7a692435305f09bbe8c840"
+                  serviceName="opbeans-python"
+                >
+                  <EuiLink
+                    className="c0"
+                    href="#/services/opbeans-python/errors/e90863d04b7a692435305f09bbe8c840?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
+                  >
+                    <a
+                      className="euiLink euiLink--primary c0"
+                      href="#/services/opbeans-python/errors/e90863d04b7a692435305f09bbe8c840?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
+                      rel="noreferrer"
+                    >
+                      e9086
+                    </a>
+                  </EuiLink>
+                </Styled(ErrorDetailLink)>
+              </div>
+            </td>
+            <td
+              className="euiTableRowCell"
+              style={
+                Object {
+                  "width": "50%",
+                }
+              }
+            >
+              <div
+                className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+              >
+                Error message and culprit
+              </div>
+              <div
+                className="euiTableCellContent euiTableCellContent--overflowingContent"
+              >
+                <styled.div
+                  className=""
+                >
+                  <div
+                    className="c1"
+                  >
+                    <span
+                      className="euiToolTipAnchor"
+                      onMouseOut={[Function]}
+                      onMouseOver={[Function]}
+                    >
+                      <Styled(ErrorDetailLink)
+                        errorGroupId="e90863d04b7a692435305f09bbe8c840"
+                        onBlur={[Function]}
+                        onFocus={[Function]}
+                        serviceName="opbeans-python"
+                      >
+                        <EuiLink
+                          className="c2"
+                          href="#/services/opbeans-python/errors/e90863d04b7a692435305f09bbe8c840?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
+                          onBlur={[Function]}
+                          onFocus={[Function]}
+                        >
+                          <a
+                            className="euiLink euiLink--primary c2"
+                            href="#/services/opbeans-python/errors/e90863d04b7a692435305f09bbe8c840?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
+                            onBlur={[Function]}
+                            onFocus={[Function]}
+                            rel="noreferrer"
+                          >
+                            AssertionError: Bad luck!
+                          </a>
+                        </EuiLink>
+                      </Styled(ErrorDetailLink)>
+                    </span>
+                    <br />
+                    <span
+                      className="euiToolTipAnchor"
+                      onMouseOut={[Function]}
+                      onMouseOver={[Function]}
+                    >
+                      <styled.div
+                        onBlur={[Function]}
+                        onFocus={[Function]}
+                      >
+                        <div
+                          className="c3"
+                          onBlur={[Function]}
+                          onFocus={[Function]}
+                        >
+                          opbeans.tasks.update_stats
+                        </div>
+                      </styled.div>
+                    </span>
+                  </div>
+                </styled.div>
+              </div>
+            </td>
+            <td
+              className="euiTableRowCell"
+              style={
+                Object {
+                  "width": undefined,
+                }
+              }
+            >
+              <div
+                className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+              />
+            </td>
+            <td
+              className="euiTableRowCell"
+              style={
+                Object {
+                  "width": undefined,
+                }
+              }
+            >
+              <div
+                className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+              >
+                Occurrences
+              </div>
+              <div
+                className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+              >
+                24
+              </div>
+            </td>
+            <td
+              className="euiTableRowCell"
+              style={
+                Object {
+                  "width": undefined,
+                }
+              }
+            >
+              <div
+                className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+              >
+                Latest occurrence
+              </div>
+              <div
+                className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+              >
+                <span
+                  className="euiToolTipAnchor"
+                  onMouseOut={[Function]}
+                  onMouseOver={[Function]}
+                >
+                  1337 minutes ago (mocking 1515578796)
+                </span>
+              </div>
+            </td>
+          </tr>
+          <tr
+            className="euiTableRow"
+          >
+            <td
+              className="euiTableRowCell"
+              style={
+                Object {
+                  "width": "96px",
+                }
+              }
+            >
+              <div
+                className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+              >
+                Group ID
+              </div>
+              <div
+                className="euiTableCellContent euiTableCellContent--overflowingContent"
+              >
+                <Styled(ErrorDetailLink)
+                  className=""
+                  errorGroupId="8673d8bf7a032e387c101bafbab0d2bc"
+                  serviceName="opbeans-python"
+                >
+                  <EuiLink
+                    className="c0"
+                    href="#/services/opbeans-python/errors/8673d8bf7a032e387c101bafbab0d2bc?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
+                  >
+                    <a
+                      className="euiLink euiLink--primary c0"
+                      href="#/services/opbeans-python/errors/8673d8bf7a032e387c101bafbab0d2bc?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
+                      rel="noreferrer"
+                    >
+                      8673d
+                    </a>
+                  </EuiLink>
+                </Styled(ErrorDetailLink)>
+              </div>
+            </td>
+            <td
+              className="euiTableRowCell"
+              style={
+                Object {
+                  "width": "50%",
+                }
+              }
+            >
+              <div
+                className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+              >
+                Error message and culprit
+              </div>
+              <div
+                className="euiTableCellContent euiTableCellContent--overflowingContent"
+              >
+                <styled.div
+                  className=""
+                >
+                  <div
+                    className="c1"
+                  >
+                    <span
+                      className="euiToolTipAnchor"
+                      onMouseOut={[Function]}
+                      onMouseOver={[Function]}
+                    >
+                      <Styled(ErrorDetailLink)
+                        errorGroupId="8673d8bf7a032e387c101bafbab0d2bc"
+                        onBlur={[Function]}
+                        onFocus={[Function]}
+                        serviceName="opbeans-python"
+                      >
+                        <EuiLink
+                          className="c2"
+                          href="#/services/opbeans-python/errors/8673d8bf7a032e387c101bafbab0d2bc?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
+                          onBlur={[Function]}
+                          onFocus={[Function]}
+                        >
+                          <a
+                            className="euiLink euiLink--primary c2"
+                            href="#/services/opbeans-python/errors/8673d8bf7a032e387c101bafbab0d2bc?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
+                            onBlur={[Function]}
+                            onFocus={[Function]}
+                            rel="noreferrer"
+                          >
+                            Customer with ID 8517 not found
+                          </a>
+                        </EuiLink>
+                      </Styled(ErrorDetailLink)>
+                    </span>
+                    <br />
+                    <span
+                      className="euiToolTipAnchor"
+                      onMouseOut={[Function]}
+                      onMouseOver={[Function]}
+                    >
+                      <styled.div
+                        onBlur={[Function]}
+                        onFocus={[Function]}
+                      >
+                        <div
+                          className="c3"
+                          onBlur={[Function]}
+                          onFocus={[Function]}
+                        >
+                          opbeans.views.customer
+                        </div>
+                      </styled.div>
+                    </span>
+                  </div>
+                </styled.div>
+              </div>
+            </td>
+            <td
+              className="euiTableRowCell"
+              style={
+                Object {
+                  "width": undefined,
+                }
+              }
+            >
+              <div
+                className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+              />
+            </td>
+            <td
+              className="euiTableRowCell"
+              style={
+                Object {
+                  "width": undefined,
+                }
+              }
+            >
+              <div
+                className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+              >
+                Occurrences
+              </div>
+              <div
+                className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+              >
+                15
+              </div>
+            </td>
+            <td
+              className="euiTableRowCell"
+              style={
+                Object {
+                  "width": undefined,
+                }
+              }
+            >
+              <div
+                className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+              >
+                Latest occurrence
+              </div>
+              <div
+                className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+              >
+                <span
+                  className="euiToolTipAnchor"
+                  onMouseOut={[Function]}
+                  onMouseOver={[Function]}
+                >
+                  1337 minutes ago (mocking 1515578773)
+                </span>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div>
+      <div
+        className="euiSpacer euiSpacer--m"
+      />
+      <EuiFlexGroup
+        alignItems="center"
+        justifyContent="spaceBetween"
+        responsive={false}
+      >
+        <div
+          className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
+        >
+          <div
+            className="euiFlexItem euiFlexItem--flexGrowZero"
+          />
+          <div
+            className="euiFlexItem euiFlexItem--flexGrowZero"
+          >
+            <div
+              className="euiPagination"
+              role="group"
+            >
+              <button
+                aria-label="Previous page"
+                className="euiButtonIcon euiButtonIcon--text"
+                data-test-subj="pagination-button-previous"
+                disabled={true}
+                onClick={[Function]}
+                type="button"
+              >
+                <svg
+                  aria-hidden={true}
+                  className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
+                  focusable="false"
+                  height={16}
+                  role="img"
+                  style={null}
+                  viewBox="0 0 16 16"
+                  width={16}
+                  xmlns="http://www.w3.org/2000/svg"
+                />
+              </button>
+              <button
+                aria-label="Page 1 of 1"
+                className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiPaginationButton euiPaginationButton-isActive euiPaginationButton--hideOnMobile"
+                data-test-subj="pagination-button-0"
+                onClick={[Function]}
+                type="button"
+              >
+                <span
+                  className="euiButtonEmpty__content"
+                >
+                  <span
+                    className="euiButtonEmpty__text"
+                  >
+                    1
+                  </span>
+                </span>
+              </button>
+              <button
+                aria-label="Next page"
+                className="euiButtonIcon euiButtonIcon--text"
+                data-test-subj="pagination-button-next"
+                disabled={true}
+                onClick={[Function]}
+                type="button"
+              >
+                <svg
+                  aria-hidden={true}
+                  className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
+                  focusable="false"
+                  height={16}
+                  role="img"
+                  style={null}
+                  viewBox="0 0 16 16"
+                  width={16}
+                  xmlns="http://www.w3.org/2000/svg"
+                />
+              </button>
+            </div>
+          </div>
+        </div>
+      </EuiFlexGroup>
+    </div>
+  </div>
+</Memo(UnoptimizedManagedTable)>
+`;

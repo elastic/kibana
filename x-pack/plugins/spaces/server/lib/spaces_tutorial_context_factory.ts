@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SpacesService } from './create_spaces_service';
+import { SpacesServiceSetup } from '../spaces_service/spaces_service';
 
-export function createSpacesTutorialContextFactory(spacesService: SpacesService) {
+export function createSpacesTutorialContextFactory(spacesService: SpacesServiceSetup) {
   return function spacesTutorialContextFactory(request: any) {
     return {
       spaceId: spacesService.getSpaceId(request),

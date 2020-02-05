@@ -17,9 +17,7 @@
  * under the License.
  */
 
-import { resolve } from 'path';
-
-export default function (kibana) {
+export default function(kibana) {
   return new kibana.Plugin({
     uiExports: {
       app: {
@@ -28,7 +26,11 @@ export default function (kibana) {
         hidden: true,
         url: '/status',
       },
-      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
-    }
+      injectDefaultVars(server) {
+        return {
+          isStatusPageAnonymous: server.config().get('status.allowAnonymous'),
+        };
+      },
+    },
   });
 }

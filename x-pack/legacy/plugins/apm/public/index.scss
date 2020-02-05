@@ -1,0 +1,16 @@
+// Import the EUI global scope so we can use EUI constants
+@import 'src/legacy/ui/public/styles/_styling_constants';
+
+/* APM plugin styles */
+
+// Prefix all styles with "apm" to avoid conflicts.
+// Examples
+//   apmChart
+//   apmChart__legend
+//   apmChart__legend--small
+//   apmChart__legend-isLoading
+
+.apmReactRoot {
+  overflow-x: auto;
+  height: 100%;
+}

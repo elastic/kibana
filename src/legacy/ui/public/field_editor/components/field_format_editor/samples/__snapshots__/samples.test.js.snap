@@ -3,7 +3,9 @@
 exports[`FormatEditorSamples should render normally 1`] = `
 <EuiFormRow
   describedByIds={Array []}
+  display="row"
   fullWidth={false}
+  hasChildLabel={true}
   hasEmptyLabelSpace={false}
   label={
     <FormattedMessage
@@ -12,6 +14,7 @@ exports[`FormatEditorSamples should render normally 1`] = `
       values={Object {}}
     />
   }
+  labelType="label"
 >
   <EuiBasicTable
     className="kbnFieldFormatEditor__samples"
@@ -51,6 +54,7 @@ exports[`FormatEditorSamples should render normally 1`] = `
     }
     noItemsMessage="No items found"
     responsive={true}
+    tableLayout="fixed"
   />
 </EuiFormRow>
 `;

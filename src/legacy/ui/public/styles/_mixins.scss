@@ -25,6 +25,7 @@
 
 // Standardizes the look and layout of resizable area handles
 @mixin kbnResizer($size: ($euiSizeM + 2px), $direction: horizontal) {
+  position: relative;
   display: flex;
   flex: 0 0 $size;
   background-color: $euiPageBackgroundColor;
@@ -34,10 +35,8 @@
   user-select: none;
 
   @if ($direction == horizontal) {
-    cursor: ew-resize;
     width: $size;
   } @else if ($direction == vertical) {
-    cursor: ns-resize;
     height: $size;
     width: 100%;
   } @else {
@@ -53,17 +52,32 @@
     background-color: $euiColorPrimary;
     color: $euiColorEmptyShade;
   }
+
+  &::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+
+    @if ($direction == horizontal) {
+      cursor: ew-resize;
+    } @else if ($direction == vertical) {
+      cursor: ns-resize;
+    }
+  }
 }
 
-@mixin kibanaFullScreenGraphics() {
+@mixin kibanaFullScreenGraphics($euiZLevel: $euiZLevel9) {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: $euiZLevel9 + 1000;
+  z-index: $euiZLevel + 1000;
   background: inherit;
-  background-image: linear-gradient(0deg, $euiColorLightestShade 0%, $euiColorEmptyShade 100%);
+  background-color: $euiPageBackgroundColor;
   opacity: 0;
   overflow: auto;
   animation: kibanaFullScreenGraphics_FadeIn $euiAnimSpeedExtraSlow $euiAnimSlightResistance 0s forwards;
@@ -71,20 +85,20 @@
   &::before {
     position: absolute;
     top: 0;
-    right: 0;
+    left: 0;
     z-index: 1;
-    width: 400px;
-    height: 370px;
+    width: 310px;
+    height: 477px;
     content: url(lightOrDarkTheme('ui/assets/images/bg_top_branded.svg', 'ui/assets/images/bg_top_branded_dark.svg'));
   }
 
   &::after {
     position: fixed;
     bottom: 0;
-    left: 0;
+    right: 0;
     z-index: 1;
-    width: 1170px;
-    height: 880px;
+    width: 313px;
+    height: 461px;
     content: url(lightOrDarkTheme('ui/assets/images/bg_bottom_branded.svg', 'ui/assets/images/bg_bottom_branded_dark.svg'));
   }
 

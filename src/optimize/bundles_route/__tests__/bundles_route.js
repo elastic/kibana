@@ -22,7 +22,7 @@ import { readFileSync } from 'fs';
 import crypto from 'crypto';
 
 import Chance from 'chance';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import Hapi from 'hapi';
 import Inert from 'inert';
 import sinon from 'sinon';
@@ -32,6 +32,18 @@ import { PUBLIC_PATH_PLACEHOLDER } from '../../public_path_placeholder';
 
 const chance = new Chance();
 const outputFixture = resolve(__dirname, './fixtures/output');
+
+const randomWordsCache = new Set();
+const uniqueRandomWord = () => {
+  const word = chance.word();
+
+  if (randomWordsCache.has(word)) {
+    return uniqueRandomWord();
+  }
+
+  randomWordsCache.add(word);
+  return word;
+};
 
 function replaceAll(source, replace, replaceWith) {
   return source.split(replace).join(replaceWith);
@@ -45,18 +57,20 @@ describe('optimizer/bundle route', () => {
       regularBundlesPath = outputFixture,
       dllBundlesPath = outputFixture,
       basePublicPath = '',
-      builtCssPath = outputFixture
+      builtCssPath = outputFixture,
     } = options;
 
     const server = new Hapi.Server();
     server.register([Inert]);
 
-    server.route(createBundlesRoute({
-      regularBundlesPath,
-      dllBundlesPath,
-      basePublicPath,
-      builtCssPath
-    }));
+    server.route(
+      createBundlesRoute({
+        regularBundlesPath,
+        dllBundlesPath,
+        basePublicPath,
+        builtCssPath,
+      })
+    );
 
     return server;
   }
@@ -69,28 +83,28 @@ describe('optimizer/bundle route', () => {
         createBundlesRoute({
           regularBundlesPath: null,
           dllBundlesPath: '/absolute/path',
-          basePublicPath: ''
+          basePublicPath: '',
         });
       }).to.throwError(/absolute path/);
       expect(() => {
         createBundlesRoute({
           regularBundlesPath: './relative',
           dllBundlesPath: '/absolute/path',
-          basePublicPath: ''
+          basePublicPath: '',
         });
       }).to.throwError(/absolute path/);
       expect(() => {
         createBundlesRoute({
           regularBundlesPath: 1234,
           dllBundlesPath: '/absolute/path',
-          basePublicPath: ''
+          basePublicPath: '',
         });
       }).to.throwError(/absolute path/);
       expect(() => {
         createBundlesRoute({
           regularBundlesPath: '/absolute/path',
           dllBundlesPath: '/absolute/path',
-          basePublicPath: ''
+          basePublicPath: '',
         });
       }).to.not.throwError();
     });
@@ -99,42 +113,42 @@ describe('optimizer/bundle route', () => {
         createBundlesRoute({
           regularBundlesPath: '/bundles',
           dllBundlesPath: '/absolute/path',
-          basePublicPath: 123
+          basePublicPath: 123,
         });
       }).to.throwError(/string/);
       expect(() => {
         createBundlesRoute({
           regularBundlesPath: '/bundles',
           dllBundlesPath: '/absolute/path',
-          basePublicPath: {}
+          basePublicPath: {},
         });
       }).to.throwError(/string/);
       expect(() => {
         createBundlesRoute({
           regularBundlesPath: '/bundles',
           dllBundlesPath: '/absolute/path',
-          basePublicPath: '/a/'
+          basePublicPath: '/a/',
         });
       }).to.throwError(/start and not end with a \//);
       expect(() => {
         createBundlesRoute({
           regularBundlesPath: '/bundles',
           dllBundlesPath: '/absolute/path',
-          basePublicPath: 'a/'
+          basePublicPath: 'a/',
         });
       }).to.throwError(/start and not end with a \//);
       expect(() => {
         createBundlesRoute({
           regularBundlesPath: '/bundles',
           dllBundlesPath: '/absolute/path',
-          basePublicPath: '/a'
+          basePublicPath: '/a',
         });
       }).to.not.throwError();
       expect(() => {
         createBundlesRoute({
           regularBundlesPath: '/bundles',
           dllBundlesPath: '/absolute/path',
-          basePublicPath: ''
+          basePublicPath: '',
         });
       }).to.not.throwError();
     });
@@ -144,7 +158,7 @@ describe('optimizer/bundle route', () => {
     it('responds with exact file data', async () => {
       const server = createServer();
       const response = await server.inject({
-        url: '/bundles/image.png'
+        url: '/bundles/image.png',
       });
 
       expect(response.statusCode).to.be(200);
@@ -159,36 +173,39 @@ describe('optimizer/bundle route', () => {
     it('responds with no content-length and exact file data', async () => {
       const server = createServer();
       const response = await server.inject({
-        url: '/bundles/no_placeholder.js'
+        url: '/bundles/no_placeholder.js',
       });
 
       expect(response.statusCode).to.be(200);
       expect(response.headers).to.not.have.property('content-length');
-      expect(response.headers).to.have.property('content-type', 'application/javascript; charset=utf-8');
-      expect(readFileSync(resolve(outputFixture, 'no_placeholder.js')))
-        .to.eql(response.rawPayload);
+      expect(response.headers).to.have.property(
+        'content-type',
+        'application/javascript; charset=utf-8'
+      );
+      expect(readFileSync(resolve(outputFixture, 'no_placeholder.js'))).to.eql(response.rawPayload);
     });
   });
 
   describe('js file with placeholder', () => {
     it('responds with no content-length and modified file data', async () => {
-      const basePublicPath = `/${chance.word()}`;
+      const basePublicPath = `/${uniqueRandomWord()}`;
       const server = createServer({ basePublicPath });
 
       const response = await server.inject({
-        url: '/bundles/with_placeholder.js'
+        url: '/bundles/with_placeholder.js',
       });
 
       expect(response.statusCode).to.be(200);
       const source = readFileSync(resolve(outputFixture, 'with_placeholder.js'), 'utf8');
       expect(response.headers).to.not.have.property('content-length');
-      expect(response.headers).to.have.property('content-type', 'application/javascript; charset=utf-8');
+      expect(response.headers).to.have.property(
+        'content-type',
+        'application/javascript; charset=utf-8'
+      );
       expect(response.result.indexOf(source)).to.be(-1);
-      expect(response.result).to.be(replaceAll(
-        source,
-        PUBLIC_PATH_PLACEHOLDER,
-        `${basePublicPath}/bundles/`
-      ));
+      expect(response.result).to.be(
+        replaceAll(source, PUBLIC_PATH_PLACEHOLDER, `${basePublicPath}/bundles/`)
+      );
     });
   });
 
@@ -196,24 +213,25 @@ describe('optimizer/bundle route', () => {
     it('responds with no content-length and exact file data', async () => {
       const server = createServer();
       const response = await server.inject({
-        url: '/bundles/no_placeholder.css'
+        url: '/bundles/no_placeholder.css',
       });
 
       expect(response.statusCode).to.be(200);
       expect(response.headers).to.not.have.property('content-length');
       expect(response.headers).to.have.property('content-type', 'text/css; charset=utf-8');
-      expect(readFileSync(resolve(outputFixture, 'no_placeholder.css')))
-        .to.eql(response.rawPayload);
+      expect(readFileSync(resolve(outputFixture, 'no_placeholder.css'))).to.eql(
+        response.rawPayload
+      );
     });
   });
 
   describe('css file with placeholder', () => {
     it('responds with no content-length and modified file data', async () => {
-      const basePublicPath = `/${chance.word()}`;
+      const basePublicPath = `/${uniqueRandomWord()}`;
       const server = createServer({ basePublicPath });
 
       const response = await server.inject({
-        url: '/bundles/with_placeholder.css'
+        url: '/bundles/with_placeholder.css',
       });
 
       expect(response.statusCode).to.be(200);
@@ -221,11 +239,9 @@ describe('optimizer/bundle route', () => {
       expect(response.headers).to.not.have.property('content-length');
       expect(response.headers).to.have.property('content-type', 'text/css; charset=utf-8');
       expect(response.result.indexOf(source)).to.be(-1);
-      expect(response.result).to.be(replaceAll(
-        source,
-        PUBLIC_PATH_PLACEHOLDER,
-        `${basePublicPath}/bundles/`
-      ));
+      expect(response.result).to.be(
+        replaceAll(source, PUBLIC_PATH_PLACEHOLDER, `${basePublicPath}/bundles/`)
+      );
     });
   });
 
@@ -234,14 +250,14 @@ describe('optimizer/bundle route', () => {
       const server = createServer();
 
       const response = await server.inject({
-        url: '/bundles/../outside_output.js'
+        url: '/bundles/../outside_output.js',
       });
 
       expect(response.statusCode).to.be(404);
       expect(response.result).to.eql({
         error: 'Not Found',
         message: 'Not Found',
-        statusCode: 404
+        statusCode: 404,
       });
     });
   });
@@ -251,14 +267,14 @@ describe('optimizer/bundle route', () => {
       const server = createServer();
 
       const response = await server.inject({
-        url: '/bundles/non_existent.js'
+        url: '/bundles/non_existent.js',
       });
 
       expect(response.statusCode).to.be(404);
       expect(response.result).to.eql({
         error: 'Not Found',
         message: 'Not Found',
-        statusCode: 404
+        statusCode: 404,
       });
     });
   });
@@ -266,18 +282,18 @@ describe('optimizer/bundle route', () => {
   describe('missing regularBundlesPath', () => {
     it('responds with 404', async () => {
       const server = createServer({
-        regularBundlesPath: resolve(__dirname, 'fixtures/not_really_output')
+        regularBundlesPath: resolve(__dirname, 'fixtures/not_really_output'),
       });
 
       const response = await server.inject({
-        url: '/bundles/with_placeholder.js'
+        url: '/bundles/with_placeholder.js',
       });
 
       expect(response.statusCode).to.be(404);
       expect(response.result).to.eql({
         error: 'Not Found',
         message: 'Not Found',
-        statusCode: 404
+        statusCode: 404,
       });
     });
   });
@@ -290,7 +306,7 @@ describe('optimizer/bundle route', () => {
 
       sinon.assert.notCalled(createHash);
       const resp1 = await server.inject({
-        url: '/bundles/no_placeholder.js'
+        url: '/bundles/no_placeholder.js',
       });
 
       sinon.assert.calledOnce(createHash);
@@ -298,7 +314,7 @@ describe('optimizer/bundle route', () => {
       expect(resp1.statusCode).to.be(200);
 
       const resp2 = await server.inject({
-        url: '/bundles/no_placeholder.js'
+        url: '/bundles/no_placeholder.js',
       });
 
       sinon.assert.notCalled(createHash);
@@ -306,15 +322,15 @@ describe('optimizer/bundle route', () => {
     });
 
     it('is unique per basePublicPath although content is the same', async () => {
-      const basePublicPath1 = `/${chance.word()}`;
-      const basePublicPath2 = `/${chance.word()}`;
+      const basePublicPath1 = `/${uniqueRandomWord()}`;
+      const basePublicPath2 = `/${uniqueRandomWord()}`;
 
       const [resp1, resp2] = await Promise.all([
         createServer({ basePublicPath: basePublicPath1 }).inject({
-          url: '/bundles/no_placeholder.js'
+          url: '/bundles/no_placeholder.js',
         }),
         createServer({ basePublicPath: basePublicPath2 }).inject({
-          url: '/bundles/no_placeholder.js'
+          url: '/bundles/no_placeholder.js',
         }),
       ]);
 
@@ -333,7 +349,7 @@ describe('optimizer/bundle route', () => {
     it('responds with 304 when etag and last modified are sent back', async () => {
       const server = createServer();
       const resp = await server.inject({
-        url: '/bundles/with_placeholder.js'
+        url: '/bundles/with_placeholder.js',
       });
 
       expect(resp.statusCode).to.be(200);
@@ -342,8 +358,8 @@ describe('optimizer/bundle route', () => {
         url: '/bundles/with_placeholder.js',
         headers: {
           'if-modified-since': resp.headers['last-modified'],
-          'if-none-match': resp.headers.etag
-        }
+          'if-none-match': resp.headers.etag,
+        },
       });
 
       expect(resp2.statusCode).to.be(304);

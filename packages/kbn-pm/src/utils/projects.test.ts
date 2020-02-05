@@ -17,7 +17,10 @@
  * under the License.
  */
 
-import { resolve } from 'path';
+import { mkdir, symlink } from 'fs';
+import { join, resolve } from 'path';
+import del from 'del';
+import { promisify } from 'util';
 
 import { getProjectPaths } from '../config';
 import { Project } from './project';
@@ -30,9 +33,21 @@ import {
   topologicallyBatchProjects,
 } from './projects';
 
-const rootPath = resolve(`${__dirname}/__fixtures__/kibana`);
+const rootPath = resolve(__dirname, '__fixtures__/kibana');
+const rootPlugins = join(rootPath, 'plugins');
 
 describe('#getProjects', () => {
+  beforeAll(async () => {
+    await promisify(mkdir)(rootPlugins);
+
+    await promisify(symlink)(
+      join(__dirname, '__fixtures__/symlinked-plugins/corge'),
+      join(rootPlugins, 'corge')
+    );
+  });
+
+  afterAll(async () => await del(rootPlugins));
+
   test('find all packages in the packages directory', async () => {
     const projects = await getProjects(rootPath, ['packages/*']);
 
@@ -65,10 +80,18 @@ describe('#getProjects', () => {
   });
 
   test('includes additional projects in package.json', async () => {
-    const projectPaths = getProjectPaths(rootPath, {});
+    const projectPaths = getProjectPaths({ rootPath });
     const projects = await getProjects(rootPath, projectPaths);
 
-    const expectedProjects = ['kibana', 'bar', 'foo', 'with-additional-projects', 'quux', 'baz'];
+    const expectedProjects = [
+      'kibana',
+      'bar',
+      'foo',
+      'with-additional-projects',
+      'quux',
+      'baz',
+      'bar',
+    ];
 
     expect([...projects.keys()]).toEqual(expect.arrayContaining(expectedProjects));
     expect(projects.size).toBe(expectedProjects.length);
@@ -77,7 +100,7 @@ describe('#getProjects', () => {
   describe('with exclude/include filters', () => {
     let projectPaths: string[];
     beforeEach(() => {
-      projectPaths = getProjectPaths(rootPath, {});
+      projectPaths = getProjectPaths({ rootPath });
     });
 
     test('excludes projects specified in `exclude` filter', async () => {
@@ -85,7 +108,12 @@ describe('#getProjects', () => {
         exclude: ['foo', 'bar', 'baz'],
       });
 
-      expect([...projects.keys()].sort()).toEqual(['kibana', 'quux', 'with-additional-projects']);
+      expect([...projects.keys()].sort()).toEqual([
+        'corge',
+        'kibana',
+        'quux',
+        'with-additional-projects',
+      ]);
     });
 
     test('ignores unknown projects specified in `exclude` filter', async () => {
@@ -95,6 +123,7 @@ describe('#getProjects', () => {
 
       expect([...projects.keys()].sort()).toEqual([
         'baz',
+        'corge',
         'foo',
         'kibana',
         'quux',
@@ -137,7 +166,7 @@ describe('#getProjects', () => {
 
     test('does not return any project if `exclude` filter is specified for all projects', async () => {
       const projects = await getProjects(rootPath, projectPaths, {
-        exclude: ['kibana', 'bar', 'foo', 'with-additional-projects', 'quux', 'baz'],
+        exclude: ['kibana', 'bar', 'corge', 'foo', 'with-additional-projects', 'quux', 'baz'],
       });
 
       expect(projects.size).toBe(0);
@@ -195,7 +224,7 @@ describe('#topologicallyBatchProjects', () => {
     expect(expectedBatches).toMatchSnapshot();
   });
 
-  describe('batchByWorkspace = true', async () => {
+  describe('batchByWorkspace = true', () => {
     test('batches projects topologically based on their project dependencies and workspaces', async () => {
       const batches = topologicallyBatchProjects(projects, graph, { batchByWorkspace: true });
 

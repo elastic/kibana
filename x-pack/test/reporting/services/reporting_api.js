@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
-import { indexTimestamp } from '../../../plugins/reporting/server/lib/esqueue/helpers/index_timestamp';
+import expect from '@kbn/expect';
+import { indexTimestamp } from '../../../legacy/plugins/reporting/server/lib/esqueue/helpers/index_timestamp';
 
 function removeWhitespace(str) {
   return str.replace(/\s/g, '');
@@ -23,7 +23,6 @@ export function ReportingAPIProvider({ getService }) {
 
       const statusCode = await new Promise(resolve => {
         const intervalId = setInterval(async () => {
-
           const response = await supertest
             .get(downloadReportPath)
             .responseType('blob')
@@ -40,9 +39,11 @@ export function ReportingAPIProvider({ getService }) {
     },
 
     async expectAllJobsToFinishSuccessfully(jobPaths) {
-      await Promise.all(jobPaths.map(async (path) => {
-        await this.waitForJobToFinish(path);
-      }));
+      await Promise.all(
+        jobPaths.map(async path => {
+          await this.waitForJobToFinish(path);
+        })
+      );
     },
 
     async postJob(apiPath) {
@@ -70,9 +71,9 @@ export function ReportingAPIProvider({ getService }) {
         .send({
           actions: [
             {
-              add: { index: indexName, alias: `.reporting-${timestampForIndex}` }
-            }
-          ]
+              add: { index: indexName, alias: `.reporting-${timestampForIndex}` },
+            },
+          ],
         })
         .expect(200);
 
@@ -82,9 +83,9 @@ export function ReportingAPIProvider({ getService }) {
           .send({
             actions: [
               {
-                remove: { index: indexName, alias: `.reporting-${timestampForIndex}` }
-              }
-            ]
+                remove: { index: indexName, alias: `.reporting-${timestampForIndex}` },
+              },
+            ],
           })
           .expect(200);
       };
@@ -92,9 +93,7 @@ export function ReportingAPIProvider({ getService }) {
 
     async deleteAllReportingIndexes() {
       log.debug('ReportingAPI.deleteAllReportingIndexes');
-      await esSupertest
-        .delete('/.reporting*')
-        .expect(200);
+      await esSupertest.delete('/.reporting*').expect(200);
     },
 
     expectRecentPdfAppStats(stats, app, count) {
@@ -130,6 +129,6 @@ export function ReportingAPIProvider({ getService }) {
 
     expectCompletedReportCount(stats, count) {
       expect(this.getCompletedReportCount(stats)).to.be(count);
-    }
+    },
   };
 }

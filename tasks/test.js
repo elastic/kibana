@@ -21,23 +21,22 @@ import _, { keys } from 'lodash';
 
 import { run } from '../utilities/visual_regression';
 
-module.exports = function (grunt) {
+module.exports = function(grunt) {
   grunt.registerTask(
     'test:visualRegression:buildGallery',
     'Compare screenshots and generate diff images.',
-    function () {
+    function() {
       const done = this.async();
       run(done);
     }
   );
 
-  grunt.registerTask('test:mocha', ['checkPlugins', 'run:mocha']);
-  grunt.registerTask('test:server', () => {
-    grunt.log.writeln('`grunt test:server` is deprecated - use `grunt test:mocha`');
-    grunt.task.run(['test:mocha']);
-  });
-
-  grunt.registerTask('test:browser', ['checkPlugins', 'run:browserSCSS', 'run:browserTestServer', 'karma:unit']);
+  grunt.registerTask('test:browser', [
+    'checkPlugins',
+    'run:browserSCSS',
+    'run:browserTestServer',
+    'karma:unit',
+  ]);
 
   grunt.registerTask('test:browser-ci', () => {
     const ciShardTasks = keys(grunt.config.get('karma'))
@@ -53,7 +52,7 @@ module.exports = function (grunt) {
 
   grunt.registerTask('test:quick', [
     'checkPlugins',
-    'test:server',
+    'run:mocha',
     'run:functionalTests',
     'test:jest',
     'test:jest_integration',
@@ -63,6 +62,7 @@ module.exports = function (grunt) {
   ]);
 
   grunt.registerTask('test:dev', ['checkPlugins', 'run:devBrowserTestServer', 'karma:dev']);
+  grunt.registerTask('test:mochaCoverage', ['run:mochaCoverage']);
 
   grunt.registerTask('test', subTask => {
     if (subTask) grunt.fail.fatal(`invalid task "test:${subTask}"`);
@@ -70,12 +70,13 @@ module.exports = function (grunt) {
     grunt.task.run(
       _.compact([
         !grunt.option('quick') && 'run:eslint',
-        !grunt.option('quick') && 'run:tslint',
         !grunt.option('quick') && 'run:sasslint',
+        !grunt.option('quick') && 'run:checkTsProjects',
+        !grunt.option('quick') && 'run:checkCoreApiChanges',
         !grunt.option('quick') && 'run:typeCheck',
         !grunt.option('quick') && 'run:i18nCheck',
         'run:checkFileCasing',
-        'licenses',
+        'run:licenses',
         'test:quick',
       ])
     );
@@ -83,7 +84,7 @@ module.exports = function (grunt) {
 
   grunt.registerTask('quick-test', ['test:quick']); // historical alias
 
-  grunt.registerTask('test:projects', function () {
+  grunt.registerTask('test:projects', function() {
     const done = this.async();
     runProjectsTests().then(done, done);
   });
@@ -91,7 +92,7 @@ module.exports = function (grunt) {
   function runProjectsTests() {
     const serverCmd = {
       cmd: 'yarn',
-      args: ['kbn', 'run', 'test', '--exclude', 'kibana', '--oss', '--skip-kibana-extra'],
+      args: ['kbn', 'run', 'test', '--exclude', 'kibana', '--oss', '--skip-kibana-plugins'],
       opts: { stdio: 'inherit' },
     };
 

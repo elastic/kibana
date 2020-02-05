@@ -18,7 +18,8 @@
  */
 
 /** @internal */
-export interface CoreService<TStartContract = void> {
-  start(...params: any[]): Promise<TStartContract>;
-  stop(): Promise<void>;
+export interface CoreService<TSetup = void, TStart = void> {
+  setup(...params: any[]): TSetup | Promise<TSetup>;
+  start(...params: any[]): TStart | Promise<TStart>;
+  stop(): void | Promise<void>;
 }

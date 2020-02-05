@@ -19,6 +19,7 @@
 
 import { writeFile } from 'fs';
 import os from 'os';
+
 import Boom from 'boom';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import TerserPlugin from 'terser-webpack-plugin';
@@ -26,23 +27,26 @@ import webpack from 'webpack';
 import Stats from 'webpack/lib/Stats';
 import * as threadLoader from 'thread-loader';
 import webpackMerge from 'webpack-merge';
+import WrapperPlugin from 'wrapper-webpack-plugin';
+import * as UiSharedDeps from '@kbn/ui-shared-deps';
+
 import { DynamicDllPlugin } from './dynamic_dll_plugin';
 
-import { defaults } from 'lodash';
-
-import { IS_KIBANA_DISTRIBUTABLE, fromRoot } from '../legacy/utils';
-
+import { IS_KIBANA_DISTRIBUTABLE } from '../legacy/utils';
+import { fromRoot } from '../core/server/utils';
 import { PUBLIC_PATH_PLACEHOLDER } from './public_path_placeholder';
 
 const POSTCSS_CONFIG_PATH = require.resolve('./postcss.config');
 const BABEL_PRESET_PATH = require.resolve('@kbn/babel-preset/webpack_preset');
-const BABEL_EXCLUDE_RE = [
-  /[\/\\](webpackShims|node_modules|bower_components)[\/\\]/,
-];
-const STATS_WARNINGS_FILTER = new RegExp([
-  '(export .* was not found in)',
-  '|(chunk .* \\[mini-css-extract-plugin\\]\\\nConflicting order between:)'
-].join(''));
+const ISTANBUL_PRESET_PATH = require.resolve('@kbn/babel-preset/istanbul_preset');
+const BABEL_EXCLUDE_RE = [/[\/\\](webpackShims|node_modules|bower_components)[\/\\]/];
+const STATS_WARNINGS_FILTER = new RegExp(
+  [
+    '(export .* was not found in)',
+    '|(chunk .* \\[mini-css-extract-plugin\\]\\\nConflicting order between:)',
+  ].join('')
+);
+const IS_CODE_COVERAGE = !!process.env.CODE_COVERAGE;
 
 function recursiveIssuer(m) {
   if (m.issuer) {
@@ -58,7 +62,9 @@ export default class BaseOptimizer {
   constructor(opts) {
     this.logWithMetadata = opts.logWithMetadata || (() => null);
     this.uiBundles = opts.uiBundles;
+    this.newPlatformPluginInfo = opts.newPlatformPluginInfo;
     this.profile = opts.profile || false;
+    this.workers = opts.workers;
 
     switch (opts.sourceMaps) {
       case true:
@@ -110,21 +116,14 @@ export default class BaseOptimizer {
 
       const path = this.uiBundles.resolvePath('stats.json');
       const content = JSON.stringify(stats.toJson());
-      writeFile(path, content, function (err) {
+      writeFile(path, content, function(err) {
         if (err) throw err;
       });
     });
   }
 
   warmupThreadLoaderPool() {
-    const baseModules = [
-      'babel-loader',
-      BABEL_PRESET_PATH
-    ];
-
-    const nonDistributableOnlyModules = !IS_KIBANA_DISTRIBUTABLE
-      ? ['ts-loader']
-      : [];
+    const baseModules = ['babel-loader', BABEL_PRESET_PATH];
 
     threadLoader.warmup(
       // pool options, like passed to loader options
@@ -133,30 +132,31 @@ export default class BaseOptimizer {
       [
         // modules to load on the pool
         ...baseModules,
-        ...nonDistributableOnlyModules
       ]
     );
   }
 
   getThreadPoolCpuCount() {
+    if (this.workers) {
+      return this.workers;
+    }
+
     const cpus = os.cpus();
     if (!cpus) {
       // sometimes this call returns undefined so we fall back to 1: https://github.com/nodejs/node/issues/19022
       return 1;
     }
 
-    return Math.max(
-      1,
-      Math.min(
-        cpus.length - 1,
-        7
-      )
-    );
+    return Math.max(1, Math.min(cpus.length - 1, 7));
   }
 
   getThreadLoaderPoolConfig() {
     // Calculate the node options from the NODE_OPTIONS env var
-    const parsedNodeOptions = process.env.NODE_OPTIONS ? process.env.NODE_OPTIONS.split(/\s/) : [];
+    const parsedNodeOptions = process.env.NODE_OPTIONS
+      ? // thread-loader could not receive empty string as options
+        // or it would break that's why we need to filter here
+        process.env.NODE_OPTIONS.split(/\s/).filter(opt => !!opt)
+      : [];
 
     return {
       name: 'optimizer-thread-loader-main-pool',
@@ -169,15 +169,13 @@ export default class BaseOptimizer {
       // are used to, into NODE_OPTIONS, it won't affect the workers.
       workerNodeArgs: parsedNodeOptions,
       poolParallelJobs: this.getThreadPoolCpuCount() * 20,
-      poolTimeout: this.uiBundles.isDevMode() ? Infinity : 2000
+      poolTimeout: this.uiBundles.isDevMode() ? Infinity : 2000,
     };
   }
 
   getConfig() {
     function getStyleLoaderExtractor() {
-      return [
-        MiniCssExtractPlugin.loader
-      ];
+      return [MiniCssExtractPlugin.loader];
     }
 
     function getStyleLoaders(preProcessors = [], postProcessors = []) {
@@ -207,22 +205,20 @@ export default class BaseOptimizer {
     /**
      * Adds a cache loader if we're running in dev mode. The reason we're not adding
      * the cache-loader when running in production mode is that it creates cache
-     * files in optimize/.cache that are not necessary for distributable versions
+     * files in data/optimize/.cache that are not necessary for distributable versions
      * of Kibana and just make compressing and extracting it more difficult.
      */
     const maybeAddCacheLoader = (cacheName, loaders) => {
-      if (IS_KIBANA_DISTRIBUTABLE) {
-        return loaders;
-      }
-
       return [
         {
           loader: 'cache-loader',
           options: {
-            cacheDirectory: this.uiBundles.getCacheDirectory(cacheName)
-          }
+            cacheContext: fromRoot('.'),
+            cacheDirectory: this.uiBundles.getCacheDirectory(cacheName),
+            readOnly: process.env.KBN_CACHE_LOADER_WRITABLE ? false : IS_KIBANA_DISTRIBUTABLE,
+          },
         },
-        ...loaders
+        ...loaders,
       ];
     };
 
@@ -230,7 +226,7 @@ export default class BaseOptimizer {
      * Creates the selection rules for a loader that will only pass for
      * source files that are eligible for automatic transpilation.
      */
-    const createSourceFileResourceSelector = (test) => {
+    const createSourceFileResourceSelector = test => {
       return [
         {
           test,
@@ -240,7 +236,7 @@ export default class BaseOptimizer {
           test,
           include: /[\/\\]node_modules[\/\\]x-pack[\/\\]/,
           exclude: /[\/\\]node_modules[\/\\]x-pack[\/\\](.+?[\/\\])*node_modules[\/\\]/,
-        }
+        },
       ];
     };
 
@@ -251,24 +247,27 @@ export default class BaseOptimizer {
       cache: true,
       entry: {
         ...this.uiBundles.toWebpackEntries(),
-        light_theme: [
-          require.resolve('../legacy/ui/public/styles/bootstrap_light.less'),
-        ],
-        dark_theme: [
-          require.resolve('../legacy/ui/public/styles/bootstrap_dark.less'),
-        ],
+        ...this._getDiscoveredPluginEntryPoints(),
+        light_theme: [require.resolve('../legacy/ui/public/styles/bootstrap_light.less')],
+        dark_theme: [require.resolve('../legacy/ui/public/styles/bootstrap_dark.less')],
       },
 
       devtool: this.sourceMaps,
       profile: this.profile || false,
 
       output: {
-        futureEmitAssets: true,  // TODO: remove on webpack 5
+        futureEmitAssets: true, // TODO: remove on webpack 5
         path: this.uiBundles.getWorkingDir(),
         filename: '[name].bundle.js',
         sourceMapFilename: '[file].map',
         publicPath: PUBLIC_PATH_PLACEHOLDER,
-        devtoolModuleFilenameTemplate: '[absolute-resource-path]'
+        devtoolModuleFilenameTemplate: '[absolute-resource-path]',
+
+        // When the entry point is loaded, assign it's exported `plugin`
+        // value to a key on the global `__kbnBundles__` object.
+        // NOTE: Only actually used by new platform plugins
+        library: ['__kbnBundles__', '[name]'],
+        libraryExport: 'plugin',
       },
 
       optimization: {
@@ -276,32 +275,33 @@ export default class BaseOptimizer {
           cacheGroups: {
             commons: {
               name: 'commons',
-              chunks: chunk => chunk.canBeInitial() && chunk.name !== 'light_theme' && chunk.name !== 'dark_theme',
+              chunks: chunk =>
+                chunk.canBeInitial() && chunk.name !== 'light_theme' && chunk.name !== 'dark_theme',
               minChunks: 2,
-              reuseExistingChunk: true
+              reuseExistingChunk: true,
             },
             light_theme: {
               name: 'light_theme',
               test: m => m.constructor.name === 'CssModule' && recursiveIssuer(m) === 'light_theme',
               chunks: 'all',
-              enforce: true
+              enforce: true,
             },
             dark_theme: {
               name: 'dark_theme',
               test: m => m.constructor.name === 'CssModule' && recursiveIssuer(m) === 'dark_theme',
               chunks: 'all',
-              enforce: true
-            }
-          }
+              enforce: true,
+            },
+          },
         },
-        noEmitOnErrors: true
+        noEmitOnErrors: true,
       },
 
       plugins: [
         new DynamicDllPlugin({
           uiBundles: this.uiBundles,
           threadLoaderPoolConfig: this.getThreadLoaderPoolConfig(),
-          logWithMetadata: this.logWithMetadata
+          logWithMetadata: this.logWithMetadata,
         }),
 
         new MiniCssExtractPlugin({
@@ -310,7 +310,7 @@ export default class BaseOptimizer {
 
         // replace imports for `uiExports/*` modules with a synthetic module
         // created by create_ui_exports_module.js
-        new webpack.NormalModuleReplacementPlugin(/^uiExports\//, (resource) => {
+        new webpack.NormalModuleReplacementPlugin(/^uiExports\//, resource => {
           // the map of uiExport types to module ids
           const extensions = this.uiBundles.getAppExtensions();
 
@@ -328,12 +328,11 @@ export default class BaseOptimizer {
             '?',
             // this JSON is parsed by create_ui_exports_module and determines
             // what require() calls it will execute within the bundle
-            JSON.stringify({ type, modules: extensions[type] || [] })
+            JSON.stringify({ type, modules: extensions[type] || [] }),
           ].join('');
         }),
 
-        ...this.uiBundles.getWebpackPluginProviders()
-          .map(provider => provider(webpack)),
+        ...this.uiBundles.getWebpackPluginProviders().map(provider => provider(webpack)),
       ],
 
       module: {
@@ -342,56 +341,53 @@ export default class BaseOptimizer {
             test: /\.less$/,
             use: [
               ...getStyleLoaderExtractor(),
-              ...getStyleLoaders(['less-loader'], maybeAddCacheLoader('less', []))
+              ...getStyleLoaders(['less-loader'], maybeAddCacheLoader('less', [])),
             ],
           },
           {
             test: /\.css$/,
             use: [
               ...getStyleLoaderExtractor(),
-              ...getStyleLoaders([], maybeAddCacheLoader('css', []))
+              ...getStyleLoaders([], maybeAddCacheLoader('css', [])),
             ],
           },
           {
             test: /\.(html|tmpl)$/,
-            loader: 'raw-loader'
+            loader: 'raw-loader',
           },
           {
-            test: /\.(png|jpg|gif|jpeg)$/,
-            loader: ['url-loader'],
+            test: /\.(woff|woff2|ttf|eot|svg|ico|png|jpg|gif|jpeg)(\?|$)/,
+            loader: 'url-loader',
+            options: {
+              limit: 8192,
+            },
           },
           {
-            test: /\.(woff|woff2|ttf|eot|svg|ico)(\?|$)/,
-            loader: 'file-loader'
-          },
-          {
-            resource: createSourceFileResourceSelector(/\.js$/),
+            resource: createSourceFileResourceSelector(/\.(js|tsx?)$/),
             use: maybeAddCacheLoader('babel', [
               {
                 loader: 'thread-loader',
-                options: this.getThreadLoaderPoolConfig()
+                options: this.getThreadLoaderPoolConfig(),
               },
               {
                 loader: 'babel-loader',
                 options: {
                   babelrc: false,
-                  presets: [
-                    BABEL_PRESET_PATH,
-                  ],
+                  presets: this.getPresets(),
                 },
-              }
+              },
             ]),
           },
           ...this.uiBundles.getPostLoaders().map(loader => ({
             enforce: 'post',
-            ...loader
+            ...loader,
           })),
         ],
         noParse: this.uiBundles.getWebpackNoParseRules(),
       },
 
       resolve: {
-        extensions: ['.js', '.json'],
+        extensions: ['.js', '.ts', '.tsx', '.json'],
         mainFields: ['browser', 'browserify', 'main'],
         modules: [
           'webpackShims',
@@ -400,18 +396,19 @@ export default class BaseOptimizer {
           'node_modules',
           fromRoot('node_modules'),
         ],
-        alias: {
-          ...this.uiBundles.getAliases(),
-          'dll/set_csp_nonce$': require.resolve('./dynamic_dll_plugin/public/set_csp_nonce')
-        }
+        alias: this.uiBundles.getAliases(),
       },
 
       performance: {
         // NOTE: we are disabling this as those hints
         // are more tailored for the final bundles result
         // and not for the webpack compilations performance itself
-        hints: false
-      }
+        hints: false,
+      },
+
+      externals: {
+        ...UiSharedDeps.externals,
+      },
     };
 
     // when running from the distributable define an environment variable we can use
@@ -420,62 +417,10 @@ export default class BaseOptimizer {
       plugins: [
         new webpack.DefinePlugin({
           'process.env': {
-            'IS_KIBANA_DISTRIBUTABLE': `"true"`
-          }
+            IS_KIBANA_DISTRIBUTABLE: `"true"`,
+          },
         }),
-      ]
-    };
-
-    // when running from source transpile TypeScript automatically
-    const getSourceConfig = () => {
-      // dev/typescript is deleted from the distributable, so only require it if we actually need the source config
-      const { Project } = require('../dev/typescript');
-      const browserProject = new Project(fromRoot('tsconfig.browser.json'));
-
-      return {
-        module: {
-          rules: [
-            {
-              resource: createSourceFileResourceSelector(/\.tsx?$/),
-              use: maybeAddCacheLoader('typescript', [
-                {
-                  loader: 'thread-loader',
-                  options: this.getThreadLoaderPoolConfig()
-                },
-                {
-                  loader: 'ts-loader',
-                  options: {
-                    happyPackMode: true,
-                    transpileOnly: true,
-                    experimentalWatchApi: true,
-                    onlyCompileBundledFiles: true,
-                    configFile: fromRoot('tsconfig.json'),
-                    compilerOptions: {
-                      ...browserProject.config.compilerOptions,
-                      sourceMap: Boolean(this.sourceMaps),
-                    }
-                  }
-                }
-              ]),
-            }
-          ]
-        },
-
-        resolve: {
-          extensions: ['.ts', '.tsx'],
-        },
-      };
-    };
-
-    // We need to add react-addons (and a few other bits) for enzyme to work.
-    // https://github.com/airbnb/enzyme/blob/master/docs/guides/webpack.md
-    const supportEnzymeConfig = {
-      externals: {
-        'mocha': 'mocha',
-        'react/lib/ExecutionEnvironment': true,
-        'react/addons': true,
-        'react/lib/ReactContext': true,
-      }
+      ],
     };
 
     const watchingConfig = {
@@ -487,8 +432,24 @@ export default class BaseOptimizer {
           // Since we can't reliably update these files anyway, we can
           // just ignore them in the watcher and prevent the extra compilation
           /bundles[\/\\].+\.entry\.js/,
-        ])
-      ]
+        ]),
+      ],
+    };
+
+    const coverageConfig = {
+      plugins: [
+        new WrapperPlugin({
+          test: /commons\.bundle\.js$/, // only wrap output of bundle files with '.js' extension
+          header: `
+            window.flushCoverageToLog = function () {
+              if (window.__coverage__) {
+                console.log('coveragejson:' + btoa(JSON.stringify(window.__coverage__)));
+              }
+            };
+            window.addEventListener('beforeunload', window.flushCoverageToLog);
+          `,
+        }),
+      ],
     };
 
     // in production we set the process.env.NODE_ENV and run
@@ -498,25 +459,26 @@ export default class BaseOptimizer {
       optimization: {
         minimizer: [
           new TerserPlugin({
-            parallel: true,
+            parallel: this.getThreadLoaderPoolConfig().workers,
             sourceMap: false,
+            cache: false,
+            extractComments: false,
             terserOptions: {
               compress: false,
-              mangle: false
-            }
+              mangle: false,
+            },
           }),
-        ]
-      }
+        ],
+      },
     };
 
-    return webpackMerge(
-      commonConfig,
-      IS_KIBANA_DISTRIBUTABLE
-        ? isDistributableConfig
-        : getSourceConfig(),
-      this.uiBundles.isDevMode()
-        ? webpackMerge(watchingConfig, supportEnzymeConfig)
-        : productionConfig
+    return this.uiBundles.getExtendedConfig(
+      webpackMerge(
+        IS_CODE_COVERAGE ? coverageConfig : {},
+        commonConfig,
+        IS_KIBANA_DISTRIBUTABLE ? isDistributableConfig : {},
+        this.uiBundles.isDevMode() ? watchingConfig : productionConfig
+      )
     );
   }
 
@@ -546,17 +508,34 @@ export default class BaseOptimizer {
   }
 
   failedStatsToError(stats) {
-    const details = stats.toString(defaults(
-      { colors: true, warningsFilter: STATS_WARNINGS_FILTER },
-      Stats.presetToOptions('minimal')
-    ));
+    const details = stats.toString({
+      ...Stats.presetToOptions('minimal'),
+      colors: true,
+      warningsFilter: STATS_WARNINGS_FILTER,
+    });
 
     return Boom.internal(
       `Optimizations failure.\n${details.split('\n').join('\n    ')}\n`,
-      stats.toJson(defaults({
+      stats.toJson({
         warningsFilter: STATS_WARNINGS_FILTER,
-        ...Stats.presetToOptions('detailed')
-      }))
+        ...Stats.presetToOptions('detailed'),
+        maxModules: 1000,
+      })
     );
+  }
+
+  _getDiscoveredPluginEntryPoints() {
+    // New platform plugin entry points
+    return [...this.newPlatformPluginInfo.entries()].reduce(
+      (entryPoints, [pluginId, pluginInfo]) => {
+        entryPoints[`plugin/${pluginId}`] = pluginInfo.entryPointPath;
+        return entryPoints;
+      },
+      {}
+    );
+  }
+
+  getPresets() {
+    return IS_CODE_COVERAGE ? [ISTANBUL_PRESET_PATH, BABEL_PRESET_PATH] : [BABEL_PRESET_PATH];
   }
 }

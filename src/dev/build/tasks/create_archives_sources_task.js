@@ -23,29 +23,28 @@ import { getNodeDownloadInfo } from './nodejs';
 export const CreateArchivesSourcesTask = {
   description: 'Creating platform-specific archive source directories',
   async run(config, log, build) {
-    await Promise.all(config.getTargetPlatforms().map(async platform => {
-      // copy all files from generic build source directory into platform-specific build directory
-      await scanCopy({
-        source: build.resolvePath(),
-        destination: build.resolvePathForPlatform(platform),
-        filter: record => !(record.isDirectory && record.name === 'node_modules')
-      });
+    await Promise.all(
+      config.getTargetPlatforms().map(async platform => {
+        // copy all files from generic build source directory into platform-specific build directory
+        await scanCopy({
+          source: build.resolvePath(),
+          destination: build.resolvePathForPlatform(platform),
+        });
 
-      await scanCopy({
-        source: build.resolvePath('node_modules'),
-        destination: build.resolvePathForPlatform(platform, 'node_modules'),
-        time: new Date()
-      });
+        log.debug(
+          'Generic build source copied into',
+          platform.getName(),
+          'specific build directory'
+        );
 
-      log.debug('Generic build source copied into', platform.getName(), 'specific build directory');
+        // copy node.js install
+        await scanCopy({
+          source: getNodeDownloadInfo(config, platform).extractDir,
+          destination: build.resolvePathForPlatform(platform, 'node'),
+        });
 
-      // copy node.js install
-      await scanCopy({
-        source: getNodeDownloadInfo(config, platform).extractDir,
-        destination: build.resolvePathForPlatform(platform, 'node'),
-      });
-
-      log.debug('Node.js copied into', platform.getName(), 'specific build directory');
-    }));
-  }
+        log.debug('Node.js copied into', platform.getName(), 'specific build directory');
+      })
+    );
+  },
 };

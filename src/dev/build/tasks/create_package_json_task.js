@@ -44,19 +44,16 @@ export const CreatePackageJsonTask = {
       engines: {
         node: pkg.engines.node,
       },
+      resolutions: pkg.resolutions,
       workspaces: pkg.workspaces,
-      dependencies: pkg.dependencies
+      dependencies: pkg.dependencies,
     };
 
     if (build.isOss()) {
-      delete newPkg.dependencies['x-pack'];
       newPkg.workspaces.packages = newPkg.workspaces.packages.filter(p => !p.startsWith('x-pack'));
     }
 
-    await write(
-      build.resolvePath('package.json'),
-      JSON.stringify(newPkg, null, '  ')
-    );
+    await write(build.resolvePath('package.json'), JSON.stringify(newPkg, null, '  '));
   },
 };
 
@@ -69,11 +66,9 @@ export const RemovePackageJsonDepsTask = {
 
     delete pkg.dependencies;
     delete pkg.private;
+    delete pkg.resolutions;
 
-    await write(
-      build.resolvePath('package.json'),
-      JSON.stringify(pkg, null, '  ')
-    );
+    await write(build.resolvePath('package.json'), JSON.stringify(pkg, null, '  '));
   },
 };
 
@@ -88,9 +83,6 @@ export const RemoveWorkspacesTask = {
 
     delete pkg.workspaces;
 
-    await write(
-      build.resolvePath('package.json'),
-      JSON.stringify(pkg, null, '  ')
-    );
-  }
+    await write(build.resolvePath('package.json'), JSON.stringify(pkg, null, '  '));
+  },
 };

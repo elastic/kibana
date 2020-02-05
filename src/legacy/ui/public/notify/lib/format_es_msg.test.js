@@ -18,7 +18,7 @@
  */
 
 import { formatESMsg } from './format_es_msg';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 describe('formatESMsg', () => {
   test('should return undefined if passed a basic error', () => {
@@ -43,10 +43,10 @@ describe('formatESMsg', () => {
       error: {
         root_cause: [
           {
-            reason: 'I am the detailed message'
-          }
-        ]
-      }
+            reason: 'I am the detailed message',
+          },
+        ],
+      },
     };
 
     const actual = formatESMsg(err);
@@ -60,13 +60,13 @@ describe('formatESMsg', () => {
       error: {
         root_cause: [
           {
-            reason: 'I am the detailed message 1'
+            reason: 'I am the detailed message 1',
           },
           {
-            reason: 'I am the detailed message 2'
-          }
-        ]
-      }
+            reason: 'I am the detailed message 2',
+          },
+        ],
+      },
     };
 
     const actual = formatESMsg(err);

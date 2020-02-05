@@ -16,111 +16,40 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import * as Rx from 'rxjs';
 
-function mockClass<T>(
-  module: string,
-  Class: { new (...args: any[]): T },
-  setup: (instance: any, args: any[]) => void
-) {
-  const MockClass = jest.fn<T>(function(this: any, ...args: any[]) {
-    setup(this, args);
-  });
-
-  // define the mock name which is used in some snapshots
-  MockClass.mockName(`Mock${Class.name}`);
-
-  // define the class name for the MockClass which is used in other snapshots
-  Object.defineProperty(MockClass, 'name', {
-    value: `Mock${Class.name}`,
-  });
-
-  jest.mock(module, () => ({
-    [Class.name]: MockClass,
-  }));
-
-  return MockClass;
-}
-
-// Mock the UiSettingsApi class
-import { UiSettingsApi } from './ui_settings_api';
-const MockUiSettingsApi = mockClass('./ui_settings_api', UiSettingsApi, inst => {
-  inst.stop = jest.fn();
-  inst.getLoadingCount$ = jest.fn().mockReturnValue({
-    loadingCountObservable: true,
-  });
-});
-
-// Mock the UiSettingsClient class
-import { UiSettingsClient } from './ui_settings_client';
-const MockUiSettingsClient = mockClass('./ui_settings_client', UiSettingsClient, inst => {
-  inst.stop = jest.fn();
-});
-
-// Load the service
+import { httpServiceMock } from '../http/http_service.mock';
+import { injectedMetadataServiceMock } from '../injected_metadata/injected_metadata_service.mock';
 import { UiSettingsService } from './ui_settings_service';
 
-const httpStartContract = {
-  addLoadingCount: jest.fn(),
+const httpSetup = httpServiceMock.createSetupContract();
+
+const defaultDeps = {
+  http: httpSetup,
+  injectedMetadata: injectedMetadataServiceMock.createSetupContract(),
 };
-
-const defaultDeps: any = {
-  notifications: {
-    notificationsStartContract: true,
-  },
-  http: httpStartContract,
-  injectedMetadata: {
-    injectedMetadataStartContract: true,
-    getKibanaVersion: jest.fn().mockReturnValue('kibanaVersion'),
-    getLegacyMetadata: jest.fn().mockReturnValue({
-      uiSettings: {
-        defaults: { legacyInjectedUiSettingDefaults: true },
-        user: { legacyInjectedUiSettingUserValues: true },
-      },
-    }),
-  },
-  basePath: {
-    basePathStartContract: true,
-  },
-};
-
-afterEach(() => {
-  jest.clearAllMocks();
-});
-
-describe('#start', () => {
-  it('returns an instance of UiSettingsClient', () => {
-    const start = new UiSettingsService().start(defaultDeps);
-    expect(start).toBeInstanceOf(MockUiSettingsClient);
-  });
-
-  it('constructs UiSettingsClient and UiSettingsApi', () => {
-    new UiSettingsService().start(defaultDeps);
-
-    expect(MockUiSettingsApi).toMatchSnapshot('UiSettingsApi args');
-    expect(MockUiSettingsClient).toMatchSnapshot('UiSettingsClient args');
-  });
-
-  it('passes the uiSettings loading count to the loading count api', () => {
-    new UiSettingsService().start(defaultDeps);
-
-    expect(httpStartContract.addLoadingCount).toMatchSnapshot('http.addLoadingCount calls');
-  });
-});
 
 describe('#stop', () => {
-  it('runs fine if service never started', () => {
+  it('runs fine if service never set up', () => {
     const service = new UiSettingsService();
     expect(() => service.stop()).not.toThrowError();
   });
 
-  it('stops the uiSettingsClient and uiSettingsApi', () => {
+  it('stops the uiSettingsClient and uiSettingsApi', async () => {
     const service = new UiSettingsService();
-    const client = service.start(defaultDeps);
-    const [[{ api }]] = MockUiSettingsClient.mock.calls;
-    jest.spyOn(client, 'stop');
-    jest.spyOn(api, 'stop');
+    let loadingCount$: Rx.Observable<unknown>;
+    defaultDeps.http.addLoadingCountSource.mockImplementation(obs$ => (loadingCount$ = obs$));
+    const client = service.setup(defaultDeps);
+
     service.stop();
-    expect(api.stop).toHaveBeenCalledTimes(1);
-    expect(client.stop).toHaveBeenCalledTimes(1);
+
+    await expect(
+      Rx.combineLatest(
+        client.getUpdate$(),
+        client.getSaved$(),
+        client.getUpdateErrors$(),
+        loadingCount$!
+      ).toPromise()
+    ).resolves.toBe(undefined);
   });
 });

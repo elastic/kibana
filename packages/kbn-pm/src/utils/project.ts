@@ -18,7 +18,8 @@
  */
 
 import chalk from 'chalk';
-import { relative, resolve as resolvePath } from 'path';
+import fs from 'fs';
+import Path from 'path';
 import { inspect } from 'util';
 
 import { CliError } from './errors';
@@ -30,11 +31,17 @@ import {
   isLinkDependency,
   readPackageJson,
 } from './package_json';
-import { installInDir, runScriptInPackage, runScriptInPackageStreaming } from './scripts';
+import {
+  installInDir,
+  runScriptInPackage,
+  runScriptInPackageStreaming,
+  yarnWorkspacesInfo,
+} from './scripts';
 
 interface BuildConfig {
   skip?: boolean;
   intermediateBuildDirectory?: string;
+  oss?: boolean;
 }
 
 interface CleanConfig {
@@ -47,15 +54,27 @@ export class Project {
     return new Project(pkgJson, path);
   }
 
+  /** parsed package.json */
   public readonly json: IPackageJson;
+  /** absolute path to the package.json file in the project */
   public readonly packageJsonLocation: string;
+  /** absolute path to the node_modules in the project (might not actually exist) */
   public readonly nodeModulesLocation: string;
+  /** absolute path to the target directory in the project (might not actually exist) */
   public readonly targetLocation: string;
+  /** absolute path to the directory containing the project */
   public readonly path: string;
+  /** the version of the project */
+  public readonly version: string;
+  /** merged set of dependencies of the project, [name => version range] */
   public readonly allDependencies: IPackageDependencies;
+  /** regular dependencies of the project, [name => version range] */
   public readonly productionDependencies: IPackageDependencies;
+  /** development dependencies of the project, [name => version range] */
   public readonly devDependencies: IPackageDependencies;
+  /** scripts defined in the package.json file for the project [name => body] */
   public readonly scripts: IPackageScripts;
+
   public isWorkspaceRoot = false;
   public isWorkspaceProject = false;
 
@@ -63,10 +82,11 @@ export class Project {
     this.json = Object.freeze(packageJson);
     this.path = projectPath;
 
-    this.packageJsonLocation = resolvePath(this.path, 'package.json');
-    this.nodeModulesLocation = resolvePath(this.path, 'node_modules');
-    this.targetLocation = resolvePath(this.path, 'target');
+    this.packageJsonLocation = Path.resolve(this.path, 'package.json');
+    this.nodeModulesLocation = Path.resolve(this.path, 'node_modules');
+    this.targetLocation = Path.resolve(this.path, 'target');
 
+    this.version = this.json.version;
     this.productionDependencies = this.json.dependencies || {};
     this.devDependencies = this.json.devDependencies || {};
     this.allDependencies = {
@@ -78,7 +98,7 @@ export class Project {
     this.scripts = this.json.scripts || {};
   }
 
-  get name(): string {
+  public get name(): string {
     return this.json.name;
   }
 
@@ -89,7 +109,7 @@ export class Project {
     if (dependentProjectIsInWorkspace) {
       expectedVersionInPackageJson = project.json.version;
     } else {
-      const relativePathToProject = normalizePath(relative(this.path, project.path));
+      const relativePathToProject = normalizePath(Path.relative(this.path, project.path));
       expectedVersionInPackageJson = `link:${relativePathToProject}`;
     }
 
@@ -108,9 +128,7 @@ export class Project {
     }
 
     throw new CliError(
-      `[${this.name}] depends on [${
-        project.name
-      }] ${problemMsg}. Update its package.json to the expected value below.`,
+      `[${this.name}] depends on [${project.name}] ${problemMsg}. Update its package.json to the expected value below.`,
       {
         actual: `"${project.name}": "${versionInPackageJson}"`,
         expected: `"${project.name}": "${expectedVersionInPackageJson}"`,
@@ -129,7 +147,7 @@ export class Project {
    * instead of everything located in the project directory.
    */
   public getIntermediateBuildDirectory() {
-    return resolvePath(this.path, this.getBuildConfig().intermediateBuildDirectory || '.');
+    return Path.resolve(this.path, this.getBuildConfig().intermediateBuildDirectory || '.');
   }
 
   public getCleanConfig(): CleanConfig {
@@ -149,14 +167,14 @@ export class Project {
 
     if (typeof raw === 'string') {
       return {
-        [this.name]: resolvePath(this.path, raw),
+        [this.name]: Path.resolve(this.path, raw),
       };
     }
 
     if (typeof raw === 'object') {
       const binsConfig: { [k: string]: string } = {};
       for (const binName of Object.keys(raw)) {
-        binsConfig[binName] = resolvePath(this.path, raw[binName]);
+        binsConfig[binName] = Path.resolve(this.path, raw[binName]);
       }
       return binsConfig;
     }
@@ -190,7 +208,41 @@ export class Project {
 
   public async installDependencies({ extraArgs }: { extraArgs: string[] }) {
     log.write(chalk.bold(`\n\nInstalling dependencies in [${chalk.green(this.name)}]:\n`));
-    return installInDir(this.path, extraArgs);
+    await installInDir(this.path, extraArgs);
+    await this.removeExtraneousNodeModules();
+  }
+
+  /**
+   * Yarn workspaces symlinks workspace projects to the root node_modules, even
+   * when there is no depenency on the project. This results in unnecicary, and
+   * often duplicated code in the build archives.
+   */
+  public async removeExtraneousNodeModules() {
+    // this is only relevant for the root workspace
+    if (!this.isWorkspaceRoot) {
+      return;
+    }
+
+    const workspacesInfo = await yarnWorkspacesInfo(this.path);
+    const unusedWorkspaces = new Set(Object.keys(workspacesInfo));
+
+    // check for any cross-project dependency
+    for (const name of Object.keys(workspacesInfo)) {
+      const workspace = workspacesInfo[name];
+      workspace.workspaceDependencies.forEach(w => unusedWorkspaces.delete(w));
+    }
+
+    unusedWorkspaces.forEach(name => {
+      const { dependencies, devDependencies } = this.json;
+      const nodeModulesPath = Path.resolve(this.nodeModulesLocation, name);
+      const isDependency = dependencies && dependencies.hasOwnProperty(name);
+      const isDevDependency = devDependencies && devDependencies.hasOwnProperty(name);
+
+      if (!isDependency && !isDevDependency && fs.existsSync(nodeModulesPath)) {
+        log.write(`No dependency on ${name}, removing link in node_modules`);
+        fs.unlinkSync(nodeModulesPath);
+      }
+    });
   }
 }
 

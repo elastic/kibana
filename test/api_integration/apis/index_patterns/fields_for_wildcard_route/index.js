@@ -17,9 +17,10 @@
  * under the License.
  */
 
-export default function ({ loadTestFile }) {
+export default function({ loadTestFile }) {
   describe('index_patterns/_fields_for_wildcard route', () => {
     loadTestFile(require.resolve('./params'));
     loadTestFile(require.resolve('./conflicts'));
+    loadTestFile(require.resolve('./response'));
   });
 }

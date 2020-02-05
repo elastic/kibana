@@ -1,0 +1,55 @@
+<paginate
+  ng-if="sortedRows.length"
+  list="sortedRows"
+  per-page-prop="perPage"
+  class="kbnAggTable">
+  <div class="kbnAggTable__paginated">
+    <table class="table table-condensed">
+      <thead data-test-subj="paginated-table-header">
+        <tr>
+          <th
+            scope="col"
+            ng-repeat="col in columns"
+            ng-click="paginatedTable.sortColumn($index)"
+            kbn-accessible-click
+            tabindex="0"
+            class="{{ col.class }}">
+            <span ng-bind="::col.title"></span>
+
+            <icon-tip
+              ng-if="col.info"
+              content="'{{ col.info }}'"
+            ></icon-tip>
+
+            <i
+              ng-if="col.sortable !== false"
+              class="fa"
+              ng-class="{
+                'fa-sort-asc': paginatedTable.sort.columnIndex === $index && paginatedTable.sort.direction === 'asc',
+                'fa-sort-desc': paginatedTable.sort.columnIndex === $index && paginatedTable.sort.direction === 'desc',
+                'fa-sort': paginatedTable.sort.columnIndex !== $index || paginatedTable.sort.direction === null
+              }">
+            </i>
+          </th>
+        </tr>
+      </thead>
+      <tbody
+        data-test-subj="paginated-table-body"
+        kbn-rows="page"
+        kbn-rows-min="page.length"
+      >
+      </tbody>
+      <tfoot ng-if="showTotal">
+        <tr>
+          <th scope="col" ng-repeat="col in columns" class="numeric-value">
+            {{ col.formattedTotal }}
+          </th>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+
+  <!-- auto-inserted by the paginate directive... -->
+  <!-- <paginate-controls></paginate-controls> -->
+  <div class="pagination-container" ng-transclude></div>
+</paginate>

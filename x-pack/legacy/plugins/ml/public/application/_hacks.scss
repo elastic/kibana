@@ -1,0 +1,60 @@
+.tab-datavisualizer_index_select,
+.tab-timeseriesexplorer,
+.tab-explorer, {
+  // Make all page background white until More of the pages use EuiPage to wrap in panel-like components
+  background-color: $euiColorEmptyShade;
+}
+
+// ML specific bootstrap hacks
+.button-wrapper {
+  display: inline;
+}
+
+.button-wrapper.disabled .kuiButton[disabled] {
+  pointer-events: none;
+}
+
+.button-wrapper.disabled {
+  cursor: not-allowed;
+}
+
+// ML bootstrap-select hacks that sit on top of Kibana hacks that often fight with KUI
+// Should go away when EUI is fully adopted
+.ui-select-match {
+  .btn-default[disabled],
+  .btn-default[disabled]:hover,
+  .btn-default[disabled]:focus {
+    background-color: $euiColorLightShade;
+    border-color: $euiColorLightShade;
+    opacity: 1;
+
+    .ui-select-placeholder {
+      color: $euiColorDarkShade;
+    }
+  }
+
+  .btn {
+    border: 1px solid $euiColorLightShade;
+    background-color: $euiColorEmptyShade;
+    color: $euiColorDarkestShade;
+  }
+ }
+
+.ui-select-container input[type="search"]::placeholder {
+  color: $euiColorDarkShade;
+}
+
+.ui-select-container input[type="search"]:focus {
+  box-shadow: none;
+}
+
+.ui-select-multiple.ui-select-bootstrap input.ui-select-search {
+  font-size: $euiFontSizeS;
+  padding: 5px 10px; // Matches current padding hacks from other parts of Kibana
+}
+
+
+// SASSTODO: Remove all the floats
+.clear, .clearfix {
+  clear: both;
+}

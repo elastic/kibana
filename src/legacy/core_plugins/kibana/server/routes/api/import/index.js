@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import Boom from 'boom';
 import Joi from 'joi';
 import { importDashboards } from '../../../lib/import/import_dashboards';
 
@@ -29,22 +28,18 @@ export function importApi(server) {
       validate: {
         payload: Joi.object().keys({
           objects: Joi.array(),
-          version: Joi.string()
+          version: Joi.string(),
         }),
         query: Joi.object().keys({
           force: Joi.boolean().default(false),
-          exclude: [Joi.string(), Joi.array().items(Joi.string())]
-        })
+          exclude: [Joi.string(), Joi.array().items(Joi.string())],
+        }),
       },
       tags: ['api'],
     },
 
-    handler: async (req) => {
-      try {
-        return await importDashboards(req);
-      } catch (err) {
-        throw Boom.boomify(err, { statusCode: 400 });
-      }
-    }
+    handler: async req => {
+      return await importDashboards(req);
+    },
   });
 }

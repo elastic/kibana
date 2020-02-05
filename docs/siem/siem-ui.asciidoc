@@ -1,0 +1,73 @@
+[role="xpack"]
+[[siem-ui]]
+== Using the SIEM UI
+
+The SIEM app is a highly interactive workspace for security analysts. It is
+designed to be discoverable, clickable, draggable and droppable, expandable and
+collapsible, resizable, moveable, and so forth. You start with an overview. Then
+you can use the interactive UI to drill down into areas of interest.
+
+[float]
+[[hosts-ui]]
+=== Hosts
+
+The Hosts view provides key metrics regarding host-related security events, and
+data tables and widgets that let you interact with the Timeline Event Viewer.
+You can drill down for deeper insights, and drag and drop items of interest from
+the Hosts view tables to Timeline for further investigation.
+
+[role="screenshot"]
+image::siem/images/hosts-ui.png[]
+
+
+[float]
+[[network-ui]]
+=== Network
+
+The Network view provides key network activity metrics, facilitates
+investigation time enrichment, and provides network event tables that enable
+interaction with the Timeline. You can drill down for deeper insights, and drag
+and drop items of interest from the Network view to Timeline for further
+investigation.
+
+[role="screenshot"]
+image::siem/images/network-ui.png[]
+
+[float]
+[[timelines-ui]]
+=== Timeline
+
+Timeline is your workspace for threat hunting and alert investigations. 
+
+[role="screenshot"]
+image::siem/images/timeline-ui.png[SIEM Timeline]
+
+You can drag objects of interest into the Timeline Event Viewer to create
+exactly the query filter you need. You can drag items from table widgets within
+Hosts and Network pages, or even from within Timeline itself.
+
+A timeline is responsive and persists as you move through the SIEM app
+collecting data. 
+
+See the {siem-guide}[SIEM Guide] for more details on data sources and an
+overview of UI elements and capabilities.
+
+[float]
+[[sample-workflow]]
+=== Sample workflow
+
+An analyst notices a suspicious user ID that warrants further investigation, and
+clicks a url that links to the SIEM app. 
+
+The analyst uses the tables, widgets, and filtering and search capabilities in
+the SIEM app to get to the bottom of the alert. The analyst can drag items of
+interest to the timeline for further analysis.
+
+Within the timeline, the analyst can investigate further--drilling down,
+searching, and filtering--and add notes and pin items of interest. 
+
+The analyst can name the timeline, write summary notes, and share it with others
+if appropriate.
+
+
+

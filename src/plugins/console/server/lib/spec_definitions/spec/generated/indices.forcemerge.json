@@ -1,0 +1,25 @@
+{
+  "indices.forcemerge": {
+    "url_params": {
+      "flush": "__flag__",
+      "ignore_unavailable": "__flag__",
+      "allow_no_indices": "__flag__",
+      "expand_wildcards": [
+        "open",
+        "closed",
+        "none",
+        "all"
+      ],
+      "max_num_segments": "dynamic",
+      "only_expunge_deletes": "__flag__"
+    },
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_forcemerge",
+      "{indices}/_forcemerge"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-forcemerge.html"
+  }
+}

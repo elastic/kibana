@@ -17,7 +17,9 @@
  * under the License.
  */
 
-export const appEntryTemplate = (bundle) => `
+import { apmImport, apmInit } from '../apm';
+
+export const appEntryTemplate = bundle => `
 /**
  * Kibana entry file
  *
@@ -26,23 +28,13 @@ export const appEntryTemplate = (bundle) => `
  * context: ${bundle.getContext()}
  */
 
-// ensure the csp nonce is set in the dll
-import 'dll/set_csp_nonce';
-
-// set the csp nonce in the primary webpack bundle too
-__webpack_nonce__ = window.__kbnNonce__;
-
-// import global polyfills
-import 'babel-polyfill';
-import 'custom-event-polyfill';
-import 'whatwg-fetch';
-import 'abortcontroller-polyfill';
-import 'childnode-remove-polyfill';
-
+${apmImport()}
 import { i18n } from '@kbn/i18n';
 import { CoreSystem } from '__kibanaCore__'
 
 const injectedMetadata = JSON.parse(document.querySelector('kbn-injected-metadata').getAttribute('data'));
+
+${apmInit('injectedMetadata.vars.apmConfig')}
 
 i18n.load(injectedMetadata.i18n.translationsUrl)
   .catch(e => e)
@@ -56,10 +48,14 @@ i18n.load(injectedMetadata.i18n.translationsUrl)
       }
     });
 
-    const coreStartContract = coreSystem.start();
+    coreSystem
+      .setup()
+      .then((coreSetup) => {
+        if (i18nError) {
+          coreSetup.fatalErrors.add(i18nError);
+        }
 
-    if (i18nError) {
-      coreStartContract.fatalErrors.add(i18nError);
-    }
+        return coreSystem.start();
+      });
   });
 `;

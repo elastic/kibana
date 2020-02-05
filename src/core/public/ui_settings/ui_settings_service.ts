@@ -16,61 +16,52 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { Subject } from 'rxjs';
 
-import { BasePathStartContract } from '../base_path';
-import { HttpStartContract } from '../http';
-import { InjectedMetadataStartContract } from '../injected_metadata';
-import { NotificationsStartContract } from '../notifications';
+import { HttpSetup } from '../http';
+import { InjectedMetadataSetup } from '../injected_metadata';
 
 import { UiSettingsApi } from './ui_settings_api';
 import { UiSettingsClient } from './ui_settings_client';
+import { IUiSettingsClient } from './types';
 
-import { i18n } from '@kbn/i18n';
-
-interface Deps {
-  notifications: NotificationsStartContract;
-  http: HttpStartContract;
-  injectedMetadata: InjectedMetadataStartContract;
-  basePath: BasePathStartContract;
+interface UiSettingsServiceDeps {
+  http: HttpSetup;
+  injectedMetadata: InjectedMetadataSetup;
 }
 
+/** @internal */
 export class UiSettingsService {
   private uiSettingsApi?: UiSettingsApi;
   private uiSettingsClient?: UiSettingsClient;
+  private done$ = new Subject();
 
-  public start({ notifications, http, injectedMetadata, basePath }: Deps): UiSettingsStartContract {
-    this.uiSettingsApi = new UiSettingsApi(basePath, injectedMetadata.getKibanaVersion());
-    http.addLoadingCount(this.uiSettingsApi.getLoadingCount$());
+  public setup({ http, injectedMetadata }: UiSettingsServiceDeps): IUiSettingsClient {
+    this.uiSettingsApi = new UiSettingsApi(http);
+    http.addLoadingCountSource(this.uiSettingsApi.getLoadingCount$());
 
     // TODO: Migrate away from legacyMetadata https://github.com/elastic/kibana/issues/22779
     const legacyMetadata = injectedMetadata.getLegacyMetadata();
 
     this.uiSettingsClient = new UiSettingsClient({
       api: this.uiSettingsApi,
-      onUpdateError: error => {
-        notifications.toasts.addDanger({
-          title: i18n.translate('core.uiSettings.unableUpdateUISettingNotificationMessageTitle', {
-            defaultMessage: 'Unable to update UI setting',
-          }),
-          text: error.message,
-        });
-      },
       defaults: legacyMetadata.uiSettings.defaults,
       initialSettings: legacyMetadata.uiSettings.user,
+      done$: this.done$,
     });
 
     return this.uiSettingsClient;
   }
 
+  public start(): IUiSettingsClient {
+    return this.uiSettingsClient!;
+  }
+
   public stop() {
-    if (this.uiSettingsClient) {
-      this.uiSettingsClient.stop();
-    }
+    this.done$.complete();
 
     if (this.uiSettingsApi) {
       this.uiSettingsApi.stop();
     }
   }
 }
-
-export type UiSettingsStartContract = UiSettingsClient;

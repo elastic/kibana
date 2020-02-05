@@ -1,0 +1,283 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Storyshots renderers/TimeFilter compact mode 1`] = `
+<div
+  className="euiPopover euiPopover--anchorDownCenter canvasTimePickerPopover"
+  container={null}
+  id="timefilter-popover-trigger-click"
+  onKeyDown={[Function]}
+  onMouseDown={[Function]}
+  onMouseUp={[Function]}
+  onTouchEnd={[Function]}
+  onTouchStart={[Function]}
+>
+  <div
+    className="euiPopover__anchor canvasTimePickerPopover__anchor"
+  >
+    <button
+      aria-label="Displaying data Last 7 days. Click to open a calendar tool to select a new time range."
+      className="canvasTimePickerPopover__button"
+      onClick={[Function]}
+    >
+      <span>
+        Last 7 days
+      </span>
+    </button>
+  </div>
+</div>
+`;
+
+exports[`Storyshots renderers/TimeFilter default 1`] = `
+<div
+  className="canvasTimePicker"
+>
+  <div
+    className="canvasDateTimeRangeAbsolute"
+  >
+    <div>
+      <div
+        className="canvasDateTimeCal"
+      >
+        <div
+          className="euiFormControlLayout euiFormControlLayout--compressed"
+        >
+          <div
+            className="euiFormControlLayout__childrenWrapper"
+          >
+            <input
+              className="euiFieldText euiFieldText--compressed"
+              onChange={[Function]}
+              style={
+                Object {
+                  "textAlign": "center",
+                }
+              }
+              type="text"
+              value="2018-06-01 00:00:00"
+            />
+          </div>
+        </div>
+        <span>
+          <span
+            className="euiDatePicker euiDatePicker--inline"
+          >
+            <div
+              className="euiFormControlLayout"
+            >
+              <div
+                className="euiFormControlLayout__childrenWrapper"
+              >
+                <ReactDatePicker
+                  accessibleMode={true}
+                  adjustDateOnChange={true}
+                  className="euiDatePicker euiFieldText"
+                  dateFormat="MM/DD/YYYY hh:mm A"
+                  endDate={"2019-05-25T00:00:00.000Z"}
+                  inline={true}
+                  maxDate={"2019-05-25T00:00:00.000Z"}
+                  onChange={[Function]}
+                  selected={"2018-06-01T00:00:00.000Z"}
+                  shouldCloseOnSelect={false}
+                  showMonthDropdown={true}
+                  showTimeSelect={true}
+                  showYearDropdown={true}
+                  startDate={"2018-06-01T00:00:00.000Z"}
+                  timeFormat="hh:mm A"
+                  yearDropdownItemNumber={7}
+                />
+              </div>
+            </div>
+          </span>
+        </span>
+      </div>
+    </div>
+    <div>
+      <div
+        className="canvasDateTimeCal"
+      >
+        <div
+          className="euiFormControlLayout euiFormControlLayout--compressed"
+        >
+          <div
+            className="euiFormControlLayout__childrenWrapper"
+          >
+            <input
+              className="euiFieldText euiFieldText--compressed"
+              onChange={[Function]}
+              style={
+                Object {
+                  "textAlign": "center",
+                }
+              }
+              type="text"
+              value="2019-05-25 00:00:00"
+            />
+          </div>
+        </div>
+        <span>
+          <span
+            className="euiDatePicker euiDatePicker--inline"
+          >
+            <div
+              className="euiFormControlLayout"
+            >
+              <div
+                className="euiFormControlLayout__childrenWrapper"
+              >
+                <ReactDatePicker
+                  accessibleMode={true}
+                  adjustDateOnChange={true}
+                  className="euiDatePicker euiFieldText"
+                  dateFormat="MM/DD/YYYY hh:mm A"
+                  endDate={"2019-05-25T00:00:00.000Z"}
+                  inline={true}
+                  minDate={"2018-06-01T00:00:00.000Z"}
+                  onChange={[Function]}
+                  selected={"2019-05-25T00:00:00.000Z"}
+                  shouldCloseOnSelect={false}
+                  showMonthDropdown={true}
+                  showTimeSelect={true}
+                  showYearDropdown={true}
+                  startDate={"2018-06-01T00:00:00.000Z"}
+                  timeFormat="hh:mm A"
+                  yearDropdownItemNumber={7}
+                />
+              </div>
+            </div>
+          </span>
+        </span>
+      </div>
+    </div>
+  </div>
+  <div
+    style={
+      Object {
+        "alignItems": "center",
+        "display": "grid",
+      }
+    }
+  >
+    <button
+      className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small"
+      onClick={[Function]}
+      type="button"
+    >
+      <span
+        className="euiButtonEmpty__content"
+      >
+        <span
+          className="euiButtonEmpty__text"
+        >
+          Today
+        </span>
+      </span>
+    </button>
+    <button
+      className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small"
+      onClick={[Function]}
+      type="button"
+    >
+      <span
+        className="euiButtonEmpty__content"
+      >
+        <span
+          className="euiButtonEmpty__text"
+        >
+          Last 24 hours
+        </span>
+      </span>
+    </button>
+    <button
+      className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small"
+      onClick={[Function]}
+      type="button"
+    >
+      <span
+        className="euiButtonEmpty__content"
+      >
+        <span
+          className="euiButtonEmpty__text"
+        >
+          Last 7 days
+        </span>
+      </span>
+    </button>
+    <button
+      className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small"
+      onClick={[Function]}
+      type="button"
+    >
+      <span
+        className="euiButtonEmpty__content"
+      >
+        <span
+          className="euiButtonEmpty__text"
+        >
+          Last 2 weeks
+        </span>
+      </span>
+    </button>
+    <button
+      className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small"
+      onClick={[Function]}
+      type="button"
+    >
+      <span
+        className="euiButtonEmpty__content"
+      >
+        <span
+          className="euiButtonEmpty__text"
+        >
+          Last 30 days
+        </span>
+      </span>
+    </button>
+    <button
+      className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small"
+      onClick={[Function]}
+      type="button"
+    >
+      <span
+        className="euiButtonEmpty__content"
+      >
+        <span
+          className="euiButtonEmpty__text"
+        >
+          Last 90 days
+        </span>
+      </span>
+    </button>
+    <button
+      className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small"
+      onClick={[Function]}
+      type="button"
+    >
+      <span
+        className="euiButtonEmpty__content"
+      >
+        <span
+          className="euiButtonEmpty__text"
+        >
+          Last 1 year
+        </span>
+      </span>
+    </button>
+    <button
+      className="euiButton euiButton--primary euiButton--small canvasTimePicker__apply euiButton--fill"
+      disabled={true}
+      onClick={[Function]}
+      type="button"
+    >
+      <span
+        className="euiButton__content"
+      >
+        <span
+          className="euiButton__text"
+        >
+          Apply
+        </span>
+      </span>
+    </button>
+  </div>
+</div>
+`;

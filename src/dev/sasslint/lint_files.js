@@ -19,7 +19,7 @@
 
 import sassLint from 'sass-lint';
 import path from 'path';
-import { createFailError } from '../run';
+import { createFailError } from '@kbn/dev-utils';
 
 /**
  * Lints a list of files with eslint. eslint reports are written to the log
@@ -39,14 +39,11 @@ export function lintFiles(log, files) {
   );
 
   const failTypes = Object.keys(
-    report.reduce(
-      (failTypes, reportEntry) => {
-        if (reportEntry.warningCount > 0) failTypes.warning = true;
-        if (reportEntry.errorCount > 0) failTypes.errors = true;
-        return failTypes;
-      },
-      {}
-    )
+    report.reduce((failTypes, reportEntry) => {
+      if (reportEntry.warningCount > 0) failTypes.warning = true;
+      if (reportEntry.errorCount > 0) failTypes.errors = true;
+      return failTypes;
+    }, {})
   );
 
   if (!failTypes.length) {
@@ -55,5 +52,5 @@ export function lintFiles(log, files) {
   }
 
   log.error(sassLint.format(report));
-  throw createFailError(`[sasslint] ${failTypes.join(' & ')}`, 1);
+  throw createFailError(`[sasslint] ${failTypes.join(' & ')}`);
 }

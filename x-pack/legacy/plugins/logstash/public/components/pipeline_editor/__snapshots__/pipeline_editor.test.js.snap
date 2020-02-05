@@ -1,0 +1,1740 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`PipelineEditor component includes required error message for falsy pipeline id 1`] = `
+<div
+  data-test-subj="pipelineEdit pipelineEdit-"
+>
+  <EuiPageContent
+    horizontalPosition="center"
+    style={
+      Object {
+        "width": 1100,
+      }
+    }
+    verticalPosition="center"
+  >
+    <EuiTitle
+      size="m"
+    >
+      <h2>
+        Create Pipeline
+      </h2>
+    </EuiTitle>
+    <EuiSpacer
+      size="m"
+    />
+    <EuiForm
+      error={
+        Array [
+          "Pipeline ID is required",
+          "Pipeline ID must begin with a letter or underscore and contain only letters, underscores, dashes, and numbers",
+        ]
+      }
+      isInvalid={true}
+    >
+      <EuiFormRow
+        describedByIds={Array []}
+        display="row"
+        fullWidth={true}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        label={
+          <FormattedMessage
+            defaultMessage="Pipeline ID"
+            id="xpack.logstash.pipelineEditor.pipelineIdFormRowLabel"
+            values={Object {}}
+          />
+        }
+        labelType="label"
+      >
+        <EuiFieldText
+          data-test-subj="inputId"
+          fullWidth={true}
+          isInvalid={true}
+          name="pipelineId"
+          onBlur={[Function]}
+          onChange={[Function]}
+          value=""
+        />
+      </EuiFormRow>
+      <EuiFormRow
+        describedByIds={Array []}
+        display="row"
+        fullWidth={true}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        label={
+          <FormattedMessage
+            defaultMessage="Description"
+            id="xpack.logstash.pipelineEditor.descriptionFormRowLabel"
+            values={Object {}}
+          />
+        }
+        labelType="label"
+      >
+        <EuiFieldText
+          data-test-subj="inputDescription"
+          fullWidth={true}
+          name="pipelineDescription"
+          onChange={[Function]}
+          value="pipeline description"
+        />
+      </EuiFormRow>
+      <EuiFormRow
+        describedByIds={Array []}
+        display="row"
+        fullWidth={true}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        label={
+          <FormattedMessage
+            defaultMessage="Pipeline"
+            id="xpack.logstash.pipelineEditor.pipelineFormRowLabel"
+            values={Object {}}
+          />
+        }
+        labelType="label"
+      >
+        <div
+          data-test-subj="acePipeline"
+        >
+          <EuiCodeEditor
+            mode="plain_text"
+            onChange={[Function]}
+            setOptions={
+              Object {
+                "maxLines": Infinity,
+                "minLines": 25,
+                "readOnly": false,
+              }
+            }
+            theme="github"
+            value="input { stdin { } } filter { } output { stdout { } }"
+            width="1017"
+          />
+        </div>
+      </EuiFormRow>
+      <EuiFormRow
+        describedByIds={Array []}
+        display="row"
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        label={
+          <FormLabelWithIconTip
+            formRowLabelText="Pipeline workers"
+            formRowTooltipText="The number of workers that will, in parallel, execute the filter and output stages of the pipeline. If you find that events are backing up, or that the CPU is not saturated, consider increasing this number to better utilize machine processing power.
+
+Default value: Number of the host’s CPU cores"
+          />
+        }
+        labelType="label"
+      >
+        <EuiFieldNumber
+          data-test-subj="inputWorkers"
+          onChange={[Function]}
+          value={1}
+        />
+      </EuiFormRow>
+      <EuiSpacer />
+      <EuiFlexGroup>
+        <FlexItemSetting
+          formRowLabelText="Pipeline batch size"
+          formRowTooltipText="The maximum number of events an individual worker thread will collect from inputs before attempting to execute its filters and outputs. Larger batch sizes are generally more efficient, but come at the cost of increased memory overhead. You may have to increase the JVM heap size by setting the LS_HEAP_SIZE variable to effectively use the option.
+
+Default value: 125"
+        >
+          <EuiFieldNumber
+            data-test-subj="inputBatchSize"
+            onChange={[Function]}
+            value={256}
+          />
+        </FlexItemSetting>
+        <FlexItemSetting
+          formRowLabelText="Pipeline batch delay"
+          formRowTooltipText="When creating pipeline event batches, how long in milliseconds to wait for each event before dispatching an undersized batch to pipeline workers.
+
+Default value: 50ms"
+        >
+          <EuiFieldNumber
+            data-test-subj="inputBatchDelay"
+            onChange={[Function]}
+            value={10}
+          />
+        </FlexItemSetting>
+      </EuiFlexGroup>
+      <EuiFlexGroup>
+        <FlexItemSetting
+          formRowLabelText="Queue type"
+          formRowTooltipText="The internal queuing model to use for event buffering. Specify memory for legacy in-memory based queuing, or persisted for disk-based ACKed queueing
+
+Default value: memory"
+        >
+          <EuiSelect
+            data-test-subj="selectQueueType"
+            onChange={[Function]}
+            options={
+              Array [
+                Object {
+                  "data-test-subj": "selectQueueType-memory",
+                  "text": "memory",
+                  "value": "memory",
+                },
+                Object {
+                  "data-test-subj": "selectQueueType-persisted",
+                  "text": "persisted",
+                  "value": "persisted",
+                },
+              ]
+            }
+            value="MB"
+          />
+        </FlexItemSetting>
+        <FlexItemSetting
+          formRowLabelText="Queue max bytes"
+          formRowTooltipText="The total capacity of the queue in number of bytes. Make sure the capacity of your disk drive is greater than the value you specify here.
+
+Default value: 1024mb (1g)"
+        >
+          <EuiFieldNumber
+            data-test-subj="inputQueueMaxBytesNumber"
+            onChange={[Function]}
+          />
+        </FlexItemSetting>
+        <FlexItemSetting>
+          <EuiSelect
+            data-test-subj="selectQueueMaxBytesUnits"
+            onChange={[Function]}
+            options={
+              Array [
+                Object {
+                  "data-test-subj": "selectQueueMaxBytesUnits-b",
+                  "text": "bytes",
+                  "value": "b",
+                },
+                Object {
+                  "data-test-subj": "selectQueueMaxBytesUnits-kb",
+                  "text": "kilobytes",
+                  "value": "kb",
+                },
+                Object {
+                  "data-test-subj": "selectQueueMaxBytesUnits-mb",
+                  "text": "megabytes",
+                  "value": "mb",
+                },
+                Object {
+                  "data-test-subj": "selectQueueMaxBytesUnits-gb",
+                  "text": "gigabytes",
+                  "value": "gb",
+                },
+                Object {
+                  "data-test-subj": "selectQueueMaxBytesUnits-tb",
+                  "text": "terabytes",
+                  "value": "tb",
+                },
+                Object {
+                  "data-test-subj": "selectQueueMaxBytesUnits-pb",
+                  "text": "petabytes",
+                  "value": "pb",
+                },
+              ]
+            }
+          />
+        </FlexItemSetting>
+        <FlexItemSetting
+          formRowLabelText="Queue checkpoint writes"
+          formRowTooltipText="The maximum number of written events before forcing a checkpoint when persistent queues are enabled. Specify 0 to set this value to unlimited.
+
+Default value: 1024"
+        >
+          <EuiFieldNumber
+            data-test-subj="inputQueueCheckpointWrites"
+            onChange={[Function]}
+            value={100}
+          />
+        </FlexItemSetting>
+      </EuiFlexGroup>
+    </EuiForm>
+    <EuiSpacer
+      size="l"
+    />
+    <EuiFlexGroup
+      justifyContent="flexStart"
+    >
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiButton
+          data-test-subj="btnSavePipeline"
+          fill={true}
+          isDisabled={true}
+          onClick={[Function]}
+        >
+          <FormattedMessage
+            defaultMessage="Create and deploy"
+            id="xpack.logstash.pipelineEditor.createAndDeployButtonLabel"
+            values={Object {}}
+          />
+        </EuiButton>
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiButton
+          data-test-subj="btnCancel"
+          onClick={[Function]}
+        >
+          <FormattedMessage
+            defaultMessage="Cancel"
+            id="xpack.logstash.pipelineEditor.cancelButtonLabel"
+            values={Object {}}
+          />
+        </EuiButton>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiPageContent>
+</div>
+`;
+
+exports[`PipelineEditor component invalidates form for invalid pipeline id input 1`] = `
+<div
+  data-test-subj="pipelineEdit pipelineEdit-$invalid-pipeline-name"
+>
+  <EuiPageContent
+    horizontalPosition="center"
+    style={
+      Object {
+        "width": 1100,
+      }
+    }
+    verticalPosition="center"
+  >
+    <EuiTitle
+      size="m"
+    >
+      <h2>
+        Create Pipeline
+      </h2>
+    </EuiTitle>
+    <EuiSpacer
+      size="m"
+    />
+    <EuiForm
+      error={
+        Array [
+          "Pipeline ID must begin with a letter or underscore and contain only letters, underscores, dashes, and numbers",
+        ]
+      }
+      isInvalid={true}
+    >
+      <EuiFormRow
+        describedByIds={Array []}
+        display="row"
+        fullWidth={true}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        label={
+          <FormattedMessage
+            defaultMessage="Pipeline ID"
+            id="xpack.logstash.pipelineEditor.pipelineIdFormRowLabel"
+            values={Object {}}
+          />
+        }
+        labelType="label"
+      >
+        <EuiFieldText
+          data-test-subj="inputId"
+          fullWidth={true}
+          isInvalid={true}
+          name="pipelineId"
+          onBlur={[Function]}
+          onChange={[Function]}
+          value="$invalid-pipeline-name"
+        />
+      </EuiFormRow>
+      <EuiFormRow
+        describedByIds={Array []}
+        display="row"
+        fullWidth={true}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        label={
+          <FormattedMessage
+            defaultMessage="Description"
+            id="xpack.logstash.pipelineEditor.descriptionFormRowLabel"
+            values={Object {}}
+          />
+        }
+        labelType="label"
+      >
+        <EuiFieldText
+          data-test-subj="inputDescription"
+          fullWidth={true}
+          name="pipelineDescription"
+          onChange={[Function]}
+          value="pipeline description"
+        />
+      </EuiFormRow>
+      <EuiFormRow
+        describedByIds={Array []}
+        display="row"
+        fullWidth={true}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        label={
+          <FormattedMessage
+            defaultMessage="Pipeline"
+            id="xpack.logstash.pipelineEditor.pipelineFormRowLabel"
+            values={Object {}}
+          />
+        }
+        labelType="label"
+      >
+        <div
+          data-test-subj="acePipeline"
+        >
+          <EuiCodeEditor
+            mode="plain_text"
+            onChange={[Function]}
+            setOptions={
+              Object {
+                "maxLines": Infinity,
+                "minLines": 25,
+                "readOnly": false,
+              }
+            }
+            theme="github"
+            value="input { stdin { } } filter { } output { stdout { } }"
+            width="1017"
+          />
+        </div>
+      </EuiFormRow>
+      <EuiFormRow
+        describedByIds={Array []}
+        display="row"
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        label={
+          <FormLabelWithIconTip
+            formRowLabelText="Pipeline workers"
+            formRowTooltipText="The number of workers that will, in parallel, execute the filter and output stages of the pipeline. If you find that events are backing up, or that the CPU is not saturated, consider increasing this number to better utilize machine processing power.
+
+Default value: Number of the host’s CPU cores"
+          />
+        }
+        labelType="label"
+      >
+        <EuiFieldNumber
+          data-test-subj="inputWorkers"
+          onChange={[Function]}
+          value={1}
+        />
+      </EuiFormRow>
+      <EuiSpacer />
+      <EuiFlexGroup>
+        <FlexItemSetting
+          formRowLabelText="Pipeline batch size"
+          formRowTooltipText="The maximum number of events an individual worker thread will collect from inputs before attempting to execute its filters and outputs. Larger batch sizes are generally more efficient, but come at the cost of increased memory overhead. You may have to increase the JVM heap size by setting the LS_HEAP_SIZE variable to effectively use the option.
+
+Default value: 125"
+        >
+          <EuiFieldNumber
+            data-test-subj="inputBatchSize"
+            onChange={[Function]}
+            value={256}
+          />
+        </FlexItemSetting>
+        <FlexItemSetting
+          formRowLabelText="Pipeline batch delay"
+          formRowTooltipText="When creating pipeline event batches, how long in milliseconds to wait for each event before dispatching an undersized batch to pipeline workers.
+
+Default value: 50ms"
+        >
+          <EuiFieldNumber
+            data-test-subj="inputBatchDelay"
+            onChange={[Function]}
+            value={10}
+          />
+        </FlexItemSetting>
+      </EuiFlexGroup>
+      <EuiFlexGroup>
+        <FlexItemSetting
+          formRowLabelText="Queue type"
+          formRowTooltipText="The internal queuing model to use for event buffering. Specify memory for legacy in-memory based queuing, or persisted for disk-based ACKed queueing
+
+Default value: memory"
+        >
+          <EuiSelect
+            data-test-subj="selectQueueType"
+            onChange={[Function]}
+            options={
+              Array [
+                Object {
+                  "data-test-subj": "selectQueueType-memory",
+                  "text": "memory",
+                  "value": "memory",
+                },
+                Object {
+                  "data-test-subj": "selectQueueType-persisted",
+                  "text": "persisted",
+                  "value": "persisted",
+                },
+              ]
+            }
+            value="MB"
+          />
+        </FlexItemSetting>
+        <FlexItemSetting
+          formRowLabelText="Queue max bytes"
+          formRowTooltipText="The total capacity of the queue in number of bytes. Make sure the capacity of your disk drive is greater than the value you specify here.
+
+Default value: 1024mb (1g)"
+        >
+          <EuiFieldNumber
+            data-test-subj="inputQueueMaxBytesNumber"
+            onChange={[Function]}
+          />
+        </FlexItemSetting>
+        <FlexItemSetting>
+          <EuiSelect
+            data-test-subj="selectQueueMaxBytesUnits"
+            onChange={[Function]}
+            options={
+              Array [
+                Object {
+                  "data-test-subj": "selectQueueMaxBytesUnits-b",
+                  "text": "bytes",
+                  "value": "b",
+                },
+                Object {
+                  "data-test-subj": "selectQueueMaxBytesUnits-kb",
+                  "text": "kilobytes",
+                  "value": "kb",
+                },
+                Object {
+                  "data-test-subj": "selectQueueMaxBytesUnits-mb",
+                  "text": "megabytes",
+                  "value": "mb",
+                },
+                Object {
+                  "data-test-subj": "selectQueueMaxBytesUnits-gb",
+                  "text": "gigabytes",
+                  "value": "gb",
+                },
+                Object {
+                  "data-test-subj": "selectQueueMaxBytesUnits-tb",
+                  "text": "terabytes",
+                  "value": "tb",
+                },
+                Object {
+                  "data-test-subj": "selectQueueMaxBytesUnits-pb",
+                  "text": "petabytes",
+                  "value": "pb",
+                },
+              ]
+            }
+          />
+        </FlexItemSetting>
+        <FlexItemSetting
+          formRowLabelText="Queue checkpoint writes"
+          formRowTooltipText="The maximum number of written events before forcing a checkpoint when persistent queues are enabled. Specify 0 to set this value to unlimited.
+
+Default value: 1024"
+        >
+          <EuiFieldNumber
+            data-test-subj="inputQueueCheckpointWrites"
+            onChange={[Function]}
+            value={100}
+          />
+        </FlexItemSetting>
+      </EuiFlexGroup>
+    </EuiForm>
+    <EuiSpacer
+      size="l"
+    />
+    <EuiFlexGroup
+      justifyContent="flexStart"
+    >
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiButton
+          data-test-subj="btnSavePipeline"
+          fill={true}
+          isDisabled={true}
+          onClick={[Function]}
+        >
+          <FormattedMessage
+            defaultMessage="Create and deploy"
+            id="xpack.logstash.pipelineEditor.createAndDeployButtonLabel"
+            values={Object {}}
+          />
+        </EuiButton>
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiButton
+          data-test-subj="btnCancel"
+          onClick={[Function]}
+        >
+          <FormattedMessage
+            defaultMessage="Cancel"
+            id="xpack.logstash.pipelineEditor.cancelButtonLabel"
+            values={Object {}}
+          />
+        </EuiButton>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiPageContent>
+</div>
+`;
+
+exports[`PipelineEditor component invalidates form for pipeline id with spaces 1`] = `
+<div
+  data-test-subj="pipelineEdit pipelineEdit-pipeline id with spaces"
+>
+  <EuiPageContent
+    horizontalPosition="center"
+    style={
+      Object {
+        "width": 1100,
+      }
+    }
+    verticalPosition="center"
+  >
+    <EuiTitle
+      size="m"
+    >
+      <h2>
+        Create Pipeline
+      </h2>
+    </EuiTitle>
+    <EuiSpacer
+      size="m"
+    />
+    <EuiForm
+      error={
+        Array [
+          "Pipeline ID must begin with a letter or underscore and contain only letters, underscores, dashes, and numbers",
+        ]
+      }
+      isInvalid={true}
+    >
+      <EuiFormRow
+        describedByIds={Array []}
+        display="row"
+        fullWidth={true}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        label={
+          <FormattedMessage
+            defaultMessage="Pipeline ID"
+            id="xpack.logstash.pipelineEditor.pipelineIdFormRowLabel"
+            values={Object {}}
+          />
+        }
+        labelType="label"
+      >
+        <EuiFieldText
+          data-test-subj="inputId"
+          fullWidth={true}
+          isInvalid={true}
+          name="pipelineId"
+          onBlur={[Function]}
+          onChange={[Function]}
+          value="pipeline id with spaces"
+        />
+      </EuiFormRow>
+      <EuiFormRow
+        describedByIds={Array []}
+        display="row"
+        fullWidth={true}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        label={
+          <FormattedMessage
+            defaultMessage="Description"
+            id="xpack.logstash.pipelineEditor.descriptionFormRowLabel"
+            values={Object {}}
+          />
+        }
+        labelType="label"
+      >
+        <EuiFieldText
+          data-test-subj="inputDescription"
+          fullWidth={true}
+          name="pipelineDescription"
+          onChange={[Function]}
+          value="pipeline description"
+        />
+      </EuiFormRow>
+      <EuiFormRow
+        describedByIds={Array []}
+        display="row"
+        fullWidth={true}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        label={
+          <FormattedMessage
+            defaultMessage="Pipeline"
+            id="xpack.logstash.pipelineEditor.pipelineFormRowLabel"
+            values={Object {}}
+          />
+        }
+        labelType="label"
+      >
+        <div
+          data-test-subj="acePipeline"
+        >
+          <EuiCodeEditor
+            mode="plain_text"
+            onChange={[Function]}
+            setOptions={
+              Object {
+                "maxLines": Infinity,
+                "minLines": 25,
+                "readOnly": false,
+              }
+            }
+            theme="github"
+            value="input { stdin { } } filter { } output { stdout { } }"
+            width="1017"
+          />
+        </div>
+      </EuiFormRow>
+      <EuiFormRow
+        describedByIds={Array []}
+        display="row"
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        label={
+          <FormLabelWithIconTip
+            formRowLabelText="Pipeline workers"
+            formRowTooltipText="The number of workers that will, in parallel, execute the filter and output stages of the pipeline. If you find that events are backing up, or that the CPU is not saturated, consider increasing this number to better utilize machine processing power.
+
+Default value: Number of the host’s CPU cores"
+          />
+        }
+        labelType="label"
+      >
+        <EuiFieldNumber
+          data-test-subj="inputWorkers"
+          onChange={[Function]}
+          value={1}
+        />
+      </EuiFormRow>
+      <EuiSpacer />
+      <EuiFlexGroup>
+        <FlexItemSetting
+          formRowLabelText="Pipeline batch size"
+          formRowTooltipText="The maximum number of events an individual worker thread will collect from inputs before attempting to execute its filters and outputs. Larger batch sizes are generally more efficient, but come at the cost of increased memory overhead. You may have to increase the JVM heap size by setting the LS_HEAP_SIZE variable to effectively use the option.
+
+Default value: 125"
+        >
+          <EuiFieldNumber
+            data-test-subj="inputBatchSize"
+            onChange={[Function]}
+            value={256}
+          />
+        </FlexItemSetting>
+        <FlexItemSetting
+          formRowLabelText="Pipeline batch delay"
+          formRowTooltipText="When creating pipeline event batches, how long in milliseconds to wait for each event before dispatching an undersized batch to pipeline workers.
+
+Default value: 50ms"
+        >
+          <EuiFieldNumber
+            data-test-subj="inputBatchDelay"
+            onChange={[Function]}
+            value={10}
+          />
+        </FlexItemSetting>
+      </EuiFlexGroup>
+      <EuiFlexGroup>
+        <FlexItemSetting
+          formRowLabelText="Queue type"
+          formRowTooltipText="The internal queuing model to use for event buffering. Specify memory for legacy in-memory based queuing, or persisted for disk-based ACKed queueing
+
+Default value: memory"
+        >
+          <EuiSelect
+            data-test-subj="selectQueueType"
+            onChange={[Function]}
+            options={
+              Array [
+                Object {
+                  "data-test-subj": "selectQueueType-memory",
+                  "text": "memory",
+                  "value": "memory",
+                },
+                Object {
+                  "data-test-subj": "selectQueueType-persisted",
+                  "text": "persisted",
+                  "value": "persisted",
+                },
+              ]
+            }
+            value="MB"
+          />
+        </FlexItemSetting>
+        <FlexItemSetting
+          formRowLabelText="Queue max bytes"
+          formRowTooltipText="The total capacity of the queue in number of bytes. Make sure the capacity of your disk drive is greater than the value you specify here.
+
+Default value: 1024mb (1g)"
+        >
+          <EuiFieldNumber
+            data-test-subj="inputQueueMaxBytesNumber"
+            onChange={[Function]}
+          />
+        </FlexItemSetting>
+        <FlexItemSetting>
+          <EuiSelect
+            data-test-subj="selectQueueMaxBytesUnits"
+            onChange={[Function]}
+            options={
+              Array [
+                Object {
+                  "data-test-subj": "selectQueueMaxBytesUnits-b",
+                  "text": "bytes",
+                  "value": "b",
+                },
+                Object {
+                  "data-test-subj": "selectQueueMaxBytesUnits-kb",
+                  "text": "kilobytes",
+                  "value": "kb",
+                },
+                Object {
+                  "data-test-subj": "selectQueueMaxBytesUnits-mb",
+                  "text": "megabytes",
+                  "value": "mb",
+                },
+                Object {
+                  "data-test-subj": "selectQueueMaxBytesUnits-gb",
+                  "text": "gigabytes",
+                  "value": "gb",
+                },
+                Object {
+                  "data-test-subj": "selectQueueMaxBytesUnits-tb",
+                  "text": "terabytes",
+                  "value": "tb",
+                },
+                Object {
+                  "data-test-subj": "selectQueueMaxBytesUnits-pb",
+                  "text": "petabytes",
+                  "value": "pb",
+                },
+              ]
+            }
+          />
+        </FlexItemSetting>
+        <FlexItemSetting
+          formRowLabelText="Queue checkpoint writes"
+          formRowTooltipText="The maximum number of written events before forcing a checkpoint when persistent queues are enabled. Specify 0 to set this value to unlimited.
+
+Default value: 1024"
+        >
+          <EuiFieldNumber
+            data-test-subj="inputQueueCheckpointWrites"
+            onChange={[Function]}
+            value={100}
+          />
+        </FlexItemSetting>
+      </EuiFlexGroup>
+    </EuiForm>
+    <EuiSpacer
+      size="l"
+    />
+    <EuiFlexGroup
+      justifyContent="flexStart"
+    >
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiButton
+          data-test-subj="btnSavePipeline"
+          fill={true}
+          isDisabled={true}
+          onClick={[Function]}
+        >
+          <FormattedMessage
+            defaultMessage="Create and deploy"
+            id="xpack.logstash.pipelineEditor.createAndDeployButtonLabel"
+            values={Object {}}
+          />
+        </EuiButton>
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiButton
+          data-test-subj="btnCancel"
+          onClick={[Function]}
+        >
+          <FormattedMessage
+            defaultMessage="Cancel"
+            id="xpack.logstash.pipelineEditor.cancelButtonLabel"
+            values={Object {}}
+          />
+        </EuiButton>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiPageContent>
+</div>
+`;
+
+exports[`PipelineEditor component matches snapshot for clone pipeline 1`] = `
+<div
+  data-test-subj="pipelineEdit pipelineEdit-pipelineId"
+>
+  <EuiPageContent
+    horizontalPosition="center"
+    style={
+      Object {
+        "width": 1100,
+      }
+    }
+    verticalPosition="center"
+  >
+    <EuiTitle
+      size="m"
+    >
+      <h2>
+        Clone Pipeline "pipelineToClone"
+      </h2>
+    </EuiTitle>
+    <EuiSpacer
+      size="m"
+    />
+    <EuiForm
+      error={Array []}
+      isInvalid={false}
+    >
+      <EuiFormRow
+        describedByIds={Array []}
+        display="row"
+        fullWidth={true}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        label={
+          <FormattedMessage
+            defaultMessage="Description"
+            id="xpack.logstash.pipelineEditor.descriptionFormRowLabel"
+            values={Object {}}
+          />
+        }
+        labelType="label"
+      >
+        <EuiFieldText
+          data-test-subj="inputDescription"
+          fullWidth={true}
+          name="pipelineDescription"
+          onChange={[Function]}
+          value="pipeline description"
+        />
+      </EuiFormRow>
+      <EuiFormRow
+        describedByIds={Array []}
+        display="row"
+        fullWidth={true}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        label={
+          <FormattedMessage
+            defaultMessage="Pipeline"
+            id="xpack.logstash.pipelineEditor.pipelineFormRowLabel"
+            values={Object {}}
+          />
+        }
+        labelType="label"
+      >
+        <div
+          data-test-subj="acePipeline"
+        >
+          <EuiCodeEditor
+            mode="plain_text"
+            onChange={[Function]}
+            setOptions={
+              Object {
+                "maxLines": Infinity,
+                "minLines": 25,
+                "readOnly": false,
+              }
+            }
+            theme="github"
+            value="input { stdin { } } filter { } output { stdout { } }"
+            width="1017"
+          />
+        </div>
+      </EuiFormRow>
+      <EuiFormRow
+        describedByIds={Array []}
+        display="row"
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        label={
+          <FormLabelWithIconTip
+            formRowLabelText="Pipeline workers"
+            formRowTooltipText="The number of workers that will, in parallel, execute the filter and output stages of the pipeline. If you find that events are backing up, or that the CPU is not saturated, consider increasing this number to better utilize machine processing power.
+
+Default value: Number of the host’s CPU cores"
+          />
+        }
+        labelType="label"
+      >
+        <EuiFieldNumber
+          data-test-subj="inputWorkers"
+          onChange={[Function]}
+          value={1}
+        />
+      </EuiFormRow>
+      <EuiSpacer />
+      <EuiFlexGroup>
+        <FlexItemSetting
+          formRowLabelText="Pipeline batch size"
+          formRowTooltipText="The maximum number of events an individual worker thread will collect from inputs before attempting to execute its filters and outputs. Larger batch sizes are generally more efficient, but come at the cost of increased memory overhead. You may have to increase the JVM heap size by setting the LS_HEAP_SIZE variable to effectively use the option.
+
+Default value: 125"
+        >
+          <EuiFieldNumber
+            data-test-subj="inputBatchSize"
+            onChange={[Function]}
+            value={256}
+          />
+        </FlexItemSetting>
+        <FlexItemSetting
+          formRowLabelText="Pipeline batch delay"
+          formRowTooltipText="When creating pipeline event batches, how long in milliseconds to wait for each event before dispatching an undersized batch to pipeline workers.
+
+Default value: 50ms"
+        >
+          <EuiFieldNumber
+            data-test-subj="inputBatchDelay"
+            onChange={[Function]}
+            value={10}
+          />
+        </FlexItemSetting>
+      </EuiFlexGroup>
+      <EuiFlexGroup>
+        <FlexItemSetting
+          formRowLabelText="Queue type"
+          formRowTooltipText="The internal queuing model to use for event buffering. Specify memory for legacy in-memory based queuing, or persisted for disk-based ACKed queueing
+
+Default value: memory"
+        >
+          <EuiSelect
+            data-test-subj="selectQueueType"
+            onChange={[Function]}
+            options={
+              Array [
+                Object {
+                  "data-test-subj": "selectQueueType-memory",
+                  "text": "memory",
+                  "value": "memory",
+                },
+                Object {
+                  "data-test-subj": "selectQueueType-persisted",
+                  "text": "persisted",
+                  "value": "persisted",
+                },
+              ]
+            }
+            value="MB"
+          />
+        </FlexItemSetting>
+        <FlexItemSetting
+          formRowLabelText="Queue max bytes"
+          formRowTooltipText="The total capacity of the queue in number of bytes. Make sure the capacity of your disk drive is greater than the value you specify here.
+
+Default value: 1024mb (1g)"
+        >
+          <EuiFieldNumber
+            data-test-subj="inputQueueMaxBytesNumber"
+            onChange={[Function]}
+          />
+        </FlexItemSetting>
+        <FlexItemSetting>
+          <EuiSelect
+            data-test-subj="selectQueueMaxBytesUnits"
+            onChange={[Function]}
+            options={
+              Array [
+                Object {
+                  "data-test-subj": "selectQueueMaxBytesUnits-b",
+                  "text": "bytes",
+                  "value": "b",
+                },
+                Object {
+                  "data-test-subj": "selectQueueMaxBytesUnits-kb",
+                  "text": "kilobytes",
+                  "value": "kb",
+                },
+                Object {
+                  "data-test-subj": "selectQueueMaxBytesUnits-mb",
+                  "text": "megabytes",
+                  "value": "mb",
+                },
+                Object {
+                  "data-test-subj": "selectQueueMaxBytesUnits-gb",
+                  "text": "gigabytes",
+                  "value": "gb",
+                },
+                Object {
+                  "data-test-subj": "selectQueueMaxBytesUnits-tb",
+                  "text": "terabytes",
+                  "value": "tb",
+                },
+                Object {
+                  "data-test-subj": "selectQueueMaxBytesUnits-pb",
+                  "text": "petabytes",
+                  "value": "pb",
+                },
+              ]
+            }
+          />
+        </FlexItemSetting>
+        <FlexItemSetting
+          formRowLabelText="Queue checkpoint writes"
+          formRowTooltipText="The maximum number of written events before forcing a checkpoint when persistent queues are enabled. Specify 0 to set this value to unlimited.
+
+Default value: 1024"
+        >
+          <EuiFieldNumber
+            data-test-subj="inputQueueCheckpointWrites"
+            onChange={[Function]}
+            value={100}
+          />
+        </FlexItemSetting>
+      </EuiFlexGroup>
+    </EuiForm>
+    <EuiSpacer
+      size="l"
+    />
+    <EuiFlexGroup
+      justifyContent="flexStart"
+    >
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiButton
+          data-test-subj="btnSavePipeline"
+          fill={true}
+          isDisabled={false}
+          onClick={[Function]}
+        >
+          <FormattedMessage
+            defaultMessage="Create and deploy"
+            id="xpack.logstash.pipelineEditor.createAndDeployButtonLabel"
+            values={Object {}}
+          />
+        </EuiButton>
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiButton
+          data-test-subj="btnCancel"
+          onClick={[Function]}
+        >
+          <FormattedMessage
+            defaultMessage="Cancel"
+            id="xpack.logstash.pipelineEditor.cancelButtonLabel"
+            values={Object {}}
+          />
+        </EuiButton>
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiButtonEmpty
+          color="danger"
+          data-test-subj="btnDeletePipeline"
+          onClick={[Function]}
+        >
+          <FormattedMessage
+            defaultMessage="Delete pipeline"
+            id="xpack.logstash.pipelineEditor.deletePipelineButtonLabel"
+            values={Object {}}
+          />
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiPageContent>
+</div>
+`;
+
+exports[`PipelineEditor component matches snapshot for create pipeline 1`] = `
+<div
+  data-test-subj="pipelineEdit pipelineEdit-pipelineId"
+>
+  <EuiPageContent
+    horizontalPosition="center"
+    style={
+      Object {
+        "width": 1100,
+      }
+    }
+    verticalPosition="center"
+  >
+    <EuiTitle
+      size="m"
+    >
+      <h2>
+        Create Pipeline
+      </h2>
+    </EuiTitle>
+    <EuiSpacer
+      size="m"
+    />
+    <EuiForm
+      error={Array []}
+      isInvalid={false}
+    >
+      <EuiFormRow
+        describedByIds={Array []}
+        display="row"
+        fullWidth={true}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        label={
+          <FormattedMessage
+            defaultMessage="Pipeline ID"
+            id="xpack.logstash.pipelineEditor.pipelineIdFormRowLabel"
+            values={Object {}}
+          />
+        }
+        labelType="label"
+      >
+        <EuiFieldText
+          data-test-subj="inputId"
+          fullWidth={true}
+          isInvalid={false}
+          name="pipelineId"
+          onBlur={[Function]}
+          onChange={[Function]}
+          value="pipelineId"
+        />
+      </EuiFormRow>
+      <EuiFormRow
+        describedByIds={Array []}
+        display="row"
+        fullWidth={true}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        label={
+          <FormattedMessage
+            defaultMessage="Description"
+            id="xpack.logstash.pipelineEditor.descriptionFormRowLabel"
+            values={Object {}}
+          />
+        }
+        labelType="label"
+      >
+        <EuiFieldText
+          data-test-subj="inputDescription"
+          fullWidth={true}
+          name="pipelineDescription"
+          onChange={[Function]}
+          value="pipeline description"
+        />
+      </EuiFormRow>
+      <EuiFormRow
+        describedByIds={Array []}
+        display="row"
+        fullWidth={true}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        label={
+          <FormattedMessage
+            defaultMessage="Pipeline"
+            id="xpack.logstash.pipelineEditor.pipelineFormRowLabel"
+            values={Object {}}
+          />
+        }
+        labelType="label"
+      >
+        <div
+          data-test-subj="acePipeline"
+        >
+          <EuiCodeEditor
+            mode="plain_text"
+            onChange={[Function]}
+            setOptions={
+              Object {
+                "maxLines": Infinity,
+                "minLines": 25,
+                "readOnly": false,
+              }
+            }
+            theme="github"
+            value="input { stdin { } } filter { } output { stdout { } }"
+            width="1017"
+          />
+        </div>
+      </EuiFormRow>
+      <EuiFormRow
+        describedByIds={Array []}
+        display="row"
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        label={
+          <FormLabelWithIconTip
+            formRowLabelText="Pipeline workers"
+            formRowTooltipText="The number of workers that will, in parallel, execute the filter and output stages of the pipeline. If you find that events are backing up, or that the CPU is not saturated, consider increasing this number to better utilize machine processing power.
+
+Default value: Number of the host’s CPU cores"
+          />
+        }
+        labelType="label"
+      >
+        <EuiFieldNumber
+          data-test-subj="inputWorkers"
+          onChange={[Function]}
+          value={1}
+        />
+      </EuiFormRow>
+      <EuiSpacer />
+      <EuiFlexGroup>
+        <FlexItemSetting
+          formRowLabelText="Pipeline batch size"
+          formRowTooltipText="The maximum number of events an individual worker thread will collect from inputs before attempting to execute its filters and outputs. Larger batch sizes are generally more efficient, but come at the cost of increased memory overhead. You may have to increase the JVM heap size by setting the LS_HEAP_SIZE variable to effectively use the option.
+
+Default value: 125"
+        >
+          <EuiFieldNumber
+            data-test-subj="inputBatchSize"
+            onChange={[Function]}
+            value={256}
+          />
+        </FlexItemSetting>
+        <FlexItemSetting
+          formRowLabelText="Pipeline batch delay"
+          formRowTooltipText="When creating pipeline event batches, how long in milliseconds to wait for each event before dispatching an undersized batch to pipeline workers.
+
+Default value: 50ms"
+        >
+          <EuiFieldNumber
+            data-test-subj="inputBatchDelay"
+            onChange={[Function]}
+            value={10}
+          />
+        </FlexItemSetting>
+      </EuiFlexGroup>
+      <EuiFlexGroup>
+        <FlexItemSetting
+          formRowLabelText="Queue type"
+          formRowTooltipText="The internal queuing model to use for event buffering. Specify memory for legacy in-memory based queuing, or persisted for disk-based ACKed queueing
+
+Default value: memory"
+        >
+          <EuiSelect
+            data-test-subj="selectQueueType"
+            onChange={[Function]}
+            options={
+              Array [
+                Object {
+                  "data-test-subj": "selectQueueType-memory",
+                  "text": "memory",
+                  "value": "memory",
+                },
+                Object {
+                  "data-test-subj": "selectQueueType-persisted",
+                  "text": "persisted",
+                  "value": "persisted",
+                },
+              ]
+            }
+            value="MB"
+          />
+        </FlexItemSetting>
+        <FlexItemSetting
+          formRowLabelText="Queue max bytes"
+          formRowTooltipText="The total capacity of the queue in number of bytes. Make sure the capacity of your disk drive is greater than the value you specify here.
+
+Default value: 1024mb (1g)"
+        >
+          <EuiFieldNumber
+            data-test-subj="inputQueueMaxBytesNumber"
+            onChange={[Function]}
+          />
+        </FlexItemSetting>
+        <FlexItemSetting>
+          <EuiSelect
+            data-test-subj="selectQueueMaxBytesUnits"
+            onChange={[Function]}
+            options={
+              Array [
+                Object {
+                  "data-test-subj": "selectQueueMaxBytesUnits-b",
+                  "text": "bytes",
+                  "value": "b",
+                },
+                Object {
+                  "data-test-subj": "selectQueueMaxBytesUnits-kb",
+                  "text": "kilobytes",
+                  "value": "kb",
+                },
+                Object {
+                  "data-test-subj": "selectQueueMaxBytesUnits-mb",
+                  "text": "megabytes",
+                  "value": "mb",
+                },
+                Object {
+                  "data-test-subj": "selectQueueMaxBytesUnits-gb",
+                  "text": "gigabytes",
+                  "value": "gb",
+                },
+                Object {
+                  "data-test-subj": "selectQueueMaxBytesUnits-tb",
+                  "text": "terabytes",
+                  "value": "tb",
+                },
+                Object {
+                  "data-test-subj": "selectQueueMaxBytesUnits-pb",
+                  "text": "petabytes",
+                  "value": "pb",
+                },
+              ]
+            }
+          />
+        </FlexItemSetting>
+        <FlexItemSetting
+          formRowLabelText="Queue checkpoint writes"
+          formRowTooltipText="The maximum number of written events before forcing a checkpoint when persistent queues are enabled. Specify 0 to set this value to unlimited.
+
+Default value: 1024"
+        >
+          <EuiFieldNumber
+            data-test-subj="inputQueueCheckpointWrites"
+            onChange={[Function]}
+            value={100}
+          />
+        </FlexItemSetting>
+      </EuiFlexGroup>
+    </EuiForm>
+    <EuiSpacer
+      size="l"
+    />
+    <EuiFlexGroup
+      justifyContent="flexStart"
+    >
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiButton
+          data-test-subj="btnSavePipeline"
+          fill={true}
+          isDisabled={false}
+          onClick={[Function]}
+        >
+          <FormattedMessage
+            defaultMessage="Create and deploy"
+            id="xpack.logstash.pipelineEditor.createAndDeployButtonLabel"
+            values={Object {}}
+          />
+        </EuiButton>
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiButton
+          data-test-subj="btnCancel"
+          onClick={[Function]}
+        >
+          <FormattedMessage
+            defaultMessage="Cancel"
+            id="xpack.logstash.pipelineEditor.cancelButtonLabel"
+            values={Object {}}
+          />
+        </EuiButton>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiPageContent>
+</div>
+`;
+
+exports[`PipelineEditor component matches snapshot for edit pipeline 1`] = `
+<div
+  data-test-subj="pipelineEdit pipelineEdit-pipelineId"
+>
+  <EuiPageContent
+    horizontalPosition="center"
+    style={
+      Object {
+        "width": 1100,
+      }
+    }
+    verticalPosition="center"
+  >
+    <EuiTitle
+      size="m"
+    >
+      <h2>
+        Edit Pipeline "pipelineId"
+      </h2>
+    </EuiTitle>
+    <EuiSpacer
+      size="m"
+    />
+    <EuiForm
+      error={Array []}
+      isInvalid={false}
+    >
+      <EuiFormRow
+        describedByIds={Array []}
+        display="row"
+        fullWidth={true}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        label={
+          <FormattedMessage
+            defaultMessage="Description"
+            id="xpack.logstash.pipelineEditor.descriptionFormRowLabel"
+            values={Object {}}
+          />
+        }
+        labelType="label"
+      >
+        <EuiFieldText
+          data-test-subj="inputDescription"
+          fullWidth={true}
+          name="pipelineDescription"
+          onChange={[Function]}
+          value="pipeline description"
+        />
+      </EuiFormRow>
+      <EuiFormRow
+        describedByIds={Array []}
+        display="row"
+        fullWidth={true}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        label={
+          <FormattedMessage
+            defaultMessage="Pipeline"
+            id="xpack.logstash.pipelineEditor.pipelineFormRowLabel"
+            values={Object {}}
+          />
+        }
+        labelType="label"
+      >
+        <div
+          data-test-subj="acePipeline"
+        >
+          <EuiCodeEditor
+            mode="plain_text"
+            onChange={[Function]}
+            setOptions={
+              Object {
+                "maxLines": Infinity,
+                "minLines": 25,
+                "readOnly": false,
+              }
+            }
+            theme="github"
+            value="input { stdin { } } filter { } output { stdout { } }"
+            width="1017"
+          />
+        </div>
+      </EuiFormRow>
+      <EuiFormRow
+        describedByIds={Array []}
+        display="row"
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        label={
+          <FormLabelWithIconTip
+            formRowLabelText="Pipeline workers"
+            formRowTooltipText="The number of workers that will, in parallel, execute the filter and output stages of the pipeline. If you find that events are backing up, or that the CPU is not saturated, consider increasing this number to better utilize machine processing power.
+
+Default value: Number of the host’s CPU cores"
+          />
+        }
+        labelType="label"
+      >
+        <EuiFieldNumber
+          data-test-subj="inputWorkers"
+          onChange={[Function]}
+          value={1}
+        />
+      </EuiFormRow>
+      <EuiSpacer />
+      <EuiFlexGroup>
+        <FlexItemSetting
+          formRowLabelText="Pipeline batch size"
+          formRowTooltipText="The maximum number of events an individual worker thread will collect from inputs before attempting to execute its filters and outputs. Larger batch sizes are generally more efficient, but come at the cost of increased memory overhead. You may have to increase the JVM heap size by setting the LS_HEAP_SIZE variable to effectively use the option.
+
+Default value: 125"
+        >
+          <EuiFieldNumber
+            data-test-subj="inputBatchSize"
+            onChange={[Function]}
+            value={256}
+          />
+        </FlexItemSetting>
+        <FlexItemSetting
+          formRowLabelText="Pipeline batch delay"
+          formRowTooltipText="When creating pipeline event batches, how long in milliseconds to wait for each event before dispatching an undersized batch to pipeline workers.
+
+Default value: 50ms"
+        >
+          <EuiFieldNumber
+            data-test-subj="inputBatchDelay"
+            onChange={[Function]}
+            value={10}
+          />
+        </FlexItemSetting>
+      </EuiFlexGroup>
+      <EuiFlexGroup>
+        <FlexItemSetting
+          formRowLabelText="Queue type"
+          formRowTooltipText="The internal queuing model to use for event buffering. Specify memory for legacy in-memory based queuing, or persisted for disk-based ACKed queueing
+
+Default value: memory"
+        >
+          <EuiSelect
+            data-test-subj="selectQueueType"
+            onChange={[Function]}
+            options={
+              Array [
+                Object {
+                  "data-test-subj": "selectQueueType-memory",
+                  "text": "memory",
+                  "value": "memory",
+                },
+                Object {
+                  "data-test-subj": "selectQueueType-persisted",
+                  "text": "persisted",
+                  "value": "persisted",
+                },
+              ]
+            }
+            value="MB"
+          />
+        </FlexItemSetting>
+        <FlexItemSetting
+          formRowLabelText="Queue max bytes"
+          formRowTooltipText="The total capacity of the queue in number of bytes. Make sure the capacity of your disk drive is greater than the value you specify here.
+
+Default value: 1024mb (1g)"
+        >
+          <EuiFieldNumber
+            data-test-subj="inputQueueMaxBytesNumber"
+            onChange={[Function]}
+          />
+        </FlexItemSetting>
+        <FlexItemSetting>
+          <EuiSelect
+            data-test-subj="selectQueueMaxBytesUnits"
+            onChange={[Function]}
+            options={
+              Array [
+                Object {
+                  "data-test-subj": "selectQueueMaxBytesUnits-b",
+                  "text": "bytes",
+                  "value": "b",
+                },
+                Object {
+                  "data-test-subj": "selectQueueMaxBytesUnits-kb",
+                  "text": "kilobytes",
+                  "value": "kb",
+                },
+                Object {
+                  "data-test-subj": "selectQueueMaxBytesUnits-mb",
+                  "text": "megabytes",
+                  "value": "mb",
+                },
+                Object {
+                  "data-test-subj": "selectQueueMaxBytesUnits-gb",
+                  "text": "gigabytes",
+                  "value": "gb",
+                },
+                Object {
+                  "data-test-subj": "selectQueueMaxBytesUnits-tb",
+                  "text": "terabytes",
+                  "value": "tb",
+                },
+                Object {
+                  "data-test-subj": "selectQueueMaxBytesUnits-pb",
+                  "text": "petabytes",
+                  "value": "pb",
+                },
+              ]
+            }
+          />
+        </FlexItemSetting>
+        <FlexItemSetting
+          formRowLabelText="Queue checkpoint writes"
+          formRowTooltipText="The maximum number of written events before forcing a checkpoint when persistent queues are enabled. Specify 0 to set this value to unlimited.
+
+Default value: 1024"
+        >
+          <EuiFieldNumber
+            data-test-subj="inputQueueCheckpointWrites"
+            onChange={[Function]}
+            value={100}
+          />
+        </FlexItemSetting>
+      </EuiFlexGroup>
+    </EuiForm>
+    <EuiSpacer
+      size="l"
+    />
+    <EuiFlexGroup
+      justifyContent="flexStart"
+    >
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiButton
+          data-test-subj="btnSavePipeline"
+          fill={true}
+          isDisabled={false}
+          onClick={[Function]}
+        >
+          <FormattedMessage
+            defaultMessage="Create and deploy"
+            id="xpack.logstash.pipelineEditor.createAndDeployButtonLabel"
+            values={Object {}}
+          />
+        </EuiButton>
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiButton
+          data-test-subj="btnCancel"
+          onClick={[Function]}
+        >
+          <FormattedMessage
+            defaultMessage="Cancel"
+            id="xpack.logstash.pipelineEditor.cancelButtonLabel"
+            values={Object {}}
+          />
+        </EuiButton>
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiButtonEmpty
+          color="danger"
+          data-test-subj="btnDeletePipeline"
+          onClick={[Function]}
+        >
+          <FormattedMessage
+            defaultMessage="Delete pipeline"
+            id="xpack.logstash.pipelineEditor.deletePipelineButtonLabel"
+            values={Object {}}
+          />
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiPageContent>
+</div>
+`;

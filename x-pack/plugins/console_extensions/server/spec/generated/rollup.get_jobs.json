@@ -1,0 +1,11 @@
+{
+  "rollup.get_jobs": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_rollup/job/{id}",
+      "_rollup/job/"
+    ]
+  }
+}

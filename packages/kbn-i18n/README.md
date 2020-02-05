@@ -33,7 +33,7 @@ For example:
 src/legacy/core_plugins/kibana/translations/fr.json
 ```
 
-The engine scans `x-pack/plugins/*/translations`, `src/core_plugins/*/translations`, `plugins/*/translations` and `src/legacy/ui/translations` folders on initialization, so there is no need to register translation files.
+The engine scans `x-pack/legacy/plugins/*/translations`, `src/core_plugins/*/translations`, `plugins/*/translations` and `src/legacy/ui/translations` folders on initialization, so there is no need to register translation files.
 
 The engine uses a `config/kibana.yml` file for locale resolution process. If locale is
 defined via `i18n.locale` option in `config/kibana.yml` then it will be used as a base
@@ -61,9 +61,9 @@ data to UI frameworks and provides methods for the direct translation.
 
 Here is the public API exposed by this engine:
 
-- `addMessages(messages: Map<string, string>, [locale: string])` - provides a way to register
+- `addTranslation(newTranslation: Translation, [locale: string])` - provides a way to register
 translations with the engine
-- `getMessages()` - returns messages for the current language
+- `getTranslation()` - returns messages for the current language
 - `setLocale(locale: string)` - tells the engine which language to use by given
 language key
 - `getLocale()` - returns the current locale
@@ -78,6 +78,7 @@ For the detailed explanation, see the section below
 translate message by id. `description` is optional context comment that will be extracted
 by i18n tools and added as a comment next to translation message at `defaultMessages.json`.
 - `init(messages: Map<string, string>)` - initializes the engine
+- `load(translationsUrl: string)` - loads JSON with translations from the specified URL and initializes i18n engine with them.
 
 #### I18n engine internals
 
@@ -283,6 +284,8 @@ Initial result: `1 minute ago`
 
 ### Attributes translation in React
 
+The long term plan is to rely on using `FormattedMessage` and `i18n.translate()` by statically importing `i18n` from the `@kbn/i18n` package. **Avoid using `injectI18n` and rely on `i18n.translate()` instead.**
+
 React wrapper provides an ability to inject the imperative formatting API into a React component via its props using `injectI18n` Higher-Order Component. This should be used when your React component needs to format data to a string value where a React element is not suitable; e.g., a `title` or `aria` attribute. In order to use it you should wrap your component with `injectI18n` Higher-Order Component. The formatting API will be provided to the wrapped component via `props.intl`.
 
 React component as a pure function:
@@ -341,6 +344,8 @@ export const MyComponent = injectI18n(
 ```
 
 ## AngularJS
+
+The long term plan is to rely on using `i18n.translate()` by statically importing `i18n` from the `@kbn/i18n` package. **Avoid using the `i18n` filter and the `i18n` service injected in controllers, directives, services.**
 
 AngularJS wrapper has 4 entities: translation `provider`, `service`, `directive`
 and `filter`. Both the directive and the filter use the translation `service`

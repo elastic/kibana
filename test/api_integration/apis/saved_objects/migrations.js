@@ -26,12 +26,12 @@ import { assert } from 'chai';
 import {
   DocumentMigrator,
   IndexMigrator,
-} from '../../../../src/legacy/server/saved_objects/migrations/core';
-import { SavedObjectsSerializer } from '../../../../src/legacy/server/saved_objects/serialization';
-import { SavedObjectsSchema } from '../../../../src/legacy/server/saved_objects/schema';
+} from '../../../../src/core/server/saved_objects/migrations/core';
+import { SavedObjectsSerializer } from '../../../../src/core/server/saved_objects/serialization';
+import { SavedObjectsSchema } from '../../../../src/core/server/saved_objects/schema';
 
 export default ({ getService }) => {
-  const es = getService('es');
+  const es = getService('legacyEs');
   const callCluster = (path, ...args) => _.get(es, path).call(es, ...args);
 
   describe('Kibana index migration', () => {
@@ -101,7 +101,9 @@ export default ({ getService }) => {
       });
 
       assert.isFalse(await callCluster('indices.existsTemplate', { name: 'migration_a_template' }));
-      assert.isTrue(await callCluster('indices.existsTemplate', { name: 'migration_test_a_template' }));
+      assert.isTrue(
+        await callCluster('indices.existsTemplate', { name: 'migration_test_a_template' })
+      );
 
       assert.deepEqual(_.omit(result, 'elapsedMs'), {
         destIndex: '.migration-a_2',
@@ -120,11 +122,35 @@ export default ({ getService }) => {
 
       // The docs in the alias have been migrated
       assert.deepEqual(await fetchDocs({ callCluster, index }), [
-        { id: 'bar:i', type: 'bar', migrationVersion: { bar: '1.9.0' }, bar: { mynum: 68 }, references: [] },
-        { id: 'bar:o', type: 'bar', migrationVersion: { bar: '1.9.0' }, bar: { mynum: 6 }, references: [] },
+        {
+          id: 'bar:i',
+          type: 'bar',
+          migrationVersion: { bar: '1.9.0' },
+          bar: { mynum: 68 },
+          references: [],
+        },
+        {
+          id: 'bar:o',
+          type: 'bar',
+          migrationVersion: { bar: '1.9.0' },
+          bar: { mynum: 6 },
+          references: [],
+        },
         { id: 'baz:u', type: 'baz', baz: { title: 'Terrific!' }, references: [] },
-        { id: 'foo:a', type: 'foo', migrationVersion: { foo: '1.0.0' }, foo: { name: 'FOO A' }, references: [] },
-        { id: 'foo:e', type: 'foo', migrationVersion: { foo: '1.0.0' }, foo: { name: 'FOOEY' }, references: [] },
+        {
+          id: 'foo:a',
+          type: 'foo',
+          migrationVersion: { foo: '1.0.0' },
+          foo: { name: 'FOO A' },
+          references: [],
+        },
+        {
+          id: 'foo:e',
+          type: 'foo',
+          migrationVersion: { foo: '1.0.0' },
+          foo: { name: 'FOOEY' },
+          references: [],
+        },
       ]);
     });
 
@@ -166,10 +192,34 @@ export default ({ getService }) => {
 
       // The index for the initial migration has not been destroyed...
       assert.deepEqual(await fetchDocs({ callCluster, index: `${index}_2` }), [
-        { id: 'bar:i', type: 'bar', migrationVersion: { bar: '1.9.0' }, bar: { mynum: 68 }, references: [] },
-        { id: 'bar:o', type: 'bar', migrationVersion: { bar: '1.9.0' }, bar: { mynum: 6 }, references: [] },
-        { id: 'foo:a', type: 'foo', migrationVersion: { foo: '1.0.0' }, foo: { name: 'FOO A' }, references: [] },
-        { id: 'foo:e', type: 'foo', migrationVersion: { foo: '1.0.0' }, foo: { name: 'FOOEY' }, references: [] },
+        {
+          id: 'bar:i',
+          type: 'bar',
+          migrationVersion: { bar: '1.9.0' },
+          bar: { mynum: 68 },
+          references: [],
+        },
+        {
+          id: 'bar:o',
+          type: 'bar',
+          migrationVersion: { bar: '1.9.0' },
+          bar: { mynum: 6 },
+          references: [],
+        },
+        {
+          id: 'foo:a',
+          type: 'foo',
+          migrationVersion: { foo: '1.0.0' },
+          foo: { name: 'FOO A' },
+          references: [],
+        },
+        {
+          id: 'foo:e',
+          type: 'foo',
+          migrationVersion: { foo: '1.0.0' },
+          foo: { name: 'FOOEY' },
+          references: [],
+        },
       ]);
 
       // The docs were migrated again...
@@ -188,16 +238,26 @@ export default ({ getService }) => {
           bar: { mynum: 6, name: 'NAME o' },
           references: [],
         },
-        { id: 'foo:a', type: 'foo', migrationVersion: { foo: '2.0.1' }, foo: { name: 'FOO Av2' }, references: [] },
-        { id: 'foo:e', type: 'foo', migrationVersion: { foo: '2.0.1' }, foo: { name: 'FOOEYv2' }, references: [] },
+        {
+          id: 'foo:a',
+          type: 'foo',
+          migrationVersion: { foo: '2.0.1' },
+          foo: { name: 'FOO Av2' },
+          references: [],
+        },
+        {
+          id: 'foo:e',
+          type: 'foo',
+          migrationVersion: { foo: '2.0.1' },
+          foo: { name: 'FOOEYv2' },
+          references: [],
+        },
       ]);
     });
 
     it('Coordinates migrations across the Kibana cluster', async () => {
       const index = '.migration-c';
-      const originalDocs = [
-        { id: 'foo:lotr', type: 'foo', foo: { name: 'Lord of the Rings' } },
-      ];
+      const originalDocs = [{ id: 'foo:lotr', type: 'foo', foo: { name: 'Lord of the Rings' } }];
 
       const mappingProperties = {
         foo: { properties: { name: { type: 'text' } } },
@@ -220,17 +280,22 @@ export default ({ getService }) => {
       // The polling instance and the migrating instance should both
       // return a similar migraiton result.
       assert.deepEqual(
-        result.map(({ status, destIndex }) => ({ status, destIndex })).sort((a) => a.destIndex ? 0 : 1),
+        result
+          .map(({ status, destIndex }) => ({ status, destIndex }))
+          .sort(a => (a.destIndex ? 0 : 1)),
         [
           { status: 'migrated', destIndex: '.migration-c_2' },
           { status: 'skipped', destIndex: undefined },
-        ],
+        ]
       );
 
       // It only created the original and the dest
       assert.deepEqual(
-        _.pluck(await callCluster('cat.indices', { index: '.migration-c*', format: 'json' }), 'index').sort(),
-        ['.migration-c_1', '.migration-c_2'],
+        _.pluck(
+          await callCluster('cat.indices', { index: '.migration-c*', format: 'json' }),
+          'index'
+        ).sort(),
+        ['.migration-c_1', '.migration-c_2']
       );
 
       // The docs in the original index are unchanged
@@ -240,7 +305,13 @@ export default ({ getService }) => {
 
       // The docs in the alias have been migrated
       assert.deepEqual(await fetchDocs({ callCluster, index }), [
-        { id: 'foo:lotr', type: 'foo', migrationVersion: { foo: '1.0.0' }, foo: { name: 'LOTR' }, references: [] },
+        {
+          id: 'foo:lotr',
+          type: 'foo',
+          migrationVersion: { foo: '1.0.0' },
+          foo: { name: 'LOTR' },
+          references: [],
+        },
       ]);
     });
   });
@@ -271,7 +342,14 @@ async function createDocs({ callCluster, index, docs }) {
   await callCluster('indices.refresh', { index });
 }
 
-async function migrateIndex({ callCluster, index, migrations, mappingProperties, validateDoc, obsoleteIndexTemplatePattern }) {
+async function migrateIndex({
+  callCluster,
+  index,
+  migrations,
+  mappingProperties,
+  validateDoc,
+  obsoleteIndexTemplatePattern,
+}) {
   const documentMigrator = new DocumentMigrator({
     kibanaVersion: '99.9.9',
     migrations,
@@ -285,7 +363,7 @@ async function migrateIndex({ callCluster, index, migrations, mappingProperties,
     obsoleteIndexTemplatePattern,
     mappingProperties,
     batchSize: 10,
-    log: _.noop,
+    log: { info: _.noop, debug: _.noop, warn: _.noop },
     pollInterval: 50,
     scrollDuration: '5m',
     serializer: new SavedObjectsSerializer(new SavedObjectsSchema()),
@@ -298,9 +376,10 @@ async function fetchDocs({ callCluster, index }) {
   const {
     hits: { hits },
   } = await callCluster('search', { index });
-  return hits.map(h => ({
-    ...h._source,
-    id: h._id,
-  }))
-    .sort(((a, b) => a.id.localeCompare(b.id)));
+  return hits
+    .map(h => ({
+      ...h._source,
+      id: h._id,
+    }))
+    .sort((a, b) => a.id.localeCompare(b.id));
 }

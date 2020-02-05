@@ -1,0 +1,70 @@
+@import 'src/legacy/ui/public/styles/styling_constants';
+
+// Canvas core
+@import 'hackery';
+@import 'main';
+
+// Canvas apps
+@import '../apps/home/home_app/home_app';
+@import '../apps/workpad/workpad_app/workpad_app';
+@import '../apps/export/export/export_app';
+
+// Canvas components
+@import '../components/alignment_guide/alignment_guide';
+@import '../components/arg_add/arg_add';
+@import '../components/arg_add_popover/arg_add_popover';
+@import '../components/arg_form/arg_form';
+@import '../components/asset_manager/asset_manager';
+@import '../components/asset_picker/asset_picker';
+@import '../components/autocomplete/autocomplete';
+@import '../components/border_connection/border_connection';
+@import '../components/border_resize_handle/border_resize_handle';
+@import '../components/clipboard/clipboard';
+@import '../components/color_dot/color_dot';
+@import '../components/color_palette/color_palette';
+@import '../components/color_picker_popover/color_picker_popover';
+@import '../components/custom_element_modal/custom_element_modal';
+@import '../components/datasource/datasource';
+@import '../components/datasource/datasource_preview/datasource_preview';
+@import '../components/datatable/datatable';
+@import '../components/debug/debug';
+@import '../components/dom_preview/dom_preview';
+@import '../components/dragbox_annotation/dragbox_annotation';
+@import '../components/element_card/element_card';
+@import '../components/element_content/element_content';
+@import '../components/expression/expression';
+@import '../components/fullscreen/fullscreen';
+@import '../components/function_form/function_form';
+@import '../components/hover_annotation/hover_annotation';
+@import '../components/loading/loading';
+@import '../components/navbar/navbar';
+@import '../components/page_manager/page_manager';
+@import '../components/palette_picker/palette_picker';
+@import '../components/palette_swatch/palette_swatch';
+@import '../components/positionable/positionable';
+@import '../components/rotation_handle/rotation_handle';
+@import '../components/shape_preview/shape_preview';
+@import '../components/shape_picker/shape_picker';
+@import '../components/sidebar/sidebar';
+@import '../components/sidebar_header/sidebar_header';
+@import '../components/toolbar/toolbar';
+@import '../components/toolbar/tray/tray';
+@import '../components/tooltip_annotation/tooltip_annotation';
+@import '../components/workpad/workpad';
+@import '../components/workpad_header/control_settings/control_settings';
+@import '../components/workpad_header/workpad_export/workpad_export';
+@import '../components/workpad_loader/workpad_loader';
+@import '../components/workpad_loader/workpad_dropzone/workpad_dropzone';
+@import '../components/workpad_page/workpad_page';
+@import '../components/workpad_page/workpad_interactive_page/workpad_interactive_page';
+@import '../components/workpad_page/workpad_static_page/workpad_static_page';
+
+@import '../../canvas_plugin_src/renderers/advanced_filter/component/advanced_filter.scss';
+@import '../../canvas_plugin_src/renderers/dropdown_filter/component/dropdown_filter.scss';
+@import '../../canvas_plugin_src/renderers/plot/plot.scss';
+@import '../../canvas_plugin_src/renderers/reveal_image/reveal_image.scss';
+@import '../../canvas_plugin_src/renderers/time_filter/components/datetime_calendar/datetime_calendar.scss';
+@import '../../canvas_plugin_src/renderers/time_filter/components/datetime_range_absolute/datetime_range_absolute.scss';
+@import '../../canvas_plugin_src/renderers/time_filter/components/time_picker/time_picker.scss';
+@import '../../canvas_plugin_src/renderers/time_filter/components/time_picker_popover/time_picker_popover.scss';
+@import '../../canvas_plugin_src/uis/arguments/image_upload/image_upload.scss';

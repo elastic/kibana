@@ -35,10 +35,7 @@ import {
   KuiTableHeaderCell,
 } from '../../index';
 
-import {
-  LEFT_ALIGNMENT,
-  RIGHT_ALIGNMENT,
-} from '../../../services';
+import { LEFT_ALIGNMENT, RIGHT_ALIGNMENT } from '../../../services';
 
 export function KuiListingTable({
   rows,
@@ -47,11 +44,11 @@ export function KuiListingTable({
   toolBarActions,
   onFilter,
   onItemSelectionChanged,
+  enableSelection,
   selectedRowIds,
   filter,
   prompt,
 }) {
-
   function areAllRowsSelected() {
     return rows.length > 0 && rows.length === selectedRowIds.length;
   }
@@ -69,18 +66,16 @@ export function KuiListingTable({
     if (selectedRowIndex >= 0) {
       onItemSelectionChanged(selectedRowIds.filter((item, index) => index !== selectedRowIndex));
     } else {
-      onItemSelectionChanged([
-        ...selectedRowIds,
-        rowId
-      ]);
+      onItemSelectionChanged([...selectedRowIds, rowId]);
     }
   }
 
-  function renderTableRows() {
+  function renderTableRows(enableSelection) {
     return rows.map((row, rowIndex) => {
       return (
         <KuiListingTableRow
           key={rowIndex}
+          enableSelection={enableSelection}
           isSelected={selectedRowIds.indexOf(row.id) >= 0}
           onSelectionChanged={toggleRow}
           row={row}
@@ -97,10 +92,7 @@ export function KuiListingTable({
         content = cell;
       }
       return (
-        <KuiTableHeaderCell
-          key={index}
-          {...props}
-        >
+        <KuiTableHeaderCell key={index} {...props}>
           {content}
         </KuiTableHeaderCell>
       );
@@ -111,16 +103,13 @@ export function KuiListingTable({
     return (
       <KuiTable>
         <KuiTableHeader>
-          <KuiTableHeaderCheckBoxCell
-            isChecked={areAllRowsSelected()}
-            onChange={toggleAll}
-          />
+          {enableSelection && (
+            <KuiTableHeaderCheckBoxCell isChecked={areAllRowsSelected()} onChange={toggleAll} />
+          )}
           {renderHeader()}
         </KuiTableHeader>
 
-        <KuiTableBody>
-          {renderTableRows()}
-        </KuiTableBody>
+        <KuiTableBody>{renderTableRows(enableSelection)}</KuiTableBody>
       </KuiTable>
     );
   }
@@ -136,10 +125,7 @@ export function KuiListingTable({
 
       {prompt ? prompt : renderInnerTable()}
 
-      <KuiListingTableToolBarFooter
-        itemsSelectedCount={selectedRowIds.length}
-        pager={pager}
-      />
+      <KuiListingTableToolBarFooter itemsSelectedCount={selectedRowIds.length} pager={pager} />
     </KuiControlledTable>
   );
 }
@@ -155,22 +141,25 @@ KuiListingTable.propTypes = {
         isSortAscending: PropTypes.bool,
         isSorted: PropTypes.bool,
       }),
-    ]
-    )),
-  rows: PropTypes.arrayOf(PropTypes.shape({
-    id: PropTypes.string,
-    cells: PropTypes.arrayOf(
-      PropTypes.oneOfType([
-        PropTypes.node,
-        PropTypes.shape({
-          content: PropTypes.node,
-          align: PropTypes.oneOf([LEFT_ALIGNMENT, RIGHT_ALIGNMENT]),
-        }),
-      ],
-      )),
-  })),
+    ])
+  ),
+  rows: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.string,
+      cells: PropTypes.arrayOf(
+        PropTypes.oneOfType([
+          PropTypes.node,
+          PropTypes.shape({
+            content: PropTypes.node,
+            align: PropTypes.oneOf([LEFT_ALIGNMENT, RIGHT_ALIGNMENT]),
+          }),
+        ])
+      ),
+    })
+  ),
   pager: PropTypes.node,
   onItemSelectionChanged: PropTypes.func.isRequired,
+  enableSelection: PropTypes.bool,
   selectedRowIds: PropTypes.array,
   prompt: PropTypes.node, // If given, will be shown instead of a table with rows.
   onFilter: PropTypes.func,
@@ -181,4 +170,5 @@ KuiListingTable.propTypes = {
 KuiListingTable.defaultProps = {
   rows: [],
   selectedRowIds: [],
+  enableSelection: true,
 };

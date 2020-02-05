@@ -1,0 +1,485 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`LoginPage disabled form states renders as expected when a connection to ES is not available 1`] = `
+<div
+  className="loginWelcome login-form"
+>
+  <header
+    className="loginWelcome__header"
+  >
+    <div
+      className="loginWelcome__content eui-textCenter loginWelcome__contentDisabledForm"
+    >
+      <EuiSpacer
+        size="xxl"
+      />
+      <span
+        className="loginWelcome__logo"
+      >
+        <EuiIcon
+          size="xxl"
+          type="logoKibana"
+        />
+      </span>
+      <EuiTitle
+        className="loginWelcome__title"
+        size="l"
+      >
+        <h1>
+          <FormattedMessage
+            defaultMessage="Welcome to Kibana"
+            id="xpack.security.loginPage.welcomeTitle"
+            values={Object {}}
+          />
+        </h1>
+      </EuiTitle>
+      <EuiText
+        className="loginWelcome__subtitle"
+        color="subdued"
+        size="s"
+      >
+        <p>
+          <FormattedMessage
+            defaultMessage="Your window into the Elastic Stack"
+            id="xpack.security.loginPage.welcomeDescription"
+            values={Object {}}
+          />
+        </p>
+      </EuiText>
+      <EuiSpacer
+        size="xl"
+      />
+    </div>
+  </header>
+  <div
+    className="loginWelcome__content loginWelcome-body loginWelcome__contentDisabledForm"
+  >
+    <EuiFlexGroup
+      gutterSize="l"
+    >
+      <EuiFlexItem>
+        <DisabledLoginForm
+          message={
+            <FormattedMessage
+              defaultMessage="See the Kibana logs for details and try reloading the page."
+              id="xpack.security.loginPage.esUnavailableMessage"
+              values={Object {}}
+            />
+          }
+          title={
+            <FormattedMessage
+              defaultMessage="Cannot connect to the Elasticsearch cluster"
+              id="xpack.security.loginPage.esUnavailableTitle"
+              values={Object {}}
+            />
+          }
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </div>
+</div>
+`;
+
+exports[`LoginPage disabled form states renders as expected when an unknown loginState layout is provided 1`] = `
+<div
+  className="loginWelcome login-form"
+>
+  <header
+    className="loginWelcome__header"
+  >
+    <div
+      className="loginWelcome__content eui-textCenter loginWelcome__contentDisabledForm"
+    >
+      <EuiSpacer
+        size="xxl"
+      />
+      <span
+        className="loginWelcome__logo"
+      >
+        <EuiIcon
+          size="xxl"
+          type="logoKibana"
+        />
+      </span>
+      <EuiTitle
+        className="loginWelcome__title"
+        size="l"
+      >
+        <h1>
+          <FormattedMessage
+            defaultMessage="Welcome to Kibana"
+            id="xpack.security.loginPage.welcomeTitle"
+            values={Object {}}
+          />
+        </h1>
+      </EuiTitle>
+      <EuiText
+        className="loginWelcome__subtitle"
+        color="subdued"
+        size="s"
+      >
+        <p>
+          <FormattedMessage
+            defaultMessage="Your window into the Elastic Stack"
+            id="xpack.security.loginPage.welcomeDescription"
+            values={Object {}}
+          />
+        </p>
+      </EuiText>
+      <EuiSpacer
+        size="xl"
+      />
+    </div>
+  </header>
+  <div
+    className="loginWelcome__content loginWelcome-body loginWelcome__contentDisabledForm"
+  >
+    <EuiFlexGroup
+      gutterSize="l"
+    >
+      <EuiFlexItem>
+        <DisabledLoginForm
+          message={
+            <FormattedMessage
+              defaultMessage="Refer to the Kibana logs for more details and refresh to try again."
+              id="xpack.security.loginPage.unknownLayoutMessage"
+              values={Object {}}
+            />
+          }
+          title={
+            <FormattedMessage
+              defaultMessage="Unsupported login form layout."
+              id="xpack.security.loginPage.unknownLayoutTitle"
+              values={Object {}}
+            />
+          }
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </div>
+</div>
+`;
+
+exports[`LoginPage disabled form states renders as expected when loginAssistanceMessage is set 1`] = `
+<div
+  className="loginWelcome login-form"
+>
+  <header
+    className="loginWelcome__header"
+  >
+    <div
+      className="loginWelcome__content eui-textCenter"
+    >
+      <EuiSpacer
+        size="xxl"
+      />
+      <span
+        className="loginWelcome__logo"
+      >
+        <EuiIcon
+          size="xxl"
+          type="logoKibana"
+        />
+      </span>
+      <EuiTitle
+        className="loginWelcome__title"
+        size="l"
+      >
+        <h1>
+          <FormattedMessage
+            defaultMessage="Welcome to Kibana"
+            id="xpack.security.loginPage.welcomeTitle"
+            values={Object {}}
+          />
+        </h1>
+      </EuiTitle>
+      <EuiText
+        className="loginWelcome__subtitle"
+        color="subdued"
+        size="s"
+      >
+        <p>
+          <FormattedMessage
+            defaultMessage="Your window into the Elastic Stack"
+            id="xpack.security.loginPage.welcomeDescription"
+            values={Object {}}
+          />
+        </p>
+      </EuiText>
+      <EuiSpacer
+        size="xl"
+      />
+    </div>
+  </header>
+  <div
+    className="loginWelcome__content loginWelcome-body"
+  >
+    <EuiFlexGroup
+      gutterSize="l"
+    >
+      <EuiFlexItem>
+        <InjectIntl(BasicLoginFormUI)
+          http={
+            Object {
+              "post": [MockFunction],
+            }
+          }
+          isSecureConnection={false}
+          loginAssistanceMessage="This is an *important* message"
+          loginState={
+            Object {
+              "allowLogin": true,
+              "layout": "form",
+            }
+          }
+          next=""
+          requiresSecureConnection={false}
+          window={Object {}}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </div>
+</div>
+`;
+
+exports[`LoginPage disabled form states renders as expected when secure cookies are required but not present 1`] = `
+<div
+  className="loginWelcome login-form"
+>
+  <header
+    className="loginWelcome__header"
+  >
+    <div
+      className="loginWelcome__content eui-textCenter loginWelcome__contentDisabledForm"
+    >
+      <EuiSpacer
+        size="xxl"
+      />
+      <span
+        className="loginWelcome__logo"
+      >
+        <EuiIcon
+          size="xxl"
+          type="logoKibana"
+        />
+      </span>
+      <EuiTitle
+        className="loginWelcome__title"
+        size="l"
+      >
+        <h1>
+          <FormattedMessage
+            defaultMessage="Welcome to Kibana"
+            id="xpack.security.loginPage.welcomeTitle"
+            values={Object {}}
+          />
+        </h1>
+      </EuiTitle>
+      <EuiText
+        className="loginWelcome__subtitle"
+        color="subdued"
+        size="s"
+      >
+        <p>
+          <FormattedMessage
+            defaultMessage="Your window into the Elastic Stack"
+            id="xpack.security.loginPage.welcomeDescription"
+            values={Object {}}
+          />
+        </p>
+      </EuiText>
+      <EuiSpacer
+        size="xl"
+      />
+    </div>
+  </header>
+  <div
+    className="loginWelcome__content loginWelcome-body loginWelcome__contentDisabledForm"
+  >
+    <EuiFlexGroup
+      gutterSize="l"
+    >
+      <EuiFlexItem>
+        <DisabledLoginForm
+          message={
+            <FormattedMessage
+              defaultMessage="Contact your system administrator."
+              id="xpack.security.loginPage.requiresSecureConnectionMessage"
+              values={Object {}}
+            />
+          }
+          title={
+            <FormattedMessage
+              defaultMessage="A secure connection is required for log in"
+              id="xpack.security.loginPage.requiresSecureConnectionTitle"
+              values={Object {}}
+            />
+          }
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </div>
+</div>
+`;
+
+exports[`LoginPage disabled form states renders as expected when xpack is not available 1`] = `
+<div
+  className="loginWelcome login-form"
+>
+  <header
+    className="loginWelcome__header"
+  >
+    <div
+      className="loginWelcome__content eui-textCenter loginWelcome__contentDisabledForm"
+    >
+      <EuiSpacer
+        size="xxl"
+      />
+      <span
+        className="loginWelcome__logo"
+      >
+        <EuiIcon
+          size="xxl"
+          type="logoKibana"
+        />
+      </span>
+      <EuiTitle
+        className="loginWelcome__title"
+        size="l"
+      >
+        <h1>
+          <FormattedMessage
+            defaultMessage="Welcome to Kibana"
+            id="xpack.security.loginPage.welcomeTitle"
+            values={Object {}}
+          />
+        </h1>
+      </EuiTitle>
+      <EuiText
+        className="loginWelcome__subtitle"
+        color="subdued"
+        size="s"
+      >
+        <p>
+          <FormattedMessage
+            defaultMessage="Your window into the Elastic Stack"
+            id="xpack.security.loginPage.welcomeDescription"
+            values={Object {}}
+          />
+        </p>
+      </EuiText>
+      <EuiSpacer
+        size="xl"
+      />
+    </div>
+  </header>
+  <div
+    className="loginWelcome__content loginWelcome-body loginWelcome__contentDisabledForm"
+  >
+    <EuiFlexGroup
+      gutterSize="l"
+    >
+      <EuiFlexItem>
+        <DisabledLoginForm
+          message={
+            <FormattedMessage
+              defaultMessage="To use the full set of free features in this distribution of Kibana, please update Elasticsearch to the default distribution."
+              id="xpack.security.loginPage.xpackUnavailableMessage"
+              values={Object {}}
+            />
+          }
+          title={
+            <FormattedMessage
+              defaultMessage="Cannot connect to the Elasticsearch cluster currently configured for Kibana."
+              id="xpack.security.loginPage.xpackUnavailableTitle"
+              values={Object {}}
+            />
+          }
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </div>
+</div>
+`;
+
+exports[`LoginPage enabled form state renders as expected 1`] = `
+<div
+  className="loginWelcome login-form"
+>
+  <header
+    className="loginWelcome__header"
+  >
+    <div
+      className="loginWelcome__content eui-textCenter"
+    >
+      <EuiSpacer
+        size="xxl"
+      />
+      <span
+        className="loginWelcome__logo"
+      >
+        <EuiIcon
+          size="xxl"
+          type="logoKibana"
+        />
+      </span>
+      <EuiTitle
+        className="loginWelcome__title"
+        size="l"
+      >
+        <h1>
+          <FormattedMessage
+            defaultMessage="Welcome to Kibana"
+            id="xpack.security.loginPage.welcomeTitle"
+            values={Object {}}
+          />
+        </h1>
+      </EuiTitle>
+      <EuiText
+        className="loginWelcome__subtitle"
+        color="subdued"
+        size="s"
+      >
+        <p>
+          <FormattedMessage
+            defaultMessage="Your window into the Elastic Stack"
+            id="xpack.security.loginPage.welcomeDescription"
+            values={Object {}}
+          />
+        </p>
+      </EuiText>
+      <EuiSpacer
+        size="xl"
+      />
+    </div>
+  </header>
+  <div
+    className="loginWelcome__content loginWelcome-body"
+  >
+    <EuiFlexGroup
+      gutterSize="l"
+    >
+      <EuiFlexItem>
+        <InjectIntl(BasicLoginFormUI)
+          http={
+            Object {
+              "post": [MockFunction],
+            }
+          }
+          isSecureConnection={false}
+          loginAssistanceMessage=""
+          loginState={
+            Object {
+              "allowLogin": true,
+              "layout": "form",
+            }
+          }
+          next=""
+          requiresSecureConnection={false}
+          window={Object {}}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </div>
+</div>
+`;

@@ -1,0 +1,106 @@
+{
+  "buckets": [
+    { "key": 0, "count": 0 },
+    { "key": 115868, "count": 0 },
+    { "key": 231736, "count": 0 },
+    { "key": 347604, "count": 0 },
+    { "key": 463472, "count": 0 },
+    {
+      "key": 579340,
+      "count": 8,
+      "samples": [
+        {
+          "transactionId": "99437ee4-08d4-41f5-9b2b-93cc32ec3dfb"
+        }
+      ]
+    },
+    {
+      "key": 695208,
+      "count": 23,
+      "samples": [
+        {
+          "transactionId": "d327611b-e999-4942-a94f-c60208940180"
+        }
+      ]
+    },
+    {
+      "key": 811076,
+      "count": 49,
+      "samples": [
+        {
+          "transactionId": "99c50a5b-44b4-4289-a3d1-a2815d128192"
+        }
+      ]
+    },
+    {
+      "key": 926944,
+      "count": 51,
+      "transactionId": "9706a1ec-23f5-4ce8-97e8-69ce35fb0a9a"
+    },
+    {
+      "key": 1042812,
+      "count": 46,
+      "transactionId": "f8d360c3-dd5e-47b6-b082-9e0bf821d3b2"
+    },
+    {
+      "key": 1158680,
+      "count": 13,
+      "samples": [
+        {
+          "transactionId": "8486d3e2-7f15-48df-aa37-6ee9955adbd2"
+        }
+      ]
+    },
+    {
+      "key": 1274548,
+      "count": 7,
+      "transactionId": "54b4b5a7-f065-4cab-9016-534e58f4fc0a"
+    },
+    {
+      "key": 1390416,
+      "count": 4,
+      "transactionId": "8cfac2a3-38e7-4d3a-9792-d008b4bcb867"
+    },
+    {
+      "key": 1506284,
+      "count": 3,
+      "transactionId": "ce3f3bd3-a37c-419e-bb9c-5db956ded149"
+    },
+    { "key": 1622152, "count": 0 },
+    {
+      "key": 1738020,
+      "count": 4,
+      "transactionId": "2300174b-85d8-40ba-a6cb-eeba2a49debf"
+    },
+    { "key": 1853888, "count": 0 },
+    { "key": 1969756, "count": 0 },
+    {
+      "key": 2085624,
+      "count": 1,
+      "transactionId": "774955a4-2ba3-4461-81a6-65759db4805d"
+    },
+    { "key": 2201492, "count": 0 },
+    { "key": 2317360, "count": 0 },
+    { "key": 2433228, "count": 0 },
+    { "key": 2549096, "count": 0 },
+    { "key": 2664964, "count": 0 },
+    {
+      "key": 2780832,
+      "count": 1,
+      "transactionId": "035d1b9d-af71-46cf-8910-57bd4faf412d"
+    },
+    {
+      "key": 2896700,
+      "count": 1,
+      "transactionId": "4a845b32-9de4-4796-8ef4-d7bbdedc9099"
+    },
+    { "key": 3012568, "count": 0 },
+    {
+      "key": 3128436,
+      "count": 1,
+      "transactionId": "68620ffb-7a1b-4f8e-b9bb-009fa5b092be"
+    }
+  ],
+  "bucketSize": 115868,
+  "defaultBucketIndex": 12
+}

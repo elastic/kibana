@@ -2,8 +2,9 @@
 
 exports[`renders matching snapshot 1`] = `
 <EuiGlobalToastList
-  dismissToast={[MockFunction]}
-  toastLifeTimeMs={6000}
+  data-test-subj="globalToastList"
+  dismissToast={[Function]}
+  toastLifeTimeMs={Infinity}
   toasts={Array []}
 />
 `;

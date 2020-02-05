@@ -1,0 +1,41 @@
+.gphGuidancePanel {
+  max-width: 580px;
+  margin: $euiSizeL 0;
+}
+
+.gphGuidancePanel__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.gphGuidancePanel__item {
+  display: block;
+  max-width: 420px;
+  position: relative;
+  padding-left: $euiSizeXL;
+  margin-bottom: $euiSizeL;
+}
+
+.gphGuidancePanel__item--disabled {
+  color: $euiColorDarkShade;
+
+  button {
+    color: $euiColorDarkShade !important;
+  }
+}
+
+.gphGuidancePanel__itemIcon {
+  position: absolute;
+  left: 0;
+  top: -($euiSizeXS / 2);
+  width: $euiSizeL;
+  height: $euiSizeL;
+  padding: $euiSizeXS;
+
+  &--done {
+    background-color: $euiColorSecondary;
+    color: $euiColorEmptyShade;
+    border-radius: 50%;
+  }
+}

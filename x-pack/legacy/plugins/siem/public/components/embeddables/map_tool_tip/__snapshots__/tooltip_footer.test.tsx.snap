@@ -1,0 +1,46 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ToolTipFilter renders correctly against snapshot 1`] = `
+<Fragment>
+  <EuiHorizontalRule
+    margin="s"
+  />
+  <EuiFlexGroup
+    alignItems="center"
+    gutterSize="xs"
+    justifyContent="spaceBetween"
+  >
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiText
+        size="xs"
+      >
+        1 of 100 features
+      </EuiText>
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    >
+      <span>
+        <EuiButtonIcon
+          aria-label="Next"
+          color="text"
+          data-test-subj="previous-feature-button"
+          disabled={true}
+          iconType="arrowLeft"
+          onClick={[MockFunction]}
+        />
+        <EuiButtonIcon
+          aria-label="Next"
+          color="text"
+          data-test-subj="next-feature-button"
+          disabled={false}
+          iconType="arrowRight"
+          onClick={[MockFunction]}
+        />
+      </span>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</Fragment>
+`;

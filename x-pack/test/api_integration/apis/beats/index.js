@@ -6,14 +6,15 @@
 
 import { ES_INDEX_NAME } from './constants';
 
-export default function ({ getService, loadTestFile }) {
-  const es = getService('es');
+export default function({ getService, loadTestFile }) {
+  const es = getService('legacyEs');
 
   describe('beats', () => {
-    const cleanup = () => es.indices.delete({
-      index: ES_INDEX_NAME,
-      ignore: [404]
-    });
+    const cleanup = () =>
+      es.indices.delete({
+        index: ES_INDEX_NAME,
+        ignore: [404],
+      });
 
     beforeEach(cleanup);
 

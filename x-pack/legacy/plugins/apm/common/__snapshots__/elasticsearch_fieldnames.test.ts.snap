@@ -1,0 +1,331 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Error CLIENT_GEO_COUNTRY_ISO_CODE 1`] = `undefined`;
+
+exports[`Error CONTAINER_ID 1`] = `undefined`;
+
+exports[`Error DESTINATION_ADDRESS 1`] = `undefined`;
+
+exports[`Error ERROR_CULPRIT 1`] = `"handleOopsie"`;
+
+exports[`Error ERROR_EXC_HANDLED 1`] = `undefined`;
+
+exports[`Error ERROR_EXC_MESSAGE 1`] = `undefined`;
+
+exports[`Error ERROR_GROUP_ID 1`] = `"grouping key"`;
+
+exports[`Error ERROR_LOG_LEVEL 1`] = `undefined`;
+
+exports[`Error ERROR_LOG_MESSAGE 1`] = `undefined`;
+
+exports[`Error ERROR_PAGE_URL 1`] = `undefined`;
+
+exports[`Error HOST_NAME 1`] = `"my hostname"`;
+
+exports[`Error HTTP_REQUEST_METHOD 1`] = `undefined`;
+
+exports[`Error LABEL_NAME 1`] = `undefined`;
+
+exports[`Error METRIC_JAVA_GC_COUNT 1`] = `undefined`;
+
+exports[`Error METRIC_JAVA_GC_TIME 1`] = `undefined`;
+
+exports[`Error METRIC_JAVA_HEAP_MEMORY_COMMITTED 1`] = `undefined`;
+
+exports[`Error METRIC_JAVA_HEAP_MEMORY_MAX 1`] = `undefined`;
+
+exports[`Error METRIC_JAVA_HEAP_MEMORY_USED 1`] = `undefined`;
+
+exports[`Error METRIC_JAVA_NON_HEAP_MEMORY_COMMITTED 1`] = `undefined`;
+
+exports[`Error METRIC_JAVA_NON_HEAP_MEMORY_MAX 1`] = `undefined`;
+
+exports[`Error METRIC_JAVA_NON_HEAP_MEMORY_USED 1`] = `undefined`;
+
+exports[`Error METRIC_JAVA_THREAD_COUNT 1`] = `undefined`;
+
+exports[`Error METRIC_PROCESS_CPU_PERCENT 1`] = `undefined`;
+
+exports[`Error METRIC_SYSTEM_CPU_PERCENT 1`] = `undefined`;
+
+exports[`Error METRIC_SYSTEM_FREE_MEMORY 1`] = `undefined`;
+
+exports[`Error METRIC_SYSTEM_TOTAL_MEMORY 1`] = `undefined`;
+
+exports[`Error OBSERVER_LISTENING 1`] = `undefined`;
+
+exports[`Error OBSERVER_VERSION_MAJOR 1`] = `undefined`;
+
+exports[`Error PARENT_ID 1`] = `"parentId"`;
+
+exports[`Error POD_NAME 1`] = `undefined`;
+
+exports[`Error PROCESSOR_EVENT 1`] = `"error"`;
+
+exports[`Error SERVICE_AGENT_NAME 1`] = `"java"`;
+
+exports[`Error SERVICE_ENVIRONMENT 1`] = `undefined`;
+
+exports[`Error SERVICE_NAME 1`] = `"service name"`;
+
+exports[`Error SERVICE_NODE_NAME 1`] = `undefined`;
+
+exports[`Error SERVICE_VERSION 1`] = `undefined`;
+
+exports[`Error SPAN_ACTION 1`] = `undefined`;
+
+exports[`Error SPAN_DURATION 1`] = `undefined`;
+
+exports[`Error SPAN_ID 1`] = `undefined`;
+
+exports[`Error SPAN_NAME 1`] = `undefined`;
+
+exports[`Error SPAN_SELF_TIME_SUM 1`] = `undefined`;
+
+exports[`Error SPAN_SUBTYPE 1`] = `undefined`;
+
+exports[`Error SPAN_TYPE 1`] = `undefined`;
+
+exports[`Error TRACE_ID 1`] = `"trace id"`;
+
+exports[`Error TRANSACTION_BREAKDOWN_COUNT 1`] = `undefined`;
+
+exports[`Error TRANSACTION_DURATION 1`] = `undefined`;
+
+exports[`Error TRANSACTION_ID 1`] = `"transaction id"`;
+
+exports[`Error TRANSACTION_NAME 1`] = `undefined`;
+
+exports[`Error TRANSACTION_PAGE_URL 1`] = `undefined`;
+
+exports[`Error TRANSACTION_RESULT 1`] = `undefined`;
+
+exports[`Error TRANSACTION_SAMPLED 1`] = `undefined`;
+
+exports[`Error TRANSACTION_TYPE 1`] = `"request"`;
+
+exports[`Error URL_FULL 1`] = `undefined`;
+
+exports[`Error USER_AGENT_NAME 1`] = `undefined`;
+
+exports[`Error USER_ID 1`] = `undefined`;
+
+exports[`Span CLIENT_GEO_COUNTRY_ISO_CODE 1`] = `undefined`;
+
+exports[`Span CONTAINER_ID 1`] = `undefined`;
+
+exports[`Span DESTINATION_ADDRESS 1`] = `undefined`;
+
+exports[`Span ERROR_CULPRIT 1`] = `undefined`;
+
+exports[`Span ERROR_EXC_HANDLED 1`] = `undefined`;
+
+exports[`Span ERROR_EXC_MESSAGE 1`] = `undefined`;
+
+exports[`Span ERROR_GROUP_ID 1`] = `undefined`;
+
+exports[`Span ERROR_LOG_LEVEL 1`] = `undefined`;
+
+exports[`Span ERROR_LOG_MESSAGE 1`] = `undefined`;
+
+exports[`Span ERROR_PAGE_URL 1`] = `undefined`;
+
+exports[`Span HOST_NAME 1`] = `undefined`;
+
+exports[`Span HTTP_REQUEST_METHOD 1`] = `undefined`;
+
+exports[`Span LABEL_NAME 1`] = `undefined`;
+
+exports[`Span METRIC_JAVA_GC_COUNT 1`] = `undefined`;
+
+exports[`Span METRIC_JAVA_GC_TIME 1`] = `undefined`;
+
+exports[`Span METRIC_JAVA_HEAP_MEMORY_COMMITTED 1`] = `undefined`;
+
+exports[`Span METRIC_JAVA_HEAP_MEMORY_MAX 1`] = `undefined`;
+
+exports[`Span METRIC_JAVA_HEAP_MEMORY_USED 1`] = `undefined`;
+
+exports[`Span METRIC_JAVA_NON_HEAP_MEMORY_COMMITTED 1`] = `undefined`;
+
+exports[`Span METRIC_JAVA_NON_HEAP_MEMORY_MAX 1`] = `undefined`;
+
+exports[`Span METRIC_JAVA_NON_HEAP_MEMORY_USED 1`] = `undefined`;
+
+exports[`Span METRIC_JAVA_THREAD_COUNT 1`] = `undefined`;
+
+exports[`Span METRIC_PROCESS_CPU_PERCENT 1`] = `undefined`;
+
+exports[`Span METRIC_SYSTEM_CPU_PERCENT 1`] = `undefined`;
+
+exports[`Span METRIC_SYSTEM_FREE_MEMORY 1`] = `undefined`;
+
+exports[`Span METRIC_SYSTEM_TOTAL_MEMORY 1`] = `undefined`;
+
+exports[`Span OBSERVER_LISTENING 1`] = `undefined`;
+
+exports[`Span OBSERVER_VERSION_MAJOR 1`] = `undefined`;
+
+exports[`Span PARENT_ID 1`] = `"parentId"`;
+
+exports[`Span POD_NAME 1`] = `undefined`;
+
+exports[`Span PROCESSOR_EVENT 1`] = `"span"`;
+
+exports[`Span SERVICE_AGENT_NAME 1`] = `"java"`;
+
+exports[`Span SERVICE_ENVIRONMENT 1`] = `undefined`;
+
+exports[`Span SERVICE_NAME 1`] = `"service name"`;
+
+exports[`Span SERVICE_NODE_NAME 1`] = `undefined`;
+
+exports[`Span SERVICE_VERSION 1`] = `undefined`;
+
+exports[`Span SPAN_ACTION 1`] = `"my action"`;
+
+exports[`Span SPAN_DURATION 1`] = `1337`;
+
+exports[`Span SPAN_ID 1`] = `"span id"`;
+
+exports[`Span SPAN_NAME 1`] = `"span name"`;
+
+exports[`Span SPAN_SELF_TIME_SUM 1`] = `undefined`;
+
+exports[`Span SPAN_SUBTYPE 1`] = `"my subtype"`;
+
+exports[`Span SPAN_TYPE 1`] = `"span type"`;
+
+exports[`Span TRACE_ID 1`] = `"trace id"`;
+
+exports[`Span TRANSACTION_BREAKDOWN_COUNT 1`] = `undefined`;
+
+exports[`Span TRANSACTION_DURATION 1`] = `undefined`;
+
+exports[`Span TRANSACTION_ID 1`] = `"transaction id"`;
+
+exports[`Span TRANSACTION_NAME 1`] = `undefined`;
+
+exports[`Span TRANSACTION_PAGE_URL 1`] = `undefined`;
+
+exports[`Span TRANSACTION_RESULT 1`] = `undefined`;
+
+exports[`Span TRANSACTION_SAMPLED 1`] = `undefined`;
+
+exports[`Span TRANSACTION_TYPE 1`] = `undefined`;
+
+exports[`Span URL_FULL 1`] = `undefined`;
+
+exports[`Span USER_AGENT_NAME 1`] = `undefined`;
+
+exports[`Span USER_ID 1`] = `undefined`;
+
+exports[`Transaction CLIENT_GEO_COUNTRY_ISO_CODE 1`] = `undefined`;
+
+exports[`Transaction CONTAINER_ID 1`] = `"container1234567890abcdef"`;
+
+exports[`Transaction DESTINATION_ADDRESS 1`] = `undefined`;
+
+exports[`Transaction ERROR_CULPRIT 1`] = `undefined`;
+
+exports[`Transaction ERROR_EXC_HANDLED 1`] = `undefined`;
+
+exports[`Transaction ERROR_EXC_MESSAGE 1`] = `undefined`;
+
+exports[`Transaction ERROR_GROUP_ID 1`] = `undefined`;
+
+exports[`Transaction ERROR_LOG_LEVEL 1`] = `undefined`;
+
+exports[`Transaction ERROR_LOG_MESSAGE 1`] = `undefined`;
+
+exports[`Transaction ERROR_PAGE_URL 1`] = `undefined`;
+
+exports[`Transaction HOST_NAME 1`] = `"my hostname"`;
+
+exports[`Transaction HTTP_REQUEST_METHOD 1`] = `"GET"`;
+
+exports[`Transaction LABEL_NAME 1`] = `undefined`;
+
+exports[`Transaction METRIC_JAVA_GC_COUNT 1`] = `undefined`;
+
+exports[`Transaction METRIC_JAVA_GC_TIME 1`] = `undefined`;
+
+exports[`Transaction METRIC_JAVA_HEAP_MEMORY_COMMITTED 1`] = `undefined`;
+
+exports[`Transaction METRIC_JAVA_HEAP_MEMORY_MAX 1`] = `undefined`;
+
+exports[`Transaction METRIC_JAVA_HEAP_MEMORY_USED 1`] = `undefined`;
+
+exports[`Transaction METRIC_JAVA_NON_HEAP_MEMORY_COMMITTED 1`] = `undefined`;
+
+exports[`Transaction METRIC_JAVA_NON_HEAP_MEMORY_MAX 1`] = `undefined`;
+
+exports[`Transaction METRIC_JAVA_NON_HEAP_MEMORY_USED 1`] = `undefined`;
+
+exports[`Transaction METRIC_JAVA_THREAD_COUNT 1`] = `undefined`;
+
+exports[`Transaction METRIC_PROCESS_CPU_PERCENT 1`] = `undefined`;
+
+exports[`Transaction METRIC_SYSTEM_CPU_PERCENT 1`] = `undefined`;
+
+exports[`Transaction METRIC_SYSTEM_FREE_MEMORY 1`] = `undefined`;
+
+exports[`Transaction METRIC_SYSTEM_TOTAL_MEMORY 1`] = `undefined`;
+
+exports[`Transaction OBSERVER_LISTENING 1`] = `undefined`;
+
+exports[`Transaction OBSERVER_VERSION_MAJOR 1`] = `undefined`;
+
+exports[`Transaction PARENT_ID 1`] = `"parentId"`;
+
+exports[`Transaction POD_NAME 1`] = `undefined`;
+
+exports[`Transaction PROCESSOR_EVENT 1`] = `"transaction"`;
+
+exports[`Transaction SERVICE_AGENT_NAME 1`] = `"java"`;
+
+exports[`Transaction SERVICE_ENVIRONMENT 1`] = `undefined`;
+
+exports[`Transaction SERVICE_NAME 1`] = `"service name"`;
+
+exports[`Transaction SERVICE_NODE_NAME 1`] = `undefined`;
+
+exports[`Transaction SERVICE_VERSION 1`] = `undefined`;
+
+exports[`Transaction SPAN_ACTION 1`] = `undefined`;
+
+exports[`Transaction SPAN_DURATION 1`] = `undefined`;
+
+exports[`Transaction SPAN_ID 1`] = `undefined`;
+
+exports[`Transaction SPAN_NAME 1`] = `undefined`;
+
+exports[`Transaction SPAN_SELF_TIME_SUM 1`] = `undefined`;
+
+exports[`Transaction SPAN_SUBTYPE 1`] = `undefined`;
+
+exports[`Transaction SPAN_TYPE 1`] = `undefined`;
+
+exports[`Transaction TRACE_ID 1`] = `"trace id"`;
+
+exports[`Transaction TRANSACTION_BREAKDOWN_COUNT 1`] = `undefined`;
+
+exports[`Transaction TRANSACTION_DURATION 1`] = `1337`;
+
+exports[`Transaction TRANSACTION_ID 1`] = `"transaction id"`;
+
+exports[`Transaction TRANSACTION_NAME 1`] = `"transaction name"`;
+
+exports[`Transaction TRANSACTION_PAGE_URL 1`] = `undefined`;
+
+exports[`Transaction TRANSACTION_RESULT 1`] = `"transaction result"`;
+
+exports[`Transaction TRANSACTION_SAMPLED 1`] = `true`;
+
+exports[`Transaction TRANSACTION_TYPE 1`] = `"transaction type"`;
+
+exports[`Transaction URL_FULL 1`] = `"http://www.elastic.co"`;
+
+exports[`Transaction USER_AGENT_NAME 1`] = `"Other"`;
+
+exports[`Transaction USER_ID 1`] = `"1337"`;

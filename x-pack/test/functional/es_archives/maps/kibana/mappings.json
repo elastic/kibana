@@ -215,6 +215,20 @@
         "namespace": {
           "type": "keyword"
         },
+        "references": {
+          "type": "nested",
+          "properties": {
+            "name": {
+              "type": "keyword"
+            },
+            "type": {
+              "type": "keyword"
+            },
+            "id": {
+              "type": "keyword"
+            }
+          }
+        },
         "search": {
           "properties": {
             "columns": {
@@ -263,6 +277,9 @@
               "type": "text"
             },
             "initials": {
+              "type": "keyword"
+            },
+            "disabledFeatures": {
               "type": "keyword"
             },
             "name": {
@@ -378,6 +395,35 @@
             },
             "visState": {
               "type": "text"
+            }
+          }
+        },
+        "query": {
+          "properties": {
+            "title": {
+              "type": "text"
+            },
+            "description": {
+              "type": "text"
+            },
+            "query": {
+              "properties": {
+                "language": {
+                  "type": "keyword"
+                },
+                "query": {
+                  "type": "keyword",
+                  "index": false
+                }
+              }
+            },
+            "filters": {
+              "type": "object",
+              "enabled": false
+            },
+            "timefilter": {
+              "type": "object",
+              "enabled": false
             }
           }
         }

@@ -34,11 +34,10 @@ const appExtension = wrap(
 // plain extension groups produce lists of modules that will be required by the entry
 // files to include extensions of specific types into specific apps
 export const visTypes = appExtension;
-export const visResponseHandlers = appExtension;
-export const visRequestHandlers = appExtension;
+
 export const visEditorTypes = appExtension;
-export const autocompleteProviders = appExtension;
 export const savedObjectTypes = appExtension;
+export const embeddableActions = appExtension;
 export const embeddableFactories = appExtension;
 export const contextMenuActions = appExtension;
 export const fieldFormats = appExtension;
@@ -57,6 +56,7 @@ export const search = appExtension;
 export const shareContextMenuExtensions = appExtension;
 // Add a visualize app extension that should be used for visualize specific stuff
 export const visualize = appExtension;
+export const interpreter = appExtension;
 
 // aliases visTypeEnhancers to the visTypes group
 export const visTypeEnhancers = wrap(alias('visTypes'), appExtension);

@@ -30,13 +30,17 @@ const pluginsPaths = [
   path.join(fixturesPath, 'test_plugin_1'),
   path.join(fixturesPath, 'test_plugin_2'),
   path.join(fixturesPath, 'test_plugin_3'),
+  path.join(fixturesPath, 'test_plugin_3_additional_path'),
 ];
 
 const config = {
   paths: {
-    plugin_1: 'src/dev/i18n/__fixtures__/extract_default_translations/test_plugin_1',
-    plugin_2: 'src/dev/i18n/__fixtures__/extract_default_translations/test_plugin_2',
-    plugin_3: 'src/dev/i18n/__fixtures__/extract_default_translations/test_plugin_3',
+    plugin_1: ['src/dev/i18n/__fixtures__/extract_default_translations/test_plugin_1'],
+    plugin_2: ['src/dev/i18n/__fixtures__/extract_default_translations/test_plugin_2'],
+    plugin_3: [
+      'src/dev/i18n/__fixtures__/extract_default_translations/test_plugin_3',
+      'src/dev/i18n/__fixtures__/extract_default_translations/test_plugin_3_additional_path',
+    ],
   },
   exclude: [],
 };
@@ -67,6 +71,20 @@ describe('dev/i18n/extract_default_translations', () => {
       '__fixtures__/extract_default_translations/test_plugin_2/test_file.html'
     );
     expect(() => validateMessageNamespace(id, filePath, config.paths)).not.toThrow();
+  });
+
+  test('validates message namespace with multiple paths', () => {
+    const id = 'plugin_3.message-id';
+    const filePath1 = path.resolve(
+      __dirname,
+      '__fixtures__/extract_default_translations/test_plugin_3/test_file.html'
+    );
+    const filePath2 = path.resolve(
+      __dirname,
+      '__fixtures__/extract_default_translations/test_plugin_3_additional_path/test_file.html'
+    );
+    expect(() => validateMessageNamespace(id, filePath1, config.paths)).not.toThrow();
+    expect(() => validateMessageNamespace(id, filePath2, config.paths)).not.toThrow();
   });
 
   test('throws on wrong message namespace', () => {

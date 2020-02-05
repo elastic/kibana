@@ -1,0 +1,219 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`NetworkTopNFlow Table Component rendering it renders the default NetworkTopNFlow table on the IP Details page 1`] = `
+<Connect(Component)
+  data={
+    Array [
+      Object {
+        "cursor": Object {
+          "value": "8.8.8.8",
+        },
+        "node": Object {
+          "destination": null,
+          "network": Object {
+            "bytes_in": 3826633497,
+            "bytes_out": 1083495734,
+          },
+          "source": Object {
+            "autonomous_system": Object {
+              "name": "Google, Inc",
+              "number": 15169,
+            },
+            "destination_ips": 12,
+            "domain": Array [
+              "test.domain.com",
+            ],
+            "flows": 12345,
+            "ip": "8.8.8.8",
+            "location": Object {
+              "flowTarget": "source",
+              "geo": Object {
+                "city_name": Array [
+                  "Mountain View",
+                ],
+                "continent_name": Array [
+                  "North America",
+                ],
+                "country_iso_code": Array [
+                  "US",
+                ],
+                "country_name": null,
+                "region_iso_code": Array [
+                  "US-CA",
+                ],
+                "region_name": Array [
+                  "California",
+                ],
+              },
+            },
+          },
+        },
+      },
+      Object {
+        "cursor": Object {
+          "value": "9.9.9.9",
+        },
+        "node": Object {
+          "destination": null,
+          "network": Object {
+            "bytes_in": 3826633497,
+            "bytes_out": 1083495734,
+          },
+          "source": Object {
+            "autonomous_system": Object {
+              "name": "TM Net, Internet Service Provider",
+              "number": 4788,
+            },
+            "destination_ips": 12,
+            "domain": Array [
+              "test.domain.net",
+              "test.old.domain.net",
+            ],
+            "flows": 12345,
+            "ip": "9.9.9.9",
+            "location": Object {
+              "flowTarget": "source",
+              "geo": Object {
+                "city_name": Array [
+                  "Petaling Jaya",
+                ],
+                "continent_name": Array [
+                  "Asia",
+                ],
+                "country_iso_code": Array [
+                  "MY",
+                ],
+                "country_name": null,
+                "region_iso_code": Array [
+                  "MY-10",
+                ],
+                "region_name": Array [
+                  "Selangor",
+                ],
+              },
+            },
+          },
+        },
+      },
+    ]
+  }
+  fakeTotalCount={50}
+  flowTargeted="source"
+  id="topNFlowSource"
+  isInspect={false}
+  loadPage={[MockFunction]}
+  loading={false}
+  showMorePagesIndicator={true}
+  totalCount={524}
+  type="details"
+/>
+`;
+
+exports[`NetworkTopNFlow Table Component rendering it renders the default NetworkTopNFlow table on the Network page 1`] = `
+<Connect(Component)
+  data={
+    Array [
+      Object {
+        "cursor": Object {
+          "value": "8.8.8.8",
+        },
+        "node": Object {
+          "destination": null,
+          "network": Object {
+            "bytes_in": 3826633497,
+            "bytes_out": 1083495734,
+          },
+          "source": Object {
+            "autonomous_system": Object {
+              "name": "Google, Inc",
+              "number": 15169,
+            },
+            "destination_ips": 12,
+            "domain": Array [
+              "test.domain.com",
+            ],
+            "flows": 12345,
+            "ip": "8.8.8.8",
+            "location": Object {
+              "flowTarget": "source",
+              "geo": Object {
+                "city_name": Array [
+                  "Mountain View",
+                ],
+                "continent_name": Array [
+                  "North America",
+                ],
+                "country_iso_code": Array [
+                  "US",
+                ],
+                "country_name": null,
+                "region_iso_code": Array [
+                  "US-CA",
+                ],
+                "region_name": Array [
+                  "California",
+                ],
+              },
+            },
+          },
+        },
+      },
+      Object {
+        "cursor": Object {
+          "value": "9.9.9.9",
+        },
+        "node": Object {
+          "destination": null,
+          "network": Object {
+            "bytes_in": 3826633497,
+            "bytes_out": 1083495734,
+          },
+          "source": Object {
+            "autonomous_system": Object {
+              "name": "TM Net, Internet Service Provider",
+              "number": 4788,
+            },
+            "destination_ips": 12,
+            "domain": Array [
+              "test.domain.net",
+              "test.old.domain.net",
+            ],
+            "flows": 12345,
+            "ip": "9.9.9.9",
+            "location": Object {
+              "flowTarget": "source",
+              "geo": Object {
+                "city_name": Array [
+                  "Petaling Jaya",
+                ],
+                "continent_name": Array [
+                  "Asia",
+                ],
+                "country_iso_code": Array [
+                  "MY",
+                ],
+                "country_name": null,
+                "region_iso_code": Array [
+                  "MY-10",
+                ],
+                "region_name": Array [
+                  "Selangor",
+                ],
+              },
+            },
+          },
+        },
+      },
+    ]
+  }
+  fakeTotalCount={50}
+  flowTargeted="source"
+  id="topNFlowSource"
+  isInspect={false}
+  loadPage={[MockFunction]}
+  loading={false}
+  showMorePagesIndicator={true}
+  totalCount={524}
+  type="page"
+/>
+`;

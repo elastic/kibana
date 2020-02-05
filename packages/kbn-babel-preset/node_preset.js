@@ -17,34 +17,58 @@
  * under the License.
  */
 
-module.exports = {
-  presets: [
-    [
-      require.resolve('babel-preset-env'),
-      {
-        targets: {
-          // only applies the necessary transformations based on the
-          // current node.js processes version. For example: running
-          // `nvm install 8 && node ./src/cli` will run kibana in node
-          // version 8 and babel will stop transpiling async/await
-          // because they are supported in the "current" version of node
-          node: 'current',
-        },
+module.exports = (_, options = {}) => {
+  const overrides = [];
+  if (!process.env.ALLOW_PERFORMANCE_HOOKS_IN_TASK_MANAGER) {
+    overrides.push({
+      test: [/x-pack[\/\\]legacy[\/\\]plugins[\/\\]task_manager/],
+      plugins: [
+        [
+          require.resolve('babel-plugin-filter-imports'),
+          {
+            imports: {
+              perf_hooks: ['performance'],
+            },
+          },
+        ],
+      ],
+    });
+  }
 
-        // replaces `import "babel-polyfill"` with a list of require statements
-        // for just the polyfills that the target versions don't already supply
-        // on their own
-        useBuiltIns: true,
-      },
+  return {
+    presets: [
+      [
+        require.resolve('@babel/preset-env'),
+        {
+          targets: {
+            // only applies the necessary transformations based on the
+            // current node.js processes version. For example: running
+            // `nvm install 8 && node ./src/cli` will run kibana in node
+            // version 8 and babel will stop transpiling async/await
+            // because they are supported in the "current" version of node
+            node: 'current',
+          },
+
+          // replaces `import "core-js/stable"` with a list of require statements
+          // for just the polyfills that the target versions don't already supply
+          // on their own
+          useBuiltIns: 'entry',
+          modules: 'cjs',
+          corejs: 3,
+
+          ...(options['@babel/preset-env'] || {}),
+        },
+      ],
+      require('./common_preset'),
     ],
-    require('./common_preset'),
-  ],
-  plugins: [
-    [
-      require.resolve('babel-plugin-transform-define'),
-      {
-        'global.__BUILT_WITH_BABEL__': 'true'
-      }
-    ]
-  ]
+    plugins: [
+      [
+        require.resolve('babel-plugin-transform-define'),
+        {
+          'global.__BUILT_WITH_BABEL__': 'true',
+        },
+      ],
+    ],
+    overrides,
+  };
 };

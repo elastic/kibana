@@ -4,16 +4,16 @@ exports[`DateFormatEditor should render normally 1`] = `
 <Fragment>
   <EuiFormRow
     describedByIds={Array []}
+    display="row"
     error={null}
     fullWidth={false}
+    hasChildLabel={true}
     hasEmptyLabelSpace={false}
     helpText={
       <span>
-        <EuiLink
-          color="primary"
-          href="http://momentjs.com/"
-          target="_window"
-          type="button"
+        <ForwardRef
+          href="https://momentjs.com/"
+          target="_blank"
         >
           <FormattedMessage
             defaultMessage="Documentation"
@@ -22,10 +22,9 @@ exports[`DateFormatEditor should render normally 1`] = `
           />
            
           <EuiIcon
-            size="m"
             type="link"
           />
-        </EuiLink>
+        </ForwardRef>
       </span>
     }
     isInvalid={false}
@@ -42,18 +41,17 @@ exports[`DateFormatEditor should render normally 1`] = `
         }
       />
     }
+    labelType="label"
   >
     <EuiFieldText
-      compressed={false}
       data-test-subj="dateEditorPattern"
-      fullWidth={false}
       isInvalid={false}
-      isLoading={false}
       onChange={[Function]}
       placeholder="MMMM Do YYYY, HH:mm:ss.SSS"
     />
   </EuiFormRow>
-  <InjectIntl(FormatEditorSamplesComponent)
+  <FormatEditorSamples
+    sampleType="text"
     samples={
       Array [
         Object {

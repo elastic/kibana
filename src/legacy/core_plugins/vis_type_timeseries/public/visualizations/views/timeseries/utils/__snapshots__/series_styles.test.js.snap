@@ -1,0 +1,81 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`src/legacy/core_plugins/metrics/public/visualizations/views/timeseries/utils/series_styles.js getAreaStyles() should match a snapshot 1`] = `
+Object {
+  "areaSeriesStyle": Object {
+    "area": Object {
+      "fill": "rgb(224, 0, 221)",
+      "opacity": 0,
+      "visible": true,
+    },
+    "line": Object {
+      "stroke": "rgb(224, 0, 221)",
+      "strokeWidth": 1,
+      "visible": true,
+    },
+    "point": Object {
+      "radius": 1,
+      "stroke": "rgb(224, 0, 221)",
+      "strokeWidth": 1,
+      "visible": true,
+    },
+  },
+  "curve": 6,
+}
+`;
+
+exports[`src/legacy/core_plugins/metrics/public/visualizations/views/timeseries/utils/series_styles.js getAreaStyles() should set default values if points, lines and color are empty 1`] = `
+Object {
+  "areaSeriesStyle": Object {
+    "area": Object {
+      "fill": "",
+      "opacity": undefined,
+      "visible": false,
+    },
+    "line": Object {
+      "stroke": "",
+      "strokeWidth": 0,
+      "visible": false,
+    },
+    "point": Object {
+      "radius": 0.5,
+      "stroke": "#000",
+      "strokeWidth": 5,
+      "visible": false,
+    },
+  },
+  "curve": 9,
+}
+`;
+
+exports[`src/legacy/core_plugins/metrics/public/visualizations/views/timeseries/utils/series_styles.js getBarStyles() should match a snapshot 1`] = `
+Object {
+  "barSeriesStyle": Object {
+    "rect": Object {
+      "fill": "rgb(224, 0, 221)",
+      "opacity": 0.5,
+    },
+    "rectBorder": Object {
+      "stroke": "rgb(224, 0, 221)",
+      "strokeWidth": 2,
+      "visible": true,
+    },
+  },
+}
+`;
+
+exports[`src/legacy/core_plugins/metrics/public/visualizations/views/timeseries/utils/series_styles.js getBarStyles() should set default values if bars and colors are empty 1`] = `
+Object {
+  "barSeriesStyle": Object {
+    "rect": Object {
+      "fill": "#000",
+      "opacity": 1,
+    },
+    "rectBorder": Object {
+      "stroke": "#000",
+      "strokeWidth": 0,
+      "visible": true,
+    },
+  },
+}
+`;

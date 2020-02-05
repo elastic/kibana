@@ -1,0 +1,253 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`policy table should change pages when a pagination link is clicked on 1`] = `
+Array [
+  "testy0",
+  "testy1",
+  "testy10",
+  "testy100",
+  "testy101",
+  "testy102",
+  "testy103",
+  "testy104",
+  "testy11",
+  "testy12",
+]
+`;
+
+exports[`policy table should change pages when a pagination link is clicked on 2`] = `
+Array [
+  "testy13",
+  "testy14",
+  "testy15",
+  "testy16",
+  "testy17",
+  "testy18",
+  "testy19",
+  "testy2",
+  "testy20",
+  "testy21",
+]
+`;
+
+exports[`policy table should filter based on content of search input 1`] = `
+Array [
+  "testy0",
+  "testy1",
+  "testy10",
+  "testy100",
+  "testy101",
+  "testy102",
+  "testy103",
+  "testy104",
+  "testy11",
+  "testy12",
+]
+`;
+
+exports[`policy table should show empty state when there are not any policies 1`] = `
+<main
+  class="euiPageBody"
+>
+  <div
+    class="euiPanel euiPanel--paddingLarge euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
+  >
+    <div>
+      <div
+        class="euiSpacer euiSpacer--l"
+      />
+      <div
+        class="euiEmptyPrompt"
+      >
+        <svg
+          aria-hidden="true"
+          class="euiIcon euiIcon--xxLarge euiIcon--subdued euiIcon--app euiIcon-isLoading"
+          focusable="false"
+          height="16"
+          role="img"
+          viewBox="0 0 16 16"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        />
+        <div
+          class="euiSpacer euiSpacer--s"
+        />
+        <span
+          class="euiTextColor euiTextColor--subdued"
+        >
+          <h1
+            class="euiTitle euiTitle--medium"
+          >
+            Create your first index lifecycle policy
+          </h1>
+          <div
+            class="euiSpacer euiSpacer--m"
+          />
+          <div
+            class="euiText euiText--medium"
+          >
+            <p>
+               An index lifecycle policy helps you manage your indices as they age.
+            </p>
+          </div>
+        </span>
+        <div
+          class="euiSpacer euiSpacer--l"
+        />
+        <div
+          class="euiSpacer euiSpacer--s"
+        />
+        <a
+          class="euiButton euiButton--primary euiButton--fill"
+          data-test-subj="createPolicyButton"
+          href="#/management/elasticsearch/index_lifecycle_management/policies/edit"
+          rel="noreferrer"
+        >
+          <span
+            class="euiButton__content"
+          >
+            <svg
+              aria-hidden="true"
+              class="euiIcon euiIcon--medium euiIcon-isLoading euiButton__icon"
+              focusable="false"
+              height="16"
+              role="img"
+              viewBox="0 0 16 16"
+              width="16"
+              xmlns="http://www.w3.org/2000/svg"
+            />
+            <span
+              class="euiButton__text"
+            >
+              Create policy
+            </span>
+          </span>
+        </a>
+      </div>
+      <div
+        class="euiSpacer euiSpacer--m"
+      />
+    </div>
+  </div>
+</main>
+`;
+
+exports[`policy table should sort when linked indices header is clicked 1`] = `
+Array [
+  "testy1",
+  "testy3",
+  "testy5",
+  "testy7",
+  "testy9",
+  "testy11",
+  "testy13",
+  "testy15",
+  "testy17",
+  "testy19",
+]
+`;
+
+exports[`policy table should sort when linked indices header is clicked 2`] = `
+Array [
+  "testy104",
+  "testy102",
+  "testy100",
+  "testy98",
+  "testy96",
+  "testy94",
+  "testy92",
+  "testy90",
+  "testy88",
+  "testy86",
+]
+`;
+
+exports[`policy table should sort when modified date header is clicked 1`] = `
+Array [
+  "testy104",
+  "testy103",
+  "testy102",
+  "testy101",
+  "testy100",
+  "testy99",
+  "testy98",
+  "testy97",
+  "testy96",
+  "testy95",
+]
+`;
+
+exports[`policy table should sort when modified date header is clicked 2`] = `
+Array [
+  "testy0",
+  "testy1",
+  "testy2",
+  "testy3",
+  "testy4",
+  "testy5",
+  "testy6",
+  "testy7",
+  "testy8",
+  "testy9",
+]
+`;
+
+exports[`policy table should sort when name header is clicked 1`] = `
+Array [
+  "testy99",
+  "testy98",
+  "testy97",
+  "testy96",
+  "testy95",
+  "testy94",
+  "testy93",
+  "testy92",
+  "testy91",
+  "testy90",
+]
+`;
+
+exports[`policy table should sort when name header is clicked 2`] = `
+Array [
+  "testy0",
+  "testy1",
+  "testy10",
+  "testy100",
+  "testy101",
+  "testy102",
+  "testy103",
+  "testy104",
+  "testy11",
+  "testy12",
+]
+`;
+
+exports[`policy table should sort when version header is clicked 1`] = `
+Array [
+  "testy0",
+  "testy1",
+  "testy2",
+  "testy3",
+  "testy4",
+  "testy5",
+  "testy6",
+  "testy7",
+  "testy8",
+  "testy9",
+]
+`;
+
+exports[`policy table should sort when version header is clicked 2`] = `
+Array [
+  "testy104",
+  "testy103",
+  "testy102",
+  "testy101",
+  "testy100",
+  "testy99",
+  "testy98",
+  "testy97",
+  "testy96",
+  "testy95",
+]
+`;

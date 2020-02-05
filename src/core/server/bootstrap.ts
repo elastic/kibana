@@ -20,8 +20,8 @@
 import chalk from 'chalk';
 import { isMaster } from 'cluster';
 import { CliArgs, Env, RawConfigService } from './config';
-import { LegacyObjectToConfigAdapter } from './legacy_compat';
 import { Root } from './root';
+import { CriticalError } from './errors';
 
 interface KibanaFeatures {
   // Indicates whether we can run Kibana in a so called cluster mode in which
@@ -29,15 +29,8 @@ interface KibanaFeatures {
   // that are orchestrated by the "master" process (dev mode only feature).
   isClusterModeSupported: boolean;
 
-  // Indicates whether we can run Kibana without X-Pack plugin pack even if it's
-  // installed (dev mode only feature).
-  isOssModeSupported: boolean;
-
   // Indicates whether we can run Kibana in REPL mode (dev mode only feature).
   isReplModeSupported: boolean;
-
-  // Indicates whether X-Pack plugin pack is installed and available.
-  isXPackInstalled: boolean;
 }
 
 interface BootstrapArgs {
@@ -47,6 +40,11 @@ interface BootstrapArgs {
   features: KibanaFeatures;
 }
 
+/**
+ *
+ * @internal
+ * @param param0 - options
+ */
 export async function bootstrap({
   configs,
   cliArgs,
@@ -63,33 +61,25 @@ export async function bootstrap({
     isDevClusterMaster: isMaster && cliArgs.dev && features.isClusterModeSupported,
   });
 
-  const rawConfigService = new RawConfigService(
-    env.configs,
-    rawConfig => new LegacyObjectToConfigAdapter(applyConfigOverrides(rawConfig))
-  );
-
+  const rawConfigService = new RawConfigService(env.configs, applyConfigOverrides);
   rawConfigService.loadConfig();
 
-  const root = new Root(rawConfigService.getConfig$(), env, onRootShutdown);
+  const root = new Root(rawConfigService, env, onRootShutdown);
 
-  function shutdown(reason?: Error) {
-    rawConfigService.stop();
-    return root.shutdown(reason);
-  }
+  process.on('SIGHUP', () => reloadLoggingConfig());
 
-  try {
-    await root.start();
-  } catch (err) {
-    await shutdown(err);
-  }
+  // This is only used by the LogRotator service
+  // in order to be able to reload the log configuration
+  // under the cluster mode
+  process.on('message', msg => {
+    if (!msg || msg.reloadLoggingConfig !== true) {
+      return;
+    }
 
-  if (cliArgs.optimize) {
-    const cliLogger = root.logger.get('cli');
-    cliLogger.info('Optimization done.');
-    await shutdown();
-  }
+    reloadLoggingConfig();
+  });
 
-  process.on('SIGHUP', () => {
+  function reloadLoggingConfig() {
     const cliLogger = root.logger.get('cli');
     cliLogger.info('Reloading logging configuration due to SIGHUP.', { tags: ['config'] });
 
@@ -100,10 +90,28 @@ export async function bootstrap({
     }
 
     cliLogger.info('Reloaded logging configuration due to SIGHUP.', { tags: ['config'] });
-  });
+  }
 
   process.on('SIGINT', () => shutdown());
   process.on('SIGTERM', () => shutdown());
+
+  function shutdown(reason?: Error) {
+    rawConfigService.stop();
+    return root.shutdown(reason);
+  }
+
+  try {
+    await root.setup();
+    await root.start();
+  } catch (err) {
+    await shutdown(err);
+  }
+
+  if (cliArgs.optimize) {
+    const cliLogger = root.logger.get('cli');
+    cliLogger.info('Optimization done.');
+    await shutdown();
+  }
 }
 
 function onRootShutdown(reason?: any) {
@@ -111,9 +119,11 @@ function onRootShutdown(reason?: any) {
     // There is a chance that logger wasn't configured properly and error that
     // that forced root to shut down could go unnoticed. To prevent this we always
     // mirror such fatal errors in standard output with `console.error`.
-    // tslint:disable no-console
+    // eslint-disable-next-line
     console.error(`\n${chalk.white.bgRed(' FATAL ')} ${reason}\n`);
+
+    process.exit(reason instanceof CriticalError ? reason.processExitCode : 1);
   }
 
-  process.exit(reason === undefined ? 0 : (reason as any).processExitCode || 1);
+  process.exit(0);
 }

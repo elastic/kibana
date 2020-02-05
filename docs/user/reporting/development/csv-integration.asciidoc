@@ -1,0 +1,51 @@
+[float]
+=== CSV
+
+[float]
+==== Job parameters
+If integrating with Reporting via a custom UI, the following job parameters must be Rison encoded and posted to
+the aforementioned generate job url:
+
+----
+interface jobParameters {
+  type: string;
+  title: string;
+  searchRequest: {
+    index: string;
+    body: object;
+  };
+  fields: string[];
+  metaFields: string[];
+  conflictedTypesFields: string[];
+  indexPatternId: string;
+}
+----
+
+The `searchRequest.body` should abide by the {ref}/search-request-body.html[Elasticsearch Search Request Body] syntax
+
+[float]
+==== `export-config` Directive
+If integrating with Reporting via the `export-config` directive, the AngularJS controller that contains the directive should expose
+the following methods and the `export-config` directive will POST them to the reporting API:
+
+----
+interface sharingData {
+  searchRequest: {
+    index: string;
+    body: object;
+  };
+  fields: string[];
+  metaFields: string[];
+  conflictedTypesFields: string[];
+  indexPatternId: string;
+}
+
+function getSharingData(): sharingData;
+
+function getSharingType(): string;
+
+function getSharingTitle() string;
+
+----
+
+The `sharingData.searchRequest.body` should abide by the {ref}/search-request-body.html[Elasticsearch Search Request Body] syntax

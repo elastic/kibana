@@ -9,11 +9,11 @@ import { SPACES } from '../../common/lib/spaces';
 import { TestInvoker } from '../../common/lib/types';
 import { deleteTestSuiteFactory } from '../../common/suites/delete';
 
-// tslint:disable:no-default-export
+// eslint-disable-next-line import/no-default-export
 export default function deleteSpaceTestSuite({ getService }: TestInvoker) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
-  const es = getService('es');
+  const es = getService('legacyEs');
 
   const {
     deleteTest,
