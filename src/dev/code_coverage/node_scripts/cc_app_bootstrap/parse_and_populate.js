@@ -23,38 +23,33 @@ import * as readline from 'readline';
 import * as fs from 'fs';
 import { resolve } from 'path';
 
-
 const KIBANA_ROOT_PATH = '../../../../..';
 const KIBANA_ROOT = resolve(__dirname, KIBANA_ROOT_PATH);
-
 const resolvePaths = (...xs) => xs.map(x => resolve(KIBANA_ROOT, x));
 
+const verbose = log => obj =>
+  Object.entries(obj).forEach(xs => log.verbose(`### ${xs[0]} -> ${xs[1]}`));
 
 export const parseAndPopulate = buildNumber => srcFile => destFile => log => {
-  initPrint(buildNumber, srcFile, destFile)(log)
+  const logV = verbose(log);
+  logV({ 'buildNumber': buildNumber, 'srcFile': srcFile, 'destFile': destFile });
 
   const [resolvedSrcFile, resolvedDestFile] = resolvePaths(srcFile, destFile);
-  log.verbose(`\n### resolvedSrcFile: \n\t${resolvedSrcFile}`);
-  log.verbose(`\n### resolvedDestFile: \n\t${resolvedDestFile}`);
+  logV({ 'resolvedSrcFile': resolvedSrcFile, 'resolvedDestFile': resolvedDestFile });
 
-  const input = fs.createReadStream(resolvedSrcFile)
+  const input = fs.createReadStream(resolvedSrcFile);
   const rl = readline.createInterface({ input });
 
+  const prok = x => {
+    console.log(`\n### x: \n\t${x}`);
+  };
 
   const lines$ = fromEvent(rl, 'line');
   lines$.pipe(takeUntil(fromEvent(rl, 'close')))
     .subscribe(
-      console.log,
-      err => console.log("Error: %s", err),
-      () => console.log("Completed"));
+      prok,
+      err => console.log('Error: %s', err),
+      () => console.log('Completed'));
 
 };
-
-function initPrint(...args) {
-  return function initPrintInner(log) {
-    log.verbose(`Job Num: ${args[0]}`);
-    log.verbose(`### Dat file: ${args[1]}`);
-    log.verbose(`### Dest file: ${args[2]}`);
-  }
-}
 
