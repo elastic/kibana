@@ -23,7 +23,6 @@ import { licenseManagement } from './legacy/plugins/license_management';
 import { indexManagement } from './legacy/plugins/index_management';
 import { indexLifecycleManagement } from './legacy/plugins/index_lifecycle_management';
 import { spaces } from './legacy/plugins/spaces';
-import { kueryAutocompleteInitializer } from './legacy/plugins/kuery_autocomplete';
 import { canvas } from './legacy/plugins/canvas';
 import { infra } from './legacy/plugins/infra';
 import { taskManager } from './legacy/plugins/task_manager';
@@ -64,7 +63,6 @@ module.exports = function(kibana) {
     licenseManagement(kibana),
     indexManagement(kibana),
     indexLifecycleManagement(kibana),
-    kueryAutocompleteInitializer(kibana),
     infra(kibana),
     taskManager(kibana),
     rollup(kibana),

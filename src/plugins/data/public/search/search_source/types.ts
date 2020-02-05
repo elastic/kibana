@@ -26,7 +26,12 @@ export enum SortDirection {
   desc = 'desc',
 }
 
-export type EsQuerySortValue = Record<string, SortDirection>;
+export interface SortDirectionNumeric {
+  order: SortDirection;
+  numeric_type?: 'double' | 'long' | 'date' | 'date_nanos';
+}
+
+export type EsQuerySortValue = Record<string, SortDirection | SortDirectionNumeric>;
 
 export interface SearchSourceFields {
   type?: string;
