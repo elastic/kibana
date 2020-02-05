@@ -25,10 +25,10 @@ import {
   TopAggregateParamEditorProps,
 } from './top_aggregate';
 import { aggParamCommonPropsMock } from './test_utils';
-import { AggConfig } from '../../legacy_imports';
+import { IAggConfig } from '../../legacy_imports';
 
 describe('TopAggregateParamEditor', () => {
-  let agg: AggConfig;
+  let agg: IAggConfig;
   let aggParam: any;
   let defaultProps: TopAggregateParamEditorProps;
   let options: AggregateValueProp[];
@@ -37,17 +37,17 @@ describe('TopAggregateParamEditor', () => {
     options = [
       {
         text: 'Min',
-        isCompatible: jest.fn((aggr: AggConfig) => aggr.params.field.type === 'number'),
+        isCompatible: jest.fn((aggr: IAggConfig) => aggr.params.field.type === 'number'),
         value: 'min',
       },
       {
         text: 'Max',
-        isCompatible: jest.fn((aggr: AggConfig) => aggr.params.field.type === 'number'),
+        isCompatible: jest.fn((aggr: IAggConfig) => aggr.params.field.type === 'number'),
         value: 'max',
       },
       {
         text: 'Average',
-        isCompatible: jest.fn((aggr: AggConfig) => aggr.params.field.type === 'string'),
+        isCompatible: jest.fn((aggr: IAggConfig) => aggr.params.field.type === 'string'),
         value: 'average',
       },
     ];
@@ -69,7 +69,7 @@ describe('TopAggregateParamEditor', () => {
         },
       },
       getAggParams: jest.fn(() => [{ name: 'aggregate', options }]),
-    } as any) as AggConfig;
+    } as any) as IAggConfig;
     defaultProps = {
       ...aggParamCommonPropsMock,
       agg,
@@ -150,7 +150,7 @@ describe('TopAggregateParamEditor', () => {
           type: 'string',
         },
       },
-    } as AggConfig;
+    } as IAggConfig;
 
     comp.setProps({ agg });
 
@@ -165,7 +165,7 @@ describe('TopAggregateParamEditor', () => {
           type: 'date',
         },
       },
-    } as AggConfig;
+    } as IAggConfig;
 
     comp.setProps({ agg });
 
@@ -179,7 +179,7 @@ describe('TopAggregateParamEditor', () => {
           type: 'string',
         },
       },
-    } as AggConfig;
+    } as IAggConfig;
 
     comp.setProps({ agg, value: undefined });
 
