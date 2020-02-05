@@ -5,7 +5,7 @@
  */
 
 import { createMockServer } from './_mock_server';
-import { getAlertStateRoute } from './getAlertState';
+import { getAlertStateRoute } from './get_alert_state';
 import { SavedObjectsErrorHelpers } from 'src/core/server';
 
 const { server, alertsClient } = createMockServer();
