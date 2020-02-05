@@ -37,9 +37,8 @@ import {
 
 import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
 
-import { getIndexListUri } from '../../../../../../../../index_management/public/app/services/navigation';
-import { BASE_PATH } from '../../../../../../../common/constants';
-import { UIM_EDIT_CLICK } from '../../../../constants';
+import { getIndexListUri } from '../../../../../../../../index_management/public/application/services/navigation';
+import { BASE_PATH, UIM_EDIT_CLICK } from '../../../../../../../common/constants';
 import { getPolicyPath } from '../../../../services/navigation';
 import { flattenPanelTree } from '../../../../services/flatten_panel_tree';
 import { trackUiMetric } from '../../../../services/ui_metric';
