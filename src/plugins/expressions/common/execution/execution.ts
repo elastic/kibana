@@ -183,31 +183,31 @@ export class Execution<
   }
 
   async invokeFunction(
-    fnDef: ExpressionFunction,
+    fn: ExpressionFunction,
     input: unknown,
     args: Record<string, unknown>
   ): Promise<any> {
-    const castedInput = this.cast(input, fnDef.context ? fnDef.context.types : undefined);
-    const output = await fnDef.fn(castedInput, args, this.context);
+    const normalizedInput = this.cast(input, fn.inputTypes);
+    const output = await fn.fn(normalizedInput, args, this.context);
 
     // Validate that the function returned the type it said it would.
     // This isn't required, but it keeps function developers honest.
     const returnType = getType(output);
-    const expectedType = fnDef.type;
+    const expectedType = fn.type;
     if (expectedType && returnType !== expectedType) {
       throw new Error(
-        `Function '${fnDef.name}' should return '${expectedType}',` +
+        `Function '${fn.name}' should return '${expectedType}',` +
           ` actually returned '${returnType}'`
       );
     }
 
     // Validate the function output against the type definition's validate function.
-    const type = this.context.types[fnDef.type];
+    const type = this.context.types[fn.type];
     if (type && type.validate) {
       try {
         type.validate(output);
       } catch (e) {
-        throw new Error(`Output of '${fnDef.name}' is not a valid type '${fnDef.type}': ${e}`);
+        throw new Error(`Output of '${fn.name}' is not a valid type '${fn.type}': ${e}`);
       }
     }
 

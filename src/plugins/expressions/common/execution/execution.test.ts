@@ -114,6 +114,18 @@ describe('Execution', () => {
     });
   });
 
+  test('casts input to correct type', async () => {
+    const execution = createExecution('add val=1');
+    execution.start(1);
+
+    const result = await execution.result;
+
+    expect(result).toEqual({
+      type: 'num',
+      value: 2,
+    });
+  });
+
   describe('execution context', () => {
     test('context.variables is an object', async () => {
       const { result } = (await run('introspectContext key="variables"')) as any;

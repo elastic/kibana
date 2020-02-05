@@ -58,7 +58,7 @@ export class ExpressionFunction {
   /**
    * Type of inputs that this function supports.
    */
-  context: { types?: string[] };
+  inputTypes: string[] | undefined;
 
   constructor(functionDefinition: AnyExpressionFunctionDefinition) {
     const { name, type, aliases, fn, help, args, context } = functionDefinition;
@@ -69,7 +69,7 @@ export class ExpressionFunction {
     this.fn = (input, params, handlers) =>
       Promise.resolve(fn(input, params, handlers as ExecutionContext));
     this.help = help || '';
-    this.context = context || {};
+    this.inputTypes = context?.types;
 
     for (const [key, arg] of Object.entries(args || {})) {
       this.args[key] = new ExpressionFunctionParameter(key, arg);
@@ -77,8 +77,8 @@ export class ExpressionFunction {
   }
 
   accepts = (type: string): boolean => {
-    // If you don't tell us about context, we'll assume you don't care what you get.
-    if (!this.context.types) return true;
-    return this.context.types.indexOf(type) > -1;
+    // If you don't tell us input types, we'll assume you don't care what you get.
+    if (!this.inputTypes) return true;
+    return this.inputTypes.indexOf(type) > -1;
   };
 }

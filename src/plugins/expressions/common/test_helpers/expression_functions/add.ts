@@ -28,6 +28,7 @@ export const add: ExpressionFunctionDefinition<
 > = {
   name: 'add',
   help: 'This function adds a number to input',
+  context: { types: ['num'] },
   args: {
     val: {
       default: 0,
@@ -36,8 +37,7 @@ export const add: ExpressionFunctionDefinition<
       types: ['null', 'number', 'string'],
     },
   },
-  fn: (input1, { val: input2 }, context) => {
-    const value1 = !input1 ? 0 : typeof input1 === 'object' ? input1.value : Number(input1);
+  fn: ({ value: value1 }, { val: input2 }, context) => {
     const value2 = !input2
       ? 0
       : typeof input2 === 'object'
