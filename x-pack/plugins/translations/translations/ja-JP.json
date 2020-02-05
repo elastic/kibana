@@ -2810,7 +2810,6 @@
     "timelion.noFunctionErrorMessage": "そのような関数はありません: {name}",
     "timelion.panels.noRenderFunctionErrorMessage": "パネルにはレンダリング関数が必要です",
     "timelion.panels.timechart.unknownIntervalErrorMessage": "不明な間隔",
-    "timelion.registerFeatureDescription": "時系列データを分析して結果を可視化するには、式言語を使用してください。",
     "timelion.requestHandlerErrorTitle": "Timelion リクエストエラー",
     "timelion.savedObjects.howToSaveAsNewDescription": "Kibana の以前のバージョンでは、{savedObjectName} の名前を変更すると新しい名前でコピーが作成されました。今後この操作を行うには、「新規 {savedObjectName} として保存」を使用します。",
     "timelion.savedObjects.saveAsNewLabel": "新規 {savedObjectName} として保存",

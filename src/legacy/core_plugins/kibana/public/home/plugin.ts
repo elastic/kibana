@@ -25,7 +25,6 @@ import { KibanaLegacySetup } from '../../../../../plugins/kibana_legacy/public';
 import { UsageCollectionSetup } from '../../../../../plugins/usage_collection/public';
 import {
   Environment,
-  FeatureCatalogueEntry,
   HomePublicPluginStart,
   HomePublicPluginSetup,
 } from '../../../../../plugins/home/public';
@@ -66,7 +65,7 @@ export class HomePlugin implements Plugin {
   private dataStart: DataPublicPluginStart | null = null;
   private savedObjectsClient: any = null;
   private environment: Environment | null = null;
-  private featureCatalogue: HomePublicPluginStart['featureCatalogue'];
+  private featureCatalogue: HomePublicPluginStart['featureCatalogue'] | null = null;
 
   setup(
     core: CoreSetup,
