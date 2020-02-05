@@ -5,7 +5,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import styled from 'styled-components';
 import {
   EmptyState,
@@ -28,6 +28,7 @@ interface OverviewPageProps {
   autocomplete: Pick<AutocompleteProviderRegister, 'getProvider'>;
   setBreadcrumbs: UMUpdateBreadcrumbs;
   indexPattern: IIndexPattern;
+  setEsKueryFilters: (esFilters: string) => void;
 }
 
 type Props = OverviewPageProps;
@@ -41,7 +42,12 @@ const EuiFlexItemStyled = styled(EuiFlexItem)`
   }
 `;
 
-export const OverviewPageComponent = ({ autocomplete, setBreadcrumbs, indexPattern }: Props) => {
+export const OverviewPageComponent = ({
+  autocomplete,
+  setBreadcrumbs,
+  indexPattern,
+  setEsKueryFilters,
+}: Props) => {
   const { colors } = useContext(UptimeThemeContext);
   const [getUrlParams] = useUrlParams();
   const { absoluteDateRangeStart, absoluteDateRangeEnd, ...params } = getUrlParams();
@@ -60,6 +66,10 @@ export const OverviewPageComponent = ({ autocomplete, setBreadcrumbs, indexPatte
   useTrackPageview({ app: 'uptime', path: 'overview', delay: 15000 });
 
   const [esFilters, error] = useUpdateKueryString(indexPattern, search, urlFilters);
+
+  useEffect(() => {
+    setEsKueryFilters(esFilters ?? '');
+  }, [esFilters, setEsKueryFilters]);
 
   const sharedProps = {
     dateRangeStart,
