@@ -4,7 +4,7 @@
     "winlogbeat-*"
   ],
   "language": "kuery",
-  "max_signals": 33,
+  "max_signals": 100,
   "name": "Volume Shadow Copy Deletion via VssAdmin",
   "query": "  event.action:\"Process Create (rule: ProcessCreate)\"  and process.name:\"vssadmin.exe\" and process.args:(\"delete\" and \"shadows\") ",
   "risk_score": 73,

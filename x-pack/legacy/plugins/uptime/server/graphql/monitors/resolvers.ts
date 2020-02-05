@@ -29,7 +29,7 @@ export const createMonitorsResolvers: CreateUMGraphQLResolvers = (
       { monitorId, dateRangeStart, dateRangeEnd, location },
       { APICaller }
     ): Promise<MonitorChart> {
-      return libs.monitors.getMonitorChartsData({
+      return await libs.requests.getMonitorCharts({
         callES: APICaller,
         monitorId,
         dateRangeStart,

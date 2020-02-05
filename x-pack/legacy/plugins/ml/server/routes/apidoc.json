@@ -16,6 +16,23 @@
     "DeleteDataFrameAnalytics",
     "StartDataFrameAnalyticsJob",
     "StopsDataFrameAnalyticsJob",
-    "GetDataFrameAnalyticsMessages"
+    "GetDataFrameAnalyticsMessages",
+    "DataVisualizer",
+    "GetOverallStats",
+    "GetStatsForFields",
+    "AnomalyDetectors",
+    "GetAnomalyDetectors",
+    "GetAnomalyDetectorsById",
+    "GetAnomalyDetectorsStats",
+    "GetAnomalyDetectorsStatsById",
+    "CreateAnomalyDetectors",
+    "UpdateAnomalyDetectors",
+    "OpenAnomalyDetectorsJob",
+    "CloseAnomalyDetectorsJob",
+    "DeleteAnomalyDetectorsJob",
+    "ValidateAnomalyDetector",
+    "ForecastAnomalyDetector",
+    "GetOverallBuckets",
+    "GetCategories"
   ]
 }

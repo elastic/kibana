@@ -20,7 +20,7 @@ describe('get_cluster_uuids', () => {
       get: sinon
         .stub()
         .withArgs('xpack.monitoring.elasticsearch.index_pattern')
-        .returns('.monitoring-es-N-*,monitoring-es-N-*')
+        .returns('.monitoring-es-N-*')
         .withArgs('xpack.monitoring.max_bucket_size')
         .returns(size),
     }),
