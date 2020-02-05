@@ -60,7 +60,7 @@ export const createMetricVisFn = (): ExpressionFunctionDefinition<
   Arguments,
   Render<RenderValue>
 > => ({
-  name,
+  name: 'metricVis',
   type: 'render',
   inputTypes: ['kibana_datatable'],
   help: i18n.translate('visTypeMetric.function.help', {
