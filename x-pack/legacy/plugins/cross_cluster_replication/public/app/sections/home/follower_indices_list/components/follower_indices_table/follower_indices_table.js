@@ -9,8 +9,8 @@ import PropTypes from 'prop-types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
-  EuiHealth,
   EuiIcon,
+  EuiHealth,
   EuiInMemoryTable,
   EuiLink,
   EuiLoadingKibana,

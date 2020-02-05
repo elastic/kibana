@@ -54,7 +54,7 @@ const AutoFollowPatternActionMenuUI: FunctionComponent<Props> = ({
 }) => {
   const [showPopover, setShowPopover] = useState(false);
 
-  const allActiveValuesSame = allValuesSame(patterns.map(({ active }) => active));
+  const allActiveValuesSame = allValuesSame(patterns.filter(Boolean).map(({ active }) => active));
 
   const closePopoverViaAction = () => {
     setShowPopover(false);
@@ -95,7 +95,7 @@ const AutoFollowPatternActionMenuUI: FunctionComponent<Props> = ({
     edit && patterns.length === 1
       ? {
           name: i18n.translate('xpack.crossClusterReplication.editAutoFollowPatternButtonLabel', {
-            defaultMessage: 'Edit',
+            defaultMessage: 'Edit pattern',
           }),
           icon: <EuiIcon type="pencil" />,
           onClick: () => {

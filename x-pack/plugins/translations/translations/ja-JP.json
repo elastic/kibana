@@ -5355,8 +5355,6 @@
     "xpack.crossClusterReplication.autoFollowPatternCreateForm.loadingRemoteClustersMessage": "リモートクラスターを読み込み中…",
     "xpack.crossClusterReplication.autoFollowPatternCreateForm.saveButtonLabel": "作成",
     "xpack.crossClusterReplication.autoFollowPatternDetailPanel.closeButtonLabel": "閉じる",
-    "xpack.crossClusterReplication.autoFollowPatternDetailPanel.deleteButtonLabel": "削除",
-    "xpack.crossClusterReplication.autoFollowPatternDetailPanel.editButtonLabel": "編集",
     "xpack.crossClusterReplication.autoFollowPatternDetailPanel.leaderPatternsLabel": "リーダーパターン",
     "xpack.crossClusterReplication.autoFollowPatternDetailPanel.notFoundLabel": "自動フォローパターンが見つかりません",
     "xpack.crossClusterReplication.autoFollowPatternDetailPanel.prefixEmptyValue": "接頭辞がありません",
