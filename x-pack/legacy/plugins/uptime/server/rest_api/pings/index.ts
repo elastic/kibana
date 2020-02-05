@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { createGetAllRoute } from './get_all';
+export { createGetPingsRoute } from './get_pings';
