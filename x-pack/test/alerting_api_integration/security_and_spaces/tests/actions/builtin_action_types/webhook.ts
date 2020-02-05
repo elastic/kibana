@@ -212,8 +212,8 @@ export default function webhookTest({ getService }: FtrProviderContext) {
         .expect(200);
 
       expect(result.status).to.eql('error');
-      expect(result.message).to.match(/error calling webhook, invalid response/);
-      expect(result.serviceMessage).to.eql('[400] Bad Request');
+      expect(result.message).to.match(/error calling webhook, retry later/);
+      expect(result.serviceMessage).to.eql('[500] Internal Server Error');
     });
   });
 }

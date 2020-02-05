@@ -34,10 +34,10 @@ const ConfigSchema = schema.object(configSchemaProps);
 type ActionTypeConfigType = TypeOf<typeof ConfigSchema>;
 
 // secrets definition
-type ActionTypeSecretsType = TypeOf<typeof SecretsSchema>;
+export type ActionTypeSecretsType = TypeOf<typeof SecretsSchema>;
 const SecretsSchema = schema.object({
-  user: schema.string(),
-  password: schema.string(),
+  user: schema.maybe(schema.string()),
+  password: schema.maybe(schema.string()),
 });
 
 // params definition
@@ -61,7 +61,7 @@ export function getActionType({
     }),
     validate: {
       config: schema.object(configSchemaProps, {
-        validate: curry(valdiateActionTypeConfig)(configurationUtilities),
+        validate: curry(validateActionTypeConfig)(configurationUtilities),
       }),
       secrets: SecretsSchema,
       params: ParamsSchema,
@@ -70,7 +70,7 @@ export function getActionType({
   };
 }
 
-function valdiateActionTypeConfig(
+function validateActionTypeConfig(
   configurationUtilities: ActionsConfigurationUtilities,
   configObject: ActionTypeConfigType
 ) {
@@ -93,17 +93,19 @@ export async function executor(
 ): Promise<ActionTypeExecutorResult> {
   const actionId = execOptions.actionId;
   const { method, url, headers = {} } = execOptions.config as ActionTypeConfigType;
-  const { user: username, password } = execOptions.secrets as ActionTypeSecretsType;
   const { body: data } = execOptions.params as ActionParamsType;
+
+  const secrets: ActionTypeSecretsType = execOptions.secrets as ActionTypeSecretsType;
+  const basicAuth =
+    secrets?.user && secrets?.password
+      ? { auth: { username: secrets.user, password: secrets.password } }
+      : {};
 
   const result: Result<AxiosResponse, AxiosError> = await promiseResult(
     axios.request({
       method,
       url,
-      auth: {
-        username,
-        password,
-      },
+      ...basicAuth,
       headers,
       data,
     })
