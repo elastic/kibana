@@ -38,7 +38,8 @@ export function registerJobInfoRoutes(
   exportTypesRegistry: ExportTypesRegistry,
   logger: Logger
 ) {
-  const jobsQuery = jobsQueryFactory(server);
+  const { elasticsearch } = plugins;
+  const jobsQuery = jobsQueryFactory(server, elasticsearch);
   const getRouteConfig = getRouteConfigFactoryManagementPre(server, plugins, logger);
   const getRouteConfigDownload = getRouteConfigFactoryDownloadPre(server, plugins, logger);
 
@@ -137,7 +138,7 @@ export function registerJobInfoRoutes(
   });
 
   // trigger a download of the output from a job
-  const jobResponseHandler = jobResponseHandlerFactory(server, exportTypesRegistry);
+  const jobResponseHandler = jobResponseHandlerFactory(server, elasticsearch, exportTypesRegistry);
   server.route({
     path: `${MAIN_ENTRY}/download/{docId}`,
     method: 'GET',

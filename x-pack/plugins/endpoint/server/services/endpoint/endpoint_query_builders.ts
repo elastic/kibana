@@ -6,6 +6,7 @@
 import { KibanaRequest } from 'kibana/server';
 import { EndpointAppConstants } from '../../../common/types';
 import { EndpointAppContext } from '../../types';
+import { esKuery } from '../../../../../../src/plugins/data/server';
 
 export const kibanaRequestToEndpointListQuery = async (
   request: KibanaRequest<any, any, any>,
@@ -14,9 +15,7 @@ export const kibanaRequestToEndpointListQuery = async (
   const pagingProperties = await getPagingProperties(request, endpointAppContext);
   return {
     body: {
-      query: {
-        match_all: {},
-      },
+      query: buildQueryBody(request),
       collapse: {
         field: 'host.id.keyword',
         inner_hits: {
@@ -65,3 +64,36 @@ async function getPagingProperties(
     pageIndex: pagingProperties.page_index || config.endpointResultListDefaultFirstPageIndex,
   };
 }
+
+function buildQueryBody(request: KibanaRequest<any, any, any>): Record<string, any> {
+  if (typeof request?.body?.filter === 'string') {
+    return esKuery.toElasticsearchQuery(esKuery.fromKueryExpression(request.body.filter));
+  }
+  return {
+    match_all: {},
+  };
+}
+
+export const kibanaRequestToEndpointFetchQuery = (
+  request: KibanaRequest<any, any, any>,
+  endpointAppContext: EndpointAppContext
+) => {
+  return {
+    body: {
+      query: {
+        match: {
+          'host.id.keyword': request.params.id,
+        },
+      },
+      sort: [
+        {
+          'event.created': {
+            order: 'desc',
+          },
+        },
+      ],
+      size: 1,
+    },
+    index: EndpointAppConstants.ENDPOINT_INDEX_NAME,
+  };
+};

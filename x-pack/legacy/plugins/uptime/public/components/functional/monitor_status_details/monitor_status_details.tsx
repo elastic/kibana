@@ -6,30 +6,27 @@
 
 import React, { useContext, useEffect, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import styled from 'styled-components';
 import { LocationMap } from '../location_map';
-import { MonitorStatusBar } from './monitor_status_bar';
 import { UptimeRefreshContext } from '../../../contexts';
+import { MonitorLocations } from '../../../../common/runtime_types';
+import { MonitorStatusBar } from '../../connected';
 
-interface MonitorStatusBarProps {
+interface MonitorStatusDetailsProps {
   monitorId: string;
-  variables: any;
-  loadMonitorLocations: any;
-  monitorLocations: any;
-  dateStart: any;
-  dateEnd: any;
+  monitorLocations: MonitorLocations;
 }
+
+const WrapFlexItem = styled(EuiFlexItem)`
+  @media (max-width: 1150px) {
+    width: 100%;
+  }
+`;
 
 export const MonitorStatusDetailsComponent = ({
   monitorId,
-  variables,
-  loadMonitorLocations,
   monitorLocations,
-  dateStart,
-  dateEnd,
-}: MonitorStatusBarProps) => {
-  useEffect(() => {
-    loadMonitorLocations(monitorId);
-  }, [loadMonitorLocations, monitorId, dateStart, dateEnd]);
+}: MonitorStatusDetailsProps) => {
   const { refreshApp } = useContext(UptimeRefreshContext);
 
   const [isTabActive] = useState(document.visibilityState);
@@ -54,18 +51,13 @@ export const MonitorStatusDetailsComponent = ({
 
   return (
     <EuiPanel>
-      <EuiFlexGroup gutterSize="l" wrap>
+      <EuiFlexGroup gutterSize="l" wrap responsive={true}>
         <EuiFlexItem grow={true}>
-          <MonitorStatusBar
-            monitorId={monitorId}
-            variables={variables}
-            dateStart={dateStart}
-            dateEnd={dateEnd}
-          />
+          <MonitorStatusBar monitorId={monitorId} />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
+        <WrapFlexItem grow={false}>
           <LocationMap monitorLocations={monitorLocations} />
-        </EuiFlexItem>
+        </WrapFlexItem>
       </EuiFlexGroup>
     </EuiPanel>
   );
