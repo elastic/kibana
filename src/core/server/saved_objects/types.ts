@@ -22,6 +22,7 @@ import { SavedObjectsMapping } from './mappings';
 import { MigrationDefinition } from './migrations/core/document_migrator';
 import { SavedObjectsSchemaDefinition } from './schema';
 import { PropertyValidators } from './validation';
+import { SavedObjectsManagementDefinition } from './management';
 
 export {
   SavedObjectsImportResponse,
@@ -217,15 +218,5 @@ export interface SavedObjectsLegacyUiExports {
   savedObjectMigrations: MigrationDefinition;
   savedObjectSchemas: SavedObjectsSchemaDefinition;
   savedObjectValidations: PropertyValidators;
-  savedObjectsManagement: Record<string, SavedObjectsLegacyTypeManagement>;
-}
-
-/**
- * @internal
- * @deprecated
- */
-export interface SavedObjectsLegacyTypeManagement {
-  icon?: string;
-  defaultSearchField?: string;
-  isImportableAndExportable?: boolean;
+  savedObjectsManagement: SavedObjectsManagementDefinition;
 }

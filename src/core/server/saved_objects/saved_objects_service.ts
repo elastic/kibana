@@ -378,8 +378,11 @@ export class SavedObjectsService
   }
 }
 
-function getImportableAndExportableTypes(uiExports: SavedObjectsLegacyUiExports) {
-  const visibleTypes = uiExports.savedObjectMappings.reduce(
+function getImportableAndExportableTypes({
+  savedObjectMappings = [],
+  savedObjectsManagement = {},
+}: SavedObjectsLegacyUiExports) {
+  const visibleTypes = savedObjectMappings.reduce(
     (types, mapping) => ({
       ...types,
       ...Object.keys(mapping.properties),
@@ -387,6 +390,6 @@ function getImportableAndExportableTypes(uiExports: SavedObjectsLegacyUiExports)
     [] as string[]
   );
   return visibleTypes.filter(
-    type => uiExports.savedObjectsManagement[type]?.isImportableAndExportable === true ?? false
+    type => savedObjectsManagement[type]?.isImportableAndExportable === true ?? false
   );
 }
