@@ -10,11 +10,19 @@ import { PageId } from '../../../../common/types';
 import { RoutingAction } from '../store/routing';
 
 /**
- * Dispatches a 'userNavigatedToPage' action with the given 'pageId' as the action payload
+ * Dispatches a 'userNavigatedToPage' action with the given 'pageId' as the action payload.
+ * When the component is un-mounted, a `userNavigatedFromPage` action will be dispatched
+ * with the given `pageId`.
+ *
+ * @param pageId A page id
  */
 export function usePageId(pageId: PageId) {
   const dispatch: (action: RoutingAction) => unknown = useDispatch();
   useEffect(() => {
     dispatch({ type: 'userNavigatedToPage', payload: pageId });
+
+    return () => {
+      dispatch({ type: 'userNavigatedFromPage', payload: pageId });
+    };
   }, [dispatch, pageId]);
 }

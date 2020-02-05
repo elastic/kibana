@@ -11,4 +11,9 @@ interface UserNavigatedToPage {
   readonly payload: PageId;
 }
 
-export type RoutingAction = UserNavigatedToPage;
+interface UserNavigatedFromPage {
+  readonly type: 'userNavigatedFromPage';
+  readonly payload: PageId;
+}
+
+export type RoutingAction = UserNavigatedToPage | UserNavigatedFromPage;
