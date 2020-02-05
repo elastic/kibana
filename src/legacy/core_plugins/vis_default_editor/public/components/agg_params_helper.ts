@@ -33,8 +33,8 @@ import {
   AggParam,
   IFieldParamType,
   IAggType,
-  EditorConfig,
 } from '../legacy_imports';
+import { EditorConfig } from './utils';
 
 interface ParamInstanceBase {
   agg: IAggConfig;

@@ -36,10 +36,8 @@ const mockEditorConfig = {
 };
 
 jest.mock('ui/new_platform');
-jest.mock('ui/vis/config', () => ({
-  editorConfigProviders: {
-    getConfigForAgg: jest.fn(() => mockEditorConfig),
-  },
+jest.mock('./utils', () => ({
+  getEditorConfig: jest.fn(() => mockEditorConfig),
 }));
 jest.mock('./agg_params_helper', () => ({
   getAggParamsToRender: jest.fn(() => ({

@@ -17,6 +17,19 @@
  * under the License.
  */
 
-export { CollectorSet } from './collector_set';
-export { Collector } from './collector';
-export { UsageCollector } from './usage_collector';
+export type AggregationRestrictions = Record<
+  string,
+  {
+    agg?: string;
+    interval?: number;
+    fixed_interval?: string;
+    calendar_interval?: string;
+    delay?: string;
+    time_zone?: string;
+  }
+>;
+
+export interface TypeMeta {
+  aggs?: Record<string, AggregationRestrictions>;
+  [key: string]: any;
+}
