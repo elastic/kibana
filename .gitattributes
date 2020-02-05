@@ -1,1 +1,2 @@
 **/__snapshots__/** linguist-generated=true
+.yarn/releases/*.js linguist-vendored=true
