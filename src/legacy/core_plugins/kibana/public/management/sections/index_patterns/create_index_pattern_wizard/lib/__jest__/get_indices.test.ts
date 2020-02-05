@@ -21,30 +21,6 @@ import { getIndices } from '../get_indices';
 import { successfulResponse, errorResponse, exceptionResponse } from './api/get_indices';
 import { IndexPatternCreationConfig } from '../../../../../../../../management/public';
 
-/*
-const mockIndexPatternCreationType = {
-  getIndexPatternType: () => 'default',
-  getIndexPatternName: () => 'name',
-  checkIndicesForErrors: () => false,
-  getShowSystemIndices: () => false,
-  renderPrompt: () => {},
-  getIndexPatternMappings: () => {
-    return {};
-  },
-  getIndexTags: () => {
-    return [];
-  },
-  key: 'default' as 'default',
-  name: 'name',
-  showSystemIndices: false,
-  httpClient: {},
-  isBeta: false,
-  getIndexPatternCreationOption: {},
-  getIsBeta: () => false,
-  getFetchForWildcardOptions: () => {},
-};
-*/
-
 const mockIndexPatternCreationType = new IndexPatternCreationConfig({
   type: 'default',
   name: 'name',
@@ -54,15 +30,18 @@ const mockIndexPatternCreationType = new IndexPatternCreationConfig({
 });
 
 function getLegacyApiCallerResponse(response: any) {
+  return { ...response };
+}
+
+function esClientFactory(search: (params: any) => any) {
   return {
-    abort: () => {},
-    ...new Promise(resolve => resolve({ ...response })),
+    search,
+    msearch: () => getLegacyApiCallerResponse({}),
   };
 }
 
 const es = {
   search: () => getLegacyApiCallerResponse(successfulResponse),
-  // search: () => new Promise(resolve => resolve({ ...successfulResponse })),
   msearch: () => getLegacyApiCallerResponse({}),
 };
 
@@ -70,9 +49,7 @@ describe('getIndices', () => {
   it('should work in a basic case', async () => {
     const result = await getIndices(es, mockIndexPatternCreationType, 'kibana', 1);
     expect(result.length).toBe(2);
-    // @ts-ignore
     expect(result[0].name).toBe('1');
-    // @ts-ignore
     expect(result[1].name).toBe('2');
   });
 
@@ -88,15 +65,11 @@ describe('getIndices', () => {
 
   it('should trim the input', async () => {
     let index;
-    const esClient = {
-      search: () => getLegacyApiCallerResponse({ index: 'kibana' }), // todo
-      msearch: () => getLegacyApiCallerResponse({}),
-      /*
-      search: jest.fn().mockImplementation(params => {
+    const esClient = esClientFactory(
+      jest.fn().mockImplementation(params => {
         index = params.index;
-      }),
-      */
-    };
+      })
+    );
 
     await getIndices(esClient, mockIndexPatternCreationType, 'kibana          ', 1);
     expect(index).toBe('kibana');
@@ -108,8 +81,8 @@ describe('getIndices', () => {
       search: jest.fn().mockImplementation(params => {
         limit = params.body.aggs.indices.terms.size;
       }),
+      msearch: () => getLegacyApiCallerResponse({}),
     };
-    // @ts-ignore
     await getIndices(esClient, mockIndexPatternCreationType, 'kibana', 10);
     expect(limit).toBe(10);
   });
@@ -117,9 +90,9 @@ describe('getIndices', () => {
   describe('errors', () => {
     it('should handle errors gracefully', async () => {
       const esClient = {
-        search: () => new Promise(resolve => resolve(errorResponse)),
+        search: () => getLegacyApiCallerResponse(errorResponse),
+        msearch: () => getLegacyApiCallerResponse({}),
       };
-      // @ts-ignore
       const result = await getIndices(esClient, mockIndexPatternCreationType, 'kibana', 1);
       expect(result.length).toBe(0);
     });
@@ -129,10 +102,10 @@ describe('getIndices', () => {
         search: () => {
           throw new Error('Fail');
         },
+        msearch: () => getLegacyApiCallerResponse({}),
       };
 
       await expect(
-        // @ts-ignore
         getIndices(esClient, mockIndexPatternCreationType, 'kibana', 1)
       ).rejects.toThrow();
     });
