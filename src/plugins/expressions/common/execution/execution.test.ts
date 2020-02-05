@@ -116,8 +116,9 @@ describe('Execution', () => {
 
   test('casts input to correct type', async () => {
     const execution = createExecution('add val=1');
-    execution.start(1);
 
+    // Below 1 is cast to { type: 'num', value: 1 }.
+    execution.start(1);
     const result = await execution.result;
 
     expect(result).toEqual({

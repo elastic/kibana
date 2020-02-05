@@ -28,7 +28,7 @@ export const add: ExpressionFunctionDefinition<
 > = {
   name: 'add',
   help: 'This function adds a number to input',
-  context: { types: ['num'] },
+  inputTypes: ['num'],
   args: {
     val: {
       default: 0,

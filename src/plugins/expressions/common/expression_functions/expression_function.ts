@@ -61,7 +61,7 @@ export class ExpressionFunction {
   inputTypes: string[] | undefined;
 
   constructor(functionDefinition: AnyExpressionFunctionDefinition) {
-    const { name, type, aliases, fn, help, args, context } = functionDefinition;
+    const { name, type, aliases, fn, help, args, inputTypes, context } = functionDefinition;
 
     this.name = name;
     this.type = type;
@@ -69,7 +69,7 @@ export class ExpressionFunction {
     this.fn = (input, params, handlers) =>
       Promise.resolve(fn(input, params, handlers as ExecutionContext));
     this.help = help || '';
-    this.inputTypes = context?.types;
+    this.inputTypes = inputTypes || context?.types;
 
     for (const [key, arg] of Object.entries(args || {})) {
       this.args[key] = new ExpressionFunctionParameter(key, arg);

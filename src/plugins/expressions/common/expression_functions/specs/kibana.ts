@@ -35,9 +35,7 @@ export const kibana: ExpressionFunctionKibana = {
   name: 'kibana',
   type: 'kibana_context',
 
-  context: {
-    types: ['kibana_context', 'null'],
-  },
+  inputTypes: ['kibana_context', 'null'],
 
   help: i18n.translate('expressions.functions.kibana.help', {
     defaultMessage: 'Gets kibana global context',

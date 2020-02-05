@@ -59,9 +59,7 @@ export const font: ExpressionFunctionDefinition<'font', null, Arguments, Style> 
   help: i18n.translate('expressions.functions.fontHelpText', {
     defaultMessage: 'Create a font style.',
   }),
-  context: {
-    types: ['null'],
-  },
+  inputTypes: ['null'],
   args: {
     align: {
       default: 'left',

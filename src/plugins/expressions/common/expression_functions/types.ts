@@ -55,10 +55,21 @@ export interface ExpressionFunctionDefinition<
   aliases?: string[];
 
   /**
-   * List of input types this function supports.
+   * List of type names this function supports as type of its input. If this
+   * property is set the input of function will be cast to the first possible
+   * type in this list. If this property is missing the input will be provided
+   * to function as-is.
+   */
+  inputTypes?: Array<TypeToString<Input>>;
+
+  /**
+   * @deprecated Use `inputTypes` instead.
    */
   context?: {
-    types: Array<TypeToString<Input>>;
+    /**
+     * @deprecated This is alias for `inputTypes`, use `inputTypes` instead.
+     */
+    types: AnyExpressionFunctionDefinition['inputTypes'];
   };
 
   /**
