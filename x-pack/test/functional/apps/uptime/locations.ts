@@ -32,19 +32,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       };
       const esService = getService('legacyEs');
       await makeChecksWithStatus(esService, MONITOR_ID, 5, 2, 10000, {}, 'up', mogrifyNoLocation);
-      await makeChecksWithStatus(
-        esService,
-        'filter-testing',
-        50,
-        1,
-        10000,
-        {},
-        'down',
-        (d: any) => {
-          d.observer.geo.name = 'filter-test';
-          return d;
-        }
-      );
+      await makeChecksWithStatus(esService, 'filter-testing', 50, 1, 10000, {}, 'up', (d: any) => {
+        d.observer.geo.name = 'filter-test';
+        return d;
+      });
     });
 
     it('renders the location missing popover when monitor has location name, but no geo data', async () => {
@@ -57,7 +48,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await pageObjects.uptime.selectFilterItems({ location: ['filter-test'] });
       await retry.tryForTime(12000, async () => {
         const snapshotCount = await pageObjects.uptime.getSnapshotCount();
-        expect(snapshotCount).to.eql({ up: '0', down: '1' });
+        expect(snapshotCount).to.eql({ up: '1', down: '0' });
       });
     });
   });
