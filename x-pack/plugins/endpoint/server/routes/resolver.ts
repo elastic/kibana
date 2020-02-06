@@ -20,8 +20,8 @@ import { ResolverData } from '../../common/types';
 
 export function registerResolverRoutes(router: IRouter, endpointAppContext: EndpointAppContext) {
   const validateQueryObject = schema.object({
-    page_size: schema.maybe(schema.number({ min: 1, max: 1000 })),
-    page_index: schema.maybe(schema.number({ min: 0 })),
+    page_size: schema.number({ min: 1, max: 1000 }),
+    page_index: schema.number({ min: 0 }),
     entity_id: schema.string(),
   });
 
