@@ -30,7 +30,6 @@ import {
   Axis,
   Chart,
   HistogramBarSeries,
-  GeometryValue,
   LineAnnotation,
   Position,
   ScaleType,
@@ -38,6 +37,7 @@ import {
   RectAnnotation,
   TooltipValue,
   TooltipType,
+  ElementClickListener,
 } from '@elastic/charts';
 
 import { i18n } from '@kbn/i18n';
@@ -139,7 +139,7 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps, Discove
     this.props.timefilterUpdateHandler(range);
   };
 
-  public onElementClick = (xInterval: number) => (elementData: GeometryValue[]) => {
+  public onElementClick = (xInterval: number): ElementClickListener => ([elementData]) => {
     const startRange = elementData[0].x;
 
     const range = {

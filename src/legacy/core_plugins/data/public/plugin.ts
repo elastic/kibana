@@ -43,19 +43,19 @@ import {
   VALUE_CLICK_TRIGGER,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../plugins/embeddable/public/lib/triggers';
-import { IUiActionsSetup, IUiActionsStart } from '../../../../plugins/ui_actions/public';
+import { UiActionsSetup, UiActionsStart } from '../../../../plugins/ui_actions/public';
 
 import { SearchSetup, SearchStart, SearchService } from './search/search_service';
 
 export interface DataPluginSetupDependencies {
   data: DataPublicPluginSetup;
   expressions: ExpressionsSetup;
-  uiActions: IUiActionsSetup;
+  uiActions: UiActionsSetup;
 }
 
 export interface DataPluginStartDependencies {
   data: DataPublicPluginStart;
-  uiActions: IUiActionsStart;
+  uiActions: UiActionsStart;
 }
 
 /**

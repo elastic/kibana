@@ -23,7 +23,7 @@ import React from 'react';
 import { EuiLoadingChart } from '@elastic/eui';
 import { Subscription } from 'rxjs';
 import { CoreStart } from 'src/core/public';
-import { TGetActionsCompatibleWithTrigger } from 'src/plugins/ui_actions/public';
+import { GetActionsCompatibleWithTrigger } from 'src/plugins/ui_actions/public';
 
 import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
 import { ErrorEmbeddable, IEmbeddable } from '../embeddables';
@@ -35,7 +35,7 @@ export interface EmbeddableChildPanelProps {
   embeddableId: string;
   className?: string;
   container: IContainer;
-  getActions: TGetActionsCompatibleWithTrigger;
+  getActions: GetActionsCompatibleWithTrigger;
   getEmbeddableFactory: GetEmbeddableFactory;
   getAllEmbeddableFactories: GetEmbeddableFactories;
   overlays: CoreStart['overlays'];
