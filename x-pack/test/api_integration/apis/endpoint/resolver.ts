@@ -27,7 +27,9 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
    *      width: 3
    */
   describe('Resolver api', function() {
-    const rootEntityID = buildPhase0EntityID('99b3e56e-0596-4b02-bbd1-0b581ec983a4', 1);
+    const endpointID = '99b3e56e-0596-4b02-bbd1-0b581ec983a4';
+    const rootEntityID = buildPhase0EntityID(endpointID, 1);
+    const rootParentEntityID = buildPhase0EntityID(endpointID, 0);
     before(() => esArchiver.load('endpoint/resolver/api_feature'));
     after(() => esArchiver.unload('endpoint/resolver/api_feature'));
     it('should return details for the root node', async () => {
@@ -37,14 +39,100 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
         .set(commonHeaders)
         .expect(200);
 
-      expect(body.node.parent_entity_id).to.eql(0);
-      expect(body.node.entity_id).to.eql(1);
+      expect(body.node.parent_entity_id).to.eql(rootParentEntityID);
+      expect(body.node.entity_id).to.eql(rootEntityID);
       expect(body.node.events.length).to.eql(1);
 
-      expect(body.node.total).to.eql(1);
+      expect(body.total).to.eql(1);
+      // default page size
+      expect(body.request_page_size).to.eql(10);
+      expect(body.request_page_index).to.eql(0);
+      expect(body.request_from_index).to.eql(0);
     });
-    it('should return the right number of total events', async () => {
-      // should be 21
+    it('should return the right number of children nodes', async () => {
+      const { body } = await supertest
+        // entity_id should be the root node
+        .get(`/api/endpoint/resolver/children?entity_id=${rootEntityID}`)
+        .set(commonHeaders)
+        .expect(200);
+
+      expect(body.origin.parent_entity_id).to.eql(rootParentEntityID);
+      expect(body.origin.entity_id).to.eql(rootEntityID);
+      expect(body.origin.events.length).to.greaterThan(0);
+
+      // it should have some children
+      expect(body.children.length).to.greaterThan(0);
+
+      // the root will count as 1 should it should have at least 1 child making the value 2 or more
+      expect(body.total).to.greaterThan(1);
+      // default page size
+      expect(body.request_page_size).to.eql(10);
+      expect(body.request_page_index).to.eql(0);
+      expect(body.request_from_index).to.eql(0);
+    });
+    it('should paginate correctly', async () => {
+      let { body } = await supertest
+        // entity_id should be the root node
+        .get(`/api/endpoint/resolver/children?entity_id=${rootEntityID}&page_size=1`)
+        .set(commonHeaders)
+        .expect(200);
+
+      // the root will count as 1 should it should have at least 1 child making the value 2 or more
+      expect(body.total).to.greaterThan(1);
+      expect(body.request_page_size).to.eql(1);
+      expect(body.request_page_index).to.eql(0);
+      expect(body.request_from_index).to.eql(0);
+
+      // there should be at least one child of the root
+      ({ body } = await supertest
+        // entity_id should be the root node
+        .get(`/api/endpoint/resolver/children?entity_id=${rootEntityID}&page_size=1&page_index=1`)
+        .set(commonHeaders)
+        .expect(200));
+      // the root will count as 1 should it should have at least 1 child making the value 2 or more
+      expect(body.total).to.greaterThan(0);
+      expect(body.request_page_size).to.eql(1);
+      expect(body.request_page_index).to.eql(1);
+      expect(body.request_from_index).to.eql(1);
+
+      // should return no nodes after paginating further
+      await supertest
+        // entity_id should be the root node
+        .get(
+          `/api/endpoint/resolver/children?entity_id=${rootEntityID}&page_size=1&page_index=1000`
+        )
+        .set(commonHeaders)
+        .expect(404);
+    });
+    it('should error on invalid pagination values', async () => {
+      await supertest
+        .get(`/api/endpoint/resolver/children?entity_id=${rootEntityID}&page_size=0`)
+        .set(commonHeaders)
+        .expect(400);
+      await supertest
+        .get(`/api/endpoint/resolver/children?entity_id=${rootEntityID}&page_size=2000`)
+        .set(commonHeaders)
+        .expect(400);
+      await supertest
+        .get(`/api/endpoint/resolver/children?entity_id=${rootEntityID}&page_size=-1`)
+        .set(commonHeaders)
+        .expect(400);
+      await supertest
+        .get(`/api/endpoint/resolver/children?entity_id=${rootEntityID}&page_index=-1`)
+        .set(commonHeaders)
+        .expect(400);
+    });
+    it('should not find any nodes', async () => {
+      await supertest
+        .get(`/api/endpoint/resolver/children?entity_id=5555`)
+        .set(commonHeaders)
+        .expect(404);
+    });
+    it('should return an error for an invalid entity ID', async () => {
+      await supertest
+        .get(`/api/endpoint/resolver/children?entity_id=endgame|slkdfjs`)
+        .set(commonHeaders)
+        .expect(400);
     });
   });
 }

@@ -17,11 +17,13 @@ import {
 } from '../services/resolver/query_builder';
 import { ResolverSearchHandler, Total } from '../services/resolver/search_handler';
 import { ResolverData } from '../../common/types';
+import { EntityParseError } from '../services/resolver/common';
 
 export function registerResolverRoutes(router: IRouter, endpointAppContext: EndpointAppContext) {
+  const log = endpointAppContext.logFactory.get('resolver-route');
   const validateQueryObject = schema.object({
-    page_size: schema.number({ min: 1, max: 1000 }),
-    page_index: schema.number({ min: 0 }),
+    page_size: schema.maybe(schema.number({ min: 1, max: 1000 })),
+    page_index: schema.maybe(schema.number({ min: 0 })),
     entity_id: schema.string(),
   });
 
@@ -65,6 +67,10 @@ export function registerResolverRoutes(router: IRouter, endpointAppContext: Endp
           ),
         });
       } catch (err) {
+        log.warn(JSON.stringify(err));
+        if (EntityParseError.isEntityParseError(err)) {
+          return res.badRequest({ body: err });
+        }
         return res.internalError({ body: err });
       }
     }
@@ -109,6 +115,10 @@ export function registerResolverRoutes(router: IRouter, endpointAppContext: Endp
           ),
         });
       } catch (err) {
+        log.warn(JSON.stringify(err));
+        if (EntityParseError.isEntityParseError(err)) {
+          return res.badRequest({ body: err });
+        }
         return res.internalError({ body: err });
       }
     }

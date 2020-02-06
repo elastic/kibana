@@ -2,7 +2,7 @@
   "type": "doc",
   "value": {
     "id": "lvx_G3AB35DY4seMO0wM",
-    "index": "endpoint-events-1-000001",
+    "index": "endgame-1-000001",
     "source": {
       "@timestamp": "2020-02-06T17:14:47.917Z",
       "agent": {
@@ -109,7 +109,7 @@
   "type": "doc",
   "value": {
     "id": "l_x_G3AB35DY4seMO0wM",
-    "index": "endpoint-events-1-000001",
+    "index": "endgame-1-000001",
     "source": {
       "@timestamp": "2020-02-06T17:14:47.923Z",
       "agent": {
@@ -216,7 +216,7 @@
   "type": "doc",
   "value": {
     "id": "mPx_G3AB35DY4seMO0wM",
-    "index": "endpoint-events-1-000001",
+    "index": "endgame-1-000001",
     "source": {
       "@timestamp": "2020-02-06T17:14:47.924Z",
       "agent": {
@@ -323,7 +323,7 @@
   "type": "doc",
   "value": {
     "id": "mfx_G3AB35DY4seMO0wM",
-    "index": "endpoint-events-1-000001",
+    "index": "endgame-1-000001",
     "source": {
       "@timestamp": "2020-02-06T17:14:47.924Z",
       "agent": {
@@ -429,7 +429,7 @@
   "type": "doc",
   "value": {
     "id": "mvx_G3AB35DY4seMO0wM",
-    "index": "endpoint-events-1-000001",
+    "index": "endgame-1-000001",
     "source": {
       "@timestamp": "2020-02-06T17:14:47.925Z",
       "agent": {
@@ -536,7 +536,7 @@
   "type": "doc",
   "value": {
     "id": "m_x_G3AB35DY4seMO0wM",
-    "index": "endpoint-events-1-000001",
+    "index": "endgame-1-000001",
     "source": {
       "@timestamp": "2020-02-06T17:14:47.928Z",
       "agent": {
@@ -643,7 +643,7 @@
   "type": "doc",
   "value": {
     "id": "nPx_G3AB35DY4seMO0wN",
-    "index": "endpoint-events-1-000001",
+    "index": "endgame-1-000001",
     "source": {
       "@timestamp": "2020-02-06T17:14:47.929Z",
       "agent": {
@@ -750,7 +750,7 @@
   "type": "doc",
   "value": {
     "id": "nfx_G3AB35DY4seMO0wN",
-    "index": "endpoint-events-1-000001",
+    "index": "endgame-1-000001",
     "source": {
       "@timestamp": "2020-02-06T17:14:47.929Z",
       "agent": {
@@ -857,7 +857,7 @@
   "type": "doc",
   "value": {
     "id": "nvx_G3AB35DY4seMO0wN",
-    "index": "endpoint-events-1-000001",
+    "index": "endgame-1-000001",
     "source": {
       "@timestamp": "2020-02-06T17:14:47.930Z",
       "agent": {
@@ -964,7 +964,7 @@
   "type": "doc",
   "value": {
     "id": "n_x_G3AB35DY4seMO0wN",
-    "index": "endpoint-events-1-000001",
+    "index": "endgame-1-000001",
     "source": {
       "@timestamp": "2020-02-06T17:14:47.931Z",
       "agent": {
@@ -1070,7 +1070,7 @@
   "type": "doc",
   "value": {
     "id": "oPx_G3AB35DY4seMO0wN",
-    "index": "endpoint-events-1-000001",
+    "index": "endgame-1-000001",
     "source": {
       "@timestamp": "2020-02-06T17:14:47.932Z",
       "agent": {
@@ -1177,7 +1177,7 @@
   "type": "doc",
   "value": {
     "id": "ofx_G3AB35DY4seMO0wN",
-    "index": "endpoint-events-1-000001",
+    "index": "endgame-1-000001",
     "source": {
       "@timestamp": "2020-02-06T17:14:47.932Z",
       "agent": {
@@ -1284,7 +1284,7 @@
   "type": "doc",
   "value": {
     "id": "ovx_G3AB35DY4seMO0wN",
-    "index": "endpoint-events-1-000001",
+    "index": "endgame-1-000001",
     "source": {
       "@timestamp": "2020-02-06T17:14:47.933Z",
       "agent": {
@@ -1391,7 +1391,7 @@
   "type": "doc",
   "value": {
     "id": "o_x_G3AB35DY4seMO0wN",
-    "index": "endpoint-events-1-000001",
+    "index": "endgame-1-000001",
     "source": {
       "@timestamp": "2020-02-06T17:14:47.934Z",
       "agent": {
@@ -1498,7 +1498,7 @@
   "type": "doc",
   "value": {
     "id": "pPx_G3AB35DY4seMO0wN",
-    "index": "endpoint-events-1-000001",
+    "index": "endgame-1-000001",
     "source": {
       "@timestamp": "2020-02-06T17:14:47.935Z",
       "agent": {
@@ -1605,7 +1605,7 @@
   "type": "doc",
   "value": {
     "id": "pfx_G3AB35DY4seMO0wN",
-    "index": "endpoint-events-1-000001",
+    "index": "endgame-1-000001",
     "source": {
       "@timestamp": "2020-02-06T17:14:47.936Z",
       "agent": {
@@ -1712,7 +1712,7 @@
   "type": "doc",
   "value": {
     "id": "pvx_G3AB35DY4seMO0wN",
-    "index": "endpoint-events-1-000001",
+    "index": "endgame-1-000001",
     "source": {
       "@timestamp": "2020-02-06T17:14:47.936Z",
       "agent": {
@@ -1820,7 +1820,7 @@
   "type": "doc",
   "value": {
     "id": "p_x_G3AB35DY4seMO0wN",
-    "index": "endpoint-events-1-000001",
+    "index": "endgame-1-000001",
     "source": {
       "@timestamp": "2020-02-06T17:14:47.937Z",
       "agent": {
@@ -1927,7 +1927,7 @@
   "type": "doc",
   "value": {
     "id": "qPx_G3AB35DY4seMO0wN",
-    "index": "endpoint-events-1-000001",
+    "index": "endgame-1-000001",
     "source": {
       "@timestamp": "2020-02-06T17:14:47.938Z",
       "agent": {
@@ -2034,7 +2034,7 @@
   "type": "doc",
   "value": {
     "id": "qfx_G3AB35DY4seMO0wN",
-    "index": "endpoint-events-1-000001",
+    "index": "endgame-1-000001",
     "source": {
       "@timestamp": "2020-02-06T17:14:47.939Z",
       "agent": {
@@ -2142,7 +2142,7 @@
   "type": "doc",
   "value": {
     "id": "qvx_G3AB35DY4seMO0wN",
-    "index": "endpoint-events-1-000001",
+    "index": "endgame-1-000001",
     "source": {
       "@timestamp": "2020-02-06T17:14:47.939Z",
       "agent": {

@@ -1,9 +1,8 @@
 {
   "type": "index",
   "value": {
-    "aliases": {
-    },
-    "index": "endpoint-events-1-000001",
+    "aliases": {},
+    "index": "endgame-1-000001",
     "mappings": {
       "properties": {
         "@timestamp": {
