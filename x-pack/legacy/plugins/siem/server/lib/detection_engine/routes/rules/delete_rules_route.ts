@@ -9,14 +9,14 @@ import Hapi from 'hapi';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { deleteRules } from '../../rules/delete_rules';
 import { LegacySetupServices, RequestFacade } from '../../../../plugin';
-import { LegacyGetScopedServices } from '../../../../services';
+import { GetScopedClientServices } from '../../../../services';
 import { queryRulesSchema } from '../schemas/query_rules_schema';
 import { getIdError, transformOrError } from './utils';
 import { transformError } from '../utils';
 import { QueryRequest, IRuleSavedAttributesSavedObjectAttributes } from '../../rules/types';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
 
-export const createDeleteRulesRoute = (getServices: LegacyGetScopedServices): Hapi.ServerRoute => {
+export const createDeleteRulesRoute = (getServices: GetScopedClientServices): Hapi.ServerRoute => {
   return {
     method: 'DELETE',
     path: DETECTION_ENGINE_RULES_URL,
@@ -70,7 +70,7 @@ export const createDeleteRulesRoute = (getServices: LegacyGetScopedServices): Ha
 
 export const deleteRulesRoute = (
   route: LegacySetupServices['route'],
-  getServices: LegacyGetScopedServices
+  getServices: GetScopedClientServices
 ): void => {
   route(createDeleteRulesRoute(getServices));
 };

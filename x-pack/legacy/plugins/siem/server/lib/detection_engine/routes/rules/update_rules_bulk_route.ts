@@ -12,7 +12,7 @@ import {
   IRuleSavedAttributesSavedObjectAttributes,
 } from '../../rules/types';
 import { LegacySetupServices } from '../../../../plugin';
-import { LegacyGetScopedServices } from '../../../../services';
+import { GetScopedClientServices } from '../../../../services';
 import { transformOrBulkError, getIdBulkError } from './utils';
 import { transformBulkError } from '../utils';
 import { updateRulesBulkSchema } from '../schemas/update_rules_bulk_schema';
@@ -20,7 +20,7 @@ import { updateRules } from '../../rules/update_rules';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
 
 export const createUpdateRulesBulkRoute = (
-  getServices: LegacyGetScopedServices
+  getServices: GetScopedClientServices
 ): Hapi.ServerRoute => {
   return {
     method: 'PUT',
@@ -131,7 +131,7 @@ export const createUpdateRulesBulkRoute = (
 
 export const updateRulesBulkRoute = (
   route: LegacySetupServices['route'],
-  getServices: LegacyGetScopedServices
+  getServices: GetScopedClientServices
 ): void => {
   route(createUpdateRulesBulkRoute(getServices));
 };

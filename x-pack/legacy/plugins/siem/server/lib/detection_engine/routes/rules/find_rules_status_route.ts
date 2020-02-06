@@ -9,7 +9,7 @@ import { snakeCase } from 'lodash/fp';
 
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { LegacySetupServices, RequestFacade } from '../../../../plugin';
-import { LegacyGetScopedServices } from '../../../../services';
+import { GetScopedClientServices } from '../../../../services';
 import { findRulesStatusesSchema } from '../schemas/find_rules_statuses_schema';
 import {
   FindRulesStatusesRequest,
@@ -31,7 +31,7 @@ const convertToSnakeCase = <T extends Record<string, any>>(obj: T): Partial<T> |
 };
 
 export const createFindRulesStatusRoute = (
-  getServices: LegacyGetScopedServices
+  getServices: GetScopedClientServices
 ): Hapi.ServerRoute => ({
   method: 'GET',
   path: `${DETECTION_ENGINE_RULES_URL}/_find_statuses`,
@@ -91,7 +91,7 @@ export const createFindRulesStatusRoute = (
 
 export const findRulesStatusesRoute = (
   route: LegacySetupServices['route'],
-  getServices: LegacyGetScopedServices
+  getServices: GetScopedClientServices
 ): void => {
   route(createFindRulesStatusRoute(getServices));
 };

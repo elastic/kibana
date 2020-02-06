@@ -10,11 +10,11 @@ import { SignalsStatusRequest } from '../../signals/types';
 import { setSignalsStatusSchema } from '../schemas/set_signal_status_schema';
 import { LegacySetupServices } from '../../../../plugin';
 import { transformError, getIndex } from '../utils';
-import { LegacyGetScopedServices } from '../../../../services';
+import { GetScopedClientServices } from '../../../../services';
 
 export const setSignalsStatusRouteDef = (
   config: LegacySetupServices['config'],
-  getServices: LegacyGetScopedServices
+  getServices: GetScopedClientServices
 ): Hapi.ServerRoute => {
   return {
     method: 'POST',
@@ -66,7 +66,7 @@ export const setSignalsStatusRouteDef = (
 export const setSignalsStatusRoute = (
   route: LegacySetupServices['route'],
   config: LegacySetupServices['config'],
-  getServices: LegacyGetScopedServices
+  getServices: GetScopedClientServices
 ) => {
   route(setSignalsStatusRouteDef(config, getServices));
 };

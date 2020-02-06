@@ -10,14 +10,14 @@ import { merge } from 'lodash/fp';
 import { DETECTION_ENGINE_PRIVILEGES_URL } from '../../../../../common/constants';
 import { RulesRequest } from '../../rules/types';
 import { LegacySetupServices } from '../../../../plugin';
-import { LegacyGetScopedServices } from '../../../../services';
+import { GetScopedClientServices } from '../../../../services';
 import { transformError, getIndex } from '../utils';
 import { readPrivileges } from '../../privileges/read_privileges';
 
 export const createReadPrivilegesRulesRoute = (
   config: LegacySetupServices['config'],
   usingEphemeralEncryptionKey: boolean,
-  getServices: LegacyGetScopedServices
+  getServices: GetScopedClientServices
 ): Hapi.ServerRoute => {
   return {
     method: 'GET',
@@ -51,7 +51,7 @@ export const readPrivilegesRoute = (
   route: LegacySetupServices['route'],
   config: LegacySetupServices['config'],
   usingEphemeralEncryptionKey: boolean,
-  getServices: LegacyGetScopedServices
+  getServices: GetScopedClientServices
 ) => {
   route(createReadPrivilegesRulesRoute(config, usingEphemeralEncryptionKey, getServices));
 };

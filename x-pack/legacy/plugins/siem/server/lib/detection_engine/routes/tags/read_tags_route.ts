@@ -10,9 +10,9 @@ import { DETECTION_ENGINE_TAGS_URL } from '../../../../../common/constants';
 import { LegacySetupServices, RequestFacade } from '../../../../plugin';
 import { transformError } from '../utils';
 import { readTags } from '../../tags/read_tags';
-import { LegacyGetScopedServices } from '../../../../services';
+import { GetScopedClientServices } from '../../../../services';
 
-export const createReadTagsRoute = (getServices: LegacyGetScopedServices): Hapi.ServerRoute => ({
+export const createReadTagsRoute = (getServices: GetScopedClientServices): Hapi.ServerRoute => ({
   method: 'GET',
   path: DETECTION_ENGINE_TAGS_URL,
   options: {
@@ -43,7 +43,7 @@ export const createReadTagsRoute = (getServices: LegacyGetScopedServices): Hapi.
 
 export const readTagsRoute = (
   route: LegacySetupServices['route'],
-  getServices: LegacyGetScopedServices
+  getServices: GetScopedClientServices
 ) => {
   route(createReadTagsRoute(getServices));
 };

@@ -13,9 +13,9 @@ import { LegacySetupServices } from '../../../../plugin';
 import { getIdError, transformOrError } from './utils';
 import { transformError } from '../utils';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
-import { LegacyGetScopedServices } from '../../../../services';
+import { GetScopedClientServices } from '../../../../services';
 
-export const createUpdateRulesRoute = (getServices: LegacyGetScopedServices): Hapi.ServerRoute => {
+export const createUpdateRulesRoute = (getServices: GetScopedClientServices): Hapi.ServerRoute => {
   return {
     method: 'PUT',
     path: DETECTION_ENGINE_RULES_URL,
@@ -120,7 +120,7 @@ export const createUpdateRulesRoute = (getServices: LegacyGetScopedServices): Ha
 
 export const updateRulesRoute = (
   route: LegacySetupServices['route'],
-  getServices: LegacyGetScopedServices
+  getServices: GetScopedClientServices
 ) => {
   route(createUpdateRulesRoute(getServices));
 };

@@ -9,7 +9,7 @@ import Boom from 'boom';
 
 import { DETECTION_ENGINE_INDEX_URL } from '../../../../../common/constants';
 import { LegacySetupServices, RequestFacade } from '../../../../plugin';
-import { LegacyGetScopedServices } from '../../../../services';
+import { GetScopedClientServices } from '../../../../services';
 import { transformError, getIndex } from '../utils';
 import { getIndexExists } from '../../index/get_index_exists';
 import { getPolicyExists } from '../../index/get_policy_exists';
@@ -30,7 +30,7 @@ import { deleteTemplate } from '../../index/delete_template';
  */
 export const createDeleteIndexRoute = (
   config: LegacySetupServices['config'],
-  getServices: LegacyGetScopedServices
+  getServices: GetScopedClientServices
 ): Hapi.ServerRoute => {
   return {
     method: 'DELETE',
@@ -73,7 +73,7 @@ export const createDeleteIndexRoute = (
 export const deleteIndexRoute = (
   route: LegacySetupServices['route'],
   config: LegacySetupServices['config'],
-  getServices: LegacyGetScopedServices
+  getServices: GetScopedClientServices
 ) => {
   route(createDeleteIndexRoute(config, getServices));
 };

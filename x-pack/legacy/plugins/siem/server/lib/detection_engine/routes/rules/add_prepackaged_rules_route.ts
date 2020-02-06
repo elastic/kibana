@@ -9,7 +9,7 @@ import Boom from 'boom';
 
 import { DETECTION_ENGINE_PREPACKAGED_URL } from '../../../../../common/constants';
 import { LegacySetupServices, RequestFacade } from '../../../../plugin';
-import { LegacyGetScopedServices } from '../../../../services';
+import { GetScopedClientServices } from '../../../../services';
 import { getIndexExists } from '../../index/get_index_exists';
 import { getIndex, transformError } from '../utils';
 import { getPrepackagedRules } from '../../rules/get_prepackaged_rules';
@@ -21,7 +21,7 @@ import { getExistingPrepackagedRules } from '../../rules/get_existing_prepackage
 
 export const createAddPrepackedRulesRoute = (
   config: LegacySetupServices['config'],
-  getServices: LegacyGetScopedServices
+  getServices: GetScopedClientServices
 ): Hapi.ServerRoute => {
   return {
     method: 'PUT',
@@ -87,7 +87,7 @@ export const createAddPrepackedRulesRoute = (
 export const addPrepackedRulesRoute = (
   route: LegacySetupServices['route'],
   config: LegacySetupServices['config'],
-  getServices: LegacyGetScopedServices
+  getServices: GetScopedClientServices
 ): void => {
   route(createAddPrepackedRulesRoute(config, getServices));
 };

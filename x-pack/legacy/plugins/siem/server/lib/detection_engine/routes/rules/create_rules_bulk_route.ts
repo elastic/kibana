@@ -8,7 +8,7 @@ import Hapi from 'hapi';
 import uuid from 'uuid';
 
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
-import { LegacyGetScopedServices } from '../../../../services';
+import { GetScopedClientServices } from '../../../../services';
 import { createRules } from '../../rules/create_rules';
 import { BulkRulesRequest } from '../../rules/types';
 import { LegacySetupServices } from '../../../../plugin';
@@ -20,7 +20,7 @@ import { createRulesBulkSchema } from '../schemas/create_rules_bulk_schema';
 
 export const createCreateRulesBulkRoute = (
   config: LegacySetupServices['config'],
-  getServices: LegacyGetScopedServices
+  getServices: GetScopedClientServices
 ): Hapi.ServerRoute => {
   return {
     method: 'POST',
@@ -142,7 +142,7 @@ export const createCreateRulesBulkRoute = (
 export const createRulesBulkRoute = (
   route: LegacySetupServices['route'],
   config: LegacySetupServices['config'],
-  getServices: LegacyGetScopedServices
+  getServices: GetScopedClientServices
 ): void => {
   route(createCreateRulesBulkRoute(config, getServices));
 };

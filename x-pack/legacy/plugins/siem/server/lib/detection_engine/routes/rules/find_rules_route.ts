@@ -7,7 +7,7 @@
 import Hapi from 'hapi';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { LegacySetupServices, RequestFacade } from '../../../../plugin';
-import { LegacyGetScopedServices } from '../../../../services';
+import { GetScopedClientServices } from '../../../../services';
 import { findRules } from '../../rules/find_rules';
 import { FindRulesRequest, IRuleSavedAttributesSavedObjectAttributes } from '../../rules/types';
 import { findRulesSchema } from '../schemas/find_rules_schema';
@@ -15,7 +15,7 @@ import { transformFindAlertsOrError } from './utils';
 import { transformError } from '../utils';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
 
-export const createFindRulesRoute = (getServices: LegacyGetScopedServices): Hapi.ServerRoute => {
+export const createFindRulesRoute = (getServices: GetScopedClientServices): Hapi.ServerRoute => {
   return {
     method: 'GET',
     path: `${DETECTION_ENGINE_RULES_URL}/_find`,
@@ -69,7 +69,7 @@ export const createFindRulesRoute = (getServices: LegacyGetScopedServices): Hapi
 
 export const findRulesRoute = (
   route: LegacySetupServices['route'],
-  getServices: LegacyGetScopedServices
+  getServices: GetScopedClientServices
 ) => {
   route(createFindRulesRoute(getServices));
 };

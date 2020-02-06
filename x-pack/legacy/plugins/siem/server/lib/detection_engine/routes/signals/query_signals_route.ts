@@ -6,7 +6,7 @@
 
 import Hapi from 'hapi';
 import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '../../../../../common/constants';
-import { LegacyGetScopedServices } from '../../../../services';
+import { GetScopedClientServices } from '../../../../services';
 import { SignalsQueryRequest } from '../../signals/types';
 import { querySignalsSchema } from '../schemas/query_signals_index_schema';
 import { LegacySetupServices } from '../../../../plugin';
@@ -14,7 +14,7 @@ import { transformError, getIndex } from '../utils';
 
 export const querySignalsRouteDef = (
   config: LegacySetupServices['config'],
-  getServices: LegacyGetScopedServices
+  getServices: GetScopedClientServices
 ): Hapi.ServerRoute => {
   return {
     method: 'POST',
@@ -50,7 +50,7 @@ export const querySignalsRouteDef = (
 export const querySignalsRoute = (
   route: LegacySetupServices['route'],
   config: LegacySetupServices['config'],
-  getServices: LegacyGetScopedServices
+  getServices: GetScopedClientServices
 ) => {
   route(querySignalsRouteDef(config, getServices));
 };

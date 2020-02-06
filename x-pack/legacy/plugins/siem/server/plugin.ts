@@ -28,7 +28,7 @@ import {
   ruleStatusSavedObjectType,
 } from './saved_objects';
 import { RequestFacade, ServerFacade } from './types';
-import { Services } from './services';
+import { ClientsService } from './services';
 
 export { CoreSetup, CoreStart, Logger, PluginInitializerContext, RequestFacade };
 
@@ -50,13 +50,13 @@ export class Plugin {
   readonly name = 'siem';
   private readonly logger: Logger;
   private context: PluginInitializerContext;
-  private services: Services;
+  private clients: ClientsService;
   private legacyInitRoutes?: LegacyInitRoutes;
 
   constructor(context: PluginInitializerContext) {
     this.context = context;
     this.logger = context.logger.get('plugins', this.name);
-    this.services = new Services();
+    this.clients = new ClientsService();
 
     this.logger.debug('Shim plugin initialized');
   }
@@ -64,7 +64,7 @@ export class Plugin {
   public setup(core: CoreSetup, plugins: SetupPlugins, __legacy: ServerFacade) {
     this.logger.debug('Shim plugin setup');
 
-    this.services.setup(core.elasticsearch.dataClient, plugins.spaces.spacesService);
+    this.clients.setup(core.elasticsearch.dataClient, plugins.spaces.spacesService);
 
     this.legacyInitRoutes = initRoutes(
       __legacy.route,
@@ -147,8 +147,8 @@ export class Plugin {
   }
 
   public start(core: CoreStart, plugins: StartPlugins) {
-    this.services.start(core.savedObjects, plugins.actions);
+    this.clients.start(core.savedObjects, plugins.actions);
 
-    this.legacyInitRoutes!(this.services.getScopedServicesFactory());
+    this.legacyInitRoutes!(this.clients.getScopedFactory());
   }
 }

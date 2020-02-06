@@ -9,7 +9,7 @@ import Hapi from 'hapi';
 
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { LegacySetupServices, RequestFacade } from '../../../../plugin';
-import { LegacyGetScopedServices } from '../../../../services';
+import { GetScopedClientServices } from '../../../../services';
 import { ExportRulesRequest } from '../../rules/types';
 import { getNonPackagedRulesCount } from '../../rules/get_existing_prepackaged_rules';
 import { exportRulesSchema, exportRulesQuerySchema } from '../schemas/export_rules_schema';
@@ -18,7 +18,7 @@ import { getExportAll } from '../../rules/get_export_all';
 
 export const createExportRulesRoute = (
   config: LegacySetupServices['config'],
-  getServices: LegacyGetScopedServices
+  getServices: GetScopedClientServices
 ): Hapi.ServerRoute => {
   return {
     method: 'POST',
@@ -73,7 +73,7 @@ export const createExportRulesRoute = (
 export const exportRulesRoute = (
   route: LegacySetupServices['route'],
   config: LegacySetupServices['config'],
-  getServices: LegacyGetScopedServices
+  getServices: GetScopedClientServices
 ): void => {
   route(createExportRulesRoute(config, getServices));
 };

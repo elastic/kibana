@@ -22,7 +22,7 @@ import { createRulesStreamFromNdJson } from '../../rules/create_rules_stream_fro
 import { ImportRuleAlertRest } from '../../types';
 import { updateRules } from '../../rules/update_rules';
 import { importRulesQuerySchema, importRulesPayloadSchema } from '../schemas/import_rules_schema';
-import { LegacyGetScopedServices } from '../../../../services';
+import { GetScopedClientServices } from '../../../../services';
 
 type PromiseFromStreams = ImportRuleAlertRest | Error;
 
@@ -36,7 +36,7 @@ const CHUNK_PARSED_OBJECT_SIZE = 10;
 
 export const createImportRulesRoute = (
   config: LegacySetupServices['config'],
-  getServices: LegacyGetScopedServices
+  getServices: GetScopedClientServices
 ): Hapi.ServerRoute => {
   return {
     method: 'POST',
@@ -266,7 +266,7 @@ export const createImportRulesRoute = (
 export const importRulesRoute = (
   route: LegacySetupServices['route'],
   config: LegacySetupServices['config'],
-  getServices: LegacyGetScopedServices
+  getServices: GetScopedClientServices
 ): void => {
   route(createImportRulesRoute(config, getServices));
 };

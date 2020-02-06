@@ -8,7 +8,7 @@ import Hapi from 'hapi';
 
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { LegacySetupServices } from '../../../../plugin';
-import { LegacyGetScopedServices } from '../../../../services';
+import { GetScopedClientServices } from '../../../../services';
 import { queryRulesBulkSchema } from '../schemas/query_rules_bulk_schema';
 import { transformOrBulkError, getIdBulkError } from './utils';
 import { transformBulkError } from '../utils';
@@ -17,7 +17,7 @@ import { deleteRules } from '../../rules/delete_rules';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
 
 export const createDeleteRulesBulkRoute = (
-  getServices: LegacyGetScopedServices
+  getServices: GetScopedClientServices
 ): Hapi.ServerRoute => {
   return {
     method: ['POST', 'DELETE'], // allow both POST and DELETE in case their client does not support bodies in DELETE
@@ -77,7 +77,7 @@ export const createDeleteRulesBulkRoute = (
 
 export const deleteRulesBulkRoute = (
   route: LegacySetupServices['route'],
-  getServices: LegacyGetScopedServices
+  getServices: GetScopedClientServices
 ): void => {
   route(createDeleteRulesBulkRoute(getServices));
 };

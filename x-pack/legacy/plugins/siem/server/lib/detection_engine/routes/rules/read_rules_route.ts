@@ -14,9 +14,9 @@ import { LegacySetupServices, RequestFacade } from '../../../../plugin';
 import { queryRulesSchema } from '../schemas/query_rules_schema';
 import { QueryRequest, IRuleSavedAttributesSavedObjectAttributes } from '../../rules/types';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
-import { LegacyGetScopedServices } from '../../../../services';
+import { GetScopedClientServices } from '../../../../services';
 
-export const createReadRulesRoute = (getServices: LegacyGetScopedServices): Hapi.ServerRoute => ({
+export const createReadRulesRoute = (getServices: GetScopedClientServices): Hapi.ServerRoute => ({
   method: 'GET',
   path: DETECTION_ENGINE_RULES_URL,
   options: {
@@ -65,7 +65,7 @@ export const createReadRulesRoute = (getServices: LegacyGetScopedServices): Hapi
 
 export const readRulesRoute = (
   route: LegacySetupServices['route'],
-  getServices: LegacyGetScopedServices
+  getServices: GetScopedClientServices
 ) => {
   route(createReadRulesRoute(getServices));
 };

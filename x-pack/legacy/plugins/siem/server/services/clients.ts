@@ -10,24 +10,25 @@ import {
   KibanaRequest,
   LegacyRequest,
   SavedObjectsClientContract,
-} from '../../../../../src/core/server';
-import { ActionsClient } from '../../../../plugins/actions/server';
-import { AlertsClient } from '../../../../legacy/plugins/alerting/server';
-import { CoreStart, StartPlugins, SetupPlugins } from './plugin';
+} from '../../../../../../src/core/server';
+import { ActionsClient } from '../../../../../plugins/actions/server';
+import { AlertsClient } from '../../../../../legacy/plugins/alerting/server';
+import { CoreStart, StartPlugins, SetupPlugins } from '../plugin';
 
-export interface SiemServices {
+export interface ClientServices {
   actionsClient?: ActionsClient;
   callCluster: IScopedClusterClient['callAsCurrentUser'];
   getSpaceId: () => string | undefined;
   savedObjectsClient: SavedObjectsClientContract;
 }
-interface LegacySiemServices {
+interface LegacyClientServices {
   alertsClient?: AlertsClient;
 }
-export type ScopedServices = SiemServices & LegacySiemServices;
-export type LegacyGetScopedServices = (request: LegacyRequest) => Promise<ScopedServices>;
+export type GetScopedClientServices = (
+  request: LegacyRequest
+) => Promise<ClientServices & LegacyClientServices>;
 
-export class Services {
+export class ClientsService {
   private actions?: StartPlugins['actions'];
   private clusterClient?: IClusterClient;
   private savedObjects?: CoreStart['savedObjects'];
@@ -46,7 +47,7 @@ export class Services {
     this.actions = actions;
   }
 
-  public getScopedServicesFactory(): LegacyGetScopedServices {
+  public getScopedFactory(): GetScopedClientServices {
     if (!this.clusterClient || !this.savedObjects) {
       throw new Error('Services not initialized');
     }
