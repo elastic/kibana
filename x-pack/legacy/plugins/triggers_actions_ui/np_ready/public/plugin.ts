@@ -42,12 +42,6 @@ export class Plugin implements CorePlugin<Setup, Start> {
     { application, notifications, http, uiSettings, injectedMetadata }: CoreSetup,
     { __LEGACY }: LegacyPlugins
   ): Setup {
-    const canShowActions = hasShowActionsCapability(__LEGACY.capabilities.get());
-    const canShowAlerts = hasShowAlertsCapability(__LEGACY.capabilities.get());
-
-    if (!canShowActions && !canShowAlerts) {
-      return;
-    }
     registerBuiltInActionTypes({
       actionTypeRegistry: this.actionTypeRegistry,
     });
@@ -61,6 +55,7 @@ export class Plugin implements CorePlugin<Setup, Start> {
       mount: async (
         {
           core: {
+            application: applicationStart,
             docLinks,
             chrome,
             // Waiting for types to be updated.
@@ -71,6 +66,16 @@ export class Plugin implements CorePlugin<Setup, Start> {
         },
         { element }
       ) => {
+        const { capabilities } = applicationStart;
+
+        const canShowActions = hasShowActionsCapability(capabilities);
+        const canShowAlerts = hasShowAlertsCapability(capabilities);
+
+        if (!canShowActions && !canShowAlerts) {
+          // Render nothing
+          return () => {};
+        }
+
         const { boot } = await import('./application/boot');
         return boot({
           element,
@@ -85,6 +90,7 @@ export class Plugin implements CorePlugin<Setup, Start> {
           legacy: {
             ...__LEGACY,
           },
+          capabilities,
           actionTypeRegistry: this.actionTypeRegistry,
           alertTypeRegistry: this.alertTypeRegistry,
         });
@@ -93,9 +99,10 @@ export class Plugin implements CorePlugin<Setup, Start> {
   }
 
   public start(core: CoreStart, { __LEGACY }: LegacyPlugins) {
-    const { capabilities } = __LEGACY;
-    const canShowActions = hasShowActionsCapability(capabilities.get());
-    const canShowAlerts = hasShowAlertsCapability(capabilities.get());
+    const { capabilities } = core.application;
+
+    const canShowActions = hasShowActionsCapability(capabilities);
+    const canShowAlerts = hasShowAlertsCapability(capabilities);
 
     // Don't register routes when user doesn't have access to the application
     if (!canShowActions && !canShowAlerts) {

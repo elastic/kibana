@@ -35,7 +35,6 @@ export const signalRulesAlertType = ({
     actionGroups: ['default'],
     validate: {
       params: schema.object({
-        createdAt: schema.string(),
         description: schema.string(),
         falsePositives: schema.arrayOf(schema.string(), { defaultValue: [] }),
         from: schema.string(),
@@ -56,7 +55,6 @@ export const signalRulesAlertType = ({
         threat: schema.nullable(schema.arrayOf(schema.object({}, { allowUnknowns: true }))),
         to: schema.string(),
         type: schema.string(),
-        updatedAt: schema.string(),
         references: schema.arrayOf(schema.string(), { defaultValue: [] }),
         version: schema.number({ defaultValue: 1 }),
       }),
@@ -121,7 +119,9 @@ export const signalRulesAlertType = ({
       const tags: string[] = savedObject.attributes.tags;
 
       const createdBy: string = savedObject.attributes.createdBy;
+      const createdAt: string = savedObject.attributes.createdAt;
       const updatedBy: string = savedObject.attributes.updatedBy;
+      const updatedAt: string = savedObject.updated_at ?? '';
       const interval: string = savedObject.attributes.schedule.interval;
       const enabled: boolean = savedObject.attributes.enabled;
       const gap = getGapBetweenRuns({
@@ -210,7 +210,9 @@ export const signalRulesAlertType = ({
             filter: esFilter,
             name,
             createdBy,
+            createdAt,
             updatedBy,
+            updatedAt,
             interval,
             enabled,
             pageSize: searchAfterSize,

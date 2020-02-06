@@ -114,13 +114,13 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps, Discove
 
   private subscription?: Subscription;
   public state = {
-    chartsTheme: getServices().eui_utils.getChartsThemeDefault(),
+    chartsTheme: getServices().theme.chartsDefaultTheme,
   };
 
   componentDidMount() {
-    this.subscription = getServices()
-      .eui_utils.getChartsTheme$()
-      .subscribe((chartsTheme: EuiChartThemeType['theme']) => this.setState({ chartsTheme }));
+    this.subscription = getServices().theme.chartsTheme$.subscribe(
+      (chartsTheme: EuiChartThemeType['theme']) => this.setState({ chartsTheme })
+    );
   }
 
   componentWillUnmount() {

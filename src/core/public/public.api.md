@@ -264,6 +264,8 @@ export interface ChromeNavLink {
     readonly category?: AppCategory;
     // @deprecated
     readonly disabled?: boolean;
+    // @deprecated
+    readonly disableSubUrlTracking?: boolean;
     readonly euiIconType?: string;
     readonly hidden?: boolean;
     readonly icon?: string;
@@ -429,11 +431,13 @@ export const DEFAULT_APP_CATEGORIES: Readonly<{
     };
     observability: {
         label: string;
+        euiIconType: string;
         order: number;
     };
     security: {
         label: string;
         order: number;
+        euiIconType: string;
     };
     management: {
         label: string;

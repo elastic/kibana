@@ -9,7 +9,7 @@ import { CoreSetup, Logger, PluginInitializerContext } from 'kibana/server';
 import { ConfigType } from './config';
 import { initCaseApi } from './routes/api';
 import { CaseService } from './services';
-import { PluginSetupContract as SecurityPluginSetup } from '../../security/server';
+import { SecurityPluginSetup } from '../../security/server';
 
 function createConfig$(context: PluginInitializerContext) {
   return context.config.create<ConfigType>().pipe(map(config => config));

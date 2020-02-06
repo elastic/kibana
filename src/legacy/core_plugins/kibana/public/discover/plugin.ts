@@ -27,7 +27,7 @@ import { IEmbeddableStart, IEmbeddableSetup } from '../../../../../plugins/embed
 import { getInnerAngularModule, getInnerAngularModuleEmbeddable } from './get_inner_angular';
 import { setAngularModule, setServices } from './kibana_services';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../../plugins/navigation/public';
-import { EuiUtilsStart } from '../../../../../plugins/eui_utils/public';
+import { ChartsPluginStart } from '../../../../../plugins/charts/public';
 import { buildServices } from './build_services';
 import { SharePluginStart } from '../../../../../plugins/share/public';
 import { KibanaLegacySetup } from '../../../../../plugins/kibana_legacy/public';
@@ -49,14 +49,14 @@ export type DiscoverStart = void;
 export interface DiscoverSetupPlugins {
   uiActions: IUiActionsSetup;
   embeddable: IEmbeddableSetup;
-  kibana_legacy: KibanaLegacySetup;
+  kibanaLegacy: KibanaLegacySetup;
   home: HomePublicPluginSetup;
 }
 export interface DiscoverStartPlugins {
   uiActions: IUiActionsStart;
   embeddable: IEmbeddableStart;
   navigation: NavigationStart;
-  eui_utils: EuiUtilsStart;
+  charts: ChartsPluginStart;
   data: DataPublicPluginStart;
   share: SharePluginStart;
   inspector: any;
@@ -99,7 +99,7 @@ export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
       order: 20,
       component: JsonCodeBlock,
     });
-    plugins.kibana_legacy.registerLegacyApp({
+    plugins.kibanaLegacy.registerLegacyApp({
       id: 'discover',
       title: 'Discover',
       order: -1004,

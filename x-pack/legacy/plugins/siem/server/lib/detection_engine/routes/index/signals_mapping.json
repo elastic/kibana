@@ -23,7 +23,20 @@
             }
           },
           "ancestors": {
-            "type": "object"
+            "properties": {
+              "rule": {
+                "type": "keyword"
+              },
+              "id": {
+                "type": "keyword"
+              },
+              "type": {
+                "type": "keyword"
+              },
+              "depth": {
+                "type": "long"
+              }
+            }
           },
           "rule": {
             "properties": {

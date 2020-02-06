@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Position } from '@elastic/charts';
-import { EuiButton, EuiSelect, EuiPanel } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSelect, EuiPanel } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import React, { memo, useCallback, useMemo, useState, useEffect } from 'react';
 import styled from 'styled-components';
@@ -12,8 +12,6 @@ import { isEmpty } from 'lodash/fp';
 
 import { HeaderSection } from '../../../../components/header_section';
 import { SignalsHistogram } from './signals_histogram';
-
-import * as i18n from './translations';
 import { Query } from '../../../../../../../../../src/plugins/data/common/query';
 import { esFilters, esQuery } from '../../../../../../../../../src/plugins/data/common/es_query';
 import { RegisterQuery, SignalsHistogramOption, SignalsAggregation, SignalsTotal } from './types';
@@ -25,9 +23,15 @@ import { InspectButtonContainer } from '../../../../components/inspect';
 import { useQuerySignals } from '../../../../containers/detection_engine/signals/use_query';
 import { MatrixLoader } from '../../../../components/matrix_histogram/matrix_loader';
 
-import { formatSignalsData, getSignalsHistogramQuery } from './helpers';
+import { formatSignalsData, getSignalsHistogramQuery, showInitialLoadingSpinner } from './helpers';
+import * as i18n from './translations';
 
-const StyledEuiPanel = styled(EuiPanel)`
+const DEFAULT_PANEL_HEIGHT = 300;
+
+const StyledEuiPanel = styled(EuiPanel)<{ height?: number }>`
+  display: flex;
+  flex-direction: column;
+  ${({ height }) => (height != null ? `height: ${height}px;` : '')}
   position: relative;
 `;
 
@@ -38,14 +42,19 @@ const defaultTotalSignalsObj: SignalsTotal = {
 
 export const DETECTIONS_HISTOGRAM_ID = 'detections-histogram';
 
+const ViewSignalsFlexItem = styled(EuiFlexItem)`
+  margin-left: 24px;
+`;
+
 interface SignalsHistogramPanelProps {
+  chartHeight?: number;
   defaultStackByOption?: SignalsHistogramOption;
   deleteQuery?: ({ id }: { id: string }) => void;
   filters?: esFilters.Filter[];
   from: number;
   query?: Query;
   legendPosition?: Position;
-  loadingInitial?: boolean;
+  panelHeight?: number;
   signalIndexName: string | null;
   setQuery: (params: RegisterQuery) => void;
   showLinkToSignals?: boolean;
@@ -58,13 +67,14 @@ interface SignalsHistogramPanelProps {
 
 export const SignalsHistogramPanel = memo<SignalsHistogramPanelProps>(
   ({
+    chartHeight,
     defaultStackByOption = signalsHistogramOptions[0],
     deleteQuery,
     filters,
     query,
     from,
     legendPosition = 'right',
-    loadingInitial = false,
+    panelHeight = DEFAULT_PANEL_HEIGHT,
     setQuery,
     signalIndexName,
     showLinkToSignals = false,
@@ -74,7 +84,7 @@ export const SignalsHistogramPanel = memo<SignalsHistogramPanelProps>(
     title = i18n.HISTOGRAM_HEADER,
     updateDateRange,
   }) => {
-    const [isInitialLoading, setIsInitialLoading] = useState(loadingInitial || true);
+    const [isInitialLoading, setIsInitialLoading] = useState(true);
     const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
     const [totalSignalsObj, setTotalSignalsObj] = useState<SignalsTotal>(defaultTotalSignalsObj);
     const [selectedStackByOption, setSelectedStackByOption] = useState<SignalsHistogramOption>(
@@ -112,10 +122,16 @@ export const SignalsHistogramPanel = memo<SignalsHistogramPanelProps>(
     const formattedSignalsData = useMemo(() => formatSignalsData(signalsData), [signalsData]);
 
     useEffect(() => {
-      if (!loadingInitial && isInitialLoading && !isLoadingSignals && signalsData) {
+      let canceled = false;
+
+      if (!canceled && !showInitialLoadingSpinner({ isInitialLoading, isLoadingSignals })) {
         setIsInitialLoading(false);
       }
-    }, [loadingInitial, isLoadingSignals, signalsData]);
+
+      return () => {
+        canceled = true; // prevent long running data fetches from updating state after unmounting
+      };
+    }, [isInitialLoading, isLoadingSignals, setIsInitialLoading]);
 
     useEffect(() => {
       return () => {
@@ -171,7 +187,7 @@ export const SignalsHistogramPanel = memo<SignalsHistogramPanelProps>(
 
     return (
       <InspectButtonContainer show={!isInitialLoading}>
-        <StyledEuiPanel>
+        <StyledEuiPanel height={panelHeight}>
           {isInitialLoading ? (
             <>
               <HeaderSection id={DETECTIONS_HISTOGRAM_ID} title={title} />
@@ -184,26 +200,33 @@ export const SignalsHistogramPanel = memo<SignalsHistogramPanelProps>(
                 title={title}
                 subtitle={showTotalSignalsCount && totalSignals}
               >
-                {stackByOptions && (
-                  <EuiSelect
-                    onChange={setSelectedOptionCallback}
-                    options={stackByOptions}
-                    prepend={i18n.STACK_BY_LABEL}
-                    value={selectedStackByOption.value}
-                  />
-                )}
-                {showLinkToSignals && (
-                  <EuiButton href={getDetectionEngineUrl()}>{i18n.VIEW_SIGNALS}</EuiButton>
-                )}
+                <EuiFlexGroup alignItems="center" gutterSize="none">
+                  <EuiFlexItem grow={false}>
+                    {stackByOptions && (
+                      <EuiSelect
+                        onChange={setSelectedOptionCallback}
+                        options={stackByOptions}
+                        prepend={i18n.STACK_BY_LABEL}
+                        value={selectedStackByOption.value}
+                      />
+                    )}
+                  </EuiFlexItem>
+                  {showLinkToSignals && (
+                    <ViewSignalsFlexItem grow={false}>
+                      <EuiButton href={getDetectionEngineUrl()}>{i18n.VIEW_SIGNALS}</EuiButton>
+                    </ViewSignalsFlexItem>
+                  )}
+                </EuiFlexGroup>
               </HeaderSection>
 
               <SignalsHistogram
+                chartHeight={chartHeight}
                 data={formattedSignalsData}
                 from={from}
                 legendPosition={legendPosition}
+                loading={isLoadingSignals}
                 to={to}
                 updateDateRange={updateDateRange}
-                loading={isLoadingSignals}
               />
             </>
           )}

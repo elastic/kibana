@@ -12,5 +12,6 @@ export default ({ loadTestFile, getService }: FtrProviderContext) => {
     loadTestFile(require.resolve('./home_page'));
     loadTestFile(require.resolve('./connectors'));
     loadTestFile(require.resolve('./alerts'));
+    loadTestFile(require.resolve('./details'));
   });
 };

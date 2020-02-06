@@ -88,6 +88,11 @@ export const buildSignalsRuleIdFilter = (ruleId: string): esFilters.Filter[] => 
 export const signalsHeaders: ColumnHeader[] = [
   {
     columnHeaderType: defaultColumnHeaderType,
+    id: '@timestamp',
+    width: DEFAULT_DATE_COLUMN_MIN_WIDTH,
+  },
+  {
+    columnHeaderType: defaultColumnHeaderType,
     id: 'signal.rule.name',
     label: i18n.SIGNALS_HEADERS_RULE,
     linkField: 'signal.rule.id',
@@ -109,13 +114,19 @@ export const signalsHeaders: ColumnHeader[] = [
     columnHeaderType: defaultColumnHeaderType,
     id: 'signal.rule.severity',
     label: i18n.SIGNALS_HEADERS_SEVERITY,
-    width: 100,
+    width: 105,
   },
   {
     columnHeaderType: defaultColumnHeaderType,
     id: 'signal.rule.risk_score',
     label: i18n.SIGNALS_HEADERS_RISK_SCORE,
-    width: 120,
+    width: 115,
+  },
+  {
+    columnHeaderType: defaultColumnHeaderType,
+    id: 'event.module',
+    linkField: 'rule.reference',
+    width: DEFAULT_COLUMN_MIN_WIDTH,
   },
   {
     category: 'event',
@@ -149,11 +160,6 @@ export const signalsHeaders: ColumnHeader[] = [
     columnHeaderType: defaultColumnHeaderType,
     id: 'destination.ip',
     width: 140,
-  },
-  {
-    columnHeaderType: defaultColumnHeaderType,
-    id: '@timestamp',
-    width: DEFAULT_DATE_COLUMN_MIN_WIDTH,
   },
 ];
 

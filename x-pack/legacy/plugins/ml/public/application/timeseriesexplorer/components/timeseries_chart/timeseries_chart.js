@@ -61,7 +61,7 @@ const contextChartHeight = 60;
 const contextChartLineTopMargin = 3;
 const chartSpacing = 25;
 const swimlaneHeight = 30;
-const margin = { top: 20, right: 10, bottom: 15, left: 40 };
+const margin = { top: 10, right: 10, bottom: 15, left: 40 };
 const mlAnnotationsEnabled = chrome.getInjected('mlAnnotationsEnabled', false);
 
 const ZOOM_INTERVAL_OPTIONS = [
@@ -431,6 +431,9 @@ const TimeseriesChartIntl = injectI18n(
         );
       }
       focusLoadTo = Math.min(focusLoadTo, contextXMax);
+
+      const brushVisibility = focusLoadFrom !== contextXMin || focusLoadTo !== contextXMax;
+      this.setBrushVisibility(brushVisibility);
 
       if (focusLoadFrom !== contextXMin || focusLoadTo !== contextXMax) {
         this.setContextBrushExtent(new Date(focusLoadFrom), new Date(focusLoadTo), true);

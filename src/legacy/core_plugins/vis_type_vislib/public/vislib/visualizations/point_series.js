@@ -249,7 +249,7 @@ export class PointSeries extends Chart {
           if (!seriArgs.show) return;
           const SeriClass =
             seriTypes[seriArgs.type || self.handler.visConfig.get('chart.type')] || seriTypes.line;
-          const series = new SeriClass(self.handler, svg, data.series[i], seriArgs, this.deps);
+          const series = new SeriClass(self.handler, svg, data.series[i], seriArgs, self.deps);
           series.events = self.events;
           svg.call(series.draw());
           self.series.push(series);

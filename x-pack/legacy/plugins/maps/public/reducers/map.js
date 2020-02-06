@@ -99,11 +99,8 @@ const INITIAL_STATE = {
   goto: null,
   tooltipState: null,
   mapState: {
-    zoom: 4,
-    center: {
-      lon: -100.41,
-      lat: 32.82,
-    },
+    zoom: null, // setting this value does not adjust map zoom, read only value used to store current map zoom for persisting between sessions
+    center: null, // setting this value does not adjust map view, read only value used to store current map center for persisting between sessions
     scrollZoom: true,
     extent: null,
     mouseCoordinates: null,

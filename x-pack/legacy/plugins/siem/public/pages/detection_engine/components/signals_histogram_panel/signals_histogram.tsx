@@ -19,7 +19,10 @@ import { useTheme } from '../../../../components/charts/common';
 import { histogramDateTimeFormatter } from '../../../../components/utils';
 import { HistogramData } from './types';
 
+const DEFAULT_CHART_HEIGHT = 174;
+
 interface HistogramSignalsProps {
+  chartHeight?: number;
   from: number;
   legendPosition?: Position;
   loading: boolean;
@@ -29,7 +32,15 @@ interface HistogramSignalsProps {
 }
 
 export const SignalsHistogram = React.memo<HistogramSignalsProps>(
-  ({ to, from, legendPosition = 'right', data, updateDateRange, loading }) => {
+  ({
+    chartHeight = DEFAULT_CHART_HEIGHT,
+    data,
+    from,
+    legendPosition = 'right',
+    loading,
+    to,
+    updateDateRange,
+  }) => {
     const theme = useTheme();
 
     return (
@@ -43,7 +54,7 @@ export const SignalsHistogram = React.memo<HistogramSignalsProps>(
           />
         )}
 
-        <Chart size={['100%', 324]}>
+        <Chart size={['100%', chartHeight]}>
           <Settings
             legendPosition={legendPosition}
             onBrushEnd={updateDateRange}

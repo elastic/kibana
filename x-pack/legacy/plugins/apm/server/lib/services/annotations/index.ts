@@ -5,7 +5,7 @@
  */
 import { isNumber } from 'lodash';
 import { Annotation, AnnotationType } from '../../../../common/annotations';
-import { ESFilter } from '../../../../typings/elasticsearch';
+import { ESFilter } from '../../../../../../../plugins/apm/typings/elasticsearch';
 import {
   SERVICE_NAME,
   SERVICE_ENVIRONMENT,

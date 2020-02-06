@@ -18,14 +18,14 @@ import {
   mlHostMultiHostKqlQuery,
   mlHostVariableHostNullKqlQuery,
   mlHostVariableHostKqlQuery,
-} from '../../lib/ml_conditional_links';
-import { loginAndWaitForPage } from '../../lib/util/helpers';
-import { KQL_INPUT } from '../../lib/url_state';
+} from '../../../urls/ml_conditional_links';
+import { loginAndWaitForPage, DEFAULT_TIMEOUT } from '../../../tasks/login';
+import { KQL_INPUT } from '../../../screens/header';
 
 describe('ml conditional links', () => {
   it('sets the KQL from a single IP with a value for the query', () => {
     loginAndWaitForPage(mlNetworkSingleIpKqlQuery);
-    cy.get(KQL_INPUT, { timeout: 5000 }).should(
+    cy.get(KQL_INPUT, { timeout: DEFAULT_TIMEOUT }).should(
       'have.attr',
       'value',
       '(process.name: "conhost.exe" or process.name: "sc.exe")'
@@ -34,7 +34,7 @@ describe('ml conditional links', () => {
 
   it('sets the KQL from a multiple IPs with a null for the query', () => {
     loginAndWaitForPage(mlNetworkMultipleIpNullKqlQuery);
-    cy.get(KQL_INPUT, { timeout: 5000 }).should(
+    cy.get(KQL_INPUT, { timeout: DEFAULT_TIMEOUT }).should(
       'have.attr',
       'value',
       '((source.ip: "127.0.0.1" or destination.ip: "127.0.0.1") or (source.ip: "127.0.0.2" or destination.ip: "127.0.0.2"))'
@@ -43,7 +43,7 @@ describe('ml conditional links', () => {
 
   it('sets the KQL from a multiple IPs with a value for the query', () => {
     loginAndWaitForPage(mlNetworkMultipleIpKqlQuery);
-    cy.get(KQL_INPUT, { timeout: 5000 }).should(
+    cy.get(KQL_INPUT, { timeout: DEFAULT_TIMEOUT }).should(
       'have.attr',
       'value',
       '((source.ip: "127.0.0.1" or destination.ip: "127.0.0.1") or (source.ip: "127.0.0.2" or destination.ip: "127.0.0.2")) and ((process.name: "conhost.exe" or process.name: "sc.exe"))'
@@ -52,7 +52,7 @@ describe('ml conditional links', () => {
 
   it('sets the KQL from a $ip$ with a value for the query', () => {
     loginAndWaitForPage(mlNetworkKqlQuery);
-    cy.get(KQL_INPUT, { timeout: 5000 }).should(
+    cy.get(KQL_INPUT, { timeout: DEFAULT_TIMEOUT }).should(
       'have.attr',
       'value',
       '(process.name: "conhost.exe" or process.name: "sc.exe")'
@@ -61,7 +61,7 @@ describe('ml conditional links', () => {
 
   it('sets the KQL from a single host name with a value for query', () => {
     loginAndWaitForPage(mlHostSingleHostKqlQuery);
-    cy.get(KQL_INPUT, { timeout: 5000 }).should(
+    cy.get(KQL_INPUT, { timeout: DEFAULT_TIMEOUT }).should(
       'have.attr',
       'value',
       '(process.name: "conhost.exe" or process.name: "sc.exe")'
@@ -70,7 +70,7 @@ describe('ml conditional links', () => {
 
   it('sets the KQL from a multiple host names with null for query', () => {
     loginAndWaitForPage(mlHostMultiHostNullKqlQuery);
-    cy.get(KQL_INPUT, { timeout: 5000 }).should(
+    cy.get(KQL_INPUT, { timeout: DEFAULT_TIMEOUT }).should(
       'have.attr',
       'value',
       '(host.name: "siem-windows" or host.name: "siem-suricata")'
@@ -79,7 +79,7 @@ describe('ml conditional links', () => {
 
   it('sets the KQL from a multiple host names with a value for query', () => {
     loginAndWaitForPage(mlHostMultiHostKqlQuery);
-    cy.get(KQL_INPUT, { timeout: 5000 }).should(
+    cy.get(KQL_INPUT, { timeout: DEFAULT_TIMEOUT }).should(
       'have.attr',
       'value',
       '(host.name: "siem-windows" or host.name: "siem-suricata") and ((process.name: "conhost.exe" or process.name: "sc.exe"))'
@@ -88,7 +88,7 @@ describe('ml conditional links', () => {
 
   it('sets the KQL from a undefined/null host name but with a value for query', () => {
     loginAndWaitForPage(mlHostVariableHostKqlQuery);
-    cy.get(KQL_INPUT, { timeout: 5000 }).should(
+    cy.get(KQL_INPUT, { timeout: DEFAULT_TIMEOUT }).should(
       'have.attr',
       'value',
       '(process.name: "conhost.exe" or process.name: "sc.exe")'

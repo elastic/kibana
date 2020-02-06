@@ -20,7 +20,7 @@
 import { CoreStart } from 'src/core/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { IUiActionsSetup, IUiActionsStart } from 'src/plugins/ui_actions/public';
-import { AutocompleteSetup, AutocompleteStart } from './autocomplete/types';
+import { AutocompleteSetup, AutocompleteStart } from './autocomplete';
 import { FieldFormatsSetup, FieldFormatsStart } from './field_formats';
 import { ISearchSetup, ISearchStart } from './search';
 import { QuerySetup, QueryStart } from './query';

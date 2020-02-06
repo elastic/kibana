@@ -4,9 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React from 'react';
 import maki from '@elastic/maki';
 import xml2js from 'xml2js';
 import { parseXmlString } from '../../../../common/parse_xml_string';
+import { SymbolIcon } from './components/legend/symbol_icon';
 
 export const LARGE_MAKI_ICON_SIZE = 15;
 const LARGE_MAKI_ICON_SIZE_AS_STRING = LARGE_MAKI_ICON_SIZE.toString();
@@ -55,6 +57,12 @@ export function getMakiSymbolAnchor(symbolId) {
   }
 }
 
+// Style descriptor stores symbolId, for example 'aircraft'
+// Icons are registered in Mapbox with full maki ids, for example 'aircraft-11'
+export function getMakiIconId(symbolId, iconPixelSize) {
+  return `${symbolId}-${iconPixelSize}`;
+}
+
 export function buildSrcUrl(svgString) {
   const domUrl = window.URL || window.webkitURL || window;
   const svg = new Blob([svgString], { type: 'image/svg+xml' });
@@ -76,4 +84,55 @@ export async function styleSvg(svgString, fill, stroke, strokeWidth) {
   if (style) svgXml.svg.$.style = style;
   const builder = new xml2js.Builder();
   return builder.buildObject(svgXml);
+}
+
+const ICON_PALETTES = [
+  {
+    id: 'filledShapes',
+    icons: ['circle', 'marker', 'square', 'star', 'triangle', 'hospital'],
+  },
+  {
+    id: 'hollowShapes',
+    icons: [
+      'circle-stroked',
+      'marker-stroked',
+      'square-stroked',
+      'star-stroked',
+      'triangle-stroked',
+    ],
+  },
+];
+
+export function getIconPaletteOptions(isDarkMode) {
+  return ICON_PALETTES.map(({ id, icons }) => {
+    const iconsDisplay = icons.map(iconId => {
+      const style = {
+        width: '10%',
+        position: 'relative',
+        height: '100%',
+        display: 'inline-block',
+        paddingTop: '4px',
+      };
+      return (
+        <div style={style} key={iconId}>
+          <SymbolIcon
+            className="mapIcon"
+            symbolId={iconId}
+            fill={isDarkMode ? 'rgb(223, 229, 239)' : 'rgb(52, 55, 65)'}
+            stroke={isDarkMode ? 'rgb(255, 255, 255)' : 'rgb(0, 0, 0)'}
+            strokeWidth={'1px'}
+          />
+        </div>
+      );
+    });
+    return {
+      value: id,
+      inputDisplay: <div>{iconsDisplay}</div>,
+    };
+  });
+}
+
+export function getIconPalette(paletteId) {
+  const palette = ICON_PALETTES.find(({ id }) => id === paletteId);
+  return palette ? [...palette.icons] : null;
 }

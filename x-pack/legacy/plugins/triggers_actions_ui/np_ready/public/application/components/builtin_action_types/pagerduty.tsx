@@ -17,10 +17,10 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import {
   ActionTypeModel,
   ActionConnectorFieldsProps,
-  ActionConnector,
   ValidationResult,
   ActionParamsProps,
 } from '../../../types';
+import { PagerDutyActionParams, PagerDutyActionConnector } from './types';
 
 export function getActionType(): ActionTypeModel {
   return {
@@ -32,7 +32,13 @@ export function getActionType(): ActionTypeModel {
         defaultMessage: 'Send an event in PagerDuty.',
       }
     ),
-    validateConnector: (action: ActionConnector): ValidationResult => {
+    actionTypeTitle: i18n.translate(
+      'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.actionTypeTitle',
+      {
+        defaultMessage: 'Send to PagerDuty',
+      }
+    ),
+    validateConnector: (action: PagerDutyActionConnector): ValidationResult => {
       const validationResult = { errors: {} };
       const errors = {
         routingKey: new Array<string>(),
@@ -50,8 +56,22 @@ export function getActionType(): ActionTypeModel {
       }
       return validationResult;
     },
-    validateParams: (actionParams: any): ValidationResult => {
+    validateParams: (actionParams: PagerDutyActionParams): ValidationResult => {
       const validationResult = { errors: {} };
+      const errors = {
+        summary: new Array<string>(),
+      };
+      validationResult.errors = errors;
+      if (!actionParams.summary?.length) {
+        errors.summary.push(
+          i18n.translate(
+            'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.error.requiredSummaryText',
+            {
+              defaultMessage: 'Summary is required.',
+            }
+          )
+        );
+      }
       return validationResult;
     },
     actionConnectorFields: PagerDutyActionConnectorFields,
@@ -59,12 +79,9 @@ export function getActionType(): ActionTypeModel {
   };
 }
 
-const PagerDutyActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({
-  errors,
-  action,
-  editActionConfig,
-  editActionSecrets,
-}) => {
+const PagerDutyActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps<
+  PagerDutyActionConnector
+>> = ({ errors, action, editActionConfig, editActionSecrets }) => {
   const { apiUrl } = action.config;
   const { routingKey } = action.secrets;
   return (
@@ -137,14 +154,22 @@ const PagerDutyActionConnectorFields: React.FunctionComponent<ActionConnectorFie
   );
 };
 
-const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps> = ({
-  action,
+const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDutyActionParams>> = ({
+  actionParams,
   editAction,
   index,
   errors,
-  hasErrors,
 }) => {
-  const { eventAction, dedupKey, summary, source, severity, timestamp, component, group } = action;
+  const {
+    eventAction,
+    dedupKey,
+    summary,
+    source,
+    severity,
+    timestamp,
+    component,
+    group,
+  } = actionParams;
   const severityOptions = [
     { value: 'critical', text: 'Critical' },
     { value: 'info', text: 'Info' },
@@ -332,7 +357,7 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps> = ({
         id="pagerDutySummary"
         fullWidth
         error={errors.summary}
-        isInvalid={hasErrors === true && summary !== undefined}
+        isInvalid={errors.summary.length > 0 && summary !== undefined}
         label={i18n.translate(
           'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.summaryFieldLabel',
           {
@@ -342,16 +367,41 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps> = ({
       >
         <EuiFieldText
           fullWidth
-          isInvalid={hasErrors === true && summary !== undefined}
+          isInvalid={errors.summary.length > 0 && summary !== undefined}
           name="summary"
           value={summary || ''}
-          data-test-subj="pagerdutyDescriptionInput"
+          data-test-subj="pagerdutySummaryInput"
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
             editAction('summary', e.target.value, index);
           }}
           onBlur={() => {
             if (!summary) {
               editAction('summary', '', index);
+            }
+          }}
+        />
+      </EuiFormRow>
+      <EuiFormRow
+        id="pagerDutyClass"
+        fullWidth
+        label={i18n.translate(
+          'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.classFieldLabel',
+          {
+            defaultMessage: 'Class',
+          }
+        )}
+      >
+        <EuiFieldText
+          fullWidth
+          name="class"
+          value={actionParams.class || ''}
+          data-test-subj="pagerdutyClassInput"
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+            editAction('class', e.target.value, index);
+          }}
+          onBlur={() => {
+            if (!actionParams.class) {
+              editAction('class', '', index);
             }
           }}
         />

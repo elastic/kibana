@@ -22,7 +22,6 @@ export interface ThreatParams {
 }
 
 export interface RuleAlertParams {
-  createdAt: string;
   description: string;
   enabled: boolean;
   falsePositives: string[];
@@ -49,7 +48,6 @@ export interface RuleAlertParams {
   threat: ThreatParams[] | undefined | null;
   type: 'query' | 'saved_query';
   version: number;
-  updatedAt: string;
 }
 
 export type RuleTypeParams = Omit<RuleAlertParams, 'name' | 'enabled' | 'interval' | 'tags'>;
@@ -65,8 +63,6 @@ export type RuleAlertParamsRest = Omit<
   | 'timelineId'
   | 'timelineTitle'
   | 'outputIndex'
-  | 'updatedAt'
-  | 'createdAt'
 > &
   Omit<
     IRuleStatusAttributes,
@@ -86,8 +82,8 @@ export type RuleAlertParamsRest = Omit<
     max_signals: RuleAlertParams['maxSignals'];
     risk_score: RuleAlertParams['riskScore'];
     output_index: RuleAlertParams['outputIndex'];
-    created_at: RuleAlertParams['createdAt'];
-    updated_at: RuleAlertParams['updatedAt'];
+    created_at: string;
+    updated_at: string;
     status?: IRuleStatusAttributes['status'] | undefined;
     status_date?: IRuleStatusAttributes['statusDate'] | undefined;
     last_failure_at?: IRuleStatusAttributes['lastFailureAt'] | undefined;

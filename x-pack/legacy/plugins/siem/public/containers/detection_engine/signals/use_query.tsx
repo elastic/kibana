@@ -45,10 +45,10 @@ export const useQuerySignals = <Hit, Aggs>(
   useEffect(() => {
     let isSubscribed = true;
     const abortCtrl = new AbortController();
-    setLoading(true);
 
     async function fetchData() {
       try {
+        setLoading(true);
         const signalResponse = await fetchQuerySignals<Hit, Aggs>({
           query,
           signal: abortCtrl.signal,

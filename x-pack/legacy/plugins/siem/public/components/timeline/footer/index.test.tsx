@@ -121,7 +121,7 @@ describe('Footer Timeline Component', () => {
         .find('[data-test-subj="TimelineMoreButton"]')
         .dive()
         .text();
-      expect(loadButton).toContain('Load More');
+      expect(loadButton).toContain('Load more');
     });
 
     test('it does NOT render the loadMore button because there is nothing else to fetch', () => {

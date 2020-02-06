@@ -4,9 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { errors as elasticsearchErrors } from 'elasticsearch';
+import { ElasticsearchServiceSetup } from 'kibana/server';
 import { get } from 'lodash';
-import { ServerFacade, JobSource } from '../../types';
+import { JobSource, ServerFacade } from '../../types';
 
+const esErrors = elasticsearchErrors as Record<string, any>;
 const defaultSize = 10;
 
 interface QueryBody {
@@ -34,12 +37,9 @@ interface CountAggResult {
   count: number;
 }
 
-export function jobsQueryFactory(server: ServerFacade) {
+export function jobsQueryFactory(server: ServerFacade, elasticsearch: ElasticsearchServiceSetup) {
   const index = server.config().get('xpack.reporting.index');
-  // @ts-ignore `errors` does not exist on type Cluster
-  const { callWithInternalUser, errors: esErrors } = server.plugins.elasticsearch.getCluster(
-    'admin'
-  );
+  const { callAsInternalUser } = elasticsearch.adminClient;
 
   function getUsername(user: any) {
     return get(user, 'username', false);
@@ -61,7 +61,7 @@ export function jobsQueryFactory(server: ServerFacade) {
       body: Object.assign(defaultBody[queryType] || {}, body),
     };
 
-    return callWithInternalUser(queryType, query).catch(err => {
+    return callAsInternalUser(queryType, query).catch(err => {
       if (err instanceof esErrors['401']) return;
       if (err instanceof esErrors['403']) return;
       if (err instanceof esErrors['404']) return;

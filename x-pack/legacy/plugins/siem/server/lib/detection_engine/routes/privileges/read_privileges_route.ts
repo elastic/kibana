@@ -29,8 +29,10 @@ export const createReadPrivilegesRulesRoute = (server: ServerFacade): Hapi.Serve
         const callWithRequest = callWithRequestFactory(request, server);
         const index = getIndex(request, server);
         const permissions = await readPrivileges(callWithRequest, index);
+        const usingEphemeralEncryptionKey = server.usingEphemeralEncryptionKey;
         return merge(permissions, {
           is_authenticated: request?.auth?.isAuthenticated ?? false,
+          has_encryption_key: !usingEphemeralEncryptionKey,
         });
       } catch (err) {
         return transformError(err);

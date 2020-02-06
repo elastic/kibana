@@ -56,3 +56,11 @@ export const NO_DATA_MESSAGE = i18n.translate('xpack.uptime.monitorList.noItemMe
 export const URL = i18n.translate('xpack.uptime.monitorList.table.url.name', {
   defaultMessage: 'Url',
 });
+
+export const UP = i18n.translate('xpack.uptime.monitorList.statusColumn.upLabel', {
+  defaultMessage: 'Up',
+});
+
+export const DOWN = i18n.translate('xpack.uptime.monitorList.statusColumn.downLabel', {
+  defaultMessage: 'Down',
+});

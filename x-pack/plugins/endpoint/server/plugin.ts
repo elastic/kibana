@@ -10,6 +10,7 @@ import { PluginSetupContract as FeaturesPluginSetupContract } from '../../featur
 import { createConfig$, EndpointConfigType } from './config';
 import { registerEndpointRoutes } from './routes/endpoints';
 import { EndpointAppContext } from './types';
+import { registerAlertRoutes } from './routes/alerts';
 
 export type EndpointPluginStart = void;
 export type EndpointPluginSetup = void;
@@ -68,6 +69,7 @@ export class EndpointPlugin
     const router = core.http.createRouter();
     addRoutes(router);
     registerEndpointRoutes(router, endpointContext);
+    registerAlertRoutes(router);
   }
 
   public start() {

@@ -229,7 +229,7 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
   }, [JSON.stringify(searchQuery)]);
 
   return (
-    <EuiPanel>
+    <EuiPanel data-test-subj="mlDFAnalyticsRegressionExplorationEvaluatePanel">
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
@@ -296,6 +296,7 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
               <Fragment>
                 <EuiFlexItem>
                   <EvaluateStat
+                    dataTestSubj={'mlDFAnalyticsRegressionGenMSEstat'}
                     isLoading={isLoadingGeneralization}
                     title={generalizationEval.meanSquaredError}
                     isMSE
@@ -303,6 +304,7 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EvaluateStat
+                    dataTestSubj={'mlDFAnalyticsRegressionGenRSquaredStat'}
                     isLoading={isLoadingGeneralization}
                     title={generalizationEval.rSquared}
                     isMSE={false}
@@ -339,6 +341,7 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
               <Fragment>
                 <EuiFlexItem>
                   <EvaluateStat
+                    dataTestSubj={'mlDFAnalyticsRegressionTrainingMSEstat'}
                     isLoading={isLoadingTraining}
                     title={trainingEval.meanSquaredError}
                     isMSE
@@ -346,6 +349,7 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EvaluateStat
+                    dataTestSubj={'mlDFAnalyticsRegressionTrainingRSquaredStat'}
                     isLoading={isLoadingTraining}
                     title={trainingEval.rSquared}
                     isMSE={false}

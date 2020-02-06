@@ -75,8 +75,6 @@ export const installPrepackagedRules = (
         threat,
         references,
         version,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
       }),
     ];
   }, []);

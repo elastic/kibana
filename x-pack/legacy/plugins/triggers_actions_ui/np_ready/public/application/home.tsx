@@ -39,11 +39,12 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
 }) => {
   const {
     chrome,
-    legacy: { MANAGEMENT_BREADCRUMB, capabilities },
+    capabilities,
+    legacy: { MANAGEMENT_BREADCRUMB },
   } = useAppDependencies();
 
-  const canShowActions = hasShowActionsCapability(capabilities.get());
-  const canShowAlerts = hasShowAlertsCapability(capabilities.get());
+  const canShowActions = hasShowActionsCapability(capabilities);
+  const canShowAlerts = hasShowAlertsCapability(capabilities);
   const tabs: Array<{
     id: Section;
     name: React.ReactNode;

@@ -24,11 +24,10 @@
  *
  * NOTE: It's a type of SavedObject, but specific to visualizations.
  */
-// @ts-ignore
-import { Vis } from 'ui/vis';
 import { SavedObject, SavedObjectKibanaServices } from 'ui/saved_objects/types';
 import { createSavedObjectClass } from 'ui/saved_objects/saved_object';
-import { updateOldState } from '../index';
+// @ts-ignore
+import { updateOldState, Vis } from '../index';
 import { extractReferences, injectReferences } from './saved_visualization_references';
 import { IIndexPattern } from '../../../../../plugins/data/public';
 import { VisSavedObject } from '../embeddable/visualize_embeddable';

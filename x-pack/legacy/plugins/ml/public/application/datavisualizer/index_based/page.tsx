@@ -41,6 +41,7 @@ import { useKibanaContext, SavedSearchQuery } from '../../contexts/kibana';
 import { kbnTypeToMLJobType } from '../../util/field_types_utils';
 import { timeBasedIndexCheck, getQueryFromSavedSearch } from '../../util/index_utils';
 import { TimeBuckets } from '../../util/time_buckets';
+import { useUrlState } from '../../util/url_state';
 import { FieldRequestConfig, FieldVisConfig } from './common';
 import { ActionsPanel } from './components/actions_panel';
 import { FieldsPanel } from './components/fields_panel';
@@ -101,6 +102,26 @@ export const Page: FC = () => {
   const { combinedQuery, currentIndexPattern, currentSavedSearch, kibanaConfig } = kibanaContext;
 
   const dataLoader = new DataLoader(currentIndexPattern, kibanaConfig);
+
+  const [globalState, setGlobalState] = useUrlState('_g');
+  useEffect(() => {
+    if (globalState?.time !== undefined) {
+      timefilter.setTime({
+        from: globalState.time.from,
+        to: globalState.time.to,
+      });
+    }
+  }, [globalState?.time?.from, globalState?.time?.to]);
+  useEffect(() => {
+    if (globalState?.refreshInterval !== undefined) {
+      timefilter.setRefreshInterval(globalState.refreshInterval);
+    }
+  }, [globalState?.refreshInterval?.pause, globalState?.refreshInterval?.value]);
+
+  const [lastRefresh, setLastRefresh] = useState(0);
+  useEffect(() => {
+    loadOverallStats();
+  }, [lastRefresh]);
 
   useEffect(() => {
     if (currentIndexPattern.timeFieldName !== undefined) {
@@ -175,7 +196,13 @@ export const Page: FC = () => {
     const timeUpdateSubscription = merge(
       timefilter.getTimeUpdate$(),
       mlTimefilterRefresh$
-    ).subscribe(loadOverallStats);
+    ).subscribe(() => {
+      setGlobalState({
+        time: timefilter.getTime(),
+        refreshInterval: timefilter.getRefreshInterval(),
+      });
+      setLastRefresh(Date.now());
+    });
     return () => {
       timeUpdateSubscription.unsubscribe();
     };
@@ -231,9 +258,16 @@ export const Page: FC = () => {
     const tf = timefilter as any;
     let earliest;
     let latest;
+
+    const activeBounds = tf.getActiveBounds();
+
+    if (currentIndexPattern.timeFieldName !== undefined && activeBounds === undefined) {
+      return;
+    }
+
     if (currentIndexPattern.timeFieldName !== undefined) {
-      earliest = tf.getActiveBounds().min.valueOf();
-      latest = tf.getActiveBounds().max.valueOf();
+      earliest = activeBounds.min.valueOf();
+      latest = activeBounds.max.valueOf();
     }
 
     try {

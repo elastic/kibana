@@ -21,6 +21,7 @@ import * as Rx from 'rxjs';
 import { Subscription } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { TExecuteTriggerActions } from 'src/plugins/ui_actions/public';
+import { RequestAdapter, Adapters } from '../../../../../../../plugins/inspector/public';
 import {
   esFilters,
   TimeRange,
@@ -43,13 +44,11 @@ import { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
 import { SortOrder } from '../angular/doc_table/components/table_header/helpers';
 import { getSortForSearchSource } from '../angular/doc_table/lib/get_sort_for_search_source';
 import {
-  Adapters,
   angular,
   getRequestInspectorStats,
   getResponseInspectorStats,
   getServices,
   IndexPattern,
-  RequestAdapter,
   ISearchSource,
 } from '../../kibana_services';
 import { SEARCH_EMBEDDABLE_TYPE } from './constants';

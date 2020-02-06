@@ -67,7 +67,6 @@ routes.when(`${BASE_PATH}:section?/:subsection?/:view?/:id?`, {
           ...(npSetup.plugins as typeof npSetup.plugins),
           __LEGACY: {
             MANAGEMENT_BREADCRUMB,
-            capabilities,
           },
         });
 
@@ -75,7 +74,6 @@ routes.when(`${BASE_PATH}:section?/:subsection?/:view?/:id?`, {
           ...(npSetup.plugins as typeof npSetup.plugins),
           __LEGACY: {
             MANAGEMENT_BREADCRUMB,
-            capabilities,
           },
         });
 

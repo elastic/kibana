@@ -26,6 +26,14 @@ import { fromNode, delay } from 'bluebird';
 import { ImageComparator } from 'test_utils/image_comparator';
 import simpleloadPng from './simpleload.png';
 
+// Replace with mock when converting to jest tests
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { seedColors } from '../../../../../../plugins/charts/public/services/colors/seed_colors';
+
+const colors = {
+  seedColors,
+};
+
 describe('tag cloud tests', function() {
   const minValue = 1;
   const maxValue = 9;
@@ -124,7 +132,7 @@ describe('tag cloud tests', function() {
     )}`, function() {
       beforeEach(async function() {
         setupDOM();
-        tagCloud = new TagCloud(domNode);
+        tagCloud = new TagCloud(domNode, colors);
         tagCloud.setData(test.data);
         tagCloud.setOptions(test.options);
         await fromNode(cb => tagCloud.once('renderComplete', cb));
@@ -156,7 +164,7 @@ describe('tag cloud tests', function() {
 
         //TagCloud takes at least 600ms to complete (due to d3 animation)
         //renderComplete should only notify at the last one
-        tagCloud = new TagCloud(domNode);
+        tagCloud = new TagCloud(domNode, colors);
         tagCloud.setData(baseTest.data);
         tagCloud.setOptions(baseTest.options);
 
@@ -188,7 +196,7 @@ describe('tag cloud tests', function() {
   describe('should use the latest state before notifying (when modifying options multiple times)', function() {
     beforeEach(async function() {
       setupDOM();
-      tagCloud = new TagCloud(domNode);
+      tagCloud = new TagCloud(domNode, colors);
       tagCloud.setData(baseTest.data);
       tagCloud.setOptions(baseTest.options);
       tagCloud.setOptions(logScaleTest.options);
@@ -215,7 +223,7 @@ describe('tag cloud tests', function() {
   describe('should use the latest state before notifying (when modifying data multiple times)', function() {
     beforeEach(async function() {
       setupDOM();
-      tagCloud = new TagCloud(domNode);
+      tagCloud = new TagCloud(domNode, colors);
       tagCloud.setData(baseTest.data);
       tagCloud.setOptions(baseTest.options);
       tagCloud.setData(trimDataTest.data);
@@ -245,7 +253,7 @@ describe('tag cloud tests', function() {
       counter = 0;
       setupDOM();
       return new Promise((resolve, reject) => {
-        tagCloud = new TagCloud(domNode);
+        tagCloud = new TagCloud(domNode, colors);
         tagCloud.setData(baseTest.data);
         tagCloud.setOptions(baseTest.options);
 
@@ -291,7 +299,7 @@ describe('tag cloud tests', function() {
   describe('should show correct data when state-updates are interleaved with resize event', function() {
     beforeEach(async function() {
       setupDOM();
-      tagCloud = new TagCloud(domNode);
+      tagCloud = new TagCloud(domNode, colors);
       tagCloud.setData(logScaleTest.data);
       tagCloud.setOptions(logScaleTest.options);
 
@@ -329,7 +337,7 @@ describe('tag cloud tests', function() {
       setupDOM();
       domNode.style.width = '1px';
       domNode.style.height = '1px';
-      tagCloud = new TagCloud(domNode);
+      tagCloud = new TagCloud(domNode, colors);
       tagCloud.setData(baseTest.data);
       tagCloud.setOptions(baseTest.options);
       await fromNode(cb => tagCloud.once('renderComplete', cb));
@@ -355,7 +363,7 @@ describe('tag cloud tests', function() {
       domNode.style.width = '1px';
       domNode.style.height = '1px';
 
-      tagCloud = new TagCloud(domNode);
+      tagCloud = new TagCloud(domNode, colors);
       tagCloud.setData(baseTest.data);
       tagCloud.setOptions(baseTest.options);
       await fromNode(cb => tagCloud.once('renderComplete', cb));
@@ -380,7 +388,7 @@ describe('tag cloud tests', function() {
   describe(`tags should no longer fit after making container smaller`, function() {
     beforeEach(async function() {
       setupDOM();
-      tagCloud = new TagCloud(domNode);
+      tagCloud = new TagCloud(domNode, colors);
       tagCloud.setData(baseTest.data);
       tagCloud.setOptions(baseTest.options);
       await fromNode(cb => tagCloud.once('renderComplete', cb));
@@ -412,7 +420,7 @@ describe('tag cloud tests', function() {
     });
 
     it('should render simple image', async function() {
-      tagCloud = new TagCloud(domNode);
+      tagCloud = new TagCloud(domNode, colors);
       tagCloud.setData(baseTest.data);
       tagCloud.setOptions(baseTest.options);
 

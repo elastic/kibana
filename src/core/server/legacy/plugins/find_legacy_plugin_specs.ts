@@ -85,6 +85,7 @@ function getNavLinks(uiExports: LegacyUiExports, pluginSpecs: LegacyPluginSpec[]
       order: typeof spec.order === 'number' ? spec.order : 0,
       url: spec.url,
       subUrlBase: spec.subUrlBase || spec.url,
+      disableSubUrlTracking: spec.disableSubUrlTracking,
       icon: spec.icon,
       euiIconType: spec.euiIconType,
       linkToLastSub: 'linkToLastSubUrl' in spec ? spec.linkToLastSubUrl : false,

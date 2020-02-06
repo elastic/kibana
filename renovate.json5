@@ -25,7 +25,7 @@
     'Team:Operations',
     'renovate',
     'v8.0.0',
-    'v7.6.0',
+    'v7.7.0',
   ],
   major: {
     labels: [
@@ -33,7 +33,7 @@
       'Team:Operations',
       'renovate',
       'v8.0.0',
-      'v7.6.0',
+      'v7.7.0',
       'renovate:major',
     ],
   },
@@ -238,7 +238,7 @@
           'Team:Operations',
           'renovate',
           'v8.0.0',
-          'v7.6.0',
+          'v7.7.0',
           ':ml',
         ],
       },

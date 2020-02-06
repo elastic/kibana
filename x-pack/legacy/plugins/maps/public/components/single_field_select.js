@@ -8,63 +8,50 @@ import _ from 'lodash';
 import PropTypes from 'prop-types';
 import React from 'react';
 
-import { EuiComboBox } from '@elastic/eui';
+import { EuiComboBox, EuiHighlight } from '@elastic/eui';
+import { FieldIcon } from '../../../../../../src/plugins/kibana_react/public';
 
-const sortByLabel = (a, b) => {
-  if (a.label < b.label) return -1;
-  if (a.label > b.label) return 1;
-  return 0;
-};
-
-// Creates grouped options by grouping fields by field type
-export const getGroupedFieldOptions = (fields, filterField) => {
+function fieldsToOptions(fields) {
   if (!fields) {
-    return;
+    return [];
   }
 
-  const fieldsByTypeMap = new Map();
-
-  fields.filter(filterField).forEach(field => {
-    const fieldLabel = 'label' in field ? field.label : field.name;
-    if (fieldsByTypeMap.has(field.type)) {
-      const fieldsList = fieldsByTypeMap.get(field.type);
-      fieldsList.push({ value: field.name, label: fieldLabel });
-      fieldsByTypeMap.set(field.type, fieldsList);
-    } else {
-      fieldsByTypeMap.set(field.type, [{ value: field.name, label: fieldLabel }]);
-    }
-  });
-
-  const groupedFieldOptions = [];
-  fieldsByTypeMap.forEach((fieldsList, fieldType) => {
-    const sortedOptions = fieldsList.sort(sortByLabel).map(({ value, label }) => {
-      return { value: value, label: label };
+  return fields
+    .map(field => {
+      return {
+        value: field,
+        label: 'label' in field ? field.label : field.name,
+      };
+    })
+    .sort((a, b) => {
+      return a.label.toLowerCase().localeCompare(b.label.toLowerCase());
     });
+}
 
-    groupedFieldOptions.push({
-      label: fieldType,
-      options: sortedOptions,
-    });
-  });
+function renderOption(option, searchValue, contentClassName) {
+  return (
+    <span className={contentClassName}>
+      <FieldIcon type={option.value.type} size="m" useColor />
+      &nbsp;
+      <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
+    </span>
+  );
+}
 
-  groupedFieldOptions.sort(sortByLabel);
-
-  return groupedFieldOptions;
-};
-
-export function SingleFieldSelect({ fields, filterField, onChange, value, placeholder, ...rest }) {
+export function SingleFieldSelect({ fields, onChange, value, placeholder, ...rest }) {
   const onSelection = selectedOptions => {
-    onChange(_.get(selectedOptions, '0.value'));
+    onChange(_.get(selectedOptions, '0.value.name'));
   };
 
   return (
     <EuiComboBox
       placeholder={placeholder}
       singleSelection={true}
-      options={getGroupedFieldOptions(fields, filterField)}
+      options={fieldsToOptions(fields)}
       selectedOptions={value ? [{ value: value, label: value }] : []}
       onChange={onSelection}
       isDisabled={!fields}
+      renderOption={renderOption}
       {...rest}
     />
   );
@@ -75,11 +62,4 @@ SingleFieldSelect.propTypes = {
   fields: PropTypes.array,
   onChange: PropTypes.func.isRequired,
   value: PropTypes.string, // fieldName
-  filterField: PropTypes.func,
-};
-
-SingleFieldSelect.defaultProps = {
-  filterField: () => {
-    return true;
-  },
 };

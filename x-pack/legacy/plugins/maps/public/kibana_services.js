@@ -21,6 +21,12 @@ export const getLicenseId = () => {
   return licenseId;
 };
 
+let inspector;
+export const setInspector = newInspector => (inspector = newInspector);
+export const getInspector = () => {
+  return inspector;
+};
+
 export async function fetchSearchSourceAndRecordWithInspector({
   searchSource,
   requestId,

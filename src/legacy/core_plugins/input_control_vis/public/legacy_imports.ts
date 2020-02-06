@@ -22,8 +22,6 @@ import { SearchSource as SearchSourceClass, ISearchSource } from '../../../../pl
 
 export { SearchSourceFields } from '../../../../plugins/data/public';
 
-export { Vis, VisParams } from 'ui/vis';
-export { VisOptionsProps } from 'ui/vis/editors/default';
 export { ValidatedDualRange } from 'ui/validated_range';
 
 export type SearchSource = Class<ISearchSource>;
