@@ -77,12 +77,19 @@ const createSetupContractMock = () => {
     auth: createAuthMock(),
     getAuthHeaders: jest.fn(),
     isTlsEnabled: false,
+    getServerInfo: jest.fn(),
   };
   setupContract.createCookieSessionStorageFactory.mockResolvedValue(
     sessionStorageMock.createFactory()
   );
   setupContract.createRouter.mockImplementation(() => mockRouter.create());
   setupContract.getAuthHeaders.mockReturnValue({ authorization: 'authorization-header' });
+  setupContract.getServerInfo.mockReturnValue({
+    host: 'localhost',
+    name: 'kibana',
+    port: 80,
+    protocol: 'http',
+  });
   return setupContract;
 };
 

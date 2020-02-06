@@ -11,12 +11,12 @@ import { EuiFieldText } from '@elastic/eui';
 import {
   addCategoricalRow,
   isCategoricalStopsInvalid,
-  getOtherCategoryLabel,
   DEFAULT_CUSTOM_COLOR,
   DEFAULT_NEXT_COLOR,
 } from './color_stops_utils';
 import { i18n } from '@kbn/i18n';
 import { ColorStops } from './color_stops';
+import { getOtherCategoryLabel } from '../../style_util';
 
 export const ColorStopsCategorical = ({
   colorStops = [

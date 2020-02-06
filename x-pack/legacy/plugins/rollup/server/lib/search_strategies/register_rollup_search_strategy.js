@@ -6,19 +6,19 @@
 import { getRollupSearchStrategy } from './rollup_search_strategy';
 import { getRollupSearchRequest } from './rollup_search_request';
 import { getRollupSearchCapabilities } from './rollup_search_capabilities';
+import {
+  AbstractSearchRequest,
+  DefaultSearchCapabilities,
+  AbstractSearchStrategy,
+} from '../../../../../../../src/plugins/vis_type_timeseries/server';
 
-export const registerRollupSearchStrategy = (kbnServer, server) =>
+export const registerRollupSearchStrategy = kbnServer =>
   kbnServer.afterPluginsInit(() => {
-    if (!server.plugins.metrics) {
+    if (!kbnServer.newPlatform.setup.plugins.metrics) {
       return;
     }
 
-    const {
-      addSearchStrategy,
-      AbstractSearchRequest,
-      AbstractSearchStrategy,
-      DefaultSearchCapabilities,
-    } = server.plugins.metrics;
+    const { addSearchStrategy } = kbnServer.newPlatform.setup.plugins.metrics;
 
     const RollupSearchRequest = getRollupSearchRequest(AbstractSearchRequest);
     const RollupSearchCapabilities = getRollupSearchCapabilities(DefaultSearchCapabilities);
@@ -28,5 +28,5 @@ export const registerRollupSearchStrategy = (kbnServer, server) =>
       RollupSearchCapabilities
     );
 
-    addSearchStrategy(new RollupSearchStrategy(server));
+    addSearchStrategy(new RollupSearchStrategy(kbnServer));
   });

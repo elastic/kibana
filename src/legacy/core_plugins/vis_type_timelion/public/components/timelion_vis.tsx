@@ -20,7 +20,7 @@
 import React from 'react';
 
 import { IUiSettingsClient } from 'kibana/public';
-import { Vis } from '../legacy_imports';
+import { Vis } from 'src/legacy/core_plugins/visualizations/public';
 import { ChartComponent } from './chart';
 import { VisParams } from '../timelion_vis_fn';
 import { TimelionSuccessResponse } from '../helpers/timelion_request_handler';

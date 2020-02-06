@@ -168,14 +168,14 @@ describe('throws when config is invalid', () => {
   it('throws if key and keystore.path are both specified', () => {
     const value = { ssl: { key: 'foo', keystore: { path: 'bar' } } };
     expect(() => parse(value)).toThrowErrorMatchingInlineSnapshot(
-      `"[config validation of [xpack.monitoring.elasticsearch].ssl]: cannot use [key] when [keystore.path] is specified"`
+      `"[config validation of [monitoring.ui.elasticsearch].ssl]: cannot use [key] when [keystore.path] is specified"`
     );
   });
 
   it('throws if certificate and keystore.path are both specified', () => {
     const value = { ssl: { certificate: 'foo', keystore: { path: 'bar' } } };
     expect(() => parse(value)).toThrowErrorMatchingInlineSnapshot(
-      `"[config validation of [xpack.monitoring.elasticsearch].ssl]: cannot use [certificate] when [keystore.path] is specified"`
+      `"[config validation of [monitoring.ui.elasticsearch].ssl]: cannot use [certificate] when [keystore.path] is specified"`
     );
   });
 });

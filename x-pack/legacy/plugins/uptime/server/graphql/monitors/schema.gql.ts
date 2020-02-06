@@ -7,19 +7,6 @@
 import gql from 'graphql-tag';
 
 export const monitorsSchema = gql`
-  type HistogramDataPoint {
-    upCount: Int
-    downCount: Int
-    x: UnsignedInteger
-    x0: UnsignedInteger
-    y: UnsignedInteger
-  }
-
-  type DataPoint {
-    x: UnsignedInteger
-    y: Float
-  }
-
   "Represents a bucket of monitor status information."
   type StatusData {
     "The timeseries point for this status data."
@@ -93,11 +80,6 @@ export const monitorsSchema = gql`
     monitors: [LatestMonitor!]
   }
 
-  type HistogramResult {
-    histogram: [HistogramDataPoint]!
-    interval: UnsignedInteger!
-  }
-
   extend type Query {
     getMonitors(
       dateRangeStart: String!
@@ -105,14 +87,6 @@ export const monitorsSchema = gql`
       filters: String
       statusFilter: String
     ): LatestMonitorsResult
-
-    getSnapshotHistogram(
-      dateRangeStart: String!
-      dateRangeEnd: String!
-      filters: String
-      statusFilter: String
-      monitorId: String
-    ): HistogramResult
 
     getMonitorChartsData(
       monitorId: String!

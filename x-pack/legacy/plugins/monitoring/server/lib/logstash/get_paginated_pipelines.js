@@ -20,7 +20,7 @@ import { getMetrics } from '../details/get_metrics';
  * and returns that so the caller can perform their normal call to get the time-series data.
  *
  * @param {*} req - Server request object
- * @param {*} lsIndexPattern - The index pattern to search against (`.monitoring-logstash-*,monitoring-logstash-*`)
+ * @param {*} lsIndexPattern - The index pattern to search against (`.monitoring-logstash-*`)
  * @param {*} uuids - The optional `clusterUuid` and `logstashUuid` to filter the results from
  * @param {*} metricSet - The array of metrics that are sortable in the UI
  * @param {*} pagination - ({ index, size })
@@ -37,7 +37,7 @@ export async function getPaginatedPipelines(
   queryText
 ) {
   const config = req.server.config();
-  const size = config.get('xpack.monitoring.max_bucket_size');
+  const size = config.get('monitoring.ui.max_bucket_size');
   const pipelines = await getLogstashPipelineIds(
     req,
     lsIndexPattern,

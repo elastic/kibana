@@ -24,7 +24,7 @@ const LOGGING_TAGS = [LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG];
  * NOTE: internal collection will be removed in 7.0
  *
  * Depends on
- *   - 'xpack.monitoring.kibana.collection.enabled' config
+ *   - 'monitoring.kibana.collection.enabled' config
  *   - monitoring enabled in ES (checked against xpack_main.info license info change)
  * The dependencies are handled upstream
  * - Ops Events - essentially Kibana's /api/status
