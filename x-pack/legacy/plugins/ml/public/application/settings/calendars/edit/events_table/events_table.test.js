@@ -27,7 +27,7 @@ const testProps = {
 
 describe('EventsTable', () => {
   test('Renders events table with no search bar', () => {
-    const wrapper = shallowWithIntl(<EventsTable.WrappedComponent {...testProps} />);
+    const wrapper = shallowWithIntl(<EventsTable {...testProps} />);
 
     expect(wrapper).toMatchSnapshot();
   });
@@ -38,7 +38,7 @@ describe('EventsTable', () => {
       showSearchBar: true,
     };
 
-    const wrapper = shallowWithIntl(<EventsTable.WrappedComponent {...showSearchBarProps} />);
+    const wrapper = shallowWithIntl(<EventsTable {...showSearchBarProps} />);
 
     expect(wrapper).toMatchSnapshot();
   });

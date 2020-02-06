@@ -9,11 +9,10 @@ import React from 'react';
 
 import { CalendarsListHeader } from './header';
 
-jest.mock('../../../util/dependency_cache', () => ({
-  getDocLinks: () => ({
-    ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
-    DOC_LINK_VERSION: 'jest-metadata-mock-branch',
-  }),
+jest.mock('../../../../../../../../../src/plugins/kibana_react/public', () => ({
+  withKibana: comp => {
+    return comp;
+  },
 }));
 
 describe('CalendarListsHeader', () => {
@@ -22,6 +21,14 @@ describe('CalendarListsHeader', () => {
   const requiredProps = {
     totalCount: 3,
     refreshCalendars,
+    kibana: {
+      services: {
+        docLinks: {
+          ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
+          DOC_LINK_VERSION: 'jest-metadata-mock-branch',
+        },
+      },
+    },
   };
 
   test('renders header', () => {

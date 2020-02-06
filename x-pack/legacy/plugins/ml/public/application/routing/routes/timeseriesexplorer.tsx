@@ -37,7 +37,7 @@ import { useRefresh } from '../use_refresh';
 import { useResolver } from '../use_resolver';
 import { basicResolvers } from '../resolvers';
 import { ANOMALY_DETECTION_BREADCRUMB, ML_BREADCRUMB } from '../breadcrumbs';
-import { getTimefilter } from '../../util/dependency_cache';
+import { useMlKibana } from '../../contexts/kibana';
 
 export const timeSeriesExplorerRoute: MlRoute = {
   path: '/timeseriesexplorer',
@@ -90,7 +90,8 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
   const [lastRefresh, setLastRefresh] = useState(0);
   const previousRefresh = usePrevious(lastRefresh);
   const [selectedJobId, setSelectedJobId] = useState<string>();
-  const timefilter = getTimefilter();
+  const { services } = useMlKibana();
+  const { timefilter } = services.data.query.timefilter;
 
   const refresh = useRefresh();
   useEffect(() => {

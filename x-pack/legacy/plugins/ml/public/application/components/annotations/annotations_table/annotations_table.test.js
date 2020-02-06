@@ -32,19 +32,17 @@ jest.mock('../../../services/ml_api_service', () => {
 
 describe('AnnotationsTable', () => {
   test('Minimal initialization without props.', () => {
-    const wrapper = shallowWithIntl(<AnnotationsTable.WrappedComponent />);
+    const wrapper = shallowWithIntl(<AnnotationsTable />);
     expect(wrapper).toMatchSnapshot();
   });
 
   test('Initialization with job config prop.', () => {
-    const wrapper = shallowWithIntl(<AnnotationsTable.WrappedComponent jobs={[jobConfig]} />);
+    const wrapper = shallowWithIntl(<AnnotationsTable jobs={[jobConfig]} />);
     expect(wrapper).toMatchSnapshot();
   });
 
   test('Initialization with annotations prop.', () => {
-    const wrapper = shallowWithIntl(
-      <AnnotationsTable.WrappedComponent annotations={mockAnnotations.slice(0, 1)} />
-    );
+    const wrapper = shallowWithIntl(<AnnotationsTable annotations={mockAnnotations.slice(0, 1)} />);
     expect(wrapper).toMatchSnapshot();
   });
 });

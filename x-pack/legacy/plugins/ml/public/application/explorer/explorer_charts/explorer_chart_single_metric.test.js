@@ -44,9 +44,7 @@ describe('ExplorerChart', () => {
 
   test('Initialize', () => {
     const wrapper = mountWithIntl(
-      <ExplorerChartSingleMetric.WrappedComponent
-        mlSelectSeverityService={mlSelectSeverityServiceMock}
-      />
+      <ExplorerChartSingleMetric mlSelectSeverityService={mlSelectSeverityServiceMock} />
     );
 
     // without setting any attributes and corresponding data
@@ -62,7 +60,7 @@ describe('ExplorerChart', () => {
     };
 
     const wrapper = mountWithIntl(
-      <ExplorerChartSingleMetric.WrappedComponent
+      <ExplorerChartSingleMetric
         seriesConfig={config}
         mlSelectSeverityService={mlSelectSeverityServiceMock}
       />
@@ -88,7 +86,7 @@ describe('ExplorerChart', () => {
     // We create the element including a wrapper which sets the width:
     return mountWithIntl(
       <div style={{ width: '500px' }}>
-        <ExplorerChartSingleMetric.WrappedComponent
+        <ExplorerChartSingleMetric
           seriesConfig={config}
           mlSelectSeverityService={mlSelectSeverityServiceMock}
         />

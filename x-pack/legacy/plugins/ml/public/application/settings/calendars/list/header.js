@@ -23,10 +23,11 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 
-import { getDocLinks } from '../../../util/dependency_cache';
+import { withKibana } from '../../../../../../../../../src/plugins/kibana_react/public';
 
-export function CalendarsListHeader({ totalCount, refreshCalendars }) {
-  const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = getDocLinks();
+function CalendarsListHeaderUI({ totalCount, refreshCalendars, kibana }) {
+  const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = kibana.services.docLinks;
+
   const docsUrl = `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-calendars.html`;
   return (
     <React.Fragment>
@@ -98,7 +99,9 @@ export function CalendarsListHeader({ totalCount, refreshCalendars }) {
     </React.Fragment>
   );
 }
-CalendarsListHeader.propTypes = {
+CalendarsListHeaderUI.propTypes = {
   totalCount: PropTypes.number.isRequired,
   refreshCalendars: PropTypes.func.isRequired,
 };
+
+export const CalendarsListHeader = withKibana(CalendarsListHeaderUI);

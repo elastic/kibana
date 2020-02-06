@@ -56,7 +56,7 @@ describe('ExplorerSwimlane', () => {
     const swimlaneRenderDoneListener = jest.fn();
 
     const wrapper = mountWithIntl(
-      <ExplorerSwimlane.WrappedComponent
+      <ExplorerSwimlane
         chartWidth={mockChartWidth}
         TimeBuckets={mocks.TimeBuckets}
         swimlaneCellClick={jest.fn()}
@@ -86,7 +86,7 @@ describe('ExplorerSwimlane', () => {
     const swimlaneRenderDoneListener = jest.fn();
 
     const wrapper = mountWithIntl(
-      <ExplorerSwimlane.WrappedComponent
+      <ExplorerSwimlane
         chartWidth={mockChartWidth}
         TimeBuckets={mocks.TimeBuckets}
         swimlaneCellClick={jest.fn()}

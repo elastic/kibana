@@ -12,6 +12,25 @@ import { I18nProvider } from '@kbn/i18n/react';
 
 import { TimeSeriesExplorerUrlStateManager } from './timeseriesexplorer';
 
+jest.mock('../../contexts/kibana', () => ({
+  useMlKibana: () => {
+    return {
+      services: {
+        data: {
+          query: {
+            timefilter: {
+              timefilter: {
+                enableTimeRangeSelector: jest.fn(),
+                enableAutoRefreshSelector: jest.fn(),
+              },
+            },
+          },
+        },
+      },
+    };
+  },
+}));
+
 jest.mock('../../util/dependency_cache', () => ({
   getTimefilter: () => ({
     enableTimeRangeSelector: jest.fn(),
