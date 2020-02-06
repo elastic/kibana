@@ -23,7 +23,7 @@ import { TextContextTypeConvert, FIELD_FORMAT_IDS } from '../types';
 
 export class PercentFormat extends NumeralFormat {
   static id = FIELD_FORMAT_IDS.PERCENT;
-  static title = i18n.translate('data.common.fieldFormats.percent.title', {
+  static title = i18n.translate('data.fieldFormats.percent.title', {
     defaultMessage: 'Percentage',
   });
 

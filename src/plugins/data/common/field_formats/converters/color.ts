@@ -29,7 +29,7 @@ const convertTemplate = template('<span style="<%- style %>"><%- val %></span>')
 
 export class ColorFormat extends FieldFormat {
   static id = FIELD_FORMAT_IDS.COLOR;
-  static title = i18n.translate('data.common.fieldFormats.color.title', {
+  static title = i18n.translate('data.fieldFormats.color.title', {
     defaultMessage: 'Color',
   });
   static fieldType = [KBN_FIELD_TYPES.NUMBER, KBN_FIELD_TYPES.STRING];

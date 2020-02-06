@@ -23,7 +23,7 @@ import { FIELD_FORMAT_IDS } from '../types';
 
 export class NumberFormat extends NumeralFormat {
   static id = FIELD_FORMAT_IDS.NUMBER;
-  static title = i18n.translate('data.common.fieldFormats.number.title', {
+  static title = i18n.translate('data.fieldFormats.number.title', {
     defaultMessage: 'Number',
   });
 
