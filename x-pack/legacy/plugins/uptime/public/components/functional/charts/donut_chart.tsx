@@ -32,15 +32,20 @@ export const DonutChart = ({ height, down, up, width }: DonutChartProps) => {
   useEffect(() => {
     if (chartElement.current !== null) {
       // we must remove any existing paths before painting
-      d3.selectAll('g').remove();
+      d3.select(chartElement.current)
+        .selectAll('g')
+        .remove();
+
       const svgElement = d3
         .select(chartElement.current)
         .append('g')
         .attr('transform', `translate(${width / 2}, ${height / 2})`);
+
       const color = d3.scale
         .ordinal()
         .domain(['up', 'down'])
         .range([gray, danger]);
+
       const pieGenerator = d3.layout
         .pie()
         .value(({ value }: any) => value)
@@ -69,6 +74,7 @@ export const DonutChart = ({ height, down, up, width }: DonutChartProps) => {
         .attr('fill', (d: any) => color(d.data.key));
     }
   }, [danger, down, gray, height, upCount, width]);
+
   return (
     <EuiFlexGroup alignItems="center" responsive={false}>
       <EuiFlexItem grow={false}>
