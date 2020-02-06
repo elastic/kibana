@@ -23,7 +23,7 @@ import {
   ESFilter,
   ESSearchResponse,
   ESSearchRequest
-} from '../../typings/elasticsearch';
+} from '../../../../../plugins/apm/typings/elasticsearch';
 import {
   ApmPluginContext,
   ApmPluginContextValue
