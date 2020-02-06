@@ -41,6 +41,7 @@ function sampleArgs() {
     xTitle: '',
     yTitle: '',
     legend: {
+      type: 'lens_xy_legendConfig',
       isVisible: false,
       position: Position.Top,
     },
