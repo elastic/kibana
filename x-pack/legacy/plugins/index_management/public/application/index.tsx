@@ -13,24 +13,24 @@ import { CoreStart } from '../../../../../../src/core/public';
 import { App } from './app';
 import { indexManagementStore } from './store';
 
-export const mountReactApp = (elem: HTMLElement | null, { core }: { core: CoreStart }): void => {
-  if (elem) {
-    const { i18n } = core;
-    const { Context: I18nContext } = i18n;
-
-    render(
-      <I18nContext>
-        <Provider store={indexManagementStore()}>
-          <App />
-        </Provider>
-      </I18nContext>,
-      elem
-    );
+export const renderApp = (elem: HTMLElement | null, { core }: { core: CoreStart }) => {
+  if (!elem) {
+    return;
   }
-};
 
-export const unmountReactApp = (elem: HTMLElement | null) => {
-  if (elem) {
+  const { i18n } = core;
+  const { Context: I18nContext } = i18n;
+
+  render(
+    <I18nContext>
+      <Provider store={indexManagementStore()}>
+        <App />
+      </Provider>
+    </I18nContext>,
+    elem
+  );
+
+  return () => {
     unmountComponentAtNode(elem);
-  }
+  };
 };
