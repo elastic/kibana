@@ -2,13 +2,13 @@
 
 set -e
 
-echo "### Bootstrapping App Initial Data"
+echo "### Querying App Initial Data"
 
 BUCKET="gs://kibana-ci-artifacts/jobs/elastic+kibana+code-coverage"
 export BUCKET
 CURRENT_BUILD_ID=$1
 export CURRENT_BUILD_ID
-PAST_BUILD_ID=$((CURRENT_BUILD_ID - 15))
+PAST_BUILD_ID=$((CURRENT_BUILD_ID - 29))
 export PAST_BUILD_ID
 OUT_FILE='bootstrapped.txt'
 export OUT_FILE
@@ -23,4 +23,4 @@ queryDataStore () {
 queryDataStore
 
 
-echo "### Bootstrapping App Initial Data - Complete"
+echo "### Querying App Initial Data - Complete"
