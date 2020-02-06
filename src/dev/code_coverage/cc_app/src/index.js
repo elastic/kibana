@@ -22,22 +22,31 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import App from './app';
 import * as serviceWorker from './service_worker';
+import { pretty as p } from './utils/pretty';
+import { tryCatch as tc } from './utils/either';
 
 const initialData = window.initialData;
-const { testRunnerTypes, buildStats, historicalItems } = initialData;
+const tryInit = () => tc(() => initialData);
+const tryOneProp = () => tc(() => initialData.testRunnerTypes);
 
-initialPrint();
+tryInit()
+  .chain(tryOneProp)
+  .map(boot);
 
-ReactDOM.render(
-  <App testRunnerTypes={testRunnerTypes} buildStats={buildStats} historicalItems={historicalItems} />,
-  document.getElementById('root')
-);
+function boot(testRunnerTypes) {
+  const { buildStats, historicalItems } = initialData;
+  initPrint(initialData);
+  ReactDOM.render(
+    <App testRunnerTypes={testRunnerTypes} buildStats={buildStats} historicalItems={historicalItems}/>,
+    document.getElementById('root'),
+  );
+}
+
+function initPrint(x) {
+  console.log(`\n### initial data: \n\n${p(x)}`);
+}
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.
 // Learn more about service workers: https://bit.ly/CRA-PWA
 serviceWorker.unregister();
-
-function initialPrint() {
-  console.log(`\n### initial data: \n\n${JSON.stringify(window.initialData, null, 2)}`);
-}
