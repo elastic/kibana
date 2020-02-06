@@ -142,15 +142,10 @@ export const FlyoutButton = React.memo<FlyoutButtonProps>(
         />
       </Container>
     ) : null,
-  (prevProps, nextProps) => {
-    console.error('duoa');
-
-    return (
-      prevProps.show === nextProps.show &&
-      prevProps.dataProviders === nextProps.dataProviders &&
-      prevProps.timelineId === nextProps.timelineId
-    );
-  }
+  (prevProps, nextProps) =>
+    prevProps.show === nextProps.show &&
+    prevProps.dataProviders === nextProps.dataProviders &&
+    prevProps.timelineId === nextProps.timelineId
 );
 
 FlyoutButton.displayName = 'FlyoutButton';
