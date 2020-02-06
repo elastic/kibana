@@ -49,8 +49,9 @@ export function logOptimizerState(log: ToolingLog, config: OptimizerConfig) {
           log.info(`⚙️  worker started for bundles ${event.bundles.map(b => b.id).join(', ')}`);
         }
 
-        if (event?.type === 'changes detected') {
+        if (state.phase === 'reallocating') {
           log.debug(`⚙️  changes detected...`);
+          return;
         }
 
         if (state.phase === 'initialized') {
