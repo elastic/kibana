@@ -4,7 +4,7 @@
     "winlogbeat-*"
   ],
   "language": "kuery",
-  "max_signals": 33,
+  "max_signals": 100,
   "name": "Disable Windows Firewall Rules via Netsh",
   "query": "event.action:\"Process Create (rule: ProcessCreate)\" and process.name:\"netsh.exe\" and process.args:(\"firewall\" and \"set\" and \"disable\") or process.args:(\"advfirewall\" and \"state\" and \"off\")",
   "risk_score": 47,

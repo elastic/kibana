@@ -4,7 +4,7 @@
     "winlogbeat-*"
   ],
   "language": "kuery",
-  "max_signals": 33,
+  "max_signals": 100,
   "name": "User Account Creation",
   "query": " event.action:\"Process Create (rule: ProcessCreate)\" and process.name:(\"net.exe\" or \"net1.exe\") and not process.parent.name:\"net.exe\" and process.args:(\"user\" and (\"/add\" or \"/ad\")) ",
   "risk_score": 21,

@@ -53,7 +53,9 @@ export { wrapInI18nContext } from 'ui/i18n';
 export { buildVislibDimensions } from '../../../visualizations/public';
 export { getRequestInspectorStats, getResponseInspectorStats } from '../../../data/public';
 // @ts-ignore
-export { intervalOptions } from 'ui/agg_types/buckets/_interval_options';
+export { intervalOptions } from 'ui/agg_types';
+// @ts-ignore
+export { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
 export { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
 export { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 export { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
