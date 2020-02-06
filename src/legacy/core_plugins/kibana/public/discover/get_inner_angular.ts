@@ -22,7 +22,6 @@
 // They can stay even after NP cutover
 import angular from 'angular';
 import 'ui/angular-bootstrap';
-import { IPrivate } from 'ui/private';
 import { EuiIcon } from '@elastic/eui';
 // @ts-ignore
 import { StateProvider } from 'ui/state_management/state';
@@ -73,6 +72,7 @@ import { DebounceProviderTimeout } from './np_ready/angular/directives/debounce/
 import { createRenderCompleteDirective } from './np_ready/angular/directives/render_complete';
 import {
   configureAppAngularModule,
+  IPrivate,
   KbnAccessibleClickProvider,
   PrivateProvider,
   PromiseServiceCreator,

@@ -40,7 +40,6 @@ export { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
 export { PersistedState } from 'ui/persisted_state';
 
 export { npSetup, npStart } from 'ui/new_platform';
-export { IPrivate } from 'ui/private';
 
 export { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
 export { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
@@ -63,9 +62,10 @@ export { VisSavedObject } from '../../../visualizations/public/embeddable/visual
 export { VISUALIZE_EMBEDDABLE_TYPE } from '../../../visualizations/public/embeddable';
 export { VisType } from '../../../visualizations/public';
 export {
+  configureAppAngularModule,
+  ensureDefaultIndexPattern,
+  IPrivate,
   migrateLegacyQuery,
   PrivateProvider,
   PromiseServiceCreator,
-  configureAppAngularModule,
-  ensureDefaultIndexPattern,
 } from '../../../../../plugins/kibana_legacy/public';

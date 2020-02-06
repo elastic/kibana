@@ -29,7 +29,6 @@ import chrome from 'ui/chrome';
 export const legacyChrome = chrome;
 export { SavedObjectSaveOpts } from 'ui/saved_objects/types';
 export { npSetup, npStart } from 'ui/new_platform';
-export { IPrivate } from 'ui/private';
 export { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
 export { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 // @ts-ignore
@@ -48,9 +47,10 @@ export { VISUALIZE_EMBEDDABLE_TYPE } from '../../../visualizations/public/embedd
 export { registerTimefilterWithGlobalStateFactory } from 'ui/timefilter/setup_router';
 export { absoluteToParsedUrl } from 'ui/url/absolute_to_parsed_url';
 export {
+  configureAppAngularModule,
+  ensureDefaultIndexPattern,
+  IPrivate,
   migrateLegacyQuery,
   PrivateProvider,
   PromiseServiceCreator,
-  configureAppAngularModule,
-  ensureDefaultIndexPattern,
 } from '../../../../../plugins/kibana_legacy/public';
