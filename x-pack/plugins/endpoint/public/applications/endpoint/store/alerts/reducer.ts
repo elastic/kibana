@@ -5,7 +5,7 @@
  */
 
 import { Reducer } from 'redux';
-import { AlertListState } from './types';
+import { AlertListState } from '../../types';
 import { AppAction } from '../action';
 
 const initialState = (): AlertListState => {
@@ -25,7 +25,7 @@ export const alertListReducer: Reducer<AlertListState, AppAction> = (
   if (action.type === 'serverReturnedAlertsData') {
     return {
       ...state,
-      ...action.payload,
+      alerts: action.payload.alerts,
     };
   }
 

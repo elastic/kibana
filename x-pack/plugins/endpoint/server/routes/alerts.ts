@@ -4,18 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IRouter } from 'kibana/server';
-import { RequestHandler } from 'kibana/server';
+import { IRouter, KibanaRequest, RequestHandler } from 'kibana/server';
 import { SearchResponse } from 'elasticsearch';
-import { schema, TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 
 import {
   getPagingProperties,
-  kibanaRequestToAlertListQuery,
+  buildAlertListESQuery,
 } from '../services/endpoint/alert_query_builders';
 
 import { AlertData, AlertResultList } from '../../common/types';
-import { EndpointAppContext } from '../types';
+import { AlertRequestParams, EndpointAppContext } from '../types';
 
 const ALERTS_ROUTE = '/api/endpoint/alerts';
 
@@ -25,14 +24,13 @@ export const reqSchema = schema.object({
 });
 
 export function registerAlertRoutes(router: IRouter, endpointAppContext: EndpointAppContext) {
-  const alertsHandler: RequestHandler<unknown, TypeOf<typeof reqSchema>> = async (
-    ctx,
-    req,
-    res
-  ) => {
+  const alertsHandler: RequestHandler<unknown, AlertRequestParams> = async (ctx, req, res) => {
     try {
-      const queryParams = await getPagingProperties(req, endpointAppContext);
-      const reqBody = await kibanaRequestToAlertListQuery(queryParams, endpointAppContext);
+      const queryParams = await getPagingProperties(
+        req as KibanaRequest<unknown, AlertRequestParams, AlertRequestParams, any>,
+        endpointAppContext
+      );
+      const reqBody = await buildAlertListESQuery(queryParams);
       const response = (await ctx.core.elasticsearch.dataClient.callAsCurrentUser(
         'search',
         reqBody
