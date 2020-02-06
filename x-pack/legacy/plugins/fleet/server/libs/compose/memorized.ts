@@ -54,7 +54,7 @@ export function compose(server?: any): FleetServerLib {
   // @ts-ignore
   const apiKeys = new ApiKeyLib(enrollmentApiKeysRepository, framework);
   const agentEvents = new AgentEventLib(agentEventsRepository);
-  const agents = new AgentLib(agentsRepository, apiKeys, agentEvents);
+  const agents = new AgentLib(agentsRepository, agentEvents);
 
   const artifactRepository = new FileSystemArtifactRepository(os.tmpdir());
   const artifacts = new ArtifactLib(artifactRepository, new HttpAdapter());

@@ -9,6 +9,14 @@ export const AGENT_TYPE_EPHEMERAL = 'EPHEMERAL';
 export const AGENT_TYPE_PERMANENT = 'PERMANENT';
 export const AGENT_TYPE_TEMPORARY = 'TEMPORARY';
 
+export const AgentTypeSchema = schema.oneOf([
+  schema.literal(AGENT_TYPE_EPHEMERAL),
+  schema.literal(AGENT_TYPE_PERMANENT),
+  schema.literal(AGENT_TYPE_TEMPORARY),
+]);
+
+export type AgentType = TypeOf<typeof AgentTypeSchema>;
+
 const AgentActionBaseSchema = {
   type: schema.oneOf([
     schema.literal('POLICY_CHANGE'),
@@ -49,14 +57,14 @@ const AgentEventBase = {
   ]),
   timestamp: schema.string(),
   message: schema.string(),
-  payload: schema.any(),
+  payload: schema.maybe(schema.any()),
   data: schema.maybe(schema.string()),
   action_id: schema.maybe(schema.string()),
   policy_id: schema.maybe(schema.string()),
   stream_id: schema.maybe(schema.string()),
 };
 
-const AgentEventSchema = schema.object({
+export const AgentEventSchema = schema.object({
   ...AgentEventBase,
 });
 
@@ -67,17 +75,13 @@ const AgentEventSOAttributesSchema = schema.object({
 export type AgentEvent = TypeOf<typeof AgentEventSchema>;
 export type AgentEventSOAttributes = TypeOf<typeof AgentEventSOAttributesSchema>;
 const AgentBaseSchema = {
-  type: schema.oneOf([
-    schema.literal(AGENT_TYPE_EPHEMERAL),
-    schema.literal(AGENT_TYPE_PERMANENT),
-    schema.literal(AGENT_TYPE_TEMPORARY),
-  ]),
+  type: AgentTypeSchema,
   active: schema.boolean(),
   enrolled_at: schema.string(),
   user_provided_metadata: schema.recordOf(schema.string(), schema.string()),
   local_metadata: schema.recordOf(schema.string(), schema.string()),
-  shared_id: schema.string(),
-  access_api_key_id: schema.string(),
+  shared_id: schema.maybe(schema.string()),
+  access_api_key_id: schema.maybe(schema.string()),
   default_api_key: schema.maybe(schema.string()),
   policy_id: schema.maybe(schema.string()),
   last_checkin: schema.maybe(schema.string()),
@@ -92,12 +96,14 @@ const AgentSchema = schema.object({
   id: schema.string(),
   user_provided_metadata: schema.recordOf(schema.string(), schema.string()),
   local_metadata: schema.recordOf(schema.string(), schema.string()),
+  access_api_key: schema.maybe(schema.string()),
 });
 
 const AgentSOAttributesSchema = schema.object({
   ...AgentBaseSchema,
   user_provided_metadata: schema.string(),
   local_metadata: schema.string(),
+  current_error_events: schema.maybe(schema.string()),
 });
 
 export type Agent = TypeOf<typeof AgentSchema>;

@@ -5,19 +5,11 @@
  */
 
 import { Server } from 'hapi';
-import { createListAgentsRoute } from './agents/list';
-import { createDeleteAgentsRoute } from './agents/delete';
-import { createEnrollAgentsRoute } from './agents/enroll';
-import { createCheckinAgentsRoute } from './agents/checkin';
 import { FleetServerLib } from '../libs/types';
 import { HapiFrameworkAdapter } from '../adapters/framework/hapi_framework_adapter';
-import { createAgentsAddActionRoute } from './agents/actions';
 import { createGETArtifactsRoute } from './artifacts';
-import { createGETAgentEventsRoute } from './agents/events';
 import { createGETInstallScript } from './install';
-import { createGETAgentsRoute } from './agents/get';
 import { createPOSTAgentsUnenrollRoute } from './agents/unenroll';
-import { createPUTAgentsRoute } from './agents/put';
 import {
   createGETEnrollmentApiKeysRoute,
   createPOSTEnrollmentApiKeysRoute,
@@ -25,7 +17,6 @@ import {
   createGETEnrollmentApiKeyRoute,
 } from './enrollment_api_keys';
 import { createGETAgentsStatusRoute } from './agents/status';
-import { createPOSTAgentsAcksRoute } from './agents/acks';
 
 export function initRestApi(server: Server, libs: FleetServerLib) {
   const frameworkAdapter = new HapiFrameworkAdapter(server);
@@ -38,17 +29,8 @@ export function initRestApi(server: Server, libs: FleetServerLib) {
 }
 
 function createAgentsRoutes(adapter: HapiFrameworkAdapter, libs: FleetServerLib) {
-  adapter.registerRoute(createListAgentsRoute(libs));
-  adapter.registerRoute(createGETAgentsRoute(libs));
-  adapter.registerRoute(createPUTAgentsRoute(libs));
-  adapter.registerRoute(createDeleteAgentsRoute(libs));
-  adapter.registerRoute(createEnrollAgentsRoute(libs));
   adapter.registerRoute(createPOSTAgentsUnenrollRoute(libs));
-  adapter.registerRoute(createCheckinAgentsRoute(libs));
-  adapter.registerRoute(createAgentsAddActionRoute(libs));
-  adapter.registerRoute(createGETAgentEventsRoute(libs));
   adapter.registerRoute(createGETAgentsStatusRoute(libs));
-  adapter.registerRoute(createPOSTAgentsAcksRoute(libs));
 }
 
 function createEnrollmentApiKeysRoutes(adapter: HapiFrameworkAdapter, libs: FleetServerLib) {

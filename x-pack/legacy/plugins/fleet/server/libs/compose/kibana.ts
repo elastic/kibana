@@ -53,7 +53,7 @@ export function compose(server: any, pluginsStart: FleetPluginsStart): FleetServ
   const apiKeys = new ApiKeyLib(enrollmentApiKeysRepository, libs, pluginsStart);
   const agentsPolicy = new AgentPolicyLib(agentsRepository);
   const agentEvents = new AgentEventLib(agentEventsRepository);
-  const agents = new AgentLib(agentsRepository, apiKeys, agentEvents);
+  const agents = new AgentLib(agentsRepository, agentEvents);
 
   const artifactRepository = new FileSystemArtifactRepository(os.tmpdir());
   const artifacts = new ArtifactLib(artifactRepository, new HttpAdapter());

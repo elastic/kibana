@@ -5,9 +5,10 @@
  */
 
 import Boom from 'boom';
-import { SavedObjectsClientContract, SavedObject } from 'kibana/server';
+import { SavedObjectsClientContract } from 'kibana/server';
 import { AGENT_SAVED_OBJECT_TYPE } from '../../constants';
 import { Agent, AgentSOAttributes } from '../../types';
+import { savedObjectToAgent } from './saved_objects';
 
 // TODO fix
 const AGENT_POLLING_THRESHOLD_MS = 30 * 1000;
@@ -15,11 +16,14 @@ const AGENT_TYPE_EPHEMERAL = 'ephemeral';
 
 export * from './events';
 export * from './checkin';
+export * from './enroll';
+export * from './acks';
 
 export async function getAgent(soClient: SavedObjectsClientContract, agentId: string) {
-  const response = await soClient.get<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, agentId);
-
-  return _savedObjectToAgent(response);
+  const agent = savedObjectToAgent(
+    await soClient.get<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, agentId)
+  );
+  return agent;
 }
 
 export async function getAgentByAccessAPIKeyId(
@@ -32,7 +36,7 @@ export async function getAgentByAccessAPIKeyId(
     search: accessAPIKeyId,
   });
 
-  const [agent] = response.saved_objects.map(_savedObjectToAgent);
+  const [agent] = response.saved_objects.map(savedObjectToAgent);
 
   if (!agent) {
     throw Boom.notFound('Agent not found');
@@ -103,7 +107,7 @@ export async function listAgents(
     ..._getSortFields(),
   });
 
-  const agents: Agent[] = saved_objects.map(_savedObjectToAgent);
+  const agents: Agent[] = saved_objects.map(savedObjectToAgent);
 
   return {
     agents,
@@ -128,22 +132,6 @@ function _getSortFields(sortOption?: string) {
         sortOrder: 'DESC',
       };
   }
-}
-
-function _savedObjectToAgent(so: SavedObject<AgentSOAttributes>): Agent {
-  if (so.error) {
-    throw new Error(so.error.message);
-  }
-
-  return {
-    id: so.id,
-    ...so.attributes,
-    // current_error_events: so.attributes.current_error_events
-    //   ? JSON.parse(so.attributes.current_error_events)
-    //   : [],
-    local_metadata: JSON.parse(so.attributes.local_metadata),
-    user_provided_metadata: JSON.parse(so.attributes.user_provided_metadata),
-  };
 }
 
 function _joinFilters(filters: string[], operator = 'AND') {

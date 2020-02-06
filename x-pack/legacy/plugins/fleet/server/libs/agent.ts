@@ -8,74 +8,15 @@ import Boom from 'boom';
 import uuid from 'uuid/v4';
 import { FrameworkUser } from '../adapters/framework/adapter_types';
 import { Agent, AgentAction, AgentsRepository, SortOptions } from '../repositories/agents/types';
-import { ApiKeyLib } from './api_keys';
 import { AgentStatusHelper } from './agent_status_helper';
 import { AgentEventLib } from './agent_event';
-import { AgentType, NewAgent, AgentActionType } from '../../common/types/domain_data';
+import { AgentActionType } from '../../common/types/domain_data';
 
 export class AgentLib {
   constructor(
     private readonly agentsRepository: AgentsRepository,
-    private readonly apiKeys: ApiKeyLib,
     private readonly agentEvents: AgentEventLib
   ) {}
-
-  /**
-   * Enroll a new agent into elastic fleet
-   */
-  public async enroll(
-    user: FrameworkUser,
-    type: AgentType,
-    metadata?: { local: any; userProvided: any },
-    sharedId?: string
-  ): Promise<Agent> {
-    const internalUser = this._getInternalUser();
-    const verifyResponse = await this.apiKeys.verifyEnrollmentApiKey(user);
-
-    if (!verifyResponse.valid) {
-      throw Boom.unauthorized(`Enrollment apiKey is not valid: ${verifyResponse.reason}`);
-    }
-    const policyId = verifyResponse.enrollmentApiKey.policy_id;
-
-    const existingAgent = sharedId
-      ? await this.agentsRepository.getBySharedId(internalUser, sharedId)
-      : null;
-
-    if (existingAgent && existingAgent.active === true) {
-      throw Boom.badRequest('Impossible to enroll an already active agent');
-    }
-
-    const enrolledAt = new Date().toISOString();
-
-    const agentData: NewAgent = {
-      shared_id: sharedId,
-      active: true,
-      policy_id: policyId,
-      type,
-      enrolled_at: enrolledAt,
-      user_provided_metadata: metadata && metadata.userProvided,
-      local_metadata: metadata && metadata.local,
-    };
-
-    let agent;
-    if (existingAgent) {
-      await this.agentsRepository.update(internalUser, existingAgent.id, agentData);
-
-      agent = {
-        ...existingAgent,
-        ...agentData,
-      };
-    } else {
-      agent = await this.agentsRepository.create(internalUser, agentData);
-    }
-
-    const accessApiKey = await this.apiKeys.generateAccessApiKey(agent.id, policyId);
-    await this.agentsRepository.update(internalUser, agent.id, {
-      access_api_key_id: accessApiKey.id,
-    });
-
-    return { ...agent, access_api_key: accessApiKey.key };
-  }
 
   public async unenrollForPolicy(user: FrameworkUser, policyId: string) {
     let hasMore = true;
@@ -182,24 +123,6 @@ export class AgentLib {
     return agent;
   }
 
-  /**
-   * Acknowledge the fact that actions as been received by an agent
-   */
-  public async acknowledgeActions(user: FrameworkUser, agent: Agent, actionIds: string[]) {
-    const now = new Date().toISOString();
-
-    const updatedActions = agent.actions.map(action => {
-      if (action.sent_at) {
-        return action;
-      }
-      return { ...action, sent_at: actionIds.indexOf(action.id) >= 0 ? now : undefined };
-    });
-
-    await this.agentsRepository.update(this._getInternalUser(), agent.id, {
-      actions: updatedActions,
-    });
-  }
-
   public async addAction(
     user: FrameworkUser,
     agentId: string,
@@ -273,11 +196,5 @@ export class AgentLib {
 
   public _filterActionsForCheckin(agent: Agent): AgentAction[] {
     return agent.actions.filter(a => !a.sent_at);
-  }
-
-  private _getInternalUser(): FrameworkUser {
-    return {
-      kind: 'internal',
-    };
   }
 }

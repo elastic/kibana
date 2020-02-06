@@ -5,6 +5,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { AgentEventSchema, AgentTypeSchema } from '../models';
 
 export const GetAgentsRequestSchema = {
   query: schema.object({
@@ -27,6 +28,27 @@ export const PostAgentCheckinRequestSchema = {
   }),
   body: schema.object({
     local_metadata: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+    events: schema.maybe(schema.arrayOf(AgentEventSchema)),
+  }),
+};
+
+export const PostAgentEnrollRequestSchema = {
+  body: schema.object({
+    type: AgentTypeSchema,
+    shared_id: schema.maybe(schema.string()),
+    metadata: schema.object({
+      local: schema.recordOf(schema.string(), schema.any()),
+      user_provided: schema.recordOf(schema.string(), schema.any()),
+    }),
+  }),
+};
+
+export const PostAgentAcksRequestSchema = {
+  body: schema.object({
+    action_ids: schema.arrayOf(schema.string()),
+  }),
+  params: schema.object({
+    agentId: schema.string(),
   }),
 };
 

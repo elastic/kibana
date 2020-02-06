@@ -7,6 +7,7 @@ export {
   // Object types
   Agent,
   AgentSOAttributes,
+  AgentType,
   AgentEvent,
   AgentEventSOAttributes,
   AgentAction,
@@ -18,6 +19,8 @@ export {
   Output,
   NewOutput,
   OutputType,
+  EnrollmentAPIKeySOAttributes,
+  EnrollmentAPIKey,
   // Common schemas
   ListWithKuery,
   ListWithKuerySchema,
@@ -33,6 +36,8 @@ export {
   UpdateAgentRequestSchema,
   DeleteAgentRequestSchema,
   PostAgentCheckinRequestSchema,
+  PostAgentEnrollRequestSchema,
+  PostAgentAcksRequestSchema,
   // Agent config schemas
   GetAgentConfigsRequestSchema,
   GetAgentConfigsResponse,

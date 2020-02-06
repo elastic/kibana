@@ -18,6 +18,8 @@ import {
   UpdateAgentRequestSchema,
   DeleteAgentRequestSchema,
   PostAgentCheckinRequestSchema,
+  PostAgentEnrollRequestSchema,
+  PostAgentAcksRequestSchema,
 } from '../../types';
 import {
   getAgentsHandler,
@@ -26,6 +28,8 @@ import {
   deleteAgentHandler,
   getAgentEventsHandler,
   postAgentCheckinHandler,
+  postAgentEnrollHandler,
+  postAgentAcksHandler,
 } from './handlers';
 
 export const registerRoutes = (router: IRouter) => {
@@ -74,6 +78,26 @@ export const registerRoutes = (router: IRouter) => {
       options: { tags: [], authRequired: false },
     },
     postAgentCheckinHandler
+  );
+
+  // Agent enrollment
+  router.post(
+    {
+      path: AGENT_API_ROUTES.ENROLL_PATTERN,
+      validate: PostAgentEnrollRequestSchema,
+      options: { tags: [], authRequired: false },
+    },
+    postAgentEnrollHandler
+  );
+
+  // Agent acks
+  router.post(
+    {
+      path: AGENT_API_ROUTES.ACKS_PATTERN,
+      validate: PostAgentAcksRequestSchema,
+      options: { tags: [], authRequired: false },
+    },
+    postAgentAcksHandler
   );
 
   // Get agent events

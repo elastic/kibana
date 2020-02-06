@@ -4,9 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './agent';
-export * from './agent_config';
-export * from './datasource';
-export * from './output';
-export * from './api_key';
-export * from './epm';
+export const ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE = 'enrollment_api_keys';

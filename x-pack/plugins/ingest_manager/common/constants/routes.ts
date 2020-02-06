@@ -44,6 +44,8 @@ export const AGENT_API_ROUTES = {
   DELETE_PATTERN: `${FLEET_API_ROOT}/agents/{agentId}`,
   EVENTS_PATTERN: `${FLEET_API_ROOT}/agents/{agentId}/events`,
   CHECKIN_PATTERN: `${FLEET_API_ROOT}/agents/{agentId}/checkin`,
+  ACKS_PATTERN: `${FLEET_API_ROOT}/agents/{agentId}/acks`,
+  ENROLL_PATTERN: `${FLEET_API_ROOT}/agents/enroll`,
 };
 
 // Fleet setup API routes

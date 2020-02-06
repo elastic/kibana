@@ -13,10 +13,12 @@ import {
   DeleteAgentRequestSchema,
   GetOneAgentEventsRequestSchema,
   PostAgentCheckinRequestSchema,
+  PostAgentEnrollRequestSchema,
+  PostAgentAcksRequestSchema,
 } from '../../types';
 import * as AgentService from '../../services/agents';
 import { appContextService } from '../../services/app_context';
-import { verifyAccessApiKey } from '../../services/api_keys';
+import * as APIKeyService from '../../services/api_keys';
 
 export const getAgentHandler: RequestHandler<TypeOf<
   typeof GetOneAgentRequestSchema.params
@@ -155,7 +157,7 @@ export const postAgentCheckinHandler: RequestHandler<
 > = async (context, request, response) => {
   try {
     const soClient = appContextService.getInternalSavedObjectsClient();
-    const res = await verifyAccessApiKey(request.headers);
+    const res = await APIKeyService.verifyAccessApiKey(request.headers);
     if (!res.valid) {
       return response.unauthorized({
         body: { message: 'Invalid Access API Key' },
@@ -168,7 +170,7 @@ export const postAgentCheckinHandler: RequestHandler<
     const { actions } = await AgentService.agentCheckin(
       soClient,
       agent,
-      [], // TODO events
+      request.body.events || [],
       request.body.local_metadata
     );
     const body = {
@@ -186,6 +188,95 @@ export const postAgentCheckinHandler: RequestHandler<
     if (e.isBoom && e.output.statusCode === 404) {
       return response.notFound({
         body: { message: `Agent ${request.params.agentId} not found` },
+      });
+    }
+
+    return response.customError({
+      statusCode: 500,
+      body: { message: e.message },
+    });
+  }
+};
+
+export const postAgentAcksHandler: RequestHandler<
+  TypeOf<typeof PostAgentAcksRequestSchema.params>,
+  undefined,
+  TypeOf<typeof PostAgentAcksRequestSchema.body>
+> = async (context, request, response) => {
+  try {
+    const soClient = appContextService.getInternalSavedObjectsClient();
+    const res = await APIKeyService.verifyAccessApiKey(request.headers);
+    if (!res.valid) {
+      return response.unauthorized({
+        body: { message: 'Invalid Access API Key' },
+      });
+    }
+    const agent = await AgentService.getAgentByAccessAPIKeyId(
+      soClient,
+      res.accessApiKeyId as string
+    );
+
+    await AgentService.acknowledgeAgentActions(soClient, agent, request.body.action_ids);
+
+    const body = {
+      action: 'acks',
+      success: true,
+    };
+
+    return response.ok({ body });
+  } catch (e) {
+    if (e.isBoom) {
+      return response.customError({
+        statusCode: e.output.statusCode,
+        body: { message: e.message },
+      });
+    }
+
+    return response.customError({
+      statusCode: 500,
+      body: { message: e.message },
+    });
+  }
+};
+
+export const postAgentEnrollHandler: RequestHandler<
+  undefined,
+  undefined,
+  TypeOf<typeof PostAgentEnrollRequestSchema.body>
+> = async (context, request, response) => {
+  try {
+    const soClient = appContextService.getInternalSavedObjectsClient();
+    const res = await APIKeyService.verifyEnrollmentAPIKey(soClient, request.headers);
+    if (!res.valid || !res.enrollmentAPIKey) {
+      return response.unauthorized({
+        body: { message: 'Invalid Enrollment API Key' },
+      });
+    }
+    const agent = await AgentService.enroll(
+      soClient,
+      request.body.type,
+      res.enrollmentAPIKey.policy_id as string,
+      {
+        userProvided: request.body.metadata.user_provided,
+        local: request.body.metadata.local,
+      },
+      request.body.shared_id
+    );
+    const body = {
+      action: 'created',
+      success: true,
+      item: {
+        ...agent,
+        // TODO FIXstatus: AgentStatusHelper.getAgentStatus(agent)
+      },
+    };
+
+    return response.ok({ body });
+  } catch (e) {
+    if (e.isBoom) {
+      return response.customError({
+        statusCode: e.output.statusCode,
+        body: { message: e.message },
       });
     }
 

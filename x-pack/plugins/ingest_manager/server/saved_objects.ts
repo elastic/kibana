@@ -10,6 +10,7 @@ import {
   PACKAGES_SAVED_OBJECT_TYPE,
   AGENT_SAVED_OBJECT_TYPE,
   AGENT_EVENT_SAVED_OBJECT_TYPE,
+  ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
 } from './constants';
 
 /*
@@ -75,6 +76,20 @@ export const savedObjectMappings = {
       updated_by: { type: 'keyword' },
     },
   },
+  [ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE]: {
+    properties: {
+      name: { type: 'keyword' },
+      type: { type: 'keyword' },
+      // FIXME_INGEST https://github.com/elastic/kibana/issues/56554
+      api_key: { type: 'binary' },
+      api_key_id: { type: 'keyword' },
+      policy_id: { type: 'keyword' },
+      created_at: { type: 'date' },
+      updated_at: { type: 'date' },
+      expire_at: { type: 'date' },
+      active: { type: 'boolean' },
+    },
+  },
   [OUTPUT_SAVED_OBJECT_TYPE]: {
     properties: {
       id: { type: 'keyword' },
@@ -85,6 +100,7 @@ export const savedObjectMappings = {
       index_name: { type: 'keyword' },
       ingest_pipeline: { type: 'keyword' },
       hosts: { type: 'keyword' },
+      // FIXME_INGEST https://github.com/elastic/kibana/issues/56554
       api_key: { type: 'keyword' },
       admin_username: { type: 'binary' },
       admin_password: { type: 'binary' },

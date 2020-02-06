@@ -4,9 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KibanaRequest, FakeRequest } from 'kibana/server';
-import { appContextService } from './app_context';
-import { outputService } from './output';
+import { KibanaRequest, FakeRequest, SavedObjectsClientContract, SavedObject } from 'kibana/server';
+import { appContextService } from '../app_context';
+import { outputService } from '../output';
+import { ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE } from '../../constants';
+import { EnrollmentAPIKeySOAttributes, EnrollmentAPIKey } from '../../types';
 
 export async function generateOutputApiKey(outputId: string, agentId: string): Promise<string> {
   const name = `${agentId}:${outputId}`;
@@ -27,6 +29,18 @@ export async function generateOutputApiKey(outputId: string, agentId: string): P
   }
 
   return `${key.id}:${key.api_key}`;
+}
+
+export async function generateAccessApiKey(agentId: string, policyId: string) {
+  const key = await _createAPIKey(agentId, {
+    'fleet-agent': {},
+  });
+
+  if (!key) {
+    throw new Error('Unable to create an access api key');
+  }
+
+  return { id: key.id, key: Buffer.from(`${key.id}:${key.api_key}`).toString('base64') };
 }
 
 async function _createAPIKey(name: string, roleDescriptors: any) {
@@ -72,6 +86,36 @@ export async function verifyAccessApiKey(
   }
 }
 
+export async function verifyEnrollmentAPIKey(soClient: SavedObjectsClientContract, headers: any) {
+  try {
+    const { apiKeyId } = _parseApiKey(headers);
+
+    await _authenticate(headers);
+
+    const [enrollmentAPIKey] = (
+      await soClient.find<EnrollmentAPIKeySOAttributes>({
+        type: ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
+        searchFields: ['api_key_id'],
+        search: apiKeyId,
+      })
+    ).saved_objects.map(_savedObjectToEnrollmentApiKey);
+
+    if (!enrollmentAPIKey || !enrollmentAPIKey.active) {
+      throw new Error('Enrollement api key does not exists or is not active');
+    }
+
+    return {
+      valid: true,
+      enrollmentAPIKey,
+    };
+  } catch (error) {
+    return {
+      valid: false,
+      reason: error.message || 'ApiKey is not valid',
+    };
+  }
+}
+
 function _parseApiKey(headers: any) {
   const authorizationHeader = headers.authorization;
 
@@ -98,13 +142,33 @@ function _parseApiKey(headers: any) {
 }
 
 async function _authenticate(headers: any) {
-  const security = appContextService.getSecurity();
-  if (!security) {
-    throw new Error('Missing security plugin');
+  const clusterClient = appContextService.getClusterClient();
+  if (!clusterClient) {
+    throw new Error('Missing clusterClient');
   }
-  const res = await security.authc.isAuthenticated({ headers } as KibanaRequest);
-
-  if (!res) {
+  try {
+    await clusterClient
+      .asScoped({ headers } as KibanaRequest)
+      .callAsCurrentUser('transport.request', {
+        path: '/_security/_authenticate',
+        method: 'GET',
+      });
+  } catch (e) {
     throw new Error('ApiKey is not valid: impossible to authicate user');
   }
+}
+
+function _savedObjectToEnrollmentApiKey({
+  error,
+  attributes,
+  id,
+}: SavedObject<any>): EnrollmentAPIKey {
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return {
+    id,
+    ...attributes,
+  };
 }

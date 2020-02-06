@@ -88,7 +88,7 @@ export class IngestManagerPlugin implements Plugin<IngestManagerPluginSetup> {
           all: {
             api: [PLUGIN_ID],
             savedObject: {
-              all: [],
+              all: ['agents', 'events', 'enrollment_api_keys'],
               read: [],
             },
             ui: ['show'],
@@ -97,7 +97,7 @@ export class IngestManagerPlugin implements Plugin<IngestManagerPluginSetup> {
             api: [PLUGIN_ID],
             savedObject: {
               all: [],
-              read: [],
+              read: ['agents', 'events', 'enrollment_api_keys'],
             },
             ui: ['show'],
           },

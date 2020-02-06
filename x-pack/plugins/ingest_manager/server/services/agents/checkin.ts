@@ -27,8 +27,8 @@ export async function agentCheckin(
     last_checkin: string;
     default_api_key?: string;
     actions?: AgentAction[];
-    local_metadata?: any;
-    current_error_events?: AgentEvent[];
+    local_metadata?: string;
+    current_error_events?: string;
   } = {
     last_checkin: new Date().toISOString(),
   };
@@ -62,14 +62,14 @@ export async function agentCheckin(
     }
   }
   if (localMetadata) {
-    updateData.local_metadata = localMetadata;
+    updateData.local_metadata = JSON.stringify(localMetadata);
   }
 
   const { updatedErrorEvents } = await processEventsForCheckin(soClient, agent, events);
 
   // Persist changes
   if (updatedErrorEvents) {
-    updateData.current_error_events = updatedErrorEvents;
+    updateData.current_error_events = JSON.stringify(updatedErrorEvents);
   }
 
   await soClient.update<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, agent.id, updateData);

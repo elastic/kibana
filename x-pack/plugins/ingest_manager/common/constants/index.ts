@@ -11,3 +11,4 @@ export * from './agent_config';
 export * from './datasource';
 export * from './epm';
 export * from './output';
+export * from './api_key';

@@ -26,7 +26,7 @@ export default function({ getService }: FtrProviderContext) {
     fleet_user: {
       permissions: {
         feature: {
-          fleet: ['read'],
+          ingestManager: ['read'],
         },
         spaces: ['*'],
       },
@@ -36,7 +36,7 @@ export default function({ getService }: FtrProviderContext) {
     fleet_admin: {
       permissions: {
         feature: {
-          fleet: ['all'],
+          ingestManager: ['all'],
         },
         spaces: ['*'],
       },
@@ -74,16 +74,17 @@ export default function({ getService }: FtrProviderContext) {
 
     it('should return the list of agents when requesting as a user with fleet write permissions', async () => {
       const { body: apiResponse } = await supertest
-        .get(`/api/fleet/agents`)
+        .get(`/api/ingest_manager/fleet/agents`)
         .auth(users.fleet_admin.username, users.fleet_admin.password)
         .expect(200);
+
       expect(apiResponse).to.have.keys('success', 'page', 'total', 'list');
       expect(apiResponse.success).to.eql(true);
       expect(apiResponse.total).to.eql(4);
     });
     it('should return the list of agents when requesting as a user with fleet read permissions', async () => {
       const { body: apiResponse } = await supertest
-        .get(`/api/fleet/agents`)
+        .get(`/api/ingest_manager/fleet/agents`)
         .auth(users.fleet_user.username, users.fleet_user.password)
         .expect(200);
       expect(apiResponse).to.have.keys('success', 'page', 'total', 'list');
@@ -92,7 +93,7 @@ export default function({ getService }: FtrProviderContext) {
     });
     it('should not return the list of agents when requesting as a user without fleet permissions', async () => {
       await supertest
-        .get(`/api/fleet/agents`)
+        .get(`/api/ingest_manager/fleet/agents`)
         .auth(users.kibana_basic_user.username, users.kibana_basic_user.password)
         .expect(404);
     });
