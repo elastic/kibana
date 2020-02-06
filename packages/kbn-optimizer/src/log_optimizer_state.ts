@@ -39,27 +39,25 @@ export function logOptimizerState(log: ToolingLog, config: OptimizerConfig) {
         if (event?.type === 'worker stdio') {
           const chunk = event.chunk.toString('utf8');
           log.warning(
-            '⚙️  worker',
+            `worker`,
             event.stream,
             chunk.slice(0, chunk.length - (chunk.endsWith('\n') ? 1 : 0))
           );
         }
 
         if (event?.type === 'worker started') {
-          log.info(`⚙️  worker started for bundles ${event.bundles.map(b => b.id).join(', ')}`);
+          log.info(`worker started for bundles ${event.bundles.map(b => b.id).join(', ')}`);
         }
 
         if (state.phase === 'reallocating') {
-          log.debug(`⚙️  changes detected...`);
+          log.debug(`changes detected...`);
           return;
         }
 
         if (state.phase === 'initialized') {
           if (!loggedInit) {
             loggedInit = true;
-            log.info(
-              `⚙️  @kbn/optimizer intialized, ${state.offlineBundles.length} bundles cached`
-            );
+            log.info(`intialized, ${state.offlineBundles.length} bundles cached`);
             log.debug(`version: ${state.version}`);
             log.debug(`cached: ${state.offlineBundles.map(b => b.id)}`);
           }
@@ -76,7 +74,7 @@ export function logOptimizerState(log: ToolingLog, config: OptimizerConfig) {
 
           bundleStates.set(id, type);
           log.debug(
-            `⚙️  [${id}] state = "${type}"${type !== 'running' ? ` after ${state.durSec} sec` : ''}`
+            `[${id}] state = "${type}"${type !== 'running' ? ` after ${state.durSec} sec` : ''}`
           );
         }
 
@@ -85,7 +83,7 @@ export function logOptimizerState(log: ToolingLog, config: OptimizerConfig) {
         }
 
         if (state.phase === 'issue') {
-          log.error('⚙️  webpack compile errors');
+          log.error(`webpack compile errors`);
           log.indent(4);
           for (const b of state.compilerStates) {
             if (b.type === 'compiler issue') {
@@ -102,8 +100,8 @@ export function logOptimizerState(log: ToolingLog, config: OptimizerConfig) {
         if (state.phase === 'success') {
           log.success(
             config.watch
-              ? `⚙️  watching for changes in all bundles after ${state.durSec} sec`
-              : `⚙️  all bundles compiled successfully after ${state.durSec} sec`
+              ? `watching for changes in all bundles after ${state.durSec} sec`
+              : `all bundles compiled successfully after ${state.durSec} sec`
           );
           return true;
         }

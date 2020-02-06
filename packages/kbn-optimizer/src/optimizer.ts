@@ -205,7 +205,7 @@ export class Optimizer {
                   // reset start time if we are transitioning into running
                   const startTime =
                     (prevState.phase === 'success' || prevState.phase === 'issue') &&
-                    stateChanges?.phase === 'running'
+                    (stateChanges?.phase === 'running' || stateChanges?.phase === 'reallocating')
                       ? Date.now()
                       : prevState.startTime;
 

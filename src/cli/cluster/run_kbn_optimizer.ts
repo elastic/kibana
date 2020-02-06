@@ -19,7 +19,13 @@
 
 import Chalk from 'chalk';
 import moment from 'moment';
-import { ToolingLog, pickLevelFromFlags, REPO_ROOT } from '@kbn/dev-utils';
+import {
+  ToolingLog,
+  pickLevelFromFlags,
+  ToolingLogTextWriter,
+  parseLogLevel,
+  REPO_ROOT,
+} from '@kbn/dev-utils';
 import { OptimizerConfig, Optimizer, logOptimizerState } from '@kbn/optimizer';
 
 import { LegacyConfig } from '../../core/server/legacy';
@@ -34,23 +40,40 @@ export function runKbnOptimizer(opts: Record<string, any>, config: LegacyConfig)
   });
 
   const dim = Chalk.dim('np bld');
+  const name = Chalk.magentaBright('@kbn/optimizer');
   const time = () => moment().format('HH:mm:ss.SSS');
-  const toolingLog = new ToolingLog({
-    level: pickLevelFromFlags(opts),
-    writeTo: {
-      write: chunk => {
-        const trailingNewLine = chunk[chunk.length - 1] === '\n';
+  const level = (msgType: string) => {
+    switch (msgType) {
+      case 'info':
+        return Chalk.green(msgType);
+      case 'success':
+        return Chalk.cyan(msgType);
+      case 'debug':
+        return Chalk.gray(msgType);
+      default:
+        return msgType;
+    }
+  };
+  const { flags: levelFlags } = parseLogLevel(pickLevelFromFlags(opts));
+  const toolingLog = new ToolingLog();
+  const has = <T extends object>(obj: T, x: any): x is keyof T => obj.hasOwnProperty(x);
 
-        process.stdout.write(
-          chunk
-            .slice(0, chunk.length - (trailingNewLine ? 1 : 0))
-            .split('\n')
-            .map(line => `${dim}    log   [${time()}] ${line}`)
-            .join('\n') + (trailingNewLine ? '\n' : '')
+  toolingLog.setWriters([
+    {
+      write(msg) {
+        if (has(levelFlags, msg.type) && !levelFlags[msg.type]) {
+          return false;
+        }
+
+        ToolingLogTextWriter.write(
+          process.stdout,
+          `${dim}    log   [${time()}] [${level(msg.type)}][${name}] `,
+          msg
         );
+        return true;
       },
     },
-  });
+  ]);
 
   const optimizer = new Optimizer(optimizerConfig);
   return optimizer.run().pipe(logOptimizerState(toolingLog, optimizerConfig));
