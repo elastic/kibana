@@ -47,10 +47,6 @@ export function setServices(newServices: any) {
   services = newServices;
 }
 
-// import directives that
-import 'ui/directives/css_truncate';
-import 'ui/directives/field_name';
-
 // EXPORT legacy static dependencies, should be migrated when available in a new version;
 export { angular };
 export { wrapInI18nContext } from 'ui/i18n';
@@ -59,7 +55,7 @@ export { buildVislibDimensions } from '../../../visualizations/public';
 export { callAfterBindingsWorkaround } from 'ui/compat';
 export { getRequestInspectorStats, getResponseInspectorStats } from '../../../data/public';
 // @ts-ignore
-export { intervalOptions } from 'ui/agg_types/buckets/_interval_options';
+export { intervalOptions } from 'ui/agg_types';
 // @ts-ignore
 export { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
 export { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
@@ -90,7 +86,6 @@ export {
 } from '../../../../../plugins/data/public';
 export { ElasticSearchHit } from './np_ready/doc_views/doc_views_types';
 export { registerTimefilterWithGlobalStateFactory } from 'ui/timefilter/setup_router';
-export { FieldName } from 'ui/directives/field_name/field_name';
 export { getFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
 // @ts-ignore
 export { buildPointSeriesData } from 'ui/agg_response/point_series/point_series';

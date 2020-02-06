@@ -38,8 +38,7 @@ export function Popover({ focusedServiceName }: PopoverProps) {
     background: 'transparent',
     height: renderedHeight,
     position: 'absolute',
-    width: renderedWidth,
-    border: '3px dotted red'
+    width: renderedWidth
   };
   const trigger = <div style={triggerStyle} />;
   const zoom = cy?.zoom() ?? 1;
