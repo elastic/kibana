@@ -19,6 +19,7 @@ import { Start as InspectorStart } from '../../../../../src/plugins/inspector/pu
 import { IUiActionsStart } from '../../../../../src/plugins/ui_actions/public';
 import { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/public';
 import { initTelemetry } from './lib/telemetry';
+import { KibanaServices } from './lib/kibana';
 
 export { AppMountParameters, CoreSetup, CoreStart, PluginInitializerContext };
 
@@ -55,10 +56,10 @@ export class Plugin implements IPlugin<Setup, Start> {
       id: this.id,
       title: this.name,
       async mount(context, params) {
-        const [coreStart, pluginsStart] = await core.getStartServices();
+        const [coreStart, startPlugins] = await core.getStartServices();
         const { renderApp } = await import('./app');
 
-        return renderApp(coreStart, pluginsStart as StartPlugins, params);
+        return renderApp(coreStart, startPlugins as StartPlugins, params);
       },
     });
 
@@ -66,6 +67,8 @@ export class Plugin implements IPlugin<Setup, Start> {
   }
 
   public start(core: CoreStart, plugins: StartPlugins) {
+    KibanaServices.init({ ...core, ...plugins });
+
     return {};
   }
 
