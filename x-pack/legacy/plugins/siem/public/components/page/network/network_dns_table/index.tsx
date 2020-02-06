@@ -163,8 +163,7 @@ export const NetworkDnsTableComponent = React.memo<NetworkDnsTableProps>(
         updateLimitPagination={updateLimitPagination}
       />
     );
-  },
-  deepEqual
+  }
 );
 
 NetworkDnsTableComponent.displayName = 'NetworkDnsTableComponent';
