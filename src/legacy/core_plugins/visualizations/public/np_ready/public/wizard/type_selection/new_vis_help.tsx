@@ -21,7 +21,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Fragment } from 'react';
 import { EuiText, EuiButton } from '@elastic/eui';
 import { VisTypeAliasListEntry } from './type_selection';
-import { VisTypeAlias } from '../../../../../../visualizations/public';
+import { VisTypeAlias } from '../../types';
 
 interface Props {
   promotedTypes: VisTypeAliasListEntry[];
@@ -33,7 +33,7 @@ export function NewVisHelp(props: Props) {
     <EuiText>
       <p>
         <FormattedMessage
-          id="kbn.visualize.newVisWizard.helpText"
+          id="visualizations.newVisWizard.helpText"
           defaultMessage="Start creating your visualization by selecting a type for that visualization."
         />
       </p>
