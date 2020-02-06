@@ -24,13 +24,13 @@ export function plugin(initializerContext: PluginInitializerContext) {
   return new UiActionsPlugin(initializerContext);
 }
 
-export { IUiActionsSetup, IUiActionsStart } from './plugin';
+export { UiActionsSetup, UiActionsStart } from './plugin';
 export {
-  IAction,
-  ITrigger,
-  IUiActionsApi,
-  TGetActionsCompatibleWithTrigger,
-  TExecuteTriggerActions,
+  Action,
+  Trigger,
+  UiActionsApi,
+  GetActionsCompatibleWithTrigger,
+  ExecuteTriggerActions,
 } from './types';
 export { createAction } from './actions';
 export { buildContextMenuForActions } from './context_menu';
