@@ -13,7 +13,6 @@ import { Provider } from 'react-redux';
 import { Store } from 'redux';
 import { appStoreFactory } from './store';
 import { AlertIndex } from './view/alerts';
-import { Resolver } from './resolver';
 
 /**
  * This module will be loaded asynchronously to reduce the bundle size of your plugin's main bundle.
@@ -23,9 +22,6 @@ export function renderApp(coreStart: CoreStart, { appBasePath, element }: AppMou
 
   const [store, stopSagas] = appStoreFactory(coreStart);
 
-  // hack to style this div
-  element.style.display = 'flex';
-  element.style.flexGrow = '1';
   ReactDOM.render(<AppRoot basename={appBasePath} store={store} />, element);
 
   return () => {
@@ -44,8 +40,15 @@ const AppRoot: React.FunctionComponent<RouterProps> = React.memo(({ basename, st
     <I18nProvider>
       <BrowserRouter basename={basename}>
         <Switch>
-          <Route exact path="/" render={() => <h2>hello world</h2>} />
-          <Route path="/resolver" render={() => <Resolver />} />
+          <Route
+            exact
+            path="/"
+            render={() => (
+              <h1 data-test-subj="welcomeTitle">
+                <FormattedMessage id="xpack.endpoint.welcomeTitle" defaultMessage="Hello World" />
+              </h1>
+            )}
+          />
           <Route
             path="/management"
             render={() => {

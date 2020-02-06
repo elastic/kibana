@@ -11,7 +11,6 @@ import { createConfig$, EndpointConfigType } from './config';
 import { registerEndpointRoutes } from './routes/endpoints';
 import { EndpointAppContext } from './types';
 import { registerAlertRoutes } from './routes/alerts';
-import { registerResolverRoutes } from './routes/resolver';
 
 export type EndpointPluginStart = void;
 export type EndpointPluginSetup = void;
@@ -71,7 +70,6 @@ export class EndpointPlugin
     addRoutes(router);
     registerEndpointRoutes(router, endpointContext);
     registerAlertRoutes(router);
-    registerResolverRoutes(router, endpointContext);
   }
 
   public start() {

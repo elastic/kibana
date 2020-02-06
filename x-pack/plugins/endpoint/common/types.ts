@@ -147,4 +147,4 @@ export interface Pagination {
 /**
  * The PageId type is used for the payload when firing userNavigatedToPage actions
  */
-export type PageId = 'alertsPage' | 'endpointListPage' | 'resolverPage';
+export type PageId = 'alertsPage' | 'endpointListPage';
