@@ -8,7 +8,7 @@ import { Pager, EuiSearchBar } from '@elastic/eui';
 import { createSelector } from 'reselect';
 import { indexStatusLabels } from '../../lib/index_status_labels';
 import { sortTable } from '../../services';
-import { getToggleExtensions } from '../../../index_management_extensions';
+import { indexManagementExtensions } from '../../../services/index_management_extensions';
 
 export const getDetailPanelData = state => state.detailPanel.data;
 export const getDetailPanelError = state => state.detailPanel.error;
@@ -46,7 +46,7 @@ export const hasSystemIndex = indexNames => {
 const defaultFilterFields = ['name'];
 
 const filterByToggles = (indices, toggleNameToVisibleMap) => {
-  const togglesByName = getToggleExtensions().reduce(
+  const togglesByName = indexManagementExtensions.toggles.reduce(
     (byName, toggle) => ({
       ...byName,
       [toggle.name]: toggle,

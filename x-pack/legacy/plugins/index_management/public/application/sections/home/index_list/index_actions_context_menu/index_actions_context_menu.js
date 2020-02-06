@@ -24,7 +24,7 @@ import {
 } from '@elastic/eui';
 import { flattenPanelTree } from '../../../../lib/flatten_panel_tree';
 import { INDEX_OPEN } from '../../../../../../common/constants';
-import { getActionExtensions } from '../../../../../index_management_extensions';
+import { indexManagementExtensions } from '../../../../../services/index_management_extensions';
 import { getHttpClient } from '../../../../services/api';
 
 export class IndexActionsContextMenu extends Component {
@@ -210,7 +210,7 @@ export class IndexActionsContextMenu extends Component {
         this.setState({ renderConfirmModal: this.renderConfirmDeleteModal });
       },
     });
-    getActionExtensions().forEach(actionExtension => {
+    indexManagementExtensions.actions.forEach(actionExtension => {
       const actionExtensionDefinition = actionExtension(indices, reloadIndices);
       if (actionExtensionDefinition) {
         const {

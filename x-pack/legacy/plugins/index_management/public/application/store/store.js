@@ -6,14 +6,14 @@
 
 import { createStore, applyMiddleware, compose } from 'redux';
 import thunk from 'redux-thunk';
-import { getToggleExtensions } from '../../index_management_extensions';
+import { indexManagementExtensions } from '../../services/index_management_extensions';
 import { defaultTableState } from './reducers/table_state';
 
 import { getReducer } from './reducers/';
 
 export function indexManagementStore({ uiMetricService }) {
   const toggleNameToVisibleMap = {};
-  getToggleExtensions().forEach(toggleExtension => {
+  indexManagementExtensions.toggles.forEach(toggleExtension => {
     toggleNameToVisibleMap[toggleExtension.name] = false;
   });
   const initialState = { tableState: { ...defaultTableState, toggleNameToVisibleMap } };

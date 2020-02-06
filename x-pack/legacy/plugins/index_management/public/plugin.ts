@@ -17,11 +17,18 @@ import { UiMetricService, setUiMetricServiceInstance } from './application/servi
 import { IndexMgmtMetricsType } from './types';
 import { MANAGEMENT_BREADCRUMB } from './_legacy';
 import { AppDependencies } from './application';
+import { IndexManagementExtensions } from './services';
+import { indexManagementExtensions } from './services/index_management_extensions';
+
+export interface IndexMgmtSetup {
+  indexManagementExtensions: IndexManagementExtensions;
+}
 
 export class IndexMgmtUIPlugin {
   private uiMetricService = new UiMetricService<IndexMgmtMetricsType>(UIM_APP_NAME);
+  private indexManagementExtensions = new IndexManagementExtensions();
 
-  public setup(coreSetup: CoreSetup, plugins: any) {
+  public setup(coreSetup: CoreSetup, plugins: any): IndexMgmtSetup {
     const { http, notifications, getStartServices } = coreSetup;
     const { usageCollection } = plugins;
 
@@ -48,6 +55,9 @@ export class IndexMgmtUIPlugin {
         const appDependencies: AppDependencies = {
           services: {
             uiMetric: this.uiMetricService,
+            // TODO: use the plugin instances above (this.indexManagementExtensions) instead of the imported one
+            // after moving to the "plugins" folder
+            extensions: indexManagementExtensions,
           },
         };
 
@@ -55,6 +65,10 @@ export class IndexMgmtUIPlugin {
         return renderApp(element, { core, dependencies: appDependencies });
       },
     });
+
+    return {
+      indexManagementExtensions: this.indexManagementExtensions,
+    };
   }
 
   public start() {}

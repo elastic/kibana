@@ -19,7 +19,7 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import { getSummaryExtensions } from '../../../../../../index_management_extensions';
+import { indexManagementExtensions } from '../../../../../../services/index_management_extensions';
 const getHeaders = () => {
   return {
     health: i18n.translate('xpack.idxMgmt.summary.headers.healthHeader', {
@@ -55,7 +55,7 @@ const getHeaders = () => {
 export class Summary extends React.PureComponent {
   getAdditionalContent() {
     const { index } = this.props;
-    const extensions = getSummaryExtensions();
+    const extensions = indexManagementExtensions.summaries;
     return extensions.map((summaryExtension, i) => {
       return (
         <Fragment key={`summaryExtension-${i}`}>

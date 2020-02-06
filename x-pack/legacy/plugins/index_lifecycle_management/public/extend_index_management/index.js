@@ -14,7 +14,7 @@ import {
   addBannerExtension,
   addActionExtension,
   addFilterExtension,
-} from '../../../index_management/public/index_management_extensions';
+} from '../../../index_management/public';
 import { retryLifecycleForIndex } from '../services/api';
 import { EuiSearchBar } from '@elastic/eui';
 
