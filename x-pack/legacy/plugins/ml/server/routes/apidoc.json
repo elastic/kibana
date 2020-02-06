@@ -33,6 +33,8 @@
     "ValidateAnomalyDetector",
     "ForecastAnomalyDetector",
     "GetOverallBuckets",
-    "GetCategories"
+    "GetCategories",
+    "FileDataVisualizer",
+    "AnalyzeFile"
   ]
 }

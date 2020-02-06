@@ -21,7 +21,17 @@ function analyzeFiles(context: RequestHandlerContext, data: InputData, overrides
   return analyzeFile(data, overrides);
 }
 
+/**
+ * Routes for the file data visualizer.
+ */
 export function fileDataVisualizerRoutes({ router, xpackMainPlugin }: RouteInitialization) {
+  /**
+   * @apiGroup FileDataVisualizer
+   *
+   * @api {post} /api/ml/file_data_visualizer/analyze_file Analyze file data
+   * @apiName AnalyzeFile
+   * @apiDescription Performs analysis of the file data.
+   */
   router.post(
     {
       path: '/api/ml/file_data_visualizer/analyze_file',
