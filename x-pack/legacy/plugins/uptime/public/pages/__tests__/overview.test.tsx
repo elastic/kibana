@@ -97,7 +97,11 @@ describe('MonitorPage', () => {
   it('shallow renders expected elements for valid props', () => {
     expect(
       shallowWithRouter(
-        <OverviewPageComponent autocomplete={autocomplete} indexPattern={indexPattern} />
+        <OverviewPageComponent
+          autocomplete={autocomplete}
+          indexPattern={indexPattern}
+          setEsKueryFilters={jest.fn()}
+        />
       )
     ).toMatchSnapshot();
   });
