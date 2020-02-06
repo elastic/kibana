@@ -4,27 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiPopover,
-  EuiTitle
-} from '@elastic/eui';
+import { EuiPopover } from '@elastic/eui';
 import cytoscape from 'cytoscape';
 import React, {
   CSSProperties,
+  useCallback,
   useContext,
   useEffect,
-  useState,
-  useCallback
+  useRef,
+  useState
 } from 'react';
 import { CytoscapeContext } from '../Cytoscape';
-import { Buttons } from './Buttons';
-import { Info } from './Info';
-import { ServiceMetricList } from './ServiceMetricList';
-
-const popoverMinWidth = 280;
+import { Contents } from './Contents';
 
 interface PopoverProps {
   focusedServiceName?: string;
@@ -35,56 +26,62 @@ export function Popover({ focusedServiceName }: PopoverProps) {
   const [selectedNode, setSelectedNode] = useState<
     cytoscape.NodeSingular | undefined
   >(undefined);
-  const onFocusClick = useCallback(() => setSelectedNode(undefined), [
+  const deselect = useCallback(() => setSelectedNode(undefined), [
     setSelectedNode
   ]);
-
-  useEffect(() => {
-    const selectHandler: cytoscape.EventHandler = event => {
-      setSelectedNode(event.target);
-    };
-    const unselectHandler: cytoscape.EventHandler = () => {
-      setSelectedNode(undefined);
-    };
-
-    if (cy) {
-      cy.on('select', 'node', selectHandler);
-      cy.on('unselect', 'node', unselectHandler);
-      cy.on('data viewport', unselectHandler);
-    }
-
-    return () => {
-      if (cy) {
-        cy.removeListener('select', 'node', selectHandler);
-        cy.removeListener('unselect', 'node', unselectHandler);
-        cy.removeListener('data viewport', undefined, unselectHandler);
-      }
-    };
-  }, [cy]);
-
   const renderedHeight = selectedNode?.renderedHeight() ?? 0;
   const renderedWidth = selectedNode?.renderedWidth() ?? 0;
   const { x, y } = selectedNode?.renderedPosition() ?? { x: 0, y: 0 };
   const isOpen = !!selectedNode;
-  const selectedNodeServiceName: string = selectedNode?.data('id');
   const isService = selectedNode?.data('type') === 'service';
   const triggerStyle: CSSProperties = {
     background: 'transparent',
     height: renderedHeight,
     position: 'absolute',
-    width: renderedWidth
+    width: renderedWidth,
+    border: '3px dotted red'
   };
-  const trigger = <div className="trigger" style={triggerStyle} />;
-
+  const trigger = <div style={triggerStyle} />;
   const zoom = cy?.zoom() ?? 1;
   const height = selectedNode?.height() ?? 0;
-  const translateY = y - (zoom + 1) * (height / 2);
+  const translateY = y - ((zoom + 1) * height) / 4;
   const popoverStyle: CSSProperties = {
     position: 'absolute',
     transform: `translate(${x}px, ${translateY}px)`
   };
-  const data = selectedNode?.data() ?? {};
-  const label = data.label || selectedNodeServiceName;
+  const selectedNodeData = selectedNode?.data() ?? {};
+  const selectedNodeServiceName = selectedNodeData.id;
+  const label = selectedNodeData.label || selectedNodeServiceName;
+  const popoverRef = useRef<EuiPopover>(null);
+
+  // Set up Cytoscape event handlers
+  useEffect(() => {
+    const selectHandler: cytoscape.EventHandler = event => {
+      setSelectedNode(event.target);
+    };
+
+    if (cy) {
+      cy.on('select', 'node', selectHandler);
+      cy.on('unselect', 'node', deselect);
+      cy.on('data viewport', deselect);
+    }
+
+    return () => {
+      if (cy) {
+        cy.removeListener('select', 'node', selectHandler);
+        cy.removeListener('unselect', 'node', deselect);
+        cy.removeListener('data viewport', undefined, deselect);
+      }
+    };
+  }, [cy, deselect]);
+
+  // Handle positioning of popover. This makes it so the popover positions
+  // itself correctly and the arrows are always pointing to where they should.
+  useEffect(() => {
+    if (popoverRef.current) {
+      popoverRef.current.positionPopoverFluid();
+    }
+  }, [popoverRef, x, y]);
 
   return (
     <EuiPopover
@@ -92,35 +89,16 @@ export function Popover({ focusedServiceName }: PopoverProps) {
       button={trigger}
       closePopover={() => {}}
       isOpen={isOpen}
+      ref={popoverRef}
       style={popoverStyle}
     >
-      <EuiFlexGroup
-        direction="column"
-        gutterSize="s"
-        style={{ minWidth: popoverMinWidth }}
-      >
-        <EuiFlexItem>
-          <EuiTitle size="xxs">
-            <h3>{label}</h3>
-          </EuiTitle>
-          <EuiHorizontalRule margin="xs" />
-        </EuiFlexItem>
-
-        <EuiFlexItem>
-          {isService ? (
-            <ServiceMetricList serviceName={selectedNodeServiceName} />
-          ) : (
-            <Info {...data} />
-          )}
-        </EuiFlexItem>
-        {isService && (
-          <Buttons
-            focusedServiceName={focusedServiceName}
-            onFocusClick={onFocusClick}
-            selectedNodeServiceName={selectedNodeServiceName}
-          />
-        )}
-      </EuiFlexGroup>
+      <Contents
+        selectedNodeData={selectedNodeData}
+        isService={isService}
+        label={label}
+        onFocusClick={deselect}
+        selectedNodeServiceName={selectedNodeServiceName}
+      />
     </EuiPopover>
   );
 }
