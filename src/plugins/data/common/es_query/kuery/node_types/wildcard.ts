@@ -19,6 +19,7 @@
 
 import { fromLiteralExpression } from '../ast/ast';
 import { WildcardTypeBuildNode } from './types';
+import { KueryNode } from '..';
 
 export const wildcardSymbol = '@kuery-wildcard@';
 
@@ -32,9 +33,9 @@ function escapeQueryString(str: string) {
   return str.replace(/[+-=&|><!(){}[\]^"~*?:\\/]/g, '\\$&'); // $& means the whole matched string
 }
 
-export function buildNode(value: string): WildcardTypeBuildNode {
+export function buildNode(value: string): WildcardTypeBuildNode | KueryNode {
   if (!value.includes(wildcardSymbol)) {
-    return (fromLiteralExpression(value) as unknown) as WildcardTypeBuildNode;
+    return fromLiteralExpression(value);
   }
 
   return {

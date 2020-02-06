@@ -40,7 +40,7 @@ export function buildNode(functionName: FunctionName, ...args: any[]) {
 // Mainly only useful in the grammar where we'll already have real argument nodes in hand
 export function buildNodeWithArgumentNodes(
   functionName: FunctionName,
-  ...args: any[]
+  args: any[]
 ): FunctionTypeBuildNode {
   if (_.isUndefined(functions[functionName])) {
     throw new Error(`Unknown function "${functionName}"`);

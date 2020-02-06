@@ -22,7 +22,7 @@
  */
 
 import { IIndexPattern } from '../../../index_patterns';
-import { JsonValue } from '..';
+import { JsonValue, KueryNode } from '..';
 
 export type FunctionName =
   | 'is'
@@ -37,7 +37,7 @@ export type FunctionName =
 
 interface FunctionType {
   buildNode: (functionName: FunctionName, ...args: any[]) => FunctionTypeBuildNode;
-  buildNodeWithArgumentNodes: (functionName: FunctionName, ...args: any[]) => FunctionTypeBuildNode;
+  buildNodeWithArgumentNodes: (functionName: FunctionName, args: any[]) => FunctionTypeBuildNode;
   toElasticsearchQuery: (
     node: any,
     indexPattern?: IIndexPattern,
@@ -75,7 +75,7 @@ export interface NamedArgTypeBuildNode {
 }
 
 interface WildcardType {
-  buildNode: (value: string) => WildcardTypeBuildNode;
+  buildNode: (value: string) => WildcardTypeBuildNode | KueryNode;
   test: (node: any, string: string) => boolean;
   toElasticsearchQuery: (node: any) => string;
   toQueryStringQuery: (node: any) => string;
