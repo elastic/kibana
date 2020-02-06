@@ -172,6 +172,8 @@ Security::
 * Role Mappings UI {pull}53620[#53620]
 * Adds message to login page {pull}51557[#51557]
 * Updates Node.js to version 10.18.0 {pull}52865[#52865]
+* Improves session idle timeout, add session lifespan {pull}49855[#49855]
+* Adds support for certificates in PKCS#12 (P12) key stores {pull}53810[#53810]
 SIEM::
 * New Overview Page {pull}54783[#54783]
 * Adds DNS histogram {pull}50409[#50409]
