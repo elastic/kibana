@@ -22,8 +22,9 @@ import { takeUntil } from 'rxjs/operators';
 import * as readline from 'readline';
 import * as fs from 'fs';
 import { resolve } from 'path';
-import { pretty } from './utils';
+import { pipe, pretty } from './utils';
 import * as rawData from '../../cc_app/public/initial_data_raw.js';
+const prettyAndFlush = pipe(pretty, flush);
 
 export const parseAndPopulate = buildNumber => srcFile => destFile => log => {
   const logV = verbose(log);
@@ -34,7 +35,7 @@ export const parseAndPopulate = buildNumber => srcFile => destFile => log => {
   const initialData = dedupe(rawData);
 
   const historicalItems = [];
-  const mutateHistorical = onLineRead(historicalItems)
+  const mutateHistorical = onLineRead(historicalItems);
   const onErr = x => log.error(`!!! ${x}`);
   const mutateInitial = onComplete(initialData);
 
@@ -42,21 +43,44 @@ export const parseAndPopulate = buildNumber => srcFile => destFile => log => {
 
   fromEvent(rl, 'line')
     .pipe(takeUntil(fromEvent(rl, 'close')))
-    .subscribe(mutateHistorical, onErr, () => mutateInitial(historicalItems, log));
+    .subscribe(mutateHistorical, onErr, () => mutateInitial(historicalItems, log, resolvedDestFile));
 
 };
+
+function onComplete(initData) {
+  return function mutateInitialData(xs, log, destFile) {
+      initData.historicalItems = xs;
+      // prettyAndFlush(initData)
+      flush(pretty(initData), destFile)
+      log.debug('### Completed');
+  }
+}
+
+function flush(initData, destFile) {
+  const fill = boilerplate(initData);
+  console.log(`\n### fill: \n\t${fill}`);
+  fs.writeFileSync(destFile, fill, { encoding: 'utf8' });
+}
+
+function boilerplate(initData) {
+  return `const initialData = ${initData};
+
+if (!isInBrowser()) {
+  module.exports.default = {}
+  module.exports.default = initialData
+} else {
+  window.initialData = initialData;
+}
+
+function isInBrowser() {
+  return !!(typeof window !== 'undefined');
+}
+`;
+}
 
 function onLineRead(xs) {
   return function pushOntoHistoricalItems(x) {
     xs.push(x);
-  }
-}
-
-function onComplete(initData) {
-  return function mutateInitialData(xs, log) {
-    initData.historicalItems = xs;
-    log.debug(pretty(initData));
-    log.debug('### Completed');
   }
 }
 
