@@ -6,7 +6,8 @@
 
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 // @ts-ignore
-import { getMapsTelemetry, TELEMETRY_TYPE } from '../maps_telemetry';
+import { getMapsTelemetry } from '../maps_telemetry';
+import { TELEMETRY_TYPE } from '../../../common/constants';
 
 export function registerMapsUsageCollector(
   usageCollection: UsageCollectionSetup,
