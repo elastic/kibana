@@ -1,0 +1,2246 @@
+{
+  "type": "doc",
+  "value": {
+    "id": "lvx_G3AB35DY4seMO0wM",
+    "index": "endpoint-events-1-000001",
+    "source": {
+      "@timestamp": "2020-02-06T17:14:47.917Z",
+      "agent": {
+        "id": "99b3e56e-0596-4b02-bbd1-0b581ec983a4",
+        "type": "endgame",
+        "version": "8.2.3"
+      },
+      "endgame": {
+        "authentication_id": 8346,
+        "command_line": "C:\\Program Files\\Internet Explorer\\valley.exe",
+        "effective_gid": 781,
+        "effective_group_name": "breakfast",
+        "effective_uid": 697,
+        "effective_user_name": "sail",
+        "elevated": false,
+        "elevation_type": "seat",
+        "event_message": "over",
+        "event_subtype_full": "creation_event",
+        "event_type_full": "process_event",
+        "exit_code_full": 372,
+        "integrity_level": "attempt",
+        "md5": "ld2rffdm8t4d69yinhgj3pumt0igjk67",
+        "opcode": 1,
+        "original_file_name": "valley.exe",
+        "package_name": "moving",
+        "parent_process_name": "bow.exe",
+        "parent_process_path": "C:\\Windows\\System32\\bow.exe",
+        "pid": 1,
+        "ppid": 0,
+        "process_name": "valley.exe",
+        "process_path": "C:\\Program Files\\Internet Explorer\\valley.exe",
+        "real_gid": 591,
+        "real_group_name": "title",
+        "real_uid": 104,
+        "real_user_name": "proper",
+        "serial_event_id": 1,
+        "session_id": 797,
+        "sha1": "vmxyl5or8gpe3dinvic1tn1sucz49hubogn3j95q",
+        "sha256": "cmz2mcphnvikj47c4hith6cxtoe1020sk71wozemd4s2ew1f6dttboslrp2vug7x",
+        "signature_signer": "sight",
+        "signature_status": "will",
+        "tid": 314,
+        "timestamp": 1,
+        "timestamp_utc": "2020-02-06 17-14-47+00:00",
+        "true_ppid": 0,
+        "unique_pid": 1,
+        "unique_ppid": 0,
+        "unique_true_ppid": 0,
+        "unknown_properties": "gate",
+        "user_domain": "equally",
+        "user_name": "positive",
+        "user_sid": "facing"
+      },
+      "event": {
+        "action": "introduced",
+        "category": "card",
+        "dataset": "particles",
+        "kind": "too",
+        "module": "six",
+        "type": "clothes"
+      },
+      "host": {
+        "hostname": "alphabet",
+        "name": "hill",
+        "os": {
+          "name": "satellites",
+          "platform": "crowd",
+          "version": "mainly"
+        }
+      },
+      "labels": {
+        "account_id": "99b3e56e-0596-4b02-bbd1-0b581ec983a4",
+        "endpoint_id": "99b3e56e-0596-4b02-bbd1-0b581ec983a4"
+      },
+      "message": "central",
+      "process": {
+        "args": "ranch",
+        "executable": "of",
+        "hash": {
+          "md5": "sing",
+          "sha1": "neighborhood",
+          "sha256": "evidence"
+        },
+        "name": "lack",
+        "pid": 1,
+        "ppid": 0,
+        "thread": {
+          "id": 40
+        }
+      },
+      "user": {
+        "group": {
+          "id": "specific",
+          "name": "fence"
+        },
+        "id": "doubt",
+        "name": "stuck"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "l_x_G3AB35DY4seMO0wM",
+    "index": "endpoint-events-1-000001",
+    "source": {
+      "@timestamp": "2020-02-06T17:14:47.923Z",
+      "agent": {
+        "id": "99b3e56e-0596-4b02-bbd1-0b581ec983a4",
+        "type": "endgame",
+        "version": "5.7.9"
+      },
+      "endgame": {
+        "authentication_id": 3908,
+        "command_line": "C:\\Program Files\\Internet Explorer\\highway.exe",
+        "effective_gid": 877,
+        "effective_group_name": "adult",
+        "effective_uid": 453,
+        "effective_user_name": "cut",
+        "elevated": false,
+        "elevation_type": "combination",
+        "event_message": "tube",
+        "event_subtype_full": "uid_change",
+        "event_type_full": "process_event",
+        "exit_code_full": 131,
+        "integrity_level": "previous",
+        "md5": "o3qqi7eoyerf2ixdqby76ze77p07onxi",
+        "opcode": 1,
+        "original_file_name": "highway.exe",
+        "package_name": "eleven",
+        "parent_process_name": "happily.exe",
+        "parent_process_path": "C:\\Windows\\System32\\happily.exe",
+        "pid": 2,
+        "ppid": 1,
+        "process_name": "highway.exe",
+        "process_path": "C:\\Program Files\\Internet Explorer\\highway.exe",
+        "real_gid": 384,
+        "real_group_name": "rapidly",
+        "real_uid": 708,
+        "real_user_name": "won",
+        "serial_event_id": 2,
+        "session_id": 792,
+        "sha1": "7o3e65i82z86g4mm6yuju3lpvx8yv7byznw9vbl4",
+        "sha256": "kh5jil1dqi9729gawzstwz09bj7e50bg6laevtpuydko7gorrm5r7iggnffnexsl",
+        "signature_signer": "apple",
+        "signature_status": "sale",
+        "tid": 488,
+        "timestamp": 1,
+        "timestamp_utc": "2020-02-06 17-14-47+00:00",
+        "true_ppid": 1,
+        "unique_pid": 2,
+        "unique_ppid": 1,
+        "unique_true_ppid": 1,
+        "unknown_properties": "several",
+        "user_domain": "planning",
+        "user_name": "corn",
+        "user_sid": "division"
+      },
+      "event": {
+        "action": "person",
+        "category": "author",
+        "dataset": "crew",
+        "kind": "speed",
+        "module": "direct",
+        "type": "organized"
+      },
+      "host": {
+        "hostname": "customs",
+        "name": "egg",
+        "os": {
+          "name": "creature",
+          "platform": "soap",
+          "version": "heat"
+        }
+      },
+      "labels": {
+        "account_id": "99b3e56e-0596-4b02-bbd1-0b581ec983a4",
+        "endpoint_id": "99b3e56e-0596-4b02-bbd1-0b581ec983a4"
+      },
+      "message": "story",
+      "process": {
+        "args": "turn",
+        "executable": "pleasant",
+        "hash": {
+          "md5": "band",
+          "sha1": "needs",
+          "sha256": "poor"
+        },
+        "name": "army",
+        "pid": 2,
+        "ppid": 1,
+        "thread": {
+          "id": 487
+        }
+      },
+      "user": {
+        "group": {
+          "id": "beautiful",
+          "name": "mainly"
+        },
+        "id": "carbon",
+        "name": "tell"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "mPx_G3AB35DY4seMO0wM",
+    "index": "endpoint-events-1-000001",
+    "source": {
+      "@timestamp": "2020-02-06T17:14:47.924Z",
+      "agent": {
+        "id": "99b3e56e-0596-4b02-bbd1-0b581ec983a4",
+        "type": "endgame",
+        "version": "4.6.5"
+      },
+      "endgame": {
+        "authentication_id": 1004,
+        "command_line": "C:\\Program Files\\Internet Explorer\\morning.exe",
+        "effective_gid": 321,
+        "effective_group_name": "cotton",
+        "effective_uid": 514,
+        "effective_user_name": "anything",
+        "elevated": true,
+        "elevation_type": "spin",
+        "event_message": "two",
+        "event_subtype_full": "still_running",
+        "event_type_full": "process_event",
+        "exit_code_full": 294,
+        "integrity_level": "copy",
+        "md5": "2lbe64e516149fxq07d6yec8phfattsi",
+        "opcode": 1,
+        "original_file_name": "morning.exe",
+        "package_name": "instrument",
+        "parent_process_name": "people.exe",
+        "parent_process_path": "C:\\Windows\\System32\\people.exe",
+        "pid": 3,
+        "ppid": 2,
+        "process_name": "morning.exe",
+        "process_path": "C:\\Program Files\\Internet Explorer\\morning.exe",
+        "real_gid": 63,
+        "real_group_name": "stop",
+        "real_uid": 181,
+        "real_user_name": "triangle",
+        "serial_event_id": 3,
+        "session_id": 56,
+        "sha1": "2mf2scxwbr1xf5ytts6ij8ofczm8l8c233sbtfes",
+        "sha256": "7rrywdp5p24hc8na8c8zpg7cxxpmct76r17k6selj1t6vm3yjyml4c53whxohrnw",
+        "signature_signer": "order",
+        "signature_status": "bill",
+        "tid": 170,
+        "timestamp": 1,
+        "timestamp_utc": "2020-02-06 17-14-47+00:00",
+        "true_ppid": 2,
+        "unique_pid": 3,
+        "unique_ppid": 2,
+        "unique_true_ppid": 2,
+        "unknown_properties": "history",
+        "user_domain": "fort",
+        "user_name": "corn",
+        "user_sid": "clothing"
+      },
+      "event": {
+        "action": "of",
+        "category": "suddenly",
+        "dataset": "depth",
+        "kind": "gently",
+        "module": "sail",
+        "type": "north"
+      },
+      "host": {
+        "hostname": "work",
+        "name": "pack",
+        "os": {
+          "name": "grain",
+          "platform": "watch",
+          "version": "apartment"
+        }
+      },
+      "labels": {
+        "account_id": "99b3e56e-0596-4b02-bbd1-0b581ec983a4",
+        "endpoint_id": "99b3e56e-0596-4b02-bbd1-0b581ec983a4"
+      },
+      "message": "success",
+      "process": {
+        "args": "hit",
+        "executable": "herself",
+        "hash": {
+          "md5": "twelve",
+          "sha1": "particularly",
+          "sha256": "pilot"
+        },
+        "name": "leaf",
+        "pid": 3,
+        "ppid": 2,
+        "thread": {
+          "id": 100
+        }
+      },
+      "user": {
+        "group": {
+          "id": "coat",
+          "name": "stiff"
+        },
+        "id": "horn",
+        "name": "advice"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "mfx_G3AB35DY4seMO0wM",
+    "index": "endpoint-events-1-000001",
+    "source": {
+      "@timestamp": "2020-02-06T17:14:47.924Z",
+      "agent": {
+        "id": "99b3e56e-0596-4b02-bbd1-0b581ec983a4",
+        "type": "endgame",
+        "version": "3.3.5"
+      },
+      "endgame": {
+        "authentication_id": 2308,
+        "command_line": "C:\\Program Files\\Internet Explorer\\attempt.exe",
+        "effective_gid": 114,
+        "effective_group_name": "importance",
+        "effective_uid": 843,
+        "effective_user_name": "fill",
+        "elevated": true,
+        "elevation_type": "milk",
+        "event_message": "sent",
+        "event_type_full": "process_event",
+        "exit_code_full": 260,
+        "integrity_level": "will",
+        "md5": "jexdofj32uriurx6dno2lri1474muajl",
+        "opcode": 1,
+        "original_file_name": "attempt.exe",
+        "package_name": "write",
+        "parent_process_name": "explain.exe",
+        "parent_process_path": "C:\\Windows\\System32\\explain.exe",
+        "pid": 4,
+        "ppid": 3,
+        "process_name": "attempt.exe",
+        "process_path": "C:\\Program Files\\Internet Explorer\\attempt.exe",
+        "real_gid": 317,
+        "real_group_name": "stretch",
+        "real_uid": 450,
+        "real_user_name": "brass",
+        "serial_event_id": 4,
+        "session_id": 175,
+        "sha1": "l64rugthav4ay478x73ucp6kiirdc802hwhfgwta",
+        "sha256": "iah1ugzgictde6up2i49octjsorum83hvli29n9wci38qykfpkyaaxrlllnv0l2v",
+        "signature_signer": "compare",
+        "signature_status": "stay",
+        "tid": 17,
+        "timestamp": 1,
+        "timestamp_utc": "2020-02-06 17-14-47+00:00",
+        "true_ppid": 3,
+        "unique_pid": 4,
+        "unique_ppid": 3,
+        "unique_true_ppid": 3,
+        "unknown_properties": "frog",
+        "user_domain": "strong",
+        "user_name": "discover",
+        "user_sid": "possible"
+      },
+      "event": {
+        "action": "open",
+        "category": "deal",
+        "dataset": "right",
+        "kind": "broad",
+        "module": "race",
+        "type": "consider"
+      },
+      "host": {
+        "hostname": "fox",
+        "name": "wealth",
+        "os": {
+          "name": "exact",
+          "platform": "structure",
+          "version": "broad"
+        }
+      },
+      "labels": {
+        "account_id": "99b3e56e-0596-4b02-bbd1-0b581ec983a4",
+        "endpoint_id": "99b3e56e-0596-4b02-bbd1-0b581ec983a4"
+      },
+      "message": "off",
+      "process": {
+        "args": "pipe",
+        "executable": "practice",
+        "hash": {
+          "md5": "tried",
+          "sha1": "drive",
+          "sha256": "exercise"
+        },
+        "name": "lamp",
+        "pid": 4,
+        "ppid": 3,
+        "thread": {
+          "id": 979
+        }
+      },
+      "user": {
+        "group": {
+          "id": "nose",
+          "name": "most"
+        },
+        "id": "stopped",
+        "name": "said"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "mvx_G3AB35DY4seMO0wM",
+    "index": "endpoint-events-1-000001",
+    "source": {
+      "@timestamp": "2020-02-06T17:14:47.925Z",
+      "agent": {
+        "id": "99b3e56e-0596-4b02-bbd1-0b581ec983a4",
+        "type": "endgame",
+        "version": "8.2.8"
+      },
+      "endgame": {
+        "authentication_id": 6484,
+        "command_line": "C:\\Program Files\\Internet Explorer\\wagon.exe",
+        "effective_gid": 53,
+        "effective_group_name": "purple",
+        "effective_uid": 307,
+        "effective_user_name": "experience",
+        "elevated": true,
+        "elevation_type": "duty",
+        "event_message": "team",
+        "event_subtype_full": "still_running",
+        "event_type_full": "process_event",
+        "exit_code_full": 94,
+        "integrity_level": "pool",
+        "md5": "jw55ut2k1mvghl8azepoqilg2tipqcy6",
+        "opcode": 1,
+        "original_file_name": "wagon.exe",
+        "package_name": "band",
+        "parent_process_name": "dig.exe",
+        "parent_process_path": "C:\\Windows\\System32\\dig.exe",
+        "pid": 5,
+        "ppid": 4,
+        "process_name": "wagon.exe",
+        "process_path": "C:\\Program Files\\Internet Explorer\\wagon.exe",
+        "real_gid": 489,
+        "real_group_name": "price",
+        "real_uid": 214,
+        "real_user_name": "push",
+        "serial_event_id": 5,
+        "session_id": 812,
+        "sha1": "39ryv3c67v0cbjm2qwyv9slx2m33u9ay4y5aqx9l",
+        "sha256": "85p5xlrdbsf7t1v31vpzqvakmn5ih9u7xx0cpa9ymvxlf0g14ag0ap4ha2mfmd7j",
+        "signature_signer": "blood",
+        "signature_status": "handle",
+        "tid": 465,
+        "timestamp": 1,
+        "timestamp_utc": "2020-02-06 17-14-47+00:00",
+        "true_ppid": 4,
+        "unique_pid": 5,
+        "unique_ppid": 4,
+        "unique_true_ppid": 4,
+        "unknown_properties": "bag",
+        "user_domain": "shop",
+        "user_name": "hope",
+        "user_sid": "run"
+      },
+      "event": {
+        "action": "night",
+        "category": "porch",
+        "dataset": "calm",
+        "kind": "character",
+        "module": "writer",
+        "type": "load"
+      },
+      "host": {
+        "hostname": "environment",
+        "name": "mainly",
+        "os": {
+          "name": "shelter",
+          "platform": "cage",
+          "version": "motion"
+        }
+      },
+      "labels": {
+        "account_id": "99b3e56e-0596-4b02-bbd1-0b581ec983a4",
+        "endpoint_id": "99b3e56e-0596-4b02-bbd1-0b581ec983a4"
+      },
+      "message": "theory",
+      "process": {
+        "args": "play",
+        "executable": "purpose",
+        "hash": {
+          "md5": "pile",
+          "sha1": "breathe",
+          "sha256": "few"
+        },
+        "name": "speed",
+        "pid": 5,
+        "ppid": 4,
+        "thread": {
+          "id": 967
+        }
+      },
+      "user": {
+        "group": {
+          "id": "if",
+          "name": "bat"
+        },
+        "id": "element",
+        "name": "quick"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "m_x_G3AB35DY4seMO0wM",
+    "index": "endpoint-events-1-000001",
+    "source": {
+      "@timestamp": "2020-02-06T17:14:47.928Z",
+      "agent": {
+        "id": "99b3e56e-0596-4b02-bbd1-0b581ec983a4",
+        "type": "endgame",
+        "version": "4.5.8"
+      },
+      "endgame": {
+        "authentication_id": 3295,
+        "command_line": "C:\\Program Files\\Internet Explorer\\rope.exe",
+        "effective_gid": 79,
+        "effective_group_name": "strong",
+        "effective_uid": 991,
+        "effective_user_name": "metal",
+        "elevated": false,
+        "elevation_type": "week",
+        "event_message": "swung",
+        "event_subtype_full": "fork_event",
+        "event_type_full": "process_event",
+        "exit_code_full": 328,
+        "integrity_level": "caught",
+        "md5": "j13u3wx3uwtapvmj4egum1h6af9m02q2",
+        "opcode": 1,
+        "original_file_name": "rope.exe",
+        "package_name": "college",
+        "parent_process_name": "face.exe",
+        "parent_process_path": "C:\\Windows\\System32\\face.exe",
+        "pid": 6,
+        "ppid": 5,
+        "process_name": "rope.exe",
+        "process_path": "C:\\Program Files\\Internet Explorer\\rope.exe",
+        "real_gid": 370,
+        "real_group_name": "automobile",
+        "real_uid": 594,
+        "real_user_name": "elephant",
+        "serial_event_id": 6,
+        "session_id": 909,
+        "sha1": "c5kig9tp9wo11xe1yk360poizqetjidyzejpshss",
+        "sha256": "cxf19pdfmbr6xwkxihotmeo6jlwf9czstp9bt8ppaywxy9nezwumeeszff82x0nv",
+        "signature_signer": "extra",
+        "signature_status": "police",
+        "tid": 275,
+        "timestamp": 1,
+        "timestamp_utc": "2020-02-06 17-14-47+00:00",
+        "true_ppid": 5,
+        "unique_pid": 6,
+        "unique_ppid": 2,
+        "unique_true_ppid": 5,
+        "unknown_properties": "same",
+        "user_domain": "cold",
+        "user_name": "quite",
+        "user_sid": "giving"
+      },
+      "event": {
+        "action": "entirely",
+        "category": "tide",
+        "dataset": "particularly",
+        "kind": "stand",
+        "module": "bee",
+        "type": "pond"
+      },
+      "host": {
+        "hostname": "love",
+        "name": "variety",
+        "os": {
+          "name": "class",
+          "platform": "open",
+          "version": "design"
+        }
+      },
+      "labels": {
+        "account_id": "99b3e56e-0596-4b02-bbd1-0b581ec983a4",
+        "endpoint_id": "99b3e56e-0596-4b02-bbd1-0b581ec983a4"
+      },
+      "message": "path",
+      "process": {
+        "args": "real",
+        "executable": "prevent",
+        "hash": {
+          "md5": "taken",
+          "sha1": "education",
+          "sha256": "liquid"
+        },
+        "name": "breath",
+        "pid": 6,
+        "ppid": 5,
+        "thread": {
+          "id": 388
+        }
+      },
+      "user": {
+        "group": {
+          "id": "pound",
+          "name": "recent"
+        },
+        "id": "early",
+        "name": "machinery"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "nPx_G3AB35DY4seMO0wN",
+    "index": "endpoint-events-1-000001",
+    "source": {
+      "@timestamp": "2020-02-06T17:14:47.929Z",
+      "agent": {
+        "id": "99b3e56e-0596-4b02-bbd1-0b581ec983a4",
+        "type": "endgame",
+        "version": "8.1.7"
+      },
+      "endgame": {
+        "authentication_id": 4404,
+        "command_line": "C:\\Program Files\\Internet Explorer\\invented.exe",
+        "effective_gid": 581,
+        "effective_group_name": "difficulty",
+        "effective_uid": 35,
+        "effective_user_name": "beside",
+        "elevated": false,
+        "elevation_type": "gun",
+        "event_message": "pink",
+        "event_subtype_full": "session_id_change",
+        "event_type_full": "process_event",
+        "exit_code_full": 116,
+        "integrity_level": "swam",
+        "md5": "yzgzo6a2fzqxvnvgc360cjxlxrf7ahyc",
+        "opcode": 1,
+        "original_file_name": "invented.exe",
+        "package_name": "nose",
+        "parent_process_name": "flies.exe",
+        "parent_process_path": "C:\\Windows\\System32\\flies.exe",
+        "pid": 7,
+        "ppid": 6,
+        "process_name": "invented.exe",
+        "process_path": "C:\\Program Files\\Internet Explorer\\invented.exe",
+        "real_gid": 163,
+        "real_group_name": "plus",
+        "real_uid": 769,
+        "real_user_name": "conversation",
+        "serial_event_id": 7,
+        "session_id": 98,
+        "sha1": "x845i608fumwsh9raz1nj0u3z79fw2k7xzalrcy0",
+        "sha256": "uqedydn3i35xqb8ds91yqne6moptafkl6w2pgf8bzaykatotw4qsjahszvtipwnv",
+        "signature_signer": "sky",
+        "signature_status": "should",
+        "tid": 800,
+        "timestamp": 1,
+        "timestamp_utc": "2020-02-06 17-14-47+00:00",
+        "true_ppid": 6,
+        "unique_pid": 7,
+        "unique_ppid": 6,
+        "unique_true_ppid": 6,
+        "unknown_properties": "alone",
+        "user_domain": "home",
+        "user_name": "helpful",
+        "user_sid": "someone"
+      },
+      "event": {
+        "action": "coal",
+        "category": "generally",
+        "dataset": "planned",
+        "kind": "flies",
+        "module": "name",
+        "type": "near"
+      },
+      "host": {
+        "hostname": "damage",
+        "name": "largest",
+        "os": {
+          "name": "saddle",
+          "platform": "independent",
+          "version": "pass"
+        }
+      },
+      "labels": {
+        "account_id": "99b3e56e-0596-4b02-bbd1-0b581ec983a4",
+        "endpoint_id": "99b3e56e-0596-4b02-bbd1-0b581ec983a4"
+      },
+      "message": "someone",
+      "process": {
+        "args": "common",
+        "executable": "as",
+        "hash": {
+          "md5": "does",
+          "sha1": "manner",
+          "sha256": "series"
+        },
+        "name": "broke",
+        "pid": 7,
+        "ppid": 6,
+        "thread": {
+          "id": 85
+        }
+      },
+      "user": {
+        "group": {
+          "id": "stay",
+          "name": "anything"
+        },
+        "id": "extra",
+        "name": "nervous"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "nfx_G3AB35DY4seMO0wN",
+    "index": "endpoint-events-1-000001",
+    "source": {
+      "@timestamp": "2020-02-06T17:14:47.929Z",
+      "agent": {
+        "id": "99b3e56e-0596-4b02-bbd1-0b581ec983a4",
+        "type": "endgame",
+        "version": "3.8.8"
+      },
+      "endgame": {
+        "authentication_id": 8078,
+        "command_line": "C:\\Program Files\\Internet Explorer\\larger.exe",
+        "effective_gid": 573,
+        "effective_group_name": "typical",
+        "effective_uid": 308,
+        "effective_user_name": "expression",
+        "elevated": true,
+        "elevation_type": "chief",
+        "event_message": "general",
+        "event_subtype_full": "gid_change",
+        "event_type_full": "process_event",
+        "exit_code_full": 447,
+        "integrity_level": "further",
+        "md5": "r1u6og4mduuelivks8qlp5nxsjx0dmim",
+        "opcode": 1,
+        "original_file_name": "larger.exe",
+        "package_name": "author",
+        "parent_process_name": "halfway.exe",
+        "parent_process_path": "C:\\Windows\\System32\\halfway.exe",
+        "pid": 8,
+        "ppid": 7,
+        "process_name": "larger.exe",
+        "process_path": "C:\\Program Files\\Internet Explorer\\larger.exe",
+        "real_gid": 246,
+        "real_group_name": "coming",
+        "real_uid": 156,
+        "real_user_name": "music",
+        "serial_event_id": 8,
+        "session_id": 264,
+        "sha1": "yjxy7fg5qohr7ajxttjxtnu9vifwcaoy0pe0cq6b",
+        "sha256": "894o273i414l6umbc6tciisk6jcbtr6xeks0h5yhjieiirnahn6dqjes86psdtu1",
+        "signature_signer": "percent",
+        "signature_status": "vegetable",
+        "tid": 422,
+        "timestamp": 1,
+        "timestamp_utc": "2020-02-06 17-14-47+00:00",
+        "true_ppid": 7,
+        "unique_pid": 8,
+        "unique_ppid": 7,
+        "unique_true_ppid": 7,
+        "unknown_properties": "write",
+        "user_domain": "country",
+        "user_name": "be",
+        "user_sid": "happen"
+      },
+      "event": {
+        "action": "swept",
+        "category": "belt",
+        "dataset": "weather",
+        "kind": "wave",
+        "module": "process",
+        "type": "instead"
+      },
+      "host": {
+        "hostname": "down",
+        "name": "actual",
+        "os": {
+          "name": "lady",
+          "platform": "buy",
+          "version": "off"
+        }
+      },
+      "labels": {
+        "account_id": "99b3e56e-0596-4b02-bbd1-0b581ec983a4",
+        "endpoint_id": "99b3e56e-0596-4b02-bbd1-0b581ec983a4"
+      },
+      "message": "thought",
+      "process": {
+        "args": "however",
+        "executable": "hope",
+        "hash": {
+          "md5": "number",
+          "sha1": "dangerous",
+          "sha256": "highway"
+        },
+        "name": "location",
+        "pid": 8,
+        "ppid": 7,
+        "thread": {
+          "id": 308
+        }
+      },
+      "user": {
+        "group": {
+          "id": "closely",
+          "name": "main"
+        },
+        "id": "pick",
+        "name": "negative"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "nvx_G3AB35DY4seMO0wN",
+    "index": "endpoint-events-1-000001",
+    "source": {
+      "@timestamp": "2020-02-06T17:14:47.930Z",
+      "agent": {
+        "id": "99b3e56e-0596-4b02-bbd1-0b581ec983a4",
+        "type": "endgame",
+        "version": "6.6.1"
+      },
+      "endgame": {
+        "authentication_id": 9349,
+        "command_line": "C:\\Program Files\\Internet Explorer\\tie.exe",
+        "effective_gid": 172,
+        "effective_group_name": "take",
+        "effective_uid": 408,
+        "effective_user_name": "easily",
+        "elevated": true,
+        "elevation_type": "current",
+        "event_message": "actually",
+        "event_subtype_full": "exec_event",
+        "event_type_full": "process_event",
+        "exit_code_full": 68,
+        "integrity_level": "current",
+        "md5": "f9x6ogbd6s8gwz9tx4qzw1v2fcbzzlgf",
+        "opcode": 1,
+        "original_file_name": "tie.exe",
+        "package_name": "wore",
+        "parent_process_name": "giant.exe",
+        "parent_process_path": "C:\\Windows\\System32\\giant.exe",
+        "pid": 9,
+        "ppid": 8,
+        "process_name": "tie.exe",
+        "process_path": "C:\\Program Files\\Internet Explorer\\tie.exe",
+        "real_gid": 493,
+        "real_group_name": "history",
+        "real_uid": 535,
+        "real_user_name": "book",
+        "serial_event_id": 9,
+        "session_id": 398,
+        "sha1": "l32mj1ick1jz50b8hhvdm6bmvrk4c79olvztyk0k",
+        "sha256": "2fp82zm209hh5fs4bvmmx4mvtcbrzzea3gtmyx1za2hxfb6q4a6sdveah3ze8jjz",
+        "signature_signer": "enemy",
+        "signature_status": "swing",
+        "tid": 526,
+        "timestamp": 1,
+        "timestamp_utc": "2020-02-06 17-14-47+00:00",
+        "true_ppid": 8,
+        "unique_pid": 9,
+        "unique_ppid": 7,
+        "unique_true_ppid": 8,
+        "unknown_properties": "fear",
+        "user_domain": "those",
+        "user_name": "poet",
+        "user_sid": "bone"
+      },
+      "event": {
+        "action": "bare",
+        "category": "nearby",
+        "dataset": "early",
+        "kind": "proud",
+        "module": "college",
+        "type": "hat"
+      },
+      "host": {
+        "hostname": "quiet",
+        "name": "shinning",
+        "os": {
+          "name": "settlers",
+          "platform": "worried",
+          "version": "bone"
+        }
+      },
+      "labels": {
+        "account_id": "99b3e56e-0596-4b02-bbd1-0b581ec983a4",
+        "endpoint_id": "99b3e56e-0596-4b02-bbd1-0b581ec983a4"
+      },
+      "message": "unknown",
+      "process": {
+        "args": "trap",
+        "executable": "sharp",
+        "hash": {
+          "md5": "boy",
+          "sha1": "depend",
+          "sha256": "fat"
+        },
+        "name": "ahead",
+        "pid": 9,
+        "ppid": 8,
+        "thread": {
+          "id": 681
+        }
+      },
+      "user": {
+        "group": {
+          "id": "pair",
+          "name": "with"
+        },
+        "id": "pupil",
+        "name": "higher"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "n_x_G3AB35DY4seMO0wN",
+    "index": "endpoint-events-1-000001",
+    "source": {
+      "@timestamp": "2020-02-06T17:14:47.931Z",
+      "agent": {
+        "id": "99b3e56e-0596-4b02-bbd1-0b581ec983a4",
+        "type": "endgame",
+        "version": "6.2.4"
+      },
+      "endgame": {
+        "authentication_id": 3669,
+        "command_line": "C:\\Program Files\\Internet Explorer\\equipment.exe",
+        "effective_gid": 881,
+        "effective_group_name": "combine",
+        "effective_uid": 465,
+        "effective_user_name": "usual",
+        "elevated": true,
+        "elevation_type": "major",
+        "event_message": "positive",
+        "event_type_full": "process_event",
+        "exit_code_full": 338,
+        "integrity_level": "among",
+        "md5": "guo85iwrw40zdzfqo4wm34jwtonp6o6e",
+        "opcode": 1,
+        "original_file_name": "equipment.exe",
+        "package_name": "perfect",
+        "parent_process_name": "wave.exe",
+        "parent_process_path": "C:\\Windows\\System32\\wave.exe",
+        "pid": 10,
+        "ppid": 9,
+        "process_name": "equipment.exe",
+        "process_path": "C:\\Program Files\\Internet Explorer\\equipment.exe",
+        "real_gid": 337,
+        "real_group_name": "difference",
+        "real_uid": 58,
+        "real_user_name": "lion",
+        "serial_event_id": 10,
+        "session_id": 179,
+        "sha1": "0hd3rd1xmz013uf51zwre38zqvvsnwy3z3e429ta",
+        "sha256": "hjtlnjqv5hqnejy8tmooo0forpz2dn2mb8jwjr0mmlm24r2o5tecvq8efhsdh1p5",
+        "signature_signer": "particularly",
+        "signature_status": "hot",
+        "tid": 423,
+        "timestamp": 1,
+        "timestamp_utc": "2020-02-06 17-14-47+00:00",
+        "true_ppid": 9,
+        "unique_pid": 10,
+        "unique_ppid": 6,
+        "unique_true_ppid": 9,
+        "unknown_properties": "continent",
+        "user_domain": "deer",
+        "user_name": "slope",
+        "user_sid": "hang"
+      },
+      "event": {
+        "action": "period",
+        "category": "judge",
+        "dataset": "layers",
+        "kind": "border",
+        "module": "graph",
+        "type": "cake"
+      },
+      "host": {
+        "hostname": "hurt",
+        "name": "weather",
+        "os": {
+          "name": "month",
+          "platform": "outer",
+          "version": "anyone"
+        }
+      },
+      "labels": {
+        "account_id": "99b3e56e-0596-4b02-bbd1-0b581ec983a4",
+        "endpoint_id": "99b3e56e-0596-4b02-bbd1-0b581ec983a4"
+      },
+      "message": "where",
+      "process": {
+        "args": "blew",
+        "executable": "shallow",
+        "hash": {
+          "md5": "two",
+          "sha1": "visit",
+          "sha256": "mind"
+        },
+        "name": "lot",
+        "pid": 10,
+        "ppid": 9,
+        "thread": {
+          "id": 564
+        }
+      },
+      "user": {
+        "group": {
+          "id": "mental",
+          "name": "aside"
+        },
+        "id": "parent",
+        "name": "stand"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "oPx_G3AB35DY4seMO0wN",
+    "index": "endpoint-events-1-000001",
+    "source": {
+      "@timestamp": "2020-02-06T17:14:47.932Z",
+      "agent": {
+        "id": "99b3e56e-0596-4b02-bbd1-0b581ec983a4",
+        "type": "endgame",
+        "version": "2.3.5"
+      },
+      "endgame": {
+        "authentication_id": 9292,
+        "command_line": "C:\\Program Files\\Internet Explorer\\progress.exe",
+        "effective_gid": 343,
+        "effective_group_name": "cave",
+        "effective_uid": 888,
+        "effective_user_name": "find",
+        "elevated": true,
+        "elevation_type": "mark",
+        "event_message": "remove",
+        "event_subtype_full": "gid_change",
+        "event_type_full": "process_event",
+        "exit_code_full": 418,
+        "integrity_level": "engine",
+        "md5": "6vicissbqdd8u416vtuogs2cunqi0id1",
+        "opcode": 1,
+        "original_file_name": "progress.exe",
+        "package_name": "factory",
+        "parent_process_name": "main.exe",
+        "parent_process_path": "C:\\Windows\\System32\\main.exe",
+        "pid": 11,
+        "ppid": 10,
+        "process_name": "progress.exe",
+        "process_path": "C:\\Program Files\\Internet Explorer\\progress.exe",
+        "real_gid": 770,
+        "real_group_name": "meat",
+        "real_uid": 795,
+        "real_user_name": "remain",
+        "serial_event_id": 11,
+        "session_id": 578,
+        "sha1": "8viainc5vutzs8noczjn2037yt690i941ohu5bi9",
+        "sha256": "558lyngkyq4qva1sciau5a5jkzg2cdzsr4xmqzfd0hxsd1m7bpm16967m784r1ux",
+        "signature_signer": "arrangement",
+        "signature_status": "stiff",
+        "tid": 467,
+        "timestamp": 1,
+        "timestamp_utc": "2020-02-06 17-14-47+00:00",
+        "true_ppid": 10,
+        "unique_pid": 11,
+        "unique_ppid": 10,
+        "unique_true_ppid": 10,
+        "unknown_properties": "refer",
+        "user_domain": "reason",
+        "user_name": "balance",
+        "user_sid": "please"
+      },
+      "event": {
+        "action": "group",
+        "category": "powder",
+        "dataset": "understanding",
+        "kind": "biggest",
+        "module": "twenty",
+        "type": "gone"
+      },
+      "host": {
+        "hostname": "living",
+        "name": "dark",
+        "os": {
+          "name": "put",
+          "platform": "design",
+          "version": "route"
+        }
+      },
+      "labels": {
+        "account_id": "99b3e56e-0596-4b02-bbd1-0b581ec983a4",
+        "endpoint_id": "99b3e56e-0596-4b02-bbd1-0b581ec983a4"
+      },
+      "message": "himself",
+      "process": {
+        "args": "due",
+        "executable": "thousand",
+        "hash": {
+          "md5": "gray",
+          "sha1": "done",
+          "sha256": "additional"
+        },
+        "name": "flag",
+        "pid": 11,
+        "ppid": 10,
+        "thread": {
+          "id": 17
+        }
+      },
+      "user": {
+        "group": {
+          "id": "shout",
+          "name": "burst"
+        },
+        "id": "dress",
+        "name": "me"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "ofx_G3AB35DY4seMO0wN",
+    "index": "endpoint-events-1-000001",
+    "source": {
+      "@timestamp": "2020-02-06T17:14:47.932Z",
+      "agent": {
+        "id": "99b3e56e-0596-4b02-bbd1-0b581ec983a4",
+        "type": "endgame",
+        "version": "5.5.5"
+      },
+      "endgame": {
+        "authentication_id": 9183,
+        "command_line": "C:\\Program Files\\Internet Explorer\\bone.exe",
+        "effective_gid": 529,
+        "effective_group_name": "building",
+        "effective_uid": 693,
+        "effective_user_name": "view",
+        "elevated": true,
+        "elevation_type": "few",
+        "event_message": "visitor",
+        "event_subtype_full": "creation_event",
+        "event_type_full": "process_event",
+        "exit_code_full": 598,
+        "integrity_level": "cast",
+        "md5": "97ukeupnvb5b5egrwm4kwwzr2qzzpuae",
+        "opcode": 1,
+        "original_file_name": "bone.exe",
+        "package_name": "hidden",
+        "parent_process_name": "card.exe",
+        "parent_process_path": "C:\\Windows\\System32\\card.exe",
+        "pid": 12,
+        "ppid": 11,
+        "process_name": "bone.exe",
+        "process_path": "C:\\Program Files\\Internet Explorer\\bone.exe",
+        "real_gid": 33,
+        "real_group_name": "met",
+        "real_uid": 474,
+        "real_user_name": "grain",
+        "serial_event_id": 12,
+        "session_id": 187,
+        "sha1": "laiddg01b8j6x4x935yrvofuxxmm8qk8o1l5j7uc",
+        "sha256": "pp2se1ox943nb7884li2a19xkqp9zt4w34f9leqserqma6wyfo7udnv3dru48avj",
+        "signature_signer": "conversation",
+        "signature_status": "problem",
+        "tid": 914,
+        "timestamp": 1,
+        "timestamp_utc": "2020-02-06 17-14-47+00:00",
+        "true_ppid": 11,
+        "unique_pid": 12,
+        "unique_ppid": 6,
+        "unique_true_ppid": 11,
+        "unknown_properties": "traffic",
+        "user_domain": "ring",
+        "user_name": "region",
+        "user_sid": "south"
+      },
+      "event": {
+        "action": "needed",
+        "category": "swam",
+        "dataset": "test",
+        "kind": "review",
+        "module": "or",
+        "type": "balloon"
+      },
+      "host": {
+        "hostname": "trail",
+        "name": "memory",
+        "os": {
+          "name": "underline",
+          "platform": "mistake",
+          "version": "brain"
+        }
+      },
+      "labels": {
+        "account_id": "99b3e56e-0596-4b02-bbd1-0b581ec983a4",
+        "endpoint_id": "99b3e56e-0596-4b02-bbd1-0b581ec983a4"
+      },
+      "message": "crowd",
+      "process": {
+        "args": "plain",
+        "executable": "area",
+        "hash": {
+          "md5": "hunter",
+          "sha1": "natural",
+          "sha256": "excellent"
+        },
+        "name": "brick",
+        "pid": 12,
+        "ppid": 11,
+        "thread": {
+          "id": 119
+        }
+      },
+      "user": {
+        "group": {
+          "id": "tone",
+          "name": "across"
+        },
+        "id": "girl",
+        "name": "traffic"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "ovx_G3AB35DY4seMO0wN",
+    "index": "endpoint-events-1-000001",
+    "source": {
+      "@timestamp": "2020-02-06T17:14:47.933Z",
+      "agent": {
+        "id": "99b3e56e-0596-4b02-bbd1-0b581ec983a4",
+        "type": "endgame",
+        "version": "5.3.1"
+      },
+      "endgame": {
+        "authentication_id": 2920,
+        "command_line": "C:\\Program Files\\Internet Explorer\\or.exe",
+        "effective_gid": 968,
+        "effective_group_name": "tomorrow",
+        "effective_uid": 82,
+        "effective_user_name": "impossible",
+        "elevated": true,
+        "elevation_type": "become",
+        "event_message": "pet",
+        "event_subtype_full": "session_id_change",
+        "event_type_full": "process_event",
+        "exit_code_full": 579,
+        "integrity_level": "slight",
+        "md5": "lfk4nbii8po3n2tzfl3uh6orgffxs618",
+        "opcode": 1,
+        "original_file_name": "or.exe",
+        "package_name": "corn",
+        "parent_process_name": "tax.exe",
+        "parent_process_path": "C:\\Windows\\System32\\tax.exe",
+        "pid": 13,
+        "ppid": 12,
+        "process_name": "or.exe",
+        "process_path": "C:\\Program Files\\Internet Explorer\\or.exe",
+        "real_gid": 980,
+        "real_group_name": "beneath",
+        "real_uid": 598,
+        "real_user_name": "pony",
+        "serial_event_id": 13,
+        "session_id": 539,
+        "sha1": "uchjqvxms7zivgtoxcq8at43h8jh2jppm5fvcv6s",
+        "sha256": "73i10yhrsf4kauwcc0emme31t21k3iuq0w3zs4nt2rjlcxnwbes98l06dljvas3z",
+        "signature_signer": "pink",
+        "signature_status": "recall",
+        "tid": 890,
+        "timestamp": 1,
+        "timestamp_utc": "2020-02-06 17-14-47+00:00",
+        "true_ppid": 12,
+        "unique_pid": 13,
+        "unique_ppid": 12,
+        "unique_true_ppid": 12,
+        "unknown_properties": "stairs",
+        "user_domain": "plain",
+        "user_name": "loose",
+        "user_sid": "term"
+      },
+      "event": {
+        "action": "business",
+        "category": "anyone",
+        "dataset": "tone",
+        "kind": "become",
+        "module": "fight",
+        "type": "century"
+      },
+      "host": {
+        "hostname": "wife",
+        "name": "organization",
+        "os": {
+          "name": "gently",
+          "platform": "student",
+          "version": "whose"
+        }
+      },
+      "labels": {
+        "account_id": "99b3e56e-0596-4b02-bbd1-0b581ec983a4",
+        "endpoint_id": "99b3e56e-0596-4b02-bbd1-0b581ec983a4"
+      },
+      "message": "parallel",
+      "process": {
+        "args": "lady",
+        "executable": "truck",
+        "hash": {
+          "md5": "noun",
+          "sha1": "kept",
+          "sha256": "guard"
+        },
+        "name": "range",
+        "pid": 13,
+        "ppid": 12,
+        "thread": {
+          "id": 268
+        }
+      },
+      "user": {
+        "group": {
+          "id": "catch",
+          "name": "thee"
+        },
+        "id": "product",
+        "name": "day"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "o_x_G3AB35DY4seMO0wN",
+    "index": "endpoint-events-1-000001",
+    "source": {
+      "@timestamp": "2020-02-06T17:14:47.934Z",
+      "agent": {
+        "id": "99b3e56e-0596-4b02-bbd1-0b581ec983a4",
+        "type": "endgame",
+        "version": "4.2.2"
+      },
+      "endgame": {
+        "authentication_id": 4043,
+        "command_line": "C:\\Program Files\\Internet Explorer\\goose.exe",
+        "effective_gid": 321,
+        "effective_group_name": "long",
+        "effective_uid": 398,
+        "effective_user_name": "industrial",
+        "elevated": false,
+        "elevation_type": "activity",
+        "event_message": "chest",
+        "event_subtype_full": "session_id_change",
+        "event_type_full": "process_event",
+        "exit_code_full": 856,
+        "integrity_level": "disappear",
+        "md5": "h2wx26wc3y9s5ndnyivx4h833yisaj9y",
+        "opcode": 1,
+        "original_file_name": "goose.exe",
+        "package_name": "cent",
+        "parent_process_name": "war.exe",
+        "parent_process_path": "C:\\Windows\\System32\\war.exe",
+        "pid": 14,
+        "ppid": 13,
+        "process_name": "goose.exe",
+        "process_path": "C:\\Program Files\\Internet Explorer\\goose.exe",
+        "real_gid": 359,
+        "real_group_name": "no",
+        "real_uid": 771,
+        "real_user_name": "factor",
+        "serial_event_id": 14,
+        "session_id": 471,
+        "sha1": "xfox5mzgwdn42rzqegb2u091dirljcvnwkbby2ij",
+        "sha256": "ht00r58vozwne0tthodfp64p9d44krpdu2lqymztqrwws8x079h8mkmh9qvvj51z",
+        "signature_signer": "bring",
+        "signature_status": "effect",
+        "tid": 189,
+        "timestamp": 1,
+        "timestamp_utc": "2020-02-06 17-14-47+00:00",
+        "true_ppid": 13,
+        "unique_pid": 14,
+        "unique_ppid": 12,
+        "unique_true_ppid": 13,
+        "unknown_properties": "nobody",
+        "user_domain": "stage",
+        "user_name": "lady",
+        "user_sid": "clock"
+      },
+      "event": {
+        "action": "whatever",
+        "category": "tea",
+        "dataset": "giant",
+        "kind": "oxygen",
+        "module": "element",
+        "type": "organized"
+      },
+      "host": {
+        "hostname": "slept",
+        "name": "terrible",
+        "os": {
+          "name": "able",
+          "platform": "wild",
+          "version": "laid"
+        }
+      },
+      "labels": {
+        "account_id": "99b3e56e-0596-4b02-bbd1-0b581ec983a4",
+        "endpoint_id": "99b3e56e-0596-4b02-bbd1-0b581ec983a4"
+      },
+      "message": "daughter",
+      "process": {
+        "args": "copy",
+        "executable": "special",
+        "hash": {
+          "md5": "fifty",
+          "sha1": "police",
+          "sha256": "applied"
+        },
+        "name": "leave",
+        "pid": 14,
+        "ppid": 13,
+        "thread": {
+          "id": 336
+        }
+      },
+      "user": {
+        "group": {
+          "id": "burst",
+          "name": "image"
+        },
+        "id": "power",
+        "name": "fix"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "pPx_G3AB35DY4seMO0wN",
+    "index": "endpoint-events-1-000001",
+    "source": {
+      "@timestamp": "2020-02-06T17:14:47.935Z",
+      "agent": {
+        "id": "99b3e56e-0596-4b02-bbd1-0b581ec983a4",
+        "type": "endgame",
+        "version": "8.3.5"
+      },
+      "endgame": {
+        "authentication_id": 283,
+        "command_line": "C:\\Program Files\\Internet Explorer\\put.exe",
+        "effective_gid": 298,
+        "effective_group_name": "constantly",
+        "effective_uid": 729,
+        "effective_user_name": "direct",
+        "elevated": false,
+        "elevation_type": "bite",
+        "event_message": "fully",
+        "event_subtype_full": "fork_event",
+        "event_type_full": "process_event",
+        "exit_code_full": 511,
+        "integrity_level": "which",
+        "md5": "xr33hr8sakjmw41ftg8regln7wsuntqb",
+        "opcode": 1,
+        "original_file_name": "put.exe",
+        "package_name": "can",
+        "parent_process_name": "cap.exe",
+        "parent_process_path": "C:\\Windows\\System32\\cap.exe",
+        "pid": 15,
+        "ppid": 14,
+        "process_name": "put.exe",
+        "process_path": "C:\\Program Files\\Internet Explorer\\put.exe",
+        "real_gid": 440,
+        "real_group_name": "trick",
+        "real_uid": 785,
+        "real_user_name": "property",
+        "serial_event_id": 15,
+        "session_id": 939,
+        "sha1": "8zqsol2kwfxspmpyaurho8xsh6jcfk6apgep8i3t",
+        "sha256": "8ii6q293t7a9dpaqesoris2oq2yls0pdn0cuti2n1vxoam1qu6tk7v9ylb9qhtoj",
+        "signature_signer": "thirty",
+        "signature_status": "influence",
+        "tid": 687,
+        "timestamp": 1,
+        "timestamp_utc": "2020-02-06 17-14-47+00:00",
+        "true_ppid": 14,
+        "unique_pid": 15,
+        "unique_ppid": 1,
+        "unique_true_ppid": 14,
+        "unknown_properties": "pie",
+        "user_domain": "rhythm",
+        "user_name": "joy",
+        "user_sid": "ready"
+      },
+      "event": {
+        "action": "summer",
+        "category": "flow",
+        "dataset": "account",
+        "kind": "stems",
+        "module": "social",
+        "type": "spring"
+      },
+      "host": {
+        "hostname": "clay",
+        "name": "climate",
+        "os": {
+          "name": "steam",
+          "platform": "view",
+          "version": "master"
+        }
+      },
+      "labels": {
+        "account_id": "99b3e56e-0596-4b02-bbd1-0b581ec983a4",
+        "endpoint_id": "99b3e56e-0596-4b02-bbd1-0b581ec983a4"
+      },
+      "message": "handsome",
+      "process": {
+        "args": "unit",
+        "executable": "numeral",
+        "hash": {
+          "md5": "breathing",
+          "sha1": "was",
+          "sha256": "extra"
+        },
+        "name": "service",
+        "pid": 15,
+        "ppid": 14,
+        "thread": {
+          "id": 893
+        }
+      },
+      "user": {
+        "group": {
+          "id": "impossible",
+          "name": "satellites"
+        },
+        "id": "river",
+        "name": "busy"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "pfx_G3AB35DY4seMO0wN",
+    "index": "endpoint-events-1-000001",
+    "source": {
+      "@timestamp": "2020-02-06T17:14:47.936Z",
+      "agent": {
+        "id": "99b3e56e-0596-4b02-bbd1-0b581ec983a4",
+        "type": "endgame",
+        "version": "3.7.1"
+      },
+      "endgame": {
+        "authentication_id": 1491,
+        "command_line": "C:\\Program Files\\Internet Explorer\\find.exe",
+        "effective_gid": 489,
+        "effective_group_name": "three",
+        "effective_uid": 206,
+        "effective_user_name": "desert",
+        "elevated": false,
+        "elevation_type": "some",
+        "event_message": "cutting",
+        "event_subtype_full": "fork_event",
+        "event_type_full": "process_event",
+        "exit_code_full": 936,
+        "integrity_level": "rice",
+        "md5": "tsw85wxlqg0xz010uc8e892q95nbthmq",
+        "opcode": 1,
+        "original_file_name": "find.exe",
+        "package_name": "previous",
+        "parent_process_name": "eleven.exe",
+        "parent_process_path": "C:\\Windows\\System32\\eleven.exe",
+        "pid": 16,
+        "ppid": 15,
+        "process_name": "find.exe",
+        "process_path": "C:\\Program Files\\Internet Explorer\\find.exe",
+        "real_gid": 129,
+        "real_group_name": "gas",
+        "real_uid": 139,
+        "real_user_name": "time",
+        "serial_event_id": 16,
+        "session_id": 783,
+        "sha1": "eilila07xxtolsqdwt88yxu1ahgw73i1s61nfk0a",
+        "sha256": "y5tmrtabg0gvuvp3o3udn98795yx00kguymws177u0p2h1wtiqynm9552zy35m8f",
+        "signature_signer": "seed",
+        "signature_status": "bound",
+        "tid": 193,
+        "timestamp": 1,
+        "timestamp_utc": "2020-02-06 17-14-47+00:00",
+        "true_ppid": 15,
+        "unique_pid": 16,
+        "unique_ppid": 15,
+        "unique_true_ppid": 15,
+        "unknown_properties": "decide",
+        "user_domain": "happy",
+        "user_name": "equally",
+        "user_sid": "horse"
+      },
+      "event": {
+        "action": "swing",
+        "category": "fresh",
+        "dataset": "shinning",
+        "kind": "twelve",
+        "module": "appropriate",
+        "type": "oxygen"
+      },
+      "host": {
+        "hostname": "sunlight",
+        "name": "term",
+        "os": {
+          "name": "establish",
+          "platform": "oxygen",
+          "version": "sometime"
+        }
+      },
+      "labels": {
+        "account_id": "99b3e56e-0596-4b02-bbd1-0b581ec983a4",
+        "endpoint_id": "99b3e56e-0596-4b02-bbd1-0b581ec983a4"
+      },
+      "message": "sure",
+      "process": {
+        "args": "judge",
+        "executable": "deep",
+        "hash": {
+          "md5": "science",
+          "sha1": "yesterday",
+          "sha256": "open"
+        },
+        "name": "fear",
+        "pid": 16,
+        "ppid": 15,
+        "thread": {
+          "id": 464
+        }
+      },
+      "user": {
+        "group": {
+          "id": "sound",
+          "name": "sugar"
+        },
+        "id": "stove",
+        "name": "yet"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "pvx_G3AB35DY4seMO0wN",
+    "index": "endpoint-events-1-000001",
+    "source": {
+      "@timestamp": "2020-02-06T17:14:47.936Z",
+      "agent": {
+        "id": "99b3e56e-0596-4b02-bbd1-0b581ec983a4",
+        "type": "endgame",
+        "version": "5.6.5"
+      },
+      "endgame": {
+        "authentication_id": 3661,
+        "command_line": "C:\\Program Files\\Internet Explorer\\pupil.exe",
+        "effective_gid": 793,
+        "effective_group_name": "happen",
+        "effective_uid": 694,
+        "effective_user_name": "these",
+        "elevated": false,
+        "elevation_type": "teach",
+        "event_message": "ride",
+        "event_subtype_full": "termination_event",
+        "event_type_full": "process_event",
+        "exit_code": 2,
+        "exit_code_full": 837,
+        "integrity_level": "cup",
+        "md5": "4juaxgfed8u64kjh7slzk86yg2usur5s",
+        "opcode": 1,
+        "original_file_name": "pupil.exe",
+        "package_name": "review",
+        "parent_process_name": "officer.exe",
+        "parent_process_path": "C:\\Windows\\System32\\officer.exe",
+        "pid": 17,
+        "ppid": 16,
+        "process_name": "pupil.exe",
+        "process_path": "C:\\Program Files\\Internet Explorer\\pupil.exe",
+        "real_gid": 795,
+        "real_group_name": "whispered",
+        "real_uid": 260,
+        "real_user_name": "separate",
+        "serial_event_id": 17,
+        "session_id": 253,
+        "sha1": "xom8a2rweb1p6lp96hhahl1vrbt3ivduih6zbjem",
+        "sha256": "nldfny17l11hdb63gjxuhav8hbgx0y0cx3whbii1e4wyg2mfuyf9u4n4p8tqlrra",
+        "signature_signer": "gasoline",
+        "signature_status": "worried",
+        "tid": 794,
+        "timestamp": 1,
+        "timestamp_utc": "2020-02-06 17-14-47+00:00",
+        "true_ppid": 16,
+        "unique_pid": 17,
+        "unique_ppid": 16,
+        "unique_true_ppid": 16,
+        "unknown_properties": "sky",
+        "user_domain": "grandfather",
+        "user_name": "pleasant",
+        "user_sid": "establish"
+      },
+      "event": {
+        "action": "sugar",
+        "category": "expression",
+        "dataset": "nails",
+        "kind": "give",
+        "module": "moment",
+        "type": "information"
+      },
+      "host": {
+        "hostname": "bean",
+        "name": "generally",
+        "os": {
+          "name": "soon",
+          "platform": "ate",
+          "version": "church"
+        }
+      },
+      "labels": {
+        "account_id": "99b3e56e-0596-4b02-bbd1-0b581ec983a4",
+        "endpoint_id": "99b3e56e-0596-4b02-bbd1-0b581ec983a4"
+      },
+      "message": "conversation",
+      "process": {
+        "args": "ice",
+        "executable": "later",
+        "hash": {
+          "md5": "straight",
+          "sha1": "oldest",
+          "sha256": "today"
+        },
+        "name": "fur",
+        "pid": 17,
+        "ppid": 16,
+        "thread": {
+          "id": 654
+        }
+      },
+      "user": {
+        "group": {
+          "id": "tropical",
+          "name": "weak"
+        },
+        "id": "to",
+        "name": "have"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "p_x_G3AB35DY4seMO0wN",
+    "index": "endpoint-events-1-000001",
+    "source": {
+      "@timestamp": "2020-02-06T17:14:47.937Z",
+      "agent": {
+        "id": "99b3e56e-0596-4b02-bbd1-0b581ec983a4",
+        "type": "endgame",
+        "version": "5.9.4"
+      },
+      "endgame": {
+        "authentication_id": 3871,
+        "command_line": "C:\\Program Files\\Internet Explorer\\water.exe",
+        "effective_gid": 730,
+        "effective_group_name": "art",
+        "effective_uid": 51,
+        "effective_user_name": "locate",
+        "elevated": true,
+        "elevation_type": "upward",
+        "event_message": "trap",
+        "event_subtype_full": "uid_change",
+        "event_type_full": "process_event",
+        "exit_code_full": 389,
+        "integrity_level": "shells",
+        "md5": "z9w9hdouhm54sgb5zqtloiz4aazttaww",
+        "opcode": 1,
+        "original_file_name": "water.exe",
+        "package_name": "drive",
+        "parent_process_name": "therefore.exe",
+        "parent_process_path": "C:\\Windows\\System32\\therefore.exe",
+        "pid": 18,
+        "ppid": 17,
+        "process_name": "water.exe",
+        "process_path": "C:\\Program Files\\Internet Explorer\\water.exe",
+        "real_gid": 200,
+        "real_group_name": "period",
+        "real_uid": 174,
+        "real_user_name": "establish",
+        "serial_event_id": 18,
+        "session_id": 704,
+        "sha1": "sxqdrplgn6v2z5pmt2tjmore6hrvbm1569tzans7",
+        "sha256": "bwwtwz973cr7u47y3w3xvngqng9ly9dqd9zi0bv7ts5hp62jsgf4ch8ryeawq3dm",
+        "signature_signer": "map",
+        "signature_status": "conversation",
+        "tid": 486,
+        "timestamp": 1,
+        "timestamp_utc": "2020-02-06 17-14-47+00:00",
+        "true_ppid": 17,
+        "unique_pid": 18,
+        "unique_ppid": 17,
+        "unique_true_ppid": 17,
+        "unknown_properties": "means",
+        "user_domain": "rest",
+        "user_name": "instrument",
+        "user_sid": "driven"
+      },
+      "event": {
+        "action": "half",
+        "category": "serious",
+        "dataset": "turn",
+        "kind": "rather",
+        "module": "opinion",
+        "type": "sentence"
+      },
+      "host": {
+        "hostname": "stiff",
+        "name": "shall",
+        "os": {
+          "name": "gulf",
+          "platform": "green",
+          "version": "classroom"
+        }
+      },
+      "labels": {
+        "account_id": "99b3e56e-0596-4b02-bbd1-0b581ec983a4",
+        "endpoint_id": "99b3e56e-0596-4b02-bbd1-0b581ec983a4"
+      },
+      "message": "rabbit",
+      "process": {
+        "args": "peace",
+        "executable": "spend",
+        "hash": {
+          "md5": "sea",
+          "sha1": "bill",
+          "sha256": "section"
+        },
+        "name": "tiny",
+        "pid": 18,
+        "ppid": 17,
+        "thread": {
+          "id": 942
+        }
+      },
+      "user": {
+        "group": {
+          "id": "planet",
+          "name": "start"
+        },
+        "id": "correctly",
+        "name": "cat"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "qPx_G3AB35DY4seMO0wN",
+    "index": "endpoint-events-1-000001",
+    "source": {
+      "@timestamp": "2020-02-06T17:14:47.938Z",
+      "agent": {
+        "id": "99b3e56e-0596-4b02-bbd1-0b581ec983a4",
+        "type": "endgame",
+        "version": "6.7.3"
+      },
+      "endgame": {
+        "authentication_id": 8311,
+        "command_line": "C:\\Program Files\\Internet Explorer\\younger.exe",
+        "effective_gid": 400,
+        "effective_group_name": "policeman",
+        "effective_uid": 209,
+        "effective_user_name": "silver",
+        "elevated": true,
+        "elevation_type": "pain",
+        "event_message": "cowboy",
+        "event_subtype_full": "creation_event",
+        "event_type_full": "process_event",
+        "exit_code_full": 142,
+        "integrity_level": "unhappy",
+        "md5": "586zjdci5jcvfddvfe1xdoi3am2buq1u",
+        "opcode": 1,
+        "original_file_name": "younger.exe",
+        "package_name": "hunt",
+        "parent_process_name": "for.exe",
+        "parent_process_path": "C:\\Windows\\System32\\for.exe",
+        "pid": 19,
+        "ppid": 18,
+        "process_name": "younger.exe",
+        "process_path": "C:\\Program Files\\Internet Explorer\\younger.exe",
+        "real_gid": 208,
+        "real_group_name": "instrument",
+        "real_uid": 204,
+        "real_user_name": "anyone",
+        "serial_event_id": 19,
+        "session_id": 955,
+        "sha1": "iz4r2xddefdam7bb43m0jz460n6rkjdmze8xhmj7",
+        "sha256": "1bky078xy2t6vgnfc26zt2c3txc1rrw5bx3bhmklj0sn3tya0v07s1mo02dlwoic",
+        "signature_signer": "greatly",
+        "signature_status": "ability",
+        "tid": 733,
+        "timestamp": 1,
+        "timestamp_utc": "2020-02-06 17-14-47+00:00",
+        "true_ppid": 18,
+        "unique_pid": 19,
+        "unique_ppid": 17,
+        "unique_true_ppid": 18,
+        "unknown_properties": "alive",
+        "user_domain": "magic",
+        "user_name": "development",
+        "user_sid": "scale"
+      },
+      "event": {
+        "action": "evening",
+        "category": "courage",
+        "dataset": "steady",
+        "kind": "horn",
+        "module": "promised",
+        "type": "rhyme"
+      },
+      "host": {
+        "hostname": "increase",
+        "name": "bright",
+        "os": {
+          "name": "fast",
+          "platform": "species",
+          "version": "develop"
+        }
+      },
+      "labels": {
+        "account_id": "99b3e56e-0596-4b02-bbd1-0b581ec983a4",
+        "endpoint_id": "99b3e56e-0596-4b02-bbd1-0b581ec983a4"
+      },
+      "message": "size",
+      "process": {
+        "args": "lower",
+        "executable": "spite",
+        "hash": {
+          "md5": "page",
+          "sha1": "opportunity",
+          "sha256": "outline"
+        },
+        "name": "try",
+        "pid": 19,
+        "ppid": 18,
+        "thread": {
+          "id": 209
+        }
+      },
+      "user": {
+        "group": {
+          "id": "mood",
+          "name": "closer"
+        },
+        "id": "are",
+        "name": "eat"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "qfx_G3AB35DY4seMO0wN",
+    "index": "endpoint-events-1-000001",
+    "source": {
+      "@timestamp": "2020-02-06T17:14:47.939Z",
+      "agent": {
+        "id": "99b3e56e-0596-4b02-bbd1-0b581ec983a4",
+        "type": "endgame",
+        "version": "6.9.3"
+      },
+      "endgame": {
+        "authentication_id": 5763,
+        "command_line": "C:\\Program Files\\Internet Explorer\\melted.exe",
+        "effective_gid": 858,
+        "effective_group_name": "know",
+        "effective_uid": 844,
+        "effective_user_name": "thick",
+        "elevated": true,
+        "elevation_type": "lips",
+        "event_message": "meet",
+        "event_subtype_full": "termination_event",
+        "event_type_full": "process_event",
+        "exit_code": 3,
+        "exit_code_full": 456,
+        "integrity_level": "numeral",
+        "md5": "abkpimgt4vi8j2skqkcupdzvh8sfx28i",
+        "opcode": 1,
+        "original_file_name": "melted.exe",
+        "package_name": "plates",
+        "parent_process_name": "of.exe",
+        "parent_process_path": "C:\\Windows\\System32\\of.exe",
+        "pid": 20,
+        "ppid": 19,
+        "process_name": "melted.exe",
+        "process_path": "C:\\Program Files\\Internet Explorer\\melted.exe",
+        "real_gid": 469,
+        "real_group_name": "exactly",
+        "real_uid": 509,
+        "real_user_name": "parent",
+        "serial_event_id": 20,
+        "session_id": 796,
+        "sha1": "v472y95h1tfe9zoe94xcgglj6z5pga8lruu01byh",
+        "sha256": "lvtqosb0fesk3f8obs9955zhqzvvckuzfkcy8fsufmo9fl8o801g50qvel0j1yej",
+        "signature_signer": "stomach",
+        "signature_status": "mark",
+        "tid": 993,
+        "timestamp": 1,
+        "timestamp_utc": "2020-02-06 17-14-47+00:00",
+        "true_ppid": 19,
+        "unique_pid": 20,
+        "unique_ppid": 16,
+        "unique_true_ppid": 19,
+        "unknown_properties": "sky",
+        "user_domain": "surface",
+        "user_name": "create",
+        "user_sid": "brain"
+      },
+      "event": {
+        "action": "thirty",
+        "category": "tune",
+        "dataset": "page",
+        "kind": "blow",
+        "module": "bank",
+        "type": "inside"
+      },
+      "host": {
+        "hostname": "pain",
+        "name": "further",
+        "os": {
+          "name": "settlers",
+          "platform": "dug",
+          "version": "ear"
+        }
+      },
+      "labels": {
+        "account_id": "99b3e56e-0596-4b02-bbd1-0b581ec983a4",
+        "endpoint_id": "99b3e56e-0596-4b02-bbd1-0b581ec983a4"
+      },
+      "message": "win",
+      "process": {
+        "args": "cast",
+        "executable": "worse",
+        "hash": {
+          "md5": "recognize",
+          "sha1": "tip",
+          "sha256": "real"
+        },
+        "name": "itself",
+        "pid": 20,
+        "ppid": 19,
+        "thread": {
+          "id": 692
+        }
+      },
+      "user": {
+        "group": {
+          "id": "meet",
+          "name": "form"
+        },
+        "id": "swimming",
+        "name": "week"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "qvx_G3AB35DY4seMO0wN",
+    "index": "endpoint-events-1-000001",
+    "source": {
+      "@timestamp": "2020-02-06T17:14:47.939Z",
+      "agent": {
+        "id": "99b3e56e-0596-4b02-bbd1-0b581ec983a4",
+        "type": "endgame",
+        "version": "6.7.6"
+      },
+      "endgame": {
+        "authentication_id": 8495,
+        "command_line": "C:\\Program Files\\Internet Explorer\\stop.exe",
+        "effective_gid": 176,
+        "effective_group_name": "minute",
+        "effective_uid": 320,
+        "effective_user_name": "jar",
+        "elevated": false,
+        "elevation_type": "cook",
+        "event_message": "love",
+        "event_subtype_full": "gid_change",
+        "event_type_full": "process_event",
+        "exit_code_full": 240,
+        "integrity_level": "eleven",
+        "md5": "qwhip1sftr8x7m5fxmc1ttl021wwx0as",
+        "opcode": 1,
+        "original_file_name": "stop.exe",
+        "package_name": "coming",
+        "parent_process_name": "solid.exe",
+        "parent_process_path": "C:\\Windows\\System32\\solid.exe",
+        "pid": 21,
+        "ppid": 20,
+        "process_name": "stop.exe",
+        "process_path": "C:\\Program Files\\Internet Explorer\\stop.exe",
+        "real_gid": 692,
+        "real_group_name": "growth",
+        "real_uid": 253,
+        "real_user_name": "stove",
+        "serial_event_id": 21,
+        "session_id": 298,
+        "sha1": "hz0ib8ejtfjd4z168rd5iu624jtmz2iqx19yxi78",
+        "sha256": "idq83ifxivqljnwzrpulu07zi4blrhdtt58ovtgwvqj0qac2rvie4awhnzd3r2qg",
+        "signature_signer": "single",
+        "signature_status": "word",
+        "tid": 112,
+        "timestamp": 1,
+        "timestamp_utc": "2020-02-06 17-14-47+00:00",
+        "true_ppid": 20,
+        "unique_pid": 21,
+        "unique_ppid": 20,
+        "unique_true_ppid": 20,
+        "unknown_properties": "free",
+        "user_domain": "box",
+        "user_name": "herself",
+        "user_sid": "fifty"
+      },
+      "event": {
+        "action": "for",
+        "category": "various",
+        "dataset": "outline",
+        "kind": "combine",
+        "module": "life",
+        "type": "equator"
+      },
+      "host": {
+        "hostname": "solve",
+        "name": "personal",
+        "os": {
+          "name": "fog",
+          "platform": "continent",
+          "version": "opposite"
+        }
+      },
+      "labels": {
+        "account_id": "99b3e56e-0596-4b02-bbd1-0b581ec983a4",
+        "endpoint_id": "99b3e56e-0596-4b02-bbd1-0b581ec983a4"
+      },
+      "message": "require",
+      "process": {
+        "args": "younger",
+        "executable": "slight",
+        "hash": {
+          "md5": "act",
+          "sha1": "plain",
+          "sha256": "sentence"
+        },
+        "name": "brave",
+        "pid": 21,
+        "ppid": 20,
+        "thread": {
+          "id": 483
+        }
+      },
+      "user": {
+        "group": {
+          "id": "tales",
+          "name": "thy"
+        },
+        "id": "happened",
+        "name": "mostly"
+      }
+    }
+  }
+}

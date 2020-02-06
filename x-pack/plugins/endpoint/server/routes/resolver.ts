@@ -19,22 +19,22 @@ import { ResolverSearchHandler, Total } from '../services/resolver/search_handle
 import { ResolverData } from '../../common/types';
 
 export function registerResolverRoutes(router: IRouter, endpointAppContext: EndpointAppContext) {
-  const validateObject = {
-    query: schema.object({
-      page_size: schema.number({ min: 1, max: 1000 }),
-      page_index: schema.number({ min: 0 }),
-      entityID: schema.string(),
-    }),
-  };
+  const validateQueryObject = schema.object({
+    page_size: schema.maybe(schema.number({ min: 1, max: 1000 })),
+    page_index: schema.maybe(schema.number({ min: 0 })),
+    entity_id: schema.string(),
+  });
 
   router.get(
     {
       path: '/api/endpoint/resolver/children',
-      validate: validateObject,
+      validate: {
+        query: validateQueryObject,
+      },
       options: { authRequired: true },
     },
     async (context, req, res) => {
-      const entityID = req.query.entityID;
+      const entityID = req.query.entity_id;
       const paginationInfo = {
         page: req.query?.page_index,
         pageSize: req.query?.page_size,
@@ -73,11 +73,13 @@ export function registerResolverRoutes(router: IRouter, endpointAppContext: Endp
   router.get(
     {
       path: '/api/endpoint/resolver/node',
-      validate: validateObject,
+      validate: {
+        query: validateQueryObject,
+      },
       options: { authRequired: true },
     },
     async (context, req, res) => {
-      const entityID = req.query.entityID;
+      const entityID = req.query.entity_id;
       const paginationInfo = {
         page: req.query?.page_index,
         pageSize: req.query?.page_size,

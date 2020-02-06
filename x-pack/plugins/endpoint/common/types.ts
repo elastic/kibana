@@ -24,7 +24,7 @@ export type ImmutableObject<T> = { readonly [K in keyof T]: Immutable<T[K]> };
 
 export class EndpointAppConstants {
   static ENDPOINT_INDEX_NAME = 'endpoint-agent*';
-  static RESOLVER_INDEX_NAME = 'endpoint-event-*';
+  static RESOLVER_INDEX_NAME = 'endpoint-events-*';
 }
 
 export interface EndpointResultList {

@@ -1,0 +1,553 @@
+{
+  "type": "index",
+  "value": {
+    "aliases": {
+    },
+    "index": "endpoint-events-1-000001",
+    "mappings": {
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "agent": {
+          "properties": {
+            "id": {
+              "type": "keyword"
+            },
+            "type": {
+              "type": "keyword"
+            },
+            "version": {
+              "type": "keyword"
+            }
+          }
+        },
+        "destination": {
+          "properties": {
+            "address": {
+              "type": "keyword"
+            },
+            "bytes": {
+              "type": "long"
+            },
+            "ip": {
+              "type": "ip"
+            },
+            "packets": {
+              "type": "long"
+            },
+            "port": {
+              "type": "long"
+            }
+          }
+        },
+        "dns": {
+          "properties": {
+            "question": {
+              "properties": {
+                "name": {
+                  "type": "keyword"
+                },
+                "registered_domain": {
+                  "type": "keyword"
+                },
+                "type": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "resolved_ip": {
+              "type": "ip"
+            }
+          }
+        },
+        "endgame": {
+          "properties": {
+            "authentication_id": {
+              "type": "long"
+            },
+            "bytes_written": {
+              "type": "keyword"
+            },
+            "bytes_written_count": {
+              "type": "integer"
+            },
+            "bytes_written_string": {
+              "type": "keyword"
+            },
+            "bytes_written_string_list": {
+              "type": "keyword"
+            },
+            "bytes_written_u32": {
+              "type": "integer"
+            },
+            "bytes_written_u64": {
+              "type": "long"
+            },
+            "command_line": {
+              "type": "keyword"
+            },
+            "connection_id": {
+              "type": "integer"
+            },
+            "create_disposition": {
+              "type": "integer"
+            },
+            "create_options": {
+              "type": "integer"
+            },
+            "desired_access": {
+              "type": "integer"
+            },
+            "destination_address": {
+              "type": "keyword"
+            },
+            "destination_port": {
+              "type": "integer"
+            },
+            "effective_gid": {
+              "type": "integer"
+            },
+            "effective_group_name": {
+              "type": "keyword"
+            },
+            "effective_uid": {
+              "type": "integer"
+            },
+            "effective_user_name": {
+              "type": "keyword"
+            },
+            "elevated": {
+              "type": "boolean"
+            },
+            "elevation_type": {
+              "type": "keyword"
+            },
+            "event_id": {
+              "type": "integer"
+            },
+            "event_message": {
+              "type": "keyword"
+            },
+            "event_subtype_full": {
+              "type": "keyword"
+            },
+            "event_type_full": {
+              "type": "keyword"
+            },
+            "exit_code": {
+              "type": "integer"
+            },
+            "exit_code_full": {
+              "type": "integer"
+            },
+            "file_attributes": {
+              "type": "integer"
+            },
+            "file_mode": {
+              "type": "keyword"
+            },
+            "file_name": {
+              "type": "keyword"
+            },
+            "file_path": {
+              "type": "keyword"
+            },
+            "file_version": {
+              "type": "keyword"
+            },
+            "fileid": {
+              "type": "long"
+            },
+            "http_request": {
+              "type": "text"
+            },
+            "image_name": {
+              "type": "keyword"
+            },
+            "image_path": {
+              "type": "keyword"
+            },
+            "in_bytes": {
+              "type": "integer"
+            },
+            "in_bytes_mean": {
+              "type": "double"
+            },
+            "in_bytes_standard_deviation": {
+              "type": "double"
+            },
+            "in_interval_mean": {
+              "type": "double"
+            },
+            "in_interval_standard_deviation": {
+              "type": "double"
+            },
+            "in_packet_count": {
+              "type": "long"
+            },
+            "integrity_level": {
+              "type": "keyword"
+            },
+            "key_path": {
+              "type": "keyword"
+            },
+            "key_type": {
+              "type": "keyword"
+            },
+            "md5": {
+              "type": "keyword"
+            },
+            "old_file_name": {
+              "type": "keyword"
+            },
+            "old_file_path": {
+              "type": "keyword"
+            },
+            "opcode": {
+              "type": "integer"
+            },
+            "original_file_name": {
+              "type": "keyword"
+            },
+            "other_file_path": {
+              "type": "keyword"
+            },
+            "out_bytes": {
+              "type": "integer"
+            },
+            "out_bytes_mean": {
+              "type": "double"
+            },
+            "out_bytes_standard_deviation": {
+              "type": "double"
+            },
+            "out_interval_mean": {
+              "type": "double"
+            },
+            "out_interval_standard_deviation": {
+              "type": "double"
+            },
+            "out_packet_count": {
+              "type": "long"
+            },
+            "package_name": {
+              "type": "keyword"
+            },
+            "parent_pid": {
+              "type": "integer"
+            },
+            "parent_process_name": {
+              "type": "keyword"
+            },
+            "parent_process_path": {
+              "type": "keyword"
+            },
+            "partial_flow": {
+              "type": "boolean"
+            },
+            "pid": {
+              "type": "integer"
+            },
+            "ppid": {
+              "type": "integer"
+            },
+            "process_name": {
+              "type": "keyword"
+            },
+            "process_path": {
+              "type": "keyword"
+            },
+            "product_version": {
+              "type": "keyword"
+            },
+            "protocol": {
+              "type": "keyword"
+            },
+            "query_name": {
+              "type": "keyword"
+            },
+            "query_options": {
+              "type": "long"
+            },
+            "query_results": {
+              "type": "keyword"
+            },
+            "query_status": {
+              "type": "integer"
+            },
+            "query_type": {
+              "type": "integer"
+            },
+            "real_gid": {
+              "type": "integer"
+            },
+            "real_group_name": {
+              "type": "keyword"
+            },
+            "real_uid": {
+              "type": "integer"
+            },
+            "real_user_name": {
+              "type": "keyword"
+            },
+            "sequence_number": {
+              "type": "integer"
+            },
+            "serial_event_id": {
+              "type": "long"
+            },
+            "session_id": {
+              "type": "integer"
+            },
+            "sha1": {
+              "type": "keyword"
+            },
+            "sha256": {
+              "type": "keyword"
+            },
+            "share_mode": {
+              "type": "integer"
+            },
+            "signature_signer": {
+              "type": "keyword"
+            },
+            "signature_status": {
+              "type": "keyword"
+            },
+            "size": {
+              "type": "integer"
+            },
+            "source_address": {
+              "type": "keyword"
+            },
+            "source_port": {
+              "type": "integer"
+            },
+            "task": {
+              "type": "integer"
+            },
+            "tid": {
+              "type": "integer"
+            },
+            "timestamp": {
+              "type": "date"
+            },
+            "timestamp_utc": {
+              "type": "keyword"
+            },
+            "total_in_bytes": {
+              "type": "long"
+            },
+            "total_out_bytes": {
+              "type": "long"
+            },
+            "true_ppid": {
+              "type": "integer"
+            },
+            "unique_pid": {
+              "type": "long"
+            },
+            "unique_ppid": {
+              "type": "long"
+            },
+            "unique_true_ppid": {
+              "type": "long"
+            },
+            "unknown_properties": {
+              "type": "keyword"
+            },
+            "user_domain": {
+              "type": "keyword"
+            },
+            "user_name": {
+              "type": "keyword"
+            },
+            "user_sid": {
+              "type": "keyword"
+            },
+            "zone_id": {
+              "type": "integer"
+            }
+          }
+        },
+        "event": {
+          "properties": {
+            "action": {
+              "type": "keyword"
+            },
+            "category": {
+              "type": "keyword"
+            },
+            "dataset": {
+              "type": "keyword"
+            },
+            "kind": {
+              "type": "keyword"
+            },
+            "module": {
+              "type": "keyword"
+            },
+            "type": {
+              "type": "keyword"
+            }
+          }
+        },
+        "host": {
+          "properties": {
+            "hostname": {
+              "type": "keyword"
+            },
+            "ip": {
+              "type": "ip"
+            },
+            "name": {
+              "type": "keyword"
+            },
+            "os": {
+              "properties": {
+                "name": {
+                  "type": "keyword"
+                },
+                "platform": {
+                  "type": "keyword"
+                },
+                "version": {
+                  "type": "keyword"
+                }
+              }
+            }
+          }
+        },
+        "labels": {
+          "properties": {
+            "account_id": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            },
+            "endpoint_id": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            }
+          }
+        },
+        "message": {
+          "type": "text"
+        },
+        "network": {
+          "properties": {
+            "bytes": {
+              "type": "long"
+            },
+            "community_id": {
+              "type": "keyword"
+            },
+            "packets": {
+              "type": "long"
+            },
+            "protocol": {
+              "type": "keyword"
+            },
+            "transport": {
+              "type": "keyword"
+            }
+          }
+        },
+        "process": {
+          "properties": {
+            "args": {
+              "type": "keyword"
+            },
+            "executable": {
+              "type": "keyword"
+            },
+            "hash": {
+              "properties": {
+                "md5": {
+                  "type": "keyword"
+                },
+                "sha1": {
+                  "type": "keyword"
+                },
+                "sha256": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "name": {
+              "type": "keyword"
+            },
+            "pid": {
+              "type": "long"
+            },
+            "ppid": {
+              "type": "long"
+            },
+            "thread": {
+              "properties": {
+                "id": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "source": {
+          "properties": {
+            "address": {
+              "type": "keyword"
+            },
+            "bytes": {
+              "type": "long"
+            },
+            "ip": {
+              "type": "ip"
+            },
+            "packets": {
+              "type": "long"
+            },
+            "port": {
+              "type": "long"
+            }
+          }
+        },
+        "user": {
+          "properties": {
+            "group": {
+              "properties": {
+                "id": {
+                  "type": "keyword"
+                },
+                "name": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "id": {
+              "type": "keyword"
+            },
+            "name": {
+              "type": "keyword"
+            }
+          }
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "number_of_replicas": "1",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}

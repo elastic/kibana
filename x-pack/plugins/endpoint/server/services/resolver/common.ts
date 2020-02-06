@@ -29,7 +29,7 @@ export function parsePhase0EntityID(entityID: string): { endpointID: string; uni
   const fields = entityID.split(phase0EntityIDDelimiter);
   if (fields.length !== 3) {
     throw Error(
-      'Invalid entity_id received, must be in the format endgame-<endpoint id>-<unique_pid>'
+      `Invalid entity_id received, must be in the format endgame${phase0EntityIDDelimiter}<endpoint id>${phase0EntityIDDelimiter}<unique_pid>`
     );
   }
   return { endpointID: fields[1], uniquePID: fields[2] };
