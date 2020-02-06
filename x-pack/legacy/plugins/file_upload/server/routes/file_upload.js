@@ -86,7 +86,7 @@ const finishValidationAndProcessReq = (elasticsearchPlugin, getSavedObjectsRepos
     let resp;
     try {
       const validIdReqData = idConditionalValidation(body, boolHasId);
-      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, validIdReqData);
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, req);
       const { importData: importDataFunc } = importDataProvider(callWithRequest);
 
       const { index, settings, mappings, ingestPipeline, data } = validIdReqData;
