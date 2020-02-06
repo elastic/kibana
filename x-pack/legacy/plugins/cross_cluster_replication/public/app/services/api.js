@@ -25,6 +25,10 @@ import {
   UIM_AUTO_FOLLOW_PATTERN_UPDATE,
   UIM_AUTO_FOLLOW_PATTERN_DELETE,
   UIM_AUTO_FOLLOW_PATTERN_DELETE_MANY,
+  UIM_AUTO_FOLLOW_PATTERN_PAUSE,
+  UIM_AUTO_FOLLOW_PATTERN_PAUSE_MANY,
+  UIM_AUTO_FOLLOW_PATTERN_RESUME,
+  UIM_AUTO_FOLLOW_PATTERN_RESUME_MANY,
 } from '../constants';
 import { trackUserRequest } from './track_ui_metric';
 import { areAllSettingsDefault } from './follower_index_default_settings';
@@ -85,6 +89,26 @@ export const deleteAutoFollowPattern = id => {
   const request = httpClient.delete(`${apiPrefix}/auto_follow_patterns/${idString}`);
   const uiMetric =
     ids.length > 1 ? UIM_AUTO_FOLLOW_PATTERN_DELETE_MANY : UIM_AUTO_FOLLOW_PATTERN_DELETE;
+  return trackUserRequest(request, uiMetric).then(extractData);
+};
+
+export const pauseAutoFollowPattern = id => {
+  const ids = arrify(id);
+  const idString = ids.map(encodeURIComponent).join(',');
+  const request = httpClient.post(`${apiPrefix}/auto_follow_patterns/${idString}/pause`);
+
+  const uiMetric =
+    ids.length > 1 ? UIM_AUTO_FOLLOW_PATTERN_PAUSE_MANY : UIM_AUTO_FOLLOW_PATTERN_PAUSE;
+  return trackUserRequest(request, uiMetric).then(extractData);
+};
+
+export const resumeAutoFollowPattern = id => {
+  const ids = arrify(id);
+  const idString = ids.map(encodeURIComponent).join(',');
+  const request = httpClient.post(`${apiPrefix}/auto_follow_patterns/${idString}/resume`);
+
+  const uiMetric =
+    ids.length > 1 ? UIM_AUTO_FOLLOW_PATTERN_RESUME_MANY : UIM_AUTO_FOLLOW_PATTERN_RESUME;
   return trackUserRequest(request, uiMetric).then(extractData);
 };
 

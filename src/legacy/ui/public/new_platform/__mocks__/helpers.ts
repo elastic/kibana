@@ -43,7 +43,7 @@ export const pluginsMock = {
     uiActions: uiActionsPluginMock.createSetupContract(),
     usageCollection: usageCollectionPluginMock.createSetupContract(),
     advancedSettings: advancedSettingsMock.createSetupContract(),
-    kibana_legacy: kibanaLegacyPluginMock.createSetupContract(),
+    kibanaLegacy: kibanaLegacyPluginMock.createSetupContract(),
   }),
   createStart: () => ({
     data: dataPluginMock.createStartContract(),
@@ -55,7 +55,7 @@ export const pluginsMock = {
     uiActions: uiActionsPluginMock.createStartContract(),
     management: managementPluginMock.createStartContract(),
     advancedSettings: advancedSettingsMock.createStartContract(),
-    kibana_legacy: kibanaLegacyPluginMock.createStartContract(),
+    kibanaLegacy: kibanaLegacyPluginMock.createStartContract(),
   }),
 };
 
