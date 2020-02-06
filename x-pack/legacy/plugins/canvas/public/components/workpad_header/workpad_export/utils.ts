@@ -4,13 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// todo: Should be removed
-import { QueryString } from 'ui/utils/query_string';
-
 import rison from 'rison-node';
 // @ts-ignore Untyped local.
 import { fetch } from '../../../../common/lib/fetch';
 import { CanvasWorkpad } from '../../../../types';
+import { encodeQueryComponent } from '../../../../../../../../src/plugins/kibana_utils/public';
 
 // type of the desired pdf output (print or preserve_layout)
 const PDF_LAYOUT_TYPE = 'preserve_layout';
@@ -73,11 +71,13 @@ function getPdfUrlParts(
 
 export function getPdfUrl(...args: Arguments): string {
   const urlParts = getPdfUrlParts(...args);
+  const param = (key, val) => {
+    return (
+      encodeQueryComponent(key, true) + (val === true ? '' : '=' + encodeQueryComponent(val, true))
+    );
+  };
 
-  return `${urlParts.createPdfUri}?${QueryString.param(
-    'jobParams',
-    urlParts.createPdfPayload.jobParams
-  )}`;
+  return `${urlParts.createPdfUri}?${param('jobParams', urlParts.createPdfPayload.jobParams)}`;
 }
 
 export function createPdf(...args: Arguments) {

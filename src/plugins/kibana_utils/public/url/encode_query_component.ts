@@ -34,5 +34,6 @@ export function encodeQueryComponent(val: string, pctEncodeSpaces = false) {
     .replace(/%3A/gi, ':')
     .replace(/%24/g, '$')
     .replace(/%2C/gi, ',')
+    .replace(/%3B/gi, ';')
     .replace(/%20/g, pctEncodeSpaces ? '%20' : '+');
 }

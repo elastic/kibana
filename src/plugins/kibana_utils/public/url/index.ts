@@ -17,10 +17,4 @@
  * under the License.
  */
 
-declare class QueryStringClass {
-  public param(key: string, value: string): string;
-}
-
-declare const QueryString: QueryStringClass;
-
-export { QueryString };
+export { encodeQueryComponent } from './encode_query_component';

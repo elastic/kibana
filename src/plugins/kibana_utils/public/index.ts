@@ -70,3 +70,4 @@ export {
 } from './state_sync';
 export { removeQueryParam } from './history';
 export { applyDiff } from './state_management/utils/diff_object';
+export { encodeQueryComponent } from './url';
