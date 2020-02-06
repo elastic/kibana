@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { History } from 'history';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import { Router } from 'react-router-dom';
@@ -107,6 +107,13 @@ const App = ({
   useGlobalStateSyncing(globalStateContainer, data.query, kbnUrlStateStorage);
   useAppStateSyncing(appStateContainer, data.query, kbnUrlStateStorage);
 
+  const onQuerySubmit = useCallback(
+    ({ query }) => {
+      appStateContainer.set({ ...appState, query });
+    },
+    [appStateContainer, appState]
+  );
+
   const indexPattern = useIndexPattern(data);
   if (!indexPattern) return <div>Loading...</div>;
 
@@ -122,7 +129,7 @@ const App = ({
             indexPatterns={[indexPattern]}
             useDefaultBehaviors={true}
             // TODO: would be cool to also get rid of this query syncing
-            onQuerySubmit={({ query }) => appStateContainer.set({ ...appState, query })}
+            onQuerySubmit={onQuerySubmit}
             query={appState.query}
           />
           <EuiPage restrictWidth="1000px">
