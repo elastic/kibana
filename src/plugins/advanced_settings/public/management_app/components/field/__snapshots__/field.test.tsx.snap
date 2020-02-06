@@ -26,7 +26,7 @@ exports[`Field for array setting should render as read only if saving is disable
       title={
         <h3>
           Array test setting
-          
+
         </h3>
       }
       titleSize="xs"
@@ -94,7 +94,7 @@ exports[`Field for array setting should render as read only with help text if ov
               <React.Fragment>
                 <FormattedMessage
                   defaultMessage="Default: {value}"
-                  id="kbn.management.settings.field.defaultValueText"
+                  id="advancedSettings.field.defaultValueText"
                   values={
                     Object {
                       "value": <EuiCode>
@@ -114,7 +114,7 @@ exports[`Field for array setting should render as read only with help text if ov
       title={
         <h3>
           Array test setting
-          
+
         </h3>
       }
       titleSize="xs"
@@ -137,7 +137,7 @@ exports[`Field for array setting should render as read only with help text if ov
           >
             <FormattedMessage
               defaultMessage="This setting is overridden by the Kibana server and can not be changed."
-              id="kbn.management.settings.field.helpText"
+              id="advancedSettings.field.helpText"
               values={Object {}}
             />
           </EuiText>
@@ -196,7 +196,7 @@ exports[`Field for array setting should render custom setting icon if it is cust
             content={
               <FormattedMessage
                 defaultMessage="Custom setting"
-                id="kbn.management.settings.field.customSettingTooltip"
+                id="advancedSettings.field.customSettingTooltip"
                 values={Object {}}
               />
             }
@@ -267,7 +267,7 @@ exports[`Field for array setting should render default value if there is no user
       title={
         <h3>
           Array test setting
-          
+
         </h3>
       }
       titleSize="xs"
@@ -335,7 +335,7 @@ exports[`Field for array setting should render user value if there is user value
               <React.Fragment>
                 <FormattedMessage
                   defaultMessage="Default: {value}"
-                  id="kbn.management.settings.field.defaultValueText"
+                  id="advancedSettings.field.defaultValueText"
                   values={
                     Object {
                       "value": <EuiCode>
@@ -355,7 +355,7 @@ exports[`Field for array setting should render user value if there is user value
       title={
         <h3>
           Array test setting
-          
+
         </h3>
       }
       titleSize="xs"
@@ -382,11 +382,11 @@ exports[`Field for array setting should render user value if there is user value
               >
                 <FormattedMessage
                   defaultMessage="Reset to default"
-                  id="kbn.management.settings.field.resetToDefaultLinkText"
+                  id="advancedSettings.field.resetToDefaultLinkText"
                   values={Object {}}
                 />
               </ForwardRef>
-                 
+
             </span>
           </span>
         }
@@ -438,7 +438,7 @@ exports[`Field for boolean setting should render as read only if saving is disab
       title={
         <h3>
           Boolean test setting
-          
+
         </h3>
       }
       titleSize="xs"
@@ -468,7 +468,7 @@ exports[`Field for boolean setting should render as read only if saving is disab
           label={
             <FormattedMessage
               defaultMessage="On"
-              id="kbn.management.settings.field.onLabel"
+              id="advancedSettings.field.onLabel"
               values={Object {}}
             />
           }
@@ -512,7 +512,7 @@ exports[`Field for boolean setting should render as read only with help text if 
               <React.Fragment>
                 <FormattedMessage
                   defaultMessage="Default: {value}"
-                  id="kbn.management.settings.field.defaultValueText"
+                  id="advancedSettings.field.defaultValueText"
                   values={
                     Object {
                       "value": <EuiCode>
@@ -532,7 +532,7 @@ exports[`Field for boolean setting should render as read only with help text if 
       title={
         <h3>
           Boolean test setting
-          
+
         </h3>
       }
       titleSize="xs"
@@ -555,7 +555,7 @@ exports[`Field for boolean setting should render as read only with help text if 
           >
             <FormattedMessage
               defaultMessage="This setting is overridden by the Kibana server and can not be changed."
-              id="kbn.management.settings.field.helpText"
+              id="advancedSettings.field.helpText"
               values={Object {}}
             />
           </EuiText>
@@ -572,7 +572,7 @@ exports[`Field for boolean setting should render as read only with help text if 
           label={
             <FormattedMessage
               defaultMessage="Off"
-              id="kbn.management.settings.field.offLabel"
+              id="advancedSettings.field.offLabel"
               values={Object {}}
             />
           }
@@ -620,7 +620,7 @@ exports[`Field for boolean setting should render custom setting icon if it is cu
             content={
               <FormattedMessage
                 defaultMessage="Custom setting"
-                id="kbn.management.settings.field.customSettingTooltip"
+                id="advancedSettings.field.customSettingTooltip"
                 values={Object {}}
               />
             }
@@ -655,7 +655,7 @@ exports[`Field for boolean setting should render custom setting icon if it is cu
           label={
             <FormattedMessage
               defaultMessage="On"
-              id="kbn.management.settings.field.onLabel"
+              id="advancedSettings.field.onLabel"
               values={Object {}}
             />
           }
@@ -697,7 +697,7 @@ exports[`Field for boolean setting should render default value if there is no us
       title={
         <h3>
           Boolean test setting
-          
+
         </h3>
       }
       titleSize="xs"
@@ -727,7 +727,7 @@ exports[`Field for boolean setting should render default value if there is no us
           label={
             <FormattedMessage
               defaultMessage="On"
-              id="kbn.management.settings.field.onLabel"
+              id="advancedSettings.field.onLabel"
               values={Object {}}
             />
           }
@@ -771,7 +771,7 @@ exports[`Field for boolean setting should render user value if there is user val
               <React.Fragment>
                 <FormattedMessage
                   defaultMessage="Default: {value}"
-                  id="kbn.management.settings.field.defaultValueText"
+                  id="advancedSettings.field.defaultValueText"
                   values={
                     Object {
                       "value": <EuiCode>
@@ -791,7 +791,7 @@ exports[`Field for boolean setting should render user value if there is user val
       title={
         <h3>
           Boolean test setting
-          
+
         </h3>
       }
       titleSize="xs"
@@ -818,11 +818,11 @@ exports[`Field for boolean setting should render user value if there is user val
               >
                 <FormattedMessage
                   defaultMessage="Reset to default"
-                  id="kbn.management.settings.field.resetToDefaultLinkText"
+                  id="advancedSettings.field.resetToDefaultLinkText"
                   values={Object {}}
                 />
               </ForwardRef>
-                 
+
             </span>
           </span>
         }
@@ -838,7 +838,7 @@ exports[`Field for boolean setting should render user value if there is user val
           label={
             <FormattedMessage
               defaultMessage="Off"
-              id="kbn.management.settings.field.offLabel"
+              id="advancedSettings.field.offLabel"
               values={Object {}}
             />
           }
@@ -880,7 +880,7 @@ exports[`Field for image setting should render as read only if saving is disable
       title={
         <h3>
           Image test setting
-          
+
         </h3>
       }
       titleSize="xs"
@@ -949,7 +949,7 @@ exports[`Field for image setting should render as read only with help text if ov
               <React.Fragment>
                 <FormattedMessage
                   defaultMessage="Default: {value}"
-                  id="kbn.management.settings.field.defaultValueText"
+                  id="advancedSettings.field.defaultValueText"
                   values={
                     Object {
                       "value": <EuiCode>
@@ -969,7 +969,7 @@ exports[`Field for image setting should render as read only with help text if ov
       title={
         <h3>
           Image test setting
-          
+
         </h3>
       }
       titleSize="xs"
@@ -992,7 +992,7 @@ exports[`Field for image setting should render as read only with help text if ov
           >
             <FormattedMessage
               defaultMessage="This setting is overridden by the Kibana server and can not be changed."
-              id="kbn.management.settings.field.helpText"
+              id="advancedSettings.field.helpText"
               values={Object {}}
             />
           </EuiText>
@@ -1048,7 +1048,7 @@ exports[`Field for image setting should render custom setting icon if it is cust
             content={
               <FormattedMessage
                 defaultMessage="Custom setting"
-                id="kbn.management.settings.field.customSettingTooltip"
+                id="advancedSettings.field.customSettingTooltip"
                 values={Object {}}
               />
             }
@@ -1120,7 +1120,7 @@ exports[`Field for image setting should render default value if there is no user
       title={
         <h3>
           Image test setting
-          
+
         </h3>
       }
       titleSize="xs"
@@ -1189,7 +1189,7 @@ exports[`Field for image setting should render user value if there is user value
               <React.Fragment>
                 <FormattedMessage
                   defaultMessage="Default: {value}"
-                  id="kbn.management.settings.field.defaultValueText"
+                  id="advancedSettings.field.defaultValueText"
                   values={
                     Object {
                       "value": <EuiCode>
@@ -1209,7 +1209,7 @@ exports[`Field for image setting should render user value if there is user value
       title={
         <h3>
           Image test setting
-          
+
         </h3>
       }
       titleSize="xs"
@@ -1236,11 +1236,11 @@ exports[`Field for image setting should render user value if there is user value
               >
                 <FormattedMessage
                   defaultMessage="Reset to default"
-                  id="kbn.management.settings.field.resetToDefaultLinkText"
+                  id="advancedSettings.field.resetToDefaultLinkText"
                   values={Object {}}
                 />
               </ForwardRef>
-                 
+
             </span>
             <span>
               <ForwardRef
@@ -1250,7 +1250,7 @@ exports[`Field for image setting should render user value if there is user value
               >
                 <FormattedMessage
                   defaultMessage="Change image"
-                  id="kbn.management.settings.field.changeImageLinkText"
+                  id="advancedSettings.field.changeImageLinkText"
                   values={Object {}}
                 />
               </ForwardRef>
@@ -1304,7 +1304,7 @@ exports[`Field for json setting should render as read only if saving is disabled
               <React.Fragment>
                 <FormattedMessage
                   defaultMessage="Default: {value}"
-                  id="kbn.management.settings.field.defaultValueTypeJsonText"
+                  id="advancedSettings.field.defaultValueTypeJsonText"
                   values={
                     Object {
                       "value": <EuiCodeBlock
@@ -1327,7 +1327,7 @@ exports[`Field for json setting should render as read only if saving is disabled
       title={
         <h3>
           Json test setting
-          
+
         </h3>
       }
       titleSize="xs"
@@ -1414,7 +1414,7 @@ exports[`Field for json setting should render as read only with help text if ove
               <React.Fragment>
                 <FormattedMessage
                   defaultMessage="Default: {value}"
-                  id="kbn.management.settings.field.defaultValueTypeJsonText"
+                  id="advancedSettings.field.defaultValueTypeJsonText"
                   values={
                     Object {
                       "value": <EuiCodeBlock
@@ -1437,7 +1437,7 @@ exports[`Field for json setting should render as read only with help text if ove
       title={
         <h3>
           Json test setting
-          
+
         </h3>
       }
       titleSize="xs"
@@ -1460,7 +1460,7 @@ exports[`Field for json setting should render as read only with help text if ove
           >
             <FormattedMessage
               defaultMessage="This setting is overridden by the Kibana server and can not be changed."
-              id="kbn.management.settings.field.helpText"
+              id="advancedSettings.field.helpText"
               values={Object {}}
             />
           </EuiText>
@@ -1538,7 +1538,7 @@ exports[`Field for json setting should render custom setting icon if it is custo
             content={
               <FormattedMessage
                 defaultMessage="Custom setting"
-                id="kbn.management.settings.field.customSettingTooltip"
+                id="advancedSettings.field.customSettingTooltip"
                 values={Object {}}
               />
             }
@@ -1630,7 +1630,7 @@ exports[`Field for json setting should render default value if there is no user 
               <React.Fragment>
                 <FormattedMessage
                   defaultMessage="Default: {value}"
-                  id="kbn.management.settings.field.defaultValueTypeJsonText"
+                  id="advancedSettings.field.defaultValueTypeJsonText"
                   values={
                     Object {
                       "value": <EuiCodeBlock
@@ -1653,7 +1653,7 @@ exports[`Field for json setting should render default value if there is no user 
       title={
         <h3>
           Json test setting
-          
+
         </h3>
       }
       titleSize="xs"
@@ -1680,11 +1680,11 @@ exports[`Field for json setting should render default value if there is no user 
               >
                 <FormattedMessage
                   defaultMessage="Reset to default"
-                  id="kbn.management.settings.field.resetToDefaultLinkText"
+                  id="advancedSettings.field.resetToDefaultLinkText"
                   values={Object {}}
                 />
               </ForwardRef>
-                 
+
             </span>
           </span>
         }
@@ -1757,7 +1757,7 @@ exports[`Field for json setting should render user value if there is user value 
               <React.Fragment>
                 <FormattedMessage
                   defaultMessage="Default: {value}"
-                  id="kbn.management.settings.field.defaultValueTypeJsonText"
+                  id="advancedSettings.field.defaultValueTypeJsonText"
                   values={
                     Object {
                       "value": <EuiCodeBlock
@@ -1780,7 +1780,7 @@ exports[`Field for json setting should render user value if there is user value 
       title={
         <h3>
           Json test setting
-          
+
         </h3>
       }
       titleSize="xs"
@@ -1807,11 +1807,11 @@ exports[`Field for json setting should render user value if there is user value 
               >
                 <FormattedMessage
                   defaultMessage="Reset to default"
-                  id="kbn.management.settings.field.resetToDefaultLinkText"
+                  id="advancedSettings.field.resetToDefaultLinkText"
                   values={Object {}}
                 />
               </ForwardRef>
-                 
+
             </span>
           </span>
         }
@@ -1882,7 +1882,7 @@ exports[`Field for markdown setting should render as read only if saving is disa
       title={
         <h3>
           Markdown test setting
-          
+
         </h3>
       }
       titleSize="xs"
@@ -1969,7 +1969,7 @@ exports[`Field for markdown setting should render as read only with help text if
               <React.Fragment>
                 <FormattedMessage
                   defaultMessage="Default: {value}"
-                  id="kbn.management.settings.field.defaultValueText"
+                  id="advancedSettings.field.defaultValueText"
                   values={
                     Object {
                       "value": <EuiCode>
@@ -1989,7 +1989,7 @@ exports[`Field for markdown setting should render as read only with help text if
       title={
         <h3>
           Markdown test setting
-          
+
         </h3>
       }
       titleSize="xs"
@@ -2012,7 +2012,7 @@ exports[`Field for markdown setting should render as read only with help text if
           >
             <FormattedMessage
               defaultMessage="This setting is overridden by the Kibana server and can not be changed."
-              id="kbn.management.settings.field.helpText"
+              id="advancedSettings.field.helpText"
               values={Object {}}
             />
           </EuiText>
@@ -2090,7 +2090,7 @@ exports[`Field for markdown setting should render custom setting icon if it is c
             content={
               <FormattedMessage
                 defaultMessage="Custom setting"
-                id="kbn.management.settings.field.customSettingTooltip"
+                id="advancedSettings.field.customSettingTooltip"
                 values={Object {}}
               />
             }
@@ -2180,7 +2180,7 @@ exports[`Field for markdown setting should render default value if there is no u
       title={
         <h3>
           Markdown test setting
-          
+
         </h3>
       }
       titleSize="xs"
@@ -2267,7 +2267,7 @@ exports[`Field for markdown setting should render user value if there is user va
               <React.Fragment>
                 <FormattedMessage
                   defaultMessage="Default: {value}"
-                  id="kbn.management.settings.field.defaultValueText"
+                  id="advancedSettings.field.defaultValueText"
                   values={
                     Object {
                       "value": <EuiCode>
@@ -2287,7 +2287,7 @@ exports[`Field for markdown setting should render user value if there is user va
       title={
         <h3>
           Markdown test setting
-          
+
         </h3>
       }
       titleSize="xs"
@@ -2314,11 +2314,11 @@ exports[`Field for markdown setting should render user value if there is user va
               >
                 <FormattedMessage
                   defaultMessage="Reset to default"
-                  id="kbn.management.settings.field.resetToDefaultLinkText"
+                  id="advancedSettings.field.resetToDefaultLinkText"
                   values={Object {}}
                 />
               </ForwardRef>
-                 
+
             </span>
           </span>
         }
@@ -2389,7 +2389,7 @@ exports[`Field for number setting should render as read only if saving is disabl
       title={
         <h3>
           Number test setting
-          
+
         </h3>
       }
       titleSize="xs"
@@ -2457,7 +2457,7 @@ exports[`Field for number setting should render as read only with help text if o
               <React.Fragment>
                 <FormattedMessage
                   defaultMessage="Default: {value}"
-                  id="kbn.management.settings.field.defaultValueText"
+                  id="advancedSettings.field.defaultValueText"
                   values={
                     Object {
                       "value": <EuiCode>
@@ -2477,7 +2477,7 @@ exports[`Field for number setting should render as read only with help text if o
       title={
         <h3>
           Number test setting
-          
+
         </h3>
       }
       titleSize="xs"
@@ -2500,7 +2500,7 @@ exports[`Field for number setting should render as read only with help text if o
           >
             <FormattedMessage
               defaultMessage="This setting is overridden by the Kibana server and can not be changed."
-              id="kbn.management.settings.field.helpText"
+              id="advancedSettings.field.helpText"
               values={Object {}}
             />
           </EuiText>
@@ -2559,7 +2559,7 @@ exports[`Field for number setting should render custom setting icon if it is cus
             content={
               <FormattedMessage
                 defaultMessage="Custom setting"
-                id="kbn.management.settings.field.customSettingTooltip"
+                id="advancedSettings.field.customSettingTooltip"
                 values={Object {}}
               />
             }
@@ -2630,7 +2630,7 @@ exports[`Field for number setting should render default value if there is no use
       title={
         <h3>
           Number test setting
-          
+
         </h3>
       }
       titleSize="xs"
@@ -2698,7 +2698,7 @@ exports[`Field for number setting should render user value if there is user valu
               <React.Fragment>
                 <FormattedMessage
                   defaultMessage="Default: {value}"
-                  id="kbn.management.settings.field.defaultValueText"
+                  id="advancedSettings.field.defaultValueText"
                   values={
                     Object {
                       "value": <EuiCode>
@@ -2718,7 +2718,7 @@ exports[`Field for number setting should render user value if there is user valu
       title={
         <h3>
           Number test setting
-          
+
         </h3>
       }
       titleSize="xs"
@@ -2745,11 +2745,11 @@ exports[`Field for number setting should render user value if there is user valu
               >
                 <FormattedMessage
                   defaultMessage="Reset to default"
-                  id="kbn.management.settings.field.resetToDefaultLinkText"
+                  id="advancedSettings.field.resetToDefaultLinkText"
                   values={Object {}}
                 />
               </ForwardRef>
-                 
+
             </span>
           </span>
         }
@@ -2801,7 +2801,7 @@ exports[`Field for select setting should render as read only if saving is disabl
       title={
         <h3>
           Select test setting
-          
+
         </h3>
       }
       titleSize="xs"
@@ -2885,7 +2885,7 @@ exports[`Field for select setting should render as read only with help text if o
               <React.Fragment>
                 <FormattedMessage
                   defaultMessage="Default: {value}"
-                  id="kbn.management.settings.field.defaultValueText"
+                  id="advancedSettings.field.defaultValueText"
                   values={
                     Object {
                       "value": <EuiCode>
@@ -2905,7 +2905,7 @@ exports[`Field for select setting should render as read only with help text if o
       title={
         <h3>
           Select test setting
-          
+
         </h3>
       }
       titleSize="xs"
@@ -2928,7 +2928,7 @@ exports[`Field for select setting should render as read only with help text if o
           >
             <FormattedMessage
               defaultMessage="This setting is overridden by the Kibana server and can not be changed."
-              id="kbn.management.settings.field.helpText"
+              id="advancedSettings.field.helpText"
               values={Object {}}
             />
           </EuiText>
@@ -3003,7 +3003,7 @@ exports[`Field for select setting should render custom setting icon if it is cus
             content={
               <FormattedMessage
                 defaultMessage="Custom setting"
-                id="kbn.management.settings.field.customSettingTooltip"
+                id="advancedSettings.field.customSettingTooltip"
                 values={Object {}}
               />
             }
@@ -3090,7 +3090,7 @@ exports[`Field for select setting should render default value if there is no use
       title={
         <h3>
           Select test setting
-          
+
         </h3>
       }
       titleSize="xs"
@@ -3174,7 +3174,7 @@ exports[`Field for select setting should render user value if there is user valu
               <React.Fragment>
                 <FormattedMessage
                   defaultMessage="Default: {value}"
-                  id="kbn.management.settings.field.defaultValueText"
+                  id="advancedSettings.field.defaultValueText"
                   values={
                     Object {
                       "value": <EuiCode>
@@ -3194,7 +3194,7 @@ exports[`Field for select setting should render user value if there is user valu
       title={
         <h3>
           Select test setting
-          
+
         </h3>
       }
       titleSize="xs"
@@ -3221,11 +3221,11 @@ exports[`Field for select setting should render user value if there is user valu
               >
                 <FormattedMessage
                   defaultMessage="Reset to default"
-                  id="kbn.management.settings.field.resetToDefaultLinkText"
+                  id="advancedSettings.field.resetToDefaultLinkText"
                   values={Object {}}
                 />
               </ForwardRef>
-                 
+
             </span>
           </span>
         }
@@ -3293,7 +3293,7 @@ exports[`Field for string setting should render as read only if saving is disabl
       title={
         <h3>
           String test setting
-          
+
         </h3>
       }
       titleSize="xs"
@@ -3361,7 +3361,7 @@ exports[`Field for string setting should render as read only with help text if o
               <React.Fragment>
                 <FormattedMessage
                   defaultMessage="Default: {value}"
-                  id="kbn.management.settings.field.defaultValueText"
+                  id="advancedSettings.field.defaultValueText"
                   values={
                     Object {
                       "value": <EuiCode>
@@ -3381,7 +3381,7 @@ exports[`Field for string setting should render as read only with help text if o
       title={
         <h3>
           String test setting
-          
+
         </h3>
       }
       titleSize="xs"
@@ -3404,7 +3404,7 @@ exports[`Field for string setting should render as read only with help text if o
           >
             <FormattedMessage
               defaultMessage="This setting is overridden by the Kibana server and can not be changed."
-              id="kbn.management.settings.field.helpText"
+              id="advancedSettings.field.helpText"
               values={Object {}}
             />
           </EuiText>
@@ -3463,7 +3463,7 @@ exports[`Field for string setting should render custom setting icon if it is cus
             content={
               <FormattedMessage
                 defaultMessage="Custom setting"
-                id="kbn.management.settings.field.customSettingTooltip"
+                id="advancedSettings.field.customSettingTooltip"
                 values={Object {}}
               />
             }
@@ -3534,7 +3534,7 @@ exports[`Field for string setting should render default value if there is no use
       title={
         <h3>
           String test setting
-          
+
         </h3>
       }
       titleSize="xs"
@@ -3602,7 +3602,7 @@ exports[`Field for string setting should render user value if there is user valu
               <React.Fragment>
                 <FormattedMessage
                   defaultMessage="Default: {value}"
-                  id="kbn.management.settings.field.defaultValueText"
+                  id="advancedSettings.field.defaultValueText"
                   values={
                     Object {
                       "value": <EuiCode>
@@ -3622,7 +3622,7 @@ exports[`Field for string setting should render user value if there is user valu
       title={
         <h3>
           String test setting
-          
+
         </h3>
       }
       titleSize="xs"
@@ -3649,11 +3649,11 @@ exports[`Field for string setting should render user value if there is user valu
               >
                 <FormattedMessage
                   defaultMessage="Reset to default"
-                  id="kbn.management.settings.field.resetToDefaultLinkText"
+                  id="advancedSettings.field.resetToDefaultLinkText"
                   values={Object {}}
                 />
               </ForwardRef>
-                 
+
             </span>
           </span>
         }
@@ -3705,7 +3705,7 @@ exports[`Field for stringWithValidation setting should render as read only if sa
       title={
         <h3>
           String test validation setting
-          
+
         </h3>
       }
       titleSize="xs"
@@ -3773,7 +3773,7 @@ exports[`Field for stringWithValidation setting should render as read only with 
               <React.Fragment>
                 <FormattedMessage
                   defaultMessage="Default: {value}"
-                  id="kbn.management.settings.field.defaultValueText"
+                  id="advancedSettings.field.defaultValueText"
                   values={
                     Object {
                       "value": <EuiCode>
@@ -3793,7 +3793,7 @@ exports[`Field for stringWithValidation setting should render as read only with 
       title={
         <h3>
           String test validation setting
-          
+
         </h3>
       }
       titleSize="xs"
@@ -3816,7 +3816,7 @@ exports[`Field for stringWithValidation setting should render as read only with 
           >
             <FormattedMessage
               defaultMessage="This setting is overridden by the Kibana server and can not be changed."
-              id="kbn.management.settings.field.helpText"
+              id="advancedSettings.field.helpText"
               values={Object {}}
             />
           </EuiText>
@@ -3875,7 +3875,7 @@ exports[`Field for stringWithValidation setting should render custom setting ico
             content={
               <FormattedMessage
                 defaultMessage="Custom setting"
-                id="kbn.management.settings.field.customSettingTooltip"
+                id="advancedSettings.field.customSettingTooltip"
                 values={Object {}}
               />
             }
@@ -3946,7 +3946,7 @@ exports[`Field for stringWithValidation setting should render default value if t
       title={
         <h3>
           String test validation setting
-          
+
         </h3>
       }
       titleSize="xs"
@@ -4014,7 +4014,7 @@ exports[`Field for stringWithValidation setting should render user value if ther
               <React.Fragment>
                 <FormattedMessage
                   defaultMessage="Default: {value}"
-                  id="kbn.management.settings.field.defaultValueText"
+                  id="advancedSettings.field.defaultValueText"
                   values={
                     Object {
                       "value": <EuiCode>
@@ -4034,7 +4034,7 @@ exports[`Field for stringWithValidation setting should render user value if ther
       title={
         <h3>
           String test validation setting
-          
+
         </h3>
       }
       titleSize="xs"
@@ -4061,11 +4061,11 @@ exports[`Field for stringWithValidation setting should render user value if ther
               >
                 <FormattedMessage
                   defaultMessage="Reset to default"
-                  id="kbn.management.settings.field.resetToDefaultLinkText"
+                  id="advancedSettings.field.resetToDefaultLinkText"
                   values={Object {}}
                 />
               </ForwardRef>
-                 
+
             </span>
           </span>
         }

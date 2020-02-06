@@ -75,7 +75,7 @@ export class Search extends PureComponent<SearchProps> {
     const box = {
       incremental: true,
       'data-test-subj': 'settingsSearchBar',
-      'aria-label': i18n.translate('kbn.management.settings.searchBarAriaLabel', {
+      'aria-label': i18n.translate('advancedSettings.searchBarAriaLabel', {
         defaultMessage: 'Search advanced settings',
       }), // hack until EuiSearchBar is fixed
     };
@@ -84,7 +84,7 @@ export class Search extends PureComponent<SearchProps> {
       {
         type: 'field_value_selection',
         field: 'category',
-        name: i18n.translate('kbn.management.settings.categorySearchLabel', {
+        name: i18n.translate('advancedSettings.categorySearchLabel', {
           defaultMessage: 'Category',
         }),
         multiSelect: 'or',
@@ -95,7 +95,7 @@ export class Search extends PureComponent<SearchProps> {
     let queryParseError;
     if (!this.state.isSearchTextValid) {
       const parseErrorMsg = i18n.translate(
-        'kbn.management.settings.searchBar.unableToParseQueryErrorMessage',
+        'advancedSettings.searchBar.unableToParseQueryErrorMessage',
         { defaultMessage: 'Unable to parse query' }
       );
       queryParseError = (

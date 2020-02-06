@@ -28,7 +28,7 @@ export const CallOuts = () => {
       <EuiCallOut
         title={
           <FormattedMessage
-            id="kbn.management.settings.callOutCautionTitle"
+            id="advancedSettings.callOutCautionTitle"
             defaultMessage="Caution: You can break stuff here"
           />
         }
@@ -37,7 +37,7 @@ export const CallOuts = () => {
       >
         <p>
           <FormattedMessage
-            id="kbn.management.settings.callOutCautionDescription"
+            id="advancedSettings.callOutCautionDescription"
             defaultMessage="Be careful in here, these settings are for very advanced users only.
             Tweaks you make here can break large portions of Kibana.
             Some of these settings may be undocumented, unsupported or experimental.

@@ -22,31 +22,31 @@ import { i18n } from '@kbn/i18n';
 const upperFirst = (str = '') => str.replace(/^./, strng => strng.toUpperCase());
 
 const names: Record<string, string> = {
-  general: i18n.translate('kbn.management.settings.categoryNames.generalLabel', {
+  general: i18n.translate('advancedSettings.categoryNames.generalLabel', {
     defaultMessage: 'General',
   }),
-  timelion: i18n.translate('kbn.management.settings.categoryNames.timelionLabel', {
+  timelion: i18n.translate('advancedSettings.categoryNames.timelionLabel', {
     defaultMessage: 'Timelion',
   }),
-  notifications: i18n.translate('kbn.management.settings.categoryNames.notificationsLabel', {
+  notifications: i18n.translate('advancedSettings.categoryNames.notificationsLabel', {
     defaultMessage: 'Notifications',
   }),
-  visualizations: i18n.translate('kbn.management.settings.categoryNames.visualizationsLabel', {
+  visualizations: i18n.translate('advancedSettings.categoryNames.visualizationsLabel', {
     defaultMessage: 'Visualizations',
   }),
-  discover: i18n.translate('kbn.management.settings.categoryNames.discoverLabel', {
+  discover: i18n.translate('advancedSettings.categoryNames.discoverLabel', {
     defaultMessage: 'Discover',
   }),
-  dashboard: i18n.translate('kbn.management.settings.categoryNames.dashboardLabel', {
+  dashboard: i18n.translate('advancedSettings.categoryNames.dashboardLabel', {
     defaultMessage: 'Dashboard',
   }),
-  reporting: i18n.translate('kbn.management.settings.categoryNames.reportingLabel', {
+  reporting: i18n.translate('advancedSettings.categoryNames.reportingLabel', {
     defaultMessage: 'Reporting',
   }),
-  search: i18n.translate('kbn.management.settings.categoryNames.searchLabel', {
+  search: i18n.translate('advancedSettings.categoryNames.searchLabel', {
     defaultMessage: 'Search',
   }),
-  siem: i18n.translate('kbn.management.settings.categoryNames.siemLabel', {
+  siem: i18n.translate('advancedSettings.categoryNames.siemLabel', {
     defaultMessage: 'SIEM',
   }),
 };

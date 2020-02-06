@@ -59,7 +59,7 @@ export class Form extends PureComponent<FormProps> {
         <EuiFlexItem grow={false}>
           <em>
             <FormattedMessage
-              id="kbn.management.settings.form.searchResultText"
+              id="advancedSettings.form.searchResultText"
               defaultMessage="Search terms are hiding {settingsCount} settings {clearSearch}"
               values={{
                 settingsCount: totalSettings - currentSettings,
@@ -67,7 +67,7 @@ export class Form extends PureComponent<FormProps> {
                   <EuiLink onClick={clearQuery}>
                     <em>
                       <FormattedMessage
-                        id="kbn.management.settings.form.clearSearchResultText"
+                        id="advancedSettings.form.clearSearchResultText"
                         defaultMessage="(clear search)"
                       />
                     </em>
@@ -122,13 +122,13 @@ export class Form extends PureComponent<FormProps> {
       return (
         <EuiPanel paddingSize="l">
           <FormattedMessage
-            id="kbn.management.settings.form.noSearchResultText"
+            id="advancedSettings.form.noSearchResultText"
             defaultMessage="No settings found {clearSearch}"
             values={{
               clearSearch: (
                 <EuiLink onClick={clearQuery}>
                   <FormattedMessage
-                    id="kbn.management.settings.form.clearNoSearchResultText"
+                    id="advancedSettings.form.clearNoSearchResultText"
                     defaultMessage="(clear search)"
                   />
                 </EuiLink>

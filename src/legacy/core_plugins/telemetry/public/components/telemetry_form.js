@@ -31,7 +31,6 @@ import {
 } from '@elastic/eui';
 import { PRIVACY_STATEMENT_URL } from '../../common/constants';
 import { OptInExampleFlyout } from './opt_in_details_component';
-// todo
 import { Field } from '../../../../../plugins/advanced_settings/public';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';

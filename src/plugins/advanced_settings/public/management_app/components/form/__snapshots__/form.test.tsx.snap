@@ -9,7 +9,7 @@ exports[`Form should render no settings message when there are no settings 1`] =
   >
     <FormattedMessage
       defaultMessage="No settings found {clearSearch}"
-      id="kbn.management.settings.form.noSearchResultText"
+      id="advancedSettings.form.noSearchResultText"
       values={
         Object {
           "clearSearch": <ForwardRef
@@ -17,7 +17,7 @@ exports[`Form should render no settings message when there are no settings 1`] =
           >
             <FormattedMessage
               defaultMessage="(clear search)"
-              id="kbn.management.settings.form.clearNoSearchResultText"
+              id="advancedSettings.form.clearNoSearchResultText"
               values={Object {}}
             />
           </ForwardRef>,
@@ -476,7 +476,7 @@ exports[`Form should render normally 1`] = `
             <em>
               <FormattedMessage
                 defaultMessage="Search terms are hiding {settingsCount} settings {clearSearch}"
-                id="kbn.management.settings.form.searchResultText"
+                id="advancedSettings.form.searchResultText"
                 values={
                   Object {
                     "clearSearch": <ForwardRef
@@ -485,7 +485,7 @@ exports[`Form should render normally 1`] = `
                       <em>
                         <FormattedMessage
                           defaultMessage="(clear search)"
-                          id="kbn.management.settings.form.clearSearchResultText"
+                          id="advancedSettings.form.clearSearchResultText"
                           values={Object {}}
                         />
                       </em>
@@ -1082,7 +1082,7 @@ exports[`Form should render read-only when saving is disabled 1`] = `
             <em>
               <FormattedMessage
                 defaultMessage="Search terms are hiding {settingsCount} settings {clearSearch}"
-                id="kbn.management.settings.form.searchResultText"
+                id="advancedSettings.form.searchResultText"
                 values={
                   Object {
                     "clearSearch": <ForwardRef
@@ -1091,7 +1091,7 @@ exports[`Form should render read-only when saving is disabled 1`] = `
                       <em>
                         <FormattedMessage
                           defaultMessage="(clear search)"
-                          id="kbn.management.settings.form.clearSearchResultText"
+                          id="advancedSettings.form.clearSearchResultText"
                           values={Object {}}
                         />
                       </em>

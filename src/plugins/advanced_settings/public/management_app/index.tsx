@@ -26,6 +26,15 @@ import { ManagementSetup } from '../../../management/public';
 import { CoreSetup } from '../../../../core/public';
 import { ComponentRegistry } from '../types';
 
+export const toBeUsed = {
+  text: i18n.translate('advancedSettings.badge.readOnly.text', {
+    defaultMessage: 'Read only',
+  }),
+  tooltip: i18n.translate('advancedSettings.badge.readOnly.tooltip', {
+    defaultMessage: 'Unable to save advanced settings',
+  }),
+};
+
 export function registerAdvSettingsMgmntApp({
   management,
   getStartServices,
@@ -36,7 +45,7 @@ export function registerAdvSettingsMgmntApp({
   componentRegistry: ComponentRegistry['start'];
 }) {
   const kibanaSection = management.sections.getSection('kibana');
-  const title = i18n.translate('kbn.management.settings.advancedSettingsLabel', {
+  const title = i18n.translate('advancedSettings.advancedSettingsLabel', {
     defaultMessage: 'Advanced Settings',
   });
 
@@ -45,7 +54,9 @@ export function registerAdvSettingsMgmntApp({
   }
 
   kibanaSection.registerApp({
-    id: 'advanced_settings',
+    id: i18n.translate('advancedSettings.sectionLabel', {
+      defaultMessage: 'Advanced Settings',
+    }),
     title,
     order: 20,
     async mount(params) {
@@ -120,7 +131,7 @@ uiModules.get('apps/management').directive('kbnManagementAdvancedReact', functio
 });
 
 management.getSection('kibana').register('settings', {
-  display: i18n.translate('kbn.management.settings.sectionLabel', {
+  display: i18n.translate('advancedSettings.sectionLabel', {
     defaultMessage: 'Advanced Settings',
   }),
   order: 20,
@@ -130,10 +141,10 @@ management.getSection('kibana').register('settings', {
 FeatureCatalogueRegistryProvider.register(() => {
   return {
     id: 'advanced_settings',
-    title: i18n.translate('kbn.management.settings.advancedSettingsLabel', {
+    title: i18n.translate('advancedSettings.advancedSettingsLabel', {
       defaultMessage: 'Advanced Settings',
     }),
-    description: i18n.translate('kbn.management.settings.advancedSettingsDescription', {
+    description: i18n.translate('advancedSettings.advancedSettingsDescription', {
       defaultMessage: 'Directly edit settings that control behavior in Kibana.',
     }),
     icon: 'advancedSettingsApp',
