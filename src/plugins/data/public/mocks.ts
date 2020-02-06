@@ -18,8 +18,8 @@
  */
 import {
   Plugin,
-  FieldFormatsStart,
-  FieldFormatsSetup,
+  DataPublicPluginSetup,
+  DataPublicPluginStart,
   IndexPatternsContract,
   IFieldFormatsRegistry,
 } from '.';
@@ -56,7 +56,7 @@ const createSetupContract = (): Setup => {
   const setupContract = {
     autocomplete: autocompleteMock,
     search: searchSetupMock,
-    fieldFormats: fieldFormatsMock as FieldFormatsSetup,
+    fieldFormats: fieldFormatsMock as DataPublicPluginSetup['fieldFormats'],
     query: querySetupMock,
     __LEGACY: {
       esClient: {
@@ -84,7 +84,7 @@ const createStartContract = (): Start => {
         },
       },
     },
-    fieldFormats: fieldFormatsMock as FieldFormatsStart,
+    fieldFormats: fieldFormatsMock as DataPublicPluginStart['fieldFormats'],
     query: queryStartMock,
     ui: {
       IndexPatternSelect: jest.fn(),
