@@ -220,14 +220,14 @@ TimeBuckets.prototype.getInterval = function(useNormalizedEsInterval = true) {
   function readInterval() {
     const interval = self._i;
     if (moment.isDuration(interval)) return interval;
-    return calcAutoIntervalNear(this.uiSettings.get('histogram:barTarget'), Number(duration));
+    return calcAutoIntervalNear(self.uiSettings.get('histogram:barTarget'), Number(duration));
   }
 
   // check to see if the interval should be scaled, and scale it if so
   function maybeScaleInterval(interval) {
     if (!self.hasBounds()) return interval;
 
-    const maxLength = this.uiSettings.get('histogram:maxBars');
+    const maxLength = self.uiSettings.get('histogram:maxBars');
     const approxLen = duration / interval;
     let scaled;
 
