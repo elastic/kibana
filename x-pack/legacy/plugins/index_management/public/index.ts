@@ -3,10 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { npStart } from 'ui/new_platform';
+import { npSetup } from 'ui/new_platform';
 
-import { IndexMgmtPlugin } from './plugin';
-import { __LEGACYStart } from './legacy';
+import { IndexMgmtUIPlugin } from './plugin';
 import {
   addSummaryExtension,
   getSummaryExtensions,
@@ -23,7 +22,7 @@ import {
 } from './index_management_extensions';
 
 export const plugin = () => {
-  return new IndexMgmtPlugin();
+  return new IndexMgmtUIPlugin();
 };
 
 /** @public */
@@ -42,4 +41,4 @@ export {
   getBadgeExtensions,
 };
 
-plugin().start(npStart.core, npStart.plugins, __LEGACYStart);
+plugin().setup(npSetup.core, npSetup.plugins);
