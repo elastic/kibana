@@ -11,5 +11,5 @@
 
 // Core
 @import 'management_app';
-@import 'sections/settings/advanced_settings';
+@import '../../../../../plugins/advanced_settings/public/management_app/advanced_settings';
 @import 'sections/index_patterns/index';
