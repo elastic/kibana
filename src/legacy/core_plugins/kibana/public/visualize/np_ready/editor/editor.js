@@ -100,7 +100,6 @@ function VisualizeAppController(
   } = getServices();
 
   const filterStateManager = new FilterStateManager(globalState, getAppState, filterManager);
-  const queryFilter = filterManager;
   // Retrieve the resolved SavedVis instance.
   const savedVis = $route.current.locals.savedVis;
   const _applyVis = () => {
@@ -314,11 +313,11 @@ function VisualizeAppController(
     return appState;
   })();
 
-  $scope.filters = queryFilter.getFilters();
+  $scope.filters = filterManager.getFilters();
 
   $scope.onFiltersUpdated = filters => {
-    // The filters will automatically be set when the queryFilter emits an update event (see below)
-    queryFilter.setFilters(filters);
+    // The filters will automatically be set when the filterManager emits an update event (see below)
+    filterManager.setFilters(filters);
   };
 
   $scope.showSaveQuery = visualizeCapabilities.saveQuery;
@@ -429,15 +428,15 @@ function VisualizeAppController(
 
     // update the searchSource when filters update
     subscriptions.add(
-      subscribeWithScope($scope, queryFilter.getUpdates$(), {
+      subscribeWithScope($scope, filterManager.getUpdates$(), {
         next: () => {
-          $scope.filters = queryFilter.getFilters();
-          $scope.globalFilters = queryFilter.getGlobalFilters();
+          $scope.filters = filterManager.getFilters();
+          $scope.globalFilters = filterManager.getGlobalFilters();
         },
       })
     );
     subscriptions.add(
-      subscribeWithScope($scope, queryFilter.getFetches$(), {
+      subscribeWithScope($scope, filterManager.getFetches$(), {
         next: $scope.fetch,
       })
     );
@@ -503,7 +502,7 @@ function VisualizeAppController(
       language:
         localStorage.get('kibana.userQueryLanguage') || uiSettings.get('search:queryLanguage'),
     };
-    queryFilter.setFilters(queryFilter.getGlobalFilters());
+    filterManager.setFilters(filterManager.getGlobalFilters());
     $state.save();
     $scope.fetch();
   };
@@ -513,8 +512,8 @@ function VisualizeAppController(
     $state.save();
 
     const savedQueryFilters = savedQuery.attributes.filters || [];
-    const globalFilters = queryFilter.getGlobalFilters();
-    queryFilter.setFilters([...globalFilters, ...savedQueryFilters]);
+    const globalFilters = filterManager.getGlobalFilters();
+    filterManager.setFilters([...globalFilters, ...savedQueryFilters]);
 
     if (savedQuery.attributes.timefilter) {
       timefilter.setTime({
