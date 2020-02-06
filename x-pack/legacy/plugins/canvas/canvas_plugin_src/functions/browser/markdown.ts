@@ -14,11 +14,13 @@ type Context = Datatable | null;
 interface Arguments {
   content: string[];
   font: Style;
+  openLinksInNewTab: boolean;
 }
 
 interface Return {
   content: string;
   font: Style;
+  openLinksInNewTab: boolean;
 }
 
 export function markdown(): ExpressionFunction<'markdown', Context, Arguments, Render<Return>> {
@@ -45,6 +47,11 @@ export function markdown(): ExpressionFunction<'markdown', Context, Arguments, R
         help: argHelp.font,
         default: '{font}',
       },
+      openLinksInNewTab: {
+        types: ['boolean'],
+        help: argHelp.openLinksInNewTab,
+        default: false,
+      },
     },
     fn: (context, args) => {
       const compileFunctions = args.content.map(str =>
@@ -63,6 +70,7 @@ export function markdown(): ExpressionFunction<'markdown', Context, Arguments, R
         value: {
           content: compileFunctions.map(fn => fn(ctx)).join(''),
           font: args.font,
+          openLinksInNewTab: args.openLinksInNewTab,
         },
       };
     },

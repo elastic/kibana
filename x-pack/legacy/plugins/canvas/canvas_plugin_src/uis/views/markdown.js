@@ -29,5 +29,12 @@ export const markdown = () => ({
       name: 'font',
       argType: 'font',
     },
+    {
+      name: 'openLinksInNewTab',
+      displayName: strings.getOpenLinksInNewTabDisplayName(),
+      help: strings.getOpenLinksInNewTabHelp(),
+      argType: 'toggle',
+      default: false,
+    },
   ],
 });
