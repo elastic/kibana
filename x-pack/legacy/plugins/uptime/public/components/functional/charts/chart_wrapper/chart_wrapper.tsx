@@ -37,7 +37,6 @@ export const ChartWrapper: FC<Props> = ({
   return (
     <EuiErrorBoundary>
       <div
-        data-test-subj=""
         style={{
           height,
           opacity,
