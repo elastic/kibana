@@ -19,7 +19,6 @@ import {
   EuiFormRow,
   EuiComboBox,
   EuiKeyPadMenuItem,
-  EuiLink,
   EuiFieldNumber,
   EuiSelect,
   EuiIconTip,
@@ -27,7 +26,6 @@ import {
   EuiButtonIcon,
   EuiEmptyPrompt,
   EuiButtonEmpty,
-  EuiText,
   EuiHorizontalRule,
 } from '@elastic/eui';
 import { useAppDependencies } from '../../app_context';
