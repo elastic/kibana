@@ -10,7 +10,12 @@
 
 // Builds the base filter criteria used in queries,
 // adding criteria for the time range and an optional query.
-export function buildBaseFilterCriteria(timeFieldName, earliestMs, latestMs, query) {
+export function buildBaseFilterCriteria(
+  timeFieldName?: string,
+  earliestMs?: number,
+  latestMs?: number,
+  query?: object
+) {
   const filterCriteria = [];
   if (timeFieldName && earliestMs && latestMs) {
     filterCriteria.push({
@@ -34,7 +39,7 @@ export function buildBaseFilterCriteria(timeFieldName, earliestMs, latestMs, que
 // Wraps the supplied aggregations in a sampler aggregation.
 // A supplied samplerShardSize (the shard_size parameter of the sampler aggregation)
 // of less than 1 indicates no sampling, and the aggs are returned as-is.
-export function buildSamplerAggregation(aggs, samplerShardSize) {
+export function buildSamplerAggregation(aggs: object, samplerShardSize: number) {
   if (samplerShardSize < 1) {
     return aggs;
   }
@@ -53,6 +58,6 @@ export function buildSamplerAggregation(aggs, samplerShardSize) {
 // depending on whether sampling is being used.
 // A supplied samplerShardSize (the shard_size parameter of the sampler aggregation)
 // of less than 1 indicates no sampling, and an empty array is returned.
-export function getSamplerAggregationsResponsePath(samplerShardSize) {
+export function getSamplerAggregationsResponsePath(samplerShardSize: number): string[] {
   return samplerShardSize > 0 ? ['sample'] : [];
 }

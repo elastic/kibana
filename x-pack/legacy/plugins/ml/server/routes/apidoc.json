@@ -16,6 +16,9 @@
     "DeleteDataFrameAnalytics",
     "StartDataFrameAnalyticsJob",
     "StopsDataFrameAnalyticsJob",
-    "GetDataFrameAnalyticsMessages"
+    "GetDataFrameAnalyticsMessages",
+    "DataVisualizer",
+    "GetOverallStats",
+    "GetStatsForFields"
   ]
 }
