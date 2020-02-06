@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import { getToastNotifications } from '../../../util/dependency_cache';
+import { useMlKibana } from '../../../contexts/kibana';
 import { AnomalyDetectionTable } from './table';
 import { ml } from '../../../services/ml_api_service';
 import { getGroupsFromJobs, getStatsBarData, getJobsWithTimerange } from './utils';
@@ -55,6 +55,9 @@ interface Props {
 }
 
 export const AnomalyDetectionPanel: FC<Props> = ({ jobCreationDisabled }) => {
+  const {
+    services: { notifications },
+  } = useMlKibana();
   const [isLoading, setIsLoading] = useState(false);
   const [groups, setGroups] = useState<GroupsDictionary>({});
   const [groupsCount, setGroupsCount] = useState<number>(0);
@@ -114,8 +117,8 @@ export const AnomalyDetectionPanel: FC<Props> = ({ jobCreationDisabled }) => {
 
       setGroups(tempGroups);
     } catch (e) {
-      const toastNotifications = getToastNotifications();
-      toastNotifications.addDanger(
+      const { toasts } = notifications;
+      toasts.addDanger(
         i18n.translate(
           'xpack.ml.overview.anomalyDetection.errorWithFetchingAnomalyScoreNotificationErrorMessage',
           {

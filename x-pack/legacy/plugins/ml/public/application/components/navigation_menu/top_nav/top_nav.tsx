@@ -14,7 +14,7 @@ import {
   mlTimefilterTimeChange$,
 } from '../../../services/timefilter_refresh_service';
 import { useUrlState } from '../../../util/url_state';
-import { getTimeHistory, getTimefilter, getUiSettings } from '../../../util/dependency_cache';
+import { useMlKibana } from '../../../contexts/kibana';
 
 interface Duration {
   start: string;
@@ -44,9 +44,9 @@ function updateLastRefresh(timeRange: OnRefreshProps) {
 }
 
 export const TopNav: FC = () => {
-  const config = getUiSettings();
-  const timefilter = getTimefilter();
-  const history = getTimeHistory();
+  const { services } = useMlKibana();
+  const config = services.uiSettings;
+  const { timefilter, history } = services.data.query.timefilter;
 
   const [globalState, setGlobalState] = useUrlState('_g');
   const getRecentlyUsedRanges = getRecentlyUsedRangesFactory(history);

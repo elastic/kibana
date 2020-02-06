@@ -22,7 +22,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { getToastNotifications } from '../../util/dependency_cache';
+import { useMlKibana } from '../../contexts/kibana';
 import { Dictionary } from '../../../../common/types/common';
 import { MlJobWithTimeRange } from '../../../../common/types/jobs';
 import { ml } from '../../services/ml_api_service';
@@ -113,6 +113,9 @@ export function JobSelector({ dateFormatTz, singleSelection, timeseriesOnly }: J
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   const [ganttBarWidth, setGanttBarWidth] = useState(DEFAULT_GANTT_BAR_WIDTH);
   const flyoutEl = useRef<{ flyout: HTMLElement }>(null);
+  const {
+    services: { notifications },
+  } = useMlKibana();
 
   // Ensure JobSelectionBar gets updated when selection via globalState changes.
   useEffect(() => {
@@ -177,8 +180,8 @@ export function JobSelector({ dateFormatTz, singleSelection, timeseriesOnly }: J
       })
       .catch((err: any) => {
         console.error('Error fetching jobs with time range', err); // eslint-disable-line
-        const toastNotifications = getToastNotifications();
-        toastNotifications.addDanger({
+        const { toasts } = notifications;
+        toasts.addDanger({
           title: i18n.translate('xpack.ml.jobSelector.jobFetchErrorMessage', {
             defaultMessage: 'An error occurred fetching jobs. Refresh and try again.',
           }),

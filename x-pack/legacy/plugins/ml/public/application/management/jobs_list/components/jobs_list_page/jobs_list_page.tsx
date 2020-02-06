@@ -17,7 +17,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { getDocLinks } from '../../../../util/dependency_cache';
+import { useMlKibana } from '../../../../contexts/kibana';
 
 // @ts-ignore undeclared module
 import { JobsListView } from '../../../../jobs/jobs_list/components/jobs_list_view/index';
@@ -65,9 +65,12 @@ function getTabs(isMlEnabledInSpace: boolean): Tab[] {
 }
 
 export const JobsListPage: FC<Props> = ({ isMlEnabledInSpace }) => {
+  const {
+    services: { docLinks },
+  } = useMlKibana();
+  const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = docLinks;
   const tabs = getTabs(isMlEnabledInSpace);
   const [currentTabId, setCurrentTabId] = useState(tabs[0].id);
-  const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = getDocLinks();
   const anomalyDetectionJobsUrl = `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-jobs.html`;
   const anomalyJobsUrl = `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-dfanalytics.html`;
 

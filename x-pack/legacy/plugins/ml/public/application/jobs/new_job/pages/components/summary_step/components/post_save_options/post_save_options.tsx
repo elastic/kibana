@@ -9,7 +9,7 @@ import { EuiButton, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { JobRunner } from '../../../../../common/job_runner';
-import { getToastNotifications } from '../../../../../../../util/dependency_cache';
+import { useMlKibana } from '../../../../../../../contexts/kibana';
 
 // @ts-ignore
 import { CreateWatchFlyout } from '../../../../../../jobs_list/components/create_watch_flyout/index';
@@ -23,6 +23,9 @@ interface Props {
 type ShowFlyout = (jobId: string) => void;
 
 export const PostSaveOptions: FC<Props> = ({ jobRunner }) => {
+  const {
+    services: { notifications },
+  } = useMlKibana();
   const { jobCreator } = useContext(JobCreatorContext);
   const [datafeedState, setDatafeedState] = useState(DATAFEED_STATE.STOPPED);
   const [watchFlyoutVisible, setWatchFlyoutVisible] = useState(false);
@@ -42,13 +45,13 @@ export const PostSaveOptions: FC<Props> = ({ jobRunner }) => {
   }
 
   async function startJobInRealTime() {
-    const toastNotifications = getToastNotifications();
+    const { toasts } = notifications;
     setDatafeedState(DATAFEED_STATE.STARTING);
     if (jobRunner !== null) {
       try {
         const started = await jobRunner.startDatafeedInRealTime(true);
         setDatafeedState(started === true ? DATAFEED_STATE.STARTED : DATAFEED_STATE.STOPPED);
-        toastNotifications.addSuccess({
+        toasts.addSuccess({
           title: i18n.translate(
             'xpack.ml.newJob.wizard.summaryStep.postSaveOptions.startJobInRealTimeSuccess',
             {
@@ -59,7 +62,7 @@ export const PostSaveOptions: FC<Props> = ({ jobRunner }) => {
         });
       } catch (error) {
         setDatafeedState(DATAFEED_STATE.STOPPED);
-        toastNotifications.addDanger({
+        toasts.addDanger({
           title: i18n.translate(
             'xpack.ml.newJob.wizard.summaryStep.postSaveOptions.startJobInRealTimeError',
             {

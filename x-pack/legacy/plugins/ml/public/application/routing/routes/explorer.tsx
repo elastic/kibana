@@ -29,7 +29,7 @@ import { useTableInterval } from '../../components/controls/select_interval';
 import { useTableSeverity } from '../../components/controls/select_severity';
 import { useUrlState } from '../../util/url_state';
 import { ANOMALY_DETECTION_BREADCRUMB, ML_BREADCRUMB } from '../breadcrumbs';
-import { getTimefilter } from '../../util/dependency_cache';
+import { useMlKibana } from '../../contexts/kibana';
 
 const breadcrumbs = [
   ML_BREADCRUMB,
@@ -70,7 +70,8 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
   const [appState, setAppState] = useUrlState('_a');
   const [globalState, setGlobalState] = useUrlState('_g');
   const [lastRefresh, setLastRefresh] = useState(0);
-  const timefilter = getTimefilter();
+  const { services } = useMlKibana();
+  const { timefilter } = services.data.query.timefilter;
 
   const { jobIds } = useJobSelection(jobsWithTimeRange, getDateFormatTz());
 

@@ -16,7 +16,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { getDocLinks } from '../../../../../util/dependency_cache';
+import { useMlKibana } from '../../../../../contexts/kibana';
 import { ErrorCallout } from '../error_callout';
 import {
   getValuesFromResponse,
@@ -46,6 +46,10 @@ interface Props {
 const defaultEval: Eval = { meanSquaredError: '', rSquared: '', error: null };
 
 export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) => {
+  const {
+    services: { docLinks },
+  } = useMlKibana();
+  const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = docLinks;
   const [trainingEval, setTrainingEval] = useState<Eval>(defaultEval);
   const [generalizationEval, setGeneralizationEval] = useState<Eval>(defaultEval);
   const [isLoadingTraining, setIsLoadingTraining] = useState<boolean>(false);
@@ -227,8 +231,6 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
 
     loadData({ isTrainingClause });
   }, [JSON.stringify(searchQuery)]);
-
-  const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = getDocLinks();
 
   return (
     <EuiPanel data-test-subj="mlDFAnalyticsRegressionExplorationEvaluatePanel">

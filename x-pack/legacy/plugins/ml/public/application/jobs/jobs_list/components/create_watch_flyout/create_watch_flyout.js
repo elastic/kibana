@@ -32,8 +32,8 @@ function getSuccessToast(id, url) {
       'xpack.ml.jobsList.createWatchFlyout.watchCreatedSuccessfullyNotificationMessage',
       {
         defaultMessage: 'Watch {id} created successfully',
-      },
-      { id }
+        values: { id },
+      }
     ),
     text: (
       <React.Fragment>

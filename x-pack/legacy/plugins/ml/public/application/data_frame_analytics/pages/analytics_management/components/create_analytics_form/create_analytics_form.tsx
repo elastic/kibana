@@ -21,7 +21,7 @@ import { debounce } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { getDocLinks } from '../../../../../util/dependency_cache';
+import { useMlKibana } from '../../../../../contexts/kibana';
 import { ml } from '../../../../../services/ml_api_service';
 import { Field } from '../../../../../../../common/types/fields';
 import { newJobCapsService } from '../../../../../services/new_job_capabilities_service';
@@ -45,6 +45,10 @@ import { DfAnalyticsExplainResponse, FieldSelectionItem } from '../../../../comm
 import { shouldAddAsDepVarOption, OMIT_FIELDS } from './form_options_validation';
 
 export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, state }) => {
+  const {
+    services: { docLinks },
+  } = useMlKibana();
+  const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = docLinks;
   const { setFormState } = actions;
   const mlContext = useMlContext();
   const { form, indexPatternsMap, isAdvancedEditorEnabled, isJobCreated, requestMessages } = state;
@@ -297,8 +301,6 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
       debouncedGetExplainData.cancel();
     };
   }, [jobType, sourceIndex, sourceIndexNameEmpty, dependentVariable, trainingPercent]);
-
-  const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = getDocLinks();
 
   return (
     <EuiForm className="mlDataFrameAnalyticsCreateForm">

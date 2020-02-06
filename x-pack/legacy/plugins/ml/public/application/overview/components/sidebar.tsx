@@ -7,7 +7,7 @@
 import React, { FC } from 'react';
 import { EuiFlexItem, EuiLink, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { getDocLinks, getBasePath } from '../../util/dependency_cache';
+import { useMlKibana } from '../../contexts/kibana';
 
 const createJobLink = '#/jobs/new_job/step/index_or_search';
 const feedbackLink = 'https://www.elastic.co/community/';
@@ -35,9 +35,15 @@ function getCreateJobLink(createAnomalyDetectionJobDisabled: boolean) {
 }
 
 export const OverviewSideBar: FC<Props> = ({ createAnomalyDetectionJobDisabled }) => {
-  const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = getDocLinks();
+  const {
+    services: {
+      docLinks,
+      http: { basePath },
+    },
+  } = useMlKibana();
+
+  const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = docLinks;
   const docsLink = `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/xpack-ml.html`;
-  const basePath = getBasePath();
 
   return (
     <EuiFlexItem grow={1}>

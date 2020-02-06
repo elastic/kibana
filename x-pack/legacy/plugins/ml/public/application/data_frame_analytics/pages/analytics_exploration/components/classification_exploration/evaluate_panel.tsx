@@ -19,7 +19,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { getDocLinks } from '../../../../../util/dependency_cache';
+import { useMlKibana } from '../../../../../contexts/kibana';
 import { ErrorCallout } from '../error_callout';
 import {
   getDependentVar,
@@ -50,6 +50,9 @@ interface Props {
 }
 
 export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) => {
+  const {
+    services: { docLinks },
+  } = useMlKibana();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [confusionMatrixData, setConfusionMatrixData] = useState<ConfusionMatrix[]>([]);
   const [columns, setColumns] = useState<any>([]);
@@ -217,7 +220,7 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
     return <LoadingPanel />;
   }
 
-  const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = getDocLinks();
+  const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = docLinks;
 
   return (
     <EuiPanel

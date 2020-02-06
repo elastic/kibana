@@ -8,27 +8,9 @@ import React, { FC } from 'react';
 import { HashRouter, Route, RouteProps } from 'react-router-dom';
 import { Location } from 'history';
 
-import {
-  IUiSettingsClient,
-  ChromeStart,
-  // SavedObjectsClientContract,
-  // ApplicationStart,
-  // HttpStart,
-} from 'src/core/public';
-import {
-  ChromeBreadcrumb,
-  // DocLinksStart,
-  // ToastsStart,
-  // OverlayStart,
-  // ChromeRecentlyAccessed,
-  // IBasePath,
-} from 'kibana/public';
-import {
-  IndexPatternsContract,
-  // TimefilterSetup,
-  // FieldFormatsStart,
-  // DataPublicPluginStart,
-} from 'src/plugins/data/public';
+import { IUiSettingsClient, ChromeStart } from 'src/core/public';
+import { ChromeBreadcrumb } from 'kibana/public';
+import { IndexPatternsContract } from 'src/plugins/data/public';
 import { MlContext, MlContextValue } from '../contexts/ml';
 
 import * as routes from './routes';
@@ -40,16 +22,16 @@ interface MlRouteProps extends RouteProps {
 
 export interface MlRoute {
   path: string;
-  render(props: MlRouteProps, deps: PageDependencies2): JSX.Element;
+  render(props: MlRouteProps, deps: PageDependencies): JSX.Element;
   breadcrumbs: ChromeBreadcrumb[];
 }
 
 export interface PageProps {
   location: Location;
-  deps: PageDependencies2;
+  deps: PageDependencies;
 }
 
-interface PageDependencies2 {
+interface PageDependencies {
   setBreadcrumbs: ChromeStart['setBreadcrumbs'];
   indexPatterns: IndexPatternsContract;
   config: IUiSettingsClient;
@@ -61,7 +43,7 @@ export const PageLoader: FC<{ context: MlContextValue }> = ({ context, children 
   );
 };
 
-export const MlRouter: FC<{ pageDeps: PageDependencies2 }> = ({ pageDeps }) => {
+export const MlRouter: FC<{ pageDeps: PageDependencies }> = ({ pageDeps }) => {
   const setBreadcrumbs = pageDeps.setBreadcrumbs;
 
   return (

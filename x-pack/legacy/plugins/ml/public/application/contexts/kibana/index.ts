@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { useMlKibana } from './kibana_context';
+export { useMlKibana, StartServices, MlKibanaReactContextValue } from './kibana_context';

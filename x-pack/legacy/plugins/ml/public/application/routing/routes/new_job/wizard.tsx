@@ -18,7 +18,6 @@ import { mlJobService } from '../../../services/job_service';
 import { loadNewJobCapabilities } from '../../../services/new_job_capabilities_service';
 import { checkCreateJobsPrivilege } from '../../../privilege/check_privilege';
 import { ANOMALY_DETECTION_BREADCRUMB, ML_BREADCRUMB } from '../../breadcrumbs';
-// import { useDependencyCache } from '../../../util/dependency_cache';
 
 interface WizardPageProps extends PageProps {
   jobType: JOB_TYPE;

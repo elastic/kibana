@@ -6,12 +6,15 @@
 
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { CoreStart } from 'kibana/public';
-import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
+import {
+  useKibana,
+  KibanaReactContextValue,
+} from '../../../../../../../../src/plugins/kibana_react/public';
 
 interface StartPlugins {
   data: DataPublicPluginStart;
 }
 export type StartServices = CoreStart & StartPlugins;
-
-// eslint-disable-next-line react-hooks/rules-of-hooks
-export const useMlKibana = () => useKibana<StartServices>();
+export // eslint-disable-next-line react-hooks/rules-of-hooks
+const useMlKibana = () => useKibana<StartServices>();
+export type MlKibanaReactContextValue = KibanaReactContextValue<StartServices>;

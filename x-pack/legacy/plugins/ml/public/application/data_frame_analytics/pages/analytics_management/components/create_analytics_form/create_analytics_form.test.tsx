@@ -29,11 +29,17 @@ jest.mock('react', () => {
   return { ...r, memo: (x: any) => x };
 });
 
-jest.mock('../../../../../util/dependency_cache', () => ({
-  getDocLinks: () => ({
-    ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
-    DOC_LINK_VERSION: 'jest-metadata-mock-branch',
-  }),
+jest.mock('../../../../../contexts/kibana', () => ({
+  useMlKibana: () => {
+    return {
+      services: {
+        docLinks: () => ({
+          ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
+          DOC_LINK_VERSION: 'jest-metadata-mock-branch',
+        }),
+      },
+    };
+  },
 }));
 
 describe('Data Frame Analytics: <CreateAnalyticsForm />', () => {

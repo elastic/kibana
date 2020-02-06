@@ -23,10 +23,10 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 
-import { getDocLinks } from '../../../util/dependency_cache';
+import { withKibana } from '../../../../../../../../../src/plugins/kibana_react/public';
 
-export function FilterListsHeader({ totalCount, refreshFilterLists }) {
-  const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = getDocLinks();
+function FilterListsHeaderUI({ totalCount, refreshFilterLists, kibana }) {
+  const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = kibana.services.docLinks;
   const docsUrl = `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-rules.html`;
   return (
     <React.Fragment>
@@ -98,7 +98,9 @@ You can use the same filter list in multiple jobs.{br}{learnMoreLink}"
     </React.Fragment>
   );
 }
-FilterListsHeader.propTypes = {
+FilterListsHeaderUI.propTypes = {
   totalCount: PropTypes.number.isRequired,
   refreshFilterLists: PropTypes.func.isRequired,
 };
+
+export const FilterListsHeader = withKibana(FilterListsHeaderUI);

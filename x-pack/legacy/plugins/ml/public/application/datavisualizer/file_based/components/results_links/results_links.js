@@ -15,11 +15,11 @@ import { ml } from '../../../../services/ml_api_service';
 import { isFullLicense } from '../../../../license/check_license';
 import { checkPermission } from '../../../../privilege/check_privilege';
 import { mlNodesAvailable } from '../../../../ml_nodes_check/check_ml_nodes';
-import { getBasePath } from '../../../../util/dependency_cache';
+import { withKibana } from '../../../../../../../../../../src/plugins/kibana_react/public';
 
 const RECHECK_DELAY_MS = 3000;
 
-export class ResultsLinks extends Component {
+class ResultsLinksUI extends Component {
   constructor(props) {
     super(props);
 
@@ -77,7 +77,7 @@ export class ResultsLinks extends Component {
         ? `&_g=(time:(from:'${from}',mode:quick,to:'${to}'))`
         : '';
 
-    const basePath = getBasePath();
+    const { basePath } = this.props.kibana.services.http;
     return (
       <EuiFlexGroup gutterSize="l">
         {createIndexPattern && (
@@ -164,6 +164,8 @@ export class ResultsLinks extends Component {
     );
   }
 }
+
+export const ResultsLinks = withKibana(ResultsLinksUI);
 
 async function getFullTimeRange(index, timeFieldName) {
   const query = { bool: { must: [{ query_string: { analyze_wildcard: true, query: '*' } }] } };

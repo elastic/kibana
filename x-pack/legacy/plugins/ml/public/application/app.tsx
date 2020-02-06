@@ -9,39 +9,9 @@ import ReactDOM from 'react-dom';
 
 // needed to make syntax highlighting work in ace editors
 import 'ace';
-import {
-  AppMountParameters,
-  CoreStart,
-  // IBasePath,
-  // AppMountContext,
-  // ChromeStart,
-  // LegacyCoreStart,
-  // SavedObjectsClientContract,
-  // ToastsStart,
-  // IUiSettingsClient,
-  // DocLinksStart,
-} from 'kibana/public';
+import { AppMountParameters, CoreStart } from 'kibana/public';
 
-// import {
-//   IUiSettingsClient,
-//   ChromeStart,
-//   SavedObjectsClientContract,
-//   ApplicationStart,
-//   HttpStart,
-// } from 'src/core/public';
-// import {
-//   DocLinksStart,
-//   ToastsStart,
-//   OverlayStart,
-//   ChromeRecentlyAccessed,
-//   IBasePath,
-// } from 'kibana/public';
-import {
-  // IndexPatternsContract,
-  // TimefilterSetup,
-  // FieldFormatsStart,
-  DataPublicPluginStart,
-} from 'src/plugins/data/public';
+import { DataPublicPluginStart } from 'src/plugins/data/public';
 
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 import { setDependencyCache, clearCache } from './util/dependency_cache';

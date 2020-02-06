@@ -47,7 +47,7 @@ interface State {
   isDeleteModalVisible: boolean;
 }
 
-class AnnotationFlyoutIntl extends Component<CommonProps & Props> {
+class AnnotationFlyoutUI extends Component<CommonProps & Props> {
   public state: State = {
     isDeleteModalVisible: false,
   };
@@ -346,5 +346,5 @@ export const AnnotationFlyout: FC<any> = props => {
     return null;
   }
 
-  return <AnnotationFlyoutIntl annotation={annotationProp} {...props} />;
+  return <AnnotationFlyoutUI annotation={annotationProp} {...props} />;
 };

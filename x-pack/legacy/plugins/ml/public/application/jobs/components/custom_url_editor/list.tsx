@@ -18,7 +18,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { getToastNotifications } from '../../../util/dependency_cache';
+import { useMlKibana } from '../../../contexts/kibana';
 import { isValidLabel, openCustomUrlWindow } from '../../../util/custom_url_utils';
 import { getTestUrl } from './utils';
 
@@ -48,6 +48,9 @@ export interface CustomUrlListProps {
  * with buttons for testing and deleting each custom URL.
  */
 export const CustomUrlList: FC<CustomUrlListProps> = ({ job, customUrls, setCustomUrls }) => {
+  const {
+    services: { notifications },
+  } = useMlKibana();
   const [expandedUrlIndex, setExpandedUrlIndex] = useState<number | null>(null);
 
   const onLabelChange = (e: ChangeEvent<HTMLInputElement>, index: number) => {
@@ -106,8 +109,8 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({ job, customUrls, setCust
           // eslint-disable-next-line no-console
           console.error('Error obtaining URL for test:', resp);
 
-          const toastNotifications = getToastNotifications();
-          toastNotifications.addDanger(
+          const { toasts } = notifications;
+          toasts.addDanger(
             i18n.translate(
               'xpack.ml.customUrlEditorList.obtainingUrlToTestConfigurationErrorMessage',
               {

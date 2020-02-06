@@ -16,13 +16,23 @@ jest.mock('../../contexts/kibana', () => ({
   useMlKibana: () => {
     return {
       services: {
+        uiSettings: { get: jest.fn() },
         data: {
           query: {
             timefilter: {
               timefilter: {
                 enableTimeRangeSelector: jest.fn(),
                 enableAutoRefreshSelector: jest.fn(),
+                getRefreshInterval: jest.fn(),
+                setRefreshInterval: jest.fn(),
+                getTime: jest.fn(),
+                isAutoRefreshSelectorEnabled: jest.fn(),
+                isTimeRangeSelectorEnabled: jest.fn(),
+                getRefreshIntervalUpdate$: jest.fn(),
+                getTimeUpdate$: jest.fn(),
+                getEnabledUpdated$: jest.fn(),
               },
+              history: { get: jest.fn() },
             },
           },
         },

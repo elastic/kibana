@@ -30,7 +30,7 @@ import {
   // getCharsetOptions,
 } from './options';
 import { isTimestampFormatValid } from './overrides_validation';
-import { getDocLinks } from '../../../../util/dependency_cache';
+import { withKibana } from '../../../../../../../../../../src/plugins/kibana_react/public';
 
 import { TIMESTAMP_OPTIONS, CUSTOM_DROPDOWN_OPTION } from './options/option_lists';
 
@@ -43,7 +43,7 @@ const quoteOptions = getQuoteOptions();
 const LINES_TO_SAMPLE_VALUE_MIN = 3;
 const LINES_TO_SAMPLE_VALUE_MAX = 1000000;
 
-export class Overrides extends Component {
+class OverridesUI extends Component {
   constructor(props) {
     super(props);
 
@@ -268,7 +268,7 @@ export class Overrides extends Component {
 
     const fieldOptions = getSortedFields(fields);
     const timestampFormatErrorsList = [this.customTimestampFormatErrors, timestampFormatError];
-    const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = getDocLinks();
+    const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = this.props.kibana.services.docLinks;
     const docsUrl = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/search-aggregations-bucket-daterange-aggregation.html#date-format-pattern`;
 
     const timestampFormatHelp = (
@@ -503,6 +503,8 @@ export class Overrides extends Component {
     );
   }
 }
+
+export const Overrides = withKibana(OverridesUI);
 
 function selectedOption(opt) {
   return [{ label: opt || '' }];

@@ -19,9 +19,10 @@ import { LineChartPoint } from '../../../common/chart_loader';
 import { JOB_TYPE } from '../../../../../../../common/constants/new_job';
 import { GetTimeFieldRangeResponse } from '../../../../../services/ml_api_service';
 import { TimeRangePicker, TimeRange } from '../../../common/components';
-import { getTimefilter, getToastNotifications } from '../../../../../util/dependency_cache';
+import { useMlKibana } from '../../../../../contexts/kibana';
 
 export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) => {
+  const { services } = useMlKibana();
   const mlContext = useMlContext();
 
   const {
@@ -62,7 +63,7 @@ export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
       max: moment(end),
     });
     // update the timefilter, to keep the URL in sync
-    const timefilter = getTimefilter();
+    const { timefilter } = services.data.query.timefilter;
     timefilter.setTime({
       from: moment(start).toISOString(),
       to: moment(end).toISOString(),
@@ -86,8 +87,8 @@ export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
         end: range.end.epoch,
       });
     } else {
-      const toastNotifications = getToastNotifications();
-      toastNotifications.addDanger(
+      const { toasts } = services.notifications;
+      toasts.addDanger(
         i18n.translate('xpack.ml.newJob.wizard.timeRangeStep.fullTimeRangeError', {
           defaultMessage: 'An error occurred obtaining the time range for the index',
         })
