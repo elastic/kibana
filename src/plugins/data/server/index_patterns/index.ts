@@ -16,15 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import {
-    findIndexPatternById as findIndexPatternById1,
-    getFieldByName as getFieldByName1
-} from './utils';
+import * as indexPatterns from './utils';
 
 export { IndexPatternsFetcher, FieldDescriptor, shouldReadFieldFromDocValues } from './fetcher';
 export { IndexPatternsService } from './index_patterns_service';
-
-export namespace indexPatterns { 
-    export const findIndexPatternById = findIndexPatternById1;
-    export const getFieldByName = getFieldByName1;
-}
+export { indexPatterns };
