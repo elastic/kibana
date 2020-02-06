@@ -39,31 +39,30 @@ const getGroupPaths = (path: SnapshotNodePath[]) => {
 
 export const TableView = (props: Props) => {
   const { nodes, options, formatter, currentTime, nodeType } = props;
-  const [isPopoverOpen, setIsPopoverOpen] = useState<string[]>([]);
+  const [openPopovers, setOpenPopovers] = useState<string[]>([]);
   const openPopoverFor = useCallback(
     (id: string) => () => {
-      setIsPopoverOpen([...isPopoverOpen, id]);
+      setOpenPopovers([...openPopovers, id]);
     },
-    [isPopoverOpen]
+    [openPopovers]
   );
 
   const closePopoverFor = useCallback(
     (id: string) => () => {
-      setIsPopoverOpen([...isPopoverOpen, id]);
-      if (isPopoverOpen.includes(id)) {
-        setIsPopoverOpen(isPopoverOpen.filter(subject => subject !== id));
+      if (openPopovers.includes(id)) {
+        setOpenPopovers(openPopovers.filter(subject => subject !== id));
       }
     },
-    [isPopoverOpen]
+    [openPopovers]
   );
 
   useEffect(() => {
-    if (isPopoverOpen.length > 0) {
+    if (openPopovers.length > 0) {
       document.getElementById(ROOT_ELEMENT_ID)!.style.overflowY = 'hidden';
     } else {
       document.getElementById(ROOT_ELEMENT_ID)!.style.overflowY = 'auto';
     }
-  }, [isPopoverOpen]);
+  }, [openPopovers]);
 
   const columns: Array<EuiBasicTableColumn<typeof items[number]>> = [
     {
@@ -84,7 +83,7 @@ export const TableView = (props: Props) => {
             nodeType={nodeType}
             closePopover={closePopoverFor(uniqueID)}
             currentTime={currentTime}
-            isPopoverOpen={isPopoverOpen.includes(uniqueID)}
+            isPopoverOpen={openPopovers.includes(uniqueID)}
             options={options}
             popoverPosition="rightCenter"
           >
