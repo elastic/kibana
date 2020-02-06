@@ -75,18 +75,16 @@ export function App({
         fromDate: currentRange.from,
         toDate: currentRange.to,
       },
+      filters: data.query.filterManager.getFilters(),
     };
   });
 
   const { lastKnownDoc } = state;
 
   useEffect(() => {
-    // Clear app-specific filters when navigating to Lens. Necessary because Lens
-    // can be loaded without a full page refresh, using the same singleton
-    if (data.query.filterManager.getAppFilters().length) {
+    if (data.query.filterManager.getAppFilters().length > 0) {
       data.query.filterManager.setFilters(data.query.filterManager.getGlobalFilters());
     }
-
     const filterSubscription = data.query.filterManager.getUpdates$().subscribe({
       next: () => {
         // Trigger a re-render, since filters are no longer tracked on state
@@ -128,7 +126,6 @@ export function App({
             core.notifications
           )
             .then(indexPatterns => {
-              // Keep any pinned filters and set app filters from doc
               data.query.filterManager.setFilters(
                 data.query.filterManager
                   .getGlobalFilters()

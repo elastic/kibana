@@ -275,13 +275,11 @@ describe('Lens App', () => {
     it('loads a document and uses query and filters if there is a document id', async () => {
       const args = makeDefaultArgs();
       args.editorFrame = frame;
-
       const savedFilter = {
         query: { match_phrase: { src: 'test' } },
         $state: { store: esFilters.FilterStateStore.APP_STATE },
         meta: { disabled: false, negate: false, alias: null },
       };
-
       (args.docStorage.load as jest.Mock).mockResolvedValue({
         id: '1234',
         expression: 'valid expression',
@@ -770,7 +768,6 @@ describe('Lens App', () => {
       const indexPattern = ({ id: 'index1' } as unknown) as IIndexPattern;
       const field = ({ name: 'myfield' } as unknown) as IFieldType;
 
-      await waitForPromises();
       const filter = {
         ...esFilters.buildExistsFilter(field, indexPattern),
         $state: { store: esFilters.FilterStateStore.APP_STATE },
