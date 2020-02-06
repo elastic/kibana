@@ -1,131 +1,169 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`ValidateJob renders button and modal with a message 1`] = `
+<Fragment>
+  <div>
+    <EuiButton
+      fill={true}
+      iconSide="right"
+      iconType="questionInCircle"
+      isDisabled={false}
+      isLoading={false}
+      onClick={[Function]}
+      size="s"
+    >
+      <FormattedMessage
+        defaultMessage="Validate Job"
+        id="xpack.ml.validateJob.validateJobButtonLabel"
+        values={Object {}}
+      />
+    </EuiButton>
+    <Modal
+      close={[Function]}
+      title={
+        <FormattedMessage
+          defaultMessage="Validate job {title}"
+          id="xpack.ml.validateJob.modal.validateJobTitle"
+          values={
+            Object {
+              "title": "test-id",
+            }
+          }
+        />
+      }
+    >
+      <MessageList
+        idFilterList={Array []}
+        messages={
+          Array [
+            Object {
+              "fieldName": "airline",
+              "id": "over_field_low_cardinality",
+              "status": "warning",
+              "text": "Cardinality of over_field \\"airline\\" is low and therefore less suitable for population analysis.",
+              "url": "https://www.elastic.co/blog/sizing-machine-learning-with-elasticsearch",
+            },
+          ]
+        }
+      />
+      <EuiText>
+        <FormattedMessage
+          defaultMessage="Job validation performs certain checks against job configurations and underlying source data and provides specific advice on how to adjust settings that are more likely to produce insightful results."
+          id="xpack.ml.validateJob.modal.jobValidationDescriptionText"
+          values={Object {}}
+        />
+      </EuiText>
+      <EuiText>
+        <FormattedMessage
+          defaultMessage="For more information, see {mlJobTipsLink}."
+          id="xpack.ml.validateJob.modal.linkToJobTipsText"
+          values={
+            Object {
+              "mlJobTipsLink": <ForwardRef
+                href="https://www.elastic.co/guide/en/machine-learning/jest-metadata-mock-branch/create-jobs.html#job-tips"
+                target="_blank"
+              >
+                <FormattedMessage
+                  defaultMessage="Machine Learning Job Tips"
+                  id="xpack.ml.validateJob.modal.linkToJobTipsText.mlJobTipsLinkText"
+                  values={Object {}}
+                />
+              </ForwardRef>,
+            }
+          }
+        />
+      </EuiText>
+    </Modal>
+  </div>
+</Fragment>
+`;
+
 exports[`ValidateJob renders the button 1`] = `
-<ValidateJobUI
-  getJobConfig={[Function]}
-  intl={
-    Object {
-      "defaultFormats": Object {},
-      "defaultLocale": "en",
-      "formatDate": [Function],
-      "formatHTMLMessage": [Function],
-      "formatMessage": [Function],
-      "formatNumber": [Function],
-      "formatPlural": [Function],
-      "formatRelative": [Function],
-      "formatTime": [Function],
-      "formats": Object {
-        "date": Object {
-          "full": Object {
-            "day": "numeric",
-            "month": "long",
-            "weekday": "long",
-            "year": "numeric",
-          },
-          "long": Object {
-            "day": "numeric",
-            "month": "long",
-            "year": "numeric",
-          },
-          "medium": Object {
-            "day": "numeric",
-            "month": "short",
-            "year": "numeric",
-          },
-          "short": Object {
-            "day": "numeric",
-            "month": "numeric",
-            "year": "2-digit",
-          },
-        },
-        "number": Object {
-          "currency": Object {
-            "style": "currency",
-          },
-          "percent": Object {
-            "style": "percent",
-          },
-        },
-        "relative": Object {
-          "days": Object {
-            "units": "day",
-          },
-          "hours": Object {
-            "units": "hour",
-          },
-          "minutes": Object {
-            "units": "minute",
-          },
-          "months": Object {
-            "units": "month",
-          },
-          "seconds": Object {
-            "units": "second",
-          },
-          "years": Object {
-            "units": "year",
-          },
-        },
-        "time": Object {
-          "full": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-            "second": "numeric",
-            "timeZoneName": "short",
-          },
-          "long": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-            "second": "numeric",
-            "timeZoneName": "short",
-          },
-          "medium": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-            "second": "numeric",
-          },
-          "short": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-          },
-        },
-      },
-      "formatters": Object {
-        "getDateTimeFormat": [Function],
-        "getMessageFormat": [Function],
-        "getNumberFormat": [Function],
-        "getPluralFormat": [Function],
-        "getRelativeFormat": [Function],
-      },
-      "locale": "en",
-      "messages": Object {},
-      "now": [Function],
-      "onError": [Function],
-      "textComponent": Symbol(react.fragment),
-      "timeZone": null,
-    }
-  }
-  kibana={
-    Object {
-      "notifications": Object {
-        "toasts": Object {
-          "danger": [Function],
-          "show": [Function],
-          "success": [Function],
-          "warning": [Function],
-        },
-      },
-      "overlays": Object {
-        "openFlyout": [Function],
-        "openModal": [Function],
-      },
-      "services": Object {},
-    }
-  }
-  mlJobService={
-    Object {
-      "validateJob": [Function],
-    }
-  }
-/>
+<Fragment>
+  <div>
+    <EuiButton
+      fill={true}
+      iconSide="right"
+      iconType="questionInCircle"
+      isDisabled={false}
+      isLoading={true}
+      onClick={[Function]}
+      size="s"
+    >
+      <FormattedMessage
+        defaultMessage="Validate Job"
+        id="xpack.ml.validateJob.validateJobButtonLabel"
+        values={Object {}}
+      />
+    </EuiButton>
+  </div>
+</Fragment>
+`;
+
+exports[`ValidateJob renders the button and modal with a success message 1`] = `
+<Fragment>
+  <div>
+    <EuiButton
+      fill={true}
+      iconSide="right"
+      iconType="questionInCircle"
+      isDisabled={false}
+      isLoading={false}
+      onClick={[Function]}
+      size="s"
+    >
+      <FormattedMessage
+        defaultMessage="Validate Job"
+        id="xpack.ml.validateJob.validateJobButtonLabel"
+        values={Object {}}
+      />
+    </EuiButton>
+    <Modal
+      close={[Function]}
+      title={
+        <FormattedMessage
+          defaultMessage="Validate job {title}"
+          id="xpack.ml.validateJob.modal.validateJobTitle"
+          values={
+            Object {
+              "title": "test-id",
+            }
+          }
+        />
+      }
+    >
+      <MessageList
+        idFilterList={Array []}
+        messages={Array []}
+      />
+      <EuiText>
+        <FormattedMessage
+          defaultMessage="Job validation performs certain checks against job configurations and underlying source data and provides specific advice on how to adjust settings that are more likely to produce insightful results."
+          id="xpack.ml.validateJob.modal.jobValidationDescriptionText"
+          values={Object {}}
+        />
+      </EuiText>
+      <EuiText>
+        <FormattedMessage
+          defaultMessage="For more information, see {mlJobTipsLink}."
+          id="xpack.ml.validateJob.modal.linkToJobTipsText"
+          values={
+            Object {
+              "mlJobTipsLink": <ForwardRef
+                href="https://www.elastic.co/guide/en/machine-learning/jest-metadata-mock-branch/create-jobs.html#job-tips"
+                target="_blank"
+              >
+                <FormattedMessage
+                  defaultMessage="Machine Learning Job Tips"
+                  id="xpack.ml.validateJob.modal.linkToJobTipsText.mlJobTipsLinkText"
+                  values={Object {}}
+                />
+              </ForwardRef>,
+            }
+          }
+        />
+      </EuiText>
+    </Modal>
+  </div>
+</Fragment>
 `;

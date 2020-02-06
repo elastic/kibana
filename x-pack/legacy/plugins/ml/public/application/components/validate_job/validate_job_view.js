@@ -28,7 +28,7 @@ import {
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { withKibana } from '../../../../../../../../src/plugins/kibana_react/public';
+import { getDocLinks } from '../../util/dependency_cache';
 
 // don't use something like plugins/ml/../common
 // because it won't work with the jest tests
@@ -184,7 +184,7 @@ Modal.propType = {
   title: PropTypes.string,
 };
 
-class ValidateJobUI extends Component {
+export class ValidateJob extends Component {
   constructor(props) {
     super(props);
     this.state = getDefaultState();
@@ -251,7 +251,7 @@ class ValidateJobUI extends Component {
   };
 
   render() {
-    const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = this.props.kibana.services.docLinks;
+    const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = getDocLinks();
     const jobTipsUrl = `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/create-jobs.html#job-tips`;
     // only set to false if really false and not another falsy value, so it defaults to true.
     const fill = this.props.fill === false ? false : true;
@@ -337,7 +337,7 @@ class ValidateJobUI extends Component {
     );
   }
 }
-ValidateJobUI.propTypes = {
+ValidateJob.propTypes = {
   fields: PropTypes.object,
   fill: PropTypes.bool,
   getDuration: PropTypes.func,
@@ -349,5 +349,3 @@ ValidateJobUI.propTypes = {
   setIsValid: PropTypes.func,
   idFilterList: PropTypes.array,
 };
-
-export const ValidateJob = withKibana(ValidateJobUI);

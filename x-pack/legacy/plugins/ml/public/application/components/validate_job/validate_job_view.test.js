@@ -46,33 +46,33 @@ describe('ValidateJob', () => {
     expect(test1.wrapper).toMatchSnapshot();
   });
 
-  // test('renders the button and modal with a success message', () => {
-  //   test1.wrapper.instance().validate();
-  //   test1.p.then(() => {
-  //     test1.wrapper.update();
-  //     expect(test1.wrapper).toMatchSnapshot();
-  //   });
-  // });
+  test('renders the button and modal with a success message', () => {
+    test1.wrapper.instance().validate();
+    test1.p.then(() => {
+      test1.wrapper.update();
+      expect(test1.wrapper).toMatchSnapshot();
+    });
+  });
 
-  // const test2 = prepareTest({
-  //   success: true,
-  //   messages: [
-  //     {
-  //       fieldName: 'airline',
-  //       id: 'over_field_low_cardinality',
-  //       status: 'warning',
-  //       text:
-  //         'Cardinality of over_field "airline" is low and therefore less suitable for population analysis.',
-  //       url: 'https://www.elastic.co/blog/sizing-machine-learning-with-elasticsearch',
-  //     },
-  //   ],
-  // });
+  const test2 = prepareTest({
+    success: true,
+    messages: [
+      {
+        fieldName: 'airline',
+        id: 'over_field_low_cardinality',
+        status: 'warning',
+        text:
+          'Cardinality of over_field "airline" is low and therefore less suitable for population analysis.',
+        url: 'https://www.elastic.co/blog/sizing-machine-learning-with-elasticsearch',
+      },
+    ],
+  });
 
-  // test('renders button and modal with a message', () => {
-  //   test2.wrapper.instance().validate();
-  //   test2.p.then(() => {
-  //     test2.wrapper.update();
-  //     expect(test2.wrapper).toMatchSnapshot();
-  //   });
-  // });
+  test('renders button and modal with a message', () => {
+    test2.wrapper.instance().validate();
+    test2.p.then(() => {
+      test2.wrapper.update();
+      expect(test2.wrapper).toMatchSnapshot();
+    });
+  });
 });

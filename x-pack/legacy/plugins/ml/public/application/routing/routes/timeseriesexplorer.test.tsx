@@ -36,28 +36,17 @@ jest.mock('../../contexts/kibana', () => ({
             },
           },
         },
+        notifications: {
+          toasts: {
+            addDanger: () => {},
+          },
+        },
       },
     };
   },
 }));
 
 jest.mock('../../util/dependency_cache', () => ({
-  getTimefilter: () => ({
-    enableTimeRangeSelector: jest.fn(),
-    enableAutoRefreshSelector: jest.fn(),
-    setTime: () => jest.fn(),
-    getBounds: () => jest.fn(),
-    isTimeRangeSelectorEnabled: () => true,
-    isAutoRefreshSelectorEnabled: () => true,
-    getTime: () => ({ from: '', to: '' }),
-    getRefreshInterval: () => ({ pause: false }),
-    setRefreshInterval: jest.fn(),
-    getRefreshIntervalUpdate$: jest.fn(),
-    getTimeUpdate$: jest.fn(),
-    getEnabledUpdated$: jest.fn(),
-  }),
-  getTimeHistory: () => ({ get: jest.fn() }),
-  getUiSettings: () => ({ get: jest.fn() }),
   getToastNotifications: () => ({ addSuccess: jest.fn(), addDanger: jest.fn() }),
 }));
 
