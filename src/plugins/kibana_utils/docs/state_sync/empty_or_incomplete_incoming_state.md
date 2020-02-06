@@ -10,7 +10,7 @@ It is up to the application to handle such scenarios.
 Consider the following example:
 
 ```ts
-// window.location.href is "/#?_a=(count:0)"
+// window.location.href is "/#?_a=(count:0"
 const defaultState = { count: 0 }; // default application state
 
 const stateContainer = createStateContainer(defaultState);
@@ -24,15 +24,15 @@ const { start, stop } = syncState({
 
 start();
 
-// on this point state in the storage and in the state is out of sync
+// At this point, state and storage are in sync
 // state: {count: 0}
 // storage: {count: 0}
 
-// And now user changed the URL to (let's assume) "/#?_a=(corrupt:0)"
-// on this point state will recieve an update: {corrupt: 0}
+// Now user changes the URL manually to "/#?_a=(corrupt:0)",
+// triggering a state update with {corrupt: 0}
 ```
 
-Application could handle this gracefully by using simple composition during setup:
+The application could, for example, handle this gracefully, by using simple composition during setup:
 
 ```ts
 const { start, stop } = syncState({
@@ -45,9 +45,9 @@ const { start, stop } = syncState({
 });
 ```
 
-In this case, app will not get into state, which is not shaped as app expects.
+In this case, the corrupt value will not get into state, preventing misshaped state.
 
-To help application developers to not forget about such edge cases,
+To help application developers remember such edge cases,
 `syncState` util sets a constraint,
 that setter to state container should be able to handle `null` value (see [IStateSyncConfig](../../public/state_sync/types.ts)).
 Incoming `null` value from state storage usually means that state is empty (e.g. URL without `storageKey` query param).

@@ -3,7 +3,7 @@
 `KbnUrlStateStorage` is a state storage for `syncState` utility which:
 
 - Keeps state in sync with the URL.
-- Serializes data and stores it in the URL in 2 different formats:
+- Serializes data and stores it in the URL in one of the supported formats:
   1. [Rison](https://github.com/w33ble/rison-node) encoded.
   2. Hashed URL: In URL we store only the hash from the serialized state, but the state itself is stored in `sessionStorage`.
      See kibana's advanced option for more context `state:storeInSessionStorage`
