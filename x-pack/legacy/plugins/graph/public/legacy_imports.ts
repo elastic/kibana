@@ -15,4 +15,7 @@ export { confirmModalFactory } from 'ui/modals/confirm_modal';
 // @ts-ignore
 export { addAppRedirectMessageToUrl } from 'ui/notify';
 export { createSavedObjectClass } from 'ui/saved_objects/saved_object';
+<<<<<<< HEAD
 export { configureAppAngularModule } from '../../../../../src/plugins/kibana_legacy/public';
+=======
+>>>>>>> [NP] Move saved object modal into new platform (#56383)
