@@ -18,10 +18,8 @@
  */
 
 import { validateInterval } from './lib/validate_interval';
-import { timezoneProvider } from 'ui/vis/lib/timezone';
-import { timefilter } from 'ui/timefilter';
-import { kfetch } from 'ui/kfetch';
-import { getUISettings } from './services';
+import { timezoneProvider } from './legacy_imports';
+import { getUISettings, getDataStart, getCoreStart } from './services';
 
 export const metricsRequestHandler = async ({
   uiState,
@@ -34,7 +32,7 @@ export const metricsRequestHandler = async ({
   const config = getUISettings();
   const timezone = timezoneProvider(config)();
   const uiStateObj = uiState.get(visParams.type, {});
-  const parsedTimeRange = timefilter.calculateBounds(timeRange);
+  const parsedTimeRange = getDataStart().query.timefilter.timefilter.calculateBounds(timeRange);
   const scaledDataFormat = config.get('dateFormat:scaled');
   const dateFormat = config.get('dateFormat');
 
@@ -44,9 +42,7 @@ export const metricsRequestHandler = async ({
 
       validateInterval(parsedTimeRange, visParams, maxBuckets);
 
-      const resp = await kfetch({
-        pathname: '/api/metrics/vis/data',
-        method: 'POST',
+      const resp = await getCoreStart().http.post('/api/metrics/vis/data', {
         body: JSON.stringify({
           timerange: {
             timezone,
