@@ -6,6 +6,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { isRight } from 'fp-ts/lib/Either';
+import { ThrowReporter } from 'io-ts/lib/ThrowReporter';
 import { UMServerLibs } from '../../lib/lib';
 import { DynamicSettings, DynamicSettingsType } from '../../../common/runtime_types';
 import { savedObjectsAdapter } from '../../lib/adapters/saved_objects/kibana_saved_objects_adapter';
@@ -28,12 +29,15 @@ export const createGetDynamicSettingsRoute: UMRestApiRouteFactory = (libs: UMSer
 export const createPostDynamicSettingsRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
   method: 'POST',
   path: '/api/uptime/dynamic_settings',
-  validate: false, // TODO add validation
+  validate: {
+    body: schema.object({}, { allowUnknowns: true }),
+  },
   options: {
     tags: ['access:uptime'],
   },
   handler: async ({ savedObjectsClient }, _context, request, response): Promise<any> => {
     const decoded = DynamicSettingsType.decode(request.body);
+    ThrowReporter.report(decoded);
     if (isRight(decoded)) {
       const newSettings: DynamicSettings = decoded.right;
       await savedObjectsAdapter.setUptimeDynamicSettings(savedObjectsClient, newSettings);
@@ -43,8 +47,6 @@ export const createPostDynamicSettingsRoute: UMRestApiRouteFactory = (libs: UMSe
           dynamic_settings: request.body,
         },
       });
-    } else {
-      throw new Error('Could not decode dynamic settings!');
     }
   },
 });

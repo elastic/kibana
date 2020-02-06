@@ -6,6 +6,7 @@
 
 import { ThrowReporter } from 'io-ts/lib/ThrowReporter';
 import { isRight } from 'fp-ts/lib/Either';
+import { PathReporter } from 'io-ts/lib/PathReporter';
 import { getApiPath } from '../../lib/helper';
 import {
   DynamicSettingsType,
@@ -41,7 +42,7 @@ export const fetchDynamicSettings = async ({
   throw new Error('`getDynamicSettings` response did not correspond to expected type');
 };
 
-export const fetchPostDynamicSettings = async ({
+export const saveDynamicSettings = async ({
   basePath,
   settings,
 }: SaveApiRequest): Promise<DynamicSettingsSaveResponse> => {
@@ -50,6 +51,7 @@ export const fetchPostDynamicSettings = async ({
     method: 'POST',
     headers: {
       'kbn-xsrf': 'kibana',
+      'content-type': 'application/json',
     },
     body: JSON.stringify(settings),
   });

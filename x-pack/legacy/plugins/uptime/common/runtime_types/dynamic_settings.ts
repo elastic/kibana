@@ -10,11 +10,14 @@ export const DynamicSettingsType = t.type({
   heartbeatIndexName: t.string,
 });
 
-export const DynamicSettingsSaveType = t.type({
-  success: t.boolean,
-  error: t.string,
-  settings: DynamicSettingsType,
-});
+export const DynamicSettingsSaveType = t.intersection([
+  t.type({
+    success: t.boolean,
+  }),
+  t.partial({
+    error: t.string,
+  }),
+]);
 
 export type DynamicSettings = t.TypeOf<typeof DynamicSettingsType>;
 export type DynamicSettingsSaveResponse = t.TypeOf<typeof DynamicSettingsSaveType>;
