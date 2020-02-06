@@ -22,6 +22,7 @@ import {
   DataPublicPluginStart,
   addSearchStrategy,
   defaultSearchStrategy,
+  DataPublicPluginSetup,
 } from '../../../../plugins/data/public';
 import { ExpressionsSetup } from '../../../../plugins/expressions/public';
 
@@ -32,15 +33,38 @@ import {
   setInjectedMetadata,
   setFieldFormats,
   setSearchService,
+  setOverlays,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../plugins/data/public/services';
+import { SELECT_RANGE_ACTION, selectRangeAction } from './actions/select_range_action';
+import { VALUE_CLICK_ACTION, valueClickAction } from './actions/value_click_action';
+import {
+  SELECT_RANGE_TRIGGER,
+  VALUE_CLICK_TRIGGER,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../plugins/embeddable/public/lib/triggers';
+import { IUiActionsSetup, IUiActionsStart } from '../../../../plugins/ui_actions/public';
+
+import { SearchSetup, SearchStart, SearchService } from './search/search_service';
 
 export interface DataPluginSetupDependencies {
+  data: DataPublicPluginSetup;
   expressions: ExpressionsSetup;
+  uiActions: IUiActionsSetup;
 }
 
 export interface DataPluginStartDependencies {
   data: DataPublicPluginStart;
+  uiActions: IUiActionsStart;
+}
+
+/**
+ * Interface for this plugin's returned `setup` contract.
+ *
+ * @public
+ */
+export interface DataSetup {
+  search: SearchSetup;
 }
 
 /**
@@ -48,7 +72,9 @@ export interface DataPluginStartDependencies {
  *
  * @public
  */
-export interface DataStart {} // eslint-disable-line @typescript-eslint/no-empty-interface
+export interface DataStart {
+  search: SearchStart;
+}
 
 /**
  * Data Plugin - public
@@ -63,22 +89,42 @@ export interface DataStart {} // eslint-disable-line @typescript-eslint/no-empty
  */
 
 export class DataPlugin
-  implements Plugin<void, DataStart, DataPluginSetupDependencies, DataPluginStartDependencies> {
-  public setup(core: CoreSetup) {
+  implements
+    Plugin<DataSetup, DataStart, DataPluginSetupDependencies, DataPluginStartDependencies> {
+  private readonly search = new SearchService();
+
+  public setup(core: CoreSetup, { data, uiActions }: DataPluginSetupDependencies) {
     setInjectedMetadata(core.injectedMetadata);
 
     // This is to be deprecated once we switch to the new search service fully
     addSearchStrategy(defaultSearchStrategy);
+
+    uiActions.registerAction(
+      selectRangeAction(data.query.filterManager, data.query.timefilter.timefilter)
+    );
+    uiActions.registerAction(
+      valueClickAction(data.query.filterManager, data.query.timefilter.timefilter)
+    );
+
+    return {
+      search: this.search.setup(core),
+    };
   }
 
-  public start(core: CoreStart, { data }: DataPluginStartDependencies): DataStart {
+  public start(core: CoreStart, { data, uiActions }: DataPluginStartDependencies): DataStart {
     setUiSettings(core.uiSettings);
     setQueryService(data.query);
     setIndexPatterns(data.indexPatterns);
     setFieldFormats(data.fieldFormats);
     setSearchService(data.search);
+    setOverlays(core.overlays);
 
-    return {};
+    uiActions.attachAction(SELECT_RANGE_TRIGGER, SELECT_RANGE_ACTION);
+    uiActions.attachAction(VALUE_CLICK_TRIGGER, VALUE_CLICK_ACTION);
+
+    return {
+      search: this.search.start(core),
+    };
   }
 
   public stop() {}

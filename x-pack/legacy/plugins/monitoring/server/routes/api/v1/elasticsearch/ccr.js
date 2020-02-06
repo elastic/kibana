@@ -26,7 +26,7 @@ function getBucketScript(max, min) {
 function buildRequest(req, config, esIndexPattern) {
   const min = moment.utc(req.payload.timeRange.min).valueOf();
   const max = moment.utc(req.payload.timeRange.max).valueOf();
-  const maxBucketSize = config.get('xpack.monitoring.max_bucket_size');
+  const maxBucketSize = config.get('monitoring.ui.max_bucket_size');
   const aggs = {
     ops_synced_max: {
       max: {

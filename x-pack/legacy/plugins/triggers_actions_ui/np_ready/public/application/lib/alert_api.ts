@@ -12,6 +12,16 @@ export async function loadAlertTypes({ http }: { http: HttpSetup }): Promise<Ale
   return await http.get(`${BASE_ALERT_API_PATH}/types`);
 }
 
+export async function loadAlert({
+  http,
+  alertId,
+}: {
+  http: HttpSetup;
+  alertId: string;
+}): Promise<Alert> {
+  return await http.get(`${BASE_ALERT_API_PATH}/${alertId}`);
+}
+
 export async function loadAlerts({
   http,
   page,
@@ -55,6 +65,10 @@ export async function loadAlerts({
   });
 }
 
+export async function deleteAlert({ id, http }: { id: string; http: HttpSetup }): Promise<void> {
+  await http.delete(`${BASE_ALERT_API_PATH}/${id}`);
+}
+
 export async function deleteAlerts({
   ids,
   http,
@@ -62,7 +76,7 @@ export async function deleteAlerts({
   ids: string[];
   http: HttpSetup;
 }): Promise<void> {
-  await Promise.all(ids.map(id => http.delete(`${BASE_ALERT_API_PATH}/${id}`)));
+  await Promise.all(ids.map(id => deleteAlert({ http, id })));
 }
 
 export async function createAlert({
@@ -91,6 +105,10 @@ export async function updateAlert({
   });
 }
 
+export async function enableAlert({ id, http }: { id: string; http: HttpSetup }): Promise<void> {
+  await http.post(`${BASE_ALERT_API_PATH}/${id}/_enable`);
+}
+
 export async function enableAlerts({
   ids,
   http,
@@ -98,7 +116,11 @@ export async function enableAlerts({
   ids: string[];
   http: HttpSetup;
 }): Promise<void> {
-  await Promise.all(ids.map(id => http.post(`${BASE_ALERT_API_PATH}/${id}/_enable`)));
+  await Promise.all(ids.map(id => enableAlert({ id, http })));
+}
+
+export async function disableAlert({ id, http }: { id: string; http: HttpSetup }): Promise<void> {
+  await http.post(`${BASE_ALERT_API_PATH}/${id}/_disable`);
 }
 
 export async function disableAlerts({
@@ -108,11 +130,19 @@ export async function disableAlerts({
   ids: string[];
   http: HttpSetup;
 }): Promise<void> {
-  await Promise.all(ids.map(id => http.post(`${BASE_ALERT_API_PATH}/${id}/_disable`)));
+  await Promise.all(ids.map(id => disableAlert({ id, http })));
+}
+
+export async function muteAlert({ id, http }: { id: string; http: HttpSetup }): Promise<void> {
+  await http.post(`${BASE_ALERT_API_PATH}/${id}/_mute_all`);
 }
 
 export async function muteAlerts({ ids, http }: { ids: string[]; http: HttpSetup }): Promise<void> {
-  await Promise.all(ids.map(id => http.post(`${BASE_ALERT_API_PATH}/${id}/_mute_all`)));
+  await Promise.all(ids.map(id => muteAlert({ http, id })));
+}
+
+export async function unmuteAlert({ id, http }: { id: string; http: HttpSetup }): Promise<void> {
+  await http.post(`${BASE_ALERT_API_PATH}/${id}/_unmute_all`);
 }
 
 export async function unmuteAlerts({
@@ -122,5 +152,5 @@ export async function unmuteAlerts({
   ids: string[];
   http: HttpSetup;
 }): Promise<void> {
-  await Promise.all(ids.map(id => http.post(`${BASE_ALERT_API_PATH}/${id}/_unmute_all`)));
+  await Promise.all(ids.map(id => unmuteAlert({ id, http })));
 }

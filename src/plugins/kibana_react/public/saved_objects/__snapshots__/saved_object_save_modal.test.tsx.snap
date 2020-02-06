@@ -8,7 +8,6 @@ exports[`SavedObjectSaveModal should render matching snapshot 1`] = `
     <EuiModal
       className="kbnSavedObjectSaveModal"
       data-test-subj="savedObjectSaveModal"
-      maxWidth={true}
       onClose={[Function]}
     >
       <EuiModalHeader>

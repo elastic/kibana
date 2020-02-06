@@ -509,7 +509,7 @@ export type ConfigDeprecation = (config: Record<string, any>, fromPath: string, 
 // @public
 export interface ConfigDeprecationFactory {
     rename(oldKey: string, newKey: string): ConfigDeprecation;
-    renameFromRoot(oldKey: string, newKey: string): ConfigDeprecation;
+    renameFromRoot(oldKey: string, newKey: string, silent?: boolean): ConfigDeprecation;
     unused(unusedKey: string): ConfigDeprecation;
     unusedFromRoot(unusedKey: string): ConfigDeprecation;
 }
@@ -736,6 +736,14 @@ export interface HttpResponseOptions {
 // @public
 export type HttpResponsePayload = undefined | string | Record<string, any> | Buffer | Stream;
 
+// @public (undocumented)
+export interface HttpServerInfo {
+    host: string;
+    name: string;
+    port: number;
+    protocol: 'http' | 'https' | 'socket';
+}
+
 // @public
 export interface HttpServiceSetup {
     // (undocumented)
@@ -747,6 +755,7 @@ export interface HttpServiceSetup {
     createCookieSessionStorageFactory: <T>(cookieOptions: SessionStorageCookieOptions<T>) => Promise<SessionStorageFactory<T>>;
     createRouter: () => IRouter;
     csp: ICspConfig;
+    getServerInfo: () => HttpServerInfo;
     isTlsEnabled: boolean;
     registerAuth: (handler: AuthenticationHandler) => void;
     registerOnPostAuth: (handler: OnPostAuthHandler) => void;

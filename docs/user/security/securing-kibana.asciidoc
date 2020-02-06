@@ -104,7 +104,7 @@ You can manage privileges on the *Management / Security / Roles* page in {kib}.
 If you're using the native realm with Basic Authentication, you can assign roles
 using the *Management / Security / Users* page in {kib} or the
 {ref}/security-api.html#security-user-apis[user management APIs]. For example, 
-the following creates a user named `jacknich` and assigns it the `kibana_user` 
+the following creates a user named `jacknich` and assigns it the `kibana_admin` 
 role:
 
 [source,js]
@@ -112,7 +112,7 @@ role:
 POST /_security/user/jacknich
 {
   "password" : "t0pS3cr3t",
-  "roles" : [ "kibana_user" ]
+  "roles" : [ "kibana_admin" ]
 }
 --------------------------------------------------------------------------------
 // CONSOLE

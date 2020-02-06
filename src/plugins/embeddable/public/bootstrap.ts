@@ -23,6 +23,8 @@ import {
   APPLY_FILTER_TRIGGER,
   createFilterAction,
   PANEL_BADGE_TRIGGER,
+  SELECT_RANGE_TRIGGER,
+  VALUE_CLICK_TRIGGER,
 } from './lib';
 
 /**
@@ -50,11 +52,25 @@ export const bootstrap = (uiActions: IUiActionsSetup) => {
     description: 'Actions appear in title bar when an embeddable loads in a panel',
     actionIds: [],
   };
+  const selectRangeTrigger = {
+    id: SELECT_RANGE_TRIGGER,
+    title: 'Select range',
+    description: 'Applies a range filter',
+    actionIds: [],
+  };
+  const valueClickTrigger = {
+    id: VALUE_CLICK_TRIGGER,
+    title: 'Value clicked',
+    description: 'Value was clicked',
+    actionIds: [],
+  };
   const actionApplyFilter = createFilterAction();
 
   uiActions.registerTrigger(triggerContext);
   uiActions.registerTrigger(triggerFilter);
   uiActions.registerAction(actionApplyFilter);
   uiActions.registerTrigger(triggerBadge);
+  uiActions.registerTrigger(selectRangeTrigger);
+  uiActions.registerTrigger(valueClickTrigger);
   // uiActions.attachAction(triggerFilter.id, actionApplyFilter.id);
 };

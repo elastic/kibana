@@ -25,7 +25,7 @@ type OpenJsonModalFunc = () => void;
 
 interface Props {
   onJson(json: { [key: string]: any }): void;
-  children: (deleteProperty: OpenJsonModalFunc) => React.ReactNode;
+  children: (openModal: OpenJsonModalFunc) => React.ReactNode;
 }
 
 interface State {

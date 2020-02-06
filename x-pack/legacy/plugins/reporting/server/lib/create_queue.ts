@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ElasticsearchServiceSetup } from 'kibana/server';
 import {
   ServerFacade,
   ExportTypesRegistry,
@@ -23,6 +24,7 @@ interface CreateQueueFactoryOpts {
 
 export function createQueueFactory(
   server: ServerFacade,
+  elasticsearch: ElasticsearchServiceSetup,
   logger: Logger,
   { exportTypesRegistry, browserDriverFactory }: CreateQueueFactoryOpts
 ): Esqueue {
@@ -33,7 +35,7 @@ export function createQueueFactory(
     interval: queueConfig.indexInterval,
     timeout: queueConfig.timeout,
     dateSeparator: '.',
-    client: server.plugins.elasticsearch.getCluster('admin'),
+    client: elasticsearch.dataClient,
     logger: createTaggedLogger(logger, ['esqueue', 'queue-worker']),
   };
 
@@ -41,7 +43,7 @@ export function createQueueFactory(
 
   if (queueConfig.pollEnabled) {
     // create workers to poll the index for idle jobs waiting to be claimed and executed
-    const createWorker = createWorkerFactory(server, logger, {
+    const createWorker = createWorkerFactory(server, elasticsearch, logger, {
       exportTypesRegistry,
       browserDriverFactory,
     });

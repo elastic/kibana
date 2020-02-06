@@ -19,7 +19,6 @@
 
 jest.mock('ui/vis/vis_filters');
 jest.mock('ui/vis/default_feedback_message');
-jest.mock('ui/vis/index.js');
 jest.mock('ui/vis/vis_factory');
 jest.mock('ui/registry/vis_types');
 jest.mock('./types/vis_type_alias_registry');

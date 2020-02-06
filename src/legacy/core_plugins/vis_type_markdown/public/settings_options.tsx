@@ -21,7 +21,7 @@ import React from 'react';
 import { EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { VisOptionsProps } from 'ui/vis/editors/default';
+import { VisOptionsProps } from 'src/legacy/core_plugins/vis_default_editor/public';
 import { RangeOption, SwitchOption } from '../../vis_type_vislib/public';
 import { MarkdownVisParams } from './types';
 

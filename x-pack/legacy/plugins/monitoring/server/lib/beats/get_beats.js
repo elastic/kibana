@@ -83,7 +83,7 @@ export async function getBeats(req, beatsIndexPattern, clusterUuid) {
 
   const params = {
     index: beatsIndexPattern,
-    size: config.get('xpack.monitoring.max_bucket_size'), // FIXME
+    size: config.get('monitoring.ui.max_bucket_size'), // FIXME
     ignoreUnavailable: true,
     filterPath: [
       // only filter path can filter for inner_hits
