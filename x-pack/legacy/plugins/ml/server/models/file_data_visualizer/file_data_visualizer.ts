@@ -6,19 +6,37 @@
 
 import Boom from 'boom';
 import fs from 'fs';
+import { RequestHandlerContext } from 'kibana/server';
 import os from 'os';
-const util = require('util');
-// const readFile = util.promisify(fs.readFile);
+import util from 'util';
+
 const readdir = util.promisify(fs.readdir);
 const writeFile = util.promisify(fs.writeFile);
 
-export function fileDataVisualizerProvider(callWithRequest) {
-  async function analyzeFile(data, overrides) {
+export interface InputData {
+  [key: string]: any;
+}
+
+export interface InputOverrides {
+  [key: string]: string;
+}
+
+export type FormattedOverrides = InputOverrides & {
+  column_names: string[];
+  has_header_row: boolean;
+  should_trim_fields: boolean;
+};
+
+export function fileDataVisualizerProvider(context: RequestHandlerContext) {
+  async function analyzeFile(data: any, overrides: any) {
     let cached = false;
     let results = [];
 
     try {
-      results = await callWithRequest('ml.fileStructure', { body: data, ...overrides });
+      results = await context.ml!.mlClient.callAsCurrentUser('ml.fileStructure', {
+        body: data,
+        ...overrides,
+      });
       if (false) {
         // disabling caching for now
         cached = await cacheData(data);
@@ -37,7 +55,7 @@ export function fileDataVisualizerProvider(callWithRequest) {
     };
   }
 
-  async function cacheData(data) {
+  async function cacheData(data: InputData) {
     const outputPath = `${os.tmpdir()}/kibana-ml`;
     const tempFile = 'es-ml-tempFile';
     const tempFilePath = `${outputPath}/${tempFile}`;
@@ -52,13 +70,13 @@ export function fileDataVisualizerProvider(callWithRequest) {
     }
   }
 
-  function createOutputDir(dir) {
+  function createOutputDir(dir: string) {
     if (fs.existsSync(dir) === false) {
       fs.mkdirSync(dir);
     }
   }
 
-  async function deleteOutputFiles(outputPath) {
+  async function deleteOutputFiles(outputPath: string) {
     const files = await readdir(outputPath);
     files.forEach(f => {
       fs.unlinkSync(`${outputPath}/${f}`);
@@ -70,28 +88,30 @@ export function fileDataVisualizerProvider(callWithRequest) {
   };
 }
 
-function formatOverrides(overrides) {
+function formatOverrides(overrides: InputOverrides) {
   let hasOverrides = false;
 
-  const reducedOverrides = Object.keys(overrides).reduce((p, c) => {
-    if (overrides[c] !== '') {
-      p[c] = overrides[c];
+  const reducedOverrides: FormattedOverrides = Object.keys(overrides).reduce((acc, overrideKey) => {
+    const overrideValue: string = overrides[overrideKey];
+    if (overrideValue !== '') {
+      acc[overrideKey] = overrideValue;
+
+      if (overrideKey === 'column_names') {
+        acc.column_names = overrideValue.split(',');
+      }
+
+      if (overrideKey === 'has_header_row') {
+        acc.has_header_row = overrideValue === 'true';
+      }
+
+      if (overrideKey === 'should_trim_fields') {
+        acc.should_trim_fields = overrideValue === 'true';
+      }
+
       hasOverrides = true;
     }
-    return p;
-  }, {});
-
-  if (reducedOverrides.column_names !== undefined) {
-    reducedOverrides.column_names = reducedOverrides.column_names.split(',');
-  }
-
-  if (reducedOverrides.has_header_row !== undefined) {
-    reducedOverrides.has_header_row = reducedOverrides.has_header_row === 'true';
-  }
-
-  if (reducedOverrides.should_trim_fields !== undefined) {
-    reducedOverrides.should_trim_fields = reducedOverrides.should_trim_fields === 'true';
-  }
+    return acc;
+  }, {} as FormattedOverrides);
 
   return {
     reducedOverrides,
