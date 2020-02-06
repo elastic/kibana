@@ -10,6 +10,7 @@ import {
   ES_GEO_FIELD_TYPE,
   MAP_SAVED_OBJECT_TYPE,
   TELEMETRY_TYPE,
+  // @ts-ignore
 } from '../../common/constants';
 
 function getUniqueLayerCounts(layerCountsList: any[], mapsCount: number) {
