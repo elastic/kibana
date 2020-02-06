@@ -18,6 +18,5 @@
  */
 
 import { npSetup } from 'ui/new_platform';
-import { ToastNotifications } from '../../../../plugins/kibana_legacy/public';
-
+import { ToastNotifications } from './toast_notifications';
 export const toastNotifications = new ToastNotifications(npSetup.core.notifications.toasts);
