@@ -12,7 +12,7 @@ import { toastNotifications } from 'ui/notify';
 import chrome from 'ui/chrome';
 
 import { npSetup } from 'ui/new_platform';
-import { IAction, IncompatibleActionError } from '../../../../../../src/plugins/ui_actions/public';
+import { Action, IncompatibleActionError } from '../../../../../../src/plugins/ui_actions/public';
 
 import {
   ViewMode,
@@ -38,7 +38,7 @@ interface ActionContext {
   embeddable: ISearchEmbeddable;
 }
 
-class GetCsvReportPanelAction implements IAction<ActionContext> {
+class GetCsvReportPanelAction implements Action<ActionContext> {
   private isDownloading: boolean;
   public readonly type = CSV_REPORTING_ACTION;
   public readonly id = CSV_REPORTING_ACTION;

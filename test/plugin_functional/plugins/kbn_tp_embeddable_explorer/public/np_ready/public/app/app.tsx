@@ -23,12 +23,12 @@ import {
   GetEmbeddableFactory,
   GetEmbeddableFactories,
 } from 'src/legacy/core_plugins/embeddable_api/public/np_ready/public';
-import { TGetActionsCompatibleWithTrigger } from '../../../../../../../../src/plugins/ui_actions/public';
+import { GetActionsCompatibleWithTrigger } from '../../../../../../../../src/plugins/ui_actions/public';
 import { DashboardContainerExample } from './dashboard_container_example';
 import { Start as InspectorStartContract } from '../../../../../../../../src/plugins/inspector/public';
 
 export interface AppProps {
-  getActions: TGetActionsCompatibleWithTrigger;
+  getActions: GetActionsCompatibleWithTrigger;
   getEmbeddableFactory: GetEmbeddableFactory;
   getAllEmbeddableFactories: GetEmbeddableFactories;
   overlays: CoreStart['overlays'];
