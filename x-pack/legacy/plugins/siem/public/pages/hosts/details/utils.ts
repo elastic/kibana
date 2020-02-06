@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Breadcrumb } from 'ui/chrome';
 import { get, isEmpty } from 'lodash/fp';
 
+import { ChromeBreadcrumb } from '../../../../../../../../src/core/public';
 import { hostsModel } from '../../../store';
 import { HostsTableType } from '../../../store/hosts/model';
 import { getHostsUrl, getHostDetailsUrl } from '../../../components/link_to/redirect_to_hosts';
@@ -25,7 +25,7 @@ const TabNameMappedToI18nKey: Record<HostsTableType, string> = {
   [HostsTableType.alerts]: i18n.NAVIGATION_ALERTS_TITLE,
 };
 
-export const getBreadcrumbs = (params: HostRouteSpyState, search: string[]): Breadcrumb[] => {
+export const getBreadcrumbs = (params: HostRouteSpyState, search: string[]): ChromeBreadcrumb[] => {
   let breadcrumb = [
     {
       text: i18n.PAGE_TITLE,

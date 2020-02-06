@@ -23,14 +23,7 @@ import { i18n } from '@kbn/i18n';
 import useUnmount from 'react-use/lib/useUnmount';
 
 import { IndexPattern } from 'src/plugins/data/public';
-import {
-  AggConfig,
-  AggGroupNames,
-  editorConfigProviders,
-  FixedParam,
-  TimeIntervalParam,
-  EditorParamConfig,
-} from '../legacy_imports';
+import { IAggConfig, AggGroupNames } from '../legacy_imports';
 
 import { DefaultEditorAggSelect } from './agg_select';
 import { DefaultEditorAggParam } from './agg_param';
@@ -46,6 +39,7 @@ import {
   initAggParamsState,
 } from './agg_params_state';
 import { DefaultEditorCommonProps } from './agg_common_props';
+import { EditorParamConfig, TimeIntervalParam, FixedParam, getEditorConfig } from './utils';
 
 const FIXED_VALUE_PROP = 'fixedValue';
 const DEFAULT_PROP = 'default';
@@ -54,7 +48,7 @@ type EditorParamConfigType = EditorParamConfig & {
 };
 
 export interface DefaultEditorAggParamsProps extends DefaultEditorCommonProps {
-  agg: AggConfig;
+  agg: IAggConfig;
   aggError?: string;
   aggIndex?: number;
   aggIsTooLow?: boolean;
@@ -93,10 +87,12 @@ function DefaultEditorAggParams({
         values: { schema: agg.schema.title },
       })
     : '';
-
-  const editorConfig = useMemo(() => editorConfigProviders.getConfigForAgg(indexPattern, agg), [
+  const aggTypeName = agg.type?.name;
+  const fieldName = agg.params?.field?.name;
+  const editorConfig = useMemo(() => getEditorConfig(indexPattern, aggTypeName, fieldName), [
     indexPattern,
-    agg,
+    aggTypeName,
+    fieldName,
   ]);
   const params = useMemo(() => getAggParamsToRender({ agg, editorConfig, metricAggs, state }), [
     agg,

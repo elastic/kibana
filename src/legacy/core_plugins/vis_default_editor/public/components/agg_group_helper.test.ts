@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { AggConfig } from '../legacy_imports';
+import { IAggConfig } from '../legacy_imports';
 import {
   isAggRemovable,
   calcAggIsTooLow,
@@ -27,7 +27,7 @@ import {
 import { AggsState } from './agg_group_state';
 
 describe('DefaultEditorGroup helpers', () => {
-  let group: AggConfig[];
+  let group: IAggConfig[];
 
   beforeEach(() => {
     group = [
@@ -39,7 +39,7 @@ describe('DefaultEditorGroup helpers', () => {
           },
         },
         schema: { name: 'metric', min: 1, mustBeFirst: true },
-      } as AggConfig,
+      } as IAggConfig,
       {
         id: '2',
         params: {
@@ -48,7 +48,7 @@ describe('DefaultEditorGroup helpers', () => {
           },
         },
         schema: { name: 'metric', min: 2 },
-      } as AggConfig,
+      } as IAggConfig,
     ];
   });
 
