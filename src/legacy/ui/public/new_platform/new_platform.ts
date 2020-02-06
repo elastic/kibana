@@ -18,7 +18,7 @@
  */
 import { IScope } from 'angular';
 
-import { IUiActionsStart, IUiActionsSetup } from 'src/plugins/ui_actions/public';
+import { UiActionsStart, UiActionsSetup } from 'src/plugins/ui_actions/public';
 import { IEmbeddableStart, IEmbeddableSetup } from 'src/plugins/embeddable/public';
 import { LegacyCoreSetup, LegacyCoreStart, App, AppMountDeprecated } from '../../../../core/public';
 import { Plugin as DataPlugin } from '../../../../plugins/data/public';
@@ -52,7 +52,7 @@ export interface PluginsSetup {
   expressions: ReturnType<ExpressionsPlugin['setup']>;
   home: HomePublicPluginSetup;
   inspector: InspectorSetup;
-  uiActions: IUiActionsSetup;
+  uiActions: UiActionsSetup;
   navigation: NavigationPublicPluginSetup;
   devTools: DevToolsSetup;
   kibanaLegacy: KibanaLegacySetup;
@@ -70,7 +70,7 @@ export interface PluginsStart {
   expressions: ReturnType<ExpressionsPlugin['start']>;
   home: HomePublicPluginStart;
   inspector: InspectorStart;
-  uiActions: IUiActionsStart;
+  uiActions: UiActionsStart;
   navigation: NavigationPublicPluginStart;
   devTools: DevToolsStart;
   kibanaLegacy: KibanaLegacyStart;
