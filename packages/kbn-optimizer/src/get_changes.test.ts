@@ -28,36 +28,29 @@ it('parses git ls-files output', async () => {
 
   execa.mockImplementation((cmd, args, options) => {
     expect(cmd).toBe('git');
-    expect(args).toEqual(['ls-files', '-dmt', '--', '/foo/bar/x', '/foo/bar/y']);
+    expect(args).toEqual(['ls-files', '-dmt', '--', '/foo/bar/x']);
     expect(options).toEqual({
-      cwd: '/foo/bar',
+      cwd: '/foo/bar/x',
     });
 
     return {
       stdout: [
-        'C x/kbn-optimizer/package.json',
-        'C x/kbn-optimizer/src/common/bundle.ts',
-        'R x/kbn-optimizer/src/common/bundles.ts',
-        'C x/kbn-optimizer/src/common/bundles.ts',
-        'R x/kbn-optimizer/src/get_bundle_definitions.test.ts',
-        'C x/kbn-optimizer/src/get_bundle_definitions.test.ts',
-        'C y/src/plugins/data/public/index.ts',
+        'C kbn-optimizer/package.json',
+        'C kbn-optimizer/src/common/bundle.ts',
+        'R kbn-optimizer/src/common/bundles.ts',
+        'C kbn-optimizer/src/common/bundles.ts',
+        'R kbn-optimizer/src/get_bundle_definitions.test.ts',
+        'C kbn-optimizer/src/get_bundle_definitions.test.ts',
       ].join('\n'),
     };
   });
 
-  await expect(getChanges('/foo/bar', ['/foo/bar/x', '/foo/bar/y'])).resolves
-    .toMatchInlineSnapshot(`
-          Map {
-            "/foo/bar/x" => Map {
-              "/foo/bar/x/kbn-optimizer/package.json" => "modified",
-              "/foo/bar/x/kbn-optimizer/src/common/bundle.ts" => "modified",
-              "/foo/bar/x/kbn-optimizer/src/common/bundles.ts" => "deleted",
-              "/foo/bar/x/kbn-optimizer/src/get_bundle_definitions.test.ts" => "deleted",
-            },
-            "/foo/bar/y" => Map {
-              "/foo/bar/y/src/plugins/data/public/index.ts" => "modified",
-            },
-          }
-        `);
+  await expect(getChanges('/foo/bar/x')).resolves.toMatchInlineSnapshot(`
+    Map {
+      "/foo/bar/x/kbn-optimizer/package.json" => "modified",
+      "/foo/bar/x/kbn-optimizer/src/common/bundle.ts" => "modified",
+      "/foo/bar/x/kbn-optimizer/src/common/bundles.ts" => "deleted",
+      "/foo/bar/x/kbn-optimizer/src/get_bundle_definitions.test.ts" => "deleted",
+    }
+  `);
 });

@@ -22,13 +22,12 @@ import 'source-map-support/register';
 import Fs from 'fs';
 import Path from 'path';
 import { inspect } from 'util';
-import { createHash } from 'crypto';
 
 import webpack, { Stats } from 'webpack';
 import * as Rx from 'rxjs';
 import { mergeMap, map, mapTo, takeUntil } from 'rxjs/operators';
 
-import { CompilerMsgs, CompilerMsg, maybeMap, Bundle, WorkerConfig, ascending } from '../common';
+import { CompilerMsgs, CompilerMsg, maybeMap, Bundle, WorkerConfig } from '../common';
 import { getWebpackConfig } from './webpack.config';
 import { isFailureStats, failedStatsToErrorMessage } from './webpack_helpers';
 import {

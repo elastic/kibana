@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { createHash } from 'crypto';
 import { inspect } from 'util';
 
 import * as Rx from 'rxjs';
@@ -26,7 +25,7 @@ import { map, mergeMap, share } from 'rxjs/operators';
 import { observeWorker, WorkerStatus } from './observe_worker';
 import { OptimizerConfig } from './optimizer_config';
 import { getOptimizerVersion } from './get_optimizer_version';
-import { CompilerMsg, WorkerMsg, pipeClosure, Bundle, ascending, maybeMap } from './common';
+import { CompilerMsg, WorkerMsg, pipeClosure, Bundle, maybeMap } from './common';
 import { assignBundlesToWorkers } from './assign_bundles_to_workers';
 import { Watcher, ChangesStarted, Changes } from './watcher';
 import { getMtimes } from './get_mtimes';
