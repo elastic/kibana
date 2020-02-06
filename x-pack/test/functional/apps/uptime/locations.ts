@@ -17,6 +17,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     const end = new Date().toISOString();
 
     const MONITOR_ID = 'location-testing-id';
+    const CUSTOM_GEO_NAME = 'filter-test';
     before(async () => {
       /**
        * This mogrify function will strip the documents of their location
@@ -33,7 +34,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const esService = getService('legacyEs');
       await makeChecksWithStatus(esService, MONITOR_ID, 5, 2, 10000, {}, 'up', mogrifyNoLocation);
       await makeChecksWithStatus(esService, 'filter-testing', 50, 1, 10000, {}, 'up', (d: any) => {
-        d.observer.geo.name = 'filter-test';
+        d.observer.geo.name = CUSTOM_GEO_NAME;
         return d;
       });
     });
@@ -45,7 +46,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('adds a second location filter option and filters the overview', async () => {
       await pageObjects.uptime.goToUptimePageAndSetDateRange(start, end);
-      await pageObjects.uptime.selectFilterItems({ location: ['filter-test'] });
+      await pageObjects.uptime.selectFilterItems({ location: [CUSTOM_GEO_NAME] });
       await retry.tryForTime(12000, async () => {
         const ariaLabel = await pageObjects.uptime.getAriaLabelForKey(
           'xpack.uptime.charts.pingHistogram'
