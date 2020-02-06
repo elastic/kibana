@@ -279,13 +279,12 @@ export class StepIndexPattern extends Component {
 
   render() {
     const { isIncludingSystemIndices, allIndices } = this.props;
-    const { query, partialMatchedIndices, exactMatchedIndices } = this.state;
+    const { partialMatchedIndices, exactMatchedIndices } = this.state;
 
     const matchedIndices = getMatchedIndices(
       allIndices,
       partialMatchedIndices,
       exactMatchedIndices,
-      query,
       isIncludingSystemIndices
     );
 

@@ -22,6 +22,14 @@ import { savedObjectsMixin } from './saved_objects_mixin';
 import { mockKibanaMigrator } from '../../../core/server/saved_objects/migrations/kibana/kibana_migrator.mock';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { savedObjectsClientProviderMock } from '../../../core/server/saved_objects/service/lib/scoped_client_provider.mock';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { convertLegacyTypes } from '../../../core/server/saved_objects/utils';
+import { SavedObjectTypeRegistry } from '../../../core/server';
+import { coreMock } from '../../../core/server/mocks';
+
+const mockConfig = {
+  get: jest.fn().mockReturnValue('anything'),
+};
 
 const savedObjectMappings = [
   {
@@ -61,7 +69,30 @@ const savedObjectMappings = [
   },
 ];
 
-const migrator = mockKibanaMigrator.create({ savedObjectMappings });
+const savedObjectSchemas = {
+  hiddentype: {
+    hidden: true,
+  },
+  doc1: {
+    indexPattern: 'other-index',
+  },
+};
+
+const savedObjectTypes = convertLegacyTypes(
+  {
+    savedObjectMappings,
+    savedObjectSchemas,
+    savedObjectMigrations: {},
+  },
+  mockConfig
+);
+
+const typeRegistry = new SavedObjectTypeRegistry();
+savedObjectTypes.forEach(type => typeRegistry.registerType(type));
+
+const migrator = mockKibanaMigrator.create({
+  types: savedObjectTypes,
+});
 
 describe('Saved Objects Mixin', () => {
   let mockKbnServer;
@@ -113,7 +144,17 @@ describe('Saved Objects Mixin', () => {
     };
     mockKbnServer = {
       newPlatform: {
-        __internals: { kibanaMigrator: migrator, savedObjectsClientProvider: clientProvider },
+        __internals: {
+          kibanaMigrator: migrator,
+          savedObjectsClientProvider: clientProvider,
+          typeRegistry,
+        },
+        setup: {
+          core: coreMock.createSetup(),
+        },
+        start: {
+          core: coreMock.createStart(),
+        },
       },
       server: mockServer,
       ready: () => {},
@@ -124,14 +165,7 @@ describe('Saved Objects Mixin', () => {
       },
       uiExports: {
         savedObjectMappings,
-        savedObjectSchemas: {
-          hiddentype: {
-            hidden: true,
-          },
-          doc1: {
-            indexPattern: 'other-index',
-          },
-        },
+        savedObjectSchemas,
       },
     };
   });

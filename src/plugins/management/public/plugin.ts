@@ -28,10 +28,10 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
   private managementSections = new ManagementService();
   private legacyManagement = new LegacyManagementAdapter();
 
-  public setup(core: CoreSetup, { kibana_legacy }: { kibana_legacy: KibanaLegacySetup }) {
+  public setup(core: CoreSetup, { kibanaLegacy }: { kibanaLegacy: KibanaLegacySetup }) {
     return {
       sections: this.managementSections.setup(
-        kibana_legacy,
+        kibanaLegacy,
         this.legacyManagement.getManagement,
         core.getStartServices
       ),
