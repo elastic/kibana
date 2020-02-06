@@ -18,13 +18,12 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
 
 import { EuiCallOut, EuiTextColor, EuiLink, EuiButton } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
-export const EmptyState = ({ onRefresh }) => (
+export const EmptyState = ({ onRefresh }: { onRefresh: () => void }) => (
   <div>
     <EuiCallOut
       color="warning"
@@ -82,7 +81,3 @@ export const EmptyState = ({ onRefresh }) => (
     </EuiCallOut>
   </div>
 );
-
-EmptyState.propTypes = {
-  onRefresh: PropTypes.func.isRequired,
-};

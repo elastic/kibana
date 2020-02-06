@@ -22,16 +22,26 @@ import React from 'react';
 import { EuiText, EuiTextColor, EuiIcon } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
+import { MatchedIndex } from '../../../../types';
 
 export const StatusMessage = ({
   matchedIndices: { allIndices = [], exactMatchedIndices = [], partialMatchedIndices = [] },
   isIncludingSystemIndices,
   query,
-  showSystemIndicies,
+  showSystemIndices,
+}: {
+  matchedIndices: {
+    allIndices: MatchedIndex[];
+    exactMatchedIndices: MatchedIndex[];
+    partialMatchedIndices: MatchedIndex[];
+  };
+  isIncludingSystemIndices: boolean;
+  query: string;
+  showSystemIndices: boolean;
 }) => {
   let statusIcon;
   let statusMessage;
-  let statusColor;
+  let statusColor: 'default' | 'secondary' | undefined;
 
   const allIndicesLength = allIndices.length;
 
@@ -49,7 +59,7 @@ export const StatusMessage = ({
           />
         </span>
       );
-    } else if (!isIncludingSystemIndices && showSystemIndicies) {
+    } else if (!isIncludingSystemIndices && showSystemIndices) {
       statusMessage = (
         <span>
           <FormattedMessage

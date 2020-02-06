@@ -36,7 +36,7 @@ describe('IndicesList', () => {
   it('should change pages', () => {
     const component = shallow(<IndicesList indices={indices} query="" />);
 
-    const instance = component.instance();
+    const instance = component.instance() as IndicesList;
 
     component.setState({ perPage: 1 });
     instance.onChangePage(1);
@@ -48,7 +48,7 @@ describe('IndicesList', () => {
   it('should change per page', () => {
     const component = shallow(<IndicesList indices={indices} query="" />);
 
-    const instance = component.instance();
+    const instance = component.instance() as IndicesList;
     instance.onChangePerPage(1);
     component.update();
 

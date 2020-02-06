@@ -17,9 +17,7 @@
  * under the License.
  */
 
-import React, { Component } from 'react';
-import PropTypes from 'prop-types';
-import { PER_PAGE_INCREMENTS } from '../../../../constants';
+import React from 'react';
 
 import {
   EuiBadge,
@@ -37,17 +35,26 @@ import {
   EuiPopover,
 } from '@elastic/eui';
 
+// @ts-ignore
 import { Pager } from '@elastic/eui/lib/services';
 
 import { FormattedMessage } from '@kbn/i18n/react';
+import { PER_PAGE_INCREMENTS } from '../../../../constants';
 
-export class IndicesList extends Component {
-  static propTypes = {
-    indices: PropTypes.array.isRequired,
-    query: PropTypes.string.isRequired,
-  };
+interface IndicesListProps {
+  indices: any[]; // todo
+  query: string;
+}
 
-  constructor(props) {
+interface IndicesListState {
+  page: number;
+  perPage: number;
+  isPerPageControlOpen: boolean;
+}
+
+export class IndicesList extends React.Component<IndicesListProps, IndicesListState> {
+  pager: any;
+  constructor(props: IndicesListProps) {
     super(props);
 
     this.state = {
@@ -59,7 +66,7 @@ export class IndicesList extends Component {
     this.pager = new Pager(props.indices.length, this.state.perPage, this.state.page);
   }
 
-  UNSAFE_componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps: IndicesListProps) {
     if (nextProps.indices.length !== this.props.indices.length) {
       this.pager.setTotalItems(nextProps.indices.length);
       this.resetPageTo0();
@@ -68,12 +75,12 @@ export class IndicesList extends Component {
 
   resetPageTo0 = () => this.onChangePage(0);
 
-  onChangePage = page => {
+  onChangePage = (page: number) => {
     this.pager.goToPageIndex(page);
     this.setState({ page });
   };
 
-  onChangePerPage = perPage => {
+  onChangePerPage = (perPage: number) => {
     this.pager.setItemsPerPage(perPage);
     this.setState({ perPage });
     this.resetPageTo0();
@@ -147,7 +154,7 @@ export class IndicesList extends Component {
     );
   }
 
-  highlightIndexName(indexName, query) {
+  highlightIndexName(indexName: string, query: string) {
     const queryIdx = indexName.indexOf(query);
     if (!query || queryIdx === -1) {
       return indexName;
@@ -178,7 +185,8 @@ export class IndicesList extends Component {
             {this.highlightIndexName(index.name, queryWithoutWildcard)}
           </EuiTableRowCell>
           <EuiTableRowCell>
-            {index.tags.map(tag => {
+            {index.tags.map((tag: { name: string; key: string }) => {
+              // todo share type
               return (
                 <EuiBadge key={`index_${key}_tag_${tag.key}`} color="primary">
                   {tag.name}

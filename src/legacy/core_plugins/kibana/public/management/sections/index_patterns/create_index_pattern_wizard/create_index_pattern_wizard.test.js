@@ -20,7 +20,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import { CreateIndexPatternWizard } from '../create_index_pattern_wizard';
+import { CreateIndexPatternWizard } from './create_index_pattern_wizard';
 const mockIndexPatternCreationType = {
   getIndexPatternType: () => 'default',
   getIndexPatternName: () => 'name',
@@ -32,12 +32,12 @@ const mockIndexPatternCreationType = {
     return {};
   },
 };
-jest.mock('../components/step_index_pattern', () => ({ StepIndexPattern: 'StepIndexPattern' }));
-jest.mock('../components/step_time_field', () => ({ StepTimeField: 'StepTimeField' }));
-jest.mock('../components/header', () => ({ Header: 'Header' }));
-jest.mock('../components/loading_state', () => ({ LoadingState: 'LoadingState' }));
-jest.mock('../components/empty_state', () => ({ EmptyState: 'EmptyState' }));
-jest.mock('../lib/get_indices', () => ({
+jest.mock('./components/step_index_pattern', () => ({ StepIndexPattern: 'StepIndexPattern' }));
+jest.mock('./components/step_time_field', () => ({ StepTimeField: 'StepTimeField' }));
+jest.mock('./components/header', () => ({ Header: 'Header' }));
+jest.mock('./components/loading_state', () => ({ LoadingState: 'LoadingState' }));
+jest.mock('./components/empty_state', () => ({ EmptyState: 'EmptyState' }));
+jest.mock('./lib/get_indices', () => ({
   getIndices: () => {
     return [{ name: 'kibana' }];
   },

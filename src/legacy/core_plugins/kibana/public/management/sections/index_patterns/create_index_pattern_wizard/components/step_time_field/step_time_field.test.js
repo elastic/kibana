@@ -22,11 +22,11 @@ import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
 
 import { StepTimeField } from '../step_time_field';
 
-jest.mock('../components/header', () => ({ Header: 'Header' }));
-jest.mock('../components/time_field', () => ({ TimeField: 'TimeField' }));
-jest.mock('../components/advanced_options', () => ({ AdvancedOptions: 'AdvancedOptions' }));
-jest.mock('../components/action_buttons', () => ({ ActionButtons: 'ActionButtons' }));
-jest.mock('../../../lib/extract_time_fields', () => ({
+jest.mock('./components/header', () => ({ Header: 'Header' }));
+jest.mock('./components/time_field', () => ({ TimeField: 'TimeField' }));
+jest.mock('./components/advanced_options', () => ({ AdvancedOptions: 'AdvancedOptions' }));
+jest.mock('./components/action_buttons', () => ({ ActionButtons: 'ActionButtons' }));
+jest.mock('./../../lib/extract_time_fields', () => ({
   extractTimeFields: fields => fields,
 }));
 jest.mock('ui/chrome', () => ({

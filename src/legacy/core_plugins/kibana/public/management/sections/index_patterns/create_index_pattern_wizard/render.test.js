@@ -33,7 +33,7 @@ jest.mock('ui/i18n', () => ({
   I18nContext: () => {},
 }));
 
-const { renderCreateIndexPatternWizard, destroyCreateIndexPatternWizard } = require('../render');
+const { renderCreateIndexPatternWizard, destroyCreateIndexPatternWizard } = require('./render');
 
 describe('CreateIndexPatternWizardRender', () => {
   beforeEach(() => {

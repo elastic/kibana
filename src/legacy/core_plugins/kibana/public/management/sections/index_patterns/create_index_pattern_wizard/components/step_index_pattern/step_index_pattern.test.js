@@ -20,9 +20,9 @@
 import React from 'react';
 import { StepIndexPattern } from '../step_index_pattern';
 import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
-import { Header } from '../components/header';
+import { Header } from './components/header';
 
-jest.mock('../../../lib/ensure_minimum_time', () => ({
+jest.mock('../../lib/ensure_minimum_time', () => ({
   ensureMinimumTime: async promises =>
     Array.isArray(promises) ? await Promise.all(promises) : await promises,
 }));
@@ -40,7 +40,7 @@ jest.mock('ui/chrome', () => ({
   addBasePath: () => {},
 }));
 
-jest.mock('../../../lib/get_indices', () => ({
+jest.mock('../../lib/get_indices', () => ({
   getIndices: (service, indexPatternCreationType, query) => {
     if (query.startsWith('e')) {
       return [{ name: 'es' }];

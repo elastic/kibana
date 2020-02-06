@@ -24,28 +24,30 @@ import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
 describe('Header', () => {
   it('should render normally', () => {
     const component = shallowWithI18nProvider(
-      <Header isIncludingSystemIndices={true} onChangeIncludingSystemIndices={() => {}} />
+      <Header
+        isInputInvalid={false}
+        errors={[]}
+        characterList={'%'}
+        query={'k'}
+        onQueryChanged={() => {}}
+        goToNextStep={() => {}}
+        isNextStepDisabled={false}
+      />
     );
 
     expect(component).toMatchSnapshot();
   });
 
-  it('should render without including system indices', () => {
-    const component = shallowWithI18nProvider(
-      <Header isIncludingSystemIndices={false} onChangeIncludingSystemIndices={() => {}} />
-    );
-
-    expect(component).toMatchSnapshot();
-  });
-
-  it('should render a different name, prompt, and beta tag if provided', () => {
+  it('should mark the input as invalid', () => {
     const component = shallowWithI18nProvider(
       <Header
-        isIncludingSystemIndices={false}
-        onChangeIncludingSystemIndices={() => {}}
-        prompt={<div>Test prompt</div>}
-        indexPatternName="test index pattern"
-        isBeta={true}
+        isInputInvalid={true}
+        errors={['Input is invalid']}
+        characterList={'%'}
+        query={'%'}
+        onQueryChanged={() => {}}
+        goToNextStep={() => {}}
+        isNextStepDisabled={true}
       />
     );
 

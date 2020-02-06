@@ -64,7 +64,7 @@ exports[`Header should render normally 1`] = `
         id="kbn.management.createIndexPatternHeader"
         values={
           Object {
-            "indexPatternName": undefined,
+            "indexPatternName": "test index pattern",
           }
         }
       />
@@ -109,7 +109,7 @@ exports[`Header should render without including system indices 1`] = `
         id="kbn.management.createIndexPatternHeader"
         values={
           Object {
-            "indexPatternName": undefined,
+            "indexPatternName": "test index pattern",
           }
         }
       />

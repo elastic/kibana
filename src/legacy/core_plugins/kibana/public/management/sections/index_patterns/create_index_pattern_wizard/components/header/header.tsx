@@ -36,10 +36,17 @@ import { FormattedMessage } from '@kbn/i18n/react';
 export const Header = ({
   prompt,
   indexPatternName,
-  showSystemIndices,
+  showSystemIndices = false,
   isIncludingSystemIndices,
   onChangeIncludingSystemIndices,
-  isBeta,
+  isBeta = false,
+}: {
+  prompt?: React.ReactNode;
+  indexPatternName: string;
+  showSystemIndices?: boolean;
+  isIncludingSystemIndices: boolean;
+  onChangeIncludingSystemIndices: () => void;
+  isBeta?: boolean;
 }) => (
   <div>
     <EuiTitle>
