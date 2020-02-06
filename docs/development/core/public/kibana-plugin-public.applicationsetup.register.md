@@ -9,14 +9,14 @@ Register an mountable application to the system.
 <b>Signature:</b>
 
 ```typescript
-register(app: App): void;
+register<HistoryLocationState = unknown>(app: App<HistoryLocationState>): void;
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  app | <code>App</code> | an [App](./kibana-plugin-public.app.md) |
+|  app | <code>App&lt;HistoryLocationState&gt;</code> | an [App](./kibana-plugin-public.app.md) |
 
 <b>Returns:</b>
 
