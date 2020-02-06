@@ -23,21 +23,9 @@ import {
   EuiCheckbox,
 } from '@elastic/eui';
 
-// We will be able to remove these after the NP migration is complete.
-import { fatalError } from 'ui/notify';
-import { createUiStatsReporter } from '../../../../../../../../../../src/legacy/core_plugins/ui_metric/public';
-import { httpService } from '../../../../services/http';
-import { notificationService } from '../../../../services/notification';
-
 import { flattenPanelTree } from '../../../../lib/flatten_panel_tree';
 import { INDEX_OPEN } from '../../../../../../common/constants';
-import { getActionExtensions } from '../../../../../index_management_extensions';
-
-// We will be able to remove this after the NP migration is complete and we can just inject the
-// NP fatalErrors service..
-const getNewPlatformCompatibleFatalErrorService = () => ({
-  add: fatalError.bind(fatalError),
-});
+import { indexManagementExtensions } from '../../../../../services/index_management_extensions';
 
 export class IndexActionsContextMenu extends Component {
   constructor(props) {
@@ -222,21 +210,8 @@ export class IndexActionsContextMenu extends Component {
         this.setState({ renderConfirmModal: this.renderConfirmDeleteModal });
       },
     });
-    getActionExtensions().forEach(actionExtension => {
-      const actionExtensionDefinition = actionExtension({
-        indices,
-        reloadIndices,
-        // These config options can be removed once the NP migration out of legacy is complete.
-        // They're needed for now because ILM's extensions make API calls which require these
-        // dependencies, but they're not available unless the app's "setup" lifecycle stage occurs.
-        // Within the old platform, "setup" only occurs once the user actually visits the app.
-        // Once ILM and IM have been moved out of legacy this hack won't be necessary.
-        createUiStatsReporter,
-        toasts: notificationService.toasts,
-        fatalErrors: getNewPlatformCompatibleFatalErrorService(),
-        httpClient: httpService.httpClient,
-      });
-
+    indexManagementExtensions.actions.forEach(actionExtension => {
+      const actionExtensionDefinition = actionExtension(indices, reloadIndices);
       if (actionExtensionDefinition) {
         const {
           buttonLabel,

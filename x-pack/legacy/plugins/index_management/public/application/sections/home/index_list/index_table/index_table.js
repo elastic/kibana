@@ -39,11 +39,7 @@ import { UIM_SHOW_DETAILS_CLICK } from '../../../../../../common/constants';
 import { REFRESH_RATE_INDEX_LIST } from '../../../../constants';
 import { healthToColor } from '../../../../services';
 import { AppContextConsumer } from '../../../../app_context';
-import {
-  getBannerExtensions,
-  getFilterExtensions,
-  getToggleExtensions,
-} from '../../../../../index_management_extensions';
+import { indexManagementExtensions } from '../../../../../services/index_management_extensions';
 import { renderBadges } from '../../../../lib/render_badges';
 import { NoMatch, PageErrorForbidden } from '../../../../components';
 import { IndexActionsContextMenu } from '../index_actions_context_menu';
@@ -155,7 +151,7 @@ export class IndexTable extends Component {
   };
   getFilters = () => {
     const { allIndices } = this.props;
-    return getFilterExtensions().reduce((accum, filterExtension) => {
+    return indexManagementExtensions.filters.reduce((accum, filterExtension) => {
       const filtersToAdd = filterExtension(allIndices);
       return [...accum, ...filtersToAdd];
     }, []);
@@ -312,7 +308,7 @@ export class IndexTable extends Component {
 
   renderBanners() {
     const { allIndices = [], filterChanged } = this.props;
-    return getBannerExtensions().map((bannerExtension, i) => {
+    return indexManagementExtensions.banners.map((bannerExtension, i) => {
       const bannerData = bannerExtension(allIndices);
       if (!bannerData) {
         return null;
@@ -454,7 +450,7 @@ export class IndexTable extends Component {
                 <EuiFlexItem grow={false}>
                   {(indicesLoading && allIndices.length === 0) || indicesError ? null : (
                     <EuiFlexGroup>
-                      {getToggleExtensions().map(toggle => {
+                      {indexManagementExtensions.toggles.map(toggle => {
                         return this.renderToggleControl(toggle);
                       })}
                       <EuiFlexItem grow={false}>

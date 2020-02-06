@@ -14,7 +14,7 @@ import {
   addBannerExtension,
   addActionExtension,
   addFilterExtension,
-} from '../../../../index_management/public/index_management_extensions';
+} from '../../../../index_management/public';
 
 import { init as initUiMetric } from '../application/services/ui_metric';
 import { init as initNotification } from '../application/services/notification';

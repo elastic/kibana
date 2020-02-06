@@ -39,6 +39,8 @@ import { useRequest, sendRequest } from './use_request';
 import { httpService } from './http';
 import { Template } from '../../../common/types';
 
+const uiMetricService = getUiMetricServiceInstance();
+
 export async function loadIndices() {
   const response = await httpService.httpClient.get(`${API_BASE_PATH}/indices`);
   return response.data ? response.data : response;

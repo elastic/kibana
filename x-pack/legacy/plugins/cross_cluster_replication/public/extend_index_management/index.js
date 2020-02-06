@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { i18n } from '@kbn/i18n';
-import { addBadgeExtension } from '../../../index_management/public/index_management_extensions';
+import { addBadgeExtension } from '../../../index_management/public';
 import { get } from 'lodash';
 
 const propertyPath = 'isFollowerIndex';
