@@ -19,10 +19,22 @@
 
 // eslint-disable-next-line import/no-extraneous-dependencies
 const wp = require('@cypress/webpack-preprocessor');
+const fs = require('fs');
 
 module.exports = on => {
   const options = {
     webpackOptions: require('../webpack.config.js')
   };
   on('file:preprocessor', wp(options));
+
+  // readFileMaybe
+  on('task', {
+    readFileMaybe(filename) {
+      if (fs.existsSync(filename)) {
+        return fs.readFileSync(filename, 'utf8');
+      }
+
+      return null;
+    }
+  });
 };
