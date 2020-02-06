@@ -176,7 +176,11 @@ let isAutoRefreshSelectorEnabled = true;
 
 export const npStart = {
   core: {
-    chrome: {},
+    chrome: {
+      overlays: {
+        openModal: sinon.fake(),
+      },
+    },
   },
   plugins: {
     management: {
