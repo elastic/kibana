@@ -46,19 +46,21 @@ export function logOptimizerState(log: ToolingLog, config: OptimizerConfig) {
         }
 
         if (event?.type === 'worker started') {
-          log.debug(`worker started for bundles ${event.bundles.map(b => b.id).join(', ')}`);
+          log.info(`⚙️  worker started for bundles ${event.bundles.map(b => b.id).join(', ')}`);
         }
 
         if (event?.type === 'changes detected') {
-          log.debug(`changes detected...`);
+          log.debug(`⚙️  changes detected...`);
         }
 
         if (state.phase === 'initialized') {
           if (!loggedInit) {
             loggedInit = true;
-            log.debug(`initialized after ${state.durSec} sec`);
-            log.debug(`  version: ${state.version}`);
-            log.debug(`  cached: ${state.offlineBundles.map(b => b.id)}`);
+            log.info(
+              `⚙️  @kbn/optimizer intialized, ${state.offlineBundles.length} bundles cached`
+            );
+            log.debug(`version: ${state.version}`);
+            log.debug(`cached: ${state.offlineBundles.map(b => b.id)}`);
           }
 
           return;
@@ -73,7 +75,7 @@ export function logOptimizerState(log: ToolingLog, config: OptimizerConfig) {
 
           bundleStates.set(id, type);
           log.debug(
-            `[${id}] state = "${type}"${type !== 'running' ? ` after ${state.durSec} sec` : ''}`
+            `⚙️  [${id}] state = "${type}"${type !== 'running' ? ` after ${state.durSec} sec` : ''}`
           );
         }
 

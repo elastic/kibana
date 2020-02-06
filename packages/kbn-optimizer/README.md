@@ -26,7 +26,7 @@ We only limit the number of workers we will start at any given time. If we start
 
 ### Caching
 
-Bundles built by the the optimizer include a cache file which describes the information needed to determine if the bundle needs to be rebuilt when the optimizer is restarted. Caching is enabled by default and is very aggressive about invalidating the cache output, but if you need to disable caching you can pass the `--optimize.useBundleCache=false` flag to the dev cli, `--no-cache` to `node scripts/build_new_platform_plugins`, or set the `KBN_OPTIMIZER_NO_CACHE` environment variable to anything (env overrides other settings).
+Bundles built by the the optimizer include a cache file which describes the information needed to determine if the bundle needs to be rebuilt when the optimizer is restarted. Caching is enabled by default and is very aggressive about invalidating the cache output, but if you need to disable caching you can pass `--no-cache` to `node scripts/build_new_platform_plugins`, or set the `KBN_OPTIMIZER_NO_CACHE` environment variable to anything (env overrides everything).
 
 When a bundle is determined to be up-to-date a worker is not started for the bundle. If running the optimizer with the `--dev/--watch` flag, then all the files referenced by cached bundles are watched for changes. Once a change is detected in any of the files referenced by the built bundle a worker is started. If a file is changed that is referenced by several bundles then workers will be started for each bundle, combining workers together to respect the worker limit.
 
