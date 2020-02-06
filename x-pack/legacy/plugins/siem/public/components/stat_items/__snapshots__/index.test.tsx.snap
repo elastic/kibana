@@ -87,7 +87,7 @@ exports[`Stat Items Component disable charts it renders the default widget 1`] =
                               queryId="statItems"
                               title="KPI HOSTS"
                             >
-                              <InspectButtonComponent
+                              <Memo(InspectButtonComponent)
                                 id=""
                                 inspect={null}
                                 inspectIndex={0}
@@ -151,7 +151,7 @@ exports[`Stat Items Component disable charts it renders the default widget 1`] =
                                   response={null}
                                   title="KPI HOSTS"
                                 />
-                              </InspectButtonComponent>
+                              </Memo(InspectButtonComponent)>
                             </Connect(Component)>
                           </div>
                         </EuiFlexItem>
@@ -320,7 +320,7 @@ exports[`Stat Items Component disable charts it renders the default widget 2`] =
                               queryId="statItems"
                               title="KPI HOSTS"
                             >
-                              <InspectButtonComponent
+                              <Memo(InspectButtonComponent)
                                 id=""
                                 inspect={null}
                                 inspectIndex={0}
@@ -384,7 +384,7 @@ exports[`Stat Items Component disable charts it renders the default widget 2`] =
                                   response={null}
                                   title="KPI HOSTS"
                                 />
-                              </InspectButtonComponent>
+                              </Memo(InspectButtonComponent)>
                             </Connect(Component)>
                           </div>
                         </EuiFlexItem>
@@ -623,7 +623,7 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                             queryId="statItems"
                             title="KPI UNIQUE_PRIVATE_IPS"
                           >
-                            <InspectButtonComponent
+                            <Memo(InspectButtonComponent)
                               id=""
                               inspect={null}
                               inspectIndex={0}
@@ -687,7 +687,7 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                                 response={null}
                                 title="KPI UNIQUE_PRIVATE_IPS"
                               />
-                            </InspectButtonComponent>
+                            </Memo(InspectButtonComponent)>
                           </Connect(Component)>
                         </div>
                       </EuiFlexItem>
