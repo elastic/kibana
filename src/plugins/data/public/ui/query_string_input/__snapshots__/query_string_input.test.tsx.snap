@@ -288,6 +288,7 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
                   "base": "https://www.elastic.co/guide/en/logstash/mocked-test-branch",
                 },
                 "management": Object {
+                  "dashboardSettings": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/advanced-options.html#kibana-dashboard-settings",
                   "kibanaSearchSettings": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/advanced-options.html#kibana-search-settings",
                 },
                 "metricbeat": Object {
@@ -929,6 +930,7 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
                           "base": "https://www.elastic.co/guide/en/logstash/mocked-test-branch",
                         },
                         "management": Object {
+                          "dashboardSettings": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/advanced-options.html#kibana-dashboard-settings",
                           "kibanaSearchSettings": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/advanced-options.html#kibana-search-settings",
                         },
                         "metricbeat": Object {
@@ -1552,6 +1554,7 @@ exports[`QueryStringInput Should pass the query language to the language switche
                   "base": "https://www.elastic.co/guide/en/logstash/mocked-test-branch",
                 },
                 "management": Object {
+                  "dashboardSettings": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/advanced-options.html#kibana-dashboard-settings",
                   "kibanaSearchSettings": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/advanced-options.html#kibana-search-settings",
                 },
                 "metricbeat": Object {
@@ -2190,6 +2193,7 @@ exports[`QueryStringInput Should pass the query language to the language switche
                           "base": "https://www.elastic.co/guide/en/logstash/mocked-test-branch",
                         },
                         "management": Object {
+                          "dashboardSettings": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/advanced-options.html#kibana-dashboard-settings",
                           "kibanaSearchSettings": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/advanced-options.html#kibana-search-settings",
                         },
                         "metricbeat": Object {
@@ -2813,6 +2817,7 @@ exports[`QueryStringInput Should render the given query 1`] = `
                   "base": "https://www.elastic.co/guide/en/logstash/mocked-test-branch",
                 },
                 "management": Object {
+                  "dashboardSettings": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/advanced-options.html#kibana-dashboard-settings",
                   "kibanaSearchSettings": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/advanced-options.html#kibana-search-settings",
                 },
                 "metricbeat": Object {
@@ -3451,6 +3456,7 @@ exports[`QueryStringInput Should render the given query 1`] = `
                           "base": "https://www.elastic.co/guide/en/logstash/mocked-test-branch",
                         },
                         "management": Object {
+                          "dashboardSettings": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/advanced-options.html#kibana-dashboard-settings",
                           "kibanaSearchSettings": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/advanced-options.html#kibana-search-settings",
                         },
                         "metricbeat": Object {

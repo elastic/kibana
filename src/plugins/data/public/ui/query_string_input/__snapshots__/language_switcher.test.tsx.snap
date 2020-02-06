@@ -171,6 +171,7 @@ exports[`LanguageSwitcher should toggle off if language is lucene 1`] = `
             "base": "https://www.elastic.co/guide/en/logstash/mocked-test-branch",
           },
           "management": Object {
+            "dashboardSettings": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/advanced-options.html#kibana-dashboard-settings",
             "kibanaSearchSettings": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/advanced-options.html#kibana-search-settings",
           },
           "metricbeat": Object {
@@ -467,6 +468,7 @@ exports[`LanguageSwitcher should toggle on if language is kuery 1`] = `
             "base": "https://www.elastic.co/guide/en/logstash/mocked-test-branch",
           },
           "management": Object {
+            "dashboardSettings": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/advanced-options.html#kibana-dashboard-settings",
             "kibanaSearchSettings": "https://www.elastic.co/guide/en/kibana/mocked-test-branch/advanced-options.html#kibana-search-settings",
           },
           "metricbeat": Object {
