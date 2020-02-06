@@ -23,7 +23,15 @@ import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiButtonEmpty } from '@elastic/e
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
-export const ActionButtons = ({ goToPreviousStep, submittable, createIndexPattern }) => (
+export const ActionButtons = ({
+  goToPreviousStep,
+  submittable,
+  createIndexPattern,
+}: {
+  goToPreviousStep: () => void;
+  submittable: boolean;
+  createIndexPattern: () => void;
+}) => (
   <EuiFlexGroup justifyContent="flexEnd">
     <EuiFlexItem grow={false}>
       <EuiButtonEmpty iconType="arrowLeft" onClick={goToPreviousStep}>

@@ -29,6 +29,11 @@ export const AdvancedOptions = ({
   indexPatternId,
   toggleAdvancedOptions,
   onChangeIndexPatternId,
+}: {
+  isVisible: boolean;
+  indexPatternId: string;
+  toggleAdvancedOptions: () => void;
+  onChangeIndexPatternId: () => void;
 }) => (
   <div>
     <EuiButtonEmpty

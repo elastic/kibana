@@ -42,6 +42,13 @@ export const TimeField = ({
   isLoading,
   selectedTimeField,
   onTimeFieldChanged,
+}: {
+  isVisible: boolean;
+  fetchTimeFields: () => void;
+  timeFieldOptions: Array<{ text: string; value: string }>;
+  isLoading: boolean;
+  selectedTimeField: string;
+  onTimeFieldChanged: () => void;
 }) => (
   <EuiForm>
     {isVisible ? (
