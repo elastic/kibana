@@ -96,5 +96,9 @@ export function UptimePageProvider({ getPageObjects, getService }: FtrProviderCo
     public locationMissingIsDisplayed() {
       return uptimeService.locationMissingExists();
     }
+
+    public getAriaLabelForKey(key: string) {
+      return uptimeService.getAriaLabelForKey(key);
+    }
   })();
 }

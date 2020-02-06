@@ -47,6 +47,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await pageObjects.uptime.goToUptimePageAndSetDateRange(start, end);
       await pageObjects.uptime.selectFilterItems({ location: ['filter-test'] });
       await retry.tryForTime(12000, async () => {
+        const ariaLabel = await pageObjects.uptime.getAriaLabelForKey(
+          'xpack.uptime.charts.pingHistogram'
+        );
+        expect(ariaLabel).to.contain('Bar Chart showing uptime status over time');
+        expect(ariaLabel).to.contain('The maximum value is 2 pings, with 2 up and 0 down');
+        expect(ariaLabel).to.contain('The most recent count is 2, with 2 up and 0 down');
         const snapshotCount = await pageObjects.uptime.getSnapshotCount();
         expect(snapshotCount).to.eql({ up: '1', down: '0' });
       });

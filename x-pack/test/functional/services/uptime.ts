@@ -72,5 +72,8 @@ export function UptimeProvider({ getService }: FtrProviderContext) {
         timeout: 3000,
       });
     },
+    async getAriaLabelForKey(key: string) {
+      return await testSubjects.getAttribute(key, 'aria-label', 5000);
+    },
   };
 }
