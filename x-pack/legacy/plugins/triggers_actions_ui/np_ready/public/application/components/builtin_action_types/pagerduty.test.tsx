@@ -3,11 +3,17 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React from 'react';
+import React, { FunctionComponent } from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { TypeRegistry } from '../../type_registry';
 import { registerBuiltInActionTypes } from './index';
-import { ActionTypeModel, ActionConnector } from '../../../types';
+import { ActionTypeModel, ActionParamsProps } from '../../../types';
+import {
+  PagerDutyActionParams,
+  EventActionOptions,
+  SeverityActionOptions,
+  PagerDutyActionConnector,
+} from './types';
 
 const ACTION_TYPE_ID = '.pagerduty';
 let actionTypeModel: ActionTypeModel;
@@ -40,7 +46,7 @@ describe('pagerduty connector validation', () => {
       config: {
         apiUrl: 'http:\\test',
       },
-    } as ActionConnector;
+    } as PagerDutyActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
       errors: {
@@ -66,7 +72,7 @@ describe('pagerduty connector validation', () => {
       config: {
         apiUrl: 'http:\\test',
       },
-    } as ActionConnector;
+    } as PagerDutyActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
       errors: {
@@ -91,7 +97,9 @@ describe('pagerduty action params validation', () => {
     };
 
     expect(actionTypeModel.validateParams(actionParams)).toEqual({
-      errors: {},
+      errors: {
+        summary: [],
+      },
     });
   });
 });
@@ -113,14 +121,13 @@ describe('PagerDutyActionConnectorFields renders', () => {
       config: {
         apiUrl: 'http:\\test',
       },
-    } as ActionConnector;
+    } as PagerDutyActionConnector;
     const wrapper = mountWithIntl(
       <ConnectorFields
         action={actionConnector}
         errors={{ routingKey: [] }}
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
-        hasErrors={false}
       />
     );
     expect(wrapper.find('[data-test-subj="pagerdutyApiUrlInput"]').length > 0).toBeTruthy();
@@ -140,13 +147,15 @@ describe('PagerDutyParamsFields renders', () => {
     if (!actionTypeModel.actionParamsFields) {
       return;
     }
-    const ParamsFields = actionTypeModel.actionParamsFields;
+    const ParamsFields = actionTypeModel.actionParamsFields as FunctionComponent<
+      ActionParamsProps<PagerDutyActionParams>
+    >;
     const actionParams = {
-      eventAction: 'trigger',
+      eventAction: EventActionOptions.TRIGGER,
       dedupKey: 'test',
       summary: '2323',
       source: 'source',
-      severity: 'critical',
+      severity: SeverityActionOptions.CRITICAL,
       timestamp: '234654564654',
       component: 'test',
       group: 'group',
@@ -154,11 +163,10 @@ describe('PagerDutyParamsFields renders', () => {
     };
     const wrapper = mountWithIntl(
       <ParamsFields
-        action={actionParams}
-        errors={{}}
+        actionParams={actionParams}
+        errors={{ summary: [] }}
         editAction={() => {}}
         index={0}
-        hasErrors={false}
       />
     );
     expect(wrapper.find('[data-test-subj="severitySelect"]').length > 0).toBeTruthy();
@@ -174,6 +182,6 @@ describe('PagerDutyParamsFields renders', () => {
     expect(wrapper.find('[data-test-subj="componentInput"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="groupInput"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="sourceInput"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="pagerdutyDescriptionInput"]').length > 0).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="pagerdutySummaryInput"]').length > 0).toBeTruthy();
   });
 });
