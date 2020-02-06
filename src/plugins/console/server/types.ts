@@ -31,4 +31,12 @@ export interface ESConfigForProxy {
   requestHeadersWhitelist: string[];
   customHeaders: Record<string, any>;
   requestTimeout: Duration;
+  ssl?: {
+    verificationMode: 'none' | 'certificate' | 'full';
+    certificateAuthorities: string[] | string;
+    alwaysPresentCertificate: boolean;
+    certificate?: string;
+    key?: string;
+    keyPassphrase?: string;
+  };
 }

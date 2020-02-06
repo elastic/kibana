@@ -21,9 +21,10 @@ import _ from 'lodash';
 import http from 'http';
 import https from 'https';
 import url from 'url';
-import { Duration } from 'moment';
 
-const createAgent = (legacyConfig: any) => {
+import { ESConfigForProxy } from '../types';
+
+const createAgent = (legacyConfig: ESConfigForProxy) => {
   const target = url.parse(_.head(legacyConfig.hosts));
   if (!/^https/.test(target.protocol || '')) return new http.Agent();
 
@@ -59,7 +60,7 @@ const createAgent = (legacyConfig: any) => {
   return new https.Agent(agentOptions);
 };
 
-export const getElasticsearchProxyConfig = (legacyConfig: { requestTimeout: Duration }) => {
+export const getElasticsearchProxyConfig = (legacyConfig: ESConfigForProxy) => {
   return {
     timeout: legacyConfig.requestTimeout.asMilliseconds(),
     agent: createAgent(legacyConfig),

@@ -34,8 +34,8 @@ jest.mock('@elastic/eui', () => ({
 jest.mock('../../../legacy_imports', () => ({
   getTableAggs: jest.fn(),
 }));
-jest.mock('../../../../../visualizations/public', () => ({
-  createFiltersFromEvent: jest.fn().mockReturnValue(['yes']),
+jest.mock('../../../../../data/public/actions/filters/create_filters_from_event', () => ({
+  createFiltersFromEvent: jest.fn().mockResolvedValue(['yes']),
 }));
 
 const vis = {
@@ -95,8 +95,8 @@ const uiState = {
   setSilent: jest.fn(),
 };
 
-const getWrapper = (props?: Partial<VisLegendProps>) =>
-  mount(
+const getWrapper = async (props?: Partial<VisLegendProps>) => {
+  const wrapper = mount(
     <I18nProvider>
       <VisLegend
         position="top"
@@ -109,6 +109,11 @@ const getWrapper = (props?: Partial<VisLegendProps>) =>
     </I18nProvider>
   );
 
+  await (wrapper.find(VisLegend).instance() as VisLegend).refresh();
+  wrapper.update();
+  return wrapper;
+};
+
 const getLegendItems = (wrapper: ReactWrapper) => wrapper.find('.visLegend__button');
 
 describe('VisLegend Component', () => {
@@ -120,9 +125,9 @@ describe('VisLegend Component', () => {
   });
 
   describe('Legend open', () => {
-    beforeEach(() => {
+    beforeEach(async () => {
       mockState.set('vis.legendOpen', true);
-      wrapper = getWrapper();
+      wrapper = await getWrapper();
     });
 
     it('should match the snapshot', () => {
@@ -131,9 +136,9 @@ describe('VisLegend Component', () => {
   });
 
   describe('Legend closed', () => {
-    beforeEach(() => {
+    beforeEach(async () => {
       mockState.set('vis.legendOpen', false);
-      wrapper = getWrapper();
+      wrapper = await getWrapper();
     });
 
     it('should match the snapshot', () => {
@@ -142,25 +147,26 @@ describe('VisLegend Component', () => {
   });
 
   describe('Highlighting', () => {
-    beforeEach(() => {
-      wrapper = getWrapper();
+    beforeEach(async () => {
+      wrapper = await getWrapper();
     });
 
-    it('should call highlight handler when legend item is focused', () => {
+    it('should call highlight handler when legend item is focused', async () => {
       const first = getLegendItems(wrapper).first();
+
       first.simulate('focus');
 
       expect(vislibVis.handler.highlight).toHaveBeenCalledTimes(1);
     });
 
-    it('should call highlight handler when legend item is hovered', () => {
+    it('should call highlight handler when legend item is hovered', async () => {
       const first = getLegendItems(wrapper).first();
       first.simulate('mouseEnter');
 
       expect(vislibVis.handler.highlight).toHaveBeenCalledTimes(1);
     });
 
-    it('should call unHighlight handler when legend item is blurred', () => {
+    it('should call unHighlight handler when legend item is blurred', async () => {
       let first = getLegendItems(wrapper).first();
       first.simulate('focus');
       first = getLegendItems(wrapper).first();
@@ -169,7 +175,7 @@ describe('VisLegend Component', () => {
       expect(vislibVis.handler.unHighlight).toHaveBeenCalledTimes(1);
     });
 
-    it('should call unHighlight handler when legend item is unhovered', () => {
+    it('should call unHighlight handler when legend item is unhovered', async () => {
       const first = getLegendItems(wrapper).first();
 
       first.simulate('mouseEnter');
@@ -187,8 +193,8 @@ describe('VisLegend Component', () => {
         },
       };
 
-      expect(() => {
-        wrapper = getWrapper({ vis: newVis });
+      expect(async () => {
+        wrapper = await getWrapper({ vis: newVis });
         const first = getLegendItems(wrapper).first();
         first.simulate('focus');
         first.simulate('blur');
@@ -197,8 +203,8 @@ describe('VisLegend Component', () => {
   });
 
   describe('Filtering', () => {
-    beforeEach(() => {
-      wrapper = getWrapper();
+    beforeEach(async () => {
+      wrapper = await getWrapper();
     });
 
     it('should filter out when clicked', () => {
@@ -223,8 +229,8 @@ describe('VisLegend Component', () => {
   });
 
   describe('Toggles details', () => {
-    beforeEach(() => {
-      wrapper = getWrapper();
+    beforeEach(async () => {
+      wrapper = await getWrapper();
     });
 
     it('should show details when clicked', () => {
@@ -236,8 +242,8 @@ describe('VisLegend Component', () => {
   });
 
   describe('setColor', () => {
-    beforeEach(() => {
-      wrapper = getWrapper();
+    beforeEach(async () => {
+      wrapper = await getWrapper();
     });
 
     it('sets the color in the UI state', () => {
@@ -255,18 +261,18 @@ describe('VisLegend Component', () => {
   });
 
   describe('toggleLegend function', () => {
-    it('click should show legend once toggled from hidden', () => {
+    it('click should show legend once toggled from hidden', async () => {
       mockState.set('vis.legendOpen', false);
-      wrapper = getWrapper();
+      wrapper = await getWrapper();
       const toggleButton = wrapper.find('.visLegend__toggle').first();
       toggleButton.simulate('click');
 
       expect(wrapper.exists('.visLegend__list')).toBe(true);
     });
 
-    it('click should hide legend once toggled from shown', () => {
+    it('click should hide legend once toggled from shown', async () => {
       mockState.set('vis.legendOpen', true);
-      wrapper = getWrapper();
+      wrapper = await getWrapper();
       const toggleButton = wrapper.find('.visLegend__toggle').first();
       toggleButton.simulate('click');
 
