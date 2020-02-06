@@ -13,7 +13,7 @@ import moment from 'moment';
 import { getChartDateLabel } from '../../../lib/helper';
 import { ChartWrapper } from './chart_wrapper';
 import { UptimeThemeContext } from '../../../contexts';
-import { HistogramResult } from '../../../../common/types';
+import { HistogramResult, HistogramDataPoint } from '../../../../common/types';
 
 export interface PingHistogramComponentProps {
   /**
@@ -34,6 +34,49 @@ export interface PingHistogramComponentProps {
 
   loading?: boolean;
 }
+
+interface HistogramDataSummary {
+  max: number;
+  maxDownCount: number;
+  maxUpCount: number;
+  maxTimestamp: number;
+  latestTimestamp: number;
+  latestDownCount: number;
+  latestUpCount: number;
+  latestMax: number;
+}
+
+export const getHistogramAriaLabelData = (
+  histogram: HistogramDataPoint[]
+): HistogramDataSummary => {
+  return histogram.reduce(
+    (ret, cur) => {
+      const up = cur.upCount ?? 0;
+      const down = cur.downCount ?? 0;
+      if (ret.max === 0 || ret.max < up + down) {
+        ret.max = up + down;
+        ret.maxDownCount = down;
+        ret.maxUpCount = up;
+        ret.maxTimestamp = cur.x ?? 0;
+      }
+      ret.latestTimestamp = cur.x;
+      ret.latestDownCount = cur.downCount ?? 0;
+      ret.latestUpCount = cur.upCount ?? 0;
+      ret.latestMax = up + down;
+      return ret;
+    },
+    {
+      max: 0,
+      maxDownCount: 0,
+      maxUpCount: 0,
+      maxTimestamp: 0,
+      latestTimestamp: 0,
+      latestDownCount: 0,
+      latestUpCount: 0,
+      latestMax: 0,
+    }
+  );
+};
 
 export const PingHistogramComponent: React.FC<PingHistogramComponentProps> = ({
   absoluteStartDate,
@@ -85,6 +128,7 @@ export const PingHistogramComponent: React.FC<PingHistogramComponentProps> = ({
       </>
     );
   const { histogram } = data;
+  const { maxTimestamp, latestTimestamp, ...summaryRest } = getHistogramAriaLabelData(histogram);
 
   const downSpecId = i18n.translate('xpack.uptime.snapshotHistogram.downMonitorsId', {
     defaultMessage: 'Down Monitors',
@@ -106,14 +150,24 @@ export const PingHistogramComponent: React.FC<PingHistogramComponentProps> = ({
       <ChartWrapper
         height={height}
         loading={loading}
-        aria-label={i18n.translate('xpack.uptime.snapshotHistogram.description', {
-          defaultMessage:
-            'Bar Chart showing uptime status over time from {startTime} to {endTime}.',
-          values: {
-            startTime: moment(new Date(absoluteStartDate).valueOf()).fromNow(),
-            endTime: moment(new Date(absoluteEndDate).valueOf()).fromNow(),
-          },
-        })}
+        aria-label={
+          histogram.length
+            ? i18n.translate('xpack.uptime.snapshotHistogram.description', {
+                defaultMessage: `Bar Chart showing uptime status over time from {startTime} to {endTime}. The maximum value is {max} pings, with {maxUpCount} up and {maxDownCount} down {maxTimestamp}. The most recent count is {latestMax}, with {latestUpCount} up and {latestDownCount} down {latestTimestamp}.`,
+                values: {
+                  startTime: moment(new Date(absoluteStartDate).valueOf()).fromNow(),
+                  endTime: moment(new Date(absoluteEndDate).valueOf()).fromNow(),
+                  maxTimestamp: moment(new Date(maxTimestamp).valueOf()).fromNow(),
+                  latestTimestamp: moment(new Date(latestTimestamp).valueOf()).fromNow(),
+                  ...summaryRest,
+                },
+              })
+            : i18n.translate('xpack.uptime.snapshotHistogram.emptyDescription', {
+                defaultMessage:
+                  'Bar Chart that shows the uptime status over time. There are no data for the selected time range',
+              })
+        }
+        data-test-subj="xpack.uptime.charts.pingHistogram"
       >
         <Chart>
           <Settings
