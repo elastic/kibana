@@ -15,19 +15,18 @@ import { doesClusterExist } from '../../lib/does_cluster_exist';
 import { RouteDependencies } from '../../types';
 import { licensePreRoutingFactory } from '../../lib/license_pre_routing_factory';
 import { isEsError } from '../../lib/is_es_error';
-import { callWithRequestFactory } from '../../lib/call_with_request_factory';
 
 export const register = (deps: RouteDependencies): void => {
   // TODO there are other settings that can be specified for a remote cluster via console/API that I think might cause issues when editing
   const updateHandler: RequestHandler<any, any, any> = async (ctx, request, response) => {
     try {
-      const callWithRequest = callWithRequestFactory(deps.elasticsearchService, request);
+      const callAsCurrentUser = ctx.core.elasticsearch.dataClient.callAsCurrentUser;
 
       const { name } = request.params;
       const { seeds, skipUnavailable } = request.body;
 
       // Check if cluster does exist.
-      const existingCluster = await doesClusterExist(callWithRequest, name);
+      const existingCluster = await doesClusterExist(callAsCurrentUser, name);
       if (!existingCluster) {
         return response.customError({
           statusCode: 404,
@@ -42,15 +41,9 @@ export const register = (deps: RouteDependencies): void => {
         });
       }
 
-      // TODO is this still needed? Issue is closed
-      // Delete existing cluster settings.
-      // This is a workaround for: https://github.com/elastic/elasticsearch/issues/37799
-      const deleteClusterPayload = serializeCluster({ name });
-      await callWithRequest('cluster.putSettings', { body: deleteClusterPayload });
-
       // Update cluster as new settings
       const updateClusterPayload = serializeCluster({ name, seeds, skipUnavailable });
-      const updateClusterResponse = await callWithRequest('cluster.putSettings', {
+      const updateClusterResponse = await callAsCurrentUser('cluster.putSettings', {
         body: updateClusterPayload,
       });
 

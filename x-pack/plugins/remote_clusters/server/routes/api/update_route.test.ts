@@ -3,118 +3,226 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { kibanaResponseFactory, RequestHandlerContext } from '../../../../../../src/core/server';
+import { register } from './update_route';
+import { API_BASE_PATH } from '../../../common/constants';
+import { LicenseStatus } from '../../types';
 
-import { Request, ResponseToolkit } from 'hapi';
-import { wrapCustomError } from '../../../../../server/lib/create_router';
-import { updateHandler } from './update_route';
+import {
+  elasticsearchServiceMock,
+  httpServerMock,
+  httpServiceMock,
+} from '../../../../../../src/core/server/mocks';
 
-describe('[API Routes] Remote Clusters updateHandler()', () => {
-  const mockResponseToolkit = {} as ResponseToolkit;
+interface TestOptions {
+  licenseCheckResult?: LicenseStatus;
+  apiResponses?: Array<() => Promise<unknown>>;
+  asserts: { statusCode: number; result?: Record<string, any>; apiArguments?: unknown[][] };
+  payload?: Record<string, any>;
+  params: {
+    name: string;
+  };
+}
 
-  it('returns the cluster information from Elasticsearch', async () => {
-    const mockCreateRequest = ({
-      payload: {
-        seeds: [],
-      },
-      params: {
-        name: 'test_cluster',
-      },
-    } as unknown) as Request;
+describe('UPDATE remote clusters', () => {
+  const updateRemoteClustersTest = (
+    description: string,
+    {
+      licenseCheckResult = { valid: true },
+      apiResponses = [],
+      asserts,
+      payload,
+      params,
+    }: TestOptions
+  ) => {
+    test(description, async () => {
+      const { adminClient: elasticsearchMock } = elasticsearchServiceMock.createSetup();
 
-    const callWithRequest = jest
-      .fn()
-      .mockReturnValueOnce({ test_cluster: true })
-      .mockReturnValueOnce(null)
-      .mockReturnValueOnce({
-        acknowledged: true,
-        persistent: {
-          cluster: {
-            remote: {
-              test_cluster: {
-                seeds: [],
+      const mockRouteDependencies = {
+        router: httpServiceMock.createRouter(),
+        getLicenseStatus: () => licenseCheckResult,
+        elasticsearchService: elasticsearchServiceMock.createInternalSetup(),
+        elasticsearch: elasticsearchMock,
+      };
+
+      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+
+      elasticsearchServiceMock
+        .createClusterClient()
+        .asScoped.mockReturnValue(mockScopedClusterClient);
+
+      for (const apiResponse of apiResponses) {
+        mockScopedClusterClient.callAsCurrentUser.mockImplementationOnce(apiResponse);
+      }
+
+      register(mockRouteDependencies);
+      const [[{ validate }, handler]] = mockRouteDependencies.router.put.mock.calls;
+
+      const mockRequest = httpServerMock.createKibanaRequest({
+        method: 'put',
+        path: `${API_BASE_PATH}/{name}`,
+        params: (validate as any).params.validate(params),
+        body: payload !== undefined ? (validate as any).body.validate(payload) : undefined,
+        headers: { authorization: 'foo' },
+      });
+
+      const mockContext = ({
+        core: {
+          elasticsearch: {
+            dataClient: mockScopedClusterClient,
+          },
+        },
+      } as unknown) as RequestHandlerContext;
+
+      const response = await handler(mockContext, mockRequest, kibanaResponseFactory);
+
+      expect(response.status).toBe(asserts.statusCode);
+      expect(response.payload).toEqual(asserts.result);
+
+      if (Array.isArray(asserts.apiArguments)) {
+        for (const apiArguments of asserts.apiArguments) {
+          expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith(...apiArguments);
+        }
+      } else {
+        expect(mockScopedClusterClient.callAsCurrentUser).not.toHaveBeenCalled();
+      }
+    });
+  };
+
+  describe('success', () => {
+    updateRemoteClustersTest('updates remote cluster', {
+      apiResponses: [
+        async () => ({
+          test: {
+            connected: true,
+            mode: 'sniff',
+            seeds: ['127.0.0.1:9300'],
+            num_nodes_connected: 1,
+            max_connections_per_cluster: 3,
+            initial_connect_timeout: '30s',
+            skip_unavailable: false,
+          },
+        }),
+        async () => ({
+          acknowledged: true,
+          persistent: {
+            cluster: {
+              remote: {
+                test: {
+                  connected: true,
+                  mode: 'sniff',
+                  seeds: ['127.0.0.1:9300'],
+                  num_nodes_connected: 1,
+                  max_connections_per_cluster: 3,
+                  initial_connect_timeout: '30s',
+                  skip_unavailable: true,
+                },
               },
             },
           },
+          transient: {},
+        }),
+      ],
+      params: {
+        name: 'test',
+      },
+      payload: {
+        seeds: ['127.0.0.1:9300'],
+        skipUnavailable: true,
+      },
+      asserts: {
+        apiArguments: [
+          ['cluster.remoteInfo'],
+          [
+            'cluster.putSettings',
+            {
+              body: {
+                persistent: {
+                  cluster: {
+                    remote: { test: { seeds: ['127.0.0.1:9300'], skip_unavailable: true } },
+                  },
+                },
+              },
+            },
+          ],
+        ],
+        statusCode: 200,
+        result: {
+          connectedNodesCount: 1,
+          initialConnectTimeout: '30s',
+          isConfiguredByNode: false,
+          isConnected: true,
+          maxConnectionsPerCluster: 3,
+          name: 'test',
+          seeds: ['127.0.0.1:9300'],
+          skipUnavailable: true,
         },
-      });
-
-    const response = await updateHandler(mockCreateRequest, callWithRequest, mockResponseToolkit);
-    const expectedResponse = {
-      name: 'test_cluster',
-      seeds: [],
-      isConfiguredByNode: false,
-    };
-    expect(response).toEqual(expectedResponse);
+      },
+    });
   });
 
-  it(`throws an error if the response doesn't contain cluster information`, async () => {
-    const mockCreateRequest = ({
+  describe('failure', () => {
+    updateRemoteClustersTest('returns 404 if remote cluster does not exist', {
+      apiResponses: [async () => ({})],
       payload: {
-        seeds: [],
+        seeds: ['127.0.0.1:9300'],
+        skipUnavailable: false,
       },
       params: {
-        name: 'test_cluster',
+        name: 'test',
       },
-    } as unknown) as Request;
+      asserts: {
+        apiArguments: [['cluster.remoteInfo']],
+        statusCode: 404,
+        result: {
+          message: 'There is no remote cluster with that name.',
+        },
+      },
+    });
 
-    const callWithRequest = jest
-      .fn()
-      .mockReturnValueOnce({ test_cluster: true })
-      .mockReturnValueOnce({
-        acknowledged: true,
-        persistent: {},
-      });
-
-    const expectedError = wrapCustomError(
-      new Error('Unable to update cluster, no response returned from ES.'),
-      400
-    );
-    await expect(
-      updateHandler(mockCreateRequest, callWithRequest, mockResponseToolkit)
-    ).rejects.toThrow(expectedError);
-  });
-
-  it('throws an error if the cluster does not exist', async () => {
-    const mockCreateRequest = ({
+    updateRemoteClustersTest('returns 400 if ES did not acknowledge remote cluster', {
+      apiResponses: [
+        async () => ({
+          test: {
+            connected: true,
+            mode: 'sniff',
+            seeds: ['127.0.0.1:9300'],
+            num_nodes_connected: 1,
+            max_connections_per_cluster: 3,
+            initial_connect_timeout: '30s',
+            skip_unavailable: false,
+          },
+        }),
+        async () => ({}),
+      ],
       payload: {
-        seeds: [],
+        seeds: ['127.0.0.1:9300'],
+        skipUnavailable: false,
       },
       params: {
-        name: 'test_cluster',
+        name: 'test',
       },
-    } as unknown) as Request;
-
-    const callWithRequest = jest.fn().mockReturnValueOnce({});
-
-    const expectedError = wrapCustomError(
-      new Error('There is no remote cluster with that name.'),
-      404
-    );
-    await expect(
-      updateHandler(mockCreateRequest, callWithRequest, mockResponseToolkit)
-    ).rejects.toThrow(expectedError);
-  });
-
-  it('throws an ES error when one is received', async () => {
-    const mockCreateRequest = ({
-      payload: {
-        seeds: [],
+      asserts: {
+        apiArguments: [
+          ['cluster.remoteInfo'],
+          [
+            'cluster.putSettings',
+            {
+              body: {
+                persistent: {
+                  cluster: {
+                    remote: { test: { seeds: ['127.0.0.1:9300'], skip_unavailable: false } },
+                  },
+                },
+              },
+            },
+          ],
+        ],
+        statusCode: 400,
+        result: {
+          message: 'Unable to edit cluster, no response returned from ES.',
+        },
       },
-      params: {
-        name: 'test_cluster',
-      },
-    } as unknown) as Request;
-
-    const mockError = new Error() as any;
-    mockError.response = JSON.stringify({ error: 'Test error' });
-
-    const callWithRequest = jest
-      .fn()
-      .mockReturnValueOnce({ test_cluster: true })
-      .mockRejectedValueOnce(mockError);
-
-    await expect(
-      updateHandler(mockCreateRequest, callWithRequest, mockResponseToolkit)
-    ).rejects.toThrow(mockError);
+    });
   });
 });

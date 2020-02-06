@@ -10,15 +10,14 @@ import { RequestHandler } from 'src/core/server';
 import { deserializeCluster } from '../../../common/lib';
 import { API_BASE_PATH } from '../../../common/constants';
 import { licensePreRoutingFactory } from '../../lib/license_pre_routing_factory';
-import { callWithRequestFactory } from '../../lib/call_with_request_factory';
 import { isEsError } from '../../lib/is_es_error';
 import { RouteDependencies } from '../../types';
 
 export const register = (deps: RouteDependencies): void => {
   const allHandler: RequestHandler<any, any, any> = async (ctx, request, response) => {
     try {
-      const callWithRequest = callWithRequestFactory(deps.elasticsearchService, request);
-      const clusterSettings = await callWithRequest('cluster.getSettings');
+      const callAsCurrentUser = await ctx.core.elasticsearch.dataClient.callAsCurrentUser;
+      const clusterSettings = await callAsCurrentUser('cluster.getSettings');
 
       const transientClusterNames = Object.keys(
         get(clusterSettings, 'transient.cluster.remote') || {}
@@ -27,7 +26,7 @@ export const register = (deps: RouteDependencies): void => {
         get(clusterSettings, 'persistent.cluster.remote') || {}
       );
 
-      const clustersByName = await callWithRequest('cluster.remoteInfo');
+      const clustersByName = await callAsCurrentUser('cluster.remoteInfo');
       const clusterNames = (clustersByName && Object.keys(clustersByName)) || [];
 
       const body = clusterNames.map((clusterName: string): any => {

@@ -15,12 +15,11 @@ import { API_BASE_PATH } from '../../../common/constants';
 import { doesClusterExist } from '../../lib/does_cluster_exist';
 import { licensePreRoutingFactory } from '../../lib/license_pre_routing_factory';
 import { isEsError } from '../../lib/is_es_error';
-import { callWithRequestFactory } from '../../lib/call_with_request_factory';
 
 export const register = (deps: RouteDependencies): void => {
   const deleteHandler: RequestHandler<any, any, any> = async (ctx, request, response) => {
     try {
-      const callWithRequest = callWithRequestFactory(deps.elasticsearchService, request);
+      const callAsCurrentUser = ctx.core.elasticsearch.dataClient.callAsCurrentUser;
 
       const { nameOrNames } = request.params;
       const names = nameOrNames.split(',');
@@ -31,7 +30,7 @@ export const register = (deps: RouteDependencies): void => {
       // Validator that returns an error if the remote cluster does not exist.
       const validateClusterDoesExist = async (name: string) => {
         try {
-          const existingCluster = await doesClusterExist(callWithRequest, name);
+          const existingCluster = await doesClusterExist(callAsCurrentUser, name);
           if (!existingCluster) {
             return response.customError({
               statusCode: 404,
@@ -54,7 +53,7 @@ export const register = (deps: RouteDependencies): void => {
       const sendRequestToDeleteCluster = async (name: string) => {
         try {
           const body = serializeCluster({ name });
-          const updateClusterResponse = await callWithRequest('cluster.putSettings', { body });
+          const updateClusterResponse = await callAsCurrentUser('cluster.putSettings', { body });
           const acknowledged = get(updateClusterResponse, 'acknowledged');
           const cluster = get(updateClusterResponse, `persistent.cluster.remote.${name}`);
 

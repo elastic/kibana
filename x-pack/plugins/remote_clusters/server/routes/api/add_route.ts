@@ -13,19 +13,18 @@ import { serializeCluster } from '../../../common/lib';
 import { doesClusterExist } from '../../lib/does_cluster_exist';
 import { API_BASE_PATH } from '../../../common/constants';
 import { licensePreRoutingFactory } from '../../lib/license_pre_routing_factory';
-import { callWithRequestFactory } from '../../lib/call_with_request_factory';
 import { isEsError } from '../../lib/is_es_error';
 import { RouteDependencies } from '../../types';
 
 export const register = (deps: RouteDependencies): void => {
   const addHandler: RequestHandler<any, any, any> = async (ctx, request, response) => {
     try {
-      const callWithRequest = callWithRequestFactory(deps.elasticsearchService, request);
+      const callAsCurrentUser = ctx.core.elasticsearch.dataClient.callAsCurrentUser;
 
       const { name, seeds, skipUnavailable } = request.body;
 
       // Check if cluster already exists.
-      const existingCluster = await doesClusterExist(callWithRequest, name);
+      const existingCluster = await doesClusterExist(callAsCurrentUser, name);
       if (existingCluster) {
         return response.customError({
           statusCode: 409,
@@ -41,7 +40,7 @@ export const register = (deps: RouteDependencies): void => {
       }
 
       const addClusterPayload = serializeCluster({ name, seeds, skipUnavailable });
-      const updateClusterResponse = await callWithRequest('cluster.putSettings', {
+      const updateClusterResponse = await callAsCurrentUser('cluster.putSettings', {
         body: addClusterPayload,
       });
       const acknowledged = get(updateClusterResponse, 'acknowledged');
