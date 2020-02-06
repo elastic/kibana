@@ -54,14 +54,6 @@ export class LegacyManagementAdapter {
       icon: 'logoKibana',
     });
 
-    this.main.register('ingest', {
-      display: i18n.translate('management.dataIngestionDisplayName', {
-        defaultMessage: 'Data Ingestion',
-      }),
-      order: 30,
-      icon: 'logoBeats',
-    });
-
     this.main.register('logstash', {
       display: 'Logstash',
       order: 30,
