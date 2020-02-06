@@ -23,8 +23,10 @@ export function demodata(): ExpressionFunctionDefinition<'demodata', Filter, Arg
     name: 'demodata',
     aliases: [],
     type: 'datatable',
+    context: {
+      types: ['filter'],
+    },
     help,
-    inputTypes: ['filter'],
     args: {
       type: {
         types: ['string'],

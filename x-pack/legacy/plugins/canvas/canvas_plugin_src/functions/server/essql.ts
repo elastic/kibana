@@ -22,7 +22,9 @@ export function essql(): ExpressionFunctionDefinition<'essql', Filter, Arguments
   return {
     name: 'essql',
     type: 'datatable',
-    inputTypes: ['filter'],
+    context: {
+      types: ['filter'],
+    },
     help,
     args: {
       query: {

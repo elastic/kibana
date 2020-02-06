@@ -26,7 +26,9 @@ export function esdocs(): ExpressionFunctionDefinition<'esdocs', Filter, Argumen
   return {
     name: 'esdocs',
     type: 'datatable',
-    inputTypes: ['filter'],
+    context: {
+      types: ['filter'],
+    },
     help,
     args: {
       query: {

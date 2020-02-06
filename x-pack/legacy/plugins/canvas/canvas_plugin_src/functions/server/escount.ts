@@ -20,7 +20,9 @@ export function escount(): ExpressionFunctionDefinition<'escount', Filter, Argum
   return {
     name: 'escount',
     type: 'number',
-    inputTypes: ['filter'],
+    context: {
+      types: ['filter'],
+    },
     help,
     args: {
       query: {

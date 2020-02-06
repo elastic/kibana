@@ -114,8 +114,8 @@ export class ExpressionsPublicPlugin
           Object.keys(serverFunctionList).forEach(functionName => {
             const fn = () => ({
               ...serverFunctionList[functionName],
-              fn: (context: any, args: any) => {
-                return batchedFunction({ functionName, args, context: serialize(context) });
+              fn: (input: any, args: any) => {
+                return batchedFunction({ functionName, args, context: serialize(input) });
               },
             });
             expressionsSetup.registerFunction(fn);

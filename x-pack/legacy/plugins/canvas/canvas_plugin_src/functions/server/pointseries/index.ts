@@ -50,7 +50,9 @@ export function pointseries(): ExpressionFunctionDefinition<
   return {
     name: 'pointseries',
     type: 'pointseries',
-    inputTypes: ['datatable'],
+    context: {
+      types: ['filter'],
+    },
     help,
     args: {
       color: {
