@@ -110,6 +110,12 @@ export class Bundle {
     return this.cache.getModuleCount();
   }
 
+  /**
+   * Calculate the cache key for this bundle based from current
+   * mtime values.
+   *
+   * @param mtimes pre-fetched mtimes (ms || undefined) for all referenced files
+   */
   createCacheKey(mtimes: Map<string, number | undefined>) {
     return createHash('sha1')
       .update(
@@ -123,6 +129,11 @@ export class Bundle {
       .digest('hex');
   }
 
+  /**
+   * Get the raw "specification" for the bundle, this object is JSON serialized
+   * in the cache key, passed to worker processes so they know what bundles
+   * to build, and passed to the Bundle constructor to rebuild the Bundle object.
+   */
   toSpec(): BundleSpec {
     return {
       type: this.type,
@@ -135,6 +146,10 @@ export class Bundle {
   }
 }
 
+/**
+ * Parse a JSON string containing an array of BundleSpec objects into an array
+ * of Bundle objects, validating everything.
+ */
 export function parseBundles(json: string) {
   try {
     if (typeof json !== 'string') {
