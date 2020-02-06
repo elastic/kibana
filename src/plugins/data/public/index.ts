@@ -45,7 +45,7 @@ export {
   // Field Formats
   fieldFormats,
   IFieldFormat,
-  FieldFormatsRegistry,
+  IFieldFormatsRegistry,
   FieldFormatsContentType,
   FieldFormatsGetConfigFn,
   FieldFormatConfig,

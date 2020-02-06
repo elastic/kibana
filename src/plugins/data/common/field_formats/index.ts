@@ -17,15 +17,19 @@
  * under the License.
  */
 
+import { FieldFormatsRegistry } from './field_formats_registry';
+type IFieldFormatsRegistry = PublicMethodsOf<FieldFormatsRegistry>;
+
+export { FieldFormatsRegistry, IFieldFormatsRegistry };
+
 export { fieldFormats } from './static';
-export { FieldFormatsRegistry } from './field_formats_registry';
 
 export {
   FieldFormatsGetConfigFn,
   FieldFormatsContentType,
   FieldFormatConfig,
   FieldFormatId,
-  // @internal
+  // Used in data plugin only
   IFieldFormatType,
   IFieldFormat,
 } from './types';

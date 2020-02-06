@@ -7,7 +7,7 @@
 import _ from 'lodash';
 import {
   FieldFormatConfig,
-  FieldFormatsRegistry,
+  IFieldFormatsRegistry,
 } from '../../../../../../../../src/plugins/data/server';
 
 interface IndexPatternSavedObject {
@@ -28,7 +28,7 @@ interface IndexPatternSavedObject {
  */
 export function fieldFormatMapFactory(
   indexPatternSavedObject: IndexPatternSavedObject,
-  fieldFormatsRegistry: FieldFormatsRegistry
+  fieldFormatsRegistry: IFieldFormatsRegistry
 ) {
   const formatsMap = new Map();
 

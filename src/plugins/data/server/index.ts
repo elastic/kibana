@@ -57,9 +57,9 @@ export {
   isNestedField,
   // fieldFormats
   fieldFormats,
+  IFieldFormatsRegistry,
   FieldFormatsGetConfigFn,
   FieldFormatConfig,
-  FieldFormatsRegistry,
 } from '../common';
 
 /**

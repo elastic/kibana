@@ -8,7 +8,7 @@ import Puid from 'puid';
 import sinon from 'sinon';
 import nodeCrypto from '@elastic/node-crypto';
 import { CancellationToken } from '../../../common/cancellation_token';
-import { fieldFormats, FieldFormatsRegistry } from '../../../../../../../src/plugins/data/server';
+import { fieldFormats } from '../../../../../../../src/plugins/data/server';
 import { LevelLogger } from '../../../server/lib/level_logger';
 import { executeJobFactory } from './execute_job';
 import { setFieldFormats } from '../../../server/services';
@@ -81,7 +81,7 @@ describe('CSV Execute Job', function() {
           _default_: { id: 'string', params: {} },
         };
 
-        const fieldFormatsRegistry = new FieldFormatsRegistry();
+        const fieldFormatsRegistry = new fieldFormats.FieldFormatsRegistry();
 
         fieldFormatsRegistry.init(key => uiConfigMock[key], {}, [fieldFormats.StringFormat]);
 

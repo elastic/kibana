@@ -24,6 +24,7 @@ import { baseFormatters } from './constants/base_formatters';
 import { DEFAULT_CONVERTER_COLOR } from './constants/color_default';
 
 import { FieldFormat } from './field_format';
+import { FieldFormatsRegistry } from './field_formats_registry';
 
 import {
   BoolFormat,
@@ -50,6 +51,7 @@ import { FIELD_FORMAT_IDS } from './types';
  */
 export const fieldFormats = {
   FieldFormat,
+  FieldFormatsRegistry, // exported only for tests. Consider mock.
 
   DEFAULT_CONVERTER_COLOR,
   HTML_CONTEXT_TYPE,
