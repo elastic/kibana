@@ -54,11 +54,6 @@ export interface UMPingsAdapter {
   getLatestMonitorStatus: UMElasticsearchQueryFn<GetLatestMonitorDocsParams, Ping>;
 
   getPingHistogram: UMElasticsearchQueryFn<GetPingHistogramParams, HistogramResult>;
-
-  /**
-   * Gets data used for a composite histogram for the currently-running monitors.
-   */
-  getDocCount: UMElasticsearchQueryFn<{}, DocCount>;
 }
 
 export interface HistogramQueryResult {

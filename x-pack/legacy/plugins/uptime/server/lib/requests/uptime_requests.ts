@@ -36,7 +36,6 @@ import { HistogramResult } from '../../../common/types';
 type ESQ<P, R> = UMElasticsearchQueryFn<P, R>;
 
 export interface UptimeRequests {
-  getDocCount: ESQ<{}, DocCount>;
   getFilterBar: ESQ<GetFilterBarParams, OverviewFilters>;
   getIndexPattern: ESQ<any, {}>;
   getLatestMonitor: ESQ<GetLatestMonitorParams, Ping>;
