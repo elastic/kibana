@@ -7,6 +7,7 @@
 import { get } from 'lodash/fp';
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
+import { getIntervalSettings, getTimeRangeSettings } from '../../utils/default_date_settings';
 import {
   deleteAllQuery,
   setAbsoluteRangeDatePicker,
@@ -39,14 +40,6 @@ import {
   deleteOneQuery as helperDeleteOneQuery,
 } from './helpers';
 import { InputsModel, TimeRange } from './model';
-import {
-  getDefaultFromValue,
-  getDefaultToValue,
-  getDefaultFromString,
-  getDefaultToString,
-  getDefaultIntervalKind,
-  getDefaultIntervalDuration,
-} from '../../utils/default_date_settings';
 
 export type InputsState = InputsModel;
 
@@ -54,16 +47,10 @@ export const initialInputsState: InputsState = {
   global: {
     timerange: {
       kind: 'relative',
-      fromStr: getDefaultFromString(),
-      toStr: getDefaultToString(),
-      from: getDefaultFromValue(),
-      to: getDefaultToValue(),
+      ...getTimeRangeSettings(false),
     },
     queries: [],
-    policy: {
-      kind: getDefaultIntervalKind(),
-      duration: getDefaultIntervalDuration(),
-    },
+    policy: getIntervalSettings(false),
     linkTo: ['timeline'],
     query: {
       query: '',
@@ -74,16 +61,10 @@ export const initialInputsState: InputsState = {
   timeline: {
     timerange: {
       kind: 'relative',
-      fromStr: getDefaultFromString(),
-      toStr: getDefaultToString(),
-      from: getDefaultFromValue(),
-      to: getDefaultToValue(),
+      ...getTimeRangeSettings(false),
     },
     queries: [],
-    policy: {
-      kind: getDefaultIntervalKind(),
-      duration: getDefaultIntervalDuration(),
-    },
+    policy: getIntervalSettings(false),
     linkTo: ['global'],
     query: {
       query: '',
@@ -91,6 +72,54 @@ export const initialInputsState: InputsState = {
     },
     filters: [],
   },
+};
+
+export const createInitialInputsState = (): InputsState => {
+  const { from, fromStr, to, toStr } = getTimeRangeSettings();
+  const { kind, duration } = getIntervalSettings();
+
+  return {
+    global: {
+      timerange: {
+        kind: 'relative',
+        fromStr,
+        toStr,
+        from,
+        to,
+      },
+      queries: [],
+      policy: {
+        kind,
+        duration,
+      },
+      linkTo: ['timeline'],
+      query: {
+        query: '',
+        language: 'kuery',
+      },
+      filters: [],
+    },
+    timeline: {
+      timerange: {
+        kind: 'relative',
+        fromStr,
+        toStr,
+        from,
+        to,
+      },
+      queries: [],
+      policy: {
+        kind,
+        duration,
+      },
+      linkTo: ['global'],
+      query: {
+        query: '',
+        language: 'kuery',
+      },
+      filters: [],
+    },
+  };
 };
 
 export const inputsReducer = reducerWithInitialState(initialInputsState)
