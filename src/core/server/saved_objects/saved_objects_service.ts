@@ -32,7 +32,7 @@ import { InternalElasticsearchServiceSetup, APICaller } from '../elasticsearch';
 import { KibanaConfigType } from '../kibana_config';
 import { migrationsRetryCallCluster } from '../elasticsearch/retry_call_cluster';
 import { SavedObjectsConfigType } from './saved_objects_config';
-import { KibanaRequest } from '../http';
+import { InternalHttpServiceSetup, KibanaRequest } from '../http';
 import { SavedObjectsClientContract, SavedObjectsType } from './types';
 import { ISavedObjectsRepository, SavedObjectsRepository } from './service/lib/repository';
 import {
@@ -44,6 +44,7 @@ import { convertLegacyTypes } from './utils';
 import { SavedObjectTypeRegistry, ISavedObjectTypeRegistry } from './saved_objects_type_registry';
 import { PropertyValidators } from './validation';
 import { SavedObjectsSerializer } from './serialization';
+import { registerRoutes } from './routes';
 
 /**
  * Saved Objects is Kibana's data persistence mechanism allowing plugins to
@@ -196,6 +197,7 @@ export interface SavedObjectsRepositoryFactory {
 
 /** @internal */
 export interface SavedObjectsSetupDeps {
+  http: InternalHttpServiceSetup;
   legacyPlugins: LegacyServiceDiscoverPlugins;
   elasticsearch: InternalElasticsearchServiceSetup;
 }
@@ -218,6 +220,7 @@ export class SavedObjectsService
   private clientFactoryProvider?: SavedObjectsClientFactoryProvider;
   private clientFactoryWrappers: WrappedClientFactoryWrapper[] = [];
 
+  private migrator?: KibanaMigrator;
   private typeRegistry = new SavedObjectTypeRegistry();
   private validations: PropertyValidators = {};
 
@@ -236,6 +239,11 @@ export class SavedObjectsService
     );
     legacyTypes.forEach(type => this.typeRegistry.registerType(type));
     this.validations = setupDeps.legacyPlugins.uiExports.savedObjectValidations || {};
+
+    registerRoutes({
+      http: setupDeps.http,
+      getMigrator: () => this.migrator,
+    });
 
     return {
       setClientFactoryProvider: provider => {
@@ -276,7 +284,7 @@ export class SavedObjectsService
       .pipe(first())
       .toPromise();
     const adminClient = this.setupDeps!.elasticsearch.adminClient;
-    const migrator = this.createMigrator(kibanaConfig, savedObjectsConfig, migrationsRetryDelay);
+    this.migrator = this.createMigrator(kibanaConfig, savedObjectsConfig, migrationsRetryDelay);
 
     /**
      * Note: We want to ensure that migrations have completed before
@@ -305,12 +313,12 @@ export class SavedObjectsService
       ).toPromise();
 
       this.logger.info('Starting saved objects migrations');
-      await migrator.runMigrations();
+      await this.migrator.runMigrations();
     }
 
     const createRepository = (callCluster: APICaller, extraTypes: string[] = []) => {
       return SavedObjectsRepository.createRepository(
-        migrator,
+        this.migrator!,
         this.typeRegistry,
         kibanaConfig.index,
         callCluster,
@@ -340,7 +348,7 @@ export class SavedObjectsService
     });
 
     return {
-      migrator,
+      migrator: this.migrator,
       clientProvider,
       typeRegistry: this.typeRegistry,
       getScopedClient: clientProvider.getClient.bind(clientProvider),

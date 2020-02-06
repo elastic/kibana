@@ -17,23 +17,17 @@
  * under the License.
  */
 
-import { Client } from 'elasticsearch';
-import { ToolingLog, KbnClient } from '@kbn/dev-utils';
+import { InternalHttpServiceSetup } from '../../http';
+import { IKibanaMigrator } from '../migrations';
+import { registerMigrateRoute } from './migrate';
 
-import { migrateKibanaIndex, deleteKibanaIndices, createStats } from '../lib';
+interface RegisterRouteOptions {
+  http: InternalHttpServiceSetup;
+  getMigrator: () => IKibanaMigrator | undefined;
+}
 
-export async function emptyKibanaIndexAction({
-  client,
-  log,
-  kbnClient,
-}: {
-  client: Client;
-  log: ToolingLog;
-  kbnClient: KbnClient;
-}) {
-  const stats = createStats('emptyKibanaIndex', log);
+export function registerRoutes({ http, getMigrator }: RegisterRouteOptions) {
+  const router = http.createRouter('');
 
-  await deleteKibanaIndices({ client, stats, log });
-  await migrateKibanaIndex({ kbnClient });
-  return stats;
+  registerMigrateRoute(router, getMigrator);
 }

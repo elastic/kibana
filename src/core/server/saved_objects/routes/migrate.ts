@@ -17,23 +17,30 @@
  * under the License.
  */
 
-import { Client } from 'elasticsearch';
-import { ToolingLog, KbnClient } from '@kbn/dev-utils';
+import { IRouter } from '../../http';
+import { IKibanaMigrator } from '../migrations';
 
-import { migrateKibanaIndex, deleteKibanaIndices, createStats } from '../lib';
-
-export async function emptyKibanaIndexAction({
-  client,
-  log,
-  kbnClient,
-}: {
-  client: Client;
-  log: ToolingLog;
-  kbnClient: KbnClient;
-}) {
-  const stats = createStats('emptyKibanaIndex', log);
-
-  await deleteKibanaIndices({ client, stats, log });
-  await migrateKibanaIndex({ kbnClient });
-  return stats;
-}
+export const registerMigrateRoute = (
+  router: IRouter,
+  getMigrator: () => IKibanaMigrator | undefined
+) => {
+  router.post(
+    {
+      path: '/api/saved_objects/_migrate',
+      validate: false,
+    },
+    async (context, req, res) => {
+      const migrator = getMigrator();
+      if (!migrator) {
+        return res.badRequest({ body: 'Migrator is not available yet.' });
+      }
+      const result = await migrator.runMigrations({ rerun: true });
+      return res.ok({
+        body: {
+          success: true,
+          result,
+        },
+      });
+    }
+  );
+};

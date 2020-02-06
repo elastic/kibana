@@ -95,8 +95,10 @@ export class KibanaMigrator {
    *    The promise resolves with an array of migration statuses, one for each
    *    elasticsearch index which was migrated.
    */
-  public runMigrations(): Promise<Array<{ status: string }>> {
-    if (this.migrationResult === undefined) {
+  public runMigrations({ rerun = false }: { rerun?: boolean } = {}): Promise<
+    Array<{ status: string }>
+  > {
+    if (this.migrationResult === undefined || rerun) {
       this.migrationResult = this.runMigrationsInternal();
     }
 

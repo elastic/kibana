@@ -17,42 +17,10 @@
  * under the License.
  */
 
-import { get } from 'lodash';
-import fs from 'fs';
-import Path from 'path';
-import { promisify } from 'util';
-import { toArray } from 'rxjs/operators';
 import { Client, CreateDocumentParams } from 'elasticsearch';
-import { ToolingLog } from '@kbn/dev-utils';
-
+import { ToolingLog, KbnClient } from '@kbn/dev-utils';
 import { Stats } from '../stats';
 import { deleteIndex } from './delete_index';
-import { KibanaMigrator } from '../../../core/server/saved_objects/migrations';
-import { LegacyConfig } from '../../../core/server';
-import { convertLegacyTypes } from '../../../core/server/saved_objects/utils';
-import { SavedObjectTypeRegistry } from '../../../core/server/saved_objects';
-// @ts-ignore
-import { collectUiExports } from '../../../legacy/ui/ui_exports';
-// @ts-ignore
-import { findPluginSpecs } from '../../../legacy/plugin_discovery';
-
-/**
- * Load the uiExports for a Kibana instance, only load uiExports from xpack if
- * it is enabled in the Kibana server.
- */
-const getUiExports = async (kibanaPluginIds: string[]) => {
-  const xpackEnabled = kibanaPluginIds.includes('xpack_main');
-
-  const { spec$ } = await findPluginSpecs({
-    plugins: {
-      scanDirs: [Path.resolve(__dirname, '../../../legacy/core_plugins')],
-      paths: xpackEnabled ? [Path.resolve(__dirname, '../../../../x-pack')] : [],
-    },
-  });
-
-  const specs = await spec$.pipe(toArray()).toPromise();
-  return collectUiExports(specs);
-};
 
 /**
  * Deletes all indices that start with `.kibana`
@@ -91,63 +59,8 @@ export async function deleteKibanaIndices({
  * builds up an object that implements just enough of the kbnMigrations interface
  * as is required by migrations.
  */
-export async function migrateKibanaIndex({
-  client,
-  log,
-  kibanaPluginIds,
-}: {
-  client: Client;
-  log: ToolingLog;
-  kibanaPluginIds: string[];
-}) {
-  const uiExports = await getUiExports(kibanaPluginIds);
-  const kibanaVersion = await loadKibanaVersion();
-
-  const configKeys: Record<string, string> = {
-    'xpack.task_manager.index': '.kibana_task_manager',
-  };
-  const config = { get: (path: string) => configKeys[path] };
-
-  const savedObjectTypes = convertLegacyTypes(uiExports, config as LegacyConfig);
-  const typeRegistry = new SavedObjectTypeRegistry();
-  savedObjectTypes.forEach(type => typeRegistry.registerType(type));
-
-  const logger = {
-    trace: log.verbose.bind(log),
-    debug: log.debug.bind(log),
-    info: log.info.bind(log),
-    warn: log.warning.bind(log),
-    error: log.error.bind(log),
-    fatal: log.error.bind(log),
-    log: (entry: any) => log.info(entry.message),
-    get: () => logger,
-  };
-
-  const migratorOptions = {
-    savedObjectsConfig: {
-      scrollDuration: '5m',
-      batchSize: 100,
-      pollInterval: 100,
-      skip: false,
-    },
-    kibanaConfig: {
-      index: '.kibana',
-    } as any,
-    logger,
-    kibanaVersion,
-    typeRegistry,
-    savedObjectValidations: uiExports.savedObjectValidations,
-    callCluster: (path: string, ...args: any[]) =>
-      (get(client, path) as Function).call(client, ...args),
-  };
-
-  return await new KibanaMigrator(migratorOptions).runMigrations();
-}
-
-async function loadKibanaVersion() {
-  const readFile = promisify(fs.readFile);
-  const packageJson = await readFile(Path.join(__dirname, '../../../../package.json'));
-  return JSON.parse(packageJson.toString('utf-8')).version;
+export async function migrateKibanaIndex({ kbnClient }: { kbnClient: KbnClient }) {
+  return await kbnClient.savedObjects.migrate();
 }
 
 /**
