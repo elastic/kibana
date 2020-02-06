@@ -17,21 +17,24 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from 'kibana/public';
-import { npSetup, npStart } from './legacy_imports';
-import { start as data } from '../../../data/public/legacy';
-import { start as embeddables } from '../../../embeddable_api/public/np_ready/public/legacy';
-import './dashboard_config';
-import { plugin } from './index';
+export interface DashboardConfig {
+  turnHideWriteControlsOn(): void;
+  getHideWriteControls(): boolean;
+}
 
-(async () => {
-  const instance = plugin({} as PluginInitializerContext);
-  instance.setup(npSetup.core, npSetup.plugins);
-  instance.start(npStart.core, {
-    ...npStart.plugins,
-    data,
-    npData: npStart.plugins.data,
-    embeddables,
-    navigation: npStart.plugins.navigation,
-  });
-})();
+export function getDashboardConfig(hideWriteControls): DashboardConfig {
+  let _hideWriteControls = hideWriteControls;
+
+  return {
+    /**
+     * Part of the exposed plugin API - do not remove without careful consideration.
+     * @type {boolean}
+     */
+    turnHideWriteControlsOn() {
+      _hideWriteControls = true;
+    },
+    getHideWriteControls() {
+      return _hideWriteControls;
+    },
+  };
+}

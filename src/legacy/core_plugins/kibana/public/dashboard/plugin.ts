@@ -25,6 +25,7 @@ import {
   LegacyCoreStart,
   Plugin,
   SavedObjectsClientContract,
+  KibanaLegacyStart,
 } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { RenderDeps } from './np_ready/application';
@@ -50,25 +51,19 @@ import { createSavedDashboardLoader } from './saved_dashboard/saved_dashboards';
 import { createKbnUrlTracker } from '../../../../../plugins/kibana_utils/public';
 import { getQueryStateContainer } from '../../../../../plugins/data/public';
 
-export interface LegacyAngularInjectedDependencies {
-  dashboardConfig: any;
-}
-
 export interface DashboardPluginStartDependencies {
   data: DataStart;
   npData: NpDataStart;
   embeddables: IEmbeddableStart;
   navigation: NavigationStart;
   share: SharePluginStart;
+  dashboardConfig: KibanaLegacyStart['dashboardConfig'];
 }
 
 export interface DashboardPluginSetupDependencies {
-  __LEGACY: {
-    getAngularDependencies: () => Promise<LegacyAngularInjectedDependencies>;
-  };
   home: HomePublicPluginSetup;
   kibanaLegacy: KibanaLegacySetup;
-  npData: NpDataSetup;
+  data: NpDataSetup;
 }
 
 export class DashboardPlugin implements Plugin {
@@ -85,12 +80,7 @@ export class DashboardPlugin implements Plugin {
 
   public setup(
     core: CoreSetup,
-    {
-      __LEGACY: { getAngularDependencies },
-      home,
-      kibanaLegacy,
-      npData,
-    }: DashboardPluginSetupDependencies
+    { home, kibanaLegacy, data: npData }: DashboardPluginSetupDependencies
   ) {
     const { querySyncStateContainer, stop: stopQuerySyncStateContainer } = getQueryStateContainer(
       npData.query
@@ -126,8 +116,8 @@ export class DashboardPlugin implements Plugin {
           navigation,
           share,
           npDataStart,
+          dashboardConfig,
         } = this.startDependencies;
-        const angularDependencies = await getAngularDependencies();
         const savedDashboards = createSavedDashboardLoader({
           savedObjectsClient,
           indexPatterns: npDataStart.indexPatterns,
@@ -137,7 +127,7 @@ export class DashboardPlugin implements Plugin {
 
         const deps: RenderDeps = {
           core: contextCore as LegacyCoreStart,
-          ...angularDependencies,
+          dashboardConfig,
           navigation,
           share,
           npDataStart,
@@ -186,7 +176,14 @@ export class DashboardPlugin implements Plugin {
 
   start(
     { savedObjects: { client: savedObjectsClient } }: CoreStart,
-    { data: dataStart, embeddables, navigation, npData, share }: DashboardPluginStartDependencies
+    {
+      data: dataStart,
+      embeddables,
+      navigation,
+      npData,
+      share,
+      kibanaLegacy: { dashboardConfig },
+    }: DashboardPluginStartDependencies
   ) {
     this.startDependencies = {
       npDataStart: npData,
@@ -194,6 +191,7 @@ export class DashboardPlugin implements Plugin {
       embeddables,
       navigation,
       share,
+      dashboardConfig,
     };
   }
 
