@@ -10,10 +10,14 @@ import { render, unmountComponentAtNode } from 'react-dom';
 
 import { CoreStart } from '../../../../../../src/core/public';
 
+import { AppContextProvider, AppDependencies } from './app_context';
 import { App } from './app';
 import { indexManagementStore } from './store';
 
-export const renderApp = (elem: HTMLElement | null, { core }: { core: CoreStart }) => {
+export const renderApp = (
+  elem: HTMLElement | null,
+  { core, dependencies }: { core: CoreStart; dependencies: AppDependencies }
+) => {
   if (!elem) {
     return;
   }
@@ -24,7 +28,9 @@ export const renderApp = (elem: HTMLElement | null, { core }: { core: CoreStart 
   render(
     <I18nContext>
       <Provider store={indexManagementStore()}>
-        <App />
+        <AppContextProvider value={dependencies}>
+          <App />
+        </AppContextProvider>
       </Provider>
     </I18nContext>,
     elem
@@ -34,3 +40,5 @@ export const renderApp = (elem: HTMLElement | null, { core }: { core: CoreStart 
     unmountComponentAtNode(elem);
   };
 };
+
+export { AppDependencies };

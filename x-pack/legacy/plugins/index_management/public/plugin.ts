@@ -12,10 +12,11 @@ import { httpService } from './application/services/http';
 import { breadcrumbService } from './application/services/breadcrumbs';
 import { documentationService } from './application/services/documentation';
 import { notificationService } from './application/services/notification';
-import { UiMetricService } from './application/services/ui_metric';
+import { UiMetricService, setUiMetricServiceInstance } from './application/services/ui_metric';
 
 import { IndexMgmtMetricsType } from './types';
 import { MANAGEMENT_BREADCRUMB } from './_legacy';
+import { AppDependencies } from './application';
 
 export class IndexMgmtUIPlugin {
   private uiMetricService = new UiMetricService<IndexMgmtMetricsType>(UIM_APP_NAME);
@@ -28,6 +29,9 @@ export class IndexMgmtUIPlugin {
     httpService.init(http);
     notificationService.init(notifications);
     this.uiMetricService.setup(usageCollection);
+    // For now let's save the instance back in the service file until
+    // we refactor the code and have the dependency injected
+    setUiMetricServiceInstance(this.uiMetricService);
 
     plugins.management.sections.getSection('elasticsearch').registerApp({
       id: 'index_management',
@@ -41,8 +45,14 @@ export class IndexMgmtUIPlugin {
         breadcrumbService.init(chrome, MANAGEMENT_BREADCRUMB);
         documentationService.init(docLinks);
 
+        const appDependencies: AppDependencies = {
+          services: {
+            uiMetric: this.uiMetricService,
+          },
+        };
+
         const { renderApp } = await import('./application');
-        return renderApp(element, { core });
+        return renderApp(element, { core, dependencies: appDependencies });
       },
     });
   }

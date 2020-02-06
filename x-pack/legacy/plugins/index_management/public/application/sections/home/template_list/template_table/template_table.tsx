@@ -11,7 +11,7 @@ import { EuiInMemoryTable, EuiIcon, EuiButton, EuiLink, EuiBasicTableColumn } fr
 import { TemplateListItem, Template } from '../../../../../../common/types';
 import { BASE_PATH, UIM_TEMPLATE_SHOW_DETAILS_CLICK } from '../../../../../../common/constants';
 import { TemplateDeleteModal } from '../../../../components';
-import { uiMetricService } from '../../../../services/ui_metric';
+import { useServices } from '../../../../app_context';
 import { getTemplateDetailsLink } from '../../../../services/routing';
 import { SendRequestResponse } from '../../../../../shared_imports';
 
@@ -28,6 +28,7 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
   editTemplate,
   cloneTemplate,
 }) => {
+  const { uiMetric } = useServices();
   const [selection, setSelection] = useState<TemplateListItem[]>([]);
   const [templatesToDelete, setTemplatesToDelete] = useState<Array<TemplateListItem['name']>>([]);
 
@@ -45,7 +46,7 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
           <EuiLink
             href={getTemplateDetailsLink(name, true)}
             data-test-subj="templateDetailsLink"
-            onClick={() => uiMetricService.trackMetric('click', UIM_TEMPLATE_SHOW_DETAILS_CLICK)}
+            onClick={() => uiMetric.trackMetric('click', UIM_TEMPLATE_SHOW_DETAILS_CLICK)}
           >
             {name}
           </EuiLink>
