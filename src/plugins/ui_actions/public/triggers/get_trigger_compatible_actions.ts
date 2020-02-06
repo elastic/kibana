@@ -17,15 +17,15 @@
  * under the License.
  */
 
-import { IUiActionsApiPure } from '../types';
-import { IAction } from '../actions/i_action';
+import { UiActionsApiPure } from '../types';
+import { Action } from '../actions/action';
 
-export const getTriggerCompatibleActions: IUiActionsApiPure['getTriggerCompatibleActions'] = ({
+export const getTriggerCompatibleActions: UiActionsApiPure['getTriggerCompatibleActions'] = ({
   api,
 }) => async (triggerId, context) => {
   const actions = api.getTriggerActions!(triggerId);
   const isCompatibles = await Promise.all(actions.map(action => action.isCompatible(context)));
-  return actions.reduce<IAction[]>(
+  return actions.reduce<Action[]>(
     (acc, action, i) => (isCompatibles[i] ? [...acc, action] : acc),
     []
   );

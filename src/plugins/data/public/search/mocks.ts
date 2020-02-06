@@ -17,6 +17,8 @@
  * under the License.
  */
 
+export * from './search_source/mocks';
+
 export const searchSetupMock = {
   registerSearchStrategyContext: jest.fn(),
   registerSearchStrategyProvider: jest.fn(),

@@ -19,7 +19,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '../../../kibana_react/public';
-import { IAction, createAction, IncompatibleActionError } from '../../../ui_actions/public';
+import { Action, createAction, IncompatibleActionError } from '../../../ui_actions/public';
 import { getOverlays, getIndexPatterns } from '../services';
 import { applyFiltersPopover } from '../ui/apply_filters';
 import {
@@ -44,7 +44,7 @@ async function isCompatible(context: ActionContext) {
 export function createFilterAction(
   filterManager: FilterManager,
   timeFilter: TimefilterContract
-): IAction<ActionContext> {
+): Action<ActionContext> {
   return createAction<ActionContext>({
     type: GLOBAL_APPLY_FILTER_ACTION,
     id: GLOBAL_APPLY_FILTER_ACTION,
