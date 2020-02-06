@@ -20,6 +20,10 @@ interface Props {
    * aria-label for accessibility
    */
   'aria-label'?: string;
+  /**
+   * attribute to find in functional tests
+   */
+  'data-test-subj'?: string;
 }
 
 export const ChartWrapper: FC<Props> = ({
@@ -33,6 +37,7 @@ export const ChartWrapper: FC<Props> = ({
   return (
     <EuiErrorBoundary>
       <div
+        data-test-subj=""
         style={{
           height,
           opacity,
