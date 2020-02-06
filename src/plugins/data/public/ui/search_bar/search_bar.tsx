@@ -47,7 +47,6 @@ interface SearchBarInjectedDeps {
   timeHistory: TimeHistoryContract;
   // Filter bar
   onFiltersUpdated?: (filters: esFilters.Filter[]) => void;
-  filters?: esFilters.Filter[];
   // Date picker
   dateRangeFrom?: string;
   dateRangeTo?: string;
@@ -69,13 +68,14 @@ export interface SearchBarOwnProps {
   showFilterBar?: boolean;
   showDatePicker?: boolean;
   showAutoRefreshOnly?: boolean;
+  filters?: esFilters.Filter[];
   // Query bar - should be in SearchBarInjectedDeps
   query?: Query;
   // Show when user has privileges to save
   showSaveQuery?: boolean;
   savedQuery?: SavedQuery;
   onQueryChange?: (payload: { dateRange: TimeRange; query?: Query }) => void;
-  onQuerySubmit?: (payload: { dateRange: TimeRange; query?: Query }) => void;
+  onQuerySubmit?: (payload: { dateRange: TimeRange; query?: Query }, isUpdate?: boolean) => void;
   // User has saved the current state as a saved query
   onSaved?: (savedQuery: SavedQuery) => void;
   // User has modified the saved query, your app should persist the update

@@ -18,43 +18,54 @@
  */
 import { SavedObjectsRepository } from './repository';
 import { mockKibanaMigrator } from '../../migrations/kibana/kibana_migrator.mock';
-import { SavedObjectsSchema } from '../../schema';
 import { KibanaMigrator } from '../../migrations';
-import { LegacyConfig } from '../../../legacy';
+import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
+
 jest.mock('./repository');
 
 const { SavedObjectsRepository: originalRepository } = jest.requireActual('./repository');
 
 describe('SavedObjectsRepository#createRepository', () => {
   const callAdminCluster = jest.fn();
-  const schema = new SavedObjectsSchema({
-    nsAgnosticType: { isNamespaceAgnostic: true },
-    nsType: { indexPattern: 'beats', isNamespaceAgnostic: false },
-    hiddenType: { isNamespaceAgnostic: true, hidden: true },
-  });
-  const mappings = [
-    {
-      pluginId: 'testplugin',
+
+  const typeRegistry = new SavedObjectTypeRegistry();
+  typeRegistry.registerType({
+    name: 'nsAgnosticType',
+    hidden: false,
+    namespaceAgnostic: true,
+    mappings: {
       properties: {
-        nsAgnosticType: {
-          properties: {
-            name: { type: 'keyword' },
-          },
-        },
-        nsType: {
-          properties: {
-            name: { type: 'keyword' },
-          },
-        },
-        hiddenType: {
-          properties: {
-            name: { type: 'keyword' },
-          },
-        },
+        name: { type: 'keyword' },
       },
     },
-  ];
-  const migrator = mockKibanaMigrator.create({ savedObjectMappings: mappings });
+    migrations: {},
+  });
+
+  typeRegistry.registerType({
+    name: 'nsType',
+    hidden: false,
+    namespaceAgnostic: false,
+    indexPattern: 'beats',
+    mappings: {
+      properties: {
+        name: { type: 'keyword' },
+      },
+    },
+    migrations: {},
+  });
+  typeRegistry.registerType({
+    name: 'hiddenType',
+    hidden: true,
+    namespaceAgnostic: true,
+    mappings: {
+      properties: {
+        name: { type: 'keyword' },
+      },
+    },
+    migrations: {},
+  });
+
+  const migrator = mockKibanaMigrator.create({ types: typeRegistry.getAllTypes() });
   const RepositoryConstructor = (SavedObjectsRepository as unknown) as jest.Mock<
     SavedObjectsRepository
   >;
@@ -67,8 +78,7 @@ describe('SavedObjectsRepository#createRepository', () => {
     try {
       originalRepository.createRepository(
         (migrator as unknown) as KibanaMigrator,
-        schema,
-        {} as LegacyConfig,
+        typeRegistry,
         '.kibana-test',
         callAdminCluster,
         ['unMappedType1', 'unmappedType2']
@@ -83,8 +93,7 @@ describe('SavedObjectsRepository#createRepository', () => {
   it('should create a repository without hidden types', () => {
     const repository = originalRepository.createRepository(
       (migrator as unknown) as KibanaMigrator,
-      schema,
-      {} as LegacyConfig,
+      typeRegistry,
       '.kibana-test',
       callAdminCluster,
       [],
@@ -103,8 +112,7 @@ describe('SavedObjectsRepository#createRepository', () => {
   it('should create a repository with a unique list of hidden types', () => {
     const repository = originalRepository.createRepository(
       (migrator as unknown) as KibanaMigrator,
-      schema,
-      {} as LegacyConfig,
+      typeRegistry,
       '.kibana-test',
       callAdminCluster,
       ['hiddenType', 'hiddenType', 'hiddenType'],
