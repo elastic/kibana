@@ -7,7 +7,7 @@
 /**
  * This import must be hoisted as it uses `jest.mock`. Is there a better way? Mocking is not good.
  */
-import { setup, clear, simulateElementResize } from './simulate_element_resize';
+import { clear, simulateElementResize } from './simulate_element_resize';
 import React from 'react';
 import { render, act } from '@testing-library/react';
 import { useCamera } from './use_camera';
@@ -19,8 +19,6 @@ describe('useCamera on an unpainted element', () => {
   let element: HTMLElement;
   let projectionMatrix: Matrix3;
   beforeEach(async () => {
-    setup(Element);
-
     const testID = 'camera';
 
     const { store } = storeFactory();
