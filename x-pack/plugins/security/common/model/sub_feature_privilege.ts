@@ -6,7 +6,6 @@
 
 import { FeatureKibanaPrivileges } from '../../../features/common';
 import { FeaturePrivilege } from './feature_privilege';
-import { PrivilegeScope } from './poc_kibana_privileges/privilege_instance';
 
 export interface SubFeaturePrivilegeConfig extends FeatureKibanaPrivileges {
   id: string;
@@ -15,16 +14,14 @@ export interface SubFeaturePrivilegeConfig extends FeatureKibanaPrivileges {
 
 export class SubFeaturePrivilege extends FeaturePrivilege {
   constructor(
-    scope: PrivilegeScope,
     protected readonly subPrivilegeConfig: SubFeaturePrivilegeConfig,
     public readonly actions: string[] = []
   ) {
-    super(scope, subPrivilegeConfig.id, subPrivilegeConfig, actions);
+    super(subPrivilegeConfig.id, subPrivilegeConfig, actions);
   }
 
-  public static empty(scope: PrivilegeScope) {
+  public static empty() {
     return new SubFeaturePrivilege(
-      scope,
       {
         id: '____EMPTY____',
         name: '____EMPTY SUB FEATURE PRIVILEGE____',

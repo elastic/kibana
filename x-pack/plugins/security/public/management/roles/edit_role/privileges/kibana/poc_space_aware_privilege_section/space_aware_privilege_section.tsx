@@ -22,13 +22,12 @@ import { Space } from '../../../../../../../../spaces/common/model/space';
 import { RoleValidator } from '../../../validate_role';
 import { PrivilegeSpaceTable } from './privilege_space_table';
 import { PrivilegeSpaceForm } from './privilege_space_form';
-import { PrivilegeCalculator, PrivilegeTableCalculator } from '../privilege_calculator';
+import { PrivilegeTableCalculator } from '../privilege_calculator';
 import { PrivilegeSummary } from '../privilege_summary';
 
 interface Props {
   kibanaPrivileges: KibanaPrivileges;
   role: Role;
-  privilegeCalculator: PrivilegeCalculator;
   spaces: Space[];
   features: Feature[];
   onChange: (role: Role) => void;
@@ -120,7 +119,6 @@ class SpaceAwarePrivilegeSectionUI extends Component<Props, State> {
           {this.state.showSpacePrivilegeEditor && (
             <PrivilegeSpaceForm
               role={this.props.role}
-              privilegeCalculator={this.props.privilegeCalculator}
               kibanaPrivileges={this.props.kibanaPrivileges}
               intl={this.props.intl}
               onChange={this.onSpacesPrivilegeChange}

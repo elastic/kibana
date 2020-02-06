@@ -13,7 +13,7 @@ import {
 } from '../../../../../../../common/model';
 
 import { NO_PRIVILEGE_VALUE } from '../constants';
-import { ScopedPrivilegeCalculator, PrivilegeFormCalculator } from '../privilege_calculator';
+import { PrivilegeFormCalculator } from '../privilege_calculator';
 
 interface Props {
   featureId: string;

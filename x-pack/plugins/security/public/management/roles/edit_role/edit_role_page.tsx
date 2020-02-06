@@ -259,10 +259,7 @@ function useFeatures(
         throw err;
       })
       .then(rawFeatures => {
-        // TODO: SCOPE
-        setFeatures(
-          rawFeatures.map(raw => new SecuredFeature(raw, privileges.features[raw.id], 'space'))
-        );
+        setFeatures(rawFeatures.map(raw => new SecuredFeature(raw, privileges.features[raw.id])));
       });
   }, [http, fatalErrors, privileges]);
 

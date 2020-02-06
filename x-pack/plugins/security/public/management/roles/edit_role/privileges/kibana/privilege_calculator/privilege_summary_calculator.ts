@@ -20,7 +20,7 @@ export class PrivilegeSummaryCalculator {
   public getEffectivePrimaryFeaturePrivilege(entry: RoleKibanaPrivilege) {
     const assignedPrivileges = this.collectAssignedPrivileges(entry);
 
-    const features = this.kibanaPrivileges.getSecuredFeatures(this.getPrivilegeScope(entry));
+    const features = this.kibanaPrivileges.getSecuredFeatures();
 
     return features.reduce((acc, feature) => {
       const effectivePrivilege =
@@ -39,10 +39,7 @@ export class PrivilegeSummaryCalculator {
   }
 
   public getEffectiveSubFeaturePrivileges(entry: RoleKibanaPrivilege, featureId: string) {
-    const feature = this.kibanaPrivileges.getSecuredFeature(
-      this.getPrivilegeScope(entry),
-      featureId
-    );
+    const feature = this.kibanaPrivileges.getSecuredFeature(featureId);
 
     const assignedPrivileges = this.collectAssignedPrivileges(entry);
 
@@ -54,7 +51,7 @@ export class PrivilegeSummaryCalculator {
   public getEffectiveFeaturePrivileges(entry: RoleKibanaPrivilege) {
     const assignedPrivileges = this.collectAssignedPrivileges(entry);
 
-    const features = this.kibanaPrivileges.getSecuredFeatures(this.getPrivilegeScope(entry));
+    const features = this.kibanaPrivileges.getSecuredFeatures();
 
     return features.reduce((acc, feature) => {
       const effectivePrimaryFeaturePrivilege =
@@ -91,7 +88,7 @@ export class PrivilegeSummaryCalculator {
     }
     const selectedFeaturePrivileges = this.getSelectedFeaturePrivileges(featureId);
 
-    const feature = this.kibanaPrivileges.getSecuredFeature(this.privilegeScope, featureId);
+    const feature = this.kibanaPrivileges.getSecuredFeature(featureId);
 
     const subFeaturePrivilege = feature.allPrivileges.find(
       ap => ap instanceof SubFeaturePrivilege && ap.id === privilegeId
@@ -135,9 +132,5 @@ export class PrivilegeSummaryCalculator {
 
   private locateGlobalPrivilege(role: Role) {
     return role.kibana.find(entry => isGlobalPrivilegeDefinition(entry));
-  }
-
-  private getPrivilegeScope(entry: RoleKibanaPrivilege) {
-    return isGlobalPrivilegeDefinition(entry) ? 'global' : 'space';
   }
 }

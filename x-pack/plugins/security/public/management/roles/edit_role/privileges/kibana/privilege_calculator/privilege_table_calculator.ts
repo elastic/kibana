@@ -4,20 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  KibanaPrivileges,
-  Role,
-  SubFeaturePrivilege,
-  SubFeaturePrivilegeGroup,
-  RoleKibanaPrivilege,
-  PrimaryFeaturePrivilege,
-  FeaturePrivilege,
-} from '../../../../../../../common/model';
+import { KibanaPrivileges, Role, RoleKibanaPrivilege } from '../../../../../../../common/model';
 import { isGlobalPrivilegeDefinition } from '../../../privilege_utils';
-
-function getPrivilegeKey(entry: RoleKibanaPrivilege) {
-  return entry.spaces.join(',');
-}
 
 export class PrivilegeTableCalculator {
   constructor(private readonly kibanaPrivileges: KibanaPrivileges, private readonly role: Role) {}
@@ -31,7 +19,7 @@ export class PrivilegeTableCalculator {
   public getBasePrivilege(entry: RoleKibanaPrivilege) {
     const { base } = entry;
 
-    const basePrivileges = this.kibanaPrivileges.getBasePrivileges(this.getPrivilegeScope(entry));
+    const basePrivileges = this.kibanaPrivileges.getBasePrivileges(entry);
     return basePrivileges.find(bp => base.includes(bp.id));
   }
 
@@ -39,9 +27,7 @@ export class PrivilegeTableCalculator {
   public hasSupersededInheritedPrivileges(entry: RoleKibanaPrivilege) {
     const global = this.locateGlobalPrivilege(this.role);
 
-    const privilegeScope = this.getPrivilegeScope(entry);
-
-    if (privilegeScope === 'global' || !global) {
+    if (isGlobalPrivilegeDefinition(entry) || !global) {
       return false;
     }
 
@@ -51,10 +37,8 @@ export class PrivilegeTableCalculator {
 
     const formPrivileges = this.kibanaPrivileges.createCollectionFromRoleKibanaPrivileges([entry]);
 
-    const basePrivileges = this.kibanaPrivileges.getBasePrivileges(privilegeScope);
-    const featurePrivileges = this.kibanaPrivileges
-      .getSecuredFeatures(privilegeScope)
-      .map(f => f.allPrivileges);
+    const basePrivileges = this.kibanaPrivileges.getBasePrivileges(entry);
+    const featurePrivileges = this.kibanaPrivileges.getSecuredFeatures().map(f => f.allPrivileges);
 
     return [basePrivileges, featurePrivileges].flat(2).some(p => {
       const globalCheck = globalPrivileges.grantsPrivilege(p);
@@ -64,22 +48,7 @@ export class PrivilegeTableCalculator {
     });
   }
 
-  private collectAssignedPrivileges(entry: RoleKibanaPrivilege) {
-    if (isGlobalPrivilegeDefinition(entry)) {
-      return this.kibanaPrivileges.createCollectionFromRoleKibanaPrivileges([entry]);
-    }
-
-    const globalPrivilege = this.locateGlobalPrivilege(this.role);
-    return this.kibanaPrivileges.createCollectionFromRoleKibanaPrivileges(
-      globalPrivilege ? [globalPrivilege, entry] : [entry]
-    );
-  }
-
   private locateGlobalPrivilege(role: Role) {
     return role.kibana.find(entry => isGlobalPrivilegeDefinition(entry));
-  }
-
-  private getPrivilegeScope(entry: RoleKibanaPrivilege) {
-    return isGlobalPrivilegeDefinition(entry) ? 'global' : 'space';
   }
 }

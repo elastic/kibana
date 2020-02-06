@@ -4,12 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export type PrivilegeScope = 'global' | 'space';
 export type PrivilegeType = 'base' | 'feature';
 
 export class Privilege {
   constructor(
-    public readonly scope: PrivilegeScope,
     public readonly type: PrivilegeType,
     public readonly id: string,
     public readonly actions: string[] = []
@@ -19,8 +17,8 @@ export class Privilege {
     return this.checkActions(this.actions, candidatePrivilege.actions);
   }
 
-  public equals({ scope, type, id }: Privilege) {
-    return scope === this.scope && type === this.type && id === this.id;
+  public equals({ type, id }: Privilege) {
+    return type === this.type && id === this.id;
   }
 
   private checkActions(knownActions: string[], candidateActions: string[]) {
