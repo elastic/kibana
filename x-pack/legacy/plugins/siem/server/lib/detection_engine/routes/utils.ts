@@ -6,8 +6,7 @@
 
 import Boom from 'boom';
 import { APP_ID, SIGNALS_INDEX_KEY } from '../../../../common/constants';
-import { LegacySetupServices, RequestFacade } from '../../../plugin';
-import { ScopedServices } from '../../../services';
+import { LegacySetupServices } from '../../../plugin';
 
 export const transformError = (err: Error & { statusCode?: number }) => {
   if (Boom.isBoom(err)) {
@@ -159,8 +158,8 @@ export const transformBulkError = (
 };
 
 export const getIndex = (
-  getSpaceId: ScopedServices['getSpaceId'],
-  config: ScopedServices['config']
+  getSpaceId: () => string | undefined,
+  config: LegacySetupServices['config']
 ): string => {
   const spaceId = getSpaceId();
   const signalsIndex = config().get(`xpack.${APP_ID}.${SIGNALS_INDEX_KEY}`);
