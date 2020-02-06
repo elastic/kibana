@@ -19,15 +19,7 @@
 
 import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
-
-import { VisType } from '../../legacy_imports';
-import { TypesStart } from '../../../../../visualizations/public/np_ready/public/types';
-
-jest.mock('../../legacy_imports', () => ({
-  State: () => null,
-  AppState: () => null,
-}));
-
+import { TypesStart, VisType } from '../types';
 import { NewVisModal } from './new_vis_modal';
 import { SavedObjectsStart } from 'kibana/public';
 
