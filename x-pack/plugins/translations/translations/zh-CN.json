@@ -3873,7 +3873,6 @@
     "xpack.apm.serviceDetails.metricsTabLabel": "指标",
     "xpack.apm.serviceDetails.nodesTabLabel": "JVM",
     "xpack.apm.serviceDetails.transactionsTabLabel": "事务",
-    "xpack.apm.serviceMap.fullscreen": "全屏",
     "xpack.apm.serviceMap.zoomIn": "放大",
     "xpack.apm.serviceMap.zoomOut": "缩小",
     "xpack.apm.serviceNodeMetrics.containerId": "容器 ID",
