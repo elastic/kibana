@@ -124,4 +124,18 @@ describe('create_rules_bulk', () => {
       expect(statusCode).toBe(400);
     });
   });
+
+  test('returns 409 if duplicate rule_ids found in request payload', async () => {
+    alertsClient.find.mockResolvedValue(getFindResult());
+    alertsClient.get.mockResolvedValue(getResult());
+    actionsClient.create.mockResolvedValue(createActionResult());
+    alertsClient.create.mockResolvedValue(getResult());
+    const request: ServerInjectOptions = {
+      method: 'POST',
+      url: `${DETECTION_ENGINE_RULES_URL}/_bulk_create`,
+      payload: [typicalPayload(), typicalPayload()],
+    };
+    const { payload } = await server.inject(request);
+    expect(JSON.parse(payload).error.status_code).toBe(409);
+  });
 });
