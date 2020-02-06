@@ -17,5 +17,4 @@
  * under the License.
  */
 
-export { createImportRoute } from './import';
 export { createResolveImportErrorsRoute } from './resolve_import_errors';

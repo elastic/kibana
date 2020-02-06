@@ -30,6 +30,7 @@ import { registerBulkCreateRoute } from './bulk_create';
 import { registerBulkUpdateRoute } from './bulk_update';
 import { registerLogLegacyImportRoute } from './log_legacy_import';
 import { registerExportRoute } from './export';
+import { registerImportRoute } from './import';
 
 export function registerRoutes(
   http: InternalHttpServiceSetup,
@@ -48,4 +49,5 @@ export function registerRoutes(
   registerBulkUpdateRoute(router);
   registerLogLegacyImportRoute(router, logger);
   registerExportRoute(router, importableExportableTypes);
+  registerImportRoute(router, importableExportableTypes);
 }

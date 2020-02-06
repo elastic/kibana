@@ -26,8 +26,9 @@ import { SavedObjectsClientContract } from 'src/core/server';
 // Disable lint errors for imports from src/core/server/saved_objects until SavedObjects migration is complete
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { resolveImportErrors } from '../../../../core/server/saved_objects/import';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { createSavedObjectsStreamFromNdJson } from '../../../../core/server/saved_objects/routes/utils';
 import { Prerequisites } from './types';
-import { createSavedObjectsStreamFromNdJson } from '../lib';
 
 interface HapiReadableStream extends Readable {
   hapi: {

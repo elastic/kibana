@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { createSavedObjectsStreamFromNdJson } from './create_saved_objects_stream_from_ndjson';
+import { createSavedObjectsStreamFromNdJson } from './utils';
 import { Readable } from 'stream';
-import { createPromiseFromStreams, createConcatStream } from '../../../utils/streams';
+import { createPromiseFromStreams, createConcatStream } from '../../../../legacy/utils/streams';
 
 async function readStreamToCompletion(stream: Readable) {
   return createPromiseFromStreams([stream, createConcatStream([])]);
