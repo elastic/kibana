@@ -167,9 +167,6 @@ export const npSetup = {
         }),
       },
     },
-    spaces: {
-      registerLegacyAPI: sinon.fake(),
-    },
   },
 };
 

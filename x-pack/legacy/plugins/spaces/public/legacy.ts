@@ -15,4 +15,7 @@ const legacyAPI = {
   },
 };
 
-((npSetup.plugins as any).spaces as SpacesPluginSetup).registerLegacyAPI(legacyAPI);
+const spaces = (npSetup.plugins as any).spaces as SpacesPluginSetup;
+if (spaces) {
+  spaces.registerLegacyAPI(legacyAPI);
+}
