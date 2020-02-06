@@ -67,7 +67,7 @@ export interface DashboardPluginSetupDependencies {
     getAngularDependencies: () => Promise<LegacyAngularInjectedDependencies>;
   };
   home: HomePublicPluginSetup;
-  kibana_legacy: KibanaLegacySetup;
+  kibanaLegacy: KibanaLegacySetup;
   npData: NpDataSetup;
 }
 
@@ -88,7 +88,7 @@ export class DashboardPlugin implements Plugin {
     {
       __LEGACY: { getAngularDependencies },
       home,
-      kibana_legacy,
+      kibanaLegacy,
       npData,
     }: DashboardPluginSetupDependencies
   ) {
@@ -146,7 +146,7 @@ export class DashboardPlugin implements Plugin {
           chrome: contextCore.chrome,
           addBasePath: contextCore.http.basePath.prepend,
           uiSettings: contextCore.uiSettings,
-          config: kibana_legacy.config,
+          config: kibanaLegacy.config,
           savedQueryService: npDataStart.query.savedQueries,
           embeddables,
           dashboardCapabilities: contextCore.application.capabilities.dashboard,
@@ -160,14 +160,14 @@ export class DashboardPlugin implements Plugin {
         };
       },
     };
-    kibana_legacy.registerLegacyApp({
+    kibanaLegacy.registerLegacyApp({
       ...app,
       id: 'dashboard',
       // only register the updater in once app, otherwise all updates would happen twice
       updater$: this.appStateUpdater.asObservable(),
       navLinkId: 'kibana:dashboard',
     });
-    kibana_legacy.registerLegacyApp({ ...app, id: 'dashboards' });
+    kibanaLegacy.registerLegacyApp({ ...app, id: 'dashboards' });
 
     home.featureCatalogue.register({
       id: 'dashboard',
