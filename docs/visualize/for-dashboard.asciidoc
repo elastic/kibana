@@ -4,10 +4,6 @@
 Visualize comes with interactive controls and Markdown widgets that you can add to dashboards.
 
 [float]
-[[for-dashboard-aggregations]]
-=== Supported aggregations
-
-[float]
 [[controls]]
 === Controls
 experimental[]
