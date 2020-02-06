@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React from 'react';
 import {
   EuiLink,
   EuiTitle,
@@ -13,42 +14,23 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import React, { useEffect } from 'react';
 import { MonitorSSLCertificate } from './monitor_ssl_certificate';
 import * as labels from './translations';
 import { StatusByLocations } from './status_by_location';
 import { Ping } from '../../../../../common/graphql/types';
 import { MonitorLocations } from '../../../../../common/runtime_types';
 
-export interface StateProps {
+interface MonitorStatusBarProps {
+  monitorId: string;
   monitorStatus: Ping;
   monitorLocations: MonitorLocations;
 }
 
-export interface DispatchProps {
-  loadMonitorStatus: () => void;
-}
-
-export interface MonitorStatusBarProps {
-  monitorId: string;
-  dateStart: string;
-  dateEnd: string;
-}
-
-type Props = MonitorStatusBarProps & StateProps & DispatchProps;
-
-export const MonitorStatusBarComponent: React.FC<Props> = ({
-  dateStart,
-  dateEnd,
+export const MonitorStatusBarComponent: React.FC<MonitorStatusBarProps> = ({
   monitorId,
-  loadMonitorStatus,
   monitorStatus,
   monitorLocations,
 }) => {
-  useEffect(() => {
-    loadMonitorStatus();
-  }, [dateStart, dateEnd, loadMonitorStatus]);
-
   const full = monitorStatus?.url?.full ?? '';
 
   return (

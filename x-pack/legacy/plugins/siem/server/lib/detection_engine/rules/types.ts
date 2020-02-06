@@ -14,7 +14,7 @@ import {
   SavedObjectsClientContract,
 } from 'kibana/server';
 import { SIGNALS_ID } from '../../../../common/constants';
-import { AlertsClient } from '../../../../../alerting/server/alerts_client';
+import { AlertsClient } from '../../../../../alerting/server';
 import { ActionsClient } from '../../../../../actions/server/actions_client';
 import { RuleAlertParams, RuleTypeParams, RuleAlertParamsRest } from '../types';
 import { RequestFacade } from '../../../types';
