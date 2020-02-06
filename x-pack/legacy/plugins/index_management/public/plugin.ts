@@ -3,32 +3,50 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { CoreStart } from '../../../../../src/core/public';
+import { i18n } from '@kbn/i18n';
 
-import { registerManagementSection } from './register_management_section';
-import { registerRoutes } from './register_routes';
-import { LegacyStart } from './legacy';
+import { CoreSetup } from '../../../../../src/core/public';
+import { UIM_APP_NAME } from '../common/constants';
 
 import { httpService } from './application/services/http';
 import { breadcrumbService } from './application/services/breadcrumbs';
 import { documentationService } from './application/services/documentation';
 import { notificationService } from './application/services/notification';
-import { uiMetricService } from './application/services/ui_metric';
+import { UiMetricService } from './application/services/ui_metric';
 
-export class IndexMgmtPlugin {
-  public start(core: CoreStart, plugins: {}, __LEGACY: LegacyStart) {
-    const { management, uiMetric } = __LEGACY;
-    const { http, chrome, docLinks, notifications } = core;
+import { IndexMgmtMetricsType } from './types';
+import { MANAGEMENT_BREADCRUMB } from './_legacy';
+
+export class IndexMgmtUIPlugin {
+  private uiMetricService = new UiMetricService<IndexMgmtMetricsType>(UIM_APP_NAME);
+
+  public setup(coreSetup: CoreSetup, plugins: any) {
+    const { http, notifications, getStartServices } = coreSetup;
+    const { usageCollection } = plugins;
 
     // Initialize services
     httpService.init(http);
-    breadcrumbService.init(chrome, management.constants.BREADCRUMB);
-    documentationService.init(docLinks);
     notificationService.init(notifications);
-    uiMetricService.init(uiMetric.createUiStatsReporter);
+    this.uiMetricService.setup(usageCollection);
 
-    // Register management section and Angular route
-    registerManagementSection(management.getSection('elasticsearch'));
-    registerRoutes(core);
+    plugins.management.sections.getSection('elasticsearch').registerApp({
+      id: 'index_management',
+      title: i18n.translate('xpack.idxMgmt.appTitle', { defaultMessage: 'Index Management' }),
+      visible: true,
+      order: 1,
+      mount: async ({ element }: { element: HTMLElement }) => {
+        const [core] = await getStartServices();
+        const { chrome, docLinks } = core;
+
+        breadcrumbService.init(chrome, MANAGEMENT_BREADCRUMB);
+        documentationService.init(docLinks);
+
+        const { renderApp } = await import('./application');
+        return renderApp(element, { core });
+      },
+    });
   }
+
+  public start() {}
+  public stop() {}
 }
