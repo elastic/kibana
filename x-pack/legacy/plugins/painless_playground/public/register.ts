@@ -31,7 +31,7 @@ npSetup.core.uiSettings.get$(ADVANCED_SETTINGS_FLAG_NAME, false).subscribe(value
   console.log('use this to figure out whether we should register', value);
 });
 
-npSetup.plugins.dev_tools.register({
+npSetup.plugins.devTools.register({
   order: 7,
   title: i18n.translate('xpack.painless_playground.displayName', {
     defaultMessage: 'Painless Playground',
