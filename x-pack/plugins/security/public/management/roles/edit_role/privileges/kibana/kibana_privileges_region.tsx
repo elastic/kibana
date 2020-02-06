@@ -11,7 +11,7 @@ import { KibanaPrivileges, Role, SecuredFeature } from '../../../../../../common
 import { RoleValidator } from '../../validate_role';
 import { CollapsiblePanel } from '../../collapsible_panel';
 import { SimplePrivilegeSection } from './simple_privilege_section';
-import { SpaceAwarePrivilegeSection } from './poc_space_aware_privilege_section';
+import { SpaceAwarePrivilegeSection } from './space_aware_privilege_section';
 import { TransformErrorSection } from './transform_error_section';
 
 interface Props {

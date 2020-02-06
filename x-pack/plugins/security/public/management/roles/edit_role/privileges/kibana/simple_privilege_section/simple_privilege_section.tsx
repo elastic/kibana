@@ -23,7 +23,7 @@ import {
 } from '../../../../../../../common/model';
 import { isGlobalPrivilegeDefinition } from '../../../privilege_utils';
 import { CUSTOM_PRIVILEGE_VALUE, NO_PRIVILEGE_VALUE } from '../constants';
-import { FeatureTable } from '../poc_feature_table';
+import { FeatureTable } from '../feature_table';
 import { UnsupportedSpacePrivilegesWarning } from './unsupported_space_privileges_warning';
 import { POCPrivilegeCalculator } from '../poc_privilege_calculator';
 

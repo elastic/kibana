@@ -11,7 +11,7 @@ import { RoleValidator } from '../../validate_role';
 import { KibanaPrivilegesRegion } from './kibana_privileges_region';
 import { SimplePrivilegeSection } from './simple_privilege_section';
 import { TransformErrorSection } from './transform_error_section';
-import { SpaceAwarePrivilegeSection } from './poc_space_aware_privilege_section';
+import { SpaceAwarePrivilegeSection } from './space_aware_privilege_section';
 
 const buildProps = (customProps = {}) => {
   return {

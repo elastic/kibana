@@ -28,7 +28,7 @@ import React, { Component, Fragment } from 'react';
 import { Role, KibanaPrivileges, copyRole } from '../../../../../../../common/model';
 import { Space } from '../../../../../../../../spaces/common/model/space';
 import { SpaceSelector } from './space_selector';
-import { FeatureTable } from '../poc_feature_table';
+import { FeatureTable } from '../feature_table';
 import { CUSTOM_PRIVILEGE_VALUE } from '../constants';
 import { PrivilegeFormCalculator } from '../privilege_calculator';
 

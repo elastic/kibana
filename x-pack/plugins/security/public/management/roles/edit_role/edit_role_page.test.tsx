@@ -27,7 +27,7 @@ import { dataPluginMock } from '../../../../../../../src/plugins/data/public/moc
 import { licenseMock } from '../../../../common/licensing/index.mock';
 import { userAPIClientMock } from '../../users/index.mock';
 import { rolesAPIClientMock, indicesAPIClientMock, privilegesAPIClientMock } from '../index.mock';
-import { SpaceAwarePrivilegeSection } from './privileges/kibana/poc_space_aware_privilege_section';
+import { SpaceAwarePrivilegeSection } from './privileges/kibana/space_aware_privilege_section';
 
 const buildFeatures = () => {
   return [
