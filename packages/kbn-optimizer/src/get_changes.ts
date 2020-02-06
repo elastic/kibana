@@ -20,40 +20,37 @@
 import Path from 'path';
 
 import execa from 'execa';
-import isPathInside from 'is-path-inside';
-
-import { descending } from './common';
 
 export type Changes = Map<string, 'modified' | 'deleted'>;
 
 /**
  * get the changes in all the context directories (plugin public paths)
  */
-export async function getChanges(repoRoot: string, dirs: string[]) {
-  const { stdout } = await execa('git', ['ls-files', '-dmt', '--', ...dirs], {
-    cwd: repoRoot,
+export async function getChanges(dir: string) {
+  const { stdout } = await execa('git', ['ls-files', '-dmt', '--', dir], {
+    cwd: dir,
   });
 
+  const changes: Changes = new Map();
   const output = stdout.trim();
-  const unassignedChanges: Changes = new Map();
 
   if (output) {
     for (const line of output.split('\n')) {
       const [tag, ...pathParts] = line.trim().split(' ');
-      const path = Path.resolve(repoRoot, pathParts.join(' '));
+      const path = Path.resolve(dir, pathParts.join(' '));
       switch (tag) {
         case 'M':
         case 'C':
           // for some reason ls-files returns deleted files as both deleted
           // and modified, so make sure not to overwrite changes already
           // tracked as "deleted"
-          if (unassignedChanges.get(path) !== 'deleted') {
-            unassignedChanges.set(path, 'modified');
+          if (changes.get(path) !== 'deleted') {
+            changes.set(path, 'modified');
           }
           break;
 
         case 'R':
-          unassignedChanges.set(path, 'deleted');
+          changes.set(path, 'deleted');
           break;
 
         default:
@@ -62,28 +59,5 @@ export async function getChanges(repoRoot: string, dirs: string[]) {
     }
   }
 
-  const changesByDir = new Map<string, Changes>();
-  const dirsBySpecificity = Array.from(dirs).sort(descending(dir => dir.length));
-
-  for (const dir of dirsBySpecificity) {
-    const ownChanges: Changes = new Map();
-    for (const [path, type] of unassignedChanges) {
-      if (isPathInside(path, dir)) {
-        ownChanges.set(path, type);
-        unassignedChanges.delete(path);
-      }
-    }
-
-    changesByDir.set(dir, ownChanges);
-  }
-
-  if (unassignedChanges.size) {
-    throw new Error(
-      `unable to assign all change paths to a project: ${JSON.stringify(
-        Array.from(unassignedChanges.entries())
-      )}`
-    );
-  }
-
-  return changesByDir;
+  return changes;
 }

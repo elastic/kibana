@@ -47,12 +47,9 @@ export async function getOptimizerVersion(config: OptimizerConfig) {
     `workerConfig:${JSON.stringify(config.getWorkerConfig('-'))}`,
   ];
 
-  const changes = (await getChanges(REPO_ROOT, [OPTIMIZER_DIR])).get(OPTIMIZER_DIR);
-  if (changes) {
-    const mtimes = await getMtimes(changes.keys());
-    for (const [path, mtime] of mtimes) {
-      cacheLines.push(`mtime:${path}:${mtime}`);
-    }
+  const mtimes = await getMtimes((await getChanges(OPTIMIZER_DIR)).keys());
+  for (const [path, mtime] of mtimes) {
+    cacheLines.push(`mtime:${path}:${mtime}`);
   }
 
   return createHash('sha1')
