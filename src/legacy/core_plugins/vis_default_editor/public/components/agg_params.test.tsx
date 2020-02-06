@@ -23,7 +23,7 @@ import { mount, shallow } from 'enzyme';
 import { VisState } from 'src/legacy/core_plugins/visualizations/public';
 import { IndexPattern } from 'src/plugins/data/public';
 import { DefaultEditorAggParams, DefaultEditorAggParamsProps } from './agg_params';
-import { AggConfig, AggGroupNames } from '../legacy_imports';
+import { IAggConfig, AggGroupNames } from '../legacy_imports';
 
 const mockEditorConfig = {
   useNormalizedEsInterval: { hidden: false, fixedValue: false },
@@ -36,10 +36,8 @@ const mockEditorConfig = {
 };
 
 jest.mock('ui/new_platform');
-jest.mock('ui/vis/config', () => ({
-  editorConfigProviders: {
-    getConfigForAgg: jest.fn(() => mockEditorConfig),
-  },
+jest.mock('./utils', () => ({
+  getEditorConfig: jest.fn(() => mockEditorConfig),
 }));
 jest.mock('./agg_params_helper', () => ({
   getAggParamsToRender: jest.fn(() => ({
@@ -97,7 +95,7 @@ describe('DefaultEditorAggParams component', () => {
         schema: {
           title: '',
         },
-      } as any) as AggConfig,
+      } as any) as IAggConfig,
       groupName: AggGroupNames.Metrics,
       formIsTouched: false,
       indexPattern: {} as IndexPattern,
