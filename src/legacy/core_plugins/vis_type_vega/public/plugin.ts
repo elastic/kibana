@@ -25,12 +25,16 @@ import { setNotifications, setData, setSavedObjects } from './services';
 
 import { createVegaFn } from './vega_fn';
 import { createVegaTypeDefinition } from './vega_type';
+import { VisTypeVegaSetup } from '../../../../plugins/vis_type_vega/public';
 
 /** @internal */
 export interface VegaVisualizationDependencies extends LegacyDependenciesPluginSetup {
   core: CoreSetup;
   plugins: {
     data: ReturnType<DataPublicPlugin['setup']>;
+  };
+  config: {
+    enableExternalUrls: boolean;
   };
 }
 
@@ -39,6 +43,7 @@ export interface VegaPluginSetupDependencies {
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
   visualizations: VisualizationsSetup;
   data: ReturnType<DataPublicPlugin['setup']>;
+  visTypeVega: VisTypeVegaSetup;
   __LEGACY: LegacyDependenciesPlugin;
 }
 
@@ -57,12 +62,15 @@ export class VegaPlugin implements Plugin<Promise<void>, void> {
 
   public async setup(
     core: CoreSetup,
-    { data, expressions, visualizations, __LEGACY }: VegaPluginSetupDependencies
+    { data, expressions, visualizations, visTypeVega, __LEGACY }: VegaPluginSetupDependencies
   ) {
     const visualizationDependencies: Readonly<VegaVisualizationDependencies> = {
       core,
       plugins: {
         data,
+      },
+      config: {
+        enableExternalUrls: visTypeVega.config.enableExternalUrls,
       },
       ...(await __LEGACY.setup()),
     };
