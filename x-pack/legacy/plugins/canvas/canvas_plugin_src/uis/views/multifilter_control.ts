@@ -12,9 +12,12 @@ export const multifilterControl = () => ({
     {
       name: 'columns',
       displayName: 'Column name',
-      help: 'Select the columns from which values will be displayed as filters.',
+      help: 'Select the column from which values will be displayed as filters.',
       argType: 'string',
       multi: true,
+      options: {
+        confirm: 'Set',
+      },
     },
     {
       name: 'filterGroup',
