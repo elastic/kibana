@@ -30,6 +30,7 @@ export interface ExpressionsServiceSetup {
 
 export interface ExpressionsServiceStart {
   readonly getFunctions: Executor['getFunctions'];
+  readonly getRenderer: ExpressionRendererRegistry['get'];
   readonly run: Executor['run'];
 }
 
@@ -56,13 +57,15 @@ export class ExpressionsService {
   }
 
   public start() {
-    const { executor } = this;
+    const { executor, renderers } = this;
 
     const getFunctions = executor.getFunctions.bind(executor);
+    const getRenderer = renderers.get.bind(renderers);
     const run = executor.run.bind(executor);
 
     return {
       getFunctions,
+      getRenderer,
       run,
     };
   }
