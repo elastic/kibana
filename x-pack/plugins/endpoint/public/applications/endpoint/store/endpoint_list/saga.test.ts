@@ -12,7 +12,7 @@ import { endpointListReducer } from './index';
 import { EndpointMetadata, EndpointResultList } from '../../../../../common/types';
 import { ManagementState } from '../../types';
 import { AppAction } from '../action';
-import { endpointListData } from './selectors';
+import { listData } from './selectors';
 describe('endpoint list saga', () => {
   const sleep = (ms = 100) => new Promise(wakeup => setTimeout(wakeup, ms));
   let fakeCoreStart: jest.Mocked<CoreStart>;
@@ -91,6 +91,6 @@ describe('endpoint list saga', () => {
         paging_properties: [{ page_index: 0 }, { page_size: 10 }],
       }),
     });
-    expect(endpointListData(store.getState().endpointList)).toEqual(apiResponse.endpoints);
+    expect(listData(store.getState().endpointList)).toEqual(apiResponse.endpoints);
   });
 });

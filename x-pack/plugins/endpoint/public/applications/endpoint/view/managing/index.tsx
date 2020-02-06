@@ -13,8 +13,6 @@ import {
   EuiPageContentBody,
   EuiPageContentHeader,
   EuiPageContentHeaderSection,
-  EuiPageHeader,
-  EuiPageHeaderSection,
   EuiTitle,
   EuiBasicTable,
 } from '@elastic/eui';

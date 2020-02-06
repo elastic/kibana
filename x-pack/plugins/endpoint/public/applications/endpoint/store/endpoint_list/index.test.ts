@@ -8,7 +8,7 @@ import { createStore, Dispatch, Store } from 'redux';
 import { EndpointListAction, endpointListReducer } from './index';
 import { EndpointMetadata } from '../../../../../common/types';
 import { ManagementState } from '../../types';
-import { endpointListData } from './selectors';
+import { listData } from './selectors';
 
 describe('endpoint_list store concerns', () => {
   let store: Store<ManagementState>;
@@ -107,9 +107,9 @@ describe('endpoint_list store concerns', () => {
       loadDataToStore();
     });
 
-    test('it selects `endpointListData`', () => {
+    test('it selects `listData`', () => {
       const currentState = store.getState();
-      expect(endpointListData(currentState)).toEqual(currentState.endpoints);
+      expect(listData(currentState)).toEqual(currentState.endpoints);
     });
   });
 });
