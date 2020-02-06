@@ -70,8 +70,8 @@ export class EndpointPlugin
     const router = core.http.createRouter();
     addRoutes(router);
     registerEndpointRoutes(router, endpointContext);
-    registerAlertRoutes(router);
     registerResolverRoutes(router, endpointContext);
+    registerAlertRoutes(router, endpointContext);
   }
 
   public start() {
