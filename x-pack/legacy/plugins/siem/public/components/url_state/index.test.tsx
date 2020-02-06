@@ -25,7 +25,6 @@ import { wait } from '../../lib/helpers';
 
 let mockProps: UrlStateContainerPropTypes;
 
-// const mockUseRouteSpy: jest.Mock = useRouteSpy as jest.Mock;
 const mockRouteSpy: RouteSpyState = {
   pageName: SiemPageName.network,
   detailName: undefined,
@@ -43,10 +42,17 @@ jest.mock('../super_date_picker', () => ({
   },
 }));
 
-jest.mock('../search_bar', () => ({
-  siemFilterManager: {
-    setFilters: jest.fn(),
-  },
+jest.mock('../../lib/kibana', () => ({
+  useKibana: () => ({
+    services: {
+      data: {
+        query: {
+          filterManager: {},
+          savedQueries: {},
+        },
+      },
+    },
+  }),
 }));
 
 describe('UrlStateContainer', () => {

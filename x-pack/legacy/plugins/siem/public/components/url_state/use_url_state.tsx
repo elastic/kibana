@@ -7,6 +7,7 @@
 import { isEqual, difference, isEmpty } from 'lodash/fp';
 import { useEffect, useRef, useState } from 'react';
 
+import { useKibana } from '../../lib/kibana';
 import { useApolloClient } from '../../utils/apollo_context';
 import { CONSTANTS, UrlStateType } from './constants';
 import {
@@ -50,6 +51,7 @@ export const useUrlStateHooks = ({
 }: UrlStateContainerPropTypes) => {
   const [isInitializing, setIsInitializing] = useState(true);
   const apolloClient = useApolloClient();
+  const { filterManager, savedQueries } = useKibana().services.data.query;
   const prevProps = usePrevious({ pathName, urlState });
 
   const handleInitialize = (type: UrlStateType, needUpdate?: boolean) => {
@@ -137,8 +139,10 @@ export const useUrlStateHooks = ({
     setInitialStateFromUrl({
       apolloClient,
       detailName,
+      filterManager,
       indexPattern,
       pageName,
+      savedQueries,
       updateTimeline,
       updateTimelineIsLoading,
       urlStateToUpdate,

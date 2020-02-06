@@ -9,8 +9,8 @@ import { ChartBase } from './types';
 import {
   ESSearchResponse,
   ESSearchRequest
-} from '../../../typings/elasticsearch';
-import { AggregationOptionsByType } from '../../../typings/elasticsearch/aggregations';
+} from '../../../../../../plugins/apm/typings/elasticsearch';
+import { AggregationOptionsByType } from '../../../../../../plugins/apm/typings/elasticsearch/aggregations';
 import { getVizColorForIndex } from '../../../common/viz_colors';
 
 export type GenericMetricsChart = ReturnType<
