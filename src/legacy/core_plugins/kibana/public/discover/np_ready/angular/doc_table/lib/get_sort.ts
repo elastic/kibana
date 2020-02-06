@@ -19,6 +19,7 @@
 
 import _ from 'lodash';
 import { IndexPattern } from '../../../../../../../../../plugins/data/public';
+import { getDefaultSort } from './get_default_sort';
 
 export type SortPairObj = Record<string, string>;
 export type SortPairArr = [string, string];
@@ -53,8 +54,16 @@ function createSortObject(
  * @param {object} indexPattern used for determining default sort
  * @returns Array<{object}> an array of sort objects
  */
-export function getSort(sort: SortPair[], indexPattern: IndexPattern): SortPairObj[] {
+export function getSort(
+  sort: SortPair[],
+  indexPattern: IndexPattern,
+  defaultDirection?: string
+): SortPairObj[] {
   if (Array.isArray(sort)) {
+    if (sort.length === 0 && defaultDirection) {
+      sort = getDefaultSort(indexPattern, defaultDirection);
+    }
+
     return sort
       .map((sortPair: SortPair) => createSortObject(sortPair, indexPattern))
       .filter(sortPairObj => typeof sortPairObj === 'object') as SortPairObj[];

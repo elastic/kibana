@@ -619,7 +619,11 @@ function discoverController(
         if (!sort) return;
 
         // get the current sort from searchSource as array of arrays
-        const currentSort = getSortArray($scope.searchSource.getField('sort'), $scope.indexPattern);
+        const currentSort = getSortArray(
+          $scope.searchSource.getField('sort'),
+          $scope.indexPattern,
+          config.get('discover:sort:defaultOrder')
+        );
 
         // if the searchSource doesn't know, tell it so
         if (!angular.equals(sort, currentSort)) $scope.fetch();
