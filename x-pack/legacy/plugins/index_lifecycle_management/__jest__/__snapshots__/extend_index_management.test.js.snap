@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`ilm banner extension should return extension when any index has lifecycle error 1`] = `
+exports[`extend index management ilm banner extension should return extension when any index has lifecycle error 1`] = `
 Object {
   "filter": Query {
     "ast": _AST {
@@ -45,7 +45,7 @@ Object {
 }
 `;
 
-exports[`ilm filter extension should return extension when any index has lifecycle policy 1`] = `
+exports[`extend index management ilm filter extension should return extension when any index has lifecycle policy 1`] = `
 Array [
   Object {
     "field": "ilm.managed",
@@ -66,7 +66,7 @@ Array [
 ]
 `;
 
-exports[`ilm summary extension should return extension when index has lifecycle error 1`] = `
+exports[`extend index management ilm summary extension should return extension when index has lifecycle error 1`] = `
 <IndexLifecycleSummary
   index={
     Object {
@@ -551,7 +551,7 @@ exports[`ilm summary extension should return extension when index has lifecycle 
 </IndexLifecycleSummary>
 `;
 
-exports[`ilm summary extension should return extension when index has lifecycle policy 1`] = `
+exports[`extend index management ilm summary extension should return extension when index has lifecycle policy 1`] = `
 <IndexLifecycleSummary
   index={
     Object {
@@ -852,7 +852,7 @@ exports[`ilm summary extension should return extension when index has lifecycle 
 </IndexLifecycleSummary>
 `;
 
-exports[`remove lifecycle action extension should return extension when all indices have lifecycle policy 1`] = `
+exports[`extend index management remove lifecycle action extension should return extension when all indices have lifecycle policy 1`] = `
 Object {
   "buttonLabel": "Remove lifecycle policy",
   "icon": "stopFilled",
@@ -866,7 +866,7 @@ Object {
 }
 `;
 
-exports[`retry lifecycle action extension should return extension when all indices have lifecycle errors 1`] = `
+exports[`extend index management retry lifecycle action extension should return extension when all indices have lifecycle errors 1`] = `
 Object {
   "buttonLabel": "Retry lifecycle step",
   "icon": "play",
