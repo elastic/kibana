@@ -17,8 +17,7 @@
  * under the License.
  */
 
-//var force = require('./force')(process.argv);
-var force = 1;
+var force = require('./force')(process.argv);
 
 var uid = process.getuid && process.getuid();
 var isRoot = require('./is_root')(uid);
