@@ -8,7 +8,7 @@ import { EuiButtonEmpty, EuiInMemoryTable, EuiToolTip, EuiBasicTableColumn } fro
 import { i18n } from '@kbn/i18n';
 
 import { last } from 'lodash';
-import React, { useState, useCallback, useRef, useEffect } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { createWaffleMapNode } from '../../containers/waffle/nodes_to_wafflemap';
 import { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../lib/lib';
 import { fieldToName } from '../waffle/lib/field_to_display_name';
