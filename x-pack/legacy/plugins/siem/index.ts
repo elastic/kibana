@@ -149,18 +149,21 @@ export const siem = (kibana: any) => {
     },
     init(server: Server) {
       const { config, newPlatform, plugins, route } = server;
-      const { coreContext, env, setup } = newPlatform;
+      const { coreContext, env, setup, start } = newPlatform;
       const initializerContext = { ...coreContext, env };
       const serverFacade = {
         config,
         plugins: {
           alerting: plugins.alerting,
-          actions: newPlatform.start.plugins.actions,
         },
         route: route.bind(server),
       };
       // @ts-ignore-next-line: NewPlatform shim is too loosely typed
-      plugin(initializerContext).setup(setup.core, setup.plugins, serverFacade);
+      const pluginInstance = plugin(initializerContext);
+      // @ts-ignore-next-line: NewPlatform shim is too loosely typed
+      pluginInstance.setup(setup.core, setup.plugins, serverFacade);
+      // @ts-ignore-next-line: NewPlatform shim is too loosely typed
+      pluginInstance.start(start.core, start.plugins);
     },
     config(Joi: Root) {
       // See x-pack/plugins/siem/server/config.ts if you're adding another

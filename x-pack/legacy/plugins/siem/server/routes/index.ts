@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LegacySetupServices } from '../plugin';
+import { ServerFacade } from '../types';
+import { LegacyGetScopedServices } from '../services';
 
 import { createRulesRoute } from '../lib/detection_engine/routes/rules/create_rules_route';
 import { createIndexRoute } from '../lib/detection_engine/routes/index/create_index_route';
@@ -27,10 +28,14 @@ import { exportRulesRoute } from '../lib/detection_engine/routes/rules/export_ru
 import { findRulesStatusesRoute } from '../lib/detection_engine/routes/rules/find_rules_status_route';
 import { getPrepackagedRulesStatusRoute } from '../lib/detection_engine/routes/rules/get_prepackaged_rules_status_route';
 
-export const initRoutes = (services: LegacySetupServices) => {
+export type LegacyInitRoutes = (getServices: LegacyGetScopedServices) => void;
+
+export const initRoutes = (route: ServerFacade['route']) => (
+  getServices: LegacyGetScopedServices
+): void => {
   // Detection Engine Rule routes that have the REST endpoints of /api/detection_engine/rules
   // All REST rule creation, deletion, updating, etc......
-  createRulesRoute(services);
+  createRulesRoute(route, getServices);
   readRulesRoute(services);
   updateRulesRoute(services);
   deleteRulesRoute(services);

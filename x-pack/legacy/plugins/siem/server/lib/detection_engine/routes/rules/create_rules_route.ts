@@ -5,10 +5,11 @@
  */
 
 import Hapi from 'hapi';
-import { isFunction } from 'lodash/fp';
 import Boom from 'boom';
 import uuid from 'uuid';
+
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
+import { LegacyGetScopedServices } from '../../../../services';
 import { createRules } from '../../rules/create_rules';
 import { RulesRequest, IRuleSavedAttributesSavedObjectAttributes } from '../../rules/types';
 import { createRulesSchema } from '../schemas/create_rules_schema';
@@ -17,10 +18,9 @@ import { readRules } from '../../rules/read_rules';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
 import { transformOrError } from './utils';
 import { getIndexExists } from '../../index/get_index_exists';
-import { callWithRequestFactory, getIndex, transformError } from '../utils';
-import { KibanaRequest } from '../../../../../../../../../src/core/server';
+import { getIndex, transformError } from '../utils';
 
-export const createCreateRulesRoute = (services: LegacySetupServices): Hapi.ServerRoute => {
+export const createCreateRulesRoute = (getServices: LegacyGetScopedServices): Hapi.ServerRoute => {
   return {
     method: 'POST',
     path: DETECTION_ENGINE_RULES_URL,
@@ -60,21 +60,22 @@ export const createCreateRulesRoute = (services: LegacySetupServices): Hapi.Serv
         type,
         references,
       } = request.payload;
-      const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
-      const actionsClient = await services.plugins.actions.getActionsClientWithRequest(
-        KibanaRequest.from(request)
-      );
-      const savedObjectsClient = isFunction(request.getSavedObjectsClient)
-        ? request.getSavedObjectsClient()
-        : null;
-      if (!alertsClient || !savedObjectsClient) {
-        return headers.response().code(404);
-      }
-
       try {
-        const finalIndex = outputIndex != null ? outputIndex : getIndex(request, services);
-        const callWithRequest = callWithRequestFactory(request, services);
-        const indexExists = await getIndexExists(callWithRequest, finalIndex);
+        const {
+          alertsClient,
+          actionsClient,
+          config,
+          callCluster,
+          getSpaceId,
+          savedObjectsClient,
+        } = await getServices(request);
+
+        if (!alertsClient || !savedObjectsClient) {
+          return headers.response().code(404);
+        }
+
+        const finalIndex = outputIndex != null ? outputIndex : getIndex(getSpaceId, config);
+        const indexExists = await getIndexExists(callCluster, finalIndex);
         if (!indexExists) {
           return Boom.badRequest(
             `To create a rule, the index must exist first. Index ${finalIndex} does not exist`
@@ -134,6 +135,9 @@ export const createCreateRulesRoute = (services: LegacySetupServices): Hapi.Serv
   };
 };
 
-export const createRulesRoute = (services: LegacySetupServices): void => {
-  services.route(createCreateRulesRoute(services));
+export const createRulesRoute = (
+  route: LegacySetupServices['route'],
+  getServices: LegacyGetScopedServices
+): void => {
+  route(createCreateRulesRoute(getServices));
 };

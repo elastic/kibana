@@ -8,6 +8,7 @@ import Boom from 'boom';
 import { CallAPIOptions } from '../../../../../../../../src/core/server';
 import { APP_ID, SIGNALS_INDEX_KEY } from '../../../../common/constants';
 import { LegacySetupServices, RequestFacade } from '../../../plugin';
+import { ScopedServices } from '../../../services';
 
 export const transformError = (err: Error & { statusCode?: number }) => {
   if (Boom.isBoom(err)) {
@@ -158,15 +159,11 @@ export const transformBulkError = (
   }
 };
 
-export const getIndex = (request: RequestFacade, services: LegacySetupServices): string => {
-  const spaceId = services.spaces.spacesService.getSpaceId(request);
-  const signalsIndex = services.config().get(`xpack.${APP_ID}.${SIGNALS_INDEX_KEY}`);
+export const getIndex = (
+  getSpaceId: ScopedServices['getSpaceId'],
+  config: ScopedServices['config']
+): string => {
+  const spaceId = getSpaceId();
+  const signalsIndex = config().get(`xpack.${APP_ID}.${SIGNALS_INDEX_KEY}`);
   return `${signalsIndex}-${spaceId}`;
-};
-
-export const callWithRequestFactory = (request: RequestFacade, services: LegacySetupServices) => {
-  const { callAsCurrentUser } = services.elasticsearch.dataClient.asScoped(request);
-
-  return <T, V>(endpoint: string, params: T, options?: CallAPIOptions): Promise<V> =>
-    callAsCurrentUser(endpoint, params, options);
 };

@@ -5,14 +5,20 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CoreSetup, PluginInitializerContext, Logger } from '../../../../../src/core/server';
+import {
+  CoreSetup,
+  CoreStart,
+  PluginInitializerContext,
+  Logger,
+} from '../../../../../src/core/server';
 import { SecurityPluginSetup as SecuritySetup } from '../../../../plugins/security/server';
 import { PluginSetupContract as FeaturesSetup } from '../../../../plugins/features/server';
 import { EncryptedSavedObjectsPluginSetup as EncryptedSavedObjectsSetup } from '../../../../plugins/encrypted_saved_objects/server';
 import { SpacesPluginSetup as SpacesSetup } from '../../../../plugins/spaces/server';
+import { PluginStartContract as ActionsStart } from '../../../../plugins/actions/server';
 import { initServer } from './init_server';
 import { compose } from './lib/compose/kibana';
-import { initRoutes } from './routes';
+import { initRoutes, LegacyInitRoutes } from './routes';
 import { isAlertExecutor } from './lib/detection_engine/signals/types';
 import { signalRulesAlertType } from './lib/detection_engine/signals/signal_rule_alert_type';
 import {
@@ -22,8 +28,9 @@ import {
   ruleStatusSavedObjectType,
 } from './saved_objects';
 import { RequestFacade, ServerFacade } from './types';
+import { Services } from './services';
 
-export { CoreSetup, Logger, PluginInitializerContext, RequestFacade };
+export { CoreSetup, CoreStart, Logger, PluginInitializerContext, RequestFacade };
 
 export interface SetupPlugins {
   encryptedSavedObjects: EncryptedSavedObjectsSetup;
@@ -35,20 +42,35 @@ export interface SetupPlugins {
 export type SetupServices = CoreSetup & SetupPlugins;
 export type LegacySetupServices = SetupServices & ServerFacade;
 
+export interface StartPlugins {
+  actions: ActionsStart;
+}
+
 export class Plugin {
   readonly name = 'siem';
   private readonly logger: Logger;
   private context: PluginInitializerContext;
+  private services: Services;
+  private legacyInitRoutes?: LegacyInitRoutes;
 
   constructor(context: PluginInitializerContext) {
     this.context = context;
     this.logger = context.logger.get('plugins', this.name);
+    this.services = new Services();
 
     this.logger.debug('Shim plugin initialized');
   }
 
   public setup(core: CoreSetup, plugins: SetupPlugins, __legacy: ServerFacade) {
     this.logger.debug('Shim plugin setup');
+
+    this.services.setup(
+      core.elasticsearch.dataClient,
+      plugins.spaces.spacesService,
+      __legacy.config
+    );
+
+    this.legacyInitRoutes = initRoutes(__legacy.route);
 
     plugins.features.registerFeature({
       id: this.name,
@@ -122,6 +144,11 @@ export class Plugin {
 
     const libs = compose(core, plugins, this.context.env);
     initServer(libs);
-    initRoutes({ ...core, ...plugins, ...__legacy });
+  }
+
+  public start(core: CoreStart, plugins: StartPlugins) {
+    this.services.start(core.savedObjects, plugins.actions);
+
+    this.legacyInitRoutes!(this.services.getScopedServicesFactory());
   }
 }

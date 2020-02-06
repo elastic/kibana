@@ -150,7 +150,7 @@ export interface FindRulesStatusesRequest extends Omit<RequestFacade, 'query'> {
 
 export interface Clients {
   alertsClient: AlertsClient;
-  actionsClient: ActionsClient;
+  actionsClient: ActionsClient | null | undefined;
 }
 
 export type UpdateRuleParams = Partial<RuleAlertParams> & {
