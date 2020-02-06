@@ -24,3 +24,8 @@ import './commands';
 
 // Alternatively you can use CommonJS syntax:
 // require('./commands')
+
+// @ts-ignore
+import { register } from '@cypress/snapshot';
+
+register();
