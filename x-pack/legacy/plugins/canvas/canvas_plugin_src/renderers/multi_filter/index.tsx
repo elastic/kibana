@@ -21,8 +21,6 @@ interface Config {
   filterGroup: string;
 }
 
-const MATCH_ALL = '%%CANVAS_MATCH_ALL%%';
-
 const getFilterValues = (filterExpression: string): MultiFilterValue[] => {
   if (filterExpression === '') {
     return [];
@@ -30,8 +28,8 @@ const getFilterValues = (filterExpression: string): MultiFilterValue[] => {
 
   const filterAST = fromExpression(filterExpression);
   return filterAST.chain.map(chain => ({
-    value: get(chain, 'arguments.value[0]', MATCH_ALL),
-    column: get(chain, 'arguments.column[0]', ''),
+    value: get(chain, 'arguments.value[0]'),
+    column: get(chain, 'arguments.column[0]'),
   }));
 };
 
