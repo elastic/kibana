@@ -17,9 +17,11 @@
  * under the License.
  */
 
+import * as React from 'react';
 import { EuiContextMenuPanelDescriptor, EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { uiToReactComponent } from '../../../kibana_react/public';
 import { IAction } from '../actions';
 
 /**
@@ -98,7 +100,12 @@ function convertPanelActionToContextMenuItem<A>({
   closeMenu: () => void;
 }): EuiContextMenuPanelItemDescriptor {
   const menuPanelItem: EuiContextMenuPanelItemDescriptor = {
-    name: action.getDisplayName(actionContext),
+    name: action.MenuItem
+      ? // Cast to `any` because `name` typed to string.
+        (React.createElement(uiToReactComponent(action.MenuItem), {
+          context: actionContext,
+        }) as any)
+      : action.getDisplayName(actionContext),
     icon: action.getIconType(actionContext),
     panel: _.get(action, 'childContextMenuPanel.id'),
     'data-test-subj': `embeddablePanelAction-${action.id}`,

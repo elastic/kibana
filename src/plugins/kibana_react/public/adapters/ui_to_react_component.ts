@@ -17,15 +17,32 @@
  * under the License.
  */
 
-export * from './code_editor';
-export * from './saved_objects';
-export * from './exit_full_screen_button';
-export * from './context';
-export * from './overlays';
-export * from './ui_settings';
-export * from './field_icon';
-export * from './table_list_view';
-export * from './split_panel';
-export { reactToUiComponent, uiToReactComponent } from './adapters';
-export { useUrlTracker } from './use_url_tracker';
-export { toMountPoint } from './util';
+import { FC, createElement as h, useRef, useLayoutEffect, useMemo } from 'react';
+import { UiComponent, UiComponentInstance } from '../../../kibana_utils/common';
+
+/**
+ * Transforms `UiComponent` into a React component.
+ */
+export const uiToReactComponent = <Props extends object>(
+  Comp: UiComponent<Props>,
+  as: string = 'div'
+): FC<Props> => props => {
+  const ref = useRef<HTMLDivElement>();
+  const comp = useMemo<UiComponentInstance<Props>>(() => Comp(), [Comp]);
+
+  useLayoutEffect(() => {
+    if (!ref.current) return;
+    comp.render(ref.current, props);
+  });
+
+  useLayoutEffect(() => {
+    if (!comp.unmount) return;
+    return () => {
+      if (comp.unmount) comp.unmount();
+    };
+  }, [comp]);
+
+  return h(as, {
+    ref,
+  });
+};
