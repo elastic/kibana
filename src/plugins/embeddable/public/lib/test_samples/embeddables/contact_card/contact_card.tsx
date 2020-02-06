@@ -22,12 +22,12 @@ import { EuiCard, EuiFlexItem, EuiFlexGroup, EuiFormRow } from '@elastic/eui';
 import { Subscription } from 'rxjs';
 import { EuiButton } from '@elastic/eui';
 import * as Rx from 'rxjs';
-import { TExecuteTriggerActions } from 'src/plugins/ui_actions/public';
+import { ExecuteTriggerActions } from 'src/plugins/ui_actions/public';
 import { ContactCardEmbeddable, CONTACT_USER_TRIGGER } from './contact_card_embeddable';
 
 interface Props {
   embeddable: ContactCardEmbeddable;
-  execTrigger: TExecuteTriggerActions;
+  execTrigger: ExecuteTriggerActions;
 }
 
 interface State {
