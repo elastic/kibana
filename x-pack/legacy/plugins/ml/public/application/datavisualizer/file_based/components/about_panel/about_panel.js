@@ -60,12 +60,12 @@ export function LoadingPanel() {
         <EuiPageContent className="file-datavisualizer-about-panel__content" paddingSize="l">
           <div style={{ textAlign: 'center' }}>
             <EuiTitle size="s">
-              <h3 role="alert">
+              <h1 role="alert">
                 <FormattedMessage
                   id="xpack.ml.fileDatavisualizer.aboutPanel.analyzingDataTitle"
                   defaultMessage="Analyzing data"
                 />
-              </h3>
+              </h1>
             </EuiTitle>
 
             <EuiSpacer size="l" />

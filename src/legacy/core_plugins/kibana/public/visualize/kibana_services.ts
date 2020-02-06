@@ -34,6 +34,7 @@ import { VisualizationsStart } from '../../../visualizations/public';
 import { SavedVisualizations } from './np_ready/types';
 import { UsageCollectionSetup } from '../../../../../plugins/usage_collection/public';
 import { Chrome } from './legacy_imports';
+import { KibanaLegacyStart } from '../../../../../plugins/kibana_legacy/public';
 
 export interface VisualizeKibanaServices {
   addBasePath: (url: string) => string;
@@ -52,6 +53,7 @@ export interface VisualizeKibanaServices {
   savedVisualizations: SavedVisualizations;
   share: SharePluginStart;
   uiSettings: IUiSettingsClient;
+  config: KibanaLegacyStart['config'];
   visualizeCapabilities: any;
   visualizations: VisualizationsStart;
   usageCollection?: UsageCollectionSetup;
