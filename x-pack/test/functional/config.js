@@ -199,6 +199,9 @@ export default async function({ readConfigFile }) {
       endpoint: {
         pathname: '/app/endpoint',
       },
+      ingestManager: {
+        pathname: '/app/ingestManager',
+      },
     },
 
     // choose where esArchiver should load archives from
