@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { SavedObjectFinderUi } from '../../../../../../../../../../src/plugins/kibana_react/public';
+import { SavedObjectFinderUi } from '../../../../../../../../../../src/plugins/saved_objects/public';
 import { useMlKibana } from '../../../../contexts/kibana';
 
 export interface PageProps {
