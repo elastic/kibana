@@ -17,30 +17,5 @@
  * under the License.
  */
 
-import { Adapters } from './inspector';
-import { EmbeddableFactory } from './embeddables/embeddable_factory';
-
-export interface Trigger {
-  id: string;
-  title?: string;
-  description?: string;
-  actionIds: string[];
-}
-
-export interface PropertySpec {
-  displayName: string;
-  accessPath: string;
-  id: string;
-  description: string;
-  value?: string;
-}
-
-export enum ViewMode {
-  EDIT = 'edit',
-  VIEW = 'view',
-}
-
-export { Adapters };
-
-export type GetEmbeddableFactory = (id: string) => EmbeddableFactory | undefined;
-export type GetEmbeddableFactories = () => IterableIterator<EmbeddableFactory>;
+export { SavedObjectSaveModal, OnSaveProps } from './saved_object_save_modal';
+export { showSaveModal, SaveResult } from './show_saved_object_save_modal';
