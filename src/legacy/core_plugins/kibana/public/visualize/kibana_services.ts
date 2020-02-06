@@ -23,6 +23,7 @@ import {
   SavedObjectsClientContract,
   ToastsStart,
   IUiSettingsClient,
+  I18nStart,
 } from 'kibana/public';
 
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../../plugins/navigation/public';
@@ -57,6 +58,7 @@ export interface VisualizeKibanaServices {
   visualizeCapabilities: any;
   visualizations: VisualizationsStart;
   usageCollection?: UsageCollectionSetup;
+  I18nContext: I18nStart['Context'];
 }
 
 let services: VisualizeKibanaServices | null = null;
