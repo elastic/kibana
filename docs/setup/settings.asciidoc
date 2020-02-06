@@ -467,6 +467,7 @@ to an array of host names which actions such as email, slack, pagerduty, and
 webhook can connect to.  An element of `*` indicates any host can be connected
 to.  An empty array indicates no hosts can be connected to.
 
+include::{docdir}/settings/alert-action-settings.asciidoc[]
 include::{docdir}/settings/apm-settings.asciidoc[]
 include::{docdir}/settings/dev-settings.asciidoc[]
 include::{docdir}/settings/graph-settings.asciidoc[]
