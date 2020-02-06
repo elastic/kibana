@@ -27,8 +27,40 @@ export type FormattedOverrides = InputOverrides & {
   should_trim_fields: boolean;
 };
 
+export interface AnalysisResult {
+  /**
+   * Indicates if the result has been cached
+   */
+  cached: boolean;
+  results: {
+    charset: string;
+    has_header_row: boolean;
+    has_byte_order_marker: boolean;
+    format: string;
+    field_stats: {
+      [fieldName: string]: {
+        count: number;
+        cardinality: number;
+        top_hits: Array<{ count: number; value: any }>;
+      };
+    };
+    sample_start: string;
+    num_messages_analyzed: number;
+    mappings: {
+      [fieldName: string]: {
+        type: string;
+      };
+    };
+    quote: string;
+    delimiter: string;
+    need_client_timezone: boolean;
+    num_lines_analyzed: number;
+    column_names: string[];
+  };
+}
+
 export function fileDataVisualizerProvider(context: RequestHandlerContext) {
-  async function analyzeFile(data: any, overrides: any) {
+  async function analyzeFile(data: any, overrides: any): Promise<AnalysisResult> {
     let cached = false;
     let results = [];
 
