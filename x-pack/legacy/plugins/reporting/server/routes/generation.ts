@@ -5,6 +5,7 @@
  */
 
 import boom from 'boom';
+import { errors as elasticsearchErrors } from 'elasticsearch';
 import { Legacy } from 'kibana';
 import { API_BASE_URL } from '../../common/constants';
 import {
@@ -22,6 +23,8 @@ import { registerGenerateCsvFromSavedObjectImmediate } from './generate_from_sav
 import { registerLegacy } from './legacy';
 import { makeRequestFacade } from './lib/make_request_facade';
 
+const esErrors = elasticsearchErrors as Record<string, any>;
+
 export function registerJobGenerationRoutes(
   server: ServerFacade,
   plugins: ReportingSetupDeps,
@@ -31,11 +34,15 @@ export function registerJobGenerationRoutes(
 ) {
   const config = server.config();
   const DOWNLOAD_BASE_URL = config.get('server.basePath') + `${API_BASE_URL}/jobs/download`;
-  // @ts-ignore TODO
-  const { errors: esErrors } = server.plugins.elasticsearch.getCluster('admin');
-
-  const esqueue = createQueueFactory(server, logger, { exportTypesRegistry, browserDriverFactory });
-  const enqueueJob = enqueueJobFactory(server, logger, { exportTypesRegistry, esqueue });
+  const { elasticsearch } = plugins;
+  const esqueue = createQueueFactory(server, elasticsearch, logger, {
+    exportTypesRegistry,
+    browserDriverFactory,
+  });
+  const enqueueJob = enqueueJobFactory(server, elasticsearch, logger, {
+    exportTypesRegistry,
+    esqueue,
+  });
 
   /*
    * Generates enqueued job details to use in responses

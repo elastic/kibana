@@ -6,7 +6,7 @@
 
 import { reloadIndices } from '../actions';
 import { notificationService } from '../../services/notification';
-import { getHttpClient } from '../../services/api';
+import { httpService } from '../../services/http';
 
 export const performExtensionAction = ({
   requestMethod,
@@ -14,7 +14,7 @@ export const performExtensionAction = ({
   successMessage,
 }) => async dispatch => {
   try {
-    await requestMethod(indexNames, getHttpClient());
+    await requestMethod(indexNames, httpService.httpClient);
   } catch (error) {
     notificationService.showDangerToast(error.message);
     return;
