@@ -90,6 +90,10 @@ src/dev/code_coverage/shell_scripts/bootstrapped.txt \
 src/dev/code_coverage/cc_app/public/initial_data.js
 
 
+                  # Check my work, again :).  This time, we wanna know if the data is there.
+                  cat src/dev/code_coverage/cc_app/public/initial_data.js
+
+
                 """,
                 "### Run `yarn kbn bootstrap && merge coverage` and Ingest Code Coverage to ES Cluster"
               )
