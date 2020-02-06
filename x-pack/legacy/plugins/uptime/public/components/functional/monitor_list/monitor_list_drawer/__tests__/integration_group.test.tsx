@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { MonitorSummary } from '../../../../common/graphql/types';
+import { MonitorSummary } from '../../../../../../common/graphql/types';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { IntegrationGroup } from '../integration_group';
 
@@ -26,12 +26,12 @@ describe('IntegrationGroup', () => {
   it('will not display APM links when APM is unavailable', () => {
     const component = shallowWithIntl(
       <IntegrationGroup
-        basePath="foo"
-        dateRangeStart="now-12m"
-        dateRangeEnd="now-1m"
-        isApmAvailable={false}
-        isInfraAvailable={true}
-        isLogsAvailable={true}
+        // basePath="foo"
+        // dateRangeStart="now-12m"
+        // dateRangeEnd="now-1m"
+        // isApmAvailable={false}
+        // isInfraAvailable={true}
+        // isLogsAvailable={true}
         summary={summary}
       />
     );
@@ -41,12 +41,12 @@ describe('IntegrationGroup', () => {
   it('will not display infra links when infra is unavailable', () => {
     const component = shallowWithIntl(
       <IntegrationGroup
-        basePath="foo"
-        dateRangeStart="now-12m"
-        dateRangeEnd="now-1m"
-        isApmAvailable={true}
-        isInfraAvailable={false}
-        isLogsAvailable={true}
+        // basePath="foo"
+        // dateRangeStart="now-12m"
+        // dateRangeEnd="now-1m"
+        // isApmAvailable={true}
+        // isInfraAvailable={false}
+        // isLogsAvailable={true}
         summary={summary}
       />
     );
@@ -56,12 +56,12 @@ describe('IntegrationGroup', () => {
   it('will not display logging links when logging is unavailable', () => {
     const component = shallowWithIntl(
       <IntegrationGroup
-        basePath="foo"
-        dateRangeStart="now-12m"
-        dateRangeEnd="now-1m"
-        isApmAvailable={true}
-        isInfraAvailable={true}
-        isLogsAvailable={false}
+        // basePath="foo"
+        // dateRangeStart="now-12m"
+        // dateRangeEnd="now-1m"
+        // isApmAvailable={true}
+        // isInfraAvailable={true}
+        // isLogsAvailable={false}
         summary={summary}
       />
     );
