@@ -49,7 +49,7 @@ export type DiscoverStart = void;
 export interface DiscoverSetupPlugins {
   uiActions: IUiActionsSetup;
   embeddable: IEmbeddableSetup;
-  kibana_legacy: KibanaLegacySetup;
+  kibanaLegacy: KibanaLegacySetup;
   home: HomePublicPluginSetup;
 }
 export interface DiscoverStartPlugins {
@@ -99,7 +99,7 @@ export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
       order: 20,
       component: JsonCodeBlock,
     });
-    plugins.kibana_legacy.registerLegacyApp({
+    plugins.kibanaLegacy.registerLegacyApp({
       id: 'discover',
       title: 'Discover',
       order: -1004,
