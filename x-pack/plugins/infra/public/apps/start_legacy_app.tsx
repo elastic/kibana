@@ -64,6 +64,10 @@ export async function startLegacyApp(plugins: object, params: AppMountParameters
                   nextSearch = undefined;
                 }
 
+                // app/inra#infrastructure/metrics/:type/:node was changed to app/metrics/detail/:type/:node, this
+                // accounts for that edge case
+                nextPath = nextPath.replace('metrics/', 'detail/');
+
                 // Query parameters (location.search) will arrive as part of location.hash and not location.search
                 const nextPathParts = nextPath.split('?');
                 nextPath = nextPathParts[0];
