@@ -12,7 +12,7 @@ export default function({ getService }: FtrProviderContext) {
   const ml = getService('ml');
 
   describe('classification creation', function() {
-    this.tags(['smoke', 'melissa']);
+    this.tags(['smoke']);
     before(async () => {
       await esArchiver.load('ml/bm_classification');
     });
