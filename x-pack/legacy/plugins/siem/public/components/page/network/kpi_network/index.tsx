@@ -193,7 +193,7 @@ export const KpiNetworkComponent = React.memo<KpiNetworkProps>(
         </EuiFlexItem>
       </EuiFlexGroup>
     );
-  },
+  }
 );
 
 KpiNetworkComponent.displayName = 'KpiNetworkComponent';

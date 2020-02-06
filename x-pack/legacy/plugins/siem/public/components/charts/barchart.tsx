@@ -113,7 +113,7 @@ export const BarChartComponent = ({
     <AutoSizer detectAnyWindowResize={false} content>
       {({ measureRef, content: { height, width } }) => (
         <WrappedByAutoSizer ref={measureRef} height={getChartHeight(customHeight, height)}>
-          <BarChartBaseComponent
+          <BarChartBase
             height={getChartHeight(customHeight, height)}
             width={getChartWidth(customWidth, width)}
             data={barChart}
