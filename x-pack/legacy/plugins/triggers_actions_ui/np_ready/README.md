@@ -1,10 +1,11 @@
 # Kibana Alerts and Actions UI
 
 The Kibana alerts and actions UI plugin provides a user interface for managing alerts and actions. 
-As a developer you can:
+As a developer you can reuse and extend buildin alerts and actions UI functionality:
 
-- Create and register own alert type which will be integrated to the current user interface: Create Alert flyout, Alerts management page.
-- Create and register a custom action type (TBD)
+- Create and register new alert type.
+- Create and register new action type.
+- Embed Create Alert flyout to Kibana plugins.
 
 -----
 
@@ -12,11 +13,28 @@ As a developer you can:
 Table of Contents
 
 - [Kibana Alerts and Actions UI](#kibana-alerts-and-actions-ui)
-  - [Built-in Alert Types](#built-in-alert-types)
-    - [Index Threshold Alert](#index-threshold-alert)
-  - [Built-in Action Types](#built-in-action-types)
-  - [Create and register new alert type UI](#create-and-register-new-alert-type-ui)
-  - [Create and register new action type UI](#register-action-type)
+  - [Build and register Alert Types](#build-and-register-alert-types)
+    - [Built-in Alert Types](#built-in-alert-types)
+      - [Index Threshold Alert](#index-threshold-alert)
+    - [Alert type model definition](#alert-type-model-definition)
+    - [Register alert type model](#register-alert-type-model)
+    - [Create and register new alert type UI example](#create-and-register-new-alert-type-ui-example)
+    - [Common expression components](#common-expression-components)
+      - [WHEN expression component](#when-expression-component)
+      - [OF expression component](#of-expression-component)
+      - [GROUPED BY expression component](#grouped-by-expression-component)
+      - [FOR THE LAST expression component](#for-the-last-expression-component)
+      - [THRESHOLD expression component](#threshold-expression-component)
+    - [Embed Create Alert flyout to Kibana plugins](#embed-create-alert-flyout-to-kibana-plugins)
+  - [Build and register Action Types](#build-and-register-action-types)
+    - [Built-in Action Types](#built-in-action-types)
+      - [Server log](#server-log)
+      - [Email](#email)
+      - [Slack](#slack)
+      - [Index](#index)
+      - [Webhook](#webhook)
+      - [PagerDuty](#pagerduty)
+    - [Create and register new action type UI](#register-action-type)
 
 ## Built-in Alert Types
 
@@ -26,8 +44,10 @@ Kibana ships with a built-in alert types:
 |---|---|---|
 |[Index Threshold](#index-threshold-alert)|`threshold`|Index Threshold Alert|
 
-All built-in alert types is located under the folder `x-pack/legacy/plugins/triggers_actions_ui/np_ready/public/application/components/builtin_alert_types`
-and the registration file is `x-pack/legacy/plugins/triggers_actions_ui/np_ready/public/application/components/builtin_alert_types/index.ts`
+Every alert type should has a server side registration and can has a client side. 
+Only alert types registered on both - client and server will be displayed in the Create Alert flyout, as a part of UI.
+Built-in alert types UI is located under the folder `x-pack/legacy/plugins/triggers_actions_ui/np_ready/public/application/components/builtin_alert_types`
+and this is a file `x-pack/legacy/plugins/triggers_actions_ui/np_ready/public/application/components/builtin_alert_types/index.ts` for client side registration.
 
 ### Index Threshold Alert
 
@@ -49,50 +69,399 @@ export function getAlertType(): AlertTypeModel {
   };
 }
 ```
-(TBD)
+alertParamsExpression form represented as an expression using `EuiExpression`:
+![Index Threshold Alert expression form](blob:https://imgur.com/86d1f717-1b5f-4890-861f-0e55ecc52566)
+With validation
+![Example Alert Type validation](https://i.imgur.com/NWo78vl.png)
 
-# Create and register new alert type UI
+## Alert type model definition
+Each alert type should be defined as `AlertTypeModel` object with the next properties:
+```
+  id: string;
+  name: string;
+  iconClass: string;
+  validate: (alertParams: any) => ValidationResult;
+  alertParamsExpression: React.FunctionComponent<any>;
+  defaultActionMessage?: string;
+```
+`name` and `iconClass` is used for representing select cards list:
+
+Server side alert type model:
+```
+export interface AlertType {
+  id: string;
+  name: string;
+  validate?: {
+    params?: { validate: (object: any) => any };
+  };
+  actionGroups: string[];
+  executor: ({ services, params, state }: AlertExecutorOptions) => Promise<State | void>;
+}
+```
+
+IMPORTANT! Current UI support only one default action group. 
+Action groups is mapped from server API result for [GET /api/alert/types: List alert types](https://github.com/elastic/kibana/tree/master/x-pack/legacy/plugins/alerting#get-apialerttypes-list-alert-types).
+Only one default (which means first item in the arrray) action group will be displayed in UI.
+Multiple action groups design and functionality is under development.
+
+## Register alert type model
+
+Registration code for a new alert type model should be added to the file `x-pack/legacy/plugins/triggers_actions_ui/np_ready/public/application/components/builtin_alert_types/index.ts`
+Only registered alert types available in the UI.
+
+## Create and register new alert type UI example
 
 To be able to add UI for a new Alert type the proper server API https://github.com/elastic/kibana/tree/master/x-pack/legacy/plugins/alerting#example recommended to be done first.
 
 Alert type UI is expected to be defined as `AlertTypeModel` object.
 
-To build and register a new alert type follow the next steps:
+Below is a list of steps that should be done to build and register a new alert type with the name `Example Alert Type`:
 
 1. At any suitable place in Kibana create a file, which will expose an object implementing interface [AlertTypeModel](https://github.com/elastic/kibana/blob/55b7905fb5265b73806006e7265739545d7521d0/x-pack/legacy/plugins/triggers_actions_ui/np_ready/public/types.ts#L83). Example:
-```export function getAlertType(): AlertTypeModel {
+```
+import { AlertTypeModel } from '../../../../types';
+import { ExampleExpression } from './expression';
+import { validateExampleAlertType } from './validation';
+
+export function getAlertType(): AlertTypeModel {
   return {
-    id: 'custom',
-    name: 'Custom Alert',
-    iconClass: 'alert',
-    alertParamsExpression: CustomAlertTypeExpression,
-    validate: validateAlertType,
+    id: 'example',
+    name: 'Example Alert Type',
+    iconClass: 'bell',
+    alertParamsExpression: ExampleExpression,
+    validate: validateExampleAlertType,
+    defaultActionMessage: 'Alert [{{ctx.metadata.name}}] has exceeded the threshold',
   };
 }
 ```
-Fields of this object `AlertTypeModel` will be mapped properly in UI:
-![AlertTypeModel properties in select card in UI](https://i.imgur.com/RLr8kmh.png)
-Action groups is mapped from server API result for [GET /api/alert/types: List alert types](https://github.com/elastic/kibana/tree/master/x-pack/legacy/plugins/alerting#get-apialerttypes-list-alert-types).
+Fields of this object `AlertTypeModel` will be mapped properly in UI below.
 
-2. Define `alertParamsExpression` as `React.FunctionComponent` - this will be the form for filling Alert params based on the current Alert type.
-If the card of alert type is selected, the alert type form becomes available.
-For Index Threshold Alert, form represented as an expression using `EuiExpression`, but it could be introdused differently up to the requirenments:
-![Index Threshold Alert expression form](https://i.imgur.com/iiyh4gC.png)
-Each expression word is defined as `EuiExpression` component and implement the basic aggregation, 
-grouping and comparison methods - all of this is currently a part of Index Threshold `alertParamsExpression` React component.
-Exposing of ES indexes and fields is a part of Index Threshold alert type server API.
+2. Define `alertParamsExpression` as `React.FunctionComponent` - this is the form for filling Alert params based on the current Alert type.
+```
+import React, { Fragment, useState } from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { WhenExpression, OfExpression } from '../../../../common/expression_items';
+import { builtInAggregationTypes } from '../../../../common/constants';
 
-3. Define form validation using the property of `AlertTypeModel` `validate`, which expect: 
+interface ExampleProps {
+  testAggType?: string;
+  testAggField?: string;
+  errors: { [key: string]: string[] };
+}
+
+export const ExampleExpression: React.FunctionComponent<ExampleProps> = ({
+  testAggType,
+  testAggField,
+  errors,
+}) => {
+  const [aggType, setAggType] = useState<string>('count');
+  return (
+    <Fragment>
+      <EuiFlexGroup gutterSize="s" wrap>
+        <EuiFlexItem grow={false}>
+          <WhenExpression
+            aggType={testAggType ?? 'count'} // defult is 'count'
+            onChangeSelectedAggType={(selectedAggType: string) => {
+              console.log(`Set alert type params field "aggType" value as ${selectedAggType}`);
+              setAggType(selectedAggType);
+            }}
+          />
+        </EuiFlexItem>
+        {aggType && builtInAggregationTypes[aggType].fieldRequired ? (
+          <EuiFlexItem grow={false}>
+            <OfExpression
+              aggField={testAggField}
+              fields={[{ normalizedType: 'number', name: 'test' }]} // can be some data from server API
+              aggType={aggType}
+              errors={errors}
+              onChangeSelectedAggField={(selectedAggField?: string) =>
+                console.log(`Set alert type params field "aggField" value as ${selectedAggField}`)
+              }
+            />
+          </EuiFlexItem>
+        ) : null}
+      </EuiFlexGroup>
+    </Fragment>
+  );
+};
+
 ```
-(alert: Alert) => ValidationResult;
+This alert type form becomes available, when the card of `Example Alert Type` is selected.
+Each expression word here is `EuiExpression` component and implement the basic aggregation, grouping and comparison methods.
+Expression components, which can be embed to different alert types is described here [Common expression components](#common-expression-components).
+
+3. Define alert type params validation using the property of `AlertTypeModel` `validate`: 
 ```
-![Index Threshold Alert validation](https://i.imgur.com/NWo78vl.png)
+import { i18n } from '@kbn/i18n';
+import { ValidationResult } from '../../../../types';
+
+export function validateExampleAlertType({
+  testAggField,
+}: {
+  testAggField: string;
+}): ValidationResult {
+  const validationResult = { errors: {} };
+  const errors = {
+    aggField: new Array<string>(),
+  };
+  validationResult.errors = errors;
+  if (!testAggField) {
+    errors.aggField.push(
+      i18n.translate('xpack.triggersActionsUI.components.example.error.requiredTestAggFieldText', {
+        defaultMessage: 'Test aggregation field is required.',
+      })
+    );
+  }
+  return validationResult;
+}
+```
 
 4. Extend registration code with the new alert type register in the file `x-pack/legacy/plugins/triggers_actions_ui/np_ready/public/application/components/builtin_alert_types/index.ts`
 ```
-import { getAlertType as getCustomAlertType } from '../../../some/plugin/custom_alert_type';
+import { getAlertType as getExampledAlertType } from './example';
 ...
-alertTypeRegistry.register(getCustomAlertType());
+
+...
+alertTypeRegistry.register(getExampledAlertType());
 ```
 
+After this four steps new `Example Alert Type` is available in UI of Create flyout:
+![Example Alert Type is in the select cards list](https://i.imgur.com/j71AEQV.png)
 
+Click on select cart for `Example Alert Type` will open expression form that was created in step 2:
+![Example Alert Type expression with validation](https://i.imgur.com/Z0jIwCS.png)
+
+## Common expression components
+
+### WHEN expression component
+
+![WHEN](https://i.imgur.com/7bYlxXK.png)
+
+```
+<WhenExpression
+  aggType={aggType ?? DEFAULT_VALUES.AGGREGATION_TYPE}
+  onChangeSelectedAggType={(selectedAggType: string) =>
+    setAlertParams('aggType', selectedAggType)
+  }
+/>
+```
+
+Props definition:
+```
+interface WhenExpressionProps {
+  aggType: string;
+  customAggTypesOptions?: { [key: string]: AggregationType };
+  onChangeSelectedAggType: (selectedAggType: string) => void;
+  popupPosition?: 'upCenter' | 'upLeft' | 'upRight' | 'downCenter' | 'downLeft'
+    | 'downRight' | 'leftCenter' | 'leftUp' | 'leftDown' | 'rightCenter' | 'rightUp' | 'rightDown';
+}
+```
+
+`aggType` - alert type property that will be set to the selected aggregation type
+`customAggTypesOptions` - (optional) list of aggregation types that will replace the default one defined under constants `x-pack/legacy/plugins/triggers_actions_ui/np_ready/public/common/constants/aggregation_types.ts`
+`onChangeSelectedAggType` - event handler that will be excuted on change of selected aggregation type
+`popupPosition` - (optional) and allows to change a position of the popup in the wide or small window space.
+
+### OF expression component
+
+![OF](https://i.imgur.com/4MC8Kbb.png)
+
+OF expression is available if aggregation type require selecting data fields for aggregating.
+
+```
+<OfExpression
+  aggField={aggField}
+  fields={esFields}
+  aggType={aggType}
+  errors={errors}
+  onChangeSelectedAggField={(selectedAggField?: string) =>
+    setAlertParams('aggField', selectedAggField)
+  }
+/>
+```
+
+Props definition:
+```
+interface OfExpressionProps {
+  aggType: string;
+  aggField?: string;
+  errors: { [key: string]: string[] };
+  onChangeSelectedAggField: (selectedAggType?: string) => void;
+  fields: Record<string, any>;
+  customAggTypesOptions?: {
+    [key: string]: AggregationType;
+  };
+  popupPosition?: 'upCenter' | 'upLeft' | 'upRight' | 'downCenter' | 'downLeft'
+    | 'downRight' | 'leftCenter' | 'leftUp' | 'leftDown' | 'rightCenter' | 'rightUp' | 'rightDown';
+}
+```
+
+`aggType` - alert type property that will be set to the selected aggregation type
+`aggField` - alert type property that will be set to the selected aggregation field
+`errors` - list errors definition for the fields that should be validated. Can contains only aggField.
+`onChangeSelectedAggField` - event handler that will be excuted on change of selected aggregation field.
+`fields` - fields list that will be available in the OF dropdow.
+`customAggTypesOptions` - (optional) list of aggregation types that will replace the default one defined under constants `x-pack/legacy/plugins/triggers_actions_ui/np_ready/public/common/constants/aggregation_types.ts`
+`popupPosition` - (optional) and allows to change a position of the popup in the wide or small window space.
+
+### GROUPED BY expression component
+
+![GROUPED BY](https://i.imgur.com/eej7WIw.png)
+
+```
+<GroupByExpression
+  groupBy={groupBy || DEFAULT_VALUES.GROUP_BY}
+  termField={termField}
+  termSize={termSize}
+  errors={errors}
+  fields={esFields}
+  onChangeSelectedGroupBy={selectedGroupBy => setAlertParams('groupBy', selectedGroupBy)}
+  onChangeSelectedTermField={selectedTermField =>
+    setAlertParams('termField', selectedTermField)
+  }
+  onChangeSelectedTermSize={selectedTermSize =>
+    setAlertParams('termSize', selectedTermSize)
+  }
+/>
+```
+
+Props definition:
+```
+interface GroupByExpressionProps {
+  groupBy: string;
+  termSize?: number;
+  termField?: string;
+  errors: { [key: string]: string[] };
+  onChangeSelectedTermSize: (selectedTermSize?: number) => void;
+  onChangeSelectedTermField: (selectedTermField?: string) => void;
+  onChangeSelectedGroupBy: (selectedGroupBy?: string) => void;
+  fields: Record<string, any>;
+  customGroupByTypes?: {
+    [key: string]: GroupByType;
+  };
+  popupPosition?: 'upCenter' | 'upLeft' | 'upRight' | 'downCenter' | 'downLeft'
+    | 'downRight' | 'leftCenter' | 'leftUp' | 'leftDown' | 'rightCenter' | 'rightUp' | 'rightDown';
+}
+```
+
+`groupBy` - alert type property that will be set to the selected groupBy
+`termSize` - alert type property that will be set to the selected termSize
+`termField` - alert type property that will be set to the selected termField
+`errors` - list errors definition for the alert type fields that should be validated under this current expression. Can contains only termSize and termField.
+`onChangeSelectedTermSize` - event handler that will be excuted on change of selected term size.
+`onChangeSelectedTermField` - event handler that will be excuted on change of selected term field.
+`onChangeSelectedGroupBy` - event handler that will be excuted on change of selected group by.
+`fields` - fields list that will be available for the `termField` dropdow.
+`customGroupByTypes` - (optional) list of group by types that will replace the default one defined under constants `x-pack/legacy/plugins/triggers_actions_ui/np_ready/public/common/constants/group_by_types.ts`
+`popupPosition` - (optional) and allows to change a position of the popup in the wide or small window space.
+
+### FOR THE LAST expression component
+
+![FOR THE LAST](https://i.imgur.com/vYJTo8F.png)
+
+```
+<ForLastExpression
+  timeWindowSize={timeWindowSize || 1}
+  timeWindowUnit={timeWindowUnit || ''}
+  errors={errors}
+  onChangeWindowSize={(selectedWindowSize: any) =>
+    setAlertParams('timeWindowSize', selectedWindowSize)
+  }
+  onChangeWindowUnit={(selectedWindowUnit: any) =>
+    setAlertParams('timeWindowUnit', selectedWindowUnit)
+  }
+/>
+```
+
+Props definition:
+```
+interface ForLastExpressionProps {
+  timeWindowSize?: number;
+  timeWindowUnit?: string;
+  errors: { [key: string]: string[] };
+  onChangeWindowSize: (selectedWindowSize: number | '') => void;
+  onChangeWindowUnit: (selectedWindowUnit: string) => void;
+  popupPosition?: 'upCenter' | 'upLeft' | 'upRight' | 'downCenter' | 'downLeft'
+    | 'downRight' | 'leftCenter' | 'leftUp' | 'leftDown' | 'rightCenter' | 'rightUp' | 'rightDown';
+}
+```
+
+`timeWindowSize` - alert type property that will be set to the selected timeWindowSize
+`timeWindowUnit` - alert type property that will be set to the selected timeWindowUnit
+`errors` - list errors definition for the alert type fields that should be validated under this current expression. Can contains only timeWindowSize.
+`onChangeWindowSize` - event handler that will be excuted on change of selected window size.
+`onChangeWindowUnit` - event handler that will be excuted on change of selected window unit.
+`popupPosition` - (optional) and allows to change a position of the popup in the wide or small window space.
+
+### THRESHOLD expression component
+
+![THRESHOLD](https://i.imgur.com/B92ZcT8.png)
+
+```
+<ThresholdExpression
+  thresholdComparator={thresholdComparator ?? DEFAULT_VALUES.THRESHOLD_COMPARATOR}
+  threshold={threshold}
+  errors={errors}
+  onChangeSelectedThreshold={selectedThresholds =>
+    setAlertParams('threshold', selectedThresholds)
+  }
+  onChangeSelectedThresholdComparator={selectedThresholdComparator =>
+    setAlertParams('thresholdComparator', selectedThresholdComparator)
+  }
+/>
+```
+
+Props definition:
+```
+interface ThresholdExpressionProps {
+  thresholdComparator: string;
+  errors: { [key: string]: string[] };
+  onChangeSelectedThresholdComparator: (selectedThresholdComparator?: string) => void;
+  onChangeSelectedThreshold: (selectedThreshold?: number[]) => void;
+  customComparators?: {
+    [key: string]: Comparator;
+  };
+  threshold?: number[];
+  popupPosition?: 'upCenter' | 'upLeft' | 'upRight' | 'downCenter' | 'downLeft'
+    | 'downRight' | 'leftCenter' | 'leftUp' | 'leftDown' | 'rightCenter' | 'rightUp' | 'rightDown';
+}
+```
+
+`thresholdComparator` - alert type property that will be set to the selected thresholdComparator
+`threshold` - alert type property that will be put to the threshold array.
+`errors` - list errors definition for the alert type fields that should be validated under this current expression. Can contains only timeWindowSize.
+`onChangeSelectedThresholdComparator` - event handler that will be excuted on change of selected threshold comparator.
+`onChangeSelectedThreshold` - event handler that will be excuted on change of selected threshold.
+`customComparators` - (optional) list of comparators that will replace the default one defined under constants `x-pack/legacy/plugins/triggers_actions_ui/np_ready/public/common/constants/comparators.ts`
+`popupPosition` - (optional) and allows to change a position of the popup in the wide or small window space.
+
+## Embed Create Alert flyout to Kibana plugins
+
+To embed Create Alert flyout to any place in Kibana the next code should be specified under the React component file:
+(TBD)
+
+```
+// import section
+import { AlertAdd } from '../../alert_add';
+
+// in the component state definition section
+const [alertFlyoutVisible, setAlertFlyoutVisibility] = useState<boolean>(false);
+
+// in render section of component
+<AlertsContextProvider
+  value={{
+    addFlyoutVisible: alertFlyoutVisible,
+    setAddFlyoutVisibility: setAlertFlyoutVisibility,
+    reloadAlerts: loadAlertsData,
+  }}
+>
+  <AlertAdd />
+</AlertsContextProvider>
+```
+
+Props definition:
+```
+
+```
+
+(TBD)
