@@ -17,11 +17,9 @@ import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/useFetcher';
-import { useLocation } from '../../../hooks/useLocation';
 import { fontSize, pct, px, units } from '../../../style/variables';
 import { ElasticDocsLink } from '../../shared/Links/ElasticDocsLink';
 import { SetupInstructionsLink } from '../../shared/Links/SetupInstructionsLink';
-import { useMatchedRoutes } from '../../../hooks/useMatchedRoutes';
 
 export const Permission: React.FC = ({ children }) => {
   const [isPermissionPageEnabled, setIsPermissionsPageEnabled] = useState(true);
@@ -68,16 +66,6 @@ interface Props {
 }
 
 const PermissionPage = ({ onEscapeHatchClick }: Props) => {
-  const location = useLocation();
-  const { matchedRoute, matchedPath } = useMatchedRoutes();
-
-  let pageName = '';
-  if (typeof matchedRoute?.breadcrumb === 'string') {
-    pageName = matchedRoute.breadcrumb;
-  } else if (typeof matchedRoute?.breadcrumb === 'function' && matchedPath) {
-    pageName = matchedRoute.breadcrumb({ location, match: matchedPath });
-  }
-
   return (
     <div style={{ height: pct(95) }}>
       <EuiFlexGroup alignItems="center">
@@ -136,9 +124,8 @@ const PermissionPage = ({ onEscapeHatchClick }: Props) => {
                       onClick={onEscapeHatchClick}
                       style={{ fontSize }}
                     >
-                      {i18n.translate('xpack.apm.permission.escapeHatch', {
-                        defaultMessage: 'Skip and go to {pageName} overview',
-                        values: { pageName }
+                      {i18n.translate('xpack.apm.permission.dismissWarning', {
+                        defaultMessage: 'Dismiss warning'
                       })}
                     </EuiLink>
                   </EscapeHatch>
