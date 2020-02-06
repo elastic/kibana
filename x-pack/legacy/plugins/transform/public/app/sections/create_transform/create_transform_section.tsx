@@ -16,7 +16,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPageContent,
-  EuiPageBody,
   EuiPageContentBody,
   EuiSpacer,
   EuiTitle,
