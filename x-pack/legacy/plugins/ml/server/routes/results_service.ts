@@ -134,7 +134,7 @@ export function resultsServiceRoutes({ xpackMainPlugin, router }: RouteInitializ
    *
    * @api {post} /api/ml/results/max_anomaly_score Returns the maximum anomaly_score
    * @apiName GetMaxAnomalyScore
-   * @apiDescription Returns the maximum anomaly_score for result_type:bucket over jobIds for the interval passed in
+   * @apiDescription Returns the maximum anomaly score of the bucket results for the request job ID(s) and time range
    */
   router.post(
     {
@@ -163,9 +163,9 @@ export function resultsServiceRoutes({ xpackMainPlugin, router }: RouteInitializ
   /**
    * @apiGroup ResultsService
    *
-   * @api {post} /api/ml/results/category_examples Returns the maximum anomaly_score
+   * @api {post} /api/ml/results/category_examples Returns category examples
    * @apiName GetCategoryExamples
-   * @apiDescription Returns the categorization examples for the categories with the specified IDs from the given index and job ID
+   * @apiDescription Returns examples for the categories with the specified IDs from the job with the supplied ID
    */
   router.post(
     {
@@ -194,9 +194,9 @@ export function resultsServiceRoutes({ xpackMainPlugin, router }: RouteInitializ
   /**
    * @apiGroup ResultsService
    *
-   * @api {post} /api/ml/results/partition_fields_values Returns partition fields
+   * @api {post} /api/ml/results/partition_fields_values Returns partition fields values
    * @apiName GetPartitionFieldsValues
-   * @apiDescription Returns the record of partition fields with possible values that fit the provided queries.
+   * @apiDescription Returns the partition fields with values that match the provided criteria for the specified job ID.
    */
   router.post(
     {
