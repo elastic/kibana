@@ -5,13 +5,7 @@
  */
 
 import { UMElasticsearchQueryFn } from '../adapters';
-import {
-  DocCount,
-  Ping,
-  MonitorChart,
-  PingResults,
-  StatesIndexStatus,
-} from '../../../common/graphql/types';
+import { Ping, MonitorChart, PingResults, StatesIndexStatus } from '../../../common/graphql/types';
 import {
   GetFilterBarParams,
   GetLatestMonitorParams,
@@ -47,5 +41,5 @@ export interface UptimeRequests {
   getPings: ESQ<GetPingsParams, PingResults>;
   getPingHistogram: ESQ<GetPingHistogramParams, HistogramResult>;
   getSnapshotCount: ESQ<GetSnapshotCountParams, Snapshot>;
-  getStatesIndexStatus: ESQ<{}, StatesIndexStatus>;
+  getIndexStatus: ESQ<{}, StatesIndexStatus>;
 }

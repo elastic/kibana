@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DocCount, Ping, PingResults } from '../../../common/graphql/types';
+import { Ping, PingResults } from '../../../common/graphql/types';
 import { UMElasticsearchQueryFn } from '../adapters';
 import { GetPingHistogramParams, HistogramResult } from '../../../common/types';
 
