@@ -10,7 +10,6 @@ import { getOr, get, isNumber } from 'lodash/fp';
 import deepmerge from 'deepmerge';
 import useResizeObserver from 'use-resize-observer';
 
-
 import { useTimeZone } from '../../lib/kibana';
 import { ChartPlaceHolder } from './chart_place_holder';
 import {
@@ -114,12 +113,7 @@ export const BarChartComponent: React.FC<BarChartComponentProps> = ({ barChart, 
 
   return checkIfAnyValidSeriesExist(barChart) ? (
     <WrappedByAutoSizer ref={measureRef as React.RefObject<HTMLDivElement>} height={chartHeight}>
-      <BarChartBase
-        height={chartHeight}
-        width={chartHeight}
-        data={barChart}
-        configs={configs}
-      />
+      <BarChartBase height={chartHeight} width={chartHeight} data={barChart} configs={configs} />
     </WrappedByAutoSizer>
   ) : (
     <ChartPlaceHolder height={chartHeight} width={chartWidth} data={barChart} />
