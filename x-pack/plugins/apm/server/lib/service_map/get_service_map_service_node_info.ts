@@ -112,7 +112,10 @@ async function getTransactionMetrics({
   setup,
   filter,
   minutes
-}: TaskParameters) {
+}: TaskParameters): Promise<{
+  avgTransactionDuration: number | null;
+  avgRequestsPerMinute: number | null;
+}> {
   const { indices, client } = setup;
 
   const response = await client.search({
@@ -140,13 +143,16 @@ async function getTransactionMetrics({
   });
 
   return {
-    avgTransactionDuration: response.aggregations?.duration.value,
+    avgTransactionDuration: response.aggregations?.duration.value ?? null,
     avgRequestsPerMinute:
       response.hits.total.value > 0 ? response.hits.total.value / minutes : null
   };
 }
 
-async function getCpuMetrics({ setup, filter }: TaskParameters) {
+async function getCpuMetrics({
+  setup,
+  filter
+}: TaskParameters): Promise<{ avgCpuUsage: number | null }> {
   const { indices, client } = setup;
 
   const response = await client.search({
@@ -180,11 +186,14 @@ async function getCpuMetrics({ setup, filter }: TaskParameters) {
   });
 
   return {
-    avgCpuUsage: response.aggregations?.avgCpuUsage.value
+    avgCpuUsage: response.aggregations?.avgCpuUsage.value ?? null
   };
 }
 
-async function getMemoryMetrics({ setup, filter }: TaskParameters) {
+async function getMemoryMetrics({
+  setup,
+  filter
+}: TaskParameters): Promise<{ avgMemoryUsage: number | null }> {
   const { client, indices } = setup;
   const response = await client.search({
     index: indices['apm_oss.metricsIndices'],
@@ -221,11 +230,14 @@ async function getMemoryMetrics({ setup, filter }: TaskParameters) {
   });
 
   return {
-    avgMemoryUsage: response.aggregations?.avgMemoryUsage.value
+    avgMemoryUsage: response.aggregations?.avgMemoryUsage.value ?? null
   };
 }
 
-async function getNumInstances({ setup, filter }: TaskParameters) {
+async function getNumInstances({
+  setup,
+  filter
+}: TaskParameters): Promise<{ numInstances: number }> {
   const { client, indices } = setup;
   const response = await client.search({
     index: indices['apm_oss.transactionIndices'],
