@@ -8,7 +8,7 @@ import {
   getMockTaskFetch,
   getMockThrowingTaskFetch,
   getMockTaskInstance,
-} from '../../../../test_utils';
+} from '../../../test_utils';
 import { taskManagerMock } from '../../../../../task_manager/server/task_manager.mock';
 import { getUsageCollector } from './get_usage_collector';
 

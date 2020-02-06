@@ -10,7 +10,7 @@ import {
   getMockConfig,
   getMockEs,
   getMockTaskInstance,
-} from '../../../../test_utils';
+} from '../../../test_utils';
 import { visualizationsTaskRunner } from './task_runner';
 import { TaskInstance } from '../../../../../task_manager/server';
 
