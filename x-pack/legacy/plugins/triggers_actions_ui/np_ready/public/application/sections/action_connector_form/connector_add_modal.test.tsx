@@ -6,7 +6,7 @@
 import * as React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { coreMock } from '../../../../../../../../../src/core/public/mocks';
-import { ConnectorAddFlyout } from './connector_add_flyout';
+import { ConnectorAddModal } from './connector_add_modal';
 import { ActionsConnectorsContextProvider } from '../../context/actions_connectors_context';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { ValidationResult } from '../../../types';
@@ -14,25 +14,25 @@ import { AppContextProvider } from '../../app_context';
 import { AppDeps } from '../../app';
 const actionTypeRegistry = actionTypeRegistryMock.create();
 
-describe('connector_add_flyout', () => {
+describe('connector_add_modal', () => {
   let deps: AppDeps | null;
 
   beforeAll(async () => {
-    const mockes = coreMock.createSetup();
+    const mocks = coreMock.createSetup();
     const [
       {
         chrome,
         docLinks,
         application: { capabilities },
       },
-    ] = await mockes.getStartServices();
+    ] = await mocks.getStartServices();
     deps = {
       chrome,
       docLinks,
-      toastNotifications: mockes.notifications.toasts,
-      injectedMetadata: mockes.injectedMetadata,
-      http: mockes.http,
-      uiSettings: mockes.uiSettings,
+      toastNotifications: mocks.notifications.toasts,
+      injectedMetadata: mocks.injectedMetadata,
+      http: mocks.http,
+      uiSettings: mocks.uiSettings,
       capabilities: {
         ...capabilities,
         actions: {
@@ -48,9 +48,8 @@ describe('connector_add_flyout', () => {
       alertTypeRegistry: {} as any,
     };
   });
-
-  it('renders action type menu on flyout open', () => {
-    const actionType = {
+  it('renders connector modal form if addModalVisible is true', () => {
+    const actionTypeModel = {
       id: 'my-action-type',
       iconClass: 'test',
       selectMessage: 'test',
@@ -64,8 +63,14 @@ describe('connector_add_flyout', () => {
       actionConnectorFields: null,
       actionParamsFields: null,
     };
-    actionTypeRegistry.get.mockReturnValueOnce(actionType);
+    actionTypeRegistry.get.mockReturnValueOnce(actionTypeModel);
     actionTypeRegistry.has.mockReturnValue(true);
+
+    const actionType = {
+      id: 'my-action-type',
+      name: 'test',
+      enabled: true,
+    };
 
     const wrapper = mountWithIntl(
       <AppContextProvider appDeps={deps}>
@@ -83,11 +88,15 @@ describe('connector_add_flyout', () => {
             },
           }}
         >
-          <ConnectorAddFlyout />
+          <ConnectorAddModal
+            addModalVisible={true}
+            setAddModalVisibility={() => {}}
+            actionType={actionType}
+          />
         </ActionsConnectorsContextProvider>
       </AppContextProvider>
     );
-    expect(wrapper.find('ActionTypeMenu')).toHaveLength(1);
-    expect(wrapper.find('[data-test-subj="my-action-type-card"]').exists()).toBeTruthy();
+    expect(wrapper.find('EuiModalHeader')).toHaveLength(1);
+    expect(wrapper.find('[data-test-subj="saveActionButtonModal"]').exists()).toBeTruthy();
   });
 });

@@ -3,11 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React from 'react';
+import React, { FunctionComponent } from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { TypeRegistry } from '../../type_registry';
 import { registerBuiltInActionTypes } from './index';
-import { ActionTypeModel, ActionConnector } from '../../../types';
+import { ActionTypeModel, ActionParamsProps } from '../../../types';
+import { WebhookActionParams, WebhookActionConnector } from './types';
 
 const ACTION_TYPE_ID = '.webhook';
 let actionTypeModel: ActionTypeModel;
@@ -41,9 +42,9 @@ describe('webhook connector validation', () => {
       config: {
         method: 'PUT',
         url: 'http:\\test',
-        headers: ['content-type: text'],
+        headers: { 'content-type': 'text' },
       },
-    } as ActionConnector;
+    } as WebhookActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
       errors: {
@@ -66,7 +67,7 @@ describe('webhook connector validation', () => {
       config: {
         method: 'PUT',
       },
-    } as ActionConnector;
+    } as WebhookActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
       errors: {
@@ -109,9 +110,9 @@ describe('WebhookActionConnectorFields renders', () => {
       config: {
         method: 'PUT',
         url: 'http:\\test',
-        headers: ['content-type: text'],
+        headers: { 'content-type': 'text' },
       },
-    } as ActionConnector;
+    } as WebhookActionConnector;
     const wrapper = mountWithIntl(
       <ConnectorFields
         action={actionConnector}
@@ -138,17 +139,18 @@ describe('WebhookParamsFields renders', () => {
     if (!actionTypeModel.actionParamsFields) {
       return;
     }
-    const ParamsFields = actionTypeModel.actionParamsFields;
+    const ParamsFields = actionTypeModel.actionParamsFields as FunctionComponent<
+      ActionParamsProps<WebhookActionParams>
+    >;
     const actionParams = {
       body: 'test message',
     };
     const wrapper = mountWithIntl(
       <ParamsFields
-        action={actionParams}
+        actionParams={actionParams}
         errors={{ body: [] }}
         editAction={() => {}}
         index={0}
-        hasErrors={false}
       />
     );
     expect(wrapper.find('[data-test-subj="webhookBodyEditor"]').length > 0).toBeTruthy();
