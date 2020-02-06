@@ -17,3 +17,9 @@ export const GetFileRequestSchema = {
     filePath: schema.string(),
   }),
 };
+
+export const GetInfoRequestSchema = {
+  params: schema.object({
+    pkgkey: schema.string(),
+  }),
+};

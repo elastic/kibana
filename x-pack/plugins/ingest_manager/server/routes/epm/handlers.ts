@@ -5,8 +5,13 @@
  */
 import { TypeOf } from '@kbn/config-schema';
 import { RequestHandler, CustomHttpResponseOptions } from 'kibana/server';
-import { GetFileRequestSchema, EPM_API_ROOT } from '../../../common';
-import { getCategories, getPackages, getFile } from '../../services/epm/packages/get';
+import { GetFileRequestSchema, GetInfoRequestSchema, EPM_API_ROOT } from '../../../common';
+import {
+  getCategories,
+  getPackages,
+  getFile,
+  getPackageInfo,
+} from '../../services/epm/packages/get';
 import { GetPackagesRequestSchema } from '../../types';
 
 export const getCategoriesHandler: RequestHandler = async (context, request, response) => {
@@ -14,7 +19,7 @@ export const getCategoriesHandler: RequestHandler = async (context, request, res
     const res = await getCategories();
     return response.ok({
       body: {
-        categories: res,
+        response: res,
         success: true,
       },
     });
@@ -38,7 +43,7 @@ export const getListHandler: RequestHandler<
     });
     return response.ok({
       body: {
-        packages: res,
+        response: res,
         success: true,
       },
     });
@@ -71,6 +76,29 @@ export const getFileHandler: RequestHandler<TypeOf<typeof GetFileRequestSchema.p
       customResponseObj.headers = { 'Content-Type': contentType };
     }
     return response.custom(customResponseObj);
+  } catch (e) {
+    return response.customError({
+      statusCode: 500,
+      body: { message: e.message },
+    });
+  }
+};
+
+export const getInfoHandler: RequestHandler<TypeOf<typeof GetInfoRequestSchema.params>> = async (
+  context,
+  request,
+  response
+) => {
+  try {
+    const { pkgkey } = request.params;
+    const savedObjectsClient = context.core.savedObjects.client;
+    const res = await getPackageInfo({ savedObjectsClient, pkgkey });
+    return response.ok({
+      body: {
+        response: res,
+        success: true,
+      },
+    });
   } catch (e) {
     return response.customError({
       statusCode: 500,
