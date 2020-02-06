@@ -5,7 +5,6 @@
  */
 
 import Hapi from 'hapi';
-import { isFunction } from 'lodash/fp';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { updateRules } from '../../rules/update_rules';
 import { UpdateRulesRequest, IRuleSavedAttributesSavedObjectAttributes } from '../../rules/types';
@@ -14,9 +13,9 @@ import { LegacySetupServices } from '../../../../plugin';
 import { getIdError, transformOrError } from './utils';
 import { transformError } from '../utils';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
-import { KibanaRequest } from '../../../../../../../../../src/core/server';
+import { LegacyGetScopedServices } from '../../../../services';
 
-export const createUpdateRulesRoute = (services: LegacySetupServices): Hapi.ServerRoute => {
+export const createUpdateRulesRoute = (getServices: LegacyGetScopedServices): Hapi.ServerRoute => {
   return {
     method: 'PUT',
     path: DETECTION_ENGINE_RULES_URL,
@@ -59,18 +58,13 @@ export const createUpdateRulesRoute = (services: LegacySetupServices): Hapi.Serv
         version,
       } = request.payload;
 
-      const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
-      const actionsClient = await services.plugins.actions.getActionsClientWithRequest(
-        KibanaRequest.from(request)
-      );
-      const savedObjectsClient = isFunction(request.getSavedObjectsClient)
-        ? request.getSavedObjectsClient()
-        : null;
-      if (!alertsClient || !savedObjectsClient) {
-        return headers.response().code(404);
-      }
-
       try {
+        const { alertsClient, actionsClient, savedObjectsClient } = await getServices(request);
+
+        if (!actionsClient || !alertsClient || !savedObjectsClient) {
+          return headers.response().code(404);
+        }
+
         const rule = await updateRules({
           alertsClient,
           actionsClient,
@@ -124,6 +118,9 @@ export const createUpdateRulesRoute = (services: LegacySetupServices): Hapi.Serv
   };
 };
 
-export const updateRulesRoute = (services: LegacySetupServices) => {
-  services.route(createUpdateRulesRoute(services));
+export const updateRulesRoute = (
+  route: LegacySetupServices['route'],
+  getServices: LegacyGetScopedServices
+) => {
+  route(createUpdateRulesRoute(getServices));
 };

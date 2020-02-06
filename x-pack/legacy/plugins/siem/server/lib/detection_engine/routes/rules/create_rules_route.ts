@@ -20,7 +20,10 @@ import { transformOrError } from './utils';
 import { getIndexExists } from '../../index/get_index_exists';
 import { getIndex, transformError } from '../utils';
 
-export const createCreateRulesRoute = (getServices: LegacyGetScopedServices): Hapi.ServerRoute => {
+export const createCreateRulesRoute = (
+  config: LegacySetupServices['config'],
+  getServices: LegacyGetScopedServices
+): Hapi.ServerRoute => {
   return {
     method: 'POST',
     path: DETECTION_ENGINE_RULES_URL,
@@ -64,13 +67,12 @@ export const createCreateRulesRoute = (getServices: LegacyGetScopedServices): Ha
         const {
           alertsClient,
           actionsClient,
-          config,
           callCluster,
           getSpaceId,
           savedObjectsClient,
         } = await getServices(request);
 
-        if (!alertsClient || !savedObjectsClient) {
+        if (!actionsClient || !alertsClient || !savedObjectsClient) {
           return headers.response().code(404);
         }
 
@@ -137,7 +139,8 @@ export const createCreateRulesRoute = (getServices: LegacyGetScopedServices): Ha
 
 export const createRulesRoute = (
   route: LegacySetupServices['route'],
+  config: LegacySetupServices['config'],
   getServices: LegacyGetScopedServices
 ): void => {
-  route(createCreateRulesRoute(getServices));
+  route(createCreateRulesRoute(config, getServices));
 };

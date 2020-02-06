@@ -9,9 +9,13 @@ import { DETECTION_ENGINE_SIGNALS_STATUS_URL } from '../../../../../common/const
 import { SignalsStatusRequest } from '../../signals/types';
 import { setSignalsStatusSchema } from '../schemas/set_signal_status_schema';
 import { LegacySetupServices } from '../../../../plugin';
-import { transformError, getIndex, callWithRequestFactory } from '../utils';
+import { transformError, getIndex } from '../utils';
+import { LegacyGetScopedServices } from '../../../../services';
 
-export const setSignalsStatusRouteDef = (services: LegacySetupServices): Hapi.ServerRoute => {
+export const setSignalsStatusRouteDef = (
+  config: LegacySetupServices['config'],
+  getServices: LegacyGetScopedServices
+): Hapi.ServerRoute => {
   return {
     method: 'POST',
     path: DETECTION_ENGINE_SIGNALS_STATUS_URL,
@@ -26,8 +30,9 @@ export const setSignalsStatusRouteDef = (services: LegacySetupServices): Hapi.Se
     },
     async handler(request: SignalsStatusRequest) {
       const { signal_ids: signalIds, query, status } = request.payload;
-      const index = getIndex(request, services);
-      const callWithRequest = callWithRequestFactory(request, services);
+      const { callCluster, getSpaceId } = await getServices(request);
+      const index = getIndex(getSpaceId, config);
+
       let queryObject;
       if (signalIds) {
         queryObject = { ids: { values: signalIds } };
@@ -40,7 +45,7 @@ export const setSignalsStatusRouteDef = (services: LegacySetupServices): Hapi.Se
         };
       }
       try {
-        return callWithRequest('updateByQuery', {
+        return callCluster('updateByQuery', {
           index,
           body: {
             script: {
@@ -58,6 +63,10 @@ export const setSignalsStatusRouteDef = (services: LegacySetupServices): Hapi.Se
   };
 };
 
-export const setSignalsStatusRoute = (services: LegacySetupServices) => {
-  services.route(setSignalsStatusRouteDef(services));
+export const setSignalsStatusRoute = (
+  route: LegacySetupServices['route'],
+  config: LegacySetupServices['config'],
+  getServices: LegacyGetScopedServices
+) => {
+  route(setSignalsStatusRouteDef(config, getServices));
 };

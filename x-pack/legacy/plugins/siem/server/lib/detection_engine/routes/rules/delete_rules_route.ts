@@ -5,19 +5,18 @@
  */
 
 import Hapi from 'hapi';
-import { isFunction } from 'lodash/fp';
 
-import { KibanaRequest } from '../../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { deleteRules } from '../../rules/delete_rules';
 import { LegacySetupServices, RequestFacade } from '../../../../plugin';
+import { LegacyGetScopedServices } from '../../../../services';
 import { queryRulesSchema } from '../schemas/query_rules_schema';
 import { getIdError, transformOrError } from './utils';
 import { transformError } from '../utils';
 import { QueryRequest, IRuleSavedAttributesSavedObjectAttributes } from '../../rules/types';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
 
-export const createDeleteRulesRoute = (services: LegacySetupServices): Hapi.ServerRoute => {
+export const createDeleteRulesRoute = (getServices: LegacyGetScopedServices): Hapi.ServerRoute => {
   return {
     method: 'DELETE',
     path: DETECTION_ENGINE_RULES_URL,
@@ -32,18 +31,14 @@ export const createDeleteRulesRoute = (services: LegacySetupServices): Hapi.Serv
     },
     async handler(request: QueryRequest & RequestFacade, headers) {
       const { id, rule_id: ruleId } = request.query;
-      const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
-      const actionsClient = await services.plugins.actions.getActionsClientWithRequest(
-        KibanaRequest.from(request)
-      );
-      const savedObjectsClient = isFunction(request.getSavedObjectsClient)
-        ? request.getSavedObjectsClient()
-        : null;
-      if (!alertsClient || !savedObjectsClient) {
-        return headers.response().code(404);
-      }
 
       try {
+        const { actionsClient, alertsClient, savedObjectsClient } = await getServices(request);
+
+        if (!actionsClient || !alertsClient || !savedObjectsClient) {
+          return headers.response().code(404);
+        }
+
         const rule = await deleteRules({
           actionsClient,
           alertsClient,
@@ -73,6 +68,9 @@ export const createDeleteRulesRoute = (services: LegacySetupServices): Hapi.Serv
   };
 };
 
-export const deleteRulesRoute = (services: LegacySetupServices): void => {
-  services.route(createDeleteRulesRoute(services));
+export const deleteRulesRoute = (
+  route: LegacySetupServices['route'],
+  getServices: LegacyGetScopedServices
+): void => {
+  route(createDeleteRulesRoute(getServices));
 };

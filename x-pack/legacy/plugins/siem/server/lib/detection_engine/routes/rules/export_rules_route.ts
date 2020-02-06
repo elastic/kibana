@@ -6,16 +6,20 @@
 
 import Boom from 'boom';
 import Hapi from 'hapi';
-import { isFunction } from 'lodash/fp';
+
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
+import { LegacySetupServices, RequestFacade } from '../../../../plugin';
+import { LegacyGetScopedServices } from '../../../../services';
 import { ExportRulesRequest } from '../../rules/types';
-import { LegacySetupServices } from '../../../../plugin';
 import { getNonPackagedRulesCount } from '../../rules/get_existing_prepackaged_rules';
 import { exportRulesSchema, exportRulesQuerySchema } from '../schemas/export_rules_schema';
 import { getExportByObjectIds } from '../../rules/get_export_by_object_ids';
 import { getExportAll } from '../../rules/get_export_all';
 
-export const createExportRulesRoute = (services: LegacySetupServices): Hapi.ServerRoute => {
+export const createExportRulesRoute = (
+  config: LegacySetupServices['config'],
+  getServices: LegacyGetScopedServices
+): Hapi.ServerRoute => {
   return {
     method: 'POST',
     path: `${DETECTION_ENGINE_RULES_URL}/_export`,
@@ -29,15 +33,15 @@ export const createExportRulesRoute = (services: LegacySetupServices): Hapi.Serv
         query: exportRulesQuerySchema,
       },
     },
-    async handler(request: ExportRulesRequest, headers) {
-      const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
+    async handler(request: ExportRulesRequest & RequestFacade, headers) {
+      const { alertsClient } = await getServices(request);
 
       if (!alertsClient) {
         return headers.response().code(404);
       }
 
       try {
-        const exportSizeLimit = services.config().get<number>('savedObjects.maxImportExportSize');
+        const exportSizeLimit = config().get<number>('savedObjects.maxImportExportSize');
         if (request.payload?.objects != null && request.payload.objects.length > exportSizeLimit) {
           return Boom.badRequest(`Can't export more than ${exportSizeLimit} rules`);
         } else {
@@ -66,6 +70,10 @@ export const createExportRulesRoute = (services: LegacySetupServices): Hapi.Serv
   };
 };
 
-export const exportRulesRoute = (services: LegacySetupServices): void => {
-  services.route(createExportRulesRoute(services));
+export const exportRulesRoute = (
+  route: LegacySetupServices['route'],
+  config: LegacySetupServices['config'],
+  getServices: LegacyGetScopedServices
+): void => {
+  route(createExportRulesRoute(config, getServices));
 };

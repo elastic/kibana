@@ -5,10 +5,11 @@
  */
 
 import Hapi from 'hapi';
-import { isFunction, snakeCase } from 'lodash/fp';
+import { snakeCase } from 'lodash/fp';
 
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
-import { LegacySetupServices } from '../../../../plugin';
+import { LegacySetupServices, RequestFacade } from '../../../../plugin';
+import { LegacyGetScopedServices } from '../../../../services';
 import { findRulesStatusesSchema } from '../schemas/find_rules_statuses_schema';
 import {
   FindRulesStatusesRequest,
@@ -29,7 +30,9 @@ const convertToSnakeCase = <T extends Record<string, any>>(obj: T): Partial<T> |
   }, {});
 };
 
-export const createFindRulesStatusRoute: Hapi.ServerRoute = {
+export const createFindRulesStatusRoute = (
+  getServices: LegacyGetScopedServices
+): Hapi.ServerRoute => ({
   method: 'GET',
   path: `${DETECTION_ENGINE_RULES_URL}/_find_statuses`,
   options: {
@@ -41,12 +44,10 @@ export const createFindRulesStatusRoute: Hapi.ServerRoute = {
       query: findRulesStatusesSchema,
     },
   },
-  async handler(request: FindRulesStatusesRequest, headers) {
+  async handler(request: FindRulesStatusesRequest & RequestFacade, headers) {
     const { query } = request;
-    const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
-    const savedObjectsClient = isFunction(request.getSavedObjectsClient)
-      ? request.getSavedObjectsClient()
-      : null;
+    const { alertsClient, savedObjectsClient } = await getServices(request);
+
     if (!alertsClient || !savedObjectsClient) {
       return headers.response().code(404);
     }
@@ -86,8 +87,11 @@ export const createFindRulesStatusRoute: Hapi.ServerRoute = {
     }, Promise.resolve<RuleStatusResponse>({}));
     return statuses;
   },
-};
+});
 
-export const findRulesStatusesRoute = (services: LegacySetupServices): void => {
-  services.route(createFindRulesStatusRoute);
+export const findRulesStatusesRoute = (
+  route: LegacySetupServices['route'],
+  getServices: LegacyGetScopedServices
+): void => {
+  route(createFindRulesStatusRoute(getServices));
 };

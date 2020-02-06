@@ -5,18 +5,18 @@
  */
 
 import Hapi from 'hapi';
-import { isFunction } from 'lodash/fp';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { getIdError, transformOrError } from './utils';
 import { transformError } from '../utils';
 
 import { readRules } from '../../rules/read_rules';
-import { LegacySetupServices } from '../../../../plugin';
+import { LegacySetupServices, RequestFacade } from '../../../../plugin';
 import { queryRulesSchema } from '../schemas/query_rules_schema';
 import { QueryRequest, IRuleSavedAttributesSavedObjectAttributes } from '../../rules/types';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
+import { LegacyGetScopedServices } from '../../../../services';
 
-export const createReadRulesRoute: Hapi.ServerRoute = {
+export const createReadRulesRoute = (getServices: LegacyGetScopedServices): Hapi.ServerRoute => ({
   method: 'GET',
   path: DETECTION_ENGINE_RULES_URL,
   options: {
@@ -28,16 +28,15 @@ export const createReadRulesRoute: Hapi.ServerRoute = {
       query: queryRulesSchema,
     },
   },
-  async handler(request: QueryRequest, headers) {
+  async handler(request: QueryRequest & RequestFacade, headers) {
     const { id, rule_id: ruleId } = request.query;
-    const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
-    const savedObjectsClient = isFunction(request.getSavedObjectsClient)
-      ? request.getSavedObjectsClient()
-      : null;
-    if (!alertsClient || !savedObjectsClient) {
-      return headers.response().code(404);
-    }
+
     try {
+      const { alertsClient, savedObjectsClient } = await getServices(request);
+      if (!alertsClient || !savedObjectsClient) {
+        return headers.response().code(404);
+      }
+
       const rule = await readRules({
         alertsClient,
         id,
@@ -62,8 +61,11 @@ export const createReadRulesRoute: Hapi.ServerRoute = {
       return transformError(err);
     }
   },
-};
+});
 
-export const readRulesRoute = (services: LegacySetupServices) => {
-  services.route(createReadRulesRoute);
+export const readRulesRoute = (
+  route: LegacySetupServices['route'],
+  getServices: LegacyGetScopedServices
+) => {
+  route(createReadRulesRoute(getServices));
 };

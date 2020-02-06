@@ -5,25 +5,23 @@
  */
 
 import Hapi from 'hapi';
-import { isFunction } from 'lodash/fp';
 import uuid from 'uuid';
+
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
+import { LegacyGetScopedServices } from '../../../../services';
 import { createRules } from '../../rules/create_rules';
 import { BulkRulesRequest } from '../../rules/types';
 import { LegacySetupServices } from '../../../../plugin';
 import { readRules } from '../../rules/read_rules';
 import { transformOrBulkError } from './utils';
 import { getIndexExists } from '../../index/get_index_exists';
-import {
-  callWithRequestFactory,
-  getIndex,
-  transformBulkError,
-  createBulkErrorObject,
-} from '../utils';
+import { getIndex, transformBulkError, createBulkErrorObject } from '../utils';
 import { createRulesBulkSchema } from '../schemas/create_rules_bulk_schema';
-import { KibanaRequest } from '../../../../../../../../../src/core/server';
 
-export const createCreateRulesBulkRoute = (services: LegacySetupServices): Hapi.ServerRoute => {
+export const createCreateRulesBulkRoute = (
+  config: LegacySetupServices['config'],
+  getServices: LegacyGetScopedServices
+): Hapi.ServerRoute => {
   return {
     method: 'POST',
     path: `${DETECTION_ENGINE_RULES_URL}/_bulk_create`,
@@ -37,14 +35,15 @@ export const createCreateRulesBulkRoute = (services: LegacySetupServices): Hapi.
       },
     },
     async handler(request: BulkRulesRequest, headers) {
-      const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
-      const actionsClient = await services.plugins.actions.getActionsClientWithRequest(
-        KibanaRequest.from(request)
-      );
-      const savedObjectsClient = isFunction(request.getSavedObjectsClient)
-        ? request.getSavedObjectsClient()
-        : null;
-      if (!alertsClient || !savedObjectsClient) {
+      const {
+        actionsClient,
+        alertsClient,
+        callCluster,
+        getSpaceId,
+        savedObjectsClient,
+      } = await getServices(request);
+
+      if (!actionsClient || !alertsClient || !savedObjectsClient) {
         return headers.response().code(404);
       }
 
@@ -78,10 +77,10 @@ export const createCreateRulesBulkRoute = (services: LegacySetupServices): Hapi.
             version,
           } = payloadRule;
           const ruleIdOrUuid = ruleId ?? uuid.v4();
+
           try {
-            const finalIndex = outputIndex != null ? outputIndex : getIndex(request, services);
-            const callWithRequest = callWithRequestFactory(request, services);
-            const indexExists = await getIndexExists(callWithRequest, finalIndex);
+            const finalIndex = outputIndex != null ? outputIndex : getIndex(getSpaceId, config);
+            const indexExists = await getIndexExists(callCluster, finalIndex);
             if (!indexExists) {
               return createBulkErrorObject({
                 ruleId: ruleIdOrUuid,
@@ -140,6 +139,10 @@ export const createCreateRulesBulkRoute = (services: LegacySetupServices): Hapi.
   };
 };
 
-export const createRulesBulkRoute = (services: LegacySetupServices): void => {
-  services.route(createCreateRulesBulkRoute(services));
+export const createRulesBulkRoute = (
+  route: LegacySetupServices['route'],
+  config: LegacySetupServices['config'],
+  getServices: LegacyGetScopedServices
+): void => {
+  route(createCreateRulesBulkRoute(config, getServices));
 };

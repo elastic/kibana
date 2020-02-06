@@ -5,7 +5,6 @@
  */
 
 import Boom from 'boom';
-import { CallAPIOptions } from '../../../../../../../../src/core/server';
 import { APP_ID, SIGNALS_INDEX_KEY } from '../../../../common/constants';
 import { LegacySetupServices, RequestFacade } from '../../../plugin';
 import { ScopedServices } from '../../../services';

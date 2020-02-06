@@ -9,7 +9,8 @@ import Boom from 'boom';
 
 import { DETECTION_ENGINE_INDEX_URL } from '../../../../../common/constants';
 import { LegacySetupServices, RequestFacade } from '../../../../plugin';
-import { transformError, getIndex, callWithRequestFactory } from '../utils';
+import { LegacyGetScopedServices } from '../../../../services';
+import { transformError, getIndex } from '../utils';
 import { getIndexExists } from '../../index/get_index_exists';
 import { getPolicyExists } from '../../index/get_policy_exists';
 import { deletePolicy } from '../../index/delete_policy';
@@ -27,7 +28,10 @@ import { deleteTemplate } from '../../index/delete_template';
  *
  * And ensuring they're all gone
  */
-export const createDeleteIndexRoute = (services: LegacySetupServices): Hapi.ServerRoute => {
+export const createDeleteIndexRoute = (
+  config: LegacySetupServices['config'],
+  getServices: LegacyGetScopedServices
+): Hapi.ServerRoute => {
   return {
     method: 'DELETE',
     path: DETECTION_ENGINE_INDEX_URL,
@@ -41,20 +45,21 @@ export const createDeleteIndexRoute = (services: LegacySetupServices): Hapi.Serv
     },
     async handler(request: RequestFacade) {
       try {
-        const index = getIndex(request, services);
-        const callWithRequest = callWithRequestFactory(request, services);
-        const indexExists = await getIndexExists(callWithRequest, index);
+        const { callCluster, getSpaceId } = await getServices(request);
+
+        const index = getIndex(getSpaceId, config);
+        const indexExists = await getIndexExists(callCluster, index);
         if (!indexExists) {
           return new Boom(`index: "${index}" does not exist`, { statusCode: 404 });
         } else {
-          await deleteAllIndex(callWithRequest, `${index}-*`);
-          const policyExists = await getPolicyExists(callWithRequest, index);
+          await deleteAllIndex(callCluster, `${index}-*`);
+          const policyExists = await getPolicyExists(callCluster, index);
           if (policyExists) {
-            await deletePolicy(callWithRequest, index);
+            await deletePolicy(callCluster, index);
           }
-          const templateExists = await getTemplateExists(callWithRequest, index);
+          const templateExists = await getTemplateExists(callCluster, index);
           if (templateExists) {
-            await deleteTemplate(callWithRequest, index);
+            await deleteTemplate(callCluster, index);
           }
           return { acknowledged: true };
         }
@@ -65,6 +70,10 @@ export const createDeleteIndexRoute = (services: LegacySetupServices): Hapi.Serv
   };
 };
 
-export const deleteIndexRoute = (services: LegacySetupServices) => {
-  services.route(createDeleteIndexRoute(services));
+export const deleteIndexRoute = (
+  route: LegacySetupServices['route'],
+  config: LegacySetupServices['config'],
+  getServices: LegacyGetScopedServices
+) => {
+  route(createDeleteIndexRoute(config, getServices));
 };

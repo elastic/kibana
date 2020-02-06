@@ -6,12 +6,16 @@
 
 import Hapi from 'hapi';
 import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '../../../../../common/constants';
+import { LegacyGetScopedServices } from '../../../../services';
 import { SignalsQueryRequest } from '../../signals/types';
 import { querySignalsSchema } from '../schemas/query_signals_index_schema';
 import { LegacySetupServices } from '../../../../plugin';
-import { transformError, getIndex, callWithRequestFactory } from '../utils';
+import { transformError, getIndex } from '../utils';
 
-export const querySignalsRouteDef = (services: LegacySetupServices): Hapi.ServerRoute => {
+export const querySignalsRouteDef = (
+  config: LegacySetupServices['config'],
+  getServices: LegacyGetScopedServices
+): Hapi.ServerRoute => {
   return {
     method: 'POST',
     path: DETECTION_ENGINE_QUERY_SIGNALS_URL,
@@ -26,11 +30,12 @@ export const querySignalsRouteDef = (services: LegacySetupServices): Hapi.Server
     },
     async handler(request: SignalsQueryRequest) {
       const { query, aggs, _source, track_total_hits, size } = request.payload;
-      const index = getIndex(request, services);
-      const callWithRequest = callWithRequestFactory(request, services);
+      const { callCluster, getSpaceId } = await getServices(request);
+
+      const index = getIndex(getSpaceId, config);
 
       try {
-        return callWithRequest('search', {
+        return callCluster('search', {
           index,
           body: { query, aggs, _source, track_total_hits, size },
         });
@@ -42,6 +47,10 @@ export const querySignalsRouteDef = (services: LegacySetupServices): Hapi.Server
   };
 };
 
-export const querySignalsRoute = (services: LegacySetupServices) => {
-  services.route(querySignalsRouteDef(services));
+export const querySignalsRoute = (
+  route: LegacySetupServices['route'],
+  config: LegacySetupServices['config'],
+  getServices: LegacyGetScopedServices
+) => {
+  route(querySignalsRouteDef(config, getServices));
 };

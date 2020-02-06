@@ -64,13 +64,13 @@ export class Plugin {
   public setup(core: CoreSetup, plugins: SetupPlugins, __legacy: ServerFacade) {
     this.logger.debug('Shim plugin setup');
 
-    this.services.setup(
-      core.elasticsearch.dataClient,
-      plugins.spaces.spacesService,
-      __legacy.config
-    );
+    this.services.setup(core.elasticsearch.dataClient, plugins.spaces.spacesService);
 
-    this.legacyInitRoutes = initRoutes(__legacy.route);
+    this.legacyInitRoutes = initRoutes(
+      __legacy.route,
+      __legacy.config,
+      plugins.encryptedSavedObjects?.usingEphemeralEncryptionKey ?? false
+    );
 
     plugins.features.registerFeature({
       id: this.name,

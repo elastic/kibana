@@ -6,13 +6,19 @@
 
 import Hapi from 'hapi';
 import { merge } from 'lodash/fp';
+
 import { DETECTION_ENGINE_PRIVILEGES_URL } from '../../../../../common/constants';
 import { RulesRequest } from '../../rules/types';
 import { LegacySetupServices } from '../../../../plugin';
-import { callWithRequestFactory, transformError, getIndex } from '../utils';
+import { LegacyGetScopedServices } from '../../../../services';
+import { transformError, getIndex } from '../utils';
 import { readPrivileges } from '../../privileges/read_privileges';
 
-export const createReadPrivilegesRulesRoute = (services: LegacySetupServices): Hapi.ServerRoute => {
+export const createReadPrivilegesRulesRoute = (
+  config: LegacySetupServices['config'],
+  usingEphemeralEncryptionKey: boolean,
+  getServices: LegacyGetScopedServices
+): Hapi.ServerRoute => {
   return {
     method: 'GET',
     path: DETECTION_ENGINE_PRIVILEGES_URL,
@@ -26,11 +32,10 @@ export const createReadPrivilegesRulesRoute = (services: LegacySetupServices): H
     },
     async handler(request: RulesRequest) {
       try {
-        const callWithRequest = callWithRequestFactory(request, services);
-        const index = getIndex(request, services);
-        const permissions = await readPrivileges(callWithRequest, index);
-        const usingEphemeralEncryptionKey =
-          services.encryptedSavedObjects?.usingEphemeralEncryptionKey ?? false;
+        const { callCluster, getSpaceId } = await getServices(request);
+
+        const index = getIndex(getSpaceId, config);
+        const permissions = await readPrivileges(callCluster, index);
         return merge(permissions, {
           is_authenticated: request?.auth?.isAuthenticated ?? false,
           has_encryption_key: !usingEphemeralEncryptionKey,
@@ -42,6 +47,11 @@ export const createReadPrivilegesRulesRoute = (services: LegacySetupServices): H
   };
 };
 
-export const readPrivilegesRoute = (services: LegacySetupServices): void => {
-  services.route(createReadPrivilegesRulesRoute(services));
+export const readPrivilegesRoute = (
+  route: LegacySetupServices['route'],
+  config: LegacySetupServices['config'],
+  usingEphemeralEncryptionKey: boolean,
+  getServices: LegacyGetScopedServices
+) => {
+  route(createReadPrivilegesRulesRoute(config, usingEphemeralEncryptionKey, getServices));
 };

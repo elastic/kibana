@@ -6,11 +6,10 @@
 
 import Boom from 'boom';
 import Hapi from 'hapi';
-import { chunk, isEmpty, isFunction } from 'lodash/fp';
+import { chunk, isEmpty } from 'lodash/fp';
 import { extname } from 'path';
 import uuid from 'uuid';
 
-import { KibanaRequest } from '../../../../../../../../../src/core/server';
 import { createPromiseFromStreams } from '../../../../../../../../../src/legacy/utils/streams';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { LegacySetupServices, RequestFacade } from '../../../../plugin';
@@ -18,16 +17,12 @@ import { createRules } from '../../rules/create_rules';
 import { ImportRulesRequest } from '../../rules/types';
 import { readRules } from '../../rules/read_rules';
 import { getIndexExists } from '../../index/get_index_exists';
-import {
-  callWithRequestFactory,
-  getIndex,
-  createBulkErrorObject,
-  ImportRuleResponse,
-} from '../utils';
+import { getIndex, createBulkErrorObject, ImportRuleResponse } from '../utils';
 import { createRulesStreamFromNdJson } from '../../rules/create_rules_stream_from_ndjson';
 import { ImportRuleAlertRest } from '../../types';
 import { updateRules } from '../../rules/update_rules';
 import { importRulesQuerySchema, importRulesPayloadSchema } from '../schemas/import_rules_schema';
+import { LegacyGetScopedServices } from '../../../../services';
 
 type PromiseFromStreams = ImportRuleAlertRest | Error;
 
@@ -39,14 +34,17 @@ type PromiseFromStreams = ImportRuleAlertRest | Error;
  */
 const CHUNK_PARSED_OBJECT_SIZE = 10;
 
-export const createImportRulesRoute = (services: LegacySetupServices): Hapi.ServerRoute => {
+export const createImportRulesRoute = (
+  config: LegacySetupServices['config'],
+  getServices: LegacyGetScopedServices
+): Hapi.ServerRoute => {
   return {
     method: 'POST',
     path: `${DETECTION_ENGINE_RULES_URL}/_import`,
     options: {
       tags: ['access:siem'],
       payload: {
-        maxBytes: services.config().get('savedObjects.maxImportPayloadBytes'),
+        maxBytes: config().get('savedObjects.maxImportPayloadBytes'),
         output: 'stream',
         allow: 'multipart/form-data',
       },
@@ -59,23 +57,25 @@ export const createImportRulesRoute = (services: LegacySetupServices): Hapi.Serv
       },
     },
     async handler(request: ImportRulesRequest & RequestFacade, headers) {
-      const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
-      const actionsClient = await services.plugins.actions.getActionsClientWithRequest(
-        KibanaRequest.from(request)
-      );
-      const savedObjectsClient = isFunction(request.getSavedObjectsClient)
-        ? request.getSavedObjectsClient()
-        : null;
-      if (!alertsClient || !savedObjectsClient) {
+      const {
+        actionsClient,
+        alertsClient,
+        callCluster,
+        getSpaceId,
+        savedObjectsClient,
+      } = await getServices(request);
+
+      if (!actionsClient || !alertsClient || !savedObjectsClient) {
         return headers.response().code(404);
       }
+
       const { filename } = request.payload.file.hapi;
       const fileExtension = extname(filename).toLowerCase();
       if (fileExtension !== '.ndjson') {
         return Boom.badRequest(`Invalid file extension ${fileExtension}`);
       }
 
-      const objectLimit = services.config().get<number>('savedObjects.maxImportExportSize');
+      const objectLimit = config().get<number>('savedObjects.maxImportExportSize');
       const readStream = createRulesStreamFromNdJson(request.payload.file, objectLimit);
       const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([readStream]);
 
@@ -149,9 +149,8 @@ export const createImportRulesRoute = (services: LegacySetupServices): Hapi.Serv
                   version,
                 } = parsedRule;
                 try {
-                  const finalIndex = getIndex(request, services);
-                  const callWithRequest = callWithRequestFactory(request, services);
-                  const indexExists = await getIndexExists(callWithRequest, finalIndex);
+                  const finalIndex = getIndex(getSpaceId, config);
+                  const indexExists = await getIndexExists(callCluster, finalIndex);
                   if (!indexExists) {
                     resolve(
                       createBulkErrorObject({
@@ -264,6 +263,10 @@ export const createImportRulesRoute = (services: LegacySetupServices): Hapi.Serv
   };
 };
 
-export const importRulesRoute = (services: LegacySetupServices): void => {
-  services.route(createImportRulesRoute(services));
+export const importRulesRoute = (
+  route: LegacySetupServices['route'],
+  config: LegacySetupServices['config'],
+  getServices: LegacyGetScopedServices
+): void => {
+  route(createImportRulesRoute(config, getServices));
 };

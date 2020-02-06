@@ -9,10 +9,14 @@ import Boom from 'boom';
 
 import { DETECTION_ENGINE_INDEX_URL } from '../../../../../common/constants';
 import { LegacySetupServices, RequestFacade } from '../../../../plugin';
-import { transformError, getIndex, callWithRequestFactory } from '../utils';
+import { LegacyGetScopedServices } from '../../../../services';
+import { transformError, getIndex } from '../utils';
 import { getIndexExists } from '../../index/get_index_exists';
 
-export const createReadIndexRoute = (services: LegacySetupServices): Hapi.ServerRoute => {
+export const createReadIndexRoute = (
+  config: LegacySetupServices['config'],
+  getServices: LegacyGetScopedServices
+): Hapi.ServerRoute => {
   return {
     method: 'GET',
     path: DETECTION_ENGINE_INDEX_URL,
@@ -26,9 +30,11 @@ export const createReadIndexRoute = (services: LegacySetupServices): Hapi.Server
     },
     async handler(request: RequestFacade, headers) {
       try {
-        const index = getIndex(request, services);
-        const callWithRequest = callWithRequestFactory(request, services);
-        const indexExists = await getIndexExists(callWithRequest, index);
+        const { callCluster, getSpaceId } = await getServices(request);
+
+        const index = getIndex(getSpaceId, config);
+        const indexExists = await getIndexExists(callCluster, index);
+
         if (indexExists) {
           // head request is used for if you want to get if the index exists
           // or not and it will return a content-length: 0 along with either a 200 or 404
@@ -52,6 +58,10 @@ export const createReadIndexRoute = (services: LegacySetupServices): Hapi.Server
   };
 };
 
-export const readIndexRoute = (services: LegacySetupServices) => {
-  services.route(createReadIndexRoute(services));
+export const readIndexRoute = (
+  route: LegacySetupServices['route'],
+  config: LegacySetupServices['config'],
+  getServices: LegacyGetScopedServices
+) => {
+  route(createReadIndexRoute(config, getServices));
 };

@@ -5,22 +5,24 @@
  */
 
 import Hapi from 'hapi';
-import { isFunction } from 'lodash/fp';
 import Boom from 'boom';
 
 import { DETECTION_ENGINE_PREPACKAGED_URL } from '../../../../../common/constants';
 import { LegacySetupServices, RequestFacade } from '../../../../plugin';
+import { LegacyGetScopedServices } from '../../../../services';
 import { getIndexExists } from '../../index/get_index_exists';
-import { callWithRequestFactory, getIndex, transformError } from '../utils';
+import { getIndex, transformError } from '../utils';
 import { getPrepackagedRules } from '../../rules/get_prepackaged_rules';
 import { installPrepackagedRules } from '../../rules/install_prepacked_rules';
 import { updatePrepackagedRules } from '../../rules/update_prepacked_rules';
 import { getRulesToInstall } from '../../rules/get_rules_to_install';
 import { getRulesToUpdate } from '../../rules/get_rules_to_update';
 import { getExistingPrepackagedRules } from '../../rules/get_existing_prepackaged_rules';
-import { KibanaRequest } from '../../../../../../../../../src/core/server';
 
-export const createAddPrepackedRulesRoute = (services: LegacySetupServices): Hapi.ServerRoute => {
+export const createAddPrepackedRulesRoute = (
+  config: LegacySetupServices['config'],
+  getServices: LegacyGetScopedServices
+): Hapi.ServerRoute => {
   return {
     method: 'PUT',
     path: DETECTION_ENGINE_PREPACKAGED_URL,
@@ -33,28 +35,28 @@ export const createAddPrepackedRulesRoute = (services: LegacySetupServices): Hap
       },
     },
     async handler(request: RequestFacade, headers) {
-      const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
-      const actionsClient = await services.plugins.actions.getActionsClientWithRequest(
-        KibanaRequest.from(request)
-      );
-      const savedObjectsClient = isFunction(request.getSavedObjectsClient)
-        ? request.getSavedObjectsClient()
-        : null;
-      if (!alertsClient || !savedObjectsClient) {
-        return headers.response().code(404);
-      }
-
       try {
-        const callWithRequest = callWithRequestFactory(request, services);
+        const {
+          actionsClient,
+          alertsClient,
+          callCluster,
+          getSpaceId,
+          savedObjectsClient,
+        } = await getServices(request);
+
+        if (!actionsClient || !alertsClient || !savedObjectsClient) {
+          return headers.response().code(404);
+        }
+
         const rulesFromFileSystem = getPrepackagedRules();
 
         const prepackagedRules = await getExistingPrepackagedRules({ alertsClient });
         const rulesToInstall = getRulesToInstall(rulesFromFileSystem, prepackagedRules);
         const rulesToUpdate = getRulesToUpdate(rulesFromFileSystem, prepackagedRules);
 
-        const spaceIndex = getIndex(request, services);
+        const spaceIndex = getIndex(getSpaceId, config);
         if (rulesToInstall.length !== 0 || rulesToUpdate.length !== 0) {
-          const spaceIndexExists = await getIndexExists(callWithRequest, spaceIndex);
+          const spaceIndexExists = await getIndexExists(callCluster, spaceIndex);
           if (!spaceIndexExists) {
             return Boom.badRequest(
               `Pre-packaged rules cannot be installed until the space index is created: ${spaceIndex}`
@@ -82,6 +84,10 @@ export const createAddPrepackedRulesRoute = (services: LegacySetupServices): Hap
   };
 };
 
-export const addPrepackedRulesRoute = (services: LegacySetupServices): void => {
-  services.route(createAddPrepackedRulesRoute(services));
+export const addPrepackedRulesRoute = (
+  route: LegacySetupServices['route'],
+  config: LegacySetupServices['config'],
+  getServices: LegacyGetScopedServices
+): void => {
+  route(createAddPrepackedRulesRoute(config, getServices));
 };

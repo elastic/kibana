@@ -13,7 +13,7 @@ import {
 } from '../../../../../src/core/server';
 import { ActionsClient } from '../../../../plugins/actions/server';
 import { AlertsClient } from '../../../../legacy/plugins/alerting/server';
-import { CoreStart, LegacySetupServices, StartPlugins, SetupPlugins } from './plugin';
+import { CoreStart, StartPlugins, SetupPlugins } from './plugin';
 
 export interface SiemServices {
   actionsClient?: ActionsClient;
@@ -23,7 +23,6 @@ export interface SiemServices {
 }
 interface LegacySiemServices {
   alertsClient?: AlertsClient;
-  config: LegacySetupServices['config'];
 }
 export type ScopedServices = SiemServices & LegacySiemServices;
 export type LegacyGetScopedServices = (request: LegacyRequest) => Promise<ScopedServices>;
@@ -31,18 +30,15 @@ export type LegacyGetScopedServices = (request: LegacyRequest) => Promise<Scoped
 export class Services {
   private actions?: StartPlugins['actions'];
   private clusterClient?: IClusterClient;
-  private config?: LegacySetupServices['config'];
   private savedObjects?: CoreStart['savedObjects'];
   private spacesService?: SetupPlugins['spaces']['spacesService'];
 
   public setup(
     clusterClient: IClusterClient,
-    spacesService: SetupPlugins['spaces']['spacesService'],
-    config: LegacySetupServices['config']
+    spacesService: SetupPlugins['spaces']['spacesService']
   ) {
     this.clusterClient = clusterClient;
     this.spacesService = spacesService;
-    this.config = config;
   }
 
   public start(savedObjects: CoreStart['savedObjects'], actions: StartPlugins['actions']) {
@@ -62,7 +58,6 @@ export class Services {
         alertsClient: request.getAlertsClient?.(),
         actionsClient: await this.actions?.getActionsClientWithRequest?.(kibanaRequest),
         callCluster: this.clusterClient!.asScoped(kibanaRequest).callAsCurrentUser,
-        config: this.config!,
         getSpaceId: () => this.spacesService?.getSpaceId?.(kibanaRequest),
         savedObjectsClient: this.savedObjects!.getScopedClient(kibanaRequest),
       };

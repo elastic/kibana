@@ -5,21 +5,23 @@
  */
 
 import Hapi from 'hapi';
-import { isFunction } from 'lodash/fp';
+
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import {
   BulkUpdateRulesRequest,
   IRuleSavedAttributesSavedObjectAttributes,
 } from '../../rules/types';
 import { LegacySetupServices } from '../../../../plugin';
+import { LegacyGetScopedServices } from '../../../../services';
 import { transformOrBulkError, getIdBulkError } from './utils';
 import { transformBulkError } from '../utils';
 import { updateRulesBulkSchema } from '../schemas/update_rules_bulk_schema';
 import { updateRules } from '../../rules/update_rules';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
-import { KibanaRequest } from '../../../../../../../../../src/core/server';
 
-export const createUpdateRulesBulkRoute = (services: LegacySetupServices): Hapi.ServerRoute => {
+export const createUpdateRulesBulkRoute = (
+  getServices: LegacyGetScopedServices
+): Hapi.ServerRoute => {
   return {
     method: 'PUT',
     path: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
@@ -33,14 +35,9 @@ export const createUpdateRulesBulkRoute = (services: LegacySetupServices): Hapi.
       },
     },
     async handler(request: BulkUpdateRulesRequest, headers) {
-      const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
-      const actionsClient = await services.plugins.actions.getActionsClientWithRequest(
-        KibanaRequest.from(request)
-      );
-      const savedObjectsClient = isFunction(request.getSavedObjectsClient)
-        ? request.getSavedObjectsClient()
-        : null;
-      if (!alertsClient || !savedObjectsClient) {
+      const { actionsClient, alertsClient, savedObjectsClient } = await getServices(request);
+
+      if (!actionsClient || !alertsClient || !savedObjectsClient) {
         return headers.response().code(404);
       }
 
@@ -132,6 +129,9 @@ export const createUpdateRulesBulkRoute = (services: LegacySetupServices): Hapi.
   };
 };
 
-export const updateRulesBulkRoute = (services: LegacySetupServices): void => {
-  services.route(createUpdateRulesBulkRoute(services));
+export const updateRulesBulkRoute = (
+  route: LegacySetupServices['route'],
+  getServices: LegacyGetScopedServices
+): void => {
+  route(createUpdateRulesBulkRoute(getServices));
 };
