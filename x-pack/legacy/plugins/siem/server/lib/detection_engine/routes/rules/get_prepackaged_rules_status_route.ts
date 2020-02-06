@@ -13,6 +13,7 @@ import { transformError } from '../utils';
 import { getPrepackagedRules } from '../../rules/get_prepackaged_rules';
 import { getRulesToInstall } from '../../rules/get_rules_to_install';
 import { getRulesToUpdate } from '../../rules/get_rules_to_update';
+import { findRules } from '../../rules/find_rules';
 import { getExistingPrepackagedRules } from '../../rules/get_existing_prepackaged_rules';
 
 export const createGetPrepackagedRulesStatusRoute = (): Hapi.ServerRoute => {
@@ -29,20 +30,26 @@ export const createGetPrepackagedRulesStatusRoute = (): Hapi.ServerRoute => {
     },
     async handler(request: RequestFacade, headers) {
       const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
-      const actionsClient = isFunction(request.getActionsClient)
-        ? request.getActionsClient()
-        : null;
 
-      if (!alertsClient || !actionsClient) {
+      if (!alertsClient) {
         return headers.response().code(404);
       }
 
       try {
         const rulesFromFileSystem = getPrepackagedRules();
+        const customRules = await findRules({
+          alertsClient,
+          perPage: 1,
+          page: 1,
+          sortField: 'enabled',
+          sortOrder: 'desc',
+          filter: 'alert.attributes.tags:"__internal_immutable:false"',
+        });
         const prepackagedRules = await getExistingPrepackagedRules({ alertsClient });
         const rulesToInstall = getRulesToInstall(rulesFromFileSystem, prepackagedRules);
         const rulesToUpdate = getRulesToUpdate(rulesFromFileSystem, prepackagedRules);
         return {
+          rules_custom_installed: customRules.total,
           rules_installed: prepackagedRules.length,
           rules_not_installed: rulesToInstall.length,
           rules_not_updated: rulesToUpdate.length,

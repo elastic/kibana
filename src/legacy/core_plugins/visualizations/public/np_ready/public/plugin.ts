@@ -38,6 +38,12 @@ import { visualization as visualizationFunction } from './expressions/visualizat
 import { visualization as visualizationRenderer } from './expressions/visualization_renderer';
 import { DataPublicPluginStart } from '../../../../../../plugins/data/public';
 import { UsageCollectionSetup } from '../../../../../../plugins/usage_collection/public';
+import {
+  createSavedVisLoader,
+  SavedObjectKibanaServicesWithVisualizations,
+} from '../../saved_visualizations';
+import { SavedVisualizations } from '../../../../kibana/public/visualize/np_ready/types';
+import { showNewVisModal } from './wizard';
 /**
  * Interface for this plugin's returned setup/start contracts.
  *
@@ -47,9 +53,10 @@ export interface VisualizationsSetup {
   types: TypesSetup;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface VisualizationsStart {
   types: TypesStart;
+  getSavedVisualizationsLoader: () => SavedVisualizations;
+  showNewVisModal: typeof showNewVisModal;
 }
 
 export interface VisualizationsSetupDeps {
@@ -79,20 +86,22 @@ export class VisualizationsPlugin
       VisualizationsStartDeps
     > {
   private readonly types: TypesService = new TypesService();
+  private savedVisualizations?: SavedVisualizations;
+  private savedVisualizationDependencies?: SavedObjectKibanaServicesWithVisualizations;
 
   constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(
     core: CoreSetup,
     { expressions, embeddable, usageCollection }: VisualizationsSetupDeps
-  ) {
+  ): VisualizationsSetup {
     setUISettings(core.uiSettings);
     setUsageCollector(usageCollection);
 
     expressions.registerFunction(visualizationFunction);
     expressions.registerRenderer(visualizationRenderer);
 
-    const embeddableFactory = new VisualizeEmbeddableFactory();
+    const embeddableFactory = new VisualizeEmbeddableFactory(this.getSavedVisualizationsLoader);
     embeddable.registerEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, embeddableFactory);
 
     return {
@@ -100,7 +109,7 @@ export class VisualizationsPlugin
     };
   }
 
-  public start(core: CoreStart, { data }: VisualizationsStartDeps) {
+  public start(core: CoreStart, { data }: VisualizationsStartDeps): VisualizationsStart {
     const types = this.types.start();
     setI18n(core.i18n);
     setTypes(types);
@@ -110,12 +119,29 @@ export class VisualizationsPlugin
     setIndexPatterns(data.indexPatterns);
     setFilterManager(data.query.filterManager);
 
+    this.savedVisualizationDependencies = {
+      savedObjectsClient: core.savedObjects.client,
+      indexPatterns: data.indexPatterns,
+      chrome: core.chrome,
+      overlays: core.overlays,
+      visualizationTypes: types,
+    };
+
     return {
       types,
+      getSavedVisualizationsLoader: () => this.getSavedVisualizationsLoader(),
+      showNewVisModal,
     };
   }
 
   public stop() {
     this.types.stop();
   }
+
+  private getSavedVisualizationsLoader = () => {
+    if (!this.savedVisualizations) {
+      this.savedVisualizations = createSavedVisLoader(this.savedVisualizationDependencies!);
+    }
+    return this.savedVisualizations;
+  };
 }

@@ -15,6 +15,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
     'timePicker',
     'security',
     'spaceSelector',
+    'settings',
   ]);
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
@@ -49,6 +50,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });
+        await PageObjects.settings.setNavType('individual');
         const navLinks = (await appsMenu.readLinks()).map(link => link.text);
         expect(navLinks).to.contain('Discover');
       });

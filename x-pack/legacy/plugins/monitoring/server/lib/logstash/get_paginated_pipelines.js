@@ -7,7 +7,6 @@
 import { get } from 'lodash';
 import { filter } from '../pagination/filter';
 import { getLogstashPipelineIds } from './get_pipeline_ids';
-import { handleGetPipelinesResponse } from './get_pipelines';
 import { sortPipelines } from './sort_pipelines';
 import { paginate } from '../pagination/paginate';
 import { getMetrics } from '../details/get_metrics';
@@ -21,7 +20,7 @@ import { getMetrics } from '../details/get_metrics';
  * and returns that so the caller can perform their normal call to get the time-series data.
  *
  * @param {*} req - Server request object
- * @param {*} lsIndexPattern - The index pattern to search against (`.monitoring-logstash-*,monitoring-logstash-*`)
+ * @param {*} lsIndexPattern - The index pattern to search against (`.monitoring-logstash-*`)
  * @param {*} uuids - The optional `clusterUuid` and `logstashUuid` to filter the results from
  * @param {*} metricSet - The array of metrics that are sortable in the UI
  * @param {*} pagination - ({ index, size })
@@ -38,7 +37,7 @@ export async function getPaginatedPipelines(
   queryText
 ) {
   const config = req.server.config();
-  const size = config.get('xpack.monitoring.max_bucket_size');
+  const size = config.get('monitoring.ui.max_bucket_size');
   const pipelines = await getLogstashPipelineIds(
     req,
     lsIndexPattern,
@@ -51,19 +50,33 @@ export async function getPaginatedPipelines(
   // the necessary sort - we only need the last bucket of data so we
   // fetch the last two buckets of data (to ensure we have a single full bucekt),
   // then return the value from that last bucket
-  const metricSeriesData = await getMetrics(
-    req,
-    lsIndexPattern,
-    metricSet,
-    [],
-    { pageOfPipelines: pipelines },
-    2
+  const metricSeriesData = Object.values(
+    await Promise.all(
+      pipelines.map(pipeline => {
+        return new Promise(async resolve => {
+          const data = await getMetrics(
+            req,
+            lsIndexPattern,
+            metricSet,
+            [],
+            {
+              pipeline,
+            },
+            2
+          );
+
+          resolve({
+            id: pipeline.id,
+            metrics: Object.keys(data).reduce((accum, metricName) => {
+              accum[metricName] = data[metricName][0];
+              return accum;
+            }, {}),
+          });
+        });
+      })
+    )
   );
-  const pipelineAggregationsData = handleGetPipelinesResponse(
-    metricSeriesData,
-    pipelines.map(p => p.id)
-  );
-  for (const pipelineAggregationData of pipelineAggregationsData) {
+  for (const pipelineAggregationData of metricSeriesData) {
     for (const pipeline of pipelines) {
       if (pipelineAggregationData.id === pipeline.id) {
         for (const metric of metricSet) {

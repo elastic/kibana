@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import migrations from './migrations';
 import mappings from './mappings.json';
 import { LegacyPluginInitializer } from '../../../../src/legacy/plugin_discovery/types';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
 
 export const graph: LegacyPluginInitializer = kibana => {
   return new kibana.Plugin({
@@ -25,6 +26,7 @@ export const graph: LegacyPluginInitializer = kibana => {
         icon: 'plugins/graph/icon.png',
         euiIconType: 'graphApp',
         main: 'plugins/graph/index',
+        category: DEFAULT_APP_CATEGORIES.analyze,
       },
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       mappings,

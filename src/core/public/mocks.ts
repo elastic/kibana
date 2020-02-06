@@ -74,6 +74,7 @@ function createCoreStartMock({ basePath = '' } = {}) {
     injectedMetadata: {
       getInjectedVar: injectedMetadataServiceMock.createStartContract().getInjectedVar,
     },
+    fatalErrors: fatalErrorsServiceMock.createStartContract(),
   };
 
   return mock;

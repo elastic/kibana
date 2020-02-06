@@ -1,0 +1,48 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`PingHistogram component renders the component without errors 1`] = `
+<Fragment>
+  <EuiTitle
+    size="xs"
+  >
+    <h5>
+      <FormattedMessage
+        defaultMessage="Pings over time"
+        id="xpack.uptime.snapshot.pingsOverTimeTitle"
+        values={Object {}}
+      />
+    </h5>
+  </EuiTitle>
+  <EuiPanel
+    paddingSize="s"
+    style={
+      Object {
+        "height": 170,
+      }
+    }
+  >
+    <EuiEmptyPrompt
+      body={
+        <p>
+          <FormattedMessage
+            defaultMessage="Sorry, there is no data available for the histogram"
+            id="xpack.uptime.snapshot.noDataDescription"
+            values={Object {}}
+          />
+        </p>
+      }
+      title={
+        <EuiTitle>
+          <h5>
+            <FormattedMessage
+              defaultMessage="No histogram data available"
+              id="xpack.uptime.snapshot.noDataTitle"
+              values={Object {}}
+            />
+          </h5>
+        </EuiTitle>
+      }
+    />
+  </EuiPanel>
+</Fragment>
+`;

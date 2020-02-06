@@ -151,5 +151,6 @@ export function createPluginStartContext<
     injectedMetadata: {
       getInjectedVar: deps.injectedMetadata.getInjectedVar,
     },
+    fatalErrors: deps.fatalErrors,
   };
 }

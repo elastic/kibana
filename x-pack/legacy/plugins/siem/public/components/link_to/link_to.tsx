@@ -77,16 +77,16 @@ export const LinkToPage = React.memo<LinkToPageProps>(({ match }) => (
     />
     <Route
       component={RedirectToCreateRulePage}
-      path={`${match.url}/:pageName(${SiemPageName.detections})/rules/create-rule`}
+      path={`${match.url}/:pageName(${SiemPageName.detections})/rules/create`}
     />
     <Route
       component={RedirectToRuleDetailsPage}
       exact
-      path={`${match.url}/:pageName(${SiemPageName.detections})/rules/rule-details`}
+      path={`${match.url}/:pageName(${SiemPageName.detections})/rules/id/:detailName`}
     />
     <Route
       component={RedirectToEditRulePage}
-      path={`${match.url}/:pageName(${SiemPageName.detections})/rules/rule-details/edit-rule`}
+      path={`${match.url}/:pageName(${SiemPageName.detections})/rules/id/:detailName/edit`}
     />
     <Route
       component={RedirectToTimelinesPage}

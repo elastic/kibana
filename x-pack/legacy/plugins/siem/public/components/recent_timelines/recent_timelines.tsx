@@ -4,13 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiText,
+  EuiToolTip,
+  EuiButtonIcon,
+} from '@elastic/eui';
 import React from 'react';
 
 import { RecentTimelineHeader } from './header';
 import { OnOpenTimeline, OpenTimelineResult } from '../open_timeline/types';
+import { WithHoverActions } from '../with_hover_actions';
 
 import { RecentTimelineCounts } from './counts';
+import * as i18n from './translations';
 
 export interface MeApiResponse {
   username: string;
@@ -34,19 +43,48 @@ export const RecentTimelines = React.memo<{
   return (
     <>
       {timelines.map((t, i) => (
-        <div key={`${t.savedObjectId}-${i}`}>
-          <RecentTimelineHeader onOpenTimeline={onOpenTimeline} timeline={t} />
-          <RecentTimelineCounts timeline={t} />
-          {t.description && t.description.length && (
-            <>
-              <EuiSpacer size="s" />
-              <EuiText color="subdued" size="xs">
-                {t.description}
-              </EuiText>
-            </>
-          )}
-          {i !== timelines.length - 1 && <EuiSpacer size="l" />}
-        </div>
+        <React.Fragment key={`${t.savedObjectId}-${i}`}>
+          <WithHoverActions
+            render={showHoverContent => (
+              <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
+                <EuiFlexItem grow={false}>
+                  <RecentTimelineHeader onOpenTimeline={onOpenTimeline} timeline={t} />
+                  <RecentTimelineCounts timeline={t} />
+                  {t.description && t.description.length && (
+                    <>
+                      <EuiSpacer size="s" />
+                      <EuiText color="subdued" size="xs">
+                        {t.description}
+                      </EuiText>
+                    </>
+                  )}
+                </EuiFlexItem>
+
+                {showHoverContent && (
+                  <EuiFlexItem grow={false}>
+                    <EuiToolTip content={i18n.OPEN_AS_DUPLICATE}>
+                      <EuiButtonIcon
+                        aria-label={i18n.OPEN_AS_DUPLICATE}
+                        data-test-subj="open-duplicate"
+                        isDisabled={t.savedObjectId == null}
+                        iconSize="s"
+                        iconType="copy"
+                        onClick={() =>
+                          onOpenTimeline({
+                            duplicate: true,
+                            timelineId: `${t.savedObjectId}`,
+                          })
+                        }
+                        size="s"
+                      />
+                    </EuiToolTip>
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
+            )}
+          />
+          <>{i !== timelines.length - 1 && <EuiSpacer size="l" />}</>
+        </React.Fragment>
       ))}
     </>
   );

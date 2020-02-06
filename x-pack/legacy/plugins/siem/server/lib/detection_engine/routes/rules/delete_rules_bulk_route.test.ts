@@ -6,9 +6,7 @@
 
 import {
   createMockServer,
-  createMockServerWithoutActionClientDecoration,
   createMockServerWithoutAlertClientDecoration,
-  createMockServerWithoutActionOrAlertClientDecoration,
 } from '../__mocks__/_mock_server';
 
 import { ServerInjectOptions } from 'hapi';
@@ -97,26 +95,10 @@ describe('delete_rules', () => {
       expect(parsed).toEqual(expected);
     });
 
-    test('returns 404 if actionClient is not available on the route', async () => {
-      const { serverWithoutActionClient } = createMockServerWithoutActionClientDecoration();
-      deleteRulesBulkRoute(serverWithoutActionClient);
-      const { statusCode } = await serverWithoutActionClient.inject(getDeleteBulkRequest());
-      expect(statusCode).toBe(404);
-    });
-
     test('returns 404 if alertClient is not available on the route', async () => {
       const { serverWithoutAlertClient } = createMockServerWithoutAlertClientDecoration();
       deleteRulesBulkRoute(serverWithoutAlertClient);
       const { statusCode } = await serverWithoutAlertClient.inject(getDeleteBulkRequest());
-      expect(statusCode).toBe(404);
-    });
-
-    test('returns 404 if alertClient and actionClient are both not available on the route', async () => {
-      const {
-        serverWithoutActionOrAlertClient,
-      } = createMockServerWithoutActionOrAlertClientDecoration();
-      deleteRulesBulkRoute(serverWithoutActionOrAlertClient);
-      const { statusCode } = await serverWithoutActionOrAlertClient.inject(getDeleteBulkRequest());
       expect(statusCode).toBe(404);
     });
   });

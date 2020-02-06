@@ -20,7 +20,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { VisOptionsProps } from '../legacy_imports';
+import { VisOptionsProps } from '../../../vis_default_editor/public';
 import { PointSeriesOptions, MetricsAxisOptions } from '../components/options';
 import { ValidationWrapper } from '../components/common';
 import { BasicVislibParams } from '../types';
@@ -29,7 +29,7 @@ function getAreaOptionTabs() {
   return [
     {
       name: 'advanced',
-      title: i18n.translate('kbnVislibVisTypes.area.tabs.metricsAxesTitle', {
+      title: i18n.translate('visTypeVislib.area.tabs.metricsAxesTitle', {
         defaultMessage: 'Metrics & axes',
       }),
       editor: (props: VisOptionsProps<BasicVislibParams>) => (
@@ -38,7 +38,7 @@ function getAreaOptionTabs() {
     },
     {
       name: 'options',
-      title: i18n.translate('kbnVislibVisTypes.area.tabs.panelSettingsTitle', {
+      title: i18n.translate('visTypeVislib.area.tabs.panelSettingsTitle', {
         defaultMessage: 'Panel settings',
       }),
       editor: (props: VisOptionsProps<BasicVislibParams>) => (
@@ -48,7 +48,7 @@ function getAreaOptionTabs() {
   ];
 }
 
-const countLabel = i18n.translate('kbnVislibVisTypes.area.countText', {
+const countLabel = i18n.translate('visTypeVislib.area.countText', {
   defaultMessage: 'Count',
 });
 

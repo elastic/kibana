@@ -23,7 +23,7 @@ export function getMlJobs(req, esIndexPattern) {
   checkParam(esIndexPattern, 'esIndexPattern in getMlJobs');
 
   const config = req.server.config();
-  const maxBucketSize = config.get('xpack.monitoring.max_bucket_size');
+  const maxBucketSize = config.get('monitoring.ui.max_bucket_size');
   const start = req.payload.timeRange.min; // no wrapping in moment :)
   const end = req.payload.timeRange.max;
   const clusterUuid = req.params.clusterUuid;

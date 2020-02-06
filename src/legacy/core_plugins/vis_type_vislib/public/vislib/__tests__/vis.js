@@ -19,19 +19,15 @@
 
 import _ from 'lodash';
 import $ from 'jquery';
-import ngMock from 'ng_mock';
-
 import expect from '@kbn/expect';
-import 'ui/persisted_state';
 
 import series from './lib/fixtures/mock_data/date_histogram/_series';
 import columns from './lib/fixtures/mock_data/date_histogram/_columns';
 import rows from './lib/fixtures/mock_data/date_histogram/_rows';
 import stackedSeries from './lib/fixtures/mock_data/date_histogram/_stacked_series';
-import getFixturesVislibVisFixtureProvider from './lib/fixtures/_vis_fixture';
+import { getVis, getMockUiState } from './lib/fixtures/_vis_fixture';
 
 const dataArray = [series, columns, rows, stackedSeries];
-
 const names = ['series', 'columns', 'rows', 'stackedSeries'];
 
 dataArray.forEach(function(data, i) {
@@ -39,19 +35,15 @@ dataArray.forEach(function(data, i) {
     const beforeEvent = 'click';
     const afterEvent = 'brush';
     let vis;
-    let persistedState;
+    let mockUiState;
     let secondVis;
     let numberOfCharts;
 
-    beforeEach(ngMock.module('kibana'));
-    beforeEach(
-      ngMock.inject(function(Private, $injector) {
-        const getVis = getFixturesVislibVisFixtureProvider(Private);
-        vis = getVis();
-        persistedState = new ($injector.get('PersistedState'))();
-        secondVis = getVis();
-      })
-    );
+    beforeEach(() => {
+      vis = getVis();
+      secondVis = getVis();
+      mockUiState = getMockUiState();
+    });
 
     afterEach(function() {
       vis.destroy();
@@ -60,7 +52,7 @@ dataArray.forEach(function(data, i) {
 
     describe('render Method', function() {
       beforeEach(function() {
-        vis.render(data, persistedState);
+        vis.render(data, mockUiState);
         numberOfCharts = vis.handler.charts.length;
       });
 
@@ -78,7 +70,7 @@ dataArray.forEach(function(data, i) {
 
       it('should throw an error if no data is provided', function() {
         expect(function() {
-          vis.render(null, persistedState);
+          vis.render(null, mockUiState);
         }).to.throwError();
       });
     });
@@ -91,8 +83,8 @@ dataArray.forEach(function(data, i) {
 
     describe('destroy Method', function() {
       beforeEach(function() {
-        vis.render(data, persistedState);
-        secondVis.render(data, persistedState);
+        vis.render(data, mockUiState);
+        secondVis.render(data, mockUiState);
         secondVis.destroy();
       });
 
@@ -107,7 +99,7 @@ dataArray.forEach(function(data, i) {
 
     describe('set Method', function() {
       beforeEach(function() {
-        vis.render(data, persistedState);
+        vis.render(data, mockUiState);
         vis.set('addLegend', false);
         vis.set('offset', 'wiggle');
       });
@@ -120,7 +112,7 @@ dataArray.forEach(function(data, i) {
 
     describe('get Method', function() {
       beforeEach(function() {
-        vis.render(data, persistedState);
+        vis.render(data, mockUiState);
       });
 
       it('should get attribute values', function() {
@@ -142,7 +134,7 @@ dataArray.forEach(function(data, i) {
         });
 
         // Render chart
-        vis.render(data, persistedState);
+        vis.render(data, mockUiState);
 
         // Add event after charts have rendered
         listeners.forEach(function(listener) {
@@ -196,7 +188,7 @@ dataArray.forEach(function(data, i) {
         vis.off(beforeEvent, listener1);
 
         // Render chart
-        vis.render(data, persistedState);
+        vis.render(data, mockUiState);
 
         // Add event after charts have rendered
         listeners.forEach(function(listener) {

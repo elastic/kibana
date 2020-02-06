@@ -67,6 +67,7 @@ export type LogEntriesStateParams = {
 
 export interface LogEntriesCallbacks {
   fetchNewerEntries: () => Promise<TimeKey | null | undefined>;
+  checkForNewEntries: () => Promise<void>;
 }
 export const logEntriesInitialCallbacks = {
   fetchNewerEntries: async () => {},
@@ -231,7 +232,7 @@ const useFetchEntriesEffect = (
   useEffect(fetchMoreEntriesEffect, fetchMoreEntriesEffectDependencies);
   useEffect(streamEntriesEffect, streamEntriesEffectDependencies);
 
-  return { fetchNewerEntries };
+  return { fetchNewerEntries, checkForNewEntries: runFetchNewEntriesRequest };
 };
 
 export const useLogEntriesState: (
@@ -239,8 +240,8 @@ export const useLogEntriesState: (
 ) => [LogEntriesStateParams, LogEntriesCallbacks] = props => {
   const [state, dispatch] = useReducer(logEntriesStateReducer, logEntriesInitialState);
 
-  const { fetchNewerEntries } = useFetchEntriesEffect(state, dispatch, props);
-  const callbacks = { fetchNewerEntries };
+  const { fetchNewerEntries, checkForNewEntries } = useFetchEntriesEffect(state, dispatch, props);
+  const callbacks = { fetchNewerEntries, checkForNewEntries };
 
   return [state, callbacks];
 };

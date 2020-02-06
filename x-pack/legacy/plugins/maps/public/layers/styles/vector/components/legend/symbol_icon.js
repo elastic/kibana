@@ -76,7 +76,23 @@ export class SymbolIcon extends Component {
       return null;
     }
 
-    return <img width="16px" src={this.state.imgDataUrl} alt={this.props.symbolId} />;
+    const {
+      symbolId, // eslint-disable-line no-unused-vars
+      fill, // eslint-disable-line no-unused-vars
+      stroke, // eslint-disable-line no-unused-vars
+      strokeWidth, // eslint-disable-line no-unused-vars
+      ...rest
+    } = this.props;
+
+    return (
+      <img
+        width="16px"
+        height="18px"
+        src={this.state.imgDataUrl}
+        alt={this.props.symbolId}
+        {...rest}
+      />
+    );
   }
 }
 

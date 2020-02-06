@@ -6,23 +6,25 @@
 
 import { notFound, notImplemented } from 'boom';
 import { get } from 'lodash';
-import { PLUGIN_ID, CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../../../common/constants';
-import { cryptoFactory, LevelLogger } from '../../../../server/lib';
+import { ElasticsearchServiceSetup } from 'kibana/server';
+import { CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../../../common/constants';
+import { cryptoFactory } from '../../../../server/lib';
 import {
   CreateJobFactory,
   ImmediateCreateJobFn,
-  ServerFacade,
+  Logger,
   RequestFacade,
+  ServerFacade,
 } from '../../../../types';
 import {
+  JobDocPayloadPanelCsv,
+  JobParamsPanelCsv,
   SavedObject,
   SavedObjectServiceError,
   SavedSearchObjectAttributesJSON,
   SearchPanel,
   TimeRangeParams,
   VisObjectAttributesJSON,
-  JobDocPayloadPanelCsv,
-  JobParamsPanelCsv,
 } from '../../types';
 import { createJobSearch } from './create_job_search';
 
@@ -34,13 +36,13 @@ interface VisData {
 
 export const createJobFactory: CreateJobFactory<ImmediateCreateJobFn<
   JobParamsPanelCsv
->> = function createJobFactoryFn(server: ServerFacade) {
+>> = function createJobFactoryFn(
+  server: ServerFacade,
+  elasticsearch: ElasticsearchServiceSetup,
+  parentLogger: Logger
+) {
   const crypto = cryptoFactory(server);
-  const logger = LevelLogger.createForServer(server, [
-    PLUGIN_ID,
-    CSV_FROM_SAVEDOBJECT_JOB_TYPE,
-    'create-job',
-  ]);
+  const logger = parentLogger.clone([CSV_FROM_SAVEDOBJECT_JOB_TYPE, 'create-job']);
 
   return async function createJob(
     jobParams: JobParamsPanelCsv,

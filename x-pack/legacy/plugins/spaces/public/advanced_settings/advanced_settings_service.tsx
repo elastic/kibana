@@ -4,25 +4,29 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { PAGE_TITLE_COMPONENT, PAGE_SUBTITLE_COMPONENT } from 'ui/management';
 import { Space } from '../../common/model/space';
 import { AdvancedSettingsTitle, AdvancedSettingsSubtitle } from './components';
+import { AdvancedSettingsSetup } from '../../../../../../src/plugins/advanced_settings/public';
 
 interface SetupDeps {
   getActiveSpace: () => Promise<Space>;
-  registerSettingsComponent: (
-    id: string,
-    component: string | React.FC<any>,
-    allowOverride: boolean
-  ) => void;
+  componentRegistry: AdvancedSettingsSetup['component'];
 }
 
 export class AdvancedSettingsService {
-  public setup({ getActiveSpace, registerSettingsComponent }: SetupDeps) {
+  public setup({ getActiveSpace, componentRegistry }: SetupDeps) {
     const PageTitle = () => <AdvancedSettingsTitle getActiveSpace={getActiveSpace} />;
     const SubTitle = () => <AdvancedSettingsSubtitle getActiveSpace={getActiveSpace} />;
 
-    registerSettingsComponent(PAGE_TITLE_COMPONENT, PageTitle, true);
-    registerSettingsComponent(PAGE_SUBTITLE_COMPONENT, SubTitle, true);
+    componentRegistry.register(
+      componentRegistry.componentType.PAGE_TITLE_COMPONENT,
+      PageTitle,
+      true
+    );
+    componentRegistry.register(
+      componentRegistry.componentType.PAGE_SUBTITLE_COMPONENT,
+      SubTitle,
+      true
+    );
   }
 }

@@ -16,6 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { getSearchService } from '../../../../plugins/data/public/services';
 import { esFilters, esQuery, TimeRange, Query } from '../../../../plugins/data/public';
 
 // @ts-ignore
@@ -36,13 +39,13 @@ interface VegaRequestHandlerParams {
 }
 
 export function createVegaRequestHandler({
-  es,
-  plugins,
+  plugins: { data },
   core: { uiSettings },
   serviceSettings,
 }: VegaVisualizationDependencies) {
-  const searchCache = new SearchCache(es, { max: 10, maxAge: 4 * 1000 });
-  const { timefilter } = plugins.data.query.timefilter;
+  const { esClient } = getSearchService().__LEGACY;
+  const searchCache = new SearchCache(esClient, { max: 10, maxAge: 4 * 1000 });
+  const { timefilter } = data.query.timefilter;
   const timeCache = new TimeCache(timefilter, 3 * 1000);
 
   return ({ timeRange, filters, query, visParams }: VegaRequestHandlerParams) => {

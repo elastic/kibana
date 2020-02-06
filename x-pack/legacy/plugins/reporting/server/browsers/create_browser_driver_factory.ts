@@ -6,17 +6,16 @@
 
 import { ensureBrowserDownloaded } from './download';
 import { installBrowser } from './install';
-import { LevelLogger } from '../lib/level_logger';
-import { ServerFacade, CaptureConfig } from '../../types';
-import { PLUGIN_ID, BROWSER_TYPE } from '../../common/constants';
+import { ServerFacade, CaptureConfig, Logger } from '../../types';
+import { BROWSER_TYPE } from '../../common/constants';
 import { chromium } from './index';
 import { HeadlessChromiumDriverFactory } from './chromium/driver_factory';
 
 export async function createBrowserDriverFactory(
-  server: ServerFacade
+  server: ServerFacade,
+  logger: Logger
 ): Promise<HeadlessChromiumDriverFactory> {
   const config = server.config();
-  const logger = LevelLogger.createForServer(server, [PLUGIN_ID, 'browser-driver']);
 
   const dataDir: string = config.get('path.data');
   const captureConfig: CaptureConfig = config.get('xpack.reporting.capture');

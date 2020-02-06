@@ -19,8 +19,7 @@ declare const TimeSeriesExplorer: FC<{
   selectedJobId: string;
   selectedDetectorIndex: number;
   selectedEntities: any[];
-  selectedForecastId: string;
-  setGlobalState: (arg: any) => void;
+  selectedForecastId?: string;
   tableInterval: string;
   tableSeverity: number;
   zoom?: { from: string; to: string };

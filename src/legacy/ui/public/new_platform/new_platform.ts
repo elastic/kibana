@@ -18,7 +18,7 @@
  */
 import { IScope } from 'angular';
 
-import { IUiActionsStart, IUiActionsSetup } from 'src/plugins/ui_actions/public';
+import { UiActionsStart, UiActionsSetup } from 'src/plugins/ui_actions/public';
 import { IEmbeddableStart, IEmbeddableSetup } from 'src/plugins/embeddable/public';
 import { LegacyCoreSetup, LegacyCoreStart, App, AppMountDeprecated } from '../../../../core/public';
 import { Plugin as DataPlugin } from '../../../../plugins/data/public';
@@ -27,12 +27,16 @@ import {
   Setup as InspectorSetup,
   Start as InspectorStart,
 } from '../../../../plugins/inspector/public';
-import { EuiUtilsStart } from '../../../../plugins/eui_utils/public';
+import { ChartsPluginSetup, ChartsPluginStart } from '../../../../plugins/charts/public';
 import { DevToolsSetup, DevToolsStart } from '../../../../plugins/dev_tools/public';
 import { KibanaLegacySetup, KibanaLegacyStart } from '../../../../plugins/kibana_legacy/public';
 import { HomePublicPluginSetup, HomePublicPluginStart } from '../../../../plugins/home/public';
 import { SharePluginSetup, SharePluginStart } from '../../../../plugins/share/public';
-import { ManagementStart } from '../../../../plugins/management/public';
+import {
+  AdvancedSettingsSetup,
+  AdvancedSettingsStart,
+} from '../../../../plugins/advanced_settings/public';
+import { ManagementSetup, ManagementStart } from '../../../../plugins/management/public';
 import { BfetchPublicSetup, BfetchPublicStart } from '../../../../plugins/bfetch/public';
 import { UsageCollectionSetup } from '../../../../plugins/usage_collection/public';
 import {
@@ -42,33 +46,37 @@ import {
 
 export interface PluginsSetup {
   bfetch: BfetchPublicSetup;
+  charts: ChartsPluginSetup;
   data: ReturnType<DataPlugin['setup']>;
   embeddable: IEmbeddableSetup;
   expressions: ReturnType<ExpressionsPlugin['setup']>;
   home: HomePublicPluginSetup;
   inspector: InspectorSetup;
-  uiActions: IUiActionsSetup;
+  uiActions: UiActionsSetup;
   navigation: NavigationPublicPluginSetup;
-  dev_tools: DevToolsSetup;
-  kibana_legacy: KibanaLegacySetup;
+  devTools: DevToolsSetup;
+  kibanaLegacy: KibanaLegacySetup;
   share: SharePluginSetup;
   usageCollection: UsageCollectionSetup;
+  advancedSettings: AdvancedSettingsSetup;
+  management: ManagementSetup;
 }
 
 export interface PluginsStart {
   bfetch: BfetchPublicStart;
+  charts: ChartsPluginStart;
   data: ReturnType<DataPlugin['start']>;
   embeddable: IEmbeddableStart;
-  eui_utils: EuiUtilsStart;
   expressions: ReturnType<ExpressionsPlugin['start']>;
   home: HomePublicPluginStart;
   inspector: InspectorStart;
-  uiActions: IUiActionsStart;
+  uiActions: UiActionsStart;
   navigation: NavigationPublicPluginStart;
-  dev_tools: DevToolsStart;
-  kibana_legacy: KibanaLegacyStart;
+  devTools: DevToolsStart;
+  kibanaLegacy: KibanaLegacyStart;
   share: SharePluginStart;
   management: ManagementStart;
+  advancedSettings: AdvancedSettingsStart;
 }
 
 export const npSetup = {

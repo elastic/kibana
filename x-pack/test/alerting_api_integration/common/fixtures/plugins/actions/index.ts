@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import Hapi from 'hapi';
-import { ActionType } from '../../../../../../legacy/plugins/actions';
+import { PluginSetupContract as ActionsPluginSetupContract } from '../../../../../../plugins/actions/server/plugin';
+import { ActionType } from '../../../../../../plugins/actions/server';
 
 import { initPlugin as initPagerduty } from './pagerduty_simulation';
 import { initPlugin as initServiceNow } from './servicenow_simulation';
@@ -35,7 +36,7 @@ export function getAllExternalServiceSimulatorPaths(): string[] {
 // eslint-disable-next-line import/no-default-export
 export default function(kibana: any) {
   return new kibana.Plugin({
-    require: ['actions'],
+    require: ['xpack_main', 'actions'],
     name: NAME,
     init: (server: Hapi.Server) => {
       // this action is specifically NOT enabled in ../../config.ts
@@ -46,7 +47,9 @@ export default function(kibana: any) {
           return { status: 'ok', actionId: '' };
         },
       };
-      server.plugins.actions!.setup.registerType(notEnabledActionType);
+      (server.newPlatform.setup.plugins.actions as ActionsPluginSetupContract).registerType(
+        notEnabledActionType
+      );
       server.plugins.xpack_main.registerFeature({
         id: 'actions',
         name: 'Actions',

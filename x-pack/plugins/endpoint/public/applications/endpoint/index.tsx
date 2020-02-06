@@ -12,6 +12,7 @@ import { Route, BrowserRouter, Switch } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { Store } from 'redux';
 import { appStoreFactory } from './store';
+import { AlertIndex } from './view/alerts';
 
 /**
  * This module will be loaded asynchronously to reduce the bundle size of your plugin's main bundle.
@@ -19,12 +20,13 @@ import { appStoreFactory } from './store';
 export function renderApp(coreStart: CoreStart, { appBasePath, element }: AppMountParameters) {
   coreStart.http.get('/api/endpoint/hello-world');
 
-  const store = appStoreFactory(coreStart);
+  const [store, stopSagas] = appStoreFactory(coreStart);
 
   ReactDOM.render(<AppRoot basename={appBasePath} store={store} />, element);
 
   return () => {
     ReactDOM.unmountComponentAtNode(element);
+    stopSagas();
   };
 }
 
@@ -63,6 +65,7 @@ const AppRoot: React.FunctionComponent<RouterProps> = React.memo(({ basename, st
               );
             }}
           />
+          <Route path="/alerts" component={AlertIndex} />
           <Route
             render={() => (
               <FormattedMessage id="xpack.endpoint.notFound" defaultMessage="Page Not Found" />

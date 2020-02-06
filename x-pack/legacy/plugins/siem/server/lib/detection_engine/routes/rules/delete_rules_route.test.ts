@@ -6,9 +6,7 @@
 
 import {
   createMockServer,
-  createMockServerWithoutActionClientDecoration,
   createMockServerWithoutAlertClientDecoration,
-  createMockServerWithoutActionOrAlertClientDecoration,
 } from '../__mocks__/_mock_server';
 
 import { deleteRulesRoute } from './delete_rules_route';
@@ -67,26 +65,10 @@ describe('delete_rules', () => {
       expect(statusCode).toBe(404);
     });
 
-    test('returns 404 if actionClient is not available on the route', async () => {
-      const { serverWithoutActionClient } = createMockServerWithoutActionClientDecoration();
-      deleteRulesRoute(serverWithoutActionClient);
-      const { statusCode } = await serverWithoutActionClient.inject(getDeleteRequest());
-      expect(statusCode).toBe(404);
-    });
-
     test('returns 404 if alertClient is not available on the route', async () => {
       const { serverWithoutAlertClient } = createMockServerWithoutAlertClientDecoration();
       deleteRulesRoute(serverWithoutAlertClient);
       const { statusCode } = await serverWithoutAlertClient.inject(getDeleteRequest());
-      expect(statusCode).toBe(404);
-    });
-
-    test('returns 404 if alertClient and actionClient are both not available on the route', async () => {
-      const {
-        serverWithoutActionOrAlertClient,
-      } = createMockServerWithoutActionOrAlertClientDecoration();
-      deleteRulesRoute(serverWithoutActionOrAlertClient);
-      const { statusCode } = await serverWithoutActionOrAlertClient.inject(getDeleteRequest());
       expect(statusCode).toBe(404);
     });
   });

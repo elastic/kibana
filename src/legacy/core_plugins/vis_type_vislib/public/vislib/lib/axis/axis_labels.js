@@ -92,32 +92,43 @@ export class AxisLabels {
   filterAxisLabels() {
     const self = this;
     const config = this.axisConfig;
-    let startPos = 0;
     const padding = 1.1;
+    let lastTickStartEdge = Number.POSITIVE_INFINITY;
+    let lastTickEndEdge = Number.NEGATIVE_INFINITY;
 
     return function(selection) {
       if (!config.get('labels.filter')) return;
 
       const el = $(config.get('rootEl')).find(config.get('elSelector'));
-      const maxSize = config.isHorizontal() ? el.width() : el.height();
+      const upperBound = config.isHorizontal() ? el.width() : el.height();
+      const lowerBound = 0;
       const scaleRange = self.axisScale.scale.range();
       const scaleWidth = Math.abs(scaleRange[scaleRange.length - 1] - scaleRange[0]);
-      const scaleStartPad = 0.5 * (maxSize - scaleWidth);
+      const scaleStartPad = 0.5 * (upperBound - scaleWidth);
 
       selection.selectAll('.tick text').text(function(d) {
-        const par = d3.select(this.parentNode).node();
-        const myPos =
+        const parentNode = d3.select(this.parentNode).node();
+        const currentTickCenter =
           scaleStartPad +
-          (config.isHorizontal() ? self.axisScale.scale(d) : maxSize - self.axisScale.scale(d));
-        const mySize =
-          (config.isHorizontal() ? par.getBBox().width : par.getBBox().height) * padding;
-        const halfSize = mySize / 2;
+          (config.isHorizontal() ? self.axisScale.scale(d) : upperBound - self.axisScale.scale(d));
+        const currentTickSize =
+          (config.isHorizontal() ? parentNode.getBBox().width : parentNode.getBBox().height) *
+          padding;
+        const currentTickHalfSize = currentTickSize / 2;
+        const currentTickStartEdge = currentTickCenter - currentTickHalfSize;
+        const currentTickEndEdge = currentTickCenter + currentTickHalfSize;
 
-        if (startPos + halfSize < myPos && maxSize > myPos + halfSize) {
-          startPos = myPos + halfSize;
-          return this.textContent;
-        } else {
+        const outsideUpperBound = currentTickEndEdge > upperBound;
+        const outsideLowerBound = currentTickStartEdge < lowerBound;
+        const overlapsLastTick =
+          currentTickEndEdge >= lastTickStartEdge && currentTickStartEdge <= lastTickEndEdge;
+
+        if (outsideUpperBound || outsideLowerBound || overlapsLastTick) {
           d3.select(this.parentNode).remove();
+        } else {
+          lastTickStartEdge = currentTickCenter - currentTickHalfSize;
+          lastTickEndEdge = currentTickCenter + currentTickHalfSize;
+          return this.textContent;
         }
       });
     };

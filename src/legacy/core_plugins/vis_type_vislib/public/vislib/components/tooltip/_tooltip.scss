@@ -1,0 +1,69 @@
+.visTooltip,
+.visTooltip__sizingClone {
+  @include euiToolTipStyle('s');
+  visibility: hidden;
+  pointer-events: none;
+  position: fixed;
+  max-width: $euiSizeXL * 10;
+  overflow: hidden;
+  padding: 0;
+
+  > :last-child {
+    margin-bottom: $euiSizeS;
+  }
+
+  > * {
+    margin: $euiSizeS $euiSizeS 0;
+  }
+
+  table {
+    td,
+    th {
+      text-align: left;
+      padding: $euiSizeXS;
+      overflow-wrap: break-word;
+      word-wrap: break-word;
+    }
+  }
+}
+
+.visTooltip__header {
+  margin: 0 0 $euiSizeS;
+  padding: $euiSizeXS $euiSizeS;
+  display: flex;
+  align-items: center;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  + * {
+    margin-top: $euiSizeS;
+  }
+}
+
+.visTooltip__labelContainer,
+.visTooltip__valueContainer {
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+}
+
+.visTooltip__headerIcon {
+  flex: 0 0 auto;
+  padding-right: $euiSizeS;
+}
+
+.visTooltip__headerText {
+  flex: 1 1 100%;
+}
+
+.visTooltip__label {
+  // max-width: $euiSizeXL * 3;
+  font-weight: $euiFontWeightMedium;
+  color: shade($euiColorGhost, 20%);
+}
+
+.visTooltip__sizingClone {
+  top: -500px;
+  left: -500px;
+}

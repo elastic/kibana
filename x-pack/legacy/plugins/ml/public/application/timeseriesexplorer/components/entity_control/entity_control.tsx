@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { isEqual } from 'lodash';
 import React, { Component } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -47,8 +48,8 @@ export class EntityControl extends Component<EntityControlProps, EntityControlSt
   };
 
   componentDidUpdate(prevProps: EntityControlProps) {
-    const { entity, forceSelection, isLoading, options } = this.props;
-    const { selectedOptions } = this.state;
+    const { entity, forceSelection, isLoading, options: propOptions } = this.props;
+    const { options: stateOptions, selectedOptions } = this.state;
 
     const { fieldValue } = entity;
 
@@ -68,8 +69,13 @@ export class EntityControl extends Component<EntityControlProps, EntityControlSt
     if (prevProps.isLoading === true && isLoading === false) {
       this.setState({
         isLoading: false,
-        options,
         selectedOptions: selectedOptionsUpdate,
+      });
+    }
+
+    if (!isEqual(propOptions, stateOptions)) {
+      this.setState({
+        options: propOptions,
       });
     }
 

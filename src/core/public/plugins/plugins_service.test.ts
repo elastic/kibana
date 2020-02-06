@@ -111,6 +111,7 @@ describe('PluginsService', () => {
       overlays: overlayServiceMock.createStartContract(),
       uiSettings: uiSettingsServiceMock.createStartContract(),
       savedObjects: savedObjectsMock.createStartContract(),
+      fatalErrors: fatalErrorsServiceMock.createStartContract(),
     };
     mockStartContext = {
       ...mockStartDeps,

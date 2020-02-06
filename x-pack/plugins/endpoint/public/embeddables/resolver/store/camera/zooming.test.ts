@@ -8,7 +8,7 @@ import { CameraAction } from './action';
 import { cameraReducer } from './reducer';
 import { createStore, Store } from 'redux';
 import { CameraState, AABB } from '../../types';
-import { viewableBoundingBox, inverseProjectionMatrix } from './selectors';
+import { viewableBoundingBox, inverseProjectionMatrix, scalingFactor } from './selectors';
 import { expectVectorsToBeClose } from './test_helpers';
 import { scaleToZoom } from './scale_to_zoom';
 import { applyMatrix3 } from '../../lib/vector2';
@@ -148,6 +148,31 @@ describe('zooming', () => {
           expect(worldCenterPoint[0]).toBeCloseTo(100);
           expect(worldCenterPoint[1]).toBeCloseTo(0);
         });
+      });
+    });
+  });
+  describe('zoom controls', () => {
+    let previousScalingFactor: CameraState['scalingFactor'];
+    describe('when user clicks on zoom in button', () => {
+      beforeEach(() => {
+        previousScalingFactor = scalingFactor(store.getState());
+        const action: CameraAction = { type: 'userClickedZoomIn' };
+        store.dispatch(action);
+      });
+      it('the scaling factor should increase by 0.1 units', () => {
+        const actual = scalingFactor(store.getState());
+        expect(actual).toEqual(previousScalingFactor + 0.1);
+      });
+    });
+    describe('when user clicks on zoom out button', () => {
+      beforeEach(() => {
+        previousScalingFactor = scalingFactor(store.getState());
+        const action: CameraAction = { type: 'userClickedZoomOut' };
+        store.dispatch(action);
+      });
+      it('the scaling factor should decrease by 0.1 units', () => {
+        const actual = scalingFactor(store.getState());
+        expect(actual).toEqual(previousScalingFactor - 0.1);
       });
     });
   });

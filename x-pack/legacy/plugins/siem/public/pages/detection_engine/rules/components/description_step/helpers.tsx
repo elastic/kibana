@@ -24,7 +24,7 @@ import { tacticsOptions, techniquesOptions } from '../../../mitre/mitre_tactics_
 
 import { FilterLabel } from './filter_label';
 import * as i18n from './translations';
-import { BuildQueryBarDescription, BuildThreatsDescription, ListItems } from './types';
+import { BuildQueryBarDescription, BuildThreatDescription, ListItems } from './types';
 import { SeverityBadge } from '../severity_badge';
 import ListTreeIcon from './assets/list_tree_icon.svg';
 
@@ -94,7 +94,7 @@ export const buildQueryBarDescription = ({
   return items;
 };
 
-const ThreatsEuiFlexGroup = styled(EuiFlexGroup)`
+const ThreatEuiFlexGroup = styled(EuiFlexGroup)`
   .euiFlexItem {
     margin-bottom: 0px;
   }
@@ -114,25 +114,22 @@ const ReferenceLinkItem = styled(EuiButtonEmpty)`
   }
 `;
 
-export const buildThreatsDescription = ({
-  label,
-  threats,
-}: BuildThreatsDescription): ListItems[] => {
-  if (threats.length > 0) {
+export const buildThreatDescription = ({ label, threat }: BuildThreatDescription): ListItems[] => {
+  if (threat.length > 0) {
     return [
       {
         title: label,
         description: (
-          <ThreatsEuiFlexGroup direction="column">
-            {threats.map((threat, index) => {
-              const tactic = tacticsOptions.find(t => t.id === threat.tactic.id);
+          <ThreatEuiFlexGroup direction="column">
+            {threat.map((singleThreat, index) => {
+              const tactic = tacticsOptions.find(t => t.id === singleThreat.tactic.id);
               return (
-                <EuiFlexItem key={`${threat.tactic.name}-${index}`}>
-                  <EuiLink href={threat.tactic.reference} target="_blank">
+                <EuiFlexItem key={`${singleThreat.tactic.name}-${index}`}>
+                  <EuiLink href={singleThreat.tactic.reference} target="_blank">
                     {tactic != null ? tactic.text : ''}
                   </EuiLink>
                   <EuiFlexGroup gutterSize="none" alignItems="flexStart" direction="column">
-                    {threat.techniques.map(technique => {
+                    {singleThreat.technique.map(technique => {
                       const myTechnique = techniquesOptions.find(t => t.id === technique.id);
                       return (
                         <EuiFlexItem>
@@ -153,7 +150,7 @@ export const buildThreatsDescription = ({
               );
             })}
             <EuiSpacer />
-          </ThreatsEuiFlexGroup>
+          </ThreatEuiFlexGroup>
         ),
       },
     ];

@@ -6,11 +6,11 @@
 
 import React, { FC } from 'react';
 import { Route, Switch } from 'react-router-dom';
-import { MonitorPage, OverviewPage, NotFoundPage } from './pages';
+import { MonitorPage, NotFoundPage, OverviewPage } from './pages';
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 import { UMUpdateBreadcrumbs } from './lib/lib';
 
-export const MONITOR_ROUTE = '/monitor/:monitorId/:location?';
+export const MONITOR_ROUTE = '/monitor/:monitorId?';
 export const OVERVIEW_ROUTE = '/';
 
 interface RouterProps {

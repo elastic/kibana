@@ -21,12 +21,36 @@ interface SingleBulkCreateParams {
   id: string;
   signalsIndex: string;
   name: string;
+  createdAt: string;
   createdBy: string;
+  updatedAt: string;
   updatedBy: string;
   interval: string;
   enabled: boolean;
   tags: string[];
 }
+
+/**
+ * This is for signals on signals to work correctly. If given a rule id this will check if
+ * that rule id already exists in the ancestor tree of each signal search response and remove
+ * those documents so they cannot be created as a signal since we do not want a rule id to
+ * ever be capable of re-writing the same signal continuously if both the _input_ and _output_
+ * of the signals index happens to be the same index.
+ * @param ruleId The rule id
+ * @param signalSearchResponse The search response that has all the documents
+ */
+export const filterDuplicateRules = (
+  ruleId: string,
+  signalSearchResponse: SignalSearchResponse
+) => {
+  return signalSearchResponse.hits.hits.filter(doc => {
+    if (doc._source.signal == null) {
+      return true;
+    } else {
+      return !doc._source.signal.ancestors.some(ancestor => ancestor.rule === ruleId);
+    }
+  });
+};
 
 // Bulk Index documents.
 export const singleBulkCreate = async ({
@@ -37,12 +61,16 @@ export const singleBulkCreate = async ({
   id,
   signalsIndex,
   name,
+  createdAt,
   createdBy,
+  updatedAt,
   updatedBy,
   interval,
   enabled,
   tags,
 }: SingleBulkCreateParams): Promise<boolean> => {
+  someResult.hits.hits = filterDuplicateRules(id, someResult);
+
   if (someResult.hits.hits.length === 0) {
     return true;
   }
@@ -67,7 +95,19 @@ export const singleBulkCreate = async ({
         ),
       },
     },
-    buildBulkBody({ doc, ruleParams, id, name, createdBy, updatedBy, interval, enabled, tags }),
+    buildBulkBody({
+      doc,
+      ruleParams,
+      id,
+      name,
+      createdAt,
+      createdBy,
+      updatedAt,
+      updatedBy,
+      interval,
+      enabled,
+      tags,
+    }),
   ]);
   const start = performance.now();
   const response: BulkResponse = await services.callCluster('bulk', {

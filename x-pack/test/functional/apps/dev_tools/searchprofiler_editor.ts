@@ -51,7 +51,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           await aceEditor.setValue(editorTestSubjectSelector, input);
 
           await retry.waitFor(
-            `parser errors to match expection: HAS ${expectation ? 'ERRORS' : 'NO ERRORS'}`,
+            `parser errors to match expectation: HAS ${expectation ? 'ERRORS' : 'NO ERRORS'}`,
             async () => {
               const actual = await aceEditor.hasParseErrors(editorTestSubjectSelector);
               return expectation === actual;

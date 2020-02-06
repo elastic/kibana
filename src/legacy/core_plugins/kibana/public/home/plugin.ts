@@ -18,15 +18,16 @@
  */
 
 import { CoreSetup, CoreStart, LegacyNavLink, Plugin, UiSettingsState } from 'kibana/public';
-import { UiStatsMetricType } from '@kbn/analytics';
 
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { setServices } from './kibana_services';
 import { KibanaLegacySetup } from '../../../../../plugins/kibana_legacy/public';
+import { UsageCollectionSetup } from '../../../../../plugins/usage_collection/public';
 import {
   Environment,
   FeatureCatalogueEntry,
   HomePublicPluginStart,
+  HomePublicPluginSetup,
 } from '../../../../../plugins/home/public';
 
 export interface LegacyAngularInjectedDependencies {
@@ -41,8 +42,6 @@ export interface HomePluginStartDependencies {
 
 export interface HomePluginSetupDependencies {
   __LEGACY: {
-    trackUiMetric: (type: UiStatsMetricType, eventNames: string | string[], count?: number) => void;
-    METRIC_TYPE: any;
     metadata: {
       app: unknown;
       bundleId: string;
@@ -59,7 +58,9 @@ export interface HomePluginSetupDependencies {
     getFeatureCatalogueEntries: () => Promise<readonly FeatureCatalogueEntry[]>;
     getAngularDependencies: () => Promise<LegacyAngularInjectedDependencies>;
   };
-  kibana_legacy: KibanaLegacySetup;
+  usageCollection: UsageCollectionSetup;
+  kibanaLegacy: KibanaLegacySetup;
+  home: HomePublicPluginSetup;
 }
 
 export class HomePlugin implements Plugin {
@@ -70,17 +71,21 @@ export class HomePlugin implements Plugin {
   setup(
     core: CoreSetup,
     {
-      kibana_legacy,
+      home,
+      kibanaLegacy,
+      usageCollection,
       __LEGACY: { getAngularDependencies, ...legacyServices },
     }: HomePluginSetupDependencies
   ) {
-    kibana_legacy.registerLegacyApp({
+    kibanaLegacy.registerLegacyApp({
       id: 'home',
       title: 'Home',
       mount: async ({ core: contextCore }, params) => {
+        const trackUiMetric = usageCollection.reportUiStats.bind(usageCollection, 'Kibana_home');
         const angularDependencies = await getAngularDependencies();
         setServices({
           ...legacyServices,
+          trackUiMetric,
           http: contextCore.http,
           toastNotifications: core.notifications.toasts,
           banners: contextCore.overlays.banners,
@@ -93,6 +98,8 @@ export class HomePlugin implements Plugin {
           getBasePath: core.http.basePath.get,
           indexPatternService: this.dataStart!.indexPatterns,
           environment: this.environment!,
+          config: kibanaLegacy.config,
+          homeConfig: home.config,
           ...angularDependencies,
         });
         const { renderApp } = await import('./np_ready/application');

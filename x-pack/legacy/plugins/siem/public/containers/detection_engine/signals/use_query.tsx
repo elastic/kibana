@@ -9,11 +9,16 @@ import React, { SetStateAction, useEffect, useState } from 'react';
 import { fetchQuerySignals } from './api';
 import { SignalSearchResponse } from './types';
 
-type Return<Hit, Aggs> = [
-  boolean,
-  SignalSearchResponse<Hit, Aggs> | null,
-  React.Dispatch<SetStateAction<object>>
-];
+type Func = () => void;
+
+interface Return<Hit, Aggs> {
+  loading: boolean;
+  data: SignalSearchResponse<Hit, Aggs> | null;
+  setQuery: React.Dispatch<SetStateAction<object>>;
+  response: string;
+  request: string;
+  refetch: Func | null;
+}
 
 /**
  * Hook for using to get a Signals from the Detection Engine API
@@ -21,29 +26,52 @@ type Return<Hit, Aggs> = [
  * @param initialQuery query dsl object
  *
  */
-export const useQuerySignals = <Hit, Aggs>(initialQuery: object): Return<Hit, Aggs> => {
+export const useQuerySignals = <Hit, Aggs>(
+  initialQuery: object,
+  indexName?: string | null
+): Return<Hit, Aggs> => {
   const [query, setQuery] = useState(initialQuery);
-  const [signals, setSignals] = useState<SignalSearchResponse<Hit, Aggs> | null>(null);
+  const [signals, setSignals] = useState<
+    Pick<Return<Hit, Aggs>, 'data' | 'setQuery' | 'response' | 'request' | 'refetch'>
+  >({
+    data: null,
+    response: '',
+    request: '',
+    setQuery,
+    refetch: null,
+  });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let isSubscribed = true;
     const abortCtrl = new AbortController();
-    setLoading(true);
 
     async function fetchData() {
       try {
+        setLoading(true);
         const signalResponse = await fetchQuerySignals<Hit, Aggs>({
           query,
           signal: abortCtrl.signal,
         });
 
         if (isSubscribed) {
-          setSignals(signalResponse);
+          setSignals({
+            data: signalResponse,
+            response: JSON.stringify(signalResponse, null, 2),
+            request: JSON.stringify({ index: [indexName] ?? [''], body: query }, null, 2),
+            setQuery,
+            refetch: fetchData,
+          });
         }
       } catch (error) {
         if (isSubscribed) {
-          setSignals(null);
+          setSignals({
+            data: null,
+            response: '',
+            request: '',
+            setQuery,
+            refetch: fetchData,
+          });
         }
       }
       if (isSubscribed) {
@@ -56,7 +84,7 @@ export const useQuerySignals = <Hit, Aggs>(initialQuery: object): Return<Hit, Ag
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, [query]);
+  }, [query, indexName]);
 
-  return [loading, signals, setQuery];
+  return { loading, ...signals };
 };

@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount, shallow } from 'enzyme';
+import { mount } from 'enzyme';
 import React from 'react';
+import { MemoryRouter } from 'react-router-dom';
 
 import { EuiSuperDatePicker } from '@elastic/eui';
 
@@ -34,8 +35,13 @@ describe('Navigation Menu: <TopNav />', () => {
     const refreshListener = jest.fn();
     const refreshSubscription = mlTimefilterRefresh$.subscribe(refreshListener);
 
-    const wrapper = shallow(<TopNav />);
-    expect(wrapper).toMatchSnapshot();
+    const wrapper = mount(
+      <MemoryRouter>
+        <TopNav />
+      </MemoryRouter>
+    );
+    expect(wrapper.find(TopNav)).toHaveLength(1);
+    expect(wrapper.find('EuiSuperDatePicker')).toHaveLength(1);
     expect(refreshListener).toBeCalledTimes(0);
 
     refreshSubscription.unsubscribe();

@@ -20,7 +20,7 @@
 import { esKuery } from '../../../../../../plugins/data/server';
 
 import { getRootPropertiesObjects, IndexMapping } from '../../../mappings';
-import { SavedObjectsSchema } from '../../../schema';
+import { ISavedObjectTypeRegistry } from '../../../saved_objects_type_registry';
 
 /**
  * Gets the types based on the type. Uses mappings to support
@@ -61,8 +61,12 @@ function getFieldsForTypes(types: string[], searchFields?: string[]) {
  *  Gets the clause that will filter for the type in the namespace.
  *  Some types are namespace agnostic, so they must be treated differently.
  */
-function getClauseForType(schema: SavedObjectsSchema, namespace: string | undefined, type: string) {
-  if (namespace && !schema.isNamespaceAgnostic(type)) {
+function getClauseForType(
+  registry: ISavedObjectTypeRegistry,
+  namespace: string | undefined,
+  type: string
+) {
+  if (namespace && !registry.isNamespaceAgnostic(type)) {
     return {
       bool: {
         must: [{ term: { type } }, { term: { namespace } }],
@@ -85,7 +89,7 @@ interface HasReferenceQueryParams {
 
 interface QueryParams {
   mappings: IndexMapping;
-  schema: SavedObjectsSchema;
+  registry: ISavedObjectTypeRegistry;
   namespace?: string;
   type?: string | string[];
   search?: string;
@@ -100,7 +104,7 @@ interface QueryParams {
  */
 export function getQueryParams({
   mappings,
-  schema,
+  registry,
   namespace,
   type,
   search,
@@ -140,7 +144,7 @@ export function getQueryParams({
                 },
               ]
             : undefined,
-          should: types.map(shouldType => getClauseForType(schema, namespace, shouldType)),
+          should: types.map(shouldType => getClauseForType(registry, namespace, shouldType)),
           minimum_should_match: 1,
         },
       },

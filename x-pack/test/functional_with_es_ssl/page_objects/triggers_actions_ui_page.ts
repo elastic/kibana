@@ -4,23 +4,35 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 const ENTER_KEY = '\uE007';
 
 export function TriggersActionsPageProvider({ getService }: FtrProviderContext) {
   const find = getService('find');
+  const retry = getService('retry');
   const testSubjects = getService('testSubjects');
 
   return {
     async getSectionHeadingText() {
       return await testSubjects.getVisibleText('appTitle');
     },
+    async clickCreateFirstConnectorButton() {
+      const createBtn = await find.byCssSelector('[data-test-subj="createFirstActionButton"]');
+      const createBtnIsVisible = await createBtn.isDisplayed();
+      if (createBtnIsVisible) {
+        await createBtn.click();
+      }
+    },
     async clickCreateConnectorButton() {
-      const createBtn = await find.byCssSelector(
-        '[data-test-subj="createActionButton"],[data-test-subj="createFirstActionButton"]'
-      );
-      await createBtn.click();
+      const createBtn = await find.byCssSelector('[data-test-subj="createActionButton"]');
+      const createBtnIsVisible = await createBtn.isDisplayed();
+      if (createBtnIsVisible) {
+        await createBtn.click();
+      } else {
+        await this.clickCreateFirstConnectorButton();
+      }
     },
     async searchConnectors(searchText: string) {
       const searchBox = await find.byCssSelector('[data-test-subj="actionsList"] .euiFieldSearch');
@@ -90,8 +102,28 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
           };
         });
     },
+    async clickOnAlertInAlertsList(name: string) {
+      await this.searchAlerts(name);
+      await find.clickDisplayedByCssSelector(`[data-test-subj="alertsList"] [title="${name}"]`);
+    },
     async changeTabs(tab: 'alertsTab' | 'connectorsTab') {
       return await testSubjects.click(tab);
+    },
+    async toggleSwitch(testSubject: string) {
+      const switchBtn = await testSubjects.find(testSubject);
+      const valueBefore = await switchBtn.getAttribute('aria-checked');
+      await switchBtn.click();
+      await retry.try(async () => {
+        const switchBtnAfter = await testSubjects.find(testSubject);
+        const valueAfter = await switchBtnAfter.getAttribute('aria-checked');
+        expect(valueAfter).not.to.eql(valueBefore);
+      });
+    },
+    async clickCreateAlertButton() {
+      const createBtn = await find.byCssSelector(
+        '[data-test-subj="createAlertButton"],[data-test-subj="createFirstAlertButton"]'
+      );
+      await createBtn.click();
     },
   };
 }
