@@ -6,7 +6,7 @@
 
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
-import queryString from 'query-string';
+import { parse } from 'query-string';
 
 import { basicResolvers } from '../../resolvers';
 import { MlRoute, PageLoader, PageProps } from '../../router';
@@ -122,7 +122,7 @@ export const categorizationRoute: MlRoute = {
 };
 
 const PageWrapper: FC<WizardPageProps> = ({ location, config, jobType, deps }) => {
-  const { index, savedSearchId }: Record<string, any> = queryString.parse(location.search);
+  const { index, savedSearchId }: Record<string, any> = parse(location.search, { sort: false });
   const { context, results } = useResolver(index, savedSearchId, config, {
     ...basicResolvers(deps),
     privileges: checkCreateJobsPrivilege,

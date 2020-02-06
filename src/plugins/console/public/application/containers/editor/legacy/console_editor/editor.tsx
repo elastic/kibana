@@ -93,9 +93,10 @@ function EditorUI({ initialTextValue }: EditorProps) {
     editorInstanceRef.current = senseEditor.create(editorRef.current!);
     const editor = editorInstanceRef.current;
 
-    const readQueryParams = (): Record<string, any> => {
+    const readQueryParams = () => {
       const [, queryString] = (window.location.hash || '').split('?');
-      return parse(queryString || '');
+
+      return parse(queryString || '', { sort: false }) as Record<string, any>;
     };
 
     const loadBufferFromRemote = (url: string) => {

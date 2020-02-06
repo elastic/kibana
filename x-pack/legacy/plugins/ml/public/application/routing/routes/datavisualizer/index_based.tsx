@@ -6,7 +6,7 @@
 
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
-import queryString from 'query-string';
+import { parse } from 'query-string';
 import { MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
 import { Page } from '../../../datavisualizer/index_based';
@@ -35,7 +35,7 @@ export const indexBasedRoute: MlRoute = {
 };
 
 const PageWrapper: FC<PageProps> = ({ location, config, deps }) => {
-  const { index, savedSearchId }: Record<string, any> = queryString.parse(location.search);
+  const { index, savedSearchId }: Record<string, any> = parse(location.search, { sort: false });
   const { context } = useResolver(index, savedSearchId, config, {
     checkBasicLicense,
     loadIndexPatterns: () => loadIndexPatterns(deps.indexPatterns),

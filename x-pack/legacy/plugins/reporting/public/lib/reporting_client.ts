@@ -5,7 +5,7 @@
  */
 
 import { npStart } from 'ui/new_platform';
-import querystring from 'query-string';
+import { stringify } from 'query-string';
 
 const { core } = npStart;
 
@@ -20,7 +20,7 @@ interface JobParams {
 }
 
 export const getReportingJobPath = (exportType: string, jobParams: JobParams) => {
-  const params = querystring.stringify({ jobParams: rison.encode(jobParams) });
+  const params = stringify({ jobParams: rison.encode(jobParams) }, { sort: false });
 
   return `${core.http.basePath.prepend(API_BASE_URL)}/${exportType}?${params}`;
 };

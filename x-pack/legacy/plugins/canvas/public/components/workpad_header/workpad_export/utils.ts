@@ -4,10 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+// todo: Should be removed
+import { QueryString } from 'ui/utils/query_string';
+
 import rison from 'rison-node';
 // @ts-ignore Untyped local.
 import { fetch } from '../../../../common/lib/fetch';
-import { getStartPlugins } from '../../../legacy';
 import { CanvasWorkpad } from '../../../../types';
 
 // type of the desired pdf output (print or preserve_layout)
@@ -72,7 +74,7 @@ function getPdfUrlParts(
 export function getPdfUrl(...args: Arguments): string {
   const urlParts = getPdfUrlParts(...args);
 
-  return `${urlParts.createPdfUri}?${getStartPlugins().__LEGACY.QueryString.param(
+  return `${urlParts.createPdfUri}?${QueryString.param(
     'jobParams',
     urlParts.createPdfPayload.jobParams
   )}`;

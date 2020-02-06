@@ -8,7 +8,7 @@ import { parse, stringify } from 'query-string';
 import { LocalUIFilterName } from '../../../../server/lib/ui_filters/local_ui_filters/config';
 
 export function toQuery(search?: string): APMQueryParamsRaw {
-  return search ? parse(search.slice(1)) : {};
+  return search ? parse(search.slice(1), { sort: false }) : {};
 }
 
 export function fromQuery(query: Record<string, any>) {

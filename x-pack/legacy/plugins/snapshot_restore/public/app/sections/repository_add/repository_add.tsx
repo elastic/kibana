@@ -44,7 +44,7 @@ export const RepositoryAdd: React.FunctionComponent<RouteComponentProps> = ({
     if (error) {
       setSaveError(error);
     } else {
-      const { redirect } = parse(search.replace(/^\?/, ''));
+      const { redirect } = parse(search.replace(/^\?/, ''), { sort: false });
       history.push(redirect ? (redirect as string) : `${BASE_PATH}/${section}/${name}`);
     }
   };

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import Joi from 'joi';
-import querystring from 'query-string';
+import { stringify } from 'query-string';
 import { callWithRequestFactory } from '../../lib/call_with_request_factory';
 import { isEsErrorFactory } from '../../lib/is_es_error_factory';
 import { wrapEsError, wrapUnknownError } from '../../lib/error_wrappers';
@@ -45,7 +45,7 @@ export function registerFieldsForWildcardRoute(server) {
       const { pattern, meta_fields: metaFields, params } = request.query;
 
       // Format call to standard index pattern `fields for wildcard`
-      const standardRequestQuery = querystring.stringify({ pattern, meta_fields: metaFields });
+      const standardRequestQuery = stringify({ pattern, meta_fields: metaFields }, { sort: false });
       const standardRequest = {
         url: `${request.getBasePath()}/api/index_patterns/_fields_for_wildcard?${standardRequestQuery}`,
         method: 'GET',

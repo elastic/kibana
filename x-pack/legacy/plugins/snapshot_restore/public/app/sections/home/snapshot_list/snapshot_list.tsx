@@ -86,7 +86,7 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
   const [filteredPolicy, setFilteredPolicy] = useState<string | undefined>(undefined);
   useEffect(() => {
     if (search) {
-      const parsedParams = parse(search.replace(/^\?/, ''));
+      const parsedParams = parse(search.replace(/^\?/, ''), { sort: false });
       const { repository, policy } = parsedParams;
 
       if (policy && policy !== filteredPolicy) {

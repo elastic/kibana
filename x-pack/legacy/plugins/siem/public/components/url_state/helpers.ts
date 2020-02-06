@@ -6,7 +6,7 @@
 
 import { decode, encode } from 'rison-node';
 import * as H from 'history';
-import { QueryString } from 'ui/utils/query_string';
+import { stringify, parse } from 'query-string';
 import { Query, esFilters } from 'src/plugins/data/public';
 
 import { isEmpty } from 'lodash/fp';
@@ -41,29 +41,39 @@ export const encodeRisonUrlState = (state: any) => encode(state);
 export const getQueryStringFromLocation = (search: string) => search.substring(1);
 
 export const getParamFromQueryString = (queryString: string, key: string): string | undefined => {
-  const queryParam = QueryString.decode(queryString)[key];
+  const parsedQueryString: Record<string, unknown> = parse(queryString, { sort: false });
+  const queryParam = parsedQueryString[key];
+
   return Array.isArray(queryParam) ? queryParam[0] : queryParam;
 };
 
 export const replaceStateKeyInQueryString = <T>(stateKey: string, urlState: T) => (
   queryString: string
 ): string => {
-  const previousQueryValues = QueryString.decode(queryString);
+  const previousQueryValues = parse(queryString);
   if (urlState == null || (typeof urlState === 'string' && urlState === '')) {
     delete previousQueryValues[stateKey];
-    return QueryString.encode({
-      ...previousQueryValues,
-    });
+
+    return stringify(
+      {
+        ...previousQueryValues,
+      },
+      { sort: false }
+    );
   }
 
   // ಠ_ಠ Code was copied from x-pack/legacy/plugins/infra/public/utils/url_state.tsx ಠ_ಠ
   // Remove this if these utilities are promoted to kibana core
   const encodedUrlState =
     typeof urlState !== 'undefined' ? encodeRisonUrlState(urlState) : undefined;
-  return QueryString.encode({
-    ...previousQueryValues,
-    [stateKey]: encodedUrlState,
-  });
+
+  return stringify(
+    {
+      ...previousQueryValues,
+      [stateKey]: encodedUrlState,
+    },
+    { sort: false }
+  );
 };
 
 export const replaceQueryStringInLocation = (

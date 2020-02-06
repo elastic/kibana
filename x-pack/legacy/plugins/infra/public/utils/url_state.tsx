@@ -9,8 +9,7 @@ import throttle from 'lodash/fp/throttle';
 import React from 'react';
 import { Route, RouteProps } from 'react-router-dom';
 import { decode, encode, RisonValue } from 'rison-node';
-
-import { QueryString } from 'ui/utils/query_string';
+import { parse, stringify } from 'query-string';
 
 interface UrlStateContainerProps<UrlState> {
   urlState: UrlState | undefined;
@@ -145,7 +144,9 @@ const encodeRisonUrlState = (state: any) => encode(state);
 export const getQueryStringFromLocation = (location: Location) => location.search.substring(1);
 
 export const getParamFromQueryString = (queryString: string, key: string): string | undefined => {
-  const queryParam = QueryString.decode(queryString)[key];
+  const parsedQueryString: Record<string, any> = parse(queryString);
+  const queryParam = parsedQueryString[key];
+
   return Array.isArray(queryParam) ? queryParam[0] : queryParam;
 };
 
@@ -153,13 +154,17 @@ export const replaceStateKeyInQueryString = <UrlState extends any>(
   stateKey: string,
   urlState: UrlState | undefined
 ) => (queryString: string) => {
-  const previousQueryValues = QueryString.decode(queryString);
+  const previousQueryValues = parse(queryString);
   const encodedUrlState =
     typeof urlState !== 'undefined' ? encodeRisonUrlState(urlState) : undefined;
-  return QueryString.encode({
-    ...previousQueryValues,
-    [stateKey]: encodedUrlState,
-  });
+
+  return stringify(
+    {
+      ...previousQueryValues,
+      [stateKey]: encodedUrlState,
+    },
+    { sort: false }
+  );
 };
 
 const replaceQueryStringInLocation = (location: Location, queryString: string): Location => {

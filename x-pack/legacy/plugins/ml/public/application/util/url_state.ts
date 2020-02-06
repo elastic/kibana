@@ -6,7 +6,7 @@
 
 import { useCallback } from 'react';
 import { isEqual } from 'lodash';
-import queryString from 'query-string';
+import { parse, stringify } from 'query-string';
 import { decode, encode } from 'rison-node';
 import { useHistory, useLocation } from 'react-router-dom';
 
@@ -32,7 +32,7 @@ function isRisonSerializationRequired(queryParam: string): boolean {
 
 export function getUrlState(search: string): Dictionary<any> {
   const urlState: Dictionary<any> = {};
-  const parsedQueryString: Record<string, any> = queryString.parse(search);
+  const parsedQueryString: Record<string, any> = parse(search, { sort: false });
 
   try {
     Object.keys(parsedQueryString).forEach(a => {
@@ -63,7 +63,7 @@ export const useUrlState = (accessor: string): UrlState => {
   const setUrlState = useCallback(
     (attribute: string | Dictionary<any>, value?: any) => {
       const urlState = getUrlState(search);
-      const parsedQueryString = queryString.parse(search);
+      const parsedQueryString = parse(search, { sort: false });
 
       if (!Object.prototype.hasOwnProperty.call(urlState, accessor)) {
         urlState[accessor] = {};
@@ -83,7 +83,7 @@ export const useUrlState = (accessor: string): UrlState => {
       }
 
       try {
-        const oldLocationSearch = queryString.stringify(parsedQueryString, { encode: false });
+        const oldLocationSearch = stringify(parsedQueryString, { encode: false, sort: false });
 
         Object.keys(urlState).forEach(a => {
           if (isRisonSerializationRequired(a)) {
@@ -92,11 +92,11 @@ export const useUrlState = (accessor: string): UrlState => {
             parsedQueryString[a] = urlState[a];
           }
         });
-        const newLocationSearch = queryString.stringify(parsedQueryString, { encode: false });
+        const newLocationSearch = stringify(parsedQueryString, { encode: false, sort: false });
 
         if (oldLocationSearch !== newLocationSearch) {
           history.push({
-            search: queryString.stringify(parsedQueryString),
+            search: stringify(parsedQueryString, { sort: false }),
           });
         }
       } catch (error) {

@@ -26,7 +26,7 @@ import moment from 'moment';
 import fetchMock from 'node-fetch';
 
 function parseUrlParams(url) {
-  return parseQueryString(parseURL(url).query);
+  return parseQueryString(parseURL(url).query, { sort: false });
 }
 
 jest.mock('node-fetch', () =>

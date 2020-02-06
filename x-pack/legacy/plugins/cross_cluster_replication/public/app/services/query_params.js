@@ -12,5 +12,5 @@ export function extractQueryParams(queryString) {
     return {};
   }
 
-  return parse(hrefSplit[1]);
+  return parse(hrefSplit[1], { sort: false });
 }

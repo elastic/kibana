@@ -8,8 +8,6 @@ import { isEqual } from 'lodash';
 import React, { FC, useCallback, useEffect, useState } from 'react';
 import { usePrevious } from 'react-use';
 import moment from 'moment';
-// @ts-ignore
-import queryString from 'query-string';
 
 import { i18n } from '@kbn/i18n';
 

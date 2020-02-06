@@ -22,16 +22,11 @@ const queryParamsFromObject = (params, encodeParams = false) => {
     return;
   }
 
-  const paramsStr = stringify(
-    params,
-    '&',
-    '=',
-    encodeParams
-      ? {}
-      : {
-          encodeURIComponent: val => val, // Don't encode special chars
-        }
-  );
+  const paramsStr = stringify(params, {
+    encode: encodeParams,
+    sort: false,
+  });
+
   return `?${paramsStr}`;
 };
 

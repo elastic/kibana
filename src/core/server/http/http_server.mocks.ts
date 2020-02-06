@@ -54,7 +54,7 @@ function createKibanaRequestMock({
   socket = new Socket(),
   routeTags,
 }: RequestFixtureOptions = {}) {
-  const queryString = stringify(query);
+  const queryString = stringify(query, { sort: false });
 
   return KibanaRequest.from(
     createRawRequestMock({

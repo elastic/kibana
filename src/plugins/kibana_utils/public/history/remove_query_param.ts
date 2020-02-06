@@ -24,8 +24,10 @@ import { stringifyQueryString } from '../state_management/url/stringify_query_st
 export function removeQueryParam(history: History, param: string, replace: boolean = true) {
   const oldLocation = history.location;
   const search = (oldLocation.search || '').replace(/^\?/, '');
-  const query = parse(search);
+  const query = parse(search, { sort: false });
+
   delete query[param];
+
   const newSearch = stringifyQueryString(query);
   const newLocation: Location<any> = {
     ...oldLocation,

@@ -108,7 +108,7 @@ export default class TransformObjStream extends Stream.Transform {
         contentLength: contentLength,
       };
 
-      const query = querystring.stringify(event.query);
+      const query = querystring.stringify(event.query, { sort: false });
       if (query) data.req.url += '?' + query;
 
       data.message = data.req.method.toUpperCase() + ' ';

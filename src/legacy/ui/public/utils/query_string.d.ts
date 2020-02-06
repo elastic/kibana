@@ -18,8 +18,6 @@
  */
 
 declare class QueryStringClass {
-  public decode(queryString: string): any;
-  public encode(obj: any): string;
   public param(key: string, value: string): string;
 }
 

@@ -31,7 +31,9 @@ export class WithURLStateComponent<URLState extends object> extends React.Compon
 > {
   private get URLState(): URLState {
     // slice because parse does not account for the initial ? in the search string
-    return parse(decodeURIComponent(this.props.history.location.search).substring(1)) as URLState;
+    return parse(decodeURIComponent(this.props.history.location.search).substring(1), {
+      sort: false,
+    }) as URLState;
   }
 
   private historyListener: (() => void) | null = null;
@@ -63,10 +65,13 @@ export class WithURLStateComponent<URLState extends object> extends React.Compon
       newState = state;
     }
 
-    const search: string = stringify({
-      ...pastState,
-      ...newState,
-    });
+    const search: string = stringify(
+      {
+        ...pastState,
+        ...newState,
+      },
+      { sort: false }
+    );
 
     const newLocation = {
       ...this.props.history.location,
