@@ -449,12 +449,12 @@ export class ExplorerChartSingleMetric extends React.Component {
                 {
                   defaultMessage:
                     '{ numberOfCauses, plural, one {# unusual {byFieldName} value} other {#{plusSign} unusual {byFieldName} values}}',
-                },
-                {
-                  numberOfCauses: marker.numberOfCauses,
-                  byFieldName: marker.byFieldName,
-                  // Maximum of 10 causes are stored in the record, so '10' may mean more than 10.
-                  plusSign: marker.numberOfCauses < 10 ? '' : '+',
+                  values: {
+                    numberOfCauses: marker.numberOfCauses,
+                    byFieldName: marker.byFieldName,
+                    // Maximum of 10 causes are stored in the record, so '10' may mean more than 10.
+                    plusSign: marker.numberOfCauses < 10 ? '' : '+',
+                  },
                 }
               ),
               seriesKey,

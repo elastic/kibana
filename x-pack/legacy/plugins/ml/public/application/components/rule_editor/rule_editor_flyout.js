@@ -104,8 +104,8 @@ class RuleEditorFlyoutUI extends Component {
           {
             defaultMessage:
               'Unable to configure rules as an error occurred obtaining details for job ID {jobId}',
-          },
-          { jobId: anomaly.jobId }
+            values: { jobId: anomaly.jobId },
+          }
         )
       );
       this.setState({
@@ -421,8 +421,8 @@ class RuleEditorFlyoutUI extends Component {
           'xpack.ml.ruleEditor.ruleEditorFlyout.errorWithDeletingRuleFromJobDetectorNotificationMessage',
           {
             defaultMessage: 'Error deleting rule from {jobId} detector',
-          },
-          { jobId }
+            values: { jobId },
+          }
         );
         if (error.message) {
           errorMessage += ` : ${error.message}`;
@@ -441,8 +441,8 @@ class RuleEditorFlyoutUI extends Component {
               'xpack.ml.ruleEditor.ruleEditorFlyout.addedItemToFilterListNotificationMessageTitle',
               {
                 defaultMessage: 'Added {item} to {filterId}',
-              },
-              { item, filterId }
+                values: { item, filterId },
+              }
             ),
             color: 'success',
             iconType: 'check',

@@ -247,15 +247,12 @@ export class ForecastsTable extends Component {
           defaultMessage: 'Processing time',
         }),
         render: ms =>
-          i18n.translate(
-            'xpack.ml.jobsList.jobDetails.forecastsTable.msTimeUnitLabel',
-            {
-              defaultMessage: '{ms} ms',
-            },
-            {
+          i18n.translate('xpack.ml.jobsList.jobDetails.forecastsTable.msTimeUnitLabel', {
+            defaultMessage: '{ms} ms',
+            values: {
               ms,
-            }
-          ),
+            },
+          }),
         sortable: true,
       },
       {

@@ -119,9 +119,9 @@ export class EditFilterListUI extends Component {
             'xpack.ml.settings.filterLists.editFilterList.loadingDetailsOfFilterErrorMessage',
             {
               defaultMessage: 'An error occurred loading details of filter {filterId}',
-            },
-            {
-              filterId,
+              values: {
+                filterId,
+              },
             }
           )
         );
