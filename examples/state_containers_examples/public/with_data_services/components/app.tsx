@@ -54,6 +54,7 @@ import {
   syncState,
 } from '../../../../../src/plugins/kibana_utils/public';
 import { PLUGIN_ID, PLUGIN_NAME } from '../../../common';
+import { Query } from '../../../../../src/plugins/data/common/query/types';
 
 interface StateDemoAppDeps {
   notifications: CoreStart['notifications'];
@@ -66,6 +67,7 @@ interface StateDemoAppDeps {
 
 interface AppState extends QueryAppState {
   name: string;
+  query?: Query;
 }
 const defaultAppState: AppState = {
   name: '',
@@ -118,6 +120,10 @@ const App = ({
             appName={PLUGIN_ID}
             showSearchBar={true}
             indexPatterns={[indexPattern]}
+            useDefaultBehaviors={true}
+            // TODO: would be cool to also get rid of this query syncing
+            onQuerySubmit={({ query }) => appStateContainer.set({ ...appState, query })}
+            query={appState.query}
           />
           <EuiPage restrictWidth="1000px">
             <EuiPageBody>
