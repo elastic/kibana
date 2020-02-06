@@ -19,15 +19,13 @@
 
 import { LiteralTypeBuildNode } from './types';
 
-type LiteralNodeValue = null | boolean | number | string;
-
-export function buildNode(value: LiteralNodeValue): LiteralTypeBuildNode {
+export function buildNode(value: LiteralTypeBuildNode['value']): LiteralTypeBuildNode {
   return {
     type: 'literal',
     value,
   };
 }
 
-export function toElasticsearchQuery(node: LiteralTypeBuildNode): LiteralNodeValue {
+export function toElasticsearchQuery(node: LiteralTypeBuildNode): LiteralTypeBuildNode['value'] {
   return node.value;
 }
