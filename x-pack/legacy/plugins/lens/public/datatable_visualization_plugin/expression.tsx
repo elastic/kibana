@@ -10,7 +10,6 @@ import { i18n } from '@kbn/i18n';
 import { EuiBasicTable } from '@elastic/eui';
 import { LensMultiTable } from '../types';
 import {
-  KibanaDatatable,
   ExpressionFunctionDefinition,
   ExpressionRenderDefinition,
   IInterpreterRenderHandlers,
@@ -24,7 +23,7 @@ export interface DatatableColumns {
 
 interface Args {
   title: string;
-  columns: DatatableColumns;
+  columns: DatatableColumns & { type: 'lens_datatable_columns' };
 }
 
 export interface DatatableProps {
@@ -40,12 +39,13 @@ export interface DatatableRender {
 
 export const datatable: ExpressionFunctionDefinition<
   'lens_datatable',
-  KibanaDatatable,
+  LensMultiTable,
   Args,
   DatatableRender
 > = {
   name: 'lens_datatable',
   type: 'render',
+  inputTypes: ['lens_multitable'],
   help: i18n.translate('xpack.lens.datatable.expressionHelpLabel', {
     defaultMessage: 'Datatable renderer',
   }),
@@ -57,14 +57,11 @@ export const datatable: ExpressionFunctionDefinition<
       }),
     },
     columns: {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      types: ['lens_datatable_columns'] as any,
+      types: ['lens_datatable_columns'],
       help: '',
     },
   },
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  inputTypes: ['lens_multitable'] as any,
-  fn(data: KibanaDatatable, args: Args) {
+  fn(data, args) {
     return {
       type: 'render',
       as: 'lens_datatable_renderer',

@@ -22,6 +22,7 @@ import {
   IInterpreterRenderHandlers,
   ExpressionRenderDefinition,
   ExpressionFunctionDefinition,
+  ExpressionValueSearchContext,
 } from 'src/plugins/expressions/public';
 import { EuiIcon, EuiText, IconType, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -54,12 +55,13 @@ type XYChartRenderProps = XYChartProps & {
 
 export const xyChart: ExpressionFunctionDefinition<
   'lens_xy_chart',
-  LensMultiTable,
+  LensMultiTable | ExpressionValueSearchContext | null,
   XYArgs,
   XYRender
 > = {
   name: 'lens_xy_chart',
   type: 'render',
+  inputTypes: ['lens_multitable', 'kibana_context', 'null'],
   help: i18n.translate('xpack.lens.xyChart.help', {
     defaultMessage: 'An X/Y chart',
   }),
@@ -73,8 +75,7 @@ export const xyChart: ExpressionFunctionDefinition<
       help: 'Y axis title',
     },
     legend: {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      types: ['lens_xy_legendConfig'] as any,
+      types: ['lens_xy_legendConfig'],
       help: i18n.translate('xpack.lens.xyChart.legend.help', {
         defaultMessage: 'Configure the chart legend.',
       }),
@@ -86,8 +87,6 @@ export const xyChart: ExpressionFunctionDefinition<
       multi: true,
     },
   },
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  inputTypes: ['lens_multitable', 'kibana_context', 'null'] as any,
   fn(data: LensMultiTable, args: XYArgs) {
     return {
       type: 'render',

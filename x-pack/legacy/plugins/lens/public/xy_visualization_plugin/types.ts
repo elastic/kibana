@@ -208,7 +208,7 @@ export type LayerArgs = LayerConfig & {
 export interface XYArgs {
   xTitle: string;
   yTitle: string;
-  legend: LegendConfig;
+  legend: LegendConfig & { type: 'lens_xy_legendConfig' };
   layers: LayerArgs[];
 }
 
