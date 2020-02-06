@@ -17,11 +17,23 @@
  * under the License.
  */
 
+import { Vis, VisState } from './vis';
 import { VisType } from './types';
-import { IAggConfigs } from '../../legacy_imports';
-import { Status } from './legacy/update_status';
+import { IIndexPattern } from '../../../../../../plugins/data/common';
 
-export interface Vis {
+type InitVisStateType =
+  | Partial<VisState>
+  | Partial<Omit<VisState, 'type'> & { type: string }>
+  | string;
+
+export type VisImplConstructor = new (
+  indexPattern: IIndexPattern,
+  visState?: InitVisStateType
+) => VisImpl;
+
+export declare class VisImpl implements Vis {
+  constructor(indexPattern: IIndexPattern, visState?: InitVisStateType);
+
   type: VisType;
 
   // Since we haven't typed everything here yet, we basically "any" the rest
@@ -29,22 +41,4 @@ export interface Vis {
   // has been completed. But that way we at least have typing for a couple of
   // properties on that type.
   [key: string]: any;
-}
-
-export interface VisParams {
-  [key: string]: any;
-}
-
-export interface VisState {
-  title: string;
-  type: VisType;
-  params: VisParams;
-  aggs: IAggConfigs;
-}
-
-export declare class VisualizationController {
-  constructor(element: HTMLElement, vis: Vis);
-  public render(visData: any, visParams: any, update: { [key in Status]: boolean }): Promise<void>;
-  public destroy(): void;
-  public isLoaded?(): Promise<void> | void;
 }

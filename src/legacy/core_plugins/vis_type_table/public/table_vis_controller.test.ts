@@ -30,7 +30,10 @@ import { initTableVisLegacyModule } from './table_vis_legacy_module';
 import { npStart, IAggConfig, tabifyAggResponse } from './legacy_imports';
 import { tableVisTypeDefinition } from './table_vis_type';
 import { Vis } from '../../visualizations/public';
-import { setup as visualizationsSetup } from '../../visualizations/public/np_ready/public/legacy';
+import {
+  setup as visualizationsSetup,
+  start as visualizationsStart,
+} from '../../visualizations/public/np_ready/public/legacy';
 // eslint-disable-next-line
 import { stubFields } from '../../../../plugins/data/public/stubs';
 // eslint-disable-next-line
@@ -112,7 +115,7 @@ describe('Table Vis - Controller', () => {
 
   function getRangeVis(params?: object) {
     // @ts-ignore
-    return new Vis(stubIndexPattern, {
+    return new visualizationsStart.Vis(stubIndexPattern, {
       type: 'table',
       params: params || {},
       aggs: [
