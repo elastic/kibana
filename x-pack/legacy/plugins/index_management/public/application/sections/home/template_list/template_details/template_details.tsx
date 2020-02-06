@@ -34,8 +34,8 @@ import { Template } from '../../../../../../common/types';
 import { TemplateDeleteModal, SectionLoading, SectionError, Error } from '../../../../components';
 import { loadIndexTemplate } from '../../../../services/api';
 import { decodePath } from '../../../../services/routing';
-import { uiMetricService } from '../../../../services/ui_metric';
 import { SendRequestResponse } from '../../../../../shared_imports';
+import { useServices } from '../../../../app_context';
 import { TabSummary, TabMappings, TabSettings, TabAliases } from './tabs';
 
 interface Props {
@@ -101,6 +101,7 @@ export const TemplateDetails: React.FunctionComponent<Props> = ({
   cloneTemplate,
   reload,
 }) => {
+  const { uiMetric } = useServices();
   const decodedTemplateName = decodePath(templateName);
   const { error, data: templateDetails, isLoading } = loadIndexTemplate(decodedTemplateName);
   // TS complains if we use destructuring here. Fixed in 3.6.0 (https://github.com/microsoft/TypeScript/pull/31711).
@@ -164,7 +165,7 @@ export const TemplateDetails: React.FunctionComponent<Props> = ({
           {TABS.map(tab => (
             <EuiTab
               onClick={() => {
-                uiMetricService.trackMetric('click', tabToUiMetricMap[tab.id]);
+                uiMetric.trackMetric('click', tabToUiMetricMap[tab.id]);
                 setActiveTab(tab.id);
               }}
               isSelected={tab.id === activeTab}

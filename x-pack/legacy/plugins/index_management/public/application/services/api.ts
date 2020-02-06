@@ -34,7 +34,7 @@ import {
 
 import { TAB_SETTINGS, TAB_MAPPING, TAB_STATS } from '../constants';
 
-import { uiMetricService } from './ui_metric';
+import { getUiMetricServiceInstance } from './ui_metric';
 import { useRequest, sendRequest } from './use_request';
 import { httpService } from './http';
 import { Template } from '../../../common/types';

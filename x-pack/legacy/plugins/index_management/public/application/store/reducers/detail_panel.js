@@ -19,7 +19,7 @@ import {
   TAB_STATS,
   TAB_EDIT_SETTINGS,
 } from '../../constants';
-import { uiMetricService } from '../../services/ui_metric';
+import { getUiMetricServiceInstance } from '../../services/ui_metric';
 import { openDetailPanel, closeDetailPanel } from '../actions/detail_panel';
 import { loadIndexDataSuccess } from '../actions/load_index_data';
 import {
@@ -29,6 +29,8 @@ import {
 import { deleteIndicesSuccess } from '../actions/delete_indices';
 
 const defaultState = {};
+
+const uiMetricService = getUiMetricServiceInstance();
 
 export const detailPanel = handleActions(
   {
