@@ -65,7 +65,6 @@ export function registerResolverRoutes(router: IRouter, endpointAppContext: Endp
           ),
         });
       } catch (err) {
-        // TODO add boom?
         return res.internalError({ body: err });
       }
     }
@@ -108,7 +107,6 @@ export function registerResolverRoutes(router: IRouter, endpointAppContext: Endp
           ),
         });
       } catch (err) {
-        // TODO add boom?
         return res.internalError({ body: err });
       }
     }

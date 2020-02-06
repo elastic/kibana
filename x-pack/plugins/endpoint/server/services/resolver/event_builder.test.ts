@@ -8,6 +8,7 @@ import { ResolverData } from '../../../common/types';
 
 export interface EventBuilder {
   originEntityID: number;
-  buildEvent(entityID: number): ResolverData;
+  originParentEntityID: number;
+  buildEvent(entityID: number, parentEntityID: number): ResolverData;
   startingChildrenEntityID(): number;
 }

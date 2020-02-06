@@ -10,15 +10,15 @@ export class Phase0Builder implements EventBuilder {
   constructor(
     public readonly endpointID: string,
     public readonly originEntityID: number,
-    public parentID: number
+    public readonly originParentEntityID: number
   ) {}
-  buildEvent(entityID: number): ResolverData {
+  buildEvent(entityID: number, parentEntityID: number): ResolverData {
     return {
       endgame: {
         event_type_full: 'process_event',
         event_subtype_full: 'creation_event',
         unique_pid: entityID,
-        unique_ppid: this.parentID,
+        unique_ppid: parentEntityID,
       },
       agent: {
         id: this.endpointID,

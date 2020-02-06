@@ -59,7 +59,8 @@ function buildResolverHits(
   let nodeIter = builder.startingChildrenEntityID();
   for (; nodeIter < numNodes + builder.startingChildrenEntityID(); nodeIter++) {
     for (let i = 0; i < eventsPerNode; i++) {
-      const event = builder.buildEvent(nodeIter);
+      // set the parent entity ID to the origin's entityID
+      const event = builder.buildEvent(nodeIter, builder.originEntityID);
       hits.push({
         _source: event,
       });
@@ -69,7 +70,7 @@ function buildResolverHits(
 
   // build the events for the origin
   for (let i = 0; i < eventsPerNode; i++) {
-    const event = builder.buildEvent(builder.originEntityID);
+    const event = builder.buildEvent(builder.originEntityID, builder.originParentEntityID);
     hits.push({
       _source: event,
     });
@@ -98,7 +99,11 @@ function buildResolverP1Hits(
   numNodes: number,
   eventsPerNode: number
 ): BuiltHits {
-  return buildResolverHits(new Phase1Builder(Number(entityID), parentID), numNodes, eventsPerNode);
+  return buildResolverHits(
+    new Phase1Builder(Number(entityID), Number(parentID)),
+    numNodes,
+    eventsPerNode
+  );
 }
 
 function createTotal(total: number, relationEqual: boolean): Total {
@@ -127,7 +132,6 @@ describe('build resolver node and related event responses', () => {
   let endpointContext: EndpointAppContext;
   let total: number;
   let hits: ResolverDataHit[];
-  let children: ResolverData[];
   let origin: ResolverData[];
   beforeEach(() => {
     mockScopedClient = elasticsearchServiceMock.createScopedClusterClient();
@@ -148,7 +152,7 @@ describe('build resolver node and related event responses', () => {
 
     describe('single node retrieval', () => {
       beforeEach(() => {
-        ({ total, hits, children, origin } = buildResolverP1Hits(
+        ({ total, hits, origin } = buildResolverP1Hits(
           entityID,
           parentEntityID,
           // 0 nodes should be created because it's a request for only the specific node
@@ -175,7 +179,7 @@ describe('build resolver node and related event responses', () => {
     });
     describe('multiple node retrieval', () => {
       beforeEach(() => {
-        ({ total, hits, children, origin } = buildResolverP1Hits(entityID, parentEntityID, 3, 3));
+        ({ total, hits, origin } = buildResolverP1Hits(entityID, parentEntityID, 3, 3));
       });
       it('sets the response correctly for a node retrieval', async () => {
         const pageInfo = buildPageInfo(1, 50);
@@ -193,23 +197,60 @@ describe('build resolver node and related event responses', () => {
         expect(res.origin.events).toStrictEqual(origin);
         // built 3 children nodes in before each call
         expect(res.children.length).toBe(3);
+        for (const child of res.children) {
+          // 3 events per child node
+          expect(child.events.length).toBe(3);
+          expect(child.parent_entity_id).toBe(entityID);
+        }
         await checkPagination(res, endpointContext, total, pageInfo);
       });
     });
   });
 
   describe('phase 0 responses', () => {
-    const phase0ID = 'endgame|12345|5';
-    const { endpointID, uniquePID } = parsePhase0EntityID(phase0ID);
+    const originEntityID = 'endgame|12345|5';
+    const { endpointID, uniquePID } = parsePhase0EntityID(originEntityID);
     const uniquePIDNum = Number(uniquePID);
     const parentUniquePID = 999;
-    const parentID = buildPhase0EntityID(endpointID, parentUniquePID);
+    const originParentEntityID = buildPhase0EntityID(endpointID, parentUniquePID);
     describe('multiple node retrieval', () => {
-      // TODO multiple phase 0 nodes in a response
+      beforeEach(() => {
+        ({ total, hits, origin } = buildResolverP0Hits(
+          endpointID,
+          uniquePIDNum,
+          parentUniquePID,
+          3,
+          4
+        ));
+      });
+      it('sets the response correctly for a node retrieval', async () => {
+        const pageInfo = buildPageInfo(1, 50);
+        const handler = new ResolverSearchHandler(
+          mockScopedClient,
+          endpointContext,
+          pageInfo,
+          {},
+          originEntityID
+        );
+
+        const res = await handler.buildChildrenResponse(hits, createTotal(total, true));
+        expect(res.origin.parent_entity_id).toBe(originParentEntityID);
+        expect(res.origin.entity_id).toBe(originEntityID);
+        expect(res.origin.events).toStrictEqual(origin);
+        // built 3 children nodes in before each call
+        expect(res.children.length).toBe(3);
+        for (const child of res.children) {
+          // 4 events per child node
+          expect(child.events.length).toBe(4);
+          // the parent of the children should be the origin's entity id
+          expect(child.parent_entity_id).toBe(originEntityID);
+        }
+        await checkPagination(res, endpointContext, total, pageInfo);
+      });
     });
     describe('single node retrieval', () => {
       beforeEach(() => {
-        ({ total, hits, children, origin } = buildResolverP0Hits(
+        ({ total, hits, origin } = buildResolverP0Hits(
           endpointID,
           uniquePIDNum,
           parentUniquePID,
@@ -225,12 +266,12 @@ describe('build resolver node and related event responses', () => {
           endpointContext,
           pageInfo,
           {},
-          phase0ID
+          originEntityID
         );
 
         const res = await handler.buildNodeResponse(hits, createTotal(total, true));
-        expect(res.node.parent_entity_id).toBe(parentID);
-        expect(res.node.entity_id).toBe(phase0ID);
+        expect(res.node.parent_entity_id).toBe(originParentEntityID);
+        expect(res.node.entity_id).toBe(originEntityID);
         expect(res.node.events).toStrictEqual(origin);
         await checkPagination(res, endpointContext, total, pageInfo);
       });
@@ -242,7 +283,7 @@ describe('build resolver node and related event responses', () => {
           endpointContext,
           pageInfo,
           {},
-          phase0ID
+          originEntityID
         );
 
         const res = await handler.buildNodeResponse(hits, createTotal(total, true));
@@ -259,7 +300,7 @@ describe('build resolver node and related event responses', () => {
           endpointContext,
           pageInfo,
           {},
-          phase0ID
+          originEntityID
         );
         const res = await handler.buildNodeResponse(hits, createTotal(total, false));
 
