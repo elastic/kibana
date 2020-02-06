@@ -552,15 +552,15 @@ _How to test ES clients_
 
 In the new platform, all plugin's dependencies to other plugins are explicitly declared in their `kibana.json`
 manifest. As for `core`, the dependencies `setup` and `start` contracts are injected in your plugin's respective 
-`setup` and `start` phases. One of the upside regarding testing is that every usage of the dependencies is explicit,
+`setup` and `start` phases. One of the upsides with testing is that every usage of the dependencies is explicit,
 and that the plugin's contracts must be propagated to the parts of the code using them, meaning that isolating a 
 specific logical component for unit testing is way easier than in legacy.
 
 The approach to test parts of a plugin's code that is relying on other plugins is quite similar to testing
 code using `core` APIs: it's expected to mock the dependency, and make it return the value the test is expecting.
 
-Most plugins are defining mocks for their contracts. The convention is to expose them in a `mocks` file at 
-the `public/server` level. For example for the `data` plugin, the client-side mocks are located in 
+Most plugins are defining mocks for their contracts. The convention is to expose them in a `mocks` file  in 
+`my_plugin/server` and/or `my_plugin/public`. For example for the `data` plugin, the client-side mocks are located in 
 `src/plugins/data/public/mocks.ts`. When such mocks are present, it's strongly recommended to use them
 when testing against dependencies. Otherwise, one should create it's own mocked implementation of the dependency's
 contract (and should probably ping the plugin's owner to ask them to add proper contract mocks).
