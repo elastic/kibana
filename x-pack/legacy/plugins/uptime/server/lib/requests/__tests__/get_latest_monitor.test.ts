@@ -11,7 +11,7 @@ describe('getLatestMonitor', () => {
   let mockEsSearchResult: any;
   beforeEach(() => {
     expectedGetLatestSearchParams = {
-      index: 'heartbeat-8*',
+      index: 'heartbeat*',
       body: {
         query: {
           bool: {

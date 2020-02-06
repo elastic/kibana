@@ -43,7 +43,7 @@ describe('getAll', () => {
       },
     };
     expectedGetAllParams = {
-      index: 'heartbeat-8*',
+      index: 'heartbeat*',
       body: {
         query: {
           bool: {
