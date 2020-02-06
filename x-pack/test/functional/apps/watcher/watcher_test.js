@@ -38,13 +38,13 @@ export default function({ getService, getPageObjects }) {
       await browser.setWindowSize(1600, 1000);
 
       // License values are emitted ES -> Kibana Server -> Kibana Public. The current implementation
-      // creates a situation the Watcher plugin may not have received a minimum required license at setup time
+      // creates a situation where the Watcher plugin may not have received a minimum required license at setup time
       // so the public app may not have registered in the UI.
       //
       // For functional testing this is a problem. The temporary solution is we wait for watcher
       // to be visible.
       //
-      // See this issue https://github.com/elastic/kibana/issues/55985 for future resolution.
+      // See this issue https://github.com/elastic/kibana/issues/55985.
       await retry.waitFor('watcher to display in management UI', async () => {
         try {
           await PageObjects.common.navigateToApp('watcher');
