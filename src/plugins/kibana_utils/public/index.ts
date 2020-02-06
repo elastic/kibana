@@ -25,7 +25,7 @@ export {
   Get,
   Set,
   UiComponent,
-  UiComponentInstance
+  UiComponentInstance,
 } from '../common';
 export * from './core';
 export * from './errors';
