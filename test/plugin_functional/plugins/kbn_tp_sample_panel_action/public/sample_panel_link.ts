@@ -17,10 +17,10 @@
  * under the License.
  */
 import { npStart } from 'ui/new_platform';
-import { IAction, createAction } from '../../../../../src/plugins/ui_actions/public';
+import { Action, createAction } from '../../../../../src/plugins/ui_actions/public';
 import { CONTEXT_MENU_TRIGGER } from '../../../../../src/plugins/embeddable/public';
 
-export const createSamplePanelLink = (): IAction =>
+export const createSamplePanelLink = (): Action =>
   createAction({
     type: 'samplePanelLink',
     getDisplayName: () => 'Sample panel Link',
