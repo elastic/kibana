@@ -238,21 +238,40 @@ export class AlertsClient {
   }
 
   public async update({ id, data }: UpdateOptions): Promise<PartialAlert> {
-    const decryptedAlertSavedObject = await this.encryptedSavedObjectsPlugin.getDecryptedAsInternalUser<
-      RawAlert
-    >('alert', id, { namespace: this.namespace });
-    const updateResult = await this.updateAlert({ id, data }, decryptedAlertSavedObject);
+    let alertSavedObject: SavedObject<RawAlert>;
 
-    if (
-      updateResult.scheduledTaskId &&
-      !isEqual(decryptedAlertSavedObject.attributes.schedule, updateResult.schedule)
-    ) {
-      this.taskManager.runNow(updateResult.scheduledTaskId).catch((err: Error) => {
-        this.logger.error(
-          `Alert update failed to run its underlying task. TaskManager runNow failed with Error: ${err.message}`
-        );
-      });
+    try {
+      alertSavedObject = await this.encryptedSavedObjectsPlugin.getDecryptedAsInternalUser<
+        RawAlert
+      >('alert', id, { namespace: this.namespace });
+    } catch (e) {
+      // We'll skip invalidating the API key since we failed to load the decrypted saved object
+      this.logger.error(
+        `update(): Failed to load API key to invalidate on alert ${id}: ${e.message}`
+      );
+      // Still attempt to load the object using SOC
+      alertSavedObject = await this.savedObjectsClient.get<RawAlert>('alert', id);
     }
+
+    const updateResult = await this.updateAlert({ id, data }, alertSavedObject);
+
+    await Promise.all([
+      alertSavedObject.attributes.apiKey
+        ? this.invalidateApiKey({ apiKey: alertSavedObject.attributes.apiKey })
+        : null,
+      (async () => {
+        if (
+          updateResult.scheduledTaskId &&
+          !isEqual(alertSavedObject.attributes.schedule, updateResult.schedule)
+        ) {
+          this.taskManager.runNow(updateResult.scheduledTaskId).catch((err: Error) => {
+            this.logger.error(
+              `Alert update failed to run its underlying task. TaskManager runNow failed with Error: ${err.message}`
+            );
+          });
+        }
+      })(),
+    ]);
 
     return updateResult;
   }
@@ -287,8 +306,6 @@ export class AlertsClient {
         references,
       }
     );
-
-    await this.invalidateApiKey({ apiKey: attributes.apiKey });
 
     return this.getPartialAlertFromRaw(
       id,
