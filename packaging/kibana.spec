@@ -50,7 +50,7 @@ cd %{name}
 #run the build
 #cd ../../
 /usr/bin/yarn kbn bootstrap
-node scripts/build --rpm --oss --skip-archives --release --verbose
+node scripts/build --rpm --oss --skip-archives --release --verbose --allow-root
 
 %install
 cd %{name}
