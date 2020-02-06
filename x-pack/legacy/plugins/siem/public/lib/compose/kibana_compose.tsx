@@ -7,29 +7,26 @@
 import { InMemoryCache, IntrospectionFragmentMatcher } from 'apollo-cache-inmemory';
 import ApolloClient from 'apollo-client';
 import { ApolloLink } from 'apollo-link';
-import 'ui/autoload/all';
-// @ts-ignore: path dynamic for kibana
-import { uiModules } from 'ui/modules';
 
 import introspectionQueryResultData from '../../graphql/introspection.json';
+import { CoreStart } from '../../plugin';
 import { AppFrontendLibs } from '../lib';
 import { getLinks } from './helpers';
 
-export function compose(): AppFrontendLibs {
+export function compose(core: CoreStart): AppFrontendLibs {
   const cache = new InMemoryCache({
     dataIdFromObject: () => null,
     fragmentMatcher: new IntrospectionFragmentMatcher({
       introspectionQueryResultData,
     }),
   });
+  const basePath = core.http.basePath.get();
 
-  const graphQLOptions = {
+  const apolloClient = new ApolloClient({
     connectToDevTools: process.env.NODE_ENV !== 'production',
     cache,
-    link: ApolloLink.from(getLinks(cache)),
-  };
-
-  const apolloClient = new ApolloClient(graphQLOptions);
+    link: ApolloLink.from(getLinks(cache, basePath)),
+  });
 
   const libs: AppFrontendLibs = {
     apolloClient,

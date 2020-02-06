@@ -211,14 +211,14 @@ function EditorUI({ initialTextValue }: EditorProps) {
           <EuiFlexItem>
             <EuiToolTip
               content={i18n.translate('console.sendRequestButtonTooltip', {
-                defaultMessage: 'click to send request',
+                defaultMessage: 'Click to send request',
               })}
             >
               <button
                 onClick={sendCurrentRequestToES}
                 data-test-subj="sendRequestButton"
                 aria-label={i18n.translate('console.sendRequestButtonTooltip', {
-                  defaultMessage: 'click to send request',
+                  defaultMessage: 'Click to send request',
                 })}
                 className="conApp__editorActionButton conApp__editorActionButton--success"
               >

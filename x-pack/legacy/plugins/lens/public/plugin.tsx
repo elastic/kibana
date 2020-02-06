@@ -30,9 +30,9 @@ import {
   stopReportManager,
   trackUiEvent,
 } from './lens_ui_telemetry';
-import { NOT_INTERNATIONALIZED_PRODUCT_NAME } from '../common';
 import { KibanaLegacySetup } from '../../../../../src/plugins/kibana_legacy/public';
 import { EditorFrameStart } from './types';
+import { NOT_INTERNATIONALIZED_PRODUCT_NAME } from '../../../../plugins/lens/common';
 import {
   addEmbeddableToDashboardUrl,
   getUrlVars,
@@ -40,7 +40,7 @@ import {
 } from '../../../../../src/legacy/core_plugins/kibana/public/dashboard/np_ready/url_helper';
 
 export interface LensPluginSetupDependencies {
-  kibana_legacy: KibanaLegacySetup;
+  kibanaLegacy: KibanaLegacySetup;
 }
 
 export interface LensPluginStartDependencies {
@@ -59,7 +59,7 @@ export class LensPlugin {
 
   constructor() {}
 
-  setup(core: CoreSetup, { kibana_legacy }: LensPluginSetupDependencies) {
+  setup(core: CoreSetup, { kibanaLegacy }: LensPluginSetupDependencies) {
     const indexPattern = indexPatternDatasourceSetup();
     const datatableVisualization = datatableVisualizationSetup();
     const xyVisualization = xyVisualizationSetup();
@@ -71,7 +71,7 @@ export class LensPlugin {
     editorFrameSetupInterface.registerVisualization(metricVisualization);
     editorFrameSetupInterface.registerDatasource(indexPattern);
 
-    kibana_legacy.registerLegacyApp({
+    kibanaLegacy.registerLegacyApp({
       id: 'lens',
       title: NOT_INTERNATIONALIZED_PRODUCT_NAME,
       mount: async (context, params) => {
