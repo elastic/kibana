@@ -40,6 +40,8 @@ interface State {
   };
   query: Query;
   savedQuery?: SavedQuery;
+
+  filters: esFilters.Filter[];
 }
 
 export function App({
@@ -82,16 +84,18 @@ export function App({
   const { lastKnownDoc } = state;
 
   useEffect(() => {
-    if (data.query.filterManager.getAppFilters().length > 0) {
-      data.query.filterManager.setFilters(data.query.filterManager.getGlobalFilters());
-    }
     const filterSubscription = data.query.filterManager.getUpdates$().subscribe({
       next: () => {
-        // Trigger a re-render, since filters are no longer tracked on state
-        setState(s => ({ ...s }));
+        setState(s => ({ ...s, filters: data.query.filterManager.getFilters() }));
         trackUiEvent('app_filters_updated');
       },
     });
+
+    // If Lens was opened from another app, unpinned filters need to be cleared
+    if (data.query.filterManager.getAppFilters().length > 0) {
+      data.query.filterManager.setFilters(data.query.filterManager.getGlobalFilters());
+    }
+
     return () => {
       filterSubscription.unsubscribe();
     };
@@ -289,7 +293,7 @@ export function App({
               nativeProps={{
                 dateRange: state.dateRange,
                 query: state.query,
-                filters: data.query.filterManager.getFilters(),
+                filters: state.filters,
                 savedQuery: state.savedQuery,
                 doc: state.persistedDoc,
                 onError,
