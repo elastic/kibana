@@ -42,12 +42,13 @@ export class NewGroupInput extends Component {
     if (tempNewGroupName === '') {
       groupsValidationError = '';
     } else if (this.props.allJobIds.includes(tempNewGroupName)) {
-      groupsValidationError =
-        ('xpack.ml.jobsList.multiJobActions.groupSelector.groupsAndJobsCanNotUseSameIdErrorMessage',
+      groupsValidationError = i18n.translate(
+        'xpack.ml.jobsList.multiJobActions.groupSelector.groupsAndJobsCanNotUseSameIdErrorMessage',
         {
           defaultMessage:
             'A job with this ID already exists. Groups and jobs cannot use the same ID.',
-        });
+        }
+      );
     } else {
       groupsValidationError = validateGroupNames([tempNewGroupName]).message;
     }
