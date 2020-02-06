@@ -6,19 +6,43 @@
 
 import * as ResizeObserverNamespace from 'resize-observer-polyfill';
 
-/**
- * A map of resize observers to the elements they observe.
- */
-let mockObserved: Map<ResizeObserver, Set<Element>> | undefined;
-/**
- * A map of resize observers to their callbacks.
- */
-let mockCallbacks: Map<ResizeObserver, ResizeObserverCallback> | undefined;
+interface MockState {
+  /**
+   * A map of resize observers to the elements they observe.
+   */
+  mockObserved: Map<ResizeObserver, Set<Element>>;
+  /**
+   * A map of resize observers to their callbacks.
+   */
+  mockCallbacks: Map<ResizeObserver, ResizeObserverCallback>;
+
+  /**
+   * TODO
+   */
+  mockContentRects: Map<Element, DOMRectReadOnly>;
+}
 
 /**
- * TODO
+ * Do not read directly, use `mockState`.
  */
-let mockContentRects: Map<Element, DOMRectReadOnly> | undefined;
+let _mockState: MockState | undefined;
+
+/**
+ * Lazily create mockState, as the jest mock of `resize-observer-polyfill` will be hoisted to the top of this file,
+ * it can only access lazily instantiated values which are created by other hoisted code.  Use a function statement,
+ * these are hoisted.
+ * Mocking is bad.
+ */
+function mockState(): MockState {
+  if (!_mockState) {
+    _mockState = {
+      mockObserved: new Map(),
+      mockCallbacks: new Map(),
+      mockContentRects: new Map(),
+    };
+  }
+  return _mockState;
+}
 
 /**
  * Simulate an observed resize on `target`. Will trigger `ResizeObserver`'s and change its `getBoundingClientRect` return value.
@@ -46,18 +70,10 @@ export const simulateElementResize: (
         },
       };
 
-  if (!mockContentRects) {
-    mockContentRects = new Map();
-  }
-  if (!mockObserved) {
-    mockObserved = new Map();
-  }
-  if (!mockCallbacks) {
-    mockCallbacks = new Map();
-  }
   /**
    * Store the `contentRect` so that the mock implement of `getBoundingClientRect` can return it.
    */
+  const { mockContentRects, mockObserved, mockCallbacks } = mockState();
   mockContentRects.set(target, contentRect);
 
   for (const [resizeObserver, observedElements] of mockObserved.entries()) {
@@ -83,13 +99,10 @@ export const simulateElementResize: (
 
 const mockGetBoundingClientRectImplementation = function(this: Element) {
   if (this) {
-    if (!mockContentRects) {
-      mockContentRects = new Map();
-    }
     /**
      * If the element has a `contentRect` stored, use that.
      */
-    const mockedValue = mockContentRects.get(this);
+    const mockedValue = mockState().mockContentRects.get(this);
     if (mockedValue) {
       return mockedValue;
     }
@@ -118,22 +131,19 @@ export const setup: (ElementConstructor: typeof Element) => void = ElementConstr
 let MockResizeObserver: jest.Mock<ResizeObserver, [ResizeObserverCallback]> | null;
 
 export const clear: () => void = () => {
-  if (mockObserved) {
-    mockObserved.clear();
-  }
-  if (mockCallbacks) {
-    mockCallbacks.clear();
-  }
-  if (mockContentRects) {
-    mockContentRects.clear();
-  }
+  const { mockObserved, mockCallbacks, mockContentRects } = mockState();
+  mockObserved.clear();
+  mockCallbacks.clear();
+  mockContentRects.clear();
   if (MockResizeObserver) {
     MockResizeObserver.mockClear();
   }
 };
 
 type MockNamespace = jest.Mocked<typeof ResizeObserverNamespace> & {
-  // TODO is this needed, if so, why?
+  /**
+   * Without this, the object is not recognized as an ES6 module correctly.
+   */
   __esModule: true;
 };
 
@@ -146,9 +156,7 @@ jest.mock(
          * Add the element to the map so that later calls to `simulateElementResize` can trigger `callback`.
          */
         observe(target: Element) {
-          if (!mockObserved) {
-            mockObserved = new Map();
-          }
+          const { mockObserved } = mockState();
           const elements = mockObserved.get(this);
           if (elements) {
             elements.add(target);
@@ -160,9 +168,7 @@ jest.mock(
          * Remove the element from the map so that later calls to `simulateElementResize` will not trigger `callback`.
          */
         unobserve(target: Element) {
-          if (!mockObserved) {
-            mockObserved = new Map();
-          }
+          const { mockObserved } = mockState();
           const elements = mockObserved.get(this);
           if (elements) {
             elements.delete(target);
@@ -172,9 +178,7 @@ jest.mock(
          * Remove all elements from the map for this instance.
          */
         disconnect() {
-          if (!mockObserved) {
-            mockObserved = new Map();
-          }
+          const { mockObserved } = mockState();
           const elements = mockObserved.get(this);
           if (elements) {
             for (const target of elements) {
@@ -183,10 +187,7 @@ jest.mock(
           }
         },
       };
-      if (!mockCallbacks) {
-        mockCallbacks = new Map();
-      }
-      mockCallbacks.set(resizeObserver, callback);
+      mockState().mockCallbacks.set(resizeObserver, callback);
       return resizeObserver;
     });
     return {
