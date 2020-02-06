@@ -74,7 +74,7 @@ export class FieldFormatsRegistry {
    * Get a derived FieldFormat class by its id.
    *
    * @param  {FieldFormatId} formatId - the format id
-   * @return {FieldFormat | undefined}
+   * @return {IFieldFormatType | undefined}
    */
   getType = (formatId: FieldFormatId): IFieldFormatType | undefined => {
     const fieldFormat = this.fieldFormats.get(formatId);
@@ -97,7 +97,7 @@ export class FieldFormatsRegistry {
    *
    * @param  {KBN_FIELD_TYPES} fieldType
    * @param  {ES_FIELD_TYPES[]} esTypes - Array of ES data types
-   * @return {FieldFormat | undefined}
+   * @return {IFieldFormatType | undefined}
    */
   getDefaultType = (
     fieldType: KBN_FIELD_TYPES,
@@ -129,7 +129,7 @@ export class FieldFormatsRegistry {
    *
    * @param  {KBN_FIELD_TYPES} fieldType
    * @param  {ES_FIELD_TYPES[]} esTypes
-   * @return {ES_FIELD_TYPES | String}
+   * @return {ES_FIELD_TYPES | KBN_FIELD_TYPES}
    */
   getDefaultTypeName = (
     fieldType: KBN_FIELD_TYPES,
@@ -144,7 +144,7 @@ export class FieldFormatsRegistry {
    * Get the singleton instance of the FieldFormat type by its id.
    *
    * @param  {FieldFormatId} formatId
-   * @return {FIELD_FORMATS_INSTANCES[number]}
+   * @return {FieldFormat}
    */
   getInstance = memoize(
     (formatId: FieldFormatId, params: Record<string, any> = {}): FieldFormat => {
@@ -197,7 +197,7 @@ export class FieldFormatsRegistry {
    * Get filtered list of field formats by format type
    *
    * @param  {KBN_FIELD_TYPES} fieldType
-   * @return {FieldFormat[]}
+   * @return {IFieldFormatType[]}
    */
   getByFieldType(fieldType: KBN_FIELD_TYPES): IFieldFormatType[] {
     return [...this.fieldFormats.values()]
@@ -238,7 +238,7 @@ export class FieldFormatsRegistry {
    *
    * @private
    * @param  {IFieldFormatType} fieldFormat - field format type
-   * @return {FieldFormat | undefined}
+   * @return {IFieldFormatType | undefined}
    */
   private fieldFormatMetaParamsDecorator = (
     fieldFormat: IFieldFormatType
