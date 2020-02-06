@@ -27,7 +27,7 @@ export const renderApp = (
 
   render(
     <I18nContext>
-      <Provider store={indexManagementStore()}>
+      <Provider store={indexManagementStore({ uiMetricService: dependencies.services.uiMetric })}>
         <AppContextProvider value={dependencies}>
           <App />
         </AppContextProvider>

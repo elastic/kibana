@@ -19,7 +19,6 @@ import {
   TAB_STATS,
   TAB_EDIT_SETTINGS,
 } from '../../constants';
-import { getUiMetricServiceInstance } from '../../services/ui_metric';
 import { openDetailPanel, closeDetailPanel } from '../actions/detail_panel';
 import { loadIndexDataSuccess } from '../actions/load_index_data';
 import {
@@ -30,62 +29,61 @@ import { deleteIndicesSuccess } from '../actions/delete_indices';
 
 const defaultState = {};
 
-const uiMetricService = getUiMetricServiceInstance();
+export const getDetailPanelReducer = uiMetricService =>
+  handleActions(
+    {
+      [deleteIndicesSuccess](state, action) {
+        const { indexNames } = action.payload;
+        const { indexName } = state;
+        if (indexNames.includes(indexName)) {
+          return {};
+        } else {
+          return state;
+        }
+      },
+      [openDetailPanel](state, action) {
+        const { panelType, indexName, title } = action.payload;
 
-export const detailPanel = handleActions(
-  {
-    [deleteIndicesSuccess](state, action) {
-      const { indexNames } = action.payload;
-      const { indexName } = state;
-      if (indexNames.includes(indexName)) {
+        const panelTypeToUiMetricMap = {
+          [TAB_SUMMARY]: UIM_DETAIL_PANEL_SUMMARY_TAB,
+          [TAB_SETTINGS]: UIM_DETAIL_PANEL_SETTINGS_TAB,
+          [TAB_MAPPING]: UIM_DETAIL_PANEL_MAPPING_TAB,
+          [TAB_STATS]: UIM_DETAIL_PANEL_STATS_TAB,
+          [TAB_EDIT_SETTINGS]: UIM_DETAIL_PANEL_EDIT_SETTINGS_TAB,
+        };
+
+        if (panelTypeToUiMetricMap[panelType]) {
+          uiMetricService.trackMetric('count', panelTypeToUiMetricMap[panelType]);
+        }
+
+        return {
+          panelType: panelType || state.panelType || TAB_SUMMARY,
+          indexName,
+          title,
+        };
+      },
+      [closeDetailPanel]() {
         return {};
-      } else {
-        return state;
-      }
+      },
+      [loadIndexDataSuccess](state, action) {
+        const { data } = action.payload;
+        const newState = {
+          ...state,
+          data,
+        };
+        return newState;
+      },
+      [updateIndexSettingsError](state, action) {
+        const { error } = action.payload;
+        const newState = {
+          ...state,
+          error,
+        };
+        return newState;
+      },
+      [updateIndexSettingsSuccess]() {
+        return {};
+      },
     },
-    [openDetailPanel](state, action) {
-      const { panelType, indexName, title } = action.payload;
-
-      const panelTypeToUiMetricMap = {
-        [TAB_SUMMARY]: UIM_DETAIL_PANEL_SUMMARY_TAB,
-        [TAB_SETTINGS]: UIM_DETAIL_PANEL_SETTINGS_TAB,
-        [TAB_MAPPING]: UIM_DETAIL_PANEL_MAPPING_TAB,
-        [TAB_STATS]: UIM_DETAIL_PANEL_STATS_TAB,
-        [TAB_EDIT_SETTINGS]: UIM_DETAIL_PANEL_EDIT_SETTINGS_TAB,
-      };
-
-      if (panelTypeToUiMetricMap[panelType]) {
-        uiMetricService.trackMetric('count', panelTypeToUiMetricMap[panelType]);
-      }
-
-      return {
-        panelType: panelType || state.panelType || TAB_SUMMARY,
-        indexName,
-        title,
-      };
-    },
-    [closeDetailPanel]() {
-      return {};
-    },
-    [loadIndexDataSuccess](state, action) {
-      const { data } = action.payload;
-      const newState = {
-        ...state,
-        data,
-      };
-      return newState;
-    },
-    [updateIndexSettingsError](state, action) {
-      const { error } = action.payload;
-      const newState = {
-        ...state,
-        error,
-      };
-      return newState;
-    },
-    [updateIndexSettingsSuccess]() {
-      return {};
-    },
-  },
-  defaultState
-);
+    defaultState
+  );
