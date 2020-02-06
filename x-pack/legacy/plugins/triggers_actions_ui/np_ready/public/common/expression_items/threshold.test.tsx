@@ -15,7 +15,6 @@ describe('threshold expression', () => {
     const wrapper = shallow(
       <ThresholdExpression
         thresholdComparator={'between'}
-        defaultThresholdComparator={'between'}
         errors={{ threshold0: [] }}
         onChangeSelectedThreshold={onChangeSelectedThreshold}
         onChangeSelectedThresholdComparator={onChangeSelectedThresholdComparator}
@@ -60,7 +59,6 @@ describe('threshold expression', () => {
     const wrapper = shallow(
       <ThresholdExpression
         thresholdComparator={'between'}
-        defaultThresholdComparator={'between'}
         errors={{ threshold0: [] }}
         onChangeSelectedThreshold={onChangeSelectedThreshold}
         onChangeSelectedThresholdComparator={onChangeSelectedThresholdComparator}
