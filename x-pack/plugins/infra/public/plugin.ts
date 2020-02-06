@@ -26,7 +26,7 @@ import { registerFeatures } from './register_feature';
 import { HomePublicPluginSetup, HomePublicPluginStart } from '../../../../src/plugins/home/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
-import { DataEnhancedSetup, DataEnhancedStart } from '../../data_enhanced';
+import { DataEnhancedSetup, DataEnhancedStart } from '../../data_enhanced/public';
 
 export type ClientSetup = void;
 export type ClientStart = void;
@@ -88,6 +88,21 @@ export class Plugin
         const plugins = getMergedPlugins(pluginsSetup, pluginsStart as ClientPluginsStart);
         const { startApp } = await import('./apps/start_app');
         return startApp(this.composeLibs(coreStart, plugins), coreStart, plugins, params);
+      },
+    });
+
+    /* This exists purely to facilitate URL redirects from the old App ID ("infra"),
+    to our new App IDs ("metrics" and "logs"). With version 8.0.0 we can remove this. */
+    core.application.register({
+      id: 'infra',
+      appRoute: '/app/infra',
+      title: 'infra',
+      navLinkStatus: 3,
+      mount: async (params: AppMountParameters) => {
+        const [coreStart, pluginsStart] = await core.getStartServices();
+        const plugins = getMergedPlugins(pluginsSetup, pluginsStart as ClientPluginsStart);
+        const { startLegacyApp } = await import('./apps/start_legacy_app');
+        return startLegacyApp(plugins, params);
       },
     });
   }

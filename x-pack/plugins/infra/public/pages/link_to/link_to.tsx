@@ -19,21 +19,23 @@ interface LinkToPageProps {
 
 const ITEM_TYPES = inventoryModels.map(m => m.id).join('|');
 
-export const LinkToPage: React.FC<LinkToPageProps> = props => (
-  <Switch>
-    <Route
-      path={`${props.match.url}/:sourceId?/:nodeType(${ITEM_TYPES})-logs/:nodeId`}
-      component={RedirectToNodeLogs}
-    />
-    <Route
-      path={`${props.match.url}/:nodeType(${ITEM_TYPES})-detail/:nodeId`}
-      component={RedirectToNodeDetail}
-    />
-    <Route
-      path={`${props.match.url}/host-detail-via-ip/:hostIp`}
-      component={RedirectToHostDetailViaIP}
-    />
-    <Route path={`${props.match.url}/:sourceId?/logs`} component={RedirectToLogs} />
-    <Redirect to="/infrastructure" />
-  </Switch>
-);
+export const LinkToPage: React.FC<LinkToPageProps> = props => {
+  return (
+    <Switch>
+      <Route
+        path={`${props.match.url}/:sourceId?/:nodeType(${ITEM_TYPES})-logs/:nodeId`}
+        component={RedirectToNodeLogs}
+      />
+      <Route
+        path={`${props.match.url}/:nodeType(${ITEM_TYPES})-detail/:nodeId`}
+        component={RedirectToNodeDetail}
+      />
+      <Route
+        path={`${props.match.url}/host-detail-via-ip/:hostIp`}
+        component={RedirectToHostDetailViaIP}
+      />
+      <Route path={`${props.match.url}/:sourceId?/logs`} component={RedirectToLogs} />
+      <Redirect to="/infrastructure" />
+    </Switch>
+  );
+};

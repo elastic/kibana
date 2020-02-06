@@ -18,17 +18,18 @@ interface InfraQueryParams {
 }
 
 interface Props extends EuiLinkAnchorProps {
+  app: string;
   path?: string;
   query: InfraQueryParams;
   children?: React.ReactNode;
 }
 
-export function InfraLink({ path, query = {}, ...rest }: Props) {
+export function InfraLink({ app, path, query = {}, ...rest }: Props) {
   const { core } = useApmPluginContext();
   const nextSearch = fromQuery(query);
   const href = url.format({
-    pathname: core.http.basePath.prepend('/app/infra'),
-    hash: compact([path, nextSearch]).join('?')
+    pathname: core.http.basePath.prepend(`/app/${app}${path}`),
+    search: nextSearch
   });
   return <EuiLink {...rest} href={href} />;
 }

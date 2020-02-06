@@ -26,7 +26,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const expectedRedirectPath = '/logs/stream?';
 
       await pageObjects.common.navigateToUrlWithBrowserHistory(
-        'infraOps',
+        'infraLogs',
         location.pathname,
         location.search,
         {

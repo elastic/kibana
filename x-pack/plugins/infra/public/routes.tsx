@@ -25,17 +25,12 @@ export const PageRouter: React.FC<RouterProps> = ({ history }) => {
   return (
     <Router history={history}>
       <Switch>
-        {uiCapabilities?.infrastructure?.show && (
-          <RedirectWithQueryParams from="/" exact={true} to="/metrics/inventory" />
-        )}
+        <Route path="/(metrics|logs)/link-to" component={LinkToPage} />
         {uiCapabilities?.infrastructure?.show && (
           <RedirectWithQueryParams from="/metrics" exact={true} to="/metrics/inventory" />
         )}
         {uiCapabilities?.infrastructure?.show && (
           <RedirectWithQueryParams from="/metrics/snapshot" exact={true} to="/metrics/inventory" />
-        )}
-        {uiCapabilities?.infrastructure?.show && (
-          <RedirectWithQueryParams from="/home" exact={true} to="/metrics/inventory" />
         )}
         {uiCapabilities?.infrastructure?.show && (
           <RedirectWithQueryParams
@@ -54,7 +49,6 @@ export const PageRouter: React.FC<RouterProps> = ({ history }) => {
         {uiCapabilities?.infrastructure?.show && (
           <Route path="/metrics" component={InfrastructurePage} />
         )}
-        <Route path="/link-to" component={LinkToPage} />
         <Route component={NotFoundPage} />
       </Switch>
     </Router>

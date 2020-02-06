@@ -56,6 +56,7 @@ interface InfraConfigItem {
   icon: string;
   label: string;
   condition?: boolean;
+  app: string;
   path: string;
   query: Record<string, any>;
 }
@@ -86,6 +87,7 @@ export const TransactionActionMenu: FunctionComponent<Props> = (
         { defaultMessage: 'Show pod logs' }
       ),
       condition: !!podId,
+      app: 'logs',
       path: `/link-to/pod-logs/${podId}`,
       query: { time }
     },
@@ -96,6 +98,7 @@ export const TransactionActionMenu: FunctionComponent<Props> = (
         { defaultMessage: 'Show container logs' }
       ),
       condition: !!containerId,
+      app: 'logs',
       path: `/link-to/container-logs/${containerId}`,
       query: { time }
     },
@@ -106,6 +109,7 @@ export const TransactionActionMenu: FunctionComponent<Props> = (
         { defaultMessage: 'Show host logs' }
       ),
       condition: !!hostName,
+      app: 'logs',
       path: `/link-to/host-logs/${hostName}`,
       query: { time }
     },
@@ -116,6 +120,7 @@ export const TransactionActionMenu: FunctionComponent<Props> = (
         { defaultMessage: 'Show trace logs' }
       ),
       condition: true,
+      app: 'logs',
       path: `/link-to/logs`,
       query: {
         time,
@@ -129,6 +134,7 @@ export const TransactionActionMenu: FunctionComponent<Props> = (
         { defaultMessage: 'Show pod metrics' }
       ),
       condition: !!podId,
+      app: 'metrics',
       path: `/link-to/pod-detail/${podId}`,
       query: infraMetricsQuery
     },
@@ -139,6 +145,7 @@ export const TransactionActionMenu: FunctionComponent<Props> = (
         { defaultMessage: 'Show container metrics' }
       ),
       condition: !!containerId,
+      app: 'metrics',
       path: `/link-to/container-detail/${containerId}`,
       query: infraMetricsQuery
     },
@@ -149,17 +156,18 @@ export const TransactionActionMenu: FunctionComponent<Props> = (
         { defaultMessage: 'Show host metrics' }
       ),
       condition: !!hostName,
+      app: 'metrics',
       path: `/link-to/host-detail/${hostName}`,
       query: infraMetricsQuery
     }
   ];
 
   const infraItems = infraConfigItems.map(
-    ({ icon, label, condition, path, query }, index) => ({
+    ({ icon, label, condition, path, query, app }, index) => ({
       icon,
       key: `infra-link-${index}`,
       child: (
-        <InfraLink path={path} query={query}>
+        <InfraLink app={app} path={path} query={query}>
           {label}
         </InfraLink>
       ),

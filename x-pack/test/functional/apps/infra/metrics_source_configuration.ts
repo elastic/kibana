@@ -38,10 +38,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('can change the metric indices to a pattern that matches nothing', async () => {
-        await pageObjects.common.navigateToUrlWithBrowserHistory(
-          'infraOps',
-          '/infrastructure/settings'
-        );
+        await pageObjects.common.navigateToUrlWithBrowserHistory('infraOps', '/settings');
 
         const nameInput = await infraSourceConfigurationForm.getNameInput();
         await nameInput.clearValueWithKeyboard({ charByChar: true });
@@ -60,10 +57,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('can change the metric indices back to a pattern that matches something', async () => {
-        await pageObjects.common.navigateToUrlWithBrowserHistory(
-          'infraOps',
-          '/infrastructure/settings'
-        );
+        await pageObjects.common.navigateToUrlWithBrowserHistory('infraOps', '/settings');
 
         const metricIndicesInput = await infraSourceConfigurationForm.getMetricIndicesInput();
         await metricIndicesInput.clearValueWithKeyboard({ charByChar: true });
