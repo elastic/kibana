@@ -7,7 +7,6 @@
 import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent, useState } from 'react';
-import styled from 'styled-components';
 import {
   ActionMenu,
   ActionMenuDivider,
@@ -36,13 +35,6 @@ const ActionMenuButton = ({ onClick }: { onClick: () => void }) => (
   </EuiButtonEmpty>
 );
 
-const SectionContainer = styled.div`
-  margin-bottom: ${px(units.plus)};
-  &:last-of-type {
-    margin-bottom: 0;
-  }
-`;
-
 export const TransactionActionMenu: FunctionComponent<Props> = ({
   transaction
 }: Props) => {
@@ -69,26 +61,24 @@ export const TransactionActionMenu: FunctionComponent<Props> = ({
     >
       {sections.map((section, idx) => (
         <div key={idx}>
-          <Section>
-            {section.map(item => (
-              <SectionContainer key={item.key}>
-                {item.title && <SectionTitle>{item.title}</SectionTitle>}
-                {item.subtitle && (
-                  <SectionSubtitle>{item.subtitle}</SectionSubtitle>
-                )}
-                <SectionLinks>
-                  {item.actions.map(action => (
-                    <SectionLink
-                      key={action.key}
-                      label={action.label}
-                      href={action.href}
-                    />
-                  ))}
-                </SectionLinks>
-              </SectionContainer>
-            ))}
-            {idx !== sections.length - 1 && <ActionMenuDivider />}
-          </Section>
+          {section.map(item => (
+            <Section key={item.key} marginBottom={px(units.plus)}>
+              {item.title && <SectionTitle>{item.title}</SectionTitle>}
+              {item.subtitle && (
+                <SectionSubtitle>{item.subtitle}</SectionSubtitle>
+              )}
+              <SectionLinks>
+                {item.actions.map(action => (
+                  <SectionLink
+                    key={action.key}
+                    label={action.label}
+                    href={action.href}
+                  />
+                ))}
+              </SectionLinks>
+            </Section>
+          ))}
+          {idx !== sections.length - 1 && <ActionMenuDivider />}
         </div>
       ))}
     </ActionMenu>

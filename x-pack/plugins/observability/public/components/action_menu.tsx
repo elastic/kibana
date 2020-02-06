@@ -16,6 +16,7 @@ import {
 
 import React, { HTMLAttributes } from 'react';
 import { EuiListGroupItemProps } from '@elastic/eui/src/components/list_group/list_group_item';
+import styled from 'styled-components';
 
 type Props = EuiPopoverProps & HTMLAttributes<HTMLDivElement>;
 
@@ -45,7 +46,14 @@ export const SectionLinks: React.FC<{}> = props => (
 
 export const SectionSpacer: React.FC<{}> = () => <EuiSpacer size={'l'} />;
 
-export const Section: React.FC<{}> = props => <>{props.children}</>;
+export const Section = styled.div<{
+  marginBottom?: string;
+}>`
+  margin-bottom: ${props => props.marginBottom ?? 0};
+  &:last-of-type {
+    margin-bottom: 0;
+  }
+`;
 
 export type SectionLinkProps = EuiListGroupItemProps;
 export const SectionLink: React.FC<EuiListGroupItemProps> = props => (

@@ -35,7 +35,7 @@ interface Action {
   condition: boolean;
 }
 
-interface SectionItem {
+interface Section {
   key: string;
   title?: string;
   subtitle?: string;
@@ -43,7 +43,7 @@ interface SectionItem {
 }
 
 interface SectionRecord {
-  [key: string]: SectionItem[];
+  [key: string]: Section[];
 }
 
 export const getSections = ({
@@ -290,14 +290,14 @@ export const getSections = ({
   };
 
   // Filter out actions that shouldnt be shown and sections without any actions.
-  return Object.values(sectionRecord).map(sections =>
-    sections
-      .map(sectionItem => {
-        const actions = sectionItem.actions.filter(
-          (action: Action) => action.condition
-        );
-        return { ...sectionItem, actions };
-      })
-      .filter(sectionItem => sectionItem.actions.length > 0)
-  );
+  return Object.values(sectionRecord)
+    .map(sections =>
+      sections
+        .map(section => ({
+          ...section,
+          actions: section.actions.filter(action => action.condition)
+        }))
+        .filter(section => !isEmpty(section.actions))
+    )
+    .filter(sections => !isEmpty(sections));
 };
