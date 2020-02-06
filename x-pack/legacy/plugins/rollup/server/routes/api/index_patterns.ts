@@ -34,7 +34,9 @@ const getFieldsForWildcardRequest = async (context: any, request: any, response:
   try {
     parsedFields = parseMetaFields(metaFields);
   } catch (error) {
-    return response.badRequest();
+    return response.badRequest({
+      body: error,
+    });
   }
 
   try {
