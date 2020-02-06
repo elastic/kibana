@@ -177,6 +177,9 @@ export const AlertForm = ({
         for (const alertTypeItem of alertTypes) {
           index[alertTypeItem.id] = alertTypeItem;
         }
+        if (alert.alertTypeId) {
+          setDefaultActionGroup(index[alert.alertTypeId].actionGroups[0]);
+        }
         setAlertTypesIndex(index);
       } catch (e) {
         if (toastNotifications) {
