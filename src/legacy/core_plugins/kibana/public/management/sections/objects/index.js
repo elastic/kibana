@@ -23,8 +23,6 @@ import './_view';
 import './_objects';
 import 'ace';
 import { uiModules } from 'ui/modules';
-import { npSetup } from 'ui/new_platform';
-import { FeatureCatalogueCategory } from '../../../../../../../plugins/home/public';
 
 // add the module deps to this module
 uiModules.get('apps/management');
@@ -35,19 +33,4 @@ management.getSection('kibana').register('objects', {
   }),
   order: 10,
   url: '#/management/kibana/objects',
-});
-
-npSetup.plugins.home.featureCatalogue.register({
-  id: 'saved_objects',
-  title: i18n.translate('kbn.management.objects.savedObjectsTitle', {
-    defaultMessage: 'Saved Objects',
-  }),
-  description: i18n.translate('kbn.management.objects.savedObjectsDescription', {
-    defaultMessage:
-      'Import, export, and manage your saved searches, visualizations, and dashboards.',
-  }),
-  icon: 'savedObjectsApp',
-  path: '/app/kibana#/management/kibana/objects',
-  showOnHomePage: true,
-  category: FeatureCatalogueCategory.ADMIN,
 });

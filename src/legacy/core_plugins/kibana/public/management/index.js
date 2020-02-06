@@ -18,7 +18,6 @@
  */
 
 import React from 'react';
-import { i18n } from '@kbn/i18n';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -30,7 +29,6 @@ import appTemplate from './app.html';
 import landingTemplate from './landing.html';
 import { management, MANAGEMENT_BREADCRUMB } from 'ui/management';
 import { ManagementSidebarNav } from '../../../../../plugins/management/public';
-import { FeatureCatalogueCategory } from '../../../../../plugins/home/public';
 import { timefilter } from 'ui/timefilter';
 import {
   EuiPageContent,
@@ -40,7 +38,7 @@ import {
   EuiIcon,
   EuiHorizontalRule,
 } from '@elastic/eui';
-import { npStart, npSetup } from 'ui/new_platform';
+import { npStart } from 'ui/new_platform';
 
 const SIDENAV_ID = 'management-sidenav';
 const LANDING_ID = 'management-landing';
@@ -166,18 +164,4 @@ uiModules.get('apps/management').directive('kbnManagementLanding', function(kbnV
       $scope.kbnVersion = kbnVersion;
     },
   };
-});
-
-npSetup.plugins.home.featureCatalogue.register({
-  id: 'stack-management',
-  title: i18n.translate('kbn.stackManagement.managementLabel', {
-    defaultMessage: 'Stack Management',
-  }),
-  description: i18n.translate('kbn.stackManagement.managementDescription', {
-    defaultMessage: 'Your center console for managing the Elastic Stack.',
-  }),
-  icon: 'managementApp',
-  path: '/app/kibana#/management',
-  showOnHomePage: false,
-  category: FeatureCatalogueCategory.ADMIN,
 });

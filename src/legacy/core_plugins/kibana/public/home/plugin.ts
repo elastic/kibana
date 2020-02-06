@@ -27,6 +27,7 @@ import {
   Environment,
   HomePublicPluginStart,
   HomePublicPluginSetup,
+  FeatureCatalogueEntry,
 } from '../../../../../plugins/home/public';
 
 export interface LegacyAngularInjectedDependencies {
@@ -65,7 +66,7 @@ export class HomePlugin implements Plugin {
   private dataStart: DataPublicPluginStart | null = null;
   private savedObjectsClient: any = null;
   private environment: Environment | null = null;
-  private featureCatalogue: HomePublicPluginStart['featureCatalogue'] | null = null;
+  private directories: readonly FeatureCatalogueEntry[] | null = null;
 
   setup(
     core: CoreSetup,
@@ -99,7 +100,7 @@ export class HomePlugin implements Plugin {
           environment: this.environment!,
           config: kibana_legacy.config,
           homeConfig: home.config,
-          directories: this.featureCatalogue!.get(),
+          directories: this.directories!,
           ...angularDependencies,
         });
         const { renderApp } = await import('./np_ready/application');
@@ -110,7 +111,7 @@ export class HomePlugin implements Plugin {
 
   start(core: CoreStart, { data, home }: HomePluginStartDependencies) {
     this.environment = home.environment.get();
-    this.featureCatalogue = home.featureCatalogue;
+    this.directories = home.featureCatalogue.get();
     this.dataStart = data;
     this.savedObjectsClient = core.savedObjects.client;
   }
