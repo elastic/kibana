@@ -48,7 +48,7 @@ export const App = (appDeps: AppDeps) => {
   );
 };
 
-export const AppWithoutRouter = ({ sectionsRegex }: any) => {
+export const AppWithoutRouter = ({ sectionsRegex }: { sectionsRegex: string }) => {
   const { capabilities } = useAppDependencies();
   const canShowAlerts = hasShowAlertsCapability(capabilities);
   const DEFAULT_SECTION: Section = canShowAlerts ? 'alerts' : 'connectors';
