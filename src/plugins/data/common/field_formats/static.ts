@@ -17,19 +17,15 @@
  * under the License.
  */
 
-/**
- * Everything the file exports is public
- */
+import { HTML_CONTEXT_TYPE, TEXT_CONTEXT_TYPE } from './content_types';
+import { getHighlightRequest, asPrettyString, getHighlightHtml } from './utils';
 
-export { HTML_CONTEXT_TYPE, TEXT_CONTEXT_TYPE } from './content_types';
-export { FieldFormat } from './field_format';
-export { FieldFormatsRegistry } from './field_formats_registry';
-export { getHighlightRequest, asPrettyString, getHighlightHtml } from './utils';
+import { baseFormatters } from './constants/base_formatters';
+import { DEFAULT_CONVERTER_COLOR } from './constants/color_default';
 
-export { baseFormatters } from './constants/base_formatters';
-export { DEFAULT_CONVERTER_COLOR } from './constants/color_default';
+import { FieldFormat } from './field_format';
 
-export {
+import {
   BoolFormat,
   BytesFormat,
   ColorFormat,
@@ -47,12 +43,37 @@ export {
   TruncateFormat,
 } from './converters';
 
-export {
-  GetConfigFn,
+import { FIELD_FORMAT_IDS } from './types';
+
+/*
+ * fieldFormats groups FieldFormat related utilities (functions, constants and classes).
+ */
+export const fieldFormats = {
+  FieldFormat,
+
+  DEFAULT_CONVERTER_COLOR,
+  HTML_CONTEXT_TYPE,
+  TEXT_CONTEXT_TYPE,
   FIELD_FORMAT_IDS,
-  ContentType,
-  IFieldFormatConfig,
-  IFieldFormatType,
-  IFieldFormat,
-  IFieldFormatId,
-} from './types';
+
+  getHighlightRequest,
+  asPrettyString,
+  getHighlightHtml,
+
+  baseFormatters,
+  BoolFormat,
+  BytesFormat,
+  ColorFormat,
+  DateFormat,
+  DateNanosFormat,
+  DurationFormat,
+  IpFormat,
+  NumberFormat,
+  PercentFormat,
+  RelativeDateFormat,
+  SourceFormat,
+  StaticLookupFormat,
+  UrlFormat,
+  StringFormat,
+  TruncateFormat,
+};

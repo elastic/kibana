@@ -35,7 +35,6 @@ export {
   esFilters,
   esKuery,
   esQuery,
-  fieldFormats,
   // kbn field types
   castEsToKbnFieldTypeName,
   getKbnFieldType,
@@ -56,6 +55,11 @@ export {
   // utils
   parseInterval,
   isNestedField,
+  // fieldFormats
+  fieldFormats,
+  FieldFormatsGetConfigFn,
+  FieldFormatConfig,
+  FieldFormatsRegistry,
 } from '../common';
 
 /**

@@ -17,6 +17,15 @@
  * under the License.
  */
 
-import * as fieldFormats from './static';
+export { fieldFormats } from './static';
+export { FieldFormatsRegistry } from './field_formats_registry';
 
-export { fieldFormats };
+export {
+  FieldFormatsGetConfigFn,
+  FieldFormatsContentType,
+  FieldFormatConfig,
+  FieldFormatId,
+  // @internal
+  IFieldFormatType,
+  IFieldFormat,
+} from './types';
