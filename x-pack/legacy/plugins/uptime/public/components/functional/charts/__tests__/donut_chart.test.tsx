@@ -32,4 +32,20 @@ describe('DonutChart component', () => {
     const wrapper = renderWithIntl(<DonutChart {...props} />);
     expect(wrapper).toMatchSnapshot();
   });
+
+  it('renders a green check when all monitors are up', () => {
+    const props = {
+      down: 0,
+      up: 95,
+      height: 125,
+      width: 125,
+    };
+
+    const wrapper = renderWithIntl(<DonutChart {...props} />);
+    expect(wrapper).toMatchSnapshot();
+
+    const greenCheck = wrapper.find('.greenCheckIcon');
+
+    expect(greenCheck).toHaveLength(1);
+  });
 });
