@@ -4,8 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LensServer } from './plugin';
+import { PluginInitializerContext } from 'kibana/server';
+import { LensServerPlugin } from './plugin';
 
 export * from './plugin';
 
-export const lensServerPlugin = () => new LensServer();
+export const plugin = (initializerContext: PluginInitializerContext) =>
+  new LensServerPlugin(initializerContext);

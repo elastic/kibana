@@ -5,29 +5,13 @@
  */
 
 import Boom from 'boom';
-import { KibanaConfig } from 'src/legacy/server/kbn_server';
-import { CoreSetup, SavedObjectsLegacyService } from 'src/core/server';
+import { CoreSetup } from 'src/core/server';
 import { schema } from '@kbn/config-schema';
 import { BASE_API_URL } from '../../common';
 
-export function getSavedObjectsClient(
-  savedObjects: SavedObjectsLegacyService,
-  callAsInternalUser: unknown
-) {
-  const { SavedObjectsClient, getSavedObjectsRepository } = savedObjects;
-  const internalRepository = getSavedObjectsRepository(callAsInternalUser);
-  return new SavedObjectsClient(internalRepository);
-}
-
 // This route is responsible for taking a batch of click events from the browser
 // and writing them to saved objects
-export async function initLensUsageRoute(
-  setup: CoreSetup,
-  plugins: {
-    savedObjects: SavedObjectsLegacyService;
-    config: KibanaConfig;
-  }
-) {
+export async function initLensUsageRoute(setup: CoreSetup) {
   const router = setup.http.createRouter();
   router.post(
     {
@@ -43,12 +27,10 @@ export async function initLensUsageRoute(
       },
     },
     async (context, req, res) => {
-      const { dataClient } = context.core.elasticsearch;
-
       const { events, suggestionEvents } = req.body;
 
       try {
-        const client = getSavedObjectsClient(plugins.savedObjects, dataClient.callAsCurrentUser);
+        const client = context.core.savedObjects.client;
 
         const allEvents: Array<{
           type: 'lens-ui-telemetry';

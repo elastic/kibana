@@ -4,24 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { APICaller, CoreSetup, Logger } from 'kibana/server';
+import { Observable } from 'rxjs';
 import moment from 'moment';
-import KbnServer, { Server } from 'src/legacy/server/kbn_server';
-import { CallClusterOptions } from 'src/legacy/core_plugins/elasticsearch';
-import {
-  SearchParams,
-  DeleteDocumentByQueryParams,
-  SearchResponse,
-  DeleteDocumentByQueryResponse,
-} from 'elasticsearch';
-import { ESSearchResponse } from '../../../apm/typings/elasticsearch';
-import { XPackMainPlugin } from '../../../xpack_main/server/xpack_main';
 import {
   RunContext,
   TaskManagerSetupContract,
   TaskManagerStartContract,
-} from '../../../../../plugins/task_manager/server';
+} from '../../../task_manager/server';
 
 import { getVisualizationCounts } from './visualization_counts';
+import { ESSearchResponse } from '../../../apm/typings/elasticsearch';
 
 // This task is responsible for running daily and aggregating all the Lens click event objects
 // into daily rolled-up documents, which will be used in reporting click stats
@@ -30,74 +23,53 @@ const TELEMETRY_TASK_TYPE = 'lens_telemetry';
 
 export const TASK_ID = `Lens-${TELEMETRY_TASK_TYPE}`;
 
-type ClusterSearchType = (
-  endpoint: 'search',
-  params: SearchParams & {
-    rest_total_hits_as_int: boolean;
-  },
-  options?: CallClusterOptions
-) => Promise<SearchResponse<unknown>>;
-type ClusterDeleteType = (
-  endpoint: 'deleteByQuery',
-  params: DeleteDocumentByQueryParams,
-  options?: CallClusterOptions
-) => Promise<DeleteDocumentByQueryResponse>;
-
-export function initializeLensTelemetry(server: Server, taskManager?: TaskManagerSetupContract) {
-  if (!taskManager) {
-    server.log(['debug', 'telemetry'], `Task manager is not available`);
-  } else {
-    registerLensTelemetryTask(server, taskManager);
-  }
+export function initializeLensTelemetry(
+  logger: Logger,
+  core: CoreSetup,
+  config: Observable<{ kibana: { index: string } }>,
+  taskManager: TaskManagerSetupContract
+) {
+  registerLensTelemetryTask(logger, core, config, taskManager);
 }
 
-export function scheduleLensTelemetry(server: Server, taskManager?: TaskManagerStartContract) {
+export function scheduleLensTelemetry(logger: Logger, taskManager?: TaskManagerStartContract) {
   if (taskManager) {
-    scheduleTasks(server, taskManager);
+    scheduleTasks(logger, taskManager);
   }
 }
 
-function registerLensTelemetryTask(server: Server, taskManager: TaskManagerSetupContract) {
+function registerLensTelemetryTask(
+  logger: Logger,
+  core: CoreSetup,
+  config: Observable<{ kibana: { index: string } }>,
+  taskManager: TaskManagerSetupContract
+) {
   taskManager.registerTaskDefinitions({
     [TELEMETRY_TASK_TYPE]: {
       title: 'Lens telemetry fetch task',
       type: TELEMETRY_TASK_TYPE,
       timeout: '1m',
-      createTaskRunner: telemetryTaskRunner(server),
+      createTaskRunner: telemetryTaskRunner(logger, core, config),
     },
   });
 }
 
-function scheduleTasks(server: Server, taskManager: TaskManagerStartContract) {
-  const { kbnServer } = (server.plugins.xpack_main as XPackMainPlugin & {
-    status: { plugin: { kbnServer: KbnServer } };
-  }).status.plugin;
-
-  kbnServer.afterPluginsInit(() => {
-    // The code block below can't await directly within "afterPluginsInit"
-    // callback due to circular dependency The server isn't "ready" until
-    // this code block finishes. Migrations wait for server to be ready before
-    // executing. Saved objects repository waits for migrations to finish before
-    // finishing the request. To avoid this, we'll await within a separate
-    // function block.
-    (async () => {
-      try {
-        await taskManager.ensureScheduled({
-          id: TASK_ID,
-          taskType: TELEMETRY_TASK_TYPE,
-          state: { byDate: {}, suggestionsByDate: {}, saved: {}, runs: 0 },
-          params: {},
-        });
-      } catch (e) {
-        server.log(['debug', 'telemetry'], `Error scheduling task, received ${e.message}`);
-      }
-    })();
-  });
+async function scheduleTasks(logger: Logger, taskManager: TaskManagerStartContract) {
+  try {
+    await taskManager.ensureScheduled({
+      id: TASK_ID,
+      taskType: TELEMETRY_TASK_TYPE,
+      state: { byDate: {}, suggestionsByDate: {}, saved: {}, runs: 0 },
+      params: {},
+    });
+  } catch (e) {
+    logger.debug(`Error scheduling task, received ${e.message}`);
+  }
 }
 
 export async function getDailyEvents(
   kibanaIndex: string,
-  callCluster: ClusterSearchType & ClusterDeleteType
+  callCluster: APICaller
 ): Promise<{
   byDate: Record<string, Record<string, number>>;
   suggestionsByDate: Record<string, Record<string, number>>;
@@ -205,18 +177,22 @@ export async function getDailyEvents(
   };
 }
 
-export function telemetryTaskRunner(server: Server) {
+export function telemetryTaskRunner(
+  logger: Logger,
+  core: CoreSetup,
+  config: Observable<{ kibana: { index: string } }>
+) {
   return ({ taskInstance }: RunContext) => {
     const { state } = taskInstance;
-    const callCluster = server.plugins.elasticsearch.getCluster('admin').callWithInternalUser;
+    const callCluster = core.elasticsearch.adminClient.callAsInternalUser;
 
     return {
       async run() {
-        const kibanaIndex = server.config().get<string>('kibana.index');
+        const kibanaIndex = (await config.toPromise()).kibana.index;
 
         return Promise.all([
           getDailyEvents(kibanaIndex, callCluster),
-          getVisualizationCounts(callCluster, server.config()),
+          getVisualizationCounts(callCluster, kibanaIndex),
         ])
           .then(([lensTelemetry, lensVisualizations]) => {
             return {
@@ -229,9 +205,7 @@ export function telemetryTaskRunner(server: Server) {
               runAt: getNextMidnight(),
             };
           })
-          .catch(errMsg =>
-            server.log(['warning'], `Error executing lens telemetry task: ${errMsg}`)
-          );
+          .catch(errMsg => logger.warn(`Error executing lens telemetry task: ${errMsg}`));
       },
     };
   };

@@ -6,11 +6,10 @@
 
 import Boom from 'boom';
 import { schema } from '@kbn/config-schema';
-import _ from 'lodash';
 import { IScopedClusterClient, SavedObject, RequestHandlerContext } from 'src/core/server';
 import { CoreSetup } from 'src/core/server';
 import { BASE_API_URL } from '../../common';
-import { IndexPatternsFetcher } from '../../../../../../src/plugins/data/server';
+import { IndexPatternsFetcher } from '../../../../../src/plugins/data/server';
 
 /**
  * The number of docs to sample to determine field empty status.
