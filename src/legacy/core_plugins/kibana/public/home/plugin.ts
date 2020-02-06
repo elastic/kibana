@@ -27,6 +27,7 @@ import {
   Environment,
   FeatureCatalogueEntry,
   HomePublicPluginStart,
+  HomePublicPluginSetup,
 } from '../../../../../plugins/home/public';
 
 export interface LegacyAngularInjectedDependencies {
@@ -59,6 +60,7 @@ export interface HomePluginSetupDependencies {
   };
   usageCollection: UsageCollectionSetup;
   kibana_legacy: KibanaLegacySetup;
+  home: HomePublicPluginSetup;
 }
 
 export class HomePlugin implements Plugin {
@@ -69,6 +71,7 @@ export class HomePlugin implements Plugin {
   setup(
     core: CoreSetup,
     {
+      home,
       kibana_legacy,
       usageCollection,
       __LEGACY: { getAngularDependencies, ...legacyServices },
@@ -95,6 +98,8 @@ export class HomePlugin implements Plugin {
           getBasePath: core.http.basePath.get,
           indexPatternService: this.dataStart!.indexPatterns,
           environment: this.environment!,
+          config: kibana_legacy.config,
+          homeConfig: home.config,
           ...angularDependencies,
         });
         const { renderApp } = await import('./np_ready/application');

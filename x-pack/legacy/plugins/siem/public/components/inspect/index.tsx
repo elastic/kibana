@@ -10,7 +10,6 @@ import React, { useCallback } from 'react';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
 import styled, { css } from 'styled-components';
-import deepEqual from 'fast-deep-equal/react';
 
 import { inputsModel, inputsSelectors, State } from '../../store';
 import { InputsModelId } from '../../store/inputs/constants';
@@ -179,4 +178,4 @@ const mapDispatchToProps = {
 export const InspectButton = connect(
   makeMapStateToProps,
   mapDispatchToProps
-)(React.memo(InspectButtonComponent, deepEqual));
+)(React.memo(InspectButtonComponent));

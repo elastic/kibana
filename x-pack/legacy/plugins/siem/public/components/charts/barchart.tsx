@@ -8,7 +8,6 @@ import React from 'react';
 import { Chart, BarSeries, Axis, Position, ScaleType, Settings } from '@elastic/charts';
 import { getOr, get, isNumber } from 'lodash/fp';
 import deepmerge from 'deepmerge';
-import deepEqual from 'fast-deep-equal/react';
 
 import { useTimeZone } from '../../hooks';
 import { AutoSizer } from '../auto_sizer';
@@ -23,15 +22,6 @@ import {
   WrappedByAutoSizer,
   useTheme,
 } from './common';
-
-const MemoChart = React.memo(Chart, deepEqual);
-MemoChart.displayName = 'MemoChart';
-const MemoSettings = React.memo(Settings, deepEqual);
-MemoSettings.displayName = 'MemoSettings';
-const MemoBarSeries = React.memo(BarSeries, deepEqual);
-MemoBarSeries.displayName = 'MemoBarSeries';
-const MemoAxis = React.memo(Axis, deepEqual);
-MemoAxis.displayName = 'MemoAxis';
 
 const checkIfAllTheDataInTheSeriesAreValid = (series: ChartSeriesData): series is ChartSeriesData =>
   series != null &&
@@ -68,12 +58,12 @@ export const BarChartBaseComponent = ({
   };
 
   return chartConfigs.width && chartConfigs.height ? (
-    <MemoChart>
-      <MemoSettings {...settings} />
+    <Chart>
+      <Settings {...settings} />
       {data.map(series => {
         const barSeriesKey = series.key;
         return checkIfAllTheDataInTheSeriesAreValid ? (
-          <MemoBarSeries
+          <BarSeries
             id={barSeriesKey}
             key={barSeriesKey}
             name={series.key}
@@ -90,7 +80,7 @@ export const BarChartBaseComponent = ({
         ) : null;
       })}
 
-      <MemoAxis
+      <Axis
         id={xAxisId}
         position={Position.Bottom}
         showOverlappingTicks={false}
@@ -98,19 +88,14 @@ export const BarChartBaseComponent = ({
         tickFormat={xTickFormatter}
       />
 
-      <MemoAxis
-        id={yAxisId}
-        position={Position.Left}
-        tickSize={tickSize}
-        tickFormat={yTickFormatter}
-      />
-    </MemoChart>
+      <Axis id={yAxisId} position={Position.Left} tickSize={tickSize} tickFormat={yTickFormatter} />
+    </Chart>
   ) : null;
 };
 
 BarChartBaseComponent.displayName = 'BarChartBaseComponent';
 
-export const BarChartBase = React.memo(BarChartBaseComponent, deepEqual);
+export const BarChartBase = React.memo(BarChartBaseComponent);
 
 BarChartBase.displayName = 'BarChartBase';
 
@@ -146,6 +131,4 @@ export const BarChartComponent = ({
   );
 };
 
-export const BarChart = React.memo(BarChartComponent, (prevProps, nextProps) =>
-  deepEqual(nextProps.barChart, prevProps.barChart)
-);
+export const BarChart = React.memo(BarChartComponent);

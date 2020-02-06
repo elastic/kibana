@@ -1,13 +1,13 @@
 {
-  "description": "A netcat process is engaging in network activity on a Linux host. Netcat is often used as a persistence mechanism by exporting a reverse shell or by serving a shell on a listening port. Netcat is also sometimes used for data exfiltration. ",
+  "description": "A netcat process is engaging in network activity on a Linux host. Netcat is often used as a persistence mechanism by exporting a reverse shell or by serving a shell on a listening port. Netcat is also sometimes used for data exfiltration.",
   "false_positives": [
-    "Netcat is a dual-use tool that can be used for benign or malicious activity. Netcat is included in some Linux distributions so its presence is not necessarily suspicious. Some normal use of this program, while uncommon, may originate from scripts, automation tools and frameworks."
+    "Netcat is a dual-use tool that can be used for benign or malicious activity. Netcat is included in some Linux distributions so its presence is not necessarily suspicious. Some normal use of this program, while uncommon, may originate from scripts, automation tools, and frameworks."
   ],
   "index": [
     "auditbeat-*"
   ],
   "language": "kuery",
-  "max_signals": 33,
+  "max_signals": 100,
   "name": "Netcat Network Activity",
   "query": "process.name: (nc or ncat or netcat or netcat.openbsd or netcat.traditional) and event.action: (connected-to or bound-socket or socket_opened)",
   "references": [

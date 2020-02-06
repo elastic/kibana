@@ -18,7 +18,6 @@ import {
 } from '@elastic/charts';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
-import deepEqual from 'fast-deep-equal/react';
 
 import { useUiSetting } from '../../lib/kibana';
 import { DEFAULT_DARK_MODE } from '../../../common/constants';
@@ -71,7 +70,7 @@ const WrappedByAutoSizerComponent = styled.div<{ height?: string }>`
 
 WrappedByAutoSizerComponent.displayName = 'WrappedByAutoSizer';
 
-export const WrappedByAutoSizer = React.memo(WrappedByAutoSizerComponent, deepEqual);
+export const WrappedByAutoSizer = React.memo(WrappedByAutoSizerComponent);
 
 export enum SeriesType {
   BAR = 'bar',

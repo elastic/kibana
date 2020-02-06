@@ -4,19 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import memoizeOne from 'memoize-one';
-import deepEqual from 'fast-deep-equal';
-
-import { HistogramData, SignalsBucket, SignalsGroupBucket } from './types';
+import { HistogramData, SignalsAggregation, SignalsBucket, SignalsGroupBucket } from './types';
+import { SignalSearchResponse } from '../../../../containers/detection_engine/signals/types';
 import * as i18n from './translations';
 
-export const formatSignalsData = (groupBuckets: SignalsGroupBucket[] | undefined) => {
-  const emptyResult: HistogramData[] = [];
-
-  if (!groupBuckets) {
-    return emptyResult;
-  }
-
+export const formatSignalsData = (
+  signalsData: SignalSearchResponse<{}, SignalsAggregation> | null
+) => {
+  const groupBuckets: SignalsGroupBucket[] =
+    signalsData?.aggregations?.signalsByGrouping?.buckets ?? [];
   return groupBuckets.reduce<HistogramData[]>((acc, { key: group, signals }) => {
     const signalsBucket: SignalsBucket[] = signals.buckets ?? [];
 
@@ -30,8 +26,6 @@ export const formatSignalsData = (groupBuckets: SignalsGroupBucket[] | undefined
     ];
   }, []);
 };
-
-export const memoFormatSignalsData = memoizeOne(formatSignalsData, deepEqual);
 
 export const getSignalsHistogramQuery = (
   stackByField: string,
@@ -82,3 +76,17 @@ export const getSignalsHistogramQuery = (
     },
   },
 });
+
+/**
+ * Returns `true` when the signals histogram initial loading spinner should be shown
+ *
+ * @param isInitialLoading The loading spinner will only be displayed if this value is `true`, because after initial load, a different, non-spinner loading indicator is displayed
+ * @param isLoadingSignals When `true`, IO is being performed to request signals (for rendering in the histogram)
+ */
+export const showInitialLoadingSpinner = ({
+  isInitialLoading,
+  isLoadingSignals,
+}: {
+  isInitialLoading: boolean;
+  isLoadingSignals: boolean;
+}): boolean => isInitialLoading && isLoadingSignals;

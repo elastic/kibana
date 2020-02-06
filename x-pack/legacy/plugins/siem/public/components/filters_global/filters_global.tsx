@@ -8,7 +8,6 @@ import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import React from 'react';
 import { Sticky } from 'react-sticky';
 import styled, { css } from 'styled-components';
-import deepEqual from 'fast-deep-equal/react';
 
 import { gutterTimeline } from '../../lib/helpers';
 
@@ -42,16 +41,13 @@ export interface FiltersGlobalProps {
   children: React.ReactNode;
 }
 
-export const FiltersGlobal = React.memo<FiltersGlobalProps>(
-  ({ children }) => (
-    <Sticky disableCompensation={disableStickyMq.matches} topOffset={-offsetChrome}>
-      {({ style, isSticky }) => (
-        <Wrapper className="siemFiltersGlobal" isSticky={isSticky} style={style}>
-          {children}
-        </Wrapper>
-      )}
-    </Sticky>
-  ),
-  deepEqual
-);
+export const FiltersGlobal = React.memo<FiltersGlobalProps>(({ children }) => (
+  <Sticky disableCompensation={disableStickyMq.matches} topOffset={-offsetChrome}>
+    {({ style, isSticky }) => (
+      <Wrapper className="siemFiltersGlobal" isSticky={isSticky} style={style}>
+        {children}
+      </Wrapper>
+    )}
+  </Sticky>
+));
 FiltersGlobal.displayName = 'FiltersGlobal';

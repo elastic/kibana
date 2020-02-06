@@ -10,7 +10,6 @@ import React, { useCallback } from 'react';
 import { connect } from 'react-redux';
 import styled from 'styled-components';
 import { ActionCreator } from 'typescript-fsa';
-import deepEqual from 'fast-deep-equal/react';
 
 import { State, timelineSelectors } from '../../store';
 import { DataProvider } from '../timeline/data_providers/data_provider';
@@ -115,8 +114,7 @@ export const FlyoutComponent = React.memo<Props>(
         />
       </>
     );
-  },
-  deepEqual
+  }
 );
 
 FlyoutComponent.displayName = 'FlyoutComponent';

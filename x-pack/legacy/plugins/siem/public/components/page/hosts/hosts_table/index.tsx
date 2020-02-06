@@ -8,7 +8,6 @@ import React, { useMemo, useCallback } from 'react';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
 import { IIndexPattern } from 'src/plugins/data/public';
-import deepEqual from 'fast-deep-equal/react';
 
 import { hostsActions } from '../../../../store/actions';
 import {
@@ -185,8 +184,7 @@ const HostsTableComponent = React.memo<HostsTableProps>(
         updateActivePage={updateActivePage}
       />
     );
-  },
-  deepEqual
+  }
 );
 
 HostsTableComponent.displayName = 'HostsTableComponent';

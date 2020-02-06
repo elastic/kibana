@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import isEqual from 'lodash/fp/isEqual';
 import React from 'react';
 import ResizeObserver from 'resize-observer-polyfill';
-import deepEqual from 'fast-deep-equal/react';
+import deepEqual from 'fast-deep-equal/es6/react';
 
 interface Measurement {
   width?: number;
@@ -72,10 +71,6 @@ export class AutoSizer extends React.Component<AutoSizerProps, AutoSizerState> {
     });
   }
 
-  public shouldComponentUpdate(nextProps: AutoSizerProps) {
-    return !deepEqual(this.props, nextProps);
-  }
-
   public componentWillUnmount() {
     if (this.resizeObserver) {
       this.resizeObserver.disconnect();
@@ -131,9 +126,9 @@ export class AutoSizer extends React.Component<AutoSizerProps, AutoSizerState> {
         : previousContentMeasurement;
 
     if (
-      isEqual(boundsMeasurement, previousBoundsMeasurement) &&
-      isEqual(contentMeasurement, previousContentMeasurement) &&
-      isEqual(windowMeasurement, previousWindowMeasurement)
+      deepEqual(boundsMeasurement, previousBoundsMeasurement) &&
+      deepEqual(contentMeasurement, previousContentMeasurement) &&
+      deepEqual(windowMeasurement, previousWindowMeasurement)
     ) {
       return;
     }

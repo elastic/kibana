@@ -42,12 +42,6 @@ export type AppenderConfigType = TypeOf<typeof appendersSchema>;
  */
 export interface Appender {
   append(record: LogRecord): void;
-
-  /**
-   * Used to signal to `Logger` that log level filtering should be ignored for this appender. Defaults to `false`.
-   * @deprecated Should be removed once the `LegacyAppender` is removed.
-   */
-  receiveAllLevels?: boolean;
 }
 
 /**

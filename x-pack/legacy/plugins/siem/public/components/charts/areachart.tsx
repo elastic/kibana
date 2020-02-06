@@ -16,7 +16,6 @@ import {
   RecursivePartial,
 } from '@elastic/charts';
 import { getOr, get, isNull, isNumber } from 'lodash/fp';
-import deepEqual from 'fast-deep-equal/react';
 
 import { AutoSizer } from '../auto_sizer';
 import { ChartPlaceHolder } from './chart_place_holder';
@@ -122,7 +121,7 @@ export const AreaChartBaseComponent = ({
 
 AreaChartBaseComponent.displayName = 'AreaChartBaseComponent';
 
-export const AreaChartBase = React.memo(AreaChartBaseComponent, deepEqual);
+export const AreaChartBase = React.memo(AreaChartBaseComponent);
 
 AreaChartBase.displayName = 'AreaChartBase';
 
@@ -158,4 +157,4 @@ export const AreaChartComponent = ({
   );
 };
 
-export const AreaChart = React.memo(AreaChartComponent, deepEqual);
+export const AreaChart = React.memo(AreaChartComponent);

@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEqual, last } from 'lodash/fp';
+import { last } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
-import deepEqual from 'fast-deep-equal/react';
+import deepEqual from 'fast-deep-equal/es6/react';
 import { IIndexPattern } from 'src/plugins/data/public';
 
 import { networkActions } from '../../../../store/actions';
@@ -143,7 +143,7 @@ const NetworkTopCountriesTableComponent = React.memo<NetworkTopCountriesTablePro
             field: lastField as NetworkTopTablesFields,
             direction: newSortDirection as Direction,
           };
-          if (!isEqual(newTopCountriesSort, sort)) {
+          if (!deepEqual(newTopCountriesSort, sort)) {
             updateNetworkTable({
               networkType: type,
               tableType,
@@ -186,8 +186,7 @@ const NetworkTopCountriesTableComponent = React.memo<NetworkTopCountriesTablePro
         updateLimitPagination={updateLimitPagination}
       />
     );
-  },
-  deepEqual
+  }
 );
 
 NetworkTopCountriesTableComponent.displayName = 'NetworkTopCountriesTableComponent';

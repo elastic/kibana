@@ -5,9 +5,10 @@
  */
 
 import { Location } from 'history';
-import { isEqual, difference, isEmpty } from 'lodash/fp';
+import { difference, isEmpty } from 'lodash/fp';
 import { useEffect, useRef, useState } from 'react';
 import { Query, esFilters } from 'src/plugins/data/public';
+import deepEqual from 'fast-deep-equal/es6/react';
 
 import { UrlInputsModel } from '../../store/inputs/model';
 import { useApolloClient } from '../../utils/apollo_context';
@@ -162,7 +163,7 @@ export const useUrlStateHooks = ({
     if (isInitializing && pageName != null && pageName !== '') {
       handleInitialize(location, type);
       setIsInitializing(false);
-    } else if (!isEqual(urlState, prevProps.urlState) && !isInitializing) {
+    } else if (!deepEqual(urlState, prevProps.urlState) && !isInitializing) {
       let newLocation: Location = location;
       URL_STATE_KEYS[type].forEach((urlKey: KeyUrlState) => {
         if (

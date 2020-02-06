@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEqual } from 'lodash/fp';
 import React, { useEffect, useCallback, useMemo } from 'react';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
+import deepEqual from 'fast-deep-equal/es6/react';
 
 import { esFilters } from '../../../../../../../src/plugins/data/public';
 
@@ -314,11 +314,11 @@ const StatefulTimelineComponent = React.memo<Props>(
       prevProps.show === nextProps.show &&
       prevProps.showCallOutUnauthorizedMsg === nextProps.showCallOutUnauthorizedMsg &&
       prevProps.start === nextProps.start &&
-      isEqual(prevProps.columns, nextProps.columns) &&
-      isEqual(prevProps.dataProviders, nextProps.dataProviders) &&
-      isEqual(prevProps.filters, nextProps.filters) &&
-      isEqual(prevProps.itemsPerPageOptions, nextProps.itemsPerPageOptions) &&
-      isEqual(prevProps.sort, nextProps.sort)
+      deepEqual(prevProps.columns, nextProps.columns) &&
+      deepEqual(prevProps.dataProviders, nextProps.dataProviders) &&
+      deepEqual(prevProps.filters, nextProps.filters) &&
+      deepEqual(prevProps.itemsPerPageOptions, nextProps.itemsPerPageOptions) &&
+      deepEqual(prevProps.sort, nextProps.sort)
     );
   }
 );

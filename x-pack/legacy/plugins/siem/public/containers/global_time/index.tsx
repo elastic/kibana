@@ -7,7 +7,6 @@
 import React, { useCallback, useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
-import deepEqual from 'fast-deep-equal/react';
 
 import { inputsModel, inputsSelectors, State } from '../../store';
 import { inputsActions } from '../../store/actions';
@@ -108,4 +107,4 @@ const mapDispatchToProps = {
 export const GlobalTime = connect(
   mapStateToProps,
   mapDispatchToProps
-)(React.memo(GlobalTimeComponent, deepEqual));
+)(React.memo(GlobalTimeComponent));

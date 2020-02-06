@@ -8,7 +8,6 @@ import { rgba } from 'polished';
 import React from 'react';
 import { Droppable } from 'react-beautiful-dnd';
 import styled from 'styled-components';
-import deepEqual from 'fast-deep-equal/react';
 
 interface Props {
   children?: React.ReactNode;
@@ -114,7 +113,6 @@ export const DroppableWrapper = React.memo<Props>(
         </ReactDndDropTarget>
       )}
     </Droppable>
-  ),
-  deepEqual
+  )
 );
 DroppableWrapper.displayName = 'DroppableWrapper';

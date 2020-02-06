@@ -7,7 +7,6 @@
 import classNames from 'classnames';
 import React from 'react';
 import styled, { css } from 'styled-components';
-import deepEqual from 'fast-deep-equal/react';
 
 import { gutterTimeline } from '../../lib/helpers';
 import { AppGlobalStyle } from '../page/index';
@@ -66,4 +65,4 @@ const WrapperPageComponent: React.FC<WrapperPageProps> = ({
   );
 };
 
-export const WrapperPage = React.memo(WrapperPageComponent, deepEqual);
+export const WrapperPage = React.memo(WrapperPageComponent);

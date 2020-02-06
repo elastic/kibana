@@ -14,7 +14,6 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import styled, { css } from 'styled-components';
-import deepEqual from 'fast-deep-equal/react';
 
 import { DefaultDraggable } from '../draggables';
 import { LinkIcon, LinkIconProps } from '../link_icon';
@@ -162,4 +161,4 @@ const HeaderPageComponent: React.FC<HeaderPageProps> = ({
   </Header>
 );
 
-export const HeaderPage = React.memo(HeaderPageComponent, deepEqual);
+export const HeaderPage = React.memo(HeaderPageComponent);

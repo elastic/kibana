@@ -15,7 +15,6 @@ import {
 } from '@elastic/eui';
 import styled from 'styled-components';
 import { chunk as _chunk } from 'lodash/fp';
-import deepEqual from 'fast-deep-equal/react';
 
 import {
   StatItemsComponent,
@@ -195,7 +194,6 @@ export const KpiNetworkComponent = React.memo<KpiNetworkProps>(
       </EuiFlexGroup>
     );
   },
-  deepEqual
 );
 
 KpiNetworkComponent.displayName = 'KpiNetworkComponent';

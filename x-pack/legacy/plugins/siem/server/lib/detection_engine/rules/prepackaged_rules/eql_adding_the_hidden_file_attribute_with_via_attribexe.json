@@ -1,10 +1,10 @@
 {
-  "description": "Adversaries can add the 'hidden' attribute to files to hide them from the user in an attempt to evade detection",
+  "description": "Adversaries can add the 'hidden' attribute to files to hide them from the user in an attempt to evade detection.",
   "index": [
     "winlogbeat-*"
   ],
   "language": "kuery",
-  "max_signals": 33,
+  "max_signals": 100,
   "name": "Adding Hidden File Attribute via Attrib",
   "query": "    event.action:\"Process Create (rule: ProcessCreate)\" and process.name:\"attrib.exe\" and process.args:\"+h\"",
   "risk_score": 21,

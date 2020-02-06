@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import isEqual from 'lodash/fp/isEqual';
-import deepEqual from 'fast-deep-equal';
 import React, { useEffect } from 'react';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
+import deepEqual from 'fast-deep-equal/es6/react';
 
 import { RouteSpyState } from '../../utils/route/types';
 import { useRouteSpy } from '../../utils/route/use_route_spy';
@@ -75,8 +74,8 @@ export const SiemNavigationRedux = compose<
     (prevProps, nextProps) =>
       prevProps.pathName === nextProps.pathName &&
       prevProps.search === nextProps.search &&
-      isEqual(prevProps.navTabs, nextProps.navTabs) &&
-      isEqual(prevProps.urlState, nextProps.urlState) &&
+      deepEqual(prevProps.navTabs, nextProps.navTabs) &&
+      deepEqual(prevProps.urlState, nextProps.urlState) &&
       deepEqual(prevProps.state, nextProps.state)
   )
 );

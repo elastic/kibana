@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEqual } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
+import deepEqual from 'fast-deep-equal/es6/react';
 
 import { networkActions } from '../../../../store/network';
 import { TlsEdges, TlsSortField, TlsFields, Direction } from '../../../../graphql/types';
@@ -106,7 +106,7 @@ const TlsTableComponent = React.memo<TlsTableProps>(
             field: getSortFromString(splitField[splitField.length - 1]),
             direction: criteria.sort.direction as Direction,
           };
-          if (!isEqual(newTlsSort, sort)) {
+          if (!deepEqual(newTlsSort, sort)) {
             updateNetworkTable({
               networkType: type,
               tableType,

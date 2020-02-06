@@ -26,5 +26,6 @@ export * from './ui_settings';
 export * from './field_icon';
 export * from './table_list_view';
 export * from './split_panel';
+export { reactToUiComponent, uiToReactComponent } from './adapters';
 export { useUrlTracker } from './use_url_tracker';
 export { toMountPoint } from './util';

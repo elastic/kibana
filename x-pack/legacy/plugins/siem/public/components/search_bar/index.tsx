@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getOr, isEqual, set } from 'lodash/fp';
+import { getOr, set } from 'lodash/fp';
 import React, { memo, useEffect, useCallback, useMemo } from 'react';
 import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
 import { Subscription } from 'rxjs';
 import styled from 'styled-components';
-import deepEqual from 'fast-deep-equal/react';
+import deepEqual from 'fast-deep-equal/es6/react';
 import { IIndexPattern } from 'src/plugins/data/public';
 import { SavedQuery } from 'src/legacy/core_plugins/data/public';
 
@@ -130,7 +130,7 @@ const SearchBarComponent = memo<SiemSearchBarProps & SiemSearchBarRedux & SiemSe
           updateSearchBar.start = payload.dateRange.from;
         }
 
-        if (payload.query != null && !isEqual(payload.query, filterQuery)) {
+        if (payload.query != null && !deepEqual(payload.query, filterQuery)) {
           isStateUpdated = true;
           updateSearchBar = set('query', payload.query, updateSearchBar);
         }
@@ -276,8 +276,7 @@ const SearchBarComponent = memo<SiemSearchBarProps & SiemSearchBarRedux & SiemSe
         />
       </SearchBarContainer>
     );
-  },
-  deepEqual
+  }
 );
 
 const makeMapStateToProps = () => {

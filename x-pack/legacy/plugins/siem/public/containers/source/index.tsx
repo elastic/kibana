@@ -10,7 +10,6 @@ import { Query } from 'react-apollo';
 import React, { useEffect, useMemo, useState } from 'react';
 import memoizeOne from 'memoize-one';
 import { IIndexPattern } from 'src/plugins/data/public';
-import deepEqual from 'fast-deep-equal/react';
 
 import { useUiSetting$ } from '../../lib/kibana';
 
@@ -115,7 +114,7 @@ export const WithSource = React.memo<WithSourceProps>(({ children, indexToAdd, s
       }
     </Query>
   );
-}, deepEqual);
+});
 
 WithSource.displayName = 'WithSource';
 

@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEqual, isEmpty } from 'lodash/fp';
+import { isEmpty } from 'lodash/fp';
 import React, { memo, useCallback, useState, useEffect } from 'react';
 import { Subscription } from 'rxjs';
-import deepEqual from 'fast-deep-equal/react';
+import deepEqual from 'fast-deep-equal/es6/react';
 
 import {
   IIndexPattern,
@@ -127,7 +127,7 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
       const filterWithoutDropArea = filterManager
         .getFilters()
         .filter((f: esFilters.Filter) => f.meta.controlledBy !== timelineFilterDropArea);
-      if (!isEqual(filters, filterWithoutDropArea)) {
+      if (!deepEqual(filters, filterWithoutDropArea)) {
         filterManager.setFilters(filters);
       }
     }, [filters]);
@@ -296,8 +296,7 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
         dataTestSubj={'timelineQueryInput'}
       />
     );
-  },
-  deepEqual
+  }
 );
 
 export const getDataProviderFilter = (dataProviderDsl: string): esFilters.Filter => {

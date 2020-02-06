@@ -3,11 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { isEqual, last } from 'lodash/fp';
+import { last } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
-import deepEqual from 'fast-deep-equal/react';
+import deepEqual from 'fast-deep-equal/es6/react';
 
 import { networkActions } from '../../../../store/actions';
 import {
@@ -114,7 +114,7 @@ const NetworkTopNFlowTableComponent: React.FC<NetworkTopNFlowTableProps> = ({
           field: field as NetworkTopTablesFields,
           direction: newSortDirection as Direction,
         };
-        if (!isEqual(newTopNFlowSort, sort)) {
+        if (!deepEqual(newTopNFlowSort, sort)) {
           updateNetworkTable({
             networkType: type,
             tableType,
@@ -192,4 +192,4 @@ export const NetworkTopNFlowTable = connect<
 >(
   makeMapStateToProps,
   mapDispatchToProps
-)(React.memo(NetworkTopNFlowTableComponent, deepEqual));
+)(React.memo(NetworkTopNFlowTableComponent));

@@ -7,7 +7,6 @@
 import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiTitle } from '@elastic/eui';
 import React from 'react';
 import styled, { css } from 'styled-components';
-import deepEqual from 'fast-deep-equal/react';
 
 import { InspectButton } from '../inspect';
 import { Subtitle } from '../subtitle';
@@ -86,4 +85,4 @@ const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
   </Header>
 );
 
-export const HeaderSection = React.memo(HeaderSectionComponent, deepEqual);
+export const HeaderSection = React.memo(HeaderSectionComponent);

@@ -7,7 +7,6 @@
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
-import deepEqual from 'fast-deep-equal/react';
 
 import { KpiHostsData, KpiHostDetailsData } from '../../../../graphql/types';
 import { StatItemsComponent, StatItemsProps, useKpiMatrixStatus } from '../../../stat_items';
@@ -76,6 +75,6 @@ export const KpiHostsComponentBase = ({
 
 KpiHostsComponentBase.displayName = 'KpiHostsComponentBase';
 
-export const KpiHostsComponent = React.memo(KpiHostsComponentBase, deepEqual);
+export const KpiHostsComponent = React.memo(KpiHostsComponentBase);
 
 KpiHostsComponent.displayName = 'KpiHostsComponent';

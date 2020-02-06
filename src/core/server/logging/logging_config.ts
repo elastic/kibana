@@ -72,13 +72,22 @@ export const config = {
     loggers: schema.arrayOf(createLoggerSchema, {
       defaultValue: [],
     }),
-    root: schema.object({
-      appenders: schema.arrayOf(schema.string(), {
-        defaultValue: [DEFAULT_APPENDER_NAME],
-        minSize: 1,
-      }),
-      level: createLevelSchema,
-    }),
+    root: schema.object(
+      {
+        appenders: schema.arrayOf(schema.string(), {
+          defaultValue: [DEFAULT_APPENDER_NAME],
+          minSize: 1,
+        }),
+        level: createLevelSchema,
+      },
+      {
+        validate(rawConfig) {
+          if (!rawConfig.appenders.includes(DEFAULT_APPENDER_NAME)) {
+            return `"${DEFAULT_APPENDER_NAME}" appender required for migration period till the next major release`;
+          }
+        },
+      }
+    ),
   }),
 };
 
@@ -118,10 +127,24 @@ export class LoggingConfig {
    */
   public readonly appenders: Map<string, AppenderConfigType> = new Map([
     [
-      DEFAULT_APPENDER_NAME,
+      'default',
       {
         kind: 'console',
         layout: { kind: 'pattern', highlight: true },
+      } as AppenderConfigType,
+    ],
+    [
+      'console',
+      {
+        kind: 'console',
+        layout: { kind: 'pattern', highlight: true },
+      } as AppenderConfigType,
+    ],
+    [
+      'file',
+      {
+        kind: 'file',
+        layout: { kind: 'pattern', highlight: false },
       } as AppenderConfigType,
     ],
   ]);
