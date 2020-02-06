@@ -35,7 +35,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await nameInput.clearValue();
       await nameInput.type(connectorName);
 
-      await find.clickByCssSelector('[data-test-subj="saveActionButton"]:not(disabled)');
+      await find.clickByCssSelector('[data-test-subj="saveNewActionButton"]:not(disabled)');
 
       const toastTitle = await pageObjects.common.closeToast();
       expect(toastTitle).to.eql(`Created '${connectorName}'`);
@@ -65,7 +65,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await nameInput.clearValue();
       await nameInput.type(connectorName);
 
-      await find.clickByCssSelector('[data-test-subj="saveActionButton"]:not(disabled)');
+      await find.clickByCssSelector('[data-test-subj="saveNewActionButton"]:not(disabled)');
 
       await pageObjects.common.closeToast();
 
@@ -81,7 +81,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await nameInputToUpdate.clearValue();
       await nameInputToUpdate.type(updatedConnectorName);
 
-      await find.clickByCssSelector('[data-test-subj="saveActionButton"]:not(disabled)');
+      await find.clickByCssSelector('[data-test-subj="saveEditedActionButton"]:not(disabled)');
 
       const toastTitle = await pageObjects.common.closeToast();
       expect(toastTitle).to.eql(`Updated '${updatedConnectorName}'`);
@@ -109,7 +109,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await nameInput.clearValue();
         await nameInput.type(connectorName);
 
-        await find.clickByCssSelector('[data-test-subj="saveActionButton"]:not(disabled)');
+        await find.clickByCssSelector('[data-test-subj="saveNewActionButton"]:not(disabled)');
         await pageObjects.common.closeToast();
       }
       const connectorName = generateUniqueKey();
@@ -147,7 +147,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await nameInput.clearValue();
         await nameInput.type(connectorName);
 
-        await find.clickByCssSelector('[data-test-subj="saveActionButton"]:not(disabled)');
+        await find.clickByCssSelector('[data-test-subj="saveNewActionButton"]:not(disabled)');
         await pageObjects.common.closeToast();
       }
 

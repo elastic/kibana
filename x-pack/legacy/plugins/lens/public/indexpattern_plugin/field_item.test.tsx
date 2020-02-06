@@ -90,6 +90,24 @@ describe('IndexPattern Field Item', () => {
     } as unknown) as FieldFormatsStart;
   });
 
+  it('should request field stats without a time field, if the index pattern has none', async () => {
+    indexPattern.timeFieldName = undefined;
+    core.http.post.mockImplementationOnce(() => {
+      return Promise.resolve({});
+    });
+    const wrapper = mountWithIntl(<FieldItem {...defaultProps} />);
+    wrapper.find('[data-test-subj="lnsFieldListPanelField-bytes"]').simulate('click');
+
+    expect(core.http.post).toHaveBeenCalledWith(
+      '/api/lens/index_stats/my-fake-index-pattern/field',
+      expect.anything()
+    );
+    // Function argument types not detected correctly (https://github.com/microsoft/TypeScript/issues/26591)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { body } = (core.http.post.mock.calls[0] as any)[1];
+    expect(JSON.parse(body)).not.toHaveProperty('timeFieldName');
+  });
+
   it('should request field stats every time the button is clicked', async () => {
     let resolveFunction: (arg: unknown) => void;
 

@@ -25,7 +25,7 @@ export const createGetMonitorDetailsRoute: UMRestApiRouteFactory = (libs: UMServ
     const { monitorId, dateStart, dateEnd } = request.query;
     return response.ok({
       body: {
-        ...(await libs.monitors.getMonitorDetails({
+        ...(await libs.requests.getMonitorDetails({
           callES,
           monitorId,
           dateStart,

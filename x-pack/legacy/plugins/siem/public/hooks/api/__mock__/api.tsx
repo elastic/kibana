@@ -13,8 +13,7 @@ export const mockIndexPatternSavedObjects: IndexPatternSavedObject[] = [
     attributes: {
       title: 'filebeat-*',
     },
-    updated_at: '2019-08-26T04:30:09.111Z',
-    version: 'WzE4LLwxXQ==',
+    _version: 'WzE4LLwxXQ==',
   },
   {
     type: 'index-pattern',
@@ -22,7 +21,6 @@ export const mockIndexPatternSavedObjects: IndexPatternSavedObject[] = [
     attributes: {
       title: 'auditbeat-*',
     },
-    updated_at: '2019-08-26T04:31:12.934Z',
-    version: 'WzELLywxXQ==',
+    _version: 'WzELLywxXQ==',
   },
 ];

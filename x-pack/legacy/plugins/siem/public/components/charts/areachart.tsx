@@ -19,7 +19,7 @@ import { getOr, get, isNull, isNumber } from 'lodash/fp';
 import useResizeObserver from 'use-resize-observer';
 
 import { ChartPlaceHolder } from './chart_place_holder';
-import { useTimeZone } from '../../hooks';
+import { useTimeZone } from '../../lib/kibana';
 import {
   chartDefaultSettings,
   ChartSeriesConfigs,
