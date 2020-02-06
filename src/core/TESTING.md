@@ -676,12 +676,27 @@ reflected in the mock.
 
 ```typescript
 // src/plugins/myplugin/public/saved_query_service.ts
-import { SavedObjectsClientContract, SavedObjectAttributes } from 'src/core/public';
+import {
+  SavedObjectsClientContract,
+  SavedObjectAttributes,
+  SimpleSavedObject,
+} from 'src/core/public';
+
+export type SavedQueryAttributes = SavedObjectAttributes & {
+  title: string;
+  description: 'bar';
+  query: {
+    language: 'kuery';
+    query: 'response:200';
+  };
+};
 
 export const createSavedQueryService = (savedObjectsClient: SavedObjectsClientContract) => {
-  const saveQuery = async (attributes: SavedObjectAttributes) => {
+  const saveQuery = async (
+    attributes: SavedQueryAttributes
+  ): Promise<SimpleSavedObject<SavedQueryAttributes>> => {
     try {
-      return await savedObjectsClient.create('query', attributes, {
+      return await savedObjectsClient.create<SavedQueryAttributes>('query', attributes, {
         id: attributes.title as string,
       });
     } catch (err) {
@@ -697,12 +712,12 @@ export const createSavedQueryService = (savedObjectsClient: SavedObjectsClientCo
 
 ```typescript
 // src/plugins/myplugin/public/saved_query_service.test.ts
-import { createSavedQueryService } from './saved_query_service';
-import { savedObjectsServiceMock } from '../../../core/public/mocks';
-import { SavedObjectsClientContract, SimpleSavedObject } from '../../../core/public';
+import { createSavedQueryService, SavedQueryAttributes } from './saved_query_service';
+import { savedObjectsServiceMock } from '../../../../../core/public/mocks';
+import { SavedObjectsClientContract, SimpleSavedObject } from '../../../../../core/public';
 
 describe('saved query service', () => {
-  const savedQueryAttributes = {
+  const savedQueryAttributes: SavedQueryAttributes = {
     title: 'foo',
     description: 'bar',
     query: {
@@ -739,12 +754,17 @@ describe('saved query service', () => {
       expect(response).toBe(mockReturnValue);
     });
 
-    it('should reject with an error when saved objects client errors', () => {
+    it('should reject with an error when saved objects client errors', async done => {
       mockSavedObjectsClient.create.mockRejectedValue(new Error('timeout'));
 
-      return expect(
-        savedQueryService.saveQuery(savedQueryAttributes)
-      ).rejects.toMatchInlineSnapshot(`[Error: Unable to create saved query, please try again.]`);
+      try {
+        await savedQueryService.saveQuery(savedQueryAttributes);
+      } catch (err) {
+        expect(err).toMatchInlineSnapshot(
+          `[Error: Unable to create saved query, please try again.]`
+        );
+        done();
+      }
     });
   });
 });
