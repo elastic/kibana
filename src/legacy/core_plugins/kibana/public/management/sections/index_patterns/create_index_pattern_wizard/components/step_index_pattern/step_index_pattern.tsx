@@ -255,7 +255,7 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
   }
 
   renderHeader({ exactMatchedIndices: indices }: { exactMatchedIndices: MatchedIndex[] }) {
-    const { goToNextStep } = this.props;
+    const { goToNextStep, indexPatternCreationType } = this.props;
     const {
       query,
       showingIndexPatternQueryErrors,
@@ -268,6 +268,8 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
     const characterList = this.ILLEGAL_CHARACTERS.slice(0, this.ILLEGAL_CHARACTERS.length - 1).join(
       ', '
     );
+
+    const checkIndices = indexPatternCreationType.checkIndicesForErrors(indices);
 
     if (!query || !query.length || query === '.' || query === '..') {
       // This is an error scenario but do not report an error
@@ -283,6 +285,9 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
       );
 
       errors.push(errorMessage);
+      containsErrors = true;
+    } else if (checkIndices) {
+      errors.push(...(checkIndices as string[]));
       containsErrors = true;
     }
 
