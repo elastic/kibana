@@ -5,7 +5,7 @@
  */
 
 import dateMath from '@elastic/datemath';
-import { getOr } from 'lodash/fp';
+import { getOr, isEmpty } from 'lodash/fp';
 import moment from 'moment';
 
 import { updateSignalStatus } from '../../../../containers/detection_engine/signals/api';
@@ -78,6 +78,7 @@ export const sendSignalToTimelineAction = async ({
   ecsData,
   updateTimelineIsLoading,
 }: SendSignalToTimelineActionProps) => {
+  let openSignalInBasicTimeline = true;
   const timelineId =
     ecsData.signal?.rule?.timeline_id != null ? ecsData.signal?.rule?.timeline_id[0] : '';
 
@@ -105,52 +106,57 @@ export const sendSignalToTimelineAction = async ({
           id: timelineId,
         },
       });
-
       const timelineTemplate: TimelineResult = omitTypenameInTimeline(
         getOr({}, 'data.getOneTimeline', responseTimeline)
       );
-      const { timeline } = formatTimelineResultToModel(timelineTemplate, true);
-      const query = replaceTemplateFieldFromQuery(
-        timeline.kqlQuery?.filterQuery?.kuery?.expression ?? '',
-        ecsData
-      );
-      const filters = replaceTemplateFieldFromMatchFilters(timeline.filters ?? [], ecsData);
-      const dataProviders = replaceTemplateFieldFromDataProviders(
-        timeline.dataProviders ?? [],
-        ecsData
-      );
-      createTimeline({
-        from,
-        timeline: {
-          ...timeline,
-          dataProviders,
-          eventType: 'all',
-          filters,
-          dateRange: {
-            start: from,
-            end: to,
-          },
-          kqlQuery: {
-            filterQuery: {
-              kuery: {
+      if (!isEmpty(timelineTemplate)) {
+        openSignalInBasicTimeline = false;
+        const { timeline } = formatTimelineResultToModel(timelineTemplate, true);
+        const query = replaceTemplateFieldFromQuery(
+          timeline.kqlQuery?.filterQuery?.kuery?.expression ?? '',
+          ecsData
+        );
+        const filters = replaceTemplateFieldFromMatchFilters(timeline.filters ?? [], ecsData);
+        const dataProviders = replaceTemplateFieldFromDataProviders(
+          timeline.dataProviders ?? [],
+          ecsData
+        );
+        createTimeline({
+          from,
+          timeline: {
+            ...timeline,
+            dataProviders,
+            eventType: 'all',
+            filters,
+            dateRange: {
+              start: from,
+              end: to,
+            },
+            kqlQuery: {
+              filterQuery: {
+                kuery: {
+                  kind: timeline.kqlQuery?.filterQuery?.kuery?.kind ?? 'kuery',
+                  expression: query,
+                },
+                serializedQuery: convertKueryToElasticSearchQuery(query),
+              },
+              filterQueryDraft: {
                 kind: timeline.kqlQuery?.filterQuery?.kuery?.kind ?? 'kuery',
                 expression: query,
               },
-              serializedQuery: convertKueryToElasticSearchQuery(query),
             },
-            filterQueryDraft: {
-              kind: timeline.kqlQuery?.filterQuery?.kuery?.kind ?? 'kuery',
-              expression: query,
-            },
+            show: true,
           },
-          show: true,
-        },
-        to,
-      });
+          to,
+        });
+      }
     } catch {
+      openSignalInBasicTimeline = true;
       updateTimelineIsLoading({ id: 'timeline-1', isLoading: false });
     }
-  } else {
+  }
+
+  if (openSignalInBasicTimeline) {
     createTimeline({
       from,
       timeline: {

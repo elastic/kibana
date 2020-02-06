@@ -6,12 +6,13 @@
 
 import { useEffect, useState } from 'react';
 
+import { useKibana } from '../lib/kibana';
 import { useStateToaster } from '../components/toasters';
 import { errorToToaster } from '../components/ml/api/error_to_toaster';
-import { IndexPatternSavedObject } from '../components/ml_popover/types';
 
-import { getIndexPatterns } from './api/api';
 import * as i18n from './translations';
+import { IndexPatternSavedObject } from './types';
+import { getIndexPatterns } from './api/api';
 
 type Return = [boolean, IndexPatternSavedObject[]];
 
@@ -19,15 +20,15 @@ export const useIndexPatterns = (refreshToggle = false): Return => {
   const [indexPatterns, setIndexPatterns] = useState<IndexPatternSavedObject[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [, dispatchToaster] = useStateToaster();
+  const { savedObjects } = useKibana().services;
 
   useEffect(() => {
     let isSubscribed = true;
-    const abortCtrl = new AbortController();
     setIsLoading(true);
 
     async function fetchIndexPatterns() {
       try {
-        const data = await getIndexPatterns(abortCtrl.signal);
+        const data = await getIndexPatterns(savedObjects);
 
         if (isSubscribed) {
           setIndexPatterns(data);
@@ -44,7 +45,6 @@ export const useIndexPatterns = (refreshToggle = false): Return => {
     fetchIndexPatterns();
     return () => {
       isSubscribed = false;
-      abortCtrl.abort();
     };
   }, [refreshToggle]);
 

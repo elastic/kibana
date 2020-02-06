@@ -42,11 +42,11 @@ export default function({ getService, getPageObjects }) {
         fullname: 'LeeFirst LeeLast',
         email: 'lee@myEmail.com',
         save: true,
-        roles: ['kibana_user'],
+        roles: ['kibana_admin'],
       });
       const users = indexBy(await PageObjects.security.getElasticsearchUsers(), 'username');
       log.debug('actualUsers = %j', users);
-      expect(users.Lee.roles).to.eql(['kibana_user']);
+      expect(users.Lee.roles).to.eql(['kibana_admin']);
       expect(users.Lee.fullname).to.eql('LeeFirst LeeLast');
       expect(users.Lee.email).to.eql('lee@myEmail.com');
       expect(users.Lee.reserved).to.be(false);
@@ -85,7 +85,7 @@ export default function({ getService, getPageObjects }) {
       expect(roles.apm_user.reserved).to.be(true);
       expect(roles.beats_admin.reserved).to.be(true);
       expect(roles.beats_system.reserved).to.be(true);
-      expect(roles.kibana_user.reserved).to.be(true);
+      expect(roles.kibana_admin.reserved).to.be(true);
       expect(roles.kibana_system.reserved).to.be(true);
       expect(roles.logstash_system.reserved).to.be(true);
       expect(roles.monitoring_user.reserved).to.be(true);

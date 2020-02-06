@@ -14,6 +14,7 @@ APIs to their New Platform equivalents.
     - [3. New Platform shim using New Platform router](#3-new-platform-shim-using-new-platform-router)
       - [4. New Platform plugin](#4-new-platform-plugin)
     - [Accessing Services](#accessing-services)
+    - [Migrating Hapi "pre" handlers](#migrating-hapi-pre-handlers)
   - [Chrome](#chrome)
     - [Updating an application navlink](#updating-application-navlink)
   - [Chromeless Applications](#chromeless-applications)
@@ -448,6 +449,142 @@ class Plugin {
     )
   }
 }
+```
+
+### Migrating Hapi "pre" handlers
+
+In the Legacy Platform, routes could provide a "pre" option in their config to
+register a function that should be run prior to the route handler. These
+"pre" handlers allow routes to share some business logic that may do some
+pre-work or validation. In Kibana, these are often used for license checks.
+
+The Kibana Platform's HTTP interface does not provide this functionality,
+however it is simple enough to port over using a higher-order function that can
+wrap the route handler.
+
+#### Simple example
+
+In this simple example, a pre-handler is used to either abort the request with
+an error or continue as normal. This is a simple "gate-keeping" pattern.
+
+```ts
+// Legacy pre-handler
+const licensePreRouting = (request) => {
+  const licenseInfo = getMyPluginLicenseInfo(request.server.plugins.xpack_main);
+  if (!licenseInfo.isOneOf(['gold', 'platinum', 'trial'])) {
+    throw Boom.forbidden(`You don't have the right license for MyPlugin!`);
+  }
+}
+
+server.route({
+  method: 'GET',
+  path: '/api/my-plugin/do-something',
+  config: {
+    pre: [{ method: licensePreRouting }]
+  },
+  handler: (req) => {
+    return doSomethingInteresting();
+  }
+})
+```
+
+In the Kibana Platform, the same functionality can be acheived by creating a
+function that takes a route handler (or factory for a route handler) as an
+argument and either invokes it in the successful case or returns an error
+response in the failure case.
+
+We'll call this a "high-order handler" similar to the "high-order component"
+pattern common in the React ecosystem.
+
+```ts
+// New Platform high-order handler
+const checkLicense = <P, Q, B>(
+  handler: RequestHandler<P, Q, B, RouteMethod>
+): RequestHandler<P, Q, B, RouteMethod> => {
+  return (context, req, res) => {
+    const licenseInfo = getMyPluginLicenseInfo(context.licensing.license);
+
+    if (licenseInfo.hasAtLeast('gold')) {
+      return handler(context, req, res);
+    } else {
+      return res.forbidden({ body: `You don't have the right license for MyPlugin!` });
+    }
+  }
+}
+
+router.get(
+  { path: '/api/my-plugin/do-something', validate: false },
+  checkLicense(async (context, req, res) => {
+    const results = doSomethingInteresting();
+    return res.ok({ body: results });
+  }),
+)
+```
+
+#### Full Example
+
+In some cases, the route handler may need access to data that the pre-handler
+retrieves. In this case, you can utilize a handler _factory_ rather than a raw
+handler.
+
+```ts
+// Legacy pre-handler
+const licensePreRouting = (request) => {
+  const licenseInfo = getMyPluginLicenseInfo(request.server.plugins.xpack_main);
+  if (licenseInfo.isOneOf(['gold', 'platinum', 'trial'])) {
+    // In this case, the return value of the pre-handler is made available on
+    // whatever the 'assign' option is in the route config.
+    return licenseInfo;
+  } else {
+    // In this case, the route handler is never called and the user gets this
+    // error message
+    throw Boom.forbidden(`You don't have the right license for MyPlugin!`);
+  }
+}
+
+server.route({
+  method: 'GET',
+  path: '/api/my-plugin/do-something',
+  config: {
+    pre: [{ method: licensePreRouting, assign: 'licenseInfo' }]
+  },
+  handler: (req) => {
+    const licenseInfo = req.pre.licenseInfo;
+    return doSomethingInteresting(licenseInfo);
+  }
+})
+```
+
+In many cases, it may be simpler to duplicate the function call
+to retrieve the data again in the main handler. In this other cases, you can
+utilize a handler _factory_ rather than a raw handler as the argument to your
+high-order handler. This way the high-order handler can pass arbitrary arguments
+to the route handler.
+
+```ts
+// New Platform high-order handler
+const checkLicense = <P, Q, B>(
+  handlerFactory: (licenseInfo: MyPluginLicenseInfo) => RequestHandler<P, Q, B, RouteMethod>
+): RequestHandler<P, Q, B, RouteMethod> => {
+  return (context, req, res) => {
+    const licenseInfo = getMyPluginLicenseInfo(context.licensing.license);
+
+    if (licenseInfo.hasAtLeast('gold')) {
+      const handler = handlerFactory(licenseInfo);
+      return handler(context, req, res);
+    } else {
+      return res.forbidden({ body: `You don't have the right license for MyPlugin!` });
+    }
+  }
+}
+
+router.get(
+  { path: '/api/my-plugin/do-something', validate: false },
+  checkLicense(licenseInfo => async (context, req, res) => {
+    const results = doSomethingInteresting(licenseInfo);
+    return res.ok({ body: results });
+  }),
+)
 ```
 
 ## Chrome

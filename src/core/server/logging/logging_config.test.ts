@@ -33,6 +33,16 @@ test('`schema` throws if `root` logger does not have appenders configured.', () 
   ).toThrowErrorMatchingSnapshot();
 });
 
+test('`schema` throws if `root` logger does not have "default" appender configured.', () => {
+  expect(() =>
+    config.schema.validate({
+      root: {
+        appenders: ['console'],
+      },
+    })
+  ).toThrowErrorMatchingSnapshot();
+});
+
 test('`getParentLoggerContext()` returns correct parent context name.', () => {
   expect(LoggingConfig.getParentLoggerContext('a.b.c')).toEqual('a.b');
   expect(LoggingConfig.getParentLoggerContext('a.b')).toEqual('a');
@@ -46,14 +56,22 @@ test('`getLoggerContext()` returns correct joined context name.', () => {
   expect(LoggingConfig.getLoggerContext([])).toEqual('root');
 });
 
-test('correctly fills in default `appenders` config.', () => {
+test('correctly fills in default config.', () => {
   const configValue = new LoggingConfig(config.schema.validate({}));
 
-  expect(configValue.appenders.size).toBe(1);
+  expect(configValue.appenders.size).toBe(3);
 
   expect(configValue.appenders.get('default')).toEqual({
     kind: 'console',
     layout: { kind: 'pattern', highlight: true },
+  });
+  expect(configValue.appenders.get('console')).toEqual({
+    kind: 'console',
+    layout: { kind: 'pattern', highlight: true },
+  });
+  expect(configValue.appenders.get('file')).toEqual({
+    kind: 'file',
+    layout: { kind: 'pattern', highlight: false },
   });
 });
 

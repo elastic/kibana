@@ -21,7 +21,7 @@ import { getLayerList } from './map_config';
 import { MAP_SAVED_OBJECT_TYPE } from '../../../../maps/common/constants';
 import * as i18n from './translations';
 import { Query, esFilters } from '../../../../../../../src/plugins/data/public';
-import { IndexPatternSavedObject } from '../ml_popover/types';
+import { IndexPatternSavedObject } from '../../hooks/types';
 
 /**
  * Creates MapEmbeddable with provided initial configuration

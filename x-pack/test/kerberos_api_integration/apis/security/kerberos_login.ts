@@ -38,7 +38,7 @@ export default function({ getService }: FtrProviderContext) {
       await getService('esSupertest')
         .post('/_security/role_mapping/krb5')
         .send({
-          roles: ['kibana_user'],
+          roles: ['kibana_admin'],
           enabled: true,
           rules: { field: { 'realm.name': 'kerb1' } },
         })
@@ -74,6 +74,7 @@ export default function({ getService }: FtrProviderContext) {
 
       expect(user.username).to.eql(username);
       expect(user.authentication_realm).to.eql({ name: 'reserved', type: 'reserved' });
+      expect(user.authentication_provider).to.eql('basic');
     });
 
     describe('initiating SPNEGO', () => {
@@ -119,7 +120,7 @@ export default function({ getService }: FtrProviderContext) {
           .set('Cookie', sessionCookie.cookieString())
           .expect(200, {
             username: 'tester@TEST.ELASTIC.CO',
-            roles: ['kibana_user'],
+            roles: ['kibana_admin'],
             full_name: null,
             email: null,
             metadata: {
@@ -129,6 +130,7 @@ export default function({ getService }: FtrProviderContext) {
             enabled: true,
             authentication_realm: { name: 'kerb1', type: 'kerberos' },
             lookup_realm: { name: 'kerb1', type: 'kerberos' },
+            authentication_provider: 'kerberos',
           });
       });
 

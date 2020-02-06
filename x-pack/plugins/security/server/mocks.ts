@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PluginSetupContract } from './plugin';
+import { SecurityPluginSetup } from './plugin';
 
 import { authenticationMock } from './authentication/index.mock';
 import { authorizationMock } from './authorization/index.mock';
@@ -19,7 +19,7 @@ function createSetupMock() {
       mode: mockAuthz.mode,
     },
     registerSpacesService: jest.fn(),
-    __legacyCompat: {} as PluginSetupContract['__legacyCompat'],
+    __legacyCompat: {} as SecurityPluginSetup['__legacyCompat'],
   };
 }
 
