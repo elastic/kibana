@@ -12,7 +12,7 @@ export const METRICS_FEATURE = {
     defaultMessage: 'Metrics',
   }),
   icon: 'metricsApp',
-  navLinkId: 'infra:home',
+  navLinkId: 'metrics',
   app: ['infra', 'kibana'],
   catalogue: ['infraops'],
   privileges: {
@@ -41,7 +41,7 @@ export const LOGS_FEATURE = {
     defaultMessage: 'Logs',
   }),
   icon: 'logsApp',
-  navLinkId: 'infra:logs',
+  navLinkId: 'logs',
   app: ['infra', 'kibana'],
   catalogue: ['infralogging'],
   privileges: {

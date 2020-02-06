@@ -10,11 +10,9 @@ import {
   FeatureCatalogueCategory,
 } from '../../../../src/plugins/home/public';
 
-const APP_ID = 'infra';
-
 export const registerFeatures = (homePlugin: HomePublicPluginSetup) => {
   homePlugin.featureCatalogue.register({
-    id: 'infraops',
+    id: 'metrics',
     title: i18n.translate('xpack.infra.registerFeatures.infraOpsTitle', {
       defaultMessage: 'Metrics',
     }),
@@ -23,13 +21,13 @@ export const registerFeatures = (homePlugin: HomePublicPluginSetup) => {
         'Explore infrastructure metrics and logs for common servers, containers, and services.',
     }),
     icon: 'metricsApp',
-    path: `/app/${APP_ID}#infrastructure`,
+    path: `/app/metrics`,
     showOnHomePage: true,
     category: FeatureCatalogueCategory.DATA,
   });
 
   homePlugin.featureCatalogue.register({
-    id: 'infralogging',
+    id: 'logs',
     title: i18n.translate('xpack.infra.registerFeatures.logsTitle', {
       defaultMessage: 'Logs',
     }),
@@ -38,7 +36,7 @@ export const registerFeatures = (homePlugin: HomePublicPluginSetup) => {
         'Stream logs in real time or scroll through historical views in a console-like experience.',
     }),
     icon: 'logsApp',
-    path: `/app/${APP_ID}#logs`,
+    path: `/app/logs`,
     showOnHomePage: true,
     category: FeatureCatalogueCategory.DATA,
   });
