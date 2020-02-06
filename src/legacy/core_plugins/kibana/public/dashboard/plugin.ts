@@ -42,7 +42,6 @@ import {
   HomePublicPluginSetup,
   FeatureCatalogueCategory,
 } from '../../../../../plugins/home/public';
-import { SharePluginStart } from '../../../../../plugins/share/public';
 import {
   AngularRenderedAppUpdater,
   KibanaLegacySetup,
