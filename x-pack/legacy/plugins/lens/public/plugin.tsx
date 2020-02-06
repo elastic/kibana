@@ -13,16 +13,16 @@ import { DataPublicPluginStart } from 'src/plugins/data/public';
 import rison, { RisonObject, RisonValue } from 'rison-node';
 import { isObject } from 'lodash';
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
-import { editorFrameSetup, editorFrameStart, editorFrameStop } from './editor_frame_plugin';
-import { indexPatternDatasourceSetup, indexPatternDatasourceStop } from './indexpattern_plugin';
+import { editorFrameSetup, editorFrameStart, editorFrameStop } from './editor_frame_service';
+import { indexPatternDatasourceSetup, indexPatternDatasourceStop } from './indexpattern_datasource';
 import { addHelpMenuToAppChrome } from './help_menu_util';
 import { SavedObjectIndexStore } from './persistence';
-import { xyVisualizationSetup, xyVisualizationStop } from './xy_visualization_plugin';
-import { metricVisualizationSetup, metricVisualizationStop } from './metric_visualization_plugin';
+import { xyVisualizationSetup, xyVisualizationStop } from './xy_visualization';
+import { metricVisualizationSetup, metricVisualizationStop } from './metric_visualization';
 import {
   datatableVisualizationSetup,
   datatableVisualizationStop,
-} from './datatable_visualization_plugin';
+} from './datatable_visualization';
 import { App } from './app_plugin';
 import {
   LensReportManager,

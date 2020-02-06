@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { ExpressionFunction, KibanaContext, KibanaDatatable } from 'src/plugins/expressions/public';
 import { LensMultiTable } from '../types';
-import { toAbsoluteDates } from '../indexpattern_plugin/auto_date';
+import { toAbsoluteDates } from '../indexpattern_datasource/auto_date';
 
 interface MergeTables {
   layerIds: string[];
