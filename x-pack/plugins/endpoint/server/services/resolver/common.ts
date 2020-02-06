@@ -28,13 +28,6 @@ export class EntityParseError extends Error {
   }
 }
 
-/**
- * Defines a type for arbitrary elasticsearch query json objects
- */
-export interface Query {
-  [key: string]: number | string | null | undefined | Query | Query[];
-}
-
 export function parsePhase0EntityID(entityID: string): { endpointID: string; uniquePID: string } {
   const fields = entityID.split(phase0EntityIDDelimiter);
   if (fields.length !== 3) {

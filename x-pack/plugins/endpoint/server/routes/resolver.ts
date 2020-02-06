@@ -7,7 +7,7 @@
 import { IRouter } from 'kibana/server';
 import { SearchResponse } from 'elasticsearch';
 import { schema } from '@kbn/config-schema';
-import { EndpointAppContext } from '../types';
+import { EndpointAppContext, Total } from '../types';
 import {
   getESChildrenQuery,
   getESNodeQuery,
@@ -15,7 +15,7 @@ import {
   getESNodeCountQuery,
   PaginationInfo,
 } from '../services/resolver/query_builder';
-import { ResolverSearchHandler, Total } from '../services/resolver/search_handler';
+import { ResolverSearchHandler } from '../services/resolver/search_handler';
 import { ResolverData } from '../../common/types';
 import { EntityParseError } from '../services/resolver/common';
 

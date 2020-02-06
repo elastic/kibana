@@ -3,8 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { isPhase0EntityID, parsePhase0EntityID, Query } from './common';
-import { EndpointAppContext } from '../../types';
+import { isPhase0EntityID, parsePhase0EntityID } from './common';
+import { EndpointAppContext, JSONish } from '../../types';
 import { EndpointAppConstants } from '../../../common/types';
 
 export interface PaginationInfo {
@@ -77,7 +77,7 @@ export async function getESChildrenQuery(
   return await buildSearchBody(context, query, paginationInfo, index);
 }
 
-export function getESChildrenCountQuery(entityID: string): { index: string; query: Query } {
+export function getESChildrenCountQuery(entityID: string): { index: string; query: JSONish } {
   if (isPhase0EntityID(entityID)) {
     const { endpointID, uniquePID } = parsePhase0EntityID(entityID);
     return {
@@ -135,7 +135,7 @@ export async function getPagination(
 
 async function buildSearchBody(
   endpointAppContext: EndpointAppContext,
-  queryClause: Query,
+  queryClause: JSONish,
   paginationInfo: PaginationInfo,
   index: string
 ) {
@@ -162,7 +162,7 @@ export async function getESNodeQuery(
   return await buildSearchBody(context, query, paginationInfo, index);
 }
 
-export function getESNodeCountQuery(entityID: string): { index: string; query: Query } {
+export function getESNodeCountQuery(entityID: string): { index: string; query: JSONish } {
   if (isPhase0EntityID(entityID)) {
     const { endpointID, uniquePID } = parsePhase0EntityID(entityID);
     return {

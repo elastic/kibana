@@ -47,7 +47,7 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
       // default page size
       expect(body.request_page_size).to.eql(10);
       expect(body.request_page_index).to.eql(0);
-      expect(body.request_from_index).to.eql(0);
+      expect(body.result_from_index).to.eql(0);
     });
     it('should return the right number of children nodes', async () => {
       const { body } = await supertest
@@ -68,7 +68,7 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
       // default page size
       expect(body.request_page_size).to.eql(10);
       expect(body.request_page_index).to.eql(0);
-      expect(body.request_from_index).to.eql(0);
+      expect(body.result_from_index).to.eql(0);
     });
     it('should paginate correctly', async () => {
       let { body } = await supertest
@@ -81,7 +81,7 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
       expect(body.total).to.greaterThan(1);
       expect(body.request_page_size).to.eql(1);
       expect(body.request_page_index).to.eql(0);
-      expect(body.request_from_index).to.eql(0);
+      expect(body.result_from_index).to.eql(0);
 
       // there should be at least one child of the root
       ({ body } = await supertest
@@ -93,7 +93,7 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
       expect(body.total).to.greaterThan(0);
       expect(body.request_page_size).to.eql(1);
       expect(body.request_page_index).to.eql(1);
-      expect(body.request_from_index).to.eql(1);
+      expect(body.result_from_index).to.eql(1);
 
       // should return no nodes after paginating further
       await supertest

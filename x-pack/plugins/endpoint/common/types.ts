@@ -32,42 +32,35 @@ export class EndpointAppConstants {
   static ENDGAME_INDEX_NAME = 'endgame-*';
 }
 
-export interface AlertResultList {
+export interface Pagination {
   /**
-   * The alerts restricted by page size.
-   */
-  alerts: AlertData[];
-
-  /**
-   * The total number of alerts on the page.
+   * The total number of items on the page.
    */
   total: number;
-
   /**
    * The size of the requested page.
    */
   request_page_size: number;
-
   /**
    * The index of the requested page, starting at 0.
    */
   request_page_index: number;
-
   /**
    * The offset of the requested page, starting at 0.
    */
   result_from_index: number;
 }
 
-export interface EndpointResultList {
+export interface AlertResultList extends Pagination {
+  /**
+   * The alerts restricted by page size.
+   */
+  alerts: AlertData[];
+}
+
+export interface EndpointResultList extends Pagination {
   /* the endpoints restricted by the page size */
   endpoints: EndpointMetadata[];
-  /* the total number of unique endpoints in the index */
-  total: number;
-  /* the page size requested */
-  request_page_size: number;
-  /* the page index requested */
-  request_page_index: number;
 }
 
 export interface AlertData {
@@ -191,13 +184,6 @@ export interface ResolverChildrenResponse extends Pagination {
 
 export interface ResolverNodeDetailsResponse extends Pagination {
   node: ResolverResponseNode;
-}
-
-export interface Pagination {
-  total: number;
-  request_page_size: number;
-  request_page_index: number;
-  request_from_index: number;
 }
 
 /**

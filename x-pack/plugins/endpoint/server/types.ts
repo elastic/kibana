@@ -28,3 +28,11 @@ export interface AlertRequestParams {
   page_index?: number;
   page_size?: number;
 }
+
+/**
+ * Total field from an ES search query
+ */
+export interface Total {
+  value: number;
+  relation: string;
+}

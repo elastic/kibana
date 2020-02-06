@@ -7,9 +7,9 @@ import {
   elasticsearchServiceMock,
   loggingServiceMock,
 } from '../../../../../../src/core/server/mocks';
-import { ResolverSearchHandler, Total } from './search_handler';
+import { ResolverSearchHandler } from './search_handler';
 import { IScopedClusterClient } from 'kibana/server';
-import { EndpointAppContext } from '../../types';
+import { EndpointAppContext, Total } from '../../types';
 import { EndpointConfigSchema } from '../../config';
 import { PaginationInfo, getPagination } from './query_builder';
 import { CountResponse } from 'elasticsearch';
@@ -122,7 +122,7 @@ async function checkPagination(
   const pagination = await getPagination(context, builtPageInfo);
   expect(resPagination.total).toBe(total);
 
-  expect(resPagination.request_from_index).toBe(pagination.from);
+  expect(resPagination.result_from_index).toBe(pagination.from);
   expect(resPagination.request_page_index).toBe(pagination.page);
   expect(resPagination.request_page_size).toBe(pagination.pageSize);
 }

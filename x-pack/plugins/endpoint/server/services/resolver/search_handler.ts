@@ -14,8 +14,8 @@ import {
   ResolverNodeDetailsResponse,
   Pagination,
 } from '../../../common/types';
-import { EndpointAppContext } from '../../types';
-import { ResolverNode, ResolverDataHit, Query } from './common';
+import { EndpointAppContext, JSONish, Total } from '../../types';
+import { ResolverNode, ResolverDataHit } from './common';
 import { ResolverPhase0Node } from './phase0_node';
 import { ResolverPhase1Node } from './phase1_node';
 import { getPagination, PaginationInfo } from './query_builder';
@@ -25,17 +25,12 @@ interface ParentAndResolverData {
   events: ResolverData[];
 }
 
-export interface Total {
-  value: number;
-  relation: string;
-}
-
 export class ResolverSearchHandler {
   constructor(
     private readonly client: IScopedClusterClient,
     private readonly endpointContext: EndpointAppContext,
     private readonly pageInfo: PaginationInfo,
-    private readonly countQuery: Query,
+    private readonly countQuery: JSONish,
     private readonly entityID: string
   ) {}
 
@@ -70,7 +65,7 @@ export class ResolverSearchHandler {
       total: amount,
       request_page_index: page,
       request_page_size: pageSize,
-      request_from_index: from,
+      result_from_index: from,
     };
   }
 
