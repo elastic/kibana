@@ -4,7 +4,7 @@
     "winlogbeat-*"
   ],
   "language": "kuery",
-  "max_signals": 33,
+  "max_signals": 100,
   "name": "Encoding or Decoding Files via CertUtil",
   "query": "event.action:\"Process Create (rule: ProcessCreate)\" and    process.name:\"certutil.exe\" and    process.args:(\"-encode\" or \"/encode\" or \"-decode\" or \"/decode\")",
   "risk_score": 47,

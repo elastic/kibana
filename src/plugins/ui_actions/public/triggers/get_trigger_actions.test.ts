@@ -17,15 +17,15 @@
  * under the License.
  */
 
-import { IAction } from '../actions';
+import { Action } from '../actions';
 import { uiActionsTestPlugin } from '../tests/test_plugin';
 
-const action1: IAction = {
+const action1: Action = {
   id: 'action1',
   order: 1,
   type: 'type1',
 } as any;
-const action2: IAction = {
+const action2: Action = {
   id: 'action2',
   order: 2,
   type: 'type2',

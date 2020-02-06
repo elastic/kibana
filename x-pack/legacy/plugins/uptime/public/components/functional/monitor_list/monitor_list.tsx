@@ -39,8 +39,6 @@ interface MonitorListQueryResult {
 }
 
 interface MonitorListProps {
-  absoluteStartDate: number;
-  absoluteEndDate: number;
   dangerColor: string;
   hasActiveFilters: boolean;
   successColor: string;
@@ -56,16 +54,7 @@ const TruncatedEuiLink = styled(EuiLink)`
 `;
 
 export const MonitorListComponent = (props: Props) => {
-  const {
-    absoluteStartDate,
-    absoluteEndDate,
-    dangerColor,
-    data,
-    errors,
-    hasActiveFilters,
-    linkParameters,
-    loading,
-  } = props;
+  const { dangerColor, data, errors, hasActiveFilters, linkParameters, loading } = props;
   const [drawerIds, updateDrawerIds] = useState<string[]>([]);
 
   const items = data?.monitorStates?.summaries ?? [];
@@ -132,12 +121,7 @@ export const MonitorListComponent = (props: Props) => {
         show: false,
       },
       render: (histogramSeries: SummaryHistogramPoint[] | null) => (
-        <MonitorBarSeries
-          absoluteStartDate={absoluteStartDate}
-          absoluteEndDate={absoluteEndDate}
-          dangerColor={dangerColor}
-          histogramSeries={histogramSeries}
-        />
+        <MonitorBarSeries dangerColor={dangerColor} histogramSeries={histogramSeries} />
       ),
     },
     {

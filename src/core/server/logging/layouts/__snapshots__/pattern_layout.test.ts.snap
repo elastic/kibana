@@ -35,3 +35,15 @@ exports[`\`format()\` correctly formats record with highlighting. 4`] = `"[2012-
 exports[`\`format()\` correctly formats record with highlighting. 5`] = `"[2012-02-01T00:00:00.000Z][INFO ][context-5] message-5"`;
 
 exports[`\`format()\` correctly formats record with highlighting. 6`] = `"[2012-02-01T00:00:00.000Z][TRACE][context-6] message-6"`;
+
+exports[`allows specifying the PID in custom pattern 1`] = `"5355-context-1-Some error stack"`;
+
+exports[`allows specifying the PID in custom pattern 2`] = `"5355-context-2-message-2"`;
+
+exports[`allows specifying the PID in custom pattern 3`] = `"5355-context-3-message-3"`;
+
+exports[`allows specifying the PID in custom pattern 4`] = `"5355-context-4-message-4"`;
+
+exports[`allows specifying the PID in custom pattern 5`] = `"5355-context-5-message-5"`;
+
+exports[`allows specifying the PID in custom pattern 6`] = `"5355-context-6-message-6"`;
