@@ -4,112 +4,197 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable max-classes-per-file */
-
-interface ResizeObserverMockInterface extends ResizeObserver {
-  readonly callback: ResizeObserverCallback;
-  elements: Set<Element>;
-}
-
-class MockSimulation {
-  observers: Set<ResizeObserverMockInterface> = new Set();
-  domRects: Map<Element, DOMRect> = new Map();
-}
-
-let mockSimulation: MockSimulation | undefined;
+import * as ResizeObserverNamespace from 'resize-observer-polyfill';
 
 /**
- * The value that is used to mock the ResizeObserver constructor,
- * use jest.fn so we have mock metadata.
- * TODO clear after each test
+ * A map of resize observers to the elements they observe.
  */
-let mockResizeObserverConstructor: jest.Mock<ResizeObserver, [ResizeObserverCallback]>;
+let mockObserved: Map<ResizeObserver, Set<Element>> | undefined;
+/**
+ * A map of resize observers to their callbacks.
+ */
+let mockCallbacks: Map<ResizeObserver, ResizeObserverCallback> | undefined;
 
 /**
- * mock the resize observer polyfill, replacing it with a factory function that registers new mock resize observers and returns em
+ * TODO
  */
-jest.mock('resize-observer-polyfill', () => {
-  class ResizeObserverMock {
-    public callback: ResizeObserverCallback;
-    constructor(callback: ResizeObserverCallback) {
-      this.callback = callback;
-    }
-    public elements: Set<Element> = new Set();
-    observe(target: Element): void {
-      this.elements.add(target);
-    }
-    unobserve(target: Element): void {
-      this.elements.delete(target);
-    }
+let mockContentRects: Map<Element, DOMRectReadOnly> | undefined;
 
-    disconnect(): void {
-      this.elements = new Set();
+/**
+ * Simulate an observed resize on `target`. Will trigger `ResizeObserver`'s and change its `getBoundingClientRect` return value.
+ */
+export const simulateElementResize: (
+  target: Element,
+  maybeContentRect?: DOMRectReadOnly
+) => void = (target, maybeContentRect?) => {
+  /**
+   * If `contentRect` isn't passed then use the default null one.
+   */
+  const contentRect: DOMRectReadOnly = maybeContentRect
+    ? maybeContentRect
+    : {
+        width: 0,
+        height: 0,
+        left: 0,
+        top: 0,
+        right: 0,
+        bottom: 0,
+        x: 0,
+        y: 0,
+        toJSON() {
+          return this;
+        },
+      };
+
+  if (!mockContentRects) {
+    mockContentRects = new Map();
+  }
+  if (!mockObserved) {
+    mockObserved = new Map();
+  }
+  if (!mockCallbacks) {
+    mockCallbacks = new Map();
+  }
+  /**
+   * Store the `contentRect` so that the mock implement of `getBoundingClientRect` can return it.
+   */
+  mockContentRects.set(target, contentRect);
+
+  for (const [resizeObserver, observedElements] of mockObserved.entries()) {
+    for (const observedElement of observedElements) {
+      if (observedElement === target) {
+        const entries = [
+          {
+            contentRect,
+            target,
+          },
+        ];
+        /**
+         * Call the callback provided by any `ResizeObserver` that observed this element.
+         */
+        const callback = mockCallbacks.get(resizeObserver);
+        if (callback) {
+          callback(entries, resizeObserver);
+        }
+      }
     }
   }
-  console.log('mockin it');
-  mockResizeObserverConstructor = jest
-    .fn()
-    .mockImplementation((callbackinoinoien: ResizeObserverCallback) => {
-      const instance = new ResizeObserverMock(callbackinoinoien);
-      if (!mockSimulation) {
-        mockSimulation = new MockSimulation();
-      }
-      mockSimulation.observers.add(instance);
-      console.log('in thing', typeof instance.observe);
-      (instance as any).frig = true;
-      return instance;
-    });
+};
 
-  const frig2 = new mockResizeObserverConstructor();
-
-  return {
+const mockGetBoundingClientRectImplementation = function(this: Element) {
+  if (this) {
+    if (!mockContentRects) {
+      mockContentRects = new Map();
+    }
     /**
-     * Without this, `default` will not be interpretted as a constructor.
+     * If the element has a `contentRect` stored, use that.
      */
-    __esModule: true,
-    default: mockResizeObserverConstructor,
-  };
-});
-
-jest
-  .spyOn(Element.prototype, 'getBoundingClientRect')
-  .mockImplementation(function(this: Element): DOMRect {
-    if (mockSimulation) {
-      const rect = mockSimulation.domRects.get(this);
-      if (rect) {
-        return rect;
-      }
-    }
-    return {
-      x: 0,
-      y: 0,
-      left: 0,
-      top: 0,
-      bottom: 0,
-      right: 0,
-      width: 0,
-      height: 0,
-      toJSON() {
-        return this;
-      },
-    };
-  });
-
-export const clear = () => {
-  mockSimulation = undefined;
-  mockResizeObserverConstructor.mockReset();
-};
-
-export const simulateElementResize: (element: Element, contentRect: DOMRect) => void = (
-  element,
-  contentRect
-) => {
-  if (mockSimulation) {
-    mockSimulation.domRects.set(element, contentRect);
-    for (const observer of mockSimulation.observers) {
-      if (observer.elements.has(element)) {
-        observer.callback([{ target: element, contentRect }], observer);
-      }
+    const mockedValue = mockContentRects.get(this);
+    if (mockedValue) {
+      return mockedValue;
     }
   }
+  return {
+    width: 0,
+    height: 0,
+    left: 0,
+    top: 0,
+    right: 0,
+    bottom: 0,
+    x: 0,
+    y: 0,
+    toJSON() {
+      return this;
+    },
+  };
 };
+
+export const setup: (ElementConstructor: typeof Element) => void = ElementConstructor => {
+  jest
+    .spyOn(ElementConstructor.prototype, 'getBoundingClientRect')
+    .mockImplementation(mockGetBoundingClientRectImplementation);
+};
+
+let MockResizeObserver: jest.Mock<ResizeObserver, [ResizeObserverCallback]> | null;
+
+export const clear: () => void = () => {
+  if (mockObserved) {
+    mockObserved.clear();
+  }
+  if (mockCallbacks) {
+    mockCallbacks.clear();
+  }
+  if (mockContentRects) {
+    mockContentRects.clear();
+  }
+  if (MockResizeObserver) {
+    MockResizeObserver.mockClear();
+  }
+};
+
+type MockNamespace = jest.Mocked<typeof ResizeObserverNamespace> & {
+  // TODO is this needed, if so, why?
+  __esModule: true;
+};
+
+jest.mock(
+  'resize-observer-polyfill',
+  (): MockNamespace => {
+    MockResizeObserver = jest.fn(function(callback: ResizeObserverCallback) {
+      const resizeObserver: ResizeObserver = {
+        /**
+         * Add the element to the map so that later calls to `simulateElementResize` can trigger `callback`.
+         */
+        observe(target: Element) {
+          if (!mockObserved) {
+            mockObserved = new Map();
+          }
+          const elements = mockObserved.get(this);
+          if (elements) {
+            elements.add(target);
+          } else {
+            mockObserved.set(this, new Set([target]));
+          }
+        },
+        /**
+         * Remove the element from the map so that later calls to `simulateElementResize` will not trigger `callback`.
+         */
+        unobserve(target: Element) {
+          if (!mockObserved) {
+            mockObserved = new Map();
+          }
+          const elements = mockObserved.get(this);
+          if (elements) {
+            elements.delete(target);
+          }
+        },
+        /**
+         * Remove all elements from the map for this instance.
+         */
+        disconnect() {
+          if (!mockObserved) {
+            mockObserved = new Map();
+          }
+          const elements = mockObserved.get(this);
+          if (elements) {
+            for (const target of elements) {
+              elements.delete(target);
+            }
+          }
+        },
+      };
+      if (!mockCallbacks) {
+        mockCallbacks = new Map();
+      }
+      mockCallbacks.set(resizeObserver, callback);
+      return resizeObserver;
+    });
+    return {
+      __esModule: true,
+      /**
+       * The constructor for ResizeObserver (mocked.)
+       */
+      default: MockResizeObserver,
+    };
+  }
+);

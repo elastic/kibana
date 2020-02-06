@@ -258,8 +258,6 @@ function useAutoUpdatingClientRect(): [DOMRect | null, (node: Element | null) =>
           setRect(nodeRef.current.getBoundingClientRect());
         }
       });
-      console.log('in real thing', typeof resizeObserver.observe);
-      console.log('frg?', resizeObserver.frig);
       resizeObserver.observe(nodeRef.current);
       return () => {
         resizeObserver.disconnect();
