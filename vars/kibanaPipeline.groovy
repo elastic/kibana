@@ -316,21 +316,20 @@ def runErrorReporter() {
   )
 }
 def processOssQueue(queue, finishedSuites, workerNumber) {
-  while(!queue.isEmpty()) {
-    def testSuite
-    try {
-      testSuite = queue.pop()
-    } catch (ex) {
-      print ex.toString()
-      continue
-    }
-
-    withEnv([
-      "CI_GROUP=${workerNumber}",
-      "JOB=kibana-ciGroup${workerNumber}",
-      "REMOVE_KIBANA_INSTALL_DIR=1",
-    ]) {
-      catchError {
+  withEnv([
+    "CI_GROUP=${workerNumber}",
+    "JOB=kibana-ciGroup${workerNumber}",
+    "REMOVE_KIBANA_INSTALL_DIR=1",
+  ]) {
+    while(!queue.isEmpty()) {
+      def testSuite
+      try {
+        testSuite = queue.pop()
+      } catch (ex) {
+        print ex.toString()
+        continue
+      }
+      try {
         retryable("kibana-ciGroup${workerNumber}") {
           testSuite.startTime = new Date().format("yyyy-MM-dd'T'HH:mm:ss'Z'", TimeZone.getTimeZone("UTC"))
           testSuite.success = null
@@ -357,30 +356,32 @@ def processOssQueue(queue, finishedSuites, workerNumber) {
           }
         }
       }
+      catch(ex) {
+        catchError {
+          throw ex
+        }
+      }
     }
-    catchError {
-      print testSuite
-      finishedSuites << testSuite
-    }
+
+    finishedSuites << testSuite
   }
 }
 
 def processXpackQueue(queue, finishedSuites, workerNumber) {
-  while(!queue.isEmpty()) {
-    def testSuite
-    try {
-      testSuite = queue.pop()
-    } catch (ex) {
-      print ex.toString()
-      continue
-    }
-
-    withEnv([
-      "CI_GROUP=${workerNumber}",
-      "JOB=xpack-kibana-ciGroup${workerNumber}",
-      "REMOVE_KIBANA_INSTALL_DIR=1",
-    ]) {
-      catchError {
+  withEnv([
+    "CI_GROUP=${workerNumber}",
+    "JOB=xpack-kibana-ciGroup${workerNumber}",
+    "REMOVE_KIBANA_INSTALL_DIR=1",
+  ]) {
+    while(!queue.isEmpty()) {
+      def testSuite
+      try {
+        testSuite = queue.pop()
+      } catch (ex) {
+        print ex.toString()
+        continue
+      }
+      try {
         retryable("xpack-kibana-ciGroup${workerNumber}") {
           testSuite.startTime = new Date().format("yyyy-MM-dd'T'HH:mm:ss'Z'", TimeZone.getTimeZone("UTC"))
           testSuite.success = null
@@ -407,11 +408,13 @@ def processXpackQueue(queue, finishedSuites, workerNumber) {
           }
         }
       }
+      catch(ex) {
+        catchError {
+          throw ex
+        }
+      }
     }
-    catchError {
-      print testSuite
-      finishedSuites << testSuite
-    }
+    finishedSuites << testSuite
   }
 }
 
@@ -423,7 +426,7 @@ def getFunctionalQueueWorker(queue, finishedSuites, workerNumber) {
 
     // timeout
     while(!queue.containsKey('xpack')) {
-      sleep 15
+      sleep 60
     }
 
     dir('../kibana-xpack') {
