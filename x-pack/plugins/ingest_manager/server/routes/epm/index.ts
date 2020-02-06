@@ -5,8 +5,8 @@
  */
 import { IRouter } from 'kibana/server';
 import { PLUGIN_ID, EPM_API_ROUTES } from '../../constants';
-import { getCategoriesHandler, getListHandler } from './handlers';
-import { GetPackagesRequestSchema } from '../../types';
+import { getCategoriesHandler, getListHandler, getFileHandler } from './handlers';
+import { GetPackagesRequestSchema, GetFileRequestSchema } from '../../types';
 
 export const registerRoutes = (router: IRouter) => {
   router.get(
@@ -30,12 +30,10 @@ export const registerRoutes = (router: IRouter) => {
   router.get(
     {
       path: `${EPM_API_ROUTES.INFO_PATTERN}/{filePath*}`,
-      validate: false,
+      validate: GetFileRequestSchema,
       options: { tags: [`access:${PLUGIN_ID}`] },
     },
-    async (context, req, res) => {
-      return res.ok({ body: { hello: 'world' } });
-    }
+    getFileHandler
   );
 
   router.get(

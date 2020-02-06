@@ -10,3 +10,10 @@ export const GetPackagesRequestSchema = {
     category: schema.maybe(schema.string()),
   }),
 };
+
+export const GetFileRequestSchema = {
+  params: schema.object({
+    pkgkey: schema.string(),
+    filePath: schema.string(),
+  }),
+};

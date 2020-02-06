@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { TypeOf } from '@kbn/config-schema';
-import { RequestHandler } from 'kibana/server';
-import { getCategories, getPackages } from '../../services/epm/packages/get';
+import { RequestHandler, CustomHttpResponseOptions } from 'kibana/server';
+import { GetFileRequestSchema, EPM_API_ROOT } from '../../../common';
+import { getCategories, getPackages, getFile } from '../../services/epm/packages/get';
 import { GetPackagesRequestSchema } from '../../types';
 
 export const getCategoriesHandler: RequestHandler = async (context, request, response) => {
@@ -41,6 +42,35 @@ export const getListHandler: RequestHandler<
         success: true,
       },
     });
+  } catch (e) {
+    return response.customError({
+      statusCode: 500,
+      body: { message: e.message },
+    });
+  }
+};
+
+export const getFileHandler: RequestHandler<TypeOf<typeof GetFileRequestSchema.params>> = async (
+  context,
+  request,
+  response
+) => {
+  try {
+    // checking for url.path, but maybe should use validated response.params to build the url:
+    // `package/${response.params.pkgkey}/${response.params.filePath}`?
+    if (!request.url.path) throw new Error('path is required');
+    const reqPath = request.url.path.replace(EPM_API_ROOT, '');
+
+    const registryResponse = await getFile(reqPath);
+    const contentType = registryResponse.headers.get('Content-Type');
+    const customResponseObj: CustomHttpResponseOptions<typeof registryResponse.body> = {
+      body: registryResponse.body,
+      statusCode: registryResponse.status,
+    };
+    if (contentType !== null) {
+      customResponseObj.headers = { 'Content-Type': contentType };
+    }
+    return response.custom(customResponseObj);
   } catch (e) {
     return response.customError({
       statusCode: 500,
