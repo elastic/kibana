@@ -15,9 +15,9 @@ const { ExpressionInput: strings } = ComponentStrings;
  * as well as the general help/documentation text associated with the function
  */
 export function getFunctionReferenceStr(fnDef: CanvasFunction) {
-  const { help, context, type } = fnDef;
-
-  const acceptTypes = context && context.types ? context.types.join(' | ') : 'null';
+  const { help, type } = fnDef;
+  const inputTypes = fnDef.inputTypes || (fnDef.context && fnDef.context.types);
+  const acceptTypes = inputTypes ? inputTypes.join(' | ') : 'null';
   const returnType = type ? type : 'null';
 
   const doc = `${strings.getFunctionReferenceAcceptsDetail(
@@ -29,7 +29,7 @@ export function getFunctionReferenceStr(fnDef: CanvasFunction) {
 }
 
 /**
- * Given an argument defintion, this function returns a markdown string
+ * Given an argument definition, this function returns a markdown string
  * that includes the aliases of the argument, types accepted for the argument,
  * the default value of the argument, whether or not its required, and
  * the general help/documentation text associated with the argument

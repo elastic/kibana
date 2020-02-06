@@ -284,11 +284,12 @@ function getFnNameSuggestions(
   const prevFnType = prevFnDef && prevFnDef.type;
 
   const nextFnDef = nextFn && getByAlias(specs, nextFn.node.function);
-  const nextFnContext = nextFnDef && nextFnDef.context && nextFnDef.context.types;
+  const nextFnInputTypes =
+    nextFnDef && (nextFnDef.inputTypes || (nextFnDef.context && nextFnDef.context.types));
 
   const fnDefs = specs.sort((a: CanvasFunction, b: CanvasFunction): number => {
-    const aScore = getScore(a, prevFnType, nextFnContext, false);
-    const bScore = getScore(b, prevFnType, nextFnContext, false);
+    const aScore = getScore(a, prevFnType, nextFnInputTypes, false);
+    const bScore = getScore(b, prevFnType, nextFnInputTypes, false);
 
     if (aScore === bScore) {
       return a.name < b.name ? -1 : 1;
@@ -352,10 +353,12 @@ function getScore(
     contextType = 'null';
   }
 
-  let funcContextTypes = [];
-  if (func.context && func.context.types && func.context.types.length) {
-    funcContextTypes = func.context.types;
-  }
+  const inputTypes = func.inputTypes
+    ? func.inputTypes
+    : func.context
+    ? func.context.types
+    : undefined;
+  const inputTypesNormalized = (inputTypes || []) as string[];
 
   if (isSubFunc) {
     if (returnTypes && func.type) {
@@ -364,21 +367,21 @@ function getScore(
       if (returnTypes.length && returnTypes.includes(func.type)) {
         score++;
 
-        if (funcContextTypes.includes(contextType)) {
+        if (inputTypesNormalized.includes(contextType)) {
           score++;
         }
       }
     }
   } else {
-    if (func.context && func.context.types) {
-      const expectsNull = (funcContextTypes as string[]).includes('null');
+    if (inputTypes) {
+      const expectsNull = inputTypesNormalized.includes('null');
 
       if (!expectsNull && contextType !== 'null') {
         // If not in a sub-expression and there's a preceding function,
         // favor functions that expect a context with top results matching the passed in context
         score++;
 
-        if (func.context.types.includes(contextType)) {
+        if (inputTypes.includes(contextType)) {
           score++;
         }
       } else if (expectsNull && contextType === 'null') {
