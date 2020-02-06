@@ -86,7 +86,7 @@ test('getUserName() returns a name when security is enabled', async () => {
   factory.create(KibanaRequest.from(fakeRequest), fakeRequest);
   const constructorCall = jest.requireMock('./alerts_client').AlertsClient.mock.calls[0][0];
 
-  securityPluginSetup.authc.getCurrentUser.mockResolvedValueOnce({ username: 'bob' });
+  securityPluginSetup.authc.getCurrentUser.mockReturnValueOnce({ username: 'bob' });
   const userNameResult = await constructorCall.getUserName();
   expect(userNameResult).toEqual('bob');
 });

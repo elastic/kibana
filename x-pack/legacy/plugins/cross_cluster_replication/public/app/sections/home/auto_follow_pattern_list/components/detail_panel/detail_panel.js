@@ -10,7 +10,6 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { getIndexListUri } from '../../../../../../../../index_management/public/app/services/navigation';
 
 import {
-  EuiButton,
   EuiButtonEmpty,
   EuiDescriptionList,
   EuiDescriptionListDescription,
@@ -21,6 +20,7 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiHealth,
   EuiIcon,
   EuiLink,
   EuiSpacer,
@@ -31,10 +31,8 @@ import {
 
 import {
   AutoFollowPatternIndicesPreview,
-  AutoFollowPatternDeleteProvider,
+  AutoFollowPatternActionMenu,
 } from '../../../../../components';
-
-import routing from '../../../../../services/routing';
 
 export class DetailPanel extends Component {
   static propTypes = {
@@ -49,105 +47,140 @@ export class DetailPanel extends Component {
     followIndexPatternSuffix,
     remoteCluster,
     leaderIndexPatterns,
+    active,
   }) {
     return (
-      <section
-        aria-labelledby="ccrAutoFollowPatternDetailSettingsTitle"
-        data-test-subj="settingsSection"
-      >
-        <EuiTitle size="s">
-          <h3 id="ccrAutoFollowPatternDetailSettingsTitle">
-            <FormattedMessage
-              id="xpack.crossClusterReplication.autoFollowPatternDetailPanel.statusTitle"
-              defaultMessage="Settings"
-            />
-          </h3>
-        </EuiTitle>
+      <>
+        <section>
+          <EuiDescriptionList>
+            <EuiDescriptionListTitle>
+              <EuiTitle size="xs">
+                <FormattedMessage
+                  id="xpack.crossClusterReplication.autoFollowPatternDetailPanel.statusLabel"
+                  defaultMessage="Status"
+                />
+              </EuiTitle>
+            </EuiDescriptionListTitle>
+
+            <EuiDescriptionListDescription data-test-subj="status">
+              {!active ? (
+                <EuiHealth color="subdued">
+                  <FormattedMessage
+                    id="xpack.crossClusterReplication.autoFollowPatternDetailPanel.pausedStatus"
+                    defaultMessage="Paused"
+                  />
+                </EuiHealth>
+              ) : (
+                <EuiHealth color="success">
+                  <FormattedMessage
+                    id="xpack.crossClusterReplication.autoFollowPatternDetailPanel.activeStatus"
+                    defaultMessage="Active"
+                  />
+                </EuiHealth>
+              )}
+            </EuiDescriptionListDescription>
+          </EuiDescriptionList>
+        </section>
 
         <EuiSpacer size="s" />
-
-        <EuiDescriptionList data-test-subj="settingsValues">
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <EuiDescriptionListTitle>
-                <EuiTitle size="xs">
-                  <FormattedMessage
-                    id="xpack.crossClusterReplication.autoFollowPatternDetailPanel.remoteClusterLabel"
-                    defaultMessage="Remote cluster"
-                  />
-                </EuiTitle>
-              </EuiDescriptionListTitle>
-
-              <EuiDescriptionListDescription data-test-subj="remoteCluster">
-                {remoteCluster}
-              </EuiDescriptionListDescription>
-            </EuiFlexItem>
-
-            <EuiFlexItem>
-              <EuiDescriptionListTitle>
-                <EuiTitle size="xs">
-                  <FormattedMessage
-                    id="xpack.crossClusterReplication.autoFollowPatternDetailPanel.leaderPatternsLabel"
-                    defaultMessage="Leader patterns"
-                  />
-                </EuiTitle>
-              </EuiDescriptionListTitle>
-
-              <EuiDescriptionListDescription data-test-subj="leaderIndexPatterns">
-                {leaderIndexPatterns.join(', ')}
-              </EuiDescriptionListDescription>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+        <section
+          aria-labelledby="ccrAutoFollowPatternDetailSettingsTitle"
+          data-test-subj="settingsSection"
+        >
+          <EuiTitle size="s">
+            <h3 id="ccrAutoFollowPatternDetailSettingsTitle">
+              <FormattedMessage
+                id="xpack.crossClusterReplication.autoFollowPatternDetailPanel.statusTitle"
+                defaultMessage="Settings"
+              />
+            </h3>
+          </EuiTitle>
 
           <EuiSpacer size="s" />
 
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <EuiDescriptionListTitle>
-                <EuiTitle size="xs">
-                  <FormattedMessage
-                    id="xpack.crossClusterReplication.autoFollowPatternDetailPanel.prefixLabel"
-                    defaultMessage="Prefix"
-                  />
-                </EuiTitle>
-              </EuiDescriptionListTitle>
-
-              <EuiDescriptionListDescription data-test-subj="patternPrefix">
-                {followIndexPatternPrefix || (
-                  <em>
+          <EuiDescriptionList data-test-subj="settingsValues">
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <EuiDescriptionListTitle>
+                  <EuiTitle size="xs">
                     <FormattedMessage
-                      id="xpack.crossClusterReplication.autoFollowPatternDetailPanel.prefixEmptyValue"
-                      defaultMessage="No prefix"
+                      id="xpack.crossClusterReplication.autoFollowPatternDetailPanel.remoteClusterLabel"
+                      defaultMessage="Remote cluster"
                     />
-                  </em>
-                )}
-              </EuiDescriptionListDescription>
-            </EuiFlexItem>
+                  </EuiTitle>
+                </EuiDescriptionListTitle>
 
-            <EuiFlexItem>
-              <EuiDescriptionListTitle>
-                <EuiTitle size="xs">
-                  <FormattedMessage
-                    id="xpack.crossClusterReplication.autoFollowPatternDetailPanel.suffixLabel"
-                    defaultMessage="Suffix"
-                  />
-                </EuiTitle>
-              </EuiDescriptionListTitle>
+                <EuiDescriptionListDescription data-test-subj="remoteCluster">
+                  {remoteCluster}
+                </EuiDescriptionListDescription>
+              </EuiFlexItem>
 
-              <EuiDescriptionListDescription data-test-subj="patternSuffix">
-                {followIndexPatternSuffix || (
-                  <em>
+              <EuiFlexItem>
+                <EuiDescriptionListTitle>
+                  <EuiTitle size="xs">
                     <FormattedMessage
-                      id="xpack.crossClusterReplication.autoFollowPatternDetailPanel.suffixEmptyValue"
-                      defaultMessage="No suffix"
+                      id="xpack.crossClusterReplication.autoFollowPatternDetailPanel.leaderPatternsLabel"
+                      defaultMessage="Leader patterns"
                     />
-                  </em>
-                )}
-              </EuiDescriptionListDescription>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiDescriptionList>
-      </section>
+                  </EuiTitle>
+                </EuiDescriptionListTitle>
+
+                <EuiDescriptionListDescription data-test-subj="leaderIndexPatterns">
+                  {leaderIndexPatterns.join(', ')}
+                </EuiDescriptionListDescription>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+
+            <EuiSpacer size="s" />
+
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <EuiDescriptionListTitle>
+                  <EuiTitle size="xs">
+                    <FormattedMessage
+                      id="xpack.crossClusterReplication.autoFollowPatternDetailPanel.prefixLabel"
+                      defaultMessage="Prefix"
+                    />
+                  </EuiTitle>
+                </EuiDescriptionListTitle>
+
+                <EuiDescriptionListDescription data-test-subj="patternPrefix">
+                  {followIndexPatternPrefix || (
+                    <em>
+                      <FormattedMessage
+                        id="xpack.crossClusterReplication.autoFollowPatternDetailPanel.prefixEmptyValue"
+                        defaultMessage="No prefix"
+                      />
+                    </em>
+                  )}
+                </EuiDescriptionListDescription>
+              </EuiFlexItem>
+
+              <EuiFlexItem>
+                <EuiDescriptionListTitle>
+                  <EuiTitle size="xs">
+                    <FormattedMessage
+                      id="xpack.crossClusterReplication.autoFollowPatternDetailPanel.suffixLabel"
+                      defaultMessage="Suffix"
+                    />
+                  </EuiTitle>
+                </EuiDescriptionListTitle>
+
+                <EuiDescriptionListDescription data-test-subj="patternSuffix">
+                  {followIndexPatternSuffix || (
+                    <em>
+                      <FormattedMessage
+                        id="xpack.crossClusterReplication.autoFollowPatternDetailPanel.suffixEmptyValue"
+                        defaultMessage="No suffix"
+                      />
+                    </em>
+                  )}
+                </EuiDescriptionListDescription>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiDescriptionList>
+        </section>
+      </>
     );
   }
 
@@ -298,34 +331,11 @@ export class DetailPanel extends Component {
             <EuiFlexItem grow={false}>
               <EuiFlexGroup alignItems="center">
                 <EuiFlexItem grow={false}>
-                  <AutoFollowPatternDeleteProvider>
-                    {deleteAutoFollowPattern => (
-                      <EuiButtonEmpty
-                        color="danger"
-                        onClick={() => deleteAutoFollowPattern(autoFollowPattern.name)}
-                        data-test-subj="deleteButton"
-                      >
-                        <FormattedMessage
-                          id="xpack.crossClusterReplication.autoFollowPatternDetailPanel.deleteButtonLabel"
-                          defaultMessage="Delete"
-                        />
-                      </EuiButtonEmpty>
-                    )}
-                  </AutoFollowPatternDeleteProvider>
-                </EuiFlexItem>
-
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    fill
-                    color="primary"
-                    href={routing.getAutoFollowPatternPath(autoFollowPattern.name)}
-                    data-test-subj="editButton"
-                  >
-                    <FormattedMessage
-                      id="xpack.crossClusterReplication.autoFollowPatternDetailPanel.editButtonLabel"
-                      defaultMessage="Edit"
-                    />
-                  </EuiButton>
+                  <AutoFollowPatternActionMenu
+                    edit
+                    arrowDirection="up"
+                    patterns={[autoFollowPattern]}
+                  />
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>

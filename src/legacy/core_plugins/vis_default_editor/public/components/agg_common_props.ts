@@ -18,25 +18,25 @@
  */
 
 import { VisState, VisParams } from 'src/legacy/core_plugins/visualizations/public';
-import { AggType, AggConfig, AggGroupNames, Schema } from '../legacy_imports';
+import { IAggType, IAggConfig, AggGroupNames, Schema } from '../legacy_imports';
 
-type AggId = AggConfig['id'];
-type AggParams = AggConfig['params'];
+type AggId = IAggConfig['id'];
+type AggParams = IAggConfig['params'];
 
 export type AddSchema = (schemas: Schema) => void;
-export type ReorderAggs = (sourceAgg: AggConfig, destinationAgg: AggConfig) => void;
+export type ReorderAggs = (sourceAgg: IAggConfig, destinationAgg: IAggConfig) => void;
 
 export interface DefaultEditorCommonProps {
   formIsTouched: boolean;
   groupName: AggGroupNames;
-  metricAggs: AggConfig[];
+  metricAggs: IAggConfig[];
   state: VisState;
   setAggParamValue: <T extends keyof AggParams>(
     aggId: AggId,
     paramName: T,
     value: AggParams[T]
   ) => void;
-  onAggTypeChange: (aggId: AggId, aggType: AggType) => void;
+  onAggTypeChange: (aggId: AggId, aggType: IAggType) => void;
 }
 
 export interface DefaultEditorAggCommonProps extends DefaultEditorCommonProps {

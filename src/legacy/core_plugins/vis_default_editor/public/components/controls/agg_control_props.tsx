@@ -18,11 +18,11 @@
  */
 
 import { VisParams } from 'src/legacy/core_plugins/visualizations/public';
-import { AggConfig } from '../../legacy_imports';
+import { IAggConfig } from '../../legacy_imports';
 import { DefaultEditorAggCommonProps } from '../agg_common_props';
 
 export interface AggControlProps {
-  agg: AggConfig;
+  agg: IAggConfig;
   editorStateParams: VisParams;
   setAggParamValue: DefaultEditorAggCommonProps['setAggParamValue'];
   setStateParamValue: DefaultEditorAggCommonProps['setStateParamValue'];

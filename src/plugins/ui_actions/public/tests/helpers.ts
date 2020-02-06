@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { IUiActionsDependencies } from '../types';
+import { UiActionsDependencies } from '../types';
 
-export const createDeps = (): IUiActionsDependencies => {
-  const deps: IUiActionsDependencies = {
+export const createDeps = (): UiActionsDependencies => {
+  const deps: UiActionsDependencies = {
     actions: new Map<any, any>(),
     triggers: new Map<any, any>(),
   };
