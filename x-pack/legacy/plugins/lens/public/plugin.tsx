@@ -37,6 +37,7 @@ import {
 } from '../../../../../src/legacy/core_plugins/kibana/public/dashboard/np_ready/url_helper';
 import { FormatFactory } from './legacy_imports';
 import { IEmbeddableSetup, IEmbeddableStart } from '../../../../../src/plugins/embeddable/public';
+import { EditorFrameStart } from './types';
 
 export interface LensPluginSetupDependencies {
   kibanaLegacy: KibanaLegacySetup;
@@ -60,6 +61,7 @@ export const isRisonObject = (value: RisonValue): value is RisonObject => {
 export class LensPlugin {
   private datatableVisualization: DatatableVisualization;
   private editorFrameService: EditorFrameService;
+  private createEditorFrame: EditorFrameStart['createInstance'] | null = null;
   private indexpatternDatasource: IndexPatternDatasource;
   private xyVisualization: XyVisualization;
   private metricVisualization: MetricVisualization;
@@ -116,9 +118,15 @@ export class LensPlugin {
         const [coreStart, startDependencies] = await core.getStartServices();
         const dataStart = startDependencies.data;
         const savedObjectsClient = coreStart.savedObjects.client;
-        const editorFrame = this.editorFrameService.start(coreStart, startDependencies);
         addHelpMenuToAppChrome(coreStart.chrome);
-        const instance = editorFrame.createInstance({});
+        if (!this.createEditorFrame) {
+          this.createEditorFrame = this.editorFrameService.start(
+            coreStart,
+            startDependencies
+          ).createInstance;
+        }
+
+        const instance = this.createEditorFrame({});
 
         setReportManager(
           new LensReportManager({
