@@ -17,16 +17,17 @@
  * under the License.
  */
 
-const createSetupContract = () => ({
+import { ManagementSetup, ManagementStart } from '../types';
+
+const createSetupContract = (): DeeplyMockedKeys<ManagementSetup> => ({
   sections: {
     register: jest.fn(),
     getSection: jest.fn(),
-    getSectionsEnabled: jest.fn(),
     getAllSections: jest.fn(),
   },
 });
 
-const createStartContract = () => ({
+const createStartContract = (): DeeplyMockedKeys<ManagementStart> => ({
   legacy: {},
   sections: {
     getSection: jest.fn(),
