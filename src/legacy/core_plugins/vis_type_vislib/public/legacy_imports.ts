@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export { AggType, AggConfig, AggGroupNames, Schemas } from 'ui/agg_types';
+export { AggType, AggGroupNames, IAggConfig, IAggType, Schemas } from 'ui/agg_types';
 // @ts-ignore
 export { SimpleEmitter } from 'ui/utils/simple_emitter';
 // @ts-ignore
