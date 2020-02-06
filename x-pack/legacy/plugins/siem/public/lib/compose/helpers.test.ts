@@ -21,7 +21,7 @@ const mockHttpLink = { mockHttpLink: 'mockHttpLink' };
 // @ts-ignore
 withClientState.mockReturnValue(mockWithClientState);
 // @ts-ignore
-apolloLinkHttp.HttpLink.mockImplementation(() => mockHttpLink);
+apolloLinkHttp.createHttpLink.mockImplementation(() => mockHttpLink);
 
 describe('getLinks helper', () => {
   test('It should return links in correct order', () => {
@@ -31,7 +31,7 @@ describe('getLinks helper', () => {
         introspectionQueryResultData,
       }),
     });
-    const links = getLinks(mockCache);
+    const links = getLinks(mockCache, 'basePath');
     expect(links[0]).toEqual(errorLink);
     expect(links[1]).toEqual(reTryOneTimeOnErrorLink);
     expect(links[2]).toEqual(mockWithClientState);

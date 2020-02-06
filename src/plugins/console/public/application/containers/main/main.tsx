@@ -24,9 +24,15 @@ import { ConsoleHistory } from '../console_history';
 import { Editor } from '../editor';
 import { Settings } from '../settings';
 
-import { TopNavMenu, WelcomePanel, HelpPanel, SomethingWentWrongCallout } from '../../components';
+import {
+  TopNavMenu,
+  WelcomePanel,
+  HelpPanel,
+  SomethingWentWrongCallout,
+  NetworkRequestStatusBar,
+} from '../../components';
 
-import { useServicesContext, useEditorReadContext } from '../../contexts';
+import { useServicesContext, useEditorReadContext, useRequestReadContext } from '../../contexts';
 import { useDataInit } from '../../hooks';
 
 import { getTopNavConfig } from './get_top_nav';
@@ -37,6 +43,11 @@ export function Main() {
   } = useServicesContext();
 
   const { ready: editorsReady } = useEditorReadContext();
+
+  const {
+    requestInFlight: requestInProgress,
+    lastResult: { data: requestData, error: requestError },
+  } = useRequestReadContext();
 
   const [showWelcome, setShowWelcomePanel] = useState(
     () => storage.get('version_welcome_shown') !== '@@SENSE_REVISION'
@@ -59,6 +70,8 @@ export function Main() {
     );
   }
 
+  const lastDatum = requestData?.[requestData.length - 1] ?? requestError;
+
   return (
     <div id="consoleRoot">
       <EuiFlexGroup
@@ -75,14 +88,34 @@ export function Main() {
               })}
             </h1>
           </EuiTitle>
-          <TopNavMenu
-            disabled={!done}
-            items={getTopNavConfig({
-              onClickHistory: () => setShowHistory(!showingHistory),
-              onClickSettings: () => setShowSettings(true),
-              onClickHelp: () => setShowHelp(!showHelp),
-            })}
-          />
+          <EuiFlexGroup gutterSize="none">
+            <EuiFlexItem>
+              <TopNavMenu
+                disabled={!done}
+                items={getTopNavConfig({
+                  onClickHistory: () => setShowHistory(!showingHistory),
+                  onClickSettings: () => setShowSettings(true),
+                  onClickHelp: () => setShowHelp(!showHelp),
+                })}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false} className="conApp__tabsExtension">
+              <NetworkRequestStatusBar
+                requestInProgress={requestInProgress}
+                requestResult={
+                  lastDatum
+                    ? {
+                        method: lastDatum.request.method.toUpperCase(),
+                        endpoint: lastDatum.request.path,
+                        statusCode: lastDatum.response.statusCode,
+                        statusText: lastDatum.response.statusText,
+                        timeElapsedMs: lastDatum.response.timeMs,
+                      }
+                    : undefined
+                }
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
         {showingHistory ? <EuiFlexItem grow={false}>{renderConsoleHistory()}</EuiFlexItem> : null}
         <EuiFlexItem>
