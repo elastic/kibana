@@ -7,7 +7,7 @@
 /**
  * This import must be hoisted as it uses `jest.mock`. Is there a better way? Mocking is not good.
  */
-import { setup, clear, simulateElementResize } from './simulate_element_resize';
+import { setup, clear, simulateElementResize } from './testing_simulator';
 import React from 'react';
 import { render, act } from '@testing-library/react';
 import { useCamera } from './use_camera';
