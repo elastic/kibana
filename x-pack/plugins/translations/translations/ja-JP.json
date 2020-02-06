@@ -355,7 +355,6 @@
     "common.ui.flotCharts.thuLabel": "木",
     "common.ui.flotCharts.tueLabel": "火",
     "common.ui.flotCharts.wedLabel": "水",
-    "common.ui.modals.cancelButtonLabel": "キャンセル",
     "common.ui.notify.fatalError.errorStatusMessage": "エラー {errStatus} {errStatusText}: {errMessage}",
     "common.ui.notify.fatalError.unavailableServerErrorMessage": "HTTP リクエストが接続に失敗しました。Kibana サーバーが実行されていて、ご使用のブラウザの接続が正常に動作していることを確認するか、システム管理者にお問い合わせください。",
     "common.ui.notify.toaster.errorMessage": "エラー: {errorMessage}\n      {errorStack}",
