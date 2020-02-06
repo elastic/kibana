@@ -92,6 +92,7 @@ export const DonutChart = ({ height, down, up, width }: DonutChartProps) => {
           width={width}
           height={height}
         />
+        {/* When all monitors are up we show green check icon in middle of donut to indicate, all is well */}
         {down === 0 && <GreenCheckIcon className="greenCheckIcon" type="checkInCircleFilled" />}
       </EuiFlexItem>
       <EuiFlexItem>
