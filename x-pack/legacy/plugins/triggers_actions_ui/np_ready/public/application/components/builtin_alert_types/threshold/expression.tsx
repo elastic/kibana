@@ -20,7 +20,7 @@ import {
   EuiFormRow,
   EuiCallOut,
 } from '@elastic/eui';
-import { HttpSetup } from 'kibana/public';
+import { HttpSetup, IUiSettingsClient, ToastsApi } from 'kibana/public';
 import { COMPARATORS, builtInComparators } from '../../../../common/constants';
 import {
   getMatchingIndicesForThresholdAlertType,
@@ -68,6 +68,11 @@ interface IndexThresholdProps {
   setAlertProperty: (key: string, value: any) => void;
   errors: { [key: string]: string[] };
   http: HttpSetup;
+  uiSettings?: IUiSettingsClient;
+  toastNotifications?: Pick<
+    ToastsApi,
+    'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'
+  >;
 }
 
 export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThresholdProps> = ({
@@ -76,6 +81,8 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
   setAlertProperty,
   errors,
   http,
+  uiSettings,
+  toastNotifications,
 }) => {
   const {
     index,
@@ -433,12 +440,15 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      {canShowVizualization ? null : (
+      {canShowVizualization || !uiSettings ? null : (
         <Fragment>
           <ThresholdVisualization
             alertParams={alertParams}
             aggregationTypes={builtInAggregationTypes}
             comparators={builtInComparators}
+            http={http}
+            toastNotifications={toastNotifications}
+            uiSettings={uiSettings}
           />
         </Fragment>
       )}

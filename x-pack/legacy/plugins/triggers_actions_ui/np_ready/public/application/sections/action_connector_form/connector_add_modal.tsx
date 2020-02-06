@@ -36,12 +36,12 @@ interface ConnectorAddModalProps {
   setAddModalVisibility: React.Dispatch<React.SetStateAction<boolean>>;
   postSaveEventHandler?: (savedAction: ActionConnector) => void;
   http: HttpSetup;
-  toastNotifications: Pick<
+  alertTypeRegistry: TypeRegistry<AlertTypeModel>;
+  actionTypeRegistry: TypeRegistry<ActionTypeModel>;
+  toastNotifications?: Pick<
     ToastsApi,
     'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'
   >;
-  alertTypeRegistry: TypeRegistry<AlertTypeModel>;
-  actionTypeRegistry: TypeRegistry<ActionTypeModel>;
 }
 
 export const ConnectorAddModal = ({
@@ -88,17 +88,19 @@ export const ConnectorAddModal = ({
   const onActionConnectorSave = async (): Promise<ActionConnector | undefined> =>
     await createActionConnector({ http, connector })
       .then(savedConnector => {
-        toastNotifications.addSuccess(
-          i18n.translate(
-            'xpack.triggersActionsUI.sections.addModalConnectorForm.updateSuccessNotificationText',
-            {
-              defaultMessage: "Created '{connectorName}'",
-              values: {
-                connectorName: savedConnector.name,
-              },
-            }
-          )
-        );
+        if (toastNotifications) {
+          toastNotifications.addSuccess(
+            i18n.translate(
+              'xpack.triggersActionsUI.sections.addModalConnectorForm.updateSuccessNotificationText',
+              {
+                defaultMessage: "Created '{connectorName}'",
+                values: {
+                  connectorName: savedConnector.name,
+                },
+              }
+            )
+          );
+        }
         return savedConnector;
       })
       .catch(errorRes => {

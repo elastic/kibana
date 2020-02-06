@@ -5,7 +5,7 @@
  */
 
 import React, { Fragment, useEffect, useState } from 'react';
-import { IUiSettingsClient } from 'kibana/public';
+import { IUiSettingsClient, HttpSetup, ToastsApi } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import {
   AnnotationDomainTypes,
@@ -26,7 +26,6 @@ import { EuiCallOut, EuiLoadingChart, EuiSpacer, EuiEmptyPrompt, EuiText } from 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { npStart } from 'ui/new_platform';
 import { getThresholdAlertVisualizationData } from './lib/api';
-import { useAppDependencies } from '../../../app_context';
 import { AggregationType, Comparator } from '../../../../common/types';
 import { IndexThresholdAlertParams } from '../types';
 
@@ -89,14 +88,22 @@ interface Props {
   comparators: {
     [key: string]: Comparator;
   };
+  http: HttpSetup;
+  uiSettings: IUiSettingsClient;
+  toastNotifications?: Pick<
+    ToastsApi,
+    'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'
+  >;
 }
 
 export const ThresholdVisualization: React.FunctionComponent<Props> = ({
   alertParams,
   aggregationTypes,
   comparators,
+  http,
+  uiSettings,
+  toastNotifications,
 }) => {
-  const { http, uiSettings, toastNotifications } = useAppDependencies();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<undefined | any>(undefined);
   const [visualizationData, setVisualizationData] = useState<Record<string, any>>([]);
@@ -142,12 +149,14 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
           })
         );
       } catch (e) {
-        toastNotifications.addDanger({
-          title: i18n.translate(
-            'xpack.triggersActionsUI.sections.alertAdd.unableToLoadVisualizationMessage',
-            { defaultMessage: 'Unable to load visualization' }
-          ),
-        });
+        if (toastNotifications) {
+          toastNotifications.addDanger({
+            title: i18n.translate(
+              'xpack.triggersActionsUI.sections.alertAdd.unableToLoadVisualizationMessage',
+              { defaultMessage: 'Unable to load visualization' }
+            ),
+          });
+        }
         setError(e);
       } finally {
         setIsLoading(false);

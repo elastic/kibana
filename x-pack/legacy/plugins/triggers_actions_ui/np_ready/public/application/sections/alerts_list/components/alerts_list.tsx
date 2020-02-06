@@ -56,6 +56,7 @@ export const AlertsList: React.FunctionComponent = () => {
     capabilities,
     alertTypeRegistry,
     actionTypeRegistry,
+    uiSettings,
   } = useAppDependencies();
   const canDelete = hasDeleteAlertsCapability(capabilities);
   const canSave = hasSaveAlertsCapability(capabilities);
@@ -395,10 +396,12 @@ export const AlertsList: React.FunctionComponent = () => {
         }}
       >
         <AlertAdd
+          consumer={'alerting'}
           http={http}
           actionTypeRegistry={actionTypeRegistry}
           alertTypeRegistry={alertTypeRegistry}
           toastNotifications={toastNotifications}
+          uiSettings={uiSettings}
         />
       </AlertsContextProvider>
     </section>

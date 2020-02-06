@@ -96,10 +96,12 @@ describe('alert_add', () => {
             }}
           >
             <AlertAdd
+              consumer={'alerting'}
               http={deps.http}
               actionTypeRegistry={deps.actionTypeRegistry}
               alertTypeRegistry={deps.alertTypeRegistry}
               toastNotifications={deps.toastNotifications}
+              uiSettings={deps.uiSettings}
             />
           </AlertsContextProvider>
         );

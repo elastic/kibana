@@ -18,7 +18,7 @@ import {
   EuiPortal,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { HttpSetup, ToastsApi } from 'kibana/public';
+import { HttpSetup, ToastsApi, IUiSettingsClient } from 'kibana/public';
 import { useAlertsContext } from '../../context/alerts_context';
 import { Alert, AlertAction, IErrorObject, AlertTypeModel, ActionTypeModel } from '../../../types';
 import { AlertForm, validateBaseProperties } from './alert_form';
@@ -27,25 +27,33 @@ import { createAlert } from '../../lib/alert_api';
 import { TypeRegistry } from '../../type_registry';
 
 interface AlertAddProps {
+  consumer: string;
   http: HttpSetup;
-  toastNotifications: Pick<
+  alertTypeRegistry: TypeRegistry<AlertTypeModel>;
+  actionTypeRegistry: TypeRegistry<ActionTypeModel>;
+  uiSettings?: IUiSettingsClient;
+  toastNotifications?: Pick<
     ToastsApi,
     'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'
   >;
-  alertTypeRegistry: TypeRegistry<AlertTypeModel>;
-  actionTypeRegistry: TypeRegistry<ActionTypeModel>;
+  alertTypeId?: string;
+  canChangeTrigger?: boolean;
 }
 
 export const AlertAdd = ({
+  consumer,
   http,
   toastNotifications,
   alertTypeRegistry,
   actionTypeRegistry,
+  uiSettings,
+  canChangeTrigger,
+  alertTypeId,
 }: AlertAddProps) => {
   const initialAlert = ({
     params: {},
-    consumer: 'alerting',
-    alertTypeId: null,
+    consumer,
+    alertTypeId,
     schedule: {
       interval: '1m',
     },
@@ -106,14 +114,16 @@ export const AlertAdd = ({
   async function onSaveAlert(): Promise<Alert | undefined> {
     try {
       const newAlert = await createAlert({ http, alert });
-      toastNotifications.addSuccess(
-        i18n.translate('xpack.triggersActionsUI.sections.alertForm.saveSuccessNotificationText', {
-          defaultMessage: "Saved '{alertName}'",
-          values: {
-            alertName: newAlert.name,
-          },
-        })
-      );
+      if (toastNotifications) {
+        toastNotifications.addSuccess(
+          i18n.translate('xpack.triggersActionsUI.sections.alertForm.saveSuccessNotificationText', {
+            defaultMessage: "Saved '{alertName}'",
+            values: {
+              alertName: newAlert.name,
+            },
+          })
+        );
+      }
       return newAlert;
     } catch (errorRes) {
       setServerError(errorRes);
@@ -146,10 +156,12 @@ export const AlertAdd = ({
             actionTypeRegistry={actionTypeRegistry}
             alertTypeRegistry={alertTypeRegistry}
             toastNotifications={toastNotifications}
+            uiSettings={uiSettings}
             alert={alert}
             dispatch={dispatch}
             errors={errors}
             serverError={serverError}
+            canChangeTrigger={canChangeTrigger}
           />
         </EuiFlyoutBody>
         <EuiFlyoutFooter>

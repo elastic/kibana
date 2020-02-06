@@ -28,7 +28,7 @@ import {
   EuiEmptyPrompt,
   EuiButtonEmpty,
 } from '@elastic/eui';
-import { HttpSetup, ToastsApi } from 'kibana/public';
+import { HttpSetup, ToastsApi, IUiSettingsClient } from 'kibana/public';
 import { loadAlertTypes } from '../../lib/alert_api';
 import { loadActionTypes, loadAllActions } from '../../lib/action_connector_api';
 import { AlertReducerAction } from './alert_reducer';
@@ -82,19 +82,20 @@ export function validateBaseProperties(alertObject: Alert) {
 
 interface AlertFormProps {
   alert: Alert;
-  canChangeTrigger?: boolean; // to hide Change trigger button
   dispatch: React.Dispatch<AlertReducerAction>;
   errors: IErrorObject;
   serverError: {
     body: { message: string; error: string };
   } | null;
   http: HttpSetup;
-  toastNotifications: Pick<
+  alertTypeRegistry: TypeRegistry<AlertTypeModel>;
+  actionTypeRegistry: TypeRegistry<ActionTypeModel>;
+  uiSettings?: IUiSettingsClient;
+  toastNotifications?: Pick<
     ToastsApi,
     'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'
   >;
-  alertTypeRegistry: TypeRegistry<AlertTypeModel>;
-  actionTypeRegistry: TypeRegistry<ActionTypeModel>;
+  canChangeTrigger?: boolean; // to hide Change trigger button
 }
 
 interface ActiveActionConnectorState {
@@ -112,6 +113,7 @@ export const AlertForm = ({
   toastNotifications,
   alertTypeRegistry,
   actionTypeRegistry,
+  uiSettings,
 }: AlertFormProps) => {
   const [alertTypeModel, setAlertTypeModel] = useState<AlertTypeModel | null>(
     alertTypeRegistry.get(alert.alertTypeId)
@@ -144,12 +146,14 @@ export const AlertForm = ({
         }
         setActionTypesIndex(index);
       } catch (e) {
-        toastNotifications.addDanger({
-          title: i18n.translate(
-            'xpack.triggersActionsUI.sections.alertForm.unableToLoadActionTypesMessage',
-            { defaultMessage: 'Unable to load action types' }
-          ),
-        });
+        if (toastNotifications) {
+          toastNotifications.addDanger({
+            title: i18n.translate(
+              'xpack.triggersActionsUI.sections.alertForm.unableToLoadActionTypesMessage',
+              { defaultMessage: 'Unable to load action types' }
+            ),
+          });
+        }
       } finally {
         setIsLoadingActionTypes(false);
       }
@@ -175,12 +179,14 @@ export const AlertForm = ({
         }
         setAlertTypesIndex(index);
       } catch (e) {
-        toastNotifications.addDanger({
-          title: i18n.translate(
-            'xpack.triggersActionsUI.sections.alertForm.unableToLoadAlertTypesMessage',
-            { defaultMessage: 'Unable to load alert types' }
-          ),
-        });
+        if (toastNotifications) {
+          toastNotifications.addDanger({
+            title: i18n.translate(
+              'xpack.triggersActionsUI.sections.alertForm.unableToLoadAlertTypesMessage',
+              { defaultMessage: 'Unable to load alert types' }
+            ),
+          });
+        }
       }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -218,14 +224,16 @@ export const AlertForm = ({
       const actionsResponse = await loadAllActions({ http });
       setConnectors(actionsResponse.data);
     } catch (e) {
-      toastNotifications.addDanger({
-        title: i18n.translate(
-          'xpack.triggersActionsUI.sections.alertForm.unableToLoadActionsMessage',
-          {
-            defaultMessage: 'Unable to load connectors',
-          }
-        ),
-      });
+      if (toastNotifications) {
+        toastNotifications.addDanger({
+          title: i18n.translate(
+            'xpack.triggersActionsUI.sections.alertForm.unableToLoadActionsMessage',
+            {
+              defaultMessage: 'Unable to load connectors',
+            }
+          ),
+        });
+      }
     }
   }
 
@@ -624,6 +632,9 @@ export const AlertForm = ({
           errors={errors}
           setAlertParams={setAlertParams}
           setAlertProperty={setAlertProperty}
+          http={http}
+          toastNotifications={toastNotifications}
+          uiSettings={uiSettings}
         />
       ) : null}
       <EuiSpacer size="xl" />

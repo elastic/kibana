@@ -108,6 +108,7 @@ describe('alert_form', () => {
               actionTypeRegistry={deps.actionTypeRegistry}
               alertTypeRegistry={deps.alertTypeRegistry}
               toastNotifications={deps.toastNotifications}
+              uiSettings={deps.uiSettings}
             />
           );
         }
@@ -172,6 +173,7 @@ describe('alert_form', () => {
               actionTypeRegistry={deps.actionTypeRegistry}
               alertTypeRegistry={deps.alertTypeRegistry}
               toastNotifications={deps.toastNotifications}
+              uiSettings={deps.uiSettings}
             />
           );
         }
