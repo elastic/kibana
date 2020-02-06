@@ -10,7 +10,6 @@ import { ActionsConnectorsContextProvider } from '../../context/actions_connecto
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { ActionTypeMenu } from './action_type_menu';
 import { ValidationResult } from '../../../types';
-import { AppContextProvider } from '../../app_context';
 const actionTypeRegistry = actionTypeRegistryMock.create();
 
 describe('connector_add_flyout', () => {
@@ -67,25 +66,26 @@ describe('connector_add_flyout', () => {
     actionTypeRegistry.get.mockReturnValueOnce(actionType);
 
     const wrapper = mountWithIntl(
-      <AppContextProvider appDeps={deps}>
-        <ActionsConnectorsContextProvider
-          value={{
-            addFlyoutVisible: true,
-            setAddFlyoutVisibility: state => {},
-            editFlyoutVisible: false,
-            setEditFlyoutVisibility: state => {},
-            actionTypesIndex: {
-              'first-action-type': { id: 'first-action-type', name: 'first', enabled: true },
-              'second-action-type': { id: 'second-action-type', name: 'second', enabled: true },
-            },
-            reloadConnectors: () => {
-              return new Promise<void>(() => {});
-            },
-          }}
-        >
-          <ActionTypeMenu onActionTypeChange={onActionTypeChange} />
-        </ActionsConnectorsContextProvider>
-      </AppContextProvider>
+      <ActionsConnectorsContextProvider
+        value={{
+          addFlyoutVisible: true,
+          setAddFlyoutVisibility: state => {},
+          editFlyoutVisible: false,
+          setEditFlyoutVisibility: state => {},
+          actionTypesIndex: {
+            'first-action-type': { id: 'first-action-type', name: 'first', enabled: true },
+            'second-action-type': { id: 'second-action-type', name: 'second', enabled: true },
+          },
+          reloadConnectors: () => {
+            return new Promise<void>(() => {});
+          },
+        }}
+      >
+        <ActionTypeMenu
+          onActionTypeChange={onActionTypeChange}
+          actionTypeRegistry={deps.actionTypeRegistry}
+        />
+      </ActionsConnectorsContextProvider>
     );
 
     expect(wrapper.find('[data-test-subj="first-action-type-card"]').exists()).toBeTruthy();

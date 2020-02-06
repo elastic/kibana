@@ -12,7 +12,6 @@ import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { alertTypeRegistryMock } from '../../alert_type_registry.mock';
 import { ValidationResult, Alert } from '../../../types';
 import { AlertForm } from './alert_form';
-import { AppContextProvider } from '../../app_context';
 import { AppDeps } from '../../app';
 const actionTypeRegistry = actionTypeRegistryMock.create();
 const alertTypeRegistry = alertTypeRegistryMock.create();
@@ -98,16 +97,20 @@ describe('alert_form', () => {
       } as unknown) as Alert;
 
       await act(async () => {
-        wrapper = mountWithIntl(
-          <AppContextProvider appDeps={deps}>
+        if (deps) {
+          wrapper = mountWithIntl(
             <AlertForm
               alert={initialAlert}
               dispatch={() => {}}
               errors={{ name: [] }}
               serverError={null}
+              http={deps.http}
+              actionTypeRegistry={deps.actionTypeRegistry}
+              alertTypeRegistry={deps.alertTypeRegistry}
+              toastNotifications={deps.toastNotifications}
             />
-          </AppContextProvider>
-        );
+          );
+        }
       });
 
       await waitForRender(wrapper);
@@ -158,16 +161,20 @@ describe('alert_form', () => {
       } as unknown) as Alert;
 
       await act(async () => {
-        wrapper = mountWithIntl(
-          <AppContextProvider appDeps={deps}>
+        if (deps) {
+          wrapper = mountWithIntl(
             <AlertForm
               alert={initialAlert}
               dispatch={() => {}}
               errors={{ name: [] }}
               serverError={null}
+              http={deps.http}
+              actionTypeRegistry={deps.actionTypeRegistry}
+              alertTypeRegistry={deps.alertTypeRegistry}
+              toastNotifications={deps.toastNotifications}
             />
-          </AppContextProvider>
-        );
+          );
+        }
       });
 
       await waitForRender(wrapper);

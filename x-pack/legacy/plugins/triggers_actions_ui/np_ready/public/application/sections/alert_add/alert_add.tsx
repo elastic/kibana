@@ -18,15 +18,30 @@ import {
   EuiPortal,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { HttpSetup, ToastsApi } from 'kibana/public';
 import { useAlertsContext } from '../../context/alerts_context';
-import { Alert, AlertAction, IErrorObject } from '../../../types';
+import { Alert, AlertAction, IErrorObject, AlertTypeModel, ActionTypeModel } from '../../../types';
 import { AlertForm, validateBaseProperties } from './alert_form';
 import { alertReducer } from './alert_reducer';
-import { useAppDependencies } from '../../app_context';
 import { createAlert } from '../../lib/alert_api';
+import { TypeRegistry } from '../../type_registry';
 
-export const AlertAdd = () => {
-  const { http, toastNotifications, alertTypeRegistry, actionTypeRegistry } = useAppDependencies();
+interface AlertAddProps {
+  http: HttpSetup;
+  toastNotifications: Pick<
+    ToastsApi,
+    'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'
+  >;
+  alertTypeRegistry: TypeRegistry<AlertTypeModel>;
+  actionTypeRegistry: TypeRegistry<ActionTypeModel>;
+}
+
+export const AlertAdd = ({
+  http,
+  toastNotifications,
+  alertTypeRegistry,
+  actionTypeRegistry,
+}: AlertAddProps) => {
   const initialAlert = ({
     params: {},
     consumer: 'alerting',
@@ -126,7 +141,16 @@ export const AlertAdd = () => {
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
-          <AlertForm alert={alert} dispatch={dispatch} errors={errors} serverError={serverError} />
+          <AlertForm
+            http={http}
+            actionTypeRegistry={actionTypeRegistry}
+            alertTypeRegistry={alertTypeRegistry}
+            toastNotifications={toastNotifications}
+            alert={alert}
+            dispatch={dispatch}
+            errors={errors}
+            serverError={serverError}
+          />
         </EuiFlyoutBody>
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="spaceBetween">
@@ -152,7 +176,9 @@ export const AlertAdd = () => {
                   setIsSaving(false);
                   if (savedAlert) {
                     closeFlyout();
-                    reloadAlerts();
+                    if (reloadAlerts) {
+                      reloadAlerts();
+                    }
                   }
                 }}
               >

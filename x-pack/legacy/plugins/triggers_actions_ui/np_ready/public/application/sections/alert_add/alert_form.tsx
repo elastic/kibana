@@ -28,7 +28,7 @@ import {
   EuiEmptyPrompt,
   EuiButtonEmpty,
 } from '@elastic/eui';
-import { useAppDependencies } from '../../app_context';
+import { HttpSetup, ToastsApi } from 'kibana/public';
 import { loadAlertTypes } from '../../lib/alert_api';
 import { loadActionTypes, loadAllActions } from '../../lib/action_connector_api';
 import { AlertReducerAction } from './alert_reducer';
@@ -45,6 +45,7 @@ import {
 import { SectionLoading } from '../../components/section_loading';
 import { ConnectorAddModal } from '../action_connector_form/connector_add_modal';
 import { getTimeOptions } from '../../../common/lib/get_time_options';
+import { TypeRegistry } from '../../type_registry';
 
 export function validateBaseProperties(alertObject: Alert) {
   const validationResult = { errors: {} };
@@ -87,6 +88,13 @@ interface AlertFormProps {
   serverError: {
     body: { message: string; error: string };
   } | null;
+  http: HttpSetup;
+  toastNotifications: Pick<
+    ToastsApi,
+    'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'
+  >;
+  alertTypeRegistry: TypeRegistry<AlertTypeModel>;
+  actionTypeRegistry: TypeRegistry<ActionTypeModel>;
 }
 
 interface ActiveActionConnectorState {
@@ -100,8 +108,11 @@ export const AlertForm = ({
   dispatch,
   errors,
   serverError,
+  http,
+  toastNotifications,
+  alertTypeRegistry,
+  actionTypeRegistry,
 }: AlertFormProps) => {
-  const { http, toastNotifications, alertTypeRegistry, actionTypeRegistry } = useAppDependencies();
   const [alertTypeModel, setAlertTypeModel] = useState<AlertTypeModel | null>(
     alertTypeRegistry.get(alert.alertTypeId)
   );
@@ -846,6 +857,10 @@ export const AlertForm = ({
             connectors.push(savedAction);
             setActionProperty('id', savedAction.id, activeActionItem.index);
           }}
+          actionTypeRegistry={actionTypeRegistry}
+          alertTypeRegistry={alertTypeRegistry}
+          http={http}
+          toastNotifications={toastNotifications}
         />
       ) : null}
     </EuiForm>

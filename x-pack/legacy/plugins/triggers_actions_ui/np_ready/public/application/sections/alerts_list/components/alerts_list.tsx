@@ -49,7 +49,14 @@ interface AlertState {
 
 export const AlertsList: React.FunctionComponent = () => {
   const history = useHistory();
-  const { http, injectedMetadata, toastNotifications, capabilities } = useAppDependencies();
+  const {
+    http,
+    injectedMetadata,
+    toastNotifications,
+    capabilities,
+    alertTypeRegistry,
+    actionTypeRegistry,
+  } = useAppDependencies();
   const canDelete = hasDeleteAlertsCapability(capabilities);
   const canSave = hasSaveAlertsCapability(capabilities);
   const createAlertUiEnabled = injectedMetadata.getInjectedVar('createAlertUiEnabled');
@@ -387,7 +394,12 @@ export const AlertsList: React.FunctionComponent = () => {
           reloadAlerts: loadAlertsData,
         }}
       >
-        <AlertAdd />
+        <AlertAdd
+          http={http}
+          actionTypeRegistry={actionTypeRegistry}
+          alertTypeRegistry={alertTypeRegistry}
+          toastNotifications={toastNotifications}
+        />
       </AlertsContextProvider>
     </section>
   );

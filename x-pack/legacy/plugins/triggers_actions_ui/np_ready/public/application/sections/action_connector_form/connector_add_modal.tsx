@@ -17,25 +17,43 @@ import {
 import { EuiButtonEmpty } from '@elastic/eui';
 import { EuiOverlayMask } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { HttpSetup, ToastsApi } from 'kibana/public';
 import { ActionConnectorForm, validateBaseProperties } from './action_connector_form';
-import { ActionType, ActionConnector, IErrorObject } from '../../../types';
+import {
+  ActionType,
+  ActionConnector,
+  IErrorObject,
+  AlertTypeModel,
+  ActionTypeModel,
+} from '../../../types';
 import { connectorReducer } from './connector_reducer';
 import { createActionConnector } from '../../lib/action_connector_api';
-import { useAppDependencies } from '../../app_context';
+import { TypeRegistry } from '../../type_registry';
+
+interface ConnectorAddModalProps {
+  actionType: ActionType;
+  addModalVisible: boolean;
+  setAddModalVisibility: React.Dispatch<React.SetStateAction<boolean>>;
+  postSaveEventHandler?: (savedAction: ActionConnector) => void;
+  http: HttpSetup;
+  toastNotifications: Pick<
+    ToastsApi,
+    'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'
+  >;
+  alertTypeRegistry: TypeRegistry<AlertTypeModel>;
+  actionTypeRegistry: TypeRegistry<ActionTypeModel>;
+}
 
 export const ConnectorAddModal = ({
   actionType,
   addModalVisible,
   setAddModalVisibility,
   postSaveEventHandler,
-}: {
-  actionType: ActionType;
-  addModalVisible: boolean;
-  setAddModalVisibility: React.Dispatch<React.SetStateAction<boolean>>;
-  postSaveEventHandler?: (savedAction: ActionConnector) => void;
-}) => {
+  http,
+  toastNotifications,
+  actionTypeRegistry,
+}: ConnectorAddModalProps) => {
   let hasErrors = false;
-  const { http, toastNotifications, actionTypeRegistry } = useAppDependencies();
   const initialConnector = {
     actionTypeId: actionType.id,
     config: {},
@@ -123,6 +141,7 @@ export const ConnectorAddModal = ({
             dispatch={dispatch}
             serverError={serverError}
             errors={errors}
+            actionTypeRegistry={actionTypeRegistry}
           />
         </EuiModalBody>
 

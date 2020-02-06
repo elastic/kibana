@@ -10,7 +10,6 @@ import { coreMock } from '../../../../../../../../../src/core/public/mocks';
 import { AlertAdd } from './alert_add';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { ValidationResult } from '../../../types';
-import { AppContextProvider } from '../../app_context';
 import { AppDeps } from '../../app';
 import { AlertsContextProvider } from '../../context/alerts_context';
 import { alertTypeRegistryMock } from '../../alert_type_registry.mock';
@@ -85,8 +84,8 @@ describe('alert_add', () => {
     actionTypeRegistry.has.mockReturnValue(true);
 
     await act(async () => {
-      wrapper = mountWithIntl(
-        <AppContextProvider appDeps={deps}>
+      if (deps) {
+        wrapper = mountWithIntl(
           <AlertsContextProvider
             value={{
               addFlyoutVisible: true,
@@ -96,10 +95,15 @@ describe('alert_add', () => {
               },
             }}
           >
-            <AlertAdd />
+            <AlertAdd
+              http={deps.http}
+              actionTypeRegistry={deps.actionTypeRegistry}
+              alertTypeRegistry={deps.alertTypeRegistry}
+              toastNotifications={deps.toastNotifications}
+            />
           </AlertsContextProvider>
-        </AppContextProvider>
-      );
+        );
+      }
     });
     await waitForRender(wrapper);
   });

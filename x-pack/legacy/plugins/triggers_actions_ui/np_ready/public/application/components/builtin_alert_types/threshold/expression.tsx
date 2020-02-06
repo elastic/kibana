@@ -20,13 +20,13 @@ import {
   EuiFormRow,
   EuiCallOut,
 } from '@elastic/eui';
+import { HttpSetup } from 'kibana/public';
 import { COMPARATORS, builtInComparators } from '../../../../common/constants';
 import {
   getMatchingIndicesForThresholdAlertType,
   getThresholdAlertTypeFields,
   loadIndexPatterns,
 } from './lib/api';
-import { useAppDependencies } from '../../../app_context';
 import { getTimeFieldOptions } from '../../../../common/lib/get_time_options';
 import { ThresholdVisualization } from './visualization';
 import { WhenExpression } from '../../../../common';
@@ -67,6 +67,7 @@ interface IndexThresholdProps {
   setAlertParams: (property: string, value: any) => void;
   setAlertProperty: (key: string, value: any) => void;
   errors: { [key: string]: string[] };
+  http: HttpSetup;
 }
 
 export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThresholdProps> = ({
@@ -74,9 +75,8 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
   setAlertParams,
   setAlertProperty,
   errors,
+  http,
 }) => {
-  const { http } = useAppDependencies();
-
   const {
     index,
     timeField,
