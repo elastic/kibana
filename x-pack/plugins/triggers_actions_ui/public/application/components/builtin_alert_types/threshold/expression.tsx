@@ -468,7 +468,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
                     defaultMessage: 'index',
                   }
                 )}
-                value={index || firstFieldOption.text}
+                value={index ? index.join(' ') : firstFieldOption.text}
                 isActive={indexPopoverOpen}
                 onClick={() => {
                   setIndexPopoverOpen(true);
