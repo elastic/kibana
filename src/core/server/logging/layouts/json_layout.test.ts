@@ -84,3 +84,39 @@ test('`format()` correctly formats record.', () => {
     expect(layout.format(record)).toMatchSnapshot();
   }
 });
+
+test('`format()` correctly formats record with meta-data', () => {
+  const layout = new JsonLayout();
+
+  expect(
+    layout.format({
+      context: 'context-with-meta',
+      level: LogLevel.Debug,
+      message: 'message-with-meta',
+      timestamp: new Date(Date.UTC(2012, 1, 1)),
+      pid: 5355,
+      meta: {
+        from: 'v7',
+        to: 'v8',
+      },
+    })
+  ).toMatchSnapshot();
+});
+
+test('`format()` correctly formats error record with meta-data', () => {
+  const layout = new JsonLayout();
+
+  expect(
+    layout.format({
+      context: 'context-with-meta',
+      level: LogLevel.Debug,
+      message: 'message-with-meta',
+      timestamp: new Date(Date.UTC(2012, 1, 1)),
+      pid: 5355,
+      meta: {
+        from: 'v7',
+        to: 'v8',
+      },
+    })
+  ).toMatchSnapshot();
+});

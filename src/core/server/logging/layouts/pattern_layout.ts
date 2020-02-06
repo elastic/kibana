@@ -33,6 +33,7 @@ const Parameters = Object.freeze({
   Message: '{message}',
   Timestamp: '{timestamp}',
   Pid: '{pid}',
+  Meta: '{meta}',
 });
 
 /**
@@ -40,7 +41,7 @@ const Parameters = Object.freeze({
  * with the actual data.
  */
 const PATTERN_REGEX = new RegExp(
-  `${Parameters.Timestamp}|${Parameters.Level}|${Parameters.Context}|${Parameters.Message}|${Parameters.Pid}`,
+  `${Parameters.Timestamp}|${Parameters.Level}|${Parameters.Context}|${Parameters.Message}|${Parameters.Pid}|${Parameters.Meta}`,
   'gi'
 );
 
@@ -59,7 +60,7 @@ const LEVEL_COLORS = new Map([
 /**
  * Default pattern used by PatternLayout if it's not overridden in the configuration.
  */
-const DEFAULT_PATTERN = `[${Parameters.Timestamp}][${Parameters.Level}][${Parameters.Context}] ${Parameters.Message}`;
+const DEFAULT_PATTERN = `[${Parameters.Timestamp}][${Parameters.Level}][${Parameters.Context}]${Parameters.Meta} ${Parameters.Message}`;
 
 const patternLayoutSchema = schema.object({
   highlight: schema.maybe(schema.boolean()),
@@ -111,6 +112,16 @@ export class PatternLayout implements Layout {
       PatternLayout.highlightRecord(record, formattedRecord);
     }
 
-    return this.pattern.replace(PATTERN_REGEX, match => formattedRecord.get(match)!);
+    return this.pattern.replace(PATTERN_REGEX, match => {
+      if (match === Parameters.Meta) {
+        return PatternLayout.formatMeta(record);
+      }
+
+      return formattedRecord.get(match)!;
+    });
+  }
+
+  private static formatMeta(record: LogRecord): string {
+    return record.meta ? `[${JSON.stringify(record.meta)}]` : '';
   }
 }

@@ -118,6 +118,47 @@ test('`format()` correctly formats record with custom pattern.', () => {
   }
 });
 
+test('`format()` correctly formats record with meta data.', () => {
+  const layout = new PatternLayout();
+
+  expect(
+    layout.format({
+      context: 'context-meta',
+      level: LogLevel.Debug,
+      message: 'message-meta',
+      timestamp: new Date(Date.UTC(2012, 1, 1)),
+      pid: 5355,
+      meta: {
+        from: 'v7',
+        to: 'v8',
+      },
+    })
+  ).toMatchInlineSnapshot(
+    `"[2012-02-01T00:00:00.000Z][DEBUG][context-meta][{\\"from\\":\\"v7\\",\\"to\\":\\"v8\\"}] message-meta"`
+  );
+
+  expect(
+    layout.format({
+      context: 'context-meta',
+      level: LogLevel.Debug,
+      message: 'message-meta',
+      timestamp: new Date(Date.UTC(2012, 1, 1)),
+      pid: 5355,
+      meta: {},
+    })
+  ).toMatchInlineSnapshot(`"[2012-02-01T00:00:00.000Z][DEBUG][context-meta][{}] message-meta"`);
+
+  expect(
+    layout.format({
+      context: 'context-meta',
+      level: LogLevel.Debug,
+      message: 'message-meta',
+      timestamp: new Date(Date.UTC(2012, 1, 1)),
+      pid: 5355,
+    })
+  ).toMatchInlineSnapshot(`"[2012-02-01T00:00:00.000Z][DEBUG][context-meta] message-meta"`);
+});
+
 test('`format()` correctly formats record with highlighting.', () => {
   const layout = new PatternLayout(undefined, true);
 
@@ -132,4 +173,22 @@ test('allows specifying the PID in custom pattern', () => {
   for (const record of records) {
     expect(layout.format(record)).toMatchSnapshot();
   }
+});
+
+test('`format()` allows specifying pattern with meta.', () => {
+  const layout = new PatternLayout('{context}-{meta}-{message}');
+  const record = {
+    context: 'context',
+    level: LogLevel.Debug,
+    message: 'message',
+    timestamp: new Date(Date.UTC(2012, 1, 1)),
+    pid: 5355,
+    meta: {
+      from: 'v7',
+      to: 'v8',
+    },
+  };
+  expect(layout.format(record)).toMatchInlineSnapshot(
+    `"context-[{\\"from\\":\\"v7\\",\\"to\\":\\"v8\\"}]-message"`
+  );
 });
