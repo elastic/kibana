@@ -5,13 +5,14 @@
  */
 
 import React, { useEffect } from 'react';
-import chrome from 'ui/chrome';
 import { i18n } from '@kbn/i18n';
-import { documentationLinks } from 'ui/documentation_links';
+import { useKibana } from '../../lib/kibana';
 
 export const HelpMenu = React.memo(() => {
+  const { chrome, docLinks } = useKibana().services;
+
   useEffect(() => {
-    chrome.helpExtension.set({
+    chrome.setHelpExtension({
       appName: i18n.translate('xpack.siem.chrome.help.appName', {
         defaultMessage: 'SIEM',
       }),
@@ -20,7 +21,7 @@ export const HelpMenu = React.memo(() => {
           content: i18n.translate('xpack.siem.chrome.helpMenu.documentation', {
             defaultMessage: 'SIEM documentation',
           }),
-          href: documentationLinks.siem.guide,
+          href: docLinks.links.siem.guide,
           iconType: 'documents',
           linkType: 'custom',
         },
