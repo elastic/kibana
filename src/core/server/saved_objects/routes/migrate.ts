@@ -22,7 +22,7 @@ import { IKibanaMigrator } from '../migrations';
 
 export const registerMigrateRoute = (
   router: IRouter,
-  getMigrator: () => IKibanaMigrator | undefined
+  migratorPromise: Promise<IKibanaMigrator>
 ) => {
   router.post(
     {
@@ -30,10 +30,7 @@ export const registerMigrateRoute = (
       validate: false,
     },
     async (context, req, res) => {
-      const migrator = getMigrator();
-      if (!migrator) {
-        return res.badRequest({ body: 'Migrator is not available yet.' });
-      }
+      const migrator = await migratorPromise;
       const result = await migrator.runMigrations({ rerun: true });
       return res.ok({
         body: {

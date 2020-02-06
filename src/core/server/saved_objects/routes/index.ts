@@ -23,11 +23,11 @@ import { registerMigrateRoute } from './migrate';
 
 interface RegisterRouteOptions {
   http: InternalHttpServiceSetup;
-  getMigrator: () => IKibanaMigrator | undefined;
+  migratorPromise: Promise<IKibanaMigrator>;
 }
 
-export function registerRoutes({ http, getMigrator }: RegisterRouteOptions) {
+export function registerRoutes({ http, migratorPromise }: RegisterRouteOptions) {
   const router = http.createRouter('');
 
-  registerMigrateRoute(router, getMigrator);
+  registerMigrateRoute(router, migratorPromise);
 }

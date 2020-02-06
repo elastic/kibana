@@ -17,8 +17,9 @@
  * under the License.
  */
 
-import { CoreService } from 'src/core/types';
+import { Subject } from 'rxjs';
 import { first, filter, take } from 'rxjs/operators';
+import { CoreService } from '../../types';
 import {
   SavedObjectsClient,
   SavedObjectsClientProvider,
@@ -220,7 +221,7 @@ export class SavedObjectsService
   private clientFactoryProvider?: SavedObjectsClientFactoryProvider;
   private clientFactoryWrappers: WrappedClientFactoryWrapper[] = [];
 
-  private migrator?: KibanaMigrator;
+  private migrator$ = new Subject<KibanaMigrator>();
   private typeRegistry = new SavedObjectTypeRegistry();
   private validations: PropertyValidators = {};
 
@@ -242,7 +243,7 @@ export class SavedObjectsService
 
     registerRoutes({
       http: setupDeps.http,
-      getMigrator: () => this.migrator,
+      migratorPromise: this.migrator$.pipe(first()).toPromise(),
     });
 
     return {
@@ -284,7 +285,9 @@ export class SavedObjectsService
       .pipe(first())
       .toPromise();
     const adminClient = this.setupDeps!.elasticsearch.adminClient;
-    this.migrator = this.createMigrator(kibanaConfig, savedObjectsConfig, migrationsRetryDelay);
+    const migrator = this.createMigrator(kibanaConfig, savedObjectsConfig, migrationsRetryDelay);
+
+    this.migrator$.next(migrator);
 
     /**
      * Note: We want to ensure that migrations have completed before
@@ -313,12 +316,12 @@ export class SavedObjectsService
       ).toPromise();
 
       this.logger.info('Starting saved objects migrations');
-      await this.migrator.runMigrations();
+      await migrator.runMigrations();
     }
 
     const createRepository = (callCluster: APICaller, extraTypes: string[] = []) => {
       return SavedObjectsRepository.createRepository(
-        this.migrator!,
+        migrator,
         this.typeRegistry,
         kibanaConfig.index,
         callCluster,
@@ -348,7 +351,7 @@ export class SavedObjectsService
     });
 
     return {
-      migrator: this.migrator,
+      migrator,
       clientProvider,
       typeRegistry: this.typeRegistry,
       getScopedClient: clientProvider.getClient.bind(clientProvider),
