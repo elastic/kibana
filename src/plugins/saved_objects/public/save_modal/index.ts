@@ -17,20 +17,5 @@
  * under the License.
  */
 
-import { Action } from './action';
-
-export function createAction<ActionContext extends {} = {}>(
-  action: { type: string; execute: Action<ActionContext>['execute'] } & Partial<
-    Action<ActionContext>
-  >
-): Action<ActionContext> {
-  return {
-    getIconType: () => undefined,
-    order: 0,
-    id: action.type,
-    isCompatible: () => Promise.resolve(true),
-    getDisplayName: () => '',
-    getHref: () => undefined,
-    ...action,
-  };
-}
+export { SavedObjectSaveModal, OnSaveProps } from './saved_object_save_modal';
+export { showSaveModal, SaveResult } from './show_saved_object_save_modal';
