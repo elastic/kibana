@@ -8,7 +8,6 @@ import { IRouter, ElasticsearchServiceSetup, IClusterClient } from 'src/core/ser
 import { XPackMainPlugin } from '../../xpack_main/server/xpack_main';
 
 export interface ServerShim {
-  route: any;
   plugins: {
     xpack_main: XPackMainPlugin;
     rollup: any;

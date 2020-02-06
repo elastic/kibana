@@ -55,7 +55,6 @@ export function rollup(kibana: any) {
         usageCollection,
         metrics,
         __LEGACY: {
-          route: server.route.bind(server),
           plugins: {
             xpack_main: server.plugins.xpack_main,
             rollup: server.plugins[PLUGIN.ID],

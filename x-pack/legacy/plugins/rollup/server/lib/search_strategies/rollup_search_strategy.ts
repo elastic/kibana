@@ -25,8 +25,8 @@ export const getRollupSearchStrategy = (
   class RollupSearchStrategy extends AbstractSearchStrategy {
     name = 'rollup';
 
-    constructor(server: ElasticsearchServiceSetup) {
-      super(server, callWithRequestFactory, RollupSearchRequest);
+    constructor(elasticsearchService: ElasticsearchServiceSetup) {
+      super(elasticsearchService, callWithRequestFactory, RollupSearchRequest);
     }
 
     getRollupData(req: KibanaRequest, indexPattern: string) {
