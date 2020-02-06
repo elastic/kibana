@@ -9,11 +9,12 @@ import { first } from 'rxjs/operators';
 import { once } from 'lodash';
 import { TaskDictionary, TaskDefinition } from './task';
 import { TaskManager } from './task_manager';
-import { createTaskManager, LegacyDeps } from './create_task_manager';
+import { createTaskManager } from './create_task_manager';
 import { TaskManagerConfig } from './config';
 import { Middleware } from './lib/middleware';
 
-export type PluginLegacyDependencies = Pick<LegacyDeps, 'savedObjectSchemas'>;
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface PluginLegacyDependencies {}
 export type TaskManagerSetupContract = {
   config$: Observable<TaskManagerConfig>;
   registerLegacyAPI: (legacyDependencies: PluginLegacyDependencies) => Promise<TaskManager>;
@@ -51,7 +52,7 @@ export class TaskManagerPlugin
               config,
               elasticsearch,
               savedObjectsRepository,
-              ...__LEGACY,
+              savedObjectsSerializer: savedObjects.createSerializer(),
             })
           );
           this.legacyTaskManager$.complete();
