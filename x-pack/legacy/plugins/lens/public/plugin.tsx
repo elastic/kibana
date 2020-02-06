@@ -8,21 +8,19 @@ import React from 'react';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import { HashRouter, Route, RouteComponentProps, Switch } from 'react-router-dom';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { CoreSetup, CoreStart, SavedObjectsClientContract } from 'src/core/public';
-import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { CoreSetup } from 'src/core/public';
+import { DataPublicPluginSetup, DataPublicPluginStart } from 'src/plugins/data/public';
 import rison, { RisonObject, RisonValue } from 'rison-node';
 import { isObject } from 'lodash';
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
-import { editorFrameSetup, editorFrameStart, editorFrameStop } from './editor_frame_service';
-import { indexPatternDatasourceSetup, indexPatternDatasourceStop } from './indexpattern_datasource';
+import { EditorFrameService } from './editor_frame_service';
+import { IndexPatternDatasource } from './indexpattern_datasource';
 import { addHelpMenuToAppChrome } from './help_menu_util';
 import { SavedObjectIndexStore } from './persistence';
-import { xyVisualizationSetup, xyVisualizationStop } from './xy_visualization';
-import { metricVisualizationSetup, metricVisualizationStop } from './metric_visualization';
-import {
-  datatableVisualizationSetup,
-  datatableVisualizationStop,
-} from './datatable_visualization';
+import { XyVisualization } from './xy_visualization';
+import { MetricVisualization } from './metric_visualization';
+import { ExpressionsSetup, ExpressionsStart } from '../../../../../src/plugins/expressions/public';
+import { DatatableVisualization } from './datatable_visualization';
 import { App } from './app_plugin';
 import {
   LensReportManager,
@@ -31,40 +29,80 @@ import {
   trackUiEvent,
 } from './lens_ui_telemetry';
 import { KibanaLegacySetup } from '../../../../../src/plugins/kibana_legacy/public';
-import { EditorFrameStart } from './types';
 import { NOT_INTERNATIONALIZED_PRODUCT_NAME } from '../../../../plugins/lens/common';
 import {
   addEmbeddableToDashboardUrl,
   getUrlVars,
   getLensUrlFromDashboardAbsoluteUrl,
 } from '../../../../../src/legacy/core_plugins/kibana/public/dashboard/np_ready/url_helper';
+import { FormatFactory } from './legacy_imports';
+import { IEmbeddableSetup, IEmbeddableStart } from '../../../../../src/plugins/embeddable/public';
 
 export interface LensPluginSetupDependencies {
   kibanaLegacy: KibanaLegacySetup;
+  expressions: ExpressionsSetup;
+  data: DataPublicPluginSetup;
+  embeddable: IEmbeddableSetup;
+  __LEGACY: {
+    formatFactory: FormatFactory;
+  };
 }
 
 export interface LensPluginStartDependencies {
   data: DataPublicPluginStart;
+  embeddable: IEmbeddableStart;
+  expressions: ExpressionsStart;
 }
 
 export const isRisonObject = (value: RisonValue): value is RisonObject => {
   return isObject(value);
 };
 export class LensPlugin {
-  private startDependencies: {
-    data: DataPublicPluginStart;
-    savedObjectsClient: SavedObjectsClientContract;
-    editorFrame: EditorFrameStart;
-  } | null = null;
+  private datatableVisualization: DatatableVisualization;
+  private editorFrameService: EditorFrameService;
+  private indexpatternDatasource: IndexPatternDatasource;
+  private xyVisualization: XyVisualization;
+  private metricVisualization: MetricVisualization;
 
-  constructor() {}
+  constructor() {
+    this.datatableVisualization = new DatatableVisualization();
+    this.editorFrameService = new EditorFrameService();
+    this.indexpatternDatasource = new IndexPatternDatasource();
+    this.xyVisualization = new XyVisualization();
+    this.metricVisualization = new MetricVisualization();
+  }
 
-  setup(core: CoreSetup, { kibanaLegacy }: LensPluginSetupDependencies) {
-    const indexPattern = indexPatternDatasourceSetup();
-    const datatableVisualization = datatableVisualizationSetup();
-    const xyVisualization = xyVisualizationSetup();
-    const metricVisualization = metricVisualizationSetup();
-    const editorFrameSetupInterface = editorFrameSetup();
+  setup(
+    core: CoreSetup<LensPluginStartDependencies>,
+    {
+      kibanaLegacy,
+      expressions,
+      data,
+      embeddable,
+      __LEGACY: { formatFactory },
+    }: LensPluginSetupDependencies
+  ) {
+    const indexPattern = this.indexpatternDatasource.setup(core, {
+      expressions,
+      data,
+    });
+    const datatableVisualization = this.datatableVisualization.setup(core, {
+      expressions,
+      formatFactory,
+    });
+    const xyVisualization = this.xyVisualization.setup(core, {
+      expressions,
+      formatFactory,
+    });
+    const metricVisualization = this.metricVisualization.setup(core, {
+      expressions,
+      formatFactory,
+    });
+    const editorFrameSetupInterface = this.editorFrameService.setup(core, {
+      data,
+      embeddable,
+      expressions,
+    });
 
     editorFrameSetupInterface.registerVisualization(xyVisualization);
     editorFrameSetupInterface.registerVisualization(datatableVisualization);
@@ -74,12 +112,12 @@ export class LensPlugin {
     kibanaLegacy.registerLegacyApp({
       id: 'lens',
       title: NOT_INTERNATIONALIZED_PRODUCT_NAME,
-      mount: async (context, params) => {
-        if (this.startDependencies === null) {
-          throw new Error('mounted before start phase');
-        }
-        const { data, savedObjectsClient, editorFrame } = this.startDependencies;
-        addHelpMenuToAppChrome(context.core.chrome);
+      mount: async params => {
+        const [coreStart, startDependencies] = await core.getStartServices();
+        const dataStart = startDependencies.data;
+        const savedObjectsClient = coreStart.savedObjects.client;
+        const editorFrame = this.editorFrameService.start(coreStart, startDependencies);
+        addHelpMenuToAppChrome(coreStart.chrome);
         const instance = editorFrame.createInstance({});
 
         setReportManager(
@@ -94,7 +132,7 @@ export class LensPlugin {
             return;
           }
           // @ts-ignore
-          decoded.time = data.query.timefilter.timefilter.getTime();
+          decoded.time = dataStart.query.timefilter.timefilter.getTime();
           urlVars._g = rison.encode(decoded);
         };
         const redirectTo = (
@@ -108,12 +146,12 @@ export class LensPlugin {
             routeProps.history.push(`/lens/edit/${id}`);
           } else if (addToDashboardMode && id) {
             routeProps.history.push(`/lens/edit/${id}`);
-            const url = context.core.chrome.navLinks.get('kibana:dashboard');
+            const url = coreStart.chrome.navLinks.get('kibana:dashboard');
             if (!url) {
               throw new Error('Cannot get last dashboard url');
             }
             const lastDashboardAbsoluteUrl = url.url;
-            const basePath = context.core.http.basePath.get();
+            const basePath = coreStart.http.basePath.get();
             const lensUrl = getLensUrlFromDashboardAbsoluteUrl(
               lastDashboardAbsoluteUrl,
               basePath,
@@ -144,8 +182,8 @@ export class LensPlugin {
             !!routeProps.location.search && routeProps.location.search.includes('addToDashboard');
           return (
             <App
-              core={context.core}
-              data={data}
+              core={coreStart}
+              data={dataStart}
               editorFrame={instance}
               storage={new Storage(localStorage)}
               docId={routeProps.match.params.id}
@@ -181,21 +219,7 @@ export class LensPlugin {
     });
   }
 
-  start({ savedObjects }: CoreStart, { data }: LensPluginStartDependencies) {
-    this.startDependencies = {
-      data,
-      savedObjectsClient: savedObjects.client,
-      editorFrame: editorFrameStart(),
-    };
-  }
-
   stop() {
     stopReportManager();
-
-    indexPatternDatasourceStop();
-    xyVisualizationStop();
-    metricVisualizationStop();
-    datatableVisualizationStop();
-    editorFrameStop();
   }
 }

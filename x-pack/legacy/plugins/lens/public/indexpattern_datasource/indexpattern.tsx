@@ -8,7 +8,7 @@ import _ from 'lodash';
 import React from 'react';
 import { render } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
-import { CoreStart, SavedObjectsClientContract } from 'src/core/public';
+import { CoreSetup, SavedObjectsClientContract } from 'src/core/public';
 import { i18n } from '@kbn/i18n';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import {
@@ -21,7 +21,6 @@ import {
 import { loadInitialState, changeIndexPattern, changeLayerIndexPattern } from './loader';
 import { toExpression } from './to_expression';
 import { IndexPatternDimensionPanel } from './dimension_panel';
-import { IndexPatternDatasourceSetupPlugins } from './plugin';
 import { IndexPatternDataPanel } from './datapanel';
 import {
   getDatasourceSuggestionsForField,
@@ -90,20 +89,19 @@ export function uniqueLabels(layers: Record<string, IndexPatternLayer>) {
 }
 
 export function getIndexPatternDatasource({
-  chrome,
   core,
   storage,
   savedObjectsClient,
   data,
-}: Pick<IndexPatternDatasourceSetupPlugins, 'chrome'> & {
+}: {
   // Core start is being required here because it contains the savedObject client
   // In the new platform, this plugin wouldn't be initialized until after setup
-  core: CoreStart;
+  core: CoreSetup;
   storage: IStorageWrapper;
-  savedObjectsClient: SavedObjectsClientContract;
-  data: ReturnType<DataPlugin['start']>;
+  savedObjectsClient: Promise<SavedObjectsClientContract>;
+  data: Promise<ReturnType<DataPlugin['start']>>;
 }) {
-  const uiSettings = chrome.getUiSettingsClient();
+  const uiSettings = core.uiSettings;
   const onIndexPatternLoadError = (err: Error) =>
     core.notifications.toasts.addError(err, {
       title: i18n.translate('xpack.lens.indexPattern.indexPatternLoadError', {
@@ -118,7 +116,7 @@ export function getIndexPatternDatasource({
     async initialize(state?: IndexPatternPersistedState) {
       return loadInitialState({
         state,
-        savedObjectsClient,
+        savedObjectsClient: await savedObjectsClient,
         defaultIndexPatternId: core.uiSettings.get('defaultIndex'),
       });
     },
@@ -180,27 +178,30 @@ export function getIndexPatternDatasource({
       domElement: Element,
       props: DatasourceDataPanelProps<IndexPatternPrivateState>
     ) {
-      render(
-        <I18nProvider>
-          <IndexPatternDataPanel
-            changeIndexPattern={(
-              id: string,
-              state: IndexPatternPrivateState,
-              setState: StateSetter<IndexPatternPrivateState>
-            ) => {
-              changeIndexPattern({
-                id,
-                state,
-                setState,
-                savedObjectsClient,
-                onError: onIndexPatternLoadError,
-              });
-            }}
-            {...props}
-          />
-        </I18nProvider>,
-        domElement
-      );
+      (async () => {
+        const resolvedSavedObjectsClient = await savedObjectsClient;
+        render(
+          <I18nProvider>
+            <IndexPatternDataPanel
+              changeIndexPattern={(
+                id: string,
+                state: IndexPatternPrivateState,
+                setState: StateSetter<IndexPatternPrivateState>
+              ) => {
+                changeIndexPattern({
+                  id,
+                  state,
+                  setState,
+                  savedObjectsClient: resolvedSavedObjectsClient,
+                  onError: onIndexPatternLoadError,
+                });
+              }}
+              {...props}
+            />
+          </I18nProvider>,
+          domElement
+        );
+      })();
     },
 
     getPublicAPI({
@@ -224,55 +225,61 @@ export function getIndexPatternDatasource({
           return null;
         },
         renderDimensionPanel: (domElement: Element, props: DatasourceDimensionPanelProps) => {
-          render(
-            <I18nProvider>
-              <KibanaContextProvider
-                services={{
-                  appName: 'lens',
-                  storage,
-                  uiSettings,
-                  data,
-                  savedObjects: core.savedObjects,
-                  docLinks: core.docLinks,
-                }}
-              >
-                <IndexPatternDimensionPanel
-                  state={state}
-                  setState={setState}
-                  uiSettings={uiSettings}
-                  storage={storage}
-                  savedObjectsClient={core.savedObjects.client}
-                  layerId={props.layerId}
-                  http={core.http}
-                  uniqueLabel={columnLabelMap[props.columnId]}
-                  dateRange={dateRange}
-                  {...props}
-                />
-              </KibanaContextProvider>
-            </I18nProvider>,
-            domElement
-          );
+          (async () => {
+            const [coreStart] = await core.getStartServices();
+            render(
+              <I18nProvider>
+                <KibanaContextProvider
+                  services={{
+                    appName: 'lens',
+                    storage,
+                    uiSettings,
+                    data: await data,
+                    savedObjects: coreStart.savedObjects,
+                    docLinks: coreStart.docLinks,
+                  }}
+                >
+                  <IndexPatternDimensionPanel
+                    state={state}
+                    setState={setState}
+                    uiSettings={uiSettings}
+                    storage={storage}
+                    savedObjectsClient={coreStart.savedObjects.client}
+                    layerId={props.layerId}
+                    http={core.http}
+                    uniqueLabel={columnLabelMap[props.columnId]}
+                    dateRange={dateRange}
+                    {...props}
+                  />
+                </KibanaContextProvider>
+              </I18nProvider>,
+              domElement
+            );
+          })();
         },
 
         renderLayerPanel: (domElement: Element, props: DatasourceLayerPanelProps) => {
-          render(
-            <LayerPanel
-              state={state}
-              onChangeIndexPattern={indexPatternId => {
-                changeLayerIndexPattern({
-                  savedObjectsClient,
-                  indexPatternId,
-                  setState,
-                  state,
-                  layerId: props.layerId,
-                  onError: onIndexPatternLoadError,
-                  replaceIfPossible: true,
-                });
-              }}
-              {...props}
-            />,
-            domElement
-          );
+          (async () => {
+            const resolvedSavedObjectsClient = await savedObjectsClient;
+            render(
+              <LayerPanel
+                state={state}
+                onChangeIndexPattern={indexPatternId => {
+                  changeLayerIndexPattern({
+                    savedObjectsClient: resolvedSavedObjectsClient,
+                    indexPatternId,
+                    setState,
+                    state,
+                    layerId: props.layerId,
+                    onError: onIndexPatternLoadError,
+                    replaceIfPossible: true,
+                  });
+                }}
+                {...props}
+              />,
+              domElement
+            );
+          })();
         },
       };
     },

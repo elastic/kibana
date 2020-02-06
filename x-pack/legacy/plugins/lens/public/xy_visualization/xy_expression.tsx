@@ -6,7 +6,6 @@
 
 import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
-import chrome from 'ui/chrome';
 import {
   Chart,
   Settings,
@@ -15,6 +14,7 @@ import {
   AreaSeries,
   BarSeries,
   Position,
+  PartialTheme,
 } from '@elastic/charts';
 import { I18nProvider } from '@kbn/i18n/react';
 import {
@@ -26,19 +26,16 @@ import {
 import { EuiIcon, EuiText, IconType, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { EUI_CHARTS_THEME_DARK, EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist/eui_charts_theme';
-import { FormatFactory } from '../../../../../../src/legacy/ui/public/visualize/loader/pipeline_helpers/utilities';
+import { FormatFactory } from '../legacy_imports';
 import { LensMultiTable } from '../types';
 import { XYArgs, SeriesType, visualizationTypes } from './types';
 import { VisualizationContainer } from '../visualization_container';
 import { isHorizontalChart } from './state_helpers';
 
-const IS_DARK_THEME = chrome.getUiSettingsClient().get('theme:darkMode');
-const chartTheme = IS_DARK_THEME ? EUI_CHARTS_THEME_DARK.theme : EUI_CHARTS_THEME_LIGHT.theme;
-
 export interface XYChartProps {
   data: LensMultiTable;
   args: XYArgs;
+  chartTheme: PartialTheme;
 }
 
 export interface XYRender {
@@ -97,6 +94,7 @@ export const xyChart: ExpressionFunction<'lens_xy_chart', LensMultiTable, XYArgs
 
 export const getXyChartRenderer = (dependencies: {
   formatFactory: FormatFactory;
+  chartTheme: PartialTheme;
   timeZone: string;
 }): IInterpreterRenderFunction<XYChartProps> => ({
   name: 'lens_xy_chart_renderer',
@@ -142,7 +140,7 @@ export function XYChartReportable(props: XYChartRenderProps) {
   );
 }
 
-export function XYChart({ data, args, formatFactory, timeZone }: XYChartRenderProps) {
+export function XYChart({ data, args, formatFactory, timeZone, chartTheme }: XYChartRenderProps) {
   const { legend, layers } = args;
 
   if (Object.values(data.tables).every(table => table.rows.length === 0)) {

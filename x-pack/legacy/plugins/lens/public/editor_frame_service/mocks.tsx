@@ -108,9 +108,6 @@ export function createMockSetupDependencies() {
     data: {},
     embeddable: embeddablePluginMock.createSetupContract(),
     expressions: expressionsPluginMock.createSetupContract(),
-    chrome: {
-      getSavedObjectsClient: () => {},
-    },
   } as unknown) as MockedSetupDependencies;
 }
 

@@ -5,11 +5,12 @@
  */
 
 import { npSetup, npStart } from 'ui/new_platform';
+import { getFormat } from './legacy_imports';
 
 export * from './types';
 
 import { plugin } from './index';
 
 const pluginInstance = plugin();
-pluginInstance.setup(npSetup.core, npSetup.plugins);
+pluginInstance.setup(npSetup.core, { ...npSetup.plugins, __LEGACY: { formatFactory: getFormat } });
 pluginInstance.start(npStart.core, npStart.plugins);

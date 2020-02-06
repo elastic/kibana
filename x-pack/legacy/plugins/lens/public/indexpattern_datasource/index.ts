@@ -4,4 +4,41 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './plugin';
+import { CoreSetup } from 'src/core/public';
+import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
+import { getIndexPatternDatasource } from './indexpattern';
+import { renameColumns } from './rename_columns';
+import { autoDate } from './auto_date';
+import { ExpressionsSetup } from '../../../../../../src/plugins/expressions/public';
+import {
+  DataPublicPluginSetup,
+  DataPublicPluginStart,
+} from '../../../../../../src/plugins/data/public';
+
+export interface IndexPatternDatasourceSetupPlugins {
+  expressions: ExpressionsSetup;
+  data: DataPublicPluginSetup;
+}
+
+export interface IndexPatternDatasourceStartPlugins {
+  data: DataPublicPluginStart;
+}
+
+export class IndexPatternDatasource {
+  constructor() {}
+
+  setup(
+    core: CoreSetup<IndexPatternDatasourceStartPlugins>,
+    { expressions }: IndexPatternDatasourceSetupPlugins
+  ) {
+    expressions.registerFunction(renameColumns);
+    expressions.registerFunction(autoDate);
+
+    return getIndexPatternDatasource({
+      core,
+      storage: new Storage(localStorage),
+      savedObjectsClient: core.getStartServices().then(([{ savedObjects }]) => savedObjects.client),
+      data: core.getStartServices().then(([_, { data }]) => data),
+    });
+  }
+}
