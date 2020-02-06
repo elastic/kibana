@@ -1044,7 +1044,7 @@ describe('disable()', () => {
 
   test('disables an alert', async () => {
     await alertsClient.disable({ id: '1' });
-    expect(savedObjectsClient.get).toHaveBeenCalledWith('alert', '1');
+    expect(savedObjectsClient.get).not.toHaveBeenCalled();
     expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith('alert', '1', {
       namespace: 'default',
     });
@@ -1068,11 +1068,39 @@ describe('disable()', () => {
     expect(alertsClientParams.invalidateAPIKey).toHaveBeenCalledWith({ id: '123' });
   });
 
+  test('falls back when getDecryptedAsInternalUser throws an error', async () => {
+    encryptedSavedObjects.getDecryptedAsInternalUser.mockRejectedValueOnce(new Error('Fail'));
+
+    await alertsClient.disable({ id: '1' });
+    expect(savedObjectsClient.get).toHaveBeenCalledWith('alert', '1');
+    expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith('alert', '1', {
+      namespace: 'default',
+    });
+    expect(savedObjectsClient.update).toHaveBeenCalledWith(
+      'alert',
+      '1',
+      {
+        schedule: { interval: '10s' },
+        alertTypeId: '2',
+        apiKey: null,
+        apiKeyOwner: null,
+        enabled: false,
+        scheduledTaskId: null,
+        updatedBy: 'elastic',
+      },
+      {
+        version: '123',
+      }
+    );
+    expect(taskManager.remove).toHaveBeenCalledWith('task-123');
+    expect(alertsClientParams.invalidateAPIKey).not.toHaveBeenCalled();
+  });
+
   test(`doesn't disable already disabled alerts`, async () => {
-    savedObjectsClient.get.mockResolvedValueOnce({
-      ...existingAlert,
+    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce({
+      ...existingDecryptedAlert,
       attributes: {
-        ...existingAlert.attributes,
+        ...existingDecryptedAlert.attributes,
         enabled: false,
       },
     });
@@ -1098,7 +1126,7 @@ describe('disable()', () => {
     expect(taskManager.remove).toHaveBeenCalled();
     expect(alertsClientParams.invalidateAPIKey).not.toHaveBeenCalled();
     expect(alertsClientParams.logger.error).toHaveBeenCalledWith(
-      'disable(): Failed to load API key to invalidate: Fail'
+      'disable(): Failed to load API key to invalidate on alert 1: Fail'
     );
   });
 
