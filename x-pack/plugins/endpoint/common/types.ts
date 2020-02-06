@@ -58,9 +58,15 @@ export interface AlertResultList extends Pagination {
   alerts: AlertData[];
 }
 
-export interface EndpointResultList extends Pagination {
+export interface EndpointResultList {
   /* the endpoints restricted by the page size */
   endpoints: EndpointMetadata[];
+  /* the total number of unique endpoints in the index */
+  total: number;
+  /* the page size requested */
+  request_page_size: number;
+  /* the page index requested */
+  request_page_index: number;
 }
 
 export interface AlertData {
@@ -109,35 +115,6 @@ export interface EndpointMetadata {
       name: string;
       full: string;
       version: string;
-    };
-  };
-}
-
-export interface AlertData {
-  value: {
-    source: {
-      endgame: {
-        data: {
-          file_operation: string;
-          malware_classification: {
-            score: number;
-          };
-        };
-        metadata: {
-          key: string;
-        };
-        timestamp_utc: Date;
-      };
-      labels: {
-        endpoint_id: string;
-      };
-      host: {
-        hostname: string;
-        ip: string;
-        os: {
-          name: string;
-        };
-      };
     };
   };
 }

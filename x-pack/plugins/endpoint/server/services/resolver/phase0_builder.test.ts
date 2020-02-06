@@ -26,6 +26,7 @@ export class Phase0Builder implements EventBuilder {
     };
   }
   startingChildrenEntityID(): number {
+    // +1 so the children's entity ids start after the origin's
     return this.originEntityID + 1;
   }
 }

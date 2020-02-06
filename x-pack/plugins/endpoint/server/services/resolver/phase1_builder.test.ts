@@ -28,6 +28,7 @@ export class Phase1Builder implements EventBuilder {
     };
   }
   startingChildrenEntityID(): number {
+    // can be zero because the phase 1 ids will be strings
     return 0;
   }
 }
