@@ -17,42 +17,42 @@
  * under the License.
  */
 
-import { IAction } from './actions/i_action';
-import { ITrigger } from './triggers/i_trigger';
+import { Action } from './actions/action';
+import { Trigger } from './triggers/trigger';
 
-export { IAction } from './actions';
-export { ITrigger } from './triggers/i_trigger';
+export { Action } from './actions';
+export { Trigger } from './triggers/trigger';
 
-export type TExecuteTriggerActions = <A>(triggerId: string, actionContext: A) => Promise<void>;
+export type ExecuteTriggerActions = <A>(triggerId: string, actionContext: A) => Promise<void>;
 
-export type TGetActionsCompatibleWithTrigger = <C>(
+export type GetActionsCompatibleWithTrigger = <C>(
   triggerId: string,
   context: C
-) => Promise<IAction[]>;
+) => Promise<Action[]>;
 
-export interface IUiActionsApi {
+export interface UiActionsApi {
   attachAction: (triggerId: string, actionId: string) => void;
   detachAction: (triggerId: string, actionId: string) => void;
-  executeTriggerActions: TExecuteTriggerActions;
-  getTrigger: (id: string) => ITrigger;
-  getTriggerActions: (id: string) => IAction[];
-  getTriggerCompatibleActions: <C>(triggerId: string, context: C) => Promise<Array<IAction<C>>>;
-  registerAction: (action: IAction) => void;
-  registerTrigger: (trigger: ITrigger) => void;
+  executeTriggerActions: ExecuteTriggerActions;
+  getTrigger: (id: string) => Trigger;
+  getTriggerActions: (id: string) => Action[];
+  getTriggerCompatibleActions: <C>(triggerId: string, context: C) => Promise<Array<Action<C>>>;
+  registerAction: (action: Action) => void;
+  registerTrigger: (trigger: Trigger) => void;
 }
 
-export interface IUiActionsDependencies {
-  actions: IActionRegistry;
-  triggers: ITriggerRegistry;
+export interface UiActionsDependencies {
+  actions: ActionRegistry;
+  triggers: TriggerRegistry;
 }
 
-export interface IUiActionsDependenciesInternal extends IUiActionsDependencies {
-  api: Readonly<Partial<IUiActionsApi>>;
+export interface UiActionsDependenciesInternal extends UiActionsDependencies {
+  api: Readonly<Partial<UiActionsApi>>;
 }
 
-export type IUiActionsApiPure = {
-  [K in keyof IUiActionsApi]: (deps: IUiActionsDependenciesInternal) => IUiActionsApi[K];
+export type UiActionsApiPure = {
+  [K in keyof UiActionsApi]: (deps: UiActionsDependenciesInternal) => UiActionsApi[K];
 };
 
-export type ITriggerRegistry = Map<string, ITrigger>;
-export type IActionRegistry = Map<string, IAction>;
+export type TriggerRegistry = Map<string, Trigger>;
+export type ActionRegistry = Map<string, Action>;

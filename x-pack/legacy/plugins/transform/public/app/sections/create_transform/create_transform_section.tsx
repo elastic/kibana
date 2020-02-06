@@ -16,7 +16,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPageContent,
-  EuiPageBody,
   EuiPageContentBody,
   EuiSpacer,
   EuiTitle,
@@ -41,53 +40,51 @@ export const CreateTransformSection: FC<Props> = ({ match }) => {
   return (
     <PrivilegesWrapper privileges={APP_CREATE_TRANSFORM_CLUSTER_PRIVILEGES}>
       <KibanaProvider savedObjectId={match.params.savedObjectId}>
-        <EuiPageBody data-test-subj="transformPageCreateTransform">
-          <EuiPageContent>
-            <EuiTitle size="l">
-              <EuiFlexGroup alignItems="center">
-                <EuiFlexItem grow={true}>
-                  <h1>
-                    <FormattedMessage
-                      id="xpack.transform.transformsWizard.createTransformTitle"
-                      defaultMessage="Create transform"
-                    />
-                    <span>&nbsp;</span>
-                    <EuiBetaBadge
-                      label={i18n.translate('xpack.transform.transformsWizard.betaBadgeLabel', {
-                        defaultMessage: `Beta`,
-                      })}
-                      tooltipContent={i18n.translate(
-                        'xpack.transform.transformsWizard.betaBadgeTooltipContent',
-                        {
-                          defaultMessage: `Transforms are a beta feature. We'd love to hear your feedback.`,
-                        }
-                      )}
-                    />
-                  </h1>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty
-                    href={documentationLinksService.getTransformsDocUrl()}
-                    target="_blank"
-                    iconType="help"
-                    data-test-subj="documentationLink"
-                  >
-                    <FormattedMessage
-                      id="xpack.transform.transformsWizard.transformDocsLinkText"
-                      defaultMessage="Transform docs"
-                    />
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiTitle>
-            <EuiPageContentBody>
-              <EuiSpacer size="l" />
-              <RenderOnlyWithInitializedKibanaContext>
-                <Wizard />
-              </RenderOnlyWithInitializedKibanaContext>
-            </EuiPageContentBody>
-          </EuiPageContent>
-        </EuiPageBody>
+        <EuiPageContent data-test-subj="transformPageCreateTransform">
+          <EuiTitle size="l">
+            <EuiFlexGroup alignItems="center">
+              <EuiFlexItem grow={true}>
+                <h1>
+                  <FormattedMessage
+                    id="xpack.transform.transformsWizard.createTransformTitle"
+                    defaultMessage="Create transform"
+                  />
+                  <span>&nbsp;</span>
+                  <EuiBetaBadge
+                    label={i18n.translate('xpack.transform.transformsWizard.betaBadgeLabel', {
+                      defaultMessage: `Beta`,
+                    })}
+                    tooltipContent={i18n.translate(
+                      'xpack.transform.transformsWizard.betaBadgeTooltipContent',
+                      {
+                        defaultMessage: `Transforms are a beta feature. We'd love to hear your feedback.`,
+                      }
+                    )}
+                  />
+                </h1>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  href={documentationLinksService.getTransformsDocUrl()}
+                  target="_blank"
+                  iconType="help"
+                  data-test-subj="documentationLink"
+                >
+                  <FormattedMessage
+                    id="xpack.transform.transformsWizard.transformDocsLinkText"
+                    defaultMessage="Transform docs"
+                  />
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiTitle>
+          <EuiPageContentBody>
+            <EuiSpacer size="l" />
+            <RenderOnlyWithInitializedKibanaContext>
+              <Wizard />
+            </RenderOnlyWithInitializedKibanaContext>
+          </EuiPageContentBody>
+        </EuiPageContent>
       </KibanaProvider>
     </PrivilegesWrapper>
   );

@@ -16,7 +16,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { npStart } from 'ui/new_platform';
-import { SavedObjectFinderUi } from '../../../../../../../../../../src/plugins/kibana_react/public';
+import { SavedObjectFinderUi } from '../../../../../../../../../../src/plugins/saved_objects/public';
 
 export interface PageProps {
   nextStepPath: string;
