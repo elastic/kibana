@@ -57,13 +57,13 @@ import { showAppRedirectNotification } from 'ui/notify';
 import 'leaflet';
 import { localApplicationService } from './local_application_service';
 
-npSetup.plugins.kibana_legacy.forwardApp('doc', 'discover', { keepPrefix: true });
-npSetup.plugins.kibana_legacy.forwardApp('context', 'discover', { keepPrefix: true });
+npSetup.plugins.kibanaLegacy.forwardApp('doc', 'discover', { keepPrefix: true });
+npSetup.plugins.kibanaLegacy.forwardApp('context', 'discover', { keepPrefix: true });
 localApplicationService.attachToAngular(routes);
 
 routes.enable();
 
-const { config } = npSetup.plugins.kibana_legacy;
+const { config } = npSetup.plugins.kibanaLegacy;
 routes.otherwise({
   redirectTo: `/${config.defaultAppId || 'discover'}`,
 });

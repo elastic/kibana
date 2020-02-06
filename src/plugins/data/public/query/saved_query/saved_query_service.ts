@@ -112,8 +112,11 @@ export const createSavedQueryService = (
   };
 
   const getSavedQuery = async (id: string): Promise<SavedQuery> => {
-    const response = await savedObjectsClient.get<SerializedSavedQueryAttributes>('query', id);
-    return parseSavedQueryObject(response);
+    const savedObject = await savedObjectsClient.get<SerializedSavedQueryAttributes>('query', id);
+    if (savedObject.error) {
+      throw new Error(savedObject.error.message);
+    }
+    return parseSavedQueryObject(savedObject);
   };
 
   const deleteSavedQuery = async (id: string) => {
