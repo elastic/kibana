@@ -21,36 +21,58 @@ import {
   SavedObjectsService,
   InternalSavedObjectsServiceSetup,
   InternalSavedObjectsServiceStart,
+  SavedObjectsServiceSetup,
+  SavedObjectsServiceStart,
 } from './saved_objects_service';
 import { mockKibanaMigrator } from './migrations/kibana/kibana_migrator.mock';
 import { savedObjectsClientProviderMock } from './service/lib/scoped_client_provider.mock';
 import { savedObjectsRepositoryMock } from './service/lib/repository.mock';
 import { savedObjectsClientMock } from './service/saved_objects_client.mock';
+import { typeRegistryMock } from './saved_objects_type_registry.mock';
 
 type SavedObjectsServiceContract = PublicMethodsOf<SavedObjectsService>;
 
 const createStartContractMock = () => {
-  const startContract: jest.Mocked<InternalSavedObjectsServiceStart> = {
-    clientProvider: savedObjectsClientProviderMock.create(),
+  const startContrat: jest.Mocked<SavedObjectsServiceStart> = {
     getScopedClient: jest.fn(),
     createInternalRepository: jest.fn(),
     createScopedRepository: jest.fn(),
-    migrator: mockKibanaMigrator.create(),
+    createSerializer: jest.fn(),
   };
 
-  startContract.getScopedClient.mockReturnValue(savedObjectsClientMock.create());
-  startContract.createInternalRepository.mockReturnValue(savedObjectsRepositoryMock.create());
-  startContract.createScopedRepository.mockReturnValue(savedObjectsRepositoryMock.create());
+  startContrat.getScopedClient.mockReturnValue(savedObjectsClientMock.create());
+  startContrat.createInternalRepository.mockReturnValue(savedObjectsRepositoryMock.create());
+  startContrat.createScopedRepository.mockReturnValue(savedObjectsRepositoryMock.create());
 
-  return startContract;
+  return startContrat;
+};
+
+const createInternalStartContractMock = () => {
+  const internalStartContract: jest.Mocked<InternalSavedObjectsServiceStart> = {
+    ...createStartContractMock(),
+    clientProvider: savedObjectsClientProviderMock.create(),
+    migrator: mockKibanaMigrator.create(),
+    typeRegistry: typeRegistryMock.create(),
+  };
+
+  return internalStartContract;
 };
 
 const createSetupContractMock = () => {
-  const setupContract: jest.Mocked<InternalSavedObjectsServiceSetup> = {
+  const setupContract: jest.Mocked<SavedObjectsServiceSetup> = {
     setClientFactoryProvider: jest.fn(),
     addClientWrapper: jest.fn(),
   };
+
   return setupContract;
+};
+
+const createInternalSetupContractMock = () => {
+  const internalSetupContract: jest.Mocked<InternalSavedObjectsServiceSetup> = {
+    ...createSetupContractMock(),
+    registerType: jest.fn(),
+  };
+  return internalSetupContract;
 };
 
 const createSavedObjectsServiceMock = () => {
@@ -60,14 +82,16 @@ const createSavedObjectsServiceMock = () => {
     stop: jest.fn(),
   };
 
-  mocked.setup.mockResolvedValue(createSetupContractMock());
-  mocked.start.mockResolvedValue(createStartContractMock());
+  mocked.setup.mockResolvedValue(createInternalSetupContractMock());
+  mocked.start.mockResolvedValue(createInternalStartContractMock());
   mocked.stop.mockResolvedValue();
   return mocked;
 };
 
 export const savedObjectsServiceMock = {
   create: createSavedObjectsServiceMock,
+  createInternalSetupContract: createInternalSetupContractMock,
   createSetupContract: createSetupContractMock,
+  createInternalStartContract: createInternalStartContractMock,
   createStartContract: createStartContractMock,
 };
