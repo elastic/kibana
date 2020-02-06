@@ -18,11 +18,8 @@ export function registerMonitoringCollection(
   const legacyCluster: Cluster = {
     callWithRequest: async (req: any, endpoint: string, params: any) =>
       cluster.asScoped(req).callAsCurrentUser(endpoint, params),
-    callWithInternalUser: () => {
-      throw new Error(
-        'callWithInternalUser is not supported in this context. Please use `callWithRequest`'
-      );
-    },
+    callWithInternalUser: (endpoint: string, params: any) =>
+      cluster.callAsInternalUser(endpoint, params),
   };
   telemetryCollectionManager.setCollection({
     esCluster: legacyCluster,
