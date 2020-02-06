@@ -12,9 +12,12 @@ import { AlertResultList } from '../../../common/types';
 
 export type MiddlewareFactory<S = GlobalState> = (
   coreStart: CoreStart
-) => (
-  api: MiddlewareAPI<Dispatch<AppAction>, S>
-) => (next: Dispatch<AppAction>) => (action: AppAction) => unknown;
+) => {
+  middleware: (
+    api: MiddlewareAPI<Dispatch<AppAction>, S>
+  ) => (next: Dispatch<AppAction>) => (action: AppAction) => unknown;
+  start?: () => void;
+};
 
 export interface ManagementListState {
   endpoints: EndpointMetadata[];

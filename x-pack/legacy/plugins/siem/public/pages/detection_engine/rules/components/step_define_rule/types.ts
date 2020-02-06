@@ -6,6 +6,11 @@
 
 import { FieldValueQueryBar } from '../query_bar';
 
+<<<<<<< HEAD:x-pack/legacy/plugins/siem/public/pages/detection_engine/rules/components/step_define_rule/types.ts
 export interface QueryBarStepDefineRule {
   queryBar: FieldValueQueryBar;
 }
+=======
+export type AlertListData = AlertResultList;
+export type AlertListState = AlertResultList & { url: string };
+>>>>>>> url now mirrors pagination status:x-pack/plugins/endpoint/public/applications/endpoint/store/alerts/types.ts

@@ -16,4 +16,9 @@ interface UserNavigatedFromPage {
   readonly payload: PageId;
 }
 
-export type RoutingAction = UserNavigatedToPage | UserNavigatedFromPage;
+interface UrlHasChanged {
+  readonly type: 'urlHasChanged';
+  readonly payload: string;
+}
+
+export type RoutingAction = UserNavigatedToPage | UserNavigatedFromPage | UrlHasChanged;

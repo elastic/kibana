@@ -4,18 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { memo, useState, useMemo, useCallback } from 'react';
+import { memo, useState, useMemo, useCallback, useEffect } from 'react';
 import React from 'react';
 import { EuiDataGrid } from '@elastic/eui';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
+import { useHistory } from 'react-router-dom';
+import qs from 'querystring';
 import * as selectors from '../../store/selectors';
 import { usePageId } from '../use_page_id';
-import { AlertAction } from '../../store/alerts';
 
 export const AlertIndex = memo(() => {
   usePageId('alertsPage');
-  const dispatch: (action: AlertAction) => unknown = useDispatch();
+  const history = useHistory();
 
   const columns: Array<{ id: string }> = useMemo(() => {
     return [
@@ -32,14 +33,24 @@ export const AlertIndex = memo(() => {
 
   const { pageIndex, pageSize, total } = useSelector(selectors.alertListPagination);
 
+  const urlPaginationData = useSelector(selectors.paginationDataFromUrl);
+
+  const formattedQueryString = useCallback(
+    (queryKey, value) => {
+      urlPaginationData[queryKey] = value;
+      return '?' + qs.stringify(urlPaginationData);
+    },
+    [urlPaginationData]
+  );
+
   const onChangeItemsPerPage = useCallback(
-    newPageSize => dispatch({ type: 'userChangedAlertPageSize', payload: newPageSize }),
-    [dispatch]
+    newPageSize => history.push(formattedQueryString('page_size', newPageSize)),
+    [formattedQueryString, history]
   );
 
   const onChangePage = useCallback(
-    newPageIndex => dispatch({ type: 'userChangedAlertPageIndex', payload: newPageIndex }),
-    [dispatch]
+    newPageIndex => history.push(formattedQueryString('page_index', newPageIndex)),
+    [formattedQueryString, history]
   );
 
   const [visibleColumns, setVisibleColumns] = useState(() => columns.map(({ id }) => id));

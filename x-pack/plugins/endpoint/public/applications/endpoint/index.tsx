@@ -8,9 +8,10 @@ import * as React from 'react';
 import ReactDOM from 'react-dom';
 import { CoreStart, AppMountParameters } from 'kibana/public';
 import { I18nProvider, FormattedMessage } from '@kbn/i18n/react';
-import { Route, BrowserRouter, Switch } from 'react-router-dom';
+import { Route, Switch, Router } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { Store } from 'redux';
+import { createBrowserHistory } from 'history';
 import { appStoreFactory } from './store';
 import { AlertIndex } from './view/alerts';
 import { ManagementList } from './view/managing';
@@ -21,6 +22,8 @@ import { PolicyList } from './view/policy';
  */
 export function renderApp(coreStart: CoreStart, { appBasePath, element }: AppMountParameters) {
   coreStart.http.get('/api/endpoint/hello-world');
+  const history: EndpointAppHistory = createBrowserHistory({ basename: appBasePath });
+  const [store, stopSagas] = appStoreFactory(coreStart, history);
 
   const store = appStoreFactory(coreStart);
 
@@ -32,14 +35,14 @@ export function renderApp(coreStart: CoreStart, { appBasePath, element }: AppMou
 }
 
 interface RouterProps {
-  basename: string;
+  history: EndpointAppHistory;
   store: Store;
 }
 
-const AppRoot: React.FunctionComponent<RouterProps> = React.memo(({ basename, store }) => (
+const AppRoot: React.FunctionComponent<RouterProps> = React.memo(({ history, store }) => (
   <Provider store={store}>
     <I18nProvider>
-      <BrowserRouter basename={basename}>
+      <Router history={history}>
         <Switch>
           <Route
             exact
@@ -59,7 +62,7 @@ const AppRoot: React.FunctionComponent<RouterProps> = React.memo(({ basename, st
             )}
           />
         </Switch>
-      </BrowserRouter>
+      </Router>
     </I18nProvider>
   </Provider>
 ));
