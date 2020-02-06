@@ -102,18 +102,7 @@ export class Optimizer {
       )
     );
 
-    return eligible.filter(bundle => {
-      const cacheKey = createHash('sha1')
-        .update(
-          (bundle.cache.getReferencedFiles() || [])
-            .map(p => `${p}:${mtimes.get(p)}`)
-            .sort(ascending(l => l))
-            .join('\n')
-        )
-        .digest('hex');
-
-      return cacheKey === bundle.cache.getKey();
-    });
+    return eligible.filter(bundle => bundle.createCacheKey(mtimes) === bundle.cache.getKey());
   }
 
   /**

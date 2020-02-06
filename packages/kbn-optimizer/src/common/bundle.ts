@@ -18,10 +18,11 @@
  */
 
 import Path from 'path';
+import { createHash } from 'crypto';
 
 import { BundleCache } from './bundle_cache';
 import { UnknownVals } from './ts_helpers';
-import { includes } from './array_helpers';
+import { includes, ascending } from './array_helpers';
 
 export const VALID_BUNDLE_TYPES = ['plugin' as const];
 
@@ -105,8 +106,21 @@ export class Bundle {
     this.cache = new BundleCache(Path.resolve(this.outputDir, '.kbn-optimizer-cache'));
   }
 
-  public getModuleCount() {
+  getModuleCount() {
     return this.cache.getModuleCount();
+  }
+
+  createCacheKey(mtimes: Map<string, number | undefined>) {
+    return createHash('sha1')
+      .update(
+        [
+          `bundleSpec:${JSON.stringify(this.toSpec())}`,
+          ...(this.cache.getReferencedFiles() || []).map(p => `${p}:${mtimes.get(p)}`),
+        ]
+          .sort(ascending(l => l))
+          .join('\n')
+      )
+      .digest('hex');
   }
 
   toSpec(): BundleSpec {
