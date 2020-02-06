@@ -10,16 +10,16 @@ interface MockState {
   /**
    * A map of resize observers to the elements they observe.
    */
-  mockObserved: Map<ResizeObserver, Set<Element>>;
+  observed: Map<ResizeObserver, Set<Element>>;
   /**
    * A map of resize observers to their callbacks.
    */
-  mockCallbacks: Map<ResizeObserver, ResizeObserverCallback>;
+  callbacks: Map<ResizeObserver, ResizeObserverCallback>;
 
   /**
    * TODO
    */
-  mockContentRects: Map<Element, DOMRectReadOnly>;
+  domRects: Map<Element, DOMRectReadOnly>;
 }
 
 /**
@@ -36,9 +36,9 @@ let _mockState: MockState | undefined;
 function mockState(): MockState {
   if (!_mockState) {
     _mockState = {
-      mockObserved: new Map(),
-      mockCallbacks: new Map(),
-      mockContentRects: new Map(),
+      observed: new Map(),
+      callbacks: new Map(),
+      domRects: new Map(),
     };
   }
   return _mockState;
@@ -73,10 +73,10 @@ export const simulateElementResize: (
   /**
    * Store the `contentRect` so that the mock implement of `getBoundingClientRect` can return it.
    */
-  const { mockContentRects, mockObserved, mockCallbacks } = mockState();
-  mockContentRects.set(target, contentRect);
+  const { domRects, observed, callbacks } = mockState();
+  domRects.set(target, contentRect);
 
-  for (const [resizeObserver, observedElements] of mockObserved.entries()) {
+  for (const [resizeObserver, observedElements] of observed.entries()) {
     for (const observedElement of observedElements) {
       if (observedElement === target) {
         const entries = [
@@ -88,7 +88,7 @@ export const simulateElementResize: (
         /**
          * Call the callback provided by any `ResizeObserver` that observed this element.
          */
-        const callback = mockCallbacks.get(resizeObserver);
+        const callback = callbacks.get(resizeObserver);
         if (callback) {
           callback(entries, resizeObserver);
         }
@@ -102,7 +102,7 @@ const mockGetBoundingClientRectImplementation = function(this: Element) {
     /**
      * If the element has a `contentRect` stored, use that.
      */
-    const mockedValue = mockState().mockContentRects.get(this);
+    const mockedValue = mockState().domRects.get(this);
     if (mockedValue) {
       return mockedValue;
     }
@@ -131,10 +131,10 @@ export const setup: (ElementConstructor: typeof Element) => void = ElementConstr
 let MockResizeObserver: jest.Mock<ResizeObserver, [ResizeObserverCallback]> | null;
 
 export const clear: () => void = () => {
-  const { mockObserved, mockCallbacks, mockContentRects } = mockState();
-  mockObserved.clear();
-  mockCallbacks.clear();
-  mockContentRects.clear();
+  const { observed, callbacks, domRects } = mockState();
+  observed.clear();
+  callbacks.clear();
+  domRects.clear();
   if (MockResizeObserver) {
     MockResizeObserver.mockClear();
   }
@@ -156,7 +156,7 @@ jest.mock(
          * Add the element to the map so that later calls to `simulateElementResize` can trigger `callback`.
          */
         observe(target: Element) {
-          const { mockObserved } = mockState();
+          const { observed: mockObserved } = mockState();
           const elements = mockObserved.get(this);
           if (elements) {
             elements.add(target);
@@ -168,7 +168,7 @@ jest.mock(
          * Remove the element from the map so that later calls to `simulateElementResize` will not trigger `callback`.
          */
         unobserve(target: Element) {
-          const { mockObserved } = mockState();
+          const { observed: mockObserved } = mockState();
           const elements = mockObserved.get(this);
           if (elements) {
             elements.delete(target);
@@ -178,7 +178,7 @@ jest.mock(
          * Remove all elements from the map for this instance.
          */
         disconnect() {
-          const { mockObserved } = mockState();
+          const { observed: mockObserved } = mockState();
           const elements = mockObserved.get(this);
           if (elements) {
             for (const target of elements) {
@@ -187,7 +187,7 @@ jest.mock(
           }
         },
       };
-      mockState().mockCallbacks.set(resizeObserver, callback);
+      mockState().callbacks.set(resizeObserver, callback);
       return resizeObserver;
     });
     return {
