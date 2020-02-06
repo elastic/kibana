@@ -54,8 +54,8 @@ export interface PluginsSetup {
   inspector: InspectorSetup;
   uiActions: IUiActionsSetup;
   navigation: NavigationPublicPluginSetup;
-  dev_tools: DevToolsSetup;
-  kibana_legacy: KibanaLegacySetup;
+  devTools: DevToolsSetup;
+  kibanaLegacy: KibanaLegacySetup;
   share: SharePluginSetup;
   usageCollection: UsageCollectionSetup;
   advancedSettings: AdvancedSettingsSetup;
@@ -72,8 +72,8 @@ export interface PluginsStart {
   inspector: InspectorStart;
   uiActions: IUiActionsStart;
   navigation: NavigationPublicPluginStart;
-  dev_tools: DevToolsStart;
-  kibana_legacy: KibanaLegacyStart;
+  devTools: DevToolsStart;
+  kibanaLegacy: KibanaLegacyStart;
   share: SharePluginStart;
   management: ManagementStart;
   advancedSettings: AdvancedSettingsStart;
