@@ -79,10 +79,6 @@ export class Plugin {
 
   constructor(initializerContext: PluginInitializerContext) {
     this.initializerContext = initializerContext;
-    // this.configPromise = initializerContext.config
-    //   .create<MonitoringConfig>()
-    //   .pipe(first())
-    //   .toPromise();
     this.log = initializerContext.logger.get(LOGGING_TAG);
     this.getLogger = (...scopes: string[]) => initializerContext.logger.get(LOGGING_TAG, ...scopes);
   }
@@ -269,11 +265,13 @@ export class Plugin {
         xpackMainPlugin: legacyApi.xpackMain,
         // expose: core.expose,
       });
+
+      // Initialize telemetry
+      if (this.cluster) {
+        registerMonitoringCollection(this.cluster, legacyApi.telemetryCollectionManager);
+      }
     }
     // });
-
-    // Initialize telemetry
-    registerMonitoringCollection(legacyApi.telemetryCollectionManager);
 
     // Register collector objects for stats to show up in the APIs
     registerCollectors(this.plugins.usageCollection, {
