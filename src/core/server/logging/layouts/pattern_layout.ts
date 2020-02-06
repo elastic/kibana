@@ -40,10 +40,7 @@ const Parameters = Object.freeze({
  * Regular expression used to parse log message pattern and fill in placeholders
  * with the actual data.
  */
-const PATTERN_REGEX = new RegExp(
-  `${Parameters.Timestamp}|${Parameters.Level}|${Parameters.Context}|${Parameters.Message}|${Parameters.Pid}|${Parameters.Meta}`,
-  'gi'
-);
+const PATTERN_REGEX = new RegExp(Object.values(Parameters).join('|'), 'gi');
 
 /**
  * Mapping between `LogLevel` and color that is used to highlight `level` part of
