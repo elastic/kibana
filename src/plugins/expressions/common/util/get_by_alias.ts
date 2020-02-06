@@ -23,7 +23,7 @@
  * `name` itself, or something under the `aliases` property.
  */
 export function getByAlias<T extends { name?: string; aliases?: string[] }>(
-  node: Record<string, T>,
+  node: T[] | Record<string, T>,
   nodeName: string
 ): T | undefined {
   const lowerCaseName = nodeName.toLowerCase();
