@@ -13,7 +13,7 @@ import {
 import { embeddablePluginMock } from '../../../../../../src/plugins/embeddable/public/mocks';
 import { expressionsPluginMock } from '../../../../../../src/plugins/expressions/public/mocks';
 import { DatasourcePublicAPI, FramePublicAPI, Datasource, Visualization } from '../types';
-import { EditorFrameSetupPlugins, EditorFrameStartPlugins } from './plugin';
+import { EditorFrameSetupPlugins, EditorFrameStartPlugins } from './service';
 
 export function createMockVisualization(): jest.Mocked<Visualization> {
   return {

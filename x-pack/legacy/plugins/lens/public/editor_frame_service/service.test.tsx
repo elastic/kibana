@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EditorFrameService } from './plugin';
+import { EditorFrameService } from './service';
 import { coreMock } from 'src/core/public/mocks';
 import {
   MockedSetupDependencies,
@@ -25,7 +25,7 @@ jest.mock('./embeddable/embeddable_factory', () => ({
   EmbeddableFactory: class Mock {},
 }));
 
-describe('editor_frame plugin', () => {
+describe('editor_frame service', () => {
   let pluginInstance: EditorFrameService;
   let mountpoint: Element;
   let pluginSetupDependencies: MockedSetupDependencies;
