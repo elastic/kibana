@@ -2445,7 +2445,7 @@ describe('updateApiKey()', () => {
   const existingEncryptedAlert = {
     ...existingAlert,
     attributes: {
-      ...existingAlert,
+      ...existingAlert.attributes,
       apiKey: Buffer.from('123:abc').toString('base64'),
     },
   };
@@ -2462,7 +2462,7 @@ describe('updateApiKey()', () => {
 
   test('updates the API key for the alert', async () => {
     await alertsClient.updateApiKey({ id: '1' });
-    expect(savedObjectsClient.get).toHaveBeenCalledWith('alert', '1');
+    expect(savedObjectsClient.get).not.toHaveBeenCalled();
     expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith('alert', '1', {
       namespace: 'default',
     });
@@ -2482,6 +2482,30 @@ describe('updateApiKey()', () => {
     expect(alertsClientParams.invalidateAPIKey).toHaveBeenCalledWith({ id: '123' });
   });
 
+  test('falls back to SOC when getDecryptedAsInternalUser throws an error', async () => {
+    encryptedSavedObjects.getDecryptedAsInternalUser.mockRejectedValueOnce(new Error('Fail'));
+
+    await alertsClient.updateApiKey({ id: '1' });
+    expect(savedObjectsClient.get).toHaveBeenCalledWith('alert', '1');
+    expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith('alert', '1', {
+      namespace: 'default',
+    });
+    expect(savedObjectsClient.update).toHaveBeenCalledWith(
+      'alert',
+      '1',
+      {
+        schedule: { interval: '10s' },
+        alertTypeId: '2',
+        enabled: true,
+        apiKey: Buffer.from('234:abc').toString('base64'),
+        apiKeyOwner: 'elastic',
+        updatedBy: 'elastic',
+      },
+      { version: '123' }
+    );
+    expect(alertsClientParams.invalidateAPIKey).not.toHaveBeenCalled();
+  });
+
   test('swallows error when invalidate API key throws', async () => {
     alertsClientParams.invalidateAPIKey.mockRejectedValue(new Error('Fail'));
 
@@ -2497,7 +2521,7 @@ describe('updateApiKey()', () => {
 
     await alertsClient.updateApiKey({ id: '1' });
     expect(alertsClientParams.logger.error).toHaveBeenCalledWith(
-      'updateApiKey(): Failed to load API key to invalidate: Fail'
+      'updateApiKey(): Failed to load API key to invalidate on alert 1: Fail'
     );
     expect(savedObjectsClient.update).toHaveBeenCalled();
     expect(alertsClientParams.invalidateAPIKey).not.toHaveBeenCalled();
