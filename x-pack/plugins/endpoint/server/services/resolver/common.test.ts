@@ -13,7 +13,10 @@ describe('phase0 entity identification and parsing', () => {
   });
 
   it('parses a phase0 entity ID correctly', () => {
-    expect(parsePhase0EntityID('endgame|endpoint|pid')).toStrictEqual(['endpoint', 'pid']);
+    expect(parsePhase0EntityID('endgame|endpoint|pid')).toStrictEqual({
+      endpointID: 'endpoint',
+      uniquePID: 'pid',
+    });
   });
 
   it('identifies a phase0 entity ID correctly', () => {
@@ -23,6 +26,9 @@ describe('phase0 entity identification and parsing', () => {
   it('builds an phase0 entity ID correctly', () => {
     const entityID = buildPhase0EntityID('endpoint', 500);
     expect(isPhase0EntityID(entityID)).toBeTruthy();
-    expect(parsePhase0EntityID(entityID)).toStrictEqual(['endpoint', '500']);
+    expect(parsePhase0EntityID(entityID)).toStrictEqual({
+      endpointID: 'endpoint',
+      uniquePID: '500',
+    });
   });
 });
