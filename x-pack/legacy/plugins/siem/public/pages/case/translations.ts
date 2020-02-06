@@ -10,6 +10,10 @@ export const BACK_TO_ALL = i18n.translate('xpack.siem.case.caseView.backLabel', 
   defaultMessage: 'Back to all cases',
 });
 
+export const CANCEL = i18n.translate('xpack.siem.case.caseView.cancel', {
+  defaultMessage: 'Cancel',
+});
+
 export const CASE_TITLE = i18n.translate('xpack.siem.case.caseView.caseTitle', {
   defaultMessage: 'Case Title',
 });

@@ -8,9 +8,9 @@ import { Dispatch, SetStateAction, useEffect, useReducer, useState } from 'react
 import { useStateToaster } from '../../components/toasters';
 import { errorToToaster } from '../../components/ml/api/error_to_toaster';
 import * as i18n from './translations';
-import { FETCH_FAILURE, FETCH_INIT, FETCH_SUCCESS, POST_NEW_CASE } from './constants';
+import { FETCH_FAILURE, FETCH_INIT, FETCH_SUCCESS, UPDATE_CASE } from './constants';
 import { CaseSavedObject, NewCaseFormatted } from './types';
-import { createCase } from './api';
+import { updateCase } from './api';
 
 interface NewCaseState {
   data: NewCaseFormatted;
@@ -32,7 +32,7 @@ const dataFetchReducer = (state: NewCaseState, action: Action): NewCaseState => 
         isLoading: true,
         isError: false,
       };
-    case POST_NEW_CASE:
+    case UPDATE_CASE:
       getTypedPayload = (a: Action['payload']) => a as NewCaseFormatted;
       return {
         ...state,
@@ -60,8 +60,9 @@ const dataFetchReducer = (state: NewCaseState, action: Action): NewCaseState => 
 };
 
 export const useUpdateCase = (
+  caseId: string,
   initialData: NewCaseFormatted
-): [NewCaseState, Dispatch<SetStateAction<NewCaseFormatted>>] => {
+): [Dispatch<SetStateAction<NewCaseFormatted>>] => {
   const [state, dispatch] = useReducer(dataFetchReducer, {
     isLoading: false,
     isError: false,
@@ -71,7 +72,7 @@ export const useUpdateCase = (
   const [, dispatchToaster] = useStateToaster();
 
   useEffect(() => {
-    dispatch({ type: POST_NEW_CASE, payload: formData });
+    dispatch({ type: UPDATE_CASE, payload: formData });
   }, [formData]);
 
   useEffect(() => {
@@ -80,7 +81,7 @@ export const useUpdateCase = (
       try {
         const dataWithoutIsNew = state.data;
         delete dataWithoutIsNew.isNew;
-        const response = await createCase(dataWithoutIsNew);
+        const response = await updateCase(caseId, dataWithoutIsNew);
         dispatch({ type: FETCH_SUCCESS, payload: response });
       } catch (error) {
         errorToToaster({ title: i18n.ERROR_TITLE, error, dispatchToaster });
@@ -91,5 +92,5 @@ export const useUpdateCase = (
       fetchData();
     }
   }, [state.data.isNew]);
-  return [state, setFormData];
+  return [setFormData];
 };

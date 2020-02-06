@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, useState } from 'react';
+import React, { Fragment, useCallback, useState } from 'react';
 import {
+  EuiButton,
   EuiButtonEmpty,
   EuiDescriptionList,
   EuiDescriptionListDescription,
@@ -21,42 +22,61 @@ import * as i18n from '../../translations';
 import { getCaseUrl } from '../../../../components/link_to';
 import { useGetCase } from '../../../../containers/case/use_get_case';
 import { FormattedRelativePreferenceDate } from '../../../../components/formatted_date';
-import { useForm } from '../shared_imports';
+import { Form, useForm } from '../shared_imports';
 import { schema } from './schema';
 import { DescriptionMarkdown } from '../description_md_editor';
 import { useUpdateCase } from '../../../../containers/case/use_update_case';
 import { CommonUseField } from '../create';
 import { caseTypeOptions, stateOptions } from '../create/form_options';
+import { NewCaseFormatted } from '../../../../containers/case/types';
 
 interface Props {
   caseId: string;
 }
 
+interface CaseDetail {
+  title: React.ReactNode;
+  definition: string | number | JSX.Element | null;
+  edit?: JSX.Element;
+}
+
 const getDictionary = (
-  title: React.ReactNode,
-  definition: string | number | JSX.Element | null,
-  key: number
+  { title, definition, edit }: CaseDetail,
+  key: number,
+  isEdit: boolean = false
 ) => {
   return definition ? (
     <Fragment key={key}>
-      <EuiDescriptionListTitle>{title}</EuiDescriptionListTitle>
-      <EuiDescriptionListDescription>{definition}</EuiDescriptionListDescription>
+      {isEdit && edit ? null : <EuiDescriptionListTitle>{title}</EuiDescriptionListTitle>}
+      <EuiDescriptionListDescription>
+        {isEdit && edit ? edit : definition}
+      </EuiDescriptionListDescription>
     </Fragment>
   ) : null;
 };
 export const CaseView = React.memo(({ caseId }: Props) => {
-  const [{ data, isLoading, isError }] = useGetCase(caseId);
+  const [{ data, isLoading, isError }, refreshCase] = useGetCase(caseId);
   if (isError) {
     return null;
   }
   const [isEdit, setIsEdit] = useState(false);
-  const [{}, setFormData] = useUpdateCase(data);
+  const [setFormData] = useUpdateCase(caseId, data);
   const { form } = useForm({
     defaultValue: data,
     options: { stripEmptyFields: false },
     schema,
   });
-  const caseDetailsDefinitions = [
+
+  const onSubmit = useCallback(async () => {
+    const { isValid, data: newData } = await form.submit();
+    if (isValid) {
+      setFormData({ ...newData, isNew: true } as NewCaseFormatted);
+      refreshCase(newData as NewCaseFormatted);
+      setIsEdit(false);
+    }
+  }, [form]);
+
+  const caseDetailsDefinitions: CaseDetail[] = [
     {
       title: i18n.DESCRIPTION,
       edit: (
@@ -119,7 +139,20 @@ export const CaseView = React.memo(({ caseId }: Props) => {
     },
     {
       title: i18n.TAGS,
-      edit: data.description,
+      edit: (
+        <CommonUseField
+          path="tags"
+          componentProps={{
+            idAria: 'caseTags',
+            'data-test-subj': 'caseTags',
+            euiFieldProps: {
+              fullWidth: true,
+              placeholder: '',
+            },
+            isDisabled: isLoading,
+          }}
+        />
+      ),
       definition:
         data.tags.length > 0 ? (
           <ul>
@@ -148,14 +181,35 @@ export const CaseView = React.memo(({ caseId }: Props) => {
         title={data.title}
       >
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
-          <EuiButtonEmpty href="">{i18n.EDIT}</EuiButtonEmpty>
+          {isEdit ? (
+            <EuiFlexItem grow={false}>
+              <EuiButton fill isDisabled={isLoading} isLoading={isLoading} onClick={onSubmit}>
+                {i18n.SUBMIT}
+              </EuiButton>
+            </EuiFlexItem>
+          ) : null}
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty onClick={() => setIsEdit(!isEdit)}>
+              {isEdit ? i18n.CANCEL : i18n.EDIT}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
         </EuiFlexGroup>
       </HeaderPage>
-      <EuiDescriptionList compressed>
-        {caseDetailsDefinitions.map((dictionaryItem, key) =>
-          getDictionary(dictionaryItem.title, dictionaryItem.definition, key)
-        )}
-      </EuiDescriptionList>
+      {isEdit ? (
+        <Form form={form}>
+          <EuiDescriptionList compressed>
+            {caseDetailsDefinitions.map((dictionaryItem, key) =>
+              getDictionary(dictionaryItem, key, isEdit)
+            )}
+          </EuiDescriptionList>
+        </Form>
+      ) : (
+        <EuiDescriptionList compressed>
+          {caseDetailsDefinitions.map((dictionaryItem, key) =>
+            getDictionary(dictionaryItem, key, isEdit)
+          )}
+        </EuiDescriptionList>
+      )}
     </EuiFlexItem>
   );
 });

@@ -28,7 +28,7 @@ import { errorToToaster } from '../../components/ml/api/error_to_toaster';
 import { useStateToaster } from '../../components/toasters';
 import * as i18n from './translations';
 import { flattenSavedObjects } from './utils';
-import { fetchCases } from './api';
+import { getCases } from './api';
 
 const dataFetchReducer = (state: CasesState, action: Action): CasesState => {
   let getTypedPayload;
@@ -113,7 +113,7 @@ export const useGetCases = (): [
     const fetchData = async () => {
       dispatch({ type: FETCH_INIT });
       try {
-        const response = await fetchCases({
+        const response = await getCases({
           filterOptions: state.filterOptions,
           pagination: state.pagination,
         });

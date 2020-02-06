@@ -16,7 +16,23 @@ import { Direction } from '../../graphql/types';
 import { throwIfNotOk } from '../../hooks/api/api';
 import { CASES_URL } from './constants';
 
-export const fetchCases = async ({
+export const getCase = async (caseId: string, includeComments: boolean) => {
+  const response = await fetch(
+    `${chrome.getBasePath()}/api/cases/${caseId}?includeComments=${includeComments}`,
+    {
+      method: 'GET',
+      credentials: 'same-origin',
+      headers: {
+        'content-type': 'application/json',
+        'kbn-system-api': 'true',
+      },
+    }
+  );
+  await throwIfNotOk(response);
+  return response.json();
+};
+
+export const getCases = async ({
   filterOptions = {
     search: '',
     tags: [],
@@ -65,6 +81,24 @@ export const createCase = async (newCase: NewCase): Promise<NewCaseFormatted> =>
       'kbn-xsrf': 'true',
     },
     body: JSON.stringify(newCase),
+  });
+  await throwIfNotOk(response);
+  return response.json();
+};
+
+export const updateCase = async (
+  caseId: string,
+  updatedCase: NewCaseFormatted
+): Promise<NewCaseFormatted> => {
+  const response = await fetch(`${chrome.getBasePath()}${CASES_URL}/${caseId}`, {
+    method: 'POST',
+    credentials: 'same-origin',
+    headers: {
+      'content-type': 'application/json',
+      'kbn-system-api': 'true',
+      'kbn-xsrf': 'true',
+    },
+    body: JSON.stringify(updatedCase),
   });
   await throwIfNotOk(response);
   return response.json();
