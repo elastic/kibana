@@ -27,7 +27,7 @@ export const monitoring = kibana =>
     id: 'monitoring',
     configPrefix: 'monitoring',
     publicDir: resolve(__dirname, 'public'),
-    init(server) {
+    async init(server) {
       const configs = [
         'monitoring.ui.enabled',
         'monitoring.kibana.collection.enabled',
@@ -41,6 +41,8 @@ export const monitoring = kibana =>
         'monitoring.kibana.collection.interval',
         'monitoring.ui.elasticsearch.hosts',
         'monitoring.ui.elasticsearch',
+        'monitoring.elasticsearch.hosts',
+        'monitoring.elasticsearch',
         'monitoring.xpack_api_polling_frequency_millis',
         'server.uuid',
         'server.name',
@@ -85,7 +87,7 @@ export const monitoring = kibana =>
       };
 
       const plugin = new Plugin();
-      plugin.setup(serverFacade, plugins);
+      await plugin.setup(serverFacade, plugins);
     },
     config,
     deprecations,

@@ -19,7 +19,7 @@ import { getLicenseExpiration } from './alerts/license_expiration';
 import { parseElasticsearchConfig } from './es_client/parse_elasticsearch_config';
 
 export class Plugin {
-  setup(core, plugins) {
+  async setup(core, plugins) {
     const kbnServer = core._kbnServer;
     const config = core.config();
     const usageCollection = plugins.usageCollection;
@@ -48,6 +48,14 @@ export class Plugin {
      */
     const elasticsearchConfig = parseElasticsearchConfig(config);
 
+    // Create the dedicated client
+    await instantiateClient({
+      log: core.log,
+      events: core.events,
+      elasticsearchConfig,
+      elasticsearchPlugin: plugins.elasticsearch,
+    });
+
     xpackMainPlugin.status.once('green', async () => {
       // first time xpack_main turns green
       /*
@@ -56,12 +64,6 @@ export class Plugin {
       const uiEnabled = config.get('monitoring.ui.enabled');
 
       if (uiEnabled) {
-        await instantiateClient({
-          log: core.log,
-          events: core.events,
-          elasticsearchConfig,
-          elasticsearchPlugin: plugins.elasticsearch,
-        }); // Instantiate the dedicated ES client
         await initMonitoringXpackInfo({
           config,
           log: core.log,
@@ -96,6 +98,7 @@ export class Plugin {
       },
     });
 
+    console.log(kbnServer.status);
     const bulkUploader = initBulkUploader({
       elasticsearchPlugin: plugins.elasticsearch,
       config,
