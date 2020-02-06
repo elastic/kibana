@@ -4,4 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export declare function indexManagementStore(): any;
+import { UiMetricService } from '../services/ui_metric';
+
+export declare function indexManagementStore(deps: { uiMetricService: UiMetricService<any> }): any;
