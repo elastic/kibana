@@ -39,6 +39,7 @@ export const parseAndPopulate = buildNumber => srcFile => destFile => log => {
   const mutateInitial = onComplete(initialData);
 
   const rl = readline.createInterface({ input: fs.createReadStream(resolvedSrcFile) });
+
   fromEvent(rl, 'line')
     .pipe(takeUntil(fromEvent(rl, 'close')))
     .subscribe(mutateHistorical, onErr, () => mutateInitial(historicalItems, log));

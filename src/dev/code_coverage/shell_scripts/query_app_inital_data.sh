@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+set -o xtrace
 
 echo "### Querying App Initial Data"
 
@@ -17,7 +17,7 @@ queryDataStore () {
   # Sink errors to /dev/null...THEE BITBUCKET :)
   for x in `seq ${PAST_BUILD_ID} ${CURRENT_BUILD_ID}`
   do
-    gsutil ls -a ${BUCKET}/${x} 2>/dev/null |grep Z 1>> $OUT_FILE
+    gsutil ls -a ${BUCKET}/${x} 2>/dev/null | grep Z 1>> $OUT_FILE
   done
 }
 queryDataStore
