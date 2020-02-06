@@ -20,21 +20,21 @@
 import { stringify as formatQueryString } from 'querystring';
 import $ from 'jquery';
 
-const esVersion = [];
+const esVersion: string[] = [];
 
 export function getVersion() {
   return esVersion;
 }
 
-export function getContentType(body) {
+export function getContentType(body: any) {
   if (!body) return;
   return 'application/json';
 }
 
-export function send(method, path, data) {
+export function send(method: string, path: string, data: any) {
   const wrappedDfd = $.Deferred(); // eslint-disable-line new-cap
 
-  const options = {
+  const options: JQuery.AjaxSettings = {
     url: '../api/console/proxy?' + formatQueryString({ path, method }),
     data,
     contentType: getContentType(data),
@@ -45,21 +45,21 @@ export function send(method, path, data) {
   };
 
   $.ajax(options).then(
-    function(data, textStatus, jqXHR) {
-      wrappedDfd.resolveWith(this, [data, textStatus, jqXHR]);
+    (responseData: any, textStatus: string, jqXHR: any) => {
+      wrappedDfd.resolveWith({}, [responseData, textStatus, jqXHR]);
     },
-    function(jqXHR, textStatus, errorThrown) {
+    ((jqXHR: any, textStatus: string, errorThrown: Error) => {
       if (jqXHR.status === 0) {
         jqXHR.responseText =
           "\n\nFailed to connect to Console's backend.\nPlease check the Kibana server is up and running";
       }
-      wrappedDfd.rejectWith(this, [jqXHR, textStatus, errorThrown]);
-    }
+      wrappedDfd.rejectWith({}, [jqXHR, textStatus, errorThrown]);
+    }) as any
   );
   return wrappedDfd;
 }
 
-export function constructESUrl(baseUri, path) {
+export function constructESUrl(baseUri: string, path: string) {
   baseUri = baseUri.replace(/\/+$/, '');
   path = path.replace(/^\/+/, '');
   return baseUri + '/' + path;
