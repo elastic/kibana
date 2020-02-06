@@ -83,7 +83,7 @@ server.ssl.enabled: true
 --------------------------------------------------------------------------------
 --
 . Restart {kib}.
-After making these changes, you must always access {kib} via HTTPS. For example, https://<your_kibana_host>.com.
+After making these changes, you must always access {kib} via HTTPS. For example, `https://<your_kibana_host>.com`.
 
 [[configuring-tls-kib-es]]
 ==== Encrypting traffic between {kib} and {es}
