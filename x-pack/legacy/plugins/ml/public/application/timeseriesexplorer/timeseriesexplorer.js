@@ -20,14 +20,14 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
+  EuiCallOut,
   EuiCheckbox,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
   EuiSelect,
   EuiSpacer,
-  EuiText,
-  EuiCallOut,
+  EuiTitle,
 } from '@elastic/eui';
 
 import chrome from 'ui/chrome';
@@ -1209,54 +1209,60 @@ export class TimeSeriesExplorer extends React.Component {
             <div>
               {/* Make sure ChartTooltip is inside this plain wrapping element without padding so positioning can be inferred correctly. */}
               <ChartTooltip />
-              <EuiText className="results-container">
-                <span className="panel-title">
-                  {i18n.translate('xpack.ml.timeSeriesExplorer.singleTimeSeriesAnalysisTitle', {
-                    defaultMessage: 'Single time series analysis of {functionLabel}',
-                    values: { functionLabel: chartDetails.functionLabel },
-                  })}
-                </span>
-                &nbsp;
-                {chartDetails.entityData.count === 1 && (
-                  <span className="entity-count-text">
-                    {chartDetails.entityData.entities.length > 0 && '('}
-                    {chartDetails.entityData.entities
-                      .map(entity => {
-                        return `${entity.fieldName}: ${entity.fieldValue}`;
-                      })
-                      .join(', ')}
-                    {chartDetails.entityData.entities.length > 0 && ')'}
-                  </span>
-                )}
-                {chartDetails.entityData.count !== 1 && (
-                  <span className="entity-count-text">
-                    {chartDetails.entityData.entities.map((countData, i) => {
-                      return (
-                        <Fragment key={countData.fieldName}>
-                          {i18n.translate(
-                            'xpack.ml.timeSeriesExplorer.countDataInChartDetailsDescription',
-                            {
-                              defaultMessage:
-                                '{openBrace}{cardinalityValue} distinct {fieldName} {cardinality, plural, one {} other { values}}{closeBrace}',
-                              values: {
-                                openBrace: i === 0 ? '(' : '',
-                                closeBrace:
-                                  i === chartDetails.entityData.entities.length - 1 ? ')' : '',
-                                cardinalityValue:
-                                  countData.cardinality === 0
-                                    ? allValuesLabel
-                                    : countData.cardinality,
-                                cardinality: countData.cardinality,
-                                fieldName: countData.fieldName,
-                              },
-                            }
-                          )}
-                          {i !== chartDetails.entityData.entities.length - 1 ? ', ' : ''}
-                        </Fragment>
-                      );
-                    })}
-                  </span>
-                )}
+
+              <div className="results-container">
+                <EuiTitle className="panel-title">
+                  <h2 style={{ display: 'inline' }}>
+                    <span>
+                      {i18n.translate('xpack.ml.timeSeriesExplorer.singleTimeSeriesAnalysisTitle', {
+                        defaultMessage: 'Single time series analysis of {functionLabel}',
+                        values: { functionLabel: chartDetails.functionLabel },
+                      })}
+                    </span>
+                    &nbsp;
+                    {chartDetails.entityData.count === 1 && (
+                      <span className="entity-count-text">
+                        {chartDetails.entityData.entities.length > 0 && '('}
+                        {chartDetails.entityData.entities
+                          .map(entity => {
+                            return `${entity.fieldName}: ${entity.fieldValue}`;
+                          })
+                          .join(', ')}
+                        {chartDetails.entityData.entities.length > 0 && ')'}
+                      </span>
+                    )}
+                    {chartDetails.entityData.count !== 1 && (
+                      <span className="entity-count-text">
+                        {chartDetails.entityData.entities.map((countData, i) => {
+                          return (
+                            <Fragment key={countData.fieldName}>
+                              {i18n.translate(
+                                'xpack.ml.timeSeriesExplorer.countDataInChartDetailsDescription',
+                                {
+                                  defaultMessage:
+                                    '{openBrace}{cardinalityValue} distinct {fieldName} {cardinality, plural, one {} other { values}}{closeBrace}',
+                                  values: {
+                                    openBrace: i === 0 ? '(' : '',
+                                    closeBrace:
+                                      i === chartDetails.entityData.entities.length - 1 ? ')' : '',
+                                    cardinalityValue:
+                                      countData.cardinality === 0
+                                        ? allValuesLabel
+                                        : countData.cardinality,
+                                    cardinality: countData.cardinality,
+                                    fieldName: countData.fieldName,
+                                  },
+                                }
+                              )}
+                              {i !== chartDetails.entityData.entities.length - 1 ? ', ' : ''}
+                            </Fragment>
+                          );
+                        })}
+                      </span>
+                    )}
+                  </h2>
+                </EuiTitle>
+
                 <EuiFlexGroup style={{ float: 'right' }}>
                   {showModelBoundsCheckbox && (
                     <EuiFlexItem grow={false}>
@@ -1311,11 +1317,14 @@ export class TimeSeriesExplorer extends React.Component {
                 </div>
                 {showAnnotations && focusAnnotationData.length > 0 && (
                   <div>
-                    <span className="panel-title">
-                      {i18n.translate('xpack.ml.timeSeriesExplorer.annotationsTitle', {
-                        defaultMessage: 'Annotations',
-                      })}
-                    </span>
+                    <EuiTitle className="panel-title">
+                      <h2>
+                        <FormattedMessage
+                          id="xpack.ml.timeSeriesExplorer.annotationsTitle"
+                          defaultMessage="Annotations"
+                        />
+                      </h2>
+                    </EuiTitle>
                     <AnnotationsTable
                       annotations={focusAnnotationData}
                       isSingleMetricViewerLinkVisible={false}
@@ -1325,11 +1334,14 @@ export class TimeSeriesExplorer extends React.Component {
                   </div>
                 )}
                 <AnnotationFlyout />
-                <span className="panel-title">
-                  {i18n.translate('xpack.ml.timeSeriesExplorer.anomaliesTitle', {
-                    defaultMessage: 'Anomalies',
-                  })}
-                </span>
+                <EuiTitle className="panel-title">
+                  <h2>
+                    <FormattedMessage
+                      id="xpack.ml.timeSeriesExplorer.anomaliesTitle"
+                      defaultMessage="Anomalies"
+                    />
+                  </h2>
+                </EuiTitle>
                 <EuiFlexGroup
                   direction="row"
                   gutterSize="l"
@@ -1356,7 +1368,7 @@ export class TimeSeriesExplorer extends React.Component {
                   </EuiFlexItem>
                 </EuiFlexGroup>
                 <EuiSpacer size="m" />
-              </EuiText>
+              </div>
             </div>
           )}
         {arePartitioningFieldsProvided && jobs.length > 0 && hasResults === true && (

@@ -56,7 +56,7 @@ export interface VisualizePluginSetupDependencies {
     legacyChrome: Chrome;
   };
   home: HomePublicPluginSetup;
-  kibana_legacy: KibanaLegacySetup;
+  kibanaLegacy: KibanaLegacySetup;
   usageCollection?: UsageCollectionSetup;
 }
 
@@ -72,9 +72,9 @@ export class VisualizePlugin implements Plugin {
 
   public async setup(
     core: CoreSetup,
-    { home, kibana_legacy, __LEGACY, usageCollection }: VisualizePluginSetupDependencies
+    { home, kibanaLegacy, __LEGACY, usageCollection }: VisualizePluginSetupDependencies
   ) {
-    kibana_legacy.registerLegacyApp({
+    kibanaLegacy.registerLegacyApp({
       id: 'visualize',
       title: 'Visualize',
       mount: async ({ core: contextCore }, params) => {
@@ -108,10 +108,11 @@ export class VisualizePlugin implements Plugin {
           share,
           toastNotifications: contextCore.notifications.toasts,
           uiSettings: contextCore.uiSettings,
-          config: kibana_legacy.config,
+          config: kibanaLegacy.config,
           visualizeCapabilities: contextCore.application.capabilities.visualize,
           visualizations,
           usageCollection,
+          I18nContext: contextCore.i18n.Context,
         };
         setServices(deps);
 

@@ -20,7 +20,7 @@
 import React from 'react';
 import { EuiFlyout, EuiFlexGroup, EuiFlexItem, EuiBadge } from '@elastic/eui';
 import { CoreStart } from 'src/core/public';
-import { createAction, IAction } from '../../actions';
+import { createAction, Action } from '../../actions';
 import { toMountPoint, reactToUiComponent } from '../../../../kibana_react/public';
 
 const ReactMenuItem: React.FC = () => {
@@ -38,7 +38,7 @@ const UiMenuItem = reactToUiComponent(ReactMenuItem);
 
 export const HELLO_WORLD_ACTION_ID = 'HELLO_WORLD_ACTION_ID';
 
-export function createHelloWorldAction(overlays: CoreStart['overlays']): IAction {
+export function createHelloWorldAction(overlays: CoreStart['overlays']): Action {
   return createAction({
     type: HELLO_WORLD_ACTION_ID,
     getIconType: () => 'lock',
