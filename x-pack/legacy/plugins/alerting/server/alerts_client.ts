@@ -410,7 +410,7 @@ export class AlertsClient {
       this.logger.error(
         `disable(): Failed to load API key to invalidate on alert ${id}: ${e.message}`
       );
-      // Still attempt to load the scheduledTaskId using SOC
+      // Still attempt to load the attributes and version using SOC
       const alert = await this.savedObjectsClient.get<RawAlert>('alert', id);
       attributes = alert.attributes;
       version = alert.version;
