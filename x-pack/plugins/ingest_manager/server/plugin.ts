@@ -12,8 +12,8 @@ import {
   ICustomClusterClient,
 } from 'kibana/server';
 import { LicensingPluginSetup, ILicense } from '../../licensing/server';
-import { PluginStartContract as EncryptedSavedObjectsPluginStart } from '../../encrypted_saved_objects/server';
-import { PluginSetupContract as SecurityPluginSetup } from '../../security/server';
+import { EncryptedSavedObjectsPluginStart } from '../../encrypted_saved_objects/server';
+import { SecurityPluginSetup } from '../../security/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import { PLUGIN_ID } from './constants';
 import { licenseService, configService, appContextService } from './services';

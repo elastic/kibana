@@ -5,8 +5,8 @@
  */
 import { ICustomClusterClient } from 'kibana/server';
 import { IngestManagerAppContext } from '../plugin';
-import { PluginStartContract as EncryptedSavedObjectsPluginStart } from '../../../encrypted_saved_objects/server';
-import { PluginSetupContract as SecurityPluginSetup } from '../../../security/server';
+import { EncryptedSavedObjectsPluginStart } from '../../../encrypted_saved_objects/server';
+import { SecurityPluginSetup } from '../../../security/server';
 
 class AppContextService {
   private clusterClient: ICustomClusterClient | undefined;

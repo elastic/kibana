@@ -5,14 +5,14 @@
  */
 
 import KbnServer from 'src/legacy/server/kbn_server';
-import { PluginSetupContract as SecurityPlugin } from '../../../../plugins/security/server';
+import { SecurityPluginSetup as SecurityPlugin } from '../../../../plugins/security/server';
 import {
   outputService as IngestOutputLib,
   agentConfigService as IngestPolicyLib,
 } from '../../../../plugins/ingest_manager/server';
 import {
-  PluginSetupContract as EncryptedSavedObjectsSetupContract,
-  PluginStartContract as EncryptedSavedObjectsStartContract,
+  EncryptedSavedObjectsPluginSetup as EncryptedSavedObjectsSetupContract,
+  EncryptedSavedObjectsPluginStart as EncryptedSavedObjectsStartContract,
 } from '../../../../plugins/encrypted_saved_objects/server';
 
 export interface IngestPluginStartContract {

@@ -5,11 +5,11 @@
  */
 
 import { SavedObjectsBaseOptions, SavedObjectAttributes, SavedObject } from 'src/core/server';
-import { PluginStartContract } from '../../../../../../plugins/encrypted_saved_objects/server';
+import { EncryptedSavedObjectsPluginStart } from '../../../../../../plugins/encrypted_saved_objects/server';
 import { EncryptedSavedObjects as EncryptedSavedObjectsType } from './adapter_types';
 
 export class EncryptedSavedObjects implements EncryptedSavedObjectsType {
-  constructor(private readonly plugin: PluginStartContract) {}
+  constructor(private readonly plugin: EncryptedSavedObjectsPluginStart) {}
 
   public async getDecryptedAsInternalUser<T extends SavedObjectAttributes = any>(
     type: string,
