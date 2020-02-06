@@ -13,7 +13,7 @@ export const getDynamicSettingsSuccess = createAction<DynamicSettings>(
 export const getDynamicSettingsFail = createAction<Error>('GET_DYNAMIC_SETTINGS_FAIL');
 
 export const setDynamicSettings = createAction<DynamicSettings>('SET_DYNAMIC_SETTINGS');
-export const setDynamicSettingsSuccess = createAction<DynamicSettingsSaveResponse>(
+export const setDynamicSettingsSuccess = createAction<DynamicSettings>(
   'SET_DYNAMIC_SETTINGS_SUCCESS'
 );
 export const setDynamicSettingsFail = createAction<Error>('SET_DYNAMIC_SETTINGS_FAIL');

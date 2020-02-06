@@ -7,6 +7,7 @@
 import { schema } from '@kbn/config-schema';
 import { isRight } from 'fp-ts/lib/Either';
 import { ThrowReporter } from 'io-ts/lib/ThrowReporter';
+import { PathReporter } from 'io-ts/lib/PathReporter';
 import { UMServerLibs } from '../../lib/lib';
 import { DynamicSettings, DynamicSettingsType } from '../../../common/runtime_types';
 import { savedObjectsAdapter } from '../../lib/adapters/saved_objects/kibana_saved_objects_adapter';
@@ -37,15 +38,24 @@ export const createPostDynamicSettingsRoute: UMRestApiRouteFactory = (libs: UMSe
   },
   handler: async ({ savedObjectsClient }, _context, request, response): Promise<any> => {
     const decoded = DynamicSettingsType.decode(request.body);
-    ThrowReporter.report(decoded);
     if (isRight(decoded)) {
       const newSettings: DynamicSettings = decoded.right;
       await savedObjectsAdapter.setUptimeDynamicSettings(savedObjectsClient, newSettings);
 
       return response.ok({
         body: {
-          dynamic_settings: request.body,
+          success: true,
         },
+      });
+    } else {
+      const error = PathReporter.report(decoded).join(', ');
+      // TODO determine if we really need a rich type here. response.badRequest only wants to return
+      // a single string, but we may want to return individual errors for form fields, which would mean
+      // returning a 200 with our own error thing on top of it.
+      // That said, a 400 is considered more restful per https://stackoverflow.com/questions/3290182/rest-http-status-codes-for-failed-validation-or-invalid-duplicate
+      // that said, lots of debate here
+      return response.badRequest({
+        body: error,
       });
     }
   },

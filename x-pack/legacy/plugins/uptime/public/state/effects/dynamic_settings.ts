@@ -37,7 +37,7 @@ export function* setDynamicSettingsEffect() {
       }
       const basePath = yield select(getBasePath);
       const response = yield call(saveDynamicSettings, { settings: action.payload, basePath });
-      yield put(setDynamicSettingsSuccess(response));
+      yield put(setDynamicSettingsSuccess(action.payload));
     } catch (error) {
       yield put(setDynamicSettingsFail(error));
     }
