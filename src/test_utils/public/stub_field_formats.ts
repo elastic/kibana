@@ -17,10 +17,10 @@
  * under the License.
  */
 import { CoreSetup } from 'kibana/public';
-import { fieldFormats } from '../../plugins/data/public';
+import { FieldFormatsRegistry } from '../../plugins/data/public';
 
 export const getFieldFormatsRegistry = (core: CoreSetup) => {
-  const fieldFormatsRegistry = new fieldFormats.FieldFormatsRegistry();
+  const fieldFormatsRegistry = new FieldFormatsRegistry();
   const getConfig = core.uiSettings.get.bind(core.uiSettings);
 
   fieldFormatsRegistry.init(getConfig, {});

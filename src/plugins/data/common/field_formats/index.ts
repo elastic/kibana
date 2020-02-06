@@ -18,3 +18,14 @@
  */
 
 export { fieldFormats } from './static';
+export { FieldFormatsRegistry } from './field_formats_registry';
+
+export {
+  FieldFormatsGetConfigFn,
+  FieldFormatsContentType,
+  FieldFormatConfig,
+  FieldFormatId,
+  // @internal
+  IFieldFormatType,
+  IFieldFormat,
+} from './types';

@@ -18,56 +18,63 @@
  */
 
 /**
- * Everything the file imports is public
+ * Everything the file exports is public
  */
 
-// import * as color from './constants/color_default';
-// import * as contentTypes from './content_types';
-import { baseFormatters as baseFormatters1 } from './constants/base_formatters';
+import { HTML_CONTEXT_TYPE, TEXT_CONTEXT_TYPE } from './content_types';
+import { getHighlightRequest, asPrettyString, getHighlightHtml } from './utils';
 
-// import * as fieldFormatType from './field_format';
-import { FieldFormatsRegistry as FieldFormatsRegistry1 }  from './field_formats_registry';
-import { IFieldFormatType as IFieldFormatType1 } from './types';
-// import * as utils from './utils';
-// import * as formatters from './converters';
+import { baseFormatters } from './constants/base_formatters';
+import { DEFAULT_CONVERTER_COLOR } from './constants/color_default';
 
-export namespace fieldFormats { 
-  // types
-  export const FieldFormatsRegistry = FieldFormatsRegistry1;
-  // export import FieldFormat = fieldFormatType.FieldFormat;
-  // export import GetConfigFn = types.GetConfigFn;
-  // export import FIELD_FORMAT_IDS = types.FIELD_FORMAT_IDS;
-  // export import ContentType = types.ContentType;
-  // export import IFieldFormatConfig = types.IFieldFormatConfig;
-  export type IFieldFormatType = IFieldFormatType1;
-  // export import IFieldFormat = types.IFieldFormat;
-  // export import IFieldFormatId = types.IFieldFormatId;
+import { FieldFormat } from './field_format';
 
-  // constants
-  // export const HTML_CONTEXT_TYPE = contentTypes.HTML_CONTEXT_TYPE;
-  // export const TEXT_CONTEXT_TYPE = contentTypes.TEXT_CONTEXT_TYPE;
-  // export const DEFAULT_CONVERTER_COLOR = color.DEFAULT_CONVERTER_COLOR;
-  export const baseFormatters = baseFormatters1;
+import {
+  BoolFormat,
+  BytesFormat,
+  ColorFormat,
+  DateFormat,
+  DateNanosFormat,
+  DurationFormat,
+  IpFormat,
+  NumberFormat,
+  PercentFormat,
+  RelativeDateFormat,
+  SourceFormat,
+  StaticLookupFormat,
+  UrlFormat,
+  StringFormat,
+  TruncateFormat,
+} from './converters';
 
-  // utils
-  // export const getHighlightRequest = utils.getHighlightRequest; 
-  // export const asPrettyString = utils.asPrettyString; 
-  // export const getHighlightHtml = utils.getHighlightHtml;
+import { FIELD_FORMAT_IDS } from './types';
 
-  // // formatter classes
-  // export const BoolFormat = formatters.BoolFormat;
-  // export const BytesFormat = formatters.BytesFormat;
-  // export const ColorFormat = formatters.ColorFormat;
-  // export const DateFormat = formatters.DateFormat;
-  // export const DateNanosFormat = formatters.DateNanosFormat;
-  // export const DurationFormat = formatters.DurationFormat;
-  // export const IpFormat = formatters.IpFormat;
-  // export const NumberFormat = formatters.NumberFormat;
-  // export const PercentFormat = formatters.PercentFormat;
-  // export const RelativeDateFormat = formatters.RelativeDateFormat;
-  // export const SourceFormat = formatters.SourceFormat;
-  // export const StaticLookupFormat = formatters.StaticLookupFormat;
-  // export const UrlFormat = formatters.UrlFormat;
-  // export const StringFormat = formatters.StringFormat;
-  // export const TruncateFormat = formatters.TruncateFormat;
-}
+export const fieldFormats = {
+  FieldFormat,
+
+  DEFAULT_CONVERTER_COLOR,
+  HTML_CONTEXT_TYPE,
+  TEXT_CONTEXT_TYPE,
+  FIELD_FORMAT_IDS,
+
+  getHighlightRequest,
+  asPrettyString,
+  getHighlightHtml,
+
+  baseFormatters,
+  BoolFormat,
+  BytesFormat,
+  ColorFormat,
+  DateFormat,
+  DateNanosFormat,
+  DurationFormat,
+  IpFormat,
+  NumberFormat,
+  PercentFormat,
+  RelativeDateFormat,
+  SourceFormat,
+  StaticLookupFormat,
+  UrlFormat,
+  StringFormat,
+  TruncateFormat,
+};

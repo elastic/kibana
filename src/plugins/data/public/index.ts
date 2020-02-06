@@ -42,6 +42,14 @@ export {
   // timefilter
   RefreshInterval,
   TimeRange,
+  // Field Formats
+  fieldFormats,
+  IFieldFormat,
+  FieldFormatsRegistry,
+  FieldFormatsContentType,
+  FieldFormatsGetConfigFn,
+  FieldFormatConfig,
+  FieldFormatId,
 } from '../common';
 export { autocomplete } from './autocomplete';
 export * from './field_formats';
@@ -54,7 +62,6 @@ export {
   esFilters,
   esKuery,
   esQuery,
-  fieldFormats,
   // index patterns
   isFilterable,
   // kbn field types

@@ -21,7 +21,7 @@ import {
   FieldFormatsStart,
   FieldFormatsSetup,
   IndexPatternsContract,
-  fieldFormats,
+  FieldFormatsRegistry,
 } from '.';
 import { searchSetupMock } from './search/mocks';
 import { queryServiceMock } from './query/mocks';
@@ -35,7 +35,7 @@ const autocompleteMock: any = {
   hasQuerySuggestions: jest.fn(),
 };
 
-const fieldFormatsMock: PublicMethodsOf<fieldFormats.FieldFormatsRegistry> = {
+const fieldFormatsMock: PublicMethodsOf<FieldFormatsRegistry> = {
   getByFieldType: jest.fn(),
   getDefaultConfig: jest.fn(),
   getDefaultInstance: jest.fn() as any,
