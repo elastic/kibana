@@ -25,7 +25,7 @@ jest.mock('ui/new_platform');
 
 test('Provides default sections', () => {
   const service = new ManagementService().setup(
-    npSetup.plugins.kibana_legacy,
+    npSetup.plugins.kibanaLegacy,
     () => {},
     coreMock.createSetup().getStartServices
   );
@@ -37,7 +37,7 @@ test('Provides default sections', () => {
 
 test('Register section, enable and disable', () => {
   const service = new ManagementService().setup(
-    npSetup.plugins.kibana_legacy,
+    npSetup.plugins.kibanaLegacy,
     () => {},
     coreMock.createSetup().getStartServices
   );
