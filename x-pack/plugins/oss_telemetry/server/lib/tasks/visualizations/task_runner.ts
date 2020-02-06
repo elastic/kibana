@@ -4,13 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Observable } from 'rxjs';
 import _, { countBy, groupBy, mapValues } from 'lodash';
 import { APICaller, CoreSetup } from 'kibana/server';
 import { getNextMidnight } from '../../get_next_midnight';
-import { VisState } from '../../../../../../../../src/legacy/core_plugins/visualizations/public';
-import { TaskInstance } from '../../../../../../../plugins/task_manager/server';
-import { ESSearchHit } from '../../../../../../../plugins/apm/typings/elasticsearch';
-import { LegacyConfig } from '../../../plugin';
+import { TaskInstance } from '../../../../../task_manager/server';
+import { ESSearchHit } from '../../../../../apm/typings/elasticsearch';
 
 interface VisSummary {
   type: string;
@@ -44,7 +43,7 @@ async function getStats(callCluster: APICaller, index: string) {
       const spacePhrases: string[] = hit._id.split(':');
       const space = spacePhrases.length === 3 ? spacePhrases[0] : 'default'; // if in a custom space, the format of a saved object ID is space:type:id
       const visualization = _.get(hit, '_source.visualization', { visState: '{}' });
-      const visState: VisState = JSON.parse(visualization.visState);
+      const visState: { type?: string } = JSON.parse(visualization.visState);
 
       return {
         type: visState.type || '_na_',
@@ -73,17 +72,17 @@ async function getStats(callCluster: APICaller, index: string) {
 
 export function visualizationsTaskRunner(
   taskInstance: TaskInstance,
-  config: LegacyConfig,
+  config: Observable<{ kibana: { index: string } }>,
   es: CoreSetup['elasticsearch']
 ) {
   const { callAsInternalUser: callCluster } = es.createClient('data');
-  const index = config.get('kibana.index').toString(); // cast to string for TypeScript
 
   return async () => {
     let stats;
     let error;
 
     try {
+      const index = (await config.toPromise()).kibana.index;
       stats = await getStats(callCluster, index);
     } catch (err) {
       if (err.constructor === Error) {

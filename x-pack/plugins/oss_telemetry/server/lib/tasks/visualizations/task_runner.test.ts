@@ -10,9 +10,9 @@ import {
   getMockConfig,
   getMockEs,
   getMockTaskInstance,
-} from '../../../../test_utils';
+} from '../../../test_utils';
 import { visualizationsTaskRunner } from './task_runner';
-import { TaskInstance } from '../../../../../../../plugins/task_manager/server';
+import { TaskInstance } from '../../../../../task_manager/server';
 
 describe('visualizationsTaskRunner', () => {
   let mockTaskInstance: TaskInstance;
