@@ -18,7 +18,14 @@
  */
 
 import React, { Component } from 'react';
-import { Comparators, EuiFlexGroup, EuiFlexItem, EuiSpacer, Query } from '@elastic/eui';
+import {
+  Comparators,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  // @ts-ignore
+  Query,
+} from '@elastic/eui';
 
 import { CallOuts } from './components/call_outs';
 import { Search } from './components/search';
