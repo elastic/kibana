@@ -7,8 +7,8 @@ import { ResolverData } from '../../../common/types';
 import { EventBuilder } from './event_builder.test';
 
 export class Phase1Builder implements EventBuilder {
-  constructor(public readonly entityID: string, public readonly parentEntityID: string) {}
-  buildEvent(): ResolverData {
+  constructor(public readonly originEntityID: number, public readonly parentEntityID: string) {}
+  buildEvent(entityID: number): ResolverData {
     return {
       event: {
         category: 'process',
@@ -16,7 +16,7 @@ export class Phase1Builder implements EventBuilder {
       },
       endpoint: {
         process: {
-          entity_id: this.entityID,
+          entity_id: String(entityID),
           parent: {
             entity_id: this.parentEntityID,
           },

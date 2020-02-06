@@ -14,7 +14,7 @@ import { EndpointConfigSchema } from '../../config';
 import { PaginationInfo, getPagination } from './query_builder';
 import { CountResponse } from 'elasticsearch';
 import { ResolverDataHit, parsePhase0EntityID, buildPhase0EntityID } from './common';
-import { ResolverData } from '../../../common/types';
+import { ResolverData, Pagination } from '../../../common/types';
 import { EventBuilder } from './event_builder.test';
 import { Phase0Builder } from './phase0_builder.test';
 import { Phase1Builder } from './phase1_builder.test';
@@ -43,7 +43,8 @@ function buildCountResponse(count: number, scopedClient: jest.Mocked<IScopedClus
 interface BuiltHits {
   total: number;
   hits: ResolverDataHit[];
-  data: ResolverData[];
+  children: ResolverData[];
+  origin: ResolverData[];
 }
 
 function buildResolverHits(
@@ -52,28 +53,30 @@ function buildResolverHits(
   eventsPerNode: number
 ): BuiltHits {
   const hits: ResolverDataHit[] = [];
-  const data: ResolverData[] = [];
+  const children: ResolverData[] = [];
+  const origin: ResolverData[] = [];
   // start after the entity id so there aren't any collisions
-  let nodeIter = builder.startingChildrenEntityID() + 1;
-  for (; nodeIter < numNodes + builder.startingChildrenEntityID() + 1; nodeIter++) {
+  let nodeIter = builder.startingChildrenEntityID();
+  for (; nodeIter < numNodes + builder.startingChildrenEntityID(); nodeIter++) {
     for (let i = 0; i < eventsPerNode; i++) {
-      const event = builder.buildEvent();
+      const event = builder.buildEvent(nodeIter);
       hits.push({
         _source: event,
       });
-      data.push(event);
+      children.push(event);
     }
   }
 
   // build the events for the origin
   for (let i = 0; i < eventsPerNode; i++) {
-    const event = builder.buildEvent();
+    const event = builder.buildEvent(builder.originEntityID);
     hits.push({
       _source: event,
     });
-    data.push(event);
+    origin.push(event);
   }
-  return { total: (numNodes + 1) * eventsPerNode, hits, data };
+  // +1 because we're generating events for the origin too
+  return { total: (numNodes + 1) * eventsPerNode, hits, children, origin };
 }
 
 function buildResolverP0Hits(
@@ -95,7 +98,7 @@ function buildResolverP1Hits(
   numNodes: number,
   eventsPerNode: number
 ): BuiltHits {
-  return buildResolverHits(new Phase1Builder(entityID, parentID), numNodes, eventsPerNode);
+  return buildResolverHits(new Phase1Builder(Number(entityID), parentID), numNodes, eventsPerNode);
 }
 
 function createTotal(total: number, relationEqual: boolean): Total {
@@ -105,12 +108,27 @@ function createTotal(total: number, relationEqual: boolean): Total {
   };
 }
 
+async function checkPagination(
+  resPagination: Pagination,
+  context: EndpointAppContext,
+  total: number,
+  builtPageInfo: PaginationInfo
+) {
+  const pagination = await getPagination(context, builtPageInfo);
+  expect(resPagination.total).toBe(total);
+
+  expect(resPagination.request_from_index).toBe(pagination.from);
+  expect(resPagination.request_page_index).toBe(pagination.page);
+  expect(resPagination.request_page_size).toBe(pagination.pageSize);
+}
+
 describe('build resolver node and related event responses', () => {
   let mockScopedClient: jest.Mocked<IScopedClusterClient>;
   let endpointContext: EndpointAppContext;
   let total: number;
   let hits: ResolverDataHit[];
-  let data: ResolverData[];
+  let children: ResolverData[];
+  let origin: ResolverData[];
   beforeEach(() => {
     mockScopedClient = elasticsearchServiceMock.createScopedClusterClient();
     endpointContext = {
@@ -127,9 +145,10 @@ describe('build resolver node and related event responses', () => {
   describe('phase 1 responses', () => {
     const entityID = '12345';
     const parentEntityID = '5555';
+
     describe('single node retrieval', () => {
       beforeEach(() => {
-        ({ total, hits, data } = buildResolverP1Hits(
+        ({ total, hits, children, origin } = buildResolverP1Hits(
           entityID,
           parentEntityID,
           // 0 nodes should be created because it's a request for only the specific node
@@ -146,21 +165,36 @@ describe('build resolver node and related event responses', () => {
           {},
           entityID
         );
-        const pagination = await getPagination(endpointContext, pageInfo);
 
         const res = await handler.buildNodeResponse(hits, createTotal(total, true));
         expect(res.node.parent_entity_id).toBe(parentEntityID);
         expect(res.node.entity_id).toBe(entityID);
-        expect(res.node.events).toStrictEqual(data);
-        expect(res.total).toBe(total);
-
-        expect(res.request_from_index).toBe(pagination.from);
-        expect(res.request_page_index).toBe(pagination.page);
-        expect(res.request_page_size).toBe(pagination.pageSize);
+        expect(res.node.events).toStrictEqual(origin);
+        await checkPagination(res, endpointContext, total, pageInfo);
       });
     });
     describe('multiple node retrieval', () => {
-      // TODO multiple phase 1 nodes in a response
+      beforeEach(() => {
+        ({ total, hits, children, origin } = buildResolverP1Hits(entityID, parentEntityID, 3, 3));
+      });
+      it('sets the response correctly for a node retrieval', async () => {
+        const pageInfo = buildPageInfo(1, 50);
+        const handler = new ResolverSearchHandler(
+          mockScopedClient,
+          endpointContext,
+          pageInfo,
+          {},
+          entityID
+        );
+
+        const res = await handler.buildChildrenResponse(hits, createTotal(total, true));
+        expect(res.origin.parent_entity_id).toBe(parentEntityID);
+        expect(res.origin.entity_id).toBe(entityID);
+        expect(res.origin.events).toStrictEqual(origin);
+        // built 3 children nodes in before each call
+        expect(res.children.length).toBe(3);
+        await checkPagination(res, endpointContext, total, pageInfo);
+      });
     });
   });
 
@@ -175,7 +209,7 @@ describe('build resolver node and related event responses', () => {
     });
     describe('single node retrieval', () => {
       beforeEach(() => {
-        ({ total, hits, data } = buildResolverP0Hits(
+        ({ total, hits, children, origin } = buildResolverP0Hits(
           endpointID,
           uniquePIDNum,
           parentUniquePID,
@@ -193,17 +227,12 @@ describe('build resolver node and related event responses', () => {
           {},
           phase0ID
         );
-        const pagination = await getPagination(endpointContext, pageInfo);
 
         const res = await handler.buildNodeResponse(hits, createTotal(total, true));
         expect(res.node.parent_entity_id).toBe(parentID);
         expect(res.node.entity_id).toBe(phase0ID);
-        expect(res.node.events).toStrictEqual(data);
-        expect(res.total).toBe(total);
-
-        expect(res.request_from_index).toBe(pagination.from);
-        expect(res.request_page_index).toBe(pagination.page);
-        expect(res.request_page_size).toBe(pagination.pageSize);
+        expect(res.node.events).toStrictEqual(origin);
+        await checkPagination(res, endpointContext, total, pageInfo);
       });
 
       it('uses defaults when pagination is not defined', async () => {
@@ -216,14 +245,9 @@ describe('build resolver node and related event responses', () => {
           phase0ID
         );
 
-        const pagination = await getPagination(endpointContext, pageInfo);
         const res = await handler.buildNodeResponse(hits, createTotal(total, true));
 
-        expect(res.total).toBe(total);
-
-        expect(res.request_from_index).toBe(pagination.from);
-        expect(res.request_page_index).toBe(pagination.page);
-        expect(res.request_page_size).toBe(pagination.pageSize);
+        await checkPagination(res, endpointContext, total, pageInfo);
       });
 
       it('uses elasticsearch count call to find the total when track hits fails', async () => {

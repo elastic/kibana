@@ -85,16 +85,17 @@ export class ResolverSearchHandler {
     let originParentEntityID: string | undefined;
     for (const hit of hits) {
       const node = ResolverSearchHandler.nodeCreator(hit._source);
-      const parentAndData = nodes.get(node.entityID) || {
-        parentEntityID: node.parentEntityID,
-        events: [],
-      };
-
-      parentAndData.events.push(node.esData);
-      nodes.set(node.entityID, parentAndData);
       if (node.entityID === this.entityID) {
         originEvents.push(node.esData);
         originParentEntityID = node.parentEntityID;
+      } else {
+        const parentAndData = nodes.get(node.entityID) || {
+          parentEntityID: node.parentEntityID,
+          events: [],
+        };
+
+        parentAndData.events.push(node.esData);
+        nodes.set(node.entityID, parentAndData);
       }
     }
     const children: ResolverResponseNode[] = [];

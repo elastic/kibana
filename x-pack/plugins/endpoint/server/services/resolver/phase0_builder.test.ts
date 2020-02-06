@@ -9,15 +9,15 @@ import { EventBuilder } from './event_builder.test';
 export class Phase0Builder implements EventBuilder {
   constructor(
     public readonly endpointID: string,
-    public readonly entityID: number,
+    public readonly originEntityID: number,
     public parentID: number
   ) {}
-  buildEvent(): ResolverData {
+  buildEvent(entityID: number): ResolverData {
     return {
       endgame: {
         event_type_full: 'process_event',
         event_subtype_full: 'creation_event',
-        unique_pid: this.entityID,
+        unique_pid: entityID,
         unique_ppid: this.parentID,
       },
       agent: {
@@ -26,6 +26,6 @@ export class Phase0Builder implements EventBuilder {
     };
   }
   startingChildrenEntityID(): number {
-    return this.entityID;
+    return this.originEntityID + 1;
   }
 }
