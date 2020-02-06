@@ -31,6 +31,7 @@ import { timeFilter } from './time_filter';
 import { verticalBarChart } from './vert_bar_chart';
 import { verticalProgressBar } from './vertical_progress_bar';
 import { verticalProgressPill } from './vertical_progress_pill';
+import { multiFilter } from './multi_filter';
 
 export const elementSpecs = applyElementStrings([
   areaChart,
@@ -45,6 +46,7 @@ export const elementSpecs = applyElementStrings([
   lineChart,
   markdown,
   metric,
+  multiFilter,
   pie,
   plot,
   progressGauge,
