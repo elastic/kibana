@@ -102,7 +102,7 @@ export class IndexPatternCreationConfig {
     return this.showSystemIndices;
   }
 
-  public getIndexTags() {
+  public getIndexTags(indexName: string) {
     return [];
   }
 
