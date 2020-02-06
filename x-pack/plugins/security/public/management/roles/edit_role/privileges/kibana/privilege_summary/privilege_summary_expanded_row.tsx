@@ -5,12 +5,13 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiCheckbox } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiCheckbox, EuiButtonGroup } from '@elastic/eui';
 import {
   SubFeaturePrivilegeGroup,
   SubFeaturePrivilege,
   SecuredFeature,
 } from '../../../../../../../common/model';
+import { NO_PRIVILEGE_VALUE } from '../constants';
 
 interface Props {
   feature: SecuredFeature;
@@ -95,6 +96,34 @@ export const PrivilegeSummaryExpandedRow = (props: Props) => {
   ) {
     const firstSelectedPrivilege = privilegeGroup.privileges.find(p =>
       effectivePrivileges.includes(p.id)
+    );
+
+    const options = [
+      ...privilegeGroup.privileges.map((privilege, privilegeIndex) => {
+        return {
+          id: privilege.id,
+          label: privilege.name,
+          isDisabled: true,
+        };
+      }),
+    ];
+
+    options.push({
+      id: NO_PRIVILEGE_VALUE,
+      label: 'None',
+      isDisabled: true,
+    });
+
+    return (
+      <EuiButtonGroup
+        key={index}
+        buttonSize="compressed"
+        data-test-subj="mutexSubFeaturePrivilegeControl"
+        options={options}
+        idSelected={firstSelectedPrivilege?.id ?? NO_PRIVILEGE_VALUE}
+        isDisabled={true}
+        onChange={() => null}
+      />
     );
 
     return <EuiText size="s">{firstSelectedPrivilege?.name ?? 'None'}</EuiText>;

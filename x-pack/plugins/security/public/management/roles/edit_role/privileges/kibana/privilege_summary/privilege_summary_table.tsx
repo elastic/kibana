@@ -58,14 +58,21 @@ export const PrivilegeSummaryTable = (props: Props) => {
     isExpander: true,
     field: 'featureId',
     name: '',
-    render: (featureId: string) => (
-      <EuiButtonIcon
-        onClick={() => toggleExpandedFeature(featureId)}
-        data-test-subj={`expandPrivilegeSummaryRow`}
-        aria-label={expandedFeatures.includes(featureId) ? 'Collapse' : 'Expand'}
-        iconType={expandedFeatures.includes(featureId) ? 'arrowUp' : 'arrowDown'}
-      />
-    ),
+    render: (featureId: string, record: any) => {
+      const feature = record.feature as SecuredFeature;
+      const hasSubFeaturePrivileges = feature.subFeaturePrivileges.length > 0;
+      if (!hasSubFeaturePrivileges) {
+        return null;
+      }
+      return (
+        <EuiButtonIcon
+          onClick={() => toggleExpandedFeature(featureId)}
+          data-test-subj={`expandPrivilegeSummaryRow`}
+          aria-label={expandedFeatures.includes(featureId) ? 'Collapse' : 'Expand'}
+          iconType={expandedFeatures.includes(featureId) ? 'arrowUp' : 'arrowDown'}
+        />
+      );
+    },
   };
 
   const rawKibanaPrivileges = [...props.role.kibana].sort(entry =>

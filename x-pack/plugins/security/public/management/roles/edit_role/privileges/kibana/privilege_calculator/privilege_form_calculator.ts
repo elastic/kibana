@@ -198,15 +198,6 @@ export class PrivilegeFormCalculator {
       const globalCheck = globalPrivileges.grantsPrivilege(p);
       const formCheck = formPrivileges.grantsPrivilege(p);
       const isSuperseded = globalCheck.hasAllRequested && !formCheck.hasAllRequested;
-      if (isSuperseded) {
-        console.log('isSuperseded', {
-          privilege: p,
-          globalCheck,
-          formCheck,
-          globalPrivileges,
-          formPrivileges,
-        });
-      }
       return isSuperseded;
     });
   }

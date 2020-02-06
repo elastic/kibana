@@ -197,8 +197,7 @@ export class FeatureTable extends Component<Props, State> {
           if (this.props.privilegeCalculator.hasNonSupersededSubFeaturePrivileges(feature.id)) {
             warningIcon = (
               <EuiIconTip
-                type="alert"
-                color="warning"
+                type="iInCircle"
                 content="This message explains that you have sub-feature privilege customizations, and should expand the row for more information"
               />
             );
@@ -228,14 +227,21 @@ export class FeatureTable extends Component<Props, State> {
         isExpander: true,
         field: 'featureId',
         name: '',
-        render: (featureId: string) => (
-          <EuiButtonIcon
-            onClick={() => this.toggleExpandedFeature(featureId)}
-            data-test-subj={`expandFeaturePrivilegeRow expandFeaturePrivilegeRow-${featureId}`}
-            aria-label={this.state.expandedFeatures.includes(featureId) ? 'Collapse' : 'Expand'}
-            iconType={this.state.expandedFeatures.includes(featureId) ? 'arrowUp' : 'arrowDown'}
-          />
-        ),
+        render: (featureId: string, record: TableRow) => {
+          const { feature } = record;
+          const hasSubFeaturePrivileges = feature.subFeaturePrivileges.length > 0;
+          if (!hasSubFeaturePrivileges) {
+            return null;
+          }
+          return (
+            <EuiButtonIcon
+              onClick={() => this.toggleExpandedFeature(featureId)}
+              data-test-subj={`expandFeaturePrivilegeRow expandFeaturePrivilegeRow-${featureId}`}
+              aria-label={this.state.expandedFeatures.includes(featureId) ? 'Collapse' : 'Expand'}
+              iconType={this.state.expandedFeatures.includes(featureId) ? 'arrowUp' : 'arrowDown'}
+            />
+          );
+        },
       },
     ] as Array<EuiBasicTableColumn<TableRow>>;
     return columns;

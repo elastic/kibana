@@ -33,7 +33,7 @@ export const PrivilegeSummary = (props: Props) => {
       <EuiButtonEmpty onClick={() => setIsOpen(true)}>View privilege summary</EuiButtonEmpty>
       {isOpen && (
         <EuiOverlayMask>
-          <EuiModal onClose={() => setIsOpen(false)}>
+          <EuiModal onClose={() => setIsOpen(false)} maxWidth={false}>
             <EuiModalHeader>
               <EuiModalHeaderTitle>Privilege summary</EuiModalHeaderTitle>
             </EuiModalHeader>

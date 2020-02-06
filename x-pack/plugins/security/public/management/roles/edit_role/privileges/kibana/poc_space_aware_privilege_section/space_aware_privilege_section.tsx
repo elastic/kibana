@@ -145,7 +145,9 @@ class SpaceAwarePrivilegeSectionUI extends Component<Props, State> {
         <PrivilegeSpaceTable
           role={this.props.role}
           displaySpaces={this.getDisplaySpaces()}
-          privilegeCalculator={new PrivilegeTableCalculator(this.props.kibanaPrivileges)}
+          privilegeCalculator={
+            new PrivilegeTableCalculator(this.props.kibanaPrivileges, this.props.role)
+          }
           onChange={this.props.onChange}
           onEdit={this.onEditSpacesPrivileges}
           intl={this.props.intl}

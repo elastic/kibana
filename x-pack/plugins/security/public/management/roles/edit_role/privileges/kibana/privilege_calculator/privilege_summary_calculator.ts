@@ -11,20 +11,11 @@ import {
   SubFeaturePrivilegeGroup,
   RoleKibanaPrivilege,
   PrimaryFeaturePrivilege,
-  FeaturePrivilege,
 } from '../../../../../../../common/model';
 import { isGlobalPrivilegeDefinition } from '../../../privilege_utils';
 
-function getPrivilegeKey(entry: RoleKibanaPrivilege) {
-  return entry.spaces.join(',');
-}
-
 export class PrivilegeSummaryCalculator {
-  private privilegeEntries: Map<string, RoleKibanaPrivilege>;
-
-  constructor(private readonly kibanaPrivileges: KibanaPrivileges, private readonly role: Role) {
-    this.privilegeEntries = new Map(role.kibana.map(entry => [getPrivilegeKey(entry), entry]));
-  }
+  constructor(private readonly kibanaPrivileges: KibanaPrivileges, private readonly role: Role) {}
 
   public getEffectivePrimaryFeaturePrivilege(entry: RoleKibanaPrivilege) {
     const assignedPrivileges = this.collectAssignedPrivileges(entry);

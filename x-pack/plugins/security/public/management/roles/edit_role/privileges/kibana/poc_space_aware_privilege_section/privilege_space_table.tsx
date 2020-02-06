@@ -10,17 +10,20 @@ import {
   EuiButtonIcon,
   EuiInMemoryTable,
   EuiBasicTableColumn,
+  EuiIcon,
+  EuiIconTip,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
 import _ from 'lodash';
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import { getSpaceColor } from 'plugins/spaces/space_avatar';
 import { Role, FeaturesPrivileges, copyRole } from '../../../../../../../common/model';
 import { SpacesPopoverList } from '../../../spaces_popover_list';
 import { PrivilegeDisplay } from './privilege_display';
 import { Space } from '../../../../../../../../spaces/common/model/space';
 import { isGlobalPrivilegeDefinition } from '../../../privilege_utils';
-import { CUSTOM_PRIVILEGE_VALUE } from '../constants';
 import { PrivilegeTableCalculator } from '../privilege_calculator';
 
 const SPACES_DISPLAY_COUNT = 4;
@@ -174,8 +177,26 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
             return <PrivilegeDisplay privilege={privileges.reserved} />;
           }
 
+          let icon = <EuiIcon type="empty" size="s" />;
+          if (privilegeCalculator.hasSupersededInheritedPrivileges(privileges)) {
+            icon = (
+              <EuiIconTip
+                type="alert"
+                size="s"
+                content="This message explains that these privileges are less permissive than global privileges"
+              />
+            );
+          }
+
           return (
-            <PrivilegeDisplay privilege={privilegeCalculator.getDisplayedPrivilege(privileges)} />
+            <EuiFlexGroup gutterSize="xs" alignItems="center">
+              <EuiFlexItem grow={false}>{icon}</EuiFlexItem>
+              <EuiFlexItem>
+                <PrivilegeDisplay
+                  privilege={privilegeCalculator.getDisplayedPrivilege(privileges)}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           );
         },
       },
