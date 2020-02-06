@@ -3,23 +3,29 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { UIM_APP_NAME } from '../../../common/constants';
-import {
-  createUiStatsReporter,
-  UiStatsMetricType,
-} from '../../../../../../../src/legacy/core_plugins/ui_metric/public';
+import { UiStatsMetricType } from '@kbn/analytics';
+import { UsageCollectionSetup } from '../../../../../../../src/plugins/usage_collection/public';
 
-class UiMetricService {
-  track?: ReturnType<typeof createUiStatsReporter>;
+export class UiMetricService<T extends string> {
+  private appName: string;
+  private usageCollection: UsageCollectionSetup | undefined;
 
-  public init = (getReporter: typeof createUiStatsReporter): void => {
-    this.track = getReporter(UIM_APP_NAME);
-  };
+  constructor(appName: string) {
+    this.appName = appName;
+  }
 
-  public trackMetric = (type: 'loaded' | 'click' | 'count', eventName: string): void => {
-    if (!this.track) throw Error('UiMetricService not initialized.');
-    return this.track(type as UiStatsMetricType, eventName);
-  };
+  public setup(usageCollection: UsageCollectionSetup) {
+    this.usageCollection = usageCollection;
+  }
+
+  private track(type: T, name: string) {
+    if (!this.usageCollection) {
+      throw Error('UiMetricService not initialized.');
+    }
+    this.usageCollection.reportUiStats(this.appName, type as UiStatsMetricType, name);
+  }
+
+  public trackMetric(type: T, eventName: string) {
+    return this.track(type, eventName);
+  }
 }
-
-export const uiMetricService = new UiMetricService();
