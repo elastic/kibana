@@ -6,18 +6,9 @@
 
 import { get } from 'lodash';
 import { PLUGIN_ID, VIS_TELEMETRY_TASK, VIS_USAGE_TYPE } from '../../../../constants';
-import { TaskManagerStartContract } from '../../../../../../../plugins/task_manager/server';
+import { TaskManagerStartContract } from '../../../../../task_manager/server';
 
-async function isTaskManagerReady(taskManager?: TaskManagerStartContract) {
-  const result = await fetch(taskManager);
-  return result !== null;
-}
-
-async function fetch(taskManager?: TaskManagerStartContract) {
-  if (!taskManager) {
-    return null;
-  }
-
+async function fetch(taskManager: TaskManagerStartContract) {
   let docs;
   try {
     ({ docs } = await taskManager.fetch({
@@ -38,27 +29,12 @@ async function fetch(taskManager?: TaskManagerStartContract) {
   return docs;
 }
 
-export function getUsageCollector(taskManager?: TaskManagerStartContract) {
-  let isCollectorReady = false;
-  async function determineIfTaskManagerIsReady() {
-    let isReady = false;
-    try {
-      isReady = await isTaskManagerReady(taskManager);
-    } catch (err) {} // eslint-disable-line
-
-    if (isReady) {
-      isCollectorReady = true;
-    } else {
-      setTimeout(determineIfTaskManagerIsReady, 500);
-    }
-  }
-  determineIfTaskManagerIsReady();
-
+export function getUsageCollector(taskManager: Promise<TaskManagerStartContract>) {
   return {
     type: VIS_USAGE_TYPE,
-    isReady: () => isCollectorReady,
+    isReady: () => true,
     fetch: async () => {
-      const docs = await fetch(taskManager);
+      const docs = await fetch(await taskManager);
       // get the accumulated state from the recurring task
       return get(docs, '[0].state.stats');
     },
