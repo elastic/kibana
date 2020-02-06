@@ -10,9 +10,7 @@ import {
   ExpressionsSetup,
   ExpressionsStart,
 } from '../../../../../../src/plugins/expressions/public';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { embeddablePluginMock } from '../../../../../../src/plugins/embeddable/public/mocks';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { expressionsPluginMock } from '../../../../../../src/plugins/expressions/public/mocks';
 import { DatasourcePublicAPI, FramePublicAPI, Datasource, Visualization } from '../types';
 import { EditorFrameSetupPlugins, EditorFrameStartPlugins } from './plugin';

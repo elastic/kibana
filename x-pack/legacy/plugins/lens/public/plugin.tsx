@@ -8,7 +8,7 @@ import React from 'react';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import { HashRouter, Route, RouteComponentProps, Switch } from 'react-router-dom';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { CoreSetup } from 'src/core/public';
+import { AppMountParameters, CoreSetup } from 'src/core/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from 'src/plugins/data/public';
 import rison, { RisonObject, RisonValue } from 'rison-node';
 import { isObject } from 'lodash';
@@ -112,7 +112,7 @@ export class LensPlugin {
     kibanaLegacy.registerLegacyApp({
       id: 'lens',
       title: NOT_INTERNATIONALIZED_PRODUCT_NAME,
-      mount: async params => {
+      mount: async (params: AppMountParameters) => {
         const [coreStart, startDependencies] = await core.getStartServices();
         const dataStart = startDependencies.data;
         const savedObjectsClient = coreStart.savedObjects.client;
@@ -218,6 +218,8 @@ export class LensPlugin {
       },
     });
   }
+
+  start() {}
 
   stop() {
     stopReportManager();
