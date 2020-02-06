@@ -79,6 +79,17 @@ export class LocalApplicationService {
           })();
         },
       });
+
+      if (app.updater$) {
+        app.updater$.subscribe(updater => {
+          const updatedFields = updater(app);
+          if (updatedFields && updatedFields.activeUrl) {
+            npStart.core.chrome.navLinks.update(app.navLinkId || app.id, {
+              url: updatedFields.activeUrl,
+            });
+          }
+        });
+      }
     });
 
     npStart.plugins.kibana_legacy.getForwards().forEach(({ legacyAppId, newAppId, keepPrefix }) => {

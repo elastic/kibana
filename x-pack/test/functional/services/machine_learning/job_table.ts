@@ -176,6 +176,7 @@ export function MachineLearningJobTableProvider({ getService }: FtrProviderConte
     }
 
     public async assertJobRowFields(jobId: string, expectedRow: object) {
+      await this.refreshJobList();
       const rows = await this.parseJobTable();
       const jobRow = rows.filter(row => row.id === jobId)[0];
       expect(jobRow).to.eql(expectedRow);
