@@ -38,7 +38,7 @@ export interface QueryGlobalState {
  * @param stateContainer
  */
 export const connectToQueryGlobalState = <S extends QueryGlobalState>(
-  { timefilter: { timefilter }, filterManager }: QueryStart,
+  { timefilter: { timefilter }, filterManager }: Pick<QueryStart, 'timefilter' | 'filterManager'>,
   globalState: BaseStateContainer<S>
 ) => {
   // initial syncing

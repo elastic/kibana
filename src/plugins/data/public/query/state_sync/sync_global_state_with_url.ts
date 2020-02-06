@@ -33,7 +33,7 @@ const GLOBAL_STATE_STORAGE_KEY = '_g';
  * @param kbnUrlStateStorage - url storage to use
  */
 export const syncGlobalQueryStateWithUrl = (
-  query: QueryStart,
+  query: Pick<QueryStart, 'filterManager' | 'timefilter'>,
   kbnUrlStateStorage: IKbnUrlStateStorage
 ) => {
   const {

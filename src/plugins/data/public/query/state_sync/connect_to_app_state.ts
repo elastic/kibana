@@ -35,7 +35,7 @@ export interface QueryAppState {
  * @param stateContainer
  */
 export function connectToQueryAppState<S extends QueryAppState>(
-  { filterManager }: QueryStart,
+  { filterManager }: Pick<QueryStart, 'filterManager'>,
   appState: BaseStateContainer<S>
 ) {
   // initial syncing

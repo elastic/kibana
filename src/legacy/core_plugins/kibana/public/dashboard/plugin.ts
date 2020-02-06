@@ -48,7 +48,8 @@ import {
 } from '../../../../../plugins/kibana_legacy/public';
 import { createSavedDashboardLoader } from './saved_dashboard/saved_dashboards';
 import { createKbnUrlTracker } from '../../../../../plugins/kibana_utils/public';
-import { getQueryStateContainer } from '../../../../../plugins/data/public';
+import { connectToQueryGlobalState } from '../../../../../plugins/data/public';
+import { createStateContainer } from '../../../../../plugins/kibana_utils/common/state_containers/create_state_container';
 
 export interface LegacyAngularInjectedDependencies {
   dashboardConfig: any;
@@ -92,8 +93,10 @@ export class DashboardPlugin implements Plugin {
       npData,
     }: DashboardPluginSetupDependencies
   ) {
-    const { querySyncStateContainer, stop: stopQuerySyncStateContainer } = getQueryStateContainer(
-      npData.query
+    const globalQueryStateContainer = createStateContainer({});
+    const disconnectGlobalQueryStateContainer = connectToQueryGlobalState(
+      npData.query,
+      globalQueryStateContainer
     );
     const { appMounted, appUnMounted, stop: stopUrlTracker } = createKbnUrlTracker({
       baseUrl: core.http.basePath.prepend('/app/kibana'),
@@ -104,12 +107,12 @@ export class DashboardPlugin implements Plugin {
       stateParams: [
         {
           kbnUrlKey: '_g',
-          stateUpdate$: querySyncStateContainer.state$,
+          stateUpdate$: globalQueryStateContainer.state$,
         },
       ],
     });
     this.stopUrlTracking = () => {
-      stopQuerySyncStateContainer();
+      disconnectGlobalQueryStateContainer();
       stopUrlTracker();
     };
     const app: App = {
