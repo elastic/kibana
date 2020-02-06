@@ -28,9 +28,6 @@ export const registerMigrateRoute = (
     {
       path: '/api/saved_objects/_migrate',
       validate: false,
-      options: {
-        authRequired: false,
-      },
     },
     async (context, req, res) => {
       const migrator = await migratorPromise;
