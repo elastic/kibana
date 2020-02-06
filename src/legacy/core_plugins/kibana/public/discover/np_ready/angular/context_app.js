@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import { getServices, getAngularModule } from '../../kibana_services';
+import { getAngularModule } from '../../kibana_services';
 import contextAppTemplate from './context_app.html';
 import './context/components/action_bar';
 import { getFirstSortableField } from './context/api/utils/sorting';
@@ -34,8 +34,6 @@ import {
   QueryActionsProvider,
 } from './context/query';
 import { callAfterBindingsWorkaround } from './context/helpers/call_after_bindings_workaround';
-
-const { timefilter } = getServices();
 
 const module = getAngularModule();
 
@@ -62,10 +60,6 @@ module.directive('contextApp', function ContextApp() {
 function ContextAppController($scope, config, Private) {
   const queryParameterActions = getQueryParameterActions();
   const queryActions = Private(QueryActionsProvider);
-
-  timefilter.disableAutoRefreshSelector();
-  timefilter.disableTimeRangeSelector();
-
   this.state = createInitialState(
     parseInt(config.get('context:step'), 10),
     getFirstSortableField(this.indexPattern, config.get('context:tieBreakerFields')),
