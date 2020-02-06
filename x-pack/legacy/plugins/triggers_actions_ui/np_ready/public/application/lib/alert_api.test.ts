@@ -35,6 +35,8 @@ describe('loadAlertTypes', () => {
       {
         id: 'test',
         name: 'Test',
+        actionVariables: ['var1'],
+        actionGroups: ['default'],
       },
     ];
     http.get.mockResolvedValueOnce(resolvedValue);
@@ -300,6 +302,7 @@ describe('createAlert', () => {
   test('should call create alert API', async () => {
     const alertToCreate = {
       name: 'test',
+      consumer: 'alerting',
       tags: ['foo'],
       enabled: true,
       alertTypeId: 'test',
@@ -309,7 +312,6 @@ describe('createAlert', () => {
       actions: [],
       params: {},
       throttle: null,
-      consumer: '',
       createdAt: new Date('1970-01-01T00:00:00.000Z'),
       updatedAt: new Date('1970-01-01T00:00:00.000Z'),
       apiKey: null,
@@ -331,7 +333,7 @@ describe('createAlert', () => {
       Array [
         "/api/alert",
         Object {
-          "body": "{\\"name\\":\\"test\\",\\"tags\\":[\\"foo\\"],\\"enabled\\":true,\\"alertTypeId\\":\\"test\\",\\"schedule\\":{\\"interval\\":\\"1m\\"},\\"actions\\":[],\\"params\\":{},\\"throttle\\":null,\\"consumer\\":\\"\\",\\"createdAt\\":\\"1970-01-01T00:00:00.000Z\\",\\"updatedAt\\":\\"1970-01-01T00:00:00.000Z\\",\\"apiKey\\":null,\\"apiKeyOwner\\":null}",
+          "body": "{\\"name\\":\\"test\\",\\"consumer\\":\\"alerting\\",\\"tags\\":[\\"foo\\"],\\"enabled\\":true,\\"alertTypeId\\":\\"test\\",\\"schedule\\":{\\"interval\\":\\"1m\\"},\\"actions\\":[],\\"params\\":{},\\"throttle\\":null,\\"createdAt\\":\\"1970-01-01T00:00:00.000Z\\",\\"updatedAt\\":\\"1970-01-01T00:00:00.000Z\\",\\"apiKey\\":null,\\"apiKeyOwner\\":null}",
         },
       ]
     `);
@@ -342,6 +344,7 @@ describe('updateAlert', () => {
   test('should call alert update API', async () => {
     const alertToUpdate = {
       throttle: '1m',
+      consumer: 'alerting',
       name: 'test',
       tags: ['foo'],
       schedule: {
@@ -349,7 +352,6 @@ describe('updateAlert', () => {
       },
       params: {},
       actions: [],
-      consumer: '',
       createdAt: new Date('1970-01-01T00:00:00.000Z'),
       updatedAt: new Date('1970-01-01T00:00:00.000Z'),
       apiKey: null,
@@ -373,7 +375,7 @@ describe('updateAlert', () => {
       Array [
         "/api/alert/123",
         Object {
-          "body": "{\\"throttle\\":\\"1m\\",\\"name\\":\\"test\\",\\"tags\\":[\\"foo\\"],\\"schedule\\":{\\"interval\\":\\"1m\\"},\\"params\\":{},\\"actions\\":[],\\"consumer\\":\\"\\",\\"createdAt\\":\\"1970-01-01T00:00:00.000Z\\",\\"updatedAt\\":\\"1970-01-01T00:00:00.000Z\\",\\"apiKey\\":null,\\"apiKeyOwner\\":null}",
+          "body": "{\\"throttle\\":\\"1m\\",\\"consumer\\":\\"alerting\\",\\"name\\":\\"test\\",\\"tags\\":[\\"foo\\"],\\"schedule\\":{\\"interval\\":\\"1m\\"},\\"params\\":{},\\"actions\\":[],\\"createdAt\\":\\"1970-01-01T00:00:00.000Z\\",\\"updatedAt\\":\\"1970-01-01T00:00:00.000Z\\",\\"apiKey\\":null,\\"apiKeyOwner\\":null}",
         },
       ]
     `);
