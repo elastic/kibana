@@ -152,6 +152,8 @@ describe('CalendarsList', () => {
     expect(wrapper).toMatchSnapshot();
   });
 
+  // disabled broken tests
+
   // test('Sets selected calendars list on checkbox change', () => {
   //   const wrapper = mount(
   //     <I18nProvider>
