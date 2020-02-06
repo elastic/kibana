@@ -116,17 +116,13 @@ export class Bundle {
    *
    * @param mtimes pre-fetched mtimes (ms || undefined) for all referenced files
    */
-  createCacheKey(mtimes: Map<string, number | undefined>) {
-    return createHash('sha1')
-      .update(
-        [
-          `bundleSpec:${JSON.stringify(this.toSpec())}`,
-          ...(this.cache.getReferencedFiles() || []).map(p => `${p}:${mtimes.get(p)}`),
-        ]
-          .sort(ascending(l => l))
-          .join('\n')
-      )
-      .digest('hex');
+  createCacheKey(files: string[], mtimes: Map<string, number | undefined>) {
+    return [
+      `bundleSpec:${JSON.stringify(this.toSpec())}`,
+      ...files.map(p => `path:${p}:${mtimes.get(p)}`),
+    ]
+      .sort(ascending(l => l))
+      .join('\n');
   }
 
   /**

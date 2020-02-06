@@ -127,10 +127,11 @@ const observeCompiler = (
         );
       }
 
+      const files = Array.from(referencedFiles);
       const mtimes = new Map(
-        Array.from(referencedFiles).map((path): [string, number | undefined] => {
+        files.map((path): [string, number | undefined] => {
           try {
-            return [path, compiler.inputFileSystem.statSync(path)?.mtime];
+            return [path, compiler.inputFileSystem.statSync(path)?.mtimeMs];
           } catch (error) {
             if (error?.code === 'ENOENT') {
               return [path, undefined];
@@ -143,9 +144,9 @@ const observeCompiler = (
 
       bundle.cache.set({
         optimizerVersion: workerConfig.optimizerVersion,
-        key: bundle.createCacheKey(mtimes),
+        key: bundle.createCacheKey(files, mtimes),
         moduleCount: normalModules.length,
-        files: Array.from(referencedFiles),
+        files,
       });
 
       return compilerMsgs.compilerSuccess({

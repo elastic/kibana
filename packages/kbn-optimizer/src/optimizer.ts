@@ -101,7 +101,11 @@ export class Optimizer {
       )
     );
 
-    return eligible.filter(bundle => bundle.createCacheKey(mtimes) === bundle.cache.getKey());
+    return eligible.filter(
+      bundle =>
+        bundle.cache.getKey() ===
+        bundle.createCacheKey(bundle.cache.getReferencedFiles() || [], mtimes)
+    );
   }
 
   /**
