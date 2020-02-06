@@ -19,7 +19,7 @@
 
 import { get, has } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { AggConfigs } from 'ui/agg_types/agg_configs';
+import { AggConfigs, IAggConfigs } from 'ui/agg_types';
 import { createFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
 import {
   KibanaContext,
@@ -50,7 +50,7 @@ import { serializeAggConfig } from './utils';
 
 export interface RequestHandlerParams {
   searchSource: ISearchSource;
-  aggs: AggConfigs;
+  aggs: IAggConfigs;
   timeRange?: TimeRange;
   query?: Query;
   filters?: esFilters.Filter[];

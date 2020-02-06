@@ -18,7 +18,7 @@
  */
 
 import { SavedObjectAttributes } from 'src/core/public';
-import { SavedObjectMetaData } from '../types';
+import { SavedObjectMetaData } from '../../../../saved_objects/public';
 import { EmbeddableInput, EmbeddableOutput, IEmbeddable } from './i_embeddable';
 import { ErrorEmbeddable } from './error_embeddable';
 import { IContainer } from '../containers/i_container';
@@ -40,7 +40,7 @@ export interface OutputSpec {
   [key: string]: PropertySpec;
 }
 
-export interface EmbeddableFactoryOptions<T> {
+export interface EmbeddableFactoryOptions<T extends SavedObjectAttributes> {
   savedObjectMetaData?: SavedObjectMetaData<T>;
 }
 
