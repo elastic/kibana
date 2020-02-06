@@ -44,10 +44,11 @@ export function essql(): ExpressionFunctionDefinition<'essql', Filter, Arguments
         help: argHelp.timezone,
       },
     },
-    fn: (input, args, context) =>
-      queryEsSQL(((context as any) as { elasticsearchClient: any }).elasticsearchClient, {
+    fn: (input, args, context) => {
+      return queryEsSQL(((context as any) as { elasticsearchClient: any }).elasticsearchClient, {
         ...args,
         filter: input.and,
-      }),
+      });
+    },
   };
 }
