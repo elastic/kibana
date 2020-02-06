@@ -17,19 +17,25 @@
  * under the License.
  */
 
-import { SavedObjectsSchema } from './schema';
+import { ISavedObjectTypeRegistry } from './saved_objects_type_registry';
 
-type Schema = PublicMethodsOf<SavedObjectsSchema>;
-const createSchemaMock = () => {
-  const mocked: jest.Mocked<Schema> = {
-    getIndexForType: jest.fn().mockReturnValue('.kibana-test'),
-    isHiddenType: jest.fn().mockReturnValue(false),
-    isNamespaceAgnostic: jest.fn((type: string) => type === 'global'),
-    getConvertToAliasScript: jest.fn().mockReturnValue(undefined),
+const createRegistryMock = (): jest.Mocked<ISavedObjectTypeRegistry> => {
+  const mock = {
+    registerType: jest.fn(),
+    getType: jest.fn(),
+    getAllTypes: jest.fn(),
+    isNamespaceAgnostic: jest.fn(),
+    isHidden: jest.fn(),
+    getIndex: jest.fn(),
   };
-  return mocked;
+
+  mock.getIndex.mockReturnValue('.kibana-test');
+  mock.isHidden.mockReturnValue(false);
+  mock.isNamespaceAgnostic.mockImplementation((type: string) => type === 'global');
+
+  return mock;
 };
 
-export const schemaMock = {
-  create: createSchemaMock,
+export const typeRegistryMock = {
+  create: createRegistryMock,
 };
