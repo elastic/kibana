@@ -32,7 +32,7 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
 
   public setup(
     core: CoreSetup,
-    { kibana_legacy, home }: { kibana_legacy: KibanaLegacySetup; home: HomePublicPluginSetup }
+    { kibanaLegacy, home }: { kibanaLegacy: KibanaLegacySetup; home: HomePublicPluginSetup }
   ) {
     home.featureCatalogue.register({
       id: 'stack-management',
@@ -50,7 +50,7 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
 
     return {
       sections: this.managementSections.setup(
-        kibana_legacy,
+        kibanaLegacy,
         this.legacyManagement.getManagement,
         core.getStartServices
       ),

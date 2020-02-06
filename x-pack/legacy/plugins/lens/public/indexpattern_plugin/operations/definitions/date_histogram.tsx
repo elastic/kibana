@@ -27,7 +27,7 @@ import { updateColumnParam } from '../../state_helpers';
 import { OperationDefinition } from '.';
 import { FieldBasedIndexPatternColumn } from './column_types';
 import { autoIntervalFromDateRange } from '../../auto_date';
-import { AggregationRestrictions } from '../../types';
+import { AggregationRestrictions } from '../../../../../../../../src/plugins/data/public';
 
 const autoInterval = 'auto';
 const calendarOnlyIntervals = new Set(['w', 'M', 'q', 'y']);
