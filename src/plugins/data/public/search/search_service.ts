@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { BehaviorSubject } from 'rxjs';
 import {
   Plugin,
   CoreSetup,
@@ -80,22 +79,17 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   private contextContainer?: IContextContainer<TSearchStrategyProvider<any>>;
   private esClient?: LegacyApiCaller;
   private search?: ISearchGeneric;
-  private readonly loadingCount$ = new BehaviorSubject(0);
 
   constructor(private initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, packageInfo: PackageInfo): ISearchSetup {
-    core.http.addLoadingCountSource(this.loadingCount$);
-    const search = (this.search = createAppMountSearchContext(
-      this.searchStrategies,
-      this.loadingCount$
-    ).search);
+    const search = (this.search = createAppMountSearchContext(this.searchStrategies).search);
     core.application.registerMountContext<'search'>('search', () => {
       return { search };
     });
 
     this.contextContainer = core.context.createContextContainer();
-    this.esClient = getEsClient(core.injectedMetadata, core.http, packageInfo, this.loadingCount$);
+    this.esClient = getEsClient(core.injectedMetadata, core.http, packageInfo);
 
     const registerSearchStrategyProvider: TRegisterSearchStrategyProvider = <
       T extends TStrategyTypes

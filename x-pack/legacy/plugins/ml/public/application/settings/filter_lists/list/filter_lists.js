@@ -11,7 +11,7 @@
 import React, { Component, Fragment } from 'react';
 import { PropTypes } from 'prop-types';
 
-import { EuiPage, EuiPageContent } from '@elastic/eui';
+import { EuiPage, EuiPageBody, EuiPageContent } from '@elastic/eui';
 
 import { injectI18n } from '@kbn/i18n/react';
 
@@ -90,24 +90,26 @@ export const FilterLists = injectI18n(
         <Fragment>
           <NavigationMenu tabId="settings" />
           <EuiPage className="ml-list-filter-lists">
-            <EuiPageContent
-              className="ml-list-filter-lists-content"
-              verticalPosition="center"
-              horizontalPosition="center"
-            >
-              <FilterListsHeader
-                totalCount={filterLists.length}
-                refreshFilterLists={this.refreshFilterLists}
-              />
-              <FilterListsTable
-                canCreateFilter={canCreateFilter}
-                canDeleteFilter={canDeleteFilter}
-                filterLists={filterLists}
-                selectedFilterLists={selectedFilterLists}
-                setSelectedFilterLists={this.setSelectedFilterLists}
-                refreshFilterLists={this.refreshFilterLists}
-              />
-            </EuiPageContent>
+            <EuiPageBody>
+              <EuiPageContent
+                className="ml-list-filter-lists-content"
+                verticalPosition="center"
+                horizontalPosition="center"
+              >
+                <FilterListsHeader
+                  totalCount={filterLists.length}
+                  refreshFilterLists={this.refreshFilterLists}
+                />
+                <FilterListsTable
+                  canCreateFilter={canCreateFilter}
+                  canDeleteFilter={canDeleteFilter}
+                  filterLists={filterLists}
+                  selectedFilterLists={selectedFilterLists}
+                  setSelectedFilterLists={this.setSelectedFilterLists}
+                  refreshFilterLists={this.refreshFilterLists}
+                />
+              </EuiPageContent>
+            </EuiPageBody>
           </EuiPage>
         </Fragment>
       );

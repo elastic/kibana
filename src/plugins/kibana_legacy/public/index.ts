@@ -20,8 +20,7 @@
 import { PluginInitializerContext } from 'kibana/public';
 import { KibanaLegacyPlugin } from './plugin';
 
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new KibanaLegacyPlugin();
-}
+export const plugin = (initializerContext: PluginInitializerContext) =>
+  new KibanaLegacyPlugin(initializerContext);
 
 export * from './plugin';
