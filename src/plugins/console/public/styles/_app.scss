@@ -48,6 +48,7 @@
   button {
     line-height: inherit;
   }
+
   position: absolute;
   z-index: $euiZLevel1;
   top: 0;
@@ -88,4 +89,13 @@
 
 .conApp__settingsModal {
   min-width: 460px;
+}
+
+.conApp__requestProgressBarContainer {
+  position: relative;
+  z-index: $euiZLevel2;
+}
+
+.conApp__tabsExtension {
+  border-bottom: $euiBorderThin;
 }
