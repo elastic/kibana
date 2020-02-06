@@ -15,7 +15,7 @@ tailor the documents table to suit your needs.
 
 [horizontal]
 Add a field column::
-Hover over the list of *Available fields* and then click *add* next to each field you want include as a column in the table.
+Hover over the list of *Available fields* and then click *add* next to each field you want to include as a column in the table.
 The first field you add replaces the `_source` column.
 Change sort order:: By default, columns are sorted by the values in the field.
 If a time field is configured for the current index pattern,

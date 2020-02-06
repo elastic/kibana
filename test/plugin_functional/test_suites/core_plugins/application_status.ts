@@ -24,50 +24,36 @@ import {
   AppUpdatableFields,
 } from '../../../../src/core/public/application/types';
 import { PluginFunctionalProviderContext } from '../../services';
-import { CoreAppStatusPluginStart } from '../../plugins/core_app_status/public/plugin';
-import '../../plugins/core_provider_plugin/types';
+import '../../plugins/core_app_status/public/types';
 
 // eslint-disable-next-line import/no-default-export
 export default function({ getService, getPageObjects }: PluginFunctionalProviderContext) {
-  const PageObjects = getPageObjects(['common']);
+  const PageObjects = getPageObjects(['common', 'settings']);
   const browser = getService('browser');
   const appsMenu = getService('appsMenu');
+  const testSubjects = getService('testSubjects');
 
   const setAppStatus = async (s: Partial<AppUpdatableFields>) => {
-    await browser.executeAsync(async (status: Partial<AppUpdatableFields>, cb: Function) => {
-      const plugin = window.__coreProvider.start.plugins
-        .core_app_status as CoreAppStatusPluginStart;
-      plugin.setAppStatus(status);
+    return browser.executeAsync(async (status: Partial<AppUpdatableFields>, cb: Function) => {
+      window.__coreAppStatus.setAppStatus(status);
       cb();
     }, s);
   };
 
-  const navigateToApp = async (i: string): Promise<{ error?: string }> => {
+  const navigateToApp = async (i: string) => {
     return (await browser.executeAsync(async (appId, cb: Function) => {
-      // navigating in legacy mode performs a page refresh
-      // and webdriver seems to re-execute the script after the reload
-      // as it considers it didn't end on the previous session.
-      // however when testing navigation to NP app, __coreProvider is not accessible
-      // so we need to check for existence.
-      if (!window.__coreProvider) {
-        cb({});
-      }
-      const plugin = window.__coreProvider.start.plugins
-        .core_app_status as CoreAppStatusPluginStart;
-      try {
-        await plugin.navigateToApp(appId);
-        cb({});
-      } catch (e) {
-        cb({
-          error: e.message,
-        });
-      }
+      await window.__coreAppStatus.navigateToApp(appId);
+      cb();
     }, i)) as any;
   };
 
   describe('application status management', () => {
+    before(async () => {
+      await PageObjects.settings.setNavType('individual');
+    });
+
     beforeEach(async () => {
-      await PageObjects.common.navigateToApp('settings');
+      await PageObjects.common.navigateToApp('app_status_start');
     });
 
     it('can change the navLink status at runtime', async () => {
@@ -98,10 +84,10 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
         status: AppStatus.inaccessible,
       });
 
-      const result = await navigateToApp('app_status');
-      expect(result.error).to.contain(
-        'Trying to navigate to an inaccessible application: app_status'
-      );
+      await navigateToApp('app_status');
+
+      expect(await testSubjects.exists('appNotFoundPageContent')).to.eql(true);
+      expect(await testSubjects.exists('appStatusApp')).to.eql(false);
     });
 
     it('allows to navigate to an accessible app', async () => {
@@ -109,8 +95,35 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
         status: AppStatus.accessible,
       });
 
-      const result = await navigateToApp('app_status');
-      expect(result.error).to.eql(undefined);
+      await navigateToApp('app_status');
+
+      expect(await testSubjects.exists('appNotFoundPageContent')).to.eql(false);
+      expect(await testSubjects.exists('appStatusApp')).to.eql(true);
+    });
+
+    it('can change the state of the currently mounted app', async () => {
+      await setAppStatus({
+        status: AppStatus.accessible,
+      });
+
+      await navigateToApp('app_status');
+
+      expect(await testSubjects.exists('appNotFoundPageContent')).to.eql(false);
+      expect(await testSubjects.exists('appStatusApp')).to.eql(true);
+
+      await setAppStatus({
+        status: AppStatus.inaccessible,
+      });
+
+      expect(await testSubjects.exists('appNotFoundPageContent')).to.eql(true);
+      expect(await testSubjects.exists('appStatusApp')).to.eql(false);
+
+      await setAppStatus({
+        status: AppStatus.accessible,
+      });
+
+      expect(await testSubjects.exists('appNotFoundPageContent')).to.eql(false);
+      expect(await testSubjects.exists('appStatusApp')).to.eql(true);
     });
   });
 }

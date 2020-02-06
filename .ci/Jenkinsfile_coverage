@@ -16,14 +16,14 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
                 withEnv([
                   'NODE_ENV=test' // Needed for jest tests only
                 ]) {
-                  kibanaPipeline.legacyJobRunner('kibana-intake')()
+                  kibanaPipeline.intakeWorker('kibana-intake', './test/scripts/jenkins_unit.sh')()
                 }
               },
               'x-pack-intake-agent': {
                 withEnv([
                   'NODE_ENV=test' // Needed for jest tests only
                 ]) {
-                  kibanaPipeline.legacyJobRunner('x-pack-intake')()
+                  kibanaPipeline.intakeWorker('x-pack-intake', './test/scripts/jenkins_xpack.sh')()
                 }
               },
               'kibana-oss-agent': kibanaPipeline.withWorkers('kibana-oss-tests', { kibanaPipeline.buildOss() }, [
@@ -40,16 +40,11 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
                 'oss-ciGroup11': kibanaPipeline.getOssCiGroupWorker(11),
                 'oss-ciGroup12': kibanaPipeline.getOssCiGroupWorker(12),
               ]),
-              'kibana-xpack-agent-1': kibanaPipeline.withWorkers('kibana-xpack-tests-1', { kibanaPipeline.buildXpack() }, [
+              'kibana-xpack-agent': kibanaPipeline.withWorkers('kibana-xpack-tests', { kibanaPipeline.buildXpack() }, [
                 'xpack-ciGroup1': kibanaPipeline.getXpackCiGroupWorker(1),
                 'xpack-ciGroup2': kibanaPipeline.getXpackCiGroupWorker(2),
-              ]),
-              'kibana-xpack-agent-2': kibanaPipeline.withWorkers('kibana-xpack-tests-2', { kibanaPipeline.buildXpack() }, [
                 'xpack-ciGroup3': kibanaPipeline.getXpackCiGroupWorker(3),
                 'xpack-ciGroup4': kibanaPipeline.getXpackCiGroupWorker(4),
-              ]),
-
-              'kibana-xpack-agent-3': kibanaPipeline.withWorkers('kibana-xpack-tests-3', { kibanaPipeline.buildXpack() }, [
                 'xpack-ciGroup5': kibanaPipeline.getXpackCiGroupWorker(5),
                 'xpack-ciGroup6': kibanaPipeline.getXpackCiGroupWorker(6),
                 'xpack-ciGroup7': kibanaPipeline.getXpackCiGroupWorker(7),
@@ -75,9 +70,7 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
                   echo extracting kibana-oss-tests
                   tar -xzf /tmp/downloaded_coverage/coverage/kibana-oss-tests/kibana-coverage.tar.gz -C /tmp/extracted_coverage
                   echo extracting kibana-xpack-tests
-                  for i in {1..3}; do
-                    tar -xzf /tmp/downloaded_coverage/coverage/kibana-xpack-tests-${i}/kibana-coverage.tar.gz -C /tmp/extracted_coverage
-                  done
+                  tar -xzf /tmp/downloaded_coverage/coverage/kibana-xpack-tests/kibana-coverage.tar.gz -C /tmp/extracted_coverage
                   # replace path in json files to have valid html report
                   pwd=$(pwd)
                   du -sh /tmp/extracted_coverage/target/kibana-coverage/

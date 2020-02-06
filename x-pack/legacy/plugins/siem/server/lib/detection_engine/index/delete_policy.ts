@@ -11,7 +11,7 @@ export const deletePolicy = async (
   policy: string
 ): Promise<unknown> => {
   return callWithRequest('transport.request', {
-    path: `_ilm/policy/${policy}`,
+    path: `/_ilm/policy/${policy}`,
     method: 'DELETE',
   });
 };

@@ -6,19 +6,24 @@
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
+import { identity } from 'fp-ts/lib/function';
 import React from 'react';
 
+import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { NoIndices } from '../../../components/empty_states/no_indices';
 import {
   ViewSourceConfigurationButton,
   ViewSourceConfigurationButtonHrefBase,
 } from '../../../components/source_configuration';
-import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 
 export const LogsPageNoIndicesContent = () => {
-  const basePath = useKibana().services.http?.basePath || '';
-  const uiCapabilities = useKibana().services.application?.capabilities;
+  const {
+    services: { application, http },
+  } = useKibana<{}>();
+
+  const canConfigureSource = application?.capabilities?.logs?.configureSource ? true : false;
+  const prependBasePath = http?.basePath.prepend ?? identity;
+
   return (
     <NoIndices
       data-test-subj="noLogsIndicesPrompt"
@@ -32,7 +37,7 @@ export const LogsPageNoIndicesContent = () => {
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiButton
-              href={`${basePath}/app/kibana#/home/tutorial_directory/logging`}
+              href={prependBasePath('/app/kibana#/home/tutorial_directory/logging')}
               color="primary"
               fill
               data-test-subj="logsViewSetupInstructionsButton"
@@ -42,7 +47,7 @@ export const LogsPageNoIndicesContent = () => {
               })}
             </EuiButton>
           </EuiFlexItem>
-          {uiCapabilities?.logs?.configureSource ? (
+          {canConfigureSource ? (
             <EuiFlexItem>
               <ViewSourceConfigurationButton
                 data-test-subj="configureSourceButton"

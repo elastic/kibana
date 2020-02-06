@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { getInternalSavedObjectsClient } from '../helpers/saved_objects_client';
-import apmIndexPattern from '../../../../../../../src/legacy/core_plugins/kibana/server/tutorials/apm/index_pattern.json';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import apmIndexPattern from '../../../../../../plugins/apm/server/tutorial/index_pattern.json';
 import { APM_STATIC_INDEX_PATTERN_ID } from '../../../common/index_pattern_constants';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { SavedObjectsErrorHelpers } from '../../../../../../../src/core/server/saved_objects';

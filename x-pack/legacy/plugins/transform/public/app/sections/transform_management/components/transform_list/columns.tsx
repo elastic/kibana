@@ -138,6 +138,7 @@ export const getColumns = (
       name: 'ID',
       sortable: true,
       truncateText: true,
+      scope: 'row',
     },
     {
       field: TRANSFORM_LIST_COLUMN.DESCRIPTION,

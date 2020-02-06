@@ -10,9 +10,13 @@ import * as H from 'history';
 import * as i18n from '../translations';
 import { TableData } from '../types';
 import { Action } from './reducer';
-import { deleteRulesAction, enableRulesAction, exportRulesAction } from './actions';
+import {
+  deleteRulesAction,
+  duplicateRulesAction,
+  enableRulesAction,
+  exportRulesAction,
+} from './actions';
 import { ActionToaster } from '../../../../components/toasters';
-import { DETECTION_ENGINE_PAGE_NAME } from '../../../../components/link_to/redirect_to_detection_engine';
 
 export const getBatchItems = (
   selectedState: TableData[],
@@ -25,7 +29,6 @@ export const getBatchItems = (
   const containsDisabled = selectedState.some(v => !v.activate);
   const containsLoading = selectedState.some(v => v.isLoading);
   const containsImmutable = selectedState.some(v => v.immutable);
-  const containsMultipleRules = Array.from(new Set(selectedState.map(v => v.rule_id))).length > 1;
 
   return [
     <EuiContextMenuItem
@@ -67,23 +70,25 @@ export const getBatchItems = (
       {i18n.BATCH_ACTION_EXPORT_SELECTED}
     </EuiContextMenuItem>,
     <EuiContextMenuItem
-      key={i18n.BATCH_ACTION_EDIT_INDEX_PATTERNS}
-      icon="indexEdit"
-      disabled={
-        containsImmutable || containsLoading || containsMultipleRules || selectedState.length === 0
-      }
+      key={i18n.BATCH_ACTION_DUPLICATE_SELECTED}
+      icon="copy"
+      disabled={containsLoading || selectedState.length === 0}
       onClick={async () => {
         closePopover();
-        history.push(`/${DETECTION_ENGINE_PAGE_NAME}/rules/id/${selectedState[0].id}/edit`);
+        await duplicateRulesAction(
+          selectedState.map(s => s.sourceRule),
+          dispatch,
+          dispatchToaster
+        );
       }}
     >
-      {i18n.BATCH_ACTION_EDIT_INDEX_PATTERNS}
+      {i18n.BATCH_ACTION_DUPLICATE_SELECTED}
     </EuiContextMenuItem>,
     <EuiContextMenuItem
       key={i18n.BATCH_ACTION_DELETE_SELECTED}
       icon="trash"
       title={containsImmutable ? i18n.BATCH_ACTION_DELETE_SELECTED_IMMUTABLE : undefined}
-      disabled={containsImmutable || containsLoading || selectedState.length === 0}
+      disabled={containsLoading || selectedState.length === 0}
       onClick={async () => {
         closePopover();
         await deleteRulesAction(

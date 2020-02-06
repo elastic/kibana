@@ -6,9 +6,8 @@
 
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
-import chrome from 'ui/chrome';
-import { MANAGEMENT_BREADCRUMB } from 'ui/management';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
 import {
   EuiButton,
@@ -25,6 +24,8 @@ import {
   EuiTitle,
   EuiCallOut,
 } from '@elastic/eui';
+
+import { withKibana } from '../../../../../../../../src/plugins/kibana_react/public/';
 
 import { CRUD_APP_BASE_PATH } from '../../constants';
 import { getRouterLinkProps, extractQueryParams, listBreadcrumb } from '../../services';
@@ -67,7 +68,7 @@ export class JobListUi extends Component {
 
     props.loadJobs();
 
-    chrome.breadcrumbs.set([MANAGEMENT_BREADCRUMB, listBreadcrumb]);
+    props.kibana.services.setBreadcrumbs([listBreadcrumb]);
 
     this.state = {};
   }
@@ -97,9 +98,7 @@ export class JobListUi extends Component {
   }
 
   renderNoPermission() {
-    const { intl } = this.props;
-    const title = intl.formatMessage({
-      id: 'xpack.rollupJobs.jobList.noPermissionTitle',
+    const title = i18n.translate('xpack.rollupJobs.jobList.noPermissionTitle', {
       defaultMessage: 'Permission error',
     });
     return (
@@ -122,13 +121,11 @@ export class JobListUi extends Component {
   }
 
   renderError(error) {
-    // We can safely depend upon the shape of this error coming from Angular $http, because we
+    // We can safely depend upon the shape of this error coming from http service, because we
     // handle unexpected error shapes in the API action.
-    const { statusCode, error: errorString } = error.data;
+    const { statusCode, error: errorString } = error.body;
 
-    const { intl } = this.props;
-    const title = intl.formatMessage({
-      id: 'xpack.rollupJobs.jobList.loadingErrorTitle',
+    const title = i18n.translate('xpack.rollupJobs.jobList.loadingErrorTitle', {
       defaultMessage: 'Error loading rollup jobs',
     });
     return (
@@ -254,4 +251,4 @@ export class JobListUi extends Component {
   }
 }
 
-export const JobList = injectI18n(JobListUi);
+export const JobList = withKibana(JobListUi);

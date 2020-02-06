@@ -6,14 +6,11 @@
 
 import {
   createMockServer,
-  createMockServerWithoutActionClientDecoration,
   createMockServerWithoutAlertClientDecoration,
-  createMockServerWithoutActionOrAlertClientDecoration,
 } from '../__mocks__/_mock_server';
 
 import { readRulesRoute } from './read_rules_route';
 import { ServerInjectOptions } from 'hapi';
-import { ServerFacade } from '../../../../types';
 
 import {
   getFindResult,
@@ -29,7 +26,7 @@ describe('read_signals', () => {
 
   beforeEach(() => {
     ({ server, alertsClient, savedObjectsClient } = createMockServer());
-    readRulesRoute((server as unknown) as ServerFacade);
+    readRulesRoute(server);
   });
 
   afterEach(() => {
@@ -45,26 +42,10 @@ describe('read_signals', () => {
       expect(statusCode).toBe(200);
     });
 
-    test('returns 404 if actionClient is not available on the route', async () => {
-      const { serverWithoutActionClient } = createMockServerWithoutActionClientDecoration();
-      readRulesRoute((serverWithoutActionClient as unknown) as ServerFacade);
-      const { statusCode } = await serverWithoutActionClient.inject(getReadRequest());
-      expect(statusCode).toBe(404);
-    });
-
     test('returns 404 if alertClient is not available on the route', async () => {
       const { serverWithoutAlertClient } = createMockServerWithoutAlertClientDecoration();
-      readRulesRoute((serverWithoutAlertClient as unknown) as ServerFacade);
+      readRulesRoute(serverWithoutAlertClient);
       const { statusCode } = await serverWithoutAlertClient.inject(getReadRequest());
-      expect(statusCode).toBe(404);
-    });
-
-    test('returns 404 if alertClient and actionClient are both not available on the route', async () => {
-      const {
-        serverWithoutActionOrAlertClient,
-      } = createMockServerWithoutActionOrAlertClientDecoration();
-      readRulesRoute((serverWithoutActionOrAlertClient as unknown) as ServerFacade);
-      const { statusCode } = await serverWithoutActionOrAlertClient.inject(getReadRequest());
       expect(statusCode).toBe(404);
     });
   });

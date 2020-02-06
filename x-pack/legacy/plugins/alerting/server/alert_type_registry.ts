@@ -69,6 +69,7 @@ export class AlertTypeRegistry {
     return Array.from(this.alertTypes).map(([alertTypeId, alertType]) => ({
       id: alertTypeId,
       name: alertType.name,
+      actionGroups: alertType.actionGroups,
     }));
   }
 }

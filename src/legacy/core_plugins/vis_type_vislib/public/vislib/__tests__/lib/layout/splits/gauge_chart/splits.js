@@ -18,9 +18,9 @@
  */
 
 import d3 from 'd3';
-import ngMock from 'ng_mock';
 import expect from '@kbn/expect';
 import $ from 'jquery';
+
 import { chartSplit } from '../../../../../lib/layout/splits/gauge_chart/chart_split';
 import { chartTitleSplit } from '../../../../../lib/layout/splits/gauge_chart/chart_title_split';
 
@@ -148,16 +148,13 @@ describe('Vislib Gauge Split Function Test Suite', function() {
       ],
     };
 
-    beforeEach(ngMock.module('kibana'));
-    beforeEach(
-      ngMock.inject(function() {
-        el = d3
-          .select('body')
-          .append('div')
-          .attr('class', 'visualization')
-          .datum(data);
-      })
-    );
+    beforeEach(function() {
+      el = d3
+        .select('body')
+        .append('div')
+        .attr('class', 'visualization')
+        .datum(data);
+    });
 
     afterEach(function() {
       el.remove();
@@ -166,11 +163,9 @@ describe('Vislib Gauge Split Function Test Suite', function() {
     describe('chart split function', function() {
       let fixture;
 
-      beforeEach(
-        ngMock.inject(function() {
-          fixture = d3.select('.visualization').call(chartSplit);
-        })
-      );
+      beforeEach(function() {
+        fixture = d3.select('.visualization').call(chartSplit);
+      });
 
       afterEach(function() {
         fixture.remove();
@@ -188,15 +183,13 @@ describe('Vislib Gauge Split Function Test Suite', function() {
     describe('chart title split function', function() {
       let visEl;
 
-      beforeEach(
-        ngMock.inject(function() {
-          visEl = el.append('div').attr('class', 'visWrapper');
-          visEl.append('div').attr('class', 'visAxis__splitTitles--x');
-          visEl.append('div').attr('class', 'visAxis__splitTitles--y');
-          visEl.select('.visAxis__splitTitles--x').call(chartTitleSplit);
-          visEl.select('.visAxis__splitTitles--y').call(chartTitleSplit);
-        })
-      );
+      beforeEach(function() {
+        visEl = el.append('div').attr('class', 'visWrapper');
+        visEl.append('div').attr('class', 'visAxis__splitTitles--x');
+        visEl.append('div').attr('class', 'visAxis__splitTitles--y');
+        visEl.select('.visAxis__splitTitles--x').call(chartTitleSplit);
+        visEl.select('.visAxis__splitTitles--y').call(chartTitleSplit);
+      });
 
       afterEach(function() {
         visEl.remove();

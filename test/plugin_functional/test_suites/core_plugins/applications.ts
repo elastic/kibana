@@ -121,13 +121,13 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
       expect(wrapperWidth).to.be.below(windowWidth);
     });
 
-    it.skip('can navigate from NP apps to legacy apps', async () => {
-      await appsMenu.clickLink('Management');
+    it('can navigate from NP apps to legacy apps', async () => {
+      await appsMenu.clickLink('Stack Management');
       await loadingScreenShown();
       await testSubjects.existOrFail('managementNav');
     });
 
-    it.skip('can navigate from legacy apps to NP apps', async () => {
+    it('can navigate from legacy apps to NP apps', async () => {
       await appsMenu.clickLink('Foo');
       await loadingScreenShown();
       await testSubjects.existOrFail('fooAppHome');

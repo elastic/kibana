@@ -183,6 +183,13 @@ export const scale = (state: CameraState): Vector2 => {
 };
 
 /**
+ * Scales the coordinate system, used for zooming. Should always be between 0 and 1
+ */
+export const scalingFactor = (state: CameraState): CameraState['scalingFactor'] => {
+  return state.scalingFactor;
+};
+
+/**
  * Whether or not the user is current panning the map.
  */
 export const userIsPanning = (state: CameraState): boolean => state.panning !== undefined;

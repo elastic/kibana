@@ -198,7 +198,7 @@ export type TestSubjects =
   | 'backButton'
   | 'codeEditorContainer'
   | 'confirmModalConfirmButton'
-  | 'createFieldWrapper.addChildButton'
+  | 'createFieldWrapper.addPropertyButton'
   | 'createFieldWrapper.addButton'
   | 'createFieldWrapper.addFieldButton'
   | 'createFieldWrapper.addMultiFieldButton'

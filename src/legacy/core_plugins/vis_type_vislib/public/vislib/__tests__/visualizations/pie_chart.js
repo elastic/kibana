@@ -18,20 +18,17 @@
  */
 
 import d3 from 'd3';
-import ngMock from 'ng_mock';
 import _ from 'lodash';
 import $ from 'jquery';
-
 import expect from '@kbn/expect';
-// TODO: Remove ui imports once converting to jest
-import 'ui/persisted_state';
-import { vislibSlicesResponseHandlerProvider } from 'ui/vis/response_handlers/vislib';
 
 import fixtures from 'fixtures/fake_hierarchical_data';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 
-import getFixturesVislibVisFixtureProvider from '../lib/fixtures/_vis_fixture';
-import { Vis, tabifyAggResponse } from '../../../legacy_imports';
+import { Vis } from '../../../../../visualizations/public';
+import { getVis, getMockUiState } from '../lib/fixtures/_vis_fixture';
+import { tabifyAggResponse } from '../../../legacy_imports';
+import { vislibSlicesResponseHandler } from '../../response_handler';
 
 const rowAgg = [
   { type: 'avg', schema: 'metric', params: { field: 'bytes' } },
@@ -123,35 +120,31 @@ describe('No global chart settings', function() {
     addTooltip: true,
   };
   let chart1;
-  let persistedState;
+  let mockUiState;
   let indexPattern;
   let responseHandler;
   let data1;
   let stubVis1;
 
-  beforeEach(ngMock.module('kibana'));
-  beforeEach(
-    ngMock.inject(function(Private, $injector) {
-      const getVis = getFixturesVislibVisFixtureProvider(Private);
-      chart1 = getVis(visLibParams1);
-      persistedState = new ($injector.get('PersistedState'))();
-      indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
-      responseHandler = vislibSlicesResponseHandlerProvider().handler;
+  beforeEach(() => {
+    chart1 = getVis(visLibParams1);
+    mockUiState = getMockUiState();
+    indexPattern = new FixturesStubbedLogstashIndexPatternProvider();
+    responseHandler = vislibSlicesResponseHandler;
 
-      let id1 = 1;
-      stubVis1 = new Vis(indexPattern, {
-        type: 'pie',
-        aggs: rowAgg,
-      });
+    let id1 = 1;
+    stubVis1 = new Vis(indexPattern, {
+      type: 'pie',
+      aggs: rowAgg,
+    });
 
-      stubVis1.isHierarchical = () => true;
+    stubVis1.isHierarchical = () => true;
 
-      // We need to set the aggs to a known value.
-      _.each(stubVis1.aggs.aggs, function(agg) {
-        agg.id = 'agg_' + id1++;
-      });
-    })
-  );
+    // We need to set the aggs to a known value.
+    _.each(stubVis1.aggs.aggs, function(agg) {
+      agg.id = 'agg_' + id1++;
+    });
+  });
 
   beforeEach(async () => {
     const table1 = tabifyAggResponse(stubVis1.aggs, fixtures.threeTermBuckets, {
@@ -159,7 +152,7 @@ describe('No global chart settings', function() {
     });
     data1 = await responseHandler(table1, rowAggDimensions);
 
-    chart1.render(data1, persistedState);
+    chart1.render(data1, mockUiState);
   });
 
   afterEach(function() {
@@ -216,40 +209,37 @@ describe('Vislib PieChart Class Test Suite', function() {
         addTooltip: true,
       };
       let vis;
-      let persistedState;
+      let mockUiState;
       let indexPattern;
       let data;
       let stubVis;
       let responseHandler;
 
-      beforeEach(ngMock.module('kibana'));
-      beforeEach(
-        ngMock.inject(function(Private, $injector) {
-          const getVis = getFixturesVislibVisFixtureProvider(Private);
-          vis = getVis(visLibParams);
-          persistedState = new ($injector.get('PersistedState'))();
-          indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
-          responseHandler = vislibSlicesResponseHandlerProvider().handler;
+      beforeEach(() => {
+        vis = getVis(visLibParams);
+        mockUiState = getMockUiState();
+        indexPattern = new FixturesStubbedLogstashIndexPatternProvider();
+        responseHandler = vislibSlicesResponseHandler;
 
-          let id = 1;
-          stubVis = new Vis(indexPattern, {
-            type: 'pie',
-            aggs: dataAgg,
-          });
+        let id = 1;
+        stubVis = new Vis(indexPattern, {
+          type: 'pie',
+          aggs: dataAgg,
+        });
 
-          // We need to set the aggs to a known value.
-          _.each(stubVis.aggs.aggs, function(agg) {
-            agg.id = 'agg_' + id++;
-          });
-        })
-      );
+        // We need to set the aggs to a known value.
+        _.each(stubVis.aggs.aggs, function(agg) {
+          agg.id = 'agg_' + id++;
+        });
+      });
 
       beforeEach(async () => {
         const table = tabifyAggResponse(stubVis.aggs, fixtures.threeTermBuckets, {
           metricsAtAllLevels: true,
         });
         data = await responseHandler(table, dataDimensions);
-        vis.render(data, persistedState);
+
+        vis.render(data, mockUiState);
       });
 
       afterEach(function() {

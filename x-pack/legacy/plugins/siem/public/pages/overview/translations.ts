@@ -6,17 +6,13 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const ALERTS_COUNT_BY = (groupByField: string) =>
-  i18n.translate('xpack.siem.overview.alertsCountByTitle', {
-    values: { groupByField },
-    defaultMessage: 'Alerts count by {groupByField}',
-  });
+export const ALERTS_GRAPH_TITLE = i18n.translate('xpack.siem.overview.alertsGraphTitle', {
+  defaultMessage: 'External alerts count',
+});
 
-export const EVENTS_COUNT_BY = (groupByField: string) =>
-  i18n.translate('xpack.siem.overview.eventsCountByTitle', {
-    values: { groupByField },
-    defaultMessage: 'Events count by {groupByField}',
-  });
+export const EVENTS = i18n.translate('xpack.siem.overview.eventsTitle', {
+  defaultMessage: 'Events count',
+});
 
 export const NEWS_FEED_TITLE = i18n.translate('xpack.siem.overview.newsFeedSidebarTitle', {
   defaultMessage: 'Security news',
@@ -30,21 +26,12 @@ export const PAGE_SUBTITLE = i18n.translate('xpack.siem.overview.pageSubtitle', 
   defaultMessage: 'Security Information & Event Management with the Elastic Stack',
 });
 
-export const PAGE_BADGE_LABEL = i18n.translate('xpack.siem.overview.pageBadgeLabel', {
-  defaultMessage: 'Beta',
-});
-
-export const PAGE_BADGE_TOOLTIP = i18n.translate('xpack.siem.overview.pageBadgeTooltip', {
-  defaultMessage:
-    'SIEM is still in beta. Please help us improve by reporting issues or bugs in the Kibana repo.',
-});
-
 export const RECENT_TIMELINES = i18n.translate('xpack.siem.overview.recentTimelinesSidebarTitle', {
   defaultMessage: 'Recent timelines',
 });
 
-export const SIGNALS_BY_CATEGORY = i18n.translate('xpack.siem.overview.signalsByCategoryTitle', {
-  defaultMessage: 'Signals count by MITRE ATT&CK\\u2122 category',
+export const SIGNAL_COUNT = i18n.translate('xpack.siem.overview.signalCountTitle', {
+  defaultMessage: 'Signals count',
 });
 
 export const VIEW_ALERTS = i18n.translate('xpack.siem.overview.viewAlertsButtonLabel', {

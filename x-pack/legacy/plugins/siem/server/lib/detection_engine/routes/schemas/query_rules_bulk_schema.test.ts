@@ -24,8 +24,10 @@ describe('query_rules_bulk_schema', () => {
           rule_id: '1',
           id: '1',
         },
-      ]).error
-    ).toBeTruthy();
+      ]).error.message
+    ).toEqual(
+      '"value" at position 0 fails because ["value" contains a conflict between exclusive peers [id, rule_id]]'
+    );
   });
 
   test('both rule_id and id being supplied do not validate if one array element works but the second does not', () => {
@@ -38,8 +40,10 @@ describe('query_rules_bulk_schema', () => {
           rule_id: '1',
           id: '1',
         },
-      ]).error
-    ).toBeTruthy();
+      ]).error.message
+    ).toEqual(
+      '"value" at position 1 fails because ["value" contains a conflict between exclusive peers [id, rule_id]]'
+    );
   });
 
   test('only id validates', () => {

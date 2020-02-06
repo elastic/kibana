@@ -34,6 +34,7 @@ import { DatabaseContext } from './DatabaseContext';
 import { StickySpanProperties } from './StickySpanProperties';
 import { HttpInfoSummaryItem } from '../../../../../../shared/Summary/HttpInfoSummaryItem';
 import { SpanMetadata } from '../../../../../../shared/MetadataTable/SpanMetadata';
+import { SyncBadge } from '../SyncBadge';
 
 function formatType(type: string) {
   switch (type) {
@@ -188,6 +189,7 @@ export function SpanFlyout({
                     <SpanBadge color="hollow">{spanTypes.spanAction}</SpanBadge>
                   </EuiToolTip>
                 )}
+                <SyncBadge sync={span.span.sync} />
               </>
             ]}
           />

@@ -17,36 +17,29 @@
  * under the License.
  */
 
-import ngMock from 'ng_mock';
 import expect from '@kbn/expect';
+import $ from 'jquery';
 
 // Data
 import series from '../fixtures/mock_data/date_histogram/_series';
 import columns from '../fixtures/mock_data/date_histogram/_columns';
 import rows from '../fixtures/mock_data/date_histogram/_rows';
 import stackedSeries from '../fixtures/mock_data/date_histogram/_stacked_series';
-import $ from 'jquery';
-import 'ui/persisted_state';
 
-import getFixturesVislibVisFixtureProvider from '../fixtures/_vis_fixture';
+import { getVis, getMockUiState } from '../fixtures/_vis_fixture';
+
 const dateHistogramArray = [series, columns, rows, stackedSeries];
 const names = ['series', 'columns', 'rows', 'stackedSeries'];
 
 dateHistogramArray.forEach(function(data, i) {
   describe('Vislib Handler Test Suite for ' + names[i] + ' Data', function() {
-    let vis;
-    let persistedState;
     const events = ['click', 'brush'];
+    let vis;
 
-    beforeEach(ngMock.module('kibana'));
-    beforeEach(
-      ngMock.inject(function(Private, $injector) {
-        const getVis = getFixturesVislibVisFixtureProvider(Private);
-        vis = getVis();
-        persistedState = new ($injector.get('PersistedState'))();
-        vis.render(data, persistedState);
-      })
-    );
+    beforeEach(() => {
+      vis = getVis();
+      vis.render(data, getMockUiState());
+    });
 
     afterEach(function() {
       vis.destroy();
@@ -107,9 +100,7 @@ dateHistogramArray.forEach(function(data, i) {
 
     describe('removeAll Method', function() {
       beforeEach(function() {
-        ngMock.inject(function() {
-          vis.handler.removeAll(vis.element);
-        });
+        vis.handler.removeAll(vis.element);
       });
 
       it('should remove all DOM elements from the el', function() {

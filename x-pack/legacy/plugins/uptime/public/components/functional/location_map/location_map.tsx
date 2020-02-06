@@ -6,10 +6,10 @@
 
 import React from 'react';
 import styled from 'styled-components';
-import { EuiFlexGroup, EuiFlexItem, EuiErrorBoundary } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiErrorBoundary, EuiHideFor } from '@elastic/eui';
 import { LocationStatusTags } from './location_status_tags';
 import { EmbeddedMap, LocationPoint } from './embeddables/embedded_map';
-import { MonitorLocations } from '../../../../common/runtime_types';
+import { MonitorLocations, MonitorLocation } from '../../../../common/runtime_types';
 import { UNNAMED_LOCATION } from '../../../../common/constants';
 import { LocationMissingWarning } from './location_missing';
 
@@ -18,7 +18,28 @@ import { LocationMissingWarning } from './location_missing';
 const MapPanel = styled.div`
   height: 240px;
   width: 520px;
-  margin-right: 20px;
+  @media (min-width: 1300px) {
+    margin-right: 20px;
+  }
+  @media (max-width: 574px) {
+    height: 250px;
+    width: 100%;
+    margin-right: 0;
+  }
+`;
+
+const EuiFlexItemTags = styled(EuiFlexItem)`
+  padding-top: 5px;
+  @media (max-width: 850px) {
+    order: 1;
+    text-align: center;
+  }
+`;
+
+const FlexGroup = styled(EuiFlexGroup)`
+  @media (max-width: 850px) {
+    justify-content: center;
+  }
 `;
 
 interface LocationMapProps {
@@ -32,31 +53,42 @@ export const LocationMap = ({ monitorLocations }: LocationMapProps) => {
   let isGeoInfoMissing = false;
 
   if (monitorLocations?.locations) {
-    monitorLocations.locations.forEach((item: any) => {
-      if (item.geo?.name !== UNNAMED_LOCATION) {
-        if (item.summary.down === 0) {
-          upPoints.push(item.geo.location);
-        } else {
-          downPoints.push(item.geo.location);
-        }
-      } else if (item.geo?.name === UNNAMED_LOCATION) {
+    monitorLocations.locations.forEach((item: MonitorLocation) => {
+      if (item.geo?.name === UNNAMED_LOCATION || !item.geo?.location) {
         isGeoInfoMissing = true;
+      } else if (
+        item.geo?.name !== UNNAMED_LOCATION &&
+        !!item.geo.location.lat &&
+        !!item.geo.location.lon
+      ) {
+        // TypeScript doesn't infer that the above checks in this block's condition
+        // ensure that lat and lon are defined when we try to pass the location object directly,
+        // but if we destructure the values it does. Improvement to this block is welcome.
+        const { lat, lon } = item.geo.location;
+        if (item?.summary?.down === 0) {
+          upPoints.push({ lat, lon });
+        } else {
+          downPoints.push({ lat, lon });
+        }
       }
     });
   }
+
   return (
     <EuiErrorBoundary>
-      <EuiFlexGroup>
-        <EuiFlexItem grow={false}>
+      <FlexGroup wrap={true} gutterSize="none">
+        <EuiFlexItemTags>
           <LocationStatusTags locations={monitorLocations?.locations || []} />
+        </EuiFlexItemTags>
+        <EuiFlexItem grow={false}>
+          <EuiHideFor sizes={['xs']}>
+            {isGeoInfoMissing && <LocationMissingWarning />}
+            <MapPanel>
+              <EmbeddedMap upPoints={upPoints} downPoints={downPoints} />
+            </MapPanel>
+          </EuiHideFor>
         </EuiFlexItem>
-        <EuiFlexItem grow={true}>
-          {isGeoInfoMissing && <LocationMissingWarning />}
-          <MapPanel>
-            <EmbeddedMap upPoints={upPoints} downPoints={downPoints} />
-          </MapPanel>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      </FlexGroup>
     </EuiErrorBoundary>
   );
 };

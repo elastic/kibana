@@ -57,6 +57,7 @@ export default function({ getService, getPageObjects }) {
         ];
         await inspector.open();
         await inspector.expectTableData(expectedData);
+        await inspector.close();
       });
 
       it('should change results after changing layer to world', async function() {
@@ -94,6 +95,8 @@ export default function({ getService, getPageObjects }) {
           ['BR', '415'],
         ];
         expect(actualData).to.eql(expectedData);
+
+        await inspector.close();
       });
 
       it('should contain a dropdown with the default road_map base layer as an option', async () => {

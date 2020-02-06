@@ -45,11 +45,25 @@ const MyEuiFlexItem = styled(EuiFlexItem)`
   white-space: nowrap;
 `;
 
-const EuiSelectableContainer = styled.div`
+const EuiSelectableContainer = styled.div<{ loading: boolean }>`
   .euiSelectable {
     .euiFormControlLayout__childrenWrapper {
       display: flex;
     }
+    ${({ loading }) => `${
+      loading
+        ? `
+      .euiFormControlLayoutIcons {
+        display: none;
+      }
+      .euiFormControlLayoutIcons.euiFormControlLayoutIcons--right {
+        display: block;
+        left: 12px;
+        top: 12px;
+      }`
+        : ''
+    }
+    `}
   }
 `;
 
@@ -59,6 +73,7 @@ const MyEuiFlexGroup = styled(EuiFlexGroup)`
 
 interface SearchTimelineSuperSelectProps {
   isDisabled: boolean;
+  hideUntitled?: boolean;
   timelineId: string | null;
   timelineTitle: string | null;
   onTimelineChange: (timelineTitle: string, timelineId: string | null) => void;
@@ -87,6 +102,7 @@ const POPOVER_HEIGHT = 260;
 const TIMELINE_ITEM_HEIGHT = 50;
 const SearchTimelineSuperSelectComponent: React.FC<SearchTimelineSuperSelectProps> = ({
   isDisabled,
+  hideUntitled = false,
   timelineId,
   timelineTitle,
   onTimelineChange,
@@ -265,7 +281,7 @@ const SearchTimelineSuperSelectComponent: React.FC<SearchTimelineSuperSelectProp
         onlyUserFavorite={onlyFavorites}
       >
         {({ timelines, loading, totalCount }) => (
-          <EuiSelectableContainer>
+          <EuiSelectableContainer loading={loading}>
             <EuiSelectable
               height={POPOVER_HEIGHT}
               isLoading={loading && timelines.length === 0}
@@ -273,7 +289,11 @@ const SearchTimelineSuperSelectComponent: React.FC<SearchTimelineSuperSelectProp
                 rowHeight: TIMELINE_ITEM_HEIGHT,
                 showIcons: false,
                 virtualizedProps: ({
-                  onScroll: handleOnScroll.bind(null, timelines.length, totalCount),
+                  onScroll: handleOnScroll.bind(
+                    null,
+                    timelines.filter(t => !hideUntitled || t.title !== '').length,
+                    totalCount
+                  ),
                 } as unknown) as ListProps,
               }}
               renderOption={renderTimelineOption}
@@ -294,18 +314,20 @@ const SearchTimelineSuperSelectComponent: React.FC<SearchTimelineSuperSelectProp
                 ...(!onlyFavorites && searchTimelineValue === ''
                   ? getBasicSelectableOptions(timelineId == null ? '-1' : timelineId)
                   : []),
-                ...timelines.map(
-                  (t, index) =>
-                    ({
-                      description: t.description,
-                      favorite: t.favorite,
-                      label: t.title,
-                      id: t.savedObjectId,
-                      key: `${t.title}-${index}`,
-                      title: t.title,
-                      checked: t.savedObjectId === timelineId ? 'on' : undefined,
-                    } as Option)
-                ),
+                ...timelines
+                  .filter(t => !hideUntitled || t.title !== '')
+                  .map(
+                    (t, index) =>
+                      ({
+                        description: t.description,
+                        favorite: t.favorite,
+                        label: t.title,
+                        id: t.savedObjectId,
+                        key: `${t.title}-${index}`,
+                        title: t.title,
+                        checked: t.savedObjectId === timelineId ? 'on' : undefined,
+                      } as Option)
+                  ),
               ]}
             >
               {(list, search) => (

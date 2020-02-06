@@ -12,7 +12,12 @@ import { EditorFrameInstance } from '../types';
 import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
 import { Document, SavedObjectStore } from '../persistence';
 import { mount } from 'enzyme';
-import { esFilters, IFieldType, IIndexPattern } from '../../../../../../src/plugins/data/public';
+import {
+  esFilters,
+  FilterManager,
+  IFieldType,
+  IIndexPattern,
+} from '../../../../../../src/plugins/data/public';
 import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks';
 const dataStartMock = dataPluginMock.createStartContract();
 
@@ -55,11 +60,19 @@ function createMockFilterManager() {
         return unsubscribe;
       },
     }),
-    setFilters: (newFilters: unknown[]) => {
+    setFilters: jest.fn((newFilters: unknown[]) => {
       filters = newFilters;
-      subscriber();
-    },
+      if (subscriber) subscriber();
+    }),
+    setAppFilters: jest.fn((newFilters: unknown[]) => {
+      filters = newFilters;
+      if (subscriber) subscriber();
+    }),
     getFilters: () => filters,
+    getGlobalFilters: () => {
+      // @ts-ignore
+      return filters.filter(esFilters.isFilterPinned);
+    },
     removeAll: () => {
       filters = [];
       subscriber();
@@ -180,6 +193,13 @@ describe('Lens App', () => {
     `);
   });
 
+  it('clears app filters on load', () => {
+    const defaultArgs = makeDefaultArgs();
+    mount(<App {...defaultArgs} />);
+
+    expect(defaultArgs.data.query.filterManager.setAppFilters).toHaveBeenCalledWith([]);
+  });
+
   it('sets breadcrumbs when the document title changes', async () => {
     const defaultArgs = makeDefaultArgs();
     const instance = mount(<App {...defaultArgs} />);
@@ -217,7 +237,7 @@ describe('Lens App', () => {
       expect(args.docStorage.load).not.toHaveBeenCalled();
     });
 
-    it('loads a document and uses query if there is a document id', async () => {
+    it('loads a document and uses query and filters if there is a document id', async () => {
       const args = makeDefaultArgs();
       args.editorFrame = frame;
       (args.docStorage.load as jest.Mock).mockResolvedValue({
@@ -225,6 +245,7 @@ describe('Lens App', () => {
         expression: 'valid expression',
         state: {
           query: 'fake query',
+          filters: [{ query: { match_phrase: { src: 'test' } } }],
           datasourceMetaData: { filterableIndexPatterns: [{ id: '1', title: 'saved' }] },
         },
       });
@@ -236,6 +257,9 @@ describe('Lens App', () => {
 
       expect(args.docStorage.load).toHaveBeenCalledWith('1234');
       expect(args.data.indexPatterns.get).toHaveBeenCalledWith('1');
+      expect(args.data.query.filterManager.setAppFilters).toHaveBeenCalledWith([
+        { query: { match_phrase: { src: 'test' } } },
+      ]);
       expect(TopNavMenu).toHaveBeenCalledWith(
         expect.objectContaining({
           query: 'fake query',
@@ -251,6 +275,7 @@ describe('Lens App', () => {
             expression: 'valid expression',
             state: {
               query: 'fake query',
+              filters: [{ query: { match_phrase: { src: 'test' } } }],
               datasourceMetaData: { filterableIndexPatterns: [{ id: '1', title: 'saved' }] },
             },
           },
@@ -821,7 +846,7 @@ describe('Lens App', () => {
       );
     });
 
-    it('clears all existing filters when the active saved query is cleared', () => {
+    it('clears all existing unpinned filters when the active saved query is cleared', () => {
       const args = makeDefaultArgs();
       args.editorFrame = frame;
 
@@ -834,8 +859,13 @@ describe('Lens App', () => {
 
       const indexPattern = ({ id: 'index1' } as unknown) as IIndexPattern;
       const field = ({ name: 'myfield' } as unknown) as IFieldType;
+      const pinnedField = ({ name: 'pinnedField' } as unknown) as IFieldType;
 
-      args.data.query.filterManager.setFilters([esFilters.buildExistsFilter(field, indexPattern)]);
+      const unpinned = esFilters.buildExistsFilter(field, indexPattern);
+      const pinned = esFilters.buildExistsFilter(pinnedField, indexPattern);
+      FilterManager.setFiltersStore([pinned], esFilters.FilterStateStore.GLOBAL_STATE);
+
+      args.data.query.filterManager.setFilters([pinned, unpinned]);
       instance.update();
 
       instance.find(TopNavMenu).prop('onClearSavedQuery')!();
@@ -844,7 +874,7 @@ describe('Lens App', () => {
       expect(frame.mount).toHaveBeenLastCalledWith(
         expect.any(Element),
         expect.objectContaining({
-          filters: [],
+          filters: [pinned],
         })
       );
     });

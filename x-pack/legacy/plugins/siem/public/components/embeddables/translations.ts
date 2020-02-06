@@ -41,6 +41,20 @@ export const DESTINATION_LAYER = i18n.translate(
   }
 );
 
+export const CLIENT_LAYER = i18n.translate(
+  'xpack.siem.components.embeddables.embeddedMap.clientLayerLabel',
+  {
+    defaultMessage: 'Client Point',
+  }
+);
+
+export const SERVER_LAYER = i18n.translate(
+  'xpack.siem.components.embeddables.embeddedMap.serverLayerLabel',
+  {
+    defaultMessage: 'Server Point',
+  }
+);
+
 export const LINE_LAYER = i18n.translate(
   'xpack.siem.components.embeddables.embeddedMap.lineLayerLabel',
   {
@@ -118,6 +132,20 @@ export const DESTINATION_IP = i18n.translate(
   }
 );
 
+export const CLIENT_IP = i18n.translate(
+  'xpack.siem.components.embeddables.mapToolTip.pointContent.clientIPTitle',
+  {
+    defaultMessage: 'Client IP',
+  }
+);
+
+export const SERVER_IP = i18n.translate(
+  'xpack.siem.components.embeddables.mapToolTip.pointContent.serverIPTitle',
+  {
+    defaultMessage: 'Server IP',
+  }
+);
+
 export const SOURCE_DOMAIN = i18n.translate(
   'xpack.siem.components.embeddables.mapToolTip.pointContent.sourceDomainTitle',
   {
@@ -129,6 +157,20 @@ export const DESTINATION_DOMAIN = i18n.translate(
   'xpack.siem.components.embeddables.mapToolTip.pointContent.destinationDomainTitle',
   {
     defaultMessage: 'Destination domain',
+  }
+);
+
+export const CLIENT_DOMAIN = i18n.translate(
+  'xpack.siem.components.embeddables.mapToolTip.pointContent.clientDomainTitle',
+  {
+    defaultMessage: 'Client domain',
+  }
+);
+
+export const SERVER_DOMAIN = i18n.translate(
+  'xpack.siem.components.embeddables.mapToolTip.pointContent.serverDomainTitle',
+  {
+    defaultMessage: 'Server domain',
   }
 );
 
@@ -157,5 +199,19 @@ export const DESTINATION = i18n.translate(
   'xpack.siem.components.embeddables.mapToolTip.lineContent.destinationLabel',
   {
     defaultMessage: 'Destination',
+  }
+);
+
+export const CLIENT = i18n.translate(
+  'xpack.siem.components.embeddables.mapToolTip.lineContent.clientLabel',
+  {
+    defaultMessage: 'Client',
+  }
+);
+
+export const SERVER = i18n.translate(
+  'xpack.siem.components.embeddables.mapToolTip.lineContent.serverLabel',
+  {
+    defaultMessage: 'Server',
   }
 );

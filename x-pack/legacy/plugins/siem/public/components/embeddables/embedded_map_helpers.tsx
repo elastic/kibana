@@ -7,6 +7,7 @@
 import uuid from 'uuid';
 import React from 'react';
 import { OutPortal, PortalNode } from 'react-reverse-portal';
+import minimatch from 'minimatch';
 import { ViewMode } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
 import {
   IndexPatternMapping,
@@ -20,6 +21,7 @@ import { getLayerList } from './map_config';
 import { MAP_SAVED_OBJECT_TYPE } from '../../../../maps/common/constants';
 import * as i18n from './translations';
 import { Query, esFilters } from '../../../../../../../src/plugins/data/public';
+import { IndexPatternSavedObject } from '../../hooks/types';
 
 /**
  * Creates MapEmbeddable with provided initial configuration
@@ -107,4 +109,26 @@ export const createEmbeddable = async (
   });
 
   return embeddableObject;
+};
+
+/**
+ * Returns kibanaIndexPatterns that wildcard match at least one of siemDefaultIndices
+ *
+ * @param kibanaIndexPatterns
+ * @param siemDefaultIndices
+ */
+export const findMatchingIndexPatterns = ({
+  kibanaIndexPatterns,
+  siemDefaultIndices,
+}: {
+  kibanaIndexPatterns: IndexPatternSavedObject[];
+  siemDefaultIndices: string[];
+}): IndexPatternSavedObject[] => {
+  try {
+    return kibanaIndexPatterns.filter(kip =>
+      siemDefaultIndices.some(sdi => minimatch(sdi, kip.attributes.title))
+    );
+  } catch {
+    return [];
+  }
 };

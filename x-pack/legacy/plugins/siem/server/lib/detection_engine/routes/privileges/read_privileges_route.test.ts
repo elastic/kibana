@@ -7,7 +7,6 @@
 import { createMockServer } from '../__mocks__/_mock_server';
 import { getPrivilegeRequest, getMockPrivileges } from '../__mocks__/request_responses';
 import { readPrivilegesRoute } from './read_privileges_route';
-import { ServerFacade } from '../../../../types';
 import * as myUtils from '../utils';
 
 describe('read_privileges', () => {
@@ -19,7 +18,7 @@ describe('read_privileges', () => {
     elasticsearch.getCluster = jest.fn(() => ({
       callWithRequest: jest.fn(() => getMockPrivileges()),
     }));
-    readPrivilegesRoute((server as unknown) as ServerFacade);
+    readPrivilegesRoute(server);
   });
 
   afterEach(() => {

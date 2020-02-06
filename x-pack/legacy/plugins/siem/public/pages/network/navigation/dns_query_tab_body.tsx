@@ -7,7 +7,6 @@
 import React, { useEffect, useCallback } from 'react';
 import { getOr } from 'lodash/fp';
 
-import { EuiSpacer } from '@elastic/eui';
 import { NetworkDnsTable } from '../../../components/page/network/network_dns_table';
 import { NetworkDnsQuery, HISTOGRAM_ID } from '../../../containers/network_dns';
 import { manageQuery } from '../../../components/page/manage_query';
@@ -24,7 +23,7 @@ const NetworkDnsTableManage = manageQuery(NetworkDnsTable);
 
 const dnsStackByOptions: MatrixHistogramOption[] = [
   {
-    text: i18n.STACK_BY_DOMAIN,
+    text: 'dns.question.registered_domain',
     value: 'dns.question.registered_domain',
   },
 ];
@@ -70,9 +69,7 @@ export const DnsQueryTabBody = ({
         title={getTitle}
         type={networkModel.NetworkType.page}
         updateDateRange={updateDateRange}
-        showLegend={false}
       />
-      <EuiSpacer />
       <NetworkDnsQuery
         endDate={endDate}
         filterQuery={filterQuery}

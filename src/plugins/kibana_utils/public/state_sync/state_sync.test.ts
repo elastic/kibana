@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { BaseState, BaseStateContainer, createStateContainer } from '../state_containers';
+import { BaseState, BaseStateContainer, createStateContainer } from '../../common/state_containers';
 import {
   defaultState,
   pureTransitions,
@@ -288,6 +288,42 @@ describe('state_sync', () => {
 
       expect(history.length).toBe(startHistoryLength);
       expect(getCurrentUrl()).toMatchInlineSnapshot(`"/"`);
+
+      stop();
+    });
+
+    it("should preserve reference to unchanged state slices if them didn't change", async () => {
+      const otherUnchangedSlice = { a: 'test' };
+      const oldState = {
+        todos: container.get().todos,
+        otherUnchangedSlice,
+      };
+      container.set(oldState as any);
+
+      const { stop, start } = syncStates([
+        {
+          stateContainer: withDefaultState(container, defaultState),
+          storageKey: key,
+          stateStorage: urlSyncStrategy,
+        },
+      ]);
+      await urlSyncStrategy.set('_s', container.get());
+      expect(getCurrentUrl()).toMatchInlineSnapshot(
+        `"/#?_s=(otherUnchangedSlice:(a:test),todos:!((completed:!f,id:0,text:'Learning%20state%20containers')))"`
+      );
+      start();
+
+      history.replace(
+        "/#?_s=(otherUnchangedSlice:(a:test),todos:!((completed:!t,id:0,text:'Learning%20state%20containers')))"
+      );
+
+      const newState = container.get();
+      expect(newState.todos).toEqual([
+        { id: 0, text: 'Learning state containers', completed: true },
+      ]);
+
+      // reference to unchanged slice is preserved
+      expect((newState as any).otherUnchangedSlice).toBe(otherUnchangedSlice);
 
       stop();
     });

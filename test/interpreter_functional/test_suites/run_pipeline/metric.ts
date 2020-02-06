@@ -81,11 +81,15 @@ export default function({
         ).toMatchScreenshot();
       });
 
-      it('with percentage option', async () => {
+      it('with percentageMode option', async () => {
         const expression =
-          'metricVis metric={visdimension 0} percentage=true colorRange={range from=0 to=1000}';
+          'metricVis metric={visdimension 0} percentageMode=true colorRange={range from=0 to=1000}';
         await (
-          await expectExpression('metric_percentage', expression, dataContext).toMatchSnapshot()
+          await expectExpression(
+            'metric_percentage_mode',
+            expression,
+            dataContext
+          ).toMatchSnapshot()
         ).toMatchScreenshot();
       });
     });

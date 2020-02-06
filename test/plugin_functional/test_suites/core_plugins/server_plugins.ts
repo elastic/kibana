@@ -55,14 +55,14 @@ export default function({ getService }: PluginFunctionalProviderContext) {
         });
     });
 
-    it('renders core application explicitly', async () => {
-      await supertest.get('/requestcontext/render/core').expect(200, /app:core/);
-    });
-
-    it('renders legacy application', async () => {
+    it('sets request.isSystemRequest when kbn-system-request header is set', async () => {
       await supertest
-        .get('/requestcontext/render/core_plugin_legacy')
-        .expect(200, /app:core_plugin_legacy/);
+        .post('/core_plugin_b/system_request')
+        .set('kbn-xsrf', 'anything')
+        .set('kbn-system-request', 'true')
+        .send()
+        .expect(200)
+        .expect('System request? true');
     });
   });
 }

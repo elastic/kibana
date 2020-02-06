@@ -15,7 +15,7 @@ type IStackframeBase = {
   vars?: {
     [key: string]: unknown;
   };
-  line: {
+  line?: {
     number: number;
   };
 } & ({ classname: string } | { filename: string });

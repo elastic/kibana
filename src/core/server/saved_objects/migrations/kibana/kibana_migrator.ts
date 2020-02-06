@@ -24,30 +24,23 @@
 
 import { Logger } from 'src/core/server/logging';
 import { KibanaConfigType } from 'src/core/server/kibana_config';
-import { MappingProperties, SavedObjectsMapping, IndexMapping } from '../../mappings';
-import { SavedObjectsSchema } from '../../schema';
-import { RawSavedObjectDoc, SavedObjectsSerializer } from '../../serialization';
+import { IndexMapping, SavedObjectsTypeMappingDefinitions } from '../../mappings';
+import { SavedObjectUnsanitizedDoc, SavedObjectsSerializer } from '../../serialization';
 import { docValidator, PropertyValidators } from '../../validation';
 import { buildActiveMappings, CallCluster, IndexMigrator } from '../core';
-import {
-  DocumentMigrator,
-  VersionedTransformer,
-  MigrationDefinition,
-} from '../core/document_migrator';
+import { DocumentMigrator, VersionedTransformer } from '../core/document_migrator';
 import { createIndexMap } from '../core/build_index_map';
 import { SavedObjectsConfigType } from '../../saved_objects_config';
-import { LegacyConfig } from '../../../legacy';
+import { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
+import { SavedObjectsType } from '../../types';
 
 export interface KibanaMigratorOptions {
   callCluster: CallCluster;
-  config: LegacyConfig;
+  typeRegistry: ISavedObjectTypeRegistry;
   savedObjectsConfig: SavedObjectsConfigType;
   kibanaConfig: KibanaConfigType;
   kibanaVersion: string;
   logger: Logger;
-  savedObjectMappings: SavedObjectsMapping[];
-  savedObjectMigrations: MigrationDefinition;
-  savedObjectSchemas: SavedObjectsSchema;
   savedObjectValidations: PropertyValidators;
 }
 
@@ -58,13 +51,12 @@ export type IKibanaMigrator = Pick<KibanaMigrator, keyof KibanaMigrator>;
  */
 export class KibanaMigrator {
   private readonly callCluster: CallCluster;
-  private readonly config: LegacyConfig;
   private readonly savedObjectsConfig: SavedObjectsConfigType;
   private readonly documentMigrator: VersionedTransformer;
   private readonly kibanaConfig: KibanaConfigType;
   private readonly log: Logger;
-  private readonly mappingProperties: MappingProperties;
-  private readonly schema: SavedObjectsSchema;
+  private readonly mappingProperties: SavedObjectsTypeMappingDefinitions;
+  private readonly typeRegistry: ISavedObjectTypeRegistry;
   private readonly serializer: SavedObjectsSerializer;
   private migrationResult?: Promise<Array<{ status: string }>>;
 
@@ -73,27 +65,23 @@ export class KibanaMigrator {
    */
   constructor({
     callCluster,
-    config,
+    typeRegistry,
     kibanaConfig,
     savedObjectsConfig,
+    savedObjectValidations,
     kibanaVersion,
     logger,
-    savedObjectMappings,
-    savedObjectMigrations,
-    savedObjectSchemas,
-    savedObjectValidations,
   }: KibanaMigratorOptions) {
-    this.config = config;
     this.callCluster = callCluster;
     this.kibanaConfig = kibanaConfig;
     this.savedObjectsConfig = savedObjectsConfig;
-    this.schema = savedObjectSchemas;
-    this.serializer = new SavedObjectsSerializer(this.schema);
-    this.mappingProperties = mergeProperties(savedObjectMappings || []);
+    this.typeRegistry = typeRegistry;
+    this.serializer = new SavedObjectsSerializer(this.typeRegistry);
+    this.mappingProperties = mergeTypes(this.typeRegistry.getAllTypes());
     this.log = logger;
     this.documentMigrator = new DocumentMigrator({
       kibanaVersion,
-      migrations: savedObjectMigrations || {},
+      typeRegistry,
       validateDoc: docValidator(savedObjectValidations || {}),
       log: this.log,
     });
@@ -107,30 +95,20 @@ export class KibanaMigrator {
    *    The promise resolves with an array of migration statuses, one for each
    *    elasticsearch index which was migrated.
    */
-  public runMigrations(skipMigrations: boolean = false): Promise<Array<{ status: string }>> {
+  public runMigrations(): Promise<Array<{ status: string }>> {
     if (this.migrationResult === undefined) {
-      this.migrationResult = this.runMigrationsInternal(skipMigrations);
+      this.migrationResult = this.runMigrationsInternal();
     }
 
     return this.migrationResult;
   }
 
-  private runMigrationsInternal(skipMigrations: boolean) {
-    if (skipMigrations) {
-      this.log.warn(
-        'Skipping Saved Object migrations on startup. Note: Individual documents will still be migrated when read or written.'
-      );
-      return Promise.resolve(
-        Object.keys(this.mappingProperties).map(() => ({ status: 'skipped' }))
-      );
-    }
-
+  private runMigrationsInternal() {
     const kibanaIndexName = this.kibanaConfig.index;
     const indexMap = createIndexMap({
-      config: this.config,
       kibanaIndexName,
       indexMap: this.mappingProperties,
-      schema: this.schema,
+      registry: this.typeRegistry,
     });
 
     const migrators = Object.keys(indexMap).map(index => {
@@ -159,7 +137,7 @@ export class KibanaMigrator {
    *
    */
   public getActiveMappings(): IndexMapping {
-    return buildActiveMappings({ properties: this.mappingProperties });
+    return buildActiveMappings(this.mappingProperties);
   }
 
   /**
@@ -168,7 +146,7 @@ export class KibanaMigrator {
    * @param doc - The saved object to migrate
    * @returns `doc` with all registered migrations applied.
    */
-  public migrateDocument(doc: RawSavedObjectDoc): RawSavedObjectDoc {
+  public migrateDocument(doc: SavedObjectUnsanitizedDoc): SavedObjectUnsanitizedDoc {
     return this.documentMigrator.migrate(doc);
   }
 }
@@ -177,12 +155,15 @@ export class KibanaMigrator {
  * Merges savedObjectMappings properties into a single object, verifying that
  * no mappings are redefined.
  */
-export function mergeProperties(mappings: SavedObjectsMapping[]): MappingProperties {
-  return mappings.reduce((acc, { pluginId, properties }) => {
-    const duplicate = Object.keys(properties).find(k => acc.hasOwnProperty(k));
+export function mergeTypes(types: SavedObjectsType[]): SavedObjectsTypeMappingDefinitions {
+  return types.reduce((acc, { name: type, mappings }) => {
+    const duplicate = acc.hasOwnProperty(type);
     if (duplicate) {
-      throw new Error(`Plugin ${pluginId} is attempting to redefine mapping "${duplicate}".`);
+      throw new Error(`Type ${type} is already defined.`);
     }
-    return Object.assign(acc, properties);
+    return {
+      ...acc,
+      [type]: mappings,
+    };
   }, {});
 }

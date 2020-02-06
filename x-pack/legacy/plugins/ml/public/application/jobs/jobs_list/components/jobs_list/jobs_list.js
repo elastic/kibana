@@ -172,6 +172,7 @@ class JobsListUI extends Component {
         sortable: true,
         truncateText: false,
         width: '20%',
+        scope: 'row',
         render: isManagementTable ? id => this.getJobIdLink(id) : undefined,
       },
       {

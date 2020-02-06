@@ -32,6 +32,11 @@ export const inverseProjectionMatrix = composeSelectors(
 export const scale = composeSelectors(cameraStateSelector, cameraSelectors.scale);
 
 /**
+ * Scales the coordinate system, used for zooming. Should always be between 0 and 1
+ */
+export const scalingFactor = composeSelectors(cameraStateSelector, cameraSelectors.scalingFactor);
+
+/**
  * Whether or not the user is current panning the map.
  */
 export const userIsPanning = composeSelectors(cameraStateSelector, cameraSelectors.userIsPanning);

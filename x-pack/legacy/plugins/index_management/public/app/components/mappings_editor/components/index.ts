@@ -9,3 +9,5 @@ export * from './configuration_form';
 export * from './document_fields';
 
 export * from './templates_form';
+
+export * from './multiple_mappings_warning';

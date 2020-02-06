@@ -15,8 +15,7 @@ import {
 } from '@elastic/eui';
 import React, { memo } from 'react';
 
-import { useRuleStatus } from '../../../../containers/detection_engine/rules/use_rule_status';
-import { RuleStatus } from '../../../../containers/detection_engine/rules';
+import { useRuleStatus, RuleInfoStatus } from '../../../../containers/detection_engine/rules';
 import { HeaderSection } from '../../../../components/header_section';
 import * as i18n from './translations';
 import { FormattedDate } from '../../../../components/formatted_date';
@@ -35,7 +34,7 @@ const FailureHistoryComponent: React.FC<FailureHistoryProps> = ({ id }) => {
       </EuiPanel>
     );
   }
-  const columns: Array<EuiBasicTableColumn<RuleStatus>> = [
+  const columns: Array<EuiBasicTableColumn<RuleInfoStatus>> = [
     {
       name: i18n.COLUMN_STATUS_TYPE,
       render: () => <EuiHealth color="danger">{i18n.TYPE_FAILED}</EuiHealth>,
@@ -65,7 +64,9 @@ const FailureHistoryComponent: React.FC<FailureHistoryProps> = ({ id }) => {
       <EuiBasicTable
         columns={columns}
         loading={loading}
-        items={ruleStatus != null ? ruleStatus?.filter(rs => rs.last_failure_at != null) : []}
+        items={
+          ruleStatus != null ? ruleStatus?.failures.filter(rs => rs.last_failure_at != null) : []
+        }
         sorting={{ sort: { field: 'status_date', direction: 'desc' } }}
       />
     </EuiPanel>

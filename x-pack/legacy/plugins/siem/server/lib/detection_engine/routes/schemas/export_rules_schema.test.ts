@@ -37,8 +37,10 @@ describe('create rules schema', () => {
       expect(
         exportRulesSchema.validate<Omit<ExportRulesRequest['payload'], 'objects'>>({
           objects: [{ id: 'test-1' }],
-        }).error
-      ).toBeTruthy();
+        }).error.message
+      ).toEqual(
+        'child "objects" fails because ["objects" at position 0 fails because ["id" is not allowed]]'
+      );
     });
   });
 
@@ -70,8 +72,8 @@ describe('create rules schema', () => {
           Partial<Omit<ExportRulesRequest['query'], 'file_name'> & { file_name: number }>
         >({
           file_name: 5,
-        }).error
-      ).toBeTruthy();
+        }).error.message
+      ).toEqual('child "file_name" fails because ["file_name" must be a string]');
     });
 
     test('exclude_export_details validates with a boolean true', () => {
@@ -92,8 +94,10 @@ describe('create rules schema', () => {
           >
         >({
           exclude_export_details: 'blah',
-        }).error
-      ).toBeTruthy();
+        }).error.message
+      ).toEqual(
+        'child "exclude_export_details" fails because ["exclude_export_details" must be a boolean]'
+      );
     });
   });
 });

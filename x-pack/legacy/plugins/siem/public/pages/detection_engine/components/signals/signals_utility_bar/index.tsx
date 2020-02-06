@@ -80,7 +80,7 @@ const SignalsUtilityBarComponent: React.FC<SignalsUtilityBarProps> = ({
 
                 <UtilityBarAction
                   disabled={areEventsLoading || isEmpty(selectedEventIds)}
-                  iconType={isFilteredToOpen ? 'indexClose' : 'indexOpen'}
+                  iconType={isFilteredToOpen ? 'securitySignalResolved' : 'securitySignalDetected'}
                   onClick={handleUpdateStatus}
                 >
                   {isFilteredToOpen
@@ -89,7 +89,7 @@ const SignalsUtilityBarComponent: React.FC<SignalsUtilityBarProps> = ({
                 </UtilityBarAction>
 
                 <UtilityBarAction
-                  iconType="listAdd"
+                  iconType={showClearSelection ? 'cross' : 'pagesSelect'}
                   onClick={() => {
                     if (!showClearSelection) {
                       selectAll();

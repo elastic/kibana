@@ -50,7 +50,6 @@ export function createInputControlVisTypeDefinition(deps: InputControlVisDepende
         pinFilters: false,
       },
     },
-    editor: 'default',
     editorConfig: {
       optionTabs: [
         {

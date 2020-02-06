@@ -11,6 +11,7 @@ exports[`EventsTable Renders events table with no search bar 1`] = `
         Object {
           "field": "description",
           "name": "Description",
+          "scope": "row",
           "sortable": true,
           "truncateText": true,
         },
@@ -79,6 +80,7 @@ exports[`EventsTable Renders events table with search bar 1`] = `
         Object {
           "field": "description",
           "name": "Description",
+          "scope": "row",
           "sortable": true,
           "truncateText": true,
         },

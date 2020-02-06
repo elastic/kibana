@@ -55,6 +55,7 @@ import {
   SEARCH_SIZE,
   defaultSearchQuery,
 } from '../../../../common';
+import { isKeywordAndTextType } from '../../../../common/fields';
 
 import { getOutlierScoreFieldName } from './common';
 import { useExploreData, TableItem } from './use_explore_data';
@@ -64,6 +65,10 @@ import {
 } from '../../../analytics_management/components/analytics_list/common';
 import { getTaskStateBadge } from '../../../analytics_management/components/analytics_list/columns';
 import { SavedSearchQuery } from '../../../../../contexts/kibana';
+import { getIndexPatternIdFromName } from '../../../../../util/index_utils';
+import { IIndexPattern } from '../../../../../../../../../../../src/plugins/data/common/index_patterns';
+import { newJobCapsService } from '../../../../../services/new_job_capabilities_service';
+import { useKibanaContext } from '../../../../../contexts/kibana';
 
 const FEATURE_INFLUENCE = 'feature_influence';
 
@@ -110,6 +115,19 @@ export const Exploration: FC<Props> = React.memo(({ jobId, jobStatus }) => {
   const [searchError, setSearchError] = useState<any>(undefined);
   const [searchString, setSearchString] = useState<string | undefined>(undefined);
 
+  const kibanaContext = useKibanaContext();
+
+  const initializeJobCapsService = async () => {
+    if (jobConfig !== undefined) {
+      const sourceIndex = jobConfig.source.index[0];
+      const indexPatternId = getIndexPatternIdFromName(sourceIndex) || sourceIndex;
+      const indexPattern: IIndexPattern = await kibanaContext.indexPatterns.get(indexPatternId);
+      if (indexPattern !== undefined) {
+        await newJobCapsService.initializeFromIndexPattern(indexPattern, false, false);
+      }
+    }
+  };
+
   useEffect(() => {
     (async function() {
       const analyticsConfigs: GetDataFrameAnalyticsResponse = await ml.dataFrameAnalytics.getDataFrameAnalytics(
@@ -123,6 +141,10 @@ export const Exploration: FC<Props> = React.memo(({ jobId, jobStatus }) => {
       }
     })();
   }, []);
+
+  useEffect(() => {
+    initializeJobCapsService();
+  }, [jobConfig && jobConfig.id]);
 
   const [selectedFields, setSelectedFields] = useState([] as EsFieldName[]);
   const [isColumnsPopoverVisible, setColumnsPopoverVisible] = useState(false);
@@ -293,10 +315,16 @@ export const Exploration: FC<Props> = React.memo(({ jobId, jobStatus }) => {
     if (jobConfig !== undefined) {
       const outlierScoreFieldName = getOutlierScoreFieldName(jobConfig);
       const outlierScoreFieldSelected = selectedFields.includes(outlierScoreFieldName);
+      let requiresKeyword = false;
 
       const field = outlierScoreFieldSelected ? outlierScoreFieldName : selectedFields[0];
       const direction = outlierScoreFieldSelected ? SORT_DIRECTION.DESC : SORT_DIRECTION.ASC;
-      loadExploreData({ field, direction, searchQuery });
+
+      if (outlierScoreFieldSelected === false) {
+        requiresKeyword = isKeywordAndTextType(field);
+      }
+
+      loadExploreData({ field, direction, searchQuery, requiresKeyword });
     }
   }, [JSON.stringify(searchQuery)]);
 
@@ -307,10 +335,16 @@ export const Exploration: FC<Props> = React.memo(({ jobId, jobStatus }) => {
     if (jobConfig !== undefined && columns.length > 0 && !selectedFields.includes(sortField)) {
       const outlierScoreFieldName = getOutlierScoreFieldName(jobConfig);
       const outlierScoreFieldSelected = selectedFields.includes(outlierScoreFieldName);
+      let requiresKeyword = false;
 
       const field = outlierScoreFieldSelected ? outlierScoreFieldName : selectedFields[0];
       const direction = outlierScoreFieldSelected ? SORT_DIRECTION.DESC : SORT_DIRECTION.ASC;
-      loadExploreData({ field, direction, searchQuery });
+
+      if (outlierScoreFieldSelected === false) {
+        requiresKeyword = isKeywordAndTextType(field);
+      }
+
+      loadExploreData({ field, direction, searchQuery, requiresKeyword });
       return;
     }
   }, [jobConfig, columns.length, sortField, sortDirection, tableItems.length]);
@@ -334,8 +368,17 @@ export const Exploration: FC<Props> = React.memo(({ jobId, jobStatus }) => {
       setPageIndex(index);
       setPageSize(size);
 
-      if (sort.field !== sortField || sort.direction !== sortDirection) {
-        loadExploreData({ ...sort, searchQuery });
+      if (
+        (sort.field !== sortField || sort.direction !== sortDirection) &&
+        jobConfig !== undefined
+      ) {
+        const outlierScoreFieldName = getOutlierScoreFieldName(jobConfig);
+        let requiresKeyword = false;
+
+        if (outlierScoreFieldName !== sort.field) {
+          requiresKeyword = isKeywordAndTextType(sort.field);
+        }
+        loadExploreData({ ...sort, searchQuery, requiresKeyword });
       }
     };
   }
@@ -410,7 +453,7 @@ export const Exploration: FC<Props> = React.memo(({ jobId, jobStatus }) => {
   const MlInMemoryTableBasic = mlInMemoryTableBasicFactory<TableItem>();
 
   return (
-    <EuiPanel grow={false}>
+    <EuiPanel grow={false} data-test-subj="mlDFAnalyticsOutlierExplorationTablePanel">
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="s">

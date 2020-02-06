@@ -24,7 +24,7 @@ import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import { getFakeRow, getFakeRowVals } from 'fixtures/fake_row';
 import $ from 'jquery';
-import { pluginInstance } from 'plugins/kibana/discover/index';
+import { pluginInstance } from 'plugins/kibana/discover/legacy';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 
 describe('Doc Table', function() {

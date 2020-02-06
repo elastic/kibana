@@ -19,7 +19,7 @@
 
 import React from 'react';
 import { BehaviorSubject, Observable, Subject, Subscription } from 'rxjs';
-import { map, takeUntil } from 'rxjs/operators';
+import { map, shareReplay, takeUntil, distinctUntilChanged, filter } from 'rxjs/operators';
 import { createBrowserHistory, History } from 'history';
 
 import { InjectedMetadataSetup } from '../injected_metadata';
@@ -114,8 +114,10 @@ export class ApplicationService {
     history,
   }: SetupDeps): InternalApplicationSetup {
     const basename = basePath.get();
-    // Only setup history if we're not in legacy mode
-    if (!injectedMetadata.getLegacyMode()) {
+    if (injectedMetadata.getLegacyMode()) {
+      this.currentAppId$.next(injectedMetadata.getLegacyMetadata().app.id);
+    } else {
+      // Only setup history if we're not in legacy mode
       this.history = history || createBrowserHistory({ basename });
     }
 
@@ -256,19 +258,23 @@ export class ApplicationService {
       )
       .subscribe(apps => applications$.next(apps));
 
+    const applicationStatuses$ = applications$.pipe(
+      map(apps => new Map([...apps.entries()].map(([id, app]) => [id, app.status!]))),
+      shareReplay(1)
+    );
+
     return {
       applications$,
       capabilities,
-      currentAppId$: this.currentAppId$.pipe(takeUntil(this.stop$)),
+      currentAppId$: this.currentAppId$.pipe(
+        filter(appId => appId !== undefined),
+        distinctUntilChanged(),
+        takeUntil(this.stop$)
+      ),
       registerMountContext: this.mountContext.registerContext,
       getUrlForApp: (appId, { path }: { path?: string } = {}) =>
         getAppUrl(availableMounters, appId, path),
       navigateToApp: async (appId, { path, state }: { path?: string; state?: any } = {}) => {
-        const app = applications$.value.get(appId);
-        if (app && app.status !== AppStatus.accessible) {
-          // should probably redirect to the error page instead
-          throw new Error(`Trying to navigate to an inaccessible application: ${appId}`);
-        }
         if (await this.shouldNavigate(overlays)) {
           this.appLeaveHandlers.delete(this.currentAppId$.value!);
           this.navigate!(getAppUrl(availableMounters, appId, path), state);
@@ -283,6 +289,7 @@ export class ApplicationService {
           <AppRouter
             history={this.history}
             mounters={availableMounters}
+            appStatuses$={applicationStatuses$}
             setAppLeaveHandler={this.setAppLeaveHandler}
           />
         );

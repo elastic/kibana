@@ -27,9 +27,6 @@ import {
   SavedObjectsClientContract,
 } from 'kibana/public';
 
-// @ts-ignore
-import { uiModules } from 'ui/modules';
-
 import { Storage } from '../../../../../plugins/kibana_utils/public';
 import { DataPublicPluginStart } from '../../../../../plugins/data/public';
 import { IEmbeddableStart } from '../../../../../plugins/embeddable/public';
@@ -43,16 +40,8 @@ import {
   FeatureCatalogueCategory,
   HomePublicPluginSetup,
 } from '../../../../../plugins/home/public';
-import { defaultEditor, VisEditorTypesRegistryProvider } from './legacy_imports';
 import { UsageCollectionSetup } from '../../../../../plugins/usage_collection/public';
-import { createSavedVisLoader } from './saved_visualizations/saved_visualizations';
-// @ts-ignore
-import { savedObjectManagementRegistry } from '../management/saved_object_registry';
-
-export interface LegacyAngularInjectedDependencies {
-  legacyChrome: any;
-  editorTypes: any;
-}
+import { Chrome } from './legacy_imports';
 
 export interface VisualizePluginStartDependencies {
   data: DataPublicPluginStart;
@@ -64,10 +53,10 @@ export interface VisualizePluginStartDependencies {
 
 export interface VisualizePluginSetupDependencies {
   __LEGACY: {
-    getAngularDependencies: () => Promise<LegacyAngularInjectedDependencies>;
+    legacyChrome: Chrome;
   };
   home: HomePublicPluginSetup;
-  kibana_legacy: KibanaLegacySetup;
+  kibanaLegacy: KibanaLegacySetup;
   usageCollection?: UsageCollectionSetup;
 }
 
@@ -83,14 +72,9 @@ export class VisualizePlugin implements Plugin {
 
   public async setup(
     core: CoreSetup,
-    {
-      home,
-      kibana_legacy,
-      __LEGACY: { getAngularDependencies },
-      usageCollection,
-    }: VisualizePluginSetupDependencies
+    { home, kibanaLegacy, __LEGACY, usageCollection }: VisualizePluginSetupDependencies
   ) {
-    kibana_legacy.registerLegacyApp({
+    kibanaLegacy.registerLegacyApp({
       id: 'visualize',
       title: 'Visualize',
       mount: async ({ core: contextCore }, params) => {
@@ -107,16 +91,8 @@ export class VisualizePlugin implements Plugin {
           share,
         } = this.startDependencies;
 
-        const angularDependencies = await getAngularDependencies();
-        const savedVisualizations = createSavedVisLoader({
-          savedObjectsClient,
-          indexPatterns: data.indexPatterns,
-          chrome: contextCore.chrome,
-          overlays: contextCore.overlays,
-          visualizations,
-        });
         const deps: VisualizeKibanaServices = {
-          ...angularDependencies,
+          ...__LEGACY,
           addBasePath: contextCore.http.basePath.prepend,
           core: contextCore as LegacyCoreStart,
           chrome: contextCore.chrome,
@@ -127,11 +103,12 @@ export class VisualizePlugin implements Plugin {
           localStorage: new Storage(localStorage),
           navigation,
           savedObjectsClient,
-          savedVisualizations,
+          savedVisualizations: visualizations.getSavedVisualizationsLoader(),
           savedQueryService: data.query.savedQueries,
           share,
           toastNotifications: contextCore.notifications.toasts,
           uiSettings: contextCore.uiSettings,
+          config: kibanaLegacy.config,
           visualizeCapabilities: contextCore.application.capabilities.visualize,
           visualizations,
           usageCollection,
@@ -155,8 +132,6 @@ export class VisualizePlugin implements Plugin {
       showOnHomePage: true,
       category: FeatureCatalogueCategory.DATA,
     });
-
-    VisEditorTypesRegistryProvider.register(defaultEditor);
   }
 
   public start(
@@ -171,21 +146,5 @@ export class VisualizePlugin implements Plugin {
       share,
       visualizations,
     };
-
-    const savedVisualizations = createSavedVisLoader({
-      savedObjectsClient: core.savedObjects.client,
-      indexPatterns: data.indexPatterns,
-      chrome: core.chrome,
-      overlays: core.overlays,
-      visualizations,
-    });
-
-    // TODO: remove once savedobjectregistry is refactored
-    savedObjectManagementRegistry.register({
-      service: 'savedVisualizations',
-      title: 'visualizations',
-    });
-
-    uiModules.get('app/visualize').service('savedVisualizations', () => savedVisualizations);
   }
 }

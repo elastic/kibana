@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useState } from 'react';
+import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -14,9 +14,6 @@ import { UseField, FormDataProvider, FormRow, ToggleField } from '../../../share
 import { ComboBoxOption } from '../../../types';
 
 export const SourceFieldSection = () => {
-  const [includeComboBoxOptions, setIncludeComboBoxOptions] = useState<ComboBoxOption[]>([]);
-  const [excludeComboBoxOptions, setExcludeComboBoxOptions] = useState<ComboBoxOption[]>([]);
-
   const renderWarning = () => (
     <EuiCallOut
       title={i18n.translate('xpack.idxMgmt.mappingsEditor.disabledSourceFieldCallOutTitle', {
@@ -73,13 +70,13 @@ export const SourceFieldSection = () => {
         {({ label, helpText, value, setValue }) => (
           <EuiFormRow label={label} helpText={helpText} fullWidth>
             <EuiComboBox
+              noSuggestions
               placeholder={i18n.translate(
                 'xpack.idxMgmt.mappingsEditor.sourceIncludeField.placeholderLabel',
                 {
                   defaultMessage: 'path.to.field.*',
                 }
               )}
-              options={includeComboBoxOptions}
               selectedOptions={value as ComboBoxOption[]}
               onChange={newValue => {
                 setValue(newValue);
@@ -90,7 +87,6 @@ export const SourceFieldSection = () => {
                 };
 
                 setValue([...(value as ComboBoxOption[]), newOption]);
-                setIncludeComboBoxOptions([...includeComboBoxOptions, newOption]);
               }}
               fullWidth
             />
@@ -104,13 +100,13 @@ export const SourceFieldSection = () => {
         {({ label, helpText, value, setValue }) => (
           <EuiFormRow label={label} helpText={helpText} fullWidth>
             <EuiComboBox
+              noSuggestions
               placeholder={i18n.translate(
                 'xpack.idxMgmt.mappingsEditor.sourceExcludeField.placeholderLabel',
                 {
                   defaultMessage: 'path.to.field.*',
                 }
               )}
-              options={excludeComboBoxOptions}
               selectedOptions={value as ComboBoxOption[]}
               onChange={newValue => {
                 setValue(newValue);
@@ -121,7 +117,6 @@ export const SourceFieldSection = () => {
                 };
 
                 setValue([...(value as ComboBoxOption[]), newOption]);
-                setExcludeComboBoxOptions([...excludeComboBoxOptions, newOption]);
               }}
               fullWidth
             />

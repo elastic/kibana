@@ -9,7 +9,7 @@ import { applyMatrix3, subtract } from '../../lib/vector2';
 import { userIsPanning, translation, projectionMatrix, inverseProjectionMatrix } from './selectors';
 import { clamp } from '../../lib/math';
 
-import { CameraState, ResolverAction } from '../../types';
+import { CameraState, ResolverAction, Vector2 } from '../../types';
 import { scaleToZoom } from './scale_to_zoom';
 
 function initialState(): CameraState {
@@ -33,6 +33,16 @@ export const cameraReducer: Reducer<CameraState, ResolverAction> = (
     return {
       ...state,
       scalingFactor: clamp(action.payload, 0, 1),
+    };
+  } else if (action.type === 'userClickedZoomIn') {
+    return {
+      ...state,
+      scalingFactor: clamp(state.scalingFactor + 0.1, 0, 1),
+    };
+  } else if (action.type === 'userClickedZoomOut') {
+    return {
+      ...state,
+      scalingFactor: clamp(state.scalingFactor - 0.1, 0, 1),
     };
   } else if (action.type === 'userZoomed') {
     const stateWithNewScaling: CameraState = {
@@ -100,6 +110,32 @@ export const cameraReducer: Reducer<CameraState, ResolverAction> = (
     } else {
       return state;
     }
+  } else if (action.type === 'userClickedPanControl') {
+    const panDirection = action.payload;
+    /**
+     * Delta amount will be in the range of 20 -> 40 depending on the scalingFactor
+     */
+    const deltaAmount = (1 + state.scalingFactor) * 20;
+    let delta: Vector2;
+    if (panDirection === 'north') {
+      delta = [0, -deltaAmount];
+    } else if (panDirection === 'south') {
+      delta = [0, deltaAmount];
+    } else if (panDirection === 'east') {
+      delta = [-deltaAmount, 0];
+    } else if (panDirection === 'west') {
+      delta = [deltaAmount, 0];
+    } else {
+      delta = [0, 0];
+    }
+
+    return {
+      ...state,
+      translationNotCountingCurrentPanning: [
+        state.translationNotCountingCurrentPanning[0] + delta[0],
+        state.translationNotCountingCurrentPanning[1] + delta[1],
+      ],
+    };
   } else if (action.type === 'userSetRasterSize') {
     /**
      * Handle resizes of the Resolver component. We need to know the size in order to convert between screen

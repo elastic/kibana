@@ -23,7 +23,7 @@ import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { VisOptionsProps } from '../../../legacy_imports';
+import { VisOptionsProps } from '../../../../../vis_default_editor/public';
 import {
   BasicOptions,
   ColorRanges,
@@ -36,6 +36,7 @@ import { SetColorSchemaOptionsValue } from '../../common/color_schema';
 import { HeatmapVisParams } from '../../../heatmap';
 import { ValueAxis } from '../../../types';
 import { LabelsPanel } from './labels_panel';
+import { SetColorRangeValue } from '../../common/color_ranges';
 
 function HeatmapOptions(props: VisOptionsProps<HeatmapVisParams>) {
   const { stateParams, vis, uiState, setValue, setValidity, setTouched } = props;
@@ -67,7 +68,7 @@ function HeatmapOptions(props: VisOptionsProps<HeatmapVisParams>) {
         <EuiTitle size="xs">
           <h3>
             <FormattedMessage
-              id="kbnVislibVisTypes.editors.heatmap.basicSettingsTitle"
+              id="visTypeVislib.editors.heatmap.basicSettingsTitle"
               defaultMessage="Basic settings"
             />
           </h3>
@@ -77,13 +78,13 @@ function HeatmapOptions(props: VisOptionsProps<HeatmapVisParams>) {
         <BasicOptions {...props} />
 
         <SwitchOption
-          label={i18n.translate('kbnVislibVisTypes.editors.heatmap.highlightLabel', {
+          label={i18n.translate('visTypeVislib.editors.heatmap.highlightLabel', {
             defaultMessage: 'Highlight range',
           })}
           paramName="enableHover"
           value={stateParams.enableHover}
           setValue={setValue}
-          tooltip={i18n.translate('kbnVislibVisTypes.editors.heatmap.highlightLabelTooltip', {
+          tooltip={i18n.translate('visTypeVislib.editors.heatmap.highlightLabelTooltip', {
             defaultMessage:
               'Highlight hovered range in the chart and corresponding label in the legend.',
           })}
@@ -96,7 +97,7 @@ function HeatmapOptions(props: VisOptionsProps<HeatmapVisParams>) {
         <EuiTitle size="xs">
           <h3>
             <FormattedMessage
-              id="kbnVislibVisTypes.editors.heatmap.heatmapSettingsTitle"
+              id="visTypeVislib.editors.heatmap.heatmapSettingsTitle"
               defaultMessage="Heatmap settings"
             />
           </h3>
@@ -113,7 +114,7 @@ function HeatmapOptions(props: VisOptionsProps<HeatmapVisParams>) {
         <EuiSpacer size="s" />
 
         <SelectOption
-          label={i18n.translate('kbnVislibVisTypes.controls.heatmapOptions.colorScaleLabel', {
+          label={i18n.translate('visTypeVislib.controls.heatmapOptions.colorScaleLabel', {
             defaultMessage: 'Color scale',
           })}
           options={vis.type.editorConfig.collections.scales}
@@ -123,10 +124,9 @@ function HeatmapOptions(props: VisOptionsProps<HeatmapVisParams>) {
         />
 
         <SwitchOption
-          label={i18n.translate(
-            'kbnVislibVisTypes.controls.heatmapOptions.scaleToDataBoundsLabel',
-            { defaultMessage: 'Scale to data bounds' }
-          )}
+          label={i18n.translate('visTypeVislib.controls.heatmapOptions.scaleToDataBoundsLabel', {
+            defaultMessage: 'Scale to data bounds',
+          })}
           paramName="defaultYExtents"
           value={valueAxis.scale.defaultYExtents}
           setValue={setValueAxisScale}
@@ -134,7 +134,7 @@ function HeatmapOptions(props: VisOptionsProps<HeatmapVisParams>) {
 
         <SwitchOption
           disabled={stateParams.setColorRange}
-          label={i18n.translate('kbnVislibVisTypes.controls.heatmapOptions.percentageModeLabel', {
+          label={i18n.translate('visTypeVislib.controls.heatmapOptions.percentageModeLabel', {
             defaultMessage: 'Percentage mode',
           })}
           paramName="percentageMode"
@@ -147,7 +147,7 @@ function HeatmapOptions(props: VisOptionsProps<HeatmapVisParams>) {
           data-test-subj="heatmapColorsNumber"
           disabled={stateParams.setColorRange}
           isInvalid={isColorsNumberInvalid}
-          label={i18n.translate('kbnVislibVisTypes.controls.heatmapOptions.colorsNumberLabel', {
+          label={i18n.translate('visTypeVislib.controls.heatmapOptions.colorsNumberLabel', {
             defaultMessage: 'Number of colors',
           })}
           max={10}
@@ -159,7 +159,7 @@ function HeatmapOptions(props: VisOptionsProps<HeatmapVisParams>) {
 
         <SwitchOption
           data-test-subj="heatmapUseCustomRanges"
-          label={i18n.translate('kbnVislibVisTypes.controls.heatmapOptions.useCustomRangesLabel', {
+          label={i18n.translate('visTypeVislib.controls.heatmapOptions.useCustomRangesLabel', {
             defaultMessage: 'Use custom ranges',
           })}
           paramName="setColorRange"
@@ -171,7 +171,7 @@ function HeatmapOptions(props: VisOptionsProps<HeatmapVisParams>) {
           <ColorRanges
             data-test-subj="heatmapColorRange"
             colorsRange={stateParams.colorsRange}
-            setValue={setValue}
+            setValue={setValue as SetColorRangeValue}
             setTouched={setTouched}
             setValidity={setIsColorRangesValid}
           />

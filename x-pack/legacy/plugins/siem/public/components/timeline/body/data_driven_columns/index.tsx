@@ -6,7 +6,8 @@
 
 import React from 'react';
 
-import { TimelineNonEcsData } from '../../../../graphql/types';
+import { getOr } from 'lodash/fp';
+import { Ecs, TimelineNonEcsData } from '../../../../graphql/types';
 import { OnColumnResized } from '../../events';
 import { EventsTd, EventsTdContent, EventsTdGroupData } from '../../styles';
 import { ColumnHeader } from '../column_headers/column_header';
@@ -18,12 +19,13 @@ interface Props {
   columnHeaders: ColumnHeader[];
   columnRenderers: ColumnRenderer[];
   data: TimelineNonEcsData[];
+  ecsData: Ecs;
   onColumnResized: OnColumnResized;
   timelineId: string;
 }
 
 export const DataDrivenColumns = React.memo<Props>(
-  ({ _id, columnHeaders, columnRenderers, data, timelineId }) => {
+  ({ _id, columnHeaders, columnRenderers, data, ecsData, timelineId }) => {
     // Passing the styles directly to the component because the width is
     // being calculated and is recommended by Styled Components for performance
     // https://github.com/styled-components/styled-components/issues/134#issuecomment-312415291
@@ -36,6 +38,7 @@ export const DataDrivenColumns = React.memo<Props>(
                 columnName: header.id,
                 eventId: _id,
                 field: header,
+                linkValues: getOr([], header.linkField ?? '', ecsData),
                 timelineId,
                 truncate: true,
                 values: getMappedNonEcsValue({

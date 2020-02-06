@@ -19,7 +19,7 @@
 
 import { createElement } from 'react';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { bufferCount, skip, take, takeUntil } from 'rxjs/operators';
+import { bufferCount, take, takeUntil } from 'rxjs/operators';
 import { shallow } from 'enzyme';
 
 import { injectedMetadataServiceMock } from '../injected_metadata/injected_metadata_service.mock';
@@ -518,6 +518,22 @@ describe('#start()', () => {
     expect([...availableApps.keys()]).toEqual(['app1', 'legacyApp1']);
   });
 
+  describe('currentAppId$', () => {
+    it('emits the legacy app id when in legacy mode', async () => {
+      setupDeps.injectedMetadata.getLegacyMode.mockReturnValue(true);
+      setupDeps.injectedMetadata.getLegacyMetadata.mockReturnValue({
+        app: {
+          id: 'legacy',
+          title: 'Legacy App',
+        },
+      } as any);
+      await service.setup(setupDeps);
+      const { currentAppId$ } = await service.start(startDeps);
+
+      expect(await currentAppId$.pipe(take(1)).toPromise()).toEqual('legacy');
+    });
+  });
+
   describe('getComponent', () => {
     it('returns renderable JSX tree', async () => {
       service.setup(setupDeps);
@@ -525,17 +541,7 @@ describe('#start()', () => {
       const { getComponent } = await service.start(startDeps);
 
       expect(() => shallow(createElement(getComponent))).not.toThrow();
-      expect(getComponent()).toMatchInlineSnapshot(`
-        <AppRouter
-          history={
-            Object {
-              "push": [MockFunction],
-            }
-          }
-          mounters={Map {}}
-          setAppLeaveHandler={[Function]}
-        />
-      `);
+      expect(getComponent()).toMatchSnapshot();
     });
 
     it('renders null when in legacy mode', async () => {
@@ -661,7 +667,7 @@ describe('#start()', () => {
 
       const { currentAppId$, navigateToApp } = await service.start(startDeps);
       const stop$ = new Subject();
-      const promise = currentAppId$.pipe(skip(1), bufferCount(4), takeUntil(stop$)).toPromise();
+      const promise = currentAppId$.pipe(bufferCount(4), takeUntil(stop$)).toPromise();
 
       await navigateToApp('alpha');
       await navigateToApp('beta');

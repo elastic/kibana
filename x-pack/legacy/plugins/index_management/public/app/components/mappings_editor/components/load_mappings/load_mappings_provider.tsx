@@ -25,7 +25,7 @@ type OpenJsonModalFunc = () => void;
 
 interface Props {
   onJson(json: { [key: string]: any }): void;
-  children: (deleteProperty: OpenJsonModalFunc) => React.ReactNode;
+  children: (openModal: OpenJsonModalFunc) => React.ReactNode;
 }
 
 interface State {
@@ -234,7 +234,7 @@ export const LoadMappingsProvider = ({ onJson, children }: Props) => {
                 <EuiText color="subdued">
                   <FormattedMessage
                     id="xpack.idxMgmt.mappingsEditor.loadJsonModal.jsonEditorHelpText"
-                    defaultMessage="Provide a mappings object, for example, the object assigned to an index {mappings} property. This will overwrite existing mappings, dynamic templates, and options"
+                    defaultMessage="Provide a mappings object, for example, the object assigned to an index {mappings} property. This will overwrite existing mappings, dynamic templates, and options."
                     values={{
                       mappings: <code>mappings</code>,
                     }}

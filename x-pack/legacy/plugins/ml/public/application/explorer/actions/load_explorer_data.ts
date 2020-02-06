@@ -12,11 +12,11 @@ import { forkJoin, of, Observable, Subject } from 'rxjs';
 import { mergeMap, switchMap, tap } from 'rxjs/operators';
 
 import { anomalyDataChange } from '../explorer_charts/explorer_charts_container_service';
-import { VIEW_BY_JOB_LABEL } from '../explorer_constants';
 import { explorerService } from '../explorer_dashboard_service';
 import {
   getDateFormatTz,
   getSelectionInfluencers,
+  getSelectionJobIds,
   getSelectionTimeRange,
   loadAnnotationsTableData,
   loadAnomaliesTableData,
@@ -114,12 +114,7 @@ function loadExplorerData(config: LoadExplorerDataConfig): Observable<Partial<Ex
   } = config;
 
   const selectionInfluencers = getSelectionInfluencers(selectedCells, viewBySwimlaneFieldName);
-
-  const jobIds =
-    selectedCells !== undefined && selectedCells.viewByFieldName === VIEW_BY_JOB_LABEL
-      ? selectedCells.lanes
-      : selectedJobs.map(d => d.id);
-
+  const jobIds = getSelectionJobIds(selectedCells, selectedJobs);
   const timerange = getSelectionTimeRange(
     selectedCells,
     swimlaneBucketInterval.asSeconds(),
