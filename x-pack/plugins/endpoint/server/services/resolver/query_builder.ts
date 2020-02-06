@@ -25,7 +25,9 @@ function buildPhase0ChildrenQuery(endpointID: string, uniquePID: string) {
                     term: { 'endgame.unique_pid': uniquePID },
                   },
                   {
-                    term: { 'agent.id': endpointID },
+                    // had to change these to match queries otherwise I can't get results back, using the kibana
+                    // developer mode it works fine AND the api tests when it's also a term...not sure why
+                    match: { 'agent.id': endpointID },
                   },
                 ],
               },
@@ -37,7 +39,7 @@ function buildPhase0ChildrenQuery(endpointID: string, uniquePID: string) {
                     term: { 'endgame.unique_ppid': uniquePID },
                   },
                   {
-                    term: { 'agent.id': endpointID },
+                    match: { 'agent.id': endpointID },
                   },
                 ],
               },
@@ -56,10 +58,10 @@ function buildPhase1ChildrenQuery(entityID: string) {
         bool: {
           should: [
             {
-              term: { 'endpoint.process.entity_id': entityID },
+              match: { 'endpoint.process.entity_id': entityID },
             },
             {
-              term: { 'endpoint.process.parent.entity_id': entityID },
+              match: { 'endpoint.process.parent.entity_id': entityID },
             },
           ],
         },
@@ -102,7 +104,7 @@ function buildPhase0NodeQuery(endpointID: string, uniquePID: string) {
           term: { 'endgame.unique_pid': uniquePID },
         },
         {
-          term: { 'agent.id': endpointID },
+          match: { 'agent.id': endpointID },
         },
       ],
     },
@@ -113,7 +115,7 @@ function buildPhase1NodeQuery(entityID: string) {
   return {
     bool: {
       filter: {
-        term: { 'endpoint.process.entity_id': entityID },
+        match: { 'endpoint.process.entity_id': entityID },
       },
     },
   };

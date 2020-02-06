@@ -37,12 +37,14 @@ export function registerResolverRoutes(router: IRouter, endpointAppContext: Endp
     },
     async (context, req, res) => {
       const entityID = req.query.entity_id;
+      log.debug(`entity_id: ${entityID}`);
       const paginationInfo = {
         page: req.query?.page_index,
         pageSize: req.query?.page_size,
       } as PaginationInfo;
       try {
         const query = await getESChildrenQuery(endpointAppContext, entityID, paginationInfo);
+        log.debug(`resolver/children query: ${JSON.stringify(query)}`);
         const response = (await context.core.elasticsearch.dataClient.callAsCurrentUser(
           'search',
           query
@@ -67,7 +69,7 @@ export function registerResolverRoutes(router: IRouter, endpointAppContext: Endp
           ),
         });
       } catch (err) {
-        log.warn(JSON.stringify(err));
+        log.warn(err);
         if (EntityParseError.isEntityParseError(err)) {
           return res.badRequest({ body: err });
         }
@@ -86,12 +88,14 @@ export function registerResolverRoutes(router: IRouter, endpointAppContext: Endp
     },
     async (context, req, res) => {
       const entityID = req.query.entity_id;
+      log.debug(`entity_id: ${entityID}`);
       const paginationInfo = {
         page: req.query?.page_index,
         pageSize: req.query?.page_size,
       };
       try {
         const query = await getESNodeQuery(endpointAppContext, entityID, paginationInfo);
+        log.debug(`resolver/node query: ${JSON.stringify(query)}`);
         const response = (await context.core.elasticsearch.dataClient.callAsCurrentUser(
           'search',
           query
@@ -115,7 +119,7 @@ export function registerResolverRoutes(router: IRouter, endpointAppContext: Endp
           ),
         });
       } catch (err) {
-        log.warn(JSON.stringify(err));
+        log.warn(err);
         if (EntityParseError.isEntityParseError(err)) {
           return res.badRequest({ body: err });
         }
