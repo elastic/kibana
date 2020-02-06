@@ -5,7 +5,7 @@
  */
 
 import { npStart } from 'ui/new_platform';
-import querystring from 'querystring';
+import querystring from 'query-string';
 
 const { core } = npStart;
 

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { parse } from 'querystring';
+import { parse } from 'query-string';
 
 export function extractQueryParams(queryString) {
   const hrefSplit = queryString.split('?');

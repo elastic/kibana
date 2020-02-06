@@ -5,7 +5,7 @@
  */
 import React, { useEffect, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
-import { parse } from 'querystring';
+import { parse } from 'query-string';
 
 import { EuiPageBody, EuiPageContent, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { Repository, EmptyRepository } from '../../../../common/types';

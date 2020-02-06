@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import qs from 'querystring';
+import qs from 'query-string';
 import { UptimeUrlParams } from './url_params';
 import { CLIENT_DEFAULTS } from '../../../common/constants';
 

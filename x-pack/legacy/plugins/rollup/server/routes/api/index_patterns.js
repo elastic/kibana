@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import Joi from 'joi';
+import querystring from 'query-string';
 import { callWithRequestFactory } from '../../lib/call_with_request_factory';
 import { isEsErrorFactory } from '../../lib/is_es_error_factory';
 import { wrapEsError, wrapUnknownError } from '../../lib/error_wrappers';
@@ -11,7 +12,6 @@ import { licensePreRoutingFactory } from '../../lib/license_pre_routing_factory'
 import indexBy from 'lodash/collection/indexBy';
 import { getCapabilitiesForRollupIndices } from '../../lib/map_capabilities';
 import { mergeCapabilitiesWithFields } from '../../lib/merge_capabilities_with_fields';
-import querystring from 'querystring';
 
 /**
  * Get list of fields for rollup index pattern, in the format of regular index pattern fields

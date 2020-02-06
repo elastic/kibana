@@ -16,17 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import { stringify, ParsedUrlQuery } from 'querystring';
+import { transform } from 'lodash';
+import { stringify } from 'query-string';
 
 // encodeUriQuery implements the less-aggressive encoding done naturally by
 // the browser. We use it to generate the same urls the browser would
-export const stringifyQueryString = (query: ParsedUrlQuery) =>
-  stringify(query, undefined, undefined, {
-    // encode spaces with %20 is needed to produce the same queries as angular does
-    // https://github.com/angular/angular.js/blob/51c516e7d4f2d10b0aaa4487bd0b52772022207a/src/Angular.js#L1377
-    encodeURIComponent: (val: string) => encodeUriQuery(val, true),
+export const stringifyQueryString = (query: Record<string, any>) => {
+  const encodedQuery = transform(query, (result, value, key) => {
+    if (key && value) {
+      result[key] = encodeUriQuery(value, true);
+    }
   });
+
+  return stringify(encodedQuery, {
+    strict: false,
+    encode: false,
+    sort: false,
+  });
+};
 
 /**
  *  Extracted from angular.js

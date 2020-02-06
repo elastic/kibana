@@ -20,7 +20,7 @@
 import fn from './quandl';
 
 const parseURL = require('url').parse;
-const parseQueryString = require('querystring').parse;
+const parseQueryString = require('query-string').parse;
 const tlConfig = require('./fixtures/tl_config')();
 import moment from 'moment';
 import fetchMock from 'node-fetch';

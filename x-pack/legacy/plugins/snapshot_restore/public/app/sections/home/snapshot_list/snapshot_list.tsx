@@ -6,7 +6,7 @@
 
 import React, { Fragment, useState, useEffect } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
-import { parse } from 'querystring';
+import { parse } from 'query-string';
 import { EuiButton, EuiCallOut, EuiLink, EuiEmptyPrompt, EuiSpacer, EuiIcon } from '@elastic/eui';
 
 import { APP_SLM_CLUSTER_PRIVILEGES } from '../../../../../common/constants';

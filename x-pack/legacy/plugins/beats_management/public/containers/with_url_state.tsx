@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { parse, stringify } from 'querystring';
+import { parse, stringify } from 'query-string';
 import React from 'react';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 import { FlatObject } from '../frontend_types';

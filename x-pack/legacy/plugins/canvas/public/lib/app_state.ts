@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import querystring from 'querystring';
+import querystring from 'query-string';
 import { get } from 'lodash';
 // @ts-ignore untyped local
 import { getInitialState } from '../state/initial_state';

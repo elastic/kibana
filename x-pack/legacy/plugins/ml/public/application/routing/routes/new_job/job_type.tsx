@@ -7,7 +7,6 @@
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
 
-// @ts-ignore
 import queryString from 'query-string';
 import { MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
@@ -33,7 +32,7 @@ export const jobTypeRoute: MlRoute = {
 };
 
 const PageWrapper: FC<PageProps> = ({ location, config, deps }) => {
-  const { index, savedSearchId } = queryString.parse(location.search);
+  const { index, savedSearchId }: Record<string, any> = queryString.parse(location.search);
   const { context } = useResolver(index, savedSearchId, config, basicResolvers(deps));
   return (
     <PageLoader context={context}>

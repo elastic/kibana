@@ -18,7 +18,7 @@
  */
 
 import { History, Location } from 'history';
-import { parse } from 'querystring';
+import { parse } from 'query-string';
 import { stringifyQueryString } from '../state_management/url/stringify_query_string'; // TODO: extract it to ../url
 
 export function removeQueryParam(history: History, param: string, replace: boolean = true) {

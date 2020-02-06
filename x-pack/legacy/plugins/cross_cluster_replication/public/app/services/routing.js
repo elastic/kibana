@@ -9,7 +9,7 @@
  */
 
 import { createLocation } from 'history';
-import { stringify } from 'querystring';
+import { stringify } from 'query-string';
 import { APPS, BASE_PATH, BASE_PATH_REMOTE_CLUSTERS } from '../../../common/constants';
 
 const isModifiedEvent = event =>

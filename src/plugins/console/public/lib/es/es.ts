@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { stringify as formatQueryString } from 'querystring';
+import { stringify as formatQueryString } from 'query-string';
 import $ from 'jquery';
 
 const esVersion: string[] = [];

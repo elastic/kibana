@@ -21,10 +21,7 @@ import React, { CSSProperties, useCallback, useEffect, useRef, useState } from '
 import { EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
-
-// Node v5 querystring for browser.
-// @ts-ignore
-import * as qs from 'querystring-browser';
+import { parse } from 'query-string';
 
 import { EuiIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useServicesContext, useEditorReadContext } from '../../../../contexts';
@@ -96,9 +93,9 @@ function EditorUI({ initialTextValue }: EditorProps) {
     editorInstanceRef.current = senseEditor.create(editorRef.current!);
     const editor = editorInstanceRef.current;
 
-    const readQueryParams = () => {
+    const readQueryParams = (): Record<string, any> => {
       const [, queryString] = (window.location.hash || '').split('?');
-      return qs.parse(queryString || '');
+      return parse(queryString || '');
     };
 
     const loadBufferFromRemote = (url: string) => {
@@ -138,6 +135,7 @@ function EditorUI({ initialTextValue }: EditorProps) {
     window.addEventListener('hashchange', onHashChange);
 
     const initialQueryParams = readQueryParams();
+
     if (initialQueryParams.load_from) {
       loadBufferFromRemote(initialQueryParams.load_from);
     } else {

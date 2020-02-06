@@ -6,7 +6,6 @@
 
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
-// @ts-ignore
 import queryString from 'query-string';
 
 import { basicResolvers } from '../../resolvers';
@@ -123,7 +122,7 @@ export const categorizationRoute: MlRoute = {
 };
 
 const PageWrapper: FC<WizardPageProps> = ({ location, config, jobType, deps }) => {
-  const { index, savedSearchId } = queryString.parse(location.search);
+  const { index, savedSearchId }: Record<string, any> = queryString.parse(location.search);
   const { context, results } = useResolver(index, savedSearchId, config, {
     ...basicResolvers(deps),
     privileges: checkCreateJobsPrivilege,

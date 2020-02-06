@@ -8,7 +8,6 @@ import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { decode } from 'rison-node';
 
-// @ts-ignore
 import queryString from 'query-string';
 import { MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
@@ -36,7 +35,8 @@ export const analyticsJobExplorationRoute: MlRoute = {
 
 const PageWrapper: FC<PageProps> = ({ location, config, deps }) => {
   const { context } = useResolver('', undefined, config, basicResolvers(deps));
-  const { _g } = queryString.parse(location.search);
+  const { _g }: Record<string, any> = queryString.parse(location.search);
+
   let globalState: any = null;
   try {
     globalState = decode(_g);

@@ -6,7 +6,6 @@
 
 import { useCallback } from 'react';
 import { isEqual } from 'lodash';
-// @ts-ignore
 import queryString from 'query-string';
 import { decode, encode } from 'rison-node';
 import { useHistory, useLocation } from 'react-router-dom';
@@ -33,12 +32,12 @@ function isRisonSerializationRequired(queryParam: string): boolean {
 
 export function getUrlState(search: string): Dictionary<any> {
   const urlState: Dictionary<any> = {};
-  const parsedQueryString = queryString.parse(search);
+  const parsedQueryString: Record<string, any> = queryString.parse(search);
 
   try {
     Object.keys(parsedQueryString).forEach(a => {
       if (isRisonSerializationRequired(a)) {
-        urlState[a] = decode(parsedQueryString[a]) as Dictionary<any>;
+        urlState[a] = decode(parsedQueryString[a]);
       } else {
         urlState[a] = parsedQueryString[a];
       }

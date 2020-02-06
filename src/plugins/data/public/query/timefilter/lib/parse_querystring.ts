@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import qs from 'querystring';
+import { parse } from 'query-string';
 
 export function parseQueryString() {
   // window.location.search is an empty string
@@ -27,5 +27,5 @@ export function parseQueryString() {
     return {};
   }
 
-  return qs.parse(hrefSplit[1]);
+  return parse(hrefSplit[1]);
 }

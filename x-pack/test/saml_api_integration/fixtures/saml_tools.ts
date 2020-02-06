@@ -6,7 +6,7 @@
 
 import crypto from 'crypto';
 import fs from 'fs';
-import querystring from 'querystring';
+import querystring from 'query-string';
 import url from 'url';
 import zlib from 'zlib';
 import { promisify } from 'util';

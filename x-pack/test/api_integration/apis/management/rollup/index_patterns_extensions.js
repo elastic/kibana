@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import querystring from 'querystring';
+import querystring from 'query-string';
 
 import { registerHelpers } from './rollup.test_helpers';
 import { INDEX_TO_ROLLUP_MAPPINGS, INDEX_PATTERNS_EXTENSION_BASE_PATH } from './constants';

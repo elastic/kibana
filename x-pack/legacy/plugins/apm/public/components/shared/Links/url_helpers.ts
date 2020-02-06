@@ -3,19 +3,25 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import qs from 'querystring';
+import { transform } from 'lodash';
+import { parse, stringify } from 'query-string';
 import { LocalUIFilterName } from '../../../../server/lib/ui_filters/local_ui_filters/config';
 
 export function toQuery(search?: string): APMQueryParamsRaw {
-  return search ? qs.parse(search.slice(1)) : {};
+  return search ? parse(search.slice(1)) : {};
 }
 
 export function fromQuery(query: Record<string, any>) {
-  return qs.stringify(query, undefined, undefined, {
-    encodeURIComponent: (value: string) => {
-      return encodeURIComponent(value).replace(/%3A/g, ':');
+  const encodedQuery = transform(query, (result, value, key) => {
+    if (key && value) {
+      result[key] = encodeURIComponent(value).replace(/%3A/g, ':');
     }
+  });
+
+  return stringify(encodedQuery, {
+    strict: false,
+    encode: false,
+    sort: false
   });
 }
 

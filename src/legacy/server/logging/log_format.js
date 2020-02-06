@@ -23,7 +23,7 @@ import { get, _ } from 'lodash';
 import numeral from '@elastic/numeral';
 import chalk from 'chalk';
 import stringify from 'json-stringify-safe';
-import querystring from 'querystring';
+import querystring from 'query-string';
 import applyFiltersToKeys from './apply_filters_to_keys';
 import { inspect } from 'util';
 import { logWithMetadata } from './log_with_metadata';
