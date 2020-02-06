@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { IUiActionsApiPure } from '../types';
+import { UiActionsApiPure } from '../types';
 
-export const registerTrigger: IUiActionsApiPure['registerTrigger'] = ({ triggers }) => trigger => {
+export const registerTrigger: UiActionsApiPure['registerTrigger'] = ({ triggers }) => trigger => {
   if (triggers.has(trigger.id)) {
     throw new Error(`Trigger [trigger.id = ${trigger.id}] already registered.`);
   }

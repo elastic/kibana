@@ -32,6 +32,7 @@ const Parameters = Object.freeze({
   Level: '{level}',
   Message: '{message}',
   Timestamp: '{timestamp}',
+  Pid: '{pid}',
 });
 
 /**
@@ -39,7 +40,7 @@ const Parameters = Object.freeze({
  * with the actual data.
  */
 const PATTERN_REGEX = new RegExp(
-  `${Parameters.Timestamp}|${Parameters.Level}|${Parameters.Context}|${Parameters.Message}`,
+  `${Parameters.Timestamp}|${Parameters.Level}|${Parameters.Context}|${Parameters.Message}|${Parameters.Pid}`,
   'gi'
 );
 
@@ -103,6 +104,7 @@ export class PatternLayout implements Layout {
       [Parameters.Level, record.level.id.toUpperCase().padEnd(5)],
       [Parameters.Context, record.context],
       [Parameters.Message, message],
+      [Parameters.Pid, String(record.pid)],
     ]);
 
     if (this.highlight) {
