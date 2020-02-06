@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-// import { IUiSettingsClient } from 'src/core/public';
 import {
   IndexPattern,
   IndexPatternsContract,

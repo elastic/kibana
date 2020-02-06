@@ -15,6 +15,6 @@ interface StartPlugins {
   data: DataPublicPluginStart;
 }
 export type StartServices = CoreStart & StartPlugins;
-export // eslint-disable-next-line react-hooks/rules-of-hooks
-const useMlKibana = () => useKibana<StartServices>();
+// eslint-disable-next-line react-hooks/rules-of-hooks
+export const useMlKibana = () => useKibana<StartServices>();
 export type MlKibanaReactContextValue = KibanaReactContextValue<StartServices>;

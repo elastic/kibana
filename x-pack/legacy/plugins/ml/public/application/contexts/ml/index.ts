@@ -6,5 +6,3 @@
 
 export { MlContext, MlContextValue, SavedSearchQuery } from './ml_context';
 export { useMlContext } from './use_ml_context';
-// export { useCurrentIndexPattern } from './use_current_index_pattern';
-// export { useCurrentSavedSearch } from './use_current_saved_search';
