@@ -5,12 +5,12 @@
  */
 
 import { EuiIcon, EuiPanel, EuiToolTip } from '@elastic/eui';
-import React from 'react';
+import React, { useCallback } from 'react';
 import styled from 'styled-components';
 
-import { WithHoverActions } from '../../with_hover_actions';
-import { siemFilterManager } from '../../search_bar';
 import { esFilters } from '../../../../../../../../src/plugins/data/public';
+import { WithHoverActions } from '../../with_hover_actions';
+import { useKibana } from '../../../lib/kibana';
 
 import * as i18n from './translations';
 
@@ -24,12 +24,15 @@ interface OwnProps {
 
 export const AddFilterToGlobalSearchBar = React.memo<OwnProps>(
   ({ children, filter, onFilterAdded }) => {
-    const addToKql = () => {
-      siemFilterManager.addFilters(filter);
+    const { filterManager } = useKibana().services.data.query;
+
+    const addToKql = useCallback(() => {
+      filterManager.addFilters(filter);
       if (onFilterAdded != null) {
         onFilterAdded();
       }
-    };
+    }, [filter, filterManager, onFilterAdded]);
+
     return (
       <WithHoverActions
         hoverContent={
