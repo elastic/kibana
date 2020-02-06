@@ -62,12 +62,12 @@ export const DatavisualizerSelector: FC = () => {
           <EuiFlexGroup gutterSize="xl">
             <EuiFlexItem grow={false}>
               <EuiTitle size="l">
-                <h2>
+                <h1>
                   <FormattedMessage
                     id="xpack.ml.datavisualizer.selector.dataVisualizerTitle"
                     defaultMessage="Data Visualizer"
                   />
-                </h2>
+                </h1>
               </EuiTitle>
             </EuiFlexItem>
           </EuiFlexGroup>
