@@ -13,7 +13,8 @@ export const dataAnalyticsJobConfigSchema = {
     results_field: schema.maybe(schema.string()),
   }),
   source: schema.object({
-    index: schema.string(),
+    index: schema.oneOf([schema.string(), schema.arrayOf(schema.string())]),
+    query: schema.maybe(schema.any()),
   }),
   analysis: schema.any(),
   analyzed_fields: schema.any(),
