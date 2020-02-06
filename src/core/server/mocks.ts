@@ -38,6 +38,7 @@ export { httpServiceMock } from './http/http_service.mock';
 export { loggingServiceMock } from './logging/logging_service.mock';
 export { savedObjectsClientMock } from './saved_objects/service/saved_objects_client.mock';
 export { savedObjectsRepositoryMock } from './saved_objects/service/lib/repository.mock';
+export { typeRegistryMock as savedObjectsTypeRegistryMock } from './saved_objects/saved_objects_type_registry.mock';
 export { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
 import { uuidServiceMock } from './uuid/uuid_service.mock';
 
@@ -112,12 +113,19 @@ function createCoreSetupMock() {
   const uiSettingsMock = {
     register: uiSettingsServiceMock.createSetupContract().register,
   };
+
+  const savedObjectsService = savedObjectsServiceMock.createSetupContract();
+  const savedObjectMock: jest.Mocked<CoreSetup['savedObjects']> = {
+    addClientWrapper: savedObjectsService.addClientWrapper,
+    setClientFactoryProvider: savedObjectsService.setClientFactoryProvider,
+  };
+
   const mock: CoreSetupMockType = {
     capabilities: capabilitiesServiceMock.createSetupContract(),
     context: contextServiceMock.createSetupContract(),
     elasticsearch: elasticsearchServiceMock.createSetup(),
     http: httpMock,
-    savedObjects: savedObjectsServiceMock.createSetupContract(),
+    savedObjects: savedObjectMock,
     uiSettings: uiSettingsMock,
     uuid: uuidServiceMock.createSetupContract(),
     getStartServices: jest
@@ -145,7 +153,7 @@ function createInternalCoreSetupMock() {
     elasticsearch: elasticsearchServiceMock.createInternalSetup(),
     http: httpServiceMock.createSetupContract(),
     uiSettings: uiSettingsServiceMock.createSetupContract(),
-    savedObjects: savedObjectsServiceMock.createSetupContract(),
+    savedObjects: savedObjectsServiceMock.createInternalSetupContract(),
     uuid: uuidServiceMock.createSetupContract(),
   };
   return setupDeps;
@@ -154,7 +162,7 @@ function createInternalCoreSetupMock() {
 function createInternalCoreStartMock() {
   const startDeps: InternalCoreStart = {
     capabilities: capabilitiesServiceMock.createStartContract(),
-    savedObjects: savedObjectsServiceMock.createStartContract(),
+    savedObjects: savedObjectsServiceMock.createInternalStartContract(),
     uiSettings: uiSettingsServiceMock.createStartContract(),
   };
   return startDeps;
