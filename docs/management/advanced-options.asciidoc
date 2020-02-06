@@ -144,6 +144,7 @@ This setting does not have an effect when loading a saved search.
 `doc_table:highlight`:: Highlights results in Discover and saved searches on dashboards.
 Highlighting slows requests when
 working on big documents.
+`doc_table:legacyTable`:: Control the way the Discover's table looks and works. Set this property to `true` to revert to the legacy implementation.
 
 
 
