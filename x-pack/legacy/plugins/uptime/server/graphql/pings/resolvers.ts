@@ -5,7 +5,7 @@
  */
 
 import { UMResolver } from '../../../common/graphql/resolver_types';
-import { AllPingsQueryArgs, DocCount, PingResults } from '../../../common/graphql/types';
+import { AllPingsQueryArgs, PingResults } from '../../../common/graphql/types';
 import { UMServerLibs } from '../../lib/lib';
 import { UMContext } from '../types';
 import { CreateUMGraphQLResolvers } from '../types';
