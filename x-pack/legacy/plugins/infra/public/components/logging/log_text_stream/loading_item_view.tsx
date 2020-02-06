@@ -121,12 +121,12 @@ const ProgressSpinner: React.FC<{ kind: 'streaming' | 'loading' }> = ({ kind }) 
         {kind === 'streaming' ? (
           <FormattedMessage
             id="xpack.infra.logs.streamingNewEntriesText"
-            defaultMessage="Streaming new entries..."
+            defaultMessage="Streaming new entries"
           />
         ) : (
           <FormattedMessage
             id="xpack.infra.logs.loadingNewEntriesText"
-            defaultMessage="Loading new entries..."
+            defaultMessage="Loading new entries"
           />
         )}
       </EuiText>
@@ -141,7 +141,7 @@ const ProgressCta: React.FC<Pick<
   if (rangeEdge === 'now' && position === 'end') {
     return (
       <EuiButton onClick={onStreamStart} size="s">
-        <FormattedMessage id="xpack.infra.logs.extendTimeframe" defaultMessage="Stream live" />
+        <FormattedMessage id="xpack.infra.logs.streamLive" defaultMessage="Stream live" />
       </EuiButton>
     );
   }
@@ -178,7 +178,7 @@ const ProgressExtendMessage: React.FC<{ amount: number; unit: Unit }> = ({ amoun
     case 'ms':
       return (
         <FormattedMessage
-          id="xpack.infra.logs.extendTimeframe"
+          id="xpack.infra.logs.extendTimeframe.ms"
           defaultMessage="Extend timeframe {amount} milliseconds"
           values={{ amount }}
         />
@@ -186,7 +186,7 @@ const ProgressExtendMessage: React.FC<{ amount: number; unit: Unit }> = ({ amoun
     case 's':
       return (
         <FormattedMessage
-          id="xpack.infra.logs.extendTimeframe"
+          id="xpack.infra.logs.extendTimeframe.s"
           defaultMessage="Extend timeframe {amount} seconds"
           values={{ amount }}
         />
@@ -194,7 +194,7 @@ const ProgressExtendMessage: React.FC<{ amount: number; unit: Unit }> = ({ amoun
     case 'm':
       return (
         <FormattedMessage
-          id="xpack.infra.logs.extendTimeframe"
+          id="xpack.infra.logs.extendTimeframe.m"
           defaultMessage="Extend timeframe {amount} minutes"
           values={{ amount }}
         />
@@ -202,7 +202,7 @@ const ProgressExtendMessage: React.FC<{ amount: number; unit: Unit }> = ({ amoun
     case 'h':
       return (
         <FormattedMessage
-          id="xpack.infra.logs.extendTimeframe"
+          id="xpack.infra.logs.extendTimeframe.h"
           defaultMessage="Extend timeframe {amount} hours"
           values={{ amount }}
         />
@@ -210,7 +210,7 @@ const ProgressExtendMessage: React.FC<{ amount: number; unit: Unit }> = ({ amoun
     case 'd':
       return (
         <FormattedMessage
-          id="xpack.infra.logs.extendTimeframe"
+          id="xpack.infra.logs.extendTimeframe.d"
           defaultMessage="Extend timeframe {amount} days"
           values={{ amount }}
         />
@@ -218,7 +218,7 @@ const ProgressExtendMessage: React.FC<{ amount: number; unit: Unit }> = ({ amoun
     case 'w':
       return (
         <FormattedMessage
-          id="xpack.infra.logs.extendTimeframe"
+          id="xpack.infra.logs.extendTimeframe.w"
           defaultMessage="Extend timeframe {amount} weeks"
           values={{ amount }}
         />
@@ -226,7 +226,7 @@ const ProgressExtendMessage: React.FC<{ amount: number; unit: Unit }> = ({ amoun
     case 'M':
       return (
         <FormattedMessage
-          id="xpack.infra.logs.extendTimeframe"
+          id="xpack.infra.logs.extendTimeframe.M"
           defaultMessage="Extend timeframe {amount} months"
           values={{ amount }}
         />
@@ -234,7 +234,7 @@ const ProgressExtendMessage: React.FC<{ amount: number; unit: Unit }> = ({ amoun
     case 'y':
       return (
         <FormattedMessage
-          id="xpack.infra.logs.extendTimeframe"
+          id="xpack.infra.logs.extendTimeframe.y"
           defaultMessage="Extend timeframe {amount} years"
           values={{ amount }}
         />
