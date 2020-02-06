@@ -129,7 +129,9 @@ const SignalsTableComponent: React.FC<SignalsTableComponentProps> = ({
         dataProviders: [],
         indexPattern: indexPatterns,
         browserFields,
-        filters: globalFilters,
+        filters: isEmpty(defaultFilters)
+          ? globalFilters
+          : [...(defaultFilters ?? []), ...globalFilters],
         kqlQuery: globalQuery,
         kqlMode: globalQuery.language,
         start: from,

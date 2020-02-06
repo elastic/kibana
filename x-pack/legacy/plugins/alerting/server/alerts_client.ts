@@ -226,14 +226,32 @@ export class AlertsClient {
   }
 
   public async delete({ id }: { id: string }) {
-    const decryptedAlertSavedObject = await this.encryptedSavedObjectsPlugin.getDecryptedAsInternalUser<
-      RawAlert
-    >('alert', id, { namespace: this.namespace });
-    const removeResult = await this.savedObjectsClient.delete('alert', id);
-    if (decryptedAlertSavedObject.attributes.scheduledTaskId) {
-      await this.taskManager.remove(decryptedAlertSavedObject.attributes.scheduledTaskId);
+    let taskIdToRemove: string | undefined;
+    let apiKeyToInvalidate: string | null = null;
+
+    try {
+      const decryptedAlert = await this.encryptedSavedObjectsPlugin.getDecryptedAsInternalUser<
+        RawAlert
+      >('alert', id, { namespace: this.namespace });
+      apiKeyToInvalidate = decryptedAlert.attributes.apiKey;
+      taskIdToRemove = decryptedAlert.attributes.scheduledTaskId;
+    } catch (e) {
+      // We'll skip invalidating the API key since we failed to load the decrypted saved object
+      this.logger.error(
+        `delete(): Failed to load API key to invalidate on alert ${id}: ${e.message}`
+      );
+      // Still attempt to load the scheduledTaskId using SOC
+      const alert = await this.savedObjectsClient.get<RawAlert>('alert', id);
+      taskIdToRemove = alert.attributes.scheduledTaskId;
     }
-    await this.invalidateApiKey({ apiKey: decryptedAlertSavedObject.attributes.apiKey });
+
+    const removeResult = await this.savedObjectsClient.delete('alert', id);
+
+    await Promise.all([
+      taskIdToRemove ? this.taskManager.remove(taskIdToRemove) : null,
+      apiKeyToInvalidate ? this.invalidateApiKey({ apiKey: apiKeyToInvalidate }) : null,
+    ]);
+
     return removeResult;
   }
 

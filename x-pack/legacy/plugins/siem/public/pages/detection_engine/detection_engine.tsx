@@ -177,7 +177,6 @@ const DetectionEnginePageComponent: React.FC<DetectionEnginePageComponentProps> 
                             deleteQuery={deleteQuery}
                             filters={filters}
                             from={from}
-                            loadingInitial={loading}
                             query={query}
                             setQuery={setQuery}
                             showTotalSignalsCount={true}
