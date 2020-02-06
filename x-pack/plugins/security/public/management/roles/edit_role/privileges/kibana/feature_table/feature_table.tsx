@@ -5,7 +5,6 @@
  */
 
 import {
-  // @ts-ignore
   EuiButtonGroup,
   EuiIconTip,
   EuiInMemoryTable,
@@ -19,18 +18,18 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 import React, { Component } from 'react';
-import {
-  Role,
-  KibanaPrivileges,
-  SecuredFeature,
-  Privilege,
-  PrimaryFeaturePrivilege,
-} from '../../../../../../../common/model';
+import { Role } from '../../../../../../../common/model';
 import { ChangeAllPrivilegesControl } from './change_all_privileges';
 import { FeatureTableExpandedRow } from './feature_table_expanded_row';
 import { NO_PRIVILEGE_VALUE } from '../constants';
 import { PrivilegeFormCalculator } from '../privilege_calculator';
 import { FeatureTableCell } from '../feature_table_cell';
+import {
+  KibanaPrivileges,
+  SecuredFeature,
+  Privilege,
+  PrimaryFeaturePrivilege,
+} from '../../../../model';
 
 interface Props {
   role: Role;

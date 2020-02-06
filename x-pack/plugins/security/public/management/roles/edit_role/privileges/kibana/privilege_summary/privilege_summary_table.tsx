@@ -7,17 +7,13 @@
 import React, { useState } from 'react';
 import { EuiInMemoryTable, EuiBasicTableColumn, EuiButtonIcon, EuiIconTip } from '@elastic/eui';
 import { Space } from '../../../../../../../../spaces/common/model/space';
-import {
-  Role,
-  KibanaPrivileges,
-  RoleKibanaPrivilege,
-  SecuredFeature,
-} from '../../../../../../../common/model';
+import { Role, RoleKibanaPrivilege } from '../../../../../../../common/model';
 import { isGlobalPrivilegeDefinition } from '../../../privilege_utils';
 import { PrivilegeSummaryCalculator } from '../privilege_calculator';
 import { FeatureTableCell } from '../feature_table_cell';
 import { SpaceColumnHeader } from './space_column_header';
 import { PrivilegeSummaryExpandedRow } from './privilege_summary_expanded_row';
+import { SecuredFeature, KibanaPrivileges } from '../../../../model';
 
 interface Props {
   role: Role;

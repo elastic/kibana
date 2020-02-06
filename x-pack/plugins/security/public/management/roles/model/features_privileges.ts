@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-
-export const PrivilegeSummarySubFeature = () => {
-  return <span>shit here</span>;
-};
+export interface FeaturesPrivileges {
+  [featureId: string]: string[];
+}

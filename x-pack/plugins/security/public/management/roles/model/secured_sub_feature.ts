@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SubFeature, SubFeatureConfig } from '../../../features/common';
+import { SubFeature, SubFeatureConfig } from '../../../../../features/common';
 import { SubFeaturePrivilege } from './sub_feature_privilege';
 import { SubFeaturePrivilegeGroup } from './sub_feature_privilege_group';
 

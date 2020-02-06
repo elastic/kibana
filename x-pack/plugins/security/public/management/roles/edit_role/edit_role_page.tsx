@@ -36,11 +36,10 @@ import {
   IHttpFetchError,
   NotificationsStart,
 } from 'src/core/public';
-import { IFeature, Feature } from '../../../../../features/common';
+import { IFeature } from '../../../../../features/common';
 import { IndexPatternsContract } from '../../../../../../../src/plugins/data/public';
 import { Space } from '../../../../../spaces/common/model/space';
 import {
-  KibanaPrivileges,
   RawKibanaPrivileges,
   Role,
   BuiltinESPrivileges,
@@ -49,7 +48,6 @@ import {
   copyRole,
   prepareRoleClone,
   RoleIndexPrivilege,
-  SecuredFeature,
 } from '../../../../common/model';
 import { ROLES_PATH } from '../../management_urls';
 import { RoleValidationResult, RoleValidator } from './validate_role';
@@ -62,6 +60,7 @@ import { DocumentationLinksService } from '../documentation_links';
 import { IndicesAPIClient } from '../indices_api_client';
 import { RolesAPIClient } from '../roles_api_client';
 import { PrivilegesAPIClient } from '../privileges_api_client';
+import { SecuredFeature, KibanaPrivileges } from '../model';
 
 interface Props {
   action: 'edit' | 'clone';
@@ -231,11 +230,10 @@ function useSpaces(http: HttpStart, fatalErrors: FatalErrorsSetup, spacesEnabled
 
 function useFeatures(
   http: HttpStart,
-  privilegesAPIClient: PublicMethodsOf<PrivilegesAPIClient>,
+  privileges: RawKibanaPrivileges | undefined,
   fatalErrors: FatalErrorsSetup
 ) {
-  const [features, setFeatures] = useState<Feature[] | null>(null);
-  const [privileges] = usePrivileges(privilegesAPIClient, fatalErrors) || [];
+  const [features, setFeatures] = useState<SecuredFeature[] | null>(null);
   useEffect(() => {
     if (!privileges) {
       return;
@@ -295,7 +293,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
   const indexPatternsTitles = useIndexPatternsTitles(indexPatterns, fatalErrors, notifications);
   const privileges = usePrivileges(privilegesAPIClient, fatalErrors);
   const spaces = useSpaces(http, fatalErrors, spacesEnabled);
-  const features = useFeatures(http, privilegesAPIClient, fatalErrors);
+  const features = useFeatures(http, privileges ? privileges[0] : undefined, fatalErrors);
   const [role, setRole] = useRole(
     rolesAPIClient,
     fatalErrors,

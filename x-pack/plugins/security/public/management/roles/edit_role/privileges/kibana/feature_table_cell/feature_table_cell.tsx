@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { EuiText, EuiIconTip, EuiIcon, IconType } from '@elastic/eui';
-import { SecuredFeature } from '../../../../../../../common/model';
+import { SecuredFeature } from '../../../../model';
 
 interface Props {
   feature: SecuredFeature;

@@ -4,15 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Role, RoleKibanaPrivilege } from '../../../../../../../common/model';
+import { isGlobalPrivilegeDefinition } from '../../../privilege_utils';
 import {
   KibanaPrivileges,
-  Role,
+  PrimaryFeaturePrivilege,
   SubFeaturePrivilege,
   SubFeaturePrivilegeGroup,
-  RoleKibanaPrivilege,
-  PrimaryFeaturePrivilege,
-} from '../../../../../../../common/model';
-import { isGlobalPrivilegeDefinition } from '../../../privilege_utils';
+} from '../../../../model';
 
 export class PrivilegeSummaryCalculator {
   constructor(private readonly kibanaPrivileges: KibanaPrivileges, private readonly role: Role) {}

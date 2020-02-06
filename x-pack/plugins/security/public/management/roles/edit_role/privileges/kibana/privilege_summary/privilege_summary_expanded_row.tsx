@@ -6,12 +6,8 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiCheckbox, EuiButtonGroup } from '@elastic/eui';
-import {
-  SubFeaturePrivilegeGroup,
-  SubFeaturePrivilege,
-  SecuredFeature,
-} from '../../../../../../../common/model';
 import { NO_PRIVILEGE_VALUE } from '../constants';
+import { SecuredFeature, SubFeaturePrivilegeGroup, SubFeaturePrivilege } from '../../../../model';
 
 interface Props {
   feature: SecuredFeature;

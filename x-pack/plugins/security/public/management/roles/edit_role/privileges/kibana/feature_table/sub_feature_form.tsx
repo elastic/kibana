@@ -6,14 +6,14 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiCheckbox, EuiButtonGroup } from '@elastic/eui';
+
+import { NO_PRIVILEGE_VALUE } from '../constants';
+import { PrivilegeFormCalculator } from '../privilege_calculator';
 import {
   SecuredSubFeature,
   SubFeaturePrivilegeGroup,
   SubFeaturePrivilege,
-} from '../../../../../../../common/model';
-
-import { NO_PRIVILEGE_VALUE } from '../constants';
-import { PrivilegeFormCalculator } from '../privilege_calculator';
+} from '../../../../model';
 
 interface Props {
   featureId: string;

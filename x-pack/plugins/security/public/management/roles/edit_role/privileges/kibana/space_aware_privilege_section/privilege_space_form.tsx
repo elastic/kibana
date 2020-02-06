@@ -25,12 +25,13 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
 import React, { Component, Fragment } from 'react';
-import { Role, KibanaPrivileges, copyRole } from '../../../../../../../common/model';
+import { Role, copyRole } from '../../../../../../../common/model';
 import { Space } from '../../../../../../../../spaces/common/model/space';
 import { SpaceSelector } from './space_selector';
 import { FeatureTable } from '../feature_table';
 import { CUSTOM_PRIVILEGE_VALUE } from '../constants';
 import { PrivilegeFormCalculator } from '../privilege_calculator';
+import { KibanaPrivileges } from '../../../../model';
 
 interface Props {
   role: Role;

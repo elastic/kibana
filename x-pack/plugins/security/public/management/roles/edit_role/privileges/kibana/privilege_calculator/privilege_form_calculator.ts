@@ -4,13 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  KibanaPrivileges,
-  Role,
-  SubFeaturePrivilege,
-  SubFeaturePrivilegeGroup,
-} from '../../../../../../../common/model';
+import { Role } from '../../../../../../../common/model';
 import { isGlobalPrivilegeDefinition } from '../../../privilege_utils';
+import { KibanaPrivileges, SubFeaturePrivilege, SubFeaturePrivilegeGroup } from '../../../../model';
 
 export class PrivilegeFormCalculator {
   constructor(

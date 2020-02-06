@@ -8,14 +8,8 @@ export { ApiKey, ApiKeyToInvalidate } from './api_key';
 export { User, EditUser, getUserDisplayName } from './user';
 export { AuthenticatedUser, canUserChangePassword } from './authenticated_user';
 export { BuiltinESPrivileges } from './builtin_es_privileges';
-export { FeaturesPrivileges } from './features_privileges';
-export { FeaturePrivilege } from './feature_privilege';
-export { SecuredFeature } from './secured_feature';
-export { SecuredSubFeature } from './secured_sub_feature';
-export { SubFeaturePrivilegeGroup } from './sub_feature_privilege_group';
-export { SubFeaturePrivilege } from './sub_feature_privilege';
-export { PrimaryFeaturePrivilege } from './primary_feature_privilege';
 export { RawKibanaPrivileges, RawKibanaFeaturePrivileges } from './raw_kibana_privileges';
+export { FeaturesPrivileges } from './features_privileges';
 export {
   Role,
   RoleIndexPrivilege,
@@ -26,12 +20,6 @@ export {
   isRoleEnabled,
   prepareRoleClone,
 } from './role';
-export {
-  KibanaPrivileges,
-  PrivilegeExplanation,
-  FeaturePrivilegesExplanations,
-  Privilege,
-} from './poc_kibana_privileges';
 export {
   InlineRoleTemplate,
   StoredRoleTemplate,

@@ -35,27 +35,6 @@ export class PrivilegeCollection {
     return this.privileges.some(p => p.equals(privilege));
   }
 
-  public bisect(bisector: (privilege: Privilege) => 'first' | 'second') {
-    const first: Privilege[] = [];
-    const second: Privilege[] = [];
-
-    this.privileges.forEach(privilege => {
-      const result = bisector(privilege);
-      switch (result) {
-        case 'first':
-          first.push(privilege);
-          break;
-        case 'second':
-          second.push(privilege);
-          break;
-        default:
-          throw new Error(`unsupported bisector return value: ${result}`);
-      }
-    });
-
-    return [new PrivilegeCollection(first), new PrivilegeCollection(second)];
-  }
-
   private checkActions(knownActions: ReadonlySet<string>, candidateActions: string[]) {
     const missing = candidateActions.filter(action => !knownActions.has(action));
 

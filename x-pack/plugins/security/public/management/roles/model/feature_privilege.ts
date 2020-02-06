@@ -5,8 +5,8 @@
  */
 
 import _ from 'lodash';
-import { FeatureKibanaPrivileges } from '../../../features/common';
-import { Privilege } from './poc_kibana_privileges/privilege_instance';
+import { FeatureKibanaPrivileges } from '../../../../../features/public';
+import { Privilege } from './kibana_privileges/privilege_instance';
 
 export class FeaturePrivilege extends Privilege {
   constructor(

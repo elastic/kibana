@@ -6,13 +6,9 @@
 
 import React, { useState, useEffect } from 'react';
 import { EuiFlexItem, EuiFlexGroup, EuiSwitch, EuiSwitchEvent, EuiText } from '@elastic/eui';
-import {
-  SecuredFeature,
-  SubFeaturePrivilege,
-  PrimaryFeaturePrivilege,
-} from '../../../../../../../common/model';
 import { SubFeatureForm } from './sub_feature_form';
 import { PrivilegeFormCalculator } from '../privilege_calculator';
+import { SecuredFeature, SubFeaturePrivilege, PrimaryFeaturePrivilege } from '../../../../model';
 
 interface Props {
   feature: SecuredFeature;

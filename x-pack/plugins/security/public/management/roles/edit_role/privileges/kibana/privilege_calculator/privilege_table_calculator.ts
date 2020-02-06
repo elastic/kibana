@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KibanaPrivileges, Role, RoleKibanaPrivilege } from '../../../../../../../common/model';
+import { Role, RoleKibanaPrivilege } from '../../../../../../../common/model';
 import { isGlobalPrivilegeDefinition } from '../../../privilege_utils';
+import { KibanaPrivileges } from '../../../../model';
 
 export class PrivilegeTableCalculator {
   constructor(private readonly kibanaPrivileges: KibanaPrivileges, private readonly role: Role) {}

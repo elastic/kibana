@@ -16,20 +16,20 @@ import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import _ from 'lodash';
 import React, { Component, Fragment } from 'react';
 import { Capabilities } from 'src/core/public';
-import { Feature } from '../../../../../../../../features/public';
-import { KibanaPrivileges, Role, isReservedRole } from '../../../../../../../common/model';
+import { Role, isReservedRole } from '../../../../../../../common/model';
 import { Space } from '../../../../../../../../spaces/common/model/space';
 import { RoleValidator } from '../../../validate_role';
 import { PrivilegeSpaceTable } from './privilege_space_table';
 import { PrivilegeSpaceForm } from './privilege_space_form';
 import { PrivilegeTableCalculator } from '../privilege_calculator';
 import { PrivilegeSummary } from '../privilege_summary';
+import { KibanaPrivileges, SecuredFeature } from '../../../../model';
 
 interface Props {
   kibanaPrivileges: KibanaPrivileges;
   role: Role;
   spaces: Space[];
-  features: Feature[];
+  features: SecuredFeature[];
   onChange: (role: Role) => void;
   editable: boolean;
   validator: RoleValidator;

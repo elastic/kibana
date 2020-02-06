@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Feature, IFeature } from '../../../features/common';
-import { FeaturePrivilege } from './feature_privilege';
+import { Feature, IFeature } from '../../../../../features/common';
 import { PrimaryFeaturePrivilege } from './primary_feature_privilege';
 import { SecuredSubFeature } from './secured_sub_feature';
 import { SubFeaturePrivilege } from './sub_feature_privilege';
+import { FeaturePrivilege } from '.';
 
 export class SecuredFeature extends Feature {
   public readonly primaryFeaturePrivileges: PrimaryFeaturePrivilege[];

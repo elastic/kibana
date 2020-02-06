@@ -7,12 +7,13 @@
 import React, { Component } from 'react';
 import { Capabilities } from 'src/core/public';
 import { Space } from '../../../../../../../spaces/common/model/space';
-import { KibanaPrivileges, Role, SecuredFeature } from '../../../../../../common/model';
+import { Role } from '../../../../../../common/model';
 import { RoleValidator } from '../../validate_role';
 import { CollapsiblePanel } from '../../collapsible_panel';
 import { SimplePrivilegeSection } from './simple_privilege_section';
 import { SpaceAwarePrivilegeSection } from './space_aware_privilege_section';
 import { TransformErrorSection } from './transform_error_section';
+import { SecuredFeature, KibanaPrivileges } from '../../../model';
 
 interface Props {
   role: Role;
@@ -72,7 +73,6 @@ export class KibanaPrivilegesRegion extends Component<Props, {}> {
           kibanaPrivileges={kibanaPrivileges}
           features={features}
           role={role}
-          privilegeCalculator={privilegeCalculator}
           onChange={onChange}
           editable={editable}
         />

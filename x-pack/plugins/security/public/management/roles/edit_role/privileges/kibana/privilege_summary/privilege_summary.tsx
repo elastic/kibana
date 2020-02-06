@@ -16,8 +16,9 @@ import {
   EuiButton,
 } from '@elastic/eui';
 import { Space } from '../../../../../../../../spaces/common/model/space';
-import { Role, KibanaPrivileges, SecuredFeature } from '../../../../../../../common/model';
+import { Role } from '../../../../../../../common/model';
 import { PrivilegeSummaryTable } from './privilege_summary_table';
+import { SecuredFeature, KibanaPrivileges } from '../../../../model';
 
 interface Props {
   role: Role;
