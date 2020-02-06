@@ -39,9 +39,6 @@ export interface VegaVisualizationDependencies extends LegacyDependenciesPluginS
   plugins: {
     data: ReturnType<DataPublicPlugin['setup']>;
   };
-  config: {
-    enableExternalUrls: boolean;
-  };
 }
 
 /** @internal */
@@ -71,8 +68,8 @@ export class VegaPlugin implements Plugin<Promise<void>, void> {
     { data, expressions, visualizations, visTypeVega, __LEGACY }: VegaPluginSetupDependencies
   ) {
     setInjectedVars({
+      enableExternalUrls: visTypeVega.config.enableExternalUrls,
       esShardTimeout: core.injectedMetadata.getInjectedVar('esShardTimeout') as number,
-      enableExternalUrls: core.injectedMetadata.getInjectedVar('enableExternalUrls') as boolean,
       emsTileLayerId: core.injectedMetadata.getInjectedVar('emsTileLayerId', true),
     });
     setUISettings(core.uiSettings);
@@ -81,9 +78,6 @@ export class VegaPlugin implements Plugin<Promise<void>, void> {
       core,
       plugins: {
         data,
-      },
-      config: {
-        enableExternalUrls: visTypeVega.config.enableExternalUrls,
       },
       ...(await __LEGACY.setup()),
     };
