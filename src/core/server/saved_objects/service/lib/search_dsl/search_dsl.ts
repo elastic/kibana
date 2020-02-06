@@ -20,11 +20,11 @@
 import Boom from 'boom';
 
 import { IndexMapping } from '../../../mappings';
-import { SavedObjectsSchema } from '../../../schema';
 import { getQueryParams } from './query_params';
 import { getSortingParams } from './sorting_params';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { esKuery } from '../../../../../../plugins/data/server';
+import { ISavedObjectTypeRegistry } from '../../../saved_objects_type_registry';
 
 interface GetSearchDslOptions {
   type: string | string[];
@@ -43,7 +43,7 @@ interface GetSearchDslOptions {
 
 export function getSearchDsl(
   mappings: IndexMapping,
-  schema: SavedObjectsSchema,
+  registry: ISavedObjectTypeRegistry,
   options: GetSearchDslOptions
 ) {
   const {
@@ -69,7 +69,7 @@ export function getSearchDsl(
   return {
     ...getQueryParams({
       mappings,
-      schema,
+      registry,
       namespace,
       type,
       search,

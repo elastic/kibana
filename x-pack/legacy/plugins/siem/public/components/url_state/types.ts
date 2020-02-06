@@ -6,7 +6,13 @@
 
 import ApolloClient from 'apollo-client';
 import { ActionCreator } from 'typescript-fsa';
-import { IIndexPattern, Query, esFilters } from 'src/plugins/data/public';
+import {
+  IIndexPattern,
+  Query,
+  esFilters,
+  FilterManager,
+  SavedQueryService,
+} from 'src/plugins/data/public';
 
 import { UrlInputsModel } from '../../store/inputs/model';
 import { RouteSpyState } from '../../utils/route/types';
@@ -120,8 +126,10 @@ export interface UrlStateToRedux {
 export interface SetInitialStateFromUrl<TCache> {
   apolloClient: ApolloClient<TCache> | ApolloClient<{}> | undefined;
   detailName: string | undefined;
+  filterManager: FilterManager;
   indexPattern: IIndexPattern | undefined;
   pageName: string;
+  savedQueries: SavedQueryService;
   updateTimeline: DispatchUpdateTimeline;
   updateTimelineIsLoading: ActionCreator<UpdateTimelineIsLoading>;
   urlStateToUpdate: UrlStateToRedux[];
