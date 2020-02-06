@@ -19,7 +19,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { INSTRUCTION_VARIANT } from '../instructions/instruction_variant';
+import { INSTRUCTION_VARIANT } from '../../../common/instruction_variant';
 import { createLogstashInstructions } from '../instructions/logstash_instructions';
 import {
   createTrycloudOption1,
