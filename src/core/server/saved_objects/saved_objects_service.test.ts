@@ -21,6 +21,7 @@ import {
   KibanaMigratorMock,
   migratorInstanceMock,
   clientProviderInstanceMock,
+  typeRegistryInstanceMock,
 } from './saved_objects_service.test.mocks';
 
 import { SavedObjectsService } from './saved_objects_service';
@@ -31,11 +32,14 @@ import { configServiceMock } from '../mocks';
 import { elasticsearchServiceMock } from '../elasticsearch/elasticsearch_service.mock';
 import { legacyServiceMock } from '../legacy/legacy_service.mock';
 import { SavedObjectsClientFactoryProvider } from './service/lib';
+import { BehaviorSubject } from 'rxjs';
+import { NodesVersionCompatibility } from '../elasticsearch/version_check/ensure_es_version';
 
 describe('SavedObjectsService', () => {
   const createSetupDeps = () => {
+    const elasticsearchMock = elasticsearchServiceMock.createInternalSetup();
     return {
-      elasticsearch: elasticsearchServiceMock.createInternalSetup(),
+      elasticsearch: elasticsearchMock,
       legacyPlugins: legacyServiceMock.createDiscoverPlugins(),
     };
   };
@@ -105,6 +109,25 @@ describe('SavedObjectsService', () => {
         );
       });
     });
+
+    describe('registerType', () => {
+      it('registers the type to the internal typeRegistry', async () => {
+        const coreContext = mockCoreContext.create();
+        const soService = new SavedObjectsService(coreContext);
+        const setup = await soService.setup(createSetupDeps());
+
+        const type = {
+          name: 'someType',
+          hidden: false,
+          namespaceAgnostic: false,
+          mappings: { properties: {} },
+        };
+        setup.registerType(type);
+
+        expect(typeRegistryInstanceMock.registerType).toHaveBeenCalledTimes(1);
+        expect(typeRegistryInstanceMock.registerType).toHaveBeenCalledWith(type);
+      });
+    });
   });
 
   describe('#start()', () => {
@@ -137,7 +160,7 @@ describe('SavedObjectsService', () => {
 
       await soService.setup(createSetupDeps());
       await soService.start({});
-      expect(migratorInstanceMock.runMigrations).toHaveBeenCalledWith(true);
+      expect(migratorInstanceMock.runMigrations).not.toHaveBeenCalled();
     });
 
     it('skips KibanaMigrator migrations when migrations.skip=true', async () => {
@@ -146,7 +169,38 @@ describe('SavedObjectsService', () => {
       const soService = new SavedObjectsService(coreContext);
       await soService.setup(createSetupDeps());
       await soService.start({});
-      expect(migratorInstanceMock.runMigrations).toHaveBeenCalledWith(true);
+      expect(migratorInstanceMock.runMigrations).not.toHaveBeenCalled();
+    });
+
+    it('waits for all es nodes to be compatible before running migrations', async done => {
+      expect.assertions(2);
+      const configService = configServiceMock.create({ atPath: { skip: false } });
+      const coreContext = mockCoreContext.create({ configService });
+      const soService = new SavedObjectsService(coreContext);
+      const setupDeps = createSetupDeps();
+      // Create an new subject so that we can control when isCompatible=true
+      // is emitted.
+      setupDeps.elasticsearch.esNodesCompatibility$ = new BehaviorSubject({
+        isCompatible: false,
+        incompatibleNodes: [],
+        warningNodes: [],
+        kibanaVersion: '8.0.0',
+      });
+      await soService.setup(setupDeps);
+      soService.start({});
+      expect(migratorInstanceMock.runMigrations).toHaveBeenCalledTimes(0);
+      ((setupDeps.elasticsearch.esNodesCompatibility$ as any) as BehaviorSubject<
+        NodesVersionCompatibility
+      >).next({
+        isCompatible: true,
+        incompatibleNodes: [],
+        warningNodes: [],
+        kibanaVersion: '8.0.0',
+      });
+      setImmediate(() => {
+        expect(migratorInstanceMock.runMigrations).toHaveBeenCalledTimes(1);
+        done();
+      });
     });
 
     it('resolves with KibanaMigrator after waiting for migrations to complete', async () => {
@@ -158,7 +212,6 @@ describe('SavedObjectsService', () => {
 
       const startContract = await soService.start({});
       expect(startContract.migrator).toBe(migratorInstanceMock);
-      expect(migratorInstanceMock.runMigrations).toHaveBeenCalledWith(false);
       expect(migratorInstanceMock.runMigrations).toHaveBeenCalledTimes(1);
     });
   });

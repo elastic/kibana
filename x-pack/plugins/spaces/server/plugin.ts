@@ -14,7 +14,7 @@ import {
   PluginInitializerContext,
 } from '../../../../src/core/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
-import { PluginSetupContract as SecurityPluginSetup } from '../../security/server';
+import { SecurityPluginSetup } from '../../security/server';
 import { LicensingPluginSetup } from '../../licensing/server';
 import { XPackMainPlugin } from '../../../legacy/plugins/xpack_main/server/xpack_main';
 import { createDefaultSpace } from './lib/create_default_space';

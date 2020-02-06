@@ -17,6 +17,7 @@ import { ErrorCount } from '../../ErrorCount';
 import { IWaterfallItem } from './waterfall_helpers/waterfall_helpers';
 import { ErrorOverviewLink } from '../../../../../shared/Links/apm/ErrorOverviewLink';
 import { TRACE_ID } from '../../../../../../../common/elasticsearch_fieldnames';
+import { SyncBadge } from './SyncBadge';
 
 type ItemType = 'transaction' | 'span' | 'error';
 
@@ -231,6 +232,7 @@ export function WaterfallItem({
           </ErrorOverviewLink>
         ) : null}
         <Duration item={item} />
+        {item.docType === 'span' && <SyncBadge sync={item.doc.span.sync} />}
       </ItemText>
     </Container>
   );

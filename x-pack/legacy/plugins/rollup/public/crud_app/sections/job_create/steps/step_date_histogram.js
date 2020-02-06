@@ -6,7 +6,7 @@
 
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import moment from 'moment-timezone';
 
 import {
@@ -26,7 +26,7 @@ import {
 
 import { parseEsInterval } from '../../../../../../../../../src/legacy/core_plugins/data/public';
 
-import { dateHistogramDetailsUrl, dateHistogramAggregationUrl } from '../../../services';
+import { getDateHistogramDetailsUrl, getDateHistogramAggregationUrl } from '../../../services';
 
 import { StepError } from './components';
 
@@ -35,7 +35,7 @@ const timeZoneOptions = moment.tz.names().map(name => ({
   text: name,
 }));
 
-export class StepDateHistogramUi extends Component {
+export class StepDateHistogram extends Component {
   static propTypes = {
     fields: PropTypes.object.isRequired,
     onFieldsChange: PropTypes.func.isRequired,
@@ -192,7 +192,7 @@ export class StepDateHistogramUi extends Component {
             <EuiButtonEmpty
               size="s"
               flush="right"
-              href={dateHistogramDetailsUrl}
+              href={getDateHistogramDetailsUrl()}
               target="_blank"
               iconType="help"
               data-test-subj="rollupJobCreateDateHistogramDocsButton"
@@ -218,7 +218,7 @@ export class StepDateHistogramUi extends Component {
                     defaultMessage="Define how {link} will operate on your rollup data."
                     values={{
                       link: (
-                        <EuiLink href={dateHistogramAggregationUrl} target="_blank">
+                        <EuiLink href={getDateHistogramAggregationUrl()} target="_blank">
                           <FormattedMessage
                             id="xpack.rollupJobs.create.stepDateHistogramDescription.aggregationsLinkLabel"
                             defaultMessage="date histogram aggregations"
@@ -318,5 +318,3 @@ export class StepDateHistogramUi extends Component {
     return <StepError />;
   };
 }
-
-export const StepDateHistogram = injectI18n(StepDateHistogramUi);

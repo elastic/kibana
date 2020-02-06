@@ -80,13 +80,9 @@ export const Waterfall: React.FC<Props> = ({
   const { serviceColors, duration } = waterfall;
 
   const agentMarks = getAgentMarks(waterfall.entryTransaction);
-  const errorMarks = getErrorMarks(waterfall.items, serviceColors);
+  const errorMarks = getErrorMarks(waterfall.errorItems, serviceColors);
 
   const renderWaterfallItem = (item: IWaterfallItem) => {
-    if (item.docType === 'error') {
-      return null;
-    }
-
     const errorCount =
       item.docType === 'transaction'
         ? waterfall.errorsPerTransaction[item.doc.transaction.id]

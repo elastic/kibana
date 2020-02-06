@@ -20,7 +20,7 @@
 import React, { useEffect } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 
-import { AggParamType, AggConfig, AggGroupNames } from '../../legacy_imports';
+import { AggParamType, IAggConfig, AggGroupNames } from '../../legacy_imports';
 import { useSubAggParamsHandlers } from './utils';
 import { AggParamEditorProps } from '../agg_param_props';
 import { DefaultEditorAggParams } from '../agg_params';
@@ -35,7 +35,7 @@ function SubAggParamEditor({
   setValue,
   setValidity,
   setTouched,
-}: AggParamEditorProps<AggConfig, AggParamType>) {
+}: AggParamEditorProps<IAggConfig, AggParamType>) {
   useEffect(() => {
     // we aren't creating a custom aggConfig
     if (agg.params.metricAgg !== 'custom') {

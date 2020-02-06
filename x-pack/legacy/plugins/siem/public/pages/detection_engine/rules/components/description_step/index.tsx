@@ -115,7 +115,7 @@ const getDescriptionItem = (
   indexPatterns?: IIndexPattern
 ): ListItems[] => {
   if (field === 'queryBar') {
-    const filters = addFilterStateIfNotThere(get('queryBar.filters', value));
+    const filters = addFilterStateIfNotThere(get('queryBar.filters', value) ?? []);
     const query = get('queryBar.query', value) as Query;
     const savedId = get('queryBar.saved_id', value);
     return buildQueryBarDescription({
