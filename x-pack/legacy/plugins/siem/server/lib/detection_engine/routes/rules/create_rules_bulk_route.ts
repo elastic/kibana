@@ -48,6 +48,35 @@ export const createCreateRulesBulkRoute = (server: ServerFacade): Hapi.ServerRou
         return headers.response().code(404);
       }
 
+      // Determine if duplicate rule_ids exist in the request
+      // before attempting to create them.
+      const mapDuplicates = request.payload.reduce<Map<string, number>>((acc, rule) => {
+        if (rule.rule_id != null && acc.has(rule.rule_id)) {
+          const totalView = acc.get(rule.rule_id) ?? 1;
+          acc.set(rule.rule_id, totalView + 1);
+        } else if (rule.rule_id != null) {
+          acc.set(rule.rule_id, 1);
+        }
+        return acc;
+      }, new Map());
+
+      const hasDuplicates = Array.from(mapDuplicates.values()).some(i => i > 1);
+      if (hasDuplicates) {
+        const duplicates = Array.from(mapDuplicates.entries())
+          .reduce<string[]>((acc, [key, val]) => {
+            if (val > 1) {
+              return [...acc, key];
+            }
+            return acc;
+          }, [])
+          .join(', ');
+        return createBulkErrorObject({
+          ruleId: duplicates,
+          statusCode: 409,
+          message: `rule_id: "${duplicates}" already exists`,
+        });
+      }
+
       const rules = await Promise.all(
         request.payload.map(async payloadRule => {
           const {
