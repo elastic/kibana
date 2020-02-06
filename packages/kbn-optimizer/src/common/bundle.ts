@@ -18,7 +18,6 @@
  */
 
 import Path from 'path';
-import { createHash } from 'crypto';
 
 import { BundleCache } from './bundle_cache';
 import { UnknownVals } from './ts_helpers';
