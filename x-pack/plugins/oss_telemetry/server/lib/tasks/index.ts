@@ -4,16 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Observable } from 'rxjs';
 import { CoreSetup, Logger } from 'kibana/server';
 import { PLUGIN_ID, VIS_TELEMETRY_TASK } from '../../../constants';
 import { visualizationsTaskRunner } from './visualizations/task_runner';
-import KbnServer from '../../../../../../../src/legacy/server/kbn_server';
-import { LegacyConfig } from '../../plugin';
 import {
   TaskInstance,
   TaskManagerStartContract,
   TaskManagerSetupContract,
-} from '../../../../../../plugins/task_manager/server';
+} from '../../../../task_manager/server';
 
 export function registerTasks({
   taskManager,
@@ -24,7 +23,7 @@ export function registerTasks({
   taskManager?: TaskManagerSetupContract;
   logger: Logger;
   elasticsearch: CoreSetup['elasticsearch'];
-  config: LegacyConfig;
+  config: Observable<{ kibana: { index: string } }>;
 }) {
   if (!taskManager) {
     logger.debug('Task manager is not available');
@@ -44,13 +43,11 @@ export function registerTasks({
   });
 }
 
-export function scheduleTasks({
+export async function scheduleTasks({
   taskManager,
-  xpackMainStatus,
   logger,
 }: {
   taskManager?: TaskManagerStartContract;
-  xpackMainStatus: { kbnServer: KbnServer };
   logger: Logger;
 }) {
   if (!taskManager) {
@@ -58,26 +55,14 @@ export function scheduleTasks({
     return;
   }
 
-  const { kbnServer } = xpackMainStatus;
-
-  kbnServer.afterPluginsInit(() => {
-    // The code block below can't await directly within "afterPluginsInit"
-    // callback due to circular dependency. The server isn't "ready" until
-    // this code block finishes. Migrations wait for server to be ready before
-    // executing. Saved objects repository waits for migrations to finish before
-    // finishing the request. To avoid this, we'll await within a separate
-    // function block.
-    (async () => {
-      try {
-        await taskManager.ensureScheduled({
-          id: `${PLUGIN_ID}-${VIS_TELEMETRY_TASK}`,
-          taskType: VIS_TELEMETRY_TASK,
-          state: { stats: {}, runs: 0 },
-          params: {},
-        });
-      } catch (e) {
-        logger.debug(`Error scheduling task, received ${e.message}`);
-      }
-    })();
-  });
+  try {
+    await taskManager.ensureScheduled({
+      id: `${PLUGIN_ID}-${VIS_TELEMETRY_TASK}`,
+      taskType: VIS_TELEMETRY_TASK,
+      state: { stats: {}, runs: 0 },
+      params: {},
+    });
+  } catch (e) {
+    logger.debug(`Error scheduling task, received ${e.message}`);
+  }
 }
