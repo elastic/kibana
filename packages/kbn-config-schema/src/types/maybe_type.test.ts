@@ -67,6 +67,17 @@ describe('maybe + object', () => {
     expect(type.validate(undefined)).toEqual(undefined);
   });
 
+  test('returns undefined if undefined object with no defaults', () => {
+    const type = schema.maybe(
+      schema.object({
+        type: schema.string(),
+        id: schema.string(),
+      })
+    );
+
+    expect(type.validate(undefined)).toEqual(undefined);
+  });
+
   test('returns empty object if maybe keys', () => {
     const type = schema.object({
       name: schema.maybe(schema.string()),
