@@ -10,8 +10,8 @@ State syncing utilities include:
 - `syncState` util which:
   - Subscribes to state changes and pushes them to state storage.
   - Optionally subscribes to state storage changes and pushes them to state.
-- 2 storage types for `syncState` util:
-  - [KbnUrlStateStorage](./storages/kbn_url_storage.md) - Serializes state and persists it to URL's query param in rison or hashed format (similar to what `AppState` & `GlobalState` did in legacy world).
+- Two types of storage compatible with `syncState`:
+  - [KbnUrlStateStorage](./storages/kbn_url_storage.md) - Serializes state and persists it to URL's query param in rison or hashed format.
     Listens for state updates in the URL and pushes them back to state.
   - [SessionStorageStateStorage](./storages/session_storage.md) - Serializes state and persists it to session storage.
 
@@ -55,6 +55,6 @@ To run them, start kibana with `--run-examples` flag.
 - [Setting up initial state](./initial_state.md).
 - [Using without state containers](./no_state_containers.md).
 - [Handling empty or incomplete incoming state](./empty_or_incomplete_incoming_state.md).
-- [On-fly state migrations](./on_fly_state_migrations.md).
+- [On-the-fly state migrations](./on_fly_state_migrations.md).
 - [syncStates helper](./sync_states.md).
 - [Helpers for Data plugin (syncing TimeRange, RefreshInterval and Filters)](./data_plugin_helpers.md).

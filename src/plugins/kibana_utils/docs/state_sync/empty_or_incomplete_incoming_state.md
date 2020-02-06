@@ -1,11 +1,13 @@
 # Handling empty or incomplete incoming state
 
-Users have direct access to storages where we sync our state to. For example, URL.
-User can manually change the URL and remove or corrupt important data which we expect to be there.
-Or users may programmatically generate URLs to Kibana and these URLs could have mistakes which application can't handle.
+Users have direct access to storages where we sync our state to.
+For example, in the URL, a user can manually change the URL and remove or corrupt important data which we expect to be there.
+URLs may also be programmatically generated, increasing the risk for mistakes which application can't handle.
 
-`syncState` utility doesn't do any handling for such edge cases and passes whatever received from storage to state container as is.
-So it is up to application to decide, how to handle such scenarios. Consider the example:
+`syncState` doesn't handle such edge cases passing input from storage to the state container as is.
+It is up to the application to handle such scenarios.
+
+Consider the following example:
 
 ```ts
 // window.location.href is "/#?_a=(count:0)"
