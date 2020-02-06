@@ -25,11 +25,11 @@ import { tap } from 'rxjs/operators';
 
 import { OptimizerConfig } from './optimizer_config';
 import { OptimizerMsg } from './optimizer';
-import { CompilerState, pipeClosure } from './common';
+import { CompilerMsg, pipeClosure } from './common';
 
 export function logOptimizerState(log: ToolingLog, config: OptimizerConfig) {
   return pipeClosure((msg$: Rx.Observable<OptimizerMsg>) => {
-    const bundleStates = new Map<string, CompilerState['type']>();
+    const bundleStates = new Map<string, CompilerMsg['type']>();
     let loggedInit = false;
 
     return msg$.pipe(

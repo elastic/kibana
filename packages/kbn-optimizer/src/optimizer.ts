@@ -26,7 +26,7 @@ import { map, mergeMap, share } from 'rxjs/operators';
 import { observeWorker, WorkerStatus } from './observe_worker';
 import { OptimizerConfig } from './optimizer_config';
 import { getOptimizerVersion } from './get_optimizer_version';
-import { CompilerState, WorkerMsg, pipeClosure, Bundle, ascending, maybeMap } from './common';
+import { CompilerMsg, WorkerMsg, pipeClosure, Bundle, ascending, maybeMap } from './common';
 import { assignBundlesToWorkers } from './assign_bundles_to_workers';
 import { Watcher, ChangesStarted, Changes } from './watcher';
 import { getMtimes } from './get_mtimes';
@@ -41,7 +41,7 @@ export interface OptimizerState {
   version: string;
   startTime: number;
   durSec: number;
-  compilerStates: CompilerState[];
+  compilerStates: CompilerMsg[];
   onlineBundles: Bundle[];
   offlineBundles: Bundle[];
 }
@@ -61,7 +61,7 @@ export type OptimizerNotif = OptimizerStartedWorker;
 
 const msToSec = (ms: number) => Math.round(ms / 100) / 10;
 
-const getPhase = (states: CompilerState[]): OptimizerState['phase'] => {
+const getPhase = (states: CompilerMsg[]): OptimizerState['phase'] => {
   const types = states.map(s => s.type);
 
   if (types.includes('running')) {
@@ -279,7 +279,7 @@ export class Optimizer {
                       event.type === 'compiler success' ||
                       event.type === 'running'
                     ) {
-                      const compilerStates: CompilerState[] = [
+                      const compilerStates: CompilerMsg[] = [
                         ...prevState.compilerStates.filter(c => c.bundleId !== event.bundleId),
                         event,
                       ];

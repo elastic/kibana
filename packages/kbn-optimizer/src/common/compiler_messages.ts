@@ -59,7 +59,7 @@ export interface CompilerSuccessMsg {
   moduleCount: number;
 }
 
-export type CompilerState = CompilerRunningMsg | CompilerIssueMsg | CompilerSuccessMsg;
+export type CompilerMsg = CompilerRunningMsg | CompilerIssueMsg | CompilerSuccessMsg;
 
 export class CompilerMsgs {
   constructor(private bundle: string) {}
