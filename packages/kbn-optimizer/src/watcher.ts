@@ -74,11 +74,11 @@ export class Watcher {
         )
       ),
 
-      // debounce and bufffer change events for 100 milliseconds to
-      // create final change notification
+      // debounce and bufffer change events for 1 second to create
+      // final change notification
       this.change$.pipe(
         map(event => event[0]),
-        debounceTimeBuffer(100),
+        debounceTimeBuffer(1000),
         map(
           (changes): Changes => {
             const changedBundles: Bundle[] = [];
