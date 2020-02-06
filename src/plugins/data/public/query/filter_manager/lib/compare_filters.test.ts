@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { compareFilters } from './compare_filters';
+import { compareFilters, COMPARE_ALL_OPTIONS } from './compare_filters';
 import { esFilters } from '../../../../common';
 
 describe('filter manager utilities', () => {
@@ -82,6 +82,135 @@ describe('filter manager utilities', () => {
       };
 
       expect(compareFilters(f1, f2)).toBeTruthy();
+    });
+
+    test('should compare filters array to non array', () => {
+      const f1 = esFilters.buildQueryFilter(
+        { _type: { match: { query: 'apache', type: 'phrase' } } },
+        'index',
+        ''
+      );
+
+      const f2 = esFilters.buildQueryFilter(
+        { _type: { match: { query: 'mochi', type: 'phrase' } } },
+        'index',
+        ''
+      );
+
+      expect(compareFilters([f1, f2], f1)).toBeFalsy();
+    });
+
+    test('should compare filters array to partial array', () => {
+      const f1 = esFilters.buildQueryFilter(
+        { _type: { match: { query: 'apache', type: 'phrase' } } },
+        'index',
+        ''
+      );
+
+      const f2 = esFilters.buildQueryFilter(
+        { _type: { match: { query: 'mochi', type: 'phrase' } } },
+        'index',
+        ''
+      );
+
+      expect(compareFilters([f1, f2], [f1])).toBeFalsy();
+    });
+
+    test('should compare filters array to exact array', () => {
+      const f1 = esFilters.buildQueryFilter(
+        { _type: { match: { query: 'apache', type: 'phrase' } } },
+        'index',
+        ''
+      );
+
+      const f2 = esFilters.buildQueryFilter(
+        { _type: { match: { query: 'mochi', type: 'phrase' } } },
+        'index',
+        ''
+      );
+
+      expect(compareFilters([f1, f2], [f1, f2])).toBeTruthy();
+    });
+
+    test('should compare array of duplicates, ignoring meta attributes', () => {
+      const f1 = esFilters.buildQueryFilter(
+        { _type: { match: { query: 'apache', type: 'phrase' } } },
+        'index1',
+        ''
+      );
+      const f2 = esFilters.buildQueryFilter(
+        { _type: { match: { query: 'apache', type: 'phrase' } } },
+        'index2',
+        ''
+      );
+
+      expect(compareFilters([f1], [f2])).toBeTruthy();
+    });
+
+    test('should compare array of duplicates, ignoring $state attributes', () => {
+      const f1 = {
+        $state: { store: esFilters.FilterStateStore.APP_STATE },
+        ...esFilters.buildQueryFilter(
+          { _type: { match: { query: 'apache', type: 'phrase' } } },
+          'index',
+          ''
+        ),
+      };
+      const f2 = {
+        $state: { store: esFilters.FilterStateStore.GLOBAL_STATE },
+        ...esFilters.buildQueryFilter(
+          { _type: { match: { query: 'apache', type: 'phrase' } } },
+          'index',
+          ''
+        ),
+      };
+
+      expect(compareFilters([f1], [f2])).toBeTruthy();
+    });
+
+    test('should compare duplicates with COMPARE_ALL_OPTIONS should check store', () => {
+      const f1 = {
+        $state: { store: esFilters.FilterStateStore.APP_STATE },
+        ...esFilters.buildQueryFilter(
+          { _type: { match: { query: 'apache', type: 'phrase' } } },
+          'index',
+          ''
+        ),
+      };
+      const f2 = {
+        $state: { store: esFilters.FilterStateStore.GLOBAL_STATE },
+        ...esFilters.buildQueryFilter(
+          { _type: { match: { query: 'apache', type: 'phrase' } } },
+          'index',
+          ''
+        ),
+      };
+
+      expect(compareFilters([f1], [f2], COMPARE_ALL_OPTIONS)).toBeFalsy();
+    });
+
+    test('should compare duplicates with COMPARE_ALL_OPTIONS should not check key and value ', () => {
+      const f1 = {
+        $state: { store: esFilters.FilterStateStore.GLOBAL_STATE },
+        ...esFilters.buildQueryFilter(
+          { _type: { match: { query: 'apache', type: 'phrase' } } },
+          'index',
+          ''
+        ),
+      };
+      const f2 = {
+        $state: { store: esFilters.FilterStateStore.GLOBAL_STATE },
+        ...esFilters.buildQueryFilter(
+          { _type: { match: { query: 'apache', type: 'phrase' } } },
+          'index',
+          ''
+        ),
+      };
+
+      f2.meta.key = 'wassup';
+      f2.meta.value = 'dog';
+
+      expect(compareFilters([f1], [f2], COMPARE_ALL_OPTIONS)).toBeTruthy();
     });
   });
 });

@@ -26,6 +26,7 @@ import {
   EuiFlexItem,
   EuiLink,
   EuiSuperDatePicker,
+  EuiFieldText,
   prettyDuration,
 } from '@elastic/eui';
 // @ts-ignore
@@ -56,7 +57,7 @@ interface Props {
   indexPatterns?: Array<IIndexPattern | string>;
   intl: InjectedIntl;
   isLoading?: boolean;
-  prepend?: React.ReactNode;
+  prepend?: React.ComponentProps<typeof EuiFieldText>['prepend'];
   showQueryInput?: boolean;
   showDatePicker?: boolean;
   dateRangeFrom?: string;

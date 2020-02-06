@@ -92,7 +92,7 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup> {
     this.logger.debug('Setting up Licensing plugin');
     const config = await this.config$.pipe(take(1)).toPromise();
     const pollingFrequency = config.api_polling_frequency;
-    const dataClient = await core.elasticsearch.dataClient$.pipe(take(1)).toPromise();
+    const dataClient = await core.elasticsearch.dataClient;
 
     const { refresh, license$ } = this.createLicensePoller(
       dataClient,

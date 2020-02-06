@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ThrowReporter } from 'io-ts/lib/ThrowReporter';
+import { PathReporter } from 'io-ts/lib/PathReporter';
 import { getApiPath } from '../../lib/helper';
+import { BaseParams } from './types';
 import {
   MonitorDetailsType,
   MonitorDetails,
@@ -19,17 +20,28 @@ interface ApiRequest {
   basePath: string;
 }
 
+export type MonitorQueryParams = BaseParams & ApiRequest;
+
 export const fetchMonitorDetails = async ({
   monitorId,
   basePath,
-}: ApiRequest): Promise<MonitorDetails> => {
-  const url = getApiPath(`/api/uptime/monitor/details?monitorId=${monitorId}`, basePath);
-  const response = await fetch(url);
+  dateStart,
+  dateEnd,
+}: MonitorQueryParams): Promise<MonitorDetails> => {
+  const url = getApiPath(`/api/uptime/monitor/details`, basePath);
+  const params = {
+    monitorId,
+    dateStart,
+    dateEnd,
+  };
+  const urlParams = new URLSearchParams(params).toString();
+  const response = await fetch(`${url}?${urlParams}`);
+
   if (!response.ok) {
     throw new Error(response.statusText);
   }
   return response.json().then(data => {
-    ThrowReporter.report(MonitorDetailsType.decode(data));
+    PathReporter.report(MonitorDetailsType.decode(data));
     return data;
   });
 };
@@ -56,7 +68,7 @@ export const fetchMonitorLocations = async ({
     throw new Error(response.statusText);
   }
   return response.json().then(data => {
-    ThrowReporter.report(MonitorLocationsType.decode(data));
+    PathReporter.report(MonitorLocationsType.decode(data));
     return data;
   });
 };

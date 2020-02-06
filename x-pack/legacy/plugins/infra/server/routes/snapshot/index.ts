@@ -11,10 +11,8 @@ import { identity } from 'fp-ts/lib/function';
 import { InfraBackendLibs } from '../../lib/infra_types';
 import { UsageCollector } from '../../usage/usage_collector';
 import { parseFilterQuery } from '../../utils/serialized_query';
-import { InfraNodeType, InfraSnapshotMetricInput } from '../../../public/graphql/types';
 import { SnapshotRequestRT, SnapshotNodeResponseRT } from '../../../common/http_api/snapshot_api';
 import { throwErrors } from '../../../common/runtime_types';
-import { InfraSnapshotRequestOptions } from '../../lib/snapshot/types';
 
 const escapeHatch = schema.object({}, { allowUnknowns: true });
 
@@ -46,16 +44,14 @@ export const initSnapshotRoute = (libs: InfraBackendLibs) => {
         );
         const source = await libs.sources.getSourceConfiguration(requestContext, sourceId);
         UsageCollector.countNode(nodeType);
-        const options: InfraSnapshotRequestOptions = {
+        const options = {
           filterQuery: parseFilterQuery(filterQuery),
           accountId,
           region,
-          // TODO: Use common infra metric and replace graphql type
-          nodeType: nodeType as InfraNodeType,
+          nodeType,
           groupBy,
           sourceConfiguration: source.configuration,
-          // TODO: Use common infra metric and replace graphql type
-          metric: metric as InfraSnapshotMetricInput,
+          metric,
           timerange,
         };
         const nodesWithInterval = await libs.snapshot.getNodes(requestContext, options);

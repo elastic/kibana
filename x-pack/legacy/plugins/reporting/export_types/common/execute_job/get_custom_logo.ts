@@ -9,13 +9,13 @@ import { ConditionalHeaders, ServerFacade } from '../../../types';
 import { JobDocPayloadPDF } from '../../printable_pdf/types'; // Logo is PDF only
 
 export const getCustomLogo = async ({
+  server,
   job,
   conditionalHeaders,
-  server,
 }: {
+  server: ServerFacade;
   job: JobDocPayloadPDF;
   conditionalHeaders: ConditionalHeaders;
-  server: ServerFacade;
 }) => {
   const serverBasePath: string = server.config().get('server.basePath');
 
@@ -38,12 +38,8 @@ export const getCustomLogo = async ({
   };
 
   const savedObjects = server.savedObjects;
-
   const savedObjectsClient = savedObjects.getScopedSavedObjectsClient(fakeRequest);
-
   const uiSettings = server.uiSettingsServiceFactory({ savedObjectsClient });
-
-  const logo = await uiSettings.get(UI_SETTINGS_CUSTOM_PDF_LOGO);
-
-  return { job, conditionalHeaders, logo, server };
+  const logo: string = await uiSettings.get(UI_SETTINGS_CUSTOM_PDF_LOGO);
+  return { conditionalHeaders, logo };
 };

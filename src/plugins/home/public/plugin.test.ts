@@ -17,26 +17,37 @@
  * under the License.
  */
 
-import { registryMock } from './plugin.test.mocks';
+import { registryMock, environmentMock } from './plugin.test.mocks';
 import { HomePublicPlugin } from './plugin';
+import { coreMock } from '../../../core/public/mocks';
+
+const mockInitializerContext = coreMock.createPluginInitializerContext();
 
 describe('HomePublicPlugin', () => {
   beforeEach(() => {
     registryMock.setup.mockClear();
     registryMock.start.mockClear();
+    environmentMock.setup.mockClear();
+    environmentMock.start.mockClear();
   });
 
   describe('setup', () => {
     test('wires up and returns registry', async () => {
-      const setup = await new HomePublicPlugin().setup();
+      const setup = await new HomePublicPlugin(mockInitializerContext).setup();
       expect(setup).toHaveProperty('featureCatalogue');
       expect(setup.featureCatalogue).toHaveProperty('register');
+    });
+
+    test('wires up and returns environment service', async () => {
+      const setup = await new HomePublicPlugin(mockInitializerContext).setup();
+      expect(setup).toHaveProperty('environment');
+      expect(setup.environment).toHaveProperty('update');
     });
   });
 
   describe('start', () => {
     test('wires up and returns registry', async () => {
-      const service = new HomePublicPlugin();
+      const service = new HomePublicPlugin(mockInitializerContext);
       await service.setup();
       const core = { application: { capabilities: { catalogue: {} } } } as any;
       const start = await service.start(core);
@@ -44,6 +55,16 @@ describe('HomePublicPlugin', () => {
         capabilities: core.application.capabilities,
       });
       expect(start.featureCatalogue.get).toBeDefined();
+    });
+
+    test('wires up and returns environment service', async () => {
+      const service = new HomePublicPlugin(mockInitializerContext);
+      await service.setup();
+      const start = await service.start({
+        application: { capabilities: { catalogue: {} } },
+      } as any);
+      expect(environmentMock.start).toHaveBeenCalled();
+      expect(start.environment.get).toBeDefined();
     });
   });
 });

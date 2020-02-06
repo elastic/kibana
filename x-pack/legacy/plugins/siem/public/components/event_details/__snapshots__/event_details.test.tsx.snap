@@ -373,6 +373,7 @@ exports[`EventDetails rendering should match snapshot 1`] = `
                     "example": null,
                     "format": "",
                     "indexes": Array [
+                      "apm-*-transaction*",
                       "auditbeat-*",
                       "endgame-*",
                       "filebeat-*",
@@ -1064,6 +1065,7 @@ In other use cases the message field can be used to concatenate different values
                       "example": null,
                       "format": "",
                       "indexes": Array [
+                        "apm-*-transaction*",
                         "auditbeat-*",
                         "endgame-*",
                         "filebeat-*",

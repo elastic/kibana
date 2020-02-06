@@ -5,7 +5,11 @@
  */
 
 import { AuthenticationsData } from '../../graphql/types';
-import { FrameworkRequest, RequestOptionsPaginated, RequestBasicOptions } from '../framework';
+import {
+  FrameworkRequest,
+  RequestOptionsPaginated,
+  MatrixHistogramRequestOptions,
+} from '../framework';
 
 import { AuthenticationsAdapter } from './types';
 import { AuthenticationsOverTimeData } from '../../../public/graphql/types';
@@ -22,7 +26,7 @@ export class Authentications {
 
   public async getAuthenticationsOverTime(
     req: FrameworkRequest,
-    options: RequestBasicOptions
+    options: MatrixHistogramRequestOptions
   ): Promise<AuthenticationsOverTimeData> {
     return this.adapter.getAuthenticationsOverTime(req, options);
   }

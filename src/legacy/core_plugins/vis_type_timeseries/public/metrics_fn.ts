@@ -31,6 +31,7 @@ type Context = KibanaContext | null;
 interface Arguments {
   params: string;
   uiState: string;
+  savedObjectId: string | null;
 }
 
 type VisParams = Required<Arguments>;
@@ -64,10 +65,16 @@ export const createMetricsFn = (): ExpressionFunction<typeof name, Context, Argu
       default: '"{}"',
       help: '',
     },
+    savedObjectId: {
+      types: ['null', 'string'],
+      default: null,
+      help: '',
+    },
   },
   async fn(context: Context, args: Arguments) {
     const params = JSON.parse(args.params);
     const uiStateParams = JSON.parse(args.uiState);
+    const savedObjectId = args.savedObjectId;
     const uiState = new PersistedState(uiStateParams);
 
     const response = await metricsRequestHandler({
@@ -76,6 +83,7 @@ export const createMetricsFn = (): ExpressionFunction<typeof name, Context, Argu
       filters: get(context, 'filters', null),
       visParams: params,
       uiState,
+      savedObjectId,
     });
 
     response.visType = 'metrics';

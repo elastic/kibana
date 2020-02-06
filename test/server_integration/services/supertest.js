@@ -17,25 +17,19 @@
  * under the License.
  */
 
-import { readFileSync } from 'fs';
 import { format as formatUrl } from 'url';
 
 import supertestAsPromised from 'supertest-as-promised';
 
-export function KibanaSupertestProvider({ getService }, options) {
-  const config = getService('config');
-  const kibanaServerUrl = options ? formatUrl(options) : formatUrl(config.get('servers.kibana'));
+export function createKibanaSupertestProvider({ certificateAuthorities, options } = {}) {
+  return function({ getService }) {
+    const config = getService('config');
+    const kibanaServerUrl = options ? formatUrl(options) : formatUrl(config.get('servers.kibana'));
 
-  const kibanaServerCert = config
-    .get('kbnTestServer.serverArgs')
-    .filter(arg => arg.startsWith('--server.ssl.certificate'))
-    .map(arg => arg.split('=').pop())
-    .map(path => readFileSync(path))
-    .shift();
-
-  return kibanaServerCert
-    ? supertestAsPromised.agent(kibanaServerUrl, { ca: kibanaServerCert })
-    : supertestAsPromised(kibanaServerUrl);
+    return certificateAuthorities
+      ? supertestAsPromised.agent(kibanaServerUrl, { ca: certificateAuthorities })
+      : supertestAsPromised(kibanaServerUrl);
+  };
 }
 
 export function KibanaSupertestWithoutAuthProvider({ getService }) {

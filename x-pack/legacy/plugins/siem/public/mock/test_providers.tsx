@@ -9,7 +9,7 @@ import { I18nProvider } from '@kbn/i18n/react';
 import { InMemoryCache as Cache } from 'apollo-cache-inmemory';
 import ApolloClient from 'apollo-client';
 import { ApolloLink } from 'apollo-link';
-import * as React from 'react';
+import React from 'react';
 import { ApolloProvider } from 'react-apollo';
 import { DragDropContext, DropResult, ResponderProvided } from 'react-beautiful-dnd';
 import { Provider as ReduxStoreProvider } from 'react-redux';
@@ -61,26 +61,33 @@ Object.defineProperty(window, 'localStorage', {
 const MockKibanaContextProvider = createKibanaContextProviderMock();
 
 /** A utility for wrapping children in the providers required to run most tests */
-export const TestProviders = React.memo<Props>(
-  ({ children, store = createStore(state, apolloClientObservable), onDragEnd = jest.fn() }) => (
-    <I18nProvider>
-      <MockKibanaContextProvider>
-        <ApolloProvider client={apolloClient}>
-          <ReduxStoreProvider store={store}>
-            <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-              <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
-            </ThemeProvider>
-          </ReduxStoreProvider>
-        </ApolloProvider>
-      </MockKibanaContextProvider>
-    </I18nProvider>
-  )
+const TestProvidersComponent: React.FC<Props> = ({
+  children,
+  store = createStore(state, apolloClientObservable),
+  onDragEnd = jest.fn(),
+}) => (
+  <I18nProvider>
+    <MockKibanaContextProvider>
+      <ApolloProvider client={apolloClient}>
+        <ReduxStoreProvider store={store}>
+          <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
+            <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
+          </ThemeProvider>
+        </ReduxStoreProvider>
+      </ApolloProvider>
+    </MockKibanaContextProvider>
+  </I18nProvider>
 );
 
-export const TestProviderWithoutDragAndDrop = React.memo<Props>(
-  ({ children, store = createStore(state, apolloClientObservable) }) => (
-    <I18nProvider>
-      <ReduxStoreProvider store={store}>{children}</ReduxStoreProvider>
-    </I18nProvider>
-  )
+export const TestProviders = React.memo(TestProvidersComponent);
+
+const TestProviderWithoutDragAndDropComponent: React.FC<Props> = ({
+  children,
+  store = createStore(state, apolloClientObservable),
+}) => (
+  <I18nProvider>
+    <ReduxStoreProvider store={store}>{children}</ReduxStoreProvider>
+  </I18nProvider>
 );
+
+export const TestProviderWithoutDragAndDrop = React.memo(TestProviderWithoutDragAndDropComponent);

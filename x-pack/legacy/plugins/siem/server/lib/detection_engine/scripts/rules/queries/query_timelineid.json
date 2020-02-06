@@ -4,8 +4,7 @@
   "risk_score": 1,
   "severity": "high",
   "type": "query",
-  "from": "now-6m",
-  "to": "now",
   "query": "user.name: root or user.name: admin",
-  "timeline_id": "timeline-id"
+  "timeline_id": "timeline-id",
+  "timeline_title": "timeline_title"
 }

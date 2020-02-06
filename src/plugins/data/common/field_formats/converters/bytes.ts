@@ -26,4 +26,5 @@ export class BytesFormat extends NumeralFormat {
 
   id = BytesFormat.id;
   title = BytesFormat.title;
+  allowsNumericalAggregations = true;
 }

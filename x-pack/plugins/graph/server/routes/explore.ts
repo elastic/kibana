@@ -71,7 +71,11 @@ export function registerExploreRoute({
             throw Boom.badRequest(relevantCause.reason);
           }
 
-          throw Boom.boomify(error);
+          return response.internalError({
+            body: {
+              message: error.message,
+            },
+          });
         }
       }
     )

@@ -5,7 +5,7 @@
  */
 
 import { mount } from 'enzyme';
-import * as React from 'react';
+import React from 'react';
 
 import { HookWrapper } from '../../mock/hook_wrapper';
 import { SiemPageName } from '../../pages/home/types';
@@ -15,13 +15,20 @@ import { getFilterQuery, getMockPropsObj, mockHistory, testCases } from './test_
 import { UrlStateContainerPropTypes } from './types';
 import { useUrlStateHooks } from './use_url_state';
 
-jest.mock('../search_bar', () => ({
-  siemFilterManager: {
-    addFilters: jest.fn(),
-  },
-}));
-
 let mockProps: UrlStateContainerPropTypes;
+
+jest.mock('../../lib/kibana', () => ({
+  useKibana: () => ({
+    services: {
+      data: {
+        query: {
+          filterManager: {},
+          savedQueries: {},
+        },
+      },
+    },
+  }),
+}));
 
 describe('UrlStateContainer - lodash.throttle mocked to test update url', () => {
   afterEach(() => {

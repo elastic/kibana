@@ -8,7 +8,7 @@ import { InfraSourceConfiguration } from '../../public/graphql/types';
 import { InfraFieldsDomain } from './domains/fields_domain';
 import { InfraLogEntriesDomain } from './domains/log_entries_domain';
 import { InfraMetricsDomain } from './domains/metrics_domain';
-import { InfraLogAnalysis } from './log_analysis/log_analysis';
+import { LogEntryCategoriesAnalysis, LogEntryRateAnalysis } from './log_analysis';
 import { InfraSnapshot } from './snapshot';
 import { InfraSources } from './sources';
 import { InfraSourceStatus } from './source_status';
@@ -31,7 +31,8 @@ export interface InfraDomainLibs {
 export interface InfraBackendLibs extends InfraDomainLibs {
   configuration: InfraConfig;
   framework: KibanaFramework;
-  logAnalysis: InfraLogAnalysis;
+  logEntryCategoriesAnalysis: LogEntryCategoriesAnalysis;
+  logEntryRateAnalysis: LogEntryRateAnalysis;
   snapshot: InfraSnapshot;
   sources: InfraSources;
   sourceStatus: InfraSourceStatus;

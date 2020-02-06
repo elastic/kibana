@@ -24,6 +24,14 @@ export interface CreateAlertWithActionOpts {
   reference: string;
 }
 
+interface UpdateAlwaysFiringAction {
+  alertId: string;
+  actionId: string | undefined;
+  reference: string;
+  user: User;
+  overwrites: Record<string, any>;
+}
+
 export class AlertUtils {
   private referenceCounter = 1;
   private readonly user?: User;
@@ -176,35 +184,38 @@ export class AlertUtils {
     if (this.user) {
       request = request.auth(this.user.username, this.user.password);
     }
-    const response = await request.send({
-      enabled: true,
-      name: 'abc',
-      schedule: { interval: '1m' },
-      throttle: '1m',
-      tags: [],
-      alertTypeId: 'test.always-firing',
-      consumer: 'bar',
-      params: {
-        index: ES_TEST_INDEX_NAME,
-        reference,
-      },
-      actions: [
-        {
-          group: 'default',
-          id: this.indexRecordActionId,
-          params: {
-            index: ES_TEST_INDEX_NAME,
-            reference,
-            message:
-              'instanceContextValue: {{context.instanceContextValue}}, instanceStateValue: {{state.instanceStateValue}}',
-          },
-        },
-      ],
-      ...overwrites,
-    });
+    const alertBody = getDefaultAlwaysFiringAlertData(reference, actionId);
+    const response = await request.send({ ...alertBody, ...overwrites });
     if (response.statusCode === 200) {
       objRemover.add(this.space.id, response.body.id, 'alert');
     }
+    return response;
+  }
+
+  public async updateAlwaysFiringAction({
+    alertId,
+    actionId,
+    reference,
+    user,
+    overwrites = {},
+  }: UpdateAlwaysFiringAction) {
+    actionId = actionId || this.indexRecordActionId;
+
+    if (!actionId) {
+      throw new Error('actionId is required ');
+    }
+
+    const request = this.supertestWithoutAuth
+      .put(`${getUrlPrefix(this.space.id)}/api/alert/${alertId}`)
+      .set('kbn-xsrf', 'foo')
+      .auth(user.username, user.password);
+
+    const alertBody = getDefaultAlwaysFiringAlertData(reference, actionId);
+    delete alertBody.alertTypeId;
+    delete alertBody.enabled;
+    delete alertBody.consumer;
+
+    const response = await request.send({ ...alertBody, ...overwrites });
     return response;
   }
 
@@ -250,4 +261,32 @@ export class AlertUtils {
     }
     return response;
   }
+}
+
+function getDefaultAlwaysFiringAlertData(reference: string, actionId: string) {
+  return {
+    enabled: true,
+    name: 'abc',
+    schedule: { interval: '1m' },
+    throttle: '1m',
+    tags: [],
+    alertTypeId: 'test.always-firing',
+    consumer: 'bar',
+    params: {
+      index: ES_TEST_INDEX_NAME,
+      reference,
+    },
+    actions: [
+      {
+        group: 'default',
+        id: actionId,
+        params: {
+          index: ES_TEST_INDEX_NAME,
+          reference,
+          message:
+            'instanceContextValue: {{context.instanceContextValue}}, instanceStateValue: {{state.instanceStateValue}}',
+        },
+      },
+    ],
+  };
 }

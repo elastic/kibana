@@ -3,6 +3,7 @@
 
 [partintro]
 --
+
 When you know what your data includes, you can create visualizations
 that best display that data and build better dashboards.
 *Discover* enables you to explore your data, find
@@ -98,6 +99,8 @@ or create a direct link to share.  The *Save* and *Share* actions are in the men
 
 
 --
+
+include::{kib-repo-dir}/management/index-patterns.asciidoc[]
 
 include::{kib-repo-dir}/discover/set-time-filter.asciidoc[]
 

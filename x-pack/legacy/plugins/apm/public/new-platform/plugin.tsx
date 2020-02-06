@@ -17,6 +17,7 @@ import {
   Plugin,
   PluginInitializerContext
 } from '../../../../../../src/core/public';
+import { featureCatalogueEntry } from './featureCatalogueEntry';
 import { DataPublicPluginSetup } from '../../../../../../src/plugins/data/public';
 import { HomePublicPluginSetup } from '../../../../../../src/plugins/home/public';
 import { LicensingPluginSetup } from '../../../../../plugins/licensing/public';
@@ -32,7 +33,6 @@ import { UrlParamsProvider } from '../context/UrlParamsContext';
 import { createStaticIndexPattern } from '../services/rest/index_pattern';
 import { px, unit, units } from '../style/variables';
 import { history } from '../utils/history';
-import { featureCatalogueEntry } from './featureCatalogueEntry';
 import { getConfigFromInjectedMetadata } from './getConfigFromInjectedMetadata';
 import { setHelpExtension } from './setHelpExtension';
 import { toggleAppLinkInNav } from './toggleAppLinkInNav';
@@ -40,7 +40,7 @@ import { setReadonlyBadge } from './updateBadge';
 
 export const REACT_APP_ROOT_ID = 'react-apm-root';
 
-const MainContainer = styled.main`
+const MainContainer = styled.div`
   min-width: ${px(unit * 50)};
   padding: ${px(units.plus)};
   height: 100%;
@@ -48,7 +48,7 @@ const MainContainer = styled.main`
 
 const App = () => {
   return (
-    <MainContainer data-test-subj="apmMainContainer">
+    <MainContainer data-test-subj="apmMainContainer" role="main">
       <UpdateBreadcrumbs routes={routes} />
       <Route component={ScrollToTopOnPathChange} />
       <Switch>

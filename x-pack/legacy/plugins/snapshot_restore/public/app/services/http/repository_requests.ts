@@ -11,6 +11,7 @@ import {
   UIM_REPOSITORY_DELETE,
   UIM_REPOSITORY_DELETE_MANY,
   UIM_REPOSITORY_DETAIL_PANEL_VERIFY,
+  UIM_REPOSITORY_DETAIL_PANEL_CLEANUP,
 } from '../../constants';
 import { uiMetricService } from '../ui_metric';
 import { httpService } from './http';
@@ -41,6 +42,20 @@ export const verifyRepository = async (name: Repository['name']) => {
 
   const { trackUiMetric } = uiMetricService;
   trackUiMetric(UIM_REPOSITORY_DETAIL_PANEL_VERIFY);
+  return result;
+};
+
+export const cleanupRepository = async (name: Repository['name']) => {
+  const result = await sendRequest({
+    path: httpService.addBasePath(
+      `${API_BASE_PATH}repositories/${encodeURIComponent(name)}/cleanup`
+    ),
+    method: 'post',
+    body: undefined,
+  });
+
+  const { trackUiMetric } = uiMetricService;
+  trackUiMetric(UIM_REPOSITORY_DETAIL_PANEL_CLEANUP);
   return result;
 };
 

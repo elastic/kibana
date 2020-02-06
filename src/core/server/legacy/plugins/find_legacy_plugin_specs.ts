@@ -29,6 +29,8 @@ import {
 import { collectUiExports as collectLegacyUiExports } from '../../../../legacy/ui/ui_exports/collect_ui_exports';
 
 import { LoggerFactory } from '../../logging';
+import { PackageInfo } from '../../config';
+
 import {
   LegacyUiExports,
   LegacyNavLink,
@@ -63,6 +65,7 @@ function getUiAppsNavLinks({ uiAppSpecs = [] }: LegacyUiExports, pluginSpecs: Le
 
     return {
       id,
+      category: spec.category,
       title: spec.title,
       order: typeof spec.order === 'number' ? spec.order : 0,
       icon: spec.icon,
@@ -77,10 +80,12 @@ function getNavLinks(uiExports: LegacyUiExports, pluginSpecs: LegacyPluginSpec[]
   return (uiExports.navLinkSpecs || [])
     .map<LegacyNavLink>(spec => ({
       id: spec.id,
+      category: spec.category,
       title: spec.title,
       order: typeof spec.order === 'number' ? spec.order : 0,
       url: spec.url,
       subUrlBase: spec.subUrlBase || spec.url,
+      disableSubUrlTracking: spec.disableSubUrlTracking,
       icon: spec.icon,
       euiIconType: spec.euiIconType,
       linkToLastSub: 'linkToLastSubUrl' in spec ? spec.linkToLastSubUrl : false,
@@ -92,7 +97,11 @@ function getNavLinks(uiExports: LegacyUiExports, pluginSpecs: LegacyPluginSpec[]
     .sort((a, b) => a.order - b.order);
 }
 
-export async function findLegacyPluginSpecs(settings: unknown, loggerFactory: LoggerFactory) {
+export async function findLegacyPluginSpecs(
+  settings: unknown,
+  loggerFactory: LoggerFactory,
+  packageInfo: PackageInfo
+) {
   const configToMutate: LegacyConfig = defaultConfig(settings);
   const {
     pack$,
@@ -152,8 +161,7 @@ export async function findLegacyPluginSpecs(settings: unknown, loggerFactory: Lo
       map(spec => {
         const name = spec.getId();
         const pluginVersion = spec.getExpectedKibanaVersion();
-        // @ts-ignore
-        const kibanaVersion = settings.pkg.version;
+        const kibanaVersion = packageInfo.version;
         return `Plugin "${name}" was disabled because it expected Kibana version "${pluginVersion}", and found "${kibanaVersion}".`;
       }),
       distinct(),

@@ -19,7 +19,6 @@
 
 import _ from 'lodash';
 import { uiModules } from '../../modules';
-import { callEach } from '../../utils/function';
 
 export function watchMultiDecorator($provide) {
   $provide.decorator('$rootScope', function($delegate) {
@@ -112,7 +111,9 @@ export function watchMultiDecorator($provide) {
         )
       );
 
-      return _.partial(callEach, unwatchers);
+      return function() {
+        unwatchers.forEach(listener => listener());
+      };
     };
 
     function normalizeExpression($scope, expr) {

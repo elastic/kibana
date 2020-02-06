@@ -7,14 +7,14 @@ import uuid from 'uuid';
 import { schema } from '@kbn/config-schema';
 import { AlertsClient } from './alerts_client';
 import { savedObjectsClientMock, loggingServiceMock } from '../../../../../src/core/server/mocks';
-import { taskManagerMock } from '../../task_manager/server/task_manager.mock';
+import { taskManagerMock } from '../../../../plugins/task_manager/server/task_manager.mock';
 import { alertTypeRegistryMock } from './alert_type_registry.mock';
-import { TaskStatus } from '../../task_manager/server';
+import { TaskStatus } from '../../../../plugins/task_manager/server';
 import { IntervalSchedule } from './types';
 import { resolvable } from './test_utils';
 import { encryptedSavedObjectsMock } from '../../../../plugins/encrypted_saved_objects/server/mocks';
 
-const taskManager = taskManagerMock.create();
+const taskManager = taskManagerMock.start();
 const alertTypeRegistry = alertTypeRegistryMock.create();
 const savedObjectsClient = savedObjectsClientMock.create();
 const encryptedSavedObjects = encryptedSavedObjectsMock.createStart();
@@ -883,7 +883,6 @@ describe('enable()', () => {
         schedule: { interval: '10s' },
         alertTypeId: '2',
         enabled: true,
-        scheduledTaskId: 'task-123',
         updatedBy: 'elastic',
         apiKey: null,
         apiKeyOwner: null,
@@ -892,6 +891,9 @@ describe('enable()', () => {
         version: '123',
       }
     );
+    expect(savedObjectsClient.update).toHaveBeenCalledWith('alert', '1', {
+      scheduledTaskId: 'task-123',
+    });
     expect(taskManager.schedule).toHaveBeenCalledWith({
       taskType: `alerting:2`,
       params: {
@@ -964,7 +966,6 @@ describe('enable()', () => {
         schedule: { interval: '10s' },
         alertTypeId: '2',
         enabled: true,
-        scheduledTaskId: 'task-123',
         apiKey: Buffer.from('123:abc').toString('base64'),
         apiKeyOwner: 'elastic',
         updatedBy: 'elastic',
@@ -973,6 +974,9 @@ describe('enable()', () => {
         version: '123',
       }
     );
+    expect(savedObjectsClient.update).toHaveBeenCalledWith('alert', '1', {
+      scheduledTaskId: 'task-123',
+    });
     expect(taskManager.schedule).toHaveBeenCalledWith({
       taskType: `alerting:2`,
       params: {
@@ -1432,95 +1436,138 @@ describe('find()', () => {
 });
 
 describe('delete()', () => {
-  test('successfully removes an alert', async () => {
-    const alertsClient = new AlertsClient(alertsClientParams);
-    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce({
-      id: '1',
-      type: 'alert',
-      attributes: {
-        alertTypeId: '123',
-        schedule: { interval: '10s' },
-        params: {
-          bar: true,
-        },
-        scheduledTaskId: 'task-123',
-        actions: [
-          {
-            group: 'default',
-            actionRef: 'action_0',
-            params: {
-              foo: true,
-            },
-          },
-        ],
+  let alertsClient: AlertsClient;
+  const existingAlert = {
+    id: '1',
+    type: 'alert',
+    attributes: {
+      alertTypeId: '123',
+      schedule: { interval: '10s' },
+      params: {
+        bar: true,
       },
-      references: [
+      scheduledTaskId: 'task-123',
+      actions: [
         {
-          name: 'action_0',
-          type: 'action',
-          id: '1',
+          group: 'default',
+          actionRef: 'action_0',
+          params: {
+            foo: true,
+          },
         },
       ],
-    });
-    savedObjectsClient.delete.mockResolvedValueOnce({
+    },
+    references: [
+      {
+        name: 'action_0',
+        type: 'action',
+        id: '1',
+      },
+    ],
+  };
+  const existingDecryptedAlert = {
+    ...existingAlert,
+    attributes: {
+      ...existingAlert.attributes,
+      apiKey: Buffer.from('123:abc').toString('base64'),
+    },
+  };
+
+  beforeEach(() => {
+    alertsClient = new AlertsClient(alertsClientParams);
+    savedObjectsClient.get.mockResolvedValue(existingAlert);
+    savedObjectsClient.delete.mockResolvedValue({
       success: true,
     });
-    const result = await alertsClient.delete({ id: '1' });
-    expect(result).toEqual({ success: true });
-    expect(savedObjectsClient.delete).toHaveBeenCalledTimes(1);
-    expect(savedObjectsClient.delete.mock.calls[0]).toMatchInlineSnapshot(`
-                                                                                                                  Array [
-                                                                                                                    "alert",
-                                                                                                                    "1",
-                                                                                                                  ]
-                                                                            `);
-    expect(taskManager.remove).toHaveBeenCalledTimes(1);
-    expect(taskManager.remove.mock.calls[0]).toMatchInlineSnapshot(`
-                                                                                                                  Array [
-                                                                                                                    "task-123",
-                                                                                                                  ]
-                                                                            `);
+    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue(existingDecryptedAlert);
   });
 
-  test('swallows error when invalidate API key throws', async () => {
-    const alertsClient = new AlertsClient(alertsClientParams);
-    alertsClientParams.invalidateAPIKey.mockRejectedValueOnce(new Error('Fail'));
-    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce({
-      id: '1',
-      type: 'alert',
-      attributes: {
-        alertTypeId: '123',
-        schedule: { interval: '10s' },
-        params: {
-          bar: true,
-        },
-        apiKey: Buffer.from('123:abc').toString('base64'),
-        scheduledTaskId: 'task-123',
-        actions: [
-          {
-            group: 'default',
-            actionRef: 'action_0',
-            params: {
-              foo: true,
-            },
-          },
-        ],
-      },
-      references: [
-        {
-          name: 'action_0',
-          type: 'action',
-          id: '1',
-        },
-      ],
+  test('successfully removes an alert', async () => {
+    const result = await alertsClient.delete({ id: '1' });
+    expect(result).toEqual({ success: true });
+    expect(savedObjectsClient.delete).toHaveBeenCalledWith('alert', '1');
+    expect(taskManager.remove).toHaveBeenCalledWith('task-123');
+    expect(alertsClientParams.invalidateAPIKey).toHaveBeenCalledWith({ id: '123' });
+    expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith('alert', '1', {
+      namespace: 'default',
     });
-    savedObjectsClient.delete.mockResolvedValueOnce({
-      success: true,
+    expect(savedObjectsClient.get).not.toHaveBeenCalled();
+  });
+
+  test('falls back to SOC.get when getDecryptedAsInternalUser throws an error', async () => {
+    encryptedSavedObjects.getDecryptedAsInternalUser.mockRejectedValue(new Error('Fail'));
+
+    const result = await alertsClient.delete({ id: '1' });
+    expect(result).toEqual({ success: true });
+    expect(savedObjectsClient.delete).toHaveBeenCalledWith('alert', '1');
+    expect(taskManager.remove).toHaveBeenCalledWith('task-123');
+    expect(alertsClientParams.invalidateAPIKey).not.toHaveBeenCalled();
+    expect(savedObjectsClient.get).toHaveBeenCalledWith('alert', '1');
+    expect(alertsClientParams.logger.error).toHaveBeenCalledWith(
+      'delete(): Failed to load API key to invalidate on alert 1: Fail'
+    );
+  });
+
+  test(`doesn't remove a task when scheduledTaskId is null`, async () => {
+    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue({
+      ...existingDecryptedAlert,
+      attributes: {
+        ...existingDecryptedAlert.attributes,
+        scheduledTaskId: null,
+      },
     });
 
     await alertsClient.delete({ id: '1' });
+    expect(taskManager.remove).not.toHaveBeenCalled();
+  });
+
+  test(`doesn't invalidate API key when apiKey is null`, async () => {
+    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue({
+      ...existingAlert,
+      attributes: {
+        ...existingAlert.attributes,
+        apiKey: null,
+      },
+    });
+
+    await alertsClient.delete({ id: '1' });
+    expect(alertsClientParams.invalidateAPIKey).not.toHaveBeenCalled();
+  });
+
+  test('swallows error when invalidate API key throws', async () => {
+    alertsClientParams.invalidateAPIKey.mockRejectedValueOnce(new Error('Fail'));
+
+    await alertsClient.delete({ id: '1' });
+    expect(alertsClientParams.invalidateAPIKey).toHaveBeenCalledWith({ id: '123' });
     expect(alertsClientParams.logger.error).toHaveBeenCalledWith(
       'Failed to invalidate API Key: Fail'
+    );
+  });
+
+  test('swallows error when getDecryptedAsInternalUser throws an error', async () => {
+    encryptedSavedObjects.getDecryptedAsInternalUser.mockRejectedValue(new Error('Fail'));
+
+    await alertsClient.delete({ id: '1' });
+    expect(alertsClientParams.invalidateAPIKey).not.toHaveBeenCalled();
+    expect(alertsClientParams.logger.error).toHaveBeenCalledWith(
+      'delete(): Failed to load API key to invalidate on alert 1: Fail'
+    );
+  });
+
+  test('throws error when savedObjectsClient.get throws an error', async () => {
+    encryptedSavedObjects.getDecryptedAsInternalUser.mockRejectedValue(new Error('Fail'));
+    savedObjectsClient.get.mockRejectedValue(new Error('SOC Fail'));
+
+    await expect(alertsClient.delete({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"SOC Fail"`
+    );
+  });
+
+  test('throws error when taskManager.remove throws an error', async () => {
+    taskManager.remove.mockRejectedValue(new Error('TM Fail'));
+
+    await expect(alertsClient.delete({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"TM Fail"`
     );
   });
 });

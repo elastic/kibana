@@ -347,7 +347,7 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
           onChange={e => {
             updatePolicy(
               {
-                snapshotName: e.target.value.toLowerCase(),
+                snapshotName: e.target.value,
               },
               {
                 managedRepository,

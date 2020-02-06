@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBetaBadge, EuiLink, EuiTab, EuiTabs } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiLink, EuiTab, EuiTabs } from '@elastic/eui';
 import React from 'react';
 import { Route } from 'react-router-dom';
 
@@ -55,24 +54,6 @@ export class RoutedTabs extends React.Component<RoutedTabsProps> {
     });
   }
 }
-
-const tabBetaBadgeLabel = i18n.translate('xpack.infra.common.tabBetaBadgeLabel', {
-  defaultMessage: 'Beta',
-});
-
-const tabBetaBadgeTooltipContent = i18n.translate('xpack.infra.common.tabBetaBadgeTooltipContent', {
-  defaultMessage:
-    'This feature is under active development. Extra functionality is coming, and some functionality may change.',
-});
-
-export const TabBetaBadge = euiStyled(EuiBetaBadge).attrs({
-  'aria-label': tabBetaBadgeLabel,
-  label: tabBetaBadgeLabel,
-  tooltipContent: tabBetaBadgeTooltipContent,
-})`
-  margin-left: 4px;
-  vertical-align: baseline;
-`;
 
 const TabContainer = euiStyled.div`
   .euiLink {

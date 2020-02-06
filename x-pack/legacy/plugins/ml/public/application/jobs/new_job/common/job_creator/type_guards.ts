@@ -8,13 +8,15 @@ import { SingleMetricJobCreator } from './single_metric_job_creator';
 import { MultiMetricJobCreator } from './multi_metric_job_creator';
 import { PopulationJobCreator } from './population_job_creator';
 import { AdvancedJobCreator } from './advanced_job_creator';
+import { CategorizationJobCreator } from './categorization_job_creator';
 import { JOB_TYPE } from '../../../../../../common/constants/new_job';
 
 export type JobCreatorType =
   | SingleMetricJobCreator
   | MultiMetricJobCreator
   | PopulationJobCreator
-  | AdvancedJobCreator;
+  | AdvancedJobCreator
+  | CategorizationJobCreator;
 
 export function isSingleMetricJobCreator(
   jobCreator: JobCreatorType
@@ -36,4 +38,10 @@ export function isPopulationJobCreator(
 
 export function isAdvancedJobCreator(jobCreator: JobCreatorType): jobCreator is AdvancedJobCreator {
   return jobCreator.type === JOB_TYPE.ADVANCED;
+}
+
+export function isCategorizationJobCreator(
+  jobCreator: JobCreatorType
+): jobCreator is CategorizationJobCreator {
+  return jobCreator.type === JOB_TYPE.CATEGORIZATION;
 }

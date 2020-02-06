@@ -70,8 +70,8 @@ export const JobsListPage: FC<Props> = ({ isMlEnabledInSpace }) => {
   const [currentTabId, setCurrentTabId] = useState(tabs[0].id);
 
   // metadata.branch corresponds to the version used in documentation links.
-  const anomalyDetectionJobsUrl = `https://www.elastic.co/guide/en/elastic-stack-overview/${metadata.branch}/ml-jobs.html`;
-  const anomalyJobsUrl = `https://www.elastic.co/guide/en/elastic-stack-overview/${metadata.branch}/ml-dfanalytics.html`;
+  const anomalyDetectionJobsUrl = `https://www.elastic.co/guide/en/machine-learning/${metadata.branch}/ml-jobs.html`;
+  const anomalyJobsUrl = `https://www.elastic.co/guide/en/machine-learning/${metadata.branch}/ml-dfanalytics.html`;
 
   const anomalyDetectionDocsLabel = i18n.translate(
     'xpack.ml.management.jobsList.anomalyDetectionDocsLabel',

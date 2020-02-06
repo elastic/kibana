@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FrameworkRequest, RequestBasicOptions } from '../framework';
+import { FrameworkRequest, MatrixHistogramRequestOptions } from '../framework';
 export * from './elasticsearch_adapter';
 import { AnomaliesAdapter } from './types';
 import { AnomaliesOverTimeData } from '../../../public/graphql/types';
@@ -14,7 +14,7 @@ export class Anomalies {
 
   public async getAnomaliesOverTime(
     req: FrameworkRequest,
-    options: RequestBasicOptions
+    options: MatrixHistogramRequestOptions
   ): Promise<AnomaliesOverTimeData> {
     return this.adapter.getAnomaliesOverTime(req, options);
   }

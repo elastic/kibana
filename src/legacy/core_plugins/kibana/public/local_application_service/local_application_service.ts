@@ -50,13 +50,13 @@ export class LocalApplicationService {
    * @param angularRouteManager The current `ui/routes` instance
    */
   attachToAngular(angularRouteManager: UIRoutes) {
-    npStart.plugins.kibana_legacy.getApps().forEach(app => {
+    npStart.plugins.kibanaLegacy.getApps().forEach(app => {
       const wrapperElementId = this.idGenerator();
       angularRouteManager.when(matchAllWithPrefix(app), {
         outerAngularWrapperRoute: true,
         reloadOnSearch: false,
         reloadOnUrl: false,
-        template: `<div style="height:100%" id="${wrapperElementId}"></div>`,
+        template: `<div class="kbnLocalApplicationWrapper" id="${wrapperElementId}"></div>`,
         controller($scope: IScope) {
           const element = document.getElementById(wrapperElementId)!;
           let unmountHandler: AppUnmount | null = null;
@@ -68,7 +68,7 @@ export class LocalApplicationService {
             isUnmounted = true;
           });
           (async () => {
-            const params = { element, appBasePath: '' };
+            const params = { element, appBasePath: '', onAppLeave: () => undefined };
             unmountHandler = isAppMountDeprecated(app.mount)
               ? await app.mount({ core: npStart.core }, params)
               : await app.mount(params);
@@ -79,9 +79,20 @@ export class LocalApplicationService {
           })();
         },
       });
+
+      if (app.updater$) {
+        app.updater$.subscribe(updater => {
+          const updatedFields = updater(app);
+          if (updatedFields && updatedFields.activeUrl) {
+            npStart.core.chrome.navLinks.update(app.navLinkId || app.id, {
+              url: updatedFields.activeUrl,
+            });
+          }
+        });
+      }
     });
 
-    npStart.plugins.kibana_legacy.getForwards().forEach(({ legacyAppId, newAppId, keepPrefix }) => {
+    npStart.plugins.kibanaLegacy.getForwards().forEach(({ legacyAppId, newAppId, keepPrefix }) => {
       angularRouteManager.when(matchAllWithPrefix(legacyAppId), {
         resolveRedirectTo: ($location: ILocationService) => {
           const url = $location.url();

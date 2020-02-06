@@ -10,6 +10,6 @@ export {
   RedirectToDetectionEnginePage,
 } from './redirect_to_detection_engine';
 export { getOverviewUrl, RedirectToOverviewPage } from './redirect_to_overview';
-export { getHostsUrl, getHostDetailsUrl } from './redirect_to_hosts';
+export { getHostDetailsUrl, getHostsUrl } from './redirect_to_hosts';
 export { getNetworkUrl, getIPDetailsUrl, RedirectToNetworkPage } from './redirect_to_network';
 export { getTimelinesUrl, RedirectToTimelinesPage } from './redirect_to_timelines';

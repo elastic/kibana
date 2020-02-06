@@ -7,6 +7,9 @@
 /** A data provider rendered in the timeline's data providers drop area */
 export const DATA_PROVIDER = '[data-test-subj="providerContainer"]';
 
+export const TIMELINE_FIELDS_BUTTON =
+  '[data-test-subj="timeline"] [data-test-subj="show-field-browser"]';
+
 /** Data providers are dropped and rendered in this area of the timeline */
 export const TIMELINE_DATA_PROVIDERS = '[data-test-subj="dataProviders"]';
 
@@ -36,3 +39,9 @@ export const TOGGLE_TIMELINE_EXPAND_EVENT = '[data-test-subj="expand-event"]';
 
 /** The body of the timeline flyout */
 export const TIMELINE_FLYOUT_BODY = '[data-test-subj="eui-flyout-body"]';
+
+export const CLOSE_TIMELINE_BTN = '[data-test-subj="close-timeline"]';
+
+export const TIMELINE_SETTINGS = '[data-test-subj="settings-gear"]';
+
+export const CREATE_NEW_TIMELINE = '[data-test-subj="timeline-new"]';

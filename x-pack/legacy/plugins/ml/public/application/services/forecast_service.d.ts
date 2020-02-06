@@ -12,6 +12,11 @@ export interface ForecastData {
   results: any;
 }
 
+export interface ForecastDateRange {
+  earliest: number;
+  latest: number;
+}
+
 export const mlForecastService: {
   getForecastData: (
     job: Job,
@@ -23,4 +28,6 @@ export const mlForecastService: {
     interval: string,
     aggType: any
   ) => Observable<ForecastData>;
+
+  getForecastDateRange: (job: Job, forecastId: string) => Promise<ForecastDateRange>;
 };

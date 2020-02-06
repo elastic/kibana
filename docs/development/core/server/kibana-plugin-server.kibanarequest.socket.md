@@ -4,6 +4,8 @@
 
 ## KibanaRequest.socket property
 
+[IKibanaSocket](./kibana-plugin-server.ikibanasocket.md)
+
 <b>Signature:</b>
 
 ```typescript

@@ -18,8 +18,7 @@
  */
 
 import { createMetricVisFn } from './metric_vis_fn';
-
-// eslint-disable-next-line
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { functionWrapper } from '../../../../plugins/expressions/public/functions/tests/utils';
 
 jest.mock('ui/new_platform');

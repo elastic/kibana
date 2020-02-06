@@ -5,8 +5,7 @@
  */
 
 import { shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
-import * as React from 'react';
+import React from 'react';
 
 import { Direction } from '../../../graphql/types';
 import { mockIndexPattern } from '../../../mock';
@@ -44,7 +43,7 @@ describe('Header', () => {
           }}
         />
       );
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper).toMatchSnapshot();
     });
 
     test('it renders the data providers', () => {

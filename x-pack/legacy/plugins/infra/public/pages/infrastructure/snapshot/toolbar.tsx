@@ -23,12 +23,21 @@ export const SnapshotToolbar = () => (
     <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="m">
       <EuiFlexItem grow={false}>
         <WithWaffleOptions>
-          {({ changeMetric, changeNodeType, changeGroupBy, nodeType }) => (
+          {({
+            changeMetric,
+            changeNodeType,
+            changeGroupBy,
+            changeAccount,
+            changeRegion,
+            nodeType,
+          }) => (
             <WaffleInventorySwitcher
               nodeType={nodeType}
               changeNodeType={changeNodeType}
               changeMetric={changeMetric}
               changeGroupBy={changeGroupBy}
+              changeAccount={changeAccount}
+              changeRegion={changeRegion}
             />
           )}
         </WithWaffleOptions>

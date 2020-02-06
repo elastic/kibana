@@ -46,7 +46,7 @@ export function calculateDefaultFocusRange(
 export function calculateInitialFocusRange(
   zoomState: any,
   contextAggregationInterval: any,
-  timefilter: any
+  bounds: any
 ): any;
 
 export function getAutoZoomDuration(jobs: any, selectedJob: any): any;

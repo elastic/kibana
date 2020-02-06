@@ -248,7 +248,7 @@ interface CancelablePromise<ResolvedValue> {
   promise: Promise<ResolvedValue>;
 }
 
-class CanceledPromiseError extends Error {
+export class CanceledPromiseError extends Error {
   public isCanceled = true;
 
   constructor(message?: string) {
@@ -257,6 +257,6 @@ class CanceledPromiseError extends Error {
   }
 }
 
-class SilentCanceledPromiseError extends CanceledPromiseError {}
+export class SilentCanceledPromiseError extends CanceledPromiseError {}
 
 const noOp = () => undefined;

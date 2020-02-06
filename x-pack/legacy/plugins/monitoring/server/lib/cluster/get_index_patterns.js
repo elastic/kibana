@@ -13,9 +13,7 @@ import {
   INDEX_ALERTS,
 } from '../../../common/constants';
 
-export function getIndexPatterns(server, additionalPatterns = {}) {
-  // wildcard means to search _all_ clusters
-  const ccs = '*';
+export function getIndexPatterns(server, additionalPatterns = {}, ccs = '*') {
   const config = server.config();
   const esIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_ELASTICSEARCH, ccs);
   const kbnIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_KIBANA, ccs);

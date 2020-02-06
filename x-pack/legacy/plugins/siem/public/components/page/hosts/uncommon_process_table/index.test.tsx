@@ -5,9 +5,8 @@
  */
 
 import { shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import { getOr } from 'lodash/fp';
-import * as React from 'react';
+import React from 'react';
 
 import { TestProviders } from '../../../../mock';
 import { hostsModel } from '../../../../store';
@@ -45,7 +44,7 @@ describe('Uncommon Process Table Component', () => {
         </TestProviders>
       );
 
-      expect(toJson(wrapper.find('UncommonProcessTable'))).toMatchSnapshot();
+      expect(wrapper.find('UncommonProcessTable')).toMatchSnapshot();
     });
 
     test('it has a double dash (empty value) without any hosts at all', () => {

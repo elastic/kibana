@@ -34,6 +34,7 @@ import { DatabaseContext } from './DatabaseContext';
 import { StickySpanProperties } from './StickySpanProperties';
 import { HttpInfoSummaryItem } from '../../../../../../shared/Summary/HttpInfoSummaryItem';
 import { SpanMetadata } from '../../../../../../shared/MetadataTable/SpanMetadata';
+import { SyncBadge } from '../SyncBadge';
 
 function formatType(type: string) {
   switch (type) {
@@ -101,7 +102,7 @@ export function SpanFlyout({
   const dbContext = span.span.db;
   const httpContext = span.span.http;
   const spanTypes = getSpanTypes(span);
-  const spanHttpStatusCode = httpContext?.response.status_code;
+  const spanHttpStatusCode = httpContext?.response?.status_code;
   const spanHttpUrl = httpContext?.url?.original;
   const spanHttpMethod = httpContext?.method;
 
@@ -188,6 +189,7 @@ export function SpanFlyout({
                     <SpanBadge color="hollow">{spanTypes.spanAction}</SpanBadge>
                   </EuiToolTip>
                 )}
+                <SyncBadge sync={span.span.sync} />
               </>
             ]}
           />

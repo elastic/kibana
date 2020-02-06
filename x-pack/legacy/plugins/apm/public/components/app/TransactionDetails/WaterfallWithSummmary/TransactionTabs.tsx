@@ -77,7 +77,6 @@ export function TransactionTabs({
 
       {currentTab.key === timelineTab.key ? (
         <WaterfallContainer
-          transaction={transaction}
           location={location}
           urlParams={urlParams}
           waterfall={waterfall}

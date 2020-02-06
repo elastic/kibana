@@ -18,3 +18,4 @@
  */
 
 export { shortenDottedString } from './shorten_dotted_string';
+export { parseInterval } from './parse_interval';

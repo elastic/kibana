@@ -206,4 +206,41 @@ export const jobs = {
       },
     });
   },
+
+  categorizationFieldExamples(
+    indexPatternTitle,
+    query,
+    size,
+    field,
+    timeField,
+    start,
+    end,
+    analyzer
+  ) {
+    return http({
+      url: `${basePath}/jobs/categorization_field_examples`,
+      method: 'POST',
+      data: {
+        indexPatternTitle,
+        query,
+        size,
+        field,
+        timeField,
+        start,
+        end,
+        analyzer,
+      },
+    });
+  },
+
+  topCategories(jobId, count) {
+    return http({
+      url: `${basePath}/jobs/top_categories`,
+      method: 'POST',
+      data: {
+        jobId,
+        count,
+      },
+    });
+  },
 };

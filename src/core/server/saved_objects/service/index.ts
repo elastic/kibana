@@ -29,13 +29,11 @@ import { SavedObjectsResolveImportErrorsOptions } from '../import/types';
  * @internal
  * @deprecated
  */
-export interface SavedObjectsLegacyService<Request = any> {
+export interface SavedObjectsLegacyService {
   // ATTENTION: these types are incomplete
-  addScopedSavedObjectsClientWrapperFactory: SavedObjectsClientProvider<
-    Request
-  >['addClientWrapperFactory'];
-  setScopedSavedObjectsClientFactory: SavedObjectsClientProvider<Request>['setClientFactory'];
-  getScopedSavedObjectsClient: SavedObjectsClientProvider<Request>['getClient'];
+  addScopedSavedObjectsClientWrapperFactory: SavedObjectsClientProvider['addClientWrapperFactory'];
+  setScopedSavedObjectsClientFactory: SavedObjectsClientProvider['setClientFactory'];
+  getScopedSavedObjectsClient: SavedObjectsClientProvider['getClient'];
   SavedObjectsClient: typeof SavedObjectsClient;
   types: string[];
   schema: SavedObjectsSchema;
@@ -59,6 +57,7 @@ export {
   SavedObjectsClientWrapperOptions,
   SavedObjectsErrorHelpers,
   SavedObjectsClientFactory,
+  SavedObjectsClientFactoryProvider,
 } from './lib';
 
 export * from './saved_objects_client';

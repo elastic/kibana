@@ -9,7 +9,7 @@ import gql from 'graphql-tag';
 export const alertsSchema = gql`
   type AlertsOverTimeData {
     inspect: Inspect
-    alertsOverTimeByModule: [MatrixOverTimeHistogramData!]!
+    matrixHistogramData: [MatrixOverTimeHistogramData!]!
     totalCount: Float!
   }
 
@@ -18,6 +18,7 @@ export const alertsSchema = gql`
       filterQuery: String
       defaultIndex: [String!]!
       timerange: TimerangeInput!
+      stackByField: String
     ): AlertsOverTimeData!
   }
 `;

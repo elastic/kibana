@@ -154,6 +154,7 @@ exports[`Relationships should render dashboards normally 1`] = `
             ],
           }
         }
+        tableLayout="fixed"
       />
     </div>
   </EuiFlyoutBody>
@@ -368,6 +369,7 @@ exports[`Relationships should render index patterns normally 1`] = `
             ],
           }
         }
+        tableLayout="fixed"
       />
     </div>
   </EuiFlyoutBody>
@@ -533,6 +535,7 @@ exports[`Relationships should render searches normally 1`] = `
             ],
           }
         }
+        tableLayout="fixed"
       />
     </div>
   </EuiFlyoutBody>
@@ -693,6 +696,7 @@ exports[`Relationships should render visualizations normally 1`] = `
             ],
           }
         }
+        tableLayout="fixed"
       />
     </div>
   </EuiFlyoutBody>

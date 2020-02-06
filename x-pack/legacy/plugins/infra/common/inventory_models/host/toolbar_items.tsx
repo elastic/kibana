@@ -7,17 +7,10 @@
 import React from 'react';
 import { ToolbarProps } from '../../../public/components/inventory/toolbars/toolbar';
 import { MetricsAndGroupByToolbarItems } from '../shared/compontents/metrics_and_groupby_toolbar_items';
-import { InfraSnapshotMetricType } from '../../graphql/types';
+import { SnapshotMetricType } from '../types';
 
 export const HostToolbarItems = (props: ToolbarProps) => {
-  const metricTypes = [
-    InfraSnapshotMetricType.cpu,
-    InfraSnapshotMetricType.memory,
-    InfraSnapshotMetricType.load,
-    InfraSnapshotMetricType.rx,
-    InfraSnapshotMetricType.tx,
-    InfraSnapshotMetricType.logRate,
-  ];
+  const metricTypes: SnapshotMetricType[] = ['cpu', 'memory', 'load', 'rx', 'tx', 'logRate'];
   const groupByFields = [
     'cloud.availability_zone',
     'cloud.machine.type',

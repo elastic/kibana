@@ -39,11 +39,12 @@ export default function({ getService, getPageObjects }) {
       await esArchiver.load('dashboard_view_mode');
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'logstash-*',
+        pageNavigation: 'individual',
       });
       await browser.setWindowSize(1600, 1000);
 
       await PageObjects.common.navigateToApp('discover');
-      await PageObjects.dashboard.setTimepickerInHistoricalDataRange();
+      await PageObjects.timePicker.setHistoricalDataRange();
       await PageObjects.discover.saveSearch(savedSearchName);
 
       await PageObjects.common.navigateToApp('dashboard');
@@ -91,7 +92,7 @@ export default function({ getService, getPageObjects }) {
         await testSubjects.setValue('userFormFullNameInput', 'mixeduser');
         await testSubjects.setValue('userFormEmailInput', 'example@example.com');
         await PageObjects.security.assignRoleToUser('kibana_dashboard_only_user');
-        await PageObjects.security.assignRoleToUser('kibana_user');
+        await PageObjects.security.assignRoleToUser('kibana_admin');
         await PageObjects.security.assignRoleToUser('logstash-data');
 
         await PageObjects.security.clickSaveEditUser();
@@ -142,7 +143,7 @@ export default function({ getService, getPageObjects }) {
       });
 
       it('can filter on a visualization', async () => {
-        await PageObjects.dashboard.setTimepickerInHistoricalDataRange();
+        await PageObjects.timePicker.setHistoricalDataRange();
         await pieChart.filterOnPieSlice();
         const filterCount = await filterBar.getFilterCount();
         expect(filterCount).to.equal(1);
@@ -199,7 +200,7 @@ export default function({ getService, getPageObjects }) {
         await PageObjects.security.forceLogout();
         await PageObjects.security.login('mixeduser', '123456');
 
-        if (await appsMenu.linkExists('Management')) {
+        if (await appsMenu.linkExists('Stack Management')) {
           throw new Error('Expected management nav link to not be shown');
         }
       });
@@ -208,7 +209,7 @@ export default function({ getService, getPageObjects }) {
         await PageObjects.security.forceLogout();
         await PageObjects.security.login('mysuperuser', '123456');
 
-        if (!(await appsMenu.linkExists('Management'))) {
+        if (!(await appsMenu.linkExists('Stack Management'))) {
           throw new Error('Expected management nav link to be shown');
         }
       });

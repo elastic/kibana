@@ -119,9 +119,9 @@ describe('deserialize', () => {
       savedWorkspace,
       {
         getNonScriptedFields: () => [
-          { name: 'field1', type: 'string' },
-          { name: 'field2', type: 'string' },
-          { name: 'field3', type: 'string' },
+          { name: 'field1', type: 'string', aggregatable: true },
+          { name: 'field2', type: 'string', aggregatable: true },
+          { name: 'field3', type: 'string', aggregatable: true },
         ],
       } as IndexPattern,
       workspace
@@ -140,6 +140,7 @@ describe('deserialize', () => {
     expect(allFields).toMatchInlineSnapshot(`
       Array [
         Object {
+          "aggregatable": true,
           "color": "black",
           "hopSize": undefined,
           "icon": undefined,
@@ -149,6 +150,7 @@ describe('deserialize', () => {
           "type": "string",
         },
         Object {
+          "aggregatable": true,
           "color": "black",
           "hopSize": undefined,
           "icon": undefined,
@@ -158,7 +160,8 @@ describe('deserialize', () => {
           "type": "string",
         },
         Object {
-          "color": "#CE0060",
+          "aggregatable": true,
+          "color": "#D36086",
           "hopSize": 5,
           "icon": Object {
             "class": "fa-folder-open-o",

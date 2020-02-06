@@ -9,7 +9,7 @@ import { ExpressionRendererProps } from 'src/plugins/expressions/public';
 import { Query, TimeRange, esFilters } from 'src/plugins/data/public';
 import { Document } from '../../persistence';
 
-jest.mock('../../../../../../../src/legacy/ui/public/inspector', () => ({
+jest.mock('../../../../../../../src/plugins/inspector/public/', () => ({
   isAvailable: false,
   open: false,
 }));

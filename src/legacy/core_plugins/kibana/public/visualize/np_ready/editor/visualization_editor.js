@@ -29,16 +29,14 @@ export function initVisEditorDirective(app, deps) {
         query: '=',
       },
       link: function($scope, element) {
-        const editorType = $scope.savedObj.vis.type.editor;
-        const Editor =
-          typeof editorType === 'function'
-            ? editorType
-            : deps.editorTypes.find(editor => editor.key === editorType);
-
+        const Editor = $scope.savedObj.vis.type.editor;
         const editor = new Editor(element[0], $scope.savedObj);
 
         $scope.renderFunction = () => {
           editor.render({
+            core: deps.core,
+            data: deps.data,
+            embeddables: deps.embeddables,
             uiState: $scope.uiState,
             timeRange: $scope.timeRange,
             filters: $scope.filters,

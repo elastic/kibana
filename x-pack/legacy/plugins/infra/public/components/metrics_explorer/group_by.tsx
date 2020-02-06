@@ -44,6 +44,9 @@ export const MetricsExplorerGroupBy = ({ options, onChange, fields }: Props) => 
       placeholder={i18n.translate('xpack.infra.metricsExplorer.groupByLabel', {
         defaultMessage: 'Everything',
       })}
+      aria-label={i18n.translate('xpack.infra.metricsExplorer.groupByAriaLabel', {
+        defaultMessage: 'Graph per',
+      })}
       fullWidth
       singleSelection={true}
       selectedOptions={(options.groupBy && [{ label: options.groupBy }]) || []}

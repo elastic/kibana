@@ -4,14 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as rt from 'io-ts';
-
-export const jobTypeRT = rt.keyof({
-  'log-entry-rate': null,
-});
-
-export type JobType = rt.TypeOf<typeof jobTypeRT>;
-
 // combines and abstracts job and datafeed status
 export type JobStatus =
   | 'unknown'

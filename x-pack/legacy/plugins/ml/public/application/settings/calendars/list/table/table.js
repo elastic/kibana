@@ -43,6 +43,7 @@ export const CalendarsListTable = injectI18n(function CalendarsListTable({
       }),
       sortable: true,
       truncateText: true,
+      scope: 'row',
       render: id => <EuiLink href={`#/settings/calendars_list/edit_calendar/${id}`}>{id}</EuiLink>,
     },
     {

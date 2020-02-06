@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Logger, SavedObjectsServiceSetup } from 'kibana/server';
+import { Logger, SavedObjectsServiceStart } from 'kibana/server';
 
 const SAVED_OBJECT_ID = 'sample-data-telemetry';
 
@@ -27,7 +27,7 @@ export interface SampleDataUsageTracker {
 }
 
 export function usage(
-  savedObjects: SavedObjectsServiceSetup,
+  savedObjects: Promise<SavedObjectsServiceStart>,
   logger: Logger
 ): SampleDataUsageTracker {
   const handleIncrementError = (err: Error) => {
@@ -37,11 +37,12 @@ export function usage(
     logger.warn(`saved objects repository incrementCounter encountered an error: ${err}`);
   };
 
-  const internalRepository = savedObjects.createInternalRepository();
+  const internalRepositoryPromise = savedObjects.then(so => so.createInternalRepository());
 
   return {
     addInstall: async (dataSet: string) => {
       try {
+        const internalRepository = await internalRepositoryPromise;
         await internalRepository.incrementCounter(SAVED_OBJECT_ID, dataSet, `installCount`);
       } catch (err) {
         handleIncrementError(err);
@@ -49,6 +50,7 @@ export function usage(
     },
     addUninstall: async (dataSet: string) => {
       try {
+        const internalRepository = await internalRepositoryPromise;
         await internalRepository.incrementCounter(SAVED_OBJECT_ID, dataSet, `unInstallCount`);
       } catch (err) {
         handleIncrementError(err);

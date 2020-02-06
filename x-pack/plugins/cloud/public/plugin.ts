@@ -7,9 +7,14 @@
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
 import { getIsCloudEnabled } from '../common/is_cloud_enabled';
 import { ELASTIC_SUPPORT_LINK } from '../common/constants';
+import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 
 interface CloudConfigType {
   id?: string;
+}
+
+interface CloudSetupDependencies {
+  home?: HomePublicPluginSetup;
 }
 
 export interface CloudSetup {
@@ -20,9 +25,13 @@ export interface CloudSetup {
 export class CloudPlugin implements Plugin<CloudSetup> {
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
-  public async setup(core: CoreSetup) {
+  public async setup(core: CoreSetup, { home }: CloudSetupDependencies) {
     const { id } = this.initializerContext.config.get<CloudConfigType>();
     const isCloudEnabled = getIsCloudEnabled(id);
+
+    if (home) {
+      home.environment.update({ cloud: isCloudEnabled });
+    }
 
     return {
       cloudId: id,

@@ -21,7 +21,7 @@
  * @name Vis
  *
  * @description This class consists of aggs, params, listeners, title, and type.
- *  - Aggs: Instances of AggConfig.
+ *  - Aggs: Instances of IAggConfig.
  *  - Params: The settings in the Options tab.
  *
  * Not to be confused with vislib/vis.js.
@@ -97,6 +97,10 @@ class Vis extends EventEmitter {
     }
   }
 
+  setVisType(type) {
+    this.type.type = type;
+  }
+
   updateState() {
     this.setState(this.getCurrentState(true));
     this.emit('update');
@@ -114,18 +118,6 @@ class Vis extends EventEmitter {
       aggs: this.aggs.aggs
         .map(agg => agg.toJSON())
         .filter(agg => includeDisabled || agg.enabled)
-        .filter(Boolean),
-    };
-  }
-
-  getSerializableState(state) {
-    return {
-      title: state.title,
-      type: state.type,
-      params: _.cloneDeep(state.params),
-      aggs: state.aggs.aggs
-        .map(agg => agg.toJSON())
-        .filter(agg => agg.enabled)
         .filter(Boolean),
     };
   }

@@ -15,6 +15,7 @@ import {
   EuiIcon,
   EuiIconTip,
   EuiTextColor,
+  EuiScreenReaderOnly,
 } from '@elastic/eui';
 
 import './ccr.css';
@@ -270,6 +271,14 @@ export class Ccr extends Component {
     return (
       <EuiPage>
         <EuiPageBody>
+          <EuiScreenReaderOnly>
+            <h1>
+              <FormattedMessage
+                id="xpack.monitoring.elasticsearch.ccr.heading"
+                defaultMessage="CCR"
+              />
+            </h1>
+          </EuiScreenReaderOnly>
           <EuiPageContent>
             <EuiPageContentBody>{this.renderTable()}</EuiPageContentBody>
           </EuiPageContent>

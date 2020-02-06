@@ -7,7 +7,7 @@
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { cloneDeep, omit } from 'lodash/fp';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import * as React from 'react';
+import React from 'react';
 import { ThemeProvider } from 'styled-components';
 
 import { DEFAULT_SEARCH_RESULTS_PER_PAGE } from '../../../pages/timelines/timelines_page';
@@ -35,6 +35,7 @@ describe('#getExtendedColumns', () => {
       const wrapper = mountWithIntl(
         <ThemeProvider theme={theme}>
           <TimelinesTable
+            actionTimelineToShow={['delete', 'duplicate', 'selectable']}
             deleteTimelines={jest.fn()}
             defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
             loading={false}
@@ -46,7 +47,7 @@ describe('#getExtendedColumns', () => {
             pageIndex={0}
             pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
             searchResults={mockResults}
-            showExtendedColumnsAndActions={true}
+            showExtendedColumns={true}
             sortDirection={DEFAULT_SORT_DIRECTION}
             sortField={DEFAULT_SORT_FIELD}
             totalSearchResultsCount={mockResults.length}
@@ -66,6 +67,7 @@ describe('#getExtendedColumns', () => {
       const wrapper = mountWithIntl(
         <ThemeProvider theme={theme}>
           <TimelinesTable
+            actionTimelineToShow={['delete', 'duplicate', 'selectable']}
             deleteTimelines={jest.fn()}
             defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
             loading={false}
@@ -77,7 +79,7 @@ describe('#getExtendedColumns', () => {
             pageIndex={0}
             pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
             searchResults={mockResults}
-            showExtendedColumnsAndActions={true}
+            showExtendedColumns={true}
             sortDirection={DEFAULT_SORT_DIRECTION}
             sortField={DEFAULT_SORT_FIELD}
             totalSearchResultsCount={mockResults.length}
@@ -99,6 +101,7 @@ describe('#getExtendedColumns', () => {
       const wrapper = mountWithIntl(
         <ThemeProvider theme={theme}>
           <TimelinesTable
+            actionTimelineToShow={['delete', 'duplicate', 'selectable']}
             deleteTimelines={jest.fn()}
             defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
             loading={false}
@@ -110,7 +113,7 @@ describe('#getExtendedColumns', () => {
             pageIndex={0}
             pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
             searchResults={missingUpdatedBy}
-            showExtendedColumnsAndActions={true}
+            showExtendedColumns={true}
             sortDirection={DEFAULT_SORT_DIRECTION}
             sortField={DEFAULT_SORT_FIELD}
             totalSearchResultsCount={missingUpdatedBy.length}

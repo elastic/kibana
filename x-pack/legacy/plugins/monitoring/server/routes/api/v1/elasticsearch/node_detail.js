@@ -61,7 +61,7 @@ export function esNodeRoute(server) {
         metricSet = metricSetOverview;
         // set the cgroup option if needed
         const showCgroupMetricsElasticsearch = config.get(
-          'xpack.monitoring.ui.container.elasticsearch.enabled'
+          'monitoring.ui.container.elasticsearch.enabled'
         );
         const metricCpu = metricSet.find(m => m.name === 'node_cpu_metric');
         if (showCgroupMetricsElasticsearch) {
@@ -78,6 +78,7 @@ export function esNodeRoute(server) {
         const shardStats = await getShardStats(req, esIndexPattern, cluster, {
           includeIndices: true,
           includeNodes: true,
+          nodeUuid,
         });
         const nodeSummary = await getNodeSummary(req, esIndexPattern, clusterState, shardStats, {
           clusterUuid,

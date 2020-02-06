@@ -7,6 +7,7 @@
 import { esFilters } from '../../../../../../../src/plugins/data/common';
 import { HostsComponentsQueryProps } from '../../pages/hosts/navigation/types';
 import { NetworkComponentQueryProps } from '../../pages/network/navigation/types';
+import { MatrixHistogramOption } from '../matrix_histogram/types';
 
 type CommonQueryProps = HostsComponentsQueryProps | NetworkComponentQueryProps;
 export interface AlertsComponentsQueryProps
@@ -22,5 +23,7 @@ export interface AlertsComponentsQueryProps
     | 'updateDateRange'
   > {
   pageFilters: esFilters.Filter[];
+  stackByOptions?: MatrixHistogramOption[];
   defaultFilters?: esFilters.Filter[];
+  defaultStackByOption?: MatrixHistogramOption;
 }

@@ -143,7 +143,7 @@ export const WizardSteps: FC<Props> = ({ currentStep, setCurrentStep }) => {
 const Title: FC<{ 'data-test-subj': string }> = ({ 'data-test-subj': dataTestSubj, children }) => {
   return (
     <Fragment>
-      <EuiTitle>
+      <EuiTitle size="s">
         <h2 data-test-subj={dataTestSubj}>{children}</h2>
       </EuiTitle>
       <EuiSpacer />

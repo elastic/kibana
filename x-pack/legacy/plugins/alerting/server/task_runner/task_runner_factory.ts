@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Logger } from '../../../../../../src/core/server';
-import { RunContext } from '../../../task_manager';
-import { PluginStartContract as EncryptedSavedObjectsStartContract } from '../../../../../plugins/encrypted_saved_objects/server';
-import { PluginStartContract as ActionsPluginStartContract } from '../../../actions';
+import { RunContext } from '../../../../../plugins/task_manager/server';
+import { EncryptedSavedObjectsPluginStart } from '../../../../../plugins/encrypted_saved_objects/server';
+import { PluginStartContract as ActionsPluginStartContract } from '../../../../../plugins/actions/server';
 import {
   AlertType,
   GetBasePathFunction,
@@ -19,7 +19,7 @@ export interface TaskRunnerContext {
   logger: Logger;
   getServices: GetServicesFunction;
   executeAction: ActionsPluginStartContract['execute'];
-  encryptedSavedObjectsPlugin: EncryptedSavedObjectsStartContract;
+  encryptedSavedObjectsPlugin: EncryptedSavedObjectsPluginStart;
   spaceIdToNamespace: SpaceIdToNamespaceFunction;
   getBasePath: GetBasePathFunction;
 }

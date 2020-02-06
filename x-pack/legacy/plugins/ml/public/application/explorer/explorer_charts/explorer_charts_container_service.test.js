@@ -102,119 +102,79 @@ jest.mock('ui/chrome', () => ({
   }),
 }));
 
-import {
-  explorerChartsContainerServiceFactory,
-  getDefaultChartsData,
-} from './explorer_charts_container_service';
+jest.mock('../explorer_dashboard_service', () => ({
+  explorerService: {
+    setCharts: jest.fn(),
+  },
+}));
+
+import { anomalyDataChange, getDefaultChartsData } from './explorer_charts_container_service';
+import { explorerService } from '../explorer_dashboard_service';
 
 describe('explorerChartsContainerService', () => {
-  test('Initialize factory', done => {
-    explorerChartsContainerServiceFactory(callback);
-
-    function callback(data) {
-      expect(data).toEqual(getDefaultChartsData());
-      done();
-    }
+  afterEach(() => {
+    explorerService.setCharts.mockClear();
   });
 
   test('call anomalyChangeListener with empty series config', done => {
-    // callback will be called multiple times.
-    // the callbackData array contains the expected data values for each consecutive call.
-    const callbackData = [];
-    callbackData.push(getDefaultChartsData());
-    callbackData.push({
-      ...getDefaultChartsData(),
-      chartsPerRow: 2,
+    anomalyDataChange([], 1486656000000, 1486670399999);
+
+    setImmediate(() => {
+      expect(explorerService.setCharts.mock.calls.length).toBe(1);
+      expect(explorerService.setCharts.mock.calls[0][0]).toStrictEqual({
+        ...getDefaultChartsData(),
+        chartsPerRow: 2,
+      });
+      done();
     });
-
-    const anomalyDataChangeListener = explorerChartsContainerServiceFactory(callback);
-
-    anomalyDataChangeListener([], 1486656000000, 1486670399999);
-
-    function callback(data) {
-      if (callbackData.length > 0) {
-        expect(data).toEqual({
-          ...callbackData.shift(),
-        });
-      }
-      if (callbackData.length === 0) {
-        done();
-      }
-    }
   });
 
   test('call anomalyChangeListener with actual series config', done => {
-    let callbackCount = 0;
-    const expectedTestCount = 3;
+    anomalyDataChange(mockAnomalyChartRecords, 1486656000000, 1486670399999);
 
-    const anomalyDataChangeListener = explorerChartsContainerServiceFactory(callback);
-
-    anomalyDataChangeListener(mockAnomalyChartRecords, 1486656000000, 1486670399999);
-
-    function callback(data) {
-      callbackCount++;
-      expect(data).toMatchSnapshot();
-      if (callbackCount === expectedTestCount) {
-        done();
-      }
-    }
+    setImmediate(() => {
+      expect(explorerService.setCharts.mock.calls.length).toBe(2);
+      expect(explorerService.setCharts.mock.calls[0][0]).toMatchSnapshot();
+      expect(explorerService.setCharts.mock.calls[1][0]).toMatchSnapshot();
+      done();
+    });
   });
 
   test('filtering should skip values of null', done => {
-    let callbackCount = 0;
-    const expectedTestCount = 3;
-
-    const anomalyDataChangeListener = explorerChartsContainerServiceFactory(callback);
-
     const mockAnomalyChartRecordsClone = _.cloneDeep(mockAnomalyChartRecords).map(d => {
       d.job_id = 'mock-job-id-distribution';
       return d;
     });
 
-    anomalyDataChangeListener(mockAnomalyChartRecordsClone, 1486656000000, 1486670399999);
+    anomalyDataChange(mockAnomalyChartRecordsClone, 1486656000000, 1486670399999);
 
-    function callback(data) {
-      callbackCount++;
+    setImmediate(() => {
+      expect(explorerService.setCharts.mock.calls.length).toBe(2);
+      expect(explorerService.setCharts.mock.calls[0][0].seriesToPlot.length).toBe(1);
+      expect(explorerService.setCharts.mock.calls[1][0].seriesToPlot.length).toBe(1);
 
-      if (callbackCount === 1) {
-        expect(data.seriesToPlot).toHaveLength(0);
-      }
-      if (callbackCount === 3) {
-        expect(data.seriesToPlot).toHaveLength(1);
-
-        // the mock source dataset has a length of 115. one data point has a value of `null`,
-        // and another one `0`. the received dataset should have a length of 114,
-        // it should remove the datapoint with `null` and keep the one with `0`.
-        const chartData = data.seriesToPlot[0].chartData;
-        expect(chartData).toHaveLength(114);
-        expect(chartData.filter(d => d.value === 0)).toHaveLength(1);
-        expect(chartData.filter(d => d.value === null)).toHaveLength(0);
-      }
-      if (callbackCount === expectedTestCount) {
-        done();
-      }
-    }
+      // the mock source dataset has a length of 115. one data point has a value of `null`,
+      // and another one `0`. the received dataset should have a length of 114,
+      // it should remove the datapoint with `null` and keep the one with `0`.
+      const chartData = explorerService.setCharts.mock.calls[1][0].seriesToPlot[0].chartData;
+      expect(chartData).toHaveLength(114);
+      expect(chartData.filter(d => d.value === 0)).toHaveLength(1);
+      expect(chartData.filter(d => d.value === null)).toHaveLength(0);
+      done();
+    });
   });
 
   test('field value with trailing dot should not throw an error', done => {
-    let callbackCount = 0;
-    const expectedTestCount = 3;
-
-    const anomalyDataChangeListener = explorerChartsContainerServiceFactory(callback);
-
     const mockAnomalyChartRecordsClone = _.cloneDeep(mockAnomalyChartRecords);
     mockAnomalyChartRecordsClone[1].partition_field_value = 'AAL.';
 
     expect(() => {
-      anomalyDataChangeListener(mockAnomalyChartRecordsClone, 1486656000000, 1486670399999);
+      anomalyDataChange(mockAnomalyChartRecordsClone, 1486656000000, 1486670399999);
     }).not.toThrow();
 
-    function callback() {
-      callbackCount++;
-
-      if (callbackCount === expectedTestCount) {
-        done();
-      }
-    }
+    setImmediate(() => {
+      expect(explorerService.setCharts.mock.calls.length).toBe(2);
+      done();
+    });
   });
 });

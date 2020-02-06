@@ -6,66 +6,106 @@
 
 import _ from 'lodash';
 import React from 'react';
-import PropTypes from 'prop-types';
+import { removeRow, isColorInvalid } from './color_stops_utils';
+import { i18n } from '@kbn/i18n';
+import { EuiButtonIcon, EuiColorPicker, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 
-import {
-  EuiColorPicker,
-  EuiFormRow,
-  EuiFieldNumber,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButtonIcon,
-} from '@elastic/eui';
-import { addRow, removeRow, isColorInvalid, isStopInvalid, isInvalid } from './color_stops_utils';
+function getColorStopRow({ index, errors, stopInput, colorInput, deleteButton, onAdd }) {
+  return (
+    <EuiFormRow
+      key={index}
+      className="mapColorStop"
+      isInvalid={errors.length !== 0}
+      error={errors}
+      display="rowCompressed"
+    >
+      <div>
+        <EuiFlexGroup responsive={false} alignItems="center" gutterSize="xs">
+          <EuiFlexItem>{stopInput}</EuiFlexItem>
+          <EuiFlexItem>{colorInput}</EuiFlexItem>
+        </EuiFlexGroup>
+        <div className="mapColorStop__icons">
+          {deleteButton}
+          <EuiButtonIcon
+            iconType="plusInCircle"
+            color="primary"
+            aria-label="Add"
+            title="Add"
+            onClick={onAdd}
+          />
+        </div>
+      </div>
+    </EuiFormRow>
+  );
+}
 
-const DEFAULT_COLOR = '#FF0000';
+export function getDeleteButton(onRemove) {
+  return (
+    <EuiButtonIcon
+      iconType="trash"
+      color="danger"
+      aria-label={i18n.translate('xpack.maps.styles.colorStops.deleteButtonAriaLabel', {
+        defaultMessage: 'Delete',
+      })}
+      title={i18n.translate('xpack.maps.styles.colorStops.deleteButtonLabel', {
+        defaultMessage: 'Delete',
+      })}
+      onClick={onRemove}
+    />
+  );
+}
 
-export const ColorStops = ({ colorStops = [{ stop: 0, color: DEFAULT_COLOR }], onChange }) => {
+export const ColorStops = ({
+  onChange,
+  colorStops,
+  isStopsInvalid,
+  sanitizeStopInput,
+  getStopError,
+  renderStopInput,
+  addNewRow,
+  canDeleteStop,
+}) => {
   function getStopInput(stop, index) {
     const onStopChange = e => {
       const newColorStops = _.cloneDeep(colorStops);
-      const sanitizedValue = parseFloat(e.target.value);
-      newColorStops[index].stop = isNaN(sanitizedValue) ? '' : sanitizedValue;
+      newColorStops[index].stop = sanitizeStopInput(e.target.value);
+      const invalid = isStopsInvalid(newColorStops);
       onChange({
         colorStops: newColorStops,
-        isInvalid: isInvalid(newColorStops),
+        isInvalid: invalid,
       });
     };
 
-    let error;
-    if (isStopInvalid(stop)) {
-      error = 'Stop must be a number';
-    } else if (index !== 0 && colorStops[index - 1].stop >= stop) {
-      error = 'Stop must be greater than previous stop value';
-    }
-
+    const error = getStopError(stop, index);
     return {
       stopError: error,
-      stopInput: (
-        <EuiFieldNumber aria-label="Stop" value={stop} onChange={onStopChange} compressed />
-      ),
+      stopInput: renderStopInput(stop, onStopChange, index),
     };
   }
 
-  function getColorInput(color, index) {
-    const onColorChange = color => {
-      const newColorStops = _.cloneDeep(colorStops);
-      newColorStops[index].color = color;
-      onChange({
-        colorStops: newColorStops,
-        isInvalid: isInvalid(newColorStops),
-      });
-    };
-
+  function getColorInput(onColorChange, color) {
     return {
-      colorError: isColorInvalid(color) ? 'Color must provide a valid hex value' : undefined,
+      colorError: isColorInvalid(color)
+        ? i18n.translate('xpack.maps.styles.colorStops.hexWarningLabel', {
+            defaultMessage: 'Color must provide a valid hex value',
+          })
+        : undefined,
       colorInput: <EuiColorPicker onChange={onColorChange} color={color} compressed />,
     };
   }
 
   const rows = colorStops.map((colorStop, index) => {
+    const onColorChange = color => {
+      const newColorStops = _.cloneDeep(colorStops);
+      newColorStops[index].color = color;
+      onChange({
+        colorStops: newColorStops,
+        isInvalid: isStopsInvalid(newColorStops),
+      });
+    };
+
     const { stopError, stopInput } = getStopInput(colorStop.stop, index);
-    const { colorError, colorInput } = getColorInput(colorStop.color, index);
+    const { colorError, colorInput } = getColorInput(onColorChange, colorStop.color);
     const errors = [];
     if (stopError) {
       errors.push(stopError);
@@ -74,82 +114,28 @@ export const ColorStops = ({ colorStops = [{ stop: 0, color: DEFAULT_COLOR }], o
       errors.push(colorError);
     }
 
-    const onRemove = () => {
-      const newColorStops = removeRow(colorStops, index);
-      onChange({
-        colorStops: newColorStops,
-        isInvalid: isInvalid(newColorStops),
-      });
-    };
-
     const onAdd = () => {
-      const newColorStops = addRow(colorStops, index);
-
+      const newColorStops = addNewRow(colorStops, index);
       onChange({
         colorStops: newColorStops,
-        isInvalid: isInvalid(newColorStops),
+        isInvalid: isStopsInvalid(newColorStops),
       });
     };
 
     let deleteButton;
-    if (colorStops.length > 1) {
-      deleteButton = (
-        <EuiButtonIcon
-          iconType="trash"
-          color="danger"
-          aria-label="Delete"
-          title="Delete"
-          onClick={onRemove}
-        />
-      );
+    if (canDeleteStop(colorStops, index)) {
+      const onRemove = () => {
+        const newColorStops = removeRow(colorStops, index);
+        onChange({
+          colorStops: newColorStops,
+          isInvalid: isStopsInvalid(newColorStops),
+        });
+      };
+      deleteButton = getDeleteButton(onRemove);
     }
 
-    return (
-      <EuiFormRow
-        key={index}
-        className="mapColorStop"
-        isInvalid={errors.length !== 0}
-        error={errors}
-        display="rowCompressed"
-      >
-        <div>
-          <EuiFlexGroup responsive={false} alignItems="center" gutterSize="xs">
-            <EuiFlexItem>{stopInput}</EuiFlexItem>
-            <EuiFlexItem>{colorInput}</EuiFlexItem>
-          </EuiFlexGroup>
-          <div className="mapColorStop__icons">
-            {deleteButton}
-            <EuiButtonIcon
-              iconType="plusInCircle"
-              color="primary"
-              aria-label="Add"
-              title="Add"
-              onClick={onAdd}
-            />
-          </div>
-        </div>
-      </EuiFormRow>
-    );
+    return getColorStopRow({ index, errors, stopInput, colorInput, deleteButton, onAdd });
   });
 
   return <div>{rows}</div>;
-};
-
-ColorStops.propTypes = {
-  /**
-   * Array of { stop, color }.
-   * Stops are numbers in strictly ascending order.
-   * The range is from the given stop number (inclusive) to the next stop number (exclusive).
-   * Colors are color hex strings (3 or 6 character).
-   */
-  colorStops: PropTypes.arrayOf(
-    PropTypes.shape({
-      stopKey: PropTypes.number,
-      color: PropTypes.string,
-    })
-  ),
-  /**
-   * Callback for when the color stops changes. Called with { colorStops, isInvalid }
-   */
-  onChange: PropTypes.func.isRequired,
 };

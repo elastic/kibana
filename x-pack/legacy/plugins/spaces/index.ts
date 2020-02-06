@@ -49,12 +49,12 @@ export const spaces = (kibana: Record<string, any>) =>
 
     uiExports: {
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
-      managementSections: ['plugins/spaces/views/management'],
+      managementSections: [],
       apps: [
         {
           id: 'space_selector',
           title: 'Spaces',
-          main: 'plugins/spaces/views/space_selector',
+          main: 'plugins/spaces/space_selector',
           url: 'space_selector',
           hidden: true,
         },
@@ -127,9 +127,6 @@ export const spaces = (kibana: Record<string, any>) =>
           kibanaIndex: config.get('kibana.index'),
         },
         savedObjects: server.savedObjects,
-        tutorial: {
-          addScopedTutorialContextFactory: server.addScopedTutorialContextFactory,
-        },
         auditLogger: {
           create: (pluginId: string) =>
             new AuditLogger(server, pluginId, server.config(), server.plugins.xpack_main.info),

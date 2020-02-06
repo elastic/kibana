@@ -114,6 +114,7 @@ export interface KibanaCore {
     elasticsearch: LegacyServiceSetupDeps['core']['elasticsearch'];
     hapiServer: LegacyServiceSetupDeps['core']['http']['server'];
     kibanaMigrator: LegacyServiceStartDeps['core']['savedObjects']['migrator'];
+    typeRegistry: LegacyServiceStartDeps['core']['savedObjects']['typeRegistry'];
     legacy: ILegacyInternals;
     rendering: LegacyServiceSetupDeps['core']['rendering'];
     uiPlugins: LegacyServiceSetupDeps['core']['plugins']['uiPlugins'];
@@ -129,7 +130,7 @@ export interface KibanaCore {
     plugins: PluginsSetup;
   };
   startDeps: {
-    core: CoreSetup;
+    core: CoreStart;
     plugins: Record<string, object>;
   };
   logger: LoggerFactory;

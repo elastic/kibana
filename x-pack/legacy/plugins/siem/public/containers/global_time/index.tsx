@@ -47,33 +47,38 @@ interface OwnProps {
 
 type GlobalTimeProps = OwnProps & GlobalTimeReduxState & GlobalTimeDispatch;
 
-export const GlobalTimeComponent = React.memo(
-  ({ children, deleteAllQuery, deleteOneQuery, from, to, setGlobalQuery }: GlobalTimeProps) => {
-    const [isInitializing, setIsInitializing] = useState(true);
+export const GlobalTimeComponent: React.FC<GlobalTimeProps> = ({
+  children,
+  deleteAllQuery,
+  deleteOneQuery,
+  from,
+  to,
+  setGlobalQuery,
+}) => {
+  const [isInitializing, setIsInitializing] = useState(true);
 
-    useEffect(() => {
-      if (isInitializing) {
-        setIsInitializing(false);
-      }
-      return () => {
-        deleteAllQuery({ id: 'global' });
-      };
-    }, []);
+  useEffect(() => {
+    if (isInitializing) {
+      setIsInitializing(false);
+    }
+    return () => {
+      deleteAllQuery({ id: 'global' });
+    };
+  }, []);
 
-    return (
-      <>
-        {children({
-          isInitializing,
-          from,
-          to,
-          setQuery: ({ id, inspect, loading, refetch }: SetQuery) =>
-            setGlobalQuery({ inputId: 'global', id, inspect, loading, refetch }),
-          deleteQuery: ({ id }: { id: string }) => deleteOneQuery({ inputId: 'global', id }),
-        })}
-      </>
-    );
-  }
-);
+  return (
+    <>
+      {children({
+        isInitializing,
+        from,
+        to,
+        setQuery: ({ id, inspect, loading, refetch }: SetQuery) =>
+          setGlobalQuery({ inputId: 'global', id, inspect, loading, refetch }),
+        deleteQuery: ({ id }: { id: string }) => deleteOneQuery({ inputId: 'global', id }),
+      })}
+    </>
+  );
+};
 
 const mapStateToProps = (state: State) => {
   const timerange: inputsModel.TimeRange = inputsSelectors.globalTimeRangeSelector(state);
@@ -87,4 +92,4 @@ export const GlobalTime = connect(mapStateToProps, {
   deleteAllQuery: inputsActions.deleteAllQuery,
   deleteOneQuery: inputsActions.deleteOneQuery,
   setGlobalQuery: inputsActions.setQuery,
-})(GlobalTimeComponent);
+})(React.memo(GlobalTimeComponent));

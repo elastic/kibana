@@ -17,13 +17,22 @@ export const LogAnalysisJobProblemIndicator: React.FC<{
   onRecreateMlJobForReconfiguration: () => void;
   onRecreateMlJobForUpdate: () => void;
 }> = ({ jobStatus, setupStatus, onRecreateMlJobForReconfiguration, onRecreateMlJobForUpdate }) => {
-  if (jobStatus === 'stopped') {
+  if (isStopped(jobStatus)) {
     return <JobStoppedCallout />;
-  } else if (setupStatus === 'skippedButUpdatable') {
+  } else if (isUpdatable(setupStatus)) {
     return <JobDefinitionOutdatedCallout onRecreateMlJob={onRecreateMlJobForUpdate} />;
-  } else if (setupStatus === 'skippedButReconfigurable') {
+  } else if (isReconfigurable(setupStatus)) {
     return <JobConfigurationOutdatedCallout onRecreateMlJob={onRecreateMlJobForReconfiguration} />;
   }
 
   return null; // no problem to indicate
 };
+
+const isStopped = (jobStatus: JobStatus) => jobStatus === 'stopped';
+
+const isUpdatable = (setupStatus: SetupStatus) => setupStatus === 'skippedButUpdatable';
+
+const isReconfigurable = (setupStatus: SetupStatus) => setupStatus === 'skippedButReconfigurable';
+
+export const jobHasProblem = (jobStatus: JobStatus, setupStatus: SetupStatus) =>
+  isStopped(jobStatus) || isUpdatable(setupStatus) || isReconfigurable(setupStatus);

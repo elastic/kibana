@@ -44,6 +44,7 @@ import { help as joinRows } from './dict/join_rows';
 import { help as location } from './dict/location';
 import { help as lt } from './dict/lt';
 import { help as lte } from './dict/lte';
+import { help as mapCenter } from './dict/map_center';
 import { help as mapColumn } from './dict/map_column';
 import { help as markdown } from './dict/markdown';
 import { help as math } from './dict/math';
@@ -75,6 +76,7 @@ import { help as tail } from './dict/tail';
 import { help as timefilter } from './dict/timefilter';
 import { help as timefilterControl } from './dict/timefilter_control';
 import { help as timelion } from './dict/timelion';
+import { help as timerange } from './dict/time_range';
 import { help as to } from './dict/to';
 import { help as urlparam } from './dict/urlparam';
 
@@ -196,6 +198,7 @@ export const getFunctionHelp = (): FunctionHelpDict => ({
   location,
   lt,
   lte,
+  mapCenter,
   mapColumn,
   markdown,
   math,
@@ -227,6 +230,7 @@ export const getFunctionHelp = (): FunctionHelpDict => ({
   timefilter,
   timefilterControl,
   timelion,
+  timerange,
   to,
   urlparam,
 });

@@ -19,7 +19,8 @@
 
 import { Server } from 'hapi';
 
-import { LegacyRequest } from '../http';
+import { KibanaRequest, LegacyRequest } from '../http';
+import { ensureRawRequest } from '../http/router';
 import { mergeVars } from './merge_vars';
 import { ILegacyInternals, LegacyVars, VarsInjector, LegacyConfig, LegacyUiExports } from './types';
 
@@ -51,11 +52,12 @@ export class LegacyInternals implements ILegacyInternals {
     ));
   }
 
-  private replaceVars(vars: LegacyVars, request: LegacyRequest) {
+  private replaceVars(vars: LegacyVars, request: KibanaRequest | LegacyRequest) {
     const { injectedVarsReplacers = [] } = this.uiExports;
 
     return injectedVarsReplacers.reduce(
-      async (injected, replacer) => replacer(await injected, request, this.server),
+      async (injected, replacer) =>
+        replacer(await injected, ensureRawRequest(request), this.server),
       Promise.resolve(vars)
     );
   }
@@ -78,7 +80,11 @@ export class LegacyInternals implements ILegacyInternals {
     );
   }
 
-  public async getVars(id: string, request: LegacyRequest, injected: LegacyVars = {}) {
+  public async getVars(
+    id: string,
+    request: KibanaRequest | LegacyRequest,
+    injected: LegacyVars = {}
+  ) {
     return this.replaceVars(
       mergeVars(this.defaultVars, await this.getInjectedUiAppVars(id), injected),
       request

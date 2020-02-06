@@ -112,6 +112,7 @@ describe('settings', () => {
             code: '1',
             label: 'test',
           },
+          aggregatable: true,
         },
         {
           selected: false,
@@ -123,6 +124,7 @@ describe('settings', () => {
             code: '1',
             label: 'test',
           },
+          aggregatable: true,
         },
       ])
     );

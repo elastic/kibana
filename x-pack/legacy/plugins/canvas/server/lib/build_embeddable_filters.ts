@@ -35,10 +35,8 @@ function getTimeRangeFromFilters(filters: Filter[]): TimeRange | undefined {
     : undefined;
 }
 
-function getQueryFilters(filters: Filter[]): esFilters.Filter[] {
-  return buildBoolArray(filters.filter(filter => filter.type !== 'time')).map(
-    esFilters.buildQueryFilter
-  );
+export function getQueryFilters(filters: Filter[]): esFilters.Filter[] {
+  return buildBoolArray(filters).map(esFilters.buildQueryFilter);
 }
 
 export function buildEmbeddableFilters(filters: Filter[]): EmbeddableFilterInput {

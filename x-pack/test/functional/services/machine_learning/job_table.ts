@@ -176,6 +176,7 @@ export function MachineLearningJobTableProvider({ getService }: FtrProviderConte
     }
 
     public async assertJobRowFields(jobId: string, expectedRow: object) {
+      await this.refreshJobList();
       const rows = await this.parseJobTable();
       const jobRow = rows.filter(row => row.id === jobId)[0];
       expect(jobRow).to.eql(expectedRow);
@@ -234,6 +235,16 @@ export function MachineLearningJobTableProvider({ getService }: FtrProviderConte
     public async confirmDeleteJobModal() {
       await testSubjects.click('mlDeleteJobConfirmModal > confirmModalConfirmButton');
       await testSubjects.missingOrFail('mlDeleteJobConfirmModal', { timeout: 30 * 1000 });
+    }
+
+    public async clickOpenJobInSingleMetricViewerButton(jobId: string) {
+      await testSubjects.click(`~openJobsInSingleMetricViewer-${jobId}`);
+      await testSubjects.existOrFail('~mlPageSingleMetricViewer');
+    }
+
+    public async clickOpenJobInAnomalyExplorerButton(jobId: string) {
+      await testSubjects.click(`~openJobsInSingleAnomalyExplorer-${jobId}`);
+      await testSubjects.existOrFail('~mlPageAnomalyExplorer');
     }
   })();
 }

@@ -6,27 +6,27 @@
 
 import {
   createMockServer,
-  createMockServerWithoutActionClientDecoration,
   createMockServerWithoutAlertClientDecoration,
-  createMockServerWithoutActionOrAlertClientDecoration,
 } from '../__mocks__/_mock_server';
 
 import { deleteRulesRoute } from './delete_rules_route';
 import { ServerInjectOptions } from 'hapi';
+
 import {
   getFindResult,
   getResult,
   getDeleteRequest,
   getFindResultWithSingleHit,
   getDeleteRequestById,
+  getFindResultStatus,
 } from '../__mocks__/request_responses';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 
 describe('delete_rules', () => {
-  let { server, alertsClient } = createMockServer();
+  let { server, alertsClient, savedObjectsClient } = createMockServer();
 
   beforeEach(() => {
-    ({ server, alertsClient } = createMockServer());
+    ({ server, alertsClient, savedObjectsClient } = createMockServer());
     deleteRulesRoute(server);
   });
 
@@ -39,6 +39,8 @@ describe('delete_rules', () => {
       alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
       alertsClient.get.mockResolvedValue(getResult());
       alertsClient.delete.mockResolvedValue({});
+      savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
+      savedObjectsClient.delete.mockResolvedValue({});
       const { statusCode } = await server.inject(getDeleteRequest());
       expect(statusCode).toBe(200);
     });
@@ -47,6 +49,8 @@ describe('delete_rules', () => {
       alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
       alertsClient.get.mockResolvedValue(getResult());
       alertsClient.delete.mockResolvedValue({});
+      savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
+      savedObjectsClient.delete.mockResolvedValue({});
       const { statusCode } = await server.inject(getDeleteRequestById());
       expect(statusCode).toBe(200);
     });
@@ -55,14 +59,9 @@ describe('delete_rules', () => {
       alertsClient.find.mockResolvedValue(getFindResult());
       alertsClient.get.mockResolvedValue(getResult());
       alertsClient.delete.mockResolvedValue({});
+      savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
+      savedObjectsClient.delete.mockResolvedValue({});
       const { statusCode } = await server.inject(getDeleteRequest());
-      expect(statusCode).toBe(404);
-    });
-
-    test('returns 404 if actionClient is not available on the route', async () => {
-      const { serverWithoutActionClient } = createMockServerWithoutActionClientDecoration();
-      deleteRulesRoute(serverWithoutActionClient);
-      const { statusCode } = await serverWithoutActionClient.inject(getDeleteRequest());
       expect(statusCode).toBe(404);
     });
 
@@ -70,15 +69,6 @@ describe('delete_rules', () => {
       const { serverWithoutAlertClient } = createMockServerWithoutAlertClientDecoration();
       deleteRulesRoute(serverWithoutAlertClient);
       const { statusCode } = await serverWithoutAlertClient.inject(getDeleteRequest());
-      expect(statusCode).toBe(404);
-    });
-
-    test('returns 404 if alertClient and actionClient are both not available on the route', async () => {
-      const {
-        serverWithoutActionOrAlertClient,
-      } = createMockServerWithoutActionOrAlertClientDecoration();
-      deleteRulesRoute(serverWithoutActionOrAlertClient);
-      const { statusCode } = await serverWithoutActionOrAlertClient.inject(getDeleteRequest());
       expect(statusCode).toBe(404);
     });
   });

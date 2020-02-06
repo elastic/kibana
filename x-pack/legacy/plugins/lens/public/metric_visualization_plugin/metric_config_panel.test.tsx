@@ -38,6 +38,7 @@ describe('MetricConfigPanel', () => {
     const state = testState();
     const component = mount(
       <MetricConfigPanel
+        layerId="bar"
         dragDropContext={dragDropContext}
         setState={jest.fn()}
         frame={{

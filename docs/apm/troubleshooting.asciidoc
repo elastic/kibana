@@ -17,6 +17,7 @@ This section can help with any of the following:
 There are a number of factors that could be at play here.
 One important thing to double-check first is your index template.
 
+*Index template*
 An APM index template must exist for the APM app to work correctly.
 By default, this index template is created by APM Server on startup.
 However, this only happens if `setup.template.enabled` is `true` in `apm-server.yml`.
@@ -34,14 +35,21 @@ GET /_template/apm-{version}
 --------------------------------------------------
 // CONSOLE
 
+*Using Logstash, Kafka, etc.*
 If you're not outputting data directly from APM Server to Elasticsearch (perhaps you're using Logstash or Kafka),
 then the index template will not be set up automatically. Instead, you'll need to
-{apm-server-ref}/_manually_loading_template_configuration.html#load-template-manually-alternate[load the template manually].
+{apm-server-ref}/_manually_loading_template_configuration.html[load the template manually].
 
-Finally, this problem can also occur if you've changed the index name that you write APM data to.
-The default index pattern can be found {apm-server-ref}/elasticsearch-output.html#index-option-es[here].
-If you change this setting, you must also configure the `setup.template.name` and `setup.template.pattern` options.
+*Using a custom index names*
+This problem can also occur if you've customized the index name that you write APM data to.
+The default index name that APM writes events to can be found
+{apm-server-ref}/elasticsearch-output.html#index-option-es[here].
+If you change the default, you must also configure the `setup.template.name` and `setup.template.pattern` options.
 See {apm-server-ref}/configuration-template.html[Load the Elasticsearch index template].
+If the Elasticsearch index template has already been successfully loaded to the index,
+you can customize the indices that the APM app uses to display data.
+Navigate to *APM* > *Settings* > *Indices*, and change all `apm_oss.*Pattern` values to
+include the new index pattern. For example: `customIndexName-*`.
 
 ==== Unknown route
 

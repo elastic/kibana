@@ -130,6 +130,9 @@ export const timelineSavedObjectMappings: {
       description: {
         type: 'text',
       },
+      eventType: {
+        type: 'keyword',
+      },
       favorite: {
         properties: {
           keySearch: {

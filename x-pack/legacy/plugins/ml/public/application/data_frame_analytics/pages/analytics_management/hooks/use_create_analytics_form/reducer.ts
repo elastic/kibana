@@ -54,7 +54,15 @@ const getSourceIndexString = (state: State) => {
 };
 
 export const validateAdvancedEditor = (state: State): State => {
-  const { jobIdEmpty, jobIdValid, jobIdExists, jobType, createIndexPattern } = state.form;
+  const {
+    jobIdEmpty,
+    jobIdValid,
+    jobIdExists,
+    jobType,
+    createIndexPattern,
+    excludes,
+    maxDistinctValuesError,
+  } = state.form;
   const { jobConfig } = state;
 
   state.advancedEditorMessages = [];
@@ -90,6 +98,7 @@ export const validateAdvancedEditor = (state: State): State => {
   }
 
   let dependentVariableEmpty = false;
+  let excludesValid = true;
 
   if (
     jobConfig.analysis === undefined &&
@@ -104,6 +113,20 @@ export const validateAdvancedEditor = (state: State): State => {
   ) {
     const dependentVariableName = getDependentVar(jobConfig.analysis) || '';
     dependentVariableEmpty = dependentVariableName === '';
+
+    if (!dependentVariableEmpty && excludes.includes(dependentVariableName)) {
+      excludesValid = false;
+
+      state.advancedEditorMessages.push({
+        error: i18n.translate(
+          'xpack.ml.dataframe.analytics.create.advancedEditorMessage.excludesInvalid',
+          {
+            defaultMessage: 'The dependent variable cannot be excluded.',
+          }
+        ),
+        message: '',
+      });
+    }
   }
 
   if (sourceIndexNameEmpty) {
@@ -182,6 +205,8 @@ export const validateAdvancedEditor = (state: State): State => {
   }
 
   state.isValid =
+    maxDistinctValuesError === undefined &&
+    excludesValid &&
     state.form.modelMemoryLimitUnitValid &&
     !jobIdEmpty &&
     jobIdValid &&
@@ -210,6 +235,7 @@ const validateForm = (state: State): State => {
     destinationIndexPatternTitleExists,
     createIndexPattern,
     dependentVariable,
+    maxDistinctValuesError,
     modelMemoryLimit,
   } = state.form;
 
@@ -225,6 +251,7 @@ const validateForm = (state: State): State => {
   }
 
   state.isValid =
+    maxDistinctValuesError === undefined &&
     !jobTypeEmpty &&
     state.form.modelMemoryLimitUnitValid &&
     !jobIdEmpty &&

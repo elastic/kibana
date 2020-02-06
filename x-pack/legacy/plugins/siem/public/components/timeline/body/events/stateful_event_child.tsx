@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as React from 'react';
+import React from 'react';
 import uuid from 'uuid';
 
-import { TimelineNonEcsData } from '../../../../graphql/types';
+import { TimelineNonEcsData, Ecs } from '../../../../graphql/types';
 import { Note } from '../../../../lib/note';
 import { AddNoteToEvent, UpdateNote } from '../../../notes/helpers';
 import { NoteCards } from '../../../notes/note_cards';
@@ -26,6 +26,7 @@ interface Props {
   columnHeaders: ColumnHeader[];
   columnRenderers: ColumnRenderer[];
   data: TimelineNonEcsData[];
+  ecsData: Ecs;
   expanded: boolean;
   eventIdToNoteIds: Readonly<Record<string, string[]>>;
   isEventViewer?: boolean;
@@ -61,6 +62,7 @@ export const StatefulEventChild = React.memo<Props>(
     columnRenderers,
     expanded,
     data,
+    ecsData,
     eventIdToNoteIds,
     getNotesByIds,
     isEventViewer = false,
@@ -92,6 +94,7 @@ export const StatefulEventChild = React.memo<Props>(
           columnHeaders={columnHeaders}
           columnRenderers={columnRenderers}
           data={data}
+          ecsData={ecsData}
           expanded={expanded}
           eventIdToNoteIds={eventIdToNoteIds}
           getNotesByIds={getNotesByIds}

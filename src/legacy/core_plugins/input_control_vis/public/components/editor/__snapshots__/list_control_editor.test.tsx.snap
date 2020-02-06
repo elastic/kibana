@@ -343,10 +343,6 @@ exports[`renders should display chaining input when parents are provided 1`] = `
     labelType="label"
   >
     <EuiSelect
-      compressed={false}
-      fullWidth={false}
-      hasNoInitialSelection={false}
-      isLoading={false}
       onChange={[Function]}
       options={
         Array [

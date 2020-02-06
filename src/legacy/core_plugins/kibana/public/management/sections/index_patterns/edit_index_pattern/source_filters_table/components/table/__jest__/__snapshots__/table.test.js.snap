@@ -19,9 +19,7 @@ exports[`Table editing should show a save button 1`] = `
 
 exports[`Table editing should show an input field 1`] = `
 <EuiFormControlLayout
-  compressed={false}
   fullWidth={false}
-  isLoading={false}
 >
   <EuiValidatableControl>
     <input
@@ -99,5 +97,6 @@ exports[`Table should render normally 1`] = `
   }
   responsive={true}
   sorting={true}
+  tableLayout="fixed"
 />
 `;

@@ -126,12 +126,7 @@ export function InnerWorkspacePanel({
     if (suggestionForDraggedField) {
       trackUiEvent('drop_onto_workspace');
       trackUiEvent(expression ? 'drop_non_empty' : 'drop_empty');
-      switchToSuggestion(
-        framePublicAPI,
-        dispatch,
-        suggestionForDraggedField,
-        'SWITCH_VISUALIZATION'
-      );
+      switchToSuggestion(dispatch, suggestionForDraggedField, 'SWITCH_VISUALIZATION');
     }
   }
 

@@ -7,7 +7,16 @@
 import React, { FC, Fragment, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
+import { metadata } from 'ui/metadata';
 import { ErrorCallout } from '../error_callout';
 import {
   getValuesFromResponse,
@@ -220,8 +229,8 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
   }, [JSON.stringify(searchQuery)]);
 
   return (
-    <EuiPanel>
-      <EuiFlexGroup gutterSize="s">
+    <EuiPanel data-test-subj="mlDFAnalyticsRegressionExplorationEvaluatePanel">
+      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
             <span>
@@ -237,6 +246,25 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <span>{getTaskStateBadge(jobStatus)}</span>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiSpacer />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            target="_blank"
+            iconType="help"
+            iconSide="left"
+            color="primary"
+            href={`https://www.elastic.co/guide/en/machine-learning/${metadata.branch}/ml-dfanalytics-evaluate.html#ml-dfanalytics-regression-evaluation`}
+          >
+            {i18n.translate(
+              'xpack.ml.dataframe.analytics.classificationExploration.regressionDocsLink',
+              {
+                defaultMessage: 'Regression evaluation docs ',
+              }
+            )}
+          </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
@@ -268,6 +296,7 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
               <Fragment>
                 <EuiFlexItem>
                   <EvaluateStat
+                    dataTestSubj={'mlDFAnalyticsRegressionGenMSEstat'}
                     isLoading={isLoadingGeneralization}
                     title={generalizationEval.meanSquaredError}
                     isMSE
@@ -275,6 +304,7 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EvaluateStat
+                    dataTestSubj={'mlDFAnalyticsRegressionGenRSquaredStat'}
                     isLoading={isLoadingGeneralization}
                     title={generalizationEval.rSquared}
                     isMSE={false}
@@ -311,6 +341,7 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
               <Fragment>
                 <EuiFlexItem>
                   <EvaluateStat
+                    dataTestSubj={'mlDFAnalyticsRegressionTrainingMSEstat'}
                     isLoading={isLoadingTraining}
                     title={trainingEval.meanSquaredError}
                     isMSE
@@ -318,6 +349,7 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EvaluateStat
+                    dataTestSubj={'mlDFAnalyticsRegressionTrainingRSquaredStat'}
                     isLoading={isLoadingTraining}
                     title={trainingEval.rSquared}
                     isMSE={false}

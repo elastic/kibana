@@ -156,6 +156,9 @@ __Usage:__
 const valueSchema = schema.boolean({ defaultValue: false });
 ```
 
+__Notes:__
+* The `schema.boolean()` also supports a string as input if it equals `'true'` or `'false'` (case-insensitive).
+
 #### `schema.literal()`
 
 Validates input data as a [string](https://www.typescriptlang.org/docs/handbook/advanced-types.html#string-literal-types), [numeric](https://www.typescriptlang.org/docs/handbook/advanced-types.html#numeric-literal-types) or boolean literal.
@@ -397,7 +400,7 @@ const valueSchema = schema.byteSize({ min: '3kb' });
 ```
 
 __Notes:__
-* The string value for `schema.byteSize()` and its options supports the following prefixes: `b`, `kb`, `mb`, `gb` and `tb`.
+* The string value for `schema.byteSize()` and its options supports the following optional suffixes: `b`, `kb`, `mb`, `gb` and `tb`. The default suffix is `b`.
 * The number value is treated as a number of bytes and hence should be a positive integer, e.g. `100` is equal to `'100b'`.
 * Currently you cannot specify zero bytes with a string format and should use number `0` instead.
 
@@ -417,7 +420,7 @@ const valueSchema = schema.duration({ defaultValue: '70ms' });
 ```
 
 __Notes:__
-* The string value for `schema.duration()` supports the following prefixes: `ms`, `s`, `m`, `h`, `d`, `w`, `M` and `Y`.
+* The string value for `schema.duration()` supports the following optional suffixes: `ms`, `s`, `m`, `h`, `d`, `w`, `M` and `Y`. The default suffix is `ms`.
 * The number value is treated as a number of milliseconds and hence should be a positive integer, e.g. `100` is equal to `'100ms'`.
 
 #### `schema.conditional()`

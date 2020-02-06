@@ -25,7 +25,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const find = getService('find');
-  const { visualize } = getPageObjects(['visualize']);
+  const { visualize, visEditor } = getPageObjects(['visualize', 'visEditor']);
 
   describe('input control range', () => {
     before(async () => {
@@ -35,36 +35,22 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should add filter with scripted field', async () => {
-      await visualize.addInputControl('range');
-      await visualize.setFilterParams({
-        indexPattern: 'kibana_sample_data_flights',
-        field: 'hour_of_day',
-      });
-      await visualize.clickGo();
-      await visualize.setFilterRange({
-        min: '7',
-        max: '10',
-      });
-      await visualize.inputControlSubmit();
+      await visEditor.addInputControl('range');
+      await visEditor.setFilterParams(0, 'kibana_sample_data_flights', 'hour_of_day');
+      await visEditor.clickGo();
+      await visEditor.setFilterRange(0, '7', '10');
+      await visEditor.inputControlSubmit();
       const controlFilters = await find.allByCssSelector('[data-test-subj^="filter"]');
       expect(controlFilters).to.have.length(1);
       expect(await controlFilters[0].getVisibleText()).to.equal('hour_of_day: 7 to 10');
     });
 
     it('should add filter with price field', async () => {
-      await visualize.addInputControl('range');
-      await visualize.setFilterParams({
-        aggNth: 1,
-        indexPattern: 'kibana_sample_data_flights',
-        field: 'AvgTicketPrice',
-      });
-      await visualize.clickGo();
-      await visualize.setFilterRange({
-        aggNth: 1,
-        min: '400',
-        max: '999',
-      });
-      await visualize.inputControlSubmit();
+      await visEditor.addInputControl('range');
+      await visEditor.setFilterParams(1, 'kibana_sample_data_flights', 'AvgTicketPrice');
+      await visEditor.clickGo();
+      await visEditor.setFilterRange(1, '400', '999');
+      await visEditor.inputControlSubmit();
       const controlFilters = await find.allByCssSelector('[data-test-subj^="filter"]');
       expect(controlFilters).to.have.length(2);
       expect(await controlFilters[1].getVisibleText()).to.equal('AvgTicketPrice: $400 to $999');

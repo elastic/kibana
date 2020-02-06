@@ -5,7 +5,7 @@
  */
 
 import { DynamicStyleProperty } from './dynamic_style_property';
-import { getComputedFieldName } from '../style_util';
+
 import {
   HALF_LARGE_MAKI_ICON_SIZE,
   LARGE_MAKI_ICON_SIZE,
@@ -63,20 +63,20 @@ export class DynamicSizeProperty extends DynamicStyleProperty {
   }
 
   syncHaloWidthWithMb(mbLayerId, mbMap) {
-    const haloWidth = this._getMbSize();
+    const haloWidth = this.getMbSizeExpression();
     mbMap.setPaintProperty(mbLayerId, 'icon-halo-width', haloWidth);
   }
 
-  syncIconImageAndSizeWithMb(symbolLayerId, mbMap, symbolId) {
-    if (this._isSizeDynamicConfigComplete(this._options)) {
-      const iconPixels =
-        this._options.maxSize >= HALF_LARGE_MAKI_ICON_SIZE
-          ? LARGE_MAKI_ICON_SIZE
-          : SMALL_MAKI_ICON_SIZE;
-      mbMap.setLayoutProperty(symbolLayerId, 'icon-image', `${symbolId}-${iconPixels}`);
+  getIconPixelSize() {
+    return this._options.maxSize >= HALF_LARGE_MAKI_ICON_SIZE
+      ? LARGE_MAKI_ICON_SIZE
+      : SMALL_MAKI_ICON_SIZE;
+  }
 
-      const halfIconPixels = iconPixels / 2;
-      const targetName = getComputedFieldName(VECTOR_STYLES.ICON_SIZE, this._options.field.name);
+  syncIconSizeWithMb(symbolLayerId, mbMap) {
+    if (this._isSizeDynamicConfigComplete(this._options)) {
+      const halfIconPixels = this.getIconPixelSize() / 2;
+      const targetName = this.getComputedFieldName();
       // Using property state instead of feature-state because layout properties do not support feature-state
       mbMap.setLayoutProperty(symbolLayerId, 'icon-size', [
         'interpolate',
@@ -88,35 +88,34 @@ export class DynamicSizeProperty extends DynamicStyleProperty {
         this._options.maxSize / halfIconPixels,
       ]);
     } else {
-      mbMap.setLayoutProperty(symbolLayerId, 'icon-image', null);
       mbMap.setLayoutProperty(symbolLayerId, 'icon-size', null);
     }
   }
 
   syncCircleStrokeWidthWithMb(mbLayerId, mbMap) {
-    const lineWidth = this._getMbSize();
+    const lineWidth = this.getMbSizeExpression();
     mbMap.setPaintProperty(mbLayerId, 'circle-stroke-width', lineWidth);
   }
 
   syncCircleRadiusWithMb(mbLayerId, mbMap) {
-    const circleRadius = this._getMbSize();
+    const circleRadius = this.getMbSizeExpression();
     mbMap.setPaintProperty(mbLayerId, 'circle-radius', circleRadius);
   }
 
   syncLineWidthWithMb(mbLayerId, mbMap) {
-    const lineWidth = this._getMbSize();
+    const lineWidth = this.getMbSizeExpression();
     mbMap.setPaintProperty(mbLayerId, 'line-width', lineWidth);
   }
 
   syncLabelSizeWithMb(mbLayerId, mbMap) {
-    const lineWidth = this._getMbSize();
+    const lineWidth = this.getMbSizeExpression();
     mbMap.setLayoutProperty(mbLayerId, 'text-size', lineWidth);
   }
 
-  _getMbSize() {
+  getMbSizeExpression() {
     if (this._isSizeDynamicConfigComplete(this._options)) {
       return this._getMbDataDrivenSize({
-        targetName: getComputedFieldName(this._styleName, this._options.field.name),
+        targetName: this.getComputedFieldName(),
         minSize: this._options.minSize,
         maxSize: this._options.maxSize,
       });

@@ -9,14 +9,7 @@ import { createEpicMiddleware } from 'redux-observable';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import {
-  createRootEpic,
-  initialState,
-  logPositionSelectors,
-  reducer,
-  State,
-  waffleTimeSelectors,
-} from '.';
+import { createRootEpic, initialState, reducer, State, waffleTimeSelectors } from '.';
 import { InfraApolloClient, InfraObservableApi } from '../lib/lib';
 
 declare global {
@@ -36,10 +29,6 @@ export function createStore({ apolloClient, observableApi }: StoreDependencies) 
   const middlewareDependencies = {
     postToApi$: observableApi.pipe(map(({ post }) => post)),
     apolloClient$: apolloClient,
-    selectIsAutoReloadingLogEntries: logPositionSelectors.selectIsAutoReloading,
-    selectIsAutoReloadingScrollLocked: logPositionSelectors.selectAutoReloadScrollLock,
-    selectLogTargetPosition: logPositionSelectors.selectTargetPosition,
-    selectVisibleLogMidpointOrTarget: logPositionSelectors.selectVisibleMidpointOrTarget,
     selectWaffleTimeUpdatePolicyInterval: waffleTimeSelectors.selectTimeUpdatePolicyInterval,
   };
 

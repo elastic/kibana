@@ -174,6 +174,16 @@ yarn kbn bootstrap
 
 (You can also run `yarn kbn` to see the other available commands. For more info about this tool, see https://github.com/elastic/kibana/tree/master/packages/kbn-pm.)
 
+When switching branches which use different versions of npm packages you may need to run;
+```bash
+yarn kbn clean
+```
+
+If you have failures during `yarn kbn bootstrap` you may have some corrupted packages in your yarn cache which you can clean with;
+```bash
+yarn cache clean
+```
+
 #### Increase node.js heap size
 
 Kibana is a big project and for some commands it can happen that the process hits the default heap limit and crashes with an out-of-memory error. If you run into this problem, you can increase maximum heap size by setting the `--max_old_space_size` option on the command line. To set the limit for all commands, simply add the following line to your shell config: `export NODE_OPTIONS="--max_old_space_size=2048"`.
@@ -189,6 +199,19 @@ These snapshots are built on a nightly basis which expire after a couple weeks. 
 ```bash
 yarn es snapshot
 ```
+
+##### Keeping data between snapshots
+
+If you want to keep the data inside your Elasticsearch between usages of this command,
+you should use the following command, to keep your data folder outside the downloaded snapshot
+folder:
+
+```bash
+yarn es snapshot -E path.data=../data
+```
+
+The same parameter can be used with the source and archive command shown in the following
+paragraphs.
 
 #### Source
 
@@ -277,6 +300,7 @@ Follow the [cross-cluster search](https://www.elastic.co/guide/en/kibana/current
 
 ### Running Kibana
 
+Change to your local Kibana directory.
 Start the development server.
 
 ```bash
@@ -325,7 +349,7 @@ The `config/kibana.yml` file stores user configuration directives. Since this fi
 
 #### Setting Up SSL
 
-Kibana includes a self-signed certificate that can be used for development purposes: `yarn start --ssl`.
+Kibana includes self-signed certificates that can be used for development purposes in the browser and for communicating with Elasticsearch: `yarn start --ssl` & `yarn es snapshot --ssl`.
 
 ### Linting
 

@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Moment } from 'moment';
+
 // TS TODO: This is not yet a fully fledged representation of the job data structure,
 // but it fulfills some basic TypeScript related needs.
 export interface MlJob {
@@ -62,6 +64,20 @@ export interface MlSummaryJob {
 }
 
 export type MlSummaryJobs = MlSummaryJob[];
+
+export interface MlJobWithTimeRange extends MlJob {
+  groups: string[];
+  timeRange: {
+    from: number;
+    to: number;
+    fromPx: number;
+    toPx: number;
+    fromMoment: Moment;
+    toMoment: Moment;
+    widthPx: number;
+    label: string;
+  };
+}
 
 export function isMlJob(arg: any): arg is MlJob {
   return typeof arg.job_id === 'string';

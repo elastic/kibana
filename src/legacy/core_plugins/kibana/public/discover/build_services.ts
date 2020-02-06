@@ -24,25 +24,28 @@ import {
   ToastsStart,
   IUiSettingsClient,
 } from 'kibana/public';
-import * as docViewsRegistry from 'ui/registry/doc_views';
-import { FilterManager, TimefilterContract, IndexPatternsContract } from 'src/plugins/data/public';
-import { createSavedSearchesService } from './saved_searches';
-// @ts-ignore
+import {
+  FilterManager,
+  TimefilterContract,
+  IndexPatternsContract,
+  DataPublicPluginStart,
+} from 'src/plugins/data/public';
+import { createSavedSearchesLoader } from './saved_searches';
 import { DiscoverStartPlugins } from './plugin';
-import { DataStart } from '../../../data/public';
-import { EuiUtilsStart } from '../../../../../plugins/eui_utils/public';
 import { SharePluginStart } from '../../../../../plugins/share/public';
 import { SavedSearch } from './np_ready/types';
+import { DocViewsRegistry } from './np_ready/doc_views/doc_views_registry';
+import { ChartsPluginStart } from '../../../../../plugins/charts/public';
 
 export interface DiscoverServices {
   addBasePath: (path: string) => string;
   capabilities: Capabilities;
   chrome: ChromeStart;
   core: CoreStart;
-  data: DataStart;
+  data: DataPublicPluginStart;
   docLinks: DocLinksStart;
-  docViewsRegistry: docViewsRegistry.DocViewsRegistry;
-  eui_utils: EuiUtilsStart;
+  docViewsRegistry: DocViewsRegistry;
+  theme: ChartsPluginStart['theme'];
   filterManager: FilterManager;
   indexPatterns: IndexPatternsContract;
   inspector: unknown;
@@ -54,14 +57,18 @@ export interface DiscoverServices {
   getSavedSearchUrlById: (id: string) => Promise<string>;
   uiSettings: IUiSettingsClient;
 }
-export async function buildServices(core: CoreStart, plugins: DiscoverStartPlugins) {
+export async function buildServices(
+  core: CoreStart,
+  plugins: DiscoverStartPlugins,
+  docViewsRegistry: DocViewsRegistry
+): Promise<DiscoverServices> {
   const services = {
     savedObjectsClient: core.savedObjects.client,
     indexPatterns: plugins.data.indexPatterns,
     chrome: core.chrome,
     overlays: core.overlays,
   };
-  const savedObjectService = createSavedSearchesService(services);
+  const savedObjectService = createSavedSearchesLoader(services);
   return {
     addBasePath: core.http.basePath.prepend,
     capabilities: core.application.capabilities,
@@ -70,7 +77,7 @@ export async function buildServices(core: CoreStart, plugins: DiscoverStartPlugi
     data: plugins.data,
     docLinks: core.docLinks,
     docViewsRegistry,
-    eui_utils: plugins.eui_utils,
+    theme: plugins.charts.theme,
     filterManager: plugins.data.query.filterManager,
     getSavedSearchById: async (id: string) => savedObjectService.get(id),
     getSavedSearchUrlById: async (id: string) => savedObjectService.urlFor(id),

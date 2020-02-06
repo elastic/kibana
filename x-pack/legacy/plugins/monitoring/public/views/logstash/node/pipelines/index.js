@@ -23,6 +23,7 @@ import { DetailStatus } from '../../../../components/logstash/detail_status';
 import { CODE_PATH_LOGSTASH } from '../../../../../common/constants';
 
 const getPageData = ($injector, _api = undefined, routeOptions = {}) => {
+  _api; // fixing eslint
   const $route = $injector.get('$route');
   const $http = $injector.get('$http');
   const globalState = $injector.get('globalState');

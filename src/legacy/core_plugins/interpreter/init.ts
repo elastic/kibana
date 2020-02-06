@@ -22,35 +22,10 @@
 // @ts-ignore
 import { register, registryFactory, Registry, Fn } from '@kbn/interpreter/common';
 
-// @ts-ignore
-import { routes } from './server/routes';
-
-import { typeSpecs as types, Type } from '../../../plugins/expressions/common';
 import { Legacy } from '../../../../kibana';
-
-export class TypesRegistry extends Registry<any, any> {
-  wrapper(obj: any) {
-    return new (Type as any)(obj);
-  }
-}
-
-export class FunctionsRegistry extends Registry<any, any> {
-  wrapper(obj: any) {
-    return new Fn(obj);
-  }
-}
-
-export const registries = {
-  types: new TypesRegistry(),
-  serverFunctions: new FunctionsRegistry(),
-};
 
 export async function init(server: Legacy.Server /* options */) {
   server.injectUiAppVars('canvas', () => {
-    register(registries, {
-      types,
-    });
-
     const config = server.config();
     const basePath = config.get('server.basePath');
     const reportingBrowserType = (() => {
@@ -63,7 +38,9 @@ export async function init(server: Legacy.Server /* options */) {
 
     return {
       kbnIndex: config.get('kibana.index'),
-      serverFunctions: registries.serverFunctions.toArray(),
+      serverFunctions: (server.newPlatform.setup.plugins.expressions as any).__LEGACY
+        .registries()
+        .serverFunctions.toArray(),
       basePath,
       reportingBrowserType,
     };
@@ -71,7 +48,5 @@ export async function init(server: Legacy.Server /* options */) {
 
   // Expose server.plugins.interpreter.register(specs) and
   // server.plugins.interpreter.registries() (a getter).
-  server.expose(registryFactory(registries));
-
-  routes(server);
+  server.expose((server.newPlatform.setup.plugins.expressions as any).__LEGACY);
 }

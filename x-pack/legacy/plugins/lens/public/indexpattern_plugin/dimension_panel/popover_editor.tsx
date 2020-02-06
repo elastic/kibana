@@ -127,7 +127,7 @@ export function PopoverEditor(props: PopoverEditorProps) {
             compatibleWithCurrentField ? '' : 'Incompatible'
           }-${operationType}`,
           onClick() {
-            if (!selectedColumn) {
+            if (!selectedColumn || !compatibleWithCurrentField) {
               const possibleFields = fieldByOperation[operationType] || [];
 
               if (possibleFields.length === 1) {
@@ -149,11 +149,6 @@ export function PopoverEditor(props: PopoverEditorProps) {
               } else {
                 setInvalidOperationType(operationType);
               }
-              trackUiEvent(`indexpattern_dimension_operation_${operationType}`);
-              return;
-            }
-            if (!compatibleWithCurrentField) {
-              setInvalidOperationType(operationType);
               trackUiEvent(`indexpattern_dimension_operation_${operationType}`);
               return;
             }

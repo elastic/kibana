@@ -6,7 +6,13 @@
 
 import ApolloClient from 'apollo-client';
 import { ActionCreator } from 'typescript-fsa';
-import { IIndexPattern, Query, esFilters } from 'src/plugins/data/public';
+import {
+  IIndexPattern,
+  Query,
+  esFilters,
+  FilterManager,
+  SavedQueryService,
+} from 'src/plugins/data/public';
 
 import { UrlInputsModel } from '../../store/inputs/model';
 import { RouteSpyState } from '../../utils/route/types';
@@ -24,7 +30,13 @@ export const ALL_URL_STATE_KEYS: KeyUrlState[] = [
 ];
 
 export const URL_STATE_KEYS: Record<UrlStateType, KeyUrlState[]> = {
-  'detection-engine': [],
+  detections: [
+    CONSTANTS.appQuery,
+    CONSTANTS.filters,
+    CONSTANTS.savedQuery,
+    CONSTANTS.timerange,
+    CONSTANTS.timeline,
+  ],
   host: [
     CONSTANTS.appQuery,
     CONSTANTS.filters,
@@ -39,12 +51,18 @@ export const URL_STATE_KEYS: Record<UrlStateType, KeyUrlState[]> = {
     CONSTANTS.timerange,
     CONSTANTS.timeline,
   ],
-  overview: [CONSTANTS.timeline, CONSTANTS.timerange],
+  overview: [
+    CONSTANTS.appQuery,
+    CONSTANTS.filters,
+    CONSTANTS.savedQuery,
+    CONSTANTS.timerange,
+    CONSTANTS.timeline,
+  ],
   timeline: [CONSTANTS.timeline, CONSTANTS.timerange],
 };
 
 export type LocationTypes =
-  | CONSTANTS.detectionEnginePage
+  | CONSTANTS.detectionsPage
   | CONSTANTS.hostsDetails
   | CONSTANTS.hostsPage
   | CONSTANTS.networkDetails
@@ -108,8 +126,10 @@ export interface UrlStateToRedux {
 export interface SetInitialStateFromUrl<TCache> {
   apolloClient: ApolloClient<TCache> | ApolloClient<{}> | undefined;
   detailName: string | undefined;
+  filterManager: FilterManager;
   indexPattern: IIndexPattern | undefined;
   pageName: string;
+  savedQueries: SavedQueryService;
   updateTimeline: DispatchUpdateTimeline;
   updateTimelineIsLoading: ActionCreator<UpdateTimelineIsLoading>;
   urlStateToUpdate: UrlStateToRedux[];

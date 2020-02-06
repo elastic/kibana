@@ -194,7 +194,7 @@
                 "height": 56,
                 "angle": 0
               },
-              "expression": "esdocs index=\"kibana_sample_data_ecommerce\" fields=\"customer_gender\" \n| ply by=\"customer_gender\" expression={rowCount | as \"percentage\"} \n| filterrows {getCell \"customer_gender\" | any {eq \"FEMALE\"}} \n| markdown {getCell \"percentage\"} \"%\" font={font family=\"Avenir\" size=48 align=\"center\" color=\"#eb6c66\" weight=\"normal\" underline=false italic=false}"
+              "expression": "esdocs index=\"kibana_sample_data_ecommerce\" sort=\"order_date, desc\" fields=\"customer_gender\" | mapColumn \"femaleCount\" exp={getCell \"customer_gender\" | if {compare to=\"FEMALE\"} then=1 else=0} | math \"round(100 * sum(femaleCount) / count(femaleCount))\" | markdown {context} \"%\" font={font family=\"Avenir\" size=48 align=\"center\" color=\"#eb6c66\" weight=\"normal\" underline=false italic=false}"
             },
             {
               "id": "element-9e0b6230-2bc9-4995-8207-043e3063faeb",
@@ -205,7 +205,7 @@
                 "height": 56,
                 "angle": 0
               },
-              "expression": "esdocs index=\"kibana_sample_data_ecommerce\" fields=\"customer_gender\" \n| ply by=\"customer_gender\" expression={rowCount | as \"percentage\"} \n| filterrows {getCell \"customer_gender\" | any {eq \"MALE\"}} \n| markdown {getCell \"percentage\"} \"%\" font={font family=\"Avenir\" size=48 align=\"center\" color=\"#f8bd4a\" weight=\"normal\" underline=false italic=false}"
+              "expression": "esdocs index=\"kibana_sample_data_ecommerce\" sort=\"order_date, desc\" fields=\"customer_gender\" | mapColumn \"maleCount\" exp={getCell \"customer_gender\" | if {compare to=\"MALE\"} then=1 else=0} | math \"round(100 * sum(maleCount) / count(maleCount))\" | markdown {context} \"%\" font={font family=\"Avenir\" size=48 align=\"center\" color=\"#f8bd4a\" weight=\"normal\" underline=false italic=false}"
             },
             {
               "id": "element-2185edff-ac50-4162-b583-3bfd6469e925",
@@ -959,23 +959,23 @@
               "id": "element-b8f13a87-b781-42d5-a663-5dbd4f645d6d",
               "position": {
                 "left": 837,
-                "top": 472,
+                "top": 468,
                 "width": 91,
                 "height": 63,
                 "angle": 0
               },
-              "expression": "esdocs index=\"kibana_sample_data_ecommerce\" fields=\"customer_gender\" \n| ply by=\"customer_gender\" expression={rowCount | as \"percentage\"} \n| filterrows {getCell \"customer_gender\" | any {eq \"FEMALE\"}} \n| markdown {getCell \"percentage\"} font={font family=\"nexa bold, Avenir\" size=48 align=\"center\" color=\"#F05A24\" weight=\"bold\" underline=false italic=false}"
+              "expression": "esdocs index=\"kibana_sample_data_ecommerce\" sort=\"order_date, desc\" fields=\"customer_gender\" | mapColumn \"femaleCount\" exp={getCell \"customer_gender\" | if {compare to=\"FEMALE\"} then=1 else=0} | math \"round(100 * sum(femaleCount) / count(femaleCount))\" | markdown {context} font={font family=\"nexa bold, Avenir\" size=48 align=\"center\" color=\"#F05A24\" weight=\"bold\" underline=false italic=false}"
             },
             {
               "id": "element-86b06b67-893e-4555-ad38-7fba9ea3153b",
               "position": {
                 "left": 837,
-                "top": 219,
+                "top": 215,
                 "width": 90,
                 "height": 72,
                 "angle": 0
               },
-              "expression": "esdocs index=\"kibana_sample_data_ecommerce\" fields=\"customer_gender\" \n| ply by=\"customer_gender\" expression={rowCount | as \"percentage\"} \n| filterrows {getCell \"customer_gender\" | any {eq \"MALE\"}} \n| markdown {getCell \"percentage\"} font={font family=\"nexa bold, Avenir\" size=48 align=\"center\" color=\"#00A89C\" weight=\"bold\" underline=false italic=false}"
+              "expression": "esdocs index=\"kibana_sample_data_ecommerce\" sort=\"order_date, desc\" fields=\"customer_gender\" | mapColumn \"maleCount\" exp={getCell \"customer_gender\" | if {compare to=\"MALE\"} then=1 else=0} | math \"round(100 * sum(maleCount) / count(maleCount))\" | markdown {context} font={font family=\"nexa bold, Avenir\" size=48 align=\"center\" color=\"#00A89C\" weight=\"bold\" underline=false italic=false}"
             },
             {
               "id": "element-507337d9-6e0e-4752-8770-6ebe88e9b3da",

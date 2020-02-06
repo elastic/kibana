@@ -31,11 +31,15 @@ describe('SpanMetadata', () => {
           name: 'opbeans-java'
         },
         span: {
-          id: '7efbc7056b746fcb'
+          id: '7efbc7056b746fcb',
+          message: {
+            age: { ms: 1577958057123 },
+            queue: { name: 'queue name' }
+          }
         }
       } as unknown) as Span;
       const output = render(<SpanMetadata span={span} />, renderOptions);
-      expectTextsInDocument(output, ['Service', 'Agent']);
+      expectTextsInDocument(output, ['Service', 'Agent', 'Message']);
     });
   });
   describe('when a span is presented', () => {
@@ -55,11 +59,15 @@ describe('SpanMetadata', () => {
             response: { status_code: 200 }
           },
           subtype: 'http',
-          type: 'external'
+          type: 'external',
+          message: {
+            age: { ms: 1577958057123 },
+            queue: { name: 'queue name' }
+          }
         }
       } as unknown) as Span;
       const output = render(<SpanMetadata span={span} />, renderOptions);
-      expectTextsInDocument(output, ['Service', 'Agent', 'Span']);
+      expectTextsInDocument(output, ['Service', 'Agent', 'Span', 'Message']);
     });
   });
   describe('when there is no id inside span', () => {
@@ -83,7 +91,7 @@ describe('SpanMetadata', () => {
       } as unknown) as Span;
       const output = render(<SpanMetadata span={span} />, renderOptions);
       expectTextsInDocument(output, ['Service', 'Agent']);
-      expectTextsNotInDocument(output, ['Span']);
+      expectTextsNotInDocument(output, ['Span', 'Message']);
     });
   });
 });

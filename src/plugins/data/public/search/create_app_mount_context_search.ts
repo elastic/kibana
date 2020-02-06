@@ -46,11 +46,7 @@ export const createAppMountSearchContext = (
 
   const search: ISearchGeneric = (request, options, strategyName) => {
     const strategyPromise = getSearchStrategy(strategyName);
-    return from(strategyPromise).pipe(
-      mergeMap(strategy => {
-        return strategy.search(request, options);
-      })
-    );
+    return from(strategyPromise).pipe(mergeMap(strategy => strategy.search(request, options)));
   };
 
   return { search };

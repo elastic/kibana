@@ -32,15 +32,24 @@ function getWizardUrlFromCloningJob(job: CombinedJob) {
   const created = job?.custom_settings?.created_by;
   let page = '';
 
-  if (created === CREATED_BY_LABEL.SINGLE_METRIC) {
-    page = JOB_TYPE.SINGLE_METRIC;
-  } else if (created === CREATED_BY_LABEL.MULTI_METRIC) {
-    page = JOB_TYPE.MULTI_METRIC;
-  } else if (created === CREATED_BY_LABEL.POPULATION) {
-    page = JOB_TYPE.POPULATION;
-  } else {
-    page = JOB_TYPE.ADVANCED;
+  switch (created) {
+    case CREATED_BY_LABEL.SINGLE_METRIC:
+      page = JOB_TYPE.SINGLE_METRIC;
+      break;
+    case CREATED_BY_LABEL.MULTI_METRIC:
+      page = JOB_TYPE.MULTI_METRIC;
+      break;
+    case CREATED_BY_LABEL.POPULATION:
+      page = JOB_TYPE.POPULATION;
+      break;
+    case CREATED_BY_LABEL.CATEGORIZATION:
+      page = JOB_TYPE.CATEGORIZATION;
+      break;
+    default:
+      page = JOB_TYPE.ADVANCED;
+      break;
   }
+
   const indexPatternId = getIndexPatternIdFromName(job.datafeed_config.indices[0]);
 
   return `jobs/new_job/${page}?index=${indexPatternId}&_g=()`;

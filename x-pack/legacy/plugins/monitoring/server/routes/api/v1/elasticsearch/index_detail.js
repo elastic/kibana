@@ -60,6 +60,7 @@ export function esIndexRoute(server) {
         const shardStats = await getShardStats(req, esIndexPattern, cluster, {
           includeNodes: true,
           includeIndices: true,
+          indexName: indexUuid,
         });
         const indexSummary = await getIndexSummary(req, esIndexPattern, shardStats, {
           clusterUuid,

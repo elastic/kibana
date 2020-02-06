@@ -26,4 +26,5 @@ export class NumberFormat extends NumeralFormat {
 
   id = NumberFormat.id;
   title = NumberFormat.title;
+  allowsNumericalAggregations = true;
 }

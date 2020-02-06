@@ -13,6 +13,13 @@ const {
   task: { properties: taskManagerIndexMapping },
 } = require('../../../../legacy/plugins/task_manager/server/mappings.json');
 
+const {
+  DEFAULT_MAX_WORKERS,
+  DEFAULT_POLL_INTERVAL,
+} = require('../../../../plugins/task_manager/server/config.ts');
+
+const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+
 export default function({ getService }) {
   const es = getService('legacyEs');
   const log = getService('log');
@@ -22,11 +29,12 @@ export default function({ getService }) {
   const supertest = supertestAsPromised(url.format(config.get('servers.kibana')));
 
   describe('scheduling and running tasks', () => {
-    beforeEach(() =>
-      supertest
-        .delete('/api/sample_tasks')
-        .set('kbn-xsrf', 'xxx')
-        .expect(200)
+    beforeEach(
+      async () =>
+        await supertest
+          .delete('/api/sample_tasks')
+          .set('kbn-xsrf', 'xxx')
+          .expect(200)
     );
 
     beforeEach(async () => {
@@ -56,11 +64,19 @@ export default function({ getService }) {
         .then(response => response.body);
     }
 
-    function historyDocs() {
+    function currentTask(task) {
+      return supertest
+        .get(`/api/sample_tasks/task/${task}`)
+        .send({ task })
+        .expect(200)
+        .then(response => response.body.docs[0]);
+    }
+
+    function historyDocs(taskId) {
       return es
         .search({
           index: testHistoryIndex,
-          q: 'type:task',
+          q: taskId ? `taskId:${taskId}` : 'type:task',
         })
         .then(result => result.hits.hits);
     }
@@ -68,6 +84,15 @@ export default function({ getService }) {
     function scheduleTask(task) {
       return supertest
         .post('/api/sample_tasks/schedule')
+        .set('kbn-xsrf', 'xxx')
+        .send({ task })
+        .expect(200)
+        .then(response => response.body);
+    }
+
+    function scheduleTaskUsingLegacyApi(task) {
+      return supertest
+        .post('/api/sample_tasks/schedule_legacy')
         .set('kbn-xsrf', 'xxx')
         .send({ task })
         .expect(200)
@@ -214,7 +239,7 @@ export default function({ getService }) {
       });
 
       await retry.try(async () => {
-        expect((await historyDocs()).length).to.eql(1);
+        expect((await historyDocs(originalTask.id)).length).to.eql(1);
 
         const [task] = (await currentTasks()).docs;
         expect(task.attempts).to.eql(0);
@@ -309,6 +334,81 @@ export default function({ getService }) {
       });
     });
 
+    it('should prioritize tasks which are called using runNow', async () => {
+      const originalTask = await scheduleTask({
+        taskType: 'sampleTask',
+        schedule: { interval: `30m` },
+        params: {},
+      });
+
+      await retry.try(async () => {
+        const docs = await historyDocs(originalTask.id);
+        expect(docs.length).to.eql(1);
+
+        const task = await currentTask(originalTask.id);
+
+        expect(task.state.count).to.eql(1);
+
+        // ensure this task shouldnt run for another half hour
+        expectReschedule(Date.parse(originalTask.runAt), task, 30 * 60000);
+      });
+
+      const taskToBeReleased = await scheduleTask({
+        taskType: 'sampleTask',
+        params: { waitForEvent: 'releaseSingleTask' },
+      });
+
+      await retry.try(async () => {
+        // wait for taskToBeReleased to stall
+        expect((await historyDocs(taskToBeReleased.id)).length).to.eql(1);
+      });
+
+      // schedule multiple tasks that should force
+      // Task Manager to use up its worker capacity
+      // causing tasks to pile up
+      await Promise.all(
+        _.times(DEFAULT_MAX_WORKERS + _.random(1, DEFAULT_MAX_WORKERS), () =>
+          scheduleTask({
+            taskType: 'sampleTask',
+            params: {
+              waitForEvent: 'releaseTheOthers',
+            },
+          })
+        )
+      );
+
+      // we need to ensure that TM has a chance to fill its queue with the stalling tasks
+      await delay(DEFAULT_POLL_INTERVAL);
+
+      // call runNow for our task
+      const runNowResult = runTaskNow({
+        id: originalTask.id,
+      });
+
+      // we need to ensure that TM has a chance to push the runNow task into the queue
+      // before we release the stalled task, so lets give it a chance
+      await delay(DEFAULT_POLL_INTERVAL);
+
+      // and release only one slot in our worker queue
+      await releaseTasksWaitingForEventToComplete('releaseSingleTask');
+
+      expect(await runNowResult).to.eql({ id: originalTask.id });
+
+      await retry.try(async () => {
+        const task = await currentTask(originalTask.id);
+        expect(task.state.count).to.eql(2);
+      });
+
+      // drain tasks, othrwise they'll keep Task Manager stalled
+      await retry.try(async () => {
+        await releaseTasksWaitingForEventToComplete('releaseTheOthers');
+        const tasks = (await currentTasks()).docs.filter(
+          task => task.params.originalParams.waitForEvent === 'releaseTheOthers'
+        );
+        expect(tasks.length).to.eql(0);
+      });
+    });
+
     it('should return a task run error result when running a task now fails', async () => {
       const originalTask = await scheduleTask({
         taskType: 'sampleTask',
@@ -320,10 +420,7 @@ export default function({ getService }) {
         const docs = await historyDocs();
         expect(docs.filter(taskDoc => taskDoc._source.taskId === originalTask.id).length).to.eql(1);
 
-        const [task] = (await currentTasks()).docs.filter(
-          taskDoc => taskDoc.id === originalTask.id
-        );
-
+        const task = await currentTask(originalTask.id);
         expect(task.state.count).to.eql(1);
 
         // ensure this task shouldnt run for another half hour
@@ -355,9 +452,7 @@ export default function({ getService }) {
           (await historyDocs()).filter(taskDoc => taskDoc._source.taskId === originalTask.id).length
         ).to.eql(2);
 
-        const [task] = (await currentTasks()).docs.filter(
-          taskDoc => taskDoc.id === originalTask.id
-        );
+        const task = await currentTask(originalTask.id);
         expect(task.attempts).to.eql(1);
       });
     });
@@ -493,6 +588,16 @@ export default function({ getService }) {
         expect(getTaskById(tasks, fastTask.id).state.count).to.greaterThan(2);
         expect(getTaskById(tasks, longRunningTask.id).state.count).to.eql(1);
       });
+    });
+
+    it('should retain the legacy api until v8.0.0', async () => {
+      const result = await scheduleTaskUsingLegacyApi({
+        id: 'task-with-legacy-api',
+        taskType: 'sampleTask',
+        params: {},
+      });
+
+      expect(result.id).to.be('task-with-legacy-api');
     });
   });
 }

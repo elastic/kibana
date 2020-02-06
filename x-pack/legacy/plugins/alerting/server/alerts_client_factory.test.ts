@@ -7,7 +7,7 @@
 import { Request } from 'hapi';
 import { AlertsClientFactory, ConstructorOpts } from './alerts_client_factory';
 import { alertTypeRegistryMock } from './alert_type_registry.mock';
-import { taskManagerMock } from '../../task_manager/server/task_manager.mock';
+import { taskManagerMock } from '../../../../plugins/task_manager/server/task_manager.mock';
 import { KibanaRequest } from '../../../../../src/core/server';
 import { loggingServiceMock } from '../../../../../src/core/server/mocks';
 import { encryptedSavedObjectsMock } from '../../../../plugins/encrypted_saved_objects/server/mocks';
@@ -23,7 +23,7 @@ const securityPluginSetup = {
 };
 const alertsClientFactoryParams: jest.Mocked<ConstructorOpts> = {
   logger: loggingServiceMock.create().get(),
-  taskManager: taskManagerMock.create(),
+  taskManager: taskManagerMock.start(),
   alertTypeRegistry: alertTypeRegistryMock.create(),
   getSpaceId: jest.fn(),
   spaceIdToNamespace: jest.fn(),
@@ -86,7 +86,7 @@ test('getUserName() returns a name when security is enabled', async () => {
   factory.create(KibanaRequest.from(fakeRequest), fakeRequest);
   const constructorCall = jest.requireMock('./alerts_client').AlertsClient.mock.calls[0][0];
 
-  securityPluginSetup.authc.getCurrentUser.mockResolvedValueOnce({ username: 'bob' });
+  securityPluginSetup.authc.getCurrentUser.mockReturnValueOnce({ username: 'bob' });
   const userNameResult = await constructorCall.getUserName();
   expect(userNameResult).toEqual('bob');
 });

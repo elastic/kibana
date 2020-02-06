@@ -20,11 +20,7 @@ exports[`DurationFormatEditor should render human readable output normally 1`] =
     labelType="label"
   >
     <EuiSelect
-      compressed={false}
-      fullWidth={false}
-      hasNoInitialSelection={false}
       isInvalid={false}
-      isLoading={false}
       onChange={[Function]}
       options={
         Array [
@@ -53,11 +49,7 @@ exports[`DurationFormatEditor should render human readable output normally 1`] =
     labelType="label"
   >
     <EuiSelect
-      compressed={false}
-      fullWidth={false}
-      hasNoInitialSelection={false}
       isInvalid={false}
-      isLoading={false}
       onChange={[Function]}
       options={
         Array [
@@ -139,11 +131,7 @@ exports[`DurationFormatEditor should render non-human readable output normally 1
     labelType="label"
   >
     <EuiSelect
-      compressed={false}
-      fullWidth={false}
-      hasNoInitialSelection={false}
       isInvalid={false}
-      isLoading={false}
       onChange={[Function]}
       options={
         Array [
@@ -172,11 +160,7 @@ exports[`DurationFormatEditor should render non-human readable output normally 1
     labelType="label"
   >
     <EuiSelect
-      compressed={false}
-      fullWidth={false}
-      hasNoInitialSelection={false}
       isInvalid={false}
-      isLoading={false}
       onChange={[Function]}
       options={
         Array [

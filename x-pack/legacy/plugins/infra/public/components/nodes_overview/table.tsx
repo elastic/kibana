@@ -10,14 +10,15 @@ import { i18n } from '@kbn/i18n';
 import { last } from 'lodash';
 import React from 'react';
 import { createWaffleMapNode } from '../../containers/waffle/nodes_to_wafflemap';
-import { InfraSnapshotNode, InfraSnapshotNodePath, InfraNodeType } from '../../graphql/types';
 import { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../lib/lib';
 import { fieldToName } from '../waffle/lib/field_to_display_name';
 import { NodeContextMenu } from '../waffle/node_context_menu';
+import { InventoryItemType } from '../../../common/inventory_models/types';
+import { SnapshotNode, SnapshotNodePath } from '../../../common/http_api/snapshot_api';
 
 interface Props {
-  nodes: InfraSnapshotNode[];
-  nodeType: InfraNodeType;
+  nodes: SnapshotNode[];
+  nodeType: InventoryItemType;
   options: InfraWaffleMapOptions;
   formatter: (subject: string | number) => string;
   currentTime: number;
@@ -30,7 +31,7 @@ const initialState = {
 
 type State = Readonly<typeof initialState>;
 
-const getGroupPaths = (path: InfraSnapshotNodePath[]) => {
+const getGroupPaths = (path: SnapshotNodePath[]) => {
   switch (path.length) {
     case 3:
       return path.slice(0, 2);

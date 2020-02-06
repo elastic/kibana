@@ -7,11 +7,13 @@
 import {
   COLOR_GRADIENTS,
   getColorRampCenterColor,
-  getColorRampStops,
+  getOrdinalColorRampStops,
   getHexColorRangeStrings,
   getLinearGradient,
   getRGBColorRangeStrings,
 } from './color_utils';
+
+jest.mock('ui/new_platform');
 
 describe('COLOR_GRADIENTS', () => {
   it('Should contain EuiSuperSelect options list of color ramps', () => {
@@ -59,7 +61,7 @@ describe('getColorRampCenterColor', () => {
 
 describe('getColorRampStops', () => {
   it('Should create color stops for color ramp', () => {
-    expect(getColorRampStops('Blues')).toEqual([
+    expect(getOrdinalColorRampStops('Blues')).toEqual([
       0,
       '#f7faff',
       0.125,

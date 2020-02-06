@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RuleAlertParamsRest } from '../types';
+import { PrepackagedRules } from '../types';
 import { RuleAlertType } from './types';
 
 export const getRulesToInstall = (
-  rulesFromFileSystem: RuleAlertParamsRest[],
+  rulesFromFileSystem: PrepackagedRules[],
   installedRules: RuleAlertType[]
-): RuleAlertParamsRest[] => {
+): PrepackagedRules[] => {
   return rulesFromFileSystem.filter(
     rule => !installedRules.some(installedRule => installedRule.params.ruleId === rule.rule_id)
   );

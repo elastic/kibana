@@ -6,23 +6,11 @@
 import { npStart } from 'ui/new_platform';
 import { esKuery } from '../../../../../../../../src/plugins/data/public';
 
-const getAutocompleteProvider = language => npStart.plugins.data.autocomplete.getProvider(language);
-
-export async function getSuggestions(query, selectionStart, indexPattern, boolFilter) {
-  const autocompleteProvider = getAutocompleteProvider('kuery');
-  if (!autocompleteProvider) {
-    return [];
-  }
-  const config = {
-    get: () => true,
-  };
-
-  const getAutocompleteSuggestions = autocompleteProvider({
-    config,
+export function getSuggestions(query, selectionStart, indexPattern, boolFilter) {
+  return npStart.plugins.data.autocomplete.getQuerySuggestions({
+    language: 'kuery',
     indexPatterns: [indexPattern],
     boolFilter,
-  });
-  return getAutocompleteSuggestions({
     query,
     selectionStart,
     selectionEnd: selectionStart,

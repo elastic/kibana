@@ -7,10 +7,7 @@
 import { isEmpty } from 'lodash';
 import { npStart } from 'ui/new_platform';
 import { ElasticsearchAdapter } from './adapter_types';
-import { AutocompleteSuggestion, esKuery } from '../../../../../../../../src/plugins/data/public';
-
-const getAutocompleteProvider = (language: string) =>
-  npStart.plugins.data.autocomplete.getProvider(language);
+import { autocomplete, esKuery } from '../../../../../../../../src/plugins/data/public';
 
 export class RestElasticsearchAdapter implements ElasticsearchAdapter {
   private cachedIndexPattern: any = null;
@@ -33,30 +30,23 @@ export class RestElasticsearchAdapter implements ElasticsearchAdapter {
     const indexPattern = await this.getIndexPattern();
     return JSON.stringify(esKuery.toElasticsearchQuery(ast, indexPattern));
   }
+
   public async getSuggestions(
     kuery: string,
     selectionStart: any
-  ): Promise<AutocompleteSuggestion[]> {
-    const autocompleteProvider = getAutocompleteProvider('kuery');
-    if (!autocompleteProvider) {
-      return [];
-    }
-    const config = {
-      get: () => true,
-    };
+  ): Promise<autocomplete.QuerySuggestion[]> {
     const indexPattern = await this.getIndexPattern();
 
-    const getAutocompleteSuggestions = autocompleteProvider({
-      config,
-      indexPatterns: [indexPattern],
-      boolFilter: null,
-    });
-    const results = getAutocompleteSuggestions({
-      query: kuery || '',
-      selectionStart,
-      selectionEnd: selectionStart,
-    });
-    return results;
+    return (
+      (await npStart.plugins.data.autocomplete.getQuerySuggestions({
+        language: 'kuery',
+        indexPatterns: [indexPattern],
+        boolFilter: [],
+        query: kuery || '',
+        selectionStart,
+        selectionEnd: selectionStart,
+      })) || []
+    );
   }
 
   private async getIndexPattern() {

@@ -5,31 +5,41 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { useContext, useEffect } from 'react';
+import React, { useEffect } from 'react';
 
 import { isSetupStatusWithResults } from '../../../../common/log_analysis';
 import { LoadingPage } from '../../../components/loading_page';
 import {
   LogAnalysisSetupStatusUnknownPrompt,
+  MissingResultsPrivilegesPrompt,
+  MissingSetupPrivilegesPrompt,
   MlUnavailablePrompt,
 } from '../../../components/logging/log_analysis_setup';
-import { LogAnalysisCapabilities } from '../../../containers/logs/log_analysis';
+import { useLogAnalysisCapabilitiesContext } from '../../../containers/logs/log_analysis';
 import { LogEntryRateResultsContent } from './page_results_content';
 import { LogEntryRateSetupContent } from './page_setup_content';
 import { useLogEntryRateModuleContext } from './use_log_entry_rate_module';
 
 export const LogEntryRatePageContent = () => {
-  const { hasLogAnalysisCapabilites } = useContext(LogAnalysisCapabilities.Context);
+  const {
+    hasLogAnalysisCapabilites,
+    hasLogAnalysisReadCapabilities,
+    hasLogAnalysisSetupCapabilities,
+  } = useLogAnalysisCapabilitiesContext();
 
   const { fetchJobStatus, fetchModuleDefinition, setupStatus } = useLogEntryRateModuleContext();
 
   useEffect(() => {
-    fetchModuleDefinition();
-    fetchJobStatus();
-  }, [fetchJobStatus, fetchModuleDefinition]);
+    if (hasLogAnalysisReadCapabilities) {
+      fetchModuleDefinition();
+      fetchJobStatus();
+    }
+  }, [fetchJobStatus, fetchModuleDefinition, hasLogAnalysisReadCapabilities]);
 
   if (!hasLogAnalysisCapabilites) {
     return <MlUnavailablePrompt />;
+  } else if (!hasLogAnalysisReadCapabilities) {
+    return <MissingResultsPrivilegesPrompt />;
   } else if (setupStatus === 'initializing') {
     return (
       <LoadingPage
@@ -42,6 +52,8 @@ export const LogEntryRatePageContent = () => {
     return <LogAnalysisSetupStatusUnknownPrompt retry={fetchJobStatus} />;
   } else if (isSetupStatusWithResults(setupStatus)) {
     return <LogEntryRateResultsContent />;
+  } else if (!hasLogAnalysisSetupCapabilities) {
+    return <MissingSetupPrivilegesPrompt />;
   } else {
     return <LogEntryRateSetupContent />;
   }

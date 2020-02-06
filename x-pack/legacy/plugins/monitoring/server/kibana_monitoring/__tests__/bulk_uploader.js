@@ -209,7 +209,7 @@ describe('BulkUploader', () => {
       }, CHECK_DELAY);
     });
 
-    it('refetches UsageCollectors if uploading to local cluster was not successful', done => {
+    it('stops refetching UsageCollectors if uploading to local cluster was not successful', async () => {
       const usageCollectorFetch = sinon
         .stub()
         .returns({ type: 'type_usage_collector_test', result: { testData: 12345 } });
@@ -227,12 +227,52 @@ describe('BulkUploader', () => {
 
       uploader._onPayload = async () => ({ took: 0, ignored: true, errors: false });
 
-      uploader.start(collectors);
-      setTimeout(() => {
-        uploader.stop();
-        expect(usageCollectorFetch.callCount).to.be.greaterThan(1);
-        done();
-      }, CHECK_DELAY);
+      await uploader._fetchAndUpload(uploader.filterCollectorSet(collectors));
+      await uploader._fetchAndUpload(uploader.filterCollectorSet(collectors));
+      await uploader._fetchAndUpload(uploader.filterCollectorSet(collectors));
+
+      expect(uploader._holdSendingUsage).to.eql(true);
+      expect(usageCollectorFetch.callCount).to.eql(1);
+    });
+
+    it('fetches UsageCollectors once uploading to local cluster is successful again', async () => {
+      const usageCollectorFetch = sinon
+        .stub()
+        .returns({ type: 'type_usage_collector_test', result: { usageData: 12345 } });
+
+      const statsCollectorFetch = sinon
+        .stub()
+        .returns({ type: 'type_stats_collector_test', result: { statsData: 12345 } });
+
+      const collectors = new MockCollectorSet(server, [
+        {
+          fetch: statsCollectorFetch,
+          isReady: () => true,
+          formatForBulkUpload: result => result,
+          isUsageCollector: false,
+        },
+        {
+          fetch: usageCollectorFetch,
+          isReady: () => true,
+          formatForBulkUpload: result => result,
+          isUsageCollector: true,
+        },
+      ]);
+
+      const uploader = new BulkUploader({ ...server, interval: FETCH_INTERVAL });
+      let bulkIgnored = true;
+      uploader._onPayload = async () => ({ took: 0, ignored: bulkIgnored, errors: false });
+
+      await uploader._fetchAndUpload(uploader.filterCollectorSet(collectors));
+      expect(uploader._holdSendingUsage).to.eql(true);
+
+      bulkIgnored = false;
+      await uploader._fetchAndUpload(uploader.filterCollectorSet(collectors));
+      await uploader._fetchAndUpload(uploader.filterCollectorSet(collectors));
+
+      expect(uploader._holdSendingUsage).to.eql(false);
+      expect(usageCollectorFetch.callCount).to.eql(2);
+      expect(statsCollectorFetch.callCount).to.eql(3);
     });
 
     it('calls UsageCollectors if last reported exceeds during a _usageInterval', done => {
