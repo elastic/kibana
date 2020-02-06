@@ -12,7 +12,7 @@ import {
 import { rangeFilter } from '../helpers/range_filter';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { ENVIRONMENT_NOT_DEFINED } from '../../../common/environment_filter_values';
-import { ESFilter } from '../../../typings/elasticsearch';
+import { ESFilter } from '../../../../../../plugins/apm/typings/elasticsearch';
 
 export async function getEnvironments(
   setup: Setup & SetupTimeRange,
