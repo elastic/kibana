@@ -76,13 +76,16 @@ export function App({
         fromDate: currentRange.from,
         toDate: currentRange.to,
       },
-      filters: [],
+      filters: data.query.filterManager.getFilters(),
     };
   });
 
   const { lastKnownDoc } = state;
 
   useEffect(() => {
+    if (data.query.filterManager.getAppFilters().length > 0) {
+      data.query.filterManager.setFilters(data.query.filterManager.getGlobalFilters());
+    }
     const filterSubscription = data.query.filterManager.getUpdates$().subscribe({
       next: () => {
         setState(s => ({ ...s, filters: data.query.filterManager.getFilters() }));
@@ -123,13 +126,22 @@ export function App({
             core.notifications
           )
             .then(indexPatterns => {
+              data.query.filterManager.setFilters(
+                data.query.filterManager
+                  .getGlobalFilters()
+                  .concat(
+                    (doc.state.filters || []).filter(
+                      filter => filter.$state?.store === esFilters.FilterStateStore.APP_STATE
+                    )
+                  )
+              );
+
               setState(s => ({
                 ...s,
                 isLoading: false,
                 persistedDoc: doc,
                 lastKnownDoc: doc,
                 query: doc.state.query,
-                filters: doc.state.filters,
                 indexPatternsForTopNav: indexPatterns,
               }));
             })
