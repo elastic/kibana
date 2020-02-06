@@ -8,9 +8,10 @@ import { fromExpression, toExpression, Ast } from '@kbn/interpreter/common';
 import { get } from 'lodash';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { RendererFactory, Datatable } from '../../../types';
+import { RendererFactory, Datatable, ExpressionFunctionAST } from '../../../types';
 import { MultiFilter, MultiFilterValue } from './component';
 import { RendererStrings } from '../../../i18n';
+import { syncFilterExpression } from '../../../public/lib/sync_filter_expression';
 
 const { dropdownFilter: strings } = RendererStrings;
 
@@ -22,13 +23,16 @@ interface Config {
 
 const MATCH_ALL = '%%CANVAS_MATCH_ALL%%';
 
-const getFilterValue = (filterExpression: string) => {
+const getFilterValues = (filterExpression: string): MultiFilterValue[] => {
   if (filterExpression === '') {
-    return MATCH_ALL;
+    return [];
   }
 
   const filterAST = fromExpression(filterExpression);
-  return get(filterAST, 'chain[0].arguments.value[0]', MATCH_ALL) as string;
+  return filterAST.chain.map(chain => ({
+    value: get(chain, 'arguments.value[0]', MATCH_ALL),
+    column: get(chain, 'arguments.column[0]', ''),
+  }));
 };
 
 export const multiFilter: RendererFactory<Config> = () => ({
@@ -38,61 +42,39 @@ export const multiFilter: RendererFactory<Config> = () => ({
   reuseDomNode: true,
   height: 50,
   render(domNode, config, handlers) {
-    // const filterExpression = handlers.getFilter();
+    const filterExpression = handlers.getFilter();
 
-    // if (filterExpression !== '') {
-    //   // NOTE: setFilter() will cause a data refresh, avoid calling unless required
-    //   // compare expression and filter, update filter if needed
-    //   const { changed, newAst } = syncFilterExpression(config, filterExpression, ['filterGroup']);
+    if (filterExpression !== '') {
+      // NOTE: setFilter() will cause a data refresh, avoid calling unless required
+      // compare expression and filter, update filter if needed
+      const { changed, newAst } = syncFilterExpression(config, filterExpression, ['filterGroup']);
 
-    //   if (changed) {
-    //     handlers.setFilter(toExpression(newAst));
-    //   }
-    // }
-
-    // const commit = (commitValue: string) => {
-    //   if (commitValue === '%%CANVAS_MATCH_ALL%%') {
-    //     handlers.setFilter('');
-    //   } else {
-    //     const newFilterAST: Ast = {
-    //       type: 'expression',
-    //       chain: [
-    //         {
-    //           type: 'function',
-    //           function: 'exactly',
-    //           arguments: {
-    //             value: [commitValue],
-    //             column: [config.column],
-    //             filterGroup: [config.filterGroup],
-    //           },
-    //         },
-    //       ],
-    //     };
-
-    //     const newFilter = toExpression(newFilterAST);
-    //     handlers.setFilter(newFilter);
-    //   }
-    // };
+      if (changed) {
+        handlers.setFilter(toExpression(newAst));
+      }
+    }
 
     const onChange = (options: MultiFilterValue[]) => {
       if (options.length === 0) {
         handlers.setFilter('');
       } else {
-        const column = options.map(option => option.column);
-        const value = options.map(option => option.value);
-        const newFilterAST: Ast = {
-          type: 'expression',
-          chain: [
-            {
+        const filterChain = options.map(
+          ({ column, value }: MultiFilterValue): ExpressionFunctionAST => {
+            return {
               type: 'function',
               function: 'exactly',
               arguments: {
-                value,
-                column,
+                value: [value],
+                column: [column],
                 filterGroup: [config.filterGroup],
               },
-            },
-          ],
+            };
+          }
+        );
+
+        const newFilterAST: Ast = {
+          type: 'expression',
+          chain: filterChain,
         };
 
         const newFilter = toExpression(newFilterAST);
@@ -101,8 +83,9 @@ export const multiFilter: RendererFactory<Config> = () => ({
     };
 
     const { datatable, columns } = config;
+    const selected = getFilterValues(filterExpression) as MultiFilterValue[];
 
-    ReactDOM.render(<MultiFilter {...{ onChange, datatable, columns }} />, domNode, () =>
+    ReactDOM.render(<MultiFilter {...{ onChange, datatable, columns, selected }} />, domNode, () =>
       handlers.done()
     );
 
