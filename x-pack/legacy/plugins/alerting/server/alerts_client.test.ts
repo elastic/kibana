@@ -2289,7 +2289,6 @@ describe('update()', () => {
     test('updating the alert schedule should rerun the task immediately', async () => {
       const alertId = uuid.v4();
       const taskId = uuid.v4();
-      const alertsClient = new AlertsClient(alertsClientParams);
 
       mockApiCalls(alertId, taskId, { interval: '60m' }, { interval: '10s' });
 
@@ -2320,7 +2319,6 @@ describe('update()', () => {
     test('updating the alert without changing the schedule should not rerun the task', async () => {
       const alertId = uuid.v4();
       const taskId = uuid.v4();
-      const alertsClient = new AlertsClient(alertsClientParams);
 
       mockApiCalls(alertId, taskId, { interval: '10s' }, { interval: '10s' });
 
@@ -2351,7 +2349,6 @@ describe('update()', () => {
     test('updating the alert should not wait for the rerun the task to complete', async done => {
       const alertId = uuid.v4();
       const taskId = uuid.v4();
-      const alertsClient = new AlertsClient(alertsClientParams);
 
       mockApiCalls(alertId, taskId, { interval: '10s' }, { interval: '30s' });
 
@@ -2390,7 +2387,6 @@ describe('update()', () => {
     test('logs when the rerun of an alerts underlying task fails', async () => {
       const alertId = uuid.v4();
       const taskId = uuid.v4();
-      const alertsClient = new AlertsClient(alertsClientParams);
 
       mockApiCalls(alertId, taskId, { interval: '10s' }, { interval: '30s' });
 
