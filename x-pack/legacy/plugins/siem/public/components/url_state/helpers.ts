@@ -183,12 +183,15 @@ export const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-export const updateTimerangeUrl = (timeRange: UrlInputsModel): UrlInputsModel => {
+export const updateTimerangeUrl = (
+  timeRange: UrlInputsModel,
+  isInitializing: boolean
+): UrlInputsModel => {
   if (timeRange.global.timerange.kind === 'relative') {
     timeRange.global.timerange.from = formatDate(timeRange.global.timerange.fromStr);
     timeRange.global.timerange.to = formatDate(timeRange.global.timerange.toStr, { roundUp: true });
   }
-  if (timeRange.timeline.timerange.kind === 'relative') {
+  if (timeRange.timeline.timerange.kind === 'relative' && isInitializing) {
     timeRange.timeline.timerange.from = formatDate(timeRange.timeline.timerange.fromStr);
     timeRange.timeline.timerange.to = formatDate(timeRange.timeline.timerange.toStr, {
       roundUp: true,
@@ -198,10 +201,12 @@ export const updateTimerangeUrl = (timeRange: UrlInputsModel): UrlInputsModel =>
 };
 
 export const updateUrlStateString = ({
+  isInitializing,
   history,
   newUrlStateString,
   pathName,
   search,
+  updateTimerange,
   urlKey,
 }: UpdateUrlStateString): string => {
   if (urlKey === CONSTANTS.appQuery) {
@@ -215,14 +220,14 @@ export const updateUrlStateString = ({
         urlStateKey: urlKey,
       });
     }
-  } else if (urlKey === CONSTANTS.timerange) {
+  } else if (urlKey === CONSTANTS.timerange && updateTimerange) {
     const queryState = decodeRisonUrlState<UrlInputsModel>(newUrlStateString);
     if (queryState != null && queryState.global != null) {
       return replaceStateInLocation({
         history,
         pathName,
         search,
-        urlStateToReplace: updateTimerangeUrl(queryState),
+        urlStateToReplace: updateTimerangeUrl(queryState, isInitializing),
         urlStateKey: urlKey,
       });
     }

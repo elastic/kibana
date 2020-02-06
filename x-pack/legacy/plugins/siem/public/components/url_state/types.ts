@@ -116,6 +116,7 @@ export type UrlStateContainerPropTypes = RouteSpyState &
 
 export interface PreviousLocationUrlState {
   pathName: string | undefined;
+  pageName: string | undefined;
   urlState: UrlState;
 }
 
@@ -155,9 +156,11 @@ export interface ReplaceStateInLocation<T> {
 }
 
 export interface UpdateUrlStateString {
+  isInitializing: boolean;
   history?: H.History;
   newUrlStateString: string;
   pathName: string;
   search: string;
+  updateTimerange: boolean;
   urlKey: KeyUrlState;
 }

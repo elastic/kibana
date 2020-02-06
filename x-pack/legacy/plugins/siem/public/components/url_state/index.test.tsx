@@ -168,7 +168,7 @@ describe('UrlStateContainer', () => {
     });
   });
 
-  describe('After Initialization, keep Relative Date up to date', () => {
+  describe('After Initialization, keep Relative Date up to date for global only on detections page', () => {
     test.each(testCases)(
       '%o',
       async (page, namespaceLower, namespaceUpper, examplePath, type, pageName, detailName) => {
@@ -187,17 +187,15 @@ describe('UrlStateContainer', () => {
           hookProps: getMockPropsObj({
             page: CONSTANTS.hostsPage,
             examplePath: '/hosts',
-            namespaceLower,
-            pageName,
-            detailName,
+            namespaceLower: 'hosts',
+            pageName: SiemPageName.hosts,
+            detailName: undefined,
           }).relativeTimeSearch.undefinedQuery,
         });
         wrapper.update();
         await wait();
-        if (CONSTANTS.hostsPage === page) {
-          // There is no change in url state, so that's expected we only have two actions
-          expect(mockSetRelativeRangeDatePicker.mock.calls.length).toEqual(2);
-        } else {
+
+        if (CONSTANTS.detectionsPage === page) {
           expect(mockSetRelativeRangeDatePicker.mock.calls[3][0]).toEqual({
             from: 11223344556677,
             fromStr: 'now-1d/d',
@@ -208,13 +206,16 @@ describe('UrlStateContainer', () => {
           });
 
           expect(mockSetRelativeRangeDatePicker.mock.calls[2][0]).toEqual({
-            from: 11223344556677,
+            from: 1558732849370,
             fromStr: 'now-15m',
             kind: 'relative',
-            to: 11223344556677,
+            to: 1558733749370,
             toStr: 'now',
             id: 'timeline',
           });
+        } else {
+          // There is no change in url state, so that's expected we only have two actions
+          expect(mockSetRelativeRangeDatePicker.mock.calls.length).toEqual(2);
         }
       }
     );

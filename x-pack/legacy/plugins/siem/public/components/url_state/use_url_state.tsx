@@ -26,6 +26,7 @@ import {
   ALL_URL_STATE_KEYS,
   UrlStateToRedux,
 } from './types';
+import { SiemPageName } from '../../pages/home/types';
 
 function usePrevious(value: PreviousLocationUrlState) {
   const ref = useRef<PreviousLocationUrlState>(value);
@@ -52,7 +53,7 @@ export const useUrlStateHooks = ({
   const [isInitializing, setIsInitializing] = useState(true);
   const apolloClient = useApolloClient();
   const { filterManager, savedQueries } = useKibana().services.data.query;
-  const prevProps = usePrevious({ pathName, urlState });
+  const prevProps = usePrevious({ pathName, pageName, urlState });
 
   const handleInitialize = (type: UrlStateType, needUpdate?: boolean) => {
     let mySearch = search;
@@ -65,9 +66,11 @@ export const useUrlStateHooks = ({
       if (newUrlStateString) {
         mySearch = updateUrlStateString({
           history,
+          isInitializing,
           newUrlStateString,
           pathName,
           search: mySearch,
+          updateTimerange: (needUpdate ?? false) || isInitializing,
           urlKey,
         });
         if (isInitializing || needUpdate) {
@@ -200,7 +203,7 @@ export const useUrlStateHooks = ({
         }
       });
     } else if (pathName !== prevProps.pathName) {
-      handleInitialize(type, true);
+      handleInitialize(type, pageName === SiemPageName.detections);
     }
   }, [isInitializing, history, pathName, pageName, prevProps, urlState]);
 
