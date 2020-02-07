@@ -13,6 +13,4 @@ export { configureAppAngularModule } from 'ui/legacy_compat';
 export { createTopNavDirective, createTopNavHelper } from 'ui/kbn_top_nav/kbn_top_nav';
 // @ts-ignore
 export { addAppRedirectMessageToUrl } from 'ui/notify';
-export { SaveResult } from 'ui/saved_objects/show_saved_object_save_modal';
 export { createSavedObjectClass } from 'ui/saved_objects/saved_object';
-export { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';

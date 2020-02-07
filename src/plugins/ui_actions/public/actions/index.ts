@@ -17,5 +17,5 @@
  * under the License.
  */
 
-export { IAction } from './i_action';
+export { Action } from './action';
 export { createAction } from './create_action';

@@ -28,13 +28,7 @@ import { map } from 'rxjs/operators';
 import { History } from 'history';
 import { DashboardEmptyScreen, DashboardEmptyScreenProps } from './dashboard_empty_screen';
 
-import {
-  migrateLegacyQuery,
-  SavedObjectSaveOpts,
-  SaveResult,
-  showSaveModal,
-  subscribeWithScope,
-} from '../legacy_imports';
+import { migrateLegacyQuery, SavedObjectSaveOpts, subscribeWithScope } from '../legacy_imports';
 import {
   COMPARE_ALL_OPTIONS,
   compareFilters,
@@ -45,6 +39,11 @@ import {
   syncAppFilters,
   syncQuery,
 } from '../../../../../../plugins/data/public';
+import {
+  SaveResult,
+  showSaveModal,
+  getSavedObjectFinder,
+} from '../../../../../../plugins/saved_objects/public';
 
 import {
   DASHBOARD_CONTAINER_TYPE,
@@ -74,10 +73,6 @@ import { getDashboardTitle } from './dashboard_strings';
 import { DashboardAppScope } from './dashboard_app';
 import { convertSavedDashboardPanelToPanelState } from './lib/embeddable_saved_object_converters';
 import { RenderDeps } from './application';
-import {
-  SavedObjectFinderProps,
-  SavedObjectFinderUi,
-} from '../../../../../../plugins/kibana_react/public';
 import {
   IKbnUrlStateStorage,
   removeQueryParam,
@@ -112,7 +107,16 @@ export class DashboardAppController {
     share,
     dashboardCapabilities,
     npDataStart: { query: queryService },
-    core: { notifications, overlays, chrome, injectedMetadata, uiSettings, savedObjects, http },
+    core: {
+      notifications,
+      overlays,
+      chrome,
+      injectedMetadata,
+      uiSettings,
+      savedObjects,
+      http,
+      i18n: i18nStart,
+    },
     history,
     kbnUrlStateStorage,
   }: DashboardAppControllerDependencies) {
@@ -779,7 +783,7 @@ export class DashboardAppController {
           showCopyOnSave={dash.id ? true : false}
         />
       );
-      showSaveModal(dashboardSaveModal);
+      showSaveModal(dashboardSaveModal, i18nStart.Context);
     };
     navActions[TopNavIds.CLONE] = () => {
       const currentTitle = dashboardStateManager.getTitle();
@@ -808,17 +812,13 @@ export class DashboardAppController {
     };
     navActions[TopNavIds.ADD] = () => {
       if (dashboardContainer && !isErrorEmbeddable(dashboardContainer)) {
-        const SavedObjectFinder = (props: SavedObjectFinderProps) => (
-          <SavedObjectFinderUi {...props} savedObjects={savedObjects} uiSettings={uiSettings} />
-        );
-
         openAddPanelFlyout({
           embeddable: dashboardContainer,
           getAllFactories: embeddables.getEmbeddableFactories,
           getFactory: embeddables.getEmbeddableFactory,
           notifications,
           overlays,
-          SavedObjectFinder,
+          SavedObjectFinder: getSavedObjectFinder(savedObjects, uiSettings),
         });
       }
     };
