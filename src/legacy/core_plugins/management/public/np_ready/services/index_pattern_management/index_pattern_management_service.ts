@@ -46,10 +46,10 @@ export class IndexPatternManagementService {
 
     home.featureCatalogue.register({
       id: 'index_patterns',
-      title: i18n.translate('kbn.management.indexPatternHeader', {
+      title: i18n.translate('management.indexPatternHeader', {
         defaultMessage: 'Index Patterns',
       }),
-      description: i18n.translate('kbn.management.indexPatternLabel', {
+      description: i18n.translate('management.indexPatternLabel', {
         defaultMessage:
           'Manage the index patterns that help retrieve your data from Elasticsearch.',
       }),
