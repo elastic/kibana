@@ -20,7 +20,7 @@
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '../../../../../plugins/kibana_react/public';
 import {
-  IAction,
+  Action,
   createAction,
   IncompatibleActionError,
 } from '../../../../../plugins/ui_actions/public';
@@ -58,7 +58,7 @@ async function isCompatible(context: ActionContext) {
 export function valueClickAction(
   filterManager: FilterManager,
   timeFilter: TimefilterContract
-): IAction<ActionContext> {
+): Action<ActionContext> {
   return createAction<ActionContext>({
     type: VALUE_CLICK_ACTION,
     id: VALUE_CLICK_ACTION,

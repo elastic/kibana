@@ -29,10 +29,10 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { AggConfig, AggGroupNames, Schema } from '../legacy_imports';
+import { IAggConfig, AggGroupNames, Schema } from '../legacy_imports';
 
 interface DefaultEditorAggAddProps {
-  group?: AggConfig[];
+  group?: IAggConfig[];
   groupName: string;
   schemas: Schema[];
   stats: {

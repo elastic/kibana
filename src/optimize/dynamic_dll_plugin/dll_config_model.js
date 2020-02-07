@@ -48,6 +48,7 @@ function generateDLL(config) {
     entry: dllEntry,
     context: dllContext,
     output: {
+      futureEmitAssets: true, // TODO: remove on webpack 5
       filename: dllBundleFilename,
       path: dllOutputPath,
       publicPath: dllPublicPath,
@@ -227,36 +228,7 @@ function optimized(config) {
           cache: false,
           extractComments: false,
           terserOptions: {
-            compress: {
-              // The following is required for dead-code the removal
-              // check in React DevTools
-              //
-              // default
-              unused: true,
-              dead_code: true,
-              conditionals: true,
-              evaluate: true,
-
-              // changed
-              keep_fnames: true,
-              keep_infinity: true,
-              comparisons: false,
-              sequences: false,
-              properties: false,
-              drop_debugger: false,
-              booleans: false,
-              loops: false,
-              toplevel: false,
-              top_retain: false,
-              hoist_funs: false,
-              if_return: false,
-              join_vars: false,
-              collapse_vars: false,
-              reduce_vars: false,
-              warnings: false,
-              negate_iife: false,
-              side_effects: false,
-            },
+            compress: false,
             mangle: false,
           },
         }),

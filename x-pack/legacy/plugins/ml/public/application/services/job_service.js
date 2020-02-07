@@ -5,7 +5,6 @@
  */
 
 import _ from 'lodash';
-import angular from 'angular';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 
@@ -116,8 +115,7 @@ class JobService {
 
       ml.getJobs()
         .then(resp => {
-          // make deep copy of jobs
-          angular.copy(resp.jobs, jobs);
+          jobs = resp.jobs;
 
           // load jobs stats
           ml.getJobStats()
@@ -131,14 +129,13 @@ class JobService {
                 job.datafeed_config = {};
 
                 for (let j = 0; j < statsResp.jobs.length; j++) {
-                  if (job.job_id === statsResp.jobs[j].job_id) {
-                    const jobStats = angular.copy(statsResp.jobs[j]);
-
+                  const jobStats = statsResp.jobs[j];
+                  if (job.job_id === jobStats.job_id) {
                     job.state = jobStats.state;
-                    job.data_counts = jobStats.data_counts;
-                    job.model_size_stats = jobStats.model_size_stats;
+                    job.data_counts = _.cloneDeep(jobStats.data_counts);
+                    job.model_size_stats = _.cloneDeep(jobStats.model_size_stats);
                     if (jobStats.node) {
-                      job.node = jobStats.node;
+                      job.node = _.cloneDeep(jobStats.node);
                     }
                     if (jobStats.open_time) {
                       job.open_time = jobStats.open_time;
@@ -199,9 +196,8 @@ class JobService {
     return new Promise((resolve, reject) => {
       ml.getJobs({ jobId })
         .then(resp => {
-          const newJob = {};
           if (resp.jobs && resp.jobs.length) {
-            angular.copy(resp.jobs[0], newJob);
+            const newJob = resp.jobs[0];
 
             // load jobs stats
             ml.getJobStats({ jobId })
@@ -213,10 +209,10 @@ class JobService {
                     newJob.state = statsJob.state;
                     newJob.data_counts = {};
                     newJob.model_size_stats = {};
-                    angular.copy(statsJob.data_counts, newJob.data_counts);
-                    angular.copy(statsJob.model_size_stats, newJob.model_size_stats);
+                    newJob.data_counts = _.cloneDeep(statsJob.data_counts);
+                    newJob.model_size_stats = _.cloneDeep(statsJob.model_size_stats);
                     if (newJob.node) {
-                      angular.copy(statsJob.node, newJob.node);
+                      newJob.node = _.cloneDeep(statsJob.node);
                     }
 
                     if (statsJob.open_time) {
@@ -273,7 +269,6 @@ class JobService {
 
   loadDatafeeds(datafeedId) {
     return new Promise((resolve, reject) => {
-      const datafeeds = [];
       const sId = datafeedId !== undefined ? { datafeed_id: datafeedId } : undefined;
 
       ml.getDatafeeds(sId)
@@ -281,7 +276,7 @@ class JobService {
           // console.log('loadDatafeeds query response:', resp);
 
           // make deep copy of datafeeds
-          angular.copy(resp.datafeeds, datafeeds);
+          const datafeeds = resp.datafeeds;
 
           // load datafeeds stats
           ml.getDatafeedStats()
@@ -357,7 +352,7 @@ class JobService {
     // create a deep copy of a job object
     // also remove items from the job which are set by the server and not needed
     // in the future this formatting could be optional
-    const tempJob = angular.copy(job);
+    const tempJob = _.cloneDeep(job);
 
     // remove all of the items which should not be copied
     // such as counts, state and times
@@ -421,7 +416,7 @@ class JobService {
         return { success: true };
       })
       .catch(err => {
-        msgs.error(
+        msgs.notify.error(
           i18n.translate('xpack.ml.jobService.couldNotUpdateJobErrorMessage', {
             defaultMessage: 'Could not update job: {jobId}',
             values: { jobId },
@@ -440,7 +435,7 @@ class JobService {
         return { success: true, messages };
       })
       .catch(err => {
-        msgs.error(
+        msgs.notify.error(
           i18n.translate('xpack.ml.jobService.jobValidationErrorMessage', {
             defaultMessage: 'Job Validation Error: {errorMessage}',
             values: { errorMessage: err.message },
@@ -633,7 +628,7 @@ class JobService {
         return { success: true };
       })
       .catch(err => {
-        msgs.error(
+        msgs.notify.error(
           i18n.translate('xpack.ml.jobService.couldNotUpdateDatafeedErrorMessage', {
             defaultMessage: 'Could not update datafeed: {datafeedId}',
             values: { datafeedId },
@@ -664,7 +659,7 @@ class JobService {
         })
         .catch(err => {
           console.log('jobService error starting datafeed:', err);
-          msgs.error(
+          msgs.notify.error(
             i18n.translate('xpack.ml.jobService.couldNotStartDatafeedErrorMessage', {
               defaultMessage: 'Could not start datafeed for {jobId}',
               values: { jobId },
@@ -697,15 +692,15 @@ class JobService {
           );
 
           if (err.statusCode === 500) {
-            msgs.error(couldNotStopDatafeedErrorMessage);
-            msgs.error(
+            msgs.notify.error(couldNotStopDatafeedErrorMessage);
+            msgs.notify.error(
               i18n.translate('xpack.ml.jobService.requestMayHaveTimedOutErrorMessage', {
                 defaultMessage:
                   'Request may have timed out and may still be running in the background.',
               })
             );
           } else {
-            msgs.error(couldNotStopDatafeedErrorMessage, err);
+            msgs.notify.error(couldNotStopDatafeedErrorMessage, err);
           }
           reject(err);
         });

@@ -61,79 +61,83 @@ describe('SIEM Navigation', () => {
   };
   const wrapper = mount(<SiemNavigationComponent {...mockProps} />);
   test('it calls setBreadcrumbs with correct path on mount', () => {
-    expect(setBreadcrumbs).toHaveBeenNthCalledWith(1, {
-      detailName: undefined,
-      navTabs: {
-        detections: {
-          disabled: false,
-          href: '#/link-to/detections',
-          id: 'detections',
-          name: 'Detections',
-          urlKey: 'detections',
-        },
-        hosts: {
-          disabled: false,
-          href: '#/link-to/hosts',
-          id: 'hosts',
-          name: 'Hosts',
-          urlKey: 'host',
-        },
-        network: {
-          disabled: false,
-          href: '#/link-to/network',
-          id: 'network',
-          name: 'Network',
-          urlKey: 'network',
-        },
-        overview: {
-          disabled: false,
-          href: '#/link-to/overview',
-          id: 'overview',
-          name: 'Overview',
-          urlKey: 'overview',
-        },
-        timelines: {
-          disabled: false,
-          href: '#/link-to/timelines',
-          id: 'timelines',
-          name: 'Timelines',
-          urlKey: 'timeline',
-        },
-      },
-      pageName: 'hosts',
-      pathName: '/hosts',
-      search: '',
-      tabName: 'authentications',
-      query: { query: '', language: 'kuery' },
-      filters: [],
-      savedQuery: undefined,
-      timeline: {
-        id: '',
-        isOpen: false,
-      },
-      timerange: {
-        global: {
-          linkTo: ['timeline'],
-          timerange: {
-            from: 1558048243696,
-            fromStr: 'now-24h',
-            kind: 'relative',
-            to: 1558134643697,
-            toStr: 'now',
+    expect(setBreadcrumbs).toHaveBeenNthCalledWith(
+      1,
+      {
+        detailName: undefined,
+        navTabs: {
+          detections: {
+            disabled: false,
+            href: '#/link-to/detections',
+            id: 'detections',
+            name: 'Detections',
+            urlKey: 'detections',
+          },
+          hosts: {
+            disabled: false,
+            href: '#/link-to/hosts',
+            id: 'hosts',
+            name: 'Hosts',
+            urlKey: 'host',
+          },
+          network: {
+            disabled: false,
+            href: '#/link-to/network',
+            id: 'network',
+            name: 'Network',
+            urlKey: 'network',
+          },
+          overview: {
+            disabled: false,
+            href: '#/link-to/overview',
+            id: 'overview',
+            name: 'Overview',
+            urlKey: 'overview',
+          },
+          timelines: {
+            disabled: false,
+            href: '#/link-to/timelines',
+            id: 'timelines',
+            name: 'Timelines',
+            urlKey: 'timeline',
           },
         },
+        pageName: 'hosts',
+        pathName: '/hosts',
+        search: '',
+        tabName: 'authentications',
+        query: { query: '', language: 'kuery' },
+        filters: [],
+        savedQuery: undefined,
         timeline: {
-          linkTo: ['global'],
-          timerange: {
-            from: 1558048243696,
-            fromStr: 'now-24h',
-            kind: 'relative',
-            to: 1558134643697,
-            toStr: 'now',
+          id: '',
+          isOpen: false,
+        },
+        timerange: {
+          global: {
+            linkTo: ['timeline'],
+            timerange: {
+              from: 1558048243696,
+              fromStr: 'now-24h',
+              kind: 'relative',
+              to: 1558134643697,
+              toStr: 'now',
+            },
+          },
+          timeline: {
+            linkTo: ['global'],
+            timerange: {
+              from: 1558048243696,
+              fromStr: 'now-24h',
+              kind: 'relative',
+              to: 1558134643697,
+              toStr: 'now',
+            },
           },
         },
       },
-    });
+      undefined
+    );
   });
   test('it calls setBreadcrumbs with correct path on update', () => {
     wrapper.setProps({
@@ -142,76 +146,80 @@ describe('SIEM Navigation', () => {
       tabName: undefined,
     });
     wrapper.update();
-    expect(setBreadcrumbs).toHaveBeenNthCalledWith(1, {
-      detailName: undefined,
-      filters: [],
-      navTabs: {
-        detections: {
-          disabled: false,
-          href: '#/link-to/detections',
-          id: 'detections',
-          name: 'Detections',
-          urlKey: 'detections',
-        },
-        hosts: {
-          disabled: false,
-          href: '#/link-to/hosts',
-          id: 'hosts',
-          name: 'Hosts',
-          urlKey: 'host',
-        },
-        network: {
-          disabled: false,
-          href: '#/link-to/network',
-          id: 'network',
-          name: 'Network',
-          urlKey: 'network',
-        },
-        overview: {
-          disabled: false,
-          href: '#/link-to/overview',
-          id: 'overview',
-          name: 'Overview',
-          urlKey: 'overview',
-        },
-        timelines: {
-          disabled: false,
-          href: '#/link-to/timelines',
-          id: 'timelines',
-          name: 'Timelines',
-          urlKey: 'timeline',
-        },
-      },
-      pageName: 'hosts',
-      pathName: '/hosts',
-      query: { language: 'kuery', query: '' },
-      savedQuery: undefined,
-      search: '',
-      state: undefined,
-      tabName: 'authentications',
-      timeline: { id: '', isOpen: false },
-      timerange: {
-        global: {
-          linkTo: ['timeline'],
-          timerange: {
-            from: 1558048243696,
-            fromStr: 'now-24h',
-            kind: 'relative',
-            to: 1558134643697,
-            toStr: 'now',
+    expect(setBreadcrumbs).toHaveBeenNthCalledWith(
+      1,
+      {
+        detailName: undefined,
+        filters: [],
+        navTabs: {
+          detections: {
+            disabled: false,
+            href: '#/link-to/detections',
+            id: 'detections',
+            name: 'Detections',
+            urlKey: 'detections',
+          },
+          hosts: {
+            disabled: false,
+            href: '#/link-to/hosts',
+            id: 'hosts',
+            name: 'Hosts',
+            urlKey: 'host',
+          },
+          network: {
+            disabled: false,
+            href: '#/link-to/network',
+            id: 'network',
+            name: 'Network',
+            urlKey: 'network',
+          },
+          overview: {
+            disabled: false,
+            href: '#/link-to/overview',
+            id: 'overview',
+            name: 'Overview',
+            urlKey: 'overview',
+          },
+          timelines: {
+            disabled: false,
+            href: '#/link-to/timelines',
+            id: 'timelines',
+            name: 'Timelines',
+            urlKey: 'timeline',
           },
         },
-        timeline: {
-          linkTo: ['global'],
-          timerange: {
-            from: 1558048243696,
-            fromStr: 'now-24h',
-            kind: 'relative',
-            to: 1558134643697,
-            toStr: 'now',
+        pageName: 'hosts',
+        pathName: '/hosts',
+        query: { language: 'kuery', query: '' },
+        savedQuery: undefined,
+        search: '',
+        state: undefined,
+        tabName: 'authentications',
+        timeline: { id: '', isOpen: false },
+        timerange: {
+          global: {
+            linkTo: ['timeline'],
+            timerange: {
+              from: 1558048243696,
+              fromStr: 'now-24h',
+              kind: 'relative',
+              to: 1558134643697,
+              toStr: 'now',
+            },
+          },
+          timeline: {
+            linkTo: ['global'],
+            timerange: {
+              from: 1558048243696,
+              fromStr: 'now-24h',
+              kind: 'relative',
+              to: 1558134643697,
+              toStr: 'now',
+            },
           },
         },
       },
-    });
+      undefined
+    );
   });
 });
