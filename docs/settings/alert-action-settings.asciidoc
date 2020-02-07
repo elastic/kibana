@@ -36,7 +36,7 @@ A list of hostnames that {kib} is allowed to connect to when built-in actions ar
 Note that hosts associated with built-in actions, such as Slack and PagerDuty, are not automatically whitelisted. If you are not using the default `[*]` setting, you must ensure that the corresponding endpoints are whitelisted as well.
 
 `xpack.actions.enabledActionTypes`::
-A list of action types that are enabled. It defaults to `[*]` enabling all types. The names for built-in {kib} action types are prefixed with a `.` and include: `.server-log`, `.slack`, `.email`, `.index`, `.pagerduty`, and `.webhook`. An empty array `[]` indicates no hosts can be connected to.
+A list of action types that are enabled. It defaults to `[*]`, enabling all types. The names for built-in {kib} action types are prefixed with a `.` and include: `.server-log`, `.slack`, `.email`, `.index`, `.pagerduty`, and `.webhook`. An empty array `[]` indicates no hosts can be connected to.
 +
 Disabled action types will not appear as an option when creating new connectors, but existing connectors and actions of that type will remain in {kib} and will not function.  
 
