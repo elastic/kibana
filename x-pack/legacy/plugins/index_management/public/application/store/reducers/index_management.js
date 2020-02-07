@@ -10,10 +10,10 @@ import { indices } from './indices';
 import { rowStatus } from './row_status';
 import { tableState } from './table_state';
 
-export const getReducer = ({ uiMetricService }) =>
+export const getReducer = ({ uiMetric }) =>
   combineReducers({
     indices,
     rowStatus,
     tableState,
-    detailPanel: getDetailPanelReducer(uiMetricService),
+    detailPanel: getDetailPanelReducer(uiMetric),
   });
