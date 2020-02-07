@@ -32,36 +32,42 @@ const records: LogRecord[] = [
     level: LogLevel.Fatal,
     message: 'message-1',
     timestamp: new Date(Date.UTC(2012, 1, 1)),
+    pid: 5355,
   },
   {
     context: 'context-2',
     level: LogLevel.Error,
     message: 'message-2',
     timestamp: new Date(Date.UTC(2012, 1, 1)),
+    pid: 5355,
   },
   {
     context: 'context-3',
     level: LogLevel.Warn,
     message: 'message-3',
     timestamp: new Date(Date.UTC(2012, 1, 1)),
+    pid: 5355,
   },
   {
     context: 'context-4',
     level: LogLevel.Debug,
     message: 'message-4',
     timestamp: new Date(Date.UTC(2012, 1, 1)),
+    pid: 5355,
   },
   {
     context: 'context-5',
     level: LogLevel.Info,
     message: 'message-5',
     timestamp: new Date(Date.UTC(2012, 1, 1)),
+    pid: 5355,
   },
   {
     context: 'context-6',
     level: LogLevel.Trace,
     message: 'message-6',
     timestamp: new Date(Date.UTC(2012, 1, 1)),
+    pid: 5355,
   },
 ];
 
