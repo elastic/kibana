@@ -135,28 +135,25 @@ describe('copySavedObjectsToSpaces', () => {
 
     expect((savedObjectsService.importExport.getSortedObjectsForExport as jest.Mock).mock.calls)
       .toMatchInlineSnapshot(`
-                  Array [
-                    Array [
-                      Object {
-                        "excludeExportDetails": true,
-                        "exportSizeLimit": 1000,
-                        "includeReferencesDeep": true,
-                        "namespace": "sourceSpace",
-                        "objects": Array [
-                          Object {
-                            "id": "my-dashboard",
-                            "type": "dashboard",
-                          },
-                        ],
-                        "savedObjectsClient": null,
-                        "types": Array [
-                          "dashboard",
-                          "visualization",
-                        ],
-                      },
-                    ],
-                  ]
-            `);
+      Array [
+        Array [
+          Object {
+            "excludeExportDetails": true,
+            "exportSizeLimit": 1000,
+            "includeReferencesDeep": true,
+            "namespace": "sourceSpace",
+            "objects": Array [
+              Object {
+                "id": "my-dashboard",
+                "type": "dashboard",
+              },
+            ],
+            "savedObjectsClient": null,
+            "types": undefined,
+          },
+        ],
+      ]
+    `);
 
     expect((savedObjectsService.importExport.importSavedObjects as jest.Mock).mock.calls)
       .toMatchInlineSnapshot(`
