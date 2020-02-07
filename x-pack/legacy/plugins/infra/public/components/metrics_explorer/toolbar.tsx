@@ -33,6 +33,7 @@ import { SavedViewsToolbarControls } from '../saved_views/toolbar_control';
 import { MetricExplorerViewState } from '../../pages/infrastructure/metrics_explorer/use_metric_explorer_state';
 import { metricsExplorerViewSavedObjectType } from '../../../common/saved_objects/metrics_explorer_view';
 import { useKibanaUiSetting } from '../../utils/use_kibana_ui_setting';
+import { mapKibanaQuickRangesToDatePickerRanges } from '../../utils/map_timepicker_quickranges_to_datepicker_ranges';
 
 interface Props {
   derivedIndexPattern: IIndexPattern;
@@ -48,12 +49,6 @@ interface Props {
   onAggregationChange: (aggregation: MetricsExplorerAggregation) => void;
   onChartOptionsChange: (chartOptions: MetricsExplorerChartOptions) => void;
   onViewStateChange: (vs: MetricExplorerViewState) => void;
-}
-
-interface QueryRange {
-  from: string;
-  to: string;
-  display: string;
 }
 
 export const MetricsExplorerToolbar = ({
@@ -73,13 +68,7 @@ export const MetricsExplorerToolbar = ({
 }: Props) => {
   const isDefaultOptions = options.aggregation === 'avg' && options.metrics.length === 0;
   const [timepickerQuickRanges] = useKibanaUiSetting('timepicker:quickRanges');
-  const commonlyUsedRanges: EuiSuperDatePickerCommonRange[] = timepickerQuickRanges
-    ? timepickerQuickRanges.map((r: QueryRange) => ({
-        start: r.from,
-        end: r.to,
-        label: r.display,
-      }))
-    : [];
+  const commonlyUsedRanges = mapKibanaQuickRangesToDatePickerRanges(timepickerQuickRanges);
   return (
     <Toolbar>
       <EuiFlexGroup alignItems="center">

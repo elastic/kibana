@@ -4,16 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiSuperDatePicker,
-  OnRefreshChangeProps,
-  OnTimeChangeProps,
-  EuiSuperDatePickerCommonRange,
-} from '@elastic/eui';
+import { EuiSuperDatePicker, OnRefreshChangeProps, OnTimeChangeProps } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import euiStyled from '../../../../../../common/eui_styled_components';
 import { MetricsTimeInput } from '../containers/with_metrics_time';
 import { useKibanaUiSetting } from '../../../utils/use_kibana_ui_setting';
+import { mapKibanaQuickRangesToDatePickerRanges } from '../../../utils/map_timepicker_quickranges_to_datepicker_ranges';
 
 interface MetricsTimeControlsProps {
   currentTimeRange: MetricsTimeInput;
@@ -23,12 +19,6 @@ interface MetricsTimeControlsProps {
   setRefreshInterval: (refreshInterval: number) => void;
   setAutoReload: (isAutoReloading: boolean) => void;
   onRefresh: () => void;
-}
-
-interface QueryRange {
-  from: string;
-  to: string;
-  display: string;
 }
 
 export const MetricsTimeControls = (props: MetricsTimeControlsProps) => {
@@ -43,13 +33,7 @@ export const MetricsTimeControls = (props: MetricsTimeControlsProps) => {
     setRefreshInterval,
   } = props;
 
-  const commonlyUsedRanges: EuiSuperDatePickerCommonRange[] = timepickerQuickRanges
-    ? timepickerQuickRanges.map((r: QueryRange) => ({
-        start: r.from,
-        end: r.to,
-        label: r.display,
-      }))
-    : [];
+  const commonlyUsedRanges = mapKibanaQuickRangesToDatePickerRanges(timepickerQuickRanges);
 
   const handleTimeChange = useCallback(
     ({ start, end }: OnTimeChangeProps) => {
