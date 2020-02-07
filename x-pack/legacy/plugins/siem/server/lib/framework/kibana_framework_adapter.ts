@@ -96,39 +96,6 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
     if (!this.isProductionMode) {
       this.router.get(
         {
-          path: routePath,
-          validate: { query: configSchema.object({}, { allowUnknowns: true }) },
-          options: {
-            tags: ['access:siem'],
-          },
-        },
-        async (context, request, response) => {
-          try {
-            const user = await this.getCurrentUserInfo(request);
-            const { query } = request;
-            const gqlResponse = await runHttpQuery([request], {
-              method: 'GET',
-              options: (req: KibanaRequest) => ({
-                context: { req: wrapRequest(req, context, user) },
-                schema,
-              }),
-              query,
-            });
-
-            return response.ok({
-              body: gqlResponse,
-              headers: {
-                'content-type': 'application/json',
-              },
-            });
-          } catch (error) {
-            return this.handleError(error, response);
-          }
-        }
-      );
-
-      this.router.get(
-        {
           path: `${routePath}/graphiql`,
           validate: false,
           options: {
