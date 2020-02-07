@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButton, EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
+import { EuiButton, EuiSpacer } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { StickyContainer } from 'react-sticky';
@@ -24,6 +24,7 @@ import {
 } from '../../components/link_to/redirect_to_detection_engine';
 import { SiemSearchBar } from '../../components/search_bar';
 import { WrapperPage } from '../../components/wrapper_page';
+import { SiemNavigation } from '../../components/navigation';
 import { State } from '../../store';
 import { inputsSelectors } from '../../store/inputs';
 import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from '../../store/inputs/actions';
@@ -60,18 +61,22 @@ export interface DispatchProps {
 
 type DetectionEnginePageComponentProps = ReduxProps & DispatchProps;
 
-const detectionsTabs = [
-  {
+const detectionsTabs = {
+  [DetectionEngineTab.signals]: {
     id: DetectionEngineTab.signals,
     name: i18n.SIGNAL,
+    href: getDetectionEngineTabUrl(DetectionEngineTab.signals),
     disabled: false,
+    urlKey: 'detections',
   },
-  {
+  [DetectionEngineTab.alerts]: {
     id: DetectionEngineTab.alerts,
     name: i18n.ALERT,
+    href: getDetectionEngineTabUrl(DetectionEngineTab.alerts),
     disabled: false,
+    urlKey: 'detections',
   },
-];
+};
 
 const DetectionEnginePageComponent: React.FC<DetectionEnginePageComponentProps> = ({
   filters,
@@ -96,24 +101,6 @@ const DetectionEnginePageComponent: React.FC<DetectionEnginePageComponentProps> 
       setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
     },
     [setAbsoluteRangeDatePicker]
-  );
-
-  const tabs = useMemo(
-    () => (
-      <EuiTabs>
-        {detectionsTabs.map(tab => (
-          <EuiTab
-            isSelected={tab.id === tabName}
-            disabled={tab.disabled}
-            key={tab.id}
-            href={getDetectionEngineTabUrl(tab.id)}
-          >
-            {tab.name}
-          </EuiTab>
-        ))}
-      </EuiTabs>
-    ),
-    [detectionsTabs, tabName]
   );
 
   const indexToAdd = useMemo(() => (signalIndexName == null ? [] : [signalIndexName]), [
@@ -169,7 +156,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEnginePageComponentProps> 
                 <GlobalTime>
                   {({ to, from, deleteQuery, setQuery }) => (
                     <>
-                      {tabs}
+                      <SiemNavigation navTabs={detectionsTabs} />
                       <EuiSpacer />
                       {tabName === DetectionEngineTab.signals && (
                         <>
