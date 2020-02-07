@@ -27,9 +27,9 @@ const packages = [
     version: '1.10.5',
     destinationPath: 'node_modules/re2/build/Release/',
     shas: {
-      darwin: '0640af2971828597cdca590e3f022071d6f11d5d4f01f16d80783ff840019f33',
-      linux: '5fea301d28756bf9fcd01b9ed98ef3fe7469a401632bc764f9b617de6faf4321',
-      windows: '96d8194f1bbb2105b71330b671b202b2b46e3fa09141bd600d9c284202eda7b4',
+      darwin: '066533b592094f91e00412499e44c338ce2466d63c9eaf0dc32be8214bde2099',
+      linux: '0322cac3c2e106129b650a8eac509f598ed283791d6116984fec4c151b24e574',
+      windows: '65b5bef7de2352f4787224c2c76a619b6683a868c8d4d71e0fdd500786fc422b',
     },
   },
 ];
