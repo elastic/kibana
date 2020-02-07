@@ -94,7 +94,7 @@ describe('POST /api/saved_objects/_export', () => {
     expect(getSortedObjectsForExport.mock.calls[0][0]).toEqual(
       expect.objectContaining({
         excludeExportDetails: false,
-        exportSizeLimit: 1000,
+        exportSizeLimit: 10000,
         includeReferencesDeep: true,
         objects: undefined,
         search: 'my search string',
