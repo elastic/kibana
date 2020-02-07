@@ -17,4 +17,12 @@
  * under the License.
  */
 
-export { PromiseService } from './promises';
+export * from './migrate_legacy_query';
+export * from './system_api';
+export * from './url_overflow_service';
+// @ts-ignore
+export { KbnAccessibleClickProvider } from './kbn_accessible_click';
+// @ts-ignore
+export { PrivateProvider, IPrivate } from './private';
+// @ts-ignore
+export { registerListenEventListener } from './register_listen_event_listener';

@@ -17,15 +17,21 @@
  * under the License.
  */
 
-import MarkdownIt from 'markdown-it';
-import { uiModules } from 'ui/modules';
-import 'angular-sanitize';
+import _ from 'lodash';
 
-const markdownIt = new MarkdownIt({
-  html: false,
-  linkify: true,
-});
+const getRootCause = (err: Record<string, any> | string) => _.get(err, 'resp.error.root_cause');
 
-uiModules.get('kibana', ['ngSanitize']).filter('markdown', function($sanitize) {
-  return md => (md ? $sanitize(markdownIt.render(md)) : '');
-});
+/**
+ * Utilize the extended error information returned from elasticsearch
+ * @param  {Error|String} err
+ * @returns {string}
+ */
+export const formatESMsg = (err: Record<string, any> | string) => {
+  const rootCause = getRootCause(err);
+
+  if (!Array.isArray(rootCause)) {
+    return;
+  }
+
+  return rootCause.map((cause: Record<string, any>) => cause.reason).join('\n');
+};

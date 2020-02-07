@@ -18,20 +18,22 @@
  */
 
 import { fromLiteralExpression } from '../ast/ast';
+import { WildcardTypeBuildNode } from './types';
+import { KueryNode } from '..';
 
 export const wildcardSymbol = '@kuery-wildcard@';
 
 // Copied from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions
-function escapeRegExp(string) {
-  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+function escapeRegExp(str: string) {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
 }
 
 // See https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html#_reserved_characters
-function escapeQueryString(string) {
-  return string.replace(/[+-=&|><!(){}[\]^"~*?:\\/]/g, '\\$&'); // $& means the whole matched string
+function escapeQueryString(str: string) {
+  return str.replace(/[+-=&|><!(){}[\]^"~*?:\\/]/g, '\\$&'); // $& means the whole matched string
 }
 
-export function buildNode(value) {
+export function buildNode(value: string): WildcardTypeBuildNode | KueryNode {
   if (!value.includes(wildcardSymbol)) {
     return fromLiteralExpression(value);
   }
@@ -42,22 +44,22 @@ export function buildNode(value) {
   };
 }
 
-export function test(node, string) {
+export function test(node: any, str: string): boolean {
   const { value } = node;
   const regex = value
     .split(wildcardSymbol)
     .map(escapeRegExp)
     .join('[\\s\\S]*');
   const regexp = new RegExp(`^${regex}$`);
-  return regexp.test(string);
+  return regexp.test(str);
 }
 
-export function toElasticsearchQuery(node) {
+export function toElasticsearchQuery(node: any): string {
   const { value } = node;
   return value.split(wildcardSymbol).join('*');
 }
 
-export function toQueryStringQuery(node) {
+export function toQueryStringQuery(node: any): string {
   const { value } = node;
   return value
     .split(wildcardSymbol)
@@ -65,7 +67,7 @@ export function toQueryStringQuery(node) {
     .join('*');
 }
 
-export function hasLeadingWildcard(node) {
+export function hasLeadingWildcard(node: any): boolean {
   const { value } = node;
   // A lone wildcard turns into an `exists` query, so we're only concerned with
   // leading wildcards followed by additional characters.

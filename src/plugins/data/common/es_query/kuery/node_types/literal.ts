@@ -17,19 +17,15 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { LiteralTypeBuildNode } from './types';
 
-// browsers format Error.stack differently; always include message
-export function formatStack(err) {
-  if (err.stack && !~err.stack.indexOf(err.message)) {
-    return i18n.translate('common.ui.notify.toaster.errorMessage', {
-      defaultMessage: `Error: {errorMessage}
-      {errorStack}`,
-      values: {
-        errorMessage: err.message,
-        errorStack: err.stack,
-      },
-    });
-  }
-  return err.stack;
+export function buildNode(value: LiteralTypeBuildNode['value']): LiteralTypeBuildNode {
+  return {
+    type: 'literal',
+    value,
+  };
+}
+
+export function toElasticsearchQuery(node: LiteralTypeBuildNode): LiteralTypeBuildNode['value'] {
+  return node.value;
 }

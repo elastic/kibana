@@ -16,15 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import * as functionType from './function';
-import * as literal from './literal';
-import * as namedArg from './named_arg';
-import * as wildcard from './wildcard';
-
-export const nodeTypes = {
-  function: functionType,
-  literal,
-  namedArg,
-  wildcard,
-};
+// @ts-ignore
+export { PromiseServiceCreator } from './promises';
+// @ts-ignore
+export { watchMultiDecorator } from './watch_multi';
+export * from './angular_config';
+export { ensureDefaultIndexPattern } from './ensure_default_index_pattern';

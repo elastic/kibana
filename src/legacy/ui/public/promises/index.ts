@@ -17,7 +17,12 @@
  * under the License.
  */
 
-export { formatESMsg } from './format_es_msg';
-export { formatMsg } from './format_msg';
-export { formatStack } from './format_stack';
-export { isAngularHttpError, formatAngularHttpError } from './format_angular_http_error';
+import { PromiseServiceCreator } from '../../../../plugins/kibana_legacy/public';
+export { createDefer } from './defer';
+// @ts-ignore
+import { uiModules } from '../modules';
+
+const module = uiModules.get('kibana');
+// Provides a tiny subset of the excellent API from
+// bluebird, reimplemented using the $q service
+module.service('Promise', PromiseServiceCreator);

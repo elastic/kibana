@@ -17,13 +17,22 @@
  * under the License.
  */
 
-export function buildNode(value) {
+import _ from 'lodash';
+import * as ast from '../ast';
+import { nodeTypes } from '../node_types';
+import { NamedArgTypeBuildNode } from './types';
+import { JsonObject } from '../types';
+
+export function buildNode(name: string, value: any): NamedArgTypeBuildNode {
+  const argumentNode =
+    _.get(value, 'type') === 'literal' ? value : nodeTypes.literal.buildNode(value);
   return {
-    type: 'literal',
-    value,
+    type: 'namedArg',
+    name,
+    value: argumentNode,
   };
 }
 
-export function toElasticsearchQuery(node) {
-  return node.value;
+export function toElasticsearchQuery(node: any): JsonObject {
+  return ast.toElasticsearchQuery(node.value);
 }

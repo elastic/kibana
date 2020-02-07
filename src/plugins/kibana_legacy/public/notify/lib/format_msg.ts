@@ -29,7 +29,7 @@ const has = _.has;
  * @param  {String} source - Prefix for message indicating source (optional)
  * @returns {string}
  */
-export function formatMsg(err, source) {
+export function formatMsg(err: Record<string, any> | string, source: string = '') {
   let message = '';
   if (source) {
     message += source + ': ';
@@ -47,14 +47,14 @@ export function formatMsg(err, source) {
     // is an Angular $http "error object"
     if (err.status === -1) {
       // status = -1 indicates that the request was failed to reach the server
-      message += i18n.translate('common.ui.notify.toaster.unavailableServerErrorMessage', {
+      message += i18n.translate('kibana_legacy.notify.toaster.unavailableServerErrorMessage', {
         defaultMessage:
           'An HTTP request has failed to connect. ' +
           'Please check if the Kibana server is running and that your browser has a working connection, ' +
           'or contact your system administrator.',
       });
     } else {
-      message += i18n.translate('common.ui.notify.toaster.errorStatusMessage', {
+      message += i18n.translate('kibana_legacy.notify.toaster.errorStatusMessage', {
         defaultMessage: 'Error {errStatus} {errStatusText}: {errMessage}',
         values: {
           errStatus: err.status,
@@ -68,7 +68,7 @@ export function formatMsg(err, source) {
   return message;
 }
 
-formatMsg.describeError = function(err) {
+formatMsg.describeError = function(err: Record<string, any>) {
   if (!err) return undefined;
   if (err.shortMessage) return err.shortMessage;
   if (err.body && err.body.message) return err.body.message;

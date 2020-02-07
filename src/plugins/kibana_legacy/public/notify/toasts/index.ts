@@ -17,22 +17,4 @@
  * under the License.
  */
 
-import _ from 'lodash';
-
-const getRootCause = err => _.get(err, 'resp.error.root_cause');
-
-/**
- * Utilize the extended error information returned from elasticsearch
- * @param  {Error|String} err
- * @returns {string}
- */
-export const formatESMsg = err => {
-  const rootCause = getRootCause(err);
-
-  if (!rootCause) {
-    return;
-  }
-
-  const result = _.pluck(rootCause, 'reason').join('\n');
-  return result;
-};
+export { ToastNotifications } from './toast_notifications';
