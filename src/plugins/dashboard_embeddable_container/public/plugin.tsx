@@ -26,9 +26,8 @@ import { CONTEXT_MENU_TRIGGER, IEmbeddableSetup, IEmbeddableStart } from './embe
 import { ExpandPanelAction, ReplacePanelAction } from '.';
 import { DashboardContainerFactory } from './embeddable/dashboard_container_factory';
 import { Start as InspectorStartContract } from '../../../plugins/inspector/public';
+import { getSavedObjectFinder } from '../../../plugins/saved_objects/public';
 import {
-  SavedObjectFinderUi,
-  SavedObjectFinderProps,
   ExitFullScreenButton as ExitFullScreenButtonUi,
   ExitFullScreenButtonProps,
 } from '../../../plugins/kibana_react/public';
@@ -61,16 +60,7 @@ export class DashboardEmbeddableContainerPublicPlugin
     const { application, notifications, overlays } = core;
     const { embeddable, inspector, uiActions } = plugins;
 
-    const SavedObjectFinder: React.FC<Exclude<
-      SavedObjectFinderProps,
-      'savedObjects' | 'uiSettings'
-    >> = props => (
-      <SavedObjectFinderUi
-        {...props}
-        savedObjects={core.savedObjects}
-        uiSettings={core.uiSettings}
-      />
-    );
+    const SavedObjectFinder = getSavedObjectFinder(core.savedObjects, core.uiSettings);
 
     const useHideChrome = () => {
       React.useEffect(() => {
