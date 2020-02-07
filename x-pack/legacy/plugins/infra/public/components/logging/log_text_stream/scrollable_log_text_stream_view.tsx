@@ -51,8 +51,8 @@ interface ScrollableLogTextStreamViewProps {
   target: TimeKey | null;
   jumpToTarget: (target: TimeKey) => any;
   reportVisibleInterval: (params: {
-    pagesBeforeStart: number;
-    pagesAfterEnd: number;
+    entriesBeforeStart: number;
+    entriesAfterEnd: number;
     startKey: TimeKey | null;
     middleKey: TimeKey | null;
     endKey: TimeKey | null;
@@ -195,7 +195,6 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
                         onVisibleChildrenChange={this.handleVisibleChildrenChange}
                         onScrollLockChange={this.handleScrollLock}
                         target={targetId}
-                        hideScrollbar={true}
                         data-test-subj={'logStream'}
                         isStreaming={isStreaming}
                         entriesCount={items.length}
@@ -284,23 +283,20 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
   private handleVisibleChildrenChange = callWithoutRepeats(
     ({
       topChild,
-      middleChild,
       bottomChild,
-      pagesAbove,
-      pagesBelow,
+      entriesBeforeStart,
+      entriesAfterEnd,
     }: {
       topChild: string;
-      middleChild: string;
       bottomChild: string;
-      pagesAbove: number;
-      pagesBelow: number;
+      entriesBeforeStart: number;
+      entriesAfterEnd: number;
     }) => {
       this.props.reportVisibleInterval({
-        endKey: parseStreamItemId(bottomChild),
-        middleKey: parseStreamItemId(middleChild),
-        pagesAfterEnd: pagesBelow,
-        pagesBeforeStart: pagesAbove,
         startKey: parseStreamItemId(topChild),
+        endKey: parseStreamItemId(bottomChild),
+        entriesBeforeStart,
+        entriesAfterEnd,
       });
     }
   );
@@ -319,10 +315,6 @@ const WithColumnWidths: React.FunctionComponent<{
   children: (params: {
     columnWidths: LogEntryColumnWidths;
     CharacterDimensionsProbe: React.ComponentType;
-    characterDimensions: {
-      height: number;
-      width: number;
-    };
   }) => React.ReactElement<any> | null;
   columnConfigurations: LogColumnConfiguration[];
   scale: TextScale;
@@ -338,23 +330,11 @@ const WithColumnWidths: React.FunctionComponent<{
     () => ({
       columnWidths,
       CharacterDimensionsProbe,
-      characterDimensions: dimensions,
     }),
-    [columnWidths, CharacterDimensionsProbe, dimensions]
+    [columnWidths, CharacterDimensionsProbe]
   );
 
-  const messageColumnId = (columnConfigurations.find(columnConfiguration =>
-    isMessageLogColumnConfiguration(columnConfiguration)
-  ) as MessageLogColumnConfiguration | undefined)?.messageColumn.id;
-
-  return (
-    <LogEntryMessageColumnWidthProvider
-      messageColumnId={messageColumnId}
-      characterDimensions={dimensions}
-    >
-      {children(childParams)}
-    </LogEntryMessageColumnWidthProvider>
-  );
+  return children(childParams);
 };
 
 const ScrollableLogTextStreamViewWrapper = euiStyled.div`

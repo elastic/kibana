@@ -10,7 +10,7 @@ import { useGraphQLQueries } from './gql_queries';
 import { TimeKey, timeKeyIsBetween } from '../../../../common/time';
 import { InfraLogEntry } from './types';
 
-const DESIRED_BUFFER_PAGES = 2;
+const DESIRED_BUFFER_ITEMS = 10;
 
 enum Action {
   FetchingNewEntries,
@@ -41,15 +41,15 @@ type Dispatch = (action: ActionObj) => void;
 interface LogEntriesProps {
   filterQuery: string | null;
   timeKey: TimeKey | null;
-  pagesBeforeStart: number | null;
-  pagesAfterEnd: number | null;
+  entriesBeforeStart: number | null;
+  entriesAfterEnd: number | null;
   sourceId: string;
   isAutoReloading: boolean;
   jumpToTargetPosition: (position: TimeKey) => void;
 }
 
 type FetchEntriesParams = Omit<LogEntriesProps, 'isAutoReloading'>;
-type FetchMoreEntriesParams = Pick<LogEntriesProps, 'pagesBeforeStart' | 'pagesAfterEnd'>;
+type FetchMoreEntriesParams = Pick<LogEntriesProps, 'entriesBeforeStart' | 'entriesAfterEnd'>;
 
 export interface LogEntriesResponse {
   entries: InfraLogEntry[];
@@ -109,13 +109,14 @@ enum ShouldFetchMoreEntries {
 }
 
 const shouldFetchMoreEntries = (
-  { pagesAfterEnd, pagesBeforeStart }: FetchMoreEntriesParams,
+  { entriesAfterEnd, entriesBeforeStart }: FetchMoreEntriesParams,
   { hasMoreBeforeStart, hasMoreAfterEnd }: LogEntriesStateParams
 ) => {
-  if (pagesBeforeStart === null || pagesAfterEnd === null) return false;
-  if (pagesBeforeStart < DESIRED_BUFFER_PAGES && hasMoreBeforeStart)
+  if (entriesBeforeStart === null || entriesAfterEnd === null) return false;
+  if (entriesBeforeStart < DESIRED_BUFFER_ITEMS && hasMoreBeforeStart)
     return ShouldFetchMoreEntries.Before;
-  if (pagesAfterEnd < DESIRED_BUFFER_PAGES && hasMoreAfterEnd) return ShouldFetchMoreEntries.After;
+  if (entriesAfterEnd < DESIRED_BUFFER_ITEMS && hasMoreAfterEnd)
+    return ShouldFetchMoreEntries.After;
   return false;
 };
 
@@ -173,7 +174,7 @@ const useFetchEntriesEffect = (
   };
 
   const fetchMoreEntriesEffectDependencies = [
-    ...Object.values(pick(props, ['pagesAfterEnd', 'pagesBeforeStart'])),
+    ...Object.values(pick(props, ['entriesAfterEnd', 'entriesBeforeStart'])),
     Object.values(pick(state, ['hasMoreBeforeStart', 'hasMoreAfterEnd'])),
   ];
   const fetchMoreEntriesEffect = () => {

@@ -12,18 +12,17 @@ type TimeKeyOrNull = TimeKey | null;
 
 interface VisiblePositions {
   startKey: TimeKeyOrNull;
-  middleKey: TimeKeyOrNull;
   endKey: TimeKeyOrNull;
-  pagesAfterEnd: number;
-  pagesBeforeStart: number;
+  entriesBeforeStart: number;
+  entriesAfterEnd: number;
 }
 
 export interface LogPositionStateParams {
   targetPosition: TimeKeyOrNull;
   isAutoReloading: boolean;
   firstVisiblePosition: TimeKeyOrNull;
-  pagesBeforeStart: number;
-  pagesAfterEnd: number;
+  entriesBeforeStart: number;
+  entriesAfterEnd: number;
   visibleMidpoint: TimeKeyOrNull;
   visibleMidpointTime: number | null;
   visibleTimeInterval: { start: number; end: number } | null;
@@ -37,24 +36,24 @@ export interface LogPositionCallbacks {
   stopLiveStreaming: () => void;
 }
 
-const useVisibleMidpoint = (middleKey: TimeKeyOrNull, targetPosition: TimeKeyOrNull) => {
-  // Of the two dependencies `middleKey` and `targetPosition`, return
+const useVisibleMidpoint = (endKey: TimeKeyOrNull, targetPosition: TimeKeyOrNull) => {
+  // Of the two dependencies `endKey` and `targetPosition`, return
   // whichever one was the most recently updated. This allows the UI controls
   // to display a newly-selected `targetPosition` before loading new data;
-  // otherwise the previous `middleKey` would linger in the UI for the entirety
+  // otherwise the previous `endKey` would linger in the UI for the entirety
   // of the loading operation, which the user could perceive as unresponsiveness
   const [store, update] = useState({
-    middleKey,
+    endKey,
     targetPosition,
-    currentValue: middleKey || targetPosition,
+    currentValue: endKey || targetPosition,
   });
   useEffect(() => {
-    if (middleKey !== store.middleKey) {
-      update({ targetPosition, middleKey, currentValue: middleKey });
+    if (endKey !== store.endKey) {
+      update({ targetPosition, endKey, currentValue: endKey });
     } else if (targetPosition !== store.targetPosition) {
-      update({ targetPosition, middleKey, currentValue: targetPosition });
+      update({ targetPosition, endKey, currentValue: targetPosition });
     }
-  }, [middleKey, targetPosition]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [endKey, targetPosition]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return store.currentValue;
 };
@@ -64,15 +63,14 @@ export const useLogPositionState: () => LogPositionStateParams & LogPositionCall
   const [isAutoReloading, setIsAutoReloading] = useState(false);
   const [visiblePositions, reportVisiblePositions] = useState<VisiblePositions>({
     endKey: null,
-    middleKey: null,
     startKey: null,
-    pagesBeforeStart: Infinity,
-    pagesAfterEnd: Infinity,
+    entriesBeforeStart: Infinity,
+    entriesAfterEnd: Infinity,
   });
 
-  const { startKey, middleKey, endKey, pagesBeforeStart, pagesAfterEnd } = visiblePositions;
+  const { startKey, endKey, entriesBeforeStart, entriesAfterEnd } = visiblePositions;
 
-  const visibleMidpoint = useVisibleMidpoint(middleKey, targetPosition);
+  const visibleMidpoint = useVisibleMidpoint(endKey, targetPosition);
 
   const visibleTimeInterval = useMemo(
     () => (startKey && endKey ? { start: startKey.time, end: endKey.time } : null),
@@ -83,8 +81,8 @@ export const useLogPositionState: () => LogPositionStateParams & LogPositionCall
     targetPosition,
     isAutoReloading,
     firstVisiblePosition: startKey,
-    pagesBeforeStart,
-    pagesAfterEnd,
+    entriesBeforeStart,
+    entriesAfterEnd,
     visibleMidpoint,
     visibleMidpointTime: visibleMidpoint ? visibleMidpoint.time : null,
     visibleTimeInterval,

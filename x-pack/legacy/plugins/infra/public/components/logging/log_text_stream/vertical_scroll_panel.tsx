@@ -5,12 +5,11 @@
  */
 
 import debounce from 'lodash/fp/debounce';
-import { VariableSizeList } from 'react-window';
+import { VariableSizeList, ListChildComponentProps } from 'react-window';
+import { useMeasure } from 'react-use';
 import { LogTextStreamLoadingItemView } from './loading_item_view';
 import { LogTextStreamJumpToTail } from './jump_to_tail';
-import React, { useCallback, useRef, useEffect, useMemo, useState } from 'react';
-import { useLogEntryMessageColumnWidthContext } from './log_entry_message_column';
-import { BoundingBoxes1D } from './bounding_boxes_1d';
+import React, { useCallback, useRef, useEffect, useMemo, useState, useLayoutEffect } from 'react';
 
 import euiStyled from '../../../../../../common/eui_styled_components';
 
@@ -21,11 +20,9 @@ const STREAM_ITEM_HEIGHT = 40;
 interface VerticalScrollPanelProps {
   onVisibleChildrenChange?: (visibleChildren: {
     topChild: string;
-    middleChild: string;
     bottomChild: string;
-    pagesAbove: number;
-    pagesBelow: number;
-    fromScroll: boolean;
+    entriesBeforeStart: number;
+    entriesAfterEnd: number;
   }) => void;
   onScrollLockChange: (isLocked: boolean) => void;
   target: string | null;
@@ -52,13 +49,8 @@ export const VerticalScrollPanel: React.FC<VerticalScrollPanelProps> = ({
 
   const windowRef = useRef<VariableSizeList>(null);
   const innerRef = useRef<HTMLDivElement>(null);
-  const {
-    messageColumnWidth,
-    characterDimensions,
-    getLogEntryHeightFromMessageContent,
-    recalculateColumnSize,
-  } = useLogEntryMessageColumnWidthContext();
-  const [scrollTop, setScrollTop] = useState(0);
+
+  const [childHeightsLookup, recordChildHeight] = useImmutableChildHeightLookup();
 
   const [isScrollLocked, setIsScrollLocked] = useState(false);
   useEffect(() => onScrollLockChange(isScrollLocked), [isScrollLocked]);
@@ -67,7 +59,7 @@ export const VerticalScrollPanel: React.FC<VerticalScrollPanelProps> = ({
   const [hasInitializedColumnWidth, setHasInitializedColumnWidth] = useState(false);
 
   const childrenArray = useMemo(() => {
-    const arr = React.Children.toArray(children);
+    const arr = React.Children.toArray(children) as React.ReactElement[];
     if (isStreaming && !isScrollLocked) return arr.slice(-maxDisplayedItems);
     return arr;
   }, [children, isStreaming, isScrollLocked]);
@@ -75,7 +67,7 @@ export const VerticalScrollPanel: React.FC<VerticalScrollPanelProps> = ({
   const targetChild = useMemo(
     () =>
       childrenArray.findIndex(child => {
-        if (child && 'type' in child && child?.type === React.Fragment) {
+        if (child?.type === React.Fragment) {
           const fragmentChildren = React.Children.toArray(child.props.children);
           const logEntry = fragmentChildren[fragmentChildren.length - 1];
           return logEntry.props.streamItemId === target;
@@ -85,151 +77,85 @@ export const VerticalScrollPanel: React.FC<VerticalScrollPanelProps> = ({
     [childrenArray, target]
   );
 
-  const centerTargetEffect = useCallback(() => {
+  const scrollToTargetEffect = useCallback(() => {
     if (!isScrollLocked) {
-      windowRef.current?.scrollToItem(targetChild, 'smart');
+      console.log('scrollToTarget', targetChild);
+      windowRef.current?.scrollToItem(targetChild, 'end');
     }
   }, [isScrollLocked, windowRef.current]);
-  useEffect(() => centerTargetEffect, [targetChild, hasInitializedColumnWidth]);
+  useEffect(() => scrollToTargetEffect, [targetChild]);
 
-  const childHeights = useMemo(() => {
-    const boundingBoxes = new BoundingBoxes1D<number>();
-    const pxHeights = childrenArray.map(child => {
-      if (child && 'type' in child) {
-        if (child.type === React.Fragment) {
+  const childrenIDStringLookup = useMemo(
+    () =>
+      childrenArray.map((child, i) => {
+        const defaultIdString = `**listItem:${i}`;
+        if (child?.type === React.Fragment) {
           const fragmentChildren = React.Children.toArray(child.props.children);
-          const hasDateRow = fragmentChildren.length === 2;
-
           const logEntry = fragmentChildren[fragmentChildren.length - 1];
-          const logEntryValue = logEntry.props.logEntry;
-          const logEntryId = logEntry.props.streamItemId;
-          const logEntryHeight = getLogEntryHeightFromMessageContent(
-            logEntryValue,
-            messageColumnWidth,
-            characterDimensions
-          );
-          const totalHeight = logEntryHeight
-            ? logEntryHeight + ITEM_PADDING + (hasDateRow ? DEFAULT_ITEM_HEIGHT : 0)
-            : DEFAULT_ITEM_HEIGHT;
-          boundingBoxes.add(logEntryId, totalHeight);
-          return totalHeight;
-        } else if (child.type === LogTextStreamLoadingItemView) {
-          return STREAM_ITEM_HEIGHT;
+          return logEntry.props.streamItemId || defaultIdString;
         }
-      }
-      return DEFAULT_ITEM_HEIGHT;
-    });
-    return { pxHeights, boundingBoxes };
-  }, [childrenArray, messageColumnWidth, characterDimensions, getLogEntryHeightFromMessageContent]);
+        return defaultIdString;
+      }),
+    [childrenArray]
+  );
 
   const resizeItemsEffect = useCallback(() => windowRef.current?.resetAfterIndex(0, true), [
     windowRef.current,
   ]);
-  useEffect(resizeItemsEffect, [
-    windowRef.current,
-    messageColumnWidth,
-    characterDimensions,
-    recalculateColumnSize,
-    childHeights,
-  ]);
-
-  const visibleChildren = useMemo(
-    () => getVisibleChildren({ height, boundingBoxes: childHeights.boundingBoxes, scrollTop }),
-    [height, childHeights.boundingBoxes, scrollTop]
-  );
-
-  const handleScroll = useCallback(
-    debounce(
-      SCROLL_DEBOUNCE_INTERVAL,
-      ({
-        scrollOffset,
-        scrollUpdateWasRequested,
-      }: {
-        scrollOffset: number;
-        scrollUpdateWasRequested: boolean;
-      }) => {
-        setScrollTop(scrollOffset);
-        const { pagesBelow } = getVisibleChildren({
-          height,
-          boundingBoxes: childHeights.boundingBoxes,
-          scrollTop: scrollOffset,
-        });
-        // if (!scrollUpdateWasRequested && isStreaming) {
-        //   setIsScrollLocked(pagesBelow > 0);
-        // }
-      }
-    ),
-    [
-      height,
-      childHeights.boundingBoxes,
-      characterDimensions,
-      isStreaming,
-      visibleChildren.pagesBelow,
-    ]
-  );
+  useEffect(resizeItemsEffect, [windowRef.current, childHeightsLookup]);
 
   // const handleScrollWhileStreaming = useCallback()
 
-  const scrollEffect = useCallback(
-    debounce(SCROLL_DEBOUNCE_INTERVAL, () => {
-      if (
-        hasInitializedColumnWidth &&
-        !isNaN(visibleChildren.pagesAbove) &&
-        visibleChildren.pagesBelow < Infinity
-      ) {
-        onVisibleChildrenChange(visibleChildren);
-      }
-    }),
-    [hasInitializedColumnWidth, visibleChildren, onVisibleChildrenChange]
-  );
-  useEffect(scrollEffect, [visibleChildren]);
+  // const scrollEffect = useCallback(
+  //   debounce(SCROLL_DEBOUNCE_INTERVAL, () => {
+  //     if (
+  //       hasInitializedColumnWidth &&
+  //       !isNaN(visibleChildren.pagesAbove) &&
+  //       visibleChildren.pagesBelow < Infinity
+  //     ) {
+  //       onVisibleChildrenChange(visibleChildren);
+  //     }
+  //   }),
+  //   [hasInitializedColumnWidth, visibleChildren, onVisibleChildrenChange]
+  // );
+  // useEffect(scrollEffect, [visibleChildren]);
 
   const jumpToTail = useCallback(() => {
     windowRef.current?.scrollTo(childHeights.boundingBoxes.totalHeight);
     setIsScrollLocked(false);
-  }, [childrenArray, windowRef.current, childHeights.boundingBoxes.totalHeight]);
+  }, [childrenArray, windowRef.current]);
 
-  const streamUpdateEffect = useCallback(() => {
-    if (isStreaming && !isScrollLocked) {
-      setScrollTop(childHeights.boundingBoxes.totalHeight);
-    }
-  }, [isStreaming, isScrollLocked]);
-  useEffect(() => streamUpdateEffect, [
-    isStreaming,
-    isScrollLocked,
-    childHeights.boundingBoxes.totalHeight,
-  ]);
+  // const streamUpdateEffect = useCallback(() => {
+  //   if (isStreaming && !isScrollLocked) {
+  //     setScrollTop(childHeights.boundingBoxes.totalHeight);
+  //   }
+  // }, [isStreaming, isScrollLocked]);
+  // useEffect(() => streamUpdateEffect, [
+  //   isStreaming,
+  //   isScrollLocked,
+  //   childHeights.boundingBoxes.totalHeight,
+  // ]);
 
-  const onItemsRendered = useCallback(() => {
-    if (!hasInitializedColumnWidth) {
-      // It will take a few animation frames for the message columns to render at their full width on
-      // initial render. Recalculate until the column width returns a value greater than two characters wide
-      if (characterDimensions.width > 0 && messageColumnWidth >= characterDimensions.width * 2) {
-        setHasInitializedColumnWidth(true);
-        return;
+  const onItemsRendered = useCallback(
+    debounce(
+      500,
+      ({
+        visibleStartIndex,
+        visibleStopIndex,
+      }: {
+        visibleStartIndex: number;
+        visibleStopIndex: number;
+      }) => {
+        const visibleChildren = getVisibleChildren({
+          visibleStartIndex,
+          visibleStopIndex,
+          childrenIDStringLookup,
+        });
+        onVisibleChildrenChange(visibleChildren);
       }
-      recalculateColumnSize();
-
-      // if (isStreaming && !isScrollLocked) {
-      //   windowRef.current?.scrollTo(childHeights.boundingBoxes.totalHeight);
-      // }
-    }
-  }, [hasInitializedColumnWidth, messageColumnWidth, characterDimensions.width]);
-
-  useEffect(() => {
-    if (innerRef.current) {
-      const { current } = innerRef;
-      const handler = e => {
-        if (e.deltaY < 0) {
-          setIsScrollLocked(true);
-          windowRef.current?.scrollToItem(childrenArray[childrenArray.length - 1], 'smart');
-        }
-      };
-      current.addEventListener('wheel', handler);
-      return () => current.removeEventListener('wheel', handler);
-    }
-  }, [innerRef.current]);
-  console.log(isScrollLocked, scrollTop);
+    ),
+    [childrenIDStringLookup, hasInitializedColumnWidth]
+  );
 
   return (
     <>
@@ -237,18 +163,19 @@ export const VerticalScrollPanel: React.FC<VerticalScrollPanelProps> = ({
         data-test-subj={dataTestSubj}
         height={height}
         width={width}
-        onScroll={handleScroll}
         ref={windowRef}
         innerRef={innerRef}
-        isHidden={!hasInitializedColumnWidth}
         itemCount={childrenArray.length}
-        itemSize={index => childHeights.pxHeights[index]}
+        itemSize={index =>
+          childHeightsLookup.get(childrenIDStringLookup[index]) || DEFAULT_ITEM_HEIGHT
+        }
+        itemData={{ childrenArray, recordChildHeight, childrenIDStringLookup }}
         onItemsRendered={onItemsRendered}
         estimatedItemSize={DEFAULT_ITEM_HEIGHT * 4}
         overscanCount={isStreaming && !isScrollLocked ? 9999 : 4}
         fixStreamToBottom={isStreaming && !isScrollLocked}
       >
-        {({ index, style }) => <div style={style}>{childrenArray[index]}</div>}
+        {ListItem}
       </ScrollPanelWrapper>
       {isStreaming && isScrollLocked && (
         <LogTextStreamJumpToTail width={width} onClickJump={() => jumpToTail()} />
@@ -257,27 +184,72 @@ export const VerticalScrollPanel: React.FC<VerticalScrollPanelProps> = ({
   );
 };
 
+const ListItem: React.FC<ListChildComponentProps> = ({ index, style, data }) => {
+  const { childrenArray, recordChildHeight, childrenIDStringLookup } = data;
+  const [ref, { height }] = useMeasure();
+  const idString = childrenIDStringLookup[index];
+  useEffect(() => recordChildHeight(idString, height), [height, idString, recordChildHeight]);
+  return (
+    <div style={style}>
+      <div style={{ visibility: height > 0 ? 'visible' : 'hidden' }} ref={ref}>
+        {childrenArray[index]}
+      </div>
+    </div>
+  );
+};
+
+const validateIDStringBelongsToLogEntry = (id?: string) =>
+  id && !id.startsWith('**') ? id : false;
+
 const getVisibleChildren = ({
-  height,
-  scrollTop,
-  boundingBoxes,
+  visibleStartIndex,
+  visibleStopIndex,
+  childrenIDStringLookup,
 }: {
-  height: number;
-  scrollTop: number;
-  boundingBoxes: BoundingBoxes1D<number>;
-}) => {
-  const scrollCenter = Math.floor(height / 2 + scrollTop);
-  const scrollBottom = Math.floor(height + scrollTop);
-  const topChild = boundingBoxes.find(scrollTop);
-  const middleChild = boundingBoxes.find(scrollCenter);
-  const bottomChild = boundingBoxes.find(scrollBottom);
-  return {
-    topChild,
-    middleChild,
-    bottomChild,
-    pagesAbove: scrollTop / height,
-    pagesBelow: Math.max(0, (boundingBoxes.totalHeight - scrollTop - height) / height),
-  };
+  visibleStartIndex: number;
+  visibleStopIndex: number;
+  childrenIDStringLookup: Array<string | undefined>;
+}) => ({
+  topChild:
+    validateIDStringBelongsToLogEntry(childrenIDStringLookup[visibleStartIndex]) ||
+    childrenIDStringLookup.find(validateIDStringBelongsToLogEntry),
+  bottomChild:
+    validateIDStringBelongsToLogEntry(childrenIDStringLookup[visibleStopIndex]) ||
+    [...childrenIDStringLookup].reverse().find(validateIDStringBelongsToLogEntry),
+  entriesBeforeStart: visibleStartIndex,
+  entriesAfterEnd: childrenIDStringLookup.length - visibleStopIndex,
+});
+
+const useImmutableChildHeightLookup: () => [
+  Map<string, number>,
+  (id: string, height: number) => void
+] = () => {
+  const [mutableLookup] = useState(new Map<string, number>());
+  const getNewProxy = () =>
+    new Proxy(mutableLookup, {
+      get(target, prop) {
+        if (prop === 'get') return (id: string) => target.get(id);
+        if (prop === '_target') return target;
+      },
+    });
+  const [currentProxy, setCurrentProxy] = useState(getNewProxy());
+
+  const refreshProxy = useCallback(
+    debounce(100, () => {
+      setCurrentProxy(getNewProxy());
+    }),
+    [setCurrentProxy, getNewProxy]
+  );
+
+  return [
+    currentProxy as Map<string, number>,
+    (id: string, height: number) => {
+      if (!mutableLookup.has(id) || mutableLookup.get(id) !== height) {
+        mutableLookup.set(id, height);
+        refreshProxy();
+      }
+    },
+  ];
 };
 
 interface ScrollPanelWrapperProps {

@@ -30,8 +30,8 @@ const LogEntriesStateProvider: React.FC = ({ children }) => {
   const { sourceId } = useContext(Source.Context);
   const {
     targetPosition,
-    pagesBeforeStart,
-    pagesAfterEnd,
+    entriesBeforeStart,
+    entriesAfterEnd,
     isAutoReloading,
     jumpToTargetPosition,
   } = useContext(LogPositionState.Context);
@@ -39,8 +39,8 @@ const LogEntriesStateProvider: React.FC = ({ children }) => {
 
   const entriesProps = {
     timeKey: targetPosition,
-    pagesBeforeStart,
-    pagesAfterEnd,
+    entriesBeforeStart,
+    entriesAfterEnd,
     filterQuery,
     sourceId,
     isAutoReloading,
