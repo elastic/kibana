@@ -18,7 +18,7 @@ export class FeaturePrivilege extends Privilege {
   }
 
   public get name() {
-    return this.config.name || _.capitalize(this.id);
+    return _.capitalize(this.id);
   }
 
   public get app() {

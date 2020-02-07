@@ -18,12 +18,14 @@ const features: Feature[] = [
     name: 'Feature 1',
     icon: 'spacesApp',
     app: [],
+    privileges: 'none',
   }),
   new Feature({
     id: 'feature-2',
     name: 'Feature 2',
     icon: 'spacesApp',
     app: [],
+    privileges: 'none',
   }),
 ];
 

@@ -24,7 +24,6 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
       catalogue: ['discover'],
       privileges: {
         all: {
-          name: 'All',
           savedObject: {
             all: ['search', 'query'],
             read: ['index-pattern'],
@@ -32,7 +31,6 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
           ui: ['show', 'save', 'saveQuery'],
         },
         read: {
-          name: 'Read',
           savedObject: {
             all: [],
             read: ['index-pattern', 'search', 'query'],
@@ -375,7 +373,6 @@ const timelionFeature: IFeature = {
   catalogue: ['timelion'],
   privileges: {
     all: {
-      name: 'All',
       savedObject: {
         all: ['timelion-sheet'],
         read: ['index-pattern'],
@@ -383,7 +380,6 @@ const timelionFeature: IFeature = {
       ui: ['save'],
     },
     read: {
-      name: 'Read',
       savedObject: {
         all: [],
         read: ['index-pattern', 'timelion-sheet'],

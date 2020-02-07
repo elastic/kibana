@@ -6,22 +6,23 @@
 
 import { FeatureKibanaPrivileges } from './feature_kibana_privileges';
 
-export interface SubFeatureConfig {
+export interface ISubFeature {
   name: string;
-  privilegeGroups: SubFeaturePrivilegeGroupConfig[];
+  privilegeGroups: ISubFeaturePrivilegeGroup[];
 }
-export interface SubFeaturePrivilegeGroupConfig {
+export interface ISubFeaturePrivilegeGroup {
   groupType: 'mutually_exclusive' | 'independent';
-  privileges: SubFeaturePrivilegeConfig[];
+  privileges: ISubFeaturePrivilege[];
 }
 
-export interface SubFeaturePrivilegeConfig extends FeatureKibanaPrivileges {
+export interface ISubFeaturePrivilege extends FeatureKibanaPrivileges {
   id: string;
+  name: string;
   includeIn: 'all' | 'read' | 'none';
 }
 
 export class SubFeature {
-  constructor(protected readonly config: SubFeatureConfig) {}
+  constructor(protected readonly config: ISubFeature) {}
 
   public get name() {
     return this.config.name;

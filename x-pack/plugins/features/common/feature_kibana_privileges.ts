@@ -8,8 +8,6 @@
  * Feature privilege definition
  */
 export interface FeatureKibanaPrivileges {
-  name: string;
-
   /**
    * Whether or not this specific privilege should be excluded from the base privileges.
    */

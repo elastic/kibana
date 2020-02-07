@@ -41,7 +41,6 @@ export class EndpointPlugin
       app: ['endpoint', 'kibana'],
       privileges: {
         all: {
-          name: 'All',
           api: ['resolver'],
           savedObject: {
             all: [],
@@ -50,7 +49,6 @@ export class EndpointPlugin
           ui: ['save'],
         },
         read: {
-          name: 'Read',
           api: [],
           savedObject: {
             all: [],

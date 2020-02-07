@@ -43,7 +43,15 @@ describe('usingPrivileges', () => {
 
       const { usingPrivileges } = disableUICapabilitiesFactory(
         mockRequest,
-        [new Feature({ id: 'fooFeature', name: 'Foo Feature', app: [], navLinkId: 'foo' })],
+        [
+          new Feature({
+            id: 'fooFeature',
+            name: 'Foo Feature',
+            app: [],
+            navLinkId: 'foo',
+            privileges: 'none',
+          }),
+        ],
         mockLoggers.get(),
         mockAuthz
       );
@@ -109,7 +117,15 @@ describe('usingPrivileges', () => {
 
       const { usingPrivileges } = disableUICapabilitiesFactory(
         mockRequest,
-        [new Feature({ id: 'fooFeature', name: 'Foo Feature', app: [], navLinkId: 'foo' })],
+        [
+          new Feature({
+            id: 'fooFeature',
+            name: 'Foo Feature',
+            app: [],
+            navLinkId: 'foo',
+            privileges: 'none',
+          }),
+        ],
         mockLoggers.get(),
         mockAuthz
       );
@@ -232,12 +248,14 @@ describe('usingPrivileges', () => {
           name: 'Foo Feature',
           navLinkId: 'foo',
           app: [],
+          privileges: 'none',
         }),
         new Feature({
           id: 'barFeature',
           name: 'Bar Feature',
           navLinkId: 'bar',
           app: [],
+          privileges: 'none',
         }),
       ],
       loggingServiceMock.create().get(),
@@ -316,12 +334,14 @@ describe('usingPrivileges', () => {
           name: 'Foo Feature',
           navLinkId: 'foo',
           app: [],
+          privileges: 'none',
         }),
         new Feature({
           id: 'barFeature',
           name: 'Bar Feature',
           navLinkId: 'bar',
           app: [],
+          privileges: 'none',
         }),
       ],
       loggingServiceMock.create().get(),
@@ -380,7 +400,15 @@ describe('all', () => {
 
     const { all } = disableUICapabilitiesFactory(
       mockRequest,
-      [new Feature({ id: 'fooFeature', name: 'Foo Feature', app: [], navLinkId: 'foo' })],
+      [
+        new Feature({
+          id: 'fooFeature',
+          name: 'Foo Feature',
+          app: [],
+          navLinkId: 'foo',
+          privileges: 'none',
+        }),
+      ],
       loggingServiceMock.create().get(),
       mockAuthz
     );

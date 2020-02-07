@@ -7,37 +7,21 @@ import { EuiIcon, EuiIconTip, EuiText, IconType, PropsOf, EuiToolTip } from '@el
 import { FormattedMessage } from '@kbn/i18n/react';
 import _ from 'lodash';
 import React, { ReactNode, FC } from 'react';
-import { PrivilegeExplanation } from '../../../../../../../common/model';
 import { NO_PRIVILEGE_VALUE } from '../constants';
 
 interface Props extends PropsOf<typeof EuiText> {
   privilege: string | string[] | undefined;
-  explanation?: PrivilegeExplanation;
   iconType?: IconType;
   iconTooltipContent?: ReactNode;
   tooltipContent?: ReactNode;
 }
 
 export const PrivilegeDisplay: FC<Props> = (props: Props) => {
-  const { explanation } = props;
-
-  if (!explanation) {
-    return <SimplePrivilegeDisplay {...props} />;
-  }
-
-  // if (explanation.supersededPrivilege) {
-  //   return <SupersededPrivilegeDisplay {...props} />;
-  // }
-
-  if (!explanation.isDirectlyAssigned()) {
-    return <EffectivePrivilegeDisplay {...props} />;
-  }
-
   return <SimplePrivilegeDisplay {...props} />;
 };
 
 const SimplePrivilegeDisplay: FC<Props> = (props: Props) => {
-  const { privilege, iconType, iconTooltipContent, explanation, tooltipContent, ...rest } = props;
+  const { privilege, iconType, iconTooltipContent, tooltipContent, ...rest } = props;
 
   const text = (
     <EuiText {...rest}>
@@ -75,7 +59,7 @@ export const SupersededPrivilegeDisplay: FC<Props> = (props: Props) => {
 };
 
 export const EffectivePrivilegeDisplay: FC<Props> = (props: Props) => {
-  const { explanation, ...rest } = props;
+  const { ...rest } = props;
 
   const source = getReadablePrivilegeSource('TODO');
 

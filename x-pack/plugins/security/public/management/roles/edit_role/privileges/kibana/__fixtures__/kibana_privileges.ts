@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KibanaPrivileges, RawKibanaPrivileges } from '../../../../../../../common/model';
+import { RawKibanaPrivileges } from '../../../../../../../common/model';
 import { Feature } from '../../../../../../../../features/public';
+import { KibanaPrivileges } from '../../../../model';
 
 function* subFeaturePrivilegeIterator(feature: Feature) {
   for (const subFeature of feature.subFeatures || []) {
@@ -30,7 +31,7 @@ const createRawKibanaPrivileges = (features: Feature[]) => {
   };
 
   for (const feature of features) {
-    if (!feature.privileges) continue;
+    if (feature.privileges === 'none') continue;
 
     const primaryAllAction = `feature/${feature.id}/allAction`;
     const primaryReadAction = `feature/${feature.id}/readAction`;

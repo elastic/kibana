@@ -15,16 +15,13 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component, Fragment } from 'react';
 
 import { Feature } from '../../../../../../../../features/public';
-import {
-  KibanaPrivileges,
-  Role,
-  RoleKibanaPrivilege,
-  copyRole,
-} from '../../../../../../../common/model';
+import { Role, RoleKibanaPrivilege, copyRole } from '../../../../../../../common/model';
 import { isGlobalPrivilegeDefinition } from '../../../privilege_utils';
 import { CUSTOM_PRIVILEGE_VALUE, NO_PRIVILEGE_VALUE } from '../constants';
 import { FeatureTable } from '../feature_table';
 import { UnsupportedSpacePrivilegesWarning } from './unsupported_space_privileges_warning';
+import { KibanaPrivileges } from '../../../../model';
+import { PrivilegeFormCalculator } from '../privilege_calculator';
 
 interface Props {
   role: Role;
@@ -56,16 +53,8 @@ export class SimplePrivilegeSection extends Component<Props, State> {
   public render() {
     const kibanaPrivilege = this.getDisplayedBasePrivilege();
 
-    const effectivePrivileges = this.props.privilegeCalculator.explainAllEffectiveFeaturePrivileges(
-      this.props.role,
-      this.state.globalPrivsIndex
-    );
-
     // TODO: bad logic here.
-    const hasReservedPrivileges = effectivePrivileges.exists(
-      (featureId, privilegeId, explanation) =>
-        explanation.isGranted() && !explanation.privilege.privilege.actions
-    );
+    const hasReservedPrivileges = false;
 
     const description = (
       <p>
@@ -216,7 +205,13 @@ export class SimplePrivilegeSection extends Component<Props, State> {
               <FeatureTable
                 role={this.props.role}
                 kibanaPrivileges={this.props.kibanaPrivileges}
-                privilegeCalculator={this.props.privilegeCalculator}
+                privilegeCalculator={
+                  new PrivilegeFormCalculator(
+                    this.props.kibanaPrivileges,
+                    this.props.role,
+                    this.props.role.kibana.findIndex(k => isGlobalPrivilegeDefinition(k))
+                  )
+                }
                 onChange={this.onFeaturePrivilegeChange}
                 onChangeAll={this.onChangeAllFeaturePrivileges}
                 spacesIndex={this.props.role.kibana.findIndex(k => isGlobalPrivilegeDefinition(k))}

@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SubFeaturePrivilegeGroupConfig } from '../../../../../features/common';
+import { ISubFeaturePrivilegeGroup } from '../../../../../features/common';
 import { SubFeaturePrivilege } from './sub_feature_privilege';
 
 export class SubFeaturePrivilegeGroup {
   constructor(
-    private readonly config: SubFeaturePrivilegeGroupConfig,
+    private readonly config: ISubFeaturePrivilegeGroup,
     private readonly actionMapping: { [privilegeId: string]: string[] } = {}
   ) {}
 

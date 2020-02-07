@@ -8,10 +8,10 @@ import { EuiButtonGroup, EuiButtonGroupProps, EuiComboBox, EuiSuperSelect } from
 import React from 'react';
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { Feature } from '../../../../../../../../features/public';
-import { KibanaPrivileges, Role } from '../../../../../../../common/model';
+import { Role } from '../../../../../../../common/model';
 import { SimplePrivilegeSection } from './simple_privilege_section';
 import { UnsupportedSpacePrivilegesWarning } from './unsupported_space_privileges_warning';
-import { POCPrivilegeCalculator } from '../poc_privilege_calculator';
+import { KibanaPrivileges } from '../../../../model';
 
 const buildProps = (customProps: any = {}) => {
   const kibanaPrivileges = new KibanaPrivileges(
@@ -43,7 +43,6 @@ const buildProps = (customProps: any = {}) => {
   return {
     editable: true,
     kibanaPrivileges,
-    privilegeCalculator: new POCPrivilegeCalculator(kibanaPrivileges),
     features: [
       new Feature({
         id: 'feature1',
@@ -52,7 +51,6 @@ const buildProps = (customProps: any = {}) => {
         icon: 'spacesApp',
         privileges: {
           all: {
-            name: 'All',
             app: ['app'],
             savedObject: {
               all: ['foo'],
@@ -61,7 +59,6 @@ const buildProps = (customProps: any = {}) => {
             ui: ['app-ui'],
           },
           read: {
-            name: 'Read',
             app: ['app'],
             savedObject: {
               all: [],

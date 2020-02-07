@@ -67,7 +67,6 @@ export class KibanaPrivilegesRegion extends Component<Props, {}> {
         />
       );
     } else {
-      // TODO
       return (
         <SimplePrivilegeSection
           kibanaPrivileges={kibanaPrivileges}

@@ -4,37 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FeatureKibanaPrivileges } from '../../../features/common';
+import { ISubFeaturePrivilege } from '../../../../../features/public';
 import { FeaturePrivilege } from './feature_privilege';
-
-export interface SubFeaturePrivilegeConfig extends FeatureKibanaPrivileges {
-  id: string;
-  includeIn: 'all' | 'read' | 'none';
-}
 
 export class SubFeaturePrivilege extends FeaturePrivilege {
   constructor(
-    protected readonly subPrivilegeConfig: SubFeaturePrivilegeConfig,
+    protected readonly subPrivilegeConfig: ISubFeaturePrivilege,
     public readonly actions: string[] = []
   ) {
     super(subPrivilegeConfig.id, subPrivilegeConfig, actions);
   }
 
-  public static empty() {
-    return new SubFeaturePrivilege(
-      {
-        id: '____EMPTY____',
-        name: '____EMPTY SUB FEATURE PRIVILEGE____',
-        includeIn: 'none',
-        api: [],
-        app: [],
-        ui: [],
-        savedObject: {
-          all: [],
-          read: [],
-        },
-      } as SubFeaturePrivilegeConfig,
-      []
-    );
+  public get name() {
+    return this.subPrivilegeConfig.name;
   }
 }

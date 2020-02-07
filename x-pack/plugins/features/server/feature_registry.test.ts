@@ -13,6 +13,7 @@ describe('FeatureRegistry', () => {
       id: 'test-feature',
       name: 'Test Feature',
       app: [],
+      privileges: 'none',
     };
 
     const featureRegistry = new FeatureRegistry();
@@ -40,7 +41,6 @@ describe('FeatureRegistry', () => {
       },
       privileges: {
         all: {
-          name: 'All',
           catalogue: ['foo'],
           management: {
             foo: ['bar'],
@@ -54,7 +54,6 @@ describe('FeatureRegistry', () => {
           ui: ['allowsFoo', 'showBar', 'showBaz'],
         },
         read: {
-          name: 'Read',
           savedObject: {
             all: [],
             read: [],
@@ -65,7 +64,6 @@ describe('FeatureRegistry', () => {
       privilegesTooltip: 'some fancy tooltip',
       reserved: {
         privilege: {
-          name: '',
           catalogue: ['foo'],
           management: {
             foo: ['bar'],
@@ -99,7 +97,6 @@ describe('FeatureRegistry', () => {
       app: [],
       privileges: {
         all: {
-          name: 'All',
           ui: [],
           savedObject: {
             all: [],
@@ -107,7 +104,6 @@ describe('FeatureRegistry', () => {
           },
         },
         read: {
-          name: 'Read',
           ui: [],
           savedObject: {
             all: [],
@@ -120,6 +116,13 @@ describe('FeatureRegistry', () => {
     const featureRegistry = new FeatureRegistry();
     featureRegistry.register(feature);
     const result = featureRegistry.getAll();
+
+    if (result[0].privileges === 'none') {
+      expect(result[0].privileges).toHaveProperty('all');
+      expect(result[0].privileges).toHaveProperty('read');
+      // makes TS happy below. The expect clauses above are guaranteed to throw.
+      return;
+    }
 
     const allPrivilege = result[0].privileges?.all;
     expect(allPrivilege?.savedObject.all).toEqual(['telemetry']);
@@ -132,7 +135,6 @@ describe('FeatureRegistry', () => {
       app: [],
       privileges: {
         all: {
-          name: 'All',
           ui: [],
           savedObject: {
             all: [],
@@ -140,7 +142,6 @@ describe('FeatureRegistry', () => {
           },
         },
         read: {
-          name: 'Read',
           ui: [],
           savedObject: {
             all: [],
@@ -154,6 +155,13 @@ describe('FeatureRegistry', () => {
     featureRegistry.register(feature);
     const result = featureRegistry.getAll();
 
+    if (result[0].privileges === 'none') {
+      expect(result[0].privileges).toHaveProperty('all');
+      expect(result[0].privileges).toHaveProperty('read');
+      // makes TS happy below. The expect clauses above are guaranteed to throw.
+      return;
+    }
+
     const allPrivilege = result[0].privileges?.all;
     const readPrivilege = result[0].privileges?.read;
     expect(allPrivilege?.savedObject.read).toEqual(['config', 'url']);
@@ -165,10 +173,10 @@ describe('FeatureRegistry', () => {
       id: 'test-feature',
       name: 'Test Feature',
       app: [],
+      privileges: 'none',
       reserved: {
         description: 'foo',
         privilege: {
-          name: '',
           ui: [],
           savedObject: {
             all: [],
@@ -194,7 +202,6 @@ describe('FeatureRegistry', () => {
       app: [],
       privileges: {
         all: {
-          name: 'All',
           ui: [],
           savedObject: {
             all: ['telemetry'],
@@ -202,7 +209,6 @@ describe('FeatureRegistry', () => {
           },
         },
         read: {
-          name: 'Read',
           ui: [],
           savedObject: {
             all: [],
@@ -216,8 +222,14 @@ describe('FeatureRegistry', () => {
     featureRegistry.register(feature);
     const result = featureRegistry.getAll();
 
-    const allPrivilege = result[0].privileges?.all;
-    const readPrivilege = result[0].privileges?.read;
+    if (result[0].privileges === 'none') {
+      expect(result[0].privileges).toHaveProperty('all');
+      expect(result[0].privileges).toHaveProperty('read');
+      // makes TS happy below. The expect clauses above are guaranteed to throw.
+      return;
+    }
+    const allPrivilege = result[0].privileges!.all;
+    const readPrivilege = result[0].privileges!.read;
     expect(allPrivilege?.savedObject.all).toEqual(['telemetry']);
     expect(allPrivilege?.savedObject.read).toEqual(['config', 'url']);
     expect(readPrivilege?.savedObject.read).toEqual(['config', 'url']);
@@ -228,12 +240,14 @@ describe('FeatureRegistry', () => {
       id: 'test-feature',
       name: 'Test Feature',
       app: [],
+      privileges: 'none',
     };
 
     const duplicateFeature: IFeature = {
       id: 'test-feature',
       name: 'Duplicate Test Feature',
       app: [],
+      privileges: 'none',
     };
 
     const featureRegistry = new FeatureRegistry();
@@ -253,6 +267,7 @@ describe('FeatureRegistry', () => {
           name: 'some feature',
           navLinkId: prohibitedChars,
           app: [],
+          privileges: 'none',
         })
       ).toThrowErrorMatchingSnapshot();
     });
@@ -267,6 +282,7 @@ describe('FeatureRegistry', () => {
             kibana: [prohibitedChars],
           },
           app: [],
+          privileges: 'none',
         })
       ).toThrowErrorMatchingSnapshot();
     });
@@ -279,6 +295,7 @@ describe('FeatureRegistry', () => {
           name: 'some feature',
           catalogue: [prohibitedChars],
           app: [],
+          privileges: 'none',
         })
       ).toThrowErrorMatchingSnapshot();
     });
@@ -292,6 +309,7 @@ describe('FeatureRegistry', () => {
           id: prohibitedId,
           name: 'some feature',
           app: [],
+          privileges: 'none',
         })
       ).toThrowErrorMatchingSnapshot();
     });
@@ -329,7 +347,6 @@ describe('FeatureRegistry', () => {
       app: ['bar'],
       privileges: {
         all: {
-          name: 'All',
           savedObject: {
             all: [],
             read: [],
@@ -338,7 +355,6 @@ describe('FeatureRegistry', () => {
           app: ['foo', 'bar', 'baz'],
         },
         read: {
-          name: 'Read',
           savedObject: {
             all: [],
             read: [],
@@ -361,10 +377,10 @@ describe('FeatureRegistry', () => {
       id: 'test-feature',
       name: 'Test Feature',
       app: ['bar'],
+      privileges: 'none',
       reserved: {
         description: 'something',
         privilege: {
-          name: '',
           savedObject: {
             all: [],
             read: [],
@@ -390,7 +406,6 @@ describe('FeatureRegistry', () => {
       catalogue: ['bar'],
       privileges: {
         all: {
-          name: 'All',
           catalogue: ['foo', 'bar', 'baz'],
           savedObject: {
             all: [],
@@ -400,7 +415,6 @@ describe('FeatureRegistry', () => {
           app: [],
         },
         read: {
-          name: 'Read',
           catalogue: ['foo', 'bar', 'baz'],
           savedObject: {
             all: [],
@@ -425,10 +439,10 @@ describe('FeatureRegistry', () => {
       name: 'Test Feature',
       app: [],
       catalogue: ['bar'],
+      privileges: 'none',
       reserved: {
         description: 'something',
         privilege: {
-          name: '',
           catalogue: ['foo', 'bar', 'baz'],
           savedObject: {
             all: [],
@@ -458,7 +472,6 @@ describe('FeatureRegistry', () => {
       },
       privileges: {
         all: {
-          name: 'All',
           catalogue: ['bar'],
           management: {
             elasticsearch: ['hey'],
@@ -471,7 +484,6 @@ describe('FeatureRegistry', () => {
           app: [],
         },
         read: {
-          name: 'Read',
           catalogue: ['bar'],
           management: {
             elasticsearch: ['hey'],
@@ -502,10 +514,10 @@ describe('FeatureRegistry', () => {
       management: {
         kibana: ['hey'],
       },
+      privileges: 'none',
       reserved: {
         description: 'something',
         privilege: {
-          name: '',
           catalogue: ['bar'],
           management: {
             kibana: ['hey-there'],
@@ -532,11 +544,13 @@ describe('FeatureRegistry', () => {
       id: 'test-feature',
       name: 'Test Feature',
       app: [],
+      privileges: 'none',
     };
     const feature2: IFeature = {
       id: 'test-feature-2',
       name: 'Test Feature 2',
       app: [],
+      privileges: 'none',
     };
 
     const featureRegistry = new FeatureRegistry();

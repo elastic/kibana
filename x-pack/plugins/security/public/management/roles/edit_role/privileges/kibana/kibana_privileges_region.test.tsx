@@ -6,12 +6,13 @@
 
 import { shallow } from 'enzyme';
 import React from 'react';
-import { KibanaPrivileges, Role } from '../../../../../../common/model';
+import { Role } from '../../../../../../common/model';
 import { RoleValidator } from '../../validate_role';
 import { KibanaPrivilegesRegion } from './kibana_privileges_region';
 import { SimplePrivilegeSection } from './simple_privilege_section';
 import { TransformErrorSection } from './transform_error_section';
 import { SpaceAwarePrivilegeSection } from './space_aware_privilege_section';
+import { KibanaPrivileges } from '../../../model';
 
 const buildProps = (customProps = {}) => {
   return {

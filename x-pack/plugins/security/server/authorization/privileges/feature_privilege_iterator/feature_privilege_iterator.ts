@@ -17,32 +17,24 @@ export function* featurePrivilegeIterator(
   feature: Feature,
   options: IteratorOptions
 ): IterableIterator<{ privilegeId: string; privilege: FeatureKibanaPrivileges }> {
-  try {
-    for (const entry of Object.entries(feature.privileges || {})) {
-      const [privilegeId, privilege] = entry;
+  if (feature.privileges === 'none') return;
 
-      if (options.predicate && !options.predicate(privilegeId, privilege)) {
-        continue;
-      }
+  for (const entry of Object.entries(feature.privileges)) {
+    const [privilegeId, privilege] = entry;
 
-      if (options.augmentWithSubFeaturePrivileges) {
-        yield { privilegeId, privilege: mergeWithSubFeatures(privilegeId, privilege, feature) };
-      } else {
-        yield { privilegeId, privilege };
-      }
+    if (options.predicate && !options.predicate(privilegeId, privilege)) {
+      continue;
     }
-  } catch (e) {
-    console.error('ERROR ITERATING OVER FEATURE ' + feature.id + ': ' + e);
-    console.error('ERROR ITERATING OVER FEATURE ' + feature.id + ': ' + e);
-    console.error('ERROR ITERATING OVER FEATURE ' + feature.id + ': ' + e);
-    console.error('ERROR ITERATING OVER FEATURE ' + feature.id + ': ' + e);
-    console.error('ERROR ITERATING OVER FEATURE ' + feature.id + ': ' + e);
-    console.error('ERROR ITERATING OVER FEATURE ' + feature.id + ': ' + e);
-    console.error('ERROR ITERATING OVER FEATURE ' + feature.id + ': ' + e);
-    console.error('ERROR ITERATING OVER FEATURE ' + feature.id + ': ' + e);
+
+    if (options.augmentWithSubFeaturePrivileges) {
+      yield { privilegeId, privilege: mergeWithSubFeatures(privilegeId, privilege, feature) };
+    } else {
+      yield { privilegeId, privilege };
+    }
   }
 }
 
+// TODO: determine how this merge logic should work
 function mergeWithSubFeatures(
   privilegeId: string,
   privilege: FeatureKibanaPrivileges,

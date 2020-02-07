@@ -5,7 +5,7 @@
  */
 
 import { FeatureKibanaPrivileges } from './feature_kibana_privileges';
-import { SubFeatureConfig, SubFeature } from './sub_feature';
+import { ISubFeature, SubFeature } from './sub_feature';
 
 export class Feature {
   constructor(protected readonly config: IFeature) {}
@@ -149,12 +149,14 @@ export interface IFeature {
    * ```
    * @see FeatureKibanaPrivileges
    */
-  privileges?: {
-    all: FeatureKibanaPrivileges;
-    read: FeatureKibanaPrivileges;
-  };
+  privileges:
+    | {
+        all: FeatureKibanaPrivileges;
+        read: FeatureKibanaPrivileges;
+      }
+    | 'none';
 
-  subFeatures?: SubFeatureConfig[];
+  subFeatures?: ISubFeature[];
 
   /**
    * Optional message to display on the Role Management screen when configuring permissions for this feature.

@@ -13,7 +13,7 @@ const actions = new Actions('1.0.0-zeta1');
 describe('features', () => {
   test('actions defined at the feature cascade to the privileges', () => {
     const features: Feature[] = [
-      {
+      new Feature({
         id: 'foo-feature',
         name: 'Foo Feature',
         icon: 'arrowDown',
@@ -39,7 +39,7 @@ describe('features', () => {
             ui: [],
           },
         },
-      },
+      }),
     ];
 
     const mockFeaturesService = { getFeatures: jest.fn().mockReturnValue(features) };
@@ -75,7 +75,7 @@ describe('features', () => {
 
   test('actions defined at the privilege take precedence', () => {
     const features: Feature[] = [
-      {
+      new Feature({
         id: 'foo',
         name: 'Foo Feature',
         icon: 'arrowDown',
@@ -110,7 +110,7 @@ describe('features', () => {
             ui: [],
           },
         },
-      },
+      }),
     ];
 
     const mockXPackMainPlugin = {
@@ -147,7 +147,7 @@ describe('features', () => {
 
   test(`actions only specified at the privilege are alright too`, () => {
     const features: Feature[] = [
-      {
+      new Feature({
         id: 'foo',
         name: 'Foo Feature',
         icon: 'arrowDown',
@@ -168,7 +168,7 @@ describe('features', () => {
             ui: ['read-ui-1', 'read-ui-2'],
           },
         },
-      },
+      }),
     ];
 
     const mockXPackMainPlugin = {
@@ -241,13 +241,13 @@ describe('features', () => {
 
   test(`features with no privileges aren't listed`, () => {
     const features: Feature[] = [
-      {
+      new Feature({
         id: 'foo',
         name: 'Foo Feature',
         icon: 'arrowDown',
         app: [],
-        privileges: {},
-      },
+        privileges: 'none',
+      }),
     ];
 
     const mockXPackMainPlugin = {
@@ -278,7 +278,7 @@ describe('features', () => {
   describe(`${group}`, () => {
     test('actions defined only at the feature are included in `all` and `read`', () => {
       const features: Feature[] = [
-        {
+        new Feature({
           id: 'foo',
           name: 'Foo Feature',
           icon: 'arrowDown',
@@ -304,7 +304,7 @@ describe('features', () => {
               ui: [],
             },
           },
-        },
+        }),
       ];
 
       const mockXPackMainPlugin = {
@@ -351,7 +351,7 @@ describe('features', () => {
 
     test('actions defined in any feature privilege are included in `all`', () => {
       const features: Feature[] = [
-        {
+        new Feature({
           id: 'foo',
           name: 'Foo Feature',
           icon: 'arrowDown',
@@ -362,17 +362,6 @@ describe('features', () => {
             foo: ['ignore-me-1', 'ignore-me-2'],
           },
           privileges: {
-            bar: {
-              management: {
-                'bar-management': ['bar-management-1', 'bar-management-2'],
-              },
-              catalogue: ['bar-catalogue-1', 'bar-catalogue-2'],
-              savedObject: {
-                all: ['bar-savedObject-all-1', 'bar-savedObject-all-2'],
-                read: ['bar-savedObject-read-1', 'bar-savedObject-read-2'],
-              },
-              ui: ['bar-ui-1', 'bar-ui-2'],
-            },
             all: {
               management: {
                 'all-management': ['all-management-1', 'all-management-2'],
@@ -396,7 +385,7 @@ describe('features', () => {
               ui: ['read-ui-1', 'read-ui-2'],
             },
           },
-        },
+        }),
       ];
 
       const mockXPackMainPlugin = {
@@ -417,35 +406,7 @@ describe('features', () => {
               actions.ui.get('management', 'kibana', 'spaces'),
             ]
           : []),
-        actions.ui.get('catalogue', 'bar-catalogue-1'),
-        actions.ui.get('catalogue', 'bar-catalogue-2'),
-        actions.ui.get('management', 'bar-management', 'bar-management-1'),
-        actions.ui.get('management', 'bar-management', 'bar-management-2'),
         actions.ui.get('navLinks', 'kibana:foo'),
-        actions.savedObject.get('bar-savedObject-all-1', 'bulk_get'),
-        actions.savedObject.get('bar-savedObject-all-1', 'get'),
-        actions.savedObject.get('bar-savedObject-all-1', 'find'),
-        actions.savedObject.get('bar-savedObject-all-1', 'create'),
-        actions.savedObject.get('bar-savedObject-all-1', 'bulk_create'),
-        actions.savedObject.get('bar-savedObject-all-1', 'update'),
-        actions.savedObject.get('bar-savedObject-all-1', 'bulk_update'),
-        actions.savedObject.get('bar-savedObject-all-1', 'delete'),
-        actions.savedObject.get('bar-savedObject-all-2', 'bulk_get'),
-        actions.savedObject.get('bar-savedObject-all-2', 'get'),
-        actions.savedObject.get('bar-savedObject-all-2', 'find'),
-        actions.savedObject.get('bar-savedObject-all-2', 'create'),
-        actions.savedObject.get('bar-savedObject-all-2', 'bulk_create'),
-        actions.savedObject.get('bar-savedObject-all-2', 'update'),
-        actions.savedObject.get('bar-savedObject-all-2', 'bulk_update'),
-        actions.savedObject.get('bar-savedObject-all-2', 'delete'),
-        actions.savedObject.get('bar-savedObject-read-1', 'bulk_get'),
-        actions.savedObject.get('bar-savedObject-read-1', 'get'),
-        actions.savedObject.get('bar-savedObject-read-1', 'find'),
-        actions.savedObject.get('bar-savedObject-read-2', 'bulk_get'),
-        actions.savedObject.get('bar-savedObject-read-2', 'get'),
-        actions.savedObject.get('bar-savedObject-read-2', 'find'),
-        actions.ui.get('foo', 'bar-ui-1'),
-        actions.ui.get('foo', 'bar-ui-2'),
         actions.ui.get('catalogue', 'all-catalogue-1'),
         actions.ui.get('catalogue', 'all-catalogue-2'),
         actions.ui.get('management', 'all-management', 'all-management-1'),
@@ -508,7 +469,7 @@ describe('features', () => {
 
     test('actions defined in a feature privilege with name `read` are included in `read`', () => {
       const features: Feature[] = [
-        {
+        new Feature({
           id: 'foo',
           name: 'Foo Feature',
           icon: 'arrowDown',
@@ -519,17 +480,6 @@ describe('features', () => {
             foo: ['ignore-me-1', 'ignore-me-2'],
           },
           privileges: {
-            bar: {
-              management: {
-                'ignore-me': ['ignore-me-1', 'ignore-me-2'],
-              },
-              catalogue: ['ignore-me-1', 'ignore-me-2'],
-              savedObject: {
-                all: ['ignore-me-1', 'ignore-me-2'],
-                read: ['ignore-me-1', 'ignore-me-2'],
-              },
-              ui: ['ignore-me-1', 'ignore-me-2'],
-            },
             all: {
               management: {
                 'ignore-me': ['ignore-me-1', 'ignore-me-2'],
@@ -553,7 +503,7 @@ describe('features', () => {
               ui: ['read-ui-1', 'read-ui-2'],
             },
           },
-        },
+        }),
       ];
 
       const mockXPackMainPlugin = {
@@ -600,7 +550,7 @@ describe('features', () => {
 
     test('actions defined in a reserved privilege are not included in `all` or `read`', () => {
       const features: Feature[] = [
-        {
+        new Feature({
           id: 'foo',
           name: 'Foo Feature',
           icon: 'arrowDown',
@@ -610,7 +560,7 @@ describe('features', () => {
           management: {
             foo: ['ignore-me-1', 'ignore-me-2'],
           },
-          privileges: {},
+          privileges: 'none',
           reserved: {
             privilege: {
               savedObject: {
@@ -621,7 +571,7 @@ describe('features', () => {
             },
             description: '',
           },
-        },
+        }),
       ];
 
       const mockXPackMainPlugin = {
@@ -649,7 +599,7 @@ describe('features', () => {
 
     test('actions defined in a feature with excludeFromBasePrivileges are not included in `all` or `read', () => {
       const features: Feature[] = [
-        {
+        new Feature({
           id: 'foo',
           name: 'Foo Feature',
           excludeFromBasePrivileges: true,
@@ -661,17 +611,6 @@ describe('features', () => {
             foo: ['ignore-me-1', 'ignore-me-2'],
           },
           privileges: {
-            bar: {
-              management: {
-                'bar-management': ['bar-management-1'],
-              },
-              catalogue: ['bar-catalogue-1'],
-              savedObject: {
-                all: ['bar-savedObject-all-1'],
-                read: ['bar-savedObject-read-1'],
-              },
-              ui: ['bar-ui-1'],
-            },
             all: {
               management: {
                 'all-management': ['all-management-1'],
@@ -695,7 +634,7 @@ describe('features', () => {
               ui: ['read-ui-1'],
             },
           },
-        },
+        }),
       ];
 
       const mockXPackMainPlugin = {
@@ -723,7 +662,7 @@ describe('features', () => {
 
     test('actions defined in an individual feature privilege with excludeFromBasePrivileges are not included in `all` or `read`', () => {
       const features: Feature[] = [
-        {
+        new Feature({
           id: 'foo',
           name: 'Foo Feature',
           icon: 'arrowDown',
@@ -734,18 +673,6 @@ describe('features', () => {
             foo: ['ignore-me-1', 'ignore-me-2'],
           },
           privileges: {
-            bar: {
-              excludeFromBasePrivileges: true,
-              management: {
-                'bar-management': ['bar-management-1'],
-              },
-              catalogue: ['bar-catalogue-1'],
-              savedObject: {
-                all: ['bar-savedObject-all-1'],
-                read: ['bar-savedObject-read-1'],
-              },
-              ui: ['bar-ui-1'],
-            },
             all: {
               excludeFromBasePrivileges: true,
               management: {
@@ -771,7 +698,7 @@ describe('features', () => {
               ui: ['read-ui-1'],
             },
           },
-        },
+        }),
       ];
 
       const mockXPackMainPlugin = {
@@ -802,7 +729,7 @@ describe('features', () => {
 describe('reserved', () => {
   test('actions defined at the feature cascade to the privileges', () => {
     const features: Feature[] = [
-      {
+      new Feature({
         id: 'foo',
         name: 'Foo Feature',
         icon: 'arrowDown',
@@ -812,7 +739,7 @@ describe('reserved', () => {
         management: {
           foo: ['management-1', 'management-2'],
         },
-        privileges: {},
+        privileges: 'none',
         reserved: {
           privilege: {
             savedObject: {
@@ -823,7 +750,7 @@ describe('reserved', () => {
           },
           description: '',
         },
-      },
+      }),
     ];
 
     const mockXPackMainPlugin = {
@@ -847,7 +774,7 @@ describe('reserved', () => {
 
   test('actions defined at the reservedPrivilege take precedence', () => {
     const features: Feature[] = [
-      {
+      new Feature({
         id: 'foo',
         name: 'Foo Feature',
         icon: 'arrowDown',
@@ -856,7 +783,7 @@ describe('reserved', () => {
         management: {
           foo: ['ignore-me-1', 'ignore-me-2'],
         },
-        privileges: {},
+        privileges: 'none',
         reserved: {
           privilege: {
             app: ['app-1', 'app-2'],
@@ -872,7 +799,7 @@ describe('reserved', () => {
           },
           description: '',
         },
-      },
+      }),
     ];
 
     const mockXPackMainPlugin = {
@@ -895,12 +822,12 @@ describe('reserved', () => {
 
   test(`actions only specified at the privilege are alright too`, () => {
     const features: Feature[] = [
-      {
+      new Feature({
         id: 'foo',
         name: 'Foo Feature',
         icon: 'arrowDown',
         app: [],
-        privileges: {},
+        privileges: 'none',
         reserved: {
           privilege: {
             savedObject: {
@@ -911,7 +838,7 @@ describe('reserved', () => {
           },
           description: '',
         },
-      },
+      }),
     ];
 
     const mockXPackMainPlugin = {
@@ -952,7 +879,7 @@ describe('reserved', () => {
 
   test(`features with no reservedPrivileges aren't listed`, () => {
     const features: Feature[] = [
-      {
+      new Feature({
         id: 'foo',
         name: 'Foo Feature',
         icon: 'arrowDown',
@@ -965,8 +892,15 @@ describe('reserved', () => {
             },
             ui: ['foo'],
           },
+          read: {
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: ['foo'],
+          },
         },
-      },
+      }),
     ];
 
     const mockXPackMainPlugin = {

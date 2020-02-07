@@ -20,7 +20,6 @@ export const createFeature = (
     catalogue: [],
     privileges: {
       all: {
-        name: 'All',
         excludeFromBasePrivileges: config.excludeFromBaseAll,
         savedObject: {
           all: [],
@@ -29,7 +28,6 @@ export const createFeature = (
         ui: [],
       },
       read: {
-        name: 'Read',
         excludeFromBasePrivileges: config.excludeFromBaseRead,
         savedObject: {
           all: [],
