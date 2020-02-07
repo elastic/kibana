@@ -3,7 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { ResolverLegacyData, ResolverPhase1Data, ResolverData } from '../../../common/types';
+import {
+  ResolverLegacyData,
+  ResolverElasticEndpointData,
+  ResolverData,
+} from '../../../common/types';
 import { JSONish } from '../../types';
 
 export const legacyEntityIDDelimiter = '|';
@@ -17,7 +21,7 @@ export interface CountQueryInfo {
 export interface ResolverNode {
   entityID: string;
   parentEntityID: string;
-  esData: ResolverLegacyData | ResolverPhase1Data;
+  esData: ResolverLegacyData | ResolverElasticEndpointData;
 }
 
 export interface ResolverDataHit {

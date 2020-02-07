@@ -6,7 +6,7 @@
 import { ResolverData } from '../../../common/types';
 import { EventBuilder } from './event_builder.test';
 
-export class Phase1Builder implements EventBuilder {
+export class ElasticEndpointBuilder implements EventBuilder {
   private childCounter: number = 0;
   constructor(
     private readonly originEntityID: string,

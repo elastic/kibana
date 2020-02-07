@@ -131,7 +131,7 @@ export interface ResolverLegacyData {
   };
 }
 
-export interface ResolverPhase1Data {
+export interface ResolverElasticEndpointData {
   event: {
     category: string;
     type: string;
@@ -146,7 +146,7 @@ export interface ResolverPhase1Data {
   };
 }
 
-export type ResolverData = ResolverLegacyData | ResolverPhase1Data;
+export type ResolverData = ResolverLegacyData | ResolverElasticEndpointData;
 
 export interface ResolverResultNode {
   entity_id: string | undefined;

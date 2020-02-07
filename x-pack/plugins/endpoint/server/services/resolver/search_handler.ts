@@ -7,7 +7,7 @@ import { IScopedClusterClient } from 'kibana/server';
 import { CountResponse } from 'elasticsearch';
 import {
   ResolverLegacyData,
-  ResolverPhase1Data,
+  ResolverElasticEndpointData,
   ResolverData,
   BaseResult,
   ResolverResponse,
@@ -15,7 +15,7 @@ import {
 import { EndpointAppContext, JSONish, Total } from '../../types';
 import { ResolverNode, ResolverDataHit } from './common';
 import { ResolverLegacyNode } from './legacy_node';
-import { ResolverPhase1Node } from './phase1_node';
+import { ResolverElasticEndpointNode } from './es_endpoint_node';
 import { getPagination, PaginationInfo } from './query_builder';
 
 export interface ParentAndResolverData {
@@ -33,7 +33,7 @@ export abstract class BaseSearchHandler {
   ) {}
 
   protected static isLegacyData(
-    data: ResolverLegacyData | ResolverPhase1Data
+    data: ResolverLegacyData | ResolverElasticEndpointData
   ): data is ResolverLegacyData {
     return (data as ResolverLegacyData).endgame?.unique_pid !== undefined;
   }
@@ -42,7 +42,7 @@ export abstract class BaseSearchHandler {
     if (BaseSearchHandler.isLegacyData(data)) {
       return new ResolverLegacyNode(data);
     }
-    return new ResolverPhase1Node(data);
+    return new ResolverElasticEndpointNode(data);
   }
   protected async buildPagination(total: Total): Promise<BaseResult> {
     const { page, pageSize, from } = await getPagination(this.endpointContext, this.pageInfo);

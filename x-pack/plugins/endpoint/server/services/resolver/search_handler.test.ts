@@ -18,7 +18,7 @@ import { ResolverDataHit, parseLegacyEntityID, buildLegacyEntityID } from './com
 import { ResolverData, BaseResult } from '../../../common/types';
 import { EventBuilder } from './event_builder.test';
 import { LegacyBuilder } from './legacy_builder.test';
-import { Phase1Builder } from './phase1_builder.test';
+import { ElasticEndpointBuilder } from './es_endpoint_builder.test';
 
 function buildPageInfo(page?: number, pageSize?: number): PaginationInfo {
   return {
@@ -99,7 +99,7 @@ function buildResolverP1Hits(
   numNodes: number,
   eventsPerNode: number
 ): BuiltHits {
-  return buildResolverHits(new Phase1Builder(entityID, parentID), numNodes, eventsPerNode);
+  return buildResolverHits(new ElasticEndpointBuilder(entityID, parentID), numNodes, eventsPerNode);
 }
 
 function createTotal(total: number, relationEqual: boolean): Total {

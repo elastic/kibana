@@ -51,7 +51,7 @@ function buildLegacyChildrenQuery(endpointID: string, uniquePID: string) {
   };
 }
 
-function buildPhase1ChildrenQuery(entityID: string) {
+function buildESEndpointChildrenQuery(entityID: string) {
   return {
     bool: {
       filter: {
@@ -89,7 +89,7 @@ export function getESChildrenCountQuery(entityID: string): CountQueryInfo {
   }
   return {
     index: EndpointAppConstants.EVENT_INDEX_NAME,
-    query: buildPhase1ChildrenQuery(entityID),
+    query: buildESEndpointChildrenQuery(entityID),
   };
 }
 
@@ -111,7 +111,7 @@ function buildLegacyNodeQuery(endpointID: string, uniquePID: string) {
   };
 }
 
-function buildPhase1NodeQuery(entityID: string) {
+function buildESEndpointNodeQuery(entityID: string) {
   return {
     bool: {
       filter: {
@@ -172,5 +172,8 @@ export function getESNodeCountQuery(entityID: string): CountQueryInfo {
       query: buildLegacyNodeQuery(endpointID, uniquePID),
     };
   }
-  return { index: EndpointAppConstants.EVENT_INDEX_NAME, query: buildPhase1NodeQuery(entityID) };
+  return {
+    index: EndpointAppConstants.EVENT_INDEX_NAME,
+    query: buildESEndpointNodeQuery(entityID),
+  };
 }
