@@ -8,6 +8,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function consoleApiIntegrationTests({ loadTestFile }: FtrProviderContext) {
   describe('console', () => {
+    loadTestFile(require.resolve('./console_extensions'));
     loadTestFile(require.resolve('./feature_controls'));
   });
 }

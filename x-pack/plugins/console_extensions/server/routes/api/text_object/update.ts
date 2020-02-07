@@ -21,11 +21,18 @@ export const createHandler = ({ getInternalSavedObjectsClient }: HandlerDependen
 ): RequestHandler<unknown, unknown, TextObjectSchemaWithId> => async (ctx, request, response) => {
   const client = getInternalSavedObjectsClient();
   const { id, ...rest } = request.body;
-  await client.update(TEXT_OBJECT.type, id, {
-    userId: username,
-    ...rest,
-  });
-  return response.noContent();
+  try {
+    await client.update(TEXT_OBJECT.type, id, {
+      userId: username,
+      ...rest,
+    });
+    return response.noContent();
+  } catch (e) {
+    if (e.output?.statusCode === 404) {
+      return response.notFound(e.message);
+    }
+    return response.internalError(e);
+  }
 };
 
 export const registerUpdateRoute = ({
