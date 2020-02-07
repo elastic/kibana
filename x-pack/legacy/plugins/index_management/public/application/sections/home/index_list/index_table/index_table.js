@@ -39,7 +39,6 @@ import { UIM_SHOW_DETAILS_CLICK } from '../../../../../../common/constants';
 import { REFRESH_RATE_INDEX_LIST } from '../../../../constants';
 import { healthToColor } from '../../../../services';
 import { AppContextConsumer } from '../../../../app_context';
-import { indexManagementExtensions } from '../../../../../services/index_management_extensions';
 import { renderBadges } from '../../../../lib/render_badges';
 import { NoMatch, PageErrorForbidden } from '../../../../components';
 import { IndexActionsContextMenu } from '../index_actions_context_menu';
@@ -149,9 +148,9 @@ export class IndexTable extends Component {
       this.setState({ filterError: null });
     }
   };
-  getFilters = () => {
+  getFilters = extensionsService => {
     const { allIndices } = this.props;
-    return indexManagementExtensions.filters.reduce((accum, filterExtension) => {
+    return extensionsService.filters.reduce((accum, filterExtension) => {
       const filtersToAdd = filterExtension(allIndices);
       return [...accum, ...filtersToAdd];
     }, []);
@@ -214,7 +213,7 @@ export class IndexTable extends Component {
     });
   }
 
-  buildRowCell(fieldName, value, index) {
+  buildRowCell(fieldName, value, index, appServices) {
     const { openDetailPanel, filterChanged } = this.props;
     if (fieldName === 'health') {
       return <EuiHealth color={healthToColor(value)}>{value}</EuiHealth>;
@@ -224,20 +223,20 @@ export class IndexTable extends Component {
           <EuiLink
             data-test-subj="indexTableIndexNameLink"
             onClick={() => {
-              this.appServices.uiMetric.trackMetric('click', UIM_SHOW_DETAILS_CLICK);
+              appServices.uiMetric.trackMetric('click', UIM_SHOW_DETAILS_CLICK);
               openDetailPanel(value);
             }}
           >
             {value}
           </EuiLink>
-          {renderBadges(index, filterChanged, this.appServices.extensions)}
+          {renderBadges(index, filterChanged, appServices.extensions)}
         </Fragment>
       );
     }
     return value;
   }
 
-  buildRowCells(index) {
+  buildRowCells(index, appServices) {
     return Object.keys(HEADERS).map(fieldName => {
       const { name } = index;
       const value = index[fieldName];
@@ -251,7 +250,9 @@ export class IndexTable extends Component {
             data-test-subj={`indexTableCell-${fieldName}`}
           >
             <div className={`euiTableCellContent indTable__cell--${fieldName}`}>
-              <span className="eui-textLeft">{this.buildRowCell(fieldName, value, index)}</span>
+              <span className="eui-textLeft">
+                {this.buildRowCell(fieldName, value, index, appServices)}
+              </span>
             </div>
           </th>
         );
@@ -264,7 +265,7 @@ export class IndexTable extends Component {
           className={'indTable__cell--' + fieldName}
           header={fieldName}
         >
-          {this.buildRowCell(fieldName, value, index)}
+          {this.buildRowCell(fieldName, value, index, appServices)}
         </EuiTableRowCell>
       );
     });
@@ -306,9 +307,9 @@ export class IndexTable extends Component {
     );
   }
 
-  renderBanners() {
+  renderBanners(extensionsService) {
     const { allIndices = [], filterChanged } = this.props;
-    return indexManagementExtensions.banners.map((bannerExtension, i) => {
+    return extensionsService.banners.map((bannerExtension, i) => {
       const bannerData = bannerExtension(allIndices);
       if (!bannerData) {
         return null;
@@ -331,7 +332,8 @@ export class IndexTable extends Component {
       );
     });
   }
-  buildRows() {
+
+  buildRows(appServices) {
     const { indices = [], detailPanelIndexName } = this.props;
     return indices.map(index => {
       const { name } = index;
@@ -356,7 +358,7 @@ export class IndexTable extends Component {
               })}
             />
           </EuiTableRowCellCheckbox>
-          {this.buildRowCells(index)}
+          {this.buildRowCells(index, appServices)}
         </EuiTableRow>
       );
     });
@@ -379,6 +381,7 @@ export class IndexTable extends Component {
   onItemSelectionChanged = selectedIndices => {
     this.setState({ selectedIndices });
   };
+
   renderToggleControl({ name, label }) {
     const { toggleNameToVisibleMap, toggleChanged } = this.props;
     return (
@@ -393,6 +396,7 @@ export class IndexTable extends Component {
       </EuiFlexItem>
     );
   }
+
   render() {
     const {
       filter,
@@ -432,7 +436,7 @@ export class IndexTable extends Component {
     return (
       <AppContextConsumer>
         {({ services }) => {
-          this.appServices = services;
+          const { extensions } = services;
 
           return (
             <Fragment>
@@ -450,7 +454,7 @@ export class IndexTable extends Component {
                 <EuiFlexItem grow={false}>
                   {(indicesLoading && allIndices.length === 0) || indicesError ? null : (
                     <EuiFlexGroup>
-                      {indexManagementExtensions.toggles.map(toggle => {
+                      {extensions.toggles.map(toggle => {
                         return this.renderToggleControl(toggle);
                       })}
                       <EuiFlexItem grow={false}>
@@ -471,7 +475,7 @@ export class IndexTable extends Component {
                 </EuiFlexItem>
               </EuiFlexGroup>
               <EuiSpacer size="l" />
-              {this.renderBanners()}
+              {this.renderBanners(extensions)}
               {indicesError && this.renderError()}
               <EuiFlexGroup gutterSize="l" alignItems="center">
                 {atLeastOneItemSelected ? (
@@ -493,7 +497,11 @@ export class IndexTable extends Component {
                   <Fragment>
                     <EuiFlexItem>
                       <EuiSearchBar
-                        filters={this.getFilters().length > 0 ? this.getFilters() : null}
+                        filters={
+                          this.getFilters(extensions).length > 0
+                            ? this.getFilters(extensions)
+                            : null
+                        }
                         defaultQuery={filter}
                         query={filter}
                         box={{
@@ -565,7 +573,7 @@ export class IndexTable extends Component {
                       </EuiTableHeaderCellCheckbox>
                       {this.buildHeader()}
                     </EuiTableHeader>
-                    <EuiTableBody>{this.buildRows()}</EuiTableBody>
+                    <EuiTableBody>{this.buildRows(services)}</EuiTableBody>
                   </EuiTable>
                 </div>
               ) : (

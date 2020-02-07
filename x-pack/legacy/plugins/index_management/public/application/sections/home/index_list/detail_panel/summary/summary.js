@@ -6,7 +6,6 @@
 
 import React, { Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
-import { healthToColor } from '../../../../../services';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiFlexGroup,
@@ -19,7 +18,9 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import { indexManagementExtensions } from '../../../../../../services/index_management_extensions';
+import { healthToColor } from '../../../../../services';
+import { AppContextConsumer } from '../../../../../app_context';
+
 const getHeaders = () => {
   return {
     health: i18n.translate('xpack.idxMgmt.summary.headers.healthHeader', {
@@ -53,9 +54,9 @@ const getHeaders = () => {
 };
 
 export class Summary extends React.PureComponent {
-  getAdditionalContent() {
+  getAdditionalContent(extensionsService) {
     const { index } = this.props;
-    const extensions = indexManagementExtensions.summaries;
+    const extensions = extensionsService.summaries;
     return extensions.map((summaryExtension, i) => {
       return (
         <Fragment key={`summaryExtension-${i}`}>
@@ -65,6 +66,7 @@ export class Summary extends React.PureComponent {
       );
     });
   }
+
   buildRows() {
     const { index } = this.props;
     const headers = getHeaders();
@@ -99,26 +101,36 @@ export class Summary extends React.PureComponent {
   }
 
   render() {
-    const { left, right } = this.buildRows();
-    const additionalContent = this.getAdditionalContent();
     return (
-      <Fragment>
-        <EuiTitle size="s">
-          <h3>
-            <FormattedMessage id="xpack.idxMgmt.summary.summaryTitle" defaultMessage="General" />
-          </h3>
-        </EuiTitle>
-        <EuiSpacer size="s" />
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <EuiDescriptionList type="column">{left}</EuiDescriptionList>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiDescriptionList type="column">{right}</EuiDescriptionList>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        {additionalContent}
-      </Fragment>
+      <AppContextConsumer>
+        {({ services }) => {
+          const { left, right } = this.buildRows();
+          const additionalContent = this.getAdditionalContent(services.extensions);
+
+          return (
+            <Fragment>
+              <EuiTitle size="s">
+                <h3>
+                  <FormattedMessage
+                    id="xpack.idxMgmt.summary.summaryTitle"
+                    defaultMessage="General"
+                  />
+                </h3>
+              </EuiTitle>
+              <EuiSpacer size="s" />
+              <EuiFlexGroup>
+                <EuiFlexItem>
+                  <EuiDescriptionList type="column">{left}</EuiDescriptionList>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiDescriptionList type="column">{right}</EuiDescriptionList>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              {additionalContent}
+            </Fragment>
+          );
+        }}
+      </AppContextConsumer>
     );
   }
 }

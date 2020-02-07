@@ -72,8 +72,3 @@ export class ExtensionsService {
     return this._toggles;
   }
 }
-
-/**
- * Temp, to be removed once IM is moved to the "plugins" folder
- */
-export const extensionsService = new ExtensionsService();

@@ -8,14 +8,14 @@ import React, { createContext, useContext } from 'react';
 
 import { IndexMgmtMetricsType } from '../types';
 import { UiMetricService } from './services';
-import { IndexManagementExtensions } from '../services';
+import { ExtensionsService } from '../services';
 
 const AppContext = createContext<AppDependencies | undefined>(undefined);
 
 export interface AppDependencies {
   services: {
     uiMetric: UiMetricService<IndexMgmtMetricsType>;
-    extensions: IndexManagementExtensions;
+    extensions: ExtensionsService;
   };
 }
 

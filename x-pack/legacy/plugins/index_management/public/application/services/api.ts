@@ -34,12 +34,19 @@ import {
 
 import { TAB_SETTINGS, TAB_MAPPING, TAB_STATS } from '../constants';
 
-import { getUiMetricServiceInstance } from './ui_metric';
 import { useRequest, sendRequest } from './use_request';
 import { httpService } from './http';
+import { UiMetricService } from './ui_metric';
 import { Template } from '../../../common/types';
+import { IndexMgmtMetricsType } from '../../types';
 
-const uiMetricService = getUiMetricServiceInstance();
+// Temporary hack to provide the uiMetricService instance to this file.
+// TODO: Refactor and export an ApiService instance through the app dependencies context
+let uiMetricService: UiMetricService<IndexMgmtMetricsType>;
+export const setUiMetricService = (_uiMetricService: UiMetricService<IndexMgmtMetricsType>) => {
+  uiMetricService = _uiMetricService;
+};
+// End hack
 
 export async function loadIndices() {
   const response = await httpService.httpClient.get(`${API_BASE_PATH}/indices`);

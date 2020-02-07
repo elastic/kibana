@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { ExtensionsService } from '../../../services';
 
-import { AppDependencies } from '../app_context';
-
-export declare function indexManagementStore(services: AppDependencies['services']): any;
+export declare function setExtensionsService(extensionsService: ExtensionsService): any;
