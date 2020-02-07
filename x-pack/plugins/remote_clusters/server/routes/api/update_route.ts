@@ -17,7 +17,6 @@ import { licensePreRoutingFactory } from '../../lib/license_pre_routing_factory'
 import { isEsError } from '../../lib/is_es_error';
 
 export const register = (deps: RouteDependencies): void => {
-  // TODO there are other settings that can be specified for a remote cluster via console/API that I think might cause issues when editing
   const updateHandler: RequestHandler<any, any, any> = async (ctx, request, response) => {
     try {
       const callAsCurrentUser = ctx.core.elasticsearch.dataClient.callAsCurrentUser;
