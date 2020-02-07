@@ -5,12 +5,12 @@ export default function TestRunnerItemList({testRunnerTypes}) {
 
   return (
     <ul>
-      {testRunnerTypes.map(renderTestRunnerItem)}
+      {testRunnerTypes.map(renderItem)}
     </ul>
   );
 }
 
-function renderTestRunnerItem(item) {
+function renderItem(item) {
   return (
     <TestRunnerItem
       item={item}
