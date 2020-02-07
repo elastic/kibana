@@ -79,11 +79,17 @@ export class OptimizerConfig {
       throw new TypeError('repoRoot must be an absolute path');
     }
 
+    /**
+     * BEWARE: this needs to stay roughly synchronized with
+     * `src/core/server/config/env.ts` which determins which paths
+     * should be searched for plugins to load
+     */
     const pluginScanDirs = options.pluginScanDirs || [
       Path.resolve(repoRoot, 'src/plugins'),
-      Path.resolve(repoRoot, 'plugins'),
       ...(oss ? [] : [Path.resolve(repoRoot, 'x-pack/plugins')]),
+      Path.resolve(repoRoot, 'plugins'),
       ...(examples ? [Path.resolve('examples')] : []),
+      Path.resolve(repoRoot, '../kibana-extra'),
     ];
     if (!pluginScanDirs.every(p => Path.isAbsolute(p))) {
       throw new TypeError('pluginScanDirs must all be absolute paths');
