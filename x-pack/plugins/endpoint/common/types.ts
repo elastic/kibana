@@ -148,20 +148,22 @@ export interface ResolverPhase1Data {
 
 export type ResolverData = ResolverLegacyData | ResolverPhase1Data;
 
-export interface ResolverResponseNode {
+export interface ResolverResultNode {
   entity_id: string | undefined;
   parent_entity_id: string | undefined;
   events: ResolverData[];
 }
 
 export interface ResolverChildrenResponse extends BaseResult {
-  origin: ResolverResponseNode;
-  children: ResolverResponseNode[];
+  origin: ResolverResultNode;
+  children: ResolverResultNode[];
 }
 
 export interface ResolverNodeDetailsResponse extends BaseResult {
-  node: ResolverResponseNode;
+  node: ResolverResultNode;
 }
+
+export type ResolverResponse = ResolverNodeDetailsResponse | ResolverChildrenResponse;
 
 /**
  * The PageId type is used for the payload when firing userNavigatedToPage actions

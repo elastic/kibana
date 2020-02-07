@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { isLegacyEntityID, parseLegacyEntityID } from './common';
+import { isLegacyEntityID, parseLegacyEntityID, CountQueryInfo } from './common';
 import { EndpointAppContext, JSONish } from '../../types';
 import { EndpointAppConstants } from '../../../common/types';
 
@@ -79,7 +79,7 @@ export async function getESChildrenQuery(
   return await buildSearchBody(context, query, paginationInfo, index);
 }
 
-export function getESChildrenCountQuery(entityID: string): { index: string; query: JSONish } {
+export function getESChildrenCountQuery(entityID: string): CountQueryInfo {
   if (isLegacyEntityID(entityID)) {
     const { endpointID, uniquePID } = parseLegacyEntityID(entityID);
     return {
@@ -164,7 +164,7 @@ export async function getESNodeQuery(
   return await buildSearchBody(context, query, paginationInfo, index);
 }
 
-export function getESNodeCountQuery(entityID: string): { index: string; query: JSONish } {
+export function getESNodeCountQuery(entityID: string): CountQueryInfo {
   if (isLegacyEntityID(entityID)) {
     const { endpointID, uniquePID } = parseLegacyEntityID(entityID);
     return {

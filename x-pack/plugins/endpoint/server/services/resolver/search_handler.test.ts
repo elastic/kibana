@@ -7,7 +7,9 @@ import {
   elasticsearchServiceMock,
   loggingServiceMock,
 } from '../../../../../../src/core/server/mocks';
-import { ResolverSearchHandler } from './search_handler';
+import { BaseSearchHandler } from './search_handler';
+import { SingleNodeHandler } from './single_node_handler';
+import { ChildrenSearchHandler } from './children_search_handler';
 import { IScopedClusterClient } from 'kibana/server';
 import { EndpointAppContext, Total } from '../../types';
 import { EndpointConfigSchema } from '../../config';
@@ -157,7 +159,7 @@ describe('build resolver node and related event responses', () => {
       });
       it('sets the response correctly for a node retrieval', async () => {
         const pageInfo = buildPageInfo(1, 50);
-        const handler = new ResolverSearchHandler(
+        const handler = new SingleNodeHandler(
           mockScopedClient,
           endpointContext,
           pageInfo,
@@ -165,7 +167,7 @@ describe('build resolver node and related event responses', () => {
           entityID
         );
 
-        const res = await handler.buildNodeResponse(hits, createTotal(total, true));
+        const res = await handler.buildResponse(hits, createTotal(total, true));
         expect(res.node.parent_entity_id).toBe(parentEntityID);
         expect(res.node.entity_id).toBe(entityID);
         expect(res.node.events).toStrictEqual(origin);
@@ -178,7 +180,7 @@ describe('build resolver node and related event responses', () => {
       });
       it('sets the response correctly for a node retrieval', async () => {
         const pageInfo = buildPageInfo(1, 50);
-        const handler = new ResolverSearchHandler(
+        const handler = new ChildrenSearchHandler(
           mockScopedClient,
           endpointContext,
           pageInfo,
@@ -186,7 +188,7 @@ describe('build resolver node and related event responses', () => {
           entityID
         );
 
-        const res = await handler.buildChildrenResponse(hits, createTotal(total, true));
+        const res = await handler.buildResponse(hits, createTotal(total, true));
         expect(res.origin.parent_entity_id).toBe(parentEntityID);
         expect(res.origin.entity_id).toBe(entityID);
         expect(res.origin.events).toStrictEqual(origin);
@@ -220,7 +222,7 @@ describe('build resolver node and related event responses', () => {
       });
       it('sets the response correctly for a node retrieval', async () => {
         const pageInfo = buildPageInfo(1, 50);
-        const handler = new ResolverSearchHandler(
+        const handler = new ChildrenSearchHandler(
           mockScopedClient,
           endpointContext,
           pageInfo,
@@ -228,7 +230,7 @@ describe('build resolver node and related event responses', () => {
           originEntityID
         );
 
-        const res = await handler.buildChildrenResponse(hits, createTotal(total, true));
+        const res = await handler.buildResponse(hits, createTotal(total, true));
         expect(res.origin.parent_entity_id).toBe(originParentEntityID);
         expect(res.origin.entity_id).toBe(originEntityID);
         expect(res.origin.events).toStrictEqual(origin);
@@ -256,7 +258,7 @@ describe('build resolver node and related event responses', () => {
       });
       it('sets the response correctly for a node retrieval', async () => {
         const pageInfo = buildPageInfo(1, 50);
-        const handler = new ResolverSearchHandler(
+        const handler = new SingleNodeHandler(
           mockScopedClient,
           endpointContext,
           pageInfo,
@@ -264,7 +266,7 @@ describe('build resolver node and related event responses', () => {
           originEntityID
         );
 
-        const res = await handler.buildNodeResponse(hits, createTotal(total, true));
+        const res = await handler.buildResponse(hits, createTotal(total, true));
         expect(res.node.parent_entity_id).toBe(originParentEntityID);
         expect(res.node.entity_id).toBe(originEntityID);
         expect(res.node.events).toStrictEqual(origin);
@@ -273,7 +275,7 @@ describe('build resolver node and related event responses', () => {
 
       it('uses defaults when pagination is not defined', async () => {
         const pageInfo = buildPageInfo();
-        const handler = new ResolverSearchHandler(
+        const handler = new SingleNodeHandler(
           mockScopedClient,
           endpointContext,
           pageInfo,
@@ -281,7 +283,7 @@ describe('build resolver node and related event responses', () => {
           originEntityID
         );
 
-        const res = await handler.buildNodeResponse(hits, createTotal(total, true));
+        const res = await handler.buildResponse(hits, createTotal(total, true));
 
         await checkPagination(res, endpointContext, total, pageInfo);
       });
@@ -290,14 +292,14 @@ describe('build resolver node and related event responses', () => {
         const trueTotal = 100;
         buildCountResponse(trueTotal, mockScopedClient);
         const pageInfo = buildPageInfo();
-        const handler = new ResolverSearchHandler(
+        const handler = new SingleNodeHandler(
           mockScopedClient,
           endpointContext,
           pageInfo,
           {},
           originEntityID
         );
-        const res = await handler.buildNodeResponse(hits, createTotal(total, false));
+        const res = await handler.buildResponse(hits, createTotal(total, false));
 
         expect(res.total).toBe(trueTotal);
       });

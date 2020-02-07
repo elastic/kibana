@@ -4,9 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { ResolverLegacyData, ResolverPhase1Data, ResolverData } from '../../../common/types';
+import { JSONish } from '../../types';
 
 export const legacyEntityIDDelimiter = '|';
 export const legacyEntityPrefix = 'endgame' + legacyEntityIDDelimiter;
+
+export interface CountQueryInfo {
+  index: string;
+  query: JSONish;
+}
 
 export interface ResolverNode {
   entityID: string;
