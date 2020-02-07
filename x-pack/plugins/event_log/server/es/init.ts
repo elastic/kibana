@@ -91,7 +91,14 @@ class EsInitializationSteps {
     try {
       await this.esContext.callEs('indices.putTemplate', addTemplateParams);
     } catch (err) {
-      throw new Error(`error creating index template: ${err.message}`);
+      // The error message doesn't have a type attribute we can look to guarantee it's due
+      // to the template already existing (only long message) so we'll check ourselves to see
+      // if the template now exists. This scenario would happen if you startup multiple Kibana
+      // instances at the same time.
+      const existsNow = await this.doesIndexTemplateExist();
+      if (!existsNow) {
+        throw new Error(`error creating index template: ${err.message}`);
+      }
     }
   }
 
@@ -111,7 +118,9 @@ class EsInitializationSteps {
     try {
       await this.esContext.callEs('indices.create', { index });
     } catch (err) {
-      throw new Error(`error creating initial index: ${err.message}`);
+      if (err.body?.error?.type !== 'resource_already_exists_exception') {
+        throw new Error(`error creating initial index: ${err.message}`);
+      }
     }
   }
 
