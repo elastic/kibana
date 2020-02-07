@@ -25,7 +25,6 @@ import angular from 'angular';
 import { Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { History } from 'history';
-import { KibanaLegacyStart } from 'kibana/public';
 import { DashboardEmptyScreen, DashboardEmptyScreenProps } from './dashboard_empty_screen';
 
 import {
@@ -83,6 +82,7 @@ import {
   removeQueryParam,
   unhashUrl,
 } from '../../../../../../plugins/kibana_utils/public';
+import { KibanaLegacyStart } from '../../../../../../plugins/kibana_legacy/public';
 
 export interface DashboardAppControllerDependencies extends RenderDeps {
   $scope: DashboardAppScope;

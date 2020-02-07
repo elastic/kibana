@@ -26,7 +26,7 @@ import {
 } from 'kibana/public';
 import { Observable } from 'rxjs';
 import { ConfigSchema } from '../config';
-import { getDashboardConfig, DashboardConfig } from './dashboard_config';
+import { getDashboardConfig } from './dashboard_config';
 
 interface ForwardDefinition {
   legacyAppId: string;

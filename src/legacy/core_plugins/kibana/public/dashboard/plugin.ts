@@ -25,7 +25,6 @@ import {
   LegacyCoreStart,
   Plugin,
   SavedObjectsClientContract,
-  KibanaLegacyStart,
 } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { RenderDeps } from './np_ready/application';
@@ -46,6 +45,7 @@ import { SharePluginStart } from '../../../../../plugins/share/public';
 import {
   AngularRenderedAppUpdater,
   KibanaLegacySetup,
+  KibanaLegacyStart,
 } from '../../../../../plugins/kibana_legacy/public';
 import { createSavedDashboardLoader } from './saved_dashboard/saved_dashboards';
 import { createKbnUrlTracker } from '../../../../../plugins/kibana_utils/public';
@@ -57,7 +57,7 @@ export interface DashboardPluginStartDependencies {
   embeddables: IEmbeddableStart;
   navigation: NavigationStart;
   share: SharePluginStart;
-  dashboardConfig: KibanaLegacyStart['dashboardConfig'];
+  kibanaLegacy: KibanaLegacyStart;
 }
 
 export interface DashboardPluginSetupDependencies {
@@ -73,6 +73,7 @@ export class DashboardPlugin implements Plugin {
     embeddables: IEmbeddableStart;
     navigation: NavigationStart;
     share: SharePluginStart;
+    dashboardConfig: KibanaLegacyStart['dashboardConfig'];
   } | null = null;
 
   private appStateUpdater = new BehaviorSubject<AngularRenderedAppUpdater>(() => ({}));

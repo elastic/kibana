@@ -22,7 +22,7 @@ export interface DashboardConfig {
   getHideWriteControls(): boolean;
 }
 
-export function getDashboardConfig(hideWriteControls): DashboardConfig {
+export function getDashboardConfig(hideWriteControls: boolean): DashboardConfig {
   let _hideWriteControls = hideWriteControls;
 
   return {
