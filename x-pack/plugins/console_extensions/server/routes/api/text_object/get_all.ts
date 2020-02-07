@@ -5,14 +5,13 @@
  */
 import { RequestHandler } from 'kibana/server';
 import { APP } from '../../../../common/constants';
-import { RouteDependencies, AuthcHandlerArgs } from './types';
+import { RouteDependencies, HandlerDependencies } from './types';
 import { TEXT_OBJECT } from './constants';
 import { withCurrentUsername } from './with_current_username';
 
-export const createHandler = ({
-  getInternalSavedObjectsClient,
-  username,
-}: AuthcHandlerArgs): RequestHandler => async (ctx, request, response) => {
+export const createHandlerFactory = ({ getInternalSavedObjectsClient }: HandlerDependencies) => (
+  username: string
+): RequestHandler => async (ctx, request, response) => {
   const client = getInternalSavedObjectsClient();
   const result = await client.find({
     type: TEXT_OBJECT.type,
@@ -35,10 +34,9 @@ export const registerGetAllRoute = ({
 }: RouteDependencies) => {
   router.get(
     { path: `${APP.apiPathBase}/text_objects/get_all`, validate: false },
-    withCurrentUsername<AuthcHandlerArgs>({
+    withCurrentUsername({
       authc,
-      passThroughDeps: { getInternalSavedObjectsClient },
-      handlerFactory: createHandler,
+      handlerFactory: createHandlerFactory({ getInternalSavedObjectsClient }),
     })
   );
 };

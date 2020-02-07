@@ -7,24 +7,34 @@
 import { RequestHandler } from 'kibana/server';
 import { Authentication } from '../../../../../security/server';
 
-interface WithCurrentUsernameArgs<D> {
+interface WithCurrentUsernameArgs {
+  /**
+   * Security provided {@link Authentication} for securely determining user information.
+   */
   authc: Authentication;
-  handlerFactory: (deps: D & { username: string }) => any;
-  passThroughDeps: Partial<D>;
+
+  /**
+   * Handler factory: a function that we can call to return a {@link RequestHandler}.
+   *
+   * This wrapper will inject authenticated user information to the handler.
+   *
+   * @remark
+   * Ideally we want to have a type like <P, Q, B>(username: string) => RequestHandler<P, Q, B>.
+   *
+   * However, when assigning with body like in `create.ts` TS complains that B
+   * not assignable to `ReadOnly<{...}>`.
+   */
+  handlerFactory: (username: string) => any;
 }
 
-export const withCurrentUsername = <D = { [key: string]: any }>({
+export const withCurrentUsername = ({
   authc,
   handlerFactory,
-  passThroughDeps,
-}: WithCurrentUsernameArgs<D>): RequestHandler => async (ctx, request, response) => {
-  const username = await authc.getCurrentUser(request);
-  if (!username) {
+}: WithCurrentUsernameArgs): RequestHandler => async (ctx, request, response) => {
+  const authenticatedUser = await authc.getCurrentUser(request);
+  if (!authenticatedUser) {
     return response.forbidden({ body: 'Could not find current username' });
   }
-  const handler = handlerFactory({ username: username.username, ...passThroughDeps } as D & {
-    username: string;
-  });
-
+  const handler = handlerFactory(authenticatedUser.username);
   return handler(ctx, request, response);
 };

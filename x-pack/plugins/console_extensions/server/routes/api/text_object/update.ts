@@ -9,31 +9,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
 import { RequestHandler } from 'kibana/server';
 import { APP } from '../../../../common/constants';
 import { TEXT_OBJECT } from './constants';
-import { RouteDependencies, AuthcHandlerArgs } from './types';
+import { RouteDependencies, HandlerDependencies } from './types';
 import { withCurrentUsername } from './with_current_username';
+import { TextObjectSchemaWithId, textObjectSchemaWithId } from './text_object';
 
-const routeValidation = {
-  body: schema.object({
-    id: schema.string(),
-    updatedAt: schema.number(),
-    text: schema.string(),
-  }),
-};
-
-type UpdateRouteValidationBody = TypeOf<typeof routeValidation.body>;
-
-export const createHandler = ({
-  getInternalSavedObjectsClient,
-  username,
-}: AuthcHandlerArgs): RequestHandler<unknown, unknown, UpdateRouteValidationBody> => async (
-  ctx,
-  request,
-  response
-) => {
+export const createHandler = ({ getInternalSavedObjectsClient }: HandlerDependencies) => (
+  username: string
+): RequestHandler<unknown, unknown, TextObjectSchemaWithId> => async (ctx, request, response) => {
   const client = getInternalSavedObjectsClient();
   const { id, ...rest } = request.body;
   await client.update(TEXT_OBJECT.type, id, {
@@ -49,11 +34,15 @@ export const registerUpdateRoute = ({
   getInternalSavedObjectsClient,
 }: RouteDependencies) => {
   router.put(
-    { path: `${APP.apiPathBase}/text_objects/update`, validate: routeValidation },
-    withCurrentUsername<AuthcHandlerArgs>({
+    {
+      path: `${APP.apiPathBase}/text_objects/update`,
+      validate: {
+        body: textObjectSchemaWithId,
+      },
+    },
+    withCurrentUsername({
       authc,
-      passThroughDeps: { getInternalSavedObjectsClient },
-      handlerFactory: createHandler,
+      handlerFactory: createHandler({ getInternalSavedObjectsClient }),
     })
   );
 };

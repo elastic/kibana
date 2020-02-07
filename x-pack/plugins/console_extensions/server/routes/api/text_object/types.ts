@@ -7,9 +7,8 @@
 import { IRouter, SavedObjectsClientContract } from 'kibana/server';
 import { Authentication } from '../../../../../security/server';
 
-export interface AuthcHandlerArgs {
+export interface HandlerDependencies {
   getInternalSavedObjectsClient: RouteDependencies['getInternalSavedObjectsClient'];
-  username: string;
 }
 
 export interface RouteDependencies {
