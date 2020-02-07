@@ -15,18 +15,16 @@ import { ActionsClient } from '../../../../../plugins/actions/server';
 import { AlertsClient } from '../../../../../legacy/plugins/alerting/server';
 import { CoreStart, StartPlugins, SetupPlugins } from '../plugin';
 
-export interface ClientServices {
+export interface Clients {
   actionsClient?: ActionsClient;
-  callCluster: IScopedClusterClient['callAsCurrentUser'];
-  getSpaceId: () => string | undefined;
+  clusterClient: IScopedClusterClient;
+  spacesClient: { getSpaceId: () => string | undefined };
   savedObjectsClient: SavedObjectsClientContract;
 }
-interface LegacyClientServices {
+interface LegacyClients {
   alertsClient?: AlertsClient;
 }
-export type GetScopedClientServices = (
-  request: LegacyRequest
-) => Promise<ClientServices & LegacyClientServices>;
+export type GetScopedClients = (request: LegacyRequest) => Promise<Clients & LegacyClients>;
 
 export class ClientsService {
   private actions?: StartPlugins['actions'];
@@ -47,7 +45,7 @@ export class ClientsService {
     this.actions = actions;
   }
 
-  public getScopedFactory(): GetScopedClientServices {
+  public getScopedFactory(): GetScopedClients {
     if (!this.clusterClient || !this.savedObjects) {
       throw new Error('Services not initialized');
     }
@@ -58,9 +56,9 @@ export class ClientsService {
       return {
         alertsClient: request.getAlertsClient?.(),
         actionsClient: await this.actions?.getActionsClientWithRequest?.(kibanaRequest),
-        callCluster: this.clusterClient!.asScoped(kibanaRequest).callAsCurrentUser,
-        getSpaceId: () => this.spacesService?.getSpaceId?.(kibanaRequest),
+        clusterClient: this.clusterClient!.asScoped(kibanaRequest),
         savedObjectsClient: this.savedObjects!.getScopedClient(kibanaRequest),
+        spacesClient: { getSpaceId: () => this.spacesService?.getSpaceId?.(kibanaRequest) },
       };
     };
   }

@@ -9,7 +9,7 @@ import Boom from 'boom';
 
 import { DETECTION_ENGINE_PREPACKAGED_URL } from '../../../../../common/constants';
 import { LegacySetupServices, RequestFacade } from '../../../../plugin';
-import { GetScopedClientServices } from '../../../../services';
+import { GetScopedClients } from '../../../../services';
 import { getIndexExists } from '../../index/get_index_exists';
 import { getIndex, transformError } from '../utils';
 import { getPrepackagedRules } from '../../rules/get_prepackaged_rules';
@@ -21,7 +21,7 @@ import { getExistingPrepackagedRules } from '../../rules/get_existing_prepackage
 
 export const createAddPrepackedRulesRoute = (
   config: LegacySetupServices['config'],
-  getServices: GetScopedClientServices
+  getClients: GetScopedClients
 ): Hapi.ServerRoute => {
   return {
     method: 'PUT',
@@ -39,10 +39,10 @@ export const createAddPrepackedRulesRoute = (
         const {
           actionsClient,
           alertsClient,
-          callCluster,
-          getSpaceId,
+          clusterClient,
           savedObjectsClient,
-        } = await getServices(request);
+          spacesClient,
+        } = await getClients(request);
 
         if (!actionsClient || !alertsClient || !savedObjectsClient) {
           return headers.response().code(404);
@@ -54,9 +54,12 @@ export const createAddPrepackedRulesRoute = (
         const rulesToInstall = getRulesToInstall(rulesFromFileSystem, prepackagedRules);
         const rulesToUpdate = getRulesToUpdate(rulesFromFileSystem, prepackagedRules);
 
-        const spaceIndex = getIndex(getSpaceId, config);
+        const spaceIndex = getIndex(spacesClient.getSpaceId, config);
         if (rulesToInstall.length !== 0 || rulesToUpdate.length !== 0) {
-          const spaceIndexExists = await getIndexExists(callCluster, spaceIndex);
+          const spaceIndexExists = await getIndexExists(
+            clusterClient.callAsCurrentUser,
+            spaceIndex
+          );
           if (!spaceIndexExists) {
             return Boom.badRequest(
               `Pre-packaged rules cannot be installed until the space index is created: ${spaceIndex}`
@@ -87,7 +90,7 @@ export const createAddPrepackedRulesRoute = (
 export const addPrepackedRulesRoute = (
   route: LegacySetupServices['route'],
   config: LegacySetupServices['config'],
-  getServices: GetScopedClientServices
+  getClients: GetScopedClients
 ): void => {
-  route(createAddPrepackedRulesRoute(config, getServices));
+  route(createAddPrepackedRulesRoute(config, getClients));
 };

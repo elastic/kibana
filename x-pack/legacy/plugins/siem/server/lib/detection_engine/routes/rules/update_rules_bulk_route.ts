@@ -12,16 +12,14 @@ import {
   IRuleSavedAttributesSavedObjectAttributes,
 } from '../../rules/types';
 import { LegacySetupServices } from '../../../../plugin';
-import { GetScopedClientServices } from '../../../../services';
+import { GetScopedClients } from '../../../../services';
 import { transformOrBulkError, getIdBulkError } from './utils';
 import { transformBulkError } from '../utils';
 import { updateRulesBulkSchema } from '../schemas/update_rules_bulk_schema';
 import { updateRules } from '../../rules/update_rules';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
 
-export const createUpdateRulesBulkRoute = (
-  getServices: GetScopedClientServices
-): Hapi.ServerRoute => {
+export const createUpdateRulesBulkRoute = (getClients: GetScopedClients): Hapi.ServerRoute => {
   return {
     method: 'PUT',
     path: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
@@ -35,7 +33,7 @@ export const createUpdateRulesBulkRoute = (
       },
     },
     async handler(request: BulkUpdateRulesRequest, headers) {
-      const { actionsClient, alertsClient, savedObjectsClient } = await getServices(request);
+      const { actionsClient, alertsClient, savedObjectsClient } = await getClients(request);
 
       if (!actionsClient || !alertsClient || !savedObjectsClient) {
         return headers.response().code(404);
@@ -131,7 +129,7 @@ export const createUpdateRulesBulkRoute = (
 
 export const updateRulesBulkRoute = (
   route: LegacySetupServices['route'],
-  getServices: GetScopedClientServices
+  getClients: GetScopedClients
 ): void => {
-  route(createUpdateRulesBulkRoute(getServices));
+  route(createUpdateRulesBulkRoute(getClients));
 };

@@ -8,7 +8,7 @@ import Hapi from 'hapi';
 import uuid from 'uuid';
 
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
-import { GetScopedClientServices } from '../../../../services';
+import { GetScopedClients } from '../../../../services';
 import { createRules } from '../../rules/create_rules';
 import { BulkRulesRequest } from '../../rules/types';
 import { LegacySetupServices } from '../../../../plugin';
@@ -20,7 +20,7 @@ import { createRulesBulkSchema } from '../schemas/create_rules_bulk_schema';
 
 export const createCreateRulesBulkRoute = (
   config: LegacySetupServices['config'],
-  getServices: GetScopedClientServices
+  getClients: GetScopedClients
 ): Hapi.ServerRoute => {
   return {
     method: 'POST',
@@ -38,10 +38,10 @@ export const createCreateRulesBulkRoute = (
       const {
         actionsClient,
         alertsClient,
-        callCluster,
-        getSpaceId,
+        clusterClient,
+        spacesClient,
         savedObjectsClient,
-      } = await getServices(request);
+      } = await getClients(request);
 
       if (!actionsClient || !alertsClient || !savedObjectsClient) {
         return headers.response().code(404);
@@ -79,8 +79,9 @@ export const createCreateRulesBulkRoute = (
           const ruleIdOrUuid = ruleId ?? uuid.v4();
 
           try {
-            const finalIndex = outputIndex != null ? outputIndex : getIndex(getSpaceId, config);
-            const indexExists = await getIndexExists(callCluster, finalIndex);
+            const finalIndex =
+              outputIndex != null ? outputIndex : getIndex(spacesClient.getSpaceId, config);
+            const indexExists = await getIndexExists(clusterClient.callAsCurrentUser, finalIndex);
             if (!indexExists) {
               return createBulkErrorObject({
                 ruleId: ruleIdOrUuid,
@@ -142,7 +143,7 @@ export const createCreateRulesBulkRoute = (
 export const createRulesBulkRoute = (
   route: LegacySetupServices['route'],
   config: LegacySetupServices['config'],
-  getServices: GetScopedClientServices
+  getClients: GetScopedClients
 ): void => {
-  route(createCreateRulesBulkRoute(config, getServices));
+  route(createCreateRulesBulkRoute(config, getClients));
 };

@@ -22,7 +22,7 @@ import { createRulesStreamFromNdJson } from '../../rules/create_rules_stream_fro
 import { ImportRuleAlertRest } from '../../types';
 import { updateRules } from '../../rules/update_rules';
 import { importRulesQuerySchema, importRulesPayloadSchema } from '../schemas/import_rules_schema';
-import { GetScopedClientServices } from '../../../../services';
+import { GetScopedClients } from '../../../../services';
 
 type PromiseFromStreams = ImportRuleAlertRest | Error;
 
@@ -36,7 +36,7 @@ const CHUNK_PARSED_OBJECT_SIZE = 10;
 
 export const createImportRulesRoute = (
   config: LegacySetupServices['config'],
-  getServices: GetScopedClientServices
+  getClients: GetScopedClients
 ): Hapi.ServerRoute => {
   return {
     method: 'POST',
@@ -60,10 +60,10 @@ export const createImportRulesRoute = (
       const {
         actionsClient,
         alertsClient,
-        callCluster,
-        getSpaceId,
+        clusterClient,
+        spacesClient,
         savedObjectsClient,
-      } = await getServices(request);
+      } = await getClients(request);
 
       if (!actionsClient || !alertsClient || !savedObjectsClient) {
         return headers.response().code(404);
@@ -149,8 +149,11 @@ export const createImportRulesRoute = (
                   version,
                 } = parsedRule;
                 try {
-                  const finalIndex = getIndex(getSpaceId, config);
-                  const indexExists = await getIndexExists(callCluster, finalIndex);
+                  const finalIndex = getIndex(spacesClient.getSpaceId, config);
+                  const indexExists = await getIndexExists(
+                    clusterClient.callAsCurrentUser,
+                    finalIndex
+                  );
                   if (!indexExists) {
                     resolve(
                       createBulkErrorObject({
@@ -266,7 +269,7 @@ export const createImportRulesRoute = (
 export const importRulesRoute = (
   route: LegacySetupServices['route'],
   config: LegacySetupServices['config'],
-  getServices: GetScopedClientServices
+  getClients: GetScopedClients
 ): void => {
-  route(createImportRulesRoute(config, getServices));
+  route(createImportRulesRoute(config, getClients));
 };

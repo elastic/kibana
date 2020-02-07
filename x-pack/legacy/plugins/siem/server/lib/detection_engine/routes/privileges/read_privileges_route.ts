@@ -10,14 +10,14 @@ import { merge } from 'lodash/fp';
 import { DETECTION_ENGINE_PRIVILEGES_URL } from '../../../../../common/constants';
 import { RulesRequest } from '../../rules/types';
 import { LegacySetupServices } from '../../../../plugin';
-import { GetScopedClientServices } from '../../../../services';
+import { GetScopedClients } from '../../../../services';
 import { transformError, getIndex } from '../utils';
 import { readPrivileges } from '../../privileges/read_privileges';
 
 export const createReadPrivilegesRulesRoute = (
   config: LegacySetupServices['config'],
   usingEphemeralEncryptionKey: boolean,
-  getServices: GetScopedClientServices
+  getClients: GetScopedClients
 ): Hapi.ServerRoute => {
   return {
     method: 'GET',
@@ -32,10 +32,10 @@ export const createReadPrivilegesRulesRoute = (
     },
     async handler(request: RulesRequest) {
       try {
-        const { callCluster, getSpaceId } = await getServices(request);
+        const { clusterClient, spacesClient } = await getClients(request);
 
-        const index = getIndex(getSpaceId, config);
-        const permissions = await readPrivileges(callCluster, index);
+        const index = getIndex(spacesClient.getSpaceId, config);
+        const permissions = await readPrivileges(clusterClient.callAsCurrentUser, index);
         return merge(permissions, {
           is_authenticated: request?.auth?.isAuthenticated ?? false,
           has_encryption_key: !usingEphemeralEncryptionKey,
@@ -51,7 +51,7 @@ export const readPrivilegesRoute = (
   route: LegacySetupServices['route'],
   config: LegacySetupServices['config'],
   usingEphemeralEncryptionKey: boolean,
-  getServices: GetScopedClientServices
+  getClients: GetScopedClients
 ) => {
-  route(createReadPrivilegesRulesRoute(config, usingEphemeralEncryptionKey, getServices));
+  route(createReadPrivilegesRulesRoute(config, usingEphemeralEncryptionKey, getClients));
 };

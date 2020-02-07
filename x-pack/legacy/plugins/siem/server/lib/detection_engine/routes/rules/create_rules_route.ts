@@ -9,7 +9,7 @@ import Boom from 'boom';
 import uuid from 'uuid';
 
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
-import { GetScopedClientServices } from '../../../../services';
+import { GetScopedClients } from '../../../../services';
 import { createRules } from '../../rules/create_rules';
 import { RulesRequest, IRuleSavedAttributesSavedObjectAttributes } from '../../rules/types';
 import { createRulesSchema } from '../schemas/create_rules_schema';
@@ -22,7 +22,7 @@ import { getIndex, transformError } from '../utils';
 
 export const createCreateRulesRoute = (
   config: LegacySetupServices['config'],
-  getServices: GetScopedClientServices
+  getClients: GetScopedClients
 ): Hapi.ServerRoute => {
   return {
     method: 'POST',
@@ -67,17 +67,18 @@ export const createCreateRulesRoute = (
         const {
           alertsClient,
           actionsClient,
-          callCluster,
-          getSpaceId,
+          clusterClient,
           savedObjectsClient,
-        } = await getServices(request);
+          spacesClient,
+        } = await getClients(request);
 
         if (!actionsClient || !alertsClient || !savedObjectsClient) {
           return headers.response().code(404);
         }
 
-        const finalIndex = outputIndex != null ? outputIndex : getIndex(getSpaceId, config);
-        const indexExists = await getIndexExists(callCluster, finalIndex);
+        const finalIndex =
+          outputIndex != null ? outputIndex : getIndex(spacesClient.getSpaceId, config);
+        const indexExists = await getIndexExists(clusterClient.callAsCurrentUser, finalIndex);
         if (!indexExists) {
           return Boom.badRequest(
             `To create a rule, the index must exist first. Index ${finalIndex} does not exist`
@@ -140,7 +141,7 @@ export const createCreateRulesRoute = (
 export const createRulesRoute = (
   route: LegacySetupServices['route'],
   config: LegacySetupServices['config'],
-  getServices: GetScopedClientServices
+  getClients: GetScopedClients
 ): void => {
-  route(createCreateRulesRoute(config, getServices));
+  route(createCreateRulesRoute(config, getClients));
 };

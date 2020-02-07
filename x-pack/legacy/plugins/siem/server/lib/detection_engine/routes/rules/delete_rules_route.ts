@@ -9,14 +9,14 @@ import Hapi from 'hapi';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { deleteRules } from '../../rules/delete_rules';
 import { LegacySetupServices, RequestFacade } from '../../../../plugin';
-import { GetScopedClientServices } from '../../../../services';
+import { GetScopedClients } from '../../../../services';
 import { queryRulesSchema } from '../schemas/query_rules_schema';
 import { getIdError, transformOrError } from './utils';
 import { transformError } from '../utils';
 import { QueryRequest, IRuleSavedAttributesSavedObjectAttributes } from '../../rules/types';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
 
-export const createDeleteRulesRoute = (getServices: GetScopedClientServices): Hapi.ServerRoute => {
+export const createDeleteRulesRoute = (getClients: GetScopedClients): Hapi.ServerRoute => {
   return {
     method: 'DELETE',
     path: DETECTION_ENGINE_RULES_URL,
@@ -33,7 +33,7 @@ export const createDeleteRulesRoute = (getServices: GetScopedClientServices): Ha
       const { id, rule_id: ruleId } = request.query;
 
       try {
-        const { actionsClient, alertsClient, savedObjectsClient } = await getServices(request);
+        const { actionsClient, alertsClient, savedObjectsClient } = await getClients(request);
 
         if (!actionsClient || !alertsClient || !savedObjectsClient) {
           return headers.response().code(404);
@@ -70,7 +70,7 @@ export const createDeleteRulesRoute = (getServices: GetScopedClientServices): Ha
 
 export const deleteRulesRoute = (
   route: LegacySetupServices['route'],
-  getServices: GetScopedClientServices
+  getClients: GetScopedClients
 ): void => {
-  route(createDeleteRulesRoute(getServices));
+  route(createDeleteRulesRoute(getClients));
 };

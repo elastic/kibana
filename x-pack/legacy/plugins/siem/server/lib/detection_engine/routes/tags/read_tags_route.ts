@@ -10,9 +10,9 @@ import { DETECTION_ENGINE_TAGS_URL } from '../../../../../common/constants';
 import { LegacySetupServices, RequestFacade } from '../../../../plugin';
 import { transformError } from '../utils';
 import { readTags } from '../../tags/read_tags';
-import { GetScopedClientServices } from '../../../../services';
+import { GetScopedClients } from '../../../../services';
 
-export const createReadTagsRoute = (getServices: GetScopedClientServices): Hapi.ServerRoute => ({
+export const createReadTagsRoute = (getClients: GetScopedClients): Hapi.ServerRoute => ({
   method: 'GET',
   path: DETECTION_ENGINE_TAGS_URL,
   options: {
@@ -24,7 +24,7 @@ export const createReadTagsRoute = (getServices: GetScopedClientServices): Hapi.
     },
   },
   async handler(request: RequestFacade, headers) {
-    const { alertsClient } = await getServices(request);
+    const { alertsClient } = await getClients(request);
 
     if (!alertsClient) {
       return headers.response().code(404);
@@ -43,7 +43,7 @@ export const createReadTagsRoute = (getServices: GetScopedClientServices): Hapi.
 
 export const readTagsRoute = (
   route: LegacySetupServices['route'],
-  getServices: GetScopedClientServices
+  getClients: GetScopedClients
 ) => {
-  route(createReadTagsRoute(getServices));
+  route(createReadTagsRoute(getClients));
 };

@@ -9,7 +9,7 @@ import Boom from 'boom';
 
 import { DETECTION_ENGINE_INDEX_URL } from '../../../../../common/constants';
 import { LegacySetupServices, RequestFacade } from '../../../../plugin';
-import { GetScopedClientServices } from '../../../../services';
+import { GetScopedClients } from '../../../../services';
 import { transformError, getIndex } from '../utils';
 import { getIndexExists } from '../../index/get_index_exists';
 import { getPolicyExists } from '../../index/get_policy_exists';
@@ -22,7 +22,7 @@ import signalsPolicy from './signals_policy.json';
 
 export const createCreateIndexRoute = (
   config: LegacySetupServices['config'],
-  getServices: GetScopedClientServices
+  getClients: GetScopedClients
 ): Hapi.ServerRoute => {
   return {
     method: 'POST',
@@ -37,9 +37,10 @@ export const createCreateIndexRoute = (
     },
     async handler(request: RequestFacade) {
       try {
-        const { callCluster, getSpaceId } = await getServices(request);
+        const { clusterClient, spacesClient } = await getClients(request);
+        const callCluster = clusterClient.callAsCurrentUser;
 
-        const index = getIndex(getSpaceId, config);
+        const index = getIndex(spacesClient.getSpaceId, config);
         const indexExists = await getIndexExists(callCluster, index);
         if (indexExists) {
           return new Boom(`index: "${index}" already exists`, { statusCode: 409 });
@@ -66,7 +67,7 @@ export const createCreateIndexRoute = (
 export const createIndexRoute = (
   route: LegacySetupServices['route'],
   config: LegacySetupServices['config'],
-  getServices: GetScopedClientServices
+  getClients: GetScopedClients
 ) => {
-  route(createCreateIndexRoute(config, getServices));
+  route(createCreateIndexRoute(config, getClients));
 };

@@ -5,7 +5,7 @@
  */
 
 import { ServerFacade } from '../types';
-import { GetScopedClientServices } from '../services';
+import { GetScopedClients } from '../services';
 
 import { createRulesRoute } from '../lib/detection_engine/routes/rules/create_rules_route';
 import { createIndexRoute } from '../lib/detection_engine/routes/index/create_index_route';
@@ -28,47 +28,47 @@ import { exportRulesRoute } from '../lib/detection_engine/routes/rules/export_ru
 import { findRulesStatusesRoute } from '../lib/detection_engine/routes/rules/find_rules_status_route';
 import { getPrepackagedRulesStatusRoute } from '../lib/detection_engine/routes/rules/get_prepackaged_rules_status_route';
 
-export type LegacyInitRoutes = (getServices: GetScopedClientServices) => void;
+export type LegacyInitRoutes = (getClients: GetScopedClients) => void;
 
 export const initRoutes = (
   route: ServerFacade['route'],
   config: ServerFacade['config'],
   usingEphemeralEncryptionKey: boolean
-) => (getServices: GetScopedClientServices): void => {
+) => (getClients: GetScopedClients): void => {
   // Detection Engine Rule routes that have the REST endpoints of /api/detection_engine/rules
   // All REST rule creation, deletion, updating, etc......
-  createRulesRoute(route, config, getServices);
-  readRulesRoute(route, getServices);
-  updateRulesRoute(route, getServices);
-  deleteRulesRoute(route, getServices);
-  findRulesRoute(route, getServices);
+  createRulesRoute(route, config, getClients);
+  readRulesRoute(route, getClients);
+  updateRulesRoute(route, getClients);
+  deleteRulesRoute(route, getClients);
+  findRulesRoute(route, getClients);
 
-  addPrepackedRulesRoute(route, config, getServices);
-  getPrepackagedRulesStatusRoute(route, getServices);
-  createRulesBulkRoute(route, config, getServices);
-  updateRulesBulkRoute(route, getServices);
-  deleteRulesBulkRoute(route, getServices);
+  addPrepackedRulesRoute(route, config, getClients);
+  getPrepackagedRulesStatusRoute(route, getClients);
+  createRulesBulkRoute(route, config, getClients);
+  updateRulesBulkRoute(route, getClients);
+  deleteRulesBulkRoute(route, getClients);
 
-  importRulesRoute(route, config, getServices);
-  exportRulesRoute(route, config, getServices);
+  importRulesRoute(route, config, getClients);
+  exportRulesRoute(route, config, getClients);
 
-  findRulesStatusesRoute(route, getServices);
+  findRulesStatusesRoute(route, getClients);
 
   // Detection Engine Signals routes that have the REST endpoints of /api/detection_engine/signals
   // POST /api/detection_engine/signals/status
   // Example usage can be found in siem/server/lib/detection_engine/scripts/signals
-  setSignalsStatusRoute(route, config, getServices);
-  querySignalsRoute(route, config, getServices);
+  setSignalsStatusRoute(route, config, getClients);
+  querySignalsRoute(route, config, getClients);
 
   // Detection Engine index routes that have the REST endpoints of /api/detection_engine/index
   // All REST index creation, policy management for spaces
-  createIndexRoute(route, config, getServices);
-  readIndexRoute(route, config, getServices);
-  deleteIndexRoute(route, config, getServices);
+  createIndexRoute(route, config, getClients);
+  readIndexRoute(route, config, getClients);
+  deleteIndexRoute(route, config, getClients);
 
   // Detection Engine tags routes that have the REST endpoints of /api/detection_engine/tags
-  readTagsRoute(route, getServices);
+  readTagsRoute(route, getClients);
 
   // Privileges API to get the generic user privileges
-  readPrivilegesRoute(route, config, usingEphemeralEncryptionKey, getServices);
+  readPrivilegesRoute(route, config, usingEphemeralEncryptionKey, getClients);
 };

@@ -10,11 +10,11 @@ import { SignalsStatusRequest } from '../../signals/types';
 import { setSignalsStatusSchema } from '../schemas/set_signal_status_schema';
 import { LegacySetupServices } from '../../../../plugin';
 import { transformError, getIndex } from '../utils';
-import { GetScopedClientServices } from '../../../../services';
+import { GetScopedClients } from '../../../../services';
 
 export const setSignalsStatusRouteDef = (
   config: LegacySetupServices['config'],
-  getServices: GetScopedClientServices
+  getClients: GetScopedClients
 ): Hapi.ServerRoute => {
   return {
     method: 'POST',
@@ -30,8 +30,8 @@ export const setSignalsStatusRouteDef = (
     },
     async handler(request: SignalsStatusRequest) {
       const { signal_ids: signalIds, query, status } = request.payload;
-      const { callCluster, getSpaceId } = await getServices(request);
-      const index = getIndex(getSpaceId, config);
+      const { clusterClient, spacesClient } = await getClients(request);
+      const index = getIndex(spacesClient.getSpaceId, config);
 
       let queryObject;
       if (signalIds) {
@@ -45,7 +45,7 @@ export const setSignalsStatusRouteDef = (
         };
       }
       try {
-        return callCluster('updateByQuery', {
+        return clusterClient.callAsCurrentUser('updateByQuery', {
           index,
           body: {
             script: {
@@ -66,7 +66,7 @@ export const setSignalsStatusRouteDef = (
 export const setSignalsStatusRoute = (
   route: LegacySetupServices['route'],
   config: LegacySetupServices['config'],
-  getServices: GetScopedClientServices
+  getClients: GetScopedClients
 ) => {
-  route(setSignalsStatusRouteDef(config, getServices));
+  route(setSignalsStatusRouteDef(config, getClients));
 };

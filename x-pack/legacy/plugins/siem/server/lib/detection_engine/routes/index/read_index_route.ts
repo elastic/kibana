@@ -9,13 +9,13 @@ import Boom from 'boom';
 
 import { DETECTION_ENGINE_INDEX_URL } from '../../../../../common/constants';
 import { LegacySetupServices, RequestFacade } from '../../../../plugin';
-import { GetScopedClientServices } from '../../../../services';
+import { GetScopedClients } from '../../../../services';
 import { transformError, getIndex } from '../utils';
 import { getIndexExists } from '../../index/get_index_exists';
 
 export const createReadIndexRoute = (
   config: LegacySetupServices['config'],
-  getServices: GetScopedClientServices
+  getClients: GetScopedClients
 ): Hapi.ServerRoute => {
   return {
     method: 'GET',
@@ -30,9 +30,10 @@ export const createReadIndexRoute = (
     },
     async handler(request: RequestFacade, headers) {
       try {
-        const { callCluster, getSpaceId } = await getServices(request);
+        const { clusterClient, spacesClient } = await getClients(request);
+        const callCluster = clusterClient.callAsCurrentUser;
 
-        const index = getIndex(getSpaceId, config);
+        const index = getIndex(spacesClient.getSpaceId, config);
         const indexExists = await getIndexExists(callCluster, index);
 
         if (indexExists) {
@@ -61,7 +62,7 @@ export const createReadIndexRoute = (
 export const readIndexRoute = (
   route: LegacySetupServices['route'],
   config: LegacySetupServices['config'],
-  getServices: GetScopedClientServices
+  getClients: GetScopedClients
 ) => {
-  route(createReadIndexRoute(config, getServices));
+  route(createReadIndexRoute(config, getClients));
 };

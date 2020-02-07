@@ -8,7 +8,7 @@ import Hapi from 'hapi';
 
 import { DETECTION_ENGINE_PREPACKAGED_URL } from '../../../../../common/constants';
 import { LegacySetupServices, RequestFacade } from '../../../../plugin';
-import { GetScopedClientServices } from '../../../../services';
+import { GetScopedClients } from '../../../../services';
 import { transformError } from '../utils';
 import { getPrepackagedRules } from '../../rules/get_prepackaged_rules';
 import { getRulesToInstall } from '../../rules/get_rules_to_install';
@@ -17,7 +17,7 @@ import { findRules } from '../../rules/find_rules';
 import { getExistingPrepackagedRules } from '../../rules/get_existing_prepackaged_rules';
 
 export const createGetPrepackagedRulesStatusRoute = (
-  getServices: GetScopedClientServices
+  getClients: GetScopedClients
 ): Hapi.ServerRoute => {
   return {
     method: 'GET',
@@ -31,7 +31,7 @@ export const createGetPrepackagedRulesStatusRoute = (
       },
     },
     async handler(request: RequestFacade, headers) {
-      const { alertsClient } = await getServices(request);
+      const { alertsClient } = await getClients(request);
 
       if (!alertsClient) {
         return headers.response().code(404);
@@ -65,7 +65,7 @@ export const createGetPrepackagedRulesStatusRoute = (
 
 export const getPrepackagedRulesStatusRoute = (
   route: LegacySetupServices['route'],
-  getServices: GetScopedClientServices
+  getClients: GetScopedClients
 ): void => {
-  route(createGetPrepackagedRulesStatusRoute(getServices));
+  route(createGetPrepackagedRulesStatusRoute(getClients));
 };
