@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { IUiActionsApiPure } from '../types';
+import { UiActionsApiPure } from '../types';
 
-export const detachAction: IUiActionsApiPure['detachAction'] = ({ triggers }) => (
+export const detachAction: UiActionsApiPure['detachAction'] = ({ triggers }) => (
   triggerId,
   actionId
 ) => {
