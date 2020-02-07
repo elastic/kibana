@@ -7,9 +7,7 @@
 import Boom from 'boom';
 import { RequestHandlerContext } from 'kibana/server';
 
-export interface InputData {
-  [key: string]: any;
-}
+export type InputData = any[];
 
 export interface InputOverrides {
   [key: string]: string;

@@ -10,3 +10,5 @@ export {
   InputData,
   AnalysisResult,
 } from './file_data_visualizer';
+
+export { importDataProvider, Settings, InjectPipeline, Mappings } from './import_data';
