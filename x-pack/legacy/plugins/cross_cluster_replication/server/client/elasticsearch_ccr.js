@@ -73,6 +73,34 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
     method: 'DELETE',
   });
 
+  ccr.pauseAutoFollowPattern = ca({
+    urls: [
+      {
+        fmt: '/_ccr/auto_follow/<%=id%>/pause',
+        req: {
+          id: {
+            type: 'string',
+          },
+        },
+      },
+    ],
+    method: 'POST',
+  });
+
+  ccr.resumeAutoFollowPattern = ca({
+    urls: [
+      {
+        fmt: '/_ccr/auto_follow/<%=id%>/resume',
+        req: {
+          id: {
+            type: 'string',
+          },
+        },
+      },
+    ],
+    method: 'POST',
+  });
+
   ccr.info = ca({
     urls: [
       {

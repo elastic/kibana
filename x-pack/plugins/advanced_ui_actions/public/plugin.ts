@@ -11,7 +11,7 @@ import {
   Plugin,
 } from '../../../../src/core/public';
 import { createReactOverlays } from '../../../../src/plugins/kibana_react/public';
-import { IUiActionsStart, IUiActionsSetup } from '../../../../src/plugins/ui_actions/public';
+import { UiActionsStart, UiActionsSetup } from '../../../../src/plugins/ui_actions/public';
 import {
   CONTEXT_MENU_TRIGGER,
   PANEL_BADGE_TRIGGER,
@@ -25,12 +25,12 @@ import { CommonlyUsedRange } from './types';
 
 interface SetupDependencies {
   embeddable: IEmbeddableSetup; // Embeddable are needed because they register basic triggers/actions.
-  uiActions: IUiActionsSetup;
+  uiActions: UiActionsSetup;
 }
 
 interface StartDependencies {
   embeddable: IEmbeddableStart;
-  uiActions: IUiActionsStart;
+  uiActions: UiActionsStart;
 }
 
 export type Setup = void;
