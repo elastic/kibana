@@ -17,13 +17,17 @@
  * under the License.
  */
 
-export function buildNode(value) {
-  return {
-    type: 'literal',
-    value,
-  };
-}
+import * as functionType from './function';
+import * as literal from './literal';
+import * as namedArg from './named_arg';
+import * as wildcard from './wildcard';
+import { NodeTypes } from './types';
 
-export function toElasticsearchQuery(node) {
-  return node.value;
-}
+export { NodeTypes };
+
+export const nodeTypes: NodeTypes = {
+  function: functionType,
+  literal,
+  namedArg,
+  wildcard,
+};
