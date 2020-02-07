@@ -18,6 +18,7 @@
  */
 
 import React, { Component } from 'react';
+import { Subscription } from 'rxjs';
 import {
   Comparators,
   EuiFlexGroup,
@@ -60,6 +61,7 @@ export class AdvancedSettings extends Component<AdvancedSettingsProps, AdvancedS
   private groupedSettings: GroupedSettings;
   private categoryCounts: Record<string, number>;
   private categories: string[] = [];
+  private uiSettingsSubscription?: Subscription;
 
   constructor(props: AdvancedSettingsProps) {
     super(props);
@@ -106,13 +108,19 @@ export class AdvancedSettings extends Component<AdvancedSettingsProps, AdvancedS
   }
 
   componentDidMount() {
-    this.props.uiSettings.getUpdate$().subscribe(() => {
+    this.uiSettingsSubscription = this.props.uiSettings.getUpdate$().subscribe(() => {
       const { query } = this.state;
       this.init(this.props.uiSettings);
       this.setState({
         filteredSettings: this.mapSettings(Query.execute(query, this.settings)),
       });
     });
+  }
+
+  componentWillUnmount() {
+    if (this.uiSettingsSubscription) {
+      this.uiSettingsSubscription.unsubscribe();
+    }
   }
 
   mapConfig(config: IUiSettingsClient) {

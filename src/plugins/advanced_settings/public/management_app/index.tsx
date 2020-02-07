@@ -35,7 +35,7 @@ export const toBeUsed = {
   }),
 };
 
-export function registerAdvSettingsMgmntApp({
+export async function registerAdvSettingsMgmntApp({
   management,
   getStartServices,
   componentRegistry,
@@ -53,7 +53,7 @@ export function registerAdvSettingsMgmntApp({
     throw new Error('`kibana` management section not found.');
   }
 
-  kibanaSection.registerApp({
+  const advancedSettingsManagementApp = kibanaSection.registerApp({
     id: i18n.translate('advancedSettings.sectionLabel', {
       defaultMessage: 'Advanced Settings',
     }),
@@ -61,15 +61,18 @@ export function registerAdvSettingsMgmntApp({
     order: 20,
     async mount(params) {
       params.setBreadcrumbs([{ text: title }]);
-      const [{ uiSettings, notifications, docLinks }] = await getStartServices();
+      const [{ uiSettings, notifications, docLinks, application }] = await getStartServices();
+      // todo badge
       ReactDOM.render(
         <I18nProvider>
           <AdvancedSettings
+            // todo - is this right?
+            /*
+            $scope.query = $route.current.params.setting || '';
+            $route.updateParams({ setting: null });
+            */
             queryText={''}
-            // todo
-            // enableSaving={application.capabilities.management}
-            // enableSaving={uiSettings.get().advancedSettings.save}
-            enableSaving={true}
+            enableSaving={application.capabilities.advancedSettings.save as boolean}
             toasts={notifications.toasts}
             dockLinks={docLinks.links}
             uiSettings={uiSettings}
@@ -83,6 +86,11 @@ export function registerAdvSettingsMgmntApp({
       };
     },
   });
+  const [{ application }] = await getStartServices();
+  // console.log('application.capabilities', application.capabilities);
+  if (!application.capabilities.management.kibana.settings) {
+    advancedSettingsManagementApp.disable();
+  }
 }
 /*
 import { getBreadcrumbs } from './breadcrumbs';
@@ -118,39 +126,5 @@ uiModules.get('apps/management').directive('kbnManagementAdvanced', function($ro
   };
 });
 
-const AdvancedSettingsApp = ({ query = '' }) => {
-  return (
-    <I18nContext>
-      <AdvancedSettings queryText={query} enableSaving={capabilities.get().advancedSettings.save} />
-    </I18nContext>
-  );
-};
 
-uiModules.get('apps/management').directive('kbnManagementAdvancedReact', function(reactDirective) {
-  return reactDirective(AdvancedSettingsApp, [['query', { watchDepth: 'reference' }]]);
-});
-
-management.getSection('kibana').register('settings', {
-  display: i18n.translate('advancedSettings.sectionLabel', {
-    defaultMessage: 'Advanced Settings',
-  }),
-  order: 20,
-  url: '#/management/kibana/settings',
-});
-
-FeatureCatalogueRegistryProvider.register(() => {
-  return {
-    id: 'advanced_settings',
-    title: i18n.translate('advancedSettings.advancedSettingsLabel', {
-      defaultMessage: 'Advanced Settings',
-    }),
-    description: i18n.translate('advancedSettings.advancedSettingsDescription', {
-      defaultMessage: 'Directly edit settings that control behavior in Kibana.',
-    }),
-    icon: 'advancedSettingsApp',
-    path: '/app/kibana#/management/kibana/settings',
-    showOnHomePage: false,
-    category: FeatureCatalogueCategory.ADMIN,
-  };
-});
 */
