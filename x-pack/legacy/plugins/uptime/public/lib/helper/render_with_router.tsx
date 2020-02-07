@@ -9,6 +9,7 @@ import React from 'react';
 import { Router } from 'react-router-dom';
 import { MemoryHistory } from 'history/createMemoryHistory';
 import { createMemoryHistory } from 'history';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
 export const renderWithRouter = (Component: any, customHistory?: MemoryHistory) => {
   if (customHistory) {
@@ -18,4 +19,14 @@ export const renderWithRouter = (Component: any, customHistory?: MemoryHistory) 
   history.location.key = 'TestKeyForTesting';
 
   return <Router history={history}>{Component}</Router>;
+};
+
+export const shallowWithRouter = (Component: any, customHistory?: MemoryHistory) => {
+  if (customHistory) {
+    return shallowWithIntl(<Router history={customHistory}>{Component}</Router>);
+  }
+  const history = createMemoryHistory();
+  history.location.key = 'TestKeyForTesting';
+
+  return shallowWithIntl(<Router history={history}>{Component}</Router>);
 };
