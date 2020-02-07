@@ -8,6 +8,7 @@ import moment from 'moment-timezone';
 import React from 'react';
 import { FormattedRelative } from '@kbn/i18n/react';
 
+import { i18n } from '@kbn/i18n';
 import { useDateFormat, useTimeZone, useUiSetting$ } from '../../lib/kibana';
 import { getOrEmptyTagFromValue } from '../empty_value';
 import { LocalizedDateTooltip } from '../localized_date_tooltip';
@@ -104,7 +105,13 @@ FormattedDate.displayName = 'FormattedDate';
  * - the raw date value (e.g. 2019-03-22T00:47:46Z)
  */
 
-export const FormattedRelativePreferenceDate = ({ value }: { value?: string | number | null }) => {
+export const FormattedRelativePreferenceDate = ({
+  value,
+  labelOn = false,
+}: {
+  value?: string | number | null;
+  labelOn?: boolean;
+}) => {
   if (value == null) {
     return getOrEmptyTagFromValue(value);
   }
@@ -118,7 +125,13 @@ export const FormattedRelativePreferenceDate = ({ value }: { value?: string | nu
       {moment(date)
         .add(1, 'hours')
         .isBefore(new Date()) ? (
-        <PreferenceFormattedDate data-test-subj="preference-time" value={date} />
+        <>
+          {labelOn &&
+            i18n.translate('xpack.siem.alertsView.alertsGraphTitle', {
+              defaultMessage: 'on ',
+            })}
+          <PreferenceFormattedDate data-test-subj="preference-time" value={date} />
+        </>
       ) : (
         <FormattedRelative data-test-subj="relative-time" value={date} />
       )}

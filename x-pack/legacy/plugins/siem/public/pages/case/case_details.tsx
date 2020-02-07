@@ -17,11 +17,11 @@ interface Props {
 
 export const CaseDetailsPage = React.memo(({ caseId }: Props) => (
   <>
-    <WrapperPage>
-      <EuiFlexGroup>
-        <CaseView caseId={caseId} />
-      </EuiFlexGroup>
-    </WrapperPage>
+    {/* <WrapperPage>*/}
+    {/*  <EuiFlexGroup>*/}
+    <CaseView caseId={caseId} />
+    {/*  </EuiFlexGroup>*/}
+    {/* </WrapperPage>*/}
     <SpyRoute />
   </>
 ));

@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const BACK_TO_ALL = i18n.translate('xpack.siem.case.caseView.backLabel', {
-  defaultMessage: 'Back to all cases',
+  defaultMessage: 'Back to cases',
 });
 
 export const CANCEL = i18n.translate('xpack.siem.case.caseView.cancel', {

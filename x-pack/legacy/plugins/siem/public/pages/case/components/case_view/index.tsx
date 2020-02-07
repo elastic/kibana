@@ -6,6 +6,7 @@
 
 import React, { Fragment, useCallback, useState } from 'react';
 import {
+  EuiAvatar,
   EuiButton,
   EuiButtonEmpty,
   EuiDescriptionList,
@@ -14,11 +15,16 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
+  EuiPanel,
+  EuiSteps,
+  EuiText,
 } from '@elastic/eui';
 
+import styled, { css } from 'styled-components';
 import { Markdown } from '../../../../components/markdown';
 import { HeaderPage } from '../../../../components/header_page';
-import * as i18n from '../../translations';
+import { WrapperPage } from '../../../../components/wrapper_page';
+import * as i18n from './translations';
 import { getCaseUrl } from '../../../../components/link_to';
 import { useGetCase } from '../../../../containers/case/use_get_case';
 import { FormattedRelativePreferenceDate } from '../../../../components/formatted_date';
@@ -29,6 +35,7 @@ import { useUpdateCase } from '../../../../containers/case/use_update_case';
 import { CommonUseField } from '../create';
 import { caseTypeOptions, stateOptions } from '../create/form_options';
 import { NewCaseFormatted } from '../../../../containers/case/types';
+import { UserActionTree } from '../user_action_tree';
 
 interface Props {
   caseId: string;
@@ -39,6 +46,45 @@ interface CaseDetail {
   definition: string | number | JSX.Element | null;
   edit?: JSX.Element;
 }
+
+const MyWrapper = styled(WrapperPage)`
+  padding-bottom: 0;
+  ${({ theme }) => css`
+    @media only screen and (min-width: ${theme.eui.euiBreakpoints.l}) {
+      margin: 0 auto;
+      width: 85%;
+    }
+  `}
+`;
+const BackgroundWrapper = styled.div`
+  ${({ theme }) => css`
+    background-color: ${theme.eui.euiSizeM};
+  `}
+`;
+
+const MySteps = styled(EuiSteps)`
+  ${({ stepAuthor, theme }) => css`
+    .euiStepNumber::before {
+      content: ${() => <EuiAvatar name={stepAuthor} />};
+    }
+    p.euiTitle {
+      width: 100%;
+      padding-right: 16px;
+      .euiPanel {
+        background-color: ${theme.eui.euiColorLightestShade};
+        border-bottom: none;
+        border-radius: ${theme.eui.euiBorderRadius} ${theme.eui.euiBorderRadius} 0 0;
+      }
+    }
+    .euiStep__content {
+      padding-top: 0;
+      margin-top: 0;
+      .euiPanel {
+        border-radius: 0 0 ${theme.eui.euiBorderRadius} ${theme.eui.euiBorderRadius};
+      }
+    }
+  `}
+`;
 
 const getDictionary = (
   { title, definition, edit }: CaseDetail,
@@ -75,7 +121,43 @@ export const CaseView = React.memo(({ caseId }: Props) => {
       setIsEdit(false);
     }
   }, [form]);
-
+  const firstSetOfSteps = [
+    {
+      avatarName: data.created_by.username,
+      title: (
+        <EuiText>
+          <p>
+            <strong>{`${data.created_by.username}`}</strong>
+            {` ${i18n.ADDED_DESCRIPTION} `}{' '}
+            <FormattedRelativePreferenceDate value={data.created_at} labelOn />
+          </p>
+        </EuiText>
+      ),
+      children: isEdit ? (
+        <DescriptionMarkdown
+          descriptionInputHeight={200}
+          initialDescription={data.description}
+          isLoading={isLoading}
+          onChange={description => setFormData({ ...data, description })}
+        />
+      ) : (
+        <Markdown raw={data.description} />
+      ),
+    },
+    {
+      avatarName: `steph`,
+      title: (
+        <EuiText>
+          <p>
+            <strong>{`${data.created_by.username}`}</strong>
+            {` ${i18n.ADDED_DESCRIPTION} `}{' '}
+            <FormattedRelativePreferenceDate value={data.created_at} labelOn />
+          </p>
+        </EuiText>
+      ),
+      children: <p>{'alright alright alright'}</p>,
+    },
+  ];
   const caseDetailsDefinitions: CaseDetail[] = [
     {
       title: i18n.DESCRIPTION,
@@ -170,47 +252,53 @@ export const CaseView = React.memo(({ caseId }: Props) => {
       </EuiFlexItem>
     </EuiFlexGroup>
   ) : (
-    <EuiFlexItem>
-      <HeaderPage
-        backOptions={{
-          href: getCaseUrl(),
-          text: i18n.BACK_TO_ALL,
-        }}
-        border
-        subtitle={caseId}
-        title={data.title}
-      >
-        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
-          {isEdit ? (
+    <>
+      <MyWrapper>
+        <HeaderPage
+          backOptions={{
+            href: getCaseUrl(),
+            text: i18n.BACK_TO_ALL,
+          }}
+          title={data.title}
+        >
+          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
+            {isEdit ? (
+              <EuiFlexItem grow={false}>
+                <EuiButton fill isDisabled={isLoading} isLoading={isLoading} onClick={onSubmit}>
+                  {i18n.SUBMIT}
+                </EuiButton>
+              </EuiFlexItem>
+            ) : null}
             <EuiFlexItem grow={false}>
-              <EuiButton fill isDisabled={isLoading} isLoading={isLoading} onClick={onSubmit}>
-                {i18n.SUBMIT}
-              </EuiButton>
+              <EuiButtonEmpty onClick={() => setIsEdit(!isEdit)}>
+                {isEdit ? i18n.CANCEL : i18n.EDIT}
+              </EuiButtonEmpty>
             </EuiFlexItem>
-          ) : null}
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={() => setIsEdit(!isEdit)}>
-              {isEdit ? i18n.CANCEL : i18n.EDIT}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </HeaderPage>
-      {isEdit ? (
-        <Form form={form}>
-          <EuiDescriptionList compressed>
-            {caseDetailsDefinitions.map((dictionaryItem, key) =>
-              getDictionary(dictionaryItem, key, isEdit)
-            )}
-          </EuiDescriptionList>
-        </Form>
-      ) : (
-        <EuiDescriptionList compressed>
-          {caseDetailsDefinitions.map((dictionaryItem, key) =>
-            getDictionary(dictionaryItem, key, isEdit)
-          )}
-        </EuiDescriptionList>
-      )}
-    </EuiFlexItem>
+          </EuiFlexGroup>
+        </HeaderPage>
+      </MyWrapper>
+      <BackgroundWrapper>
+        <MyWrapper>
+          <UserActionTree userActions={firstSetOfSteps} />
+          {/* <MySteps steps={firstSetOfSteps} />*/}
+          {/* {isEdit ? (*/}
+          {/*  <Form form={form}>*/}
+          {/*    <EuiDescriptionList compressed>*/}
+          {/*      {caseDetailsDefinitions.map((dictionaryItem, key) =>*/}
+          {/*        getDictionary(dictionaryItem, key, isEdit)*/}
+          {/*      )}*/}
+          {/*    </EuiDescriptionList>*/}
+          {/*  </Form>*/}
+          {/* ) : (*/}
+          {/*  <EuiDescriptionList compressed>*/}
+          {/*    {caseDetailsDefinitions.map((dictionaryItem, key) =>*/}
+          {/*      getDictionary(dictionaryItem, key, isEdit)*/}
+          {/*    )}*/}
+          {/*  </EuiDescriptionList>*/}
+          {/* )}*/}
+        </MyWrapper>
+      </BackgroundWrapper>
+    </>
   );
 });
 
