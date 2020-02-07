@@ -37,6 +37,8 @@ export const ToolbarWrapper = (props: Props) => {
                 nodeType,
                 accountId,
                 region,
+                customMetrics,
+                changeCustomMetrics,
               }) =>
                 props.children({
                   createDerivedIndexPattern,
@@ -51,6 +53,8 @@ export const ToolbarWrapper = (props: Props) => {
                   nodeType,
                   region,
                   accountId,
+                  customMetrics,
+                  changeCustomMetrics,
                 })
               }
             </WithWaffleOptions>

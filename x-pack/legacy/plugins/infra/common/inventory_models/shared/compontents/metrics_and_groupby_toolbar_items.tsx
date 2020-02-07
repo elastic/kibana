@@ -34,6 +34,8 @@ export const MetricsAndGroupByToolbarItems = (props: Props) => {
           options={metricOptions}
           metric={props.metric}
           onChange={props.changeMetric}
+          onChangeCustomMetrics={props.changeCustomMetrics}
+          customMetrics={props.customMetrics}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
