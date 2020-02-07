@@ -40,6 +40,11 @@ export function useKibanaUiSetting(
   (key: 'timepicker:quickRanges', value: TimePickerQuickRange[]) => Promise<boolean>
 ];
 
+export function useKibanaUiSetting(
+  key: string,
+  defaultValue?: any
+): [any, (key: string, value: any) => Promise<boolean>];
+
 export function useKibanaUiSetting(key: string, defaultValue?: any) {
   const uiSettingsClient = npSetup.core.uiSettings;
 
