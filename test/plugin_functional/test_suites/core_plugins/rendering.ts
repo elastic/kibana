@@ -69,7 +69,8 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
       return window.__RENDERING_SESSION__;
     });
 
-  describe('rendering service', () => {
+  // eslint-disable-next-line ban/ban
+  describe.only('rendering service', () => {
     it('renders "core" application', async () => {
       await navigateTo('/render/core');
 
