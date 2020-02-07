@@ -54,9 +54,6 @@ export { buildVislibDimensions } from '../../../visualizations/public';
 export { getRequestInspectorStats, getResponseInspectorStats } from '../../../data/public';
 // @ts-ignore
 export { intervalOptions } from 'ui/agg_types';
-// @ts-ignore
-export { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
-export { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 export { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
 export { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 // @ts-ignore
