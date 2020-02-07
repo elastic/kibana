@@ -25,7 +25,7 @@ describe('AdvancedOptions', () => {
   it('should render normally', () => {
     const component = shallowWithI18nProvider(
       <AdvancedOptions
-        showingAdvancedOptions={true}
+        isVisible={true}
         indexPatternId={'foobar'}
         toggleAdvancedOptions={() => {}}
         onChangeIndexPatternId={() => {}}
@@ -38,7 +38,7 @@ describe('AdvancedOptions', () => {
   it('should hide if not showing', () => {
     const component = shallowWithI18nProvider(
       <AdvancedOptions
-        showingAdvancedOptions={false}
+        isVisible={false}
         indexPatternId={'foobar'}
         toggleAdvancedOptions={() => {}}
         onChangeIndexPatternId={() => {}}
