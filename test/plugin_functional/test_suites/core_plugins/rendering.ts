@@ -22,6 +22,16 @@ import expect from '@kbn/expect';
 import '../../plugins/core_provider_plugin/types';
 import { PluginFunctionalProviderContext } from '../../services';
 
+declare global {
+  interface Window {
+    /**
+     * We use this global variable to track page history changes to ensure that
+     * navigation is done without causing a full page reload.
+     */
+    __RENDERING_SESSION__: string[];
+  }
+}
+
 // eslint-disable-next-line import/no-default-export
 export default function({ getService, getPageObjects }: PluginFunctionalProviderContext) {
   const PageObjects = getPageObjects(['common']);
@@ -36,10 +46,10 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
     await appsMenu.clickLink(title);
     return browser.execute(() => {
       if (!('__RENDERING_SESSION__' in window)) {
-        (window as any).__RENDERING_SESSION__ = [];
+        window.__RENDERING_SESSION__ = [];
       }
 
-      (window as any).__RENDERING_SESSION__.push(window.location.pathname);
+      window.__RENDERING_SESSION__.push(window.location.pathname);
     });
   };
   const getLegacyMode = () =>
@@ -52,11 +62,15 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
       return JSON.parse(document.querySelector('kbn-injected-metadata')!.getAttribute('data')!)
         .legacyMetadata.uiSettings.user;
     });
-  const exists = (selector: string) => testSubjects.exists(selector);
-  const findLoadingMessage = () => testSubjects.find('kbnLoadingMessage');
-  const getRenderingSession = () => browser.execute(() => (window as any).__RENDERING_SESSION__);
+  const exists = (selector: string) => testSubjects.exists(selector, { timeout: 5000 });
+  const findLoadingMessage = () => testSubjects.find('kbnLoadingMessage', 5000);
+  const getRenderingSession = () =>
+    browser.execute(() => {
+      return window.__RENDERING_SESSION__;
+    });
 
-  describe('rendering service', () => {
+  // Talked to @dover, he aggreed we can skip these tests that are unexpectedly flaky
+  describe.skip('rendering service', () => {
     it('renders "core" application', async () => {
       await navigateTo('/render/core');
 
