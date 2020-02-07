@@ -630,7 +630,7 @@ export const ViewStrings = {
       }),
     getOpenLinksInNewTabDisplayName: () =>
       i18n.translate('xpack.canvas.uis.views.openLinksInNewTabTitle', {
-        defaultMessage: 'Open links in new tab',
+        defaultMessage: 'Open all links in a new tab',
         values: {
           markdown: MARKDOWN,
         },
