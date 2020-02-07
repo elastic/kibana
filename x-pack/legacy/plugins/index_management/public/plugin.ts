@@ -41,7 +41,6 @@ export class IndexMgmtUIPlugin {
     const { http, notifications, getStartServices } = coreSetup;
     const { usageCollection } = plugins;
 
-    // Initialize services
     httpService.init(http);
     notificationService.init(notifications);
     this.uiMetricService.setup(usageCollection);
