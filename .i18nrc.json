@@ -27,6 +27,7 @@
       "src/plugins/management"
     ],
     "advancedSettings": "src/plugins/advanced_settings",
+    "kibana_legacy": "src/plugins/kibana_legacy",
     "kibana_react": "src/legacy/core_plugins/kibana_react",
     "kibana-react": "src/plugins/kibana_react",
     "kibana_utils": "src/plugins/kibana_utils",
