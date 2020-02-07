@@ -1,0 +1,263 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Storyshots renderers/Metric with formatted string metric and a specified format 1`] = `
+<div
+  style={
+    Object {
+      "width": "200px",
+    }
+  }
+>
+  <div
+    className="canvasMetric"
+  >
+    <div
+      className="canvasMetric__metric"
+      style={
+        Object {
+          "color": "#b83c6f",
+          "fontFamily": "Optima, 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif",
+          "fontSize": "48px",
+          "fontStyle": "normal",
+          "fontWeight": "bold",
+          "lineHeight": "1",
+          "textAlign": "center",
+          "textDecoration": "none",
+        }
+      }
+    >
+      $10m
+    </div>
+    <div
+      className="canvasMetric__label"
+      style={
+        Object {
+          "color": "#000000",
+          "fontFamily": "Baskerville, Georgia, Garamond, 'Times New Roman', Times, serif",
+          "fontSize": "24px",
+          "fontStyle": "italic",
+          "fontWeight": "normal",
+          "lineHeight": "1",
+          "textAlign": "center",
+          "textDecoration": "none",
+        }
+      }
+    >
+      Total Revenue
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Storyshots renderers/Metric with invalid metricFont 1`] = `
+<div
+  style={
+    Object {
+      "width": "200px",
+    }
+  }
+>
+  <div
+    className="canvasMetric"
+  >
+    <div
+      className="canvasMetric__metric"
+      style={
+        Object {
+          "color": "#b83c6f",
+          "fontFamily": "Optima, 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif",
+          "fontSize": "48px",
+          "fontStyle": "normal",
+          "fontWeight": "bold",
+          "lineHeight": "1",
+          "textAlign": "center",
+          "textDecoration": "none",
+        }
+      }
+    >
+      $10m
+    </div>
+    <div
+      className="canvasMetric__label"
+      style={
+        Object {
+          "color": "#000000",
+          "fontFamily": "Baskerville, Georgia, Garamond, 'Times New Roman', Times, serif",
+          "fontSize": "24px",
+          "fontStyle": "italic",
+          "fontWeight": "normal",
+          "lineHeight": "1",
+          "textAlign": "center",
+          "textDecoration": "none",
+        }
+      }
+    >
+      Total Revenue
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Storyshots renderers/Metric with label 1`] = `
+<div
+  style={
+    Object {
+      "width": "200px",
+    }
+  }
+>
+  <div
+    className="canvasMetric"
+  >
+    <div
+      className="canvasMetric__metric"
+      style={
+        Object {
+          "color": "#b83c6f",
+          "fontFamily": "Optima, 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif",
+          "fontSize": "48px",
+          "fontStyle": "normal",
+          "fontWeight": "bold",
+          "lineHeight": "1",
+          "textAlign": "center",
+          "textDecoration": "none",
+        }
+      }
+    >
+      $12.34
+    </div>
+    <div
+      className="canvasMetric__label"
+      style={
+        Object {
+          "color": "#000000",
+          "fontFamily": "Baskerville, Georgia, Garamond, 'Times New Roman', Times, serif",
+          "fontSize": "24px",
+          "fontStyle": "italic",
+          "fontWeight": "normal",
+          "lineHeight": "1",
+          "textAlign": "center",
+          "textDecoration": "none",
+        }
+      }
+    >
+      Average price
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Storyshots renderers/Metric with null metric 1`] = `
+<div
+  style={
+    Object {
+      "width": "200px",
+    }
+  }
+>
+  <div
+    className="canvasMetric"
+  >
+    <div
+      className="canvasMetric__metric"
+      style={Object {}}
+    />
+  </div>
+</div>
+`;
+
+exports[`Storyshots renderers/Metric with number metric 1`] = `
+<div
+  style={
+    Object {
+      "width": "200px",
+    }
+  }
+>
+  <div
+    className="canvasMetric"
+  >
+    <div
+      className="canvasMetric__metric"
+      style={
+        Object {
+          "color": "#b83c6f",
+          "fontFamily": "Optima, 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif",
+          "fontSize": "48px",
+          "fontStyle": "normal",
+          "fontWeight": "bold",
+          "lineHeight": "1",
+          "textAlign": "center",
+          "textDecoration": "none",
+        }
+      }
+    >
+      12345.6789
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Storyshots renderers/Metric with number metric and a specified format 1`] = `
+<div
+  style={
+    Object {
+      "width": "200px",
+    }
+  }
+>
+  <div
+    className="canvasMetric"
+  >
+    <div
+      className="canvasMetric__metric"
+      style={
+        Object {
+          "color": "#b83c6f",
+          "fontFamily": "Optima, 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif",
+          "fontSize": "48px",
+          "fontStyle": "normal",
+          "fontWeight": "bold",
+          "lineHeight": "1",
+          "textAlign": "center",
+          "textDecoration": "none",
+        }
+      }
+    >
+      -0.24%
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Storyshots renderers/Metric with string metric 1`] = `
+<div
+  style={
+    Object {
+      "width": "200px",
+    }
+  }
+>
+  <div
+    className="canvasMetric"
+  >
+    <div
+      className="canvasMetric__metric"
+      style={
+        Object {
+          "color": "#b83c6f",
+          "fontFamily": "Optima, 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif",
+          "fontSize": "48px",
+          "fontStyle": "normal",
+          "fontWeight": "bold",
+          "lineHeight": "1",
+          "textAlign": "center",
+          "textDecoration": "none",
+        }
+      }
+    >
+      $12.34
+    </div>
+  </div>
+</div>
+`;

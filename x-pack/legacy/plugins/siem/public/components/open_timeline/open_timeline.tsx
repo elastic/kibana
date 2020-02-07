@@ -4,10 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiPanel, EuiSpacer } from '@elastic/eui';
-import * as React from 'react';
-import { pure } from 'recompose';
-import styled from 'styled-components';
+import { EuiPanel } from '@elastic/eui';
+import React from 'react';
 
 import { OPEN_TIMELINE_CLASS_NAME } from './helpers';
 import { OpenTimelineProps } from './types';
@@ -15,11 +13,7 @@ import { SearchRow } from './search_row';
 import { TimelinesTable } from './timelines_table';
 import { TitleRow } from './title_row';
 
-export const OpenTimelinePanel = styled(EuiPanel)`
-  width: 100%;
-`;
-
-export const OpenTimeline = pure<OpenTimelineProps>(
+export const OpenTimeline = React.memo<OpenTimelineProps>(
   ({
     deleteTimelines,
     defaultPageSize,
@@ -44,7 +38,7 @@ export const OpenTimeline = pure<OpenTimelineProps>(
     title,
     totalSearchResultsCount,
   }) => (
-    <OpenTimelinePanel className={OPEN_TIMELINE_CLASS_NAME} paddingSize="l">
+    <EuiPanel className={OPEN_TIMELINE_CLASS_NAME}>
       <TitleRow
         data-test-subj="title-row"
         onDeleteSelected={onDeleteSelected}
@@ -52,8 +46,6 @@ export const OpenTimeline = pure<OpenTimelineProps>(
         selectedTimelinesCount={selectedItems.length}
         title={title}
       />
-
-      <EuiSpacer data-test-subj="title-row-spacer" size="l" />
 
       <SearchRow
         data-test-subj="search-row"
@@ -64,9 +56,12 @@ export const OpenTimeline = pure<OpenTimelineProps>(
         totalSearchResultsCount={totalSearchResultsCount}
       />
 
-      <EuiSpacer data-test-subj="search-row-spacer" size="l" />
-
       <TimelinesTable
+        actionTimelineToShow={
+          onDeleteSelected != null && deleteTimelines != null
+            ? ['delete', 'duplicate', 'selectable']
+            : ['duplicate', 'selectable']
+        }
         data-test-subj="timelines-table"
         deleteTimelines={deleteTimelines}
         defaultPageSize={defaultPageSize}
@@ -79,11 +74,13 @@ export const OpenTimeline = pure<OpenTimelineProps>(
         pageIndex={pageIndex}
         pageSize={pageSize}
         searchResults={searchResults}
-        showExtendedColumnsAndActions={onDeleteSelected != null && deleteTimelines != null}
+        showExtendedColumns={true}
         sortDirection={sortDirection}
         sortField={sortField}
         totalSearchResultsCount={totalSearchResultsCount}
       />
-    </OpenTimelinePanel>
+    </EuiPanel>
   )
 );
+
+OpenTimeline.displayName = 'OpenTimeline';

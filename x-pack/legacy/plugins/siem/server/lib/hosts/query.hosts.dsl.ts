@@ -6,25 +6,20 @@
 
 import { Direction, HostsFields, HostsSortField } from '../../graphql/types';
 import { assertUnreachable, createQueryFilterClauses } from '../../utils/build_query';
-import { reduceFields } from '../../utils/build_query/reduce_fields';
-import { hostFieldsMap } from '../ecs_fields';
 
 import { HostsRequestOptions } from '.';
-import { buildFieldsTermAggregation } from './helpers';
 
 export const buildHostsQuery = ({
+  defaultIndex,
   fields,
   filterQuery,
-  pagination: { limit, cursor },
+  pagination: { querySize },
   sort,
-  defaultIndex,
   sourceConfiguration: {
     fields: { timestamp },
   },
   timerange: { from, to },
 }: HostsRequestOptions) => {
-  const esFields = reduceFields(fields, hostFieldsMap);
-
   const filter = [
     ...createQueryFilterClauses(filterQuery),
     {
@@ -47,12 +42,24 @@ export const buildHostsQuery = ({
       aggregations: {
         ...agg,
         host_data: {
-          terms: { size: limit + 1, field: 'host.name', order: getQueryOrder(sort) },
+          terms: { size: querySize, field: 'host.name', order: getQueryOrder(sort) },
           aggs: {
             lastSeen: { max: { field: '@timestamp' } },
-            ...buildFieldsTermAggregation(
-              esFields.filter(field => !['@timestamp', '_id'].includes(field))
-            ),
+            os: {
+              top_hits: {
+                size: 1,
+                sort: [
+                  {
+                    '@timestamp': {
+                      order: 'desc',
+                    },
+                  },
+                ],
+                _source: {
+                  includes: ['host.os.*'],
+                },
+              },
+            },
           },
         },
       },
@@ -61,6 +68,7 @@ export const buildHostsQuery = ({
       track_total_hits: false,
     },
   };
+
   return dslQuery;
 };
 

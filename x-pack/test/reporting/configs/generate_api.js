@@ -4,29 +4,40 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getApiIntegrationConfig } from '../../api_integration/config';
-import { getReportingApiConfig } from './api';
+import { esTestConfig, kbnTestConfig, kibanaServerTestUser } from '@kbn/test';
+import { format as formatUrl } from 'url';
+import { ReportingAPIProvider } from '../services';
 
-export default async function ({ readConfigFile }) {
-  const apiTestConfig = await getApiIntegrationConfig({ readConfigFile });
-  const reportingApiConfig = await getReportingApiConfig({ readConfigFile });
-  const xPackFunctionalTestsConfig = await readConfigFile(require.resolve('../../functional/config.js'));
+export default async function({ readConfigFile }) {
+  const apiConfig = await readConfigFile(require.resolve('../../api_integration/config.js'));
 
   return {
-    ...reportingApiConfig,
+    servers: apiConfig.get('servers'),
     junit: { reportName: 'X-Pack Reporting Generate API Integration Tests' },
     testFiles: [require.resolve('../api/generate')],
     services: {
-      ...apiTestConfig.services,
-      ...reportingApiConfig.services,
+      ...apiConfig.get('services'),
+      reportingAPI: ReportingAPIProvider,
     },
     kbnTestServer: {
-      ...xPackFunctionalTestsConfig.get('kbnTestServer'),
+      ...apiConfig.get('kbnTestServer'),
       serverArgs: [
-        ...xPackFunctionalTestsConfig.get('kbnTestServer.serverArgs'),
-        '--xpack.reporting.csv.enablePanelActionDownload=true',
+        '--logging.events.log',
+        '["info","warning","error","fatal","optimize","reporting"]',
+        `--elasticsearch.hosts=${formatUrl(esTestConfig.getUrlParts())}`,
+        `--elasticsearch.password=${kibanaServerTestUser.password}`,
+        `--elasticsearch.username=${kibanaServerTestUser.username}`,
+        `--logging.json=false`,
+        `--optimize.enabled=false`,
+        `--server.maxPayloadBytes=1679958`,
+        `--server.port=${kbnTestConfig.getPort()}`,
+        `--xpack.reporting.csv.enablePanelActionDownload=true`,
+        `--xpack.reporting.csv.maxSizeBytes=2850`,
+        `--xpack.reporting.queue.pollInterval=3000`,
+        `--xpack.spaces.enabled=false`,
       ],
     },
-    esArchiver: apiTestConfig.esArchiver,
+    esArchiver: apiConfig.get('esArchiver'),
+    esTestCluster: apiConfig.get('esTestCluster'),
   };
 }

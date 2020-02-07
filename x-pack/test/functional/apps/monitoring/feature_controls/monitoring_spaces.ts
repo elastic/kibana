@@ -4,20 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect';
-import { SpacesService } from '../../../../common/services';
-import { KibanaFunctionalTestDefaultProviders } from '../../../../types/providers';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
-export default function({ getPageObjects, getService }: KibanaFunctionalTestDefaultProviders) {
+export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const spacesService: SpacesService = getService('spaces');
-  const PageObjects = getPageObjects(['common', 'dashboard', 'security', 'error']);
+  const spacesService = getService('spaces');
+  const PageObjects = getPageObjects(['common', 'dashboard', 'security', 'error', 'settings']);
   const appsMenu = getService('appsMenu');
   const find = getService('find');
 
   describe('spaces', () => {
     before(async () => {
       await esArchiver.load('empty_kibana');
+    });
+
+    after(async () => {
+      await esArchiver.unload('empty_kibana');
+      await PageObjects.common.navigateToApp('home');
+      await PageObjects.security.forceLogout();
     });
 
     describe('space with no features disabled', () => {
@@ -33,13 +37,12 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         await spacesService.delete('custom_space');
       });
 
-      it('shows Stack Monitoring navlink', async () => {
+      it('shows Stack Monitoring navlink fail', async () => {
         await PageObjects.common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
+        await PageObjects.settings.setNavType('individual');
+        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
         expect(navLinks).to.contain('Stack Monitoring');
       });
 
@@ -70,9 +73,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         await PageObjects.common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
+        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
         expect(navLinks).not.to.contain('Stack Monitoring');
       });
 

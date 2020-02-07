@@ -20,22 +20,11 @@
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 
-import {
-  getIsCodeViewerOpen,
-  getIsSandbox,
-  getSections,
-  getSource,
-  getTitle,
-} from '../store';
+import { getIsCodeViewerOpen, getIsSandbox, getSections, getSource, getTitle } from '../store';
 
 import { AppView } from './app_view';
 
-import {
-  openCodeViewer,
-  closeCodeViewer,
-  registerSection,
-  unregisterSection,
-} from '../actions';
+import { openCodeViewer, closeCodeViewer, registerSection, unregisterSection } from '../actions';
 
 function mapStateToProps(state, ownProps) {
   return {

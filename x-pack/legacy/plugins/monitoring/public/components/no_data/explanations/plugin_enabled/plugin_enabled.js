@@ -6,15 +6,12 @@
 
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
-import {
-  EuiCode,
-  EuiText,
-  EuiHorizontalRule,
-} from '@elastic/eui';
+import { EuiCode, EuiText, EuiHorizontalRule } from '@elastic/eui';
 import { ChangesNeeded } from '../../blurbs';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-export function ExplainPluginEnabled({ context, property, data }) {
+export function ExplainPluginEnabled({ reason }) {
+  const { context, property, data } = reason;
   return (
     <Fragment>
       <ChangesNeeded />
@@ -29,9 +26,9 @@ export function ExplainPluginEnabled({ context, property, data }) {
             from your configuration will put the default into effect and enable Monitoring."
             values={{
               context,
-              property: (<EuiCode>{property}</EuiCode>),
-              data: (<EuiCode>{data}</EuiCode>),
-              monitoringEnableFalse: (<EuiCode>xpack.monitoring.enabled: false</EuiCode>)
+              property: <EuiCode>{property}</EuiCode>,
+              data: <EuiCode>{data}</EuiCode>,
+              monitoringEnableFalse: <EuiCode>xpack.monitoring.enabled: false</EuiCode>,
             }}
           />
         </p>
@@ -41,7 +38,5 @@ export function ExplainPluginEnabled({ context, property, data }) {
 }
 
 ExplainPluginEnabled.propTypes = {
-  property: PropTypes.string.isRequired,
-  context: PropTypes.string.isRequired,
-  data: PropTypes.string.isRequired
+  reason: PropTypes.object.isRequired,
 };

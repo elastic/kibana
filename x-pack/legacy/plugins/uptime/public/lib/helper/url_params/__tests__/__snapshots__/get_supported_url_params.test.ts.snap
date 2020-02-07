@@ -1,0 +1,81 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`getSupportedUrlParams provides defaults for empty string array values 1`] = `
+Object {
+  "absoluteDateRangeEnd": 20,
+  "absoluteDateRangeStart": 20,
+  "autorefreshInterval": 60000,
+  "autorefreshIsPaused": false,
+  "dateRangeEnd": "now",
+  "dateRangeStart": "now-15m",
+  "filters": "",
+  "pagination": undefined,
+  "search": "",
+  "selectedPingStatus": "",
+  "statusFilter": "",
+}
+`;
+
+exports[`getSupportedUrlParams provides defaults for undefined values 1`] = `
+Object {
+  "absoluteDateRangeEnd": 20,
+  "absoluteDateRangeStart": 20,
+  "autorefreshInterval": 60000,
+  "autorefreshIsPaused": false,
+  "dateRangeEnd": "now",
+  "dateRangeStart": "now-15m",
+  "filters": "",
+  "pagination": undefined,
+  "search": "",
+  "selectedPingStatus": "",
+  "statusFilter": "",
+}
+`;
+
+exports[`getSupportedUrlParams returns custom values 1`] = `
+Object {
+  "absoluteDateRangeEnd": 20,
+  "absoluteDateRangeStart": 20,
+  "autorefreshInterval": 23,
+  "autorefreshIsPaused": false,
+  "dateRangeEnd": "now",
+  "dateRangeStart": "now-15m",
+  "filters": "",
+  "pagination": undefined,
+  "search": "monitor.status: down",
+  "selectedPingStatus": "up",
+  "statusFilter": "",
+}
+`;
+
+exports[`getSupportedUrlParams returns default values 1`] = `
+Object {
+  "absoluteDateRangeEnd": 20,
+  "absoluteDateRangeStart": 20,
+  "autorefreshInterval": 60000,
+  "autorefreshIsPaused": false,
+  "dateRangeEnd": "now",
+  "dateRangeStart": "now-15m",
+  "filters": "",
+  "pagination": undefined,
+  "search": "",
+  "selectedPingStatus": "",
+  "statusFilter": "",
+}
+`;
+
+exports[`getSupportedUrlParams returns the first item for string arrays 1`] = `
+Object {
+  "absoluteDateRangeEnd": 20,
+  "absoluteDateRangeStart": 20,
+  "autorefreshInterval": 60000,
+  "autorefreshIsPaused": false,
+  "dateRangeEnd": "now",
+  "dateRangeStart": "now-18d",
+  "filters": "",
+  "pagination": undefined,
+  "search": "",
+  "selectedPingStatus": "",
+  "statusFilter": "",
+}
+`;

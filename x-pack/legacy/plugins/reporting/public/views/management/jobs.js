@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
+import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 
 import routes from 'ui/routes';
 import template from 'plugins/reporting/views/management/jobs.html';
@@ -24,14 +24,12 @@ routes.when('/management/kibana/reporting', {
     MANAGEMENT_BREADCRUMB,
     {
       text: i18n.translate('xpack.reporting.breadcrumb', {
-        defaultMessage: 'Reporting'
-      })
-    }
+        defaultMessage: 'Reporting',
+      }),
+    },
   ],
   controllerAs: 'jobsCtrl',
-  controller($scope, kbnUrl, Private) {
-    const xpackInfo = Private(XPackInfoProvider);
-
+  controller($scope, kbnUrl) {
     $scope.$$postDigest(() => {
       const node = document.getElementById(REACT_ANCHOR_DOM_ELEMENT_ID);
       if (!node) {
@@ -47,7 +45,7 @@ routes.when('/management/kibana/reporting', {
             redirect={kbnUrl.redirect}
           />
         </I18nContext>,
-        node,
+        node
       );
     });
 
@@ -57,5 +55,5 @@ routes.when('/management/kibana/reporting', {
         unmountComponentAtNode(node);
       }
     });
-  }
+  },
 });

@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Moment } from 'moment';
+
 // TS TODO: This is not yet a fully fledged representation of the job data structure,
 // but it fulfills some basic TypeScript related needs.
 export interface MlJob {
@@ -37,6 +39,44 @@ export interface MlJob {
   model_snapshot_retention_days: number;
   results_index_name: string;
   state: string;
+}
+
+export interface MlSummaryJob {
+  id: string;
+  description: string;
+  groups: string[];
+  processed_record_count: number;
+  memory_status?: string;
+  jobState: string;
+  hasDatafeed: boolean;
+  datafeedId?: string;
+  datafeedIndices: any[];
+  datafeedState?: string;
+  latestTimestampMs: number;
+  earliestTimestampMs?: number;
+  latestResultsTimestampMs: number;
+  isSingleMetricViewerJob: boolean;
+  nodeName?: string;
+  deleting?: boolean;
+  fullJob?: any;
+  auditMessage?: any;
+  latestTimestampSortValue?: number;
+}
+
+export type MlSummaryJobs = MlSummaryJob[];
+
+export interface MlJobWithTimeRange extends MlJob {
+  groups: string[];
+  timeRange: {
+    from: number;
+    to: number;
+    fromPx: number;
+    toPx: number;
+    fromMoment: Moment;
+    toMoment: Moment;
+    widthPx: number;
+    label: string;
+  };
 }
 
 export function isMlJob(arg: any): arg is MlJob {

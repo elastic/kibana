@@ -8,15 +8,16 @@ import uiRoutes from 'ui/routes';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import template from './index.html';
 import { ElasticsearchOverviewController } from './controller';
+import { CODE_PATH_ELASTICSEARCH } from '../../../../common/constants';
 
 uiRoutes.when('/elasticsearch', {
   template,
   resolve: {
     clusters(Private) {
       const routeInit = Private(routeInitProvider);
-      return routeInit();
-    }
+      return routeInit({ codePaths: [CODE_PATH_ELASTICSEARCH] });
+    },
   },
   controllerAs: 'elasticsearchOverview',
-  controller: ElasticsearchOverviewController
+  controller: ElasticsearchOverviewController,
 });

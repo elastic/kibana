@@ -5,7 +5,7 @@
  */
 
 import { UIM_CLUSTER_ADD, UIM_CLUSTER_UPDATE } from '../constants';
-import { trackUserRequest } from './track_ui_metric';
+import { trackUserRequest } from './ui_metric';
 import { sendGet, sendPost, sendPut, sendDelete } from './http';
 
 export async function loadClusters() {
@@ -19,10 +19,7 @@ export async function addCluster(cluster) {
 }
 
 export async function editCluster(cluster) {
-  const {
-    name,
-    ...rest
-  } = cluster;
+  const { name, ...rest } = cluster;
 
   const request = sendPut(name, rest);
   return await trackUserRequest(request, UIM_CLUSTER_UPDATE);

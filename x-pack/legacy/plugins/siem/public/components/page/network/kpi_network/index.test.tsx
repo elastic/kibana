@@ -5,8 +5,7 @@
  */
 
 import { shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
-import * as React from 'react';
+import React from 'react';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
 import { apolloClientObservable, mockGlobalState } from '../../../../mock';
@@ -17,6 +16,9 @@ import { mockData } from './mock';
 
 describe('KpiNetwork Component', () => {
   const state: State = mockGlobalState;
+  const from = new Date('2019-06-15T06:00:00.000Z').valueOf();
+  const to = new Date('2019-06-18T06:00:00.000Z').valueOf();
+  const narrowDateRange = jest.fn();
 
   let store = createStore(state, apolloClientObservable);
 
@@ -28,21 +30,35 @@ describe('KpiNetwork Component', () => {
     test('it renders loading icons', () => {
       const wrapper = shallow(
         <ReduxStoreProvider store={store}>
-          <KpiNetworkComponent data={mockData.KpiNetwork} loading={true} />
+          <KpiNetworkComponent
+            data={mockData.KpiNetwork}
+            from={from}
+            id="kpiNetwork"
+            loading={true}
+            to={to}
+            narrowDateRange={narrowDateRange}
+          />
         </ReduxStoreProvider>
       );
 
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper.find('KpiNetworkComponent')).toMatchSnapshot();
     });
 
     test('it renders the default widget', () => {
       const wrapper = shallow(
         <ReduxStoreProvider store={store}>
-          <KpiNetworkComponent data={mockData.KpiNetwork} loading={false} />
+          <KpiNetworkComponent
+            data={mockData.KpiNetwork}
+            from={from}
+            id="kpiNetwork"
+            loading={false}
+            to={to}
+            narrowDateRange={narrowDateRange}
+          />
         </ReduxStoreProvider>
       );
 
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper.find('KpiNetworkComponent')).toMatchSnapshot();
     });
   });
 });

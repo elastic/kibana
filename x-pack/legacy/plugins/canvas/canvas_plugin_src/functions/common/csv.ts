@@ -5,9 +5,9 @@
  */
 
 import Papa from 'papaparse';
-import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
-import { Datatable } from '../types';
-import { getFunctionHelp, getFunctionErrors } from '../../strings';
+import { ExpressionFunction } from 'src/plugins/expressions/common';
+import { Datatable } from '../../../types';
+import { getFunctionHelp, getFunctionErrors } from '../../../i18n';
 
 interface Arguments {
   data: string;

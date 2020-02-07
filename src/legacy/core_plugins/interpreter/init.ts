@@ -17,32 +17,15 @@
  * under the License.
  */
 
-// @ts-ignore
-import { register, registryFactory } from '@kbn/interpreter/common';
+/* eslint-disable max-classes-per-file */
 
 // @ts-ignore
-import { routes } from './server/routes';
+import { register, registryFactory, Registry, Fn } from '@kbn/interpreter/common';
 
 import { Legacy } from '../../../../kibana';
 
-// @ts-ignore
-import { FunctionsRegistry } from './common/functions_registry';
-// @ts-ignore
-import { typeSpecs as types } from './common/types';
-// @ts-ignore
-import { TypesRegistry } from './common/types_registry';
-
-export const registries = {
-  types: new TypesRegistry(),
-  serverFunctions: new FunctionsRegistry(),
-};
-
 export async function init(server: Legacy.Server /* options */) {
   server.injectUiAppVars('canvas', () => {
-    register(registries, {
-      types,
-    });
-
     const config = server.config();
     const basePath = config.get('server.basePath');
     const reportingBrowserType = (() => {
@@ -55,7 +38,9 @@ export async function init(server: Legacy.Server /* options */) {
 
     return {
       kbnIndex: config.get('kibana.index'),
-      serverFunctions: registries.serverFunctions.toArray(),
+      serverFunctions: (server.newPlatform.setup.plugins.expressions as any).__LEGACY
+        .registries()
+        .serverFunctions.toArray(),
       basePath,
       reportingBrowserType,
     };
@@ -63,7 +48,5 @@ export async function init(server: Legacy.Server /* options */) {
 
   // Expose server.plugins.interpreter.register(specs) and
   // server.plugins.interpreter.registries() (a getter).
-  server.expose(registryFactory(registries));
-
-  routes(server);
+  server.expose((server.newPlatform.setup.plugins.expressions as any).__LEGACY);
 }

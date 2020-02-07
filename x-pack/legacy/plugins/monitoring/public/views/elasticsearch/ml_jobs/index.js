@@ -11,35 +11,37 @@ import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import { MonitoringViewBaseEuiTableController } from '../../';
 import { getPageData } from './get_page_data';
 import template from './index.html';
+import { CODE_PATH_ELASTICSEARCH, CODE_PATH_ML } from '../../../../common/constants';
 
 uiRoutes.when('/elasticsearch/ml_jobs', {
   template,
   resolve: {
-    clusters: function (Private) {
+    clusters: function(Private) {
       const routeInit = Private(routeInitProvider);
-      return routeInit();
+      return routeInit({ codePaths: [CODE_PATH_ELASTICSEARCH, CODE_PATH_ML] });
     },
-    pageData: getPageData
+    pageData: getPageData,
   },
   controllerAs: 'mlJobs',
   controller: class MlJobsList extends MonitoringViewBaseEuiTableController {
-
     constructor($injector, $scope) {
       super({
         title: i18n.translate('xpack.monitoring.elasticsearch.mlJobs.routeTitle', {
-          defaultMessage: 'Elasticsearch - Machine Learning Jobs'
+          defaultMessage: 'Elasticsearch - Machine Learning Jobs',
         }),
         storageKey: 'elasticsearch.mlJobs',
         getPageData,
         $scope,
-        $injector
+        $injector,
       });
 
       const $route = $injector.get('$route');
       this.data = $route.current.locals.pageData;
       const globalState = $injector.get('globalState');
-      $scope.cluster = find($route.current.locals.clusters, { cluster_uuid: globalState.cluster_uuid });
+      $scope.cluster = find($route.current.locals.clusters, {
+        cluster_uuid: globalState.cluster_uuid,
+      });
       this.isCcrEnabled = Boolean($scope.cluster && $scope.cluster.isCcrEnabled);
     }
-  }
+  },
 });

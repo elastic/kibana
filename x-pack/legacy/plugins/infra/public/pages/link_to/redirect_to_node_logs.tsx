@@ -4,73 +4,74 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+
 import compose from 'lodash/fp/compose';
 import React from 'react';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 
 import { LoadingPage } from '../../components/loading_page';
-import { replaceLogFilterInQueryString } from '../../containers/logs/with_log_filter';
-import { replaceLogPositionInQueryString } from '../../containers/logs/with_log_position';
+import { replaceLogFilterInQueryString } from '../../containers/logs/log_filter';
+import { replaceLogPositionInQueryString } from '../../containers/logs/log_position';
 import { replaceSourceIdInQueryString } from '../../containers/source_id';
-import { InfraNodeType } from '../../graphql/types';
+import { SourceConfigurationFields } from '../../graphql/types';
 import { getFilterFromLocation, getTimeFromLocation } from './query_params';
 import { useSource } from '../../containers/source/source';
+import { findInventoryFields } from '../../../common/inventory_models';
+import { InventoryItemType } from '../../../common/inventory_models/types';
 
 type RedirectToNodeLogsType = RouteComponentProps<{
   nodeId: string;
-  nodeType: InfraNodeType;
+  nodeType: InventoryItemType;
   sourceId?: string;
 }>;
 
-interface RedirectToNodeLogsProps extends RedirectToNodeLogsType {
-  intl: InjectedIntl;
-}
+const getFieldByNodeType = (
+  nodeType: InventoryItemType,
+  fields: SourceConfigurationFields.Fields
+) => {
+  const inventoryFields = findInventoryFields(nodeType, fields);
+  return inventoryFields.id;
+};
 
-export const RedirectToNodeLogs = injectI18n(
-  ({
-    match: {
-      params: { nodeId, nodeType, sourceId = 'default' },
-    },
-    location,
-    intl,
-  }: RedirectToNodeLogsProps) => {
-    const { source, isLoading } = useSource({ sourceId });
-    const configuration = source && source.configuration;
+export const RedirectToNodeLogs = ({
+  match: {
+    params: { nodeId, nodeType, sourceId = 'default' },
+  },
+  location,
+}: RedirectToNodeLogsType) => {
+  const { source, isLoading } = useSource({ sourceId });
+  const configuration = source && source.configuration;
 
-    if (isLoading) {
-      return (
-        <LoadingPage
-          message={intl.formatMessage(
-            {
-              id: 'xpack.infra.redirectToNodeLogs.loadingNodeLogsMessage',
-              defaultMessage: 'Loading {nodeType} logs',
-            },
-            {
-              nodeType,
-            }
-          )}
-        />
-      );
-    }
-
-    if (!configuration) {
-      return null;
-    }
-
-    const nodeFilter = `${configuration.fields[nodeType]}: ${nodeId}`;
-    const userFilter = getFilterFromLocation(location);
-    const filter = userFilter ? `(${nodeFilter}) and (${userFilter})` : nodeFilter;
-
-    const searchString = compose(
-      replaceLogFilterInQueryString(filter),
-      replaceLogPositionInQueryString(getTimeFromLocation(location)),
-      replaceSourceIdInQueryString(sourceId)
-    )('');
-
-    return <Redirect to={`/logs?${searchString}`} />;
+  if (isLoading) {
+    return (
+      <LoadingPage
+        message={i18n.translate('xpack.infra.redirectToNodeLogs.loadingNodeLogsMessage', {
+          defaultMessage: 'Loading {nodeType} logs',
+          values: {
+            nodeType,
+          },
+        })}
+      />
+    );
   }
-);
+
+  if (!configuration) {
+    return null;
+  }
+
+  const nodeFilter = `${getFieldByNodeType(nodeType, configuration.fields)}: ${nodeId}`;
+  const userFilter = getFilterFromLocation(location);
+  const filter = userFilter ? `(${nodeFilter}) and (${userFilter})` : nodeFilter;
+
+  const searchString = compose(
+    replaceLogFilterInQueryString(filter),
+    replaceLogPositionInQueryString(getTimeFromLocation(location)),
+    replaceSourceIdInQueryString(sourceId)
+  )('');
+
+  return <Redirect to={`/logs?${searchString}`} />;
+};
 
 export const getNodeLogsUrl = ({
   nodeId,
@@ -78,6 +79,6 @@ export const getNodeLogsUrl = ({
   time,
 }: {
   nodeId: string;
-  nodeType: InfraNodeType;
+  nodeType: InventoryItemType;
   time?: number;
 }) => [`#/link-to/${nodeType}-logs/`, nodeId, ...(time ? [`?time=${time}`] : [])].join('');

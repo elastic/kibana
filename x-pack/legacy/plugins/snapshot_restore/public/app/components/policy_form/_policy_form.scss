@@ -1,0 +1,16 @@
+/*
+ * Prevent switch controls from moving around when toggling content
+ */
+.snapshotRestore__policyForm__stepSettings {
+  .euiFormRow--hasEmptyLabelSpace {
+    min-height: auto;
+    margin-top: $euiFontSizeXS + $euiSizeS + ($euiSizeXXL / 4);
+  }
+}
+
+/*
+ * Allow toggle mode link in indices field label to be flushed right
+ */
+.snapshotRestore__policyForm__stepSettings__indicesFieldWrapper .euiFormLabel {
+  width: 100%;
+}

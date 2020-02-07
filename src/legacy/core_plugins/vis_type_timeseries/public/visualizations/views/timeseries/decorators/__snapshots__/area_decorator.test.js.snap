@@ -1,0 +1,60 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`src/legacy/core_plugins/metrics/public/visualizations/views/timeseries/decorators/area_decorator.js <AreaSeriesDecorator /> should render and match a snapshot 1`] = `
+<AreaSeries
+  areaSeriesStyle={
+    Object {
+      "area": Object {
+        "fill": "rgb(0, 156, 224)",
+        "opacity": 1,
+        "visible": true,
+      },
+      "line": Object {
+        "stroke": "rgb(0, 156, 224)",
+        "strokeWidth": 2,
+        "visible": true,
+      },
+      "point": Object {
+        "radius": 1,
+        "stroke": "rgb(0, 156, 224)",
+        "strokeWidth": 5,
+        "visible": false,
+      },
+    }
+  }
+  curve={9}
+  customSeriesColors={
+    Array [
+      "rgb(0, 156, 224)",
+    ]
+  }
+  data={
+    Array [
+      Array [
+        1556917200000,
+        7,
+      ],
+      Array [
+        1557003600000,
+        9,
+      ],
+    ]
+  }
+  enableHistogramMode={true}
+  groupId="yaxis_main_group"
+  hideInLegend={false}
+  histogramModeAlignment="center"
+  id="61ca57f1-469d-11e7-af02-69e470af7417:Rome"
+  name="Rome"
+  stackAsPercentage={false}
+  timeZone="local"
+  xAccessor={0}
+  xScaleType="time"
+  yAccessors={
+    Array [
+      1,
+    ]
+  }
+  yScaleType="linear"
+/>
+`;

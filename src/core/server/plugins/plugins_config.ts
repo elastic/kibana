@@ -29,7 +29,6 @@ export const config = {
 
     /**
      * Defines an array of directories where another plugin should be loaded from.
-     * Should only be used in a development environment.
      */
     paths: schema.arrayOf(schema.string(), { defaultValue: [] }),
   }),
@@ -45,17 +44,16 @@ export class PluginsConfig {
   /**
    * Defines directories that we should scan for the plugin subdirectories.
    */
-  public readonly pluginSearchPaths: ReadonlyArray<string>;
+  public readonly pluginSearchPaths: readonly string[];
 
   /**
    * Defines directories where an additional plugin exists.
    */
-  public readonly additionalPluginPaths: ReadonlyArray<string>;
+  public readonly additionalPluginPaths: readonly string[];
 
   constructor(rawConfig: PluginsConfigType, env: Env) {
     this.initialize = rawConfig.initialize;
     this.pluginSearchPaths = env.pluginSearchPaths;
-    // Only allow custom plugin paths in dev.
-    this.additionalPluginPaths = env.mode.dev ? rawConfig.paths : [];
+    this.additionalPluginPaths = rawConfig.paths;
   }
 }

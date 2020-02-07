@@ -22,7 +22,7 @@
 import { EnvOptions } from '../env';
 
 type DeepPartial<T> = {
-  [P in keyof T]?: T[P] extends Array<infer R> ? Array<DeepPartial<R>> : DeepPartial<T[P]>
+  [P in keyof T]?: T[P] extends Array<infer R> ? Array<DeepPartial<R>> : DeepPartial<T[P]>;
 };
 
 export function getEnvOptions(options: DeepPartial<EnvOptions> = {}): EnvOptions {
@@ -38,6 +38,7 @@ export function getEnvOptions(options: DeepPartial<EnvOptions> = {}): EnvOptions
       basePath: false,
       optimize: false,
       oss: false,
+      runExamples: false,
       ...(options.cliArgs || {}),
     },
     isDevClusterMaster:

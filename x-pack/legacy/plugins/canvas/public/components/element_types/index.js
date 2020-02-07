@@ -15,7 +15,10 @@ import { notify } from '../../lib/notify';
 import { selectToplevelNodes } from '../../state/actions/transient';
 import { insertNodes, addElement } from '../../state/actions/elements';
 import { getSelectedPage } from '../../state/selectors/workpad';
+import { trackCanvasUiMetric, METRIC_TYPE } from '../../lib/ui_metric';
 import { ElementTypes as Component } from './element_types';
+
+const customElementAdded = 'elements-custom-added';
 
 const mapStateToProps = state => ({ pageId: getSelectedPage(state) });
 
@@ -48,6 +51,7 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
         selectToplevelNodes(clonedNodes); // then select the cloned node(s)
       }
       onClose();
+      trackCanvasUiMetric(METRIC_TYPE.LOADED, customElementAdded);
     },
     // custom element search
     findCustomElements: async text => {
@@ -91,11 +95,7 @@ export const ElementTypes = compose(
   withState('customElements', 'setCustomElements', []),
   withState('filterTags', 'setFilterTags', []),
   withProps(() => ({ elements: elementsRegistry.toJS() })),
-  connect(
-    mapStateToProps,
-    mapDispatchToProps,
-    mergeProps
-  )
+  connect(mapStateToProps, mapDispatchToProps, mergeProps)
 )(Component);
 
 ElementTypes.propTypes = {

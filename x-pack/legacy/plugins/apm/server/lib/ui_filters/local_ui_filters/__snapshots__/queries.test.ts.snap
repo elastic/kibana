@@ -1,0 +1,65 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`local ui filter queries fetches local ui filter aggregations 1`] = `
+Object {
+  "body": Object {
+    "aggs": Object {
+      "by_terms": Object {
+        "aggs": Object {
+          "bucket_count": Object {
+            "cardinality": Object {
+              "field": "service.name",
+            },
+          },
+        },
+        "terms": Object {
+          "field": "transaction.result",
+          "order": Object {
+            "_count": "desc",
+          },
+        },
+      },
+      "services": Object {
+        "terms": Object {
+          "field": "service.name",
+        },
+      },
+    },
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "terms": Object {
+              "processor.event": Array [
+                "transaction",
+                "error",
+                "metric",
+              ],
+            },
+          },
+          Object {
+            "range": Object {
+              "@timestamp": Object {
+                "format": "epoch_millis",
+                "gte": 1528113600000,
+                "lte": 1528977600000,
+              },
+            },
+          },
+          Object {
+            "term": Object {
+              "service.environment": "prod",
+            },
+          },
+        ],
+      },
+    },
+    "size": 0,
+  },
+  "index": Array [
+    "myIndex",
+    "myIndex",
+    "myIndex",
+  ],
+}
+`;

@@ -5,8 +5,7 @@
  */
 
 import { EuiIcon } from '@elastic/eui';
-import * as React from 'react';
-import { pure } from 'recompose';
+import React from 'react';
 import styled from 'styled-components';
 
 const LinkIcon = styled(EuiIcon)`
@@ -14,9 +13,13 @@ const LinkIcon = styled(EuiIcon)`
   top: -2px;
 `;
 
+LinkIcon.displayName = 'LinkIcon';
+
 const LinkIconWithMargin = styled(LinkIcon)`
   margin-left: 5px;
 `;
+
+LinkIconWithMargin.displayName = 'LinkIconWithMargin';
 
 const color = 'subdued';
 const iconSize = 's';
@@ -26,7 +29,7 @@ const iconType = 'popout';
  * Renders an icon that indicates following the hyperlink will navigate to
  * content external to the app
  */
-export const ExternalLinkIcon = pure<{
+export const ExternalLinkIcon = React.memo<{
   leftMargin?: boolean;
 }>(({ leftMargin = true }) =>
   leftMargin ? (
@@ -40,3 +43,5 @@ export const ExternalLinkIcon = pure<{
     <LinkIcon color={color} data-test-subj="external-link-icon" size={iconSize} type={iconType} />
   )
 );
+
+ExternalLinkIcon.displayName = 'ExternalLinkIcon';

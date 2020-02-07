@@ -37,7 +37,7 @@ const writeFileAsync = promisify(writeFile);
 async function getPrecommitGitHookScriptPath(rootPath) {
   // Retrieves the correct location for the .git dir for
   // every git setup (including git worktree)
-  const gitDirPath = (await gitRevParseAsync(['--git-dir'])).trim();
+  const gitDirPath = (await gitRevParseAsync(['--git-common-dir'])).trim();
 
   return resolve(rootPath, gitDirPath, 'hooks/pre-commit');
 }
@@ -54,10 +54,18 @@ function getKbnPrecommitGitHookScript(rootPath, nodeHome, platform) {
   # PLEASE RE-RUN 'yarn kbn bootstrap' or 'node scripts/register_git_hook' IN THE ROOT
   # OF THE CURRENT PROJECT ${rootPath}
 
+  # pre-commit script takes zero arguments: https://git-scm.com/docs/githooks#_pre_commit
+
   set -euo pipefail
 
-  # Export Git hook params
-  export GIT_PARAMS="$*"
+  # Make it possible to terminate pre commit hook
+  # using ctrl-c so nothing else would happen or be
+  # sent to the output.
+  #
+  # The correct exit code on that situation
+  # according the linux documentation project is 130
+  # https://www.tldp.org/LDP/abs/html/exitcodes.html
+  trap "exit 130" INT
 
   has_node() {
     command -v node >/dev/null 2>&1
@@ -111,7 +119,17 @@ function getKbnPrecommitGitHookScript(rootPath, nodeHome, platform) {
     exit 1
   }
 
-  node scripts/precommit_hook || {
+  execute_precommit_hook() {
+    node scripts/precommit_hook || return 1
+
+    PRECOMMIT_FILE="./.git/hooks/pre-commit.local"
+    if [ -x "\${PRECOMMIT_FILE}" ]; then
+      echo "Executing local precommit hook found in \${PRECOMMIT_FILE}"
+      "$PRECOMMIT_FILE" || return 1
+    fi
+  }
+
+  execute_precommit_hook || {
     echo "Pre-commit hook failed (add --no-verify to bypass)";
     echo '  For eslint failures you can try running \`node scripts/precommit_hook --fix\`';
     exit 1;
@@ -122,23 +140,17 @@ function getKbnPrecommitGitHookScript(rootPath, nodeHome, platform) {
 }
 
 export async function registerPrecommitGitHook(log) {
-  log.write(
-    chalk.bold(
-      `Registering Kibana pre-commit git hook...\n`
-    )
-  );
+  log.write(chalk.bold(`Registering Kibana pre-commit git hook...\n`));
 
   try {
     await writeGitHook(
       await getPrecommitGitHookScriptPath(REPO_ROOT),
-      getKbnPrecommitGitHookScript(
-        REPO_ROOT,
-        normalizePath(os.homedir()),
-        process.platform
-      )
+      getKbnPrecommitGitHookScript(REPO_ROOT, normalizePath(os.homedir()), process.platform)
     );
   } catch (e) {
-    log.write(`${chalk.red('fail')} Kibana pre-commit git hook was not installed as an error occur.\n`);
+    log.write(
+      `${chalk.red('fail')} Kibana pre-commit git hook was not installed as an error occur.\n`
+    );
     throw e;
   }
 
@@ -148,7 +160,9 @@ export async function registerPrecommitGitHook(log) {
 async function writeGitHook(gitHookScriptPath, kbnHookScriptSource) {
   try {
     await unlinkAsync(gitHookScriptPath);
-  } catch (e) { /* no-op */ }
+  } catch (e) {
+    /* no-op */
+  }
 
   await writeFileAsync(gitHookScriptPath, kbnHookScriptSource);
   await chmodAsync(gitHookScriptPath, 0o755);

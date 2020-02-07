@@ -3,7 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React from 'react';
+import React, { Fragment } from 'react';
+import { isEmpty } from 'lodash';
+import chrome from 'ui/chrome';
 import { i18n } from '@kbn/i18n';
 import uiRoutes from 'ui/routes';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
@@ -11,6 +13,14 @@ import template from './index.html';
 import { MonitoringViewBaseController } from '../../';
 import { Overview } from 'plugins/monitoring/components/cluster/overview';
 import { I18nContext } from 'ui/i18n';
+import { SetupModeRenderer } from '../../../components/renderers';
+import {
+  CODE_PATH_ALL,
+  MONITORING_CONFIG_ALERTING_EMAIL_ADDRESS,
+  KIBANA_ALERTING_ENABLED,
+} from '../../../../common/constants';
+
+const CODE_PATHS = [CODE_PATH_ALL];
 
 uiRoutes.when('/overview', {
   template,
@@ -18,27 +28,33 @@ uiRoutes.when('/overview', {
     clusters(Private) {
       // checks license info of all monitored clusters for multi-cluster monitoring usage and capability
       const routeInit = Private(routeInitProvider);
-      return routeInit();
+      return routeInit({ codePaths: CODE_PATHS });
     },
-    cluster(monitoringClusters, globalState) {
-      return monitoringClusters(globalState.cluster_uuid, globalState.ccs);
-    }
   },
   controller: class extends MonitoringViewBaseController {
     constructor($injector, $scope) {
       const kbnUrl = $injector.get('kbnUrl');
       const monitoringClusters = $injector.get('monitoringClusters');
       const globalState = $injector.get('globalState');
+      const showLicenseExpiration = $injector.get('showLicenseExpiration');
+      const config = $injector.get('config');
 
       super({
         title: i18n.translate('xpack.monitoring.cluster.overviewTitle', {
-          defaultMessage: 'Overview'
+          defaultMessage: 'Overview',
         }),
         defaultData: {},
-        getPageData: () => monitoringClusters(globalState.cluster_uuid, globalState.ccs),
+        getPageData: async () => {
+          const clusters = await monitoringClusters(
+            globalState.cluster_uuid,
+            globalState.ccs,
+            CODE_PATHS
+          );
+          return clusters[0];
+        },
         reactNodeId: 'monitoringClusterOverviewApp',
         $scope,
-        $injector
+        $injector,
       });
 
       const changeUrl = target => {
@@ -47,17 +63,41 @@ uiRoutes.when('/overview', {
         });
       };
 
-      $scope.$watch(() => this.data, data => {
-        this.renderReact(
-          <I18nContext>
-            <Overview
-              cluster={data}
-              changeUrl={changeUrl}
-              showLicenseExpiration={true}
-            />
-          </I18nContext>
-        );
-      });
+      $scope.$watch(
+        () => this.data,
+        async data => {
+          if (isEmpty(data)) {
+            return;
+          }
+
+          let emailAddress = chrome.getInjected('monitoringLegacyEmailAddress') || '';
+          if (KIBANA_ALERTING_ENABLED) {
+            emailAddress = config.get(MONITORING_CONFIG_ALERTING_EMAIL_ADDRESS) || emailAddress;
+          }
+
+          this.renderReact(
+            <I18nContext>
+              <SetupModeRenderer
+                scope={$scope}
+                injector={$injector}
+                render={({ setupMode, flyoutComponent, bottomBarComponent }) => (
+                  <Fragment>
+                    {flyoutComponent}
+                    <Overview
+                      cluster={data}
+                      emailAddress={emailAddress}
+                      setupMode={setupMode}
+                      changeUrl={changeUrl}
+                      showLicenseExpiration={showLicenseExpiration}
+                    />
+                    {bottomBarComponent}
+                  </Fragment>
+                )}
+              />
+            </I18nContext>
+          );
+        }
+      );
     }
-  }
+  },
 });

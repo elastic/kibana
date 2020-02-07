@@ -16,16 +16,32 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
+import { LegacyConfig } from '../../legacy';
+
+/**
+ * @deprecated
+ * @internal
+ **/
 interface SavedObjectsSchemaTypeDefinition {
   isNamespaceAgnostic: boolean;
   hidden?: boolean;
-  indexPattern?: string;
+  indexPattern?: ((config: LegacyConfig) => string) | string;
+  convertToAliasScript?: string;
 }
 
+/**
+ * @deprecated
+ * @internal
+ **/
 export interface SavedObjectsSchemaDefinition {
-  [key: string]: SavedObjectsSchemaTypeDefinition;
+  [type: string]: SavedObjectsSchemaTypeDefinition;
 }
 
+/**
+ * @deprecated This is only used by the {@link SavedObjectsLegacyService | legacy savedObjects service}
+ * @internal
+ **/
 export class SavedObjectsSchema {
   private readonly definition?: SavedObjectsSchemaDefinition;
   constructor(schemaDefinition?: SavedObjectsSchemaDefinition) {
@@ -40,11 +56,18 @@ export class SavedObjectsSchema {
     return false;
   }
 
-  public getIndexForType(type: string): string | undefined {
+  public getIndexForType(config: LegacyConfig, type: string): string | undefined {
     if (this.definition != null && this.definition.hasOwnProperty(type)) {
-      return this.definition[type].indexPattern;
+      const { indexPattern } = this.definition[type];
+      return typeof indexPattern === 'function' ? indexPattern(config) : indexPattern;
     } else {
       return undefined;
+    }
+  }
+
+  public getConvertToAliasScript(type: string): string | undefined {
+    if (this.definition != null && this.definition.hasOwnProperty(type)) {
+      return this.definition[type].convertToAliasScript;
     }
   }
 

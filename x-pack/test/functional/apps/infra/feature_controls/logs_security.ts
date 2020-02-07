@@ -5,10 +5,9 @@
  */
 
 import expect from '@kbn/expect';
-import { KibanaFunctionalTestDefaultProviders } from '../../../../types/providers';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
-export default function({ getPageObjects, getService }: KibanaFunctionalTestDefaultProviders) {
+export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
   const PageObjects = getPageObjects(['common', 'infraHome', 'security']);
@@ -58,10 +57,8 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       });
 
       it('shows logs navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
-        expect(navLinks).to.eql(['Logs', 'Management']);
+        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
+        expect(navLinks).to.eql(['Logs', 'Stack Management']);
       });
 
       describe('logs landing page without data', () => {
@@ -70,9 +67,9 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
             ensureCurrentUrl: true,
             shouldLoginIfPrompted: false,
           });
-          await testSubjects.existOrFail('infraLogsPage');
-          await testSubjects.existOrFail('logsViewSetupInstructionsButton');
-          await testSubjects.existOrFail('configureSourceButton');
+          await testSubjects.existOrFail('~infraLogsPage');
+          await testSubjects.existOrFail('~logsViewSetupInstructionsButton');
+          await testSubjects.existOrFail('~configureSourceButton');
         });
 
         it(`doesn't show read-only badge`, async () => {
@@ -123,10 +120,8 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       });
 
       it('shows logs navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
-        expect(navLinks).to.eql(['Logs', 'Management']);
+        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
+        expect(navLinks).to.eql(['Logs', 'Stack Management']);
       });
 
       describe('logs landing page without data', () => {
@@ -135,9 +130,9 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
             ensureCurrentUrl: true,
             shouldLoginIfPrompted: false,
           });
-          await testSubjects.existOrFail('infraLogsPage');
-          await testSubjects.existOrFail('logsViewSetupInstructionsButton');
-          await testSubjects.missingOrFail('configureSourceButton');
+          await testSubjects.existOrFail('~infraLogsPage');
+          await testSubjects.existOrFail('~logsViewSetupInstructionsButton');
+          await testSubjects.missingOrFail('~configureSourceButton');
         });
 
         it(`shows read-only badge`, async () => {
@@ -188,9 +183,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       });
 
       it(`doesn't show logs navlink`, async () => {
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
+        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
         expect(navLinks).to.not.contain('Logs');
       });
 
@@ -199,7 +192,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           ensureCurrentUrl: true,
           shouldLoginIfPrompted: false,
         });
-        await testSubjects.existOrFail('infraNotFoundPage');
+        await testSubjects.existOrFail('~infraNotFoundPage');
       });
     });
   });

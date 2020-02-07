@@ -4,10 +4,10 @@
 
 ## CoreStart.uiSettings property
 
-[UiSettingsStart](./kibana-plugin-public.uisettingsstart.md)
+[IUiSettingsClient](./kibana-plugin-public.iuisettingsclient.md)
 
 <b>Signature:</b>
 
 ```typescript
-uiSettings: UiSettingsStart;
+uiSettings: IUiSettingsClient;
 ```

@@ -4,15 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount, shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
+import { shallow } from 'enzyme';
 import { cloneDeep } from 'lodash/fp';
-import * as React from 'react';
+import React from 'react';
 
 import { BrowserFields } from '../../../../../containers/source';
 import { mockBrowserFields } from '../../../../../containers/source/mock';
 import { Ecs } from '../../../../../graphql/types';
 import { mockTimelineData, TestProviders } from '../../../../../mock';
+import { useMountAppended } from '../../../../../utils/use_mount_appended';
 import { RowRenderer } from '../row_renderer';
 import {
   createGenericAuditRowRenderer,
@@ -20,6 +20,8 @@ import {
 } from './generic_row_renderer';
 
 describe('GenericRowRenderer', () => {
+  const mount = useMountAppended();
+
   describe('#createGenericAuditRowRenderer', () => {
     let nonAuditd: Ecs;
     let auditd: Ecs;
@@ -38,12 +40,12 @@ describe('GenericRowRenderer', () => {
       const children = connectedToRenderer.renderRow({
         browserFields,
         data: auditd,
-        width: 100,
         children: <span>{'some children'}</span>,
+        timelineId: 'test',
       });
 
       const wrapper = shallow(<span>{children}</span>);
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper).toMatchSnapshot();
     });
 
     test('should return false if not a auditd datum', () => {
@@ -68,8 +70,8 @@ describe('GenericRowRenderer', () => {
       const children = connectedToRenderer.renderRow({
         browserFields: mockBrowserFields,
         data: nonAuditd,
-        width: 100,
         children: <span>{'some children'}</span>,
+        timelineId: 'test',
       });
       const wrapper = mount(
         <TestProviders>
@@ -83,8 +85,8 @@ describe('GenericRowRenderer', () => {
       const children = connectedToRenderer.renderRow({
         browserFields: mockBrowserFields,
         data: auditd,
-        width: 100,
         children: <span>{'some children '}</span>,
+        timelineId: 'test',
       });
       const wrapper = mount(
         <TestProviders>
@@ -92,7 +94,7 @@ describe('GenericRowRenderer', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toContain(
-        'some children Session246alice@zeek-londonsome textwgetwith resultsuccessDestination93.184.216.34:80'
+        'some children Session246alice@zeek-londonsome textwget(1490)wget www.example.comwith resultsuccessDestination93.184.216.34:80'
       );
     });
   });
@@ -117,12 +119,12 @@ describe('GenericRowRenderer', () => {
       const children = fileToRenderer.renderRow({
         browserFields,
         data: auditdFile,
-        width: 100,
         children: <span>{'some children'}</span>,
+        timelineId: 'test',
       });
 
       const wrapper = shallow(<span>{children}</span>);
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper).toMatchSnapshot();
     });
 
     test('should return false if not a auditd datum', () => {
@@ -147,8 +149,8 @@ describe('GenericRowRenderer', () => {
       const children = fileToRenderer.renderRow({
         browserFields: mockBrowserFields,
         data: nonAuditd,
-        width: 100,
         children: <span>{'some children'}</span>,
+        timelineId: 'test',
       });
       const wrapper = mount(
         <TestProviders>
@@ -162,8 +164,8 @@ describe('GenericRowRenderer', () => {
       const children = fileToRenderer.renderRow({
         browserFields: mockBrowserFields,
         data: auditdFile,
-        width: 100,
         children: <span>{'some children '}</span>,
+        timelineId: 'test',
       });
       const wrapper = mount(
         <TestProviders>
@@ -171,7 +173,7 @@ describe('GenericRowRenderer', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toContain(
-        'some children Sessionunsetroot@zeek-londonin/some text/proc/15990/attr/currentusingsystemd-journalwith resultsuccess'
+        'some children Sessionunsetroot@zeek-londonin/some text/proc/15990/attr/currentusingsystemd-journal(27244)/lib/systemd/systemd-journaldwith resultsuccess'
       );
     });
   });

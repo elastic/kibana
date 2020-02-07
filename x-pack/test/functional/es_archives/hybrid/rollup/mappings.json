@@ -1,0 +1,264 @@
+{
+  "type": "index",
+  "value": {
+    "aliases": {
+    },
+    "index": "rollup_logstash",
+    "mappings": {
+      "_meta": {
+        "_rollup": {
+          "Rollupjob": {
+            "cron": "0 * * * * ?",
+            "groups": {
+              "date_histogram": {
+                "delay": "10m",
+                "field": "@timestamp",
+                "fixed_interval": "20m",
+                "time_zone": "UTC"
+              },
+              "histogram": {
+                "fields": [
+                  "machine.ram"
+                ],
+                "interval": 5
+              },
+              "terms": {
+                "fields": [
+                  "extension.keyword",
+                  "geo.src",
+                  "geo.dest",
+                  "machine.os.keyword"
+                ]
+              }
+            },
+            "id": "Rollupjob",
+            "index_pattern": "logstash*",
+            "metrics": [
+              {
+                "field": "bytes",
+                "metrics": [
+                  "avg"
+                ]
+              },
+              {
+                "field": "memory",
+                "metrics": [
+                  "avg",
+                  "max",
+                  "min",
+                  "sum",
+                  "value_count"
+                ]
+              }
+            ],
+            "page_size": 1000,
+            "rollup_index": "rollup_logstash",
+            "timeout": "20s"
+          }
+        },
+        "rollup-version": "8.0.0"
+      },
+      "dynamic_templates": [
+        {
+          "strings": {
+            "mapping": {
+              "type": "keyword"
+            },
+            "match_mapping_type": "string"
+          }
+        },
+        {
+          "date_histograms": {
+            "mapping": {
+              "type": "date"
+            },
+            "path_match": "*.date_histogram.timestamp"
+          }
+        }
+      ],
+      "properties": {
+        "@timestamp": {
+          "properties": {
+            "date_histogram": {
+              "properties": {
+                "_count": {
+                  "type": "long"
+                },
+                "interval": {
+                  "type": "keyword"
+                },
+                "time_zone": {
+                  "type": "keyword"
+                },
+                "timestamp": {
+                  "type": "date"
+                }
+              }
+            }
+          }
+        },
+        "_rollup": {
+          "properties": {
+            "id": {
+              "type": "keyword"
+            },
+            "version": {
+              "type": "long"
+            }
+          }
+        },
+        "bytes": {
+          "properties": {
+            "avg": {
+              "properties": {
+                "_count": {
+                  "type": "float"
+                },
+                "value": {
+                  "type": "float"
+                }
+              }
+            }
+          }
+        },
+        "extension": {
+          "properties": {
+            "keyword": {
+              "properties": {
+                "terms": {
+                  "properties": {
+                    "_count": {
+                      "type": "long"
+                    },
+                    "value": {
+                      "type": "keyword"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "geo": {
+          "properties": {
+            "dest": {
+              "properties": {
+                "terms": {
+                  "properties": {
+                    "_count": {
+                      "type": "long"
+                    },
+                    "value": {
+                      "type": "keyword"
+                    }
+                  }
+                }
+              }
+            },
+            "src": {
+              "properties": {
+                "terms": {
+                  "properties": {
+                    "_count": {
+                      "type": "long"
+                    },
+                    "value": {
+                      "type": "keyword"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "machine": {
+          "properties": {
+            "os": {
+              "properties": {
+                "keyword": {
+                  "properties": {
+                    "terms": {
+                      "properties": {
+                        "_count": {
+                          "type": "long"
+                        },
+                        "value": {
+                          "type": "keyword"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "ram": {
+              "properties": {
+                "histogram": {
+                  "properties": {
+                    "_count": {
+                      "type": "long"
+                    },
+                    "interval": {
+                      "type": "long"
+                    },
+                    "value": {
+                      "type": "float"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "memory": {
+          "properties": {
+            "avg": {
+              "properties": {
+                "_count": {
+                  "type": "float"
+                },
+                "value": {
+                  "type": "float"
+                }
+              }
+            },
+            "max": {
+              "properties": {
+                "value": {
+                  "type": "float"
+                }
+              }
+            },
+            "min": {
+              "properties": {
+                "value": {
+                  "type": "float"
+                }
+              }
+            },
+            "sum": {
+              "properties": {
+                "value": {
+                  "type": "float"
+                }
+              }
+            },
+            "value_count": {
+              "properties": {
+                "value": {
+                  "type": "float"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "number_of_replicas": "1",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}

@@ -4,10 +4,12 @@
 
 ## HttpInterceptor.response() method
 
+Define an interceptor to be executed after a response is received.
+
 <b>Signature:</b>
 
 ```typescript
-response?(httpResponse: HttpResponse, controller: HttpInterceptController): Promise<HttpResponse> | HttpResponse | void;
+response?(httpResponse: HttpResponse, controller: IHttpInterceptController): MaybePromise<IHttpResponseInterceptorOverrides> | void;
 ```
 
 ## Parameters
@@ -15,9 +17,9 @@ response?(httpResponse: HttpResponse, controller: HttpInterceptController): Prom
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  httpResponse | <code>HttpResponse</code> |  |
-|  controller | <code>HttpInterceptController</code> |  |
+|  controller | <code>IHttpInterceptController</code> |  |
 
 <b>Returns:</b>
 
-`Promise<HttpResponse> | HttpResponse | void`
+`MaybePromise<IHttpResponseInterceptorOverrides> | void`
 

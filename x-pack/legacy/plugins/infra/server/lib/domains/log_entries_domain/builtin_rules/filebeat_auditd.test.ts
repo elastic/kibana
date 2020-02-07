@@ -42,7 +42,7 @@ describe('Filebeat Rules', () => {
         user: { 'audit.id': '4294967295', id: '0', 'saved.id': '74' },
       };
 
-      expect(format(flattenedDocument)).toMatchInlineSnapshot(`
+      expect(format(flattenedDocument, {})).toMatchInlineSnapshot(`
 Array [
   Object {
     "constant": "[AuditD][",
@@ -155,7 +155,7 @@ Array [
         },
       };
 
-      expect(format(flattenedDocument)).toMatchInlineSnapshot(`
+      expect(format(flattenedDocument, {})).toMatchInlineSnapshot(`
 Array [
   Object {
     "constant": "[AuditD][",
@@ -238,7 +238,7 @@ Array [
         'input.type': 'log',
         'log.offset': 0,
       };
-      const message = format(event);
+      const message = format(event, {});
       expect(message).toEqual([
         { constant: '[AuditD][' },
         { field: 'auditd.log.record_type', highlights: [], value: 'MAC_IPSEC_EVENT' },
@@ -287,7 +287,7 @@ Array [
         'input.type': 'log',
         'log.offset': 174,
       };
-      const message = format(event);
+      const message = format(event, {});
       expect(message).toEqual([
         { constant: '[AuditD][' },
         { field: 'auditd.log.record_type', highlights: [], value: 'SYSCALL' },
@@ -323,7 +323,7 @@ Array [
         'input.type': 'log',
         'log.offset': 174,
       };
-      const message = format(event);
+      const message = format(event, {});
       expect(message).toEqual([
         { constant: '[AuditD][' },
         { field: 'auditd.log.record_type', highlights: [], value: 'EXAMPLE' },
@@ -348,7 +348,7 @@ Array [
         'input.type': 'log',
         'log.offset': 174,
       };
-      const message = format(event);
+      const message = format(event, {});
       expect(message).toEqual([
         { constant: '[AuditD][' },
         { field: 'auditd.log.record_type', highlights: [], value: 'EXAMPLE' },

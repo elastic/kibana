@@ -25,7 +25,7 @@ export function KuiLocalTabs({ className, children, ...rest }) {
   const classes = classnames('kuiLocalTabs', className);
   return (
     <div className={classes} {...rest}>
-      { children }
+      {children}
     </div>
   );
 }

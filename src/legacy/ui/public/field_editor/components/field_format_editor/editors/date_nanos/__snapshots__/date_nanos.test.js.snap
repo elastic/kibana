@@ -1,0 +1,73 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DateFormatEditor should render normally 1`] = `
+<Fragment>
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    error={null}
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    helpText={
+      <span>
+        <ForwardRef
+          href="https://momentjs.com/"
+          target="_blank"
+        >
+          <FormattedMessage
+            defaultMessage="Documentation"
+            id="common.ui.fieldEditor.date.documentationLabel"
+            values={Object {}}
+          />
+           
+          <EuiIcon
+            type="link"
+          />
+        </ForwardRef>
+      </span>
+    }
+    isInvalid={false}
+    label={
+      <FormattedMessage
+        defaultMessage="Moment.js format pattern (Default: {defaultPattern})"
+        id="common.ui.fieldEditor.date.momentLabel"
+        values={
+          Object {
+            "defaultPattern": <EuiCode>
+              MMM D, YYYY @ HH:mm:ss.SSSSSSSSS
+            </EuiCode>,
+          }
+        }
+      />
+    }
+    labelType="label"
+  >
+    <EuiFieldText
+      data-test-subj="dateEditorPattern"
+      isInvalid={false}
+      onChange={[Function]}
+      placeholder="MMM D, YYYY @ HH:mm:ss.SSSSSSSSS"
+    />
+  </EuiFormRow>
+  <FormatEditorSamples
+    sampleType="text"
+    samples={
+      Array [
+        Object {
+          "input": "2015-01-01T12:10:30.123456789Z",
+          "output": "converted date for 2015-01-01T12:10:30.123456789Z",
+        },
+        Object {
+          "input": "2019-05-08T06:55:21.567891234Z",
+          "output": "converted date for 2019-05-08T06:55:21.567891234Z",
+        },
+        Object {
+          "input": "2019-08-06T17:22:30.987654321Z",
+          "output": "converted date for 2019-08-06T17:22:30.987654321Z",
+        },
+      ]
+    }
+  />
+</Fragment>
+`;

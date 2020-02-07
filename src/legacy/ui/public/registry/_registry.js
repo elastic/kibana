@@ -19,6 +19,7 @@
 
 import _ from 'lodash';
 import { IndexedArray } from '../indexed_array';
+
 const notPropsOptNames = IndexedArray.OPT_NAMES.concat('constructor', 'invokeProviders');
 
 /**
@@ -78,6 +79,10 @@ export function uiRegistry(spec) {
   const props = _.omit(spec, notPropsOptNames);
   const providers = [];
 
+  let isInstantiated = false;
+  let getInvokedProviders;
+  let modules;
+
   /**
    * This is the Private module that will be instantiated by
    *
@@ -86,18 +91,22 @@ export function uiRegistry(spec) {
    *                          that were registered, the registry spec
    *                          defines how things will be indexed.
    */
-  const registry = function (Private, $injector) {
-    // call the registered providers to get their values
-    iaOpts.initialSet = invokeProviders
-      ? $injector.invoke(invokeProviders, undefined, { providers })
-      : providers.map(Private);
+  const registry = function(Private, $injector) {
+    getInvokedProviders = function(newProviders) {
+      let set = invokeProviders
+        ? $injector.invoke(invokeProviders, undefined, { providers: newProviders })
+        : newProviders.map(Private);
 
-    if (filter && _.isFunction(filter)) {
-      iaOpts.initialSet = iaOpts.initialSet.filter(item => filter(item));
-    }
+      if (filter && _.isFunction(filter)) {
+        set = set.filter(item => filter(item));
+      }
 
-    // index all of the modules
-    let modules = new IndexedArray(iaOpts);
+      return set;
+    };
+
+    iaOpts.initialSet = getInvokedProviders(providers);
+
+    modules = new IndexedArray(iaOpts);
 
     // mixin other props
     _.assign(modules, props);
@@ -107,13 +116,24 @@ export function uiRegistry(spec) {
       modules = $injector.invoke(constructor, modules) || modules;
     }
 
+    isInstantiated = true;
+
     return modules;
   };
 
   registry.displayName = '[registry ' + props.name + ']';
 
-  registry.register = function (privateModule) {
+  registry.register = function(privateModule) {
     providers.push(privateModule);
+
+    if (isInstantiated) {
+      const [provider] = getInvokedProviders([privateModule]);
+
+      if (provider) {
+        modules.push(provider);
+      }
+    }
+
     return registry;
   };
 

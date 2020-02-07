@@ -17,4 +17,13 @@
  * under the License.
  */
 export { getTypes, getProperty, getRootProperties, getRootPropertiesObjects } from './lib';
-export { FieldMapping, MappingMeta, MappingProperties, IndexMapping } from './types';
+export {
+  SavedObjectsComplexFieldMapping,
+  SavedObjectsCoreFieldMapping,
+  SavedObjectsTypeMappingDefinition,
+  SavedObjectsTypeMappingDefinitions,
+  SavedObjectsMappingProperties,
+  SavedObjectsFieldMapping,
+  IndexMappingMeta,
+  IndexMapping,
+} from './types';

@@ -5,17 +5,13 @@
  */
 
 import expect from '@kbn/expect';
-import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
+import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { NavLinksBuilder } from '../../common/nav_links_builder';
 import { FeaturesService } from '../../common/services';
-import {
-  GetUICapabilitiesFailureReason,
-  UICapabilitiesService,
-} from '../../common/services/ui_capabilities';
+import { UICapabilitiesService } from '../../common/services/ui_capabilities';
 import { UserScenarios } from '../scenarios';
 
-// eslint-disable-next-line import/no-default-export
-export default function navLinksTests({ getService }: KibanaFunctionalTestDefaultProviders) {
+export default function navLinksTests({ getService }: FtrProviderContext) {
   const uiCapabilitiesService: UICapabilitiesService = getService('uiCapabilities');
   const featuresService: FeaturesService = getService('features');
 
@@ -60,8 +56,9 @@ export default function navLinksTests({ getService }: KibanaFunctionalTestDefaul
             break;
           case 'legacy_all':
           case 'no_kibana_privileges':
-            expect(uiCapabilities.success).to.be(false);
-            expect(uiCapabilities.failureReason).to.be(GetUICapabilitiesFailureReason.NotFound);
+            expect(uiCapabilities.success).to.be(true);
+            expect(uiCapabilities.value).to.have.property('navLinks');
+            expect(uiCapabilities.value!.navLinks).to.eql(navLinksBuilder.only('management'));
             break;
           default:
             throw new UnreachableError(scenario);

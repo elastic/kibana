@@ -31,8 +31,8 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
       />
       <EuiCallOut
         color="warning"
+        data-test-subj="importSavedObjectsConflictsWarning"
         iconType="help"
-        size="m"
         title={
           <FormattedMessage
             defaultMessage="Index Pattern Conflicts"
@@ -47,17 +47,15 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
             id="kbn.management.objects.objectsTable.flyout.indexPatternConflictsDescription"
             values={
               Object {
-                "indexPatternLink": <EuiLink
-                  color="primary"
+                "indexPatternLink": <ForwardRef
                   href=""
-                  type="button"
                 >
                   <FormattedMessage
                     defaultMessage="create a new index pattern"
                     id="kbn.management.objects.objectsTable.flyout.indexPatternConflictsCalloutLinkText"
                     values={Object {}}
                   />
-                </EuiLink>,
+                </ForwardRef>,
               }
             }
           />
@@ -92,7 +90,6 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
           },
         ]
       }
-      executeQueryOptions={Object {}}
       items={
         Array [
           Object {
@@ -118,7 +115,7 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
         }
       }
       responsive={true}
-      sorting={false}
+      tableLayout="fixed"
     />
   </EuiFlyoutBody>
   <EuiFlyoutFooter>
@@ -129,11 +126,8 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
         grow={false}
       >
         <EuiButtonEmpty
-          color="primary"
-          iconSide="left"
           onClick={[MockFunction]}
           size="s"
-          type="button"
         >
           <FormattedMessage
             defaultMessage="Cancel"
@@ -146,14 +140,11 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
         grow={false}
       >
         <EuiButton
-          color="primary"
           data-test-subj="importSavedObjectsConfirmBtn"
           fill={true}
-          iconSide="left"
           isLoading={false}
           onClick={[Function]}
           size="s"
-          type="button"
         >
           <FormattedMessage
             defaultMessage="Confirm all changes"
@@ -247,8 +238,8 @@ exports[`Flyout conflicts should allow conflict resolution 2`] = `
 exports[`Flyout conflicts should handle errors 1`] = `
 <EuiCallOut
   color="warning"
+  data-test-subj="importSavedObjectsFailedWarning"
   iconType="help"
-  size="m"
   title={
     <FormattedMessage
       defaultMessage="Import failed"
@@ -276,8 +267,8 @@ exports[`Flyout conflicts should handle errors 1`] = `
 exports[`Flyout errors should display unsupported type errors properly 1`] = `
 <EuiCallOut
   color="warning"
+  data-test-subj="importSavedObjectsFailedWarning"
   iconType="help"
-  size="m"
   title={
     <FormattedMessage
       defaultMessage="Import failed"
@@ -335,8 +326,8 @@ exports[`Flyout legacy conflicts should allow conflict resolution 1`] = `
       />
       <EuiCallOut
         color="warning"
+        data-test-subj="importSavedObjectsLegacyWarning"
         iconType="help"
-        size="m"
         title={
           <FormattedMessage
             defaultMessage="Support for JSON files is going away"
@@ -360,8 +351,8 @@ exports[`Flyout legacy conflicts should allow conflict resolution 1`] = `
       />
       <EuiCallOut
         color="warning"
+        data-test-subj="importSavedObjectsConflictsWarning"
         iconType="help"
-        size="m"
         title={
           <FormattedMessage
             defaultMessage="Index Pattern Conflicts"
@@ -376,17 +367,15 @@ exports[`Flyout legacy conflicts should allow conflict resolution 1`] = `
             id="kbn.management.objects.objectsTable.flyout.indexPatternConflictsDescription"
             values={
               Object {
-                "indexPatternLink": <EuiLink
-                  color="primary"
+                "indexPatternLink": <ForwardRef
                   href=""
-                  type="button"
                 >
                   <FormattedMessage
                     defaultMessage="create a new index pattern"
                     id="kbn.management.objects.objectsTable.flyout.indexPatternConflictsCalloutLinkText"
                     values={Object {}}
                   />
-                </EuiLink>,
+                </ForwardRef>,
               }
             }
           />
@@ -421,7 +410,6 @@ exports[`Flyout legacy conflicts should allow conflict resolution 1`] = `
           },
         ]
       }
-      executeQueryOptions={Object {}}
       items={
         Array [
           Object {
@@ -429,6 +417,17 @@ exports[`Flyout legacy conflicts should allow conflict resolution 1`] = `
             "list": Array [
               Object {
                 "id": "MyIndexPattern*",
+                "title": "MyIndexPattern*",
+                "type": "index-pattern",
+              },
+            ],
+            "newIndexPatternId": undefined,
+          },
+          Object {
+            "existingIndexPatternId": "filterIndex",
+            "list": Array [
+              Object {
+                "id": "filterIndex",
                 "title": "MyIndexPattern*",
                 "type": "index-pattern",
               },
@@ -447,7 +446,7 @@ exports[`Flyout legacy conflicts should allow conflict resolution 1`] = `
         }
       }
       responsive={true}
-      sorting={false}
+      tableLayout="fixed"
     />
   </EuiFlyoutBody>
   <EuiFlyoutFooter>
@@ -458,11 +457,8 @@ exports[`Flyout legacy conflicts should allow conflict resolution 1`] = `
         grow={false}
       >
         <EuiButtonEmpty
-          color="primary"
-          iconSide="left"
           onClick={[MockFunction]}
           size="s"
-          type="button"
         >
           <FormattedMessage
             defaultMessage="Cancel"
@@ -475,14 +471,11 @@ exports[`Flyout legacy conflicts should allow conflict resolution 1`] = `
         grow={false}
       >
         <EuiButton
-          color="primary"
           data-test-subj="importSavedObjectsConfirmBtn"
           fill={true}
-          iconSide="left"
           isLoading={false}
           onClick={[Function]}
           size="s"
-          type="button"
         >
           <FormattedMessage
             defaultMessage="Confirm all changes"
@@ -500,8 +493,8 @@ exports[`Flyout legacy conflicts should handle errors 1`] = `
 Array [
   <EuiCallOut
     color="warning"
+    data-test-subj="importSavedObjectsLegacyWarning"
     iconType="help"
-    size="m"
     title={
       <FormattedMessage
         defaultMessage="Support for JSON files is going away"
@@ -520,8 +513,8 @@ Array [
   </EuiCallOut>,
   <EuiCallOut
     color="warning"
+    data-test-subj="importSavedObjectsConflictsWarning"
     iconType="help"
-    size="m"
     title={
       <FormattedMessage
         defaultMessage="Index Pattern Conflicts"
@@ -536,17 +529,15 @@ Array [
         id="kbn.management.objects.objectsTable.flyout.indexPatternConflictsDescription"
         values={
           Object {
-            "indexPatternLink": <EuiLink
-              color="primary"
+            "indexPatternLink": <ForwardRef
               href=""
-              type="button"
             >
               <FormattedMessage
                 defaultMessage="create a new index pattern"
                 id="kbn.management.objects.objectsTable.flyout.indexPatternConflictsCalloutLinkText"
                 values={Object {}}
               />
-            </EuiLink>,
+            </ForwardRef>,
           }
         }
       />
@@ -554,7 +545,6 @@ Array [
   </EuiCallOut>,
   <EuiCallOut
     color="danger"
-    size="m"
     title={
       <FormattedMessage
         defaultMessage="Sorry, there was an error"
@@ -598,7 +588,9 @@ exports[`Flyout should render import step 1`] = `
     <EuiForm>
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         fullWidth={false}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         label={
           <FormattedMessage
@@ -611,6 +603,7 @@ exports[`Flyout should render import step 1`] = `
       >
         <EuiFilePicker
           compressed={false}
+          display="large"
           initialPromptText={
             <FormattedMessage
               defaultMessage="Import"
@@ -623,7 +616,9 @@ exports[`Flyout should render import step 1`] = `
       </EuiFormRow>
       <EuiFormRow
         describedByIds={Array []}
+        display="row"
         fullWidth={false}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         labelType="label"
       >
@@ -651,11 +646,8 @@ exports[`Flyout should render import step 1`] = `
         grow={false}
       >
         <EuiButtonEmpty
-          color="primary"
-          iconSide="left"
           onClick={[MockFunction]}
           size="s"
-          type="button"
         >
           <FormattedMessage
             defaultMessage="Cancel"
@@ -668,14 +660,11 @@ exports[`Flyout should render import step 1`] = `
         grow={false}
       >
         <EuiButton
-          color="primary"
           data-test-subj="importSavedObjectsImportBtn"
           fill={true}
-          iconSide="left"
           isLoading={false}
           onClick={[Function]}
           size="s"
-          type="button"
         >
           <FormattedMessage
             defaultMessage="Import"

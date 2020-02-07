@@ -17,37 +17,36 @@
  * under the License.
  */
 
-import { exportDashboards } from '../../../lib/export/export_dashboards';
-import Boom from 'boom';
 import Joi from 'joi';
 import moment from 'moment';
+
+import { exportDashboards } from '../../../lib/export/export_dashboards';
+
 export function exportApi(server) {
   server.route({
     path: '/api/kibana/dashboards/export',
     config: {
       validate: {
         query: Joi.object().keys({
-          dashboard: Joi.alternatives().try(
-            Joi.string(),
-            Joi.array().items(Joi.string())
-          ).required()
-        })
+          dashboard: Joi.alternatives()
+            .try(Joi.string(), Joi.array().items(Joi.string()))
+            .required(),
+        }),
       },
       tags: ['api'],
     },
     method: ['GET'],
     handler: async (req, h) => {
       const currentDate = moment.utc();
-      return exportDashboards(req)
-        .then(resp => {
-          const json = JSON.stringify(resp, null, '  ');
-          const filename = `kibana-dashboards.${currentDate.format('YYYY-MM-DD-HH-mm-ss')}.json`;
-          return h.response(json)
-            .header('Content-Disposition', `attachment; filename="${filename}"`)
-            .header('Content-Type', 'application/json')
-            .header('Content-Length', Buffer.byteLength(json, 'utf8'));
-        })
-        .catch(err => Boom.boomify(err, { statusCode: 400 }));
-    }
+      return exportDashboards(req).then(resp => {
+        const json = JSON.stringify(resp, null, '  ');
+        const filename = `kibana-dashboards.${currentDate.format('YYYY-MM-DD-HH-mm-ss')}.json`;
+        return h
+          .response(json)
+          .header('Content-Disposition', `attachment; filename="${filename}"`)
+          .header('Content-Type', 'application/json')
+          .header('Content-Length', Buffer.byteLength(json, 'utf8'));
+      });
+    },
   });
 }

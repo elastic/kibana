@@ -9,7 +9,7 @@ import { callWithRequestFactory } from '../../../lib/call_with_request_factory';
 import { fetchAllFromScroll } from '../../../lib/fetch_all_from_scroll';
 import { INDEX_NAMES, ES_SCROLL_SETTINGS } from '../../../../common/constants';
 import { PipelineListItem } from '../../../models/pipeline_list_item';
-import { licensePreRoutingFactory } from'../../../lib/license_pre_routing_factory';
+import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
 
 function fetchPipelines(callWithRequest) {
   const params = {
@@ -18,11 +18,12 @@ function fetchPipelines(callWithRequest) {
     body: {
       size: ES_SCROLL_SETTINGS.PAGE_SIZE,
     },
-    ignore: [404]
+    ignore: [404],
   };
 
-  return callWithRequest('search', params)
-    .then(response => fetchAllFromScroll(response, callWithRequest));
+  return callWithRequest('search', params).then(response =>
+    fetchAllFromScroll(response, callWithRequest)
+  );
 }
 
 export function registerListRoute(server) {
@@ -31,12 +32,11 @@ export function registerListRoute(server) {
   server.route({
     path: '/api/logstash/pipelines',
     method: 'GET',
-    handler: (request) => {
+    handler: request => {
       const callWithRequest = callWithRequestFactory(server, request);
 
       return fetchPipelines(callWithRequest)
         .then((pipelinesHits = []) => {
-
           const pipelines = pipelinesHits.map(pipeline => {
             return PipelineListItem.fromUpstreamJSON(pipeline).downstreamJSON;
           });
@@ -46,7 +46,7 @@ export function registerListRoute(server) {
         .catch(e => wrapEsError(e));
     },
     config: {
-      pre: [ licensePreRouting ]
-    }
+      pre: [licensePreRouting],
+    },
   });
 }

@@ -5,8 +5,7 @@
  */
 
 import { EuiIcon } from '@elastic/eui';
-import * as React from 'react';
-import { pure } from 'recompose';
+import React from 'react';
 import styled from 'styled-components';
 
 /** Renders the body (non-pointy part) of an arrow */
@@ -16,11 +15,15 @@ export const ArrowBody = styled.span<{ height: number }>`
   width: 25px;
 `;
 
+ArrowBody.displayName = 'ArrowBody';
+
 export type ArrowDirection = 'arrowLeft' | 'arrowRight';
 
 /** Renders the head of an arrow */
-export const ArrowHead = pure<{
+export const ArrowHead = React.memo<{
   direction: ArrowDirection;
 }>(({ direction }) => (
   <EuiIcon color="subdued" data-test-subj="arrow-icon" size="s" type={direction} />
 ));
+
+ArrowHead.displayName = 'ArrowHead';

@@ -6,15 +6,16 @@
 
 import { encode } from 'rison-node';
 import uuid from 'uuid';
+import { set } from 'lodash';
 import { colorTransformer, MetricsExplorerColor } from '../../../../common/color_palette';
-import {
-  MetricsExplorerSeries,
-  MetricsExplorerAggregation,
-} from '../../../../server/routes/metrics_explorer/types';
+import { MetricsExplorerSeries } from '../../../../server/routes/metrics_explorer/types';
 import {
   MetricsExplorerOptions,
   MetricsExplorerOptionsMetric,
   MetricsExplorerTimeOptions,
+  MetricsExplorerChartOptions,
+  MetricsExplorerYAxisMode,
+  MetricsExplorerChartType,
 } from '../../../containers/metrics_explorer/use_metrics_explorer_options';
 import { metricToFormat } from './metric_to_format';
 import { InfraFormatterType } from '../../../lib/lib';
@@ -22,7 +23,7 @@ import { SourceQuery } from '../../../graphql/types';
 import { createMetricLabel } from './create_metric_label';
 
 export const metricsExplorerMetricToTSVBMetric = (metric: MetricsExplorerOptionsMetric) => {
-  if (metric.aggregation === MetricsExplorerAggregation.rate) {
+  if (metric.aggregation === 'rate') {
     const metricId = uuid.v1();
     const positiveOnlyId = uuid.v1();
     const derivativeId = uuid.v1();
@@ -55,7 +56,9 @@ export const metricsExplorerMetricToTSVBMetric = (metric: MetricsExplorerOptions
   }
 };
 
-const mapMetricToSeries = (metric: MetricsExplorerOptionsMetric) => {
+const mapMetricToSeries = (chartOptions: MetricsExplorerChartOptions) => (
+  metric: MetricsExplorerOptionsMetric
+) => {
   const format = metricToFormat(metric);
   return {
     label: createMetricLabel(metric),
@@ -65,17 +68,16 @@ const mapMetricToSeries = (metric: MetricsExplorerOptionsMetric) => {
       (metric.color && colorTransformer(metric.color)) ||
         colorTransformer(MetricsExplorerColor.color0)
     ),
-    fill: 0,
+    fill: chartOptions.type === MetricsExplorerChartType.area ? 0.5 : 0,
     formatter: format === InfraFormatterType.bits ? InfraFormatterType.bytes : format,
-    value_template:
-      MetricsExplorerAggregation.rate === metric.aggregation ? '{{value}}/s' : '{{value}}',
+    value_template: 'rate' === metric.aggregation ? '{{value}}/s' : '{{value}}',
     id: uuid.v1(),
     line_width: 2,
     metrics: metricsExplorerMetricToTSVBMetric(metric),
     point_size: 0,
     separate_axis: 0,
     split_mode: 'everything',
-    stacked: 'none',
+    stacked: chartOptions.stack ? 'stacked' : 'none',
   };
 };
 
@@ -98,7 +100,8 @@ export const createTSVBLink = (
   source: SourceQuery.Query['source']['configuration'] | undefined,
   options: MetricsExplorerOptions,
   series: MetricsExplorerSeries,
-  timeRange: MetricsExplorerTimeOptions
+  timeRange: MetricsExplorerTimeOptions,
+  chartOptions: MetricsExplorerChartOptions
 ) => {
   const appState = {
     filters: [],
@@ -115,7 +118,7 @@ export const createTSVBLink = (
         default_index_pattern: (source && source.metricAlias) || 'metricbeat-*',
         index_pattern: (source && source.metricAlias) || 'metricbeat-*',
         interval: 'auto',
-        series: options.metrics.map(mapMetricToSeries),
+        series: options.metrics.map(mapMetricToSeries(chartOptions)),
         show_grid: 1,
         show_legend: 1,
         time_field: (source && source.fields.timestamp) || '@timestamp',
@@ -126,6 +129,10 @@ export const createTSVBLink = (
       type: 'metrics',
     },
   };
+
+  if (chartOptions.yAxisMode === MetricsExplorerYAxisMode.fromZero) {
+    set(appState, 'vis.params.axis_min', 0);
+  }
 
   const globalState = {
     refreshInterval: { pause: true, value: 0 },

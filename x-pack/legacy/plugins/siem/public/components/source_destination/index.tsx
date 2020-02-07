@@ -5,8 +5,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import * as React from 'react';
-import { pure } from 'recompose';
+import React from 'react';
 import styled from 'styled-components';
 
 import { Network } from './network';
@@ -17,11 +16,13 @@ const EuiFlexItemMarginTop = styled(EuiFlexItem)`
   margin-top: 3px;
 `;
 
+EuiFlexItemMarginTop.displayName = 'EuiFlexItemMarginTop';
+
 /**
  * Renders a visualization of network traffic between a source and a destination
  * This component is used by the Netflow row renderer
  */
-export const SourceDestination = pure<SourceDestinationProps>(
+export const SourceDestination = React.memo<SourceDestinationProps>(
   ({
     contextId,
     destinationBytes,
@@ -91,3 +92,5 @@ export const SourceDestination = pure<SourceDestinationProps>(
     </EuiFlexGroup>
   )
 );
+
+SourceDestination.displayName = 'SourceDestination';

@@ -30,9 +30,9 @@ describe('Error handling for 401/403 errors', () => {
         payload: {
           statusCode: 403,
           error: 'Forbidden',
-          message: 'Insufficient user permissions for monitoring data'
+          message: 'Insufficient user permissions for monitoring data',
         },
-        headers: {}
+        headers: {},
       });
     });
 
@@ -50,9 +50,9 @@ describe('Error handling for 401/403 errors', () => {
         payload: {
           statusCode: 403,
           error: 'Forbidden',
-          message: 'Invalid authentication for monitoring cluster'
+          message: 'Invalid authentication for monitoring cluster',
         },
-        headers: {}
+        headers: {},
       });
     });
   });
@@ -72,9 +72,9 @@ describe('Error handling for 401/403 errors', () => {
         payload: {
           statusCode: 403,
           error: 'Forbidden',
-          message: 'Invalid authentication for monitoring cluster'
+          message: 'Invalid authentication for monitoring cluster',
         },
-        headers: {}
+        headers: {},
       });
     });
 
@@ -92,11 +92,10 @@ describe('Error handling for 401/403 errors', () => {
         payload: {
           statusCode: 403,
           error: 'Forbidden',
-          message: 'Insufficient user permissions for monitoring data'
+          message: 'Insufficient user permissions for monitoring data',
         },
-        headers: {}
+        headers: {},
       });
     });
   });
-
 });

@@ -12,22 +12,21 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import moment from 'moment';
 import { find, get } from 'lodash';
-import uiRoutes from'ui/routes';
+import uiRoutes from 'ui/routes';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import template from './index.html';
 import { MonitoringViewBaseController } from '../../base_controller';
 import { ApmServerInstance } from '../../../components/apm/instance';
-import { timefilter } from 'ui/timefilter';
 import { I18nContext } from 'ui/i18n';
+import { CODE_PATH_APM } from '../../../../common/constants';
 
 uiRoutes.when('/apm/instances/:uuid', {
   template,
   resolve: {
-    clusters: function (Private) {
+    clusters: function(Private) {
       const routeInit = Private(routeInitProvider);
-      return routeInit();
+      return routeInit({ codePaths: [CODE_PATH_APM] });
     },
   },
 
@@ -37,48 +36,44 @@ uiRoutes.when('/apm/instances/:uuid', {
       const title = $injector.get('title');
       const globalState = $injector.get('globalState');
       $scope.cluster = find($route.current.locals.clusters, {
-        cluster_uuid: globalState.cluster_uuid
+        cluster_uuid: globalState.cluster_uuid,
       });
 
       super({
         title: i18n.translate('xpack.monitoring.apm.instance.routeTitle', {
           defaultMessage: '{apm} - Instance',
           values: {
-            apm: 'APM'
-          }
+            apm: 'APM',
+          },
         }),
         api: `../api/monitoring/v1/clusters/${globalState.cluster_uuid}/apm/${$route.current.params.uuid}`,
         defaultData: {},
         reactNodeId: 'apmInstanceReact',
         $scope,
-        $injector
+        $injector,
       });
 
-      function onBrush({ xaxis }) {
-        timefilter.setTime({
-          from: moment(xaxis.from),
-          to: moment(xaxis.to),
-          mode: 'absolute',
-        });
-      }
-
-      $scope.$watch(() => this.data, data => {
-        title($scope.cluster, `APM - ${get(data, 'apmSummary.name')}`);
-        this.renderReact(data, onBrush);
-      });
+      $scope.$watch(
+        () => this.data,
+        data => {
+          title($scope.cluster, `APM - ${get(data, 'apmSummary.name')}`);
+          this.renderReact(data);
+        }
+      );
     }
 
-    renderReact(data, onBrush) {
+    renderReact(data) {
       const component = (
         <I18nContext>
           <ApmServerInstance
             summary={data.apmSummary || {}}
             metrics={data.metrics || {}}
-            onBrush={onBrush}
+            onBrush={this.onBrush}
+            zoomInfo={this.zoomInfo}
           />
         </I18nContext>
       );
       super.renderReact(component);
     }
-  }
+  },
 });

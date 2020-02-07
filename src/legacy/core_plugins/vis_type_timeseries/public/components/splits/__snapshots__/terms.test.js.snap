@@ -1,0 +1,230 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`src/legacy/core_plugins/metrics/public/components/splits/terms.test.js <SplitByTermsUI /> should render and match a snapshot 1`] = `
+<div>
+  <EuiFlexGroup>
+    <EuiFlexItem>
+      <EuiFormRow
+        describedByIds={Array []}
+        display="row"
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        id="42"
+        label={
+          <FormattedMessage
+            defaultMessage="Group by"
+            id="visTypeTimeseries.splits.terms.groupByLabel"
+            values={Object {}}
+          />
+        }
+        labelType="label"
+      >
+        <InjectIntl(GroupBySelectUi)
+          onChange={[Function]}
+        />
+      </EuiFormRow>
+    </EuiFlexItem>
+    <EuiFlexItem>
+      <EuiFormRow
+        describedByIds={Array []}
+        display="row"
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        id="42"
+        label={
+          <FormattedMessage
+            defaultMessage="By"
+            description="This labels a field selector allowing the user to chose 'by' which field to group."
+            id="visTypeTimeseries.splits.terms.byLabel"
+            values={Object {}}
+          />
+        }
+        labelType="label"
+      >
+        <InjectIntl(FieldSelectUi)
+          fields={
+            Object {
+              "kibana_sample_data_flights": Array [
+                Object {
+                  "aggregatable": true,
+                  "esTypes": Array [
+                    "keyword",
+                  ],
+                  "name": "OriginCityName",
+                  "readFromDocValues": true,
+                  "searchable": true,
+                  "type": "string",
+                },
+              ],
+            }
+          }
+          indexPattern="kibana_sample_data_flights"
+          onChange={[Function]}
+          type="terms"
+          value="OriginCityName"
+        />
+      </EuiFormRow>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiFlexGroup>
+    <EuiFlexItem>
+      <EuiFormRow
+        describedByIds={Array []}
+        display="row"
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        id="42"
+        label={
+          <FormattedMessage
+            defaultMessage="Include"
+            id="visTypeTimeseries.splits.terms.includeLabel"
+            values={Object {}}
+          />
+        }
+        labelType="label"
+      >
+        <EuiFieldText
+          onChange={[Function]}
+        />
+      </EuiFormRow>
+    </EuiFlexItem>
+    <EuiFlexItem>
+      <EuiFormRow
+        describedByIds={Array []}
+        display="row"
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        id="42"
+        label={
+          <FormattedMessage
+            defaultMessage="Exclude"
+            id="visTypeTimeseries.splits.terms.excludeLabel"
+            values={Object {}}
+          />
+        }
+        labelType="label"
+      >
+        <EuiFieldText
+          onChange={[Function]}
+        />
+      </EuiFormRow>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiFlexGroup>
+    <EuiFlexItem>
+      <EuiFormRow
+        describedByIds={Array []}
+        display="row"
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        id="42"
+        label={
+          <FormattedMessage
+            defaultMessage="Top"
+            id="visTypeTimeseries.splits.terms.topLabel"
+            values={Object {}}
+          />
+        }
+        labelType="label"
+      >
+        <EuiFieldNumber
+          onChange={[Function]}
+          value={10}
+        />
+      </EuiFormRow>
+    </EuiFlexItem>
+    <EuiFlexItem>
+      <EuiFormRow
+        describedByIds={Array []}
+        display="row"
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        id="42"
+        label={
+          <FormattedMessage
+            defaultMessage="Order by"
+            id="visTypeTimeseries.splits.terms.orderByLabel"
+            values={Object {}}
+          />
+        }
+        labelType="label"
+      >
+        <InjectIntl(MetricSelectUi)
+          additionalOptions={
+            Array [
+              Object {
+                "label": undefined,
+                "value": "_count",
+              },
+              Object {
+                "label": undefined,
+                "value": "_key",
+              },
+            ]
+          }
+          clearable={false}
+          onChange={[Function]}
+          restrict="basic"
+          value="_count"
+        />
+      </EuiFormRow>
+    </EuiFlexItem>
+    <EuiFlexItem>
+      <EuiFormRow
+        describedByIds={Array []}
+        display="row"
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        id="42"
+        label={
+          <FormattedMessage
+            defaultMessage="Direction"
+            id="visTypeTimeseries.splits.terms.directionLabel"
+            values={Object {}}
+          />
+        }
+        labelType="label"
+      >
+        <EuiComboBox
+          compressed={false}
+          fullWidth={false}
+          isClearable={false}
+          onChange={[Function]}
+          options={
+            Array [
+              Object {
+                "label": undefined,
+                "value": "desc",
+              },
+              Object {
+                "label": undefined,
+                "value": "asc",
+              },
+            ]
+          }
+          selectedOptions={
+            Array [
+              Object {
+                "label": undefined,
+                "value": "desc",
+              },
+            ]
+          }
+          singleSelection={
+            Object {
+              "asPlainText": true,
+            }
+          }
+        />
+      </EuiFormRow>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</div>
+`;

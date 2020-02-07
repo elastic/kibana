@@ -30,6 +30,19 @@ export const queryEsSQL = (elasticsearchClient, { count, query, filter, timezone
       });
       const columnNames = map(columns, 'name');
       const rows = res.rows.map(row => zipObject(columnNames, row));
+
+      if (!!res.cursor) {
+        elasticsearchClient('transport.request', {
+          path: '/_sql/close',
+          method: 'POST',
+          body: {
+            cursor: res.cursor,
+          },
+        }).catch(e => {
+          throw new Error(`Unexpected error from Elasticsearch: ${e.message}`);
+        });
+      }
+
       return {
         type: 'datatable',
         columns,
@@ -39,9 +52,7 @@ export const queryEsSQL = (elasticsearchClient, { count, query, filter, timezone
     .catch(e => {
       if (e.message.indexOf('parsing_exception') > -1) {
         throw new Error(
-          `Couldn't parse Elasticsearch SQL query. You may need to add double quotes to names containing special characters. Check your query and try again. Error: ${
-            e.message
-          }`
+          `Couldn't parse Elasticsearch SQL query. You may need to add double quotes to names containing special characters. Check your query and try again. Error: ${e.message}`
         );
       }
       throw new Error(`Unexpected error from Elasticsearch: ${e.message}`);

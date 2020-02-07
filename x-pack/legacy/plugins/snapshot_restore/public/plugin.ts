@@ -11,7 +11,7 @@ import { AppCore, AppPlugins } from './app/types';
 import template from './index.html';
 import { Core, Plugins } from './shim';
 
-import { breadcrumbService } from './app/services/navigation';
+import { breadcrumbService, docTitleService } from './app/services/navigation';
 import { documentationLinksService } from './app/services/documentation';
 import { httpService } from './app/services/http';
 import { textService } from './app/services/text';
@@ -21,7 +21,7 @@ const REACT_ROOT_ID = 'snapshotRestoreReactRoot';
 
 export class Plugin {
   public start(core: Core, plugins: Plugins): void {
-    const { i18n, routing, http, chrome, notification, documentation } = core;
+    const { i18n, routing, http, chrome, notification, documentation, docTitle } = core;
     const { management, uiMetric } = plugins;
 
     // Register management section
@@ -29,7 +29,7 @@ export class Plugin {
     esSection.register(PLUGIN.ID, {
       visible: true,
       display: i18n.translate('xpack.snapshotRestore.appName', {
-        defaultMessage: 'Snapshot Repositories',
+        defaultMessage: 'Snapshot and Restore',
       }),
       order: 7,
       url: `#${CLIENT_BASE_PATH}`,
@@ -38,8 +38,9 @@ export class Plugin {
     // Initialize services
     textService.init(i18n);
     breadcrumbService.init(chrome, management.constants.BREADCRUMB);
+    uiMetricService.init(uiMetric.createUiStatsReporter);
     documentationLinksService.init(documentation.esDocBasePath, documentation.esPluginDocBasePath);
-    uiMetricService.init(uiMetric.track);
+    docTitleService.init(docTitle.change);
 
     const unmountReactApp = (): void => {
       const elem = document.getElementById(REACT_ROOT_ID);
@@ -85,7 +86,7 @@ export class Plugin {
           if (elem) {
             renderReact(
               elem,
-              { i18n, notification } as AppCore,
+              { i18n, notification, chrome } as AppCore,
               { management: { sections: management.sections } } as AppPlugins
             );
           }

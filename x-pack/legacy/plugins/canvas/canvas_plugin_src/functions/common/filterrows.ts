@@ -3,9 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
-import { Datatable } from '../types';
-import { getFunctionHelp } from '../../strings';
+
+import { Datatable, ExpressionFunction } from '../../../types';
+import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {
   fn: (datatable: Datatable) => Promise<boolean>;
@@ -23,10 +23,10 @@ export function filterrows(): ExpressionFunction<
     name: 'filterrows',
     aliases: [],
     type: 'datatable',
+    help,
     context: {
       types: ['datatable'],
     },
-    help,
     args: {
       fn: {
         resolve: false,

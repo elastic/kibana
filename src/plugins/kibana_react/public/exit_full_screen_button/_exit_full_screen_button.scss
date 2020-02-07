@@ -1,0 +1,69 @@
+/**
+ * 1. override the z-index: 1 applied to all non-eui elements that are in :focus via kui
+ *      - see packages/kbn-ui-framework/src/global_styling/reset/_reset.scss
+ */
+
+.dshExitFullScreenButton {
+  height: $euiSizeXXL;
+  left: 0;
+  bottom: 0;
+  position: fixed;
+  display: block;
+  padding: 0;
+  border: none;
+  background: none;
+  z-index: 5;
+
+  &:hover,
+  &:focus {
+    transition: all $euiAnimSpeedExtraSlow $euiAnimSlightResistance;
+    z-index: 10 !important; /* 1 */
+
+    .dshExitFullScreenButton__text {
+      transition: all $euiAnimSpeedNormal $euiAnimSlightResistance;
+      transform: translateX(-$euiSize);
+    }
+  }
+}
+
+.dshExitFullScreenButton__logo {
+  display: block;
+  // Just darken the background for all themes because the logo is always white
+  background-color: shade($euiColorPrimary, 25%);
+  height: $euiSizeXXL;
+
+  // These numbers are very specific to the Kibana logo size
+  width: 92px;
+  background-image: url('ui/assets/images/kibana.svg');
+  background-position: 8px 5px;
+  background-size: 72px 30px;
+  background-repeat: no-repeat;
+
+  z-index: $euiZLevel1;
+}
+
+/**
+ * 1. Calc made to allow caret in text to peek out / animate.
+ */
+
+.dshExitFullScreenButton__text {
+  background: $euiColorPrimary;
+  color: $euiColorEmptyShade;
+  line-height: $euiSizeXXL;
+  display: inline-block;
+  font-size: $euiFontSizeS;
+  height: $euiSizeXXL;
+  position: absolute;
+  left: calc(100% + #{$euiSize}); /* 1 */
+  top: 0px;
+  bottom: 0px;
+  white-space: nowrap;
+  padding: 0px $euiSizeXS 0px $euiSizeM;
+  transition: all .2s ease;
+  transform: translateX(-100%);
+  z-index: -1;
+  
+  .euiIcon {
+    margin-left: $euiSizeXS;
+  }
+}

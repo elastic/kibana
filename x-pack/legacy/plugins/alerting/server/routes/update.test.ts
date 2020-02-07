@@ -8,21 +8,25 @@ import { createMockServer } from './_mock_server';
 import { updateAlertRoute } from './update';
 
 const { server, alertsClient } = createMockServer();
-updateAlertRoute(server);
+server.route(updateAlertRoute);
 
 beforeEach(() => jest.resetAllMocks());
 
 const mockedResponse = {
   id: '1',
   alertTypeId: '1',
-  interval: 12000,
-  alertTypeParams: {
+  tags: ['foo'],
+  schedule: { interval: '12s' },
+  params: {
     otherField: false,
   },
+  createdAt: new Date(),
+  updatedAt: new Date(),
   actions: [
     {
       group: 'default',
       id: '2',
+      actionTypeId: 'test',
       params: {
         baz: true,
       },
@@ -35,8 +39,11 @@ test('calls the update function with proper parameters', async () => {
     method: 'PUT',
     url: '/api/alert/1',
     payload: {
-      interval: 12000,
-      alertTypeParams: {
+      throttle: null,
+      name: 'abc',
+      tags: ['bar'],
+      schedule: { interval: '12s' },
+      params: {
         otherField: false,
       },
       actions: [
@@ -54,29 +61,38 @@ test('calls the update function with proper parameters', async () => {
   alertsClient.update.mockResolvedValueOnce(mockedResponse);
   const { payload, statusCode } = await server.inject(request);
   expect(statusCode).toBe(200);
-  const response = JSON.parse(payload);
-  expect(response).toEqual(mockedResponse);
+  const { createdAt, updatedAt, ...response } = JSON.parse(payload);
+  expect({ createdAt: new Date(createdAt), updatedAt: new Date(updatedAt), ...response }).toEqual(
+    mockedResponse
+  );
   expect(alertsClient.update).toHaveBeenCalledTimes(1);
   expect(alertsClient.update.mock.calls[0]).toMatchInlineSnapshot(`
-Array [
-  Object {
-    "data": Object {
-      "actions": Array [
-        Object {
-          "group": "default",
-          "id": "2",
+    Array [
+      Object {
+        "data": Object {
+          "actions": Array [
+            Object {
+              "group": "default",
+              "id": "2",
+              "params": Object {
+                "baz": true,
+              },
+            },
+          ],
+          "name": "abc",
           "params": Object {
-            "baz": true,
+            "otherField": false,
           },
+          "schedule": Object {
+            "interval": "12s",
+          },
+          "tags": Array [
+            "bar",
+          ],
+          "throttle": null,
         },
-      ],
-      "alertTypeParams": Object {
-        "otherField": false,
+        "id": "1",
       },
-      "interval": 12000,
-    },
-    "id": "1",
-  },
-]
-`);
+    ]
+  `);
 });

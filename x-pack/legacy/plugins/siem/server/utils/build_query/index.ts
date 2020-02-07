@@ -7,10 +7,19 @@
 export * from './fields';
 export * from './filters';
 export * from './merge_fields_with_hits';
+export * from './calculate_timeseries_interval';
 
 export const assertUnreachable = (
   x: never,
   message: string = 'Unknown Field in switch statement'
 ): never => {
   throw new Error(`${message} ${x}`);
+};
+
+export const inspectStringifyObject = (obj: unknown) => {
+  try {
+    return JSON.stringify(obj, null, 2);
+  } catch {
+    return 'Sorry about that, something went wrong.';
+  }
 };

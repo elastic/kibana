@@ -6,21 +6,23 @@
 
 import { find } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import uiRoutes from'ui/routes';
+import uiRoutes from 'ui/routes';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import { MonitoringViewBaseEuiTableController } from '../../';
 import { getPageData } from './get_page_data';
 import template from './index.html';
-import React from 'react';
+import React, { Fragment } from 'react';
 import { I18nContext } from 'ui/i18n';
 import { Listing } from '../../../components/beats/listing/listing';
+import { SetupModeRenderer } from '../../../components/renderers';
+import { CODE_PATH_BEATS, BEATS_SYSTEM_ID } from '../../../../common/constants';
 
 uiRoutes.when('/beats/beats', {
   template,
   resolve: {
-    clusters: function (Private) {
+    clusters: function(Private) {
       const routeInit = Private(routeInitProvider);
-      return routeInit();
+      return routeInit({ codePaths: [CODE_PATH_BEATS] });
     },
     pageData: getPageData,
   },
@@ -30,7 +32,9 @@ uiRoutes.when('/beats/beats', {
       // breadcrumbs + page title
       const $route = $injector.get('$route');
       const globalState = $injector.get('globalState');
-      $scope.cluster = find($route.current.locals.clusters, { cluster_uuid: globalState.cluster_uuid });
+      $scope.cluster = find($route.current.locals.clusters, {
+        cluster_uuid: globalState.cluster_uuid,
+      });
 
       super({
         title: i18n.translate('xpack.monitoring.beats.routeTitle', { defaultMessage: 'Beats' }),
@@ -38,36 +42,52 @@ uiRoutes.when('/beats/beats', {
         getPageData,
         reactNodeId: 'monitoringBeatsInstancesApp',
         $scope,
-        $injector
+        $injector,
       });
 
       this.data = $route.current.locals.pageData;
       this.scope = $scope;
+      this.injector = $injector;
       this.kbnUrl = $injector.get('kbnUrl');
 
       //Bypassing super.updateData, since this controller loads its own data
       this._isDataInitialized = true;
 
-      $scope.$watch(() => this.data, () => this.renderComponent());
+      $scope.$watch(
+        () => this.data,
+        () => this.renderComponent()
+      );
     }
 
     renderComponent() {
       const { sorting, pagination, onTableChange } = this.scope.beats;
       this.renderReact(
         <I18nContext>
-          <Listing
-            stats={this.data.stats}
-            data={this.data.listing}
-            sorting={this.sorting || sorting}
-            pagination={this.pagination || pagination}
-            onTableChange={this.onTableChange || onTableChange}
-            angular={{
-              kbnUrl: this.kbnUrl,
-              scope: this.scope,
-            }}
+          <SetupModeRenderer
+            scope={this.scope}
+            injector={this.injector}
+            productName={BEATS_SYSTEM_ID}
+            render={({ setupMode, flyoutComponent, bottomBarComponent }) => (
+              <Fragment>
+                {flyoutComponent}
+                <Listing
+                  stats={this.data.stats}
+                  data={this.data.listing}
+                  setupMode={setupMode}
+                  sorting={this.sorting || sorting}
+                  pagination={this.pagination || pagination}
+                  onTableChange={this.onTableChange || onTableChange}
+                  angular={{
+                    kbnUrl: this.kbnUrl,
+                    scope: this.scope,
+                  }}
+                />
+                {bottomBarComponent}
+              </Fragment>
+            )}
           />
         </I18nContext>
       );
     }
-  }
+  },
 });

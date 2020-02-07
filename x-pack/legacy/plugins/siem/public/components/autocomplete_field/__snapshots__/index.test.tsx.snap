@@ -4,12 +4,13 @@ exports[`Autocomplete rendering it renders against snapshot 1`] = `
 <EuiOutsideClickDetector
   onOutsideClick={[Function]}
 >
-  <styled.div>
+  <AutocompleteContainer>
     <EuiFieldSearch
       compressed={false}
       fullWidth={true}
       incremental={false}
       inputRef={[Function]}
+      isClearable={true}
       isInvalid={true}
       isLoading={false}
       onChange={[Function]}
@@ -20,6 +21,6 @@ exports[`Autocomplete rendering it renders against snapshot 1`] = `
       placeholder="myPlaceholder"
       value=""
     />
-  </styled.div>
+  </AutocompleteContainer>
 </EuiOutsideClickDetector>
 `;

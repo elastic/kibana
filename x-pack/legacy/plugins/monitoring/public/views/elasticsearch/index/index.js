@@ -19,6 +19,7 @@ import { labels } from '../../../components/elasticsearch/shard_allocation/lib/l
 import { indicesByNodes } from '../../../components/elasticsearch/shard_allocation/transformers/indices_by_nodes';
 import { Index } from '../../../components/elasticsearch/index/index';
 import { MonitoringViewBaseController } from '../../base_controller';
+import { CODE_PATH_ELASTICSEARCH } from '../../../../common/constants';
 
 function getPageData($injector) {
   const $http = $injector.get('$http');
@@ -27,16 +28,17 @@ function getPageData($injector) {
   const url = `../api/monitoring/v1/clusters/${globalState.cluster_uuid}/elasticsearch/indices/${$route.current.params.index}`;
   const timeBounds = timefilter.getBounds();
 
-  return $http.post(url, {
-    ccs: globalState.ccs,
-    timeRange: {
-      min: timeBounds.min.toISOString(),
-      max: timeBounds.max.toISOString()
-    },
-    is_advanced: false,
-  })
+  return $http
+    .post(url, {
+      ccs: globalState.ccs,
+      timeRange: {
+        min: timeBounds.min.toISOString(),
+        max: timeBounds.max.toISOString(),
+      },
+      is_advanced: false,
+    })
     .then(response => response.data)
-    .catch((err) => {
+    .catch(err => {
       const Private = $injector.get('Private');
       const ajaxErrorHandlers = Private(ajaxErrorHandlersProvider);
       return ajaxErrorHandlers(err);
@@ -48,9 +50,9 @@ uiRoutes.when('/elasticsearch/indices/:index', {
   resolve: {
     clusters(Private) {
       const routeInit = Private(routeInitProvider);
-      return routeInit();
+      return routeInit({ codePaths: [CODE_PATH_ELASTICSEARCH] });
     },
-    pageData: getPageData
+    pageData: getPageData,
   },
   controllerAs: 'monitoringElasticsearchIndexApp',
   controller: class extends MonitoringViewBaseController {
@@ -64,47 +66,50 @@ uiRoutes.when('/elasticsearch/indices/:index', {
           defaultMessage: 'Elasticsearch - Indices - {indexName} - Overview',
           values: {
             indexName,
-          }
+          },
         }),
         defaultData: {},
         getPageData,
         reactNodeId: 'monitoringElasticsearchIndexApp',
         $scope,
-        $injector
+        $injector,
       });
 
       this.indexName = indexName;
       const transformer = indicesByNodes();
 
-      $scope.$watch(() => this.data, data => {
-        if (!data || !data.shards) {
-          return;
+      $scope.$watch(
+        () => this.data,
+        data => {
+          if (!data || !data.shards) {
+            return;
+          }
+
+          const shards = data.shards;
+          $scope.totalCount = shards.length;
+          $scope.showing = transformer(shards, data.nodes);
+          $scope.labels = labels.node;
+          if (shards.some(shard => shard.state === 'UNASSIGNED')) {
+            $scope.labels = labels.indexWithUnassigned;
+          } else {
+            $scope.labels = labels.index;
+          }
+
+          this.renderReact(
+            <I18nContext>
+              <Index
+                scope={$scope}
+                kbnUrl={kbnUrl}
+                onBrush={this.onBrush}
+                indexUuid={this.indexName}
+                clusterUuid={$scope.cluster.cluster_uuid}
+                zoomInfo={this.zoomInfo}
+                {...data}
+              />
+            </I18nContext>
+          );
         }
-
-        const shards = data.shards;
-        $scope.totalCount = shards.length;
-        $scope.showing = transformer(shards, data.nodes);
-        $scope.labels = labels.node;
-        if (shards.some((shard) => shard.state === 'UNASSIGNED')) {
-          $scope.labels = labels.indexWithUnassigned;
-        } else {
-          $scope.labels = labels.index;
-        }
-
-
-        this.renderReact(
-          <I18nContext>
-            <Index
-              scope={$scope}
-              kbnUrl={kbnUrl}
-              onBrush={this.onBrush}
-              indexUuid={this.indexName}
-              clusterUuid={$scope.cluster.cluster_uuid}
-              {...data}
-            />
-          </I18nContext>
-        );
-      });
+      );
     }
-  }
+  },
 });

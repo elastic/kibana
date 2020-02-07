@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as React from 'react';
-import { pure } from 'recompose';
+import React from 'react';
 import styled from 'styled-components';
 
 import { DraggableBadge } from '../draggables';
@@ -20,12 +19,14 @@ const Ja3FingerprintLabel = styled.span`
   margin-right: 5px;
 `;
 
+Ja3FingerprintLabel.displayName = 'Ja3FingerprintLabel';
+
 /**
  * Renders a ja3 fingerprint, which enables (some) clients and servers communicating
  * using TLS traffic to be identified, which is possible because SSL
  * negotiations happen in the clear
  */
-export const Ja3Fingerprint = pure<{
+export const Ja3Fingerprint = React.memo<{
   eventId: string;
   contextId: string;
   fieldName: string;
@@ -46,3 +47,5 @@ export const Ja3Fingerprint = pure<{
     <ExternalLinkIcon />
   </DraggableBadge>
 ));
+
+Ja3Fingerprint.displayName = 'Ja3Fingerprint';

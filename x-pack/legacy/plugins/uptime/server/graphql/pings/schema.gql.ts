@@ -12,7 +12,11 @@ export const pingsSchema = gql`
   }
 
   type PingResults {
+    "Total number of matching pings"
     total: UnsignedInteger!
+    "Unique list of all locations the query matched"
+    locations: [String!]!
+    "List of pings "
     pings: [Ping!]!
   }
 
@@ -58,10 +62,6 @@ export const pingsSchema = gql`
   "The monitor's status for a ping"
   type Duration {
     us: UnsignedInteger
-  }
-
-  type StatusCode {
-    status_code: Int
   }
 
   "An agent for recording a beat"
@@ -136,8 +136,24 @@ export const pingsSchema = gql`
     write_request: Duration
   }
 
+  type HTTPBody {
+    "Size of HTTP response body in bytes"
+    bytes: UnsignedInteger
+    "Hash of the HTTP response body"
+    hash: String
+    "Response body of the HTTP Response. May be truncated based on client settings."
+    content: String
+    "Byte length of the content string, taking into account multibyte chars."
+    content_bytes: UnsignedInteger
+  }
+
+  type HTTPResponse {
+    status_code: UnsignedInteger
+    body: HTTPBody
+  }
+
   type HTTP {
-    response: StatusCode
+    response: HTTPResponse
     rtt: HttpRTT
     url: String
   }
@@ -222,17 +238,14 @@ export const pingsSchema = gql`
     rtt: RTT
   }
 
-  type Summary {
-    up: Int
-    down: Int
-  }
-
   type TCP {
     port: Int
     rtt: RTT
   }
 
-  type TLS {
+  "Contains monitor transmission encryption information."
+  type PingTLS {
+    "The date and time after which the certificate is invalid."
     certificate_not_valid_after: String
     certificate_not_valid_before: String
     certificates: String
@@ -250,10 +263,10 @@ export const pingsSchema = gql`
 
   "A request sent from a monitor to a host"
   type Ping {
+    "unique ID for this ping"
+    id: String!
     "The timestamp of the ping's creation"
     timestamp: String!
-    "Milliseconds from the timestamp to the current time"
-    millisFromNow: String
     "The agent that recorded the ping"
     beat: Beat
     container: Container
@@ -272,7 +285,7 @@ export const pingsSchema = gql`
     summary: Summary
     tags: String
     tcp: TCP
-    tls: TLS
+    tls: PingTLS
     url: URL
   }
 `;

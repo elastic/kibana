@@ -4,28 +4,41 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ConfigObject, KbnServer, Logger } from '../../../types';
+import { i18n } from '@kbn/i18n';
+import { ElasticsearchServiceSetup } from 'kibana/server';
+import { Logger, ServerFacade } from '../../../types';
+import { HeadlessChromiumDriverFactory } from '../../browsers/chromium/driver_factory';
 import { validateBrowser } from './validate_browser';
-// @ts-ignore
-import { validateConfig } from './validate_config';
+import { validateEncryptionKey } from './validate_encryption_key';
 import { validateMaxContentLength } from './validate_max_content_length';
+import { validateServerHost } from './validate_server_host';
 
 export async function runValidations(
-  server: KbnServer,
-  config: ConfigObject,
+  server: ServerFacade,
+  elasticsearch: ElasticsearchServiceSetup,
   logger: Logger,
-  browserFactory: any
+  browserFactory: HeadlessChromiumDriverFactory
 ) {
   try {
     await Promise.all([
       validateBrowser(server, browserFactory, logger),
-      validateConfig(config, logger),
-      validateMaxContentLength(server, logger),
+      validateEncryptionKey(server, logger),
+      validateMaxContentLength(server, elasticsearch, logger),
+      validateServerHost(server),
     ]);
-    logger.debug(`Reporting plugin self-check ok!`);
+    logger.debug(
+      i18n.translate('xpack.reporting.selfCheck.ok', {
+        defaultMessage: `Reporting plugin self-check ok!`,
+      })
+    );
   } catch (err) {
     logger.warning(
-      `Reporting plugin self-check failed. Please check the Kibana Reporting settings. ${err}`
+      i18n.translate('xpack.reporting.selfCheck.warning', {
+        defaultMessage: `Reporting plugin self-check generated a warning: {err}`,
+        values: {
+          err,
+        },
+      })
     );
   }
 }

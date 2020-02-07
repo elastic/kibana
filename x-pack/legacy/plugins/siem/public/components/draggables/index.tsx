@@ -4,10 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBadge, EuiToolTip, IconType } from '@elastic/eui';
-import * as React from 'react';
-import { pure } from 'recompose';
-import styled from 'styled-components';
+import { EuiBadge, EuiBadgeProps, EuiToolTip, IconType } from '@elastic/eui';
+import React from 'react';
 
 import { Omit } from '../../../common/utility_types';
 import { DragEffects, DraggableWrapper } from '../drag_and_drop/draggable_wrapper';
@@ -51,7 +49,7 @@ export const getDefaultWhenTooltipIsUnspecified = ({
 /**
  * Renders the content of the draggable, wrapped in a tooltip
  */
-const Content = pure<{
+const Content = React.memo<{
   children?: React.ReactNode;
   field: string;
   tooltipContent?: React.ReactNode;
@@ -69,6 +67,8 @@ const Content = pure<{
   )
 );
 
+Content.displayName = 'Content';
+
 /**
  * Draggable text (or an arbitrary visualization specified by `children`)
  * that's only displayed when the specified value is non-`null`.
@@ -82,7 +82,7 @@ const Content = pure<{
  * prevent a tooltip from being displayed, or pass arbitrary content
  * @param queryValue - defaults to `value`, this query overrides the `queryMatch.value` used by the `DataProvider` that represents the data
  */
-export const DefaultDraggable = pure<DefaultDraggableType>(
+export const DefaultDraggable = React.memo<DefaultDraggableType>(
   ({ id, field, value, name, children, tooltipContent, queryValue }) =>
     value != null ? (
       <DraggableWrapper
@@ -105,21 +105,26 @@ export const DefaultDraggable = pure<DefaultDraggableType>(
               <Provider dataProvider={dataProvider} />
             </DragEffects>
           ) : (
-            <Content
-              children={children}
-              field={field}
-              tooltipContent={tooltipContent}
-              value={value}
-            />
+            <Content field={field} tooltipContent={tooltipContent} value={value}>
+              {children}
+            </Content>
           )
         }
       />
     ) : null
 );
 
-const Badge = styled(EuiBadge)`
-  vertical-align: top;
-`;
+DefaultDraggable.displayName = 'DefaultDraggable';
+
+// Ref: https://github.com/elastic/eui/issues/1655
+// const Badge = styled(EuiBadge)`
+//   vertical-align: top;
+// `;
+export const Badge = (props: EuiBadgeProps) => (
+  <EuiBadge {...props} style={{ verticalAlign: 'top' }} />
+);
+
+Badge.displayName = 'Badge';
 
 export type BadgeDraggableType = Omit<DefaultDraggableType, 'id'> & {
   contextId: string;
@@ -143,7 +148,7 @@ export type BadgeDraggableType = Omit<DefaultDraggableType, 'id'> & {
  * prevent a tooltip from being displayed, or pass arbitrary content
  * @param queryValue - defaults to `value`, this query overrides the `queryMatch.value` used by the `DataProvider` that represents the data
  */
-export const DraggableBadge = pure<BadgeDraggableType>(
+export const DraggableBadge = React.memo<BadgeDraggableType>(
   ({
     contextId,
     eventId,
@@ -158,7 +163,7 @@ export const DraggableBadge = pure<BadgeDraggableType>(
   }) =>
     value != null ? (
       <DefaultDraggable
-        id={`${contextId}-${eventId}-${field}-${value}`}
+        id={`draggable-badge-default-draggable-${contextId}-${eventId}-${field}-${value}`}
         field={field}
         name={name}
         value={value}
@@ -171,3 +176,5 @@ export const DraggableBadge = pure<BadgeDraggableType>(
       </DefaultDraggable>
     ) : null
 );
+
+DraggableBadge.displayName = 'DraggableBadge';

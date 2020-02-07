@@ -4,25 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount, shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
+import { shallow } from 'enzyme';
 import { getOr } from 'lodash/fp';
-import * as React from 'react';
+import React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
 import { FlowTarget } from '../../../../graphql/types';
 import { apolloClientObservable, mockGlobalState, TestProviders } from '../../../../mock';
+import { useMountAppended } from '../../../../utils/use_mount_appended';
 import { createStore, networkModel, State } from '../../../../store';
 
 import { UsersTable } from '.';
 import { mockUsersData } from './mock';
 
 describe('Users Table Component', () => {
-  const loadMore = jest.fn();
+  const loadPage = jest.fn();
   const state: State = mockGlobalState;
 
   let store = createStore(state, apolloClientObservable);
+  const mount = useMountAppended();
 
   beforeEach(() => {
     store = createStore(state, apolloClientObservable);
@@ -33,19 +34,21 @@ describe('Users Table Component', () => {
       const wrapper = shallow(
         <ReduxStoreProvider store={store}>
           <UsersTable
-            totalCount={1}
-            loading={false}
-            loadMore={loadMore}
             data={mockUsersData.edges}
             flowTarget={FlowTarget.source}
-            hasNextPage={getOr(false, 'hasNextPage', mockUsersData.pageInfo)!}
-            nextCursor={getOr(null, 'endCursor.value', mockUsersData.pageInfo)!}
+            fakeTotalCount={getOr(50, 'fakeTotalCount', mockUsersData.pageInfo)}
+            id="user"
+            isInspect={false}
+            loading={false}
+            loadPage={loadPage}
+            showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', mockUsersData.pageInfo)}
+            totalCount={1}
             type={networkModel.NetworkType.details}
           />
         </ReduxStoreProvider>
       );
 
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper.find('Connect(UsersTableComponent)')).toMatchSnapshot();
     });
   });
 
@@ -55,19 +58,25 @@ describe('Users Table Component', () => {
         <MockedProvider>
           <TestProviders store={store}>
             <UsersTable
-              totalCount={1}
-              loading={false}
-              loadMore={loadMore}
               data={mockUsersData.edges}
               flowTarget={FlowTarget.source}
-              hasNextPage={getOr(false, 'hasNextPage', mockUsersData.pageInfo)!}
-              nextCursor={getOr(null, 'endCursor.value', mockUsersData.pageInfo)!}
+              fakeTotalCount={getOr(50, 'fakeTotalCount', mockUsersData.pageInfo)}
+              id="user"
+              isInspect={false}
+              loading={false}
+              loadPage={loadPage}
+              showMorePagesIndicator={getOr(
+                false,
+                'showMorePagesIndicator',
+                mockUsersData.pageInfo
+              )}
+              totalCount={1}
               type={networkModel.NetworkType.details}
             />
           </TestProviders>
         </MockedProvider>
       );
-      expect(store.getState().network.details.queries!.users.usersSortField).toEqual({
+      expect(store.getState().network.details.queries!.users.sort).toEqual({
         direction: 'asc',
         field: 'name',
       });
@@ -79,7 +88,7 @@ describe('Users Table Component', () => {
 
       wrapper.update();
 
-      expect(store.getState().network.details.queries!.users.usersSortField).toEqual({
+      expect(store.getState().network.details.queries!.users.sort).toEqual({
         direction: 'desc',
         field: 'name',
       });
@@ -88,7 +97,7 @@ describe('Users Table Component', () => {
           .find('.euiTable thead tr th button')
           .first()
           .text()
-      ).toEqual('NameClick to sort in ascending order');
+      ).toEqual('UserClick to sort in ascending order');
     });
   });
 });

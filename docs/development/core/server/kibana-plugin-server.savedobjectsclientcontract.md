@@ -4,6 +4,8 @@
 
 ## SavedObjectsClientContract type
 
+Saved Objects is Kibana's data persisentence mechanism allowing plugins to use Elasticsearch for storing plugin state.
+
 \#\# SavedObjectsClient errors
 
 Since the SavedObjectsClient has its hands in everything we are a little paranoid about the way we present errors back to to application code. Ideally, all errors will be either:
@@ -32,7 +34,7 @@ From my (Spencer) perspective, a 404 from the SavedObjectsApi is a 404; The obje
 
 Unlike all other methods, create requests are supposed to succeed even when the Kibana index does not exist because it will be automatically created by elasticsearch. When that is not the case it is because Elasticsearch's `action.auto_create_index` setting prevents it from being created automatically so we throw a special 503 with the intention of informing the user that their Elasticsearch settings need to be updated.
 
-See [SavedObjectsErrorHelpers](./kibana-plugin-server.savedobjectserrorhelpers.md)
+See [SavedObjectsClient](./kibana-plugin-server.savedobjectsclient.md) See [SavedObjectsErrorHelpers](./kibana-plugin-server.savedobjectserrorhelpers.md)
 
 <b>Signature:</b>
 

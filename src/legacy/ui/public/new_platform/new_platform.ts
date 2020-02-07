@@ -16,16 +16,77 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { InternalCoreSetup, InternalCoreStart } from '../../../../core/public';
+import { IScope } from 'angular';
+
+import { UiActionsStart, UiActionsSetup } from 'src/plugins/ui_actions/public';
+import { IEmbeddableStart, IEmbeddableSetup } from 'src/plugins/embeddable/public';
+import { LegacyCoreSetup, LegacyCoreStart, App, AppMountDeprecated } from '../../../../core/public';
+import { Plugin as DataPlugin } from '../../../../plugins/data/public';
+import { Plugin as ExpressionsPlugin } from '../../../../plugins/expressions/public';
+import {
+  Setup as InspectorSetup,
+  Start as InspectorStart,
+} from '../../../../plugins/inspector/public';
+import { ChartsPluginSetup, ChartsPluginStart } from '../../../../plugins/charts/public';
+import { DevToolsSetup, DevToolsStart } from '../../../../plugins/dev_tools/public';
+import { KibanaLegacySetup, KibanaLegacyStart } from '../../../../plugins/kibana_legacy/public';
+import { HomePublicPluginSetup, HomePublicPluginStart } from '../../../../plugins/home/public';
+import { SharePluginSetup, SharePluginStart } from '../../../../plugins/share/public';
+import {
+  AdvancedSettingsSetup,
+  AdvancedSettingsStart,
+} from '../../../../plugins/advanced_settings/public';
+import { ManagementSetup, ManagementStart } from '../../../../plugins/management/public';
+import { BfetchPublicSetup, BfetchPublicStart } from '../../../../plugins/bfetch/public';
+import { UsageCollectionSetup } from '../../../../plugins/usage_collection/public';
+import {
+  NavigationPublicPluginSetup,
+  NavigationPublicPluginStart,
+} from '../../../../plugins/navigation/public';
+
+export interface PluginsSetup {
+  bfetch: BfetchPublicSetup;
+  charts: ChartsPluginSetup;
+  data: ReturnType<DataPlugin['setup']>;
+  embeddable: IEmbeddableSetup;
+  expressions: ReturnType<ExpressionsPlugin['setup']>;
+  home: HomePublicPluginSetup;
+  inspector: InspectorSetup;
+  uiActions: UiActionsSetup;
+  navigation: NavigationPublicPluginSetup;
+  devTools: DevToolsSetup;
+  kibanaLegacy: KibanaLegacySetup;
+  share: SharePluginSetup;
+  usageCollection: UsageCollectionSetup;
+  advancedSettings: AdvancedSettingsSetup;
+  management: ManagementSetup;
+}
+
+export interface PluginsStart {
+  bfetch: BfetchPublicStart;
+  charts: ChartsPluginStart;
+  data: ReturnType<DataPlugin['start']>;
+  embeddable: IEmbeddableStart;
+  expressions: ReturnType<ExpressionsPlugin['start']>;
+  home: HomePublicPluginStart;
+  inspector: InspectorStart;
+  uiActions: UiActionsStart;
+  navigation: NavigationPublicPluginStart;
+  devTools: DevToolsStart;
+  kibanaLegacy: KibanaLegacyStart;
+  share: SharePluginStart;
+  management: ManagementStart;
+  advancedSettings: AdvancedSettingsStart;
+}
 
 export const npSetup = {
-  core: (null as unknown) as InternalCoreSetup,
-  plugins: {} as Record<string, unknown>,
+  core: (null as unknown) as LegacyCoreSetup,
+  plugins: {} as PluginsSetup,
 };
 
 export const npStart = {
-  core: (null as unknown) as InternalCoreStart,
-  plugins: {} as Record<string, unknown>,
+  core: (null as unknown) as LegacyCoreStart,
+  plugins: {} as PluginsStart,
 };
 
 /**
@@ -33,16 +94,60 @@ export const npStart = {
  * @internal
  */
 export function __reset__() {
-  npSetup.core = (null as unknown) as InternalCoreSetup;
-  npStart.core = (null as unknown) as InternalCoreStart;
+  npSetup.core = (null as unknown) as LegacyCoreSetup;
+  npSetup.plugins = {} as any;
+  npStart.core = (null as unknown) as LegacyCoreStart;
+  npStart.plugins = {} as any;
+  legacyAppRegistered = false;
 }
 
-export function __setup__(coreSetup: InternalCoreSetup, plugins: Record<string, unknown>) {
+export function __setup__(coreSetup: LegacyCoreSetup, plugins: PluginsSetup) {
   npSetup.core = coreSetup;
   npSetup.plugins = plugins;
+
+  // Setup compatibility layer for AppService in legacy platform
+  npSetup.core.application.register = legacyAppRegister;
 }
 
-export function __start__(coreStart: InternalCoreStart, plugins: Record<string, unknown>) {
+export function __start__(coreStart: LegacyCoreStart, plugins: PluginsStart) {
   npStart.core = coreStart;
   npStart.plugins = plugins;
+}
+
+/** Flag used to ensure `legacyAppRegister` is only called once. */
+let legacyAppRegistered = false;
+
+/**
+ * Exported for testing only. Use `npSetup.core.application.register` in legacy apps.
+ * @internal
+ */
+export const legacyAppRegister = (app: App) => {
+  if (legacyAppRegistered) {
+    throw new Error(`core.application.register may only be called once for legacy plugins.`);
+  }
+  legacyAppRegistered = true;
+
+  require('ui/chrome').setRootController(app.id, ($scope: IScope, $element: JQLite) => {
+    const element = $element[0];
+
+    // Root controller cannot return a Promise so use an internal async function and call it immediately
+    (async () => {
+      const params = {
+        element,
+        appBasePath: npSetup.core.http.basePath.prepend(`/app/${app.id}`),
+        onAppLeave: () => undefined,
+      };
+      const unmount = isAppMountDeprecated(app.mount)
+        ? await app.mount({ core: npStart.core }, params)
+        : await app.mount(params);
+      $scope.$on('$destroy', () => {
+        unmount();
+      });
+    })();
+  });
+};
+
+function isAppMountDeprecated(mount: (...args: any[]) => any): mount is AppMountDeprecated {
+  // Mount functions with two arguments are assumed to expect deprecated `context` object.
+  return mount.length === 2;
 }

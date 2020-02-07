@@ -1,0 +1,46 @@
+// Should import both the EUI constants and any Kibana ones that are considered global
+@import 'src/legacy/ui/public/styles/styling_constants';
+
+// ML has it's own variables for coloring
+@import 'variables';
+
+// Kibana management page ML section
+#kibanaManagementMLSection {
+  @import 'management/index';
+}
+
+// Protect the rest of Kibana from ML generic namespacing
+// SASSTODO: Prefix ml selectors instead
+#ml-app {
+  // App level
+  @import 'app';
+
+  // Sub applications
+  @import 'data_frame_analytics/index';
+  @import 'datavisualizer/index';
+  @import 'explorer/index'; // SASSTODO: This file needs to be rewritten
+  @import 'jobs/index'; // SASSTODO: This collection of sass files has multiple problems
+  @import 'overview/index';
+  @import 'settings/index';
+  @import 'timeseriesexplorer/index';
+
+  // Components
+  @import 'components/annotations/annotation_description_list/index'; // SASSTODO: This file overwrites EUI directly
+  @import 'components/anomalies_table/index'; // SASSTODO: This file overwrites EUI directly
+  @import 'components/chart_tooltip/index';
+  @import 'components/color_range_legend/index';
+  @import 'components/controls/index';
+  @import 'components/entity_cell/index';
+  @import 'components/field_title_bar/index';
+  @import 'components/field_type_icon/index';
+  @import 'components/influencers_list/index';
+  @import 'components/items_grid/index';
+  @import 'components/job_selector/index';
+  @import 'components/loading_indicator/index'; // SASSTODO: This component should be replaced with EuiLoadingSpinner
+  @import 'components/navigation_menu/index';
+  @import 'components/rule_editor/index'; // SASSTODO: This file overwrites EUI directly
+  @import 'components/stats_bar/index';
+
+  // Hacks are last so they can overwrite anything above if needed
+  @import 'hacks';
+}

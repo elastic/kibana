@@ -6,7 +6,6 @@
 
 import { injectXPackInfoSignature } from './inject_xpack_info_signature';
 import { XPackInfo } from './xpack_info';
-import { FeatureRegistry } from './feature_registry';
 
 /**
  * Setup the X-Pack Main plugin. This is fired every time that the Elasticsearch plugin becomes Green.
@@ -17,17 +16,24 @@ import { FeatureRegistry } from './feature_registry';
  * @param server {Object} The Kibana server object.
  */
 export function setupXPackMain(server) {
-  const info = new XPackInfo(server, {
-    pollFrequencyInMillis: server.config().get('xpack.xpack_main.xpack_api_polling_frequency_millis')
-  });
+  const info = new XPackInfo(server, { licensing: server.newPlatform.setup.plugins.licensing });
 
   server.expose('info', info);
-  server.expose('createXPackInfo', (options) => new XPackInfo(server, options));
+  server.expose('createXPackInfo', options => {
+    const client = server.newPlatform.setup.core.elasticsearch.createClient(options.clusterSource);
+    const monitoringLicensing = server.newPlatform.setup.plugins.licensing.createLicensePoller(
+      client,
+      options.pollFrequencyInMillis
+    );
+
+    return new XPackInfo(server, { licensing: monitoringLicensing });
+  });
+
   server.ext('onPreResponse', (request, h) => injectXPackInfoSignature(info, request, h));
 
-  const featureRegistry = new FeatureRegistry();
-  server.expose('registerFeature', (feature) => featureRegistry.register(feature));
-  server.expose('getFeatures', () => featureRegistry.getAll());
+  const { registerFeature, getFeatures } = server.newPlatform.setup.plugins.features;
+  server.expose('registerFeature', registerFeature);
+  server.expose('getFeatures', getFeatures);
 
   const setPluginStatus = () => {
     if (info.isAvailable()) {
@@ -46,4 +52,6 @@ export function setupXPackMain(server) {
   // whenever the license info is updated, regardless of the elasticsearch plugin status
   // changes, reflect the change in our plugin status. See https://github.com/elastic/kibana/issues/20017
   info.onLicenseInfoChange(setPluginStatus);
+
+  return info;
 }

@@ -4,14 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { StringMap } from '../../../typings/common';
-import { Setup } from '../helpers/setup_request';
-import { transactionGroupsFetcher } from './fetcher';
+import {
+  Setup,
+  SetupTimeRange,
+  SetupUIFilters
+} from '../helpers/setup_request';
+import { transactionGroupsFetcher, Options } from './fetcher';
 import { transactionGroupsTransformer } from './transform';
+import { PromiseReturnType } from '../../../typings/common';
 
-export async function getTransactionGroups(setup: Setup, bodyQuery: StringMap) {
+export type TransactionGroupListAPIResponse = PromiseReturnType<
+  typeof getTransactionGroupList
+>;
+export async function getTransactionGroupList(
+  options: Options,
+  setup: Setup & SetupTimeRange & SetupUIFilters
+) {
   const { start, end } = setup;
-  const response = await transactionGroupsFetcher(setup, bodyQuery);
+  const response = await transactionGroupsFetcher(options, setup);
   return transactionGroupsTransformer({
     response,
     start,

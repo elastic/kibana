@@ -4,13 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createMockServer } from '../../../test_helpers/create_mock_server';
 import { omitBlacklistedHeaders } from './index';
-
-let mockServer: any;
-beforeEach(() => {
-  mockServer = createMockServer('');
-});
 
 test(`omits blacklisted headers`, async () => {
   const permittedHeaders = {
@@ -20,13 +14,14 @@ test(`omits blacklisted headers`, async () => {
 
   const blacklistedHeaders = {
     'accept-encoding': '',
+    connection: 'upgrade',
     'content-length': '',
     'content-type': '',
     host: '',
     'transfer-encoding': '',
   };
 
-  const { filteredHeaders } = await omitBlacklistedHeaders({
+  const filteredHeaders = await omitBlacklistedHeaders({
     job: {
       title: 'cool-job-bro',
       type: 'csv',
@@ -40,7 +35,6 @@ test(`omits blacklisted headers`, async () => {
       ...permittedHeaders,
       ...blacklistedHeaders,
     },
-    server: mockServer,
   });
 
   expect(filteredHeaders).toEqual(permittedHeaders);

@@ -5,7 +5,7 @@
  */
 
 import { EuiSpacer, EuiText } from '@elastic/eui';
-import * as React from 'react';
+import React from 'react';
 import styled from 'styled-components';
 
 import { AndOrBadge } from '../../and_or_badge';
@@ -17,6 +17,8 @@ const AndOrContainer = styled.div`
   position: relative;
   top: -1px;
 `;
+
+AndOrContainer.displayName = 'AndOrContainer';
 
 interface ModeProperties {
   mode: KqlMode;

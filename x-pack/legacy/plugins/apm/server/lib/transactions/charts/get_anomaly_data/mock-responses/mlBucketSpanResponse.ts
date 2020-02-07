@@ -19,7 +19,6 @@ export const mlBucketSpanResponse = {
     hits: [
       {
         _index: '.ml-anomalies-shared',
-        _type: 'doc',
         _id:
           'opbeans-go-request-high_mean_response_time_model_plot_1542636000000_900_0_29791_0',
         _score: 1.0,

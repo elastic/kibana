@@ -1,0 +1,49 @@
+{
+  "count" : 2,
+  "data_frame_analytics" : [
+    {
+      "id" : "completed",
+      "state" : "stopped",
+      "progress" : [
+        {
+          "phase" : "reindexing",
+          "progress_percent" : 100
+        },
+        {
+          "phase" : "loading_data",
+          "progress_percent" : 100
+        },
+        {
+          "phase" : "analyzing",
+          "progress_percent" : 100
+        },
+        {
+          "phase" : "writing_results",
+          "progress_percent" : 100
+        }
+      ]
+    },
+    {
+      "id" : "running",
+      "state" : "analyzing",
+      "progress" : [
+        {
+          "phase" : "reindexing",
+          "progress_percent" : 100
+        },
+        {
+          "phase" : "loading_data",
+          "progress_percent" : 100
+        },
+        {
+          "phase" : "analyzing",
+          "progress_percent" : 37
+        },
+        {
+          "phase" : "writing_results",
+          "progress_percent" : 0
+        }
+      ]
+    }
+  ]
+}

@@ -25,6 +25,7 @@ import { unit } from '../../../../style/variables';
 import Tooltip from '../Tooltip';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { tint } from 'polished';
+import { getTimeTicksTZ, getDomainTZ } from '../helper/timezone';
 
 const XY_HEIGHT = unit * 10;
 const XY_MARGIN = {
@@ -36,8 +37,12 @@ const XY_MARGIN = {
 
 const X_TICK_TOTAL = 8;
 
+// position absolutely to make sure that window resizing/zooming works
 const ChartsWrapper = styled.div`
   user-select: none;
+  position: absolute;
+  top: 0;
+  left: 0;
 `;
 
 export class HistogramInner extends PureComponent {
@@ -100,6 +105,9 @@ export class HistogramInner extends PureComponent {
       return null;
     }
 
+    const isTimeSeries =
+      this.props.xType === 'time' || this.props.xType === 'time-utc';
+
     const xMin = d3.min(buckets, d => d.x0);
     const xMax = d3.max(buckets, d => d.x);
     const yMin = 0;
@@ -116,10 +124,18 @@ export class HistogramInner extends PureComponent {
       .range([XY_HEIGHT, 0])
       .nice();
 
+    const [xMinZone, xMaxZone] = getDomainTZ(xMin, xMax);
+    const xTickValues = isTimeSeries
+      ? getTimeTicksTZ({
+          domain: [xMinZone, xMaxZone],
+          totalTicks: X_TICK_TOTAL,
+          width: XY_WIDTH
+        })
+      : undefined;
+
     const xDomain = x.domain();
     const yDomain = y.domain();
     const yTickValues = [0, yDomain[1] / 2, yDomain[1]];
-    const isTimeSeries = this.props.xType === 'time';
     const shouldShowTooltip =
       hoveredBucket.x > 0 && (hoveredBucket.y > 0 || isTimeSeries);
 
@@ -127,97 +143,103 @@ export class HistogramInner extends PureComponent {
     const showBackgroundHover = backgroundHover(hoveredBucket);
 
     return (
-      <ChartsWrapper>
-        <XYPlot
-          xType={this.props.xType}
-          width={XY_WIDTH}
-          height={XY_HEIGHT}
-          margin={XY_MARGIN}
-          xDomain={xDomain}
-          yDomain={yDomain}
-        >
-          <HorizontalGridLines tickValues={yTickValues} />
-          <XAxis
-            style={{ strokeWidth: '1px' }}
-            marginRight={10}
-            tickSizeOuter={10}
-            tickSizeInner={0}
-            tickTotal={X_TICK_TOTAL}
-            tickFormat={formatX}
-          />
-          <YAxis
-            tickSize={0}
-            hideLine
-            tickValues={yTickValues}
-            tickFormat={formatYShort}
-          />
-
-          {showBackgroundHover && (
-            <SingleRect
-              x={x(hoveredBucket.x0)}
-              width={x(bucketSize) - x(0)}
-              style={{
-                fill: theme.euiColorLightestShade
-              }}
+      <div style={{ position: 'relative', height: XY_HEIGHT }}>
+        <ChartsWrapper>
+          <XYPlot
+            xType={this.props.xType}
+            width={XY_WIDTH}
+            height={XY_HEIGHT}
+            margin={XY_MARGIN}
+            xDomain={xDomain}
+            yDomain={yDomain}
+          >
+            <HorizontalGridLines tickValues={yTickValues} />
+            <XAxis
+              style={{ strokeWidth: '1px' }}
+              marginRight={10}
+              tickSizeOuter={10}
+              tickSizeInner={0}
+              tickTotal={X_TICK_TOTAL}
+              tickFormat={formatX}
+              tickValues={xTickValues}
             />
-          )}
-
-          {shouldShowTooltip && (
-            <Tooltip
-              style={{
-                marginLeft: '1%',
-                marginRight: '1%'
-              }}
-              header={tooltipHeader(hoveredBucket)}
-              footer={tooltipFooter(hoveredBucket)}
-              tooltipPoints={[{ value: formatYLong(hoveredBucket.y) }]}
-              x={hoveredBucket.xCenter}
-              y={yDomain[1] / 2}
+            <YAxis
+              tickSize={0}
+              hideLine
+              tickValues={yTickValues}
+              tickFormat={formatYShort}
             />
-          )}
 
-          {selectedBucket && (
-            <SingleRect
-              x={x(selectedBucket.x0)}
-              width={x(bucketSize) - x(0)}
+            {showBackgroundHover && (
+              <SingleRect
+                x={x(hoveredBucket.x0)}
+                width={x(bucketSize) - x(0)}
+                style={{
+                  fill: theme.euiColorLightestShade
+                }}
+              />
+            )}
+
+            {shouldShowTooltip && (
+              <Tooltip
+                style={{
+                  marginLeft: '1%',
+                  marginRight: '1%'
+                }}
+                header={tooltipHeader(hoveredBucket)}
+                footer={tooltipFooter(hoveredBucket)}
+                tooltipPoints={[{ value: formatYLong(hoveredBucket.y) }]}
+                x={hoveredBucket.xCenter}
+                y={yDomain[1] / 2}
+              />
+            )}
+
+            {selectedBucket && (
+              <SingleRect
+                x={x(selectedBucket.x0)}
+                width={x(bucketSize) - x(0)}
+                style={{
+                  fill: 'transparent',
+                  stroke: theme.euiColorVis1,
+                  rx: '0px',
+                  ry: '0px'
+                }}
+              />
+            )}
+
+            <VerticalRectSeries
+              colorType="literal"
+              data={chartData}
               style={{
-                fill: 'transparent',
-                stroke: theme.euiColorVis1,
                 rx: '0px',
                 ry: '0px'
               }}
             />
-          )}
 
-          <VerticalRectSeries
-            colorType="literal"
-            data={chartData}
-            style={{
-              rx: '0px',
-              ry: '0px'
-            }}
-          />
+            {showVerticalLineHover && (
+              <VerticalGridLines tickValues={[hoveredBucket.x]} />
+            )}
 
-          {showVerticalLineHover && (
-            <VerticalGridLines tickValues={[hoveredBucket.x]} />
-          )}
-
-          <Voronoi
-            extent={[[XY_MARGIN.left, XY_MARGIN.top], [XY_WIDTH, XY_HEIGHT]]}
-            nodes={this.props.buckets.map(bucket => {
-              return {
-                ...bucket,
-                xCenter: (bucket.x0 + bucket.x) / 2
-              };
-            })}
-            onClick={this.onClick}
-            onHover={this.onHover}
-            onBlur={this.onBlur}
-            x={d => x(d.xCenter)}
-            y={() => 1}
-          />
-        </XYPlot>
-      </ChartsWrapper>
+            <Voronoi
+              extent={[
+                [XY_MARGIN.left, XY_MARGIN.top],
+                [XY_WIDTH, XY_HEIGHT]
+              ]}
+              nodes={buckets.map(bucket => {
+                return {
+                  ...bucket,
+                  xCenter: (bucket.x0 + bucket.x) / 2
+                };
+              })}
+              onClick={this.onClick}
+              onHover={this.onHover}
+              onBlur={this.onBlur}
+              x={d => x(d.xCenter)}
+              y={() => 1}
+            />
+          </XYPlot>
+        </ChartsWrapper>
+      </div>
     );
   }
 }

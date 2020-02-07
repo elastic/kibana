@@ -8,7 +8,6 @@ import { EuiBadge } from '@elastic/eui';
 import classNames from 'classnames';
 import { isString } from 'lodash/fp';
 import React from 'react';
-import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { getEmptyString } from '../../empty_value';
@@ -24,18 +23,27 @@ const ProviderBadgeStyled = styled(EuiBadge)`
       padding: 0px 3px;
     }
   }
-  .field-value {
-    font-weight: 200;
-  }
   &.globalFilterItem {
-    line-height: 28px;
+    white-space: nowrap;
     &.globalFilterItem-isDisabled {
       text-decoration: line-through;
       font-weight: 400;
       font-style: italic;
     }
   }
+  .euiBadge.euiBadge--iconLeft &.euiBadge.euiBadge--iconRight .euiBadge__content {
+    flex-direction: row;
+  }
+  .euiBadge.euiBadge--iconLeft
+    &.euiBadge.euiBadge--iconRight
+    .euiBadge__content
+    .euiBadge__iconButton {
+    margin-right: 0;
+    margin-left: 4px;
+  }
 `;
+
+ProviderBadgeStyled.displayName = 'ProviderBadgeStyled';
 
 interface ProviderBadgeProps {
   deleteProvider: () => void;
@@ -44,12 +52,12 @@ interface ProviderBadgeProps {
   isEnabled: boolean;
   isExcluded: boolean;
   providerId: string;
-  togglePopover?: () => void;
+  togglePopover: () => void;
   val: string | number;
   operator: QueryOperator;
 }
 
-export const ProviderBadge = pure<ProviderBadgeProps>(
+export const ProviderBadge = React.memo<ProviderBadgeProps>(
   ({ deleteProvider, field, isEnabled, isExcluded, operator, providerId, togglePopover, val }) => {
     const deleteFilter: React.MouseEventHandler<HTMLButtonElement> = (
       event: React.MouseEvent<HTMLButtonElement>
@@ -83,7 +91,7 @@ export const ProviderBadge = pure<ProviderBadgeProps>(
         closeButtonProps={{
           // Removing tab focus on close button because the same option can be obtained through the context menu
           // TODO: add a `DEL` keyboard press functionality
-          tabIndex: '-1',
+          tabIndex: -1,
         }}
         data-test-subj="providerBadge"
       >
@@ -102,3 +110,5 @@ export const ProviderBadge = pure<ProviderBadgeProps>(
     );
   }
 );
+
+ProviderBadge.displayName = 'ProviderBadge';

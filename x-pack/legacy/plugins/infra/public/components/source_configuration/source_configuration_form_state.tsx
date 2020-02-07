@@ -49,13 +49,10 @@ export const useSourceConfigurationFormState = (configuration?: SourceConfigurat
     [indicesConfigurationFormState.errors, logColumnsConfigurationFormState.errors]
   );
 
-  const resetForm = useCallback(
-    () => {
-      indicesConfigurationFormState.resetForm();
-      logColumnsConfigurationFormState.resetForm();
-    },
-    [indicesConfigurationFormState.resetForm, logColumnsConfigurationFormState.formState]
-  );
+  const resetForm = useCallback(() => {
+    indicesConfigurationFormState.resetForm();
+    logColumnsConfigurationFormState.resetForm();
+  }, [indicesConfigurationFormState, logColumnsConfigurationFormState]);
 
   const isFormDirty = useMemo(
     () => indicesConfigurationFormState.isFormDirty || logColumnsConfigurationFormState.isFormDirty,
@@ -108,6 +105,7 @@ export const useSourceConfigurationFormState = (configuration?: SourceConfigurat
 
   return {
     addLogColumn: logColumnsConfigurationFormState.addLogColumn,
+    moveLogColumn: logColumnsConfigurationFormState.moveLogColumn,
     errors,
     formState,
     formStateChanges,

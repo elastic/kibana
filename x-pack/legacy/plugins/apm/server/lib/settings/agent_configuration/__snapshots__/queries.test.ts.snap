@@ -1,0 +1,224 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`agent configuration queries fetches all environments 1`] = `
+Object {
+  "body": Object {
+    "aggs": Object {
+      "environments": Object {
+        "terms": Object {
+          "field": "service.environment",
+          "size": 100,
+        },
+      },
+    },
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "terms": Object {
+              "processor.event": Array [
+                "transaction",
+                "error",
+                "metric",
+              ],
+            },
+          },
+          Object {
+            "term": Object {
+              "service.name": "foo",
+            },
+          },
+        ],
+      },
+    },
+    "size": 0,
+  },
+  "index": Array [
+    "myIndex",
+    "myIndex",
+    "myIndex",
+  ],
+}
+`;
+
+exports[`agent configuration queries fetches configurations 1`] = `
+Object {
+  "index": "myIndex",
+  "size": 200,
+}
+`;
+
+exports[`agent configuration queries fetches filtered configurations with an environment 1`] = `
+Object {
+  "body": Object {
+    "query": Object {
+      "bool": Object {
+        "minimum_should_match": 2,
+        "should": Array [
+          Object {
+            "constant_score": Object {
+              "boost": 2,
+              "filter": Object {
+                "term": Object {
+                  "service.name": Object {
+                    "value": "foo",
+                  },
+                },
+              },
+            },
+          },
+          Object {
+            "constant_score": Object {
+              "boost": 1,
+              "filter": Object {
+                "term": Object {
+                  "service.environment": Object {
+                    "value": "bar",
+                  },
+                },
+              },
+            },
+          },
+          Object {
+            "bool": Object {
+              "must_not": Array [
+                Object {
+                  "exists": Object {
+                    "field": "service.name",
+                  },
+                },
+              ],
+            },
+          },
+          Object {
+            "bool": Object {
+              "must_not": Array [
+                Object {
+                  "exists": Object {
+                    "field": "service.environment",
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  },
+  "index": "myIndex",
+}
+`;
+
+exports[`agent configuration queries fetches filtered configurations without an environment 1`] = `
+Object {
+  "body": Object {
+    "query": Object {
+      "bool": Object {
+        "minimum_should_match": 2,
+        "should": Array [
+          Object {
+            "constant_score": Object {
+              "boost": 2,
+              "filter": Object {
+                "term": Object {
+                  "service.name": Object {
+                    "value": "foo",
+                  },
+                },
+              },
+            },
+          },
+          Object {
+            "bool": Object {
+              "must_not": Array [
+                Object {
+                  "exists": Object {
+                    "field": "service.name",
+                  },
+                },
+              ],
+            },
+          },
+          Object {
+            "bool": Object {
+              "must_not": Array [
+                Object {
+                  "exists": Object {
+                    "field": "service.environment",
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  },
+  "index": "myIndex",
+}
+`;
+
+exports[`agent configuration queries fetches service names 1`] = `
+Object {
+  "body": Object {
+    "aggs": Object {
+      "services": Object {
+        "terms": Object {
+          "field": "service.name",
+          "size": 50,
+        },
+      },
+    },
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "terms": Object {
+              "processor.event": Array [
+                "transaction",
+                "error",
+                "metric",
+              ],
+            },
+          },
+        ],
+      },
+    },
+    "size": 0,
+  },
+  "index": Array [
+    "myIndex",
+    "myIndex",
+    "myIndex",
+  ],
+}
+`;
+
+exports[`agent configuration queries fetches unavailable environments 1`] = `
+Object {
+  "body": Object {
+    "aggs": Object {
+      "environments": Object {
+        "terms": Object {
+          "field": "service.environment",
+          "missing": "ALL_OPTION_VALUE",
+          "size": 50,
+        },
+      },
+    },
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "term": Object {
+              "service.name": "foo",
+            },
+          },
+        ],
+      },
+    },
+    "size": 0,
+  },
+  "index": "myIndex",
+}
+`;

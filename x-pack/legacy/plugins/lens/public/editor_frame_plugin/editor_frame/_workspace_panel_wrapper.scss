@@ -1,0 +1,35 @@
+.lnsWorkspacePanelWrapper {
+  @include euiScrollBar;
+  overflow: hidden;
+  // Override panel size padding
+  padding: 0 !important; // sass-lint:disable-line no-important
+  margin-bottom: $euiSize;
+  display: flex;
+  flex-direction: column;
+
+  .lnsWorkspacePanelWrapper__pageContentHeader {
+    @include euiTitle('xs');
+    padding: $euiSizeM;
+    border-bottom: $euiBorderThin;
+    // override EuiPage
+    margin-bottom: 0 !important; // sass-lint:disable-line no-important
+  }
+
+  .lnsWorkspacePanelWrapper__pageContentBody {
+    @include euiScrollBar;
+    flex-grow: 1;
+    display: flex;
+    align-items: stretch;
+    justify-content: stretch;
+    overflow: auto;
+    position: relative;
+
+    > * {
+      flex: 1 1 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow-x: hidden;
+    }
+  }
+}

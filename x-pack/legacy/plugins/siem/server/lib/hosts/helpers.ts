@@ -6,16 +6,16 @@
 
 import { AggregationRequest } from '../types';
 
-export const buildFieldsTermAggregation = (esFields: ReadonlyArray<string>): AggregationRequest =>
+export const buildFieldsTermAggregation = (esFields: readonly string[]): AggregationRequest =>
   esFields.reduce<AggregationRequest>(
     (res, field) => ({
       ...res,
-      ...getAggregationTypeFromField(field),
+      ...getTermsAggregationTypeFromField(field),
     }),
     {}
   );
 
-const getAggregationTypeFromField = (field: string): AggregationRequest => {
+const getTermsAggregationTypeFromField = (field: string): AggregationRequest => {
   return {
     [field.replace(/\./g, '_')]: {
       terms: {

@@ -4,17 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SecurityService } from '../../../common/services';
-import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
+import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { isCustomRoleSpecification } from '../../common/types';
 import { UserScenarios } from '../scenarios';
 
-// eslint-disable-next-line import/no-default-export
-export default function uiCapabilitesTests({
-  loadTestFile,
-  getService,
-}: KibanaFunctionalTestDefaultProviders) {
-  const securityService: SecurityService = getService('security');
+export default function uiCapabilitesTests({ loadTestFile, getService }: FtrProviderContext) {
+  const securityService = getService('security');
 
   describe('ui capabilities', function() {
     this.tags('ciGroup9');

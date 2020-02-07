@@ -8,7 +8,7 @@ import _ from 'lodash';
 import { uiModules } from 'ui/modules';
 
 const uiModule = uiModules.get('monitoring/features', []);
-uiModule.service('features', function ($window) {
+uiModule.service('features', function($window) {
   function getData() {
     let returnData = {};
     const monitoringData = $window.localStorage.getItem('xpack.monitoring.data');
@@ -43,6 +43,6 @@ uiModule.service('features', function ($window) {
 
   return {
     isEnabled,
-    update
+    update,
   };
 });

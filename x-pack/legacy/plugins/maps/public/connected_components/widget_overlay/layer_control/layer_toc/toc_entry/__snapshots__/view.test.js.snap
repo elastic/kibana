@@ -1,0 +1,194 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`TOCEntry is rendered 1`] = `
+<div
+  className="mapTocEntry"
+  data-layerid="1"
+  id="1"
+>
+  <div
+    className="mapTocEntry-visible"
+  >
+    <LayerTocActions
+      cloneLayer={[Function]}
+      displayName="layer 1"
+      editLayer={[Function]}
+      escapedDisplayName="layer_1"
+      fitToBounds={[Function]}
+      layer={
+        Object {
+          "getDisplayName": [Function],
+          "getId": [Function],
+          "hasErrors": [Function],
+          "hasLegendDetails": [Function],
+          "isVisible": [Function],
+          "renderLegendDetails": [Function],
+          "showAtZoomLevel": [Function],
+        }
+      }
+      removeLayer={[Function]}
+      toggleVisible={[Function]}
+      zoom={0}
+    />
+    <div
+      className="mapTocEntry__layerIcons"
+    >
+      <EuiButtonIcon
+        aria-label="Edit layer"
+        iconType="pencil"
+        onClick={[Function]}
+        title="Edit layer"
+      />
+      <EuiButtonIcon
+        aria-label="Reorder layer"
+        className="mapTocEntry__grab"
+        color="subdued"
+        iconType="grab"
+        title="Reorder layer"
+      />
+    </div>
+  </div>
+  <span
+    className="mapTocEntry__detailsToggle"
+  >
+    <button
+      aria-label="Show layer details"
+      className="mapTocEntry__detailsToggleButton"
+      onClick={[Function]}
+      title="Show layer details"
+    >
+      <EuiIcon
+        className="eui-alignBaseline"
+        size="s"
+        type="arrowDown"
+      />
+    </button>
+  </span>
+</div>
+`;
+
+exports[`TOCEntry props isReadOnly 1`] = `
+<div
+  className="mapTocEntry"
+  data-layerid="1"
+  id="1"
+>
+  <div
+    className="mapTocEntry-visible"
+  >
+    <LayerTocActions
+      cloneLayer={[Function]}
+      displayName="layer 1"
+      editLayer={[Function]}
+      escapedDisplayName="layer_1"
+      fitToBounds={[Function]}
+      isReadOnly={true}
+      layer={
+        Object {
+          "getDisplayName": [Function],
+          "getId": [Function],
+          "hasErrors": [Function],
+          "hasLegendDetails": [Function],
+          "isVisible": [Function],
+          "renderLegendDetails": [Function],
+          "showAtZoomLevel": [Function],
+        }
+      }
+      removeLayer={[Function]}
+      toggleVisible={[Function]}
+      zoom={0}
+    />
+  </div>
+  <span
+    className="mapTocEntry__detailsToggle"
+  >
+    <button
+      aria-label="Show layer details"
+      className="mapTocEntry__detailsToggleButton"
+      onClick={[Function]}
+      title="Show layer details"
+    >
+      <EuiIcon
+        className="eui-alignBaseline"
+        size="s"
+        type="arrowDown"
+      />
+    </button>
+  </span>
+</div>
+`;
+
+exports[`TOCEntry props should display layer details when isLegendDetailsOpen is true 1`] = `
+<div
+  className="mapTocEntry"
+  data-layerid="1"
+  id="1"
+>
+  <div
+    className="mapTocEntry-visible"
+  >
+    <LayerTocActions
+      cloneLayer={[Function]}
+      displayName="layer 1"
+      editLayer={[Function]}
+      escapedDisplayName="layer_1"
+      fitToBounds={[Function]}
+      layer={
+        Object {
+          "getDisplayName": [Function],
+          "getId": [Function],
+          "hasErrors": [Function],
+          "hasLegendDetails": [Function],
+          "isVisible": [Function],
+          "renderLegendDetails": [Function],
+          "showAtZoomLevel": [Function],
+        }
+      }
+      removeLayer={[Function]}
+      toggleVisible={[Function]}
+      zoom={0}
+    />
+    <div
+      className="mapTocEntry__layerIcons"
+    >
+      <EuiButtonIcon
+        aria-label="Edit layer"
+        iconType="pencil"
+        onClick={[Function]}
+        title="Edit layer"
+      />
+      <EuiButtonIcon
+        aria-label="Reorder layer"
+        className="mapTocEntry__grab"
+        color="subdued"
+        iconType="grab"
+        title="Reorder layer"
+      />
+    </div>
+  </div>
+  <div
+    className="mapTocEntry__layerDetails"
+    data-test-subj="mapLayerTOCDetailslayer_1"
+  >
+    <div>
+      TOC details mock
+    </div>
+  </div>
+  <span
+    className="mapTocEntry__detailsToggle"
+  >
+    <button
+      aria-label="Hide layer details"
+      className="mapTocEntry__detailsToggleButton"
+      onClick={[Function]}
+      title="Hide layer details"
+    >
+      <EuiIcon
+        className="eui-alignBaseline"
+        size="s"
+        type="arrowUp"
+      />
+    </button>
+  </span>
+</div>
+`;

@@ -31,19 +31,17 @@ const SUITE2_SIZE = { width: 900, height: 900 };
 const SUITE3_SIZE = { width: 800, height: 800 };
 const SUITE31_SIZE = { width: 700, height: 700 };
 
-describe('remote default window size', function () {
+describe('remote default window size', function() {
   // give the tests some time to initialize the FTR and Chrome
   this.timeout(30 * SECOND);
 
   it('restores the window size after a suite completes', async () => {
-    const proc = fork(FTR_SCRIPT, [
-      '--config', CONFIG_PATH
-    ], {
-      silent: true
+    const proc = fork(FTR_SCRIPT, ['--config', CONFIG_PATH], {
+      silent: true,
     });
 
     const messages = [];
-    proc.on('message', (msg) => {
+    proc.on('message', msg => {
       messages.push(msg);
     });
 
@@ -76,7 +74,7 @@ describe('remote default window size', function () {
       // but suite3 size should be restored before running suite3's after hook
       { name: 'after suite3', size: SUITE3_SIZE },
       // then finally, suite1 should complete with 1000X1000 because suite3's size was rolled back
-      { name: 'after suite1', size: SUITE1_SIZE }
+      { name: 'after suite1', size: SUITE1_SIZE },
     ]);
   });
 });

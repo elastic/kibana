@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage, FormattedDate, FormattedTime } from '@kbn/i18n/react';
 import { I18nContext } from 'ui/i18n';
 
 import chrome from 'ui/chrome';
@@ -12,22 +12,26 @@ import { DOC_LINK_VERSION, ELASTIC_WEBSITE_URL } from 'ui/documentation_links';
 import { management, MANAGEMENT_BREADCRUMB } from 'ui/management';
 import { fatalError, toastNotifications } from 'ui/notify';
 import routes from 'ui/routes';
+import { docTitle } from 'ui/doc_title/doc_title';
 
 import { HashRouter } from 'react-router-dom';
 
 // @ts-ignore: allow traversal to fail on x-pack build
-import { trackUiMetric as track } from '../../../../../src/legacy/core_plugins/ui_metric/public';
+import { createUiStatsReporter } from '../../../../../src/legacy/core_plugins/ui_metric/public';
 
 export interface AppCore {
   i18n: {
     [i18nPackage: string]: any;
     Context: typeof I18nContext;
     FormattedMessage: typeof FormattedMessage;
+    FormattedDate: typeof FormattedDate;
+    FormattedTime: typeof FormattedTime;
   };
   notification: {
     fatalError: typeof fatalError;
     toastNotifications: typeof toastNotifications;
   };
+  chrome: typeof chrome;
 }
 
 export interface AppPlugins {
@@ -37,7 +41,6 @@ export interface AppPlugins {
 }
 
 export interface Core extends AppCore {
-  chrome: typeof chrome;
   http: {
     getClient(): any;
     setClient(client: any): void;
@@ -51,6 +54,9 @@ export interface Core extends AppCore {
     esDocBasePath: string;
     esPluginDocBasePath: string;
   };
+  docTitle: {
+    change: typeof docTitle.change;
+  };
 }
 
 export interface Plugins extends AppPlugins {
@@ -61,7 +67,7 @@ export interface Plugins extends AppPlugins {
     };
   };
   uiMetric: {
-    track: typeof track;
+    createUiStatsReporter: typeof createUiStatsReporter;
   };
 }
 
@@ -78,6 +84,8 @@ export function createShim(): { core: Core; plugins: Plugins } {
         ...i18n,
         Context: I18nContext,
         FormattedMessage,
+        FormattedDate,
+        FormattedTime,
       },
       routing: {
         registerAngularRoute: (path: string, config: object): void => {
@@ -105,6 +113,9 @@ export function createShim(): { core: Core; plugins: Plugins } {
         esDocBasePath: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/`,
         esPluginDocBasePath: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/plugins/${DOC_LINK_VERSION}/`,
       },
+      docTitle: {
+        change: docTitle.change,
+      },
     },
     plugins: {
       management: {
@@ -114,7 +125,7 @@ export function createShim(): { core: Core; plugins: Plugins } {
         },
       },
       uiMetric: {
-        track,
+        createUiStatsReporter,
       },
     },
   };

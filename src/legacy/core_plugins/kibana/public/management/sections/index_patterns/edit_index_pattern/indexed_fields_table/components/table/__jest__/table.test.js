@@ -19,12 +19,12 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
 
-import { TableComponent } from '../table';
+import { Table } from '../table';
 
 const indexPattern = {
-  timeFieldName: 'timestamp'
+  timeFieldName: 'timestamp',
 };
 
 const items = [
@@ -35,24 +35,16 @@ const items = [
 
 describe('Table', () => {
   it('should render normally', async () => {
-    const component = shallowWithIntl(
-      <TableComponent
-        indexPattern={indexPattern}
-        items={items}
-        editField={() => {}}
-      />
+    const component = shallowWithI18nProvider(
+      <Table indexPattern={indexPattern} items={items} editField={() => {}} />
     );
 
     expect(component).toMatchSnapshot();
   });
 
   it('should render normal field name', async () => {
-    const component = shallowWithIntl(
-      <TableComponent
-        indexPattern={indexPattern}
-        items={items}
-        editField={() => {}}
-      />
+    const component = shallowWithI18nProvider(
+      <Table indexPattern={indexPattern} items={items} editField={() => {}} />
     );
 
     const tableCell = shallow(component.prop('columns')[0].render('Elastic', items[0]));
@@ -60,12 +52,8 @@ describe('Table', () => {
   });
 
   it('should render timestamp field name', async () => {
-    const component = shallowWithIntl(
-      <TableComponent
-        indexPattern={indexPattern}
-        items={items}
-        editField={() => {}}
-      />
+    const component = shallowWithI18nProvider(
+      <Table indexPattern={indexPattern} items={items} editField={() => {}} />
     );
 
     const tableCell = shallow(component.prop('columns')[0].render('timestamp', items[1]));
@@ -73,12 +61,8 @@ describe('Table', () => {
   });
 
   it('should render the boolean template (true)', async () => {
-    const component = shallowWithIntl(
-      <TableComponent
-        indexPattern={indexPattern}
-        items={items}
-        editField={() => {}}
-      />
+    const component = shallowWithI18nProvider(
+      <Table indexPattern={indexPattern} items={items} editField={() => {}} />
     );
 
     const tableCell = shallow(component.prop('columns')[3].render(true));
@@ -86,12 +70,8 @@ describe('Table', () => {
   });
 
   it('should render the boolean template (false)', async () => {
-    const component = shallowWithIntl(
-      <TableComponent
-        indexPattern={indexPattern}
-        items={items}
-        editField={() => {}}
-      />
+    const component = shallowWithI18nProvider(
+      <Table indexPattern={indexPattern} items={items} editField={() => {}} />
     );
 
     const tableCell = shallow(component.prop('columns')[3].render(false, items[2]));
@@ -99,12 +79,8 @@ describe('Table', () => {
   });
 
   it('should render normal type', async () => {
-    const component = shallowWithIntl(
-      <TableComponent
-        indexPattern={indexPattern}
-        items={items}
-        editField={() => {}}
-      />
+    const component = shallowWithI18nProvider(
+      <Table indexPattern={indexPattern} items={items} editField={() => {}} />
     );
 
     const tableCell = shallow(component.prop('columns')[1].render('string'));
@@ -112,12 +88,8 @@ describe('Table', () => {
   });
 
   it('should render conflicting type', async () => {
-    const component = shallowWithIntl(
-      <TableComponent
-        indexPattern={indexPattern}
-        items={items}
-        editField={() => {}}
-      />
+    const component = shallowWithI18nProvider(
+      <Table indexPattern={indexPattern} items={items} editField={() => {}} />
     );
 
     const tableCell = shallow(component.prop('columns')[1].render('conflict', true));
@@ -127,12 +99,8 @@ describe('Table', () => {
   it('should allow edits', () => {
     const editField = jest.fn();
 
-    const component = shallowWithIntl(
-      <TableComponent
-        indexPattern={indexPattern}
-        items={items}
-        editField={editField}
-      />
+    const component = shallowWithI18nProvider(
+      <Table indexPattern={indexPattern} items={items} editField={editField} />
     );
 
     // Click the edit button

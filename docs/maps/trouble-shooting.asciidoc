@@ -1,0 +1,38 @@
+[role="xpack"]
+[[maps-troubleshooting]]
+== Elastic Maps troubleshooting
+
+Use the information in this section to inspect Elasticsearch requests and find solutions to common problems.
+
+[float]
+=== Inspect Elasticsearch requests
+
+*Elastic Maps* uses the {ref}/search-search.html[{es} search API] to get documents and aggregation results from {es}. To troubleshoot these requests, open the Inspector, which shows the most recent requests for each layer. You can switch between different requests using the *Request* dropdown.
+
+[role="screenshot"]
+image::maps/images/inspector.png[]
+
+[float]
+=== Solutions to common problems
+
+[float]
+==== Features are not displayed
+
+* Use Inspector to view {es} responses. Ensure the response is not empty.
+* Ensure geometry uses the correct latitude and longitude ordering.
+  ** Geo-points expressed as strings are ordered as `"latitude,longitude"`. Geo-points expressed as arrays are ordered as the reverse: `[longitude, latitude]`.
+  ** Geo-shapes expressed as geojson provide coordinates as `[longitude, latitude]`.
+* Ensure fill color and border color are distinguishable from map tiles. It's hard to see white features on a white background.
+
+[float]
+==== Tiles are not displayed
+
+* Ensure your tile server has configured https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS[Cross-Origin Resource Sharing (CORS)] so tile requests from your Kibana domain have permission to access your tile server domain.
+* Ensure tiles have the required coordinate system. Vector data must use EPSG:4326 and tiles must use EPSG:3857.
+
+[float]
+==== Coordinate and region map visualizations not available in New Visualization menu
+
+Kibana’s out-of-the-box settings no longer offers coordinate and region maps as a choice in the New Visualization menu because you can create these maps in *Elastic Maps*.
+If you want to create new coordinate and region map visualizations, set `xpack.maps.showMapVisualizationTypes` to `true`.
+

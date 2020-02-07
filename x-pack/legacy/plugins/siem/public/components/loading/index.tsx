@@ -5,21 +5,14 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiPanel, EuiText } from '@elastic/eui';
-import * as React from 'react';
-import { pure } from 'recompose';
-import styled, { injectGlobal } from 'styled-components';
-
-// SIDE EFFECT: the following `injectGlobal` overrides default styling in angular code that was not theme-friendly
-// eslint-disable-next-line no-unused-expressions
-injectGlobal`
-  .euiPanel-loading-hide-border {
-    border: none;
-  }
-`;
+import React from 'react';
+import styled from 'styled-components';
 
 const SpinnerFlexItem = styled(EuiFlexItem)`
   margin-right: 5px;
 `;
+
+SpinnerFlexItem.displayName = 'SpinnerFlexItem';
 
 interface LoadingProps {
   text: string;
@@ -30,7 +23,7 @@ interface LoadingProps {
   position?: string;
 }
 
-export const LoadingPanel = pure<LoadingProps>(
+export const LoadingPanel = React.memo<LoadingProps>(
   ({
     height = 'auto',
     showBorder = true,
@@ -63,6 +56,8 @@ export const LoadingPanel = pure<LoadingProps>(
   )
 );
 
+LoadingPanel.displayName = 'LoadingPanel';
+
 export const LoadingStaticPanel = styled.div<{
   height: number | string;
   position: string;
@@ -79,6 +74,8 @@ export const LoadingStaticPanel = styled.div<{
   z-index: ${({ zIndex }) => zIndex};
 `;
 
+LoadingStaticPanel.displayName = 'LoadingStaticPanel';
+
 export const LoadingStaticContentPanel = styled.div`
   flex: 0 0 auto;
   align-self: center;
@@ -88,3 +85,5 @@ export const LoadingStaticContentPanel = styled.div`
     padding: 10px;
   }
 `;
+
+LoadingStaticContentPanel.displayName = 'LoadingStaticContentPanel';

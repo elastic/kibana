@@ -17,7 +17,6 @@
  * under the License.
  */
 
-
 const fs = require('fs');
 const path = require('path');
 const program = require('commander');
@@ -45,7 +44,12 @@ files.forEach(file => {
   if (program.directory) {
     const outputName = path.basename(file);
     const outputPath = path.resolve(program.directory, outputName);
-    fs.writeFileSync(outputPath, output + '\n');
+    try {
+      fs.mkdirSync(program.directory, { recursive: true });
+      fs.writeFileSync(outputPath, output + '\n');
+    } catch (e) {
+      console.log('Cannot write file ', e);
+    }
   } else {
     console.log(output);
   }

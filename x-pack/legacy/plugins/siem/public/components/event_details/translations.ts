@@ -26,10 +26,18 @@ export const DESCRIPTION = i18n.translate('xpack.siem.eventDetails.description',
   defaultMessage: 'Description',
 });
 
+export const BLANK = i18n.translate('xpack.siem.eventDetails.blank', {
+  defaultMessage: ' ',
+});
+
 export const PLACEHOLDER = i18n.translate('xpack.siem.eventDetails.filter.placeholder', {
   defaultMessage: 'Filter by Field, Value, or Description...',
 });
 
 export const COPY_TO_CLIPBOARD = i18n.translate('xpack.siem.eventDetails.copyToClipboard', {
   defaultMessage: 'Copy to Clipboard',
+});
+
+export const TOGGLE_COLUMN_TOOLTIP = i18n.translate('xpack.siem.eventDetails.toggleColumnTooltip', {
+  defaultMessage: 'Toggle column',
 });

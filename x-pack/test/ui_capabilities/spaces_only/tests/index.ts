@@ -4,17 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SpacesService } from '../../../common/services';
-import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
+import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { FeaturesService } from '../../common/services';
 import { SpaceScenarios } from '../scenarios';
 
-// eslint-disable-next-line import/no-default-export
-export default function uiCapabilitesTests({
-  loadTestFile,
-  getService,
-}: KibanaFunctionalTestDefaultProviders) {
-  const spacesService: SpacesService = getService('spaces');
+export default function uiCapabilitesTests({ loadTestFile, getService }: FtrProviderContext) {
+  const spacesService = getService('spaces');
   const featuresService: FeaturesService = getService('features');
 
   describe('ui capabilities', function() {

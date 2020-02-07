@@ -1,0 +1,42 @@
+[[api]]
+= REST API
+
+[partintro]
+--
+Some {kib} features are provided via a REST API, which is ideal for creating an 
+integration with {kib}, or automating certain aspects of configuring and 
+deploying {kib}.
+
+Each API is experimental and can include breaking changes in any version of 
+{kib}, or might be entirely removed from {kib}.
+
+////
+Each API has one of the following labels:
+
+* *Stable* APIs should be safe to use extensively in production. Any breaking
+changes to these APIs should only occur in major versions and will be
+clearly documented in the breaking changes documentation for that release.
+
+* *Beta* APIs are on track to become stable, permanent features of {kib}.
+Caution should be exercised in their use since it is possible we'd have to make
+a breaking change to these APIs in a minor version, but we'll avoid this
+wherever possible.
+
+* *Experimental* APIs are just that - an experiment. An experimental API might
+have breaking changes in any version of {kib}, or it might even be removed
+entirely.
+
+If a label is missing from an API, it is considered `experimental`.
+////
+
+--
+
+include::{kib-repo-dir}/api/using-api.asciidoc[]
+include::{kib-repo-dir}/api/features.asciidoc[]
+include::{kib-repo-dir}/api/spaces-management.asciidoc[]
+include::{kib-repo-dir}/api/role-management.asciidoc[]
+include::{kib-repo-dir}/api/saved-objects.asciidoc[]
+include::{kib-repo-dir}/api/dashboard-api.asciidoc[]
+include::{kib-repo-dir}/api/logstash-configuration-management.asciidoc[]
+include::{kib-repo-dir}/api/url-shortening.asciidoc[]
+include::{kib-repo-dir}/api/upgrade-assistant.asciidoc[]

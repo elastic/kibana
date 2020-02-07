@@ -1,6 +1,3 @@
-@import './gis_map/gis_map';
-@import './layer_addpanel/source_select/index';
-@import './layer_panel/index';
-@import './widget_overlay/index';
-@import './toolbar_overlay/index';
-@import './map/feature_tooltip';
+@import './metric_editors';
+@import './geometry_filter';
+@import './tooltip_selector';

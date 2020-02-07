@@ -1,22 +1,22 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`ErrorGroupOverview -> List should render columns correctly 1`] = `
+exports[`ServiceOverview -> List should render columns correctly 1`] = `
 <EuiToolTip
   content="opbeans-python"
   delay="regular"
   id="service-name-tooltip"
   position="top"
 >
-  <Styled(APMLink)
-    path="/opbeans-python/transactions"
+  <ForwardRef(Styled(TransactionOverviewLink))
+    serviceName="opbeans-python"
   >
     opbeans-python
-  </Styled(APMLink)>
+  </ForwardRef(Styled(TransactionOverviewLink))>
 </EuiToolTip>
 `;
 
-exports[`ErrorGroupOverview -> List should render empty state 1`] = `
-<ManagedTable
+exports[`ServiceOverview -> List should render empty state 1`] = `
+<Memo(UnoptimizedManagedTable)
   columns={
     Array [
       Object {
@@ -63,18 +63,13 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
     ]
   }
   initialPageSize={50}
-  initialSort={
-    Object {
-      "direction": "asc",
-      "field": "serviceName",
-    }
-  }
+  initialSortField="serviceName"
   items={Array []}
 />
 `;
 
-exports[`ErrorGroupOverview -> List should render with data 1`] = `
-<ManagedTable
+exports[`ServiceOverview -> List should render with data 1`] = `
+<Memo(UnoptimizedManagedTable)
   columns={
     Array [
       Object {
@@ -121,12 +116,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
     ]
   }
   initialPageSize={50}
-  initialSort={
-    Object {
-      "direction": "asc",
-      "field": "serviceName",
-    }
-  }
+  initialSortField="serviceName"
   items={
     Array [
       Object {

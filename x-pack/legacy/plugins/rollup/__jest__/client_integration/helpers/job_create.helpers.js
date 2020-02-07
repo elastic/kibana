@@ -10,11 +10,13 @@ import { JobCreate } from '../../../public/crud_app/sections';
 
 import { JOB_TO_CREATE } from './constants';
 
-const initTestBed = registerTestBed(JobCreate, { store: rollupJobsStore });
+import { wrapComponent } from './setup_context';
 
-export const setup = (props) => {
+const initTestBed = registerTestBed(wrapComponent(JobCreate), { store: rollupJobsStore });
+
+export const setup = props => {
   const testBed = initTestBed(props);
-  const { component, form } = testBed;
+  const { component, form, table } = testBed;
 
   // User actions
   const clickNextStep = () => {
@@ -36,7 +38,7 @@ export const setup = (props) => {
   };
 
   // Forms
-  const fillFormFields = async (step) => {
+  const fillFormFields = async step => {
     switch (step) {
       case 'logistics':
         form.setInputValue('rollupJobName', JOB_TO_CREATE.id);
@@ -52,20 +54,44 @@ export const setup = (props) => {
   };
 
   // Navigation
-  const goToStep = async (targetStep) => {
+  const goToStep = async targetStep => {
     const stepHandlers = {
       1: () => fillFormFields('logistics'),
-      2: () => fillFormFields('date-histogram')
+      2: () => fillFormFields('date-histogram'),
     };
 
     let currentStep = 1;
-    while(currentStep < targetStep) {
+    while (currentStep < targetStep) {
       if (stepHandlers[currentStep]) {
         await stepHandlers[currentStep]();
       }
       clickNextStep();
       currentStep++;
     }
+  };
+
+  // Helpers for the metrics step in job creation.
+  // Mostly placed here for now to make test file a bit smaller and specific
+  // to tests.
+  const getFieldListTableRows = () => {
+    const { rows } = table.getMetaData('rollupJobMetricsFieldList');
+    return rows;
+  };
+
+  const getFieldListTableRow = row => {
+    const rows = getFieldListTableRows();
+    return rows[row];
+  };
+
+  const getFieldChooserColumnForRow = row => {
+    const selectedRow = getFieldListTableRow(row);
+    const [, , fieldChooserColumn] = selectedRow.columns;
+    return fieldChooserColumn;
+  };
+
+  const getSelectAllInputForRow = row => {
+    const fieldChooser = getFieldChooserColumnForRow(row);
+    return fieldChooser.reactWrapper.find('input').first();
   };
 
   // Misc
@@ -78,11 +104,17 @@ export const setup = (props) => {
     actions: {
       clickNextStep,
       clickPreviousStep,
-      clickSave
+      clickSave,
     },
     form: {
       ...testBed.form,
       fillFormFields,
+    },
+    metrics: {
+      getFieldListTableRows,
+      getFieldListTableRow,
+      getFieldChooserColumnForRow,
+      getSelectAllInputForRow,
     },
   };
 };

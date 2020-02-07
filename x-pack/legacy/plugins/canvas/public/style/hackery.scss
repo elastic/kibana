@@ -3,7 +3,7 @@
   when the UI framework implements everything we need
 */
 
-#canvas-app {
+#canvas-app { // sass-lint:disable-line no-ids
   // Give buttons some room to the right
   .euiAccordion__childWrapper {
     overflow-x: hidden;

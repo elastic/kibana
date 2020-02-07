@@ -5,8 +5,7 @@
  */
 
 import { EuiText } from '@elastic/eui';
-import * as React from 'react';
-import { pure } from 'recompose';
+import React from 'react';
 import styled from 'styled-components';
 
 import * as i18n from './translations';
@@ -15,38 +14,54 @@ const Heading = styled.span`
   margin-right: 5px;
 `;
 
+Heading.displayName = 'Heading';
+
 const Bold = styled.span`
   font-weight: bold;
   margin-right: 5px;
 `;
 
+Bold.displayName = 'Bold';
+
 const MarkdownHintContainer = styled(EuiText)<{ visibility: string }>`
   visibility: ${({ visibility }) => visibility};
 `;
 
+MarkdownHintContainer.displayName = 'MarkdownHintContainer';
+
 const ImageUrl = styled.span`
   margin-left: 5px;
 `;
+
+ImageUrl.displayName = 'ImageUrl';
 
 const Italic = styled.span`
   font-style: italic;
   margin-right: 5px;
 `;
 
+Italic.displayName = 'Italic';
+
 const Strikethrough = styled.span`
   text-decoration: line-through;
 `;
+
+Strikethrough.displayName = 'Strikethrough';
 
 const Code = styled.span`
   font-family: monospace;
   margin-right: 5px;
 `;
 
+Code.displayName = 'Code';
+
 const TrailingWhitespace = styled.span`
   margin-right: 5px;
 `;
 
-export const MarkdownHint = pure<{ show: boolean }>(({ show }) => (
+TrailingWhitespace.displayName = 'TrailingWhitespace';
+
+export const MarkdownHintComponent = ({ show }: { show: boolean }) => (
   <MarkdownHintContainer
     color="subdued"
     data-test-subj="markdown-hint"
@@ -68,4 +83,10 @@ export const MarkdownHint = pure<{ show: boolean }>(({ show }) => (
     {'~~'}
     <ImageUrl>{i18n.MARKDOWN_HINT_IMAGE_URL}</ImageUrl>
   </MarkdownHintContainer>
-));
+);
+
+MarkdownHintComponent.displayName = 'MarkdownHintComponent';
+
+export const MarkdownHint = React.memo(MarkdownHintComponent);
+
+MarkdownHint.displayName = 'MarkdownHint';

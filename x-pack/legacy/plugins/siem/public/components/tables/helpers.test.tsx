@@ -8,16 +8,17 @@ import {
   getRowItemDraggables,
   getRowItemOverflow,
   getRowItemDraggable,
-  OverflowField,
+  OverflowFieldComponent,
 } from './helpers';
-import * as React from 'react';
-import { mount, shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
+import React from 'react';
+import { shallow } from 'enzyme';
 import { TestProviders } from '../../mock';
 import { getEmptyValue } from '../empty_value';
+import { useMountAppended } from '../../utils/use_mount_appended';
 
 describe('Table Helpers', () => {
   const items = ['item1', 'item2', 'item3'];
+  const mount = useMountAppended();
 
   describe('#getRowItemDraggable', () => {
     test('it returns correctly against snapshot', () => {
@@ -27,7 +28,7 @@ describe('Table Helpers', () => {
         idPrefix: 'idPrefix',
       });
       const wrapper = shallow(<TestProviders>{rowItem}</TestProviders>);
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper.find('DraggableWrapper')).toMatchSnapshot();
     });
 
     test('it returns empty value when rowItem is undefined', () => {
@@ -37,8 +38,8 @@ describe('Table Helpers', () => {
         idPrefix: 'idPrefix',
         displayCount: 0,
       });
-      const wrapper = shallow(<TestProviders>{rowItem}</TestProviders>);
-      expect(wrapper.html()).toBe(getEmptyValue());
+      const wrapper = mount(<TestProviders>{rowItem}</TestProviders>);
+      expect(wrapper.find('DragDropContext').text()).toBe(getEmptyValue());
     });
 
     test('it returns empty string value when rowItem is empty', () => {
@@ -51,7 +52,7 @@ describe('Table Helpers', () => {
       const wrapper = mount(<TestProviders>{rowItem}</TestProviders>);
       expect(
         wrapper
-          .find('[data-test-subj="draggable-content"]')
+          .find('[data-test-subj="draggable-content-attrName"]')
           .first()
           .text()
       ).toBe('(Empty String)');
@@ -64,8 +65,9 @@ describe('Table Helpers', () => {
         idPrefix: 'idPrefix',
         displayCount: 0,
       });
-      const wrapper = shallow(<TestProviders>{rowItem}</TestProviders>);
-      expect(wrapper.html()).toBe(getEmptyValue());
+      const wrapper = mount(<TestProviders>{rowItem}</TestProviders>);
+
+      expect(wrapper.text()).toBe(getEmptyValue());
     });
 
     test('it uses custom renderer', () => {
@@ -79,7 +81,7 @@ describe('Table Helpers', () => {
       const wrapper = mount(<TestProviders>{rowItem}</TestProviders>);
       expect(
         wrapper
-          .find('[data-test-subj="draggable-content"]')
+          .find('[data-test-subj="draggable-content-attrName"]')
           .first()
           .text()
       ).toBe('Hi item1 renderer');
@@ -94,7 +96,7 @@ describe('Table Helpers', () => {
         idPrefix: 'idPrefix',
       });
       const wrapper = shallow(<TestProviders>{rowItems}</TestProviders>);
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper.find('DragDropContext')).toMatchSnapshot();
     });
 
     test('it returns empty value when rowItems is undefined', () => {
@@ -104,8 +106,8 @@ describe('Table Helpers', () => {
         idPrefix: 'idPrefix',
         displayCount: 0,
       });
-      const wrapper = shallow(<TestProviders>{rowItems}</TestProviders>);
-      expect(wrapper.html()).toBe(getEmptyValue());
+      const wrapper = mount(<TestProviders>{rowItems}</TestProviders>);
+      expect(wrapper.text()).toBe(getEmptyValue());
     });
 
     test('it returns empty string value when rowItem is empty', () => {
@@ -117,7 +119,7 @@ describe('Table Helpers', () => {
       const wrapper = mount(<TestProviders>{rowItems}</TestProviders>);
       expect(
         wrapper
-          .find('[data-test-subj="draggable-content"]')
+          .find('[data-test-subj="draggable-content-attrName"]')
           .first()
           .text()
       ).toBe('(Empty String)');
@@ -130,8 +132,8 @@ describe('Table Helpers', () => {
         idPrefix: 'idPrefix',
         displayCount: 0,
       });
-      const wrapper = shallow(<TestProviders>{rowItems}</TestProviders>);
-      expect(wrapper.html()).toBe(getEmptyValue());
+      const wrapper = mount(<TestProviders>{rowItems}</TestProviders>);
+      expect(wrapper.text()).toBe(getEmptyValue());
     });
 
     test('it returns no items when provided a 0 displayCount', () => {
@@ -141,8 +143,8 @@ describe('Table Helpers', () => {
         idPrefix: 'idPrefix',
         displayCount: 0,
       });
-      const wrapper = shallow(<TestProviders>{rowItems}</TestProviders>);
-      expect(wrapper.html()).toBe(getEmptyValue());
+      const wrapper = mount(<TestProviders>{rowItems}</TestProviders>);
+      expect(wrapper.text()).toBe(getEmptyValue());
     });
 
     test('it returns no items when provided an empty array', () => {
@@ -151,9 +153,11 @@ describe('Table Helpers', () => {
         attrName: 'attrName',
         idPrefix: 'idPrefix',
       });
-      const wrapper = shallow(<TestProviders>{rowItems}</TestProviders>);
-      expect(wrapper.html()).toBe(getEmptyValue());
+      const wrapper = mount(<TestProviders>{rowItems}</TestProviders>);
+      expect(wrapper.text()).toBe(getEmptyValue());
     });
+
+    // Using hostNodes due to this issue: https://github.com/airbnb/enzyme/issues/836
 
     test('it returns 2 items then overflows', () => {
       const rowItems = getRowItemDraggables({
@@ -163,7 +167,7 @@ describe('Table Helpers', () => {
         displayCount: 2,
       });
       const wrapper = mount(<TestProviders>{rowItems}</TestProviders>);
-      expect(wrapper.find('[data-test-subj="draggableWrapperDiv"]').length).toBe(2);
+      expect(wrapper.find('[data-test-subj="draggableWrapperDiv"]').hostNodes().length).toBe(2);
     });
 
     test('it uses custom renderer', () => {
@@ -177,7 +181,7 @@ describe('Table Helpers', () => {
       const wrapper = mount(<TestProviders>{rowItems}</TestProviders>);
       expect(
         wrapper
-          .find('[data-test-subj="draggable-content"]')
+          .find('[data-test-subj="draggable-content-attrName"]')
           .first()
           .text()
       ).toBe('Hi item1 renderer');
@@ -188,42 +192,40 @@ describe('Table Helpers', () => {
     test('it returns correctly against snapshot', () => {
       const rowItemOverflow = getRowItemOverflow(items, 'attrName', 1, 1);
       const wrapper = shallow(<div>{rowItemOverflow}</div>);
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper).toMatchSnapshot();
     });
 
-    test('it does not show "More..." when maxOverflowItems are not exceeded', () => {
+    test('it does not show "more not shown" when maxOverflowItems are not exceeded', () => {
       const rowItemOverflow = getRowItemOverflow(items, 'attrName', 1, 5);
       const wrapper = shallow(<div>{rowItemOverflow}</div>);
-      expect(JSON.stringify(wrapper.find('EuiToolTip').prop('content'))).not.toContain(
-        'defaultMessage'
-      );
+      expect(wrapper.find('[data-test-subj="popover-additional-overflow"]').length).toBe(0);
     });
 
-    test('it shows "More..." when maxOverflowItems are exceeded', () => {
+    test('it shows "more not shown" when maxOverflowItems are exceeded', () => {
       const rowItemOverflow = getRowItemOverflow(items, 'attrName', 1, 1);
       const wrapper = shallow(<div>{rowItemOverflow}</div>);
-      expect(JSON.stringify(wrapper.find('EuiToolTip').prop('content'))).toContain(
-        'defaultMessage'
-      );
+      expect(wrapper.find('[data-test-subj="popover-additional-overflow"]').length).toBe(1);
     });
   });
 
   describe('OverflowField', () => {
     test('it returns correctly against snapshot', () => {
       const overflowString = 'This string is exactly fifty-one chars in length!!!';
-      const wrapper = shallow(<OverflowField value={overflowString} showToolTip={false} />);
-      expect(toJson(wrapper)).toMatchSnapshot();
+      const wrapper = shallow(
+        <OverflowFieldComponent value={overflowString} showToolTip={false} />
+      );
+      expect(wrapper).toMatchSnapshot();
     });
 
     test('it does not truncates as per custom overflowLength value', () => {
       const overflowString = 'This string is short';
-      const wrapper = mount(<OverflowField value={overflowString} overflowLength={20} />);
+      const wrapper = mount(<OverflowFieldComponent value={overflowString} overflowLength={20} />);
       expect(wrapper.text()).toBe('This string is short');
     });
 
     test('it truncates as per custom overflowLength value', () => {
       const overflowString = 'This string is exactly fifty-one chars in length!!!';
-      const wrapper = mount(<OverflowField value={overflowString} overflowLength={20} />);
+      const wrapper = mount(<OverflowFieldComponent value={overflowString} overflowLength={20} />);
       expect(wrapper.text()).toBe('This string is exact');
     });
   });

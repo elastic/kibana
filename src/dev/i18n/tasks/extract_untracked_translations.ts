@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { createFailError } from '@kbn/dev-utils';
 import {
   I18nConfig,
   matchEntriesWithExctractors,
@@ -24,7 +25,6 @@ import {
   readFileAsync,
   ErrorReporter,
 } from '..';
-import { createFailError } from '../../run';
 
 function filterEntries(entries: string[], exclude: string[]) {
   return entries.filter((entry: string) =>
@@ -42,7 +42,7 @@ export async function extractUntrackedMessagesTask({
   reporter: any;
 }) {
   const inputPaths = Array.isArray(path) ? path : [path || './'];
-  const availablePaths = Object.values(config.paths);
+  const availablePaths = Object.values(config.paths).flat();
   const ignore = availablePaths.concat([
     '**/build/**',
     '**/webpackShims/**',
@@ -92,13 +92,13 @@ export async function extractUntrackedMessagesTask({
   }
 }
 
-export function extractUntrackedMessages(srcPaths: string[], config: I18nConfig) {
-  return srcPaths.map(srcPath => ({
-    title: `Checking untracked messages in ${srcPath}`,
-    task: async (context: { reporter: ErrorReporter }) => {
-      const { reporter } = context;
+export function extractUntrackedMessages(inputPaths: string[]) {
+  return inputPaths.map(inputPath => ({
+    title: `Checking untracked messages in ${inputPath}`,
+    task: async (context: { reporter: ErrorReporter; config: I18nConfig }) => {
+      const { reporter, config } = context;
       const initialErrorsNumber = reporter.errors.length;
-      const result = await extractUntrackedMessagesTask({ path: srcPath, config, reporter });
+      const result = await extractUntrackedMessagesTask({ path: inputPath, config, reporter });
       if (reporter.errors.length === initialErrorsNumber) {
         return result;
       }

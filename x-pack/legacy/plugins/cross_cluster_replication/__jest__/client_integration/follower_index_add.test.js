@@ -7,29 +7,9 @@
 import { setupEnvironment, pageHelpers, nextTick } from './helpers';
 import { RemoteClustersFormField } from '../../public/app/components';
 
-import { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } from '../../../../../../src/legacy/ui/public/index_patterns';
+import { indexPatterns } from '../../../../../../src/plugins/data/public';
 
-jest.mock('ui/chrome', () => ({
-  addBasePath: (path) => path || 'api/cross_cluster_replication',
-  breadcrumbs: { set: () => {} },
-  getInjected: (key) => {
-    if (key === 'uiCapabilities') {
-      return {
-        navLinks: {},
-        management: {},
-        catalogue: {}
-      };
-    }
-  }
-}));
-
-jest.mock('ui/index_patterns', () => {
-  const { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } =
-    jest.requireActual('../../../../../../src/legacy/ui/public/index_patterns/constants');
-  const { validateIndexPattern, ILLEGAL_CHARACTERS, CONTAINS_SPACES } =
-    jest.requireActual('../../../../../../src/legacy/ui/public/index_patterns/validate/validate_index_pattern');
-  return { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE, validateIndexPattern, ILLEGAL_CHARACTERS, CONTAINS_SPACES };
-});
+jest.mock('ui/new_platform');
 
 const { setup } = pageHelpers.followerIndexAdd;
 const { setup: setupAutoFollowPatternAdd } = pageHelpers.autoFollowPatternAdd;
@@ -94,10 +74,7 @@ describe('Create Follower index', () => {
       actions.clickSaveForm();
 
       expect(exists('formError')).toBe(true);
-      expect(form.getErrorsMessages()).toEqual([
-        'Leader index is required.',
-        'Name is required.'
-      ]);
+      expect(form.getErrorsMessages()).toEqual(['Leader index is required.', 'Name is required.']);
       expect(find('submitButton').props().disabled).toBe(true);
     });
   });
@@ -126,7 +103,9 @@ describe('Create Follower index', () => {
         autoFollowPatternAddComponent.update();
 
         const remoteClusterFormFieldFollowerIndex = component.find(RemoteClustersFormField);
-        const remoteClusterFormFieldAutoFollowPattern = autoFollowPatternAddComponent.find(RemoteClustersFormField);
+        const remoteClusterFormFieldAutoFollowPattern = autoFollowPatternAddComponent.find(
+          RemoteClustersFormField
+        );
 
         expect(remoteClusterFormFieldFollowerIndex.length).toBe(1);
         expect(remoteClusterFormFieldAutoFollowPattern.length).toBe(1);
@@ -143,12 +122,14 @@ describe('Create Follower index', () => {
       test('should not allow invalid characters', () => {
         actions.clickSaveForm(); // Make all errors visible
 
-        const expectInvalidChar = (char) => {
+        const expectInvalidChar = char => {
           form.setInputValue('leaderIndexInput', `with${char}`);
-          expect(form.getErrorsMessages()).toContain(`Remove the characters ${char} from your leader index.`);
+          expect(form.getErrorsMessages()).toContain(
+            `Remove the characters ${char} from your leader index.`
+          );
         };
 
-        return INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE.reduce((promise, char) => {
+        return indexPatterns.ILLEGAL_CHARACTERS_VISIBLE.reduce((promise, char) => {
           return promise.then(() => expectInvalidChar(char));
         }, Promise.resolve());
       });
@@ -170,18 +151,19 @@ describe('Create Follower index', () => {
       test('should not allow invalid characters', () => {
         actions.clickSaveForm(); // Make all errors visible
 
-        const expectInvalidChar = (char) => {
+        const expectInvalidChar = char => {
           form.setInputValue('followerIndexInput', `with${char}`);
-          expect(form.getErrorsMessages()).toContain(`Remove the characters ${char} from your name.`);
+          expect(form.getErrorsMessages()).toContain(
+            `Remove the characters ${char} from your name.`
+          );
         };
 
-        return INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE.reduce((promise, char) => {
+        return indexPatterns.ILLEGAL_CHARACTERS_VISIBLE.reduce((promise, char) => {
           return promise.then(() => expectInvalidChar(char));
         }, Promise.resolve());
       });
 
       describe('ES index name validation', () => {
-
         test('should make a request to check if the index name is available in ES', async () => {
           httpRequestsMockHelpers.setGetClusterIndicesResponse([]);
 
@@ -192,7 +174,9 @@ describe('Create Follower index', () => {
           await nextTick(550); // we need to wait as there is a debounce of 500ms on the http validation
 
           expect(server.requests.length).toBe(totalRequests + 1);
-          expect(server.requests[server.requests.length - 1].url).toBe('/api/index_management/indices');
+          expect(server.requests[server.requests.length - 1].url).toBe(
+            '/api/index_management/indices'
+          );
         });
 
         test('should display an error if the index already exists', async () => {
@@ -253,7 +237,7 @@ describe('Create Follower index', () => {
       };
 
       test('should have a toggle to activate advanced settings', () => {
-        const expectDoesNotExist = (testSubject) => {
+        const expectDoesNotExist = testSubject => {
           try {
             expect(exists(testSubject)).toBe(false);
           } catch {
@@ -261,7 +245,7 @@ describe('Create Follower index', () => {
           }
         };
 
-        const expectDoesExist = (testSubject) => {
+        const expectDoesExist = testSubject => {
           try {
             expect(exists(testSubject)).toBe(true);
           } catch {

@@ -1,0 +1,827 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`MonitorList component renders a no items message when no data is provided 1`] = `
+<Fragment>
+  <EuiPanel>
+    <EuiTitle
+      size="xs"
+    >
+      <h5>
+        <FormattedMessage
+          defaultMessage="Monitor status"
+          id="xpack.uptime.monitorList.monitoringStatusTitle"
+          values={Object {}}
+        />
+      </h5>
+    </EuiTitle>
+    <EuiSpacer
+      size="s"
+    />
+    <EuiBasicTable
+      aria-label="Monitor Status table with columns for Status, Name, URL, IP, Downtime History and Integrations. The table is currently displaying 0 items."
+      columns={
+        Array [
+          Object {
+            "align": "left",
+            "field": "state.monitor.status",
+            "mobileOptions": Object {
+              "fullWidth": true,
+            },
+            "name": "Status",
+            "render": [Function],
+          },
+          Object {
+            "align": "left",
+            "field": "state.monitor.name",
+            "mobileOptions": Object {
+              "fullWidth": true,
+            },
+            "name": "Name",
+            "render": [Function],
+            "sortable": true,
+          },
+          Object {
+            "align": "left",
+            "field": "state.url.full",
+            "name": "Url",
+            "render": [Function],
+          },
+          Object {
+            "align": "center",
+            "field": "histogram.points",
+            "mobileOptions": Object {
+              "show": false,
+            },
+            "name": "Downtime history",
+            "render": [Function],
+          },
+          Object {
+            "align": "right",
+            "field": "monitor_id",
+            "isExpander": true,
+            "name": "",
+            "render": [Function],
+            "sortable": true,
+            "width": "24px",
+          },
+        ]
+      }
+      hasActions={true}
+      isExpandable={true}
+      itemId="monitor_id"
+      itemIdToExpandedRowMap={Object {}}
+      items={Array []}
+      loading={false}
+      noItemsMessage="No uptime monitors found"
+      responsive={true}
+      tableLayout="fixed"
+    />
+    <EuiSpacer
+      size="m"
+    />
+    <EuiFlexGroup
+      responsive={false}
+    >
+      <EuiFlexItem
+        grow={false}
+      >
+        <OverviewPageLink
+          dataTestSubj="xpack.uptime.monitorList.prevButton"
+          direction="prev"
+          pagination=""
+        />
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+        <OverviewPageLink
+          dataTestSubj="xpack.uptime.monitorList.nextButton"
+          direction="next"
+          pagination=""
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiPanel>
+</Fragment>
+`;
+
+exports[`MonitorList component renders the monitor list 1`] = `
+.c1 {
+  padding-left: 17px;
+}
+
+.c2 {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (max-width:574px) {
+  .c0 {
+    min-width: 230px;
+  }
+}
+
+<div
+  class="euiPanel euiPanel--paddingMedium"
+>
+  <h5
+    class="euiTitle euiTitle--xsmall"
+  >
+    Monitor status
+  </h5>
+  <div
+    class="euiSpacer euiSpacer--s"
+  />
+  <div
+    aria-label="Monitor Status table with columns for Status, Name, URL, IP, Downtime History and Integrations. The table is currently displaying 2 items."
+    class="euiBasicTable"
+  >
+    <div>
+      <div
+        class="euiTableHeaderMobile"
+      >
+        <div
+          class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
+        >
+          <div
+            class="euiFlexItem euiFlexItem--flexGrowZero"
+          />
+          <div
+            class="euiFlexItem euiFlexItem--flexGrowZero"
+          />
+        </div>
+      </div>
+      <table
+        class="euiTable euiTable--responsive"
+      >
+        <caption
+          aria-live="polite"
+          aria-relevant="text"
+          class="euiScreenReaderOnly euiTableCaption"
+          role="status"
+        />
+        <thead>
+          <tr>
+            <th
+              class="euiTableHeaderCell euiTableHeaderCell--hideForMobile"
+              data-test-subj="tableHeaderCell_state.monitor.status_0"
+              role="columnheader"
+              scope="col"
+            >
+              <div
+                class="euiTableCellContent"
+              >
+                <span
+                  class="euiTableCellContent__text"
+                >
+                  Status
+                </span>
+              </div>
+            </th>
+            <th
+              class="euiTableHeaderCell euiTableHeaderCell--hideForMobile"
+              data-test-subj="tableHeaderCell_state.monitor.name_1"
+              role="columnheader"
+              scope="col"
+            >
+              <div
+                class="euiTableCellContent"
+              >
+                <span
+                  class="euiTableCellContent__text"
+                >
+                  Name
+                </span>
+              </div>
+            </th>
+            <th
+              class="euiTableHeaderCell"
+              data-test-subj="tableHeaderCell_state.url.full_2"
+              role="columnheader"
+              scope="col"
+            >
+              <div
+                class="euiTableCellContent"
+              >
+                <span
+                  class="euiTableCellContent__text"
+                >
+                  Url
+                </span>
+              </div>
+            </th>
+            <th
+              class="euiTableHeaderCell euiTableHeaderCell--hideForMobile"
+              data-test-subj="tableHeaderCell_histogram.points_3"
+              role="columnheader"
+              scope="col"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignCenter"
+              >
+                <span
+                  class="euiTableCellContent__text"
+                >
+                  Downtime history
+                </span>
+              </div>
+            </th>
+            <th
+              class="euiTableHeaderCell"
+              data-test-subj="tableHeaderCell_monitor_id_4"
+              role="columnheader"
+              scope="col"
+              style="width:24px"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight"
+              >
+                <span
+                  class="euiTableCellContent__text"
+                />
+              </div>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            class="euiTableRow euiTableRow-hasActions euiTableRow-isExpandable"
+          >
+            <td
+              class="euiTableRowCell euiTableRowCell--isMobileFullWidth"
+            >
+              <div
+                class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+              >
+                Status
+              </div>
+              <div
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
+              >
+                <div
+                  class="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow c0"
+                >
+                  <div
+                    class="euiFlexItem euiFlexItem--flexGrow1"
+                    style="flex-basis:40px"
+                  >
+                    <div
+                      class="euiHealth"
+                      style="display:block"
+                    >
+                      <div
+                        class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+                      >
+                        <div
+                          class="euiFlexItem euiFlexItem--flexGrowZero"
+                        >
+                          <svg
+                            aria-hidden="true"
+                            class="euiIcon euiIcon--medium euiIcon-isLoading"
+                            focusable="false"
+                            height="16"
+                            role="img"
+                            viewBox="0 0 16 16"
+                            width="16"
+                            xmlns="http://www.w3.org/2000/svg"
+                          />
+                        </div>
+                        <div
+                          class="euiFlexItem euiFlexItem--flexGrowZero"
+                        />
+                      </div>
+                    </div>
+                    <span
+                      class="c1"
+                    >
+                      <span
+                        class="euiToolTipAnchor"
+                      >
+                        <div
+                          class="euiText euiText--extraSmall"
+                        >
+                          <div
+                            class="euiTextColor euiTextColor--subdued"
+                          >
+                            1897 Yr ago
+                          </div>
+                        </div>
+                      </span>
+                    </span>
+                  </div>
+                  <div
+                    class="euiFlexItem euiFlexItem--flexGrow2"
+                  >
+                    <div
+                      class="euiText euiText--small"
+                    >
+                      in 0/1 Location
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--isMobileFullWidth"
+            >
+              <div
+                class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+              >
+                Name
+              </div>
+              <div
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
+              >
+                <button
+                  class="euiLink euiLink--primary"
+                  type="button"
+                >
+                  <a
+                    data-test-subj="monitor-page-link-foo"
+                    href="/monitor/Zm9v"
+                  >
+                    Unnamed - foo
+                  </a>
+                </button>
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell"
+            >
+              <div
+                class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+              >
+                Url
+              </div>
+              <div
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
+              >
+                <button
+                  class="euiLink euiLink--text c2"
+                  type="button"
+                >
+                   
+                  <svg
+                    aria-hidden="true"
+                    class="euiIcon euiIcon--small euiIcon-isLoading"
+                    focusable="false"
+                    height="16"
+                    role="img"
+                    style="fill:subbdued"
+                    viewBox="0 0 16 16"
+                    width="16"
+                    xmlns="http://www.w3.org/2000/svg"
+                  />
+                </button>
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--hideForMobile"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignCenter euiTableCellContent--overflowingContent"
+              >
+                <span
+                  class="euiToolTipAnchor"
+                >
+                  <div
+                    class="euiText euiText--medium"
+                  >
+                    <div
+                      class="euiTextColor euiTextColor--secondary"
+                    >
+                      --
+                    </div>
+                  </div>
+                </span>
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--isExpander"
+              style="width:24px"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+              >
+                <button
+                  aria-label="Expand row for monitor with ID foo"
+                  class="euiButtonIcon euiButtonIcon--primary"
+                  type="button"
+                >
+                  <svg
+                    aria-hidden="true"
+                    class="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
+                    focusable="false"
+                    height="16"
+                    role="img"
+                    viewBox="0 0 16 16"
+                    width="16"
+                    xmlns="http://www.w3.org/2000/svg"
+                  />
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr
+            class="euiTableRow euiTableRow-hasActions euiTableRow-isExpandable"
+          >
+            <td
+              class="euiTableRowCell euiTableRowCell--isMobileFullWidth"
+            >
+              <div
+                class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+              >
+                Status
+              </div>
+              <div
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
+              >
+                <div
+                  class="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow c0"
+                >
+                  <div
+                    class="euiFlexItem euiFlexItem--flexGrow1"
+                    style="flex-basis:40px"
+                  >
+                    <div
+                      class="euiHealth"
+                      style="display:block"
+                    >
+                      <div
+                        class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+                      >
+                        <div
+                          class="euiFlexItem euiFlexItem--flexGrowZero"
+                        >
+                          <svg
+                            aria-hidden="true"
+                            class="euiIcon euiIcon--medium euiIcon-isLoading"
+                            focusable="false"
+                            height="16"
+                            role="img"
+                            viewBox="0 0 16 16"
+                            width="16"
+                            xmlns="http://www.w3.org/2000/svg"
+                          />
+                        </div>
+                        <div
+                          class="euiFlexItem euiFlexItem--flexGrowZero"
+                        />
+                      </div>
+                    </div>
+                    <span
+                      class="c1"
+                    >
+                      <span
+                        class="euiToolTipAnchor"
+                      >
+                        <div
+                          class="euiText euiText--extraSmall"
+                        >
+                          <div
+                            class="euiTextColor euiTextColor--subdued"
+                          >
+                            1895 Yr ago
+                          </div>
+                        </div>
+                      </span>
+                    </span>
+                  </div>
+                  <div
+                    class="euiFlexItem euiFlexItem--flexGrow2"
+                  >
+                    <div
+                      class="euiText euiText--small"
+                    >
+                      in 1/1 Location
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--isMobileFullWidth"
+            >
+              <div
+                class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+              >
+                Name
+              </div>
+              <div
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
+              >
+                <button
+                  class="euiLink euiLink--primary"
+                  type="button"
+                >
+                  <a
+                    data-test-subj="monitor-page-link-bar"
+                    href="/monitor/YmFy"
+                  >
+                    Unnamed - bar
+                  </a>
+                </button>
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell"
+            >
+              <div
+                class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+              >
+                Url
+              </div>
+              <div
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
+              >
+                <button
+                  class="euiLink euiLink--text c2"
+                  type="button"
+                >
+                   
+                  <svg
+                    aria-hidden="true"
+                    class="euiIcon euiIcon--small euiIcon-isLoading"
+                    focusable="false"
+                    height="16"
+                    role="img"
+                    style="fill:subbdued"
+                    viewBox="0 0 16 16"
+                    width="16"
+                    xmlns="http://www.w3.org/2000/svg"
+                  />
+                </button>
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--hideForMobile"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignCenter euiTableCellContent--overflowingContent"
+              >
+                <span
+                  class="euiToolTipAnchor"
+                >
+                  <div
+                    class="euiText euiText--medium"
+                  >
+                    <div
+                      class="euiTextColor euiTextColor--secondary"
+                    >
+                      --
+                    </div>
+                  </div>
+                </span>
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell euiTableRowCell--isExpander"
+              style="width:24px"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
+              >
+                <button
+                  aria-label="Expand row for monitor with ID bar"
+                  class="euiButtonIcon euiButtonIcon--primary"
+                  type="button"
+                >
+                  <svg
+                    aria-hidden="true"
+                    class="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
+                    focusable="false"
+                    height="16"
+                    role="img"
+                    viewBox="0 0 16 16"
+                    width="16"
+                    xmlns="http://www.w3.org/2000/svg"
+                  />
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div
+    class="euiSpacer euiSpacer--m"
+  />
+  <div
+    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow"
+  >
+    <div
+      class="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <button
+        aria-label="A disabled pagination button indicating that there cannot be any further navigation in the monitors list."
+        class="euiButtonIcon euiButtonIcon--text"
+        data-test-subj="xpack.uptime.monitorList.prevButton"
+        disabled=""
+        type="button"
+      >
+        <svg
+          aria-hidden="true"
+          class="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
+          focusable="false"
+          height="16"
+          role="img"
+          viewBox="0 0 16 16"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        />
+      </button>
+    </div>
+    <div
+      class="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <button
+        aria-label="A disabled pagination button indicating that there cannot be any further navigation in the monitors list."
+        class="euiButtonIcon euiButtonIcon--text"
+        data-test-subj="xpack.uptime.monitorList.nextButton"
+        disabled=""
+        type="button"
+      >
+        <svg
+          aria-hidden="true"
+          class="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
+          focusable="false"
+          height="16"
+          role="img"
+          viewBox="0 0 16 16"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        />
+      </button>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`MonitorList component shallow renders the monitor list 1`] = `
+<Fragment>
+  <EuiPanel>
+    <EuiTitle
+      size="xs"
+    >
+      <h5>
+        <FormattedMessage
+          defaultMessage="Monitor status"
+          id="xpack.uptime.monitorList.monitoringStatusTitle"
+          values={Object {}}
+        />
+      </h5>
+    </EuiTitle>
+    <EuiSpacer
+      size="s"
+    />
+    <EuiBasicTable
+      aria-label="Monitor Status table with columns for Status, Name, URL, IP, Downtime History and Integrations. The table is currently displaying 2 items."
+      columns={
+        Array [
+          Object {
+            "align": "left",
+            "field": "state.monitor.status",
+            "mobileOptions": Object {
+              "fullWidth": true,
+            },
+            "name": "Status",
+            "render": [Function],
+          },
+          Object {
+            "align": "left",
+            "field": "state.monitor.name",
+            "mobileOptions": Object {
+              "fullWidth": true,
+            },
+            "name": "Name",
+            "render": [Function],
+            "sortable": true,
+          },
+          Object {
+            "align": "left",
+            "field": "state.url.full",
+            "name": "Url",
+            "render": [Function],
+          },
+          Object {
+            "align": "center",
+            "field": "histogram.points",
+            "mobileOptions": Object {
+              "show": false,
+            },
+            "name": "Downtime history",
+            "render": [Function],
+          },
+          Object {
+            "align": "right",
+            "field": "monitor_id",
+            "isExpander": true,
+            "name": "",
+            "render": [Function],
+            "sortable": true,
+            "width": "24px",
+          },
+        ]
+      }
+      hasActions={true}
+      isExpandable={true}
+      itemId="monitor_id"
+      itemIdToExpandedRowMap={Object {}}
+      items={
+        Array [
+          Object {
+            "monitor_id": "foo",
+            "state": Object {
+              "checks": Array [
+                Object {
+                  "monitor": Object {
+                    "ip": "127.0.0.1",
+                    "status": "up",
+                  },
+                  "timestamp": "124",
+                },
+                Object {
+                  "monitor": Object {
+                    "ip": "127.0.0.2",
+                    "status": "down",
+                  },
+                  "timestamp": "125",
+                },
+                Object {
+                  "monitor": Object {
+                    "ip": "127.0.0.3",
+                    "status": "down",
+                  },
+                  "timestamp": "126",
+                },
+              ],
+              "summary": Object {
+                "down": 2,
+                "up": 1,
+              },
+              "timestamp": "123",
+            },
+          },
+          Object {
+            "monitor_id": "bar",
+            "state": Object {
+              "checks": Array [
+                Object {
+                  "monitor": Object {
+                    "ip": "127.0.0.1",
+                    "status": "up",
+                  },
+                  "timestamp": "125",
+                },
+                Object {
+                  "monitor": Object {
+                    "ip": "127.0.0.2",
+                    "status": "up",
+                  },
+                  "timestamp": "126",
+                },
+              ],
+              "summary": Object {
+                "down": 0,
+                "up": 2,
+              },
+              "timestamp": "125",
+            },
+          },
+        ]
+      }
+      loading={false}
+      noItemsMessage="No uptime monitors found"
+      responsive={true}
+      tableLayout="fixed"
+    />
+    <EuiSpacer
+      size="m"
+    />
+    <EuiFlexGroup
+      responsive={false}
+    >
+      <EuiFlexItem
+        grow={false}
+      >
+        <OverviewPageLink
+          dataTestSubj="xpack.uptime.monitorList.prevButton"
+          direction="prev"
+          pagination=""
+        />
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+        <OverviewPageLink
+          dataTestSubj="xpack.uptime.monitorList.nextButton"
+          direction="next"
+          pagination=""
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiPanel>
+</Fragment>
+`;

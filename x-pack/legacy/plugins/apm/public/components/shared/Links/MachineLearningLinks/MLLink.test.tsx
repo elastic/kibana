@@ -8,28 +8,6 @@ import { Location } from 'history';
 import React from 'react';
 import { getRenderedHref } from '../../../../utils/testHelpers';
 import { MLLink } from './MLLink';
-import chrome from 'ui/chrome';
-import * as savedObjects from '../../../../services/rest/savedObjects';
-
-jest.mock('ui/kfetch');
-
-jest
-  .spyOn(chrome, 'addBasePath')
-  .mockImplementation(path => `/basepath${path}`);
-
-jest
-  .spyOn(savedObjects, 'getAPMIndexPattern')
-  .mockReturnValue(
-    Promise.resolve({ id: 'apm-index-pattern-id' } as savedObjects.ISavedObject)
-  );
-
-beforeAll(() => {
-  jest.spyOn(console, 'error').mockImplementation(() => null);
-});
-
-afterAll(() => {
-  jest.restoreAllMocks();
-});
 
 test('MLLink produces the correct URL', async () => {
   const href = await getRenderedHref(

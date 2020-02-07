@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect';
-import { KibanaFunctionalTestDefaultProviders } from '../../../../types/providers';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
-export default function({ getPageObjects, getService }: KibanaFunctionalTestDefaultProviders) {
+export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
   const PageObjects = getPageObjects(['common', 'canvas', 'security', 'spaceSelector']);
@@ -46,7 +45,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           full_name: 'test user',
         });
 
-        await PageObjects.security.logout();
+        await PageObjects.security.forceLogout();
 
         await PageObjects.security.login(
           'global_canvas_all_user',
@@ -61,15 +60,13 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         await Promise.all([
           security.role.delete('global_canvas_all_role'),
           security.user.delete('global_canvas_all_user'),
-          PageObjects.security.logout(),
+          PageObjects.security.forceLogout(),
         ]);
       });
 
       it('shows canvas navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
-        expect(navLinks).to.eql(['Canvas', 'Management']);
+        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
+        expect(navLinks).to.eql(['Canvas', 'Stack Management']);
       });
 
       it(`landing page shows "Create new workpad" button`, async () => {
@@ -87,7 +84,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       it(`allows a workpad to be created`, async () => {
         await PageObjects.common.navigateToActualUrl('canvas', 'workpad/create', {
           ensureCurrentUrl: true,
-          showLoginIfPrompted: false,
+          shouldLoginIfPrompted: false,
         });
 
         await PageObjects.canvas.expectAddElementButton();
@@ -99,7 +96,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           'workpad/workpad-1705f884-6224-47de-ba49-ca224fe6ec31',
           {
             ensureCurrentUrl: true,
-            showLoginIfPrompted: false,
+            shouldLoginIfPrompted: false,
           }
         );
 
@@ -144,10 +141,8 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       });
 
       it('shows canvas navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
-        expect(navLinks).to.eql(['Canvas', 'Management']);
+        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
+        expect(navLinks).to.eql(['Canvas', 'Stack Management']);
       });
 
       it(`landing page shows disabled "Create new workpad" button`, async () => {

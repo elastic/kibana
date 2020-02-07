@@ -8,8 +8,10 @@ import { getOr } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import React from 'react';
 import { Query } from 'react-apollo';
+import { compose } from 'redux';
+import { connect } from 'react-redux';
 
-import chrome from 'ui/chrome';
+import { IIndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns';
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import {
   GetTimelineQuery,
@@ -18,15 +20,17 @@ import {
   TimelineEdges,
   TimelineItem,
 } from '../../graphql/types';
-import { inputsModel } from '../../store';
+import { inputsModel, inputsSelectors, State } from '../../store';
+import { withKibana, WithKibanaProps } from '../../lib/kibana';
 import { createFilter } from '../helpers';
 import { QueryTemplate, QueryTemplateProps } from '../query_template';
-
+import { EventType } from '../../store/timeline/model';
 import { timelineQuery } from './index.gql_query';
 
 export interface TimelineArgs {
   events: TimelineItem[];
   id: string;
+  inspect: inputsModel.InspectQuery;
   loading: boolean;
   loadMore: (cursor: string, tieBreaker: string) => void;
   pageInfo: PageInfo;
@@ -35,22 +39,31 @@ export interface TimelineArgs {
   getUpdatedAt: () => number;
 }
 
+export interface TimelineQueryReduxProps {
+  isInspected: boolean;
+}
+
 export interface OwnProps extends QueryTemplateProps {
   children?: (args: TimelineArgs) => React.ReactNode;
+  eventType?: EventType;
+  id: string;
+  indexPattern?: IIndexPattern;
+  indexToAdd?: string[];
   limit: number;
   sortField: SortField;
   fields: string[];
 }
+type TimelineQueryProps = OwnProps & TimelineQueryReduxProps & WithKibanaProps;
 
-export class TimelineQuery extends QueryTemplate<
-  OwnProps,
+class TimelineQueryComponent extends QueryTemplate<
+  TimelineQueryProps,
   GetTimelineQuery.Query,
   GetTimelineQuery.Variables
 > {
   private updatedDate: number = Date.now();
   private memoizedTimelineEvents: (variables: string, events: TimelineEdges[]) => TimelineItem[];
 
-  constructor(props: OwnProps) {
+  constructor(props: TimelineQueryProps) {
     super(props);
     this.memoizedTimelineEvents = memoizeOne(this.getTimelineEvents);
   }
@@ -58,20 +71,34 @@ export class TimelineQuery extends QueryTemplate<
   public render() {
     const {
       children,
-      id = 'timelineQuery',
+      eventType = 'raw',
+      id,
+      indexPattern,
+      indexToAdd = [],
+      isInspected,
+      kibana,
       limit,
       fields,
       filterQuery,
       sourceId,
       sortField,
     } = this.props;
+    const defaultKibanaIndex = kibana.services.uiSettings.get<string[]>(DEFAULT_INDEX_KEY);
+    const defaultIndex =
+      indexPattern == null || (indexPattern != null && indexPattern.title === '')
+        ? [
+            ...(['all', 'raw'].includes(eventType) ? defaultKibanaIndex : []),
+            ...(['all', 'signal'].includes(eventType) ? indexToAdd : []),
+          ]
+        : indexPattern?.title.split(',') ?? [];
     const variables: GetTimelineQuery.Variables = {
       fieldRequested: fields,
       filterQuery: createFilter(filterQuery),
       sourceId,
       pagination: { limit, cursor: null, tiebreaker: null },
       sortField,
-      defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
+      defaultIndex,
+      inspect: isInspected,
     };
     return (
       <Query<GetTimelineQuery.Query, GetTimelineQuery.Variables>
@@ -113,6 +140,7 @@ export class TimelineQuery extends QueryTemplate<
           this.updatedDate = Date.now();
           return children!({
             id,
+            inspect: getOr(null, 'source.Timeline.inspect', data),
             refetch,
             loading,
             totalCount: getOr(0, 'source.Timeline.totalCount', data),
@@ -131,3 +159,19 @@ export class TimelineQuery extends QueryTemplate<
   private getTimelineEvents = (variables: string, timelineEdges: TimelineEdges[]): TimelineItem[] =>
     timelineEdges.map((e: TimelineEdges) => e.node);
 }
+
+const makeMapStateToProps = () => {
+  const getQuery = inputsSelectors.timelineQueryByIdSelector();
+  const mapStateToProps = (state: State, { id }: OwnProps) => {
+    const { isInspected } = getQuery(state, id);
+    return {
+      isInspected,
+    };
+  };
+  return mapStateToProps;
+};
+
+export const TimelineQuery = compose<React.ComponentClass<OwnProps>>(
+  connect(makeMapStateToProps),
+  withKibana
+)(TimelineQueryComponent);

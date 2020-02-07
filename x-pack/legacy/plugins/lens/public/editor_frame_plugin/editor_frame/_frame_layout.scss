@@ -1,0 +1,48 @@
+.lnsFrameLayout {
+  padding: 0;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+  flex-direction: column;
+}
+
+.lnsFrameLayout__pageContent {
+  display: flex;
+  overflow: auto;
+  flex-grow: 1;
+}
+
+.lnsFrameLayout__pageBody {
+  @include euiScrollBar;
+  min-width: $lnsPanelMinWidth + $euiSizeXL;
+  overflow: hidden;
+  // Leave out bottom padding so the suggestions scrollbar stays flush to window edge
+  // Leave out left padding so the left sidebar's focus states are visible outside of content bounds
+  // This also means needing to add same amount of margin to page content and suggestion items
+  padding: $euiSize $euiSize 0 0;
+
+  &:first-child {
+    padding-left: $euiSize;
+  }
+}
+
+.lnsFrameLayout__sidebar {
+  margin: 0;
+  flex: 1 0 18%;
+  min-width: $lnsPanelMinWidth + $euiSize;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.lnsFrameLayout__sidebar--right {
+  @include euiScrollBar;
+  min-width: $lnsPanelMinWidth + $euiSize;
+  overflow-x: hidden;
+  overflow-y: scroll;
+  padding-top: $euiSize;
+  max-height: 100%;
+}

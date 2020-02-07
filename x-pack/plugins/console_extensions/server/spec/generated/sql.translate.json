@@ -1,0 +1,12 @@
+{
+  "sql.translate": {
+    "methods": [
+      "POST",
+      "GET"
+    ],
+    "patterns": [
+      "_sql/translate"
+    ],
+    "documentation": "Translate SQL into Elasticsearch queries"
+  }
+}

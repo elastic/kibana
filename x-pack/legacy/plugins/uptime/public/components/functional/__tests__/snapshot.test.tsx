@@ -6,39 +6,18 @@
 
 import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
-import { Snapshot as SnapshotType } from '../../../../common/graphql/types';
+import { Snapshot } from '../../../../common/runtime_types';
 import { SnapshotComponent } from '../snapshot';
 
 describe('Snapshot component', () => {
-  const snapshot: SnapshotType = {
+  const snapshot: Snapshot = {
     up: 8,
     down: 2,
     total: 10,
-    histogram: [
-      { upCount: 7, downCount: 3, x: 1548697920000, x0: 1548697620000, y: 1 },
-      { upCount: 7, downCount: 3, x: 1548698220000, x0: 1548697920000, y: 1 },
-      { upCount: 7, downCount: 3, x: 1548698520000, x0: 1548698220000, y: 1 },
-      { upCount: 7, downCount: 3, x: 1548698820000, x0: 1548698520000, y: 1 },
-      { upCount: 8, downCount: 2, x: 1548699120000, x0: 1548698820000, y: 1 },
-      { upCount: 8, downCount: 2, x: 1548699420000, x0: 1548699120000, y: 1 },
-      { upCount: 8, downCount: 2, x: 1548699720000, x0: 1548699420000, y: 1 },
-      { upCount: 8, downCount: 2, x: 1548700020000, x0: 1548699720000, y: 1 },
-      { upCount: 8, downCount: 2, x: 1548700320000, x0: 1548700020000, y: 1 },
-      { upCount: 8, downCount: 2, x: 1548700620000, x0: 1548700320000, y: 1 },
-      { upCount: 8, downCount: 2, x: 1548700920000, x0: 1548700620000, y: 1 },
-    ],
   };
 
   it('renders without errors', () => {
-    const wrapper = shallowWithIntl(
-      <SnapshotComponent
-        absoluteStartDate={1548697920000}
-        absoluteEndDate={1548700920000}
-        colors={{ danger: '#F050F0', mean: '#001100', range: '#FF00FF', success: '#000000' }}
-        data={{ snapshot }}
-        loading={false}
-      />
-    );
+    const wrapper = shallowWithIntl(<SnapshotComponent count={snapshot} loading={false} />);
     expect(wrapper).toMatchSnapshot();
   });
 });

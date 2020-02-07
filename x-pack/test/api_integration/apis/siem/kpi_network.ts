@@ -7,9 +7,9 @@
 import expect from '@kbn/expect';
 import { kpiNetworkQuery } from '../../../../legacy/plugins/siem/public/containers/kpi_network/index.gql_query';
 import { GetKpiNetworkQuery } from '../../../../legacy/plugins/siem/public/graphql/types';
-import { KbnTestProvider } from './types';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-const kpiNetworkTests: KbnTestProvider = ({ getService }) => {
+export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const client = getService('siemGraphQLClient');
   describe('Kpi Network', () => {
@@ -21,7 +21,7 @@ const kpiNetworkTests: KbnTestProvider = ({ getService }) => {
       const TO = new Date('3000-01-01T00:00:00.000Z').valueOf();
       const expectedResult = {
         __typename: 'KpiNetworkData',
-        networkEvents: 6157,
+        networkEvents: 6158,
         uniqueFlowId: 712,
         uniqueSourcePrivateIps: 8,
         uniqueSourcePrivateIpsHistogram: [
@@ -85,6 +85,7 @@ const kpiNetworkTests: KbnTestProvider = ({ getService }) => {
                 from: FROM,
               },
               defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+              inspect: false,
             },
           })
           .then(resp => {
@@ -102,7 +103,7 @@ const kpiNetworkTests: KbnTestProvider = ({ getService }) => {
       const TO = new Date('3000-01-01T00:00:00.000Z').valueOf();
       const expectedResult = {
         __typename: 'KpiNetworkData',
-        networkEvents: 6157,
+        networkEvents: 6158,
         uniqueFlowId: 712,
         uniqueSourcePrivateIps: 8,
         uniqueSourcePrivateIpsHistogram: [
@@ -165,6 +166,7 @@ const kpiNetworkTests: KbnTestProvider = ({ getService }) => {
                 from: FROM,
               },
               defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+              inspect: false,
             },
           })
           .then(resp => {
@@ -174,7 +176,4 @@ const kpiNetworkTests: KbnTestProvider = ({ getService }) => {
       });
     });
   });
-};
-
-// eslint-disable-next-line import/no-default-export
-export default kpiNetworkTests;
+}

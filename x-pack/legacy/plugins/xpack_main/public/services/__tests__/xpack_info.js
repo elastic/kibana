@@ -5,61 +5,41 @@
  */
 
 import expect from '@kbn/expect';
-import ngMock from 'ng_mock';
-import sinon from 'sinon';
-import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
-import { mockWindow } from './_mock_window';
+import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 
 const XPACK_INFO_KEY = 'xpackMain.info';
 
 describe('xpack_info service', () => {
-  let xpackInfo;
-
-  beforeEach(ngMock.module('kibana', () => {
-    sinon.stub(sessionStorage, 'getItem')
-      .callsFake(mockWindow.sessionStorage.getItem);
-    sinon.stub(sessionStorage, 'setItem')
-      .callsFake(mockWindow.sessionStorage.setItem);
-    sinon.stub(sessionStorage, 'removeItem')
-      .callsFake(mockWindow.sessionStorage.removeItem);
-  }));
-
   afterEach(() => {
-    sessionStorage.getItem.restore();
-    sessionStorage.setItem.restore();
-    sessionStorage.removeItem.restore();
+    sessionStorage.clear();
   });
 
-  beforeEach(ngMock.inject((Private) => {
-    xpackInfo = Private(XPackInfoProvider);
-  }));
-
-  it ('updates the stored xpack info', () => {
+  it('updates the stored xpack info', () => {
     const updatedXPackInfo = {
       foo: {
-        bar: 17
-      }
+        bar: 17,
+      },
     };
     xpackInfo.setAll(updatedXPackInfo);
-    expect(mockWindow.sessionStorage.getItem(XPACK_INFO_KEY)).to.be(JSON.stringify(updatedXPackInfo));
+    expect(sessionStorage.getItem(XPACK_INFO_KEY)).to.be(JSON.stringify(updatedXPackInfo));
     expect(xpackInfo.get('foo.bar')).to.be(17);
   });
 
-  it ('clears the stored xpack info', () => {
+  it('clears the stored xpack info', () => {
     const updatedXPackInfo = {
       foo: {
-        bar: 17
-      }
+        bar: 17,
+      },
     };
     xpackInfo.setAll(updatedXPackInfo);
-    expect(xpackInfo.get('foo.bar')).not.to.be(undefined);
+    expect(xpackInfo.get('foo.bar')).not.to.be(null);
 
     xpackInfo.clear();
-    expect(mockWindow.sessionStorage.getItem(XPACK_INFO_KEY)).to.be(undefined);
+    expect(sessionStorage.getItem(XPACK_INFO_KEY)).to.be(null);
     expect(xpackInfo.get('foo.bar')).to.be(undefined);
   });
 
-  it ('defaults to the provided default value if the requested path is not found', () => {
+  it('defaults to the provided default value if the requested path is not found', () => {
     xpackInfo.setAll({ foo: 'bar' });
     expect(xpackInfo.get('foo.baz', 17)).to.be(17);
   });

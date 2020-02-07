@@ -18,8 +18,8 @@
  */
 
 import Boom from 'boom';
-import { SavedObject, SavedObjectsClientContract } from '../';
-import { ImportError } from './types';
+import { SavedObject, SavedObjectsClientContract } from '../types';
+import { SavedObjectsImportError } from './types';
 
 const REF_TYPES_TO_VLIDATE = ['index-pattern', 'search'];
 
@@ -29,7 +29,8 @@ function filterReferencesToValidate({ type }: { type: string }) {
 
 export async function getNonExistingReferenceAsKeys(
   savedObjects: SavedObject[],
-  savedObjectsClient: SavedObjectsClientContract
+  savedObjectsClient: SavedObjectsClientContract,
+  namespace?: string
 ) {
   const collector = new Map();
   // Collect all references within objects
@@ -50,7 +51,7 @@ export async function getNonExistingReferenceAsKeys(
 
   // Fetch references to see if they exist
   const bulkGetOpts = Array.from(collector.values()).map(obj => ({ ...obj, fields: ['id'] }));
-  const bulkGetResponse = await savedObjectsClient.bulkGet(bulkGetOpts);
+  const bulkGetResponse = await savedObjectsClient.bulkGet(bulkGetOpts, { namespace });
 
   // Error handling
   const erroredObjects = bulkGetResponse.saved_objects.filter(
@@ -77,12 +78,14 @@ export async function getNonExistingReferenceAsKeys(
 
 export async function validateReferences(
   savedObjects: SavedObject[],
-  savedObjectsClient: SavedObjectsClientContract
+  savedObjectsClient: SavedObjectsClientContract,
+  namespace?: string
 ) {
-  const errorMap: { [key: string]: ImportError } = {};
+  const errorMap: { [key: string]: SavedObjectsImportError } = {};
   const nonExistingReferenceKeys = await getNonExistingReferenceAsKeys(
     savedObjects,
-    savedObjectsClient
+    savedObjectsClient,
+    namespace
   );
 
   // Filter out objects with missing references, add to error object

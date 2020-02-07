@@ -1,0 +1,17 @@
+{
+  "transform.get_transform": {
+    "url_params": {
+      "from": 0,
+      "size": 0,
+      "allow_no_match": "__flag__"
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_transform/{transform_id}",
+      "_transform"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/get-transform.html"
+  }
+}

@@ -17,4 +17,5 @@
  * under the License.
  */
 
-export { KibanaMigrator } from './kibana';
+export { KibanaMigrator, IKibanaMigrator } from './kibana';
+export { SavedObjectMigrationFn, SavedObjectMigrationMap } from './types';

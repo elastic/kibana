@@ -49,9 +49,18 @@ export function _downloadSingle(settings, logger, sourceUrl) {
 
   if (/^file/.test(urlInfo.protocol)) {
     _checkFilePathDeprecation(sourceUrl, logger);
-    downloadPromise = downloadLocalFile(logger, _getFilePath(urlInfo.path, sourceUrl), settings.tempArchiveFile);
+    downloadPromise = downloadLocalFile(
+      logger,
+      _getFilePath(urlInfo.path, sourceUrl),
+      settings.tempArchiveFile
+    );
   } else if (/^https?/.test(urlInfo.protocol)) {
-    downloadPromise = downloadHttpFile(logger, sourceUrl, settings.tempArchiveFile, settings.timeout);
+    downloadPromise = downloadHttpFile(
+      logger,
+      sourceUrl,
+      settings.tempArchiveFile,
+      settings.timeout
+    );
   } else {
     downloadPromise = Promise.reject(new UnsupportedProtocolError());
   }
@@ -71,15 +80,14 @@ export function download(settings, logger) {
 
     logger.log(`Attempting to transfer from ${sourceUrl}`);
 
-    return _downloadSingle(settings, logger, sourceUrl)
-      .catch((err) => {
-        const isUnsupportedProtocol = err instanceof UnsupportedProtocolError;
-        const isDownloadResourceNotFound = err.message === 'ENOTFOUND';
-        if (isUnsupportedProtocol || isDownloadResourceNotFound) {
-          return tryNext();
-        }
-        throw (err);
-      });
+    return _downloadSingle(settings, logger, sourceUrl).catch(err => {
+      const isUnsupportedProtocol = err instanceof UnsupportedProtocolError;
+      const isDownloadResourceNotFound = err.message === 'ENOTFOUND';
+      if (isUnsupportedProtocol || isDownloadResourceNotFound) {
+        return tryNext();
+      }
+      throw err;
+    });
   }
 
   return tryNext();

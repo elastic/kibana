@@ -19,18 +19,11 @@
 
 import React, { Fragment } from 'react';
 
-import {
-  EuiFormRow,
-  EuiSelect,
-} from '@elastic/eui';
+import { EuiFormRow, EuiSelect } from '@elastic/eui';
 
-import {
-  DefaultFormatEditor
-} from '../default';
+import { DefaultFormatEditor } from '../default';
 
-import {
-  FormatEditorSamples
-} from '../../samples';
+import { FormatEditorSamples } from '../../samples';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -44,7 +37,8 @@ export class StringFormatEditor extends DefaultFormatEditor {
       'STAY CALM!',
       'com.organizations.project.ClassName',
       'hostname.net',
-      'SGVsbG8gd29ybGQ='
+      'SGVsbG8gd29ybGQ=',
+      '%EC%95%88%EB%85%95%20%ED%82%A4%EB%B0%94%EB%82%98',
     ];
   }
 
@@ -55,7 +49,12 @@ export class StringFormatEditor extends DefaultFormatEditor {
     return (
       <Fragment>
         <EuiFormRow
-          label={<FormattedMessage id="common.ui.fieldEditor.string.transformLabel" defaultMessage="Transform"/>}
+          label={
+            <FormattedMessage
+              id="common.ui.fieldEditor.string.transformLabel"
+              defaultMessage="Transform"
+            />
+          }
           isInvalid={!!error}
           error={error}
         >
@@ -68,15 +67,13 @@ export class StringFormatEditor extends DefaultFormatEditor {
                 text: option.text,
               };
             })}
-            onChange={(e) => {
+            onChange={e => {
               this.onChange({ transform: e.target.value });
             }}
             isInvalid={!!error}
           />
         </EuiFormRow>
-        <FormatEditorSamples
-          samples={samples}
-        />
+        <FormatEditorSamples samples={samples} />
       </Fragment>
     );
   }

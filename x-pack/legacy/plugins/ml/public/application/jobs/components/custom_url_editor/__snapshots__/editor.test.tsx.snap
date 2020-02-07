@@ -1,0 +1,1103 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CustomUrlEditor renders the editor for a dashboard type URL with a label 1`] = `
+<Fragment>
+  <EuiTitle
+    size="xs"
+  >
+    <h4>
+      <FormattedMessage
+        defaultMessage="Create new custom URL"
+        id="xpack.ml.customUrlsEditor.createNewCustomUrlTitle"
+        values={Object {}}
+      />
+    </h4>
+  </EuiTitle>
+  <EuiSpacer
+    size="m"
+  />
+  <EuiForm
+    className="ml-edit-url-form"
+  >
+    <EuiFormRow
+      className="url-label"
+      compressed={true}
+      describedByIds={Array []}
+      display="row"
+      error={Array []}
+      fullWidth={false}
+      hasChildLabel={true}
+      hasEmptyLabelSpace={false}
+      isInvalid={false}
+      label={
+        <FormattedMessage
+          defaultMessage="Label"
+          id="xpack.ml.customUrlsEditor.labelLabel"
+          values={Object {}}
+        />
+      }
+      labelType="label"
+    >
+      <EuiFieldText
+        compressed={true}
+        data-test-subj="mlJobCustomUrlLabelInput"
+        isInvalid={false}
+        name="label"
+        onChange={[Function]}
+        value="Open Dashboard 1"
+      />
+    </EuiFormRow>
+    <EuiFormRow
+      compressed={true}
+      describedByIds={Array []}
+      display="row"
+      fullWidth={false}
+      hasChildLabel={true}
+      hasEmptyLabelSpace={false}
+      label={
+        <FormattedMessage
+          defaultMessage="Link to"
+          id="xpack.ml.customUrlsEditor.linkToLabel"
+          values={Object {}}
+        />
+      }
+      labelType="label"
+    >
+      <EuiRadioGroup
+        className="url-link-to-radio"
+        idSelected="KIBANA_DASHBOARD"
+        onChange={[Function]}
+        options={
+          Array [
+            Object {
+              "id": "KIBANA_DASHBOARD",
+              "label": "Kibana dashboard",
+            },
+            Object {
+              "id": "KIBANA_DISCOVER",
+              "label": "Discover",
+            },
+            Object {
+              "id": "OTHER",
+              "label": "Other",
+            },
+          ]
+        }
+      />
+    </EuiFormRow>
+    <EuiFormRow
+      compressed={true}
+      describedByIds={Array []}
+      display="row"
+      fullWidth={false}
+      hasChildLabel={true}
+      hasEmptyLabelSpace={false}
+      label={
+        <FormattedMessage
+          defaultMessage="Dashboard name"
+          id="xpack.ml.customUrlsEditor.dashboardNameLabel"
+          values={Object {}}
+        />
+      }
+      labelType="label"
+    >
+      <EuiSelect
+        compressed={true}
+        onChange={[Function]}
+        options={
+          Array [
+            Object {
+              "text": "Dashboard 1",
+              "value": "dash1",
+            },
+            Object {
+              "text": "Dashboard 2",
+              "value": "dash2",
+            },
+          ]
+        }
+        value="dash1"
+      />
+    </EuiFormRow>
+    <EuiFormRow
+      describedByIds={Array []}
+      display="row"
+      fullWidth={false}
+      hasChildLabel={true}
+      hasEmptyLabelSpace={false}
+      label={
+        <FormattedMessage
+          defaultMessage="Query entities"
+          id="xpack.ml.customUrlsEditor.queryEntitiesLabel"
+          values={Object {}}
+        />
+      }
+      labelType="label"
+    >
+      <EuiComboBox
+        compressed={false}
+        fullWidth={false}
+        isClearable={true}
+        onChange={[Function]}
+        options={
+          Array [
+            Object {
+              "label": "airline",
+            },
+          ]
+        }
+        placeholder="Select entities"
+        selectedOptions={Array []}
+        singleSelection={false}
+      />
+    </EuiFormRow>
+    <EuiSpacer
+      size="m"
+    />
+    <EuiFlexGroup>
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiFormRow
+          className="url-time-range"
+          compressed={true}
+          describedByIds={Array []}
+          display="row"
+          fullWidth={false}
+          hasChildLabel={true}
+          hasEmptyLabelSpace={false}
+          label={
+            <FormattedMessage
+              defaultMessage="Time range"
+              id="xpack.ml.customUrlsEditor.timeRangeLabel"
+              values={Object {}}
+            />
+          }
+          labelType="label"
+        >
+          <EuiSelect
+            compressed={true}
+            onChange={[Function]}
+            options={
+              Array [
+                Object {
+                  "text": "auto",
+                  "value": "auto",
+                },
+                Object {
+                  "text": "interval",
+                  "value": "interval",
+                },
+              ]
+            }
+            value="auto"
+          />
+        </EuiFormRow>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiForm>
+</Fragment>
+`;
+
+exports[`CustomUrlEditor renders the editor for a discover type URL with an entity and empty time range interval 1`] = `
+<Fragment>
+  <EuiTitle
+    size="xs"
+  >
+    <h4>
+      <FormattedMessage
+        defaultMessage="Create new custom URL"
+        id="xpack.ml.customUrlsEditor.createNewCustomUrlTitle"
+        values={Object {}}
+      />
+    </h4>
+  </EuiTitle>
+  <EuiSpacer
+    size="m"
+  />
+  <EuiForm
+    className="ml-edit-url-form"
+  >
+    <EuiFormRow
+      className="url-label"
+      compressed={true}
+      describedByIds={Array []}
+      display="row"
+      error={Array []}
+      fullWidth={false}
+      hasChildLabel={true}
+      hasEmptyLabelSpace={false}
+      isInvalid={false}
+      label={
+        <FormattedMessage
+          defaultMessage="Label"
+          id="xpack.ml.customUrlsEditor.labelLabel"
+          values={Object {}}
+        />
+      }
+      labelType="label"
+    >
+      <EuiFieldText
+        compressed={true}
+        data-test-subj="mlJobCustomUrlLabelInput"
+        isInvalid={false}
+        name="label"
+        onChange={[Function]}
+        value="Open Discover"
+      />
+    </EuiFormRow>
+    <EuiFormRow
+      compressed={true}
+      describedByIds={Array []}
+      display="row"
+      fullWidth={false}
+      hasChildLabel={true}
+      hasEmptyLabelSpace={false}
+      label={
+        <FormattedMessage
+          defaultMessage="Link to"
+          id="xpack.ml.customUrlsEditor.linkToLabel"
+          values={Object {}}
+        />
+      }
+      labelType="label"
+    >
+      <EuiRadioGroup
+        className="url-link-to-radio"
+        idSelected="KIBANA_DISCOVER"
+        onChange={[Function]}
+        options={
+          Array [
+            Object {
+              "id": "KIBANA_DASHBOARD",
+              "label": "Kibana dashboard",
+            },
+            Object {
+              "id": "KIBANA_DISCOVER",
+              "label": "Discover",
+            },
+            Object {
+              "id": "OTHER",
+              "label": "Other",
+            },
+          ]
+        }
+      />
+    </EuiFormRow>
+    <EuiFormRow
+      compressed={true}
+      describedByIds={Array []}
+      display="row"
+      fullWidth={false}
+      hasChildLabel={true}
+      hasEmptyLabelSpace={false}
+      label={
+        <FormattedMessage
+          defaultMessage="Index pattern"
+          id="xpack.ml.customUrlsEditor.indexPatternLabel"
+          values={Object {}}
+        />
+      }
+      labelType="label"
+    >
+      <EuiSelect
+        compressed={true}
+        onChange={[Function]}
+        options={
+          Array [
+            Object {
+              "text": "Index Pattern 1",
+              "value": "pattern1",
+            },
+            Object {
+              "text": "Index Pattern 2",
+              "value": "pattern2",
+            },
+          ]
+        }
+        value="pattern1"
+      />
+    </EuiFormRow>
+    <EuiFormRow
+      describedByIds={Array []}
+      display="row"
+      fullWidth={false}
+      hasChildLabel={true}
+      hasEmptyLabelSpace={false}
+      label={
+        <FormattedMessage
+          defaultMessage="Query entities"
+          id="xpack.ml.customUrlsEditor.queryEntitiesLabel"
+          values={Object {}}
+        />
+      }
+      labelType="label"
+    >
+      <EuiComboBox
+        compressed={false}
+        fullWidth={false}
+        isClearable={true}
+        onChange={[Function]}
+        options={
+          Array [
+            Object {
+              "label": "airline",
+            },
+          ]
+        }
+        placeholder="Select entities"
+        selectedOptions={
+          Array [
+            Object {
+              "label": "airline",
+            },
+          ]
+        }
+        singleSelection={false}
+      />
+    </EuiFormRow>
+    <EuiSpacer
+      size="m"
+    />
+    <EuiFlexGroup>
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiFormRow
+          className="url-time-range"
+          compressed={true}
+          describedByIds={Array []}
+          display="row"
+          fullWidth={false}
+          hasChildLabel={true}
+          hasEmptyLabelSpace={false}
+          label={
+            <FormattedMessage
+              defaultMessage="Time range"
+              id="xpack.ml.customUrlsEditor.timeRangeLabel"
+              values={Object {}}
+            />
+          }
+          labelType="label"
+        >
+          <EuiSelect
+            compressed={true}
+            onChange={[Function]}
+            options={
+              Array [
+                Object {
+                  "text": "auto",
+                  "value": "auto",
+                },
+                Object {
+                  "text": "interval",
+                  "value": "interval",
+                },
+              ]
+            }
+            value="interval"
+          />
+        </EuiFormRow>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiFormRow
+          className="url-time-range"
+          compressed={true}
+          describedByIds={Array []}
+          display="row"
+          error={
+            Array [
+              "Invalid interval format",
+            ]
+          }
+          fullWidth={false}
+          hasChildLabel={true}
+          hasEmptyLabelSpace={false}
+          isInvalid={true}
+          label={
+            <FormattedMessage
+              defaultMessage="Interval"
+              id="xpack.ml.customUrlsEditor.intervalLabel"
+              values={Object {}}
+            />
+          }
+          labelType="label"
+        >
+          <EuiFieldText
+            compressed={true}
+            isInvalid={true}
+            onChange={[Function]}
+            value=""
+          />
+        </EuiFormRow>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiForm>
+</Fragment>
+`;
+
+exports[`CustomUrlEditor renders the editor for a discover type URL with valid time range interval 1`] = `
+<Fragment>
+  <EuiTitle
+    size="xs"
+  >
+    <h4>
+      <FormattedMessage
+        defaultMessage="Create new custom URL"
+        id="xpack.ml.customUrlsEditor.createNewCustomUrlTitle"
+        values={Object {}}
+      />
+    </h4>
+  </EuiTitle>
+  <EuiSpacer
+    size="m"
+  />
+  <EuiForm
+    className="ml-edit-url-form"
+  >
+    <EuiFormRow
+      className="url-label"
+      compressed={true}
+      describedByIds={Array []}
+      display="row"
+      error={Array []}
+      fullWidth={false}
+      hasChildLabel={true}
+      hasEmptyLabelSpace={false}
+      isInvalid={false}
+      label={
+        <FormattedMessage
+          defaultMessage="Label"
+          id="xpack.ml.customUrlsEditor.labelLabel"
+          values={Object {}}
+        />
+      }
+      labelType="label"
+    >
+      <EuiFieldText
+        compressed={true}
+        data-test-subj="mlJobCustomUrlLabelInput"
+        isInvalid={false}
+        name="label"
+        onChange={[Function]}
+        value="Open Discover"
+      />
+    </EuiFormRow>
+    <EuiFormRow
+      compressed={true}
+      describedByIds={Array []}
+      display="row"
+      fullWidth={false}
+      hasChildLabel={true}
+      hasEmptyLabelSpace={false}
+      label={
+        <FormattedMessage
+          defaultMessage="Link to"
+          id="xpack.ml.customUrlsEditor.linkToLabel"
+          values={Object {}}
+        />
+      }
+      labelType="label"
+    >
+      <EuiRadioGroup
+        className="url-link-to-radio"
+        idSelected="KIBANA_DISCOVER"
+        onChange={[Function]}
+        options={
+          Array [
+            Object {
+              "id": "KIBANA_DASHBOARD",
+              "label": "Kibana dashboard",
+            },
+            Object {
+              "id": "KIBANA_DISCOVER",
+              "label": "Discover",
+            },
+            Object {
+              "id": "OTHER",
+              "label": "Other",
+            },
+          ]
+        }
+      />
+    </EuiFormRow>
+    <EuiFormRow
+      compressed={true}
+      describedByIds={Array []}
+      display="row"
+      fullWidth={false}
+      hasChildLabel={true}
+      hasEmptyLabelSpace={false}
+      label={
+        <FormattedMessage
+          defaultMessage="Index pattern"
+          id="xpack.ml.customUrlsEditor.indexPatternLabel"
+          values={Object {}}
+        />
+      }
+      labelType="label"
+    >
+      <EuiSelect
+        compressed={true}
+        onChange={[Function]}
+        options={
+          Array [
+            Object {
+              "text": "Index Pattern 1",
+              "value": "pattern1",
+            },
+            Object {
+              "text": "Index Pattern 2",
+              "value": "pattern2",
+            },
+          ]
+        }
+        value="pattern1"
+      />
+    </EuiFormRow>
+    <EuiFormRow
+      describedByIds={Array []}
+      display="row"
+      fullWidth={false}
+      hasChildLabel={true}
+      hasEmptyLabelSpace={false}
+      label={
+        <FormattedMessage
+          defaultMessage="Query entities"
+          id="xpack.ml.customUrlsEditor.queryEntitiesLabel"
+          values={Object {}}
+        />
+      }
+      labelType="label"
+    >
+      <EuiComboBox
+        compressed={false}
+        fullWidth={false}
+        isClearable={true}
+        onChange={[Function]}
+        options={
+          Array [
+            Object {
+              "label": "airline",
+            },
+          ]
+        }
+        placeholder="Select entities"
+        selectedOptions={
+          Array [
+            Object {
+              "label": "airline",
+            },
+          ]
+        }
+        singleSelection={false}
+      />
+    </EuiFormRow>
+    <EuiSpacer
+      size="m"
+    />
+    <EuiFlexGroup>
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiFormRow
+          className="url-time-range"
+          compressed={true}
+          describedByIds={Array []}
+          display="row"
+          fullWidth={false}
+          hasChildLabel={true}
+          hasEmptyLabelSpace={false}
+          label={
+            <FormattedMessage
+              defaultMessage="Time range"
+              id="xpack.ml.customUrlsEditor.timeRangeLabel"
+              values={Object {}}
+            />
+          }
+          labelType="label"
+        >
+          <EuiSelect
+            compressed={true}
+            onChange={[Function]}
+            options={
+              Array [
+                Object {
+                  "text": "auto",
+                  "value": "auto",
+                },
+                Object {
+                  "text": "interval",
+                  "value": "interval",
+                },
+              ]
+            }
+            value="interval"
+          />
+        </EuiFormRow>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiFormRow
+          className="url-time-range"
+          compressed={true}
+          describedByIds={Array []}
+          display="row"
+          error={Array []}
+          fullWidth={false}
+          hasChildLabel={true}
+          hasEmptyLabelSpace={false}
+          isInvalid={false}
+          label={
+            <FormattedMessage
+              defaultMessage="Interval"
+              id="xpack.ml.customUrlsEditor.intervalLabel"
+              values={Object {}}
+            />
+          }
+          labelType="label"
+        >
+          <EuiFieldText
+            compressed={true}
+            isInvalid={false}
+            onChange={[Function]}
+            value="1h"
+          />
+        </EuiFormRow>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiForm>
+</Fragment>
+`;
+
+exports[`CustomUrlEditor renders the editor for a new dashboard type URL with no label 1`] = `
+<Fragment>
+  <EuiTitle
+    size="xs"
+  >
+    <h4>
+      <FormattedMessage
+        defaultMessage="Create new custom URL"
+        id="xpack.ml.customUrlsEditor.createNewCustomUrlTitle"
+        values={Object {}}
+      />
+    </h4>
+  </EuiTitle>
+  <EuiSpacer
+    size="m"
+  />
+  <EuiForm
+    className="ml-edit-url-form"
+  >
+    <EuiFormRow
+      className="url-label"
+      compressed={true}
+      describedByIds={Array []}
+      display="row"
+      error={
+        Array [
+          "A unique label must be supplied",
+        ]
+      }
+      fullWidth={false}
+      hasChildLabel={true}
+      hasEmptyLabelSpace={false}
+      isInvalid={true}
+      label={
+        <FormattedMessage
+          defaultMessage="Label"
+          id="xpack.ml.customUrlsEditor.labelLabel"
+          values={Object {}}
+        />
+      }
+      labelType="label"
+    >
+      <EuiFieldText
+        compressed={true}
+        data-test-subj="mlJobCustomUrlLabelInput"
+        isInvalid={true}
+        name="label"
+        onChange={[Function]}
+        value=""
+      />
+    </EuiFormRow>
+    <EuiFormRow
+      compressed={true}
+      describedByIds={Array []}
+      display="row"
+      fullWidth={false}
+      hasChildLabel={true}
+      hasEmptyLabelSpace={false}
+      label={
+        <FormattedMessage
+          defaultMessage="Link to"
+          id="xpack.ml.customUrlsEditor.linkToLabel"
+          values={Object {}}
+        />
+      }
+      labelType="label"
+    >
+      <EuiRadioGroup
+        className="url-link-to-radio"
+        idSelected="KIBANA_DASHBOARD"
+        onChange={[Function]}
+        options={
+          Array [
+            Object {
+              "id": "KIBANA_DASHBOARD",
+              "label": "Kibana dashboard",
+            },
+            Object {
+              "id": "KIBANA_DISCOVER",
+              "label": "Discover",
+            },
+            Object {
+              "id": "OTHER",
+              "label": "Other",
+            },
+          ]
+        }
+      />
+    </EuiFormRow>
+    <EuiFormRow
+      compressed={true}
+      describedByIds={Array []}
+      display="row"
+      fullWidth={false}
+      hasChildLabel={true}
+      hasEmptyLabelSpace={false}
+      label={
+        <FormattedMessage
+          defaultMessage="Dashboard name"
+          id="xpack.ml.customUrlsEditor.dashboardNameLabel"
+          values={Object {}}
+        />
+      }
+      labelType="label"
+    >
+      <EuiSelect
+        compressed={true}
+        onChange={[Function]}
+        options={
+          Array [
+            Object {
+              "text": "Dashboard 1",
+              "value": "dash1",
+            },
+            Object {
+              "text": "Dashboard 2",
+              "value": "dash2",
+            },
+          ]
+        }
+        value="dash1"
+      />
+    </EuiFormRow>
+    <EuiFormRow
+      describedByIds={Array []}
+      display="row"
+      fullWidth={false}
+      hasChildLabel={true}
+      hasEmptyLabelSpace={false}
+      label={
+        <FormattedMessage
+          defaultMessage="Query entities"
+          id="xpack.ml.customUrlsEditor.queryEntitiesLabel"
+          values={Object {}}
+        />
+      }
+      labelType="label"
+    >
+      <EuiComboBox
+        compressed={false}
+        fullWidth={false}
+        isClearable={true}
+        onChange={[Function]}
+        options={
+          Array [
+            Object {
+              "label": "airline",
+            },
+          ]
+        }
+        placeholder="Select entities"
+        selectedOptions={Array []}
+        singleSelection={false}
+      />
+    </EuiFormRow>
+    <EuiSpacer
+      size="m"
+    />
+    <EuiFlexGroup>
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiFormRow
+          className="url-time-range"
+          compressed={true}
+          describedByIds={Array []}
+          display="row"
+          fullWidth={false}
+          hasChildLabel={true}
+          hasEmptyLabelSpace={false}
+          label={
+            <FormattedMessage
+              defaultMessage="Time range"
+              id="xpack.ml.customUrlsEditor.timeRangeLabel"
+              values={Object {}}
+            />
+          }
+          labelType="label"
+        >
+          <EuiSelect
+            compressed={true}
+            onChange={[Function]}
+            options={
+              Array [
+                Object {
+                  "text": "auto",
+                  "value": "auto",
+                },
+                Object {
+                  "text": "interval",
+                  "value": "interval",
+                },
+              ]
+            }
+            value="auto"
+          />
+        </EuiFormRow>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiForm>
+</Fragment>
+`;
+
+exports[`CustomUrlEditor renders the editor for other type of URL with duplicate label 1`] = `
+<Fragment>
+  <EuiTitle
+    size="xs"
+  >
+    <h4>
+      <FormattedMessage
+        defaultMessage="Create new custom URL"
+        id="xpack.ml.customUrlsEditor.createNewCustomUrlTitle"
+        values={Object {}}
+      />
+    </h4>
+  </EuiTitle>
+  <EuiSpacer
+    size="m"
+  />
+  <EuiForm
+    className="ml-edit-url-form"
+  >
+    <EuiFormRow
+      className="url-label"
+      compressed={true}
+      describedByIds={Array []}
+      display="row"
+      error={
+        Array [
+          "A unique label must be supplied",
+        ]
+      }
+      fullWidth={false}
+      hasChildLabel={true}
+      hasEmptyLabelSpace={false}
+      isInvalid={true}
+      label={
+        <FormattedMessage
+          defaultMessage="Label"
+          id="xpack.ml.customUrlsEditor.labelLabel"
+          values={Object {}}
+        />
+      }
+      labelType="label"
+    >
+      <EuiFieldText
+        compressed={true}
+        data-test-subj="mlJobCustomUrlLabelInput"
+        isInvalid={true}
+        name="label"
+        onChange={[Function]}
+        value="Show airline"
+      />
+    </EuiFormRow>
+    <EuiFormRow
+      compressed={true}
+      describedByIds={Array []}
+      display="row"
+      fullWidth={false}
+      hasChildLabel={true}
+      hasEmptyLabelSpace={false}
+      label={
+        <FormattedMessage
+          defaultMessage="Link to"
+          id="xpack.ml.customUrlsEditor.linkToLabel"
+          values={Object {}}
+        />
+      }
+      labelType="label"
+    >
+      <EuiRadioGroup
+        className="url-link-to-radio"
+        idSelected="OTHER"
+        onChange={[Function]}
+        options={
+          Array [
+            Object {
+              "id": "KIBANA_DASHBOARD",
+              "label": "Kibana dashboard",
+            },
+            Object {
+              "id": "KIBANA_DISCOVER",
+              "label": "Discover",
+            },
+            Object {
+              "id": "OTHER",
+              "label": "Other",
+            },
+          ]
+        }
+      />
+    </EuiFormRow>
+    <EuiFormRow
+      compressed={true}
+      describedByIds={Array []}
+      display="row"
+      fullWidth={true}
+      hasChildLabel={true}
+      hasEmptyLabelSpace={false}
+      label={
+        <FormattedMessage
+          defaultMessage="URL"
+          id="xpack.ml.customUrlsEditor.urlLabel"
+          values={Object {}}
+        />
+      }
+      labelType="label"
+    >
+      <EuiTextArea
+        compressed={true}
+        fullWidth={true}
+        onChange={[Function]}
+        rows={2}
+        value="https://www.google.co.uk/search?q=airline+code+$airline$"
+      />
+    </EuiFormRow>
+  </EuiForm>
+</Fragment>
+`;
+
+exports[`CustomUrlEditor renders the editor for other type of URL with unique label 1`] = `
+<Fragment>
+  <EuiTitle
+    size="xs"
+  >
+    <h4>
+      <FormattedMessage
+        defaultMessage="Create new custom URL"
+        id="xpack.ml.customUrlsEditor.createNewCustomUrlTitle"
+        values={Object {}}
+      />
+    </h4>
+  </EuiTitle>
+  <EuiSpacer
+    size="m"
+  />
+  <EuiForm
+    className="ml-edit-url-form"
+  >
+    <EuiFormRow
+      className="url-label"
+      compressed={true}
+      describedByIds={Array []}
+      display="row"
+      error={Array []}
+      fullWidth={false}
+      hasChildLabel={true}
+      hasEmptyLabelSpace={false}
+      isInvalid={false}
+      label={
+        <FormattedMessage
+          defaultMessage="Label"
+          id="xpack.ml.customUrlsEditor.labelLabel"
+          values={Object {}}
+        />
+      }
+      labelType="label"
+    >
+      <EuiFieldText
+        compressed={true}
+        data-test-subj="mlJobCustomUrlLabelInput"
+        isInvalid={false}
+        name="label"
+        onChange={[Function]}
+        value="View airline"
+      />
+    </EuiFormRow>
+    <EuiFormRow
+      compressed={true}
+      describedByIds={Array []}
+      display="row"
+      fullWidth={false}
+      hasChildLabel={true}
+      hasEmptyLabelSpace={false}
+      label={
+        <FormattedMessage
+          defaultMessage="Link to"
+          id="xpack.ml.customUrlsEditor.linkToLabel"
+          values={Object {}}
+        />
+      }
+      labelType="label"
+    >
+      <EuiRadioGroup
+        className="url-link-to-radio"
+        idSelected="OTHER"
+        onChange={[Function]}
+        options={
+          Array [
+            Object {
+              "id": "KIBANA_DASHBOARD",
+              "label": "Kibana dashboard",
+            },
+            Object {
+              "id": "KIBANA_DISCOVER",
+              "label": "Discover",
+            },
+            Object {
+              "id": "OTHER",
+              "label": "Other",
+            },
+          ]
+        }
+      />
+    </EuiFormRow>
+    <EuiFormRow
+      compressed={true}
+      describedByIds={Array []}
+      display="row"
+      fullWidth={true}
+      hasChildLabel={true}
+      hasEmptyLabelSpace={false}
+      label={
+        <FormattedMessage
+          defaultMessage="URL"
+          id="xpack.ml.customUrlsEditor.urlLabel"
+          values={Object {}}
+        />
+      }
+      labelType="label"
+    >
+      <EuiTextArea
+        compressed={true}
+        fullWidth={true}
+        onChange={[Function]}
+        rows={2}
+        value="https://www.google.co.uk/search?q=airline+code+$airline$"
+      />
+    </EuiFormRow>
+  </EuiForm>
+</Fragment>
+`;

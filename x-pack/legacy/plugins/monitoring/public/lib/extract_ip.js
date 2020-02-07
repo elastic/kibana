@@ -4,10 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
-
-
 export function extractIp(transport) {
   if (typeof transport !== 'string') {
     return null;
@@ -18,4 +14,3 @@ export function extractIp(transport) {
   }
   return transport;
 }
-

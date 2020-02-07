@@ -1,0 +1,27 @@
+[role="xpack"]
+[[graph-limitations]]
+== Graph limitations
+++++
+<titleabbrev>Limitations</titleabbrev>
+++++
+
+[discrete]
+=== Limited support for multiple indices
+The graph API can explore multiple indices, types, or aliases in a
+single API request, but the assumption is that each "hop" it performs
+is querying the same set of indices. Currently, it is not possible to
+take a term found in a field from one index and use that value to explore
+connections in _a different field_ held in another type or index.
+
+A good example of where this might be useful is if an IP address is
+found in the `remote_host` field of an index called "weblogs20160101",
+you might want to follow that up by looking for the same address in
+the `ip_address` field of an index called "knownthreats".
+
+Supporting this behaviour would require extra mappings to indicate that
+the weblogs' `remote_host` field contained values that had currency and
+meaning in the `ip_address` field of the threats index.
+
+Since we do not currently support this translation, you would have to
+perform multiple calls to take the values from the weblogs index
+response and build them into a separate request to the threats index.

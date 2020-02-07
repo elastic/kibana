@@ -4,12 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 import { callWithRequestFactory } from '../client/call_with_request_factory';
 import { wrapError } from '../client/errors';
 import { FilterManager } from '../models/filter';
-
 
 // TODO - add function for returning a list of just the filter IDs.
 // TODO - add function for returning a list of filter IDs plus item count.
@@ -33,12 +30,7 @@ function newFilter(callWithRequest, filter) {
   return mgr.newFilter(filter);
 }
 
-function updateFilter(
-  callWithRequest,
-  filterId,
-  description,
-  addItems,
-  removeItems) {
+function updateFilter(callWithRequest, filterId, description, addItems, removeItems) {
   const mgr = new FilterManager(callWithRequest);
   return mgr.updateFilter(filterId, description, addItems, removeItems);
 }
@@ -49,18 +41,16 @@ function deleteFilter(callWithRequest, filterId) {
 }
 
 export function filtersRoutes({ commonRouteConfig, elasticsearchPlugin, route }) {
-
   route({
     method: 'GET',
     path: '/api/ml/filters',
     handler(request) {
       const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
-      return getAllFilters(callWithRequest)
-        .catch(resp => wrapError(resp));
+      return getAllFilters(callWithRequest).catch(resp => wrapError(resp));
     },
     config: {
-      ...commonRouteConfig
-    }
+      ...commonRouteConfig,
+    },
   });
 
   route({
@@ -68,12 +58,11 @@ export function filtersRoutes({ commonRouteConfig, elasticsearchPlugin, route })
     path: '/api/ml/filters/_stats',
     handler(request) {
       const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
-      return getAllFilterStats(callWithRequest)
-        .catch(resp => wrapError(resp));
+      return getAllFilterStats(callWithRequest).catch(resp => wrapError(resp));
     },
     config: {
-      ...commonRouteConfig
-    }
+      ...commonRouteConfig,
+    },
   });
 
   route({
@@ -82,12 +71,11 @@ export function filtersRoutes({ commonRouteConfig, elasticsearchPlugin, route })
     handler(request) {
       const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const filterId = request.params.filterId;
-      return getFilter(callWithRequest, filterId)
-        .catch(resp => wrapError(resp));
+      return getFilter(callWithRequest, filterId).catch(resp => wrapError(resp));
     },
     config: {
-      ...commonRouteConfig
-    }
+      ...commonRouteConfig,
+    },
   });
 
   route({
@@ -96,12 +84,11 @@ export function filtersRoutes({ commonRouteConfig, elasticsearchPlugin, route })
     handler(request) {
       const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const body = request.payload;
-      return newFilter(callWithRequest, body)
-        .catch(resp => wrapError(resp));
+      return newFilter(callWithRequest, body).catch(resp => wrapError(resp));
     },
     config: {
-      ...commonRouteConfig
-    }
+      ...commonRouteConfig,
+    },
   });
 
   route({
@@ -116,12 +103,12 @@ export function filtersRoutes({ commonRouteConfig, elasticsearchPlugin, route })
         filterId,
         payload.description,
         payload.addItems,
-        payload.removeItems)
-        .catch(resp => wrapError(resp));
+        payload.removeItems
+      ).catch(resp => wrapError(resp));
     },
     config: {
-      ...commonRouteConfig
-    }
+      ...commonRouteConfig,
+    },
   });
 
   route({
@@ -130,13 +117,10 @@ export function filtersRoutes({ commonRouteConfig, elasticsearchPlugin, route })
     handler(request) {
       const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const filterId = request.params.filterId;
-      return deleteFilter(callWithRequest, filterId)
-        .catch(resp => wrapError(resp));
+      return deleteFilter(callWithRequest, filterId).catch(resp => wrapError(resp));
     },
     config: {
-      ...commonRouteConfig
-    }
+      ...commonRouteConfig,
+    },
   });
-
-
 }

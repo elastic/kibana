@@ -17,44 +17,88 @@
  * under the License.
  */
 import { PriorityCollection } from './priority_collection';
-import { SavedObjectsClientContract } from '..';
+import { SavedObjectsClientContract } from '../../types';
+import { SavedObjectsRepositoryFactory } from '../../saved_objects_service';
+import { KibanaRequest } from '../../../http';
 
-export interface SavedObjectsClientWrapperOptions<Request = unknown> {
+/**
+ * Options passed to each SavedObjectsClientWrapperFactory to aid in creating the wrapper instance.
+ * @public
+ */
+export interface SavedObjectsClientWrapperOptions {
   client: SavedObjectsClientContract;
-  request: Request;
+  request: KibanaRequest;
 }
 
-export type SavedObjectsClientWrapperFactory<Request = unknown> = (
-  options: SavedObjectsClientWrapperOptions<Request>
-) => SavedObjectsClientContract;
-
-export type SavedObjectsClientFactory<Request = unknown> = (
-  { request }: { request: Request }
+/**
+ * Describes the factory used to create instances of Saved Objects Client Wrappers.
+ * @public
+ */
+export type SavedObjectsClientWrapperFactory = (
+  options: SavedObjectsClientWrapperOptions
 ) => SavedObjectsClientContract;
 
 /**
- * Provider for the Scoped Saved Object Client.
+ * Describes the factory used to create instances of the Saved Objects Client.
+ * @public
  */
-export class ScopedSavedObjectsClientProvider<Request = unknown> {
-  private readonly _wrapperFactories = new PriorityCollection<
-    SavedObjectsClientWrapperFactory<Request>
-  >();
-  private _clientFactory: SavedObjectsClientFactory<Request>;
-  private readonly _originalClientFactory: SavedObjectsClientFactory<Request>;
+export type SavedObjectsClientFactory = ({
+  request,
+}: {
+  request: KibanaRequest;
+}) => SavedObjectsClientContract;
 
-  constructor({
-    defaultClientFactory,
-  }: {
-    defaultClientFactory: SavedObjectsClientFactory<Request>;
-  }) {
+/**
+ * Provider to invoke to retrieve a {@link SavedObjectsClientFactory}.
+ * @public
+ */
+export type SavedObjectsClientFactoryProvider = (
+  repositoryFactory: SavedObjectsRepositoryFactory
+) => SavedObjectsClientFactory;
+
+/**
+ * Options to control the creation of the Saved Objects Client.
+ * @public
+ */
+export interface SavedObjectsClientProviderOptions {
+  excludedWrappers?: string[];
+}
+
+/**
+ * @internal
+ */
+export type ISavedObjectsClientProvider = Pick<
+  SavedObjectsClientProvider,
+  keyof SavedObjectsClientProvider
+>;
+
+/**
+ * Provider for the Scoped Saved Objects Client.
+ *
+ * @internal
+ */
+export class SavedObjectsClientProvider {
+  private readonly _wrapperFactories = new PriorityCollection<{
+    id: string;
+    factory: SavedObjectsClientWrapperFactory;
+  }>();
+  private _clientFactory: SavedObjectsClientFactory;
+  private readonly _originalClientFactory: SavedObjectsClientFactory;
+
+  constructor({ defaultClientFactory }: { defaultClientFactory: SavedObjectsClientFactory }) {
     this._originalClientFactory = this._clientFactory = defaultClientFactory;
   }
 
   addClientWrapperFactory(
     priority: number,
-    wrapperFactory: SavedObjectsClientWrapperFactory<Request>
+    id: string,
+    factory: SavedObjectsClientWrapperFactory
   ): void {
-    this._wrapperFactories.add(priority, wrapperFactory);
+    if (this._wrapperFactories.has(entry => entry.id === id)) {
+      throw new Error(`wrapper factory with id ${id} is already defined`);
+    }
+
+    this._wrapperFactories.add(priority, { id, factory });
   }
 
   setClientFactory(customClientFactory: SavedObjectsClientFactory) {
@@ -65,15 +109,24 @@ export class ScopedSavedObjectsClientProvider<Request = unknown> {
     this._clientFactory = customClientFactory;
   }
 
-  getClient(request: Request): SavedObjectsClientContract {
+  getClient(
+    request: KibanaRequest,
+    options: SavedObjectsClientProviderOptions = {}
+  ): SavedObjectsClientContract {
     const client = this._clientFactory({
       request,
     });
 
+    const excludedWrappers = options.excludedWrappers || [];
+
     return this._wrapperFactories
       .toPrioritizedArray()
-      .reduceRight((clientToWrap, wrapperFactory) => {
-        return wrapperFactory({
+      .reduceRight((clientToWrap, { id, factory }) => {
+        if (excludedWrappers.includes(id)) {
+          return clientToWrap;
+        }
+
+        return factory({
           request,
           client: clientToWrap,
         });

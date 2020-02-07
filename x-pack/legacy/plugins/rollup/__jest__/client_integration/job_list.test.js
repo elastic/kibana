@@ -4,39 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getRouter } from '../../public/crud_app/services';
-import { setupEnvironment, pageHelpers, nextTick } from './helpers';
+import { getRouter, setHttp } from '../../public/crud_app/services';
+import { mockHttpRequest, pageHelpers, nextTick } from './helpers';
 import { JOBS } from './helpers/constants';
 
-jest.mock('ui/index_patterns', () => {
-  const { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } = require.requireActual('../../../../../../src/legacy/ui/public/index_patterns/constants'); // eslint-disable-line max-len
-  return { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE };
-});
-
-jest.mock('ui/chrome', () => ({
-  addBasePath: (path) => path ? path : 'api/rollup',
-  breadcrumbs: { set: () => {} },
-  getInjected: (key) => {
-    if (key === 'uiCapabilities') {
-      return {
-        navLinks: {},
-        management: {},
-        catalogue: {}
-      };
-    }
-    throw new Error(`Unexpected call to chrome.getInjected with key ${key}`);
-  }
-}));
-
-jest.mock('../../../../../../src/legacy/core_plugins/ui_metric/public', () => ({
-  trackUiMetric: jest.fn(),
-}));
+jest.mock('ui/new_platform');
 
 jest.mock('../../public/crud_app/services', () => {
   const services = require.requireActual('../../public/crud_app/services');
   return {
     ...services,
-    getRouterLinkProps: (link) => ({ href: link }),
+    getRouterLinkProps: link => ({ href: link }),
   };
 });
 
@@ -44,27 +22,27 @@ const { setup } = pageHelpers.jobList;
 
 describe('<JobList />', () => {
   describe('detail panel', () => {
-    let server;
-    let httpRequestsMockHelpers;
     let component;
     let table;
     let exists;
+    let npStart;
 
     beforeAll(() => {
-      ({ server, httpRequestsMockHelpers } = setupEnvironment());
-    });
-
-    afterAll(() => {
-      server.restore();
+      npStart = require('ui/new_platform').npStart; // eslint-disable-line
+      setHttp(npStart.core.http);
     });
 
     beforeEach(async () => {
-      httpRequestsMockHelpers.setLoadJobsResponse(JOBS);
+      mockHttpRequest(npStart.core.http, { jobs: JOBS });
 
       ({ component, exists, table } = setup());
 
       await nextTick(); // We need to wait next tick for the mock server response to comes in
       component.update();
+    });
+
+    afterEach(() => {
+      npStart.core.http.get.mockClear();
     });
 
     test('should open the detail panel when clicking on a job in the table', () => {
@@ -87,9 +65,11 @@ describe('<JobList />', () => {
       button.simulate('click');
 
       const {
-        jobs: [{
-          config: { id: jobId },
-        }],
+        jobs: [
+          {
+            config: { id: jobId },
+          },
+        ],
       } = JOBS;
       expect(getRouter().history.location.search).toEqual(`?job=${jobId}`);
     });

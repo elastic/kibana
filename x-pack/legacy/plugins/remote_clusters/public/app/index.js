@@ -20,6 +20,7 @@ export const renderReact = async (elem, I18nContext) => {
           <App />
         </HashRouter>
       </Provider>
-    </I18nContext>
-    , elem);
+    </I18nContext>,
+    elem
+  );
 };

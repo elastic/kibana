@@ -12,9 +12,11 @@ import { sortBy } from 'lodash';
 import { getType } from '@kbn/interpreter/common';
 import { createStatefulPropHoc } from '../../../../public/components/enhance/stateful_prop';
 import { templateFromReactComponent } from '../../../../public/lib/template_from_react_component';
+import { ArgumentStrings } from '../../../../i18n';
 import { SimpleMathFunction } from './simple_math_function';
 import { getFormObject } from './get_form_object';
 
+const { DataColumn: strings } = ArgumentStrings;
 const maybeQuoteValue = val => (val.match(/\s/) ? `'${val}'` : val);
 
 // TODO: Garbage, we could make a much nicer math form that can handle way more.
@@ -89,7 +91,7 @@ class DatacolumnArgInput extends Component {
     });
 
     return (
-      <EuiFlexGroup gutterSize="s" id={argId}>
+      <EuiFlexGroup gutterSize="s" id={argId} direction="row">
         <EuiFlexItem grow={false}>
           <SimpleMathFunction
             id={argId}
@@ -141,8 +143,8 @@ EnhancedDatacolumnArgInput.propTypes = {
 
 export const datacolumn = () => ({
   name: 'datacolumn',
-  displayName: 'Column',
-  help: 'Select the data column',
+  displayName: strings.getDisplayName(),
+  help: strings.getHelp(),
   default: '""',
   simpleTemplate: templateFromReactComponent(EnhancedDatacolumnArgInput),
 });

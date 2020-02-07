@@ -1,0 +1,45 @@
+{
+  $schema: https://vega.github.io/schema/vega-lite/v2.json
+  data: {
+    format: {property: "aggregations.time_buckets.buckets"}
+    values: {
+      aggregations: {
+        time_buckets: {
+          buckets: [
+            {key: 1512950400000, doc_count: 0}
+            {key: 1513036800000, doc_count: 0}
+            {key: 1513123200000, doc_count: 0}
+            {key: 1513209600000, doc_count: 4545}
+            {key: 1513296000000, doc_count: 4667}
+            {key: 1513382400000, doc_count: 4660}
+            {key: 1513468800000, doc_count: 133}
+            {key: 1513555200000, doc_count: 0}
+            {key: 1513641600000, doc_count: 0}
+            {key: 1513728000000, doc_count: 0}
+          ]
+        }
+      }
+      status: 200
+    }
+  }
+  mark: line
+  encoding: {
+    x: {
+      field: key
+      type: temporal
+      axis: null
+    }
+    y: {
+      field: doc_count
+      type: quantitative
+      axis: null
+    }
+  }
+  config: {
+    range: {
+      category: {scheme: "elastic"}
+    }
+    mark: {color: "#54B399"}
+  }
+  autosize: {type: "fit", contains: "padding"}
+}

@@ -4,69 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Legacy } from 'kibana';
-import {
-  createAlertRoute,
-  deleteAlertRoute,
-  findRoute,
-  getRoute,
-  listAlertTypesRoute,
-  updateAlertRoute,
-} from './routes';
-import { AlertingPlugin, Services } from './types';
-import { AlertTypeRegistry } from './alert_type_registry';
-import { AlertsClient } from './alerts_client';
+import { Server, shim } from './shim';
+import { Plugin } from './plugin';
+import { AlertingPlugin } from './types';
 
-export function init(server: Legacy.Server) {
-  const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
-  const savedObjectsRepositoryWithInternalUser = server.savedObjects.getSavedObjectsRepository(
-    callWithInternalUser
-  );
+export async function init(server: Server) {
+  const { initializerContext, coreSetup, coreStart, pluginsSetup, pluginsStart } = shim(server);
 
-  function getServices(basePath: string): Services {
-    const fakeRequest: any = {
-      headers: {},
-      getBasePath: () => basePath,
-    };
-    return {
-      log: server.log,
-      callCluster: callWithInternalUser,
-      savedObjectsClient: server.savedObjects.getScopedSavedObjectsClient(fakeRequest),
-    };
-  }
+  const plugin = new Plugin(initializerContext);
 
-  const { taskManager } = server;
-  const alertTypeRegistry = new AlertTypeRegistry({
-    getServices,
-    taskManager: taskManager!,
-    fireAction: server.plugins.actions!.fire,
-    internalSavedObjectsRepository: savedObjectsRepositoryWithInternalUser,
-  });
+  const setupContract = await plugin.setup(coreSetup, pluginsSetup);
+  const startContract = plugin.start(coreStart, pluginsStart);
 
-  // Register routes
-  createAlertRoute(server);
-  deleteAlertRoute(server);
-  findRoute(server);
-  getRoute(server);
-  listAlertTypesRoute(server);
-  updateAlertRoute(server);
-
-  // Expose functions
   server.decorate('request', 'getAlertsClient', function() {
-    const request = this;
-    const savedObjectsClient = request.getSavedObjectsClient();
-    const alertsClient = new AlertsClient({
-      log: server.log,
-      savedObjectsClient,
-      alertTypeRegistry,
-      taskManager: taskManager!,
-      basePath: request.getBasePath(),
-    });
-    return alertsClient;
+    return startContract.getAlertsClientWithRequest(this);
   });
+
   const exposedFunctions: AlertingPlugin = {
-    registerType: alertTypeRegistry.register.bind(alertTypeRegistry),
-    listTypes: alertTypeRegistry.list.bind(alertTypeRegistry),
+    setup: setupContract,
+    start: startContract,
   };
   server.expose(exposedFunctions);
 }

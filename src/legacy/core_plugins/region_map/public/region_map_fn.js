@@ -17,19 +17,16 @@
  * under the License.
  */
 
-import { functionsRegistry } from 'plugins/interpreter/registries';
 import { i18n } from '@kbn/i18n';
 
-export const regionmap = () => ({
+export const createRegionMapFn = () => ({
   name: 'regionmap',
   type: 'render',
   context: {
-    types: [
-      'kibana_datatable'
-    ],
+    types: ['kibana_datatable'],
   },
   help: i18n.translate('regionMap.function.help', {
-    defaultMessage: 'Regionmap visualization'
+    defaultMessage: 'Regionmap visualization',
   }),
   args: {
     visConfig: {
@@ -49,10 +46,8 @@ export const regionmap = () => ({
         visConfig,
         params: {
           listenOnChange: true,
-        }
+        },
       },
     };
   },
 });
-
-functionsRegistry.register(regionmap);

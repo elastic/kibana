@@ -11,13 +11,13 @@ import {
   EuiPageContent,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLoadingSpinner
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 export function PageLoading() {
   return (
-    <EuiPage>
+    <EuiPage style={{ height: 'calc(100vh - 50px)' }}>
       <EuiPageBody>
         <EuiPageContent
           verticalPosition="center"

@@ -1,0 +1,150 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`it renders without crashing 1`] = `
+<Fragment>
+  <EuiHorizontalRule />
+  <EuiFlexGroup
+    className="index-privilege-form"
+  >
+    <EuiFlexItem>
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiFormRow
+            describedByIds={Array []}
+            display="row"
+            fullWidth={true}
+            hasChildLabel={true}
+            hasEmptyLabelSpace={false}
+            isInvalid={false}
+            label={
+              <FormattedMessage
+                defaultMessage="Indices"
+                id="xpack.security.management.editRole.indexPrivilegeForm.indicesFormRowLabel"
+                values={Object {}}
+              />
+            }
+            labelType="label"
+          >
+            <EuiComboBox
+              compressed={false}
+              data-test-subj="indicesInput0"
+              fullWidth={false}
+              isClearable={true}
+              isDisabled={false}
+              onChange={[Function]}
+              onCreateOption={[Function]}
+              options={Array []}
+              selectedOptions={Array []}
+              singleSelection={false}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormRow
+            describedByIds={Array []}
+            display="row"
+            fullWidth={true}
+            hasChildLabel={true}
+            hasEmptyLabelSpace={false}
+            label={
+              <FormattedMessage
+                defaultMessage="Privileges"
+                id="xpack.security.management.editRole.indexPrivilegeForm.privilegesFormRowLabel"
+                values={Object {}}
+              />
+            }
+            labelType="label"
+          >
+            <EuiComboBox
+              compressed={false}
+              data-test-subj="privilegesInput0"
+              fullWidth={false}
+              isClearable={true}
+              isDisabled={false}
+              onChange={[Function]}
+              options={
+                Array [
+                  Object {
+                    "label": "all",
+                  },
+                  Object {
+                    "label": "read",
+                  },
+                  Object {
+                    "label": "write",
+                  },
+                  Object {
+                    "label": "index",
+                  },
+                ]
+              }
+              selectedOptions={Array []}
+              singleSelection={false}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer />
+      <EuiFlexGroup
+        direction="column"
+      >
+        <EuiFlexItem>
+          <EuiSwitch
+            checked={false}
+            compressed={true}
+            data-test-subj="restrictFieldsQuery0"
+            label={
+              <FormattedMessage
+                defaultMessage="Grant access to specific fields"
+                id="xpack.security.management.editRoles.indexPrivilegeForm.grantFieldPrivilegesLabel"
+                values={Object {}}
+              />
+            }
+            onChange={[Function]}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer />
+      <EuiFlexGroup
+        direction="column"
+      >
+        <EuiFlexItem>
+          <EuiSwitch
+            checked={false}
+            compressed={true}
+            data-test-subj="restrictDocumentsQuery0"
+            disabled={false}
+            label={
+              <FormattedMessage
+                defaultMessage="Grant read privileges to specific documents"
+                id="xpack.security.management.editRole.indexPrivilegeForm.grantReadPrivilegesLabel"
+                values={Object {}}
+              />
+            }
+            onChange={[Function]}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiFormRow
+        describedByIds={Array []}
+        display="row"
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={true}
+        labelType="label"
+      >
+        <EuiButtonIcon
+          aria-label="Delete index privilege"
+          color="danger"
+          iconType="trash"
+          onClick={[MockFunction]}
+        />
+      </EuiFormRow>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</Fragment>
+`;

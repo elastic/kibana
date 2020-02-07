@@ -5,10 +5,10 @@
  */
 
 import moment from 'moment';
-import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
-import { getFunctionHelp } from '../../strings';
+import { ExpressionFunction } from 'src/plugins/expressions/common/types';
+import { getFunctionHelp } from '../../../i18n';
 
-interface Arguments {
+export interface Arguments {
   format: string;
 }
 

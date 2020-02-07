@@ -63,13 +63,14 @@
     "logs": {
       "enabled": false,
       "reason": {
-        "clusterExists": null,
+        "clusterExists": false,
         "indexPatternExists": false,
         "indexPatternInTimeRangeExists": false,
         "nodeExists": null,
         "indexExists": null,
         "typeExists": false,
-        "typeExistsAtAnyTime": false
+        "typeExistsAtAnyTime": false,
+        "usingStructuredLogs": false
       },
       "types": []
     }

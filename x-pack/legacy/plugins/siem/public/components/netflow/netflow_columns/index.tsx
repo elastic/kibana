@@ -5,8 +5,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import * as React from 'react';
-import { pure } from 'recompose';
+import React from 'react';
 import styled from 'styled-components';
 
 import { SourceDestination } from '../../source_destination';
@@ -22,6 +21,8 @@ const EuiFlexItemMarginRight = styled(EuiFlexItem)`
   margin-right: 10px;
 `;
 
+EuiFlexItemMarginRight.displayName = 'EuiFlexItemMarginRight';
+
 /**
  * Renders columns of draggable badges that describe both Netflow data, or more
  * generally, hosts interacting over a network connection. This component is
@@ -30,7 +31,7 @@ const EuiFlexItemMarginRight = styled(EuiFlexItem)`
  * This component will allow columns to wrap if constraints on width prevent all
  * the columns from fitting on a single horizontal row
  */
-export const NetflowColumns = pure<NetflowColumnsProps>(
+export const NetflowColumns = React.memo<NetflowColumnsProps>(
   ({
     contextId,
     destinationBytes,
@@ -122,3 +123,5 @@ export const NetflowColumns = pure<NetflowColumnsProps>(
     </EuiFlexGroup>
   )
 );
+
+NetflowColumns.displayName = 'NetflowColumns';

@@ -8,7 +8,10 @@
 
 ```typescript
 config: {
-        create: <Schema>() => Observable<Schema>;
-        createIfExists: <Schema>() => Observable<Schema | undefined>;
+        legacy: {
+            globalConfig$: Observable<SharedGlobalConfig>;
+        };
+        create: <T = ConfigSchema>() => Observable<T>;
+        createIfExists: <T = ConfigSchema>() => Observable<T | undefined>;
     };
 ```

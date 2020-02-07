@@ -17,7 +17,6 @@
  * under the License.
  */
 
-
 const map = require('./static/map_interpolation');
 
 module.exports = (pattern, { brackets, exact } = {}) => {

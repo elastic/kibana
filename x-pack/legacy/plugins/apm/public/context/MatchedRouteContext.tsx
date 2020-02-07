@@ -3,30 +3,32 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useMemo } from 'react';
+import React, { useMemo, ReactChild } from 'react';
 import { matchPath } from 'react-router-dom';
-import { routes } from '../components/app/Main/route_config';
 import { useLocation } from '../hooks/useLocation';
+import { BreadcrumbRoute } from '../components/app/Main/ProvideBreadcrumbs';
 
-export const MatchedRouteContext = React.createContext<Array<typeof routes[0]>>(
-  []
-);
+export const MatchedRouteContext = React.createContext<BreadcrumbRoute[]>([]);
 
-export const MatchedRouteProvider: React.FC = ({ children }) => {
+interface MatchedRouteProviderProps {
+  children: ReactChild;
+  routes: BreadcrumbRoute[];
+}
+export function MatchedRouteProvider({
+  children,
+  routes
+}: MatchedRouteProviderProps) {
   const { pathname } = useLocation();
 
-  const contextValue = useMemo(
-    () => {
-      return routes.filter(route => {
-        return matchPath(pathname, {
-          path: route.path
-        });
+  const contextValue = useMemo(() => {
+    return routes.filter(route => {
+      return matchPath(pathname, {
+        path: route.path
       });
-    },
-    [pathname]
-  );
+    });
+  }, [pathname, routes]);
 
   return (
     <MatchedRouteContext.Provider value={contextValue} children={children} />
   );
-};
+}

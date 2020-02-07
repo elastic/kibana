@@ -5,17 +5,15 @@
  */
 
 import { isArray, isEmpty, isString, uniq } from 'lodash/fp';
-import * as React from 'react';
-import { pure } from 'recompose';
+import React from 'react';
 
 import { DragEffects, DraggableWrapper } from '../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../drag_and_drop/helpers';
 import { getOrEmptyTagFromValue } from '../empty_value';
 import { IPDetailsLink } from '../links';
+import { parseQueryValue } from '../timeline/body/renderers/parse_query_value';
 import { DataProvider, IS_OPERATOR } from '../timeline/data_providers/data_provider';
 import { Provider } from '../timeline/data_providers/provider';
-import { TruncatableText } from '../truncatable_text';
-import { parseQueryValue } from '../timeline/body/renderers/parse_query_value';
 
 const getUniqueId = ({
   contextId,
@@ -27,7 +25,7 @@ const getUniqueId = ({
   eventId: string;
   fieldName: string;
   address: string | object | null | undefined;
-}) => `id-${contextId}-${fieldName}-${address}-for-event-${eventId}`;
+}) => `formatted-ip-data-provider-${contextId}-${fieldName}-${address}-${eventId}`;
 
 const tryStringify = (value: string | object | null | undefined): string => {
   try {
@@ -61,16 +59,21 @@ const getDataProvider = ({
   and: [],
 });
 
-const NonDecoratedIp = pure<{
+const NonDecoratedIpComponent: React.FC<{
   contextId: string;
   eventId: string;
   fieldName: string;
+  truncate?: boolean;
   value: string | object | null | undefined;
-  width?: string;
-}>(({ contextId, eventId, fieldName, value, width }) => (
+}> = ({ contextId, eventId, fieldName, truncate, value }) => (
   <DraggableWrapper
-    key={getUniqueId({ contextId, eventId, fieldName, address: value })}
     dataProvider={getDataProvider({ contextId, eventId, fieldName, address: value })}
+    key={`non-decorated-ip-draggable-wrapper-${getUniqueId({
+      contextId,
+      eventId,
+      fieldName,
+      address: value,
+    })}`}
     render={(dataProvider, _, snapshot) =>
       snapshot.isDragging ? (
         <DragEffects>
@@ -82,22 +85,29 @@ const NonDecoratedIp = pure<{
         getOrEmptyTagFromValue(tryStringify(value))
       )
     }
-    width={width}
+    truncate={truncate}
   />
-));
+);
 
-const AddressLinks = pure<{
+const NonDecoratedIp = React.memo(NonDecoratedIpComponent);
+
+const AddressLinksComponent: React.FC<{
   addresses: string[];
   contextId: string;
   eventId: string;
   fieldName: string;
-  width?: string;
-}>(({ addresses, eventId, contextId, fieldName, width }) => (
+  truncate?: boolean;
+}> = ({ addresses, contextId, eventId, fieldName, truncate }) => (
   <>
     {uniq(addresses).map(address => (
       <DraggableWrapper
-        key={getUniqueId({ contextId, eventId, fieldName, address })}
         dataProvider={getDataProvider({ contextId, eventId, fieldName, address })}
+        key={`address-links-draggable-wrapper-${getUniqueId({
+          contextId,
+          eventId,
+          fieldName,
+          address,
+        })}`}
         render={(_, __, snapshot) =>
           snapshot.isDragging ? (
             <DragEffects>
@@ -105,29 +115,25 @@ const AddressLinks = pure<{
                 dataProvider={getDataProvider({ contextId, eventId, fieldName, address })}
               />
             </DragEffects>
-          ) : width != null ? (
-            <IPDetailsLink data-test-sub="truncatable-ip-details-link" ip={address}>
-              <TruncatableText data-test-sub="truncatable-ip-details-text" width={width}>
-                {address}
-              </TruncatableText>
-            </IPDetailsLink>
           ) : (
             <IPDetailsLink data-test-sub="ip-details" ip={address} />
           )
         }
-        width={width}
+        truncate={truncate}
       />
     ))}
   </>
-));
+);
 
-export const FormattedIp = pure<{
+const AddressLinks = React.memo(AddressLinksComponent);
+
+const FormattedIpComponent: React.FC<{
   contextId: string;
   eventId: string;
   fieldName: string;
+  truncate?: boolean;
   value: string | object | null | undefined;
-  width?: string;
-}>(({ eventId, contextId, fieldName, value, width }) => {
+}> = ({ contextId, eventId, fieldName, truncate, value }) => {
   if (isString(value) && !isEmpty(value)) {
     try {
       const addresses = JSON.parse(value);
@@ -135,10 +141,10 @@ export const FormattedIp = pure<{
         return (
           <AddressLinks
             addresses={addresses}
-            eventId={eventId}
             contextId={contextId}
+            eventId={eventId}
             fieldName={fieldName}
-            width={width}
+            truncate={truncate}
           />
         );
       }
@@ -150,21 +156,23 @@ export const FormattedIp = pure<{
     return (
       <AddressLinks
         addresses={[value]}
-        eventId={eventId}
         contextId={contextId}
+        eventId={eventId}
         fieldName={fieldName}
-        width={width}
+        truncate={truncate}
       />
     );
   } else {
     return (
       <NonDecoratedIp
-        eventId={eventId}
         contextId={contextId}
+        eventId={eventId}
         fieldName={fieldName}
+        truncate={truncate}
         value={value}
-        width={width}
       />
     );
   }
-});
+};
+
+export const FormattedIp = React.memo(FormattedIpComponent);

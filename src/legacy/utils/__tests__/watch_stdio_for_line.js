@@ -23,7 +23,7 @@ import sinon from 'sinon';
 
 import { watchStdioForLine } from '../watch_stdio_for_line';
 
-describe('src/legacy/utils/watch_stdio_for_line', function () {
+describe('src/legacy/utils/watch_stdio_for_line', function() {
   const sandbox = sinon.sandbox.create();
   afterEach(() => sandbox.reset());
 
@@ -39,7 +39,7 @@ describe('src/legacy/utils/watch_stdio_for_line', function () {
     sinon.assert.calledWithExactly(onLogLine, sinon.match(/hi/));
   });
 
-  it('send the proc SIGKILL if it logs a line matching exitAfter regexp', async function () {
+  it('send the proc SIGKILL if it logs a line matching exitAfter regexp', async function() {
     // fixture proc will exit after 10 seconds if sigint not received, but the test won't fail
     // unless we see the log line `SIGINT not received`, so we let the test take up to 30 seconds
     // for potentially huge delays here and there

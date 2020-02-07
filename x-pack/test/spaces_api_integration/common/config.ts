@@ -9,7 +9,7 @@ import { resolveKibanaPath } from '@kbn/plugin-helpers';
 import path from 'path';
 import { TestInvoker } from './lib/types';
 // @ts-ignore
-import { EsProvider } from './services/es';
+import { LegacyEsProvider } from './services/legacy_es';
 
 interface CreateTestConfigOptions {
   license: string;
@@ -34,10 +34,11 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
       testFiles: [require.resolve(`../${name}/apis/`)],
       servers: config.xpack.api.get('servers'),
       services: {
-        es: EsProvider,
+        legacyEs: LegacyEsProvider,
         esSupertestWithoutAuth: config.xpack.api.get('services.esSupertestWithoutAuth'),
         supertest: config.kibana.api.get('services.supertest'),
         supertestWithoutAuth: config.xpack.api.get('services.supertestWithoutAuth'),
+        retry: config.xpack.api.get('services.retry'),
         esArchiver: config.kibana.functional.get('services.esArchiver'),
         kibanaServer: config.kibana.functional.get('services.kibanaServer'),
       },

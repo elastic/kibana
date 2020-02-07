@@ -22,3 +22,51 @@ export * from './service';
 export { SavedObjectsSchema } from './schema';
 
 export { SavedObjectsManagement } from './management';
+
+export * from './import';
+
+export {
+  getSortedObjectsForExport,
+  SavedObjectsExportOptions,
+  SavedObjectsExportResultDetails,
+} from './export';
+
+export {
+  SavedObjectsSerializer,
+  SavedObjectsRawDoc,
+  SavedObjectSanitizedDoc,
+  SavedObjectUnsanitizedDoc,
+} from './serialization';
+
+export { SavedObjectsMigrationLogger } from './migrations/core/migration_logger';
+
+export {
+  SavedObjectsService,
+  InternalSavedObjectsServiceStart,
+  SavedObjectsServiceStart,
+  SavedObjectsServiceSetup,
+  InternalSavedObjectsServiceSetup,
+  SavedObjectsRepositoryFactory,
+} from './saved_objects_service';
+
+export {
+  ISavedObjectsRepository,
+  SavedObjectsIncrementCounterOptions,
+  SavedObjectsDeleteByNamespaceOptions,
+} from './service/lib/repository';
+
+export {
+  SavedObjectsCoreFieldMapping,
+  SavedObjectsComplexFieldMapping,
+  SavedObjectsFieldMapping,
+  SavedObjectsMappingProperties,
+  SavedObjectsTypeMappingDefinition,
+  SavedObjectsTypeMappingDefinitions,
+} from './mappings';
+
+export { SavedObjectMigrationMap, SavedObjectMigrationFn } from './migrations';
+
+export { SavedObjectsType } from './types';
+
+export { config } from './saved_objects_config';
+export { SavedObjectTypeRegistry, ISavedObjectTypeRegistry } from './saved_objects_type_registry';

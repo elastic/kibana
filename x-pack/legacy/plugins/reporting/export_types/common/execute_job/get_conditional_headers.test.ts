@@ -6,6 +6,8 @@
 
 import { createMockServer } from '../../../test_helpers/create_mock_server';
 import { getConditionalHeaders, getCustomLogo } from './index';
+import { JobDocPayload } from '../../../types';
+import { JobDocPayloadPDF } from '../../printable_pdf/types';
 
 let mockServer: any;
 beforeEach(() => {
@@ -25,16 +27,8 @@ describe('conditions', () => {
       baz: 'quix',
     };
 
-    const { conditionalHeaders } = await getConditionalHeaders({
-      job: {
-        title: 'cool-job-bro',
-        type: 'csv',
-        jobParams: {
-          savedObjectId: 'abc-123',
-          isImmediate: false,
-          savedObjectType: 'search',
-        },
-      },
+    const conditionalHeaders = await getConditionalHeaders({
+      job: {} as JobDocPayload<any>,
       filteredHeaders: permittedHeaders,
       server: mockServer,
     });
@@ -50,16 +44,8 @@ describe('conditions', () => {
       baz: 'quix',
     };
 
-    const { conditionalHeaders } = await getConditionalHeaders({
-      job: {
-        title: 'cool-job-bro',
-        type: 'csv',
-        jobParams: {
-          savedObjectId: 'abc-123',
-          isImmediate: false,
-          savedObjectType: 'search',
-        },
-      },
+    const conditionalHeaders = await getConditionalHeaders({
+      job: {} as JobDocPayload<any>,
       filteredHeaders: permittedHeaders,
       server: mockServer,
     });
@@ -79,16 +65,8 @@ describe('conditions', () => {
       baz: 'quix',
     };
 
-    const { conditionalHeaders } = await getConditionalHeaders({
-      job: {
-        title: 'cool-job-bro',
-        type: 'csv',
-        jobParams: {
-          savedObjectId: 'abc-123',
-          isImmediate: false,
-          savedObjectType: 'search',
-        },
-      },
+    const conditionalHeaders = await getConditionalHeaders({
+      job: {} as JobDocPayload<any>,
       filteredHeaders: permittedHeaders,
       server: mockServer,
     });
@@ -104,16 +82,8 @@ describe('conditions', () => {
       baz: 'quix',
     };
 
-    const { conditionalHeaders } = await getConditionalHeaders({
-      job: {
-        title: 'cool-job-bro',
-        type: 'csv',
-        jobParams: {
-          savedObjectId: 'abc-123',
-          isImmediate: false,
-          savedObjectType: 'search',
-        },
-      },
+    const conditionalHeaders = await getConditionalHeaders({
+      job: {} as JobDocPayload<any>,
       filteredHeaders: permittedHeaders,
       server: mockServer,
     });
@@ -127,16 +97,8 @@ describe('conditions', () => {
       baz: 'quix',
     };
 
-    const { conditionalHeaders } = await getConditionalHeaders({
-      job: {
-        title: 'cool-job-bro',
-        type: 'csv',
-        jobParams: {
-          savedObjectId: 'abc-123',
-          isImmediate: false,
-          savedObjectType: 'search',
-        },
-      },
+    const conditionalHeaders = await getConditionalHeaders({
+      job: {} as JobDocPayload<any>,
       filteredHeaders: permittedHeaders,
       server: mockServer,
     });
@@ -158,16 +120,8 @@ describe('conditions', () => {
       baz: 'quix',
     };
 
-    const { conditionalHeaders } = await getConditionalHeaders({
-      job: {
-        title: 'cool-job-bro',
-        type: 'csv',
-        jobParams: {
-          savedObjectId: 'abc-123',
-          isImmediate: false,
-          savedObjectType: 'search',
-        },
-      },
+    const conditionalHeaders = await getConditionalHeaders({
+      job: {} as JobDocPayload<any>,
       filteredHeaders: permittedHeaders,
       server: mockServer,
     });
@@ -183,16 +137,8 @@ describe('conditions', () => {
       baz: 'quix',
     };
 
-    const { conditionalHeaders } = await getConditionalHeaders({
-      job: {
-        title: 'cool-job-bro',
-        type: 'csv',
-        jobParams: {
-          savedObjectId: 'abc-123',
-          isImmediate: false,
-          savedObjectType: 'search',
-        },
-      },
+    const conditionalHeaders = await getConditionalHeaders({
+      job: {} as JobDocPayload<any>,
       filteredHeaders: permittedHeaders,
       server: mockServer,
     });
@@ -207,16 +153,8 @@ test('uses basePath from job when creating saved object service', async () => {
     baz: 'quix',
   };
 
-  const { conditionalHeaders } = await getConditionalHeaders({
-    job: {
-      title: 'cool-job-bro',
-      type: 'csv',
-      jobParams: {
-        savedObjectId: 'abc-123',
-        isImmediate: false,
-        savedObjectType: 'search',
-      },
-    },
+  const conditionalHeaders = await getConditionalHeaders({
+    job: {} as JobDocPayload<any>,
     filteredHeaders: permittedHeaders,
     server: mockServer,
   });
@@ -226,16 +164,7 @@ test('uses basePath from job when creating saved object service', async () => {
 
   const jobBasePath = '/sbp/s/marketing';
   await getCustomLogo({
-    job: {
-      title: 'cool-job-bro',
-      type: 'csv',
-      jobParams: {
-        savedObjectId: 'abc-123',
-        isImmediate: false,
-        savedObjectType: 'search',
-      },
-      basePath: jobBasePath,
-    },
+    job: { basePath: jobBasePath } as JobDocPayloadPDF,
     conditionalHeaders,
     server: mockServer,
   });
@@ -251,16 +180,8 @@ test(`uses basePath from server if job doesn't have a basePath when creating sav
     baz: 'quix',
   };
 
-  const { conditionalHeaders } = await getConditionalHeaders({
-    job: {
-      title: 'cool-job-bro',
-      type: 'csv',
-      jobParams: {
-        savedObjectId: 'abc-123',
-        isImmediate: false,
-        savedObjectType: 'search',
-      },
-    },
+  const conditionalHeaders = await getConditionalHeaders({
+    job: {} as JobDocPayload<any>,
     filteredHeaders: permittedHeaders,
     server: mockServer,
   });
@@ -269,15 +190,7 @@ test(`uses basePath from server if job doesn't have a basePath when creating sav
   mockServer.uiSettingsServiceFactory().get.mockReturnValue(logo);
 
   await getCustomLogo({
-    job: {
-      title: 'cool-job-bro',
-      type: 'csv',
-      jobParams: {
-        savedObjectId: 'abc-123',
-        isImmediate: false,
-        savedObjectType: 'search',
-      },
-    },
+    job: {} as JobDocPayloadPDF,
     conditionalHeaders,
     server: mockServer,
   });
@@ -290,16 +203,8 @@ test(`uses basePath from server if job doesn't have a basePath when creating sav
 describe('config formatting', () => {
   test(`lowercases server.host`, async () => {
     mockServer = createMockServer({ settings: { 'server.host': 'COOL-HOSTNAME' } });
-    const { conditionalHeaders } = await getConditionalHeaders({
-      job: {
-        title: 'cool-job-bro',
-        type: 'csv',
-        jobParams: {
-          savedObjectId: 'abc-123',
-          isImmediate: false,
-          savedObjectType: 'search',
-        },
-      },
+    const conditionalHeaders = await getConditionalHeaders({
+      job: {} as JobDocPayload<any>,
       filteredHeaders: {},
       server: mockServer,
     });
@@ -310,7 +215,7 @@ describe('config formatting', () => {
     mockServer = createMockServer({
       settings: { 'xpack.reporting.kibanaServer.hostname': 'GREAT-HOSTNAME' },
     });
-    const { conditionalHeaders } = await getConditionalHeaders({
+    const conditionalHeaders = await getConditionalHeaders({
       job: {
         title: 'cool-job-bro',
         type: 'csv',

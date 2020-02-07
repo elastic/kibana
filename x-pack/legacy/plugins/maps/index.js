@@ -4,26 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { resolve } from 'path';
-import { initRoutes } from './server/routes';
-import { getEcommerceSavedObjects } from './server/sample_data/ecommerce_saved_objects';
-import { getFlightsSavedObjects } from './server/sample_data/flights_saved_objects.js';
-import { getWebLogsSavedObjects } from './server/sample_data/web_logs_saved_objects.js';
-import mappings from './mappings.json';
-import { checkLicense } from './check_license';
-import { migrations } from './migrations';
-import { watchStatusAndLicenseToInitialize } from
-  '../../server/lib/watch_status_and_license_to_initialize';
-import { initTelemetryCollection } from './server/maps_telemetry';
-import { i18n } from '@kbn/i18n';
-import { APP_ID, APP_ICON, createMapPath } from './common/constants';
-import { getAppTitle } from './common/i18n_getters';
 import _ from 'lodash';
+import mappings from './mappings.json';
+import { i18n } from '@kbn/i18n';
+import { resolve } from 'path';
+import { migrations } from './migrations';
+import { initTelemetryCollection } from './server/maps_telemetry';
+import { getAppTitle } from './common/i18n_getters';
+import { MapPlugin } from './server/plugin';
+import { APP_ID, APP_ICON, createMapPath, MAP_SAVED_OBJECT_TYPE } from './common/constants';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
 
 export function maps(kibana) {
-
   return new kibana.Plugin({
-    require: ['kibana', 'elasticsearch', 'xpack_main', 'tile_map', 'task_manager'],
+    require: ['kibana', 'elasticsearch'],
     id: APP_ID,
     configPrefix: 'xpack.maps',
     publicDir: resolve(__dirname, 'public'),
@@ -31,43 +25,44 @@ export function maps(kibana) {
       app: {
         title: getAppTitle(),
         description: i18n.translate('xpack.maps.appDescription', {
-          defaultMessage: 'Map application'
+          defaultMessage: 'Map application',
         }),
-        main: 'plugins/maps/index',
+        main: 'plugins/maps/legacy',
         icon: 'plugins/maps/icon.svg',
         euiIconType: APP_ICON,
+        category: DEFAULT_APP_CATEGORIES.analyze,
       },
       injectDefaultVars(server) {
         const serverConfig = server.config();
         const mapConfig = serverConfig.get('map');
 
         return {
+          showMapVisualizationTypes: serverConfig.get('xpack.maps.showMapVisualizationTypes'),
           showMapsInspectorAdapter: serverConfig.get('xpack.maps.showMapsInspectorAdapter'),
+          preserveDrawingBuffer: serverConfig.get('xpack.maps.preserveDrawingBuffer'),
           isEmsEnabled: mapConfig.includeElasticMapsService,
+          emsFontLibraryUrl: mapConfig.emsFontLibraryUrl,
           emsTileLayerId: mapConfig.emsTileLayerId,
           proxyElasticMapsServiceInMaps: mapConfig.proxyElasticMapsServiceInMaps,
-          emsManifestServiceUrl: mapConfig.manifestServiceUrl,
+          emsFileApiUrl: mapConfig.emsFileApiUrl,
+          emsTileApiUrl: mapConfig.emsTileApiUrl,
           emsLandingPageUrl: mapConfig.emsLandingPageUrl,
           kbnPkgVersion: serverConfig.get('pkg.version'),
           regionmapLayers: _.get(mapConfig, 'regionmap.layers', []),
-          tilemap: _.get(mapConfig, 'tilemap', [])
+          tilemap: _.get(mapConfig, 'tilemap', []),
         };
       },
-      embeddableFactories: [
-        'plugins/maps/embeddable/map_embeddable_factory_provider'
-      ],
-      inspectorViews: [
-        'plugins/maps/inspector/views/register_views',
-      ],
+      embeddableFactories: ['plugins/maps/embeddable/map_embeddable_factory'],
+      inspectorViews: ['plugins/maps/inspector/views/register_views'],
       home: ['plugins/maps/register_feature'],
       styleSheetPaths: `${__dirname}/public/index.scss`,
       savedObjectSchemas: {
         'maps-telemetry': {
-          isNamespaceAgnostic: true
-        }
+          isNamespaceAgnostic: true,
+        },
       },
       savedObjectsManagement: {
-        'map': {
+        [MAP_SAVED_OBJECT_TYPE]: {
           icon: APP_ICON,
           defaultSearchField: 'title',
           isImportableAndExportable: true,
@@ -89,91 +84,48 @@ export function maps(kibana) {
     config(Joi) {
       return Joi.object({
         enabled: Joi.boolean().default(true),
-        showMapsInspectorAdapter: Joi.boolean().default(false),
+        showMapVisualizationTypes: Joi.boolean().default(false),
+        showMapsInspectorAdapter: Joi.boolean().default(false), // flag used in functional testing
+        preserveDrawingBuffer: Joi.boolean().default(false), // flag used in functional testing
       }).default();
     },
 
     init(server) {
       const mapsEnabled = server.config().get('xpack.maps.enabled');
-
+      const { usageCollection } = server.newPlatform.setup.plugins;
       if (!mapsEnabled) {
         server.log(['info', 'maps'], 'Maps app disabled by configuration');
         return;
       }
-      initTelemetryCollection(server);
+      initTelemetryCollection(usageCollection, server);
 
-      const xpackMainPlugin = server.plugins.xpack_main;
-      let routesInitialized = false;
+      const coreSetup = server.newPlatform.setup.core;
+      const newPlatformPlugins = server.newPlatform.setup.plugins;
+      const pluginsSetup = {
+        featuresPlugin: newPlatformPlugins.features,
+        licensing: newPlatformPlugins.licensing,
+        home: newPlatformPlugins.home,
+      };
 
-      xpackMainPlugin.registerFeature({
-        id: 'maps',
-        name: i18n.translate('xpack.maps.featureRegistry.mapsFeatureName', {
-          defaultMessage: 'Maps',
-        }),
-        icon: APP_ICON,
-        navLinkId: 'maps',
-        app: [APP_ID, 'kibana'],
-        catalogue: ['maps'],
-        privileges: {
-          all: {
-            savedObject: {
-              all: ['map'],
-              read: ['index-pattern']
-            },
-            ui: ['save', 'show'],
-          },
-          read: {
-            savedObject: {
-              all: [],
-              read: ['map', 'index-pattern']
-            },
-            ui: ['show'],
-          },
-        }
-      });
+      // legacy dependencies
+      const __LEGACY = {
+        config: server.config,
+        mapConfig() {
+          return server.config().get('map');
+        },
+        route: server.route.bind(server),
+        plugins: {
+          elasticsearch: server.plugins.elasticsearch,
+        },
+        savedObjects: {
+          getSavedObjectsRepository: server.savedObjects.getSavedObjectsRepository,
+        },
+        injectUiAppVars: server.injectUiAppVars,
+        getInjectedUiAppVars: server.getInjectedUiAppVars,
+      };
 
-      watchStatusAndLicenseToInitialize(xpackMainPlugin, this,
-        async license => {
-          if (license && license.maps && !routesInitialized) {
-            routesInitialized = true;
-            initRoutes(server, license.uid);
-          }
-        });
-
-      xpackMainPlugin.info
-        .feature(this.id)
-        .registerLicenseCheckResultsGenerator(checkLicense);
-
-      const sampleDataLinkLabel = i18n.translate('xpack.maps.sampleDataLinkLabel', {
-        defaultMessage: 'Map'
-      });
-      server.addSavedObjectsToSampleDataset('ecommerce', getEcommerceSavedObjects());
-      server.addAppLinksToSampleDataset('ecommerce', [
-        {
-          path: createMapPath('2c9c1f60-1909-11e9-919b-ffe5949a18d2'),
-          label: sampleDataLinkLabel,
-          icon: 'gisApp'
-        }
-      ]);
-      server.addSavedObjectsToSampleDataset('flights', getFlightsSavedObjects());
-      server.addAppLinksToSampleDataset('flights', [
-        {
-          path: createMapPath('5dd88580-1906-11e9-919b-ffe5949a18d2'),
-          label: sampleDataLinkLabel,
-          icon: 'gisApp'
-        }
-      ]);
-      server.addSavedObjectsToSampleDataset('logs', getWebLogsSavedObjects());
-      server.addAppLinksToSampleDataset('logs', [
-        {
-          path: createMapPath('de71f4f0-1902-11e9-919b-ffe5949a18d2'),
-          label: sampleDataLinkLabel,
-          icon: 'gisApp'
-        }
-      ]);
-      server.injectUiAppVars('maps', async () => {
-        return await server.getInjectedUiAppVars('kibana');
-      });
-    }
+      const mapPluginSetup = new MapPlugin().setup(coreSetup, pluginsSetup, __LEGACY);
+      server.expose('getMapConfig', mapPluginSetup.getMapConfig);
+    },
   });
 }

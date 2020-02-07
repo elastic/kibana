@@ -27,6 +27,7 @@ import { workspacePackagePaths } from './workspaces';
 
 const glob = promisify(globSync);
 
+/** a Map of project names to Project instances */
 export type ProjectMap = Map<string, Project>;
 export type ProjectGraph = Map<string, Project[]>;
 export interface IProjectsOptions {
@@ -198,7 +199,7 @@ export function includeTransitiveProjects(
   allProjects: ProjectMap,
   { onlyProductionDependencies = false } = {}
 ) {
-  const dependentProjects: ProjectMap = new Map();
+  const projectsWithDependents: ProjectMap = new Map();
 
   // the current list of packages we are expanding using breadth-first-search
   const toProcess = [...subsetOfProjects];
@@ -216,8 +217,8 @@ export function includeTransitiveProjects(
       }
     });
 
-    dependentProjects.set(project.name, project);
+    projectsWithDependents.set(project.name, project);
   }
 
-  return dependentProjects;
+  return projectsWithDependents;
 }

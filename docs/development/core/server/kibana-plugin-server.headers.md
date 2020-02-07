@@ -4,9 +4,14 @@
 
 ## Headers type
 
+Http request headers to read.
 
 <b>Signature:</b>
 
 ```typescript
-export declare type Headers = Record<string, string | string[] | undefined>;
+export declare type Headers = {
+    [header in KnownHeaders]?: string | string[] | undefined;
+} & {
+    [header: string]: string | string[] | undefined;
+};
 ```

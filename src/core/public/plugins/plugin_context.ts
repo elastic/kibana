@@ -17,7 +17,9 @@
  * under the License.
  */
 
-import { DiscoveredPlugin, PluginName } from '../../server';
+import { omit } from 'lodash';
+import { DiscoveredPlugin } from '../../server';
+import { PluginOpaqueId, PackageInfo, EnvironmentMode } from '../../server/types';
 import { CoreContext } from '../core_system';
 import { PluginWrapper } from './plugin';
 import { PluginsServiceSetupDeps, PluginsServiceStartDeps } from './plugins_service';
@@ -28,22 +30,47 @@ import { CoreSetup, CoreStart } from '../';
  *
  * @public
  */
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface PluginInitializerContext {}
+export interface PluginInitializerContext<ConfigSchema extends object = object> {
+  /**
+   * A symbol used to identify this plugin in the system. Needed when registering handlers or context providers.
+   */
+  readonly opaqueId: PluginOpaqueId;
+  readonly env: {
+    mode: Readonly<EnvironmentMode>;
+    packageInfo: Readonly<PackageInfo>;
+  };
+  readonly config: {
+    get: <T extends object = ConfigSchema>() => T;
+  };
+}
 
 /**
  * Provides a plugin-specific context passed to the plugin's construtor. This is currently
  * empty but should provide static services in the future, such as config and logging.
  *
  * @param coreContext
- * @param pluginManinfest
+ * @param opaqueId
+ * @param pluginManifest
+ * @param pluginConfig
  * @internal
  */
 export function createPluginInitializerContext(
   coreContext: CoreContext,
-  pluginManifest: DiscoveredPlugin
+  opaqueId: PluginOpaqueId,
+  pluginManifest: DiscoveredPlugin,
+  pluginConfig: {
+    [key: string]: unknown;
+  }
 ): PluginInitializerContext {
-  return {};
+  return {
+    opaqueId,
+    env: coreContext.env,
+    config: {
+      get<T>() {
+        return (pluginConfig as unknown) as T;
+      },
+    },
+  };
 }
 
 /**
@@ -59,18 +86,29 @@ export function createPluginInitializerContext(
 export function createPluginSetupContext<
   TSetup,
   TStart,
-  TPluginsSetup extends Record<PluginName, unknown>,
-  TPluginsStart extends Record<PluginName, unknown>
+  TPluginsSetup extends object,
+  TPluginsStart extends object
 >(
   coreContext: CoreContext,
   deps: PluginsServiceSetupDeps,
   plugin: PluginWrapper<TSetup, TStart, TPluginsSetup, TPluginsStart>
 ): CoreSetup {
   return {
-    http: deps.http,
+    application: {
+      register: app => deps.application.register(plugin.opaqueId, app),
+      registerAppUpdater: statusUpdater$ => deps.application.registerAppUpdater(statusUpdater$),
+      registerMountContext: (contextName, provider) =>
+        deps.application.registerMountContext(plugin.opaqueId, contextName, provider),
+    },
+    context: deps.context,
     fatalErrors: deps.fatalErrors,
+    http: deps.http,
     notifications: deps.notifications,
     uiSettings: deps.uiSettings,
+    injectedMetadata: {
+      getInjectedVar: deps.injectedMetadata.getInjectedVar,
+    },
+    getStartServices: () => plugin.startDependencies,
   };
 }
 
@@ -87,8 +125,8 @@ export function createPluginSetupContext<
 export function createPluginStartContext<
   TSetup,
   TStart,
-  TPluginsSetup extends Record<PluginName, unknown>,
-  TPluginsStart extends Record<PluginName, unknown>
+  TPluginsSetup extends object,
+  TPluginsStart extends object
 >(
   coreContext: CoreContext,
   deps: PluginsServiceStartDeps,
@@ -97,13 +135,22 @@ export function createPluginStartContext<
   return {
     application: {
       capabilities: deps.application.capabilities,
+      navigateToApp: deps.application.navigateToApp,
+      getUrlForApp: deps.application.getUrlForApp,
+      registerMountContext: (contextName, provider) =>
+        deps.application.registerMountContext(plugin.opaqueId, contextName, provider),
     },
     docLinks: deps.docLinks,
     http: deps.http,
-    chrome: deps.chrome,
+    chrome: omit(deps.chrome, 'getComponent'),
     i18n: deps.i18n,
     notifications: deps.notifications,
     overlays: deps.overlays,
     uiSettings: deps.uiSettings,
+    savedObjects: deps.savedObjects,
+    injectedMetadata: {
+      getInjectedVar: deps.injectedMetadata.getInjectedVar,
+    },
+    fatalErrors: deps.fatalErrors,
   };
 }

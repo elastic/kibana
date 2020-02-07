@@ -5,13 +5,15 @@
  */
 
 import { mount } from 'enzyme';
-import * as React from 'react';
+import React from 'react';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
 import { mockGlobalState, apolloClientObservable } from '../../../mock';
 import { createStore, State } from '../../../store';
 
 import { Properties, showDescriptionThreshold, showNotesThreshold } from '.';
+
+jest.mock('../../../lib/kibana');
 
 describe('Properties', () => {
   const usersViewing = ['elastic'];
@@ -30,6 +32,7 @@ describe('Properties', () => {
         <Properties
           associateNote={jest.fn()}
           createTimeline={jest.fn()}
+          isDataInTimeline={false}
           isDatepickerLocked={false}
           isFavorite={false}
           title=""
@@ -56,6 +59,7 @@ describe('Properties', () => {
         <Properties
           associateNote={jest.fn()}
           createTimeline={jest.fn()}
+          isDataInTimeline={false}
           isDatepickerLocked={false}
           isFavorite={false}
           title=""
@@ -83,6 +87,7 @@ describe('Properties', () => {
         <Properties
           associateNote={jest.fn()}
           createTimeline={jest.fn()}
+          isDataInTimeline={false}
           isDatepickerLocked={false}
           isFavorite={true}
           title=""
@@ -112,6 +117,7 @@ describe('Properties', () => {
         <Properties
           associateNote={jest.fn()}
           createTimeline={jest.fn()}
+          isDataInTimeline={false}
           isDatepickerLocked={false}
           isFavorite={false}
           title={title}
@@ -144,6 +150,7 @@ describe('Properties', () => {
         <Properties
           associateNote={jest.fn()}
           createTimeline={jest.fn()}
+          isDataInTimeline={false}
           isDatepickerLocked={false}
           isFavorite={false}
           title=""
@@ -176,6 +183,7 @@ describe('Properties', () => {
         <Properties
           associateNote={jest.fn()}
           createTimeline={jest.fn()}
+          isDataInTimeline={false}
           isDatepickerLocked={true}
           isFavorite={false}
           title=""
@@ -207,6 +215,7 @@ describe('Properties', () => {
         <Properties
           associateNote={jest.fn()}
           createTimeline={jest.fn()}
+          isDataInTimeline={false}
           isDatepickerLocked={false}
           isFavorite={false}
           title=""
@@ -241,6 +250,7 @@ describe('Properties', () => {
         <Properties
           associateNote={jest.fn()}
           createTimeline={jest.fn()}
+          isDataInTimeline={false}
           isDatepickerLocked={false}
           isFavorite={false}
           title=""
@@ -277,6 +287,7 @@ describe('Properties', () => {
         <Properties
           associateNote={jest.fn()}
           createTimeline={jest.fn()}
+          isDataInTimeline={false}
           isDatepickerLocked={false}
           isFavorite={false}
           title=""
@@ -311,6 +322,7 @@ describe('Properties', () => {
         <Properties
           associateNote={jest.fn()}
           createTimeline={jest.fn()}
+          isDataInTimeline={false}
           isDatepickerLocked={false}
           isFavorite={false}
           title=""
@@ -345,6 +357,7 @@ describe('Properties', () => {
         <Properties
           associateNote={jest.fn()}
           createTimeline={jest.fn()}
+          isDataInTimeline={false}
           isDatepickerLocked={false}
           isFavorite={false}
           title=""
@@ -377,6 +390,7 @@ describe('Properties', () => {
         <Properties
           associateNote={jest.fn()}
           createTimeline={jest.fn()}
+          isDataInTimeline={false}
           isDatepickerLocked={false}
           isFavorite={false}
           title=""
@@ -406,6 +420,7 @@ describe('Properties', () => {
         <Properties
           associateNote={jest.fn()}
           createTimeline={jest.fn()}
+          isDataInTimeline={false}
           isDatepickerLocked={false}
           isFavorite={false}
           title={title}
@@ -433,6 +448,7 @@ describe('Properties', () => {
         <Properties
           associateNote={jest.fn()}
           createTimeline={jest.fn()}
+          isDataInTimeline={false}
           isDatepickerLocked={false}
           isFavorite={false}
           title=""

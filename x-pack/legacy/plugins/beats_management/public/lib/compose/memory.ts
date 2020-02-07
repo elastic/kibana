@@ -3,8 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import { AutocompleteSuggestion } from 'ui/autocomplete_providers';
 import 'ui/autoload/all';
 // @ts-ignore: path dynamic for kibana
 import { management } from 'ui/management';
@@ -26,13 +24,14 @@ import { TagsLib } from '../tags';
 import { FrontendLibs } from '../types';
 import { MemoryElasticsearchAdapter } from './../adapters/elasticsearch/memory';
 import { ElasticsearchLib } from './../elasticsearch';
+import { autocomplete } from '../../../../../../../src/plugins/data/public';
 
 const onKibanaReady = uiModules.get('kibana').run;
 
 export function compose(
   mockIsKueryValid: (kuery: string) => boolean,
   mockKueryToEsQuery: (kuery: string) => string,
-  suggestions: AutocompleteSuggestion[]
+  suggestions: autocomplete.QuerySuggestion[]
 ): FrontendLibs {
   const esAdapter = new MemoryElasticsearchAdapter(
     mockIsKueryValid,

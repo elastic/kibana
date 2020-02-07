@@ -17,145 +17,112 @@
  * under the License.
  */
 
-import _ from 'lodash';
-import { KbnServer, KibanaMigrator } from './kibana_migrator';
+import { KibanaMigratorOptions, KibanaMigrator } from './kibana_migrator';
+import { loggingServiceMock } from '../../../logging/logging_service.mock';
+import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
+import { SavedObjectsType } from '../../types';
+
+const createRegistry = (types: Array<Partial<SavedObjectsType>>) => {
+  const registry = new SavedObjectTypeRegistry();
+  types.forEach(type =>
+    registry.registerType({
+      name: 'unknown',
+      namespaceAgnostic: false,
+      hidden: false,
+      mappings: { properties: {} },
+      migrations: {},
+      ...type,
+    })
+  );
+  return registry;
+};
 
 describe('KibanaMigrator', () => {
   describe('getActiveMappings', () => {
     it('returns full index mappings w/ core properties', () => {
-      const { kbnServer } = mockKbnServer();
-      kbnServer.uiExports.savedObjectMappings = [
+      const options = mockOptions();
+      options.typeRegistry = createRegistry([
         {
-          pluginId: 'aaa',
-          properties: { amap: { type: 'text' } },
+          name: 'amap',
+          mappings: {
+            properties: { field: { type: 'text' } },
+          },
         },
         {
-          pluginId: 'bbb',
-          properties: { bmap: { type: 'text' } },
+          name: 'bmap',
+          indexPattern: 'other-index',
+          mappings: {
+            properties: { field: { type: 'text' } },
+          },
         },
-      ];
-      const mappings = new KibanaMigrator({ kbnServer }).getActiveMappings();
-      expect(mappings).toMatchSnapshot();
-    });
+      ]);
 
-    it('Fails if duplicate mappings are defined', () => {
-      const { kbnServer } = mockKbnServer();
-      kbnServer.uiExports.savedObjectMappings = [
-        {
-          pluginId: 'aaa',
-          properties: { amap: { type: 'text' } },
-        },
-        {
-          pluginId: 'bbb',
-          properties: { amap: { type: 'long' } },
-        },
-      ];
-      expect(() => new KibanaMigrator({ kbnServer }).getActiveMappings()).toThrow(
-        /Plugin bbb is attempting to redefine mapping "amap"/
-      );
+      const mappings = new KibanaMigrator(options).getActiveMappings();
+      expect(mappings).toMatchSnapshot();
     });
   });
 
-  describe('awaitMigration', () => {
-    it('changes isMigrated to true if migrations were skipped', async () => {
-      const { kbnServer } = mockKbnServer();
-      kbnServer.server.plugins.elasticsearch = undefined;
-      const result = await new KibanaMigrator({ kbnServer }).awaitMigration();
-      expect(result).toEqual([{ status: 'skipped' }, { status: 'skipped' }]);
-    });
-
-    it('waits for kbnServer.ready and elasticsearch.ready before attempting migrations', async () => {
-      const { kbnServer } = mockKbnServer();
+  describe('runMigrations', () => {
+    it('only runs migrations once if called multiple times', async () => {
+      const options = mockOptions();
       const clusterStub = jest.fn<any, any>(() => ({ status: 404 }));
-      const waitUntilReady = jest.fn(async () => undefined);
 
-      kbnServer.server.plugins.elasticsearch = {
-        waitUntilReady,
-        getCluster() {
-          expect(kbnServer.ready as any).toHaveBeenCalledTimes(1);
-          expect(waitUntilReady).toHaveBeenCalledTimes(1);
+      options.callCluster = clusterStub;
+      const migrator = new KibanaMigrator(options);
+      await migrator.runMigrations();
+      await migrator.runMigrations();
 
-          return {
-            callWithInternalUser: clusterStub,
-          };
-        },
-      };
-
-      const migrationResults = await new KibanaMigrator({ kbnServer }).awaitMigration();
-      expect(migrationResults.length).toEqual(2);
+      // callCluster with "cat.templates" is called by "deleteIndexTemplates" function
+      // and should only be done once
+      const callClusterCommands = clusterStub.mock.calls
+        .map(([callClusterPath]) => callClusterPath)
+        .filter(callClusterPath => callClusterPath === 'cat.templates');
+      expect(callClusterCommands.length).toBe(1);
     });
   });
 });
 
-function mockKbnServer({ configValues }: { configValues?: any } = {}) {
+function mockOptions(): KibanaMigratorOptions {
   const callCluster = jest.fn();
-  const kbnServer: KbnServer = {
-    version: '8.2.3',
-    ready: jest.fn(async () => undefined),
-    uiExports: {
-      savedObjectsManagement: {},
-      savedObjectValidations: {},
-      savedObjectMigrations: {},
-      savedObjectMappings: [
-        {
-          pluginId: 'testtype',
+  return {
+    logger: loggingServiceMock.create().get(),
+    kibanaVersion: '8.2.3',
+    savedObjectValidations: {},
+    typeRegistry: createRegistry([
+      {
+        name: 'testtype',
+        hidden: false,
+        namespaceAgnostic: false,
+        mappings: {
           properties: {
-            testtype: {
-              properties: {
-                name: { type: 'keyword' },
-              },
-            },
+            name: { type: 'keyword' },
           },
         },
-        {
-          pluginId: 'testtype2',
+        migrations: {},
+      },
+      {
+        name: 'testtype2',
+        hidden: false,
+        namespaceAgnostic: false,
+        indexPattern: 'other-index',
+        mappings: {
           properties: {
-            testtype2: {
-              properties: {
-                name: { type: 'keyword' },
-              },
-            },
+            name: { type: 'keyword' },
           },
         },
-      ],
-      savedObjectSchemas: {
-        testtype2: {
-          isNamespaceAgnostic: false,
-          indexPattern: 'other-index',
-        },
+        migrations: {},
       },
+    ]),
+    kibanaConfig: {
+      enabled: true,
+      index: '.my-index',
+    } as KibanaMigratorOptions['kibanaConfig'],
+    savedObjectsConfig: {
+      batchSize: 20,
+      pollInterval: 20000,
+      scrollDuration: '10m',
+      skip: false,
     },
-    server: {
-      config: () => ({
-        get: ((name: string) => {
-          if (configValues && configValues[name]) {
-            return configValues[name];
-          }
-          switch (name) {
-            case 'kibana.index':
-              return '.my-index';
-            case 'migrations.batchSize':
-              return 20;
-            case 'migrations.pollInterval':
-              return 20000;
-            case 'migrations.scrollDuration':
-              return '10m';
-            default:
-              throw new Error(`Unexpected config ${name}`);
-          }
-        }) as any,
-      }),
-      log: _.noop as any,
-      plugins: {
-        elasticsearch: {
-          getCluster: () => ({
-            callWithInternalUser: callCluster,
-          }),
-          waitUntilReady: async () => undefined,
-        },
-      },
-    },
+    callCluster,
   };
-
-  return { kbnServer, callCluster };
 }

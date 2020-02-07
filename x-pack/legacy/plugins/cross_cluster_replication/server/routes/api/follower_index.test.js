@@ -4,25 +4,27 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { callWithRequestFactory } from '../../lib/call_with_request_factory';
-import { isEsErrorFactory } from '../../lib/is_es_error_factory';
-import { registerFollowerIndexRoutes } from './follower_index';
+import { deserializeFollowerIndex } from '../../../common/services/follower_index_serialization';
 import {
   getFollowerIndexStatsMock,
   getFollowerIndexListStatsMock,
   getFollowerIndexInfoMock,
   getFollowerIndexListInfoMock,
 } from '../../../fixtures';
-import { deserializeFollowerIndex } from '../../lib/follower_index_serialization';
+import { callWithRequestFactory } from '../../lib/call_with_request_factory';
+import { isEsErrorFactory } from '../../lib/is_es_error_factory';
+import { registerFollowerIndexRoutes } from './follower_index';
 
 jest.mock('../../lib/call_with_request_factory');
 jest.mock('../../lib/is_es_error_factory');
 jest.mock('../../lib/license_pre_routing_factory');
 
-const DESERIALIZED_KEYS = Object.keys(deserializeFollowerIndex({
-  ...getFollowerIndexInfoMock(),
-  ...getFollowerIndexStatsMock()
-}));
+const DESERIALIZED_KEYS = Object.keys(
+  deserializeFollowerIndex({
+    ...getFollowerIndexInfoMock(),
+    ...getFollowerIndexStatsMock(),
+  })
+);
 
 /**
  * Hashtable to save the route handlers
@@ -77,7 +79,7 @@ const setHttpRequestResponse = (error, response) => {
   requestResponseQueue.push({ error, response });
 };
 
-const resetHttpRequestResponses = () => requestResponseQueue = [];
+const resetHttpRequestResponses = () => (requestResponseQueue = []);
 
 const getNextResponseFromQueue = () => {
   if (!requestResponseQueue.length) {
@@ -108,7 +110,10 @@ describe('[CCR API Routes] Follower Index', () => {
     it('deserializes the response from Elasticsearch', async () => {
       const totalResult = 2;
       const infoResult = getFollowerIndexListInfoMock(totalResult);
-      const statsResult = getFollowerIndexListStatsMock(totalResult, infoResult.follower_indices.map(index => index.follower_index));
+      const statsResult = getFollowerIndexListStatsMock(
+        totalResult,
+        infoResult.follower_indices.map(index => index.follower_index)
+      );
       setHttpRequestResponse(null, infoResult);
       setHttpRequestResponse(null, statsResult);
 

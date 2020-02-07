@@ -4,9 +4,11 @@
 
 ## ChromeNavLink.active property
 
-Indicates whether or not this app is currently on the screen.
+> Warning: This API is now obsolete.
+> 
+> 
 
-NOTE: remove this when ApplicationService is implemented and managing apps.
+Indicates whether or not this app is currently on the screen.
 
 <b>Signature:</b>
 

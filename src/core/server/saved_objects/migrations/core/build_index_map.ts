@@ -17,24 +17,43 @@
  * under the License.
  */
 
-import { MappingProperties } from '../../mappings';
-import { SavedObjectsSchemaDefinition } from '../../schema';
+import { SavedObjectsTypeMappingDefinitions } from '../../mappings';
+import { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
+
+export interface CreateIndexMapOptions {
+  kibanaIndexName: string;
+  registry: ISavedObjectTypeRegistry;
+  indexMap: SavedObjectsTypeMappingDefinitions;
+}
+
+export interface IndexMap {
+  [index: string]: {
+    typeMappings: SavedObjectsTypeMappingDefinitions;
+    script?: string;
+  };
+}
 
 /*
- * This file contains logic to convert savedObjectSchemas into a dictonary of indexes and documents
+ * This file contains logic to convert savedObjectSchemas into a dictionary of indexes and documents
  */
-export function createIndexMap(
-  defaultIndex: string,
-  savedObjectSchemas: SavedObjectsSchemaDefinition,
-  indexMap: MappingProperties
-) {
-  const map: { [index: string]: MappingProperties } = {};
+export function createIndexMap({ kibanaIndexName, registry, indexMap }: CreateIndexMapOptions) {
+  const map: IndexMap = {};
   Object.keys(indexMap).forEach(type => {
-    const indexPattern = (savedObjectSchemas[type] || {}).indexPattern || defaultIndex;
+    const typeDef = registry.getType(type);
+    const script = typeDef?.convertToAliasScript;
+    // Defaults to kibanaIndexName if indexPattern isn't defined
+    const indexPattern = typeDef?.indexPattern || kibanaIndexName;
     if (!map.hasOwnProperty(indexPattern as string)) {
-      map[indexPattern] = {};
+      map[indexPattern] = { typeMappings: {} };
     }
-    map[indexPattern][type] = indexMap[type];
+    map[indexPattern].typeMappings[type] = indexMap[type];
+    if (script && map[indexPattern].script) {
+      throw Error(
+        `convertToAliasScript has been defined more than once for index pattern "${indexPattern}"`
+      );
+    } else if (script) {
+      map[indexPattern].script = script;
+    }
   });
   return map;
 }

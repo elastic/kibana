@@ -1,0 +1,215 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Storyshots arguments/DateFormat with custom format 1`] = `
+Array [
+  <div
+    className="euiFormControlLayout euiFormControlLayout--compressed"
+  >
+    <div
+      className="euiFormControlLayout__childrenWrapper"
+    >
+      <select
+        className="euiSelect euiSelect--compressed"
+        id="DateFormatExample3"
+        onChange={[Function]}
+        onMouseUp={[Function]}
+        value="custom"
+      >
+        <option
+          value="l"
+        >
+          Shorthand
+        </option>
+        <option
+          value="x"
+        >
+          Unix
+        </option>
+        <option
+          value="LLL"
+        >
+          Longhand
+        </option>
+        <option
+          value="custom"
+        >
+          Custom
+        </option>
+      </select>
+      <div
+        className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+      >
+        <span
+          className="euiFormControlLayoutCustomIcon"
+        >
+          <svg
+            aria-hidden={true}
+            className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+            focusable="false"
+            height={16}
+            role="img"
+            style={null}
+            viewBox="0 0 16 16"
+            width={16}
+            xmlns="http://www.w3.org/2000/svg"
+          />
+        </span>
+      </div>
+    </div>
+  </div>,
+  <div
+    className="euiSpacer euiSpacer--s"
+  />,
+  <div
+    className="euiFormControlLayout euiFormControlLayout--compressed"
+  >
+    <div
+      className="euiFormControlLayout__childrenWrapper"
+    >
+      <input
+        className="euiFieldText euiFieldText--compressed"
+        onChange={[Function]}
+        placeholder="M/D/YY h:ma"
+        type="text"
+        value="MM/DD/YYYY"
+      />
+    </div>
+  </div>,
+]
+`;
+
+exports[`Storyshots arguments/DateFormat with no format 1`] = `
+Array [
+  <div
+    className="euiFormControlLayout euiFormControlLayout--compressed"
+  >
+    <div
+      className="euiFormControlLayout__childrenWrapper"
+    >
+      <select
+        className="euiSelect euiSelect--compressed"
+        id="DateFormatExample1"
+        onChange={[Function]}
+        onMouseUp={[Function]}
+        value="custom"
+      >
+        <option
+          value="l"
+        >
+          Shorthand
+        </option>
+        <option
+          value="x"
+        >
+          Unix
+        </option>
+        <option
+          value="LLL"
+        >
+          Longhand
+        </option>
+        <option
+          value="custom"
+        >
+          Custom
+        </option>
+      </select>
+      <div
+        className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+      >
+        <span
+          className="euiFormControlLayoutCustomIcon"
+        >
+          <svg
+            aria-hidden={true}
+            className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+            focusable="false"
+            height={16}
+            role="img"
+            style={null}
+            viewBox="0 0 16 16"
+            width={16}
+            xmlns="http://www.w3.org/2000/svg"
+          />
+        </span>
+      </div>
+    </div>
+  </div>,
+  <div
+    className="euiSpacer euiSpacer--s"
+  />,
+  <div
+    className="euiFormControlLayout euiFormControlLayout--compressed"
+  >
+    <div
+      className="euiFormControlLayout__childrenWrapper"
+    >
+      <input
+        className="euiFieldText euiFieldText--compressed"
+        onChange={[Function]}
+        placeholder="M/D/YY h:ma"
+        type="text"
+        value=""
+      />
+    </div>
+  </div>,
+]
+`;
+
+exports[`Storyshots arguments/DateFormat with preset format 1`] = `
+<div
+  className="euiFormControlLayout euiFormControlLayout--compressed"
+>
+  <div
+    className="euiFormControlLayout__childrenWrapper"
+  >
+    <select
+      className="euiSelect euiSelect--compressed"
+      id="DateFormatExample2"
+      onChange={[Function]}
+      onMouseUp={[Function]}
+      value="LLL"
+    >
+      <option
+        value="l"
+      >
+        Shorthand
+      </option>
+      <option
+        value="x"
+      >
+        Unix
+      </option>
+      <option
+        value="LLL"
+      >
+        Longhand
+      </option>
+      <option
+        value="custom"
+      >
+        Custom
+      </option>
+    </select>
+    <div
+      className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+    >
+      <span
+        className="euiFormControlLayoutCustomIcon"
+      >
+        <svg
+          aria-hidden={true}
+          className="euiIcon euiIcon--medium euiIcon-isLoading euiFormControlLayoutCustomIcon__icon"
+          focusable="false"
+          height={16}
+          role="img"
+          style={null}
+          viewBox="0 0 16 16"
+          width={16}
+          xmlns="http://www.w3.org/2000/svg"
+        />
+      </span>
+    </div>
+  </div>
+</div>
+`;

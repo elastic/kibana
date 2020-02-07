@@ -3,8 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
-import { getFunctionHelp } from '../../strings';
+
+import { ExpressionFunction } from 'src/plugins/expressions/common/types';
+import { getFunctionHelp } from '../../../i18n';
 
 export enum Shape {
   ARROW = 'arrow',
@@ -49,6 +50,13 @@ export function shape(): ExpressionFunction<'shape', null, Arguments, Return> {
       types: ['null'],
     },
     args: {
+      shape: {
+        types: ['string'],
+        help: argHelp.shape,
+        aliases: ['_'],
+        default: 'square',
+        options: Object.values(Shape),
+      },
       border: {
         types: ['string'],
         aliases: ['stroke'],
@@ -59,13 +67,6 @@ export function shape(): ExpressionFunction<'shape', null, Arguments, Return> {
         aliases: ['strokeWidth'],
         help: argHelp.borderWidth,
         default: 0,
-      },
-      shape: {
-        types: ['string'],
-        help: argHelp.shape,
-        aliases: ['_'],
-        default: 'square',
-        options: Object.values(Shape),
       },
       fill: {
         types: ['string'],

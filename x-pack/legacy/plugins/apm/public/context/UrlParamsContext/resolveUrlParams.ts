@@ -15,11 +15,10 @@ import {
   toNumber,
   toString
 } from './helpers';
-import {
-  toQuery,
-  legacyDecodeURIComponent
-} from '../../components/shared/Links/url_helpers';
+import { toQuery } from '../../components/shared/Links/url_helpers';
 import { TIMEPICKER_DEFAULTS } from './constants';
+import { localUIFilterNames } from '../../../server/lib/ui_filters/local_ui_filters/config';
+import { pickKeys } from '../../utils/pickKeys';
 
 type TimeUrlParams = Pick<
   IUrlParams,
@@ -30,19 +29,24 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
   const {
     processorEvent,
     serviceName,
-    transactionName,
-    transactionType,
-    errorGroupId
+    serviceNodeName,
+    errorGroupId,
+    traceId: traceIdLink
   } = getPathParams(location.pathname);
+
+  const query = toQuery(location.search);
 
   const {
     traceId,
     transactionId,
+    transactionName,
+    transactionType,
     detailTab,
     flyoutDetailTab,
     waterfallItemId,
     spanId,
     page,
+    pageSize,
     sortDirection,
     sortField,
     kuery,
@@ -50,8 +54,11 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
     refreshInterval = TIMEPICKER_DEFAULTS.refreshInterval,
     rangeFrom = TIMEPICKER_DEFAULTS.rangeFrom,
     rangeTo = TIMEPICKER_DEFAULTS.rangeTo,
-    environment
-  } = toQuery(location.search);
+    environment,
+    searchTerm
+  } = query;
+
+  const localUIFilters = pickKeys(query, ...localUIFilterNames);
 
   return removeUndefinedProps({
     // date params
@@ -61,10 +68,12 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
     rangeTo,
     refreshPaused: toBoolean(refreshPaused),
     refreshInterval: toNumber(refreshInterval),
+
     // query params
     sortDirection,
     sortField,
     page: toNumber(page) || 0,
+    pageSize: pageSize ? toNumber(pageSize) : undefined,
     transactionId: toString(transactionId),
     traceId: toString(traceId),
     waterfallItemId: toString(waterfallItemId),
@@ -72,13 +81,21 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
     flyoutDetailTab: toString(flyoutDetailTab),
     spanId: toNumber(spanId),
     kuery: kuery && decodeURIComponent(kuery),
+    transactionName,
+    transactionType,
+    searchTerm: toString(searchTerm),
+
     // path params
     processorEvent,
     serviceName,
-    transactionType: legacyDecodeURIComponent(transactionType),
-    transactionName: legacyDecodeURIComponent(transactionName),
+    traceIdLink,
     errorGroupId,
+    serviceNodeName: serviceNodeName
+      ? decodeURIComponent(serviceNodeName)
+      : serviceNodeName,
+
     // ui filters
-    environment
+    environment,
+    ...localUIFilters
   });
 }

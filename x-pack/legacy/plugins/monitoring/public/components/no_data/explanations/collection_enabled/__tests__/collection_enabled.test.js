@@ -16,14 +16,12 @@ let component;
 describe('ExplainCollectionEnabled', () => {
   beforeEach(() => {
     enabler.enableCollectionEnabled = sinon.spy();
-    component = (
-      <ExplainCollectionEnabled
-        context="cluster"
-        property="xpack.monitoring.collection.enabled"
-        data="-1"
-        enabler={enabler}
-      />
-    );
+    const reason = {
+      property: 'xpack.monitoring.collection.enabled',
+      data: '-1',
+      context: 'cluster',
+    };
+    component = <ExplainCollectionEnabled {...{ reason, enabler }} />;
   });
 
   test('should explain about xpack.monitoring.collection.enabled setting', () => {

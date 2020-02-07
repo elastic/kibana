@@ -4,21 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount, shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
-import * as React from 'react';
+import { shallow } from 'enzyme';
+import React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
 
 import { mockBrowserFields, mocksSource } from '../../containers/source/mock';
 import { TestProviders } from '../../mock';
 import { mockDataProviders } from '../timeline/data_providers/mock/mock_data_providers';
-
 import { DragDropContextWrapper } from './drag_drop_context_wrapper';
 import { DraggableWrapper } from './draggable_wrapper';
+import { useMountAppended } from '../../utils/use_mount_appended';
 
 describe('DraggableWrapper', () => {
   const dataProvider = mockDataProviders[0];
   const message = 'draggable wrapper content';
+  const mount = useMountAppended();
+
   describe('rendering', () => {
     test('it renders against the snapshot', () => {
       const wrapper = shallow(
@@ -31,7 +32,7 @@ describe('DraggableWrapper', () => {
         </TestProviders>
       );
 
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper.find('DraggableWrapper')).toMatchSnapshot();
     });
 
     test('it renders the children passed to the render prop', () => {
@@ -50,14 +51,12 @@ describe('DraggableWrapper', () => {
   });
 
   describe('text truncation styling', () => {
-    test('it applies text truncation styling when a width IS specified (implicit: and the user is not dragging)', () => {
-      const width = '100px';
-
+    test('it applies text truncation styling when truncate IS specified (implicit: and the user is not dragging)', () => {
       const wrapper = mount(
         <TestProviders>
           <MockedProvider mocks={mocksSource} addTypename={false}>
             <DragDropContextWrapper browserFields={mockBrowserFields}>
-              <DraggableWrapper dataProvider={dataProvider} width={width} render={() => message} />
+              <DraggableWrapper dataProvider={dataProvider} render={() => message} truncate />
             </DragDropContextWrapper>
           </MockedProvider>
         </TestProviders>
@@ -68,7 +67,7 @@ describe('DraggableWrapper', () => {
       );
     });
 
-    test('it does NOT apply text truncation styling when a width is NOT specified', () => {
+    test('it does NOT apply text truncation styling when truncate is NOT specified', () => {
       const wrapper = mount(
         <TestProviders>
           <MockedProvider mocks={mocksSource} addTypename={false}>

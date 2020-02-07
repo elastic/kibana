@@ -5,10 +5,10 @@
  */
 
 import { resolve } from 'path';
-import { KibanaFunctionalTestDefaultProviders } from '../types/providers';
+import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
+import { services } from './services';
 
-// eslint-disable-next-line import/no-default-export
-export default async function({ readConfigFile }: KibanaFunctionalTestDefaultProviders) {
+export default async function({ readConfigFile }: FtrConfigProviderContext) {
   const xPackAPITestsConfig = await readConfigFile(require.resolve('../api_integration/config.js'));
 
   const kerberosKeytabPath = resolve(
@@ -23,11 +23,7 @@ export default async function({ readConfigFile }: KibanaFunctionalTestDefaultPro
   return {
     testFiles: [require.resolve('./apis')],
     servers: xPackAPITestsConfig.get('servers'),
-    services: {
-      es: xPackAPITestsConfig.get('services.es'),
-      esSupertest: xPackAPITestsConfig.get('services.esSupertest'),
-      supertestWithoutAuth: xPackAPITestsConfig.get('services.supertestWithoutAuth'),
-    },
+    services,
     junit: {
       reportName: 'X-Pack Kerberos API Integration Tests',
     },
@@ -38,6 +34,7 @@ export default async function({ readConfigFile }: KibanaFunctionalTestDefaultPro
         ...xPackAPITestsConfig.get('esTestCluster.serverArgs'),
         'xpack.security.authc.token.enabled=true',
         'xpack.security.authc.token.timeout=15s',
+        'xpack.security.authc.realms.kerberos.kerb1.order=0',
         `xpack.security.authc.realms.kerberos.kerb1.keytab.path=${kerberosKeytabPath}`,
       ],
       serverEnvVars: {

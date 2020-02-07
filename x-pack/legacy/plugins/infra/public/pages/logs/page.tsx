@@ -5,17 +5,15 @@
  */
 
 import React from 'react';
+import { RouteComponentProps } from 'react-router-dom';
 
-import { ColumnarPage } from '../../components/page';
 import { LogsPageContent } from './page_content';
-import { LogsPageHeader } from './page_header';
 import { LogsPageProviders } from './page_providers';
 
-export const LogsPage = () => (
-  <LogsPageProviders>
-    <ColumnarPage data-test-subj="infraLogsPage">
-      <LogsPageHeader />
-      <LogsPageContent />
-    </ColumnarPage>
-  </LogsPageProviders>
-);
+export const LogsPage: React.FunctionComponent<RouteComponentProps> = ({ match }) => {
+  return (
+    <LogsPageProviders>
+      <LogsPageContent logsPagePath={match.path} />
+    </LogsPageProviders>
+  );
+};

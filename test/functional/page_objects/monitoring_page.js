@@ -18,21 +18,11 @@
  */
 
 export function MonitoringPageProvider({ getService }) {
-  const testSubjects = getService('testSubjects');
   const find = getService('find');
 
   class MonitoringPage {
     async getWelcome() {
       const el = await find.displayedByCssSelector('render-directive');
-      return await el.getVisibleText();
-    }
-
-    dismissWelcome() {
-      return testSubjects.click('notifierDismissButton');
-    }
-
-    async getToasterContents() {
-      const el = await find.byCssSelector('div.kbnToaster__container');
       return await el.getVisibleText();
     }
 

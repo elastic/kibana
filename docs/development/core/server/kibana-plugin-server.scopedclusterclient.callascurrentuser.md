@@ -4,12 +4,12 @@
 
 ## ScopedClusterClient.callAsCurrentUser() method
 
-Calls specified `endpoint` with provided `clientParams` on behalf of the user initiated request to the Kibana server (via HTTP request headers).
+Calls specified `endpoint` with provided `clientParams` on behalf of the user initiated request to the Kibana server (via HTTP request headers). See [APICaller](./kibana-plugin-server.apicaller.md)<!-- -->.
 
 <b>Signature:</b>
 
 ```typescript
-callAsCurrentUser(endpoint: string, clientParams?: Record<string, unknown>, options?: CallAPIOptions): Promise<unknown>;
+callAsCurrentUser(endpoint: string, clientParams?: Record<string, any>, options?: CallAPIOptions): Promise<any>;
 ```
 
 ## Parameters
@@ -17,10 +17,10 @@ callAsCurrentUser(endpoint: string, clientParams?: Record<string, unknown>, opti
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  endpoint | <code>string</code> | String descriptor of the endpoint e.g. <code>cluster.getSettings</code> or <code>ping</code>. |
-|  clientParams | <code>Record&lt;string, unknown&gt;</code> | A dictionary of parameters that will be passed directly to the Elasticsearch JS client. |
+|  clientParams | <code>Record&lt;string, any&gt;</code> | A dictionary of parameters that will be passed directly to the Elasticsearch JS client. |
 |  options | <code>CallAPIOptions</code> | Options that affect the way we call the API and process the result. |
 
 <b>Returns:</b>
 
-`Promise<unknown>`
+`Promise<any>`
 

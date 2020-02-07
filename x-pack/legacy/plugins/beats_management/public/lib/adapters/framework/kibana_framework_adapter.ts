@@ -10,6 +10,9 @@ import { PathReporter } from 'io-ts/lib/PathReporter';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { UIRoutes } from 'ui/routes';
+import { isLeft } from 'fp-ts/lib/Either';
+import { npSetup } from 'ui/new_platform';
+import { SecurityPluginSetup } from '../../../../../../../plugins/security/public';
 import { BufferedKibanaServiceCall, KibanaAdapterServiceRefs, KibanaUIConfig } from '../../types';
 import {
   FrameworkAdapter,
@@ -44,7 +47,7 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
     private readonly routes: UIRoutes,
     private readonly getBasePath: () => string,
     private readonly onKibanaReady: () => Promise<IInjector>,
-    private readonly XPackInfoProvider: unknown,
+    private readonly xpackInfoService: any | null,
     public readonly version: string
   ) {
     this.adapterService = new KibanaAdapterServiceProvider();
@@ -57,17 +60,10 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
   };
 
   public async waitUntilFrameworkReady(): Promise<void> {
-    const $injector = await this.onKibanaReady();
-    const Private: any = $injector.get('Private');
-
-    let xpackInfo: any;
-    try {
-      xpackInfo = Private(this.XPackInfoProvider);
-    } catch (e) {
-      xpackInfo = false;
-    }
-
+    await this.onKibanaReady();
+    const xpackInfo: any = this.xpackInfoService;
     let xpackInfoUnpacked: FrameworkInfo;
+
     try {
       xpackInfoUnpacked = {
         basePath: this.getBasePath(),
@@ -90,22 +86,24 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
         settings: xpackInfo ? xpackInfo.get(`features.${this.PLUGIN_ID}.settings`) : {},
       };
     } catch (e) {
-      throw new Error(`Unexpected data structure from XPackInfoProvider, ${JSON.stringify(e)}`);
+      throw new Error(`Unexpected data structure from xpackInfoService, ${JSON.stringify(e)}`);
     }
 
     const assertData = RuntimeFrameworkInfo.decode(xpackInfoUnpacked);
-    if (assertData.isLeft()) {
+    if (isLeft(assertData)) {
       throw new Error(
         `Error parsing xpack info in ${this.PLUGIN_ID},   ${PathReporter.report(assertData)[0]}`
       );
     }
     this.xpackInfo = xpackInfoUnpacked;
 
+    const securitySetup = ((npSetup.plugins as unknown) as { security?: SecurityPluginSetup })
+      .security;
     try {
-      this.shieldUser = await $injector.get('ShieldUser').getCurrent().$promise;
+      this.shieldUser = (await securitySetup?.authc.getCurrentUser()) || null;
       const assertUser = RuntimeFrameworkUser.decode(this.shieldUser);
 
-      if (assertUser.isLeft()) {
+      if (isLeft(assertUser)) {
         throw new Error(
           `Error parsing user info in ${this.PLUGIN_ID},   ${PathReporter.report(assertUser)[0]}`
         );

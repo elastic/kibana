@@ -1,0 +1,54 @@
+{
+  "description": "Identifies a suspicious process being spawned from a script interpreter, which could be indicative of a potential phishing attack.",
+  "false_positives": [
+    "Security testing may produce events like this. Activity of this kind performed by non-engineers and ordinary users is unusual."
+  ],
+  "index": [
+    "winlogbeat-*"
+  ],
+  "language": "kuery",
+  "max_signals": 100,
+  "name": "Suspicious Process spawning from Script Interpreter",
+  "query": "(process.parent.name:cmd.exe or process.parent.name:cscript.exe or process.parent.name:mshta.exe or process.parent.name:powershell.exe or process.parent.name:rundll32.exe or process.parent.name:wscript.exe or process.parent.name:wmiprvse.exe) and (process.name:bitsadmin.exe or process.name:certutil.exe or mshta.exe or process.name:nslookup.exe or process.name:schtasks.exe) and event.code:1",
+  "risk_score": 21,
+  "rule_id": "89db767d-99f9-479f-8052-9205fd3090c4",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Windows"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1064",
+          "name": "Scripting",
+          "reference": "https://attack.mitre.org/techniques/T1064/"
+        }
+      ]
+    },
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0002",
+        "name": "Execution",
+        "reference": "https://attack.mitre.org/tactics/TA0002/"
+      },
+      "technique": [
+        {
+          "id": "T1064",
+          "name": "Scripting",
+          "reference": "https://attack.mitre.org/techniques/T1064/"
+        }
+      ]
+    }
+  ],
+  "type": "query",
+  "version": 1
+}

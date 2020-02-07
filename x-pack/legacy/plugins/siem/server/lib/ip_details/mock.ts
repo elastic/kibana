@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DomainsEdges, NetworkDirectionEcs, UsersEdges } from '../../graphql/types';
+import { UsersEdges } from '../../graphql/types';
 
-import { DomainsBuckets, IpOverviewHit, UsersResponse } from './types';
+import { IpOverviewHit, UsersResponse } from './types';
 
 export const responseAggs: IpOverviewHit = {
   aggregations: {
@@ -52,7 +52,7 @@ export const responseAggs: IpOverviewHit = {
         value: 1551388820000,
         value_as_string: '2019-02-28T21:20:20.000Z',
       },
-      autonomous_system: {
+      autonomousSystem: {
         doc_count: 0,
         results: {
           hits: {
@@ -112,7 +112,7 @@ export const responseAggs: IpOverviewHit = {
         value: 1551388804322,
         value_as_string: '2019-02-28T21:20:04.322Z',
       },
-      autonomous_system: {
+      autonomousSystem: {
         doc_count: 0,
         results: {
           hits: {
@@ -128,44 +128,41 @@ export const responseAggs: IpOverviewHit = {
     },
     host: {
       doc_count: 1588091,
-      host: {
-        doc_count: 1588091,
-        results: {
-          hits: {
-            total: {
-              value: 1588091,
-              relation: 'eq',
-            },
-            max_score: null,
-            hits: [
-              {
-                _index: 'filebeat-8.0.0-2019.05.20-000004',
-                _type: '_doc',
-                _id: 'NU9dD2sB9v5HJNSHMMRc',
-                _score: null,
-                _source: {
-                  host: {
-                    hostname: 'suricata-iowa',
-                    os: {
-                      kernel: '4.15.0-1032-gcp',
-                      codename: 'bionic',
-                      name: 'Ubuntu',
-                      family: 'debian',
-                      version: '18.04.2 LTS (Bionic Beaver)',
-                      platform: 'ubuntu',
-                    },
-                    ip: ['10.128.0.4', 'fe80::4001:aff:fe80:4'],
-                    containerized: false,
-                    name: 'suricata-iowa',
-                    id: 'be1f3d767896212736b880e846876dcb',
-                    mac: ['42:01:0a:80:00:04'],
-                    architecture: 'x86_64',
-                  },
-                },
-                sort: [1559330892000],
-              },
-            ],
+      results: {
+        hits: {
+          total: {
+            value: 1588091,
+            relation: 'eq',
           },
+          max_score: null,
+          hits: [
+            {
+              _index: 'filebeat-8.0.0-2019.05.20-000004',
+              _type: '_doc',
+              _id: 'NU9dD2sB9v5HJNSHMMRc',
+              _score: null,
+              _source: {
+                host: {
+                  hostname: 'suricata-iowa',
+                  os: {
+                    kernel: '4.15.0-1032-gcp',
+                    codename: 'bionic',
+                    name: 'Ubuntu',
+                    family: 'debian',
+                    version: '18.04.2 LTS (Bionic Beaver)',
+                    platform: 'ubuntu',
+                  },
+                  ip: ['10.128.0.4', 'fe80::4001:aff:fe80:4'],
+                  containerized: false,
+                  name: 'suricata-iowa',
+                  id: 'be1f3d767896212736b880e846876dcb',
+                  mac: ['42:01:0a:80:00:04'],
+                  architecture: 'x86_64',
+                },
+              },
+              sort: [1559330892000],
+            },
+          ],
         },
       },
     },
@@ -254,81 +251,6 @@ export const formattedEmptySource = {
     geo: {},
   },
 };
-
-export const mockDomainsResponseBuckets: DomainsBuckets[] = [
-  {
-    key: 'example.com',
-    uniqueIpCount: {
-      value: 805,
-    },
-    lastSeen: {
-      value: 1554920919000,
-      value_as_string: '2019-04-10T18:28:39.000Z',
-    },
-    bytes: {
-      value: 974964465,
-    },
-    firstSeen: {
-      value: 1554146873000,
-      value_as_string: '2019-04-01T19:27:53.000Z',
-    },
-    packets: {
-      value: 16946245,
-    },
-    direction: {
-      buckets: [
-        {
-          key: NetworkDirectionEcs.outbound,
-          doc_count: 51668,
-        },
-        {
-          key: NetworkDirectionEcs.inbound,
-          doc_count: 25681,
-        },
-      ],
-    },
-  },
-];
-
-export const mockFormattedSource: DomainsEdges[] = [
-  {
-    cursor: { tiebreaker: null, value: 'example.com' },
-    node: {
-      _id: 'example.com',
-      network: {
-        bytes: 974964465,
-        direction: [NetworkDirectionEcs.outbound, NetworkDirectionEcs.inbound],
-        packets: 16946245,
-      },
-      source: {
-        domainName: 'example.com',
-        firstSeen: '2019-04-01T19:27:53.000Z',
-        lastSeen: '2019-04-10T18:28:39.000Z',
-        uniqueIpCount: 805,
-      },
-    },
-  },
-];
-
-export const mockFormattedDestination: DomainsEdges[] = [
-  {
-    cursor: { tiebreaker: null, value: 'example.com' },
-    node: {
-      _id: 'example.com',
-      destination: {
-        domainName: 'example.com',
-        firstSeen: '2019-04-01T19:27:53.000Z',
-        lastSeen: '2019-04-10T18:28:39.000Z',
-        uniqueIpCount: 805,
-      },
-      network: {
-        bytes: 974964465,
-        direction: [NetworkDirectionEcs.outbound, NetworkDirectionEcs.inbound],
-        packets: 16946245,
-      },
-    },
-  },
-];
 
 export const mockUsersData: UsersResponse = {
   took: 445,

@@ -11,10 +11,10 @@ import { UsersRequestOptions } from './index';
 
 export const buildUsersQuery = ({
   ip,
-  usersSortField,
+  sort,
   filterQuery,
   flowTarget,
-  pagination: { limit },
+  pagination: { querySize },
   defaultIndex,
   sourceConfiguration: {
     fields: { timestamp },
@@ -41,9 +41,9 @@ export const buildUsersQuery = ({
         users: {
           terms: {
             field: 'user.name',
-            size: limit + 1,
+            size: querySize,
             order: {
-              ...getQueryOrder(usersSortField),
+              ...getQueryOrder(sort),
             },
           },
           aggs: {
@@ -87,13 +87,13 @@ export const buildUsersQuery = ({
 
 type QueryOrder = { _count: Direction } | { _key: Direction };
 
-const getQueryOrder = (usersSortField: UsersSortField): QueryOrder => {
-  switch (usersSortField.field) {
+const getQueryOrder = (sort: UsersSortField): QueryOrder => {
+  switch (sort.field) {
     case UsersFields.name:
-      return { _key: usersSortField.direction };
+      return { _key: sort.direction };
     case UsersFields.count:
-      return { _count: usersSortField.direction };
+      return { _count: sort.direction };
     default:
-      return assertUnreachable(usersSortField.field);
+      return assertUnreachable(sort.field);
   }
 };

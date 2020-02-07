@@ -176,7 +176,7 @@ async function migrateSourceToDest(context: Context) {
   if (!source.aliases[alias]) {
     log.info(`Reindexing ${alias} to ${source.indexName}`);
 
-    await Index.convertToAlias(callCluster, source, alias, batchSize);
+    await Index.convertToAlias(callCluster, source, alias, batchSize, context.convertToAliasScript);
   }
 
   const read = Index.reader(callCluster, source.indexName, { batchSize, scrollDuration });

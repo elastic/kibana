@@ -1,0 +1,25 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AddFilterToGlobalSearchBar Component Rendering 1`] = `
+<WithHoverActions
+  hoverContent={
+    <ForwardRef(Styled(EuiPanel))
+      data-test-subj="hover-actions-container"
+      paddingSize="none"
+    >
+      <EuiToolTip
+        content="Filter for value"
+        delay="regular"
+        position="top"
+      >
+        <EuiIcon
+          data-test-subj="add-to-filter"
+          onClick={[Function]}
+          type="filter"
+        />
+      </EuiToolTip>
+    </ForwardRef(Styled(EuiPanel))>
+  }
+  render={[Function]}
+/>
+`;

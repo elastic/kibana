@@ -18,6 +18,7 @@
  */
 
 import { Duration } from 'moment';
+import { Stream } from 'stream';
 
 import { ByteSizeValue } from './byte_size_value';
 import { ContextReference, Reference, SiblingReference } from './references';
@@ -26,6 +27,7 @@ import {
   ArrayOptions,
   ArrayType,
   BooleanType,
+  BufferType,
   ByteSizeOptions,
   ByteSizeType,
   ConditionalType,
@@ -36,6 +38,7 @@ import {
   MapOfOptions,
   MapOfType,
   MaybeType,
+  NeverType,
   NumberOptions,
   NumberType,
   ObjectType,
@@ -51,10 +54,12 @@ import {
   UnionType,
   URIOptions,
   URIType,
+  StreamType,
 } from './types';
 
 export { ObjectType, TypeOf, Type };
 export { ByteSizeValue } from './byte_size_value';
+export { SchemaTypeError, ValidationError } from './errors';
 
 function any(options?: TypeOptions<any>) {
   return new AnyType(options);
@@ -62,6 +67,14 @@ function any(options?: TypeOptions<any>) {
 
 function boolean(options?: TypeOptions<boolean>): Type<boolean> {
   return new BooleanType(options);
+}
+
+function buffer(options?: TypeOptions<Buffer>): Type<Buffer> {
+  return new BufferType(options);
+}
+
+function stream(options?: TypeOptions<Stream>): Type<Stream> {
+  return new StreamType(options);
 }
 
 function string(options?: StringOptions): Type<string> {
@@ -72,7 +85,7 @@ function uri(options?: URIOptions): Type<string> {
   return new URIType(options);
 }
 
-function literal<T extends string | number | boolean>(value: T): Type<T> {
+function literal<T extends string | number | boolean | null>(value: T): Type<T> {
   return new LiteralType(value);
 }
 
@@ -88,11 +101,19 @@ function duration(options?: DurationOptions): Type<Duration> {
   return new DurationType(options);
 }
 
+function never(): Type<never> {
+  return new NeverType();
+}
+
 /**
  * Create an optional type
  */
 function maybe<V>(type: Type<V>): Type<V | undefined> {
   return new MaybeType(type);
+}
+
+function nullable<V>(type: Type<V>): Type<V | null> {
+  return schema.oneOf([type, schema.literal(null)], { defaultValue: null });
 }
 
 function object<P extends Props>(props: P, options?: ObjectTypeOptions<P>): ObjectType<P> {
@@ -167,7 +188,7 @@ function siblingRef<T>(key: string): SiblingReference<T> {
 
 function conditional<A extends ConditionalTypeValue, B, C>(
   leftOperand: Reference<A>,
-  rightOperand: Reference<A> | A,
+  rightOperand: Reference<A> | A | Type<unknown>,
   equalType: Type<B>,
   notEqualType: Type<C>,
   options?: TypeOptions<B | C>
@@ -179,6 +200,7 @@ export const schema = {
   any,
   arrayOf,
   boolean,
+  buffer,
   byteSize,
   conditional,
   contextRef,
@@ -186,10 +208,13 @@ export const schema = {
   literal,
   mapOf,
   maybe,
+  nullable,
+  never,
   number,
   object,
   oneOf,
   recordOf,
+  stream,
   siblingRef,
   string,
   uri,

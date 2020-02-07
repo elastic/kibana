@@ -4,16 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as React from 'react';
+import { rgba } from 'polished';
+import React from 'react';
 import { Droppable } from 'react-beautiful-dnd';
-import { pure } from 'recompose';
 import styled from 'styled-components';
 
 interface Props {
+  children?: React.ReactNode;
   droppableId: string;
   height?: string;
   isDropDisabled?: boolean;
   type?: string;
+  render?: ({ isDraggingOver }: { isDraggingOver: boolean }) => React.ReactNode;
 }
 
 const ReactDndDropTarget = styled.div<{ isDraggingOver: boolean; height: string }>`
@@ -30,16 +32,24 @@ const ReactDndDropTarget = styled.div<{ isDraggingOver: boolean; height: string 
       ? `
     .drop-and-provider-timeline {
       &:hover {
-        background-color: ${props.theme.eui.euiColorEmptyShade};
+        background-color: ${rgba(props.theme.eui.euiColorSuccess, 0.3)};
       }
     }
+    .drop-and-provider-timeline:hover {
+        background-color: ${rgba(props.theme.eui.euiColorSuccess, 0.3)};
+    }
   > div.timeline-drop-area-empty {
-     background-color: ${props.theme.eui.euiColorLightShade};
+     color: ${props.theme.eui.euiColorSuccess};
+     background-color: ${rgba(props.theme.eui.euiColorSuccess, 0.2)};
+
+     & .euiTextColor--subdued {
+      color: ${props.theme.eui.euiColorSuccess};
+     }
   }
   > div.timeline-drop-area {
-    background-color: ${props.theme.eui.euiColorLightShade};
+    background-color: ${rgba(props.theme.eui.euiColorSuccess, 0.2)};
     .provider-item-filter-container div:first-child{
-      // Override dragNdrop beautiful so we do not have our droppable moving around for no good reason
+      /* Override dragNdrop beautiful so we do not have our droppable moving around for no good reason */
       transform: none !important;
     }
     .drop-and-provider-timeline {
@@ -48,13 +58,17 @@ const ReactDndDropTarget = styled.div<{ isDraggingOver: boolean; height: string 
         display: none;
       }
     }
+
+    & .euiFormHelpText {
+      color: ${props.theme.eui.euiColorSuccess};
+    }
   }
   .flyout-overlay {
     .euiPanel {
       background-color: ${props.theme.eui.euiColorLightShade};
     }
     + div {
-      // Override dragNdrop beautiful so we do not have our droppable moving around for no good reason
+      /* Override dragNdrop beautiful so we do not have our droppable moving around for no good reason */
       display: none !important;
     }
   }
@@ -65,14 +79,22 @@ const ReactDndDropTarget = styled.div<{ isDraggingOver: boolean; height: string 
       display: none;
     }
     & + div {
-      // Override dragNdrop beautiful so we do not have our droppable moving around for no good reason
+      /* Override dragNdrop beautiful so we do not have our droppable moving around for no good reason */
       display: none !important;
     }
   }
 `;
+ReactDndDropTarget.displayName = 'ReactDndDropTarget';
 
-export const DroppableWrapper = pure<Props>(
-  ({ children, droppableId, height = '100%', isDropDisabled = false, type }) => (
+export const DroppableWrapper = React.memo<Props>(
+  ({
+    children = null,
+    droppableId,
+    height = '100%',
+    isDropDisabled = false,
+    type,
+    render = null,
+  }) => (
     <Droppable
       isDropDisabled={isDropDisabled}
       droppableId={droppableId}
@@ -82,14 +104,15 @@ export const DroppableWrapper = pure<Props>(
       {(provided, snapshot) => (
         <ReactDndDropTarget
           height={height}
-          innerRef={provided.innerRef}
+          ref={provided.innerRef}
           {...provided.droppableProps}
           isDraggingOver={snapshot.isDraggingOver}
         >
-          {children}
+          {render == null ? children : render({ isDraggingOver: snapshot.isDraggingOver })}
           {provided.placeholder}
         </ReactDndDropTarget>
       )}
     </Droppable>
   )
 );
+DroppableWrapper.displayName = 'DroppableWrapper';

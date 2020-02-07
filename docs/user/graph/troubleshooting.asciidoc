@@ -1,0 +1,59 @@
+[role="xpack"]
+[[graph-troubleshooting]]
+== Graph troubleshooting
+++++
+<titleabbrev>Troubleshooting</titleabbrev>
+++++
+
+[discrete]
+=== Why are results missing?
+
+The default settings in Graph API requests are configured to tune out noisy
+results by using the following strategies:
+
+* Only looking at samples of the most-relevant documents for a query
+* Only considering terms that have a significant statistical correlation with
+the sample
+* Only considering terms to be paired that have at least 3 documents asserting
+that connection
+
+These are useful defaults for getting the "big picture" signals from noisy data,
+but they can miss details from individual documents. If you need to perform a
+detailed forensic analysis, you can adjust the following settings to ensure a
+graph exploration produces all of the relevant data:
+
+* Increase the `sample_size` to a larger number of documents to analyse more
+data on each shard.
+* Set the `use_significance` setting to `false` to retrieve terms regardless
+of any statistical correlation with the sample.
+* Set the `min_doc_count` for your vertices to 1 to ensure only one document is
+required to assert a relationship.
+
+[discrete]
+=== What can I do to to improve performance?
+
+With the default setting of `use_significance` set to `true`, the Graph API
+performs a background frequency check of the terms it discovers as part of
+exploration. Each unique term has to have its frequency looked up in the index,
+which costs at least one disk seek. Disk seeks are expensive. If you don't need
+to perform this noise-filtering, setting `use_significance` to `false`
+eliminates all of these expensive checks (at the expense of not performing any
+quality-filtering on the terms).
+
+If your data is noisy and you need to filter based on significance, you can
+reduce the number of frequency checks by:
+
+* Reducing the `sample_size`. Considering fewer documents can actually be better
+when the quality of matches is quite variable.
+* Avoiding noisy documents that have a large number of terms. You can do this by
+either allowing ranking to naturally favor shorter documents in the top-results
+sample (see {ref}/norms.html[enabling norms]) or by explicitly excluding
+large documents with your seed and guiding queries.
+* Increasing the frequency threshold. Many many terms occur very infrequently
+so even increasing the frequency threshold by one can massively reduce the
+number of candidate terms whose background frequencies are checked.
+
+Keep in mind that all of these options reduce the scope of information analysed
+and can increase the potential to miss what could be interesting details. However,
+the information that's lost tends to be associated with lower-quality documents
+with lower-frequency terms, which can be an acceptable trade-off.

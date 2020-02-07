@@ -8,10 +8,10 @@ import Joi from 'joi';
 import { getClusterStats } from '../../../../lib/cluster/get_cluster_stats';
 import { getClusterStatus } from '../../../../lib/cluster/get_cluster_status';
 import { getMlJobs } from '../../../../lib/elasticsearch/get_ml_jobs';
-import { getShardStats } from '../../../../lib/elasticsearch/shards';
 import { handleError } from '../../../../lib/errors/handle_error';
 import { prefixIndexPattern } from '../../../../lib/ccs_utils';
 import { INDEX_PATTERN_ELASTICSEARCH } from '../../../../../common/constants';
+import { getIndicesUnassignedShardStats } from '../../../../lib/elasticsearch/shards/get_indices_unassigned_shard_stats';
 
 export function mlJobRoute(server) {
   server.route({
@@ -20,16 +20,16 @@ export function mlJobRoute(server) {
     config: {
       validate: {
         params: Joi.object({
-          clusterUuid: Joi.string().required()
+          clusterUuid: Joi.string().required(),
         }),
         payload: Joi.object({
           ccs: Joi.string().optional(),
           timeRange: Joi.object({
             min: Joi.date().required(),
-            max: Joi.date().required()
-          }).required()
-        })
-      }
+            max: Joi.date().required(),
+          }).required(),
+        }),
+      },
     },
     async handler(req) {
       const config = server.config();
@@ -39,16 +39,20 @@ export function mlJobRoute(server) {
 
       try {
         const clusterStats = await getClusterStats(req, esIndexPattern, clusterUuid);
-        const shardStats = await getShardStats(req, esIndexPattern, clusterStats);
+        const indicesUnassignedShardStats = await getIndicesUnassignedShardStats(
+          req,
+          esIndexPattern,
+          clusterStats
+        );
         const rows = await getMlJobs(req, esIndexPattern);
 
         return {
-          clusterStatus: getClusterStatus(clusterStats, shardStats),
-          rows
+          clusterStatus: getClusterStatus(clusterStats, indicesUnassignedShardStats),
+          rows,
         };
-      } catch(err) {
+      } catch (err) {
         throw handleError(err, req);
       }
-    }
+    },
   });
 }

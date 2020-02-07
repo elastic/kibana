@@ -4,22 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount, shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
+import { shallow } from 'enzyme';
 import { cloneDeep } from 'lodash/fp';
-import moment from 'moment-timezone';
-import * as React from 'react';
+import React from 'react';
 
 import { TimelineNonEcsData } from '../../../../graphql/types';
-import { defaultHeaders, mockFrameworks, mockTimelineData, TestProviders } from '../../../../mock';
+import { defaultHeaders, mockTimelineData, TestProviders } from '../../../../mock';
 import { getEmptyValue } from '../../../empty_value';
+import { useMountAppended } from '../../../../utils/use_mount_appended';
 
 import { plainColumnRenderer } from './plain_column_renderer';
 import { getValues, deleteItemIdx, findItem } from './helpers';
 
-const mockFramework = mockFrameworks.default_UTC;
-
 describe('plain_column_renderer', () => {
+  const mount = useMountAppended();
+
   describe('rendering', () => {
     let mockDatum: TimelineNonEcsData[];
     const _id = mockTimelineData[0]._id;
@@ -33,9 +32,10 @@ describe('plain_column_renderer', () => {
         eventId: _id,
         values: getValues('event.category', mockDatum),
         field: defaultHeaders.find(h => h.id === 'event.category')!,
+        timelineId: 'test',
       });
       const wrapper = shallow(<span>{column}</span>);
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper).toMatchSnapshot();
     });
 
     test('should return isInstance false if source is empty', () => {
@@ -57,6 +57,7 @@ describe('plain_column_renderer', () => {
         eventId: _id,
         values: getValues('event.category', mockDatum),
         field: defaultHeaders.find(h => h.id === 'event.category')!,
+        timelineId: 'test',
       });
       const wrapper = mount(
         <TestProviders>
@@ -72,6 +73,7 @@ describe('plain_column_renderer', () => {
         eventId: _id,
         values: getValues('destination.ip', mockDatum),
         field: defaultHeaders.find(h => h.id === 'destination.ip')!,
+        timelineId: 'test',
       });
       const wrapper = mount(
         <TestProviders>
@@ -81,12 +83,29 @@ describe('plain_column_renderer', () => {
       expect(wrapper.text()).toEqual('192.168.0.3');
     });
 
+    test('should return the value of destination.bytes if destination.bytes has a valid value', () => {
+      const column = plainColumnRenderer.renderColumn({
+        columnName: 'destination.bytes',
+        eventId: _id,
+        values: getValues('destination.bytes', mockDatum),
+        field: defaultHeaders.find(h => h.id === 'destination.bytes')!,
+        timelineId: 'test',
+      });
+      const wrapper = mount(
+        <TestProviders>
+          <span>{column}</span>
+        </TestProviders>
+      );
+      expect(wrapper.text()).toEqual('120.6KB');
+    });
+
     test('should return the value of event.action if event has a valid value', () => {
       const column = plainColumnRenderer.renderColumn({
         columnName: 'event.action',
         eventId: _id,
         values: getValues('event.action', mockDatum),
         field: defaultHeaders.find(h => h.id === 'event.action')!,
+        timelineId: 'test',
       });
       const wrapper = mount(
         <TestProviders>
@@ -102,17 +121,14 @@ describe('plain_column_renderer', () => {
         eventId: _id,
         values: getValues('@timestamp', mockDatum),
         field: defaultHeaders.find(h => h.id === '@timestamp')!,
+        timelineId: 'test',
       });
       const wrapper = mount(
         <TestProviders>
           <span>{column}</span>
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual(
-        moment
-          .tz(getValues('@timestamp', mockDatum)![0], mockFramework.dateFormatTz!)
-          .format(mockFramework.dateFormat)
-      );
+      expect(wrapper.text()).toEqual('Nov 5, 2018 @ 19:03:25.937');
     });
 
     test('should return an empty value if destination ip is empty', () => {
@@ -122,6 +138,7 @@ describe('plain_column_renderer', () => {
         eventId: _id,
         values: getValues('destination.ip', mockDatum),
         field: defaultHeaders.find(h => h.id === 'destination.ip')!,
+        timelineId: 'test',
       });
       const wrapper = mount(
         <TestProviders>
@@ -138,6 +155,7 @@ describe('plain_column_renderer', () => {
         eventId: _id,
         values: getValues('event.severity', mockDatum),
         field: defaultHeaders.find(h => h.id === 'event.severity')!,
+        timelineId: 'test',
       });
       const wrapper = mount(
         <TestProviders>
@@ -154,6 +172,7 @@ describe('plain_column_renderer', () => {
         eventId: _id,
         values: getValues('message', mockMessageDatum),
         field: defaultHeaders.find(h => h.id === 'message')!,
+        timelineId: 'test',
       });
       const wrapper = mount(
         <TestProviders>
@@ -170,6 +189,7 @@ describe('plain_column_renderer', () => {
         eventId: _id,
         values: getValues('message', mockMessageDatum),
         field: defaultHeaders.find(h => h.id === 'message')!,
+        timelineId: 'test',
       });
       const wrapper = mount(
         <TestProviders>
@@ -191,6 +211,7 @@ describe('plain_column_renderer', () => {
         eventId: _id,
         values: [mockTimelineData[0]._id],
         field: defaultHeaders.find(h => h.id === '_id')!,
+        timelineId: 'test',
       });
       const wrapper = mount(
         <TestProviders>

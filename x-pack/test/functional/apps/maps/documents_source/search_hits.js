@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getPageObjects, getService }) {
+export default function({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['maps']);
   const inspector = getService('inspector');
 
@@ -19,18 +19,12 @@ export default function ({ getPageObjects, getService }) {
       await inspector.open();
       await inspector.openInspectorRequestsView();
       const requestStats = await inspector.getTableData();
-      const requestTimestamp =  PageObjects.maps.getInspectorStatRowHit(requestStats, 'Request timestamp');
+      const requestTimestamp = PageObjects.maps.getInspectorStatRowHit(
+        requestStats,
+        'Request timestamp'
+      );
       await inspector.close();
       return requestTimestamp;
-    }
-
-    async function getHits() {
-      await inspector.open();
-      await inspector.openInspectorRequestsView();
-      const requestStats = await inspector.getTableData();
-      const hits = PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits');
-      await inspector.close();
-      return hits;
     }
 
     it('should re-fetch documents with refresh timer', async () => {
@@ -43,14 +37,16 @@ export default function ({ getPageObjects, getService }) {
 
     describe('inspector', () => {
       it('should register elasticsearch request in inspector', async () => {
-        const hits = await getHits();
+        const hits = await PageObjects.maps.getHits();
         expect(hits).to.equal('6');
       });
     });
 
     describe('query bar', () => {
       before(async () => {
-        await PageObjects.maps.setAndSubmitQuery('machine.os.raw : "win 8" OR machine.os.raw : "ios"');
+        await PageObjects.maps.setAndSubmitQuery(
+          'machine.os.raw : "win 8" OR machine.os.raw : "ios"'
+        );
       });
 
       after(async () => {
@@ -112,13 +108,13 @@ export default function ({ getPageObjects, getService }) {
     describe('filter by extent', () => {
       it('should handle geo_point filtering with extents that cross antimeridian', async () => {
         await PageObjects.maps.loadSavedMap('antimeridian points example');
-        const hits = await getHits();
+        const hits = await PageObjects.maps.getHits();
         expect(hits).to.equal('2');
       });
 
       it('should handle geo_shape filtering with extents that cross antimeridian', async () => {
         await PageObjects.maps.loadSavedMap('antimeridian shapes example');
-        const hits = await getHits();
+        const hits = await PageObjects.maps.getHits();
         expect(hits).to.equal('2');
       });
     });

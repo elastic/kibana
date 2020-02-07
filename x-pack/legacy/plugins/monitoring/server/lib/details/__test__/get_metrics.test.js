@@ -17,10 +17,10 @@ const max = 1499054399999; // 2017-07-03T03:59:59.999Z
 
 function getMockReq(metricsBuckets = []) {
   const config = {
-    get: sinon.stub()
+    get: sinon.stub(),
   };
 
-  config.get.withArgs('xpack.monitoring.min_interval_seconds').returns(10);
+  config.get.withArgs('monitoring.ui.min_interval_seconds').returns(10);
 
   return {
     server: {
@@ -37,21 +37,24 @@ function getMockReq(metricsBuckets = []) {
                 Promise.resolve({
                   aggregations: {
                     check: {
-                      buckets: metricsBuckets
-                    }
-                  }
+                      buckets: metricsBuckets,
+                    },
+                  },
                 })
-              )
-            })
-        }
-      }
+              ),
+            }),
+        },
+      },
     },
     payload: {
-      timeRange: { min, max }
+      timeRange: { min, max },
     },
     params: {
-      clusterUuid: '1234xyz'
-    }
+      clusterUuid: '1234xyz',
+    },
+    getUiSettingsService: () => ({
+      get: () => 'Browser',
+    }),
   };
 }
 
@@ -88,9 +91,9 @@ describe('getMetrics and getSeries', () => {
           'index_mem_overall_1',
           'index_mem_stored_fields',
           'index_mem_doc_values',
-          'index_mem_norms'
-        ]
-      }
+          'index_mem_norms',
+        ],
+      },
     ];
     const result = await getMetrics(req, indexPattern, metricSet);
     expect(result).toMatchSnapshot();

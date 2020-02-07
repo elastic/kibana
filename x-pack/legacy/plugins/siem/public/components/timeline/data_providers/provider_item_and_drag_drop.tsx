@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-import * as React from 'react';
-import { pure } from 'recompose';
+import { EuiBadge, EuiBadgeProps, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { rgba } from 'polished';
+import React from 'react';
 import styled from 'styled-components';
 
 import { AndOrBadge } from '../../and_or_badge';
@@ -19,20 +19,23 @@ import {
   OnToggleDataProviderExcluded,
 } from '../events';
 
+import { BrowserFields } from '../../../containers/source';
+
 import { DataProvider } from './data_provider';
 import { ProviderItemAnd } from './provider_item_and';
 
 import * as i18n from './translations';
-import { BrowserFields } from '../../../containers/source';
 
 const DropAndTargetDataProvidersContainer = styled(EuiFlexItem)`
   margin: 0px 8px;
 `;
 
+DropAndTargetDataProvidersContainer.displayName = 'DropAndTargetDataProvidersContainer';
+
 const DropAndTargetDataProviders = styled.div<{ hasAndItem: boolean }>`
   min-width: 230px;
   width: auto;
-  border: 0.1rem dashed ${props => props.theme.eui.euiColorMediumShade};
+  border: 0.1rem dashed ${props => props.theme.eui.euiColorSuccess};
   border-radius: 5px;
   text-align: center;
   padding: 3px 10px;
@@ -43,15 +46,23 @@ const DropAndTargetDataProviders = styled.div<{ hasAndItem: boolean }>`
     props.hasAndItem
       ? `&:hover {
     transition: background-color 0.7s ease;
-    background-color: ${props.theme.eui.euiColorEmptyShade};
+    background-color: ${() => rgba(props.theme.eui.euiColorSuccess, 0.2)};
   }`
       : ''};
   cursor: ${({ hasAndItem }) => (!hasAndItem ? `default` : 'inherit')};
 `;
 
-const NumberProviderAndBadge = styled(EuiBadge)`
-  margin: 0px 5px;
-`;
+DropAndTargetDataProviders.displayName = 'DropAndTargetDataProviders';
+
+// Ref: https://github.com/elastic/eui/issues/1655
+// const NumberProviderAndBadge = styled(EuiBadge)`
+//   margin: 0px 5px;
+// `;
+const NumberProviderAndBadge = (props: EuiBadgeProps) => (
+  <EuiBadge {...props} style={{ margin: '0px 5px' }} />
+);
+
+NumberProviderAndBadge.displayName = 'NumberProviderAndBadge';
 
 interface ProviderItemDropProps {
   browserFields: BrowserFields;
@@ -66,7 +77,7 @@ interface ProviderItemDropProps {
   timelineId: string;
 }
 
-export const ProviderItemAndDragDrop = pure<ProviderItemDropProps>(
+export const ProviderItemAndDragDrop = React.memo<ProviderItemDropProps>(
   ({
     browserFields,
     dataProvider,
@@ -120,3 +131,5 @@ export const ProviderItemAndDragDrop = pure<ProviderItemDropProps>(
     );
   }
 );
+
+ProviderItemAndDragDrop.displayName = 'ProviderItemAndDragDrop';

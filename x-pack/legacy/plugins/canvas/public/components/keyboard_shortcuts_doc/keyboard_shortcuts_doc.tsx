@@ -16,10 +16,14 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import { keymap, ShortcutMap, ShortcutNameSpace } from '../../lib/keymap';
+import { keymap } from '../../lib/keymap';
+import { ShortcutMap, ShortcutNameSpace } from '../../../types/shortcuts';
 import { getClientPlatform } from '../../lib/get_client_platform';
 import { getId } from '../../lib/get_id';
 import { getPrettyShortcut } from '../../lib/get_pretty_shortcut';
+import { ComponentStrings } from '../../../i18n/components';
+
+const { KeyboardShortcutsDoc: strings } = ComponentStrings;
 
 interface DescriptionListItem {
   title: string;
@@ -45,7 +49,7 @@ const getDescriptionListItems = (shortcuts: ShortcutMap[]): DescriptionListItem[
           // replace +'s with spaces so we can display the plus symbol for the plus key
           shortcut = shortcut.replace(/\+/g, ' ');
           if (i !== 0) {
-            acc.push(<span key={getId('span')}> or </span>);
+            acc.push(<span key={getId('span')}> {strings.getShortcutSeparator()} </span>);
           }
           acc.push(
             <span key={getId('span')}>
@@ -61,10 +65,14 @@ const getDescriptionListItems = (shortcuts: ShortcutMap[]): DescriptionListItem[
   );
 
 export const KeyboardShortcutsDoc: FunctionComponent<Props> = ({ onClose }) => (
-  <EuiFlyout closeButtonAriaLabel="Closes keyboard shortcuts reference" size="s" onClose={onClose}>
+  <EuiFlyout
+    closeButtonAriaLabel={strings.getFlyoutCloseButtonAriaLabel()}
+    size="s"
+    onClose={onClose}
+  >
     <EuiFlyoutHeader hasBorder>
       <EuiTitle size="s">
-        <h2>Keyboard Shortcuts</h2>
+        <h2>{strings.getTitle()}</h2>
       </EuiTitle>
     </EuiFlyoutHeader>
     <EuiFlyoutBody>

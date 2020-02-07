@@ -8,84 +8,94 @@ import { getOr } from 'lodash/fp';
 import React from 'react';
 import { Query } from 'react-apollo';
 import { connect } from 'react-redux';
+import { compose } from 'redux';
 
-import chrome from 'ui/chrome';
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
-import { AuthenticationsEdges, GetAuthenticationsQuery, PageInfo } from '../../graphql/types';
-import { hostsModel, hostsSelectors, inputsModel, State } from '../../store';
+import {
+  AuthenticationsEdges,
+  GetAuthenticationsQuery,
+  PageInfoPaginated,
+} from '../../graphql/types';
+import { hostsModel, hostsSelectors, inputsModel, State, inputsSelectors } from '../../store';
 import { createFilter, getDefaultFetchPolicy } from '../helpers';
-import { QueryTemplate, QueryTemplateProps } from '../query_template';
+import { generateTablePaginationOptions } from '../../components/paginated_table/helpers';
+import { withKibana, WithKibanaProps } from '../../lib/kibana';
+import { QueryTemplatePaginated, QueryTemplatePaginatedProps } from '../query_template_paginated';
 
 import { authenticationsQuery } from './index.gql_query';
 
+const ID = 'authenticationQuery';
+
 export interface AuthenticationArgs {
-  id: string;
   authentications: AuthenticationsEdges[];
-  totalCount: number;
-  pageInfo: PageInfo;
+  id: string;
+  inspect: inputsModel.InspectQuery;
+  isInspected: boolean;
   loading: boolean;
-  loadMore: (cursor: string) => void;
+  loadPage: (newActivePage: number) => void;
+  pageInfo: PageInfoPaginated;
   refetch: inputsModel.Refetch;
+  totalCount: number;
 }
 
-export interface OwnProps extends QueryTemplateProps {
+export interface OwnProps extends QueryTemplatePaginatedProps {
   children: (args: AuthenticationArgs) => React.ReactNode;
   type: hostsModel.HostsType;
 }
 
 export interface AuthenticationsComponentReduxProps {
+  activePage: number;
+  isInspected: boolean;
   limit: number;
 }
 
-type AuthenticationsProps = OwnProps & AuthenticationsComponentReduxProps;
+type AuthenticationsProps = OwnProps & AuthenticationsComponentReduxProps & WithKibanaProps;
 
-class AuthenticationsComponentQuery extends QueryTemplate<
+class AuthenticationsComponentQuery extends QueryTemplatePaginated<
   AuthenticationsProps,
   GetAuthenticationsQuery.Query,
   GetAuthenticationsQuery.Variables
 > {
   public render() {
     const {
-      id = 'authenticationQuery',
+      activePage,
       children,
+      endDate,
       filterQuery,
+      id = ID,
+      isInspected,
+      kibana,
+      limit,
       skip,
       sourceId,
       startDate,
-      endDate,
-      limit,
     } = this.props;
+    const variables: GetAuthenticationsQuery.Variables = {
+      sourceId,
+      timerange: {
+        interval: '12h',
+        from: startDate!,
+        to: endDate!,
+      },
+      pagination: generateTablePaginationOptions(activePage, limit),
+      filterQuery: createFilter(filterQuery),
+      defaultIndex: kibana.services.uiSettings.get<string[]>(DEFAULT_INDEX_KEY),
+      inspect: isInspected,
+    };
     return (
       <Query<GetAuthenticationsQuery.Query, GetAuthenticationsQuery.Variables>
         query={authenticationsQuery}
         fetchPolicy={getDefaultFetchPolicy()}
         notifyOnNetworkStatusChange
         skip={skip}
-        variables={{
-          sourceId,
-          timerange: {
-            interval: '12h',
-            from: startDate!,
-            to: endDate!,
-          },
-          pagination: {
-            limit,
-            cursor: null,
-            tiebreaker: null,
-          },
-          filterQuery: createFilter(filterQuery),
-          defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
-        }}
+        variables={variables}
       >
-        {({ data, loading, fetchMore, refetch }) => {
+        {({ data, loading, fetchMore, networkStatus, refetch }) => {
           const authentications = getOr([], 'source.Authentications.edges', data);
           this.setFetchMore(fetchMore);
-          this.setFetchMoreOptions((newCursor: string) => ({
+          this.setFetchMoreOptions((newActivePage: number) => ({
             variables: {
-              pagination: {
-                cursor: newCursor,
-                limit: limit + parseInt(newCursor, 10),
-              },
+              pagination: generateTablePaginationOptions(newActivePage, limit),
             },
             updateQuery: (prev, { fetchMoreResult }) => {
               if (!fetchMoreResult) {
@@ -97,23 +107,23 @@ class AuthenticationsComponentQuery extends QueryTemplate<
                   ...fetchMoreResult.source,
                   Authentications: {
                     ...fetchMoreResult.source.Authentications,
-                    edges: [
-                      ...prev.source.Authentications.edges,
-                      ...fetchMoreResult.source.Authentications.edges,
-                    ],
+                    edges: [...fetchMoreResult.source.Authentications.edges],
                   },
                 },
               };
             },
           }));
+          const isLoading = this.isItAValidLoading(loading, variables, networkStatus);
           return children({
-            id,
-            refetch,
-            loading,
-            totalCount: getOr(0, 'source.Authentications.totalCount', data),
             authentications,
+            id,
+            inspect: getOr(null, 'source.Authentications.inspect', data),
+            isInspected,
+            loading: isLoading,
+            loadPage: this.wrappedLoadMore,
             pageInfo: getOr({}, 'source.Authentications.pageInfo', data),
-            loadMore: this.wrappedLoadMore,
+            refetch: this.memoizedRefetchQuery(variables, limit, refetch),
+            totalCount: getOr(-1, 'source.Authentications.totalCount', data),
           });
         }}
       </Query>
@@ -123,10 +133,18 @@ class AuthenticationsComponentQuery extends QueryTemplate<
 
 const makeMapStateToProps = () => {
   const getAuthenticationsSelector = hostsSelectors.authenticationsSelector();
-  const mapStateToProps = (state: State, { type }: OwnProps) => {
-    return getAuthenticationsSelector(state, type);
+  const getQuery = inputsSelectors.globalQueryByIdSelector();
+  const mapStateToProps = (state: State, { type, id = ID }: OwnProps) => {
+    const { isInspected } = getQuery(state, id);
+    return {
+      ...getAuthenticationsSelector(state, type),
+      isInspected,
+    };
   };
   return mapStateToProps;
 };
 
-export const AuthenticationsQuery = connect(makeMapStateToProps)(AuthenticationsComponentQuery);
+export const AuthenticationsQuery = compose<React.ComponentClass<OwnProps>>(
+  connect(makeMapStateToProps),
+  withKibana
+)(AuthenticationsComponentQuery);

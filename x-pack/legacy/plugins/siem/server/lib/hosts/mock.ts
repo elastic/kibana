@@ -5,6 +5,7 @@
  */
 
 import { Direction, HostsFields } from '../../graphql/types';
+import { defaultIndexPattern } from '../../../default_index_pattern';
 
 import {
   HostOverviewRequestOptions,
@@ -13,7 +14,7 @@ import {
 } from '.';
 
 export const mockGetHostsOptions: HostsRequestOptions = {
-  defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+  defaultIndex: defaultIndexPattern,
   sourceConfiguration: {
     fields: {
       container: 'docker.container.name',
@@ -26,7 +27,12 @@ export const mockGetHostsOptions: HostsRequestOptions = {
   },
   timerange: { interval: '12h', to: 1554824274610, from: 1554737874610 },
   sort: { field: HostsFields.lastSeen, direction: Direction.asc },
-  pagination: { limit: 10, cursor: null, tiebreaker: null },
+  pagination: {
+    activePage: 0,
+    cursorStart: 0,
+    fakePossibleCount: 10,
+    querySize: 2,
+  },
   filterQuery: {},
   fields: [
     'totalCount',
@@ -36,8 +42,9 @@ export const mockGetHostsOptions: HostsRequestOptions = {
     'host.os.name',
     'host.os.version',
     'edges.cursor.value',
-    'pageInfo.endCursor.value',
-    'pageInfo.hasNextPage',
+    'pageInfo.activePage',
+    'pageInfo.fakeTotalCount',
+    'pageInfo.showMorePagesIndicator',
   ],
 };
 
@@ -48,7 +55,12 @@ export const mockGetHostsRequest = {
     variables: {
       sourceId: 'default',
       timerange: { interval: '12h', from: 1554737729201, to: 1554824129202 },
-      pagination: { limit: 10, cursor: null, tiebreaker: null },
+      pagination: {
+        activePage: 0,
+        cursorStart: 0,
+        fakePossibleCount: 10,
+        querySize: 2,
+      },
       sort: { field: HostsFields.lastSeen, direction: Direction.asc },
       filterQuery: '',
     },
@@ -224,7 +236,13 @@ export const mockGetHostsResponse = {
   },
 };
 
+export const mockGetHostsQueryDsl = { mockGetHostsQueryDsl: 'mockGetHostsQueryDsl' };
+
 export const mockGetHostsResult = {
+  inspect: {
+    dsl: [JSON.stringify(mockGetHostsQueryDsl, null, 2)],
+    response: [JSON.stringify(mockGetHostsResponse, null, 2)],
+  },
   edges: [
     {
       node: {
@@ -263,10 +281,9 @@ export const mockGetHostsResult = {
   ],
   totalCount: 1627,
   pageInfo: {
-    hasNextPage: false,
-    endCursor: {
-      value: '10',
-    },
+    activePage: 0,
+    fakeTotalCount: 10,
+    showMorePagesIndicator: true,
   },
 };
 
@@ -282,7 +299,7 @@ export const mockGetHostOverviewOptions: HostOverviewRequestOptions = {
     },
   },
   timerange: { interval: '12h', to: 1554824274610, from: 1554737874610 },
-  defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+  defaultIndex: defaultIndexPattern,
   fields: [
     '_id',
     'host.architecture',
@@ -452,7 +469,15 @@ export const mockGetHostOverviewResponse = {
   },
 };
 
+export const mockGetHostOverviewRequestDsl = {
+  mockGetHostOverviewRequestDsl: 'mockGetHostOverviewRequestDsl',
+};
+
 export const mockGetHostOverviewResult = {
+  inspect: {
+    dsl: [JSON.stringify(mockGetHostOverviewRequestDsl, null, 2)],
+    response: [JSON.stringify(mockGetHostOverviewResponse, null, 2)],
+  },
   _id: 'siem-es',
   host: {
     architecture: 'x86_64',
@@ -480,7 +505,7 @@ export const mockGetHostOverviewResult = {
 };
 
 export const mockGetHostLastFirstSeenOptions: HostLastFirstSeenRequestOptions = {
-  defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+  defaultIndex: defaultIndexPattern,
   sourceConfiguration: {
     fields: {
       container: 'docker.container.name',
@@ -532,4 +557,17 @@ export const mockGetHostLastFirstSeenResponse = {
       value_as_string: '2019-02-22T03:41:32.826Z',
     },
   },
+};
+
+export const mockGetHostLastFirstSeenDsl = {
+  mockGetHostLastFirstSeenDsl: 'mockGetHostLastFirstSeenDsl',
+};
+
+export const mockGetHostLastFirstSeenResult = {
+  inspect: {
+    dsl: [JSON.stringify(mockGetHostLastFirstSeenDsl, null, 2)],
+    response: [JSON.stringify(mockGetHostLastFirstSeenResponse, null, 2)],
+  },
+  firstSeen: '2019-02-22T03:41:32.826Z',
+  lastSeen: '2019-04-09T16:18:12.178Z',
 };

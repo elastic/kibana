@@ -1,0 +1,35 @@
+{
+  "lens": {
+    "properties": {
+      "title": {
+        "type": "text"
+      },
+      "visualizationType": {
+        "type": "keyword"
+      },
+      "state": {
+        "type": "flattened"
+      },
+      "expression": {
+        "index": false,
+        "type": "keyword"
+      }
+    }
+  },
+  "lens-ui-telemetry": {
+    "properties": {
+      "name": {
+        "type": "keyword"
+      },
+      "type": {
+        "type": "keyword"
+      },
+      "date": {
+        "type": "date"
+      },
+      "count": {
+        "type": "integer"
+      }
+    }
+  }
+}

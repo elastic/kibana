@@ -4,27 +4,44 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as React from 'react';
-import { pure } from 'recompose';
+import { EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import { isNumber, isString, isEmpty } from 'lodash/fp';
+import React from 'react';
 
-import { isNumber } from 'lodash/fp';
-import { EuiToolTip, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import { DefaultDraggable } from '../../../draggables';
+import { Bytes, BYTES_FORMAT } from '../../../bytes';
 import { Duration, EVENT_DURATION_FIELD_NAME } from '../../../duration';
-
-import { getOrEmptyTagFromValue } from '../../../empty_value';
+import { getOrEmptyTagFromValue, getEmptyTagValue } from '../../../empty_value';
 import { FormattedDate } from '../../../formatted_date';
 import { FormattedIp } from '../../../formatted_ip';
+import { HostDetailsLink } from '../../../links';
+
 import { Port, PORT_NAMES } from '../../../port';
+import { TruncatableText } from '../../../truncatable_text';
+import {
+  DATE_FIELD_TYPE,
+  HOST_NAME_FIELD_NAME,
+  IP_FIELD_TYPE,
+  MESSAGE_FIELD_NAME,
+  EVENT_MODULE_FIELD_NAME,
+  RULE_REFERENCE_FIELD_NAME,
+  SIGNAL_RULE_NAME_FIELD_NAME,
+} from './constants';
+import { renderRuleName, renderEventModule, renderRulReference } from './formatted_field_helpers';
 
-import { DATE_FIELD_TYPE, IP_FIELD_TYPE, MESSAGE_FIELD_NAME } from './constants';
+// simple black-list to prevent dragging and dropping fields such as message name
+const columnNamesNotDraggable = [MESSAGE_FIELD_NAME];
 
-export const FormattedFieldValue = pure<{
-  eventId: string;
+const FormattedFieldValueComponent: React.FC<{
   contextId: string;
+  eventId: string;
+  fieldFormat?: string;
   fieldName: string;
   fieldType: string;
+  truncate?: boolean;
   value: string | number | undefined | null;
-}>(({ eventId, contextId, fieldName, fieldType, value }) => {
+  linkValue?: string | null | undefined;
+}> = ({ contextId, eventId, fieldFormat, fieldName, fieldType, truncate, value, linkValue }) => {
   if (fieldType === IP_FIELD_TYPE) {
     return (
       <FormattedIp
@@ -35,7 +52,16 @@ export const FormattedFieldValue = pure<{
       />
     );
   } else if (fieldType === DATE_FIELD_TYPE) {
-    return <FormattedDate fieldName={fieldName} value={value} />;
+    return (
+      <DefaultDraggable
+        field={fieldName}
+        id={`event-details-value-default-draggable-${contextId}-${eventId}-${fieldName}-${value}`}
+        tooltipContent={null}
+        value={`${value}`}
+      >
+        <FormattedDate fieldName={fieldName} value={value} />
+      </DefaultDraggable>
+    );
   } else if (PORT_NAMES.some(portName => fieldName === portName)) {
     return (
       <Port contextId={contextId} eventId={eventId} fieldName={fieldName} value={`${value}`} />
@@ -44,26 +70,74 @@ export const FormattedFieldValue = pure<{
     return (
       <Duration contextId={contextId} eventId={eventId} fieldName={fieldName} value={`${value}`} />
     );
-  } else if (fieldName === MESSAGE_FIELD_NAME && value != null && value !== '') {
-    return (
-      <EuiToolTip
-        position="left"
-        data-test-subj="message-tool-tip"
-        content={
-          <EuiFlexGroup direction="column" gutterSize="none">
-            <EuiFlexItem grow={false}>
-              <span>{fieldName}</span>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <span>{value}</span>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        }
+  } else if (fieldName === HOST_NAME_FIELD_NAME) {
+    const hostname = `${value}`;
+
+    return isString(value) && hostname.length > 0 ? (
+      <DefaultDraggable
+        field={fieldName}
+        id={`event-details-value-default-draggable-${contextId}-${eventId}-${fieldName}-${value}`}
+        tooltipContent={value}
+        value={value}
       >
-        <>{value}</>
-      </EuiToolTip>
+        <HostDetailsLink data-test-subj="host-details-link" hostName={hostname}>
+          <TruncatableText data-test-subj="draggable-truncatable-content">{value}</TruncatableText>
+        </HostDetailsLink>
+      </DefaultDraggable>
+    ) : (
+      getEmptyTagValue()
+    );
+  } else if (fieldFormat === BYTES_FORMAT) {
+    return (
+      <Bytes contextId={contextId} eventId={eventId} fieldName={fieldName} value={`${value}`} />
+    );
+  } else if (fieldName === SIGNAL_RULE_NAME_FIELD_NAME) {
+    return renderRuleName({ contextId, eventId, fieldName, linkValue, truncate, value });
+  } else if (fieldName === EVENT_MODULE_FIELD_NAME) {
+    return renderEventModule({ contextId, eventId, fieldName, linkValue, truncate, value });
+  } else if (fieldName === RULE_REFERENCE_FIELD_NAME) {
+    return renderRulReference({ contextId, eventId, fieldName, linkValue, truncate, value });
+  } else if (columnNamesNotDraggable.includes(fieldName)) {
+    return truncate && !isEmpty(value) ? (
+      <TruncatableText data-test-subj="truncatable-message">
+        <EuiToolTip
+          data-test-subj="message-tool-tip"
+          content={
+            <EuiFlexGroup direction="column" gutterSize="none">
+              <EuiFlexItem grow={false}>
+                <span>{fieldName}</span>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <span>{value}</span>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          }
+        >
+          <>{value}</>
+        </EuiToolTip>
+      </TruncatableText>
+    ) : (
+      <>{value}</>
     );
   } else {
-    return getOrEmptyTagFromValue(value);
+    const contentValue = getOrEmptyTagFromValue(value);
+    const content = truncate ? <TruncatableText>{contentValue}</TruncatableText> : contentValue;
+
+    return (
+      <DefaultDraggable
+        field={fieldName}
+        id={`event-details-value-default-draggable-${contextId}-${eventId}-${fieldName}-${value}`}
+        value={`${value}`}
+        tooltipContent={
+          fieldType === DATE_FIELD_TYPE || fieldType === EVENT_DURATION_FIELD_NAME
+            ? null
+            : fieldName
+        }
+      >
+        {content}
+      </DefaultDraggable>
+    );
   }
-});
+};
+
+export const FormattedFieldValue = React.memo(FormattedFieldValueComponent);

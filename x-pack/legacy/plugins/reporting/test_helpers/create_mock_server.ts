@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { memoize } from 'lodash';
+import { ServerFacade } from '../types';
 
-export const createMockServer = ({ settings = {} }: any) => {
+export const createMockServer = ({ settings = {} }: any): ServerFacade => {
   const mockServer = {
     expose: () => {
       ' ';
@@ -40,5 +41,5 @@ export const createMockServer = ({ settings = {} }: any) => {
     return key in settings ? settings[key] : defaultSettings[key];
   });
 
-  return mockServer;
+  return (mockServer as unknown) as ServerFacade;
 };

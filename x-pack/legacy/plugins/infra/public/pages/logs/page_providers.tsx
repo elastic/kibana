@@ -5,23 +5,16 @@
  */
 
 import React from 'react';
-
-import { SourceConfigurationFlyoutState } from '../../components/source_configuration';
-import { LogFlyout } from '../../containers/logs/log_flyout';
-import { LogViewConfiguration } from '../../containers/logs/log_view_configuration';
-import { Source } from '../../containers/source';
+import { LogAnalysisCapabilitiesProvider } from '../../containers/logs/log_analysis';
+import { SourceProvider } from '../../containers/source';
 import { useSourceId } from '../../containers/source_id';
 
 export const LogsPageProviders: React.FunctionComponent = ({ children }) => {
   const [sourceId] = useSourceId();
 
   return (
-    <Source.Provider sourceId={sourceId}>
-      <SourceConfigurationFlyoutState.Provider>
-        <LogViewConfiguration.Provider>
-          <LogFlyout.Provider>{children}</LogFlyout.Provider>
-        </LogViewConfiguration.Provider>
-      </SourceConfigurationFlyoutState.Provider>
-    </Source.Provider>
+    <SourceProvider sourceId={sourceId}>
+      <LogAnalysisCapabilitiesProvider>{children}</LogAnalysisCapabilitiesProvider>
+    </SourceProvider>
   );
 };

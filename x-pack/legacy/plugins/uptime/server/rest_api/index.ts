@@ -4,10 +4,33 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createIsValidRoute } from './auth';
-import { createGetAllRoute } from './pings';
-import { UMRestApiRouteCreator } from './types';
+import { createGetOverviewFilters } from './overview_filters';
+import { createGetPingsRoute } from './pings';
+import { createGetIndexPatternRoute } from './index_pattern';
+import { createLogMonitorPageRoute, createLogOverviewPageRoute } from './telemetry';
+import { createGetSnapshotCount } from './snapshot';
+import { UMRestApiRouteFactory } from './types';
+import {
+  createGetMonitorRoute,
+  createGetMonitorDetailsRoute,
+  createGetMonitorLocationsRoute,
+  createGetStatusBarRoute,
+} from './monitors';
+import { createGetPingHistogramRoute } from './pings/get_ping_histogram';
 
 export * from './types';
 export { createRouteWithAuth } from './create_route_with_auth';
-export const restApiRoutes: UMRestApiRouteCreator[] = [createIsValidRoute, createGetAllRoute];
+export { uptimeRouteWrapper } from './uptime_route_wrapper';
+export const restApiRoutes: UMRestApiRouteFactory[] = [
+  createGetOverviewFilters,
+  createGetPingsRoute,
+  createGetIndexPatternRoute,
+  createGetMonitorRoute,
+  createGetMonitorDetailsRoute,
+  createGetMonitorLocationsRoute,
+  createGetStatusBarRoute,
+  createGetSnapshotCount,
+  createLogMonitorPageRoute,
+  createLogOverviewPageRoute,
+  createGetPingHistogramRoute,
+];

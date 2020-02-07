@@ -4,15 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable react/display-name */
+
 import { IconType } from '@elastic/eui';
 import { get } from 'lodash/fp';
 import React from 'react';
 
-import * as i18n from './translations';
 import { RowRenderer, RowRendererContainer } from '../row_renderer';
-import { Row } from '../helpers';
 import { AuditdGenericDetails } from './generic_details';
 import { AuditdGenericFileDetails } from './generic_file_details';
+import * as i18n from './translations';
 
 export const createGenericAuditRowRenderer = ({
   actionName,
@@ -31,18 +32,19 @@ export const createGenericAuditRowRenderer = ({
       action.toLowerCase() === actionName
     );
   },
-  renderRow: ({ browserFields, data, width, children }) => (
-    <Row>
+  renderRow: ({ browserFields, data, children, timelineId }) => (
+    <>
       {children}
-      <RowRendererContainer width={width}>
+      <RowRendererContainer>
         <AuditdGenericDetails
           browserFields={browserFields}
           data={data}
-          contextId={actionName}
+          contextId={`${actionName}-${timelineId}`}
           text={text}
+          timelineId={timelineId}
         />
       </RowRendererContainer>
-    </Row>
+    </>
   ),
 });
 
@@ -65,19 +67,20 @@ export const createGenericFileRowRenderer = ({
       action.toLowerCase() === actionName
     );
   },
-  renderRow: ({ browserFields, data, width, children }) => (
-    <Row>
+  renderRow: ({ browserFields, data, children, timelineId }) => (
+    <>
       {children}
-      <RowRendererContainer width={width}>
+      <RowRendererContainer>
         <AuditdGenericFileDetails
           browserFields={browserFields}
           data={data}
-          contextId={actionName}
+          contextId={`${actionName}-${timelineId}`}
           text={text}
           fileIcon={fileIcon}
+          timelineId={timelineId}
         />
       </RowRendererContainer>
-    </Row>
+    </>
   ),
 });
 

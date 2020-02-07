@@ -5,8 +5,7 @@
  */
 
 import { EuiAvatar, EuiPanel } from '@elastic/eui';
-import * as React from 'react';
-import { pure } from 'recompose';
+import React from 'react';
 import styled from 'styled-components';
 
 import * as i18n from '../translations';
@@ -17,9 +16,13 @@ const Action = styled.span`
   margin-right: 5px;
 `;
 
+Action.displayName = 'Action';
+
 const Avatar = styled(EuiAvatar)`
   margin-right: 5px;
 `;
+
+Avatar.displayName = 'Avatar';
 
 const HeaderContainer = styled.div`
   align-items: center;
@@ -27,12 +30,14 @@ const HeaderContainer = styled.div`
   user-select: none;
 `;
 
+HeaderContainer.displayName = 'HeaderContainer';
+
 const User = styled.span`
   font-weight: 700;
   margin: 5px;
 `;
 
-export const NoteCardHeader = pure<{ created: Date; user: string }>(({ created, user }) => (
+export const NoteCardHeader = React.memo<{ created: Date; user: string }>(({ created, user }) => (
   <EuiPanel data-test-subj="note-card-header" hasShadow={false} paddingSize="s">
     <HeaderContainer>
       <Avatar data-test-subj="avatar" size="s" name={user} />
@@ -42,3 +47,5 @@ export const NoteCardHeader = pure<{ created: Date; user: string }>(({ created, 
     </HeaderContainer>
   </EuiPanel>
 ));
+
+NoteCardHeader.displayName = 'NoteCardHeader';

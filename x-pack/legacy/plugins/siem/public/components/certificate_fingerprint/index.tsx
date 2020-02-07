@@ -5,8 +5,7 @@
  */
 
 import { EuiText } from '@elastic/eui';
-import * as React from 'react';
-import { pure } from 'recompose';
+import React from 'react';
 import styled from 'styled-components';
 
 import { DraggableBadge } from '../draggables';
@@ -26,6 +25,8 @@ const FingerprintLabel = styled.span`
   margin-right: 5px;
 `;
 
+FingerprintLabel.displayName = 'FingerprintLabel';
+
 /**
  * Represents a field containing a certificate fingerprint (e.g. a sha1), with
  * a link to an external site, which in-turn compares the fingerprint against a
@@ -34,7 +35,7 @@ const FingerprintLabel = styled.span`
  * 'tls.client_certificate.fingerprint.sha1'
  * 'tls.server_certificate.fingerprint.sha1'
  */
-export const CertificateFingerprint = pure<{
+export const CertificateFingerprint = React.memo<{
   eventId: string;
   certificateType: CertificateType;
   contextId: string;
@@ -63,3 +64,5 @@ export const CertificateFingerprint = pure<{
     </DraggableBadge>
   );
 });
+
+CertificateFingerprint.displayName = 'CertificateFingerprint';

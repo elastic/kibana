@@ -7,7 +7,7 @@
 import { migrations } from './migrations';
 import { CANVAS_TYPE } from './common/lib';
 
-describe(CANVAS_TYPE, () => {
+describe(`${CANVAS_TYPE}`, () => {
   describe('7.0.0', () => {
     const migrate = doc => migrations[CANVAS_TYPE]['7.0.0'](doc);
 

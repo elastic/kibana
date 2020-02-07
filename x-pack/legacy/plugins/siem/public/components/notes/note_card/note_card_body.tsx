@@ -5,8 +5,7 @@
  */
 
 import { EuiPanel, EuiToolTip } from '@elastic/eui';
-import * as React from 'react';
-import { pure } from 'recompose';
+import React from 'react';
 import styled from 'styled-components';
 
 import { WithCopyToClipboard } from '../../../lib/clipboard/with_copy_to_clipboard';
@@ -17,6 +16,8 @@ import * as i18n from '../translations';
 const BodyContainer = styled(EuiPanel)`
   border: none;
 `;
+
+BodyContainer.displayName = 'BodyContainer';
 
 const HoverActionsContainer = styled(EuiPanel)`
   align-items: center;
@@ -30,7 +31,9 @@ const HoverActionsContainer = styled(EuiPanel)`
   width: 30px;
 `;
 
-export const NoteCardBody = pure<{ rawNote: string }>(({ rawNote }) => (
+HoverActionsContainer.displayName = 'HoverActionsContainer';
+
+export const NoteCardBody = React.memo<{ rawNote: string }>(({ rawNote }) => (
   <BodyContainer data-test-subj="note-card-body" hasShadow={false} paddingSize="s">
     <WithHoverActions
       hoverContent={
@@ -44,3 +47,5 @@ export const NoteCardBody = pure<{ rawNote: string }>(({ rawNote }) => (
     />
   </BodyContainer>
 ));
+
+NoteCardBody.displayName = 'NoteCardBody';

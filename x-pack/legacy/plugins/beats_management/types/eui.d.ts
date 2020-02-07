@@ -11,8 +11,6 @@
 
 import * as eui from '@elastic/eui';
 import { Moment } from 'moment';
-import { ChangeEventHandler, MouseEventHandler, ReactType, Ref, SFC } from 'react';
+import { ChangeEventHandler, MouseEventHandler, ReactType, Ref, FC } from 'react';
 
-declare module '@elastic/eui' {
-
-}
+declare module '@elastic/eui' {}

@@ -6,7 +6,7 @@
 
 import header from './header.png';
 
-import { ElementFactory } from '../types';
+import { ElementFactory } from '../../../types';
 export const markdown: ElementFactory = () => ({
   name: 'markdown',
   displayName: 'Markdown',
@@ -26,7 +26,7 @@ The data table contains
  **{{name}}**
 {{/each}}
 
-You can use standard Markdown in here, but you can also access your piped-in data using Handlebars. If you want to know more, check out the [Handlebars documentation](http://handlebarsjs.com/expressions.html).
+You can use standard Markdown in here, but you can also access your piped-in data using Handlebars. If you want to know more, check out the [Handlebars documentation](https://handlebarsjs.com/guide/expressions.html).
 
 #### Enjoy!" | render`,
 });

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import elasticsearch from 'elasticsearch';
+import * as legacyElasticsearch from 'elasticsearch';
 import { get } from 'lodash';
 
 const {
@@ -34,7 +34,7 @@ const {
   413: RequestEntityTooLarge,
   NotFound,
   BadRequest,
-} = elasticsearch.errors;
+} = legacyElasticsearch.errors;
 
 import { SavedObjectsErrorHelpers } from './errors';
 

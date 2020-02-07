@@ -29,7 +29,7 @@ import { PluginsConfig } from '../plugins_config';
 import { PluginDiscoveryError } from './plugin_discovery_error';
 import { parseManifest } from './plugin_manifest_parser';
 
-const fsReadDir$ = bindNodeCallback(readdir);
+const fsReadDir$ = bindNodeCallback<string, string[]>(readdir);
 const fsStat$ = bindNodeCallback(stat);
 
 /**
@@ -46,11 +46,9 @@ export function discover(config: PluginsConfig, coreContext: CoreContext) {
   const log = coreContext.logger.get('plugins-discovery');
   log.debug('Discovering plugins...');
 
-  if (config.additionalPluginPaths.length) {
+  if (config.additionalPluginPaths.length && coreContext.env.mode.dev) {
     log.warn(
-      `Explicit plugin paths [${
-        config.additionalPluginPaths
-      }] are only supported in development. Relative imports will not work in production.`
+      `Explicit plugin paths [${config.additionalPluginPaths}] should only be used in development. Relative imports may not work properly in production.`
     );
   }
 
@@ -83,7 +81,7 @@ export function discover(config: PluginsConfig, coreContext: CoreContext) {
  * @param pluginDirs List of the top-level directories to process.
  * @param log Plugin discovery logger instance.
  */
-function processPluginSearchPaths$(pluginDirs: ReadonlyArray<string>, log: Logger) {
+function processPluginSearchPaths$(pluginDirs: readonly string[], log: Logger) {
   return from(pluginDirs).pipe(
     mergeMap(dir => {
       log.debug(`Scanning "${dir}" for plugin sub-directories...`);
@@ -114,14 +112,16 @@ function processPluginSearchPaths$(pluginDirs: ReadonlyArray<string>, log: Logge
  * @param coreContext Kibana core context.
  */
 function createPlugin$(path: string, log: Logger, coreContext: CoreContext) {
-  return from(parseManifest(path, coreContext.env.packageInfo)).pipe(
+  return from(parseManifest(path, coreContext.env.packageInfo, log)).pipe(
     map(manifest => {
       log.debug(`Successfully discovered plugin "${manifest.id}" at "${path}"`);
-      return new PluginWrapper(
+      const opaqueId = Symbol(manifest.id);
+      return new PluginWrapper({
         path,
         manifest,
-        createPluginInitializerContext(coreContext, manifest)
-      );
+        opaqueId,
+        initializerContext: createPluginInitializerContext(coreContext, opaqueId, manifest),
+      });
     }),
     catchError(err => [err])
   );

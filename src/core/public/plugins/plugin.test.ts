@@ -19,6 +19,7 @@
 import { mockInitializer, mockPlugin, mockPluginLoader } from './plugin.test.mocks';
 
 import { DiscoveredPlugin } from '../../server';
+import { coreMock } from '../mocks';
 import { PluginWrapper } from './plugin';
 
 function createManifest(
@@ -35,7 +36,8 @@ function createManifest(
 }
 
 let plugin: PluginWrapper<unknown, Record<string, unknown>>;
-const initializerContext = {};
+const opaqueId = Symbol();
+const initializerContext = coreMock.createPluginInitializerContext();
 const addBasePath = (path: string) => path;
 
 beforeEach(() => {
@@ -43,7 +45,7 @@ beforeEach(() => {
   mockPlugin.setup.mockClear();
   mockPlugin.start.mockClear();
   mockPlugin.stop.mockClear();
-  plugin = new PluginWrapper(createManifest('plugin-a'), initializerContext);
+  plugin = new PluginWrapper(createManifest('plugin-a'), opaqueId, initializerContext);
 });
 
 describe('PluginWrapper', () => {
@@ -102,6 +104,33 @@ describe('PluginWrapper', () => {
     const deps = { otherDep: 'value' };
     await plugin.start(context, deps);
     expect(mockPlugin.start).toHaveBeenCalledWith(context, deps);
+  });
+
+  test("`start` resolves `startDependencies` Promise after plugin's start", async () => {
+    expect.assertions(2);
+
+    let startDependenciesResolved = false;
+    mockPluginLoader.mockResolvedValueOnce(() => ({
+      setup: jest.fn(),
+      start: async () => {
+        // Add small delay to ensure startDependencies is not resolved until after the plugin instance's start resolves.
+        await new Promise(resolve => setTimeout(resolve, 10));
+        expect(startDependenciesResolved).toBe(false);
+      },
+    }));
+    await plugin.load(addBasePath);
+    await plugin.setup({} as any, {} as any);
+    const context = { any: 'thing' } as any;
+    const deps = { otherDep: 'value' };
+
+    // Add promise callback prior to calling `start` to ensure calls in `setup` will not resolve before `start` is
+    // called.
+    const startDependenciesCheck = plugin.startDependencies.then(res => {
+      startDependenciesResolved = true;
+      expect(res).toEqual([context, deps]);
+    });
+    await plugin.start(context, deps);
+    await startDependenciesCheck;
   });
 
   test('`stop` fails if plugin is not setup up', async () => {

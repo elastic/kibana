@@ -18,37 +18,49 @@
  */
 
 import _ from 'lodash';
-import { RawSavedObjectDoc } from '../../serialization';
+import { SavedObjectUnsanitizedDoc } from '../../serialization';
 import { DocumentMigrator } from './document_migrator';
+import { loggingServiceMock } from '../../../logging/logging_service.mock';
+import { SavedObjectsType } from '../../types';
+import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
+
+const mockLoggerFactory = loggingServiceMock.create();
+const mockLogger = mockLoggerFactory.get('mock logger');
+
+const createRegistry = (...types: Array<Partial<SavedObjectsType>>) => {
+  const registry = new SavedObjectTypeRegistry();
+  types.forEach(type =>
+    registry.registerType({
+      name: 'unknown',
+      namespaceAgnostic: false,
+      hidden: false,
+      mappings: { properties: {} },
+      migrations: {},
+      ...type,
+    })
+  );
+  return registry;
+};
 
 describe('DocumentMigrator', () => {
   function testOpts() {
     return {
       kibanaVersion: '25.2.3',
-      migrations: {},
+      typeRegistry: createRegistry(),
       validateDoc: _.noop,
-      log: jest.fn(),
+      log: mockLogger,
     };
   }
 
-  it('validates the migration definition', () => {
-    const invalidDefinition: any = {
-      kibanaVersion: '3.2.3',
-      migrations: 'hello',
-      validateDoc: _.noop,
-    };
-    expect(() => new DocumentMigrator(invalidDefinition)).toThrow(
-      /Migration definition should be an object/i
-    );
-  });
-
   it('validates individual migration definitions', () => {
-    const invalidDefinition: any = {
+    const invalidDefinition = {
       kibanaVersion: '3.2.3',
-      migrations: {
-        foo: _.noop,
-      },
+      typeRegistry: createRegistry({
+        name: 'foo',
+        migrations: _.noop as any,
+      }),
       validateDoc: _.noop,
+      log: mockLogger,
     };
     expect(() => new DocumentMigrator(invalidDefinition)).toThrow(
       /Migration for type foo should be an object/i
@@ -56,14 +68,16 @@ describe('DocumentMigrator', () => {
   });
 
   it('validates individual migration semvers', () => {
-    const invalidDefinition: any = {
+    const invalidDefinition = {
       kibanaVersion: '3.2.3',
-      migrations: {
-        foo: {
-          bar: _.noop,
+      typeRegistry: createRegistry({
+        name: 'foo',
+        migrations: {
+          bar: doc => doc,
         },
-      },
+      }),
       validateDoc: _.noop,
+      log: mockLogger,
     };
     expect(() => new DocumentMigrator(invalidDefinition)).toThrow(
       /Expected all properties to be semvers/i
@@ -71,14 +85,16 @@ describe('DocumentMigrator', () => {
   });
 
   it('validates the migration function', () => {
-    const invalidDefinition: any = {
+    const invalidDefinition = {
       kibanaVersion: '3.2.3',
-      migrations: {
-        foo: {
-          '1.2.3': 23,
+      typeRegistry: createRegistry({
+        name: 'foo',
+        migrations: {
+          '1.2.3': 23 as any,
         },
-      },
+      }),
       validateDoc: _.noop,
+      log: mockLogger,
     };
     expect(() => new DocumentMigrator(invalidDefinition)).toThrow(
       /expected a function, but got 23/i
@@ -88,11 +104,12 @@ describe('DocumentMigrator', () => {
   it('migrates type and attributes', () => {
     const migrator = new DocumentMigrator({
       ...testOpts(),
-      migrations: {
-        user: {
+      typeRegistry: createRegistry({
+        name: 'user',
+        migrations: {
           '1.2.3': setAttr('attributes.name', 'Chris'),
         },
-      },
+      }),
     });
     const actual = migrator.migrate({
       id: 'me',
@@ -111,14 +128,15 @@ describe('DocumentMigrator', () => {
   it(`doesn't mutate the original document`, () => {
     const migrator = new DocumentMigrator({
       ...testOpts(),
-      migrations: {
-        user: {
-          '1.2.3': (doc: RawSavedObjectDoc) => {
+      typeRegistry: createRegistry({
+        name: 'user',
+        migrations: {
+          '1.2.3': doc => {
             _.set(doc, 'attributes.name', 'Mike');
             return doc;
           },
         },
-      },
+      }),
     });
     const originalDoc = {
       id: 'me',
@@ -134,11 +152,12 @@ describe('DocumentMigrator', () => {
   it('migrates meta properties', () => {
     const migrator = new DocumentMigrator({
       ...testOpts(),
-      migrations: {
-        acl: {
+      typeRegistry: createRegistry({
+        name: 'acl',
+        migrations: {
           '2.3.5': setAttr('acl', 'admins-only,sucka!'),
         },
-      },
+      }),
     });
     const actual = migrator.migrate({
       id: 'me',
@@ -159,11 +178,26 @@ describe('DocumentMigrator', () => {
   it('does not apply migrations to unrelated docs', () => {
     const migrator = new DocumentMigrator({
       ...testOpts(),
-      migrations: {
-        aaa: { '1.0.0': setAttr('aaa', 'A') },
-        bbb: { '1.0.0': setAttr('bbb', 'B') },
-        ccc: { '1.0.0': setAttr('ccc', 'C') },
-      },
+      typeRegistry: createRegistry(
+        {
+          name: 'aaa',
+          migrations: {
+            '1.0.0': setAttr('aaa', 'A'),
+          },
+        },
+        {
+          name: 'bbb',
+          migrations: {
+            '1.0.0': setAttr('bbb', 'B'),
+          },
+        },
+        {
+          name: 'ccc',
+          migrations: {
+            '1.0.0': setAttr('ccc', 'C'),
+          },
+        }
+      ),
     });
     const actual = migrator.migrate({
       id: 'me',
@@ -181,11 +215,26 @@ describe('DocumentMigrator', () => {
   it('assumes documents w/ undefined migrationVersion are up to date', () => {
     const migrator = new DocumentMigrator({
       ...testOpts(),
-      migrations: {
-        user: { '1.0.0': setAttr('aaa', 'A') },
-        bbb: { '2.3.4': setAttr('bbb', 'B') },
-        ccc: { '1.0.0': setAttr('ccc', 'C') },
-      },
+      typeRegistry: createRegistry(
+        {
+          name: 'user',
+          migrations: {
+            '1.0.0': setAttr('aaa', 'A'),
+          },
+        },
+        {
+          name: 'bbb',
+          migrations: {
+            '2.3.4': setAttr('bbb', 'B'),
+          },
+        },
+        {
+          name: 'ccc',
+          migrations: {
+            '1.0.0': setAttr('ccc', 'C'),
+          },
+        }
+      ),
     });
     const actual = migrator.migrate({
       id: 'me',
@@ -208,13 +257,14 @@ describe('DocumentMigrator', () => {
   it('only applies migrations that are more recent than the doc', () => {
     const migrator = new DocumentMigrator({
       ...testOpts(),
-      migrations: {
-        dog: {
+      typeRegistry: createRegistry({
+        name: 'dog',
+        migrations: {
           '1.2.3': setAttr('attributes.a', 'A'),
           '1.2.4': setAttr('attributes.b', 'B'),
           '2.0.1': setAttr('attributes.c', 'C'),
         },
-      },
+      }),
     });
     const actual = migrator.migrate({
       id: 'smelly',
@@ -250,11 +300,12 @@ describe('DocumentMigrator', () => {
   it('rejects docs that belong to a newer plugin', () => {
     const migrator = new DocumentMigrator({
       ...testOpts(),
-      migrations: {
-        dawg: {
+      typeRegistry: createRegistry({
+        name: 'dawg',
+        migrations: {
           '1.2.3': setAttr('attributes.a', 'A'),
         },
-      },
+      }),
     });
     expect(() =>
       migrator.migrate({
@@ -272,13 +323,14 @@ describe('DocumentMigrator', () => {
     let count = 0;
     const migrator = new DocumentMigrator({
       ...testOpts(),
-      migrations: {
-        dog: {
+      typeRegistry: createRegistry({
+        name: 'dog',
+        migrations: {
           '2.2.4': setAttr('attributes.b', () => ++count),
           '10.0.1': setAttr('attributes.c', () => ++count),
           '1.2.3': setAttr('attributes.a', () => ++count),
         },
-      },
+      }),
     });
     const actual = migrator.migrate({
       id: 'smelly',
@@ -297,14 +349,20 @@ describe('DocumentMigrator', () => {
   it('allows props to be added', () => {
     const migrator = new DocumentMigrator({
       ...testOpts(),
-      migrations: {
-        animal: {
-          '1.0.0': setAttr('animal', (name: string) => `Animal: ${name}`),
+      typeRegistry: createRegistry(
+        {
+          name: 'animal',
+          migrations: {
+            '1.0.0': setAttr('animal', (name: string) => `Animal: ${name}`),
+          },
         },
-        dog: {
-          '2.2.4': setAttr('animal', 'Doggie'),
-        },
-      },
+        {
+          name: 'dog',
+          migrations: {
+            '2.2.4': setAttr('animal', 'Doggie'),
+          },
+        }
+      ),
     });
     const actual = migrator.migrate({
       id: 'smelly',
@@ -324,16 +382,22 @@ describe('DocumentMigrator', () => {
   it('allows props to be renamed', () => {
     const migrator = new DocumentMigrator({
       ...testOpts(),
-      migrations: {
-        animal: {
-          '1.0.0': setAttr('animal', (name: string) => `Animal: ${name}`),
-          '3.2.1': renameAttr('animal', 'dawg'),
+      typeRegistry: createRegistry(
+        {
+          name: 'animal',
+          migrations: {
+            '1.0.0': setAttr('animal', (name: string) => `Animal: ${name}`),
+            '3.2.1': renameAttr('animal', 'dawg'),
+          },
         },
-        dawg: {
-          '2.2.4': renameAttr('dawg', 'animal'),
-          '3.2.0': setAttr('dawg', (name: string) => `Dawg3.x: ${name}`),
-        },
-      },
+        {
+          name: 'dawg',
+          migrations: {
+            '2.2.4': renameAttr('dawg', 'animal'),
+            '3.2.0': setAttr('dawg', (name: string) => `Dawg3.x: ${name}`),
+          },
+        }
+      ),
     });
     const actual = migrator.migrate({
       id: 'smelly',
@@ -354,14 +418,20 @@ describe('DocumentMigrator', () => {
   it('allows changing type', () => {
     const migrator = new DocumentMigrator({
       ...testOpts(),
-      migrations: {
-        cat: {
-          '1.0.0': setAttr('attributes.name', (name: string) => `Kitty ${name}`),
+      typeRegistry: createRegistry(
+        {
+          name: 'cat',
+          migrations: {
+            '1.0.0': setAttr('attributes.name', (name: string) => `Kitty ${name}`),
+          },
         },
-        dog: {
-          '2.2.4': setAttr('type', 'cat'),
-        },
-      },
+        {
+          name: 'dog',
+          migrations: {
+            '2.2.4': setAttr('type', 'cat'),
+          },
+        }
+      ),
     });
     const actual = migrator.migrate({
       id: 'smelly',
@@ -380,11 +450,12 @@ describe('DocumentMigrator', () => {
   it('disallows updating a migrationVersion prop to a lower version', () => {
     const migrator = new DocumentMigrator({
       ...testOpts(),
-      migrations: {
-        cat: {
+      typeRegistry: createRegistry({
+        name: 'cat',
+        migrations: {
           '1.0.0': setAttr('migrationVersion.foo', '3.2.1'),
         },
-      },
+      }),
     });
 
     expect(() =>
@@ -402,11 +473,12 @@ describe('DocumentMigrator', () => {
   it('disallows removing a migrationVersion prop', () => {
     const migrator = new DocumentMigrator({
       ...testOpts(),
-      migrations: {
-        cat: {
+      typeRegistry: createRegistry({
+        name: 'cat',
+        migrations: {
           '1.0.0': setAttr('migrationVersion', {}),
         },
-      },
+      }),
     });
     expect(() =>
       migrator.migrate({
@@ -423,8 +495,9 @@ describe('DocumentMigrator', () => {
   it('allows updating a migrationVersion prop to a later version', () => {
     const migrator = new DocumentMigrator({
       ...testOpts(),
-      migrations: {
-        cat: {
+      typeRegistry: createRegistry({
+        name: 'cat',
+        migrations: {
           '1.0.0': setAttr('migrationVersion.cat', '2.9.1'),
           '2.0.0': () => {
             throw new Error('POW!');
@@ -434,7 +507,7 @@ describe('DocumentMigrator', () => {
           },
           '3.0.0': setAttr('attributes.name', 'Shiny'),
         },
-      },
+      }),
     });
     const actual = migrator.migrate({
       id: 'smelly',
@@ -453,11 +526,12 @@ describe('DocumentMigrator', () => {
   it('allows adding props to migrationVersion', () => {
     const migrator = new DocumentMigrator({
       ...testOpts(),
-      migrations: {
-        cat: {
+      typeRegistry: createRegistry({
+        name: 'cat',
+        migrations: {
           '1.0.0': setAttr('migrationVersion.foo', '5.6.7'),
         },
-      },
+      }),
     });
     const actual = migrator.migrate({
       id: 'smelly',
@@ -474,16 +548,17 @@ describe('DocumentMigrator', () => {
   });
 
   it('logs the document and transform that failed', () => {
-    const log = jest.fn();
+    const log = mockLogger;
     const migrator = new DocumentMigrator({
       ...testOpts(),
-      migrations: {
-        dog: {
+      typeRegistry: createRegistry({
+        name: 'dog',
+        migrations: {
           '1.2.3': () => {
             throw new Error('Dang diggity!');
           },
         },
-      },
+      }),
       log,
     });
     const failedDoc = {
@@ -497,28 +572,27 @@ describe('DocumentMigrator', () => {
       expect('Did not throw').toEqual('But it should have!');
     } catch (error) {
       expect(error.message).toMatch(/Dang diggity!/);
-      const warning = log.mock.calls.filter(([[level]]) => level === 'warning')[0][1];
+      const warning = loggingServiceMock.collect(mockLoggerFactory).warn[0][0];
       expect(warning).toContain(JSON.stringify(failedDoc));
       expect(warning).toContain('dog:1.2.3');
     }
   });
 
   it('logs message in transform function', () => {
-    const logStash: string[] = [];
     const logTestMsg = '...said the joker to the thief';
     const migrator = new DocumentMigrator({
       ...testOpts(),
-      migrations: {
-        dog: {
+      typeRegistry: createRegistry({
+        name: 'dog',
+        migrations: {
           '1.2.3': (doc, log) => {
-            log!.info(logTestMsg);
+            log.info(logTestMsg);
+            log.warning(logTestMsg);
             return doc;
           },
         },
-      },
-      log: (path: string[], message: string) => {
-        logStash.push(message);
-      },
+      }),
+      log: mockLogger,
     });
     const doc = {
       id: 'joker',
@@ -527,23 +601,30 @@ describe('DocumentMigrator', () => {
       migrationVersion: {},
     };
     migrator.migrate(doc);
-    expect(logStash[0]).toEqual(logTestMsg);
+    expect(loggingServiceMock.collect(mockLoggerFactory).info[0][0]).toEqual(logTestMsg);
+    expect(loggingServiceMock.collect(mockLoggerFactory).warn[1][0]).toEqual(logTestMsg);
   });
 
   test('extracts the latest migration version info', () => {
     const { migrationVersion } = new DocumentMigrator({
       ...testOpts(),
-      migrations: {
-        aaa: {
-          '1.2.3': (doc: RawSavedObjectDoc) => doc,
-          '10.4.0': (doc: RawSavedObjectDoc) => doc,
-          '2.2.1': (doc: RawSavedObjectDoc) => doc,
+      typeRegistry: createRegistry(
+        {
+          name: 'aaa',
+          migrations: {
+            '1.2.3': (doc: SavedObjectUnsanitizedDoc) => doc,
+            '10.4.0': (doc: SavedObjectUnsanitizedDoc) => doc,
+            '2.2.1': (doc: SavedObjectUnsanitizedDoc) => doc,
+          },
         },
-        bbb: {
-          '3.2.3': (doc: RawSavedObjectDoc) => doc,
-          '2.0.0': (doc: RawSavedObjectDoc) => doc,
-        },
-      },
+        {
+          name: 'bbb',
+          migrations: {
+            '3.2.3': (doc: SavedObjectUnsanitizedDoc) => doc,
+            '2.0.0': (doc: SavedObjectUnsanitizedDoc) => doc,
+          },
+        }
+      ),
     });
 
     expect(migrationVersion).toEqual({
@@ -555,11 +636,12 @@ describe('DocumentMigrator', () => {
   test('fails if the validate doc throws', () => {
     const migrator = new DocumentMigrator({
       ...testOpts(),
-      migrations: {
-        aaa: {
+      typeRegistry: createRegistry({
+        name: 'aaa',
+        migrations: {
           '2.3.4': d => _.set(d, 'attributes.counter', 42),
         },
-      },
+      }),
       validateDoc: d => {
         if ((d.attributes as any).counter === 42) {
           throw new Error('Meaningful!');
@@ -574,11 +656,15 @@ describe('DocumentMigrator', () => {
 });
 
 function renameAttr(path: string, newPath: string) {
-  return (doc: RawSavedObjectDoc) =>
-    _.omit(_.set(doc, newPath, _.get(doc, path)), path) as RawSavedObjectDoc;
+  return (doc: SavedObjectUnsanitizedDoc) =>
+    _.omit(_.set(doc, newPath, _.get(doc, path)) as {}, path) as SavedObjectUnsanitizedDoc;
 }
 
 function setAttr(path: string, value: any) {
-  return (doc: RawSavedObjectDoc) =>
-    _.set(doc, path, _.isFunction(value) ? value(_.get(doc, path)) : value) as RawSavedObjectDoc;
+  return (doc: SavedObjectUnsanitizedDoc) =>
+    _.set(
+      doc,
+      path,
+      _.isFunction(value) ? value(_.get(doc, path)) : value
+    ) as SavedObjectUnsanitizedDoc;
 }

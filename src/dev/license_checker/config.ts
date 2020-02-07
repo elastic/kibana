@@ -23,6 +23,7 @@ export const LICENSE_WHITELIST = [
   'Elastic-License',
   '(BSD-2-Clause OR MIT OR Apache-2.0)',
   '(BSD-2-Clause OR MIT)',
+  '(BSD-3-Clause AND Apache-2.0)',
   '(GPL-2.0 OR MIT)',
   '(MIT AND CC-BY-3.0)',
   '(MIT AND Zlib)',
@@ -63,10 +64,12 @@ export const LICENSE_WHITELIST = [
   'MIT/X11',
   'new BSD, and MIT',
   '(OFL-1.1 AND MIT)',
+  'PSF',
   'Public Domain',
   'Unlicense',
   'WTFPL OR ISC',
   'WTFPL',
+  'Nuclide software',
 ];
 
 // The following list only applies to licenses that
@@ -93,17 +96,11 @@ export const LICENSE_OVERRIDES = {
   'sha.js@2.4.11': ['BSD-3-Clause AND MIT'],
 
   // TODO can be removed if the ISSUE#239 is accepted on the source
-  'xmldom@0.1.19': ['MIT'],
+  'xmldom@0.1.27': ['MIT'],
 
   // TODO can be removed if the PR#9 is accepted on the source
   'pause-stream@0.0.11': ['MIT'],
 
-  // TODO can be removed once we upgrade past or equal pdf-image@2.0.1
-  'pdf-image@1.1.0': ['MIT'],
-
   // TODO can be removed once we upgrade the use of walk dependency past or equal to v2.3.14
   'walk@2.3.9': ['MIT'],
-
-  // TODO remove this once we upgrade past or equal to v1.0.2
-  'babel-plugin-mock-imports@1.0.1': ['MIT'],
 };

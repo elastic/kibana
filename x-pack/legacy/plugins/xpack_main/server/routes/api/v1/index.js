@@ -5,5 +5,4 @@
  */
 
 export { xpackInfoRoute } from './xpack_info';
-export { featuresRoute } from './features';
 export { settingsRoute } from './settings';

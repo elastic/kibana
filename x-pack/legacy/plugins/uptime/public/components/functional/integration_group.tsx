@@ -16,9 +16,10 @@ import {
   getInfraIpHref,
   getInfraKubernetesHref,
   getLoggingContainerHref,
+  getLoggingIpHref,
   getLoggingKubernetesHref,
 } from '../../lib/helper';
-import { LatestMonitor } from '../../../common/graphql/types';
+import { MonitorSummary } from '../../../common/graphql/types';
 
 interface IntegrationGroupProps {
   basePath: string;
@@ -27,7 +28,7 @@ interface IntegrationGroupProps {
   isApmAvailable: boolean;
   isInfraAvailable: boolean;
   isLogsAvailable: boolean;
-  monitor: LatestMonitor;
+  summary: MonitorSummary;
 }
 
 export const IntegrationGroup = ({
@@ -37,13 +38,12 @@ export const IntegrationGroup = ({
   isApmAvailable,
   isInfraAvailable,
   isLogsAvailable,
-  monitor,
-  monitor: { ping },
+  summary,
 }: IntegrationGroupProps) => {
-  const domain = get<string>(ping, 'url.domain', '');
-  const podUid = get<string | undefined>(ping, 'kubernetes.pod.uid', undefined);
-  const containerId = get<string | undefined>(ping, 'container.id', undefined);
-  const ip = get<string | undefined>(ping, 'monitor.ip');
+  const domain = get<string>(summary, 'state.url.domain', '');
+  const podUid = get<string | undefined>(summary, 'state.checks[0].kubernetes.pod.uid', undefined);
+  const containerId = get<string | undefined>(summary, 'state.checks[0].container.id', undefined);
+  const ip = get<string | undefined>(summary, 'state.checks[0].monitor.ip', undefined);
   return isApmAvailable || isInfraAvailable || isLogsAvailable ? (
     <EuiFlexGroup direction="column">
       {isApmAvailable ? (
@@ -54,7 +54,7 @@ export const IntegrationGroup = ({
               description:
                 'This value is shown to users when they hover over an icon that will take them to the APM app.',
             })}
-            href={getApmHref(monitor, basePath, dateRangeStart, dateRangeEnd)}
+            href={getApmHref(summary, basePath, dateRangeStart, dateRangeEnd)}
             iconType="apmApp"
             message={i18n.translate('xpack.uptime.apmIntegrationAction.text', {
               defaultMessage: 'Check APM for domain',
@@ -86,8 +86,8 @@ export const IntegrationGroup = ({
                   description: 'This value is shown as the aria label value for screen readers.',
                 }
               )}
-              href={getInfraIpHref(monitor, basePath)}
-              iconType="infraApp"
+              href={getInfraIpHref(summary, basePath)}
+              iconType="metricsApp"
               message={i18n.translate(
                 'xpack.uptime.monitorList.infraIntegrationAction.ip.message',
                 {
@@ -115,8 +115,8 @@ export const IntegrationGroup = ({
                   description: 'This value is shown as the aria label value for screen readers.',
                 }
               )}
-              href={getInfraKubernetesHref(monitor, basePath)}
-              iconType="infraApp"
+              href={getInfraKubernetesHref(summary, basePath)}
+              iconType="metricsApp"
               message={i18n.translate(
                 'xpack.uptime.monitorList.infraIntegrationAction.kubernetes.message',
                 {
@@ -144,8 +144,8 @@ export const IntegrationGroup = ({
                   defaultMessage: `Check Infrastructure UI for this monitor's container ID`,
                 }
               )}
-              href={getInfraContainerHref(monitor, basePath)}
-              iconType="infraApp"
+              href={getInfraContainerHref(summary, basePath)}
+              iconType="metricsApp"
               message={i18n.translate(
                 'xpack.uptime.monitorList.infraIntegrationAction.container.message',
                 {
@@ -170,13 +170,37 @@ export const IntegrationGroup = ({
           <EuiFlexItem>
             <IntegrationLink
               ariaLabel={i18n.translate(
+                'xpack.uptime.monitorList.loggingIntegrationAction.ip.description',
+                {
+                  defaultMessage: `Check Logging UI for this monitor's ip address`,
+                  description: 'This value is shown as the aria label for screen readers.',
+                }
+              )}
+              href={getLoggingIpHref(summary, basePath)}
+              iconType="logsApp"
+              message={i18n.translate(
+                'xpack.uptime.monitorList.loggingIntegrationAction.ip.message',
+                {
+                  defaultMessage: 'Show host logs',
+                  description: `A message explaining that this link will take the user to the Infrastructure UI filtered for the monitor's IP Address`,
+                }
+              )}
+              tooltipContent={i18n.translate(
+                'xpack.uptime.monitorList.loggingIntegrationAction.ip.tooltip',
+                { defaultMessage: 'Check Logging UI for the IP "{ip}"', values: { ip } }
+              )}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <IntegrationLink
+              ariaLabel={i18n.translate(
                 'xpack.uptime.monitorList.loggingIntegrationAction.kubernetes.ariaLabel',
                 {
                   defaultMessage: 'Show pod logs',
                 }
               )}
-              href={getLoggingKubernetesHref(monitor, basePath)}
-              iconType="loggingApp"
+              href={getLoggingKubernetesHref(summary, basePath)}
+              iconType="logsApp"
               message={i18n.translate(
                 'xpack.uptime.monitorList.loggingIntegrationAction.kubernetes.message',
                 {
@@ -202,8 +226,8 @@ export const IntegrationGroup = ({
                   defaultMessage: 'Show container logs',
                 }
               )}
-              href={getLoggingContainerHref(monitor, basePath)}
-              iconType="loggingApp"
+              href={getLoggingContainerHref(summary, basePath)}
+              iconType="logsApp"
               message={i18n.translate(
                 'xpack.uptime.monitorList.loggingIntegrationAction.container.message',
                 {

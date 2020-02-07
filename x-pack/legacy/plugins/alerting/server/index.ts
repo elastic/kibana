@@ -4,6 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { AlertsClient as AlertsClientClass } from './alerts_client';
+
+export type AlertsClient = PublicMethodsOf<AlertsClientClass>;
+
 export { init } from './init';
-export { AlertType, AlertingPlugin, AlertExecuteOptions } from './types';
-export { AlertsClient } from './alerts_client';
+export { AlertType, AlertingPlugin, AlertExecutorOptions } from './types';
+export { PluginSetupContract, PluginStartContract } from './plugin';

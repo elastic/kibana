@@ -1,5 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`#hostname returns error when empty string 1`] = `"any.empty"`;
+
 exports[`#hostname returns error when value is not a valid hostname 1`] = `"value is [host:name] but it must be a valid hostname (see RFC 1123)."`;
 
 exports[`#hostname returns error when value is not a valid hostname 2`] = `"value is [localhost:5601] but it must be a valid hostname (see RFC 1123)."`;
@@ -10,9 +12,15 @@ exports[`#hostname returns error when value is not a valid hostname 4`] = `"valu
 
 exports[`#hostname returns error when value is not a valid hostname 5`] = `"value is [aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa] but it must be a valid hostname (see RFC 1123)."`;
 
+exports[`#hostname supports string validation rules 1`] = `"value is [www.example.com] but it must have a maximum length of [3]."`;
+
 exports[`#maxLength returns error when longer string 1`] = `"value is [foo] but it must have a maximum length of [2]."`;
 
+exports[`#minLength returns error when empty string 1`] = `"value is [] but it must have a minimum length of [2]."`;
+
 exports[`#minLength returns error when shorter string 1`] = `"value is [foo] but it must have a minimum length of [4]."`;
+
+exports[`#validate throw when empty string 1`] = `"validator failure"`;
 
 exports[`#validate throws when returns string 1`] = `"validator failure"`;
 

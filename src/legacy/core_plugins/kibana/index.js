@@ -17,56 +17,50 @@
  * under the License.
  */
 
-import Promise from 'bluebird';
-import { mkdirp as mkdirpNode } from 'mkdirp';
+import Fs from 'fs';
 import { resolve } from 'path';
+import { promisify } from 'util';
 
 import { migrations } from './migrations';
-import manageUuid from './server/lib/manage_uuid';
-import { searchApi } from './server/routes/api/search';
-import { scrollSearchApi } from './server/routes/api/scroll_search';
 import { importApi } from './server/routes/api/import';
 import { exportApi } from './server/routes/api/export';
-import { homeApi } from './server/routes/api/home';
 import { managementApi } from './server/routes/api/management';
-import { scriptsApi } from './server/routes/api/scripts';
-import { registerSuggestionsApi } from './server/routes/api/suggestions';
-import { registerKqlTelemetryApi } from './server/routes/api/kql_telemetry';
-import { registerFieldFormats } from './server/field_formats/register';
-import { registerTutorials } from './server/tutorials/register';
 import * as systemApi from './server/lib/system_api';
-import handleEsError from './server/lib/handle_es_error';
 import mappings from './mappings.json';
 import { getUiSettingDefaults } from './ui_setting_defaults';
-import { makeKQLUsageCollector } from './server/lib/kql_usage_collector';
+import { registerCspCollector } from './server/lib/csp_usage_collector';
 import { injectVars } from './inject_vars';
 import { i18n } from '@kbn/i18n';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
 
-const mkdirp = Promise.promisify(mkdirpNode);
+const mkdirAsync = promisify(Fs.mkdir);
 
-export default function (kibana) {
+export default function(kibana) {
   const kbnBaseUrl = '/app/kibana';
   return new kibana.Plugin({
     id: 'kibana',
-    config: function (Joi) {
+    config: function(Joi) {
       return Joi.object({
         enabled: Joi.boolean().default(true),
-        defaultAppId: Joi.string().default('home'),
         index: Joi.string().default('.kibana'),
-        disableWelcomeScreen: Joi.boolean().default(false),
-        autocompleteTerminateAfter: Joi.number().integer().min(1).default(100000),
+        autocompleteTerminateAfter: Joi.number()
+          .integer()
+          .min(1)
+          .default(100000),
         // TODO Also allow units here like in elasticsearch config once this is moved to the new platform
-        autocompleteTimeout: Joi.number().integer().min(1).default(1000),
+        autocompleteTimeout: Joi.number()
+          .integer()
+          .min(1)
+          .default(1000),
       }).default();
     },
 
     uiExports: {
-      hacks: ['plugins/kibana/dev_tools/hacks/hide_empty_tools'],
-      fieldFormats: ['plugins/kibana/field_formats/register'],
-      savedObjectTypes: [
-        'plugins/kibana/visualize/saved_visualizations/saved_visualization_register',
-        'plugins/kibana/discover/saved_searches/saved_search_register',
-        'plugins/kibana/dashboard/saved_dashboard/saved_dashboard_register',
+      hacks: [
+        'plugins/kibana/discover/legacy',
+        'plugins/kibana/dev_tools',
+        'plugins/kibana/visualize/legacy',
+        'plugins/kibana/dashboard/legacy',
       ],
       app: {
         id: 'kibana',
@@ -83,8 +77,8 @@ export default function (kibana) {
           }),
           order: -1003,
           url: `${kbnBaseUrl}#/discover`,
-          icon: 'plugins/kibana/assets/discover.svg',
           euiIconType: 'discoverApp',
+          category: DEFAULT_APP_CATEGORIES.analyze,
         },
         {
           id: 'kibana:visualize',
@@ -93,8 +87,8 @@ export default function (kibana) {
           }),
           order: -1002,
           url: `${kbnBaseUrl}#/visualize`,
-          icon: 'plugins/kibana/assets/visualize.svg',
           euiIconType: 'visualizeApp',
+          category: DEFAULT_APP_CATEGORIES.analyze,
         },
         {
           id: 'kibana:dashboard',
@@ -103,14 +97,9 @@ export default function (kibana) {
           }),
           order: -1001,
           url: `${kbnBaseUrl}#/dashboards`,
-          // The subUrlBase is the common substring of all urls for this app. If not given, it defaults to the url
-          // above. This app has to use a different subUrlBase, in addition to the url above, because "#/dashboard"
-          // routes to a page that creates a new dashboard. When we introduced a landing page, we needed to change
-          // the url above in order to preserve the original url for BWC. The subUrlBase helps the Chrome api nav
-          // to determine what url to use for the app link.
-          subUrlBase: `${kbnBaseUrl}#/dashboard`,
-          icon: 'plugins/kibana/assets/dashboard.svg',
           euiIconType: 'dashboardApp',
+          disableSubUrlTracking: true,
+          category: DEFAULT_APP_CATEGORIES.analyze,
         },
         {
           id: 'kibana:dev_tools',
@@ -119,19 +108,19 @@ export default function (kibana) {
           }),
           order: 9001,
           url: '/app/kibana#/dev_tools',
-          icon: 'plugins/kibana/assets/wrench.svg',
           euiIconType: 'devToolsApp',
+          category: DEFAULT_APP_CATEGORIES.management,
         },
         {
-          id: 'kibana:management',
+          id: 'kibana:stack_management',
           title: i18n.translate('kbn.managementTitle', {
-            defaultMessage: 'Management',
+            defaultMessage: 'Stack Management',
           }),
           order: 9003,
           url: `${kbnBaseUrl}#/management`,
-          icon: 'plugins/kibana/assets/settings.svg',
           euiIconType: 'managementApp',
           linkToLastSubUrl: false,
+          category: DEFAULT_APP_CATEGORIES.management,
         },
       ],
 
@@ -171,7 +160,7 @@ export default function (kibana) {
           },
         },
         search: {
-          icon: 'search',
+          icon: 'discoverApp',
           defaultSearchField: 'title',
           isImportableAndExportable: true,
           getTitle(obj) {
@@ -235,9 +224,22 @@ export default function (kibana) {
       },
 
       injectDefaultVars(server, options) {
+        const mapConfig = server.config().get('map');
+        const tilemap = mapConfig.tilemap;
+
         return {
           kbnIndex: options.index,
           kbnBaseUrl,
+
+          // required on all pages due to hacks that use these values
+          mapConfig,
+          tilemapsConfig: {
+            deprecated: {
+              // If url is set, old settings must be used for backward compatibility
+              isOverridden: typeof tilemap.url === 'string' && tilemap.url !== '',
+              config: tilemap,
+            },
+          },
         };
       },
 
@@ -247,23 +249,26 @@ export default function (kibana) {
       migrations,
     },
 
-    uiCapabilities: async function () {
+    uiCapabilities: async function() {
       return {
         discover: {
           show: true,
           createShortUrl: true,
           save: true,
+          saveQuery: true,
         },
         visualize: {
           show: true,
           createShortUrl: true,
           delete: true,
           save: true,
+          saveQuery: true,
         },
         dashboard: {
           createNew: true,
           show: true,
           showWriteControls: true,
+          saveQuery: true,
         },
         catalogue: {
           discover: true,
@@ -299,11 +304,11 @@ export default function (kibana) {
       };
     },
 
-    preInit: async function (server) {
+    preInit: async function(server) {
       try {
         // Create the data directory (recursively, if the a parent dir doesn't exist).
         // If it already exists, does nothing.
-        await mkdirp(server.config().get('path.data'));
+        await mkdirAsync(server.config().get('path.data'), { recursive: true });
       } catch (err) {
         server.log(['error', 'init'], err);
         // Stop the server startup with a fatal error
@@ -311,24 +316,14 @@ export default function (kibana) {
       }
     },
 
-    init: function (server) {
-      // uuid
-      manageUuid(server);
+    init: async function(server) {
+      const { usageCollection } = server.newPlatform.setup.plugins;
       // routes
-      searchApi(server);
-      scriptsApi(server);
-      scrollSearchApi(server);
       importApi(server);
       exportApi(server);
-      homeApi(server);
       managementApi(server);
-      registerSuggestionsApi(server);
-      registerKqlTelemetryApi(server);
-      registerFieldFormats(server);
-      registerTutorials(server);
-      makeKQLUsageCollector(server);
+      registerCspCollector(usageCollection, server);
       server.expose('systemApi', systemApi);
-      server.expose('handleEsError', handleEsError);
       server.injectUiAppVars('kibana', () => injectVars(server));
     },
   });

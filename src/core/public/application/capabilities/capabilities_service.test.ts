@@ -17,39 +17,46 @@
  * under the License.
  */
 
-import { InjectedMetadataService } from '../../injected_metadata';
+import { httpServiceMock, HttpSetupMock } from '../../http/http_service.mock';
 import { CapabilitiesService } from './capabilities_service';
 
-describe('#start', () => {
-  const injectedMetadata = new InjectedMetadataService({
-    injectedMetadata: {
-      version: 'kibanaVersion',
-      capabilities: {
-        catalogue: {},
-        management: {},
-        navLinks: {
-          app1: true,
-          app2: false,
-        },
-        foo: { feature: true },
-        bar: { feature: true },
-      },
-    } as any,
-  }).start();
-  const apps = [{ id: 'app1' }, { id: 'app2', capabilities: { app2: { feature: true } } }] as any;
+const mockedCapabilities = {
+  catalogue: {},
+  management: {},
+  navLinks: {
+    app1: true,
+    app2: false,
+    legacyApp1: true,
+    legacyApp2: false,
+  },
+  foo: { feature: true },
+  bar: { feature: true },
+};
 
-  it('filters available apps based on returned navLinks', async () => {
+describe('#start', () => {
+  let http: HttpSetupMock;
+
+  beforeEach(() => {
+    http = httpServiceMock.createStartContract();
+    http.post.mockReturnValue(Promise.resolve(mockedCapabilities));
+  });
+
+  it('only returns capabilities for given appIds', async () => {
     const service = new CapabilitiesService();
-    expect((await service.start({ apps, injectedMetadata })).availableApps).toEqual([
-      { id: 'app1' },
-    ]);
+    const { capabilities } = await service.start({
+      http,
+      appIds: ['app1', 'app2', 'legacyApp1', 'legacyApp2'],
+    });
+
+    // @ts-ignore TypeScript knows this shouldn't be possible
+    expect(() => (capabilities.foo = 'foo')).toThrowError();
   });
 
   it('does not allow Capabilities to be modified', async () => {
     const service = new CapabilitiesService();
     const { capabilities } = await service.start({
-      apps,
-      injectedMetadata,
+      http,
+      appIds: ['app1', 'app2', 'legacyApp1', 'legacyApp2'],
     });
 
     // @ts-ignore TypeScript knows this shouldn't be possible

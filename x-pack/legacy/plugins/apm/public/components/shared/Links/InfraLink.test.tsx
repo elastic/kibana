@@ -8,11 +8,6 @@ import { Location } from 'history';
 import React from 'react';
 import { getRenderedHref } from '../../../utils/testHelpers';
 import { InfraLink } from './InfraLink';
-import chrome from 'ui/chrome';
-
-jest
-  .spyOn(chrome, 'addBasePath')
-  .mockImplementation(path => `/basepath${path}`);
 
 test('InfraLink produces the correct URL', async () => {
   const href = await getRenderedHref(

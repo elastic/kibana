@@ -7,9 +7,9 @@
 import { EuiLink, EuiLinkAnchorProps } from '@elastic/eui';
 import { compact } from 'lodash';
 import React from 'react';
-import chrome from 'ui/chrome';
 import url from 'url';
 import { fromQuery } from './url_helpers';
+import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
 
 interface InfraQueryParams {
   time?: number;
@@ -24,9 +24,10 @@ interface Props extends EuiLinkAnchorProps {
 }
 
 export function InfraLink({ path, query = {}, ...rest }: Props) {
+  const { core } = useApmPluginContext();
   const nextSearch = fromQuery(query);
   const href = url.format({
-    pathname: chrome.addBasePath('/app/infra'),
+    pathname: core.http.basePath.prepend('/app/infra'),
     hash: compact([path, nextSearch]).join('?')
   });
   return <EuiLink {...rest} href={href} />;

@@ -5,24 +5,41 @@
  */
 
 import { useState, useCallback, useContext } from 'react';
-import { StaticIndexPattern } from 'ui/index_patterns';
+import { IIndexPattern } from 'src/plugins/data/public';
 import {
   MetricsExplorerMetric,
   MetricsExplorerAggregation,
 } from '../../../../server/routes/metrics_explorer/types';
 import { useMetricsExplorerData } from '../../../containers/metrics_explorer/use_metrics_explorer_data';
-import { MetricsExplorerOptionsContainer } from '../../../containers/metrics_explorer/use_metrics_explorer_options';
+import {
+  MetricsExplorerOptionsContainer,
+  MetricsExplorerChartOptions,
+  MetricsExplorerTimeOptions,
+  MetricsExplorerOptions,
+} from '../../../containers/metrics_explorer/use_metrics_explorer_options';
 import { SourceQuery } from '../../../graphql/types';
+
+export interface MetricExplorerViewState {
+  chartOptions: MetricsExplorerChartOptions;
+  currentTimerange: MetricsExplorerTimeOptions;
+  options: MetricsExplorerOptions;
+}
 
 export const useMetricsExplorerState = (
   source: SourceQuery.Query['source']['configuration'],
-  derivedIndexPattern: StaticIndexPattern
+  derivedIndexPattern: IIndexPattern
 ) => {
   const [refreshSignal, setRefreshSignal] = useState(0);
   const [afterKey, setAfterKey] = useState<string | null>(null);
-  const { options, currentTimerange, setTimeRange, setOptions } = useContext(
-    MetricsExplorerOptionsContainer.Context
-  );
+  const {
+    defaultViewState,
+    options,
+    currentTimerange,
+    chartOptions,
+    setChartOptions,
+    setTimeRange,
+    setOptions,
+  } = useContext(MetricsExplorerOptionsContainer.Context);
   const { loading, error, data } = useMetricsExplorerData(
     options,
     source,
@@ -32,20 +49,17 @@ export const useMetricsExplorerState = (
     refreshSignal
   );
 
-  const handleRefresh = useCallback(
-    () => {
-      setAfterKey(null);
-      setRefreshSignal(refreshSignal + 1);
-    },
-    [refreshSignal]
-  );
+  const handleRefresh = useCallback(() => {
+    setAfterKey(null);
+    setRefreshSignal(refreshSignal + 1);
+  }, [refreshSignal]);
 
   const handleTimeChange = useCallback(
     (start: string, end: string) => {
       setAfterKey(null);
       setTimeRange({ ...currentTimerange, from: start, to: end });
     },
-    [currentTimerange]
+    [currentTimerange, setTimeRange]
   );
 
   const handleGroupByChange = useCallback(
@@ -56,7 +70,7 @@ export const useMetricsExplorerState = (
         groupBy: groupBy || void 0,
       });
     },
-    [options]
+    [options, setOptions]
   );
 
   const handleFilterQuerySubmit = useCallback(
@@ -67,7 +81,7 @@ export const useMetricsExplorerState = (
         filterQuery: query,
       });
     },
-    [options]
+    [options, setOptions]
   );
 
   const handleMetricsChange = useCallback(
@@ -78,24 +92,39 @@ export const useMetricsExplorerState = (
         metrics,
       });
     },
-    [options]
+    [options, setOptions]
   );
 
   const handleAggregationChange = useCallback(
     (aggregation: MetricsExplorerAggregation) => {
       setAfterKey(null);
       const metrics =
-        aggregation === MetricsExplorerAggregation.count
+        aggregation === 'count'
           ? [{ aggregation }]
           : options.metrics
-              .filter(metric => metric.aggregation !== MetricsExplorerAggregation.count)
+              .filter(metric => metric.aggregation !== 'count')
               .map(metric => ({
                 ...metric,
                 aggregation,
               }));
       setOptions({ ...options, aggregation, metrics });
     },
-    [options]
+    [options, setOptions]
+  );
+
+  const onViewStateChange = useCallback(
+    (vs: MetricExplorerViewState) => {
+      if (vs.chartOptions) {
+        setChartOptions(vs.chartOptions);
+      }
+      if (vs.currentTimerange) {
+        setTimeRange(vs.currentTimerange);
+      }
+      if (vs.options) {
+        setOptions(vs.options);
+      }
+    },
+    [setChartOptions, setOptions, setTimeRange]
   );
 
   return {
@@ -104,6 +133,8 @@ export const useMetricsExplorerState = (
     data,
     currentTimerange,
     options,
+    chartOptions,
+    setChartOptions,
     handleAggregationChange,
     handleMetricsChange,
     handleFilterQuerySubmit,
@@ -111,5 +142,7 @@ export const useMetricsExplorerState = (
     handleTimeChange,
     handleRefresh,
     handleLoadMore: setAfterKey,
+    defaultViewState,
+    onViewStateChange,
   };
 };

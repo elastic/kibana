@@ -5,58 +5,51 @@
  */
 
 import { mount, shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
-import * as React from 'react';
+import React from 'react';
 
-import { mockFrameworks, TestProviders } from '../../mock';
+import { useUiSetting$ } from '../../lib/kibana';
 
-import { PreferenceFormattedBytes } from '.';
+import { PreferenceFormattedBytesComponent } from '.';
 
-describe('formatted_bytes', () => {
-  describe('PreferenceFormattedBytes', () => {
-    describe('rendering', () => {
-      const bytes = '2806422';
+jest.mock('../../lib/kibana');
+const mockUseUiSetting$ = useUiSetting$ as jest.Mock;
 
-      test('renders correctly against snapshot', () => {
-        const wrapper = shallow(<PreferenceFormattedBytes value={bytes} />);
-        expect(toJson(wrapper)).toMatchSnapshot();
-      });
+const DEFAULT_BYTES_FORMAT_VALUE = '0,0.[0]b'; // kibana's default for this setting
+const bytes = '2806422';
 
-      test('it renders bytes to hardcoded format when no configuration exists', () => {
-        const wrapper = mount(
-          <TestProviders mockFramework={{}}>
-            <PreferenceFormattedBytes value={bytes} />
-          </TestProviders>
-        );
-        expect(wrapper.text()).toEqual('2.676MB');
-      });
+describe('PreferenceFormattedBytes', () => {
+  test('renders correctly against snapshot', () => {
+    mockUseUiSetting$.mockImplementation(() => [DEFAULT_BYTES_FORMAT_VALUE]);
+    const wrapper = shallow(<PreferenceFormattedBytesComponent value={bytes} />);
 
-      test('it renders bytes according to the default format', () => {
-        const wrapper = mount(
-          <TestProviders mockFramework={mockFrameworks.default_browser}>
-            <PreferenceFormattedBytes value={bytes} />
-          </TestProviders>
-        );
-        expect(wrapper.text()).toEqual('2.676MB');
-      });
+    expect(wrapper).toMatchSnapshot();
+  });
 
-      test('it renders bytes supplied as a number according to the default format', () => {
-        const wrapper = mount(
-          <TestProviders mockFramework={mockFrameworks.default_browser}>
-            <PreferenceFormattedBytes value={+bytes} />
-          </TestProviders>
-        );
-        expect(wrapper.text()).toEqual('2.676MB');
-      });
+  test('it renders bytes to Numeral formatting when no format setting exists', () => {
+    mockUseUiSetting$.mockImplementation(() => [null]);
+    const wrapper = mount(<PreferenceFormattedBytesComponent value={bytes} />);
 
-      test('it renders bytes according to new format', () => {
-        const wrapper = mount(
-          <TestProviders mockFramework={mockFrameworks.bytes_short}>
-            <PreferenceFormattedBytes value={bytes} />
-          </TestProviders>
-        );
-        expect(wrapper.text()).toEqual('3MB');
-      });
-    });
+    expect(wrapper.text()).toEqual('2,806,422');
+  });
+
+  test('it renders bytes according to the default format', () => {
+    mockUseUiSetting$.mockImplementation(() => [DEFAULT_BYTES_FORMAT_VALUE]);
+    const wrapper = mount(<PreferenceFormattedBytesComponent value={bytes} />);
+
+    expect(wrapper.text()).toEqual('2.7MB');
+  });
+
+  test('it renders bytes supplied as a number according to the default format', () => {
+    mockUseUiSetting$.mockImplementation(() => [DEFAULT_BYTES_FORMAT_VALUE]);
+    const wrapper = mount(<PreferenceFormattedBytesComponent value={+bytes} />);
+
+    expect(wrapper.text()).toEqual('2.7MB');
+  });
+
+  test('it renders bytes according to new format', () => {
+    mockUseUiSetting$.mockImplementation(() => ['0b']);
+    const wrapper = mount(<PreferenceFormattedBytesComponent value={bytes} />);
+
+    expect(wrapper.text()).toEqual('3MB');
   });
 });

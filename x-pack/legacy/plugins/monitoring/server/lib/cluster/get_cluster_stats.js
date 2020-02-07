@@ -18,24 +18,28 @@ import { i18n } from '@kbn/i18n';
  */
 export function getClusterStats(req, esIndexPattern, clusterUuid) {
   if (!clusterUuid) {
-    throw badRequest(i18n.translate('xpack.monitoring.clusterStats.uuidNotSpecifiedErrorMessage', {
-      defaultMessage: '{clusterUuid} not specified',
-      values: { clusterUuid: 'clusterUuid' }
-    }));
+    throw badRequest(
+      i18n.translate('xpack.monitoring.clusterStats.uuidNotSpecifiedErrorMessage', {
+        defaultMessage: '{clusterUuid} not specified',
+        values: { clusterUuid: 'clusterUuid' },
+      })
+    );
   }
 
   // passing clusterUuid so `get_clusters` will filter for single cluster
-  return getClustersStats(req, esIndexPattern, clusterUuid)
-    .then(clusters => {
-      if (!clusters || clusters.length === 0) {
-        throw notFound(i18n.translate('xpack.monitoring.clusterStats.uuidNotFoundErrorMessage', {
-          defaultMessage: 'Unable to find the cluster in the selected time range. UUID: {clusterUuid}',
+  return getClustersStats(req, esIndexPattern, clusterUuid).then(clusters => {
+    if (!clusters || clusters.length === 0) {
+      throw notFound(
+        i18n.translate('xpack.monitoring.clusterStats.uuidNotFoundErrorMessage', {
+          defaultMessage:
+            'Unable to find the cluster in the selected time range. UUID: {clusterUuid}',
           values: {
-            clusterUuid
-          }
-        }));
-      }
+            clusterUuid,
+          },
+        })
+      );
+    }
 
-      return clusters[0];
-    });
+    return clusters[0];
+  });
 }

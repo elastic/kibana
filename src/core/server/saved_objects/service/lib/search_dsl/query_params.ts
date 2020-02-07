@@ -16,9 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { esKuery } from '../../../../../../plugins/data/server';
 
 import { getRootPropertiesObjects, IndexMapping } from '../../../mappings';
-import { SavedObjectsSchema } from '../../../schema';
+import { ISavedObjectTypeRegistry } from '../../../saved_objects_type_registry';
 
 /**
  * Gets the types based on the type. Uses mappings to support
@@ -59,8 +61,12 @@ function getFieldsForTypes(types: string[], searchFields?: string[]) {
  *  Gets the clause that will filter for the type in the namespace.
  *  Some types are namespace agnostic, so they must be treated differently.
  */
-function getClauseForType(schema: SavedObjectsSchema, namespace: string | undefined, type: string) {
-  if (namespace && !schema.isNamespaceAgnostic(type)) {
+function getClauseForType(
+  registry: ISavedObjectTypeRegistry,
+  namespace: string | undefined,
+  type: string
+) {
+  if (namespace && !registry.isNamespaceAgnostic(type)) {
     return {
       bool: {
         must: [{ term: { type } }, { term: { namespace } }],
@@ -76,25 +82,41 @@ function getClauseForType(schema: SavedObjectsSchema, namespace: string | undefi
   };
 }
 
+interface HasReferenceQueryParams {
+  type: string;
+  id: string;
+}
+
+interface QueryParams {
+  mappings: IndexMapping;
+  registry: ISavedObjectTypeRegistry;
+  namespace?: string;
+  type?: string | string[];
+  search?: string;
+  searchFields?: string[];
+  defaultSearchOperator?: string;
+  hasReference?: HasReferenceQueryParams;
+  kueryNode?: esKuery.KueryNode;
+}
+
 /**
  *  Get the "query" related keys for the search body
  */
-export function getQueryParams(
-  mappings: IndexMapping,
-  schema: SavedObjectsSchema,
-  namespace?: string,
-  type?: string | string[],
-  search?: string,
-  searchFields?: string[],
-  defaultSearchOperator?: string,
-  hasReference?: {
-    type: string;
-    id: string;
-  }
-) {
+export function getQueryParams({
+  mappings,
+  registry,
+  namespace,
+  type,
+  search,
+  searchFields,
+  defaultSearchOperator,
+  hasReference,
+  kueryNode,
+}: QueryParams) {
   const types = getTypes(mappings, type);
   const bool: any = {
     filter: [
+      ...(kueryNode != null ? [esKuery.toElasticsearchQuery(kueryNode)] : []),
       {
         bool: {
           must: hasReference
@@ -122,7 +144,7 @@ export function getQueryParams(
                 },
               ]
             : undefined,
-          should: types.map(shouldType => getClauseForType(schema, namespace, shouldType)),
+          should: types.map(shouldType => getClauseForType(registry, namespace, shouldType)),
           minimum_should_match: 1,
         },
       },

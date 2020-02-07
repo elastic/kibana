@@ -1,7 +1,6 @@
 /* eslint-disable @kbn/eslint/require-license-header */
 
-/**
- * @notice
+/* @notice
  * Based on the scroll-into-view-if-necessary module from npm
  * https://github.com/stipsan/compute-scroll-into-view/blob/master/src/index.ts#L269-L340
  *
@@ -37,13 +36,9 @@ export function scrollIntoViewIfNecessary(target, fixedHeaderHeight) {
   var rootRect = rootScroller.getBoundingClientRect();
   var targetRect = target.getBoundingClientRect();
 
-  var viewportHeight = window.visualViewport
-    ? visualViewport.height
-    : window.innerHeight;
+  var viewportHeight = window.visualViewport ? visualViewport.height : window.innerHeight;
 
-  var viewportWidth = window.visualViewport
-    ? visualViewport.width
-    : window.innerWidth;
+  var viewportWidth = window.visualViewport ? visualViewport.width : window.innerWidth;
 
   function isInView() {
     return (

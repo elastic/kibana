@@ -5,19 +5,27 @@
  */
 
 import { notFound, notImplemented } from 'boom';
-import { Request } from 'hapi';
 import { get } from 'lodash';
-
-import { cryptoFactory, LevelLogger, oncePerServer } from '../../../../server/lib';
-import { JobDocPayload, JobParams, KbnServer } from '../../../../types';
+import { ElasticsearchServiceSetup } from 'kibana/server';
+import { CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../../../common/constants';
+import { cryptoFactory } from '../../../../server/lib';
 import {
+  CreateJobFactory,
+  ImmediateCreateJobFn,
+  Logger,
+  RequestFacade,
+  ServerFacade,
+} from '../../../../types';
+import {
+  JobDocPayloadPanelCsv,
+  JobParamsPanelCsv,
   SavedObject,
   SavedObjectServiceError,
   SavedSearchObjectAttributesJSON,
   SearchPanel,
   TimeRangeParams,
   VisObjectAttributesJSON,
-} from '../../';
+} from '../../types';
 import { createJobSearch } from './create_job_search';
 
 interface VisData {
@@ -26,17 +34,21 @@ interface VisData {
   panel: SearchPanel;
 }
 
-type CreateJobFn = (jobParams: JobParams, headers: any, req: Request) => Promise<JobDocPayload>;
-
-function createJobFn(server: KbnServer): CreateJobFn {
+export const createJobFactory: CreateJobFactory<ImmediateCreateJobFn<
+  JobParamsPanelCsv
+>> = function createJobFactoryFn(
+  server: ServerFacade,
+  elasticsearch: ElasticsearchServiceSetup,
+  parentLogger: Logger
+) {
   const crypto = cryptoFactory(server);
-  const logger = LevelLogger.createForServer(server, ['reporting', 'savedobject-csv']);
+  const logger = parentLogger.clone([CSV_FROM_SAVEDOBJECT_JOB_TYPE, 'create-job']);
 
   return async function createJob(
-    jobParams: JobParams,
+    jobParams: JobParamsPanelCsv,
     headers: any,
-    req: Request
-  ): Promise<JobDocPayload> {
+    req: RequestFacade
+  ): Promise<JobDocPayloadPanelCsv> {
     const { savedObjectType, savedObjectId } = jobParams;
     const serializedEncryptedHeaders = await crypto.encrypt(headers);
     const client = req.getSavedObjectsClient();
@@ -83,14 +95,10 @@ function createJobFn(server: KbnServer): CreateJobFn {
       });
 
     return {
-      basePath: req.getBasePath(),
       headers: serializedEncryptedHeaders,
       jobParams: { ...jobParams, panel, visType },
-      type: null, // resolved in executeJob
-      objects: null, // resolved in executeJob
+      type: null,
       title,
     };
   };
-}
-
-export const createJobFactory = oncePerServer(createJobFn);
+};

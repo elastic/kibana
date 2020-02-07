@@ -13,6 +13,10 @@ import { ConfirmModal } from '../confirm_modal';
 import { Link } from '../link';
 import { PagePreview } from '../page_preview';
 
+import { ComponentStrings } from '../../../i18n';
+
+const { PageManager: strings } = ComponentStrings;
+
 export class PageManager extends React.PureComponent {
   static propTypes = {
     isWriteable: PropTypes.bool.isRequired,
@@ -154,7 +158,7 @@ export class PageManager extends React.PureComponent {
                 <Link
                   name="loadWorkpad"
                   params={{ id: workpadId, page: pageNumber }}
-                  aria-label={`Load page number ${pageNumber}`}
+                  aria-label={strings.getPageNumberAriaLabel(pageNumber)}
                 >
                   {Style.it(
                     workpadCSS,

@@ -24,6 +24,8 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
   const { visualize, visualBuilder } = getPageObjects(['visualBuilder', 'visualize']);
   const retry = getService('retry');
   const log = getService('log');
+  const kibanaServer = getService('kibanaServer');
+  const testSubjects = getService('testSubjects');
 
   describe('visual builder', function describeIndexTests() {
     beforeEach(async () => {
@@ -73,7 +75,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await visualBuilder.changePanelPreview();
 
         await visualBuilder.cloneSeries();
-        const legend = await visualBuilder.getLegentItems();
+        const legend = await visualBuilder.getLegendItems();
         const series = await visualBuilder.getSeries();
         expect(legend.length).to.be(2);
         expect(series.length).to.be(2);
@@ -106,7 +108,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         expect(actualCount).to.be(expectedLegendValue);
       });
 
-      it('should show the correct count in the legend with "Human readable" duration formatter', async () => {
+      it.skip('should show the correct count in the legend with "Human readable" duration formatter', async () => {
         await visualBuilder.clickSeriesOption();
         await visualBuilder.changeDataFormatter('Duration');
         await visualBuilder.setDurationFormatterSettings({ to: 'Human readable' });
@@ -122,6 +124,29 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await visualBuilder.setDurationFormatterSettings({ to: 'Human readable', from: 'Minutes' });
         const actualCountMin = await visualBuilder.getRhythmChartLegendValue();
         expect(actualCountMin).to.be('3 hours');
+      });
+
+      // --reversed class is not implemented in @elastic\chart
+      describe.skip('Dark mode', () => {
+        before(async () => {
+          await kibanaServer.uiSettings.update({
+            'theme:darkMode': true,
+          });
+        });
+
+        it(`viz should have 'reversed' class when background color is white`, async () => {
+          await visualBuilder.clickPanelOptions('timeSeries');
+          await visualBuilder.setBackgroundColor('#FFFFFF');
+
+          const classNames = await testSubjects.getAttribute('timeseriesChart', 'class');
+          expect(classNames.includes('tvbVisTimeSeries--reversed')).to.be(true);
+        });
+
+        after(async () => {
+          await kibanaServer.uiSettings.update({
+            'theme:darkMode': false,
+          });
+        });
       });
     });
   });

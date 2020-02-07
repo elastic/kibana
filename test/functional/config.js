@@ -20,7 +20,7 @@
 import { pageObjects } from './page_objects';
 import { services } from './services';
 
-export default async function ({ readConfigFile }) {
+export default async function({ readConfigFile }) {
   const commonConfig = await readConfigFile(require.resolve('../common/config'));
 
   return {
@@ -35,7 +35,6 @@ export default async function ({ readConfigFile }) {
       require.resolve('./apps/status_page'),
       require.resolve('./apps/timelion'),
       require.resolve('./apps/visualize'),
-      require.resolve('./apps/xpack'),
     ],
     pageObjects,
     services,
@@ -45,17 +44,14 @@ export default async function ({ readConfigFile }) {
 
     kbnTestServer: {
       ...commonConfig.get('kbnTestServer'),
-      serverArgs: [
-        ...commonConfig.get('kbnTestServer.serverArgs'),
-        '--oss',
-      ],
+      serverArgs: [...commonConfig.get('kbnTestServer.serverArgs'), '--oss'],
     },
 
     uiSettings: {
       defaults: {
         'accessibility:disableAnimations': true,
         'dateFormat:tz': 'UTC',
-        'telemetry:optIn': false
+        'telemetry:optIn': false,
       },
     },
 
@@ -103,10 +99,10 @@ export default async function ({ readConfigFile }) {
       },
     },
     junit: {
-      reportName: 'Chrome UI Functional Tests'
+      reportName: 'Chrome UI Functional Tests',
     },
     browser: {
-      type: 'chrome'
-    }
+      type: 'chrome',
+    },
   };
 }

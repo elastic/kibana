@@ -42,7 +42,7 @@ export class RecordOfType<K extends string, V> extends Type<Record<K, V>> {
         return `expected value of type [object] but got [${typeDetect(value)}]`;
       case 'record.key':
       case 'record.value':
-        const childPathWithIndex = reason.path.slice();
+        const childPathWithIndex = path.slice();
         childPathWithIndex.splice(
           path.length,
           0,

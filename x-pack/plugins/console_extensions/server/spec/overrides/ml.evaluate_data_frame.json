@@ -1,0 +1,24 @@
+{
+  "ml.evaluate_data_frame": {
+    "data_autocomplete_rules": {
+      "evaluation": {
+        "actual_field": "FIELD_NAME",
+        "predicted_probability_field": "FIELD_NAME",
+        "metrics": {
+          "auc_roc": {
+            "include_curve": true
+          },
+          "precision": {
+            "at": []
+          },
+          "recall": {
+            "at": []
+          },
+          "confusion_matrix": {
+            "at": []
+          }
+        }
+      }
+    }
+  }
+}

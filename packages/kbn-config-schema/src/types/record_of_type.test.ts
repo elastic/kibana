@@ -120,3 +120,23 @@ test('object within recordOf', () => {
 
   expect(type.validate(value)).toEqual({ foo: { bar: 123 } });
 });
+
+test('error preserves full path', () => {
+  const type = schema.object({
+    grandParentKey: schema.object({
+      parentKey: schema.recordOf(schema.string({ minLength: 2 }), schema.number()),
+    }),
+  });
+
+  expect(() =>
+    type.validate({ grandParentKey: { parentKey: { a: 'some-value' } } })
+  ).toThrowErrorMatchingInlineSnapshot(
+    `"[grandParentKey.parentKey.key(\\"a\\")]: value is [a] but it must have a minimum length of [2]."`
+  );
+
+  expect(() =>
+    type.validate({ grandParentKey: { parentKey: { ab: 'some-value' } } })
+  ).toThrowErrorMatchingInlineSnapshot(
+    `"[grandParentKey.parentKey.ab]: expected value of type [number] but got [string]"`
+  );
+});

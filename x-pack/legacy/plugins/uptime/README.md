@@ -3,7 +3,7 @@
 ## Purpose
 
 The purpose of this plugin is to provide users of Heartbeat more visibility of what's happening
-in their infrasturcture. It's primarily built using React and Apollo's GraphQL tools.
+in their infrastructure. It's primarily built using React and Apollo's GraphQL tools.
 
 ## Layout
 
@@ -44,15 +44,21 @@ From `~/kibana/x-pack`, run `node scripts/jest.js`.
 ### Functional tests
 
 In one shell, from **~/kibana/x-pack**:
-`node scripts/functional_tests-server.js`
+`node scripts/functional_tests_server.js`
 
 In another shell, from **~kibana/x-pack**:
 `node ../scripts/functional_test_runner.js --grep="{TEST_NAME}"`.
 
-### API tests
+#### API tests
 
-In one shell, from **~/kibana/x-pack**:
-`node scripts/functional_tests-server.js`
-
-In another shell, from **~kibana/x-pack**:
+If instead you need to run API tests, start up the test server and then in another shell, from **~kibana/x-pack**:
 `node ../scripts/functional_test_runner.js --config test/api_integration/config.js --grep="{TEST_NAME}"`.
+
+You can update snapshots by prefixing the runner command with `env UPDATE_UPTIME_FIXTURES=1`
+
+You can access the functional test server's Kibana at `http://localhost:5620/`.
+
+You can login with username `elastic` and password `changeme` by default.
+
+If you want to freeze a UI or API test you can include an async call like `await new Promise(r => setTimeout(r, 1000 * 60))`
+to freeze the execution for 60 seconds if you need to click around or check things in the state that is loaded.

@@ -1,0 +1,37 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`FieldIcon renders a blackwhite icon for a string 1`] = `
+<EuiIcon
+  aria-label="string"
+  size="s"
+  type="string"
+/>
+`;
+
+exports[`FieldIcon renders a colored icon for a number 1`] = `
+<EuiIcon
+  aria-label="test"
+  color="#54B399"
+  size="s"
+  type="number"
+/>
+`;
+
+exports[`FieldIcon renders an icon for an unknown type 1`] = `
+<EuiIcon
+  aria-label="test"
+  color="#54B399"
+  size="s"
+  type="questionInCircle"
+/>
+`;
+
+exports[`FieldIcon renders with className if provided 1`] = `
+<EuiIcon
+  aria-label="test"
+  className="myClass"
+  color="#54B399"
+  size="s"
+  type="questionInCircle"
+/>
+`;

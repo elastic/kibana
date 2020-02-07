@@ -1,0 +1,146 @@
+[[management]]
+= Management
+
+[partintro]
+--
+*Management* is home to UIs for managing all things Elastic Stack&mdash;
+indices, clusters, licenses, UI settings, index patterns, spaces, and more.
+
+[float]
+[[manage-Elasticsearch]]
+== Manage {es}
+
+[cols="50, 50"]
+|===
+
+a| <<working-remote-clusters, *Cross-Cluster Replication*>>
+
+Replicate indices on a remote cluster and copy them to a follower index on a local cluster.
+This is important for
+disaster recovery. It also keeps data local for faster queries.
+
+| <<index-lifecycle-policies, *Index Lifecycle Policies*>>
+
+Create a policy for defining the lifecycle of an index as it ages
+through the hot, warm, cold, and delete phases.
+Such policies help you control operation costs
+because you can put data in different resource tiers.
+
+a| <<managing-indices, *Index Management*>>
+
+View index settings, mappings, and statistics and perform operations, such as refreshing,
+flushing, and clearing the cache. Practicing good index management ensures
+that your data is stored cost effectively.
+
+| <<managing-licenses, *License Management*>>
+
+View the status of your license, start a trial, or install a new license. For
+the full list of features that are included in your license,
+see the https://www.elastic.co/subscriptions[subscription page].
+
+| <<working-remote-clusters, *Remote Clusters*>>
+
+Manage your remote clusters for use with cross-cluster search and cross-cluster replication.
+You can add and remove remote clusters, and check their connectivity.
+
+| <<data-rollups, *Rollup Jobs*>>
+
+Create a job that periodically aggregates data from one or more indices, and then
+rolls it into a new, compact index. Rollup indices are a good way to store months or
+years of historical data in combination with your raw data.
+
+| <<snapshot-repositories, *Snapshot and Restore*>>
+
+Define a policy that creates, schedules, and automatically deletes snapshots to ensure that you
+have backups of your cluster in case something goes wrong.
+
+| {ref}/transforms.html[*Transforms*]
+
+Use transforms to pivot existing {es} indices into summarized or entity-centric indices.
+
+| <<upgrade-assistant, *Upgrade Assistant*>>
+
+Identify the issues that you need to address before upgrading to the
+next major version of {es}, and then reindex, if needed.
+
+| <<watcher-ui, *Watcher*>>
+
+Detect changes in your data by creating, managing, and monitoring alerts.
+For example, create an alert when the maximum total CPU usage on a machine goes
+above a certain percentage.
+
+|===
+
+[float]
+[[manage-kibana]]
+== Manage {kib}
+
+[cols="50, 50"]
+|===
+
+a| <<advanced-options, *Advanced Settings*>>
+
+Customize {kib} to suit your needs. Change the format for displaying dates, turn on dark mode,
+set the timespan for notification messages, and much more.
+
+| <<managing-fields, *Index Patterns*>>
+
+Create and manage the index patterns that help you retrieve your data from {es}.
+
+| <<reporting-getting-started, *Reporting*>>
+
+Monitor the generation of reports&mdash;PDF, PNG, and CSV&mdash;and download reports that you previously generated.
+A report can contain a dashboard, visualization, saved search, or Canvas workpad.
+
+| <<managing-saved-objects, *Saved Objects*>>
+
+Copy, edit, delete, import, and export your saved objects.
+These include dashboards, visualizations, maps, index patterns, Canvas workpads, and more.
+
+| <<xpack-spaces, *Spaces*>>
+
+Create spaces to organize your dashboards and other saved objects into categories.
+A space is isolated from all other spaces,
+so you can tailor it to your needs without impacting others.
+
+| &nbsp;
+
+|===
+
+--
+
+include::{kib-repo-dir}/management/advanced-options.asciidoc[]
+
+include::{kib-repo-dir}/management/managing-beats.asciidoc[]
+
+include::{kib-repo-dir}/management/index-lifecycle-policies/intro-to-lifecycle-policies.asciidoc[]
+
+include::{kib-repo-dir}/management/index-lifecycle-policies/create-policy.asciidoc[]
+
+include::{kib-repo-dir}/management/index-lifecycle-policies/manage-policy.asciidoc[]
+
+include::{kib-repo-dir}/management/index-lifecycle-policies/add-policy-to-index.asciidoc[]
+
+include::{kib-repo-dir}/management/index-lifecycle-policies/example-index-lifecycle-policy.asciidoc[]
+
+include::{kib-repo-dir}/management/managing-indices.asciidoc[]
+
+include::{kib-repo-dir}/management/managing-fields.asciidoc[]
+
+include::{kib-repo-dir}/management/managing-licenses.asciidoc[]
+
+include::{kib-repo-dir}/management/managing-remote-clusters.asciidoc[]
+
+include::{kib-repo-dir}/management/rollups/create_and_manage_rollups.asciidoc[]
+
+include::{kib-repo-dir}/management/managing-saved-objects.asciidoc[]
+
+include::security/index.asciidoc[]
+
+include::{kib-repo-dir}/management/snapshot-restore/index.asciidoc[]
+
+include::{kib-repo-dir}/spaces/index.asciidoc[]
+
+include::{kib-repo-dir}/management/upgrade-assistant/index.asciidoc[]
+
+include::{kib-repo-dir}/management/watcher-ui/index.asciidoc[]

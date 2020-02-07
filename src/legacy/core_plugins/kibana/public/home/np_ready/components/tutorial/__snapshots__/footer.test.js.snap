@@ -1,0 +1,35 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`render 1`] = `
+<div>
+  <EuiHorizontalRule />
+  <EuiFlexGroup
+    alignItems="center"
+    justifyContent="spaceBetween"
+  >
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiText>
+        <p>
+          <FormattedMessage
+            defaultMessage="When all steps are complete, you're ready to explore your data."
+            id="kbn.home.exploreYourDataDescription"
+            values={Object {}}
+          />
+        </p>
+      </EuiText>
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiButton
+        fill={true}
+        href="/app/myapp"
+      >
+        launch myapp
+      </EuiButton>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</div>
+`;

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { getKbnTypeNames } from '../../../../utils';
+import { getKbnTypeNames } from '../../../../../plugins/data/public';
 
 export const FIELD_TYPES_BY_LANG = {
   painless: ['number', 'string', 'date', 'boolean'],

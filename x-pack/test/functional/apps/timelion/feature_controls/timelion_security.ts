@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect';
-import { KibanaFunctionalTestDefaultProviders } from '../../../../types/providers';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
-export default function({ getPageObjects, getService }: KibanaFunctionalTestDefaultProviders) {
+export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
   const PageObjects = getPageObjects(['common', 'timelion', 'header', 'security', 'spaceSelector']);
@@ -42,7 +41,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           full_name: 'test user',
         });
 
-        await PageObjects.security.logout();
+        await PageObjects.security.forceLogout();
 
         await PageObjects.security.login(
           'global_timelion_all_user',
@@ -54,16 +53,14 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       });
 
       after(async () => {
-        await PageObjects.security.logout();
+        await PageObjects.security.forceLogout();
         await security.role.delete('global_timelion_all_role');
         await security.user.delete('global_timelion_all_user');
       });
 
       it('shows timelion navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
-        expect(navLinks).to.eql(['Timelion', 'Management']);
+        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
+        expect(navLinks).to.eql(['Timelion', 'Stack Management']);
       });
 
       it(`allows a timelion sheet to be created`, async () => {
@@ -108,16 +105,14 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       });
 
       after(async () => {
-        await PageObjects.security.logout();
+        await PageObjects.security.forceLogout();
         await security.role.delete('global_timelion_read_role');
         await security.user.delete('global_timelion_read_user');
       });
 
       it('shows timelion navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
-        expect(navLinks).to.eql(['Timelion', 'Management']);
+        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
+        expect(navLinks).to.eql(['Timelion', 'Stack Management']);
       });
 
       it(`does not allow a timelion sheet to be created`, async () => {
@@ -152,7 +147,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           full_name: 'test user',
         });
 
-        await PageObjects.security.logout();
+        await PageObjects.security.forceLogout();
 
         await PageObjects.security.login(
           'no_timelion_privileges_user',
@@ -164,7 +159,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       });
 
       after(async () => {
-        await PageObjects.security.logout();
+        await PageObjects.security.forceLogout();
         await security.role.delete('no_timelion_privileges_role');
         await security.user.delete('no_timelion_privileges_user');
       });

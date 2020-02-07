@@ -1,0 +1,114 @@
+[role="xpack"]
+[[reporting-getting-started]]
+= Reporting from Kibana
+
+[partintro]
+
+--
+
+You can generate a report that contains a {kib} dashboard, visualization,
+saved search, or Canvas workpad. Depending on the object type, you can export the data as
+a PDF, PNG, or CSV document, which you can keep for yourself, or share with others.
+
+Reporting is available from the *Share* menu
+in *Discover*, *Visualize*, *Dashboard*, and *Canvas*.
+
+[role="screenshot"]
+image::user/reporting/images/share-button.png["Share"]
+
+[float]
+== Setup
+
+{reporting} is automatically enabled in {kib}. The first time {kib} runs, it extracts a custom build for the Chromium web browser, which
+runs on the server in headless mode to load {kib} and capture the rendered {kib} charts as images.
+
+Chromium is an open-source project not related to Elastic, but the Chromium binary for {kib} has been custom-built by Elastic to ensure it
+works with minimal setup. However, the {kib} server OS might still require additional dependencies for Chromium. See the
+<<reporting-troubleshooting-system-dependencies, Reporting troubleshooting>> section for more information about the system dependencies
+for different operating systems.
+
+[float]
+[[reporting-required-privileges]]
+== Roles and privileges
+
+To generate a report, you must have the `reporting_user` role. You also need
+the appropriate {kib} privileges to access the objects that you
+want to report on and the {es} indices.  See <<secure-reporting, Reporting and security>>
+for an example.
+
+[float]
+[[manually-generate-reports]]
+== Generate a report manually
+
+. Open the dashboard, visualization, Canvas workpad, or saved search that you want to include in the report.
+
+. In the {kib} toolbar, click *Share*.  If you are working in Canvas,
+click the share icon image:user/reporting/images/canvas-share-button.png["Canvas Share button"].
+
+. Select the option appropriate for your object. You can export:
++
+** A dashboard or visualization as either a PNG or PDF document
+** A Canvas workpad as a PDF document
+** A saved search as a CSV document
+
+. Generate the report.
++
+A notification appears when the report is complete.
+
+[float]
+[[reporting-layout-sizing]]
+== Layout and sizing
+The layout and size of the PDF or PNG image depends on the {kib} app
+with which the Reporting plugin is integrated. For Canvas, the
+worksheet dimensions determine the size for Reporting. In other apps,
+the dimensions are taken on the fly by looking at
+the size of the visualization elements or panels on the page.
+
+The size dimensions are part of the reporting job parameters. Therefore, to
+make the report output larger or smaller, you can change the size of the browser.
+This resizes the shareable container before generating the
+report, so the desired dimensions are passed in the job parameters.
+
+In the following {kib} dashboard, the shareable container is highlighted.
+The shareable container is captured when you click the
+*Generate* or *Copy POST URL* button. It might take some trial and error
+before you're satisfied with the layout and dimensions in the resulting
+PNG or PDF image.
+
+[role="screenshot"]
+image::user/reporting/images/shareable-container.png["Shareable Container"]
+
+
+
+[float]
+[[optimize-pdf]]
+== Optimize PDF for print&mdash;dashboard only
+
+To create a printer-friendly PDF with multiple A4 portrait pages and two visualizations per page, turn on *Optimize for printing*.
+
+[role="screenshot"]
+image::user/reporting/images/preserve-layout-switch.png["Share"]
+
+
+[float]
+[[manage-report-history]]
+== View and manage report history
+
+For a list of your reports, go to *Management > Reporting*.
+From this view, you can monitor the generation of a report and
+download reports that you previously generated.
+
+[float]
+[[automatically-generate-reports]]
+== Automatically generate a report
+
+To automatically generate a report from a script or with
+{watcher}, see <<automating-report-generation, Automating report generation>>.
+
+--
+
+include::automating-report-generation.asciidoc[]
+include::configuring-reporting.asciidoc[]
+include::chromium-sandbox.asciidoc[]
+include::reporting-troubleshooting.asciidoc[]
+include::development/index.asciidoc[]

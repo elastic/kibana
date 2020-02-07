@@ -22,9 +22,9 @@ interface LogEntryColumnProps {
   shrinkWeight: number;
 }
 
-export const LogEntryColumn = euiStyled.div.attrs<LogEntryColumnProps>({
+export const LogEntryColumn = euiStyled.div.attrs(() => ({
   role: 'cell',
-})`
+}))<LogEntryColumnProps>`
   align-items: stretch;
   display: flex;
   flex-basis: ${props => props.baseWidth || '0%'};
@@ -44,38 +44,59 @@ export type LogEntryColumnWidth = Pick<
   'baseWidth' | 'growWeight' | 'shrinkWeight'
 >;
 
+export const iconColumnId = Symbol('iconColumnId');
+
+export interface LogEntryColumnWidths {
+  [columnId: string]: LogEntryColumnWidth;
+  [iconColumnId]: LogEntryColumnWidth;
+}
+
 export const getColumnWidths = (
   columns: LogColumnConfiguration[],
   characterWidth: number,
   formattedDateWidth: number
-): LogEntryColumnWidth[] => [
-  ...columns.map(column => {
-    if (isTimestampLogColumnConfiguration(column)) {
-      return {
+): LogEntryColumnWidths =>
+  columns.reduce<LogEntryColumnWidths>(
+    (columnWidths, column) => {
+      if (isTimestampLogColumnConfiguration(column)) {
+        return {
+          ...columnWidths,
+          [column.timestampColumn.id]: {
+            growWeight: 0,
+            shrinkWeight: 0,
+            baseWidth: `${Math.ceil(
+              characterWidth * formattedDateWidth * DATE_COLUMN_SLACK_FACTOR
+            ) +
+              2 * COLUMN_PADDING}px`,
+          },
+        };
+      } else if (isMessageLogColumnConfiguration(column)) {
+        return {
+          ...columnWidths,
+          [column.messageColumn.id]: {
+            growWeight: 5,
+            shrinkWeight: 0,
+            baseWidth: '0%',
+          },
+        };
+      } else {
+        return {
+          ...columnWidths,
+          [column.fieldColumn.id]: {
+            growWeight: 1,
+            shrinkWeight: 0,
+            baseWidth: `${Math.ceil(characterWidth * FIELD_COLUMN_MIN_WIDTH_CHARACTERS) +
+              2 * COLUMN_PADDING}px`,
+          },
+        };
+      }
+    },
+    {
+      // the detail flyout icon column
+      [iconColumnId]: {
         growWeight: 0,
         shrinkWeight: 0,
-        baseWidth: `${Math.ceil(characterWidth * formattedDateWidth * DATE_COLUMN_SLACK_FACTOR) +
-          2 * COLUMN_PADDING}px`,
-      };
-    } else if (isMessageLogColumnConfiguration(column)) {
-      return {
-        growWeight: 5,
-        shrinkWeight: 0,
-        baseWidth: '0%',
-      };
-    } else {
-      return {
-        growWeight: 1,
-        shrinkWeight: 0,
-        baseWidth: `${Math.ceil(characterWidth * FIELD_COLUMN_MIN_WIDTH_CHARACTERS) +
-          2 * COLUMN_PADDING}px`,
-      };
+        baseWidth: `${DETAIL_FLYOUT_ICON_MIN_WIDTH + 2 * COLUMN_PADDING}px`,
+      },
     }
-  }),
-  // the detail flyout icon column
-  {
-    growWeight: 0,
-    shrinkWeight: 0,
-    baseWidth: `${DETAIL_FLYOUT_ICON_MIN_WIDTH + 2 * COLUMN_PADDING}px`,
-  },
-];
+  );

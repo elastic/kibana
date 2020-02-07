@@ -1,0 +1,45 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`draggable_score renders correctly against snapshot 1`] = `
+<DraggableWrapper
+  dataProvider={
+    Object {
+      "and": Array [],
+      "enabled": true,
+      "excluded": false,
+      "id": "some-id",
+      "kqlQuery": "",
+      "name": "process.name",
+      "queryMatch": Object {
+        "field": "process.name",
+        "operator": ":",
+        "value": "du",
+      },
+    }
+  }
+  key="draggable-score-draggable-wrapper-some-id"
+  render={[Function]}
+/>
+`;
+
+exports[`draggable_score renders correctly against snapshot when the index is not included 1`] = `
+<DraggableWrapper
+  dataProvider={
+    Object {
+      "and": Array [],
+      "enabled": true,
+      "excluded": false,
+      "id": "some-id",
+      "kqlQuery": "",
+      "name": "process.name",
+      "queryMatch": Object {
+        "field": "process.name",
+        "operator": ":",
+        "value": "du",
+      },
+    }
+  }
+  key="draggable-score-draggable-wrapper-some-id"
+  render={[Function]}
+/>
+`;

@@ -4,6 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { UMAuthDomain } from './auth';
-export { UMMonitorsDomain } from './monitors';
-export { UMPingsDomain } from './pings';
+export { licenseCheck, UMLicenseCheck } from './license';

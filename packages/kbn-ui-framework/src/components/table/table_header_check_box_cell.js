@@ -25,10 +25,7 @@ import { KuiTableHeaderCell } from './table_header_cell';
 export const KuiTableHeaderCheckBoxCell = ({ onChange, isChecked, className, ...rest }) => {
   const classes = classNames('kuiTableHeaderCell--checkBox', className);
   return (
-    <KuiTableHeaderCell
-      className={classes}
-      {...rest}
-    >
+    <KuiTableHeaderCell className={classes} {...rest}>
       <input
         type="checkbox"
         className="kuiCheckBox"

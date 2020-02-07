@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InfraNodeType } from '../graphql/types';
-import { KbnServer } from '../kibana.index';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { InventoryItemType } from '../../common/inventory_models/types';
 
 const KIBANA_REPORTING_TYPE = 'infraops';
 
@@ -17,10 +17,13 @@ interface InfraopsSum {
 }
 
 export class UsageCollector {
-  public static getUsageCollector(server: KbnServer) {
-    const { collectorSet } = server.usage;
+  public static registerUsageCollector(usageCollection: UsageCollectionSetup): void {
+    const collector = UsageCollector.getUsageCollector(usageCollection);
+    usageCollection.registerCollector(collector);
+  }
 
-    return collectorSet.makeUsageCollector({
+  public static getUsageCollector(usageCollection: UsageCollectionSetup) {
+    return usageCollection.makeUsageCollector({
       type: KIBANA_REPORTING_TYPE,
       isReady: () => true,
       fetch: async () => {
@@ -29,15 +32,15 @@ export class UsageCollector {
     });
   }
 
-  public static countNode(nodeType: InfraNodeType) {
+  public static countNode(nodeType: InventoryItemType) {
     const bucket = this.getBucket();
     this.maybeInitializeBucket(bucket);
 
     switch (nodeType) {
-      case InfraNodeType.pod:
+      case 'pod':
         this.counters[bucket].infraopsKubernetes += 1;
         break;
-      case InfraNodeType.container:
+      case 'container':
         this.counters[bucket].infraopsDocker += 1;
         break;
       default:

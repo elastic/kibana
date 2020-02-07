@@ -2,8 +2,7 @@
 
 // This function was extracted from angular v1.3
 
-/**
- * @notice
+/* @notice
  * This product includes code that was extracted from angular@1.3.
  * Original license:
  * The MIT License
@@ -36,5 +35,5 @@ export function encodeUriQuery(val, pctEncodeSpaces) {
     .replace(/%24/g, '$')
     .replace(/%2C/gi, ',')
     .replace(/%3B/gi, ';')
-    .replace(/%20/g, (pctEncodeSpaces ? '%20' : '+'));
+    .replace(/%20/g, pctEncodeSpaces ? '%20' : '+');
 }

@@ -260,10 +260,6 @@ not necessarily optimized for our use-cases. It's also not ideal for the setup
 we currently have, with one app that "owns everything" and the rest being
 packages for that app.
 
-### Why a local version of Yarn?
-
-See the [vendor readme](./vendor/README.md).
-
 [npm-link]: https://docs.npmjs.com/cli/link
 [npm5-file]: https://github.com/npm/npm/pull/15900
 [yarn-workspaces]: https://yarnpkg.com/lang/en/docs/workspaces/

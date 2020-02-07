@@ -17,68 +17,33 @@
  * under the License.
  */
 
+import { Capabilities } from '../../../types/capabilities';
 import { deepFreeze, RecursiveReadonly } from '../../../utils';
-import { MixedApp } from '../application_service';
-import { InjectedMetadataStart } from '../../injected_metadata';
+import { HttpStart } from '../../http';
 
 interface StartDeps {
-  apps: ReadonlyArray<MixedApp>;
-  injectedMetadata: InjectedMetadataStart;
-}
-
-/**
- * The read-only set of capabilities available for the current UI session.
- * Capabilities are simple key-value pairs of (string, boolean), where the string denotes the capability ID,
- * and the boolean is a flag indicating if the capability is enabled or disabled.
- *
- * @public
- */
-export interface Capabilities {
-  /** Navigation link capabilities. */
-  navLinks: Record<string, boolean>;
-
-  /** Management section capabilities. */
-  management: {
-    [sectionId: string]: Record<string, boolean>;
-  };
-
-  /** Catalogue capabilities. Catalogue entries drive the visibility of the Kibana homepage options. */
-  catalogue: Record<string, boolean>;
-
-  /** Custom capabilities, registered by plugins. */
-  [key: string]: Record<string, boolean | Record<string, boolean>>;
-}
-
-/**
- * Capabilities Setup.
- * @public
- */
-export interface CapabilitiesStart {
-  /**
-   * Gets the read-only capabilities.
-   */
-  capabilities: RecursiveReadonly<Capabilities>;
-
-  /**
-   * Apps available based on the current capabilities. Should be used
-   * to show navigation links and make routing decisions.
-   */
-  availableApps: ReadonlyArray<MixedApp>;
+  appIds: string[];
+  http: HttpStart;
 }
 
 /** @internal */
+export interface CapabilitiesStart {
+  capabilities: RecursiveReadonly<Capabilities>;
+}
 
 /**
  * Service that is responsible for UI Capabilities.
+ * @internal
  */
 export class CapabilitiesService {
-  public async start({ apps, injectedMetadata }: StartDeps): Promise<CapabilitiesStart> {
-    const capabilities = deepFreeze(injectedMetadata.getCapabilities());
-    const availableApps = apps.filter(app => capabilities.navLinks[app.id]);
+  public async start({ appIds, http }: StartDeps): Promise<CapabilitiesStart> {
+    const route = http.anonymousPaths.isAnonymous(window.location.pathname) ? '/defaults' : '';
+    const capabilities = await http.post<Capabilities>(`/api/core/capabilities${route}`, {
+      body: JSON.stringify({ applications: appIds }),
+    });
 
     return {
-      availableApps,
-      capabilities,
+      capabilities: deepFreeze(capabilities),
     };
   }
 }

@@ -5,9 +5,9 @@
  */
 
 import moment from 'moment';
-import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
-import { Position } from '../types';
-import { getFunctionHelp, getFunctionErrors } from '../../strings';
+import { ExpressionFunction } from 'src/plugins/expressions/common';
+import { Position } from '../../../types';
+import { getFunctionHelp, getFunctionErrors } from '../../../i18n';
 
 interface Arguments {
   show: boolean;
@@ -29,15 +29,18 @@ export function axisConfig(): ExpressionFunction<'axisConfig', null, Arguments, 
     name: 'axisConfig',
     aliases: [],
     type: 'axisConfig',
+    help,
     context: {
       types: ['null'],
     },
-    help,
     args: {
-      show: {
-        types: ['boolean'],
-        help: argHelp.show,
-        default: true,
+      max: {
+        types: ['number', 'string', 'null'],
+        help: argHelp.max,
+      },
+      min: {
+        types: ['number', 'string', 'null'],
+        help: argHelp.min,
       },
       position: {
         types: ['string'],
@@ -45,13 +48,10 @@ export function axisConfig(): ExpressionFunction<'axisConfig', null, Arguments, 
         options: Object.values(Position),
         default: 'left',
       },
-      min: {
-        types: ['number', 'string', 'null'],
-        help: argHelp.min,
-      },
-      max: {
-        types: ['number', 'string', 'null'],
-        help: argHelp.max,
+      show: {
+        types: ['boolean'],
+        help: argHelp.show,
+        default: true,
       },
       tickSize: {
         types: ['number', 'null'],

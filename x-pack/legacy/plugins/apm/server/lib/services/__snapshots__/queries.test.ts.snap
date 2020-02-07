@@ -1,0 +1,230 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`services queries fetches the agent status 1`] = `
+Object {
+  "body": Object {
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "terms": Object {
+              "processor.event": Array [
+                "error",
+                "metric",
+                "sourcemap",
+                "transaction",
+              ],
+            },
+          },
+        ],
+      },
+    },
+    "size": 0,
+  },
+  "index": Array [
+    "myIndex",
+    "myIndex",
+    "myIndex",
+    "myIndex",
+  ],
+  "terminateAfter": 1,
+}
+`;
+
+exports[`services queries fetches the legacy data status 1`] = `
+Object {
+  "body": Object {
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "terms": Object {
+              "processor.event": Array [
+                "transaction",
+              ],
+            },
+          },
+          Object {
+            "range": Object {
+              "observer.version_major": Object {
+                "lt": 7,
+              },
+            },
+          },
+        ],
+      },
+    },
+    "size": 0,
+  },
+  "index": "myIndex",
+  "terminateAfter": 1,
+}
+`;
+
+exports[`services queries fetches the service agent name 1`] = `
+Object {
+  "body": Object {
+    "aggs": Object {
+      "agents": Object {
+        "terms": Object {
+          "field": "agent.name",
+          "size": 1,
+        },
+      },
+    },
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "term": Object {
+              "service.name": "foo",
+            },
+          },
+          Object {
+            "terms": Object {
+              "processor.event": Array [
+                "error",
+                "transaction",
+                "metric",
+              ],
+            },
+          },
+          Object {
+            "range": Object {
+              "@timestamp": Object {
+                "format": "epoch_millis",
+                "gte": 1528113600000,
+                "lte": 1528977600000,
+              },
+            },
+          },
+        ],
+      },
+    },
+    "size": 0,
+  },
+  "index": Array [
+    "myIndex",
+    "myIndex",
+    "myIndex",
+  ],
+  "terminateAfter": 1,
+}
+`;
+
+exports[`services queries fetches the service items 1`] = `
+Object {
+  "body": Object {
+    "aggs": Object {
+      "services": Object {
+        "aggs": Object {
+          "agents": Object {
+            "terms": Object {
+              "field": "agent.name",
+              "size": 1,
+            },
+          },
+          "avg": Object {
+            "avg": Object {
+              "field": "transaction.duration.us",
+            },
+          },
+          "environments": Object {
+            "terms": Object {
+              "field": "service.environment",
+            },
+          },
+          "events": Object {
+            "terms": Object {
+              "field": "processor.event",
+            },
+          },
+        },
+        "terms": Object {
+          "field": "service.name",
+          "size": 500,
+        },
+      },
+    },
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "terms": Object {
+              "processor.event": Array [
+                "transaction",
+                "error",
+                "metric",
+              ],
+            },
+          },
+          Object {
+            "range": Object {
+              "@timestamp": Object {
+                "format": "epoch_millis",
+                "gte": 1528113600000,
+                "lte": 1528977600000,
+              },
+            },
+          },
+          Object {
+            "term": Object {
+              "service.environment": "prod",
+            },
+          },
+        ],
+      },
+    },
+    "size": 0,
+  },
+  "index": Array [
+    "myIndex",
+    "myIndex",
+    "myIndex",
+  ],
+}
+`;
+
+exports[`services queries fetches the service transaction types 1`] = `
+Object {
+  "body": Object {
+    "aggs": Object {
+      "types": Object {
+        "terms": Object {
+          "field": "transaction.type",
+          "size": 100,
+        },
+      },
+    },
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "term": Object {
+              "service.name": "foo",
+            },
+          },
+          Object {
+            "terms": Object {
+              "processor.event": Array [
+                "transaction",
+              ],
+            },
+          },
+          Object {
+            "range": Object {
+              "@timestamp": Object {
+                "format": "epoch_millis",
+                "gte": 1528113600000,
+                "lte": 1528977600000,
+              },
+            },
+          },
+        ],
+      },
+    },
+    "size": 0,
+  },
+  "index": "myIndex",
+}
+`;

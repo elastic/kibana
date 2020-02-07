@@ -12,7 +12,7 @@ class HttpService {
     this.addBasePath = chrome.addBasePath.bind(chrome);
   }
 
-  get httpClient(): any {
+  public get httpClient(): any {
     return this.client;
   }
 }

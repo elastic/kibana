@@ -4,18 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount, shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
+import { shallow } from 'enzyme';
 import { cloneDeep } from 'lodash/fp';
-import * as React from 'react';
+import React from 'react';
 
 import { mockBrowserFields } from '../../../../../containers/source/mock';
 import { Ecs } from '../../../../../graphql/types';
 import { mockTimelineData } from '../../../../../mock';
 import { TestProviders } from '../../../../../mock/test_providers';
 import { suricataRowRenderer } from './suricata_row_renderer';
+import { useMountAppended } from '../../../../../utils/use_mount_appended';
 
 describe('suricata_row_renderer', () => {
+  const mount = useMountAppended();
   let nonSuricata: Ecs;
   let suricata: Ecs;
 
@@ -28,12 +29,12 @@ describe('suricata_row_renderer', () => {
     const children = suricataRowRenderer.renderRow({
       browserFields: mockBrowserFields,
       data: nonSuricata,
-      width: 100,
       children: <span>{'some children'}</span>,
+      timelineId: 'test',
     });
 
     const wrapper = shallow(<span>{children}</span>);
-    expect(toJson(wrapper)).toMatchSnapshot();
+    expect(wrapper).toMatchSnapshot();
   });
 
   test('should return false if not a suricata datum', () => {
@@ -48,8 +49,8 @@ describe('suricata_row_renderer', () => {
     const children = suricataRowRenderer.renderRow({
       browserFields: mockBrowserFields,
       data: nonSuricata,
-      width: 100,
       children: <span>{'some children'}</span>,
+      timelineId: 'test',
     });
     const wrapper = mount(
       <TestProviders>
@@ -63,8 +64,8 @@ describe('suricata_row_renderer', () => {
     const children = suricataRowRenderer.renderRow({
       browserFields: mockBrowserFields,
       data: suricata,
-      width: 100,
       children: <span>{'some children '}</span>,
+      timelineId: 'test',
     });
     const wrapper = mount(
       <TestProviders>
@@ -81,8 +82,8 @@ describe('suricata_row_renderer', () => {
     const children = suricataRowRenderer.renderRow({
       browserFields: mockBrowserFields,
       data: suricata,
-      width: 100,
       children: <span>{'some children'}</span>,
+      timelineId: 'test',
     });
     const wrapper = mount(
       <TestProviders>

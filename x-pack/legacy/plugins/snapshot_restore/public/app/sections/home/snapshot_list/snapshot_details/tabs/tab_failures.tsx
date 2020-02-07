@@ -16,7 +16,7 @@ interface Props {
   snapshotState: string;
 }
 
-export const TabFailures: React.SFC<Props> = ({ indexFailures, snapshotState }) => {
+export const TabFailures: React.FC<Props> = ({ indexFailures, snapshotState }) => {
   const {
     core: {
       i18n: { FormattedMessage },
@@ -70,8 +70,8 @@ export const TabFailures: React.SFC<Props> = ({ indexFailures, snapshotState }) 
                 </p>
               </EuiText>
 
-              <EuiCodeBlock paddingSize="s" data-test-subj="reason">
-                {status}: {reason}
+              <EuiCodeBlock paddingSize="s" data-test-subj="reason" language="text">
+                {`${status}: ${reason}`}
               </EuiCodeBlock>
 
               {failuresCount < failures.length - 1 ? <EuiSpacer size="s" /> : undefined}

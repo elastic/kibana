@@ -7,7 +7,6 @@
 import React from 'react';
 
 import euiStyled from '../../../../../common/eui_styled_components';
-import { InfraNodeType, InfraTimerangeInput } from '../../graphql/types';
 import {
   InfraWaffleMapBounds,
   InfraWaffleMapGroupOfNodes,
@@ -15,6 +14,7 @@ import {
 } from '../../lib/lib';
 import { GroupName } from './group_name';
 import { Node } from './node';
+import { InventoryItemType } from '../../../common/inventory_models/types';
 
 interface Props {
   onDrilldown: (filter: string) => void;
@@ -23,11 +23,11 @@ interface Props {
   formatter: (val: number) => string;
   isChild: boolean;
   bounds: InfraWaffleMapBounds;
-  nodeType: InfraNodeType;
-  timeRange: InfraTimerangeInput;
+  nodeType: InventoryItemType;
+  currentTime: number;
 }
 
-export const GroupOfNodes: React.SFC<Props> = ({
+export const GroupOfNodes: React.FC<Props> = ({
   group,
   options,
   formatter,
@@ -35,7 +35,7 @@ export const GroupOfNodes: React.SFC<Props> = ({
   isChild = false,
   bounds,
   nodeType,
-  timeRange,
+  currentTime,
 }) => {
   const width = group.width > 200 ? group.width : 200;
   return (
@@ -51,7 +51,7 @@ export const GroupOfNodes: React.SFC<Props> = ({
             formatter={formatter}
             bounds={bounds}
             nodeType={nodeType}
-            timeRange={timeRange}
+            currentTime={currentTime}
           />
         ))}
       </Nodes>

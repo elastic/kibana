@@ -1,0 +1,135 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`FilterPopover component does not show item list when loading 1`] = `
+<EuiPopover
+  anchorPosition="downCenter"
+  button={
+    <UptimeFilterButton
+      isSelected={true}
+      numActiveFilters={2}
+      numFilters={4}
+      onClick={[Function]}
+      title="bar"
+    />
+  }
+  closePopover={[Function]}
+  data-test-subj="filter-popover_test"
+  display="inlineBlock"
+  hasArrow={true}
+  id="test"
+  isOpen={false}
+  ownFocus={true}
+  panelPaddingSize="m"
+  withTitle={true}
+  zIndex={1000}
+>
+  <EuiPopoverTitle>
+    <EuiFieldSearch
+      compressed={false}
+      disabled={false}
+      fullWidth={false}
+      incremental={false}
+      isClearable={true}
+      isLoading={false}
+      onSearch={[Function]}
+      placeholder="Loading..."
+    />
+  </EuiPopoverTitle>
+</EuiPopover>
+`;
+
+exports[`FilterPopover component renders without errors for valid props 1`] = `
+<EuiPopover
+  anchorPosition="downCenter"
+  button={
+    <UptimeFilterButton
+      isSelected={true}
+      numActiveFilters={2}
+      numFilters={4}
+      onClick={[Function]}
+      title="bar"
+    />
+  }
+  closePopover={[Function]}
+  data-test-subj="filter-popover_test"
+  display="inlineBlock"
+  hasArrow={true}
+  id="test"
+  isOpen={false}
+  ownFocus={true}
+  panelPaddingSize="m"
+  withTitle={true}
+  zIndex={1000}
+>
+  <EuiPopoverTitle>
+    <EuiFieldSearch
+      compressed={false}
+      disabled={false}
+      fullWidth={false}
+      incremental={false}
+      isClearable={true}
+      isLoading={false}
+      onSearch={[Function]}
+      placeholder="Search bar"
+    />
+  </EuiPopoverTitle>
+</EuiPopover>
+`;
+
+exports[`FilterPopover component returns selected items on popover close 1`] = `
+<div
+  intl="[object Object]"
+>
+  <div
+    id="foo"
+  >
+    Some text
+  </div>
+  <div
+    class="euiPopover euiPopover--anchorDownCenter euiPopover--withTitle"
+    data-test-subj="filter-popover_test"
+    id="test"
+  >
+    <div
+      class="euiPopover__anchor"
+    >
+      <button
+        class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--iconRight euiFilterButton euiFilterButton-isSelected euiFilterButton-hasActiveFilters euiFilterButton-hasNotification euiFilterButton--hasIcon"
+        type="button"
+      >
+        <span
+          class="euiButtonEmpty__content"
+        >
+          <svg
+            aria-hidden="true"
+            class="euiIcon euiIcon--medium euiIcon-isLoading euiButtonEmpty__icon"
+            focusable="false"
+            height="16"
+            role="img"
+            viewBox="0 0 16 16"
+            width="16"
+            xmlns="http://www.w3.org/2000/svg"
+          />
+          <span
+            class="euiButtonEmpty__text euiFilterButton__text-hasNotification"
+          >
+            <span
+              class="euiFilterButton__textShift"
+              data-text="bar"
+              title="bar"
+            >
+              bar
+            </span>
+            <span
+              aria-label="3 active filters"
+              class="euiNotificationBadge euiNotificationBadge--medium euiFilterButton__notification"
+            >
+              3
+            </span>
+          </span>
+        </span>
+      </button>
+    </div>
+  </div>
+</div>
+`;

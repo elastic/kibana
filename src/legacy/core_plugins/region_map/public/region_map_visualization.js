@@ -17,23 +17,22 @@
  * under the License.
  */
 
-import 'plugins/kbn_vislib_vis_types/controls/vislib_basic_options';
 import { i18n } from '@kbn/i18n';
-import { BaseMapsVisualizationProvider } from '../../tile_map/public/base_maps_visualization';
 import ChoroplethLayer from './choropleth_layer';
-import { truncatedColorMaps }  from 'ui/vislib/components/color/truncated_colormaps';
 import { getFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
-import { TileMapTooltipFormatter } from './tooltip_formatter';
-import 'ui/vis/map/service_settings';
 import { toastNotifications } from 'ui/notify';
 
-export function RegionMapsVisualizationProvider(Private, config) {
+import { TileMapTooltipFormatter } from './tooltip_formatter';
+import { truncatedColorMaps } from '../../../../plugins/charts/public';
 
-  const tooltipFormatter = Private(TileMapTooltipFormatter);
-  const BaseMapsVisualization = Private(BaseMapsVisualizationProvider);
+// TODO: reference to TILE_MAP plugin should be removed
+import { BaseMapsVisualizationProvider } from '../../tile_map/public/base_maps_visualization';
+
+export function createRegionMapVisualization({ serviceSettings, $injector, uiSettings }) {
+  const BaseMapsVisualization = new BaseMapsVisualizationProvider(serviceSettings);
+  const tooltipFormatter = new TileMapTooltipFormatter($injector);
 
   return class RegionMapsVisualization extends BaseMapsVisualization {
-
     constructor(container, vis) {
       super(container, vis);
       this._vis = this.vis;
@@ -81,14 +80,18 @@ export function RegionMapsVisualizationProvider(Private, config) {
 
       this._choroplethLayer.setMetrics(results, metricFieldFormatter, valueColumn.name);
       if (termColumn && valueColumn) {
-        this._choroplethLayer.setTooltipFormatter(tooltipFormatter, metricFieldFormatter, termColumn.name, valueColumn.name);
+        this._choroplethLayer.setTooltipFormatter(
+          tooltipFormatter,
+          metricFieldFormatter,
+          termColumn.name,
+          valueColumn.name
+        );
       }
 
       this._kibanaMap.useUiStateFromVisualization(this._vis);
     }
 
-    async  _updateParams() {
-
+    async _updateParams() {
       await super._updateParams();
       const visParams = this._params;
 
@@ -111,12 +114,18 @@ export function RegionMapsVisualizationProvider(Private, config) {
       this._choroplethLayer.setJoinField(visParams.selectedJoinField.name);
       this._choroplethLayer.setColorRamp(truncatedColorMaps[visParams.colorSchema].value);
       this._choroplethLayer.setLineWeight(visParams.outlineWeight);
-      this._choroplethLayer.setTooltipFormatter(tooltipFormatter, metricFieldFormatter, this._metricLabel);
-
+      this._choroplethLayer.setTooltipFormatter(
+        tooltipFormatter,
+        metricFieldFormatter,
+        this._metricLabel
+      );
     }
 
     _updateChoroplethLayerForNewMetrics(name, attribution, showAllData, newMetrics) {
-      if (this._choroplethLayer && this._choroplethLayer.canReuseInstanceForNewMetrics(name, showAllData, newMetrics)) {
+      if (
+        this._choroplethLayer &&
+        this._choroplethLayer.canReuseInstanceForNewMetrics(name, showAllData, newMetrics)
+      ) {
         return;
       }
       return this._recreateChoroplethLayer(name, attribution, showAllData);
@@ -130,9 +139,7 @@ export function RegionMapsVisualizationProvider(Private, config) {
     }
 
     _recreateChoroplethLayer(name, attribution, showAllData) {
-
       this._kibanaMap.removeLayer(this._choroplethLayer);
-
 
       if (this._choroplethLayer) {
         this._choroplethLayer = this._choroplethLayer.cloneChoroplethLayerForNewData(
@@ -141,7 +148,8 @@ export function RegionMapsVisualizationProvider(Private, config) {
           this._params.selectedLayer.format,
           showAllData,
           this._params.selectedLayer.meta,
-          this._params.selectedLayer
+          this._params.selectedLayer,
+          serviceSettings
         );
       } else {
         this._choroplethLayer = new ChoroplethLayer(
@@ -150,28 +158,37 @@ export function RegionMapsVisualizationProvider(Private, config) {
           this._params.selectedLayer.format,
           showAllData,
           this._params.selectedLayer.meta,
-          this._params.selectedLayer
+          this._params.selectedLayer,
+          serviceSettings
         );
       }
 
-      this._choroplethLayer.on('select', (event) => {
+      this._choroplethLayer.on('select', event => {
         const rowIndex = this._chartData.rows.findIndex(row => row[0] === event);
-        this._vis.API.events.filter({ table: this._chartData, column: 0, row: rowIndex, value: event });
+        this._vis.API.events.filter({
+          table: this._chartData,
+          column: 0,
+          row: rowIndex,
+          value: event,
+        });
       });
 
-      this._choroplethLayer.on('styleChanged', (event) => {
-        const shouldShowWarning = this._params.isDisplayWarning && config.get('visualization:regionmap:showWarnings');
+      this._choroplethLayer.on('styleChanged', event => {
+        const shouldShowWarning =
+          this._params.isDisplayWarning && uiSettings.get('visualization:regionmap:showWarnings');
         if (event.mismatches.length > 0 && shouldShowWarning) {
           toastNotifications.addWarning({
             title: i18n.translate('regionMap.visualization.unableToShowMismatchesWarningTitle', {
-              defaultMessage: 'Unable to show {mismatchesLength} {oneMismatch, plural, one {result} other {results}} on map',
+              defaultMessage:
+                'Unable to show {mismatchesLength} {oneMismatch, plural, one {result} other {results}} on map',
               values: {
                 mismatchesLength: event.mismatches.length,
                 oneMismatch: event.mismatches.length > 1 ? 0 : 1,
               },
             }),
             text: i18n.translate('regionMap.visualization.unableToShowMismatchesWarningText', {
-              defaultMessage: 'Ensure that each of these term matches a shape on that shape\'s join field: {mismatches}',
+              defaultMessage:
+                "Ensure that each of these term matches a shape on that shape's join field: {mismatches}",
               values: {
                 mismatches: event.mismatches ? event.mismatches.join(', ') : '',
               },
@@ -180,15 +197,11 @@ export function RegionMapsVisualizationProvider(Private, config) {
         }
       });
 
-
       this._kibanaMap.addLayer(this._choroplethLayer);
-
     }
 
     _hasColumns() {
       return this._chartData && this._chartData.columns.length === 2;
     }
-
   };
-
 }

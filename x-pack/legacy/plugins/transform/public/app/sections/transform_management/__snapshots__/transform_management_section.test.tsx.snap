@@ -1,0 +1,14 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Transform: <TransformManagementSection /> Minimal initialization 1`] = `
+<PrivilegesWrapper
+  privileges={
+    Array [
+      "cluster.cluster:monitor/transform/get",
+      "cluster.cluster:monitor/transform/stats/get",
+    ]
+  }
+>
+  <TransformManagement />
+</PrivilegesWrapper>
+`;

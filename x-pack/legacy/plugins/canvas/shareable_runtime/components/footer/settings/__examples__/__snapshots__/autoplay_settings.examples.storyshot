@@ -1,0 +1,526 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Storyshots shareables/Footer/Settings/AutoplaySettings component: off, 2s 1`] = `
+<div
+  className="kbnCanvas"
+  style={
+    Object {
+      "background": "#fff",
+      "border": "1px solid #ccc",
+      "height": 228,
+      "overflow": "hidden",
+      "padding": 16,
+      "position": "relative",
+      "width": 256,
+    }
+  }
+>
+  <div
+    style={
+      Object {
+        "padding": 16,
+      }
+    }
+  >
+    <div
+      className="euiSwitch"
+    >
+      <button
+        aria-checked={false}
+        aria-labelledby="generated-id"
+        className="euiSwitch__button"
+        id="cycle"
+        name="cycle"
+        onClick={[Function]}
+        role="switch"
+        type="button"
+      >
+        <span
+          className="euiSwitch__body"
+        >
+          <span
+            className="euiSwitch__thumb"
+          />
+          <span
+            className="euiSwitch__track"
+          >
+            <svg
+              aria-hidden={true}
+              className="euiIcon euiIcon--medium euiIcon-isLoading euiSwitch__icon"
+              focusable="false"
+              height={16}
+              role="img"
+              style={null}
+              viewBox="0 0 16 16"
+              width={16}
+              xmlns="http://www.w3.org/2000/svg"
+            />
+            <svg
+              aria-hidden={true}
+              className="euiIcon euiIcon--medium euiIcon-isLoading euiSwitch__icon euiSwitch__icon--checked"
+              focusable="false"
+              height={16}
+              role="img"
+              style={null}
+              viewBox="0 0 16 16"
+              width={16}
+              xmlns="http://www.w3.org/2000/svg"
+            />
+          </span>
+        </span>
+      </button>
+      <span
+        className="euiSwitch__label"
+        id="generated-id"
+        onClick={[Function]}
+      >
+        Cycle Slides
+      </span>
+    </div>
+    <hr
+      className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium"
+    />
+    <form
+      onSubmit={[Function]}
+    >
+      <div
+        className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive"
+      >
+        <div
+          className="euiFlexItem"
+        >
+          <div
+            className="euiFormRow euiFormRow--compressed"
+            id="generated-id-row"
+          >
+            <div
+              className="euiFormRow__labelWrapper"
+            >
+              <label
+                className="euiFormLabel euiFormRow__label"
+                htmlFor="generated-id"
+              >
+                Set a custom interval
+              </label>
+            </div>
+            <div
+              className="euiFormRow__fieldWrapper"
+            >
+              <div
+                className="euiFormControlLayout euiFormControlLayout--compressed"
+              >
+                <div
+                  className="euiFormControlLayout__childrenWrapper"
+                >
+                  <input
+                    aria-describedby="generated-id-help"
+                    className="euiFieldText euiFieldText--compressed"
+                    id="generated-id"
+                    onBlur={[Function]}
+                    onChange={[Function]}
+                    onFocus={[Function]}
+                    type="text"
+                    value="2s"
+                  />
+                </div>
+              </div>
+              <div
+                className="euiFormHelpText euiFormRow__text"
+                id="generated-id-help"
+              >
+                Use shorthand notation, like 30s, 10m, or 1h
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          className="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <div
+            className="euiFormRow euiFormRow--hasEmptyLabelSpace euiFormRow--compressed"
+            id="generated-id-row"
+          >
+            <div
+              className="euiFormRow__fieldWrapper"
+            >
+              <button
+                className="euiButton euiButton--primary euiButton--small"
+                disabled={false}
+                id="generated-id"
+                onBlur={[Function]}
+                onFocus={[Function]}
+                style={
+                  Object {
+                    "minWidth": "auto",
+                  }
+                }
+                type="submit"
+              >
+                <span
+                  className="euiButton__content"
+                >
+                  <span
+                    className="euiButton__text"
+                  >
+                    Set
+                  </span>
+                </span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+`;
+
+exports[`Storyshots shareables/Footer/Settings/AutoplaySettings component: on, 5s 1`] = `
+<div
+  className="kbnCanvas"
+  style={
+    Object {
+      "background": "#fff",
+      "border": "1px solid #ccc",
+      "height": 228,
+      "overflow": "hidden",
+      "padding": 16,
+      "position": "relative",
+      "width": 256,
+    }
+  }
+>
+  <div
+    style={
+      Object {
+        "padding": 16,
+      }
+    }
+  >
+    <div
+      className="euiSwitch"
+    >
+      <button
+        aria-checked={true}
+        aria-labelledby="generated-id"
+        className="euiSwitch__button"
+        id="cycle"
+        name="cycle"
+        onClick={[Function]}
+        role="switch"
+        type="button"
+      >
+        <span
+          className="euiSwitch__body"
+        >
+          <span
+            className="euiSwitch__thumb"
+          />
+          <span
+            className="euiSwitch__track"
+          >
+            <svg
+              aria-hidden={true}
+              className="euiIcon euiIcon--medium euiIcon-isLoading euiSwitch__icon"
+              focusable="false"
+              height={16}
+              role="img"
+              style={null}
+              viewBox="0 0 16 16"
+              width={16}
+              xmlns="http://www.w3.org/2000/svg"
+            />
+            <svg
+              aria-hidden={true}
+              className="euiIcon euiIcon--medium euiIcon-isLoading euiSwitch__icon euiSwitch__icon--checked"
+              focusable="false"
+              height={16}
+              role="img"
+              style={null}
+              viewBox="0 0 16 16"
+              width={16}
+              xmlns="http://www.w3.org/2000/svg"
+            />
+          </span>
+        </span>
+      </button>
+      <span
+        className="euiSwitch__label"
+        id="generated-id"
+        onClick={[Function]}
+      >
+        Cycle Slides
+      </span>
+    </div>
+    <hr
+      className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium"
+    />
+    <form
+      onSubmit={[Function]}
+    >
+      <div
+        className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive"
+      >
+        <div
+          className="euiFlexItem"
+        >
+          <div
+            className="euiFormRow euiFormRow--compressed"
+            id="generated-id-row"
+          >
+            <div
+              className="euiFormRow__labelWrapper"
+            >
+              <label
+                className="euiFormLabel euiFormRow__label"
+                htmlFor="generated-id"
+              >
+                Set a custom interval
+              </label>
+            </div>
+            <div
+              className="euiFormRow__fieldWrapper"
+            >
+              <div
+                className="euiFormControlLayout euiFormControlLayout--compressed"
+              >
+                <div
+                  className="euiFormControlLayout__childrenWrapper"
+                >
+                  <input
+                    aria-describedby="generated-id-help"
+                    className="euiFieldText euiFieldText--compressed"
+                    id="generated-id"
+                    onBlur={[Function]}
+                    onChange={[Function]}
+                    onFocus={[Function]}
+                    type="text"
+                    value="5s"
+                  />
+                </div>
+              </div>
+              <div
+                className="euiFormHelpText euiFormRow__text"
+                id="generated-id-help"
+              >
+                Use shorthand notation, like 30s, 10m, or 1h
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          className="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <div
+            className="euiFormRow euiFormRow--hasEmptyLabelSpace euiFormRow--compressed"
+            id="generated-id-row"
+          >
+            <div
+              className="euiFormRow__fieldWrapper"
+            >
+              <button
+                className="euiButton euiButton--primary euiButton--small"
+                disabled={false}
+                id="generated-id"
+                onBlur={[Function]}
+                onFocus={[Function]}
+                style={
+                  Object {
+                    "minWidth": "auto",
+                  }
+                }
+                type="submit"
+              >
+                <span
+                  className="euiButton__content"
+                >
+                  <span
+                    className="euiButton__text"
+                  >
+                    Set
+                  </span>
+                </span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+`;
+
+exports[`Storyshots shareables/Footer/Settings/AutoplaySettings contextual 1`] = `
+<div
+  className="kbnCanvas"
+  style={
+    Object {
+      "background": "#fff",
+      "border": "1px solid #ccc",
+      "height": 228,
+      "overflow": "hidden",
+      "padding": 16,
+      "position": "relative",
+      "width": 256,
+    }
+  }
+>
+  <div
+    style={
+      Object {
+        "padding": 16,
+      }
+    }
+  >
+    <div
+      className="euiSwitch"
+    >
+      <button
+        aria-checked={false}
+        aria-labelledby="generated-id"
+        className="euiSwitch__button"
+        id="cycle"
+        name="cycle"
+        onClick={[Function]}
+        role="switch"
+        type="button"
+      >
+        <span
+          className="euiSwitch__body"
+        >
+          <span
+            className="euiSwitch__thumb"
+          />
+          <span
+            className="euiSwitch__track"
+          >
+            <svg
+              aria-hidden={true}
+              className="euiIcon euiIcon--medium euiIcon-isLoading euiSwitch__icon"
+              focusable="false"
+              height={16}
+              role="img"
+              style={null}
+              viewBox="0 0 16 16"
+              width={16}
+              xmlns="http://www.w3.org/2000/svg"
+            />
+            <svg
+              aria-hidden={true}
+              className="euiIcon euiIcon--medium euiIcon-isLoading euiSwitch__icon euiSwitch__icon--checked"
+              focusable="false"
+              height={16}
+              role="img"
+              style={null}
+              viewBox="0 0 16 16"
+              width={16}
+              xmlns="http://www.w3.org/2000/svg"
+            />
+          </span>
+        </span>
+      </button>
+      <span
+        className="euiSwitch__label"
+        id="generated-id"
+        onClick={[Function]}
+      >
+        Cycle Slides
+      </span>
+    </div>
+    <hr
+      className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium"
+    />
+    <form
+      onSubmit={[Function]}
+    >
+      <div
+        className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive"
+      >
+        <div
+          className="euiFlexItem"
+        >
+          <div
+            className="euiFormRow euiFormRow--compressed"
+            id="generated-id-row"
+          >
+            <div
+              className="euiFormRow__labelWrapper"
+            >
+              <label
+                className="euiFormLabel euiFormRow__label"
+                htmlFor="generated-id"
+              >
+                Set a custom interval
+              </label>
+            </div>
+            <div
+              className="euiFormRow__fieldWrapper"
+            >
+              <div
+                className="euiFormControlLayout euiFormControlLayout--compressed"
+              >
+                <div
+                  className="euiFormControlLayout__childrenWrapper"
+                >
+                  <input
+                    aria-describedby="generated-id-help"
+                    className="euiFieldText euiFieldText--compressed"
+                    id="generated-id"
+                    onBlur={[Function]}
+                    onChange={[Function]}
+                    onFocus={[Function]}
+                    type="text"
+                    value="5s"
+                  />
+                </div>
+              </div>
+              <div
+                className="euiFormHelpText euiFormRow__text"
+                id="generated-id-help"
+              >
+                Use shorthand notation, like 30s, 10m, or 1h
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          className="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <div
+            className="euiFormRow euiFormRow--hasEmptyLabelSpace euiFormRow--compressed"
+            id="generated-id-row"
+          >
+            <div
+              className="euiFormRow__fieldWrapper"
+            >
+              <button
+                className="euiButton euiButton--primary euiButton--small"
+                disabled={false}
+                id="generated-id"
+                onBlur={[Function]}
+                onFocus={[Function]}
+                style={
+                  Object {
+                    "minWidth": "auto",
+                  }
+                }
+                type="submit"
+              >
+                <span
+                  className="euiButton__content"
+                >
+                  <span
+                    className="euiButton__text"
+                  >
+                    Set
+                  </span>
+                </span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+`;

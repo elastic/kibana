@@ -5,8 +5,7 @@
  */
 
 import { EuiPanel, EuiTabbedContent, EuiTextArea } from '@elastic/eui';
-import * as React from 'react';
-import { pure } from 'recompose';
+import React from 'react';
 import styled from 'styled-components';
 
 import { Markdown } from '../../markdown';
@@ -17,18 +16,26 @@ const NewNoteTabs = styled(EuiTabbedContent)`
   width: 100%;
 `;
 
+NewNoteTabs.displayName = 'NewNoteTabs';
+
 const MarkdownContainer = styled(EuiPanel)<{ height: number }>`
   height: ${({ height }) => height}px;
   overflow: auto;
 `;
+
+MarkdownContainer.displayName = 'MarkdownContainer';
 
 const TextArea = styled(EuiTextArea)<{ height: number }>`
   min-height: ${({ height }) => `${height}px`};
   width: 100%;
 `;
 
+TextArea.displayName = 'TextArea';
+
+TextArea.displayName = 'TextArea';
+
 /** An input for entering a new note  */
-export const NewNote = pure<{
+export const NewNote = React.memo<{
   noteInputHeight: number;
   note: string;
   updateNewNote: UpdateInternalNewNote;
@@ -68,3 +75,5 @@ export const NewNote = pure<{
 
   return <NewNoteTabs data-test-subj="new-note-tabs" tabs={tabs} initialSelectedTab={tabs[0]} />;
 });
+
+NewNote.displayName = 'NewNote';

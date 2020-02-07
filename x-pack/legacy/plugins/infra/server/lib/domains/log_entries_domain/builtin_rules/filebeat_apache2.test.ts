@@ -41,8 +41,11 @@ describe('Filebeat Rules', () => {
         'user_agent.os.minor': '12',
         'user_agent.os.name': 'Mac OS X',
       };
+      const highlights = {
+        'http.request.method': ['GET'],
+      };
 
-      expect(format(flattenedDocument)).toMatchInlineSnapshot(`
+      expect(format(flattenedDocument, highlights)).toMatchInlineSnapshot(`
 Array [
   Object {
     "constant": "[",
@@ -73,7 +76,9 @@ Array [
   },
   Object {
     "field": "http.request.method",
-    "highlights": Array [],
+    "highlights": Array [
+      "GET",
+    ],
     "value": "GET",
   },
   Object {
@@ -128,7 +133,7 @@ Array [
         'source.ip': '192.168.33.1',
       };
 
-      expect(format(flattenedDocument)).toMatchInlineSnapshot(`
+      expect(format(flattenedDocument, {})).toMatchInlineSnapshot(`
 Array [
   Object {
     "constant": "[apache][",
@@ -164,7 +169,7 @@ Array [
         'apache2.access.body_sent.bytes': 1024,
       };
 
-      expect(format(flattenedDocument)).toMatchInlineSnapshot(`
+      expect(format(flattenedDocument, {})).toMatchInlineSnapshot(`
 Array [
   Object {
     "constant": "[apache][access] ",
@@ -233,7 +238,7 @@ Array [
         'apache2.error.level': 'notice',
       };
 
-      expect(format(flattenedDocument)).toMatchInlineSnapshot(`
+      expect(format(flattenedDocument, {})).toMatchInlineSnapshot(`
 Array [
   Object {
     "constant": "[apache][",

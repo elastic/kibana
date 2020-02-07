@@ -4,37 +4,53 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LatestMonitor } from '../../../../common/graphql/types';
+import { MonitorSummary } from '../../../../common/graphql/types';
 import { addBasePath } from './add_base_path';
 import { buildHref } from './build_href';
 
 export const getLoggingContainerHref = (
-  monitor: LatestMonitor,
+  summary: MonitorSummary,
   basePath: string
-): string | undefined =>
-  buildHref(monitor, 'ping.container.id', containerId =>
-    addBasePath(
+): string | undefined => {
+  const getHref = (value: string | string[] | undefined) => {
+    if (!value) {
+      return undefined;
+    }
+    const ret = !Array.isArray(value) ? value : value[0];
+    return addBasePath(
       basePath,
-      `/app/infra#/logs?logFilter=${encodeURI(
-        `(expression:'container.id : ${containerId}',kind:kuery)`
-      )}`
-    )
-  );
+      `/app/infra#/logs?logFilter=${encodeURI(`(expression:'container.id : ${ret}',kind:kuery)`)}`
+    );
+  };
+  return buildHref(summary.state.checks || [], 'container.id', getHref);
+};
 
-export const getLoggingKubernetesHref = (monitor: LatestMonitor, basePath: string) =>
-  buildHref(monitor, 'ping.kubernetes.pod.uid', podUID =>
-    addBasePath(
+export const getLoggingKubernetesHref = (summary: MonitorSummary, basePath: string) => {
+  const getHref = (value: string | string[] | undefined) => {
+    if (!value) {
+      return undefined;
+    }
+    const ret = !Array.isArray(value) ? value : value[0];
+    return addBasePath(
       basePath,
-      `/app/infra#/logs?logFilter=${encodeURI(`(expression:'pod.uid : ${podUID}',kind:kuery)`)}`
-    )
-  );
+      `/app/infra#/logs?logFilter=${encodeURI(`(expression:'pod.uid : ${ret}',kind:kuery)`)}`
+    );
+  };
+  return buildHref(summary.state.checks || [], 'kubernetes.pod.uid', getHref);
+};
 
-export const getLoggingIpHref = (monitor: LatestMonitor, basePath: string) =>
-  buildHref(monitor, 'ping.monitor.ip', ip =>
-    addBasePath(
+export const getLoggingIpHref = (summary: MonitorSummary, basePath: string) => {
+  const getHref = (value: string | string[] | undefined) => {
+    if (!value) {
+      return undefined;
+    }
+    const ret = !Array.isArray(value) ? value : value[0];
+    return addBasePath(
       basePath,
       `/app/infra#/logs?logFilter=(expression:'${encodeURIComponent(
-        `host.ip : ${ip}`
+        `host.ip : ${ret}`
       )}',kind:kuery)`
-    )
-  );
+    );
+  };
+  return buildHref(summary.state.checks || [], 'monitor.ip', getHref);
+};

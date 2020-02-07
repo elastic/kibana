@@ -19,27 +19,31 @@
 
 import { intersection, isObject } from 'lodash';
 import { Headers } from '../http/router';
-import { CallAPIOptions } from './cluster_client';
+import { APICaller, CallAPIOptions } from './api_types';
 
 /** @public */
 export { Headers };
-
-/** @public */
-export type APICaller = (
-  endpoint: string,
-  clientParams: Record<string, unknown>,
-  options?: CallAPIOptions
-) => Promise<unknown>;
 
 /**
  * Serves the same purpose as "normal" `ClusterClient` but exposes additional
  * `callAsCurrentUser` method that doesn't use credentials of the Kibana internal
  * user (as `callAsInternalUser` does) to request Elasticsearch API, but rather
- * passes HTTP headers extracted from the current user request to the API
+ * passes HTTP headers extracted from the current user request to the API.
+ *
+ * See {@link ScopedClusterClient}.
  *
  * @public
  */
-export class ScopedClusterClient {
+export type IScopedClusterClient = Pick<
+  ScopedClusterClient,
+  'callAsCurrentUser' | 'callAsInternalUser'
+>;
+
+/**
+ * {@inheritDoc IScopedClusterClient}
+ * @public
+ */
+export class ScopedClusterClient implements IScopedClusterClient {
   constructor(
     private readonly internalAPICaller: APICaller,
     private readonly scopedAPICaller: APICaller,
@@ -52,13 +56,15 @@ export class ScopedClusterClient {
   /**
    * Calls specified `endpoint` with provided `clientParams` on behalf of the
    * Kibana internal user.
+   * See {@link APICaller}.
+   *
    * @param endpoint - String descriptor of the endpoint e.g. `cluster.getSettings` or `ping`.
    * @param clientParams - A dictionary of parameters that will be passed directly to the Elasticsearch JS client.
    * @param options - Options that affect the way we call the API and process the result.
    */
   public callAsInternalUser(
     endpoint: string,
-    clientParams: Record<string, unknown> = {},
+    clientParams: Record<string, any> = {},
     options?: CallAPIOptions
   ) {
     return this.internalAPICaller(endpoint, clientParams, options);
@@ -67,13 +73,15 @@ export class ScopedClusterClient {
   /**
    * Calls specified `endpoint` with provided `clientParams` on behalf of the
    * user initiated request to the Kibana server (via HTTP request headers).
+   * See {@link APICaller}.
+   *
    * @param endpoint - String descriptor of the endpoint e.g. `cluster.getSettings` or `ping`.
    * @param clientParams - A dictionary of parameters that will be passed directly to the Elasticsearch JS client.
    * @param options - Options that affect the way we call the API and process the result.
    */
   public callAsCurrentUser(
     endpoint: string,
-    clientParams: Record<string, unknown> = {},
+    clientParams: Record<string, any> = {},
     options?: CallAPIOptions
   ) {
     const defaultHeaders = this.headers;

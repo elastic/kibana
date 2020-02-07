@@ -6,15 +6,13 @@
 
 import expect from '@kbn/expect';
 import { docCountQueryString } from '../../../../legacy/plugins/uptime/public/queries';
-import { SecurityService, SpacesService } from '../../../common/services';
-import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
+import { FtrProviderContext } from '../../ftr_provider_context';
 import { PINGS_DATE_RANGE_END, PINGS_DATE_RANGE_START } from './constants';
 
-// eslint-disable-next-line import/no-default-export
-export default function featureControlsTests({ getService }: KibanaFunctionalTestDefaultProviders) {
+export default function featureControlsTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
-  const security: SecurityService = getService('security');
-  const spaces: SpacesService = getService('spaces');
+  const security = getService('security');
+  const spaces = getService('spaces');
 
   const expect404 = (result: any) => {
     expect(result.error).to.be(undefined);
@@ -33,7 +31,10 @@ export default function featureControlsTests({ getService }: KibanaFunctionalTes
     const getDocCountQuery = {
       operationName: null,
       query: docCountQueryString,
-      variables: {},
+      variables: {
+        dateRangeStart: '2019-01-28T17:40:08.078Z',
+        dateRangeEnd: '2019-01-28T19:00:16.078Z',
+      },
     };
 
     return await supertest
@@ -41,17 +42,6 @@ export default function featureControlsTests({ getService }: KibanaFunctionalTes
       .auth(username, password)
       .set('kbn-xsrf', 'foo')
       .send({ ...getDocCountQuery })
-      .then((response: any) => ({ error: undefined, response }))
-      .catch((error: any) => ({ error, response: undefined }));
-  };
-
-  const executeIsValidRequest = async (username: string, password: string, spaceId?: string) => {
-    const basePath = spaceId ? `/s/${spaceId}` : '';
-
-    return await supertest
-      .get(`${basePath}/api/uptime/is_valid`)
-      .auth(username, password)
-      .set('kbn-xsrf', 'foo')
       .then((response: any) => ({ error: undefined, response }))
       .catch((error: any) => ({ error, response: undefined }));
   };
@@ -95,9 +85,6 @@ export default function featureControlsTests({ getService }: KibanaFunctionalTes
         const graphQLResult = await executeGraphQLQuery(username, password);
         expect404(graphQLResult);
 
-        const isValidResult = await executeIsValidRequest(username, password);
-        expect404(isValidResult);
-
         const pingsResult = await executePingsRequest(username, password);
         expect404(pingsResult);
       } finally {
@@ -136,9 +123,6 @@ export default function featureControlsTests({ getService }: KibanaFunctionalTes
 
         const graphQLResult = await executeGraphQLQuery(username, password);
         expectResponse(graphQLResult);
-
-        const isValidResult = await executeIsValidRequest(username, password);
-        expectResponse(isValidResult);
 
         const pingsResult = await executePingsRequest(username, password);
         expectResponse(pingsResult);
@@ -181,9 +165,6 @@ export default function featureControlsTests({ getService }: KibanaFunctionalTes
 
         const graphQLResult = await executeGraphQLQuery(username, password);
         expect404(graphQLResult);
-
-        const isValidResult = await executeIsValidRequest(username, password);
-        expect404(isValidResult);
 
         const pingsResult = await executePingsRequest(username, password);
         expect404(pingsResult);
@@ -254,9 +235,6 @@ export default function featureControlsTests({ getService }: KibanaFunctionalTes
         const graphQLResult = await executeGraphQLQuery(username, password, space1Id);
         expectResponse(graphQLResult);
 
-        const isValidResult = await executeIsValidRequest(username, password, space1Id);
-        expectResponse(isValidResult);
-
         const pingsResult = await executePingsRequest(username, password, space1Id);
         expectResponse(pingsResult);
       });
@@ -264,9 +242,6 @@ export default function featureControlsTests({ getService }: KibanaFunctionalTes
       it(`user_1 can't access APIs in space_2`, async () => {
         const graphQLResult = await executeGraphQLQuery(username, password);
         expect404(graphQLResult);
-
-        const isValidResult = await executeIsValidRequest(username, password);
-        expect404(isValidResult);
 
         const pingsResult = await executePingsRequest(username, password);
         expect404(pingsResult);

@@ -5,9 +5,8 @@
  */
 
 import { mount, shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import { set } from 'lodash/fp';
-import * as React from 'react';
+import React from 'react';
 import { ActionCreator } from 'typescript-fsa';
 
 import { apolloClientObservable, mockGlobalState, TestProviders } from '../../mock';
@@ -35,7 +34,7 @@ describe('Flyout', () => {
           />
         </TestProviders>
       );
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper.find('Flyout')).toMatchSnapshot();
     });
 
     test('it renders the default flyout state as a button', () => {
@@ -52,10 +51,10 @@ describe('Flyout', () => {
 
       expect(
         wrapper
-          .find('[data-test-subj="flyoutButton"]')
+          .find('[data-test-subj="flyout-button-not-ready-to-drop"]')
           .first()
           .text()
-      ).toContain('T I M E L I N E');
+      ).toContain('Timeline');
     });
 
     test('it renders the title field when its state is set to flyout is true', () => {
@@ -96,7 +95,9 @@ describe('Flyout', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find('[data-test-subj="flyoutButton"]').exists()).toEqual(false);
+      expect(wrapper.find('[data-test-subj="flyout-button-not-ready-to-drop"]').exists()).toEqual(
+        false
+      );
     });
 
     test('it renders the flyout body', () => {
@@ -173,7 +174,7 @@ describe('Flyout', () => {
       ).toContain('10');
     });
 
-    test('it does NOT render the data providers badge when the number is equal to 0', () => {
+    test('it hides the data providers badge when the timeline does NOT have data providers', () => {
       const wrapper = mount(
         <TestProviders>
           <Flyout
@@ -185,7 +186,39 @@ describe('Flyout', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find('[data-test-subj="badge"]').exists()).toEqual(false);
+      expect(
+        wrapper
+          .find('[data-test-subj="badge"]')
+          .first()
+          .props().style!.visibility
+      ).toEqual('hidden');
+    });
+
+    test('it does NOT hide the data providers badge when the timeline has data providers', () => {
+      const stateWithDataProviders = set(
+        'timeline.timelineById.test.dataProviders',
+        mockDataProviders,
+        state
+      );
+      const storeWithDataProviders = createStore(stateWithDataProviders, apolloClientObservable);
+
+      const wrapper = mount(
+        <TestProviders store={storeWithDataProviders}>
+          <Flyout
+            flyoutHeight={testFlyoutHeight}
+            headerHeight={flyoutHeaderHeight}
+            timelineId="test"
+            usersViewing={usersViewing}
+          />
+        </TestProviders>
+      );
+
+      expect(
+        wrapper
+          .find('[data-test-subj="badge"]')
+          .first()
+          .props().style!.visibility
+      ).toEqual('inherit');
     });
 
     test('should call the onOpen when the mouse is clicked for rendering', () => {
@@ -199,6 +232,7 @@ describe('Flyout', () => {
             show={false}
             showTimeline={showTimeline}
             timelineId="test"
+            width={100}
             usersViewing={usersViewing}
           />
         </TestProviders>
@@ -224,6 +258,7 @@ describe('Flyout', () => {
             flyoutHeight={testFlyoutHeight}
             headerHeight={flyoutHeaderHeight}
             show={true}
+            width={100}
             showTimeline={showTimeline}
             timelineId="test"
             usersViewing={usersViewing}
@@ -253,7 +288,9 @@ describe('Flyout', () => {
           />
         </TestProviders>
       );
-      expect(wrapper.find('[data-test-subj="flyoutButton"]').exists()).toEqual(true);
+      expect(wrapper.find('[data-test-subj="flyout-button-not-ready-to-drop"]').exists()).toEqual(
+        true
+      );
     });
 
     test('should NOT show the flyout button when show is false', () => {
@@ -268,7 +305,9 @@ describe('Flyout', () => {
           />
         </TestProviders>
       );
-      expect(wrapper.find('[data-test-subj="flyoutButton"]').exists()).toEqual(false);
+      expect(wrapper.find('[data-test-subj="flyout-button-not-ready-to-drop"]').exists()).toEqual(
+        false
+      );
     });
 
     test('should return the flyout button with text', () => {
@@ -285,10 +324,10 @@ describe('Flyout', () => {
       );
       expect(
         wrapper
-          .find('[data-test-subj="flyoutButton"]')
+          .find('[data-test-subj="flyout-button-not-ready-to-drop"]')
           .first()
           .text()
-      ).toContain('T I M E L I N E');
+      ).toContain('Timeline');
     });
 
     test('should call the onOpen when it is clicked', () => {

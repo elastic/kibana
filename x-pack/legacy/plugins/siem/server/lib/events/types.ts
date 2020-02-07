@@ -5,20 +5,24 @@
  */
 
 import {
-  EventsData,
   LastEventIndexKey,
   LastEventTimeData,
   LastTimeDetails,
   SourceConfiguration,
   TimelineData,
   TimelineDetailsData,
+  EventsOverTimeData,
 } from '../../graphql/types';
-import { FrameworkRequest, RequestOptions } from '../framework';
+import {
+  FrameworkRequest,
+  RequestOptions,
+  RequestOptionsPaginated,
+  RequestBasicOptions,
+} from '../framework';
 import { SearchHit } from '../types';
 
 export interface EventsAdapter {
-  getEvents(req: FrameworkRequest, options: RequestOptions): Promise<EventsData>;
-  getTimelineData(req: FrameworkRequest, options: EventsRequestOptions): Promise<TimelineData>;
+  getTimelineData(req: FrameworkRequest, options: TimelineRequestOptions): Promise<TimelineData>;
   getTimelineDetails(
     req: FrameworkRequest,
     options: RequestDetailsOptions
@@ -27,9 +31,17 @@ export interface EventsAdapter {
     req: FrameworkRequest,
     options: LastEventTimeRequestOptions
   ): Promise<LastEventTimeData>;
+  getEventsOverTime(
+    req: FrameworkRequest,
+    options: RequestBasicOptions
+  ): Promise<EventsOverTimeData>;
 }
 
-export interface EventsRequestOptions extends RequestOptions {
+export interface TimelineRequestOptions extends RequestOptions {
+  fieldRequested: string[];
+}
+
+export interface EventsRequestOptions extends RequestOptionsPaginated {
   fieldRequested: string[];
 }
 
@@ -74,4 +86,18 @@ export interface RequestDetailsOptions {
   indexName: string;
   eventId: string;
   defaultIndex: string[];
+}
+
+interface EventsOverTimeHistogramData {
+  key_as_string: string;
+  key: number;
+  doc_count: number;
+}
+
+export interface EventsActionGroupData {
+  key: number;
+  events: {
+    bucket: EventsOverTimeHistogramData[];
+  };
+  doc_count: number;
 }

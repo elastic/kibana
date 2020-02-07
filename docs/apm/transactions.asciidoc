@@ -5,12 +5,22 @@ TIP: A {apm-overview-ref-v}/transactions.html[transaction] describes an event ca
 The APM agents automatically collect performance metrics on HTTP requests, database queries, and much more.
 
 Selecting a <<services,*service*>> brings you to the *transactions* overview.
-The *transaction duration* and *requests per minute* chart display information on all transactions associated with the selected service.
+The *time spent by span type*, *transaction duration* and *requests per minute* chart display information on all transactions associated with the selected service.
 The *Transactions* table, however, provides only a list of _transaction groups_ for the selected service.
 In other words, this view groups all transactions of the same name together, and only displays one transaction for each group.
 
 [role="screenshot"]
-image::apm/images/apm-transactions-overview.png[Example view of transactions table in the APM UI in Kibana]
+image::apm/images/apm-transactions-overview.png[Example view of transactions table in the APM app in Kibana]
+
+*Time spent by span type* -- Most agents support breakdown graphs in the APM app.
+This graph is an easy way to visualize where your application is spending most of its time.
+For example, is your app spending time in external calls, database processing, or application code execution?
+
+The time a transaction took to complete is also recorded and displayed on the chart under the "app" label.
+"app" indicates that something was happening within the application, but we're not sure exactly what.
+This could be a sign that the agent does not have auto-instrumentation for whatever was happening during that time.
+
+It's important to note that if you have asynchronous spans, the sum of all span times may exceed the duration of the transaction.
 
 *Transaction duration* shows the response times for this service and is broken down into average, 95th, and 99th percentile.
 If there's a weird spike that you'd like to investigate,
@@ -40,13 +50,27 @@ For further details, including troubleshooting and custom implementation instruc
 refer to the documentation for each {apm-agents-ref}[APM Agent] you've implemented.
 ====
 
+[[rum-transaction-overview]]
+==== RUM Transaction overview
+
+The transaction overview page is customized for the JavaScript RUM Agent.
+This page highlights things like *page load times*, *transactions per minute*, and even the *average page load duration distribution by country*.
+
+[role="screenshot"]
+image::apm/images/apm-geo-ui.jpg[average page load duration distribution]
+
+This data is available due to the geo-ip and user agent pipelines being enabled by default,
+which allows for the capture of geo-location and user agent data.
+These visualizations make it easy for you to visualize performance information about your
+end users' experience based on their location.
+
 [[transaction-details]]
 ==== Transaction details
 
 Selecting a transaction group will bring you to the *transaction* details.
-Transaction details include a high-level overview of the transaction group duration,
-requests per minute, and transaction group duration distribution.
-It's important to note that all three of these graphs show data from every transaction within the selected transaction group. 
+Transaction details include a high-level overview of the time spent by span type,
+transaction group duration, requests per minute, and transaction group duration distribution.
+It's important to note that all of these graphs show data from every transaction within the selected transaction group.
 
 [role="screenshot"]
 image::apm/images/apm-transaction-response-dist.png[Example view of response time distribution]

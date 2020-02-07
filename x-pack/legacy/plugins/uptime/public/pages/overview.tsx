@@ -4,106 +4,109 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore EuiSearchBar missing
-import { EuiSearchBar, EuiSpacer } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import React, { Fragment, useContext, useEffect } from 'react';
-import { getOverviewPageBreadcrumbs } from '../breadcrumbs';
-import { EmptyState, ErrorList, FilterBar, MonitorList, Snapshot } from '../components/functional';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import React, { useContext, useEffect } from 'react';
+import styled from 'styled-components';
+import {
+  EmptyState,
+  MonitorList,
+  OverviewPageParsingErrorCallout,
+  StatusPanel,
+} from '../components/functional';
 import { UMUpdateBreadcrumbs } from '../lib/lib';
-import { UptimeSettingsContext } from '../contexts';
-import { useUrlParams } from '../hooks';
+import { useUrlParams, useUptimeTelemetry, UptimePage } from '../hooks';
 import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
+import { useTrackPageview } from '../../../infra/public';
+import { PageHeader } from './page_header';
+import { DataPublicPluginStart, IIndexPattern } from '../../../../../../src/plugins/data/public';
+import { UptimeThemeContext } from '../contexts';
+import { FilterGroup, KueryBar } from '../components/connected';
+import { useUpdateKueryString } from '../hooks';
 
 interface OverviewPageProps {
-  basePath: string;
-  history: any;
-  location: {
-    pathname: string;
-    search: string;
-  };
+  autocomplete: DataPublicPluginStart['autocomplete'];
   setBreadcrumbs: UMUpdateBreadcrumbs;
+  indexPattern: IIndexPattern;
+  setEsKueryFilters: (esFilters: string) => void;
 }
 
 type Props = OverviewPageProps;
 
-export type UptimeSearchBarQueryChangeHandler = (
-  queryChangedEvent: { query?: { text: string }; queryText?: string }
-) => void;
+const EuiFlexItemStyled = styled(EuiFlexItem)`
+  && {
+    min-width: 598px;
+    @media only screen and (max-width: 630px) {
+      min-width: initial;
+    }
+  }
+`;
 
-export const OverviewPage = ({ basePath, setBreadcrumbs, history, location }: Props) => {
-  const { absoluteStartDate, absoluteEndDate, colors, refreshApp, setHeadingText } = useContext(
-    UptimeSettingsContext
-  );
-  const [params, updateUrl] = useUrlParams(history, location);
-  const { dateRangeStart, dateRangeEnd, search } = params;
+export const OverviewPageComponent = ({
+  autocomplete,
+  setBreadcrumbs,
+  indexPattern,
+  setEsKueryFilters,
+}: Props) => {
+  const { colors } = useContext(UptimeThemeContext);
+  const [getUrlParams] = useUrlParams();
+  const { absoluteDateRangeStart, absoluteDateRangeEnd, ...params } = getUrlParams();
+  const {
+    dateRangeStart,
+    dateRangeEnd,
+    pagination,
+    statusFilter,
+    search,
+    filters: urlFilters,
+  } = params;
+
+  useUptimeTelemetry(UptimePage.Overview);
+
+  useTrackPageview({ app: 'uptime', path: 'overview' });
+  useTrackPageview({ app: 'uptime', path: 'overview', delay: 15000 });
+
+  const [esFilters, error] = useUpdateKueryString(indexPattern, search, urlFilters);
 
   useEffect(() => {
-    setBreadcrumbs(getOverviewPageBreadcrumbs());
-    if (setHeadingText) {
-      setHeadingText(
-        i18n.translate('xpack.uptime.overviewPage.headerText', {
-          defaultMessage: 'Overview',
-          description: `The text that will be displayed in the app's heading when the Overview page loads.`,
-        })
-      );
-    }
-  }, []);
+    setEsKueryFilters(esFilters ?? '');
+  }, [esFilters, setEsKueryFilters]);
 
-  const filterQueryString = search || '';
-  let error: any;
-  let filters: any | undefined;
-  try {
-    // toESQuery will throw errors
-    if (filterQueryString) {
-      filters = JSON.stringify(EuiSearchBar.Query.toESQuery(filterQueryString));
-    }
-  } catch (e) {
-    error = e;
-  }
   const sharedProps = {
     dateRangeStart,
     dateRangeEnd,
-    filters,
+    statusFilter,
+    filters: esFilters,
   };
 
-  const updateQuery: UptimeSearchBarQueryChangeHandler = ({ queryText }) => {
-    updateUrl({ search: queryText || '' });
-    refreshApp();
-  };
-
-  const linkParameters = stringifyUrlParams(params);
+  const linkParameters = stringifyUrlParams(params, true);
 
   return (
-    <Fragment>
-      <EmptyState basePath={basePath} implementsCustomErrorState={true} variables={sharedProps}>
-        <FilterBar
-          currentQuery={filterQueryString}
-          error={error}
-          updateQuery={updateQuery}
-          variables={sharedProps}
-        />
+    <>
+      <PageHeader setBreadcrumbs={setBreadcrumbs} />
+      <EmptyState implementsCustomErrorState={true} variables={{}}>
+        <EuiFlexGroup gutterSize="xs" wrap responsive>
+          <EuiFlexItem grow={1} style={{ flexBasis: 500 }}>
+            <KueryBar autocomplete={autocomplete} />
+          </EuiFlexItem>
+          <EuiFlexItemStyled grow={true}>
+            <FilterGroup esFilters={esFilters} />
+          </EuiFlexItemStyled>
+          {error && <OverviewPageParsingErrorCallout error={error} />}
+        </EuiFlexGroup>
         <EuiSpacer size="s" />
-        <Snapshot
-          absoluteStartDate={absoluteStartDate}
-          absoluteEndDate={absoluteEndDate}
-          colors={colors}
-          variables={sharedProps}
-        />
+        <StatusPanel />
         <EuiSpacer size="s" />
         <MonitorList
-          absoluteStartDate={absoluteStartDate}
-          absoluteEndDate={absoluteEndDate}
-          basePath={basePath}
           dangerColor={colors.danger}
-          dateRangeStart={dateRangeStart}
-          dateRangeEnd={dateRangeEnd}
+          hasActiveFilters={!!esFilters}
+          implementsCustomErrorState={true}
           linkParameters={linkParameters}
-          variables={sharedProps}
+          successColor={colors.success}
+          variables={{
+            ...sharedProps,
+            pagination,
+          }}
         />
-        <EuiSpacer size="s" />
-        <ErrorList linkParameters={linkParameters} variables={sharedProps} />
       </EmptyState>
-    </Fragment>
+    </>
   );
 };

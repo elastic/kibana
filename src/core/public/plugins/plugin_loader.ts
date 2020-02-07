@@ -31,7 +31,6 @@ export type UnknownPluginInitializer = PluginInitializer<unknown, Record<string,
  * @internal
  */
 export interface CoreWindow {
-  __kbnNonce__: string;
   __kbnBundles__: {
     [pluginBundleName: string]: UnknownPluginInitializer | undefined;
   };
@@ -62,8 +61,8 @@ export const LOAD_TIMEOUT = 120 * 1000; // 2 minutes
 export const loadPluginBundle: LoadPluginBundle = <
   TSetup,
   TStart,
-  TPluginsSetup extends Record<string, unknown>,
-  TPluginsStart extends Record<string, unknown>
+  TPluginsSetup extends object,
+  TPluginsStart extends object
 >(
   addBasePath: (path: string) => string,
   pluginName: PluginName,
@@ -79,9 +78,6 @@ export const loadPluginBundle: LoadPluginBundle = <
       script.setAttribute('src', bundlePath);
       script.setAttribute('id', `kbn-plugin-${pluginName}`);
       script.setAttribute('async', '');
-
-      // Add kbnNonce for CSP
-      script.setAttribute('nonce', coreWindow.__kbnNonce__);
 
       const cleanupTag = () => {
         clearTimeout(timeout);
@@ -125,8 +121,8 @@ export const loadPluginBundle: LoadPluginBundle = <
 export type LoadPluginBundle = <
   TSetup,
   TStart,
-  TPluginsSetup extends Record<string, unknown>,
-  TPluginsStart extends Record<string, unknown>
+  TPluginsSetup extends object,
+  TPluginsStart extends object
 >(
   addBasePath: (path: string) => string,
   pluginName: PluginName,

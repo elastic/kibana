@@ -13,10 +13,11 @@
   border-right: $euiBorderThin;
 }
 
-.autocompleteItems, .autocompleteReference {
+.autocompleteItems,
+.autocompleteReference {
+  @include euiScrollBar;
   height: 258px;
   overflow: auto;
-  @include euiScrollBar;
 }
 
 .autocompleteReference {

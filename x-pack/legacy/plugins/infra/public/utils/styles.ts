@@ -6,7 +6,7 @@
 
 import get from 'lodash/fp/get';
 import getOr from 'lodash/fp/getOr';
-import { parseToHsl, shade, tint } from 'polished';
+import { getLuminance, parseToHsl, parseToRgb, rgba, shade, tint } from 'polished';
 
 type PropReader = <Prop, Default = any>(props: object, defaultValue?: Default) => Prop;
 
@@ -39,6 +39,58 @@ export const ifProp = <Pass, Fail>(
   fail: Fail
 ) => (props: object) => (asPropReader(propName)(props) ? pass : fail);
 
-export const tintOrShade = (textColor: 'string', color: 'string', fraction: number) => {
-  return parseToHsl(textColor).lightness > 0.5 ? shade(fraction, color) : tint(fraction, color);
+export const tintOrShade = (
+  textColor: string,
+  color: string,
+  tintFraction: number,
+  shadeFraction: number
+) => {
+  if (parseToHsl(textColor).lightness > 0.5) {
+    return shade(1 - shadeFraction, color);
+  } else {
+    return tint(1 - tintFraction, color);
+  }
 };
+
+export const getContrast = (color1: string, color2: string): number => {
+  const luminance1 = getLuminance(color1);
+  const luminance2 = getLuminance(color2);
+
+  return parseFloat(
+    (luminance1 > luminance2
+      ? (luminance1 + 0.05) / (luminance2 + 0.05)
+      : (luminance2 + 0.05) / (luminance1 + 0.05)
+    ).toFixed(2)
+  );
+};
+
+export const chooseLightOrDarkColor = (
+  backgroundColor: string,
+  lightColor: string,
+  darkColor: string
+) => {
+  if (getContrast(backgroundColor, lightColor) > getContrast(backgroundColor, darkColor)) {
+    return lightColor;
+  } else {
+    return darkColor;
+  }
+};
+
+export const transparentize = (amount: number, color: string): string => {
+  if (color === 'transparent') {
+    return color;
+  }
+
+  const parsedColor = parseToRgb(color);
+  const alpha: number =
+    'alpha' in parsedColor && typeof parsedColor.alpha === 'number' ? parsedColor.alpha : 1;
+  const colorWithAlpha = {
+    ...parsedColor,
+    alpha: clampValue((alpha * 100 - amount * 100) / 100, 0, 1),
+  };
+
+  return rgba(colorWithAlpha);
+};
+
+export const clampValue = (value: number, minValue: number, maxValue: number) =>
+  Math.max(minValue, Math.min(maxValue, value));

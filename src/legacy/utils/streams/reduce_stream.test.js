@@ -17,11 +17,7 @@
  * under the License.
  */
 
-import {
-  createReduceStream,
-  createPromiseFromStreams,
-  createListStream,
-} from './';
+import { createReduceStream, createPromiseFromStreams, createListStream } from './';
 
 const promiseFromEvent = (name, emitter) =>
   new Promise(resolve => emitter.on(name, () => resolve(name)));
@@ -34,7 +30,7 @@ describe('reduceStream', () => {
       createReduceStream((val, chunk, enc) => {
         stub(val, chunk, enc);
         return chunk;
-      }, 0)
+      }, 0),
     ]);
     expect(stub).toHaveBeenCalledTimes(3);
     expect(stub.mock.calls[0]).toEqual([0, 1, 'utf8']);
@@ -45,7 +41,7 @@ describe('reduceStream', () => {
   test('provides the return value of the last iteration of the reducer', async () => {
     const result = await createPromiseFromStreams([
       createListStream('abcdefg'.split('')),
-      createReduceStream((acc) => acc + 1, 0)
+      createReduceStream(acc => acc + 1, 0),
     ]);
     expect(result).toBe(7);
   });

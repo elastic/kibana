@@ -190,6 +190,8 @@ export const useTrackedPromise = <Arguments extends any[], Result>(
 
       return newPendingPromise.promise;
     },
+    // the dependencies are managed by the caller
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     dependencies
   );
 
@@ -246,7 +248,7 @@ interface CancelablePromise<ResolvedValue> {
   promise: Promise<ResolvedValue>;
 }
 
-class CanceledPromiseError extends Error {
+export class CanceledPromiseError extends Error {
   public isCanceled = true;
 
   constructor(message?: string) {
@@ -255,6 +257,6 @@ class CanceledPromiseError extends Error {
   }
 }
 
-class SilentCanceledPromiseError extends CanceledPromiseError {}
+export class SilentCanceledPromiseError extends CanceledPromiseError {}
 
 const noOp = () => undefined;

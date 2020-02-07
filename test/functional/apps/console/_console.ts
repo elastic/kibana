@@ -35,6 +35,8 @@ GET _search
 export default function({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const log = getService('log');
+  const find = getService('find');
+  const browser = getService('browser');
   const PageObjects = getPageObjects(['common', 'console']);
 
   describe('console app', function describeIndexTests() {
@@ -46,7 +48,11 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should show the default request', async () => {
       // collapse the help pane because we only get the VISIBLE TEXT, not the part that is scrolled
-      await PageObjects.console.collapseHelp();
+      // on IE11, the dialog that says 'Your browser does not meet the security requirements for Kibana.'
+      // blocks the close help button for several seconds so just retry until we can click it.
+      await retry.try(async () => {
+        await PageObjects.console.collapseHelp();
+      });
       await retry.try(async () => {
         const actualRequest = await PageObjects.console.getRequest();
         log.debug(actualRequest);
@@ -76,6 +82,15 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
         // the settings are not applied synchronously, so we retry for a time
         expect(await PageObjects.console.getRequestFontSize()).to.be('24px');
       });
+    });
+
+    it('should resize the editor', async () => {
+      const editor = await find.byCssSelector('.conApp');
+      await browser.setWindowSize(1300, 1100);
+      const initialSize = await editor.getSize();
+      await browser.setWindowSize(1000, 1100);
+      const afterSize = await editor.getSize();
+      expect(initialSize.width).to.be.greaterThan(afterSize.width);
     });
   });
 }

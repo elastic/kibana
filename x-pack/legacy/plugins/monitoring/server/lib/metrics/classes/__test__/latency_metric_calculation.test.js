@@ -31,4 +31,3 @@ describe('Latency Metric Calculation', () => {
     expect(Metric.calculateLatency(timeInMillis, totalEvents)).toBeCloseTo(16.666666666666668);
   });
 });
-

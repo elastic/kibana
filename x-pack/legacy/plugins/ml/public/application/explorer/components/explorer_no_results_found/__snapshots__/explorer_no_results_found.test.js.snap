@@ -1,0 +1,27 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ExplorerNoInfluencersFound snapshot 1`] = `
+<EuiEmptyPrompt
+  body={
+    <React.Fragment>
+      <p>
+        <FormattedMessage
+          defaultMessage="Try widening the time selection or moving further back in time"
+          id="xpack.ml.explorer.tryWideningTimeSelectionLabel"
+          values={Object {}}
+        />
+      </p>
+    </React.Fragment>
+  }
+  iconType="iInCircle"
+  title={
+    <h2>
+      <FormattedMessage
+        defaultMessage="No results found"
+        id="xpack.ml.explorer.noResultsFoundLabel"
+        values={Object {}}
+      />
+    </h2>
+  }
+/>
+`;

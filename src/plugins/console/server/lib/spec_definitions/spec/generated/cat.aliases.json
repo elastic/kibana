@@ -1,0 +1,20 @@
+{
+  "cat.aliases": {
+    "url_params": {
+      "format": "",
+      "local": "__flag__",
+      "h": [],
+      "help": "__flag__",
+      "s": [],
+      "v": "__flag__"
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_cat/aliases",
+      "_cat/aliases/{name}"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/cat-alias.html"
+  }
+}

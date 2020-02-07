@@ -13,27 +13,24 @@ export const useHostIpToName = (ipAddress: string | null, indexPattern: string |
   const [loading, setLoadingState] = useState<boolean>(true);
   const [data, setData] = useState<IpToHostResponse | null>(null);
 
-  useEffect(
-    () => {
-      (async () => {
-        setLoadingState(true);
-        setError(null);
-        try {
-          if (ipAddress && indexPattern) {
-            const response = await fetch.post<IpToHostResponse>('../api/infra/ip_to_host', {
-              ip: ipAddress,
-              index_pattern: indexPattern,
-            });
-            setLoadingState(false);
-            setData(response.data);
-          }
-        } catch (err) {
+  useEffect(() => {
+    (async () => {
+      setLoadingState(true);
+      setError(null);
+      try {
+        if (ipAddress && indexPattern) {
+          const response = await fetch.post<IpToHostResponse>('../api/infra/ip_to_host', {
+            ip: ipAddress,
+            index_pattern: indexPattern,
+          });
           setLoadingState(false);
-          setError(err);
+          setData(response.data);
         }
-      })();
-    },
-    [ipAddress, indexPattern]
-  );
+      } catch (err) {
+        setLoadingState(false);
+        setError(err);
+      }
+    })();
+  }, [ipAddress, indexPattern]);
   return { name: (data && data.host) || null, loading, error };
 };

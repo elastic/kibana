@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect';
-import { KibanaFunctionalTestDefaultProviders } from '../../../../types/providers';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
-export default function({ getPageObjects, getService }: KibanaFunctionalTestDefaultProviders) {
+export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
   const PageObjects = getPageObjects(['common', 'settings', 'security']);
@@ -17,6 +16,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
   describe('security feature controls', () => {
     before(async () => {
       await esArchiver.load('empty_kibana');
+      await PageObjects.settings.setNavType('individual');
     });
 
     after(async () => {
@@ -40,7 +40,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           full_name: 'test user',
         });
 
-        await PageObjects.security.logout();
+        await PageObjects.security.forceLogout();
 
         await PageObjects.security.login('global_all_user', 'global_all_user-password', {
           expectSpaceSelector: false,
@@ -51,15 +51,13 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         await Promise.all([
           security.role.delete('global_all_role'),
           security.user.delete('global_all_user'),
-          PageObjects.security.logout(),
+          PageObjects.security.forceLogout(),
         ]);
       });
 
       it('shows management navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
-        expect(navLinks).to.contain('Management');
+        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
+        expect(navLinks).to.contain('Stack Management');
       });
 
       it(`displays Spaces management section`, async () => {
@@ -112,7 +110,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           full_name: 'test user',
         });
 
-        await PageObjects.security.logout();
+        await PageObjects.security.forceLogout();
 
         await PageObjects.security.login(
           'default_space_all_user',
@@ -127,15 +125,13 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         await Promise.all([
           security.role.delete('default_space_all_role'),
           security.user.delete('default_space_all_user'),
-          PageObjects.security.logout(),
+          PageObjects.security.forceLogout(),
         ]);
       });
 
       it('shows management navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
-        expect(navLinks).to.contain('Management');
+        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
+        expect(navLinks).to.contain('Stack Management');
       });
 
       it(`doesn't display Spaces management section`, async () => {

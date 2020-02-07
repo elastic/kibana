@@ -1,17 +1,20 @@
 /*
-* Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
-* or more contributor license agreements. Licensed under the Elastic License;
-* you may not use this file except in compliance with the Elastic License.
-*/
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
 
 // Merge rollup capabilities information with field information
 
-export const mergeCapabilitiesWithFields = (rollupIndexCapabilities, fieldsFromFieldCapsApi, previousFields = []) => {
+export const mergeCapabilitiesWithFields = (
+  rollupIndexCapabilities,
+  fieldsFromFieldCapsApi,
+  previousFields = []
+) => {
   const rollupFields = [...previousFields];
   const rollupFieldNames = [];
 
   Object.keys(rollupIndexCapabilities).forEach(agg => {
-
     // Field names of the aggregation
     const fields = Object.keys(rollupIndexCapabilities[agg]);
 
@@ -25,7 +28,7 @@ export const mergeCapabilitiesWithFields = (rollupIndexCapabilities, fieldsFromF
 
     // Date histogram agg only ever has one field defined, let date type overwrite a
     // previous type if defined (such as number from max and min aggs).
-    if(agg === 'date_histogram') {
+    if (agg === 'date_histogram') {
       const timeFieldName = fields[0];
       const fieldCapsKey = `${timeFieldName}.${agg}.timestamp`;
       const newField = {
@@ -35,7 +38,7 @@ export const mergeCapabilitiesWithFields = (rollupIndexCapabilities, fieldsFromF
       };
       const existingField = rollupFields.find(field => field.name === timeFieldName);
 
-      if(existingField) {
+      if (existingField) {
         Object.assign(existingField, newField);
       } else {
         rollupFieldNames.push(timeFieldName);

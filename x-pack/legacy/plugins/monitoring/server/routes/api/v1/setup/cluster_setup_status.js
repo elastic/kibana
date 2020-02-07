@@ -16,21 +16,33 @@ export function clusterSetupStatusRoute(server) {
    */
   server.route({
     method: 'POST',
-    path: '/api/monitoring/v1/setup/collection/{clusterUuid}',
+    path: '/api/monitoring/v1/setup/collection/cluster/{clusterUuid?}',
     config: {
       validate: {
         params: Joi.object({
-          clusterUuid: Joi.string().required()
+          clusterUuid: Joi.string().optional(),
+        }),
+        query: Joi.object({
+          // This flag is not intended to be used in production. It was introduced
+          // as a way to ensure consistent API testing - the typical data source
+          // for API tests are archived data, where the cluster configuration and data
+          // are consistent from environment to environment. However, this endpoint
+          // also attempts to retrieve data from the running stack products (ES and Kibana)
+          // which will vary from environment to environment making it difficult
+          // to write tests against. Therefore, this flag exists and should only be used
+          // in our testing environment.
+          skipLiveData: Joi.boolean().default(false),
         }),
         payload: Joi.object({
+          ccs: Joi.string().optional(),
           timeRange: Joi.object({
             min: Joi.date().required(),
-            max: Joi.date().required()
-          }).optional()
-        }).allow(null)
-      }
+            max: Joi.date().required(),
+          }).optional(),
+        }).allow(null),
+      },
     },
-    handler: async (req) => {
+    handler: async req => {
       let status = null;
 
       // NOTE using try/catch because checkMonitoringAuth is expected to throw
@@ -38,13 +50,19 @@ export function clusterSetupStatusRoute(server) {
       // the monitoring data. `try/catch` makes it a little more explicit.
       try {
         await verifyMonitoringAuth(req);
-        const indexPatterns = getIndexPatterns(server);
-        status = await getCollectionStatus(req, indexPatterns, req.params.clusterUuid);
+        const indexPatterns = getIndexPatterns(server, {}, req.payload.ccs);
+        status = await getCollectionStatus(
+          req,
+          indexPatterns,
+          req.params.clusterUuid,
+          null,
+          req.query.skipLiveData
+        );
       } catch (err) {
         throw handleError(err, req);
       }
 
       return status;
-    }
+    },
   });
 }

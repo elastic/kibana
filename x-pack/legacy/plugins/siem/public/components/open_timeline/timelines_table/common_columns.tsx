@@ -4,28 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { omit } from 'lodash/fp';
-import { EuiButtonIcon, EuiLink } from '@elastic/eui';
-import * as React from 'react';
-import styled from 'styled-components';
+/* eslint-disable react/display-name */
 
-import { FormattedDate } from '../../formatted_date';
-import { getEmptyTagValue } from '../../empty_value';
+import { EuiButtonIcon, EuiLink } from '@elastic/eui';
+import { omit } from 'lodash/fp';
+import React from 'react';
+
+import { ACTION_COLUMN_WIDTH } from './common_styles';
 import { isUntitled } from '../helpers';
 import { NotePreviews } from '../note_previews';
-import { OnOpenTimeline, OnToggleShowNotes, OpenTimelineResult } from '../types';
-
 import * as i18n from '../translations';
-
-/** the width of the description column when showing extended columns */
-export const EXTENDED_COLUMNS_DESCRIPTION_WIDTH = '30%';
-
-export const DESCRIPTION_WIDTH = '45%';
-
-const ExpandButtonContainer = styled.div`
-  position: relative;
-  top -4px;
-`;
+import { OnOpenTimeline, OnToggleShowNotes, OpenTimelineResult } from '../types';
+import { getEmptyTagValue } from '../../empty_value';
+import { FormattedRelativePreferenceDate } from '../../formatted_date';
 
 /**
  * Returns the column definitions (passed as the `columns` prop to
@@ -36,36 +27,30 @@ export const getCommonColumns = ({
   itemIdToExpandedNotesRowMap,
   onOpenTimeline,
   onToggleShowNotes,
-  showExtendedColumnsAndActions,
 }: {
   onOpenTimeline: OnOpenTimeline;
   onToggleShowNotes: OnToggleShowNotes;
-  showExtendedColumnsAndActions: boolean;
   itemIdToExpandedNotesRowMap: Record<string, JSX.Element>;
 }) => [
   {
     isExpander: true,
     render: ({ notes, savedObjectId }: OpenTimelineResult) =>
       notes != null && notes.length > 0 && savedObjectId != null ? (
-        <ExpandButtonContainer>
-          <EuiButtonIcon
-            data-test-subj="expand-notes"
-            onClick={() =>
-              itemIdToExpandedNotesRowMap[savedObjectId] != null
-                ? onToggleShowNotes(omit(savedObjectId, itemIdToExpandedNotesRowMap))
-                : onToggleShowNotes({
-                    ...itemIdToExpandedNotesRowMap,
-                    [savedObjectId]: (
-                      <NotePreviews notes={notes} isModal={!showExtendedColumnsAndActions} />
-                    ),
-                  })
-            }
-            aria-label={itemIdToExpandedNotesRowMap[savedObjectId] ? i18n.COLLAPSE : i18n.EXPAND}
-            iconType={itemIdToExpandedNotesRowMap[savedObjectId] ? 'arrowDown' : 'arrowRight'}
-          />
-        </ExpandButtonContainer>
+        <EuiButtonIcon
+          data-test-subj="expand-notes"
+          onClick={() =>
+            itemIdToExpandedNotesRowMap[savedObjectId] != null
+              ? onToggleShowNotes(omit(savedObjectId, itemIdToExpandedNotesRowMap))
+              : onToggleShowNotes({
+                  ...itemIdToExpandedNotesRowMap,
+                  [savedObjectId]: <NotePreviews notes={notes} />,
+                })
+          }
+          aria-label={itemIdToExpandedNotesRowMap[savedObjectId] ? i18n.COLLAPSE : i18n.EXPAND}
+          iconType={itemIdToExpandedNotesRowMap[savedObjectId] ? 'arrowDown' : 'arrowRight'}
+        />
       ) : null,
-    width: '32px',
+    width: ACTION_COLUMN_WIDTH,
   },
   {
     dataType: 'string',
@@ -101,7 +86,6 @@ export const getCommonColumns = ({
       </span>
     ),
     sortable: false,
-    width: showExtendedColumnsAndActions ? EXTENDED_COLUMNS_DESCRIPTION_WIDTH : DESCRIPTION_WIDTH,
   },
   {
     dataType: 'date',
@@ -110,7 +94,7 @@ export const getCommonColumns = ({
     render: (date: number, timelineResult: OpenTimelineResult) => (
       <div data-test-subj="updated">
         {timelineResult.updated != null ? (
-          <FormattedDate fieldName="" value={date} />
+          <FormattedRelativePreferenceDate value={date} />
         ) : (
           getEmptyTagValue()
         )}

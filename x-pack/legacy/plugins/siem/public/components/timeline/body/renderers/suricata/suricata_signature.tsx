@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
-import * as React from 'react';
-import { pure } from 'recompose';
+import { EuiBadge, EuiBadgeProps, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import React from 'react';
 import styled from 'styled-components';
 
 import { DragEffects, DraggableWrapper } from '../../../../drag_and_drop/draggable_wrapper';
@@ -27,15 +26,23 @@ const SignatureFlexItem = styled(EuiFlexItem)`
   min-width: 77px;
 `;
 
-const Badge = styled(EuiBadge)`
-  vertical-align: top;
-`;
+SignatureFlexItem.displayName = 'SignatureFlexItem';
+
+// Ref: https://github.com/elastic/eui/issues/1655
+// const Badge = styled(EuiBadge)`
+//   vertical-align: top;
+// `;
+const Badge = (props: EuiBadgeProps) => <EuiBadge {...props} style={{ verticalAlign: 'top' }} />;
+
+Badge.displayName = 'Badge';
 
 const LinkFlexItem = styled(EuiFlexItem)`
   margin-left: 6px;
 `;
 
-export const Tokens = pure<{ tokens: string[] }>(({ tokens }) => (
+LinkFlexItem.displayName = 'LinkFlexItem';
+
+export const Tokens = React.memo<{ tokens: string[] }>(({ tokens }) => (
   <>
     {tokens.map(token => (
       <TokensFlexItem key={token} grow={false}>
@@ -47,14 +54,16 @@ export const Tokens = pure<{ tokens: string[] }>(({ tokens }) => (
   </>
 ));
 
-export const DraggableSignatureId = pure<{ id: string; signatureId: number }>(
+Tokens.displayName = 'Tokens';
+
+export const DraggableSignatureId = React.memo<{ id: string; signatureId: number }>(
   ({ id, signatureId }) => (
     <SignatureFlexItem grow={false}>
       <DraggableWrapper
         dataProvider={{
           and: [],
           enabled: true,
-          id: escapeDataProviderId(`suricata-${id}-sig-${signatureId}`),
+          id: escapeDataProviderId(`suricata-draggable-signature-id-${id}-sig-${signatureId}`),
           name: String(signatureId),
           excluded: false,
           kqlQuery: '',
@@ -85,7 +94,9 @@ export const DraggableSignatureId = pure<{ id: string; signatureId: number }>(
   )
 );
 
-export const SuricataSignature = pure<{
+DraggableSignatureId.displayName = 'DraggableSignatureId';
+
+export const SuricataSignature = React.memo<{
   contextId: string;
   id: string;
   signature: string;
@@ -94,14 +105,16 @@ export const SuricataSignature = pure<{
   const tokens = getBeginningTokens(signature);
   return (
     <EuiFlexGroup justifyContent="center" gutterSize="none" wrap={true}>
-      <DraggableSignatureId id={id} signatureId={signatureId} />
+      <DraggableSignatureId
+        id={`draggable-signature-id-${contextId}-${id}`}
+        signatureId={signatureId}
+      />
       <Tokens tokens={tokens} />
       <LinkFlexItem grow={false}>
         <DefaultDraggable
           data-test-subj="draggable-signature-link"
           field={SURICATA_SIGNATURE_FIELD_NAME}
-          id={`${contextId}-${id}-${SURICATA_SIGNATURE_FIELD_NAME}`}
-          name={name}
+          id={`suricata-signature-default-draggable-${contextId}-${id}-${SURICATA_SIGNATURE_FIELD_NAME}`}
           value={signature}
         >
           <div>
@@ -118,3 +131,5 @@ export const SuricataSignature = pure<{
     </EuiFlexGroup>
   );
 });
+
+SuricataSignature.displayName = 'SuricataSignature';

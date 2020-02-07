@@ -1,11 +1,27 @@
 {
   "alert": {
     "properties": {
+      "enabled": {
+        "type": "boolean"
+      },
+      "name": {
+        "type": "text"
+      },
+      "tags": {
+        "type": "keyword"
+      },
       "alertTypeId": {
         "type": "keyword"
       },
-      "interval": {
-        "type": "long"
+      "schedule": {
+        "properties": {
+          "interval": {
+            "type": "keyword"
+          }
+        }
+      },
+      "consumer": {
+        "type": "keyword"
       },
       "actions": {
         "type": "nested",
@@ -16,17 +32,44 @@
           "actionRef": {
             "type": "keyword"
           },
+          "actionTypeId": {
+            "type": "keyword"
+          },
           "params": {
             "enabled": false,
             "type": "object"
           }
         }
       },
-      "alertTypeParams": {
+      "params": {
         "enabled": false,
         "type": "object"
       },
       "scheduledTaskId": {
+        "type": "keyword"
+      },
+      "createdBy": {
+        "type": "keyword"
+      },
+      "updatedBy": {
+        "type": "keyword"
+      },
+      "createdAt": {
+        "type": "date"
+      },
+      "apiKey": {
+        "type": "binary"
+      },
+      "apiKeyOwner": {
+        "type": "keyword"
+      },
+      "throttle": {
+        "type": "keyword"
+      },
+      "muteAll": {
+        "type": "boolean"
+      },
+      "mutedInstanceIds": {
         "type": "keyword"
       }
     }

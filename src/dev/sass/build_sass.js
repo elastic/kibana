@@ -19,9 +19,10 @@
 
 import { resolve } from 'path';
 
+import * as Rx from 'rxjs';
 import { toArray } from 'rxjs/operators';
 
-import { createFailError } from '../run';
+import { createFailError } from '@kbn/dev-utils';
 import { findPluginSpecs } from '../../legacy/plugin_discovery';
 import { collectUiExports } from '../../legacy/ui';
 import { buildAll } from '../../legacy/server/sass/build_all';
@@ -61,9 +62,11 @@ export async function buildSass({ log, kibanaDir, watch }) {
 
   const scanDirs = [resolve(kibanaDir, 'src/legacy/core_plugins')];
   const paths = [resolve(kibanaDir, 'x-pack')];
-  const { spec$ } = findPluginSpecs({ plugins: { scanDirs, paths } });
-  const enabledPlugins = await spec$.pipe(toArray()).toPromise();
-  const uiExports = collectUiExports(enabledPlugins);
+  const { spec$, disabledSpec$ } = findPluginSpecs({ plugins: { scanDirs, paths } });
+  const allPlugins = await Rx.merge(spec$, disabledSpec$)
+    .pipe(toArray())
+    .toPromise();
+  const uiExports = collectUiExports(allPlugins);
   const { styleSheetPaths } = uiExports;
 
   log.info('%s %d styleSheetPaths', watch ? 'watching' : 'found', styleSheetPaths.length);

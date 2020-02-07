@@ -7,7 +7,7 @@ Kibana on any Debian-based system such as Debian and Ubuntu.
 
 This package is free to use under the Elastic license. It contains open source 
 and free commercial features and access to paid commercial features. 
-{xpack-ref}/license-management.html[Start a 30-day trial] to try out all of the 
+{stack-ov}/license-management.html[Start a 30-day trial] to try out all of the 
 paid commercial features. See the 
 https://www.elastic.co/subscriptions[Subscriptions] page for information about 
 Elastic license levels.
@@ -205,11 +205,16 @@ locations for a Debian-based system:
   | The location of the data files written to disk by Kibana and its plugins
   | /var/lib/kibana
   | path.data
+  
+| logs
+    | Logs files location
+    |  /var/log/kibana
+    | path.logs
 
 | optimize
   | Transpiled source code. Certain administrative actions (e.g. plugin install)
     result in the source code being retranspiled on the fly.
-  | /usr/share/kibana/optimize
+  | /var/lib/kibana/optimize
  d|
 
 | plugins

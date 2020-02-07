@@ -6,36 +6,23 @@
 
 import Boom from 'boom';
 import { i18n } from '@kbn/i18n';
-import { SavedObjectsClientContract } from 'src/core/server';
-import { AlertType, Services } from './types';
-import { TaskManager } from '../../task_manager';
-import { getCreateTaskRunnerFunction } from './lib';
-import { ActionsPlugin } from '../../actions';
+import { RunContext, TaskManagerSetupContract } from '../../../../plugins/task_manager/server';
+import { TaskRunnerFactory } from './task_runner';
+import { AlertType } from './types';
 
 interface ConstructorOptions {
-  getServices: (basePath: string) => Services;
-  taskManager: TaskManager;
-  fireAction: ActionsPlugin['fire'];
-  internalSavedObjectsRepository: SavedObjectsClientContract;
+  taskManager: TaskManagerSetupContract;
+  taskRunnerFactory: TaskRunnerFactory;
 }
 
 export class AlertTypeRegistry {
-  private readonly getServices: (basePath: string) => Services;
-  private readonly taskManager: TaskManager;
-  private readonly fireAction: ActionsPlugin['fire'];
+  private readonly taskManager: TaskManagerSetupContract;
   private readonly alertTypes: Map<string, AlertType> = new Map();
-  private readonly internalSavedObjectsRepository: SavedObjectsClientContract;
+  private readonly taskRunnerFactory: TaskRunnerFactory;
 
-  constructor({
-    internalSavedObjectsRepository,
-    fireAction,
-    taskManager,
-    getServices,
-  }: ConstructorOptions) {
+  constructor({ taskManager, taskRunnerFactory }: ConstructorOptions) {
     this.taskManager = taskManager;
-    this.fireAction = fireAction;
-    this.internalSavedObjectsRepository = internalSavedObjectsRepository;
-    this.getServices = getServices;
+    this.taskRunnerFactory = taskRunnerFactory;
   }
 
   public has(id: string) {
@@ -58,12 +45,8 @@ export class AlertTypeRegistry {
       [`alerting:${alertType.id}`]: {
         title: alertType.name,
         type: `alerting:${alertType.id}`,
-        createTaskRunner: getCreateTaskRunnerFunction({
-          alertType,
-          getServices: this.getServices,
-          fireAction: this.fireAction,
-          internalSavedObjectsRepository: this.internalSavedObjectsRepository,
-        }),
+        createTaskRunner: (context: RunContext) =>
+          this.taskRunnerFactory.create(alertType, context),
       },
     });
   }
@@ -86,6 +69,7 @@ export class AlertTypeRegistry {
     return Array.from(this.alertTypes).map(([alertTypeId, alertType]) => ({
       id: alertTypeId,
       name: alertType.name,
+      actionGroups: alertType.actionGroups,
     }));
   }
 }

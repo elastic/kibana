@@ -5,9 +5,8 @@
  */
 
 import { sortBy } from 'lodash';
-import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
-import { Datatable } from '../types';
-import { getFunctionHelp } from '../../strings';
+import { ExpressionFunction, Datatable } from 'src/plugins/expressions/common';
+import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {
   by: string;

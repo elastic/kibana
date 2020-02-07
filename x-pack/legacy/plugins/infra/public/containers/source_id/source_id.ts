@@ -6,6 +6,9 @@
 
 import * as runtimeTypes from 'io-ts';
 
+import { pipe } from 'fp-ts/lib/pipeable';
+import { fold } from 'fp-ts/lib/Either';
+import { constant, identity } from 'fp-ts/lib/function';
 import { useUrlState, replaceStateKeyInQueryString } from '../../utils/use_url_state';
 
 const SOURCE_ID_URL_STATE_KEY = 'sourceId';
@@ -25,4 +28,4 @@ export const replaceSourceIdInQueryString = (sourceId: string) =>
 const sourceIdRuntimeType = runtimeTypes.union([runtimeTypes.string, runtimeTypes.undefined]);
 const encodeSourceIdUrlState = sourceIdRuntimeType.encode;
 const decodeSourceIdUrlState = (value: unknown) =>
-  sourceIdRuntimeType.decode(value).getOrElse(undefined);
+  pipe(sourceIdRuntimeType.decode(value), fold(constant(undefined), identity));

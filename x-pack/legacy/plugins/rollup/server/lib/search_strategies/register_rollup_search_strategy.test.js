@@ -1,8 +1,8 @@
 /*
-* Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
-* or more contributor license agreements. Licensed under the Elastic License;
-* you may not use this file except in compliance with the Elastic License.
-*/
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
 import { registerRollupSearchStrategy } from './register_rollup_search_strategy';
 
 describe('Register Rollup Search Strategy', () => {
@@ -10,10 +10,13 @@ describe('Register Rollup Search Strategy', () => {
   let metrics;
 
   beforeEach(() => {
-    const afterPluginsInit = jest.fn((callback) => callback());
+    const afterPluginsInit = jest.fn(callback => callback());
 
     kbnServer = {
       afterPluginsInit,
+      newPlatform: {
+        setup: { plugins: {} },
+      },
     };
 
     metrics = {
@@ -25,27 +28,22 @@ describe('Register Rollup Search Strategy', () => {
   });
 
   test('should run initialization on "afterPluginsInit" hook', () => {
-    registerRollupSearchStrategy(kbnServer, {
-      plugins: {},
-    });
+    registerRollupSearchStrategy(kbnServer);
 
     expect(kbnServer.afterPluginsInit).toHaveBeenCalled();
   });
 
   test('should run initialization if metrics plugin available', () => {
-    registerRollupSearchStrategy(kbnServer, {
-      plugins: {
-        metrics,
-      },
+    registerRollupSearchStrategy({
+      ...kbnServer,
+      newPlatform: { setup: { plugins: { metrics } } },
     });
 
     expect(metrics.addSearchStrategy).toHaveBeenCalled();
   });
 
   test('should not run initialization if metrics plugin unavailable', () => {
-    registerRollupSearchStrategy(kbnServer, {
-      plugins: {},
-    });
+    registerRollupSearchStrategy(kbnServer);
 
     expect(metrics.addSearchStrategy).not.toHaveBeenCalled();
   });

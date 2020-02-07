@@ -4,23 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { I18nServiceType } from '@kbn/i18n/angular';
+import { i18n } from '@kbn/i18n';
 // @ts-ignore: implicit any for JS file
-import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
+import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 import React from 'react';
-import { ShareActionProps } from 'ui/share/share_action';
-import { ShareContextMenuExtensionsRegistryProvider } from 'ui/share/share_action_registry';
+import { npSetup } from 'ui/new_platform';
 import { ReportingPanelContent } from '../components/reporting_panel_content';
+import { ShareContext } from '../../../../../../src/plugins/share/public';
 
-function reportingProvider(Private: any, i18n: I18nServiceType) {
-  const xpackInfo = Private(XPackInfoProvider);
-  const getShareActions = ({
+function reportingProvider() {
+  const getShareMenuItems = ({
     objectType,
     objectId,
     sharingData,
     isDirty,
     onClose,
-  }: ShareActionProps) => {
+  }: ShareContext) => {
     if ('search' !== objectType) {
       return [];
     }
@@ -34,7 +33,7 @@ function reportingProvider(Private: any, i18n: I18nServiceType) {
 
     const shareActions = [];
     if (xpackInfo.get('features.reporting.csv.showLinks', false)) {
-      const panelTitle = i18n('xpack.reporting.shareContextMenu.csvReportsButtonLabel', {
+      const panelTitle = i18n.translate('xpack.reporting.shareContextMenu.csvReportsButtonLabel', {
         defaultMessage: 'CSV Reports',
       });
 
@@ -45,8 +44,10 @@ function reportingProvider(Private: any, i18n: I18nServiceType) {
           toolTipContent: xpackInfo.get('features.reporting.csv.message'),
           disabled: !xpackInfo.get('features.reporting.csv.enableLinks', false) ? true : false,
           ['data-test-subj']: 'csvReportMenuItem',
+          sortOrder: 1,
         },
         panel: {
+          id: 'csvReportingPanel',
           title: panelTitle,
           content: (
             <ReportingPanelContent
@@ -68,8 +69,8 @@ function reportingProvider(Private: any, i18n: I18nServiceType) {
 
   return {
     id: 'csvReports',
-    getShareActions,
+    getShareMenuItems,
   };
 }
 
-ShareContextMenuExtensionsRegistryProvider.register(reportingProvider);
+npSetup.plugins.share.register(reportingProvider());

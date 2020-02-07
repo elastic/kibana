@@ -12,10 +12,11 @@
     "logs": {
       "enabled": false,
       "reason": {
-        "clusterExists": null,
+        "clusterExists": false,
         "indexPatternExists": false,
         "indexPatternInTimeRangeExists": false,
         "typeExistsAtAnyTime": false,
+        "usingStructuredLogs": false,
         "nodeExists": null,
         "indexExists": null,
         "typeExists": false

@@ -17,7 +17,18 @@
  * under the License.
  */
 
-export const log = {
+import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/dev-utils';
+
+class Log extends ToolingLog {
+  testWriter?: ToolingLogCollectingWriter;
+
+  constructor() {
+    super({
+      level: 'info',
+      writeTo: process.stdout,
+    });
+  }
+
   /**
    * Log something to the console. Ideally we would use a real logger in
    * kbn-pm, but that's a pretty big change for now.
@@ -26,5 +37,7 @@ export const log = {
   write(...args: any[]) {
     // eslint-disable-next-line no-console
     console.log(...args);
-  },
-};
+  }
+}
+
+export const log = new Log();

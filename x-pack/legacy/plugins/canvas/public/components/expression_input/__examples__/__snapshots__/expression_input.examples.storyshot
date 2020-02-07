@@ -1,0 +1,34 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Storyshots components/ExpressionInput default 1`] = `
+<div
+  className="canvasExpressionInput"
+>
+  <div
+    className="euiFormRow euiFormRow--fullWidth canvasExpressionInput__inner"
+    id="generated-id-row"
+  >
+    <div
+      className="euiFormRow__fieldWrapper"
+    >
+      <div
+        className="canvasExpressionInput__editor"
+        id="generated-id"
+        onBlur={[Function]}
+        onFocus={[Function]}
+      >
+        <div
+          className="react-monaco-editor-container"
+          style={
+            Object {
+              "height": "100%",
+              "width": "100%",
+            }
+          }
+        />
+        <div />
+      </div>
+    </div>
+  </div>
+</div>
+`;

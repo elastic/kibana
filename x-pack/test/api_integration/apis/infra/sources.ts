@@ -13,10 +13,10 @@ import {
   sourceStatusFieldsFragment,
 } from '../../../../legacy/plugins/infra/public/containers/source/source_fields_fragment.gql_query';
 import { SourceQuery } from '../../../../legacy/plugins/infra/public/graphql/types';
-import { KbnTestProvider } from './types';
+import { FtrProviderContext } from '../../ftr_provider_context';
 import { sharedFragments } from '../../../../legacy/plugins/infra/common/graphql/shared';
 
-const sourcesTests: KbnTestProvider = ({ getService }) => {
+export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const client = getService('infraOpsGraphQLClient');
 
@@ -383,10 +383,7 @@ const sourcesTests: KbnTestProvider = ({ getService }) => {
       });
     });
   });
-};
-
-// eslint-disable-next-line import/no-default-export
-export default sourcesTests;
+}
 
 const createSourceMutation = gql`
   mutation createSource($sourceId: ID!, $sourceProperties: UpdateSourceInput!) {

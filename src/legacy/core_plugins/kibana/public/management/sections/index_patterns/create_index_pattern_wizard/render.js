@@ -25,10 +25,7 @@ import { I18nContext } from 'ui/i18n';
 
 const CREATE_INDEX_PATTERN_DOM_ELEMENT_ID = 'createIndexPatternReact';
 
-export function renderCreateIndexPatternWizard(
-  initialQuery,
-  services,
-) {
+export function renderCreateIndexPatternWizard(initialQuery, services) {
   const node = document.getElementById(CREATE_INDEX_PATTERN_DOM_ELEMENT_ID);
   if (!node) {
     return;
@@ -36,12 +33,9 @@ export function renderCreateIndexPatternWizard(
 
   render(
     <I18nContext>
-      <CreateIndexPatternWizard
-        initialQuery={initialQuery}
-        services={services}
-      />
+      <CreateIndexPatternWizard initialQuery={initialQuery} services={services} />
     </I18nContext>,
-    node,
+    node
   );
 }
 

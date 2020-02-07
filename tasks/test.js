@@ -21,19 +21,22 @@ import _, { keys } from 'lodash';
 
 import { run } from '../utilities/visual_regression';
 
-module.exports = function (grunt) {
+module.exports = function(grunt) {
   grunt.registerTask(
     'test:visualRegression:buildGallery',
     'Compare screenshots and generate diff images.',
-    function () {
+    function() {
       const done = this.async();
       run(done);
     }
   );
 
-  grunt.registerTask('test:mocha', ['checkPlugins', 'run:mocha']);
-
-  grunt.registerTask('test:browser', ['checkPlugins', 'run:browserSCSS', 'run:browserTestServer', 'karma:unit']);
+  grunt.registerTask('test:browser', [
+    'checkPlugins',
+    'run:browserSCSS',
+    'run:browserTestServer',
+    'karma:unit',
+  ]);
 
   grunt.registerTask('test:browser-ci', () => {
     const ciShardTasks = keys(grunt.config.get('karma'))
@@ -49,7 +52,7 @@ module.exports = function (grunt) {
 
   grunt.registerTask('test:quick', [
     'checkPlugins',
-    'test:mocha',
+    'run:mocha',
     'run:functionalTests',
     'test:jest',
     'test:jest_integration',
@@ -59,6 +62,7 @@ module.exports = function (grunt) {
   ]);
 
   grunt.registerTask('test:dev', ['checkPlugins', 'run:devBrowserTestServer', 'karma:dev']);
+  grunt.registerTask('test:mochaCoverage', ['run:mochaCoverage']);
 
   grunt.registerTask('test', subTask => {
     if (subTask) grunt.fail.fatal(`invalid task "test:${subTask}"`);
@@ -72,7 +76,7 @@ module.exports = function (grunt) {
         !grunt.option('quick') && 'run:typeCheck',
         !grunt.option('quick') && 'run:i18nCheck',
         'run:checkFileCasing',
-        'licenses',
+        'run:licenses',
         'test:quick',
       ])
     );
@@ -80,7 +84,7 @@ module.exports = function (grunt) {
 
   grunt.registerTask('quick-test', ['test:quick']); // historical alias
 
-  grunt.registerTask('test:projects', function () {
+  grunt.registerTask('test:projects', function() {
     const done = this.async();
     runProjectsTests().then(done, done);
   });

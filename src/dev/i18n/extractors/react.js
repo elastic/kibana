@@ -15,7 +15,7 @@
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
  * under the License.
-*/
+ */
 
 import { isJSXIdentifier, isObjectExpression, isJSXExpressionContainer } from '@babel/types';
 
@@ -30,7 +30,7 @@ import {
   checkValuesProperty,
 } from '../utils';
 import { DEFAULT_MESSAGE_KEY, VALUES_KEY, DESCRIPTION_KEY } from '../constants';
-import { createFailError } from '../../run';
+import { createFailError } from '@kbn/dev-utils';
 
 /**
  * Extract default messages from ReactJS intl.formatMessage(...) AST

@@ -63,7 +63,6 @@ export const setup = async (): Promise<HomeTestBed> => {
     const { rows } = table.getMetaData(REPOSITORY_TABLE);
     const repositoryLink = findTestSubject(rows[index].reactWrapper, 'repositoryLink');
 
-    // @ts-ignore (remove when react 16.9.0 is released)
     await act(async () => {
       const { href } = repositoryLink.props();
       router.navigateTo(href!);
@@ -78,7 +77,6 @@ export const setup = async (): Promise<HomeTestBed> => {
     const lastColumn = currentRow.columns[currentRow.columns.length - 1].reactWrapper;
     const button = findTestSubject(lastColumn, `${action}RepositoryButton`);
 
-    // @ts-ignore (remove when react 16.9.0 is released)
     await act(async () => {
       button.simulate('click');
       component.update();
@@ -89,7 +87,6 @@ export const setup = async (): Promise<HomeTestBed> => {
     const { rows } = table.getMetaData(SNAPSHOT_TABLE);
     const snapshotLink = findTestSubject(rows[index].reactWrapper, 'snapshotLink');
 
-    // @ts-ignore (remove when react 16.9.0 is released)
     await act(async () => {
       const { href } = snapshotLink.props();
       router.navigateTo(href!);
@@ -102,7 +99,7 @@ export const setup = async (): Promise<HomeTestBed> => {
     const tabs = ['snapshots', 'repositories'];
 
     testBed
-      .find('tab')
+      .find(`${tab}_tab`)
       .at(tabs.indexOf(tab))
       .simulate('click');
   };
@@ -363,7 +360,10 @@ export type TestSubjects =
   | 'state'
   | 'state.title'
   | 'state.value'
-  | 'tab'
+  | 'repositories_tab'
+  | 'snapshots_tab'
+  | 'policies_tab'
+  | 'restore_status_tab'
   | 'tableHeaderCell_durationInMillis_3'
   | 'tableHeaderCell_durationInMillis_3.tableHeaderSortButton'
   | 'tableHeaderCell_indices_4'

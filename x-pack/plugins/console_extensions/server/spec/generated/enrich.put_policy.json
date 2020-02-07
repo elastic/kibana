@@ -1,0 +1,10 @@
+{
+  "enrich.put_policy": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "_enrich/policy/{name}"
+    ]
+  }
+}

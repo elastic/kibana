@@ -42,7 +42,31 @@ class DocumentationLinksService {
   }
 
   public getSnapshotDocUrl() {
-    return `${this.esDocBasePath}/modules-snapshots.html#_snapshot`;
+    return `${this.esDocBasePath}modules-snapshots.html#snapshots-take-snapshot`;
+  }
+
+  public getRestoreDocUrl() {
+    return `${this.esDocBasePath}modules-snapshots.html#restore-snapshot`;
+  }
+
+  public getRestoreIndexSettingsUrl() {
+    return `${this.esDocBasePath}modules-snapshots.html#_changing_index_settings_during_restore`;
+  }
+
+  public getIndexSettingsUrl() {
+    return `${this.esDocBasePath}index-modules.html`;
+  }
+
+  public getDateMathIndexNamesUrl() {
+    return `${this.esDocBasePath}date-math-index-names.html`;
+  }
+
+  public getSlmUrl() {
+    return `${this.esDocBasePath}slm-api-put.html`;
+  }
+
+  public getCronUrl() {
+    return `${this.esDocBasePath}trigger-schedule.html#schedule-cron`;
   }
 }
 

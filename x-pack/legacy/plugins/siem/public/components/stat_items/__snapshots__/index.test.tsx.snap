@@ -1,236 +1,470 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Stat Items Component disable charts it renders the default widget 1`] = `
-<Provider
-  store={
-    Object {
-      "dispatch": [Function],
-      "getState": [Function],
-      "replaceReducer": [Function],
-      "subscribe": [Function],
-      Symbol(Symbol.observable): [Function],
-    }
-  }
+<ThemeProvider
+  theme={[Function]}
 >
-  <Memo()
-    description="HOSTS"
-    fields={
-      Array [
-        Object {
-          "color": "#3185FC",
-          "icon": "cross",
-          "key": "hosts",
-          "value": null,
-        },
-      ]
+  <Provider
+    store={
+      Object {
+        "dispatch": [Function],
+        "getState": [Function],
+        "replaceReducer": [Function],
+        "subscribe": [Function],
+        Symbol(observable): [Function],
+      }
     }
-    key="mock-keys"
   >
-    <Styled(EuiFlexItem)>
-      <EuiFlexItem
-        className="sc-bwzfXH hrDDAP"
+    <StatItemsComponent
+      description="HOSTS"
+      fields={
+        Array [
+          Object {
+            "color": "#6092C0",
+            "icon": "cross",
+            "key": "hosts",
+            "value": null,
+          },
+        ]
+      }
+      from={1560578400000}
+      id="statItems"
+      index={0}
+      key="mock-keys"
+      narrowDateRange={[MockFunction]}
+      to={1560837600000}
+    >
+      <FlexItem
+        data-test-subj="stat-item"
       >
-        <div
-          className="euiFlexItem sc-bwzfXH hrDDAP"
+        <EuiFlexItem
+          className="sc-AykKG dLVTBE"
+          data-test-subj="stat-item"
         >
-          <EuiPanel
-            grow={true}
-            hasShadow={false}
-            paddingSize="m"
+          <div
+            className="euiFlexItem sc-AykKG dLVTBE"
+            data-test-subj="stat-item"
           >
-            <div
-              className="euiPanel euiPanel--paddingMedium"
+            <InspectButtonContainer
+              show={true}
             >
-              <EuiTitle
-                size="xxxs"
+              <div
+                className="sc-AykKF jvsAjF"
               >
-                <h6
-                  className="euiTitle euiTitle--xxxsmall"
-                >
-                  HOSTS
-                </h6>
-              </EuiTitle>
-              <EuiFlexGroup>
-                <div
-                  className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
-                >
-                  <Styled(EuiFlexItem)
-                    key="stat-items-field-hosts"
+                <EuiPanel>
+                  <div
+                    className="euiPanel euiPanel--paddingMedium"
                   >
-                    <EuiFlexItem
-                      className="sc-bwzfXH hrDDAP"
+                    <EuiFlexGroup
+                      gutterSize="none"
                     >
                       <div
-                        className="euiFlexItem sc-bwzfXH hrDDAP"
+                        className="euiFlexGroup euiFlexGroup--directionRow euiFlexGroup--responsive"
                       >
-                        <EuiFlexGroup
-                          alignItems="center"
-                          gutterSize="m"
-                          responsive={false}
+                        <EuiFlexItem>
+                          <div
+                            className="euiFlexItem"
+                          >
+                            <EuiTitle
+                              size="xxxs"
+                            >
+                              <h6
+                                className="euiTitle euiTitle--xxxsmall"
+                              >
+                                HOSTS
+                              </h6>
+                            </EuiTitle>
+                          </div>
+                        </EuiFlexItem>
+                        <EuiFlexItem
+                          grow={false}
                         >
                           <div
-                            className="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+                            className="euiFlexItem euiFlexItem--flexGrowZero"
                           >
-                            <Styled(EuiFlexItem)>
-                              <EuiFlexItem
-                                className="sc-bwzfXH hrDDAP"
+                            <Connect(Component)
+                              inspectIndex={0}
+                              queryId="statItems"
+                              title="KPI HOSTS"
+                            >
+                              <Memo(InspectButtonComponent)
+                                id=""
+                                inspect={null}
+                                inspectIndex={0}
+                                isInspected={false}
+                                loading={false}
+                                queryId="statItems"
+                                refetch={null}
+                                selectedInspectIndex={0}
+                                setIsInspected={[Function]}
+                                title="KPI HOSTS"
+                              >
+                                <EuiButtonIcon
+                                  aria-label="Inspect"
+                                  className="inspectButtonComponent"
+                                  data-test-subj="inspect-icon-button"
+                                  iconSize="m"
+                                  iconType="inspect"
+                                  onClick={[Function]}
+                                  title="Inspect"
+                                >
+                                  <button
+                                    aria-label="Inspect"
+                                    className="euiButtonIcon euiButtonIcon--primary inspectButtonComponent"
+                                    data-test-subj="inspect-icon-button"
+                                    onClick={[Function]}
+                                    title="Inspect"
+                                    type="button"
+                                  >
+                                    <EuiIcon
+                                      aria-hidden="true"
+                                      className="euiButtonIcon__icon"
+                                      size="m"
+                                      type="inspect"
+                                    >
+                                      <EuiIconEmpty
+                                        aria-hidden={true}
+                                        className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
+                                        focusable="false"
+                                        role="img"
+                                        style={null}
+                                      >
+                                        <svg
+                                          aria-hidden={true}
+                                          className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
+                                          focusable="false"
+                                          height={16}
+                                          role="img"
+                                          style={null}
+                                          viewBox="0 0 16 16"
+                                          width={16}
+                                          xmlns="http://www.w3.org/2000/svg"
+                                        />
+                                      </EuiIconEmpty>
+                                    </EuiIcon>
+                                  </button>
+                                </EuiButtonIcon>
+                                <ModalInspectQuery
+                                  closeModal={[Function]}
+                                  data-test-subj="inspect-modal"
+                                  isShowing={false}
+                                  request={null}
+                                  response={null}
+                                  title="KPI HOSTS"
+                                />
+                              </Memo(InspectButtonComponent)>
+                            </Connect(Component)>
+                          </div>
+                        </EuiFlexItem>
+                      </div>
+                    </EuiFlexGroup>
+                    <EuiFlexGroup>
+                      <div
+                        className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                      >
+                        <FlexItem
+                          key="stat-items-field-hosts"
+                        >
+                          <EuiFlexItem
+                            className="sc-AykKG dLVTBE"
+                          >
+                            <div
+                              className="euiFlexItem sc-AykKG dLVTBE"
+                            >
+                              <EuiFlexGroup
+                                alignItems="center"
+                                gutterSize="m"
+                                responsive={false}
                               >
                                 <div
-                                  className="euiFlexItem sc-bwzfXH hrDDAP"
+                                  className="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
                                 >
-                                  <Styled(EuiTitle)>
-                                    <EuiTitle
-                                      className="sc-htpNat bTDdmQ"
+                                  <FlexItem>
+                                    <EuiFlexItem
+                                      className="sc-AykKG dLVTBE"
                                     >
-                                      <p
-                                        className="euiTitle euiTitle--medium sc-htpNat bTDdmQ"
-                                        data-test-subj="stat-title"
+                                      <div
+                                        className="euiFlexItem sc-AykKG dLVTBE"
                                       >
-                                        --
-                                         
-                                      </p>
-                                    </EuiTitle>
-                                  </Styled(EuiTitle)>
+                                        <StatValue>
+                                          <EuiTitle
+                                            className="sc-AykKH eFqnYS"
+                                          >
+                                            <p
+                                              className="euiTitle euiTitle--medium sc-AykKH eFqnYS"
+                                              data-test-subj="stat-title"
+                                            >
+                                              <EmptyWrapper>
+                                                <span
+                                                  className="sc-AykKC inVqby"
+                                                >
+                                                  —
+                                                </span>
+                                              </EmptyWrapper>
+                                               
+                                            </p>
+                                          </EuiTitle>
+                                        </StatValue>
+                                      </div>
+                                    </EuiFlexItem>
+                                  </FlexItem>
                                 </div>
-                              </EuiFlexItem>
-                            </Styled(EuiFlexItem)>
-                          </div>
-                        </EuiFlexGroup>
+                              </EuiFlexGroup>
+                            </div>
+                          </EuiFlexItem>
+                        </FlexItem>
                       </div>
-                    </EuiFlexItem>
-                  </Styled(EuiFlexItem)>
-                </div>
-              </EuiFlexGroup>
-              <EuiFlexGroup>
-                <div
-                  className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
-                />
-              </EuiFlexGroup>
-            </div>
-          </EuiPanel>
-        </div>
-      </EuiFlexItem>
-    </Styled(EuiFlexItem)>
-  </Memo()>
-</Provider>
+                    </EuiFlexGroup>
+                    <EuiFlexGroup>
+                      <div
+                        className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                      />
+                    </EuiFlexGroup>
+                  </div>
+                </EuiPanel>
+              </div>
+            </InspectButtonContainer>
+          </div>
+        </EuiFlexItem>
+      </FlexItem>
+    </StatItemsComponent>
+  </Provider>
+</ThemeProvider>
 `;
 
 exports[`Stat Items Component disable charts it renders the default widget 2`] = `
-<Provider
-  store={
-    Object {
-      "dispatch": [Function],
-      "getState": [Function],
-      "replaceReducer": [Function],
-      "subscribe": [Function],
-      Symbol(Symbol.observable): [Function],
-    }
-  }
+<ThemeProvider
+  theme={[Function]}
 >
-  <Memo()
-    areaChart={Array []}
-    barChart={Array []}
-    description="HOSTS"
-    fields={
-      Array [
-        Object {
-          "color": "#3185FC",
-          "icon": "cross",
-          "key": "hosts",
-          "value": null,
-        },
-      ]
+  <Provider
+    store={
+      Object {
+        "dispatch": [Function],
+        "getState": [Function],
+        "replaceReducer": [Function],
+        "subscribe": [Function],
+        Symbol(observable): [Function],
+      }
     }
-    key="mock-keys"
   >
-    <Styled(EuiFlexItem)>
-      <EuiFlexItem
-        className="sc-bwzfXH hrDDAP"
+    <StatItemsComponent
+      areaChart={Array []}
+      barChart={Array []}
+      description="HOSTS"
+      fields={
+        Array [
+          Object {
+            "color": "#6092C0",
+            "icon": "cross",
+            "key": "hosts",
+            "value": null,
+          },
+        ]
+      }
+      from={1560578400000}
+      id="statItems"
+      index={0}
+      key="mock-keys"
+      narrowDateRange={[MockFunction]}
+      to={1560837600000}
+    >
+      <FlexItem
+        data-test-subj="stat-item"
       >
-        <div
-          className="euiFlexItem sc-bwzfXH hrDDAP"
+        <EuiFlexItem
+          className="sc-AykKG dLVTBE"
+          data-test-subj="stat-item"
         >
-          <EuiPanel
-            grow={true}
-            hasShadow={false}
-            paddingSize="m"
+          <div
+            className="euiFlexItem sc-AykKG dLVTBE"
+            data-test-subj="stat-item"
           >
-            <div
-              className="euiPanel euiPanel--paddingMedium"
+            <InspectButtonContainer
+              show={true}
             >
-              <EuiTitle
-                size="xxxs"
+              <div
+                className="sc-AykKF jvsAjF"
               >
-                <h6
-                  className="euiTitle euiTitle--xxxsmall"
-                >
-                  HOSTS
-                </h6>
-              </EuiTitle>
-              <EuiFlexGroup>
-                <div
-                  className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
-                >
-                  <Styled(EuiFlexItem)
-                    key="stat-items-field-hosts"
+                <EuiPanel>
+                  <div
+                    className="euiPanel euiPanel--paddingMedium"
                   >
-                    <EuiFlexItem
-                      className="sc-bwzfXH hrDDAP"
+                    <EuiFlexGroup
+                      gutterSize="none"
                     >
                       <div
-                        className="euiFlexItem sc-bwzfXH hrDDAP"
+                        className="euiFlexGroup euiFlexGroup--directionRow euiFlexGroup--responsive"
                       >
-                        <EuiFlexGroup
-                          alignItems="center"
-                          gutterSize="m"
-                          responsive={false}
+                        <EuiFlexItem>
+                          <div
+                            className="euiFlexItem"
+                          >
+                            <EuiTitle
+                              size="xxxs"
+                            >
+                              <h6
+                                className="euiTitle euiTitle--xxxsmall"
+                              >
+                                HOSTS
+                              </h6>
+                            </EuiTitle>
+                          </div>
+                        </EuiFlexItem>
+                        <EuiFlexItem
+                          grow={false}
                         >
                           <div
-                            className="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+                            className="euiFlexItem euiFlexItem--flexGrowZero"
                           >
-                            0
-                            <Styled(EuiFlexItem)>
-                              <EuiFlexItem
-                                className="sc-bwzfXH hrDDAP"
+                            <Connect(Component)
+                              inspectIndex={0}
+                              queryId="statItems"
+                              title="KPI HOSTS"
+                            >
+                              <Memo(InspectButtonComponent)
+                                id=""
+                                inspect={null}
+                                inspectIndex={0}
+                                isInspected={false}
+                                loading={false}
+                                queryId="statItems"
+                                refetch={null}
+                                selectedInspectIndex={0}
+                                setIsInspected={[Function]}
+                                title="KPI HOSTS"
+                              >
+                                <EuiButtonIcon
+                                  aria-label="Inspect"
+                                  className="inspectButtonComponent"
+                                  data-test-subj="inspect-icon-button"
+                                  iconSize="m"
+                                  iconType="inspect"
+                                  onClick={[Function]}
+                                  title="Inspect"
+                                >
+                                  <button
+                                    aria-label="Inspect"
+                                    className="euiButtonIcon euiButtonIcon--primary inspectButtonComponent"
+                                    data-test-subj="inspect-icon-button"
+                                    onClick={[Function]}
+                                    title="Inspect"
+                                    type="button"
+                                  >
+                                    <EuiIcon
+                                      aria-hidden="true"
+                                      className="euiButtonIcon__icon"
+                                      size="m"
+                                      type="inspect"
+                                    >
+                                      <EuiIconEmpty
+                                        aria-hidden={true}
+                                        className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
+                                        focusable="false"
+                                        role="img"
+                                        style={null}
+                                      >
+                                        <svg
+                                          aria-hidden={true}
+                                          className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
+                                          focusable="false"
+                                          height={16}
+                                          role="img"
+                                          style={null}
+                                          viewBox="0 0 16 16"
+                                          width={16}
+                                          xmlns="http://www.w3.org/2000/svg"
+                                        />
+                                      </EuiIconEmpty>
+                                    </EuiIcon>
+                                  </button>
+                                </EuiButtonIcon>
+                                <ModalInspectQuery
+                                  closeModal={[Function]}
+                                  data-test-subj="inspect-modal"
+                                  isShowing={false}
+                                  request={null}
+                                  response={null}
+                                  title="KPI HOSTS"
+                                />
+                              </Memo(InspectButtonComponent)>
+                            </Connect(Component)>
+                          </div>
+                        </EuiFlexItem>
+                      </div>
+                    </EuiFlexGroup>
+                    <EuiFlexGroup>
+                      <div
+                        className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                      >
+                        <FlexItem
+                          key="stat-items-field-hosts"
+                        >
+                          <EuiFlexItem
+                            className="sc-AykKG dLVTBE"
+                          >
+                            <div
+                              className="euiFlexItem sc-AykKG dLVTBE"
+                            >
+                              <EuiFlexGroup
+                                alignItems="center"
+                                gutterSize="m"
+                                responsive={false}
                               >
                                 <div
-                                  className="euiFlexItem sc-bwzfXH hrDDAP"
+                                  className="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
                                 >
-                                  <Styled(EuiTitle)>
-                                    <EuiTitle
-                                      className="sc-htpNat bTDdmQ"
+                                  0
+                                  <FlexItem>
+                                    <EuiFlexItem
+                                      className="sc-AykKG dLVTBE"
                                     >
-                                      <p
-                                        className="euiTitle euiTitle--medium sc-htpNat bTDdmQ"
-                                        data-test-subj="stat-title"
+                                      <div
+                                        className="euiFlexItem sc-AykKG dLVTBE"
                                       >
-                                        --
-                                         
-                                      </p>
-                                    </EuiTitle>
-                                  </Styled(EuiTitle)>
+                                        <StatValue>
+                                          <EuiTitle
+                                            className="sc-AykKH eFqnYS"
+                                          >
+                                            <p
+                                              className="euiTitle euiTitle--medium sc-AykKH eFqnYS"
+                                              data-test-subj="stat-title"
+                                            >
+                                              <EmptyWrapper>
+                                                <span
+                                                  className="sc-AykKC inVqby"
+                                                >
+                                                  —
+                                                </span>
+                                              </EmptyWrapper>
+                                               
+                                            </p>
+                                          </EuiTitle>
+                                        </StatValue>
+                                      </div>
+                                    </EuiFlexItem>
+                                  </FlexItem>
                                 </div>
-                              </EuiFlexItem>
-                            </Styled(EuiFlexItem)>
-                          </div>
-                        </EuiFlexGroup>
+                              </EuiFlexGroup>
+                            </div>
+                          </EuiFlexItem>
+                        </FlexItem>
                       </div>
-                    </EuiFlexItem>
-                  </Styled(EuiFlexItem)>
-                </div>
-              </EuiFlexGroup>
-              <EuiFlexGroup>
-                <div
-                  className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
-                />
-              </EuiFlexGroup>
-            </div>
-          </EuiPanel>
-        </div>
-      </EuiFlexItem>
-    </Styled(EuiFlexItem)>
-  </Memo()>
-</Provider>
+                    </EuiFlexGroup>
+                    <EuiFlexGroup>
+                      <div
+                        className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                      />
+                    </EuiFlexGroup>
+                  </div>
+                </EuiPanel>
+              </div>
+            </InspectButtonContainer>
+          </div>
+        </EuiFlexItem>
+      </FlexItem>
+    </StatItemsComponent>
+  </Provider>
+</ThemeProvider>
 `;
 
 exports[`Stat Items Component rendering kpis with charts it renders the default widget 1`] = `
@@ -241,15 +475,15 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
       "getState": [Function],
       "replaceReducer": [Function],
       "subscribe": [Function],
-      Symbol(Symbol.observable): [Function],
+      Symbol(observable): [Function],
     }
   }
 >
-  <Memo()
+  <StatItemsComponent
     areaChart={
       Array [
         Object {
-          "color": "#DB1374",
+          "color": "#D36086",
           "key": "uniqueSourceIpsHistogram",
           "value": Array [
             Object {
@@ -267,7 +501,7 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
           ],
         },
         Object {
-          "color": "#490092",
+          "color": "#9170B8",
           "key": "uniqueDestinationIpsHistogram",
           "value": Array [
             Object {
@@ -289,7 +523,7 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
     barChart={
       Array [
         Object {
-          "color": "#DB1374",
+          "color": "#D36086",
           "key": "uniqueSourceIps",
           "value": Array [
             Object {
@@ -299,7 +533,7 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
           ],
         },
         Object {
-          "color": "#490092",
+          "color": "#9170B8",
           "key": "uniqueDestinationIps",
           "value": Array [
             Object {
@@ -316,14 +550,14 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
     fields={
       Array [
         Object {
-          "color": "#DB1374",
+          "color": "#D36086",
           "description": "Source",
           "icon": "cross",
           "key": "uniqueSourceIps",
           "value": 1714,
         },
         Object {
-          "color": "#490092",
+          "color": "#9170B8",
           "description": "Dest.",
           "icon": "cross",
           "key": "uniqueDestinationIps",
@@ -331,295 +565,413 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
         },
       ]
     }
+    from={1560578400000}
+    id="statItems"
+    index={0}
     key="mock-keys"
+    narrowDateRange={[MockFunction]}
+    to={1560837600000}
   >
-    <Styled(EuiFlexItem)>
+    <FlexItem
+      data-test-subj="stat-item"
+    >
       <EuiFlexItem
-        className="sc-bwzfXH hrDDAP"
+        className="sc-AykKG dLVTBE"
+        data-test-subj="stat-item"
       >
         <div
-          className="euiFlexItem sc-bwzfXH hrDDAP"
+          className="euiFlexItem sc-AykKG dLVTBE"
+          data-test-subj="stat-item"
         >
-          <EuiPanel
-            grow={true}
-            hasShadow={false}
-            paddingSize="m"
+          <InspectButtonContainer
+            show={true}
           >
             <div
-              className="euiPanel euiPanel--paddingMedium"
+              className="sc-AykKF jbBKkl"
             >
-              <EuiTitle
-                size="xxxs"
-              >
-                <h6
-                  className="euiTitle euiTitle--xxxsmall"
-                >
-                  UNIQUE_PRIVATE_IPS
-                </h6>
-              </EuiTitle>
-              <EuiFlexGroup>
+              <EuiPanel>
                 <div
-                  className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                  className="euiPanel euiPanel--paddingMedium"
                 >
-                  <Styled(EuiFlexItem)
-                    key="stat-items-field-uniqueSourceIps"
+                  <EuiFlexGroup
+                    gutterSize="none"
                   >
-                    <EuiFlexItem
-                      className="sc-bwzfXH hrDDAP"
+                    <div
+                      className="euiFlexGroup euiFlexGroup--directionRow euiFlexGroup--responsive"
                     >
-                      <div
-                        className="euiFlexItem sc-bwzfXH hrDDAP"
-                      >
-                        <EuiFlexGroup
-                          alignItems="center"
-                          gutterSize="m"
-                          responsive={false}
+                      <EuiFlexItem>
+                        <div
+                          className="euiFlexItem"
                         >
-                          <div
-                            className="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+                          <EuiTitle
+                            size="xxxs"
                           >
-                            <Styled(EuiFlexItem)
-                              grow={false}
+                            <h6
+                              className="euiTitle euiTitle--xxxsmall"
                             >
-                              <EuiFlexItem
-                                className="sc-bwzfXH hrDDAP"
-                                grow={false}
+                              UNIQUE_PRIVATE_IPS
+                            </h6>
+                          </EuiTitle>
+                        </div>
+                      </EuiFlexItem>
+                      <EuiFlexItem
+                        grow={false}
+                      >
+                        <div
+                          className="euiFlexItem euiFlexItem--flexGrowZero"
+                        >
+                          <Connect(Component)
+                            inspectIndex={0}
+                            queryId="statItems"
+                            title="KPI UNIQUE_PRIVATE_IPS"
+                          >
+                            <Memo(InspectButtonComponent)
+                              id=""
+                              inspect={null}
+                              inspectIndex={0}
+                              isInspected={false}
+                              loading={false}
+                              queryId="statItems"
+                              refetch={null}
+                              selectedInspectIndex={0}
+                              setIsInspected={[Function]}
+                              title="KPI UNIQUE_PRIVATE_IPS"
+                            >
+                              <EuiButtonIcon
+                                aria-label="Inspect"
+                                className="inspectButtonComponent"
+                                data-test-subj="inspect-icon-button"
+                                iconSize="m"
+                                iconType="inspect"
+                                onClick={[Function]}
+                                title="Inspect"
                               >
-                                <div
-                                  className="euiFlexItem euiFlexItem--flexGrowZero sc-bwzfXH hrDDAP"
+                                <button
+                                  aria-label="Inspect"
+                                  className="euiButtonIcon euiButtonIcon--primary inspectButtonComponent"
+                                  data-test-subj="inspect-icon-button"
+                                  onClick={[Function]}
+                                  title="Inspect"
+                                  type="button"
                                 >
                                   <EuiIcon
-                                    color="#DB1374"
-                                    data-test-subj="stat-icon"
-                                    size="l"
-                                    type="cross"
+                                    aria-hidden="true"
+                                    className="euiButtonIcon__icon"
+                                    size="m"
+                                    type="inspect"
                                   >
                                     <EuiIconEmpty
-                                      className="euiIcon euiIcon--large euiIcon-isLoading"
-                                      data-test-subj="stat-icon"
+                                      aria-hidden={true}
+                                      className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
                                       focusable="false"
-                                      style={
-                                        Object {
-                                          "fill": "#DB1374",
-                                        }
-                                      }
+                                      role="img"
+                                      style={null}
                                     >
                                       <svg
-                                        className="euiIcon euiIcon--large euiIcon-isLoading"
-                                        data-test-subj="stat-icon"
+                                        aria-hidden={true}
+                                        className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
                                         focusable="false"
                                         height={16}
-                                        style={
-                                          Object {
-                                            "fill": "#DB1374",
-                                          }
-                                        }
+                                        role="img"
+                                        style={null}
                                         viewBox="0 0 16 16"
                                         width={16}
                                         xmlns="http://www.w3.org/2000/svg"
                                       />
                                     </EuiIconEmpty>
                                   </EuiIcon>
-                                </div>
-                              </EuiFlexItem>
-                            </Styled(EuiFlexItem)>
-                            <Styled(EuiFlexItem)>
-                              <EuiFlexItem
-                                className="sc-bwzfXH hrDDAP"
-                              >
-                                <div
-                                  className="euiFlexItem sc-bwzfXH hrDDAP"
-                                >
-                                  <Styled(EuiTitle)>
-                                    <EuiTitle
-                                      className="sc-htpNat bTDdmQ"
-                                    >
-                                      <p
-                                        className="euiTitle euiTitle--medium sc-htpNat bTDdmQ"
-                                        data-test-subj="stat-title"
-                                      >
-                                        1,714
-                                         
-                                        Source
-                                      </p>
-                                    </EuiTitle>
-                                  </Styled(EuiTitle)>
-                                </div>
-                              </EuiFlexItem>
-                            </Styled(EuiFlexItem)>
-                          </div>
-                        </EuiFlexGroup>
-                      </div>
-                    </EuiFlexItem>
-                  </Styled(EuiFlexItem)>
-                  <Styled(EuiFlexItem)
-                    key="stat-items-field-uniqueDestinationIps"
-                  >
-                    <EuiFlexItem
-                      className="sc-bwzfXH hrDDAP"
+                                </button>
+                              </EuiButtonIcon>
+                              <ModalInspectQuery
+                                closeModal={[Function]}
+                                data-test-subj="inspect-modal"
+                                isShowing={false}
+                                request={null}
+                                response={null}
+                                title="KPI UNIQUE_PRIVATE_IPS"
+                              />
+                            </Memo(InspectButtonComponent)>
+                          </Connect(Component)>
+                        </div>
+                      </EuiFlexItem>
+                    </div>
+                  </EuiFlexGroup>
+                  <EuiFlexGroup>
+                    <div
+                      className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
                     >
-                      <div
-                        className="euiFlexItem sc-bwzfXH hrDDAP"
+                      <FlexItem
+                        key="stat-items-field-uniqueSourceIps"
                       >
-                        <EuiFlexGroup
-                          alignItems="center"
-                          gutterSize="m"
-                          responsive={false}
+                        <EuiFlexItem
+                          className="sc-AykKG dLVTBE"
                         >
                           <div
-                            className="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+                            className="euiFlexItem sc-AykKG dLVTBE"
                           >
-                            <Styled(EuiFlexItem)
-                              grow={false}
+                            <EuiFlexGroup
+                              alignItems="center"
+                              gutterSize="m"
+                              responsive={false}
                             >
-                              <EuiFlexItem
-                                className="sc-bwzfXH hrDDAP"
-                                grow={false}
+                              <div
+                                className="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
                               >
-                                <div
-                                  className="euiFlexItem euiFlexItem--flexGrowZero sc-bwzfXH hrDDAP"
+                                <FlexItem
+                                  grow={false}
                                 >
-                                  <EuiIcon
-                                    color="#490092"
-                                    data-test-subj="stat-icon"
-                                    size="l"
-                                    type="cross"
+                                  <EuiFlexItem
+                                    className="sc-AykKG dLVTBE"
+                                    grow={false}
                                   >
-                                    <EuiIconEmpty
-                                      className="euiIcon euiIcon--large euiIcon-isLoading"
-                                      data-test-subj="stat-icon"
-                                      focusable="false"
-                                      style={
-                                        Object {
-                                          "fill": "#490092",
-                                        }
-                                      }
+                                    <div
+                                      className="euiFlexItem euiFlexItem--flexGrowZero sc-AykKG dLVTBE"
                                     >
-                                      <svg
-                                        className="euiIcon euiIcon--large euiIcon-isLoading"
+                                      <EuiIcon
+                                        color="#D36086"
                                         data-test-subj="stat-icon"
-                                        focusable="false"
-                                        height={16}
-                                        style={
-                                          Object {
-                                            "fill": "#490092",
-                                          }
-                                        }
-                                        viewBox="0 0 16 16"
-                                        width={16}
-                                        xmlns="http://www.w3.org/2000/svg"
-                                      />
-                                    </EuiIconEmpty>
-                                  </EuiIcon>
-                                </div>
-                              </EuiFlexItem>
-                            </Styled(EuiFlexItem)>
-                            <Styled(EuiFlexItem)>
-                              <EuiFlexItem
-                                className="sc-bwzfXH hrDDAP"
-                              >
-                                <div
-                                  className="euiFlexItem sc-bwzfXH hrDDAP"
-                                >
-                                  <Styled(EuiTitle)>
-                                    <EuiTitle
-                                      className="sc-htpNat bTDdmQ"
-                                    >
-                                      <p
-                                        className="euiTitle euiTitle--medium sc-htpNat bTDdmQ"
-                                        data-test-subj="stat-title"
+                                        size="l"
+                                        type="cross"
                                       >
-                                        2,359
-                                         
-                                        Dest.
-                                      </p>
-                                    </EuiTitle>
-                                  </Styled(EuiTitle)>
-                                </div>
-                              </EuiFlexItem>
-                            </Styled(EuiFlexItem)>
+                                        <EuiIconEmpty
+                                          aria-hidden={true}
+                                          className="euiIcon euiIcon--large euiIcon-isLoading"
+                                          data-test-subj="stat-icon"
+                                          focusable="false"
+                                          role="img"
+                                          style={
+                                            Object {
+                                              "fill": "#D36086",
+                                            }
+                                          }
+                                        >
+                                          <svg
+                                            aria-hidden={true}
+                                            className="euiIcon euiIcon--large euiIcon-isLoading"
+                                            data-test-subj="stat-icon"
+                                            focusable="false"
+                                            height={16}
+                                            role="img"
+                                            style={
+                                              Object {
+                                                "fill": "#D36086",
+                                              }
+                                            }
+                                            viewBox="0 0 16 16"
+                                            width={16}
+                                            xmlns="http://www.w3.org/2000/svg"
+                                          />
+                                        </EuiIconEmpty>
+                                      </EuiIcon>
+                                    </div>
+                                  </EuiFlexItem>
+                                </FlexItem>
+                                <FlexItem>
+                                  <EuiFlexItem
+                                    className="sc-AykKG dLVTBE"
+                                  >
+                                    <div
+                                      className="euiFlexItem sc-AykKG dLVTBE"
+                                    >
+                                      <StatValue>
+                                        <EuiTitle
+                                          className="sc-AykKH eFqnYS"
+                                        >
+                                          <p
+                                            className="euiTitle euiTitle--medium sc-AykKH eFqnYS"
+                                            data-test-subj="stat-title"
+                                          >
+                                            1,714
+                                             
+                                            Source
+                                          </p>
+                                        </EuiTitle>
+                                      </StatValue>
+                                    </div>
+                                  </EuiFlexItem>
+                                </FlexItem>
+                              </div>
+                            </EuiFlexGroup>
                           </div>
-                        </EuiFlexGroup>
-                      </div>
-                    </EuiFlexItem>
-                  </Styled(EuiFlexItem)>
-                </div>
-              </EuiFlexGroup>
-              <EuiHorizontalRule>
-                <hr
-                  className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginLarge"
-                />
-              </EuiHorizontalRule>
-              <EuiFlexGroup>
-                <div
-                  className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
-                >
-                  <Styled(EuiFlexItem)>
-                    <EuiFlexItem
-                      className="sc-bwzfXH hrDDAP"
-                    >
-                      <div
-                        className="euiFlexItem sc-bwzfXH hrDDAP"
+                        </EuiFlexItem>
+                      </FlexItem>
+                      <FlexItem
+                        key="stat-items-field-uniqueDestinationIps"
                       >
-                        <Memo(mockConstructor)
-                          barChart={
-                            Array [
-                              Object {
-                                "color": "#DB1374",
-                                "key": "uniqueSourceIps",
-                                "value": Array [
-                                  Object {
-                                    "x": "uniqueSourceIps",
-                                    "y": "1714",
-                                  },
-                                ],
-                              },
-                              Object {
-                                "color": "#490092",
-                                "key": "uniqueDestinationIps",
-                                "value": Array [
-                                  Object {
-                                    "x": "uniqueDestinationIps",
-                                    "y": 2354,
-                                  },
-                                ],
-                              },
-                            ]
-                          }
-                          configs={
-                            Object {
-                              "axis": Object {
-                                "xTickFormatter": [Function],
-                              },
-                              "series": Object {
-                                "xScaleType": "ordinal",
-                                "yScaleType": "linear",
-                              },
-                            }
-                          }
-                        />
-                      </div>
-                    </EuiFlexItem>
-                  </Styled(EuiFlexItem)>
-                  <Styled(EuiFlexItem)>
-                    <EuiFlexItem
-                      className="sc-bwzfXH hrDDAP"
-                    >
-                      <div
-                        className="euiFlexItem sc-bwzfXH hrDDAP"
-                      >
-                        <Connect(GlobalTimeComponent)>
-                          <GlobalTimeComponent
-                            deleteAllQuery={[Function]}
-                            from={0}
-                            setGlobalQuery={[Function]}
-                            to={1}
+                        <EuiFlexItem
+                          className="sc-AykKG dLVTBE"
+                        >
+                          <div
+                            className="euiFlexItem sc-AykKG dLVTBE"
                           >
-                            <Memo(mockConstructor)
+                            <EuiFlexGroup
+                              alignItems="center"
+                              gutterSize="m"
+                              responsive={false}
+                            >
+                              <div
+                                className="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+                              >
+                                <FlexItem
+                                  grow={false}
+                                >
+                                  <EuiFlexItem
+                                    className="sc-AykKG dLVTBE"
+                                    grow={false}
+                                  >
+                                    <div
+                                      className="euiFlexItem euiFlexItem--flexGrowZero sc-AykKG dLVTBE"
+                                    >
+                                      <EuiIcon
+                                        color="#9170B8"
+                                        data-test-subj="stat-icon"
+                                        size="l"
+                                        type="cross"
+                                      >
+                                        <EuiIconEmpty
+                                          aria-hidden={true}
+                                          className="euiIcon euiIcon--large euiIcon-isLoading"
+                                          data-test-subj="stat-icon"
+                                          focusable="false"
+                                          role="img"
+                                          style={
+                                            Object {
+                                              "fill": "#9170B8",
+                                            }
+                                          }
+                                        >
+                                          <svg
+                                            aria-hidden={true}
+                                            className="euiIcon euiIcon--large euiIcon-isLoading"
+                                            data-test-subj="stat-icon"
+                                            focusable="false"
+                                            height={16}
+                                            role="img"
+                                            style={
+                                              Object {
+                                                "fill": "#9170B8",
+                                              }
+                                            }
+                                            viewBox="0 0 16 16"
+                                            width={16}
+                                            xmlns="http://www.w3.org/2000/svg"
+                                          />
+                                        </EuiIconEmpty>
+                                      </EuiIcon>
+                                    </div>
+                                  </EuiFlexItem>
+                                </FlexItem>
+                                <FlexItem>
+                                  <EuiFlexItem
+                                    className="sc-AykKG dLVTBE"
+                                  >
+                                    <div
+                                      className="euiFlexItem sc-AykKG dLVTBE"
+                                    >
+                                      <StatValue>
+                                        <EuiTitle
+                                          className="sc-AykKH eFqnYS"
+                                        >
+                                          <p
+                                            className="euiTitle euiTitle--medium sc-AykKH eFqnYS"
+                                            data-test-subj="stat-title"
+                                          >
+                                            2,359
+                                             
+                                            Dest.
+                                          </p>
+                                        </EuiTitle>
+                                      </StatValue>
+                                    </div>
+                                  </EuiFlexItem>
+                                </FlexItem>
+                              </div>
+                            </EuiFlexGroup>
+                          </div>
+                        </EuiFlexItem>
+                      </FlexItem>
+                    </div>
+                  </EuiFlexGroup>
+                  <EuiHorizontalRule>
+                    <hr
+                      className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginLarge"
+                    />
+                  </EuiHorizontalRule>
+                  <EuiFlexGroup>
+                    <div
+                      className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                    >
+                      <FlexItem>
+                        <EuiFlexItem
+                          className="sc-AykKG dLVTBE"
+                        >
+                          <div
+                            className="euiFlexItem sc-AykKG dLVTBE"
+                          >
+                            <BarChart
+                              barChart={
+                                Array [
+                                  Object {
+                                    "color": "#D36086",
+                                    "key": "uniqueSourceIps",
+                                    "value": Array [
+                                      Object {
+                                        "x": "uniqueSourceIps",
+                                        "y": "1714",
+                                      },
+                                    ],
+                                  },
+                                  Object {
+                                    "color": "#9170B8",
+                                    "key": "uniqueDestinationIps",
+                                    "value": Array [
+                                      Object {
+                                        "x": "uniqueDestinationIps",
+                                        "y": 2354,
+                                      },
+                                    ],
+                                  },
+                                ]
+                              }
+                              configs={
+                                Object {
+                                  "axis": Object {
+                                    "xTickFormatter": [Function],
+                                  },
+                                  "customHeight": 74,
+                                  "series": Object {
+                                    "stackAccessors": Array [
+                                      "y0",
+                                    ],
+                                    "xScaleType": "ordinal",
+                                    "yScaleType": "linear",
+                                  },
+                                  "settings": Object {
+                                    "onElementClick": [Function],
+                                    "rotation": 90,
+                                  },
+                                }
+                              }
+                            >
+                              <div
+                                className="barchart"
+                              />
+                            </BarChart>
+                          </div>
+                        </EuiFlexItem>
+                      </FlexItem>
+                      <FlexItem>
+                        <EuiFlexItem
+                          className="sc-AykKG dLVTBE"
+                        >
+                          <div
+                            className="euiFlexItem sc-AykKG dLVTBE"
+                          >
+                            <AreaChart
                               areaChart={
                                 Array [
                                   Object {
-                                    "color": "#DB1374",
+                                    "color": "#D36086",
                                     "key": "uniqueSourceIpsHistogram",
                                     "value": Array [
                                       Object {
@@ -637,7 +989,7 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                                     ],
                                   },
                                   Object {
-                                    "color": "#490092",
+                                    "color": "#9170B8",
                                     "key": "uniqueDestinationIpsHistogram",
                                     "value": Array [
                                       Object {
@@ -662,25 +1014,33 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
                                     "xTickFormatter": [Function],
                                     "yTickFormatter": [Function],
                                   },
+                                  "customHeight": 74,
                                   "series": Object {
                                     "xScaleType": "time",
                                     "yScaleType": "linear",
                                   },
+                                  "settings": Object {
+                                    "onBrushEnd": [MockFunction],
+                                  },
                                 }
                               }
-                            />
-                          </GlobalTimeComponent>
-                        </Connect(GlobalTimeComponent)>
-                      </div>
-                    </EuiFlexItem>
-                  </Styled(EuiFlexItem)>
+                            >
+                              <div
+                                className="areachart"
+                              />
+                            </AreaChart>
+                          </div>
+                        </EuiFlexItem>
+                      </FlexItem>
+                    </div>
+                  </EuiFlexGroup>
                 </div>
-              </EuiFlexGroup>
+              </EuiPanel>
             </div>
-          </EuiPanel>
+          </InspectButtonContainer>
         </div>
       </EuiFlexItem>
-    </Styled(EuiFlexItem)>
-  </Memo()>
+    </FlexItem>
+  </StatItemsComponent>
 </Provider>
 `;

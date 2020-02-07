@@ -11,8 +11,7 @@ import Style from 'style-it';
 import { WorkpadPage } from '../workpad_page';
 import { Fullscreen } from '../fullscreen';
 import { isTextInput } from '../../lib/is_text_input';
-
-const WORKPAD_CANVAS_BUFFER = 32; // 32px padding around the workpad
+import { WORKPAD_CANVAS_BUFFER } from '../../../common/lib/constants';
 
 export class Workpad extends React.PureComponent {
   static propTypes = {
@@ -34,25 +33,32 @@ export class Workpad extends React.PureComponent {
     fetchAllRenderables: PropTypes.func.isRequired,
     registerLayout: PropTypes.func.isRequired,
     unregisterLayout: PropTypes.func.isRequired,
+    zoomIn: PropTypes.func.isRequired,
+    zoomOut: PropTypes.func.isRequired,
+    resetZoom: PropTypes.func.isRequired,
   };
 
-  // handle keypress events for editor and presentation events
+  _toggleFullscreen = () => {
+    const { setFullscreen, isFullscreen } = this.props;
+    setFullscreen(!isFullscreen);
+  };
+
+  // handle keypress events for editor events
   _keyMap = {
-    // this exists in both contexts
     REFRESH: this.props.fetchAllRenderables,
-    // editor events
     UNDO: this.props.undoHistory,
     REDO: this.props.redoHistory,
     GRID: () => this.props.setGrid(!this.props.grid),
     ZOOM_IN: this.props.zoomIn,
     ZOOM_OUT: this.props.zoomOut,
-    // presentation events
+    ZOOM_RESET: this.props.resetZoom,
     PREV: this.props.previousPage,
     NEXT: this.props.nextPage,
+    FULLSCREEN: this._toggleFullscreen,
   };
 
   _keyHandler = (action, event) => {
-    if (!isTextInput(event.target)) {
+    if (!isTextInput(event.target) && typeof this._keyMap[action] === 'function') {
       event.preventDefault();
       this._keyMap[action]();
     }
@@ -103,8 +109,6 @@ export class Workpad extends React.PureComponent {
                     transform: `scale3d(${scale}, ${scale}, 1)`,
                     WebkitTransform: `scale3d(${scale}, ${scale}, 1)`,
                     msTransform: `scale3d(${scale}, ${scale}, 1)`,
-                    // height,
-                    // width,
                     height: windowSize.height < height ? 'auto' : height,
                     width: windowSize.width < width ? 'auto' : width,
                   }

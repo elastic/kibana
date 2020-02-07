@@ -10,48 +10,50 @@ import {
 } from '../../../../../server/lib/create_router/error_wrappers';
 
 import { DEFAULT_REPOSITORY_TYPES, REPOSITORY_PLUGINS_MAP } from '../../../common/constants';
-import { Repository, RepositoryType, RepositoryVerification } from '../../../common/types';
+import {
+  Repository,
+  RepositoryType,
+  RepositoryVerification,
+  SlmPolicyEs,
+  RepositoryCleanup,
+} from '../../../common/types';
 
-import { Plugins } from '../../../shim';
-import { deserializeRepositorySettings, serializeRepositorySettings } from '../../lib';
+import { Plugins } from '../../shim';
+import {
+  deserializeRepositorySettings,
+  serializeRepositorySettings,
+  getManagedRepositoryName,
+} from '../../lib';
 
 let isCloudEnabled: boolean = false;
 let callWithInternalUser: any;
 
 export function registerRepositoriesRoutes(router: Router, plugins: Plugins) {
-  isCloudEnabled = plugins.cloud.config.isCloudEnabled;
+  isCloudEnabled = plugins.cloud && plugins.cloud.isCloudEnabled;
   callWithInternalUser = plugins.elasticsearch.getCluster('data').callWithInternalUser;
   router.get('repository_types', getTypesHandler);
   router.get('repositories', getAllHandler);
   router.get('repositories/{name}', getOneHandler);
   router.get('repositories/{name}/verify', getVerificationHandler);
+  router.post('repositories/{name}/cleanup', getCleanupHandler);
   router.put('repositories', createHandler);
   router.put('repositories/{name}', updateHandler);
   router.delete('repositories/{names}', deleteHandler);
 }
 
-export const getManagedRepositoryName = async () => {
-  const { persistent, transient, defaults } = await callWithInternalUser('cluster.getSettings', {
-    filterPath: '*.*managed_repository',
-    flatSettings: true,
-    includeDefaults: true,
-  });
-  const { 'cluster.metadata.managed_repository': managedRepositoryName = undefined } = {
-    ...defaults,
-    ...persistent,
-    ...transient,
-  };
-  return managedRepositoryName;
-};
+interface ManagedRepository {
+  name?: string;
+  policy?: string;
+}
 
 export const getAllHandler: RouterRouteHandler = async (
   req,
   callWithRequest
 ): Promise<{
   repositories: Repository[];
-  managedRepository?: string;
+  managedRepository: ManagedRepository;
 }> => {
-  const managedRepository = await getManagedRepositoryName();
+  const managedRepositoryName = await getManagedRepositoryName(callWithInternalUser);
   const repositoriesByName = await callWithRequest('snapshot.getRepository', {
     repository: '_all',
   });
@@ -64,6 +66,35 @@ export const getAllHandler: RouterRouteHandler = async (
       settings: deserializeRepositorySettings(settings),
     };
   });
+
+  const managedRepository = {
+    name: managedRepositoryName,
+  } as ManagedRepository;
+
+  // If a managed repository, we also need to check if a policy is associated to it
+  if (managedRepositoryName) {
+    try {
+      const policiesByName: {
+        [key: string]: SlmPolicyEs;
+      } = await callWithRequest('sr.policies', {
+        human: true,
+      });
+      const managedRepositoryPolicy = Object.entries(policiesByName)
+        .filter(([, data]) => {
+          const { policy } = data;
+          return policy.repository === managedRepositoryName;
+        })
+        .flat();
+
+      const [policyName] = managedRepositoryPolicy;
+
+      managedRepository.policy = policyName as ManagedRepository['name'];
+    } catch (e) {
+      // swallow error for now
+      // we don't want to block repositories from loading if request fails
+    }
+  }
+
   return { repositories, managedRepository };
 };
 
@@ -76,7 +107,7 @@ export const getOneHandler: RouterRouteHandler = async (
   snapshots: { count: number | null } | {};
 }> => {
   const { name } = req.params;
-  const managedRepository = await getManagedRepositoryName();
+  const managedRepository = await getManagedRepositoryName(callWithInternalUser);
   const repositoryByName = await callWithRequest('snapshot.getRepository', { repository: name });
   const {
     responses: snapshotResponses,
@@ -139,6 +170,31 @@ export const getVerificationHandler: RouterRouteHandler = async (
       : {
           valid: true,
           response: verificationResults,
+        },
+  };
+};
+
+export const getCleanupHandler: RouterRouteHandler = async (
+  req,
+  callWithRequest
+): Promise<{
+  cleanup: RepositoryCleanup | {};
+}> => {
+  const { name } = req.params;
+
+  const cleanupResults = await callWithRequest('sr.cleanupRepository', {
+    name,
+  }).catch(e => ({
+    cleaned: false,
+    error: e.response ? JSON.parse(e.response) : e,
+  }));
+
+  return {
+    cleanup: cleanupResults.error
+      ? cleanupResults
+      : {
+          cleaned: true,
+          response: cleanupResults,
         },
   };
 };

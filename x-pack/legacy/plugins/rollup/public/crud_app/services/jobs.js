@@ -97,9 +97,7 @@ export function deserializeJob(job) {
         histogram,
       },
     },
-    status: {
-      job_state: status,
-    },
+    status: { job_state: status },
     stats: {
       documents_processed: documentsProcessed,
       pages_processed: pagesProcessed,
@@ -155,6 +153,6 @@ export function deserializeJob(job) {
   return deserializedJob;
 }
 
-export function deserializeJobs(jobs) {
+export function deserializeJobs(jobs = []) {
   return jobs.map(deserializeJob);
 }

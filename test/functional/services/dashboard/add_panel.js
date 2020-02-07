@@ -17,7 +17,6 @@
  * under the License.
  */
 
-
 export function DashboardAddPanelProvider({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
@@ -25,14 +24,18 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
   const flyout = getService('flyout');
   const PageObjects = getPageObjects(['header', 'common']);
 
-  return new class DashboardAddPanel {
+  return new (class DashboardAddPanel {
     async clickOpenAddPanel() {
       log.debug('DashboardAddPanel.clickOpenAddPanel');
       await testSubjects.click('dashboardAddPanelButton');
+      // Give some time for the animation to complete
+      await PageObjects.common.sleep(500);
     }
 
-    async clickAddNewEmbeddableLink() {
-      await testSubjects.click('addNewSavedObjectLink');
+    async clickAddNewEmbeddableLink(type) {
+      await testSubjects.click('createNew');
+      await testSubjects.click(`createNew-${type}`);
+      await testSubjects.missingOrFail(`createNew-${type}`);
     }
 
     async toggleFilterPopover() {
@@ -51,14 +54,23 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
     async addEveryEmbeddableOnCurrentPage() {
       log.debug('addEveryEmbeddableOnCurrentPage');
       const itemList = await testSubjects.find('savedObjectFinderItemList');
-      const embeddableRows = await itemList.findAllByCssSelector('li');
       const embeddableList = [];
-      for (let i = 0; i < embeddableRows.length; i++) {
-        embeddableList.push(await embeddableRows[i].getVisibleText());
-        await embeddableRows[i].click();
-        await PageObjects.common.closeToast();
-      }
-      log.debug(`Added ${embeddableRows.length} embeddables`);
+      await retry.try(async () => {
+        const embeddableRows = await itemList.findAllByCssSelector('li');
+        for (let i = 0; i < embeddableRows.length; i++) {
+          const name = await embeddableRows[i].getVisibleText();
+
+          if (embeddableList.includes(name)) {
+            // already added this one
+            continue;
+          }
+
+          await embeddableRows[i].click();
+          await PageObjects.common.closeToast();
+          embeddableList.push(name);
+        }
+      });
+      log.debug(`Added ${embeddableList.length} embeddables`);
       return embeddableList;
     }
 
@@ -95,8 +107,8 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
       if (!isOpen) {
         await retry.try(async () => {
           await this.clickOpenAddPanel();
-          const isOpen = await this.isAddPanelOpen();
-          if (!isOpen) {
+          const isNowOpen = await this.isAddPanelOpen();
+          if (!isNowOpen) {
             throw new Error('Add panel still not open, trying again.');
           }
         });
@@ -170,7 +182,9 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
     }
 
     async addEmbeddable(embeddableName, embeddableType) {
-      log.debug(`DashboardAddPanel.addEmbeddable, name: ${embeddableName}, type: ${embeddableType}`);
+      log.debug(
+        `DashboardAddPanel.addEmbeddable, name: ${embeddableName}, type: ${embeddableType}`
+      );
       await this.ensureAddPanelIsShowing();
       await this.toggleFilter(embeddableType);
       await this.filterEmbeddableNames(`"${embeddableName.replace('-', ' ')}"`);
@@ -193,5 +207,5 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
       await this.filterEmbeddableNames(`"${name}"`);
       return await testSubjects.exists(`savedObjectTitle${name.split(' ').join('-')}`);
     }
-  };
+  })();
 }

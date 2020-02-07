@@ -5,5 +5,9 @@
  */
 
 import { TagFactory } from '../../../public/lib/tag';
+import { TagStrings as strings } from '../../../i18n';
 
-export const text: TagFactory = () => ({ name: 'text', color: '#D3DAE6' });
+export const text: TagFactory = () => ({
+  name: strings.text(),
+  color: '#D3DAE6',
+});

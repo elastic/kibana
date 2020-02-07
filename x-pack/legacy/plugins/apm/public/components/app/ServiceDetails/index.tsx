@@ -6,31 +6,18 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import React from 'react';
-import { useFetcher } from '../../../hooks/useFetcher';
-import { loadServiceDetails } from '../../../services/rest/apm/services';
 import { ApmHeader } from '../../shared/ApmHeader';
 import { ServiceDetailTabs } from './ServiceDetailTabs';
 import { ServiceIntegrations } from './ServiceIntegrations';
-import { isRumAgentName } from '../../../../common/agent_name';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 
-export function ServiceDetails() {
-  const { urlParams, uiFilters } = useUrlParams();
-  const { serviceName, start, end } = urlParams;
-  const { data: serviceDetailsData } = useFetcher(
-    () => {
-      if (serviceName && start && end) {
-        return loadServiceDetails({ serviceName, start, end, uiFilters });
-      }
-    },
-    [serviceName, start, end, uiFilters]
-  );
+interface Props {
+  tab: React.ComponentProps<typeof ServiceDetailTabs>['tab'];
+}
 
-  if (!serviceDetailsData) {
-    return null;
-  }
-
-  const isRumAgent = isRumAgentName(serviceDetailsData.agentName);
+export function ServiceDetails({ tab }: Props) {
+  const { urlParams } = useUrlParams();
+  const { serviceName } = urlParams;
 
   return (
     <div>
@@ -42,20 +29,12 @@ export function ServiceDetails() {
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <ServiceIntegrations
-              transactionTypes={serviceDetailsData.types}
-              urlParams={urlParams}
-            />
+            <ServiceIntegrations urlParams={urlParams} />
           </EuiFlexItem>
         </EuiFlexGroup>
       </ApmHeader>
 
-      <ServiceDetailTabs
-        urlParams={urlParams}
-        transactionTypes={serviceDetailsData.types}
-        isRumAgent={isRumAgent}
-        agentName={serviceDetailsData.agentName}
-      />
+      <ServiceDetailTabs tab={tab} />
     </div>
   );
 }

@@ -1,0 +1,196 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Should render cancel button when drawing 1`] = `
+<EuiFlexGroup
+  gutterSize="s"
+>
+  <EuiFlexItem>
+    <EuiPopover
+      anchorPosition="leftUp"
+      button={
+        <EuiButtonIcon
+          aria-label="Tools"
+          className="mapToolbarOverlay__button"
+          color="text"
+          iconType="wrench"
+          onClick={[Function]}
+          title="Tools"
+        />
+      }
+      closePopover={[Function]}
+      display="inlineBlock"
+      hasArrow={true}
+      id="contextMenu"
+      isOpen={false}
+      ownFocus={false}
+      panelPaddingSize="none"
+      withTitle={true}
+    >
+      <EuiContextMenu
+        initialPanelId={0}
+        panels={
+          Array [
+            Object {
+              "id": 0,
+              "items": Array [
+                Object {
+                  "name": "Draw shape to filter data",
+                  "panel": 1,
+                },
+                Object {
+                  "name": "Draw bounds to filter data",
+                  "panel": 2,
+                },
+              ],
+              "title": "Tools",
+            },
+            Object {
+              "content": <GeometryFilterForm
+                buttonLabel="Draw shape"
+                className="mapDrawControl__geometryFilterForm"
+                geoFields={
+                  Array [
+                    Object {
+                      "geoFieldName": "location",
+                      "geoFieldType": "geo_point",
+                      "indexPatternId": "1",
+                      "indexPatternTitle": "my_index",
+                    },
+                  ]
+                }
+                intitialGeometryLabel="shape"
+                isFilterGeometryClosed={true}
+                onSubmit={[Function]}
+              />,
+              "id": 1,
+              "title": "Draw shape",
+            },
+            Object {
+              "content": <GeometryFilterForm
+                buttonLabel="Draw bounds"
+                className="mapDrawControl__geometryFilterForm"
+                geoFields={
+                  Array [
+                    Object {
+                      "geoFieldName": "location",
+                      "geoFieldType": "geo_point",
+                      "indexPatternId": "1",
+                      "indexPatternTitle": "my_index",
+                    },
+                  ]
+                }
+                intitialGeometryLabel="bounds"
+                isFilterGeometryClosed={true}
+                onSubmit={[Function]}
+              />,
+              "id": 2,
+              "title": "Draw bounds",
+            },
+          ]
+        }
+      />
+    </EuiPopover>
+  </EuiFlexItem>
+  <EuiFlexItem>
+    <EuiButton
+      fill={true}
+      onClick={[Function]}
+      size="s"
+    >
+      <FormattedMessage
+        defaultMessage="Cancel"
+        id="xpack.maps.tooltip.toolsControl.cancelDrawButtonLabel"
+        values={Object {}}
+      />
+    </EuiButton>
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;
+
+exports[`renders 1`] = `
+<EuiPopover
+  anchorPosition="leftUp"
+  button={
+    <EuiButtonIcon
+      aria-label="Tools"
+      className="mapToolbarOverlay__button"
+      color="text"
+      iconType="wrench"
+      onClick={[Function]}
+      title="Tools"
+    />
+  }
+  closePopover={[Function]}
+  display="inlineBlock"
+  hasArrow={true}
+  id="contextMenu"
+  isOpen={false}
+  ownFocus={false}
+  panelPaddingSize="none"
+  withTitle={true}
+>
+  <EuiContextMenu
+    initialPanelId={0}
+    panels={
+      Array [
+        Object {
+          "id": 0,
+          "items": Array [
+            Object {
+              "name": "Draw shape to filter data",
+              "panel": 1,
+            },
+            Object {
+              "name": "Draw bounds to filter data",
+              "panel": 2,
+            },
+          ],
+          "title": "Tools",
+        },
+        Object {
+          "content": <GeometryFilterForm
+            buttonLabel="Draw shape"
+            className="mapDrawControl__geometryFilterForm"
+            geoFields={
+              Array [
+                Object {
+                  "geoFieldName": "location",
+                  "geoFieldType": "geo_point",
+                  "indexPatternId": "1",
+                  "indexPatternTitle": "my_index",
+                },
+              ]
+            }
+            intitialGeometryLabel="shape"
+            isFilterGeometryClosed={true}
+            onSubmit={[Function]}
+          />,
+          "id": 1,
+          "title": "Draw shape",
+        },
+        Object {
+          "content": <GeometryFilterForm
+            buttonLabel="Draw bounds"
+            className="mapDrawControl__geometryFilterForm"
+            geoFields={
+              Array [
+                Object {
+                  "geoFieldName": "location",
+                  "geoFieldType": "geo_point",
+                  "indexPatternId": "1",
+                  "indexPatternTitle": "my_index",
+                },
+              ]
+            }
+            intitialGeometryLabel="bounds"
+            isFilterGeometryClosed={true}
+            onSubmit={[Function]}
+          />,
+          "id": 2,
+          "title": "Draw bounds",
+        },
+      ]
+    }
+  />
+</EuiPopover>
+`;

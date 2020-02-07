@@ -29,11 +29,11 @@ export function isAgentName(agentName: string): boolean {
 }
 
 export function isRumAgentName(agentName: string | undefined) {
-  if (!agentName) {
-    return false;
-  }
-
-  return ([agentNames['js-base'], agentNames['rum-js']] as string[]).includes(
-    agentName
+  return (
+    agentName === agentNames['js-base'] || agentName === agentNames['rum-js']
   );
+}
+
+export function isJavaAgentName(agentName: string | undefined) {
+  return agentName === agentNames.java;
 }

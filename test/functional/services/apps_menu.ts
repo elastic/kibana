@@ -23,27 +23,33 @@ export function AppsMenuProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const log = getService('log');
 
-  return new class AppsMenu {
+  return new (class AppsMenu {
     /**
-     * Get the text and href from each of the links in the apps menu
+     * Get the attributes from each of the links in the apps menu
      */
     public async readLinks() {
       const appMenu = await testSubjects.find('navDrawer');
       const $ = await appMenu.parseDomContent();
 
-      const links: Array<{
-        text: string;
-        href: string;
-      }> = $.findTestSubjects('navDrawerAppsMenuLink')
+      const links = $.findTestSubjects('navDrawerAppsMenuLink')
         .toArray()
-        .map((link: any) => {
+        .map(link => {
           return {
             text: $(link).text(),
             href: $(link).attr('href'),
+            disabled: $(link).attr('disabled') != null,
           };
         });
 
       return links;
+    }
+
+    /**
+     * Get the attributes from the link with the given name.
+     * @param name
+     */
+    public async getLink(name: string) {
+      return (await this.readLinks()).find(nl => nl.text === name);
     }
 
     /**
@@ -69,5 +75,5 @@ export function AppsMenuProvider({ getService }: FtrProviderContext) {
         // Intentionally empty
       }
     }
-  }();
+  })();
 }

@@ -32,10 +32,14 @@ export class Job extends events.EventEmitter {
     this.indexSettings = options.indexSettings || {};
     this.browser_type = options.browser_type;
 
+    if (typeof this.maxAttempts !== 'number' || this.maxAttempts < 1) {
+      throw new Error(`Invalid max_attempts: ${this.maxAttempts}`);
+    }
+
     this.debug = (msg, err) => {
-      const logger = options.logger || function () {};
+      const logger = options.logger || function() {};
       const message = `${this.id} - ${msg}`;
-      const tags = ['job', 'debug'];
+      const tags = ['debug'];
 
       if (err) {
         logger(`${message}: ${err}`, tags);
@@ -53,7 +57,7 @@ export class Job extends events.EventEmitter {
         meta: {
           // We are copying these values out of payload because these fields are indexed and can be aggregated on
           // for tracking stats, while payload contents are not.
-          objectType: payload.type,
+          objectType: payload.objectType,
           layout: payload.layout ? payload.layout.id : 'none',
         },
         payload: this.payload,
@@ -66,7 +70,7 @@ export class Job extends events.EventEmitter {
         max_attempts: this.maxAttempts,
         status: constants.JOB_STATUS_PENDING,
         browser_type: this.browser_type,
-      }
+      },
     };
 
     if (options.headers) {
@@ -74,8 +78,8 @@ export class Job extends events.EventEmitter {
     }
 
     this.ready = createIndex(this._client, this.index, this.indexSettings)
-      .then(() => this._client.callWithInternalUser('index', indexParams))
-      .then((doc) => {
+      .then(() => this._client.callAsInternalUser('index', indexParams))
+      .then(doc => {
         this.document = {
           id: doc._id,
           index: doc._index,
@@ -84,14 +88,16 @@ export class Job extends events.EventEmitter {
         };
         this.debug(`Job created in index ${this.index}`);
 
-        return this._client.callWithInternalUser('indices.refresh', {
-          index: this.index
-        }).then(() => {
-          this.debug(`Job index refreshed ${this.index}`);
-          this.emit(constants.EVENT_JOB_CREATED, this.document);
-        });
+        return this._client
+          .callAsInternalUser('indices.refresh', {
+            index: this.index,
+          })
+          .then(() => {
+            this.debug(`Job index refreshed ${this.index}`);
+            this.emit(constants.EVENT_JOB_CREATED, this.document);
+          });
       })
-      .catch((err) => {
+      .catch(err => {
         this.debug('Job creation failed', err);
         this.emit(constants.EVENT_JOB_CREATE_ERROR, err);
       });
@@ -105,12 +111,12 @@ export class Job extends events.EventEmitter {
   get() {
     return this.ready
       .then(() => {
-        return this._client.callWithInternalUser('get', {
+        return this._client.callAsInternalUser('get', {
           index: this.index,
-          id: this.id
+          id: this.id,
         });
       })
-      .then((doc) => {
+      .then(doc => {
         return Object.assign(doc._source, {
           index: doc._index,
           id: doc._id,

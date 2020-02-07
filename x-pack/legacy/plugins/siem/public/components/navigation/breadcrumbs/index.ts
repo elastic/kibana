@@ -4,64 +4,118 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import chrome, { Breadcrumb } from 'ui/chrome';
+import { getOr, omit } from 'lodash/fp';
 
+import { ChromeBreadcrumb } from '../../../../../../../../src/core/public';
 import { APP_NAME } from '../../../../common/constants';
-import { getBreadcrumbs as getHostDetailsBreadcrumbs } from '../../../pages/hosts/host_details';
+import { StartServices } from '../../../plugin';
+import { getBreadcrumbs as getHostDetailsBreadcrumbs } from '../../../pages/hosts/details/utils';
 import { getBreadcrumbs as getIPDetailsBreadcrumbs } from '../../../pages/network/ip_details';
-import { getHostsUrl, getNetworkUrl, getOverviewUrl, getTimelinesUrl } from '../../link_to';
-import * as i18n from '../translations';
+import { getBreadcrumbs as getDetectionRulesBreadcrumbs } from '../../../pages/detection_engine/rules/utils';
+import { SiemPageName } from '../../../pages/home/types';
+import { RouteSpyState, HostRouteSpyState, NetworkRouteSpyState } from '../../../utils/route/types';
+import { getOverviewUrl } from '../../link_to';
 
-export const setBreadcrumbs = (pathname: string) => {
-  const breadcrumbs = getBreadcrumbsForRoute(pathname);
+import { TabNavigationProps } from '../tab_navigation/types';
+import { getSearch } from '../helpers';
+import { SearchNavTab } from '../types';
+
+export const setBreadcrumbs = (
+  spyState: RouteSpyState & TabNavigationProps,
+  chrome: StartServices['chrome']
+) => {
+  const breadcrumbs = getBreadcrumbsForRoute(spyState);
   if (breadcrumbs) {
-    chrome.breadcrumbs.set(breadcrumbs);
+    chrome.setBreadcrumbs(breadcrumbs);
   }
 };
 
-export const siemRootBreadcrumb: Breadcrumb[] = [
+export const siemRootBreadcrumb: ChromeBreadcrumb[] = [
   {
     text: APP_NAME,
     href: getOverviewUrl(),
   },
 ];
 
-export const rootBreadcrumbs: { [name: string]: Breadcrumb[] } = {
-  overview: siemRootBreadcrumb,
-  hosts: [
-    ...siemRootBreadcrumb,
-    {
-      text: i18n.HOSTS,
-      href: getHostsUrl(),
-    },
-  ],
-  network: [
-    ...siemRootBreadcrumb,
-    {
-      text: i18n.NETWORK,
-      href: getNetworkUrl(),
-    },
-  ],
-  timelines: [
-    ...siemRootBreadcrumb,
-    {
-      text: i18n.TIMELINES,
-      href: getTimelinesUrl(),
-    },
-  ],
-};
+const isNetworkRoutes = (spyState: RouteSpyState): spyState is NetworkRouteSpyState =>
+  spyState != null && spyState.pageName === SiemPageName.network;
 
-export const getBreadcrumbsForRoute = (pathname: string): Breadcrumb[] | null => {
-  const trailingPath = pathname.match(/([^\/]+$)/);
-  if (trailingPath !== null) {
-    if (Object.keys(rootBreadcrumbs).includes(trailingPath[0])) {
-      return rootBreadcrumbs[trailingPath[0]];
+const isHostsRoutes = (spyState: RouteSpyState): spyState is HostRouteSpyState =>
+  spyState != null && spyState.pageName === SiemPageName.hosts;
+
+const isDetectionsRoutes = (spyState: RouteSpyState) =>
+  spyState != null && spyState.pageName === SiemPageName.detections;
+
+export const getBreadcrumbsForRoute = (
+  object: RouteSpyState & TabNavigationProps
+): ChromeBreadcrumb[] | null => {
+  const spyState: RouteSpyState = omit('navTabs', object);
+  if (isHostsRoutes(spyState) && object.navTabs) {
+    const tempNav: SearchNavTab = { urlKey: 'host', isDetailPage: false };
+    let urlStateKeys = [getOr(tempNav, spyState.pageName, object.navTabs)];
+    if (spyState.tabName != null) {
+      urlStateKeys = [...urlStateKeys, getOr(tempNav, spyState.tabName, object.navTabs)];
     }
-    if (pathname.match(/hosts\/.*?/)) {
-      return [...siemRootBreadcrumb, ...getHostDetailsBreadcrumbs(trailingPath[0])];
-    } else if (pathname.match(/network\/ip\/.*?/)) {
-      return [...siemRootBreadcrumb, ...getIPDetailsBreadcrumbs(trailingPath[0])];
-    }
+    return [
+      ...siemRootBreadcrumb,
+      ...getHostDetailsBreadcrumbs(
+        spyState,
+        urlStateKeys.reduce(
+          (acc: string[], item: SearchNavTab) => [...acc, getSearch(item, object)],
+          []
+        )
+      ),
+    ];
   }
+  if (isNetworkRoutes(spyState) && object.navTabs) {
+    const tempNav: SearchNavTab = { urlKey: 'network', isDetailPage: false };
+    let urlStateKeys = [getOr(tempNav, spyState.pageName, object.navTabs)];
+    if (spyState.tabName != null) {
+      urlStateKeys = [...urlStateKeys, getOr(tempNav, spyState.tabName, object.navTabs)];
+    }
+    return [
+      ...siemRootBreadcrumb,
+      ...getIPDetailsBreadcrumbs(
+        spyState,
+        urlStateKeys.reduce(
+          (acc: string[], item: SearchNavTab) => [...acc, getSearch(item, object)],
+          []
+        )
+      ),
+    ];
+  }
+  if (isDetectionsRoutes(spyState) && object.navTabs) {
+    const tempNav: SearchNavTab = { urlKey: 'detections', isDetailPage: false };
+    let urlStateKeys = [getOr(tempNav, spyState.pageName, object.navTabs)];
+    if (spyState.tabName != null) {
+      urlStateKeys = [...urlStateKeys, getOr(tempNav, spyState.tabName, object.navTabs)];
+    }
+
+    return [
+      ...siemRootBreadcrumb,
+      ...getDetectionRulesBreadcrumbs(
+        spyState,
+        urlStateKeys.reduce(
+          (acc: string[], item: SearchNavTab) => [...acc, getSearch(item, object)],
+          []
+        )
+      ),
+    ];
+  }
+  if (
+    spyState != null &&
+    object.navTabs &&
+    spyState.pageName &&
+    object.navTabs[spyState.pageName]
+  ) {
+    return [
+      ...siemRootBreadcrumb,
+      {
+        text: object.navTabs[spyState.pageName].name,
+        href: '',
+      },
+    ];
+  }
+
   return null;
 };

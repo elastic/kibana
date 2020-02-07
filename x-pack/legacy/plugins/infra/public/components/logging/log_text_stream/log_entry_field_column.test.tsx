@@ -4,23 +4,33 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { LogEntryFieldColumn } from './log_entry_field_column';
 import { mount } from 'enzyme';
+import React from 'react';
+
 import { EuiThemeProvider } from '../../../../../../common/eui_styled_components';
+import { LogEntryColumn } from '../../../utils/log_entry';
+import { LogEntryFieldColumn } from './log_entry_field_column';
 
 describe('LogEntryFieldColumn', () => {
   it('should output a <ul> when displaying an Array of values', () => {
-    const encodedValue = '["a","b","c"]'; // Using JSON.stringify here fails the test when running locally on macOS
+    const column: LogEntryColumn = {
+      columnId: 'TEST_COLUMN',
+      field: 'TEST_FIELD',
+      value: JSON.stringify(['a', 'b', 'c']),
+    };
+
     const component = mount(
       <LogEntryFieldColumn
-        encodedValue={encodedValue}
+        columnValue={column}
+        highlights={[]}
+        isActiveHighlight={false}
         isHighlighted={false}
         isHovered={false}
         isWrapped={false}
       />,
       { wrappingComponent: EuiThemeProvider } as any // https://github.com/DefinitelyTyped/DefinitelyTyped/issues/36075
     );
+
     expect(component.exists('ul')).toBe(true);
     expect(
       component.containsAllMatchingElements([
@@ -30,17 +40,51 @@ describe('LogEntryFieldColumn', () => {
       ])
     ).toBe(true);
   });
-  it('should output just text when passed a non-Array', () => {
-    const encodedValue = JSON.stringify('foo');
+
+  it('should output a text representation of a passed complex value', () => {
+    const column: LogEntryColumn = {
+      columnId: 'TEST_COLUMN',
+      field: 'TEST_FIELD',
+      value: JSON.stringify({
+        lat: 1,
+        lon: 2,
+      }),
+    };
+
     const component = mount(
       <LogEntryFieldColumn
-        encodedValue={encodedValue}
+        columnValue={column}
+        highlights={[]}
+        isActiveHighlight={false}
         isHighlighted={false}
         isHovered={false}
         isWrapped={false}
       />,
       { wrappingComponent: EuiThemeProvider } as any // https://github.com/DefinitelyTyped/DefinitelyTyped/issues/36075
     );
+
+    expect(component.text()).toEqual('{"lat":1,"lon":2}');
+  });
+
+  it('should output just text when passed a non-Array', () => {
+    const column: LogEntryColumn = {
+      columnId: 'TEST_COLUMN',
+      field: 'TEST_FIELD',
+      value: JSON.stringify('foo'),
+    };
+
+    const component = mount(
+      <LogEntryFieldColumn
+        columnValue={column}
+        highlights={[]}
+        isActiveHighlight={false}
+        isHighlighted={false}
+        isHovered={false}
+        isWrapped={false}
+      />,
+      { wrappingComponent: EuiThemeProvider } as any // https://github.com/DefinitelyTyped/DefinitelyTyped/issues/36075
+    );
+
     expect(component.exists('ul')).toBe(false);
     expect(component.text()).toEqual('foo');
   });

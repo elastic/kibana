@@ -41,7 +41,9 @@ export class UnionType<RTS extends Array<Type<any>>, T> extends Type<T> {
             const childPathWithIndex = e.path.slice();
             childPathWithIndex.splice(path.length, 0, index.toString());
 
-            return new SchemaTypeError(e.message, childPathWithIndex);
+            return e instanceof SchemaTypesError
+              ? new SchemaTypesError(e.message, childPathWithIndex, e.errors)
+              : new SchemaTypeError(e.message, childPathWithIndex);
           })
         );
     }

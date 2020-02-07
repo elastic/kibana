@@ -13,6 +13,8 @@ import { LoadWorkpad } from './load_workpad';
 import { WorkpadApp as Component } from './workpad_app';
 import { withElementsLoadedTelemetry } from './workpad_telemetry';
 
+export { WORKPAD_CONTAINER_ID } from './workpad_app';
+
 const mapStateToProps = state => {
   const appReady = getAppReady(state);
 
@@ -33,10 +35,7 @@ const mapDispatchToProps = dispatch => ({
 const branches = [branch(({ workpad }) => workpad == null, renderComponent(LoadWorkpad))];
 
 export const WorkpadApp = compose(
-  connect(
-    mapStateToProps,
-    mapDispatchToProps
-  ),
+  connect(mapStateToProps, mapDispatchToProps),
   ...branches,
   withElementsLoadedTelemetry
 )(Component);

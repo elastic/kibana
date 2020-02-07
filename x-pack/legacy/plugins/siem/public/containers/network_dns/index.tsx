@@ -8,95 +8,128 @@ import { getOr } from 'lodash/fp';
 import React from 'react';
 import { Query } from 'react-apollo';
 import { connect } from 'react-redux';
+import { compose } from 'redux';
 
-import chrome from 'ui/chrome';
+import { DocumentNode } from 'graphql';
+import { ScaleType } from '@elastic/charts';
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import {
   GetNetworkDnsQuery,
   NetworkDnsEdges,
   NetworkDnsSortField,
-  PageInfo,
+  PageInfoPaginated,
+  MatrixOverOrdinalHistogramData,
 } from '../../graphql/types';
-import { inputsModel, networkModel, networkSelectors, State } from '../../store';
-import { createFilter } from '../helpers';
-import { QueryTemplate, QueryTemplateProps } from '../query_template';
-
+import { inputsModel, networkModel, networkSelectors, State, inputsSelectors } from '../../store';
+import { withKibana, WithKibanaProps } from '../../lib/kibana';
+import { generateTablePaginationOptions } from '../../components/paginated_table/helpers';
+import { createFilter, getDefaultFetchPolicy } from '../helpers';
+import { QueryTemplatePaginated, QueryTemplatePaginatedProps } from '../query_template_paginated';
 import { networkDnsQuery } from './index.gql_query';
+import { DEFAULT_TABLE_ACTIVE_PAGE, DEFAULT_TABLE_LIMIT } from '../../store/constants';
+import { MatrixHistogram } from '../../components/matrix_histogram';
+import { MatrixHistogramOption, GetSubTitle } from '../../components/matrix_histogram/types';
+import { UpdateDateRange } from '../../components/charts/common';
+import { SetQuery } from '../../pages/hosts/navigation/types';
 
+const ID = 'networkDnsQuery';
+export const HISTOGRAM_ID = 'networkDnsHistogramQuery';
 export interface NetworkDnsArgs {
   id: string;
-  networkDns: NetworkDnsEdges[];
-  totalCount: number;
-  pageInfo: PageInfo;
+  inspect: inputsModel.InspectQuery;
+  isInspected: boolean;
   loading: boolean;
-  loadMore: (cursor: string) => void;
+  loadPage: (newActivePage: number) => void;
+  networkDns: NetworkDnsEdges[];
+  pageInfo: PageInfoPaginated;
   refetch: inputsModel.Refetch;
+  stackByField?: string;
+  totalCount: number;
+  histogram: MatrixOverOrdinalHistogramData[];
 }
 
-export interface OwnProps extends QueryTemplateProps {
+export interface OwnProps extends QueryTemplatePaginatedProps {
   children: (args: NetworkDnsArgs) => React.ReactNode;
   type: networkModel.NetworkType;
 }
 
-export interface NetworkDnsComponentReduxProps {
-  limit: number;
-  dnsSortField: NetworkDnsSortField;
-  isPtrIncluded: boolean;
+interface DnsHistogramOwnProps extends QueryTemplatePaginatedProps {
+  dataKey: string | string[];
+  defaultStackByOption: MatrixHistogramOption;
+  errorMessage: string;
+  isDnsHistogram?: boolean;
+  query: DocumentNode;
+  scaleType: ScaleType;
+  setQuery: SetQuery;
+  showLegend?: boolean;
+  stackByOptions: MatrixHistogramOption[];
+  subtitle?: string | GetSubTitle;
+  title: string;
+  type: networkModel.NetworkType;
+  updateDateRange: UpdateDateRange;
+  yTickFormatter?: (value: number) => string;
 }
 
-type NetworkDnsProps = OwnProps & NetworkDnsComponentReduxProps;
+export interface NetworkDnsComponentReduxProps {
+  activePage: number;
+  sort: NetworkDnsSortField;
+  isInspected: boolean;
+  isPtrIncluded: boolean;
+  limit: number;
+}
 
-class NetworkDnsComponentQuery extends QueryTemplate<
+type NetworkDnsProps = OwnProps & NetworkDnsComponentReduxProps & WithKibanaProps;
+
+export class NetworkDnsComponentQuery extends QueryTemplatePaginated<
   NetworkDnsProps,
   GetNetworkDnsQuery.Query,
   GetNetworkDnsQuery.Variables
 > {
   public render() {
     const {
-      id = 'networkDnsQuery',
+      activePage,
       children,
-      dnsSortField,
+      sort,
+      endDate,
       filterQuery,
+      id = ID,
+      isInspected,
       isPtrIncluded,
+      kibana,
+      limit,
       skip,
       sourceId,
       startDate,
-      endDate,
-      limit,
     } = this.props;
+    const variables: GetNetworkDnsQuery.Variables = {
+      defaultIndex: kibana.services.uiSettings.get<string[]>(DEFAULT_INDEX_KEY),
+      filterQuery: createFilter(filterQuery),
+      inspect: isInspected,
+      isPtrIncluded,
+      pagination: generateTablePaginationOptions(activePage, limit),
+      sort,
+      sourceId,
+      timerange: {
+        interval: '12h',
+        from: startDate!,
+        to: endDate!,
+      },
+    };
+
     return (
       <Query<GetNetworkDnsQuery.Query, GetNetworkDnsQuery.Variables>
-        query={networkDnsQuery}
-        fetchPolicy="cache-and-network"
+        fetchPolicy={getDefaultFetchPolicy()}
         notifyOnNetworkStatusChange
+        query={networkDnsQuery}
         skip={skip}
-        variables={{
-          sourceId,
-          timerange: {
-            interval: '12h',
-            from: startDate!,
-            to: endDate!,
-          },
-          sort: dnsSortField,
-          isPtrIncluded,
-          pagination: {
-            limit,
-            cursor: null,
-            tiebreaker: null,
-          },
-          filterQuery: createFilter(filterQuery),
-          defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
-        }}
+        variables={variables}
       >
-        {({ data, loading, fetchMore, refetch }) => {
+        {({ data, loading, fetchMore, networkStatus, refetch }) => {
           const networkDns = getOr([], `source.NetworkDns.edges`, data);
           this.setFetchMore(fetchMore);
-          this.setFetchMoreOptions((newCursor: string) => ({
+          this.setFetchMoreOptions((newActivePage: number) => ({
             variables: {
-              pagination: {
-                cursor: newCursor,
-                limit: limit + parseInt(newCursor, 10),
-              },
+              pagination: generateTablePaginationOptions(newActivePage, limit),
             },
             updateQuery: (prev, { fetchMoreResult }) => {
               if (!fetchMoreResult) {
@@ -108,23 +141,24 @@ class NetworkDnsComponentQuery extends QueryTemplate<
                   ...fetchMoreResult.source,
                   NetworkDns: {
                     ...fetchMoreResult.source.NetworkDns,
-                    edges: [
-                      ...prev.source.NetworkDns.edges,
-                      ...fetchMoreResult.source.NetworkDns.edges,
-                    ],
+                    edges: [...fetchMoreResult.source.NetworkDns.edges],
                   },
                 },
               };
             },
           }));
+          const isLoading = this.isItAValidLoading(loading, variables, networkStatus);
           return children({
             id,
-            refetch,
-            loading,
-            totalCount: getOr(0, 'source.NetworkDns.totalCount', data),
+            inspect: getOr(null, 'source.NetworkDns.inspect', data),
+            isInspected,
+            loading: isLoading,
+            loadPage: this.wrappedLoadMore,
             networkDns,
             pageInfo: getOr({}, 'source.NetworkDns.pageInfo', data),
-            loadMore: this.wrappedLoadMore,
+            refetch: this.memoizedRefetchQuery(variables, limit, refetch),
+            totalCount: getOr(-1, 'source.NetworkDns.totalCount', data),
+            histogram: getOr(null, 'source.NetworkDns.histogram', data),
           });
         }}
       </Query>
@@ -134,9 +168,42 @@ class NetworkDnsComponentQuery extends QueryTemplate<
 
 const makeMapStateToProps = () => {
   const getNetworkDnsSelector = networkSelectors.dnsSelector();
-  const mapStateToProps = (state: State) => getNetworkDnsSelector(state);
+  const getQuery = inputsSelectors.globalQueryByIdSelector();
+  const mapStateToProps = (state: State, { id = ID }: OwnProps) => {
+    const { isInspected } = getQuery(state, id);
+    return {
+      ...getNetworkDnsSelector(state),
+      isInspected,
+      id,
+    };
+  };
 
   return mapStateToProps;
 };
 
-export const NetworkDnsQuery = connect(makeMapStateToProps)(NetworkDnsComponentQuery);
+const makeMapHistogramStateToProps = () => {
+  const getNetworkDnsSelector = networkSelectors.dnsSelector();
+  const getQuery = inputsSelectors.globalQueryByIdSelector();
+  const mapStateToProps = (state: State, { id = HISTOGRAM_ID }: DnsHistogramOwnProps) => {
+    const { isInspected } = getQuery(state, id);
+    return {
+      ...getNetworkDnsSelector(state),
+      activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+      limit: DEFAULT_TABLE_LIMIT,
+      isInspected,
+      id,
+    };
+  };
+
+  return mapStateToProps;
+};
+
+export const NetworkDnsQuery = compose<React.ComponentClass<OwnProps>>(
+  connect(makeMapStateToProps),
+  withKibana
+)(NetworkDnsComponentQuery);
+
+export const NetworkDnsHistogramQuery = compose<React.ComponentClass<DnsHistogramOwnProps>>(
+  connect(makeMapHistogramStateToProps),
+  withKibana
+)(MatrixHistogram);

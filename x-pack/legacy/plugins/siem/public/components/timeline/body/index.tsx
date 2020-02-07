@@ -4,13 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiText } from '@elastic/eui';
-import * as React from 'react';
-import { pure } from 'recompose';
-import styled from 'styled-components';
+import React, { useMemo, useRef } from 'react';
 
 import { BrowserFields } from '../../../containers/source';
-import { TimelineItem } from '../../../graphql/types';
+import { TimelineItem, TimelineNonEcsData } from '../../../graphql/types';
 import { Note } from '../../../lib/note';
 import { AddNoteToEvent, UpdateNote } from '../../notes/helpers';
 import {
@@ -19,20 +16,22 @@ import {
   OnColumnSorted,
   OnFilterChange,
   OnPinEvent,
+  OnRowSelected,
+  OnSelectAll,
   OnUnPinEvent,
   OnUpdateColumns,
 } from '../events';
-import { footerHeight } from '../footer';
-
+import { EventsTable, TimelineBody, TimelineBodyGlobalStyle } from '../styles';
 import { ColumnHeaders } from './column_headers';
 import { ColumnHeader } from './column_headers/column_header';
 import { Events } from './events';
-import { ACTIONS_COLUMN_WIDTH } from './helpers';
-import { Sort } from './sort';
+import { getActionsColumnWidth } from './helpers';
 import { ColumnRenderer } from './renderers/column_renderer';
 import { RowRenderer } from './renderers/row_renderer';
+import { Sort } from './sort';
+import { useTimelineTypeContext } from '../timeline_context';
 
-interface Props {
+export interface BodyProps {
   addNoteToEvent: AddNoteToEvent;
   browserFields: BrowserFields;
   columnHeaders: ColumnHeader[];
@@ -41,11 +40,15 @@ interface Props {
   getNotesByIds: (noteIds: string[]) => Note[];
   height: number;
   id: string;
-  isLoading: boolean;
+  isEventViewer?: boolean;
+  isSelectAllChecked: boolean;
   eventIdToNoteIds: Readonly<Record<string, string[]>>;
+  loadingEventIds: Readonly<string[]>;
   onColumnRemoved: OnColumnRemoved;
   onColumnResized: OnColumnResized;
   onColumnSorted: OnColumnSorted;
+  onRowSelected: OnRowSelected;
+  onSelectAll: OnSelectAll;
   onFilterChange: OnFilterChange;
   onPinEvent: OnPinEvent;
   onUpdateColumns: OnUpdateColumns;
@@ -53,34 +56,15 @@ interface Props {
   pinnedEventIds: Readonly<Record<string, boolean>>;
   range: string;
   rowRenderers: RowRenderer[];
+  selectedEventIds: Readonly<Record<string, TimelineNonEcsData[]>>;
+  showCheckboxes: boolean;
   sort: Sort;
+  toggleColumn: (column: ColumnHeader) => void;
   updateNote: UpdateNote;
-  width: number;
 }
 
-const HorizontalScroll = styled.div<{
-  height: number;
-}>`
-  display: block;
-  height: ${({ height }) => `${height}px`};
-  overflow: hidden;
-  overflow-x: auto;
-  min-height: 0px;
-`;
-
-const VerticalScrollContainer = styled.div<{
-  height: number;
-  minWidth: number;
-}>`
-  display: block;
-  height: ${({ height }) => `${height - footerHeight - 12}px`};
-  overflow: hidden;
-  overflow-y: auto;
-  min-width: ${({ minWidth }) => `${minWidth}px`};
-`;
-
 /** Renders the timeline body */
-export const Body = pure<Props>(
+export const Body = React.memo<BodyProps>(
   ({
     addNoteToEvent,
     browserFields,
@@ -91,51 +75,72 @@ export const Body = pure<Props>(
     getNotesByIds,
     height,
     id,
-    isLoading,
+    isEventViewer = false,
+    isSelectAllChecked,
+    loadingEventIds,
     onColumnRemoved,
     onColumnResized,
     onColumnSorted,
+    onRowSelected,
+    onSelectAll,
     onFilterChange,
     onPinEvent,
     onUpdateColumns,
     onUnPinEvent,
     pinnedEventIds,
     rowRenderers,
+    selectedEventIds,
+    showCheckboxes,
     sort,
+    toggleColumn,
     updateNote,
-    width,
   }) => {
-    const columnWidths = columnHeaders.reduce(
-      (totalWidth, header) => totalWidth + header.width,
-      ACTIONS_COLUMN_WIDTH
+    const containerElementRef = useRef<HTMLDivElement>(null);
+    const timelineTypeContext = useTimelineTypeContext();
+    const additionalActionWidth =
+      timelineTypeContext.timelineActions?.reduce((acc, v) => acc + v.width, 0) ?? 0;
+
+    const actionsColumnWidth = useMemo(
+      () => getActionsColumnWidth(isEventViewer, showCheckboxes, additionalActionWidth),
+      [isEventViewer, showCheckboxes, additionalActionWidth]
+    );
+
+    const columnWidths = useMemo(
+      () =>
+        columnHeaders.reduce((totalWidth, header) => totalWidth + header.width, actionsColumnWidth),
+      [actionsColumnWidth, columnHeaders]
     );
 
     return (
-      <HorizontalScroll data-test-subj="horizontal-scroll" height={height}>
-        <EuiText size="s">
-          <ColumnHeaders
-            actionsColumnWidth={ACTIONS_COLUMN_WIDTH}
-            browserFields={browserFields}
-            columnHeaders={columnHeaders}
-            isLoading={isLoading}
-            onColumnRemoved={onColumnRemoved}
-            onColumnResized={onColumnResized}
-            onColumnSorted={onColumnSorted}
-            onFilterChange={onFilterChange}
-            onUpdateColumns={onUpdateColumns}
-            showEventsSelect={false}
-            sort={sort}
-            timelineId={id}
-            minWidth={columnWidths}
-          />
-
-          <VerticalScrollContainer
-            data-test-subj="vertical-scroll-container"
-            height={height}
-            minWidth={columnWidths}
+      <>
+        <TimelineBody data-test-subj="timeline-body" bodyHeight={height} ref={containerElementRef}>
+          <EventsTable
+            data-test-subj="events-table"
+            // Passing the styles directly to the component because the width is being calculated and is recommended by Styled Components for performance: https://github.com/styled-components/styled-components/issues/134#issuecomment-312415291
+            style={{ minWidth: `${columnWidths}px` }}
           >
+            <ColumnHeaders
+              actionsColumnWidth={actionsColumnWidth}
+              browserFields={browserFields}
+              columnHeaders={columnHeaders}
+              isEventViewer={isEventViewer}
+              isSelectAllChecked={isSelectAllChecked}
+              onColumnRemoved={onColumnRemoved}
+              onColumnResized={onColumnResized}
+              onColumnSorted={onColumnSorted}
+              onFilterChange={onFilterChange}
+              onSelectAll={onSelectAll}
+              onUpdateColumns={onUpdateColumns}
+              showEventsSelect={false}
+              showSelectAllCheckbox={showCheckboxes}
+              sort={sort}
+              timelineId={id}
+              toggleColumn={toggleColumn}
+            />
+
             <Events
-              actionsColumnWidth={ACTIONS_COLUMN_WIDTH}
+              containerElementRef={containerElementRef.current!}
+              actionsColumnWidth={actionsColumnWidth}
               addNoteToEvent={addNoteToEvent}
               browserFields={browserFields}
               columnHeaders={columnHeaders}
@@ -144,20 +149,25 @@ export const Body = pure<Props>(
               eventIdToNoteIds={eventIdToNoteIds}
               getNotesByIds={getNotesByIds}
               id={id}
-              isLoading={isLoading}
+              isEventViewer={isEventViewer}
+              loadingEventIds={loadingEventIds}
               onColumnResized={onColumnResized}
               onPinEvent={onPinEvent}
+              onRowSelected={onRowSelected}
               onUpdateColumns={onUpdateColumns}
               onUnPinEvent={onUnPinEvent}
               pinnedEventIds={pinnedEventIds}
               rowRenderers={rowRenderers}
+              selectedEventIds={selectedEventIds}
+              showCheckboxes={showCheckboxes}
+              toggleColumn={toggleColumn}
               updateNote={updateNote}
-              minWidth={columnWidths}
-              width={width}
             />
-          </VerticalScrollContainer>
-        </EuiText>
-      </HorizontalScroll>
+          </EventsTable>
+        </TimelineBody>
+        <TimelineBodyGlobalStyle />
+      </>
     );
   }
 );
+Body.displayName = 'Body';

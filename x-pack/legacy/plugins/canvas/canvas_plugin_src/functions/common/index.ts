@@ -29,8 +29,10 @@ import { gte } from './gte';
 import { head } from './head';
 import { ifFn } from './if';
 import { image } from './image';
+import { joinRows } from './join_rows';
 import { lt } from './lt';
 import { lte } from './lte';
+import { mapCenter } from './map_center';
 import { mapColumn } from './mapColumn';
 import { math } from './math';
 import { metric } from './metric';
@@ -46,6 +48,9 @@ import { rounddate } from './rounddate';
 import { rowCount } from './rowCount';
 import { repeatImage } from './repeatImage';
 import { revealImage } from './revealImage';
+import { savedMap } from './saved_map';
+import { savedSearch } from './saved_search';
+import { savedVisualization } from './saved_visualization';
 import { seriesStyle } from './seriesStyle';
 import { shape } from './shape';
 import { sort } from './sort';
@@ -53,6 +58,7 @@ import { staticColumn } from './staticColumn';
 import { string } from './string';
 import { table } from './table';
 import { tail } from './tail';
+import { timerange } from './time_range';
 import { timefilter } from './timefilter';
 import { timefilterControl } from './timefilterControl';
 import { switchFn } from './switch';
@@ -86,6 +92,8 @@ export const functions = [
   image,
   lt,
   lte,
+  joinRows,
+  mapCenter,
   mapColumn,
   math,
   metric,
@@ -101,6 +109,9 @@ export const functions = [
   revealImage,
   rounddate,
   rowCount,
+  savedMap,
+  savedSearch,
+  savedVisualization,
   seriesStyle,
   shape,
   sort,
@@ -110,6 +121,7 @@ export const functions = [
   tail,
   timefilter,
   timefilterControl,
+  timerange,
   switchFn,
   caseFn,
 ];

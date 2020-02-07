@@ -10,7 +10,7 @@ import { pure, compose, withState, withProps, getContext, withHandlers } from 'r
 import { transitionsRegistry } from '../../lib/transitions_registry';
 import { undoHistory, redoHistory } from '../../state/actions/history';
 import { fetchAllRenderables } from '../../state/actions/elements';
-import { setZoomScale } from '../../state/actions/transient';
+import { setZoomScale, setFullscreen } from '../../state/actions/transient';
 import { getFullscreen, getZoomScale } from '../../state/selectors/app';
 import {
   getSelectedPageIndex,
@@ -19,6 +19,8 @@ import {
   getPages,
 } from '../../state/selectors/workpad';
 import { zoomHandlerCreators } from '../../lib/app_handler_creators';
+import { trackCanvasUiMetric, METRIC_TYPE } from '../../lib/ui_metric';
+import { LAUNCHED_FULLSCREEN, LAUNCHED_FULLSCREEN_AUTOPLAY } from '../../../common/lib/constants';
 import { Workpad as Component } from './workpad';
 
 const mapStateToProps = state => {
@@ -41,6 +43,27 @@ const mapDispatchToProps = {
   redoHistory,
   fetchAllRenderables,
   setZoomScale,
+  setFullscreen,
+};
+
+const mergeProps = (stateProps, dispatchProps, ownProps) => {
+  return {
+    ...ownProps,
+    ...stateProps,
+    ...dispatchProps,
+    setFullscreen: value => {
+      dispatchProps.setFullscreen(value);
+
+      if (value === true) {
+        trackCanvasUiMetric(
+          METRIC_TYPE.COUNT,
+          stateProps.autoplayEnabled
+            ? [LAUNCHED_FULLSCREEN, LAUNCHED_FULLSCREEN_AUTOPLAY]
+            : LAUNCHED_FULLSCREEN
+        );
+      }
+    },
+  };
 };
 
 export const Workpad = compose(
@@ -49,10 +72,7 @@ export const Workpad = compose(
     router: PropTypes.object,
   }),
   withState('grid', 'setGrid', false),
-  connect(
-    mapStateToProps,
-    mapDispatchToProps
-  ),
+  connect(mapStateToProps, mapDispatchToProps, mergeProps),
   withState('transition', 'setTransition', null),
   withState('prevSelectedPageNumber', 'setPrevSelectedPageNumber', 0),
   withProps(({ selectedPageNumber, prevSelectedPageNumber, transition }) => {

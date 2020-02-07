@@ -8,9 +8,7 @@ import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import {
-  EuiPageContent,
-} from '@elastic/eui';
+import { EuiPageContent } from '@elastic/eui';
 
 import { CRUD_APP_BASE_PATH } from '../../constants';
 import { getRouter, redirect, extractQueryParams } from '../../services';
@@ -23,7 +21,7 @@ export class RemoteClusterAdd extends PureComponent {
     isAddingCluster: PropTypes.bool,
     addClusterError: PropTypes.object,
     clearAddClusterErrors: PropTypes.func,
-  }
+  };
 
   componentDidMount() {
     setBreadcrumbs('add');
@@ -34,12 +32,17 @@ export class RemoteClusterAdd extends PureComponent {
     this.props.clearAddClusterErrors();
   }
 
-  save = (clusterConfig) => {
+  save = clusterConfig => {
     this.props.addCluster(clusterConfig);
   };
 
   cancel = () => {
-    const { history, route: { location: { search } } } = getRouter();
+    const {
+      history,
+      route: {
+        location: { search },
+      },
+    } = getRouter();
     const { redirect: redirectUrl } = extractQueryParams(search);
 
     if (redirectUrl) {
@@ -54,17 +57,14 @@ export class RemoteClusterAdd extends PureComponent {
     const { isAddingCluster, addClusterError } = this.props;
 
     return (
-      <EuiPageContent
-        horizontalPosition="center"
-        className="remoteClusterAddPage"
-      >
+      <EuiPageContent horizontalPosition="center" className="remoteClusterAddPage">
         <RemoteClusterPageTitle
-          title={(
+          title={
             <FormattedMessage
               id="xpack.remoteClusters.addTitle"
               defaultMessage="Add remote cluster"
             />
-          )}
+          }
         />
 
         <RemoteClusterForm

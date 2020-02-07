@@ -10,7 +10,7 @@ import { getRandomString } from './random';
  * during our tests.
  * @param {ElasticsearchClient} es The Elasticsearch client instance
  */
-export const initElasticsearchHelpers = (es) => {
+export const initElasticsearchHelpers = es => {
   let indicesCreated = [];
 
   const createIndex = (index = getRandomString(), body) => {
@@ -18,33 +18,29 @@ export const initElasticsearchHelpers = (es) => {
     return es.indices.create({ index, body }).then(() => index);
   };
 
-  const deleteIndex = (index) => {
+  const deleteIndex = index => {
     indicesCreated = indicesCreated.filter(i => i !== index);
     return es.indices.delete({ index, ignoreUnavailable: true });
   };
 
-  const deleteAllIndices = () => (
-    Promise.all(indicesCreated.map(deleteIndex)).then(() => indicesCreated = [])
-  );
+  const deleteAllIndices = () =>
+    Promise.all(indicesCreated.map(deleteIndex)).then(() => (indicesCreated = []));
 
-  const catIndex = (index, h) => (
-    es.cat.indices({ index, format: 'json', h })
-  );
+  const catIndex = (index, h) => es.cat.indices({ index, format: 'json', h });
 
-  const indexStats = (index, metric) => (
-    es.indices.stats({ index, metric })
-  );
+  const indexStats = (index, metric) => es.indices.stats({ index, metric });
 
-  const cleanUp = () => (
-    deleteAllIndices()
-  );
+  const cleanUp = () => deleteAllIndices();
 
-  return ({
+  const catTemplate = name => es.cat.templates({ name, format: 'json' });
+
+  return {
     createIndex,
     deleteIndex,
     deleteAllIndices,
     catIndex,
     indexStats,
     cleanUp,
-  });
+    catTemplate,
+  };
 };

@@ -5,20 +5,21 @@
  */
 
 import Boom from 'boom';
-import { callWithRequestFactory } from '../../lib/call_with_request_factory';
-import { isEsErrorFactory } from '../../lib/is_es_error_factory';
-import { wrapEsError, wrapUnknownError } from '../../lib/error_wrappers';
+
 import {
   deserializeFollowerIndex,
   deserializeListFollowerIndices,
   serializeFollowerIndex,
   serializeAdvancedSettings,
-} from '../../lib/follower_index_serialization';
-import { licensePreRoutingFactory } from'../../lib/license_pre_routing_factory';
+} from '../../../common/services/follower_index_serialization';
 import { API_BASE_PATH } from '../../../common/constants';
 import { removeEmptyFields } from '../../../common/services/utils';
+import { callWithRequestFactory } from '../../lib/call_with_request_factory';
+import { isEsErrorFactory } from '../../lib/is_es_error_factory';
+import { wrapEsError, wrapUnknownError } from '../../lib/error_wrappers';
+import { licensePreRoutingFactory } from '../../lib/license_pre_routing_factory';
 
-export const registerFollowerIndexRoutes = (server) => {
+export const registerFollowerIndexRoutes = server => {
   const isEsError = isEsErrorFactory(server);
   const licensePreRouting = licensePreRoutingFactory(server);
 
@@ -29,20 +30,18 @@ export const registerFollowerIndexRoutes = (server) => {
     path: `${API_BASE_PATH}/follower_indices`,
     method: 'GET',
     config: {
-      pre: [ licensePreRouting ]
+      pre: [licensePreRouting],
     },
-    handler: async (request) => {
+    handler: async request => {
       const callWithRequest = callWithRequestFactory(server, request);
 
       try {
-        const {
-          follower_indices: followerIndices
-        }  = await callWithRequest('ccr.info', { id: '_all' });
+        const { follower_indices: followerIndices } = await callWithRequest('ccr.info', {
+          id: '_all',
+        });
 
         const {
-          follow_stats: {
-            indices: followerIndicesStats
-          }
+          follow_stats: { indices: followerIndicesStats },
         } = await callWithRequest('ccr.stats');
 
         const followerIndicesStatsMap = followerIndicesStats.reduce((map, stats) => {
@@ -53,14 +52,14 @@ export const registerFollowerIndexRoutes = (server) => {
         const collatedFollowerIndices = followerIndices.map(followerIndex => {
           return {
             ...followerIndex,
-            ...followerIndicesStatsMap[followerIndex.follower_index]
+            ...followerIndicesStatsMap[followerIndex.follower_index],
           };
         });
 
-        return ({
-          indices: deserializeListFollowerIndices(collatedFollowerIndices)
-        });
-      } catch(err) {
+        return {
+          indices: deserializeListFollowerIndices(collatedFollowerIndices),
+        };
+      } catch (err) {
         if (isEsError(err)) {
           throw wrapEsError(err);
         }
@@ -76,16 +75,14 @@ export const registerFollowerIndexRoutes = (server) => {
     path: `${API_BASE_PATH}/follower_indices/{id}`,
     method: 'GET',
     config: {
-      pre: [ licensePreRouting ]
+      pre: [licensePreRouting],
     },
-    handler: async (request) => {
+    handler: async request => {
       const callWithRequest = callWithRequestFactory(server, request);
       const { id } = request.params;
 
       try {
-        const {
-          follower_indices: followerIndices
-        }  = await callWithRequest('ccr.info', { id });
+        const { follower_indices: followerIndices } = await callWithRequest('ccr.info', { id });
 
         const followerIndexInfo = followerIndices && followerIndices[0];
 
@@ -97,19 +94,20 @@ export const registerFollowerIndexRoutes = (server) => {
         // If this follower is paused, skip call to ES stats api since it will return 404
         if (followerIndexInfo.status === 'paused') {
           return deserializeFollowerIndex({
-            ...followerIndexInfo
+            ...followerIndexInfo,
           });
         } else {
-          const {
-            indices: followerIndicesStats
-          } = await callWithRequest('ccr.followerIndexStats', { id });
+          const { indices: followerIndicesStats } = await callWithRequest(
+            'ccr.followerIndexStats',
+            { id }
+          );
 
           return deserializeFollowerIndex({
             ...followerIndexInfo,
-            ...(followerIndicesStats ? followerIndicesStats[0] : {})
+            ...(followerIndicesStats ? followerIndicesStats[0] : {}),
           });
         }
-      } catch(err) {
+      } catch (err) {
         if (isEsError(err)) {
           throw wrapEsError(err);
         }
@@ -125,16 +123,16 @@ export const registerFollowerIndexRoutes = (server) => {
     path: `${API_BASE_PATH}/follower_indices`,
     method: 'POST',
     config: {
-      pre: [ licensePreRouting ]
+      pre: [licensePreRouting],
     },
-    handler: async (request) => {
+    handler: async request => {
       const callWithRequest = callWithRequestFactory(server, request);
       const { name, ...rest } = request.payload;
       const body = removeEmptyFields(serializeFollowerIndex(rest));
 
       try {
         return await callWithRequest('ccr.saveFollowerIndex', { name, body });
-      } catch(err) {
+      } catch (err) {
         if (isEsError(err)) {
           throw wrapEsError(err);
         }
@@ -150,16 +148,14 @@ export const registerFollowerIndexRoutes = (server) => {
     path: `${API_BASE_PATH}/follower_indices/{id}`,
     method: 'PUT',
     config: {
-      pre: [ licensePreRouting ]
+      pre: [licensePreRouting],
     },
-    handler: async (request) => {
+    handler: async request => {
       const callWithRequest = callWithRequestFactory(server, request);
       const { id } = request.params;
 
       async function isFollowerIndexPaused() {
-        const {
-          follower_indices: followerIndices
-        }  = await callWithRequest('ccr.info', { id });
+        const { follower_indices: followerIndices } = await callWithRequest('ccr.info', { id });
 
         const followerIndexInfo = followerIndices && followerIndices[0];
 
@@ -183,7 +179,7 @@ export const registerFollowerIndexRoutes = (server) => {
         // Resume follower
         const body = removeEmptyFields(serializeAdvancedSettings(request.payload));
         return await callWithRequest('ccr.resumeFollowerIndex', { id, body });
-      } catch(err) {
+      } catch (err) {
         if (isEsError(err)) {
           throw wrapEsError(err);
         }
@@ -199,9 +195,9 @@ export const registerFollowerIndexRoutes = (server) => {
     path: `${API_BASE_PATH}/follower_indices/{id}/pause`,
     method: 'PUT',
     config: {
-      pre: [ licensePreRouting ]
+      pre: [licensePreRouting],
     },
-    handler: async (request) => {
+    handler: async request => {
       const callWithRequest = callWithRequestFactory(server, request);
       const { id } = request.params;
       const ids = id.split(',');
@@ -209,21 +205,23 @@ export const registerFollowerIndexRoutes = (server) => {
       const itemsPaused = [];
       const errors = [];
 
-      await Promise.all(ids.map((_id) => (
-        callWithRequest('ccr.pauseFollowerIndex', { id: _id })
-          .then(() => itemsPaused.push(_id))
-          .catch(err => {
-            if (isEsError(err)) {
-              errors.push({ id: _id, error: wrapEsError(err) });
-            } else {
-              errors.push({ id: _id, error: wrapUnknownError(err) });
-            }
-          })
-      )));
+      await Promise.all(
+        ids.map(_id =>
+          callWithRequest('ccr.pauseFollowerIndex', { id: _id })
+            .then(() => itemsPaused.push(_id))
+            .catch(err => {
+              if (isEsError(err)) {
+                errors.push({ id: _id, error: wrapEsError(err) });
+              } else {
+                errors.push({ id: _id, error: wrapUnknownError(err) });
+              }
+            })
+        )
+      );
 
       return {
         itemsPaused,
-        errors
+        errors,
       };
     },
   });
@@ -235,9 +233,9 @@ export const registerFollowerIndexRoutes = (server) => {
     path: `${API_BASE_PATH}/follower_indices/{id}/resume`,
     method: 'PUT',
     config: {
-      pre: [ licensePreRouting ]
+      pre: [licensePreRouting],
     },
-    handler: async (request) => {
+    handler: async request => {
       const callWithRequest = callWithRequestFactory(server, request);
       const { id } = request.params;
       const ids = id.split(',');
@@ -245,21 +243,23 @@ export const registerFollowerIndexRoutes = (server) => {
       const itemsResumed = [];
       const errors = [];
 
-      await Promise.all(ids.map((_id) => (
-        callWithRequest('ccr.resumeFollowerIndex', { id: _id })
-          .then(() => itemsResumed.push(_id))
-          .catch(err => {
-            if (isEsError(err)) {
-              errors.push({ id: _id, error: wrapEsError(err) });
-            } else {
-              errors.push({ id: _id, error: wrapUnknownError(err) });
-            }
-          })
-      )));
+      await Promise.all(
+        ids.map(_id =>
+          callWithRequest('ccr.resumeFollowerIndex', { id: _id })
+            .then(() => itemsResumed.push(_id))
+            .catch(err => {
+              if (isEsError(err)) {
+                errors.push({ id: _id, error: wrapEsError(err) });
+              } else {
+                errors.push({ id: _id, error: wrapUnknownError(err) });
+              }
+            })
+        )
+      );
 
       return {
         itemsResumed,
-        errors
+        errors,
       };
     },
   });
@@ -271,10 +271,9 @@ export const registerFollowerIndexRoutes = (server) => {
     path: `${API_BASE_PATH}/follower_indices/{id}/unfollow`,
     method: 'PUT',
     config: {
-      pre: [ licensePreRouting ]
+      pre: [licensePreRouting],
     },
-    handler: async (request) => {
-
+    handler: async request => {
       const callWithRequest = callWithRequestFactory(server, request);
       const { id } = request.params;
       const ids = id.split(',');
@@ -283,44 +282,46 @@ export const registerFollowerIndexRoutes = (server) => {
       const itemsNotOpen = [];
       const errors = [];
 
-      await Promise.all(ids.map(async (_id) => {
-        try {
-          // Try to pause follower, let it fail silently since it may already be paused
+      await Promise.all(
+        ids.map(async _id => {
           try {
-            await callWithRequest('ccr.pauseFollowerIndex', { id: _id });
-          } catch (e) {
-            // Swallow errors
+            // Try to pause follower, let it fail silently since it may already be paused
+            try {
+              await callWithRequest('ccr.pauseFollowerIndex', { id: _id });
+            } catch (e) {
+              // Swallow errors
+            }
+
+            // Close index
+            await callWithRequest('indices.close', { index: _id });
+
+            // Unfollow leader
+            await callWithRequest('ccr.unfollowLeaderIndex', { id: _id });
+
+            // Try to re-open the index, store failures in a separate array to surface warnings in the UI
+            // This will allow users to query their index normally after unfollowing
+            try {
+              await callWithRequest('indices.open', { index: _id });
+            } catch (e) {
+              itemsNotOpen.push(_id);
+            }
+
+            // Push success
+            itemsUnfollowed.push(_id);
+          } catch (err) {
+            if (isEsError(err)) {
+              errors.push({ id: _id, error: wrapEsError(err) });
+            } else {
+              errors.push({ id: _id, error: wrapUnknownError(err) });
+            }
           }
-
-          // Close index
-          await callWithRequest('indices.close', { index: _id });
-
-          // Unfollow leader
-          await callWithRequest('ccr.unfollowLeaderIndex', { id: _id });
-
-          // Try to re-open the index, store failures in a separate array to surface warnings in the UI
-          // This will allow users to query their index normally after unfollowing
-          try {
-            await callWithRequest('indices.open', { index: _id });
-          } catch (e) {
-            itemsNotOpen.push(_id);
-          }
-
-          // Push success
-          itemsUnfollowed.push(_id);
-        } catch (err) {
-          if (isEsError(err)) {
-            errors.push({ id: _id, error: wrapEsError(err) });
-          } else {
-            errors.push({ id: _id, error: wrapUnknownError(err) });
-          }
-        }
-      }));
+        })
+      );
 
       return {
         itemsUnfollowed,
         itemsNotOpen,
-        errors
+        errors,
       };
     },
   });

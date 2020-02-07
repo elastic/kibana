@@ -3,12 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import { mount } from 'enzyme';
-import * as React from 'react';
+import React from 'react';
 
 import { TestProviders } from '../../../../mock';
-import { ACTIONS_COLUMN_WIDTH } from '../helpers';
+import { DEFAULT_ACTIONS_COLUMN_WIDTH } from '../helpers';
 
 import { Actions } from '.';
 
@@ -17,7 +16,7 @@ describe('Actions', () => {
     const wrapper = mount(
       <TestProviders>
         <Actions
-          actionsColumnWidth={ACTIONS_COLUMN_WIDTH}
+          actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
           associateNote={jest.fn()}
           checked={false}
           expanded={false}
@@ -25,9 +24,11 @@ describe('Actions', () => {
           eventIsPinned={false}
           getNotesByIds={jest.fn()}
           loading={false}
+          loadingEventIds={[]}
           noteIds={[]}
           onEventToggled={jest.fn()}
           onPinClicked={jest.fn()}
+          onRowSelected={jest.fn()}
           showCheckboxes={true}
           showNotes={false}
           toggleShowNotes={jest.fn()}
@@ -43,7 +44,7 @@ describe('Actions', () => {
     const wrapper = mount(
       <TestProviders>
         <Actions
-          actionsColumnWidth={ACTIONS_COLUMN_WIDTH}
+          actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
           associateNote={jest.fn()}
           checked={false}
           expanded={false}
@@ -51,9 +52,11 @@ describe('Actions', () => {
           eventIsPinned={false}
           getNotesByIds={jest.fn()}
           loading={false}
+          loadingEventIds={[]}
           noteIds={[]}
           onEventToggled={jest.fn()}
           onPinClicked={jest.fn()}
+          onRowSelected={jest.fn()}
           showCheckboxes={false}
           showNotes={false}
           toggleShowNotes={jest.fn()}
@@ -69,7 +72,7 @@ describe('Actions', () => {
     const wrapper = mount(
       <TestProviders>
         <Actions
-          actionsColumnWidth={ACTIONS_COLUMN_WIDTH}
+          actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
           associateNote={jest.fn()}
           checked={false}
           expanded={false}
@@ -77,9 +80,11 @@ describe('Actions', () => {
           eventIsPinned={false}
           getNotesByIds={jest.fn()}
           loading={false}
+          loadingEventIds={[]}
           noteIds={[]}
           onEventToggled={jest.fn()}
           onPinClicked={jest.fn()}
+          onRowSelected={jest.fn()}
           showCheckboxes={false}
           showNotes={false}
           toggleShowNotes={jest.fn()}
@@ -97,7 +102,7 @@ describe('Actions', () => {
     const wrapper = mount(
       <TestProviders>
         <Actions
-          actionsColumnWidth={ACTIONS_COLUMN_WIDTH}
+          actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
           associateNote={jest.fn()}
           checked={false}
           expanded={false}
@@ -105,9 +110,11 @@ describe('Actions', () => {
           eventIsPinned={false}
           getNotesByIds={jest.fn()}
           loading={false}
+          loadingEventIds={[]}
           noteIds={[]}
           onEventToggled={onEventToggled}
           onPinClicked={jest.fn()}
+          onRowSelected={jest.fn()}
           showCheckboxes={false}
           showNotes={false}
           toggleShowNotes={jest.fn()}
@@ -124,37 +131,35 @@ describe('Actions', () => {
     expect(onEventToggled).toBeCalled();
   });
 
-  test('it invokes onPinClicked when the button for pinning events is clicked', () => {
-    const onPinClicked = jest.fn();
+  test('it does NOT render a notes button when isEventsViewer is true', () => {
+    const toggleShowNotes = jest.fn();
 
     const wrapper = mount(
       <TestProviders>
         <Actions
-          actionsColumnWidth={ACTIONS_COLUMN_WIDTH}
+          actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
           associateNote={jest.fn()}
           checked={false}
           expanded={false}
           eventId="abc"
           eventIsPinned={false}
           getNotesByIds={jest.fn()}
+          isEventViewer={true}
           loading={false}
+          loadingEventIds={[]}
           noteIds={[]}
           onEventToggled={jest.fn()}
-          onPinClicked={onPinClicked}
+          onPinClicked={jest.fn()}
+          onRowSelected={jest.fn()}
           showCheckboxes={false}
           showNotes={false}
-          toggleShowNotes={jest.fn()}
+          toggleShowNotes={toggleShowNotes}
           updateNote={jest.fn()}
         />
       </TestProviders>
     );
 
-    wrapper
-      .find('[data-test-subj="pin-event"]')
-      .first()
-      .simulate('click');
-
-    expect(onPinClicked).toBeCalled();
+    expect(wrapper.find('[data-test-subj="timeline-notes-button-small"]').exists()).toBe(false);
   });
 
   test('it invokes toggleShowNotes when the button for adding notes is clicked', () => {
@@ -163,7 +168,7 @@ describe('Actions', () => {
     const wrapper = mount(
       <TestProviders>
         <Actions
-          actionsColumnWidth={ACTIONS_COLUMN_WIDTH}
+          actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
           associateNote={jest.fn()}
           checked={false}
           expanded={false}
@@ -171,9 +176,11 @@ describe('Actions', () => {
           eventIsPinned={false}
           getNotesByIds={jest.fn()}
           loading={false}
+          loadingEventIds={[]}
           noteIds={[]}
           onEventToggled={jest.fn()}
           onPinClicked={jest.fn()}
+          onRowSelected={jest.fn()}
           showCheckboxes={false}
           showNotes={false}
           toggleShowNotes={toggleShowNotes}
@@ -188,5 +195,71 @@ describe('Actions', () => {
       .simulate('click');
 
     expect(toggleShowNotes).toBeCalled();
+  });
+
+  test('it does NOT render a pin button when isEventViewer is true', () => {
+    const onPinClicked = jest.fn();
+
+    const wrapper = mount(
+      <TestProviders>
+        <Actions
+          actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
+          associateNote={jest.fn()}
+          checked={false}
+          expanded={false}
+          eventId="abc"
+          eventIsPinned={false}
+          getNotesByIds={jest.fn()}
+          isEventViewer={true}
+          loading={false}
+          loadingEventIds={[]}
+          noteIds={[]}
+          onEventToggled={jest.fn()}
+          onPinClicked={onPinClicked}
+          onRowSelected={jest.fn()}
+          showCheckboxes={false}
+          showNotes={false}
+          toggleShowNotes={jest.fn()}
+          updateNote={jest.fn()}
+        />
+      </TestProviders>
+    );
+
+    expect(wrapper.find('[data-test-subj="pin"]').exists()).toBe(false);
+  });
+
+  test('it invokes onPinClicked when the button for pinning events is clicked', () => {
+    const onPinClicked = jest.fn();
+
+    const wrapper = mount(
+      <TestProviders>
+        <Actions
+          actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
+          associateNote={jest.fn()}
+          checked={false}
+          expanded={false}
+          eventId="abc"
+          eventIsPinned={false}
+          getNotesByIds={jest.fn()}
+          loading={false}
+          loadingEventIds={[]}
+          noteIds={[]}
+          onEventToggled={jest.fn()}
+          onPinClicked={onPinClicked}
+          onRowSelected={jest.fn()}
+          showCheckboxes={false}
+          showNotes={false}
+          toggleShowNotes={jest.fn()}
+          updateNote={jest.fn()}
+        />
+      </TestProviders>
+    );
+
+    wrapper
+      .find('[data-test-subj="pin"]')
+      .first()
+      .simulate('click');
+
+    expect(onPinClicked).toHaveBeenCalled();
   });
 });

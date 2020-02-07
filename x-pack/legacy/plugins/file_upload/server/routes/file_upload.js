@@ -5,41 +5,126 @@
  */
 
 import { callWithRequestFactory } from '../client/call_with_request_factory';
-import { wrapError } from '../client/errors';
 import { importDataProvider } from '../models/import_data';
-import { MAX_BYTES } from '../../common/constants/file_import';
 import { updateTelemetry } from '../telemetry/telemetry';
+import { MAX_BYTES } from '../../common/constants/file_import';
+import { schema } from '@kbn/config-schema';
 
+export const IMPORT_ROUTE = '/api/fileupload/import';
 
-function importData({
-  callWithRequest, id, index, settings, mappings, ingestPipeline, data
-}) {
-  const { importData: importDataFunc } = importDataProvider(callWithRequest);
-  return importDataFunc(id, index, settings, mappings, ingestPipeline, data);
-}
+export const querySchema = schema.maybe(
+  schema.object({
+    id: schema.nullable(schema.string()),
+  })
+);
 
-export function fileUploadRoutes(server, commonRouteConfig) {
+export const bodySchema = schema.object(
+  {
+    app: schema.maybe(schema.string()),
+    index: schema.string(),
+    fileType: schema.string(),
+    ingestPipeline: schema.maybe(
+      schema.object(
+        {},
+        {
+          defaultValue: {},
+          allowUnknowns: true,
+        }
+      )
+    ),
+  },
+  { allowUnknowns: true }
+);
 
-  server.route({
-    method: 'POST',
-    path: '/api/fileupload/import',
-    async handler(request) {
+const options = {
+  body: {
+    maxBytes: MAX_BYTES,
+    accepts: ['application/json'],
+  },
+};
 
-      // `id` being `undefined` tells us that this is a new import due to create a new index.
-      // follow-up import calls to just add additional data will include the `id` of the created
-      // index, we'll ignore those and don't increment the counter.
-      const { id } = request.query;
-      if (id === undefined) {
-        await updateTelemetry({ server, ...request.payload });
+export const idConditionalValidation = (body, boolHasId) =>
+  schema
+    .object(
+      {
+        data: boolHasId
+          ? schema.arrayOf(schema.object({}, { allowUnknowns: true }), { minSize: 1 })
+          : schema.any(),
+        settings: boolHasId
+          ? schema.any()
+          : schema.object(
+              {},
+              {
+                defaultValue: {
+                  number_of_shards: 1,
+                },
+                allowUnknowns: true,
+              }
+            ),
+        mappings: boolHasId
+          ? schema.any()
+          : schema.object(
+              {},
+              {
+                defaultValue: {},
+                allowUnknowns: true,
+              }
+            ),
+      },
+      { allowUnknowns: true }
+    )
+    .validate(body);
+
+const finishValidationAndProcessReq = (elasticsearchPlugin, getSavedObjectsRepository) => {
+  return async (con, req, { ok, badRequest }) => {
+    const {
+      query: { id },
+      body,
+    } = req;
+    const boolHasId = !!id;
+
+    let resp;
+    try {
+      const validIdReqData = idConditionalValidation(body, boolHasId);
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, req);
+      const { importData: importDataFunc } = importDataProvider(callWithRequest);
+
+      const { index, settings, mappings, ingestPipeline, data } = validIdReqData;
+      const processedReq = await importDataFunc(
+        id,
+        index,
+        settings,
+        mappings,
+        ingestPipeline,
+        data
+      );
+
+      if (processedReq.success) {
+        resp = ok({ body: processedReq });
+        // If no id's been established then this is a new index, update telemetry
+        if (!boolHasId) {
+          await updateTelemetry({ elasticsearchPlugin, getSavedObjectsRepository });
+        }
+      } else {
+        resp = badRequest(`Error processing request 1: ${processedReq.error.message}`, ['body']);
       }
-
-      const callWithRequest = callWithRequestFactory(server, request);
-      return importData({ callWithRequest, id, ...request.payload })
-        .catch(wrapError);
-    },
-    config: {
-      ...commonRouteConfig,
-      payload: { maxBytes: MAX_BYTES },
+    } catch (e) {
+      resp = badRequest(`Error processing request 2: : ${e.message}`, ['body']);
     }
-  });
-}
+    return resp;
+  };
+};
+
+export const initRoutes = (router, esPlugin, getSavedObjectsRepository) => {
+  router.post(
+    {
+      path: `${IMPORT_ROUTE}{id?}`,
+      validate: {
+        query: querySchema,
+        body: bodySchema,
+      },
+      options,
+    },
+    finishValidationAndProcessReq(esPlugin, getSavedObjectsRepository)
+  );
+};

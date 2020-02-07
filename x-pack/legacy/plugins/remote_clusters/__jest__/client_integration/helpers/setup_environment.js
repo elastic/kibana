@@ -13,6 +13,7 @@ import { fatalError, toastNotifications } from 'ui/notify'; // eslint-disable-li
 import { init as initBreadcrumb } from '../../../public/app/services/breadcrumb';
 import { init as initHttp } from '../../../public/app/services/http';
 import { init as initNotification } from '../../../public/app/services/notification';
+import { init as initUiMetric } from '../../../public/app/services/ui_metric';
 import { init as initHttpRequests } from './http_requests';
 
 export const setupEnvironment = () => {
@@ -20,9 +21,10 @@ export const setupEnvironment = () => {
     set: () => {},
   };
   // axios has a $http like interface so using it to simulate $http
-  initHttp(axios.create({ adapter: axiosXhrAdapter }), (path) => path);
+  initHttp(axios.create({ adapter: axiosXhrAdapter }), path => path);
   initBreadcrumb(() => {}, MANAGEMENT_BREADCRUMB);
   initNotification(toastNotifications, fatalError);
+  initUiMetric(() => () => {});
 
   const { server, httpRequestsMockHelpers } = initHttpRequests();
 

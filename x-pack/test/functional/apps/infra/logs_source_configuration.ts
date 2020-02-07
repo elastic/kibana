@@ -6,16 +6,18 @@
 
 import expect from '@kbn/expect';
 
-import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
-export default ({ getPageObjects, getService }: KibanaFunctionalTestDefaultProviders) => {
+export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
-  const infraLogStream = getService('infraLogStream');
-  const infraSourceConfigurationFlyout = getService('infraSourceConfigurationFlyout');
-  const pageObjects = getPageObjects(['infraLogs']);
+  const logsUi = getService('logsUi');
+  const infraSourceConfigurationForm = getService('infraSourceConfigurationForm');
+  const pageObjects = getPageObjects(['common', 'infraLogs']);
+  const retry = getService('retry');
 
-  describe('Logs Page', () => {
+  describe('Logs Source Configuration', function() {
+    this.tags('smoke');
+
     before(async () => {
       await esArchiver.load('empty_kibana');
     });
@@ -23,7 +25,7 @@ export default ({ getPageObjects, getService }: KibanaFunctionalTestDefaultProvi
       await esArchiver.unload('empty_kibana');
     });
 
-    describe('with logs present', () => {
+    describe('Allows indices configuration', () => {
       before(async () => {
         await esArchiver.load('infra/metrics_and_logs');
       });
@@ -31,58 +33,60 @@ export default ({ getPageObjects, getService }: KibanaFunctionalTestDefaultProvi
         await esArchiver.unload('infra/metrics_and_logs');
       });
 
-      it('renders the log stream', async () => {
-        await pageObjects.infraLogs.navigateTo();
-        await pageObjects.infraLogs.getLogStream();
-      });
-
       it('can change the log indices to a pattern that matches nothing', async () => {
-        await pageObjects.infraLogs.openSourceConfigurationFlyout();
-        await infraSourceConfigurationFlyout.switchToIndicesAndFieldsTab();
+        await pageObjects.infraLogs.navigateToTab('settings');
 
-        const nameInput = await infraSourceConfigurationFlyout.getNameInput();
+        await retry.try(async () => {
+          await infraSourceConfigurationForm.getForm();
+        });
+
+        const nameInput = await infraSourceConfigurationForm.getNameInput();
         await nameInput.clearValueWithKeyboard({ charByChar: true });
         await nameInput.type('Modified Source');
 
-        const logIndicesInput = await infraSourceConfigurationFlyout.getLogIndicesInput();
+        const logIndicesInput = await infraSourceConfigurationForm.getLogIndicesInput();
         await logIndicesInput.clearValueWithKeyboard({ charByChar: true });
         await logIndicesInput.type('does-not-exist-*');
 
-        await infraSourceConfigurationFlyout.saveConfiguration();
-        await infraSourceConfigurationFlyout.closeFlyout();
+        await infraSourceConfigurationForm.saveConfiguration();
       });
 
       it('renders the no indices screen when no indices match the pattern', async () => {
-        await pageObjects.infraLogs.getNoLogsIndicesPrompt();
+        await logsUi.logStreamPage.navigateTo();
+
+        await retry.try(async () => {
+          await logsUi.logStreamPage.getNoLogsIndicesPrompt();
+        });
       });
 
       it('can change the log indices back to a pattern that matches something', async () => {
-        await pageObjects.infraLogs.openSourceConfigurationFlyout();
-        await infraSourceConfigurationFlyout.switchToIndicesAndFieldsTab();
+        await pageObjects.infraLogs.navigateToTab('settings');
 
-        const logIndicesInput = await infraSourceConfigurationFlyout.getLogIndicesInput();
+        await retry.try(async () => {
+          await infraSourceConfigurationForm.getForm();
+        });
+
+        const logIndicesInput = await infraSourceConfigurationForm.getLogIndicesInput();
         await logIndicesInput.clearValueWithKeyboard({ charByChar: true });
         await logIndicesInput.type('filebeat-*');
 
-        await infraSourceConfigurationFlyout.saveConfiguration();
-        await infraSourceConfigurationFlyout.closeFlyout();
-      });
-
-      it('renders the log stream again', async () => {
-        await pageObjects.infraLogs.getLogStream();
+        await infraSourceConfigurationForm.saveConfiguration();
       });
 
       it('renders the default log columns with their headers', async () => {
-        const columnHeaderLabels = await infraLogStream.getColumnHeaderLabels();
+        await logsUi.logStreamPage.navigateTo();
 
-        expect(columnHeaderLabels).to.eql(['Timestamp', 'event.dataset', 'Message', '']);
+        await retry.try(async () => {
+          const columnHeaderLabels = await logsUi.logStreamPage.getColumnHeaderLabels();
 
-        const logStreamEntries = await infraLogStream.getStreamEntries();
+          expect(columnHeaderLabels).to.eql(['Oct 17, 2018', 'event.dataset', 'Message']);
+        });
 
+        const logStreamEntries = await logsUi.logStreamPage.getStreamEntries();
         expect(logStreamEntries.length).to.be.greaterThan(0);
 
         const firstLogStreamEntry = logStreamEntries[0];
-        const logStreamEntryColumns = await infraLogStream.getLogColumnsOfStreamEntry(
+        const logStreamEntryColumns = await logsUi.logStreamPage.getLogColumnsOfStreamEntry(
           firstLogStreamEntry
         );
 
@@ -90,28 +94,34 @@ export default ({ getPageObjects, getService }: KibanaFunctionalTestDefaultProvi
       });
 
       it('can change the log columns', async () => {
-        await pageObjects.infraLogs.openSourceConfigurationFlyout();
-        await infraSourceConfigurationFlyout.switchToLogsTab();
+        await pageObjects.infraLogs.navigateToTab('settings');
 
-        await infraSourceConfigurationFlyout.removeAllLogColumns();
-        await infraSourceConfigurationFlyout.addTimestampLogColumn();
-        await infraSourceConfigurationFlyout.addFieldLogColumn('host.name');
+        await retry.try(async () => {
+          await infraSourceConfigurationForm.getForm();
+        });
 
-        await infraSourceConfigurationFlyout.saveConfiguration();
-        await infraSourceConfigurationFlyout.closeFlyout();
+        await infraSourceConfigurationForm.removeAllLogColumns();
+        await infraSourceConfigurationForm.addTimestampLogColumn();
+        await infraSourceConfigurationForm.addFieldLogColumn('host.name');
+
+        await infraSourceConfigurationForm.saveConfiguration();
       });
 
       it('renders the changed log columns with their headers', async () => {
-        const columnHeaderLabels = await infraLogStream.getColumnHeaderLabels();
+        await logsUi.logStreamPage.navigateTo();
 
-        expect(columnHeaderLabels).to.eql(['Timestamp', 'host.name', '']);
+        await retry.try(async () => {
+          const columnHeaderLabels = await logsUi.logStreamPage.getColumnHeaderLabels();
 
-        const logStreamEntries = await infraLogStream.getStreamEntries();
+          expect(columnHeaderLabels).to.eql(['Oct 17, 2018', 'host.name']);
+        });
+
+        const logStreamEntries = await logsUi.logStreamPage.getStreamEntries();
 
         expect(logStreamEntries.length).to.be.greaterThan(0);
 
         const firstLogStreamEntry = logStreamEntries[0];
-        const logStreamEntryColumns = await infraLogStream.getLogColumnsOfStreamEntry(
+        const logStreamEntryColumns = await logsUi.logStreamPage.getLogColumnsOfStreamEntry(
           firstLogStreamEntry
         );
 

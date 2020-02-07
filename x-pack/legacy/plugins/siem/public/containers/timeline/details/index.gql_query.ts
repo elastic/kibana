@@ -17,11 +17,7 @@ export const timelineDetailsQuery = gql`
       id
       TimelineDetails(eventId: $eventId, indexName: $indexName, defaultIndex: $defaultIndex) {
         data {
-          category
-          description
-          example
           field
-          type
           values
           originalValue
         }

@@ -5,17 +5,15 @@
  */
 
 import expect from '@kbn/expect';
-import { SecurityService } from '../../../common/services';
-import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
-export default function featureControlsTests({ getService }: KibanaFunctionalTestDefaultProviders) {
+export default function featureControlsTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
-  const security: SecurityService = getService('security');
+  const security = getService('security');
 
   describe('feature controls', () => {
-    const kibanaUsername = 'kibana_user';
-    const kibanaUserRoleName = 'kibana_user';
+    const kibanaUsername = 'kibana_admin';
+    const kibanaUserRoleName = 'kibana_admin';
 
     const kibanaUserPassword = `${kibanaUsername}-password`;
 
@@ -109,7 +107,7 @@ export default function featureControlsTests({ getService }: KibanaFunctionalTes
               expect(resp.status).to.eql(302);
               expect(resp.headers.location).to.eql('/app/kibana#foo/bar/baz');
             } else {
-              expect(resp.status).to.eql(500);
+              expect(resp.status).to.eql(403);
               expect(resp.headers.location).to.eql(undefined);
             }
           });

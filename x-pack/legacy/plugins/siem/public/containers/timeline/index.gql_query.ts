@@ -14,6 +14,7 @@ export const timelineQuery = gql`
     $sortField: SortField!
     $filterQuery: String
     $defaultIndex: [String!]!
+    $inspect: Boolean!
   ) {
     source(id: $sourceId) {
       id
@@ -25,6 +26,10 @@ export const timelineQuery = gql`
         defaultIndex: $defaultIndex
       ) {
         totalCount
+        inspect @include(if: $inspect) {
+          dsl
+          response
+        }
         pageInfo {
           endCursor {
             value
@@ -66,6 +71,7 @@ export const timelineQuery = gql`
               event {
                 action
                 category
+                code
                 created
                 dataset
                 duration
@@ -107,6 +113,7 @@ export const timelineQuery = gql`
                 }
               }
               file {
+                name
                 path
                 target_path
                 extension
@@ -126,6 +133,9 @@ export const timelineQuery = gql`
                 id
                 name
                 ip
+              }
+              rule {
+                reference
               }
               source {
                 bytes
@@ -155,9 +165,48 @@ export const timelineQuery = gql`
                   region_name
                 }
               }
+              dns {
+                question {
+                  name
+                  type
+                }
+                resolved_ip
+                response_code
+              }
+              endgame {
+                exit_code
+                file_name
+                file_path
+                logon_type
+                parent_process_name
+                pid
+                process_name
+                subject_domain_name
+                subject_logon_id
+                subject_user_name
+                target_domain_name
+                target_logon_id
+                target_user_name
+              }
               geo {
                 region_name
                 country_iso_code
+              }
+              signal {
+                original_time
+                rule {
+                  id
+                  saved_id
+                  timeline_id
+                  timeline_title
+                  output_index
+                  from
+                  index
+                  language
+                  query
+                  to
+                  filters
+                }
               }
               suricata {
                 eve {
@@ -219,9 +268,18 @@ export const timelineQuery = gql`
                 password
               }
               user {
+                domain
                 name
               }
+              winlog {
+                event_id
+              }
               process {
+                hash {
+                  md5
+                  sha1
+                  sha256
+                }
                 pid
                 name
                 ppid

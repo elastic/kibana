@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { failure } from 'io-ts/lib/PathReporter';
-
 import {
   InfraLogEntryColumn,
   InfraLogEntryFieldColumn,
@@ -17,8 +15,6 @@ import {
   InfraSourceResolvers,
 } from '../../graphql/types';
 import { InfraLogEntriesDomain } from '../../lib/domains/log_entries_domain';
-import { SourceConfigurationRuntimeType } from '../../lib/sources';
-import { UsageCollector } from '../../usage/usage_collector';
 import { parseFilterQuery } from '../../utils/serialized_query';
 import { ChildResolverOf, InfraResolverOf } from '../../utils/typed_resolvers';
 import { QuerySourceResolver } from '../sources/resolvers';
@@ -33,13 +29,8 @@ export type InfraSourceLogEntriesBetweenResolver = ChildResolverOf<
   QuerySourceResolver
 >;
 
-export type InfraSourceLogSummaryBetweenResolver = ChildResolverOf<
-  InfraResolverOf<InfraSourceResolvers.LogSummaryBetweenResolver>,
-  QuerySourceResolver
->;
-
-export type InfraSourceLogItem = ChildResolverOf<
-  InfraResolverOf<InfraSourceResolvers.LogItemResolver>,
+export type InfraSourceLogEntryHighlightsResolver = ChildResolverOf<
+  InfraResolverOf<InfraSourceResolvers.LogEntryHighlightsResolver>,
   QuerySourceResolver
 >;
 
@@ -49,8 +40,7 @@ export const createLogEntriesResolvers = (libs: {
   InfraSource: {
     logEntriesAround: InfraSourceLogEntriesAroundResolver;
     logEntriesBetween: InfraSourceLogEntriesBetweenResolver;
-    logSummaryBetween: InfraSourceLogSummaryBetweenResolver;
-    logItem: InfraSourceLogItem;
+    logEntryHighlights: InfraSourceLogEntryHighlightsResolver;
   };
   InfraLogEntryColumn: {
     __resolveType(
@@ -78,8 +68,7 @@ export const createLogEntriesResolvers = (libs: {
         args.key,
         countBefore + 1,
         countAfter + 1,
-        parseFilterQuery(args.filterQuery),
-        args.highlightQuery || undefined
+        parseFilterQuery(args.filterQuery)
       );
 
       const hasMoreBefore = entriesBefore.length > countBefore;
@@ -96,7 +85,6 @@ export const createLogEntriesResolvers = (libs: {
         hasMoreBefore,
         hasMoreAfter,
         filterQuery: args.filterQuery,
-        highlightQuery: args.highlightQuery,
         entries,
       };
     },
@@ -106,8 +94,7 @@ export const createLogEntriesResolvers = (libs: {
         source.id,
         args.startKey,
         args.endKey,
-        parseFilterQuery(args.filterQuery),
-        args.highlightQuery || undefined
+        parseFilterQuery(args.filterQuery)
       );
 
       return {
@@ -116,35 +103,27 @@ export const createLogEntriesResolvers = (libs: {
         hasMoreBefore: true,
         hasMoreAfter: true,
         filterQuery: args.filterQuery,
-        highlightQuery: args.highlightQuery,
         entries,
       };
     },
-    async logSummaryBetween(source, args, { req }) {
-      UsageCollector.countLogs();
-      const buckets = await libs.logEntries.getLogSummaryBucketsBetween(
+    async logEntryHighlights(source, args, { req }) {
+      const highlightedLogEntrySets = await libs.logEntries.getLogEntryHighlights(
         req,
         source.id,
-        args.start,
-        args.end,
-        args.bucketSize,
+        args.startKey,
+        args.endKey,
+        args.highlights.filter(highlightInput => !!highlightInput.query),
         parseFilterQuery(args.filterQuery)
       );
 
-      return {
-        start: buckets.length > 0 ? buckets[0].start : null,
-        end: buckets.length > 0 ? buckets[buckets.length - 1].end : null,
-        buckets,
-      };
-    },
-    async logItem(source, args, { req }) {
-      const sourceConfiguration = SourceConfigurationRuntimeType.decode(
-        source.configuration
-      ).getOrElseL(errors => {
-        throw new Error(failure(errors).join('\n'));
-      });
-
-      return await libs.logEntries.getLogItem(req, args.id, sourceConfiguration);
+      return highlightedLogEntrySets.map(entries => ({
+        start: entries.length > 0 ? entries[0].key : null,
+        end: entries.length > 0 ? entries[entries.length - 1].key : null,
+        hasMoreBefore: true,
+        hasMoreAfter: true,
+        filterQuery: args.filterQuery,
+        entries,
+      }));
     },
   },
   InfraLogEntryColumn: {

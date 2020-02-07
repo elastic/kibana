@@ -10,23 +10,22 @@ export function MonitoringClusterListProvider({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['monitoring']);
 
   const SUBJ_TABLE_CONTAINER = 'clusterTableContainer';
-  const SUBJ_TABLE_NO_DATA = `${SUBJ_TABLE_CONTAINER} monitoringTableNoData`;
-  const SUBJ_SEARCH_BAR = `${SUBJ_TABLE_CONTAINER} monitoringTableToolBar`;
+  const SUBJ_TABLE_NO_DATA = `monitoringTableNoData`;
+  const SUBJ_SEARCH_BAR = `${SUBJ_TABLE_CONTAINER} > monitoringTableToolBar`;
 
-  const SUBJ_CLUSTER_ROW_PREFIX = `${SUBJ_TABLE_CONTAINER} clusterRow_`;
+  const SUBJ_CLUSTER_ROW_PREFIX = `${SUBJ_TABLE_CONTAINER} > clusterRow_`;
 
-  return new class ClusterList {
-
+  return new (class ClusterList {
     async assertDefaults() {
       await retry.try(async () => {
-        if (!await testSubjects.exists(SUBJ_TABLE_CONTAINER)) {
+        if (!(await testSubjects.exists(SUBJ_TABLE_CONTAINER))) {
           throw new Error('Expected to find the cluster list');
         }
       });
     }
 
     assertNoData() {
-      return PageObjects.monitoring.assertEuiTableNoData(SUBJ_TABLE_NO_DATA);
+      return PageObjects.monitoring.assertTableNoData(SUBJ_TABLE_NO_DATA);
     }
 
     getRows() {
@@ -42,31 +41,35 @@ export function MonitoringClusterListProvider({ getService, getPageObjects }) {
     }
 
     getClusterLink(clusterUuid) {
-      return testSubjects.find(`${SUBJ_CLUSTER_ROW_PREFIX}${clusterUuid} clusterLink`);
+      return testSubjects.find(`${SUBJ_CLUSTER_ROW_PREFIX}${clusterUuid} > clusterLink`);
     }
     getClusterName(clusterUuid) {
-      return testSubjects.getVisibleText(`${SUBJ_CLUSTER_ROW_PREFIX}${clusterUuid} clusterLink`);
+      return testSubjects.getVisibleText(`${SUBJ_CLUSTER_ROW_PREFIX}${clusterUuid} > clusterLink`);
     }
     getClusterStatus(clusterUuid) {
-      return testSubjects.getVisibleText(`${SUBJ_CLUSTER_ROW_PREFIX}${clusterUuid} alertsStatus`);
+      return testSubjects.getVisibleText(`${SUBJ_CLUSTER_ROW_PREFIX}${clusterUuid} > alertsStatus`);
     }
     getClusterNodesCount(clusterUuid) {
-      return testSubjects.getVisibleText(`${SUBJ_CLUSTER_ROW_PREFIX}${clusterUuid} nodesCount`);
+      return testSubjects.getVisibleText(`${SUBJ_CLUSTER_ROW_PREFIX}${clusterUuid} > nodesCount`);
     }
     getClusterIndicesCount(clusterUuid) {
-      return testSubjects.getVisibleText(`${SUBJ_CLUSTER_ROW_PREFIX}${clusterUuid} indicesCount`);
+      return testSubjects.getVisibleText(`${SUBJ_CLUSTER_ROW_PREFIX}${clusterUuid} > indicesCount`);
     }
     getClusterDataSize(clusterUuid) {
-      return testSubjects.getVisibleText(`${SUBJ_CLUSTER_ROW_PREFIX}${clusterUuid} dataSize`);
+      return testSubjects.getVisibleText(`${SUBJ_CLUSTER_ROW_PREFIX}${clusterUuid} > dataSize`);
     }
     getClusterLogstashCount(clusterUuid) {
-      return testSubjects.getVisibleText(`${SUBJ_CLUSTER_ROW_PREFIX}${clusterUuid} logstashCount`);
+      return testSubjects.getVisibleText(
+        `${SUBJ_CLUSTER_ROW_PREFIX}${clusterUuid} > logstashCount`
+      );
     }
     getClusterKibanaCount(clusterUuid) {
-      return testSubjects.getVisibleText(`${SUBJ_CLUSTER_ROW_PREFIX}${clusterUuid} kibanaCount`);
+      return testSubjects.getVisibleText(`${SUBJ_CLUSTER_ROW_PREFIX}${clusterUuid} > kibanaCount`);
     }
     getClusterLicense(clusterUuid) {
-      return testSubjects.getVisibleText(`${SUBJ_CLUSTER_ROW_PREFIX}${clusterUuid} clusterLicense`);
+      return testSubjects.getVisibleText(
+        `${SUBJ_CLUSTER_ROW_PREFIX}${clusterUuid} > clusterLicense`
+      );
     }
-  };
+  })();
 }

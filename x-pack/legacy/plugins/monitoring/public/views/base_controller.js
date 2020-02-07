@@ -12,6 +12,22 @@ import { PageLoading } from 'plugins/monitoring/components';
 import { timefilter } from 'ui/timefilter';
 import { I18nContext } from 'ui/i18n';
 import { PromiseWithCancel } from '../../common/cancel_promise';
+import { updateSetupModeData, getSetupModeState } from '../lib/setup_mode';
+
+/**
+ * Given a timezone, this function will calculate the offset in milliseconds
+ * from UTC time.
+ *
+ * @param {string} timezone
+ */
+const getOffsetInMS = timezone => {
+  if (timezone === 'Browser') {
+    return 0;
+  }
+  const offsetInMinutes = moment.tz(timezone).utcOffset();
+  const offsetInMS = offsetInMinutes * 1 * 60 * 1000;
+  return offsetInMS;
+};
 
 /**
  * Class to manage common instantiation behaviors in a view controller
@@ -69,10 +85,13 @@ export class MonitoringViewBaseController {
     reactNodeId = null, // WIP: https://github.com/elastic/x-pack-kibana/issues/5198
     $scope,
     $injector,
-    options = {}
+    options = {},
+    fetchDataImmediately = true,
   }) {
     const titleService = $injector.get('title');
     const $executor = $injector.get('$executor');
+    const $window = $injector.get('$window');
+    const config = $injector.get('config');
 
     titleService($scope.cluster, title);
 
@@ -80,10 +99,19 @@ export class MonitoringViewBaseController {
     this._isDataInitialized = false;
     this.reactNodeId = reactNodeId;
 
-    const {
-      enableTimeFilter = true,
-      enableAutoRefresh = true
-    } = options;
+    let deferTimer;
+    let zoomInLevel = 0;
+
+    const popstateHandler = () => zoomInLevel > 0 && --zoomInLevel;
+    const removePopstateHandler = () => $window.removeEventListener('popstate', popstateHandler);
+    const addPopstateHandler = () => $window.addEventListener('popstate', popstateHandler);
+
+    this.zoomInfo = {
+      zoomOutHandler: () => $window.history.back(),
+      showZoomOutBtn: () => zoomInLevel > 0,
+    };
+
+    const { enableTimeFilter = true, enableAutoRefresh = true } = options;
 
     if (enableTimeFilter === false) {
       timefilter.disableTimeRangeSelector();
@@ -105,22 +133,30 @@ export class MonitoringViewBaseController {
         this.updateDataPromise = null;
       }
       const _api = apiUrlFn ? apiUrlFn() : api;
-      this.updateDataPromise = new PromiseWithCancel(_getPageData($injector, _api));
-      return this.updateDataPromise.promise().then((pageData) => {
+      const promises = [_getPageData($injector, _api, this.getPaginationRouteOptions())];
+      const setupMode = getSetupModeState();
+      if (setupMode.enabled) {
+        promises.push(updateSetupModeData());
+      }
+      this.updateDataPromise = new PromiseWithCancel(Promise.all(promises));
+      return this.updateDataPromise.promise().then(([pageData]) => {
         $scope.$apply(() => {
           this._isDataInitialized = true; // render will replace loading screen with the react component
           $scope.pageData = this.data = pageData; // update the view's data with the fetch result
         });
       });
     };
-    this.updateData();
+    fetchDataImmediately && this.updateData();
 
     $executor.register({
-      execute: () => this.updateData()
+      execute: () => this.updateData(),
     });
     $executor.start($scope);
     $scope.$on('$destroy', () => {
-      if (this.reactNodeId) { // WIP https://github.com/elastic/x-pack-kibana/issues/5198
+      clearTimeout(deferTimer);
+      removePopstateHandler();
+      if (this.reactNodeId) {
+        // WIP https://github.com/elastic/x-pack-kibana/issues/5198
         unmountComponentAtNode(document.getElementById(this.reactNodeId));
       }
       $executor.destroy();
@@ -128,12 +164,24 @@ export class MonitoringViewBaseController {
 
     // needed for chart pages
     this.onBrush = ({ xaxis }) => {
+      removePopstateHandler();
       const { to, from } = xaxis;
+      const timezone = config.get('dateFormat:tz');
+      const offset = getOffsetInMS(timezone);
       timefilter.setTime({
-        from: moment(from),
-        to: moment(to),
-        mode: 'absolute'
+        from: moment(from - offset),
+        to: moment(to - offset),
+        mode: 'absolute',
       });
+      $executor.cancel();
+      $executor.run();
+      ++zoomInLevel;
+      clearTimeout(deferTimer);
+      /*
+        Needed to defer 'popstate' event, so it does not fire immediately after it's added.
+        10ms is to make sure the event is not added with the same code digest
+      */
+      deferTimer = setTimeout(() => addPopstateHandler(), 10);
     };
 
     this.setTitle = title => titleService($scope.cluster, title);
@@ -141,9 +189,18 @@ export class MonitoringViewBaseController {
 
   renderReact(component) {
     if (this._isDataInitialized === false) {
-      render(<I18nContext><PageLoading /></I18nContext>, document.getElementById(this.reactNodeId));
+      render(
+        <I18nContext>
+          <PageLoading />
+        </I18nContext>,
+        document.getElementById(this.reactNodeId)
+      );
     } else {
       render(component, document.getElementById(this.reactNodeId));
     }
+  }
+
+  getPaginationRouteOptions() {
+    return {};
   }
 }

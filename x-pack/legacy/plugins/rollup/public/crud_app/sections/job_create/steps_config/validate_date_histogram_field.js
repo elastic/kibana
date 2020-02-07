@@ -9,12 +9,12 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 export function validateDateHistogramField(dateHistogramField) {
   if (!dateHistogramField || !dateHistogramField.trim()) {
-    return [(
+    return [
       <FormattedMessage
         id="xpack.rollupJobs.create.errors.dateHistogramFieldMissing"
         defaultMessage="Date field is required."
-      />
-    )];
+      />,
+    ];
   }
 
   return undefined;

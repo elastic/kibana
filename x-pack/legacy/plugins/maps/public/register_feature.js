@@ -6,7 +6,7 @@
 
 import {
   FeatureCatalogueRegistryProvider,
-  FeatureCatalogueCategory
+  FeatureCatalogueCategory,
 } from 'ui/registry/feature_catalogue';
 import { i18n } from '@kbn/i18n';
 import { APP_ID, APP_ICON } from '../common/constants';
@@ -17,12 +17,11 @@ FeatureCatalogueRegistryProvider.register(() => {
     id: APP_ID,
     title: getAppTitle(),
     description: i18n.translate('xpack.maps.feature.appDescription', {
-      defaultMessage: 'Explore geospatial data from Elasticsearch and the Elastic Maps Service'
+      defaultMessage: 'Explore geospatial data from Elasticsearch and the Elastic Maps Service',
     }),
     icon: APP_ICON,
     path: '/app/maps',
     showOnHomePage: true,
-    category: FeatureCatalogueCategory.DATA
+    category: FeatureCatalogueCategory.DATA,
   };
 });
-

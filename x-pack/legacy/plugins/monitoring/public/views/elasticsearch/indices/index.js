@@ -13,14 +13,15 @@ import { MonitoringViewBaseEuiTableController } from '../../';
 import { ElasticsearchIndices } from '../../../components';
 import template from './index.html';
 import { I18nContext } from 'ui/i18n';
+import { CODE_PATH_ELASTICSEARCH } from '../../../../common/constants';
 
 uiRoutes.when('/elasticsearch/indices', {
   template,
   resolve: {
     clusters(Private) {
       const routeInit = Private(routeInitProvider);
-      return routeInit();
-    }
+      return routeInit({ codePaths: [CODE_PATH_ELASTICSEARCH] });
+    },
   },
   controllerAs: 'elasticsearchIndices',
   controller: class ElasticsearchIndicesController extends MonitoringViewBaseEuiTableController {
@@ -36,16 +37,17 @@ uiRoutes.when('/elasticsearch/indices', {
 
       super({
         title: i18n.translate('xpack.monitoring.elasticsearch.indices.routeTitle', {
-          defaultMessage: 'Elasticsearch - Indices'
+          defaultMessage: 'Elasticsearch - Indices',
         }),
         storageKey: 'elasticsearch.indices',
-        apiUrlFn: () => `../api/monitoring/v1/clusters/${clusterUuid}/elasticsearch/indices?show_system_indices=${showSystemIndices}`,
+        apiUrlFn: () =>
+          `../api/monitoring/v1/clusters/${clusterUuid}/elasticsearch/indices?show_system_indices=${showSystemIndices}`,
         reactNodeId: 'elasticsearchIndicesReact',
         defaultData: {},
         $scope,
         $injector,
         $scope,
-        $injector
+        $injector,
       });
 
       this.isCcrEnabled = $scope.cluster.isCcrEnabled;
@@ -60,9 +62,12 @@ uiRoutes.when('/elasticsearch/indices', {
         this.updateData();
       };
 
-      $scope.$watch(() => this.data, data => {
-        this.renderReact(data);
-      });
+      $scope.$watch(
+        () => this.data,
+        data => {
+          this.renderReact(data);
+        }
+      );
 
       this.renderReact = ({ clusterStatus, indices }) => {
         super.renderReact(
@@ -80,5 +85,5 @@ uiRoutes.when('/elasticsearch/indices', {
         );
       };
     }
-  }
+  },
 });

@@ -17,6 +17,7 @@
  * under the License.
  */
 
+/** @public */
 export type ConfigPath = string | string[];
 
 /**

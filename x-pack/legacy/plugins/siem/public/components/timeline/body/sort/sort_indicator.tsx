@@ -5,8 +5,7 @@
  */
 
 import { EuiIcon } from '@elastic/eui';
-import * as React from 'react';
-import { pure } from 'recompose';
+import React from 'react';
 
 import { Direction } from '../../../../graphql/types';
 
@@ -38,6 +37,8 @@ interface Props {
 }
 
 /** Renders a sort indicator */
-export const SortIndicator = pure<Props>(({ sortDirection }) => (
+export const SortIndicator = React.memo<Props>(({ sortDirection }) => (
   <EuiIcon data-test-subj="sortIndicator" type={getDirection(sortDirection) || 'empty'} />
 ));
+
+SortIndicator.displayName = 'SortIndicator';

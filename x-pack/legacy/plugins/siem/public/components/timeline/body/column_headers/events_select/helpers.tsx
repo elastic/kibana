@@ -5,8 +5,7 @@
  */
 
 import { EuiText } from '@elastic/eui';
-import * as React from 'react';
-import { pure } from 'recompose';
+import React from 'react';
 import styled from 'styled-components';
 
 import { Pin } from '../../../../pin';
@@ -17,14 +16,20 @@ const InputDisplay = styled.div`
   width: 5px;
 `;
 
+InputDisplay.displayName = 'InputDisplay';
+
 const PinIconContainer = styled.div`
   margin-right: 5px;
 `;
+
+PinIconContainer.displayName = 'PinIconContainer';
 
 const PinActionItem = styled.div`
   display: flex;
   flex-direction: row;
 `;
+
+PinActionItem.displayName = 'PinActionItem';
 
 export type EventsSelectAction =
   | 'select-all'
@@ -41,11 +46,13 @@ export interface EventsSelectOption {
   dropdownDisplay: JSX.Element | string;
 }
 
-export const DropdownDisplay = pure<{ text: string }>(({ text }) => (
+export const DropdownDisplay = React.memo<{ text: string }>(({ text }) => (
   <EuiText size="s" color="subdued">
     {text}
   </EuiText>
 ));
+
+DropdownDisplay.displayName = 'DropdownDisplay';
 
 export const getEventsSelectOptions = (): EventsSelectOption[] => [
   {

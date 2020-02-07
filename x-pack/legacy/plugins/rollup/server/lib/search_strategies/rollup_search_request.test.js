@@ -1,8 +1,8 @@
 /*
-* Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
-* or more contributor license agreements. Licensed under the Elastic License;
-* you may not use this file except in compliance with the Elastic License.
-*/
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
 import { getRollupSearchRequest } from './rollup_search_request';
 
 class AbstractSearchRequest {
@@ -41,7 +41,10 @@ describe('Rollup search request', () => {
 
   test('should send multiple request for multi search', async () => {
     const rollupSearchRequest = new RollupSearchRequest();
-    const searches = [{ body: 'body', index: 'index' }, { body: 'body1', index: 'index' }];
+    const searches = [
+      { body: 'body', index: 'index' },
+      { body: 'body1', index: 'index' },
+    ];
 
     await rollupSearchRequest.search(searches);
 

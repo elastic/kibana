@@ -12,11 +12,8 @@ exports[`renders matching snapshot 1`] = `
   >
     <EuiButton
       color="danger"
-      fill={false}
-      iconSide="left"
       onClick={[Function]}
       size="s"
-      type="button"
     >
       <FormattedMessage
         defaultMessage="See the full error"

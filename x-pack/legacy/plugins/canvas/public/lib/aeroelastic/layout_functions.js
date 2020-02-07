@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { landmarkPoint, shapesAt } from './geometry';
+import { insideAABB, landmarkPoint, shapesAt } from './geometry';
 
 import {
   compositeComponent,
@@ -62,14 +62,45 @@ const resizeVertexTuples = [
 ];
 
 const connectorVertices = [
-  [[-1, -1], [0, -1]],
-  [[0, -1], [1, -1]],
-  [[1, -1], [1, 0]],
-  [[1, 0], [1, 1]],
-  [[1, 1], [0, 1]],
-  [[0, 1], [-1, 1]],
-  [[-1, 1], [-1, 0]],
-  [[-1, 0], [-1, -1]],
+  [
+    [-1, -1],
+    [0, -1],
+  ],
+  [
+    [0, -1],
+    [1, -1],
+  ],
+  [
+    [1, -1],
+    [1, 0],
+  ],
+  [
+    [1, 0],
+    [1, 1],
+  ],
+  [
+    [1, 1],
+    [0, 1],
+  ],
+  [
+    [0, 1],
+    [-1, 1],
+  ],
+  [
+    [-1, 1],
+    [-1, 0],
+  ],
+  [
+    [-1, 0],
+    [-1, -1],
+  ],
+];
+
+const cornerVertices = [
+  [-1, -1],
+  [1, -1],
+  [-1, 1],
+  [1, 1],
 ];
 
 const resizeMultiplierHorizontal = { left: -1, center: 0, right: 1 };
@@ -87,6 +118,41 @@ const bidirectionalCursors = {
   '225': 'nesw-resize',
   '270': 'ew-resize',
   '315': 'nwse-resize',
+};
+
+const identityAABB = () => [
+  [Infinity, Infinity],
+  [-Infinity, -Infinity],
+];
+
+const extend = ([[xMin, yMin], [xMax, yMax]], [x0, y0], [x1, y1]) => [
+  [Math.min(xMin, x0, x1), Math.min(yMin, y0, y1)],
+  [Math.max(xMax, x0, x1), Math.max(yMax, y0, y1)],
+];
+
+const shapeAABB = (shape, prevOuter) =>
+  cornerVertices.reduce((prevInner, xyVertex) => {
+    const cornerPoint = normalize(
+      mvMultiply(shape.transformMatrix, [shape.a * xyVertex[0], shape.b * xyVertex[1], 0, 1])
+    );
+    return extend(prevInner, cornerPoint, cornerPoint);
+  }, prevOuter);
+
+const shapesAABB = shapes =>
+  shapes.reduce(
+    (prevOuter, shape) => extend(prevOuter, ...shapeAABB(shape, prevOuter)),
+    identityAABB()
+  );
+
+const projectAABB = ([[xMin, yMin], [xMax, yMax]]) => {
+  const a = (xMax - xMin) / 2;
+  const b = (yMax - yMin) / 2;
+  const xTranslate = xMin + a;
+  const yTranslate = yMin + b;
+  const zTranslate = 0;
+  const localTransformMatrix = translate(xTranslate, yTranslate, zTranslate);
+  const rigTransform = translate(-xTranslate, -yTranslate, -zTranslate);
+  return { a, b, localTransformMatrix, rigTransform };
 };
 
 // returns the currently dragged shape, or a falsey value otherwise
@@ -331,6 +397,97 @@ const fromScreen = currentTransform => transform => {
   }
 };
 
+const horizontalToIndex = horizontal => (horizontal ? 0 : 1);
+
+const anchorAABB = (aabb, anchorDirection, horizontal) => {
+  const dimension = horizontalToIndex(horizontal);
+  if (anchorDirection === 0) {
+    return (aabb[0][dimension] + aabb[1][dimension]) / 2; // midpoint
+  } else {
+    const index = (anchorDirection + 1) / 2; // {-1, 1} -> {0, 1} for array lookup
+    return aabb[index][dimension];
+  }
+};
+
+export const getAlignDistributeTransformIntents = (
+  alignAction,
+  distributeAction,
+  shapes,
+  selectedShapes
+) => {
+  // at most, only one of them can happen
+  if (selectedShapes.length !== 1 || selectedShapes[0].subtype !== 'adHocGroup') {
+    return [];
+  }
+
+  const group = selectedShapes[0];
+  const children = shapes.filter(s => s.parent === group.id && s.type !== 'annotation');
+
+  if (alignAction && children.length > 1) {
+    const { controlledAnchor, horizontal } = alignAction;
+    const groupBoundingBox = shapeAABB(group, identityAABB());
+    const groupAnchor = anchorAABB(groupBoundingBox, controlledAnchor, horizontal);
+    const results = children.map(c => {
+      const childBoundingBox = shapeAABB(c, identityAABB());
+      const childAnchor = anchorAABB(childBoundingBox, controlledAnchor, horizontal);
+      const delta = groupAnchor - childAnchor;
+      return {
+        cumulativeTransforms: [translate(horizontal ? delta : 0, horizontal ? 0 : delta, 0)],
+        shapes: [c.id],
+      };
+    });
+    return results;
+  } else if (distributeAction && children.length > 2) {
+    const { horizontal } = distributeAction;
+    const { a: A, b: B } = group;
+    const groupBoundingBox = shapeAABB(group, identityAABB());
+    const groupAnchor = anchorAABB(groupBoundingBox, -1, horizontal);
+    const dimension = horizontalToIndex(horizontal);
+    const childrenBoxes2D = children.map(c => shapeAABB(c, identityAABB()));
+    const childrenAnchors = childrenBoxes2D.map(childBoundingBox =>
+      anchorAABB(childBoundingBox, -1, horizontal)
+    );
+    const childrenBoxes1D = childrenBoxes2D.map(box2D => [
+      box2D[0][dimension],
+      box2D[1][dimension],
+    ]);
+    const childrenCenters = childrenBoxes1D.map(box1D => (box1D[1] + box1D[0]) / 2);
+    const childrenSizes = childrenBoxes1D.map(box1D => box1D[1] - box1D[0]);
+    const totalChildrenSize = childrenSizes.reduce((a, b) => a + b, 0);
+    const groupSize = horizontal ? 2 * A : 2 * B;
+    const totalFreeSpace = groupSize - totalChildrenSize;
+    const gapCount = children.length - 1;
+    const gap = totalFreeSpace / gapCount;
+    const childrenIndex = [...Array(children.length)].map((_, i) => i);
+    const sortedChildrenIndex = childrenIndex.sort(
+      (i, j) => childrenCenters[i] - childrenCenters[j]
+    );
+    const reduction = sortedChildrenIndex.reduce(
+      ({ cursor, deltas }, i) => {
+        const size = childrenSizes[i];
+        const originalLeft = childrenAnchors[i];
+        const desiredLeft = cursor;
+        const delta = desiredLeft - originalLeft;
+        const nextLeft = cursor + size + gap;
+        return {
+          cursor: nextLeft,
+          deltas: [...deltas, delta],
+        };
+      },
+      { cursor: groupAnchor, deltas: [] }
+    );
+    const results = reduction.deltas.map((delta, ii) => {
+      const i = sortedChildrenIndex[ii];
+      return {
+        cumulativeTransforms: [translate(horizontal ? delta : 0, horizontal ? 0 : delta, 0)],
+        shapes: [children[i].id],
+      };
+    });
+    return results;
+  }
+  return [];
+};
+
 const shapeApplyLocalTransforms = intents => shape => {
   const transformIntents = flatten(
     intents
@@ -422,14 +579,18 @@ export const applyLocalTransforms = (shapes, transformIntents) => {
 // eslint-disable-next-line
 const getUpstreamTransforms = (shapes, shape) =>
   shape.parent
-    ? getUpstreamTransforms(shapes, shapes.find(s => s.id === shape.parent)).concat([
-        shape.localTransformMatrix,
-      ])
+    ? getUpstreamTransforms(
+        shapes,
+        shapes.find(s => s.id === shape.parent)
+      ).concat([shape.localTransformMatrix])
     : [shape.localTransformMatrix];
 
 const getUpstreams = (shapes, shape) =>
   shape.parent
-    ? getUpstreams(shapes, shapes.find(s => s.id === shape.parent)).concat([shape])
+    ? getUpstreams(
+        shapes,
+        shapes.find(s => s.id === shape.parent)
+      ).concat([shape])
     : [shape];
 
 const snappedA = shape => shape.a + (shape.snapResizeVector ? shape.snapResizeVector[0] : 0);
@@ -752,7 +913,12 @@ function resizeAnnotation(config, shapes, selectedShapes, shape) {
   const b = snappedB(properShape);
   const allowResize =
     properShape.type !== 'group' ||
-    (config.groupResize && magic(config, properShape, shapes.filter(s => s.type !== 'annotation')));
+    (config.groupResize &&
+      magic(
+        config,
+        properShape,
+        shapes.filter(s => s.type !== 'annotation')
+      ));
   const resizeVertices = allowResize ? resizeVertexTuples : [];
   const resizePoints = resizeVertices.map(resizePointAnnotations(config, shape, a, b));
   const connectors = connectorVertices.map(resizeEdgeAnnotations(config, shape, a, b));
@@ -856,38 +1022,6 @@ const resizeShapeSnap = (
   }
 };
 
-const extend = ([[xMin, yMin], [xMax, yMax]], [x0, y0], [x1, y1]) => [
-  [Math.min(xMin, x0, x1), Math.min(yMin, y0, y1)],
-  [Math.max(xMax, x0, x1), Math.max(yMax, y0, y1)],
-];
-
-const cornerVertices = [[-1, -1], [1, -1], [-1, 1], [1, 1]];
-
-const getAABB = shapes =>
-  shapes.reduce(
-    (prevOuter, shape) => {
-      const shapeBounds = cornerVertices.reduce((prevInner, xyVertex) => {
-        const cornerPoint = normalize(
-          mvMultiply(shape.transformMatrix, [shape.a * xyVertex[0], shape.b * xyVertex[1], 0, 1])
-        );
-        return extend(prevInner, cornerPoint, cornerPoint);
-      }, prevOuter);
-      return extend(prevOuter, ...shapeBounds);
-    },
-    [[Infinity, Infinity], [-Infinity, -Infinity]]
-  );
-
-const projectAABB = ([[xMin, yMin], [xMax, yMax]]) => {
-  const a = (xMax - xMin) / 2;
-  const b = (yMax - yMin) / 2;
-  const xTranslate = xMin + a;
-  const yTranslate = yMin + b;
-  const zTranslate = 0; // todo fix hack that ensures that grouped elements continue to be selectable
-  const localTransformMatrix = translate(xTranslate, yTranslate, zTranslate);
-  const rigTransform = translate(-xTranslate, -yTranslate, -zTranslate);
-  return { a, b, localTransformMatrix, rigTransform };
-};
-
 const dissolveGroups = (groupsToDissolve, shapes, selectedShapes) => {
   return {
     shapes: shapes
@@ -923,7 +1057,7 @@ const idMatch = shape => s => s.id === shape.id;
 const idsMatch = selectedShapes => shape => selectedShapes.find(idMatch(shape));
 
 const axisAlignedBoundingBoxShape = (config, shapesToBox) => {
-  const axisAlignedBoundingBox = getAABB(shapesToBox);
+  const axisAlignedBoundingBox = shapesAABB(shapesToBox);
   const { a, b, localTransformMatrix, rigTransform } = projectAABB(axisAlignedBoundingBox);
   const id = getId(config.groupName, shapesToBox.map(s => s.id).join('|'));
   const aabbShape = {
@@ -1030,7 +1164,7 @@ export const getHoveredShapes = (config, shapes, cursorPosition) =>
 
 export const getHoveredShape = hoveredShapes => (hoveredShapes.length ? hoveredShapes[0] : null);
 
-const singleSelect = (prev, config, hoveredShapes, metaHeld, uid) => {
+const singleSelect = (prev, config, hoveredShapes, metaHeld, uid, _, boxHighlightedShapes) => {
   // cycle from top ie. from zero after the cursor position changed ie. !sameLocation
   const down = true; // this function won't be called otherwise
   const depthIndex =
@@ -1044,10 +1178,19 @@ const singleSelect = (prev, config, hoveredShapes, metaHeld, uid) => {
     uid,
     depthIndex: hoveredShapes.length ? depthIndex : 0,
     down,
+    boxHighlightedShapes,
   };
 };
 
-const multiSelect = (prev, config, hoveredShapes, metaHeld, uid, selectedShapeObjects) => {
+const multiSelect = (
+  prev,
+  config,
+  hoveredShapes,
+  metaHeld,
+  uid,
+  selectedShapeObjects,
+  boxHighlightedShapes
+) => {
   const shapes =
     hoveredShapes.length > 0
       ? disjunctiveUnion(shape => shape.id, selectedShapeObjects, hoveredShapes.slice(0, 1)) // ie. depthIndex of 0, if any
@@ -1057,6 +1200,7 @@ const multiSelect = (prev, config, hoveredShapes, metaHeld, uid, selectedShapeOb
     uid,
     depthIndex: 0,
     down: false,
+    boxHighlightedShapes,
   };
 };
 
@@ -1132,7 +1276,10 @@ export const getGrouping = (config, shapes, selectedShapes, groupAction, tuple) 
     return config.groupResize
       ? {
           shapes: [
-            ...resizeGroup(shapes.filter(s => s.type !== 'annotation'), elements[0]),
+            ...resizeGroup(
+              shapes.filter(s => s.type !== 'annotation'),
+              elements[0]
+            ),
             ...shapes.filter(s => s.type === 'annotation'),
           ],
           selectedShapes,
@@ -1198,26 +1345,52 @@ export const getSelectionStateFull = (
   config,
   selectedShapeObjects,
   hoveredShapes,
-  { down, uid },
+  { up, down, uid },
   metaHeld,
-  multiselect
+  multiselect,
+  boxHighlightedShapes
 ) => {
   const uidUnchanged = uid === prev.uid;
   const mouseButtonUp = !down;
   if (selectedShapeObjects) {
     prev.shapes = selectedShapeObjects.slice();
   }
-  // take action on mouse down only, and if the uid changed (except with directSelect), ie. bail otherwise
   if (mouseButtonUp || uidUnchanged) {
-    return { ...prev, down, uid, metaHeld };
+    return {
+      ...prev,
+      shapes:
+        up && prev.boxHighlightedShapes.length
+          ? prev.shapes
+              .concat(prev.boxHighlightedShapes)
+              .filter((d, i, a) => a.findIndex(dd => dd.id === d.id) === i)
+          : prev.shapes,
+      down,
+      uid,
+      metaHeld,
+      boxHighlightedShapes: boxHighlightedShapes,
+    };
   }
   const selectFunction = config.singleSelect || !multiselect ? singleSelect : multiSelect;
-  return selectFunction(prev, config, hoveredShapes, metaHeld, uid, selectedShapeObjects);
+  return selectFunction(
+    prev,
+    config,
+    hoveredShapes,
+    metaHeld,
+    uid,
+    selectedShapeObjects,
+    boxHighlightedShapes
+  );
 };
 
 export const getSelectedShapes = selectionTuple => selectionTuple.shapes;
 
-export const getSelectionState = ({ uid, depthIndex, down }) => ({ uid, depthIndex, down });
+export const getSelectionState = ({ uid, depthIndex, down, metaHeld, boxHighlightedShapes }) => ({
+  uid,
+  depthIndex,
+  down,
+  metaHeld,
+  boxHighlightedShapes,
+});
 
 export const getSelectedPrimaryShapeIds = shapes => shapes.map(primaryShape);
 
@@ -1296,6 +1469,9 @@ export const getHoverAnnotations = (config, shapes, selectedPrimaryShapeIds, dra
     )
     .map(borderAnnotation(config.hoverAnnotationName, config.hoverLift));
 
+export const getShapesToHover = (dragBox, hoveredShapes, boxHighlightedShapes) =>
+  dragBox ? boxHighlightedShapes : hoveredShapes.slice(0, 1);
+
 export const getSnappedShapes = (
   config,
   shapes,
@@ -1344,6 +1520,56 @@ export const getGroupAction = (action, mouseIsDown) => {
   return !mouseIsDown && (event === 'group' || event === 'ungroup') ? event : null;
 };
 
+const alignments = {
+  // in the future, we might want to snap eg. the element center to the left edge
+  // controlling anchor is which side (-1: lower, eg. left; 0: central) of the container
+  // we want to snap to; controlled anchor specifies which side of the element snaps
+  alignLeft: {
+    type: 'alignLeftAction',
+    horizontal: true,
+    controlledAnchor: -1,
+    controllingAnchor: -1,
+  },
+  alignCenter: {
+    type: 'alignCenterAction',
+    horizontal: true,
+    controlledAnchor: 0,
+    controllingAnchor: 0,
+  },
+  alignRight: {
+    type: 'alignRightAction',
+    horizontal: true,
+    controlledAnchor: 1,
+    controllingAnchor: 1,
+  },
+  alignTop: {
+    type: 'alignTopAction',
+    horizontal: false,
+    controlledAnchor: -1,
+    controllingAnchor: -1,
+  },
+  alignMiddle: {
+    type: 'alignMiddleAction',
+    horizontal: false,
+    controlledAnchor: 0,
+    controllingAnchor: 0,
+  },
+  alignBottom: {
+    type: 'alignBottomAction',
+    horizontal: false,
+    controlledAnchor: 1,
+    controllingAnchor: 1,
+  },
+};
+
+const distributions = {
+  distributeHorizontally: { type: 'distributeHorizontallyAction', horizontal: true },
+  distributeVertically: { type: 'distributeVerticallyAction', horizontal: false },
+};
+
+export const getAlignAction = action => alignments[action && action.event] || null;
+export const getDistributeAction = action => distributions[action && action.event] || null;
+
 export const getGroupedSelectedShapes = ({ selectedShapes }) => selectedShapes;
 
 export const getGroupedSelectedPrimaryShapeIds = selectedShapes => selectedShapes.map(primaryShape);
@@ -1357,6 +1583,41 @@ export const getRotationAnnotations = (config, { shapes, selectedShapes }) => {
     .filter(identity);
 };
 
+export const getDragBox = (dragging, draggedShape, { x0, y0, x1, y1 }) =>
+  dragging &&
+  !draggedShape && {
+    x: (x0 + x1) / 2,
+    y: (y0 + y1) / 2,
+    a: Math.abs(x1 - x0) / 2,
+    b: Math.abs(y1 - y0) / 2,
+  };
+
+export const getDragboxHighlighted = (box, shapes) => {
+  if (!box) {
+    return [];
+  }
+  const filter = insideAABB(box);
+  return shapes.filter(
+    s => s.type !== 'annotation' && !s.parent && filter(s.transformMatrix, s.a, s.b)
+  );
+};
+
+export const getDragBoxAnnotation = (config, box) =>
+  box
+    ? [
+        {
+          id: config.dragBoxAnnotationName,
+          type: 'annotation',
+          subtype: config.dragBoxAnnotationName,
+          interactive: false,
+          parent: null,
+          localTransformMatrix: translate(box.x, box.y, config.dragBoxZ),
+          a: box.a,
+          b: box.b,
+        },
+      ]
+    : [];
+
 export const getAnnotatedShapes = (
   { shapes },
   alignmentGuideAnnotations,
@@ -1364,7 +1625,8 @@ export const getAnnotatedShapes = (
   rotationAnnotations,
   resizeAnnotations,
   rotationTooltipAnnotation,
-  adHocChildrenAnnotations
+  adHocChildrenAnnotations,
+  dragBoxAnnotation
 ) => {
   // fixme update it to a simple concatenator, no need for enlisting the now pretty long subtype list
   const annotations = [].concat(
@@ -1373,7 +1635,8 @@ export const getAnnotatedShapes = (
     rotationAnnotations,
     resizeAnnotations,
     rotationTooltipAnnotation,
-    adHocChildrenAnnotations
+    adHocChildrenAnnotations,
+    dragBoxAnnotation
   );
   // remove preexisting annotations
   const contentShapes = shapes.filter(shape => shape.type !== 'annotation');

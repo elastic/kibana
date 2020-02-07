@@ -5,14 +5,14 @@
  */
 
 import { EuiButtonIcon, EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, EuiToolTip } from '@elastic/eui';
-import * as React from 'react';
+import React, { useCallback, useState } from 'react';
 import { connect } from 'react-redux';
-import { pure } from 'recompose';
 import styled from 'styled-components';
 import { ActionCreator } from 'typescript-fsa';
+import { Resizable, ResizeCallback } from 're-resizable';
+import { throttle } from 'lodash/fp';
 
-import { OnResize, Resizeable } from '../../resize_handle';
-import { TimelineResizeHandle } from '../../resize_handle/styled_handles';
+import { TimelineResizeHandle } from './timeline_resize_handle';
 import { FlyoutHeader } from '../header';
 
 import * as i18n from './translations';
@@ -42,10 +42,10 @@ interface DispatchProps {
 
 type Props = OwnProps & DispatchProps;
 
-const EuiFlyoutContainer = styled.div<{ headerHeight: number; width: number }>`
+const EuiFlyoutContainer = styled.div<{ headerHeight: number }>`
   .timeline-flyout {
     min-width: 150px;
-    width: ${({ width }) => `${width}px`};
+    width: auto;
   }
   .timeline-flyout-header {
     align-items: center;
@@ -79,11 +79,11 @@ const WrappedCloseButton = styled.div`
   margin-right: 5px;
 `;
 
-const FlyoutHeaderWithCloseButton = pure<{
+const FlyoutHeaderWithCloseButtonComponent: React.FC<{
   onClose: () => void;
   timelineId: string;
   usersViewing: string[];
-}>(({ onClose, timelineId, usersViewing }) => (
+}> = ({ onClose, timelineId, usersViewing }) => (
   <FlyoutHeaderContainer>
     <WrappedCloseButton>
       <EuiToolTip content={i18n.CLOSE_TIMELINE}>
@@ -97,39 +97,72 @@ const FlyoutHeaderWithCloseButton = pure<{
     </WrappedCloseButton>
     <FlyoutHeader timelineId={timelineId} usersViewing={usersViewing} />
   </FlyoutHeaderContainer>
-));
+);
 
-class FlyoutPaneComponent extends React.PureComponent<Props> {
-  public render() {
-    const {
-      children,
-      flyoutHeight,
-      headerHeight,
-      onClose,
-      timelineId,
-      usersViewing,
-      width,
-    } = this.props;
+const FlyoutHeaderWithCloseButton = React.memo(
+  FlyoutHeaderWithCloseButtonComponent,
+  (prevProps, nextProps) =>
+    prevProps.timelineId === nextProps.timelineId &&
+    prevProps.usersViewing === nextProps.usersViewing
+);
 
-    return (
-      <EuiFlyoutContainer headerHeight={headerHeight} data-test-subj="flyout-pane" width={width}>
-        <EuiFlyout
-          aria-label={i18n.TIMELINE_DESCRIPTION}
-          className="timeline-flyout"
-          data-test-subj="eui-flyout"
-          hideCloseButton={true}
-          maxWidth={`${maxWidthPercent}%`}
-          onClose={onClose}
-          size="l"
-        >
-          <Resizeable
-            handle={
+const FlyoutPaneComponent: React.FC<Props> = ({
+  applyDeltaToWidth,
+  children,
+  flyoutHeight,
+  headerHeight,
+  onClose,
+  timelineId,
+  usersViewing,
+  width,
+}) => {
+  const [lastDelta, setLastDelta] = useState(0);
+  const onResizeStop: ResizeCallback = useCallback(
+    (e, direction, ref, delta) => {
+      const bodyClientWidthPixels = document.body.clientWidth;
+
+      if (delta.width) {
+        applyDeltaToWidth({
+          bodyClientWidthPixels,
+          delta: -(delta.width - lastDelta),
+          id: timelineId,
+          maxWidthPercent,
+          minWidthPixels,
+        });
+        setLastDelta(delta.width);
+      }
+    },
+    [applyDeltaToWidth, maxWidthPercent, minWidthPixels, lastDelta]
+  );
+  const resetLastDelta = useCallback(() => setLastDelta(0), [setLastDelta]);
+  const throttledResize = throttle(100, onResizeStop);
+
+  return (
+    <EuiFlyoutContainer headerHeight={headerHeight} data-test-subj="flyout-pane">
+      <EuiFlyout
+        aria-label={i18n.TIMELINE_DESCRIPTION}
+        className="timeline-flyout"
+        data-test-subj="eui-flyout"
+        hideCloseButton={true}
+        onClose={onClose}
+        size="l"
+      >
+        <Resizable
+          enable={{ left: true }}
+          defaultSize={{
+            width,
+            height: 'auto',
+          }}
+          minWidth={minWidthPixels}
+          maxWidth={`${maxWidthPercent}vw`}
+          handleComponent={{
+            left: (
               <TimelineResizeHandle data-test-subj="flyout-resize-handle" height={flyoutHeight} />
-            }
-            id={timelineId}
-            onResize={this.onResize}
-            render={this.renderFlyout}
-          />
+            ),
+          }}
+          onResizeStart={resetLastDelta}
+          onResize={throttledResize}
+        >
           <EuiFlyoutHeader
             className="timeline-flyout-header"
             data-test-subj="eui-flyout-header"
@@ -144,31 +177,14 @@ class FlyoutPaneComponent extends React.PureComponent<Props> {
           <EuiFlyoutBody data-test-subj="eui-flyout-body" className="timeline-flyout-body">
             {children}
           </EuiFlyoutBody>
-        </EuiFlyout>
-      </EuiFlyoutContainer>
-    );
-  }
+        </Resizable>
+      </EuiFlyout>
+    </EuiFlyoutContainer>
+  );
+};
 
-  private renderFlyout = () => <></>;
+export const Pane = connect(null, {
+  applyDeltaToWidth: timelineActions.applyDeltaToWidth,
+})(React.memo(FlyoutPaneComponent));
 
-  private onResize: OnResize = ({ delta, id }) => {
-    const { applyDeltaToWidth } = this.props;
-
-    const bodyClientWidthPixels = document.body.clientWidth;
-
-    applyDeltaToWidth({
-      bodyClientWidthPixels,
-      delta,
-      id,
-      maxWidthPercent,
-      minWidthPixels,
-    });
-  };
-}
-
-export const Pane = connect(
-  null,
-  {
-    applyDeltaToWidth: timelineActions.applyDeltaToWidth,
-  }
-)(FlyoutPaneComponent);
+Pane.displayName = 'Pane';

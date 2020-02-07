@@ -5,8 +5,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { pure } from 'recompose';
-import * as React from 'react';
+import React from 'react';
 import styled from 'styled-components';
 
 import { BrowserFields } from '../../containers/source';
@@ -25,14 +24,15 @@ const NoFieldsPanel = styled.div`
   height: ${TABLE_HEIGHT}px;
 `;
 
+NoFieldsPanel.displayName = 'NoFieldsPanel';
+
 const NoFieldsFlexGroup = styled(EuiFlexGroup)`
   height: 100%;
 `;
 
-type Props = Pick<
-  FieldBrowserProps,
-  'isLoading' | 'onFieldSelected' | 'onUpdateColumns' | 'timelineId'
-> & {
+NoFieldsFlexGroup.displayName = 'NoFieldsFlexGroup';
+
+type Props = Pick<FieldBrowserProps, 'onFieldSelected' | 'onUpdateColumns' | 'timelineId'> & {
   columnHeaders: ColumnHeader[];
   /**
    * A map of categoryId -> metadata about the fields in that category,
@@ -58,11 +58,10 @@ type Props = Pick<
    */
   toggleColumn: (column: ColumnHeader) => void;
 };
-export const FieldsPane = pure<Props>(
+export const FieldsPane = React.memo<Props>(
   ({
     columnHeaders,
     filteredBrowserFields,
-    isLoading,
     onCategorySelected,
     onUpdateColumns,
     searchInput,
@@ -83,7 +82,6 @@ export const FieldsPane = pure<Props>(
             categoryId: selectedCategoryId,
             columnHeaders,
             highlight: searchInput,
-            isLoading,
             onUpdateColumns,
             timelineId,
             toggleColumn,
@@ -104,3 +102,5 @@ export const FieldsPane = pure<Props>(
     </>
   )
 );
+
+FieldsPane.displayName = 'FieldsPane';

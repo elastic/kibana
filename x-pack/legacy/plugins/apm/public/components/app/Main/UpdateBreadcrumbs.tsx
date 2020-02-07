@@ -5,16 +5,27 @@
  */
 
 import { Location } from 'history';
-import { last } from 'lodash';
 import React from 'react';
-import chrome from 'ui/chrome';
-import { getAPMHref } from '../../shared/Links/APMLink';
-import { Breadcrumb, ProvideBreadcrumbs } from './ProvideBreadcrumbs';
-import { routes } from './route_config';
+import { AppMountContext } from 'src/core/public';
+import { getAPMHref } from '../../shared/Links/apm/APMLink';
+import {
+  Breadcrumb,
+  ProvideBreadcrumbs,
+  BreadcrumbRoute
+} from './ProvideBreadcrumbs';
+import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
 
 interface Props {
   location: Location;
   breadcrumbs: Breadcrumb[];
+  core: AppMountContext['core'];
+}
+
+function getTitleFromBreadCrumbs(breadcrumbs: Breadcrumb[]) {
+  return breadcrumbs
+    .map(({ value }) => value)
+    .reverse()
+    .join(' | ');
 }
 
 class UpdateBreadcrumbsComponent extends React.Component<Props> {
@@ -24,9 +35,8 @@ class UpdateBreadcrumbsComponent extends React.Component<Props> {
       href: getAPMHref(match.url, this.props.location.search)
     }));
 
-    const current = last(breadcrumbs) || { text: '' };
-    document.title = current.text;
-    chrome.breadcrumbs.set(breadcrumbs);
+    document.title = getTitleFromBreadCrumbs(this.props.breadcrumbs);
+    this.props.core.chrome.setBreadcrumbs(breadcrumbs);
   }
 
   public componentDidMount() {
@@ -42,7 +52,13 @@ class UpdateBreadcrumbsComponent extends React.Component<Props> {
   }
 }
 
-export function UpdateBreadcrumbs() {
+interface UpdateBreadcrumbsProps {
+  routes: BreadcrumbRoute[];
+}
+
+export function UpdateBreadcrumbs({ routes }: UpdateBreadcrumbsProps) {
+  const { core } = useApmPluginContext();
+
   return (
     <ProvideBreadcrumbs
       routes={routes}
@@ -50,6 +66,7 @@ export function UpdateBreadcrumbs() {
         <UpdateBreadcrumbsComponent
           breadcrumbs={breadcrumbs}
           location={location}
+          core={core}
         />
       )}
     />

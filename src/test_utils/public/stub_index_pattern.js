@@ -18,47 +18,58 @@
  */
 
 import sinon from 'sinon';
-import { IndexPattern } from 'ui/index_patterns/_index_pattern';
-import { getRoutes } from 'ui/index_patterns/get_routes';
-import { formatHitProvider } from 'ui/index_patterns/_format_hit';
-import { getComputedFields } from 'ui/index_patterns/_get_computed_fields';
-import { fieldFormats } from 'ui/registry/field_formats';
-import { flattenHitWrapper } from 'ui/index_patterns/_flatten_hit';
-import { FieldList } from 'ui/index_patterns/_field_list';
+// TODO: We should not be importing from the data plugin directly here; this is only necessary
+// because it is one of the few places that we need to access the IndexPattern class itself, rather
+// than just the type. Doing this as a temporary measure; it will be left behind when migrating to NP.
 
-export default function () {
+import { FieldList, IndexPattern, indexPatterns, KBN_FIELD_TYPES } from '../../plugins/data/public';
 
-  function StubIndexPattern(pattern, timeField, fields) {
-    this.id = pattern;
-    this.title = pattern;
-    this.popularizeField = sinon.stub();
-    this.timeFieldName = timeField;
-    this.isTimeBased = () => Boolean(this.timeFieldName);
-    this.getNonScriptedFields = sinon.spy(IndexPattern.prototype.getNonScriptedFields);
-    this.getScriptedFields = sinon.spy(IndexPattern.prototype.getScriptedFields);
-    this.getSourceFiltering = sinon.stub();
-    this.metaFields = ['_id', '_type', '_source'];
-    this.fieldFormatMap = {};
-    this.routes = getRoutes();
+import { setFieldFormats } from '../../plugins/data/public/services';
 
-    this.getComputedFields = getComputedFields.bind(this);
-    this.flattenHit = flattenHitWrapper(this, this.metaFields);
-    this.formatHit = formatHitProvider(this, fieldFormats.getDefaultInstance('string'));
-    this.fieldsFetcher = { apiClient: { baseUrl: '' } };
-    this.formatField = this.formatHit.formatField;
+setFieldFormats({
+  getDefaultInstance: () => ({
+    getConverterFor: () => value => value,
+    convert: value => JSON.stringify(value),
+  }),
+});
 
-    this._reindexFields = function () {
-      this.fields = new FieldList(this, this.fields || fields);
-    };
+import { getFieldFormatsRegistry } from './stub_field_formats';
 
-    this.stubSetFieldFormat = function (fieldName, id, params) {
-      const FieldFormat = fieldFormats.byId[id];
-      this.fieldFormatMap[fieldName] = new FieldFormat(params);
-      this._reindexFields();
-    };
+export default function StubIndexPattern(pattern, getConfig, timeField, fields, core) {
+  const registeredFieldFormats = getFieldFormatsRegistry(core);
 
+  this.id = pattern;
+  this.title = pattern;
+  this.popularizeField = sinon.stub();
+  this.timeFieldName = timeField;
+  this.isTimeBased = () => Boolean(this.timeFieldName);
+  this.getConfig = getConfig;
+  this.getNonScriptedFields = sinon.spy(IndexPattern.prototype.getNonScriptedFields);
+  this.getScriptedFields = sinon.spy(IndexPattern.prototype.getScriptedFields);
+  this.getFieldByName = sinon.spy(IndexPattern.prototype.getFieldByName);
+  this.getSourceFiltering = sinon.stub();
+  this.metaFields = ['_id', '_type', '_source'];
+  this.fieldFormatMap = {};
+  this.routes = indexPatterns.getRoutes();
+
+  this.getComputedFields = IndexPattern.prototype.getComputedFields.bind(this);
+  this.flattenHit = indexPatterns.flattenHitWrapper(this, this.metaFields);
+  this.formatHit = indexPatterns.formatHitProvider(
+    this,
+    registeredFieldFormats.getDefaultInstance(KBN_FIELD_TYPES.STRING)
+  );
+  this.fieldsFetcher = { apiClient: { baseUrl: '' } };
+  this.formatField = this.formatHit.formatField;
+
+  this._reindexFields = function() {
+    this.fields = new FieldList(this, this.fields || fields);
+  };
+
+  this.stubSetFieldFormat = function(fieldName, id, params) {
+    const FieldFormat = registeredFieldFormats.getType(id);
+    this.fieldFormatMap[fieldName] = new FieldFormat(params);
     this._reindexFields();
-  }
+  };
 
-  return StubIndexPattern;
+  this._reindexFields();
 }

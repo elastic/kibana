@@ -1,0 +1,34 @@
+==========
+String only 1
+-------------------------------------
+""" hello
+to you """
+-------------------------------------
+" hello\nto you "
+==========
+String only 2
+-------------------------------------
+"""
+starting with new lines and ending as well
+"""
+-------------------------------------
+"\nstarting with new lines and ending as well\n"
+==========
+Strings in requests
+-------------------------------------
+{
+  "f": { "somefield" : """
+test
+test2
+""" },
+  "g": { "script" : """second + "\";""" },
+  "h": 1,
+  "script": "a + 2"
+}
+-------------------------------------
+{
+  "f": { "somefield" : "\ntest\ntest2\n" },
+  "g": { "script" : "second + \"\\\";" },
+  "h": 1,
+  "script": "a + 2"
+}

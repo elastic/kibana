@@ -24,7 +24,7 @@
 
 import _ from 'lodash';
 import { IndexMapping } from '../../mappings';
-import { SavedObjectsMigrationVersion } from '../../';
+import { SavedObjectsMigrationVersion } from '../../types';
 import { AliasAction, CallCluster, NotFound, RawDoc, ShardsInfo } from './call_cluster';
 
 const settings = { number_of_shards: 1, auto_expand_replicas: '0-1' };
@@ -228,14 +228,15 @@ export async function convertToAlias(
   callCluster: CallCluster,
   info: FullIndexInfo,
   alias: string,
-  batchSize: number
+  batchSize: number,
+  script?: string
 ) {
   await callCluster('indices.create', {
     body: { mappings: info.mappings, settings },
     index: info.indexName,
   });
 
-  await reindex(callCluster, alias, info.indexName, batchSize);
+  await reindex(callCluster, alias, info.indexName, batchSize, script);
 
   await claimAlias(callCluster, info.indexName, alias, [{ remove_index: { index: alias } }]);
 }
@@ -316,7 +317,13 @@ function assertResponseIncludeAllShards({ _shards }: { _shards: ShardsInfo }) {
 /**
  * Reindexes from source to dest, polling for the reindex completion.
  */
-async function reindex(callCluster: CallCluster, source: string, dest: string, batchSize: number) {
+async function reindex(
+  callCluster: CallCluster,
+  source: string,
+  dest: string,
+  batchSize: number,
+  script?: string
+) {
   // We poll instead of having the request wait for completion, as for large indices,
   // the request times out on the Elasticsearch side of things. We have a relatively tight
   // polling interval, as the request is fairly efficent, and we don't
@@ -326,6 +333,12 @@ async function reindex(callCluster: CallCluster, source: string, dest: string, b
     body: {
       dest: { index: dest },
       source: { index: source, size: batchSize },
+      script: script
+        ? {
+            source: script,
+            lang: 'painless',
+          }
+        : undefined,
     },
     refresh: true,
     waitForCompletion: false,

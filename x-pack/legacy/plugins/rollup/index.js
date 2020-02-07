@@ -26,9 +26,7 @@ export function rollup(kibana) {
     require: ['kibana', 'elasticsearch', 'xpack_main'],
     uiExports: {
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
-      managementSections: [
-        'plugins/rollup/crud_app',
-      ],
+      managementSections: ['plugins/rollup/legacy'],
       uiSettingDefaults: {
         [CONFIG_ROLLUPS]: {
           name: i18n.translate('xpack.rollupJobs.rollupIndexPatternsTitle', {
@@ -36,33 +34,25 @@ export function rollup(kibana) {
           }),
           value: true,
           description: i18n.translate('xpack.rollupJobs.rollupIndexPatternsDescription', {
-            defaultMessage:
-              `Enable the creation of index patterns which capture rollup indices,
+            defaultMessage: `Enable the creation of index patterns which capture rollup indices,
               which in turn enable visualizations based on rollup data. Refresh
               the page to apply the changes.`,
           }),
           category: ['rollups'],
         },
       },
-      indexManagement: [
-        'plugins/rollup/index_pattern_creation',
-        'plugins/rollup/index_pattern_list',
-        'plugins/rollup/extend_index_management',
-      ],
-      visualize: [
-        'plugins/rollup/visualize',
-      ],
-      search: [
-        'plugins/rollup/search',
-      ],
+      indexManagement: ['plugins/rollup/legacy'],
+      visualize: ['plugins/rollup/legacy'],
+      search: ['plugins/rollup/legacy'],
     },
-    init: function (server) {
+    init: function(server) {
+      const { usageCollection } = server.newPlatform.setup.plugins;
       registerLicenseChecker(server);
       registerIndicesRoute(server);
       registerFieldsForWildcardRoute(server);
       registerSearchRoute(server);
       registerJobsRoute(server);
-      registerRollupUsageCollector(server);
+      registerRollupUsageCollector(usageCollection, server);
       if (
         server.plugins.index_management &&
         server.plugins.index_management.addIndexManagementDataEnricher
@@ -70,7 +60,7 @@ export function rollup(kibana) {
         server.plugins.index_management.addIndexManagementDataEnricher(rollupDataEnricher);
       }
 
-      registerRollupSearchStrategy(this.kbnServer, server);
-    }
+      registerRollupSearchStrategy(this.kbnServer);
+    },
   });
 }

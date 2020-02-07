@@ -5,42 +5,39 @@
  */
 
 import React, { useState, Fragment } from 'react';
-import { RouteComponentProps, withRouter } from 'react-router-dom';
-
 import {
-  EuiBadge,
   EuiButton,
   EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiInMemoryTable,
   EuiLink,
   EuiToolTip,
+  EuiIconTip,
 } from '@elastic/eui';
 
 import { REPOSITORY_TYPES } from '../../../../../../common/constants';
 import { Repository, RepositoryType } from '../../../../../../common/types';
 import { RepositoryDeleteProvider } from '../../../../components';
-import { BASE_PATH, UIM_REPOSITORY_SHOW_DETAILS_CLICK } from '../../../../constants';
+import { UIM_REPOSITORY_SHOW_DETAILS_CLICK } from '../../../../constants';
 import { useAppDependencies } from '../../../../index';
 import { textService } from '../../../../services/text';
 import { uiMetricService } from '../../../../services/ui_metric';
+import { linkToEditRepository, linkToAddRepository } from '../../../../services/navigation';
+import { SendRequestResponse } from '../../../../../shared_imports';
 
-interface Props extends RouteComponentProps {
+interface Props {
   repositories: Repository[];
   managedRepository?: string;
-  reload: () => Promise<void>;
+  reload: () => Promise<SendRequestResponse>;
   openRepositoryDetailsUrl: (name: Repository['name']) => string;
   onRepositoryDeleted: (repositoriesDeleted: Array<Repository['name']>) => void;
 }
 
-const RepositoryTableUi: React.FunctionComponent<Props> = ({
+export const RepositoryTable: React.FunctionComponent<Props> = ({
   repositories,
   managedRepository,
   reload,
   openRepositoryDetailsUrl,
   onRepositoryDeleted,
-  history,
 }) => {
   const {
     core: { i18n },
@@ -60,6 +57,7 @@ const RepositoryTableUi: React.FunctionComponent<Props> = ({
       render: (name: Repository['name']) => {
         return (
           <Fragment>
+            {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
             <EuiLink
               onClick={() => trackUiMetric(UIM_REPOSITORY_SHOW_DETAILS_CLICK)}
               href={openRepositoryDetailsUrl(name)}
@@ -69,12 +67,15 @@ const RepositoryTableUi: React.FunctionComponent<Props> = ({
             </EuiLink>
             &nbsp;&nbsp;
             {managedRepository === name ? (
-              <EuiBadge color="primary">
-                <FormattedMessage
-                  id="xpack.snapshotRestore.repositoryList.table.managedRepositoryBadgeLabel"
-                  defaultMessage="Managed"
-                />
-              </EuiBadge>
+              <EuiIconTip
+                content={
+                  <FormattedMessage
+                    id="xpack.snapshotRestore.repositoryList.table.managedRepositoryBadgeLabel"
+                    defaultMessage="This is a managed repository"
+                  />
+                }
+                position="right"
+              />
             ) : null}
           </Fragment>
         );
@@ -95,6 +96,7 @@ const RepositoryTableUi: React.FunctionComponent<Props> = ({
       },
     },
     {
+      field: 'actions',
       name: i18n.translate('xpack.snapshotRestore.repositoryList.table.actionsColumnTitle', {
         defaultMessage: 'Actions',
       }),
@@ -107,7 +109,7 @@ const RepositoryTableUi: React.FunctionComponent<Props> = ({
             );
 
             return (
-              <EuiToolTip content={label} delay="long">
+              <EuiToolTip content={label}>
                 <EuiButtonIcon
                   aria-label={i18n.translate(
                     'xpack.snapshotRestore.repositoryList.table.actionEditAriaLabel',
@@ -118,7 +120,7 @@ const RepositoryTableUi: React.FunctionComponent<Props> = ({
                   )}
                   iconType="pencil"
                   color="primary"
-                  href={`#${BASE_PATH}/edit_repository/${name}`}
+                  href={linkToEditRepository(name)}
                   data-test-subj="editRepositoryButton"
                 />
               </EuiToolTip>
@@ -143,7 +145,7 @@ const RepositoryTableUi: React.FunctionComponent<Props> = ({
                           }
                         );
                   return (
-                    <EuiToolTip content={label} delay="long">
+                    <EuiToolTip content={label}>
                       <EuiButtonIcon
                         aria-label={i18n.translate(
                           'xpack.snapshotRestore.repositoryList.table.actionRemoveAriaLabel',
@@ -173,7 +175,7 @@ const RepositoryTableUi: React.FunctionComponent<Props> = ({
   const sorting = {
     sort: {
       field: 'name',
-      direction: 'asc',
+      direction: 'asc' as const,
     },
   };
 
@@ -235,47 +237,43 @@ const RepositoryTableUi: React.FunctionComponent<Props> = ({
     ) : (
       undefined
     ),
-    toolsRight: (
-      <EuiFlexGroup gutterSize="m" justifyContent="spaceAround">
-        <EuiFlexItem>
-          <EuiButton
-            color="secondary"
-            iconType="refresh"
-            onClick={reload}
-            data-test-subj="reloadButton"
-          >
-            <FormattedMessage
-              id="xpack.snapshotRestore.repositoryList.table.reloadRepositoriesButton"
-              defaultMessage="Reload"
-            />
-          </EuiButton>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiButton
-            href={history.createHref({
-              pathname: `${BASE_PATH}/add_repository`,
-            })}
-            fill
-            iconType="plusInCircle"
-            data-test-subj="registerRepositoryButton"
-          >
-            <FormattedMessage
-              id="xpack.snapshotRestore.repositoryList.addRepositoryButtonLabel"
-              defaultMessage="Register a repository"
-            />
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    ),
+    toolsRight: [
+      <EuiButton
+        key="reloadButton"
+        color="secondary"
+        iconType="refresh"
+        onClick={reload}
+        data-test-subj="reloadButton"
+      >
+        <FormattedMessage
+          id="xpack.snapshotRestore.repositoryList.table.reloadRepositoriesButton"
+          defaultMessage="Reload"
+        />
+      </EuiButton>,
+      <EuiButton
+        key="registerRepo"
+        href={linkToAddRepository()}
+        fill
+        iconType="plusInCircle"
+        data-test-subj="registerRepositoryButton"
+      >
+        <FormattedMessage
+          id="xpack.snapshotRestore.repositoryList.addRepositoryButtonLabel"
+          defaultMessage="Register a repository"
+        />
+      </EuiButton>,
+    ],
     box: {
       incremental: true,
       schema: true,
     },
     filters: [
       {
-        type: 'field_value_selection',
+        type: 'field_value_selection' as const,
         field: 'type',
-        name: 'Type',
+        name: i18n.translate('xpack.snapshotRestore.repositoryList.table.typeFilterLabel', {
+          defaultMessage: 'Type',
+        }),
         multiSelect: false,
         options: Object.keys(
           repositories.reduce((typeMap: any, repository) => {
@@ -305,12 +303,10 @@ const RepositoryTableUi: React.FunctionComponent<Props> = ({
       rowProps={() => ({
         'data-test-subj': 'row',
       })}
-      cellProps={(item: any, column: any) => ({
-        'data-test-subj': `cell`,
+      cellProps={(item, field) => ({
+        'data-test-subj': `${field.name}_cell`,
       })}
       data-test-subj="repositoryTable"
     />
   );
 };
-
-export const RepositoryTable = withRouter(RepositoryTableUi);

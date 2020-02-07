@@ -25,23 +25,16 @@ import {
   EuiLink,
   EuiSelect,
   EuiSwitch,
+  EuiFieldNumber,
 } from '@elastic/eui';
 
-import {
-  DefaultFormatEditor
-} from '../default';
+import { DefaultFormatEditor } from '../default';
 
-import {
-  FormatEditorSamples
-} from '../../samples';
+import { FormatEditorSamples } from '../../samples';
 
-import {
-  LabelTemplateFlyout
-} from './label_template_flyout';
+import { LabelTemplateFlyout } from './label_template_flyout';
 
-import {
-  UrlTemplateFlyout
-} from './url_template_flyout';
+import { UrlTemplateFlyout } from './url_template_flyout';
 
 import chrome from 'ui/chrome';
 import './icons';
@@ -58,9 +51,9 @@ export class UrlFormatEditor extends DefaultFormatEditor {
     this.state = {
       ...this.state,
       sampleInputsByType: {
-        a: [ 'john', '/some/pathname/asset.png', 1234 ],
-        img: [ 'go', 'stop', ['de', 'ne', 'us', 'ni'], 'cv' ],
-        audio: [ 'hello.mp3' ],
+        a: ['john', '/some/pathname/asset.png', 1234],
+        img: ['go', 'stop', ['de', 'ne', 'us', 'ni'], 'cv'],
+        audio: ['hello.mp3'],
       },
       sampleConverterType: 'html',
       showUrlTemplateHelp: false,
@@ -68,54 +61,95 @@ export class UrlFormatEditor extends DefaultFormatEditor {
     };
   }
 
-  onTypeChange = (newType) => {
-    const { urlTemplate } = this.props.formatParams;
-    if(newType === 'img' && !urlTemplate) {
-      this.onChange({
-        type: newType,
-        urlTemplate: this.iconPattern,
-      });
-    } else if(newType !== 'img' && urlTemplate === this.iconPattern) {
-      this.onChange({
-        type: newType,
-        urlTemplate: null,
-      });
-    } else {
-      this.onChange({
-        type: newType,
-      });
+  sanitizeNumericValue = val => {
+    const sanitizedValue = parseInt(val);
+    if (isNaN(sanitizedValue)) {
+      return '';
     }
-  }
+    return sanitizedValue;
+  };
+
+  onTypeChange = newType => {
+    const { urlTemplate, width, height } = this.props.formatParams;
+    const params = {
+      type: newType,
+    };
+    if (newType === 'img') {
+      params.width = width;
+      params.height = height;
+      if (!urlTemplate) {
+        params.urlTemplate = this.iconPattern;
+      }
+    } else if (newType !== 'img' && urlTemplate === this.iconPattern) {
+      params.urlTemplate = null;
+    }
+    this.onChange(params);
+  };
 
   showUrlTemplateHelp = () => {
     this.setState({
       showLabelTemplateHelp: false,
       showUrlTemplateHelp: true,
     });
-  }
+  };
 
   hideUrlTemplateHelp = () => {
     this.setState({
       showUrlTemplateHelp: false,
     });
-  }
+  };
 
   showLabelTemplateHelp = () => {
     this.setState({
       showLabelTemplateHelp: true,
       showUrlTemplateHelp: false,
     });
-  }
+  };
 
   hideLabelTemplateHelp = () => {
     this.setState({
       showLabelTemplateHelp: false,
     });
-  }
+  };
+
+  renderWidthHeightParameters = () => {
+    const width = this.sanitizeNumericValue(this.props.formatParams.width);
+    const height = this.sanitizeNumericValue(this.props.formatParams.height);
+    return (
+      <Fragment>
+        <EuiFormRow
+          label={
+            <FormattedMessage id="common.ui.fieldEditor.url.widthLabel" defaultMessage="Width" />
+          }
+        >
+          <EuiFieldNumber
+            data-test-subj="urlEditorWidth"
+            value={width}
+            onChange={e => {
+              this.onChange({ width: e.target.value });
+            }}
+          />
+        </EuiFormRow>
+        <EuiFormRow
+          label={
+            <FormattedMessage id="common.ui.fieldEditor.url.heightLabel" defaultMessage="Height" />
+          }
+        >
+          <EuiFieldNumber
+            data-test-subj="urlEditorHeight"
+            value={height}
+            onChange={e => {
+              this.onChange({ height: e.target.value });
+            }}
+          />
+        </EuiFormRow>
+      </Fragment>
+    );
+  };
 
   render() {
     const { format, formatParams } = this.props;
-    const { error, samples } = this.state;
+    const { error, samples, sampleConverterType } = this.state;
 
     return (
       <Fragment>
@@ -127,7 +161,11 @@ export class UrlFormatEditor extends DefaultFormatEditor {
           isVisible={this.state.showUrlTemplateHelp}
           onClose={this.hideUrlTemplateHelp}
         />
-        <EuiFormRow label={<FormattedMessage id="common.ui.fieldEditor.url.typeLabel" defaultMessage="Type"/>}>
+        <EuiFormRow
+          label={
+            <FormattedMessage id="common.ui.fieldEditor.url.typeLabel" defaultMessage="Type" />
+          }
+        >
           <EuiSelect
             data-test-subj="urlEditorType"
             value={formatParams.type}
@@ -137,20 +175,31 @@ export class UrlFormatEditor extends DefaultFormatEditor {
                 text: type.text,
               };
             })}
-            onChange={(e) => {
+            onChange={e => {
               this.onTypeChange(e.target.value);
             }}
           />
         </EuiFormRow>
 
         {formatParams.type === 'a' ? (
-          <EuiFormRow label={<FormattedMessage id="common.ui.fieldEditor.url.openTabLabel" defaultMessage="Open in a new tab"/>}>
+          <EuiFormRow
+            label={
+              <FormattedMessage
+                id="common.ui.fieldEditor.url.openTabLabel"
+                defaultMessage="Open in a new tab"
+              />
+            }
+          >
             <EuiSwitch
-              label={formatParams.openLinkInCurrentTab
-                ? <FormattedMessage id="common.ui.fieldEditor.url.offLabel" defaultMessage="Off"/>
-                : <FormattedMessage id="common.ui.fieldEditor.url.onLabel" defaultMessage="On"/>}
+              label={
+                formatParams.openLinkInCurrentTab ? (
+                  <FormattedMessage id="common.ui.fieldEditor.url.offLabel" defaultMessage="Off" />
+                ) : (
+                  <FormattedMessage id="common.ui.fieldEditor.url.onLabel" defaultMessage="On" />
+                )
+              }
               checked={!formatParams.openLinkInCurrentTab}
-              onChange={(e) => {
+              onChange={e => {
                 this.onChange({ openLinkInCurrentTab: !e.target.checked });
               }}
             />
@@ -158,48 +207,62 @@ export class UrlFormatEditor extends DefaultFormatEditor {
         ) : null}
 
         <EuiFormRow
-          label={<FormattedMessage id="common.ui.fieldEditor.url.urlTemplateLabel" defaultMessage="URL template" />}
-          helpText={(
+          label={
+            <FormattedMessage
+              id="common.ui.fieldEditor.url.urlTemplateLabel"
+              defaultMessage="URL template"
+            />
+          }
+          helpText={
             <EuiLink onClick={this.showUrlTemplateHelp}>
-              <FormattedMessage id="common.ui.fieldEditor.url.template.helpLinkText" defaultMessage="URL template help" />
-            </EuiLink>)}
+              <FormattedMessage
+                id="common.ui.fieldEditor.url.template.helpLinkText"
+                defaultMessage="URL template help"
+              />
+            </EuiLink>
+          }
           isInvalid={!!error}
           error={error}
         >
           <EuiFieldText
             data-test-subj="urlEditorUrlTemplate"
             value={formatParams.urlTemplate || ''}
-            onChange={(e) => {
+            onChange={e => {
               this.onChange({ urlTemplate: e.target.value });
             }}
           />
         </EuiFormRow>
 
         <EuiFormRow
-          label={<FormattedMessage id="common.ui.fieldEditor.url.labelTemplateLabel" defaultMessage="Label template" />}
-          helpText={(
+          label={
+            <FormattedMessage
+              id="common.ui.fieldEditor.url.labelTemplateLabel"
+              defaultMessage="Label template"
+            />
+          }
+          helpText={
             <EuiLink onClick={this.showLabelTemplateHelp}>
               <FormattedMessage
                 id="common.ui.fieldEditor.url.labelTemplateHelpText"
                 defaultMessage="Label template help"
               />
             </EuiLink>
-          )}
+          }
           isInvalid={!!error}
           error={error}
         >
           <EuiFieldText
             data-test-subj="urlEditorLabelTemplate"
             value={formatParams.labelTemplate || ''}
-            onChange={(e) => {
+            onChange={e => {
               this.onChange({ labelTemplate: e.target.value });
             }}
           />
         </EuiFormRow>
 
-        <FormatEditorSamples
-          samples={samples}
-        />
+        {formatParams.type === 'img' && this.renderWidthHeightParameters()}
+
+        <FormatEditorSamples samples={samples} sampleType={sampleConverterType} />
       </Fragment>
     );
   }

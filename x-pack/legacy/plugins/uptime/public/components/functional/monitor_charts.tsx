@@ -11,13 +11,14 @@ import { MonitorChart } from '../../../common/graphql/types';
 import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../higher_order';
 import { monitorChartsQuery } from '../../queries';
 import { DurationChart } from './charts';
-import { ChecksChart } from './charts/checks_chart';
+import { PingHistogram } from '../connected';
 
 interface MonitorChartsQueryResult {
   monitorChartsData?: MonitorChart;
 }
 
 interface MonitorChartsProps {
+  monitorId: string;
   danger: string;
   mean: string;
   range: string;
@@ -26,29 +27,26 @@ interface MonitorChartsProps {
 
 type Props = MonitorChartsProps & UptimeGraphQLQueryProps<MonitorChartsQueryResult>;
 
-export const MonitorChartsComponent = (props: Props) => {
-  const { danger, data, mean, range, success } = props;
+export const MonitorChartsComponent = ({ data, mean, range, monitorId, loading }: Props) => {
   if (data && data.monitorChartsData) {
     const {
-      monitorChartsData: { durationArea, durationLine, status },
+      monitorChartsData: { locationDurationLines },
     } = data;
 
     return (
-      <Fragment>
-        <EuiFlexGroup>
-          <EuiFlexItem style={{ height: 400 }}>
-            <DurationChart
-              durationArea={durationArea}
-              durationLine={durationLine}
-              meanColor={mean}
-              rangeColor={range}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <ChecksChart dangerColor={danger} status={status} successColor={success} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </Fragment>
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <DurationChart
+            locationDurationLines={locationDurationLines}
+            meanColor={mean}
+            rangeColor={range}
+            loading={loading}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <PingHistogram height="400px" isResponsive={false} monitorId={monitorId} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
   return (

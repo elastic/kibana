@@ -5,37 +5,82 @@
  */
 
 import {
+  SERVICE_NAME,
   TRANSACTION_DURATION,
+  TRANSACTION_SAMPLED,
   TRANSACTION_NAME
 } from '../../../common/elasticsearch_fieldnames';
-import { PromiseReturnType, StringMap } from '../../../typings/common';
-import { Setup } from '../helpers/setup_request';
+import { getTransactionGroupsProjection } from '../../../common/projections/transaction_groups';
+import { mergeProjection } from '../../../common/projections/util/merge_projection';
+import { PromiseReturnType } from '../../../typings/common';
+import { SortOptions } from '../../../../../../plugins/apm/typings/elasticsearch/aggregations';
+import { Transaction } from '../../../typings/es_schemas/ui/Transaction';
+import {
+  Setup,
+  SetupTimeRange,
+  SetupUIFilters
+} from '../helpers/setup_request';
+
+interface TopTransactionOptions {
+  type: 'top_transactions';
+  serviceName: string;
+  transactionType: string;
+  transactionName?: string;
+}
+
+interface TopTraceOptions {
+  type: 'top_traces';
+  transactionName?: string;
+}
+
+export type Options = TopTransactionOptions | TopTraceOptions;
 
 export type ESResponse = PromiseReturnType<typeof transactionGroupsFetcher>;
-export function transactionGroupsFetcher(setup: Setup, bodyQuery: StringMap) {
-  const { client, config } = setup;
-  const params = {
-    index: config.get<string>('apm_oss.transactionIndices'),
+export function transactionGroupsFetcher(
+  options: Options,
+  setup: Setup & SetupTimeRange & SetupUIFilters
+) {
+  const { client } = setup;
+
+  const projection = getTransactionGroupsProjection({
+    setup,
+    options
+  });
+
+  const sort: SortOptions = [
+    { _score: 'desc' as const }, // sort by _score to ensure that buckets with sampled:true ends up on top
+    { '@timestamp': { order: 'desc' as const } }
+  ];
+
+  const isTopTraces = options.type === 'top_traces';
+
+  if (isTopTraces) {
+    // Delete the projection aggregation when searching for traces, as it should use the combined aggregation instead
+    delete projection.body.aggs;
+  }
+
+  const params = mergeProjection(projection, {
     body: {
       size: 0,
-      query: bodyQuery,
+      query: {
+        bool: {
+          // prefer sampled transactions
+          should: [{ term: { [TRANSACTION_SAMPLED]: true } }]
+        }
+      },
       aggs: {
-        transactions: {
-          terms: {
-            field: TRANSACTION_NAME,
-            order: { sum: 'desc' },
-            size: config.get<number>('xpack.apm.ui.transactionGroupBucketSize')
+        transaction_groups: {
+          composite: {
+            size: 10000,
+            sources: [
+              ...(isTopTraces
+                ? [{ service: { terms: { field: SERVICE_NAME } } }]
+                : []),
+              { transaction: { terms: { field: TRANSACTION_NAME } } }
+            ]
           },
           aggs: {
-            sample: {
-              top_hits: {
-                size: 1,
-                sort: [
-                  { _score: 'desc' }, // sort by _score to ensure that buckets with sampled:true ends up on top
-                  { '@timestamp': { order: 'desc' } }
-                ]
-              }
-            },
+            sample: { top_hits: { size: 1, sort } },
             avg: { avg: { field: TRANSACTION_DURATION } },
             p95: {
               percentiles: { field: TRANSACTION_DURATION, percents: [95] }
@@ -45,7 +90,7 @@ export function transactionGroupsFetcher(setup: Setup, bodyQuery: StringMap) {
         }
       }
     }
-  };
+  });
 
-  return client.search(params);
+  return client.search<Transaction, typeof params>(params);
 }

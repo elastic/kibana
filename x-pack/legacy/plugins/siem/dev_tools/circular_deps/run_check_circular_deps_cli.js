@@ -6,23 +6,25 @@
 
 import { resolve } from 'path';
 
-// eslint-disable-next-line import/no-extraneous-dependencies
+/* eslint-disable-next-line import/no-extraneous-dependencies */
 import madge from 'madge';
-
-import { run, createFailError } from '../../../../../../src/dev/run';
+/* eslint-disable-next-line import/no-extraneous-dependencies */
+import { run, createFailError } from '@kbn/dev-utils';
 
 run(
   async ({ log }) => {
-    const result = await madge([resolve(__dirname, '../../public'), resolve(__dirname, '../../common')], {
-      fileExtensions: ['ts', 'js', 'tsx'],
-    });
+    const result = await madge(
+      [resolve(__dirname, '../../public'), resolve(__dirname, '../../common')],
+      {
+        fileExtensions: ['ts', 'js', 'tsx'],
+      }
+    );
 
     const circularFound = result.circular();
-    if (circularFound.length !== 0) {
+    // We can only care about SIEM code, we should not be penalyze for others
+    if (circularFound.filter(cf => cf.includes('siem')).length !== 0) {
       throw createFailError(
-        'SIEM circular dependencies of imports has been found:' +
-          '\n - ' +
-          circularFound.join('\n - ')
+        `SIEM circular dependencies of imports has been found:\n - ${circularFound.join('\n - ')}`
       );
     } else {
       log.success('No circular deps 👍');
@@ -32,4 +34,3 @@ run(
     description: 'Check the SIEM plugin for circular deps',
   }
 );
-

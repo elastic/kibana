@@ -1,0 +1,10 @@
+{
+  "id": "expressions",
+  "version": "kibana",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": [
+    "bfetch",
+    "inspector"
+  ]
+}

@@ -1,0 +1,34 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`EmbeddedMapComponent renders correctly against snapshot 1`] = `
+<Embeddable>
+  <EmbeddableHeader
+    title="Network map"
+  >
+    <EuiText
+      size="xs"
+    >
+      <EuiLink
+        href="https://www.elastic.co/guide/en/siem/guide/mocked-test-branch/conf-map-ui.html"
+        target="_blank"
+      >
+        Map configuration help
+      </EuiLink>
+    </EuiText>
+  </EmbeddableHeader>
+  <InPortal
+    node={<div />}
+  >
+    <MapToolTip />
+  </InPortal>
+  <EmbeddableMap
+    maintainRatio={true}
+  >
+    <Loader
+      data-test-subj="loading-panel"
+      overlay={true}
+      size="xl"
+    />
+  </EmbeddableMap>
+</Embeddable>
+`;

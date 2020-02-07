@@ -45,16 +45,21 @@ import { extractQueryParams } from '../../services/query_params';
 import { getRemoteClusterName } from '../../services/get_remote_cluster_name';
 import { RemoteClustersFormField } from '../remote_clusters_form_field';
 
+import { FollowerIndexRequestFlyout } from './follower_index_request_flyout';
+
 const indexNameIllegalCharacters = INDEX_ILLEGAL_CHARACTERS_VISIBLE.join(' ');
 
-const fieldToValidatorMap = advancedSettingsFields.reduce((map, advancedSetting) => {
-  const { field, validator } = advancedSetting;
-  map[field] = validator;
-  return map;
-}, {
-  'name': indexNameValidator,
-  'leaderIndex': leaderIndexValidator,
-});
+const fieldToValidatorMap = advancedSettingsFields.reduce(
+  (map, advancedSetting) => {
+    const { field, validator } = advancedSetting;
+    map[field] = validator;
+    return map;
+  },
+  {
+    name: indexNameValidator,
+    leaderIndex: leaderIndexValidator,
+  }
+);
 
 const getEmptyFollowerIndex = (remoteClusterName = '') => ({
   name: '',
@@ -66,7 +71,7 @@ const getEmptyFollowerIndex = (remoteClusterName = '') => ({
 /**
  * State transitions: fields update
  */
-export const updateFields = (fields) => ({ followerIndex }) => ({
+export const updateFields = fields => ({ followerIndex }) => ({
   followerIndex: {
     ...followerIndex,
     ...fields,
@@ -76,11 +81,11 @@ export const updateFields = (fields) => ({ followerIndex }) => ({
 /**
  * State transitions: errors update
  */
-export const updateFormErrors = (errors) => ({ fieldsErrors }) => ({
+export const updateFormErrors = errors => ({ fieldsErrors }) => ({
   fieldsErrors: {
     ...fieldsErrors,
     ...errors,
-  }
+  },
 });
 
 export class FollowerIndexForm extends PureComponent {
@@ -92,12 +97,16 @@ export class FollowerIndexForm extends PureComponent {
     apiStatus: PropTypes.string.isRequired,
     remoteClusters: PropTypes.array,
     saveButtonLabel: PropTypes.node,
-  }
+  };
 
   constructor(props) {
     super(props);
 
-    const { route: { location: { search } } } = routing.reactRouter;
+    const {
+      route: {
+        location: { search },
+      },
+    } = routing.reactRouter;
     const queryParams = extractQueryParams(search);
 
     const isNew = this.props.followerIndex === undefined;
@@ -105,12 +114,16 @@ export class FollowerIndexForm extends PureComponent {
     const followerIndex = isNew
       ? getEmptyFollowerIndex(remoteClusterName)
       : {
-        ...getEmptyFollowerIndex(),
-        ...this.props.followerIndex,
-      };
-    const areAdvancedSettingsVisible = isNew ? false : ( // eslint-disable-line no-nested-ternary
-      areAdvancedSettingsEdited(followerIndex) ? true : false
-    );
+          ...getEmptyFollowerIndex(),
+          ...this.props.followerIndex,
+        };
+
+    // eslint-disable-next-line no-nested-ternary
+    const areAdvancedSettingsVisible = isNew
+      ? false
+      : areAdvancedSettingsEdited(followerIndex)
+      ? true
+      : false;
 
     const fieldsErrors = this.getFieldsErrors(followerIndex);
 
@@ -121,13 +134,20 @@ export class FollowerIndexForm extends PureComponent {
       areErrorsVisible: false,
       areAdvancedSettingsVisible,
       isValidatingIndexName: false,
+      isRequestVisible: false,
     };
 
     this.cachedAdvancedSettings = {};
     this.validateIndexName = debounce(this.validateIndexName, 500);
   }
 
-  onFieldsChange = (fields) => {
+  toggleRequest = () => {
+    this.setState(({ isRequestVisible }) => ({
+      isRequestVisible: !isRequestVisible,
+    }));
+  };
+
+  onFieldsChange = fields => {
     this.setState(updateFields(fields));
 
     const newFields = {
@@ -142,7 +162,7 @@ export class FollowerIndexForm extends PureComponent {
     }
   };
 
-  getFieldsErrors = (newFields) => {
+  getFieldsErrors = newFields => {
     return Object.keys(newFields).reduce((errors, field) => {
       const validator = fieldToValidatorMap[field];
       const value = newFields[field];
@@ -181,7 +201,7 @@ export class FollowerIndexForm extends PureComponent {
     this.validateIndexName(name);
   };
 
-  validateIndexName = async (name) => {
+  validateIndexName = async name => {
     try {
       const indices = await loadIndices();
       const doesExist = indices.some(index => index.name === name);
@@ -214,13 +234,19 @@ export class FollowerIndexForm extends PureComponent {
 
       // This error isn't an HTTP error, so let the fatal error screen tell the user something
       // unexpected happened.
-      fatalError(error, i18n.translate('xpack.crossClusterReplication.followerIndexForm.indexNameValidationFatalErrorTitle', {
-        defaultMessage: 'Follower Index Form index name validation',
-      }));
+      fatalError(
+        error,
+        i18n.translate(
+          'xpack.crossClusterReplication.followerIndexForm.indexNameValidationFatalErrorTitle',
+          {
+            defaultMessage: 'Follower Index Form index name validation',
+          }
+        )
+      );
     }
   };
 
-  onClusterChange = (remoteCluster) => {
+  onClusterChange = remoteCluster => {
     this.onFieldsChange({ remoteCluster });
   };
 
@@ -228,7 +254,7 @@ export class FollowerIndexForm extends PureComponent {
     return this.state.followerIndex;
   };
 
-  toggleAdvancedSettings = (event) => {
+  toggleAdvancedSettings = event => {
     // If the user edits the advanced settings but then hides them, we need to make sure the
     // edited values don't get sent to the API when the user saves, but we *do* want to restore
     // these values to the form when the user re-opens the advanced settings.
@@ -262,10 +288,12 @@ export class FollowerIndexForm extends PureComponent {
     this.setState({
       areAdvancedSettingsVisible: false,
     });
-  }
+  };
 
   isFormValid() {
-    return Object.values(this.state.fieldsErrors).every(error => error === undefined || error === null);
+    return Object.values(this.state.fieldsErrors).every(
+      error => error === undefined || error === null
+    );
   }
 
   sendForm = () => {
@@ -293,20 +321,27 @@ export class FollowerIndexForm extends PureComponent {
     const { apiError } = this.props;
 
     if (apiError) {
-      const title = i18n.translate('xpack.crossClusterReplication.followerIndexForm.savingErrorTitle', {
-        defaultMessage: `Can't create follower index`,
-      });
-      const { leaderIndex } = this.state.followerIndex;
-      const error = apiError.status === 404
-        ? {
-          data: {
-            message: i18n.translate('xpack.crossClusterReplication.followerIndexForm.leaderIndexNotFoundError', {
-              defaultMessage: `The leader index '{leaderIndex}' does not exist.`,
-              values: { leaderIndex },
-            }),
-          },
+      const title = i18n.translate(
+        'xpack.crossClusterReplication.followerIndexForm.savingErrorTitle',
+        {
+          defaultMessage: `Can't create follower index`,
         }
-        : apiError;
+      );
+      const { leaderIndex } = this.state.followerIndex;
+      const error =
+        apiError.status === 404
+          ? {
+              data: {
+                message: i18n.translate(
+                  'xpack.crossClusterReplication.followerIndexForm.leaderIndexNotFoundError',
+                  {
+                    defaultMessage: `The leader index '{leaderIndex}' does not exist.`,
+                    values: { leaderIndex },
+                  }
+                ),
+              },
+            }
+          : apiError;
 
       return (
         <Fragment>
@@ -356,7 +391,7 @@ export class FollowerIndexForm extends PureComponent {
     const indexNameLabel = i18n.translate(
       'xpack.crossClusterReplication.followerIndexForm.sectionFollowerIndexNameTitle',
       {
-        defaultMessage: 'Follower index'
+        defaultMessage: 'Follower index',
       }
     );
 
@@ -365,15 +400,18 @@ export class FollowerIndexForm extends PureComponent {
         field="name"
         value={followerIndex.name}
         error={fieldsErrors.name}
-        title={(
+        title={
           <EuiTitle size="s">
             <h2>{indexNameLabel}</h2>
           </EuiTitle>
-        )}
+        }
         label={indexNameLabel}
-        description={i18n.translate('xpack.crossClusterReplication.followerIndexForm.sectionFollowerIndexNameDescription', {
-          defaultMessage: 'A unique name for your index.'
-        })}
+        description={i18n.translate(
+          'xpack.crossClusterReplication.followerIndexForm.sectionFollowerIndexNameDescription',
+          {
+            defaultMessage: 'A unique name for your index.',
+          }
+        )}
         helpText={indexNameHelpText}
         isLoading={isValidatingIndexName}
         disabled={!isNew}
@@ -396,7 +434,7 @@ export class FollowerIndexForm extends PureComponent {
             defaultMessage="Replication requires a leader index on a remote cluster."
           />
         ),
-        remoteClusterNotConnectedNotEditable: (name) => ({
+        remoteClusterNotConnectedNotEditable: name => ({
           title: (
             <FormattedMessage
               id="xpack.crossClusterReplication.followerIndexForm.currentRemoteClusterNotConnectedCallOutTitle"
@@ -411,7 +449,7 @@ export class FollowerIndexForm extends PureComponent {
             />
           ),
         }),
-        remoteClusterDoesNotExist: (name) => (
+        remoteClusterDoesNotExist: name => (
           <FormattedMessage
             id="xpack.crossClusterReplication.followerIndexForm.currentRemoteClusterNotFoundCallOutDescription"
             defaultMessage="To edit this follower index, you must add a remote cluster
@@ -423,7 +461,7 @@ export class FollowerIndexForm extends PureComponent {
 
       return (
         <EuiDescribedFormGroup
-          title={(
+          title={
             <EuiTitle size="s">
               <h2>
                 <FormattedMessage
@@ -432,13 +470,13 @@ export class FollowerIndexForm extends PureComponent {
                 />
               </h2>
             </EuiTitle>
-          )}
-          description={(
+          }
+          description={
             <FormattedMessage
               id="xpack.crossClusterReplication.followerIndexForm.sectionRemoteClusterDescription"
               defaultMessage="The cluster that contains the index to replicate."
             />
-          )}
+          }
           fullWidth
         >
           <RemoteClustersFormField
@@ -448,7 +486,7 @@ export class FollowerIndexForm extends PureComponent {
             isEditable={isNew}
             areErrorsVisible={areErrorsVisible}
             onChange={this.onClusterChange}
-            onError={(error) => {
+            onError={error => {
               this.setState(updateFormErrors({ remoteCluster: error }));
             }}
             errorMessages={errorMessages}
@@ -462,8 +500,9 @@ export class FollowerIndexForm extends PureComponent {
      */
 
     const leaderIndexLabel = i18n.translate(
-      'xpack.crossClusterReplication.followerIndexForm.sectionLeaderIndexTitle', {
-        defaultMessage: 'Leader index'
+      'xpack.crossClusterReplication.followerIndexForm.sectionLeaderIndexTitle',
+      {
+        defaultMessage: 'Leader index',
       }
     );
 
@@ -472,13 +511,13 @@ export class FollowerIndexForm extends PureComponent {
         field="leaderIndex"
         value={followerIndex.leaderIndex}
         error={fieldsErrors.leaderIndex}
-        title={(
+        title={
           <EuiTitle size="s">
             <h2>{leaderIndexLabel}</h2>
           </EuiTitle>
-        )}
+        }
         label={leaderIndexLabel}
-        description={(
+        description={
           <Fragment>
             <p>
               <FormattedMessage
@@ -491,25 +530,27 @@ export class FollowerIndexForm extends PureComponent {
               <FormattedMessage
                 id="xpack.crossClusterReplication.followerIndexForm.sectionLeaderIndexDescription2"
                 defaultMessage="{note} The leader index must already exist."
-                values={{ note: (
-                  <strong>
-                    <FormattedMessage
-                      id="xpack.crossClusterReplication.followerIndexForm.sectionLeaderIndexDescription2.noteLabel"
-                      defaultMessage="Note:"
-                    />
-                  </strong>
-                ) }}
+                values={{
+                  note: (
+                    <strong>
+                      <FormattedMessage
+                        id="xpack.crossClusterReplication.followerIndexForm.sectionLeaderIndexDescription2.noteLabel"
+                        defaultMessage="Note:"
+                      />
+                    </strong>
+                  ),
+                }}
               />
             </p>
           </Fragment>
-        )}
-        helpText={(
+        }
+        helpText={
           <FormattedMessage
             id="xpack.crossClusterReplication.followerIndexForm.indexNameHelpLabel"
             defaultMessage="Spaces and the characters {characterList} are not allowed."
             values={{ characterList: <strong>{indexNameIllegalCharacters}</strong> }}
           />
-        )}
+        }
         disabled={!isNew}
         areErrorsVisible={areErrorsVisible}
         onValueUpdate={this.onFieldsChange}
@@ -526,7 +567,7 @@ export class FollowerIndexForm extends PureComponent {
         <Fragment>
           <EuiHorizontalRule />
           <EuiDescribedFormGroup
-            title={(
+            title={
               <EuiTitle size="s">
                 <h2>
                   <FormattedMessage
@@ -535,8 +576,8 @@ export class FollowerIndexForm extends PureComponent {
                   />
                 </h2>
               </EuiTitle>
-            )}
-            description={(
+            }
+            description={
               <Fragment>
                 <p>
                   <FormattedMessage
@@ -547,18 +588,18 @@ export class FollowerIndexForm extends PureComponent {
                 </p>
 
                 <EuiSwitch
-                  label={(
+                  label={
                     <FormattedMessage
                       id="xpack.crossClusterReplication.followerIndex.advancedSettingsForm.showSwitchLabel"
                       defaultMessage="Customize advanced settings"
                     />
-                  )}
+                  }
                   checked={areAdvancedSettingsVisible}
                   onChange={this.toggleAdvancedSettings}
                   data-test-subj="advancedSettingsToggle"
                 />
               </Fragment>
-            )}
+            }
             fullWidth
           >
             <Fragment /> {/* Avoid missing `children` warning */}
@@ -566,9 +607,18 @@ export class FollowerIndexForm extends PureComponent {
 
           {areAdvancedSettingsVisible && (
             <Fragment>
-              <EuiSpacer size="s"/>
-              {advancedSettingsFields.map((advancedSetting) => {
-                const { field, testSubject, title, description, label, helpText, defaultValue, type } = advancedSetting;
+              <EuiSpacer size="s" />
+              {advancedSettingsFields.map(advancedSetting => {
+                const {
+                  field,
+                  testSubject,
+                  title,
+                  description,
+                  label,
+                  helpText,
+                  defaultValue,
+                  type,
+                } = advancedSetting;
                 return (
                   <FormEntryRow
                     key={field}
@@ -576,11 +626,11 @@ export class FollowerIndexForm extends PureComponent {
                     value={followerIndex[field]}
                     defaultValue={defaultValue}
                     error={fieldsErrors[field]}
-                    title={(
+                    title={
                       <EuiTitle size="xs">
                         <h3>{title}</h3>
                       </EuiTitle>
-                    )}
+                    }
                     description={description}
                     label={label}
                     helpText={helpText}
@@ -612,12 +662,12 @@ export class FollowerIndexForm extends PureComponent {
       return (
         <Fragment>
           <EuiCallOut
-            title={(
+            title={
               <FormattedMessage
                 id="xpack.crossClusterReplication.followerIndexForm.validationErrorTitle"
                 defaultMessage="Fix errors before continuing."
               />
-            )}
+            }
             color="danger"
             iconType="cross"
             data-test-subj="formError"
@@ -633,13 +683,13 @@ export class FollowerIndexForm extends PureComponent {
      */
     const renderActions = () => {
       const { apiStatus, saveButtonLabel } = this.props;
-      const { areErrorsVisible } = this.state;
+      const { areErrorsVisible, isRequestVisible } = this.state;
 
       if (apiStatus === API_STATUS.SAVING) {
         return (
           <EuiFlexGroup justifyContent="flexStart" gutterSize="m">
             <EuiFlexItem grow={false}>
-              <EuiLoadingSpinner size="l"/>
+              <EuiLoadingSpinner size="l" />
             </EuiFlexItem>
 
             <EuiFlexItem grow={false}>
@@ -657,30 +707,48 @@ export class FollowerIndexForm extends PureComponent {
       const isSaveDisabled = areErrorsVisible && !this.isFormValid();
 
       return (
-        <EuiFlexGroup gutterSize="m" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              color="secondary"
-              iconType="check"
-              onClick={this.sendForm}
-              fill
-              disabled={isSaveDisabled}
-              data-test-subj="submitButton"
-            >
-              {saveButtonLabel}
-            </EuiButton>
-          </EuiFlexItem>
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+          <EuiFlexGroup gutterSize="m" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                color="secondary"
+                iconType="check"
+                onClick={this.sendForm}
+                fill
+                disabled={isSaveDisabled}
+                data-test-subj="submitButton"
+              >
+                {saveButtonLabel}
+              </EuiButton>
+            </EuiFlexItem>
+
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                color="primary"
+                onClick={this.cancelForm}
+                data-test-subj="cancelButton"
+              >
+                <FormattedMessage
+                  id="xpack.crossClusterReplication.followerIndexForm.cancelButtonLabel"
+                  defaultMessage="Cancel"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
 
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              color="primary"
-              onClick={this.cancelForm}
-              data-test-subj="cancelButton"
-            >
-              <FormattedMessage
-                id="xpack.crossClusterReplication.followerIndexForm.cancelButtonLabel"
-                defaultMessage="Cancel"
-              />
+            <EuiButtonEmpty onClick={this.toggleRequest}>
+              {isRequestVisible ? (
+                <FormattedMessage
+                  id="xpack.crossClusterReplication.followerIndexForm.hideRequestButtonLabel"
+                  defaultMessage="Hide request"
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.crossClusterReplication.followerIndexForm.showRequestButtonLabel"
+                  defaultMessage="Show request"
+                />
+              )}
             </EuiButtonEmpty>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -702,7 +770,7 @@ export class FollowerIndexForm extends PureComponent {
         {renderActions()}
       </Fragment>
     );
-  }
+  };
 
   renderLoading = () => {
     const { apiStatus } = this.props;
@@ -710,18 +778,28 @@ export class FollowerIndexForm extends PureComponent {
     if (apiStatus === API_STATUS.SAVING) {
       return (
         <EuiOverlayMask>
-          <EuiLoadingKibana size="xl"/>
+          <EuiLoadingKibana size="xl" />
         </EuiOverlayMask>
       );
     }
     return null;
-  }
+  };
 
   render() {
+    const { followerIndex, isRequestVisible } = this.state;
+
     return (
       <Fragment>
         {this.renderForm()}
         {this.renderLoading()}
+
+        {isRequestVisible ? (
+          <FollowerIndexRequestFlyout
+            name={followerIndex.name}
+            followerIndex={this.getFields()}
+            close={() => this.setState({ isRequestVisible: false })}
+          />
+        ) : null}
       </Fragment>
     );
   }

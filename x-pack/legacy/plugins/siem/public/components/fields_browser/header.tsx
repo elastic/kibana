@@ -12,13 +12,16 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import * as React from 'react';
-import { pure } from 'recompose';
+import React, { useCallback } from 'react';
 import styled from 'styled-components';
 
 import { BrowserFields } from '../../containers/source';
+import { signalsHeaders } from '../../pages/detection_engine/components/signals/default_config';
+import { alertsHeaders } from '../alerts_viewer/default_headers';
+import { defaultHeaders as eventsDefaultHeaders } from '../events_viewer/default_headers';
 import { defaultHeaders } from '../timeline/body/column_headers/default_headers';
 import { OnUpdateColumns } from '../timeline/events';
+import { useTimelineTypeContext } from '../timeline/timeline_context';
 
 import { getFieldBrowserSearchInputClassName, getFieldCount, SEARCH_INPUT_WIDTH } from './helpers';
 
@@ -28,15 +31,21 @@ const CountsFlexGroup = styled(EuiFlexGroup)`
   margin-top: 5px;
 `;
 
+CountsFlexGroup.displayName = 'CountsFlexGroup';
+
 const CountFlexItem = styled(EuiFlexItem)`
   margin-right: 5px;
 `;
+
+CountFlexItem.displayName = 'CountFlexItem';
 
 // background-color: ${props => props.theme.eui.euiColorLightestShade};
 const HeaderContainer = styled.div`
   padding: 16px;
   margin-bottom: 8px;
 `;
+
+HeaderContainer.displayName = 'HeaderContainer';
 
 const SearchContainer = styled.div`
   input {
@@ -45,8 +54,11 @@ const SearchContainer = styled.div`
   }
 `;
 
+SearchContainer.displayName = 'SearchContainer';
+
 interface Props {
   filteredBrowserFields: BrowserFields;
+  isEventViewer?: boolean;
   isSearching: boolean;
   onOutsideClick: () => void;
   onSearchInputChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
@@ -55,7 +67,7 @@ interface Props {
   timelineId: string;
 }
 
-const CountRow = pure<Pick<Props, 'filteredBrowserFields'>>(({ filteredBrowserFields }) => (
+const CountRow = React.memo<Pick<Props, 'filteredBrowserFields'>>(({ filteredBrowserFields }) => (
   <CountsFlexGroup
     alignItems="center"
     data-test-subj="counts-flex-group"
@@ -81,8 +93,30 @@ const CountRow = pure<Pick<Props, 'filteredBrowserFields'>>(({ filteredBrowserFi
   </CountsFlexGroup>
 ));
 
-const TitleRow = pure<{ onOutsideClick: () => void; onUpdateColumns: OnUpdateColumns }>(
-  ({ onOutsideClick, onUpdateColumns }) => (
+CountRow.displayName = 'CountRow';
+
+const TitleRow = React.memo<{
+  isEventViewer?: boolean;
+  onOutsideClick: () => void;
+  onUpdateColumns: OnUpdateColumns;
+}>(({ isEventViewer, onOutsideClick, onUpdateColumns }) => {
+  const timelineTypeContext = useTimelineTypeContext();
+  const handleResetColumns = useCallback(() => {
+    let resetDefaultHeaders = defaultHeaders;
+    if (isEventViewer) {
+      if (timelineTypeContext.documentType?.toLocaleLowerCase() === 'alerts') {
+        resetDefaultHeaders = alertsHeaders;
+      } else if (timelineTypeContext.documentType?.toLocaleLowerCase() === 'signals') {
+        resetDefaultHeaders = signalsHeaders;
+      } else {
+        resetDefaultHeaders = eventsDefaultHeaders;
+      }
+    }
+    onUpdateColumns(resetDefaultHeaders);
+    onOutsideClick();
+  }, [isEventViewer, onOutsideClick, onUpdateColumns, timelineTypeContext]);
+
+  return (
     <EuiFlexGroup
       alignItems="center"
       justifyContent="spaceBetween"
@@ -90,27 +124,25 @@ const TitleRow = pure<{ onOutsideClick: () => void; onUpdateColumns: OnUpdateCol
       gutterSize="none"
     >
       <EuiFlexItem grow={false}>
-        <EuiTitle size="s">
+        <EuiTitle data-test-subj="field-browser-title" size="s">
           <h2>{i18n.CUSTOMIZE_COLUMNS}</h2>
         </EuiTitle>
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
-        <EuiButtonEmpty
-          onClick={() => {
-            onUpdateColumns(defaultHeaders);
-            onOutsideClick();
-          }}
-        >
+        <EuiButtonEmpty data-test-subj="reset-fields" onClick={handleResetColumns}>
           {i18n.RESET_FIELDS}
         </EuiButtonEmpty>
       </EuiFlexItem>
     </EuiFlexGroup>
-  )
-);
+  );
+});
 
-export const Header = pure<Props>(
+TitleRow.displayName = 'TitleRow';
+
+export const Header = React.memo<Props>(
   ({
+    isEventViewer,
     isSearching,
     filteredBrowserFields,
     onOutsideClick,
@@ -120,10 +152,15 @@ export const Header = pure<Props>(
     timelineId,
   }) => (
     <HeaderContainer>
-      <TitleRow onUpdateColumns={onUpdateColumns} onOutsideClick={onOutsideClick} />
+      <TitleRow
+        isEventViewer={isEventViewer}
+        onUpdateColumns={onUpdateColumns}
+        onOutsideClick={onOutsideClick}
+      />
       <SearchContainer>
         <EuiFieldSearch
           className={getFieldBrowserSearchInputClassName(timelineId)}
+          data-test-subj="field-search"
           isLoading={isSearching}
           onChange={onSearchInputChange}
           placeholder={i18n.FILTER_PLACEHOLDER}
@@ -134,3 +171,5 @@ export const Header = pure<Props>(
     </HeaderContainer>
   )
 );
+
+Header.displayName = 'Header';

@@ -4,19 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiToolTip } from '@elastic/eui';
+import { EuiIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import styled from 'styled-components';
 import { ITransactionGroup } from '../../../../server/lib/transaction_groups/transform';
 import { fontSizes, truncate } from '../../../style/variables';
-import { asMillis } from '../../../utils/formatters';
+import { convertTo } from '../../../utils/formatters';
 import { EmptyMessage } from '../../shared/EmptyMessage';
 import { ImpactBar } from '../../shared/ImpactBar';
-import { TransactionLink } from '../../shared/Links/TransactionLink';
+import { TransactionDetailLink } from '../../shared/Links/apm/TransactionDetailLink';
 import { ITableColumn, ManagedTable } from '../../shared/ManagedTable';
+import { LoadingStatePrompt } from '../../shared/LoadingStatePrompt';
 
-const StyledTransactionLink = styled(TransactionLink)`
+const StyledTransactionLink = styled(TransactionDetailLink)`
   font-size: ${fontSizes.large};
   ${truncate('100%')};
 `;
@@ -34,9 +35,15 @@ const traceListColumns: Array<ITableColumn<ITransactionGroup>> = [
     }),
     width: '40%',
     sortable: true,
-    render: (name: string, group: ITransactionGroup) => (
+    render: (name: string, { sample }: ITransactionGroup) => (
       <EuiToolTip id="trace-transaction-link-tooltip" content={name}>
-        <StyledTransactionLink transaction={group.sample}>
+        <StyledTransactionLink
+          serviceName={sample.service.name}
+          transactionId={sample.transaction.id}
+          traceId={sample.trace.id}
+          transactionName={sample.transaction.name}
+          transactionType={sample.transaction.type}
+        >
           {name}
         </StyledTransactionLink>
       </EuiToolTip>
@@ -59,7 +66,11 @@ const traceListColumns: Array<ITableColumn<ITransactionGroup>> = [
     }),
     sortable: true,
     dataType: 'number',
-    render: (value: number) => asMillis(value)
+    render: (time: number) =>
+      convertTo({
+        unit: 'milliseconds',
+        microseconds: time
+      }).formatted
   },
   {
     field: 'transactionsPerMinute',
@@ -78,11 +89,31 @@ const traceListColumns: Array<ITableColumn<ITransactionGroup>> = [
   },
   {
     field: 'impact',
-    name: i18n.translate('xpack.apm.tracesTable.impactColumnLabel', {
-      defaultMessage: 'Impact'
-    }),
+    name: (
+      <EuiToolTip
+        content={i18n.translate(
+          'xpack.apm.tracesTable.impactColumnDescription',
+          {
+            defaultMessage:
+              "The most used and slowest endpoints in your service. It's calculated by taking the relative average duration times the number of transactions per minute."
+          }
+        )}
+      >
+        <>
+          {i18n.translate('xpack.apm.tracesTable.impactColumnLabel', {
+            defaultMessage: 'Impact'
+          })}{' '}
+          <EuiIcon
+            size="s"
+            color="subdued"
+            type="questionInCircle"
+            className="eui-alignTop"
+          />
+        </>
+      </EuiToolTip>
+    ),
     width: '20%',
-    align: 'right',
+    align: 'left',
     sortable: true,
     render: (value: number) => <ImpactBar value={value} />
   }
@@ -97,12 +128,13 @@ const noItemsMessage = (
 );
 
 export function TraceList({ items = [], isLoading }: Props) {
-  const noItems = isLoading ? null : noItemsMessage;
+  const noItems = isLoading ? <LoadingStatePrompt /> : noItemsMessage;
   return (
     <ManagedTable
       columns={traceListColumns}
       items={items}
-      initialSort={{ field: 'impact', direction: 'desc' }}
+      initialSortField="impact"
+      initialSortDirection="desc"
       noItemsMessage={noItems}
       initialPageSize={25}
     />

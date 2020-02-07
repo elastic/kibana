@@ -18,6 +18,7 @@ interface UpdateTest {
 interface UpdateTests {
   spaceAware: UpdateTest;
   notSpaceAware: UpdateTest;
+  hiddenType: UpdateTest;
   doesntExist: UpdateTest;
 }
 
@@ -47,6 +48,12 @@ export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
     return createExpectNotFound('visualization', 'dd7caf20-9efd-11e7-acb3-3dab96693fab', spaceId);
   };
 
+  const expectHiddenTypeNotFound = createExpectNotFound(
+    'hiddentype',
+    'hiddentype_1',
+    DEFAULT_SPACE_ID
+  );
+
   const createExpectRbacForbidden = (type: string) => (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql({
       statusCode: 403,
@@ -58,6 +65,8 @@ export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
   const expectDoesntExistRbacForbidden = createExpectRbacForbidden('visualization');
 
   const expectNotSpaceAwareRbacForbidden = createExpectRbacForbidden('globaltype');
+
+  const expectHiddenTypeRbacForbidden = createExpectRbacForbidden('hiddentype');
 
   const expectNotSpaceAwareResults = (resp: { [key: string]: any }) => {
     // loose uuid validation
@@ -78,7 +87,6 @@ export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
       attributes: {
         name: 'My second favorite',
       },
-      references: [],
     });
   };
 
@@ -103,7 +111,6 @@ export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
       attributes: {
         title: 'My second favorite vis',
       },
-      references: [],
     });
   };
 
@@ -150,6 +157,19 @@ export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
           .then(tests.notSpaceAware.response);
       });
 
+      it(`should return ${tests.hiddenType.statusCode} for hiddentype doc`, async () => {
+        await supertest
+          .put(`${getUrlPrefix(otherSpaceId || spaceId)}/api/saved_objects/hiddentype/hiddentype_1`)
+          .auth(user.username, user.password)
+          .send({
+            attributes: {
+              name: 'My favorite hidden type',
+            },
+          })
+          .expect(tests.hiddenType.statusCode)
+          .then(tests.hiddenType.response);
+      });
+
       describe('unknown id', () => {
         it(`should return ${tests.doesntExist.statusCode}`, async () => {
           await supertest
@@ -178,11 +198,13 @@ export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
   return {
     createExpectDoesntExistNotFound,
     createExpectSpaceAwareNotFound,
+    expectSpaceNotFound: expectHiddenTypeNotFound,
     expectDoesntExistRbacForbidden,
     expectNotSpaceAwareRbacForbidden,
     expectNotSpaceAwareResults,
     expectSpaceAwareRbacForbidden,
     expectSpaceAwareResults,
+    expectHiddenTypeRbacForbidden,
     updateTest,
   };
 }

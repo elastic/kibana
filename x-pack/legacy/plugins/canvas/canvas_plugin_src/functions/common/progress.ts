@@ -5,10 +5,9 @@
  */
 
 import { get } from 'lodash';
-import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
 import { openSans } from '../../../common/lib/fonts';
-import { Render, Style } from '../types';
-import { getFunctionHelp, getFunctionErrors } from '../../strings';
+import { Render, Style, ExpressionFunction } from '../../../types';
+import { getFunctionHelp, getFunctionErrors } from '../../../i18n';
 
 export enum Shape {
   GAUGE = 'gauge',
@@ -45,47 +44,47 @@ export function progress(): ExpressionFunction<'progress', number, Arguments, Re
       types: ['number'],
     },
     args: {
-      barColor: {
-        default: `#f0f0f0`,
-        help: argHelp.barColor,
-        types: ['string'],
-      },
-      barWeight: {
-        default: 20,
-        help: argHelp.barWeight,
-        types: ['number'],
-      },
-      font: {
-        default: `{font size=24 family="${openSans.value}" color="#000000" align=center}`,
-        help: argHelp.font,
-        types: ['style'],
-      },
-      label: {
-        default: true,
-        help: argHelp.label,
-        types: ['boolean', 'string'],
-      },
-      max: {
-        default: 1,
-        help: argHelp.max,
-        types: ['number'],
-      },
       shape: {
         aliases: ['_'],
-        default: 'gauge',
+        types: ['string'],
         help: argHelp.shape,
         options: Object.values(Shape),
+        default: 'gauge',
+      },
+      barColor: {
         types: ['string'],
+        help: argHelp.barColor,
+        default: `#f0f0f0`,
+      },
+      barWeight: {
+        types: ['number'],
+        help: argHelp.barWeight,
+        default: 20,
+      },
+      font: {
+        types: ['style'],
+        help: argHelp.font,
+        default: `{font size=24 family="${openSans.value}" color="#000000" align=center}`,
+      },
+      label: {
+        types: ['boolean', 'string'],
+        help: argHelp.label,
+        default: true,
+      },
+      max: {
+        types: ['number'],
+        help: argHelp.max,
+        default: 1,
       },
       valueColor: {
-        default: `#1785b0`,
-        help: argHelp.valueColor,
         types: ['string'],
+        help: argHelp.valueColor,
+        default: `#1785b0`,
       },
       valueWeight: {
-        default: 20,
-        help: argHelp.valueWeight,
         types: ['number'],
+        help: argHelp.valueWeight,
+        default: 20,
       },
     },
     fn: (value, args) => {

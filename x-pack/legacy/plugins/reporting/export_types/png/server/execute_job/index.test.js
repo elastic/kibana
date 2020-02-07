@@ -9,11 +9,12 @@ import { memoize } from 'lodash';
 import { cryptoFactory } from '../../../../server/lib/crypto';
 import { executeJobFactory } from './index';
 import { generatePngObservableFactory } from '../lib/generate_png';
+import { LevelLogger } from '../../../../server/lib';
 
 jest.mock('../lib/generate_png', () => ({ generatePngObservableFactory: jest.fn() }));
 
 const cancellationToken = {
-  on: jest.fn()
+  on: jest.fn(),
 };
 
 let config;
@@ -23,30 +24,22 @@ beforeEach(() => {
     'xpack.reporting.encryptionKey': 'testencryptionkey',
     'server.basePath': '/sbp',
     'server.host': 'localhost',
-    'server.port': 5601
+    'server.port': 5601,
   };
   mockServer = {
-    expose: () => { },
+    expose: () => {}, // NOTE: this is for oncePerServer
     config: memoize(() => ({ get: jest.fn() })),
     info: {
       protocol: 'http',
-    },
-    plugins: {
-      elasticsearch: {
-        getCluster: memoize(() => {
-          return {
-            callWithRequest: jest.fn()
-          };
-        })
-      }
     },
     savedObjects: {
       getScopedSavedObjectsClient: jest.fn(),
     },
     uiSettingsServiceFactory: jest.fn().mockReturnValue({ get: jest.fn() }),
+    log: jest.fn(),
   };
 
-  mockServer.config().get.mockImplementation((key) => {
+  mockServer.config().get.mockImplementation(key => {
     return config[key];
   });
 
@@ -55,7 +48,15 @@ beforeEach(() => {
 
 afterEach(() => generatePngObservableFactory.mockReset());
 
-const encryptHeaders = async (headers) => {
+const mockElasticsearch = {
+  dataClient: {
+    asScoped: () => ({ callAsCurrentUser: jest.fn() }),
+  },
+};
+
+const getMockLogger = () => new LevelLogger();
+
+const encryptHeaders = async headers => {
   const crypto = cryptoFactory(mockServer);
   return await crypto.encrypt(headers);
 };
@@ -66,22 +67,39 @@ test(`passes browserTimezone to generatePng`, async () => {
   const generatePngObservable = generatePngObservableFactory();
   generatePngObservable.mockReturnValue(Rx.of(Buffer.from('')));
 
-  const executeJob = executeJobFactory(mockServer);
+  const executeJob = executeJobFactory(mockServer, mockElasticsearch, getMockLogger(), {
+    browserDriverFactory: {},
+  });
   const browserTimezone = 'UTC';
-  await executeJob({ relativeUrl: '/app/kibana#/something', browserTimezone, headers: encryptedHeaders }, cancellationToken);
+  await executeJob(
+    'pngJobId',
+    { relativeUrl: '/app/kibana#/something', browserTimezone, headers: encryptedHeaders },
+    cancellationToken
+  );
 
-  expect(generatePngObservable).toBeCalledWith('http://localhost:5601/sbp/app/kibana#/something', browserTimezone, expect.anything(), undefined);
+  expect(generatePngObservable).toBeCalledWith(
+    expect.any(LevelLogger),
+    'http://localhost:5601/sbp/app/kibana#/something',
+    browserTimezone,
+    expect.anything(),
+    undefined
+  );
 });
 
 test(`returns content_type of application/png`, async () => {
-  const executeJob = executeJobFactory(mockServer);
+  const executeJob = executeJobFactory(mockServer, mockElasticsearch, getMockLogger(), {
+    browserDriverFactory: {},
+  });
   const encryptedHeaders = await encryptHeaders({});
 
   const generatePngObservable = generatePngObservableFactory();
   generatePngObservable.mockReturnValue(Rx.of(Buffer.from('')));
 
-  const { content_type: contentType } = await executeJob({ relativeUrl: '/app/kibana#/something',
-    timeRange: {}, headers: encryptedHeaders }, cancellationToken);
+  const { content_type: contentType } = await executeJob(
+    'pngJobId',
+    { relativeUrl: '/app/kibana#/something', timeRange: {}, headers: encryptedHeaders },
+    cancellationToken
+  );
   expect(contentType).toBe('image/png');
 });
 
@@ -91,10 +109,15 @@ test(`returns content of generatePng getBuffer base64 encoded`, async () => {
   const generatePngObservable = generatePngObservableFactory();
   generatePngObservable.mockReturnValue(Rx.of(Buffer.from(testContent)));
 
-  const executeJob = executeJobFactory(mockServer);
+  const executeJob = executeJobFactory(mockServer, mockElasticsearch, getMockLogger(), {
+    browserDriverFactory: {},
+  });
   const encryptedHeaders = await encryptHeaders({});
-  const { content } = await executeJob({ relativeUrl: '/app/kibana#/something',
-    timeRange: {}, headers: encryptedHeaders }, cancellationToken);
+  const { content } = await executeJob(
+    'pngJobId',
+    { relativeUrl: '/app/kibana#/something', timeRange: {}, headers: encryptedHeaders },
+    cancellationToken
+  );
 
   expect(content).toEqual(Buffer.from(testContent).toString('base64'));
 });

@@ -11,13 +11,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import chrome from 'ui/chrome';
 import { MANAGEMENT_BREADCRUMB } from 'ui/management';
 
-import {
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPageContent,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiPageContent, EuiSpacer } from '@elastic/eui';
 
 import { listBreadcrumb, editBreadcrumb } from '../../services/breadcrumbs';
 import routing from '../../services/routing';
@@ -40,7 +34,7 @@ export class AutoFollowPatternEdit extends PureComponent {
     apiStatus: PropTypes.object.isRequired,
     autoFollowPattern: PropTypes.object,
     autoFollowPatternId: PropTypes.string,
-  }
+  };
 
   static getDerivedStateFromProps({ autoFollowPatternId }, { lastAutoFollowPatternId }) {
     if (lastAutoFollowPatternId !== autoFollowPatternId) {
@@ -49,21 +43,29 @@ export class AutoFollowPatternEdit extends PureComponent {
     return null;
   }
 
-  state = { lastAutoFollowPatternId: undefined }
+  state = { lastAutoFollowPatternId: undefined };
 
   componentDidMount() {
-    const { match: { params: { id } }, selectAutoFollowPattern } = this.props;
+    const {
+      match: {
+        params: { id },
+      },
+      selectAutoFollowPattern,
+    } = this.props;
     const decodedId = decodeURIComponent(id);
 
     selectAutoFollowPattern(decodedId);
 
-    chrome.breadcrumbs.set([ MANAGEMENT_BREADCRUMB, listBreadcrumb, editBreadcrumb ]);
+    chrome.breadcrumbs.set([MANAGEMENT_BREADCRUMB, listBreadcrumb, editBreadcrumb]);
   }
 
   componentDidUpdate(prevProps, prevState) {
     const { autoFollowPattern, getAutoFollowPattern } = this.props;
     // Fetch the auto-follow pattern on the server if we don't have it (i.e. page reload)
-    if (!autoFollowPattern && prevState.lastAutoFollowPatternId !== this.state.lastAutoFollowPatternId) {
+    if (
+      !autoFollowPattern &&
+      prevState.lastAutoFollowPatternId !== this.state.lastAutoFollowPatternId
+    ) {
       getAutoFollowPattern(this.state.lastAutoFollowPatternId);
     }
   }
@@ -73,24 +75,31 @@ export class AutoFollowPatternEdit extends PureComponent {
   }
 
   renderGetAutoFollowPatternError(error) {
-    const { match: { params: { id: name } } } = this.props;
+    const {
+      match: {
+        params: { id: name },
+      },
+    } = this.props;
     const title = i18n.translate(
       'xpack.crossClusterReplication.autoFollowPatternEditForm.loadingErrorTitle',
       {
-        defaultMessage: 'Error loading auto-follow pattern'
+        defaultMessage: 'Error loading auto-follow pattern',
       }
     );
-    const errorMessage = error.status === 404 ? {
-      data: {
-        error: i18n.translate(
-          'xpack.crossClusterReplication.autoFollowPatternEditForm.loadingErrorMessage',
-          {
-            defaultMessage: `The auto-follow pattern '{name}' does not exist.`,
-            values: { name }
+    const errorMessage =
+      error.status === 404
+        ? {
+            data: {
+              error: i18n.translate(
+                'xpack.crossClusterReplication.autoFollowPatternEditForm.loadingErrorMessage',
+                {
+                  defaultMessage: `The auto-follow pattern '{name}' does not exist.`,
+                  values: { name },
+                }
+              ),
+            },
           }
-        )
-      }
-    } : error;
+        : error;
 
     return (
       <Fragment>
@@ -129,24 +138,26 @@ export class AutoFollowPatternEdit extends PureComponent {
   }
 
   render() {
-    const { saveAutoFollowPattern, apiStatus, apiError, autoFollowPattern, match: { url: currentUrl }  } = this.props;
+    const {
+      saveAutoFollowPattern,
+      apiStatus,
+      apiError,
+      autoFollowPattern,
+      match: { url: currentUrl },
+    } = this.props;
 
     return (
-      <EuiPageContent
-        horizontalPosition="center"
-        className="ccrPageContent"
-      >
+      <EuiPageContent horizontalPosition="center" className="ccrPageContent">
         <AutoFollowPatternPageTitle
-          title={(
+          title={
             <FormattedMessage
               id="xpack.crossClusterReplication.autoFollowPattern.editTitle"
               defaultMessage="Edit auto-follow pattern"
             />
-          )}
+          }
         />
 
         {apiStatus.get === API_STATUS.LOADING && this.renderLoadingAutoFollowPattern()}
-
 
         {apiError.get && this.renderGetAutoFollowPatternError(apiError.get)}
 
@@ -172,12 +183,12 @@ export class AutoFollowPatternEdit extends PureComponent {
                   remoteClusters={error ? [] : remoteClusters}
                   autoFollowPattern={autoFollowPattern}
                   saveAutoFollowPattern={saveAutoFollowPattern}
-                  saveButtonLabel={(
+                  saveButtonLabel={
                     <FormattedMessage
                       id="xpack.crossClusterReplication.autoFollowPatternEditForm.saveButtonLabel"
                       defaultMessage="Update"
                     />
-                  )}
+                  }
                 />
               );
             }}

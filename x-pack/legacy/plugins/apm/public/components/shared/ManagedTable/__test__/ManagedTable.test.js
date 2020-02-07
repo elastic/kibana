@@ -6,7 +6,7 @@
 
 import { shallow } from 'enzyme';
 import React from 'react';
-import { ManagedTable } from '..';
+import { UnoptimizedManagedTable } from '..';
 
 describe('ManagedTable component', () => {
   let people;
@@ -31,17 +31,18 @@ describe('ManagedTable component', () => {
 
   it('should render a page-full of items, with defaults', () => {
     expect(
-      shallow(<ManagedTable columns={columns} items={people} />)
+      shallow(<UnoptimizedManagedTable columns={columns} items={people} />)
     ).toMatchSnapshot();
   });
 
   it('should render when specifying initial values', () => {
     expect(
       shallow(
-        <ManagedTable
+        <UnoptimizedManagedTable
           columns={columns}
           items={people}
-          initialSort={{ field: 'age', direction: 'desc' }}
+          initialSortField="age"
+          initialSortDirection="desc"
           initialPageIndex={1}
           initialPageSize={2}
           hidePerPageOptions={false}

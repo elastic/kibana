@@ -25,6 +25,7 @@ export const sourceStatusSchema = gql`
     aggregatable: Boolean!
     "Description of the field"
     description: String
+    format: String
   }
 
   extend type SourceStatus {

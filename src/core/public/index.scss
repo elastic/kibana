@@ -1,0 +1,11 @@
+// Functions need to be first, since we use them in our variables and mixin definitions
+@import '@elastic/eui/src/global_styling/functions/index';
+
+// Variables come next, and are used in some mixins
+@import '@elastic/eui/src/global_styling/variables/index';
+
+// Mixins provide generic code expansion through helpers
+@import '@elastic/eui/src/global_styling/mixins/index';
+
+@import './chrome/index';
+@import './overlays/index';

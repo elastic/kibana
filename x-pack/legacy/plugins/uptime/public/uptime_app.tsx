@@ -4,97 +4,73 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import DateMath from '@elastic/datemath';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  // @ts-ignore missing typings for EuiHeaderLink
-  EuiHeaderLink,
-  // @ts-ignore missing typings for EuiHeaderLinks
-  EuiHeaderLogo,
-  // @ts-ignore missing typings for EuiHeaderLogo
-  EuiHeaderSectionItem,
-  // @ts-ignore missing typings for EuiHeaderSectionItem
-  EuiPage,
-  EuiSpacer,
-  // @ts-ignore missing typings for EuiSuperDatePicker
-  EuiSuperDatePicker,
-  EuiTitle,
-} from '@elastic/eui';
-import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
-import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
+import { EuiPage, EuiErrorBoundary } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { ApolloProvider } from 'react-apollo';
-import { BrowserRouter as Router, Route, RouteComponentProps, Switch } from 'react-router-dom';
-import { capabilities } from 'ui/capabilities';
-import { I18nContext } from 'ui/i18n';
-import { UMBreadcrumb } from './breadcrumbs';
+import { Provider as ReduxProvider } from 'react-redux';
+import { BrowserRouter as Router } from 'react-router-dom';
+import { I18nStart, ChromeBreadcrumb, LegacyCoreStart } from 'src/core/public';
+import { PluginsStart } from 'ui/new_platform/new_platform';
+import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 import { UMGraphQLClient, UMUpdateBreadcrumbs, UMUpdateBadge } from './lib/lib';
-import { MonitorPage, OverviewPage } from './pages';
-import { UptimeRefreshContext, UptimeSettingsContext } from './contexts';
-import { UptimeDatePicker } from './components/functional/uptime_date_picker';
-import { useUrlParams } from './hooks';
+import {
+  UptimeRefreshContextProvider,
+  UptimeSettingsContextProvider,
+  UptimeThemeContextProvider,
+} from './contexts';
+import { CommonlyUsedRange } from './components/functional/uptime_date_picker';
+import { store } from './state';
+import { setBasePath } from './state/actions';
+import { PageRouter } from './routes';
 
 export interface UptimeAppColors {
   danger: string;
   success: string;
+  gray: string;
   range: string;
   mean: string;
+  warning: string;
 }
 
 export interface UptimeAppProps {
   basePath: string;
+  canSave: boolean;
   client: UMGraphQLClient;
+  core: LegacyCoreStart;
   darkMode: boolean;
+  i18n: I18nStart;
   isApmAvailable: boolean;
   isInfraAvailable: boolean;
   isLogsAvailable: boolean;
-  kibanaBreadcrumbs: UMBreadcrumb[];
+  kibanaBreadcrumbs: ChromeBreadcrumb[];
+  plugins: PluginsStart;
   routerBasename: string;
   setBreadcrumbs: UMUpdateBreadcrumbs;
   setBadge: UMUpdateBadge;
   renderGlobalHelpControls(): void;
+  commonlyUsedRanges: CommonlyUsedRange[];
 }
 
 const Application = (props: UptimeAppProps) => {
   const {
     basePath,
+    canSave,
     client,
+    core,
     darkMode,
-    isApmAvailable,
-    isInfraAvailable,
-    isLogsAvailable,
+    i18n: i18nCore,
+    plugins,
     renderGlobalHelpControls,
     routerBasename,
     setBreadcrumbs,
     setBadge,
   } = props;
 
-  let colors: UptimeAppColors;
-  if (darkMode) {
-    colors = {
-      success: euiDarkVars.euiColorSuccess,
-      range: euiDarkVars.euiFocusBackgroundColor,
-      mean: euiDarkVars.euiColorPrimary,
-      danger: euiDarkVars.euiColorDanger,
-    };
-  } else {
-    colors = {
-      success: euiLightVars.euiColorSuccess,
-      range: euiLightVars.euiFocusBackgroundColor,
-      mean: euiLightVars.euiColorPrimary,
-      danger: euiLightVars.euiColorDanger,
-    };
-  }
-
-  const [lastRefresh, setLastRefresh] = useState<number>(Date.now());
-  const [headingText, setHeadingText] = useState<string | undefined>(undefined);
-
   useEffect(() => {
     renderGlobalHelpControls();
     setBadge(
-      !capabilities.get().uptime.save
+      !canSave
         ? {
             text: i18n.translate('xpack.uptime.badge.readOnly.text', {
               defaultMessage: 'Read only',
@@ -106,93 +82,38 @@ const Application = (props: UptimeAppProps) => {
           }
         : undefined
     );
-  }, []);
+  }, [canSave, renderGlobalHelpControls, setBadge]);
 
-  const refreshApp = () => {
-    setLastRefresh(Date.now());
-  };
+  store.dispatch(setBasePath(basePath));
 
   return (
-    <I18nContext>
-      <Router basename={routerBasename}>
-        <Route
-          path="/"
-          render={(rootRouteProps: RouteComponentProps) => {
-            const [
-              { autorefreshInterval, autorefreshIsPaused, dateRangeStart, dateRangeEnd },
-            ] = useUrlParams(rootRouteProps.history, rootRouteProps.location);
-            const absoluteStartDate = DateMath.parse(dateRangeStart);
-            const absoluteEndDate = DateMath.parse(dateRangeEnd);
-            return (
+    <EuiErrorBoundary>
+      <i18nCore.Context>
+        <ReduxProvider store={store}>
+          <KibanaContextProvider services={{ ...core, ...plugins }}>
+            <Router basename={routerBasename}>
               <ApolloProvider client={client}>
-                <UptimeSettingsContext.Provider
-                  value={{
-                    absoluteStartDate: absoluteStartDate ? absoluteStartDate.valueOf() : 0,
-                    absoluteEndDate: absoluteEndDate ? absoluteEndDate.valueOf() : 1,
-                    autorefreshInterval,
-                    autorefreshIsPaused,
-                    basePath,
-                    colors,
-                    dateRangeStart,
-                    dateRangeEnd,
-                    isApmAvailable,
-                    isInfraAvailable,
-                    isLogsAvailable,
-                    refreshApp,
-                    setHeadingText,
-                  }}
-                >
-                  <UptimeRefreshContext.Provider value={{ lastRefresh }}>
-                    <EuiPage className="app-wrapper-panel " data-test-subj="uptimeApp">
-                      <div>
-                        <EuiFlexGroup
-                          alignItems="center"
-                          justifyContent="spaceBetween"
-                          gutterSize="s"
-                        >
-                          <EuiFlexItem grow={false}>
-                            <EuiTitle>
-                              <h2>{headingText}</h2>
-                            </EuiTitle>
-                          </EuiFlexItem>
-                          <EuiFlexItem grow={false}>
-                            <UptimeDatePicker refreshApp={refreshApp} {...rootRouteProps} />
-                          </EuiFlexItem>
-                        </EuiFlexGroup>
-                        <EuiSpacer size="s" />
-                        <Switch>
-                          <Route
-                            exact
-                            path="/"
-                            render={routerProps => (
-                              <OverviewPage
-                                basePath={basePath}
-                                setBreadcrumbs={setBreadcrumbs}
-                                {...routerProps}
-                              />
-                            )}
+                <UptimeRefreshContextProvider>
+                  <UptimeSettingsContextProvider {...props}>
+                    <UptimeThemeContextProvider darkMode={darkMode}>
+                      <EuiPage className="app-wrapper-panel " data-test-subj="uptimeApp">
+                        <main>
+                          <PageRouter
+                            autocomplete={plugins.data.autocomplete}
+                            basePath={basePath}
+                            setBreadcrumbs={setBreadcrumbs}
                           />
-                          <Route
-                            path="/monitor/:id/:location?"
-                            render={routerProps => (
-                              <MonitorPage
-                                query={client.query}
-                                setBreadcrumbs={setBreadcrumbs}
-                                {...routerProps}
-                              />
-                            )}
-                          />
-                        </Switch>
-                      </div>
-                    </EuiPage>
-                  </UptimeRefreshContext.Provider>
-                </UptimeSettingsContext.Provider>
+                        </main>
+                      </EuiPage>
+                    </UptimeThemeContextProvider>
+                  </UptimeSettingsContextProvider>
+                </UptimeRefreshContextProvider>
               </ApolloProvider>
-            );
-          }}
-        />
-      </Router>
-    </I18nContext>
+            </Router>
+          </KibanaContextProvider>
+        </ReduxProvider>
+      </i18nCore.Context>
+    </EuiErrorBoundary>
   );
 };
 

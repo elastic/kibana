@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export default function ({ loadTestFile }) {
+export default function({ loadTestFile }) {
   describe('Logs', () => {
     loadTestFile(require.resolve('./node_detail'));
     loadTestFile(require.resolve('./index_detail'));
     loadTestFile(require.resolve('./cluster'));
+    loadTestFile(require.resolve('./multiple_clusters'));
   });
 }

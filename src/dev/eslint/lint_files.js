@@ -19,7 +19,7 @@
 
 import { CLIEngine } from 'eslint';
 
-import { createFailError } from '../run';
+import { createFailError } from '@kbn/dev-utils';
 import { REPO_ROOT } from '../constants';
 
 /**
@@ -34,7 +34,7 @@ export function lintFiles(log, files, { fix } = {}) {
   const cli = new CLIEngine({
     cache: true,
     cwd: REPO_ROOT,
-    fix
+    fix,
   });
 
   const paths = files.map(file => file.getRelativePath());

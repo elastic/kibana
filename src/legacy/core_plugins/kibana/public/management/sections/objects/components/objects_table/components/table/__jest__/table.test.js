@@ -18,45 +18,40 @@
  */
 
 import React from 'react';
-import { shallowWithIntl, mountWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithI18nProvider, mountWithI18nProvider } from 'test_utils/enzyme_helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { keyCodes } from '@elastic/eui/lib/services';
+import { mockManagementPlugin } from '../../../../../../../../../../management/public/np_ready/mocks';
 
 jest.mock('ui/kfetch', () => ({ kfetch: jest.fn() }));
 
-jest.mock('ui/errors', () => ({
-  SavedObjectNotFound: class SavedObjectNotFound extends Error {
-    constructor(options) {
-      super();
-      for (const option in options) {
-        if (options.hasOwnProperty(option)) {
-          this[option] = options[option];
-        }
-      }
-    }
-  },
+jest.mock('ui/chrome', () => ({
+  addBasePath: () => '',
 }));
 
-jest.mock('ui/chrome', () => ({
-  addBasePath: () => ''
+jest.mock('../../../../../../../../../../management/public/legacy', () => ({
+  setup: mockManagementPlugin.createSetupContract(),
+  start: mockManagementPlugin.createStartContract(),
 }));
 
 import { Table } from '../table';
 
 const defaultProps = {
-  selectedSavedObjects: [{
-    id: '1',
-    type: 'index-pattern',
-    meta: {
-      title: `MyIndexPattern*`,
-      icon: 'indexPatternApp',
-      editUrl: '#/management/kibana/index_patterns/1',
-      inAppUrl: {
-        path: '/management/kibana/index_patterns/1',
-        uiCapabilitiesPath: 'management.kibana.index_patterns',
+  selectedSavedObjects: [
+    {
+      id: '1',
+      type: 'index-pattern',
+      meta: {
+        title: `MyIndexPattern*`,
+        icon: 'indexPatternApp',
+        editUrl: '#/management/kibana/index_patterns/1',
+        inAppUrl: {
+          path: '/management/kibana/index_patterns/1',
+          uiCapabilitiesPath: 'management.kibana.index_patterns',
+        },
       },
     },
-  }],
+  ],
   selectionConfig: {
     onSelectionChange: () => {},
   },
@@ -67,35 +62,33 @@ const defaultProps = {
   canGoInApp: () => {},
   pageIndex: 1,
   pageSize: 2,
-  items: [{
-    id: '1',
-    type: 'index-pattern',
-    meta: {
-      title: `MyIndexPattern*`,
-      icon: 'indexPatternApp',
-      editUrl: '#/management/kibana/index_patterns/1',
-      inAppUrl: {
-        path: '/management/kibana/index_patterns/1',
-        uiCapabilitiesPath: 'management.kibana.index_patterns',
+  items: [
+    {
+      id: '1',
+      type: 'index-pattern',
+      meta: {
+        title: `MyIndexPattern*`,
+        icon: 'indexPatternApp',
+        editUrl: '#/management/kibana/index_patterns/1',
+        inAppUrl: {
+          path: '/management/kibana/index_patterns/1',
+          uiCapabilitiesPath: 'management.kibana.index_patterns',
+        },
       },
     },
-  }],
+  ],
   itemId: 'id',
   totalItemCount: 3,
   onQueryChange: () => {},
   onTableChange: () => {},
   isSearching: false,
   onShowRelationships: () => {},
-  canDelete: true
+  canDelete: true,
 };
 
 describe('Table', () => {
   it('should render normally', () => {
-    const component = shallowWithIntl(
-      <Table.WrappedComponent
-        {...defaultProps}
-      />
-    );
+    const component = shallowWithI18nProvider(<Table {...defaultProps} />);
 
     expect(component).toMatchSnapshot();
   });
@@ -104,14 +97,10 @@ describe('Table', () => {
     const onQueryChangeMock = jest.fn();
     const customizedProps = {
       ...defaultProps,
-      onQueryChange: onQueryChangeMock
+      onQueryChange: onQueryChangeMock,
     };
 
-    const component = mountWithIntl(
-      <Table.WrappedComponent
-        {...customizedProps}
-      />
-    );
+    const component = mountWithI18nProvider(<Table {...customizedProps} />);
     const searchBar = findTestSubject(component, 'savedObjectSearchBar');
 
     // Send invalid query
@@ -128,13 +117,13 @@ describe('Table', () => {
   });
 
   it(`prevents saved objects from being deleted`, () => {
-    const selectedSavedObjects = [{ type: 'visualization' }, { type: 'search' }, { type: 'index-pattern' }];
+    const selectedSavedObjects = [
+      { type: 'visualization' },
+      { type: 'search' },
+      { type: 'index-pattern' },
+    ];
     const customizedProps = { ...defaultProps, selectedSavedObjects, canDelete: false };
-    const component = shallowWithIntl(
-      <Table.WrappedComponent
-        {...customizedProps}
-      />
-    );
+    const component = shallowWithI18nProvider(<Table {...customizedProps} />);
 
     expect(component).toMatchSnapshot();
   });

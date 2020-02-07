@@ -2,14 +2,14 @@
 
 exports[`Footer Timeline Component rendering it renders the default timeline footer 1`] = `
 <Fragment>
-  <Styled(EuiFlexGroup)
+  <FooterContainer
     data-test-subj="timeline-footer"
     direction="column"
     gutterSize="none"
     height={100}
     justifyContent="spaceAround"
   >
-    <Styled(EuiFlexGroup)
+    <FooterFlexGroup
       alignItems="center"
       data-test-subj="footer-flex-group"
       direction="row"
@@ -26,40 +26,32 @@ exports[`Footer Timeline Component rendering it renders the default timeline foo
           direction="row"
           gutterSize="none"
         >
-          <pure(Component)
+          <EventsCount
             closePopover={[Function]}
             isOpen={false}
             items={
               Array [
                 <EuiContextMenuItem
                   icon="empty"
-                  layoutAlign="center"
                   onClick={[Function]}
-                  toolTipPosition="right"
                 >
                   1 rows
                 </EuiContextMenuItem>,
                 <EuiContextMenuItem
                   icon="empty"
-                  layoutAlign="center"
                   onClick={[Function]}
-                  toolTipPosition="right"
                 >
                   5 rows
                 </EuiContextMenuItem>,
                 <EuiContextMenuItem
                   icon="empty"
-                  layoutAlign="center"
                   onClick={[Function]}
-                  toolTipPosition="right"
                 >
                   10 rows
                 </EuiContextMenuItem>,
                 <EuiContextMenuItem
                   icon="empty"
-                  layoutAlign="center"
                   onClick={[Function]}
-                  toolTipPosition="right"
                 >
                   20 rows
                 </EuiContextMenuItem>,
@@ -75,7 +67,7 @@ exports[`Footer Timeline Component rendering it renders the default timeline foo
         data-test-subj="paging-control-container"
         grow={false}
       >
-        <pure(Component)
+        <PagingControl
           data-test-subj="paging-control"
           hasNextPage={true}
           isLoading={false}
@@ -86,7 +78,7 @@ exports[`Footer Timeline Component rendering it renders the default timeline foo
         data-test-subj="last-updated-container"
         grow={false}
       >
-        <styled.div
+        <FixedWidthLastUpdated
           compact={true}
           data-test-subj="fixed-width-last-updated"
         >
@@ -94,9 +86,9 @@ exports[`Footer Timeline Component rendering it renders the default timeline foo
             compact={true}
             updatedAt={1546878704036}
           />
-        </styled.div>
+        </FixedWidthLastUpdated>
       </EuiFlexItem>
-    </Styled(EuiFlexGroup)>
-  </Styled(EuiFlexGroup)>
+    </FooterFlexGroup>
+  </FooterContainer>
 </Fragment>
 `;

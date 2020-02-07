@@ -5,11 +5,24 @@
  */
 
 import { PromiseReturnType } from '../../../../typings/common';
-import { Setup } from '../../helpers/setup_request';
-import { calculateBucketSize } from './calculate_bucket_size';
+import {
+  Setup,
+  SetupTimeRange,
+  SetupUIFilters
+} from '../../helpers/setup_request';
 import { getBuckets } from './get_buckets';
+import { getDistributionMax } from './get_distribution_max';
+import { roundToNearestFiveOrTen } from '../../helpers/round_to_nearest_five_or_ten';
+import { MINIMUM_BUCKET_SIZE, BUCKET_TARGET_COUNT } from '../constants';
 
-export type ITransactionDistributionAPIResponse = PromiseReturnType<
+function getBucketSize(max: number) {
+  const bucketSize = max / BUCKET_TARGET_COUNT;
+  return roundToNearestFiveOrTen(
+    bucketSize > MINIMUM_BUCKET_SIZE ? bucketSize : MINIMUM_BUCKET_SIZE
+  );
+}
+
+export type TransactionDistributionAPIResponse = PromiseReturnType<
   typeof getTransactionDistribution
 >;
 export async function getTransactionDistribution({
@@ -25,29 +38,34 @@ export async function getTransactionDistribution({
   transactionType: string;
   transactionId: string;
   traceId: string;
-  setup: Setup;
+  setup: Setup & SetupTimeRange & SetupUIFilters;
 }) {
-  const bucketSize = await calculateBucketSize(
+  const distributionMax = await getDistributionMax(
     serviceName,
     transactionName,
     transactionType,
     setup
   );
 
-  const { defaultSample, buckets, totalHits } = await getBuckets(
+  if (distributionMax == null) {
+    return { noHits: true, buckets: [], bucketSize: 0 };
+  }
+
+  const bucketSize = getBucketSize(distributionMax);
+  const { buckets, noHits } = await getBuckets(
     serviceName,
     transactionName,
     transactionType,
     transactionId,
     traceId,
+    distributionMax,
     bucketSize,
     setup
   );
 
   return {
-    totalHits,
+    noHits,
     buckets,
-    bucketSize,
-    defaultSample
+    bucketSize
   };
 }

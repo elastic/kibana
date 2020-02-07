@@ -28,22 +28,30 @@ export const logEntriesSchema = gql`
 
   "A special built-in column that contains the log entry's timestamp"
   type InfraLogEntryTimestampColumn {
+    "The id of the corresponding column configuration"
+    columnId: ID!
     "The timestamp"
     timestamp: Float!
   }
 
   "A special built-in column that contains the log entry's constructed message"
   type InfraLogEntryMessageColumn {
+    "The id of the corresponding column configuration"
+    columnId: ID!
     "A list of the formatted log entry segments"
     message: [InfraLogMessageSegment!]!
   }
 
   "A column that contains the value of a field of the log entry"
   type InfraLogEntryFieldColumn {
+    "The id of the corresponding column configuration"
+    columnId: ID!
     "The field name of the column"
     field: String!
     "The value of the field in the log entry"
     value: String!
+    "A list of highlighted substrings of the value"
+    highlights: [String!]!
   }
 
   "A column of a log entry"
@@ -64,14 +72,14 @@ export const logEntriesSchema = gql`
     columns: [InfraLogEntryColumn!]!
   }
 
-  "A log summary bucket"
-  type InfraLogSummaryBucket {
-    "The start timestamp of the bucket"
-    start: Float!
-    "The end timestamp of the bucket"
-    end: Float!
-    "The number of entries inside the bucket"
-    entriesCount: Int!
+  "A highlighting definition"
+  input InfraLogEntryHighlightInput {
+    "The query to highlight by"
+    query: String!
+    "The number of highlighted documents to include beyond the beginning of the interval"
+    countBefore: Int!
+    "The number of highlighted documents to include beyond the end of the interval"
+    countAfter: Int!
   }
 
   "A consecutive sequence of log entries"
@@ -92,36 +100,6 @@ export const logEntriesSchema = gql`
     entries: [InfraLogEntry!]!
   }
 
-  "A consecutive sequence of log summary buckets"
-  type InfraLogSummaryInterval {
-    "The millisecond timestamp corresponding to the start of the interval covered by the summary"
-    start: Float
-    "The millisecond timestamp corresponding to the end of the interval covered by the summary"
-    end: Float
-    "The query the log entries were filtered by"
-    filterQuery: String
-    "A list of the log entries"
-    buckets: [InfraLogSummaryBucket!]!
-  }
-
-  type InfraLogItemField {
-    "The flattened field name"
-    field: String!
-    "The value for the Field as a string"
-    value: String!
-  }
-
-  type InfraLogItem {
-    "The ID of the document"
-    id: ID!
-    "The index where the document was found"
-    index: String!
-    "Time key for the document - derived from the source configuration timestamp and tiebreaker settings"
-    key: InfraTimeKey!
-    "An array of flattened fields and values"
-    fields: [InfraLogItemField!]!
-  }
-
   extend type InfraSource {
     "A consecutive span of log entries surrounding a point in time"
     logEntriesAround(
@@ -133,8 +111,6 @@ export const logEntriesSchema = gql`
       countAfter: Int = 0
       "The query to filter the log entries by"
       filterQuery: String
-      "The query to highlight the log entries with"
-      highlightQuery: String
     ): InfraLogEntryInterval!
     "A consecutive span of log entries within an interval"
     logEntriesBetween(
@@ -144,20 +120,17 @@ export const logEntriesSchema = gql`
       endKey: InfraTimeKeyInput!
       "The query to filter the log entries by"
       filterQuery: String
-      "The query to highlight the log entries with"
-      highlightQuery: String
     ): InfraLogEntryInterval!
-    "A consecutive span of summary buckets within an interval"
-    logSummaryBetween(
-      "The millisecond timestamp that corresponds to the start of the interval"
-      start: Float!
-      "The millisecond timestamp that corresponds to the end of the interval"
-      end: Float!
-      "The size of each bucket in milliseconds"
-      bucketSize: Float!
+    "Sequences of log entries matching sets of highlighting queries within an interval"
+    logEntryHighlights(
+      "The sort key that corresponds to the start of the interval"
+      startKey: InfraTimeKeyInput!
+      "The sort key that corresponds to the end of the interval"
+      endKey: InfraTimeKeyInput!
       "The query to filter the log entries by"
       filterQuery: String
-    ): InfraLogSummaryInterval!
-    logItem(id: ID!): InfraLogItem!
+      "The highlighting to apply to the log entries"
+      highlights: [InfraLogEntryHighlightInput!]!
+    ): [InfraLogEntryInterval!]!
   }
 `;

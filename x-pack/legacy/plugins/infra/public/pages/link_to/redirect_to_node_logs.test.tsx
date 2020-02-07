@@ -7,7 +7,7 @@
 import { createLocation } from 'history';
 import React from 'react';
 import { matchPath } from 'react-router-dom';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallow } from 'enzyme';
 
 import { RedirectToNodeLogs } from './redirect_to_node_logs';
 
@@ -29,89 +29,83 @@ jest.mock('../../containers/source/source', () => ({
 
 describe('RedirectToNodeLogs component', () => {
   it('renders a redirect with the correct host filter', () => {
-    const component = shallowWithIntl(
+    const component = shallow(
       <RedirectToNodeLogs {...createRouteComponentProps('/host-logs/HOST_NAME')} />
-    ).dive();
+    );
 
     expect(component).toMatchInlineSnapshot(`
-<Redirect
-  push={false}
-  to="/logs?logFilter=(expression:'HOST_FIELD:%20HOST_NAME',kind:kuery)&sourceId=default"
-/>
-`);
+      <Redirect
+        to="/logs?logFilter=(expression:'HOST_FIELD:%20HOST_NAME',kind:kuery)&sourceId=default"
+      />
+    `);
   });
 
   it('renders a redirect with the correct container filter', () => {
-    const component = shallowWithIntl(
+    const component = shallow(
       <RedirectToNodeLogs {...createRouteComponentProps('/container-logs/CONTAINER_ID')} />
-    ).dive();
+    );
 
     expect(component).toMatchInlineSnapshot(`
-<Redirect
-  push={false}
-  to="/logs?logFilter=(expression:'CONTAINER_FIELD:%20CONTAINER_ID',kind:kuery)&sourceId=default"
-/>
-`);
+      <Redirect
+        to="/logs?logFilter=(expression:'CONTAINER_FIELD:%20CONTAINER_ID',kind:kuery)&sourceId=default"
+      />
+    `);
   });
 
   it('renders a redirect with the correct pod filter', () => {
-    const component = shallowWithIntl(
+    const component = shallow(
       <RedirectToNodeLogs {...createRouteComponentProps('/pod-logs/POD_ID')} />
-    ).dive();
+    );
 
     expect(component).toMatchInlineSnapshot(`
-<Redirect
-  push={false}
-  to="/logs?logFilter=(expression:'POD_FIELD:%20POD_ID',kind:kuery)&sourceId=default"
-/>
-`);
+      <Redirect
+        to="/logs?logFilter=(expression:'POD_FIELD:%20POD_ID',kind:kuery)&sourceId=default"
+      />
+    `);
   });
 
   it('renders a redirect with the correct position', () => {
-    const component = shallowWithIntl(
+    const component = shallow(
       <RedirectToNodeLogs
         {...createRouteComponentProps('/host-logs/HOST_NAME?time=1550671089404')}
       />
-    ).dive();
+    );
 
     expect(component).toMatchInlineSnapshot(`
-<Redirect
-  push={false}
-  to="/logs?logFilter=(expression:'HOST_FIELD:%20HOST_NAME',kind:kuery)&logPosition=(position:(tiebreaker:0,time:1550671089404))&sourceId=default"
-/>
-`);
+      <Redirect
+        to="/logs?logFilter=(expression:'HOST_FIELD:%20HOST_NAME',kind:kuery)&logPosition=(position:(tiebreaker:0,time:1550671089404))&sourceId=default"
+      />
+    `);
   });
 
   it('renders a redirect with the correct user-defined filter', () => {
-    const component = shallowWithIntl(
+    const component = shallow(
       <RedirectToNodeLogs
         {...createRouteComponentProps(
           '/host-logs/HOST_NAME?time=1550671089404&filter=FILTER_FIELD:FILTER_VALUE'
         )}
       />
-    ).dive();
+    );
 
     expect(component).toMatchInlineSnapshot(`
-<Redirect
-  push={false}
-  to="/logs?logFilter=(expression:'(HOST_FIELD:%20HOST_NAME)%20and%20(FILTER_FIELD:FILTER_VALUE)',kind:kuery)&logPosition=(position:(tiebreaker:0,time:1550671089404))&sourceId=default"
-/>
-`);
+      <Redirect
+        to="/logs?logFilter=(expression:'(HOST_FIELD:%20HOST_NAME)%20and%20(FILTER_FIELD:FILTER_VALUE)',kind:kuery)&logPosition=(position:(tiebreaker:0,time:1550671089404))&sourceId=default"
+      />
+    `);
   });
 
   it('renders a redirect with the correct custom source id', () => {
-    const component = shallowWithIntl(
+    const component = shallow(
       <RedirectToNodeLogs
         {...createRouteComponentProps('/SOME-OTHER-SOURCE/host-logs/HOST_NAME')}
       />
-    ).dive();
+    );
 
     expect(component).toMatchInlineSnapshot(`
-<Redirect
-  push={false}
-  to="/logs?logFilter=(expression:'HOST_FIELD:%20HOST_NAME',kind:kuery)&sourceId=SOME-OTHER-SOURCE"
-/>
-`);
+      <Redirect
+        to="/logs?logFilter=(expression:'HOST_FIELD:%20HOST_NAME',kind:kuery)&sourceId=SOME-OTHER-SOURCE"
+      />
+    `);
   });
 });
 

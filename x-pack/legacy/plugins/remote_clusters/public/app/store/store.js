@@ -11,12 +11,8 @@ import { remoteClusters } from './reducers';
 import { detailPanel } from './middleware';
 
 export function createRemoteClustersStore(initialState = {}) {
-  const enhancers = [ applyMiddleware(thunk, detailPanel) ];
-  return createStore(
-    remoteClusters,
-    initialState,
-    compose(...enhancers)
-  );
+  const enhancers = [applyMiddleware(thunk, detailPanel)];
+  return createStore(remoteClusters, initialState, compose(...enhancers));
 }
 
 export const remoteClustersStore = createRemoteClustersStore();

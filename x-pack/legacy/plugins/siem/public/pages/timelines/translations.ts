@@ -13,6 +13,6 @@ export const PAGE_TITLE = i18n.translate('xpack.siem.timelines.pageTitle', {
 export const ALL_TIMELINES_PANEL_TITLE = i18n.translate(
   'xpack.siem.timelines.allTimelines.panelTitle',
   {
-    defaultMessage: 'All Timelines',
+    defaultMessage: 'All timelines',
   }
 );

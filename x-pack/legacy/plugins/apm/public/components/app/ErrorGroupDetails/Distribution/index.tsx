@@ -6,7 +6,11 @@
 
 import { EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { scaleUtc } from 'd3-scale';
+import d3 from 'd3';
 import React from 'react';
+import { asRelativeDateTimeRange } from '../../../../utils/formatters';
+import { getTimezoneOffsetInMs } from '../../../shared/charts/CustomPlot/getTimezoneOffsetInMs';
 // @ts-ignore
 import Histogram from '../../../shared/charts/Histogram';
 import { EmptyMessage } from '../../../shared/EmptyMessage';
@@ -16,9 +20,9 @@ interface IBucket {
   count: number;
 }
 
-// TODO: cleanup duplication of this in distribution/get_distribution.ts (ErrorDistributionAPIResponse) and transactions/distribution/index.ts (ITransactionDistributionAPIResponse)
+// TODO: cleanup duplication of this in distribution/get_distribution.ts (ErrorDistributionAPIResponse) and transactions/distribution/index.ts (TransactionDistributionAPIResponse)
 interface IDistribution {
-  totalHits: number;
+  noHits: boolean;
   buckets: IBucket[];
   bucketSize: number;
 }
@@ -51,15 +55,16 @@ interface Props {
   title: React.ReactNode;
 }
 
+const tooltipHeader = (bucket: FormattedBucket) =>
+  asRelativeDateTimeRange(bucket.x0, bucket.x);
+
 export function ErrorDistribution({ distribution, title }: Props) {
   const buckets = getFormattedBuckets(
     distribution.buckets,
     distribution.bucketSize
   );
 
-  const isEmpty = distribution.totalHits === 0;
-
-  if (isEmpty) {
+  if (!buckets || distribution.noHits) {
     return (
       <EmptyMessage
         heading={i18n.translate('xpack.apm.errorGroupDetails.noErrorsLabel', {
@@ -69,14 +74,25 @@ export function ErrorDistribution({ distribution, title }: Props) {
     );
   }
 
+  const xMin = d3.min(buckets, d => d.x0);
+  const xMax = d3.max(buckets, d => d.x);
+  const tickFormat = scaleUtc()
+    .domain([xMin, xMax])
+    .tickFormat();
+
   return (
     <div>
       <EuiTitle size="xs">
         <span>{title}</span>
       </EuiTitle>
       <Histogram
+        tooltipHeader={tooltipHeader}
         verticalLineHover={(bucket: FormattedBucket) => bucket.x}
-        xType="time"
+        xType="time-utc"
+        formatX={(value: Date) => {
+          const time = value.getTime();
+          return tickFormat(new Date(time - getTimezoneOffsetInMs(time)));
+        }}
         buckets={buckets}
         bucketSize={distribution.bucketSize}
         formatYShort={(value: number) =>

@@ -1,0 +1,228 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`PingListExpandedRow doesn't render list items if the body field is undefined 1`] = `
+<EuiFlexGroup>
+  <EuiFlexItem>
+    <EuiCallOut
+      color="primary"
+    >
+      <EuiDescriptionList
+        listItems={Array []}
+      />
+    </EuiCallOut>
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;
+
+exports[`PingListExpandedRow doesn't render list items if the http field is undefined 1`] = `
+<EuiFlexGroup>
+  <EuiFlexItem>
+    <EuiCallOut
+      color="primary"
+    >
+      <EuiDescriptionList
+        listItems={Array []}
+      />
+    </EuiCallOut>
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;
+
+exports[`PingListExpandedRow doesn't render list items if the response field is undefined 1`] = `
+<EuiFlexGroup>
+  <EuiFlexItem>
+    <EuiCallOut
+      color="primary"
+    >
+      <EuiDescriptionList
+        listItems={Array []}
+      />
+    </EuiCallOut>
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;
+
+exports[`PingListExpandedRow renders error information when an error field is present 1`] = `
+<EuiFlexGroup>
+  <EuiFlexItem>
+    <EuiCallOut
+      color="danger"
+    >
+      <EuiDescriptionList
+        listItems={
+          Array [
+            Object {
+              "description": <EuiText>
+                Forbidden
+              </EuiText>,
+              "title": "Error",
+            },
+            Object {
+              "description": <React.Fragment>
+                <BodyDescription
+                  body={
+                    Object {
+                      "bytes": 1200000,
+                      "content": "<http><head><title>The Title</title></head><body></body></http>",
+                      "hash": "testhash",
+                    }
+                  }
+                />
+                <EuiSpacer
+                  size="s"
+                />
+                <BodyExcerpt
+                  content="<http><head><title>The Title</title></head><body></body></http>"
+                />
+              </React.Fragment>,
+              "title": "Response Body",
+            },
+          ]
+        }
+      />
+    </EuiCallOut>
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;
+
+exports[`PingListExpandedRow renders expected elements for valid props 1`] = `
+<EuiFlexGroup>
+  <EuiFlexItem>
+    <EuiCallOut
+      color="primary"
+    >
+      <EuiDescriptionList
+        listItems={
+          Array [
+            Object {
+              "description": <React.Fragment>
+                <BodyDescription
+                  body={
+                    Object {
+                      "bytes": 1200000,
+                      "content": "<http><head><title>The Title</title></head><body></body></http>",
+                      "hash": "testhash",
+                    }
+                  }
+                />
+                <EuiSpacer
+                  size="s"
+                />
+                <BodyExcerpt
+                  content="<http><head><title>The Title</title></head><body></body></http>"
+                />
+              </React.Fragment>,
+              "title": "Response Body",
+            },
+          ]
+        }
+      />
+    </EuiCallOut>
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;
+
+exports[`PingListExpandedRow renders link to docs if body is not recorded but it is present 1`] = `
+<div
+  class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+>
+  <div
+    class="euiFlexItem"
+  >
+    <div
+      class="euiCallOut euiCallOut--primary"
+    >
+      <div
+        class="euiCallOutHeader"
+      >
+        <span
+          class="euiCallOutHeader__title"
+        />
+      </div>
+      <div
+        class="euiText euiText--small"
+      >
+        <dl
+          class="euiDescriptionList euiDescriptionList--row"
+        >
+          <dt
+            class="euiDescriptionList__title"
+          >
+            Response Body
+          </dt>
+          <dd
+            class="euiDescriptionList__description"
+          >
+            <div
+              class="euiText euiText--medium"
+            >
+              Body size is 1MB.
+            </div>
+            <div
+              class="euiSpacer euiSpacer--s"
+            />
+            <div
+              class="euiText euiText--medium"
+            >
+              Body not recorded. Read our 
+              <a
+                class="euiLink euiLink--primary"
+                href="https://www.elastic.co/guide/en/beats/heartbeat/current/configuration-heartbeat-options.html#monitor-http-response"
+                rel="noopener"
+                target="_blank"
+              >
+                docs 
+                <svg
+                  aria-hidden="true"
+                  class="euiIcon euiIcon--small euiIcon-isLoading"
+                  focusable="false"
+                  height="16"
+                  role="img"
+                  viewBox="0 0 16 16"
+                  width="16"
+                  xmlns="http://www.w3.org/2000/svg"
+                />
+              </a>
+               for more information on recording response bodies.
+            </div>
+          </dd>
+        </dl>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`PingListExpandedRow shallow renders link to docs if body is not recorded but it is present 1`] = `
+<EuiFlexGroup>
+  <EuiFlexItem>
+    <EuiCallOut
+      color="primary"
+    >
+      <EuiDescriptionList
+        listItems={
+          Array [
+            Object {
+              "description": <React.Fragment>
+                <BodyDescription
+                  body={
+                    Object {
+                      "bytes": 1200000,
+                      "hash": "testhash",
+                    }
+                  }
+                />
+                <EuiSpacer
+                  size="s"
+                />
+                <DocLinkForBody />
+              </React.Fragment>,
+              "title": "Response Body",
+            },
+          ]
+        }
+      />
+    </EuiCallOut>
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;

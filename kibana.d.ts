@@ -20,8 +20,8 @@
 /**
  * All exports from TS source files (where the implementation is actually done in TS).
  */
-import * as Public from 'target/types/public';
-import * as Server from 'target/types/server';
+import * as Public from 'src/core/public';
+import * as Server from 'src/core/server';
 
 export { Public, Server };
 
@@ -35,14 +35,14 @@ import * as LegacyKibanaServer from './src/legacy/server/kbn_server';
 /**
  *  Re-export legacy types under a namespace.
  */
-// eslint-disable-next-line @typescript/eslint-no-namespace
+// eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace Legacy {
   export type IndexPatternsService = LegacyKibanaServer.IndexPatternsService;
   export type KibanaConfig = LegacyKibanaServer.KibanaConfig;
   export type Request = LegacyKibanaServer.Request;
   export type ResponseToolkit = LegacyKibanaServer.ResponseToolkit;
   export type SavedObjectsClient = LegacyKibanaServer.SavedObjectsClient;
-  export type SavedObjectsService = LegacyKibanaServer.SavedObjectsService;
+  export type SavedObjectsService = LegacyKibanaServer.SavedObjectsLegacyService;
   export type Server = LegacyKibanaServer.Server;
 
   export type InitPluginFunction = LegacyKibanaPluginSpec.InitPluginFunction;

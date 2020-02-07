@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ScaleType, Rotation, BrushEndListener, ElementClickListener } from '@elastic/charts';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -13,21 +14,24 @@ import {
   EuiTitle,
   IconType,
 } from '@elastic/eui';
+import { get, getOr } from 'lodash/fp';
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 
-import { get, getOr } from 'lodash/fp';
-import { ScaleType, niceTimeFormatter } from '@elastic/charts';
-import { BarChart } from '../charts/barchart';
-import { AreaChart } from '../charts/areachart';
-import { getEmptyTagValue } from '../empty_value';
-import { ChartConfigsData, ChartData, ChartSeriesConfigs } from '../charts/common';
 import { KpiHostsData, KpiNetworkData } from '../../graphql/types';
-import { GlobalTime } from '../../containers/global_time';
+import { AreaChart } from '../charts/areachart';
+import { BarChart } from '../charts/barchart';
+import { ChartSeriesData, ChartData, ChartSeriesConfigs, UpdateDateRange } from '../charts/common';
+import { histogramDateTimeFormatter } from '../utils';
+import { getEmptyTagValue } from '../empty_value';
+
+import { InspectButton, InspectButtonContainer } from '../inspect';
 
 const FlexItem = styled(EuiFlexItem)`
   min-width: 0;
 `;
+
+FlexItem.displayName = 'FlexItem';
 
 const StatValue = styled(EuiTitle)`
   overflow: hidden;
@@ -35,51 +39,76 @@ const StatValue = styled(EuiTitle)`
   white-space: nowrap;
 `;
 
+StatValue.displayName = 'StatValue';
+
 interface StatItem {
-  key: string;
-  description?: string;
-  value: number | undefined | null;
   color?: string;
+  description?: string;
   icon?: IconType;
+  key: string;
   name?: string;
+  value: number | undefined | null;
 }
 
 export interface StatItems {
-  key: string;
-  fields: StatItem[];
+  areachartConfigs?: ChartSeriesConfigs;
+  barchartConfigs?: ChartSeriesConfigs;
   description?: string;
   enableAreaChart?: boolean;
   enableBarChart?: boolean;
+  fields: StatItem[];
   grow?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | true | false | null;
-  areachartConfigs?: ChartSeriesConfigs;
-  barchartConfigs?: ChartSeriesConfigs;
+  index: number;
+  key: string;
+  statKey?: string;
 }
 
 export interface StatItemsProps extends StatItems {
-  areaChart?: ChartConfigsData[];
-  barChart?: ChartConfigsData[];
+  areaChart?: ChartSeriesData[];
+  barChart?: ChartSeriesData[];
+  from: number;
+  id: string;
+  narrowDateRange: UpdateDateRange;
+  to: number;
 }
 
 export const numberFormatter = (value: string | number): string => value.toLocaleString();
-export const areachartConfigs = (from: number, to: number) => ({
+const statItemBarchartRotation: Rotation = 90;
+const statItemChartCustomHeight = 74;
+
+export const areachartConfigs = (config?: {
+  xTickFormatter: (value: number) => string;
+  onBrushEnd?: BrushEndListener;
+}) => ({
   series: {
     xScaleType: ScaleType.Time,
     yScaleType: ScaleType.Linear,
   },
   axis: {
-    xTickFormatter: niceTimeFormatter([from, to]),
+    xTickFormatter: get('xTickFormatter', config),
     yTickFormatter: numberFormatter,
   },
+  settings: {
+    onBrushEnd: getOr(() => {}, 'onBrushEnd', config),
+  },
+  customHeight: statItemChartCustomHeight,
 });
-export const barchartConfigs = {
+
+export const barchartConfigs = (config?: { onElementClick?: ElementClickListener }) => ({
   series: {
     xScaleType: ScaleType.Ordinal,
     yScaleType: ScaleType.Linear,
+    stackAccessors: ['y0'],
   },
   axis: {
     xTickFormatter: numberFormatter,
   },
-};
+  settings: {
+    onElementClick: getOr(() => {}, 'onElementClick', config),
+    rotation: statItemBarchartRotation,
+  },
+  customHeight: statItemChartCustomHeight,
+});
 
 export const addValueToFields = (
   fields: StatItem[],
@@ -89,7 +118,7 @@ export const addValueToFields = (
 export const addValueToAreaChart = (
   fields: StatItem[],
   data: KpiHostsData | KpiNetworkData
-): ChartConfigsData[] =>
+): ChartSeriesData[] =>
   fields
     .filter(field => get(`${field.key}Histogram`, data) != null)
     .map(field => ({
@@ -101,9 +130,9 @@ export const addValueToAreaChart = (
 export const addValueToBarChart = (
   fields: StatItem[],
   data: KpiHostsData | KpiNetworkData
-): ChartConfigsData[] => {
+): ChartSeriesData[] => {
   if (fields.length === 0) return [];
-  return fields.reduce((acc: ChartConfigsData[], field: StatItem, idx: number) => {
+  return fields.reduce((acc: ChartSeriesData[], field: StatItem, idx: number) => {
     const { key, color } = field;
     const y: number | null = getOr(null, key, data);
     const x: string = get(`${idx}.name`, fields) || getOr('', `${idx}.description`, fields);
@@ -112,6 +141,7 @@ export const addValueToBarChart = (
         x,
         y,
         g: key,
+        y0: 0,
       },
     ];
 
@@ -128,32 +158,52 @@ export const addValueToBarChart = (
 
 export const useKpiMatrixStatus = (
   mappings: Readonly<StatItems[]>,
-  data: KpiHostsData | KpiNetworkData
+  data: KpiHostsData | KpiNetworkData,
+  id: string,
+  from: number,
+  to: number,
+  narrowDateRange: UpdateDateRange
 ): StatItemsProps[] => {
   const [statItemsProps, setStatItemsProps] = useState(mappings as StatItemsProps[]);
 
-  useEffect(
-    () => {
-      setStatItemsProps(
-        mappings.map(stat => {
-          return {
-            ...stat,
-            key: `kpi-summary-${stat.key}`,
-            fields: addValueToFields(stat.fields, data),
-            areaChart: stat.enableAreaChart ? addValueToAreaChart(stat.fields, data) : undefined,
-            barChart: stat.enableBarChart ? addValueToBarChart(stat.fields, data) : undefined,
-          };
-        })
-      );
-    },
-    [data]
-  );
+  useEffect(() => {
+    setStatItemsProps(
+      mappings.map(stat => {
+        return {
+          ...stat,
+          areaChart: stat.enableAreaChart ? addValueToAreaChart(stat.fields, data) : undefined,
+          barChart: stat.enableBarChart ? addValueToBarChart(stat.fields, data) : undefined,
+          fields: addValueToFields(stat.fields, data),
+          id,
+          key: `kpi-summary-${stat.key}`,
+          statKey: `${stat.key}`,
+          from,
+          to,
+          narrowDateRange,
+        };
+      })
+    );
+  }, [data]);
 
   return statItemsProps;
 };
 
 export const StatItemsComponent = React.memo<StatItemsProps>(
-  ({ fields, description, grow, barChart, areaChart, enableAreaChart, enableBarChart }) => {
+  ({
+    areaChart,
+    barChart,
+    description,
+    enableAreaChart,
+    enableBarChart,
+    fields,
+    from,
+    grow,
+    id,
+    index,
+    narrowDateRange,
+    statKey = 'item',
+    to,
+  }) => {
     const isBarChartDataAvailable =
       barChart &&
       barChart.length &&
@@ -162,62 +212,75 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
       areaChart &&
       areaChart.length &&
       areaChart.every(item => item.value != null && item.value.length > 0);
+
     return (
-      <FlexItem grow={grow}>
-        <EuiPanel>
-          <EuiTitle size="xxxs">
-            <h6>{description}</h6>
-          </EuiTitle>
+      <FlexItem grow={grow} data-test-subj={`stat-${statKey}`}>
+        <InspectButtonContainer>
+          <EuiPanel>
+            <EuiFlexGroup gutterSize={'none'}>
+              <EuiFlexItem>
+                <EuiTitle size="xxxs">
+                  <h6>{description}</h6>
+                </EuiTitle>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <InspectButton queryId={id} title={`KPI ${description}`} inspectIndex={index} />
+              </EuiFlexItem>
+            </EuiFlexGroup>
 
-          <EuiFlexGroup>
-            {fields.map(field => (
-              <FlexItem key={`stat-items-field-${field.key}`}>
-                <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
-                  {(isAreaChartDataAvailable || isBarChartDataAvailable) && field.icon && (
-                    <FlexItem grow={false}>
-                      <EuiIcon
-                        type={field.icon}
-                        color={field.color}
-                        size="l"
-                        data-test-subj="stat-icon"
-                      />
+            <EuiFlexGroup>
+              {fields.map(field => (
+                <FlexItem key={`stat-items-field-${field.key}`}>
+                  <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+                    {(isAreaChartDataAvailable || isBarChartDataAvailable) && field.icon && (
+                      <FlexItem grow={false}>
+                        <EuiIcon
+                          type={field.icon}
+                          color={field.color}
+                          size="l"
+                          data-test-subj="stat-icon"
+                        />
+                      </FlexItem>
+                    )}
+
+                    <FlexItem>
+                      <StatValue>
+                        <p data-test-subj="stat-title">
+                          {field.value != null ? field.value.toLocaleString() : getEmptyTagValue()}{' '}
+                          {field.description}
+                        </p>
+                      </StatValue>
                     </FlexItem>
-                  )}
+                  </EuiFlexGroup>
+                </FlexItem>
+              ))}
+            </EuiFlexGroup>
 
-                  <FlexItem>
-                    <StatValue>
-                      <p data-test-subj="stat-title">
-                        {field.value != null ? field.value.toLocaleString() : getEmptyTagValue()}{' '}
-                        {field.description}
-                      </p>
-                    </StatValue>
-                  </FlexItem>
-                </EuiFlexGroup>
-              </FlexItem>
-            ))}
-          </EuiFlexGroup>
+            {(enableAreaChart || enableBarChart) && <EuiHorizontalRule />}
+            <EuiFlexGroup>
+              {enableBarChart && (
+                <FlexItem>
+                  <BarChart barChart={barChart} configs={barchartConfigs()} />
+                </FlexItem>
+              )}
 
-          {(enableAreaChart || enableBarChart) && <EuiHorizontalRule />}
-
-          <EuiFlexGroup>
-            {enableBarChart && (
-              <FlexItem>
-                <BarChart barChart={barChart} configs={barchartConfigs} />
-              </FlexItem>
-            )}
-
-            {enableAreaChart && (
-              <FlexItem>
-                <GlobalTime>
-                  {({ from, to }) => (
-                    <AreaChart areaChart={areaChart} configs={areachartConfigs(from, to)} />
-                  )}
-                </GlobalTime>
-              </FlexItem>
-            )}
-          </EuiFlexGroup>
-        </EuiPanel>
+              {enableAreaChart && from != null && to != null && (
+                <FlexItem>
+                  <AreaChart
+                    areaChart={areaChart}
+                    configs={areachartConfigs({
+                      xTickFormatter: histogramDateTimeFormatter([from, to]),
+                      onBrushEnd: narrowDateRange,
+                    })}
+                  />
+                </FlexItem>
+              )}
+            </EuiFlexGroup>
+          </EuiPanel>
+        </InspectButtonContainer>
       </FlexItem>
     );
   }
 );
+
+StatItemsComponent.displayName = 'StatItemsComponent';

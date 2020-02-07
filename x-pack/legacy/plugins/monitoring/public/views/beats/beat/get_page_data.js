@@ -14,13 +14,14 @@ export function getPageData($injector) {
   const url = `../api/monitoring/v1/clusters/${globalState.cluster_uuid}/beats/beat/${$route.current.params.beatUuid}`;
   const timeBounds = timefilter.getBounds();
 
-  return $http.post(url, {
-    ccs: globalState.ccs,
-    timeRange: {
-      min: timeBounds.min.toISOString(),
-      max: timeBounds.max.toISOString()
-    }
-  })
+  return $http
+    .post(url, {
+      ccs: globalState.ccs,
+      timeRange: {
+        min: timeBounds.min.toISOString(),
+        max: timeBounds.max.toISOString(),
+      },
+    })
     .then(response => response.data)
     .catch(err => {
       const Private = $injector.get('Private');

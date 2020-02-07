@@ -4,7 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export {
-  getJob,
-  getJobs,
-} from './job';
+export { getJob, getJobs, jobCount } from './job';

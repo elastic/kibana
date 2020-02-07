@@ -30,7 +30,7 @@ export const convertSchemaToAssociativeArray = (schema: Schema): OutputSchema =>
     return accumulator;
   }, {});
 
-const paramsToPick = ['description', 'example', 'name', 'type'];
+const paramsToPick = ['description', 'example', 'name', 'type', 'format'];
 
 const onlyStringOrNumber = (fields: object) =>
   Object.keys(fields).reduce((acc, item) => {
@@ -77,7 +77,7 @@ const convertFieldsToAssociativeArray = (
     : {};
 
 export const getIndexAlias = (defaultIndex: string[], indexName: string): string => {
-  const found = defaultIndex.find(index => indexName.match(index) != null);
+  const found = defaultIndex.find(index => `\\${indexName}`.match(`\\${index}`) != null);
   if (found != null) {
     return found;
   } else {

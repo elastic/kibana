@@ -4,7 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Setup } from '../../../helpers/setup_request';
+import {
+  Setup,
+  SetupTimeRange,
+  SetupUIFilters
+} from '../../../helpers/setup_request';
 import { bucketFetcher } from './fetcher';
 import { bucketTransformer } from './transform';
 
@@ -14,8 +18,9 @@ export async function getBuckets(
   transactionType: string,
   transactionId: string,
   traceId: string,
+  distributionMax: number,
   bucketSize: number,
-  setup: Setup
+  setup: Setup & SetupTimeRange & SetupUIFilters
 ) {
   const response = await bucketFetcher(
     serviceName,
@@ -23,6 +28,7 @@ export async function getBuckets(
     transactionType,
     transactionId,
     traceId,
+    distributionMax,
     bucketSize,
     setup
   );

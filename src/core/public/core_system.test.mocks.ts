@@ -29,6 +29,9 @@ import { overlayServiceMock } from './overlays/overlay_service.mock';
 import { pluginsServiceMock } from './plugins/plugins_service.mock';
 import { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
 import { docLinksServiceMock } from './doc_links/doc_links_service.mock';
+import { renderingServiceMock } from './rendering/rendering_service.mock';
+import { contextServiceMock } from './context/context_service.mock';
+import { integrationsServiceMock } from './integrations/integrations_service.mock';
 
 export const MockLegacyPlatformService = legacyPlatformServiceMock.create();
 export const LegacyPlatformServiceConstructor = jest
@@ -112,4 +115,24 @@ export const MockDocLinksService = docLinksServiceMock.create();
 export const DocLinksServiceConstructor = jest.fn().mockImplementation(() => MockDocLinksService);
 jest.doMock('./doc_links', () => ({
   DocLinksService: DocLinksServiceConstructor,
+}));
+
+export const MockRenderingService = renderingServiceMock.create();
+export const RenderingServiceConstructor = jest.fn().mockImplementation(() => MockRenderingService);
+jest.doMock('./rendering', () => ({
+  RenderingService: RenderingServiceConstructor,
+}));
+
+export const MockContextService = contextServiceMock.create();
+export const ContextServiceConstructor = jest.fn().mockImplementation(() => MockContextService);
+jest.doMock('./context', () => ({
+  ContextService: ContextServiceConstructor,
+}));
+
+export const MockIntegrationsService = integrationsServiceMock.create();
+export const IntegrationsServiceConstructor = jest
+  .fn()
+  .mockImplementation(() => MockIntegrationsService);
+jest.doMock('./integrations', () => ({
+  IntegrationsService: IntegrationsServiceConstructor,
 }));

@@ -19,11 +19,9 @@
 
 import _ from 'lodash';
 import $ from 'jquery';
-
-const app = require('ui/modules').get('apps/timelion', []);
 import template from './timelion_interval.html';
 
-app.directive('timelionInterval', function ($timeout) {
+export function TimelionInterval($timeout) {
   return {
     restrict: 'E',
     scope: {
@@ -31,10 +29,10 @@ app.directive('timelionInterval', function ($timeout) {
       model: '=',
     },
     template,
-    link: function ($scope, $elem) {
+    link: function($scope, $elem) {
       $scope.intervalOptions = ['auto', '1s', '1m', '1h', '1d', '1w', '1M', '1y', 'other'];
       $scope.intervalLabels = {
-        'auto': 'auto',
+        auto: 'auto',
         '1s': '1 second',
         '1m': '1 minute',
         '1h': '1 hour',
@@ -42,10 +40,10 @@ app.directive('timelionInterval', function ($timeout) {
         '1w': '1 week',
         '1M': '1 month',
         '1y': '1 year',
-        'other': 'other',
+        other: 'other',
       };
 
-      $scope.$watch('model', function (newVal, oldVal) {
+      $scope.$watch('model', function(newVal, oldVal) {
         // Only run this on initialization
         if (newVal !== oldVal || oldVal == null) return;
 
@@ -60,13 +58,13 @@ app.directive('timelionInterval', function ($timeout) {
         }
       });
 
-      $scope.$watch('interval', function (newVal, oldVal) {
+      $scope.$watch('interval', function(newVal, oldVal) {
         if (newVal === oldVal) return;
 
         if (newVal === 'other') {
           $scope.otherInterval = oldVal;
           $scope.model = $scope.otherInterval;
-          $timeout(function () {
+          $timeout(function() {
             $('input', $elem).select();
           }, 0);
         } else {
@@ -75,10 +73,10 @@ app.directive('timelionInterval', function ($timeout) {
         }
       });
 
-      $scope.$watch('otherInterval', function (newVal, oldVal) {
+      $scope.$watch('otherInterval', function(newVal, oldVal) {
         if (newVal === oldVal) return;
         $scope.model = newVal;
       });
-    }
+    },
   };
-});
+}

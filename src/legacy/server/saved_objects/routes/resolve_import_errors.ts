@@ -27,6 +27,7 @@ import { SavedObjectsClientContract } from 'src/core/server';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { resolveImportErrors } from '../../../../core/server/saved_objects/import';
 import { Prerequisites } from './types';
+import { createSavedObjectsStreamFromNdJson } from '../lib';
 
 interface HapiReadableStream extends Readable {
   hapi: {
@@ -103,7 +104,7 @@ export const createResolveImportErrorsRoute = (
     return await resolveImportErrors({
       supportedTypes,
       savedObjectsClient,
-      readStream: request.payload.file,
+      readStream: createSavedObjectsStreamFromNdJson(request.payload.file),
       retries: request.payload.retries,
       objectLimit: request.server.config().get('savedObjects.maxImportExportSize'),
     });

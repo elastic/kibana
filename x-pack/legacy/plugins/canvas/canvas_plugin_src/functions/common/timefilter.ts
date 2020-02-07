@@ -5,9 +5,8 @@
  */
 
 import dateMath from '@elastic/datemath';
-import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
-import { Filter } from '../types';
-import { getFunctionHelp, getFunctionErrors } from '../../strings';
+import { Filter, ExpressionFunction } from '../../../types';
+import { getFunctionHelp, getFunctionErrors } from '../../../i18n';
 
 interface Arguments {
   column: string;
@@ -47,7 +46,7 @@ export function timefilter(): ExpressionFunction<'timefilter', Filter, Arguments
       },
       filterGroup: {
         types: ['string'],
-        help: 'Group name for the filter',
+        help: 'The group name for the filter',
       },
     },
     fn: (context, args) => {

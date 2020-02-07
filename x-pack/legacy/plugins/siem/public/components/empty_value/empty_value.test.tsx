@@ -6,7 +6,6 @@
 
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { mount, shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
@@ -25,11 +24,12 @@ describe('EmptyValue', () => {
 
   test('it renders against snapshot', () => {
     const wrapper = shallow(<p>{getEmptyString()}</p>);
-    expect(toJson(wrapper)).toMatchSnapshot();
+    expect(wrapper).toMatchSnapshot();
   });
 
-  describe('#getEmptyValue', () =>
-    test('should return an empty value', () => expect(getEmptyValue()).toBe('--')));
+  describe('#getEmptyValue', () => {
+    test('should return an empty value', () => expect(getEmptyValue()).toBe('—'));
+  });
 
   describe('#getEmptyString', () => {
     test('should turn into an empty string place holder', () => {
@@ -43,8 +43,12 @@ describe('EmptyValue', () => {
   });
 
   describe('#getEmptyTagValue', () => {
-    const wrapper = mount(<p>{getEmptyTagValue()}</p>);
-    test('should return an empty tag value', () => expect(wrapper.text()).toBe('--'));
+    const wrapper = mount(
+      <ThemeProvider theme={theme}>
+        <p>{getEmptyTagValue()}</p>
+      </ThemeProvider>
+    );
+    test('should return an empty tag value', () => expect(wrapper.text()).toBe('—'));
   });
 
   describe('#getEmptyStringTag', () => {
@@ -69,12 +73,20 @@ describe('EmptyValue', () => {
 
   describe('#defaultToEmptyTag', () => {
     test('should default to an empty value when a value is null', () => {
-      const wrapper = mount(<p>{defaultToEmptyTag(null)}</p>);
+      const wrapper = mount(
+        <ThemeProvider theme={theme}>
+          <p>{defaultToEmptyTag(null)}</p>
+        </ThemeProvider>
+      );
       expect(wrapper.text()).toBe(getEmptyValue());
     });
 
     test('should default to an empty value when a value is undefined', () => {
-      const wrapper = mount(<p>{defaultToEmptyTag(undefined)}</p>);
+      const wrapper = mount(
+        <ThemeProvider theme={theme}>
+          <p>{defaultToEmptyTag(undefined)}</p>
+        </ThemeProvider>
+      );
       expect(wrapper.text()).toBe(getEmptyValue());
     });
 
@@ -100,7 +112,11 @@ describe('EmptyValue', () => {
           },
         },
       };
-      const wrapper = mount(<p>{getOrEmptyTag('a.b.c', test)}</p>);
+      const wrapper = mount(
+        <ThemeProvider theme={theme}>
+          <p>{getOrEmptyTag('a.b.c', test)}</p>
+        </ThemeProvider>
+      );
       expect(wrapper.text()).toBe(getEmptyValue());
     });
 
@@ -112,7 +128,11 @@ describe('EmptyValue', () => {
           },
         },
       };
-      const wrapper = mount(<p>{getOrEmptyTag('a.b.c', test)}</p>);
+      const wrapper = mount(
+        <ThemeProvider theme={theme}>
+          <p>{getOrEmptyTag('a.b.c', test)}</p>
+        </ThemeProvider>
+      );
       expect(wrapper.text()).toBe(getEmptyValue());
     });
 
@@ -122,7 +142,11 @@ describe('EmptyValue', () => {
           b: {},
         },
       };
-      const wrapper = mount(<p>{getOrEmptyTag('a.b.c', test)}</p>);
+      const wrapper = mount(
+        <ThemeProvider theme={theme}>
+          <p>{getOrEmptyTag('a.b.c', test)}</p>
+        </ThemeProvider>
+      );
       expect(wrapper.text()).toBe(getEmptyValue());
     });
 
