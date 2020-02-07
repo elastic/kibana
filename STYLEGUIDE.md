@@ -81,7 +81,7 @@ Since we have some components that are used multiple times on the page, you must
 make sure every instance of that component has a unique `id`. To make the generation
 of those `id`s easier, you can use the `htmlIdGenerator` service in the `@elastic/eui`.
 
-A react component could use it as follows:
+A React component could use it as follows:
 
 ```jsx
 import { htmlIdGenerator } from '@elastic/eui';
