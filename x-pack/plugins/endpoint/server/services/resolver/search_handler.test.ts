@@ -7,7 +7,6 @@ import {
   elasticsearchServiceMock,
   loggingServiceMock,
 } from '../../../../../../src/core/server/mocks';
-import { BaseSearchHandler } from './search_handler';
 import { SingleNodeHandler } from './single_node_handler';
 import { ChildrenSearchHandler } from './children_search_handler';
 import { IScopedClusterClient } from 'kibana/server';

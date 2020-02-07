@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { buildPhase0EntityID } from '../../../../plugins/endpoint/server/services/resolver/common';
+import { buildLegacyEntityID } from '../../../../plugins/endpoint/server/services/resolver/common';
 
 const commonHeaders = {
   Accept: 'application/json',
@@ -28,8 +28,8 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
    */
   describe('Resolver api', function() {
     const endpointID = '99b3e56e-0596-4b02-bbd1-0b581ec983a4';
-    const rootEntityID = buildPhase0EntityID(endpointID, 1);
-    const rootParentEntityID = buildPhase0EntityID(endpointID, 0);
+    const rootEntityID = buildLegacyEntityID(endpointID, 1);
+    const rootParentEntityID = buildLegacyEntityID(endpointID, 0);
     before(() => esArchiver.load('endpoint/resolver/api_feature'));
     after(() => esArchiver.unload('endpoint/resolver/api_feature'));
     it('should return details for the root node', async () => {
