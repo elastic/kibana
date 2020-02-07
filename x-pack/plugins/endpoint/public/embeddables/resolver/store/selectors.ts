@@ -17,6 +17,9 @@ export const projectionMatrix = composeSelectors(
   cameraSelectors.projectionMatrix
 );
 
+export const clippingPlanes = composeSelectors(cameraStateSelector, cameraSelectors.clippingPlanes);
+export const translation = composeSelectors(cameraStateSelector, cameraSelectors.translation);
+
 /**
  * A matrix that when applied to a Vector2 converts it from screen coordinates to world coordinates.
  * See https://en.wikipedia.org/wiki/Orthographic_projection

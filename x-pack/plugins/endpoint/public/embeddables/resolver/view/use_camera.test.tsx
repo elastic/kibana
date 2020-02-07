@@ -8,24 +8,39 @@
  * This import must be hoisted as it uses `jest.mock`. Is there a better way? Mocking is not good.
  */
 import React from 'react';
-import { render, act, RenderResult } from '@testing-library/react';
+import { render, act, RenderResult, fireEvent } from '@testing-library/react';
 import { useCamera } from './use_camera';
 import { Provider } from 'react-redux';
 import { storeFactory } from '../store';
-import { Matrix3, SideEffectors } from '../types';
+import {
+  Matrix3,
+  SideEffectors,
+  ResolverMiddleware,
+  ResolverAction,
+  ResolverStore,
+} from '../types';
+import { MockResizeObserver } from './mock_resize_observer';
 import { SideEffectContext } from './side_effect_context';
+import { applyMatrix3 } from '../lib/vector2';
 
 describe('useCamera on an unpainted element', () => {
   let element: HTMLElement;
   let projectionMatrix: Matrix3;
   let time: number;
-  let frameRequestedCallbacks: FrameRequestCallback[];
-  let provideFrame: () => void;
+  let frameRequestedCallbacksIDCounter: number;
+  let frameRequestedCallbacks: Map<number, FrameRequestCallback>;
   const testID = 'camera';
   let reactRenderQueries: RenderResult;
   let simulateElementResize: (target: Element, contentRect: DOMRect) => void;
+  let actions: ResolverAction[];
+  let store: ResolverStore;
   beforeEach(async () => {
-    const { store } = storeFactory();
+    actions = [];
+    const middleware: ResolverMiddleware = () => next => action => {
+      actions.push(action);
+      next(action);
+    };
+    ({ store } = storeFactory(middleware));
 
     const Test = function Test() {
       const camera = useCamera();
@@ -35,68 +50,8 @@ describe('useCamera on an unpainted element', () => {
     };
 
     time = 0;
-    frameRequestedCallbacks = [];
-
-    provideFrame = () => {
-      for (const callback of frameRequestedCallbacks) {
-        callback(time);
-      }
-      frameRequestedCallbacks.length = 0;
-    };
-
-    class MockResizeObserver implements ResizeObserver {
-      static instances: Set<MockResizeObserver> = new Set();
-      static contentRects: Map<Element, DOMRect> = new Map();
-      static simulateElementResize: (target: Element, contentRect: DOMRect) => void = (
-        target,
-        contentRect
-      ) => {
-        MockResizeObserver.contentRects.set(target, contentRect);
-        for (const instance of MockResizeObserver.instances) {
-          instance.simulateElementResize(target, contentRect);
-        }
-      };
-      static contentRectForElement: (target: Element) => DOMRect = target => {
-        if (MockResizeObserver.contentRects.has(target)) {
-          return MockResizeObserver.contentRects.get(target)!;
-        }
-        const domRect: DOMRect = {
-          x: 0,
-          y: 0,
-          top: 0,
-          right: 0,
-          bottom: 0,
-          left: 0,
-          width: 0,
-          height: 0,
-          toJSON() {
-            return this;
-          },
-        };
-        return domRect;
-      };
-      constructor(private readonly callback: ResizeObserverCallback) {
-        MockResizeObserver.instances.add(this);
-      }
-      private elements: Set<Element> = new Set();
-      simulateElementResize(target: Element, contentRect: DOMRect) {
-        if (this.elements.has(target)) {
-          const entries: ResizeObserverEntry[] = [{ target, contentRect }];
-          act(() => {
-            this.callback(entries, this);
-          });
-        }
-      }
-      observe(target: Element) {
-        this.elements.add(target);
-      }
-      unobserve(target: Element) {
-        this.elements.delete(target);
-      }
-      disconnect() {
-        this.elements.clear();
-      }
-    }
+    frameRequestedCallbacksIDCounter = 0;
+    frameRequestedCallbacks = new Map();
 
     jest
       .spyOn(Element.prototype, 'getBoundingClientRect')
@@ -106,7 +61,13 @@ describe('useCamera on an unpainted element', () => {
 
     const sideEffectors: SideEffectors = {
       timestamp: jest.fn().mockImplementation(),
-      requestAnimationFrame: jest.fn().mockImplementation(),
+      requestAnimationFrame: jest
+        .fn()
+        .mockImplementation((callback: FrameRequestCallback): number => {
+          const id = frameRequestedCallbacksIDCounter++;
+          frameRequestedCallbacks.set(id, callback);
+          return id;
+        }),
       ResizeObserver: MockResizeObserver,
     };
 
@@ -144,20 +105,30 @@ describe('useCamera on an unpainted element', () => {
     `);
   });
   describe('which has been resize to 800x400', () => {
-    test('provides a projection matrix', () => {
-      simulateElementResize(element, {
-        width: 800,
-        height: 600,
-        left: 20,
-        top: 20,
-        right: 820,
-        bottom: 620,
-        x: 20,
-        y: 20,
-        toJSON() {
-          return this;
-        },
+    const width = 800;
+    const height = 600;
+    const leftMargin = 20;
+    const topMargin = 20;
+    const centerX = width / 2 + leftMargin;
+    const centerY = height / 2 + topMargin;
+    beforeEach(() => {
+      act(() => {
+        simulateElementResize(element, {
+          width,
+          height,
+          left: leftMargin,
+          top: topMargin,
+          right: leftMargin + width,
+          bottom: topMargin + height,
+          x: leftMargin,
+          y: topMargin,
+          toJSON() {
+            return this;
+          },
+        });
       });
+    });
+    test('provides a projection matrix', () => {
       expect(projectionMatrix).toMatchInlineSnapshot(`
         Array [
           1,
@@ -171,6 +142,25 @@ describe('useCamera on an unpainted element', () => {
           0,
         ]
       `);
+    });
+    describe('when the user presses the mousedown button in the middle of the element', () => {
+      beforeEach(() => {
+        fireEvent.mouseDown(element, {
+          clientX: centerX,
+          clientY: centerY,
+        });
+      });
+      describe('when the user moves the mouse 50 pixels to the right', () => {
+        beforeEach(() => {
+          fireEvent.mouseMove(element, {
+            clientX: centerX + 50,
+            clientY: centerY,
+          });
+        });
+        it('should project [0, 0] in world corrdinates 50 pixels to the right of the center of the element', () => {
+          expect(applyMatrix3([0, 0], projectionMatrix)).toEqual([450, 300]);
+        });
+      });
     });
   });
 });

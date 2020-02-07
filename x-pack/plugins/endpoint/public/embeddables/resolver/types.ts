@@ -4,7 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Middleware, Dispatch, Store } from 'redux';
+import { ResolverAction } from './store/actions';
 export { ResolverAction } from './store/actions';
+import * as selectors from './store/selectors';
 
 /**
  * Redux state for the Resolver feature. Properties on this interface are populated via multiple reducers using redux's `combineReducers`.
@@ -248,3 +251,15 @@ export interface SideEffectors {
   requestAnimationFrame: typeof window.requestAnimationFrame;
   ResizeObserver: ResizeObserverConstructor;
 }
+
+export type ResolverMiddleware = Middleware<{}, ResolverState, Dispatch<ResolverAction>>;
+
+export type Selectors = typeof selectors;
+
+export type FullyEvaluatedSelectors = {
+  -readonly [K in keyof Selectors]: ReturnType<Selectors[K]> extends (...args: any[]) => infer R
+    ? R
+    : ReturnType<Selectors[K]>;
+};
+
+export type ResolverStore = Store<ResolverState, ResolverAction>;

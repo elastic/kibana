@@ -19,7 +19,7 @@ describe('inverseProjectionMatrix', () => {
     store = createStore(cameraReducer, undefined);
     compare = (rasterPosition: [number, number], expectedWorldPosition: [number, number]) => {
       // time isn't really relevant as we aren't testing animation
-      const time = new Date(0);
+      const time = 0;
       const [worldX, worldY] = applyMatrix3(
         rasterPosition,
         inverseProjectionMatrix(store.getState())(time)

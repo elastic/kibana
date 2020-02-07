@@ -15,7 +15,7 @@ import { applyMatrix3 } from '../../lib/vector2';
 
 describe('zooming', () => {
   let store: Store<CameraState, CameraAction>;
-  let time: Date;
+  let time: number;
 
   const cameraShouldBeBoundBy = (expectedViewableBoundingBox: AABB): [string, () => void] => {
     return [
@@ -31,7 +31,7 @@ describe('zooming', () => {
   };
   beforeEach(() => {
     // Time isn't relevant as we aren't testing animation
-    time = new Date(0);
+    time = 0;
     store = createStore(cameraReducer, undefined);
   });
   describe('when the raster size is 300 x 200 pixels', () => {
