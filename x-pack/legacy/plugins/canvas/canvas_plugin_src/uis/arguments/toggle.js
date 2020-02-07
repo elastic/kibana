@@ -29,8 +29,8 @@ const ToggleArgInput = ({ onValueChange, argValue, argId, renderError, typeInsta
           className="canvasArg__form"
           aria-label={typeInstance.displayName}
           resize="none"
-          label=""
-          showLabel={false}
+          label={typeInstance.options.labelValue}
+          showLabel
         />
       </EuiFormRow>
     </div>
@@ -41,6 +41,8 @@ ToggleArgInput.propTypes = {
   onValueChange: PropTypes.func.isRequired,
   argValue: PropTypes.oneOfType([PropTypes.bool, PropTypes.string, PropTypes.object]).isRequired,
   argId: PropTypes.string.isRequired,
+  labelValue: PropTypes.string,
+  showLabelValue: PropTypes.bool,
   renderError: PropTypes.func.isRequired,
 };
 
