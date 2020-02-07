@@ -47,7 +47,6 @@ Note: You probably should create the index first.
 Two indexes are needed, see README.md.
 
 Examples:
-export TIME_STAMP=\\$(date -u +%FT%T)
 export BUILD_ID=JOB_NUMBER_FROM_CI
 export ES_HOST=https://SOME_ES_CLUSTER
 
