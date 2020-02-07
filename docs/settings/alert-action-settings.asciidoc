@@ -31,7 +31,7 @@ Although the key can be specified in clear text in `kibana.yml`, it's recommende
 ==== Action settings
 
 `xpack.actions.whitelistedHosts`::
-A list of hostnames that {kib} is allowed to connect to when built-in actions are triggered. It defaults to `[*]` allowing any host, but keed in mind the potential for SSRF attacks when hosts are not explicitly whitelisted. 
+A list of hostnames that {kib} is allowed to connect to when built-in actions are triggered. It defaults to `[*]`, allowing any host, but keep in mind the potential for SSRF attacks when hosts are not explicitly whitelisted. 
 +
 Note that hosts associated with built-in actions such as slack and pagerduty are not automatically whitelisted. If you are not using the default `[*]` setting, you have to ensure that the corresponding endpoints are whitelisted as well.
 
