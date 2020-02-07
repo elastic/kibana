@@ -26,6 +26,14 @@ export const HelpMenu = React.memo(() => {
           linkType: 'custom',
         },
         {
+          content: i18n.translate('xpack.siem.chrome.helpMenu.documentation.ecs', {
+            defaultMessage: 'ECS documentation',
+          }),
+          href: `${docLinks.ELASTIC_WEBSITE_URL}guide/en/ecs/${docLinks.DOC_LINK_VERSION}/index.html`,
+          iconType: 'documents',
+          linkType: 'custom',
+        },
+        {
           linkType: 'discuss',
           href: 'https://discuss.elastic.co/c/siem',
         },
