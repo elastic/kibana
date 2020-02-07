@@ -67,7 +67,7 @@ export interface GlobalState {
 }
 
 export type AlertListData = AlertResultList;
-export type AlertListState = AlertResultList;
+export type AlertListState = AlertResultList & { url: string };
 export type CreateStructuredSelector = <
   SelectorMap extends { [key: string]: (...args: never[]) => unknown }
 >(

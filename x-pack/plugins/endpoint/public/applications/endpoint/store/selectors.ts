@@ -17,9 +17,14 @@ export const alertListPagination = composeSelectors(
   alertListSelectors.alertListPagination
 );
 
-export const paginationDataFromUrl = composeSelectors(
+export const urlFromNewPageSizeParam = composeSelectors(
   alertListStateSelector,
-  alertListSelectors.paginationDataFromUrl
+  alertListSelectors.urlFromNewPageSizeParam
+);
+
+export const urlFromNewPageIndexParam = composeSelectors(
+  alertListStateSelector,
+  alertListSelectors.urlFromNewPageIndexParam
 );
 
 /**
