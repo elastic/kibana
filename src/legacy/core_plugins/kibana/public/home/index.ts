@@ -20,9 +20,9 @@
 import { FeatureCatalogueRegistryProvider } from 'ui/registry/feature_catalogue';
 import { npSetup, npStart } from 'ui/new_platform';
 import chrome from 'ui/chrome';
-import { IPrivate } from 'ui/private';
 import { HomePlugin, LegacyAngularInjectedDependencies } from './plugin';
 import { TelemetryOptInProvider } from '../../../telemetry/public/services';
+import { IPrivate } from '../../../../../plugins/kibana_legacy/public';
 
 /**
  * Get dependencies relying on the global angular context.

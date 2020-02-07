@@ -20,7 +20,6 @@
 // Disable lint errors for imports from src/core/server/saved_objects until SavedObjects migration is complete
 /* eslint-disable @kbn/eslint/no-restricted-paths */
 import { SavedObjectsSchema } from '../../../core/server/saved_objects/schema';
-import { SavedObjectsSerializer } from '../../../core/server/saved_objects/serialization';
 import {
   SavedObjectsClient,
   SavedObjectsRepository,
@@ -29,6 +28,7 @@ import {
   resolveImportErrors,
 } from '../../../core/server/saved_objects';
 import { getRootPropertiesObjects } from '../../../core/server/saved_objects/mappings';
+import { convertTypesToLegacySchema } from '../../../core/server/saved_objects/utils';
 import { SavedObjectsManagement } from '../../../core/server/saved_objects/management';
 
 import {
@@ -57,9 +57,10 @@ function getImportableAndExportableTypes({ kbnServer, visibleTypes }) {
 
 export function savedObjectsMixin(kbnServer, server) {
   const migrator = kbnServer.newPlatform.__internals.kibanaMigrator;
+  const typeRegistry = kbnServer.newPlatform.__internals.typeRegistry;
   const mappings = migrator.getActiveMappings();
   const allTypes = Object.keys(getRootPropertiesObjects(mappings));
-  const schema = new SavedObjectsSchema(kbnServer.uiExports.savedObjectSchemas);
+  const schema = new SavedObjectsSchema(convertTypesToLegacySchema(typeRegistry.getAllTypes()));
   const visibleTypes = allTypes.filter(type => !schema.isHiddenType(type));
   const importableAndExportableTypes = getImportableAndExportableTypes({ kbnServer, visibleTypes });
 
@@ -99,7 +100,7 @@ export function savedObjectsMixin(kbnServer, server) {
   server.route(createResolveImportErrorsRoute(prereqs, server, importableAndExportableTypes));
   server.route(createLogLegacyImportRoute());
 
-  const serializer = new SavedObjectsSerializer(schema);
+  const serializer = kbnServer.newPlatform.start.core.savedObjects.createSerializer();
 
   const createRepository = (callCluster, extraTypes = []) => {
     if (typeof callCluster !== 'function') {
@@ -118,10 +119,9 @@ export function savedObjectsMixin(kbnServer, server) {
 
     return new SavedObjectsRepository({
       index: config.get('kibana.index'),
-      config,
       migrator,
       mappings,
-      schema,
+      typeRegistry,
       serializer,
       allowedTypes,
       callCluster,

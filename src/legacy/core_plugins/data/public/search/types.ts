@@ -17,4 +17,5 @@
  * under the License.
  */
 
+export * from './aggs/types';
 export * from './utils/types';
