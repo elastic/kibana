@@ -5,8 +5,15 @@
  */
 
 import ApolloClient from 'apollo-client';
+import * as H from 'history';
 import { ActionCreator } from 'typescript-fsa';
-import { IIndexPattern, Query, esFilters } from 'src/plugins/data/public';
+import {
+  IIndexPattern,
+  Query,
+  esFilters,
+  FilterManager,
+  SavedQueryService,
+} from 'src/plugins/data/public';
 
 import { UrlInputsModel } from '../../store/inputs/model';
 import { RouteSpyState } from '../../utils/route/types';
@@ -109,6 +116,7 @@ export type UrlStateContainerPropTypes = RouteSpyState &
 
 export interface PreviousLocationUrlState {
   pathName: string | undefined;
+  pageName: string | undefined;
   urlState: UrlState;
 }
 
@@ -120,8 +128,10 @@ export interface UrlStateToRedux {
 export interface SetInitialStateFromUrl<TCache> {
   apolloClient: ApolloClient<TCache> | ApolloClient<{}> | undefined;
   detailName: string | undefined;
+  filterManager: FilterManager;
   indexPattern: IIndexPattern | undefined;
   pageName: string;
+  savedQueries: SavedQueryService;
   updateTimeline: DispatchUpdateTimeline;
   updateTimelineIsLoading: ActionCreator<UpdateTimelineIsLoading>;
   urlStateToUpdate: UrlStateToRedux[];
@@ -136,3 +146,21 @@ export type DispatchSetInitialStateFromUrl = <TCache>({
   updateTimelineIsLoading,
   urlStateToUpdate,
 }: SetInitialStateFromUrl<TCache>) => () => void;
+
+export interface ReplaceStateInLocation<T> {
+  history?: H.History;
+  urlStateToReplace: T;
+  urlStateKey: string;
+  pathName: string;
+  search: string;
+}
+
+export interface UpdateUrlStateString {
+  isInitializing: boolean;
+  history?: H.History;
+  newUrlStateString: string;
+  pathName: string;
+  search: string;
+  updateTimerange: boolean;
+  urlKey: KeyUrlState;
+}
