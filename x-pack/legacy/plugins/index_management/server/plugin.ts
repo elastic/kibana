@@ -10,6 +10,7 @@ import { PLUGIN } from '../common';
 import { Dependencies } from './types';
 import { ApiRoutes } from './routes';
 import { License, IndexDataEnricher } from './services';
+import { isEsError } from './lib/is_es_error';
 
 export interface IndexMgmtSetup {
   indexDataEnricher: {
@@ -51,6 +52,9 @@ export class IndexMgmtServerPlugin implements Plugin<IndexMgmtSetup, void, any, 
       router,
       license: this.license,
       indexDataEnricher: this.indexDataEnricher,
+      lib: {
+        isEsError,
+      },
     });
 
     return {
