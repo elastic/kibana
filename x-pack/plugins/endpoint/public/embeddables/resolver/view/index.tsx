@@ -5,24 +5,14 @@
  */
 
 import React from 'react';
-import { Provider, useSelector } from 'react-redux';
-import { Store } from 'redux';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 import * as selectors from '../store/selectors';
-import { ResolverAction, ResolverState } from '../types';
 import { EdgeLine } from './edge_line';
 import { Panel } from './panel';
 import { GraphControls } from './graph_controls';
 import { ProcessEventDot } from './process_event_dot';
 import { useCamera } from './use_camera';
-
-export const AppRoot = React.memo(({ store }: { store: Store<ResolverState, ResolverAction> }) => {
-  return (
-    <Provider store={store}>
-      <Resolver />
-    </Provider>
-  );
-});
 
 const StyledPanel = styled(Panel)`
   position: absolute;
@@ -40,7 +30,7 @@ const StyledGraphControls = styled(GraphControls)`
   right: 5px;
 `;
 
-const Resolver = styled(
+export const Resolver = styled(
   React.memo(function Resolver({ className }: { className?: string }) {
     const { processNodePositions, edgeLineSegments } = useSelector(
       selectors.processNodePositionsAndEdgeLineSegments

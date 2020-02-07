@@ -27,8 +27,8 @@ interface ClippingPlanes {
   clippingPlaneBottom: number;
 }
 
-function animationIsActive(animation: CameraAnimationState, time: Date): boolean {
-  return animation.startTime.getTime() + animation.duration >= time.getTime();
+function animationIsActive(animation: CameraAnimationState, time: number): boolean {
+  return animation.startTime + animation.duration >= time;
 }
 
 /**
@@ -62,7 +62,7 @@ function animationIsActive(animation: CameraAnimationState, time: Date): boolean
  *   we calculate a temporary target scale and animate to it.
  *
  */
-export const scale: (state: CameraState) => (time: Date) => Vector2 = createSelector(
+export const scale: (state: CameraState) => (time: number) => Vector2 = createSelector(
   state => state.scalingFactor,
   state => state.animation,
   (scalingFactor, animation) => {
@@ -274,10 +274,10 @@ export const scale: (state: CameraState) => (time: Date) => Vector2 = createSele
  */
 export const clippingPlanes: (
   state: CameraState
-) => (time: Date) => ClippingPlanes = createSelector(
+) => (time: number) => ClippingPlanes = createSelector(
   state => state.rasterSize,
   scale,
-  (rasterSize, scaleAtTime) => (time: Date) => {
+  (rasterSize, scaleAtTime) => (time: number) => {
     const [scaleX, scaleY] = scaleAtTime(time);
     const renderWidth = rasterSize[0];
     const renderHeight = rasterSize[1];
@@ -298,7 +298,7 @@ export const clippingPlanes: (
 /**
  * Whether or not the camera is animating, at a given time.
  */
-export const isAnimating: (state: CameraState) => (time: Date) => boolean = createSelector(
+export const isAnimating: (state: CameraState) => (time: number) => boolean = createSelector(
   state => state.animation,
   animation => time => {
     return animation !== undefined && animationIsActive(animation, time);
@@ -317,13 +317,13 @@ export const isAnimating: (state: CameraState) => (time: Date) => boolean = crea
  *
  * We could update the translation as the user moved the mouse but floating point drift (round-off error) could occur.
  */
-export const translation: (state: CameraState) => (time: Date) => Vector2 = createSelector(
+export const translation: (state: CameraState) => (time: number) => Vector2 = createSelector(
   state => state.panning,
   state => state.translationNotCountingCurrentPanning,
   scale,
   state => state.animation,
   (panning, translationNotCountingCurrentPanning, scaleAtTime, animation) => {
-    return (time: Date) => {
+    return (time: number) => {
       const [scaleX, scaleY] = scaleAtTime(time);
       if (animation !== undefined && animationIsActive(animation, time)) {
         return vector2.lerp(
@@ -353,11 +353,11 @@ export const translation: (state: CameraState) => (time: Date) => Vector2 = crea
  */
 export const inverseProjectionMatrix: (
   state: CameraState
-) => (time: Date) => Matrix3 = createSelector(
+) => (time: number) => Matrix3 = createSelector(
   clippingPlanes,
   translation,
   (clippingPlanesAtTime, translationAtTime) => {
-    return (time: Date) => {
+    return (time: number) => {
       const {
         renderWidth,
         renderHeight,
@@ -411,11 +411,11 @@ export const inverseProjectionMatrix: (
 /**
  * The viewable area in the Resolver map, in world coordinates.
  */
-export const viewableBoundingBox: (state: CameraState) => (time: Date) => AABB = createSelector(
+export const viewableBoundingBox: (state: CameraState) => (time: number) => AABB = createSelector(
   clippingPlanes,
   inverseProjectionMatrix,
   (clippingPlanesAtTime, matrixAtTime) => {
-    return (time: Date) => {
+    return (time: number) => {
       const { renderWidth, renderHeight } = clippingPlanesAtTime(time);
       const matrix = matrixAtTime(time);
       const bottomLeftCorner: Vector2 = [0, renderHeight];
@@ -432,11 +432,11 @@ export const viewableBoundingBox: (state: CameraState) => (time: Date) => AABB =
  * A matrix that when applied to a Vector2 will convert it from world coordinates to screen coordinates.
  * See https://en.wikipedia.org/wiki/Orthographic_projection
  */
-export const projectionMatrix: (state: CameraState) => (time: Date) => Matrix3 = createSelector(
+export const projectionMatrix: (state: CameraState) => (time: number) => Matrix3 = createSelector(
   clippingPlanes,
   translation,
   (clippingPlanesAtTime, translationAtTime) => {
-    return defaultMemoize((time: Date) => {
+    return defaultMemoize((time: number) => {
       const {
         renderWidth,
         renderHeight,
@@ -515,6 +515,6 @@ export const userIsPanning = (state: CameraState): boolean => state.panning !== 
  * 0 meaning it just started,
  * 1 meaning it is done.
  */
-function animationProgress(animation: CameraAnimationState, time: Date): number {
-  return clamp((time.getTime() - animation.startTime.getTime()) / animation.duration, 0, 1);
+function animationProgress(animation: CameraAnimationState, time: number): number {
+  return clamp((time - animation.startTime) / animation.duration, 0, 1);
 }

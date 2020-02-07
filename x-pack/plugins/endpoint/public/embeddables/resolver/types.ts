@@ -25,7 +25,7 @@ export interface CameraAnimationState {
   /**
    * The time when the animation began.
    */
-  readonly startTime: Date;
+  readonly startTime: number;
   /**
    * The final translation when the animation is complete.
    */
@@ -231,3 +231,11 @@ export type ProcessWithWidthMetadata = {
       firstChildWidth: null;
     }
 );
+
+export interface SideEffects {
+  /**
+   * A function which returns the time since epoch in milliseconds. Injected because mocking Date is tedious.
+   */
+  timestamp: () => number;
+  requestAnimationFrame: typeof window.requestAnimationFrame;
+}

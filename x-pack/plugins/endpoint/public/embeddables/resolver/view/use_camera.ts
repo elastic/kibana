@@ -3,9 +3,17 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useCallback, useState, useEffect, useRef, useLayoutEffect } from 'react';
+import React, {
+  useCallback,
+  useState,
+  useEffect,
+  useRef,
+  useLayoutEffect,
+  useContext,
+} from 'react';
 import { useSelector } from 'react-redux';
 import ResizeObserver from 'resize-observer-polyfill';
+import { SideEffectContext } from './side_effect_context';
 import { Matrix3 } from '../types';
 import { useResolverDispatch } from './use_resolver_dispatch';
 import * as selectors from '../store/selectors';
@@ -24,6 +32,7 @@ export function useCamera(): {
   projectionMatrix: Matrix3;
 } {
   const dispatch = useResolverDispatch();
+  const { timestamp: timestamp } = useContext(SideEffectContext);
 
   const [ref, setRef] = useState<null | HTMLDivElement>(null);
 
@@ -50,7 +59,7 @@ export function useCamera(): {
    * When the projection matrix changes, the component should be rerendered.
    */
   const [projectionMatrix, setProjectionMatrix] = useState<Matrix3>(
-    projectionMatrixAtTime(new Date())
+    projectionMatrixAtTime(timestamp())
   );
 
   const userIsPanning = useSelector(selectors.userIsPanning);
@@ -80,7 +89,7 @@ export function useCamera(): {
       if (maybeCoordinates !== null) {
         dispatch({
           type: 'userStartedPanning',
-          payload: { screenCoordinates: maybeCoordinates, time: new Date() },
+          payload: { screenCoordinates: maybeCoordinates, time: event.timeStamp },
         });
       }
     },
@@ -95,12 +104,12 @@ export function useCamera(): {
           type: 'userMovedPointer',
           payload: {
             screenCoordinates: maybeCoordinates,
-            time: new Date(),
+            time: timestamp(),
           },
         });
       }
     },
-    [dispatch, relativeCoordinatesFromMouseEvent]
+    [dispatch, relativeCoordinatesFromMouseEvent, timestamp]
   );
 
   const handleMouseUp = useCallback(() => {
@@ -108,11 +117,11 @@ export function useCamera(): {
       dispatch({
         type: 'userStoppedPanning',
         payload: {
-          time: new Date(),
+          time: timestamp(),
         },
       });
     }
-  }, [dispatch, userIsPanning]);
+  }, [dispatch, timestamp, userIsPanning]);
 
   const handleWheel = useCallback(
     (event: WheelEvent) => {
@@ -131,12 +140,12 @@ export function useCamera(): {
              * when pinch-zooming in on a mac, deltaY is a negative number but we want the payload to be positive
              */
             zoomChange: event.deltaY / -elementBoundingClientRect.height,
-            time: new Date(),
+            time: timestamp(),
           },
         });
       }
     },
-    [elementBoundingClientRect, dispatch]
+    [elementBoundingClientRect, dispatch, timestamp]
   );
 
   const refCallback = useCallback(
@@ -189,15 +198,15 @@ export function useCamera(): {
    * This isn't needed during animation.
    */
   useLayoutEffect(() => {
-    setProjectionMatrix(projectionMatrixAtTime(new Date()));
-  }, [projectionMatrixAtTime]);
+    setProjectionMatrix(projectionMatrixAtTime(timestamp()));
+  }, [projectionMatrixAtTime, timestamp]);
 
   useLayoutEffect(() => {
-    const startDate = new Date();
+    const startDate = timestamp();
     if (isAnimatingAtTime(startDate)) {
       let rafRef: null | number = null;
       const handleFrame = () => {
-        const date = new Date();
+        const date = timestamp();
         if (projectionMatrixAtTimeRef.current !== undefined) {
           setProjectionMatrix(projectionMatrixAtTimeRef.current(date));
         }
@@ -214,7 +223,7 @@ export function useCamera(): {
         }
       };
     }
-  }, [isAnimatingAtTime]);
+  }, [isAnimatingAtTime, timestamp]);
 
   useEffect(() => {
     if (elementBoundingClientRect !== null) {

@@ -7,7 +7,7 @@
 /**
  * This import must be hoisted as it uses `jest.mock`. Is there a better way? Mocking is not good.
  */
-import { setup, clear, simulateElementResize } from './testing_simulator';
+import { setup as simulatorSetup, clear, simulateElementResize } from './testing_simulator';
 import React from 'react';
 import { render, act } from '@testing-library/react';
 import { useCamera } from './use_camera';
@@ -18,8 +18,8 @@ import { Matrix3 } from '../types';
 describe('useCamera on an unpainted element', () => {
   let element: HTMLElement;
   let projectionMatrix: Matrix3;
-  beforeEach(async () => {
-    setup(Element, window);
+  const setup = async () => {
+    simulatorSetup(Element, window);
 
     const testID = 'camera';
 
@@ -39,11 +39,16 @@ describe('useCamera on an unpainted element', () => {
     );
     element = await findByTestId(testID);
     expect(element).toBeInTheDocument();
+  };
+  beforeEach(async () => {
+    // TODO cant use this, it squashes error and still runs the test.
+    // jest is a very bad library
   });
   afterEach(() => {
     clear();
   });
   test('returns a projectionMatrix that changes everything to 0', async () => {
+    await setup();
     expect(projectionMatrix).toMatchInlineSnapshot(`
       Array [
         0,
@@ -57,9 +62,11 @@ describe('useCamera on an unpainted element', () => {
         0,
       ]
     `);
+    throw new Error('you cant be right now');
   });
   describe('which has been resize to 800x400', () => {
-    beforeEach(() => {
+    test('provides a projection matrix', async () => {
+      await setup();
       act(() => {
         simulateElementResize(element, {
           width: 800,
@@ -75,8 +82,6 @@ describe('useCamera on an unpainted element', () => {
           },
         });
       });
-    });
-    test('provides a projection matrix', async () => {
       expect(projectionMatrix).toMatchInlineSnapshot(`
         Array [
           1,

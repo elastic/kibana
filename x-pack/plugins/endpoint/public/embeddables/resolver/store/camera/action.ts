@@ -6,6 +6,13 @@
 
 import { Vector2 } from '../../types';
 
+interface TimestampedPayload {
+  /**
+   * Time (since epoch in milliseconds) when this action was dispatched.
+   */
+  readonly time: number;
+}
+
 interface UserSetZoomLevel {
   readonly type: 'userSetZoomLevel';
   /**
@@ -30,11 +37,7 @@ interface UserZoomed {
      * pass `event.deltaY / -renderHeight` where `renderHeight` is the height of the Resolver element in pixels.
      */
     readonly zoomChange: number;
-    /**
-     * Time when this action was dispatched.
-     */
-    readonly time: Date;
-  };
+  } & TimestampedPayload;
 }
 
 interface UserSetRasterSize {
@@ -66,23 +69,13 @@ interface UserStartedPanning {
      * Represents a starting position during panning for a pointing device.
      */
     readonly screenCoordinates: Vector2;
-
-    /**
-     * Time when this action was dispatched.
-     */
-    readonly time: Date;
-  };
+  } & TimestampedPayload;
 }
 
 interface UserStoppedPanning {
   readonly type: 'userStoppedPanning';
 
-  readonly payload: {
-    /**
-     * Time when this action was dispatched.
-     */
-    readonly time: Date;
-  };
+  readonly payload: TimestampedPayload;
 }
 
 interface UserNudgedCamera {
@@ -95,12 +88,7 @@ interface UserNudgedCamera {
      * A cardinal direction to move the users perspective in.
      */
     readonly direction: Vector2;
-
-    /**
-     * Time when this action was dispatched.
-     */
-    readonly time: Date;
-  };
+  } & TimestampedPayload;
 }
 
 interface UserMovedPointer {
@@ -111,11 +99,7 @@ interface UserMovedPointer {
      * The payload should be contain clientX and clientY minus the client position of the Resolver component.
      */
     screenCoordinates: Vector2;
-    /**
-     * Time when this action was dispatched.
-     */
-    time: Date;
-  };
+  } & TimestampedPayload;
 }
 
 export type CameraAction =

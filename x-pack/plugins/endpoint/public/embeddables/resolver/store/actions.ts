@@ -18,9 +18,9 @@ interface UserBroughtProcessIntoView {
      */
     readonly process: ProcessEvent;
     /**
-     * The time when the action was dispatched.
+     * The time (since epoch in milliseconds) when the action was dispatched.
      */
-    readonly time: Date;
+    readonly time: number;
   };
 }
 

@@ -143,6 +143,8 @@ const mockGetBoundingClientRectImplementation = jest
     };
   });
 
+let RealDate: DateConstructor | undefined;
+
 // TODO, am i cleaning this up correctly? mockClear, mockReset? mockRestore?
 export const setup: (
   ElementConstructor: typeof Element,
@@ -155,6 +157,21 @@ export const setup: (
   jest.spyOn(window, 'requestAnimationFrame').mockImplementation(mockRequestAnimationFrame);
 
   jest.spyOn(window, 'cancelAnimationFrame').mockImplementation(mockCancelAnimationFrame);
+
+  RealDate = Date;
+
+  function FakeDate(...args) {
+    if (new.target) {
+      return new RealDate(...args);
+    } else {
+      return RealDate(...args);
+    }
+  }
+
+  Object.assign(FakeDate, RealDate);
+  console.log(typeof Date.now);
+
+  window.Date = FakeDate;
 };
 
 let MockResizeObserver: jest.Mock<ResizeObserver, [ResizeObserverCallback]> | null;
@@ -170,6 +187,7 @@ export const clear: () => void = () => {
   mockGetBoundingClientRectImplementation.mockClear();
   mockRequestAnimationFrame.mockClear();
   mockCancelAnimationFrame.mockClear();
+  window.Date = RealDate;
 };
 
 export const animate: (timestamp: number) => void = timestamp => {
