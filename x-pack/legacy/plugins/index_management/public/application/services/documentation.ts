@@ -12,7 +12,7 @@ class DocumentationService {
   private esDocsBase: string = '';
   private kibanaDocsBase: string = '';
 
-  public init(docLinks: DocLinksStart): void {
+  public setup(docLinks: DocLinksStart): void {
     const { DOC_LINK_VERSION, ELASTIC_WEBSITE_URL } = docLinks;
     const docsBase = `${ELASTIC_WEBSITE_URL}guide/en`;
 

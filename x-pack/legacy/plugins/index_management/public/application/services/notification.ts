@@ -9,8 +9,8 @@ import { NotificationsStart } from '../../../../../../../src/core/public';
 class NotificationService {
   private _toasts: any;
 
-  public init(notifications: NotificationsStart): void {
-    this._toasts = notifications.toasts;
+  public setup(notifications: NotificationsStart): void {
+    this.toasts = notifications.toasts;
   }
 
   public get toasts() {
