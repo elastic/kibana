@@ -43,6 +43,7 @@ import {
   NavigationPublicPluginSetup,
   NavigationPublicPluginStart,
 } from '../../../../plugins/navigation/public';
+import { VisTypeVegaSetup } from '../../../../plugins/vis_type_vega/public';
 
 export interface PluginsSetup {
   bfetch: BfetchPublicSetup;
@@ -60,6 +61,7 @@ export interface PluginsSetup {
   usageCollection: UsageCollectionSetup;
   advancedSettings: AdvancedSettingsSetup;
   management: ManagementSetup;
+  visTypeVega: VisTypeVegaSetup;
 }
 
 export interface PluginsStart {

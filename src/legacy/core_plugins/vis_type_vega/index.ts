@@ -43,11 +43,6 @@ const vegaPluginInitializer: LegacyPluginInitializer = ({ Plugin }: LegacyPlugin
       },
     },
     init: (server: Legacy.Server) => ({}),
-    config(Joi: any) {
-      return Joi.object({
-        enabled: Joi.boolean().default(true),
-      }).default();
-    },
   } as Legacy.PluginSpecOptions);
 
 // eslint-disable-next-line import/no-default-export

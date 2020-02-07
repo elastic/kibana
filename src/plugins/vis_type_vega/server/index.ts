@@ -27,6 +27,12 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
   },
   schema: configSchema,
   deprecations: ({ renameFromRoot }) => [
-    renameFromRoot('vega.enableExternalUrls', 'vis_tye_vega.enableExternalUrls'),
+    renameFromRoot('vega.enableExternalUrls', 'vis_type_vega.enableExternalUrls'),
+    renameFromRoot('vega.enabled', 'vis_type_vega.enabled'),
   ],
 };
+
+export const plugin = () => ({
+  setup() {},
+  start() {},
+});
