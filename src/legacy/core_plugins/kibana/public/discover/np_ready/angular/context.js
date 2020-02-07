@@ -20,13 +20,10 @@
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { getAngularModule, getServices, subscribeWithScope } from '../../kibana_services';
-
 import './context_app';
 import { getAppState } from './context_state';
 import contextAppRouteTemplate from './context.html';
 import { getRootBreadcrumbs } from '../helpers/breadcrumbs';
-import { FilterStateManager } from '../../../../../data/public';
-const { chrome } = getServices();
 
 const k7Breadcrumbs = $route => {
   const { indexPattern } = $route.current.locals;
@@ -69,19 +66,27 @@ getAngularModule().config($routeProvider => {
     });
 });
 
-function ContextAppRouteController($routeParams, $scope, config, $route, globalState) {
+function ContextAppRouteController($routeParams, $scope, config, $route) {
   const filterManager = getServices().filterManager;
   const indexPattern = $route.current.locals.indexPattern.ip;
-  const { start, stateContainer, initialState } = getAppState(
+  const { start, stop, stateContainer, initialState } = getAppState(
     config.get('context:defaultSize'),
     indexPattern.timeFieldName
   );
   this.state = _.cloneDeep(initialState);
-  const filterStateManager = new FilterStateManager(globalState, () => ({}), filterManager);
-
+  this.filters = this.state.filters;
   start();
-  stateContainer.subscribe(state => {
-    this.state = { ...this.state, ...state };
+  const updateState = newStateVars => {
+    const newState = _.cloneDeep({ ...this.state, ...newStateVars });
+    if (!_.isEqual(this.state, newState)) {
+      this.state = newState;
+      this.filters = this.state.filters;
+    }
+    return this.state;
+  };
+
+  stateContainer.subscribe(newState => {
+    updateState(newState);
   });
 
   $scope.$watchGroup(
@@ -90,24 +95,27 @@ function ContextAppRouteController($routeParams, $scope, config, $route, globalS
       'contextAppRoute.state.predecessorCount',
       'contextAppRoute.state.successorCount',
     ],
-    res => {
-      stateContainer.set({ columns: res[0], predecessorCount: res[1], successorCount: res[2] });
+    newValues => {
+      const [columns, predecessorCount, successorCount] = newValues;
+      stateContainer.set({
+        ...this.state,
+        ...{ columns, predecessorCount, successorCount },
+      });
     }
   );
 
-  const updateSubsciption = subscribeWithScope($scope, filterManager.getUpdates$(), {
+  const updateSubscription = subscribeWithScope($scope, filterManager.getUpdates$(), {
     next: () => {
-      this.filters = _.cloneDeep(filterManager.getFilters());
+      const newState = updateState({ filters: filterManager.getFilters() });
+      stateContainer.set(newState);
     },
   });
 
   $scope.$on('$destroy', () => {
-    filterStateManager.destroy();
-    updateSubsciption.unsubscribe();
-    //stop();
+    updateSubscription.unsubscribe();
+    stop();
   });
   this.anchorId = $routeParams.id;
   this.indexPattern = indexPattern;
-  this.discoverUrl = chrome.navLinks.get('kibana:discover').url;
-  this.filters = _.cloneDeep(filterManager.getFilters());
+  this.discoverUrl = getServices().chrome.navLinks.get('kibana:discover').url;
 }
