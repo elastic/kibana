@@ -5,6 +5,7 @@
  */
 
 import KbnServer from 'src/legacy/server/kbn_server';
+import { ElasticsearchPlugin } from 'src/legacy/core_plugins/elasticsearch';
 import { SecurityPluginSetup as SecurityPlugin } from '../../../../plugins/security/server';
 import {
   outputService as IngestOutputLib,
@@ -24,6 +25,7 @@ export interface FleetPluginsStart {
   security: SecurityPluginStartContract;
   ingest: IngestPluginStartContract;
   encryptedSavedObjects: EncryptedSavedObjectsStartContract;
+  elasticsearch: ElasticsearchPlugin;
 }
 
 export interface FleetPluginsSetup {
@@ -36,6 +38,7 @@ export type SecurityPluginStartContract = Pick<SecurityPlugin, 'authc'>;
 export function shim(server: any) {
   const newPlatform = ((server as unknown) as KbnServer).newPlatform;
   const pluginsStart: FleetPluginsStart = {
+    elasticsearch: server.plugins.elasticsearch,
     security: newPlatform.setup.plugins.security as SecurityPluginStartContract,
     ingest: {
       outputs: IngestOutputLib,

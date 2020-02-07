@@ -265,9 +265,14 @@ export class ApiKeyLib {
       throw new Error('Invalid user');
     }
 
-    const res = await this.pluginsStart.security.authc.isAuthenticated(user[internalAuthData]);
+    const { callWithRequest } = this.pluginsStart.elasticsearch.getCluster('admin');
 
-    if (!res) {
+    try {
+      await callWithRequest(user[internalAuthData], 'transport.request', {
+        path: '/_security/_authenticate',
+        method: 'GET',
+      });
+    } catch (e) {
       throw new Error('ApiKey is not valid: impossible to authicate user');
     }
   }
