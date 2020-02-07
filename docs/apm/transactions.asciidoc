@@ -104,14 +104,14 @@ image::apm/images/apm-transaction-duration-dist.png[Example view of transactions
 
 Let's look at an example.
 In the screenshot below,
-you'll notice we're looking at the first of ten trace samples.
-Most of the requests in this first sample fall into buckets on the left side of the graph,
+you'll notice most of the requests fall into buckets on the left side of the graph,
 with a long tail of smaller buckets to the right.
 This is a typical distribution, and indicates most of our requests were served quickly - awesome!
 It's the requests on the right, the ones taking longer than average, that we probably want to focus on.
-By clicking on these buckets,
-we're presented with a span timeline waterfall showing what a typical request in that bucket was doing.
-By investigating this timeline waterfall, we can hopefully see why it was slow and then implement a fix.
+When you select one of these buckets,
+you're presented with up to ten trace samples.
+Each sample has a span timeline waterfall that shows what a typical request in that bucket was doing.
+By investigating this timeline waterfall, we can hopefully determine _why_ this request was slow and then implement a fix.
 
 [role="screenshot"]
 image::apm/images/apm-transaction-sample.png[Example view of transactions sample]
