@@ -11,10 +11,12 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
   const spacesService = getService('spaces');
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
+  const esArchiver = getService('esArchiver');
 
   describe('spaces', () => {
     describe('space with no features disabled', () => {
       before(async () => {
+        await esArchiver.load('endpoint/endpoints/api_feature');
         await spacesService.create({
           id: 'custom_space',
           name: 'custom_space',
@@ -42,13 +44,22 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       // refactor this test
-      it.skip(`endpoint management shows 'Manage Endpoints'`, async () => {
+      it(`endpoint management shows 'Manage Endpoints'`, async () => {
         await pageObjects.common.navigateToUrlWithBrowserHistory('endpoint', '/management', {
           basePath: '/s/custom_space',
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await testSubjects.existOrFail('endpointManagement');
+        await testSubjects.existOrFail('managementViewTitle');
+      });
+
+      it(`endpoint management shows table with data`, async () => {
+        await pageObjects.common.navigateToUrlWithBrowserHistory('endpoint', '/management', {
+          basePath: '/s/custom_space',
+          ensureCurrentUrl: false,
+          shouldLoginIfPrompted: false,
+        });
+        await testSubjects.existOrFail('managementListTable');
       });
     });
 
