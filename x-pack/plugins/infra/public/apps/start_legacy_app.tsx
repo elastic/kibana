@@ -15,7 +15,7 @@ import { EuiErrorBoundary } from '@elastic/eui';
 
 // This exists purely to facilitate legacy app/infra URL redirects.
 // It will be removed in 8.0.0.
-export async function startLegacyApp(plugins: object, params: AppMountParameters) {
+export async function startLegacyApp(params: AppMountParameters) {
   const { element } = params;
   const history = createBrowserHistory();
 

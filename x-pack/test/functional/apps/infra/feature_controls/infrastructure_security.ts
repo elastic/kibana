@@ -423,23 +423,9 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         expect(navLinks).to.not.contain(['Metrics']);
       });
 
-      it(`infrastructure home page renders not found page`, async () => {
-        await PageObjects.common.navigateToUrlWithBrowserHistory('infraOps', '', undefined, {
-          ensureCurrentUrl: false,
-          shouldLoginIfPrompted: false,
-        });
-        await testSubjects.existOrFail('~infraNotFoundPage');
-      });
-
-      it(`infrastructure landing page renders not found page`, async () => {
-        await PageObjects.common.navigateToUrlWithBrowserHistory('infraOps', '', undefined, {
-          ensureCurrentUrl: false,
-          shouldLoginIfPrompted: false,
-        });
-        await testSubjects.existOrFail('~infraNotFoundPage');
-      });
-
-      it(`infrastructure snapshot page renders not found page`, async () => {
+      it(`metrics app is inaccessible and Application Not Found message is rendered`, async () => {
+        await PageObjects.common.navigateToApp('infraOps');
+        await testSubjects.existOrFail('~appNotFoundPageContent');
         await PageObjects.common.navigateToUrlWithBrowserHistory(
           'infraOps',
           '/inventory',
@@ -449,20 +435,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
             shouldLoginIfPrompted: false,
           }
         );
-        await testSubjects.existOrFail('~infraNotFoundPage');
-      });
-
-      it(`metrics page renders not found page`, async () => {
-        await PageObjects.common.navigateToUrlWithBrowserHistory(
-          'infraOps',
-          '/detail/host/demo-stack-redis-01',
-          undefined,
-          {
-            ensureCurrentUrl: false,
-            shouldLoginIfPrompted: false,
-          }
-        );
-        await testSubjects.existOrFail('~infraNotFoundPage');
+        await testSubjects.existOrFail('~appNotFoundPageContent');
       });
     });
   });

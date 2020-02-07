@@ -5,7 +5,6 @@
  */
 
 import { EuiLink, EuiLinkAnchorProps } from '@elastic/eui';
-import { compact } from 'lodash';
 import React from 'react';
 import url from 'url';
 import { fromQuery } from './url_helpers';

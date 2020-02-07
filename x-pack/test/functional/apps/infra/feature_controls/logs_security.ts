@@ -187,12 +187,19 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         expect(navLinks).to.not.contain('Logs');
       });
 
-      it('logs landing page renders not found page', async () => {
-        await PageObjects.common.navigateToUrlWithBrowserHistory('infraLogs', '', undefined, {
-          ensureCurrentUrl: true,
-          shouldLoginIfPrompted: false,
-        });
-        await testSubjects.existOrFail('~infraNotFoundPage');
+      it(`logs app is inaccessible and Application Not Found message is rendered`, async () => {
+        await PageObjects.common.navigateToApp('infraLogs');
+        await testSubjects.existOrFail('~appNotFoundPageContent');
+        await PageObjects.common.navigateToUrlWithBrowserHistory(
+          'infraLogs',
+          '/stream',
+          undefined,
+          {
+            ensureCurrentUrl: false,
+            shouldLoginIfPrompted: false,
+          }
+        );
+        await testSubjects.existOrFail('~appNotFoundPageContent');
       });
     });
   });

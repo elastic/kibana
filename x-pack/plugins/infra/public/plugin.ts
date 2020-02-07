@@ -99,10 +99,8 @@ export class Plugin
       title: 'infra',
       navLinkStatus: 3,
       mount: async (params: AppMountParameters) => {
-        const [coreStart, pluginsStart] = await core.getStartServices();
-        const plugins = getMergedPlugins(pluginsSetup, pluginsStart as ClientPluginsStart);
         const { startLegacyApp } = await import('./apps/start_legacy_app');
-        return startLegacyApp(plugins, params);
+        return startLegacyApp(params);
       },
     });
   }
