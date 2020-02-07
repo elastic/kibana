@@ -4,9 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createMockServer } from '../__mocks__/_mock_server';
-import { createRulesRoute } from './create_rules_route';
 import { ServerInjectOptions } from 'hapi';
+import { omit } from 'lodash/fp';
+
+import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
+import { createRulesRoute } from './create_rules_route';
 
 import {
   getFindResult,
@@ -18,58 +20,53 @@ import {
   getNonEmptyIndex,
   getEmptyIndex,
 } from '../__mocks__/request_responses';
-import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
+import { createMockServer } from '../__mocks__/_mock_server';
+import { createMockConfig } from '../__mocks__/_mock_config';
+import { createMockClients } from '../__mocks__/_mock_clients';
 
 describe('create_rules', () => {
-  let {
-    services,
-    inject,
-    alertsClient,
-    actionsClient,
-    callClusterMock,
-    savedObjectsClient,
-  } = createMockServer();
+  let { route, inject } = createMockServer();
+  let mockConfig = createMockConfig();
+  let { getClients, clients } = createMockClients();
 
   beforeEach(() => {
     jest.resetAllMocks();
-    ({
-      services,
-      inject,
-      alertsClient,
-      actionsClient,
-      callClusterMock,
-      savedObjectsClient,
-    } = createMockServer());
-    callClusterMock.mockImplementation(getNonEmptyIndex);
-    createRulesRoute(services);
+
+    ({ route, inject } = createMockServer());
+    mockConfig = createMockConfig();
+    ({ getClients, clients } = createMockClients());
+
+    clients.clusterClient.callAsCurrentUser.mockResolvedValue(getNonEmptyIndex());
+    createRulesRoute(route, mockConfig, getClients);
   });
 
   describe('status codes with actionClient and alertClient', () => {
     test('returns 200 when creating a single rule with a valid actionClient and alertClient', async () => {
-      alertsClient.find.mockResolvedValue(getFindResult());
-      alertsClient.get.mockResolvedValue(getResult());
-      actionsClient.create.mockResolvedValue(createActionResult());
-      alertsClient.create.mockResolvedValue(getResult());
-      savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
+      clients.alertsClient.find.mockResolvedValue(getFindResult());
+      clients.alertsClient.get.mockResolvedValue(getResult());
+      clients.actionsClient.create.mockResolvedValue(createActionResult());
+      clients.alertsClient.create.mockResolvedValue(getResult());
+      clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
       const { statusCode } = await inject(getCreateRequest());
       expect(statusCode).toBe(200);
     });
 
     test('returns 404 if alertClient is not available on the route', async () => {
-      const { services: _services, inject: _inject } = createMockServer(false);
-      createRulesRoute(_services);
-      const { statusCode } = await _inject(getCreateRequest());
+      getClients.mockResolvedValue(omit('alertsClient', clients));
+      const newServer = createMockServer();
+      createRulesRoute(newServer.route, mockConfig, getClients);
+      const { statusCode } = await newServer.inject(getCreateRequest());
       expect(statusCode).toBe(404);
     });
   });
 
   describe('validation', () => {
     test('it returns a 400 if the index does not exist', async () => {
-      callClusterMock.mockImplementation(getEmptyIndex);
-      alertsClient.find.mockResolvedValue(getFindResult());
-      alertsClient.get.mockResolvedValue(getResult());
-      actionsClient.create.mockResolvedValue(createActionResult());
-      alertsClient.create.mockResolvedValue(getResult());
+      clients.clusterClient.callAsCurrentUser.mockResolvedValue(getEmptyIndex());
+      clients.alertsClient.find.mockResolvedValue(getFindResult());
+      clients.alertsClient.get.mockResolvedValue(getResult());
+      clients.actionsClient.create.mockResolvedValue(createActionResult());
+      clients.alertsClient.create.mockResolvedValue(getResult());
       const { payload } = await inject(getCreateRequest());
       expect(JSON.parse(payload)).toEqual({
         error: 'Bad Request',
@@ -79,11 +76,11 @@ describe('create_rules', () => {
     });
 
     test('returns 200 if rule_id is not given as the id is auto generated from the alert framework', async () => {
-      alertsClient.find.mockResolvedValue(getFindResult());
-      alertsClient.get.mockResolvedValue(getResult());
-      actionsClient.create.mockResolvedValue(createActionResult());
-      alertsClient.create.mockResolvedValue(getResult());
-      savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
+      clients.alertsClient.find.mockResolvedValue(getFindResult());
+      clients.alertsClient.get.mockResolvedValue(getResult());
+      clients.actionsClient.create.mockResolvedValue(createActionResult());
+      clients.alertsClient.create.mockResolvedValue(getResult());
+      clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
       // missing rule_id should return 200 as it will be auto generated if not given
       const { rule_id, ...noRuleId } = typicalPayload();
       const request: ServerInjectOptions = {
@@ -96,11 +93,11 @@ describe('create_rules', () => {
     });
 
     test('returns 200 if type is query', async () => {
-      alertsClient.find.mockResolvedValue(getFindResult());
-      alertsClient.get.mockResolvedValue(getResult());
-      actionsClient.create.mockResolvedValue(createActionResult());
-      alertsClient.create.mockResolvedValue(getResult());
-      savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
+      clients.actionsClient.create.mockResolvedValue(createActionResult());
+      clients.alertsClient.find.mockResolvedValue(getFindResult());
+      clients.alertsClient.get.mockResolvedValue(getResult());
+      clients.alertsClient.create.mockResolvedValue(getResult());
+      clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
       const { type, ...noType } = typicalPayload();
       const request: ServerInjectOptions = {
         method: 'POST',
@@ -115,11 +112,11 @@ describe('create_rules', () => {
     });
 
     test('returns 400 if type is not filter or kql', async () => {
-      alertsClient.find.mockResolvedValue(getFindResult());
-      alertsClient.get.mockResolvedValue(getResult());
-      actionsClient.create.mockResolvedValue(createActionResult());
-      alertsClient.create.mockResolvedValue(getResult());
-      savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
+      clients.actionsClient.create.mockResolvedValue(createActionResult());
+      clients.alertsClient.find.mockResolvedValue(getFindResult());
+      clients.alertsClient.get.mockResolvedValue(getResult());
+      clients.alertsClient.create.mockResolvedValue(getResult());
+      clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
       const { type, ...noType } = typicalPayload();
       const request: ServerInjectOptions = {
         method: 'POST',
