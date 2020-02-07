@@ -36,6 +36,7 @@ export {
   UpdateAgentRequestSchema,
   DeleteAgentRequestSchema,
   PostAgentCheckinRequestSchema,
+  PostAgentUnenrollRequestSchema,
   PostAgentEnrollRequestSchema,
   PostAgentAcksRequestSchema,
   // Agent config schemas

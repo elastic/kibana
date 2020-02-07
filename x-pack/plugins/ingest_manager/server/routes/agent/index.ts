@@ -20,6 +20,7 @@ import {
   PostAgentCheckinRequestSchema,
   PostAgentEnrollRequestSchema,
   PostAgentAcksRequestSchema,
+  PostAgentUnenrollRequestSchema,
 } from '../../types';
 import {
   getAgentsHandler,
@@ -30,6 +31,7 @@ import {
   postAgentCheckinHandler,
   postAgentEnrollHandler,
   postAgentAcksHandler,
+  postAgentsUnenrollHandler,
 } from './handlers';
 
 export const registerRoutes = (router: IRouter) => {
@@ -98,6 +100,15 @@ export const registerRoutes = (router: IRouter) => {
       options: { tags: [], authRequired: false },
     },
     postAgentAcksHandler
+  );
+
+  router.post(
+    {
+      path: AGENT_API_ROUTES.UNENROLL_PATTERN,
+      validate: PostAgentUnenrollRequestSchema,
+      options: { tags: [], authRequired: false },
+    },
+    postAgentsUnenrollHandler
   );
 
   // Get agent events

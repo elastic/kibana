@@ -9,7 +9,6 @@ import { FleetServerLib } from '../libs/types';
 import { HapiFrameworkAdapter } from '../adapters/framework/hapi_framework_adapter';
 import { createGETArtifactsRoute } from './artifacts';
 import { createGETInstallScript } from './install';
-import { createPOSTAgentsUnenrollRoute } from './agents/unenroll';
 import {
   createGETEnrollmentApiKeysRoute,
   createPOSTEnrollmentApiKeysRoute,
@@ -29,7 +28,6 @@ export function initRestApi(server: Server, libs: FleetServerLib) {
 }
 
 function createAgentsRoutes(adapter: HapiFrameworkAdapter, libs: FleetServerLib) {
-  adapter.registerRoute(createPOSTAgentsUnenrollRoute(libs));
   adapter.registerRoute(createGETAgentsStatusRoute(libs));
 }
 

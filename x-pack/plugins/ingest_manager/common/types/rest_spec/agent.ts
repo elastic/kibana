@@ -52,6 +52,17 @@ export const PostAgentAcksRequestSchema = {
   }),
 };
 
+export const PostAgentUnenrollRequestSchema = {
+  body: schema.oneOf([
+    schema.object({
+      kuery: schema.string(),
+    }),
+    schema.object({
+      ids: schema.arrayOf(schema.string()),
+    }),
+  ]),
+};
+
 export const GetOneAgentEventsRequestSchema = {
   params: schema.object({
     agentId: schema.string(),

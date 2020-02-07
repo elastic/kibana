@@ -46,6 +46,7 @@ export const AGENT_API_ROUTES = {
   CHECKIN_PATTERN: `${FLEET_API_ROOT}/agents/{agentId}/checkin`,
   ACKS_PATTERN: `${FLEET_API_ROOT}/agents/{agentId}/acks`,
   ENROLL_PATTERN: `${FLEET_API_ROOT}/agents/enroll`,
+  UNENROLL_PATTERN: `${FLEET_API_ROOT}/agents/unenroll`,
 };
 
 // Fleet setup API routes

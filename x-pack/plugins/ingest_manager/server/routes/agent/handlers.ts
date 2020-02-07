@@ -15,6 +15,7 @@ import {
   PostAgentCheckinRequestSchema,
   PostAgentEnrollRequestSchema,
   PostAgentAcksRequestSchema,
+  PostAgentUnenrollRequestSchema,
 } from '../../types';
 import * as AgentService from '../../services/agents';
 import { appContextService } from '../../services/app_context';
@@ -310,6 +311,70 @@ export const getAgentsHandler: RequestHandler<
       total,
       page,
       perPage,
+    };
+    return response.ok({ body });
+  } catch (e) {
+    return response.customError({
+      statusCode: 500,
+      body: { message: e.message },
+    });
+  }
+};
+
+export const postAgentsUnenrollHandler: RequestHandler<
+  undefined,
+  undefined,
+  TypeOf<typeof PostAgentUnenrollRequestSchema.body>
+> = async (context, request, response) => {
+  const soClient = context.core.savedObjects.client;
+  try {
+    const kuery = (request.body as { kuery: string }).kuery;
+    let toUnenrollIds: string[] = (request.body as { ids: string[] }).ids || [];
+
+    if (kuery) {
+      let hasMore = true;
+      let page = 1;
+      while (hasMore) {
+        const { agents } = await AgentService.listAgents(soClient, {
+          page: page++,
+          perPage: 100,
+          kuery,
+          showInactive: true,
+        });
+        if (agents.length === 0) {
+          hasMore = false;
+        }
+        const agentIds = agents.filter(a => a.active).map(a => a.id);
+        toUnenrollIds = toUnenrollIds.concat(agentIds);
+      }
+    }
+    const results = (await AgentService.unenrollAgents(soClient, toUnenrollIds)).map(
+      ({
+        success,
+        id,
+        error,
+      }): {
+        success: boolean;
+        id: string;
+        action: 'unenrolled';
+        error?: {
+          message: string;
+        };
+      } => {
+        return {
+          success,
+          id,
+          action: 'unenrolled',
+          error: error && {
+            message: error.message,
+          },
+        };
+      }
+    );
+
+    const body = {
+      results,
+      success: results.every(result => result.success),
     };
     return response.ok({ body });
   } catch (e) {

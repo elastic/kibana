@@ -14,10 +14,11 @@ import { savedObjectToAgent } from './saved_objects';
 const AGENT_POLLING_THRESHOLD_MS = 30 * 1000;
 const AGENT_TYPE_EPHEMERAL = 'ephemeral';
 
+export * from './acks';
 export * from './events';
 export * from './checkin';
 export * from './enroll';
-export * from './acks';
+export * from './unenroll';
 
 export async function getAgent(soClient: SavedObjectsClientContract, agentId: string) {
   const agent = savedObjectToAgent(
