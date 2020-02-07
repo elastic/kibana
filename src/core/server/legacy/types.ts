@@ -139,7 +139,7 @@ export type LegacyNavLinkSpec = Record<string, unknown> & ChromeNavLink;
  */
 export type LegacyAppSpec = Pick<
   ChromeNavLink,
-  'title' | 'order' | 'icon' | 'euiIconType' | 'url' | 'linkToLastSubUrl' | 'hidden'
+  'title' | 'order' | 'icon' | 'euiIconType' | 'url' | 'linkToLastSubUrl' | 'hidden' | 'category'
 > & { pluginId?: string; id?: string; listed?: boolean };
 
 /**

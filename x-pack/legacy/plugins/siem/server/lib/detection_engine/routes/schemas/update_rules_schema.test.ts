@@ -147,7 +147,7 @@ describe('update rules schema', () => {
         from: 'now-5m',
         to: 'now',
         name: 'some-name',
-        severity: 'severity',
+        severity: 'low',
       }).error
     ).toBeFalsy();
   });
@@ -160,7 +160,7 @@ describe('update rules schema', () => {
         from: 'now-5m',
         to: 'now',
         name: 'some-name',
-        severity: 'severity',
+        severity: 'low',
       }).error
     ).toBeFalsy();
   });
@@ -173,7 +173,7 @@ describe('update rules schema', () => {
         from: 'now-5m',
         to: 'now',
         name: 'some-name',
-        severity: 'severity',
+        severity: 'low',
         type: 'query',
       }).error
     ).toBeFalsy();
@@ -187,7 +187,7 @@ describe('update rules schema', () => {
         from: 'now-5m',
         to: 'now',
         name: 'some-name',
-        severity: 'severity',
+        severity: 'low',
         type: 'query',
       }).error
     ).toBeFalsy();
@@ -201,7 +201,7 @@ describe('update rules schema', () => {
         from: 'now-5m',
         to: 'now',
         name: 'some-name',
-        severity: 'severity',
+        severity: 'low',
         interval: '5m',
         type: 'query',
       }).error
@@ -216,7 +216,7 @@ describe('update rules schema', () => {
         from: 'now-5m',
         to: 'now',
         name: 'some-name',
-        severity: 'severity',
+        severity: 'low',
         interval: '5m',
         type: 'query',
       }).error
@@ -232,7 +232,7 @@ describe('update rules schema', () => {
         to: 'now',
         index: ['index-1'],
         name: 'some-name',
-        severity: 'severity',
+        severity: 'low',
         interval: '5m',
         type: 'query',
       }).error
@@ -248,7 +248,7 @@ describe('update rules schema', () => {
         to: 'now',
         index: ['index-1'],
         name: 'some-name',
-        severity: 'severity',
+        severity: 'low',
         interval: '5m',
         type: 'query',
       }).error
@@ -264,7 +264,7 @@ describe('update rules schema', () => {
         to: 'now',
         index: ['index-1'],
         name: 'some-name',
-        severity: 'severity',
+        severity: 'low',
         interval: '5m',
         type: 'query',
         query: 'some query',
@@ -281,7 +281,7 @@ describe('update rules schema', () => {
         to: 'now',
         index: ['index-1'],
         name: 'some-name',
-        severity: 'severity',
+        severity: 'low',
         interval: '5m',
         type: 'query',
         query: 'some query',
@@ -298,7 +298,7 @@ describe('update rules schema', () => {
         to: 'now',
         index: ['index-1'],
         name: 'some-name',
-        severity: 'severity',
+        severity: 'low',
         interval: '5m',
         type: 'query',
         query: 'some query',
@@ -316,7 +316,7 @@ describe('update rules schema', () => {
         to: 'now',
         index: ['index-1'],
         name: 'some-name',
-        severity: 'severity',
+        severity: 'low',
         interval: '5m',
         type: 'query',
         query: 'some query',
@@ -334,7 +334,7 @@ describe('update rules schema', () => {
         to: 'now',
         index: ['index-1'],
         name: 'some-name',
-        severity: 'severity',
+        severity: 'low',
         interval: '5m',
         type: 'query',
       }).error
@@ -350,7 +350,7 @@ describe('update rules schema', () => {
         to: 'now',
         index: ['index-1'],
         name: 'some-name',
-        severity: 'severity',
+        severity: 'low',
         interval: '5m',
         type: 'query',
       }).error
@@ -366,7 +366,7 @@ describe('update rules schema', () => {
         to: 'now',
         index: ['index-1'],
         name: 'some-name',
-        severity: 'severity',
+        severity: 'low',
         interval: '5m',
         type: 'query',
         references: ['index-1'],
@@ -385,7 +385,7 @@ describe('update rules schema', () => {
         to: 'now',
         index: ['index-1'],
         name: 'some-name',
-        severity: 'severity',
+        severity: 'low',
         interval: '5m',
         type: 'query',
         query: 'some-query',
@@ -403,7 +403,7 @@ describe('update rules schema', () => {
         to: 'now',
         index: ['index-1'],
         name: 'some-name',
-        severity: 'severity',
+        severity: 'low',
         type: 'query',
       }).value.interval
     ).toEqual(undefined);
@@ -418,7 +418,7 @@ describe('update rules schema', () => {
         to: 'now',
         index: ['index-1'],
         name: 'some-name',
-        severity: 'severity',
+        severity: 'low',
         interval: '5m',
         type: 'query',
       }).value.max_signals
@@ -436,7 +436,7 @@ describe('update rules schema', () => {
         to: 'now',
         index: ['index-1'],
         name: 'some-name',
-        severity: 'severity',
+        severity: 'low',
         interval: '5m',
         type: 'query',
         query: 'some-query',
@@ -459,7 +459,7 @@ describe('update rules schema', () => {
         to: 'now',
         index: [5],
         name: 'some-name',
-        severity: 'severity',
+        severity: 'low',
         interval: '5m',
         type: 'query',
         query: 'some-query',
@@ -479,7 +479,7 @@ describe('update rules schema', () => {
         to: 'now',
         index: ['index-1'],
         name: 'some-name',
-        severity: 'severity',
+        severity: 'low',
         interval: '5m',
         type: 'saved_query',
       }).error
@@ -495,7 +495,7 @@ describe('update rules schema', () => {
         to: 'now',
         index: ['index-1'],
         name: 'some-name',
-        severity: 'severity',
+        severity: 'low',
         interval: '5m',
         type: 'saved_query',
         saved_id: 'some id',
@@ -512,7 +512,7 @@ describe('update rules schema', () => {
         to: 'now',
         index: ['index-1'],
         name: 'some-name',
-        severity: 'severity',
+        severity: 'low',
         interval: '5m',
         type: 'saved_query',
         saved_id: 'some id',
@@ -530,7 +530,7 @@ describe('update rules schema', () => {
         to: 'now',
         index: ['index-1'],
         name: 'some-name',
-        severity: 'severity',
+        severity: 'low',
         interval: '5m',
         type: 'query',
         references: ['index-1'],
@@ -549,7 +549,7 @@ describe('update rules schema', () => {
         to: 'now',
         index: ['index-1'],
         name: 'some-name',
-        severity: 'severity',
+        severity: 'low',
         interval: '5m',
         type: 'query',
         references: ['index-1'],
@@ -568,7 +568,7 @@ describe('update rules schema', () => {
         to: 'now',
         index: ['index-1'],
         name: 'some-name',
-        severity: 'severity',
+        severity: 'low',
         interval: '5m',
         type: 'query',
         references: ['index-1'],
@@ -587,7 +587,7 @@ describe('update rules schema', () => {
         to: 'now',
         index: ['index-1'],
         name: 'some-name',
-        severity: 'severity',
+        severity: 'low',
         interval: '5m',
         type: 'query',
         references: ['index-1'],
@@ -607,7 +607,7 @@ describe('update rules schema', () => {
         to: 'now',
         index: ['index-1'],
         name: 'some-name',
-        severity: 'severity',
+        severity: 'low',
         interval: '5m',
         type: 'query',
         references: ['index-1'],
@@ -627,7 +627,7 @@ describe('update rules schema', () => {
         to: 'now',
         index: ['index-1'],
         name: 'some-name',
-        severity: 'severity',
+        severity: 'low',
         interval: '5m',
         type: 'query',
         references: ['index-1'],
@@ -670,7 +670,7 @@ describe('update rules schema', () => {
     ).toEqual('child "filters" fails because ["filters" must be an array]');
   });
 
-  test('threats is not defaulted to empty array on update', () => {
+  test('threat is not defaulted to empty array on update', () => {
     expect(
       updateRulesSchema.validate<Partial<UpdateRuleAlertParamsRest>>({
         id: 'rule-1',
@@ -679,18 +679,18 @@ describe('update rules schema', () => {
         to: 'now',
         index: ['index-1'],
         name: 'some-name',
-        severity: 'severity',
+        severity: 'low',
         interval: '5m',
         type: 'query',
         references: ['index-1'],
         query: 'some query',
         language: 'kuery',
         max_signals: 1,
-      }).value.threats
+      }).value.threat
     ).toBe(undefined);
   });
 
-  test('threats is not defaulted to undefined on update with empty array', () => {
+  test('threat is not defaulted to undefined on update with empty array', () => {
     expect(
       updateRulesSchema.validate<Partial<UpdateRuleAlertParamsRest>>({
         id: 'rule-1',
@@ -699,19 +699,19 @@ describe('update rules schema', () => {
         to: 'now',
         index: ['index-1'],
         name: 'some-name',
-        severity: 'severity',
+        severity: 'low',
         interval: '5m',
         type: 'query',
         references: ['index-1'],
         query: 'some query',
         language: 'kuery',
         max_signals: 1,
-        threats: [],
-      }).value.threats
+        threat: [],
+      }).value.threat
     ).toMatchObject([]);
   });
 
-  test('threats is valid when updated with all sub-objects', () => {
+  test('threat is valid when updated with all sub-objects', () => {
     const expected: ThreatParams[] = [
       {
         framework: 'fake',
@@ -720,7 +720,7 @@ describe('update rules schema', () => {
           name: 'fakeName',
           reference: 'fakeRef',
         },
-        techniques: [
+        technique: [
           {
             id: 'techniqueId',
             name: 'techniqueName',
@@ -737,14 +737,14 @@ describe('update rules schema', () => {
         to: 'now',
         index: ['index-1'],
         name: 'some-name',
-        severity: 'severity',
+        severity: 'low',
         interval: '5m',
         type: 'query',
         references: ['index-1'],
         query: 'some query',
         language: 'kuery',
         max_signals: 1,
-        threats: [
+        threat: [
           {
             framework: 'fake',
             tactic: {
@@ -752,7 +752,7 @@ describe('update rules schema', () => {
               name: 'fakeName',
               reference: 'fakeRef',
             },
-            techniques: [
+            technique: [
               {
                 id: 'techniqueId',
                 name: 'techniqueName',
@@ -761,15 +761,15 @@ describe('update rules schema', () => {
             ],
           },
         ],
-      }).value.threats
+      }).value.threat
     ).toMatchObject(expected);
   });
 
-  test('threats is invalid when updated with missing property framework', () => {
+  test('threat is invalid when updated with missing property framework', () => {
     expect(
       updateRulesSchema.validate<
-        Partial<Omit<UpdateRuleAlertParamsRest, 'threats'>> & {
-          threats: Array<Partial<Omit<ThreatParams, 'framework'>>>;
+        Partial<Omit<UpdateRuleAlertParamsRest, 'threat'>> & {
+          threat: Array<Partial<Omit<ThreatParams, 'framework'>>>;
         }
       >({
         id: 'rule-1',
@@ -778,21 +778,21 @@ describe('update rules schema', () => {
         to: 'now',
         index: ['index-1'],
         name: 'some-name',
-        severity: 'severity',
+        severity: 'low',
         interval: '5m',
         type: 'query',
         references: ['index-1'],
         query: 'some query',
         language: 'kuery',
         max_signals: 1,
-        threats: [
+        threat: [
           {
             tactic: {
               id: 'fakeId',
               name: 'fakeName',
               reference: 'fakeRef',
             },
-            techniques: [
+            technique: [
               {
                 id: 'techniqueId',
                 name: 'techniqueName',
@@ -803,15 +803,15 @@ describe('update rules schema', () => {
         ],
       }).error.message
     ).toEqual(
-      'child "threats" fails because ["threats" at position 0 fails because [child "framework" fails because ["framework" is required]]]'
+      'child "threat" fails because ["threat" at position 0 fails because [child "framework" fails because ["framework" is required]]]'
     );
   });
 
-  test('threats is invalid when updated with missing tactic sub-object', () => {
+  test('threat is invalid when updated with missing tactic sub-object', () => {
     expect(
       updateRulesSchema.validate<
-        Partial<Omit<UpdateRuleAlertParamsRest, 'threats'>> & {
-          threats: Array<Partial<Omit<ThreatParams, 'tactic'>>>;
+        Partial<Omit<UpdateRuleAlertParamsRest, 'threat'>> & {
+          threat: Array<Partial<Omit<ThreatParams, 'tactic'>>>;
         }
       >({
         id: 'rule-1',
@@ -820,17 +820,17 @@ describe('update rules schema', () => {
         to: 'now',
         index: ['index-1'],
         name: 'some-name',
-        severity: 'severity',
+        severity: 'low',
         interval: '5m',
         type: 'query',
         references: ['index-1'],
         query: 'some query',
         language: 'kuery',
         max_signals: 1,
-        threats: [
+        threat: [
           {
             framework: 'fake',
-            techniques: [
+            technique: [
               {
                 id: 'techniqueId',
                 name: 'techniqueName',
@@ -841,15 +841,15 @@ describe('update rules schema', () => {
         ],
       }).error.message
     ).toEqual(
-      'child "threats" fails because ["threats" at position 0 fails because [child "tactic" fails because ["tactic" is required]]]'
+      'child "threat" fails because ["threat" at position 0 fails because [child "tactic" fails because ["tactic" is required]]]'
     );
   });
 
-  test('threats is invalid when updated with missing techniques', () => {
+  test('threat is invalid when updated with missing technique', () => {
     expect(
       updateRulesSchema.validate<
-        Partial<Omit<UpdateRuleAlertParamsRest, 'threats'>> & {
-          threats: Array<Partial<Omit<ThreatParams, 'techniques'>>>;
+        Partial<Omit<UpdateRuleAlertParamsRest, 'threat'>> & {
+          threat: Array<Partial<Omit<ThreatParams, 'technique'>>>;
         }
       >({
         id: 'rule-1',
@@ -858,14 +858,14 @@ describe('update rules schema', () => {
         to: 'now',
         index: ['index-1'],
         name: 'some-name',
-        severity: 'severity',
+        severity: 'low',
         interval: '5m',
         type: 'query',
         references: ['index-1'],
         query: 'some query',
         language: 'kuery',
         max_signals: 1,
-        threats: [
+        threat: [
           {
             framework: 'fake',
             tactic: {
@@ -877,7 +877,7 @@ describe('update rules schema', () => {
         ],
       }).error.message
     ).toEqual(
-      'child "threats" fails because ["threats" at position 0 fails because [child "techniques" fails because ["techniques" is required]]]'
+      'child "threat" fails because ["threat" at position 0 fails because [child "technique" fails because ["technique" is required]]]'
     );
   });
 
@@ -890,7 +890,7 @@ describe('update rules schema', () => {
         to: 'now',
         index: ['index-1'],
         name: 'some-name',
-        severity: 'severity',
+        severity: 'low',
         interval: '5m',
         type: 'saved_query',
         saved_id: 'some id',
@@ -909,7 +909,7 @@ describe('update rules schema', () => {
         to: 'now',
         index: ['index-1'],
         name: 'some-name',
-        severity: 'severity',
+        severity: 'low',
         interval: '5m',
         type: 'saved_query',
         saved_id: 'some id',
@@ -927,7 +927,7 @@ describe('update rules schema', () => {
         to: 'now',
         index: ['index-1'],
         name: 'some-name',
-        severity: 'severity',
+        severity: 'low',
         interval: '5m',
         type: 'saved_query',
         saved_id: 'some id',
@@ -946,7 +946,7 @@ describe('update rules schema', () => {
         to: 'now',
         index: ['index-1'],
         name: 'some-name',
-        severity: 'severity',
+        severity: 'low',
         interval: '5m',
         type: 'saved_query',
         saved_id: 'some id',
@@ -965,7 +965,7 @@ describe('update rules schema', () => {
         to: 'now',
         index: ['index-1'],
         name: 'some-name',
-        severity: 'severity',
+        severity: 'low',
         interval: '5m',
         type: 'saved_query',
         saved_id: 'some id',
@@ -984,12 +984,32 @@ describe('update rules schema', () => {
         to: 'now',
         index: ['index-1'],
         name: 'some-name',
-        severity: 'severity',
+        severity: 'low',
         interval: '5m',
         type: 'saved_query',
         saved_id: 'some id',
         timeline_title: 'some-title',
       }).error.message
     ).toEqual('child "timeline_title" fails because ["timeline_title" is not allowed]');
+  });
+
+  test('You cannot set the severity to a value other than low, medium, high, or critical', () => {
+    expect(
+      updateRulesSchema.validate<Partial<UpdateRuleAlertParamsRest>>({
+        id: 'rule-1',
+        risk_score: 50,
+        description: 'some description',
+        name: 'some-name',
+        severity: 'junk',
+        type: 'query',
+        references: ['index-1'],
+        query: 'some query',
+        language: 'kuery',
+        max_signals: 1,
+        version: 1,
+      }).error.message
+    ).toEqual(
+      'child "severity" fails because ["severity" must be one of [low, medium, high, critical]]'
+    );
   });
 });

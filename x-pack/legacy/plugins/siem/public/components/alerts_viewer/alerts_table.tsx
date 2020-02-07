@@ -64,6 +64,7 @@ const AlertsTableComponent: React.FC<Props> = ({ endDate, startDate, pageFilters
       documentType: i18n.ALERTS_DOCUMENT_TYPE,
       footerText: i18n.TOTAL_COUNT_OF_ALERTS,
       title: i18n.ALERTS_TABLE_TITLE,
+      unit: i18n.UNIT,
     }),
     []
   );

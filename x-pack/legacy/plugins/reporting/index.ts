@@ -4,18 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { resolve } from 'path';
 import { i18n } from '@kbn/i18n';
 import { Legacy } from 'kibana';
+import { resolve } from 'path';
 import { PLUGIN_ID, UI_SETTINGS_CUSTOM_PDF_LOGO } from './common/constants';
-import { ReportingConfigOptions, ReportingPluginSpecOptions } from './types.d';
 import { config as reportingConfig } from './config';
-import {
-  LegacySetup,
-  ReportingPlugin,
-  ReportingSetupDeps,
-  reportingPluginFactory,
-} from './server/plugin';
+import { legacyInit } from './server/legacy';
+import { ReportingConfigOptions, ReportingPluginSpecOptions } from './types.d';
 
 const kbToBase64Length = (kb: number) => {
   return Math.floor((kb * 1024 * 8) / 6);
@@ -66,28 +61,7 @@ export const reporting = (kibana: any) => {
     },
 
     async init(server: Legacy.Server) {
-      const coreSetup = server.newPlatform.setup.core;
-      const pluginsSetup: ReportingSetupDeps = {
-        usageCollection: server.newPlatform.setup.plugins.usageCollection,
-      };
-      const __LEGACY: LegacySetup = {
-        config: server.config,
-        info: server.info,
-        route: server.route.bind(server),
-        plugins: {
-          elasticsearch: server.plugins.elasticsearch,
-          xpack_main: server.plugins.xpack_main,
-          security: server.plugins.security,
-        },
-        savedObjects: server.savedObjects,
-        uiSettingsServiceFactory: server.uiSettingsServiceFactory,
-        // @ts-ignore Property 'fieldFormatServiceFactory' does not exist on type 'Server'.
-        fieldFormatServiceFactory: server.fieldFormatServiceFactory,
-        log: server.log.bind(server),
-      };
-
-      const plugin: ReportingPlugin = reportingPluginFactory(__LEGACY, this);
-      await plugin.setup(coreSetup, pluginsSetup);
+      return legacyInit(server, this);
     },
 
     deprecations({ unused }: any) {

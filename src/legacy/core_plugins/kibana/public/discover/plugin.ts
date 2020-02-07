@@ -18,16 +18,16 @@
  */
 import { i18n } from '@kbn/i18n';
 import { AppMountParameters, CoreSetup, CoreStart, Plugin } from 'kibana/public';
-import angular from 'angular';
-import { IUiActionsSetup, IUiActionsStart } from 'src/plugins/ui_actions/public';
+import angular, { auto } from 'angular';
+import { UiActionsSetup, UiActionsStart } from 'src/plugins/ui_actions/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { registerFeature } from './np_ready/register_feature';
 import './kibana_services';
 import { IEmbeddableStart, IEmbeddableSetup } from '../../../../../plugins/embeddable/public';
 import { getInnerAngularModule, getInnerAngularModuleEmbeddable } from './get_inner_angular';
-import { Chrome, setAngularModule, setServices } from './kibana_services';
+import { setAngularModule, setServices } from './kibana_services';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../../plugins/navigation/public';
-import { EuiUtilsStart } from '../../../../../plugins/eui_utils/public';
+import { ChartsPluginStart } from '../../../../../plugins/charts/public';
 import { buildServices } from './build_services';
 import { SharePluginStart } from '../../../../../plugins/share/public';
 import { KibanaLegacySetup } from '../../../../../plugins/kibana_legacy/public';
@@ -47,19 +47,16 @@ export interface DiscoverSetup {
 }
 export type DiscoverStart = void;
 export interface DiscoverSetupPlugins {
-  uiActions: IUiActionsSetup;
+  uiActions: UiActionsSetup;
   embeddable: IEmbeddableSetup;
-  kibana_legacy: KibanaLegacySetup;
-  __LEGACY: {
-    chrome: Chrome;
-  };
+  kibanaLegacy: KibanaLegacySetup;
   home: HomePublicPluginSetup;
 }
 export interface DiscoverStartPlugins {
-  uiActions: IUiActionsStart;
+  uiActions: UiActionsStart;
   embeddable: IEmbeddableStart;
   navigation: NavigationStart;
-  eui_utils: EuiUtilsStart;
+  charts: ChartsPluginStart;
   data: DataPublicPluginStart;
   share: SharePluginStart;
   inspector: any;
@@ -76,15 +73,18 @@ export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
   private servicesInitialized: boolean = false;
   private innerAngularInitialized: boolean = false;
   private docViewsRegistry: DocViewsRegistry | null = null;
+  private embeddableInjector: auto.IInjectorService | null = null;
+  private getEmbeddableInjector: (() => Promise<auto.IInjectorService>) | null = null;
   /**
    * why are those functions public? they are needed for some mocha tests
    * can be removed once all is Jest
    */
   public initializeInnerAngular?: () => void;
-  public initializeServices?: () => void;
+  public initializeServices?: () => Promise<{ core: CoreStart; plugins: DiscoverStartPlugins }>;
 
   setup(core: CoreSetup, plugins: DiscoverSetupPlugins): DiscoverSetup {
-    this.docViewsRegistry = new DocViewsRegistry(plugins.__LEGACY.chrome);
+    this.getEmbeddableInjector = this.getInjector.bind(this);
+    this.docViewsRegistry = new DocViewsRegistry(this.getEmbeddableInjector);
     this.docViewsRegistry.addDocView({
       title: i18n.translate('kbn.discover.docViews.table.tableTitle', {
         defaultMessage: 'Table',
@@ -99,7 +99,7 @@ export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
       order: 20,
       component: JsonCodeBlock,
     });
-    plugins.kibana_legacy.registerLegacyApp({
+    plugins.kibanaLegacy.registerLegacyApp({
       id: 'discover',
       title: 'Discover',
       order: -1004,
@@ -113,6 +113,7 @@ export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
         }
         await this.initializeServices();
         await this.initializeInnerAngular();
+
         const { renderApp } = await import('./np_ready/application');
         return renderApp(innerAngularName, params.element);
       },
@@ -141,11 +142,13 @@ export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
 
     this.initializeServices = async () => {
       if (this.servicesInitialized) {
-        return;
+        return { core, plugins };
       }
       const services = await buildServices(core, plugins, this.docViewsRegistry!);
       setServices(services);
       this.servicesInitialized = true;
+
+      return { core, plugins };
     };
 
     this.registerEmbeddable(core, plugins);
@@ -156,22 +159,31 @@ export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
    */
   private async registerEmbeddable(core: CoreStart, plugins: DiscoverStartPlugins) {
     const { SearchEmbeddableFactory } = await import('./np_ready/embeddable');
-    const getInjector = async () => {
-      if (!this.initializeServices) {
-        throw Error('Discover plugin registerEmbeddable:  initializeServices is undefined');
-      }
-      await this.initializeServices();
-      getInnerAngularModuleEmbeddable(embeddableAngularName, core, plugins);
-      const mountpoint = document.createElement('div');
-      return angular.bootstrap(mountpoint, [embeddableAngularName]);
-    };
     const isEditable = () => core.application.capabilities.discover.save as boolean;
+
+    if (!this.getEmbeddableInjector) {
+      throw Error('Discover plugin method getEmbeddableInjector is undefined');
+    }
 
     const factory = new SearchEmbeddableFactory(
       plugins.uiActions.executeTriggerActions,
-      getInjector,
+      this.getEmbeddableInjector,
       isEditable
     );
     plugins.embeddable.registerEmbeddableFactory(factory.type, factory);
+  }
+
+  private async getInjector() {
+    if (!this.embeddableInjector) {
+      if (!this.initializeServices) {
+        throw Error('Discover plugin getEmbeddableInjector:  initializeServices is undefined');
+      }
+      const { core, plugins } = await this.initializeServices();
+      getInnerAngularModuleEmbeddable(embeddableAngularName, core, plugins);
+      const mountpoint = document.createElement('div');
+      this.embeddableInjector = angular.bootstrap(mountpoint, [embeddableAngularName]);
+    }
+
+    return this.embeddableInjector;
   }
 }

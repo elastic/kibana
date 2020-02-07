@@ -27,6 +27,7 @@ A high level overview of our contributing guidelines.
     - [Instrumenting with Elastic APM](#instrumenting-with-elastic-apm)
   - [Debugging Unit Tests](#debugging-unit-tests)
   - [Unit Testing Plugins](#unit-testing-plugins)
+  - [Automated Accessibility Testing](#automated-accessibility-testing)
   - [Cross-browser compatibility](#cross-browser-compatibility)
     - [Testing compatibility locally](#testing-compatibility-locally)
     - [Running Browser Automation Tests](#running-browser-automation-tests)
@@ -174,6 +175,16 @@ yarn kbn bootstrap
 
 (You can also run `yarn kbn` to see the other available commands. For more info about this tool, see https://github.com/elastic/kibana/tree/master/packages/kbn-pm.)
 
+When switching branches which use different versions of npm packages you may need to run;
+```bash
+yarn kbn clean
+```
+
+If you have failures during `yarn kbn bootstrap` you may have some corrupted packages in your yarn cache which you can clean with;
+```bash
+yarn cache clean
+```
+
 #### Increase node.js heap size
 
 Kibana is a big project and for some commands it can happen that the process hits the default heap limit and crashes with an out-of-memory error. If you run into this problem, you can increase maximum heap size by setting the `--max_old_space_size` option on the command line. To set the limit for all commands, simply add the following line to your shell config: `export NODE_OPTIONS="--max_old_space_size=2048"`.
@@ -193,7 +204,7 @@ yarn es snapshot
 ##### Keeping data between snapshots
 
 If you want to keep the data inside your Elasticsearch between usages of this command,
-you should use the following command, to keep your data folder outside the downloaded snapshot 
+you should use the following command, to keep your data folder outside the downloaded snapshot
 folder:
 
 ```bash
@@ -290,6 +301,7 @@ Follow the [cross-cluster search](https://www.elastic.co/guide/en/kibana/current
 
 ### Running Kibana
 
+Change to your local Kibana directory.
 Start the development server.
 
 ```bash
@@ -338,7 +350,7 @@ The `config/kibana.yml` file stores user configuration directives. Since this fi
 
 #### Setting Up SSL
 
-Kibana includes a self-signed certificate that can be used for development purposes: `yarn start --ssl`.
+Kibana includes self-signed certificates that can be used for development purposes in the browser and for communicating with Elasticsearch: `yarn start --ssl` & `yarn es snapshot --ssl`.
 
 ### Linting
 
@@ -541,6 +553,23 @@ To run the tests for just your particular plugin run the following command from 
 yarn test:mocha
 yarn test:browser --dev # remove the --dev flag to run them once and close
 ```
+
+### Automated Accessibility Testing
+
+To run the tests locally:
+
+1. In one terminal window run `node scripts/functional_tests_server --config test/accessibility/config.ts`
+2. In another terminal window run `node scripts/functional_test_runner.js --config test/accessibility/config.ts`
+
+To run the x-pack tests, swap the config file out for `x-pack/test/accessibility/config.ts`.
+
+After the server is up, you can go to this instance of Kibana at `localhost:5620`.
+
+The testing is done using [axe](https://github.com/dequelabs/axe-core). The same thing that runs in CI,
+can be run locally using their browser plugins:
+
+- [Chrome](https://chrome.google.com/webstore/detail/axe-web-accessibility-tes/lhdoppojpmngadmnindnejefpokejbdd?hl=en-US)
+- [Firefox](https://addons.mozilla.org/en-US/firefox/addon/axe-devtools/)
 
 ### Cross-browser Compatibility
 

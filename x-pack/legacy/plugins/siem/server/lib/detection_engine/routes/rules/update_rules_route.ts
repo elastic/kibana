@@ -14,111 +14,116 @@ import { ServerFacade } from '../../../../types';
 import { getIdError, transformOrError } from './utils';
 import { transformError } from '../utils';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
+import { KibanaRequest } from '../../../../../../../../../src/core/server';
 
-export const createUpdateRulesRoute: Hapi.ServerRoute = {
-  method: 'PUT',
-  path: DETECTION_ENGINE_RULES_URL,
-  options: {
-    tags: ['access:siem'],
-    validate: {
-      options: {
-        abortEarly: false,
+export const createUpdateRulesRoute = (server: ServerFacade): Hapi.ServerRoute => {
+  return {
+    method: 'PUT',
+    path: DETECTION_ENGINE_RULES_URL,
+    options: {
+      tags: ['access:siem'],
+      validate: {
+        options: {
+          abortEarly: false,
+        },
+        payload: updateRulesSchema,
       },
-      payload: updateRulesSchema,
     },
-  },
-  async handler(request: UpdateRulesRequest, headers) {
-    const {
-      description,
-      enabled,
-      false_positives: falsePositives,
-      from,
-      query,
-      language,
-      output_index: outputIndex,
-      saved_id: savedId,
-      timeline_id: timelineId,
-      timeline_title: timelineTitle,
-      meta,
-      filters,
-      rule_id: ruleId,
-      id,
-      index,
-      interval,
-      max_signals: maxSignals,
-      risk_score: riskScore,
-      name,
-      severity,
-      tags,
-      to,
-      type,
-      threats,
-      references,
-      version,
-    } = request.payload;
-
-    const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
-    const actionsClient = isFunction(request.getActionsClient) ? request.getActionsClient() : null;
-    const savedObjectsClient = isFunction(request.getSavedObjectsClient)
-      ? request.getSavedObjectsClient()
-      : null;
-    if (!alertsClient || !actionsClient || !savedObjectsClient) {
-      return headers.response().code(404);
-    }
-
-    try {
-      const rule = await updateRules({
-        alertsClient,
-        actionsClient,
+    async handler(request: UpdateRulesRequest, headers) {
+      const {
         description,
         enabled,
-        falsePositives,
+        false_positives: falsePositives,
         from,
         query,
         language,
-        outputIndex,
-        savedId,
-        savedObjectsClient,
-        timelineId,
-        timelineTitle,
+        output_index: outputIndex,
+        saved_id: savedId,
+        timeline_id: timelineId = null,
+        timeline_title: timelineTitle = null,
         meta,
         filters,
+        rule_id: ruleId,
         id,
-        ruleId,
         index,
         interval,
-        maxSignals,
-        riskScore,
+        max_signals: maxSignals,
+        risk_score: riskScore,
         name,
         severity,
         tags,
         to,
         type,
-        threats,
+        threat,
         references,
         version,
-      });
-      if (rule != null) {
-        const ruleStatuses = await savedObjectsClient.find<
-          IRuleSavedAttributesSavedObjectAttributes
-        >({
-          type: ruleStatusSavedObjectType,
-          perPage: 1,
-          sortField: 'statusDate',
-          sortOrder: 'desc',
-          search: rule.id,
-          searchFields: ['alertId'],
-        });
-        return transformOrError(rule, ruleStatuses.saved_objects[0]);
-      } else {
-        return getIdError({ id, ruleId });
+      } = request.payload;
+
+      const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
+      const actionsClient = await server.plugins.actions.getActionsClientWithRequest(
+        KibanaRequest.from((request as unknown) as Hapi.Request)
+      );
+      const savedObjectsClient = isFunction(request.getSavedObjectsClient)
+        ? request.getSavedObjectsClient()
+        : null;
+      if (!alertsClient || !savedObjectsClient) {
+        return headers.response().code(404);
       }
-    } catch (err) {
-      return transformError(err);
-    }
-  },
+
+      try {
+        const rule = await updateRules({
+          alertsClient,
+          actionsClient,
+          description,
+          enabled,
+          falsePositives,
+          from,
+          query,
+          language,
+          outputIndex,
+          savedId,
+          savedObjectsClient,
+          timelineId,
+          timelineTitle,
+          meta,
+          filters,
+          id,
+          ruleId,
+          index,
+          interval,
+          maxSignals,
+          riskScore,
+          name,
+          severity,
+          tags,
+          to,
+          type,
+          threat,
+          references,
+          version,
+        });
+        if (rule != null) {
+          const ruleStatuses = await savedObjectsClient.find<
+            IRuleSavedAttributesSavedObjectAttributes
+          >({
+            type: ruleStatusSavedObjectType,
+            perPage: 1,
+            sortField: 'statusDate',
+            sortOrder: 'desc',
+            search: rule.id,
+            searchFields: ['alertId'],
+          });
+          return transformOrError(rule, ruleStatuses.saved_objects[0]);
+        } else {
+          return getIdError({ id, ruleId });
+        }
+      } catch (err) {
+        return transformError(err);
+      }
+    },
+  };
 };
 
 export const updateRulesRoute = (server: ServerFacade) => {
-  server.route(createUpdateRulesRoute);
+  server.route(createUpdateRulesRoute(server));
 };

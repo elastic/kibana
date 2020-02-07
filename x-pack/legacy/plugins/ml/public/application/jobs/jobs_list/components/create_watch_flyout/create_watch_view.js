@@ -21,7 +21,7 @@ import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
 import { parseInterval } from '../../../../../../common/util/parse_interval';
 import { ml } from '../../../../services/ml_api_service';
-import { SelectSeverity } from '../../../../components/controls/select_severity/select_severity';
+import { SelectSeverity } from './select_severity';
 import { mlCreateWatchService } from './create_watch_service';
 const STATUS = mlCreateWatchService.STATUS;
 
@@ -111,19 +111,6 @@ export const CreateWatch = injectI18n(
 
     render() {
       const { intl } = this.props;
-      const mlSelectSeverityService = {
-        state: {
-          set: (name, threshold) => {
-            this.onThresholdChange(threshold);
-            return {
-              changed: () => {},
-            };
-          },
-          get: () => {
-            return this.config.threshold;
-          },
-        },
-      };
       const { status } = this.state;
 
       if (status === null || status === STATUS.SAVING || status === STATUS.SAVE_FAILED) {
@@ -164,10 +151,7 @@ export const CreateWatch = injectI18n(
                   </label>
                 </div>
                 <div className="dropdown-group">
-                  <SelectSeverity
-                    id="selectSeverity"
-                    mlSelectSeverityService={mlSelectSeverityService}
-                  />
+                  <SelectSeverity onChange={this.onThresholdChange} />
                 </div>
               </div>
             </div>

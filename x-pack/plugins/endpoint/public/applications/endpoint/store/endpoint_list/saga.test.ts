@@ -24,6 +24,7 @@ describe('endpoint list saga', () => {
   let fakeHttpServices: jest.Mocked<HttpSetup>;
   let store: Store<EndpointListState>;
   let dispatch: Dispatch<EndpointListAction>;
+  let stopSagas: () => void;
 
   // TODO: consolidate the below ++ helpers in `index.test.ts` into a `test_helpers.ts`??
   const generateEndpoint = (): EndpointData => {
@@ -89,11 +90,17 @@ describe('endpoint list saga', () => {
   beforeEach(() => {
     fakeCoreStart = coreMock.createStart({ basePath: '/mock' });
     fakeHttpServices = fakeCoreStart.http as jest.Mocked<HttpSetup>;
-    store = createStore(
-      endpointListReducer,
-      applyMiddleware(createSagaMiddleware(endpointListSagaFactory()))
-    );
+
+    const sagaMiddleware = createSagaMiddleware(endpointListSagaFactory());
+    store = createStore(endpointListReducer, applyMiddleware(sagaMiddleware));
+
+    sagaMiddleware.start();
+    stopSagas = sagaMiddleware.stop;
     dispatch = store.dispatch;
+  });
+
+  afterEach(() => {
+    stopSagas();
   });
 
   test('it handles `userEnteredEndpointListPage`', async () => {

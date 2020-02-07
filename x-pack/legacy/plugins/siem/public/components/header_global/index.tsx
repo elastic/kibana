@@ -39,55 +39,59 @@ interface HeaderGlobalProps {
 export const HeaderGlobal = React.memo<HeaderGlobalProps>(({ hideDetectionEngine = false }) => (
   <Wrapper className="siemHeaderGlobal">
     <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" wrap>
-      <FlexItem>
-        <EuiFlexGroup alignItems="center" responsive={false}>
-          <FlexItem grow={false}>
-            <EuiLink href={getOverviewUrl()}>
-              <EuiIcon aria-label={i18n.SIEM} type="securityAnalyticsApp" size="l" />
-            </EuiLink>
-          </FlexItem>
+      <WithSource sourceId="default">
+        {({ indicesExist }) => (
+          <>
+            <FlexItem>
+              <EuiFlexGroup alignItems="center" responsive={false}>
+                <FlexItem grow={false}>
+                  <EuiLink href={getOverviewUrl()}>
+                    <EuiIcon aria-label={i18n.SIEM} type="securityAnalyticsApp" size="l" />
+                  </EuiLink>
+                </FlexItem>
 
-          <FlexItem component="nav">
-            <WithSource sourceId="default">
-              {({ indicesExist }) =>
-                indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
-                  <SiemNavigation
-                    display="condensed"
-                    navTabs={
-                      hideDetectionEngine
-                        ? pickBy((_, key) => key !== SiemPageName.detections, navTabs)
-                        : navTabs
-                    }
-                  />
-                ) : (
-                  <SiemNavigation
-                    display="condensed"
-                    navTabs={pickBy((_, key) => key === SiemPageName.overview, navTabs)}
-                  />
-                )
-              }
-            </WithSource>
-          </FlexItem>
-        </EuiFlexGroup>
-      </FlexItem>
+                <FlexItem component="nav">
+                  {indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
+                    <SiemNavigation
+                      display="condensed"
+                      navTabs={
+                        hideDetectionEngine
+                          ? pickBy((_, key) => key !== SiemPageName.detections, navTabs)
+                          : navTabs
+                      }
+                    />
+                  ) : (
+                    <SiemNavigation
+                      display="condensed"
+                      navTabs={pickBy((_, key) => key === SiemPageName.overview, navTabs)}
+                    />
+                  )}
+                </FlexItem>
+              </EuiFlexGroup>
+            </FlexItem>
 
-      <FlexItem grow={false}>
-        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
-          <FlexItem grow={false}>
-            <MlPopover />
-          </FlexItem>
+            <FlexItem grow={false}>
+              <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
+                {indicesExistOrDataTemporarilyUnavailable(indicesExist) && (
+                  <FlexItem grow={false}>
+                    <MlPopover />
+                  </FlexItem>
+                )}
 
-          <FlexItem grow={false}>
-            <EuiButtonEmpty
-              data-test-subj="add-data"
-              href="kibana#home/tutorial_directory/siem"
-              iconType="plusInCircle"
-            >
-              {i18n.BUTTON_ADD_DATA}
-            </EuiButtonEmpty>
-          </FlexItem>
-        </EuiFlexGroup>
-      </FlexItem>
+                <FlexItem grow={false}>
+                  <EuiButtonEmpty
+                    data-test-subj="add-data"
+                    href="kibana#home/tutorial_directory/siem"
+                    iconType="plusInCircle"
+                  >
+                    {i18n.BUTTON_ADD_DATA}
+                  </EuiButtonEmpty>
+                </FlexItem>
+              </EuiFlexGroup>
+            </FlexItem>
+          </>
+        )}
+      </WithSource>
     </EuiFlexGroup>
   </Wrapper>
 ));

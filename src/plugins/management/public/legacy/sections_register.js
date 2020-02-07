@@ -27,7 +27,8 @@ export class LegacyManagementAdapter {
       'management',
       {
         display: i18n.translate('management.displayName', {
-          defaultMessage: 'Management',
+          // todo
+          defaultMessage: 'Stack Management',
         }),
       },
       capabilities
@@ -35,6 +36,7 @@ export class LegacyManagementAdapter {
 
     this.main.register('data', {
       display: i18n.translate('management.connectDataDisplayName', {
+        // todo
         defaultMessage: 'Connect Data',
       }),
       order: 0,

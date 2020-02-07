@@ -135,12 +135,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
               expect(response.body).to.eql({
                 statusCode: 400,
                 error: 'Bad Request',
-                message:
-                  'child "name" fails because ["name" is required]. child "actionTypeId" fails because ["actionTypeId" is required]',
-                validation: {
-                  source: 'payload',
-                  keys: ['name', 'actionTypeId'],
-                },
+                message: '[request body.name]: expected value of type [string] but got [undefined]',
               });
               break;
             default:

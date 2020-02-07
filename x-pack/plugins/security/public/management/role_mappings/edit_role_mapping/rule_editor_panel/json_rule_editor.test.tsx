@@ -44,9 +44,9 @@ describe('JSONRuleEditor', () => {
         new AnyRule([new FieldRule('username', '*')]),
         new ExceptAnyRule([
           new FieldRule('metadata.foo.bar', '*'),
-          new AllRule([new FieldRule('realm', 'special-one')]),
+          new AllRule([new FieldRule('realm.name', 'special-one')]),
         ]),
-        new ExceptAllRule([new FieldRule('realm', '*')]),
+        new ExceptAllRule([new FieldRule('realm.name', '*')]),
       ]),
       onChange: jest.fn(),
       onValidityChange: jest.fn(),
@@ -65,14 +65,14 @@ describe('JSONRuleEditor', () => {
             any: [
               { field: { 'metadata.foo.bar': '*' } },
               {
-                all: [{ field: { realm: 'special-one' } }],
+                all: [{ field: { ['realm.name']: 'special-one' } }],
               },
             ],
           },
         },
         {
           except: {
-            all: [{ field: { realm: '*' } }],
+            all: [{ field: { ['realm.name']: '*' } }],
           },
         },
       ],

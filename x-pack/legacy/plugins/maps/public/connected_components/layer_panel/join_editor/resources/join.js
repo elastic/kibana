@@ -13,6 +13,7 @@ import { MetricsExpression } from './metrics_expression';
 import { WhereExpression } from './where_expression';
 import { GlobalFilterCheckbox } from '../../../../components/global_filter_checkbox';
 
+import { isNestedField } from '../../../../../../../../../src/plugins/data/public';
 import { indexPatternService } from '../../../../kibana_services';
 
 const getIndexPatternId = props => {
@@ -88,7 +89,7 @@ export class Join extends Component {
     }
 
     this.setState({
-      rightFields: indexPattern.fields,
+      rightFields: indexPattern.fields.filter(field => !isNestedField(field)),
       indexPattern,
     });
   }

@@ -18,16 +18,19 @@
  */
 
 import { get, startsWith } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import * as monacoEditor from 'monaco-editor/esm/vs/editor/editor.api';
 
-import { i18n } from '@kbn/i18n';
 import { Parser } from 'pegjs';
 
 // @ts-ignore
 import { parse } from '../_generated_/chain';
 
-import { ITimelionFunction, TimelionFunctionArgs } from '../../common/types';
 import { ArgValueSuggestions, FunctionArg, Location } from '../helpers/arg_value_suggestions';
+import {
+  ITimelionFunction,
+  TimelionFunctionArgs,
+} from '../../../../../plugins/timelion/common/types';
 
 export enum SUGGESTION_TYPE {
   ARGUMENTS = 'arguments',

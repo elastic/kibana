@@ -16,7 +16,7 @@ import { JobCreator, JobCreatorType, isCategorizationJobCreator } from '../job_c
 import { populateValidationMessages, checkForExistingJobAndGroupIds } from './util';
 import { ExistingJobsAndGroups } from '../../../../services/job_service';
 import { cardinalityValidator, CardinalityValidatorResult } from './validators';
-import { CATEGORY_EXAMPLES_ERROR_LIMIT } from '../../../../../../common/constants/new_job';
+import { CATEGORY_EXAMPLES_VALIDATION_STATUS } from '../../../../../../common/constants/new_job';
 
 // delay start of validation to allow the user to make changes
 // e.g. if they are typing in a new value, try not to validate
@@ -207,7 +207,7 @@ export class JobValidator {
   private _runAdvancedValidation() {
     if (isCategorizationJobCreator(this._jobCreator)) {
       this._advancedValidations.categorizationFieldValid.valid =
-        this._jobCreator.categoryFieldValid > CATEGORY_EXAMPLES_ERROR_LIMIT;
+        this._jobCreator.overallValidStatus !== CATEGORY_EXAMPLES_VALIDATION_STATUS.INVALID;
     }
   }
 

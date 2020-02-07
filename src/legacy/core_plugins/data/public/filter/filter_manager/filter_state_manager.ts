@@ -21,13 +21,7 @@ import _ from 'lodash';
 import { Subscription } from 'rxjs';
 import { State } from 'ui/state_management/state';
 import { FilterManager, esFilters } from '../../../../../../plugins/data/public';
-
-import {
-  compareFilters,
-  COMPARE_ALL_OPTIONS,
-  // this whole file will soon be deprecated by new state management.
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../../../plugins/data/public/query/filter_manager/lib/compare_filters';
+import { compareFilters, COMPARE_ALL_OPTIONS } from '../../../../../../plugins/data/public';
 
 type GetAppStateFunc = () => { filters?: esFilters.Filter[]; save?: () => void } | undefined | null;
 

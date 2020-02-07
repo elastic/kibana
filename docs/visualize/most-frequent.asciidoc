@@ -1,30 +1,41 @@
 [[most-frequent]]
 == Most frequently used visualizations
 
-The most frequently used visualizations allow you to plot aggregated data from a <<save-open-search, saved search>> or <<index-patterns, index pattern>>. They all support a single level of
-Elasticsearch {es} {ref}/search-aggregations-metrics.html[metric] aggregations, and one or more
-levels of {es} {ref}/search-aggregations-bucket.html[bucket] aggregations.
+The most frequently used visualizations allow you to plot aggregated data from a <<save-open-search, saved search>> or <<index-patterns, index pattern>>.
 
 The most frequently used visualizations include:
 
 * Line, area, and bar charts
-* Pie charts
-* Data tables
-* Metric, goals, and gauges
-* Heat maps
-* Tag clouds
+* Pie chart
+* Data table
+* Metric, goal, and gauge
+* Tag cloud
+
+[float]
+[[frequently-used-viz-aggregation]]
+=== Supported aggregations
+
+The most frequently used visualizations support the following aggregations:
+
+* <<visualize-metric-aggregations,Metric>>
+
+* <<visualize-parent-pipeline-aggregations,Parent pipeline>>
+
+* <<visualize-sibling-pipeline-aggregations,Sibling pipeline>>
+
+* <<visualize-bucket-aggregations,Bucket>>
 
 [float]
 === Configure your visualization
 
-You configure visualizations using the default editor, which is broken into metrics and buckets, and includes a default count
-metric. Each visualization supports different configurations for what the metrics and buckets
-represent. For example, a bar chart allows you to add an X-axis:
+You configure visualizations using the default editor. Each visualization supports different configurations of the metrics and buckets.
+
+For example, a bar chart allows you to add an x-axis:
 
 [role="screenshot"]
 image::images/add-bucket.png["",height=478]
 
-A common configuration for the X-axis is to use a {es} {ref}/search-aggregations-bucket-datehistogram-aggregation.html[date histogram] aggregation:
+A common configuration for the x-axis is to use a {es} {ref}/search-aggregations-bucket-datehistogram-aggregation.html[date histogram] aggregation:
 
 [role="screenshot"]
 image::images/visualize-date-histogram.png[]
@@ -58,5 +69,3 @@ Each visualization also has its own customization options. Most visualizations a
 
 [role="screenshot"]
 image::images/color-picker.png[An array of color dots that users can select,height=267]
-
-include::aggregations.asciidoc[]

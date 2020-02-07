@@ -82,6 +82,7 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
             items,
             lastLoadedTime,
             fetchNewerEntries,
+            checkForNewEntries,
           }) => (
             <ScrollableLogTextStreamView
               columnConfigurations={(source && source.configuration.logColumns) || []}
@@ -94,6 +95,7 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
               jumpToTarget={jumpToTargetPosition}
               lastLoadedTime={lastLoadedTime}
               loadNewerItems={fetchNewerEntries}
+              reloadItems={checkForNewEntries}
               reportVisibleInterval={reportVisiblePositions}
               scale={textScale}
               target={targetPosition}

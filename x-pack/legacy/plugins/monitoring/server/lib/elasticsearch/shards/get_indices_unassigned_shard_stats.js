@@ -12,7 +12,7 @@ import { calculateIndicesTotals } from './calculate_shard_stat_indices_totals';
 
 async function getUnassignedShardData(req, esIndexPattern, cluster) {
   const config = req.server.config();
-  const maxBucketSize = config.get('xpack.monitoring.max_bucket_size');
+  const maxBucketSize = config.get('monitoring.ui.max_bucket_size');
   const metric = ElasticsearchMetric.getMetricFields();
 
   const params = {

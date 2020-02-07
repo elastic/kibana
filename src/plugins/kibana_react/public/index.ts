@@ -18,12 +18,13 @@
  */
 
 export * from './code_editor';
-export * from './saved_objects';
 export * from './exit_full_screen_button';
 export * from './context';
 export * from './overlays';
 export * from './ui_settings';
 export * from './field_icon';
 export * from './table_list_view';
+export * from './split_panel';
+export { reactToUiComponent, uiToReactComponent } from './adapters';
 export { useUrlTracker } from './use_url_tracker';
 export { toMountPoint } from './util';

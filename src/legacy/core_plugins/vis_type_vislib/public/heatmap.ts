@@ -19,13 +19,15 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { Schemas, AggGroupNames, ColorSchemas, RangeValues } from './legacy_imports';
+import { RangeValues } from '../../vis_default_editor/public';
+import { Schemas, AggGroupNames } from './legacy_imports';
 import { AxisTypes, getHeatmapCollections, Positions, ScaleTypes } from './utils/collections';
 import { HeatmapOptions } from './components/options';
 import { createVislibVisController } from './vis_controller';
 import { TimeMarker } from './vislib/visualizations/time_marker';
 import { CommonVislibParams, ColorSchemaVislibParams, ValueAxis } from './types';
-import { KbnVislibVisTypesDependencies } from './plugin';
+import { VisTypeVislibDependencies } from './plugin';
+import { ColorSchemas } from '../../../../plugins/charts/public';
 
 export interface HeatmapVisParams extends CommonVislibParams, ColorSchemaVislibParams {
   type: 'heatmap';
@@ -39,11 +41,11 @@ export interface HeatmapVisParams extends CommonVislibParams, ColorSchemaVislibP
   times: TimeMarker[];
 }
 
-export const createHeatmapVisTypeDefinition = (deps: KbnVislibVisTypesDependencies) => ({
+export const createHeatmapVisTypeDefinition = (deps: VisTypeVislibDependencies) => ({
   name: 'heatmap',
-  title: i18n.translate('kbnVislibVisTypes.heatmap.heatmapTitle', { defaultMessage: 'Heat Map' }),
+  title: i18n.translate('visTypeVislib.heatmap.heatmapTitle', { defaultMessage: 'Heat Map' }),
   icon: 'visHeatmap',
-  description: i18n.translate('kbnVislibVisTypes.heatmap.heatmapDescription', {
+  description: i18n.translate('visTypeVislib.heatmap.heatmapDescription', {
     defaultMessage: 'Shade cells within a matrix',
   }),
   visualization: createVislibVisController(deps),
@@ -90,7 +92,7 @@ export const createHeatmapVisTypeDefinition = (deps: KbnVislibVisTypesDependenci
       {
         group: AggGroupNames.Metrics,
         name: 'metric',
-        title: i18n.translate('kbnVislibVisTypes.heatmap.metricTitle', { defaultMessage: 'Value' }),
+        title: i18n.translate('visTypeVislib.heatmap.metricTitle', { defaultMessage: 'Value' }),
         min: 1,
         max: 1,
         aggFilter: [
@@ -109,7 +111,7 @@ export const createHeatmapVisTypeDefinition = (deps: KbnVislibVisTypesDependenci
       {
         group: AggGroupNames.Buckets,
         name: 'segment',
-        title: i18n.translate('kbnVislibVisTypes.heatmap.segmentTitle', {
+        title: i18n.translate('visTypeVislib.heatmap.segmentTitle', {
           defaultMessage: 'X-axis',
         }),
         min: 0,
@@ -119,7 +121,7 @@ export const createHeatmapVisTypeDefinition = (deps: KbnVislibVisTypesDependenci
       {
         group: AggGroupNames.Buckets,
         name: 'group',
-        title: i18n.translate('kbnVislibVisTypes.heatmap.groupTitle', { defaultMessage: 'Y-axis' }),
+        title: i18n.translate('visTypeVislib.heatmap.groupTitle', { defaultMessage: 'Y-axis' }),
         min: 0,
         max: 1,
         aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
@@ -127,7 +129,7 @@ export const createHeatmapVisTypeDefinition = (deps: KbnVislibVisTypesDependenci
       {
         group: AggGroupNames.Buckets,
         name: 'split',
-        title: i18n.translate('kbnVislibVisTypes.heatmap.splitTitle', {
+        title: i18n.translate('visTypeVislib.heatmap.splitTitle', {
           defaultMessage: 'Split chart',
         }),
         min: 0,

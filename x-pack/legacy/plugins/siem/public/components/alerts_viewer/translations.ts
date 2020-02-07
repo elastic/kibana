@@ -7,19 +7,19 @@
 import { i18n } from '@kbn/i18n';
 
 export const ALERTS_DOCUMENT_TYPE = i18n.translate('xpack.siem.alertsView.alertsDocumentType', {
-  defaultMessage: 'Alerts',
+  defaultMessage: 'External alerts',
 });
 
 export const TOTAL_COUNT_OF_ALERTS = i18n.translate('xpack.siem.alertsView.totalCountOfAlerts', {
-  defaultMessage: 'alerts match the search criteria',
+  defaultMessage: 'external alerts match the search criteria',
 });
 
 export const ALERTS_TABLE_TITLE = i18n.translate('xpack.siem.alertsView.alertsTableTitle', {
-  defaultMessage: 'Alerts',
+  defaultMessage: 'External alerts',
 });
 
 export const ALERTS_GRAPH_TITLE = i18n.translate('xpack.siem.alertsView.alertsGraphTitle', {
-  defaultMessage: 'Alert detection frequency',
+  defaultMessage: 'External alerts count',
 });
 
 export const ALERTS_STACK_BY_MODULE = i18n.translate(
@@ -36,7 +36,7 @@ export const SHOWING = i18n.translate('xpack.siem.alertsView.showing', {
 export const UNIT = (totalCount: number) =>
   i18n.translate('xpack.siem.alertsView.unit', {
     values: { totalCount },
-    defaultMessage: `{totalCount, plural, =1 {alert} other {alerts}}`,
+    defaultMessage: `external {totalCount, plural, =1 {alert} other {alerts}}`,
   });
 
 export const ERROR_FETCHING_ALERTS_DATA = i18n.translate(

@@ -24,8 +24,11 @@ import {
   SavedObjectAttributes,
   SavedObjectReference,
 } from 'kibana/public';
-import { ISearchSource } from 'ui/courier';
-import { IIndexPattern, IndexPatternsContract } from '../../../../plugins/data/public';
+import {
+  IIndexPattern,
+  IndexPatternsContract,
+  ISearchSource,
+} from '../../../../plugins/data/public';
 
 export interface SavedObject {
   _serialize: () => { attributes: SavedObjectAttributes; references: SavedObjectReference[] };

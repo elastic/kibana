@@ -25,12 +25,14 @@ export class UiNavLink {
       order = 0,
       url,
       subUrlBase,
+      disableSubUrlTracking,
       icon,
       euiIconType,
       linkToLastSubUrl = true,
       hidden = false,
       disabled = false,
       tooltip = '',
+      category,
     } = spec;
 
     this._id = id;
@@ -38,12 +40,14 @@ export class UiNavLink {
     this._order = order;
     this._url = url;
     this._subUrlBase = subUrlBase || url;
+    this._disableSubUrlTracking = disableSubUrlTracking;
     this._icon = icon;
     this._euiIconType = euiIconType;
     this._linkToLastSubUrl = linkToLastSubUrl;
     this._hidden = hidden;
     this._disabled = disabled;
     this._tooltip = tooltip;
+    this._category = category;
   }
 
   getOrder() {
@@ -60,9 +64,11 @@ export class UiNavLink {
       icon: this._icon,
       euiIconType: this._euiIconType,
       linkToLastSubUrl: this._linkToLastSubUrl,
+      disableSubUrlTracking: this._disableSubUrlTracking,
       hidden: this._hidden,
       disabled: this._disabled,
       tooltip: this._tooltip,
+      category: this._category,
     };
   }
 }

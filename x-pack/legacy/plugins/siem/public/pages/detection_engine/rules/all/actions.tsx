@@ -21,6 +21,7 @@ import {
   displayErrorToast,
   displaySuccessToast,
 } from '../../../../components/toasters';
+import { track, METRIC_TYPE, TELEMETRY_EVENT } from '../../../../lib/telemetry';
 
 import * as i18n from '../translations';
 import { bucketRulesResponse } from './helpers';
@@ -38,12 +39,7 @@ export const duplicateRulesAction = async (
     const ruleIds = rules.map(r => r.id);
     dispatch({ type: 'updateLoading', ids: ruleIds, isLoading: true });
     const duplicatedRules = await duplicateRules({ rules });
-    dispatch({ type: 'updateLoading', ids: ruleIds, isLoading: false });
-    dispatch({
-      type: 'updateRules',
-      rules: duplicatedRules,
-      appendRuleId: rules[rules.length - 1].id,
-    });
+    dispatch({ type: 'refresh' });
     displaySuccessToast(
       i18n.SUCCESSFULLY_DUPLICATED_RULES(duplicatedRules.length),
       dispatchToaster
@@ -64,13 +60,12 @@ export const deleteRulesAction = async (
   onRuleDeleted?: () => void
 ) => {
   try {
-    dispatch({ type: 'updateLoading', ids, isLoading: true });
+    dispatch({ type: 'loading', isLoading: true });
 
     const response = await deleteRules({ ids });
-    const { rules, errors } = bucketRulesResponse(response);
+    const { errors } = bucketRulesResponse(response);
 
-    dispatch({ type: 'deleteRules', rules });
-
+    dispatch({ type: 'refresh' });
     if (errors.length > 0) {
       displayErrorToast(
         i18n.BATCH_ACTION_DELETE_SELECTED_ERROR(ids.length),
@@ -113,6 +108,19 @@ export const enableRulesAction = async (
         errorTitle,
         errors.map(e => e.error.message),
         dispatchToaster
+      );
+    }
+
+    if (rules.some(rule => rule.immutable)) {
+      track(
+        METRIC_TYPE.COUNT,
+        enabled ? TELEMETRY_EVENT.SIEM_RULE_ENABLED : TELEMETRY_EVENT.SIEM_RULE_DISABLED
+      );
+    }
+    if (rules.some(rule => !rule.immutable)) {
+      track(
+        METRIC_TYPE.COUNT,
+        enabled ? TELEMETRY_EVENT.CUSTOM_RULE_ENABLED : TELEMETRY_EVENT.CUSTOM_RULE_DISABLED
       );
     }
   } catch (e) {

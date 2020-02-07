@@ -38,6 +38,7 @@ import { formatHitProvider } from './format_hit';
 import { flattenHitWrapper } from './flatten_hit';
 import { IIndexPatternsApiClient } from './index_patterns_api_client';
 import { getNotifications, getFieldFormats } from '../../services';
+import { TypeMeta } from './types';
 
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
 const type = 'index-pattern';
@@ -49,7 +50,7 @@ export class IndexPattern implements IIndexPattern {
   public title: string = '';
   public type?: string;
   public fieldFormatMap: any;
-  public typeMeta: any;
+  public typeMeta?: TypeMeta;
   public fields: IFieldList;
   public timeFieldName: string | undefined;
   public formatHit: any;
@@ -336,6 +337,10 @@ export class IndexPattern implements IIndexPattern {
     return this.fields.getByName(name);
   }
 
+  getAggregationRestrictions() {
+    return this.typeMeta?.aggs;
+  }
+
   isWildcard() {
     return _.includes(this.title, '*');
   }
@@ -492,10 +497,13 @@ export class IndexPattern implements IIndexPattern {
 
         toasts.addError(err, {
           title: i18n.translate('data.indexPatterns.fetchFieldErrorTitle', {
-            defaultMessage: 'Error fetching fields',
+            defaultMessage: 'Error fetching fields for index pattern {title} (ID: {id})',
+            values: {
+              id: this.id,
+              title: this.title,
+            },
           }),
         });
-        throw err;
       });
   }
 

@@ -90,6 +90,11 @@ export const ImportRuleModalComponent = ({
     }
   }, [selectedFiles, overwrite]);
 
+  const handleCloseModal = useCallback(() => {
+    setSelectedFiles(null);
+    closeModal();
+  }, [closeModal]);
+
   return (
     <>
       {showModal && (
@@ -125,7 +130,7 @@ export const ImportRuleModalComponent = ({
             </EuiModalBody>
 
             <EuiModalFooter>
-              <EuiButtonEmpty onClick={closeModal}>{i18n.CANCEL_BUTTON}</EuiButtonEmpty>
+              <EuiButtonEmpty onClick={handleCloseModal}>{i18n.CANCEL_BUTTON}</EuiButtonEmpty>
               <EuiButton
                 onClick={importRulesCallback}
                 disabled={selectedFiles == null || isImporting}
