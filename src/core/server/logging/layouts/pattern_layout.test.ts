@@ -20,7 +20,7 @@
 import { stripAnsiSnapshotSerializer } from '../../../test_helpers/strip_ansi_snapshot_serializer';
 import { LogLevel } from '../log_level';
 import { LogRecord } from '../log_record';
-import { PatternLayout } from './pattern_layout';
+import { PatternLayout, patternSchema } from './pattern_layout';
 
 const records: LogRecord[] = [
   {
@@ -191,4 +191,156 @@ test('`format()` allows specifying pattern with meta.', () => {
   expect(layout.format(record)).toMatchInlineSnapshot(
     `"context-[{\\"from\\":\\"v7\\",\\"to\\":\\"v8\\"}]-message"`
   );
+});
+
+describe('format', () => {
+  describe('timestamp', () => {
+    const record = {
+      context: 'context',
+      level: LogLevel.Debug,
+      message: 'message',
+      timestamp: new Date(Date.UTC(2012, 1, 1)),
+      pid: 5355,
+    };
+    it('uses ISO8601 as default', () => {
+      const layout = new PatternLayout();
+
+      expect(layout.format(record)).toMatchInlineSnapshot(
+        `"[2012-02-01T00:00:00.000Z][DEBUG][context] message"`
+      );
+    });
+    describe('supports specifying a predefined format', () => {
+      it('ISO8601', () => {
+        const layout = new PatternLayout('[{timestamp{ISO8601}}][{context}]');
+
+        expect(layout.format(record)).toMatchInlineSnapshot(
+          `"[2012-02-01T00:00:00.000Z][context]"`
+        );
+      });
+
+      it('ISO8601_TZ', () => {
+        const layout = new PatternLayout(
+          '[{timestamp{ISO8601_TZ}{America/Los_Angeles}}][{context}]'
+        );
+
+        expect(layout.format(record)).toMatchInlineSnapshot(
+          `"[2012-01-31T16:00:00,000-0800][context]"`
+        );
+      });
+
+      it('ABSOLUTE', () => {
+        const layout = new PatternLayout('[{timestamp{ABSOLUTE}}][{context}]');
+
+        expect(layout.format(record)).toMatchInlineSnapshot(`"[01:00:00,000][context]"`);
+      });
+
+      it('UNIX', () => {
+        const layout = new PatternLayout('[{timestamp{UNIX}}][{context}]');
+
+        expect(layout.format(record)).toMatchInlineSnapshot(`"[1328054400][context]"`);
+      });
+
+      it('UNIX_MILLIS', () => {
+        const layout = new PatternLayout('[{timestamp{UNIX_MILLIS}}][{context}]');
+
+        expect(layout.format(record)).toMatchInlineSnapshot(`"[1328054400000][context]"`);
+      });
+    });
+
+    describe('supports specifying a predefined format and timezone', () => {
+      it('ISO8601', () => {
+        const layout = new PatternLayout('[{timestamp{ISO8601}{America/Los_Angeles}}][{context}]');
+
+        expect(layout.format(record)).toMatchInlineSnapshot(
+          `"[2012-02-01T00:00:00.000Z][context]"`
+        );
+      });
+
+      it('ISO8601_TZ', () => {
+        const layout = new PatternLayout(
+          '[{timestamp{ISO8601_TZ}{America/Los_Angeles}}][{context}]'
+        );
+
+        expect(layout.format(record)).toMatchInlineSnapshot(
+          `"[2012-01-31T16:00:00,000-0800][context]"`
+        );
+      });
+
+      it('ABSOLUTE', () => {
+        const layout = new PatternLayout('[{timestamp{ABSOLUTE}{America/Los_Angeles}}][{context}]');
+
+        expect(layout.format(record)).toMatchInlineSnapshot(`"[16:00:00,000][context]"`);
+      });
+
+      it('UNIX', () => {
+        const layout = new PatternLayout('[{timestamp{UNIX}{America/Los_Angeles}}][{context}]');
+
+        expect(layout.format(record)).toMatchInlineSnapshot(`"[1328054400][context]"`);
+      });
+
+      it('UNIX_MILLIS', () => {
+        const layout = new PatternLayout(
+          '[{timestamp{UNIX_MILLIS}{America/Los_Angeles}}][{context}]'
+        );
+
+        expect(layout.format(record)).toMatchInlineSnapshot(`"[1328054400000][context]"`);
+      });
+    });
+    it('formats several conversions patterns correctly', () => {
+      const layout = new PatternLayout(
+        '[{timestamp{ABSOLUTE}{America/Los_Angeles}}][{context}][{timestamp{UNIX}}]'
+      );
+
+      expect(layout.format(record)).toMatchInlineSnapshot(`"[16:00:00,000][context][1328054400]"`);
+    });
+  });
+});
+
+describe('schema', () => {
+  describe('pattern', () => {
+    describe('{timestamp}', () => {
+      it('does not fail when {timestamp} not present', () => {
+        expect(patternSchema.validate('')).toBe('');
+        expect(patternSchema.validate('{pid}')).toBe('{pid}');
+      });
+
+      it('does not fail on {timestamp} without params', () => {
+        expect(patternSchema.validate('{timestamp}')).toBe('{timestamp}');
+        expect(patternSchema.validate('{timestamp}}')).toBe('{timestamp}}');
+        expect(patternSchema.validate('{{timestamp}}')).toBe('{{timestamp}}');
+      });
+
+      it('does not fail on {timestamp} with predefined date format', () => {
+        expect(patternSchema.validate('{timestamp{ISO8601}}')).toBe('{timestamp{ISO8601}}');
+      });
+
+      it('does not fail on {timestamp} with predefined date format and valid timezone', () => {
+        expect(patternSchema.validate('{timestamp{ISO8601_TZ}{Europe/Berlin}}')).toBe(
+          '{timestamp{ISO8601_TZ}{Europe/Berlin}}'
+        );
+      });
+
+      it('fails on {timestamp} with unknown date format', () => {
+        expect(() =>
+          patternSchema.validate('{timestamp{HH:MM:SS}}')
+        ).toThrowErrorMatchingInlineSnapshot(
+          `"Date format expected one of ISO8601, ISO8601_TZ, ABSOLUTE, UNIX, UNIX_MILLIS, but given: HH:MM:SS"`
+        );
+      });
+
+      it('fails on {timestamp} with predefined date format and invalid timezone', () => {
+        expect(() =>
+          patternSchema.validate('{timestamp{ISO8601_TZ}{Europe/Kibana}}')
+        ).toThrowErrorMatchingInlineSnapshot(`"Unknown timezone: Europe/Kibana"`);
+      });
+
+      it('validates several {timestamp} in pattern', () => {
+        expect(() =>
+          patternSchema.validate('{timestamp{ISO8601_TZ}{Europe/Berlin}}{message}{timestamp{HH}}')
+        ).toThrowErrorMatchingInlineSnapshot(
+          `"Date format expected one of ISO8601, ISO8601_TZ, ABSOLUTE, UNIX, UNIX_MILLIS, but given: HH"`
+        );
+      });
+    });
+  });
 });
