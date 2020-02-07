@@ -4490,11 +4490,7 @@ const tslib_1 = __webpack_require__(36);
 var proc_runner_1 = __webpack_require__(37);
 exports.withProcRunner = proc_runner_1.withProcRunner;
 exports.ProcRunner = proc_runner_1.ProcRunner;
-var tooling_log_1 = __webpack_require__(415);
-exports.ToolingLog = tooling_log_1.ToolingLog;
-exports.ToolingLogTextWriter = tooling_log_1.ToolingLogTextWriter;
-exports.pickLevelFromFlags = tooling_log_1.pickLevelFromFlags;
-exports.ToolingLogCollectingWriter = tooling_log_1.ToolingLogCollectingWriter;
+tslib_1.__exportStar(__webpack_require__(415), exports);
 var serializers_1 = __webpack_require__(420);
 exports.createAbsolutePathSerializer = serializers_1.createAbsolutePathSerializer;
 var certs_1 = __webpack_require__(445);
@@ -36634,6 +36630,7 @@ var tooling_log_text_writer_1 = __webpack_require__(417);
 exports.ToolingLogTextWriter = tooling_log_text_writer_1.ToolingLogTextWriter;
 var log_levels_1 = __webpack_require__(418);
 exports.pickLevelFromFlags = log_levels_1.pickLevelFromFlags;
+exports.parseLogLevel = log_levels_1.parseLogLevel;
 var tooling_log_collecting_writer_1 = __webpack_require__(419);
 exports.ToolingLogCollectingWriter = tooling_log_collecting_writer_1.ToolingLogCollectingWriter;
 
@@ -36789,17 +36786,23 @@ class ToolingLogTextWriter {
             throw new Error('ToolingLogTextWriter requires the `writeTo` option be set to a stream (like process.stdout)');
         }
     }
-    write({ type, indent, args }) {
-        if (!shouldWriteType(this.level, type)) {
+    write(msg) {
+        if (!shouldWriteType(this.level, msg.type)) {
             return false;
         }
-        const txt = type === 'error' ? stringifyError(args[0]) : util_1.format(args[0], ...args.slice(1));
-        const prefix = has(MSG_PREFIXES, type) ? MSG_PREFIXES[type] : '';
+        const prefix = has(MSG_PREFIXES, msg.type) ? MSG_PREFIXES[msg.type] : '';
+        ToolingLogTextWriter.write(this.writeTo, prefix, msg);
+        return true;
+    }
+    static write(writeTo, prefix, msg) {
+        const txt = msg.type === 'error'
+            ? stringifyError(msg.args[0])
+            : util_1.format(msg.args[0], ...msg.args.slice(1));
         (prefix + txt).split('\n').forEach((line, i) => {
             let lineIndent = '';
-            if (indent > 0) {
+            if (msg.indent > 0) {
                 // if we are indenting write some spaces followed by a symbol
-                lineIndent += ' '.repeat(indent - 1);
+                lineIndent += ' '.repeat(msg.indent - 1);
                 lineIndent += line.startsWith('-') ? '└' : '│';
             }
             if (line && prefix && i > 0) {
@@ -36807,9 +36810,8 @@ class ToolingLogTextWriter {
                 // the first if this message gets a prefix
                 lineIndent += PREFIX_INDENT;
             }
-            this.writeTo.write(`${lineIndent}${line}\n`);
+            writeTo.write(`${lineIndent}${line}\n`);
         });
-        return true;
     }
 }
 exports.ToolingLogTextWriter = ToolingLogTextWriter;
