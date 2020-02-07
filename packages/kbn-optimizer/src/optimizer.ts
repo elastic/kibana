@@ -151,7 +151,7 @@ export class Optimizer {
         const onlineBundles = this.config.bundles.filter(b => !offlineBundles.includes(b));
 
         return {
-          phase: onlineBundles.length || this.config.watch ? 'initialized' : 'success',
+          phase: 'initialized',
           version,
           compilerStates: [],
           durSec: msToSec(Date.now() - startTime),
@@ -163,12 +163,6 @@ export class Optimizer {
     ).pipe(
       mergeMap(
         (initState): Rx.Observable<OptimizerMsg> => {
-          if (initState.phase === 'success') {
-            return Rx.of({
-              state: initState,
-            });
-          }
-
           const change$ = this.config.watch
             ? this.watchBundlesForChanges$(initState.offlineBundles).pipe(share())
             : Rx.EMPTY;
@@ -193,7 +187,13 @@ export class Optimizer {
           );
 
           return Rx.concat(
-            Rx.of({ state: initState }),
+            Rx.from([
+              { state: initState },
+              // emit a success state if there are no online bundles
+              ...(!initState.onlineBundles.length
+                ? [{ state: { ...initState, phase: 'success' as const } }]
+                : []),
+            ]),
             Rx.merge(change$, workerMsg$).pipe(
               pipeClosure(event$ => {
                 let prevState = initState;
