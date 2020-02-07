@@ -13,7 +13,7 @@ const bodySchema = schema.object({
   indices: schema.arrayOf(schema.string()),
 });
 
-export function registerUnfreezeRoute({ router, license }: RouteDependencies) {
+export function registerUnfreezeRoute({ router, license, lib }: RouteDependencies) {
   router.post(
     { path: addBasePath('/indices/unfreeze'), validate: { body: bodySchema } },
     license.guardApiRoute(async (ctx, req, res) => {
@@ -23,8 +23,19 @@ export function registerUnfreezeRoute({ router, license }: RouteDependencies) {
         method: 'POST',
       };
 
-      await ctx.core.elasticsearch.dataClient.callAsCurrentUser('transport.request', params);
-      return res.ok();
+      try {
+        await ctx.core.elasticsearch.dataClient.callAsCurrentUser('transport.request', params);
+        return res.ok();
+      } catch (e) {
+        if (lib.isEsError(e)) {
+          return res.customError({
+            statusCode: e.statusCode,
+            body: e,
+          });
+        }
+        // Case: default
+        return res.internalError({ body: e });
+      }
     })
   );
 }

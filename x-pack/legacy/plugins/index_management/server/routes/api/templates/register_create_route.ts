@@ -14,7 +14,7 @@ import { templateSchema } from './validate_schemas';
 
 const bodySchema = templateSchema;
 
-export function registerCreateRoute({ router, license }: RouteDependencies) {
+export function registerCreateRoute({ router, license, lib }: RouteDependencies) {
   router.put(
     { path: addBasePath('/templates'), validate: { body: bodySchema } },
     license.guardApiRoute(async (ctx, req, res) => {
@@ -48,20 +48,31 @@ export function registerCreateRoute({ router, license }: RouteDependencies) {
         });
       }
 
-      // Otherwise create new index template
-      const response = await callAsCurrentUser('indices.putTemplate', {
-        name,
-        order,
-        body: {
-          index_patterns,
-          version,
-          settings,
-          mappings,
-          aliases,
-        },
-      });
+      try {
+        // Otherwise create new index template
+        const response = await callAsCurrentUser('indices.putTemplate', {
+          name,
+          order,
+          body: {
+            index_patterns,
+            version,
+            settings,
+            mappings,
+            aliases,
+          },
+        });
 
-      return res.ok({ body: response });
+        return res.ok({ body: response });
+      } catch (e) {
+        if (lib.isEsError(e)) {
+          return res.customError({
+            statusCode: e.statusCode,
+            body: e,
+          });
+        }
+        // Case: default
+        return res.internalError({ body: e });
+      }
     })
   );
 }

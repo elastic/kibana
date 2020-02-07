@@ -14,7 +14,7 @@ const paramsSchema = schema.object({
   indexName: schema.string(),
 });
 
-export function registerUpdateRoute({ router, license }: RouteDependencies) {
+export function registerUpdateRoute({ router, license, lib }: RouteDependencies) {
   router.put(
     {
       path: addBasePath('/settings/{indexName}'),
@@ -30,11 +30,22 @@ export function registerUpdateRoute({ router, license }: RouteDependencies) {
         body: req.body,
       };
 
-      const response = await ctx.core.elasticsearch.dataClient.callAsCurrentUser(
-        'indices.putSettings',
-        params
-      );
-      return res.ok({ body: response });
+      try {
+        const response = await ctx.core.elasticsearch.dataClient.callAsCurrentUser(
+          'indices.putSettings',
+          params
+        );
+        return res.ok({ body: response });
+      } catch (e) {
+        if (lib.isEsError(e)) {
+          return res.customError({
+            statusCode: e.statusCode,
+            body: e,
+          });
+        }
+        // Case: default
+        return res.internalError({ body: e });
+      }
     })
   );
 }

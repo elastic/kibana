@@ -13,7 +13,7 @@ const bodySchema = schema.object({
   indices: schema.arrayOf(schema.string()),
 });
 
-export function registerFreezeRoute({ router, license }: RouteDependencies) {
+export function registerFreezeRoute({ router, license, lib }: RouteDependencies) {
   router.post(
     { path: addBasePath('/indices/freeze'), validate: { body: bodySchema } },
     license.guardApiRoute(async (ctx, req, res) => {
@@ -25,8 +25,22 @@ export function registerFreezeRoute({ router, license }: RouteDependencies) {
         method: 'POST',
       };
 
-      await await ctx.core.elasticsearch.dataClient.callAsCurrentUser('transport.request', params);
-      return res.ok();
+      try {
+        await await ctx.core.elasticsearch.dataClient.callAsCurrentUser(
+          'transport.request',
+          params
+        );
+        return res.ok();
+      } catch (e) {
+        if (lib.isEsError(e)) {
+          return res.customError({
+            statusCode: e.statusCode,
+            body: e,
+          });
+        }
+        // Case: default
+        return res.internalError({ body: e });
+      }
     })
   );
 }

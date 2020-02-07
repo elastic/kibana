@@ -21,7 +21,7 @@ function formatHit(hit: { _shards: any; indices: { [key: string]: any } }, index
   };
 }
 
-export function registerStatsRoute({ router, license }: RouteDependencies) {
+export function registerStatsRoute({ router, license, lib }: RouteDependencies) {
   router.get(
     { path: addBasePath('/stats/{indexName}'), validate: { params: paramsSchema } },
     license.guardApiRoute(async (ctx, req, res) => {
@@ -30,12 +30,23 @@ export function registerStatsRoute({ router, license }: RouteDependencies) {
         expand_wildcards: 'none',
         index: indexName,
       };
-      const hit = await ctx.core.elasticsearch.dataClient.callAsCurrentUser(
-        'indices.stats',
-        params
-      );
 
-      return res.ok({ body: formatHit(hit, indexName) });
+      try {
+        const hit = await ctx.core.elasticsearch.dataClient.callAsCurrentUser(
+          'indices.stats',
+          params
+        );
+        return res.ok({ body: formatHit(hit, indexName) });
+      } catch (e) {
+        if (lib.isEsError(e)) {
+          return res.customError({
+            statusCode: e.statusCode,
+            body: e,
+          });
+        }
+        // Case: default
+        return res.internalError({ body: e });
+      }
     })
   );
 }

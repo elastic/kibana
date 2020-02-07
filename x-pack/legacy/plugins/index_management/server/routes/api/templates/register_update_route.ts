@@ -16,7 +16,7 @@ const paramsSchema = schema.object({
   name: schema.string(),
 });
 
-export function registerUpdateRoute({ router, license }: RouteDependencies) {
+export function registerUpdateRoute({ router, license, lib }: RouteDependencies) {
   router.put(
     {
       path: addBasePath('/templates/{name}'),
@@ -37,20 +37,31 @@ export function registerUpdateRoute({ router, license }: RouteDependencies) {
         return res.notFound();
       }
 
-      // Next, update index template
-      const response = await callAsCurrentUser('indices.putTemplate', {
-        name,
-        order,
-        body: {
-          index_patterns,
-          version,
-          settings,
-          mappings,
-          aliases,
-        },
-      });
+      try {
+        // Next, update index template
+        const response = await callAsCurrentUser('indices.putTemplate', {
+          name,
+          order,
+          body: {
+            index_patterns,
+            version,
+            settings,
+            mappings,
+            aliases,
+          },
+        });
 
-      return res.ok({ body: response });
+        return res.ok({ body: response });
+      } catch (e) {
+        if (lib.isEsError(e)) {
+          return res.customError({
+            statusCode: e.statusCode,
+            body: e,
+          });
+        }
+        // Case: default
+        return res.internalError({ body: e });
+      }
     })
   );
 }

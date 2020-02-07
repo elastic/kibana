@@ -12,7 +12,7 @@ const bodySchema = schema.object({
   indices: schema.arrayOf(schema.string()),
 });
 
-export function registerOpenRoute({ router, license }: RouteDependencies) {
+export function registerOpenRoute({ router, license, lib }: RouteDependencies) {
   router.post(
     { path: addBasePath('/indices/open'), validate: { body: bodySchema } },
     license.guardApiRoute(async (ctx, req, res) => {
@@ -24,8 +24,20 @@ export function registerOpenRoute({ router, license }: RouteDependencies) {
         format: 'json',
         index: indices,
       };
-      await await ctx.core.elasticsearch.dataClient.callAsCurrentUser('indices.open', params);
-      return res.ok();
+
+      try {
+        await await ctx.core.elasticsearch.dataClient.callAsCurrentUser('indices.open', params);
+        return res.ok();
+      } catch (e) {
+        if (lib.isEsError(e)) {
+          return res.customError({
+            statusCode: e.statusCode,
+            body: e,
+          });
+        }
+        // Case: default
+        return res.internalError({ body: e });
+      }
     })
   );
 }

@@ -14,7 +14,7 @@ const bodySchema = schema.object({
   maxNumSegments: schema.number(),
 });
 
-export function registerForcemergeRoute({ router, license }: RouteDependencies) {
+export function registerForcemergeRoute({ router, license, lib }: RouteDependencies) {
   router.post(
     {
       path: addBasePath('/indices/forcemerge'),
@@ -33,8 +33,19 @@ export function registerForcemergeRoute({ router, license }: RouteDependencies) 
         (params as any).max_num_segments = maxNumSegments;
       }
 
-      await ctx.core.elasticsearch.dataClient.callAsCurrentUser('indices.forcemerge', params);
-      return res.ok();
+      try {
+        await ctx.core.elasticsearch.dataClient.callAsCurrentUser('indices.forcemerge', params);
+        return res.ok();
+      } catch (e) {
+        if (lib.isEsError(e)) {
+          return res.customError({
+            statusCode: e.statusCode,
+            body: e,
+          });
+        }
+        // Case: default
+        return res.internalError({ body: e });
+      }
     })
   );
 }

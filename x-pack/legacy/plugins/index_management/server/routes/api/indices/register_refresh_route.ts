@@ -13,7 +13,7 @@ const bodySchema = schema.object({
   indices: schema.arrayOf(schema.string()),
 });
 
-export function registerRefreshRoute({ router, license }: RouteDependencies) {
+export function registerRefreshRoute({ router, license, lib }: RouteDependencies) {
   router.post(
     { path: addBasePath('/indices/refresh'), validate: { body: bodySchema } },
     license.guardApiRoute(async (ctx, req, res) => {
@@ -26,8 +26,19 @@ export function registerRefreshRoute({ router, license }: RouteDependencies) {
         index: indices,
       };
 
-      await ctx.core.elasticsearch.dataClient.callAsCurrentUser('indices.refresh', params);
-      return res.ok();
+      try {
+        await ctx.core.elasticsearch.dataClient.callAsCurrentUser('indices.refresh', params);
+        return res.ok();
+      } catch (e) {
+        if (lib.isEsError(e)) {
+          return res.customError({
+            statusCode: e.statusCode,
+            body: e,
+          });
+        }
+        // Case: default
+        return res.internalError({ body: e });
+      }
     })
   );
 }

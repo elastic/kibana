@@ -19,7 +19,7 @@ function formatHit(hit: { [key: string]: {} }) {
   return hit[key];
 }
 
-export function registerLoadRoute({ router, license }: RouteDependencies) {
+export function registerLoadRoute({ router, license, lib }: RouteDependencies) {
   router.get(
     { path: addBasePath('/settings/{indexName}'), validate: { params: paramsSchema } },
     license.guardApiRoute(async (ctx, req, res) => {
@@ -32,11 +32,22 @@ export function registerLoadRoute({ router, license }: RouteDependencies) {
         index: indexName,
       };
 
-      const hit = await ctx.core.elasticsearch.dataClient.callAsCurrentUser(
-        'indices.getSettings',
-        params
-      );
-      return res.ok({ body: formatHit(hit) });
+      try {
+        const hit = await ctx.core.elasticsearch.dataClient.callAsCurrentUser(
+          'indices.getSettings',
+          params
+        );
+        return res.ok({ body: formatHit(hit) });
+      } catch (e) {
+        if (lib.isEsError(e)) {
+          return res.customError({
+            statusCode: e.statusCode,
+            body: e,
+          });
+        }
+        // Case: default
+        return res.internalError({ body: e });
+      }
     })
   );
 }

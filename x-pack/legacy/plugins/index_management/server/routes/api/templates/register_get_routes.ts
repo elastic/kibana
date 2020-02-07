@@ -28,23 +28,37 @@ const paramsSchema = schema.object({
   name: schema.string(),
 });
 
-export function registerGetOneRoute({ router, license }: RouteDependencies) {
+export function registerGetOneRoute({ router, license, lib }: RouteDependencies) {
   router.get(
     { path: addBasePath('/templates/{name}'), validate: { params: paramsSchema } },
     license.guardApiRoute(async (ctx, req, res) => {
       const { name } = req.params as typeof paramsSchema.type;
       const { callAsCurrentUser } = ctx.core.elasticsearch.dataClient;
 
-      const managedTemplatePrefix = await getManagedTemplatePrefix(callAsCurrentUser);
-      const indexTemplateByName = await callAsCurrentUser('indices.getTemplate', { name });
+      try {
+        const managedTemplatePrefix = await getManagedTemplatePrefix(callAsCurrentUser);
+        const indexTemplateByName = await callAsCurrentUser('indices.getTemplate', { name });
 
-      if (indexTemplateByName[name]) {
-        return res.ok({
-          body: deserializeTemplate({ ...indexTemplateByName[name], name }, managedTemplatePrefix),
-        });
+        if (indexTemplateByName[name]) {
+          return res.ok({
+            body: deserializeTemplate(
+              { ...indexTemplateByName[name], name },
+              managedTemplatePrefix
+            ),
+          });
+        }
+
+        return res.notFound();
+      } catch (e) {
+        if (lib.isEsError(e)) {
+          return res.customError({
+            statusCode: e.statusCode,
+            body: e,
+          });
+        }
+        // Case: default
+        return res.internalError({ body: e });
       }
-
-      return res.notFound();
     })
   );
 }
