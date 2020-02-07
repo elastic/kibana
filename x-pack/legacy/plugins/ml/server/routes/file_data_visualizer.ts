@@ -61,6 +61,24 @@ export function fileDataVisualizerRoutes({
       path: '/api/ml/file_data_visualizer/analyze_file',
       validate: {
         body: schema.any(),
+        query: schema.maybe(
+          schema.object({
+            charset: schema.maybe(schema.string()),
+            column_names: schema.maybe(schema.string()),
+            delimiter: schema.maybe(schema.string()),
+            explain: schema.maybe(schema.string()),
+            format: schema.maybe(schema.string()),
+            grok_pattern: schema.maybe(schema.string()),
+            has_header_row: schema.maybe(schema.string()),
+            line_merge_size_limit: schema.maybe(schema.string()),
+            lines_to_sample: schema.maybe(schema.string()),
+            quote: schema.maybe(schema.string()),
+            should_trim_fields: schema.maybe(schema.string()),
+            timeout: schema.maybe(schema.string()),
+            timestamp_field: schema.maybe(schema.string()),
+            timestamp_format: schema.maybe(schema.string()),
+          })
+        ),
       },
       options: {
         body: {
@@ -99,7 +117,7 @@ export function fileDataVisualizerRoutes({
           settings: schema.maybe(schema.any()),
           mappings: schema.any(),
           ingestPipeline: schema.object({
-            id: schema.string(),
+            id: schema.maybe(schema.string()),
             pipeline: schema.maybe(schema.any()),
           }),
         }),
