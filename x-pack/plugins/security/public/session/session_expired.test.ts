@@ -80,7 +80,7 @@ describe('Session Expiration', () => {
 
       const url = await newUrlPromise;
       expect(url).toBe(
-        `/foo/logout?next=${encodeURIComponent('/bar?baz=quz#quuz')}&msg=SESSION_EXPIRED`
+        `/foo/logout?next=${encodeURIComponent('/foo/bar?baz=quz#quuz')}&msg=SESSION_EXPIRED`
       );
     });
   });
