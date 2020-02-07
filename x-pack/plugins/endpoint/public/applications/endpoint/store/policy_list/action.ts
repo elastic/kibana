@@ -4,11 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { PolicyData } from '../../types';
+
 interface ServerReturnedPolicyListData {
   type: 'serverReturnedPolicyListData';
   payload: {
-    policyItems: object[];
-    // tbd...
+    policyItems: PolicyData[];
+    total: number;
+    pageSize: number;
+    pageIndex: number;
   };
 }
 

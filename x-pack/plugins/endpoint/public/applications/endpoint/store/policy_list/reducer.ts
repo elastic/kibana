@@ -11,8 +11,9 @@ import { AppAction } from '../action';
 const initialPolicyListState = (): PolicyListState => {
   return {
     policyItems: [],
+    isLoading: false,
     pageIndex: 0,
-    pageSize: 0,
+    pageSize: 10,
     total: 0,
   };
 };
@@ -24,14 +25,15 @@ export const policyListReducer: Reducer<PolicyListState, AppAction> = (
   if (action.type === 'serverReturnedPolicyListData') {
     return {
       ...state,
-      policyItems: action.payload.policyItems,
+      ...action.payload,
+      isLoading: false,
     };
   }
 
   if (action.type === 'userPaginatedPolicyListTable') {
     return {
       ...state,
-      ...action.payload,
+      isLoading: true,
     };
   }
 

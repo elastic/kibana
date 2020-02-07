@@ -14,12 +14,14 @@ import {
   EuiPageContentHeaderSection,
   EuiTitle,
   EuiBasicTable,
+  EuiTextColor,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage, FormattedDate, FormattedTime } from '@kbn/i18n/react';
 import { useDispatch } from 'react-redux';
 import { usePageId } from '../use_page_id';
 import {
+  selectIsLoading,
   selectPageIndex,
   selectPageSize,
   selectPolicyItems,
@@ -32,6 +34,17 @@ interface TTableChangeCallbackArguments {
   page: { index: number; size: number };
 }
 
+const FormattedDateAndTime: React.FC<{ date: Date }> = ({ date }) => {
+  return (
+    <span title={date.toISOString()}>
+      <FormattedDate value={date} year="numeric" month="short" day="2-digit" />
+      {' @ '}
+      <FormattedTime value={date} />
+    </span>
+  );
+};
+const renderDate = (d: string) => <FormattedDateAndTime date={new Date(d)} />;
+
 export const PolicyList = React.memo(() => {
   usePageId('policyListPage');
 
@@ -40,7 +53,7 @@ export const PolicyList = React.memo(() => {
   const pageIndex = usePolicyListSelector(selectPageIndex);
   const pageSize = usePolicyListSelector(selectPageSize);
   const totalItemCount = usePolicyListSelector(selectTotal);
-  const loading = true;
+  const loading = usePolicyListSelector(selectIsLoading);
 
   const paginationSetup = useMemo(() => {
     return {
@@ -86,7 +99,7 @@ export const PolicyList = React.memo(() => {
         }),
       },
       {
-        field: 'Failed',
+        field: 'failed',
         name: i18n.translate('xpack.endpoint.policyList.failedField', {
           defaultMessage: 'Failed',
         }),
@@ -102,6 +115,7 @@ export const PolicyList = React.memo(() => {
         name: i18n.translate('xpack.endpoint.policyList.createdField', {
           defaultMessage: 'Created',
         }),
+        render: renderDate,
       },
       {
         field: 'updated_by',
@@ -114,6 +128,7 @@ export const PolicyList = React.memo(() => {
         name: i18n.translate('xpack.endpoint.policyList.updatedField', {
           defaultMessage: 'Last Updated',
         }),
+        render: renderDate,
       },
     ],
     []
@@ -133,6 +148,15 @@ export const PolicyList = React.memo(() => {
                   />
                 </h2>
               </EuiTitle>
+              <h3>
+                <EuiTextColor color="subdued">
+                  <FormattedMessage
+                    id="xpack.endpoint.policyList.viewTitleTotalCount"
+                    defaultMessage="{totalItemCount} Policies"
+                    values={{ totalItemCount }}
+                  />
+                </EuiTextColor>
+              </h3>
             </EuiPageContentHeaderSection>
           </EuiPageContentHeader>
           <EuiPageContentBody>
