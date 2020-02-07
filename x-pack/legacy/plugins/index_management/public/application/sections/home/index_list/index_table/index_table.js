@@ -230,7 +230,7 @@ export class IndexTable extends Component {
           >
             {value}
           </EuiLink>
-          {renderBadges(index, filterChanged)}
+          {renderBadges(index, filterChanged, this.appServices.extensions)}
         </Fragment>
       );
     }
