@@ -33,7 +33,7 @@ Although the key can be specified in clear text in `kibana.yml`, it's recommende
 `xpack.actions.whitelistedHosts`::
 A list of hostnames that {kib} is allowed to connect to when built-in actions are triggered. It defaults to `[*]`, allowing any host, but keep in mind the potential for SSRF attacks when hosts are not explicitly whitelisted. 
 +
-Note that hosts associated with built-in actions such as slack and pagerduty are not automatically whitelisted. If you are not using the default `[*]` setting, you have to ensure that the corresponding endpoints are whitelisted as well.
+Note that hosts associated with built-in actions, such as Slack and PagerDuty, are not automatically whitelisted. If you are not using the default `[*]` setting, you must ensure that the corresponding endpoints are whitelisted as well.
 
 `xpack.actions.enabledActionTypes`::
 A list of action types that are enabled. It defaults to `[*]` enabling all types. The names for built-in {kib} action types are prefixed with a `.` and include: `.server-log`, `.slack`, `.email`, `.index`, `.pagerduty`, and `.webhook`. An empty array `[]` indicates no hosts can be connected to.
