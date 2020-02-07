@@ -29,6 +29,7 @@ import {
 } from '../../store/policy_list/selectors';
 import { usePolicyListSelector } from './policy_hooks';
 import { PolicyListAction } from '../../store/policy_list';
+import { PolicyData } from '../../types';
 
 interface TTableChangeCallbackArguments {
   page: { index: number; size: number };
@@ -44,7 +45,11 @@ const FormattedDateAndTime: React.FC<{ date: Date }> = ({ date }) => {
   );
 };
 
-const renderDate = (d: any) => <FormattedDateAndTime date={new Date(d as string)} />;
+const renderDate = (d: string, _item: PolicyData) => (
+  //                           ^^
+  // Second argument, declared even if not used, to avoid TS error
+  <FormattedDateAndTime date={new Date(d as string)} />
+);
 
 export const PolicyList = React.memo(() => {
   usePageId('policyListPage');
