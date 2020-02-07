@@ -36,5 +36,11 @@
     "FileDataVisualizer",
     "AnalyzeFile",
     "ImportFile"
+    "ResultsService",
+    "GetAnomaliesTableData",
+    "GetCategoryDefinition",
+    "GetMaxAnomalyScore",
+    "GetCategoryExamples",
+    "GetPartitionFieldsValues"
   ]
 }
