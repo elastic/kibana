@@ -19,7 +19,7 @@
 
 import { i18n } from '@kbn/i18n';
 import {
-  IAction,
+  Action,
   createAction,
   IncompatibleActionError,
 } from '../../../../../plugins/ui_actions/public';
@@ -55,7 +55,7 @@ async function isCompatible(context: ActionContext) {
 export function selectRangeAction(
   filterManager: FilterManager,
   timeFilter: TimefilterContract
-): IAction<ActionContext> {
+): Action<ActionContext> {
   return createAction<ActionContext>({
     type: SELECT_RANGE_ACTION,
     id: SELECT_RANGE_ACTION,
