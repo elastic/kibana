@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getOr } from 'lodash/fp';
-import React, { useEffect } from 'react';
+import { getOr, noop } from 'lodash/fp';
+import React, { useEffect, useMemo } from 'react';
 import { AuthenticationTable } from '../../../components/page/hosts/authentications_table';
 import { manageQuery } from '../../../components/page/manage_query';
 import { AuthenticationsQuery } from '../../../containers/authentications';
@@ -14,6 +14,7 @@ import { hostsModel } from '../../../store/hosts';
 import {
   MatrixHistogramOption,
   MatrixHistogramMappingTypes,
+  HistogramType,
 } from '../../../components/matrix_histogram/types';
 import { MatrixHistogramContainer } from '../../../components/matrix_histogram';
 import { KpiHostsChartColors } from '../../../components/page/hosts/kpi_hosts/types';
@@ -46,6 +47,16 @@ export const authMatrixDataMappingFields: MatrixHistogramMappingTypes = {
   },
 };
 
+const histogramConfigs = {
+  defaultStackByOption: authStackByOptions[0],
+  errorMessage: i18n.ERROR_FETCHING_AUTHENTICATIONS_DATA,
+  histogramType: 'authentications' as HistogramType,
+  mapping: authMatrixDataMappingFields,
+  stackByOptions: authStackByOptions,
+  title: i18n.NAVIGATION_AUTHENTICATIONS_TITLE,
+  updateDateRange: noop,
+};
+
 export const AuthenticationsQueryTabBody = ({
   deleteQuery,
   endDate,
@@ -54,7 +65,7 @@ export const AuthenticationsQueryTabBody = ({
   setQuery,
   startDate,
   type,
-  updateDateRange = () => {},
+  updateDateRange = noop,
 }: HostsComponentsQueryProps) => {
   useEffect(() => {
     return () => {
@@ -63,23 +74,25 @@ export const AuthenticationsQueryTabBody = ({
       }
     };
   }, [deleteQuery]);
+
+  const authHistogramConfigs = useMemo(
+    () => ({
+      ...histogramConfigs,
+      updateDateRange,
+    }),
+    [updateDateRange]
+  );
   return (
     <>
       <MatrixHistogramContainer
-        defaultStackByOption={authStackByOptions[0]}
         endDate={endDate}
-        errorMessage={i18n.ERROR_FETCHING_AUTHENTICATIONS_DATA}
         filterQuery={filterQuery}
-        histogramType="authentications"
         id={ID}
-        mapping={authMatrixDataMappingFields}
         setQuery={setQuery}
         sourceId="default"
         startDate={startDate}
-        stackByOptions={authStackByOptions}
-        title={i18n.NAVIGATION_AUTHENTICATIONS_TITLE}
         type={hostsModel.HostsType.page}
-        updateDateRange={updateDateRange}
+        {...authHistogramConfigs}
       />
       <AuthenticationsQuery
         endDate={endDate}

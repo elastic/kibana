@@ -33,7 +33,6 @@ export interface MatrixHistogramBasicProps {
   mapping?: MatrixHistogramMappingTypes;
   panelHeight?: number;
   setQuery: SetQuery;
-  sourceId: string;
   startDate: number;
   stackByOptions: MatrixHistogramOption[];
   subtitle?: string | GetSubTitle;

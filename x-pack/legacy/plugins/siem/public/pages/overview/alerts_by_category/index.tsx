@@ -15,7 +15,6 @@ import {
   SHOWING,
   UNIT,
 } from '../../../components/alerts_viewer/translations';
-import { alertsStackByOptions } from '../../../components/alerts_viewer';
 import { getDetectionEngineAlertUrl } from '../../../components/link_to/redirect_to_detection_engine';
 import { MatrixHistogramContainer } from '../../../components/matrix_histogram';
 import { useKibana, useUiSetting$ } from '../../../lib/kibana';
@@ -31,6 +30,7 @@ import { inputsModel } from '../../../store';
 import { HostsType } from '../../../store/hosts/model';
 
 import * as i18n from '../translations';
+import { alertsStackByOptions } from '../../../components/alerts_viewer/histogram_configs';
 
 const ID = 'alertsByCategoryOverview';
 

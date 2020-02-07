@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
+import { noop } from 'lodash/fp';
 import { StatefulEventsViewer } from '../../../components/events_viewer';
 import { HostsComponentsQueryProps } from './types';
 import { hostsModel } from '../../../store/hosts';
 import { eventsDefaultModel } from '../../../components/events_viewer/default_model';
-import { MatrixHistogramOption } from '../../../components/matrix_histogram/types';
+import { MatrixHistogramOption, HistogramType } from '../../../components/matrix_histogram/types';
 import { MatrixHistogramContainer } from '../../../components/matrix_histogram';
 import * as i18n from '../translations';
 
@@ -31,14 +32,23 @@ export const eventsStackByOptions: MatrixHistogramOption[] = [
   },
 ];
 
+export const histogramConfigs = {
+  defaultStackByOption: eventsStackByOptions[0],
+  errorMessage: i18n.ERROR_FETCHING_EVENTS_DATA,
+  histogramType: 'events' as HistogramType,
+  stackByOptions: eventsStackByOptions,
+  subtitle: undefined,
+  title: i18n.NAVIGATION_EVENTS_TITLE,
+  updateDateRange: noop,
+};
+
 export const EventsQueryTabBody = ({
   deleteQuery,
   endDate,
   filterQuery,
   setQuery,
-  skip,
   startDate,
-  updateDateRange = () => {},
+  updateDateRange = noop,
 }: HostsComponentsQueryProps) => {
   useEffect(() => {
     return () => {
@@ -47,22 +57,21 @@ export const EventsQueryTabBody = ({
       }
     };
   }, [deleteQuery]);
+
+  const eventsHistogramConfigs = useMemo(() => ({ ...histogramConfigs, updateDateRange }), [
+    updateDateRange,
+  ]);
   return (
     <>
       <MatrixHistogramContainer
-        defaultStackByOption={eventsStackByOptions[0]}
         endDate={endDate}
-        errorMessage={i18n.ERROR_FETCHING_EVENTS_DATA}
         filterQuery={filterQuery}
-        histogramType="events"
         setQuery={setQuery}
         sourceId="default"
-        stackByOptions={eventsStackByOptions}
         startDate={startDate}
         type={hostsModel.HostsType.page}
-        title={i18n.NAVIGATION_EVENTS_TITLE}
-        updateDateRange={updateDateRange}
         id={EVENTS_HISTOGRAM_ID}
+        {...eventsHistogramConfigs}
       />
       <StatefulEventsViewer
         defaultModel={eventsDefaultModel}
