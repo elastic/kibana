@@ -21,6 +21,8 @@ export {
   GetOneDatasourceRequestSchema,
   CreateDatasourceRequestSchema,
   UpdateDatasourceRequestSchema,
+  DeleteDatasourcesRequestSchema,
+  DeleteDatasourcesResponse,
   // Agent config schemas
   GetAgentConfigsRequestSchema,
   GetAgentConfigsResponse,

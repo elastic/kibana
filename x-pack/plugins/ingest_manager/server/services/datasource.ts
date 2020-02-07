@@ -5,7 +5,7 @@
  */
 import { SavedObjectsClientContract } from 'kibana/server';
 import { DATASOURCE_SAVED_OBJECT_TYPE } from '../constants';
-import { NewDatasource, Datasource, ListWithKuery } from '../types';
+import { NewDatasource, Datasource, DeleteDatasourcesResponse, ListWithKuery } from '../types';
 
 const SAVED_OBJECT_TYPE = DATASOURCE_SAVED_OBJECT_TYPE;
 
@@ -104,8 +104,28 @@ class DatasourceService {
     return (await this.get(soClient, id)) as Datasource;
   }
 
-  public async delete(soClient: SavedObjectsClientContract, id: string): Promise<void> {
-    await soClient.delete(SAVED_OBJECT_TYPE, id);
+  public async delete(
+    soClient: SavedObjectsClientContract,
+    ids: string[]
+  ): Promise<DeleteDatasourcesResponse> {
+    const result: DeleteDatasourcesResponse = [];
+
+    for (const id of ids) {
+      try {
+        await soClient.delete(SAVED_OBJECT_TYPE, id);
+        result.push({
+          id,
+          success: true,
+        });
+      } catch (e) {
+        result.push({
+          id,
+          success: false,
+        });
+      }
+    }
+
+    return result;
   }
 }
 

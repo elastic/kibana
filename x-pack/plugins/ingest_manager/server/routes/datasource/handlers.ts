@@ -11,6 +11,8 @@ import {
   GetOneDatasourceRequestSchema,
   CreateDatasourceRequestSchema,
   UpdateDatasourceRequestSchema,
+  DeleteDatasourcesRequestSchema,
+  DeleteDatasourcesResponse,
 } from '../../types';
 
 export const getDatasourcesHandler: RequestHandler<
@@ -97,6 +99,28 @@ export const updateDatasourceHandler: RequestHandler<
     );
     return response.ok({
       body: { item: datasource, success: true },
+    });
+  } catch (e) {
+    return response.customError({
+      statusCode: 500,
+      body: { message: e.message },
+    });
+  }
+};
+
+export const deleteDatasourcesHandler: RequestHandler<
+  unknown,
+  unknown,
+  TypeOf<typeof DeleteDatasourcesRequestSchema.body>
+> = async (context, request, response) => {
+  const soClient = context.core.savedObjects.client;
+  try {
+    const body: DeleteDatasourcesResponse = await datasourceService.delete(
+      soClient,
+      request.body.datasourceIds
+    );
+    return response.ok({
+      body,
     });
   } catch (e) {
     return response.customError({

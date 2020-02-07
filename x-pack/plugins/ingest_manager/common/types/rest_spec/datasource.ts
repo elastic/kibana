@@ -25,3 +25,14 @@ export const UpdateDatasourceRequestSchema = {
   ...GetOneDatasourceRequestSchema,
   body: NewDatasourceSchema,
 };
+
+export const DeleteDatasourcesRequestSchema = {
+  body: schema.object({
+    datasourceIds: schema.arrayOf(schema.string()),
+  }),
+};
+
+export type DeleteDatasourcesResponse = Array<{
+  id: string;
+  success: boolean;
+}>;
