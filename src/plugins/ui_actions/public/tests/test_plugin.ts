@@ -18,20 +18,20 @@
  */
 
 import { CoreSetup, CoreStart } from 'src/core/public';
-import { UiActionsPlugin, IUiActionsSetup, IUiActionsStart } from '../plugin';
+import { UiActionsPlugin, UiActionsSetup, UiActionsStart } from '../plugin';
 
-export interface IUiActionsTestPluginReturn {
+export interface UiActionsTestPluginReturn {
   plugin: UiActionsPlugin;
   coreSetup: CoreSetup;
   coreStart: CoreStart;
-  setup: IUiActionsSetup;
-  doStart: (anotherCoreStart?: CoreStart) => IUiActionsStart;
+  setup: UiActionsSetup;
+  doStart: (anotherCoreStart?: CoreStart) => UiActionsStart;
 }
 
 export const uiActionsTestPlugin = (
   coreSetup: CoreSetup = {} as CoreSetup,
   coreStart: CoreStart = {} as CoreStart
-): IUiActionsTestPluginReturn => {
+): UiActionsTestPluginReturn => {
   const initializerContext = {} as any;
   const plugin = new UiActionsPlugin(initializerContext);
   const setup = plugin.setup(coreSetup);

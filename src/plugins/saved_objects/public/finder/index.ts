@@ -17,9 +17,8 @@
  * under the License.
  */
 
-export interface ITrigger {
-  id: string;
-  title?: string;
-  description?: string;
-  actionIds: string[];
-}
+export {
+  SavedObjectMetaData,
+  SavedObjectFinderUi,
+  getSavedObjectFinder,
+} from './saved_object_finder';
