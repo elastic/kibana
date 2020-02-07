@@ -45,7 +45,7 @@ const createMock = () => {
   return mocked;
 };
 
-export const savedObjectsMock = {
+export const savedObjectsServiceMock = {
   create: createMock,
   createStartContract: createStartContractMock,
 };
