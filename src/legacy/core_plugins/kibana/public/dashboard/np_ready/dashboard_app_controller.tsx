@@ -31,8 +31,6 @@ import {
   ConfirmationButtonTypes,
   migrateLegacyQuery,
   SavedObjectSaveOpts,
-  SaveResult,
-  showSaveModal,
   subscribeWithScope,
 } from '../legacy_imports';
 import {
@@ -45,6 +43,11 @@ import {
   syncAppFilters,
   syncQuery,
 } from '../../../../../../plugins/data/public';
+import {
+  SaveResult,
+  showSaveModal,
+  getSavedObjectFinder,
+} from '../../../../../../plugins/saved_objects/public';
 
 import {
   DASHBOARD_CONTAINER_TYPE,
@@ -75,10 +78,6 @@ import { DashboardAppScope } from './dashboard_app';
 import { convertSavedDashboardPanelToPanelState } from './lib/embeddable_saved_object_converters';
 import { RenderDeps } from './application';
 import {
-  SavedObjectFinderProps,
-  SavedObjectFinderUi,
-} from '../../../../../../plugins/kibana_react/public';
-import {
   IKbnUrlStateStorage,
   removeQueryParam,
   unhashUrl,
@@ -90,7 +89,6 @@ export interface DashboardAppControllerDependencies extends RenderDeps {
   $routeParams: any;
   indexPatterns: IndexPatternsContract;
   dashboardConfig: any;
-  config: any;
   confirmModal: ConfirmModalFn;
   history: History;
   kbnUrlStateStorage: IKbnUrlStateStorage;
@@ -109,14 +107,22 @@ export class DashboardAppController {
     dashboardConfig,
     localStorage,
     indexPatterns,
-    config,
     confirmModal,
     savedQueryService,
     embeddables,
     share,
     dashboardCapabilities,
     npDataStart: { query: queryService },
-    core: { notifications, overlays, chrome, injectedMetadata, uiSettings, savedObjects, http },
+    core: {
+      notifications,
+      overlays,
+      chrome,
+      injectedMetadata,
+      uiSettings,
+      savedObjects,
+      http,
+      i18n: i18nStart,
+    },
     history,
     kbnUrlStateStorage,
   }: DashboardAppControllerDependencies) {
@@ -376,7 +382,7 @@ export class DashboardAppController {
       dashboardStateManager.getQuery() || {
         query: '',
         language:
-          localStorage.get('kibana.userQueryLanguage') || config.get('search:queryLanguage'),
+          localStorage.get('kibana.userQueryLanguage') || uiSettings.get('search:queryLanguage'),
       },
       queryFilter.getFilters()
     );
@@ -493,7 +499,7 @@ export class DashboardAppController {
         {
           query: '',
           language:
-            localStorage.get('kibana.userQueryLanguage') || config.get('search:queryLanguage'),
+            localStorage.get('kibana.userQueryLanguage') || uiSettings.get('search:queryLanguage'),
         },
         queryFilter.getGlobalFilters()
       );
@@ -779,7 +785,7 @@ export class DashboardAppController {
           showCopyOnSave={dash.id ? true : false}
         />
       );
-      showSaveModal(dashboardSaveModal);
+      showSaveModal(dashboardSaveModal, i18nStart.Context);
     };
     navActions[TopNavIds.CLONE] = () => {
       const currentTitle = dashboardStateManager.getTitle();
@@ -808,17 +814,13 @@ export class DashboardAppController {
     };
     navActions[TopNavIds.ADD] = () => {
       if (dashboardContainer && !isErrorEmbeddable(dashboardContainer)) {
-        const SavedObjectFinder = (props: SavedObjectFinderProps) => (
-          <SavedObjectFinderUi {...props} savedObjects={savedObjects} uiSettings={uiSettings} />
-        );
-
         openAddPanelFlyout({
           embeddable: dashboardContainer,
           getAllFactories: embeddables.getEmbeddableFactories,
           getFactory: embeddables.getEmbeddableFactory,
           notifications,
           overlays,
-          SavedObjectFinder,
+          SavedObjectFinder: getSavedObjectFinder(savedObjects, uiSettings),
         });
       }
     };
