@@ -31,7 +31,7 @@ import {
 } from './saved_objects';
 import { ClientsService } from './services';
 
-export { CoreSetup, CoreStart, Logger, PluginInitializerContext };
+export { CoreSetup, CoreStart };
 
 export interface SetupPlugins {
   encryptedSavedObjects: EncryptedSavedObjectsSetup;
@@ -142,7 +142,7 @@ export class Plugin {
       }
     }
 
-    const libs = compose(core, plugins, this.context.env);
+    const libs = compose(core, plugins, this.context.env.mode.prod);
     initServer(libs);
   }
 

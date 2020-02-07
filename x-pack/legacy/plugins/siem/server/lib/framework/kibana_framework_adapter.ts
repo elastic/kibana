@@ -16,7 +16,7 @@ import {
 } from '../../../../../../../src/core/server';
 import { IndexPatternsFetcher } from '../../../../../../../src/plugins/data/server';
 import { AuthenticatedUser } from '../../../../../../plugins/security/common/model';
-import { CoreSetup, SetupPlugins, PluginInitializerContext } from '../../plugin';
+import { CoreSetup, SetupPlugins } from '../../plugin';
 
 import {
   FrameworkAdapter,
@@ -26,14 +26,10 @@ import {
 } from './types';
 
 export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
-  public version: string;
-  private isProductionMode: boolean;
   private router: IRouter;
   private security: SetupPlugins['security'];
 
-  constructor(core: CoreSetup, plugins: SetupPlugins, env: PluginInitializerContext['env']) {
-    this.version = env.packageInfo.version;
-    this.isProductionMode = env.mode.prod;
+  constructor(core: CoreSetup, plugins: SetupPlugins, private isProductionMode: boolean) {
     this.router = core.http.createRouter();
     this.security = plugins.security;
   }
@@ -107,7 +103,7 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
             request.query,
             {
               endpointURL: routePath,
-              passHeader: `'kbn-version': '${this.version}'`,
+              passHeader: "'kbn-xsrf': 'graphiql'",
             },
             request
           );
