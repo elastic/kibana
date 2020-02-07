@@ -122,7 +122,7 @@ If you include the above React component multiple times in the same page,
 each component instance will have a unique id, because each render method will use a different
 id generator.
 
-You can use also this service outside of React.
+You can also use this service outside of React.
 
 ## API endpoints
 
