@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Location } from 'history';
+import moment from 'moment-timezone';
 import { getSections } from '../sections';
 import { Transaction } from '../../../../../typings/es_schemas/ui/Transaction';
 import { AppMountContextBasePath } from '../../../../context/ApmPluginContext';
@@ -12,7 +13,11 @@ describe('Transaction action menu', () => {
   const basePath = ({
     prepend: jest.fn()
   } as unknown) as AppMountContextBasePath;
-  const timestamp = { us: new Date('2020/02/06').valueOf() * 1000 };
+  beforeAll(() => {
+    moment.tz.setDefault('Europe/Amsterdam');
+  });
+  afterAll(() => moment.tz.setDefault(''));
+  const timestamp = { us: moment('2020-02-06 10:00:00').valueOf() * 1000 };
 
   it('shows required sections only', () => {
     const transaction = ({
@@ -38,7 +43,7 @@ describe('Transaction action menu', () => {
               key: 'traceLogs',
               label: 'Trace logs',
               href:
-                '#/link-to/logs?time=1580943600000&filter=trace.id:%22123%22%20OR%20123',
+                '#/link-to/logs?time=1580979600000&filter=trace.id:%22123%22%20OR%20123',
               condition: true
             }
           ]
@@ -85,7 +90,7 @@ describe('Transaction action menu', () => {
             {
               key: 'podLogs',
               label: 'Pod logs',
-              href: '#/link-to/pod-logs/123?time=1580943600000',
+              href: '#/link-to/pod-logs/123?time=1580979600000',
               condition: true
             },
             {
@@ -105,7 +110,7 @@ describe('Transaction action menu', () => {
               key: 'traceLogs',
               label: 'Trace logs',
               href:
-                '#/link-to/logs?time=1580943600000&filter=trace.id:%22123%22%20OR%20123',
+                '#/link-to/logs?time=1580979600000&filter=trace.id:%22123%22%20OR%20123',
               condition: true
             }
           ]
@@ -152,7 +157,7 @@ describe('Transaction action menu', () => {
             {
               key: 'hostLogs',
               label: 'Host logs',
-              href: '#/link-to/host-logs/foo?time=1580943600000',
+              href: '#/link-to/host-logs/foo?time=1580979600000',
               condition: true
             },
             {
@@ -172,7 +177,7 @@ describe('Transaction action menu', () => {
               key: 'traceLogs',
               label: 'Trace logs',
               href:
-                '#/link-to/logs?time=1580943600000&filter=trace.id:%22123%22%20OR%20123',
+                '#/link-to/logs?time=1580979600000&filter=trace.id:%22123%22%20OR%20123',
               condition: true
             }
           ]
