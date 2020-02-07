@@ -7,7 +7,7 @@
 import { getEnvironmentUiFilterES } from '../get_environment_ui_filter_es';
 import { ENVIRONMENT_NOT_DEFINED } from '../../../../../common/environment_filter_values';
 import { SERVICE_ENVIRONMENT } from '../../../../../common/elasticsearch_fieldnames';
-import { ESFilter } from '../../../../../typings/elasticsearch';
+import { ESFilter } from '../../../../../../../../plugins/apm/typings/elasticsearch';
 
 describe('getEnvironmentUiFilterES', () => {
   it('should return undefined, when environment is undefined', () => {
