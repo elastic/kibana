@@ -22,17 +22,17 @@ const SELECT_PLACEHOLDER_LABEL = `- ${i18n.translate(
 interface Props {
   isReadOnly: boolean;
   serviceName: string;
-  setServiceName: (env: string) => void;
+  onServiceNameChange: (env: string) => void;
   environment: string;
-  setEnvironment: (env: string) => void;
+  onEnvironmentChange: (env: string) => void;
 }
 
 export function ServiceForm({
   isReadOnly,
   serviceName,
-  setServiceName,
+  onServiceNameChange,
   environment,
-  setEnvironment
+  onEnvironmentChange
 }: Props) {
   const { data: serviceNames = [], status: serviceNamesStatus } = useFetcher(
     callApmApi => {
@@ -115,8 +115,8 @@ export function ServiceForm({
             disabled={serviceNamesStatus === 'loading'}
             onChange={e => {
               e.preventDefault();
-              setServiceName(e.target.value);
-              setEnvironment('');
+              onServiceNameChange(e.target.value);
+              onEnvironmentChange('');
             }}
           />
         )}
@@ -149,7 +149,7 @@ export function ServiceForm({
             disabled={!serviceName || environmentStatus === 'loading'}
             onChange={e => {
               e.preventDefault();
-              setEnvironment(e.target.value);
+              onEnvironmentChange(e.target.value);
             }}
           />
         )}

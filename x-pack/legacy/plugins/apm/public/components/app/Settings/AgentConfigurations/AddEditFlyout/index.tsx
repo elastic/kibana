@@ -181,11 +181,11 @@ export function AddEditFlyout({
                 //
                 // environment
                 environment={environment}
-                setEnvironment={setEnvironment}
+                onEnvironmentChange={setEnvironment}
                 //
                 // serviceName
                 serviceName={serviceName}
-                setServiceName={setServiceName}
+                onServiceNameChange={setServiceName}
               />
 
               <EuiSpacer />

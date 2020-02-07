@@ -28,7 +28,7 @@ export const Title = () => (
                 'xpack.apm.settings.customizeUI.customActions.info',
                 {
                   defaultMessage:
-                    'Actions will be shown in the Actions context menu by the trace and error details.'
+                    "These actions will be shown in the 'Actions' context menu for the trace and error detail components."
                 }
               )}
             />

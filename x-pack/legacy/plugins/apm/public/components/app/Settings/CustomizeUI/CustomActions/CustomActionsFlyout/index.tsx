@@ -26,7 +26,7 @@ interface Props {
   onClose: () => void;
 }
 
-export const Flyout = ({ onClose }: Props) => {
+export const CustomActionsFlyout = ({ onClose }: Props) => {
   const [serviceName, setServiceName] = useState('');
   const [environment, setEnvironment] = useState('');
   const [label, setLabel] = useState('');
@@ -53,7 +53,7 @@ export const Flyout = ({ onClose }: Props) => {
                 'xpack.apm.settings.customizeUI.customAction.flyout.label',
                 {
                   defaultMessage:
-                    'Action will be shown in the Actions context menu by the trace and error details. You can specify an unlimited amount of links, but we will opt to only show the first 3 alphabetically.'
+                    "This action will be shown in the 'Actions' context menu for the trace and error detail components. You can specify any number of links, but only the first three will be shown, in alphabetical order."
                 }
               )}
             </p>
@@ -62,33 +62,43 @@ export const Flyout = ({ onClose }: Props) => {
           <ServiceForm
             isReadOnly={false}
             serviceName={serviceName}
-            setServiceName={setServiceName}
+            onServiceNameChange={setServiceName}
             environment={environment}
-            setEnvironment={setEnvironment}
+            onEnvironmentChange={setEnvironment}
           />
 
           <EuiSpacer size="l" />
 
           <SettingsSection
             label={label}
-            setLabel={setLabel}
+            onLabelChange={setLabel}
             url={url}
-            setURL={setURL}
+            onURLChange={setURL}
           />
         </EuiFlyoutBody>
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty iconType="cross" onClick={onClose} flush="left">
-                Close
+                {i18n.translate(
+                  'xpack.apm.settings.customizeUI.customAction.flyout.close',
+                  {
+                    defaultMessage: 'Close'
+                  }
+                )}
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButton
-                // TODO: onClick={this.closeFlyout}
+                // TODO: onClick={closeFlyout}
                 fill
               >
-                Save
+                {i18n.translate(
+                  'xpack.apm.settings.customizeUI.customAction.flyout.save',
+                  {
+                    defaultMessage: 'Save'
+                  }
+                )}
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>

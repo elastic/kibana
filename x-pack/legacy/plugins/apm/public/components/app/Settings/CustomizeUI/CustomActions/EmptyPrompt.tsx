@@ -8,9 +8,9 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 
 export const EmptyPrompt = ({
-  setIsFlyoutOpen
+  onCreateCustomActionClick
 }: {
-  setIsFlyoutOpen: (isFlyoutOpen: boolean) => void;
+  onCreateCustomActionClick: () => void;
 }) => {
   return (
     <EuiEmptyPrompt
@@ -33,14 +33,18 @@ export const EmptyPrompt = ({
               'xpack.apm.settings.customizeUI.customActions.emptyPromptText',
               {
                 defaultMessage:
-                  "Let's change that! You can add custom actions to the Actions context menu by the trace and error details for each service. This could be linking to a Kibana dashboard or go to your organization's support portal."
+                  "Let's change that! You can add custom actions to the Actions context menu by the trace and error details for each service. This could be linking to a Kibana dashboard or going to your organization's support portal"
               }
             )}
           </p>
         </>
       }
       actions={
-        <EuiButton color="primary" fill onClick={() => setIsFlyoutOpen(true)}>
+        <EuiButton
+          color="primary"
+          fill
+          onClick={() => onCreateCustomActionClick()}
+        >
           {i18n.translate(
             'xpack.apm.settings.customizeUI.customActions.createCustomAction',
             { defaultMessage: 'Create custom action' }

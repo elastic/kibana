@@ -9,12 +9,17 @@ import React from 'react';
 
 interface Props {
   label: string;
-  setLabel: (label: string) => void;
+  onLabelChange: (label: string) => void;
   url: string;
-  setURL: (url: string) => void;
+  onURLChange: (url: string) => void;
 }
 
-export const SettingsSection = ({ label, setLabel, url, setURL }: Props) => {
+export const SettingsSection = ({
+  label,
+  onLabelChange,
+  url,
+  onURLChange
+}: Props) => {
   return (
     <>
       <EuiTitle size="xs">
@@ -33,7 +38,7 @@ export const SettingsSection = ({ label, setLabel, url, setURL }: Props) => {
         )}
         helpText={i18n.translate(
           'xpack.apm.settings.customizeUI.customAction.flyout.settingsSection.label.helpText',
-          { defaultMessage: 'Labels can be max. 128 characters.' }
+          { defaultMessage: 'Labels can be a maximum of 128 characters' }
         )}
       >
         <EuiFieldText
@@ -43,7 +48,7 @@ export const SettingsSection = ({ label, setLabel, url, setURL }: Props) => {
           )}
           value={label}
           onChange={e => {
-            setLabel(e.target.value);
+            onLabelChange(e.target.value);
           }}
         />
       </EuiFormRow>
@@ -63,11 +68,11 @@ export const SettingsSection = ({ label, setLabel, url, setURL }: Props) => {
         <EuiFieldText
           placeholder={i18n.translate(
             'xpack.apm.settings.customizeUI.customAction.flyout.settingsSection.url.placeHolder',
-            { defaultMessage: 'i.e. https://www.elastic.co/' }
+            { defaultMessage: 'e.g. https://www.elastic.co/' }
           )}
           value={url}
           onChange={e => {
-            setURL(e.target.value);
+            onURLChange(e.target.value);
           }}
         />
       </EuiFormRow>

@@ -10,7 +10,7 @@ import React, { useState } from 'react';
 import { ManagedTable } from '../../../../shared/ManagedTable';
 import { Title } from './Title';
 import { EmptyPrompt } from './EmptyPrompt';
-import { Flyout } from './Flyout';
+import { CustomActionsFlyout } from './CustomActionsFlyout';
 
 export const CustomActions = () => {
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
@@ -47,14 +47,18 @@ export const CustomActions = () => {
     setIsFlyoutOpen(false);
   };
 
+  const onCreateCustomActionClick = () => {
+    setIsFlyoutOpen(true);
+  };
+
   return (
     <>
       <EuiPanel>
         <Title />
         <EuiSpacer size="m" />
-        {isFlyoutOpen && <Flyout onClose={onCloseFlyout} />}
+        {isFlyoutOpen && <CustomActionsFlyout onClose={onCloseFlyout} />}
         {isEmpty(items) ? (
-          <EmptyPrompt setIsFlyoutOpen={setIsFlyoutOpen} />
+          <EmptyPrompt onCreateCustomActionClick={onCreateCustomActionClick} />
         ) : (
           <ManagedTable
             items={items}
