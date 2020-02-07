@@ -17,8 +17,9 @@
  * under the License.
  */
 
-export { aggTypes } from './agg_types';
+export { AggTypesRegistry } from './agg_types_registry';
 export { AggType } from './agg_type';
+export { aggTypes } from './agg_types';
 export { AggConfig } from './agg_config';
 export { AggConfigs } from './agg_configs';
 export { FieldParamType } from './param_types';
