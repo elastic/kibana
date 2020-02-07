@@ -16,13 +16,23 @@ const authorizedUserHeaders = {
   ...commonHeaders,
   Authorization: 'Basic ZWxhc3RpYzpjaGFuZ2VtZQ==',
 };
+// Just to appease tests. Can/should this be from project types?
+interface NewAgentConfig {
+  name: string;
+  description: string;
+  namespace: string;
+}
+
+interface AgentConfig extends NewAgentConfig {
+  id: string;
+}
 
 const paginatedSuccessKeys = ['success', 'items', 'total', 'page', 'perPage'];
 // eslint-disable-next-line import/no-default-export
 export default function resolverAPIIntegrationTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  let createdConfig = {}; // track config created for later removal
-  let initialResults = [];
+
+  let createdConfig: AgentConfig; // track config created for later removal
   const exampleConfig = { name: 'NAME', description: 'DESCRIPTION', namespace: 'NAMESPACE' };
 
   describe('/agent_configs', function() {
@@ -35,8 +45,6 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
 
       expect(body).to.have.keys(paginatedSuccessKeys);
       expect(Array.isArray(body.items));
-
-      initialResults = body.items;
     });
 
     it('should create agent config', async function() {
