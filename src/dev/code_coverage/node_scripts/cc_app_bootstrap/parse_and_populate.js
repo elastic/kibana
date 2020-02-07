@@ -49,7 +49,7 @@ export const parseAndPopulate = buildNumber => srcFile => destFile => log => {
 function onComplete (initData) {
   const prettyFlush = pipe(pretty, flush);
   return function mutateInitialData (xs, log, destFile) {
-    initData.historicalItems = xs;
+    initData.historicalItems = xs.filter(x => x !== '');
     prettyFlush(initData)(destFile);
     log.debug('### Completed');
   };
@@ -58,7 +58,7 @@ function onComplete (initData) {
 function flush (initData) {
   return function flushInner (destFile) {
     const fill = boilerplate(initData);
-    console.log(`\n### fill: \n\t${fill}`);
+    console.log(`\n### fill: \n${fill}`);
     fs.writeFileSync(destFile, fill, { encoding: 'utf8' });
   };
 }

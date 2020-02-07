@@ -17,8 +17,12 @@ const initialData = {
     "url": "\nhttps://build-stats.elastic.co/app/kibana#/dashboard/02b9d310-9513-11e8-a9c0-db5f285c257f?_g=\n(refreshInterval%3A(pause%3A!f%2Cvalue%3A10000)%2Ctime%3A(from%3Anow%2Fd%2Cmode%3Aquick%2Cto%3Anow%2Fd))\n"
   },
   "historicalItems": [
-    "",
-    "gs://kibana-ci-artifacts/jobs/elastic+kibana+code-coverage/255"
+    "afafadsfd",
+    "a",
+    "a",
+    "a",
+    "asdfasdfa",
+    "end"
   ]
 };
 
