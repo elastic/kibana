@@ -4,13 +4,44 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { schema } from '@kbn/config-schema';
-import { AssetReference } from '../epm';
+import {
+  AssetReference,
+  CategorySummaryList,
+  Installable,
+  RegistryPackage,
+  Installed,
+  NotInstalled,
+} from '../epm';
 
+export interface GetCategoriesResponse {
+  response: CategorySummaryList;
+  success: boolean;
+}
 export const GetPackagesRequestSchema = {
   query: schema.object({
     category: schema.maybe(schema.string()),
   }),
 };
+
+export interface GetPackagesResponse {
+  response: Array<
+    Installable<
+      Pick<
+        RegistryPackage,
+        | 'name'
+        | 'title'
+        | 'version'
+        | 'description'
+        | 'type'
+        | 'icons'
+        | 'internal'
+        | 'download'
+        | 'path'
+      >
+    >
+  >;
+  success: boolean;
+}
 
 export const GetFileRequestSchema = {
   params: schema.object({
@@ -24,6 +55,11 @@ export const GetInfoRequestSchema = {
     pkgkey: schema.string(),
   }),
 };
+
+export interface GetInfoResponse {
+  response: Installed | NotInstalled;
+  success: boolean;
+}
 
 export const InstallPackageRequestSchema = {
   params: schema.object({

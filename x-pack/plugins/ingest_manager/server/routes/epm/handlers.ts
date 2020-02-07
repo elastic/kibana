@@ -6,9 +6,12 @@
 import { TypeOf } from '@kbn/config-schema';
 import { RequestHandler, CustomHttpResponseOptions } from 'kibana/server';
 import {
+  GetCategoriesResponse,
   GetPackagesRequestSchema,
+  GetPackagesResponse,
   GetFileRequestSchema,
   GetInfoRequestSchema,
+  GetInfoResponse,
   InstallPackageRequestSchema,
   InstallPackageResponse,
   DeletePackageRequestSchema,
@@ -29,12 +32,11 @@ import { getClusterAccessor } from '../../services/epm/cluster_access';
 export const getCategoriesHandler: RequestHandler = async (context, request, response) => {
   try {
     const res = await getCategories();
-    return response.ok({
-      body: {
-        response: res,
-        success: true,
-      },
-    });
+    const body: GetCategoriesResponse = {
+      response: res,
+      success: true,
+    };
+    return response.ok({ body });
   } catch (e) {
     return response.customError({
       statusCode: 500,
@@ -53,11 +55,12 @@ export const getListHandler: RequestHandler<
       savedObjectsClient,
       category: request.query.category,
     });
+    const body: GetPackagesResponse = {
+      response: res,
+      success: true,
+    };
     return response.ok({
-      body: {
-        response: res,
-        success: true,
-      },
+      body,
     });
   } catch (e) {
     return response.customError({
@@ -105,12 +108,11 @@ export const getInfoHandler: RequestHandler<TypeOf<typeof GetInfoRequestSchema.p
     const { pkgkey } = request.params;
     const savedObjectsClient = context.core.savedObjects.client;
     const res = await getPackageInfo({ savedObjectsClient, pkgkey });
-    return response.ok({
-      body: {
-        response: res,
-        success: true,
-      },
-    });
+    const body: GetInfoResponse = {
+      response: res,
+      success: true,
+    };
+    return response.ok({ body });
   } catch (e) {
     return response.customError({
       statusCode: 500,
