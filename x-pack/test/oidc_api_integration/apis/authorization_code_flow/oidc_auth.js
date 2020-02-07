@@ -173,6 +173,7 @@ export default function({ getService }) {
           'enabled',
           'authentication_realm',
           'lookup_realm',
+          'authentication_provider',
         ]);
 
         expect(apiResponse.body.username).to.be('user1');
@@ -222,6 +223,7 @@ export default function({ getService }) {
           'enabled',
           'authentication_realm',
           'lookup_realm',
+          'authentication_provider',
         ]);
 
         expect(apiResponse.body.username).to.be('user2');
