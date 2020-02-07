@@ -62,7 +62,9 @@ export function migrationsRetryCallCluster(
                     error instanceof esErrors.ServiceUnavailable ||
                     error instanceof esErrors.RequestTimeout ||
                     error instanceof esErrors.AuthenticationException ||
-                    error instanceof esErrors.AuthorizationException
+                    error instanceof esErrors.AuthorizationException ||
+                    // @ts-ignore
+                    error instanceof esErrors.Gone
                   );
                 },
                 timer(delay),

@@ -38,6 +38,7 @@ import { setHelpExtension } from './setHelpExtension';
 import { toggleAppLinkInNav } from './toggleAppLinkInNav';
 import { setReadonlyBadge } from './updateBadge';
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
+import { Permission } from '../components/app/Permission';
 
 export const REACT_APP_ROOT_ID = 'react-apm-root';
 
@@ -52,11 +53,14 @@ const App = () => {
     <MainContainer data-test-subj="apmMainContainer" role="main">
       <UpdateBreadcrumbs routes={routes} />
       <Route component={ScrollToTopOnPathChange} />
-      <Switch>
-        {routes.map((route, i) => (
-          <ApmRoute key={i} {...route} />
-        ))}
-      </Switch>
+      {/* Check if user has the appropriate permissions to use the APM UI. */}
+      <Permission>
+        <Switch>
+          {routes.map((route, i) => (
+            <ApmRoute key={i} {...route} />
+          ))}
+        </Switch>
+      </Permission>
     </MainContainer>
   );
 };

@@ -33,6 +33,12 @@
     "ValidateAnomalyDetector",
     "ForecastAnomalyDetector",
     "GetOverallBuckets",
-    "GetCategories"
+    "GetCategories",
+    "ResultsService",
+    "GetAnomaliesTableData",
+    "GetCategoryDefinition",
+    "GetMaxAnomalyScore",
+    "GetCategoryExamples",
+    "GetPartitionFieldsValues"
   ]
 }

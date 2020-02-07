@@ -258,13 +258,13 @@ export class LegacyCoreEditor implements CoreEditor {
     } else {
       if (topOrBottom === 'top') {
         this.$actions.css({
-          bottom: 'unset',
+          bottom: 'auto',
           top: value,
           visibility: 'visible',
         });
       } else {
         this.$actions.css({
-          top: 'unset',
+          top: 'auto',
           bottom: value,
           visibility: 'visible',
         });
