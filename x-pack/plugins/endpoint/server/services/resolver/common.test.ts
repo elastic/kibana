@@ -3,30 +3,30 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { parsePhase0EntityID, isPhase0EntityID, buildPhase0EntityID } from './common';
+import { parseLegacyEntityID, isLegacyEntityID, buildLegacyEntityID } from './common';
 
-describe('phase0 entity identification and parsing', () => {
+describe('legacy entity identification and parsing', () => {
   it('throws an error for an id without 3 parts', () => {
     expect(() => {
-      parsePhase0EntityID('endgame|blah');
+      parseLegacyEntityID('endgame|blah');
     }).toThrow();
   });
 
-  it('parses a phase0 entity ID correctly', () => {
-    expect(parsePhase0EntityID('endgame|endpoint|pid')).toStrictEqual({
+  it('parses a legacy entity ID correctly', () => {
+    expect(parseLegacyEntityID('endgame|endpoint|pid')).toStrictEqual({
       endpointID: 'endpoint',
       uniquePID: 'pid',
     });
   });
 
-  it('identifies a phase0 entity ID correctly', () => {
-    expect(isPhase0EntityID('endgame|some-endpoint-id|12456')).toBeTruthy();
+  it('identifies a legacy entity ID correctly', () => {
+    expect(isLegacyEntityID('endgame|some-endpoint-id|12456')).toBeTruthy();
   });
 
-  it('builds an phase0 entity ID correctly', () => {
-    const entityID = buildPhase0EntityID('endpoint', 500);
-    expect(isPhase0EntityID(entityID)).toBeTruthy();
-    expect(parsePhase0EntityID(entityID)).toStrictEqual({
+  it('builds an legacy entity ID correctly', () => {
+    const entityID = buildLegacyEntityID('endpoint', 500);
+    expect(isLegacyEntityID(entityID)).toBeTruthy();
+    expect(parseLegacyEntityID(entityID)).toStrictEqual({
       endpointID: 'endpoint',
       uniquePID: '500',
     });

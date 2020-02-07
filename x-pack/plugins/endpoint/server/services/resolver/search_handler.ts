@@ -6,17 +6,17 @@
 import { IScopedClusterClient } from 'kibana/server';
 import { CountResponse } from 'elasticsearch';
 import {
-  ResolverPhase0Data,
+  ResolverLegacyData,
   ResolverPhase1Data,
   ResolverData,
   ResolverChildrenResponse,
   ResolverResponseNode,
   ResolverNodeDetailsResponse,
-  Pagination,
+  BaseResult,
 } from '../../../common/types';
 import { EndpointAppContext, JSONish, Total } from '../../types';
 import { ResolverNode, ResolverDataHit } from './common';
-import { ResolverPhase0Node } from './phase0_node';
+import { ResolverLegacyNode } from './legacy_node';
 import { ResolverPhase1Node } from './phase1_node';
 import { getPagination, PaginationInfo } from './query_builder';
 
@@ -34,19 +34,19 @@ export class ResolverSearchHandler {
     private readonly entityID: string
   ) {}
 
-  private static isPhase0Data(
-    data: ResolverPhase0Data | ResolverPhase1Data
-  ): data is ResolverPhase0Data {
-    return (data as ResolverPhase0Data).endgame?.unique_pid !== undefined;
+  private static isLegacyData(
+    data: ResolverLegacyData | ResolverPhase1Data
+  ): data is ResolverLegacyData {
+    return (data as ResolverLegacyData).endgame?.unique_pid !== undefined;
   }
 
   private static nodeCreator(data: ResolverData): ResolverNode {
-    if (ResolverSearchHandler.isPhase0Data(data)) {
-      return new ResolverPhase0Node(data);
+    if (ResolverSearchHandler.isLegacyData(data)) {
+      return new ResolverLegacyNode(data);
     }
     return new ResolverPhase1Node(data);
   }
-  private async buildPagination(total: Total): Promise<Pagination> {
+  private async buildPagination(total: Total): Promise<BaseResult> {
     const { page, pageSize, from } = await getPagination(this.endpointContext, this.pageInfo);
     let amount = total.value;
     if (total.relation === 'gte') {

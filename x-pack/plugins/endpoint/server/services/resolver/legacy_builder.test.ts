@@ -6,37 +6,38 @@
 import { ResolverData } from '../../../common/types';
 import { EventBuilder } from './event_builder.test';
 
-export class Phase1Builder implements EventBuilder {
-  private childCounter: number = 0;
-  constructor(
-    private readonly originEntityID: string,
-    private readonly originParentEntityID: string
-  ) {}
+export class LegacyBuilder implements EventBuilder {
+  private childEntityID: number;
 
-  createEvent(entityID: string, parentEntityID: string) {
+  constructor(
+    private readonly endpointID: string,
+    private readonly originEntityID: number,
+    private readonly originParentEntityID: number
+  ) {
+    this.childEntityID = this.originEntityID + 1;
+  }
+
+  private createEvent(entityID: number, parentEntityID: number) {
     return {
-      event: {
-        category: 'process',
-        type: 'start',
+      endgame: {
+        event_type_full: 'process_event',
+        event_subtype_full: 'creation_event',
+        unique_pid: entityID,
+        unique_ppid: parentEntityID,
       },
-      endpoint: {
-        process: {
-          entity_id: entityID,
-          parent: {
-            entity_id: parentEntityID,
-          },
-        },
+      agent: {
+        id: this.endpointID,
       },
     };
   }
 
   buildChildEvent(): ResolverData {
-    const entityID = this.originEntityID + String(this.childCounter);
+    const entityID = this.childEntityID;
     return this.createEvent(entityID, this.originEntityID);
   }
 
   startNewChildNode() {
-    this.childCounter += 1;
+    this.childEntityID += 1;
   }
 
   buildOriginEvent(): ResolverData {

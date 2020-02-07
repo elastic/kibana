@@ -27,12 +27,12 @@ export class EndpointAppConstants {
   static ENDPOINT_INDEX_NAME = 'endpoint-agent*';
   static EVENT_INDEX_NAME = 'endpoint-events-*';
   /**
-   * Phase 0 events are stored in indices with endgame-* prefix
+   * Legacy events are stored in indices with endgame-* prefix
    */
-  static ENDGAME_INDEX_NAME = 'endgame-*';
+  static LEGACY_EVENT_INDEX_NAME = 'endgame-*';
 }
 
-export interface Pagination {
+export interface BaseResult {
   /**
    * The total number of items on the page.
    */
@@ -51,7 +51,7 @@ export interface Pagination {
   result_from_index: number;
 }
 
-export interface AlertResultList extends Pagination {
+export interface AlertResultList extends BaseResult {
   /**
    * The alerts restricted by page size.
    */
@@ -119,7 +119,7 @@ export interface EndpointMetadata {
   };
 }
 
-export interface ResolverPhase0Data {
+export interface ResolverLegacyData {
   endgame: {
     event_type_full: string;
     event_subtype_full: string;
@@ -146,7 +146,7 @@ export interface ResolverPhase1Data {
   };
 }
 
-export type ResolverData = ResolverPhase0Data | ResolverPhase1Data;
+export type ResolverData = ResolverLegacyData | ResolverPhase1Data;
 
 export interface ResolverResponseNode {
   entity_id: string | undefined;
@@ -154,12 +154,12 @@ export interface ResolverResponseNode {
   events: ResolverData[];
 }
 
-export interface ResolverChildrenResponse extends Pagination {
+export interface ResolverChildrenResponse extends BaseResult {
   origin: ResolverResponseNode;
   children: ResolverResponseNode[];
 }
 
-export interface ResolverNodeDetailsResponse extends Pagination {
+export interface ResolverNodeDetailsResponse extends BaseResult {
   node: ResolverResponseNode;
 }
 

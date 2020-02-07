@@ -5,11 +5,12 @@
  */
 import { Plugin, CoreSetup, PluginInitializerContext, Logger } from 'kibana/server';
 import { first } from 'rxjs/operators';
-import { addRoutes } from './routes';
 import { PluginSetupContract as FeaturesPluginSetupContract } from '../../features/server';
 import { createConfig$, EndpointConfigType } from './config';
-import { registerEndpointRoutes } from './routes/endpoints';
 import { EndpointAppContext } from './types';
+
+import { addRoutes } from './routes';
+import { registerEndpointRoutes } from './routes/endpoints';
 import { registerAlertRoutes } from './routes/alerts';
 import { registerResolverRoutes } from './routes/resolver';
 

@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { isPhase0EntityID, parsePhase0EntityID } from './common';
+import { isLegacyEntityID, parseLegacyEntityID } from './common';
 import { EndpointAppContext, JSONish } from '../../types';
 import { EndpointAppConstants } from '../../../common/types';
 
@@ -12,7 +12,7 @@ export interface PaginationInfo {
   pageSize: number | undefined;
 }
 
-function buildPhase0ChildrenQuery(endpointID: string, uniquePID: string) {
+function buildLegacyChildrenQuery(endpointID: string, uniquePID: string) {
   return {
     bool: {
       filter: {
@@ -80,11 +80,11 @@ export async function getESChildrenQuery(
 }
 
 export function getESChildrenCountQuery(entityID: string): { index: string; query: JSONish } {
-  if (isPhase0EntityID(entityID)) {
-    const { endpointID, uniquePID } = parsePhase0EntityID(entityID);
+  if (isLegacyEntityID(entityID)) {
+    const { endpointID, uniquePID } = parseLegacyEntityID(entityID);
     return {
-      index: EndpointAppConstants.ENDGAME_INDEX_NAME,
-      query: buildPhase0ChildrenQuery(endpointID, uniquePID),
+      index: EndpointAppConstants.LEGACY_EVENT_INDEX_NAME,
+      query: buildLegacyChildrenQuery(endpointID, uniquePID),
     };
   }
   return {
@@ -96,7 +96,7 @@ export function getESChildrenCountQuery(entityID: string): { index: string; quer
 // this will only get the specific node requested, the UI will need to use the parent_entity_id that we pass back
 // otherwise the backend will have to query for the entity ID and then use the endpoint.process.parent.entity_id to
 // query again for actual ancestor of the first node
-function buildPhase0NodeQuery(endpointID: string, uniquePID: string) {
+function buildLegacyNodeQuery(endpointID: string, uniquePID: string) {
   return {
     bool: {
       filter: [
@@ -165,11 +165,11 @@ export async function getESNodeQuery(
 }
 
 export function getESNodeCountQuery(entityID: string): { index: string; query: JSONish } {
-  if (isPhase0EntityID(entityID)) {
-    const { endpointID, uniquePID } = parsePhase0EntityID(entityID);
+  if (isLegacyEntityID(entityID)) {
+    const { endpointID, uniquePID } = parseLegacyEntityID(entityID);
     return {
-      index: EndpointAppConstants.ENDGAME_INDEX_NAME,
-      query: buildPhase0NodeQuery(endpointID, uniquePID),
+      index: EndpointAppConstants.LEGACY_EVENT_INDEX_NAME,
+      query: buildLegacyNodeQuery(endpointID, uniquePID),
     };
   }
   return { index: EndpointAppConstants.EVENT_INDEX_NAME, query: buildPhase1NodeQuery(entityID) };

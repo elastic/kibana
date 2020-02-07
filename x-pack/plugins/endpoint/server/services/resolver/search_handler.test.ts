@@ -13,10 +13,10 @@ import { EndpointAppContext, Total } from '../../types';
 import { EndpointConfigSchema } from '../../config';
 import { PaginationInfo, getPagination } from './query_builder';
 import { CountResponse } from 'elasticsearch';
-import { ResolverDataHit, parsePhase0EntityID, buildPhase0EntityID } from './common';
-import { ResolverData, Pagination } from '../../../common/types';
+import { ResolverDataHit, parseLegacyEntityID, buildLegacyEntityID } from './common';
+import { ResolverData, BaseResult } from '../../../common/types';
 import { EventBuilder } from './event_builder.test';
-import { Phase0Builder } from './phase0_builder.test';
+import { LegacyBuilder } from './legacy_builder.test';
 import { Phase1Builder } from './phase1_builder.test';
 
 function buildPageInfo(page?: number, pageSize?: number): PaginationInfo {
@@ -55,12 +55,11 @@ function buildResolverHits(
   const hits: ResolverDataHit[] = [];
   const children: ResolverData[] = [];
   const origin: ResolverData[] = [];
-  // start after the entity id so there aren't any collisions
-  let nodeIter = builder.startingChildrenEntityID();
-  for (; nodeIter < numNodes + builder.startingChildrenEntityID(); nodeIter++) {
+  // create the child nodes and the events for each
+  for (let nodeIter = 0; nodeIter < numNodes; nodeIter++) {
+    builder.startNewChildNode();
     for (let i = 0; i < eventsPerNode; i++) {
-      // set the parent entity ID to the origin's entityID
-      const event = builder.buildEvent(nodeIter, builder.originEntityID);
+      const event = builder.buildChildEvent();
       hits.push({
         _source: event,
       });
@@ -70,7 +69,7 @@ function buildResolverHits(
 
   // build the events for the origin
   for (let i = 0; i < eventsPerNode; i++) {
-    const event = builder.buildEvent(builder.originEntityID, builder.originParentEntityID);
+    const event = builder.buildOriginEvent();
     hits.push({
       _source: event,
     });
@@ -88,7 +87,7 @@ function buildResolverP0Hits(
   eventsPerNode: number
 ): BuiltHits {
   return buildResolverHits(
-    new Phase0Builder(endpointID, entityID, parentEntityID),
+    new LegacyBuilder(endpointID, entityID, parentEntityID),
     numNodes,
     eventsPerNode
   );
@@ -99,11 +98,7 @@ function buildResolverP1Hits(
   numNodes: number,
   eventsPerNode: number
 ): BuiltHits {
-  return buildResolverHits(
-    new Phase1Builder(Number(entityID), Number(parentID)),
-    numNodes,
-    eventsPerNode
-  );
+  return buildResolverHits(new Phase1Builder(entityID, parentID), numNodes, eventsPerNode);
 }
 
 function createTotal(total: number, relationEqual: boolean): Total {
@@ -114,7 +109,7 @@ function createTotal(total: number, relationEqual: boolean): Total {
 }
 
 async function checkPagination(
-  resPagination: Pagination,
+  resPagination: BaseResult,
   context: EndpointAppContext,
   total: number,
   builtPageInfo: PaginationInfo
@@ -146,7 +141,7 @@ describe('build resolver node and related event responses', () => {
         ),
     };
   });
-  describe('phase 1 responses', () => {
+  describe('new format responses', () => {
     const entityID = '12345';
     const parentEntityID = '5555';
 
@@ -207,12 +202,12 @@ describe('build resolver node and related event responses', () => {
     });
   });
 
-  describe('phase 0 responses', () => {
+  describe('legacy responses', () => {
     const originEntityID = 'endgame|12345|5';
-    const { endpointID, uniquePID } = parsePhase0EntityID(originEntityID);
+    const { endpointID, uniquePID } = parseLegacyEntityID(originEntityID);
     const uniquePIDNum = Number(uniquePID);
     const parentUniquePID = 999;
-    const originParentEntityID = buildPhase0EntityID(endpointID, parentUniquePID);
+    const originParentEntityID = buildLegacyEntityID(endpointID, parentUniquePID);
     describe('multiple node retrieval', () => {
       beforeEach(() => {
         ({ total, hits, origin } = buildResolverP0Hits(

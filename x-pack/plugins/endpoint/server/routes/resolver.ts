@@ -4,9 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IRouter } from 'kibana/server';
+import { IRouter, ResponseError, Logger } from 'kibana/server';
 import { SearchResponse } from 'elasticsearch';
 import { schema } from '@kbn/config-schema';
+import { KibanaResponse, KibanaResponseFactory } from 'src/core/server/http/router/response';
+
 import { EndpointAppContext, Total } from '../types';
 import {
   getESChildrenQuery,
@@ -69,11 +71,7 @@ export function registerResolverRoutes(router: IRouter, endpointAppContext: Endp
           ),
         });
       } catch (err) {
-        log.warn(err);
-        if (EntityParseError.isEntityParseError(err)) {
-          return res.badRequest({ body: err });
-        }
-        return res.internalError({ body: err });
+        return handleError(res, log, err);
       }
     }
   );
@@ -119,12 +117,20 @@ export function registerResolverRoutes(router: IRouter, endpointAppContext: Endp
           ),
         });
       } catch (err) {
-        log.warn(err);
-        if (EntityParseError.isEntityParseError(err)) {
-          return res.badRequest({ body: err });
-        }
-        return res.internalError({ body: err });
+        return handleError(res, log, err);
       }
     }
   );
+}
+
+function handleError(
+  res: KibanaResponseFactory,
+  log: Logger,
+  err: any
+): KibanaResponse<ResponseError> {
+  log.warn(err);
+  if (EntityParseError.isEntityParseError(err)) {
+    return res.badRequest({ body: err });
+  }
+  return res.internalError({ body: err });
 }
