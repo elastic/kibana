@@ -72,7 +72,7 @@ export const spacesManagementApp = Object.freeze({
               http={http}
               notifications={notifications}
               spacesManager={spacesManager}
-              securityEnabled={Boolean(securityLicense && securityLicense.getFeatures().showLinks)}
+              securityEnabled={securityLicense?.getFeatures().showLinks ?? false}
             />
           );
         };
@@ -98,7 +98,7 @@ export const spacesManagementApp = Object.freeze({
               spacesManager={spacesManager}
               spaceId={spaceId}
               onLoadSpace={onLoadSpace}
-              securityEnabled={Boolean(securityLicense && securityLicense.getFeatures().showLinks)}
+              securityEnabled={securityLicense?.getFeatures().showLinks ?? false}
             />
           );
         };

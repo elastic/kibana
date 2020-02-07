@@ -14,7 +14,8 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 import React, { Component, Fragment } from 'react';
 import { Capabilities, HttpStart, NotificationsStart } from 'src/core/public';
@@ -36,7 +37,6 @@ interface Props {
   notifications: NotificationsStart;
   spacesManager: SpacesManager;
   spaceId?: string;
-  intl: InjectedIntl;
   onLoadSpace?: (space: Space) => void;
   capabilities: Capabilities;
   securityEnabled: boolean;
@@ -55,7 +55,7 @@ interface State {
   };
 }
 
-class ManageSpacePageUI extends Component<Props, State> {
+export class ManageSpacePage extends Component<Props, State> {
   private readonly validator: SpaceValidator;
 
   constructor(props: Props) {
@@ -75,44 +75,21 @@ class ManageSpacePageUI extends Component<Props, State> {
       return;
     }
 
-    const { spaceId, spacesManager, intl, onLoadSpace, http } = this.props;
+    const { spaceId, http } = this.props;
 
     const getFeatures = http.get('/api/features');
 
     if (spaceId) {
-      try {
-        const [space, features] = await Promise.all([spacesManager.getSpace(spaceId), getFeatures]);
-        if (space) {
-          if (onLoadSpace) {
-            onLoadSpace(space);
-          }
-
-          this.setState({
-            space,
-            features: await features,
-            originalSpace: space,
-            isLoading: false,
-          });
-        }
-      } catch (error) {
-        const { message = '' } = error.data || {};
-
-        this.props.notifications.toasts.addDanger(
-          intl.formatMessage(
-            {
-              id: 'xpack.spaces.management.manageSpacePage.errorLoadingSpaceTitle',
-              defaultMessage: 'Error loading space: {message}',
-            },
-            {
-              message,
-            }
-          )
-        );
-        this.backToSpacesList();
-      }
+      await this.loadSpace(spaceId, getFeatures);
     } else {
       const features = await getFeatures;
       this.setState({ isLoading: false, features });
+    }
+  }
+
+  public async componentDidUpdate(previousProps: Props) {
+    if (this.props.spaceId !== previousProps.spaceId && this.props.spaceId) {
+      await this.loadSpace(this.props.spaceId, Promise.resolve(this.state.features));
     }
   }
 
@@ -163,7 +140,6 @@ class ManageSpacePageUI extends Component<Props, State> {
           onChange={this.onSpaceChange}
           editingExistingSpace={this.editingExistingSpace()}
           validator={this.validator}
-          intl={this.props.intl}
         />
 
         <EuiSpacer />
@@ -171,9 +147,8 @@ class ManageSpacePageUI extends Component<Props, State> {
         <EnabledFeatures
           space={this.state.space}
           features={this.state.features}
-          capabilities={this.props.capabilities}
           onChange={this.onSpaceChange}
-          intl={this.props.intl}
+          securityEnabled={this.props.securityEnabled}
         />
 
         <EuiSpacer />
@@ -220,20 +195,26 @@ class ManageSpacePageUI extends Component<Props, State> {
   };
 
   public getFormButtons = () => {
-    const createSpaceText = this.props.intl.formatMessage({
-      id: 'xpack.spaces.management.manageSpacePage.createSpaceButton',
-      defaultMessage: 'Create space',
-    });
+    const createSpaceText = i18n.translate(
+      'xpack.spaces.management.manageSpacePage.createSpaceButton',
+      {
+        defaultMessage: 'Create space',
+      }
+    );
 
-    const updateSpaceText = this.props.intl.formatMessage({
-      id: 'xpack.spaces.management.manageSpacePage.updateSpaceButton',
-      defaultMessage: 'Update space',
-    });
+    const updateSpaceText = i18n.translate(
+      'xpack.spaces.management.manageSpacePage.updateSpaceButton',
+      {
+        defaultMessage: 'Update space',
+      }
+    );
 
-    const cancelButtonText = this.props.intl.formatMessage({
-      id: 'xpack.spaces.management.manageSpacePage.cancelSpaceButton',
-      defaultMessage: 'Cancel',
-    });
+    const cancelButtonText = i18n.translate(
+      'xpack.spaces.management.manageSpacePage.cancelSpaceButton',
+      {
+        defaultMessage: 'Cancel',
+      }
+    );
 
     const saveText = this.editingExistingSpace() ? updateSpaceText : createSpaceText;
     return (
@@ -322,8 +303,40 @@ class ManageSpacePageUI extends Component<Props, State> {
     }
   };
 
+  private loadSpace = async (spaceId: string, featuresPromise: Promise<Feature[]>) => {
+    const { spacesManager, onLoadSpace } = this.props;
+
+    try {
+      const [space, features] = await Promise.all([
+        spacesManager.getSpace(spaceId),
+        featuresPromise,
+      ]);
+      if (space) {
+        if (onLoadSpace) {
+          onLoadSpace(space);
+        }
+
+        this.setState({
+          space,
+          features: await features,
+          originalSpace: space,
+          isLoading: false,
+        });
+      }
+    } catch (error) {
+      const message = error?.body?.message ?? '';
+
+      this.props.notifications.toasts.addDanger(
+        i18n.translate('xpack.spaces.management.manageSpacePage.errorLoadingSpaceTitle', {
+          defaultMessage: 'Error loading space: {message}',
+          values: { message },
+        })
+      );
+      this.backToSpacesList();
+    }
+  };
+
   private performSave = (requireRefresh = false) => {
-    const { intl } = this.props;
     if (!this.state.space) {
       return;
     }
@@ -360,14 +373,11 @@ class ManageSpacePageUI extends Component<Props, State> {
     action
       .then(() => {
         this.props.notifications.toasts.addSuccess(
-          intl.formatMessage(
+          i18n.translate(
+            'xpack.spaces.management.manageSpacePage.spaceSuccessfullySavedNotificationMessage',
             {
-              id:
-                'xpack.spaces.management.manageSpacePage.spaceSuccessfullySavedNotificationMessage',
               defaultMessage: `Space {name} was saved.`,
-            },
-            {
-              name: `'${name}'`,
+              values: { name: `'${name}'` },
             }
           )
         );
@@ -379,20 +389,15 @@ class ManageSpacePageUI extends Component<Props, State> {
         }
       })
       .catch(error => {
-        const { message = '' } = error.data || {};
+        const message = error?.body?.message ?? '';
 
         this.setState({ saveInProgress: false });
 
         this.props.notifications.toasts.addDanger(
-          intl.formatMessage(
-            {
-              id: 'xpack.spaces.management.manageSpacePage.errorSavingSpaceTitle',
-              defaultMessage: 'Error saving space: {message}',
-            },
-            {
-              message,
-            }
-          )
+          i18n.translate('xpack.spaces.management.manageSpacePage.errorSavingSpaceTitle', {
+            defaultMessage: 'Error saving space: {message}',
+            values: { message },
+          })
         );
       });
   };
@@ -403,5 +408,3 @@ class ManageSpacePageUI extends Component<Props, State> {
 
   private editingExistingSpace = () => !!this.props.spaceId;
 }
-
-export const ManageSpacePage = injectI18n(ManageSpacePageUI);

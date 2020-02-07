@@ -6,7 +6,7 @@
 
 import { ManagementSetup, ManagementApp } from 'src/plugins/management/public';
 import { CoreSetup, Capabilities } from 'src/core/public';
-import { SecurityPluginSetup } from '../../../security/public';
+import { SecurityLicense } from '../../../security/public';
 import { SpacesManager } from '../spaces_manager';
 import { PluginsStart } from '../plugin';
 import { spacesManagementApp } from './spaces_management_app';
@@ -15,7 +15,7 @@ interface SetupDeps {
   management: ManagementSetup;
   getStartServices: CoreSetup<PluginsStart>['getStartServices'];
   spacesManager: SpacesManager;
-  securityLicense?: SecurityPluginSetup['license'];
+  securityLicense?: SecurityLicense;
 }
 
 interface StartDeps {

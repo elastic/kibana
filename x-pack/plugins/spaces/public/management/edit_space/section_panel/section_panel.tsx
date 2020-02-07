@@ -14,7 +14,7 @@ import {
   EuiTitle,
   IconType,
 } from '@elastic/eui';
-import { InjectedIntl } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import React, { Component, Fragment, ReactNode } from 'react';
 
 interface Props {
@@ -22,7 +22,6 @@ interface Props {
   title: string | ReactNode;
   description: string;
   collapsible: boolean;
-  intl: InjectedIntl;
   initiallyCollapsed?: boolean;
 }
 
@@ -52,38 +51,31 @@ export class SectionPanel extends Component<Props, State> {
   }
 
   public getTitle = () => {
-    const showLinkText = this.props.intl.formatMessage({
-      id: 'xpack.spaces.management.collapsiblePanel.showLinkText',
+    const showLinkText = i18n.translate('xpack.spaces.management.collapsiblePanel.showLinkText', {
       defaultMessage: 'show',
     });
 
-    const hideLinkText = this.props.intl.formatMessage({
-      id: 'xpack.spaces.management.collapsiblePanel.hideLinkText',
+    const hideLinkText = i18n.translate('xpack.spaces.management.collapsiblePanel.hideLinkText', {
       defaultMessage: 'hide',
     });
 
-    const showLinkDescription = this.props.intl.formatMessage(
+    const showLinkDescription = i18n.translate(
+      'xpack.spaces.management.collapsiblePanel.showLinkDescription',
       {
-        id: 'xpack.spaces.management.collapsiblePanel.showLinkDescription',
         defaultMessage: 'show {title}',
-      },
-      {
-        title: this.props.description,
+        values: { title: this.props.description },
       }
     );
 
-    const hideLinkDescription = this.props.intl.formatMessage(
+    const hideLinkDescription = i18n.translate(
+      'xpack.spaces.management.collapsiblePanel.hideLinkDescription',
       {
-        id: 'xpack.spaces.management.collapsiblePanel.hideLinkDescription',
         defaultMessage: 'hide {title}',
-      },
-      {
-        title: this.props.description,
+        values: { title: this.props.description },
       }
     );
 
     return (
-      // @ts-ignore
       <EuiFlexGroup alignItems={'baseline'} gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiTitle size="m">

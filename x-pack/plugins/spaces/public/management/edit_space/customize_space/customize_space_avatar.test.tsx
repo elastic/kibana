@@ -15,9 +15,7 @@ const space = {
 };
 
 test('renders without crashing', () => {
-  const wrapper = shallowWithIntl(
-    <CustomizeSpaceAvatar.WrappedComponent space={space} onChange={jest.fn()} intl={null as any} />
-  );
+  const wrapper = shallowWithIntl(<CustomizeSpaceAvatar space={space} onChange={jest.fn()} />);
   expect(wrapper).toMatchSnapshot();
 });
 

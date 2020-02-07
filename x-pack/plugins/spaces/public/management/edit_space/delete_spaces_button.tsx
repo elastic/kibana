@@ -5,7 +5,8 @@
  */
 
 import { EuiButton, EuiButtonIcon, EuiButtonIconProps } from '@elastic/eui';
-import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component, Fragment } from 'react';
 import { NotificationsStart } from 'src/core/public';
 import { Space } from '../../../common/model/space';
@@ -17,7 +18,6 @@ interface Props {
   space: Space;
   spacesManager: SpacesManager;
   onDelete: () => void;
-  intl: InjectedIntl;
   notifications: NotificationsStart;
 }
 
@@ -26,7 +26,7 @@ interface State {
   showConfirmRedirectModal: boolean;
 }
 
-class DeleteSpacesButtonUI extends Component<Props, State> {
+export class DeleteSpacesButton extends Component<Props, State> {
   public state = {
     showConfirmDeleteModal: false,
     showConfirmRedirectModal: false,
@@ -39,7 +39,6 @@ class DeleteSpacesButtonUI extends Component<Props, State> {
         defaultMessage="Delete space"
       />
     );
-    const { intl } = this.props;
 
     let ButtonComponent: any = EuiButton;
 
@@ -55,10 +54,12 @@ class DeleteSpacesButtonUI extends Component<Props, State> {
         <ButtonComponent
           color={'danger'}
           onClick={this.onDeleteClick}
-          aria-label={intl.formatMessage({
-            id: 'xpack.spaces.management.deleteSpacesButton.deleteSpaceAriaLabel',
-            defaultMessage: 'Delete this space',
-          })}
+          aria-label={i18n.translate(
+            'xpack.spaces.management.deleteSpacesButton.deleteSpaceAriaLabel',
+            {
+              defaultMessage: 'Delete this space',
+            }
+          )}
           {...extraProps}
         >
           {buttonText}
@@ -96,7 +97,7 @@ class DeleteSpacesButtonUI extends Component<Props, State> {
   };
 
   public deleteSpaces = async () => {
-    const { spacesManager, space, intl } = this.props;
+    const { spacesManager, space } = this.props;
 
     try {
       await spacesManager.deleteSpace(space);
@@ -104,15 +105,10 @@ class DeleteSpacesButtonUI extends Component<Props, State> {
       const { message: errorMessage = '' } = error.data || {};
 
       this.props.notifications.toasts.addDanger(
-        intl.formatMessage(
-          {
-            id: 'xpack.spaces.management.deleteSpacesButton.deleteSpaceErrorTitle',
-            defaultMessage: 'Error deleting space: {errorMessage}',
-          },
-          {
-            errorMessage,
-          }
-        )
+        i18n.translate('xpack.spaces.management.deleteSpacesButton.deleteSpaceErrorTitle', {
+          defaultMessage: 'Error deleting space: {errorMessage}',
+          values: { errorMessage },
+        })
       );
     }
 
@@ -120,14 +116,11 @@ class DeleteSpacesButtonUI extends Component<Props, State> {
       showConfirmDeleteModal: false,
     });
 
-    const message = intl.formatMessage(
+    const message = i18n.translate(
+      'xpack.spaces.management.deleteSpacesButton.spaceSuccessfullyDeletedNotificationMessage',
       {
-        id:
-          'xpack.spaces.management.deleteSpacesButton.spaceSuccessfullyDeletedNotificationMessage',
         defaultMessage: 'Deleted {spaceName} space.',
-      },
-      {
-        spaceName: space.name,
+        values: { spaceName: space.name },
       }
     );
 
@@ -138,5 +131,3 @@ class DeleteSpacesButtonUI extends Component<Props, State> {
     }
   };
 }
-
-export const DeleteSpacesButton = injectI18n(DeleteSpacesButtonUI);

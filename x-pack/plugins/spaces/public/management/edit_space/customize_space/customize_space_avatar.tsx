@@ -16,7 +16,7 @@ import {
   EuiSpacer,
   isValidHex,
 } from '@elastic/eui';
-import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import { Space } from '../../../../common/model/space';
 import { imageTypes, encode } from '../../../../common/lib/dataurl';
 import { getSpaceColor, getSpaceInitials } from '../../../space_avatar';
@@ -24,7 +24,6 @@ import { MAX_SPACE_INITIALS } from '../../../../common';
 interface Props {
   space: Partial<Space>;
   onChange: (space: Partial<Space>) => void;
-  intl: InjectedIntl;
 }
 
 interface State {
@@ -32,7 +31,7 @@ interface State {
   pendingInitials?: string | null;
 }
 
-class CustomizeSpaceAvatarUI extends Component<Props, State> {
+export class CustomizeSpaceAvatar extends Component<Props, State> {
   private initialsRef: HTMLInputElement | null = null;
 
   constructor(props: Props) {
@@ -100,7 +99,7 @@ class CustomizeSpaceAvatarUI extends Component<Props, State> {
   };
 
   public render() {
-    const { space, intl } = this.props;
+    const { space } = this.props;
 
     const { initialsHasFocus, pendingInitials } = this.state;
 
@@ -110,10 +109,12 @@ class CustomizeSpaceAvatarUI extends Component<Props, State> {
     return (
       <form onSubmit={() => false}>
         <EuiFormRow
-          label={intl.formatMessage({
-            id: 'xpack.spaces.management.customizeSpaceAvatar.initialItemsFormRowLabel',
-            defaultMessage: 'Initials (2 max)',
-          })}
+          label={i18n.translate(
+            'xpack.spaces.management.customizeSpaceAvatar.initialItemsFormRowLabel',
+            {
+              defaultMessage: 'Initials (2 max)',
+            }
+          )}
         >
           <EuiFieldText
             inputRef={this.initialsInputRef}
@@ -127,8 +128,7 @@ class CustomizeSpaceAvatarUI extends Component<Props, State> {
         </EuiFormRow>
         <EuiSpacer size="m" />
         <EuiFormRow
-          label={intl.formatMessage({
-            id: 'xpack.spaces.management.customizeSpaceAvatar.colorFormRowLabel',
+          label={i18n.translate('xpack.spaces.management.customizeSpaceAvatar.colorFormRowLabel', {
             defaultMessage: 'Color',
           })}
           isInvalid={isInvalidSpaceColor}
@@ -153,22 +153,21 @@ class CustomizeSpaceAvatarUI extends Component<Props, State> {
   }
 
   public filePickerOrImage() {
-    const { intl } = this.props;
-
     if (!this.props.space.imageUrl) {
       return (
         <EuiFormRow
-          label={intl.formatMessage({
-            id: 'xpack.spaces.management.customizeSpaceAvatar.imageUrl',
+          label={i18n.translate('xpack.spaces.management.customizeSpaceAvatar.imageUrl', {
             defaultMessage: 'Custom image',
           })}
         >
           <EuiFilePicker
             display="default"
-            initialPromptText={intl.formatMessage({
-              id: 'xpack.spaces.management.customizeSpaceAvatar.selectImageUrl',
-              defaultMessage: 'Select image file',
-            })}
+            initialPromptText={i18n.translate(
+              'xpack.spaces.management.customizeSpaceAvatar.selectImageUrl',
+              {
+                defaultMessage: 'Select image file',
+              }
+            )}
             onChange={this.onFileUpload}
             accept={imageTypes}
           />
@@ -178,8 +177,7 @@ class CustomizeSpaceAvatarUI extends Component<Props, State> {
       return (
         <EuiFlexItem grow={true}>
           <EuiButton onClick={() => this.removeImageUrl()} color="danger" iconType="trash">
-            {intl.formatMessage({
-              id: 'xpack.spaces.management.customizeSpaceAvatar.removeImage',
+            {i18n.translate('xpack.spaces.management.customizeSpaceAvatar.removeImage', {
               defaultMessage: 'Remove custom image',
             })}
           </EuiButton>
@@ -236,5 +234,3 @@ class CustomizeSpaceAvatarUI extends Component<Props, State> {
     });
   };
 }
-
-export const CustomizeSpaceAvatar = injectI18n(CustomizeSpaceAvatarUI);

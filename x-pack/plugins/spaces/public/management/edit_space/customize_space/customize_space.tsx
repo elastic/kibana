@@ -16,7 +16,8 @@ import {
   EuiTextArea,
   EuiTitle,
 } from '@elastic/eui';
-import { FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import React, { ChangeEvent, Component, Fragment } from 'react';
 import { isReservedSpace } from '../../../../common';
 import { Space } from '../../../../common/model/space';
@@ -30,7 +31,6 @@ interface Props {
   validator: SpaceValidator;
   space: Partial<Space>;
   editingExistingSpace: boolean;
-  intl: InjectedIntl;
   onChange: (space: Partial<Space>) => void;
 }
 
@@ -46,24 +46,21 @@ export class CustomizeSpace extends Component<Props, State> {
   };
 
   public render() {
-    const { validator, editingExistingSpace, intl } = this.props;
+    const { validator, editingExistingSpace } = this.props;
     const { name = '', description = '' } = this.props.space;
-    const panelTitle = intl.formatMessage({
-      id: 'xpack.spaces.management.manageSpacePage.customizeSpaceTitle',
-      defaultMessage: 'Customize your space',
-    });
+    const panelTitle = i18n.translate(
+      'xpack.spaces.management.manageSpacePage.customizeSpaceTitle',
+      {
+        defaultMessage: 'Customize your space',
+      }
+    );
 
     const extraPopoverProps: Partial<EuiPopoverProps> = {
       initialFocus: 'input[name="spaceInitials"]',
     };
 
     return (
-      <SectionPanel
-        collapsible={false}
-        title={panelTitle}
-        description={panelTitle}
-        intl={this.props.intl}
-      >
+      <SectionPanel collapsible={false} title={panelTitle} description={panelTitle}>
         <EuiDescribedFormGroup
           title={
             <EuiTitle size="xs">
@@ -81,8 +78,7 @@ export class CustomizeSpace extends Component<Props, State> {
           <EuiFlexGroup responsive={false}>
             <EuiFlexItem>
               <EuiFormRow
-                label={intl.formatMessage({
-                  id: 'xpack.spaces.management.manageSpacePage.nameFormRowLabel',
+                label={i18n.translate('xpack.spaces.management.manageSpacePage.nameFormRowLabel', {
                   defaultMessage: 'Name',
                 })}
                 {...validator.validateSpaceName(this.props.space)}
@@ -90,10 +86,12 @@ export class CustomizeSpace extends Component<Props, State> {
               >
                 <EuiFieldText
                   name="name"
-                  placeholder={intl.formatMessage({
-                    id: 'xpack.spaces.management.manageSpacePage.awesomeSpacePlaceholder',
-                    defaultMessage: 'Awesome space',
-                  })}
+                  placeholder={i18n.translate(
+                    'xpack.spaces.management.manageSpacePage.awesomeSpacePlaceholder',
+                    {
+                      defaultMessage: 'Awesome space',
+                    }
+                  )}
                   value={name}
                   onChange={this.onNameChange}
                   fullWidth
@@ -102,19 +100,23 @@ export class CustomizeSpace extends Component<Props, State> {
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiFormRow
-                label={intl.formatMessage({
-                  id: 'xpack.spaces.management.manageSpacePage.avatarFormRowLabel',
-                  defaultMessage: 'Avatar',
-                })}
+                label={i18n.translate(
+                  'xpack.spaces.management.manageSpacePage.avatarFormRowLabel',
+                  {
+                    defaultMessage: 'Avatar',
+                  }
+                )}
               >
                 <EuiPopover
                   id="customizeAvatarPopover"
                   button={
                     <button
-                      title={intl.formatMessage({
-                        id: 'xpack.spaces.management.manageSpacePage.clickToCustomizeTooltip',
-                        defaultMessage: 'Click to customize this space avatar',
-                      })}
+                      title={i18n.translate(
+                        'xpack.spaces.management.manageSpacePage.clickToCustomizeTooltip',
+                        {
+                          defaultMessage: 'Click to customize this space avatar',
+                        }
+                      )}
                       onClick={this.togglePopover}
                     >
                       <SpaceAvatar space={this.props.space} size="l" />
@@ -147,14 +149,18 @@ export class CustomizeSpace extends Component<Props, State> {
           )}
 
           <EuiFormRow
-            label={intl.formatMessage({
-              id: 'xpack.spaces.management.manageSpacePage.spaceDescriptionFormRowLabel',
-              defaultMessage: 'Description (optional)',
-            })}
-            helpText={intl.formatMessage({
-              id: 'xpack.spaces.management.manageSpacePage.spaceDescriptionHelpText',
-              defaultMessage: 'The description appears on the Space selection screen.',
-            })}
+            label={i18n.translate(
+              'xpack.spaces.management.manageSpacePage.spaceDescriptionFormRowLabel',
+              {
+                defaultMessage: 'Description (optional)',
+              }
+            )}
+            helpText={i18n.translate(
+              'xpack.spaces.management.manageSpacePage.spaceDescriptionHelpText',
+              {
+                defaultMessage: 'The description appears on the Space selection screen.',
+              }
+            )}
             {...validator.validateSpaceDescription(this.props.space)}
             fullWidth
           >

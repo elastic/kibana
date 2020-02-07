@@ -5,9 +5,9 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
-import { FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component, Fragment, ReactNode } from 'react';
-import { Capabilities } from 'src/core/public';
 import { Feature } from '../../../../../../plugins/features/public';
 import { Space } from '../../../../common/model/space';
 import { getEnabledFeatures } from '../../lib/feature_utils';
@@ -17,17 +17,18 @@ import { FeatureTable } from './feature_table';
 interface Props {
   space: Partial<Space>;
   features: Feature[];
-  capabilities: Capabilities;
-  intl: InjectedIntl;
+  securityEnabled: boolean;
   onChange: (space: Partial<Space>) => void;
 }
 
 export class EnabledFeatures extends Component<Props, {}> {
   public render() {
-    const description = this.props.intl.formatMessage({
-      id: 'xpack.spaces.management.manageSpacePage.customizeVisibleFeatures',
-      defaultMessage: 'Customize visible features',
-    });
+    const description = i18n.translate(
+      'xpack.spaces.management.manageSpacePage.customizeVisibleFeatures',
+      {
+        defaultMessage: 'Customize visible features',
+      }
+    );
 
     return (
       <SectionPanel
@@ -35,7 +36,6 @@ export class EnabledFeatures extends Component<Props, {}> {
         initiallyCollapsed
         title={this.getPanelTitle()}
         description={description}
-        intl={this.props.intl}
         data-test-subj="enabled-features-panel"
       >
         <EuiFlexGroup>
@@ -56,7 +56,6 @@ export class EnabledFeatures extends Component<Props, {}> {
               features={this.props.features}
               space={this.props.space}
               onChange={this.props.onChange}
-              intl={this.props.intl}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -130,7 +129,7 @@ export class EnabledFeatures extends Component<Props, {}> {
               defaultMessage="The feature is hidden in the UI, but is not disabled."
             />
           </p>
-          {this.props.capabilities.spaces.manage && (
+          {this.props.securityEnabled && (
             <p>
               <FormattedMessage
                 id="xpack.spaces.management.enabledSpaceFeatures.goToRolesLink"

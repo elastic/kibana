@@ -31,9 +31,8 @@ describe('ManageSpacePage', () => {
     httpStart.get.mockResolvedValue([{ id: 'feature-1', name: 'feature 1', icon: 'spacesApp' }]);
 
     const wrapper = mountWithIntl(
-      <ManageSpacePage.WrappedComponent
+      <ManageSpacePage
         spacesManager={(spacesManager as unknown) as SpacesManager}
-        intl={null as any}
         http={httpStart}
         notifications={notificationServiceMock.createStartContract()}
         securityEnabled={true}
@@ -90,11 +89,10 @@ describe('ManageSpacePage', () => {
     const onLoadSpace = jest.fn();
 
     const wrapper = mountWithIntl(
-      <ManageSpacePage.WrappedComponent
+      <ManageSpacePage
         spaceId={'existing-space'}
         spacesManager={(spacesManager as unknown) as SpacesManager}
         onLoadSpace={onLoadSpace}
-        intl={null as any}
         http={httpStart}
         notifications={notificationServiceMock.createStartContract()}
         securityEnabled={true}
@@ -148,10 +146,9 @@ describe('ManageSpacePage', () => {
     httpStart.get.mockResolvedValue([{ id: 'feature-1', name: 'feature 1', icon: 'spacesApp' }]);
 
     const wrapper = mountWithIntl(
-      <ManageSpacePage.WrappedComponent
+      <ManageSpacePage
         spaceId={'my-space'}
         spacesManager={(spacesManager as unknown) as SpacesManager}
-        intl={null as any}
         http={httpStart}
         notifications={notificationServiceMock.createStartContract()}
         securityEnabled={true}
@@ -211,10 +208,9 @@ describe('ManageSpacePage', () => {
     httpStart.get.mockResolvedValue([{ id: 'feature-1', name: 'feature 1', icon: 'spacesApp' }]);
 
     const wrapper = mountWithIntl(
-      <ManageSpacePage.WrappedComponent
+      <ManageSpacePage
         spaceId={'my-space'}
         spacesManager={(spacesManager as unknown) as SpacesManager}
-        intl={null as any}
         http={httpStart}
         notifications={notificationServiceMock.createStartContract()}
         securityEnabled={true}

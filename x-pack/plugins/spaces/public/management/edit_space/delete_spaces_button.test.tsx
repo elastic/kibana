@@ -24,11 +24,10 @@ describe('DeleteSpacesButton', () => {
     const notifications = notificationServiceMock.createStartContract();
 
     const wrapper = shallowWithIntl(
-      <DeleteSpacesButton.WrappedComponent
+      <DeleteSpacesButton
         space={space}
         spacesManager={(spacesManager as unknown) as SpacesManager}
         onDelete={jest.fn()}
-        intl={null as any}
         notifications={notifications}
       />
     );

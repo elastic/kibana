@@ -5,7 +5,8 @@
  */
 
 import { EuiIcon, EuiInMemoryTable, EuiSwitch, EuiText, IconType } from '@elastic/eui';
-import { FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import _ from 'lodash';
 import React, { ChangeEvent, Component } from 'react';
 import { Feature } from '../../../../../../plugins/features/public';
@@ -15,7 +16,6 @@ import { ToggleAllFeatures } from './toggle_all_features';
 interface Props {
   space: Partial<Space>;
   features: Feature[];
-  intl: InjectedIntl;
   onChange: (space: Partial<Space>) => void;
 }
 
@@ -66,8 +66,7 @@ export class FeatureTable extends Component<Props, {}> {
   private getColumns = () => [
     {
       field: 'feature',
-      name: this.props.intl.formatMessage({
-        id: 'xpack.spaces.management.enabledSpaceFeaturesFeatureColumnTitle',
+      name: i18n.translate('xpack.spaces.management.enabledSpaceFeaturesFeatureColumnTitle', {
         defaultMessage: 'Feature',
       }),
       render: (feature: Feature, _item: { feature: Feature; space: Props['space'] }) => {

@@ -35,15 +35,6 @@ const space: Space = {
   disabledFeatures: ['feature-1', 'feature-2'],
 };
 
-const capabilities = {
-  navLinks: {},
-  management: {},
-  catalogue: {},
-  spaces: {
-    manage: true,
-  },
-};
-
 describe('EnabledFeatures', () => {
   it(`renders as expected`, () => {
     expect(
@@ -51,8 +42,7 @@ describe('EnabledFeatures', () => {
         <EnabledFeatures
           features={features}
           space={space}
-          capabilities={capabilities}
-          intl={null as any}
+          securityEnabled={true}
           onChange={jest.fn()}
         />
       )
@@ -66,8 +56,7 @@ describe('EnabledFeatures', () => {
       <EnabledFeatures
         features={features}
         space={space}
-        capabilities={capabilities}
-        intl={null as any}
+        securityEnabled={true}
         onChange={changeHandler}
       />
     );
@@ -101,8 +90,7 @@ describe('EnabledFeatures', () => {
       <EnabledFeatures
         features={features}
         space={space}
-        capabilities={capabilities}
-        intl={null as any}
+        securityEnabled={true}
         onChange={changeHandler}
       />
     );
