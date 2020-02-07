@@ -13,6 +13,6 @@ jobs:
         with:
           issue-mappings: |
             [
-              { "label": "pa_test", "projectName": "Workflow Test", "columnId": 7922444 },
+              { "label": "pa_test", "projectName": "Workflow Test", "columnId": 7922444 }
             ]
           ghToken: ${{ secrets.GH_PAT }}
