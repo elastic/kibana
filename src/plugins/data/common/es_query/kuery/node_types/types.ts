@@ -22,9 +22,9 @@
  */
 
 import { IIndexPattern } from '../../../index_patterns';
-import { KueryNode, JsonValue } from '..';
+import { JsonValue, KueryNode } from '..';
 
-type FunctionName =
+export type FunctionName =
   | 'is'
   | 'and'
   | 'or'
@@ -37,7 +37,7 @@ type FunctionName =
 
 interface FunctionType {
   buildNode: (functionName: FunctionName, ...args: any[]) => FunctionTypeBuildNode;
-  buildNodeWithArgumentNodes: (functionName: FunctionName, ...args: any[]) => FunctionTypeBuildNode;
+  buildNodeWithArgumentNodes: (functionName: FunctionName, args: any[]) => FunctionTypeBuildNode;
   toElasticsearchQuery: (
     node: any,
     indexPattern?: IIndexPattern,
@@ -46,7 +46,7 @@ interface FunctionType {
   ) => JsonValue;
 }
 
-interface FunctionTypeBuildNode {
+export interface FunctionTypeBuildNode {
   type: 'function';
   function: FunctionName;
   // TODO -> Need to define a better type for DSL query
@@ -58,40 +58,38 @@ interface LiteralType {
   toElasticsearchQuery: (node: any) => null | boolean | number | string;
 }
 
-interface LiteralTypeBuildNode {
+export interface LiteralTypeBuildNode {
   type: 'literal';
   value: null | boolean | number | string;
 }
 
 interface NamedArgType {
   buildNode: (name: string, value: any) => NamedArgTypeBuildNode;
-  toElasticsearchQuery: (node: any) => string;
+  toElasticsearchQuery: (node: any) => JsonValue;
 }
 
-interface NamedArgTypeBuildNode {
+export interface NamedArgTypeBuildNode {
   type: 'namedArg';
   name: string;
   value: any;
 }
 
 interface WildcardType {
-  buildNode: (value: string) => WildcardTypeBuildNode;
+  buildNode: (value: string) => WildcardTypeBuildNode | KueryNode;
   test: (node: any, string: string) => boolean;
   toElasticsearchQuery: (node: any) => string;
   toQueryStringQuery: (node: any) => string;
   hasLeadingWildcard: (node: any) => boolean;
 }
 
-interface WildcardTypeBuildNode {
+export interface WildcardTypeBuildNode {
   type: 'wildcard';
   value: string;
 }
 
-interface NodeTypes {
+export interface NodeTypes {
   function: FunctionType;
   literal: LiteralType;
   namedArg: NamedArgType;
   wildcard: WildcardType;
 }
-
-export const nodeTypes: NodeTypes;
