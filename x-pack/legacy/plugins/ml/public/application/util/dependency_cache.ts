@@ -25,25 +25,6 @@ import {
   IBasePath,
 } from 'kibana/public';
 
-// export interface AppDependencies {
-//   config: IUiSettingsClient;
-//   indexPatterns: IndexPatternsContract;
-//   timefilter: TimefilterSetup;
-//   chrome: ChromeStart;
-//   docLinks: DocLinksStart;
-//   toastNotifications: ToastsStart;
-//   overlays: OverlayStart;
-//   recentlyAccessed: ChromeRecentlyAccessed;
-//   fieldFormats: FieldFormatsStart;
-//   autocomplete: DataPublicPluginStart['autocomplete'];
-//   basePath: IBasePath;
-//   savedObjectsClient: SavedObjectsClientContract;
-//   XSRF: string;
-//   APP_URL: string;
-//   application: ApplicationStart;
-//   http: HttpStart;
-// }
-
 export interface DependencyCache {
   timefilter: TimefilterSetup | null;
   config: IUiSettingsClient | null;
@@ -99,48 +80,6 @@ export function setDependencyCache(deps: DependencyCache) {
   cache.APP_URL = deps.APP_URL;
   cache.application = deps.application;
   cache.http = deps.http;
-}
-
-// this isn't used and might never be needed
-export function getDependencyCache(): Readonly<DependencyCache> {
-  if (
-    cache.timefilter === null ||
-    cache.config === null ||
-    cache.chrome === null ||
-    cache.indexPatterns === null ||
-    cache.docLinks === null ||
-    cache.toastNotifications === null ||
-    cache.overlays === null ||
-    cache.recentlyAccessed === null ||
-    cache.fieldFormats === null ||
-    cache.autocomplete === null ||
-    cache.basePath === null ||
-    cache.savedObjectsClient === null ||
-    cache.XSRF === null ||
-    cache.APP_URL === null ||
-    cache.application === null ||
-    cache.http === null
-  ) {
-    throw new Error();
-  }
-  return {
-    timefilter: cache.timefilter,
-    config: cache.config,
-    chrome: cache.chrome,
-    indexPatterns: cache.indexPatterns,
-    docLinks: cache.docLinks,
-    toastNotifications: cache.toastNotifications,
-    overlays: cache.overlays,
-    recentlyAccessed: cache.recentlyAccessed,
-    fieldFormats: cache.fieldFormats,
-    autocomplete: cache.autocomplete,
-    basePath: cache.basePath,
-    savedObjectsClient: cache.savedObjectsClient,
-    XSRF: cache.XSRF,
-    APP_URL: cache.APP_URL,
-    application: cache.application,
-    http: cache.http,
-  };
 }
 
 export function getTimefilter() {
@@ -255,7 +194,7 @@ export function getHttp() {
 }
 
 export function clearCache() {
-  console.log('clearing cache'); // eslint-disable-line no-console
+  console.log('clearing dependency cache'); // eslint-disable-line no-console
   Object.keys(cache).forEach(k => {
     cache[k as keyof DependencyCache] = null;
   });

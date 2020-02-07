@@ -41,7 +41,6 @@ let deletingJobsRefreshTimeout = null;
 
 // 'isManagementTable' bool prop to determine when to configure table for use in Kibana management page
 class JobsListViewUI extends Component {
-  // static contextType = KibanaReactContext;
   constructor(props) {
     super(props);
 

@@ -121,8 +121,6 @@ const PageWrapper: FC<WizardPageProps> = ({ location, jobType, deps }) => {
     existingJobsAndGroups: mlJobService.getJobAndGroupIds,
   });
 
-  // useDependencyCache(deps);
-
   return (
     <PageLoader context={context}>
       <Page jobType={jobType} existingJobsAndGroups={results.existingJobsAndGroups} />

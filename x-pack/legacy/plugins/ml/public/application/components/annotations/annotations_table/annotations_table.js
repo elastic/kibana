@@ -68,7 +68,6 @@ export class AnnotationsTable extends Component {
     this.state = {
       annotations: [],
       isLoading: false,
-      // Need to do a detailed check here because the angular wrapper could pass on something like `[undefined]`.
       jobId:
         Array.isArray(this.props.jobs) &&
         this.props.jobs.length > 0 &&
