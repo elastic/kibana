@@ -22,6 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { getAngularModule, getServices, subscribeWithScope } from '../../kibana_services';
 
 import './context_app';
+import { getAppState } from './context_state';
 import contextAppRouteTemplate from './context.html';
 import { getRootBreadcrumbs } from '../helpers/breadcrumbs';
 import { FilterStateManager } from '../../../../../data/public';
@@ -68,21 +69,20 @@ getAngularModule().config($routeProvider => {
     });
 });
 
-function ContextAppRouteController(
-  $routeParams,
-  $scope,
-  AppState,
-  config,
-  $route,
-  getAppState,
-  globalState
-) {
+function ContextAppRouteController($routeParams, $scope, config, $route, globalState) {
   const filterManager = getServices().filterManager;
-  const filterStateManager = new FilterStateManager(globalState, getAppState, filterManager);
   const indexPattern = $route.current.locals.indexPattern.ip;
+  const { start, stateContainer, initialState } = getAppState(
+    config.get('context:defaultSize'),
+    indexPattern.timeFieldName
+  );
+  this.state = _.cloneDeep(initialState);
+  const filterStateManager = new FilterStateManager(globalState, () => ({}), filterManager);
 
-  this.state = new AppState(createDefaultAppState(config, indexPattern));
-  this.state.save(true);
+  start();
+  stateContainer.subscribe(state => {
+    this.state = { ...this.state, ...state };
+  });
 
   $scope.$watchGroup(
     [
@@ -90,7 +90,9 @@ function ContextAppRouteController(
       'contextAppRoute.state.predecessorCount',
       'contextAppRoute.state.successorCount',
     ],
-    () => this.state.save(true)
+    res => {
+      stateContainer.set({ columns: res[0], predecessorCount: res[1], successorCount: res[2] });
+    }
   );
 
   const updateSubsciption = subscribeWithScope($scope, filterManager.getUpdates$(), {
@@ -102,19 +104,10 @@ function ContextAppRouteController(
   $scope.$on('$destroy', () => {
     filterStateManager.destroy();
     updateSubsciption.unsubscribe();
+    //stop();
   });
   this.anchorId = $routeParams.id;
   this.indexPattern = indexPattern;
   this.discoverUrl = chrome.navLinks.get('kibana:discover').url;
   this.filters = _.cloneDeep(filterManager.getFilters());
-}
-
-function createDefaultAppState(config, indexPattern) {
-  return {
-    columns: ['_source'],
-    filters: [],
-    predecessorCount: parseInt(config.get('context:defaultSize'), 10),
-    sort: [indexPattern.timeFieldName, 'desc'],
-    successorCount: parseInt(config.get('context:defaultSize'), 10),
-  };
 }
