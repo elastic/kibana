@@ -17,19 +17,12 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { PromiseServiceCreator } from '../../../../plugins/kibana_legacy/public';
+export { createDefer } from './defer';
+// @ts-ignore
+import { uiModules } from '../modules';
 
-// browsers format Error.stack differently; always include message
-export function formatStack(err) {
-  if (err.stack && !~err.stack.indexOf(err.message)) {
-    return i18n.translate('common.ui.notify.toaster.errorMessage', {
-      defaultMessage: `Error: {errorMessage}
-      {errorStack}`,
-      values: {
-        errorMessage: err.message,
-        errorStack: err.stack,
-      },
-    });
-  }
-  return err.stack;
-}
+const module = uiModules.get('kibana');
+// Provides a tiny subset of the excellent API from
+// bluebird, reimplemented using the $q service
+module.service('Promise', PromiseServiceCreator);

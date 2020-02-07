@@ -16,8 +16,5 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-export {
-  InitAfterBindingsWorkaround,
-  callAfterBindingsWorkaround,
-} from './init_after_bindings_workaround';
+export * from './toasts';
+export * from './lib';

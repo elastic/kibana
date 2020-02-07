@@ -49,26 +49,6 @@
  *
  */
 
-export class InitAfterBindingsWorkaround {
-  static $inject = ['$injector', '$attrs', '$element', '$scope', '$transclude'];
-  constructor($injector, $attrs, $element, $scope, $transclude) {
-    if (!this.initAfterBindings) {
-      throw new Error(
-        'When using inheritance you must move the logic in the constructor to the `initAfterBindings` method'
-      );
-    }
-
-    this.$onInit = () => {
-      $injector.invoke(this.initAfterBindings, this, {
-        $attrs,
-        $element,
-        $scope,
-        $transclude,
-      });
-    };
-  }
-}
-
 export function callAfterBindingsWorkaround(constructor) {
   return function InitAfterBindingsWrapper($injector, $attrs, $element, $scope, $transclude) {
     this.$onInit = () => {

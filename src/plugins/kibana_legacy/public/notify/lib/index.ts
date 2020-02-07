@@ -17,22 +17,11 @@
  * under the License.
  */
 
-import _ from 'lodash';
-
-const getRootCause = err => _.get(err, 'resp.error.root_cause');
-
-/**
- * Utilize the extended error information returned from elasticsearch
- * @param  {Error|String} err
- * @returns {string}
- */
-export const formatESMsg = err => {
-  const rootCause = getRootCause(err);
-
-  if (!rootCause) {
-    return;
-  }
-
-  const result = _.pluck(rootCause, 'reason').join('\n');
-  return result;
-};
+export { formatESMsg } from './format_es_msg';
+export { formatMsg } from './format_msg';
+export { formatStack } from './format_stack';
+export {
+  isAngularHttpError,
+  formatAngularHttpError,
+  AngularHttpError,
+} from './format_angular_http_error';
