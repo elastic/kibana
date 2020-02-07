@@ -39,7 +39,7 @@ export function copySavedObjectsToSpacesFactory(
       excludeExportDetails: true,
       objects: options.objects,
       savedObjectsClient,
-      types: eligibleTypes,
+      types: options.objects.length > 0 ? undefined : eligibleTypes,
       exportSizeLimit: importExport.objectLimit,
     });
 
