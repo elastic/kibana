@@ -9,7 +9,6 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function securityTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
   const security = getService('security');
-  const spaces = getService('spaces');
 
   describe('/api/console_extensions/text_object/*', () => {
     const username = 'kibana_user';
