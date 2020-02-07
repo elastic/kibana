@@ -4,24 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getImportRouteHandler } from './routes/file_upload';
-import { MAX_BYTES } from '../common/constants/file_import';
+import { initRoutes } from './routes/file_upload';
 import { registerFileUploadUsageCollector } from './telemetry';
 
 export class FileUploadPlugin {
   setup(core, plugins, __LEGACY) {
     const elasticsearchPlugin = __LEGACY.plugins.elasticsearch;
     const getSavedObjectsRepository = __LEGACY.savedObjects.getSavedObjectsRepository;
+    const router = core.http.createRouter();
 
-    // Set up route
-    __LEGACY.route({
-      method: 'POST',
-      path: '/api/fileupload/import',
-      handler: getImportRouteHandler(elasticsearchPlugin, getSavedObjectsRepository),
-      config: {
-        payload: { maxBytes: MAX_BYTES },
-      },
-    });
+    initRoutes(router, elasticsearchPlugin, getSavedObjectsRepository);
 
     registerFileUploadUsageCollector(plugins.usageCollection, {
       elasticsearchPlugin,
