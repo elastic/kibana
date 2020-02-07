@@ -73,7 +73,7 @@ alertParamsExpression form represented as an expression using `EuiExpression`:
 ![Index Threshold Alert expression form](https://i.imgur.com/Ysk1ljY.png)
 
 Index Threshold Alert validation:
-![Index Threshold Alert validation](https://i.imgur.com/NWo78vl.png)
+![Index Threshold Alert validation](https://i.imgur.com/TV8c7hL.png)
 
 ## Alert type model definition
 
@@ -282,15 +282,15 @@ interface WhenExpressionProps {
 |Property|Description|
 |---|---|
 |aggType|Selected aggregation type that will be set as the alert type property.|
-|customAggTypesOptions|(Optional) List of aggregation types that replaces the default options defined in constants `x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts`|
+|customAggTypesOptions|(Optional) List of aggregation types that replaces the default options defined in constants `x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts`.|
 |onChangeSelectedAggType|event handler that will be excuted selected aggregation type is changed.|
-|popupPosition|(Optional) expression popup position. Default is ``, recomemded to change for smaller parent window space.|
+|popupPosition|(Optional) expression popup position. Default is `downLeft`, recomemded to change it for a small parent window space.|
 
 ### OF expression component
 
 ![OF](https://i.imgur.com/4MC8Kbb.png)
 
-OF expression is available if aggregation type require selecting data fields for aggregating.
+OF expression is available, if aggregation type requires selecting data fields for aggregating.
 
 ```
 <OfExpression
@@ -320,13 +320,15 @@ interface OfExpressionProps {
 }
 ```
 
-`aggType` - alert type property that will be set to the selected aggregation type
-`aggField` - alert type property that will be set to the selected aggregation field
-`errors` - list errors definition for the fields that should be validated. Can contains only aggField.
-`onChangeSelectedAggField` - event handler that will be excuted on change of selected aggregation field.
-`fields` - fields list that will be available in the OF dropdow.
-`customAggTypesOptions` - (optional) list of aggregation types that will replace the default one defined under constants `x-pack/legacy/plugins/triggers_actions_ui/np_ready/public/common/constants/aggregation_types.ts`
-`popupPosition` - (optional) and allows to change a position of the popup in the wide or small window space.
+|Property|Description|
+|---|---|
+|aggType|Selected aggregation type that will be set as the alert type property.|
+|aggField|Selected aggregation field that will be set as the alert type property.|
+|errors|List of errors with proper messages for the alert params that should be validated. In current component is validated `aggField`.|
+|onChangeSelectedAggField|Event handler that will be excuted if selected aggregation field is changed.|
+|fields|Fields list that will be available in the OF `Select a field` dropdow.|
+|customAggTypesOptions|(Optional) List of aggregation types that replaces the default options defined in constants `x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts`.|
+|popupPosition|(Optional) expression popup position. Default is `downRight`, recomemded to change it for a small parent window space.|
 
 ### GROUPED BY expression component
 
@@ -368,16 +370,18 @@ interface GroupByExpressionProps {
 }
 ```
 
-`groupBy` - alert type property that will be set to the selected groupBy
-`termSize` - alert type property that will be set to the selected termSize
-`termField` - alert type property that will be set to the selected termField
-`errors` - list errors definition for the alert type fields that should be validated under this current expression. Can contains only termSize and termField.
-`onChangeSelectedTermSize` - event handler that will be excuted on change of selected term size.
-`onChangeSelectedTermField` - event handler that will be excuted on change of selected term field.
-`onChangeSelectedGroupBy` - event handler that will be excuted on change of selected group by.
-`fields` - fields list that will be available for the `termField` dropdow.
-`customGroupByTypes` - (optional) list of group by types that will replace the default one defined under constants `x-pack/legacy/plugins/triggers_actions_ui/np_ready/public/common/constants/group_by_types.ts`
-`popupPosition` - (optional) and allows to change a position of the popup in the wide or small window space.
+|Property|Description|
+|---|---|
+|groupBy|Selected group by type that will be set as the alert type property.|
+|termSize|Selected term size that will be set as the alert type property.|
+|termField|Selected term field that will be set as the alert type property.|
+|errors|List of errors with proper messages for the alert params that should be validated. In current component is validated `termSize` and `termField`.|
+|onChangeSelectedTermSize|Event handler that will be excuted if selected term size is changed.|
+|onChangeSelectedTermField|Event handler that will be excuted if selected term field is changed.|
+|onChangeSelectedGroupBy|Event handler that will be excuted if selected group by is changed.|
+|fields|Fields list that will an options for the `termField` dropdow.|
+|customGroupByTypes|(Optional) List of group by types that replaces the default options defined in constants `x-pack/plugins/triggers_actions_ui/public/common/constants/group_by_types.ts`.|
+|popupPosition|(Optional) expression popup position. Default is `downLeft`, recomemded to change it for a small parent window space.|
 
 ### FOR THE LAST expression component
 
@@ -410,12 +414,14 @@ interface ForLastExpressionProps {
 }
 ```
 
-`timeWindowSize` - alert type property that will be set to the selected timeWindowSize
-`timeWindowUnit` - alert type property that will be set to the selected timeWindowUnit
-`errors` - list errors definition for the alert type fields that should be validated under this current expression. Can contains only timeWindowSize.
-`onChangeWindowSize` - event handler that will be excuted on change of selected window size.
-`onChangeWindowUnit` - event handler that will be excuted on change of selected window unit.
-`popupPosition` - (optional) and allows to change a position of the popup in the wide or small window space.
+|Property|Description|
+|---|---|
+|timeWindowSize|Selected time window size that will be set as the alert type property.|
+|timeWindowUnit|Selected time window unit that will be set as the alert type property.|
+|errors|List of errors with proper messages for the alert params that should be validated. In current component is validated `termWindowSize`.|
+|onChangeWindowSize|Event handler that will be excuted if selected window size is changed.|
+|onChangeWindowUnit|Event handler that will be excuted if selected window unit is changed.|
+|popupPosition|(Optional) expression popup position. Default is `downLeft`, recomemded to change it for a small parent window space.|
 
 ### THRESHOLD expression component
 
@@ -451,13 +457,15 @@ interface ThresholdExpressionProps {
 }
 ```
 
-`thresholdComparator` - alert type property that will be set to the selected thresholdComparator
-`threshold` - alert type property that will be put to the threshold array.
-`errors` - list errors definition for the alert type fields that should be validated under this current expression. Can contains only timeWindowSize.
-`onChangeSelectedThresholdComparator` - event handler that will be excuted on change of selected threshold comparator.
-`onChangeSelectedThreshold` - event handler that will be excuted on change of selected threshold.
-`customComparators` - (optional) list of comparators that will replace the default one defined under constants `x-pack/legacy/plugins/triggers_actions_ui/np_ready/public/common/constants/comparators.ts`
-`popupPosition` - (optional) and allows to change a position of the popup in the wide or small window space.
+|Property|Description|
+|---|---|
+|thresholdComparator|Selected time window size that will be set as the alert type property.|
+|threshold|Selected time window size that will be set as the alert type property.|
+|errors|List of errors with proper messages for the alert params that should be validated. In current component is validated `threshold0` and `threshold1`.|
+|onChangeSelectedThresholdComparator|Event handler that will be excuted if selected threshold comparator is changed.|
+|onChangeSelectedThreshold|Event handler that will be excuted if selected threshold is changed.|
+|customComparators|(Optional) List of comparators that replaces the default options defined in constants `x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts`.|
+|popupPosition|(Optional) expression popup position. Default is `downLeft`, recomemded to change it for a small parent window space.|
 
 ## Embed Create Alert flyout to Kibana plugins
 
@@ -516,9 +524,12 @@ interface AlertAddProps {
   canChangeTrigger?: boolean;
 }
 ```
-`consumer` - name of the plugin, which creating an alert
-`alertTypeId` - optional property to predefine alert type
-`canChangeTrigger` - optional property that hide change alert type possibility (only predefined will be an option)
+
+|Property|Description|
+|---|---|
+|consumer|Name of the plugin, which creating an alert.|
+|alertTypeId|Optional property to preselect alert type.|
+|canChangeTrigger|Optional property, that hides change alert type possibility.|
 
 AlertsContextProvider value options:
 ```
@@ -538,16 +549,19 @@ export interface AlertsContextValue {
   dataFieldsFormats?: Pick<FieldFormatsRegistry, 'register'>;
 }
 ```
-`addFlyoutVisible` - visibility state of the Create Alert flyout
-`setAddFlyoutVisibility` - function for changing visibility state of the Create Alert flyout
-`reloadAlerts` - otional function which will be executed if alert was saved sucsessfuly
-`http` - HttpSetup needed for API calls
-`alertTypeRegistry` - registry for alert types
-`actionTypeRegistry` - registry for action types
-`uiSettings` - optional property which is needed to display visualization of alert type expression
-`toastNotifications` - optional toasts
-`charts` - optional property which is needed to display visualization of alert type expression
-`dataFieldsFormats` - optional property which is needed to display visualization of alert type expression
+
+|Property|Description|
+|---|---|
+|addFlyoutVisible|Visibility state of the Create Alert flyout.|
+|setAddFlyoutVisibility|Function for changing visibility state of the Create Alert flyout.|
+|reloadAlerts|Optional function, which will be executed if alert was saved sucsessfuly.|
+|http|HttpSetup needed for executing API calls.|
+|alertTypeRegistry|Registry for alert types.|
+|actionTypeRegistry|Registry for action types.|
+|uiSettings|Optional property, which is needed to display visualization of alert type expression. Will be changed after visualization refactoring.|
+|toastNotifications|Optional toasts messages.|
+|charts|Optional property, which is needed to display visualization of alert type expression. Will be changed after visualization refactoring.|
+|dataFieldsFormats|Optional property, which is needed to display visualization of alert type expression. Will be changed after visualization refactoring.|
 
 ## Build and register Action Types
 
