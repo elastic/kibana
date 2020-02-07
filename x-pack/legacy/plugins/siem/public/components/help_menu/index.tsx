@@ -24,6 +24,8 @@ export const HelpMenu = React.memo(() => {
           href: docLinks.links.siem.guide,
           iconType: 'documents',
           linkType: 'custom',
+          target: '_blank',
+          rel: 'noopener',
         },
         {
           content: i18n.translate('xpack.siem.chrome.helpMenu.documentation.ecs', {
@@ -32,10 +34,14 @@ export const HelpMenu = React.memo(() => {
           href: `${docLinks.ELASTIC_WEBSITE_URL}guide/en/ecs/${docLinks.DOC_LINK_VERSION}/index.html`,
           iconType: 'documents',
           linkType: 'custom',
+          target: '_blank',
+          rel: 'noopener',
         },
         {
           linkType: 'discuss',
           href: 'https://discuss.elastic.co/c/siem',
+          target: '_blank',
+          rel: 'noopener',
         },
       ],
     });
