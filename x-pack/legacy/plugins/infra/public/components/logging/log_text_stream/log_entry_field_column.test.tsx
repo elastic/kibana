@@ -16,7 +16,7 @@ describe('LogEntryFieldColumn', () => {
     const column: LogColumn = {
       columnId: 'TEST_COLUMN',
       field: 'TEST_FIELD',
-      value: JSON.stringify(['a', 'b', 'c']),
+      value: ['a', 'b', 'c'],
       highlights: [],
     };
 
@@ -46,10 +46,10 @@ describe('LogEntryFieldColumn', () => {
     const column: LogColumn = {
       columnId: 'TEST_COLUMN',
       field: 'TEST_FIELD',
-      value: JSON.stringify({
+      value: {
         lat: 1,
         lon: 2,
-      }),
+      },
       highlights: [],
     };
 
@@ -72,7 +72,7 @@ describe('LogEntryFieldColumn', () => {
     const column: LogColumn = {
       columnId: 'TEST_COLUMN',
       field: 'TEST_FIELD',
-      value: JSON.stringify('foo'),
+      value: 'foo',
       highlights: [],
     };
 
