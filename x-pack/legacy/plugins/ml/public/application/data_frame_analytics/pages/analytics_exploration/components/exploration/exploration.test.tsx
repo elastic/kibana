@@ -10,8 +10,6 @@ import { DATA_FRAME_TASK_STATE } from '../../../analytics_management/components/
 import { MlContext } from '../../../../../contexts/ml';
 import { kibanaContextValueMock } from '../../../../../contexts/ml/__mocks__/kibana_context_value';
 
-jest.mock('../../../../../contexts/ui/use_ui_chrome_context');
-
 import { Exploration } from './exploration';
 
 // workaround to make React.memo() work with enzyme

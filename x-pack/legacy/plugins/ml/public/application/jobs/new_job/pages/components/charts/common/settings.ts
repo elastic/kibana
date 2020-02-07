@@ -12,10 +12,10 @@ import {
   isPopulationJobCreator,
 } from '../../../../common/job_creator';
 import { TimeBuckets } from '../../../../../../util/time_buckets';
-import { useUiSettingsContext } from '../../../../../../contexts/ui/use_ui_settings_context';
+import { useUiSettings } from '../../../../../../contexts/kibana/use_ui_settings_context';
 
 export function useChartColors() {
-  const IS_DARK_THEME = useUiSettingsContext().get('theme:darkMode');
+  const IS_DARK_THEME = useUiSettings().get('theme:darkMode');
   const themeName = IS_DARK_THEME ? darkTheme : lightTheme;
   return {
     LINE_COLOR: themeName.euiColorPrimary,

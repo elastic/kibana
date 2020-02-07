@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useMlKibana } from '../kibana/kibana_context';
+import { useMlKibana } from './kibana_context';
 
-export const useUiSettingsContext = () => {
+export const useUiSettings = () => {
   return useMlKibana().services.uiSettings;
 };

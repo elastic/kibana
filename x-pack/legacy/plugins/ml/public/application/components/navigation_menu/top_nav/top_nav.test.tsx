@@ -10,15 +10,9 @@ import { MemoryRouter } from 'react-router-dom';
 
 import { EuiSuperDatePicker } from '@elastic/eui';
 
-import { uiTimefilterMock } from '../../../contexts/ui/__mocks__/mocks_jest';
 import { mlTimefilterRefresh$ } from '../../../services/timefilter_refresh_service';
 
 import { TopNav } from './top_nav';
-
-uiTimefilterMock.enableAutoRefreshSelector();
-uiTimefilterMock.enableTimeRangeSelector();
-
-jest.mock('../../../contexts/ui/use_ui_context');
 
 jest.mock('../../../contexts/kibana', () => ({
   useMlKibana: () => {
