@@ -18,10 +18,10 @@
  */
 
 import {
-  IUiActionsApi,
-  IUiActionsDependenciesInternal,
-  IUiActionsDependencies,
-  IUiActionsApiPure,
+  UiActionsApi,
+  UiActionsDependenciesInternal,
+  UiActionsDependencies,
+  UiActionsApiPure,
 } from './types';
 import { attachAction } from './triggers/attach_action';
 import { detachAction } from './triggers/detach_action';
@@ -32,7 +32,7 @@ import { getTriggerCompatibleActions } from './triggers/get_trigger_compatible_a
 import { registerAction } from './actions/register_action';
 import { registerTrigger } from './triggers/register_trigger';
 
-export const pureApi: IUiActionsApiPure = {
+export const pureApi: UiActionsApiPure = {
   attachAction,
   detachAction,
   executeTriggerActions,
@@ -43,13 +43,13 @@ export const pureApi: IUiActionsApiPure = {
   registerTrigger,
 };
 
-export const createApi = (deps: IUiActionsDependencies) => {
-  const partialApi: Partial<IUiActionsApi> = {};
-  const depsInternal: IUiActionsDependenciesInternal = { ...deps, api: partialApi };
+export const createApi = (deps: UiActionsDependencies) => {
+  const partialApi: Partial<UiActionsApi> = {};
+  const depsInternal: UiActionsDependenciesInternal = { ...deps, api: partialApi };
   for (const [key, fn] of Object.entries(pureApi)) {
     (partialApi as any)[key] = fn(depsInternal);
   }
   Object.freeze(partialApi);
-  const api = partialApi as IUiActionsApi;
+  const api = partialApi as UiActionsApi;
   return { api, depsInternal };
 };
