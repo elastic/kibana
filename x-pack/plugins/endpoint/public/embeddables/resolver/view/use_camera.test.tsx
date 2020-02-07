@@ -16,13 +16,14 @@ import { Matrix3, SideEffectors } from '../types';
 import { SideEffectContext } from './side_effect_context';
 
 describe('useCamera on an unpainted element', () => {
-  let reactRootElement: HTMLElement;
+  let element: HTMLElement;
   let projectionMatrix: Matrix3;
   let time: number;
   let frameRequestedCallbacks: FrameRequestCallback[];
   let provideFrame: () => void;
   const testID = 'camera';
   let reactRenderQueries: RenderResult;
+  let simulateElementResize: (target: Element, contentRect: DOMRect) => void;
   beforeEach(async () => {
     const { store } = storeFactory();
 
@@ -45,13 +46,34 @@ describe('useCamera on an unpainted element', () => {
 
     class MockResizeObserver implements ResizeObserver {
       static instances: Set<MockResizeObserver> = new Set();
+      static contentRects: Map<Element, DOMRect> = new Map();
       static simulateElementResize: (target: Element, contentRect: DOMRect) => void = (
         target,
         contentRect
       ) => {
+        MockResizeObserver.contentRects.set(target, contentRect);
         for (const instance of MockResizeObserver.instances) {
           instance.simulateElementResize(target, contentRect);
         }
+      };
+      static contentRectForElement: (target: Element) => DOMRect = target => {
+        if (MockResizeObserver.contentRects.has(target)) {
+          return MockResizeObserver.contentRects.get(target)!;
+        }
+        const domRect: DOMRect = {
+          x: 0,
+          y: 0,
+          top: 0,
+          right: 0,
+          bottom: 0,
+          left: 0,
+          width: 0,
+          height: 0,
+          toJSON() {
+            return this;
+          },
+        };
+        return domRect;
       };
       constructor(private readonly callback: ResizeObserverCallback) {
         MockResizeObserver.instances.add(this);
@@ -60,7 +82,9 @@ describe('useCamera on an unpainted element', () => {
       simulateElementResize(target: Element, contentRect: DOMRect) {
         if (this.elements.has(target)) {
           const entries: ResizeObserverEntry[] = [{ target, contentRect }];
-          this.callback(entries, this);
+          act(() => {
+            this.callback(entries, this);
+          });
         }
       }
       observe(target: Element) {
@@ -73,6 +97,12 @@ describe('useCamera on an unpainted element', () => {
         this.elements.clear();
       }
     }
+
+    jest
+      .spyOn(Element.prototype, 'getBoundingClientRect')
+      .mockImplementation(function(this: Element) {
+        return MockResizeObserver.contentRectForElement(this);
+      });
 
     const sideEffectors: SideEffectors = {
       timestamp: jest.fn().mockImplementation(),
@@ -87,11 +117,16 @@ describe('useCamera on an unpainted element', () => {
         </SideEffectContext.Provider>
       </Provider>
     );
+
+    simulateElementResize = MockResizeObserver.simulateElementResize;
+    const { findByTestId } = reactRenderQueries;
+    element = await findByTestId(testID);
+  });
+  afterEach(() => {
+    jest.clearAllMocks();
   });
   it('should be usable in React', async () => {
-    const { findByTestId } = reactRenderQueries;
-    reactRootElement = await findByTestId(testID);
-    expect(reactRootElement).toBeInTheDocument();
+    expect(element).toBeInTheDocument();
   });
   test('returns a projectionMatrix that changes everything to 0', () => {
     expect(projectionMatrix).toMatchInlineSnapshot(`
@@ -108,23 +143,20 @@ describe('useCamera on an unpainted element', () => {
       ]
     `);
   });
-  /*
   describe('which has been resize to 800x400', () => {
     test('provides a projection matrix', () => {
-      act(() => {
-        simulateElementResize(element, {
-          width: 800,
-          height: 600,
-          left: 20,
-          top: 20,
-          right: 820,
-          bottom: 620,
-          x: 20,
-          y: 20,
-          toJSON() {
-            return this;
-          },
-        });
+      simulateElementResize(element, {
+        width: 800,
+        height: 600,
+        left: 20,
+        top: 20,
+        right: 820,
+        bottom: 620,
+        x: 20,
+        y: 20,
+        toJSON() {
+          return this;
+        },
       });
       expect(projectionMatrix).toMatchInlineSnapshot(`
         Array [
@@ -141,5 +173,4 @@ describe('useCamera on an unpainted element', () => {
       `);
     });
   });
-   */
 });
