@@ -19,18 +19,21 @@ const ToggleArgInput = ({ onValueChange, argValue, argId, renderError, typeInsta
     return null;
   }
   return (
-    <EuiFormRow display="columnCompressedSwitch">
-      <EuiSwitch
-        compressed
-        id={argId}
-        checked={argValue}
-        onChange={handleChange}
-        className="canvasArg__switch"
-        aria-label={typeInstance.displayName}
-        label=""
-        showLabel={false}
-      />
-    </EuiFormRow>
+    <div>
+      <EuiFormRow display="rowCompressed">
+        <EuiSwitch
+          compressed
+          id={argId}
+          checked={argValue}
+          onChange={handleChange}
+          className="canvasArg__form"
+          aria-label={typeInstance.displayName}
+          resize="none"
+          label=""
+          showLabel={false}
+        />
+      </EuiFormRow>
+    </div>
   );
 };
 
@@ -45,6 +48,6 @@ export const toggle = () => ({
   name: 'toggle',
   displayName: strings.getDisplayName(),
   help: strings.getHelp(),
-  simpleTemplate: templateFromReactComponent(ToggleArgInput),
+  template: templateFromReactComponent(ToggleArgInput),
   default: 'false',
 });
