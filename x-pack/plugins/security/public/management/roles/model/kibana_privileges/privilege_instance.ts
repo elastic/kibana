@@ -14,7 +14,7 @@ export class Privilege {
   ) {}
 
   public grantsPrivilege(candidatePrivilege: Privilege) {
-    return this.checkActions(this.actions, candidatePrivilege.actions);
+    return this.checkActions(this.actions, candidatePrivilege.actions).hasAllRequested;
   }
 
   public equals({ type, id }: Privilege) {

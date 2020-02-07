@@ -12,34 +12,13 @@ import { PrivilegeCollection } from '../../../../model/kibana_privileges/privile
 export class PrivilegeSummaryCalculator {
   constructor(private readonly kibanaPrivileges: KibanaPrivileges, private readonly role: Role) {}
 
-  public getEffectivePrimaryFeaturePrivileges(entry: RoleKibanaPrivilege) {
-    const assignedPrivileges = this.collectAssignedPrivileges(entry);
-
-    const features = this.kibanaPrivileges.getSecuredFeatures();
-
-    return features.reduce((acc, feature) => {
-      return {
-        ...acc,
-        [feature.id]: this.getEffectivePrimaryFeaturePrivilege(assignedPrivileges, feature),
-      };
-    }, {} as Record<string, PrimaryFeaturePrivilege | undefined>);
-  }
-
-  public getEffectiveSubFeaturePrivileges(entry: RoleKibanaPrivilege, featureId: string) {
-    const feature = this.kibanaPrivileges.getSecuredFeature(featureId);
-
-    const assignedPrivileges = this.collectAssignedPrivileges(entry);
-
-    return feature.getSubFeaturePrivileges().filter(sfp => assignedPrivileges.grantsPrivilege(sfp));
-  }
-
   public getEffectiveFeaturePrivileges(entry: RoleKibanaPrivilege) {
     const assignedPrivileges = this.collectAssignedPrivileges(entry);
 
     const features = this.kibanaPrivileges.getSecuredFeatures();
 
     return features.reduce((acc, feature) => {
-      const effectivePrimaryFeaturePrivilege = this.getEffectivePrimaryFeaturePrivilege(
+      const displayedPrimaryFeaturePrivilege = this.getDisplayedPrimaryFeaturePrivilege(
         assignedPrivileges,
         feature
       );
@@ -49,13 +28,13 @@ export class PrivilegeSummaryCalculator {
         .filter(ap => assignedPrivileges.grantsPrivilege(ap));
 
       const hasNonSupersededSubFeaturePrivileges = effectiveSubPrivileges.some(
-        esp => !effectivePrimaryFeaturePrivilege?.grantsPrivilege(esp)
+        esp => !displayedPrimaryFeaturePrivilege?.grantsPrivilege(esp)
       );
 
       return {
         ...acc,
         [feature.id]: {
-          primary: effectivePrimaryFeaturePrivilege,
+          primary: displayedPrimaryFeaturePrivilege,
           hasNonSupersededSubFeaturePrivileges,
           subFeature: effectiveSubPrivileges.map(p => p.id),
         },
@@ -63,18 +42,24 @@ export class PrivilegeSummaryCalculator {
     }, {} as Record<string, { primary?: PrimaryFeaturePrivilege; hasNonSupersededSubFeaturePrivileges: boolean; subFeature: string[] }>);
   }
 
-  private getEffectivePrimaryFeaturePrivilege(
+  private getDisplayedPrimaryFeaturePrivilege(
     assignedPrivileges: PrivilegeCollection,
     feature: SecuredFeature
   ) {
     const primaryFeaturePrivileges = feature.getPrimaryFeaturePrivileges();
     const minimalPrimaryFeaturePrivileges = feature.getMinimalFeaturePrivileges();
 
-    // Order matters here. A non-minimal privileges by definition also grants the minimal version of itself,
-    // and we want to return the most-permissive privilege.
-    const effectivePrivilege =
-      primaryFeaturePrivileges.find(pfp => assignedPrivileges.grantsPrivilege(pfp)) ||
-      minimalPrimaryFeaturePrivileges.find(pfp => assignedPrivileges.grantsPrivilege(pfp));
+    const effectivePrivilege = primaryFeaturePrivileges.find(pfp => {
+      const isPrimaryGranted = assignedPrivileges.grantsPrivilege(pfp);
+      if (!isPrimaryGranted) {
+        const correspindingMinimal = minimalPrimaryFeaturePrivileges.find(
+          mpfp => mpfp.id === `minimal_${pfp.id}`
+        )!;
+
+        return assignedPrivileges.grantsPrivilege(correspindingMinimal);
+      }
+      return isPrimaryGranted;
+    });
 
     return effectivePrivilege;
   }
