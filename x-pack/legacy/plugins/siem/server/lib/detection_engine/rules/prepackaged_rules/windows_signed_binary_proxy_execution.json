@@ -7,7 +7,7 @@
     "winlogbeat-*"
   ],
   "language": "kuery",
-  "max_signals": 33,
+  "max_signals": 100,
   "name": "Execution via Signed Binary",
   "query": "event.code:1 and http and (process.name:certutil.exe or process.name:msiexec.exe)",
   "risk_score": 21,

@@ -17,7 +17,7 @@
  * under the License.
  */
 import { i18n } from '@kbn/i18n';
-import { IAction } from 'src/plugins/ui_actions/public';
+import { Action } from 'src/plugins/ui_actions/public';
 import { NotificationsStart, OverlayStart } from 'src/core/public';
 import { ViewMode, GetEmbeddableFactory, GetEmbeddableFactories } from '../../../../types';
 import { openAddPanelFlyout } from './open_add_panel_flyout';
@@ -29,7 +29,7 @@ interface ActionContext {
   embeddable: IContainer;
 }
 
-export class AddPanelAction implements IAction<ActionContext> {
+export class AddPanelAction implements Action<ActionContext> {
   public readonly type = ADD_PANEL_ACTION_ID;
   public readonly id = ADD_PANEL_ACTION_ID;
 

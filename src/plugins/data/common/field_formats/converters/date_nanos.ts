@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import moment, { Moment } from 'moment';
 import { memoize, noop } from 'lodash';
 import { KBN_FIELD_TYPES } from '../../kbn_field_types/types';
@@ -70,7 +71,9 @@ export function formatWithNanos(
 
 export class DateNanosFormat extends FieldFormat {
   static id = FIELD_FORMAT_IDS.DATE_NANOS;
-  static title = 'Date Nanos';
+  static title = i18n.translate('data.fieldFormats.date_nanos.title', {
+    defaultMessage: 'Date nanos',
+  });
   static fieldType = KBN_FIELD_TYPES.DATE;
 
   private memoizedConverter: Function = noop;
