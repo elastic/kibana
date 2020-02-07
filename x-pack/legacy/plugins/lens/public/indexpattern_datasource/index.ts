@@ -14,10 +14,12 @@ import {
   DataPublicPluginSetup,
   DataPublicPluginStart,
 } from '../../../../../../src/plugins/data/public';
+import { Datasource, EditorFrameSetup } from '../types';
 
 export interface IndexPatternDatasourceSetupPlugins {
   expressions: ExpressionsSetup;
   data: DataPublicPluginSetup;
+  editorFrame: EditorFrameSetup;
 }
 
 export interface IndexPatternDatasourceStartPlugins {
@@ -29,16 +31,19 @@ export class IndexPatternDatasource {
 
   setup(
     core: CoreSetup<IndexPatternDatasourceStartPlugins>,
-    { expressions }: IndexPatternDatasourceSetupPlugins
+    { expressions, editorFrame }: IndexPatternDatasourceSetupPlugins
   ) {
     expressions.registerFunction(renameColumns);
     expressions.registerFunction(autoDate);
 
-    return getIndexPatternDatasource({
-      core,
-      storage: new Storage(localStorage),
-      savedObjectsClient: core.getStartServices().then(([{ savedObjects }]) => savedObjects.client),
-      data: core.getStartServices().then(([_, { data }]) => data),
-    });
+    editorFrame.registerDatasource(
+      core.getStartServices().then(([coreStart, { data }]) =>
+        getIndexPatternDatasource({
+          core: coreStart,
+          storage: new Storage(localStorage),
+          data,
+        })
+      ) as Promise<Datasource>
+    );
   }
 }

@@ -12,10 +12,12 @@ import { ExpressionsSetup } from '../../../../../../src/plugins/expressions/publ
 import { xyVisualization } from './xy_visualization';
 import { xyChart, getXyChartRenderer } from './xy_expression';
 import { legendConfig, xConfig, layerConfig } from './types';
+import { EditorFrameSetup } from '../types';
 
 export interface XyVisualizationPluginSetupPlugins {
   expressions: ExpressionsSetup;
   formatFactory: FormatFactory;
+  editorFrame: EditorFrameSetup;
 }
 
 function getTimeZone(uiSettings: IUiSettingsClient) {
@@ -30,7 +32,10 @@ function getTimeZone(uiSettings: IUiSettingsClient) {
 export class XyVisualization {
   constructor() {}
 
-  setup(core: CoreSetup, { expressions, formatFactory }: XyVisualizationPluginSetupPlugins) {
+  setup(
+    core: CoreSetup,
+    { expressions, formatFactory, editorFrame }: XyVisualizationPluginSetupPlugins
+  ) {
     expressions.registerFunction(() => legendConfig);
     expressions.registerFunction(() => xConfig);
     expressions.registerFunction(() => layerConfig);
@@ -46,6 +51,6 @@ export class XyVisualization {
       })
     );
 
-    return xyVisualization;
+    editorFrame.registerVisualization(xyVisualization);
   }
 }

@@ -5,7 +5,6 @@
  */
 
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
-import { SavedObjectsClientContract } from 'kibana/public';
 import { getIndexPatternDatasource, IndexPatternColumn, uniqueLabels } from './indexpattern';
 import { DatasourcePublicAPI, Operation, Datasource } from '../types';
 import { coreMock } from 'src/core/public/mocks';
@@ -140,9 +139,8 @@ describe('IndexPattern Data Source', () => {
   beforeEach(() => {
     indexPatternDatasource = getIndexPatternDatasource({
       storage: {} as IStorageWrapper,
-      core: coreMock.createSetup(),
-      savedObjectsClient: Promise.resolve({} as SavedObjectsClientContract),
-      data: Promise.resolve(pluginsMock.createStart().data),
+      core: coreMock.createStart(),
+      data: pluginsMock.createStart().data,
     });
 
     persistedState = {

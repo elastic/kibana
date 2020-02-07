@@ -8,7 +8,7 @@ import React from 'react';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import { HashRouter, Route, RouteComponentProps, Switch } from 'react-router-dom';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { AppMountParameters, CoreSetup } from 'src/core/public';
+import { AppMountParameters, CoreSetup, CoreStart } from 'src/core/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from 'src/plugins/data/public';
 import rison, { RisonObject, RisonValue } from 'rison-node';
 import { isObject } from 'lodash';
@@ -84,32 +84,21 @@ export class LensPlugin {
       __LEGACY: { formatFactory },
     }: LensPluginSetupDependencies
   ) {
-    const indexPattern = this.indexpatternDatasource.setup(core, {
-      expressions,
-      data,
-    });
-    const datatableVisualization = this.datatableVisualization.setup(core, {
-      expressions,
-      formatFactory,
-    });
-    const xyVisualization = this.xyVisualization.setup(core, {
-      expressions,
-      formatFactory,
-    });
-    const metricVisualization = this.metricVisualization.setup(core, {
-      expressions,
-      formatFactory,
-    });
     const editorFrameSetupInterface = this.editorFrameService.setup(core, {
       data,
       embeddable,
       expressions,
     });
-
-    editorFrameSetupInterface.registerVisualization(xyVisualization);
-    editorFrameSetupInterface.registerVisualization(datatableVisualization);
-    editorFrameSetupInterface.registerVisualization(metricVisualization);
-    editorFrameSetupInterface.registerDatasource(indexPattern);
+    const dependencies = {
+      expressions,
+      data,
+      editorFrame: editorFrameSetupInterface,
+      formatFactory,
+    };
+    this.indexpatternDatasource.setup(core, dependencies);
+    this.xyVisualization.setup(core, dependencies);
+    this.datatableVisualization.setup(core, dependencies);
+    this.metricVisualization.setup(core, dependencies);
 
     kibanaLegacy.registerLegacyApp({
       id: 'lens',
@@ -119,14 +108,8 @@ export class LensPlugin {
         const dataStart = startDependencies.data;
         const savedObjectsClient = coreStart.savedObjects.client;
         addHelpMenuToAppChrome(coreStart.chrome);
-        if (!this.createEditorFrame) {
-          this.createEditorFrame = this.editorFrameService.start(
-            coreStart,
-            startDependencies
-          ).createInstance;
-        }
 
-        const instance = this.createEditorFrame({});
+        const instance = await this.createEditorFrame!({});
 
         setReportManager(
           new LensReportManager({
@@ -227,7 +210,9 @@ export class LensPlugin {
     });
   }
 
-  start() {}
+  start(core: CoreStart, startDependencies: LensPluginStartDependencies) {
+    this.createEditorFrame = this.editorFrameService.start(core, startDependencies).createInstance;
+  }
 
   stop() {
     stopReportManager();

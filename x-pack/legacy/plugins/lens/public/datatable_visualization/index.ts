@@ -9,10 +9,12 @@ import { datatableVisualization } from './visualization';
 import { ExpressionsSetup } from '../../../../../../src/plugins/expressions/public';
 import { datatable, datatableColumns, getDatatableRenderer } from './expression';
 import { FormatFactory } from '../legacy_imports';
+import { EditorFrameSetup } from '../types';
 
 export interface DatatableVisualizationPluginSetupPlugins {
   expressions: ExpressionsSetup;
   formatFactory: FormatFactory;
+  editorFrame: EditorFrameSetup;
 }
 
 export class DatatableVisualization {
@@ -20,12 +22,11 @@ export class DatatableVisualization {
 
   setup(
     _core: CoreSetup | null,
-    { expressions, formatFactory }: DatatableVisualizationPluginSetupPlugins
+    { expressions, formatFactory, editorFrame }: DatatableVisualizationPluginSetupPlugins
   ) {
     expressions.registerFunction(() => datatableColumns);
     expressions.registerFunction(() => datatable);
     expressions.registerRenderer(() => getDatatableRenderer(formatFactory));
-
-    return datatableVisualization;
+    editorFrame.registerVisualization(datatableVisualization);
   }
 }

@@ -9,10 +9,12 @@ import { FormatFactory } from '../legacy_imports';
 import { metricVisualization } from './metric_visualization';
 import { ExpressionsSetup } from '../../../../../../src/plugins/expressions/public';
 import { metricChart, getMetricChartRenderer } from './metric_expression';
+import { EditorFrameSetup } from '../types';
 
 export interface MetricVisualizationPluginSetupPlugins {
   expressions: ExpressionsSetup;
   formatFactory: FormatFactory;
+  editorFrame: EditorFrameSetup;
 }
 
 export class MetricVisualization {
@@ -20,12 +22,12 @@ export class MetricVisualization {
 
   setup(
     _core: CoreSetup | null,
-    { expressions, formatFactory }: MetricVisualizationPluginSetupPlugins
+    { expressions, formatFactory, editorFrame }: MetricVisualizationPluginSetupPlugins
   ) {
     expressions.registerFunction(() => metricChart);
 
     expressions.registerRenderer(() => getMetricChartRenderer(formatFactory));
 
-    return metricVisualization;
+    editorFrame.registerVisualization(metricVisualization);
   }
 }

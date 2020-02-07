@@ -42,26 +42,28 @@ describe('editor_frame service', () => {
     mountpoint.remove();
   });
 
-  it('should create an editor frame instance which mounts and unmounts', () => {
-    expect(() => {
-      pluginInstance.setup(coreMock.createSetup(), pluginSetupDependencies);
-      const publicAPI = pluginInstance.start(coreMock.createStart(), pluginStartDependencies);
-      const instance = publicAPI.createInstance({});
-      instance.mount(mountpoint, {
-        onError: jest.fn(),
-        onChange: jest.fn(),
-        dateRange: { fromDate: '', toDate: '' },
-        query: { query: '', language: 'lucene' },
-        filters: [],
-      });
-      instance.unmount();
-    }).not.toThrowError();
+  it('should create an editor frame instance which mounts and unmounts', async () => {
+    await expect(
+      (async () => {
+        pluginInstance.setup(coreMock.createSetup(), pluginSetupDependencies);
+        const publicAPI = pluginInstance.start(coreMock.createStart(), pluginStartDependencies);
+        const instance = await publicAPI.createInstance({});
+        instance.mount(mountpoint, {
+          onError: jest.fn(),
+          onChange: jest.fn(),
+          dateRange: { fromDate: '', toDate: '' },
+          query: { query: '', language: 'lucene' },
+          filters: [],
+        });
+        instance.unmount();
+      })()
+    ).resolves.toBeUndefined();
   });
 
-  it('should not have child nodes after unmount', () => {
+  it('should not have child nodes after unmount', async () => {
     pluginInstance.setup(coreMock.createSetup(), pluginSetupDependencies);
     const publicAPI = pluginInstance.start(coreMock.createStart(), pluginStartDependencies);
-    const instance = publicAPI.createInstance({});
+    const instance = await publicAPI.createInstance({});
     instance.mount(mountpoint, {
       onError: jest.fn(),
       onChange: jest.fn(),
