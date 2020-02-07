@@ -193,6 +193,7 @@ Depending on the subscriptions to the channels by the plugins, the polling will 
 - Testing architecture: any dockerised way to test the local dev environment?
 - We'll increase the local usage of indices. Making it more expensive to users to maintain the cluster. We need to careful with this! Although it might not change much, compared to the current implementation, if any plugin decides to maintain its own index/saved objects to do aggregations afterwards.
 - It is indeed a breaking change, but it can be migrated over-time as new features, making use of the instructions.
+- We need to update other products already reporting telemetry from outside Kibana (like Beats, Enterprise Search, Logstash, ...) to use the new way of pushing telemetry.
 
 # Alternatives
 
