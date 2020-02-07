@@ -19,3 +19,12 @@ export const indexAnnotationSchema = {
   _id: schema.maybe(schema.string()),
   key: schema.maybe(schema.string()),
 };
+
+export const getAnnotationsSchema = {
+  jobIds: schema.arrayOf(schema.string()),
+  earliestMs: schema.oneOf([schema.nullable(schema.number()), schema.maybe(schema.number())]),
+  latestMs: schema.oneOf([schema.nullable(schema.number()), schema.maybe(schema.number())]),
+  maxAnnotations: schema.number(),
+};
+
+export const deleteAnnotationSchema = { annotationId: schema.string() };

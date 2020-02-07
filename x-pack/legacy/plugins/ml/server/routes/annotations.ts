@@ -14,7 +14,11 @@ import { annotationServiceProvider } from '../models/annotation_service';
 import { wrapError } from '../client/error_wrapper';
 import { licensePreRoutingFactory } from '../new_platform/licence_check_pre_routing_factory';
 import { RouteInitialization } from '../new_platform/plugin';
-import { indexAnnotationSchema } from '../new_platform/annotations_schema';
+import {
+  deleteAnnotationSchema,
+  getAnnotationsSchema,
+  indexAnnotationSchema,
+} from '../new_platform/annotations_schema';
 
 import { ANNOTATION_USER_UNKNOWN } from '../../common/constants/annotations';
 
@@ -50,12 +54,7 @@ export function annotationRoutes({ xpackMainPlugin, router }: RouteInitializatio
     {
       path: '/api/ml/annotations',
       validate: {
-        body: schema.object({
-          jobIds: schema.arrayOf(schema.string()),
-          earliestMs: schema.number(),
-          latestMs: schema.number(),
-          maxAnnotations: schema.number(),
-        }),
+        body: schema.object(getAnnotationsSchema),
       },
     },
     licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
@@ -124,7 +123,7 @@ export function annotationRoutes({ xpackMainPlugin, router }: RouteInitializatio
     {
       path: '/api/ml/annotations/delete/{annotationId}',
       validate: {
-        params: schema.object({ annotationId: schema.string() }),
+        params: schema.object(deleteAnnotationSchema),
       },
     },
     licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
