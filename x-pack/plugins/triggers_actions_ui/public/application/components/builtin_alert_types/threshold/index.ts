@@ -6,7 +6,7 @@
 import { i18n } from '@kbn/i18n';
 import { AlertTypeModel, ValidationResult } from '../../../../types';
 import { IndexThresholdAlertTypeExpression } from './expression';
-import { IndexThresholdAlertParams } from '../types';
+import { IndexThresholdAlertParams } from './types';
 import { builtInGroupByTypes, builtInAggregationTypes } from '../../../../common/constants';
 
 export function getAlertType(): AlertTypeModel {

@@ -17,18 +17,15 @@ export enum COMPARATORS {
 
 export const builtInComparators: { [key: string]: Comparator } = {
   [COMPARATORS.GREATER_THAN]: {
-    text: i18n.translate(
-      'xpack.triggersActionsUI.sections.alertAdd.threshold.comparators.isAboveLabel',
-      {
-        defaultMessage: 'Is above',
-      }
-    ),
+    text: i18n.translate('xpack.triggersActionsUI.common.constants.comparators.isAboveLabel', {
+      defaultMessage: 'Is above',
+    }),
     value: COMPARATORS.GREATER_THAN,
     requiredValues: 1,
   },
   [COMPARATORS.GREATER_THAN_OR_EQUALS]: {
     text: i18n.translate(
-      'xpack.triggersActionsUI.sections.alertAdd.threshold.comparators.isAboveOrEqualsLabel',
+      'xpack.triggersActionsUI.common.constants.comparators.isAboveOrEqualsLabel',
       {
         defaultMessage: 'Is above or equals',
       }
@@ -37,18 +34,15 @@ export const builtInComparators: { [key: string]: Comparator } = {
     requiredValues: 1,
   },
   [COMPARATORS.LESS_THAN]: {
-    text: i18n.translate(
-      'xpack.triggersActionsUI.sections.alertAdd.threshold.comparators.isBelowLabel',
-      {
-        defaultMessage: 'Is below',
-      }
-    ),
+    text: i18n.translate('xpack.triggersActionsUI.common.constants.comparators.isBelowLabel', {
+      defaultMessage: 'Is below',
+    }),
     value: COMPARATORS.LESS_THAN,
     requiredValues: 1,
   },
   [COMPARATORS.LESS_THAN_OR_EQUALS]: {
     text: i18n.translate(
-      'xpack.triggersActionsUI.sections.alertAdd.threshold.comparators.isBelowOrEqualsLabel',
+      'xpack.triggersActionsUI.common.constants.comparators.isBelowOrEqualsLabel',
       {
         defaultMessage: 'Is below or equals',
       }
@@ -57,12 +51,9 @@ export const builtInComparators: { [key: string]: Comparator } = {
     requiredValues: 1,
   },
   [COMPARATORS.BETWEEN]: {
-    text: i18n.translate(
-      'xpack.triggersActionsUI.sections.alertAdd.threshold.comparators.isBetweenLabel',
-      {
-        defaultMessage: 'Is between',
-      }
-    ),
+    text: i18n.translate('xpack.triggersActionsUI.common.constants.comparators.isBetweenLabel', {
+      defaultMessage: 'Is between',
+    }),
     value: COMPARATORS.BETWEEN,
     requiredValues: 2,
   },

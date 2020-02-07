@@ -395,18 +395,16 @@ export const AlertsList: React.FunctionComponent = () => {
           addFlyoutVisible: alertFlyoutVisible,
           setAddFlyoutVisibility: setAlertFlyoutVisibility,
           reloadAlerts: loadAlertsData,
+          http,
+          actionTypeRegistry,
+          alertTypeRegistry,
+          toastNotifications,
+          uiSettings,
+          charts,
+          dataFieldsFormats: dataPlugin.fieldFormats,
         }}
       >
-        <AlertAdd
-          consumer={'alerting'}
-          http={http}
-          actionTypeRegistry={actionTypeRegistry}
-          alertTypeRegistry={alertTypeRegistry}
-          toastNotifications={toastNotifications}
-          uiSettings={uiSettings}
-          charts={charts}
-          dataFieldsFormats={dataPlugin.fieldFormats}
-        />
+        <AlertAdd consumer={'alerting'} />
       </AlertsContextProvider>
     </section>
   );

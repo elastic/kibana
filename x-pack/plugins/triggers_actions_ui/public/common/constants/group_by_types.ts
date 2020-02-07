@@ -9,7 +9,7 @@ import { GroupByType } from '../types';
 export const builtInGroupByTypes: { [key: string]: GroupByType } = {
   all: {
     text: i18n.translate(
-      'xpack.triggersActionsUI.sections.alertAdd.threshold.groupByLabel.allDocumentsLabel',
+      'xpack.triggersActionsUI.common.constants.comparators.groupByTypes.allDocumentsLabel',
       {
         defaultMessage: 'all documents',
       }
@@ -20,7 +20,7 @@ export const builtInGroupByTypes: { [key: string]: GroupByType } = {
   },
   top: {
     text: i18n.translate(
-      'xpack.triggersActionsUI.sections.alertAdd.threshold.groupByLabel.topLabel',
+      'xpack.triggersActionsUI.common.constants.comparators.groupByTypes.topLabel',
       {
         defaultMessage: 'top',
       }

@@ -15,6 +15,7 @@ import { AlertForm } from './alert_form';
 import { AppDeps } from '../../app';
 import { chartPluginMock } from '../../../../../../../src/plugins/charts/public/mocks';
 import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
+import { AlertsContextProvider } from '../../context/alerts_context';
 const actionTypeRegistry = actionTypeRegistryMock.create();
 const alertTypeRegistry = alertTypeRegistryMock.create();
 describe('alert_form', () => {
@@ -101,17 +102,27 @@ describe('alert_form', () => {
       await act(async () => {
         if (deps) {
           wrapper = mountWithIntl(
-            <AlertForm
-              alert={initialAlert}
-              dispatch={() => {}}
-              errors={{ name: [] }}
-              serverError={null}
-              http={deps.http}
-              actionTypeRegistry={deps.actionTypeRegistry}
-              alertTypeRegistry={deps.alertTypeRegistry}
-              toastNotifications={deps.toastNotifications}
-              uiSettings={deps.uiSettings}
-            />
+            <AlertsContextProvider
+              value={{
+                addFlyoutVisible: true,
+                setAddFlyoutVisibility: state => {},
+                reloadAlerts: () => {
+                  return new Promise<void>(() => {});
+                },
+                http: deps.http,
+                actionTypeRegistry: deps.actionTypeRegistry,
+                alertTypeRegistry: deps.alertTypeRegistry,
+                toastNotifications: deps.toastNotifications,
+                uiSettings: deps.uiSettings,
+              }}
+            >
+              <AlertForm
+                alert={initialAlert}
+                dispatch={() => {}}
+                errors={{ name: [] }}
+                serverError={null}
+              />
+            </AlertsContextProvider>
           );
         }
       });
@@ -166,17 +177,27 @@ describe('alert_form', () => {
       await act(async () => {
         if (deps) {
           wrapper = mountWithIntl(
-            <AlertForm
-              alert={initialAlert}
-              dispatch={() => {}}
-              errors={{ name: [] }}
-              serverError={null}
-              http={deps.http}
-              actionTypeRegistry={deps.actionTypeRegistry}
-              alertTypeRegistry={deps.alertTypeRegistry}
-              toastNotifications={deps.toastNotifications}
-              uiSettings={deps.uiSettings}
-            />
+            <AlertsContextProvider
+              value={{
+                addFlyoutVisible: true,
+                setAddFlyoutVisibility: state => {},
+                reloadAlerts: () => {
+                  return new Promise<void>(() => {});
+                },
+                http: deps.http,
+                actionTypeRegistry: deps.actionTypeRegistry,
+                alertTypeRegistry: deps.alertTypeRegistry,
+                toastNotifications: deps.toastNotifications,
+                uiSettings: deps.uiSettings,
+              }}
+            >
+              <AlertForm
+                alert={initialAlert}
+                dispatch={() => {}}
+                errors={{ name: [] }}
+                serverError={null}
+              />
+            </AlertsContextProvider>
           );
         }
       });

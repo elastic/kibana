@@ -5,7 +5,7 @@
  */
 
 import React, { Fragment, useEffect, useState } from 'react';
-import { IUiSettingsClient, HttpSetup, ToastsApi } from 'kibana/public';
+import { IUiSettingsClient } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import {
   AnnotationDomainTypes,
@@ -23,13 +23,12 @@ import dateMath from '@elastic/datemath';
 import moment from 'moment-timezone';
 import { EuiCallOut, EuiLoadingChart, EuiSpacer, EuiEmptyPrompt, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { ChartsPluginSetup } from 'src/plugins/charts/public';
-import { FieldFormatsRegistry } from 'src/plugins/data/common/field_formats/static';
 import { getThresholdAlertVisualizationData } from './lib/api';
 import { AggregationType, Comparator } from '../../../../common/types';
-import { IndexThresholdAlertParams } from '../types';
 /* TODO: This file was copied from ui/time_buckets for NP migration. We should clean this up and add TS support */
 import { TimeBuckets } from './lib/time_buckets';
+import { AlertsContextValue } from '../../../context/alerts_context';
+import { IndexThresholdAlertParams } from './types';
 
 const customTheme = () => {
   return {
@@ -94,30 +93,15 @@ interface Props {
   comparators: {
     [key: string]: Comparator;
   };
-  http: HttpSetup;
-  uiSettings: IUiSettingsClient;
-  toastNotifications?: Pick<
-    ToastsApi,
-    'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'
-  >;
-  charts: ChartsPluginSetup;
-  dataFieldsFormats: Pick<FieldFormatsRegistry, 'register'>;
+  alertsContext: AlertsContextValue;
 }
 
 export const ThresholdVisualization: React.FunctionComponent<Props> = ({
   alertParams,
   aggregationTypes,
   comparators,
-  http,
-  uiSettings,
-  toastNotifications,
-  charts,
-  dataFieldsFormats,
+  alertsContext,
 }) => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<undefined | any>(undefined);
-  const [visualizationData, setVisualizationData] = useState<Record<string, any>>([]);
-  const chartsTheme = charts.theme.useChartsTheme();
   const {
     index,
     timeField,
@@ -131,20 +115,11 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
     groupBy,
     threshold,
   } = alertParams;
+  const { http, toastNotifications, charts, uiSettings, dataFieldsFormats } = alertsContext;
 
-  const domain = getDomain(alertParams);
-  const timeBuckets = new TimeBuckets(uiSettings, dataFieldsFormats);
-  timeBuckets.setBounds(domain);
-  const interval = timeBuckets.getInterval().expression;
-  const visualizeOptions = {
-    rangeFrom: domain.min,
-    rangeTo: domain.max,
-    interval,
-    timezone: getTimezone(uiSettings),
-  };
-
-  // Fetching visualization data is independent of alert actions
-  const alertWithoutActions = { ...alertParams, actions: [], type: 'threshold' };
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<undefined | any>(undefined);
+  const [visualizationData, setVisualizationData] = useState<Record<string, any>>([]);
 
   useEffect(() => {
     (async () => {
@@ -186,6 +161,25 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
     threshold,
   ]);
   /* eslint-enable react-hooks/exhaustive-deps */
+
+  if (!charts || !uiSettings || !dataFieldsFormats) {
+    return null;
+  }
+  const chartsTheme = charts.theme.useChartsTheme();
+
+  const domain = getDomain(alertParams);
+  const timeBuckets = new TimeBuckets(uiSettings, dataFieldsFormats);
+  timeBuckets.setBounds(domain);
+  const interval = timeBuckets.getInterval().expression;
+  const visualizeOptions = {
+    rangeFrom: domain.min,
+    rangeTo: domain.max,
+    interval,
+    timezone: getTimezone(uiSettings),
+  };
+
+  // Fetching visualization data is independent of alert actions
+  const alertWithoutActions = { ...alertParams, actions: [], type: 'threshold' };
 
   if (isLoading) {
     return (

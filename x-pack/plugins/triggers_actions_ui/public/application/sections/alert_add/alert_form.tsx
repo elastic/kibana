@@ -28,9 +28,6 @@ import {
   EuiEmptyPrompt,
   EuiButtonEmpty,
 } from '@elastic/eui';
-import { ChartsPluginSetup } from 'src/plugins/charts/public';
-import { HttpSetup, ToastsApi, IUiSettingsClient } from 'kibana/public';
-import { FieldFormatsRegistry } from 'src/plugins/data/common/field_formats/static';
 import { loadAlertTypes } from '../../lib/alert_api';
 import { loadActionTypes, loadAllActions } from '../../lib/action_connector_api';
 import { AlertReducerAction } from './alert_reducer';
@@ -47,7 +44,7 @@ import {
 import { SectionLoading } from '../../components/section_loading';
 import { ConnectorAddModal } from '../action_connector_form/connector_add_modal';
 import { getTimeOptions } from '../../../common/lib/get_time_options';
-import { TypeRegistry } from '../../type_registry';
+import { useAlertsContext } from '../../context/alerts_context';
 
 export function validateBaseProperties(alertObject: Alert) {
   const validationResult = { errors: {} };
@@ -89,17 +86,7 @@ interface AlertFormProps {
   serverError: {
     body: { message: string; error: string };
   } | null;
-  http: HttpSetup;
-  alertTypeRegistry: TypeRegistry<AlertTypeModel>;
-  actionTypeRegistry: TypeRegistry<ActionTypeModel>;
-  uiSettings?: IUiSettingsClient;
-  toastNotifications?: Pick<
-    ToastsApi,
-    'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'
-  >;
   canChangeTrigger?: boolean; // to hide Change trigger button
-  charts?: ChartsPluginSetup;
-  dataFieldsFormats?: Pick<FieldFormatsRegistry, 'register'>;
 }
 
 interface ActiveActionConnectorState {
@@ -113,14 +100,10 @@ export const AlertForm = ({
   dispatch,
   errors,
   serverError,
-  http,
-  toastNotifications,
-  alertTypeRegistry,
-  actionTypeRegistry,
-  uiSettings,
-  charts,
-  dataFieldsFormats,
 }: AlertFormProps) => {
+  const alertsContext = useAlertsContext();
+  const { http, toastNotifications, alertTypeRegistry, actionTypeRegistry } = alertsContext;
+
   const [alertTypeModel, setAlertTypeModel] = useState<AlertTypeModel | null>(
     alertTypeRegistry.get(alert.alertTypeId)
   );
@@ -641,11 +624,7 @@ export const AlertForm = ({
           errors={errors}
           setAlertParams={setAlertParams}
           setAlertProperty={setAlertProperty}
-          http={http}
-          toastNotifications={toastNotifications}
-          uiSettings={uiSettings}
-          charts={charts}
-          dataFieldsFormats={dataFieldsFormats}
+          alertsContext={alertsContext}
         />
       ) : null}
       <EuiSpacer size="xl" />

@@ -20,9 +20,6 @@ import {
   EuiFormRow,
   EuiCallOut,
 } from '@elastic/eui';
-import { HttpSetup, IUiSettingsClient, ToastsApi } from 'kibana/public';
-import { ChartsPluginSetup } from 'src/plugins/charts/public';
-import { FieldFormatsRegistry } from 'src/plugins/data/common/field_formats/static';
 import { COMPARATORS, builtInComparators } from '../../../../common/constants';
 import {
   getMatchingIndicesForThresholdAlertType,
@@ -39,7 +36,8 @@ import {
   GroupByExpression,
 } from '../../../../common';
 import { builtInAggregationTypes } from '../../../../common/constants';
-import { IndexThresholdAlertParams } from '../types';
+import { IndexThresholdAlertParams } from './types';
+import { AlertsContextValue } from '../../../context/alerts_context';
 
 const DEFAULT_VALUES = {
   AGGREGATION_TYPE: 'count',
@@ -69,14 +67,7 @@ interface IndexThresholdProps {
   setAlertParams: (property: string, value: any) => void;
   setAlertProperty: (key: string, value: any) => void;
   errors: { [key: string]: string[] };
-  http: HttpSetup;
-  uiSettings?: IUiSettingsClient;
-  toastNotifications?: Pick<
-    ToastsApi,
-    'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'
-  >;
-  charts?: ChartsPluginSetup;
-  dataFieldsFormats?: Pick<FieldFormatsRegistry, 'register'>;
+  alertsContext: AlertsContextValue;
 }
 
 export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThresholdProps> = ({
@@ -84,11 +75,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
   setAlertParams,
   setAlertProperty,
   errors,
-  http,
-  uiSettings,
-  toastNotifications,
-  charts,
-  dataFieldsFormats,
+  alertsContext,
 }) => {
   const {
     index,
@@ -113,6 +100,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
     ),
     value: '',
   };
+  const { http } = alertsContext;
 
   const [indexPopoverOpen, setIndexPopoverOpen] = useState(false);
   const [indexPatterns, setIndexPatterns] = useState([]);
@@ -446,17 +434,13 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      {canShowVizualization || !uiSettings || !dataFieldsFormats || !charts ? null : (
+      {canShowVizualization ? null : (
         <Fragment>
           <ThresholdVisualization
             alertParams={alertParams}
             aggregationTypes={builtInAggregationTypes}
             comparators={builtInComparators}
-            http={http}
-            toastNotifications={toastNotifications}
-            uiSettings={uiSettings}
-            charts={charts}
-            dataFieldsFormats={dataFieldsFormats}
+            alertsContext={alertsContext}
           />
         </Fragment>
       )}

@@ -95,16 +95,14 @@ describe('alert_add', () => {
               reloadAlerts: () => {
                 return new Promise<void>(() => {});
               },
+              http: deps.http,
+              actionTypeRegistry: deps.actionTypeRegistry,
+              alertTypeRegistry: deps.alertTypeRegistry,
+              toastNotifications: deps.toastNotifications,
+              uiSettings: deps.uiSettings,
             }}
           >
-            <AlertAdd
-              consumer={'alerting'}
-              http={deps.http}
-              actionTypeRegistry={deps.actionTypeRegistry}
-              alertTypeRegistry={deps.alertTypeRegistry}
-              toastNotifications={deps.toastNotifications}
-              uiSettings={deps.uiSettings}
-            />
+            <AlertAdd consumer={'alerting'} />
           </AlertsContextProvider>
         );
       }

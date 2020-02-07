@@ -18,44 +18,19 @@ import {
   EuiPortal,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { HttpSetup, ToastsApi, IUiSettingsClient } from 'kibana/public';
-import { ChartsPluginSetup } from 'src/plugins/charts/public';
-import { FieldFormatsRegistry } from 'src/plugins/data/common/field_formats/static';
 import { useAlertsContext } from '../../context/alerts_context';
-import { Alert, AlertAction, IErrorObject, AlertTypeModel, ActionTypeModel } from '../../../types';
+import { Alert, AlertAction, IErrorObject } from '../../../types';
 import { AlertForm, validateBaseProperties } from './alert_form';
 import { alertReducer } from './alert_reducer';
 import { createAlert } from '../../lib/alert_api';
-import { TypeRegistry } from '../../type_registry';
 
 interface AlertAddProps {
   consumer: string;
-  http: HttpSetup;
-  alertTypeRegistry: TypeRegistry<AlertTypeModel>;
-  actionTypeRegistry: TypeRegistry<ActionTypeModel>;
-  uiSettings?: IUiSettingsClient;
-  toastNotifications?: Pick<
-    ToastsApi,
-    'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'
-  >;
   alertTypeId?: string;
   canChangeTrigger?: boolean;
-  charts?: ChartsPluginSetup;
-  dataFieldsFormats?: Pick<FieldFormatsRegistry, 'register'>;
 }
 
-export const AlertAdd = ({
-  consumer,
-  http,
-  toastNotifications,
-  alertTypeRegistry,
-  actionTypeRegistry,
-  uiSettings,
-  canChangeTrigger,
-  alertTypeId,
-  charts,
-  dataFieldsFormats,
-}: AlertAddProps) => {
+export const AlertAdd = ({ consumer, canChangeTrigger, alertTypeId }: AlertAddProps) => {
   const initialAlert = ({
     params: {},
     consumer,
@@ -74,7 +49,15 @@ export const AlertAdd = ({
     dispatch({ command: { type: 'setAlert' }, payload: { key: 'alert', value } });
   };
 
-  const { addFlyoutVisible, setAddFlyoutVisibility, reloadAlerts } = useAlertsContext();
+  const {
+    addFlyoutVisible,
+    setAddFlyoutVisibility,
+    reloadAlerts,
+    http,
+    toastNotifications,
+    alertTypeRegistry,
+    actionTypeRegistry,
+  } = useAlertsContext();
 
   const closeFlyout = useCallback(() => {
     setAddFlyoutVisibility(false);
@@ -158,18 +141,11 @@ export const AlertAdd = ({
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
           <AlertForm
-            http={http}
-            actionTypeRegistry={actionTypeRegistry}
-            alertTypeRegistry={alertTypeRegistry}
-            toastNotifications={toastNotifications}
-            uiSettings={uiSettings}
             alert={alert}
             dispatch={dispatch}
             errors={errors}
             serverError={serverError}
             canChangeTrigger={canChangeTrigger}
-            charts={charts}
-            dataFieldsFormats={dataFieldsFormats}
           />
         </EuiFlyoutBody>
         <EuiFlyoutFooter>
