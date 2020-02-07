@@ -77,7 +77,12 @@ export const ConnectorAddFlyout = () => {
   let currentForm;
   let actionTypeModel;
   if (!actionType) {
-    currentForm = <ActionTypeMenu onActionTypeChange={onActionTypeChange} />;
+    currentForm = (
+      <ActionTypeMenu
+        onActionTypeChange={onActionTypeChange}
+        actionTypeRegistry={actionTypeRegistry}
+      />
+    );
   } else {
     actionTypeModel = actionTypeRegistry.get(actionType.id);
 
@@ -94,6 +99,7 @@ export const ConnectorAddFlyout = () => {
         dispatch={dispatch}
         serverError={serverError}
         errors={errors}
+        actionTypeRegistry={actionTypeRegistry}
       />
     );
   }
