@@ -21,23 +21,23 @@ describe('connector_add_flyout', () => {
   let deps: AppDeps | null;
 
   beforeAll(async () => {
-    const mockes = coreMock.createSetup();
+    const mocks = coreMock.createSetup();
     const [
       {
         chrome,
         docLinks,
         application: { capabilities },
       },
-    ] = await mockes.getStartServices();
+    ] = await mocks.getStartServices();
     deps = {
       chrome,
       docLinks,
       dataPlugin: dataPluginMock.createStartContract(),
       charts: chartPluginMock.createStartContract(),
-      toastNotifications: mockes.notifications.toasts,
-      injectedMetadata: mockes.injectedMetadata,
-      http: mockes.http,
-      uiSettings: mockes.uiSettings,
+      toastNotifications: mocks.notifications.toasts,
+      injectedMetadata: mocks.injectedMetadata,
+      http: mocks.http,
+      uiSettings: mocks.uiSettings,
       capabilities: {
         ...capabilities,
         actions: {
