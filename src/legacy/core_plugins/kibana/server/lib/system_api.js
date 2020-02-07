@@ -17,7 +17,8 @@
  * under the License.
  */
 
-const SYSTEM_API_HEADER_NAME = 'kbn-system-api';
+const SYSTEM_REQUEST_HEADER_NAME = 'kbn-system-request';
+const LEGACY_SYSTEM_API_HEADER_NAME = 'kbn-system-api';
 
 /**
  * Checks on the *server-side*, if an HTTP request is a system API request
@@ -27,5 +28,8 @@ const SYSTEM_API_HEADER_NAME = 'kbn-system-api';
  * @deprecated Use KibanaRequest#isSystemApi
  */
 export function isSystemApiRequest(request) {
-  return !!request.headers[SYSTEM_API_HEADER_NAME];
+  return (
+    !!request.headers[SYSTEM_REQUEST_HEADER_NAME] ||
+    !!request.headers[LEGACY_SYSTEM_API_HEADER_NAME]
+  );
 }
