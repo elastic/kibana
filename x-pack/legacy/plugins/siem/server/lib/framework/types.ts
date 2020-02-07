@@ -24,7 +24,6 @@ export * from '../../utils/typed_resolvers';
 export const internalFrameworkRequest = Symbol('internalFrameworkRequest');
 
 export interface FrameworkAdapter {
-  version: string;
   registerGraphQLEndpoint(routePath: string, schema: GraphQLSchema): void;
   callWithRequest<Hit = {}, Aggregation = undefined>(
     req: FrameworkRequest,
