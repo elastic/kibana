@@ -22,10 +22,8 @@ import PropTypes from 'prop-types';
 import React from 'react';
 
 import {
-  CommonProps,
   EuiContextMenuItem,
   EuiContextMenuPanel,
-  EuiContextMenuPanelProps,
   EuiEmptyPrompt,
   EuiFieldSearch,
   EuiFilterButton,
@@ -44,19 +42,13 @@ import {
 import { Direction } from '@elastic/eui/src/services/sort/sort_direction';
 import { i18n } from '@kbn/i18n';
 
-import { SavedObjectAttributes } from '../../../../core/public';
-import { SimpleSavedObject, CoreStart } from '../../../../core/public';
-import { useKibana } from '../context';
-
-// TODO the typings for EuiListGroup are incorrect - maxWidth is missing. This can be removed when the types are adjusted
-const FixedEuiListGroup = (EuiListGroup as any) as React.FunctionComponent<
-  CommonProps & { maxWidth: boolean }
->;
-
-// TODO the typings for EuiContextMenuPanel are incorrect - watchedItemProps is missing. This can be removed when the types are adjusted
-const FixedEuiContextMenuPanel = (EuiContextMenuPanel as any) as React.FunctionComponent<
-  EuiContextMenuPanelProps & { watchedItemProps: string[] }
->;
+import {
+  SavedObjectAttributes,
+  SimpleSavedObject,
+  CoreStart,
+  IUiSettingsClient,
+  SavedObjectsStart,
+} from '../../../../core/public';
 
 export interface SavedObjectMetaData<T extends SavedObjectAttributes> {
   type: string;
@@ -299,7 +291,7 @@ class SavedObjectFinderUi extends React.Component<
           });
         }}
       >
-        {i18n.translate('kibana-react.savedObjects.finder.sortAsc', {
+        {i18n.translate('savedObjects.finder.sortAsc', {
           defaultMessage: 'Ascending',
         })}
       </EuiContextMenuItem>,
@@ -312,7 +304,7 @@ class SavedObjectFinderUi extends React.Component<
           });
         }}
       >
-        {i18n.translate('kibana-react.savedObjects.finder.sortDesc', {
+        {i18n.translate('savedObjects.finder.sortDesc', {
           defaultMessage: 'Descending',
         })}
       </EuiContextMenuItem>,
@@ -328,7 +320,7 @@ class SavedObjectFinderUi extends React.Component<
             });
           }}
         >
-          {i18n.translate('kibana-react.savedObjects.finder.sortAuto', {
+          {i18n.translate('savedObjects.finder.sortAuto', {
             defaultMessage: 'Best match',
           })}
         </EuiContextMenuItem>
@@ -344,10 +336,10 @@ class SavedObjectFinderUi extends React.Component<
       <EuiFlexGroup gutterSize="m">
         <EuiFlexItem grow={true}>
           <EuiFieldSearch
-            placeholder={i18n.translate('kibana-react.savedObjects.finder.searchPlaceholder', {
+            placeholder={i18n.translate('savedObjects.finder.searchPlaceholder', {
               defaultMessage: 'Search…',
             })}
-            aria-label={i18n.translate('kibana-react.savedObjects.finder.searchPlaceholder', {
+            aria-label={i18n.translate('savedObjects.finder.searchPlaceholder', {
               defaultMessage: 'Search…',
             })}
             fullWidth
@@ -383,13 +375,13 @@ class SavedObjectFinderUi extends React.Component<
                   isSelected={this.state.sortOpen}
                   data-test-subj="savedObjectFinderSortButton"
                 >
-                  {i18n.translate('kibana-react.savedObjects.finder.sortButtonLabel', {
+                  {i18n.translate('savedObjects.finder.sortButtonLabel', {
                     defaultMessage: 'Sort',
                   })}
                 </EuiFilterButton>
               }
             >
-              <FixedEuiContextMenuPanel
+              <EuiContextMenuPanel
                 watchedItemProps={['icon', 'disabled']}
                 items={this.getSortOptions()}
               />
@@ -415,13 +407,13 @@ class SavedObjectFinderUi extends React.Component<
                     hasActiveFilters={this.state.filteredTypes.length > 0}
                     numActiveFilters={this.state.filteredTypes.length}
                   >
-                    {i18n.translate('kibana-react.savedObjects.finder.filterButtonLabel', {
+                    {i18n.translate('savedObjects.finder.filterButtonLabel', {
                       defaultMessage: 'Types',
                     })}
                   </EuiFilterButton>
                 }
               >
-                <FixedEuiContextMenuPanel
+                <EuiContextMenuPanel
                   watchedItemProps={['icon', 'disabled']}
                   items={this.props.savedObjectMetaData.map(metaData => (
                     <EuiContextMenuItem
@@ -465,7 +457,7 @@ class SavedObjectFinderUi extends React.Component<
           </EuiFlexGroup>
         )}
         {items.length > 0 ? (
-          <FixedEuiListGroup data-test-subj="savedObjectFinderItemList" maxWidth={false}>
+          <EuiListGroup data-test-subj="savedObjectFinderItemList" maxWidth={false}>
             {items.map(item => {
               const currentSavedObjectMetaData = savedObjectMetaData.find(
                 metaData => metaData.type === item.type
@@ -496,7 +488,7 @@ class SavedObjectFinderUi extends React.Component<
                 />
               );
             })}
-          </FixedEuiListGroup>
+          </EuiListGroup>
         ) : (
           !this.state.isFetchingItems && <EuiEmptyPrompt body={this.props.noItemsMessage} />
         )}
@@ -534,15 +526,10 @@ class SavedObjectFinderUi extends React.Component<
   }
 }
 
-const SavedObjectFinder = (props: SavedObjectFinderProps) => {
-  const { services } = useKibana();
-  return (
-    <SavedObjectFinderUi
-      {...props}
-      savedObjects={services.savedObject}
-      uiSettings={services.uiSettings}
-    />
+const getSavedObjectFinder = (savedObject: SavedObjectsStart, uiSettings: IUiSettingsClient) => {
+  return (props: SavedObjectFinderProps) => (
+    <SavedObjectFinderUi {...props} savedObjects={savedObject} uiSettings={uiSettings} />
   );
 };
 
-export { SavedObjectFinder, SavedObjectFinderUi };
+export { getSavedObjectFinder, SavedObjectFinderUi };
