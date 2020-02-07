@@ -11,7 +11,7 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle, EuiToolTip } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { abbreviateWholeNumber } from '../../formatters/abbreviate_whole_number';
@@ -115,7 +115,7 @@ function InfluencersByName({ influencerFieldName, influencerFilter, fieldValues 
   return (
     <React.Fragment key={influencerFieldName}>
       <EuiTitle size="xs" data-test-subj={`mlInfluencerFieldName ${influencerFieldName}`}>
-        <h4>{influencerFieldName}</h4>
+        <h3>{influencerFieldName}</h3>
       </EuiTitle>
       <EuiSpacer size="xs" />
       {influencerValues}
@@ -131,17 +131,17 @@ InfluencersByName.propTypes = {
 export function InfluencersList({ influencers, influencerFilter }) {
   if (influencers === undefined || Object.keys(influencers).length === 0) {
     return (
-      <EuiFlexGroup justifyContent="spaceAround">
+      <EuiFlexGroup justifyContent="spaceAround" className="ml-influencers-list">
         <EuiFlexItem grow={false}>
           <EuiSpacer size="xxl" />
-          <EuiText>
-            <h4>
+          <EuiTitle size="xs" className="influencer-title">
+            <h3>
               <FormattedMessage
                 id="xpack.ml.influencersList.noInfluencersFoundTitle"
                 defaultMessage="No influencers found"
               />
-            </h4>
-          </EuiText>
+            </h3>
+          </EuiTitle>
         </EuiFlexItem>
       </EuiFlexGroup>
     );

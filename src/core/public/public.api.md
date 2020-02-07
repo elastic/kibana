@@ -431,11 +431,13 @@ export const DEFAULT_APP_CATEGORIES: Readonly<{
     };
     observability: {
         label: string;
+        euiIconType: string;
         order: number;
     };
     security: {
         label: string;
         order: number;
+        euiIconType: string;
     };
     management: {
         label: string;
@@ -1168,7 +1170,7 @@ export interface SavedObjectsUpdateOptions {
 
 // @public
 export class SimpleSavedObject<T extends SavedObjectAttributes> {
-    constructor(client: SavedObjectsClient, { id, type, version, attributes, error, references, migrationVersion }: SavedObject<T>);
+    constructor(client: SavedObjectsClientContract, { id, type, version, attributes, error, references, migrationVersion }: SavedObject<T>);
     // (undocumented)
     attributes: T;
     // (undocumented)

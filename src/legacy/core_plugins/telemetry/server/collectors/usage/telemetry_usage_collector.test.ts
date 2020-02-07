@@ -136,7 +136,7 @@ describe('telemetry_usage_collector', () => {
       const collectorOptions = createTelemetryUsageCollector(usageCollector, server);
 
       expect(collectorOptions.type).toBe('static_telemetry');
-      expect(await collectorOptions.fetch()).toEqual(expectedObject);
+      expect(await collectorOptions.fetch({} as any)).toEqual(expectedObject); // Sending any as the callCluster client because it's not needed in this collector but TS requires it when calling it.
     });
   });
 });
