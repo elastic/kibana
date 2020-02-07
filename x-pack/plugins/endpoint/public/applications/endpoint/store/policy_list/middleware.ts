@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { MiddlewareFactory } from '../../types';
+import { MiddlewareFactory, PolicyListState } from '../../types';
 
-export const policyListMiddlewareFactory: MiddlewareFactory = coreStart => {
+export const policyListMiddlewareFactory: MiddlewareFactory<PolicyListState> = coreStart => {
   return ({ getState, dispatch }) => next => async action => {
     next(action);
 
@@ -16,6 +16,17 @@ export const policyListMiddlewareFactory: MiddlewareFactory = coreStart => {
     ) {
       // load data from API
       // Refactor tracked via: https://github.com/elastic/endpoint-app-team/issues/150
+      setTimeout(() => {
+        dispatch({
+          type: 'serverReturnedPolicyListData',
+          payload: {
+            policyItems: [],
+            pageIndex: 0,
+            pageSize: 10,
+            total: 0,
+          },
+        });
+      }, 50);
     }
   };
 };
