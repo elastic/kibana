@@ -563,7 +563,7 @@ To run the tests locally:
 
 To run the x-pack tests, swap the config file out for `x-pack/test/accessibility/config.ts`.
 
-After the server is up, you can go to this instance of Kibana at `localhost:5020`.
+After the server is up, you can go to this instance of Kibana at `localhost:5620`.
 
 The testing is done using [axe](https://github.com/dequelabs/axe-core). The same thing that runs in CI,
 can be run locally using their browser plugins:
