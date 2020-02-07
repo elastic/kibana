@@ -180,8 +180,6 @@ exports[`MonitorCharts component renders the component without errors 1`] = `
         },
       }
     }
-    dateRangeEnd="2011-12-03T10:15:30+01:00"
-    dateRangeStart="2011-12-03T10:15:30+01:00"
     loading={false}
     mean="mean"
     monitorId="something"

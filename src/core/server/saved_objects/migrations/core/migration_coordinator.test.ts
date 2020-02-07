@@ -24,6 +24,7 @@ describe('coordinateMigration', () => {
   const log = {
     debug: jest.fn(),
     warning: jest.fn(),
+    warn: jest.fn(),
     info: jest.fn(),
   };
 

@@ -5,8 +5,15 @@
  */
 
 import React, { Component, Fragment } from 'react';
-import { getVectorStyleLabel } from './get_vector_style_label';
-import { EuiFormRow, EuiSelect } from '@elastic/eui';
+import { getVectorStyleLabel, getDisabledByMessage } from './get_vector_style_label';
+import {
+  EuiFormRow,
+  EuiSelect,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFieldText,
+  EuiToolTip,
+} from '@elastic/eui';
 import { VectorStyle } from '../vector_style';
 import { i18n } from '@kbn/i18n';
 
@@ -69,7 +76,7 @@ export class StylePropEditor extends Component {
             : VectorStyle.STYLE_TYPE.STATIC
         }
         onChange={this._onTypeToggle}
-        disabled={this.props.fields.length === 0}
+        disabled={this.props.disabled || this.props.fields.length === 0}
         aria-label={i18n.translate('xpack.maps.styles.staticDynamicSelect.ariaLabel', {
           defaultMessage: 'Select to style by fixed value or by data value',
         })}
@@ -83,17 +90,35 @@ export class StylePropEditor extends Component {
       this._onFieldMetaOptionsChange
     );
 
+    const staticDynamicSelect = this.renderStaticDynamicSelect();
+
+    const stylePropertyForm = this.props.disabled ? (
+      <EuiToolTip
+        anchorClassName="mapStyleFormDisabledTooltip"
+        content={getDisabledByMessage(this.props.disabledBy)}
+      >
+        <EuiFlexGroup gutterSize="none" justifyContent="flexEnd">
+          <EuiFlexItem grow={false}>{staticDynamicSelect}</EuiFlexItem>
+          <EuiFlexItem>
+            <EuiFieldText compressed disabled />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiToolTip>
+    ) : (
+      <Fragment>
+        {React.cloneElement(this.props.children, {
+          staticDynamicSelect,
+        })}
+        {fieldMetaOptionsPopover}
+      </Fragment>
+    );
+
     return (
       <EuiFormRow
         label={getVectorStyleLabel(this.props.styleProperty.getStyleName())}
         display="rowCompressed"
       >
-        <Fragment>
-          {React.cloneElement(this.props.children, {
-            staticDynamicSelect: this.renderStaticDynamicSelect(),
-          })}
-          {fieldMetaOptionsPopover}
-        </Fragment>
+        {stylePropertyForm}
       </EuiFormRow>
     );
   }

@@ -5,7 +5,9 @@
  */
 
 import { services as xpackFunctionalServices } from '../../functional/services';
+import { AlertsServiceProvider } from './alerting';
 
 export const services = {
   ...xpackFunctionalServices,
+  alerting: AlertsServiceProvider,
 };

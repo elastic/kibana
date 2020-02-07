@@ -20,7 +20,6 @@
 // autoloading
 
 // preloading (for faster webpack builds)
-import chrome from 'ui/chrome';
 import routes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 import { npSetup } from 'ui/new_platform';
@@ -58,14 +57,15 @@ import { showAppRedirectNotification } from 'ui/notify';
 import 'leaflet';
 import { localApplicationService } from './local_application_service';
 
-npSetup.plugins.kibana_legacy.forwardApp('doc', 'discover', { keepPrefix: true });
-npSetup.plugins.kibana_legacy.forwardApp('context', 'discover', { keepPrefix: true });
+npSetup.plugins.kibanaLegacy.forwardApp('doc', 'discover', { keepPrefix: true });
+npSetup.plugins.kibanaLegacy.forwardApp('context', 'discover', { keepPrefix: true });
 localApplicationService.attachToAngular(routes);
 
 routes.enable();
 
+const { config } = npSetup.plugins.kibanaLegacy;
 routes.otherwise({
-  redirectTo: `/${chrome.getInjected('kbnDefaultAppId', 'discover')}`,
+  redirectTo: `/${config.defaultAppId || 'discover'}`,
 });
 
 uiModules.get('kibana').run(showAppRedirectNotification);

@@ -20,7 +20,7 @@ function getMockReq(metricsBuckets = []) {
     get: sinon.stub(),
   };
 
-  config.get.withArgs('xpack.monitoring.min_interval_seconds').returns(10);
+  config.get.withArgs('monitoring.ui.min_interval_seconds').returns(10);
 
   return {
     server: {

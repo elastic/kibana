@@ -5,12 +5,13 @@
  */
 
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-// @ts-ignore untyped module
-import { KIBANA_STATS_TYPE_MONITORING } from '../../../monitoring/common/constants';
 import { ServerFacade, ExportTypesRegistry, ESCallCluster } from '../../types';
 import { KIBANA_REPORTING_TYPE } from '../../common/constants';
 import { getReportingUsage } from './get_reporting_usage';
 import { RangeStats } from './types';
+
+// places the reporting data as kibana stats
+const METATYPE = 'kibana_stats';
 
 /*
  * @param {Object} server
@@ -35,7 +36,7 @@ export function getReportingUsageCollector(
      */
     formatForBulkUpload: (result: RangeStats) => {
       return {
-        type: KIBANA_STATS_TYPE_MONITORING,
+        type: METATYPE,
         payload: {
           usage: {
             xpack: {

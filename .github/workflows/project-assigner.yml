@@ -8,7 +8,7 @@ jobs:
     name: Assign issue or PR to project based on label
     steps:
       - name: Assign to project
-        uses: elastic/github-actions/project-assigner@v1.0.0
+        uses: elastic/github-actions/project-assigner@v1.0.2
         id: project_assigner
         with:
           issue-mappings: '[{"label": "Team:AppArch", "projectName": "kibana-app-arch", "columnId": 6173895}, {"label": "Feature:Lens", "projectName": "Lens", "columnId": 6219363}, {"label": "Team:Canvas", "projectName": "canvas", "columnId": 6187593}]'

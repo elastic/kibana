@@ -9,6 +9,7 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export function UptimeProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
+  const retry = getService('retry');
 
   return {
     async assertExists(key: string) {
@@ -17,7 +18,9 @@ export function UptimeProvider({ getService }: FtrProviderContext) {
       }
     },
     async monitorIdExists(key: string) {
-      await testSubjects.existOrFail(key);
+      await retry.tryForTime(10000, async () => {
+        await testSubjects.existOrFail(key);
+      });
     },
     async monitorPageLinkExists(monitorId: string) {
       await testSubjects.existOrFail(`monitor-page-link-${monitorId}`);
@@ -38,10 +41,10 @@ export function UptimeProvider({ getService }: FtrProviderContext) {
       await browser.pressKeys(browser.keys.ENTER);
     },
     async goToNextPage() {
-      await testSubjects.click('xpack.uptime.monitorList.nextButton');
+      await testSubjects.click('xpack.uptime.monitorList.nextButton', 5000);
     },
     async goToPreviousPage() {
-      await testSubjects.click('xpack.uptime.monitorList.prevButton');
+      await testSubjects.click('xpack.uptime.monitorList.prevButton', 5000);
     },
     async setStatusFilterUp() {
       await testSubjects.click('xpack.uptime.filterBar.filterStatusUp');

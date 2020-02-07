@@ -70,7 +70,7 @@ export async function getLogs(
 
   const params = {
     index: filebeatIndexPattern,
-    size: Math.min(50, config.get('xpack.monitoring.elasticsearch.logFetchCount')),
+    size: Math.min(50, config.get('monitoring.ui.elasticsearch.logFetchCount')),
     filterPath: [
       'hits.hits._source.message',
       'hits.hits._source.log.level',
