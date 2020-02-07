@@ -11,7 +11,7 @@ import {
   BulkUpdateRulesRequest,
   IRuleSavedAttributesSavedObjectAttributes,
 } from '../../rules/types';
-import { LegacySetupServices } from '../../../../plugin';
+import { LegacyServices } from '../../../../types';
 import { GetScopedClients } from '../../../../services';
 import { transformOrBulkError, getIdBulkError } from './utils';
 import { transformBulkError } from '../utils';
@@ -128,7 +128,7 @@ export const createUpdateRulesBulkRoute = (getClients: GetScopedClients): Hapi.S
 };
 
 export const updateRulesBulkRoute = (
-  route: LegacySetupServices['route'],
+  route: LegacyServices['route'],
   getClients: GetScopedClients
 ): void => {
   route(createUpdateRulesBulkRoute(getClients));

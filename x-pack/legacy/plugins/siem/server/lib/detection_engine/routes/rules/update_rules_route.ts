@@ -9,7 +9,7 @@ import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { updateRules } from '../../rules/update_rules';
 import { UpdateRulesRequest, IRuleSavedAttributesSavedObjectAttributes } from '../../rules/types';
 import { updateRulesSchema } from '../schemas/update_rules_schema';
-import { LegacySetupServices } from '../../../../plugin';
+import { LegacyServices } from '../../../../types';
 import { getIdError, transformOrError } from './utils';
 import { transformError } from '../utils';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
@@ -118,9 +118,6 @@ export const createUpdateRulesRoute = (getClients: GetScopedClients): Hapi.Serve
   };
 };
 
-export const updateRulesRoute = (
-  route: LegacySetupServices['route'],
-  getClients: GetScopedClients
-) => {
+export const updateRulesRoute = (route: LegacyServices['route'], getClients: GetScopedClients) => {
   route(createUpdateRulesRoute(getClients));
 };

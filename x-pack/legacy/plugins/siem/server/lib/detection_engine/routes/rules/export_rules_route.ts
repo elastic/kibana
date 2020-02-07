@@ -8,7 +8,7 @@ import Boom from 'boom';
 import Hapi from 'hapi';
 
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
-import { LegacySetupServices, RequestFacade } from '../../../../plugin';
+import { LegacyServices, LegacyRequest } from '../../../../types';
 import { GetScopedClients } from '../../../../services';
 import { ExportRulesRequest } from '../../rules/types';
 import { getNonPackagedRulesCount } from '../../rules/get_existing_prepackaged_rules';
@@ -17,7 +17,7 @@ import { getExportByObjectIds } from '../../rules/get_export_by_object_ids';
 import { getExportAll } from '../../rules/get_export_all';
 
 export const createExportRulesRoute = (
-  config: LegacySetupServices['config'],
+  config: LegacyServices['config'],
   getClients: GetScopedClients
 ): Hapi.ServerRoute => {
   return {
@@ -33,7 +33,7 @@ export const createExportRulesRoute = (
         query: exportRulesQuerySchema,
       },
     },
-    async handler(request: ExportRulesRequest & RequestFacade, headers) {
+    async handler(request: ExportRulesRequest & LegacyRequest, headers) {
       const { alertsClient } = await getClients(request);
 
       if (!alertsClient) {
@@ -71,8 +71,8 @@ export const createExportRulesRoute = (
 };
 
 export const exportRulesRoute = (
-  route: LegacySetupServices['route'],
-  config: LegacySetupServices['config'],
+  route: LegacyServices['route'],
+  config: LegacyServices['config'],
   getClients: GetScopedClients
 ): void => {
   route(createExportRulesRoute(config, getClients));

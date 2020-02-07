@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ServerFacade } from '../types';
+import { LegacyServices } from '../types';
 import { GetScopedClients } from '../services';
 
 import { createRulesRoute } from '../lib/detection_engine/routes/rules/create_rules_route';
@@ -31,8 +31,8 @@ import { getPrepackagedRulesStatusRoute } from '../lib/detection_engine/routes/r
 export type LegacyInitRoutes = (getClients: GetScopedClients) => void;
 
 export const initRoutes = (
-  route: ServerFacade['route'],
-  config: ServerFacade['config'],
+  route: LegacyServices['route'],
+  config: LegacyServices['config'],
   usingEphemeralEncryptionKey: boolean
 ) => (getClients: GetScopedClients): void => {
   // Detection Engine Rule routes that have the REST endpoints of /api/detection_engine/rules

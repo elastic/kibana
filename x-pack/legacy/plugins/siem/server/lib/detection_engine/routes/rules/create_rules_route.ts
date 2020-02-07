@@ -10,10 +10,10 @@ import uuid from 'uuid';
 
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { GetScopedClients } from '../../../../services';
+import { LegacyServices } from '../../../../types';
 import { createRules } from '../../rules/create_rules';
 import { RulesRequest, IRuleSavedAttributesSavedObjectAttributes } from '../../rules/types';
 import { createRulesSchema } from '../schemas/create_rules_schema';
-import { LegacySetupServices } from '../../../../plugin';
 import { readRules } from '../../rules/read_rules';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
 import { transformOrError } from './utils';
@@ -21,7 +21,7 @@ import { getIndexExists } from '../../index/get_index_exists';
 import { getIndex, transformError } from '../utils';
 
 export const createCreateRulesRoute = (
-  config: LegacySetupServices['config'],
+  config: LegacyServices['config'],
   getClients: GetScopedClients
 ): Hapi.ServerRoute => {
   return {
@@ -139,8 +139,8 @@ export const createCreateRulesRoute = (
 };
 
 export const createRulesRoute = (
-  route: LegacySetupServices['route'],
-  config: LegacySetupServices['config'],
+  route: LegacyServices['route'],
+  config: LegacyServices['config'],
   getClients: GetScopedClients
 ): void => {
   route(createCreateRulesRoute(config, getClients));

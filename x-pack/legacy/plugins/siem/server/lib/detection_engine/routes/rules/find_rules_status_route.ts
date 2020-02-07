@@ -8,7 +8,7 @@ import Hapi from 'hapi';
 import { snakeCase } from 'lodash/fp';
 
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
-import { LegacySetupServices, RequestFacade } from '../../../../plugin';
+import { LegacyServices, LegacyRequest } from '../../../../types';
 import { GetScopedClients } from '../../../../services';
 import { findRulesStatusesSchema } from '../schemas/find_rules_statuses_schema';
 import {
@@ -42,7 +42,7 @@ export const createFindRulesStatusRoute = (getClients: GetScopedClients): Hapi.S
       query: findRulesStatusesSchema,
     },
   },
-  async handler(request: FindRulesStatusesRequest & RequestFacade, headers) {
+  async handler(request: FindRulesStatusesRequest & LegacyRequest, headers) {
     const { query } = request;
     const { alertsClient, savedObjectsClient } = await getClients(request);
 
@@ -88,7 +88,7 @@ export const createFindRulesStatusRoute = (getClients: GetScopedClients): Hapi.S
 });
 
 export const findRulesStatusesRoute = (
-  route: LegacySetupServices['route'],
+  route: LegacyServices['route'],
   getClients: GetScopedClients
 ): void => {
   route(createFindRulesStatusRoute(getClients));

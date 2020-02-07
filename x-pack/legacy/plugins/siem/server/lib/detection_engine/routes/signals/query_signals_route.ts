@@ -6,14 +6,14 @@
 
 import Hapi from 'hapi';
 import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '../../../../../common/constants';
+import { LegacyServices } from '../../../../types';
 import { GetScopedClients } from '../../../../services';
 import { SignalsQueryRequest } from '../../signals/types';
 import { querySignalsSchema } from '../schemas/query_signals_index_schema';
-import { LegacySetupServices } from '../../../../plugin';
 import { transformError, getIndex } from '../utils';
 
 export const querySignalsRouteDef = (
-  config: LegacySetupServices['config'],
+  config: LegacyServices['config'],
   getClients: GetScopedClients
 ): Hapi.ServerRoute => {
   return {
@@ -48,8 +48,8 @@ export const querySignalsRouteDef = (
 };
 
 export const querySignalsRoute = (
-  route: LegacySetupServices['route'],
-  config: LegacySetupServices['config'],
+  route: LegacyServices['route'],
+  config: LegacyServices['config'],
   getClients: GetScopedClients
 ) => {
   route(querySignalsRouteDef(config, getClients));

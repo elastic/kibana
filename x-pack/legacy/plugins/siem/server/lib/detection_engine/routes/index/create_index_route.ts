@@ -8,7 +8,7 @@ import Hapi from 'hapi';
 import Boom from 'boom';
 
 import { DETECTION_ENGINE_INDEX_URL } from '../../../../../common/constants';
-import { LegacySetupServices, RequestFacade } from '../../../../plugin';
+import { LegacyServices, LegacyRequest } from '../../../../types';
 import { GetScopedClients } from '../../../../services';
 import { transformError, getIndex } from '../utils';
 import { getIndexExists } from '../../index/get_index_exists';
@@ -21,7 +21,7 @@ import { createBootstrapIndex } from '../../index/create_bootstrap_index';
 import signalsPolicy from './signals_policy.json';
 
 export const createCreateIndexRoute = (
-  config: LegacySetupServices['config'],
+  config: LegacyServices['config'],
   getClients: GetScopedClients
 ): Hapi.ServerRoute => {
   return {
@@ -35,7 +35,7 @@ export const createCreateIndexRoute = (
         },
       },
     },
-    async handler(request: RequestFacade) {
+    async handler(request: LegacyRequest) {
       try {
         const { clusterClient, spacesClient } = await getClients(request);
         const callCluster = clusterClient.callAsCurrentUser;
@@ -65,8 +65,8 @@ export const createCreateIndexRoute = (
 };
 
 export const createIndexRoute = (
-  route: LegacySetupServices['route'],
-  config: LegacySetupServices['config'],
+  route: LegacyServices['route'],
+  config: LegacyServices['config'],
   getClients: GetScopedClients
 ) => {
   route(createCreateIndexRoute(config, getClients));

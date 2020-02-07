@@ -14,10 +14,10 @@ import {
   SavedObjectsClientContract,
 } from 'kibana/server';
 import { SIGNALS_ID } from '../../../../common/constants';
+import { LegacyRequest } from '../../../types';
 import { AlertsClient } from '../../../../../alerting/server';
 import { ActionsClient } from '../../../../../../../plugins/actions/server';
 import { RuleAlertParams, RuleTypeParams, RuleAlertParamsRest } from '../types';
-import { RequestFacade } from '../../../types';
 import { Alert } from '../../../../../alerting/server/types';
 
 export type UpdateRuleAlertParamsRest = Partial<RuleAlertParamsRest> & {
@@ -34,11 +34,11 @@ export interface FindParamsRest {
   filter: string;
 }
 
-export interface UpdateRulesRequest extends RequestFacade {
+export interface UpdateRulesRequest extends LegacyRequest {
   payload: UpdateRuleAlertParamsRest;
 }
 
-export interface BulkUpdateRulesRequest extends RequestFacade {
+export interface BulkUpdateRulesRequest extends LegacyRequest {
   payload: UpdateRuleAlertParamsRest[];
 }
 
@@ -86,11 +86,11 @@ export interface IRuleStatusFindType {
 
 export type RuleStatusString = 'succeeded' | 'failed' | 'going to run' | 'executing';
 
-export interface RulesRequest extends RequestFacade {
+export interface RulesRequest extends LegacyRequest {
   payload: RuleAlertParamsRest;
 }
 
-export interface BulkRulesRequest extends RequestFacade {
+export interface BulkRulesRequest extends LegacyRequest {
   payload: RuleAlertParamsRest[];
 }
 
@@ -99,12 +99,12 @@ export interface HapiReadableStream extends Readable {
     filename: string;
   };
 }
-export interface ImportRulesRequest extends Omit<RequestFacade, 'query'> {
+export interface ImportRulesRequest extends Omit<LegacyRequest, 'query'> {
   query: { overwrite: boolean };
   payload: { file: HapiReadableStream };
 }
 
-export interface ExportRulesRequest extends Omit<RequestFacade, 'query'> {
+export interface ExportRulesRequest extends Omit<LegacyRequest, 'query'> {
   payload: { objects: Array<{ rule_id: string }> | null | undefined };
   query: {
     file_name: string;
@@ -112,11 +112,11 @@ export interface ExportRulesRequest extends Omit<RequestFacade, 'query'> {
   };
 }
 
-export type QueryRequest = Omit<RequestFacade, 'query'> & {
+export type QueryRequest = Omit<LegacyRequest, 'query'> & {
   query: { id: string | undefined; rule_id: string | undefined };
 };
 
-export interface QueryBulkRequest extends RequestFacade {
+export interface QueryBulkRequest extends LegacyRequest {
   payload: Array<QueryRequest['query']>;
 }
 
@@ -130,7 +130,7 @@ export interface FindRuleParams {
   sortOrder?: 'asc' | 'desc';
 }
 
-export interface FindRulesRequest extends Omit<RequestFacade, 'query'> {
+export interface FindRulesRequest extends Omit<LegacyRequest, 'query'> {
   query: {
     per_page: number;
     page: number;
@@ -142,7 +142,7 @@ export interface FindRulesRequest extends Omit<RequestFacade, 'query'> {
   };
 }
 
-export interface FindRulesStatusesRequest extends Omit<RequestFacade, 'query'> {
+export interface FindRulesStatusesRequest extends Omit<LegacyRequest, 'query'> {
   query: {
     ids: string[];
   };

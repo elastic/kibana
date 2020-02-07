@@ -5,16 +5,11 @@
  */
 
 import { Legacy } from 'kibana';
-import { LegacyRequest } from '../../../../../src/core/server';
 
-export interface ServerFacade {
+export { LegacyRequest } from '../../../../../src/core/server';
+
+export interface LegacyServices {
+  alerting?: Legacy.Server['plugins']['alerting'];
   config: Legacy.Server['config'];
-  plugins: {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    actions: any; // We have to do this at the moment because the types are not compatible
-    alerting?: Legacy.Server['plugins']['alerting'];
-  };
   route: Legacy.Server['route'];
 }
-
-export type RequestFacade = LegacyRequest;

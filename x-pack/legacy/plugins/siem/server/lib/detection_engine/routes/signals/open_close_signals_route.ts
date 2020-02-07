@@ -6,14 +6,14 @@
 
 import Hapi from 'hapi';
 import { DETECTION_ENGINE_SIGNALS_STATUS_URL } from '../../../../../common/constants';
+import { LegacyServices } from '../../../../types';
+import { GetScopedClients } from '../../../../services';
 import { SignalsStatusRequest } from '../../signals/types';
 import { setSignalsStatusSchema } from '../schemas/set_signal_status_schema';
-import { LegacySetupServices } from '../../../../plugin';
 import { transformError, getIndex } from '../utils';
-import { GetScopedClients } from '../../../../services';
 
 export const setSignalsStatusRouteDef = (
-  config: LegacySetupServices['config'],
+  config: LegacyServices['config'],
   getClients: GetScopedClients
 ): Hapi.ServerRoute => {
   return {
@@ -64,8 +64,8 @@ export const setSignalsStatusRouteDef = (
 };
 
 export const setSignalsStatusRoute = (
-  route: LegacySetupServices['route'],
-  config: LegacySetupServices['config'],
+  route: LegacyServices['route'],
+  config: LegacyServices['config'],
   getClients: GetScopedClients
 ) => {
   route(setSignalsStatusRouteDef(config, getClients));

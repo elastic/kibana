@@ -15,7 +15,7 @@ import { actionsClientMock } from '../../../../../../../../plugins/actions/serve
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { spacesServiceMock } from '../../../../../../../../plugins/spaces/server/spaces_service/spaces_service.mock';
 import { APP_ID, SIGNALS_INDEX_KEY } from '../../../../../common/constants';
-import { LegacySetupServices } from '../../../../plugin';
+import { LegacyServices } from '../../../../types';
 
 const defaultConfig = {
   'kibana.index': '.kibana',
@@ -71,7 +71,7 @@ export const createMockServer = (hasAlertsClient = true) => {
   const services = ({
     ...npServices,
     ...legacyServices,
-  } as unknown) as LegacySetupServices;
+  } as unknown) as LegacyServices;
 
   return {
     inject: server.inject.bind(server),

@@ -7,7 +7,7 @@
 import Hapi from 'hapi';
 
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
-import { LegacySetupServices } from '../../../../plugin';
+import { LegacyServices } from '../../../../types';
 import { GetScopedClients } from '../../../../services';
 import { queryRulesBulkSchema } from '../schemas/query_rules_bulk_schema';
 import { transformOrBulkError, getIdBulkError } from './utils';
@@ -74,7 +74,7 @@ export const createDeleteRulesBulkRoute = (getClients: GetScopedClients): Hapi.S
 };
 
 export const deleteRulesBulkRoute = (
-  route: LegacySetupServices['route'],
+  route: LegacyServices['route'],
   getClients: GetScopedClients
 ): void => {
   route(createDeleteRulesBulkRoute(getClients));

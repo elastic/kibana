@@ -148,20 +148,18 @@ export const siem = (kibana: any) => {
       mappings: savedObjectMappings,
     },
     init(server: Server) {
-      const { config, newPlatform, plugins, route } = server;
-      const { coreContext, env, setup, start } = newPlatform;
+      const { coreContext, env, setup, start } = server.newPlatform;
       const initializerContext = { ...coreContext, env };
-      const serverFacade = {
-        config,
-        plugins: {
-          alerting: plugins.alerting,
-        },
-        route: route.bind(server),
+      const __legacy = {
+        config: server.config,
+        alerting: server.plugins.alerting,
+        route: server.route.bind(server),
       };
+
       // @ts-ignore-next-line: NewPlatform shim is too loosely typed
       const pluginInstance = plugin(initializerContext);
       // @ts-ignore-next-line: NewPlatform shim is too loosely typed
-      pluginInstance.setup(setup.core, setup.plugins, serverFacade);
+      pluginInstance.setup(setup.core, setup.plugins, __legacy);
       // @ts-ignore-next-line: NewPlatform shim is too loosely typed
       pluginInstance.start(start.core, start.plugins);
     },

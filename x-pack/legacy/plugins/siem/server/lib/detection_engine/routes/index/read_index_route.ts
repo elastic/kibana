@@ -8,13 +8,13 @@ import Hapi from 'hapi';
 import Boom from 'boom';
 
 import { DETECTION_ENGINE_INDEX_URL } from '../../../../../common/constants';
-import { LegacySetupServices, RequestFacade } from '../../../../plugin';
+import { LegacyServices, LegacyRequest } from '../../../../types';
 import { GetScopedClients } from '../../../../services';
 import { transformError, getIndex } from '../utils';
 import { getIndexExists } from '../../index/get_index_exists';
 
 export const createReadIndexRoute = (
-  config: LegacySetupServices['config'],
+  config: LegacyServices['config'],
   getClients: GetScopedClients
 ): Hapi.ServerRoute => {
   return {
@@ -28,7 +28,7 @@ export const createReadIndexRoute = (
         },
       },
     },
-    async handler(request: RequestFacade, headers) {
+    async handler(request: LegacyRequest, headers) {
       try {
         const { clusterClient, spacesClient } = await getClients(request);
         const callCluster = clusterClient.callAsCurrentUser;
@@ -60,8 +60,8 @@ export const createReadIndexRoute = (
 };
 
 export const readIndexRoute = (
-  route: LegacySetupServices['route'],
-  config: LegacySetupServices['config'],
+  route: LegacyServices['route'],
+  config: LegacyServices['config'],
   getClients: GetScopedClients
 ) => {
   route(createReadIndexRoute(config, getClients));

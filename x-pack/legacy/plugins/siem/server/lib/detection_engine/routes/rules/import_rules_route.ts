@@ -12,7 +12,7 @@ import uuid from 'uuid';
 
 import { createPromiseFromStreams } from '../../../../../../../../../src/legacy/utils/streams';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
-import { LegacySetupServices, RequestFacade } from '../../../../plugin';
+import { LegacyServices, LegacyRequest } from '../../../../types';
 import { createRules } from '../../rules/create_rules';
 import { ImportRulesRequest } from '../../rules/types';
 import { readRules } from '../../rules/read_rules';
@@ -35,7 +35,7 @@ type PromiseFromStreams = ImportRuleAlertRest | Error;
 const CHUNK_PARSED_OBJECT_SIZE = 10;
 
 export const createImportRulesRoute = (
-  config: LegacySetupServices['config'],
+  config: LegacyServices['config'],
   getClients: GetScopedClients
 ): Hapi.ServerRoute => {
   return {
@@ -56,7 +56,7 @@ export const createImportRulesRoute = (
         payload: importRulesPayloadSchema,
       },
     },
-    async handler(request: ImportRulesRequest & RequestFacade, headers) {
+    async handler(request: ImportRulesRequest & LegacyRequest, headers) {
       const {
         actionsClient,
         alertsClient,
@@ -267,8 +267,8 @@ export const createImportRulesRoute = (
 };
 
 export const importRulesRoute = (
-  route: LegacySetupServices['route'],
-  config: LegacySetupServices['config'],
+  route: LegacyServices['route'],
+  config: LegacyServices['config'],
   getClients: GetScopedClients
 ): void => {
   route(createImportRulesRoute(config, getClients));

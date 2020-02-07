@@ -6,7 +6,7 @@
 
 import Boom from 'boom';
 import { APP_ID, SIGNALS_INDEX_KEY } from '../../../../common/constants';
-import { LegacySetupServices } from '../../../plugin';
+import { LegacyServices } from '../../../types';
 
 export const transformError = (err: Error & { statusCode?: number }) => {
   if (Boom.isBoom(err)) {
@@ -159,7 +159,7 @@ export const transformBulkError = (
 
 export const getIndex = (
   getSpaceId: () => string | undefined,
-  config: LegacySetupServices['config']
+  config: LegacyServices['config']
 ): string => {
   const spaceId = getSpaceId();
   const signalsIndex = config().get(`xpack.${APP_ID}.${SIGNALS_INDEX_KEY}`);

@@ -7,7 +7,7 @@
 import Hapi from 'hapi';
 
 import { DETECTION_ENGINE_PREPACKAGED_URL } from '../../../../../common/constants';
-import { LegacySetupServices, RequestFacade } from '../../../../plugin';
+import { LegacyServices, LegacyRequest } from '../../../../types';
 import { GetScopedClients } from '../../../../services';
 import { transformError } from '../utils';
 import { getPrepackagedRules } from '../../rules/get_prepackaged_rules';
@@ -30,7 +30,7 @@ export const createGetPrepackagedRulesStatusRoute = (
         },
       },
     },
-    async handler(request: RequestFacade, headers) {
+    async handler(request: LegacyRequest, headers) {
       const { alertsClient } = await getClients(request);
 
       if (!alertsClient) {
@@ -64,7 +64,7 @@ export const createGetPrepackagedRulesStatusRoute = (
 };
 
 export const getPrepackagedRulesStatusRoute = (
-  route: LegacySetupServices['route'],
+  route: LegacyServices['route'],
   getClients: GetScopedClients
 ): void => {
   route(createGetPrepackagedRulesStatusRoute(getClients));

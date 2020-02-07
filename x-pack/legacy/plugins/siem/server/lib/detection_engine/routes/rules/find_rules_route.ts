@@ -6,7 +6,7 @@
 
 import Hapi from 'hapi';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
-import { LegacySetupServices, RequestFacade } from '../../../../plugin';
+import { LegacyServices, LegacyRequest } from '../../../../types';
 import { GetScopedClients } from '../../../../services';
 import { findRules } from '../../rules/find_rules';
 import { FindRulesRequest, IRuleSavedAttributesSavedObjectAttributes } from '../../rules/types';
@@ -28,7 +28,7 @@ export const createFindRulesRoute = (getClients: GetScopedClients): Hapi.ServerR
         query: findRulesSchema,
       },
     },
-    async handler(request: FindRulesRequest & RequestFacade, headers) {
+    async handler(request: FindRulesRequest & LegacyRequest, headers) {
       const { query } = request;
       try {
         const { alertsClient, savedObjectsClient } = await getClients(request);
@@ -67,9 +67,6 @@ export const createFindRulesRoute = (getClients: GetScopedClients): Hapi.ServerR
   };
 };
 
-export const findRulesRoute = (
-  route: LegacySetupServices['route'],
-  getClients: GetScopedClients
-) => {
+export const findRulesRoute = (route: LegacyServices['route'], getClients: GetScopedClients) => {
   route(createFindRulesRoute(getClients));
 };

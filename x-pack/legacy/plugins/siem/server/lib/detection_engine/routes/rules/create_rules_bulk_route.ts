@@ -9,9 +9,9 @@ import uuid from 'uuid';
 
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { GetScopedClients } from '../../../../services';
+import { LegacyServices } from '../../../../types';
 import { createRules } from '../../rules/create_rules';
 import { BulkRulesRequest } from '../../rules/types';
-import { LegacySetupServices } from '../../../../plugin';
 import { readRules } from '../../rules/read_rules';
 import { transformOrBulkError } from './utils';
 import { getIndexExists } from '../../index/get_index_exists';
@@ -19,7 +19,7 @@ import { getIndex, transformBulkError, createBulkErrorObject } from '../utils';
 import { createRulesBulkSchema } from '../schemas/create_rules_bulk_schema';
 
 export const createCreateRulesBulkRoute = (
-  config: LegacySetupServices['config'],
+  config: LegacyServices['config'],
   getClients: GetScopedClients
 ): Hapi.ServerRoute => {
   return {
@@ -141,8 +141,8 @@ export const createCreateRulesBulkRoute = (
 };
 
 export const createRulesBulkRoute = (
-  route: LegacySetupServices['route'],
-  config: LegacySetupServices['config'],
+  route: LegacyServices['route'],
+  config: LegacyServices['config'],
   getClients: GetScopedClients
 ): void => {
   route(createCreateRulesBulkRoute(config, getClients));

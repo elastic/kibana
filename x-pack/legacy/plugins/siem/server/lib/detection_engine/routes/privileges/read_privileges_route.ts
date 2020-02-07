@@ -8,14 +8,14 @@ import Hapi from 'hapi';
 import { merge } from 'lodash/fp';
 
 import { DETECTION_ENGINE_PRIVILEGES_URL } from '../../../../../common/constants';
+import { LegacyServices } from '../../../../types';
 import { RulesRequest } from '../../rules/types';
-import { LegacySetupServices } from '../../../../plugin';
 import { GetScopedClients } from '../../../../services';
 import { transformError, getIndex } from '../utils';
 import { readPrivileges } from '../../privileges/read_privileges';
 
 export const createReadPrivilegesRulesRoute = (
-  config: LegacySetupServices['config'],
+  config: LegacyServices['config'],
   usingEphemeralEncryptionKey: boolean,
   getClients: GetScopedClients
 ): Hapi.ServerRoute => {
@@ -48,8 +48,8 @@ export const createReadPrivilegesRulesRoute = (
 };
 
 export const readPrivilegesRoute = (
-  route: LegacySetupServices['route'],
-  config: LegacySetupServices['config'],
+  route: LegacyServices['route'],
+  config: LegacyServices['config'],
   usingEphemeralEncryptionKey: boolean,
   getClients: GetScopedClients
 ) => {

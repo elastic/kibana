@@ -8,7 +8,7 @@ import Hapi from 'hapi';
 import Boom from 'boom';
 
 import { DETECTION_ENGINE_INDEX_URL } from '../../../../../common/constants';
-import { LegacySetupServices, RequestFacade } from '../../../../plugin';
+import { LegacyServices, LegacyRequest } from '../../../../types';
 import { GetScopedClients } from '../../../../services';
 import { transformError, getIndex } from '../utils';
 import { getIndexExists } from '../../index/get_index_exists';
@@ -29,7 +29,7 @@ import { deleteTemplate } from '../../index/delete_template';
  * And ensuring they're all gone
  */
 export const createDeleteIndexRoute = (
-  config: LegacySetupServices['config'],
+  config: LegacyServices['config'],
   getClients: GetScopedClients
 ): Hapi.ServerRoute => {
   return {
@@ -43,7 +43,7 @@ export const createDeleteIndexRoute = (
         },
       },
     },
-    async handler(request: RequestFacade) {
+    async handler(request: LegacyRequest) {
       try {
         const { clusterClient, spacesClient } = await getClients(request);
         const callCluster = clusterClient.callAsCurrentUser;
@@ -72,8 +72,8 @@ export const createDeleteIndexRoute = (
 };
 
 export const deleteIndexRoute = (
-  route: LegacySetupServices['route'],
-  config: LegacySetupServices['config'],
+  route: LegacyServices['route'],
+  config: LegacyServices['config'],
   getClients: GetScopedClients
 ) => {
   route(createDeleteIndexRoute(config, getClients));

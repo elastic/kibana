@@ -8,7 +8,7 @@ import Hapi from 'hapi';
 import Boom from 'boom';
 
 import { DETECTION_ENGINE_PREPACKAGED_URL } from '../../../../../common/constants';
-import { LegacySetupServices, RequestFacade } from '../../../../plugin';
+import { LegacyServices, LegacyRequest } from '../../../../types';
 import { GetScopedClients } from '../../../../services';
 import { getIndexExists } from '../../index/get_index_exists';
 import { getIndex, transformError } from '../utils';
@@ -20,7 +20,7 @@ import { getRulesToUpdate } from '../../rules/get_rules_to_update';
 import { getExistingPrepackagedRules } from '../../rules/get_existing_prepackaged_rules';
 
 export const createAddPrepackedRulesRoute = (
-  config: LegacySetupServices['config'],
+  config: LegacyServices['config'],
   getClients: GetScopedClients
 ): Hapi.ServerRoute => {
   return {
@@ -34,7 +34,7 @@ export const createAddPrepackedRulesRoute = (
         },
       },
     },
-    async handler(request: RequestFacade, headers) {
+    async handler(request: LegacyRequest, headers) {
       try {
         const {
           actionsClient,
@@ -88,8 +88,8 @@ export const createAddPrepackedRulesRoute = (
 };
 
 export const addPrepackedRulesRoute = (
-  route: LegacySetupServices['route'],
-  config: LegacySetupServices['config'],
+  route: LegacyServices['route'],
+  config: LegacyServices['config'],
   getClients: GetScopedClients
 ): void => {
   route(createAddPrepackedRulesRoute(config, getClients));

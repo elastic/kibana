@@ -5,6 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+
 import {
   CoreSetup,
   CoreStart,
@@ -16,6 +17,7 @@ import { PluginSetupContract as FeaturesSetup } from '../../../../plugins/featur
 import { EncryptedSavedObjectsPluginSetup as EncryptedSavedObjectsSetup } from '../../../../plugins/encrypted_saved_objects/server';
 import { SpacesPluginSetup as SpacesSetup } from '../../../../plugins/spaces/server';
 import { PluginStartContract as ActionsStart } from '../../../../plugins/actions/server';
+import { LegacyServices } from './types';
 import { initServer } from './init_server';
 import { compose } from './lib/compose/kibana';
 import { initRoutes, LegacyInitRoutes } from './routes';
@@ -27,10 +29,9 @@ import {
   timelineSavedObjectType,
   ruleStatusSavedObjectType,
 } from './saved_objects';
-import { RequestFacade, ServerFacade } from './types';
 import { ClientsService } from './services';
 
-export { CoreSetup, CoreStart, Logger, PluginInitializerContext, RequestFacade };
+export { CoreSetup, CoreStart, Logger, PluginInitializerContext };
 
 export interface SetupPlugins {
   encryptedSavedObjects: EncryptedSavedObjectsSetup;
@@ -40,7 +41,6 @@ export interface SetupPlugins {
 }
 
 export type SetupServices = CoreSetup & SetupPlugins;
-export type LegacySetupServices = SetupServices & ServerFacade;
 
 export interface StartPlugins {
   actions: ActionsStart;
@@ -61,7 +61,7 @@ export class Plugin {
     this.logger.debug('Shim plugin initialized');
   }
 
-  public setup(core: CoreSetup, plugins: SetupPlugins, __legacy: ServerFacade) {
+  public setup(core: CoreSetup, plugins: SetupPlugins, __legacy: LegacyServices) {
     this.logger.debug('Shim plugin setup');
 
     this.clients.setup(core.elasticsearch.dataClient, plugins.spaces.spacesService);
@@ -132,13 +132,13 @@ export class Plugin {
       },
     });
 
-    if (__legacy.plugins.alerting != null) {
+    if (__legacy.alerting != null) {
       const type = signalRulesAlertType({
         logger: this.logger,
         version: this.context.env.packageInfo.version,
       });
       if (isAlertExecutor(type)) {
-        __legacy.plugins.alerting.setup.registerType(type);
+        __legacy.alerting.setup.registerType(type);
       }
     }
 

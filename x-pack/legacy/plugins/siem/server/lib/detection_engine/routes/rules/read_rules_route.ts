@@ -10,7 +10,7 @@ import { getIdError, transformOrError } from './utils';
 import { transformError } from '../utils';
 
 import { readRules } from '../../rules/read_rules';
-import { LegacySetupServices, RequestFacade } from '../../../../plugin';
+import { LegacyServices, LegacyRequest } from '../../../../types';
 import { queryRulesSchema } from '../schemas/query_rules_schema';
 import { QueryRequest, IRuleSavedAttributesSavedObjectAttributes } from '../../rules/types';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
@@ -28,7 +28,7 @@ export const createReadRulesRoute = (getClients: GetScopedClients): Hapi.ServerR
       query: queryRulesSchema,
     },
   },
-  async handler(request: QueryRequest & RequestFacade, headers) {
+  async handler(request: QueryRequest & LegacyRequest, headers) {
     const { id, rule_id: ruleId } = request.query;
 
     try {
@@ -63,9 +63,6 @@ export const createReadRulesRoute = (getClients: GetScopedClients): Hapi.ServerR
   },
 });
 
-export const readRulesRoute = (
-  route: LegacySetupServices['route'],
-  getClients: GetScopedClients
-) => {
+export const readRulesRoute = (route: LegacyServices['route'], getClients: GetScopedClients) => {
   route(createReadRulesRoute(getClients));
 };

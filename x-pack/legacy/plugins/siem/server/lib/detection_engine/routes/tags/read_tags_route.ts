@@ -7,7 +7,7 @@
 import Hapi from 'hapi';
 
 import { DETECTION_ENGINE_TAGS_URL } from '../../../../../common/constants';
-import { LegacySetupServices, RequestFacade } from '../../../../plugin';
+import { LegacyServices, LegacyRequest } from '../../../../types';
 import { transformError } from '../utils';
 import { readTags } from '../../tags/read_tags';
 import { GetScopedClients } from '../../../../services';
@@ -23,7 +23,7 @@ export const createReadTagsRoute = (getClients: GetScopedClients): Hapi.ServerRo
       },
     },
   },
-  async handler(request: RequestFacade, headers) {
+  async handler(request: LegacyRequest, headers) {
     const { alertsClient } = await getClients(request);
 
     if (!alertsClient) {
@@ -41,9 +41,6 @@ export const createReadTagsRoute = (getClients: GetScopedClients): Hapi.ServerRo
   },
 });
 
-export const readTagsRoute = (
-  route: LegacySetupServices['route'],
-  getClients: GetScopedClients
-) => {
+export const readTagsRoute = (route: LegacyServices['route'], getClients: GetScopedClients) => {
   route(createReadTagsRoute(getClients));
 };

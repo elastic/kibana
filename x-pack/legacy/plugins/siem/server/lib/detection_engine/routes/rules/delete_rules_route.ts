@@ -8,7 +8,7 @@ import Hapi from 'hapi';
 
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { deleteRules } from '../../rules/delete_rules';
-import { LegacySetupServices, RequestFacade } from '../../../../plugin';
+import { LegacyServices, LegacyRequest } from '../../../../types';
 import { GetScopedClients } from '../../../../services';
 import { queryRulesSchema } from '../schemas/query_rules_schema';
 import { getIdError, transformOrError } from './utils';
@@ -29,7 +29,7 @@ export const createDeleteRulesRoute = (getClients: GetScopedClients): Hapi.Serve
         query: queryRulesSchema,
       },
     },
-    async handler(request: QueryRequest & RequestFacade, headers) {
+    async handler(request: QueryRequest & LegacyRequest, headers) {
       const { id, rule_id: ruleId } = request.query;
 
       try {
@@ -69,7 +69,7 @@ export const createDeleteRulesRoute = (getClients: GetScopedClients): Hapi.Serve
 };
 
 export const deleteRulesRoute = (
-  route: LegacySetupServices['route'],
+  route: LegacyServices['route'],
   getClients: GetScopedClients
 ): void => {
   route(createDeleteRulesRoute(getClients));
