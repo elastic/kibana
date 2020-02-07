@@ -405,7 +405,7 @@ export const AlertsList: React.FunctionComponent = () => {
           toastNotifications={toastNotifications}
           uiSettings={uiSettings}
           charts={charts}
-          dataPlugin={dataPlugin}
+          dataFieldsFormats={dataPlugin.fieldFormats}
         />
       </AlertsContextProvider>
     </section>
