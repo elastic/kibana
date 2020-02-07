@@ -17,7 +17,7 @@
  * under the License.
  */
 import _ from 'lodash';
-import { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
+import { migrateLegacyQuery } from '../../../../../plugins/kibana_legacy/public';
 import { SavedObject } from '../types';
 import { InvalidJSONProperty } from '../../../../../plugins/kibana_utils/public';
 

@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { IAction, createAction } from '../actions';
+import { Action, createAction } from '../actions';
 import { openContextMenu } from '../context_menu';
-import { IUiActionsTestPluginReturn, uiActionsTestPlugin } from '../tests/test_plugin';
+import { UiActionsTestPluginReturn, uiActionsTestPlugin } from '../tests/test_plugin';
 
 jest.mock('../context_menu');
 
@@ -28,7 +28,7 @@ const openContextMenuSpy = (openContextMenu as any) as jest.SpyInstance;
 
 const CONTACT_USER_TRIGGER = 'CONTACT_USER_TRIGGER';
 
-function createTestAction<A>(id: string, checkCompatibility: (context: A) => boolean): IAction<A> {
+function createTestAction<A>(id: string, checkCompatibility: (context: A) => boolean): Action<A> {
   return createAction<A>({
     type: 'testAction',
     id,
@@ -37,7 +37,7 @@ function createTestAction<A>(id: string, checkCompatibility: (context: A) => boo
   });
 }
 
-let uiActions: IUiActionsTestPluginReturn;
+let uiActions: UiActionsTestPluginReturn;
 const reset = () => {
   uiActions = uiActionsTestPlugin();
 
