@@ -42,14 +42,15 @@ export const parseAndPopulate = buildNumber => srcFile => destFile => log => {
 
   fromEvent(rl, 'line')
     .pipe(takeUntil(fromEvent(rl, 'close')))
-    .subscribe(mutateHistorical, onErr, () => mutateInitial(historicalItems, log, resolvedDestFile));
+    .subscribe(mutateHistorical, onErr, () => mutateInitial(historicalItems, log, resolvedDestFile, buildNumber));
 
 };
 
 function onComplete (initData) {
   const prettyFlush = pipe(pretty, flush);
-  return function mutateInitialData (xs, log, destFile) {
+  return function mutateInitialData (xs, log, destFile, buildNumber) {
     initData.historicalItems = xs.filter(x => x !== '');
+    initData.currentJobNumber = buildNumber;
     prettyFlush(initData)(destFile);
     log.debug('### Completed');
   };

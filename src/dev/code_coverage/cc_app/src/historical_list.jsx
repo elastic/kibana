@@ -23,9 +23,12 @@ import HistoricalItem from './historical_item';
 export default function HistoricalList({historicalItems}) {
 
   return (
-    <ul>
-      {historicalItems.map((x, i) => renderItem(x, i))}
-    </ul> );
+    <div className="App-Historical-List">
+      <ul>
+        {historicalItems.map((x, i) => renderItem(x, i))}
+      </ul>
+    </div>
+     );
 }
 
 function renderItem(x, i) {

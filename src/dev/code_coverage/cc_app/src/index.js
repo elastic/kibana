@@ -25,6 +25,7 @@ import * as serviceWorker from './service_worker';
 import { pretty as p } from './utils/pretty';
 import { tryCatch as tc } from './utils/either';
 
+const rootEl = document.getElementById.bind(document, 'root');
 const initialData = window.initialData;
 const tryInit = () => tc(() => initialData);
 const tryOneProp = () => tc(() => initialData.testRunnerTypes);
@@ -34,11 +35,16 @@ tryInit()
   .map(boot);
 
 function boot(testRunnerTypes) {
-  const { buildStats, historicalItems } = initialData;
+  const { buildStats, historicalItems, currentJobNumber } = initialData;
   initPrint(initialData);
   ReactDOM.render(
-    <App testRunnerTypes={testRunnerTypes} buildStats={buildStats} historicalItems={historicalItems}/>,
-    document.getElementById('root'),
+    <App
+      testRunnerTypes={testRunnerTypes}
+      buildStats={buildStats}
+      historicalItems={historicalItems}
+      currentJobNumber={currentJobNumber}
+    />,
+    rootEl(),
   );
 }
 

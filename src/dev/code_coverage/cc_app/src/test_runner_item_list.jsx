@@ -4,9 +4,11 @@ import TestRunnerItem from './test_runner_item';
 export default function TestRunnerItemList({testRunnerTypes}) {
 
   return (
-    <ul>
-      {testRunnerTypes.map(renderItem)}
-    </ul>
+    <div className="App-TestRunner-List">
+      <ul>
+        {testRunnerTypes.map(renderItem)}
+      </ul>
+    </div>
   );
 }
 
