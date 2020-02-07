@@ -6,7 +6,6 @@
 
 import { decode, encode } from 'rison-node';
 import * as H from 'history';
-import { stringify, parse } from 'query-string';
 import { Query, esFilters } from 'src/plugins/data/public';
 
 import { isEmpty } from 'lodash/fp';
@@ -23,6 +22,7 @@ import {
   Timeline,
   UpdateUrlStateString,
 } from './types';
+import { url } from '../../../../../../../src/plugins/kibana_utils/public';
 
 export const decodeRisonUrlState = <T>(value: string | undefined): T | null => {
   try {
@@ -41,7 +41,7 @@ export const encodeRisonUrlState = (state: any) => encode(state);
 export const getQueryStringFromLocation = (search: string) => search.substring(1);
 
 export const getParamFromQueryString = (queryString: string, key: string): string | undefined => {
-  const parsedQueryString: Record<string, unknown> = parse(queryString, { sort: false });
+  const parsedQueryString = url.parseUrlQuery(queryString);
   const queryParam = parsedQueryString[key];
 
   return Array.isArray(queryParam) ? queryParam[0] : queryParam;
@@ -50,16 +50,13 @@ export const getParamFromQueryString = (queryString: string, key: string): strin
 export const replaceStateKeyInQueryString = <T>(stateKey: string, urlState: T) => (
   queryString: string
 ): string => {
-  const previousQueryValues = parse(queryString);
+  const previousQueryValues = url.parseUrlQuery(queryString);
   if (urlState == null || (typeof urlState === 'string' && urlState === '')) {
     delete previousQueryValues[stateKey];
 
-    return stringify(
-      {
-        ...previousQueryValues,
-      },
-      { sort: false }
-    );
+    return url.stringifyUrlQuery({
+      ...previousQueryValues,
+    });
   }
 
   // ಠ_ಠ Code was copied from x-pack/legacy/plugins/infra/public/utils/url_state.tsx ಠ_ಠ
@@ -67,13 +64,10 @@ export const replaceStateKeyInQueryString = <T>(stateKey: string, urlState: T) =
   const encodedUrlState =
     typeof urlState !== 'undefined' ? encodeRisonUrlState(urlState) : undefined;
 
-  return stringify(
-    {
-      ...previousQueryValues,
-      [stateKey]: encodedUrlState,
-    },
-    { sort: false }
-  );
+  return url.stringifyUrlQuery({
+    ...previousQueryValues,
+    [stateKey]: encodedUrlState,
+  });
 };
 
 export const replaceQueryStringInLocation = (

@@ -6,12 +6,12 @@
 
 import { Location } from 'history';
 import omit from 'lodash/fp/omit';
-import { parse as parseQueryString, stringify as stringifyQueryString } from 'querystring';
 import React from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 // eslint-disable-next-line @typescript-eslint/camelcase
 import { decode_object, encode_object } from 'rison-node';
 import { Omit } from '../lib/lib';
+import { url } from '../../../../../../src/plugins/kibana_utils/public';
 
 interface AnyObject {
   [key: string]: any;
@@ -102,7 +102,7 @@ const encodeRisonAppState = (state: AnyObject) => ({
 export const mapRisonAppLocationToState = <State extends {}>(
   mapState: (risonAppState: AnyObject) => State = (state: AnyObject) => state as State
 ) => (location: Location): State => {
-  const queryValues = parseQueryString(location.search.substring(1));
+  const queryValues = url.parseUrlQuery(location.search.substring(1));
   const decodedState = decodeRisonAppState(queryValues);
   return mapState(decodedState);
 };
@@ -110,14 +110,14 @@ export const mapRisonAppLocationToState = <State extends {}>(
 export const mapStateToRisonAppLocation = <State extends {}>(
   mapState: (state: State) => AnyObject = (state: State) => state
 ) => (state: State, location: Location): Location => {
-  const previousQueryValues = parseQueryString(location.search.substring(1));
+  const previousQueryValues = url.parseUrlQuery(location.search.substring(1));
   const previousState = decodeRisonAppState(previousQueryValues);
 
   const encodedState = encodeRisonAppState({
     ...previousState,
     ...mapState(state),
   });
-  const newQueryValues = stringifyQueryString({
+  const newQueryValues = url.stringifyUrlQuery({
     ...previousQueryValues,
     ...encodedState,
   });

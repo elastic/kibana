@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { parse, stringify } from 'query-string';
 import React from 'react';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 import { FlatObject } from '../frontend_types';
 import { RendererFunction } from '../utils/typed_react';
+import { url } from '../../../../../../src/plugins/kibana_utils/public';
 
 type StateCallback<T> = (previousState: T) => T;
 
@@ -31,9 +31,9 @@ export class WithURLStateComponent<URLState extends object> extends React.Compon
 > {
   private get URLState(): URLState {
     // slice because parse does not account for the initial ? in the search string
-    return parse(decodeURIComponent(this.props.history.location.search).substring(1), {
-      sort: false,
-    }) as URLState;
+    return url.parseUrlQuery<URLState>(
+      decodeURIComponent(this.props.history.location.search).substring(1)
+    );
   }
 
   private historyListener: (() => void) | null = null;
@@ -65,13 +65,10 @@ export class WithURLStateComponent<URLState extends object> extends React.Compon
       newState = state;
     }
 
-    const search: string = stringify(
-      {
-        ...pastState,
-        ...newState,
-      },
-      { sort: false }
-    );
+    const search: string = url.stringifyUrlQuery({
+      ...pastState,
+      ...newState,
+    });
 
     const newLocation = {
       ...this.props.history.location,

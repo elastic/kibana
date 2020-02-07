@@ -34,7 +34,7 @@ export const stringifyUrlQuery = (
   const encodedQuery =
     encodeFunction &&
     transform(query, (result, value, key) => {
-      if (key && value) {
+      if (key) {
         result[key] = encodeFunction(value, true);
       }
     });
