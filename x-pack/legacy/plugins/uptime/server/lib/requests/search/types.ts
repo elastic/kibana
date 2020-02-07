@@ -4,5 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './framework';
-export * from './telemetry';
+import { CursorDirection, SortOrder } from '../../../../common/graphql/types';
+
+export interface CursorPagination {
+  cursorKey?: any;
+  cursorDirection: CursorDirection;
+  sortOrder: SortOrder;
+}
