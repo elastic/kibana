@@ -461,7 +461,7 @@ export default class BaseOptimizer {
       optimization: {
         minimizer: [
           new TerserPlugin({
-            parallel: this.getThreadLoaderPoolConfig().workers,
+            parallel: false,
             sourceMap: false,
             cache: false,
             extractComments: false,
