@@ -7,6 +7,14 @@ As a developer you can reuse and extend buildin alerts and actions UI functional
 - Create and register new action type.
 - Embed Create Alert flyout to Kibana plugins.
 
+To enample Alerts and Actions UI next configuration settings should be provided:
+```
+xpack.alerting.enabled: true
+xpack.actions.enabled: true
+xpack.triggers_actions_ui.enabled: true
+xpack.triggers_actions_ui.createAlertUiEnabled: true
+```
+
 -----
 
 
@@ -46,8 +54,8 @@ Kibana ships with a built-in alert types:
 
 Every alert type should has a server side registration and can has a client side. 
 Only alert types registered on both - client and server will be displayed in the Create Alert flyout, as a part of UI.
-Built-in alert types UI is located under the folder `x-pack/legacy/plugins/triggers_actions_ui/np_ready/public/application/components/builtin_alert_types`
-and this is a file `x-pack/legacy/plugins/triggers_actions_ui/np_ready/public/application/components/builtin_alert_types/index.ts` for client side registration.
+Built-in alert types UI is located under the folder `x-pack/plugins/triggers_actions_ui/public/application/components/builtin_alert_types`
+and this is a file `x-pack/plugins/triggers_actions_ui/public/application/components/builtin_alert_types/index.ts` for client side registration.
 
 ### Index Threshold Alert
 
@@ -117,7 +125,7 @@ UI design and server API for multiple action groups is on the stage of discussio
 There are two ways of registration new alert type:
 
 1. Directly in `triggers_actions_ui` plugin. In this case alert type will be available in Create Alert flyout of the Alerts and Actions management section.
-Registration code for a new alert type model should be added to the file `x-pack/legacy/plugins/triggers_actions_ui/np_ready/public/application/components/builtin_alert_types/index.ts`
+Registration code for a new alert type model should be added to the file `x-pack/plugins/triggers_actions_ui/public/application/components/builtin_alert_types/index.ts`
 Only registered alert types are available in UI.
 
 2. Register alert type in other plugin. In this case alert type will be available only in current plugin UI. 
@@ -238,7 +246,7 @@ export function validateExampleAlertType({
 }
 ```
 
-4. Extend registration code with the new alert type register in the file `x-pack/legacy/plugins/triggers_actions_ui/np_ready/public/application/components/builtin_alert_types/index.ts`
+4. Extend registration code with the new alert type register in the file `x-pack/plugins/triggers_actions_ui/public/application/components/builtin_alert_types/index.ts`
 ```
 import { getAlertType as getExampledAlertType } from './example';
 ...
@@ -576,5 +584,177 @@ Kibana ships with a set of built-in action types UI:
 |[Webhook](#webhook)|`.webhook`|Send a payload to a web service using HTTP POST or PUT|
 |[PagerDuty](#pagerduty)|`.pagerduty`|Trigger, resolve, or acknowlege an incident to a PagerDuty service|
 
+Every action type should has a server side registration and can has a client side. 
+Only action types registered on both - client and server will be displayed in Alerts and Actions UI.
+Built-in action types UI is located under the folder `x-pack/plugins/triggers_actions_ui/public/application/components/builtin_action_types`
+and this is a file `x-pack/plugins/triggers_actions_ui/public/application/components/builtin_action_types/index.ts` for client side registration.
+
+
 ### Server log
+
+Action type model definition:
+```
+export function getActionType(): ActionTypeModel {
+  return {
+    id: '.server-log',
+    iconClass: 'logsApp',
+    selectMessage: i18n.translate(
+      'xpack.triggersActionsUI.components.builtinActionTypes.serverLogAction.selectMessageText',
+      {
+        defaultMessage: 'Add a message to a Kibana log.',
+      }
+    ),
+    actionTypeTitle: i18n.translate(
+      'xpack.triggersActionsUI.components.builtinActionTypes.serverLogAction.actionTypeTitle',
+      {
+        defaultMessage: 'Send to Server log',
+      }
+    ),
+    validateConnector: (): ValidationResult => {
+      return { errors: {} };
+    },
+    validateParams: (actionParams: ServerLogActionParams): ValidationResult => {
+      // validation of action params implementation
+    },
+    actionConnectorFields: null,
+    actionParamsFields: ServerLogParamsFields,
+  };
+}
+```
+Server log has a connector UI:
+
+![Server log connector card](https://i.imgur.com/ZIWhV89.png)
+
+![Server log connector form](https://i.imgur.com/rkc3U59.png)
+
+and action params form available in Create Alert form:
+![Server log action form](https://i.imgur.com/c0ds76T.png)
+
+### Email
+
+Action type model definition:
+```
+export function getActionType(): ActionTypeModel {
+  const mailformat = /^[^@\s]+@[^@\s]+$/;
+  return {
+    id: '.email',
+    iconClass: 'email',
+    selectMessage: i18n.translate(
+      'xpack.triggersActionsUI.components.builtinActionTypes.emailAction.selectMessageText',
+      {
+        defaultMessage: 'Send email from your server.',
+      }
+    ),
+    actionTypeTitle: i18n.translate(
+      'xpack.triggersActionsUI.components.builtinActionTypes.emailAction.actionTypeTitle',
+      {
+        defaultMessage: 'Send to email',
+      }
+    ),
+    validateConnector: (action: EmailActionConnector): ValidationResult => {
+      // validation of connector properties implementation
+    },
+    validateParams: (actionParams: EmailActionParams): ValidationResult => {
+      // validation of action params implementation
+    },
+    actionConnectorFields: EmailActionConnectorFields,
+    actionParamsFields: EmailParamsFields,
+  };
+}
+```
+
+### Slack
+
+```
+export function getActionType(): ActionTypeModel {
+  return {
+    id: '.slack',
+    iconClass: 'logoSlack',
+    selectMessage: i18n.translate(
+      'xpack.triggersActionsUI.components.builtinActionTypes.slackAction.selectMessageText',
+      {
+        defaultMessage: 'Send a message to a Slack channel or user.',
+      }
+    ),
+    actionTypeTitle: i18n.translate(
+      'xpack.triggersActionsUI.components.builtinActionTypes.slackAction.actionTypeTitle',
+      {
+        defaultMessage: 'Send to Slack',
+      }
+    ),
+    validateConnector: (action: SlackActionConnector): ValidationResult => {
+      // validation of connector properties implementation
+    },
+    validateParams: (actionParams: SlackActionParams): ValidationResult => {
+      // validation of action params implementation 
+    },
+    actionConnectorFields: SlackActionFields,
+    actionParamsFields: SlackParamsFields,
+  };
+}
+```
+
+### Index
+
+```
+export function getActionType(): ActionTypeModel {
+  return {
+    id: '.index',
+    iconClass: 'indexOpen',
+    selectMessage: i18n.translate(
+      'xpack.triggersActionsUI.components.builtinActionTypes.indexAction.selectMessageText',
+      {
+        defaultMessage: 'Index data into Elasticsearch.',
+      }
+    ),
+    validateConnector: (): ValidationResult => {
+      return { errors: {} };
+    },
+    actionConnectorFields: IndexActionConnectorFields,
+    actionParamsFields: IndexParamsFields,
+    validateParams: (): ValidationResult => {
+      return { errors: {} };
+    },
+  };
+}
+```
+
+### Webhook
+
+```
+
+```
+
+### PagerDuty
+
+```
+export function getActionType(): ActionTypeModel {
+  return {
+    id: '.pagerduty',
+    iconClass: 'apps',
+    selectMessage: i18n.translate(
+      'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.selectMessageText',
+      {
+        defaultMessage: 'Send an event in PagerDuty.',
+      }
+    ),
+    actionTypeTitle: i18n.translate(
+      'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.actionTypeTitle',
+      {
+        defaultMessage: 'Send to PagerDuty',
+      }
+    ),
+    validateConnector: (action: PagerDutyActionConnector): ValidationResult => {
+      // validation of connector properties implementation
+    },
+    validateParams: (actionParams: PagerDutyActionParams): ValidationResult => {
+      // validation of action params implementation
+    },
+    actionConnectorFields: PagerDutyActionConnectorFields,
+    actionParamsFields: PagerDutyParamsFields,
+  };
+}
+```
+
+## Create and register new action type UI
 
