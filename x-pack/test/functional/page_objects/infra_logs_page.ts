@@ -6,7 +6,7 @@
 
 // import testSubjSelector from '@kbn/test-subj-selector';
 // import moment from 'moment';
-
+import { encode, RisonValue } from 'rison-node';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function InfraLogsPageProvider({ getPageObjects, getService }: FtrProviderContext) {
@@ -18,8 +18,20 @@ export function InfraLogsPageProvider({ getPageObjects, getService }: FtrProvide
       await pageObjects.common.navigateToApp('infraLogs');
     },
 
-    async navigateToTab(logsUiTab: LogsUiTab) {
-      await pageObjects.common.navigateToActualUrl('infraLogs', `/logs/${logsUiTab}`);
+    async navigateToTab(logsUiTab: LogsUiTab, params?: Record<string, RisonValue>) {
+      let queryString = '';
+      if (params) {
+        queryString = Object.keys(params).reduce((qs, key, idx) => {
+          qs += (idx > 0 ? '&' : '') + `${key}=${encode(params[key])}`;
+
+          return qs;
+        }, '?');
+      }
+      await pageObjects.common.navigateToActualUrl(
+        'infraLogs',
+        `/logs/${logsUiTab}${decodeURI(queryString)}`,
+        { ensureCurrentUrl: false } // Test runner struggles with `rison-node` escaped values
+      );
     },
 
     async getLogStream() {
