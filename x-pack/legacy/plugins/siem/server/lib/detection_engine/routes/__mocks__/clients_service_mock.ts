@@ -13,17 +13,27 @@ import { ActionsClient } from '../../../../../../../../plugins/actions/server';
 import { actionsClientMock } from '../../../../../../../../plugins/actions/server/mocks';
 import { GetScopedClients } from '../../../../services';
 
-export const createMockClients = () => {
-  const mockClients = {
-    actionsClient: actionsClientMock.create() as jest.Mocked<ActionsClient>,
-    alertsClient: alertsClientMock.create(),
-    clusterClient: elasticsearchServiceMock.createScopedClusterClient(),
-    savedObjectsClient: savedObjectsClientMock.create(),
-    spacesClient: { getSpaceId: jest.fn() },
-  };
+const createClients = () => ({
+  actionsClient: actionsClientMock.create() as jest.Mocked<ActionsClient>,
+  alertsClient: alertsClientMock.create(),
+  clusterClient: elasticsearchServiceMock.createScopedClusterClient(),
+  savedObjectsClient: savedObjectsClientMock.create(),
+  spacesClient: { getSpaceId: jest.fn() },
+});
 
+const createGetScoped = () =>
+  jest.fn(() => Promise.resolve(createClients()) as ReturnType<GetScopedClients>);
+
+export const createClientsServiceMock = () => {
   return {
-    getClients: jest.fn(() => Promise.resolve(mockClients) as ReturnType<GetScopedClients>),
-    clients: mockClients,
+    setup: jest.fn(),
+    start: jest.fn(),
+    createGetScoped,
   };
+};
+
+export const clientsServiceMock = {
+  create: createClientsServiceMock,
+  createGetScoped,
+  createClients,
 };

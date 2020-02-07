@@ -14,3 +14,8 @@ export const createMockServer = () => {
     inject: server.inject.bind(server),
   };
 };
+
+export const createMockConfig = () => () => ({
+  get: jest.fn(),
+  has: jest.fn(),
+});

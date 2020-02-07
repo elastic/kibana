@@ -45,7 +45,7 @@ export class ClientsService {
     this.actions = actions;
   }
 
-  public getScopedFactory(): GetScopedClients {
+  public createGetScoped(): GetScopedClients {
     if (!this.clusterClient || !this.savedObjects) {
       throw new Error('Services not initialized');
     }

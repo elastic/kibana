@@ -149,6 +149,6 @@ export class Plugin {
   public start(core: CoreStart, plugins: StartPlugins) {
     this.clients.start(core.savedObjects, plugins.actions);
 
-    this.legacyInitRoutes!(this.clients.getScopedFactory());
+    this.legacyInitRoutes!(this.clients.createGetScoped());
   }
 }
