@@ -20,11 +20,7 @@ import { EuiContextMenuPanelDescriptor, EuiPanel, htmlIdGenerator } from '@elast
 import classNames from 'classnames';
 import React from 'react';
 import { Subscription } from 'rxjs';
-import {
-  buildContextMenuForActions,
-  TGetActionsCompatibleWithTrigger,
-  IAction,
-} from '../ui_actions';
+import { buildContextMenuForActions, GetActionsCompatibleWithTrigger, Action } from '../ui_actions';
 import { CoreStart, OverlayStart } from '../../../../../core/public';
 import { toMountPoint } from '../../../../kibana_react/public';
 
@@ -43,7 +39,7 @@ import { CustomizePanelModal } from './panel_header/panel_actions/customize_titl
 
 interface Props {
   embeddable: IEmbeddable<any, any>;
-  getActions: TGetActionsCompatibleWithTrigger;
+  getActions: GetActionsCompatibleWithTrigger;
   getEmbeddableFactory: GetEmbeddableFactory;
   getAllEmbeddableFactories: GetEmbeddableFactories;
   overlays: CoreStart['overlays'];
@@ -59,7 +55,7 @@ interface State {
   viewMode: ViewMode;
   hidePanelTitles: boolean;
   closeContextMenu: boolean;
-  badges: IAction[];
+  badges: Action[];
 }
 
 export class EmbeddablePanel extends React.Component<Props, State> {
@@ -91,7 +87,7 @@ export class EmbeddablePanel extends React.Component<Props, State> {
   }
 
   private async refreshBadges() {
-    let badges: IAction[] = await this.props.getActions(PANEL_BADGE_TRIGGER, {
+    let badges: Action[] = await this.props.getActions(PANEL_BADGE_TRIGGER, {
       embeddable: this.props.embeddable,
     });
     if (!this.mounted) return;
@@ -235,7 +231,7 @@ export class EmbeddablePanel extends React.Component<Props, State> {
 
     // These actions are exposed on the context menu for every embeddable, they bypass the trigger
     // registry.
-    const extraActions: Array<IAction<{ embeddable: IEmbeddable }>> = [
+    const extraActions: Array<Action<{ embeddable: IEmbeddable }>> = [
       new CustomizePanelTitleAction(createGetUserData(this.props.overlays)),
       new AddPanelAction(
         this.props.getEmbeddableFactory,
@@ -249,7 +245,7 @@ export class EmbeddablePanel extends React.Component<Props, State> {
       new EditPanelAction(this.props.getEmbeddableFactory),
     ];
 
-    const sorted = actions.concat(extraActions).sort((a: IAction, b: IAction) => {
+    const sorted = actions.concat(extraActions).sort((a: Action, b: Action) => {
       const bOrder = b.order || 0;
       const aOrder = a.order || 0;
       return bOrder - aOrder;

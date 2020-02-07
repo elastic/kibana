@@ -49,7 +49,17 @@ interface AlertState {
 
 export const AlertsList: React.FunctionComponent = () => {
   const history = useHistory();
-  const { http, injectedMetadata, toastNotifications, capabilities } = useAppDependencies();
+  const {
+    http,
+    injectedMetadata,
+    toastNotifications,
+    capabilities,
+    alertTypeRegistry,
+    actionTypeRegistry,
+    uiSettings,
+    charts,
+    dataPlugin,
+  } = useAppDependencies();
   const canDelete = hasDeleteAlertsCapability(capabilities);
   const canSave = hasSaveAlertsCapability(capabilities);
   const createAlertUiEnabled = injectedMetadata.getInjectedVar('createAlertUiEnabled');
@@ -385,9 +395,16 @@ export const AlertsList: React.FunctionComponent = () => {
           addFlyoutVisible: alertFlyoutVisible,
           setAddFlyoutVisibility: setAlertFlyoutVisibility,
           reloadAlerts: loadAlertsData,
+          http,
+          actionTypeRegistry,
+          alertTypeRegistry,
+          toastNotifications,
+          uiSettings,
+          charts,
+          dataFieldsFormats: dataPlugin.fieldFormats,
         }}
       >
-        <AlertAdd />
+        <AlertAdd consumer={'alerting'} />
       </AlertsContextProvider>
     </section>
   );
