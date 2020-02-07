@@ -6,7 +6,6 @@
 
 import React, { Fragment, useState, useEffect } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
-import { parse } from 'query-string';
 import { EuiButton, EuiCallOut, EuiLink, EuiEmptyPrompt, EuiSpacer, EuiIcon } from '@elastic/eui';
 
 import { APP_SLM_CLUSTER_PRIVILEGES } from '../../../../../common/constants';
@@ -24,6 +23,7 @@ import {
   linkToSnapshot,
 } from '../../../services/navigation';
 import { uiMetricService } from '../../../services/ui_metric';
+import { url } from '../../../../../../../../../src/plugins/kibana_utils/public';
 
 import { SnapshotDetails } from './snapshot_details';
 import { SnapshotTable } from './snapshot_table';
@@ -86,7 +86,7 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
   const [filteredPolicy, setFilteredPolicy] = useState<string | undefined>(undefined);
   useEffect(() => {
     if (search) {
-      const parsedParams = parse(search.replace(/^\?/, ''), { sort: false });
+      const parsedParams = url.parseUrlQuery(search.replace(/^\?/, ''));
       const { repository, policy } = parsedParams;
 
       if (policy && policy !== filteredPolicy) {

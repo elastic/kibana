@@ -17,21 +17,32 @@
  * under the License.
  */
 import { transform } from 'lodash';
-import { stringify } from 'query-string';
-import { encodeQueryComponent } from '../../url';
+import { stringify, parse, StringifyOptions } from 'query-string';
+import { encodeQueryComponent } from './encode_query_component';
 
-// encodeUriQuery implements the less-aggressive encoding done naturally by
-// the browser. We use it to generate the same urls the browser would
-export const stringifyQueryString = (query: Record<string, any>) => {
-  const encodedQuery = transform(query, (result, value, key) => {
-    if (key && value) {
-      result[key] = encodeQueryComponent(value, true);
-    }
-  });
+export const parseUrlQuery = <TReturn = Record<string, any>>(val: string): TReturn => {
+  return (parse(val, { sort: false }) as unknown) as TReturn;
+};
 
-  return stringify(encodedQuery, {
+export const stringifyUrlQuery = (
+  query: Record<string, any>,
+  encodeFunction:
+    | false
+    | ((val: string, pctEncodeSpaces?: boolean) => string) = encodeQueryComponent,
+  options: StringifyOptions = {}
+) => {
+  const encodedQuery =
+    encodeFunction &&
+    transform(query, (result, value, key) => {
+      if (key && value) {
+        result[key] = encodeFunction(value, true);
+      }
+    });
+
+  return stringify(encodedQuery || query, {
     strict: false,
     encode: false,
     sort: false,
+    ...options,
   });
 };

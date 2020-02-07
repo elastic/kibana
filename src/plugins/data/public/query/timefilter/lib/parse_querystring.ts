@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { parse } from 'query-string';
+import { url } from '../../../../../kibana_utils/public';
 
 export function parseQueryString() {
   // window.location.search is an empty string
@@ -27,5 +27,5 @@ export function parseQueryString() {
     return {};
   }
 
-  return parse(hrefSplit[1], { sort: false });
+  return url.parseUrlQuery(hrefSplit[1]);
 }

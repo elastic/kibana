@@ -18,15 +18,15 @@
  */
 
 import fn from './quandl';
-
-const parseURL = require('url').parse;
-const parseQueryString = require('query-string').parse;
-const tlConfig = require('./fixtures/tl_config')();
+import { url as urlUtils } from '../../../kibana_utils/server';
 import moment from 'moment';
 import fetchMock from 'node-fetch';
 
+const parseURL = require('url').parse;
+const tlConfig = require('./fixtures/tl_config')();
+
 function parseUrlParams(url) {
-  return parseQueryString(parseURL(url).query, { sort: false });
+  return urlUtils.parseUrlQuery(parseURL(url).query);
 }
 
 jest.mock('node-fetch', () =>

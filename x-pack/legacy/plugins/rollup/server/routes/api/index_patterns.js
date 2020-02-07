@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import Joi from 'joi';
-import { stringify } from 'query-string';
 import { callWithRequestFactory } from '../../lib/call_with_request_factory';
 import { isEsErrorFactory } from '../../lib/is_es_error_factory';
 import { wrapEsError, wrapUnknownError } from '../../lib/error_wrappers';
@@ -12,6 +11,7 @@ import { licensePreRoutingFactory } from '../../lib/license_pre_routing_factory'
 import indexBy from 'lodash/collection/indexBy';
 import { getCapabilitiesForRollupIndices } from '../../lib/map_capabilities';
 import { mergeCapabilitiesWithFields } from '../../lib/merge_capabilities_with_fields';
+import { url } from '../../../../../../../src/plugins/kibana_utils/server';
 
 /**
  * Get list of fields for rollup index pattern, in the format of regular index pattern fields
@@ -45,7 +45,7 @@ export function registerFieldsForWildcardRoute(server) {
       const { pattern, meta_fields: metaFields, params } = request.query;
 
       // Format call to standard index pattern `fields for wildcard`
-      const standardRequestQuery = stringify({ pattern, meta_fields: metaFields }, { sort: false });
+      const standardRequestQuery = url.stringifyUrlQuery({ pattern, meta_fields: metaFields });
       const standardRequest = {
         url: `${request.getBasePath()}/api/index_patterns/_fields_for_wildcard?${standardRequestQuery}`,
         method: 'GET',

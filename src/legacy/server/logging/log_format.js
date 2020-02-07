@@ -23,10 +23,10 @@ import { get, _ } from 'lodash';
 import numeral from '@elastic/numeral';
 import chalk from 'chalk';
 import stringify from 'json-stringify-safe';
-import querystring from 'query-string';
 import applyFiltersToKeys from './apply_filters_to_keys';
 import { inspect } from 'util';
 import { logWithMetadata } from './log_with_metadata';
+import { url } from '../../../plugins/kibana_utils/server';
 
 function serializeError(err = {}) {
   return {
@@ -108,7 +108,7 @@ export default class TransformObjStream extends Stream.Transform {
         contentLength: contentLength,
       };
 
-      const query = querystring.stringify(event.query, { sort: false });
+      const query = url.stringifyUrlQuery(event.query);
       if (query) data.req.url += '?' + query;
 
       data.message = data.req.method.toUpperCase() + ' ';

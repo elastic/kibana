@@ -5,14 +5,12 @@
  */
 
 import { npStart } from 'ui/new_platform';
-import { stringify } from 'query-string';
-
-const { core } = npStart;
-
 // @ts-ignore
 import rison from 'rison-node';
 import { add } from './job_completion_notifications';
+import { url } from '../../../../../../src/plugins/kibana_utils/public';
 
+const { core } = npStart;
 const API_BASE_URL = '/api/reporting/generate';
 
 interface JobParams {
@@ -20,7 +18,7 @@ interface JobParams {
 }
 
 export const getReportingJobPath = (exportType: string, jobParams: JobParams) => {
-  const params = stringify({ jobParams: rison.encode(jobParams) }, { sort: false });
+  const params = url.stringifyUrlQuery({ jobParams: rison.encode(jobParams) });
 
   return `${core.http.basePath.prepend(API_BASE_URL)}/${exportType}?${params}`;
 };

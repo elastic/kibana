@@ -6,14 +6,12 @@
 
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
-
-import { parse } from 'query-string';
 import { MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
 import { basicResolvers } from '../../resolvers';
 import { Page } from '../../../jobs/new_job/pages/job_type';
 import { ANOMALY_DETECTION_BREADCRUMB, ML_BREADCRUMB } from '../../breadcrumbs';
-
+import { url } from '../../../../../../../../../src/plugins/kibana_utils/public';
 const breadcrumbs = [
   ML_BREADCRUMB,
   ANOMALY_DETECTION_BREADCRUMB,
@@ -32,7 +30,7 @@ export const jobTypeRoute: MlRoute = {
 };
 
 const PageWrapper: FC<PageProps> = ({ location, config, deps }) => {
-  const { index, savedSearchId }: Record<string, any> = parse(location.search, { sort: false });
+  const { index, savedSearchId }: Record<string, any> = url.parseUrlQuery(location.search);
   const { context } = useResolver(index, savedSearchId, config, basicResolvers(deps));
   return (
     <PageLoader context={context}>

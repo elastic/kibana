@@ -6,7 +6,6 @@
 
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
-import { parse } from 'query-string';
 
 import { basicResolvers } from '../../resolvers';
 import { MlRoute, PageLoader, PageProps } from '../../router';
@@ -17,6 +16,7 @@ import { mlJobService } from '../../../services/job_service';
 import { loadNewJobCapabilities } from '../../../services/new_job_capabilities_service';
 import { checkCreateJobsPrivilege } from '../../../privilege/check_privilege';
 import { ANOMALY_DETECTION_BREADCRUMB, ML_BREADCRUMB } from '../../breadcrumbs';
+import { url } from '../../../../../../../../../src/plugins/kibana_utils/public';
 
 interface WizardPageProps extends PageProps {
   jobType: JOB_TYPE;
@@ -122,7 +122,7 @@ export const categorizationRoute: MlRoute = {
 };
 
 const PageWrapper: FC<WizardPageProps> = ({ location, config, jobType, deps }) => {
-  const { index, savedSearchId }: Record<string, any> = parse(location.search, { sort: false });
+  const { index, savedSearchId }: Record<string, any> = url.parseUrlQuery(location.search);
   const { context, results } = useResolver(index, savedSearchId, config, {
     ...basicResolvers(deps),
     privileges: checkCreateJobsPrivilege,

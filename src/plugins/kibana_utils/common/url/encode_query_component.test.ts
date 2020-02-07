@@ -17,49 +17,32 @@
  * under the License.
  */
 
-import { encodeUriQuery, stringifyQueryString } from './stringify_query_string';
-
-describe('stringifyQueryString', () => {
-  it('stringifyQueryString', () => {
-    expect(
-      stringifyQueryString({
-        a: 'asdf1234asdf',
-        b: "-_.!~*'() -_.!~*'()",
-        c: ':@$, :@$,',
-        d: "&;=+# &;=+#'",
-        f: ' ',
-        g: 'null',
-      })
-    ).toMatchInlineSnapshot(
-      `"a=asdf1234asdf&b=-_.!~*'()%20-_.!~*'()&c=:@$,%20:@$,&d=%26;%3D%2B%23%20%26;%3D%2B%23'&f=%20&g=null"`
-    );
-  });
-});
+import { encodeQueryComponent } from './encode_query_component';
 
 describe('encodeUriQuery', function() {
   it('should correctly encode uri query and not encode chars defined as pchar set in rfc3986', () => {
     // don't encode alphanum
-    expect(encodeUriQuery('asdf1234asdf')).toBe('asdf1234asdf');
+    expect(encodeQueryComponent('asdf1234asdf')).toBe('asdf1234asdf');
 
     // don't encode unreserved
-    expect(encodeUriQuery("-_.!~*'() -_.!~*'()")).toBe("-_.!~*'()+-_.!~*'()");
+    expect(encodeQueryComponent("-_.!~*'() -_.!~*'()")).toBe("-_.!~*'()+-_.!~*'()");
 
     // don't encode the rest of pchar
-    expect(encodeUriQuery(':@$, :@$,')).toBe(':@$,+:@$,');
+    expect(encodeQueryComponent(':@$, :@$,')).toBe(':@$,+:@$,');
 
     // encode '&', ';', '=', '+', and '#'
-    expect(encodeUriQuery('&;=+# &;=+#')).toBe('%26;%3D%2B%23+%26;%3D%2B%23');
+    expect(encodeQueryComponent('&;=+# &;=+#')).toBe('%26;%3D%2B%23+%26;%3D%2B%23');
 
     // encode ' ' as '+'
-    expect(encodeUriQuery('  ')).toBe('++');
+    expect(encodeQueryComponent('  ')).toBe('++');
 
     // encode ' ' as '%20' when a flag is used
-    expect(encodeUriQuery('  ', true)).toBe('%20%20');
+    expect(encodeQueryComponent('  ', true)).toBe('%20%20');
 
     // do not encode `null` as '+' when flag is used
-    expect(encodeUriQuery('null', true)).toBe('null');
+    expect(encodeQueryComponent('null', true)).toBe('null');
 
     // do not encode `null` with no flag
-    expect(encodeUriQuery('null')).toBe('null');
+    expect(encodeQueryComponent('null')).toBe('null');
   });
 });

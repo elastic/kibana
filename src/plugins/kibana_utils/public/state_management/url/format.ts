@@ -18,18 +18,18 @@
  */
 
 import { format as formatUrl } from 'url';
-import { ParsedQuery } from 'query-string';
 import { parseUrl, parseUrlHash } from './parse';
-import { stringifyQueryString } from './stringify_query_string';
+import { url as urlUtils } from '../../../common';
 
 export function replaceUrlHashQuery(
   rawUrl: string,
-  queryReplacer: (query: ParsedQuery) => ParsedQuery
+  queryReplacer: (query: Record<string, any>) => Record<string, any>
 ) {
   const url = parseUrl(rawUrl);
   const hash = parseUrlHash(rawUrl);
   const newQuery = queryReplacer(hash?.query || {});
-  const searchQueryString = stringifyQueryString(newQuery);
+  const searchQueryString = urlUtils.stringifyUrlQuery(newQuery);
+
   if ((!hash || !hash.search) && !searchQueryString) return rawUrl; // nothing to change. return original url
   return formatUrl({
     ...url,

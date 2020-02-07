@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { ParsedQuery } from 'query-string';
 import { format as formatUrl, parse as parseUrl, UrlObject } from 'url';
 
 /**
@@ -33,7 +32,7 @@ export interface URLMeaningfulParts {
   protocol?: string | null;
   slashes?: boolean | null;
   port?: string | null;
-  query: ParsedQuery;
+  query: Record<string, any>;
 }
 
 /**

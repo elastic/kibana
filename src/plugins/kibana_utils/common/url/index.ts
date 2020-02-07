@@ -17,24 +17,11 @@
  * under the License.
  */
 
-import { History, Location } from 'history';
-import { url } from '../../../kibana_utils/public';
+import { encodeQueryComponent } from './encode_query_component';
+import { stringifyUrlQuery, parseUrlQuery } from './utils';
 
-export function removeQueryParam(history: History, param: string, replace: boolean = true) {
-  const oldLocation = history.location;
-  const search = (oldLocation.search || '').replace(/^\?/, '');
-  const query = url.parseUrlQuery(search);
-
-  delete query[param];
-
-  const newSearch = url.stringifyUrlQuery(query);
-  const newLocation: Location<any> = {
-    ...oldLocation,
-    search: newSearch,
-  };
-  if (replace) {
-    history.replace(newLocation);
-  } else {
-    history.push(newLocation);
-  }
-}
+export const url = {
+  encodeQueryComponent,
+  stringifyUrlQuery,
+  parseUrlQuery,
+};

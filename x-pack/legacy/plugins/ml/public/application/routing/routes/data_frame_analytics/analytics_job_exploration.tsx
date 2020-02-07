@@ -7,8 +7,6 @@
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { decode } from 'rison-node';
-
-import { parse } from 'query-string';
 import { MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
 import { basicResolvers } from '../../resolvers';
@@ -16,6 +14,7 @@ import { Page } from '../../../data_frame_analytics/pages/analytics_exploration'
 import { ANALYSIS_CONFIG_TYPE } from '../../../data_frame_analytics/common/analytics';
 import { DATA_FRAME_TASK_STATE } from '../../../data_frame_analytics/pages/analytics_management/components/analytics_list/common';
 import { ML_BREADCRUMB } from '../../breadcrumbs';
+import { url } from '../../../../../../../../../src/plugins/kibana_utils/public';
 
 const breadcrumbs = [
   ML_BREADCRUMB,
@@ -35,7 +34,7 @@ export const analyticsJobExplorationRoute: MlRoute = {
 
 const PageWrapper: FC<PageProps> = ({ location, config, deps }) => {
   const { context } = useResolver('', undefined, config, basicResolvers(deps));
-  const { _g }: Record<string, any> = parse(location.search, { sort: false });
+  const { _g }: Record<string, any> = url.parseUrlQuery(location.search);
 
   let globalState: any = null;
   try {

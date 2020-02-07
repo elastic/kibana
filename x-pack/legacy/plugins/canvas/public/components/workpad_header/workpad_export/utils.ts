@@ -8,7 +8,7 @@ import rison from 'rison-node';
 // @ts-ignore Untyped local.
 import { fetch } from '../../../../common/lib/fetch';
 import { CanvasWorkpad } from '../../../../types';
-import { encodeQueryComponent } from '../../../../../../../../src/plugins/kibana_utils/public';
+import { url } from '../../../../../../../../src/plugins/kibana_utils/public';
 
 // type of the desired pdf output (print or preserve_layout)
 const PDF_LAYOUT_TYPE = 'preserve_layout';
@@ -71,11 +71,9 @@ function getPdfUrlParts(
 
 export function getPdfUrl(...args: Arguments): string {
   const urlParts = getPdfUrlParts(...args);
-  const param = (key, val) => {
-    return (
-      encodeQueryComponent(key, true) + (val === true ? '' : '=' + encodeQueryComponent(val, true))
-    );
-  };
+  const param = (key: string, val: any) =>
+    url.encodeQueryComponent(key, true) +
+    (val === true ? '' : '=' + url.encodeQueryComponent(val, true));
 
   return `${urlParts.createPdfUri}?${param('jobParams', urlParts.createPdfPayload.jobParams)}`;
 }

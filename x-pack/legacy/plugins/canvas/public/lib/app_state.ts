@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { parse } from 'query-string';
 import { get } from 'lodash';
 // @ts-ignore untyped local
 import { getInitialState } from '../state/initial_state';
@@ -15,6 +14,7 @@ import { historyProvider } from './history_provider';
 import { routerProvider } from './router_provider';
 import { createTimeInterval, isValidTimeInterval, getTimeInterval } from './time_interval';
 import { AppState, AppStateKeys } from '../../types';
+import { url } from '../../../../../../src/plugins/kibana_utils/public';
 
 export function getDefaultAppState(): AppState {
   const transientState = getInitialState('transient');
@@ -38,7 +38,7 @@ export function getDefaultAppState(): AppState {
 export function getCurrentAppState(): AppState {
   const history = historyProvider(getWindow());
   const { search } = history.getLocation();
-  const qs = !!search ? parse(search.replace(/^\?/, ''), { sort: false }) : {};
+  const qs = !!search ? url.parseUrlQuery(search.replace(/^\?/, '')) : {};
   const appState = assignAppState({}, qs);
 
   return appState;

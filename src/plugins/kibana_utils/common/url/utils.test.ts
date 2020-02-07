@@ -17,4 +17,21 @@
  * under the License.
  */
 
-export { encodeQueryComponent } from './encode_query_component';
+import { stringifyUrlQuery } from './utils';
+
+describe('stringifyUrlQuery', () => {
+  it('stringifyUrlQuery', () => {
+    expect(
+      stringifyUrlQuery({
+        a: 'asdf1234asdf',
+        b: "-_.!~*'() -_.!~*'()",
+        c: ':@$, :@$,',
+        d: "&;=+# &;=+#'",
+        f: ' ',
+        g: 'null',
+      })
+    ).toBe(
+      `a=asdf1234asdf&b=-_.!~*'()%20-_.!~*'()&c=:@$,%20:@$,&d=%26;%3D%2B%23%20%26;%3D%2B%23'&f=%20&g=null`
+    );
+  });
+});

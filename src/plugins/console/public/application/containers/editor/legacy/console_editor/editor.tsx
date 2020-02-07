@@ -21,12 +21,11 @@ import React, { CSSProperties, useCallback, useEffect, useRef, useState } from '
 import { EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
-import { parse } from 'query-string';
-
 import { EuiIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useServicesContext, useEditorReadContext } from '../../../../contexts';
 import { useUIAceKeyboardMode } from '../use_ui_ace_keyboard_mode';
 import { ConsoleMenu } from '../../../../components';
+import { url as urlUtils } from '../../../../../../../../plugins/kibana_utils/public';
 
 import { autoIndent, getDocumentation } from '../console_menu_actions';
 import { registerCommands } from './keyboard_shortcuts';
@@ -96,7 +95,7 @@ function EditorUI({ initialTextValue }: EditorProps) {
     const readQueryParams = () => {
       const [, queryString] = (window.location.hash || '').split('?');
 
-      return parse(queryString || '', { sort: false }) as Record<string, any>;
+      return urlUtils.parseUrlQuery(queryString || '');
     };
 
     const loadBufferFromRemote = (url: string) => {

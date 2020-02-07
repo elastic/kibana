@@ -26,6 +26,7 @@ export {
   Set,
   UiComponent,
   UiComponentInstance,
+  url,
 } from '../common';
 export * from './core';
 export * from './errors';
@@ -70,4 +71,3 @@ export {
 } from './state_sync';
 export { removeQueryParam } from './history';
 export { applyDiff } from './state_management/utils/diff_object';
-export { encodeQueryComponent } from './url';

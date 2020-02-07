@@ -8,9 +8,9 @@ import { EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import { encode } from 'rison-node';
-import { stringify } from 'query-string';
 import url from 'url';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
+import { url as urlUtils } from '../../../../../../../../src/plugins/kibana_utils/public';
 import { TimeRange } from '../../../../common/http_api/shared/time_range';
 
 export const AnalyzeInMlButton: React.FunctionComponent<{
@@ -61,7 +61,7 @@ const getOverallAnomalyExplorerLink = (pathname: string, jobId: string, timeRang
     },
   });
 
-  const hash = `/explorer?${stringify({ _g })}`;
+  const hash = `/explorer?${urlUtils.stringifyUrlQuery({ _g })}`;
 
   return url.format({
     pathname,
@@ -94,7 +94,7 @@ const getPartitionSpecificSingleMetricViewerLink = (
     },
   });
 
-  const hash = `/timeseriesexplorer?${stringify({ _g, _a })}`;
+  const hash = `/timeseriesexplorer?${urlUtils.stringifyUrlQuery({ _g, _a })}`;
 
   return url.format({
     pathname,

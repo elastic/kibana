@@ -3,26 +3,17 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { transform } from 'lodash';
-import { parse, stringify } from 'query-string';
 import { LocalUIFilterName } from '../../../../server/lib/ui_filters/local_ui_filters/config';
+import { url } from '../../../../../../../../src/plugins/kibana_utils/public';
 
 export function toQuery(search?: string): APMQueryParamsRaw {
-  return search ? parse(search.slice(1), { sort: false }) : {};
+  return search ? url.parseUrlQuery(search.slice(1)) : {};
 }
 
 export function fromQuery(query: Record<string, any>) {
-  const encodedQuery = transform(query, (result, value, key) => {
-    if (key && value) {
-      result[key] = encodeURIComponent(value).replace(/%3A/g, ':');
-    }
-  });
-
-  return stringify(encodedQuery, {
-    strict: false,
-    encode: false,
-    sort: false
-  });
+  return url.stringifyUrlQuery(query, (value: string) =>
+    encodeURIComponent(value).replace(/%3A/g, ':')
+  );
 }
 
 export type APMQueryParams = {

@@ -6,9 +6,9 @@
 
 import { useCallback } from 'react';
 import { isEqual } from 'lodash';
-import { parse, stringify } from 'query-string';
 import { decode, encode } from 'rison-node';
 import { useHistory, useLocation } from 'react-router-dom';
+import { url } from '../../../../../../../src/plugins/kibana_utils/public';
 
 import { Dictionary } from '../../../common/types/common';
 
@@ -32,7 +32,7 @@ function isRisonSerializationRequired(queryParam: string): boolean {
 
 export function getUrlState(search: string): Dictionary<any> {
   const urlState: Dictionary<any> = {};
-  const parsedQueryString: Record<string, any> = parse(search, { sort: false });
+  const parsedQueryString: Record<string, any> = url.parseUrlQuery(search);
 
   try {
     Object.keys(parsedQueryString).forEach(a => {
@@ -63,7 +63,7 @@ export const useUrlState = (accessor: string): UrlState => {
   const setUrlState = useCallback(
     (attribute: string | Dictionary<any>, value?: any) => {
       const urlState = getUrlState(search);
-      const parsedQueryString = parse(search, { sort: false });
+      const parsedQueryString = url.parseUrlQuery(search);
 
       if (!Object.prototype.hasOwnProperty.call(urlState, accessor)) {
         urlState[accessor] = {};
@@ -83,7 +83,7 @@ export const useUrlState = (accessor: string): UrlState => {
       }
 
       try {
-        const oldLocationSearch = stringify(parsedQueryString, { encode: false, sort: false });
+        const oldLocationSearch = url.stringifyUrlQuery(parsedQueryString, false);
 
         Object.keys(urlState).forEach(a => {
           if (isRisonSerializationRequired(a)) {
@@ -92,11 +92,11 @@ export const useUrlState = (accessor: string): UrlState => {
             parsedQueryString[a] = urlState[a];
           }
         });
-        const newLocationSearch = stringify(parsedQueryString, { encode: false, sort: false });
+        const newLocationSearch = url.stringifyUrlQuery(parsedQueryString, false);
 
         if (oldLocationSearch !== newLocationSearch) {
           history.push({
-            search: stringify(parsedQueryString, { sort: false }),
+            search: url.stringifyUrlQuery(parsedQueryString),
           });
         }
       } catch (error) {
