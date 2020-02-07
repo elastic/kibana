@@ -9,11 +9,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import {
-  EuiConfirmModal,
-  EuiLink,
-  EuiOverlayMask,
-} from '@elastic/eui';
+import { EuiConfirmModal, EuiLink, EuiOverlayMask } from '@elastic/eui';
 
 import routing from '../services/routing';
 import { resumeFollowerIndex } from '../store/actions';
@@ -22,20 +18,20 @@ import { arrify } from '../../../common/services/utils';
 class FollowerIndexResumeProviderUi extends PureComponent {
   static propTypes = {
     onConfirm: PropTypes.func,
-  }
+  };
 
   state = {
     isModalOpen: false,
-    ids: null
-  }
+    ids: null,
+  };
 
-  onMouseOverModal = (event) => {
+  onMouseOverModal = event => {
     // This component can sometimes be used inside of an EuiToolTip, in which case mousing over
     // the modal can trigger the tooltip. Stopping propagation prevents this.
     event.stopPropagation();
   };
 
-  resumeFollowerIndex = (id) => {
+  resumeFollowerIndex = id => {
     this.setState({ isModalOpen: true, ids: arrify(id) });
   };
 
@@ -43,7 +39,7 @@ class FollowerIndexResumeProviderUi extends PureComponent {
     this.props.resumeFollowerIndex(this.state.ids);
     this.setState({ isModalOpen: false, ids: null });
     this.props.onConfirm && this.props.onConfirm();
-  }
+  };
 
   closeConfirmModal = () => {
     this.setState({
@@ -56,43 +52,40 @@ class FollowerIndexResumeProviderUi extends PureComponent {
     const isSingle = ids.length === 1;
     const title = isSingle
       ? i18n.translate(
-        'xpack.crossClusterReplication.resumeFollowerIndex.confirmModal.resumeSingleTitle',
-        {
-          defaultMessage: `Resume replication to follower index '{name}'?`,
-          values: { name: ids[0] }
-        }
-      ) : i18n.translate(
-        'xpack.crossClusterReplication.resumeFollowerIndex.confirmModal.resumeMultipleTitle',
-        {
-          defaultMessage: `Resume replication to {count} follower indices?`,
-          values: { count: ids.length }
-        }
-      );
+          'xpack.crossClusterReplication.resumeFollowerIndex.confirmModal.resumeSingleTitle',
+          {
+            defaultMessage: `Resume replication to follower index '{name}'?`,
+            values: { name: ids[0] },
+          }
+        )
+      : i18n.translate(
+          'xpack.crossClusterReplication.resumeFollowerIndex.confirmModal.resumeMultipleTitle',
+          {
+            defaultMessage: `Resume replication to {count} follower indices?`,
+            values: { count: ids.length },
+          }
+        );
 
     return (
       <EuiOverlayMask>
-        { /* eslint-disable-next-line jsx-a11y/mouse-events-have-key-events */ }
+        {/* eslint-disable-next-line jsx-a11y/mouse-events-have-key-events */}
         <EuiConfirmModal
           title={title}
           onCancel={this.closeConfirmModal}
           onConfirm={this.onConfirm}
-          cancelButtonText={
-            i18n.translate(
-              'xpack.crossClusterReplication.resumeFollowerIndex.confirmModal.cancelButtonText',
-              {
-                defaultMessage: 'Cancel'
-              }
-            )
-          }
+          cancelButtonText={i18n.translate(
+            'xpack.crossClusterReplication.resumeFollowerIndex.confirmModal.cancelButtonText',
+            {
+              defaultMessage: 'Cancel',
+            }
+          )}
           buttonColor="primary"
-          confirmButtonText={
-            i18n.translate(
-              'xpack.crossClusterReplication.resumeFollowerIndex.confirmModal.confirmButtonText',
-              {
-                defaultMessage: 'Resume replication'
-              }
-            )
-          }
+          confirmButtonText={i18n.translate(
+            'xpack.crossClusterReplication.resumeFollowerIndex.confirmModal.confirmButtonText',
+            {
+              defaultMessage: 'Resume replication',
+            }
+          )}
           onMouseOver={this.onMouseOverModal}
           data-test-subj="resumeReplicationConfirmation"
         >
@@ -104,10 +97,7 @@ class FollowerIndexResumeProviderUi extends PureComponent {
                   custom advanced settings, {editLink}."
                 values={{
                   editLink: (
-                    <EuiLink
-                      href={routing.getFollowerIndexPath(ids[0])}
-                      data-test-subj="editLink"
-                    >
+                    <EuiLink href={routing.getFollowerIndexPath(ids[0])} data-test-subj="editLink">
                       <FormattedMessage
                         id="xpack.crossClusterReplication.resumeFollowerIndex.confirmModal.singleResumeEditLink"
                         defaultMessage="edit the follower index"
@@ -134,14 +124,16 @@ class FollowerIndexResumeProviderUi extends PureComponent {
               </p>
 
               <ul>
-                {ids.map(id => <li key={id}>{id}</li>)}
+                {ids.map(id => (
+                  <li key={id}>{id}</li>
+                ))}
               </ul>
             </Fragment>
           )}
         </EuiConfirmModal>
       </EuiOverlayMask>
     );
-  }
+  };
 
   render() {
     const { children } = this.props;
@@ -156,12 +148,11 @@ class FollowerIndexResumeProviderUi extends PureComponent {
   }
 }
 
-const mapDispatchToProps = (dispatch) => ({
-  resumeFollowerIndex: (id) => dispatch(resumeFollowerIndex(id)),
+const mapDispatchToProps = dispatch => ({
+  resumeFollowerIndex: id => dispatch(resumeFollowerIndex(id)),
 });
 
 export const FollowerIndexResumeProvider = connect(
   undefined,
   mapDispatchToProps
 )(FollowerIndexResumeProviderUi);
-

@@ -6,24 +6,29 @@
 
 import React from 'react';
 
-import { StaticDynamicStyleRow } from '../../../components/static_dynamic_style_row';
-import { DynamicColorSelection } from './dynamic_color_selection';
-import { StaticColorSelection } from './static_color_selection';
-import { getVectorStyleLabel } from '../get_vector_style_label';
+import { StylePropEditor } from '../style_prop_editor';
+import { DynamicColorForm } from './dynamic_color_form';
+import { StaticColorForm } from './static_color_form';
+import { i18n } from '@kbn/i18n';
 
 export function VectorStyleColorEditor(props) {
+  const colorForm = props.styleProperty.isDynamic() ? (
+    <DynamicColorForm {...props} />
+  ) : (
+    <StaticColorForm {...props} />
+  );
+
   return (
-    <StaticDynamicStyleRow
-      ordinalFields={props.ordinalFields}
-      property={props.styleProperty}
-      label={getVectorStyleLabel(props.styleProperty)}
-      styleDescriptor={props.styleDescriptor}
-      handlePropertyChange={props.handlePropertyChange}
-      swatches={props.swatches}
-      DynamicSelector={DynamicColorSelection}
-      StaticSelector={StaticColorSelection}
-      defaultDynamicStyleOptions={props.defaultDynamicStyleOptions}
-      defaultStaticStyleOptions={props.defaultStaticStyleOptions}
-    />
+    <StylePropEditor
+      {...props}
+      customStaticOptionLabel={i18n.translate(
+        'xpack.maps.styles.color.staticDynamicSelect.staticLabel',
+        {
+          defaultMessage: 'Solid',
+        }
+      )}
+    >
+      {colorForm}
+    </StylePropEditor>
   );
 }

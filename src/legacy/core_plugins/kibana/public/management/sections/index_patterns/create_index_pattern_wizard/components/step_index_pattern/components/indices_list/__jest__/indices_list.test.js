@@ -23,22 +23,18 @@ import { shallow } from 'enzyme';
 
 const indices = [
   { name: 'kibana', tags: [] },
-  { name: 'es', tags: []   }
+  { name: 'es', tags: [] },
 ];
 
 describe('IndicesList', () => {
   it('should render normally', () => {
-    const component = shallow(
-      <IndicesList indices={indices} query=""/>
-    );
+    const component = shallow(<IndicesList indices={indices} query="" />);
 
     expect(component).toMatchSnapshot();
   });
 
   it('should change pages', () => {
-    const component = shallow(
-      <IndicesList indices={indices} query=""/>
-    );
+    const component = shallow(<IndicesList indices={indices} query="" />);
 
     const instance = component.instance();
 
@@ -50,9 +46,7 @@ describe('IndicesList', () => {
   });
 
   it('should change per page', () => {
-    const component = shallow(
-      <IndicesList indices={indices} query="" />
-    );
+    const component = shallow(<IndicesList indices={indices} query="" />);
 
     const instance = component.instance();
     instance.onChangePerPage(1);
@@ -62,18 +56,14 @@ describe('IndicesList', () => {
   });
 
   it('should highlight the query in the matches', () => {
-    const component = shallow(
-      <IndicesList indices={indices} query="ki" />
-    );
+    const component = shallow(<IndicesList indices={indices} query="ki" />);
 
     expect(component).toMatchSnapshot();
   });
 
   describe('updating props', () => {
     it('should render all new indices', () => {
-      const component = shallow(
-        <IndicesList indices={indices} query=""/>
-      );
+      const component = shallow(<IndicesList indices={indices} query="" />);
 
       const moreIndices = [
         ...indices,

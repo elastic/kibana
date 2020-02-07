@@ -4,11 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TimeRange } from 'src/plugins/data/public';
-import { Query } from 'src/legacy/core_plugins/data/public';
 import { Ast, fromExpression, ExpressionFunctionAST } from '@kbn/interpreter/common';
 import { Visualization, Datasource, FramePublicAPI } from '../../types';
-import { esFilters } from '../../../../../../../src/plugins/data/public';
+import { esFilters, TimeRange, Query } from '../../../../../../../src/plugins/data/public';
 
 export function prependDatasourceExpression(
   visualizationExpression: Ast | string | null,
@@ -38,9 +36,13 @@ export function prependDatasourceExpression(
   if (datasourceExpressions.length === 0 || visualizationExpression === null) {
     return null;
   }
-  const parsedDatasourceExpressions: Array<[string, Ast]> = datasourceExpressions.map(
-    ([layerId, expr]) => [layerId, typeof expr === 'string' ? fromExpression(expr) : expr]
-  );
+  const parsedDatasourceExpressions: Array<[
+    string,
+    Ast
+  ]> = datasourceExpressions.map(([layerId, expr]) => [
+    layerId,
+    typeof expr === 'string' ? fromExpression(expr) : expr,
+  ]);
 
   const datafetchExpression: ExpressionFunctionAST = {
     type: 'function',

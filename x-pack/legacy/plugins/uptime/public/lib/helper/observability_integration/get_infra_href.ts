@@ -13,8 +13,8 @@ export const getInfraContainerHref = (
   basePath: string
 ): string | undefined => {
   const getHref = (value: string | string[] | undefined) => {
-    if (value === undefined) {
-      return value;
+    if (!value) {
+      return undefined;
     }
     const ret = !Array.isArray(value) ? value : value[0];
     return addBasePath(basePath, `/app/infra#/link-to/container-detail/${encodeURIComponent(ret)}`);
@@ -27,8 +27,8 @@ export const getInfraKubernetesHref = (
   basePath: string
 ): string | undefined => {
   const getHref = (value: string | string[] | undefined) => {
-    if (value === undefined) {
-      return value;
+    if (!value) {
+      return undefined;
     }
     const ret = !Array.isArray(value) ? value : value[0];
     return addBasePath(basePath, `/app/infra#/link-to/pod-detail/${encodeURIComponent(ret)}`);
@@ -39,8 +39,8 @@ export const getInfraKubernetesHref = (
 
 export const getInfraIpHref = (summary: MonitorSummary, basePath: string) => {
   const getHref = (value: string | string[] | undefined) => {
-    if (value === undefined) {
-      return value;
+    if (!value) {
+      return undefined;
     }
     if (!Array.isArray(value)) {
       const expression = encodeURIComponent(`host.ip : ${value}`);

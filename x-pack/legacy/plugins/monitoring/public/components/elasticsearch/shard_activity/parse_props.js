@@ -34,7 +34,7 @@ export const parseProps = props => {
     source,
     target,
     translog,
-    type
+    type,
   } = props;
 
   const { files, size } = index;
@@ -63,6 +63,6 @@ export const parseProps = props => {
     hasTranslog: translog.total > 0,
     translogPercent: translog.percent,
     translogDone: translog.total,
-    translogTotal: translog.total_on_start
+    translogTotal: translog.total_on_start,
   };
 };

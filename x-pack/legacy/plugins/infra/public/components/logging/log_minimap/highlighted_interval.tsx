@@ -17,7 +17,7 @@ interface HighlightedIntervalProps {
   target: number | null;
 }
 
-export const HighlightedInterval: React.SFC<HighlightedIntervalProps> = ({
+export const HighlightedInterval: React.FC<HighlightedIntervalProps> = ({
   className,
   end,
   getPositionOfTime,

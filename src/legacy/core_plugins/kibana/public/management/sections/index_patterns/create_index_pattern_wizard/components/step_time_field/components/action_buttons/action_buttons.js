@@ -19,26 +19,14 @@
 
 import React from 'react';
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButton,
-  EuiButtonEmpty
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiButtonEmpty } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
-export const ActionButtons = ({
-  goToPreviousStep,
-  submittable,
-  createIndexPattern,
-}) => (
+export const ActionButtons = ({ goToPreviousStep, submittable, createIndexPattern }) => (
   <EuiFlexGroup justifyContent="flexEnd">
     <EuiFlexItem grow={false}>
-      <EuiButtonEmpty
-        iconType="arrowLeft"
-        onClick={goToPreviousStep}
-      >
+      <EuiButtonEmpty iconType="arrowLeft" onClick={goToPreviousStep}>
         <FormattedMessage
           id="kbn.management.createIndexPattern.stepTime.backButton"
           defaultMessage="Back"

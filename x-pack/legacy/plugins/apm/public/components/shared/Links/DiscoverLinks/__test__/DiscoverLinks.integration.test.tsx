@@ -13,38 +13,8 @@ import { getRenderedHref } from '../../../../../utils/testHelpers';
 import { DiscoverErrorLink } from '../DiscoverErrorLink';
 import { DiscoverSpanLink } from '../DiscoverSpanLink';
 import { DiscoverTransactionLink } from '../DiscoverTransactionLink';
-import * as kibanaCore from '../../../../../../../observability/public/context/kibana_core';
-import * as useAPMIndexPattern from '../../../../../hooks/useAPMIndexPattern';
-import { LegacyCoreStart } from 'src/core/public';
-import { FETCH_STATUS } from '../../../../../hooks/useFetcher';
-
-jest.spyOn(useAPMIndexPattern, 'useAPMIndexPattern').mockReturnValue({
-  status: FETCH_STATUS.SUCCESS,
-  apmIndexPattern: { id: 'apm-index-pattern-id' }
-} as any);
 
 describe('DiscoverLinks', () => {
-  beforeAll(() => {
-    jest.spyOn(console, 'error').mockImplementation(() => null);
-
-    const coreMock = ({
-      http: {
-        notifications: {
-          toasts: {}
-        },
-        basePath: {
-          prepend: (path: string) => `/basepath${path}`
-        }
-      }
-    } as unknown) as LegacyCoreStart;
-
-    spyOn(kibanaCore, 'useKibanaCore').and.returnValue(coreMock);
-  });
-
-  afterAll(() => {
-    jest.restoreAllMocks();
-  });
-
   it('produces the correct URL for a transaction', async () => {
     const transaction = {
       transaction: {
@@ -63,7 +33,7 @@ describe('DiscoverLinks', () => {
     );
 
     expect(href).toEqual(
-      `/basepath/app/kibana#/discover?_g=(refreshInterval:(pause:true,value:'0'),time:(from:now%2Fw,to:now))&_a=(index:apm-index-pattern-id,interval:auto,query:(language:kuery,query:'processor.event:"transaction" AND transaction.id:"8b60bd32ecc6e150" AND trace.id:"8b60bd32ecc6e1506735a8b6cfcf175c"'))`
+      `/basepath/app/kibana#/discover?_g=(refreshInterval:(pause:true,value:'0'),time:(from:now%2Fw,to:now))&_a=(index:apm_static_index_pattern_id,interval:auto,query:(language:kuery,query:'processor.event:"transaction" AND transaction.id:"8b60bd32ecc6e150" AND trace.id:"8b60bd32ecc6e1506735a8b6cfcf175c"'))`
     );
   });
 
@@ -79,7 +49,7 @@ describe('DiscoverLinks', () => {
     } as Location);
 
     expect(href).toEqual(
-      `/basepath/app/kibana#/discover?_g=(refreshInterval:(pause:true,value:'0'),time:(from:now%2Fw,to:now))&_a=(index:apm-index-pattern-id,interval:auto,query:(language:kuery,query:'span.id:"test-span-id"'))`
+      `/basepath/app/kibana#/discover?_g=(refreshInterval:(pause:true,value:'0'),time:(from:now%2Fw,to:now))&_a=(index:apm_static_index_pattern_id,interval:auto,query:(language:kuery,query:'span.id:"test-span-id"'))`
     );
   });
 
@@ -100,7 +70,7 @@ describe('DiscoverLinks', () => {
     );
 
     expect(href).toEqual(
-      `/basepath/app/kibana#/discover?_g=(refreshInterval:(pause:true,value:'0'),time:(from:now%2Fw,to:now))&_a=(index:apm-index-pattern-id,interval:auto,query:(language:kuery,query:'service.name:"service-name" AND error.grouping_key:"grouping-key"'),sort:('@timestamp':desc))`
+      `/basepath/app/kibana#/discover?_g=(refreshInterval:(pause:true,value:'0'),time:(from:now%2Fw,to:now))&_a=(index:apm_static_index_pattern_id,interval:auto,query:(language:kuery,query:'service.name:"service-name" AND error.grouping_key:"grouping-key"'),sort:('@timestamp':desc))`
     );
   });
 
@@ -122,7 +92,7 @@ describe('DiscoverLinks', () => {
     );
 
     expect(href).toEqual(
-      `/basepath/app/kibana#/discover?_g=(refreshInterval:(pause:true,value:'0'),time:(from:now%2Fw,to:now))&_a=(index:apm-index-pattern-id,interval:auto,query:(language:kuery,query:'service.name:"service-name" AND error.grouping_key:"grouping-key" AND some:kuery-string'),sort:('@timestamp':desc))`
+      `/basepath/app/kibana#/discover?_g=(refreshInterval:(pause:true,value:'0'),time:(from:now%2Fw,to:now))&_a=(index:apm_static_index_pattern_id,interval:auto,query:(language:kuery,query:'service.name:"service-name" AND error.grouping_key:"grouping-key" AND some:kuery-string'),sort:('@timestamp':desc))`
     );
   });
 });

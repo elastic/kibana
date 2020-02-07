@@ -8,11 +8,10 @@ import { getOr } from 'lodash/fp';
 import React from 'react';
 import { Query } from 'react-apollo';
 import { connect } from 'react-redux';
-import { pure } from 'recompose';
 
-import chrome from 'ui/chrome';
 import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 import { GetOverviewNetworkQuery, OverviewNetworkData } from '../../../graphql/types';
+import { useUiSetting } from '../../../lib/kibana';
 import { State } from '../../../store';
 import { inputsModel, inputsSelectors } from '../../../store/inputs';
 import { createFilter, getDefaultFetchPolicy } from '../../helpers';
@@ -41,37 +40,37 @@ export interface OverviewNetworkProps extends QueryTemplateProps {
   startDate: number;
 }
 
-export const OverviewNetworkComponentQuery = pure<OverviewNetworkProps & OverviewNetworkReducer>(
-  ({ id = ID, children, filterQuery, isInspected, sourceId, startDate, endDate }) => (
-    <Query<GetOverviewNetworkQuery.Query, GetOverviewNetworkQuery.Variables>
-      query={overviewNetworkQuery}
-      fetchPolicy={getDefaultFetchPolicy()}
-      notifyOnNetworkStatusChange
-      variables={{
-        sourceId,
-        timerange: {
-          interval: '12h',
-          from: startDate,
-          to: endDate,
-        },
-        filterQuery: createFilter(filterQuery),
-        defaultIndex: chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY),
-        inspect: isInspected,
-      }}
-    >
-      {({ data, loading, refetch }) => {
-        const overviewNetwork = getOr({}, `source.OverviewNetwork`, data);
-        return children({
-          id,
-          inspect: getOr(null, 'source.OverviewNetwork.inspect', data),
-          overviewNetwork,
-          loading,
-          refetch,
-        });
-      }}
-    </Query>
-  )
-);
+export const OverviewNetworkComponentQuery = React.memo<
+  OverviewNetworkProps & OverviewNetworkReducer
+>(({ id = ID, children, filterQuery, isInspected, sourceId, startDate, endDate }) => (
+  <Query<GetOverviewNetworkQuery.Query, GetOverviewNetworkQuery.Variables>
+    query={overviewNetworkQuery}
+    fetchPolicy={getDefaultFetchPolicy()}
+    notifyOnNetworkStatusChange
+    variables={{
+      sourceId,
+      timerange: {
+        interval: '12h',
+        from: startDate,
+        to: endDate,
+      },
+      filterQuery: createFilter(filterQuery),
+      defaultIndex: useUiSetting<string[]>(DEFAULT_INDEX_KEY),
+      inspect: isInspected,
+    }}
+  >
+    {({ data, loading, refetch }) => {
+      const overviewNetwork = getOr({}, `source.OverviewNetwork`, data);
+      return children({
+        id,
+        inspect: getOr(null, 'source.OverviewNetwork.inspect', data),
+        overviewNetwork,
+        loading,
+        refetch,
+      });
+    }}
+  </Query>
+));
 
 OverviewNetworkComponentQuery.displayName = 'OverviewNetworkComponentQuery';
 

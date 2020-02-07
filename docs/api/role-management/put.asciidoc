@@ -26,7 +26,9 @@ To use the create or update role API, you must have the `manage_security` cluste
   (Optional, object) In the `metadata` object, keys that begin with `_` are reserved for system usage.
 
 `elasticsearch`:: 
-  (Optional, object) {es} cluster and index privileges. Valid keys include `cluster`, `indices`, and `run_as`. For more information, see {xpack-ref}/defining-roles.html[Defining Roles].
+  (Optional, object) {es} cluster and index privileges. Valid keys include 
+  `cluster`, `indices`, and `run_as`. For more information, see
+  {ref}/defining-roles.html[Defining roles].
 
 `kibana`:: 
   (list) Objects that specify the <<kibana-privileges, Kibana privileges>> for the role:

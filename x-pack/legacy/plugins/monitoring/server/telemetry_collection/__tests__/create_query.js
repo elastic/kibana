@@ -12,10 +12,7 @@ describe('Create Type Filter', () => {
   it('Builds a type filter syntax', () => {
     const typeFilter = createTypeFilter('my_type');
     expect(typeFilter).to.eql({
-      bool: { should: [
-        { term: { _type: 'my_type' } },
-        { term: { type: 'my_type' } }
-      ] }
+      bool: { should: [{ term: { _type: 'my_type' } }, { term: { type: 'my_type' } }] },
     });
   });
 });
@@ -32,12 +29,12 @@ describe('Create Query', () => {
               timestamp: {
                 format: 'epoch_millis',
                 gte: 1456826400000,
-                lte: 1456826401000
-              }
-            }
-          }
-        ]
-      }
+                lte: 1456826401000,
+              },
+            },
+          },
+        ],
+      },
     };
     expect(result).to.be.eql(expected);
   });
@@ -46,7 +43,10 @@ describe('Create Query', () => {
     const options = { type: 'test-type-yay' };
     const result = createQuery(options);
     let expected = {};
-    expected = set(expected, 'bool.filter[0].bool.should', [ { term: { _type: 'test-type-yay' } }, { term: { type: 'test-type-yay' } } ]);
+    expected = set(expected, 'bool.filter[0].bool.should', [
+      { term: { _type: 'test-type-yay' } },
+      { term: { type: 'test-type-yay' } },
+    ]);
     expect(result).to.be.eql(expected);
   });
 
@@ -62,23 +62,20 @@ describe('Create Query', () => {
         filter: [
           {
             bool: {
-              should: [
-                { term: { _type: 'test-type-yay' } },
-                { term: { type: 'test-type-yay' } }
-              ]
-            }
+              should: [{ term: { _type: 'test-type-yay' } }, { term: { type: 'test-type-yay' } }],
+            },
           },
           {
             range: {
               timestamp: {
                 format: 'epoch_millis',
                 gte: 1456826400000,
-                lte: 1456826401000
-              }
-            }
-          }
-        ]
-      }
+                lte: 1456826401000,
+              },
+            },
+          },
+        ],
+      },
     };
     expect(result).to.be.eql(expected);
   });

@@ -12,8 +12,8 @@ import { hasMlUserPermissions } from '../../ml/permissions/has_ml_user_permissio
 import { MlCapabilitiesContext } from '../../ml/permissions/ml_capabilities_provider';
 import { useStateToaster } from '../../toasters';
 import { errorToToaster } from '../../ml/api/error_to_toaster';
-import { useKibanaUiSetting } from '../../../lib/settings/use_kibana_ui_setting';
-import { DEFAULT_INDEX_KEY, DEFAULT_KBN_VERSION } from '../../../../common/constants';
+import { useUiSetting$ } from '../../../lib/kibana';
+import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 
 import * as i18n from './translations';
 import { createSiemJobs } from './use_siem_jobs_helpers';
@@ -33,8 +33,7 @@ export const useSiemJobs = (refetchData: boolean): Return => {
   const [loading, setLoading] = useState(true);
   const capabilities = useContext(MlCapabilitiesContext);
   const userPermissions = hasMlUserPermissions(capabilities);
-  const [siemDefaultIndex] = useKibanaUiSetting(DEFAULT_INDEX_KEY);
-  const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
+  const [siemDefaultIndex] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
   const [, dispatchToaster] = useStateToaster();
 
   useEffect(() => {
@@ -47,11 +46,10 @@ export const useSiemJobs = (refetchData: boolean): Return => {
         try {
           // Batch fetch all installed jobs, ML modules, and check which modules are compatible with siemDefaultIndex
           const [jobSummaryData, modulesData, compatibleModules] = await Promise.all([
-            getJobsSummary(abortCtrl.signal, kbnVersion),
-            getModules({ signal: abortCtrl.signal, kbnVersion }),
+            getJobsSummary(abortCtrl.signal),
+            getModules({ signal: abortCtrl.signal }),
             checkRecognizer({
               indexPatternName: siemDefaultIndex,
-              kbnVersion,
               signal: abortCtrl.signal,
             }),
           ]);

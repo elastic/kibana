@@ -18,17 +18,10 @@
  */
 
 import { Telemetry } from './telemetry';
-import {
-  REPORT_INTERVAL_MS,
-  LOCALSTORAGE_KEY,
-} from '../../common/constants';
+import { REPORT_INTERVAL_MS, LOCALSTORAGE_KEY } from '../../common/constants';
 
 describe('telemetry class', () => {
-
-  const clusters = [
-    { cluster_uuid: 'fake-123' },
-    { cluster_uuid: 'fake-456' },
-  ];
+  const clusters = [{ cluster_uuid: 'fake-123' }, { cluster_uuid: 'fake-456' }];
   const telemetryUrl = 'https://not.a.valid.url.0';
   const mockFetchTelemetry = () => Promise.resolve({ data: clusters });
   // returns a function that behaves like the injector by fetching the requested key from the object directly
@@ -39,13 +32,12 @@ describe('telemetry class', () => {
   };
 
   describe('constructor', () => {
-
     test('defaults lastReport if unset', () => {
       const injector = {
         localStorage: {
           get: jest.fn().mockReturnValueOnce(undefined),
         },
-        '$http': jest.fn(),
+        $http: jest.fn(),
         telemetryOptedIn: true,
         telemetryUrl,
       };
@@ -69,7 +61,7 @@ describe('telemetry class', () => {
         localStorage: {
           get: jest.fn().mockReturnValueOnce({ lastReport }),
         },
-        '$http': jest.fn(),
+        $http: jest.fn(),
         telemetryOptedIn: true,
         telemetryUrl,
       };
@@ -86,7 +78,6 @@ describe('telemetry class', () => {
       expect(injector.localStorage.get).toHaveBeenCalledTimes(1);
       expect(injector.localStorage.get).toHaveBeenCalledWith(LOCALSTORAGE_KEY);
     });
-
   });
 
   test('_saveToBrowser uses _lastReport', () => {
@@ -94,7 +85,7 @@ describe('telemetry class', () => {
       localStorage: {
         get: jest.fn().mockReturnValueOnce({ random: 'junk', gets: 'thrown away' }),
         set: jest.fn(),
-      }
+      },
     };
     const lastReport = Date.now();
     const telemetry = new Telemetry(mockInjectorFromObject(injector), mockFetchTelemetry);
@@ -151,7 +142,7 @@ describe('telemetry class', () => {
     test('returns true if last report is not defined', () => {
       const injector = {
         localStorage: {
-          get: jest.fn().mockReturnValueOnce({ }),
+          get: jest.fn().mockReturnValueOnce({}),
         },
         telemetryOptedIn: true,
       };
@@ -195,11 +186,9 @@ describe('telemetry class', () => {
 
       expect(telemetry._checkReportStatus()).toBe(true);
     });
-
   });
 
   describe('_sendIfDue', () => {
-
     test('ignores and returns false if already sending', () => {
       const injector = {
         localStorage: {
@@ -228,7 +217,7 @@ describe('telemetry class', () => {
     test('sends telemetry when requested', () => {
       const now = Date.now();
       const injector = {
-        '$http': jest.fn().mockResolvedValue({ }), // ignored response
+        $http: jest.fn().mockResolvedValue({}), // ignored response
         localStorage: {
           get: jest.fn().mockReturnValueOnce({ lastReport: now - REPORT_INTERVAL_MS - 1 }),
           set: jest.fn(),
@@ -240,37 +229,36 @@ describe('telemetry class', () => {
 
       expect.hasAssertions();
 
-      return telemetry._sendIfDue()
-        .then(result => {
-          expect(result).toBe(true);
-          expect(telemetry._sending).toBe(false);
+      return telemetry._sendIfDue().then(result => {
+        expect(result).toBe(true);
+        expect(telemetry._sending).toBe(false);
 
-          // should be updated
-          const lastReport = telemetry._lastReport;
+        // should be updated
+        const lastReport = telemetry._lastReport;
 
-          // if the test runs fast enough it should be exactly equal, but probably a few ms greater
-          expect(lastReport).toBeGreaterThanOrEqual(now);
+        // if the test runs fast enough it should be exactly equal, but probably a few ms greater
+        expect(lastReport).toBeGreaterThanOrEqual(now);
 
-          expect(injector.$http).toHaveBeenCalledTimes(2);
-          // assert that it sent every cluster's telemetry
-          clusters.forEach(cluster => {
-            expect(injector.$http).toHaveBeenCalledWith({
-              method: 'POST',
-              url: telemetryUrl,
-              data: cluster,
-              kbnXsrfToken: false,
-            });
+        expect(injector.$http).toHaveBeenCalledTimes(2);
+        // assert that it sent every cluster's telemetry
+        clusters.forEach(cluster => {
+          expect(injector.$http).toHaveBeenCalledWith({
+            method: 'POST',
+            url: telemetryUrl,
+            data: cluster,
+            kbnXsrfToken: false,
           });
-
-          expect(injector.localStorage.set).toHaveBeenCalledTimes(1);
-          expect(injector.localStorage.set).toHaveBeenCalledWith(LOCALSTORAGE_KEY, { lastReport });
         });
+
+        expect(injector.localStorage.set).toHaveBeenCalledTimes(1);
+        expect(injector.localStorage.set).toHaveBeenCalledWith(LOCALSTORAGE_KEY, { lastReport });
+      });
     });
 
     test('sends telemetry when requested and catches exceptions', () => {
       const lastReport = Date.now() - REPORT_INTERVAL_MS - 1;
       const injector = {
-        '$http': jest.fn().mockRejectedValue(new Error('TEST - expected')), // caught failure
+        $http: jest.fn().mockRejectedValue(new Error('TEST - expected')), // caught failure
         localStorage: {
           get: jest.fn().mockReturnValueOnce({ lastReport }),
           set: jest.fn(),
@@ -282,28 +270,26 @@ describe('telemetry class', () => {
 
       expect.hasAssertions();
 
-      return telemetry._sendIfDue()
-        .then(result => {
-          expect(result).toBe(true); // attempted to send
-          expect(telemetry._sending).toBe(false);
+      return telemetry._sendIfDue().then(result => {
+        expect(result).toBe(true); // attempted to send
+        expect(telemetry._sending).toBe(false);
 
-          // should be unchanged
-          expect(telemetry._lastReport).toBe(lastReport);
-          expect(injector.localStorage.set).toHaveBeenCalledTimes(0);
+        // should be unchanged
+        expect(telemetry._lastReport).toBe(lastReport);
+        expect(injector.localStorage.set).toHaveBeenCalledTimes(0);
 
-          expect(injector.$http).toHaveBeenCalledTimes(2);
-          // assert that it sent every cluster's telemetry
-          clusters.forEach(cluster => {
-            expect(injector.$http).toHaveBeenCalledWith({
-              method: 'POST',
-              url: telemetryUrl,
-              data: cluster,
-              kbnXsrfToken: false,
-            });
+        expect(injector.$http).toHaveBeenCalledTimes(2);
+        // assert that it sent every cluster's telemetry
+        clusters.forEach(cluster => {
+          expect(injector.$http).toHaveBeenCalledWith({
+            method: 'POST',
+            url: telemetryUrl,
+            data: cluster,
+            kbnXsrfToken: false,
           });
         });
+      });
     });
-
   });
 
   test('start', () => {
@@ -317,5 +303,4 @@ describe('telemetry class', () => {
 
     clearInterval(telemetry.start());
   });
-
 });

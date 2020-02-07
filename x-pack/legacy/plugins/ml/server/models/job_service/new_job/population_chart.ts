@@ -6,9 +6,8 @@
 
 import { get } from 'lodash';
 import { AggFieldNamePair, EVENT_RATE_FIELD_ID } from '../../../../common/types/fields';
+import { callWithRequestType } from '../../../../common/types/kibana';
 import { ML_MEDIAN_PERCENTS } from '../../../../common/util/job_utils';
-
-export type callWithRequestType = (action: string, params: any) => Promise<any>;
 
 const OVER_FIELD_EXAMPLES_COUNT = 40;
 
@@ -54,7 +53,10 @@ export function newJobPopulationChartProvider(callWithRequest: callWithRequestTy
 
     try {
       const results = await callWithRequest('search', json);
-      return processSearchResults(results, aggFieldNamePairs.map(af => af.field));
+      return processSearchResults(
+        results,
+        aggFieldNamePairs.map(af => af.field)
+      );
     } catch (error) {
       return { error };
     }

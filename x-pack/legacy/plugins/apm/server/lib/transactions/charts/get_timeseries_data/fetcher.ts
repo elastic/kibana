@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ESFilter } from '../../../../../typings/elasticsearch';
+import { ESFilter } from '../../../../../../../../plugins/apm/typings/elasticsearch';
 import {
   PROCESSOR_EVENT,
   SERVICE_NAME,
@@ -16,7 +16,11 @@ import {
 import { PromiseReturnType } from '../../../../../typings/common';
 import { getBucketSize } from '../../../helpers/get_bucket_size';
 import { rangeFilter } from '../../../helpers/range_filter';
-import { Setup } from '../../../helpers/setup_request';
+import {
+  Setup,
+  SetupTimeRange,
+  SetupUIFilters
+} from '../../../helpers/setup_request';
 
 export type ESResponse = PromiseReturnType<typeof timeseriesFetcher>;
 export function timeseriesFetcher({
@@ -28,7 +32,7 @@ export function timeseriesFetcher({
   serviceName: string;
   transactionType: string | undefined;
   transactionName: string | undefined;
-  setup: Setup;
+  setup: Setup & SetupTimeRange & SetupUIFilters;
 }) {
   const { start, end, uiFiltersES, client, indices } = setup;
   const { intervalString } = getBucketSize(start, end, 'auto');

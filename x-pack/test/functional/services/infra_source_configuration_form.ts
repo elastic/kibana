@@ -38,10 +38,12 @@ export function InfraSourceConfigurationFormProvider({ getService }: FtrProvider
     async addTimestampLogColumn() {
       await (await this.getAddLogColumnButton()).click();
       await retry.try(async () => {
-        await (await testSubjects.findDescendant(
-          '~addTimestampLogColumn',
-          await this.getAddLogColumnPopover()
-        )).click();
+        await (
+          await testSubjects.findDescendant(
+            '~addTimestampLogColumn',
+            await this.getAddLogColumnPopover()
+          )
+        ).click();
       });
     },
     async addFieldLogColumn(fieldName: string) {
@@ -49,10 +51,9 @@ export function InfraSourceConfigurationFormProvider({ getService }: FtrProvider
       await retry.try(async () => {
         const popover = await this.getAddLogColumnPopover();
         await (await testSubjects.findDescendant('~fieldSearchInput', popover)).type(fieldName);
-        await (await testSubjects.findDescendant(
-          `~addFieldLogColumn:${fieldName}`,
-          popover
-        )).click();
+        await (
+          await testSubjects.findDescendant(`~addFieldLogColumn:${fieldName}`, popover)
+        ).click();
       });
     },
     async getLogColumnPanels(): Promise<WebElementWrapper[]> {
@@ -98,10 +99,9 @@ export function InfraSourceConfigurationFormProvider({ getService }: FtrProvider
       return await testSubjects.find('~sourceConfigurationContent');
     },
     async saveConfiguration() {
-      await (await testSubjects.findDescendant(
-        '~applySettingsButton',
-        await this.getForm()
-      )).click();
+      await (
+        await testSubjects.findDescendant('~applySettingsButton', await this.getForm())
+      ).click();
 
       await retry.try(async () => {
         const element = await testSubjects.findDescendant(

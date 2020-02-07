@@ -22,25 +22,26 @@ import { resolve } from 'path';
 import { Build } from './build';
 
 export async function buildAll({ styleSheets, log, buildDir, sourceMap, outputStyle }) {
-  const bundles = await Promise.all(styleSheets.map(async styleSheet => {
+  const bundles = await Promise.all(
+    styleSheets.map(async styleSheet => {
+      if (!styleSheet.localPath.endsWith('.scss')) {
+        return;
+      }
 
-    if (!styleSheet.localPath.endsWith('.scss')) {
-      return;
-    }
+      const bundle = new Build({
+        sourcePath: styleSheet.localPath,
+        log,
+        sourceMap,
+        outputStyle,
+        theme: styleSheet.theme,
+        targetPath: resolve(buildDir, styleSheet.publicPath),
+        urlImports: styleSheet.urlImports,
+      });
+      await bundle.build();
 
-    const bundle = new Build({
-      sourcePath: styleSheet.localPath,
-      log,
-      sourceMap,
-      outputStyle,
-      theme: styleSheet.theme,
-      targetPath: resolve(buildDir, styleSheet.publicPath),
-      urlImports: styleSheet.urlImports
-    });
-    await bundle.build();
-
-    return bundle;
-  }));
+      return bundle;
+    })
+  );
 
   return bundles.filter(v => v);
 }

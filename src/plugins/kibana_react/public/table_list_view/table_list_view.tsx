@@ -23,7 +23,6 @@ import { i18n } from '@kbn/i18n';
 import { debounce, indexBy, sortBy, uniq } from 'lodash';
 import {
   EuiTitle,
-  // @ts-ignore
   EuiInMemoryTable,
   EuiPage,
   EuiPageBody,
@@ -36,8 +35,10 @@ import {
   EuiOverlayMask,
   EuiConfirmModal,
   EuiCallOut,
+  EuiBasicTableColumn,
 } from '@elastic/eui';
-import { ToastsStart, UiSettingsClientContract } from 'kibana/public';
+import { ToastsStart, IUiSettingsClient } from 'kibana/public';
+import { toMountPoint } from '../util';
 
 export const EMPTY_FILTER = '';
 
@@ -65,7 +66,12 @@ export interface TableListViewProps {
   tableColumns: Column[];
   tableListTitle: string;
   toastNotifications: ToastsStart;
-  uiSettings: UiSettingsClientContract;
+  uiSettings: IUiSettingsClient;
+  /**
+   * Id of the heading element describing the table. This id will be used as `aria-labelledby` of the wrapper element.
+   * If the table is not empty, this component renders its own h1 element using the same id.
+   */
+  headingId?: string;
 }
 
 export interface TableListViewState {
@@ -111,7 +117,7 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
     };
   }
 
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     this._isMounted = true;
   }
 
@@ -166,7 +172,7 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
       await this.props.deleteItems(this.state.selectedIds.map(id => itemsById[id]));
     } catch (error) {
       this.props.toastNotifications.addDanger({
-        title: (
+        title: toMountPoint(
           <FormattedMessage
             id="kibana-react.tableListView.listing.unableToDeleteDangerMessage"
             defaultMessage="Unable to delete {entityName}(s)"
@@ -365,7 +371,7 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
             });
           },
         }
-      : null;
+      : undefined;
 
     const actions = [
       {
@@ -415,7 +421,7 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
       <EuiInMemoryTable
         itemId="id"
         items={this.state.items}
-        columns={columns}
+        columns={(columns as unknown) as Array<EuiBasicTableColumn<object>>} // EuiBasicTableColumn is stricter than Column
         pagination={this.pagination}
         loading={this.state.isFetchingItems}
         message={noItemsMessage}
@@ -462,7 +468,7 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd" data-test-subj="top-nav">
           <EuiFlexItem grow={false}>
             <EuiTitle size="l">
-              <h1>{this.props.tableListTitle}</h1>
+              <h1 id={this.props.headingId}>{this.props.tableListTitle}</h1>
             </EuiTitle>
           </EuiFlexItem>
 
@@ -497,7 +503,11 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
         className="itemListing__page"
         restrictWidth
       >
-        <EuiPageBody>{this.renderPageContent()}</EuiPageBody>
+        <EuiPageBody
+          aria-labelledby={this.state.hasInitialFetchReturned ? this.props.headingId : undefined}
+        >
+          {this.renderPageContent()}
+        </EuiPageBody>
       </EuiPage>
     );
   }

@@ -39,9 +39,6 @@ import { plugin } from '.';
 
 const dataPlugin = plugin();
 
-export const setup = dataPlugin.setup(npSetup.core);
+export const setup = dataPlugin.setup(npSetup.core, npSetup.plugins);
 
-export const start = dataPlugin.start(npStart.core, {
-  data: npStart.plugins.data,
-  uiActions: npSetup.plugins.uiActions,
-});
+export const start = dataPlugin.start(npStart.core, npStart.plugins);

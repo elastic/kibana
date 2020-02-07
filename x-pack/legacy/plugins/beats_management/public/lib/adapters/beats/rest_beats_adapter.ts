@@ -26,9 +26,9 @@ export class RestBeatsAdapter implements CMBeatsAdapter {
 
   public async getBeatWithToken(enrollmentToken: string): Promise<CMBeat | null> {
     try {
-      return (await this.REST.get<ReturnTypeGet<CMBeat>>(
-        `/api/beats/agent/unknown/${enrollmentToken}`
-      )).item;
+      return (
+        await this.REST.get<ReturnTypeGet<CMBeat>>(`/api/beats/agent/unknown/${enrollmentToken}`)
+      ).item;
     } catch (e) {
       return null;
     }
@@ -59,16 +59,20 @@ export class RestBeatsAdapter implements CMBeatsAdapter {
   public async removeTagsFromBeats(
     removals: BeatsTagAssignment[]
   ): Promise<ReturnTypeBulkAction['results']> {
-    return (await this.REST.post<ReturnTypeBulkAction>(`/api/beats/agents_tags/removals`, {
-      removals,
-    })).results;
+    return (
+      await this.REST.post<ReturnTypeBulkAction>(`/api/beats/agents_tags/removals`, {
+        removals,
+      })
+    ).results;
   }
 
   public async assignTagsToBeats(
     assignments: BeatsTagAssignment[]
   ): Promise<ReturnTypeBulkAction['results']> {
-    return (await this.REST.post<ReturnTypeBulkAction>(`/api/beats/agents_tags/assignments`, {
-      assignments,
-    })).results;
+    return (
+      await this.REST.post<ReturnTypeBulkAction>(`/api/beats/agents_tags/assignments`, {
+        assignments,
+      })
+    ).results;
   }
 }

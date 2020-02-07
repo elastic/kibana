@@ -85,7 +85,7 @@ export const PolicyStepRetention: React.FunctionComponent<StepProps> = ({
         }
         describedByIds={['expirationDescription']}
         isInvalid={touched.expireAfterValue && Boolean(errors.expireAfterValue)}
-        error={errors.expireAfter}
+        error={errors.expireAfterValue}
         fullWidth
       >
         <EuiFlexGroup>
@@ -100,6 +100,7 @@ export const PolicyStepRetention: React.FunctionComponent<StepProps> = ({
                 });
               }}
               data-test-subj="expireAfterValueInput"
+              min={0}
             />
           </EuiFlexItem>
           <EuiFlexItem>
@@ -167,6 +168,7 @@ export const PolicyStepRetention: React.FunctionComponent<StepProps> = ({
                 });
               }}
               data-test-subj="minCountInput"
+              min={0}
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -179,6 +181,7 @@ export const PolicyStepRetention: React.FunctionComponent<StepProps> = ({
               />
             }
             describedByIds={['countDescription']}
+            isInvalid={touched.maxCount && Boolean(errors.maxCount)}
             error={errors.maxCount}
             fullWidth
           >
@@ -193,6 +196,7 @@ export const PolicyStepRetention: React.FunctionComponent<StepProps> = ({
                 });
               }}
               data-test-subj="maxCountInput"
+              min={0}
             />
           </EuiFormRow>
         </EuiFlexItem>

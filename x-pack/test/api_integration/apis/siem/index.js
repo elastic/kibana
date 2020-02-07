@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export default function ({ loadTestFile }) {
+export default function({ loadTestFile }) {
   describe('Siem GraphQL Endpoints', () => {
     loadTestFile(require.resolve('./authentications'));
-    loadTestFile(require.resolve('./events_over_time'));
     loadTestFile(require.resolve('./hosts'));
     loadTestFile(require.resolve('./kpi_network'));
     loadTestFile(require.resolve('./kpi_hosts'));

@@ -5,10 +5,12 @@
  */
 
 export {
-  isKibanaContextInitialized,
+  useKibanaContext,
+  InitializedKibanaContextValue,
   KibanaContext,
   KibanaContextValue,
   SavedSearchQuery,
+  RenderOnlyWithInitializedKibanaContext,
 } from './kibana_context';
 export { KibanaProvider } from './kibana_provider';
 export { useCurrentIndexPattern } from './use_current_index_pattern';

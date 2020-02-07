@@ -45,7 +45,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           full_name: 'test user',
         });
 
-        await PageObjects.security.logout();
+        await PageObjects.security.forceLogout();
 
         await PageObjects.security.login(
           'global_canvas_all_user',
@@ -60,15 +60,13 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await Promise.all([
           security.role.delete('global_canvas_all_role'),
           security.user.delete('global_canvas_all_user'),
-          PageObjects.security.logout(),
+          PageObjects.security.forceLogout(),
         ]);
       });
 
       it('shows canvas navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
-        expect(navLinks).to.eql(['Canvas', 'Management']);
+        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
+        expect(navLinks).to.eql(['Canvas', 'Stack Management']);
       });
 
       it(`landing page shows "Create new workpad" button`, async () => {
@@ -86,7 +84,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       it(`allows a workpad to be created`, async () => {
         await PageObjects.common.navigateToActualUrl('canvas', 'workpad/create', {
           ensureCurrentUrl: true,
-          showLoginIfPrompted: false,
+          shouldLoginIfPrompted: false,
         });
 
         await PageObjects.canvas.expectAddElementButton();
@@ -98,7 +96,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           'workpad/workpad-1705f884-6224-47de-ba49-ca224fe6ec31',
           {
             ensureCurrentUrl: true,
-            showLoginIfPrompted: false,
+            shouldLoginIfPrompted: false,
           }
         );
 
@@ -143,10 +141,8 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('shows canvas navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
-        expect(navLinks).to.eql(['Canvas', 'Management']);
+        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
+        expect(navLinks).to.eql(['Canvas', 'Stack Management']);
       });
 
       it(`landing page shows disabled "Create new workpad" button`, async () => {

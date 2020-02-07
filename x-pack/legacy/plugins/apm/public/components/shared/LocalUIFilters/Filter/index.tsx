@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { FunctionComponent, useState, useMemo, useEffect } from 'react';
 import {
   EuiTitle,
   EuiPopover,
+  EuiPopoverProps,
   EuiSelectable,
   EuiSpacer,
   EuiHorizontalRule,
@@ -23,9 +24,11 @@ import { FilterBadgeList } from './FilterBadgeList';
 import { unit, px } from '../../../../style/variables';
 import { FilterTitleButton } from './FilterTitleButton';
 
-const Popover = styled(EuiPopover).attrs({
-  anchorClassName: 'anchor'
-})`
+const Popover = styled((EuiPopover as unknown) as FunctionComponent).attrs(
+  () => ({
+    anchorClassName: 'anchor'
+  })
+)<EuiPopoverProps & { className?: string; id?: string }>`
   .anchor {
     display: block;
   }

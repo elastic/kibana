@@ -14,12 +14,6 @@ mockDispatch.mockImplementation(fn => fn);
 
 const applyTimelineKqlMock: jest.Mock = (dispatchApplyTimelineFilterQuery as unknown) as jest.Mock;
 
-jest.mock('../../store/hosts/actions', () => ({
-  applyHostsFilterQuery: jest.fn(),
-}));
-jest.mock('../../store/network/actions', () => ({
-  applyNetworkFilterQuery: jest.fn(),
-}));
 jest.mock('../../store/timeline/actions', () => ({
   applyKqlFilterQuery: jest.fn(),
 }));
@@ -36,7 +30,6 @@ describe('#useUpdateKql', () => {
       kueryFilterQuery: { expression: '', kind: 'kuery' },
       kueryFilterQueryDraft: { expression: 'host.name: "myLove"', kind: 'kuery' },
       storeType: 'timelineType',
-      type: null,
       timelineId: 'myTimelineId',
     })(mockDispatch);
     expect(applyTimelineKqlMock).toHaveBeenCalledWith({

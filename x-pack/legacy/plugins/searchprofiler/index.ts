@@ -5,12 +5,10 @@
  */
 
 import { resolve } from 'path';
-import Boom from 'boom';
 
-import { CoreSetup } from 'src/core/server';
-import { Server } from 'src/legacy/server/kbn_server';
-import { LegacySetup } from './server/np_ready/types';
-import { plugin } from './server/np_ready';
+// TODO:
+// Until we can process SCSS in new platform, this part of Searchprofiler
+// legacy must remain here.
 
 export const searchprofiler = (kibana: any) => {
   const publicSrc = resolve(__dirname, 'public');
@@ -22,44 +20,8 @@ export const searchprofiler = (kibana: any) => {
     publicDir: publicSrc,
 
     uiExports: {
-      // NP Ready
-      devTools: [`${publicSrc}/legacy`],
-      styleSheetPaths: `${publicSrc}/np_ready/application/index.scss`,
-      // Legacy
-      hacks: ['plugins/searchprofiler/register'],
-      home: ['plugins/searchprofiler/register_feature'],
+      styleSheetPaths: `${publicSrc}/index.scss`,
     },
-    init(server: Server) {
-      const serverPlugin = plugin();
-      const thisPlugin = this;
-
-      const commonRouteConfig = {
-        pre: [
-          function forbidApiAccess() {
-            const licenseCheckResults = server.plugins.xpack_main.info
-              .feature(thisPlugin.id)
-              .getLicenseCheckResults();
-            if (licenseCheckResults.showAppLink && licenseCheckResults.enableAppLink) {
-              return null;
-            } else {
-              throw Boom.forbidden(licenseCheckResults.message);
-            }
-          },
-        ],
-      };
-
-      const legacySetup: LegacySetup = {
-        route: (args: Parameters<typeof server.route>[0]) => server.route(args),
-        plugins: {
-          __LEGACY: {
-            thisPlugin,
-            xpackMain: server.plugins.xpack_main,
-            elasticsearch: server.plugins.elasticsearch,
-            commonRouteConfig,
-          },
-        },
-      };
-      serverPlugin.setup({} as CoreSetup, legacySetup);
-    },
+    init() {},
   });
 };

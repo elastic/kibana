@@ -4,7 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiToolTip } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiToolTip,
+  EuiSpacer
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import { UNIDENTIFIED_SERVICE_NODES_LABEL } from '../../../../common/i18n';
@@ -34,9 +40,7 @@ const ServiceNodeOverview = () => {
   const { uiFilters, urlParams } = useUrlParams();
   const { serviceName, start, end } = urlParams;
 
-  const localFiltersConfig: React.ComponentProps<
-    typeof LocalUIFilters
-  > = useMemo(
+  const localFiltersConfig: React.ComponentProps<typeof LocalUIFilters> = useMemo(
     () => ({
       filterNames: ['host', 'containerId', 'podName'],
       params: {
@@ -152,25 +156,31 @@ const ServiceNodeOverview = () => {
   ];
 
   return (
-    <EuiFlexGroup>
-      <EuiFlexItem grow={1}>
-        <LocalUIFilters {...localFiltersConfig} />
-      </EuiFlexItem>
-      <EuiFlexItem grow={7}>
-        <EuiPanel>
-          <ManagedTable
-            noItemsMessage={i18n.translate('xpack.apm.jvmsTable.noJvmsLabel', {
-              defaultMessage: 'No JVMs were found'
-            })}
-            items={items}
-            columns={columns}
-            initialPageSize={INITIAL_PAGE_SIZE}
-            initialSortField={INITIAL_SORT_FIELD}
-            initialSortDirection={INITIAL_SORT_DIRECTION}
-          />
-        </EuiPanel>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <>
+      <EuiSpacer />
+      <EuiFlexGroup>
+        <EuiFlexItem grow={1}>
+          <LocalUIFilters {...localFiltersConfig} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={7}>
+          <EuiPanel>
+            <ManagedTable
+              noItemsMessage={i18n.translate(
+                'xpack.apm.jvmsTable.noJvmsLabel',
+                {
+                  defaultMessage: 'No JVMs were found'
+                }
+              )}
+              items={items}
+              columns={columns}
+              initialPageSize={INITIAL_PAGE_SIZE}
+              initialSortField={INITIAL_SORT_FIELD}
+              initialSortDirection={INITIAL_SORT_DIRECTION}
+            />
+          </EuiPanel>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </>
   );
 };
 

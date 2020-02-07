@@ -22,7 +22,6 @@ import { registerLanguage } from 'react-syntax-highlighter/dist/light';
 // @ts-ignore
 import { xcode } from 'react-syntax-highlighter/dist/styles';
 import styled from 'styled-components';
-import { idx } from '@kbn/elastic-idx';
 import { IStackframeWithLineContext } from '../../../../typings/es_schemas/raw/fields/Stackframe';
 import { borderRadius, px, unit, units } from '../../../style/variables';
 
@@ -106,13 +105,13 @@ const Code = styled.code`
 
 function getStackframeLines(stackframe: IStackframeWithLineContext) {
   const line = stackframe.line.context;
-  const preLines = idx(stackframe, _ => _.context.pre) || [];
-  const postLines = idx(stackframe, _ => _.context.post) || [];
+  const preLines = stackframe.context?.pre || [];
+  const postLines = stackframe.context?.post || [];
   return [...preLines, line, ...postLines];
 }
 
 function getStartLineNumber(stackframe: IStackframeWithLineContext) {
-  const preLines = size(idx(stackframe, _ => _.context.pre) || []);
+  const preLines = size(stackframe.context?.pre || []);
   return stackframe.line.number - preLines;
 }
 
@@ -125,7 +124,7 @@ interface Props {
 export function Context({ stackframe, codeLanguage, isLibraryFrame }: Props) {
   const lines = getStackframeLines(stackframe);
   const startLineNumber = getStartLineNumber(stackframe);
-  const highlightedLineIndex = size(idx(stackframe, _ => _.context.pre) || []);
+  const highlightedLineIndex = size(stackframe.context?.pre || []);
   const language = codeLanguage || 'javascript'; // TODO: Add support for more languages
 
   return (

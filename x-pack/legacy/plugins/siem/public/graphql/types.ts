@@ -122,6 +122,10 @@ export interface TimelineInput {
 
   description?: Maybe<string>;
 
+  eventType?: Maybe<string>;
+
+  filters?: Maybe<FilterTimelineInput[]>;
+
   kqlMode?: Maybe<string>;
 
   kqlQuery?: Maybe<SerializedFilterQueryInput>;
@@ -129,6 +133,8 @@ export interface TimelineInput {
   title?: Maybe<string>;
 
   dateRange?: Maybe<DateRangePickerInput>;
+
+  savedQueryId?: Maybe<string>;
 
   sort?: Maybe<SortTimelineInput>;
 }
@@ -183,6 +189,46 @@ export interface QueryMatchInput {
   displayValue?: Maybe<string>;
 
   operator?: Maybe<string>;
+}
+
+export interface FilterTimelineInput {
+  exists?: Maybe<string>;
+
+  meta?: Maybe<FilterMetaTimelineInput>;
+
+  match_all?: Maybe<string>;
+
+  missing?: Maybe<string>;
+
+  query?: Maybe<string>;
+
+  range?: Maybe<string>;
+
+  script?: Maybe<string>;
+}
+
+export interface FilterMetaTimelineInput {
+  alias?: Maybe<string>;
+
+  controlledBy?: Maybe<string>;
+
+  disabled?: Maybe<boolean>;
+
+  field?: Maybe<string>;
+
+  formattedValue?: Maybe<string>;
+
+  index?: Maybe<string>;
+
+  key?: Maybe<string>;
+
+  negate?: Maybe<boolean>;
+
+  params?: Maybe<string>;
+
+  type?: Maybe<string>;
+
+  value?: Maybe<string>;
 }
 
 export interface SerializedFilterQueryInput {
@@ -323,6 +369,8 @@ export type ToDateArray = string[];
 
 export type ToBooleanArray = boolean[];
 
+export type ToAny = any;
+
 export type EsValue = any;
 
 // ====================================================
@@ -412,10 +460,14 @@ export interface Source {
   configuration: SourceConfiguration;
   /** The status of the source */
   status: SourceStatus;
+
+  AlertsHistogram: AlertsOverTimeData;
+
+  AnomaliesHistogram: AnomaliesOverTimeData;
   /** Gets Authentication success and failures based on a timerange */
   Authentications: AuthenticationsData;
 
-  AuthenticationsOverTime: AuthenticationsOverTimeData;
+  AuthenticationsHistogram: AuthenticationsOverTimeData;
 
   Timeline: TimelineData;
 
@@ -423,7 +475,7 @@ export interface Source {
 
   LastEventTime: LastEventTimeData;
 
-  EventsOverTime: EventsOverTimeData;
+  EventsHistogram: EventsOverTimeData;
   /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
   Hosts: HostsData;
 
@@ -446,6 +498,8 @@ export interface Source {
   NetworkTopNFlow: NetworkTopNFlowData;
 
   NetworkDns: NetworkDnsData;
+
+  NetworkDnsHistogram: NetworkDsOverTimeData;
 
   NetworkHttp: NetworkHttpData;
 
@@ -510,6 +564,36 @@ export interface IndexField {
   description?: Maybe<string>;
 
   format?: Maybe<string>;
+}
+
+export interface AlertsOverTimeData {
+  inspect?: Maybe<Inspect>;
+
+  matrixHistogramData: MatrixOverTimeHistogramData[];
+
+  totalCount: number;
+}
+
+export interface Inspect {
+  dsl: string[];
+
+  response: string[];
+}
+
+export interface MatrixOverTimeHistogramData {
+  x: number;
+
+  y: number;
+
+  g: string;
+}
+
+export interface AnomaliesOverTimeData {
+  inspect?: Maybe<Inspect>;
+
+  matrixHistogramData: MatrixOverTimeHistogramData[];
+
+  totalCount: number;
 }
 
 export interface AuthenticationsData {
@@ -646,26 +730,12 @@ export interface PageInfoPaginated {
   showMorePagesIndicator: boolean;
 }
 
-export interface Inspect {
-  dsl: string[];
-
-  response: string[];
-}
-
 export interface AuthenticationsOverTimeData {
   inspect?: Maybe<Inspect>;
 
-  authenticationsOverTime: MatrixOverTimeHistogramData[];
+  matrixHistogramData: MatrixOverTimeHistogramData[];
 
   totalCount: number;
-}
-
-export interface MatrixOverTimeHistogramData {
-  x: number;
-
-  y: number;
-
-  g: string;
 }
 
 export interface TimelineData {
@@ -720,6 +790,10 @@ export interface Ecs {
   host?: Maybe<HostEcsFields>;
 
   network?: Maybe<NetworkEcsField>;
+
+  rule?: Maybe<RuleEcsField>;
+
+  signal?: Maybe<SignalField>;
 
   source?: Maybe<SourceEcsFields>;
 
@@ -896,6 +970,78 @@ export interface NetworkEcsField {
   protocol?: Maybe<string[]>;
 
   transport?: Maybe<string[]>;
+}
+
+export interface RuleEcsField {
+  reference?: Maybe<string[]>;
+}
+
+export interface SignalField {
+  rule?: Maybe<RuleField>;
+
+  original_time?: Maybe<string[]>;
+}
+
+export interface RuleField {
+  id?: Maybe<string[]>;
+
+  rule_id?: Maybe<string[]>;
+
+  false_positives: string[];
+
+  saved_id?: Maybe<string[]>;
+
+  timeline_id?: Maybe<string[]>;
+
+  timeline_title?: Maybe<string[]>;
+
+  max_signals?: Maybe<number[]>;
+
+  risk_score?: Maybe<string[]>;
+
+  output_index?: Maybe<string[]>;
+
+  description?: Maybe<string[]>;
+
+  from?: Maybe<string[]>;
+
+  immutable?: Maybe<boolean[]>;
+
+  index?: Maybe<string[]>;
+
+  interval?: Maybe<string[]>;
+
+  language?: Maybe<string[]>;
+
+  query?: Maybe<string[]>;
+
+  references?: Maybe<string[]>;
+
+  severity?: Maybe<string[]>;
+
+  tags?: Maybe<string[]>;
+
+  threat?: Maybe<ToAny>;
+
+  type?: Maybe<string[]>;
+
+  size?: Maybe<string[]>;
+
+  to?: Maybe<string[]>;
+
+  enabled?: Maybe<boolean[]>;
+
+  filters?: Maybe<ToAny>;
+
+  created_at?: Maybe<string[]>;
+
+  updated_at?: Maybe<string[]>;
+
+  created_by?: Maybe<string[]>;
+
+  updated_by?: Maybe<string[]>;
+
+  version?: Maybe<string[]>;
 }
 
 export interface SuricataEcsFields {
@@ -1247,7 +1393,7 @@ export interface LastEventTimeData {
 export interface EventsOverTimeData {
   inspect?: Maybe<Inspect>;
 
-  eventsOverTime: MatrixOverTimeHistogramData[];
+  matrixHistogramData: MatrixOverTimeHistogramData[];
 
   totalCount: number;
 }
@@ -1582,6 +1728,8 @@ export interface NetworkDnsData {
   pageInfo: PageInfoPaginated;
 
   inspect?: Maybe<Inspect>;
+
+  histogram?: Maybe<MatrixOverOrdinalHistogramData[]>;
 }
 
 export interface NetworkDnsEdges {
@@ -1602,6 +1750,22 @@ export interface NetworkDnsItem {
   queryCount?: Maybe<number>;
 
   uniqueDomains?: Maybe<number>;
+}
+
+export interface MatrixOverOrdinalHistogramData {
+  x: string;
+
+  y: number;
+
+  g: string;
+}
+
+export interface NetworkDsOverTimeData {
+  inspect?: Maybe<Inspect>;
+
+  matrixHistogramData: MatrixOverTimeHistogramData[];
+
+  totalCount: number;
 }
 
 export interface NetworkHttpData {
@@ -1689,7 +1853,9 @@ export interface OverviewHostData {
 
   filebeatSystemModule?: Maybe<number>;
 
-  winlogbeat?: Maybe<number>;
+  winlogbeatSecurity?: Maybe<number>;
+
+  winlogbeatMWSysmonOperational?: Maybe<number>;
 
   inspect?: Maybe<Inspect>;
 }
@@ -1760,9 +1926,11 @@ export interface SayMyName {
 }
 
 export interface TimelineResult {
-  savedObjectId: string;
-
   columns?: Maybe<ColumnHeaderResult[]>;
+
+  created?: Maybe<number>;
+
+  createdBy?: Maybe<string>;
 
   dataProviders?: Maybe<DataProviderResult[]>;
 
@@ -1772,7 +1940,11 @@ export interface TimelineResult {
 
   eventIdToNoteIds?: Maybe<NoteResult[]>;
 
+  eventType?: Maybe<string>;
+
   favorite?: Maybe<FavoriteTimelineResult[]>;
+
+  filters?: Maybe<FilterTimelineResult[]>;
 
   kqlMode?: Maybe<string>;
 
@@ -1786,13 +1958,13 @@ export interface TimelineResult {
 
   pinnedEventsSaveObject?: Maybe<PinnedEvent[]>;
 
-  title?: Maybe<string>;
+  savedQueryId?: Maybe<string>;
+
+  savedObjectId: string;
 
   sort?: Maybe<SortTimelineResult>;
 
-  created?: Maybe<number>;
-
-  createdBy?: Maybe<string>;
+  title?: Maybe<string>;
 
   updated?: Maybe<number>;
 
@@ -1865,6 +2037,46 @@ export interface FavoriteTimelineResult {
   userName?: Maybe<string>;
 
   favoriteDate?: Maybe<number>;
+}
+
+export interface FilterTimelineResult {
+  exists?: Maybe<string>;
+
+  meta?: Maybe<FilterMetaTimelineResult>;
+
+  match_all?: Maybe<string>;
+
+  missing?: Maybe<string>;
+
+  query?: Maybe<string>;
+
+  range?: Maybe<string>;
+
+  script?: Maybe<string>;
+}
+
+export interface FilterMetaTimelineResult {
+  alias?: Maybe<string>;
+
+  controlledBy?: Maybe<string>;
+
+  disabled?: Maybe<boolean>;
+
+  field?: Maybe<string>;
+
+  formattedValue?: Maybe<string>;
+
+  index?: Maybe<string>;
+
+  key?: Maybe<string>;
+
+  negate?: Maybe<boolean>;
+
+  params?: Maybe<string>;
+
+  type?: Maybe<string>;
+
+  value?: Maybe<string>;
 }
 
 export interface SerializedFilterQueryResult {
@@ -2029,6 +2241,24 @@ export interface GetAllTimelineQueryArgs {
 
   onlyUserFavorite?: Maybe<boolean>;
 }
+export interface AlertsHistogramSourceArgs {
+  filterQuery?: Maybe<string>;
+
+  defaultIndex: string[];
+
+  timerange: TimerangeInput;
+
+  stackByField?: Maybe<string>;
+}
+export interface AnomaliesHistogramSourceArgs {
+  timerange: TimerangeInput;
+
+  filterQuery?: Maybe<string>;
+
+  defaultIndex: string[];
+
+  stackByField?: Maybe<string>;
+}
 export interface AuthenticationsSourceArgs {
   timerange: TimerangeInput;
 
@@ -2038,12 +2268,14 @@ export interface AuthenticationsSourceArgs {
 
   defaultIndex: string[];
 }
-export interface AuthenticationsOverTimeSourceArgs {
+export interface AuthenticationsHistogramSourceArgs {
   timerange: TimerangeInput;
 
   filterQuery?: Maybe<string>;
 
   defaultIndex: string[];
+
+  stackByField?: Maybe<string>;
 }
 export interface TimelineSourceArgs {
   pagination: PaginationInput;
@@ -2074,12 +2306,14 @@ export interface LastEventTimeSourceArgs {
 
   defaultIndex: string[];
 }
-export interface EventsOverTimeSourceArgs {
+export interface EventsHistogramSourceArgs {
   timerange: TimerangeInput;
 
   filterQuery?: Maybe<string>;
 
   defaultIndex: string[];
+
+  stackByField?: Maybe<string>;
 }
 export interface HostsSourceArgs {
   id?: Maybe<string>;
@@ -2208,9 +2442,20 @@ export interface NetworkDnsSourceArgs {
 
   sort: NetworkDnsSortField;
 
+  stackByField?: Maybe<string>;
+
   timerange: TimerangeInput;
 
   defaultIndex: string[];
+}
+export interface NetworkDnsHistogramSourceArgs {
+  filterQuery?: Maybe<string>;
+
+  defaultIndex: string[];
+
+  timerange: TimerangeInput;
+
+  stackByField?: Maybe<string>;
 }
 export interface NetworkHttpSourceArgs {
   id?: Maybe<string>;
@@ -2322,58 +2567,6 @@ export interface DeleteTimelineMutationArgs {
 // ====================================================
 // Documents
 // ====================================================
-
-export namespace GetAuthenticationsOverTimeQuery {
-  export type Variables = {
-    sourceId: string;
-    timerange: TimerangeInput;
-    defaultIndex: string[];
-    filterQuery?: Maybe<string>;
-    inspect: boolean;
-  };
-
-  export type Query = {
-    __typename?: 'Query';
-
-    source: Source;
-  };
-
-  export type Source = {
-    __typename?: 'Source';
-
-    id: string;
-
-    AuthenticationsOverTime: AuthenticationsOverTime;
-  };
-
-  export type AuthenticationsOverTime = {
-    __typename?: 'AuthenticationsOverTimeData';
-
-    authenticationsOverTime: _AuthenticationsOverTime[];
-
-    totalCount: number;
-
-    inspect: Maybe<Inspect>;
-  };
-
-  export type _AuthenticationsOverTime = {
-    __typename?: 'MatrixOverTimeHistogramData';
-
-    x: number;
-
-    y: number;
-
-    g: string;
-  };
-
-  export type Inspect = {
-    __typename?: 'Inspect';
-
-    dsl: string[];
-
-    response: string[];
-  };
-}
 
 export namespace GetAuthenticationsQuery {
   export type Variables = {
@@ -2503,58 +2696,6 @@ export namespace GetAuthenticationsQuery {
     fakeTotalCount: number;
 
     showMorePagesIndicator: boolean;
-  };
-
-  export type Inspect = {
-    __typename?: 'Inspect';
-
-    dsl: string[];
-
-    response: string[];
-  };
-}
-
-export namespace GetEventsOverTimeQuery {
-  export type Variables = {
-    sourceId: string;
-    timerange: TimerangeInput;
-    defaultIndex: string[];
-    filterQuery?: Maybe<string>;
-    inspect: boolean;
-  };
-
-  export type Query = {
-    __typename?: 'Query';
-
-    source: Source;
-  };
-
-  export type Source = {
-    __typename?: 'Source';
-
-    id: string;
-
-    EventsOverTime: EventsOverTime;
-  };
-
-  export type EventsOverTime = {
-    __typename?: 'EventsOverTimeData';
-
-    eventsOverTime: _EventsOverTime[];
-
-    totalCount: number;
-
-    inspect: Maybe<Inspect>;
-  };
-
-  export type _EventsOverTime = {
-    __typename?: 'MatrixOverTimeHistogramData';
-
-    x: number;
-
-    y: number;
-
-    g: string;
   };
 
   export type Inspect = {
@@ -3187,16 +3328,195 @@ export namespace GetKpiNetworkQuery {
   };
 }
 
+export namespace GetMatrixHistogramQuery {
+  export type Variables = {
+    isAlertsHistogram: boolean;
+    isAnomaliesHistogram: boolean;
+    isAuthenticationsHistogram: boolean;
+    isDnsHistogram: boolean;
+    defaultIndex: string[];
+    isEventsHistogram: boolean;
+    filterQuery?: Maybe<string>;
+    inspect: boolean;
+    sourceId: string;
+    stackByField?: Maybe<string>;
+    timerange: TimerangeInput;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'Source';
+
+    id: string;
+
+    AlertsHistogram: AlertsHistogram;
+
+    AnomaliesHistogram: AnomaliesHistogram;
+
+    AuthenticationsHistogram: AuthenticationsHistogram;
+
+    EventsHistogram: EventsHistogram;
+
+    NetworkDnsHistogram: NetworkDnsHistogram;
+  };
+
+  export type AlertsHistogram = {
+    __typename?: 'AlertsOverTimeData';
+
+    matrixHistogramData: MatrixHistogramData[];
+
+    totalCount: number;
+
+    inspect: Maybe<Inspect>;
+  };
+
+  export type MatrixHistogramData = {
+    __typename?: 'MatrixOverTimeHistogramData';
+
+    x: number;
+
+    y: number;
+
+    g: string;
+  };
+
+  export type Inspect = {
+    __typename?: 'Inspect';
+
+    dsl: string[];
+
+    response: string[];
+  };
+
+  export type AnomaliesHistogram = {
+    __typename?: 'AnomaliesOverTimeData';
+
+    matrixHistogramData: _MatrixHistogramData[];
+
+    totalCount: number;
+
+    inspect: Maybe<_Inspect>;
+  };
+
+  export type _MatrixHistogramData = {
+    __typename?: 'MatrixOverTimeHistogramData';
+
+    x: number;
+
+    y: number;
+
+    g: string;
+  };
+
+  export type _Inspect = {
+    __typename?: 'Inspect';
+
+    dsl: string[];
+
+    response: string[];
+  };
+
+  export type AuthenticationsHistogram = {
+    __typename?: 'AuthenticationsOverTimeData';
+
+    matrixHistogramData: __MatrixHistogramData[];
+
+    totalCount: number;
+
+    inspect: Maybe<__Inspect>;
+  };
+
+  export type __MatrixHistogramData = {
+    __typename?: 'MatrixOverTimeHistogramData';
+
+    x: number;
+
+    y: number;
+
+    g: string;
+  };
+
+  export type __Inspect = {
+    __typename?: 'Inspect';
+
+    dsl: string[];
+
+    response: string[];
+  };
+
+  export type EventsHistogram = {
+    __typename?: 'EventsOverTimeData';
+
+    matrixHistogramData: ___MatrixHistogramData[];
+
+    totalCount: number;
+
+    inspect: Maybe<___Inspect>;
+  };
+
+  export type ___MatrixHistogramData = {
+    __typename?: 'MatrixOverTimeHistogramData';
+
+    x: number;
+
+    y: number;
+
+    g: string;
+  };
+
+  export type ___Inspect = {
+    __typename?: 'Inspect';
+
+    dsl: string[];
+
+    response: string[];
+  };
+
+  export type NetworkDnsHistogram = {
+    __typename?: 'NetworkDsOverTimeData';
+
+    matrixHistogramData: ____MatrixHistogramData[];
+
+    totalCount: number;
+
+    inspect: Maybe<____Inspect>;
+  };
+
+  export type ____MatrixHistogramData = {
+    __typename?: 'MatrixOverTimeHistogramData';
+
+    x: number;
+
+    y: number;
+
+    g: string;
+  };
+
+  export type ____Inspect = {
+    __typename?: 'Inspect';
+
+    dsl: string[];
+
+    response: string[];
+  };
+}
+
 export namespace GetNetworkDnsQuery {
   export type Variables = {
-    sourceId: string;
-    sort: NetworkDnsSortField;
-    isPtrIncluded: boolean;
-    timerange: TimerangeInput;
-    pagination: PaginationInputPaginated;
-    filterQuery?: Maybe<string>;
     defaultIndex: string[];
+    filterQuery?: Maybe<string>;
     inspect: boolean;
+    isPtrIncluded: boolean;
+    pagination: PaginationInputPaginated;
+    sort: NetworkDnsSortField;
+    sourceId: string;
+    stackByField?: Maybe<string>;
+    timerange: TimerangeInput;
   };
 
   export type Query = {
@@ -3717,7 +4037,9 @@ export namespace GetOverviewHostQuery {
 
     filebeatSystemModule: Maybe<number>;
 
-    winlogbeat: Maybe<number>;
+    winlogbeatSecurity: Maybe<number>;
+
+    winlogbeatMWSysmonOperational: Maybe<number>;
 
     inspect: Maybe<Inspect>;
   };
@@ -4140,6 +4462,8 @@ export namespace GetTimelineQuery {
 
     host: Maybe<Host>;
 
+    rule: Maybe<Rule>;
+
     source: Maybe<_Source>;
 
     destination: Maybe<Destination>;
@@ -4149,6 +4473,8 @@ export namespace GetTimelineQuery {
     endgame: Maybe<Endgame>;
 
     geo: Maybe<__Geo>;
+
+    signal: Maybe<Signal>;
 
     suricata: Maybe<Suricata>;
 
@@ -4353,6 +4679,12 @@ export namespace GetTimelineQuery {
     ip: Maybe<string[]>;
   };
 
+  export type Rule = {
+    __typename?: 'RuleEcsField';
+
+    reference: Maybe<string[]>;
+  };
+
   export type _Source = {
     __typename?: 'SourceEcsFields';
 
@@ -4467,6 +4799,40 @@ export namespace GetTimelineQuery {
     region_name: Maybe<string[]>;
 
     country_iso_code: Maybe<string[]>;
+  };
+
+  export type Signal = {
+    __typename?: 'SignalField';
+
+    original_time: Maybe<string[]>;
+
+    rule: Maybe<_Rule>;
+  };
+
+  export type _Rule = {
+    __typename?: 'RuleField';
+
+    id: Maybe<string[]>;
+
+    saved_id: Maybe<string[]>;
+
+    timeline_id: Maybe<string[]>;
+
+    timeline_title: Maybe<string[]>;
+
+    output_index: Maybe<string[]>;
+
+    from: Maybe<string[]>;
+
+    index: Maybe<string[]>;
+
+    language: Maybe<string[]>;
+
+    query: Maybe<string[]>;
+
+    to: Maybe<string[]>;
+
+    filters: Maybe<ToAny>;
   };
 
   export type Suricata = {
@@ -4870,9 +5236,13 @@ export namespace GetOneTimeline {
 
     description: Maybe<string>;
 
+    eventType: Maybe<string>;
+
     eventIdToNoteIds: Maybe<EventIdToNoteIds[]>;
 
     favorite: Maybe<Favorite[]>;
+
+    filters: Maybe<Filters[]>;
 
     kqlMode: Maybe<string>;
 
@@ -4887,6 +5257,8 @@ export namespace GetOneTimeline {
     pinnedEventsSaveObject: Maybe<PinnedEventsSaveObject[]>;
 
     title: Maybe<string>;
+
+    savedQueryId: Maybe<string>;
 
     sort: Maybe<Sort>;
 
@@ -5029,6 +5401,50 @@ export namespace GetOneTimeline {
     favoriteDate: Maybe<number>;
   };
 
+  export type Filters = {
+    __typename?: 'FilterTimelineResult';
+
+    meta: Maybe<Meta>;
+
+    query: Maybe<string>;
+
+    exists: Maybe<string>;
+
+    match_all: Maybe<string>;
+
+    missing: Maybe<string>;
+
+    range: Maybe<string>;
+
+    script: Maybe<string>;
+  };
+
+  export type Meta = {
+    __typename?: 'FilterMetaTimelineResult';
+
+    alias: Maybe<string>;
+
+    controlledBy: Maybe<string>;
+
+    disabled: Maybe<boolean>;
+
+    field: Maybe<string>;
+
+    formattedValue: Maybe<string>;
+
+    index: Maybe<string>;
+
+    key: Maybe<string>;
+
+    negate: Maybe<boolean>;
+
+    params: Maybe<string>;
+
+    type: Maybe<string>;
+
+    value: Maybe<string>;
+  };
+
   export type KqlQuery = {
     __typename?: 'SerializedFilterQueryResult';
 
@@ -5140,7 +5556,11 @@ export namespace PersistTimelineMutation {
 
     description: Maybe<string>;
 
+    eventType: Maybe<string>;
+
     favorite: Maybe<Favorite[]>;
+
+    filters: Maybe<Filters[]>;
 
     kqlMode: Maybe<string>;
 
@@ -5149,6 +5569,8 @@ export namespace PersistTimelineMutation {
     title: Maybe<string>;
 
     dateRange: Maybe<DateRange>;
+
+    savedQueryId: Maybe<string>;
 
     sort: Maybe<Sort>;
 
@@ -5255,6 +5677,50 @@ export namespace PersistTimelineMutation {
     userName: Maybe<string>;
 
     favoriteDate: Maybe<number>;
+  };
+
+  export type Filters = {
+    __typename?: 'FilterTimelineResult';
+
+    meta: Maybe<Meta>;
+
+    query: Maybe<string>;
+
+    exists: Maybe<string>;
+
+    match_all: Maybe<string>;
+
+    missing: Maybe<string>;
+
+    range: Maybe<string>;
+
+    script: Maybe<string>;
+  };
+
+  export type Meta = {
+    __typename?: 'FilterMetaTimelineResult';
+
+    alias: Maybe<string>;
+
+    controlledBy: Maybe<string>;
+
+    disabled: Maybe<boolean>;
+
+    field: Maybe<string>;
+
+    formattedValue: Maybe<string>;
+
+    index: Maybe<string>;
+
+    key: Maybe<string>;
+
+    negate: Maybe<boolean>;
+
+    params: Maybe<string>;
+
+    type: Maybe<string>;
+
+    value: Maybe<string>;
   };
 
   export type KqlQuery = {

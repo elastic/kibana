@@ -44,6 +44,11 @@ const WWWAuthenticateHeaderName = 'WWW-Authenticate';
  */
 export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
   /**
+   * Type of the provider.
+   */
+  static readonly type = 'kerberos';
+
+  /**
    * Performs Kerberos request authentication.
    * @param request Request instance.
    * @param [state] Optional state object associated with the provider.
@@ -54,7 +59,8 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
     const authenticationScheme = getRequestAuthenticationScheme(request);
     if (
       authenticationScheme &&
-      (authenticationScheme !== 'negotiate' && authenticationScheme !== 'bearer')
+      authenticationScheme !== 'negotiate' &&
+      authenticationScheme !== 'bearer'
     ) {
       this.logger.debug(`Unsupported authentication scheme: ${authenticationScheme}`);
       return AuthenticationResult.notHandled();
@@ -106,7 +112,7 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
       return DeauthenticationResult.failed(err);
     }
 
-    return DeauthenticationResult.redirectTo('/logged_out');
+    return DeauthenticationResult.redirectTo(`${this.options.basePath.serverBasePath}/logged_out`);
   }
 
   /**

@@ -5,3 +5,4 @@
  */
 
 export { initBulkUploader } from './init';
+export { registerCollectors } from './collectors';

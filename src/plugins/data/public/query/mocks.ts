@@ -35,6 +35,7 @@ const createStartContractMock = () => {
   const startContract = {
     filterManager: jest.fn() as any,
     timefilter: timefilterServiceMock.createStartContract(),
+    savedQueries: jest.fn() as any,
   };
 
   return startContract;

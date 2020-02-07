@@ -18,7 +18,7 @@ interface LogTextStreamLoadingItemViewProps {
   hasMore: boolean;
   isLoading: boolean;
   isStreaming: boolean;
-  lastStreamingUpdate: number | null;
+  lastStreamingUpdate: Date | null;
   onLoadMore?: () => void;
 }
 
@@ -114,7 +114,7 @@ interface ProgressEntryProps {
   isLoading: boolean;
 }
 
-const ProgressEntry: React.SFC<ProgressEntryProps> = props => {
+const ProgressEntry: React.FC<ProgressEntryProps> = props => {
   const { alignment, children, className, color, isLoading } = props;
 
   // NOTE: styled-components seems to make all props in EuiProgress required, so this

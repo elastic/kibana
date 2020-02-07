@@ -19,12 +19,7 @@
 
 import React from 'react';
 
-import {
-  GuideDemo,
-  GuidePage,
-  GuideSection,
-  GuideSectionTypes,
-} from '../../components';
+import { GuideDemo, GuidePage, GuideSection, GuideSectionTypes } from '../../components';
 
 import html from './status_text.html';
 import infoHtml from './status_text_info.html';
@@ -36,62 +31,62 @@ export default props => (
   <GuidePage title={props.route.name}>
     <GuideSection
       title="StatusText"
-      source={[{
-        type: GuideSectionTypes.HTML,
-        code: html,
-      }]}
+      source={[
+        {
+          type: GuideSectionTypes.HTML,
+          code: html,
+        },
+      ]}
     >
-      <GuideDemo
-        html={html}
-      />
+      <GuideDemo html={html} />
     </GuideSection>
 
     <GuideSection
       title="Info"
-      source={[{
-        type: GuideSectionTypes.HTML,
-        code: infoHtml,
-      }]}
+      source={[
+        {
+          type: GuideSectionTypes.HTML,
+          code: infoHtml,
+        },
+      ]}
     >
-      <GuideDemo
-        html={infoHtml}
-      />
+      <GuideDemo html={infoHtml} />
     </GuideSection>
 
     <GuideSection
       title="Success"
-      source={[{
-        type: GuideSectionTypes.HTML,
-        code: successHtml,
-      }]}
+      source={[
+        {
+          type: GuideSectionTypes.HTML,
+          code: successHtml,
+        },
+      ]}
     >
-      <GuideDemo
-        html={successHtml}
-      />
+      <GuideDemo html={successHtml} />
     </GuideSection>
 
     <GuideSection
       title="Warning"
-      source={[{
-        type: GuideSectionTypes.HTML,
-        code: warningHtml,
-      }]}
+      source={[
+        {
+          type: GuideSectionTypes.HTML,
+          code: warningHtml,
+        },
+      ]}
     >
-      <GuideDemo
-        html={warningHtml}
-      />
+      <GuideDemo html={warningHtml} />
     </GuideSection>
 
     <GuideSection
       title="Error"
-      source={[{
-        type: GuideSectionTypes.HTML,
-        code: errorHtml,
-      }]}
+      source={[
+        {
+          type: GuideSectionTypes.HTML,
+          code: errorHtml,
+        },
+      ]}
     >
-      <GuideDemo
-        html={errorHtml}
-      />
+      <GuideDemo html={errorHtml} />
     </GuideSection>
   </GuidePage>
 );

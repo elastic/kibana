@@ -4,16 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { flattenObject } from '../../public/lib/flatten_object';
+import { flattenObject } from '../../public/app/lib/flatten_object';
 describe('flatten_object', () => {
   test('it flattens an object', () => {
     const obj = {
       foo: {
         nested: {
-          field: 1
-        }
+          field: 1,
+        },
       },
-      bar: 3
+      bar: 3,
     };
     expect(flattenObject(obj)).toMatchSnapshot();
   });
@@ -21,12 +21,10 @@ describe('flatten_object', () => {
     const obj = {
       foo: {
         nested: {
-          field: [
-            1, 2, 3
-          ]
-        }
+          field: [1, 2, 3],
+        },
       },
-      bar: 3
+      bar: 3,
     };
     expect(flattenObject(obj)).toMatchSnapshot();
   });

@@ -188,7 +188,7 @@ exports[`TelemetryOptIn should display when telemetry not opted in 1`] = `
                             />
                           </ForwardRef>,
                           "telemetryPrivacyStatementLink": <ForwardRef
-                            href="https://www.elastic.co/legal/telemetry-privacy-statement"
+                            href="https://www.elastic.co/legal/privacy-statement"
                             target="_blank"
                           >
                             <FormattedMessage
@@ -275,7 +275,7 @@ exports[`TelemetryOptIn should display when telemetry not opted in 1`] = `
                               />
                             </ForwardRef>,
                             "telemetryPrivacyStatementLink": <ForwardRef
-                              href="https://www.elastic.co/legal/telemetry-privacy-statement"
+                              href="https://www.elastic.co/legal/privacy-statement"
                               target="_blank"
                             >
                               <FormattedMessage

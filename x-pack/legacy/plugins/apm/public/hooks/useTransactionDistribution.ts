@@ -49,19 +49,10 @@ export function useTransactionDistribution(urlParams: IUrlParams) {
           }
         });
       }
-      // the histogram should not be refetched if the transactionId or traceId changes
-      // eslint-disable-next-line react-hooks/exhaustive-deps
     },
-    [
-      serviceName,
-      start,
-      end,
-      transactionType,
-      transactionName,
-      transactionId,
-      traceId,
-      uiFilters
-    ]
+    // the histogram should not be refetched if the transactionId or traceId changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [serviceName, start, end, transactionType, transactionName, uiFilters]
   );
 
   return { data, status, error };

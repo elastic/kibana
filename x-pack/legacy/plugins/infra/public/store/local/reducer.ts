@@ -6,8 +6,6 @@
 
 import { combineReducers } from 'redux';
 
-import { initialLogFilterState, logFilterReducer, LogFilterState } from './log_filter';
-import { initialLogPositionState, logPositionReducer, LogPositionState } from './log_position';
 import { initialWaffleFilterState, waffleFilterReducer, WaffleFilterState } from './waffle_filter';
 import {
   initialWaffleOptionsState,
@@ -17,24 +15,18 @@ import {
 import { initialWaffleTimeState, waffleTimeReducer, WaffleTimeState } from './waffle_time';
 
 export interface LocalState {
-  logFilter: LogFilterState;
-  logPosition: LogPositionState;
   waffleFilter: WaffleFilterState;
   waffleTime: WaffleTimeState;
   waffleMetrics: WaffleOptionsState;
 }
 
 export const initialLocalState: LocalState = {
-  logFilter: initialLogFilterState,
-  logPosition: initialLogPositionState,
   waffleFilter: initialWaffleFilterState,
   waffleTime: initialWaffleTimeState,
   waffleMetrics: initialWaffleOptionsState,
 };
 
 export const localReducer = combineReducers<LocalState>({
-  logFilter: logFilterReducer,
-  logPosition: logPositionReducer,
   waffleFilter: waffleFilterReducer,
   waffleTime: waffleTimeReducer,
   waffleMetrics: waffleOptionsReducer,

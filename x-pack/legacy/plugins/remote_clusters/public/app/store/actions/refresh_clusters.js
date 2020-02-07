@@ -6,27 +6,25 @@
 
 import { i18n } from '@kbn/i18n';
 
-import {
-  loadClusters as sendLoadClustersRequest,
-  showApiWarning,
-} from '../../services';
+import { loadClusters as sendLoadClustersRequest, showApiWarning } from '../../services';
 
-import {
-  REFRESH_CLUSTERS_SUCCESS,
-} from '../action_types';
+import { REFRESH_CLUSTERS_SUCCESS } from '../action_types';
 
-export const refreshClusters = () => async (dispatch) => {
+export const refreshClusters = () => async dispatch => {
   let clusters;
   try {
     clusters = await sendLoadClustersRequest();
   } catch (error) {
-    return showApiWarning(error, i18n.translate('xpack.remoteClusters.refreshAction.errorTitle', {
-      defaultMessage: 'Error refreshing remote clusters',
-    }));
+    return showApiWarning(
+      error,
+      i18n.translate('xpack.remoteClusters.refreshAction.errorTitle', {
+        defaultMessage: 'Error refreshing remote clusters',
+      })
+    );
   }
 
   dispatch({
     type: REFRESH_CLUSTERS_SUCCESS,
-    payload: { clusters }
+    payload: { clusters },
   });
 };

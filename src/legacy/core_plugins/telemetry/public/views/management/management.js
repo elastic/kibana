@@ -19,16 +19,17 @@
 import React from 'react';
 import routes from 'ui/routes';
 
-import { registerSettingsComponent, PAGE_FOOTER_COMPONENT } from 'ui/management';
+import { npSetup } from 'ui/new_platform';
 import { TelemetryOptInProvider } from '../../services';
 import { TelemetryForm } from '../../components';
 
 routes.defaults(/\/management/, {
   resolve: {
-    telemetryManagementSection: function (Private) {
+    telemetryManagementSection: function(Private) {
       const telemetryOptInProvider = Private(TelemetryOptInProvider);
+      const componentRegistry = npSetup.plugins.advancedSettings.component;
 
-      const Component = (props) => (
+      const Component = props => (
         <TelemetryForm
           showAppliesSettingMessage={true}
           telemetryOptInProvider={telemetryOptInProvider}
@@ -36,7 +37,11 @@ routes.defaults(/\/management/, {
         />
       );
 
-      registerSettingsComponent(PAGE_FOOTER_COMPONENT, Component, true);
-    }
-  }
+      componentRegistry.register(
+        componentRegistry.componentType.PAGE_FOOTER_COMPONENT,
+        Component,
+        true
+      );
+    },
+  },
 });

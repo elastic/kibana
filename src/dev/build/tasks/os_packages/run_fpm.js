@@ -25,23 +25,15 @@ export async function runFpm(config, log, build, type, pkgSpecificFlags) {
   const linux = config.getLinuxPlatform();
   const version = config.getBuildVersion();
 
-  const resolveWithTrailingSlash = (...paths) => (
-    `${resolve(...paths)}/`
-  );
+  const resolveWithTrailingSlash = (...paths) => `${resolve(...paths)}/`;
 
-  const fromBuild = (...paths) => (
-    build.resolvePathForPlatform(linux, ...paths)
-  );
+  const fromBuild = (...paths) => build.resolvePathForPlatform(linux, ...paths);
 
   const pickLicense = () => {
     if (build.isOss()) {
-      return type === 'rpm'
-        ? 'ASL 2.0'
-        : 'ASL-2.0';
+      return type === 'rpm' ? 'ASL 2.0' : 'ASL-2.0';
     } else {
-      return type === 'rpm'
-        ? 'Elastic License'
-        : 'Elastic-License';
+      return type === 'rpm' ? 'Elastic License' : 'Elastic-License';
     }
   };
 
@@ -50,54 +42,73 @@ export async function runFpm(config, log, build, type, pkgSpecificFlags) {
     '--force',
 
     // define the type for this package
-    '-t', type,
+    '-t',
+    type,
 
     // we force dashes in the version file name because otherwise fpm uses
     // the filtered package version, which would have dashes replaced with
     // underscores
-    '--package', config.resolveFromTarget(`NAME-${version}-ARCH.TYPE`),
+    '--package',
+    config.resolveFromTarget(`NAME-${version}-ARCH.TYPE`),
 
     // input type
-    '-s', 'dir',
+    '-s',
+    'dir',
 
     // general info about the package
-    '--name', build.isOss()
-      ? 'kibana-oss'
-      : 'kibana',
-    '--description', 'Explore\ and\ visualize\ your\ Elasticsearch\ data',
-    '--version', version,
-    '--url', 'https://www.elastic.co',
-    '--vendor', 'Elasticsearch,\ Inc.',
-    '--maintainer', 'Kibana Team\ \<info@elastic.co\>',
-    '--license', pickLicense(),
+    '--name',
+    build.isOss() ? 'kibana-oss' : 'kibana',
+    '--description',
+    'Explore and visualize your Elasticsearch data',
+    '--version',
+    version,
+    '--url',
+    'https://www.elastic.co',
+    '--vendor',
+    'Elasticsearch, Inc.',
+    '--maintainer',
+    'Kibana Team <info@elastic.co>',
+    '--license',
+    pickLicense(),
 
     // prevent installing kibana if installing kibana-oss and vice versa
-    '--conflicts', build.isOss()
-      ? 'kibana'
-      : 'kibana-oss',
+    '--conflicts',
+    build.isOss() ? 'kibana' : 'kibana-oss',
 
     // define install/uninstall scripts
-    '--after-install', resolve(__dirname, 'package_scripts/post_install.sh'),
-    '--before-install', resolve(__dirname, 'package_scripts/pre_install.sh'),
-    '--before-remove', resolve(__dirname, 'package_scripts/pre_remove.sh'),
-    '--after-remove', resolve(__dirname, 'package_scripts/post_remove.sh'),
+    '--after-install',
+    resolve(__dirname, 'package_scripts/post_install.sh'),
+    '--before-install',
+    resolve(__dirname, 'package_scripts/pre_install.sh'),
+    '--before-remove',
+    resolve(__dirname, 'package_scripts/pre_remove.sh'),
+    '--after-remove',
+    resolve(__dirname, 'package_scripts/post_remove.sh'),
 
     // tell fpm about the config file so that it is called out in the package definition
-    '--config-files', `/etc/kibana/kibana.yml`,
+    '--config-files',
+    `/etc/kibana/kibana.yml`,
 
     // define template values that will be injected into the install/uninstall
     // scripts, also causes scripts to be processed with erb
-    '--template-value', `user=kibana`,
-    '--template-value', `group=kibana`,
-    '--template-value', `configDir=/etc/kibana`,
-    '--template-value', `pluginsDir=/usr/share/kibana/plugins`,
-    '--template-value', `dataDir=/var/lib/kibana`,
+    '--template-value',
+    `user=kibana`,
+    '--template-value',
+    `group=kibana`,
+    '--template-value',
+    `configDir=/etc/kibana`,
+    '--template-value',
+    `pluginsDir=/usr/share/kibana/plugins`,
+    '--template-value',
+    `dataDir=/var/lib/kibana`,
 
     // config and data directories are copied to /usr/share and /var/lib
     // below, so exclude them from the main package source located in
     // /usr/share/kibana/config. PATHS MUST BE RELATIVE, so drop the leading slash
-    '--exclude', `usr/share/kibana/config`,
-    '--exclude', `usr/share/kibana/data`,
+    '--exclude',
+    `usr/share/kibana/config`,
+    '--exclude',
+    `usr/share/kibana/data`,
 
     // flags specific to the package we are building, supplied by tasks below
     ...pkgSpecificFlags,

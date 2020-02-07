@@ -5,20 +5,19 @@
  */
 import { i18n } from '@kbn/i18n';
 import React, { Fragment } from 'react';
-import {
-  EuiSpacer,
-  EuiCodeBlock,
-  EuiText
-} from '@elastic/eui';
+import { EuiSpacer, EuiCodeBlock, EuiText } from '@elastic/eui';
 import { Monospace } from '../components/monospace';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { getDisableStatusStep } from '../common_instructions';
 
 export function getApmInstructionsForDisablingInternalCollection(product, meta) {
   const disableInternalCollectionStep = {
-    title: i18n.translate('xpack.monitoring.metricbeatMigration.apmInstructions.disableInternalCollection.title', {
-      defaultMessage: 'Disable self monitoring of the APM server\'s monitoring metrics'
-    }),
+    title: i18n.translate(
+      'xpack.monitoring.metricbeatMigration.apmInstructions.disableInternalCollection.title',
+      {
+        defaultMessage: "Disable self monitoring of the APM server's monitoring metrics",
+      }
+    ),
     children: (
       <Fragment>
         <EuiText>
@@ -27,21 +26,16 @@ export function getApmInstructionsForDisablingInternalCollection(product, meta) 
               id="xpack.monitoring.metricbeatMigration.apmInstructions.disableInternalCollection.description"
               defaultMessage="Add the following setting in the APM server's configuration file ({file}):"
               values={{
-                file: (
-                  <Monospace>apm-server.yml</Monospace>
-                )
+                file: <Monospace>apm-server.yml</Monospace>,
               }}
             />
           </p>
         </EuiText>
-        <EuiSpacer size="s"/>
-        <EuiCodeBlock
-          isCopyable
-          language="bash"
-        >
+        <EuiSpacer size="s" />
+        <EuiCodeBlock isCopyable language="bash">
           monitoring.enabled: false
         </EuiCodeBlock>
-        <EuiSpacer size="s"/>
+        <EuiSpacer size="s" />
         <EuiText>
           <p>
             <FormattedMessage
@@ -51,13 +45,10 @@ export function getApmInstructionsForDisablingInternalCollection(product, meta) 
           </p>
         </EuiText>
       </Fragment>
-    )
+    ),
   };
 
   const migrationStatusStep = getDisableStatusStep(product, meta);
 
-  return [
-    disableInternalCollectionStep,
-    migrationStatusStep
-  ];
+  return [disableInternalCollectionStep, migrationStatusStep];
 }

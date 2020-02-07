@@ -8,8 +8,6 @@ import React, { useEffect, useState, FC } from 'react';
 
 import { npStart } from 'ui/new_platform';
 
-import { start as data } from '../../../../../../../../src/legacy/core_plugins/data/public/legacy';
-
 import { useAppDependencies } from '../../app_dependencies';
 
 import {
@@ -21,7 +19,7 @@ import {
 
 import { KibanaContext, KibanaContextValue } from './kibana_context';
 
-const { indexPatterns } = data.indexPatterns;
+const indexPatterns = npStart.plugins.data.indexPatterns;
 const savedObjectsClient = npStart.core.savedObjects.client;
 
 interface Props {

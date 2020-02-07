@@ -7,9 +7,12 @@
 import { CANVAS as label } from '../../i18n';
 // @ts-ignore Untyped local
 import { ecommerceSavedObjects, flightsSavedObjects, webLogsSavedObjects } from './index';
+import { SampleDataRegistrySetup } from '../../../../../../src/plugins/home/server';
 
-// @ts-ignore: Untyped in Kibana
-export function loadSampleData(addSavedObjectsToSampleDataset, addAppLinksToSampleDataset) {
+export function loadSampleData(
+  addSavedObjectsToSampleDataset: SampleDataRegistrySetup['addSavedObjectsToSampleDataset'],
+  addAppLinksToSampleDataset: SampleDataRegistrySetup['addAppLinksToSampleDataset']
+) {
   const now = new Date();
   const nowTimestamp = now.toISOString();
 
@@ -27,23 +30,29 @@ export function loadSampleData(addSavedObjectsToSampleDataset, addAppLinksToSamp
   }
 
   addSavedObjectsToSampleDataset('ecommerce', updateCanvasWorkpadTimestamps(ecommerceSavedObjects));
-  addAppLinksToSampleDataset('ecommerce', {
-    path: '/app/canvas#/workpad/workpad-e08b9bdb-ec14-4339-94c4-063bddfd610e',
-    icon: 'canvasApp',
-    label,
-  });
+  addAppLinksToSampleDataset('ecommerce', [
+    {
+      path: '/app/canvas#/workpad/workpad-e08b9bdb-ec14-4339-94c4-063bddfd610e',
+      icon: 'canvasApp',
+      label,
+    },
+  ]);
 
   addSavedObjectsToSampleDataset('flights', updateCanvasWorkpadTimestamps(flightsSavedObjects));
-  addAppLinksToSampleDataset('flights', {
-    path: '/app/canvas#/workpad/workpad-a474e74b-aedc-47c3-894a-db77e62c41e0',
-    icon: 'canvasApp',
-    label,
-  });
+  addAppLinksToSampleDataset('flights', [
+    {
+      path: '/app/canvas#/workpad/workpad-a474e74b-aedc-47c3-894a-db77e62c41e0',
+      icon: 'canvasApp',
+      label,
+    },
+  ]);
 
   addSavedObjectsToSampleDataset('logs', updateCanvasWorkpadTimestamps(webLogsSavedObjects));
-  addAppLinksToSampleDataset('logs', {
-    path: '/app/canvas#/workpad/workpad-ad72a4e9-b422-480c-be6d-a64a0b79541d',
-    icon: 'canvasApp',
-    label,
-  });
+  addAppLinksToSampleDataset('logs', [
+    {
+      path: '/app/canvas#/workpad/workpad-ad72a4e9-b422-480c-be6d-a64a0b79541d',
+      icon: 'canvasApp',
+      label,
+    },
+  ]);
 }

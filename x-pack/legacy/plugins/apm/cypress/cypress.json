@@ -1,7 +1,6 @@
 {
   "baseUrl": "http://localhost:5601",
   "video": false,
-
   "trashAssetsBeforeRuns": false,
   "fileServerFolder": "../",
   "fixturesFolder": "./fixtures",
@@ -10,5 +9,10 @@
   "screenshotsFolder": "./screenshots",
   "supportFile": "./support/index.ts",
   "videosFolder": "./videos",
-  "useRelativeSnapshots": true
+  "useRelativeSnapshots": true,
+  "reporter": "junit",
+  "reporterOptions": {
+    "mochaFile": "[hash]-e2e-tests.xml",
+    "toConsole": false
+  }
 }

@@ -433,61 +433,6 @@ describe('IndexPattern Data Source', () => {
       });
     });
 
-    describe('removeColumnInTableSpec', () => {
-      it('should remove the specified column', async () => {
-        const initialState = await indexPatternDatasource.initialize(persistedState);
-        const setState = jest.fn();
-        const sampleColumn: IndexPatternColumn = {
-          dataType: 'number',
-          isBucketed: false,
-          label: 'foo',
-          operationType: 'max',
-          sourceField: 'baz',
-          suggestedPriority: 0,
-        };
-        const columns: Record<string, IndexPatternColumn> = {
-          a: {
-            ...sampleColumn,
-            suggestedPriority: 0,
-          },
-          b: {
-            ...sampleColumn,
-            suggestedPriority: 1,
-          },
-          c: {
-            ...sampleColumn,
-            suggestedPriority: 2,
-          },
-        };
-        const api = indexPatternDatasource.getPublicAPI({
-          state: {
-            ...initialState,
-            layers: {
-              first: {
-                ...initialState.layers.first,
-                columns,
-                columnOrder: ['a', 'b', 'c'],
-              },
-            },
-          },
-          setState,
-          layerId: 'first',
-          dateRange: {
-            fromDate: 'now-1y',
-            toDate: 'now',
-          },
-        });
-
-        api.removeColumnInTableSpec('b');
-
-        expect(setState.mock.calls[0][0].layers.first.columnOrder).toEqual(['a', 'c']);
-        expect(setState.mock.calls[0][0].layers.first.columns).toEqual({
-          a: columns.a,
-          c: columns.c,
-        });
-      });
-    });
-
     describe('getOperationForColumnId', () => {
       it('should get an operation for col1', () => {
         expect(publicAPI.getOperationForColumnId('col1')).toEqual({

@@ -6,8 +6,7 @@
 
 import { Type } from '@kbn/config-schema';
 import { kibanaResponseFactory, RequestHandlerContext } from '../../../../../../../src/core/server';
-import { ILicenseCheck } from '../../../../../licensing/server';
-import { LICENSE_STATUS } from '../../../../../licensing/server/constants';
+import { LicenseCheck, LICENSE_CHECK_STATE } from '../../../../../licensing/server';
 import { GLOBAL_RESOURCE } from '../../../../common/constants';
 import { definePutRolesRoutes } from './put';
 
@@ -45,7 +44,7 @@ const privilegeMap = {
 
 interface TestOptions {
   name: string;
-  licenseCheckResult?: ILicenseCheck;
+  licenseCheckResult?: LicenseCheck;
   apiResponses?: Array<() => Promise<unknown>>;
   payload?: Record<string, any>;
   asserts: { statusCode: number; result?: Record<string, any>; apiArguments?: unknown[][] };
@@ -56,14 +55,14 @@ const putRoleTest = (
   {
     name,
     payload,
-    licenseCheckResult = { check: LICENSE_STATUS.Valid },
+    licenseCheckResult = { state: LICENSE_CHECK_STATE.Valid },
     apiResponses = [],
     asserts,
   }: TestOptions
 ) => {
   test(description, async () => {
     const mockRouteDefinitionParams = routeDefinitionParamsMock.create();
-    mockRouteDefinitionParams.authz.getApplicationName.mockReturnValue(application);
+    mockRouteDefinitionParams.authz.applicationName = application;
     mockRouteDefinitionParams.authz.privileges.get.mockReturnValue(privilegeMap);
 
     const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
@@ -139,9 +138,9 @@ describe('PUT role', () => {
   });
 
   describe('failure', () => {
-    putRoleTest(`returns result of license checker`, {
+    putRoleTest('returns result of license checker', {
       name: 'foo-role',
-      licenseCheckResult: { check: LICENSE_STATUS.Invalid, message: 'test forbidden message' },
+      licenseCheckResult: { state: LICENSE_CHECK_STATE.Invalid, message: 'test forbidden message' },
       asserts: { statusCode: 403, result: { message: 'test forbidden message' } },
     });
   });

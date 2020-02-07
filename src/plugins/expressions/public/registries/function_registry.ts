@@ -19,9 +19,12 @@
 
 /* eslint-disable max-classes-per-file */
 
-import { AnyExpressionFunction, FunctionHandlers } from '../types/functions';
-import { ExpressionValue } from '../types/types';
-import { ArgumentType } from '../types';
+import {
+  ArgumentType,
+  ExpressionValue,
+  AnyExpressionFunction,
+  FunctionHandlers,
+} from '../../common/types';
 import { Registry } from './registry';
 
 export class FunctionParameter {

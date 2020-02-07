@@ -5,19 +5,18 @@
  */
 
 import {
-  IClusterClient,
+  CoreSetup,
   SavedObject,
   SavedObjectAttributes,
   SavedObjectsBaseOptions,
 } from 'src/core/server';
-import { LegacyAPI } from '../plugin';
 import { EncryptedSavedObjectsService } from '../crypto';
 import { EncryptedSavedObjectsClientWrapper } from './encrypted_saved_objects_client_wrapper';
 
 interface SetupSavedObjectsParams {
-  adminClusterClient: IClusterClient;
   service: PublicMethodsOf<EncryptedSavedObjectsService>;
-  savedObjects: LegacyAPI['savedObjects'];
+  savedObjects: CoreSetup['savedObjects'];
+  getStartServices: CoreSetup['getStartServices'];
 }
 
 export interface SavedObjectsSetup {
@@ -29,31 +28,31 @@ export interface SavedObjectsSetup {
 }
 
 export function setupSavedObjects({
-  adminClusterClient,
   service,
   savedObjects,
+  getStartServices,
 }: SetupSavedObjectsParams): SavedObjectsSetup {
   // Register custom saved object client that will encrypt, decrypt and strip saved object
   // attributes where appropriate for any saved object repository request. We choose max possible
   // priority for this wrapper to allow all other wrappers to set proper `namespace` for the Saved
   // Object (e.g. wrapper registered by the Spaces plugin) before we encrypt attributes since
   // `namespace` is included into AAD.
-  savedObjects.addScopedSavedObjectsClientWrapperFactory(
+  savedObjects.addClientWrapper(
     Number.MAX_SAFE_INTEGER,
     'encryptedSavedObjects',
     ({ client: baseClient }) => new EncryptedSavedObjectsClientWrapper({ baseClient, service })
   );
 
-  const internalRepository = savedObjects.getSavedObjectsRepository(
-    adminClusterClient.callAsInternalUser
+  const internalRepositoryPromise = getStartServices().then(([core]) =>
+    core.savedObjects.createInternalRepository()
   );
-
   return {
     getDecryptedAsInternalUser: async <T extends SavedObjectAttributes = any>(
       type: string,
       id: string,
       options?: SavedObjectsBaseOptions
     ): Promise<SavedObject<T>> => {
+      const internalRepository = await internalRepositoryPromise;
       const savedObject = await internalRepository.get(type, id, options);
       return {
         ...savedObject,

@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 // Service for carrying out queries to obtain data
 // specific to fields in Elasticsearch indices.
 
@@ -15,26 +13,19 @@ export function fieldsServiceProvider(callWithRequest) {
   // with values equal to the cardinality of the field.
   // Any of the supplied fieldNames which are not aggregatable will
   // be omitted from the returned Object.
-  function getCardinalityOfFields(
-    index,
-    fieldNames,
-    query,
-    timeFieldName,
-    earliestMs,
-    latestMs) {
-
+  function getCardinalityOfFields(index, fieldNames, query, timeFieldName, earliestMs, latestMs) {
     // First check that each of the supplied fieldNames are aggregatable,
     // then obtain the cardinality for each of the aggregatable fields.
     return new Promise((resolve, reject) => {
       callWithRequest('fieldCaps', {
         index,
-        fields: fieldNames
+        fields: fieldNames,
       })
-        .then((fieldCapsResp) => {
+        .then(fieldCapsResp => {
           const aggregatableFields = [];
-          fieldNames.forEach((fieldName) => {
+          fieldNames.forEach(fieldName => {
             const fieldInfo = fieldCapsResp.fields[fieldName];
-            const typeKeys = (fieldInfo !== undefined ? Object.keys(fieldInfo) : []);
+            const typeKeys = fieldInfo !== undefined ? Object.keys(fieldInfo) : [];
             if (typeKeys.length > 0) {
               const fieldType = typeKeys[0];
               const isFieldAggregatable = fieldInfo[fieldType].aggregatable;
@@ -53,10 +44,10 @@ export function fieldsServiceProvider(callWithRequest) {
                   [timeFieldName]: {
                     gte: earliestMs,
                     lte: latestMs,
-                    format: 'epoch_millis'
-                  }
-                }
-              }
+                    format: 'epoch_millis',
+                  },
+                },
+              },
             ];
 
             if (query) {
@@ -71,21 +62,21 @@ export function fieldsServiceProvider(callWithRequest) {
             const body = {
               query: {
                 bool: {
-                  must: mustCriteria
-                }
+                  must: mustCriteria,
+                },
               },
               size: 0,
               _source: {
-                excludes: []
+                excludes: [],
               },
-              aggs
+              aggs,
             };
 
             callWithRequest('search', {
               index,
-              body
+              body,
             })
-              .then((resp) => {
+              .then(resp => {
                 const aggregations = resp.aggregations;
                 if (aggregations !== undefined) {
                   const results = aggregatableFields.reduce((obj, field) => {
@@ -97,26 +88,21 @@ export function fieldsServiceProvider(callWithRequest) {
                   resolve({});
                 }
               })
-              .catch((resp) => {
+              .catch(resp => {
                 reject(resp);
               });
           } else {
             // None of the fields are aggregatable. Return empty Object.
             resolve({});
           }
-
         })
-        .catch((resp) => {
+        .catch(resp => {
           reject(resp);
         });
     });
-
   }
 
-  function getTimeFieldRange(
-    index,
-    timeFieldName,
-    query) {
+  function getTimeFieldRange(index, timeFieldName, query) {
     return new Promise((resolve, reject) => {
       const obj = { success: true, start: { epoch: 0, string: '' }, end: { epoch: 0, string: '' } };
 
@@ -128,18 +114,18 @@ export function fieldsServiceProvider(callWithRequest) {
           aggs: {
             earliest: {
               min: {
-                field: timeFieldName
-              }
+                field: timeFieldName,
+              },
             },
             latest: {
               max: {
-                field: timeFieldName
-              }
-            }
-          }
-        }
+                field: timeFieldName,
+              },
+            },
+          },
+        },
       })
-        .then((resp) => {
+        .then(resp => {
           if (resp.aggregations && resp.aggregations.earliest && resp.aggregations.latest) {
             obj.start.epoch = resp.aggregations.earliest.value;
             obj.start.string = resp.aggregations.earliest.value_as_string;
@@ -149,7 +135,7 @@ export function fieldsServiceProvider(callWithRequest) {
           }
           resolve(obj);
         })
-        .catch((resp) => {
+        .catch(resp => {
           reject(resp);
         });
     });
@@ -157,6 +143,6 @@ export function fieldsServiceProvider(callWithRequest) {
 
   return {
     getCardinalityOfFields,
-    getTimeFieldRange
+    getTimeFieldRange,
   };
 }

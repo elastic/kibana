@@ -25,7 +25,8 @@ import {
   TestKibanaUtils,
   TestUtils,
 } from '../../../../../test_utils/kbn_server';
-import { CallCluster } from '../../../../../legacy/core_plugins/elasticsearch';
+import { APICaller } from '../../../elasticsearch/';
+import { httpServerMock } from '../../../http/http_server.mocks';
 
 let servers: TestUtils;
 let esServer: TestElasticsearchUtils;
@@ -36,7 +37,7 @@ let kbnServer: TestKibanaUtils['kbnServer'];
 interface AllServices {
   kbnServer: TestKibanaUtils['kbnServer'];
   savedObjectsClient: SavedObjectsClientContract;
-  callCluster: CallCluster;
+  callCluster: APICaller;
   uiSettings: IUiSettingsClient;
   deleteKibanaIndex: typeof deleteKibanaIndex;
 }
@@ -61,7 +62,7 @@ export async function startServers() {
   kbnServer = kbn.kbnServer;
 }
 
-async function deleteKibanaIndex(callCluster: CallCluster) {
+async function deleteKibanaIndex(callCluster: APICaller) {
   const kibanaIndices = await callCluster('cat.indices', { index: '.kibana*', format: 'json' });
   const indexNames = kibanaIndices.map((x: any) => x.index);
   if (!indexNames.length) {
@@ -83,7 +84,9 @@ export function getServices() {
   const callCluster = esServer.es.getCallCluster();
 
   const savedObjects = kbnServer.server.savedObjects;
-  const savedObjectsClient = savedObjects.getScopedSavedObjectsClient({});
+  const savedObjectsClient = savedObjects.getScopedSavedObjectsClient(
+    httpServerMock.createKibanaRequest()
+  );
 
   const uiSettings = kbnServer.server.uiSettingsServiceFactory({
     savedObjectsClient,

@@ -18,7 +18,7 @@
  */
 
 import { onlyDisabledFiltersChanged } from './only_disabled';
-import { esFilters } from '../../../../../data/public';
+import { esFilters } from '../../../../common';
 
 describe('filter manager utilities', () => {
   describe('onlyDisabledFiltersChanged()', () => {

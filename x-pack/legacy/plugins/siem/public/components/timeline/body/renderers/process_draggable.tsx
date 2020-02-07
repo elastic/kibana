@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as React from 'react';
-import { pure } from 'recompose';
+import React from 'react';
 
 import { DraggableBadge } from '../../../draggables';
 
@@ -22,7 +21,7 @@ interface Props {
   processName: string | undefined | null;
 }
 
-export const ProcessDraggable = pure<Props>(
+export const ProcessDraggable = React.memo<Props>(
   ({
     contextId,
     endgamePid,
@@ -94,7 +93,7 @@ export const ProcessDraggable = pure<Props>(
 
 ProcessDraggable.displayName = 'ProcessDraggable';
 
-export const ProcessDraggableWithNonExistentProcess = pure<Props>(
+export const ProcessDraggableWithNonExistentProcess = React.memo<Props>(
   ({
     contextId,
     endgamePid,

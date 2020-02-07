@@ -19,7 +19,16 @@
 
 import { transform, size, cloneDeep, get, defaults } from 'lodash';
 import { createCustomFieldFormat } from './converters/custom';
-import { ContentType, FieldFormatConvert, FieldFormatConvertFunction } from './types';
+import {
+  GetConfigFn,
+  ContentType,
+  IFieldFormatType,
+  FieldFormatConvert,
+  FieldFormatConvertFunction,
+  HtmlContextTypeOptions,
+  TextContextTypeOptions,
+  IFieldFormatMetaParams,
+} from './types';
 import {
   htmlContentTypeSetup,
   textContentTypeSetup,
@@ -58,8 +67,20 @@ export abstract class FieldFormat {
    */
   convertObject: FieldFormatConvert | undefined;
 
+  /**
+   * @property {htmlConvert}
+   * @protected
+   * have to remove the protected because of
+   * https://github.com/Microsoft/TypeScript/issues/17293
+   */
   htmlConvert: HtmlContextTypeConvert | undefined;
 
+  /**
+   * @property {textConvert}
+   * @protected
+   * have to remove the protected because of
+   * https://github.com/Microsoft/TypeScript/issues/17293
+   */
   textConvert: TextContextTypeConvert | undefined;
 
   /**
@@ -68,7 +89,16 @@ export abstract class FieldFormat {
    */
   public type: any = this.constructor;
 
-  constructor(public _params: any = {}) {}
+  protected readonly _params: any;
+  protected getConfig: GetConfigFn | undefined;
+
+  constructor(_params: IFieldFormatMetaParams = {}, getConfig?: GetConfigFn) {
+    this._params = _params;
+
+    if (getConfig) {
+      this.getConfig = getConfig;
+    }
+  }
 
   /**
    * Convert a raw value to a formatted string
@@ -80,11 +110,15 @@ export abstract class FieldFormat {
    *                    injecting into the DOM or a DOM attribute
    * @public
    */
-  convert(value: any, contentType: ContentType = DEFAULT_CONTEXT_TYPE): string {
+  convert(
+    value: any,
+    contentType: ContentType = DEFAULT_CONTEXT_TYPE,
+    options?: HtmlContextTypeOptions | TextContextTypeOptions
+  ): string {
     const converter = this.getConverterFor(contentType);
 
     if (converter) {
-      return converter.call(this, value);
+      return converter.call(this, value, options);
     }
 
     return value;
@@ -170,7 +204,7 @@ export abstract class FieldFormat {
     };
   }
 
-  static from(convertFn: FieldFormatConvertFunction): ReturnType<typeof createCustomFieldFormat> {
+  static from(convertFn: FieldFormatConvertFunction): IFieldFormatType {
     return createCustomFieldFormat(convertFn);
   }
 
@@ -180,6 +214,8 @@ export abstract class FieldFormat {
       [HTML_CONTEXT_TYPE]: htmlContentTypeSetup(this, this.htmlConvert),
     };
   }
-}
 
-export type IFieldFormat = PublicMethodsOf<FieldFormat>;
+  static isInstanceOfFieldFormat(fieldFormat: any): fieldFormat is FieldFormat {
+    return Boolean(fieldFormat && fieldFormat.convert);
+  }
+}

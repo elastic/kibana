@@ -5,7 +5,7 @@
  */
 
 import { IClusterClient, KibanaRequest, Logger } from '../../../../../src/core/server';
-import { SecurityLicense } from '../licensing';
+import { SecurityLicense } from '../../common/licensing';
 
 /**
  * Represents the options to create an APIKey class instance that will be

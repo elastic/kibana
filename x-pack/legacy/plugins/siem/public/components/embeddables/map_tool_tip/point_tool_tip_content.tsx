@@ -15,6 +15,7 @@ import { DescriptionListStyled } from '../../page';
 import { FeatureProperty } from '../types';
 import { HostDetailsLink, IPDetailsLink } from '../../links';
 import { DefaultFieldRenderer } from '../../field_renderers/field_renderers';
+import { FlowTarget } from '../../../graphql/types';
 
 interface PointToolTipContentProps {
   contextId: string;
@@ -22,35 +23,41 @@ interface PointToolTipContentProps {
   closeTooltip?(): void;
 }
 
-export const PointToolTipContent = React.memo<PointToolTipContentProps>(
-  ({ contextId, featureProps, closeTooltip }) => {
-    const featureDescriptionListItems = featureProps.map(
-      ({ _propertyKey: key, _rawValue: value }) => ({
-        title: sourceDestinationFieldMappings[key],
-        description: (
-          <AddFilterToGlobalSearchBar
-            filter={createFilter(key, Array.isArray(value) ? value[0] : value)}
-            onFilterAdded={closeTooltip}
-            data-test-subj={`add-to-kql-${key}`}
-          >
-            {value != null ? (
-              <DefaultFieldRenderer
-                rowItems={Array.isArray(value) ? value : [value]}
-                attrName={key}
-                idPrefix={`map-point-tooltip-${contextId}-${key}-${value}`}
-                render={item => getRenderedFieldValue(key, item)}
-              />
-            ) : (
-              getEmptyTagValue()
-            )}
-          </AddFilterToGlobalSearchBar>
-        ),
-      })
-    );
+export const PointToolTipContentComponent = ({
+  contextId,
+  featureProps,
+  closeTooltip,
+}: PointToolTipContentProps) => {
+  const featureDescriptionListItems = featureProps.map(
+    ({ _propertyKey: key, _rawValue: value }) => ({
+      title: sourceDestinationFieldMappings[key],
+      description: (
+        <AddFilterToGlobalSearchBar
+          filter={createFilter(key, Array.isArray(value) ? value[0] : value)}
+          onFilterAdded={closeTooltip}
+          data-test-subj={`add-to-kql-${key}`}
+        >
+          {value != null ? (
+            <DefaultFieldRenderer
+              rowItems={Array.isArray(value) ? value : [value]}
+              attrName={key}
+              idPrefix={`map-point-tooltip-${contextId}-${key}-${value}`}
+              render={item => getRenderedFieldValue(key, item)}
+            />
+          ) : (
+            getEmptyTagValue()
+          )}
+        </AddFilterToGlobalSearchBar>
+      ),
+    })
+  );
 
-    return <DescriptionListStyled listItems={featureDescriptionListItems} />;
-  }
-);
+  return <DescriptionListStyled listItems={featureDescriptionListItems} />;
+};
+
+PointToolTipContentComponent.displayName = 'PointToolTipContentComponent';
+
+export const PointToolTipContent = React.memo(PointToolTipContentComponent);
 
 PointToolTipContent.displayName = 'PointToolTipContent';
 
@@ -60,7 +67,8 @@ export const getRenderedFieldValue = (field: string, value: string) => {
   } else if (['host.name'].includes(field)) {
     return <HostDetailsLink hostName={value} />;
   } else if (['source.ip', 'destination.ip'].includes(field)) {
-    return <IPDetailsLink ip={value} />;
+    const flowTarget = field.split('.')[0] as FlowTarget;
+    return <IPDetailsLink ip={value} flowTarget={flowTarget} />;
   }
   return <>{value}</>;
 };

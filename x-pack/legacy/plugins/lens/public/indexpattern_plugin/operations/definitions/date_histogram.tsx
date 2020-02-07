@@ -9,12 +9,13 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 // TODO: make this new-platform compatible
-import { isValidInterval } from 'ui/agg_types/utils';
+import { isValidInterval } from 'ui/agg_types';
 
 import {
   EuiForm,
   EuiFormRow,
   EuiSwitch,
+  EuiSwitchEvent,
   EuiFieldNumber,
   EuiSelect,
   EuiFlexItem,
@@ -26,7 +27,7 @@ import { updateColumnParam } from '../../state_helpers';
 import { OperationDefinition } from '.';
 import { FieldBasedIndexPatternColumn } from './column_types';
 import { autoIntervalFromDateRange } from '../../auto_date';
-import { AggregationRestrictions } from '../../types';
+import { AggregationRestrictions } from '../../../../../../../../src/plugins/data/public';
 
 const autoInterval = 'auto';
 const calendarOnlyIntervals = new Set(['w', 'M', 'q', 'y']);
@@ -154,7 +155,7 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
       restrictedInterval(field!.aggregationRestrictions)
     );
 
-    function onChangeAutoInterval(ev: React.ChangeEvent<HTMLInputElement>) {
+    function onChangeAutoInterval(ev: EuiSwitchEvent) {
       const value = ev.target.checked ? autoIntervalFromDateRange(dateRange) : autoInterval;
       setState(updateColumnParam({ state, layerId, currentColumn, paramName: 'interval', value }));
     }
@@ -207,7 +208,11 @@ export const dateHistogramOperation: OperationDefinition<DateHistogramIndexPatte
                   <EuiFlexItem>
                     <EuiFieldNumber
                       data-test-subj="lensDateHistogramValue"
-                      value={interval.value}
+                      value={
+                        typeof interval.value === 'number' || interval.value === ''
+                          ? interval.value
+                          : parseInt(interval.value, 10)
+                      }
                       disabled={calendarOnlyIntervals.has(interval.unit)}
                       isInvalid={!isValid}
                       onChange={e => {
@@ -317,7 +322,7 @@ function parseInterval(currentInterval: string) {
   };
 }
 
-function restrictedInterval(aggregationRestrictions?: AggregationRestrictions) {
+function restrictedInterval(aggregationRestrictions?: Partial<AggregationRestrictions>) {
   if (!aggregationRestrictions || !aggregationRestrictions.date_histogram) {
     return;
   }

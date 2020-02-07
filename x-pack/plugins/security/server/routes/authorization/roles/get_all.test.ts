@@ -5,8 +5,7 @@
  */
 import Boom from 'boom';
 import { kibanaResponseFactory, RequestHandlerContext } from '../../../../../../../src/core/server';
-import { ILicenseCheck } from '../../../../../licensing/server';
-import { LICENSE_STATUS } from '../../../../../licensing/server/constants';
+import { LicenseCheck, LICENSE_CHECK_STATE } from '../../../../../licensing/server';
 import { defineGetAllRolesRoutes } from './get_all';
 
 import {
@@ -20,7 +19,7 @@ const reservedPrivilegesApplicationWildcard = 'kibana-*';
 
 interface TestOptions {
   name?: string;
-  licenseCheckResult?: ILicenseCheck;
+  licenseCheckResult?: LicenseCheck;
   apiResponse?: () => Promise<unknown>;
   asserts: { statusCode: number; result?: Record<string, any> };
 }
@@ -28,11 +27,11 @@ interface TestOptions {
 describe('GET all roles', () => {
   const getRolesTest = (
     description: string,
-    { licenseCheckResult = { check: LICENSE_STATUS.Valid }, apiResponse, asserts }: TestOptions
+    { licenseCheckResult = { state: LICENSE_CHECK_STATE.Valid }, apiResponse, asserts }: TestOptions
   ) => {
     test(description, async () => {
       const mockRouteDefinitionParams = routeDefinitionParamsMock.create();
-      mockRouteDefinitionParams.authz.getApplicationName.mockReturnValue(application);
+      mockRouteDefinitionParams.authz.applicationName = application;
 
       const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
       mockRouteDefinitionParams.clusterClient.asScoped.mockReturnValue(mockScopedClusterClient);
@@ -68,14 +67,16 @@ describe('GET all roles', () => {
   };
 
   describe('failure', () => {
-    getRolesTest(`returns result of license check`, {
-      licenseCheckResult: { check: LICENSE_STATUS.Invalid, message: 'test forbidden message' },
+    getRolesTest('returns result of license checker', {
+      licenseCheckResult: { state: LICENSE_CHECK_STATE.Invalid, message: 'test forbidden message' },
       asserts: { statusCode: 403, result: { message: 'test forbidden message' } },
     });
 
     const error = Boom.notAcceptable('test not acceptable message');
-    getRolesTest(`returns error from cluster client`, {
-      apiResponse: () => Promise.reject(error),
+    getRolesTest('returns error from cluster client', {
+      apiResponse: async () => {
+        throw error;
+      },
       asserts: { statusCode: 406, result: error },
     });
 

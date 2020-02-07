@@ -20,20 +20,23 @@
 import React from 'react';
 import { EuiFlyout } from '@elastic/eui';
 import { CoreStart } from 'src/core/public';
-import { IAction, createAction } from '../../actions';
+import { Action, createAction } from '../../actions';
+import { toMountPoint } from '../../../../kibana_react/public';
 
 export const SAY_HELLO_ACTION = 'SAY_HELLO_ACTION';
 
-export function createSayHelloAction(overlays: CoreStart['overlays']): IAction<{ name: string }> {
+export function createSayHelloAction(overlays: CoreStart['overlays']): Action<{ name: string }> {
   return createAction<{ name: string }>({
     type: SAY_HELLO_ACTION,
     getDisplayName: ({ name }) => `Hello, ${name}`,
     isCompatible: async ({ name }) => name !== undefined,
     execute: async context => {
       const flyoutSession = overlays.openFlyout(
-        <EuiFlyout ownFocus onClose={() => flyoutSession && flyoutSession.close()}>
-          this.getDisplayName(context)
-        </EuiFlyout>,
+        toMountPoint(
+          <EuiFlyout ownFocus onClose={() => flyoutSession && flyoutSession.close()}>
+            this.getDisplayName(context)
+          </EuiFlyout>
+        ),
         {
           'data-test-subj': 'sayHelloAction',
         }

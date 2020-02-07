@@ -22,13 +22,10 @@ import 'uiExports/interpreter';
 import { register, registryFactory } from '@kbn/interpreter/common';
 import { npSetup } from 'ui/new_platform';
 import { registries } from './registries';
-import { visualization } from './renderers/visualization';
 import {
   ExpressionInterpretWithHandlers,
   ExpressionExecutor,
 } from '../../../../plugins/expressions/public';
-import { esaggs as esaggsFn } from './functions/esaggs';
-import { visualization as visualizationFn } from './functions/visualization';
 
 // Expose kbnInterpreter.register(specs) and kbnInterpreter.registries() globally so that plugins
 // can register without a transpile step.
@@ -37,13 +34,6 @@ import { visualization as visualizationFn } from './functions/visualization';
   (global as any).kbnInterpreter || {},
   registryFactory(registries)
 );
-
-// TODO: This needs to be moved to `data` plugin Search service.
-registries.browserFunctions.register(esaggsFn);
-
-// TODO: This needs to be moved to `visualizations` plugin.
-registries.browserFunctions.register(visualizationFn);
-registries.renderers.register(visualization);
 
 // TODO: This function will be left behind in the legacy platform.
 let executorPromise: Promise<ExpressionExecutor> | undefined;

@@ -17,7 +17,7 @@ interface NoDataProps {
   testString?: string;
 }
 
-export const NoData: React.SFC<NoDataProps> = ({
+export const NoData: React.FC<NoDataProps> = ({
   titleText,
   bodyText,
   refetchText,

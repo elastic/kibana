@@ -12,7 +12,7 @@ import {
   trackSuggestionEvent,
 } from './factory';
 import { coreMock } from 'src/core/public/mocks';
-import { HttpServiceBase } from 'kibana/public';
+import { HttpSetup } from 'kibana/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 
 jest.useFakeTimers();
@@ -31,7 +31,7 @@ const createMockStorage = () => {
 
 describe('Lens UI telemetry', () => {
   let storage: jest.Mocked<IStorageWrapper>;
-  let http: jest.Mocked<HttpServiceBase>;
+  let http: jest.Mocked<HttpSetup>;
   let dateSpy: jest.SpyInstance;
 
   beforeEach(() => {

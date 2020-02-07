@@ -15,10 +15,7 @@ import {
   METRIC_TYPE,
 } from '../../services';
 
-import {
-  REMOVE_CLUSTERS_START,
-  REMOVE_CLUSTERS_FINISH,
-} from '../action_types';
+import { REMOVE_CLUSTERS_START, REMOVE_CLUSTERS_FINISH } from '../action_types';
 
 import { closeDetailPanel } from './detail_panel';
 import { getDetailPanelClusterName } from '../selectors';
@@ -39,7 +36,7 @@ function getErrorTitle(count, name = null) {
   }
 }
 
-export const removeClusters = (names) => async (dispatch, getState) => {
+export const removeClusters = names => async (dispatch, getState) => {
   dispatch({
     type: REMOVE_CLUSTERS_START,
   });
@@ -48,10 +45,9 @@ export const removeClusters = (names) => async (dispatch, getState) => {
   let errors = [];
 
   await Promise.all([
-    sendRemoveClusterRequest(names.join(','))
-      .then((response) => {
-        ({ itemsDeleted, errors } = response.data);
-      }),
+    sendRemoveClusterRequest(names.join(',')).then(response => {
+      ({ itemsDeleted, errors } = response.data);
+    }),
     // Wait at least half a second to avoid a weird flicker of the saving feedback (only visible
     // when requests resolve very quickly).
     new Promise(resolve => setTimeout(resolve, 500)),
@@ -68,9 +64,7 @@ export const removeClusters = (names) => async (dispatch, getState) => {
       name,
       error: {
         output: {
-          payload: {
-            message,
-          },
+          payload: { message },
         },
       },
     } = errors[0];
@@ -84,18 +78,25 @@ export const removeClusters = (names) => async (dispatch, getState) => {
 
   if (itemsDeleted.length > 0) {
     // Only track successful requests.
-    trackUiMetric(METRIC_TYPE.COUNT, names.length > 1 ? UIM_CLUSTER_REMOVE_MANY : UIM_CLUSTER_REMOVE);
+    trackUiMetric(
+      METRIC_TYPE.COUNT,
+      names.length > 1 ? UIM_CLUSTER_REMOVE_MANY : UIM_CLUSTER_REMOVE
+    );
 
     if (itemsDeleted.length === 1) {
-      toasts.addSuccess(i18n.translate('xpack.remoteClusters.removeAction.successSingleNotificationTitle', {
-        defaultMessage: `Remote cluster '{name}' was removed`,
-        values: { name: itemsDeleted[0] },
-      }));
+      toasts.addSuccess(
+        i18n.translate('xpack.remoteClusters.removeAction.successSingleNotificationTitle', {
+          defaultMessage: `Remote cluster '{name}' was removed`,
+          values: { name: itemsDeleted[0] },
+        })
+      );
     } else {
-      toasts.addSuccess(i18n.translate('xpack.remoteClusters.removeAction.successMultipleNotificationTitle', {
-        defaultMessage: '{count} remote clusters were removed',
-        values: { count: itemsDeleted.length },
-      }));
+      toasts.addSuccess(
+        i18n.translate('xpack.remoteClusters.removeAction.successMultipleNotificationTitle', {
+          defaultMessage: '{count} remote clusters were removed',
+          values: { count: itemsDeleted.length },
+        })
+      );
     }
   }
 

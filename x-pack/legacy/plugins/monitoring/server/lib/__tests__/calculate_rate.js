@@ -21,7 +21,7 @@ describe('Calculate Rate', () => {
       latestTotal: 24924,
       earliestTotal: 18945,
       timeWindowMin: '2017-08-08T17:33:04.501Z',
-      timeWindowMax: '2017-08-08T17:33:04.501Z' // max === min
+      timeWindowMax: '2017-08-08T17:33:04.501Z', // max === min
     });
     expect(rate).to.be(null);
     expect(isEstimate).to.be(false);
@@ -34,7 +34,7 @@ describe('Calculate Rate', () => {
       latestTotal: 24924,
       earliestTotal: 18945,
       timeWindowMin: '2017-08-08T17:33:04.501Z',
-      timeWindowMax: '2017-08-08T18:33:04.501Z'
+      timeWindowMax: '2017-08-08T18:33:04.501Z',
     });
     expect(rate).to.be(null);
     expect(isEstimate).to.be(false);
@@ -47,7 +47,7 @@ describe('Calculate Rate', () => {
       latestTotal: 24924,
       earliestTotal: 18945,
       timeWindowMin: '2017-08-08T17:33:04.501Z',
-      timeWindowMax: '2017-08-08T18:33:04.501Z'
+      timeWindowMax: '2017-08-08T18:33:04.501Z',
     });
     expect(rate).to.be(1.6608333333333334);
     expect(isEstimate).to.be(false);
@@ -60,7 +60,7 @@ describe('Calculate Rate', () => {
       latestTotal: 18945,
       earliestTotal: 18945,
       timeWindowMin: '2017-08-08T17:33:04.501Z',
-      timeWindowMax: '2017-08-08T18:33:04.501Z'
+      timeWindowMax: '2017-08-08T18:33:04.501Z',
     });
     expect(rate).to.be(0);
     expect(isEstimate).to.be(false);
@@ -73,7 +73,7 @@ describe('Calculate Rate', () => {
       latestTotal: 20000,
       earliestTotal: 40000,
       timeWindowMin: '2017-08-08T17:33:04.501Z',
-      timeWindowMax: '2017-08-08T18:33:04.501Z'
+      timeWindowMax: '2017-08-08T18:33:04.501Z',
     });
     expect(rate).to.be(5.555555555555555);
     expect(isEstimate).to.be(true);

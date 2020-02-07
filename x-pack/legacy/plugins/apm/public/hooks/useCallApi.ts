@@ -5,11 +5,11 @@
  */
 
 import { useMemo } from 'react';
-import { useKibanaCore } from '../../../observability/public';
 import { callApi, FetchOptions } from '../services/rest/callApi';
+import { useApmPluginContext } from './useApmPluginContext';
 
 export function useCallApi() {
-  const { http } = useKibanaCore();
+  const { http } = useApmPluginContext().core;
 
   return useMemo(() => {
     return <T = void>(options: FetchOptions) => callApi<T>(http, options);

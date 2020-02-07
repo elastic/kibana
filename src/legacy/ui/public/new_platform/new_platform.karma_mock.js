@@ -18,18 +18,58 @@
  */
 
 import sinon from 'sinon';
+import { getFieldFormatsRegistry } from '../../../../test_utils/public/stub_field_formats';
+import { METRIC_TYPE } from '@kbn/analytics';
+import { ComponentRegistry } from '../../../../../src/plugins/advanced_settings/public/';
 
 const mockObservable = () => {
   return {
-    subscribe: () => {}
+    subscribe: () => {},
   };
 };
 
-export const npSetup = {
-  core: {
-    chrome: {}
+const mockComponent = () => {
+  return null;
+};
+
+export const mockUiSettings = {
+  get: item => {
+    return mockUiSettings[item];
   },
+  getUpdate$: () => ({
+    subscribe: sinon.fake(),
+  }),
+  'query:allowLeadingWildcards': true,
+  'query:queryString:options': {},
+  'courier:ignoreFilterIfFieldNotInIndex': true,
+  'dateFormat:tz': 'Browser',
+  'format:defaultTypeMap': {},
+};
+
+const mockCore = {
+  chrome: {},
+  uiSettings: mockUiSettings,
+  http: {
+    basePath: {
+      get: sinon.fake.returns(''),
+    },
+  },
+};
+
+export const npSetup = {
+  core: mockCore,
   plugins: {
+    advancedSettings: {
+      component: {
+        register: sinon.fake(),
+        componentType: ComponentRegistry.componentType,
+      },
+    },
+    usageCollection: {
+      allowTrackUserAgent: sinon.fake(),
+      reportUiStats: sinon.fake(),
+      METRIC_TYPE,
+    },
     embeddable: {
       registerEmbeddableFactory: sinon.fake(),
     },
@@ -59,7 +99,35 @@ export const npSetup = {
         timefilter: {
           timefilter: sinon.fake(),
           history: sinon.fake(),
-        }
+        },
+        savedQueries: {
+          saveQuery: sinon.fake(),
+          getAllSavedQueries: sinon.fake(),
+          findSavedQueries: sinon.fake(),
+          getSavedQuery: sinon.fake(),
+          deleteSavedQuery: sinon.fake(),
+          getSavedQueryCount: sinon.fake(),
+        },
+      },
+      __LEGACY: {
+        esClient: {
+          search: sinon.fake(),
+          msearch: sinon.fake(),
+        },
+      },
+      fieldFormats: getFieldFormatsRegistry(mockCore),
+    },
+    share: {
+      register: () => {},
+    },
+    devTools: {
+      register: () => {},
+    },
+    kibanaLegacy: {
+      registerLegacyApp: () => {},
+      forwardApp: () => {},
+      config: {
+        defaultAppId: 'home',
       },
     },
     inspector: {
@@ -75,6 +143,30 @@ export const npSetup = {
       registerAction: sinon.fake(),
       registerTrigger: sinon.fake(),
     },
+    home: {
+      featureCatalogue: {
+        register: sinon.fake(),
+      },
+      environment: {
+        update: sinon.fake(),
+      },
+      config: {
+        disableWelcomeScreen: false,
+      },
+    },
+    charts: {
+      theme: {
+        chartsTheme$: mockObservable,
+        useChartsTheme: sinon.fake(),
+      },
+    },
+    management: {
+      sections: {
+        getSection: () => ({
+          registerApp: sinon.fake(),
+        }),
+      },
+    },
   },
 };
 
@@ -84,9 +176,23 @@ let isAutoRefreshSelectorEnabled = true;
 
 export const npStart = {
   core: {
-    chrome: {}
+    chrome: {},
   },
   plugins: {
+    management: {
+      legacy: {
+        getSection: () => ({
+          register: sinon.fake(),
+          deregister: sinon.fake(),
+          hasItem: sinon.fake(),
+        }),
+      },
+      sections: {
+        getSection: () => ({
+          registerApp: sinon.fake(),
+        }),
+      },
+    },
     embeddable: {
       getEmbeddableFactory: sinon.fake(),
       getEmbeddableFactories: sinon.fake(),
@@ -97,11 +203,26 @@ export const npStart = {
       registerRenderer: sinon.fake(),
       registerType: sinon.fake(),
     },
+    devTools: {
+      getSortedDevTools: () => [],
+    },
+    kibanaLegacy: {
+      getApps: () => [],
+      getForwards: () => [],
+      config: {
+        defaultAppId: 'home',
+      },
+    },
     data: {
       autocomplete: {
         getProvider: sinon.fake(),
       },
       getSuggestions: sinon.fake(),
+      indexPatterns: sinon.fake(),
+      ui: {
+        IndexPatternSelect: mockComponent,
+        SearchBar: mockComponent,
+      },
       query: {
         filterManager: {
           getFetches$: sinon.fake(),
@@ -113,7 +234,6 @@ export const npStart = {
           setFilters: sinon.fake(),
           removeAll: sinon.fake(),
           getUpdates$: mockObservable,
-
         },
         timefilter: {
           timefilter: {
@@ -137,7 +257,7 @@ export const npStart = {
             getRefreshInterval: () => {
               return refreshInterval;
             },
-            setRefreshInterval: (interval) => {
+            setRefreshInterval: interval => {
               refreshInterval = interval;
             },
             enableTimeRangeSelector: () => {
@@ -148,6 +268,7 @@ export const npStart = {
             },
             getTime: sinon.fake(),
             setTime: sinon.fake(),
+            getActiveBounds: sinon.fake(),
             getBounds: sinon.fake(),
             calculateBounds: sinon.fake(),
             createFilter: sinon.fake(),
@@ -155,6 +276,18 @@ export const npStart = {
           history: sinon.fake(),
         },
       },
+      search: {
+        __LEGACY: {
+          esClient: {
+            search: sinon.fake(),
+            msearch: sinon.fake(),
+          },
+        },
+      },
+      fieldFormats: getFieldFormatsRegistry(mockCore),
+    },
+    share: {
+      toggleShareContextMenu: () => {},
     },
     inspector: {
       isAvailable: () => false,
@@ -172,6 +305,28 @@ export const npStart = {
       getTrigger: sinon.fake(),
       getTriggerActions: sinon.fake(),
       getTriggerCompatibleActions: sinon.fake(),
+    },
+    home: {
+      featureCatalogue: {
+        register: sinon.fake(),
+      },
+      environment: {
+        get: sinon.fake(),
+      },
+      config: {
+        disableWelcomeScreen: false,
+      },
+    },
+    navigation: {
+      ui: {
+        TopNavMenu: mockComponent,
+      },
+    },
+    charts: {
+      theme: {
+        chartsTheme$: mockObservable,
+        useChartsTheme: sinon.fake(),
+      },
     },
   },
 };

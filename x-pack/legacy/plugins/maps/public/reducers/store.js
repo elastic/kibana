@@ -13,16 +13,12 @@ import { nonSerializableInstances } from './non_serializable_instances';
 const rootReducer = combineReducers({
   map,
   ui,
-  nonSerializableInstances
+  nonSerializableInstances,
 });
 
-const enhancers = [ applyMiddleware(thunk) ];
+const enhancers = [applyMiddleware(thunk)];
 
 export function createMapStore() {
   const storeConfig = {};
-  return createStore(
-    rootReducer,
-    storeConfig,
-    compose(...enhancers)
-  );
+  return createStore(rootReducer, storeConfig, compose(...enhancers));
 }

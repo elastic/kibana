@@ -30,11 +30,10 @@ jest.mock('./lib/parse_querystring', () => ({
 }));
 
 import sinon from 'sinon';
-import expect from '@kbn/expect';
 import moment from 'moment';
 import { Timefilter } from './timefilter';
 import { Subscription } from 'rxjs';
-import { TimeRange, RefreshInterval } from 'src/plugins/data/public';
+import { TimeRange, RefreshInterval } from '../../../common';
 
 import { timefilterServiceMock } from './timefilter_service.mock';
 const timefilterSetupMock = timefilterServiceMock.createSetupContract();
@@ -79,7 +78,7 @@ describe('setTime', () => {
 
   test('should update time', () => {
     timefilter.setTime({ from: '5', to: '10' });
-    expect(timefilter.getTime()).to.eql({
+    expect(timefilter.getTime()).toEqual({
       from: '5',
       to: '10',
     });
@@ -92,31 +91,31 @@ describe('setTime', () => {
       to: '10',
       [unexpectedKey]: 'I should not be added to time state',
     } as TimeRange);
-    expect(timefilter.getTime()).not.to.have.property(unexpectedKey);
+    expect(timefilter.getTime()).not.toHaveProperty(unexpectedKey);
   });
 
   test('should allow partial updates to time', () => {
     timefilter.setTime({ from: '5', to: '10' });
-    expect(timefilter.getTime()).to.eql({ from: '5', to: '10' });
+    expect(timefilter.getTime()).toEqual({ from: '5', to: '10' });
   });
 
   test('not emit anything if the time has not changed', () => {
     timefilter.setTime({ from: '0', to: '1' });
-    expect(update.called).to.be(false);
-    expect(fetch.called).to.be(false);
+    expect(update.called).toBe(false);
+    expect(fetch.called).toBe(false);
   });
 
   test('emit update and fetch if the time has changed', () => {
     timefilter.setTime({ from: '5', to: '10' });
-    expect(update.called).to.be(true);
-    expect(fetch.called).to.be(true);
+    expect(update.called).toBe(true);
+    expect(fetch.called).toBe(true);
   });
 
   test('should return strings and not moment objects', () => {
     const from = moment().subtract(15, 'minutes');
     const to = moment();
     timefilter.setTime({ to, from });
-    expect(timefilter.getTime()).to.eql({
+    expect(timefilter.getTime()).toEqual({
       from: from.toISOString(),
       to: to.toISOString(),
     });
@@ -152,7 +151,7 @@ describe('setRefreshInterval', () => {
 
   test('should update refresh interval', () => {
     timefilter.setRefreshInterval({ pause: true, value: 10 });
-    expect(timefilter.getRefreshInterval()).to.eql({ pause: true, value: 10 });
+    expect(timefilter.getRefreshInterval()).toEqual({ pause: true, value: 10 });
   });
 
   test('should not add unexpected object keys to refreshInterval state', () => {
@@ -162,90 +161,90 @@ describe('setRefreshInterval', () => {
       value: 10,
       [unexpectedKey]: 'I should not be added to refreshInterval state',
     } as RefreshInterval);
-    expect(timefilter.getRefreshInterval()).not.to.have.property(unexpectedKey);
+    expect(timefilter.getRefreshInterval()).not.toHaveProperty(unexpectedKey);
   });
 
   test('should allow partial updates to refresh interval', () => {
     timefilter.setRefreshInterval({ value: 10 });
-    expect(timefilter.getRefreshInterval()).to.eql({ pause: true, value: 10 });
+    expect(timefilter.getRefreshInterval()).toEqual({ pause: true, value: 10 });
   });
 
   test('should not allow negative intervals', () => {
     timefilter.setRefreshInterval({ value: -10 });
-    expect(timefilter.getRefreshInterval()).to.eql({ pause: true, value: 0 });
+    expect(timefilter.getRefreshInterval()).toEqual({ pause: true, value: 0 });
   });
 
   test('should set pause to true when interval is zero', () => {
     timefilter.setRefreshInterval({ value: 0, pause: false });
-    expect(timefilter.getRefreshInterval()).to.eql({ pause: true, value: 0 });
+    expect(timefilter.getRefreshInterval()).toEqual({ pause: true, value: 0 });
   });
 
   test('not emit anything if nothing has changed', () => {
     timefilter.setRefreshInterval({ pause: false, value: 0 });
-    expect(update.called).to.be(false);
-    expect(fetch.called).to.be(false);
+    expect(update.called).toBe(false);
+    expect(fetch.called).toBe(false);
   });
 
   test('emit only an update when paused', () => {
     timefilter.setRefreshInterval({ pause: true, value: 5000 });
-    expect(update.called).to.be(true);
-    expect(fetch.called).to.be(false);
+    expect(update.called).toBe(true);
+    expect(fetch.called).toBe(false);
   });
 
   test('emit update, not fetch, when switching to value: 0', () => {
     timefilter.setRefreshInterval({ pause: false, value: 5000 });
-    expect(update.calledOnce).to.be(true);
-    expect(fetch.calledOnce).to.be(true);
+    expect(update.calledOnce).toBe(true);
+    expect(fetch.calledOnce).toBe(true);
 
     timefilter.setRefreshInterval({ pause: false, value: 0 });
-    expect(update.calledTwice).to.be(true);
-    expect(fetch.calledTwice).to.be(false);
+    expect(update.calledTwice).toBe(true);
+    expect(fetch.calledTwice).toBe(false);
   });
 
   test('should emit update, not fetch, when moving from unpaused to paused', () => {
     timefilter.setRefreshInterval({ pause: false, value: 5000 });
-    expect(update.calledOnce).to.be(true);
-    expect(fetch.calledOnce).to.be(true);
+    expect(update.calledOnce).toBe(true);
+    expect(fetch.calledOnce).toBe(true);
 
     timefilter.setRefreshInterval({ pause: true, value: 5000 });
-    expect(update.calledTwice).to.be(true);
-    expect(fetch.calledTwice).to.be(false);
+    expect(update.calledTwice).toBe(true);
+    expect(fetch.calledTwice).toBe(false);
   });
 
   test('should emit update and fetch when unpaused', () => {
     timefilter.setRefreshInterval({ pause: true, value: 5000 });
-    expect(update.calledOnce).to.be(true);
-    expect(fetch.calledOnce).to.be(false);
+    expect(update.calledOnce).toBe(true);
+    expect(fetch.calledOnce).toBe(false);
 
     timefilter.setRefreshInterval({ pause: false, value: 5000 });
-    expect(update.calledTwice).to.be(true);
-    expect(fetch.calledOnce).to.be(true);
+    expect(update.calledTwice).toBe(true);
+    expect(fetch.calledOnce).toBe(true);
   });
 
   test('should start auto refresh when unpaused', () => {
     timefilter.setRefreshInterval({ pause: false, value: 1000 });
-    expect(autoRefreshFetch.callCount).to.be(0);
+    expect(autoRefreshFetch.callCount).toBe(0);
     jest.advanceTimersByTime(1000);
-    expect(autoRefreshFetch.callCount).to.be(1);
+    expect(autoRefreshFetch.callCount).toBe(1);
     jest.advanceTimersByTime(1000);
-    expect(autoRefreshFetch.callCount).to.be(2);
+    expect(autoRefreshFetch.callCount).toBe(2);
   });
 
   test('should stop auto refresh when paused', () => {
     timefilter.setRefreshInterval({ pause: true, value: 1000 });
-    expect(autoRefreshFetch.callCount).to.be(0);
+    expect(autoRefreshFetch.callCount).toBe(0);
     jest.advanceTimersByTime(1000);
-    expect(autoRefreshFetch.callCount).to.be(0);
+    expect(autoRefreshFetch.callCount).toBe(0);
   });
 
   test('should not keep old interval when updated', () => {
     timefilter.setRefreshInterval({ pause: false, value: 1000 });
-    expect(autoRefreshFetch.callCount).to.be(0);
+    expect(autoRefreshFetch.callCount).toBe(0);
     jest.advanceTimersByTime(1000);
-    expect(autoRefreshFetch.callCount).to.be(1);
+    expect(autoRefreshFetch.callCount).toBe(1);
     timefilter.setRefreshInterval({ pause: false, value: 2000 });
     jest.advanceTimersByTime(2000);
-    expect(autoRefreshFetch.callCount).to.be(2);
+    expect(autoRefreshFetch.callCount).toBe(2);
   });
 });
 
@@ -264,14 +263,14 @@ describe('isTimeRangeSelectorEnabled', () => {
 
   test('should emit updated when disabled', () => {
     timefilter.disableTimeRangeSelector();
-    expect(timefilter.isTimeRangeSelectorEnabled()).to.be(false);
-    expect(update.called).to.be(true);
+    expect(timefilter.isTimeRangeSelectorEnabled()).toBe(false);
+    expect(update.called).toBe(true);
   });
 
   test('should emit updated when enabled', () => {
     timefilter.enableTimeRangeSelector();
-    expect(timefilter.isTimeRangeSelectorEnabled()).to.be(true);
-    expect(update.called).to.be(true);
+    expect(timefilter.isTimeRangeSelectorEnabled()).toBe(true);
+    expect(update.called).toBe(true);
   });
 });
 
@@ -290,14 +289,14 @@ describe('isAutoRefreshSelectorEnabled', () => {
 
   test('should emit updated when disabled', () => {
     timefilter.disableAutoRefreshSelector();
-    expect(timefilter.isAutoRefreshSelectorEnabled()).to.be(false);
-    expect(update.called).to.be(true);
+    expect(timefilter.isAutoRefreshSelectorEnabled()).toBe(false);
+    expect(update.called).toBe(true);
   });
 
   test('should emit updated when enabled', () => {
     timefilter.enableAutoRefreshSelector();
-    expect(timefilter.isAutoRefreshSelectorEnabled()).to.be(true);
-    expect(update.called).to.be(true);
+    expect(timefilter.isAutoRefreshSelectorEnabled()).toBe(true);
+    expect(update.called).toBe(true);
   });
 });
 
@@ -324,8 +323,10 @@ describe('calculateBounds', () => {
 
     stubNowTime(undefined);
     const result = timefilter.calculateBounds(timeRange);
-    expect(result.min && result.min.valueOf()).to.eql(clockNowTicks - fifteenMinutesInMilliseconds);
-    expect(result.max && result.max.valueOf()).to.eql(clockNowTicks);
+    expect(result.min && result.min.valueOf()).toEqual(
+      clockNowTicks - fifteenMinutesInMilliseconds
+    );
+    expect(result.max && result.max.valueOf()).toEqual(clockNowTicks);
   });
 
   test('uses forceNow string', () => {
@@ -339,8 +340,10 @@ describe('calculateBounds', () => {
     const result = timefilter.calculateBounds(timeRange);
 
     const forceNowTicks = Date.parse(forceNowString);
-    expect(result.min && result.min.valueOf()).to.eql(forceNowTicks - fifteenMinutesInMilliseconds);
-    expect(result.max && result.max.valueOf()).to.eql(forceNowTicks);
+    expect(result.min && result.min.valueOf()).toEqual(
+      forceNowTicks - fifteenMinutesInMilliseconds
+    );
+    expect(result.max && result.max.valueOf()).toEqual(forceNowTicks);
   });
 
   test(`throws Error if forceNow can't be parsed`, () => {
@@ -350,6 +353,6 @@ describe('calculateBounds', () => {
     };
 
     stubNowTime('not_a_parsable_date');
-    expect(() => timefilter.calculateBounds(timeRange)).to.throwError();
+    expect(() => timefilter.calculateBounds(timeRange)).toThrowError();
   });
 });

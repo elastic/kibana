@@ -21,7 +21,7 @@ export default async function({ readConfigFile }: FtrConfigProviderContext) {
     servers: xPackAPITestsConfig.get('servers'),
     services: {
       randomness: kibanaAPITestsConfig.get('services.randomness'),
-      es: kibanaAPITestsConfig.get('services.es'),
+      legacyEs: kibanaAPITestsConfig.get('services.legacyEs'),
       supertestWithoutAuth: xPackAPITestsConfig.get('services.supertestWithoutAuth'),
     },
     junit: {

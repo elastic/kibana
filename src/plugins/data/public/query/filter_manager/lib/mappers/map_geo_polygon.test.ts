@@ -18,7 +18,7 @@
  */
 
 import { mapGeoPolygon } from './map_geo_polygon';
-import { esFilters } from '../../../../../common/es_query';
+import { esFilters } from '../../../../../common';
 
 describe('filter manager utilities', () => {
   let filter: esFilters.GeoPolygonFilter;
@@ -30,7 +30,10 @@ describe('filter manager utilities', () => {
       },
       geo_polygon: {
         point: {
-          points: [{ lat: 5, lon: 10 }, { lat: 15, lon: 20 }],
+          points: [
+            { lat: 5, lon: 10 },
+            { lat: 15, lon: 20 },
+          ],
         },
       },
     } as esFilters.GeoPolygonFilter;

@@ -36,7 +36,7 @@ import { i18n } from '@kbn/i18n';
 import { DataDownloadOptions } from './download_options';
 import { DataViewRow, DataViewColumn } from '../types';
 import { TabularData } from '../../../adapters/data/types';
-import { UiSettingsClientContract } from '../../../../../../core/public';
+import { IUiSettingsClient } from '../../../../../../core/public';
 
 interface DataTableFormatState {
   columns: DataViewColumn[];
@@ -46,7 +46,7 @@ interface DataTableFormatState {
 interface DataTableFormatProps {
   data: TabularData;
   exportTitle: string;
-  uiSettings: UiSettingsClientContract;
+  uiSettings: IUiSettingsClient;
   isFormatted?: boolean;
 }
 

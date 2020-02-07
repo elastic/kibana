@@ -142,7 +142,10 @@ describe('Duration Format', () => {
       test(`should format ${input} ${inputFormat} through ${outputFormat}${
         outputPrecision ? `, ${outputPrecision} decimals` : ''
       }`, () => {
-        const duration = new DurationFormat({ inputFormat, outputFormat, outputPrecision });
+        const duration = new DurationFormat(
+          { inputFormat, outputFormat, outputPrecision },
+          jest.fn()
+        );
         expect(duration.convert(input)).toBe(output);
       });
     });

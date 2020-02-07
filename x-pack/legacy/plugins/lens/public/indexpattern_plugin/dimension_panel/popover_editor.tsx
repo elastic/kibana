@@ -127,7 +127,7 @@ export function PopoverEditor(props: PopoverEditorProps) {
             compatibleWithCurrentField ? '' : 'Incompatible'
           }-${operationType}`,
           onClick() {
-            if (!selectedColumn) {
+            if (!selectedColumn || !compatibleWithCurrentField) {
               const possibleFields = fieldByOperation[operationType] || [];
 
               if (possibleFields.length === 1) {
@@ -149,11 +149,6 @@ export function PopoverEditor(props: PopoverEditorProps) {
               } else {
                 setInvalidOperationType(operationType);
               }
-              trackUiEvent(`indexpattern_dimension_operation_${operationType}`);
-              return;
-            }
-            if (!compatibleWithCurrentField) {
-              setInvalidOperationType(operationType);
               trackUiEvent(`indexpattern_dimension_operation_${operationType}`);
               return;
             }
@@ -269,7 +264,8 @@ export function PopoverEditor(props: PopoverEditorProps) {
                 if (
                   !incompatibleSelectedOperationType &&
                   selectedColumn &&
-                  ('field' in choice && choice.operationType === selectedColumn.operationType)
+                  'field' in choice &&
+                  choice.operationType === selectedColumn.operationType
                 ) {
                   // If we just changed the field are not in an error state and the operation didn't change,
                   // we use the operations onFieldChange method to calculate the new column.

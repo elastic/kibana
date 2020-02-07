@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
+import { ExpressionFunction } from 'src/plugins/expressions/common';
 import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {

@@ -5,35 +5,12 @@
  */
 
 import pluginHelpers from '@kbn/plugin-helpers';
-import { createAutoJUnitReporter } from '@kbn/test';
-// @ts-ignore no types available
-import mocha from 'gulp-mocha';
 import gulp from 'gulp';
 
 import { getEnabledPlugins } from './helpers/flags';
 
 export const testServerTask = async () => {
-  const pluginIds = await getEnabledPlugins();
-
-  const testGlobs = ['common/**/__tests__/**/*.js', 'server/**/__tests__/**/*.js'];
-
-  for (const pluginId of pluginIds) {
-    testGlobs.push(
-      `legacy/plugins/${pluginId}/__tests__/**/*.js`,
-      `legacy/plugins/${pluginId}/common/**/__tests__/**/*.js`,
-      `legacy/plugins/${pluginId}/**/server/**/__tests__/**/*.js`
-    );
-  }
-
-  return gulp.src(testGlobs, { read: false }).pipe(
-    mocha({
-      ui: 'bdd',
-      require: require.resolve('../../src/setup_node_env'),
-      reporter: createAutoJUnitReporter({
-        reportName: 'X-Pack Mocha Tests',
-      }),
-    })
-  );
+  throw new Error('server mocha tests are now included in the `node scripts/mocha` script');
 };
 
 export const testBrowserTask = async () => {
@@ -51,4 +28,4 @@ export const testBrowserDevTask = async () => {
   });
 };
 
-export const testTask = gulp.series(testServerTask, testBrowserTask);
+export const testTask = gulp.series(testBrowserTask, testServerTask);

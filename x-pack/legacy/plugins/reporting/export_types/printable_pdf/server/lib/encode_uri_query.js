@@ -35,5 +35,5 @@ export function encodeUriQuery(val, pctEncodeSpaces) {
     .replace(/%24/g, '$')
     .replace(/%2C/gi, ',')
     .replace(/%3B/gi, ';')
-    .replace(/%20/g, (pctEncodeSpaces ? '%20' : '+'));
+    .replace(/%20/g, pctEncodeSpaces ? '%20' : '+');
 }

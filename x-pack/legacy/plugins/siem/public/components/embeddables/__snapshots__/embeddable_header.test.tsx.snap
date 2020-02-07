@@ -1,9 +1,22 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`EmbeddableHeader it renders 1`] = `
-<Component>
-  <EmbeddableHeader
-    title="Test title"
-  />
-</Component>
+<Header>
+  <EuiFlexGroup
+    alignItems="center"
+    gutterSize="m"
+  >
+    <EuiFlexItem>
+      <EuiTitle
+        size="xxxs"
+      >
+        <h6
+          data-test-subj="header-embeddable-title"
+        >
+          Test title
+        </h6>
+      </EuiTitle>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</Header>
 `;

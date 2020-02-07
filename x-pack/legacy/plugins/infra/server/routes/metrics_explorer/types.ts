@@ -4,69 +4,33 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InfraWrappableRequest } from '../../lib/adapters/framework';
+import * as rt from 'io-ts';
+import {
+  metricsExplorerMetricRT,
+  metricsExplorerPageInfoRT,
+  metricsExplorerColumnRT,
+  metricsExplorerRowRT,
+  metricsExplorerSeriesRT,
+  metricsExplorerRequestBodyRT,
+  metricsExplorerResponseRT,
+  metricsExplorerAggregationRT,
+  metricsExplorerColumnTypeRT,
+} from '../../../common/http_api';
 
-export interface InfraTimerange {
-  field: string;
-  from: number;
-  to: number;
-  interval: string;
-}
+export type MetricsExplorerAggregation = rt.TypeOf<typeof metricsExplorerAggregationRT>;
 
-export enum MetricsExplorerAggregation {
-  avg = 'avg',
-  max = 'max',
-  min = 'min',
-  cardinality = 'cardinality',
-  rate = 'rate',
-  count = 'count',
-}
+export type MetricsExplorerColumnType = rt.TypeOf<typeof metricsExplorerColumnTypeRT>;
 
-export interface MetricsExplorerMetric {
-  aggregation: MetricsExplorerAggregation;
-  field?: string | undefined;
-}
+export type MetricsExplorerMetric = rt.TypeOf<typeof metricsExplorerMetricRT>;
 
-export interface MetricsExplorerRequest {
-  timerange: InfraTimerange;
-  indexPattern: string;
-  metrics: MetricsExplorerMetric[];
-  groupBy?: string;
-  afterKey?: string;
-  limit?: number;
-  filterQuery?: string;
-}
+export type MetricsExplorerPageInfo = rt.TypeOf<typeof metricsExplorerPageInfoRT>;
 
-export type MetricsExplorerWrappedRequest = InfraWrappableRequest<MetricsExplorerRequest>;
+export type MetricsExplorerColumn = rt.TypeOf<typeof metricsExplorerColumnRT>;
 
-export interface MetricsExplorerPageInfo {
-  total: number;
-  afterKey?: string | null;
-}
+export type MetricsExplorerRow = rt.TypeOf<typeof metricsExplorerRowRT>;
 
-export enum MetricsExplorerColumnType {
-  date = 'date',
-  number = 'number',
-  string = 'string',
-}
+export type MetricsExplorerSeries = rt.TypeOf<typeof metricsExplorerSeriesRT>;
 
-export interface MetricsExplorerColumn {
-  name: string;
-  type: MetricsExplorerColumnType;
-}
+export type MetricsExplorerRequestBody = rt.TypeOf<typeof metricsExplorerRequestBodyRT>;
 
-export interface MetricsExplorerRow {
-  timestamp: number;
-  [key: string]: string | number | null | undefined;
-}
-
-export interface MetricsExplorerSeries {
-  id: string;
-  columns: MetricsExplorerColumn[];
-  rows: MetricsExplorerRow[];
-}
-
-export interface MetricsExplorerResponse {
-  series: MetricsExplorerSeries[];
-  pageInfo: MetricsExplorerPageInfo;
-}
+export type MetricsExplorerResponse = rt.TypeOf<typeof metricsExplorerResponseRT>;

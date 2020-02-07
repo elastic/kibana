@@ -12,11 +12,13 @@ import {
   OnRefreshProps,
   OnTimeChangeProps,
 } from '@elastic/eui';
-import { getOr, take } from 'lodash/fp';
+import { getOr, take, isEmpty } from 'lodash/fp';
 import React, { useState, useCallback } from 'react';
 import { connect } from 'react-redux';
-
 import { Dispatch } from 'redux';
+
+import { DEFAULT_TIMEPICKER_QUICK_RANGES } from '../../../common/constants';
+import { useUiSetting$ } from '../../lib/kibana';
 import { inputsModel, State } from '../../store';
 import { inputsActions, timelineActions } from '../../store/actions';
 import { InputsModelId } from '../../store/inputs/constants';
@@ -35,6 +37,12 @@ import {
 import { InputsRange, Policy } from '../../store/inputs/model';
 
 const MAX_RECENTLY_USED_RANGES = 9;
+
+interface Range {
+  from: string;
+  to: string;
+  display: string;
+}
 
 interface SuperDatePickerStateRedux {
   duration: number;
@@ -194,8 +202,18 @@ export const SuperDatePickerComponent = React.memo<SuperDatePickerProps>(
     const endDate = kind === 'relative' ? toStr : new Date(end).toISOString();
     const startDate = kind === 'relative' ? fromStr : new Date(start).toISOString();
 
+    const [quickRanges] = useUiSetting$<Range[]>(DEFAULT_TIMEPICKER_QUICK_RANGES);
+    const commonlyUsedRanges = isEmpty(quickRanges)
+      ? []
+      : quickRanges.map(({ from, to, display }) => ({
+          start: from,
+          end: to,
+          label: display,
+        }));
+
     return (
       <EuiSuperDatePicker
+        commonlyUsedRanges={commonlyUsedRanges}
         end={endDate}
         isLoading={isLoading}
         isPaused={policy === 'manual'}

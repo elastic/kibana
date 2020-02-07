@@ -6,7 +6,7 @@
 
 import { isObject, set } from 'lodash';
 import { InfraDatabaseSearchResponse } from '../../../lib/adapters/framework';
-import { MetricsExplorerRequest, MetricsExplorerResponse } from '../types';
+import { MetricsExplorerRequestBody, MetricsExplorerResponse } from '../types';
 
 interface GroupingAggregation {
   groupingsCount: {
@@ -27,7 +27,7 @@ const EMPTY_RESPONSE = {
 
 export const getGroupings = async (
   search: <Aggregation>(options: object) => Promise<InfraDatabaseSearchResponse<{}, Aggregation>>,
-  options: MetricsExplorerRequest
+  options: MetricsExplorerRequestBody
 ): Promise<MetricsExplorerResponse> => {
   if (!options.groupBy) {
     return EMPTY_RESPONSE;

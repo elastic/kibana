@@ -62,24 +62,24 @@ export const DEFAULT_CHART_OPTIONS: MetricsExplorerChartOptions = {
 
 export const DEFAULT_METRICS: MetricsExplorerOptionsMetric[] = [
   {
-    aggregation: MetricsExplorerAggregation.avg,
+    aggregation: 'avg',
     field: 'system.cpu.user.pct',
     color: MetricsExplorerColor.color0,
   },
   {
-    aggregation: MetricsExplorerAggregation.avg,
+    aggregation: 'avg',
     field: 'kubernetes.pod.cpu.usage.node.pct',
     color: MetricsExplorerColor.color1,
   },
   {
-    aggregation: MetricsExplorerAggregation.avg,
+    aggregation: 'avg',
     field: 'docker.cpu.total.pct',
     color: MetricsExplorerColor.color2,
   },
 ];
 
 export const DEFAULT_OPTIONS: MetricsExplorerOptions = {
-  aggregation: MetricsExplorerAggregation.avg,
+  aggregation: 'avg',
   metrics: DEFAULT_METRICS,
 };
 
@@ -102,7 +102,7 @@ function useStateWithLocalStorage<State>(
   const [state, setState] = useState<State>(parseJsonOrDefault<State>(storageState, defaultState));
   useEffect(() => {
     localStorage.setItem(key, JSON.stringify(state));
-  }, [state]);
+  }, [key, state]);
   return [state, setState];
 }
 

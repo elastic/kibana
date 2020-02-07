@@ -6,17 +6,12 @@
 
 import React, { Fragment } from 'react';
 import _ from 'lodash';
-import {
-  EuiText,
-  EuiLink,
-} from '@elastic/eui';
+import { EuiText, EuiLink } from '@elastic/eui';
 
-
-export class AttributionControl  extends React.Component {
-
+export class AttributionControl extends React.Component {
   state = {
-    uniqueAttributions: []
-  }
+    uniqueAttributions: [],
+  };
 
   componentDidMount() {
     this._isMounted = true;
@@ -32,7 +27,7 @@ export class AttributionControl  extends React.Component {
   }
 
   _loadAttributions = async () => {
-    const attributionPromises = this.props.layerList.map(async (layer) => {
+    const attributionPromises = this.props.layerList.map(async layer => {
       try {
         return await layer.getAttributions();
       } catch (error) {
@@ -48,8 +43,8 @@ export class AttributionControl  extends React.Component {
     for (let i = 0; i < attributions.length; i++) {
       for (let j = 0; j < attributions[i].length; j++) {
         const testAttr = attributions[i][j];
-        const attr = uniqueAttributions.find((added) => {
-          return (added.url === testAttr.url && added.label === testAttr.label);
+        const attr = uniqueAttributions.find(added => {
+          return added.url === testAttr.url && added.label === testAttr.label;
         });
         if (!attr) {
           uniqueAttributions.push(testAttr);
@@ -69,7 +64,9 @@ export class AttributionControl  extends React.Component {
     }
 
     return (
-      <EuiLink color="text" href={url} target="_blank">{label}</EuiLink>
+      <EuiLink color="text" href={url} target="_blank">
+        {label}
+      </EuiLink>
     );
   }
 
@@ -78,7 +75,7 @@ export class AttributionControl  extends React.Component {
       return (
         <Fragment key={index}>
           {this._renderAttribution(attribution)}
-          {index < (this.state.uniqueAttributions.length - 1) && ', '}
+          {index < this.state.uniqueAttributions.length - 1 && ', '}
         </Fragment>
       );
     });
@@ -91,7 +88,9 @@ export class AttributionControl  extends React.Component {
     return (
       <div className="mapAttributionControl">
         <EuiText size="xs">
-          <small><strong>{this._renderAttributions()}</strong></small>
+          <small>
+            <strong>{this._renderAttributions()}</strong>
+          </small>
         </EuiText>
       </div>
     );

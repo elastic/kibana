@@ -10,6 +10,7 @@ import { join } from 'path';
 import { cloneDeep } from 'lodash';
 
 const fixturesDir = join(__dirname, '..', 'fixtures');
+const restFixturesDir = join(__dirname, '../../rest/', 'fixtures');
 
 const excludeFieldsFrom = (from: any, excluder?: (d: any) => any): any => {
   const clone = cloneDeep(from);
@@ -20,7 +21,11 @@ const excludeFieldsFrom = (from: any, excluder?: (d: any) => any): any => {
 };
 
 export const expectFixtureEql = <T>(data: T, fixtureName: string, excluder?: (d: T) => void) => {
-  const fixturePath = join(fixturesDir, `${fixtureName}.json`);
+  let fixturePath = join(fixturesDir, `${fixtureName}.json`);
+  if (!fs.existsSync(fixturePath)) {
+    fixturePath = join(restFixturesDir, `${fixtureName}.json`);
+  }
+
   const dataExcluded = excludeFieldsFrom(data, excluder);
   expect(dataExcluded).not.to.be(undefined);
   if (process.env.UPDATE_UPTIME_FIXTURES) {

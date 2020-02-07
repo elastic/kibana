@@ -19,8 +19,8 @@
 
 import { createTagCloudFn } from './tag_cloud_fn';
 
-// @ts-ignore
-import { functionWrapper } from '../../interpreter/test_helpers';
+// eslint-disable-next-line
+import { functionWrapper } from '../../../../plugins/expressions/public/functions/tests/utils';
 
 describe('interpreter/functions#tagcloud', () => {
   const fn = functionWrapper(createTagCloudFn);

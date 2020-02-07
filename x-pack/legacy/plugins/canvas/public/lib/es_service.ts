@@ -4,24 +4,32 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import chrome from 'ui/chrome';
 import { API_ROUTE } from '../../common/lib/constants';
 // @ts-ignore untyped local
 import { fetch } from '../../common/lib/fetch';
 import { ErrorStrings } from '../../i18n';
 // @ts-ignore untyped local
 import { notify } from './notify';
+import { getCoreStart } from '../legacy';
 
 const { esService: strings } = ErrorStrings;
 
-const basePath = chrome.getBasePath();
-const apiPath = basePath + API_ROUTE;
-const savedObjectsClient = chrome.getSavedObjectsClient();
-const AdvancedSettings = chrome.getUiSettingsClient();
+const getApiPath = function() {
+  const basePath = getCoreStart().http.basePath.get();
+  return basePath + API_ROUTE;
+};
+
+const getSavedObjectsClient = function() {
+  return getCoreStart().savedObjects.client;
+};
+
+const getAdvancedSettings = function() {
+  return getCoreStart().uiSettings;
+};
 
 export const getFields = (index = '_all') => {
   return fetch
-    .get(`${apiPath}/es_fields?index=${index}`)
+    .get(`${getApiPath()}/es_fields?index=${index}`)
     .then(({ data: mapping }: { data: object }) =>
       Object.keys(mapping)
         .filter(field => !field.startsWith('_')) // filters out meta fields
@@ -35,7 +43,7 @@ export const getFields = (index = '_all') => {
 };
 
 export const getIndices = () =>
-  savedObjectsClient
+  getSavedObjectsClient()
     .find({
       type: 'index-pattern',
       fields: ['title'],
@@ -50,10 +58,10 @@ export const getIndices = () =>
     .catch((err: Error) => notify.error(err, { title: strings.getIndicesFetchErrorMessage() }));
 
 export const getDefaultIndex = () => {
-  const defaultIndexId = AdvancedSettings.get('defaultIndex');
+  const defaultIndexId = getAdvancedSettings().get('defaultIndex');
 
   return defaultIndexId
-    ? savedObjectsClient
+    ? getSavedObjectsClient()
         .get('index-pattern', defaultIndexId)
         .then(defaultIndex => defaultIndex.attributes.title)
         .catch(err => notify.error(err, { title: strings.getDefaultIndexFetchErrorMessage() }))

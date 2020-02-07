@@ -5,13 +5,17 @@
  */
 
 import { Unionize } from 'utility-types';
-import { Setup } from '../helpers/setup_request';
+import {
+  Setup,
+  SetupTimeRange,
+  SetupUIFilters
+} from '../helpers/setup_request';
 import { getMetricsDateHistogramParams } from '../helpers/metrics';
 import { ChartBase } from './types';
 import { transformDataToMetricsChart } from './transform_metrics_chart';
 import { getMetricsProjection } from '../../../common/projections/metrics';
 import { mergeProjection } from '../../../common/projections/util/merge_projection';
-import { AggregationOptionsByType } from '../../../typings/elasticsearch/aggregations';
+import { AggregationOptionsByType } from '../../../../../../plugins/apm/typings/elasticsearch/aggregations';
 
 interface Aggs {
   [key: string]: Unionize<{
@@ -39,7 +43,7 @@ export async function fetchAndTransformMetrics<T extends Aggs>({
   aggs,
   additionalFilters = []
 }: {
-  setup: Setup;
+  setup: Setup & SetupTimeRange & SetupUIFilters;
   serviceName: string;
   serviceNodeName?: string;
   chartBase: ChartBase;

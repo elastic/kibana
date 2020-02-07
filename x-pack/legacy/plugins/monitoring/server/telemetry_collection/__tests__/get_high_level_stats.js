@@ -6,7 +6,11 @@
 
 import expect from '@kbn/expect';
 import sinon from 'sinon';
-import { fetchHighLevelStats, getHighLevelStats, handleHighLevelStatsResponse } from '../get_high_level_stats';
+import {
+  fetchHighLevelStats,
+  getHighLevelStats,
+  handleHighLevelStatsResponse,
+} from '../get_high_level_stats';
 
 describe('get_high_level_stats', () => {
   const callWith = sinon.stub();
@@ -17,9 +21,13 @@ describe('get_high_level_stats', () => {
   const end = 1;
   const server = {
     config: sinon.stub().returns({
-      get: sinon.stub().withArgs(`xpack.monitoring.${product}.index_pattern`).returns(`.monitoring-${product}-N-*`)
-        .withArgs('xpack.monitoring.max_bucket_size').returns(size)
-    })
+      get: sinon
+        .stub()
+        .withArgs(`xpack.monitoring.${product}.index_pattern`)
+        .returns(`.monitoring-${product}-N-*`)
+        .withArgs('xpack.monitoring.max_bucket_size')
+        .returns(size),
+    }),
   };
   const response = {
     hits: {
@@ -29,68 +37,68 @@ describe('get_high_level_stats', () => {
             cluster_uuid: 'a',
             [`${product}_stats`]: {
               [`${product}`]: {
-                version: '1.2.3-alpha1'
+                version: '1.2.3-alpha1',
               },
               os: {
                 platform: 'linux',
                 platformRelease: 'linux-4.0',
                 distro: 'Ubuntu Linux',
-                distroRelease: 'Ubuntu Linux-14.04'
-              }
-            }
-          }
+                distroRelease: 'Ubuntu Linux-14.04',
+              },
+            },
+          },
         },
         {
           _source: {
             cluster_uuid: 'a',
             [`${product}_stats`]: {
               [`${product}`]: {
-                version: '1.2.3-alpha1'
+                version: '1.2.3-alpha1',
               },
               os: {
                 platform: 'linux',
                 platformRelease: 'linux-4.0',
                 distro: 'Ubuntu Linux',
-                distroRelease: 'Ubuntu Linux-14.04'
-              }
-            }
-          }
+                distroRelease: 'Ubuntu Linux-14.04',
+              },
+            },
+          },
         },
         {
           _source: {
             cluster_uuid: 'b',
             [`${product}_stats`]: {
               [`${product}`]: {
-                version: '2.3.4-rc1'
+                version: '2.3.4-rc1',
               },
               os: {
                 platform: 'linux',
                 platformRelease: 'linux-4.0',
                 distro: 'Ubuntu Linux',
-                distroRelease: 'Ubuntu Linux-14.04'
-              }
-            }
-          }
+                distroRelease: 'Ubuntu Linux-14.04',
+              },
+            },
+          },
         },
         {
           _source: {
             cluster_uuid: 'b',
             [`${product}_stats`]: {
               [`${product}`]: {
-                version: '2.3.4'
+                version: '2.3.4',
               },
               os: {
                 platform: 'darwin',
-                platformRelease: 'darwin-18.0'
-              }
-            }
-          }
+                platformRelease: 'darwin-18.0',
+              },
+            },
+          },
         },
         // no version or os
         {
           _source: {
-            cluster_uuid: 'b'
-          }
+            cluster_uuid: 'b',
+          },
         },
         // provides cloud data
         {
@@ -98,33 +106,33 @@ describe('get_high_level_stats', () => {
             cluster_uuid: 'c',
             [`${product}_stats`]: {
               [`${product}`]: {
-                version: '5.6.1'
+                version: '5.6.1',
               },
               cloud: {
                 name: cloudName,
                 id: '123',
                 vm_type: 'x1',
-                region: 'abc-123'
-              }
-            }
-          }
+                region: 'abc-123',
+              },
+            },
+          },
         },
         {
           _source: {
             cluster_uuid: 'c',
             [`${product}_stats`]: {
               [`${product}`]: {
-                version: '5.6.1'
+                version: '5.6.1',
               },
               cloud: {
                 name: cloudName,
                 id: '234',
                 vm_type: 'ps4',
                 region: 'def-123',
-                zone: 'def-123-A'
-              }
-            }
-          }
+                zone: 'def-123-A',
+              },
+            },
+          },
         },
         // same cloud instance as above (based on its ID)
         {
@@ -132,17 +140,17 @@ describe('get_high_level_stats', () => {
             cluster_uuid: 'c',
             [`${product}_stats`]: {
               [`${product}`]: {
-                version: '5.6.1'
+                version: '5.6.1',
               },
               cloud: {
                 name: cloudName,
                 id: '234',
                 vm_type: 'ps4',
                 region: 'def-123',
-                zone: 'def-123-A'
-              }
-            }
-          }
+                zone: 'def-123-A',
+              },
+            },
+          },
         },
         // cloud instance without anything other than the name
         {
@@ -150,46 +158,44 @@ describe('get_high_level_stats', () => {
             cluster_uuid: 'c',
             [`${product}_stats`]: {
               [`${product}`]: {
-                version: '5.6.1'
+                version: '5.6.1',
               },
               cloud: {
-                name: cloudName
-              }
-            }
-          }
+                name: cloudName,
+              },
+            },
+          },
         },
         // no cluster_uuid (not counted)
         {
           _source: {
             [`${product}_stats`]: {
               [`${product}`]: {
-                version: '2.3.4'
-              }
-            }
-          }
-        }
-      ]
-    }
+                version: '2.3.4',
+              },
+            },
+          },
+        },
+      ],
+    },
   };
   const expectedClusters = {
     a: {
       count: 2,
-      versions: [
-        { version: '1.2.3-alpha1', count: 2 }
-      ],
+      versions: [{ version: '1.2.3-alpha1', count: 2 }],
       os: {
         platforms: [{ platform: 'linux', count: 2 }],
         platformReleases: [{ platformRelease: 'linux-4.0', count: 2 }],
         distros: [{ distro: 'Ubuntu Linux', count: 2 }],
         distroReleases: [{ distroRelease: 'Ubuntu Linux-14.04', count: 2 }],
       },
-      cloud: undefined
+      cloud: undefined,
     },
     b: {
       count: 3,
       versions: [
         { version: '2.3.4-rc1', count: 1 },
-        { version: '2.3.4', count: 1 }
+        { version: '2.3.4', count: 1 },
       ],
       os: {
         platformReleases: [
@@ -203,13 +209,11 @@ describe('get_high_level_stats', () => {
         distros: [{ distro: 'Ubuntu Linux', count: 1 }],
         distroReleases: [{ distroRelease: 'Ubuntu Linux-14.04', count: 1 }],
       },
-      cloud: undefined
+      cloud: undefined,
     },
     c: {
       count: 4,
-      versions: [
-        { version: '5.6.1', count: 4 }
-      ],
+      versions: [{ version: '5.6.1', count: 4 }],
       os: {
         platforms: [],
         platformReleases: [],
@@ -223,18 +227,16 @@ describe('get_high_level_stats', () => {
           vms: 2,
           vm_types: [
             { vm_type: 'x1', count: 1 },
-            { vm_type: 'ps4', count: 2 }
+            { vm_type: 'ps4', count: 2 },
           ],
           regions: [
             { region: 'abc-123', count: 1 },
-            { region: 'def-123', count: 2 }
+            { region: 'def-123', count: 2 },
           ],
-          zones: [
-            { zone: 'def-123-A', count: 2 }
-          ]
-        }
-      ]
-    }
+          zones: [{ zone: 'def-123-A', count: 2 }],
+        },
+      ],
+    },
   };
   const clusterUuids = Object.keys(expectedClusters);
 
@@ -242,7 +244,9 @@ describe('get_high_level_stats', () => {
     it('returns clusters', async () => {
       callWith.withArgs('search').returns(Promise.resolve(response));
 
-      expect(await getHighLevelStats(server, callWith, clusterUuids, start, end, product)).to.eql(expectedClusters);
+      expect(await getHighLevelStats(server, callWith, clusterUuids, start, end, product)).to.eql(
+        expectedClusters
+      );
     });
   });
 
@@ -250,7 +254,9 @@ describe('get_high_level_stats', () => {
     it('searches for clusters', async () => {
       callWith.returns(Promise.resolve(response));
 
-      expect(await fetchHighLevelStats(server, callWith, clusterUuids, start, end, product)).to.be(response);
+      expect(await fetchHighLevelStats(server, callWith, clusterUuids, start, end, product)).to.be(
+        response
+      );
     });
   });
 
@@ -269,7 +275,7 @@ describe('get_high_level_stats', () => {
     });
 
     it('handles no hits response', () => {
-      const clusters = handleHighLevelStatsResponse({ hits: { hits: [ ] } }, product);
+      const clusters = handleHighLevelStatsResponse({ hits: { hits: [] } }, product);
 
       expect(clusters).to.eql({});
     });

@@ -6,10 +6,7 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import {
-  GetUICapabilitiesFailureReason,
-  UICapabilitiesService,
-} from '../../common/services/ui_capabilities';
+import { UICapabilitiesService } from '../../common/services/ui_capabilities';
 import { UserScenarios } from '../scenarios';
 
 export default function fooTests({ getService }: FtrProviderContext) {
@@ -55,8 +52,14 @@ export default function fooTests({ getService }: FtrProviderContext) {
           // these users have no access to even get the ui capabilities
           case 'legacy_all':
           case 'no_kibana_privileges':
-            expect(uiCapabilities.success).to.be(false);
-            expect(uiCapabilities.failureReason).to.be(GetUICapabilitiesFailureReason.NotFound);
+            expect(uiCapabilities.success).to.be(true);
+            expect(uiCapabilities.value).to.have.property('foo');
+            expect(uiCapabilities.value!.foo).to.eql({
+              create: false,
+              edit: false,
+              delete: false,
+              show: false,
+            });
             break;
           // all other users can't do anything with Foo
           default:

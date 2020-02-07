@@ -9,14 +9,14 @@ Add a new banner
 <b>Signature:</b>
 
 ```typescript
-add(mount: OverlayBannerMount, priority?: number): string;
+add(mount: MountPoint, priority?: number): string;
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  mount | <code>OverlayBannerMount</code> |  |
+|  mount | <code>MountPoint</code> |  |
 |  priority | <code>number</code> |  |
 
 <b>Returns:</b>

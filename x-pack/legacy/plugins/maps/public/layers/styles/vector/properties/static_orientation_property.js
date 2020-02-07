@@ -4,12 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import { StaticStyleProperty } from './static_style_property';
 
-
 export class StaticOrientationProperty extends StaticStyleProperty {
-
   constructor(options, styleName) {
     if (typeof options.orientation !== 'number') {
       super({ orientation: 0 }, styleName);
@@ -21,6 +18,4 @@ export class StaticOrientationProperty extends StaticStyleProperty {
   syncIconRotationWithMb(symbolLayerId, mbMap) {
     mbMap.setLayoutProperty(symbolLayerId, 'icon-rotate', this._options.orientation);
   }
-
-
 }

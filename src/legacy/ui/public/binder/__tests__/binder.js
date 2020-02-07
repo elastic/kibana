@@ -24,23 +24,25 @@ import ngMock from 'ng_mock';
 import { Binder } from '..';
 import $ from 'jquery';
 
-describe('Binder class', function () {
+describe('Binder class', function() {
   let $scope;
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function ($rootScope) {
-    $scope = $rootScope.$new();
-  }));
+  beforeEach(
+    ngMock.inject(function($rootScope) {
+      $scope = $rootScope.$new();
+    })
+  );
 
-  describe('Constructing with a $scope', function () {
-    it('accepts a $scope and listens for $destroy', function () {
+  describe('Constructing with a $scope', function() {
+    it('accepts a $scope and listens for $destroy', function() {
       sinon.stub($scope, '$on');
       new Binder($scope);
       expect($scope.$on.callCount).to.be(1);
       expect($scope.$on.args[0][0]).to.be('$destroy');
     });
 
-    it('unbinds when the $scope is destroyed', function () {
+    it('unbinds when the $scope is destroyed', function() {
       const binder = new Binder($scope);
       sinon.stub(binder, 'destroy');
       $scope.$destroy();
@@ -48,12 +50,12 @@ describe('Binder class', function () {
     });
   });
 
-  describe('Binder#on', function () {
-    it('binds to normal event emitters', function () {
+  describe('Binder#on', function() {
+    it('binds to normal event emitters', function() {
       const binder = new Binder();
       const emitter = {
         on: sinon.stub(),
-        removeListener: sinon.stub()
+        removeListener: sinon.stub(),
       };
       const handler = sinon.stub();
 
@@ -69,8 +71,8 @@ describe('Binder class', function () {
     });
   });
 
-  describe('Binder#jqOn', function () {
-    it('binds jquery event handlers', function () {
+  describe('Binder#jqOn', function() {
+    it('binds jquery event handlers', function() {
       const binder = new Binder();
       const el = document.createElement('div');
       const handler = sinon.stub();

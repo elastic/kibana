@@ -6,7 +6,11 @@
 
 import React from 'react';
 import { formatNumber } from 'plugins/monitoring/lib/format_number';
-import { ClusterItemContainer, BytesPercentageUsage, DisabledIfNoDataAndInSetupModeLink } from './helpers';
+import {
+  ClusterItemContainer,
+  BytesPercentageUsage,
+  DisabledIfNoDataAndInSetupModeLink,
+} from './helpers';
 import { LOGSTASH, LOGSTASH_SYSTEM_ID } from '../../../../common/constants';
 
 import {
@@ -42,22 +46,21 @@ export function LogstashPanel(props) {
   const goToPipelines = () => props.changeUrl('logstash/pipelines');
 
   const setupModeData = get(setupMode.data, 'logstash');
-  const setupModeTooltip = setupMode && setupMode.enabled
-    ? (
+  const setupModeTooltip =
+    setupMode && setupMode.enabled ? (
       <SetupModeTooltip
         setupModeData={setupModeData}
         productName={LOGSTASH_SYSTEM_ID}
         badgeClickAction={goToNodes}
       />
-    )
-    : null;
+    ) : null;
 
   return (
     <ClusterItemContainer
       {...props}
       url="logstash"
       title={i18n.translate('xpack.monitoring.cluster.overview.logstashPanel.logstashTitle', {
-        defaultMessage: 'Logstash'
+        defaultMessage: 'Logstash',
       })}
     >
       <EuiFlexGrid columns={4}>
@@ -69,9 +72,12 @@ export function LogstashPanel(props) {
                   setupModeEnabled={setupMode.enabled}
                   setupModeData={setupModeData}
                   onClick={goToLogstash}
-                  aria-label={i18n.translate('xpack.monitoring.cluster.overview.logstashPanel.overviewLinkAriaLabel', {
-                    defaultMessage: 'Logstash Overview'
-                  })}
+                  aria-label={i18n.translate(
+                    'xpack.monitoring.cluster.overview.logstashPanel.overviewLinkAriaLabel',
+                    {
+                      defaultMessage: 'Logstash Overview',
+                    }
+                  )}
                 >
                   <FormattedMessage
                     id="xpack.monitoring.cluster.overview.logstashPanel.overviewLinkLabel"
@@ -89,7 +95,7 @@ export function LogstashPanel(props) {
                 />
               </EuiDescriptionListTitle>
               <EuiDescriptionListDescription data-test-subj="lsEventsReceived">
-                { formatNumber(props.events_in_total, '0.[0]a') }
+                {formatNumber(props.events_in_total, '0.[0]a')}
               </EuiDescriptionListDescription>
               <EuiDescriptionListTitle>
                 <FormattedMessage
@@ -98,7 +104,7 @@ export function LogstashPanel(props) {
                 />
               </EuiDescriptionListTitle>
               <EuiDescriptionListDescription data-test-subj="lsEventsEmitted">
-                { formatNumber(props.events_out_total, '0.[0]a') }
+                {formatNumber(props.events_out_total, '0.[0]a')}
               </EuiDescriptionListDescription>
             </EuiDescriptionList>
           </EuiPanel>
@@ -117,14 +123,18 @@ export function LogstashPanel(props) {
                         'xpack.monitoring.cluster.overview.logstashPanel.nodesCountLinkAriaLabel',
                         {
                           defaultMessage: 'Logstash Nodes: {nodesCount}',
-                          values: { nodesCount }
+                          values: { nodesCount },
                         }
                       )}
                     >
                       <FormattedMessage
                         id="xpack.monitoring.cluster.overview.logstashPanel.nodesCountLinkLabel"
                         defaultMessage="Nodes: {nodesCount}"
-                        values={{ nodesCount: (<span data-test-subj="number_of_logstash_instances">{ nodesCount }</span>) }}
+                        values={{
+                          nodesCount: (
+                            <span data-test-subj="number_of_logstash_instances">{nodesCount}</span>
+                          ),
+                        }}
                       />
                     </EuiLink>
                   </h3>
@@ -141,7 +151,7 @@ export function LogstashPanel(props) {
                 />
               </EuiDescriptionListTitle>
               <EuiDescriptionListDescription data-test-subj="lsUptime">
-                { props.max_uptime ? formatNumber(props.max_uptime, 'time_since') : 0 }
+                {props.max_uptime ? formatNumber(props.max_uptime, 'time_since') : 0}
               </EuiDescriptionListDescription>
               <EuiDescriptionListTitle>
                 <FormattedMessage
@@ -151,7 +161,10 @@ export function LogstashPanel(props) {
                 />
               </EuiDescriptionListTitle>
               <EuiDescriptionListDescription data-test-subj="lsJvmHeap">
-                <BytesPercentageUsage usedBytes={props.avg_memory_used} maxBytes={props.avg_memory} />
+                <BytesPercentageUsage
+                  usedBytes={props.avg_memory_used}
+                  maxBytes={props.avg_memory}
+                />
               </EuiDescriptionListDescription>
             </EuiDescriptionList>
           </EuiPanel>
@@ -172,14 +185,20 @@ export function LogstashPanel(props) {
                         'xpack.monitoring.cluster.overview.logstashPanel.pipelineCountLinkAriaLabel',
                         {
                           defaultMessage: 'Logstash Pipelines (beta feature): {pipelineCount}',
-                          values: { pipelineCount: props.pipeline_count }
+                          values: { pipelineCount: props.pipeline_count },
                         }
                       )}
                     >
                       <FormattedMessage
                         id="xpack.monitoring.cluster.overview.logstashPanel.pipelinesCountLinkLabel"
                         defaultMessage="Pipelines: {pipelineCount}"
-                        values={{ pipelineCount: (<span data-test-subj="number_of_logstash_pipelines">{ props.pipeline_count }</span>) }}
+                        values={{
+                          pipelineCount: (
+                            <span data-test-subj="number_of_logstash_pipelines">
+                              {props.pipeline_count}
+                            </span>
+                          ),
+                        }}
                       />
                     </DisabledIfNoDataAndInSetupModeLink>
                   </h3>
@@ -187,9 +206,12 @@ export function LogstashPanel(props) {
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiIconTip
-                  content={i18n.translate('xpack.monitoring.cluster.overview.logstashPanel.betaFeatureTooltip', {
-                    defaultMessage: 'Beta feature'
-                  })}
+                  content={i18n.translate(
+                    'xpack.monitoring.cluster.overview.logstashPanel.betaFeatureTooltip',
+                    {
+                      defaultMessage: 'Beta feature',
+                    }
+                  )}
                   position="bottom"
                   type="beaker"
                   aria-label="Beta feature"
@@ -204,14 +226,18 @@ export function LogstashPanel(props) {
                   defaultMessage="With Memory Queues"
                 />
               </EuiDescriptionListTitle>
-              <EuiDescriptionListDescription>{ queueTypes[LOGSTASH.QUEUE_TYPES.MEMORY] || 0 }</EuiDescriptionListDescription>
+              <EuiDescriptionListDescription>
+                {queueTypes[LOGSTASH.QUEUE_TYPES.MEMORY] || 0}
+              </EuiDescriptionListDescription>
               <EuiDescriptionListTitle>
                 <FormattedMessage
                   id="xpack.monitoring.cluster.overview.logstashPanel.withPersistentQueuesLabel"
                   defaultMessage="With Persistent Queues"
                 />
               </EuiDescriptionListTitle>
-              <EuiDescriptionListDescription>{ queueTypes[LOGSTASH.QUEUE_TYPES.PERSISTED] || 0 }</EuiDescriptionListDescription>
+              <EuiDescriptionListDescription>
+                {queueTypes[LOGSTASH.QUEUE_TYPES.PERSISTED] || 0}
+              </EuiDescriptionListDescription>
             </EuiDescriptionList>
           </EuiPanel>
         </EuiFlexItem>

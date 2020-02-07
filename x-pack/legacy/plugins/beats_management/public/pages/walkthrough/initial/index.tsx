@@ -17,7 +17,7 @@ type Props = AppPageProps & {
   intl: InjectedIntl;
 };
 
-const InitialWalkthroughPageComponent: React.SFC<Props> = props => {
+const InitialWalkthroughPageComponent: React.FC<Props> = props => {
   if (props.location.pathname === '/walkthrough/initial') {
     return (
       <NoDataLayout

@@ -7,26 +7,21 @@
 import { i18n } from '@kbn/i18n';
 
 import React from 'react';
-import { StaticIndexPattern } from 'ui/index_patterns';
+import { IIndexPattern } from 'src/plugins/data/public';
 import { DocumentTitle } from '../../../components/document_title';
 import { MetricsExplorerCharts } from '../../../components/metrics_explorer/charts';
 import { MetricsExplorerToolbar } from '../../../components/metrics_explorer/toolbar';
-import { SourceLoadingPage } from '../../../components/source_loading_page';
 import { SourceQuery } from '../../../../common/graphql/types';
 import { NoData } from '../../../components/empty_states';
 import { useMetricsExplorerState } from './use_metric_explorer_state';
 import { useTrackPageview } from '../../../hooks/use_track_metric';
 
 interface MetricsExplorerPageProps {
-  source: SourceQuery.Query['source']['configuration'] | undefined;
-  derivedIndexPattern: StaticIndexPattern;
+  source: SourceQuery.Query['source']['configuration'];
+  derivedIndexPattern: IIndexPattern;
 }
 
 export const MetricsExplorerPage = ({ source, derivedIndexPattern }: MetricsExplorerPageProps) => {
-  if (!source) {
-    return <SourceLoadingPage />;
-  }
-
   const {
     loading,
     error,

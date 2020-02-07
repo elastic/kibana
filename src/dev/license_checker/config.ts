@@ -23,6 +23,7 @@ export const LICENSE_WHITELIST = [
   'Elastic-License',
   '(BSD-2-Clause OR MIT OR Apache-2.0)',
   '(BSD-2-Clause OR MIT)',
+  '(BSD-3-Clause AND Apache-2.0)',
   '(GPL-2.0 OR MIT)',
   '(MIT AND CC-BY-3.0)',
   '(MIT AND Zlib)',
@@ -100,11 +101,6 @@ export const LICENSE_OVERRIDES = {
   // TODO can be removed if the PR#9 is accepted on the source
   'pause-stream@0.0.11': ['MIT'],
 
-  // TODO can be removed once we upgrade past or equal pdf-image@2.0.1
-  'pdf-image@1.1.0': ['MIT'],
-
   // TODO can be removed once we upgrade the use of walk dependency past or equal to v2.3.14
   'walk@2.3.9': ['MIT'],
-
-  '@elastic/node-ctags@1.0.2': ['Nuclide software'],
 };

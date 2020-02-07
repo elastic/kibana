@@ -24,7 +24,7 @@ import '../../directives/bind';
 const bindingRE = /^(=|=\?|&|@)([a-zA-Z0-9_$]+)?$/;
 
 export function ApplyScopeBindingsProvider($parse) {
-  return function (bindings, $scope, $attrs) {
+  return function(bindings, $scope, $attrs) {
     forOwn(bindings, (binding, local) => {
       if (!bindingRE.test(binding)) {
         throw new Error(`Invalid scope binding "${binding}". Expected it to match ${bindingRE}`);
@@ -37,12 +37,14 @@ export function ApplyScopeBindingsProvider($parse) {
           $scope.$bind(local, attr);
           break;
         case '=?':
-          throw new Error('<render-directive> does not currently support optional two-way bindings.');
+          throw new Error(
+            '<render-directive> does not currently support optional two-way bindings.'
+          );
           break;
         case '&':
           if (attr) {
             const getter = $parse(attr);
-            $scope[local] = function () {
+            $scope[local] = function() {
               return getter($scope.$parent);
             };
           } else {
@@ -51,7 +53,7 @@ export function ApplyScopeBindingsProvider($parse) {
           break;
         case '@':
           $scope[local] = attr;
-          $attrs.$observe(attribute, v => $scope[local] = v);
+          $attrs.$observe(attribute, v => ($scope[local] = v));
           break;
       }
     });

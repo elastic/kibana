@@ -8,13 +8,12 @@ import { spy, stub } from 'sinon';
 import expect from '@kbn/expect';
 import { MonitoringViewBaseController } from '../';
 import { timefilter } from 'ui/timefilter';
-import { PromiseWithCancel,  Status } from '../../../common/cancel_promise';
+import { PromiseWithCancel, Status } from '../../../common/cancel_promise';
 
 /*
  * Mostly copied from base_table_controller test, with modifications
  */
-describe('MonitoringViewBaseController', function () {
-
+describe('MonitoringViewBaseController', function() {
   let ctrl;
   let $injector;
   let $scope;
@@ -22,7 +21,7 @@ describe('MonitoringViewBaseController', function () {
   let titleService;
   let executorService;
   let configService;
-  const httpCall = (ms) => new Promise((resolve) => setTimeout(() => resolve(), ms));
+  const httpCall = ms => new Promise(resolve => setTimeout(() => resolve(), ms));
 
   before(() => {
     titleService = spy();
@@ -30,10 +29,10 @@ describe('MonitoringViewBaseController', function () {
       register: spy(),
       start: spy(),
       cancel: spy(),
-      run: spy()
+      run: spy(),
     };
     configService = {
-      get: spy()
+      get: spy(),
     };
 
     const windowMock = () => {
@@ -43,15 +42,17 @@ describe('MonitoringViewBaseController', function () {
         removeEventListener: stub(),
         addEventListener: (name, handler) => name === targetEvent && (events[name] = handler),
         history: {
-          back: () => events[targetEvent] && events[targetEvent]()
-        }
+          back: () => events[targetEvent] && events[targetEvent](),
+        },
       };
     };
 
     const injectorGetStub = stub();
     injectorGetStub.withArgs('title').returns(titleService);
     injectorGetStub.withArgs('$executor').returns(executorService);
-    injectorGetStub.withArgs('localStorage').throws('localStorage should not be used by this class');
+    injectorGetStub
+      .withArgs('localStorage')
+      .throws('localStorage should not be used by this class');
     injectorGetStub.withArgs('$window').returns(windowMock());
     injectorGetStub.withArgs('config').returns(configService);
     $injector = { get: injectorGetStub };
@@ -59,20 +60,20 @@ describe('MonitoringViewBaseController', function () {
     $scope = {
       cluster: { cluster_uuid: 'foo' },
       $on: stub(),
-      $apply: stub()
+      $apply: stub(),
     };
 
     opts = {
       title: 'testo',
       getPageData: () => Promise.resolve({ data: { test: true } }),
       $injector,
-      $scope
+      $scope,
     };
 
     ctrl = new MonitoringViewBaseController(opts);
   });
 
-  it('show/hide zoom-out button based on interaction', (done) => {
+  it('show/hide zoom-out button based on interaction', done => {
     const xaxis = { from: 1562089923880, to: 1562090159676 };
     const timeRange = { xaxis };
     const { zoomInfo } = ctrl;
@@ -89,7 +90,6 @@ describe('MonitoringViewBaseController', function () {
       expect(zoomInfo.showZoomOutBtn()).to.be(false);
       done();
     }, 15);
-
   });
 
   it('creates functions for fetching data', () => {
@@ -97,14 +97,10 @@ describe('MonitoringViewBaseController', function () {
     expect(ctrl.onBrush).to.be.a('function');
   });
 
-
   it('sets page title', () => {
     expect(titleService.calledOnce).to.be(true);
     const { args } = titleService.getCall(0);
-    expect(args).to.eql([
-      { cluster_uuid: 'foo' },
-      'testo'
-    ]);
+    expect(args).to.eql([{ cluster_uuid: 'foo' }, 'testo']);
   });
 
   it('starts data poller', () => {
@@ -116,9 +112,9 @@ describe('MonitoringViewBaseController', function () {
     let counter = 0;
     const opts = {
       title: 'testo',
-      getPageData: (ms) => httpCall(ms),
+      getPageData: ms => httpCall(ms),
       $injector,
-      $scope
+      $scope,
     };
 
     const ctrl = new MonitoringViewBaseController(opts);
@@ -138,7 +134,7 @@ describe('MonitoringViewBaseController', function () {
     it('enables timepicker and auto refresh #2', () => {
       opts = {
         ...opts,
-        options: {}
+        options: {},
       };
       ctrl = new MonitoringViewBaseController(opts);
 
@@ -149,7 +145,7 @@ describe('MonitoringViewBaseController', function () {
     it('disables timepicker and enables auto refresh', () => {
       opts = {
         ...opts,
-        options: { enableTimeFilter: false }
+        options: { enableTimeFilter: false },
       };
       ctrl = new MonitoringViewBaseController(opts);
 
@@ -160,7 +156,7 @@ describe('MonitoringViewBaseController', function () {
     it('enables timepicker and disables auto refresh', () => {
       opts = {
         ...opts,
-        options: { enableAutoRefresh: false }
+        options: { enableAutoRefresh: false },
       };
       ctrl = new MonitoringViewBaseController(opts);
 
@@ -174,7 +170,7 @@ describe('MonitoringViewBaseController', function () {
         options: {
           enableTimeFilter: false,
           enableAutoRefresh: false,
-        }
+        },
       };
       ctrl = new MonitoringViewBaseController(opts);
 
@@ -182,12 +178,12 @@ describe('MonitoringViewBaseController', function () {
       expect(timefilter.isAutoRefreshSelectorEnabled()).to.be(false);
     });
 
-    it('disables timepicker and auto refresh', (done) => {
+    it('disables timepicker and auto refresh', done => {
       opts = {
         title: 'test',
         getPageData: () => httpCall(60),
         $injector,
-        $scope
+        $scope,
       };
 
       ctrl = new MonitoringViewBaseController({ ...opts });
@@ -205,6 +201,4 @@ describe('MonitoringViewBaseController', function () {
       });
     });
   });
-
 });
-

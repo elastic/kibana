@@ -10,17 +10,16 @@ import ApolloClient from 'apollo-client';
 import { AxiosRequestConfig } from 'axios';
 import React from 'react';
 import { Observable } from 'rxjs';
+import { SourceQuery } from '../graphql/types';
 import {
-  InfraSnapshotMetricInput,
-  InfraSnapshotNodeMetric,
-  InfraSnapshotNodePath,
-  InfraSnapshotGroupbyInput,
+  SnapshotMetricInput,
+  SnapshotGroupBy,
   InfraTimerangeInput,
-  SourceQuery,
-} from '../graphql/types';
+  SnapshotNodeMetric,
+  SnapshotNodePath,
+} from '../../common/http_api/snapshot_api';
 
 export interface InfraFrontendLibs {
-  framework: InfraFrameworkAdapter;
   apolloClient: InfraApolloClient;
   observableApi: InfraObservableApi;
 }
@@ -103,8 +102,8 @@ export interface InfraWaffleMapNode {
   id: string;
   name: string;
   ip?: string | null;
-  path: InfraSnapshotNodePath[];
-  metric: InfraSnapshotNodeMetric;
+  path: SnapshotNodePath[];
+  metric: SnapshotNodeMetric;
 }
 
 export type InfraWaffleMapGroup = InfraWaffleMapGroupOfNodes | InfraWaffleMapGroupOfGroups;
@@ -166,8 +165,8 @@ export interface InfraWaffleMapOptions {
   fields?: SourceQuery.Query['source']['configuration']['fields'] | null;
   formatter: InfraFormatterType;
   formatTemplate: string;
-  metric: InfraSnapshotMetricInput;
-  groupBy: InfraSnapshotGroupbyInput[];
+  metric: SnapshotMetricInput;
+  groupBy: SnapshotGroupBy;
   legend: InfraWaffleMapLegend;
 }
 

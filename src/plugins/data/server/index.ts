@@ -18,19 +18,61 @@
  */
 
 import { PluginInitializerContext } from '../../../core/server';
-import { DataServerPlugin } from './plugin';
+import { DataServerPlugin, DataPluginSetup, DataPluginStart } from './plugin';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new DataServerPlugin(initializerContext);
 }
 
-export { DataServerPlugin as Plugin };
+/**
+ * Types to be shared externally
+ * @public
+ */
+export { IRequestTypesMap, IResponseTypesMap } from './search';
+
+export {
+  // es query
+  esFilters,
+  esKuery,
+  esQuery,
+  fieldFormats,
+  // kbn field types
+  castEsToKbnFieldTypeName,
+  getKbnFieldType,
+  getKbnTypeNames,
+  // index patterns
+  IIndexPattern,
+  isFilterable,
+  IFieldType,
+  IFieldSubType,
+  // kbn field types
+  ES_FIELD_TYPES,
+  KBN_FIELD_TYPES,
+  // query
+  Query,
+  // timefilter
+  RefreshInterval,
+  TimeRange,
+  // utils
+  parseInterval,
+  isNestedField,
+} from '../common';
+
+/**
+ * Static code to be shared externally
+ * @public
+ */
 export {
   IndexPatternsFetcher,
   FieldDescriptor,
   shouldReadFieldFromDocValues,
+  indexPatterns,
 } from './index_patterns';
 
 export * from './search';
 
-export { IRequestTypesMap, IResponseTypesMap } from './search';
+export {
+  DataServerPlugin as Plugin,
+  DataPluginSetup as PluginSetup,
+  DataPluginStart as PluginStart,
+};

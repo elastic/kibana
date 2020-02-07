@@ -370,7 +370,12 @@ describe('#bulkUpdate', () => {
 
     mockBaseClient.bulkUpdate.mockResolvedValue(mockedResponse);
 
-    await expect(wrapper.bulkUpdate(docs.map(doc => ({ ...doc })), {})).resolves.toEqual({
+    await expect(
+      wrapper.bulkUpdate(
+        docs.map(doc => ({ ...doc })),
+        {}
+      )
+    ).resolves.toEqual({
       saved_objects: [
         {
           id: 'some-id',

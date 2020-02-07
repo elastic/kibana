@@ -18,53 +18,52 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { asPrettyString } from '../index';
+import { asPrettyString } from '../utils';
 import { KBN_FIELD_TYPES } from '../../kbn_field_types/types';
 import { FieldFormat } from '../field_format';
-import { TextContextTypeConvert } from '../types';
-// @ts-ignore
-import { shortenDottedString } from '../../../../../legacy/core_plugins/kibana/common/utils/shorten_dotted_string';
+import { TextContextTypeConvert, FIELD_FORMAT_IDS } from '../types';
+import { shortenDottedString } from '../../utils';
 
 const TRANSFORM_OPTIONS = [
   {
     kind: false,
-    text: i18n.translate('data.common.fieldFormats.string.transformOptions.none', {
+    text: i18n.translate('data.fieldFormats.string.transformOptions.none', {
       defaultMessage: '- None -',
     }),
   },
   {
     kind: 'lower',
-    text: i18n.translate('data.common.fieldFormats.string.transformOptions.lower', {
+    text: i18n.translate('data.fieldFormats.string.transformOptions.lower', {
       defaultMessage: 'Lower Case',
     }),
   },
   {
     kind: 'upper',
-    text: i18n.translate('data.common.fieldFormats.string.transformOptions.upper', {
+    text: i18n.translate('data.fieldFormats.string.transformOptions.upper', {
       defaultMessage: 'Upper Case',
     }),
   },
   {
     kind: 'title',
-    text: i18n.translate('data.common.fieldFormats.string.transformOptions.title', {
+    text: i18n.translate('data.fieldFormats.string.transformOptions.title', {
       defaultMessage: 'Title Case',
     }),
   },
   {
     kind: 'short',
-    text: i18n.translate('data.common.fieldFormats.string.transformOptions.short', {
+    text: i18n.translate('data.fieldFormats.string.transformOptions.short', {
       defaultMessage: 'Short Dots',
     }),
   },
   {
     kind: 'base64',
-    text: i18n.translate('data.common.fieldFormats.string.transformOptions.base64', {
+    text: i18n.translate('data.fieldFormats.string.transformOptions.base64', {
       defaultMessage: 'Base64 Decode',
     }),
   },
   {
     kind: 'urlparam',
-    text: i18n.translate('data.common.fieldFormats.string.transformOptions.url', {
+    text: i18n.translate('data.fieldFormats.string.transformOptions.url', {
       defaultMessage: 'URL Param Decode',
     }),
   },
@@ -72,8 +71,10 @@ const TRANSFORM_OPTIONS = [
 const DEFAULT_TRANSFORM_OPTION = false;
 
 export class StringFormat extends FieldFormat {
-  static id = 'string';
-  static title = 'String';
+  static id = FIELD_FORMAT_IDS.STRING;
+  static title = i18n.translate('data.fieldFormats.string.title', {
+    defaultMessage: 'String',
+  });
   static fieldType = [
     KBN_FIELD_TYPES.NUMBER,
     KBN_FIELD_TYPES.BOOLEAN,

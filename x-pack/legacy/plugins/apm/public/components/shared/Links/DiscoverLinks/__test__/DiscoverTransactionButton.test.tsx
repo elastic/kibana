@@ -5,7 +5,6 @@
  */
 
 import { shallow } from 'enzyme';
-import 'jest-styled-components';
 import React from 'react';
 import { Transaction } from '../../../../../../typings/es_schemas/ui/Transaction';
 import {

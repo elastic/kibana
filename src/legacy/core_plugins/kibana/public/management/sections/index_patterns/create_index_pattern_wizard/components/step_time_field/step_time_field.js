@@ -50,8 +50,6 @@ export class StepTimeField extends Component {
   constructor(props) {
     super(props);
 
-    const { getIndexPatternType, getIndexPatternName } = props.indexPatternCreationType;
-
     this.state = {
       error: '',
       timeFields: [],
@@ -61,8 +59,8 @@ export class StepTimeField extends Component {
       isFetchingTimeFields: false,
       isCreating: false,
       indexPatternId: '',
-      indexPatternType: getIndexPatternType(),
-      indexPatternName: getIndexPatternName(),
+      indexPatternType: props.indexPatternCreationType.getIndexPatternType(),
+      indexPatternName: props.indexPatternCreationType.getIndexPatternName(),
     };
   }
 
@@ -181,13 +179,13 @@ export class StepTimeField extends Component {
 
     const timeFieldOptions = timeFields
       ? [
-        { text: '', value: '' },
-        ...timeFields.map(timeField => ({
-          text: timeField.display,
-          value: timeField.fieldName,
-          disabled: timeFields.isDisabled,
-        })),
-      ]
+          { text: '', value: '' },
+          ...timeFields.map(timeField => ({
+            text: timeField.display,
+            value: timeField.fieldName,
+            disabled: timeFields.isDisabled,
+          })),
+        ]
       : [];
 
     const showTimeField = !timeFields || timeFields.length > 1;

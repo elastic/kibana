@@ -9,10 +9,10 @@ import moment from 'moment';
 
 import { ES_INDEX_NAME } from './constants';
 
-export default function ({ getService }) {
+export default function({ getService }) {
   const supertest = getService('supertest');
   const randomness = getService('randomness');
-  const es = getService('es');
+  const es = getService('legacyEs');
 
   describe('enroll_beat', () => {
     let validEnrollmentToken;

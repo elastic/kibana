@@ -19,11 +19,7 @@
 
 import path from 'path';
 
-import {
-  extractHtmlMessages,
-  extractCodeMessages,
-  extractPugMessages,
-} from './extractors';
+import { extractHtmlMessages, extractCodeMessages, extractPugMessages } from './extractors';
 import { globAsync, readFileAsync, normalizePath } from './utils';
 
 import { createFailError, isFailError } from '@kbn/dev-utils';
@@ -63,12 +59,13 @@ See .i18nrc.json for the list of supported namespaces.`)
 }
 
 export async function matchEntriesWithExctractors(inputPath, options = {}) {
-  const {
-    additionalIgnore = [],
-    mark = false,
-    absolute = false,
-  } = options;
-  const ignore = ['**/node_modules/**', '**/__tests__/**', '**/*.test.{js,jsx,ts,tsx}', '**/*.d.ts'].concat(additionalIgnore);
+  const { additionalIgnore = [], mark = false, absolute = false } = options;
+  const ignore = [
+    '**/node_modules/**',
+    '**/__tests__/**',
+    '**/*.test.{js,jsx,ts,tsx}',
+    '**/*.d.ts',
+  ].concat(additionalIgnore);
 
   const entries = await globAsync('*.{js,jsx,pug,ts,tsx,html}', {
     cwd: inputPath,
@@ -105,33 +102,32 @@ export async function matchEntriesWithExctractors(inputPath, options = {}) {
 export async function extractMessagesFromPathToMap(inputPath, targetMap, config, reporter) {
   const categorizedEntries = await matchEntriesWithExctractors(inputPath);
   return Promise.all(
-    categorizedEntries
-      .map(async ([entries, extractFunction]) => {
-        const files = await Promise.all(
-          filterEntries(entries, config.exclude).map(async entry => {
-            return {
-              name: entry,
-              content: await readFileAsync(entry),
-            };
-          })
-        );
+    categorizedEntries.map(async ([entries, extractFunction]) => {
+      const files = await Promise.all(
+        filterEntries(entries, config.exclude).map(async entry => {
+          return {
+            name: entry,
+            content: await readFileAsync(entry),
+          };
+        })
+      );
 
-        for (const { name, content } of files) {
-          const reporterWithContext = reporter.withContext({ name });
+      for (const { name, content } of files) {
+        const reporterWithContext = reporter.withContext({ name });
 
-          try {
-            for (const [id, value] of extractFunction(content, reporterWithContext)) {
-              validateMessageNamespace(id, name, config.paths, reporterWithContext);
-              addMessageToMap(targetMap, id, value, reporterWithContext);
-            }
-          } catch (error) {
-            if (!isFailError(error)) {
-              throw error;
-            }
-
-            reporterWithContext.report(error);
+        try {
+          for (const [id, value] of extractFunction(content, reporterWithContext)) {
+            validateMessageNamespace(id, name, config.paths, reporterWithContext);
+            addMessageToMap(targetMap, id, value, reporterWithContext);
           }
+        } catch (error) {
+          if (!isFailError(error)) {
+            throw error;
+          }
+
+          reporterWithContext.report(error);
         }
-      })
+      }
+    })
   );
 }

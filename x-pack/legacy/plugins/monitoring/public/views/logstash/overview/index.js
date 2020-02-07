@@ -8,7 +8,7 @@
  * Logstash Overview
  */
 import React from 'react';
-import uiRoutes from'ui/routes';
+import uiRoutes from 'ui/routes';
 import { ajaxErrorHandlersProvider } from 'plugins/monitoring/lib/ajax_error_handler';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import template from './index.html';
@@ -24,15 +24,16 @@ function getPageData($injector) {
   const url = `../api/monitoring/v1/clusters/${globalState.cluster_uuid}/logstash`;
   const timeBounds = timefilter.getBounds();
 
-  return $http.post(url, {
-    ccs: globalState.ccs,
-    timeRange: {
-      min: timeBounds.min.toISOString(),
-      max: timeBounds.max.toISOString()
-    }
-  })
+  return $http
+    .post(url, {
+      ccs: globalState.ccs,
+      timeRange: {
+        min: timeBounds.min.toISOString(),
+        max: timeBounds.max.toISOString(),
+      },
+    })
     .then(response => response.data)
-    .catch((err) => {
+    .catch(err => {
       const Private = $injector.get('Private');
       const ajaxErrorHandlers = Private(ajaxErrorHandlersProvider);
       return ajaxErrorHandlers(err);
@@ -42,11 +43,11 @@ function getPageData($injector) {
 uiRoutes.when('/logstash', {
   template,
   resolve: {
-    clusters: function (Private) {
+    clusters: function(Private) {
       const routeInit = Private(routeInitProvider);
       return routeInit({ codePaths: [CODE_PATH_LOGSTASH] });
     },
-    pageData: getPageData
+    pageData: getPageData,
   },
   controller: class extends MonitoringViewBaseController {
     constructor($injector, $scope) {
@@ -55,21 +56,24 @@ uiRoutes.when('/logstash', {
         getPageData,
         reactNodeId: 'monitoringLogstashOverviewApp',
         $scope,
-        $injector
+        $injector,
       });
 
-      $scope.$watch(() => this.data, data => {
-        this.renderReact(
-          <I18nContext>
-            <Overview
-              stats={data.clusterStatus}
-              metrics={data.metrics}
-              onBrush={this.onBrush}
-              zoomInfo={this.zoomInfo}
-            />
-          </I18nContext>
-        );
-      });
+      $scope.$watch(
+        () => this.data,
+        data => {
+          this.renderReact(
+            <I18nContext>
+              <Overview
+                stats={data.clusterStatus}
+                metrics={data.metrics}
+                onBrush={this.onBrush}
+                zoomInfo={this.zoomInfo}
+              />
+            </I18nContext>
+          );
+        }
+      );
     }
-  }
+  },
 });

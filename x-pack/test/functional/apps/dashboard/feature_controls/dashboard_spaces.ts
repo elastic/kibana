@@ -4,18 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect';
-// eslint-disable-next-line max-len
 import {
   createDashboardEditUrl,
   DashboardConstants,
-} from '../../../../../../src/legacy/core_plugins/kibana/public/dashboard/dashboard_constants';
-import { SpacesService } from '../../../../common/services';
+} from '../../../../../../src/legacy/core_plugins/kibana/public/dashboard/np_ready/dashboard_constants';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const spacesService: SpacesService = getService('spaces');
-  const PageObjects = getPageObjects(['common', 'dashboard', 'security', 'spaceSelector']);
+  const spacesService = getService('spaces');
+  const PageObjects = getPageObjects([
+    'common',
+    'dashboard',
+    'security',
+    'spaceSelector',
+    'settings',
+  ]);
   const appsMenu = getService('appsMenu');
   const testSubjects = getService('testSubjects');
 
@@ -45,9 +49,8 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
+        await PageObjects.settings.setNavType('individual');
+        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
         expect(navLinks).to.contain('Dashboard');
       });
 
@@ -75,7 +78,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
             shouldLoginIfPrompted: false,
           }
         );
-        await testSubjects.existOrFail('emptyDashboardAddPanelButton', { timeout: 10000 });
+        await testSubjects.existOrFail('emptyDashboardWidget', { timeout: 10000 });
       });
 
       it(`can view existing Dashboard`, async () => {
@@ -109,9 +112,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
+        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
         expect(navLinks).not.to.contain('Dashboard');
       });
 

@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { RequestHandlerContext } from 'src/core/server';
 import { InfraIndexField, InfraIndexType } from '../../graphql/types';
 import { FieldsAdapter } from '../adapters/fields';
-import { InfraFrameworkRequest } from '../adapters/framework';
 import { InfraSources } from '../sources';
 
 export class InfraFieldsDomain {
@@ -16,16 +16,19 @@ export class InfraFieldsDomain {
   ) {}
 
   public async getFields(
-    request: InfraFrameworkRequest,
+    requestContext: RequestHandlerContext,
     sourceId: string,
     indexType: InfraIndexType
   ): Promise<InfraIndexField[]> {
-    const { configuration } = await this.libs.sources.getSourceConfiguration(request, sourceId);
+    const { configuration } = await this.libs.sources.getSourceConfiguration(
+      requestContext,
+      sourceId
+    );
     const includeMetricIndices = [InfraIndexType.ANY, InfraIndexType.METRICS].includes(indexType);
     const includeLogIndices = [InfraIndexType.ANY, InfraIndexType.LOGS].includes(indexType);
 
     const fields = await this.adapter.getIndexFields(
-      request,
+      requestContext,
       `${includeMetricIndices ? configuration.metricAlias : ''},${
         includeLogIndices ? configuration.logAlias : ''
       }`,

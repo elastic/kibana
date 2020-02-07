@@ -40,10 +40,10 @@ export const CreateArchivesTask = {
             {
               archiverOptions: {
                 zlib: {
-                  level: 9
-                }
+                  level: 9,
+                },
               },
-              createRootDirectory: true
+              createRootDirectory: true,
             },
             source,
             destination
@@ -57,10 +57,10 @@ export const CreateArchivesTask = {
               archiverOptions: {
                 gzip: true,
                 gzipOptions: {
-                  level: 9
-                }
+                  level: 9,
+                },
               },
-              createRootDirectory: true
+              createRootDirectory: true,
             },
             source,
             destination
@@ -71,5 +71,5 @@ export const CreateArchivesTask = {
           throw new Error(`Unexpected extension for archive destination: ${destination}`);
       }
     }
-  }
+  },
 };

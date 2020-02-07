@@ -27,9 +27,10 @@ export interface KbnFieldTypeOptions {
 
 /** @public **/
 export enum ES_FIELD_TYPES {
-  _TYPE = '_type',
   _ID = '_id',
+  _INDEX = '_index',
   _SOURCE = '_source',
+  _TYPE = '_type',
 
   STRING = 'string',
   TEXT = 'text',

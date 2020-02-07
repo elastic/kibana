@@ -171,7 +171,10 @@ describe(`spaces disabled`, () => {
 
       const client = new SecureSavedObjectsClientWrapper(options);
 
-      const objects = [{ type: type1, attributes: {} }, { type: type2, attributes: {} }];
+      const objects = [
+        { type: type1, attributes: {} },
+        { type: type2, attributes: {} },
+      ];
       const apiCallOptions = Object.freeze({ namespace: 'some-ns' });
       await expect(client.bulkCreate(objects, apiCallOptions)).rejects.toThrowError(
         options.forbiddenError
@@ -483,7 +486,10 @@ describe(`spaces disabled`, () => {
 
       const client = new SecureSavedObjectsClientWrapper(options);
 
-      const objects = [{ type: type1, id: `bar-${type1}` }, { type: type2, id: `bar-${type2}` }];
+      const objects = [
+        { type: type1, id: `bar-${type1}` },
+        { type: type2, id: `bar-${type2}` },
+      ];
       const apiCallOptions = Object.freeze({ namespace: 'some-ns' });
       await expect(client.bulkGet(objects, apiCallOptions)).rejects.toThrowError(
         options.forbiddenError
@@ -526,7 +532,10 @@ describe(`spaces disabled`, () => {
 
       const client = new SecureSavedObjectsClientWrapper(options);
 
-      const objects = [{ type: type1, id: `id-${type1}` }, { type: type2, id: `id-${type2}` }];
+      const objects = [
+        { type: type1, id: `id-${type1}` },
+        { type: type2, id: `id-${type2}` },
+      ];
       const apiCallOptions = Object.freeze({ namespace: 'some-ns' });
       await expect(client.bulkGet(objects, apiCallOptions)).resolves.toBe(apiCallReturnValue);
 

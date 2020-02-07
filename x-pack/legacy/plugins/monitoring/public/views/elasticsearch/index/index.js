@@ -28,16 +28,17 @@ function getPageData($injector) {
   const url = `../api/monitoring/v1/clusters/${globalState.cluster_uuid}/elasticsearch/indices/${$route.current.params.index}`;
   const timeBounds = timefilter.getBounds();
 
-  return $http.post(url, {
-    ccs: globalState.ccs,
-    timeRange: {
-      min: timeBounds.min.toISOString(),
-      max: timeBounds.max.toISOString()
-    },
-    is_advanced: false,
-  })
+  return $http
+    .post(url, {
+      ccs: globalState.ccs,
+      timeRange: {
+        min: timeBounds.min.toISOString(),
+        max: timeBounds.max.toISOString(),
+      },
+      is_advanced: false,
+    })
     .then(response => response.data)
-    .catch((err) => {
+    .catch(err => {
       const Private = $injector.get('Private');
       const ajaxErrorHandlers = Private(ajaxErrorHandlersProvider);
       return ajaxErrorHandlers(err);
@@ -51,7 +52,7 @@ uiRoutes.when('/elasticsearch/indices/:index', {
       const routeInit = Private(routeInitProvider);
       return routeInit({ codePaths: [CODE_PATH_ELASTICSEARCH] });
     },
-    pageData: getPageData
+    pageData: getPageData,
   },
   controllerAs: 'monitoringElasticsearchIndexApp',
   controller: class extends MonitoringViewBaseController {
@@ -65,48 +66,50 @@ uiRoutes.when('/elasticsearch/indices/:index', {
           defaultMessage: 'Elasticsearch - Indices - {indexName} - Overview',
           values: {
             indexName,
-          }
+          },
         }),
         defaultData: {},
         getPageData,
         reactNodeId: 'monitoringElasticsearchIndexApp',
         $scope,
-        $injector
+        $injector,
       });
 
       this.indexName = indexName;
       const transformer = indicesByNodes();
 
-      $scope.$watch(() => this.data, data => {
-        if (!data || !data.shards) {
-          return;
+      $scope.$watch(
+        () => this.data,
+        data => {
+          if (!data || !data.shards) {
+            return;
+          }
+
+          const shards = data.shards;
+          $scope.totalCount = shards.length;
+          $scope.showing = transformer(shards, data.nodes);
+          $scope.labels = labels.node;
+          if (shards.some(shard => shard.state === 'UNASSIGNED')) {
+            $scope.labels = labels.indexWithUnassigned;
+          } else {
+            $scope.labels = labels.index;
+          }
+
+          this.renderReact(
+            <I18nContext>
+              <Index
+                scope={$scope}
+                kbnUrl={kbnUrl}
+                onBrush={this.onBrush}
+                indexUuid={this.indexName}
+                clusterUuid={$scope.cluster.cluster_uuid}
+                zoomInfo={this.zoomInfo}
+                {...data}
+              />
+            </I18nContext>
+          );
         }
-
-        const shards = data.shards;
-        $scope.totalCount = shards.length;
-        $scope.showing = transformer(shards, data.nodes);
-        $scope.labels = labels.node;
-        if (shards.some((shard) => shard.state === 'UNASSIGNED')) {
-          $scope.labels = labels.indexWithUnassigned;
-        } else {
-          $scope.labels = labels.index;
-        }
-
-
-        this.renderReact(
-          <I18nContext>
-            <Index
-              scope={$scope}
-              kbnUrl={kbnUrl}
-              onBrush={this.onBrush}
-              indexUuid={this.indexName}
-              clusterUuid={$scope.cluster.cluster_uuid}
-              zoomInfo={this.zoomInfo}
-              {...data}
-            />
-          </I18nContext>
-        );
-      });
+      );
     }
-  }
+  },
 });

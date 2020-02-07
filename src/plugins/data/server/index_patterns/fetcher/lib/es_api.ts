@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { APICaller } from 'src/core/server';
+import { APICaller } from 'kibana/server';
 import { convertEsError } from './errors';
 import { FieldCapsResponse } from './field_capabilities';
 

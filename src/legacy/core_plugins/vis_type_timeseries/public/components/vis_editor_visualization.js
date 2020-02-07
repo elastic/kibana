@@ -28,7 +28,7 @@ import {
   isGteInterval,
   AUTO_INTERVAL,
 } from './lib/get_interval';
-import { PANEL_TYPES } from '../../common/panel_types';
+import { PANEL_TYPES } from '../../../../../plugins/vis_type_timeseries/common/panel_types';
 import { start as embeddables } from '../../../embeddable_api/public/np_ready/public/legacy';
 
 const MIN_CHART_HEIGHT = 300;
@@ -70,13 +70,15 @@ class VisEditorVisualizationUI extends Component {
       return;
     }
 
-    const { timeRange, appState, savedObj, onDataChange } = this.props;
+    const { timeRange, savedObj, onDataChange } = this.props;
 
-    this._handler = await embeddables.getEmbeddableFactory('visualization').createFromObject(savedObj, {
-      vis: {},
-      timeRange: timeRange,
-      filters: appState ? appState.filters || [] : [],
-    });
+    this._handler = await embeddables
+      .getEmbeddableFactory('visualization')
+      .createFromObject(savedObj, {
+        vis: {},
+        timeRange: timeRange,
+        filters: [],
+      });
     await this._handler.render(this._visEl.current);
 
     this._subscription = this._handler.handler.data$.subscribe(data => {
@@ -287,7 +289,6 @@ VisEditorVisualizationUI.propTypes = {
   timeRange: PropTypes.object,
   dirty: PropTypes.bool,
   autoApply: PropTypes.bool,
-  appState: PropTypes.object,
 };
 
 export const VisEditorVisualization = injectI18n(VisEditorVisualizationUI);

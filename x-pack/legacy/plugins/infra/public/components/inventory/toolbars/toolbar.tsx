@@ -4,18 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { StaticIndexPattern } from 'ui/index_patterns';
+import React, { FunctionComponent } from 'react';
 import { Action } from 'typescript-fsa';
 import { EuiFlexItem } from '@elastic/eui';
-import {
-  InfraNodeType,
-  InfraSnapshotMetricInput,
-  InfraSnapshotGroupbyInput,
-} from '../../../graphql/types';
-import { HostToolbarItems } from './host_toolbar_items';
-import { PodToolbarItems } from './pod_toolbar_items';
-import { ContainerToolbarItems } from './container_toolbar_items';
+import { SnapshotMetricInput, SnapshotGroupBy } from '../../../../common/http_api/snapshot_api';
+import { InventoryCloudAccount } from '../../../../common/http_api/inventory_meta_api';
+import { findToolbar } from '../../../../common/inventory_models/toolbars';
 import { ToolbarWrapper } from './toolbar_wrapper';
 
 import { waffleOptionsSelectors } from '../../../store';
@@ -23,24 +17,36 @@ import { InfraGroupByOptions } from '../../../lib/lib';
 import { WithWaffleViewState } from '../../../containers/waffle/with_waffle_view_state';
 import { SavedViewsToolbarControls } from '../../saved_views/toolbar_control';
 import { inventoryViewSavedObjectType } from '../../../../common/saved_objects/inventory_view';
+import { IIndexPattern } from '../../../../../../../../src/plugins/data/public';
+import { InventoryItemType } from '../../../../common/inventory_models/types';
 
 export interface ToolbarProps {
-  createDerivedIndexPattern: (type: 'logs' | 'metrics' | 'both') => StaticIndexPattern;
-  changeMetric: (payload: InfraSnapshotMetricInput) => Action<InfraSnapshotMetricInput>;
-  changeGroupBy: (payload: InfraSnapshotGroupbyInput[]) => Action<InfraSnapshotGroupbyInput[]>;
+  createDerivedIndexPattern: (type: 'logs' | 'metrics' | 'both') => IIndexPattern;
+  changeMetric: (payload: SnapshotMetricInput) => Action<SnapshotMetricInput>;
+  changeGroupBy: (payload: SnapshotGroupBy) => Action<SnapshotGroupBy>;
   changeCustomOptions: (payload: InfraGroupByOptions[]) => Action<InfraGroupByOptions[]>;
+  changeAccount: (id: string) => Action<string>;
+  changeRegion: (name: string) => Action<string>;
   customOptions: ReturnType<typeof waffleOptionsSelectors.selectCustomOptions>;
   groupBy: ReturnType<typeof waffleOptionsSelectors.selectGroupBy>;
   metric: ReturnType<typeof waffleOptionsSelectors.selectMetric>;
   nodeType: ReturnType<typeof waffleOptionsSelectors.selectNodeType>;
+  accountId: ReturnType<typeof waffleOptionsSelectors.selectAccountId>;
+  region: ReturnType<typeof waffleOptionsSelectors.selectRegion>;
+  accounts: InventoryCloudAccount[];
+  regions: string[];
 }
 
-const wrapToolbarItems = (ToolbarItems: (props: ToolbarProps) => JSX.Element) => {
+const wrapToolbarItems = (
+  ToolbarItems: FunctionComponent<ToolbarProps>,
+  accounts: InventoryCloudAccount[],
+  regions: string[]
+) => {
   return (
     <ToolbarWrapper>
       {props => (
         <>
-          <ToolbarItems {...props} />
+          <ToolbarItems {...props} accounts={accounts} regions={regions} />
           <EuiFlexItem grow={true} />
           <EuiFlexItem grow={false}>
             <WithWaffleViewState indexPattern={props.createDerivedIndexPattern('metrics')}>
@@ -60,15 +66,12 @@ const wrapToolbarItems = (ToolbarItems: (props: ToolbarProps) => JSX.Element) =>
   );
 };
 
-export const Toolbar = (props: { nodeType: InfraNodeType }) => {
-  switch (props.nodeType) {
-    case InfraNodeType.host:
-      return wrapToolbarItems(HostToolbarItems);
-    case InfraNodeType.pod:
-      return wrapToolbarItems(PodToolbarItems);
-    case InfraNodeType.container:
-      return wrapToolbarItems(ContainerToolbarItems);
-    default:
-      return null;
-  }
+interface Props {
+  nodeType: InventoryItemType;
+  regions: string[];
+  accounts: InventoryCloudAccount[];
+}
+export const Toolbar = ({ nodeType, accounts, regions }: Props) => {
+  const ToolbarItems = findToolbar(nodeType);
+  return wrapToolbarItems(ToolbarItems, accounts, regions);
 };

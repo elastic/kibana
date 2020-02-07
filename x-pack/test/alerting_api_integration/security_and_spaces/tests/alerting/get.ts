@@ -51,19 +51,25 @@ export default function createGetTests({ getService }: FtrProviderContext) {
               expect(response.body).to.eql({
                 id: createdAlert.id,
                 name: 'abc',
+                tags: ['foo'],
                 alertTypeId: 'test.noop',
-                interval: '10s',
+                consumer: 'bar',
+                schedule: { interval: '1m' },
                 enabled: true,
                 actions: [],
-                alertTypeParams: {},
+                params: {},
                 createdBy: 'elastic',
                 scheduledTaskId: response.body.scheduledTaskId,
+                updatedAt: response.body.updatedAt,
+                createdAt: response.body.createdAt,
                 throttle: '1m',
                 updatedBy: 'elastic',
                 apiKeyOwner: 'elastic',
                 muteAll: false,
                 mutedInstanceIds: [],
               });
+              expect(Date.parse(response.body.createdAt)).to.be.greaterThan(0);
+              expect(Date.parse(response.body.updatedAt)).to.be.greaterThan(0);
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);

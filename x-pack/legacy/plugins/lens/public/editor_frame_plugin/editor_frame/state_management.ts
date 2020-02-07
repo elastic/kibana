@@ -32,6 +32,13 @@ export type Action =
       title: string;
     }
   | {
+      type: 'UPDATE_STATE';
+      // Just for diagnostics, so we can determine what action
+      // caused this update.
+      subType: string;
+      updater: (prevState: EditorFrameState) => EditorFrameState;
+    }
+  | {
       type: 'UPDATE_DATASOURCE_STATE';
       updater: unknown | ((prevState: unknown) => unknown);
       datasourceId: string;
@@ -39,6 +46,7 @@ export type Action =
     }
   | {
       type: 'UPDATE_VISUALIZATION_STATE';
+      visualizationId: string;
       newState: unknown;
       clearStagedPreview?: boolean;
     }
@@ -128,6 +136,8 @@ export const reducer = (state: EditorFrameState, action: Action): EditorFrameSta
       return action.state;
     case 'UPDATE_TITLE':
       return { ...state, title: action.title };
+    case 'UPDATE_STATE':
+      return action.updater(state);
     case 'UPDATE_LAYER':
       return {
         ...state,
@@ -248,6 +258,12 @@ export const reducer = (state: EditorFrameState, action: Action): EditorFrameSta
     case 'UPDATE_VISUALIZATION_STATE':
       if (!state.visualization.activeId) {
         throw new Error('Invariant: visualization state got updated without active visualization');
+      }
+      // This is a safeguard that prevents us from accidentally updating the
+      // wrong visualization. This occurs in some cases due to the uncoordinated
+      // way we manage state across plugins.
+      if (state.visualization.activeId !== action.visualizationId) {
+        return state;
       }
       return {
         ...state,

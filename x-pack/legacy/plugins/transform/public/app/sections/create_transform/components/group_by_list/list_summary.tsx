@@ -16,7 +16,7 @@ interface ListProps {
   list: PivotGroupByConfigDict;
 }
 
-export const GroupByListSummary: React.SFC<ListProps> = ({ list }) => {
+export const GroupByListSummary: React.FC<ListProps> = ({ list }) => {
   const listKeys = Object.keys(list);
   return (
     <Fragment>

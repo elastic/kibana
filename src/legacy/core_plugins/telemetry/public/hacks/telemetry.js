@@ -17,13 +17,9 @@
  * under the License.
  */
 
-import {
-  REPORT_INTERVAL_MS,
-  LOCALSTORAGE_KEY,
-} from '../../common/constants';
+import { REPORT_INTERVAL_MS, LOCALSTORAGE_KEY } from '../../common/constants';
 
 export class Telemetry {
-
   /**
    * @param {Object} $injector - AngularJS injector service
    * @param {Function} fetchTelemetry Method used to fetch telemetry data (expects an array response)
@@ -57,7 +53,7 @@ export class Telemetry {
       // returns NaN for any malformed or unset (null/undefined) value
       const lastReport = parseInt(this._lastReport, 10);
       // If it's been a day since we last sent telemetry
-      if (isNaN(lastReport) || (Date.now() - lastReport) > REPORT_INTERVAL_MS) {
+      if (isNaN(lastReport) || Date.now() - lastReport > REPORT_INTERVAL_MS) {
         return true;
       }
     }
@@ -71,37 +67,45 @@ export class Telemetry {
    * @returns {Promise} Always.
    */
   _sendIfDue() {
-    if (this._sending || !this._checkReportStatus()) { return Promise.resolve(false); }
+    if (this._sending || !this._checkReportStatus()) {
+      return Promise.resolve(false);
+    }
 
     // mark that we are working so future requests are ignored until we're done
     this._sending = true;
 
-    return this._fetchTelemetry()
-      .then(response => {
-        const clusters = [].concat(response.data);
-        return Promise.all(clusters.map(cluster => {
-          const req = {
-            method: 'POST',
-            url: this._telemetryUrl,
-            data: cluster
-          };
-          // if passing data externally, then suppress kbnXsrfToken
-          if (this._telemetryUrl.match(/^https/)) { req.kbnXsrfToken = false; }
-          return this._$http(req);
-        }));
-      })
-      // the response object is ignored because we do not check it
-      .then(() => {
-        // we sent a report, so we need to record and store the current timestamp
-        this._lastReport = Date.now();
-        this._saveToBrowser();
-      })
-      // no ajaxErrorHandlers for telemetry
-      .catch(() => null)
-      .then(() => {
-        this._sending = false;
-        return true; // sent, but not necessarilly successfully
-      });
+    return (
+      this._fetchTelemetry()
+        .then(response => {
+          const clusters = [].concat(response.data);
+          return Promise.all(
+            clusters.map(cluster => {
+              const req = {
+                method: 'POST',
+                url: this._telemetryUrl,
+                data: cluster,
+              };
+              // if passing data externally, then suppress kbnXsrfToken
+              if (this._telemetryUrl.match(/^https/)) {
+                req.kbnXsrfToken = false;
+              }
+              return this._$http(req);
+            })
+          );
+        })
+        // the response object is ignored because we do not check it
+        .then(() => {
+          // we sent a report, so we need to record and store the current timestamp
+          this._lastReport = Date.now();
+          this._saveToBrowser();
+        })
+        // no ajaxErrorHandlers for telemetry
+        .catch(() => null)
+        .then(() => {
+          this._sending = false;
+          return true; // sent, but not necessarilly successfully
+        })
+    );
   }
 
   /**
@@ -113,5 +117,4 @@ export class Telemetry {
     // continuously check if it's due time for a report
     return window.setInterval(() => this._sendIfDue(), 60000);
   }
-
 } // end class

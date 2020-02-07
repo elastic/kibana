@@ -150,6 +150,7 @@ exports[`Header rendering renders correctly against snapshot 1`] = `
     show={true}
   />
   <Connect(StatefulSearchOrFilterComponent)
+    browserFields={Object {}}
     indexPattern={
       Object {
         "fields": Array [

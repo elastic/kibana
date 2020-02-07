@@ -1,0 +1,607 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`explorerChartsContainerService call anomalyChangeListener with actual series config 1`] = `
+Object {
+  "chartsPerRow": 1,
+  "seriesToPlot": Array [
+    Object {
+      "bucketSpanSeconds": 900,
+      "chartData": null,
+      "datafeedConfig": Object {
+        "chunking_config": Object {
+          "mode": "auto",
+        },
+        "datafeed_id": "datafeed-mock-job-id",
+        "indices": Array [
+          "farequote-2017",
+        ],
+        "job_id": "mock-job-id",
+        "query": Object {
+          "match_all": Object {
+            "boost": 1,
+          },
+        },
+        "query_delay": "86658ms",
+        "scroll_size": 1000,
+        "state": "stopped",
+      },
+      "detectorIndex": 0,
+      "detectorLabel": "mean(responsetime)",
+      "entityFields": Array [
+        Object {
+          "fieldName": "airline",
+          "fieldType": "partition",
+          "fieldValue": "AAL",
+        },
+      ],
+      "fieldName": "responsetime",
+      "functionDescription": "mean",
+      "infoTooltip": Object {
+        "aggregationInterval": "15m",
+        "chartFunction": "avg responsetime",
+        "entityFields": Array [
+          Object {
+            "fieldName": "airline",
+            "fieldValue": "AAL",
+          },
+        ],
+        "jobId": "mock-job-id",
+      },
+      "interval": "15m",
+      "jobId": "mock-job-id",
+      "loading": true,
+      "metricFieldName": "responsetime",
+      "metricFunction": "avg",
+      "timeField": "@timestamp",
+    },
+  ],
+  "timeFieldName": "timestamp",
+  "tooManyBuckets": false,
+}
+`;
+
+exports[`explorerChartsContainerService call anomalyChangeListener with actual series config 2`] = `
+Object {
+  "chartsPerRow": 1,
+  "seriesToPlot": Array [
+    Object {
+      "bucketSpanSeconds": 900,
+      "chartData": Array [
+        Object {
+          "date": 1486611900000,
+          "value": 95.61584963117328,
+        },
+        Object {
+          "date": 1486612800000,
+          "value": 99.34646708170573,
+        },
+        Object {
+          "date": 1486613700000,
+          "value": 92.54502330106847,
+        },
+        Object {
+          "date": 1486614600000,
+          "value": 98.87258768081665,
+        },
+        Object {
+          "date": 1486615500000,
+          "value": 102.82824816022601,
+        },
+        Object {
+          "date": 1486616400000,
+          "value": 96.7391939163208,
+        },
+        Object {
+          "date": 1486617300000,
+          "value": 99.72634760538737,
+        },
+        Object {
+          "date": 1486618200000,
+          "value": 101.08556365966797,
+        },
+        Object {
+          "actual": Array [
+            84.60266517190372,
+          ],
+          "anomalyScore": 0.02716009,
+          "date": 1486619100000,
+          "typical": Array [
+            99.79426367092864,
+          ],
+          "value": 84.60266517190372,
+        },
+        Object {
+          "date": 1486620000000,
+          "value": 105.24246263504028,
+        },
+        Object {
+          "date": 1486620900000,
+          "value": 91.86086603800456,
+        },
+        Object {
+          "date": 1486621800000,
+          "value": 94.5369130452474,
+        },
+        Object {
+          "date": 1486622700000,
+          "value": 97.63843189586292,
+        },
+        Object {
+          "date": 1486623600000,
+          "value": 93.79290502211627,
+        },
+        Object {
+          "date": 1486624500000,
+          "value": 108.91006604362937,
+        },
+        Object {
+          "date": 1486625400000,
+          "value": 107.46900049845378,
+        },
+        Object {
+          "date": 1486626300000,
+          "value": 100.03502061631944,
+        },
+        Object {
+          "date": 1486627200000,
+          "value": 92.0638559129503,
+        },
+        Object {
+          "date": 1486628100000,
+          "value": 96.06356851678146,
+        },
+        Object {
+          "date": 1486629000000,
+          "value": 109.89569989372703,
+        },
+        Object {
+          "date": 1486629900000,
+          "value": 96.09498441786994,
+        },
+        Object {
+          "date": 1486630800000,
+          "value": 105.05972120496962,
+        },
+        Object {
+          "date": 1486631700000,
+          "value": 94.53041982650757,
+        },
+        Object {
+          "date": 1486632600000,
+          "value": 103.37048240329908,
+        },
+        Object {
+          "date": 1486633500000,
+          "value": 105.2058048248291,
+        },
+        Object {
+          "date": 1486634400000,
+          "value": 102.06169471740722,
+        },
+        Object {
+          "date": 1486635300000,
+          "value": 101.4836499955919,
+        },
+        Object {
+          "date": 1486636200000,
+          "value": 96.34219177246094,
+        },
+        Object {
+          "date": 1486637100000,
+          "value": 102.81613063812256,
+        },
+        Object {
+          "date": 1486638000000,
+          "value": 96.09064518321644,
+        },
+        Object {
+          "date": 1486638900000,
+          "value": 104.8488635012978,
+        },
+        Object {
+          "date": 1486639800000,
+          "value": 93.45240384056454,
+        },
+        Object {
+          "date": 1486640700000,
+          "value": 102.28834065524015,
+        },
+        Object {
+          "date": 1486641600000,
+          "value": 104.54204668317523,
+        },
+        Object {
+          "date": 1486642500000,
+          "value": 99.85492063823499,
+        },
+        Object {
+          "date": 1486643400000,
+          "value": 97.12778260972765,
+        },
+        Object {
+          "date": 1486644300000,
+          "value": 103.99638447008635,
+        },
+        Object {
+          "date": 1486645200000,
+          "value": 95.34676822863128,
+        },
+        Object {
+          "date": 1486646100000,
+          "value": 97.04620517383923,
+        },
+        Object {
+          "date": 1486647000000,
+          "value": 104.2849609375,
+        },
+        Object {
+          "date": 1486647900000,
+          "value": 97.88982413796818,
+        },
+        Object {
+          "date": 1486648800000,
+          "value": 99.03312370300293,
+        },
+        Object {
+          "date": 1486649700000,
+          "value": 105.5509593963623,
+        },
+        Object {
+          "date": 1486650600000,
+          "value": 100.49496881585372,
+        },
+        Object {
+          "date": 1486651500000,
+          "value": 99.06059494018555,
+        },
+        Object {
+          "date": 1486652400000,
+          "value": 90.58293914794922,
+        },
+        Object {
+          "date": 1486653300000,
+          "value": 92.8633090655009,
+        },
+        Object {
+          "date": 1486654200000,
+          "value": 96.12510445004418,
+        },
+        Object {
+          "date": 1486655100000,
+          "value": 100.4840145111084,
+        },
+        Object {
+          "actual": Array [
+            242.3568918440077,
+          ],
+          "anomalyScore": 98.56065708456248,
+          "date": 1486656000000,
+          "typical": Array [
+            99.81123207526203,
+          ],
+          "value": 242.3568918440077,
+        },
+        Object {
+          "actual": Array [
+            282.02533259111306,
+          ],
+          "anomalyScore": 96.93718,
+          "date": 1486656900000,
+          "typical": Array [
+            100.02884159032787,
+          ],
+          "value": 282.02533259111294,
+        },
+        Object {
+          "date": 1486657800000,
+          "value": 100.15823459625244,
+        },
+        Object {
+          "date": 1486658700000,
+          "value": 97.5446532754337,
+        },
+        Object {
+          "date": 1486659600000,
+          "value": 99.53840043809679,
+        },
+        Object {
+          "date": 1486660500000,
+          "value": 101.24810005636776,
+        },
+        Object {
+          "date": 1486661400000,
+          "value": 101.11400771141052,
+        },
+        Object {
+          "date": 1486662300000,
+          "value": 100.70463662398488,
+        },
+        Object {
+          "date": 1486663200000,
+          "value": 110.70174247340152,
+        },
+        Object {
+          "date": 1486664100000,
+          "value": 96.51030629475912,
+        },
+        Object {
+          "date": 1486665000000,
+          "value": 103.92840491400824,
+        },
+        Object {
+          "date": 1486665900000,
+          "value": 98.29448418868215,
+        },
+        Object {
+          "date": 1486666800000,
+          "value": 98.0272060394287,
+        },
+        Object {
+          "date": 1486667700000,
+          "value": 99.63833363850911,
+        },
+        Object {
+          "date": 1486668600000,
+          "value": 105.18764642568735,
+        },
+        Object {
+          "date": 1486669500000,
+          "value": 97.8544118669298,
+        },
+        Object {
+          "date": 1486670400000,
+          "value": 97.99196343672902,
+        },
+        Object {
+          "date": 1486671300000,
+          "value": 106.30481338500977,
+        },
+        Object {
+          "date": 1486672200000,
+          "value": 99.88215498490767,
+        },
+        Object {
+          "date": 1486673100000,
+          "value": 93.50493303934734,
+        },
+        Object {
+          "date": 1486674000000,
+          "value": 101.2538422175816,
+        },
+        Object {
+          "date": 1486674900000,
+          "value": 102.07398986816406,
+        },
+        Object {
+          "date": 1486675800000,
+          "value": 102.66583075890175,
+        },
+        Object {
+          "date": 1486676700000,
+          "value": 108.5278158748851,
+        },
+        Object {
+          "date": 1486677600000,
+          "value": 103.91436131795247,
+        },
+        Object {
+          "date": 1486678500000,
+          "value": 98.55452414119945,
+        },
+        Object {
+          "date": 1486679400000,
+          "value": 88.25028387705485,
+        },
+        Object {
+          "date": 1486680300000,
+          "value": 93.57433591570172,
+        },
+        Object {
+          "date": 1486681200000,
+          "value": 96.70550713172325,
+        },
+        Object {
+          "date": 1486682100000,
+          "value": 98.14921424502418,
+        },
+        Object {
+          "date": 1486683000000,
+          "value": 96.99264602661133,
+        },
+        Object {
+          "date": 1486683900000,
+          "value": 88.23578810691833,
+        },
+        Object {
+          "date": 1486684800000,
+          "value": 106.89157305265728,
+        },
+        Object {
+          "date": 1486685700000,
+          "value": 101.07822271493765,
+        },
+        Object {
+          "date": 1486686600000,
+          "value": 101.77820564718807,
+        },
+        Object {
+          "date": 1486687500000,
+          "value": 102.84660829816546,
+        },
+        Object {
+          "date": 1486688400000,
+          "value": 103.91598869772518,
+        },
+        Object {
+          "date": 1486689300000,
+          "value": 104.73469270978656,
+        },
+        Object {
+          "date": 1486690200000,
+          "value": 97.01155325082632,
+        },
+        Object {
+          "date": 1486691100000,
+          "value": 104.97890539730297,
+        },
+        Object {
+          "date": 1486692000000,
+          "value": 99.66440022786459,
+        },
+        Object {
+          "date": 1486692900000,
+          "value": 99.64117607703575,
+        },
+        Object {
+          "date": 1486693800000,
+          "value": 87.37038326263428,
+        },
+        Object {
+          "date": 1486694700000,
+          "value": 105.95191955566406,
+        },
+        Object {
+          "date": 1486695600000,
+          "value": 104.33271111382379,
+        },
+        Object {
+          "date": 1486696500000,
+          "value": 101.93921706255745,
+        },
+        Object {
+          "date": 1486697400000,
+          "value": 101.11774004422702,
+        },
+        Object {
+          "date": 1486698300000,
+          "value": 101.70929403866039,
+        },
+        Object {
+          "date": 1486699200000,
+          "value": 102.61243908221905,
+        },
+        Object {
+          "date": 1486700100000,
+          "value": 99.16273922390408,
+        },
+        Object {
+          "date": 1486701000000,
+          "value": 105.98729952643899,
+        },
+        Object {
+          "date": 1486701900000,
+          "value": 114.16951904296874,
+        },
+        Object {
+          "date": 1486702800000,
+          "value": 98.25128769874573,
+        },
+        Object {
+          "date": 1486703700000,
+          "value": 94.25434192858245,
+        },
+        Object {
+          "date": 1486704600000,
+          "value": 99.7759528526893,
+        },
+        Object {
+          "date": 1486705500000,
+          "value": 113.10429502788342,
+        },
+        Object {
+          "date": 1486706400000,
+          "value": 97.95185834711248,
+        },
+        Object {
+          "date": 1486707300000,
+          "value": 114.46214866638184,
+        },
+        Object {
+          "date": 1486708200000,
+          "value": 105.51880025863647,
+        },
+        Object {
+          "date": 1486709100000,
+          "value": 99.89148930140904,
+        },
+        Object {
+          "date": 1486710000000,
+          "value": 90.5253866369074,
+        },
+        Object {
+          "date": 1486710900000,
+          "value": 103.66612243652344,
+        },
+        Object {
+          "date": 1486711800000,
+          "value": 103.97851837158203,
+        },
+        Object {
+          "date": 1486712700000,
+          "value": 92.76053659539474,
+        },
+        Object {
+          "date": 1486713600000,
+          "value": 99.99461364746094,
+        },
+      ],
+      "chartLimits": Object {
+        "max": 282.02533259111294,
+        "min": 84.60266517190372,
+      },
+      "datafeedConfig": Object {
+        "chunking_config": Object {
+          "mode": "auto",
+        },
+        "datafeed_id": "datafeed-mock-job-id",
+        "indices": Array [
+          "farequote-2017",
+        ],
+        "job_id": "mock-job-id",
+        "query": Object {
+          "match_all": Object {
+            "boost": 1,
+          },
+        },
+        "query_delay": "86658ms",
+        "scroll_size": 1000,
+        "state": "stopped",
+      },
+      "detectorIndex": 0,
+      "detectorLabel": "mean(responsetime)",
+      "entityFields": Array [
+        Object {
+          "fieldName": "airline",
+          "fieldType": "partition",
+          "fieldValue": "AAL",
+        },
+      ],
+      "fieldName": "responsetime",
+      "functionDescription": "mean",
+      "infoTooltip": Object {
+        "aggregationInterval": "15m",
+        "chartFunction": "avg responsetime",
+        "entityFields": Array [
+          Object {
+            "fieldName": "airline",
+            "fieldValue": "AAL",
+          },
+        ],
+        "jobId": "mock-job-id",
+      },
+      "interval": "15m",
+      "jobId": "mock-job-id",
+      "loading": false,
+      "metricFieldName": "responsetime",
+      "metricFunction": "avg",
+      "plotEarliest": 1486560600000,
+      "plotLatest": 1486765800000,
+      "selectedEarliest": 1486656000000,
+      "selectedLatest": 1486670399999,
+      "timeField": "@timestamp",
+    },
+  ],
+  "timeFieldName": "timestamp",
+  "tooManyBuckets": false,
+}
+`;

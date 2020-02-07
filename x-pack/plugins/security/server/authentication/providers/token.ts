@@ -9,8 +9,8 @@ import { KibanaRequest } from '../../../../../../src/core/server';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
 import { BaseAuthenticationProvider } from './base';
+import { canRedirectRequest } from '../can_redirect_request';
 import { Tokens, TokenPair } from '../tokens';
-import { canRedirectRequest } from '..';
 
 /**
  * Describes the parameters that are required by the provider to process the initial login request.
@@ -29,6 +29,11 @@ type ProviderState = TokenPair;
  * Provider that supports token-based request authentication.
  */
 export class TokenAuthenticationProvider extends BaseAuthenticationProvider {
+  /**
+   * Type of the provider.
+   */
+  static readonly type = 'token';
+
   /**
    * Performs initial login request using username and password.
    * @param request Request instance.
@@ -120,18 +125,16 @@ export class TokenAuthenticationProvider extends BaseAuthenticationProvider {
   public async logout(request: KibanaRequest, state?: ProviderState | null) {
     this.logger.debug(`Trying to log user out via ${request.url.path}.`);
 
-    if (!state) {
+    if (state) {
+      this.logger.debug('Token-based logout has been initiated by the user.');
+      try {
+        await this.options.tokens.invalidate(state);
+      } catch (err) {
+        this.logger.debug(`Failed invalidating user's access token: ${err.message}`);
+        return DeauthenticationResult.failed(err);
+      }
+    } else {
       this.logger.debug('There are no access and refresh tokens to invalidate.');
-      return DeauthenticationResult.notHandled();
-    }
-
-    this.logger.debug('Token-based logout has been initiated by the user.');
-
-    try {
-      await this.options.tokens.invalidate(state);
-    } catch (err) {
-      this.logger.debug(`Failed invalidating user's access token: ${err.message}`);
-      return DeauthenticationResult.failed(err);
     }
 
     const queryString = request.url.search || `?msg=LOGGED_OUT`;

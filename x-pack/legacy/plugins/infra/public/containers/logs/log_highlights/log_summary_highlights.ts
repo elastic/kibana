@@ -7,12 +7,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import { debounce } from 'lodash';
 
-import { LogSummaryHighlightsQuery } from '../../../graphql/types';
-import { DependencyError, useApolloClient } from '../../../utils/apollo_context';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
-import { logSummaryHighlightsQuery } from './log_summary_highlights.gql_query';
-
-export type LogSummaryHighlights = LogSummaryHighlightsQuery.Query['source']['logSummaryHighlightsBetween'];
+import { fetchLogSummaryHighlights } from './api/fetch_log_summary_highlights';
+import { LogEntriesSummaryHighlightsResponse } from '../../../../common/http_api';
 
 export const useLogSummaryHighlights = (
   sourceId: string,
@@ -23,41 +20,32 @@ export const useLogSummaryHighlights = (
   filterQuery: string | null,
   highlightTerms: string[]
 ) => {
-  const apolloClient = useApolloClient();
-  const [logSummaryHighlights, setLogSummaryHighlights] = useState<LogSummaryHighlights>([]);
+  const [logSummaryHighlights, setLogSummaryHighlights] = useState<
+    LogEntriesSummaryHighlightsResponse['data']
+  >([]);
 
   const [loadLogSummaryHighlightsRequest, loadLogSummaryHighlights] = useTrackedPromise(
     {
       cancelPreviousOn: 'resolution',
       createPromise: async () => {
-        if (!apolloClient) {
-          throw new DependencyError('Failed to load source: No apollo client available.');
-        }
         if (!start || !end || !highlightTerms.length) {
           throw new Error('Skipping request: Insufficient parameters');
         }
 
-        return await apolloClient.query<
-          LogSummaryHighlightsQuery.Query,
-          LogSummaryHighlightsQuery.Variables
-        >({
-          fetchPolicy: 'no-cache',
-          query: logSummaryHighlightsQuery,
-          variables: {
-            sourceId,
-            start,
-            end,
-            bucketSize,
-            highlightQueries: [highlightTerms[0]],
-            filterQuery,
-          },
+        return await fetchLogSummaryHighlights({
+          sourceId,
+          startDate: start,
+          endDate: end,
+          bucketSize,
+          query: filterQuery,
+          highlightTerms,
         });
       },
       onResolve: response => {
-        setLogSummaryHighlights(response.data.source.logSummaryHighlightsBetween);
+        setLogSummaryHighlights(response.data);
       },
     },
-    [apolloClient, sourceId, start, end, bucketSize, filterQuery, highlightTerms]
+    [sourceId, start, end, bucketSize, filterQuery, highlightTerms]
   );
 
   const debouncedLoadSummaryHighlights = useMemo(() => debounce(loadLogSummaryHighlights, 275), [
@@ -74,7 +62,15 @@ export const useLogSummaryHighlights = (
     } else {
       setLogSummaryHighlights([]);
     }
-  }, [highlightTerms, start, end, bucketSize, filterQuery, sourceVersion]);
+  }, [
+    bucketSize,
+    debouncedLoadSummaryHighlights,
+    end,
+    filterQuery,
+    highlightTerms,
+    sourceVersion,
+    start,
+  ]);
 
   return {
     logSummaryHighlights,

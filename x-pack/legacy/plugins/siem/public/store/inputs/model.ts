@@ -5,12 +5,11 @@
  */
 
 import { Dispatch } from 'redux';
-import { Query } from 'src/plugins/data/common/query';
 import { SavedQuery } from 'src/legacy/core_plugins/data/public';
 import { Omit } from '../../../common/utility_types';
 import { InputsModelId } from './constants';
 import { CONSTANTS } from '../../components/url_state/constants';
-import { esFilters } from '../../../../../../../src/plugins/data/public';
+import { Query, esFilters } from '../../../../../../../src/plugins/data/public';
 
 export interface AbsoluteTimeRange {
   kind: 'absolute';

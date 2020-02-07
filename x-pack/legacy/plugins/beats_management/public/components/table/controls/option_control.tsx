@@ -18,7 +18,7 @@ interface ComponentProps extends ControlSchema {
   actionHandler(action: AssignmentActionType, payload?: any): void;
 }
 
-export const OptionControl: React.SFC<ComponentProps> = (props: ComponentProps) => {
+export const OptionControl: React.FC<ComponentProps> = (props: ComponentProps) => {
   switch (props.type) {
     case ActionComponentType.Action:
       if (!props.action) {

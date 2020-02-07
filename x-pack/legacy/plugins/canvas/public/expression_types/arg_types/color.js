@@ -13,10 +13,15 @@ import { ArgTypesStrings } from '../../../i18n';
 
 const { Color: strings } = ArgTypesStrings;
 
-const ColorArgInput = ({ onValueChange, argValue, workpad }) => (
+const ColorArgInput = ({ onValueChange, argValue, workpad, typeInstance }) => (
   <EuiFlexGroup gutterSize="s">
     <EuiFlexItem grow={false}>
-      <ColorPickerPopover value={argValue} onChange={onValueChange} colors={workpad.colors} />
+      <ColorPickerPopover
+        value={argValue}
+        onChange={onValueChange}
+        colors={workpad.colors}
+        ariaLabel={`${typeInstance.displayName} ${strings.getDisplayName()}`}
+      />
     </EuiFlexItem>
   </EuiFlexGroup>
 );

@@ -70,32 +70,27 @@ export const useGetTransforms = (
         const transformConfigs: GetTransformsResponse = await api.getTransforms();
         const transformStats: GetTransformsStatsResponse = await api.getTransformsStats();
 
-        const tableRows = transformConfigs.transforms.reduce(
-          (reducedtableRows, config) => {
-            const stats = isGetTransformsStatsResponseOk(transformStats)
-              ? transformStats.transforms.find(d => config.id === d.id)
-              : undefined;
+        const tableRows = transformConfigs.transforms.reduce((reducedtableRows, config) => {
+          const stats = isGetTransformsStatsResponseOk(transformStats)
+            ? transformStats.transforms.find(d => config.id === d.id)
+            : undefined;
 
-            // A newly created transform might not have corresponding stats yet.
-            // If that's the case we just skip the transform and don't add it to the transform list yet.
-            if (!isTransformStats(stats)) {
-              return reducedtableRows;
-            }
-
-            // Table with expandable rows requires `id` on the outer most level
-            reducedtableRows.push({
-              id: config.id,
-              config,
-              mode:
-                typeof config.sync !== 'undefined'
-                  ? TRANSFORM_MODE.CONTINUOUS
-                  : TRANSFORM_MODE.BATCH,
-              stats,
-            });
+          // A newly created transform might not have corresponding stats yet.
+          // If that's the case we just skip the transform and don't add it to the transform list yet.
+          if (!isTransformStats(stats)) {
             return reducedtableRows;
-          },
-          [] as TransformListRow[]
-        );
+          }
+
+          // Table with expandable rows requires `id` on the outer most level
+          reducedtableRows.push({
+            id: config.id,
+            config,
+            mode:
+              typeof config.sync !== 'undefined' ? TRANSFORM_MODE.CONTINUOUS : TRANSFORM_MODE.BATCH,
+            stats,
+          });
+          return reducedtableRows;
+        }, [] as TransformListRow[]);
 
         setTransforms(tableRows);
         setErrorMessage(undefined);

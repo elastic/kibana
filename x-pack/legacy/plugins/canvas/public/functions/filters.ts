@@ -10,7 +10,7 @@ import { get } from 'lodash';
 import { interpretAst } from 'plugins/interpreter/interpreter';
 // @ts-ignore untyped Elastic lib
 import { registries } from 'plugins/interpreter/registries';
-import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
+import { ExpressionFunction } from 'src/plugins/expressions/public';
 // @ts-ignore untyped local
 import { getState } from '../state/store';
 import { getGlobalFilters } from '../state/selectors/workpad';

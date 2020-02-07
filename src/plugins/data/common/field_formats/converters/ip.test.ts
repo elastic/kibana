@@ -23,7 +23,7 @@ describe('IP Address Format', () => {
   let ip: Record<string, any>;
 
   beforeEach(() => {
-    ip = new IpFormat();
+    ip = new IpFormat({}, jest.fn());
   });
 
   test('converts a value from a decimal to a string', () => {

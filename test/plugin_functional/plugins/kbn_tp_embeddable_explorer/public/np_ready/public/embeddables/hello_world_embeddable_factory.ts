@@ -20,7 +20,9 @@
 // eslint-disable-next-line
 import { npSetup } from '../../../../../../../../src/legacy/ui/public/new_platform';
 // eslint-disable-next-line
-import { HelloWorldEmbeddableFactory } from '../../../../../../../../src/plugins/embeddable/public/lib/test_samples';
+import { HelloWorldEmbeddableFactory, HELLO_WORLD_EMBEDDABLE } from '../../../../../../../../examples/embeddable_examples/public';
 
-const factory = new HelloWorldEmbeddableFactory();
-npSetup.plugins.embeddable.registerEmbeddableFactory(factory.type, factory);
+npSetup.plugins.embeddable.registerEmbeddableFactory(
+  HELLO_WORLD_EMBEDDABLE,
+  new HelloWorldEmbeddableFactory()
+);

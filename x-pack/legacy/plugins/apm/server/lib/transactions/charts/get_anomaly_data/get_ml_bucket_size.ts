@@ -4,14 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { idx } from '@kbn/elastic-idx';
 import { getMlIndex } from '../../../../../common/ml_job_constants';
-import { Setup } from '../../../helpers/setup_request';
+import { Setup, SetupTimeRange } from '../../../helpers/setup_request';
 
 interface IOptions {
   serviceName: string;
   transactionType: string;
-  setup: Setup;
+  setup: Setup & SetupTimeRange;
 }
 
 interface ESResponse {
@@ -50,7 +49,7 @@ export async function getMlBucketSize({
 
   try {
     const resp = await client.search<ESResponse, typeof params>(params);
-    return idx(resp, _ => _.hits.hits[0]._source.bucket_span) || 0;
+    return resp.hits.hits[0]?._source.bucket_span || 0;
   } catch (err) {
     const isHttpError = 'statusCode' in err;
     if (isHttpError) {

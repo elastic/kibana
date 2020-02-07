@@ -5,7 +5,7 @@
  */
 
 import { Privileges, getDefaultPrivileges } from '../../../common/types/privileges';
-import { XPackMainPlugin } from '../../../../../../legacy/plugins/xpack_main/xpack_main';
+import { XPackMainPlugin } from '../../../../xpack_main/server/xpack_main';
 import { callWithRequestType } from '../../../common/types/kibana';
 import { isSecurityDisabled } from '../../lib/security_utils';
 import { upgradeCheckProvider } from './upgrade';

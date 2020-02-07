@@ -4,10 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  isSeedNodeValid,
-  isSeedNodePortValid,
-} from './validate_seed_node';
+import { isSeedNodeValid, isSeedNodePortValid } from './validate_seed_node';
 
 describe('Validate seed node', () => {
   describe('isSeedNodeValid', () => {

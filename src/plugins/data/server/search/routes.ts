@@ -36,10 +36,18 @@ export function registerSearchRoute(router: IRouter): void {
       const searchRequest = request.body;
       const strategy = request.params.strategy;
       try {
-        const response = await context.search!.search(searchRequest, strategy);
+        const response = await context.search!.search(searchRequest, {}, strategy);
         return res.ok({ body: response });
       } catch (err) {
-        return res.internalError({ body: err });
+        return res.customError({
+          statusCode: err.statusCode,
+          body: {
+            message: err.message,
+            attributes: {
+              error: err.body.error,
+            },
+          },
+        });
       }
     }
   );

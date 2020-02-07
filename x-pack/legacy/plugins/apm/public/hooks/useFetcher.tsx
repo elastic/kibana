@@ -5,14 +5,14 @@
  */
 
 import React, { useContext, useEffect, useState, useMemo } from 'react';
-import { idx } from '@kbn/elastic-idx';
 import { i18n } from '@kbn/i18n';
 import { IHttpFetchError } from 'src/core/public';
+import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
 import { LoadingIndicatorContext } from '../context/LoadingIndicatorContext';
 import { useComponentId } from './useComponentId';
-import { useKibanaCore } from '../../../observability/public';
 import { APMClient } from '../services/rest/createCallApmApi';
 import { useCallApmApi } from './useCallApmApi';
+import { useApmPluginContext } from './useApmPluginContext';
 
 export enum FETCH_STATUS {
   LOADING = 'loading',
@@ -42,7 +42,7 @@ export function useFetcher<TReturn>(
     preservePreviousData?: boolean;
   } = {}
 ): Result<InferResponseType<TReturn>> & { refetch: () => void } {
-  const { notifications } = useKibanaCore();
+  const { notifications } = useApmPluginContext().core;
   const { preservePreviousData = true } = options;
   const id = useComponentId();
 
@@ -92,21 +92,20 @@ export function useFetcher<TReturn>(
             title: i18n.translate('xpack.apm.fetcher.error.title', {
               defaultMessage: `Error while fetching resource`
             }),
-            text: (
+            text: toMountPoint(
               <div>
                 <h5>
                   {i18n.translate('xpack.apm.fetcher.error.status', {
                     defaultMessage: `Error`
                   })}
                 </h5>
-                {idx(err.response, r => r.statusText)} (
-                {idx(err.response, r => r.status)})
+                {err.response?.statusText} ({err.response?.status})
                 <h5>
                   {i18n.translate('xpack.apm.fetcher.error.url', {
                     defaultMessage: `URL`
                   })}
                 </h5>
-                {idx(err.response, r => r.url)}
+                {err.response?.url}
               </div>
             )
           });

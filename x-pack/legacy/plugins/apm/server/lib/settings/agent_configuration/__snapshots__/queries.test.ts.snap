@@ -44,6 +44,7 @@ Object {
 exports[`agent configuration queries fetches configurations 1`] = `
 Object {
   "index": "myIndex",
+  "size": 200,
 }
 `;
 
@@ -55,16 +56,26 @@ Object {
         "minimum_should_match": 2,
         "should": Array [
           Object {
-            "term": Object {
-              "service.name": Object {
-                "value": "foo",
+            "constant_score": Object {
+              "boost": 2,
+              "filter": Object {
+                "term": Object {
+                  "service.name": Object {
+                    "value": "foo",
+                  },
+                },
               },
             },
           },
           Object {
-            "term": Object {
-              "service.environment": Object {
-                "value": "bar",
+            "constant_score": Object {
+              "boost": 1,
+              "filter": Object {
+                "term": Object {
+                  "service.environment": Object {
+                    "value": "bar",
+                  },
+                },
               },
             },
           },
@@ -106,9 +117,14 @@ Object {
         "minimum_should_match": 2,
         "should": Array [
           Object {
-            "term": Object {
-              "service.name": Object {
-                "value": "foo",
+            "constant_score": Object {
+              "boost": 2,
+              "filter": Object {
+                "term": Object {
+                  "service.name": Object {
+                    "value": "foo",
+                  },
+                },
               },
             },
           },

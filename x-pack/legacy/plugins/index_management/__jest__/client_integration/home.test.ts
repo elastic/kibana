@@ -8,8 +8,7 @@ import { act } from 'react-dom/test-utils';
 import * as fixtures from '../../test/fixtures';
 import { setupEnvironment, pageHelpers, nextTick, getRandomString } from './helpers';
 import { IdxMgmtHomeTestBed } from './helpers/home.helpers';
-
-const API_PATH = '/api/index_management';
+import { API_BASE_PATH } from '../../common/constants';
 
 const { setup } = pageHelpers.home;
 
@@ -21,20 +20,9 @@ const removeWhiteSpaceOnArrayValues = (array: any[]) =>
     return value.trim();
   });
 
-jest.mock('ui/index_patterns', () => ({
-  ILLEGAL_CHARACTERS: '',
-  CONTAINS_SPACES: '',
-  validateIndexPattern: () => {},
-}));
+jest.mock('ui/new_platform');
 
-jest.mock('ui/chrome', () => ({
-  breadcrumbs: { set: () => {} },
-  addBasePath: (path: string) => path || '/api/index_management',
-}));
-
-// We need to skip the tests until react 16.9.0 is released
-// which supports asynchronous code inside act()
-describe.skip('<IndexManagementHome />', () => {
+describe('<IndexManagementHome />', () => {
   const { server, httpRequestsMockHelpers } = setupEnvironment();
   let testBed: IdxMgmtHomeTestBed;
 
@@ -48,7 +36,6 @@ describe.skip('<IndexManagementHome />', () => {
 
       testBed = await setup();
 
-      // @ts-ignore (remove when react 16.9.0 is released)
       await act(async () => {
         const { component } = testBed;
 
@@ -91,7 +78,6 @@ describe.skip('<IndexManagementHome />', () => {
 
         actions.selectHomeTab('templatesTab');
 
-        // @ts-ignore (remove when react 16.9.0 is released)
         await act(async () => {
           await nextTick();
           component.update();
@@ -111,7 +97,6 @@ describe.skip('<IndexManagementHome />', () => {
 
           actions.selectHomeTab('templatesTab');
 
-          // @ts-ignore (remove when react 16.9.0 is released)
           await act(async () => {
             await nextTick();
             component.update();
@@ -157,7 +142,6 @@ describe.skip('<IndexManagementHome />', () => {
 
           actions.selectHomeTab('templatesTab');
 
-          // @ts-ignore (remove when react 16.9.0 is released)
           await act(async () => {
             await nextTick();
             component.update();
@@ -196,7 +180,6 @@ describe.skip('<IndexManagementHome />', () => {
 
           expect(exists('reloadButton')).toBe(true);
 
-          // @ts-ignore (remove when react 16.9.0 is released)
           await act(async () => {
             actions.clickReloadButton();
             await nextTick();
@@ -204,7 +187,9 @@ describe.skip('<IndexManagementHome />', () => {
           });
 
           expect(server.requests.length).toBe(totalRequests + 1);
-          expect(server.requests[server.requests.length - 1].url).toBe(`${API_PATH}/templates`);
+          expect(server.requests[server.requests.length - 1].url).toBe(
+            `${API_BASE_PATH}/templates`
+          );
         });
 
         test('should have a button to create a new template', () => {
@@ -222,7 +207,6 @@ describe.skip('<IndexManagementHome />', () => {
 
           expect(exists('systemTemplatesSwitch')).toBe(true);
 
-          // @ts-ignore (remove when react 16.9.0 is released)
           await act(async () => {
             form.toggleEuiSwitch('systemTemplatesSwitch');
             await nextTick();
@@ -298,7 +282,6 @@ describe.skip('<IndexManagementHome />', () => {
           test('should show a warning message when attempting to delete a system template', async () => {
             const { component, form, actions } = testBed;
 
-            // @ts-ignore (remove when react 16.9.0 is released)
             await act(async () => {
               form.toggleEuiSwitch('systemTemplatesSwitch');
               await nextTick();
@@ -336,7 +319,6 @@ describe.skip('<IndexManagementHome />', () => {
               },
             });
 
-            // @ts-ignore (remove when react 16.9.0 is released)
             await act(async () => {
               confirmButton!.click();
               await nextTick();
@@ -346,7 +328,7 @@ describe.skip('<IndexManagementHome />', () => {
             const latestRequest = server.requests[server.requests.length - 1];
 
             expect(latestRequest.method).toBe('DELETE');
-            expect(latestRequest.url).toBe(`${API_PATH}/templates/${template1.name}`);
+            expect(latestRequest.url).toBe(`${API_BASE_PATH}/templates/${template1.name}`);
           });
         });
 
@@ -392,7 +374,6 @@ describe.skip('<IndexManagementHome />', () => {
 
               actions.clickCloseDetailsButton();
 
-              // @ts-ignore (remove when react 16.9.0 is released)
               await act(async () => {
                 await nextTick();
                 component.update();
@@ -482,7 +463,6 @@ describe.skip('<IndexManagementHome />', () => {
 
               await actions.clickTemplateAt(0);
 
-              // @ts-ignore (remove when react 16.9.0 is released)
               await act(async () => {
                 await nextTick();
                 component.update();

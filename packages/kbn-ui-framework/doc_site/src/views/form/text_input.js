@@ -17,12 +17,8 @@
  * under the License.
  */
 
-import React, {
-  Component,
-} from 'react';
-import {
-  KuiTextInput,
-} from '../../../../components';
+import React, { Component } from 'react';
+import { KuiTextInput } from '../../../../components';
 
 class KuiTextInputExample extends Component {
   state = {
@@ -36,7 +32,7 @@ class KuiTextInputExample extends Component {
 
   handleChange = (event, key) => {
     this.setState({ [key]: event.target.value });
-  }
+  };
 
   render() {
     return (
@@ -46,32 +42,32 @@ class KuiTextInputExample extends Component {
           placeholder="Placeholder text"
           onChange={event => this.handleChange(event, 'value1')}
         />
-        <hr className="guideBreak"/>
+        <hr className="guideBreak" />
         <KuiTextInput
           value={this.state.value2}
           autoFocus
           onChange={event => this.handleChange(event, 'value2')}
         />
-        <hr className="guideBreak"/>
+        <hr className="guideBreak" />
         <KuiTextInput
           value={this.state.value3}
           isInvalid
           onChange={event => this.handleChange(event, 'value3')}
         />
-        <hr className="guideBreak"/>
+        <hr className="guideBreak" />
         <KuiTextInput
           value={this.state.value4}
           isDisabled
           onChange={event => this.handleChange(event, 'value4')}
         />
-        <hr className="guideBreak"/>
+        <hr className="guideBreak" />
         <KuiTextInput
           value={this.state.value5}
           size="small"
           placeholder="Small"
           onChange={event => this.handleChange(event, 'value5')}
         />
-        <hr className="guideBreak"/>
+        <hr className="guideBreak" />
         <KuiTextInput
           value={this.state.value6}
           size="large"

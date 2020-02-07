@@ -43,19 +43,17 @@ export async function getFileHash(cache, path, stat, fd) {
   const read = createReadStream(null, {
     fd,
     start: 0,
-    autoClose: false
+    autoClose: false,
   });
 
-  const promise = Rx.fromEvent(read, 'data').pipe(
-    merge(
-      Rx.fromEvent(read, 'error')
-        .pipe(mergeMap(Rx.throwError))
-    ),
-    takeUntil(Rx.fromEvent(read, 'end')),
-  )
+  const promise = Rx.fromEvent(read, 'data')
+    .pipe(
+      merge(Rx.fromEvent(read, 'error').pipe(mergeMap(Rx.throwError))),
+      takeUntil(Rx.fromEvent(read, 'end'))
+    )
     .forEach(chunk => hash.update(chunk))
     .then(() => hash.digest('hex'))
-    .catch((error) => {
+    .catch(error => {
       // don't cache failed attempts
       cache.del(key);
       throw error;

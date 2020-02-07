@@ -6,8 +6,7 @@
 
 import Boom from 'boom';
 import { kibanaResponseFactory, RequestHandlerContext } from '../../../../../../../src/core/server';
-import { ILicenseCheck } from '../../../../../licensing/server';
-import { LICENSE_STATUS } from '../../../../../licensing/server/constants';
+import { LicenseCheck, LICENSE_CHECK_STATE } from '../../../../../licensing/server';
 import { defineDeleteRolesRoutes } from './delete';
 
 import {
@@ -17,7 +16,7 @@ import {
 import { routeDefinitionParamsMock } from '../../index.mock';
 
 interface TestOptions {
-  licenseCheckResult?: ILicenseCheck;
+  licenseCheckResult?: LicenseCheck;
   name: string;
   apiResponse?: () => Promise<unknown>;
   asserts: { statusCode: number; result?: Record<string, any> };
@@ -28,7 +27,7 @@ describe('DELETE role', () => {
     description: string,
     {
       name,
-      licenseCheckResult = { check: LICENSE_STATUS.Valid },
+      licenseCheckResult = { state: LICENSE_CHECK_STATE.Valid },
       apiResponse,
       asserts,
     }: TestOptions
@@ -74,16 +73,18 @@ describe('DELETE role', () => {
   };
 
   describe('failure', () => {
-    deleteRoleTest(`returns result of license checker`, {
+    deleteRoleTest('returns result of license checker', {
       name: 'foo-role',
-      licenseCheckResult: { check: LICENSE_STATUS.Invalid, message: 'test forbidden message' },
+      licenseCheckResult: { state: LICENSE_CHECK_STATE.Invalid, message: 'test forbidden message' },
       asserts: { statusCode: 403, result: { message: 'test forbidden message' } },
     });
 
     const error = Boom.notFound('test not found message');
-    deleteRoleTest(`returns error from cluster client`, {
+    deleteRoleTest('returns error from cluster client', {
       name: 'foo-role',
-      apiResponse: () => Promise.reject(error),
+      apiResponse: async () => {
+        throw error;
+      },
       asserts: { statusCode: 404, result: error },
     });
   });

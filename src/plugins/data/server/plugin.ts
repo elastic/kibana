@@ -21,23 +21,57 @@ import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../..
 import { IndexPatternsService } from './index_patterns';
 import { ISearchSetup } from './search';
 import { SearchService } from './search/search_service';
+import { ScriptsService } from './scripts';
+import { KqlTelemetryService } from './kql_telemetry';
+import { UsageCollectionSetup } from '../../usage_collection/server';
+import { AutocompleteService } from './autocomplete';
+import { FieldFormatsService, FieldFormatsSetup, FieldFormatsStart } from './field_formats';
 
 export interface DataPluginSetup {
   search: ISearchSetup;
+  fieldFormats: FieldFormatsSetup;
 }
-export class DataServerPlugin implements Plugin<DataPluginSetup> {
+
+export interface DataPluginStart {
+  fieldFormats: FieldFormatsStart;
+}
+
+export interface DataPluginSetupDependencies {
+  usageCollection?: UsageCollectionSetup;
+}
+
+export class DataServerPlugin implements Plugin<DataPluginSetup, DataPluginStart> {
   private readonly searchService: SearchService;
+  private readonly scriptsService: ScriptsService;
+  private readonly kqlTelemetryService: KqlTelemetryService;
+  private readonly autocompleteService = new AutocompleteService();
   private readonly indexPatterns = new IndexPatternsService();
+  private readonly fieldFormats = new FieldFormatsService();
+
   constructor(initializerContext: PluginInitializerContext) {
     this.searchService = new SearchService(initializerContext);
+    this.scriptsService = new ScriptsService();
+    this.kqlTelemetryService = new KqlTelemetryService(initializerContext);
   }
-  public setup(core: CoreSetup) {
+
+  public setup(core: CoreSetup, { usageCollection }: DataPluginSetupDependencies) {
     this.indexPatterns.setup(core);
+    this.scriptsService.setup(core);
+    this.autocompleteService.setup(core);
+    this.kqlTelemetryService.setup(core, { usageCollection });
+
     return {
+      fieldFormats: this.fieldFormats.setup(),
       search: this.searchService.setup(core),
     };
   }
-  public start(core: CoreStart) {}
+
+  public start(core: CoreStart) {
+    return {
+      fieldFormats: this.fieldFormats.start(),
+    };
+  }
+
   public stop() {}
 }
 

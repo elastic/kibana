@@ -18,12 +18,10 @@
  */
 
 import { Observable } from 'rxjs';
+import { MaybePromise } from '@kbn/utility-types';
 
 /** @public */
-export interface HttpServiceBase {
-  /** @internal */
-  stop(): void;
-
+export interface HttpSetup {
   /**
    * APIs for manipulating the basePath on URL segments.
    */
@@ -40,11 +38,6 @@ export interface HttpServiceBase {
    * @returns a function for removing the attached interceptor.
    */
   intercept(interceptor: HttpInterceptor): () => void;
-
-  /**
-   * Removes all configured interceptors.
-   */
-  removeAllInterceptors(): void;
 
   /** Makes an HTTP request. Defaults to a GET request unless overriden. See {@link HttpHandler} for options. */
   fetch: HttpHandler;
@@ -68,13 +61,19 @@ export interface HttpServiceBase {
    * more than 0.
    * @param countSource$ an Observable to subscribe to for loading count updates.
    */
-  addLoadingCount(countSource$: Observable<number>): void;
+  addLoadingCountSource(countSource$: Observable<number>): void;
 
   /**
    * Get the sum of all loading count sources as a single Observable.
    */
   getLoadingCount$(): Observable<number>;
 }
+
+/**
+ * See {@link HttpSetup}
+ * @public
+ */
+export type HttpStart = HttpSetup;
 
 /**
  * APIs for manipulating the basePath on URL segments.
@@ -113,18 +112,10 @@ export interface IAnonymousPaths {
 }
 
 /**
- * See {@link HttpServiceBase}
+ * Headers to append to the request. Any headers that begin with `kbn-` are considered private to Core and will cause
+ * {@link HttpHandler} to throw an error.
  * @public
  */
-export type HttpSetup = HttpServiceBase;
-
-/**
- * See {@link HttpServiceBase}
- * @public
- */
-export type HttpStart = HttpServiceBase;
-
-/** @public */
 export interface HttpHeadersInit {
   [name: string]: any;
 }
@@ -229,31 +220,73 @@ export interface HttpFetchOptions extends HttpRequestInit {
    * Headers to send with the request. See {@link HttpHeadersInit}.
    */
   headers?: HttpHeadersInit;
+
+  /**
+   * Whether or not the request should include the "system request" header to differentiate an end user request from
+   * Kibana internal request.
+   * Can be read on the server-side using KibanaRequest#isSystemRequest. Defaults to `false`.
+   */
+  asSystemRequest?: boolean;
+
+  /**
+   * When `true` the return type of {@link HttpHandler} will be an {@link HttpResponse} with detailed request and
+   * response information. When `false`, the return type will just be the parsed response body. Defaults to `false`.
+   */
+  asResponse?: boolean;
+}
+
+/**
+ * Similar to {@link HttpFetchOptions} but with the URL path included.
+ * @public
+ */
+export interface HttpFetchOptionsWithPath extends HttpFetchOptions {
+  /*
+   * The path on the Kibana server to send the request to. Should not include the basePath.
+   */
+  path: string;
 }
 
 /**
  * A function for making an HTTP requests to Kibana's backend. See {@link HttpFetchOptions} for options and
- * {@link HttpBody} for the response.
+ * {@link HttpResponse} for the response.
  *
  * @param path the path on the Kibana server to send the request to. Should not include the basePath.
  * @param options {@link HttpFetchOptions}
- * @returns a Promise that resolves to a {@link HttpBody}
+ * @returns a Promise that resolves to a {@link HttpResponse}
  * @public
  */
-export type HttpHandler = (path: string, options?: HttpFetchOptions) => Promise<HttpBody>;
-
-/** @public */
-export type HttpBody = BodyInit | null | any;
-
-/** @public */
-export interface InterceptedHttpResponse {
-  response?: Response;
-  body?: HttpBody;
+export interface HttpHandler {
+  <TResponseBody = any>(path: string, options: HttpFetchOptions & { asResponse: true }): Promise<
+    HttpResponse<TResponseBody>
+  >;
+  <TResponseBody = any>(options: HttpFetchOptionsWithPath & { asResponse: true }): Promise<
+    HttpResponse<TResponseBody>
+  >;
+  <TResponseBody = any>(path: string, options?: HttpFetchOptions): Promise<TResponseBody>;
+  <TResponseBody = any>(options: HttpFetchOptionsWithPath): Promise<TResponseBody>;
 }
 
 /** @public */
-export interface HttpResponse extends InterceptedHttpResponse {
-  request: Readonly<Request>;
+export interface HttpResponse<TResponseBody = any> {
+  /** The original {@link HttpFetchOptionsWithPath} used to send this request. */
+  readonly fetchOptions: Readonly<HttpFetchOptionsWithPath>;
+  /** Raw request sent to Kibana server. */
+  readonly request: Readonly<Request>;
+  /** Raw response received, may be undefined if there was an error. */
+  readonly response?: Readonly<Response>;
+  /** Parsed body received, may be undefined if there was an error. */
+  readonly body?: TResponseBody;
+}
+
+/**
+ * Properties that can be returned by HttpInterceptor.request to override the response.
+ * @public
+ */
+export interface IHttpResponseInterceptorOverrides<TResponseBody = any> {
+  /** Raw response received, may be undefined if there was an error. */
+  readonly response?: Readonly<Response>;
+  /** Parsed body received, may be undefined if there was an error. */
+  readonly body?: TResponseBody;
 }
 
 /** @public */
@@ -272,12 +305,13 @@ export interface IHttpFetchError extends Error {
 }
 
 /** @public */
-export interface HttpErrorResponse extends HttpResponse {
+export interface HttpInterceptorResponseError extends HttpResponse {
+  request: Readonly<Request>;
   error: Error | IHttpFetchError;
 }
 /** @public */
-export interface HttpErrorRequest {
-  request: Request;
+export interface HttpInterceptorRequestError {
+  fetchOptions: Readonly<HttpFetchOptionsWithPath>;
   error: Error;
 }
 
@@ -294,19 +328,19 @@ export interface HttpInterceptor {
    * @param controller {@link IHttpInterceptController}
    */
   request?(
-    request: Request,
+    fetchOptions: Readonly<HttpFetchOptionsWithPath>,
     controller: IHttpInterceptController
-  ): Promise<Request> | Request | void;
+  ): MaybePromise<Partial<HttpFetchOptionsWithPath>> | void;
 
   /**
    * Define an interceptor to be executed if a request interceptor throws an error or returns a rejected Promise.
-   * @param httpErrorRequest {@link HttpErrorRequest}
+   * @param httpErrorRequest {@link HttpInterceptorRequestError}
    * @param controller {@link IHttpInterceptController}
    */
   requestError?(
-    httpErrorRequest: HttpErrorRequest,
+    httpErrorRequest: HttpInterceptorRequestError,
     controller: IHttpInterceptController
-  ): Promise<Request> | Request | void;
+  ): MaybePromise<Partial<HttpFetchOptionsWithPath>> | void;
 
   /**
    * Define an interceptor to be executed after a response is received.
@@ -316,17 +350,17 @@ export interface HttpInterceptor {
   response?(
     httpResponse: HttpResponse,
     controller: IHttpInterceptController
-  ): Promise<InterceptedHttpResponse> | InterceptedHttpResponse | void;
+  ): MaybePromise<IHttpResponseInterceptorOverrides> | void;
 
   /**
    * Define an interceptor to be executed if a response interceptor throws an error or returns a rejected Promise.
-   * @param httpErrorResponse {@link HttpErrorResponse}
+   * @param httpErrorResponse {@link HttpInterceptorResponseError}
    * @param controller {@link IHttpInterceptController}
    */
   responseError?(
-    httpErrorResponse: HttpErrorResponse,
+    httpErrorResponse: HttpInterceptorResponseError,
     controller: IHttpInterceptController
-  ): Promise<InterceptedHttpResponse> | InterceptedHttpResponse | void;
+  ): MaybePromise<IHttpResponseInterceptorOverrides> | void;
 }
 
 /**

@@ -7,10 +7,14 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function({ loadTestFile }: FtrProviderContext) {
   describe('anomaly detection', function() {
+    this.tags(['skipFirefox']);
+
     loadTestFile(require.resolve('./single_metric_job'));
     loadTestFile(require.resolve('./multi_metric_job'));
     loadTestFile(require.resolve('./population_job'));
     loadTestFile(require.resolve('./saved_search_job'));
     loadTestFile(require.resolve('./advanced_job'));
+    loadTestFile(require.resolve('./single_metric_viewer'));
+    loadTestFile(require.resolve('./anomaly_explorer'));
   });
 }

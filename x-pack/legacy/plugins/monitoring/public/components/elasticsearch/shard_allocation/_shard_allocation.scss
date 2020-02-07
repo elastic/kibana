@@ -1,9 +1,3 @@
-// SASSTODO: Generic selector
-monitoring-shard-allocation {
-  display: block;
-  border-top: $euiSizeS solid $euiColorLightestShade;
-}
-
 .monClusterTitle {
   font-size: $euiFontSizeL;
   margin: 0;
@@ -11,55 +5,48 @@ monitoring-shard-allocation {
 
 // SASSTODO: This needs a full rewrite / redesign
 .monCluster {
-  cluster-view {
-    display: block;
-  }
-  .parent {
-    padding-top: 14px;
-    border-left: 3px solid $euiColorSuccess !important;
-    &.red {
-      border-left: 3px solid $euiColorDanger !important;
-    }
-    &.yellow {
-      border-left: 3px solid $euiColorWarning !important;
-    }
-  }
-  td.unassigned {
+  .monUnassigned {
     vertical-align: middle;
     width: 150px;
   }
 
-  .child {
+  .monUnassigned__children,
+  .monAssigned__children {
+    padding-top: $euiSizeL;
+  }
+
+  .monChild {
     float: left;
     align-self: center;
-
+    background-color: $euiColorLightestShade;
+    margin: $euiSizeS;
+    border: 1px solid $euiColorMediumShade;
+    border-radius: $euiSizeXS;
+    padding: $euiSizeXS/2 0;
+    // SASS-TODO: Rename this class following Eui conventions
     &.index {
       border-left: $euiSizeXS solid $euiColorSuccess;
-      &.red {
+
+      &.monChild--danger {
         border-left: $euiSizeXS solid $euiColorDanger;
       }
-      &.yellow {
+
+      &.monChild--warning {
         border-left: $euiSizeXS solid $euiColorWarning;
       }
     }
-    background-color: $euiColorDarkShade;
-    margin: 5px;
-    .title {
-      padding: 5px 7px;
-      display: inline-block;
+
+    .monChild__title {
+      padding: $euiSizeXS $euiSizeS;
       text-align: center;
-      font-size: 12px;
-      font: 10px sans-serif;
+      font-size: $euiFontSizeXS;
       color: $euiColorGhost;
-      a {
-        color: $euiColorGhost;
-        text-decoration: none;
-      }
-      i {
-        margin-left: 5px;
-      }
+      display: flex;
+      flex-direction: row;
+      align-items: center;
     }
-    &.unassigned {
+
+    &.monClusterUnassigned {
       .title {
         display: none;
       }
@@ -73,30 +60,12 @@ monitoring-shard-allocation {
   td:first-child {
     width: 200px;
   }
-
+  // SASS-TODO: Rename this class following Eui conventions
   .shard {
     align-self: center;
-    padding: 5px 7px;
-    font: 10px sans-serif;
-    border-left: 1px solid $euiColorEmptyShade;
+    padding: $euiSizeXS $euiSizeS;
+    font-size: $euiFontSizeXS;
     position: relative;
     display: inline-block;
-  }
-
-  .legend {
-    font-size: 12px;
-    background-color: $euiColorEmptyShade;
-    .title {
-      margin-left: 5px;
-      font-weight: bold;
-    }
-    color: $euiColorDarkestShade;
-    padding: 5px;
-    span.shard {
-      float: none;
-      display: inline-block;
-      margin: 0 5px 0 10px;
-      padding: 0 4px;
-    }
   }
 }

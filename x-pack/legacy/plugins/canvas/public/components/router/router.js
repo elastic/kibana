@@ -37,7 +37,7 @@ export class Router extends React.PureComponent {
     return { router };
   }
 
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     // routerProvider is a singleton, and will only ever return one instance
     const { routes, onRouteChange, onLoad, onError } = this.props;
     const router = routerProvider(routes);

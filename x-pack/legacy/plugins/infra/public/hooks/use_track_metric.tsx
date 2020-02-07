@@ -7,6 +7,7 @@
 import { useEffect } from 'react';
 import {
   createUiStatsReporter,
+  UiStatsMetricType,
   METRIC_TYPE,
 } from '../../../../../../src/legacy/core_plugins/ui_metric/public';
 
@@ -36,7 +37,7 @@ function getTrackerForApp(app: string) {
 
 interface TrackOptions {
   app: ObservabilityApp;
-  metricType?: METRIC_TYPE;
+  metricType?: UiStatsMetricType;
   delay?: number; // in ms
 }
 type EffectDeps = unknown[];
@@ -56,6 +57,9 @@ export function useTrackMetric(
     const trackUiMetric = getTrackerForApp(app);
     const id = setTimeout(() => trackUiMetric(metricType, decoratedMetric), Math.max(delay, 0));
     return () => clearTimeout(id);
+
+    // the dependencies are managed externally
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, effectDependencies);
 }
 
@@ -76,7 +80,7 @@ export function useTrackPageview(
 interface TrackEventProps {
   app: ObservabilityApp;
   name: string;
-  metricType?: METRIC_TYPE;
+  metricType?: UiStatsMetricType;
 }
 
 export function trackEvent({ app, name, metricType = METRIC_TYPE.CLICK }: TrackEventProps) {

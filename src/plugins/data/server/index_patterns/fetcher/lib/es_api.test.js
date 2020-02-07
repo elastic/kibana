@@ -28,7 +28,7 @@ import { callIndexAliasApi, callFieldCapsApi } from './es_api';
 describe('server/index_patterns/service/lib/es_api', () => {
   describe('#callIndexAliasApi()', () => {
     let sandbox;
-    beforeEach(() => sandbox = sinon.createSandbox());
+    beforeEach(() => (sandbox = sinon.createSandbox()));
     afterEach(() => sandbox.restore());
 
     it('calls indices.getAlias() via callCluster', async () => {
@@ -70,7 +70,9 @@ describe('server/index_patterns/service/lib/es_api', () => {
       const convertedError = new Error('convertedError');
 
       sandbox.stub(convertEsErrorNS, 'convertEsError').throws(convertedError);
-      const callCluster = sinon.spy(async () => { throw esError; });
+      const callCluster = sinon.spy(async () => {
+        throw esError;
+      });
       try {
         await callIndexAliasApi(callCluster, indices);
         throw new Error('expected callIndexAliasApi() to throw');
@@ -85,7 +87,7 @@ describe('server/index_patterns/service/lib/es_api', () => {
 
   describe('#callFieldCapsApi()', () => {
     let sandbox;
-    beforeEach(() => sandbox = sinon.createSandbox());
+    beforeEach(() => (sandbox = sinon.createSandbox()));
     afterEach(() => sandbox.restore());
 
     it('calls fieldCaps() via callCluster', async () => {
@@ -128,7 +130,9 @@ describe('server/index_patterns/service/lib/es_api', () => {
       const convertedError = new Error('convertedError');
 
       sandbox.stub(convertEsErrorNS, 'convertEsError').throws(convertedError);
-      const callCluster = sinon.spy(async () => { throw esError; });
+      const callCluster = sinon.spy(async () => {
+        throw esError;
+      });
       try {
         await callFieldCapsApi(callCluster, indices);
         throw new Error('expected callFieldCapsApi() to throw');

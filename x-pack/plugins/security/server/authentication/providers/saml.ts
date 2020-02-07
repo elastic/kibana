@@ -10,8 +10,8 @@ import { KibanaRequest } from '../../../../../../src/core/server';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
 import { AuthenticationProviderOptions, BaseAuthenticationProvider } from './base';
+import { canRedirectRequest } from '../can_redirect_request';
 import { Tokens, TokenPair } from '../tokens';
-import { canRedirectRequest } from '..';
 
 /**
  * The state supported by the provider (for the SAML handshake or established session).
@@ -66,6 +66,11 @@ export function isSAMLRequestQuery(query: any): query is { SAMLRequest: string }
  * Provider that supports SAML request authentication.
  */
 export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
+  /**
+   * Type of the provider.
+   */
+  static readonly type = 'saml';
+
   /**
    * Specifies Elasticsearch SAML realm name that Kibana should use.
    */
@@ -228,7 +233,9 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
         return DeauthenticationResult.redirectTo(redirect);
       }
 
-      return DeauthenticationResult.redirectTo('/logged_out');
+      return DeauthenticationResult.redirectTo(
+        `${this.options.basePath.serverBasePath}/logged_out`
+      );
     } catch (err) {
       this.logger.debug(`Failed to deauthenticate user: ${err.message}`);
       return DeauthenticationResult.failed(err);
@@ -502,7 +509,9 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
       // user usually doesn't have `cluster:admin/xpack/security/saml/prepare`.
       const { id: requestId, redirect } = await this.options.client.callAsInternalUser(
         'shield.samlPrepare',
-        { body: { realm: this.realm } }
+        {
+          body: { realm: this.realm },
+        }
       );
 
       this.logger.debug('Redirecting to Identity Provider with SAML request.');

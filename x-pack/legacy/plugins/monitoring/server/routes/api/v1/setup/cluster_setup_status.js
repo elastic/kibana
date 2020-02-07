@@ -31,17 +31,18 @@ export function clusterSetupStatusRoute(server) {
           // which will vary from environment to environment making it difficult
           // to write tests against. Therefore, this flag exists and should only be used
           // in our testing environment.
-          skipLiveData: Joi.boolean().default(false)
+          skipLiveData: Joi.boolean().default(false),
         }),
         payload: Joi.object({
+          ccs: Joi.string().optional(),
           timeRange: Joi.object({
             min: Joi.date().required(),
-            max: Joi.date().required()
-          }).optional()
-        }).allow(null)
-      }
+            max: Joi.date().required(),
+          }).optional(),
+        }).allow(null),
+      },
     },
-    handler: async (req) => {
+    handler: async req => {
       let status = null;
 
       // NOTE using try/catch because checkMonitoringAuth is expected to throw
@@ -49,13 +50,19 @@ export function clusterSetupStatusRoute(server) {
       // the monitoring data. `try/catch` makes it a little more explicit.
       try {
         await verifyMonitoringAuth(req);
-        const indexPatterns = getIndexPatterns(server);
-        status = await getCollectionStatus(req, indexPatterns, req.params.clusterUuid, null, req.query.skipLiveData);
+        const indexPatterns = getIndexPatterns(server, {}, req.payload.ccs);
+        status = await getCollectionStatus(
+          req,
+          indexPatterns,
+          req.params.clusterUuid,
+          null,
+          req.query.skipLiveData
+        );
       } catch (err) {
         throw handleError(err, req);
       }
 
       return status;
-    }
+    },
   });
 }

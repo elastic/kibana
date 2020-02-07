@@ -10,14 +10,10 @@ import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
 import { Subscription } from 'rxjs';
 import styled from 'styled-components';
-import { StaticIndexPattern, IndexPattern } from 'ui/index_patterns';
-
-import { TimeRange, Query } from 'src/plugins/data/common/types';
+import { FilterManager, IIndexPattern, TimeRange, Query, esFilters } from 'src/plugins/data/public';
 import { SavedQuery } from 'src/legacy/core_plugins/data/public';
 
 import { OnTimeChangeProps } from '@elastic/eui';
-import { npStart } from 'ui/new_platform';
-import { start as data } from '../../../../../../../src/legacy/core_plugins/data/public/legacy';
 
 import { inputsActions } from '../../store/inputs';
 import { InputsRange } from '../../store/inputs/model';
@@ -36,15 +32,7 @@ import {
   toStrSelector,
 } from './selectors';
 import { timelineActions, hostsActions, networkActions } from '../../store/actions';
-import { esFilters } from '../../../../../../../src/plugins/data/public';
-
-const {
-  ui: { SearchBar },
-  search,
-} = data;
-
-export const siemFilterManager = npStart.plugins.data.query.filterManager;
-export const savedQueryService = search.services.savedQueryService;
+import { useKibana } from '../../lib/kibana';
 
 interface SiemSearchBarRedux {
   end: number;
@@ -71,8 +59,9 @@ interface SiemSearchBarDispatch {
 
 interface SiemSearchBarProps {
   id: InputsModelId;
-  indexPattern: StaticIndexPattern;
+  indexPattern: IIndexPattern;
   timelineId?: string;
+  dataTestSubj?: string;
 }
 
 const SearchBarContainer = styled.div`
@@ -97,8 +86,14 @@ const SearchBarComponent = memo<SiemSearchBarProps & SiemSearchBarRedux & SiemSe
     timelineId,
     toStr,
     updateSearch,
+    dataTestSubj,
   }) => {
-    const { timefilter } = npStart.plugins.data.query.timefilter;
+    const { data } = useKibana().services;
+    const {
+      timefilter: { timefilter },
+      filterManager,
+    } = data.query;
+
     if (fromStr != null && toStr != null) {
       timefilter.setTime({ from: fromStr, to: toStr });
     } else if (start != null && end != null) {
@@ -119,6 +114,7 @@ const SearchBarComponent = memo<SiemSearchBarProps & SiemSearchBarRedux & SiemSe
           isInvalid: false,
           isQuickSelection,
           updateTime: false,
+          filterManager,
         };
         let isStateUpdated = false;
 
@@ -166,12 +162,13 @@ const SearchBarComponent = memo<SiemSearchBarProps & SiemSearchBarRedux & SiemSe
             isInvalid: false,
             isQuickSelection: true,
             updateTime: true,
+            filterManager,
           });
         } else {
           queries.forEach(q => q.refetch && (q.refetch as inputsModel.Refetch)());
         }
       },
-      [id, queries]
+      [id, queries, filterManager]
     );
 
     const onSaved = useCallback(
@@ -196,6 +193,7 @@ const SearchBarComponent = memo<SiemSearchBarProps & SiemSearchBarRedux & SiemSe
           isInvalid: false,
           isQuickSelection,
           updateTime: false,
+          filterManager,
         };
 
         if (savedQueryUpdated.attributes.timefilter) {
@@ -232,21 +230,22 @@ const SearchBarComponent = memo<SiemSearchBarProps & SiemSearchBarRedux & SiemSe
           },
           resetSavedQuery: true,
           savedQuery: undefined,
+          filterManager,
         });
       }
-    }, [id, end, fromStr, start, toStr]);
+    }, [id, end, filterManager, fromStr, start, toStr, savedQuery]);
 
     useEffect(() => {
       let isSubscribed = true;
       const subscriptions = new Subscription();
 
       subscriptions.add(
-        siemFilterManager.getUpdates$().subscribe({
+        filterManager.getUpdates$().subscribe({
           next: () => {
             if (isSubscribed) {
               setSearchBarFilter({
                 id,
-                filters: siemFilterManager.getFilters(),
+                filters: filterManager.getFilters(),
               });
             }
           },
@@ -258,13 +257,13 @@ const SearchBarComponent = memo<SiemSearchBarProps & SiemSearchBarRedux & SiemSe
         subscriptions.unsubscribe();
       };
     }, []);
-    const IndexPatterns = useMemo(() => [indexPattern as IndexPattern], [indexPattern]);
+    const indexPatterns = useMemo(() => [indexPattern], [indexPattern]);
     return (
       <SearchBarContainer data-test-subj={`${id}DatePicker`}>
-        <SearchBar
+        <data.ui.SearchBar
           appName="siem"
           isLoading={isLoading}
-          indexPatterns={IndexPatterns}
+          indexPatterns={indexPatterns}
           query={filterQuery}
           onClearSavedQuery={onClearSavedQuery}
           onQuerySubmit={onQuerySubmit}
@@ -277,6 +276,7 @@ const SearchBarComponent = memo<SiemSearchBarProps & SiemSearchBarRedux & SiemSe
           showQueryBar={true}
           showQueryInput={true}
           showSaveQuery={true}
+          dataTestSubj={dataTestSubj}
         />
       </SearchBarContainer>
     );
@@ -314,6 +314,7 @@ SearchBarComponent.displayName = 'SiemSearchBar';
 interface UpdateReduxSearchBar extends OnTimeChangeProps {
   id: InputsModelId;
   filters?: esFilters.Filter[];
+  filterManager: FilterManager;
   query?: Query;
   savedQuery?: SavedQuery;
   resetSavedQuery?: boolean;
@@ -329,7 +330,7 @@ type DispatchUpdateSearch = ({
   timelineId,
 }: UpdateReduxSearchBar) => void;
 
-export const dispatchUpdateSearch = (dispatch: Dispatch) => ({
+const dispatchUpdateSearch = (dispatch: Dispatch) => ({
   end,
   filters,
   id,
@@ -339,6 +340,7 @@ export const dispatchUpdateSearch = (dispatch: Dispatch) => ({
   savedQuery,
   start,
   timelineId,
+  filterManager,
   updateTime = false,
 }: UpdateReduxSearchBar): void => {
   if (updateTime) {
@@ -383,7 +385,7 @@ export const dispatchUpdateSearch = (dispatch: Dispatch) => ({
     );
   }
   if (filters != null) {
-    siemFilterManager.setFilters(filters);
+    filterManager.setFilters(filters);
   }
   if (savedQuery != null || resetSavedQuery) {
     dispatch(inputsActions.setSavedQuery({ id, savedQuery }));
@@ -401,7 +403,4 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
     dispatch(inputsActions.setSearchBarFilter({ id, filters })),
 });
 
-export const SiemSearchBar = connect(
-  makeMapStateToProps,
-  mapDispatchToProps
-)(SearchBarComponent);
+export const SiemSearchBar = connect(makeMapStateToProps, mapDispatchToProps)(SearchBarComponent);

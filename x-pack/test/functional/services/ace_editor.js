@@ -16,7 +16,7 @@ export function AceEditorProvider({ getService }) {
   const CMD_KEY = '\uE03D';
   const BKSP_KEY = '\uE003';
 
-  return new class AceEditorService {
+  return new (class AceEditorService {
     async setValue(testSubjectSelector, value) {
       await retry.try(async () => {
         const container = await testSubjects.find(testSubjectSelector);
@@ -46,5 +46,5 @@ export function AceEditorProvider({ getService }) {
         return errors.length !== 0;
       });
     }
-  };
+  })();
 }

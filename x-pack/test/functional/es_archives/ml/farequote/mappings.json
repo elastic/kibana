@@ -133,7 +133,7 @@
             "alertTypeId": {
               "type": "keyword"
             },
-            "alertTypeParams": {
+            "params": {
               "enabled": false,
               "type": "object"
             },

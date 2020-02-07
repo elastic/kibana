@@ -11,6 +11,7 @@ exports[`Transform: <GroupByLabelForm /> Date histogram aggregation 1`] = `
   >
     <span
       className="eui-textTruncate"
+      data-test-subj="transformGroupByEntryLabel"
     >
       the-group-by-agg-name
     </span>
@@ -22,6 +23,7 @@ exports[`Transform: <GroupByLabelForm /> Date histogram aggregation 1`] = `
     <EuiTextColor
       className="eui-textTruncate"
       color="subdued"
+      data-test-subj="transformGroupByEntryIntervalLabel"
     >
       1m
     </EuiTextColor>
@@ -35,6 +37,7 @@ exports[`Transform: <GroupByLabelForm /> Date histogram aggregation 1`] = `
       button={
         <EuiButtonIcon
           aria-label="Edit interval"
+          data-test-subj="transformGroupByEntryEditButton"
           iconType="pencil"
           onClick={[Function]}
           size="s"
@@ -70,6 +73,7 @@ exports[`Transform: <GroupByLabelForm /> Date histogram aggregation 1`] = `
   >
     <EuiButtonIcon
       aria-label="Delete item"
+      data-test-subj="transformGroupByEntryDeleteButton"
       iconType="cross"
       onClick={[Function]}
       size="s"
@@ -89,6 +93,7 @@ exports[`Transform: <GroupByLabelForm /> Histogram aggregation 1`] = `
   >
     <span
       className="eui-textTruncate"
+      data-test-subj="transformGroupByEntryLabel"
     >
       the-group-by-agg-name
     </span>
@@ -100,6 +105,7 @@ exports[`Transform: <GroupByLabelForm /> Histogram aggregation 1`] = `
     <EuiTextColor
       className="eui-textTruncate"
       color="subdued"
+      data-test-subj="transformGroupByEntryIntervalLabel"
     >
       100
     </EuiTextColor>
@@ -113,6 +119,7 @@ exports[`Transform: <GroupByLabelForm /> Histogram aggregation 1`] = `
       button={
         <EuiButtonIcon
           aria-label="Edit interval"
+          data-test-subj="transformGroupByEntryEditButton"
           iconType="pencil"
           onClick={[Function]}
           size="s"
@@ -148,6 +155,7 @@ exports[`Transform: <GroupByLabelForm /> Histogram aggregation 1`] = `
   >
     <EuiButtonIcon
       aria-label="Delete item"
+      data-test-subj="transformGroupByEntryDeleteButton"
       iconType="cross"
       onClick={[Function]}
       size="s"
@@ -167,6 +175,7 @@ exports[`Transform: <GroupByLabelForm /> Terms aggregation 1`] = `
   >
     <span
       className="eui-textTruncate"
+      data-test-subj="transformGroupByEntryLabel"
     >
       the-group-by-agg-name
     </span>
@@ -180,6 +189,7 @@ exports[`Transform: <GroupByLabelForm /> Terms aggregation 1`] = `
       button={
         <EuiButtonIcon
           aria-label="Edit interval"
+          data-test-subj="transformGroupByEntryEditButton"
           iconType="pencil"
           onClick={[Function]}
           size="s"
@@ -214,6 +224,7 @@ exports[`Transform: <GroupByLabelForm /> Terms aggregation 1`] = `
   >
     <EuiButtonIcon
       aria-label="Delete item"
+      data-test-subj="transformGroupByEntryDeleteButton"
       iconType="cross"
       onClick={[Function]}
       size="s"

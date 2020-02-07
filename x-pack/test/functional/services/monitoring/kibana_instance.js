@@ -17,8 +17,7 @@ export function MonitoringKibanaInstanceProvider({ getService }) {
   const SUBJ_SUMMARY_UPTIME = `${SUBJ_SUMMARY} > uptime`;
   const SUBJ_SUMMARY_HEALTH = `${SUBJ_SUMMARY} > statusIcon`;
 
-  return new class KibanaInstance {
-
+  return new (class KibanaInstance {
     async isOnInstance() {
       const pageId = await retry.try(() => testSubjects.find(SUBJ_INSTANCE_PAGE));
       return pageId !== null;
@@ -33,6 +32,5 @@ export function MonitoringKibanaInstanceProvider({ getService }) {
         health: await testSubjects.getAttribute(SUBJ_SUMMARY_HEALTH, 'alt'),
       };
     }
-
-  };
+  })();
 }

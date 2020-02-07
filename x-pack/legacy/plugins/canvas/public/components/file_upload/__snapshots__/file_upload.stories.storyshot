@@ -1,0 +1,41 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Storyshots components/FileUpload default 1`] = `
+<div
+  className="euiFilePicker euiFilePicker--large euiFilePicker--compressed canvasFileUpload"
+>
+  <div
+    className="euiFilePicker__wrap"
+  >
+    <input
+      className="euiFilePicker__input"
+      id=""
+      onChange={[Function]}
+      onDragLeave={[Function]}
+      onDragOver={[Function]}
+      onDrop={[Function]}
+      type="file"
+    />
+    <div
+      className="euiFilePicker__prompt"
+    >
+      <svg
+        aria-hidden={true}
+        className="euiIcon euiIcon--large euiIcon-isLoading euiFilePicker__icon"
+        focusable="false"
+        height={16}
+        role="img"
+        style={null}
+        viewBox="0 0 16 16"
+        width={16}
+        xmlns="http://www.w3.org/2000/svg"
+      />
+      <div
+        className="euiFilePicker__promptText"
+      >
+        Select or drag and drop a file
+      </div>
+    </div>
+  </div>
+</div>
+`;

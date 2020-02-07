@@ -14,14 +14,12 @@ import {
   getApiError,
   isApiAuthorized,
 } from '../../../store/selectors';
-import {
-  loadFollowerIndices, selectDetailFollowerIndex,
-} from '../../../store/actions';
+import { loadFollowerIndices, selectDetailFollowerIndex } from '../../../store/actions';
 import { FollowerIndicesList as FollowerIndicesListView } from './follower_indices_list';
 
 const scope = SECTIONS.FOLLOWER_INDEX;
 
-const mapStateToProps = (state) => ({
+const mapStateToProps = state => ({
   followerIndices: getListFollowerIndices(state),
   followerIndexId: getSelectedFollowerIndexId('detail')(state),
   apiStatus: getApiStatus(scope)(state),
@@ -30,8 +28,8 @@ const mapStateToProps = (state) => ({
 });
 
 const mapDispatchToProps = dispatch => ({
-  loadFollowerIndices: (inBackground) => dispatch(loadFollowerIndices(inBackground)),
-  selectFollowerIndex: (id) => dispatch(selectDetailFollowerIndex(id)),
+  loadFollowerIndices: inBackground => dispatch(loadFollowerIndices(inBackground)),
+  selectFollowerIndex: id => dispatch(selectDetailFollowerIndex(id)),
 });
 
 export const FollowerIndicesList = connect(

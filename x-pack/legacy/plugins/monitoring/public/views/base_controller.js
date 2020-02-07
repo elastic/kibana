@@ -20,7 +20,7 @@ import { updateSetupModeData, getSetupModeState } from '../lib/setup_mode';
  *
  * @param {string} timezone
  */
-const getOffsetInMS = (timezone) => {
+const getOffsetInMS = timezone => {
   if (timezone === 'Browser') {
     return 0;
   }
@@ -86,7 +86,7 @@ export class MonitoringViewBaseController {
     $scope,
     $injector,
     options = {},
-    fetchDataImmediately = true
+    fetchDataImmediately = true,
   }) {
     const titleService = $injector.get('title');
     const $executor = $injector.get('$executor');
@@ -102,19 +102,16 @@ export class MonitoringViewBaseController {
     let deferTimer;
     let zoomInLevel = 0;
 
-    const popstateHandler = () => (zoomInLevel > 0) && --zoomInLevel;
+    const popstateHandler = () => zoomInLevel > 0 && --zoomInLevel;
     const removePopstateHandler = () => $window.removeEventListener('popstate', popstateHandler);
     const addPopstateHandler = () => $window.addEventListener('popstate', popstateHandler);
 
     this.zoomInfo = {
       zoomOutHandler: () => $window.history.back(),
-      showZoomOutBtn: () => zoomInLevel > 0
+      showZoomOutBtn: () => zoomInLevel > 0,
     };
 
-    const {
-      enableTimeFilter = true,
-      enableAutoRefresh = true
-    } = options;
+    const { enableTimeFilter = true, enableAutoRefresh = true } = options;
 
     if (enableTimeFilter === false) {
       timefilter.disableTimeRangeSelector();
@@ -152,13 +149,14 @@ export class MonitoringViewBaseController {
     fetchDataImmediately && this.updateData();
 
     $executor.register({
-      execute: () => this.updateData()
+      execute: () => this.updateData(),
     });
     $executor.start($scope);
     $scope.$on('$destroy', () => {
       clearTimeout(deferTimer);
       removePopstateHandler();
-      if (this.reactNodeId) { // WIP https://github.com/elastic/x-pack-kibana/issues/5198
+      if (this.reactNodeId) {
+        // WIP https://github.com/elastic/x-pack-kibana/issues/5198
         unmountComponentAtNode(document.getElementById(this.reactNodeId));
       }
       $executor.destroy();
@@ -173,7 +171,7 @@ export class MonitoringViewBaseController {
       timefilter.setTime({
         from: moment(from - offset),
         to: moment(to - offset),
-        mode: 'absolute'
+        mode: 'absolute',
       });
       $executor.cancel();
       $executor.run();
@@ -191,7 +189,12 @@ export class MonitoringViewBaseController {
 
   renderReact(component) {
     if (this._isDataInitialized === false) {
-      render(<I18nContext><PageLoading /></I18nContext>, document.getElementById(this.reactNodeId));
+      render(
+        <I18nContext>
+          <PageLoading />
+        </I18nContext>,
+        document.getElementById(this.reactNodeId)
+      );
     } else {
       render(component, document.getElementById(this.reactNodeId));
     }

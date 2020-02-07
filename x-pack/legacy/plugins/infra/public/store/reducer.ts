@@ -7,19 +7,15 @@
 import { combineReducers } from 'redux';
 
 import { initialLocalState, localReducer, LocalState } from './local';
-import { initialRemoteState, remoteReducer, RemoteState } from './remote';
 
 export interface State {
   local: LocalState;
-  remote: RemoteState;
 }
 
 export const initialState: State = {
   local: initialLocalState,
-  remote: initialRemoteState,
 };
 
 export const reducer = combineReducers<State>({
   local: localReducer,
-  remote: remoteReducer,
 });

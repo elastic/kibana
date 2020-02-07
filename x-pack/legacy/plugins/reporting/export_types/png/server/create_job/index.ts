@@ -5,22 +5,24 @@
  */
 
 import {
+  CreateJobFactory,
   ServerFacade,
   RequestFacade,
+  ESQueueCreateJobFn,
   ConditionalHeaders,
-  CreateJobFactory,
 } from '../../../../types';
 import { validateUrls } from '../../../../common/validate_urls';
 import { cryptoFactory } from '../../../../server/lib/crypto';
-import { oncePerServer } from '../../../../server/lib/once_per_server';
-import { JobParamsPNG, ESQueueCreateJobFnPNG } from '../../types';
+import { JobParamsPNG } from '../../types';
 
-function createJobFn(server: ServerFacade) {
+export const createJobFactory: CreateJobFactory<ESQueueCreateJobFn<
+  JobParamsPNG
+>> = function createJobFactoryFn(server: ServerFacade) {
   const crypto = cryptoFactory(server);
 
   return async function createJob(
     { objectType, title, relativeUrl, browserTimezone, layout }: JobParamsPNG,
-    headers: ConditionalHeaders,
+    headers: ConditionalHeaders['headers'],
     request: RequestFacade
   ) {
     const serializedEncryptedHeaders = await crypto.encrypt(headers);
@@ -38,8 +40,4 @@ function createJobFn(server: ServerFacade) {
       forceNow: new Date().toISOString(),
     };
   };
-}
-
-export const createJobFactory: CreateJobFactory = oncePerServer(createJobFn as (
-  server: ServerFacade
-) => ESQueueCreateJobFnPNG);
+};

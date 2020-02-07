@@ -8,19 +8,21 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import * as rt from 'io-ts';
-import { kfetch } from 'ui/kfetch';
-
+import { npStart } from 'ui/new_platform';
 import { jobCustomSettingsRT } from './ml_api_types';
 import { throwErrors, createPlainError } from '../../../../../common/runtime_types';
-import { getAllModuleJobIds } from '../../../../../common/log_analysis';
+import { getJobId } from '../../../../../common/log_analysis';
 
-export const callJobsSummaryAPI = async (spaceId: string, sourceId: string) => {
-  const response = await kfetch({
+export const callJobsSummaryAPI = async <JobType extends string>(
+  spaceId: string,
+  sourceId: string,
+  jobTypes: JobType[]
+) => {
+  const response = await npStart.core.http.fetch('/api/ml/jobs/jobs_summary', {
     method: 'POST',
-    pathname: '/api/ml/jobs/jobs_summary',
     body: JSON.stringify(
       fetchJobStatusRequestPayloadRT.encode({
-        jobIds: getAllModuleJobIds(spaceId, sourceId),
+        jobIds: jobTypes.map(jobType => getJobId(spaceId, sourceId, jobType)),
       })
     ),
   });
@@ -39,12 +41,14 @@ export type FetchJobStatusRequestPayload = rt.TypeOf<typeof fetchJobStatusReques
 const datafeedStateRT = rt.keyof({
   started: null,
   stopped: null,
+  stopping: null,
   '': null,
 });
 
 const jobStateRT = rt.keyof({
   closed: null,
   closing: null,
+  deleting: null,
   failed: null,
   opened: null,
   opening: null,

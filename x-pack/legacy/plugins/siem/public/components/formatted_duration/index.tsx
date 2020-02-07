@@ -4,13 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as React from 'react';
-import { pure } from 'recompose';
+import React from 'react';
 
 import { getFormattedDurationString } from './helpers';
 import { FormattedDurationTooltip } from './tooltip';
 
-export const FormattedDuration = pure<{
+export const FormattedDuration = React.memo<{
   maybeDurationNanoseconds: string | number | object | undefined | null;
   tooltipTitle?: string;
 }>(({ maybeDurationNanoseconds, tooltipTitle }) => (

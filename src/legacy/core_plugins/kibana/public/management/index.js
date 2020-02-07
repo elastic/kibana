@@ -28,33 +28,33 @@ import { I18nContext } from 'ui/i18n';
 import { uiModules } from 'ui/modules';
 import appTemplate from './app.html';
 import landingTemplate from './landing.html';
-import { capabilities } from 'ui/capabilities';
-import { management, SidebarNav, MANAGEMENT_BREADCRUMB } from 'ui/management';
-import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
+import { management, MANAGEMENT_BREADCRUMB } from 'ui/management';
+import { ManagementSidebarNav } from '../../../../../plugins/management/public';
+import {
+  FeatureCatalogueRegistryProvider,
+  FeatureCatalogueCategory,
+} from 'ui/registry/feature_catalogue';
 import { timefilter } from 'ui/timefilter';
-import { EuiPageContent, EuiTitle, EuiText, EuiSpacer, EuiIcon, EuiHorizontalRule } from '@elastic/eui';
+import {
+  EuiPageContent,
+  EuiTitle,
+  EuiText,
+  EuiSpacer,
+  EuiIcon,
+  EuiHorizontalRule,
+} from '@elastic/eui';
+import { npStart } from 'ui/new_platform';
 
 const SIDENAV_ID = 'management-sidenav';
 const LANDING_ID = 'management-landing';
 
-uiRoutes
-  .when('/management', {
-    template: landingTemplate,
-    k7Breadcrumbs: () => [
-      MANAGEMENT_BREADCRUMB
-    ]
-  });
+uiRoutes.when('/management', {
+  template: landingTemplate,
+  k7Breadcrumbs: () => [MANAGEMENT_BREADCRUMB],
+});
 
-uiRoutes
-  .when('/management/:section', {
-    redirectTo: '/management'
-  });
-
-require('./route_setup/load_default')({
-  whenMissingRedirectTo: () => {
-    const canManageIndexPatterns = capabilities.get().management.kibana.index_patterns;
-    return canManageIndexPatterns ? '/management/kibana/index_pattern' : '/home';
-  }
+uiRoutes.when('/management/:section', {
+  redirectTo: '/management',
 });
 
 export function updateLandingPage(version) {
@@ -74,7 +74,7 @@ export function updateLandingPage(version) {
               <h1>
                 <FormattedMessage
                   id="kbn.management.landing.header"
-                  defaultMessage="Kibana {version} management"
+                  defaultMessage="Welcome to Stack Management {version}"
                   values={{ version }}
                 />
               </h1>
@@ -93,20 +93,18 @@ export function updateLandingPage(version) {
             <p>
               <FormattedMessage
                 id="kbn.management.landing.text"
-                defaultMessage="A full list of tools can be found in the left menu"
+                defaultMessage="A complete list of apps is in the menu on the left."
               />
             </p>
           </EuiText>
         </div>
       </I18nContext>
     </EuiPageContent>,
-    node,
+    node
   );
 }
 
-export function updateSidebar(
-  items, id
-) {
+export function updateSidebar(legacySections, id) {
   const node = document.getElementById(SIDENAV_ID);
   if (!node) {
     return;
@@ -114,13 +112,14 @@ export function updateSidebar(
 
   render(
     <I18nContext>
-      <SidebarNav
-        sections={items}
+      <ManagementSidebarNav
+        getSections={npStart.plugins.management.sections.getSectionsEnabled}
+        legacySections={legacySections}
         selectedId={id}
         className="mgtSideNav"
       />
     </I18nContext>,
-    node,
+    node
   );
 }
 
@@ -129,65 +128,61 @@ export const destroyReact = id => {
   node && unmountComponentAtNode(node);
 };
 
-uiModules
-  .get('apps/management')
-  .directive('kbnManagementApp', function ($location) {
-    return {
-      restrict: 'E',
-      template: appTemplate,
-      transclude: true,
-      scope: {
-        sectionName: '@section',
-        omitPages: '@omitBreadcrumbPages',
-        pageTitle: '='
-      },
+uiModules.get('apps/management').directive('kbnManagementApp', function($location) {
+  return {
+    restrict: 'E',
+    template: appTemplate,
+    transclude: true,
+    scope: {
+      sectionName: '@section',
+      omitPages: '@omitBreadcrumbPages',
+      pageTitle: '=',
+    },
 
-      link: function ($scope) {
-        timefilter.disableAutoRefreshSelector();
-        timefilter.disableTimeRangeSelector();
-        $scope.sections = management.visibleItems;
-        $scope.section = management.getSection($scope.sectionName) || management;
+    link: function($scope) {
+      timefilter.disableAutoRefreshSelector();
+      timefilter.disableTimeRangeSelector();
+      $scope.sections = management.visibleItems;
+      $scope.section = management.getSection($scope.sectionName) || management;
 
-        if ($scope.section) {
-          $scope.section.items.forEach(item => {
-            item.active = `#${$location.path()}`.indexOf(item.url) > -1;
-          });
-        }
-
-        updateSidebar($scope.sections, $scope.section.id);
-        $scope.$on('$destroy', () => destroyReact(SIDENAV_ID));
-        management.addListener(() => updateSidebar(management.visibleItems, $scope.section.id));
-
-        updateLandingPage($scope.$root.chrome.getKibanaVersion());
-        $scope.$on('$destroy', () => destroyReact(LANDING_ID));
+      if ($scope.section) {
+        $scope.section.items.forEach(item => {
+          item.active = `#${$location.path()}`.indexOf(item.url) > -1;
+        });
       }
-    };
-  });
 
-uiModules
-  .get('apps/management')
-  .directive('kbnManagementLanding', function (kbnVersion) {
-    return {
-      restrict: 'E',
-      link: function ($scope) {
-        $scope.sections = management.visibleItems;
-        $scope.kbnVersion = kbnVersion;
-      }
-    };
-  });
+      updateSidebar($scope.sections, $scope.section.id);
+      $scope.$on('$destroy', () => destroyReact(SIDENAV_ID));
+      management.addListener(() => updateSidebar(management.visibleItems, $scope.section.id));
+
+      updateLandingPage($scope.$root.chrome.getKibanaVersion());
+      $scope.$on('$destroy', () => destroyReact(LANDING_ID));
+    },
+  };
+});
+
+uiModules.get('apps/management').directive('kbnManagementLanding', function(kbnVersion) {
+  return {
+    restrict: 'E',
+    link: function($scope) {
+      $scope.sections = management.visibleItems;
+      $scope.kbnVersion = kbnVersion;
+    },
+  };
+});
 
 FeatureCatalogueRegistryProvider.register(() => {
   return {
-    id: 'management',
-    title: i18n.translate('kbn.management.managementLabel', {
-      defaultMessage: 'Management',
+    id: 'stack-management',
+    title: i18n.translate('kbn.stackManagement.managementLabel', {
+      defaultMessage: 'Stack Management',
     }),
-    description: i18n.translate('kbn.management.managementDescription', {
+    description: i18n.translate('kbn.stackManagement.managementDescription', {
       defaultMessage: 'Your center console for managing the Elastic Stack.',
     }),
     icon: 'managementApp',
     path: '/app/kibana#/management',
     showOnHomePage: false,
-    category: FeatureCatalogueCategory.ADMIN
+    category: FeatureCatalogueCategory.ADMIN,
   };
 });

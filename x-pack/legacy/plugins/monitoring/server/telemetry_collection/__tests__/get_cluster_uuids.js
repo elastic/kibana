@@ -6,45 +6,49 @@
 
 import expect from '@kbn/expect';
 import sinon from 'sinon';
-import { getClusterUuids, fetchClusterUuids, handleClusterUuidsResponse } from '../get_cluster_uuids';
+import {
+  getClusterUuids,
+  fetchClusterUuids,
+  handleClusterUuidsResponse,
+} from '../get_cluster_uuids';
 
 describe('get_cluster_uuids', () => {
-  const callWith = sinon.stub();
+  const callCluster = sinon.stub();
   const size = 123;
   const server = {
     config: sinon.stub().returns({
-      get: sinon.stub().withArgs('xpack.monitoring.elasticsearch.index_pattern').returns('.monitoring-es-N-*')
-        .withArgs('xpack.monitoring.max_bucket_size').returns(size)
-    })
+      get: sinon
+        .stub()
+        .withArgs('xpack.monitoring.elasticsearch.index_pattern')
+        .returns('.monitoring-es-N-*')
+        .withArgs('xpack.monitoring.max_bucket_size')
+        .returns(size),
+    }),
   };
   const response = {
     aggregations: {
       cluster_uuids: {
-        buckets: [
-          { key: 'abc' },
-          { key: 'xyz' },
-          { key: '123' }
-        ]
-      }
-    }
+        buckets: [{ key: 'abc' }, { key: 'xyz' }, { key: '123' }],
+      },
+    },
   };
-  const expectedUuids = response.aggregations.cluster_uuids.buckets.map(bucket => bucket.key);
+  const expectedUuids = response.aggregations.cluster_uuids.buckets
+    .map(bucket => bucket.key)
+    .map(expectedUuid => ({ clusterUuid: expectedUuid }));
   const start = new Date();
   const end = new Date();
 
   describe('getClusterUuids', () => {
     it('returns cluster UUIDs', async () => {
-      callWith.withArgs('search').returns(Promise.resolve(response));
-
-      expect(await getClusterUuids(server, callWith, start, end)).to.eql(expectedUuids);
+      callCluster.withArgs('search').returns(Promise.resolve(response));
+      expect(await getClusterUuids({ server, callCluster, start, end })).to.eql(expectedUuids);
     });
   });
 
   describe('fetchClusterUuids', () => {
     it('searches for clusters', async () => {
-      callWith.returns(Promise.resolve(response));
-
-      expect(await fetchClusterUuids(server, callWith, start, end)).to.be(response);
+      callCluster.returns(Promise.resolve(response));
+      expect(await fetchClusterUuids({ server, callCluster, start, end })).to.be(response);
     });
   });
 
@@ -52,13 +56,11 @@ describe('get_cluster_uuids', () => {
     // filterPath makes it easy to ignore anything unexpected because it will come back empty
     it('handles unexpected response', () => {
       const clusterUuids = handleClusterUuidsResponse({});
-
       expect(clusterUuids.length).to.be(0);
     });
 
     it('handles valid response', () => {
       const clusterUuids = handleClusterUuidsResponse(response);
-
       expect(clusterUuids).to.eql(expectedUuids);
     });
 
@@ -66,9 +68,9 @@ describe('get_cluster_uuids', () => {
       const clusterUuids = handleClusterUuidsResponse({
         aggregations: {
           cluster_uuids: {
-            buckets: []
-          }
-        }
+            buckets: [],
+          },
+        },
       });
 
       expect(clusterUuids.length).to.be(0);

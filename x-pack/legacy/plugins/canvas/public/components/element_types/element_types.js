@@ -116,7 +116,10 @@ export class ElementTypes extends Component {
   };
 
   _sortElements = elements =>
-    sortBy(map(elements, (element, name) => ({ name, ...element })), 'displayName');
+    sortBy(
+      map(elements, (element, name) => ({ name, ...element })),
+      'displayName'
+    );
 
   render() {
     const {

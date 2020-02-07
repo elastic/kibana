@@ -2,7 +2,6 @@
 
 exports[`EmptyState component does not render empty state with appropriate base path and no docs 1`] = `
 <EmptyStateComponent
-  basePath="foo"
   data={
     Object {
       "statesIndexStatus": Object {
@@ -118,7 +117,6 @@ exports[`EmptyState component does not render empty state with appropriate base 
   loading={false}
 >
   <DataMissing
-    basePath="foo"
     headingMessage="No uptime data found"
   >
     <EuiFlexGroup
@@ -153,7 +151,7 @@ exports[`EmptyState component does not render empty state with appropriate base 
                         values={
                           Object {
                             "configureHeartbeatLink": <ForwardRef
-                              href="foo/app/kibana#/home/tutorial/uptimeMonitors"
+                              href="/app/kibana#/home/tutorial/uptimeMonitors"
                               target="_blank"
                             >
                               <FormattedMessage
@@ -187,14 +185,18 @@ exports[`EmptyState component does not render empty state with appropriate base 
                       type="uptimeApp"
                     >
                       <EuiIconEmpty
+                        aria-hidden={true}
                         className="euiIcon euiIcon--xxLarge euiIcon--subdued euiIcon--app euiIcon-isLoading"
                         focusable="false"
+                        role="img"
                         style={null}
                       >
                         <svg
+                          aria-hidden={true}
                           className="euiIcon euiIcon--xxLarge euiIcon--subdued euiIcon--app euiIcon-isLoading"
                           focusable="false"
                           height={16}
+                          role="img"
                           style={null}
                           viewBox="0 0 16 16"
                           width={16}
@@ -245,7 +247,7 @@ exports[`EmptyState component does not render empty state with appropriate base 
                                 values={
                                   Object {
                                     "configureHeartbeatLink": <ForwardRef
-                                      href="foo/app/kibana#/home/tutorial/uptimeMonitors"
+                                      href="/app/kibana#/home/tutorial/uptimeMonitors"
                                       target="_blank"
                                     >
                                       <FormattedMessage
@@ -258,12 +260,12 @@ exports[`EmptyState component does not render empty state with appropriate base 
                                 }
                               >
                                 <EuiLink
-                                  href="foo/app/kibana#/home/tutorial/uptimeMonitors"
+                                  href="/app/kibana#/home/tutorial/uptimeMonitors"
                                   target="_blank"
                                 >
                                   <a
                                     className="euiLink euiLink--primary"
-                                    href="foo/app/kibana#/home/tutorial/uptimeMonitors"
+                                    href="/app/kibana#/home/tutorial/uptimeMonitors"
                                     rel="noopener noreferrer"
                                     target="_blank"
                                   >
@@ -297,7 +299,6 @@ exports[`EmptyState component does not render empty state with appropriate base 
 
 exports[`EmptyState component doesn't render child components when count is falsey 1`] = `
 <EmptyStateComponent
-  basePath=""
   intl={
     Object {
       "defaultFormats": Object {},
@@ -466,7 +467,6 @@ exports[`EmptyState component doesn't render child components when count is fals
 
 exports[`EmptyState component notifies when index does not exist 1`] = `
 <EmptyStateComponent
-  basePath="foo"
   data={
     Object {
       "statesIndexStatus": Object {
@@ -582,7 +582,6 @@ exports[`EmptyState component notifies when index does not exist 1`] = `
   loading={false}
 >
   <DataMissing
-    basePath="foo"
     headingMessage="Uptime index not found"
   >
     <EuiFlexGroup
@@ -617,7 +616,7 @@ exports[`EmptyState component notifies when index does not exist 1`] = `
                         values={
                           Object {
                             "configureHeartbeatLink": <ForwardRef
-                              href="foo/app/kibana#/home/tutorial/uptimeMonitors"
+                              href="/app/kibana#/home/tutorial/uptimeMonitors"
                               target="_blank"
                             >
                               <FormattedMessage
@@ -651,14 +650,18 @@ exports[`EmptyState component notifies when index does not exist 1`] = `
                       type="uptimeApp"
                     >
                       <EuiIconEmpty
+                        aria-hidden={true}
                         className="euiIcon euiIcon--xxLarge euiIcon--subdued euiIcon--app euiIcon-isLoading"
                         focusable="false"
+                        role="img"
                         style={null}
                       >
                         <svg
+                          aria-hidden={true}
                           className="euiIcon euiIcon--xxLarge euiIcon--subdued euiIcon--app euiIcon-isLoading"
                           focusable="false"
                           height={16}
+                          role="img"
                           style={null}
                           viewBox="0 0 16 16"
                           width={16}
@@ -709,7 +712,7 @@ exports[`EmptyState component notifies when index does not exist 1`] = `
                                 values={
                                   Object {
                                     "configureHeartbeatLink": <ForwardRef
-                                      href="foo/app/kibana#/home/tutorial/uptimeMonitors"
+                                      href="/app/kibana#/home/tutorial/uptimeMonitors"
                                       target="_blank"
                                     >
                                       <FormattedMessage
@@ -722,12 +725,12 @@ exports[`EmptyState component notifies when index does not exist 1`] = `
                                 }
                               >
                                 <EuiLink
-                                  href="foo/app/kibana#/home/tutorial/uptimeMonitors"
+                                  href="/app/kibana#/home/tutorial/uptimeMonitors"
                                   target="_blank"
                                 >
                                   <a
                                     className="euiLink euiLink--primary"
-                                    href="foo/app/kibana#/home/tutorial/uptimeMonitors"
+                                    href="/app/kibana#/home/tutorial/uptimeMonitors"
                                     rel="noopener noreferrer"
                                     target="_blank"
                                   >
@@ -775,7 +778,6 @@ exports[`EmptyState component renders child components when count is truthy 1`] 
 
 exports[`EmptyState component renders error message when an error occurs 1`] = `
 <EmptyStateComponent
-  basePath=""
   errors={
     Array [
       Object {
@@ -957,14 +959,18 @@ exports[`EmptyState component renders error message when an error occurs 1`] = `
                       type="securityApp"
                     >
                       <EuiIconEmpty
+                        aria-hidden={true}
                         className="euiIcon euiIcon--xxLarge euiIcon--subdued euiIcon--app euiIcon-isLoading"
                         focusable="false"
+                        role="img"
                         style={null}
                       >
                         <svg
+                          aria-hidden={true}
                           className="euiIcon euiIcon--xxLarge euiIcon--subdued euiIcon--app euiIcon-isLoading"
                           focusable="false"
                           height={16}
+                          role="img"
                           style={null}
                           viewBox="0 0 16 16"
                           width={16}
@@ -1031,7 +1037,6 @@ exports[`EmptyState component renders error message when an error occurs 1`] = `
 
 exports[`EmptyState component renders loading state if no errors or doc count 1`] = `
 <EmptyStateComponent
-  basePath=""
   intl={
     Object {
       "defaultFormats": Object {},

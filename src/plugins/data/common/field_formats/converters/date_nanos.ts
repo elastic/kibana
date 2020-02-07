@@ -17,11 +17,12 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import moment, { Moment } from 'moment';
 import { memoize, noop } from 'lodash';
 import { KBN_FIELD_TYPES } from '../../kbn_field_types/types';
 import { FieldFormat } from '../field_format';
-import { TextContextTypeConvert } from '../types';
+import { TextContextTypeConvert, FIELD_FORMAT_IDS } from '../types';
 
 /**
  * Analyse the given moment.js format pattern for the fractional sec part (S,SS,SSS...)
@@ -69,26 +70,21 @@ export function formatWithNanos(
 }
 
 export class DateNanosFormat extends FieldFormat {
-  static id = 'date_nanos';
-  static title = 'Date Nanos';
+  static id = FIELD_FORMAT_IDS.DATE_NANOS;
+  static title = i18n.translate('data.fieldFormats.date_nanos.title', {
+    defaultMessage: 'Date nanos',
+  });
   static fieldType = KBN_FIELD_TYPES.DATE;
 
-  private getConfig: Function;
   private memoizedConverter: Function = noop;
   private memoizedPattern: string = '';
   private timeZone: string = '';
 
-  constructor(params: Record<string, any>, getConfig: Function) {
-    super(params);
-
-    this.getConfig = getConfig;
-  }
-
   getParamDefaults() {
     return {
-      pattern: this.getConfig('dateNanosFormat'),
-      fallbackPattern: this.getConfig('dateFormat'),
-      timezone: this.getConfig('dateFormat:tz'),
+      pattern: this.getConfig!('dateNanosFormat'),
+      fallbackPattern: this.getConfig!('dateFormat'),
+      timezone: this.getConfig!('dateFormat:tz'),
     };
   }
 

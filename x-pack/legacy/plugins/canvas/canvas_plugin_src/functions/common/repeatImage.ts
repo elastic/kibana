@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
+import { ExpressionFunction } from 'src/plugins/expressions/common/types';
 // @ts-ignore untyped local
 import { resolveWithMissingImage } from '../../../common/lib/resolve_dataurl';
 // @ts-ignore .png file

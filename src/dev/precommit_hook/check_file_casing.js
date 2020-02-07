@@ -35,9 +35,7 @@ const NON_SNAKE_CASE_RE = /[A-Z \-]/;
 const NON_KEBAB_CASE_RE = /[A-Z \_]/;
 
 function listPaths(paths) {
-  return paths
-    .map(path => ` - ${path}`)
-    .join('\n');
+  return paths.map(path => ` - ${path}`).join('\n');
 }
 
 /**
@@ -78,13 +76,15 @@ async function checkForKebabCase(log, files) {
     .reduce((acc, file) => {
       const parents = file.getRelativeParentDirs();
 
-      return acc.concat(parents.filter(parent => (
-        matchesAnyGlob(parent, KEBAB_CASE_DIRECTORY_GLOBS) && NON_KEBAB_CASE_RE.test(basename(parent))
-      )));
+      return acc.concat(
+        parents.filter(
+          parent =>
+            matchesAnyGlob(parent, KEBAB_CASE_DIRECTORY_GLOBS) &&
+            NON_KEBAB_CASE_RE.test(basename(parent))
+        )
+      );
     }, [])
-    .reduce((acc, path) => (
-      acc.includes(path) ? acc : acc.concat(path)
-    ), []);
+    .reduce((acc, path) => (acc.includes(path) ? acc : acc.concat(path)), []);
 
   if (errorPaths.length) {
     throw createFailError(`These directories MUST use kebab-case.\n${listPaths(errorPaths)}`);

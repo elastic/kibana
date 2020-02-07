@@ -22,5 +22,5 @@ add(toastOrTitle: ToastInput): Toast;
 
 `Toast`
 
-a 
+a [Toast](./kibana-plugin-public.toast.md)
 

@@ -16,7 +16,11 @@ import {
   TRANSACTION_TYPE
 } from '../../../../../common/elasticsearch_fieldnames';
 import { rangeFilter } from '../../../helpers/range_filter';
-import { Setup } from '../../../helpers/setup_request';
+import {
+  Setup,
+  SetupTimeRange,
+  SetupUIFilters
+} from '../../../helpers/setup_request';
 
 export async function bucketFetcher(
   serviceName: string,
@@ -26,7 +30,7 @@ export async function bucketFetcher(
   traceId: string,
   distributionMax: number,
   bucketSize: number,
-  setup: Setup
+  setup: Setup & SetupTimeRange & SetupUIFilters
 ) {
   const { start, end, uiFiltersES, client, indices } = setup;
 
@@ -46,8 +50,7 @@ export async function bucketFetcher(
           ],
           should: [
             { term: { [TRACE_ID]: traceId } },
-            { term: { [TRANSACTION_ID]: transactionId } },
-            { term: { [TRANSACTION_SAMPLED]: true } }
+            { term: { [TRANSACTION_ID]: transactionId } }
           ]
         }
       },
@@ -63,10 +66,17 @@ export async function bucketFetcher(
             }
           },
           aggs: {
-            sample: {
-              top_hits: {
-                _source: [TRANSACTION_ID, TRANSACTION_SAMPLED, TRACE_ID],
-                size: 1
+            samples: {
+              filter: {
+                term: { [TRANSACTION_SAMPLED]: true }
+              },
+              aggs: {
+                items: {
+                  top_hits: {
+                    _source: [TRANSACTION_ID, TRACE_ID],
+                    size: 10
+                  }
+                }
               }
             }
           }

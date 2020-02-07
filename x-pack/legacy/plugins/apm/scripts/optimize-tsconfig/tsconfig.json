@@ -2,6 +2,7 @@
   "extends": "../../../apm.tsconfig.json",
   "include": [
     "./**/*",
+    "../../../plugins/apm/**/*",
     "../../../typings/**/*"
   ],
   "exclude": [

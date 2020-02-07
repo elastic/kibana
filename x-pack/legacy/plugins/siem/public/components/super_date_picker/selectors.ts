@@ -13,62 +13,25 @@ export const getTimerange = (inputState: InputsRange): TimeRange => inputState.t
 
 export const getQueries = (inputState: InputsRange): GlobalQuery[] => inputState.queries;
 
-export const policySelector = () =>
-  createSelector(
-    getPolicy,
-    policy => policy.kind
-  );
+export const policySelector = () => createSelector(getPolicy, policy => policy.kind);
 
-export const durationSelector = () =>
-  createSelector(
-    getPolicy,
-    policy => policy.duration
-  );
+export const durationSelector = () => createSelector(getPolicy, policy => policy.duration);
 
-export const kindSelector = () =>
-  createSelector(
-    getTimerange,
-    timerange => timerange.kind
-  );
+export const kindSelector = () => createSelector(getTimerange, timerange => timerange.kind);
 
-export const startSelector = () =>
-  createSelector(
-    getTimerange,
-    timerange => timerange.from
-  );
+export const startSelector = () => createSelector(getTimerange, timerange => timerange.from);
 
-export const endSelector = () =>
-  createSelector(
-    getTimerange,
-    timerange => timerange.to
-  );
+export const endSelector = () => createSelector(getTimerange, timerange => timerange.to);
 
-export const fromStrSelector = () =>
-  createSelector(
-    getTimerange,
-    timerange => timerange.fromStr
-  );
+export const fromStrSelector = () => createSelector(getTimerange, timerange => timerange.fromStr);
 
-export const toStrSelector = () =>
-  createSelector(
-    getTimerange,
-    timerange => timerange.toStr
-  );
+export const toStrSelector = () => createSelector(getTimerange, timerange => timerange.toStr);
 
 export const isLoadingSelector = () =>
-  createSelector(
-    getQueries,
-    queries => queries.some(i => i.loading === true)
-  );
+  createSelector(getQueries, queries => queries.some(i => i.loading === true));
 
 export const queriesSelector = () =>
-  createSelector(
-    getQueries,
-    queries => queries.filter(q => q.id !== 'kql')
-  );
+  createSelector(getQueries, queries => queries.filter(q => q.id !== 'kql'));
 
 export const kqlQuerySelector = () =>
-  createSelector(
-    getQueries,
-    queries => queries.find(q => q.id === 'kql')
-  );
+  createSelector(getQueries, queries => queries.find(q => q.id === 'kql'));

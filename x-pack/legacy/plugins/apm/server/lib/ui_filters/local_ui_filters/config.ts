@@ -9,7 +9,8 @@ import {
   POD_NAME,
   SERVICE_AGENT_NAME,
   HOST_NAME,
-  TRANSACTION_RESULT
+  TRANSACTION_RESULT,
+  SERVICE_VERSION
 } from '../../../../common/elasticsearch_fieldnames';
 
 const filtersByName = {
@@ -42,6 +43,12 @@ const filtersByName = {
       defaultMessage: 'Transaction result'
     }),
     fieldName: TRANSACTION_RESULT
+  },
+  serviceVersion: {
+    title: i18n.translate('xpack.apm.localFilters.titles.serviceVersion', {
+      defaultMessage: 'Service version'
+    }),
+    fieldName: SERVICE_VERSION
   }
 };
 
@@ -61,17 +68,14 @@ export const localUIFilterNames = Object.keys(
   filtersByName
 ) as LocalUIFilterName[];
 
-export const localUIFilters = localUIFilterNames.reduce(
-  (acc, key) => {
-    const field = filtersByName[key];
+export const localUIFilters = localUIFilterNames.reduce((acc, key) => {
+  const field = filtersByName[key];
 
-    return {
-      ...acc,
-      [key]: {
-        ...field,
-        name: key
-      }
-    };
-  },
-  {} as LocalUIFilterMap
-);
+  return {
+    ...acc,
+    [key]: {
+      ...field,
+      name: key
+    }
+  };
+}, {} as LocalUIFilterMap);

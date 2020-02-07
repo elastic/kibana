@@ -11,6 +11,7 @@ exports[`Transform: <AggLabelForm /> Date histogram aggregation 1`] = `
   >
     <span
       className="eui-textTruncate"
+      data-test-subj="transformAggregationEntryLabel"
     >
       the-group-by-agg-name
     </span>
@@ -24,6 +25,7 @@ exports[`Transform: <AggLabelForm /> Date histogram aggregation 1`] = `
       button={
         <EuiButtonIcon
           aria-label="Edit aggregation"
+          data-test-subj="transformAggregationEntryEditButton"
           iconType="pencil"
           onClick={[Function]}
           size="s"
@@ -58,6 +60,7 @@ exports[`Transform: <AggLabelForm /> Date histogram aggregation 1`] = `
   >
     <EuiButtonIcon
       aria-label="Delete item"
+      data-test-subj="transformAggregationEntryDeleteButton"
       iconType="cross"
       onClick={[Function]}
       size="s"

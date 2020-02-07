@@ -23,7 +23,7 @@ import ngMock from 'ng_mock';
 import $ from 'jquery';
 import { createVegaVisualization } from '../vega_visualization';
 import LogstashIndexPatternStubProvider from 'fixtures/stubbed_logstash_index_pattern';
-import * as visModule from 'ui/vis';
+import { Vis } from '../../../visualizations/public/np_ready/public/vis';
 import { ImageComparator } from 'test_utils/image_comparator';
 
 import vegaliteGraph from '!!raw-loader!./vegalite_graph.hjson';
@@ -43,6 +43,7 @@ import { SearchCache } from '../data_model/search_cache';
 
 import { setup as visualizationsSetup } from '../../../visualizations/public/np_ready/public/legacy';
 import { createVegaTypeDefinition } from '../vega_type';
+import { npStart } from 'ui/new_platform';
 
 const THRESHOLD = 0.1;
 const PIXEL_DIFF = 30;
@@ -50,7 +51,6 @@ const PIXEL_DIFF = 30;
 describe('VegaVisualizations', () => {
   let domNode;
   let VegaVisualization;
-  let Vis;
   let indexPattern;
   let vis;
   let imageComparator;
@@ -61,19 +61,30 @@ describe('VegaVisualizations', () => {
   beforeEach(
     ngMock.inject((Private, $injector) => {
       vegaVisualizationDependencies = {
-        es: $injector.get('es'),
         serviceSettings: $injector.get('serviceSettings'),
-        uiSettings: $injector.get('config'),
+        core: {
+          uiSettings: npStart.core.uiSettings,
+        },
+        plugins: {
+          data: {
+            query: {
+              timefilter: {
+                timefilter: {},
+              },
+            },
+            __LEGACY: {
+              esClient: npStart.plugins.data.search.__LEGACY.esClient,
+            },
+          },
+        },
       };
 
-      if(!visRegComplete) {
+      if (!visRegComplete) {
         visRegComplete = true;
-        visualizationsSetup.types.registerVisualization(() =>
+        visualizationsSetup.types.createBaseVisualization(
           createVegaTypeDefinition(vegaVisualizationDependencies)
         );
       }
-
-      Vis = Private(visModule.VisProvider);
 
       VegaVisualization = createVegaVisualization(vegaVisualizationDependencies);
       indexPattern = Private(LogstashIndexPatternStubProvider);
@@ -81,19 +92,19 @@ describe('VegaVisualizations', () => {
   );
 
   describe('VegaVisualization - basics', () => {
-    beforeEach(async function () {
+    beforeEach(async function() {
       setupDOM('512px', '512px');
       imageComparator = new ImageComparator();
 
       vis = new Vis(indexPattern, { type: 'vega' });
     });
 
-    afterEach(function () {
+    afterEach(function() {
       teardownDOM();
       imageComparator.destroy();
     });
 
-    it('should show vegalite graph and update on resize (may fail in dev env)', async function () {
+    it('should show vegalite graph and update on resize (may fail in dev env)', async function() {
       let vegaVis;
       try {
         vegaVis = new VegaVisualization(domNode, vis);
@@ -116,7 +127,7 @@ describe('VegaVisualizations', () => {
       }
     });
 
-    it('should show vega graph (may fail in dev env)', async function () {
+    it('should show vega graph (may fail in dev env)', async function() {
       let vegaVis;
       try {
         vegaVis = new VegaVisualization(domNode, vis);

@@ -21,7 +21,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { Fragment } from 'react';
 import styled from 'styled-components';
-import { idx } from '@kbn/elastic-idx';
 import { px, units } from '../../../../../../../style/variables';
 import { Summary } from '../../../../../../shared/Summary';
 import { TimestampTooltip } from '../../../../../../shared/TimestampTooltip';
@@ -35,6 +34,7 @@ import { DatabaseContext } from './DatabaseContext';
 import { StickySpanProperties } from './StickySpanProperties';
 import { HttpInfoSummaryItem } from '../../../../../../shared/Summary/HttpInfoSummaryItem';
 import { SpanMetadata } from '../../../../../../shared/MetadataTable/SpanMetadata';
+import { SyncBadge } from '../SyncBadge';
 
 function formatType(type: string) {
   switch (type) {
@@ -98,13 +98,13 @@ export function SpanFlyout({
   }
 
   const stackframes = span.span.stacktrace;
-  const codeLanguage = idx(parentTransaction, _ => _.service.language.name);
-  const dbContext = idx(span, _ => _.span.db);
-  const httpContext = idx(span, _ => _.span.http);
+  const codeLanguage = parentTransaction?.service.language?.name;
+  const dbContext = span.span.db;
+  const httpContext = span.span.http;
   const spanTypes = getSpanTypes(span);
-  const spanHttpStatusCode = idx(httpContext, _ => _.response.status_code);
-  const spanHttpUrl = idx(httpContext, _ => _.url.original);
-  const spanHttpMethod = idx(httpContext, _ => _.method);
+  const spanHttpStatusCode = httpContext?.response?.status_code;
+  const spanHttpUrl = httpContext?.url?.original;
+  const spanHttpMethod = httpContext?.method;
 
   return (
     <EuiPortal>
@@ -189,6 +189,7 @@ export function SpanFlyout({
                     <SpanBadge color="hollow">{spanTypes.spanAction}</SpanBadge>
                   </EuiToolTip>
                 )}
+                <SyncBadge sync={span.span.sync} />
               </>
             ]}
           />

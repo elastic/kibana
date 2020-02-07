@@ -18,8 +18,9 @@ import { ANNOTATION_USER_UNKNOWN } from '../../common/constants/annotations';
 function getAnnotationsFeatureUnavailableErrorMessage() {
   return Boom.badRequest(
     i18n.translate('xpack.ml.routes.annotations.annotationsFeatureUnavailableErrorMessage', {
-      defaultMessage: 'Index and aliases required for the annotations feature have not been'
-        + ' created or are not accessible for the current user.',
+      defaultMessage:
+        'Index and aliases required for the annotations feature have not been' +
+        ' created or are not accessible for the current user.',
     })
   );
 }
@@ -30,12 +31,11 @@ export function annotationRoutes({ commonRouteConfig, elasticsearchPlugin, route
     handler(request) {
       const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const { getAnnotations } = annotationServiceProvider(callWithRequest);
-      return getAnnotations(request.payload)
-        .catch(resp => wrapError(resp));
+      return getAnnotations(request.payload).catch(resp => wrapError(resp));
     },
     config: {
-      ...commonRouteConfig
-    }
+      ...commonRouteConfig,
+    },
   });
 
   route({
@@ -50,12 +50,11 @@ export function annotationRoutes({ commonRouteConfig, elasticsearchPlugin, route
 
       const { indexAnnotation } = annotationServiceProvider(callWithRequest);
       const username = _.get(request, 'auth.credentials.username', ANNOTATION_USER_UNKNOWN);
-      return indexAnnotation(request.payload, username)
-        .catch(resp => wrapError(resp));
+      return indexAnnotation(request.payload, username).catch(resp => wrapError(resp));
     },
     config: {
-      ...commonRouteConfig
-    }
+      ...commonRouteConfig,
+    },
   });
 
   route({
@@ -70,12 +69,10 @@ export function annotationRoutes({ commonRouteConfig, elasticsearchPlugin, route
 
       const annotationId = request.params.annotationId;
       const { deleteAnnotation } = annotationServiceProvider(callWithRequest);
-      return deleteAnnotation(annotationId)
-        .catch(resp => wrapError(resp));
+      return deleteAnnotation(annotationId).catch(resp => wrapError(resp));
     },
     config: {
-      ...commonRouteConfig
-    }
+      ...commonRouteConfig,
+    },
   });
-
 }

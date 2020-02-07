@@ -4,12 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TaskRunnerFactory } from './lib';
+import { TaskRunnerFactory } from './task_runner';
 import { AlertTypeRegistry } from './alert_type_registry';
-import { taskManagerMock } from '../../task_manager/task_manager.mock';
+import { taskManagerMock } from '../../../../plugins/task_manager/server/task_manager.mock';
 
-const taskManager = taskManagerMock.create();
-
+const taskManager = taskManagerMock.setup();
 const alertTypeRegistryParams = {
   taskManager,
   taskRunnerFactory: new TaskRunnerFactory(),
@@ -119,13 +118,16 @@ describe('list()', () => {
     registry.register({
       id: 'test',
       name: 'Test',
-      actionGroups: [],
+      actionGroups: ['testActionGroup'],
       executor: jest.fn(),
     });
     const result = registry.list();
     expect(result).toMatchInlineSnapshot(`
       Array [
         Object {
+          "actionGroups": Array [
+            "testActionGroup",
+          ],
           "id": "test",
           "name": "Test",
         },

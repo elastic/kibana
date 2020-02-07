@@ -14,13 +14,13 @@ import { REMOTE_CLUSTER_EDIT_NAME } from './constants';
 const testBedConfig = {
   store: createRemoteClustersStore,
   memoryRouter: {
-    onRouter: (router) => registerRouter(router),
+    onRouter: router => registerRouter(router),
     // The remote cluster name to edit is read from the router ":id" param
     // so we first set it in our initial entries
     initialEntries: [`/${REMOTE_CLUSTER_EDIT_NAME}`],
     // and then we declarae the :id param on the component route path
-    componentRoutePath: '/:name'
-  }
+    componentRoutePath: '/:name',
+  },
 };
 
 export const setup = registerTestBed(RemoteClusterEdit, testBedConfig);

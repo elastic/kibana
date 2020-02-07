@@ -17,9 +17,8 @@
  * under the License.
  */
 import { i18n } from '@kbn/i18n';
-import { IAction } from 'src/plugins/ui_actions/public';
-import { NotificationsStart } from 'src/core/public';
-import { KibanaReactOverlays } from 'src/plugins/kibana_react/public';
+import { Action } from 'src/plugins/ui_actions/public';
+import { NotificationsStart, OverlayStart } from 'src/core/public';
 import { ViewMode, GetEmbeddableFactory, GetEmbeddableFactories } from '../../../../types';
 import { openAddPanelFlyout } from './open_add_panel_flyout';
 import { IContainer } from '../../../../containers';
@@ -30,14 +29,14 @@ interface ActionContext {
   embeddable: IContainer;
 }
 
-export class AddPanelAction implements IAction<ActionContext> {
+export class AddPanelAction implements Action<ActionContext> {
   public readonly type = ADD_PANEL_ACTION_ID;
   public readonly id = ADD_PANEL_ACTION_ID;
 
   constructor(
     private readonly getFactory: GetEmbeddableFactory,
     private readonly getAllFactories: GetEmbeddableFactories,
-    private readonly overlays: KibanaReactOverlays,
+    private readonly overlays: OverlayStart,
     private readonly notifications: NotificationsStart,
     private readonly SavedObjectFinder: React.ComponentType<any>
   ) {}

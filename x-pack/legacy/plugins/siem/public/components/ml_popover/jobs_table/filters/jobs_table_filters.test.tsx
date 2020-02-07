@@ -5,9 +5,8 @@
  */
 
 import { mount, shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
-import * as React from 'react';
-import { JobsTableFilters } from './jobs_table_filters';
+import React from 'react';
+import { JobsTableFiltersComponent } from './jobs_table_filters';
 import { SiemJob } from '../../types';
 import { cloneDeep } from 'lodash/fp';
 import { mockSiemJobs } from '../../__mocks__/api';
@@ -20,14 +19,16 @@ describe('JobsTableFilters', () => {
   });
 
   test('renders correctly against snapshot', () => {
-    const wrapper = shallow(<JobsTableFilters siemJobs={siemJobs} onFilterChanged={jest.fn()} />);
-    expect(toJson(wrapper)).toMatchSnapshot();
+    const wrapper = shallow(
+      <JobsTableFiltersComponent siemJobs={siemJobs} onFilterChanged={jest.fn()} />
+    );
+    expect(wrapper).toMatchSnapshot();
   });
 
   test('when you click Elastic Jobs filter, state is updated and it is selected', () => {
     const onFilterChanged = jest.fn();
     const wrapper = mount(
-      <JobsTableFilters siemJobs={siemJobs} onFilterChanged={onFilterChanged} />
+      <JobsTableFiltersComponent siemJobs={siemJobs} onFilterChanged={onFilterChanged} />
     );
 
     wrapper
@@ -47,7 +48,7 @@ describe('JobsTableFilters', () => {
   test('when you click Custom Jobs filter, state is updated and it is selected', () => {
     const onFilterChanged = jest.fn();
     const wrapper = mount(
-      <JobsTableFilters siemJobs={siemJobs} onFilterChanged={onFilterChanged} />
+      <JobsTableFiltersComponent siemJobs={siemJobs} onFilterChanged={onFilterChanged} />
     );
 
     wrapper
@@ -67,7 +68,7 @@ describe('JobsTableFilters', () => {
   test('when you click Custom Jobs filter once, then Elastic Jobs filter, state is updated and  selected changed', () => {
     const onFilterChanged = jest.fn();
     const wrapper = mount(
-      <JobsTableFilters siemJobs={siemJobs} onFilterChanged={onFilterChanged} />
+      <JobsTableFiltersComponent siemJobs={siemJobs} onFilterChanged={onFilterChanged} />
     );
 
     wrapper
@@ -99,7 +100,7 @@ describe('JobsTableFilters', () => {
   test('when you click Custom Jobs filter twice, state is updated and it is revert', () => {
     const onFilterChanged = jest.fn();
     const wrapper = mount(
-      <JobsTableFilters siemJobs={siemJobs} onFilterChanged={onFilterChanged} />
+      <JobsTableFiltersComponent siemJobs={siemJobs} onFilterChanged={onFilterChanged} />
     );
 
     wrapper

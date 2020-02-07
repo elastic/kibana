@@ -28,6 +28,13 @@ import { handleOldSettings } from './handle_old_settings';
  * @param {Object} _handleOldSettings handleOldSettings function, but overridable for tests.
  * @return {Boolean} {@code true} if the banner should be displayed. {@code false} otherwise.
  */
-export async function shouldShowBanner(telemetryOptInProvider, config, { _handleOldSettings = handleOldSettings } = {}) {
-  return telemetryOptInProvider.getOptIn() === null && await _handleOldSettings(config, telemetryOptInProvider);
+export async function shouldShowBanner(
+  telemetryOptInProvider,
+  config,
+  { _handleOldSettings = handleOldSettings } = {}
+) {
+  return (
+    telemetryOptInProvider.getOptIn() === null &&
+    (await _handleOldSettings(config, telemetryOptInProvider))
+  );
 }

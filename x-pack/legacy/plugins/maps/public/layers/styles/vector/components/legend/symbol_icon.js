@@ -10,22 +10,31 @@ import PropTypes from 'prop-types';
 import { getMakiSymbolSvg, styleSvg, buildSrcUrl } from '../../symbol_utils';
 
 export class SymbolIcon extends Component {
-
   state = {
     imgDataUrl: undefined,
     prevSymbolId: undefined,
     prevFill: undefined,
     prevStroke: undefined,
     prevStrokeWidth: undefined,
-  }
+  };
 
   componentDidMount() {
     this._isMounted = true;
-    this._loadSymbol(this.props.symbolId, this.props.fill, this.props.stroke, this.props.strokeWidth);
+    this._loadSymbol(
+      this.props.symbolId,
+      this.props.fill,
+      this.props.stroke,
+      this.props.strokeWidth
+    );
   }
 
   componentDidUpdate() {
-    this._loadSymbol(this.props.symbolId, this.props.fill, this.props.stroke, this.props.strokeWidth);
+    this._loadSymbol(
+      this.props.symbolId,
+      this.props.fill,
+      this.props.stroke,
+      this.props.strokeWidth
+    );
   }
 
   componentWillUnmount() {
@@ -33,10 +42,12 @@ export class SymbolIcon extends Component {
   }
 
   async _loadSymbol(nextSymbolId, nextFill, nextStroke, nextStrokeWidth) {
-    if (nextSymbolId === this.state.prevSymbolId
-      && nextFill === this.state.prevFill
-      && nextStroke === this.state.prevStroke
-      && nextStrokeWidth === this.state.prevStrokeWidth) {
+    if (
+      nextSymbolId === this.state.prevSymbolId &&
+      nextFill === this.state.prevFill &&
+      nextStroke === this.state.prevStroke &&
+      nextStrokeWidth === this.state.prevStrokeWidth
+    ) {
       return;
     }
 
@@ -55,7 +66,7 @@ export class SymbolIcon extends Component {
         prevSymbolId: nextSymbolId,
         prevFill: nextFill,
         prevStroke: nextStroke,
-        prevStrokeWidth: nextStrokeWidth
+        prevStrokeWidth: nextStrokeWidth,
       });
     }
   }
@@ -65,8 +76,22 @@ export class SymbolIcon extends Component {
       return null;
     }
 
+    const {
+      symbolId, // eslint-disable-line no-unused-vars
+      fill, // eslint-disable-line no-unused-vars
+      stroke, // eslint-disable-line no-unused-vars
+      strokeWidth, // eslint-disable-line no-unused-vars
+      ...rest
+    } = this.props;
+
     return (
-      <img width="16px" src={this.state.imgDataUrl} alt={this.props.symbolId} />
+      <img
+        width="16px"
+        height="18px"
+        src={this.state.imgDataUrl}
+        alt={this.props.symbolId}
+        {...rest}
+      />
     );
   }
 }
@@ -75,5 +100,5 @@ SymbolIcon.propTypes = {
   symbolId: PropTypes.string.isRequired,
   fill: PropTypes.string.isRequired,
   stroke: PropTypes.string.isRequired,
-  strokeWidth: PropTypes.string.isRequired
+  strokeWidth: PropTypes.string.isRequired,
 };

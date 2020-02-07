@@ -4,15 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { StaticIndexPattern } from 'ui/index_patterns';
+import { IIndexPattern } from '../../../../../../../../src/plugins/data/common/';
 import { NarrowDateRange } from '../../../components/ml/types';
-import { hostsModel } from '../../../store';
 import { ESTermQuery } from '../../../../common/typed_json';
 import { InspectQuery, Refetch } from '../../../store/inputs/model';
 
-import { HostsTableType } from '../../../store/hosts/model';
+import { HostsTableType, HostsType } from '../../../store/hosts/model';
 import { NavTab } from '../../../components/navigation/types';
 import { UpdateDateRange } from '../../../components/charts/common';
+import { esFilters } from '../../../../../../../../src/plugins/data/common/es_query';
 
 export type KeyHostsNavTabWithoutMlPermission = HostsTableType.hosts &
   HostsTableType.authentications &
@@ -25,37 +25,37 @@ type KeyHostsNavTab = KeyHostsNavTabWithoutMlPermission | KeyHostsNavTabWithMlPe
 
 export type HostsNavTab = Record<KeyHostsNavTab, NavTab>;
 
-interface QueryTabBodyProps {
-  type: hostsModel.HostsType;
+export type SetQuery = ({
+  id,
+  inspect,
+  loading,
+  refetch,
+}: {
+  id: string;
+  inspect: InspectQuery | null;
+  loading: boolean;
+  refetch: Refetch;
+}) => void;
+
+export interface QueryTabBodyProps {
+  type: HostsType;
   startDate: number;
   endDate: number;
   filterQuery?: string | ESTermQuery;
 }
 
-export type AnomaliesQueryTabBodyProps = QueryTabBodyProps & {
-  skip: boolean;
-  narrowDateRange: NarrowDateRange;
-  hostName?: string;
-};
-
 export type HostsComponentsQueryProps = QueryTabBodyProps & {
   deleteQuery?: ({ id }: { id: string }) => void;
-  indexPattern: StaticIndexPattern;
+  indexPattern: IIndexPattern;
   skip: boolean;
-  setQuery: ({
-    id,
-    inspect,
-    loading,
-    refetch,
-  }: {
-    id: string;
-    inspect: InspectQuery | null;
-    loading: boolean;
-    refetch: Refetch;
-  }) => void;
+  setQuery: SetQuery;
   updateDateRange?: UpdateDateRange;
   narrowDateRange?: NarrowDateRange;
 };
 
+export type AlertsComponentQueryProps = HostsComponentsQueryProps & {
+  filterQuery: string;
+  pageFilters?: esFilters.Filter[];
+};
+
 export type CommonChildren = (args: HostsComponentsQueryProps) => JSX.Element;
-export type AnomaliesChildren = (args: AnomaliesQueryTabBodyProps) => JSX.Element;

@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Renders CircleIcon with correct styles when isPointOnly 1`] = `
+exports[`Renders CircleIcon 1`] = `
 <CircleIcon
   style={
     Object {
@@ -12,7 +12,7 @@ exports[`Renders CircleIcon with correct styles when isPointOnly 1`] = `
 />
 `;
 
-exports[`Renders LineIcon with correct styles when isLineOnly 1`] = `
+exports[`Renders LineIcon 1`] = `
 <LineIcon
   style={
     Object {
@@ -23,7 +23,7 @@ exports[`Renders LineIcon with correct styles when isLineOnly 1`] = `
 />
 `;
 
-exports[`Renders PolygonIcon with correct styles when not line only or not point only 1`] = `
+exports[`Renders PolygonIcon 1`] = `
 <PolygonIcon
   style={
     Object {
@@ -35,7 +35,7 @@ exports[`Renders PolygonIcon with correct styles when not line only or not point
 />
 `;
 
-exports[`Renders SymbolIcon with correct styles when isPointOnly and symbolId provided 1`] = `
+exports[`Renders SymbolIcon 1`] = `
 <SymbolIcon
   fill="#ff0000"
   stroke="rgb(106,173,213)"

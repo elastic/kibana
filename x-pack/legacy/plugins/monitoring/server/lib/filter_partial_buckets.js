@@ -18,7 +18,7 @@ function getDelta(t1, t2) {
 }
 
 export function filterPartialBuckets(min, max, bucketSize, options = {}) {
-  return (bucket) => {
+  return bucket => {
     const bucketTime = getTime(bucket);
     // timestamp is too late to be complete
     if (getDelta(max, bucketTime.add(bucketSize, 'seconds')) < 0) {
@@ -28,7 +28,7 @@ export function filterPartialBuckets(min, max, bucketSize, options = {}) {
     /* Table listing metrics don't need to filter the beginning of data for
      * partial buckets. They just boil down the data into max/min/last/slope
      * numbers instead of graphing it. So table listing data buckets pass
-    * ignoreEarly */
+     * ignoreEarly */
     if (options.ignoreEarly !== true) {
       // timestamp is too early to be complete
       if (getDelta(bucketTime.subtract(bucketSize, 'seconds'), min) < 0) {

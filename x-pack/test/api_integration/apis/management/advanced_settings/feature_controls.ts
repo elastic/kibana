@@ -6,13 +6,12 @@
 
 import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
-import { SecurityService, SpacesService } from '../../../../common/services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function featureControlsTests({ getService }: FtrProviderContext) {
   const supertest: SuperTest<any> = getService('supertestWithoutAuth');
-  const security: SecurityService = getService('security');
-  const spaces: SpacesService = getService('spaces');
+  const security = getService('security');
+  const spaces = getService('spaces');
 
   const expect403 = (result: any) => {
     expect(result.error).to.be(undefined);

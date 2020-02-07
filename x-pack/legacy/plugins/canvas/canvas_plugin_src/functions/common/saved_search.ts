@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
-import { SearchInput } from 'src/legacy/core_plugins/kibana/public/discover/embeddable';
+import { ExpressionFunction } from 'src/plugins/expressions/common/types';
+import { SearchInput } from 'src/legacy/core_plugins/kibana/public/discover/np_ready/embeddable';
 import {
   EmbeddableTypes,
   EmbeddableExpressionType,

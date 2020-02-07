@@ -22,6 +22,7 @@ export default function alertingTests({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./unmute_instance'));
     loadTestFile(require.resolve('./update'));
     loadTestFile(require.resolve('./update_api_key'));
-    loadTestFile(require.resolve('./alerts'));
+    loadTestFile(require.resolve('./alerts_space1'));
+    loadTestFile(require.resolve('./alerts_default_space'));
   });
 }

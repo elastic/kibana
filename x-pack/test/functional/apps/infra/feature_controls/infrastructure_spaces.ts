@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect';
-import { SpacesService } from '../../../../common/services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { DATES } from '../constants';
 
@@ -12,8 +11,14 @@ const DATE_WITH_DATA = DATES.metricsAndLogs.hosts.withData;
 
 export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const spacesService: SpacesService = getService('spaces');
-  const PageObjects = getPageObjects(['common', 'infraHome', 'security', 'spaceSelector']);
+  const spacesService = getService('spaces');
+  const PageObjects = getPageObjects([
+    'common',
+    'infraHome',
+    'security',
+    'spaceSelector',
+    'settings',
+  ]);
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
   const retry = getService('retry');
@@ -32,7 +37,6 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         // we need to load the following in every situation as deleting
         // a space deletes all of the associated saved objects
         await esArchiver.load('empty_kibana');
-
         await spacesService.create({
           id: 'custom_space',
           name: 'custom_space',
@@ -49,9 +53,8 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
+        await PageObjects.settings.setNavType('individual');
+        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
         expect(navLinks).to.contain('Metrics');
       });
 
@@ -102,9 +105,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
+        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
         expect(navLinks).not.to.contain('Metrics');
       });
 
@@ -190,7 +191,8 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
         it(`doesn't show link to view logs`, async () => {
           await retry.waitFor('context menu', () => testSubjects.exists('~nodeContextMenu'));
-          await testSubjects.missingOrFail('~viewLogsContextMenuItem');
+          const link = await testSubjects.find('~viewLogsContextMenuItem');
+          expect(await link.isEnabled()).to.be(false);
         });
 
         it(`shows link to view apm traces`, async () => {
@@ -238,7 +240,8 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
         it(`doesn't show link to view apm traces`, async () => {
           await retry.waitFor('context menu', () => testSubjects.exists('~nodeContextMenu'));
-          await testSubjects.missingOrFail('~viewApmTracesContextMenuItem');
+          const link = await testSubjects.find('~viewApmTracesContextMenuItem');
+          expect(await link.isEnabled()).to.be(false);
         });
       });
     });

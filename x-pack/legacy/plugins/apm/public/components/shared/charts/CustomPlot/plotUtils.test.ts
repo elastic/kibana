@@ -6,6 +6,7 @@
 
 // @ts-ignore
 import * as plotUtils from './plotUtils';
+import { TimeSeries, Coordinate } from '../../../../../typings/timeseries';
 
 describe('plotUtils', () => {
   describe('getPlotValues', () => {
@@ -34,7 +35,10 @@ describe('plotUtils', () => {
           expect(
             plotUtils
               .getPlotValues(
-                [{ data: { x: 0, y: 200 } }, { data: { x: 0, y: 300 } }],
+                [
+                  { data: [{ x: 0, y: 200 }] },
+                  { data: [{ x: 0, y: 300 }] }
+                ] as Array<TimeSeries<Coordinate>>,
                 [],
                 {
                   height: 1,

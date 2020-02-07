@@ -24,9 +24,7 @@ export function editCluster(state = initialState, action) {
 
   switch (type) {
     case EDIT_CLUSTER_START:
-      const {
-        clusterName,
-      } = payload;
+      const { clusterName } = payload;
 
       return {
         clusterName,

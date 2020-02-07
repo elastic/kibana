@@ -18,7 +18,7 @@
  */
 
 import { expandShorthand } from './mapping_setup';
-import { ES_FIELD_TYPES } from '../../../data/common';
+import { ES_FIELD_TYPES } from '../../../data/public';
 
 describe('mapping_setup', () => {
   it('allows shortcuts for field types by just setting the value to the type name', () => {

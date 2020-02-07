@@ -6,12 +6,18 @@
 
 import expect from '@kbn/expect';
 import { UserAtSpaceScenarios } from '../../scenarios';
-import { AlertUtils, getUrlPrefix, getTestAlertData, ObjectRemover } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import {
+  AlertUtils,
+  checkAAD,
+  getUrlPrefix,
+  getTestAlertData,
+  ObjectRemover,
+} from '../../../common/lib';
 
 // eslint-disable-next-line import/no-default-export
 export default function createDisableAlertTests({ getService }: FtrProviderContext) {
-  const es = getService('es');
+  const es = getService('legacyEs');
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
@@ -65,6 +71,13 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
               } catch (e) {
                 expect(e.status).to.eql(404);
               }
+              // Ensure AAD isn't broken
+              await checkAAD({
+                supertest,
+                spaceId: space.id,
+                type: 'alert',
+                id: createdAlert.id,
+              });
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);

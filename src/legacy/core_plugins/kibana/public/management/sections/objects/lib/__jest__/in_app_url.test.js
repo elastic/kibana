@@ -24,7 +24,7 @@ describe('canViewInApp', () => {
     let uiCapabilities = {
       discover: {
         show: true,
-      }
+      },
     };
     expect(canViewInApp(uiCapabilities, 'search')).toEqual(true);
     expect(canViewInApp(uiCapabilities, 'searches')).toEqual(true);
@@ -32,7 +32,7 @@ describe('canViewInApp', () => {
     uiCapabilities = {
       discover: {
         show: false,
-      }
+      },
     };
     expect(canViewInApp(uiCapabilities, 'search')).toEqual(false);
     expect(canViewInApp(uiCapabilities, 'searches')).toEqual(false);
@@ -42,7 +42,7 @@ describe('canViewInApp', () => {
     let uiCapabilities = {
       visualize: {
         show: true,
-      }
+      },
     };
     expect(canViewInApp(uiCapabilities, 'visualization')).toEqual(true);
     expect(canViewInApp(uiCapabilities, 'visualizations')).toEqual(true);
@@ -50,7 +50,7 @@ describe('canViewInApp', () => {
     uiCapabilities = {
       visualize: {
         show: false,
-      }
+      },
     };
     expect(canViewInApp(uiCapabilities, 'visualization')).toEqual(false);
     expect(canViewInApp(uiCapabilities, 'visualizations')).toEqual(false);
@@ -60,9 +60,9 @@ describe('canViewInApp', () => {
     let uiCapabilities = {
       management: {
         kibana: {
-          index_patterns: true
-        }
-      }
+          index_patterns: true,
+        },
+      },
     };
     expect(canViewInApp(uiCapabilities, 'index-pattern')).toEqual(true);
     expect(canViewInApp(uiCapabilities, 'index-patterns')).toEqual(true);
@@ -71,21 +71,20 @@ describe('canViewInApp', () => {
     uiCapabilities = {
       management: {
         kibana: {
-          index_patterns: false
-        }
-      }
+          index_patterns: false,
+        },
+      },
     };
     expect(canViewInApp(uiCapabilities, 'index-pattern')).toEqual(false);
     expect(canViewInApp(uiCapabilities, 'index-patterns')).toEqual(false);
     expect(canViewInApp(uiCapabilities, 'indexPatterns')).toEqual(false);
-
   });
 
   it('should handle dashboards', () => {
     let uiCapabilities = {
       dashboard: {
         show: true,
-      }
+      },
     };
     expect(canViewInApp(uiCapabilities, 'dashboard')).toEqual(true);
     expect(canViewInApp(uiCapabilities, 'dashboards')).toEqual(true);
@@ -93,7 +92,7 @@ describe('canViewInApp', () => {
     uiCapabilities = {
       dashboard: {
         show: false,
-      }
+      },
     };
     expect(canViewInApp(uiCapabilities, 'dashboard')).toEqual(false);
     expect(canViewInApp(uiCapabilities, 'dashboards')).toEqual(false);
@@ -103,14 +102,14 @@ describe('canViewInApp', () => {
     let uiCapabilities = {
       foo: {
         show: true,
-      }
+      },
     };
     expect(canViewInApp(uiCapabilities, 'foo')).toEqual(true);
 
     uiCapabilities = {
       foo: {
         show: false,
-      }
+      },
     };
     expect(canViewInApp(uiCapabilities, 'foo')).toEqual(false);
   });

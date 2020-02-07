@@ -17,8 +17,8 @@ export function getPageData($injector, api) {
       ccs: globalState.ccs,
       timeRange: {
         min: timeBounds.min.toISOString(),
-        max: timeBounds.max.toISOString()
-      }
+        max: timeBounds.max.toISOString(),
+      },
     })
     .then(response => response.data)
     .catch(err => {

@@ -18,12 +18,17 @@
  */
 
 import { CoreSetup, CoreStart, LegacyNavLink, Plugin, UiSettingsState } from 'kibana/public';
-import { UiStatsMetricType } from '@kbn/analytics';
 
-import { DataStart } from '../../../data/public';
-import { LocalApplicationService } from '../local_application_service';
+import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { setServices } from './kibana_services';
-import { FeatureCatalogueEntry } from '../../../../../plugins/feature_catalogue/public';
+import { KibanaLegacySetup } from '../../../../../plugins/kibana_legacy/public';
+import { UsageCollectionSetup } from '../../../../../plugins/usage_collection/public';
+import {
+  Environment,
+  FeatureCatalogueEntry,
+  HomePublicPluginStart,
+  HomePublicPluginSetup,
+} from '../../../../../plugins/home/public';
 
 export interface LegacyAngularInjectedDependencies {
   telemetryOptInProvider: any;
@@ -31,13 +36,12 @@ export interface LegacyAngularInjectedDependencies {
 }
 
 export interface HomePluginStartDependencies {
-  data: DataStart;
+  data: DataPublicPluginStart;
+  home: HomePublicPluginStart;
 }
 
 export interface HomePluginSetupDependencies {
   __LEGACY: {
-    trackUiMetric: (type: UiStatsMetricType, eventNames: string | string[], count?: number) => void;
-    METRIC_TYPE: any;
     metadata: {
       app: unknown;
       bundleId: string;
@@ -53,27 +57,35 @@ export interface HomePluginSetupDependencies {
     };
     getFeatureCatalogueEntries: () => Promise<readonly FeatureCatalogueEntry[]>;
     getAngularDependencies: () => Promise<LegacyAngularInjectedDependencies>;
-    localApplicationService: LocalApplicationService;
   };
+  usageCollection: UsageCollectionSetup;
+  kibanaLegacy: KibanaLegacySetup;
+  home: HomePublicPluginSetup;
 }
 
 export class HomePlugin implements Plugin {
-  private dataStart: DataStart | null = null;
+  private dataStart: DataPublicPluginStart | null = null;
   private savedObjectsClient: any = null;
+  private environment: Environment | null = null;
 
   setup(
     core: CoreSetup,
     {
-      __LEGACY: { localApplicationService, getAngularDependencies, ...legacyServices },
+      home,
+      kibanaLegacy,
+      usageCollection,
+      __LEGACY: { getAngularDependencies, ...legacyServices },
     }: HomePluginSetupDependencies
   ) {
-    localApplicationService.register({
+    kibanaLegacy.registerLegacyApp({
       id: 'home',
       title: 'Home',
       mount: async ({ core: contextCore }, params) => {
+        const trackUiMetric = usageCollection.reportUiStats.bind(usageCollection, 'Kibana_home');
         const angularDependencies = await getAngularDependencies();
         setServices({
           ...legacyServices,
+          trackUiMetric,
           http: contextCore.http,
           toastNotifications: core.notifications.toasts,
           banners: contextCore.overlays.banners,
@@ -84,17 +96,20 @@ export class HomePlugin implements Plugin {
           uiSettings: core.uiSettings,
           addBasePath: core.http.basePath.prepend,
           getBasePath: core.http.basePath.get,
-          indexPatternService: this.dataStart!.indexPatterns.indexPatterns,
+          indexPatternService: this.dataStart!.indexPatterns,
+          environment: this.environment!,
+          config: kibanaLegacy.config,
+          homeConfig: home.config,
           ...angularDependencies,
         });
-        const { renderApp } = await import('./render_app');
+        const { renderApp } = await import('./np_ready/application');
         return await renderApp(params.element);
       },
     });
   }
 
-  start(core: CoreStart, { data }: HomePluginStartDependencies) {
-    // TODO is this really the right way? I though the app context would give us those
+  start(core: CoreStart, { data, home }: HomePluginStartDependencies) {
+    this.environment = home.environment.get();
     this.dataStart = data;
     this.savedObjectsClient = core.savedObjects.client;
   }

@@ -6,11 +6,9 @@
 
 import { connect } from 'react-redux';
 import { compose, withProps } from 'recompose';
-import { jobCompletionNotifications } from '../../../../../reporting/public/lib/job_completion_notifications';
+import * as jobCompletionNotifications from '../../../../../reporting/public/lib/job_completion_notifications';
 // @ts-ignore Untyped local
 import { getWorkpad, getPages } from '../../../state/selectors/workpad';
-// @ts-ignore Untyped local
-import { getReportingBrowserType } from '../../../state/selectors/app';
 // @ts-ignore Untyped local
 import { notify } from '../../../lib/notify';
 import { getWindow } from '../../../lib/get_window';
@@ -24,14 +22,16 @@ import { getPdfUrl, createPdf } from './utils';
 import { State, CanvasWorkpad } from '../../../../types';
 // @ts-ignore Untyped local.
 import { fetch, arrayBufferFetch } from '../../../../common/lib/fetch';
+import { withKibana } from '../../../../../../../../src/plugins/kibana_react/public/';
+import { WithKibanaProps } from '../../../index';
 
 import { ComponentStrings } from '../../../../i18n';
+
 const { WorkpadHeaderWorkpadExport: strings } = ComponentStrings;
 
 const mapStateToProps = (state: State) => ({
   workpad: getWorkpad(state),
   pageCount: getPages(state).length,
-  enabled: getReportingBrowserType(state) === 'chromium',
 });
 
 const getAbsoluteUrl = (path: string) => {
@@ -48,18 +48,17 @@ const getAbsoluteUrl = (path: string) => {
 interface Props {
   workpad: CanvasWorkpad;
   pageCount: number;
-  enabled: boolean;
 }
 
 export const WorkpadExport = compose<ComponentProps, {}>(
   connect(mapStateToProps),
+  withKibana,
   withProps(
-    ({ workpad, pageCount, enabled }: Props): ComponentProps => ({
-      enabled,
+    ({ workpad, pageCount, kibana }: Props & WithKibanaProps): ComponentProps => ({
       getExportUrl: type => {
         if (type === 'pdf') {
-          const { createPdfUri } = getPdfUrl(workpad, { pageCount });
-          return getAbsoluteUrl(createPdfUri);
+          const pdfUrl = getPdfUrl(workpad, { pageCount }, kibana.services.http.basePath.prepend);
+          return getAbsoluteUrl(pdfUrl);
         }
 
         throw new Error(strings.getUnknownExportErrorMessage(type));
@@ -79,7 +78,7 @@ export const WorkpadExport = compose<ComponentProps, {}>(
       onExport: type => {
         switch (type) {
           case 'pdf':
-            return createPdf(workpad, { pageCount })
+            return createPdf(workpad, { pageCount }, kibana.services.http.basePath.prepend)
               .then(({ data }: { data: { job: { id: string } } }) => {
                 notify.info(strings.getExportPDFMessage(), {
                   title: strings.getExportPDFTitle(workpad.name),

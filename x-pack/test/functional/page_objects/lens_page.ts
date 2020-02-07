@@ -46,7 +46,9 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * Move the date filter to the specified time range, defaults to
      * a range that has data in our dataset.
      */
-    goToTimeRange(fromTime = '2015-09-19 06:31:44.000', toTime = '2015-09-23 18:31:44.000') {
+    goToTimeRange(fromTime?: string, toTime?: string) {
+      fromTime = fromTime || PageObjects.timePicker.defaultStartTime;
+      toTime = toTime || PageObjects.timePicker.defaultEndTime;
       return PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
     },
 

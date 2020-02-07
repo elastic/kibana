@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ExpressionFunction } from '../types';
+import { ExpressionFunction } from '../../common/types';
 
 const name = 'clog';
 

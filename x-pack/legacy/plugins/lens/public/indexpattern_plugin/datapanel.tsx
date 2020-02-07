@@ -109,6 +109,7 @@ export function IndexPatternDataPanel({
     .sort((a, b) => a.localeCompare(b))
     .filter(id => !!indexPatterns[id])
     .map(id => ({
+      id,
       title: indexPatterns[id].title,
       timeFieldName: indexPatterns[id].timeFieldName,
     }));
@@ -298,6 +299,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                 'data-test-subj': 'indexPattern-switch-link',
                 className: 'lnsInnerIndexPatternDataPanel__triggerButton',
               }}
+              indexPatternId={currentIndexPatternId}
               indexPatternRefs={indexPatternRefs}
               onChangeIndexPattern={(newId: string) => {
                 onChangeIndexPattern(newId);

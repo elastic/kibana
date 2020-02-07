@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`EmbeddedMap renders correctly against snapshot 1`] = `
+exports[`EmbeddedMapComponent renders correctly against snapshot 1`] = `
 <Embeddable>
   <EmbeddableHeader
     title="Network map"
@@ -9,7 +9,7 @@ exports[`EmbeddedMap renders correctly against snapshot 1`] = `
       size="xs"
     >
       <EuiLink
-        href="undefinedguide/en/siem/guide/undefined/conf-map-ui.html"
+        href="https://www.elastic.co/guide/en/siem/guide/mocked-test-branch/conf-map-ui.html"
         target="_blank"
       >
         Map configuration help

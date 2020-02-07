@@ -26,39 +26,29 @@ const PLUGIN = new PluginPack({
   path: __dirname,
   pkg: {
     name: 'foo',
-    version: 'kibana'
+    version: 'kibana',
   },
-  provider: ({ Plugin }) => (
+  provider: ({ Plugin }) =>
     new Plugin({
       uiExports: {
         concatNames: {
-          name: 'export1'
+          name: 'export1',
         },
 
-        concat: [
-          'export2',
-          'export3',
-        ],
-      }
-    })
-  )
+        concat: ['export2', 'export3'],
+      },
+    }),
 });
 
 const REDUCERS = {
   concatNames(acc, spec, type, pluginSpec) {
     return {
-      names: [].concat(
-        acc.names || [],
-        `${pluginSpec.getId()}:${spec.name}`,
-      )
+      names: [].concat(acc.names || [], `${pluginSpec.getId()}:${spec.name}`),
     };
   },
   concat(acc, spec, type, pluginSpec) {
     return {
-      names: [].concat(
-        acc.names || [],
-        `${pluginSpec.getId()}:${spec}`,
-      )
+      names: [].concat(acc.names || [], `${pluginSpec.getId()}:${spec}`),
     };
   },
 };
@@ -69,28 +59,17 @@ describe('reduceExportSpecs', () => {
   it('combines ui exports from a list of plugin definitions', () => {
     const exports = reduceExportSpecs(PLUGIN_SPECS, REDUCERS);
     expect(exports).to.eql({
-      names: [
-        'foo:export1',
-        'foo:export2',
-        'foo:export3',
-      ]
+      names: ['foo:export1', 'foo:export2', 'foo:export3'],
     });
   });
 
   it('starts with the defaults', () => {
     const exports = reduceExportSpecs(PLUGIN_SPECS, REDUCERS, {
-      names: [
-        'default'
-      ]
+      names: ['default'],
     });
 
     expect(exports).to.eql({
-      names: [
-        'default',
-        'foo:export1',
-        'foo:export2',
-        'foo:export3',
-      ]
+      names: ['default', 'foo:export1', 'foo:export2', 'foo:export3'],
     });
   });
 });

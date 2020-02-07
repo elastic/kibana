@@ -12,20 +12,18 @@ describe('getSourceFields', () => {
   test('Should remove multi fields from field list', () => {
     const fields = [
       {
-        name: 'agent'
+        name: 'agent',
       },
       {
         name: 'agent.keyword',
         subType: {
           multi: {
-            parent: 'agent'
-          }
-        }
-      }
+            parent: 'agent',
+          },
+        },
+      },
     ];
     const sourceFields = getSourceFields(fields);
-    expect(sourceFields).toEqual([
-      { name: 'agent' }
-    ]);
+    expect(sourceFields).toEqual([{ name: 'agent' }]);
   });
 });

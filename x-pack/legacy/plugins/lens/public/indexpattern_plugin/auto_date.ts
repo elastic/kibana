@@ -10,22 +10,42 @@ import {
   ExpressionFunction,
   KibanaContext,
 } from '../../../../../../src/plugins/expressions/public';
-import { DateRange } from '../../common';
+import { DateRange } from '../../../../../plugins/lens/common';
 
 interface LensAutoDateProps {
   aggConfigs: string;
 }
 
-export function autoIntervalFromDateRange(dateRange?: DateRange, defaultValue: string = '1h') {
+export function toAbsoluteDates(dateRange?: DateRange) {
   if (!dateRange) {
+    return;
+  }
+
+  const fromDate = dateMath.parse(dateRange.fromDate);
+  const toDate = dateMath.parse(dateRange.toDate, { roundUp: true });
+
+  if (!fromDate || !toDate) {
+    return;
+  }
+
+  return {
+    fromDate: fromDate.toDate(),
+    toDate: toDate.toDate(),
+  };
+}
+
+export function autoIntervalFromDateRange(dateRange?: DateRange, defaultValue: string = '1h') {
+  const dates = toAbsoluteDates(dateRange);
+  if (!dates) {
     return defaultValue;
   }
 
   const buckets = new TimeBuckets();
+
   buckets.setInterval('auto');
   buckets.setBounds({
-    min: dateMath.parse(dateRange.fromDate),
-    max: dateMath.parse(dateRange.toDate, { roundUp: true }),
+    min: dates.fromDate,
+    max: dates.toDate,
   });
 
   return buckets.getInterval().expression;

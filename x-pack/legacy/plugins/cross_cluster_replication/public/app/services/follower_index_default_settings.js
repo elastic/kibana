@@ -6,8 +6,8 @@
 
 import { FOLLOWER_INDEX_ADVANCED_SETTINGS } from '../../../common/constants';
 
-export const getSettingDefault = (name) => {
-  if(!FOLLOWER_INDEX_ADVANCED_SETTINGS[name]) {
+export const getSettingDefault = name => {
+  if (!FOLLOWER_INDEX_ADVANCED_SETTINGS[name]) {
     throw new Error(`Unknown setting ${name}`);
   }
 
@@ -18,6 +18,8 @@ export const isSettingDefault = (name, value) => {
   return getSettingDefault(name) === value;
 };
 
-export const areAllSettingsDefault = (settings) => {
-  return Object.keys(FOLLOWER_INDEX_ADVANCED_SETTINGS).every((name) => isSettingDefault(name, settings[name]));
+export const areAllSettingsDefault = settings => {
+  return Object.keys(FOLLOWER_INDEX_ADVANCED_SETTINGS).every(name =>
+    isSettingDefault(name, settings[name])
+  );
 };

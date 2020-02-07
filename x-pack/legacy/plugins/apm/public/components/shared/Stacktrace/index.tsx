@@ -78,29 +78,26 @@ interface StackframesGroup {
 }
 
 export function getGroupedStackframes(stackframes: IStackframe[]) {
-  return stackframes.reduce(
-    (acc, stackframe) => {
-      const prevGroup = last(acc);
-      const shouldAppend =
-        prevGroup &&
-        prevGroup.isLibraryFrame === stackframe.library_frame &&
-        !prevGroup.excludeFromGrouping &&
-        !stackframe.exclude_from_grouping;
+  return stackframes.reduce((acc, stackframe) => {
+    const prevGroup = last(acc);
+    const shouldAppend =
+      prevGroup &&
+      prevGroup.isLibraryFrame === stackframe.library_frame &&
+      !prevGroup.excludeFromGrouping &&
+      !stackframe.exclude_from_grouping;
 
-      // append to group
-      if (shouldAppend) {
-        prevGroup.stackframes.push(stackframe);
-        return acc;
-      }
-
-      // create new group
-      acc.push({
-        isLibraryFrame: Boolean(stackframe.library_frame),
-        excludeFromGrouping: Boolean(stackframe.exclude_from_grouping),
-        stackframes: [stackframe]
-      });
+    // append to group
+    if (shouldAppend) {
+      prevGroup.stackframes.push(stackframe);
       return acc;
-    },
-    [] as StackframesGroup[]
-  );
+    }
+
+    // create new group
+    acc.push({
+      isLibraryFrame: Boolean(stackframe.library_frame),
+      excludeFromGrouping: Boolean(stackframe.exclude_from_grouping),
+      stackframes: [stackframe]
+    });
+    return acc;
+  }, [] as StackframesGroup[]);
 }

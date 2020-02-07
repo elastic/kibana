@@ -33,7 +33,8 @@ export function isValidIndexName(indexName: string) {
     // Cannot start with -, _, +
     /^[^-_\+]+$/.test(indexName.charAt(0)) &&
     // Cannot be . or ..
-    (indexName !== '.' && indexName !== '..') &&
+    indexName !== '.' &&
+    indexName !== '..' &&
     // Cannot be longer than 255 bytes (note it is bytes,
     // so multi-byte characters will count towards the 255 limit faster)
     isValidIndexNameLength(indexName)

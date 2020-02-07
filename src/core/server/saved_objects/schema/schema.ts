@@ -17,21 +17,31 @@
  * under the License.
  */
 
-import { Config } from '../../config';
+import { LegacyConfig } from '../../legacy';
 
+/**
+ * @deprecated
+ * @internal
+ **/
 interface SavedObjectsSchemaTypeDefinition {
   isNamespaceAgnostic: boolean;
   hidden?: boolean;
-  indexPattern?: ((config: Config) => string) | string;
+  indexPattern?: ((config: LegacyConfig) => string) | string;
   convertToAliasScript?: string;
 }
 
-/** @internal */
+/**
+ * @deprecated
+ * @internal
+ **/
 export interface SavedObjectsSchemaDefinition {
-  [key: string]: SavedObjectsSchemaTypeDefinition;
+  [type: string]: SavedObjectsSchemaTypeDefinition;
 }
 
-/** @internal */
+/**
+ * @deprecated This is only used by the {@link SavedObjectsLegacyService | legacy savedObjects service}
+ * @internal
+ **/
 export class SavedObjectsSchema {
   private readonly definition?: SavedObjectsSchemaDefinition;
   constructor(schemaDefinition?: SavedObjectsSchemaDefinition) {
@@ -46,7 +56,7 @@ export class SavedObjectsSchema {
     return false;
   }
 
-  public getIndexForType(config: Config, type: string): string | undefined {
+  public getIndexForType(config: LegacyConfig, type: string): string | undefined {
     if (this.definition != null && this.definition.hasOwnProperty(type)) {
       const { indexPattern } = this.definition[type];
       return typeof indexPattern === 'function' ? indexPattern(config) : indexPattern;

@@ -19,10 +19,9 @@
 
 import { FtrProviderContext } from '../ftr_provider_context';
 
-export function SharePageProvider({ getService, getPageObjects }: FtrProviderContext) {
+export function SharePageProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const find = getService('find');
-  const PageObjects = getPageObjects(['visualize', 'common']);
   const log = getService('log');
 
   class SharePage {
@@ -78,7 +77,7 @@ export function SharePageProvider({ getService, getPageObjects }: FtrProviderCon
 
     async checkShortenUrl() {
       const shareForm = await testSubjects.find('shareUrlForm');
-      await PageObjects.visualize.checkCheckbox('useShortUrl');
+      await testSubjects.setCheckbox('useShortUrl', 'check');
       await shareForm.waitForDeletedByCssSelector('.euiLoadingSpinner');
     }
 

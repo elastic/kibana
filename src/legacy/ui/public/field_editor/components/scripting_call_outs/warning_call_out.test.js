@@ -23,24 +23,18 @@ import { shallow } from 'enzyme';
 import { ScriptingWarningCallOut } from './warning_call_out';
 
 jest.mock('ui/documentation_links', () => ({
-  getDocLink: (doc) => `(docLink for ${doc})`,
+  getDocLink: doc => `(docLink for ${doc})`,
 }));
 
 describe('ScriptingWarningCallOut', () => {
   it('should render normally', async () => {
-    const component = shallow(
-      <ScriptingWarningCallOut
-        isVisible={true}
-      />
-    );
+    const component = shallow(<ScriptingWarningCallOut isVisible={true} />);
 
     expect(component).toMatchSnapshot();
   });
 
   it('should render nothing if not visible', async () => {
-    const component = shallow(
-      <ScriptingWarningCallOut />
-    );
+    const component = shallow(<ScriptingWarningCallOut />);
 
     expect(component).toMatchSnapshot();
   });

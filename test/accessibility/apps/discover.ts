@@ -19,14 +19,13 @@
 
 import { FtrProviderContext } from '../ftr_provider_context';
 
-const FROM_TIME = '2015-09-19 06:31:44.000';
-const TO_TIME = '2015-09-23 18:31:44.000';
-
 export default function({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'timePicker']);
+  const PageObjects = getPageObjects(['common', 'discover', 'header', 'share', 'timePicker']);
   const a11y = getService('a11y');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
+  const inspector = getService('inspector');
+  const filterBar = getService('filterBar');
 
   describe('Discover', () => {
     before(async () => {
@@ -36,10 +35,78 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
         defaultIndex: 'logstash-*',
       });
       await PageObjects.common.navigateToApp('discover');
-      await PageObjects.timePicker.setAbsoluteRange(FROM_TIME, TO_TIME);
+      await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
 
     it('main view', async () => {
+      await a11y.testAppSnapshot();
+    });
+
+    it('Click save button', async () => {
+      await PageObjects.discover.clickSaveSearchButton();
+      await a11y.testAppSnapshot();
+    });
+
+    it('Save search panel', async () => {
+      await PageObjects.discover.inputSavedSearchTitle('a11ySearch');
+      await a11y.testAppSnapshot();
+    });
+
+    it('Confirm saved search', async () => {
+      await PageObjects.discover.clickConfirmSavedSearch();
+      await a11y.testAppSnapshot();
+    });
+
+    // skipping the test for new because we can't fix it right now
+    it.skip('Click on new to clear the search', async () => {
+      await PageObjects.discover.clickNewSearchButton();
+      await a11y.testAppSnapshot();
+    });
+
+    it('Open load saved search panel', async () => {
+      await PageObjects.discover.openLoadSavedSearchPanel();
+      await a11y.testAppSnapshot();
+      await PageObjects.discover.closeLoadSavedSearchPanel();
+    });
+
+    it('Open inspector panel', async () => {
+      await inspector.open();
+      await a11y.testAppSnapshot();
+      await inspector.close();
+    });
+
+    it('Open add filter', async () => {
+      await PageObjects.discover.openAddFilterPanel();
+      await a11y.testAppSnapshot();
+    });
+
+    it('Select values for a filter', async () => {
+      await filterBar.addFilter('extension.raw', 'is one of', 'jpg');
+      await a11y.testAppSnapshot();
+    });
+
+    it('Load a new search from the panel', async () => {
+      await PageObjects.discover.clickSaveSearchButton();
+      await PageObjects.discover.inputSavedSearchTitle('filterSearch');
+      await PageObjects.discover.clickConfirmSavedSearch();
+      await PageObjects.discover.openLoadSavedSearchPanel();
+      await PageObjects.discover.loadSavedSearch('filterSearch');
+      await a11y.testAppSnapshot();
+    });
+
+    // unable to validate on EUI pop-over
+    it('click share button', async () => {
+      await PageObjects.share.clickShareTopNavButton();
+      await a11y.testAppSnapshot();
+    });
+
+    it('Open sidebar filter', async () => {
+      await PageObjects.discover.openSidebarFieldFilter();
+      await a11y.testAppSnapshot();
+    });
+
+    it('Close sidebar filter', async () => {
+      await PageObjects.discover.closeSidebarFieldFilter();
       await a11y.testAppSnapshot();
     });
   });

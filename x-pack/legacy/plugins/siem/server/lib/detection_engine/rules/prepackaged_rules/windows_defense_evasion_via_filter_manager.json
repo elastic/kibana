@@ -1,0 +1,36 @@
+{
+  "description": "The Filter Manager Control Program (fltMC.exe) binary may be abused by adversaries to unload a filter driver and evade defenses.",
+  "index": [
+    "winlogbeat-*"
+  ],
+  "language": "kuery",
+  "max_signals": 100,
+  "name": "Potential Evasion via Filter Manager",
+  "query": "event.code:1 and process.name:fltMC.exe",
+  "risk_score": 21,
+  "rule_id": "06dceabf-adca-48af-ac79-ffdf4c3b1e9a",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Windows"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1222",
+          "name": "File and Directory Permissions Modification",
+          "reference": "https://attack.mitre.org/techniques/T1222/"
+        }
+      ]
+    }
+  ],
+  "type": "query",
+  "version": 1
+}

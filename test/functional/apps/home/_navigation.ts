@@ -28,8 +28,6 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const retry = getService('retry');
   const kibanaServer = getService('kibanaServer');
-  const fromTime = '2015-09-19 06:31:44.000';
-  const toTime = '2015-09-23 18:31:44.000';
 
   const getHost = () => {
     if (process.env.TEST_KIBANA_HOSTNAME) {
@@ -66,8 +64,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       }
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/33468
-    it.skip('detect navigate back issues', async () => {
+    it('detect navigate back issues', async () => {
       let currUrl;
       // Detects bug described in issue #31238 - where back navigation would get stuck to URL encoding handling in Angular.
       // Navigate to home app
@@ -77,7 +74,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       // Navigate to discover app
       await appsMenu.clickLink('Discover');
       const discoverUrl = await browser.getCurrentUrl();
-      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.timePicker.setDefaultAbsoluteRange();
       const modifiedTimeDiscoverUrl = await browser.getCurrentUrl();
 
       // Navigate to dashboard app
@@ -107,7 +104,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       await browser.get(`${basePath}/app/kibana#/home`, false);
       await retry.waitFor(
         'navigation to home app',
-        async () => (await browser.getCurrentUrl()) === `${basePath}/app/kibana#/home?_g=()`
+        async () => (await browser.getCurrentUrl()) === `${basePath}/app/kibana#/home`
       );
 
       await browser.get(`${basePath}/app/kibana#/home?_g=()&a=b/c`, false);

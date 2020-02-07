@@ -6,7 +6,7 @@
 
 import React, { ReactNode, MouseEventHandler } from 'react';
 import PropTypes from 'prop-types';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { TooltipIcon, IconType } from '../tooltip_icon';
 
 import { ComponentStrings } from '../../../i18n';
@@ -41,13 +41,16 @@ export const ArgSimpleForm: React.FunctionComponent<Props> = ({
       )}
 
       {!required && (
-        <EuiButtonIcon
-          color="danger"
-          onClick={onRemove}
-          iconType="trash"
-          aria-label={strings.getRemoveAriaLabel()}
-          className="canvasArg__remove"
-        />
+        <EuiToolTip position="top" content={strings.getRemoveAriaLabel()}>
+          <EuiButtonIcon
+            color="subdued"
+            onClick={onRemove}
+            iconType="cross"
+            iconSize="s"
+            aria-label={strings.getRemoveAriaLabel()}
+            className="canvasArg__remove"
+          />
+        </EuiToolTip>
       )}
     </EuiFlexGroup>
   );

@@ -17,13 +17,12 @@
  * under the License.
  */
 
-import { CoreSetup } from 'kibana/server';
-import { Plugin } from '../../../../core/server';
+import { CoreSetup, Plugin } from 'kibana/server';
 import { registerRoutes } from './routes';
 
 export class IndexPatternsService implements Plugin<void> {
-  public setup({ http, elasticsearch }: CoreSetup) {
-    registerRoutes(http, elasticsearch);
+  public setup({ http }: CoreSetup) {
+    registerRoutes(http);
   }
 
   public start() {}

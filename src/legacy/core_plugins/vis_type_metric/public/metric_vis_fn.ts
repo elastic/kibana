@@ -19,18 +19,24 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { vislibColorMaps, ColorSchemas } from 'ui/vislib/components/color/colormaps';
-import { ExpressionFunction, KibanaDatatable, Range, Render, Style } from '../../interpreter/types';
-import { ColorModes } from '../../kbn_vislib_vis_types/public/utils/collections';
+import {
+  ExpressionFunction,
+  KibanaDatatable,
+  Range,
+  Render,
+  Style,
+} from '../../../../plugins/expressions/public';
+import { ColorModes } from '../../vis_type_vislib/public';
 import { visType, DimensionsVisParam, VisParams } from './types';
+import { ColorSchemas, vislibColorMaps } from '../../../../plugins/charts/public';
 
-type Context = KibanaDatatable;
+export type Context = KibanaDatatable;
 
 const name = 'metricVis';
 
 interface Arguments {
-  percentage: boolean;
-  colorScheme: ColorSchemas;
+  percentageMode: boolean;
+  colorSchema: ColorSchemas;
   colorMode: ColorModes;
   useRanges: boolean;
   invertColors: boolean;
@@ -67,19 +73,19 @@ export const createMetricVisFn = (): ExpressionFunction<
     defaultMessage: 'Metric visualization',
   }),
   args: {
-    percentage: {
+    percentageMode: {
       types: ['boolean'],
       default: false,
-      help: i18n.translate('visTypeMetric.function.percentage.help', {
+      help: i18n.translate('visTypeMetric.function.percentageMode.help', {
         defaultMessage: 'Shows metric in percentage mode. Requires colorRange to be set.',
       }),
     },
-    colorScheme: {
+    colorSchema: {
       types: ['string'],
       default: '"Green to Red"',
       options: Object.values(vislibColorMaps).map((value: any) => value.id),
-      help: i18n.translate('visTypeMetric.function.colorScheme.help', {
-        defaultMessage: 'Color scheme to use',
+      help: i18n.translate('visTypeMetric.function.colorSchema.help', {
+        defaultMessage: 'Color schema to use',
       }),
     },
     colorMode: {
@@ -93,6 +99,7 @@ export const createMetricVisFn = (): ExpressionFunction<
     colorRange: {
       types: ['range'],
       multi: true,
+      default: '{range from=0 to=10000}',
       help: i18n.translate('visTypeMetric.function.colorRange.help', {
         defaultMessage:
           'A range object specifying groups of values to which different colors should be applied.',
@@ -167,8 +174,8 @@ export const createMetricVisFn = (): ExpressionFunction<
       dimensions.bucket = args.bucket;
     }
 
-    if (args.percentage && (!args.colorRange || args.colorRange.length === 0)) {
-      throw new Error('colorRange must be provided when using percentage');
+    if (args.percentageMode && (!args.colorRange || args.colorRange.length === 0)) {
+      throw new Error('colorRange must be provided when using percentageMode');
     }
 
     const fontSize = Number.parseInt(args.font.spec.fontSize || '', 10);
@@ -181,9 +188,9 @@ export const createMetricVisFn = (): ExpressionFunction<
         visType,
         visConfig: {
           metric: {
-            percentageMode: args.percentage,
+            percentageMode: args.percentageMode,
             useRanges: args.useRanges,
-            colorSchema: args.colorScheme,
+            colorSchema: args.colorSchema,
             metricColorMode: args.colorMode,
             colorsRange: args.colorRange,
             labels: {

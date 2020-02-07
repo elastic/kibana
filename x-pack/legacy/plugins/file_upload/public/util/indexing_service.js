@@ -4,31 +4,28 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { http } from './http_service';
-import chrome from 'ui/chrome';
-import { i18n } from '@kbn/i18n';
-import { indexPatternService } from '../kibana_services';
+import { http as httpService } from './http_service';
+import { indexPatternService, savedObjectsClient } from '../kibana_services';
 import { getGeoJsonIndexingDetails } from './geo_processing';
 import { sizeLimitedChunking } from './size_limited_chunking';
+import { i18n } from '@kbn/i18n';
 
-const basePath = chrome.addBasePath('/api/fileupload');
 const fileType = 'json';
 
 export async function indexData(parsedFile, transformDetails, indexName, dataType, appName) {
   if (!parsedFile) {
-    throw(i18n.translate('xpack.fileUpload.indexingService.noFileImported', {
-      defaultMessage: 'No file imported.'
-    }));
-    return;
+    throw i18n.translate('xpack.fileUpload.indexingService.noFileImported', {
+      defaultMessage: 'No file imported.',
+    });
   }
 
   // Perform any processing required on file prior to indexing
   const transformResult = transformDataByFormatForIndexing(transformDetails, parsedFile, dataType);
   if (!transformResult.success) {
-    throw(i18n.translate('xpack.fileUpload.indexingService.transformResultError', {
+    throw i18n.translate('xpack.fileUpload.indexingService.transformResultError', {
       defaultMessage: 'Error transforming data: {error}',
-      values: { error: transformResult.error }
-    }));
+      values: { error: transformResult.error },
+    });
   }
 
   // Create new index
@@ -40,11 +37,9 @@ export async function indexData(parsedFile, transformDetails, indexName, dataTyp
     data: [],
     index: indexName,
   });
-  let id;
+  const id = createdIndex && createdIndex.id;
   try {
-    if (createdIndex && createdIndex.id) {
-      id = createdIndex.id;
-    } else {
+    if (!id) {
       throw i18n.translate('xpack.fileUpload.indexingService.errorCreatingIndex', {
         defaultMessage: 'Error creating index',
       });
@@ -52,7 +47,7 @@ export async function indexData(parsedFile, transformDetails, indexName, dataTyp
   } catch (error) {
     return {
       error,
-      success: false
+      success: false,
     };
   }
 
@@ -74,11 +69,11 @@ function transformDataByFormatForIndexing(transform, parsedFile, dataType) {
       success: false,
       error: i18n.translate('xpack.fileUpload.indexingService.noTransformDefined', {
         defaultMessage: 'No transform defined',
-      })
+      }),
     };
   }
   if (typeof transform !== 'object') {
-    switch(transform) {
+    switch (transform) {
       case 'geo':
         indexingDetails = getGeoJsonIndexingDetails(parsedFile, dataType);
         break;
@@ -87,51 +82,46 @@ function transformDataByFormatForIndexing(transform, parsedFile, dataType) {
           success: false,
           error: i18n.translate('xpack.fileUpload.indexingService.noHandlingForTransform', {
             defaultMessage: 'No handling defined for transform: {transform}',
-            values: { transform }
-          })
+            values: { transform },
+          }),
         };
     }
-  } else { // Custom transform
+  } else {
+    // Custom transform
     indexingDetails = transform.getIndexingDetails(parsedFile);
   }
   if (indexingDetails && indexingDetails.data && indexingDetails.data.length) {
     return {
       success: true,
-      indexingDetails
+      indexingDetails,
     };
   } else if (indexingDetails && indexingDetails.data) {
     return {
       success: false,
       error: i18n.translate('xpack.fileUpload.indexingService.noIndexingDetailsForDatatype', {
         defaultMessage: `No indexing details defined for datatype: {dataType}`,
-        values: { dataType }
-      })
+        values: { dataType },
+      }),
     };
   } else {
     return {
       success: false,
       error: i18n.translate('xpack.fileUpload.indexingService.unknownTransformError', {
         defaultMessage: 'Unknown error performing transform: {transform}',
-        values: { transform }
-      })
+        values: { transform },
+      }),
     };
   }
 }
 
 async function writeToIndex(indexingDetails) {
-  const paramString = (indexingDetails.id !== undefined) ? `?id=${indexingDetails.id}` : '';
-  const {
-    appName,
-    index,
-    data,
-    settings,
-    mappings,
-    ingestPipeline
-  } = indexingDetails;
+  const query = indexingDetails.id ? { id: indexingDetails.id } : null;
+  const { appName, index, data, settings, mappings, ingestPipeline } = indexingDetails;
 
-  return await http({
-    url: `${basePath}/import${paramString}`,
+  return await httpService({
+    url: `/api/fileupload/import`,
     method: 'POST',
+    ...(query ? { query } : {}),
     data: {
       index,
       data,
@@ -139,7 +129,7 @@ async function writeToIndex(indexingDetails) {
       mappings,
       ingestPipeline,
       fileType,
-      ...(appName ? { app: appName } : {})
+      ...(appName ? { app: appName } : {}),
     },
   });
 }
@@ -149,8 +139,8 @@ async function chunkDataAndWriteToIndex({ id, index, data, mappings, settings })
     return {
       success: false,
       error: i18n.translate('xpack.fileUpload.noIndexSuppliedErrorMessage', {
-        defaultMessage: 'No index provided.'
-      })
+        defaultMessage: 'No index provided.',
+      }),
     };
   }
 
@@ -168,7 +158,7 @@ async function chunkDataAndWriteToIndex({ id, index, data, mappings, settings })
       data: chunks[i],
       settings,
       mappings,
-      ingestPipeline: {} // TODO: Support custom ingest pipelines
+      ingestPipeline: {}, // TODO: Support custom ingest pipelines
     };
 
     let resp = {
@@ -178,7 +168,7 @@ async function chunkDataAndWriteToIndex({ id, index, data, mappings, settings })
     };
     resp = await writeToIndex(aggs);
 
-    failures = [ ...failures, ...resp.failures ];
+    failures = [...failures, ...resp.failures];
     if (resp.success) {
       ({ success } = resp);
       docCount = docCount + resp.docCount;
@@ -194,7 +184,7 @@ async function chunkDataAndWriteToIndex({ id, index, data, mappings, settings })
     success,
     failures,
     docCount,
-    ...(error ? { error } : {})
+    ...(error ? { error } : {}),
   };
 }
 
@@ -212,7 +202,7 @@ export async function createIndexPattern(indexPatternName) {
     return {
       success: true,
       id,
-      fields: indexPattern.fields
+      fields: indexPattern.fields,
     };
   } catch (error) {
     return {
@@ -223,53 +213,45 @@ export async function createIndexPattern(indexPatternName) {
 }
 
 async function getIndexPatternId(name) {
-  const savedObjectsClient = chrome.getSavedObjectsClient();
-  const savedObjectSearch =
-    await savedObjectsClient.find({ type: 'index-pattern', perPage: 1000 });
+  const savedObjectSearch = await savedObjectsClient.find({ type: 'index-pattern', perPage: 1000 });
   const indexPatternSavedObjects = savedObjectSearch.savedObjects;
 
   if (indexPatternSavedObjects) {
     const ip = indexPatternSavedObjects.find(i => i.attributes.title === name);
-    return (ip !== undefined) ? ip.id : undefined;
+    return ip !== undefined ? ip.id : undefined;
   } else {
     return undefined;
   }
 }
 
 export const getExistingIndexNames = async () => {
-  const basePath = chrome.addBasePath('/api');
-  const indexes = await http({
-    url: `${basePath}/index_management/indices`,
+  const indexes = await httpService({
+    url: `/api/index_management/indices`,
     method: 'GET',
   });
-  return indexes
-    ? indexes.map(({ name }) => name)
-    : [];
+  return indexes ? indexes.map(({ name }) => name) : [];
 };
 
 export const getExistingIndexPatternNames = async () => {
-  const savedObjectsClient = chrome.getSavedObjectsClient();
-  const indexPatterns = await savedObjectsClient.find({
-    type: 'index-pattern',
-    fields: ['id', 'title', 'type', 'fields'],
-    perPage: 10000
-  }).then(
-    ({ savedObjects }) => savedObjects.map(savedObject => savedObject.get('title'))
-  );
-  return indexPatterns
-    ? indexPatterns.map(({ name }) => name)
-    : [];
+  const indexPatterns = await savedObjectsClient
+    .find({
+      type: 'index-pattern',
+      fields: ['id', 'title', 'type', 'fields'],
+      perPage: 10000,
+    })
+    .then(({ savedObjects }) => savedObjects.map(savedObject => savedObject.get('title')));
+  return indexPatterns ? indexPatterns.map(({ name }) => name) : [];
 };
 
 export function checkIndexPatternValid(name) {
-  const byteLength = encodeURI(name)
-    .split(/%(?:u[0-9A-F]{2})?[0-9A-F]{2}|./).length - 1;
-  const reg = new RegExp('[\\\\/\*\?\"\<\>\|\\s\,\#]+');
+  const byteLength = encodeURI(name).split(/%(?:u[0-9A-F]{2})?[0-9A-F]{2}|./).length - 1;
+  const reg = new RegExp('[\\\\/*?"<>|\\s,#]+');
   const indexPatternInvalid =
     byteLength > 255 || // name can't be greater than 255 bytes
     name !== name.toLowerCase() || // name should be lowercase
-    (name === '.' || name === '..')   || // name can't be . or ..
-    name.match(/^[-_+]/) !== null  || // name can't start with these chars
-    name.match(reg) !== null;  // name can't contain these chars
+    name === '.' ||
+    name === '..' || // name can't be . or ..
+    name.match(/^[-_+]/) !== null || // name can't start with these chars
+    name.match(reg) !== null; // name can't contain these chars
   return !indexPatternInvalid;
 }

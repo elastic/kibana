@@ -56,10 +56,14 @@ function getProps(
     } as any,
     notifications: {} as any,
     overlays: {} as any,
-    inspector: {} as any,
+    inspector: {
+      isAvailable: jest.fn(),
+    } as any,
     SavedObjectFinder: () => null,
     ExitFullScreenButton,
-    uiActions: {} as any,
+    uiActions: {
+      getTriggerCompatibleActions: (() => []) as any,
+    } as any,
   };
 
   const input = getSampleDashboardInput({
@@ -117,6 +121,24 @@ test('renders DashboardViewport with no visualizations', () => {
   component.unmount();
 });
 
+test('renders DashboardEmptyScreen', () => {
+  const renderEmptyScreen = jest.fn();
+  const { props, options } = getProps({ renderEmpty: renderEmptyScreen });
+  props.container.updateInput({ isEmptyState: true });
+  const component = mount(
+    <I18nProvider>
+      <KibanaContextProvider services={options}>
+        <DashboardViewport {...props} />
+      </KibanaContextProvider>
+    </I18nProvider>
+  );
+  const dashboardEmptyScreenDiv = component.find('.dshDashboardEmptyScreen');
+  expect(dashboardEmptyScreenDiv.length).toBe(1);
+  expect(renderEmptyScreen).toHaveBeenCalled();
+
+  component.unmount();
+});
+
 test('renders exit full screen button when in full screen mode', async () => {
   const { props, options } = getProps();
   props.container.updateInput({ isFullScreenMode: true });
@@ -142,6 +164,39 @@ test('renders exit full screen button when in full screen mode', async () => {
   expect(
     (component
       .find('.dshDashboardViewport')
+      .childAt(0)
+      .type() as any).name
+  ).not.toBe('ExitFullScreenButton');
+
+  component.unmount();
+});
+
+test('renders exit full screen button when in full screen mode and empty screen', async () => {
+  const renderEmptyScreen = jest.fn();
+  renderEmptyScreen.mockReturnValue(React.createElement('div'));
+  const { props, options } = getProps({ renderEmpty: renderEmptyScreen });
+  props.container.updateInput({ isEmptyState: true, isFullScreenMode: true });
+  const component = mount(
+    <I18nProvider>
+      <KibanaContextProvider services={options}>
+        <DashboardViewport {...props} />
+      </KibanaContextProvider>
+    </I18nProvider>
+  );
+  expect(
+    (component
+      .find('.dshDashboardEmptyScreen')
+      .childAt(0)
+      .type() as any).name
+  ).toBe('ExitFullScreenButton');
+
+  props.container.updateInput({ isFullScreenMode: false });
+  component.update();
+  await nextTick();
+
+  expect(
+    (component
+      .find('.dshDashboardEmptyScreen')
       .childAt(0)
       .type() as any).name
   ).not.toBe('ExitFullScreenButton');

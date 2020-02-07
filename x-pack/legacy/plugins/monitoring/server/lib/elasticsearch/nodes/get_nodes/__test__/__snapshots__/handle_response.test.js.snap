@@ -5,7 +5,7 @@ Array [
   Object {
     "isOnline": false,
     "name": "hello01",
-    "nodeTypeClass": "fa-server",
+    "nodeTypeClass": "storage",
     "nodeTypeLabel": "Node",
     "resolver": "_x_V2YzPQU-a9KRRBxUxZQ",
     "shardCount": 6,
@@ -15,7 +15,7 @@ Array [
   Object {
     "isOnline": false,
     "name": "hello02",
-    "nodeTypeClass": "fa-server",
+    "nodeTypeClass": "storage",
     "nodeTypeLabel": "Node",
     "resolver": "DAiX7fFjS3Wii7g2HYKrOg",
     "shardCount": 6,
@@ -32,7 +32,7 @@ Array [
   Object {
     "isOnline": true,
     "name": "hello01",
-    "nodeTypeClass": "fa-star",
+    "nodeTypeClass": "starFilled",
     "nodeTypeLabel": "Master Node",
     "node_cgroup_quota": Object {
       "metric": Object {
@@ -160,7 +160,7 @@ Array [
   Object {
     "isOnline": true,
     "name": "hello02",
-    "nodeTypeClass": "fa-server",
+    "nodeTypeClass": "storage",
     "nodeTypeLabel": "Node",
     "node_cgroup_quota": undefined,
     "node_cgroup_throttled": Object {
@@ -274,7 +274,7 @@ Array [
   Object {
     "isOnline": true,
     "name": "hello01",
-    "nodeTypeClass": "fa-star",
+    "nodeTypeClass": "starFilled",
     "nodeTypeLabel": "Master Node",
     "node_cgroup_quota": null,
     "node_cgroup_throttled": null,
@@ -290,7 +290,7 @@ Array [
   Object {
     "isOnline": true,
     "name": "hello02",
-    "nodeTypeClass": "fa-server",
+    "nodeTypeClass": "storage",
     "nodeTypeLabel": "Node",
     "node_cgroup_quota": null,
     "node_cgroup_throttled": null,
@@ -311,7 +311,7 @@ Array [
   Object {
     "isOnline": true,
     "name": "hello01",
-    "nodeTypeClass": "fa-star",
+    "nodeTypeClass": "starFilled",
     "nodeTypeLabel": "Master Node",
     "node_cgroup_quota": Object {
       "metric": Object {
@@ -439,7 +439,7 @@ Array [
   Object {
     "isOnline": true,
     "name": "hello02",
-    "nodeTypeClass": "fa-server",
+    "nodeTypeClass": "storage",
     "nodeTypeLabel": "Node",
     "node_cgroup_quota": undefined,
     "node_cgroup_throttled": Object {

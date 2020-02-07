@@ -18,46 +18,49 @@ import 'uiExports/contextMenuActions';
 import 'uiExports/visTypes';
 import 'uiExports/visResponseHandlers';
 import 'uiExports/visRequestHandlers';
-import 'uiExports/visEditorTypes';
 import 'uiExports/inspectorViews';
+import 'uiExports/interpreter';
 import 'uiExports/savedObjectTypes';
 import 'uiExports/embeddableActions';
 import 'uiExports/embeddableFactories';
 import 'uiExports/navbarExtensions';
 import 'uiExports/docViews';
-import 'uiExports/fieldFormats';
 import 'uiExports/search';
 import 'uiExports/shareContextMenuExtensions';
 import _ from 'lodash';
 import 'ui/autoload/all';
 import 'ui/kbn_top_nav';
-import 'plugins/kibana/dashboard';
-import 'ui/vislib';
 import 'ui/agg_response';
 import 'ui/agg_types';
 import 'leaflet';
+import 'plugins/kibana/dashboard/legacy';
 import { npStart } from 'ui/new_platform';
+import { localApplicationService } from 'plugins/kibana/local_application_service';
 
 import { showAppRedirectNotification } from 'ui/notify';
-import { DashboardConstants, createDashboardEditUrl } from 'plugins/kibana/dashboard/dashboard_constants';
+import { DashboardConstants, createDashboardEditUrl } from 'plugins/kibana/dashboard';
 
-uiModules.get('kibana')
+uiModules
+  .get('kibana')
   .config(dashboardConfigProvider => dashboardConfigProvider.turnHideWriteControlsOn());
+
+localApplicationService.attachToAngular(routes);
 
 routes.enable();
 routes.otherwise({ redirectTo: defaultUrl() });
 
-chrome
-  .setRootController('kibana', function () {
-    npStart.core.chrome.navLinks.showOnly('kibana:dashboard');
-  });
+chrome.setRootController('kibana', function() {
+  npStart.core.chrome.navLinks.showOnly('kibana:dashboard');
+});
 
 uiModules.get('kibana').run(showAppRedirectNotification);
 
-// If there is a configured kbnDefaultAppId, and it is a dashboard ID, we'll
-// show that dashboard, otherwise, we'll show the default dasbhoard landing page.
+/**
+ * If there is a configured `kibana.defaultAppId`, and it is a dashboard ID, we'll
+ * show that dashboard, otherwise, we'll show the default dasbhoard landing page.
+ */
 function defaultUrl() {
-  const defaultAppId = chrome.getInjected('kbnDefaultAppId', '');
+  const defaultAppId = npStart.plugins.kibanaLegacy.config.defaultAppId || '';
   const isDashboardId = defaultAppId.startsWith(dashboardAppIdPrefix());
   return isDashboardId ? `/${defaultAppId}` : DashboardConstants.LANDING_PAGE_PATH;
 }

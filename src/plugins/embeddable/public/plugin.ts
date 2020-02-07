@@ -17,17 +17,23 @@
  * under the License.
  */
 
-import { IUiActionsSetup } from 'src/plugins/ui_actions/public';
+import { UiActionsSetup } from 'src/plugins/ui_actions/public';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/public';
 import { EmbeddableFactoryRegistry } from './types';
 import { createApi, EmbeddableApi } from './api';
 import { bootstrap } from './bootstrap';
 
 export interface IEmbeddableSetupDependencies {
-  uiActions: IUiActionsSetup;
+  uiActions: UiActionsSetup;
 }
 
-export class EmbeddablePublicPlugin implements Plugin<any, any> {
+export interface IEmbeddableSetup {
+  registerEmbeddableFactory: EmbeddableApi['registerEmbeddableFactory'];
+}
+
+export type IEmbeddableStart = EmbeddableApi;
+
+export class EmbeddablePublicPlugin implements Plugin<IEmbeddableSetup, IEmbeddableStart> {
   private readonly embeddableFactories: EmbeddableFactoryRegistry = new Map();
   private api!: EmbeddableApi;
 
@@ -52,6 +58,3 @@ export class EmbeddablePublicPlugin implements Plugin<any, any> {
 
   public stop() {}
 }
-
-export type Setup = ReturnType<EmbeddablePublicPlugin['setup']>;
-export type Start = ReturnType<EmbeddablePublicPlugin['start']>;

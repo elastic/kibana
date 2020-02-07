@@ -18,7 +18,7 @@
  */
 
 import { mapQueryString } from './map_query_string';
-import { esFilters } from '../../../../../common/es_query';
+import { esFilters } from '../../../../../common';
 
 describe('filter manager utilities', () => {
   describe('mapQueryString()', () => {

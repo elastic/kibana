@@ -16,8 +16,8 @@ describe('Elasticsearch Settings Find Reason for No Data', () => {
         {
           enabled: 'false',
           collection: {
-            interval: -1
-          }
+            interval: -1,
+          },
         },
         context
       );
@@ -26,8 +26,8 @@ describe('Elasticsearch Settings Find Reason for No Data', () => {
         reason: {
           context: 'unit_test',
           data: 'false',
-          property: 'xpack.monitoring.enabled'
-        }
+          property: 'xpack.monitoring.enabled',
+        },
       });
     });
 
@@ -36,8 +36,8 @@ describe('Elasticsearch Settings Find Reason for No Data', () => {
         {
           collection: {
             interval: -1,
-            enabled: false
-          }
+            enabled: false,
+          },
         },
         context
       );
@@ -46,8 +46,8 @@ describe('Elasticsearch Settings Find Reason for No Data', () => {
         reason: {
           context: 'unit_test',
           data: 'false',
-          property: 'xpack.monitoring.collection.enabled'
-        }
+          property: 'xpack.monitoring.collection.enabled',
+        },
       });
     });
 
@@ -55,11 +55,11 @@ describe('Elasticsearch Settings Find Reason for No Data', () => {
       const result = await findReason(
         {
           collection: {
-            interval: -1
+            interval: -1,
           },
           exporters: {
-            coolExporterToIgnore: {}
-          }
+            coolExporterToIgnore: {},
+          },
         },
         context
       );
@@ -68,8 +68,8 @@ describe('Elasticsearch Settings Find Reason for No Data', () => {
         reason: {
           context: 'unit_test',
           data: '-1',
-          property: 'xpack.monitoring.collection.interval'
-        }
+          property: 'xpack.monitoring.collection.interval',
+        },
       });
     });
   });
@@ -89,8 +89,8 @@ describe('Elasticsearch Settings Find Reason for No Data', () => {
         reason: {
           context: 'unit_test',
           data: '0',
-          property: 'xpack.monitoring.collection.interval'
-        }
+          property: 'xpack.monitoring.collection.interval',
+        },
       });
 
       result = await findReason({ collection: { interval: -10 } }, context);
@@ -99,8 +99,8 @@ describe('Elasticsearch Settings Find Reason for No Data', () => {
         reason: {
           context: 'unit_test',
           data: '-10',
-          property: 'xpack.monitoring.collection.interval'
-        }
+          property: 'xpack.monitoring.collection.interval',
+        },
       });
 
       result = await findReason({ collection: { interval: null } }, context);
@@ -109,8 +109,8 @@ describe('Elasticsearch Settings Find Reason for No Data', () => {
         reason: {
           context: 'unit_test',
           data: 'null',
-          property: 'xpack.monitoring.collection.interval'
-        }
+          property: 'xpack.monitoring.collection.interval',
+        },
       });
     });
   });
@@ -135,21 +135,21 @@ describe('Elasticsearch Settings Find Reason for No Data', () => {
         exporters: {
           my_local: {
             type: 'local',
-            enabled: false
+            enabled: false,
           },
           my_local_2: {
             type: 'local',
-            enabled: false
+            enabled: false,
           },
           my_http: {
             type: 'http',
-            enabled: false
+            enabled: false,
           },
           my_http_2: {
             type: 'http',
-            enabled: false
-          }
-        }
+            enabled: false,
+          },
+        },
       };
       const result = await findReason(input, context);
       expect(result).to.eql({
@@ -157,8 +157,8 @@ describe('Elasticsearch Settings Find Reason for No Data', () => {
         reason: {
           context: 'unit_test',
           data: 'Exporters are disabled: my_local, my_local_2, my_http, my_http_2',
-          property: 'xpack.monitoring.exporters'
-        }
+          property: 'xpack.monitoring.exporters',
+        },
       });
     });
 
@@ -171,9 +171,9 @@ describe('Elasticsearch Settings Find Reason for No Data', () => {
           },
           my_local: {
             type: 'local',
-            enabled: false
-          }
-        }
+            enabled: false,
+          },
+        },
       };
 
       const result = await findReason(input, context, true); // last element is to enable cloud
@@ -182,8 +182,8 @@ describe('Elasticsearch Settings Find Reason for No Data', () => {
         reason: {
           context: 'unit_test',
           data: 'Cloud detected',
-          property: 'xpack.monitoring.exporters.cloud_enabled'
-        }
+          property: 'xpack.monitoring.exporters.cloud_enabled',
+        },
       });
     });
 
@@ -192,17 +192,17 @@ describe('Elasticsearch Settings Find Reason for No Data', () => {
         exporters: {
           my_local: {
             type: 'local',
-            enabled: false
+            enabled: false,
           },
           my_http: {
             type: 'http',
-            enabled: true
+            enabled: true,
           },
           my_http_2: {
             type: 'http',
-            enabled: false
-          }
-        }
+            enabled: false,
+          },
+        },
       };
       const result = await findReason(input, context);
       expect(result).to.eql({
@@ -210,8 +210,8 @@ describe('Elasticsearch Settings Find Reason for No Data', () => {
         reason: {
           context: 'unit_test',
           data: 'Remote exporters indicate a possible misconfiguration: my_http',
-          property: 'xpack.monitoring.exporters'
-        }
+          property: 'xpack.monitoring.exporters',
+        },
       });
     });
 
@@ -220,25 +220,24 @@ describe('Elasticsearch Settings Find Reason for No Data', () => {
         exporters: {
           my_local: {
             type: 'local',
-            enabled: true
+            enabled: true,
           },
           my_local_2: {
             type: 'local',
-            enabled: false
+            enabled: false,
           },
           my_http: {
             type: 'http',
-            enabled: true
+            enabled: true,
           },
           my_http_2: {
             type: 'http',
-            enabled: false
-          }
-        }
+            enabled: false,
+          },
+        },
       };
       const result = await findReason(input, context);
       expect(result).to.eql({ found: false });
     });
   });
-
 });

@@ -17,7 +17,7 @@
  * under the License.
  */
 import { mapPhrase } from './map_phrase';
-import { esFilters } from '../../../../../common/es_query';
+import { esFilters } from '../../../../../common';
 
 describe('filter manager utilities', () => {
   describe('mapPhrase()', () => {
