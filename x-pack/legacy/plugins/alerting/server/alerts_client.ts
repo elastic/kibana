@@ -287,7 +287,8 @@ export class AlertsClient {
 
     const { actions, references } = await this.denormalizeActions(data.actions);
     const username = await this.getUserName();
-    const apiKeyAttributes = this.apiKeyAsAlertAttributes(await this.createAPIKey(), username);
+    const createdAPIKey = attributes.enabled ? await this.createAPIKey() : null;
+    const apiKeyAttributes = this.apiKeyAsAlertAttributes(createdAPIKey, username);
 
     const updatedObject = await this.savedObjectsClient.update<RawAlert>(
       'alert',
@@ -317,10 +318,10 @@ export class AlertsClient {
   }
 
   private apiKeyAsAlertAttributes(
-    apiKey: CreateAPIKeyResult,
+    apiKey: CreateAPIKeyResult | null,
     username: string | null
   ): Pick<RawAlert, 'apiKey' | 'apiKeyOwner'> {
-    return apiKey.apiKeysEnabled
+    return apiKey && apiKey.apiKeysEnabled
       ? {
           apiKeyOwner: username,
           apiKey: Buffer.from(`${apiKey.result.id}:${apiKey.result.api_key}`).toString('base64'),
