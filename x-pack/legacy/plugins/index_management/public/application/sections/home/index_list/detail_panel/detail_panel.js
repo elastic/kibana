@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component, Fragment } from 'react';
+import React, { Fragment } from 'react';
 import { Route } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -33,6 +33,7 @@ import { IndexActionsContextMenu } from '../index_actions_context_menu';
 import { ShowJson } from './show_json';
 import { Summary } from './summary';
 import { EditSettingsJson } from './edit_settings_json';
+import { useServices } from '../../../../app_context';
 
 const tabToHumanizedMap = {
   [TAB_SUMMARY]: (
@@ -57,9 +58,10 @@ const tabToHumanizedMap = {
 
 const tabs = [TAB_SUMMARY, TAB_SETTINGS, TAB_MAPPING, TAB_STATS, TAB_EDIT_SETTINGS];
 
-export class DetailPanel extends Component {
-  renderTabs() {
-    const { panelType, indexName, index, openDetailPanel } = this.props;
+export const DetailPanel = ({ panelType, indexName, index, openDetailPanel, closeDetailPanel }) => {
+  const { extensions } = useServices();
+
+  const renderTabs = () => {
     return tabs.map((tab, i) => {
       const isSelected = tab === panelType;
       return (
@@ -74,91 +76,92 @@ export class DetailPanel extends Component {
         </EuiTab>
       );
     });
+  };
+
+  if (!panelType) {
+    return null;
   }
-  render() {
-    const { panelType, indexName, index, closeDetailPanel } = this.props;
-    if (!panelType) {
-      return null;
-    }
-    let component = null;
-    switch (panelType) {
-      case TAB_EDIT_SETTINGS:
-        component = <EditSettingsJson />;
-        break;
-      case TAB_MAPPING:
-      case TAB_SETTINGS:
-      case TAB_STATS:
-        component = <ShowJson />;
-        break;
-      default:
-        component = <Summary />;
-    }
-    const content = index ? (
-      <Fragment>
-        <EuiFlyoutBody>{component}</EuiFlyoutBody>
-        <EuiFlyoutFooter>
-          <EuiFlexGroup justifyContent="flexEnd">
-            <EuiFlexItem grow={false}>
-              <Route
-                key="menu"
-                render={() => (
-                  <IndexActionsContextMenu
-                    iconSide="left"
-                    indexNames={[indexName]}
-                    anchorPosition="upRight"
-                    detailPanel={true}
-                    iconType="arrowUp"
-                    label={
-                      <FormattedMessage
-                        id="xpack.idxMgmt.detailPanel.manageContextMenuLabel"
-                        defaultMessage="Manage"
-                      />
-                    }
-                  />
-                )}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlyoutFooter>
-      </Fragment>
-    ) : (
-      <EuiFlyoutBody>
-        <EuiSpacer size="l" />
-        <EuiCallOut
-          title={
-            <FormattedMessage
-              id="xpack.idxMgmt.detailPanel.missingIndexTitle"
-              defaultMessage="Missing index"
+
+  let component = null;
+  switch (panelType) {
+    case TAB_EDIT_SETTINGS:
+      component = <EditSettingsJson />;
+      break;
+    case TAB_MAPPING:
+    case TAB_SETTINGS:
+    case TAB_STATS:
+      component = <ShowJson />;
+      break;
+    default:
+      component = <Summary />;
+  }
+
+  const content = index ? (
+    <Fragment>
+      <EuiFlyoutBody>{component}</EuiFlyoutBody>
+      <EuiFlyoutFooter>
+        <EuiFlexGroup justifyContent="flexEnd">
+          <EuiFlexItem grow={false}>
+            <Route
+              key="menu"
+              render={() => (
+                <IndexActionsContextMenu
+                  iconSide="left"
+                  indexNames={[indexName]}
+                  anchorPosition="upRight"
+                  detailPanel={true}
+                  iconType="arrowUp"
+                  label={
+                    <FormattedMessage
+                      id="xpack.idxMgmt.detailPanel.manageContextMenuLabel"
+                      defaultMessage="Manage"
+                    />
+                  }
+                />
+              )}
             />
-          }
-          color="danger"
-          iconType="cross"
-        >
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlyoutFooter>
+    </Fragment>
+  ) : (
+    <EuiFlyoutBody>
+      <EuiSpacer size="l" />
+      <EuiCallOut
+        title={
           <FormattedMessage
-            id="xpack.idxMgmt.detailPanel.missingIndexMessage"
-            defaultMessage="This index does not exist.
-              It might have been deleted by a running job or another system."
+            id="xpack.idxMgmt.detailPanel.missingIndexTitle"
+            defaultMessage="Missing index"
           />
-        </EuiCallOut>
-      </EuiFlyoutBody>
-    );
-    return (
-      <EuiFlyout
-        data-test-subj="indexDetailFlyout"
-        onClose={closeDetailPanel}
-        aria-labelledby="indexDetailsFlyoutTitle"
+        }
+        color="danger"
+        iconType="cross"
       >
-        <EuiFlyoutHeader>
-          <EuiTitle id="indexDetailsFlyoutTitle">
-            <h2>
-              {indexName}
-              {renderBadges(index)}
-            </h2>
-          </EuiTitle>
-          {index ? <EuiTabs>{this.renderTabs()}</EuiTabs> : null}
-        </EuiFlyoutHeader>
-        {content}
-      </EuiFlyout>
-    );
-  }
-}
+        <FormattedMessage
+          id="xpack.idxMgmt.detailPanel.missingIndexMessage"
+          defaultMessage="This index does not exist.
+            It might have been deleted by a running job or another system."
+        />
+      </EuiCallOut>
+    </EuiFlyoutBody>
+  );
+
+  return (
+    <EuiFlyout
+      data-test-subj="indexDetailFlyout"
+      onClose={closeDetailPanel}
+      aria-labelledby="indexDetailsFlyoutTitle"
+    >
+      <EuiFlyoutHeader>
+        <EuiTitle id="indexDetailsFlyoutTitle">
+          <h2>
+            {indexName}
+            {renderBadges(index, undefined, extensions)}
+          </h2>
+        </EuiTitle>
+        {index ? <EuiTabs>{renderTabs()}</EuiTabs> : null}
+      </EuiFlyoutHeader>
+      {content}
+    </EuiFlyout>
+  );
+};
