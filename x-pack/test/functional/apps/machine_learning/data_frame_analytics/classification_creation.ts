@@ -26,8 +26,9 @@ export default function({ getService }: FtrProviderContext) {
       {
         suiteTitle: 'bank marketing',
         jobType: 'classification',
-        jobId: `egs_1_${Date.now()}`,
-        jobDescription: 'This is the classification job description',
+        jobId: `bm_1_${Date.now()}`,
+        jobDescription:
+          "Classification job based on 'bank-marketing' dataset with dependentVariable 'y' and trainingPercent '20'",
         source: 'bank-marketing*',
         get destinationIndex(): string {
           return `dest_${this.jobId}`;
