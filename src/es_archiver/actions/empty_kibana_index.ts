@@ -34,6 +34,6 @@ export async function emptyKibanaIndexAction({
   const stats = createStats('emptyKibanaIndex', log);
 
   await deleteKibanaIndices({ client, stats, log });
-  await migrateKibanaIndex({ kbnClient });
+  await migrateKibanaIndex({ client, kbnClient });
   return stats;
 }

@@ -59,7 +59,22 @@ export async function deleteKibanaIndices({
  * builds up an object that implements just enough of the kbnMigrations interface
  * as is required by migrations.
  */
-export async function migrateKibanaIndex({ kbnClient }: { kbnClient: KbnClient }) {
+export async function migrateKibanaIndex({
+  client,
+  kbnClient,
+}: {
+  client: Client;
+  kbnClient: KbnClient;
+}) {
+  // we allow dynamic mappings on the index, as some interceptors are accessing documents before
+  // the migration is actually performed. The migrator will put the value back to `strict` after migration.
+  await client.indices.putMapping({
+    index: '.kibana',
+    body: {
+      dynamic: true,
+    },
+  } as any);
+
   return await kbnClient.savedObjects.migrate();
 }
 
