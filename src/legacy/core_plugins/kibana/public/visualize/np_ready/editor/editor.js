@@ -31,6 +31,10 @@ import { getEditBreadcrumbs } from '../breadcrumbs';
 import { addHelpMenuToAppChrome } from '../help_menu/help_menu_util';
 import { FilterStateManager } from '../../../../../data/public';
 import { unhashUrl } from '../../../../../../../plugins/kibana_utils/public';
+import {
+  SavedObjectSaveModal,
+  showSaveModal,
+} from '../../../../../../../plugins/saved_objects/public';
 
 import { initVisEditorDirective } from './visualization_editor';
 import { initVisualizationDirective } from './visualization';
@@ -40,8 +44,6 @@ import {
   absoluteToParsedUrl,
   KibanaParsedUrl,
   migrateLegacyQuery,
-  SavedObjectSaveModal,
-  showSaveModal,
   stateMonitorFactory,
   DashboardConstants,
 } from '../../legacy_imports';
@@ -94,6 +96,7 @@ function VisualizeAppController(
     core: { docLinks },
     savedQueryService,
     uiSettings,
+    I18nContext,
   } = getServices();
 
   const filterStateManager = new FilterStateManager(globalState, getAppState, filterManager);
@@ -191,7 +194,7 @@ function VisualizeAppController(
                   description={savedVis.description}
                 />
               );
-              showSaveModal(saveModal);
+              showSaveModal(saveModal, I18nContext);
             },
           },
         ]
