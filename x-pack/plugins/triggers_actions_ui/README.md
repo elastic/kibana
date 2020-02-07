@@ -438,30 +438,90 @@ interface ThresholdExpressionProps {
 ## Embed Create Alert flyout to Kibana plugins
 
 To embed Create Alert flyout to any place in Kibana the next code should be specified under the React component file:
-(TBD)
+1. Add TriggersAndActionsUIPublicPluginSetup to Kibana plugin setup dependencies:
 
 ```
+triggers_actions_ui: TriggersAndActionsUIPublicPluginSetup;
+```
+Then this dependency will be used to embed Create Alert flyout or register new alert/action type.
+
+2. Add Create Alert flyout to React component:
+```
 // import section
-import { AlertAdd } from '../../alert_add';
+import { AlertsContextProvider, AlertAdd } from '../../../../../../../triggers_actions_ui/public';
 
 // in the component state definition section
 const [alertFlyoutVisible, setAlertFlyoutVisibility] = useState<boolean>(false);
+
+// UI control item for open flyout
+<EuiButton
+  fill
+  iconType="plusInCircle"
+  iconSide="left"
+  onClick={() => setAlertFlyoutVisibility(true)}
+>
+  <FormattedMessage
+    id="emptyButton"
+    defaultMessage="Create alert"
+  />
+</EuiButton>
 
 // in render section of component
 <AlertsContextProvider
   value={{
     addFlyoutVisible: alertFlyoutVisible,
     setAddFlyoutVisibility: setAlertFlyoutVisibility,
-    reloadAlerts: loadAlertsData,
+    http,
+    actionTypeRegistry: triggers_actions_ui.actionTypeRegistry,
+    alertTypeRegistry: triggers_actions_ui.alertTypeRegistry,
+    toastNotifications: toasts,
+    uiSettings,
+    charts,
+    dataFieldsFormats,
   }}
 >
-  <AlertAdd />
+  <AlertAdd consumer={'watcher'}  />
 </AlertsContextProvider>
 ```
 
-Props definition:
+AlertAdd Props definition:
 ```
-
+interface AlertAddProps {
+  consumer: string;
+  alertTypeId?: string;
+  canChangeTrigger?: boolean;
+}
 ```
+`consumer` - name of the plugin, which creating an alert
+`alertTypeId` - optional property to predefine alert type
+`canChangeTrigger` - optional property that hide change alert type possibility (only predefined will be an option)
 
-(TBD)
+AlertsContextProvider value options:
+```
+export interface AlertsContextValue {
+  addFlyoutVisible: boolean;
+  setAddFlyoutVisibility: React.Dispatch<React.SetStateAction<boolean>>;
+  reloadAlerts?: () => Promise<void>;
+  http: HttpSetup;
+  alertTypeRegistry: TypeRegistry<AlertTypeModel>;
+  actionTypeRegistry: TypeRegistry<ActionTypeModel>;
+  uiSettings?: IUiSettingsClient;
+  toastNotifications?: Pick<
+    ToastsApi,
+    'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'
+  >;
+  charts?: ChartsPluginSetup;
+  dataFieldsFormats?: Pick<FieldFormatsRegistry, 'register'>;
+}
+```
+`addFlyoutVisible` - visibility state of the Create Alert flyout
+`setAddFlyoutVisibility` - function for changing visibility state of the Create Alert flyout
+`reloadAlerts` - otional function which will be executed if alert was saved sucsessfuly
+`http` - HttpSetup needed for API calls
+`alertTypeRegistry` - registry for alert types
+`actionTypeRegistry` - registry for action types
+`uiSettings` - optional property which is needed to display visualization of alert type expression
+`toastNotifications` - optional toasts
+`charts` - optional property which is needed to display visualization of alert type expression
+`dataFieldsFormats` - optional property which is needed to display visualization of alert type expression
+
