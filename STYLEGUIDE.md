@@ -118,7 +118,7 @@ generatorOne('foo') !== generatorTwo('foo');
 ```
 
 This allows multiple instances of a single react component to now have different ids.
-If you include the above react component multiple times in the same page,
+If you include the above React component multiple times in the same page,
 each component instance will have a unique id, because each render method will use a different
 id generator.
 
