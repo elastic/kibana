@@ -18,7 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { IAction } from 'src/plugins/ui_actions/public';
+import { Action } from 'src/plugins/ui_actions/public';
 import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
 import { IEmbeddable } from '../../../embeddables';
 
@@ -28,7 +28,7 @@ interface ActionContext {
   embeddable: IEmbeddable;
 }
 
-export class InspectPanelAction implements IAction<ActionContext> {
+export class InspectPanelAction implements Action<ActionContext> {
   public readonly type = INSPECT_PANEL_ACTION_ID;
   public readonly id = INSPECT_PANEL_ACTION_ID;
   public order = 10;

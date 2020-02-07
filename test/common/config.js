@@ -54,7 +54,7 @@ export default function() {
         `--elasticsearch.hosts=${formatUrl(servers.elasticsearch)}`,
         `--elasticsearch.username=${kibanaServerTestUser.username}`,
         `--elasticsearch.password=${kibanaServerTestUser.password}`,
-        `--kibana.disableWelcomeScreen=true`,
+        `--home.disableWelcomeScreen=true`,
         '--telemetry.banner=false',
         `--server.maxPayloadBytes=1679958`,
         // newsfeed mock service

@@ -1,7 +1,20 @@
 .homAddData__card {
-  max-width: 250px;
   border: none;
   box-shadow: none;
+}
+
+.homAddData__cardDivider {
+  position: relative;
+
+  &:after {
+    position: absolute;
+    content: '';
+    width: 1px;
+    right: -$euiSizeS;
+    top: 0;
+    bottom: 0;
+    background: $euiBorderColor;
+  }
 }
 
 .homAddData__icon {
@@ -18,15 +31,28 @@
   text-align: center;
 }
 
-@include euiBreakpoint('xs') {
-  .homAddData__card {
-    max-width: none;
-  }
+.homAddData__logo {
+  margin-left: $euiSize;
 }
 
 @include euiBreakpoint('xs', 's') {
   .homeAddData__flexGroup {
     flex-wrap: wrap;
+  }
+}
+
+@include euiBreakpoint('xs', 's', 'm') {
+  .homAddDat__flexTablet {
+    flex-direction: column;
+  }
+
+  .homAddData__cardDivider:after {
+    display: none;
+  }
+
+  .homAddData__cardDivider {
+    flex-grow: 0 !important;
+    flex-basis: 100% !important;
   }
 }
 

@@ -5,14 +5,11 @@
  */
 
 import { CoreSetup, PluginsSetup } from './shim';
-import { routes } from './routes';
 import { functions } from '../canvas_plugin_src/functions/server';
 import { loadSampleData } from './sample_data';
 
 export class Plugin {
   public setup(core: CoreSetup, plugins: PluginsSetup) {
-    routes(core);
-
     plugins.interpreter.register({ serverFunctions: functions });
 
     core.injectUiAppVars('canvas', async () => {

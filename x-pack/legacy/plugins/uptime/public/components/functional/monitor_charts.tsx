@@ -11,7 +11,6 @@ import { MonitorChart } from '../../../common/graphql/types';
 import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../higher_order';
 import { monitorChartsQuery } from '../../queries';
 import { DurationChart } from './charts';
-import { useUrlParams } from '../../hooks';
 import { PingHistogram } from '../connected';
 
 interface MonitorChartsQueryResult {
@@ -24,28 +23,15 @@ interface MonitorChartsProps {
   mean: string;
   range: string;
   success: string;
-  dateRangeStart: string;
-  dateRangeEnd: string;
 }
 
 type Props = MonitorChartsProps & UptimeGraphQLQueryProps<MonitorChartsQueryResult>;
 
-export const MonitorChartsComponent = ({
-  data,
-  mean,
-  range,
-  monitorId,
-  dateRangeStart,
-  dateRangeEnd,
-  loading,
-}: Props) => {
-  const [getUrlParams] = useUrlParams();
+export const MonitorChartsComponent = ({ data, mean, range, monitorId, loading }: Props) => {
   if (data && data.monitorChartsData) {
     const {
       monitorChartsData: { locationDurationLines },
     } = data;
-
-    const { absoluteDateRangeStart, absoluteDateRangeEnd } = getUrlParams();
 
     return (
       <EuiFlexGroup>
@@ -58,15 +44,7 @@ export const MonitorChartsComponent = ({
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <PingHistogram
-            absoluteStartDate={absoluteDateRangeStart}
-            absoluteEndDate={absoluteDateRangeEnd}
-            height="400px"
-            isResponsive={false}
-            dateStart={dateRangeStart}
-            dateEnd={dateRangeEnd}
-            monitorId={monitorId}
-          />
+          <PingHistogram height="400px" isResponsive={false} monitorId={monitorId} />
         </EuiFlexItem>
       </EuiFlexGroup>
     );

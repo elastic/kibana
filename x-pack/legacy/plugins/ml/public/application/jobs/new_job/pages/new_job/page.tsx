@@ -200,13 +200,13 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
             <EuiPageContentHeader>
               <EuiPageContentHeaderSection>
                 <EuiTitle>
-                  <h2>
+                  <h1>
                     <FormattedMessage
                       id="xpack.ml.newJob.page.createJob"
                       defaultMessage="Create job"
                     />
                     : {jobCreatorTitle}
-                  </h2>
+                  </h1>
                 </EuiTitle>
               </EuiPageContentHeaderSection>
             </EuiPageContentHeader>
