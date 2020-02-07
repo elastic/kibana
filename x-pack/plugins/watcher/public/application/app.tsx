@@ -27,6 +27,7 @@ import { EuiCallOut, EuiLink } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
+import { FieldFormatsRegistry } from 'src/plugins/data/common/field_formats/static';
 import { LicenseStatus } from '../../common/types/license_status';
 import { WatchStatus } from './sections/watch_status/components/watch_status';
 import { WatchEdit } from './sections/watch_edit/components/watch_edit';
@@ -48,9 +49,12 @@ export interface AppDeps {
   http: HttpSetup;
   uiSettings: IUiSettingsClient;
   theme: ChartsPluginSetup['theme'];
+  charts: ChartsPluginSetup;
+  dataFieldsFormats: Pick<FieldFormatsRegistry, 'register'>;
   createTimeBuckets: () => any;
   licenseStatus$: Observable<LicenseStatus>;
   MANAGEMENT_BREADCRUMB: any;
+  triggers_actions_ui: any;
 }
 
 export const App = (deps: AppDeps) => {

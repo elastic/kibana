@@ -9,6 +9,7 @@ import { ChartsPluginStart } from 'src/plugins/charts/public';
 import { LicensingPluginSetup } from '../../licensing/public';
 import { DataPublicPluginSetup } from '../../../../src/plugins/data/public';
 import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
+import { TriggersAndActionsUIPublicPluginSetup } from '../../../plugins/triggers_actions_ui/public';
 
 export interface Dependencies {
   home: HomePublicPluginSetup;
@@ -16,4 +17,5 @@ export interface Dependencies {
   licensing: LicensingPluginSetup;
   charts: ChartsPluginStart;
   data: DataPublicPluginSetup;
+  triggers_actions_ui: TriggersAndActionsUIPublicPluginSetup;
 }

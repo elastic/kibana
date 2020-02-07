@@ -6,7 +6,8 @@
     "licensing",
     "management",
     "charts",
-    "data"
+    "data",
+    "triggers_actions_ui"
   ],
   "server": true,
   "ui": true

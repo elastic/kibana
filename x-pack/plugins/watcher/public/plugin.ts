@@ -27,7 +27,7 @@ const licenseToLicenseStatus = (license: ILicense): LicenseStatus => {
 export class WatcherUIPlugin implements Plugin<void, void, Dependencies, any> {
   setup(
     { notifications, http, uiSettings, getStartServices }: CoreSetup,
-    { licensing, management, data, home, charts }: Dependencies
+    { licensing, management, data, home, charts, triggers_actions_ui }: Dependencies
   ) {
     const esSection = management.sections.getSection('elasticsearch');
 
@@ -41,7 +41,6 @@ export class WatcherUIPlugin implements Plugin<void, void, Dependencies, any> {
         const [core] = await getStartServices();
         const { chrome, i18n: i18nDep, docLinks, savedObjects } = core;
         const { boot } = await import('./application/boot');
-
         return boot({
           // Skip the first license status, because that's already been used to determine
           // whether to include Watcher.
@@ -52,11 +51,14 @@ export class WatcherUIPlugin implements Plugin<void, void, Dependencies, any> {
           uiSettings,
           docLinks,
           chrome,
+          charts,
           theme: charts.theme,
           savedObjects: savedObjects.client,
           I18nContext: i18nDep.Context,
+          dataFieldsFormats: data.fieldFormats,
           createTimeBuckets: () => new TimeBuckets(uiSettings, data),
           MANAGEMENT_BREADCRUMB,
+          triggers_actions_ui,
         });
       },
     });

@@ -26,6 +26,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { AlertsContextProvider, AlertAdd } from '../../../../../../../triggers_actions_ui/public';
 import { TIME_UNITS } from '../../../../../../common/constants';
 import { serializeThresholdWatch } from '../../../../../../common/lib/serialization';
 import { ErrableFormRow, SectionError, Error as ServerError } from '../../../../components';
@@ -159,7 +160,14 @@ const getIndexOptions = async (patternString: string, indexPatterns: string[]) =
 
 export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
   // hooks
-  const { toasts } = useAppContext();
+  const {
+    toasts,
+    triggers_actions_ui,
+    uiSettings,
+    charts,
+    dataFieldsFormats,
+    http,
+  } = useAppContext();
   const [indexPatterns, setIndexPatterns] = useState<any[]>([]);
   const [esFields, setEsFields] = useState([]);
   const [indexOptions, setIndexOptions] = useState<IOption[]>([]);
@@ -174,6 +182,8 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [isIndiciesLoading, setIsIndiciesLoading] = useState<boolean>(false);
   const [isRequestVisible, setIsRequestVisible] = useState<boolean>(false);
+
+  const [alertFlyoutVisible, setAlertFlyoutVisibility] = useState<boolean>(false);
 
   const { watch, setWatchProperty } = useContext(WatchContext);
 
@@ -442,6 +452,21 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
                 </EuiFlexItem>
               </EuiFlexGroup>
             </ErrableFormRow>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiButton
+              data-test-subj="createFirstAlertButton"
+              key="create-action"
+              fill
+              iconType="plusInCircle"
+              iconSide="left"
+              onClick={() => setAlertFlyoutVisibility(true)}
+            >
+              <FormattedMessage
+                id="xpack.triggersActionsUI.sections.alertsList.emptyButton"
+                defaultMessage="Create alert"
+              />
+            </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer />
@@ -959,6 +984,21 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
           close={() => setIsRequestVisible(false)}
         />
       ) : null}
+      <AlertsContextProvider
+        value={{
+          addFlyoutVisible: alertFlyoutVisible,
+          setAddFlyoutVisibility: setAlertFlyoutVisibility,
+          http,
+          actionTypeRegistry: triggers_actions_ui.actionTypeRegistry,
+          alertTypeRegistry: triggers_actions_ui.alertTypeRegistry,
+          toastNotifications: toasts,
+          uiSettings,
+          charts,
+          dataFieldsFormats,
+        }}
+      >
+        <AlertAdd consumer={'watcher'} />
+      </AlertsContextProvider>
     </EuiPageContent>
   );
 };
