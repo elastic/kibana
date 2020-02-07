@@ -10,14 +10,14 @@ import { defaultTableState } from './reducers/table_state';
 
 import { getReducer } from './reducers/';
 
-export function indexManagementStore({ uiMetricService, extensionsService }) {
+export function indexManagementStore(services) {
   const toggleNameToVisibleMap = {};
-  extensionsService.toggles.forEach(toggleExtension => {
+  services.extensions.toggles.forEach(toggleExtension => {
     toggleNameToVisibleMap[toggleExtension.name] = false;
   });
   const initialState = { tableState: { ...defaultTableState, toggleNameToVisibleMap } };
   const enhancers = [applyMiddleware(thunk)];
 
   window.__REDUX_DEVTOOLS_EXTENSION__ && enhancers.push(window.__REDUX_DEVTOOLS_EXTENSION__());
-  return createStore(getReducer({ uiMetricService }), initialState, compose(...enhancers));
+  return createStore(getReducer(services), initialState, compose(...enhancers));
 }
