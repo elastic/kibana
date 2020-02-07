@@ -19,7 +19,7 @@
 
 import { UiComponent } from 'src/plugins/kibana_utils/common';
 
-export interface IAction<ActionContext extends {} = {}> {
+export interface Action<ActionContext extends {} = {}> {
   /**
    * Determined the order when there is more than one action matched to a trigger.
    * Higher numbers are displayed first.

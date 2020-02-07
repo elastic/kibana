@@ -19,7 +19,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
-import { IUiActionsStart } from '../../../../../../../src/plugins/ui_actions/public';
+import { UiActionsStart } from '../../../../../../../src/plugins/ui_actions/public';
 import { createHelloWorldAction } from '../../../../../../../src/plugins/ui_actions/public/tests/test_samples';
 
 import {
@@ -54,7 +54,7 @@ export interface SetupDependencies {
 
 interface StartDependencies {
   embeddable: IEmbeddableStart;
-  uiActions: IUiActionsStart;
+  uiActions: UiActionsStart;
   inspector: InspectorStartContract;
   __LEGACY: {
     ExitFullScreenButton: React.ComponentType<any>;
