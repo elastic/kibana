@@ -95,8 +95,9 @@ describe('OptimizerConfig::parseOptions()', () => {
         "pluginPaths": Array [],
         "pluginScanDirs": Array [
           <absolute path>/src/plugins,
-          <absolute path>/plugins,
           <absolute path>/x-pack/plugins,
+          <absolute path>/plugins,
+          <absolute path>-extra,
         ],
         "profileWebpack": false,
         "repoRoot": <absolute path>,
@@ -118,8 +119,9 @@ describe('OptimizerConfig::parseOptions()', () => {
         "pluginPaths": Array [],
         "pluginScanDirs": Array [
           <absolute path>/src/plugins,
-          <absolute path>/plugins,
           <absolute path>/x-pack/plugins,
+          <absolute path>/plugins,
+          <absolute path>-extra,
         ],
         "profileWebpack": false,
         "repoRoot": <absolute path>,
@@ -141,9 +143,10 @@ describe('OptimizerConfig::parseOptions()', () => {
         "pluginPaths": Array [],
         "pluginScanDirs": Array [
           <absolute path>/src/plugins,
-          <absolute path>/plugins,
           <absolute path>/x-pack/plugins,
+          <absolute path>/plugins,
           <absolute path>/examples,
+          <absolute path>-extra,
         ],
         "profileWebpack": false,
         "repoRoot": <absolute path>,
@@ -166,6 +169,7 @@ describe('OptimizerConfig::parseOptions()', () => {
         "pluginScanDirs": Array [
           <absolute path>/src/plugins,
           <absolute path>/plugins,
+          <absolute path>-extra,
         ],
         "profileWebpack": false,
         "repoRoot": <absolute path>,
