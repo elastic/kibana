@@ -17,15 +17,69 @@
  * under the License.
  */
 
-export { aggTypes } from './agg_types';
-export { AggParam } from './agg_params';
-export { AggConfig } from './agg_config';
-export { AggConfigs } from './agg_configs';
-export { AggGroupNames, aggGroupNamesMap } from './agg_groups';
-export { FieldParamType } from './param_types';
-export { BUCKET_TYPES } from './buckets/bucket_agg_types';
-export { METRIC_TYPES } from './metrics/metric_agg_types';
-export { ISchemas, Schema, Schemas } from './schemas';
-export { AggType } from './agg_type';
-export { setBounds } from './buckets/date_histogram';
-export { termsAggFilter } from './buckets/terms';
+/**
+ * Nothing to see here!
+ *
+ * Agg Types have moved to the data plugin, and are being
+ * re-exported from ui/agg_types for backwards compatibility.
+ */
+
+import { start as dataStart } from '../../../core_plugins/data/public/legacy';
+
+// runtime contracts
+export const {
+  types: aggTypes,
+  AggConfig,
+  AggConfigs,
+  AggType,
+  aggTypeFieldFilters,
+  FieldParamType,
+  MetricAggType,
+  parentPipelineAggHelper,
+  siblingPipelineAggHelper,
+  setBounds,
+} = dataStart.search.aggs;
+
+// types
+export {
+  IAggConfig,
+  IAggConfigs,
+  IAggType,
+  IFieldParamType,
+  IMetricAggType,
+  AggParam,
+  AggParamOption,
+  BUCKET_TYPES,
+  DateRangeKey,
+  IpRangeKey,
+  ISchemas,
+  METRIC_TYPES,
+  OptionedParamEditorProps,
+  OptionedValueProp,
+} from '../../../core_plugins/data/public';
+
+// static code
+export {
+  AggParamType,
+  AggTypeFilters,
+  aggTypeFilters,
+  AggTypeFieldFilters,
+  AggGroupNames,
+  aggGroupNamesMap,
+  CidrMask,
+  convertDateRangeToString,
+  convertIPRangeToString,
+  intervalOptions,
+  isDateHistogramBucketAggConfig,
+  isStringType,
+  isType,
+  isValidInterval,
+  isValidJson,
+  OptionedParamType,
+  parentPipelineType,
+  propFilter,
+  Schema,
+  Schemas,
+  siblingPipelineType,
+  termsAggFilter,
+} from '../../../core_plugins/data/public';

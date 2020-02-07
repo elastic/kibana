@@ -6,7 +6,7 @@ exports[`AdvancedSettings should render read-only when saving is disabled 1`] = 
     gutterSize="none"
   >
     <EuiFlexItem>
-      <advanced_settings_page_title />
+      <foo_component />
     </EuiFlexItem>
     <EuiFlexItem>
       <Search
@@ -57,7 +57,7 @@ exports[`AdvancedSettings should render read-only when saving is disabled 1`] = 
       />
     </EuiFlexItem>
   </EuiFlexGroup>
-  <advanced_settings_page_subtitle />
+  <foo_component />
   <EuiSpacer
     size="m"
   />
@@ -139,7 +139,7 @@ exports[`AdvancedSettings should render read-only when saving is disabled 1`] = 
     }
     showNoResultsMessage={true}
   />
-  <advanced_settings_page_footer
+  <foo_component
     enableSaving={false}
     onQueryMatchChange={[Function]}
     query={
@@ -189,7 +189,7 @@ exports[`AdvancedSettings should render specific setting if given setting key 1`
     gutterSize="none"
   >
     <EuiFlexItem>
-      <advanced_settings_page_title />
+      <foo_component />
     </EuiFlexItem>
     <EuiFlexItem>
       <Search
@@ -240,7 +240,7 @@ exports[`AdvancedSettings should render specific setting if given setting key 1`
       />
     </EuiFlexItem>
   </EuiFlexGroup>
-  <advanced_settings_page_subtitle />
+  <foo_component />
   <EuiSpacer
     size="m"
   />
@@ -322,7 +322,7 @@ exports[`AdvancedSettings should render specific setting if given setting key 1`
     }
     showNoResultsMessage={true}
   />
-  <advanced_settings_page_footer
+  <foo_component
     enableSaving={true}
     onQueryMatchChange={[Function]}
     query={
