@@ -6,17 +6,13 @@
 
 import React, { Fragment, useCallback, useState } from 'react';
 import {
-  EuiAvatar,
   EuiButton,
   EuiButtonEmpty,
-  EuiDescriptionList,
   EuiDescriptionListDescription,
   EuiDescriptionListTitle,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
-  EuiPanel,
-  EuiSteps,
   EuiText,
 } from '@elastic/eui';
 
@@ -59,30 +55,6 @@ const MyWrapper = styled(WrapperPage)`
 const BackgroundWrapper = styled.div`
   ${({ theme }) => css`
     background-color: ${theme.eui.euiSizeM};
-  `}
-`;
-
-const MySteps = styled(EuiSteps)`
-  ${({ stepAuthor, theme }) => css`
-    .euiStepNumber::before {
-      content: ${() => <EuiAvatar name={stepAuthor} />};
-    }
-    p.euiTitle {
-      width: 100%;
-      padding-right: 16px;
-      .euiPanel {
-        background-color: ${theme.eui.euiColorLightestShade};
-        border-bottom: none;
-        border-radius: ${theme.eui.euiBorderRadius} ${theme.eui.euiBorderRadius} 0 0;
-      }
-    }
-    .euiStep__content {
-      padding-top: 0;
-      margin-top: 0;
-      .euiPanel {
-        border-radius: 0 0 ${theme.eui.euiBorderRadius} ${theme.eui.euiBorderRadius};
-      }
-    }
   `}
 `;
 
@@ -280,7 +252,6 @@ export const CaseView = React.memo(({ caseId }: Props) => {
       <BackgroundWrapper>
         <MyWrapper>
           <UserActionTree userActions={firstSetOfSteps} />
-          {/* <MySteps steps={firstSetOfSteps} />*/}
           {/* {isEdit ? (*/}
           {/*  <Form form={form}>*/}
           {/*    <EuiDescriptionList compressed>*/}

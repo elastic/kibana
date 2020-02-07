@@ -5,21 +5,22 @@
  */
 
 import React, { ReactNode } from 'react';
-import { EuiAvatar, EuiPanel, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiAvatar, EuiPanel, EuiTitle } from '@elastic/eui';
 import styled, { css } from 'styled-components';
+
 export interface UserActionItem {
   avatarName: string;
   children: ReactNode;
-  title: string;
+  title: ReactNode;
 }
 
 export interface UserActionTreeProps {
   userActions: UserActionItem[];
 }
 
-const UserAction = styled.div`
+const UserAction = styled(EuiFlexGroup)`
   ${({ theme }) => css`
-    &:not(:last-of-type) {
+    & {
       background-image: linear-gradient(
         to right,
         transparent 0,
@@ -31,9 +32,10 @@ const UserAction = styled.div`
       );
       background-repeat: no-repeat;
       background-position: left ${theme.eui.euiSizeXXL};
+      margin-bottom: ${theme.eui.euiSizeS};
     }
-    .userAction__titleWrapper {
-      display: flex;
+    .userAction__panel {
+      margin-bottom: ${theme.eui.euiSize};
     }
     .userAction__circle {
       flex-shrink: 0;
@@ -41,34 +43,32 @@ const UserAction = styled.div`
       vertical-align: top;
     }
     .userAction__title {
+      padding: ${theme.eui.euiSizeS} ${theme.eui.euiSizeL};
+      background: ${theme.eui.euiColorLightestShade};
+      border-bottom: ${theme.eui.euiBorderThin};
     }
     .userAction__content {
-      padding: ${theme.eui.euiSize} ${theme.eui.euiSize} ${theme.eui.euiSizeXL};
-      margin: ${theme.eui.euiSizeS} 0;
-
-      // Align the content's contents with the title
-      padding-left: 24px;
-
-      // Align content border to horizontal center of step number
-      margin-left: 16px;
+      padding: ${theme.eui.euiSizeM} ${theme.eui.euiSizeL};
     }
   `}
 `;
 
 const renderUserActions = (userActions: UserActionItem[]) => {
   return userActions.map(({ avatarName, children, title }, key) => (
-    <UserAction key={key}>
-      <div className="userAction__titleWrapper">
+    <UserAction key={key} gutterSize={'none'}>
+      <EuiFlexItem grow={false}>
         <EuiAvatar className="userAction__circle" name={avatarName} />
-        <EuiPanel>
-          <EuiTitle size="s" className="userAction__title">
-            <p>{title}</p>
-          </EuiTitle>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiPanel className="userAction__panel" paddingSize="none">
+          <div className="userAction__titleWrapper">
+            <EuiTitle size="xxs" className="userAction__title">
+              <h3>{title}</h3>
+            </EuiTitle>
+          </div>
+          <div className="userAction__content">{children}</div>
         </EuiPanel>
-      </div>
-      <div className="userAction__content">
-        <EuiPanel paddingSize="m">{children}</EuiPanel>
-      </div>
+      </EuiFlexItem>
     </UserAction>
   ));
 };
