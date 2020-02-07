@@ -108,10 +108,10 @@ describe('index table', () => {
   beforeEach(() => {
     // Mock initialization of services
     // @ts-ignore
-    httpService.init(mockHttpClient);
-    breadcrumbService.init(chromeServiceMock.createStartContract(), '');
+    httpService.setup(mockHttpClient);
+    breadcrumbService.setup(chromeServiceMock.createStartContract(), '');
     uiMetricService.init(createUiStatsReporter);
-    notificationService.init(notificationServiceMock.createStartContract());
+    notificationService.setup(notificationServiceMock.createStartContract());
 
     store = indexManagementStore();
     component = (

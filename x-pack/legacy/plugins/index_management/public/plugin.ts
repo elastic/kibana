@@ -41,8 +41,8 @@ export class IndexMgmtUIPlugin {
     const { http, notifications, getStartServices } = coreSetup;
     const { usageCollection } = plugins;
 
-    httpService.init(http);
-    notificationService.init(notifications);
+    httpService.setup(http);
+    notificationService.setup(notifications);
     this.uiMetricService.setup(usageCollection);
 
     plugins.management.sections.getSection('elasticsearch').registerApp({
@@ -54,8 +54,8 @@ export class IndexMgmtUIPlugin {
         const [core] = await getStartServices();
         const { chrome, docLinks } = core;
 
-        breadcrumbService.init(chrome, MANAGEMENT_BREADCRUMB);
-        documentationService.init(docLinks);
+        breadcrumbService.setup(chrome, MANAGEMENT_BREADCRUMB);
+        documentationService.setup(docLinks);
 
         const appDependencies: AppDependencies = {
           services: {

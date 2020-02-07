@@ -11,8 +11,6 @@ import { httpService } from '../../../public/application/services/http';
 import { breadcrumbService } from '../../../public/application/services/breadcrumbs';
 import { documentationService } from '../../../public/application/services/documentation';
 import { notificationService } from '../../../public/application/services/notification';
-import { uiMetricService } from '../../../public/application/services/ui_metric';
-import { createUiStatsReporter } from '../../../../../../../src/legacy/core_plugins/ui_metric/public';
 
 /* eslint-disable @kbn/eslint/no-restricted-paths */
 import { notificationServiceMock } from '../../../../../../../src/core/public/notifications/notifications_service.mock';
@@ -24,11 +22,10 @@ const mockHttpClient = axios.create({ adapter: axiosXhrAdapter });
 export const setupEnvironment = () => {
   // Mock initialization of services
   // @ts-ignore
-  httpService.init(mockHttpClient);
-  breadcrumbService.init(chromeServiceMock.createStartContract(), '');
-  documentationService.init(docLinksServiceMock.createStartContract());
-  notificationService.init(notificationServiceMock.createStartContract());
-  uiMetricService.init(createUiStatsReporter);
+  httpService.setup(mockHttpClient);
+  breadcrumbService.setup(chromeServiceMock.createStartContract(), '');
+  documentationService.setup(docLinksServiceMock.createStartContract());
+  notificationService.setup(notificationServiceMock.createStartContract());
 
   const { server, httpRequestsMockHelpers } = initHttpRequests();
 

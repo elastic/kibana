@@ -9,7 +9,7 @@ import { HttpSetup } from '../../../../../../../src/core/public';
 class HttpService {
   private client: any;
 
-  public init(httpClient: HttpSetup): void {
+  public setup(httpClient: HttpSetup): void {
     this.client = httpClient;
   }
 

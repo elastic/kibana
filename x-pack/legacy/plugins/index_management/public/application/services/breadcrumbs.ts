@@ -19,7 +19,7 @@ class BreadcrumbService {
     home: [],
   };
 
-  public init(chrome: ChromeStart, managementBreadcrumb: any): void {
+  public setup(chrome: ChromeStart, managementBreadcrumb: any): void {
     this.chrome = chrome;
     this.breadcrumbs.management = [managementBreadcrumb];
 

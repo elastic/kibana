@@ -9,7 +9,7 @@ import { NotificationsStart } from '../../../../../../../src/core/public';
 class NotificationService {
   private toasts: any;
 
-  public init(notifications: NotificationsStart): void {
+  public setup(notifications: NotificationsStart): void {
     this.toasts = notifications.toasts;
   }
 
