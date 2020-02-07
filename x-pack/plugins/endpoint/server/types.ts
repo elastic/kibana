@@ -22,12 +22,26 @@ export interface EndpointAppContext {
 }
 
 /**
+ * Custom validation error class for the Endpoint app.
+ */
+export class EndpointValidationError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'EndpointValidationError';
+  }
+}
+
+/**
  * Request params for alert queries.
  */
 export interface AlertRequestParams {
   page_index?: number;
   page_size?: number;
   filters?: string;
+  sort?: string;
+  order?: string;
+  search_after?: string;
+  search_before?: string;
 }
 
 /**
@@ -35,7 +49,13 @@ export interface AlertRequestParams {
  */
 export interface AlertRequestData {
   pageSize: number;
-  pageIndex: number;
-  fromIndex: number;
-  filters: string;
+  pageIndex?: number;
+  fromIndex?: number;
+  filters: string; // Defaults to ''
+  sort: string;
+  order: string;
+  searchAfter?: string;
+  searchBefore?: string;
+  next?: string;
+  prev?: string;
 }

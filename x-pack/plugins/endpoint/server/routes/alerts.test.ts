@@ -179,11 +179,40 @@ describe('test alerts route', () => {
     expect(alertResultList.request_page_size).toEqual(3);
   });
 
-  it('should correctly validate params', async () => {
+  it('should require `page_size` to be a number', async () => {
     const validate = () => {
       reqSchema.validate({
         page_size: 'abc',
-        page_index: 0,
+      });
+    };
+    expect(validate).toThrow();
+  });
+
+  it('should allow either `page_index` or `search_after`, but not both', async () => {
+    const validate = () => {
+      reqSchema.validate({
+        page_index: 1,
+        search_after: 'abc',
+      });
+    };
+    expect(validate).toThrow();
+  });
+
+  it('should allow either `page_index` or `search_before`, but not both', async () => {
+    const validate = () => {
+      reqSchema.validate({
+        page_index: 1,
+        search_before: 'abc',
+      });
+    };
+    expect(validate).toThrow();
+  });
+
+  it('should allow either `search_before` or `search_after`, but not both', async () => {
+    const validate = () => {
+      reqSchema.validate({
+        search_before: 'abc',
+        search_after: 'abc',
       });
     };
     expect(validate).toThrow();

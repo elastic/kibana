@@ -13,9 +13,13 @@ import { EndpointAppContext, AlertRequestParams, AlertRequestData, JSONish } fro
 
 export const buildAlertListESQuery = async (reqData: AlertRequestData): Promise<JSONish> => {
   const DEFAULT_TOTAL_HITS = 10000;
+  let totalHitsMin: number = DEFAULT_TOTAL_HITS;
 
   // Calculate minimum total hits set to indicate there's a next page
-  const totalHitsMin = Math.max(reqData.fromIndex + reqData.pageSize * 2, DEFAULT_TOTAL_HITS);
+  // TODO: handle this for search_after?
+  if (reqData.fromIndex !== undefined) {
+    totalHitsMin = Math.max(reqData.fromIndex + reqData.pageSize * 2, DEFAULT_TOTAL_HITS);
+  }
 
   function buildQueryBody(): JSONish {
     if (reqData.filters !== '') {
@@ -27,7 +31,7 @@ export const buildAlertListESQuery = async (reqData: AlertRequestData): Promise<
     };
   }
 
-  return {
+  const reqBody: JSONish = {
     body: {
       track_total_hits: totalHitsMin,
       query: buildQueryBody(),
@@ -39,10 +43,15 @@ export const buildAlertListESQuery = async (reqData: AlertRequestData): Promise<
         },
       ],
     },
-    from: reqData.fromIndex,
     size: reqData.pageSize,
     index: EndpointAppConstants.ALERT_INDEX_NAME,
   };
+
+  if (reqData.fromIndex !== undefined) {
+    reqBody.from = reqData.fromIndex;
+  }
+
+  return reqBody;
 };
 
 export const getRequestData = async (
@@ -53,16 +62,31 @@ export const getRequestData = async (
   const reqData = {} as AlertRequestData;
 
   if (request?.route?.method === 'get') {
-    reqData.pageIndex = request.query?.page_index || config.alertResultListDefaultFirstPageIndex;
+    reqData.pageIndex = request.query?.page_index;
     reqData.pageSize = request.query?.page_size || config.alertResultListDefaultPageSize;
     reqData.filters = request.query?.filters || config.alertResultListDefaultFilters;
+    reqData.sort = request.query?.sort || config.alertResultListDefaultSort;
+    reqData.order = request.query?.order || config.alertResultListDefaultOrder;
+    reqData.searchAfter = request.query?.search_after;
+    reqData.searchBefore = request.query?.search_before;
   } else {
-    reqData.pageIndex = request.body?.page_index || config.alertResultListDefaultFirstPageIndex;
+    reqData.pageIndex = request.body?.page_index;
     reqData.pageSize = request.body?.page_size || config.alertResultListDefaultPageSize;
     reqData.filters = request.body?.filters || config.alertResultListDefaultFilters;
+    reqData.sort = request.body?.sort || config.alertResultListDefaultSort;
+    reqData.order = request.body?.order || config.alertResultListDefaultOrder;
+    reqData.searchAfter = request.body?.search_after;
+    reqData.searchBefore = request.body?.search_before;
   }
 
-  reqData.fromIndex = reqData.pageIndex * reqData.pageSize;
+  if (reqData.searchAfter === undefined && reqData.searchBefore === undefined) {
+    // simple pagination
+    if (reqData.pageIndex === undefined) {
+      reqData.pageIndex = config.alertResultListDefaultFirstPageIndex;
+    }
+
+    reqData.fromIndex = reqData.pageIndex * reqData.pageSize;
+  }
 
   return reqData;
 };

@@ -15,8 +15,45 @@ import { AlertRequestParams, AlertRequestData, EndpointAppContext } from '../typ
 const ALERTS_ROUTE = '/api/endpoint/alerts';
 
 export const reqSchema = schema.object({
-  page_size: schema.number({ defaultValue: 10, min: 1, max: 10000 }),
-  page_index: schema.number({ defaultValue: 0, min: 0 }),
+  page_size: schema.maybe(schema.number()),
+  page_index: schema.maybe(
+    schema.number({
+      validate(value) {
+        if (
+          schema.contextRef('search_after') !== undefined ||
+          schema.contextRef('search_before') !== undefined
+        ) {
+          return 'error';
+        }
+      },
+    })
+  ),
+  search_after: schema.maybe(
+    schema.string({
+      validate(value) {
+        if (schema.contextRef('page_index') !== undefined) {
+          return 'error';
+        }
+        if (schema.contextRef('search_before') !== undefined) {
+          return 'error';
+        }
+      },
+    })
+  ),
+  search_before: schema.maybe(
+    schema.string({
+      validate(value) {
+        if (schema.contextRef('page_index') !== undefined) {
+          return 'error';
+        }
+        if (schema.contextRef('search_after') !== undefined) {
+          return 'error';
+        }
+      },
+    })
+  ),
+  sort: schema.string({ defaultValue: '@timestamp' }),
+  order: schema.string({ defaultValue: 'desc' }),
   filters: schema.string({ defaultValue: '' }),
 });
 
@@ -37,6 +74,11 @@ export function registerAlertRoutes(router: IRouter, endpointAppContext: Endpoin
       )) as SearchResponse<AlertData>;
       return res.ok({ body: mapToAlertResultList(endpointAppContext, reqData, response) });
     } catch (err) {
+      const e = err as Error;
+      if (e.name === 'EndpointValidationError') {
+        return res.badRequest({ body: err });
+      }
+
       return res.internalError({ body: err });
     }
   };
