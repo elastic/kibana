@@ -17,95 +17,16 @@
  * under the License.
  */
 
-import { Observable, Subscription } from 'rxjs';
-import { filter, map, share } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { share } from 'rxjs/operators';
 import { CoreStart } from 'src/core/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
-import { COMPARE_ALL_OPTIONS, compareFilters, FilterManager } from './filter_manager';
+import { FilterManager } from './filter_manager';
 import { TimefilterService, TimefilterSetup } from './timefilter';
 import { createSavedQueryService } from './saved_query/saved_query_service';
-import { createStateContainer } from '../../../kibana_utils/common/state_containers/create_state_container';
 import { QueryAppState, QueryGlobalState } from './state_sync';
-
-function createGlobalQueryObservable({
-  timefilter: { timefilter },
-  filterManager,
-}: {
-  timefilter: TimefilterSetup;
-  filterManager: FilterManager;
-}): Observable<QueryGlobalState> {
-  return new Observable(subscriber => {
-    const state = createStateContainer<QueryGlobalState>({
-      time: timefilter.getTime(),
-      refreshInterval: timefilter.getRefreshInterval(),
-      filters: filterManager.getGlobalFilters(),
-    });
-
-    const subs: Subscription[] = [
-      timefilter.getTimeUpdate$().subscribe(() => {
-        state.set({ ...state.get(), time: timefilter.getTime() });
-      }),
-      timefilter.getRefreshIntervalUpdate$().subscribe(() => {
-        state.set({ ...state.get(), refreshInterval: timefilter.getRefreshInterval() });
-      }),
-      filterManager
-        .getUpdates$()
-        .pipe(
-          // we need to track only global filters here
-          map(() => filterManager.getGlobalFilters()),
-          // continue only if global filters changed
-          // and ignore app state filters
-          filter(
-            newGlobalFilters =>
-              !compareFilters(newGlobalFilters, state.get().filters || [], COMPARE_ALL_OPTIONS)
-          )
-        )
-        .subscribe(newGlobalFilters => {
-          state.set({ ...state.get(), filters: newGlobalFilters });
-        }),
-      state.state$.subscribe(subscriber),
-    ];
-    return () => {
-      subs.forEach(s => s.unsubscribe());
-    };
-  });
-}
-
-function createAppQueryObservable({
-  timefilter: { timefilter },
-  filterManager,
-}: {
-  timefilter: TimefilterSetup;
-  filterManager: FilterManager;
-}): Observable<QueryAppState> {
-  return new Observable(subscriber => {
-    const state = createStateContainer<QueryAppState>({
-      filters: filterManager.getAppFilters(),
-    });
-
-    const subs: Subscription[] = [
-      filterManager
-        .getUpdates$()
-        .pipe(
-          // we need to track only app filters here
-          map(() => filterManager.getAppFilters()),
-          // continue only if app filters changed
-          // and ignore global state filters
-          filter(
-            newAppFilters =>
-              !compareFilters(newAppFilters, state.get().filters || [], COMPARE_ALL_OPTIONS)
-          )
-        )
-        .subscribe(newAppFilters => {
-          state.set({ ...state.get(), filters: newAppFilters });
-        }),
-      state.state$.subscribe(subscriber),
-    ];
-    return () => {
-      subs.forEach(s => s.unsubscribe());
-    };
-  });
-}
+import { createGlobalQueryObservable } from './state_sync/create_global_query_observable';
+import { createAppQueryObservable } from './state_sync/create_app_query_observable';
 
 /**
  * Query Service

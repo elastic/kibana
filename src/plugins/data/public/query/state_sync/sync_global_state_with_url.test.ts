@@ -31,8 +31,8 @@ import {
 import { QueryService, QueryStart } from '../query_service';
 import { StubBrowserStorage } from 'test_utils/stub_browser_storage';
 import { TimefilterContract } from '../timefilter';
-import { QueryGlobalState } from './connect_to_global_state';
 import { syncGlobalQueryStateWithUrl } from './sync_global_state_with_url';
+import { QueryGlobalState } from './types';
 
 const setupMock = coreMock.createSetup();
 const startMock = coreMock.createStart();
