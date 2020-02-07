@@ -18,13 +18,14 @@
  */
 
 import Path from 'path';
-import { createHash } from 'crypto';
 
 import execa from 'execa';
 import { REPO_ROOT } from '@kbn/dev-utils';
+
 import { getMtimes } from './get_mtimes';
 import { getChanges } from './get_changes';
 import { OptimizerConfig } from './optimizer_config';
+import { ascending } from './common';
 
 const OPTIMIZER_DIR = Path.dirname(require.resolve('../package.json'));
 const RELATIVE_DIR = Path.relative(REPO_ROOT, OPTIMIZER_DIR);
@@ -47,12 +48,18 @@ export async function getOptimizerVersion(config: OptimizerConfig) {
     `workerConfig:${JSON.stringify(config.getWorkerConfig('-'))}`,
   ];
 
-  const mtimes = await getMtimes((await getChanges(OPTIMIZER_DIR)).keys());
-  for (const [path, mtime] of mtimes) {
-    cacheLines.push(`mtime:${path}:${mtime}`);
+  const filesToMtime: string[] = [];
+  for (const [path, type] of await getChanges(OPTIMIZER_DIR)) {
+    if (type === 'deleted') {
+      cacheLines.push(`deleted:${path}`);
+    } else {
+      filesToMtime.push(path);
+    }
   }
 
-  return createHash('sha1')
-    .update(cacheLines.sort((a, b) => a.localeCompare(b)).join('\n'))
-    .digest('hex');
+  for (const [path, mtime] of await getMtimes(filesToMtime)) {
+    cacheLines.push(`modified:${path}:${mtime}`);
+  }
+
+  return cacheLines.sort(ascending(l => l)).join('\n');
 }
