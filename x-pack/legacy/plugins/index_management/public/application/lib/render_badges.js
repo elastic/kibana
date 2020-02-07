@@ -7,10 +7,10 @@
 import React, { Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiBadge, EuiSearchBar } from '@elastic/eui';
-import { indexManagementExtensions } from '../../services/index_management_extensions';
-export const renderBadges = (index, filterChanged) => {
+
+export const renderBadges = (index, filterChanged, extensionsService) => {
   const badgeLabels = [];
-  indexManagementExtensions.badges.forEach(({ matchIndex, label, color, filterExpression }) => {
+  extensionsService.badges.forEach(({ matchIndex, label, color, filterExpression }) => {
     if (matchIndex(index)) {
       const clickHandler = () => {
         filterChanged &&
