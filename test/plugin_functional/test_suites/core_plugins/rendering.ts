@@ -22,16 +22,6 @@ import expect from '@kbn/expect';
 import '../../plugins/core_provider_plugin/types';
 import { PluginFunctionalProviderContext } from '../../services';
 
-declare global {
-  interface Window {
-    /**
-     * We use this global variable to track page history changes to ensure that
-     * navigation is done without causing a full page reload.
-     */
-    __RENDERING_SESSION__: string[];
-  }
-}
-
 // eslint-disable-next-line import/no-default-export
 export default function({ getService, getPageObjects }: PluginFunctionalProviderContext) {
   const PageObjects = getPageObjects(['common']);
@@ -46,10 +36,10 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
     await appsMenu.clickLink(title);
     return browser.execute(() => {
       if (!('__RENDERING_SESSION__' in window)) {
-        window.__RENDERING_SESSION__ = [];
+        (window as any).__RENDERING_SESSION__ = [];
       }
 
-      window.__RENDERING_SESSION__.push(window.location.pathname);
+      (window as any).__RENDERING_SESSION__.push(window.location.pathname);
     });
   };
   const getLegacyMode = () =>
@@ -64,7 +54,7 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
     });
   const exists = (selector: string) => testSubjects.exists(selector);
   const findLoadingMessage = () => testSubjects.find('kbnLoadingMessage');
-  const getRenderingSession = () => browser.execute(() => window.__RENDERING_SESSION__);
+  const getRenderingSession = () => browser.execute(() => (window as any).__RENDERING_SESSION__);
 
   describe('rendering service', () => {
     it('renders "core" application', async () => {
