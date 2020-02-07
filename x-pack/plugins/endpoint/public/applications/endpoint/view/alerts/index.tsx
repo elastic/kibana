@@ -8,6 +8,7 @@ import { memo, useState, useMemo } from 'react';
 import React from 'react';
 import { EuiDataGrid } from '@elastic/eui';
 import { useSelector } from 'react-redux';
+import { i18n } from '@kbn/i18n';
 import * as selectors from '../../store/selectors';
 import { usePageId } from '../use_page_id';
 
@@ -40,21 +41,26 @@ export const AlertIndex = memo(() => {
       const row = json[rowIndex];
 
       if (columnId === 'alert_type') {
-        return row.value.source.endgame.metadata.key;
+        return i18n.translate(
+          'xpack.endpoint.application.endpoint.alerts.alertType.maliciousFileDescription',
+          {
+            defaultMessage: 'Malicious File',
+          }
+        );
       } else if (columnId === 'event_type') {
-        return row.value.source.endgame.data.file_operation;
+        return row.event.action;
       } else if (columnId === 'os') {
-        return row.value.source.host.os.name;
+        return row.host.os.name;
       } else if (columnId === 'ip_address') {
-        return row.value.source.host.ip;
+        return row.host.ip;
       } else if (columnId === 'host_name') {
-        return row.value.source.host.hostname;
+        return row.host.hostname;
       } else if (columnId === 'timestamp') {
-        return row.value.source.endgame.timestamp_utc;
+        return row['@timestamp'];
       } else if (columnId === 'archived') {
         return null;
       } else if (columnId === 'malware_score') {
-        return row.value.source.endgame.data.malware_classification.score;
+        return row.file_classification.malware_classification.score;
       }
       return null;
     };
