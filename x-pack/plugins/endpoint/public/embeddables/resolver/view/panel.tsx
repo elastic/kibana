@@ -3,13 +3,14 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { memo, useCallback, useMemo } from 'react';
+import React, { memo, useCallback, useMemo, useContext } from 'react';
 import { EuiPanel, EuiBadge, EuiBasicTableColumn } from '@elastic/eui';
 import { EuiTitle } from '@elastic/eui';
 import { EuiHorizontalRule, EuiInMemoryTable } from '@elastic/eui';
 import euiVars from '@elastic/eui/dist/eui_theme_light.json';
 import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
+import { SideEffectContext } from './side_effect_context';
 import { ProcessEvent } from '../types';
 import { useResolverDispatch } from './use_resolver_dispatch';
 import * as selectors from '../store/selectors';
@@ -41,6 +42,7 @@ export const Panel = memo(function Event({ className }: { className?: string }) 
   }
 
   const { processNodePositions } = useSelector(selectors.processNodePositionsAndEdgeLineSegments);
+  const { timestamp } = useContext(SideEffectContext);
 
   const processTableView: ProcessTableView[] = useMemo(
     () =>
@@ -71,12 +73,12 @@ export const Panel = memo(function Event({ className }: { className?: string }) 
       dispatch({
         type: 'userBroughtProcessIntoView',
         payload: {
-          time: new Date(),
+          time: timestamp(),
           process: processTableViewItem.event,
         },
       });
     },
-    [dispatch]
+    [dispatch, timestamp]
   );
 
   const columns = useMemo<Array<EuiBasicTableColumn<ProcessTableView>>>(
@@ -107,8 +109,8 @@ export const Panel = memo(function Event({ className }: { className?: string }) 
         }),
         dataType: 'date' as const,
         sortable: true,
-        render(timestamp: Date) {
-          return formatter.format(timestamp);
+        render(eventTimestamp: Date) {
+          return formatter.format(eventTimestamp);
         },
       },
       {

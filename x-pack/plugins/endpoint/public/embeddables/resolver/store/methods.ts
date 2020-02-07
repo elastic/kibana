@@ -15,7 +15,7 @@ const animationDuration = 1000;
  */
 export function animateProcessIntoView(
   state: ResolverState,
-  startTime: Date,
+  startTime: number,
   process: ProcessEvent
 ): ResolverState {
   const { processNodePositions } = processNodePositionsAndEdgeLineSegments(state);

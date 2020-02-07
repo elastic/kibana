@@ -232,7 +232,7 @@ export type ProcessWithWidthMetadata = {
     }
 );
 
-export interface SideEffects {
+export interface SideEffectors {
   /**
    * A function which returns the time since epoch in milliseconds. Injected because mocking Date is tedious.
    */

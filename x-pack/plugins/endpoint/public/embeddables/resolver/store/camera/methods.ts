@@ -13,7 +13,7 @@ import { CameraState, Vector2 } from '../../types';
  */
 export function animatePanning(
   state: CameraState,
-  startTime: Date,
+  startTime: number,
   targetTranslation: Vector2,
   duration: number
 ): CameraState {

@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useContext } from 'react';
 import styled from 'styled-components';
 import { EuiRange, EuiPanel, EuiIcon } from '@elastic/eui';
 import { useSelector, useDispatch } from 'react-redux';
+import { SideEffectContext } from './side_effect_context';
 import { ResolverAction, Vector2 } from '../types';
 import * as selectors from '../store/selectors';
 
@@ -26,6 +27,7 @@ export const GraphControls = styled(
     }) => {
       const dispatch: (action: ResolverAction) => unknown = useDispatch();
       const scalingFactor = useSelector(selectors.scalingFactor);
+      const { timestamp } = useContext(SideEffectContext);
 
       const handleZoomAmountChange = useCallback(
         (event: React.ChangeEvent<HTMLInputElement> | React.MouseEvent<HTMLButtonElement>) => {
@@ -72,12 +74,12 @@ export const GraphControls = styled(
           return () => {
             const action: ResolverAction = {
               type: 'userNudgedCamera',
-              payload: { direction, time: new Date() },
+              payload: { direction, time: timestamp() },
             };
             dispatch(action);
           };
         });
-      }, [dispatch]);
+      }, [dispatch, timestamp]);
 
       return (
         <div className={className}>

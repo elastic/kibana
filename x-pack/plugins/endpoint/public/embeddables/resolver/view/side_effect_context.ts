@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { createContext, Context } from 'react';
-import { SideEffects } from '../types';
+import { SideEffectors } from '../types';
 
-const s: SideEffects = {
+const sideEffectors: SideEffectors = {
   timestamp: () => Date.now(),
   requestAnimationFrame: window.requestAnimationFrame,
 };
-export const SideEffectContext: Context<SideEffects> = createContext(s);
+export const SideEffectContext: Context<SideEffectors> = createContext(sideEffectors);
