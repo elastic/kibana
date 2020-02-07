@@ -49,6 +49,13 @@ export const AGENT_API_ROUTES = {
   UNENROLL_PATTERN: `${FLEET_API_ROOT}/agents/unenroll`,
 };
 
+export const ENROLLMENT_API_KEY_ROUTES = {
+  CREATE_PATTERN: `${FLEET_API_ROOT}/enrollment-api-keys`,
+  LIST_PATTERN: `${FLEET_API_ROOT}/enrollment-api-keys`,
+  INFO_PATTERN: `${FLEET_API_ROOT}/enrollment-api-keys/{keyId}`,
+  DELETE_PATTERN: `${FLEET_API_ROOT}/enrollment-api-keys/{keyId}`,
+};
+
 // Fleet setup API routes
 export const FLEET_SETUP_API_ROUTES = {
   INFO_PATTERN: `${FLEET_API_ROOT}/setup`,

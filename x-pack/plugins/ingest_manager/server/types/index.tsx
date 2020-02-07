@@ -54,11 +54,17 @@ export {
   GetFleetSetupRequestSchema,
   CreateFleetSetupRequestSchema,
   CreateFleetSetupResponse,
+  // EPM schema
   GetPackagesRequestSchema,
   GetFileRequestSchema,
   GetInfoRequestSchema,
   InstallPackageRequestSchema,
   DeletePackageRequestSchema,
+  // Enrollment API keys schemas
+  GetEnrollmentAPIKeysRequestSchema,
+  PostEnrollmentAPIKeyRequestSchema,
+  DeleteEnrollmentAPIKeyRequestSchema,
+  GetOneEnrollmentAPIKeyRequestSchema,
 } from '../../common';
 
 export type AgentConfigUpdateHandler = (

@@ -9,8 +9,6 @@ export interface EnrollmentAPIKey {
   api_key_id: string;
   api_key: string;
   name?: string;
-  created_at: string;
-  expire_at?: string;
   active: boolean;
   policy_id?: string;
 }
@@ -19,8 +17,6 @@ export interface EnrollmentAPIKeySOAttributes {
   api_key_id: string;
   api_key: string;
   name?: string;
-  created_at: string;
-  expire_at?: string;
   active: boolean;
   policy_id?: string;
   [k: string]: any; // allow to use it as saved object attributes type
