@@ -27,7 +27,7 @@ exports[`Header should render normally 1`] = `
           "indexPattern": <strong>
             ki*
           </strong>,
-          "indexPatternName": undefined,
+          "indexPatternName": "ki*",
         }
       }
     />
