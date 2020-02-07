@@ -55,10 +55,7 @@ export function renderApp({
   const trackUiMetric = createUsageTracker(usageCollection);
   trackUiMetric.load('opened_app');
 
-  const storage = createStorage({
-    engine: window.localStorage,
-    prefix: 'sense:',
-  });
+  const storage = createStorage({ engine: window.localStorage });
   const history = createHistory({ storage });
   const settings = createSettings({ storage });
   const objectStorageClient = getObjectStorageClient() ?? localStorageObjectClient.create(storage);

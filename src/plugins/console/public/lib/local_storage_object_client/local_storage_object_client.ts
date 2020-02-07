@@ -50,4 +50,18 @@ export class LocalObjectStorage<O extends IdObject> implements ObjectStorage<O> 
     }
     return result;
   }
+
+  /**
+   * This is a one way operation that removes state from localStorage.
+   *
+   * This is only really useful for users who have text object data stored locally,
+   * but have security available and so need to migrate to SavedObject storage.
+   */
+  public deleteLocallyStoredState() {
+    const allLocalKeys = this.client.keys().filter(key => {
+      return key.includes(this.prefix);
+    });
+
+    allLocalKeys.forEach(key => this.client.delete(key));
+  }
 }

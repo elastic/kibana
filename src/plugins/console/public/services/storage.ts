@@ -19,6 +19,8 @@
 
 import { transform, keys, startsWith } from 'lodash';
 
+const STORAGE_PREFIX = 'sense:';
+
 type IStorageEngine = typeof window.localStorage;
 
 export enum StorageKeys {
@@ -26,7 +28,9 @@ export enum StorageKeys {
 }
 
 export class Storage {
-  constructor(private readonly engine: IStorageEngine, private readonly prefix: string) {}
+  prefix = STORAGE_PREFIX;
+
+  constructor(private readonly engine: IStorageEngine) {}
 
   encode(val: any) {
     return JSON.stringify(val);
@@ -77,6 +81,6 @@ export class Storage {
   }
 }
 
-export function createStorage(deps: { engine: IStorageEngine; prefix: string }) {
-  return new Storage(deps.engine, deps.prefix);
+export function createStorage(deps: { engine: IStorageEngine }) {
+  return new Storage(deps.engine);
 }

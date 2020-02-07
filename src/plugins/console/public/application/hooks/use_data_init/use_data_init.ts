@@ -21,7 +21,13 @@ import { useCallback, useEffect, useState } from 'react';
 import { migrateToTextObjects } from './data_migration';
 import { useEditorActionContext, useServicesContext } from '../../contexts';
 
+import * as localStorageObjectClient from '../../../lib/local_storage_object_client';
+
 export const useDataInit = () => {
+  const {
+    services: { objectStorageClient, history, storage },
+  } = useServicesContext();
+
   const [error, setError] = useState<Error | null>(null);
   const [done, setDone] = useState<boolean>(false);
   const [retryToken, setRetryToken] = useState<object>({});
@@ -32,16 +38,16 @@ export const useDataInit = () => {
     setError(null);
   }, []);
 
-  const {
-    services: { objectStorageClient, history },
-  } = useServicesContext();
-
   const dispatch = useEditorActionContext();
 
   useEffect(() => {
     const load = async () => {
       try {
-        await migrateToTextObjects({ history, objectStorageClient });
+        await migrateToTextObjects({
+          history,
+          objectStorageClient,
+          localObjectStorageMigrationClient: localStorageObjectClient.create(storage),
+        });
         const results = await objectStorageClient.text.findAll();
         if (!results.length) {
           const newObject = await objectStorageClient.text.create({
@@ -66,7 +72,7 @@ export const useDataInit = () => {
     };
 
     load();
-  }, [dispatch, objectStorageClient, history, retryToken]);
+  }, [dispatch, objectStorageClient, history, retryToken, storage]);
 
   return {
     error,
