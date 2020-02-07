@@ -12,10 +12,6 @@ const commonHeaders = {
   'kbn-xsrf': 'some-xsrf-token',
 };
 
-const authorizedUserHeaders = {
-  ...commonHeaders,
-  Authorization: 'Basic ZWxhc3RpYzpjaGFuZ2VtZQ==',
-};
 // Just to appease tests. Can/should this be from project types?
 interface NewAgentConfig {
   name: string;
@@ -33,78 +29,174 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
   const supertest = getService('supertest');
 
   let createdConfig: AgentConfig; // track config created for later removal
-  const exampleConfig = { name: 'NAME', description: 'DESCRIPTION', namespace: 'NAMESPACE' };
+  const configPayload = { name: 'NAME', description: 'DESCRIPTION', namespace: 'NAMESPACE' };
 
-  describe('/agent_configs', function() {
-    it('should get agent configs', async function() {
-      const { body } = await supertest
-        .get('/api/ingest_manager/agent_configs')
-        .set(commonHeaders)
-        .expect('Content-Type', /application\/json/)
-        .expect(200);
+  describe('HTTP APIs', function() {
+    describe('/agent_configs', function() {
+      it('GET should return agent configs', async function() {
+        const { body } = await supertest
+          .get('/api/ingest_manager/agent_configs')
+          .set(commonHeaders)
+          .expect('Content-Type', /application\/json/)
+          .expect(200);
 
-      expect(body).to.have.keys(paginatedSuccessKeys);
-      expect(Array.isArray(body.items));
+        expect(body).to.have.keys(paginatedSuccessKeys);
+        expect(Array.isArray(body.items)).to.be(true);
+      });
+
+      it('POST should create agent config', async function() {
+        const { body } = await supertest
+          .post('/api/ingest_manager/agent_configs')
+          .set(commonHeaders)
+          .send(configPayload)
+          .expect('Content-Type', /application\/json/)
+          .expect(200);
+
+        createdConfig = body.item;
+
+        expect(body.success).to.be(true);
+        expect(createdConfig.name).to.eql(configPayload.name);
+        expect(createdConfig.description).to.eql(configPayload.description);
+        expect(createdConfig.namespace).to.eql(configPayload.namespace);
+        expect(createdConfig).to.have.keys(['id', 'updated_on', 'updated_by']);
+      });
+
+      it('GET /agent_configs/:id should return one agent config', async function() {
+        const { body } = await supertest
+          .get(`/api/ingest_manager/agent_configs/${createdConfig.id}`)
+          .set(commonHeaders)
+          .expect('Content-Type', /application\/json/)
+          .expect(200);
+
+        expect(body.success).to.be(true);
+        // this should work, but body.item object also has `datasources: []`
+        // expect(body.item).to.eql(createdConfig);
+      });
+
+      it('POST /agent_configs/delete should delete config', async function() {
+        const { body } = await supertest
+          .post('/api/ingest_manager/agent_configs/delete')
+          .set(commonHeaders)
+          .send({ agentConfigIds: [createdConfig.id] })
+          .expect('Content-Type', /application\/json/)
+          .expect(200);
+
+        expect(Array.isArray(body));
+        expect(body.length).to.be(1);
+        expect(body[0].id).to.be(createdConfig.id);
+        expect(body[0].success).to.be(true);
+      });
     });
 
-    it('should create agent config', async function() {
-      const { body } = await supertest
-        .post('/api/ingest_manager/agent_configs')
-        .set(authorizedUserHeaders)
-        .send(exampleConfig)
-        .expect('Content-Type', /application\/json/)
-        .expect(200);
-      createdConfig = body.item;
+    describe('/datasources', function() {
+      let createdDatasource: Record<string, any>;
+      it('GET should return a list of data sources', async function() {
+        const { body } = await supertest
+          .get('/api/ingest_manager/datasources')
+          .set(commonHeaders)
+          .expect('Content-Type', /application\/json/)
+          .expect(200);
 
-      expect(body.success).to.be(true);
-      expect(createdConfig.name).to.eql(exampleConfig.name);
-      expect(createdConfig.description).to.eql(exampleConfig.description);
-      expect(createdConfig.namespace).to.eql(exampleConfig.namespace);
-      expect(createdConfig).to.have.keys(['id', 'updated_on', 'updated_by']);
+        expect(body).to.have.keys(paginatedSuccessKeys);
+        expect(Array.isArray(body.items)).to.be(true);
+      });
+
+      it('should create datasource', async function() {
+        const datasourcePayload = {
+          name: 'name string',
+          agent_config_id: 'some id string',
+          package: {
+            name: 'endpoint',
+            version: '1.0.1',
+            description: 'Description about Endpoint package',
+            title: 'Endpoint Security',
+            assets: [
+              {
+                id: 'string',
+                type: 'index-template',
+              },
+            ],
+          },
+          streams: [
+            {
+              input: {
+                type: 'etc',
+                config: {
+                  paths: '/var/log/*.log',
+                },
+                ingest_pipelines: ['string'],
+                index_template: 'string',
+                ilm_policy: 'string',
+                fields: [{}],
+              },
+              config: {
+                metricsets: ['container', 'cpu'],
+              },
+              output_id: 'default',
+              processors: ['string'],
+            },
+          ],
+          read_alias: 'string',
+        };
+
+        const { body } = await supertest
+          .post('/api/ingest_manager/datasources')
+          .set(commonHeaders)
+          .send(datasourcePayload)
+          .expect('Content-Type', /application\/json/)
+          .expect(200);
+
+        expect(body.success).to.be(true);
+        // should be identical to what was submitted, plus an `id` value
+        expect(body.item).to.eql({ ...datasourcePayload, id: body.item.id });
+
+        createdDatasource = body.item;
+      });
+
+      it('POST /datasources/delete should delete config', async function() {
+        const { body } = await supertest
+          .post('/api/ingest_manager/datasources/delete')
+          .set(commonHeaders)
+          .send({ datasourceIds: [createdDatasource.id] })
+          .expect('Content-Type', /application\/json/)
+          .expect(200);
+
+        expect(Array.isArray(body));
+        expect(body.length).to.be(1);
+        expect(body[0].id).to.be(createdDatasource.id);
+        expect(body[0].success).to.be(true);
+      });
     });
-    it('should have new agent config', async function() {
-      const { body } = await supertest
-        .get(`/api/ingest_manager/agent_configs/${createdConfig.id}`)
-        .set(commonHeaders)
-        .expect('Content-Type', /application\/json/)
-        .expect(200);
 
-      expect(body.success).to.be(true);
-      // this should work, but body.item object also has `datasources: []`
-      // expect(body.item).to.eql(createdConfig);
+    describe('/epm', function() {
+      it('should 404', async function() {
+        const { body } = await supertest
+          .get('/api/ingest_manager/epm')
+          .set(commonHeaders)
+          .expect('Content-Type', /application\/json/)
+          .expect(404);
+
+        expect(body).to.eql({
+          error: 'Not Found',
+          message: 'Not Found',
+          statusCode: 404,
+        });
+      });
     });
-    it('should delete that new config', async function() {
-      const { body } = await supertest
-        .post('/api/ingest_manager/agent_configs/delete')
-        .set(authorizedUserHeaders)
-        .send({ agentConfigIds: [createdConfig.id] })
-        .expect('Content-Type', /application\/json/)
-        .expect(200);
 
-      expect((body as Array<Record<string, any>>).every(b => b.success && b.id));
-    });
-    it('should get datasources', async function() {
-      const { body } = await supertest
-        .get('/api/ingest_manager/datasources')
-        .set(commonHeaders)
-        .expect('Content-Type', /application\/json/)
-        .expect(200);
+    describe('/fleet', function() {
+      it('should 404', async function() {
+        const { body } = await supertest
+          .get('/api/ingest_manager/fleet')
+          .set(commonHeaders)
+          .expect('Content-Type', /application\/json/)
+          .expect(404);
 
-      const expected = { items: [], total: 0, page: 1, perPage: 20, success: true };
-      expect(body).to.eql(expected);
-    });
-    // it('should create datasource', async function() {});
-    it('should 404 from EPM package api', async function() {
-      const { body } = await supertest
-        .get('/api/ingest_manager/epm')
-        .set(commonHeaders)
-        .expect('Content-Type', /application\/json/)
-        .expect(404);
-
-      expect(body).to.eql({
-        error: 'Not Found',
-        message: 'Not Found',
-        statusCode: 404,
+        expect(body).to.eql({
+          error: 'Not Found',
+          message: 'Not Found',
+          statusCode: 404,
+        });
       });
     });
   });
