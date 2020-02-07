@@ -38,6 +38,7 @@ export default function({ getService }: FtrProviderContext) {
               apm: ['all', 'read'],
               siem: ['all', 'read'],
               endpoint: ['all', 'read'],
+              console_extensions: ['all', 'read'],
             },
             global: ['all', 'read'],
             space: ['all', 'read'],
