@@ -863,6 +863,7 @@ describe('enable()', () => {
 
   beforeEach(() => {
     alertsClient = new AlertsClient(alertsClientParams);
+    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue(existingAlert);
     savedObjectsClient.get.mockResolvedValue(existingAlert);
     alertsClientParams.createAPIKey.mockResolvedValue({
       apiKeysEnabled: false,
@@ -884,7 +885,11 @@ describe('enable()', () => {
 
   test('enables an alert', async () => {
     await alertsClient.enable({ id: '1' });
-    expect(savedObjectsClient.get).toHaveBeenCalledWith('alert', '1');
+    expect(savedObjectsClient.get).not.toHaveBeenCalled();
+    expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith('alert', '1', {
+      namespace: 'default',
+    });
+    expect(alertsClientParams.invalidateAPIKey).not.toHaveBeenCalled();
     expect(alertsClientParams.createAPIKey).toHaveBeenCalled();
     expect(savedObjectsClient.update).toHaveBeenCalledWith(
       'alert',
@@ -919,8 +924,25 @@ describe('enable()', () => {
     });
   });
 
+  test('invalidates API key if ever one existed prior to updating', async () => {
+    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue({
+      ...existingAlert,
+      attributes: {
+        ...existingAlert.attributes,
+        apiKey: Buffer.from('123:abc').toString('base64'),
+      },
+    });
+
+    await alertsClient.enable({ id: '1' });
+    expect(savedObjectsClient.get).not.toHaveBeenCalled();
+    expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith('alert', '1', {
+      namespace: 'default',
+    });
+    expect(alertsClientParams.invalidateAPIKey).toHaveBeenCalledWith({ id: '123' });
+  });
+
   test(`doesn't enable already enabled alerts`, async () => {
-    savedObjectsClient.get.mockResolvedValueOnce({
+    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce({
       ...existingAlert,
       attributes: {
         ...existingAlert.attributes,
@@ -959,7 +981,18 @@ describe('enable()', () => {
     );
   });
 
-  test('throws error when failing to load the saved object', async () => {
+  test('falls back when failing to getDecryptedAsInternalUser', async () => {
+    encryptedSavedObjects.getDecryptedAsInternalUser.mockRejectedValue(new Error('Fail'));
+
+    await alertsClient.enable({ id: '1' });
+    expect(savedObjectsClient.get).toHaveBeenCalledWith('alert', '1');
+    expect(alertsClientParams.logger.error).toHaveBeenCalledWith(
+      'enable(): Failed to load API key to invalidate on alert 1: Fail'
+    );
+  });
+
+  test('throws error when failing to load the saved object using SOC', async () => {
+    encryptedSavedObjects.getDecryptedAsInternalUser.mockRejectedValue(new Error('Fail'));
     savedObjectsClient.get.mockRejectedValueOnce(new Error('Fail to get'));
 
     await expect(alertsClient.enable({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
