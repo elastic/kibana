@@ -24,9 +24,9 @@ function isValidMoment(m) {
  * @param {state} object - one of ""
  * @param {[type]} display [description]
  */
-function TimeBuckets(uiSettings, dataPlugin) {
+function TimeBuckets(uiSettings, dataFieldsFormats) {
   this.uiSettings = uiSettings;
-  this.dataPlugin = dataPlugin;
+  this.dataFieldsFormats = dataFieldsFormats;
   return TimeBuckets.__cached__(this);
 }
 
@@ -294,7 +294,7 @@ TimeBuckets.prototype.getScaledDateFormat = function() {
 };
 
 TimeBuckets.prototype.getScaledDateFormatter = function() {
-  const fieldFormatsService = this.dataPlugin.fieldFormats;
+  const fieldFormatsService = this.dataFieldsFormats;
   const DateFieldFormat = fieldFormatsService.getType(fieldFormats.FIELD_FORMAT_IDS.DATE);
 
   return new DateFieldFormat(

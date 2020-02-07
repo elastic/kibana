@@ -24,12 +24,12 @@ import moment from 'moment-timezone';
 import { EuiCallOut, EuiLoadingChart, EuiSpacer, EuiEmptyPrompt, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ChartsPluginSetup } from 'src/plugins/charts/public';
+import { FieldFormatsRegistry } from 'src/plugins/data/common/field_formats/static';
 import { getThresholdAlertVisualizationData } from './lib/api';
 import { AggregationType, Comparator } from '../../../../common/types';
 import { IndexThresholdAlertParams } from '../types';
 /* TODO: This file was copied from ui/time_buckets for NP migration. We should clean this up and add TS support */
 import { TimeBuckets } from './lib/time_buckets';
-import { DataPublicPluginStart } from '../../../../../../../../src/plugins/data/public';
 
 const customTheme = () => {
   return {
@@ -79,11 +79,11 @@ const getDomain = (alertParams: any) => {
 
 const getTimeBuckets = (
   uiSettings: IUiSettingsClient,
-  dataPlugin: DataPublicPluginStart,
+  dataFieldsFormats: any,
   alertParams: any
 ) => {
   const domain = getDomain(alertParams);
-  const timeBuckets = new TimeBuckets(uiSettings, dataPlugin);
+  const timeBuckets = new TimeBuckets(uiSettings, dataFieldsFormats);
   timeBuckets.setBounds(domain);
   return timeBuckets;
 };
@@ -101,7 +101,7 @@ interface Props {
     'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'
   >;
   charts: ChartsPluginSetup;
-  dataPlugin: DataPublicPluginStart;
+  dataFieldsFormats: Pick<FieldFormatsRegistry, 'register'>;
 }
 
 export const ThresholdVisualization: React.FunctionComponent<Props> = ({
@@ -112,7 +112,7 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
   uiSettings,
   toastNotifications,
   charts,
-  dataPlugin,
+  dataFieldsFormats,
 }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<undefined | any>(undefined);
@@ -133,7 +133,7 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
   } = alertParams;
 
   const domain = getDomain(alertParams);
-  const timeBuckets = new TimeBuckets(uiSettings, dataPlugin);
+  const timeBuckets = new TimeBuckets(uiSettings, dataFieldsFormats);
   timeBuckets.setBounds(domain);
   const interval = timeBuckets.getInterval().expression;
   const visualizeOptions = {
@@ -247,7 +247,7 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
     const dateFormatter = (d: number) => {
       return moment(d)
         .tz(timezone)
-        .format(getTimeBuckets(uiSettings, dataPlugin, alertParams).getScaledDateFormat());
+        .format(getTimeBuckets(uiSettings, dataFieldsFormats, alertParams).getScaledDateFormat());
     };
     const aggLabel = aggregationTypes[aggType].text;
     return (

@@ -20,7 +20,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { HttpSetup, ToastsApi, IUiSettingsClient } from 'kibana/public';
 import { ChartsPluginSetup } from 'src/plugins/charts/public';
-import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { FieldFormatsRegistry } from 'src/plugins/data/common/field_formats/static';
 import { useAlertsContext } from '../../context/alerts_context';
 import { Alert, AlertAction, IErrorObject, AlertTypeModel, ActionTypeModel } from '../../../types';
 import { AlertForm, validateBaseProperties } from './alert_form';
@@ -41,7 +41,7 @@ interface AlertAddProps {
   alertTypeId?: string;
   canChangeTrigger?: boolean;
   charts?: ChartsPluginSetup;
-  dataPlugin?: DataPublicPluginStart;
+  dataFieldsFormats?: Pick<FieldFormatsRegistry, 'register'>;
 }
 
 export const AlertAdd = ({
@@ -54,7 +54,7 @@ export const AlertAdd = ({
   canChangeTrigger,
   alertTypeId,
   charts,
-  dataPlugin,
+  dataFieldsFormats,
 }: AlertAddProps) => {
   const initialAlert = ({
     params: {},
@@ -169,7 +169,7 @@ export const AlertAdd = ({
             serverError={serverError}
             canChangeTrigger={canChangeTrigger}
             charts={charts}
-            dataPlugin={dataPlugin}
+            dataFieldsFormats={dataFieldsFormats}
           />
         </EuiFlyoutBody>
         <EuiFlyoutFooter>

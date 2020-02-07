@@ -22,7 +22,7 @@ import {
 } from '@elastic/eui';
 import { HttpSetup, IUiSettingsClient, ToastsApi } from 'kibana/public';
 import { ChartsPluginSetup } from 'src/plugins/charts/public';
-import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { FieldFormatsRegistry } from 'src/plugins/data/common/field_formats/static';
 import { COMPARATORS, builtInComparators } from '../../../../common/constants';
 import {
   getMatchingIndicesForThresholdAlertType,
@@ -76,7 +76,7 @@ interface IndexThresholdProps {
     'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'
   >;
   charts?: ChartsPluginSetup;
-  dataPlugin?: DataPublicPluginStart;
+  dataFieldsFormats?: Pick<FieldFormatsRegistry, 'register'>;
 }
 
 export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThresholdProps> = ({
@@ -88,7 +88,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
   uiSettings,
   toastNotifications,
   charts,
-  dataPlugin,
+  dataFieldsFormats,
 }) => {
   const {
     index,
@@ -446,7 +446,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      {canShowVizualization || !uiSettings || !dataPlugin || !charts ? null : (
+      {canShowVizualization || !uiSettings || !dataFieldsFormats || !charts ? null : (
         <Fragment>
           <ThresholdVisualization
             alertParams={alertParams}
@@ -456,7 +456,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
             toastNotifications={toastNotifications}
             uiSettings={uiSettings}
             charts={charts}
-            dataPlugin={dataPlugin}
+            dataFieldsFormats={dataFieldsFormats}
           />
         </Fragment>
       )}

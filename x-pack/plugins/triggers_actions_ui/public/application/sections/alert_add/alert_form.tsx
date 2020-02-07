@@ -29,8 +29,8 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { ChartsPluginSetup } from 'src/plugins/charts/public';
-import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { HttpSetup, ToastsApi, IUiSettingsClient } from 'kibana/public';
+import { FieldFormatsRegistry } from 'src/plugins/data/common/field_formats/static';
 import { loadAlertTypes } from '../../lib/alert_api';
 import { loadActionTypes, loadAllActions } from '../../lib/action_connector_api';
 import { AlertReducerAction } from './alert_reducer';
@@ -99,7 +99,7 @@ interface AlertFormProps {
   >;
   canChangeTrigger?: boolean; // to hide Change trigger button
   charts?: ChartsPluginSetup;
-  dataPlugin?: DataPublicPluginStart;
+  dataFieldsFormats?: Pick<FieldFormatsRegistry, 'register'>;
 }
 
 interface ActiveActionConnectorState {
@@ -119,7 +119,7 @@ export const AlertForm = ({
   actionTypeRegistry,
   uiSettings,
   charts,
-  dataPlugin,
+  dataFieldsFormats,
 }: AlertFormProps) => {
   const [alertTypeModel, setAlertTypeModel] = useState<AlertTypeModel | null>(
     alertTypeRegistry.get(alert.alertTypeId)
@@ -645,7 +645,7 @@ export const AlertForm = ({
           toastNotifications={toastNotifications}
           uiSettings={uiSettings}
           charts={charts}
-          dataPlugin={dataPlugin}
+          dataFieldsFormats={dataFieldsFormats}
         />
       ) : null}
       <EuiSpacer size="xl" />
