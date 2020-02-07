@@ -79,6 +79,13 @@ export function fileDataVisualizerRoutes({
     })
   );
 
+  /**
+   * @apiGroup FileDataVisualizer
+   *
+   * @api {post} /api/ml/file_data_visualizer/import Import file data
+   * @apiName ImportFile
+   * @apiDescription Imports file data into elasticsearch index.
+   */
   router.post(
     {
       path: '/api/ml/file_data_visualizer/import',
