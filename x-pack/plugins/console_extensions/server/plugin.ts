@@ -68,7 +68,7 @@ export class ConsoleExtensionsServerPlugin implements Plugin<void, void, SetupDe
 
     getStartServices().then(([{ savedObjects }]) => {
       this.internalSavedObjectsClient = new SavedObjectsClient(
-        savedObjects.createInternalRepository()
+        savedObjects.createInternalRepository(['textObject'])
       );
     });
 

@@ -14,6 +14,11 @@ export function consoleExtensions(kibana: any) {
     id: APP.id,
     uiExports: {
       mappings,
+      savedObjectSchemas: {
+        textObject: {
+          hidden: true,
+        },
+      },
     },
   });
 }
