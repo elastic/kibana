@@ -24,7 +24,7 @@ import {
 } from '@elastic/eui';
 import { flattenPanelTree } from '../../../../lib/flatten_panel_tree';
 import { INDEX_OPEN } from '../../../../../../common/constants';
-import { indexManagementExtensions } from '../../../../../services/index_management_extensions';
+import { AppContextConsumer } from '../../../../app_context';
 import { getHttpClient } from '../../../../services/api';
 
 export class IndexActionsContextMenu extends Component {
@@ -46,7 +46,7 @@ export class IndexActionsContextMenu extends Component {
   confirmAction = isActionConfirmed => {
     this.setState({ isActionConfirmed });
   };
-  panels() {
+  panels(extensionsService) {
     const {
       closeIndices,
       openIndices,
@@ -210,7 +210,7 @@ export class IndexActionsContextMenu extends Component {
         this.setState({ renderConfirmModal: this.renderConfirmDeleteModal });
       },
     });
-    indexManagementExtensions.actions.forEach(actionExtension => {
+    extensionsService.actions.forEach(actionExtension => {
       const actionExtensionDefinition = actionExtension(indices, reloadIndices);
       if (actionExtensionDefinition) {
         const {
@@ -696,52 +696,61 @@ export class IndexActionsContextMenu extends Component {
   };
 
   render() {
-    const { indexNames } = this.props;
-    const selectedIndexCount = indexNames.length;
-    const {
-      iconSide = 'right',
-      anchorPosition = 'rightUp',
-      label = i18n.translate('xpack.idxMgmt.indexActionsMenu.manageButtonLabel', {
-        defaultMessage: 'Manage {selectedIndexCount, plural, one {index} other {indices}}',
-        values: { selectedIndexCount },
-      }),
-      iconType = 'arrowDown',
-    } = this.props;
-    const panels = this.panels();
-    const button = (
-      <EuiButton
-        data-test-subj="indexActionsContextMenuButton"
-        iconSide={iconSide}
-        aria-label={i18n.translate('xpack.idxMgmt.indexActionsMenu.manageButtonAriaLabel', {
-          defaultMessage: '{selectedIndexCount, plural, one {index} other {indices} } options',
-          values: { selectedIndexCount },
-        })}
-        onClick={this.onButtonClick}
-        iconType={iconType}
-        fill
-      >
-        {label}
-      </EuiButton>
-    );
-
     return (
-      <div>
-        {this.state.renderConfirmModal
-          ? this.state.renderConfirmModal(this.closeConfirmModal, getHttpClient())
-          : null}
-        <EuiPopover
-          id="contextMenuIndices"
-          button={button}
-          isOpen={this.state.isPopoverOpen}
-          closePopover={this.closePopover}
-          panelPaddingSize="none"
-          withTitle
-          anchorPosition={anchorPosition}
-          repositionOnScroll
-        >
-          <EuiContextMenu initialPanelId={0} panels={panels} />
-        </EuiPopover>
-      </div>
+      <AppContextConsumer>
+        {({ services }) => {
+          const { indexNames } = this.props;
+          const selectedIndexCount = indexNames.length;
+          const {
+            iconSide = 'right',
+            anchorPosition = 'rightUp',
+            label = i18n.translate('xpack.idxMgmt.indexActionsMenu.manageButtonLabel', {
+              defaultMessage: 'Manage {selectedIndexCount, plural, one {index} other {indices}}',
+              values: { selectedIndexCount },
+            }),
+            iconType = 'arrowDown',
+          } = this.props;
+
+          const panels = this.panels(services.extensions);
+
+          const button = (
+            <EuiButton
+              data-test-subj="indexActionsContextMenuButton"
+              iconSide={iconSide}
+              aria-label={i18n.translate('xpack.idxMgmt.indexActionsMenu.manageButtonAriaLabel', {
+                defaultMessage:
+                  '{selectedIndexCount, plural, one {index} other {indices} } options',
+                values: { selectedIndexCount },
+              })}
+              onClick={this.onButtonClick}
+              iconType={iconType}
+              fill
+            >
+              {label}
+            </EuiButton>
+          );
+
+          return (
+            <div>
+              {this.state.renderConfirmModal
+                ? this.state.renderConfirmModal(this.closeConfirmModal, getHttpClient())
+                : null}
+              <EuiPopover
+                id="contextMenuIndices"
+                button={button}
+                isOpen={this.state.isPopoverOpen}
+                closePopover={this.closePopover}
+                panelPaddingSize="none"
+                withTitle
+                anchorPosition={anchorPosition}
+                repositionOnScroll
+              >
+                <EuiContextMenu initialPanelId={0} panels={panels} />
+              </EuiPopover>
+            </div>
+          );
+        }}
+      </AppContextConsumer>
     );
   }
 }

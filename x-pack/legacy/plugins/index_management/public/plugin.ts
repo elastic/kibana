@@ -13,7 +13,10 @@ import { httpService } from './application/services/http';
 import { breadcrumbService } from './application/services/breadcrumbs';
 import { documentationService } from './application/services/documentation';
 import { notificationService } from './application/services/notification';
-import { UiMetricService, setUiMetricServiceInstance } from './application/services/ui_metric';
+import { UiMetricService } from './application/services/ui_metric';
+
+import { setExtensionsService } from './application/store/selectors';
+import { setUiMetricService } from './application/services/api';
 
 import { IndexMgmtMetricsType } from './types';
 import { MANAGEMENT_BREADCRUMB } from './_legacy';
@@ -27,6 +30,13 @@ export class IndexMgmtUIPlugin {
   private uiMetricService = new UiMetricService<IndexMgmtMetricsType>(UIM_APP_NAME);
   private extensionsService = new ExtensionsService();
 
+  constructor() {
+    // Temporary hack to provide the service instances in module files in order to avoid a big refactor
+    // For the selectors we should expose them through app dependencies and read them from there on each container component.
+    setExtensionsService(this.extensionsService);
+    setUiMetricService(this.uiMetricService);
+  }
+
   public setup(coreSetup: CoreSetup, plugins: any): IndexMgmtSetup {
     const { http, notifications, getStartServices } = coreSetup;
     const { usageCollection } = plugins;
@@ -35,9 +45,6 @@ export class IndexMgmtUIPlugin {
     httpService.init(http);
     notificationService.init(notifications);
     this.uiMetricService.setup(usageCollection);
-    // For now let's save the instance back in the service file until
-    // we refactor the code and have the dependency injected
-    setUiMetricServiceInstance(this.uiMetricService);
 
     plugins.management.sections.getSection('elasticsearch').registerApp({
       id: 'index_management',
