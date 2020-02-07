@@ -225,7 +225,7 @@ function optimized() {
           // to run tasks in a pool of workers. Currently it looks like
           // is requiring too much memory and break on large entry points
           // compilations (like this) one. Also the gain we have enabling
-          // that option is barely noticed. (1-2s gain)
+          // that option was barely noticed.
           // https://github.com/webpack-contrib/terser-webpack-plugin/issues/143
           parallel: false,
           sourceMap: false,
