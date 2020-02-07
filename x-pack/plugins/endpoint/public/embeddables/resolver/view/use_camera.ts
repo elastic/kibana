@@ -12,7 +12,6 @@ import React, {
   useContext,
 } from 'react';
 import { useSelector } from 'react-redux';
-import ResizeObserver from 'resize-observer-polyfill';
 import { SideEffectContext } from './side_effect_context';
 import { Matrix3 } from '../types';
 import { useResolverDispatch } from './use_resolver_dispatch';
@@ -260,6 +259,7 @@ function useAutoUpdatingClientRect(): [DOMRect | null, (node: Element | null) =>
       setRect(node.getBoundingClientRect());
     }
   }, []);
+  const { ResizeObserver } = useContext(SideEffectContext);
   useEffect(() => {
     if (nodeRef.current !== null) {
       const resizeObserver = new ResizeObserver(entries => {
@@ -272,6 +272,6 @@ function useAutoUpdatingClientRect(): [DOMRect | null, (node: Element | null) =>
         resizeObserver.disconnect();
       };
     }
-  }, [nodeRef]);
+  }, [ResizeObserver, nodeRef]);
   return [rect, ref];
 }

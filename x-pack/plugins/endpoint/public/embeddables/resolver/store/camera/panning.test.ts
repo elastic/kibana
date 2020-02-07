@@ -13,11 +13,11 @@ import { translation } from './selectors';
 describe('panning interaction', () => {
   let store: Store<CameraState, CameraAction>;
   let translationShouldBeCloseTo: (expectedTranslation: Vector2) => void;
-  let time: Date;
+  let time: number;
 
   beforeEach(() => {
     // The time isn't relevant as we don't use animations in this suite.
-    time = new Date(0);
+    time = 0;
     store = createStore(cameraReducer, undefined);
     translationShouldBeCloseTo = expectedTranslation => {
       const actualTranslation = translation(store.getState())(time);
@@ -79,7 +79,7 @@ describe('panning interaction', () => {
       store.dispatch(action);
     });
     it('the camera eventually moves up so that objects appear closer to the bottom of the screen', () => {
-      const aBitIntoTheFuture = new Date(time.getTime() + 100);
+      const aBitIntoTheFuture = time + 100;
 
       /**
        * Check the position once the animation has advanced 100ms

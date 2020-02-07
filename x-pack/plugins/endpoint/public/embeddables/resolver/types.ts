@@ -232,10 +232,19 @@ export type ProcessWithWidthMetadata = {
     }
 );
 
+/**
+ * The constructor for a ResizeObserver
+ */
+interface ResizeObserverConstructor {
+  prototype: ResizeObserver;
+  new (callback: ResizeObserverCallback): ResizeObserver;
+}
+
 export interface SideEffectors {
   /**
    * A function which returns the time since epoch in milliseconds. Injected because mocking Date is tedious.
    */
   timestamp: () => number;
   requestAnimationFrame: typeof window.requestAnimationFrame;
+  ResizeObserver: ResizeObserverConstructor;
 }

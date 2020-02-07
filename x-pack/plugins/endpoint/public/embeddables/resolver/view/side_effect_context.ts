@@ -4,10 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { createContext, Context } from 'react';
+import ResizeObserver from 'resize-observer-polyfill';
 import { SideEffectors } from '../types';
 
 const sideEffectors: SideEffectors = {
   timestamp: () => Date.now(),
   requestAnimationFrame: window.requestAnimationFrame,
+  ResizeObserver,
 };
 export const SideEffectContext: Context<SideEffectors> = createContext(sideEffectors);
