@@ -13,6 +13,7 @@
         - [Deployment](#deployment)
         - [Endpoints](#endpoints)
           - [Authenticate](#authenticate)
+          - [Opt-In|Out](#opt-inout)
           - [Inject telemetry](#inject-telemetry)
           - [Retrieve instructions](#retrieve-instructions)
         - [Data model](#data-model)
@@ -118,6 +119,10 @@ I'd appreciate some insights here to come up with a strong handshake mechanism t
 
 In order to _dereference_ the data, we can store these mappings in a Vault or Secrets provider instead of an index in our ES.
 
+##### Opt-In|Out
+
+Similar to the current telemetry, we want to keep track of when the user opts in or out of telemetry. The implementation can be very similar to the current one. But we recently learned we need to add the origin to know what application has telemetry disabled (Kibana, Beats, Enterprise Search, ...). This makes me wonder if we will ever want to provide a granular option for the user to be able to cherry-pick about what channels are sent and which ones should be disabled.
+
 ##### Inject telemetry
 
 In order to minimise the amount of requests, this `POST` should accept bulks of data in the payload (mind the payload size limits if any). It will require authentication based on the `deploymentID` and `token` explained in the [previous endpoint](#authenticate).
@@ -169,7 +174,7 @@ The users should be able to control how long they want to keep that information 
 
 The telemetry will be sent, preferably, from the server. Only falling back to the browser in case we detect the server is behind firewalls and it cannot reach the service or if the user explicitly sets the behaviour in the config.
 
-Periodically, the process (either in the server or the browser) will retrieve the telemetry to be sent by the channels, compile it into 1 bulk payload and send it encrypted to the [ingest endpoint](inject-telemetry) explained earlier.
+Periodically, the process (either in the server or the browser) will retrieve the telemetry to be sent by the channels, compile it into 1 bulk payload and send it encrypted to the [ingest endpoint](#inject-telemetry) explained earlier.
 
 How often it sends the data, depends on the channel specifications. We will have 3 levels of periodicity:
 
@@ -235,3 +240,4 @@ This telemetry is supposed to be internal only. Only internal developers will be
 # Unresolved questions
 
 - Pending to define a proper handshake in the authentication mechanism to reduce the chance of a man-in-the-middle attack or DDoS.
+- Opt-in/out per channel?
