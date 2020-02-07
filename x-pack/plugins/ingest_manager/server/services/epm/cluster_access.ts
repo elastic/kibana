@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IClusterClient, ScopedClusterClient } from 'src/core/server/';
+import { ICustomClusterClient, ScopedClusterClient } from 'src/core/server/';
 import { KibanaRequest } from 'kibana/server';
 
 export type CallESAsCurrentUser = ScopedClusterClient['callAsCurrentUser'];
 
-export function getClusterAccessor(esClient: IClusterClient, req: KibanaRequest) {
+export function getClusterAccessor(esClient: ICustomClusterClient, req: KibanaRequest) {
   return esClient.asScoped(req).callAsCurrentUser;
 }

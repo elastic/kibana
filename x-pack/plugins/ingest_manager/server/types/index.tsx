@@ -40,6 +40,7 @@ export {
   GetFileRequestSchema,
   GetInfoRequestSchema,
   InstallPackageRequestSchema,
+  DeletePackageRequestSchema,
 } from '../../common';
 
 export type AgentConfigUpdateHandler = (

@@ -35,3 +35,14 @@ export interface InstallPackageResponse {
   response: AssetReference[];
   success: boolean;
 }
+
+export const DeletePackageRequestSchema = {
+  params: schema.object({
+    pkgkey: schema.string(),
+  }),
+};
+
+export interface DeletePackageResponse {
+  response: AssetReference[];
+  success: boolean;
+}

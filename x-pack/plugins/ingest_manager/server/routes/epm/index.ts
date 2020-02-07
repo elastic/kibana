@@ -11,12 +11,14 @@ import {
   getFileHandler,
   getInfoHandler,
   installPackageHandler,
+  deletePackageHandler,
 } from './handlers';
 import {
   GetPackagesRequestSchema,
   GetFileRequestSchema,
   GetInfoRequestSchema,
   InstallPackageRequestSchema,
+  DeletePackageRequestSchema,
 } from '../../types';
 
 export const registerRoutes = (router: IRouter) => {
@@ -68,11 +70,9 @@ export const registerRoutes = (router: IRouter) => {
   router.get(
     {
       path: EPM_API_ROUTES.DELETE_PATTERN,
-      validate: false,
+      validate: DeletePackageRequestSchema,
       options: { tags: [`access:${PLUGIN_ID}`] },
     },
-    async (context, req, res) => {
-      return res.ok({ body: { hello: 'world' } });
-    }
+    deletePackageHandler
   );
 };
