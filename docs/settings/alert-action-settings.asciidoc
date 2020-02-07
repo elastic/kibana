@@ -11,7 +11,7 @@ Alerts and actions are enabled by default in {kib}, but require you configure th
 . <<configuring-tls-kib-es,Set up TLS encryption between {kib} and {es}>>.
 . <<general-alert-action-settings,Specify a value for `xpack.encrypted_saved_objects.encryptionKey`>>.
 
-You can configure the following settings in the `kibana.yml` file:
+You can configure the following settings in the `kibana.yml` file.
 
 
 [float]
