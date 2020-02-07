@@ -165,6 +165,7 @@ export class OptimizerConfig {
       repoRoot: this.repoRoot,
       watch: this.watch,
       optimizerVersion,
+      browserslistEnv: this.dist ? 'production' : process.env.BROWSERSLIST_ENV || 'dev',
     };
   }
 }

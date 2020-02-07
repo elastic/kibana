@@ -83,10 +83,6 @@ function usingWorkerProc<T>(
             : []),
           ...(config.maxWorkerCount <= 3 ? ['--max-old-space-size=2048'] : []),
         ],
-        env: {
-          ...process.env,
-          BROWSERSLIST_ENV: config.dist ? 'production' : process.env.BROWSERSLIST_ENV || 'dev',
-        },
       });
 
       return {

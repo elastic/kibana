@@ -79,7 +79,14 @@ Rx.defer(() => {
     bundles: parseBundles(process.argv[3]),
   });
 })
-  .pipe(mergeMap(({ workerConfig, bundles }) => runCompilers(workerConfig, bundles)))
+  .pipe(
+    mergeMap(({ workerConfig, bundles }) => {
+      // set BROWSERSLIST_ENV so that style/babel loaders see it before running compilers
+      process.env.BROWSERSLIST_ENV = workerConfig.browserslistEnv;
+
+      return runCompilers(workerConfig, bundles);
+    })
+  )
   .subscribe(
     msg => {
       send(msg);

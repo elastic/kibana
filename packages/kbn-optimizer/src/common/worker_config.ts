@@ -27,6 +27,7 @@ export interface WorkerConfig {
   readonly dist: boolean;
   readonly cache: boolean;
   readonly profileWebpack: boolean;
+  readonly browserslistEnv: string;
   readonly optimizerVersion: string;
 }
 
@@ -72,6 +73,11 @@ export function parseWorkerConfig(json: string): WorkerConfig {
       throw new Error('`optimizerVersion` must be a string');
     }
 
+    const browserslistEnv = parsed.browserslistEnv;
+    if (typeof browserslistEnv !== 'string') {
+      throw new Error('`browserslistEnv` must be a string');
+    }
+
     return {
       repoRoot,
       cache,
@@ -79,6 +85,7 @@ export function parseWorkerConfig(json: string): WorkerConfig {
       dist,
       profileWebpack,
       optimizerVersion,
+      browserslistEnv,
     };
   } catch (error) {
     throw new Error(`unable to parse worker config: ${error.message}`);
