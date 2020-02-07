@@ -53,8 +53,8 @@ and this is a file `x-pack/legacy/plugins/triggers_actions_ui/np_ready/public/ap
 
 ID: `threshold`
 
-In Create Alert flyout available registered alert types appears as a list of select cards:
-![Index Threshold select card in UI](https://i.imgur.com/hWm6Pdb.png)
+In Kibana UI this alert type is available as a select cards on Create Alert flyout:
+![Index Threshold select card](https://i.imgur.com/a0bqLwC.png)
 
 AlertTypeModel:
 
@@ -70,11 +70,13 @@ export function getAlertType(): AlertTypeModel {
 }
 ```
 alertParamsExpression form represented as an expression using `EuiExpression`:
-![Index Threshold Alert expression form](blob:https://imgur.com/86d1f717-1b5f-4890-861f-0e55ecc52566)
-With validation
-![Example Alert Type validation](https://i.imgur.com/NWo78vl.png)
+![Index Threshold Alert expression form](https://i.imgur.com/Ysk1ljY.png)
+
+Index Threshold Alert validation:
+![Index Threshold Alert validation](https://i.imgur.com/NWo78vl.png)
 
 ## Alert type model definition
+
 Each alert type should be defined as `AlertTypeModel` object with the next properties:
 ```
   id: string;
@@ -84,8 +86,17 @@ Each alert type should be defined as `AlertTypeModel` object with the next prope
   alertParamsExpression: React.FunctionComponent<any>;
   defaultActionMessage?: string;
 ```
-`name` and `iconClass` is used for representing select cards list:
+|Property|Description|
+|---|---|
+|id|Alert type id|
+|name|Name of alert type, that will be displayed on the select card in UI|
+|iconClass|Icon of alert type, that will be displayed on the select card in UI|
+|validate|Validation function for alert params|
+|alertParamsExpression|React functional component for building UI of current alert type params|
+|defaultActionMessage|Optional property for specifying default message in all actions with `message` property|
 
+IMPORTANT! Current UI support only one default action group. 
+Action groups is mapped from server API result for [GET /api/alert/types: List alert types](https://github.com/elastic/kibana/tree/master/x-pack/legacy/plugins/alerting#get-apialerttypes-list-alert-types).
 Server side alert type model:
 ```
 export interface AlertType {
@@ -98,16 +109,27 @@ export interface AlertType {
   executor: ({ services, params, state }: AlertExecutorOptions) => Promise<State | void>;
 }
 ```
-
-IMPORTANT! Current UI support only one default action group. 
-Action groups is mapped from server API result for [GET /api/alert/types: List alert types](https://github.com/elastic/kibana/tree/master/x-pack/legacy/plugins/alerting#get-apialerttypes-list-alert-types).
-Only one default (which means first item in the arrray) action group will be displayed in UI.
-Multiple action groups design and functionality is under development.
+Only one default (which means first item of the array) action group is displayed in UI.
+UI design and server API for multiple action groups is on the stage of discussion and development.
 
 ## Register alert type model
 
+There are two ways of registration new alert type:
+
+1. Directly in `triggers_actions_ui` plugin. In this case alert type will be available in Create Alert flyout of the Alerts and Actions management section.
 Registration code for a new alert type model should be added to the file `x-pack/legacy/plugins/triggers_actions_ui/np_ready/public/application/components/builtin_alert_types/index.ts`
-Only registered alert types available in the UI.
+Only registered alert types are available in UI.
+
+2. Register alert type in other plugin. In this case alert type will be available only in current plugin UI. 
+It should be done by importing dependency `TriggersAndActionsUIPublicPluginSetup` and adding the next code on plugin setup:
+
+```
+function getSomeNewAlertType() {
+  return { ... } as AlertTypeModel;
+}
+
+triggers_actions_ui.alertTypeRegistry.register(getSomeNewAlertType());
+```
 
 ## Create and register new alert type UI example
 
@@ -524,4 +546,19 @@ export interface AlertsContextValue {
 `toastNotifications` - optional toasts
 `charts` - optional property which is needed to display visualization of alert type expression
 `dataFieldsFormats` - optional property which is needed to display visualization of alert type expression
+
+## Build and register Action Types
+
+Kibana ships with a set of built-in action types UI:
+
+|Type|Id|Description|
+|---|---|---|
+|[Server log](#server-log)|`.log`|Logs messages to the Kibana log using `server.log()`|
+|[Email](#email)|`.email`|Sends an email using SMTP|
+|[Slack](#slack)|`.slack`|Posts a message to a slack channel|
+|[Index](#index)|`.index`|Indexes document(s) into Elasticsearch|
+|[Webhook](#webhook)|`.webhook`|Send a payload to a web service using HTTP POST or PUT|
+|[PagerDuty](#pagerduty)|`.pagerduty`|Trigger, resolve, or acknowlege an incident to a PagerDuty service|
+
+### Server log
 
