@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import { filter, map } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 import { COMPARE_ALL_OPTIONS, compareFilters } from '../filter_manager/lib/compare_filters';
 import { esFilters } from '../../../common';
 import { BaseStateContainer } from '../../../../../plugins/kibana_utils/public';
@@ -35,7 +35,7 @@ export interface QueryAppState {
  * @param stateContainer
  */
 export function connectToQueryAppState<S extends QueryAppState>(
-  { filterManager }: Pick<QueryStart, 'filterManager'>,
+  { filterManager, app$ }: Pick<QueryStart, 'filterManager' | 'app$'>,
   appState: BaseStateContainer<S>
 ) {
   // initial syncing
@@ -47,19 +47,9 @@ export function connectToQueryAppState<S extends QueryAppState>(
 
   // subscribe to updates
   const subs = [
-    filterManager
-      .getUpdates$()
-      .pipe(
-        map(() => filterManager.getAppFilters()),
-        filter(
-          // continue only if app state filters updated
-          appFilters =>
-            !compareFilters(appFilters, appState.get().filters || [], COMPARE_ALL_OPTIONS)
-        )
-      )
-      .subscribe(appFilters => {
-        appState.set({ ...appState.get(), filters: appFilters } as S);
-      }),
+    app$.subscribe(appQueryState => {
+      appState.set({ ...appState.get(), ...appQueryState } as S);
+    }),
 
     // if appFilters in dashboardStateManager changed (e.g browser history update),
     // sync it to filterManager

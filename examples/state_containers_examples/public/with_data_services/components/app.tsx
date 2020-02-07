@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { History } from 'history';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import { Router } from 'react-router-dom';
@@ -54,7 +54,7 @@ import {
   syncState,
 } from '../../../../../src/plugins/kibana_utils/public';
 import { PLUGIN_ID, PLUGIN_NAME } from '../../../common';
-import { Query } from '../../../../../src/plugins/data/common/query/types';
+// import { Query } from '../../../../../src/plugins/data/common/query/types';
 
 interface StateDemoAppDeps {
   notifications: CoreStart['notifications'];
@@ -67,7 +67,7 @@ interface StateDemoAppDeps {
 
 interface AppState extends QueryAppState {
   name: string;
-  query?: Query;
+  //  query?: Query;
 }
 const defaultAppState: AppState = {
   name: '',
@@ -107,12 +107,12 @@ const App = ({
   useGlobalStateSyncing(globalStateContainer, data.query, kbnUrlStateStorage);
   useAppStateSyncing(appStateContainer, data.query, kbnUrlStateStorage);
 
-  const onQuerySubmit = useCallback(
-    ({ query }) => {
-      appStateContainer.set({ ...appState, query });
-    },
-    [appStateContainer, appState]
-  );
+  // const onQuerySubmit = useCallback(
+  //   ({ query }) => {
+  //     appStateContainer.set({ ...appState, query });
+  //   },
+  //   [appStateContainer, appState]
+  // );
 
   const indexPattern = useIndexPattern(data);
   if (!indexPattern) return <div>Loading...</div>;
@@ -129,8 +129,8 @@ const App = ({
             indexPatterns={[indexPattern]}
             useDefaultBehaviors={true}
             // TODO: would be cool to also get rid of this query syncing
-            onQuerySubmit={onQuerySubmit}
-            query={appState.query}
+            // onQuerySubmit={onQuerySubmit}
+            // query={appState.query}
           />
           <EuiPage restrictWidth="1000px">
             <EuiPageBody>
