@@ -5,9 +5,12 @@
  */
 
 import { resolve } from 'path';
-import { Server } from 'src/legacy/server/kbn_server';
-import KbnServer from 'src/legacy/server/kbn_server';
-import { LegacyPluginApi, LegacyPluginSpec } from 'src/legacy/plugin_discovery/types';
+import KbnServer, { Server } from 'src/legacy/server/kbn_server';
+import {
+  LegacyPluginApi,
+  LegacyPluginSpec,
+  LegacyPluginOptions,
+} from 'src/legacy/plugin_discovery/types';
 import { KIBANA_ALERTING_ENABLED } from './common/constants';
 
 // @ts-ignore
@@ -52,7 +55,12 @@ const validConfigOptions: string[] = [
   'monitoring.cluster_alerts.email_notifications.email_address',
   'monitoring.ui.ccs.enabled',
   'monitoring.ui.elasticsearch.logFetchCount',
+  'monitoring.ui.logs.index',
 ];
+
+interface LegacyPluginOptionsWithKbnServer extends LegacyPluginOptions {
+  kbnServer?: KbnServer;
+}
 
 /**
  * Invokes plugin modules to instantiate the Monitoring plugin for Kibana
@@ -94,8 +102,7 @@ export const monitoring = (kibana: LegacyPluginApi): LegacyPluginSpec => {
         route,
         expose,
         _hapi: server,
-        // @ts-ignore
-        _kbnServer: this.kbnServer as KbnServer,
+        _kbnServer: this.kbnServer,
       };
 
       const legacyPlugins = plugins as Partial<typeof plugins> & { infra?: InfraPlugin };
@@ -127,5 +134,5 @@ export const monitoring = (kibana: LegacyPluginApi): LegacyPluginSpec => {
       const { infra } = server.plugins as Partial<typeof server.plugins> & { infra?: InfraPlugin };
       initInfraSource(server.config(), infra);
     },
-  });
+  } as Partial<LegacyPluginOptionsWithKbnServer>);
 };
