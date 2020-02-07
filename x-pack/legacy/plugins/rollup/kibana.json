@@ -1,0 +1,14 @@
+{
+  "id": "rollup",
+  "version": "kibana",
+  "requiredPlugins": [
+    "home",
+    "index_management",
+    "metrics"
+  ],
+  "optionalPlugins": [
+    "usageCollection"
+  ],
+  "server": true,
+  "ui": false
+}
