@@ -206,3 +206,32 @@ export const transformOrImportError = (
     });
   }
 };
+
+export const getMapDuplicates = (
+  arr: Array<{ [key: string]: string }>,
+  prop: string
+): Map<string, number> =>
+  arr.reduce<Map<string, number>>((acc, item) => {
+    if (item[prop] != null && acc.has(item[prop])) {
+      const totalView = acc.get(item[prop]) ?? 1;
+      acc.set(item[prop], totalView + 1);
+    } else if (item[prop] != null) {
+      acc.set(item[prop], 1);
+    }
+    return acc;
+  }, new Map());
+
+export const getDuplicates = (someMap: Map<string, number>): string | null => {
+  const hasDuplicates = Array.from(someMap.values()).some(i => i > 1);
+  if (hasDuplicates) {
+    return Array.from(someMap.entries())
+      .reduce<string[]>((acc, [key, val]) => {
+        if (val > 1) {
+          return [...acc, key];
+        }
+        return acc;
+      }, [])
+      .join(', ');
+  }
+  return null;
+};

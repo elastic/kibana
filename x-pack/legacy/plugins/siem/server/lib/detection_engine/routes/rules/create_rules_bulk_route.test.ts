@@ -20,6 +20,8 @@ import {
 } from '../__mocks__/request_responses';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { createRulesBulkRoute } from './create_rules_bulk_route';
+import { BulkError } from '../utils';
+import { OutputRuleAlertRest } from '../../types';
 
 describe('create_rules_bulk', () => {
   let { server, alertsClient, actionsClient, elasticsearch } = createMockServer();
@@ -136,6 +138,7 @@ describe('create_rules_bulk', () => {
       payload: [typicalPayload(), typicalPayload()],
     };
     const { payload } = await server.inject(request);
-    expect(JSON.parse(payload).error.status_code).toBe(409);
+    const output: Array<BulkError | Partial<OutputRuleAlertRest>> = JSON.parse(payload);
+    expect(output.some(item => item.error?.status_code === 409)).toBeTruthy();
   });
 });
