@@ -35,13 +35,8 @@ import { UpgradeWarning } from '../../../../components/upgrade';
 import { RefreshJobsListButton } from '../refresh_jobs_list_button';
 import { isEqual } from 'lodash';
 
-import {
-  DEFAULT_REFRESH_INTERVAL_MS,
-  DELETING_JOBS_REFRESH_INTERVAL_MS,
-  MINIMUM_REFRESH_INTERVAL_MS,
-} from '../../../../../../common/constants/jobs_list';
+import { DELETING_JOBS_REFRESH_INTERVAL_MS } from '../../../../../../common/constants/jobs_list';
 
-let jobsRefreshInterval = null;
 let deletingJobsRefreshTimeout = null;
 
 // 'isManagementTable' bool prop to determine when to configure table for use in Kibana management page
@@ -67,9 +62,6 @@ export class JobsListView extends Component {
     this.showDeleteJobModal = () => {};
     this.showStartDatafeedModal = () => {};
     this.showCreateWatchFlyout = () => {};
-
-    this.blockRefresh = false;
-    this.refreshIntervalSubscription = null;
   }
 
   componentDidMount() {
@@ -79,9 +71,6 @@ export class JobsListView extends Component {
       timefilter.disableTimeRangeSelector();
       timefilter.enableAutoRefreshSelector();
 
-      this.initAutoRefresh();
-      this.initAutoRefreshUpdate();
-
       // check to see if we need to open the start datafeed modal
       // after the page has rendered. This will happen if the user
       // has just created a job in the advanced wizard and selected to
@@ -90,57 +79,16 @@ export class JobsListView extends Component {
     }
   }
 
+  componentDidUpdate(prevProps) {
+    if (prevProps.lastRefresh !== this.props.lastRefresh && this.props.blockRefresh === false) {
+      this.refreshJobSummaryList();
+    }
+  }
+
   componentWillUnmount() {
     if (this.props.isManagementTable === undefined) {
-      if (this.refreshIntervalSubscription) this.refreshIntervalSubscription.unsubscribe();
       deletingJobsRefreshTimeout = null;
-      this.clearRefreshInterval();
     }
-  }
-
-  initAutoRefresh() {
-    const { value } = timefilter.getRefreshInterval();
-    if (value === 0) {
-      // the auto refresher starts in an off state
-      // so switch it on and set the interval to 30s
-      timefilter.setRefreshInterval({
-        pause: false,
-        value: DEFAULT_REFRESH_INTERVAL_MS,
-      });
-    }
-
-    this.setAutoRefresh();
-  }
-
-  initAutoRefreshUpdate() {
-    // update the interval if it changes
-    this.refreshIntervalSubscription = timefilter.getRefreshIntervalUpdate$().subscribe({
-      next: () => this.setAutoRefresh(),
-    });
-  }
-
-  setAutoRefresh() {
-    const { value, pause } = timefilter.getRefreshInterval();
-    if (pause) {
-      this.clearRefreshInterval();
-    } else {
-      this.setRefreshInterval(value);
-    }
-    // force load the jobs list when the refresh interval changes
-    this.refreshJobSummaryList(true);
-  }
-
-  setRefreshInterval(interval) {
-    this.clearRefreshInterval();
-    if (interval >= MINIMUM_REFRESH_INTERVAL_MS) {
-      this.blockRefresh = false;
-      jobsRefreshInterval = setInterval(() => this.refreshJobSummaryList(), interval);
-    }
-  }
-
-  clearRefreshInterval() {
-    this.blockRefresh = true;
-    clearInterval(jobsRefreshInterval);
   }
 
   openAutoStartDatafeedModal() {
@@ -281,7 +229,7 @@ export class JobsListView extends Component {
   };
 
   async refreshJobSummaryList(forceRefresh = false) {
-    if (forceRefresh === true || this.blockRefresh === false) {
+    if (forceRefresh === true || this.props.blockRefresh === false) {
       // Set loading to true for jobs_list table for initial job loading
       if (this.state.loading === null) {
         this.setState({ loading: true });
