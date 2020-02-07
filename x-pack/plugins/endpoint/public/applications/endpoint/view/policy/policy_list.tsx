@@ -155,7 +155,7 @@ export const PolicyList = React.memo(() => {
                 </h2>
               </EuiTitle>
               <h3>
-                <EuiTextColor color="subdued">
+                <EuiTextColor color="subdued" data-test-subj="policyTotalCount">
                   <FormattedMessage
                     id="xpack.endpoint.policyList.viewTitleTotalCount"
                     defaultMessage="{totalItemCount} Policies"
@@ -172,6 +172,7 @@ export const PolicyList = React.memo(() => {
               loading={loading}
               pagination={paginationSetup}
               onChange={handleTableChange}
+              data-test-subj="policyTable"
             />
           </EuiPageContentBody>
         </EuiPageContent>
