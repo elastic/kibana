@@ -5,7 +5,7 @@
  */
 import { i18n } from '@kbn/i18n';
 
-export class IndexManagementExtensions {
+export class ExtensionsService {
   private _summaries: any[] = [];
   private _actions: any[] = [];
   private _banners: any[] = [];
@@ -76,4 +76,4 @@ export class IndexManagementExtensions {
 /**
  * Temp, to be removed once IM is moved to the "plugins" folder
  */
-export const indexManagementExtensions = new IndexManagementExtensions();
+export const extensionsService = new ExtensionsService();

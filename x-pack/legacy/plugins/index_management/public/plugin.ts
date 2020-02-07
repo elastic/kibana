@@ -8,6 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { CoreSetup } from '../../../../../src/core/public';
 import { UIM_APP_NAME } from '../common/constants';
 
+import { AppDependencies } from './application';
 import { httpService } from './application/services/http';
 import { breadcrumbService } from './application/services/breadcrumbs';
 import { documentationService } from './application/services/documentation';
@@ -16,17 +17,15 @@ import { UiMetricService, setUiMetricServiceInstance } from './application/servi
 
 import { IndexMgmtMetricsType } from './types';
 import { MANAGEMENT_BREADCRUMB } from './_legacy';
-import { AppDependencies } from './application';
-import { IndexManagementExtensions } from './services';
-import { indexManagementExtensions } from './services/index_management_extensions';
+import { ExtensionsService } from './services';
 
 export interface IndexMgmtSetup {
-  indexManagementExtensions: IndexManagementExtensions;
+  indexManagementExtensions: ExtensionsService;
 }
 
 export class IndexMgmtUIPlugin {
   private uiMetricService = new UiMetricService<IndexMgmtMetricsType>(UIM_APP_NAME);
-  private indexManagementExtensions = new IndexManagementExtensions();
+  private extensionsService = new ExtensionsService();
 
   public setup(coreSetup: CoreSetup, plugins: any): IndexMgmtSetup {
     const { http, notifications, getStartServices } = coreSetup;
@@ -55,9 +54,7 @@ export class IndexMgmtUIPlugin {
         const appDependencies: AppDependencies = {
           services: {
             uiMetric: this.uiMetricService,
-            // TODO: use the plugin instances above (this.indexManagementExtensions) instead of the imported one
-            // after moving to the "plugins" folder
-            extensions: indexManagementExtensions,
+            extensions: this.extensionsService,
           },
         };
 
@@ -67,7 +64,7 @@ export class IndexMgmtUIPlugin {
     });
 
     return {
-      indexManagementExtensions: this.indexManagementExtensions,
+      indexManagementExtensions: this.extensionsService,
     };
   }
 

@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { IndexManagementExtensions } from './index_management_extensions';
+export { ExtensionsService } from './index_management_extensions';
