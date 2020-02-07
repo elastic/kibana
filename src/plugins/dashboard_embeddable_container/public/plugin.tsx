@@ -21,7 +21,7 @@
 
 import * as React from 'react';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
-import { IUiActionsSetup, IUiActionsStart } from '../../../plugins/ui_actions/public';
+import { UiActionsSetup, UiActionsStart } from '../../../plugins/ui_actions/public';
 import { CONTEXT_MENU_TRIGGER, IEmbeddableSetup, IEmbeddableStart } from './embeddable_plugin';
 import { ExpandPanelAction, ReplacePanelAction } from '.';
 import { DashboardContainerFactory } from './embeddable/dashboard_container_factory';
@@ -34,13 +34,13 @@ import {
 
 interface SetupDependencies {
   embeddable: IEmbeddableSetup;
-  uiActions: IUiActionsSetup;
+  uiActions: UiActionsSetup;
 }
 
 interface StartDependencies {
   embeddable: IEmbeddableStart;
   inspector: InspectorStartContract;
-  uiActions: IUiActionsStart;
+  uiActions: UiActionsStart;
 }
 
 export type Setup = void;
