@@ -19,7 +19,6 @@ import { buildRequestPayload, formatJson, getFromLocalStorage } from '../lib/hel
 import { Request, Response } from '../common/types';
 import { Output } from './output';
 import { MainControls } from './main_controls';
-import { Settings } from './settings';
 import { Editor } from './editor';
 
 export function PainlessPlayground({
@@ -62,23 +61,10 @@ export function PainlessPlayground({
     setShowRequestFlyout(!showRequestFlyout);
   };
 
-  const renderMainControls = () => (
-    <MainControls
-      submit={submit}
-      disabled={code.trim() === ''}
-      toggleFlyout={toggleViewRequestFlyout}
-    />
-  );
-
   return (
     <>
-      <EuiFlexGroup
-        className="consoleContainer"
-        gutterSize="s"
-        direction="column"
-        responsive={false}
-      >
-        <EuiFlexItem grow={false}>
+      <EuiFlexGroup gutterSize="s">
+        <EuiFlexItem>
           <EuiTitle className="euiScreenReaderOnly">
             <h1>
               {i18n.translate('xpack.painless_playground.title', {
@@ -87,40 +73,29 @@ export function PainlessPlayground({
             </h1>
           </EuiTitle>
 
-          <EuiTabbedContent
-            size="s"
-            tabs={[
-              {
-                id: 'input',
-                name: 'Code',
-                content: (
-                  <Editor code={code} setCode={setCode} renderMainControls={renderMainControls} />
-                ),
-              },
-              {
-                id: 'settings',
-                name: 'Settings',
-                content: (
-                  <Settings
-                    context={context}
-                    contextSetup={contextSetup}
-                    setContext={setContext}
-                    setContextSetup={setContextSetup}
-                    renderMainControls={renderMainControls}
-                  />
-                ),
-              },
-            ]}
+          <Editor code={code} setCode={setCode} />
+        </EuiFlexItem>
+
+        <EuiFlexItem>
+          <Output
+            response={response}
+            context={context}
+            setContext={setContext}
+            contextSetup={contextSetup}
+            setContextSetup={setContextSetup}
           />
         </EuiFlexItem>
-        {response.error || typeof response.result !== 'undefined' ? (
-          <EuiFlexItem>
-            <Output response={response} />
-          </EuiFlexItem>
-        ) : null}
       </EuiFlexGroup>
+
+      <MainControls
+        submit={submit}
+        disabled={code.trim() === ''}
+        toggleFlyout={toggleViewRequestFlyout}
+        isFlyoutOpen={showRequestFlyout}
+      />
+
       {showRequestFlyout && (
-        <EuiFlyout onClose={() => setShowRequestFlyout(false)}>
+        <EuiFlyout onClose={() => setShowRequestFlyout(false)} maxWidth={640}>
           <EuiPageContent>
             <EuiTitle>
               <h3>

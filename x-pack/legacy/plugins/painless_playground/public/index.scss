@@ -1,0 +1,29 @@
+// Import the EUI global scope so we can use EUI constants
+@import 'src/legacy/ui/public/styles/_styling_constants';
+
+/**
+ * 1. This is a very brittle way of preventing the editor and other content from disappearing
+ *    behind the bottom bar.
+ */
+.painlessPlaygroundBottomBarPlaceholder {
+  height: $euiSize * 4.5; /* [1] */
+}
+
+.painlessPlaygroundRightPane {
+  border-right: none;
+  border-top: none;
+  border-bottom: none;
+  border-radius: 0;
+  padding-top: 0;
+  height: 100%;
+}
+
+.painlessPlaygroundRightPane__tabs {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+
+  [role="tabpanel"] {
+    height: 100%;
+  }
+}

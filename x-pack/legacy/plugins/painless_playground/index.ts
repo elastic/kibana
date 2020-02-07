@@ -23,6 +23,7 @@ export const painlessPlayground = (kibana: any) =>
       }).default();
     },
     uiExports: {
+      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       devTools: [resolve(__dirname, 'public/register')],
     },
     init: (server: Legacy.Server) => {

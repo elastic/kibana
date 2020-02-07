@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiBottomBar, EuiButton, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
@@ -14,29 +14,40 @@ interface Props {
   toggleFlyout: () => void;
 }
 
-export function MainControls({ submit, disabled, toggleFlyout }: Props) {
+export function MainControls({ submit, disabled, toggleFlyout, isFlyoutOpen }: Props) {
   return (
-    <EuiFlexGroup gutterSize="s">
-      <EuiFlexItem grow={false}>
-        <EuiButton fill onClick={submit} isDisabled={disabled} data-test-subj="btnExecute">
-          <FormattedMessage
-            id="xpack.painless_playground.executeButtonLabel"
-            defaultMessage="Execute"
-          />
-        </EuiButton>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiButton
-          fill
-          onClick={toggleFlyout}
-          isDisabled={disabled}
-          data-test-subj="btnViewRequest"
-        >
-          {i18n.translate('xpack.painless_playground.previewRequestButtonLabel', {
-            defaultMessage: 'Preview Request',
-          })}
-        </EuiButton>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <>
+      <div className="painlessPlaygroundBottomBarPlaceholder" />
+
+      <EuiBottomBar>
+        <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              color="ghost"
+              onClick={toggleFlyout}
+              isDisabled={disabled}
+              data-test-subj="btnViewRequest"
+            >
+              {isFlyoutOpen
+                ? i18n.translate('xpack.painless_playground.hideRequestButtonLabel', {
+                    defaultMessage: 'Hide request',
+                  })
+                : i18n.translate('xpack.painless_playground.showRequestButtonLabel', {
+                    defaultMessage: 'Show request',
+                  })}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+
+          <EuiFlexItem grow={false}>
+            <EuiButton fill onClick={submit} isDisabled={disabled} data-test-subj="btnExecute">
+              <FormattedMessage
+                id="xpack.painless_playground.executeButtonLabel"
+                defaultMessage="Test"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiBottomBar>
+    </>
   );
 }
