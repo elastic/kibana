@@ -5,14 +5,21 @@
  */
 import { TypeOf } from '@kbn/config-schema';
 import { RequestHandler, CustomHttpResponseOptions } from 'kibana/server';
-import { GetFileRequestSchema, GetInfoRequestSchema, EPM_API_ROOT } from '../../../common';
+import {
+  GetPackagesRequestSchema,
+  GetFileRequestSchema,
+  GetInfoRequestSchema,
+  InstallPackageRequestSchema,
+  InstallPackageResponse,
+  EPM_API_ROOT,
+} from '../../../common';
 import {
   getCategories,
   getPackages,
   getFile,
   getPackageInfo,
-} from '../../services/epm/packages/get';
-import { GetPackagesRequestSchema } from '../../types';
+  installPackage,
+} from '../../services/epm/packages';
 
 export const getCategoriesHandler: RequestHandler = async (context, request, response) => {
   try {
@@ -99,6 +106,29 @@ export const getInfoHandler: RequestHandler<TypeOf<typeof GetInfoRequestSchema.p
         success: true,
       },
     });
+  } catch (e) {
+    return response.customError({
+      statusCode: 500,
+      body: { message: e.message },
+    });
+  }
+};
+
+export const installPackageHandler: RequestHandler<TypeOf<
+  typeof InstallPackageRequestSchema.params
+>> = async (context, request, response) => {
+  try {
+    const { pkgkey } = request.params;
+    const savedObjectsClient = context.core.savedObjects.client;
+    const res = await installPackage({
+      savedObjectsClient,
+      pkgkey,
+    });
+    const body: InstallPackageResponse = {
+      response: res,
+      success: true,
+    };
+    return response.ok({ body });
   } catch (e) {
     return response.customError({
       statusCode: 500,

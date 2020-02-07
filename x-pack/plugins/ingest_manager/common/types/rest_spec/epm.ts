@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { schema } from '@kbn/config-schema';
+import { AssetReference } from '../epm';
 
 export const GetPackagesRequestSchema = {
   query: schema.object({
@@ -23,3 +24,14 @@ export const GetInfoRequestSchema = {
     pkgkey: schema.string(),
   }),
 };
+
+export const InstallPackageRequestSchema = {
+  params: schema.object({
+    pkgkey: schema.string(),
+  }),
+};
+
+export interface InstallPackageResponse {
+  response: AssetReference[];
+  success: boolean;
+}
