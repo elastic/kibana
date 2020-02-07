@@ -40,11 +40,7 @@ export const EmptyPrompt = ({
         </>
       }
       actions={
-        <EuiButton
-          color="primary"
-          fill
-          onClick={() => onCreateCustomActionClick()}
-        >
+        <EuiButton color="primary" fill onClick={onCreateCustomActionClick}>
           {i18n.translate(
             'xpack.apm.settings.customizeUI.customActions.createCustomAction',
             { defaultMessage: 'Create custom action' }
