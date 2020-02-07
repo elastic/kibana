@@ -6,19 +6,15 @@
 
 import { Dispatch, MiddlewareAPI } from 'redux';
 import { CoreStart } from 'kibana/public';
-import { Immutable, AlertData } from '../../../common/types';
 import { EndpointListState } from './store/endpoint_list';
 import { AppAction } from './store/action';
+import { AlertResultList } from '../../../common/types';
 
 export type MiddlewareFactory = (
   coreStart: CoreStart
 ) => (
   api: MiddlewareAPI<Dispatch<AppAction>, GlobalState>
 ) => (next: Dispatch<AppAction>) => (action: AppAction) => unknown;
-
-export type AlertListState = Immutable<{
-  alerts: AlertData[];
-}>;
 
 // REFACTOR to use Types from Ingest Manager - see: https://github.com/elastic/endpoint-app-team/issues/150
 export interface PolicyData {
@@ -53,3 +49,6 @@ export interface GlobalState {
   readonly alertList: AlertListState;
   readonly policyList: PolicyListState;
 }
+
+export type AlertListData = AlertResultList;
+export type AlertListState = AlertResultList;
