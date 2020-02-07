@@ -43,7 +43,8 @@ const FormattedDateAndTime: React.FC<{ date: Date }> = ({ date }) => {
     </span>
   );
 };
-const renderDate = (d: string) => <FormattedDateAndTime date={new Date(d)} />;
+
+const renderDate = (d: any) => <FormattedDateAndTime date={new Date(d as string)} />;
 
 export const PolicyList = React.memo(() => {
   usePageId('policyListPage');
