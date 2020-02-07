@@ -51,23 +51,22 @@ export function setServices(newServices: any) {
 export { angular };
 export { wrapInI18nContext } from 'ui/i18n';
 export { buildVislibDimensions } from '../../../visualizations/public';
-// @ts-ignore
-export { callAfterBindingsWorkaround } from 'ui/compat';
 export { getRequestInspectorStats, getResponseInspectorStats } from '../../../data/public';
 // @ts-ignore
 export { intervalOptions } from 'ui/agg_types';
-// @ts-ignore
-export { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
 export { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
 export { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 // @ts-ignore
 export { timezoneProvider } from 'ui/vis/lib/timezone';
 // @ts-ignore
 export { tabifyAggResponse } from 'ui/agg_response/tabify';
-export { ensureDefaultIndexPattern } from 'ui/legacy_compat';
 export { unhashUrl } from '../../../../../plugins/kibana_utils/public';
-// @ts-ignore
-export { formatMsg, formatStack } from 'ui/notify/lib/index';
+export {
+  migrateLegacyQuery,
+  ensureDefaultIndexPattern,
+  formatMsg,
+  formatStack,
+} from '../../../../../plugins/kibana_legacy/public';
 
 // EXPORT types
 export {
