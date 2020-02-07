@@ -16,11 +16,6 @@ export class Privilege {
   public grantsPrivilege(candidatePrivilege: Privilege) {
     return this.checkActions(this.actions, candidatePrivilege.actions).hasAllRequested;
   }
-
-  public equals({ type, id }: Privilege) {
-    return type === this.type && id === this.id;
-  }
-
   private checkActions(knownActions: string[], candidateActions: string[]) {
     const missing = candidateActions.filter(action => !knownActions.includes(action));
 
