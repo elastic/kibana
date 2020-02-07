@@ -8,6 +8,9 @@ node scripts/build_new_platform_plugins \
   --scan-dir "$KIBANA_DIR/test/plugin_functional/plugins" \
   --verbose;
 
+# doesn't persist, also set in kibanaPipeline.groovy
+export KBN_NP_PLUGINS_BUILT=true
+
 echo " -> downloading es snapshot"
 node scripts/es snapshot --license=oss --download-only;
 
