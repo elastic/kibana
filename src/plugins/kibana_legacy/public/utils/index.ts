@@ -17,15 +17,12 @@
  * under the License.
  */
 
-import MarkdownIt from 'markdown-it';
-import { uiModules } from 'ui/modules';
-import 'angular-sanitize';
-
-const markdownIt = new MarkdownIt({
-  html: false,
-  linkify: true,
-});
-
-uiModules.get('kibana', ['ngSanitize']).filter('markdown', function($sanitize) {
-  return md => (md ? $sanitize(markdownIt.render(md)) : '');
-});
+export * from './migrate_legacy_query';
+export * from './system_api';
+export * from './url_overflow_service';
+// @ts-ignore
+export { KbnAccessibleClickProvider } from './kbn_accessible_click';
+// @ts-ignore
+export { PrivateProvider, IPrivate } from './private';
+// @ts-ignore
+export { registerListenEventListener } from './register_listen_event_listener';

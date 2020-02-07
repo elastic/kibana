@@ -28,25 +28,33 @@ import {
   IRootScopeService,
 } from 'angular';
 import $ from 'jquery';
-import _, { cloneDeep, forOwn, get, set } from 'lodash';
+import { cloneDeep, forOwn, get, set } from 'lodash';
 import React, { Fragment } from 'react';
 import * as Rx from 'rxjs';
+import { ChromeBreadcrumb } from 'kibana/public';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { CoreStart, LegacyCoreStart } from 'kibana/public';
-
-import { fatalError } from 'ui/notify';
-import { RouteConfiguration } from 'ui/routes/route_manager';
-// @ts-ignore
-import { modifyUrl } from 'ui/url';
-import { toMountPoint } from '../../../../plugins/kibana_react/public';
-// @ts-ignore
-import { UrlOverflowService } from '../error_url_overflow';
-// @ts-ignore
-import { isSystemApiRequest } from '../system_api';
+import { modifyUrl } from '../../../../core/utils';
+import { toMountPoint } from '../../../kibana_react/public';
+import { isSystemApiRequest, UrlOverflowService } from '../utils';
+import { formatAngularHttpError, isAngularHttpError } from '../notify/lib';
 
 const URL_LIMIT_WARN_WITHIN = 1000;
+
+export interface RouteConfiguration {
+  controller?: string | ((...args: any[]) => void);
+  redirectTo?: string;
+  resolveRedirectTo?: (...args: any[]) => void;
+  reloadOnSearch?: boolean;
+  reloadOnUrl?: boolean;
+  outerAngularWrapperRoute?: boolean;
+  resolve?: object;
+  template?: string;
+  k7Breadcrumbs?: (...args: any[]) => ChromeBreadcrumb[];
+  requireUICapability?: string;
+}
 
 /**
  * Detects whether a given angular route is a dummy route that doesn't
@@ -91,7 +99,7 @@ export const configureAppAngularModule = (
     .value('esUrl', getEsUrl(newPlatform))
     .value('uiCapabilities', newPlatform.application.capabilities)
     .config(setupCompileProvider(newPlatform))
-    .config(setupLocationProvider(newPlatform))
+    .config(setupLocationProvider())
     .config($setupXsrfRequestInterceptor(newPlatform))
     .run(capture$httpLoadingCount(newPlatform))
     .run($setupBreadcrumbsAutoClear(newPlatform, isLocalAngular))
@@ -122,9 +130,7 @@ const setupCompileProvider = (newPlatform: LegacyCoreStart) => (
   }
 };
 
-const setupLocationProvider = (newPlatform: CoreStart) => (
-  $locationProvider: ILocationProvider
-) => {
+const setupLocationProvider = () => ($locationProvider: ILocationProvider) => {
   $locationProvider.html5Mode({
     enabled: false,
     requireBase: false,
@@ -165,9 +171,6 @@ export const $setupXsrfRequestInterceptor = (newPlatform: LegacyCoreStart) => {
  * and adds a root-level watcher that will capture the count of
  * active $http requests on each digest loop and expose the count to
  * the core.loadingCount api
- * @param  {Angular.Scope} $rootScope
- * @param  {HttpService} $http
- * @return {undefined}
  */
 const capture$httpLoadingCount = (newPlatform: CoreStart) => (
   $rootScope: IRootScopeService,
@@ -260,7 +263,10 @@ const $setupBreadcrumbsAutoClear = (newPlatform: CoreStart, isLocalAngular: bool
     try {
       newPlatform.chrome.setBreadcrumbs($injector.invoke(k7BreadcrumbsProvider));
     } catch (error) {
-      fatalError(error);
+      if (isAngularHttpError(error)) {
+        error = formatAngularHttpError(error);
+      }
+      newPlatform.fatalErrors.add(error, 'location');
     }
   });
 };
@@ -302,7 +308,10 @@ const $setupBadgeAutoClear = (newPlatform: CoreStart, isLocalAngular: boolean) =
     try {
       newPlatform.chrome.setBadge($injector.invoke(badgeProvider));
     } catch (error) {
-      fatalError(error);
+      if (isAngularHttpError(error)) {
+        error = formatAngularHttpError(error);
+      }
+      newPlatform.fatalErrors.add(error, 'location');
     }
   });
 };
@@ -374,13 +383,13 @@ const $setupUrlOverflowHandling = (newPlatform: CoreStart, isLocalAngular: boole
     try {
       if (urlOverflow.check($location.absUrl()) <= URL_LIMIT_WARN_WITHIN) {
         newPlatform.notifications.toasts.addWarning({
-          title: i18n.translate('common.ui.chrome.bigUrlWarningNotificationTitle', {
+          title: i18n.translate('kibana_legacy.bigUrlWarningNotificationTitle', {
             defaultMessage: 'The URL is big and Kibana might stop working',
           }),
           text: toMountPoint(
             <Fragment>
               <FormattedMessage
-                id="common.ui.chrome.bigUrlWarningNotificationMessage"
+                id="kibana_legacy.bigUrlWarningNotificationMessage"
                 defaultMessage="Either enable the {storeInSessionStorageParam} option
                   in {advancedSettingsLink} or simplify the onscreen visuals."
                 values={{
@@ -388,7 +397,7 @@ const $setupUrlOverflowHandling = (newPlatform: CoreStart, isLocalAngular: boole
                   advancedSettingsLink: (
                     <a href="#/management/kibana/settings">
                       <FormattedMessage
-                        id="common.ui.chrome.bigUrlWarningNotificationMessage.advancedSettingsLinkText"
+                        id="kibana_legacy.bigUrlWarningNotificationMessage.advancedSettingsLinkText"
                         defaultMessage="advanced settings"
                       />
                     </a>

@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { PromiseService } from './promises';
+export { ToastNotifications } from './toast_notifications';
