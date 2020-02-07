@@ -135,8 +135,8 @@ export function observeWorker(
         type: 'worker started',
         bundles,
       }),
-      observeStdio$(proc.stdout!, 'stdout'),
-      observeStdio$(proc.stderr!, 'stderr'),
+      observeStdio$(proc.stdout, 'stdout'),
+      observeStdio$(proc.stderr, 'stderr'),
       Rx.fromEvent<[unknown]>(proc, 'message')
         .pipe(
           // validate the messages from the process
