@@ -21,6 +21,7 @@ import { CoreSetup, CoreStart } from '../../../../../core/public';
 import {
   aggTypes,
   AggType,
+  AggTypesRegistry,
   AggConfig,
   AggConfigs,
   FieldParamType,
@@ -32,11 +33,11 @@ import {
 } from './aggs';
 
 interface AggsSetup {
-  types: typeof aggTypes;
+  types: ReturnType<AggTypesRegistry['setup']>;
 }
 
 interface AggsStart {
-  types: typeof aggTypes;
+  types: ReturnType<AggTypesRegistry['start']>;
   AggConfig: typeof AggConfig;
   AggConfigs: typeof AggConfigs;
   AggType: typeof AggType;
@@ -63,11 +64,16 @@ export interface SearchStart {
  * it will move into the existing search service in src/plugins/data/public/search
  */
 export class SearchService {
+  private readonly aggTypesRegistry = new AggTypesRegistry();
+
   public setup(core: CoreSetup): SearchSetup {
+    const aggTypesSetup = this.aggTypesRegistry.setup();
+    aggTypes.buckets.forEach(b => aggTypesSetup.registerBucket(b));
+    aggTypes.metrics.forEach(m => aggTypesSetup.registerMetric(m));
+
     return {
       aggs: {
-        types: aggTypes, // TODO convert to registry
-        // TODO add other items as needed
+        types: aggTypesSetup,
       },
     };
   }
@@ -75,7 +81,7 @@ export class SearchService {
   public start(core: CoreStart): SearchStart {
     return {
       aggs: {
-        types: aggTypes, // TODO convert to registry
+        types: this.aggTypesRegistry.start(),
         AggConfig, // TODO make static
         AggConfigs,
         AggType,
