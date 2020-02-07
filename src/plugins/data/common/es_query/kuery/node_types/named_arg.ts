@@ -20,8 +20,10 @@
 import _ from 'lodash';
 import * as ast from '../ast';
 import { nodeTypes } from '../node_types';
+import { NamedArgTypeBuildNode } from './types';
+import { JsonObject } from '../types';
 
-export function buildNode(name, value) {
+export function buildNode(name: string, value: any): NamedArgTypeBuildNode {
   const argumentNode =
     _.get(value, 'type') === 'literal' ? value : nodeTypes.literal.buildNode(value);
   return {
@@ -31,6 +33,6 @@ export function buildNode(name, value) {
   };
 }
 
-export function toElasticsearchQuery(node) {
+export function toElasticsearchQuery(node: any): JsonObject {
   return ast.toElasticsearchQuery(node.value);
 }
