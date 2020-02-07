@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import { map } from 'rxjs/operators';
+import { filter } from 'rxjs/operators';
 import { COMPARE_ALL_OPTIONS, compareFilters } from '../filter_manager/lib/compare_filters';
 import { BaseStateContainer } from '../../../../../plugins/kibana_utils/public';
 import { QuerySetup, QueryStart } from '../query_service';
@@ -33,26 +33,35 @@ export function connectToQueryAppState<S extends QueryAppState>(
   { filterManager, app$ }: Pick<QueryStart | QuerySetup, 'filterManager' | 'app$'>,
   appState: BaseStateContainer<S>
 ) {
+  function shouldSync() {
+    const stateContainerFilters = appState.get().filters;
+    if (!stateContainerFilters) return true;
+    const filterManagerFilters = filterManager.getAppFilters();
+    const areAppFiltersEqual = compareFilters(
+      stateContainerFilters,
+      filterManagerFilters,
+      COMPARE_ALL_OPTIONS
+    );
+    if (areAppFiltersEqual) return false;
+
+    return true;
+  }
+
   // initial syncing
   // TODO:
   // filterManager takes precedence, this seems like a good default,
   // and apps could anyway set their own value after initialisation,
   // but maybe maybe this should be a configurable option?
-  appState.set({ ...appState.get(), filters: filterManager.getAppFilters() });
+  if (shouldSync()) {
+    appState.set({ ...appState.get(), filters: filterManager.getAppFilters() });
+  }
 
-  // subscribe to updates
   const subs = [
-    app$.subscribe(appQueryState => {
+    app$.pipe(filter(shouldSync)).subscribe(appQueryState => {
       appState.set({ ...appState.get(), ...appQueryState });
     }),
-
-    // if appFilters in dashboardStateManager changed (e.g browser history update),
-    // sync it to filterManager
-    appState.state$.pipe(map(state => state.filters)).subscribe(appFilters => {
-      appFilters = appFilters || [];
-      if (!compareFilters(appFilters, filterManager.getAppFilters(), COMPARE_ALL_OPTIONS)) {
-        filterManager.setAppFilters(_.cloneDeep(appFilters));
-      }
+    appState.state$.pipe(filter(shouldSync)).subscribe(appFilters => {
+      filterManager.setAppFilters(_.cloneDeep(appFilters.filters || []));
     }),
   ];
 
