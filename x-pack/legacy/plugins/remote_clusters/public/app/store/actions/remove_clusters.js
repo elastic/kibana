@@ -46,7 +46,7 @@ export const removeClusters = names => async (dispatch, getState) => {
 
   await Promise.all([
     sendRemoveClusterRequest(names.join(',')).then(response => {
-      ({ itemsDeleted, errors } = response.data);
+      ({ itemsDeleted, errors } = response);
     }),
     // Wait at least half a second to avoid a weird flicker of the saving feedback (only visible
     // when requests resolve very quickly).
@@ -55,7 +55,7 @@ export const removeClusters = names => async (dispatch, getState) => {
     const errorTitle = getErrorTitle(names.length, names[0]);
     toasts.addDanger({
       title: errorTitle,
-      text: error.data.message,
+      text: error.body.message,
     });
   });
 

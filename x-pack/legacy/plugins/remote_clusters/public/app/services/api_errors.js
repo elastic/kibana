@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { fatalError, toasts } from './notification';
+import { toasts, fatalError } from './notification';
 
 function createToastConfig(error, errorTitle) {
-  // Expect an error in the shape provided by Angular's $http service.
-  if (error && error.data) {
-    const { error: errorString, statusCode, message } = error.data;
+  // Expect an error in the shape provided by http service.
+  if (error && error.body) {
+    const { error: errorString, statusCode, message } = error.body;
     return {
       title: errorTitle,
       text: `${statusCode}: ${errorString}. ${message}`,
@@ -26,7 +26,7 @@ export function showApiWarning(error, errorTitle) {
 
   // This error isn't an HTTP error, so let the fatal error screen tell the user something
   // unexpected happened.
-  return fatalError(error, errorTitle);
+  return fatalError().add(error, errorTitle);
 }
 
 export function showApiError(error, errorTitle) {
@@ -38,5 +38,5 @@ export function showApiError(error, errorTitle) {
 
   // This error isn't an HTTP error, so let the fatal error screen tell the user something
   // unexpected happened.
-  fatalError(error, errorTitle);
+  fatalError().add(error, errorTitle);
 }

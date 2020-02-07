@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { fatalError, toasts } from '../../services/notification';
+import { toasts, fatalError } from '../../services/notification';
 import { CRUD_APP_BASE_PATH } from '../../constants';
 import { loadClusters } from './load_clusters';
 
@@ -60,7 +60,7 @@ export const editCluster = cluster => async dispatch => {
 
     // This error isn't an HTTP error, so let the fatal error screen tell the user something
     // unexpected happened.
-    return fatalError(
+    return fatalError().add(
       error,
       i18n.translate('xpack.remoteClusters.editAction.errorTitle', {
         defaultMessage: 'Error editing cluster',

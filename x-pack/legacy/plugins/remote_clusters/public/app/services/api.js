@@ -10,7 +10,7 @@ import { sendGet, sendPost, sendPut, sendDelete } from './http';
 
 export async function loadClusters() {
   const response = await sendGet();
-  return response.data;
+  return response;
 }
 
 export async function addCluster(cluster) {

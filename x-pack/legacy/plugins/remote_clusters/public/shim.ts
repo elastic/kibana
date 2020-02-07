@@ -6,14 +6,12 @@
 
 import { npStart } from 'ui/new_platform';
 import { management, MANAGEMENT_BREADCRUMB } from 'ui/management';
-import { fatalError } from 'ui/notify';
-import { DOC_LINK_VERSION, ELASTIC_WEBSITE_URL } from 'ui/documentation_links';
 
 import { createUiStatsReporter } from '../../../../../src/legacy/core_plugins/ui_metric/public';
 
 export function createShim() {
   const {
-    core: { chrome, i18n, notifications, http, injectedMetadata },
+    core: { chrome, i18n, notifications, http, injectedMetadata, docLinks, fatalErrors },
   } = npStart;
 
   return {
@@ -21,13 +19,10 @@ export function createShim() {
       chrome,
       i18n,
       notifications,
-      fatalError,
       injectedMetadata,
       http,
-      documentation: {
-        elasticWebsiteUrl: ELASTIC_WEBSITE_URL,
-        docLinkVersion: DOC_LINK_VERSION,
-      },
+      docLinks,
+      fatalErrors,
     },
     pluginsStart: {
       management: {

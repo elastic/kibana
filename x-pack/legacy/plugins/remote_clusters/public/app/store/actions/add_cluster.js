@@ -74,7 +74,7 @@ export const addCluster = cluster => async dispatch => {
 
     // This error isn't an HTTP error, so let the fatal error screen tell the user something
     // unexpected happened.
-    return fatalError(
+    return fatalError().add(
       error,
       i18n.translate('xpack.remoteClusters.addAction.errorTitle', {
         defaultMessage: 'Error adding cluster',

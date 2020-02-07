@@ -26,12 +26,10 @@ export class Plugin {
       i18n: { Context },
       chrome: { setBreadcrumbs },
       notifications: { toasts },
-      fatalError,
-      http: {
-        basePath: { prepend: prependBasePath },
-      },
+      http,
       injectedMetadata: { getInjectedVar },
-      documentation: { elasticWebsiteUrl, docLinkVersion },
+      docLinks,
+      fatalErrors,
     } = coreStart;
 
     if (getInjectedVar('remoteClustersUiEnabled')) {
@@ -52,9 +50,9 @@ export class Plugin {
 
       // Initialize services
       initBreadcrumbs(setBreadcrumbs, managementBreadcrumb);
-      initDocumentation(`${elasticWebsiteUrl}guide/en/elasticsearch/reference/${docLinkVersion}/`);
+      initDocumentation(docLinks);
       initUiMetric(createUiStatsReporter);
-      initNotification(toasts, fatalError);
+      initNotification(toasts, fatalErrors);
 
       const unmountReactApp = () => {
         const appElement = document.getElementById(REACT_ROOT_ID);
@@ -70,9 +68,7 @@ export class Plugin {
         controllerAs: 'remoteClusters',
         controller: class RemoteClustersController {
           constructor($scope, $route, $http, kbnUrl) {
-            // NOTE: We depend upon Angular's $http service because it's decorated with interceptors,
-            // e.g. to check license status per request.
-            initHttp($http, prependBasePath);
+            initHttp(http);
 
             setRedirect(path => {
               $scope.$evalAsync(() => {

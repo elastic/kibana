@@ -4,10 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export let toasts: any;
-export let fatalError: any;
+import { NotificationsStart, FatalErrorsSetup } from 'src/core/public';
 
-export function init(_toasts: any, _fatalError: any): void {
+export let toasts: NotificationsStart;
+export let fatalError: FatalErrorsSetup;
+
+export function init(_toasts: NotificationsStart, _fatalError: FatalErrorsSetup): void {
   toasts = _toasts;
   fatalError = _fatalError;
 }
