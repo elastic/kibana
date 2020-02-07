@@ -25,6 +25,7 @@ import {
 import { SiemSearchBar } from '../../components/search_bar';
 import { WrapperPage } from '../../components/wrapper_page';
 import { SiemNavigation } from '../../components/navigation';
+import { NavTab } from '../../components/navigation/types';
 import { State } from '../../store';
 import { inputsSelectors } from '../../store/inputs';
 import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from '../../store/inputs/actions';
@@ -61,7 +62,7 @@ export interface DispatchProps {
 
 type DetectionEnginePageComponentProps = ReduxProps & DispatchProps;
 
-const detectionsTabs = {
+const detectionsTabs: Record<string, NavTab> = {
   [DetectionEngineTab.signals]: {
     id: DetectionEngineTab.signals,
     name: i18n.SIGNAL,
