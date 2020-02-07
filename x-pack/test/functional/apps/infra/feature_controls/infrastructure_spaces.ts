@@ -21,7 +21,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
   ]);
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
-  const retry = getService('retry');
+  // const retry = getService('retry');
 
   describe('infrastructure spaces', () => {
     before(async () => {
@@ -58,30 +58,31 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         expect(navLinks).to.contain('Metrics');
       });
 
-      it(`landing page shows Wafflemap`, async () => {
-        await PageObjects.common.navigateToUrlWithBrowserHistory('infraOps', '/home', undefined, {
-          basePath: '/s/custom_space',
-          ensureCurrentUrl: true,
-        });
-        await PageObjects.infraHome.goToTime(DATE_WITH_DATA);
-        await testSubjects.existOrFail('~waffleMap');
-      });
+      // TODO: To fix
+      // it(`landing page shows Wafflemap`, async () => {
+      //   await PageObjects.common.navigateToUrlWithBrowserHistory('infraOps', '', undefined, {
+      //     basePath: '/s/custom_space',
+      //     ensureCurrentUrl: true,
+      //   });
+      //   await PageObjects.infraHome.goToTime(DATE_WITH_DATA);
+      //   await testSubjects.existOrFail('~waffleMap');
+      // });
 
-      describe('context menu', () => {
-        before(async () => {
-          await testSubjects.click('~nodeContainer');
-        });
+      // describe('context menu', () => {
+      //   before(async () => {
+      //     await testSubjects.click('~nodeContainer');
+      //   });
 
-        it(`shows link to view logs`, async () => {
-          await retry.waitFor('context menu', () => testSubjects.exists('~nodeContextMenu'));
-          await testSubjects.existOrFail('~viewLogsContextMenuItem');
-        });
+      //   it(`shows link to view logs`, async () => {
+      //     await retry.waitFor('context menu', () => testSubjects.exists('~nodeContextMenu'));
+      //     await testSubjects.existOrFail('~viewLogsContextMenuItem');
+      //   });
 
-        it(`shows link to view apm traces`, async () => {
-          await retry.waitFor('context menu', () => testSubjects.exists('~nodeContextMenu'));
-          await testSubjects.existOrFail('~viewApmTracesContextMenuItem');
-        });
-      });
+      //   it(`shows link to view apm traces`, async () => {
+      //     await retry.waitFor('context menu', () => testSubjects.exists('~nodeContextMenu'));
+      //     await testSubjects.existOrFail('~viewApmTracesContextMenuItem');
+      //   });
+      // });
     });
 
     describe('space with Infrastructure disabled', () => {
@@ -145,31 +146,31 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await esArchiver.unload('empty_kibana');
       });
 
-      it(`landing page shows Wafflemap`, async () => {
-        await PageObjects.common.navigateToUrlWithBrowserHistory('infraOps', '', undefined, {
-          basePath: '/s/custom_space',
-          ensureCurrentUrl: true,
-        });
-        await PageObjects.infraHome.goToTime(DATE_WITH_DATA);
-        await testSubjects.existOrFail('~waffleMap');
-      });
+      // it(`landing page shows Wafflemap`, async () => {
+      //   await PageObjects.common.navigateToUrlWithBrowserHistory('infraOps', '', undefined, {
+      //     basePath: '/s/custom_space',
+      //     ensureCurrentUrl: true,
+      //   });
+      //   await PageObjects.infraHome.goToTime(DATE_WITH_DATA);
+      //   await testSubjects.existOrFail('~waffleMap');
+      // });
 
-      describe('context menu', () => {
-        before(async () => {
-          await testSubjects.click('~nodeContainer');
-        });
+      // describe('context menu', () => {
+      //   before(async () => {
+      //     await testSubjects.click('~nodeContainer');
+      //   });
 
-        it(`doesn't show link to view logs`, async () => {
-          await retry.waitFor('context menu', () => testSubjects.exists('~nodeContextMenu'));
-          const link = await testSubjects.find('~viewLogsContextMenuItem');
-          expect(await link.isEnabled()).to.be(false);
-        });
+      //   it(`doesn't show link to view logs`, async () => {
+      //     await retry.waitFor('context menu', () => testSubjects.exists('~nodeContextMenu'));
+      //     const link = await testSubjects.find('~viewLogsContextMenuItem');
+      //     expect(await link.isEnabled()).to.be(false);
+      //   });
 
-        it(`shows link to view apm traces`, async () => {
-          await retry.waitFor('context menu', () => testSubjects.exists('~nodeContextMenu'));
-          await testSubjects.existOrFail('~viewApmTracesContextMenuItem');
-        });
-      });
+      //   it(`shows link to view apm traces`, async () => {
+      //     await retry.waitFor('context menu', () => testSubjects.exists('~nodeContextMenu'));
+      //     await testSubjects.existOrFail('~viewApmTracesContextMenuItem');
+      //   });
+      // });
     });
 
     describe('space with APM disabled', () => {
@@ -189,31 +190,31 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await esArchiver.unload('empty_kibana');
       });
 
-      it(`landing page shows Wafflemap`, async () => {
-        await PageObjects.common.navigateToUrlWithBrowserHistory('infraOps', '', undefined, {
-          basePath: '/s/custom_space',
-          ensureCurrentUrl: true,
-        });
-        await PageObjects.infraHome.goToTime(DATE_WITH_DATA);
-        await testSubjects.existOrFail('~waffleMap');
-      });
+      // it(`landing page shows Wafflemap`, async () => {
+      //   await PageObjects.common.navigateToUrlWithBrowserHistory('infraOps', '', undefined, {
+      //     basePath: '/s/custom_space',
+      //     ensureCurrentUrl: true,
+      //   });
+      //   await PageObjects.infraHome.goToTime(DATE_WITH_DATA);
+      //   await testSubjects.existOrFail('~waffleMap');
+      // });
 
-      describe('context menu', () => {
-        before(async () => {
-          await testSubjects.click('~nodeContainer');
-        });
+      // describe('context menu', () => {
+      //   before(async () => {
+      //     await testSubjects.click('~nodeContainer');
+      //   });
 
-        it(`shows link to view logs`, async () => {
-          await retry.waitFor('context menu', () => testSubjects.exists('~nodeContextMenu'));
-          await testSubjects.existOrFail('~viewLogsContextMenuItem');
-        });
+      //   it(`shows link to view logs`, async () => {
+      //     await retry.waitFor('context menu', () => testSubjects.exists('~nodeContextMenu'));
+      //     await testSubjects.existOrFail('~viewLogsContextMenuItem');
+      //   });
 
-        it(`doesn't show link to view apm traces`, async () => {
-          await retry.waitFor('context menu', () => testSubjects.exists('~nodeContextMenu'));
-          const link = await testSubjects.find('~viewApmTracesContextMenuItem');
-          expect(await link.isEnabled()).to.be(false);
-        });
-      });
+      //   it(`doesn't show link to view apm traces`, async () => {
+      //     await retry.waitFor('context menu', () => testSubjects.exists('~nodeContextMenu'));
+      //     const link = await testSubjects.find('~viewApmTracesContextMenuItem');
+      //     expect(await link.isEnabled()).to.be(false);
+      //   });
+      // });
     });
   });
 }
