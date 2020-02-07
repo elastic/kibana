@@ -11,12 +11,13 @@ import { SubFeaturePrivilege } from './sub_feature_privilege';
 import { FeaturePrivilege } from '.';
 
 export class SecuredFeature extends Feature {
-  public readonly primaryFeaturePrivileges: PrimaryFeaturePrivilege[];
-  public readonly minimalPrimaryFeaturePrivileges: PrimaryFeaturePrivilege[];
+  private readonly primaryFeaturePrivileges: PrimaryFeaturePrivilege[];
 
-  public readonly subFeaturePrivileges: SubFeaturePrivilege[];
+  private readonly minimalPrimaryFeaturePrivileges: PrimaryFeaturePrivilege[];
 
-  public readonly subFeatures: SecuredSubFeature[];
+  private readonly subFeaturePrivileges: SubFeaturePrivilege[];
+
+  private readonly securedSubFeatures: SecuredSubFeature[];
 
   constructor(config: IFeature, actionMapping: { [privilegeId: string]: string[] } = {}) {
     super(config);
@@ -29,11 +30,11 @@ export class SecuredFeature extends Feature {
         new PrimaryFeaturePrivilege(`minimal_${id}`, privilege, actionMapping[`minimal_${id}`])
     );
 
-    this.subFeatures =
+    this.securedSubFeatures =
       this.config.subFeatures?.map(sf => new SecuredSubFeature(sf, actionMapping)) ?? [];
 
     this.subFeaturePrivileges = [];
-    for (const subFeature of this.subFeatures) {
+    for (const subFeature of this.securedSubFeatures) {
       for (const subFeaturePriv of subFeature.privilegeIterator()) {
         this.subFeaturePrivileges.push(subFeaturePriv);
       }
@@ -59,17 +60,32 @@ export class SecuredFeature extends Feature {
   }
 
   public get allPrivileges() {
-    const subFeaturePrivileges = [];
-    for (const subFeature of this.subFeatures) {
-      for (const subFeaturePriv of subFeature.privilegeIterator()) {
-        subFeaturePrivileges.push(subFeaturePriv);
-      }
-    }
-
     return [
       ...this.primaryFeaturePrivileges,
       ...this.minimalPrimaryFeaturePrivileges,
-      ...subFeaturePrivileges,
+      ...this.subFeaturePrivileges,
     ];
+  }
+
+  public getPrimaryFeaturePrivileges(
+    { includeMinimalFeaturePrivileges }: { includeMinimalFeaturePrivileges: boolean } = {
+      includeMinimalFeaturePrivileges: false,
+    }
+  ) {
+    return includeMinimalFeaturePrivileges
+      ? [this.primaryFeaturePrivileges, this.minimalPrimaryFeaturePrivileges].flat()
+      : [...this.primaryFeaturePrivileges];
+  }
+
+  public getMinimalFeaturePrivileges() {
+    return [...this.minimalPrimaryFeaturePrivileges];
+  }
+
+  public getSubFeaturePrivileges() {
+    return [...this.subFeaturePrivileges];
+  }
+
+  public getSubFeatures() {
+    return [...this.securedSubFeatures];
   }
 }

@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
 import _ from 'lodash';
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 import { getSpaceColor } from 'plugins/spaces/space_avatar';
 import { Role, FeaturesPrivileges, copyRole } from '../../../../../../../common/model';
 import { SpacesPopoverList } from '../../../spaces_popover_list';

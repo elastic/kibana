@@ -511,9 +511,9 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
       entry.feature = {};
     } else {
       this.props.kibanaPrivileges.getSecuredFeatures().forEach(feature => {
-        const nextFeaturePrivilege = feature.primaryFeaturePrivileges.find(pfp =>
-          privileges.includes(pfp.id)
-        );
+        const nextFeaturePrivilege = feature
+          .getPrimaryFeaturePrivileges()
+          .find(pfp => privileges.includes(pfp.id));
         if (nextFeaturePrivilege) {
           entry.feature[feature.id] = [nextFeaturePrivilege.id];
         }

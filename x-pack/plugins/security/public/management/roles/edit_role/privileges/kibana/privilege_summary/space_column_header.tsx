@@ -18,7 +18,7 @@ interface Props {
   entry: RoleKibanaPrivilege;
 }
 
-const SPACES_DISPLAY_COUNT = 8;
+const SPACES_DISPLAY_COUNT = 4;
 
 export const SpaceColumnHeader = (props: Props) => {
   const isGlobal = isGlobalPrivilegeDefinition(props.entry);

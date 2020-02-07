@@ -22,8 +22,6 @@ interface Props {
   kibanaPrivileges: KibanaPrivileges;
 }
 
-const SPACES_DISPLAY_COUNT = 4;
-
 function getColumnKey(entry: RoleKibanaPrivilege) {
   return `privilege_entry_${entry.spaces.join('|')}`;
 }
@@ -56,7 +54,7 @@ export const PrivilegeSummaryTable = (props: Props) => {
     name: '',
     render: (featureId: string, record: any) => {
       const feature = record.feature as SecuredFeature;
-      const hasSubFeaturePrivileges = feature.subFeaturePrivileges.length > 0;
+      const hasSubFeaturePrivileges = feature.getSubFeaturePrivileges().length > 0;
       if (!hasSubFeaturePrivileges) {
         return null;
       }
@@ -89,8 +87,7 @@ export const PrivilegeSummaryTable = (props: Props) => {
           iconTip = (
             <EuiIconTip
               size="s"
-              type="alert"
-              color="warning"
+              type="iInCircle"
               content={
                 <span>Additional privileges granted. Expand this row for more information.</span>
               }

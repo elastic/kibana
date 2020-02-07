@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { FeaturesPrivileges } from './features_privileges';
 export { FeaturePrivilege } from './feature_privilege';
 export { SecuredFeature } from './secured_feature';
 export { SecuredSubFeature } from './secured_sub_feature';

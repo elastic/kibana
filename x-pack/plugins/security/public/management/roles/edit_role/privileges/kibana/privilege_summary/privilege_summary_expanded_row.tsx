@@ -15,17 +15,9 @@ interface Props {
 }
 
 export const PrivilegeSummaryExpandedRow = (props: Props) => {
-  if (!props.feature.subFeatures || props.feature.subFeatures.length === 0) {
-    return (
-      <EuiText size="s" data-test-subj="noSubFeatures">
-        Customizations are not available for this feature.
-      </EuiText>
-    );
-  }
-
   return (
     <EuiFlexGroup direction="column">
-      {props.feature.subFeatures.map(subFeature => {
+      {props.feature.getSubFeatures().map(subFeature => {
         return (
           <EuiFlexItem key={subFeature.name}>
             <EuiFlexGroup>

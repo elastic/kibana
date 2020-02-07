@@ -9,30 +9,14 @@ import { Privilege } from './privilege_instance';
 export class PrivilegeCollection {
   private actions: ReadonlySet<string>;
 
-  constructor(private readonly privileges: Privilege[]) {
+  constructor(privileges: Privilege[]) {
     this.actions = new Set(
       privileges.reduce((acc, priv) => [...acc, ...priv.actions], [] as string[])
     );
   }
 
   public grantsPrivilege(privilege: Privilege) {
-    return this.checkActions(this.actions, privilege.actions);
-  }
-
-  public getPrivilegesGranting(privilege: Privilege) {
-    return this.privileges.filter(p => p.grantsPrivilege(privilege).hasAllRequested);
-  }
-
-  public subtract(otherCollection: PrivilegeCollection) {
-    return new PrivilegeCollection(this.privileges.filter(p => !otherCollection.includes(p)));
-  }
-
-  public filter(predicate: (privilege: Privilege) => boolean) {
-    return new PrivilegeCollection(this.privileges.filter(predicate));
-  }
-
-  public includes(privilege: Privilege) {
-    return this.privileges.some(p => p.equals(privilege));
+    return this.checkActions(this.actions, privilege.actions).hasAllRequested;
   }
 
   private checkActions(knownActions: ReadonlySet<string>, candidateActions: string[]) {

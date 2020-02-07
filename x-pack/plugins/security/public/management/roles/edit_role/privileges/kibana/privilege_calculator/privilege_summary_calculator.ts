@@ -6,33 +6,21 @@
 
 import { Role, RoleKibanaPrivilege } from '../../../../../../../common/model';
 import { isGlobalPrivilegeDefinition } from '../../../privilege_utils';
-import {
-  KibanaPrivileges,
-  PrimaryFeaturePrivilege,
-  SubFeaturePrivilege,
-  SubFeaturePrivilegeGroup,
-} from '../../../../model';
+import { KibanaPrivileges, PrimaryFeaturePrivilege, SecuredFeature } from '../../../../model';
+import { PrivilegeCollection } from '../../../../model/kibana_privileges/privilege_collection';
 
 export class PrivilegeSummaryCalculator {
   constructor(private readonly kibanaPrivileges: KibanaPrivileges, private readonly role: Role) {}
 
-  public getEffectivePrimaryFeaturePrivilege(entry: RoleKibanaPrivilege) {
+  public getEffectivePrimaryFeaturePrivileges(entry: RoleKibanaPrivilege) {
     const assignedPrivileges = this.collectAssignedPrivileges(entry);
 
     const features = this.kibanaPrivileges.getSecuredFeatures();
 
     return features.reduce((acc, feature) => {
-      const effectivePrivilege =
-        feature.primaryFeaturePrivileges.find(
-          pfp => assignedPrivileges.grantsPrivilege(pfp).hasAllRequested
-        ) ||
-        feature.minimalPrimaryFeaturePrivileges.find(
-          pfp => assignedPrivileges.grantsPrivilege(pfp).hasAllRequested
-        );
-
       return {
         ...acc,
-        [feature.id]: effectivePrivilege,
+        [feature.id]: this.getEffectivePrimaryFeaturePrivilege(assignedPrivileges, feature),
       };
     }, {} as Record<string, PrimaryFeaturePrivilege | undefined>);
   }
@@ -42,9 +30,7 @@ export class PrivilegeSummaryCalculator {
 
     const assignedPrivileges = this.collectAssignedPrivileges(entry);
 
-    return feature.subFeaturePrivileges.filter(
-      sfp => assignedPrivileges.grantsPrivilege(sfp).hasAllRequested
-    );
+    return feature.getSubFeaturePrivileges().filter(sfp => assignedPrivileges.grantsPrivilege(sfp));
   }
 
   public getEffectiveFeaturePrivileges(entry: RoleKibanaPrivilege) {
@@ -53,20 +39,17 @@ export class PrivilegeSummaryCalculator {
     const features = this.kibanaPrivileges.getSecuredFeatures();
 
     return features.reduce((acc, feature) => {
-      const effectivePrimaryFeaturePrivilege =
-        feature.primaryFeaturePrivileges.find(
-          pfp => assignedPrivileges.grantsPrivilege(pfp).hasAllRequested
-        ) ||
-        feature.minimalPrimaryFeaturePrivileges.find(
-          pfp => assignedPrivileges.grantsPrivilege(pfp).hasAllRequested
-        );
-
-      const effectiveSubPrivileges = feature.subFeaturePrivileges.filter(
-        ap => assignedPrivileges.grantsPrivilege(ap).hasAllRequested
+      const effectivePrimaryFeaturePrivilege = this.getEffectivePrimaryFeaturePrivilege(
+        assignedPrivileges,
+        feature
       );
 
+      const effectiveSubPrivileges = feature
+        .getSubFeaturePrivileges()
+        .filter(ap => assignedPrivileges.grantsPrivilege(ap));
+
       const hasNonSupersededSubFeaturePrivileges = effectiveSubPrivileges.some(
-        esp => !effectivePrimaryFeaturePrivilege?.grantsPrivilege(esp).hasAllRequested
+        esp => !effectivePrimaryFeaturePrivilege?.grantsPrivilege(esp)
       );
 
       return {
@@ -80,42 +63,20 @@ export class PrivilegeSummaryCalculator {
     }, {} as Record<string, { primary?: PrimaryFeaturePrivilege; hasNonSupersededSubFeaturePrivileges: boolean; subFeature: string[] }>);
   }
 
-  public isIndependentSubFeaturePrivilegeGranted(featureId: string, privilegeId: string) {
-    const primaryFeaturePrivilege = this.getEffectivePrimaryFeaturePrivilege(featureId);
-    if (!primaryFeaturePrivilege) {
-      return false;
-    }
-    const selectedFeaturePrivileges = this.getSelectedFeaturePrivileges(featureId);
-
-    const feature = this.kibanaPrivileges.getSecuredFeature(featureId);
-
-    const subFeaturePrivilege = feature.allPrivileges.find(
-      ap => ap instanceof SubFeaturePrivilege && ap.id === privilegeId
-    ) as SubFeaturePrivilege;
-
-    return Boolean(
-      primaryFeaturePrivilege.grantsPrivilege(subFeaturePrivilege).hasAllRequested ||
-        selectedFeaturePrivileges.includes(subFeaturePrivilege.id)
-    );
-  }
-
-  public getSelectedMutuallyExclusiveSubFeaturePrivilege(
-    featureId: string,
-    subFeatureGroup: SubFeaturePrivilegeGroup
+  private getEffectivePrimaryFeaturePrivilege(
+    assignedPrivileges: PrivilegeCollection,
+    feature: SecuredFeature
   ) {
-    const primaryFeaturePrivilege = this.getEffectivePrimaryFeaturePrivilege(featureId);
-    if (!primaryFeaturePrivilege) {
-      return undefined;
-    }
+    const primaryFeaturePrivileges = feature.getPrimaryFeaturePrivileges();
+    const minimalPrimaryFeaturePrivileges = feature.getMinimalFeaturePrivileges();
 
-    const selectedFeaturePrivileges = this.getSelectedFeaturePrivileges(featureId);
+    // Order matters here. A non-minimal privileges by definition also grants the minimal version of itself,
+    // and we want to return the most-permissive privilege.
+    const effectivePrivilege =
+      primaryFeaturePrivileges.find(pfp => assignedPrivileges.grantsPrivilege(pfp)) ||
+      minimalPrimaryFeaturePrivileges.find(pfp => assignedPrivileges.grantsPrivilege(pfp));
 
-    return subFeatureGroup.privileges.find(p => {
-      return (
-        primaryFeaturePrivilege.grantsPrivilege(p).hasAllRequested ||
-        selectedFeaturePrivileges.includes(p.id)
-      );
-    });
+    return effectivePrivilege;
   }
 
   private collectAssignedPrivileges(entry: RoleKibanaPrivilege) {

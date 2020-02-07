@@ -56,10 +56,6 @@ export class KibanaPrivileges {
     return Array.from(this.feature.values());
   }
 
-  public getFeaturePrivileges(featureId: string) {
-    return this.getSecuredFeature(featureId).allPrivileges ?? [];
-  }
-
   public createCollectionFromRoleKibanaPrivileges(roleKibanaPrivileges: RoleKibanaPrivilege[]) {
     const filterAssigned = (assignedPrivileges: string[]) => (privilege: Privilege) =>
       assignedPrivileges.includes(privilege.id);
@@ -80,5 +76,9 @@ export class KibanaPrivileges {
       .flat<Privilege>();
 
     return new PrivilegeCollection(privileges);
+  }
+
+  private getFeaturePrivileges(featureId: string) {
+    return this.getSecuredFeature(featureId).allPrivileges ?? [];
   }
 }

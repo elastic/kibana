@@ -44,7 +44,7 @@ export class PrivilegeTableCalculator {
     return [basePrivileges, featurePrivileges].flat(2).some(p => {
       const globalCheck = globalPrivileges.grantsPrivilege(p);
       const formCheck = formPrivileges.grantsPrivilege(p);
-      const isSuperseded = globalCheck.hasAllRequested && !formCheck.hasAllRequested;
+      const isSuperseded = globalCheck && !formCheck;
       return isSuperseded;
     });
   }

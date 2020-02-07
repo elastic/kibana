@@ -166,7 +166,7 @@ export class FeatureTable extends Component<Props, State> {
             return <EuiText size={'s'}>{feature.reserved.description}</EuiText>;
           }
 
-          const featurePrivileges = this.props.privilegeCalculator.getFeaturePrivileges(feature.id);
+          const featurePrivileges = feature.allPrivileges;
 
           if (featurePrivileges.length === 0) {
             return null;
@@ -228,7 +228,7 @@ export class FeatureTable extends Component<Props, State> {
         name: '',
         render: (featureId: string, record: TableRow) => {
           const { feature } = record;
-          const hasSubFeaturePrivileges = feature.subFeaturePrivileges.length > 0;
+          const hasSubFeaturePrivileges = feature.getSubFeaturePrivileges().length > 0;
           if (!hasSubFeaturePrivileges) {
             return null;
           }

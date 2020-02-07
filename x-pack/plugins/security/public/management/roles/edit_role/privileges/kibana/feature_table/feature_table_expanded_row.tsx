@@ -5,7 +5,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { EuiFlexItem, EuiFlexGroup, EuiSwitch, EuiSwitchEvent, EuiText } from '@elastic/eui';
+import { EuiFlexItem, EuiFlexGroup, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
 import { SubFeatureForm } from './sub_feature_form';
 import { PrivilegeFormCalculator } from '../privilege_calculator';
 import { SecuredFeature, SubFeaturePrivilege, PrimaryFeaturePrivilege } from '../../../../model';
@@ -60,14 +60,6 @@ export const FeatureTableExpandedRow = ({
     setIsCustomizing(e.target.checked);
   };
 
-  if (!feature.subFeatures || feature.subFeatures.length === 0) {
-    return (
-      <EuiText size="s" data-test-subj="noSubFeatures">
-        Customizations are not available for this feature.
-      </EuiText>
-    );
-  }
-
   return (
     <EuiFlexGroup direction="column">
       <EuiFlexItem>
@@ -78,7 +70,7 @@ export const FeatureTableExpandedRow = ({
           disabled={disabled || !privilegeCalculator.canCustomizeSubFeaturePrivileges(feature.id)}
         />
       </EuiFlexItem>
-      {feature.subFeatures.map(subFeature => {
+      {feature.getSubFeatures().map(subFeature => {
         return (
           <EuiFlexItem key={subFeature.name}>
             <SubFeatureForm
