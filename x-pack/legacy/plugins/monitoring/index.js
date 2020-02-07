@@ -50,6 +50,7 @@ export const monitoring = kibana =>
         'monitoring.cluster_alerts.email_notifications.email_address',
         'monitoring.ui.ccs.enabled',
         'monitoring.ui.elasticsearch.logFetchCount',
+        'monitoring.ui.logs.index',
       ];
 
       const serverConfig = server.config();
