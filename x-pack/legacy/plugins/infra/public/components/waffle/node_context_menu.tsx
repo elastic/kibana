@@ -28,7 +28,6 @@ import {
 interface Props {
   options: InfraWaffleMapOptions;
   currentTime: number;
-  children: any;
   node: InfraWaffleMapNode;
   nodeType: InventoryItemType;
   isPopoverOpen: boolean;
@@ -36,7 +35,7 @@ interface Props {
   popoverPosition: EuiPopoverProps['anchorPosition'];
 }
 
-export const NodeContextMenu = ({
+export const NodeContextMenu: React.FC<Props> = ({
   options,
   currentTime,
   children,
@@ -45,7 +44,7 @@ export const NodeContextMenu = ({
   closePopover,
   nodeType,
   popoverPosition,
-}: Props) => {
+}) => {
   const uiCapabilities = useKibana().services.application?.capabilities;
   const inventoryModel = findInventoryModel(nodeType);
   const nodeDetailFrom = currentTime - inventoryModel.metrics.defaultTimeRangeInSeconds * 1000;
@@ -132,7 +131,7 @@ export const NodeContextMenu = ({
       closePopover={closePopover}
       id={`${node.pathId}-popover`}
       isOpen={isPopoverOpen}
-      button={children}
+      button={children!}
       anchorPosition={popoverPosition}
     >
       <div style={{ maxWidth: 300 }} data-test-subj="nodeContextMenu">

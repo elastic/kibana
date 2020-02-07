@@ -4,8 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { i18n } from '@kbn/i18n';
-import { Alert, AlertTypeModel, ValidationResult } from '../../../../types';
-import { IndexThresholdAlertTypeExpression, aggregationTypes, groupByTypes } from './expression';
+import { AlertTypeModel, ValidationResult } from '../../../../types';
+import { IndexThresholdAlertTypeExpression } from './expression';
+import { IndexThresholdAlertParams } from './types';
+import { builtInGroupByTypes, builtInAggregationTypes } from '../../../../common/constants';
 
 export function getAlertType(): AlertTypeModel {
   return {
@@ -13,7 +15,7 @@ export function getAlertType(): AlertTypeModel {
     name: 'Index Threshold',
     iconClass: 'alert',
     alertParamsExpression: IndexThresholdAlertTypeExpression,
-    validate: (alert: Alert): ValidationResult => {
+    validate: (alertParams: IndexThresholdAlertParams): ValidationResult => {
       const {
         index,
         timeField,
@@ -24,7 +26,7 @@ export function getAlertType(): AlertTypeModel {
         termField,
         threshold,
         timeWindowSize,
-      } = alert.params;
+      } = alertParams;
       const validationResult = { errors: {} };
       const errors = {
         aggField: new Array<string>(),
@@ -51,7 +53,7 @@ export function getAlertType(): AlertTypeModel {
           })
         );
       }
-      if (aggType && aggregationTypes[aggType].fieldRequired && !aggField) {
+      if (aggType && builtInAggregationTypes[aggType].fieldRequired && !aggField) {
         errors.aggField.push(
           i18n.translate('xpack.triggersActionsUI.sections.addAlert.error.requiredAggFieldText', {
             defaultMessage: 'Aggregation field is required.',
@@ -65,7 +67,7 @@ export function getAlertType(): AlertTypeModel {
           })
         );
       }
-      if (groupBy && groupByTypes[groupBy].sizeRequired && !termField) {
+      if (!termField && groupBy && builtInGroupByTypes[groupBy].sizeRequired) {
         errors.termField.push(
           i18n.translate('xpack.triggersActionsUI.sections.addAlert.error.requiredtTermFieldText', {
             defaultMessage: 'Term field is required.',
