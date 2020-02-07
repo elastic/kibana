@@ -21,7 +21,6 @@ import { PluginInitializerContext } from 'kibana/public';
 import { npSetup, npStart } from './legacy_imports';
 import { start as data } from '../../../data/public/legacy';
 import { start as embeddables } from '../../../embeddable_api/public/np_ready/public/legacy';
-import './dashboard_config';
 import { plugin } from './index';
 
 (async () => {

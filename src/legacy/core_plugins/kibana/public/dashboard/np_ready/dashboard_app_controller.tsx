@@ -25,6 +25,7 @@ import angular from 'angular';
 import { Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { History } from 'history';
+import { KibanaLegacyStart } from 'kibana/public';
 import { DashboardEmptyScreen, DashboardEmptyScreenProps } from './dashboard_empty_screen';
 
 import {
@@ -88,7 +89,7 @@ export interface DashboardAppControllerDependencies extends RenderDeps {
   $route: any;
   $routeParams: any;
   indexPatterns: IndexPatternsContract;
-  dashboardConfig: any;
+  dashboardConfig: KibanaLegacyStart['dashboardConfig'];
   confirmModal: ConfirmModalFn;
   history: History;
   kbnUrlStateStorage: IKbnUrlStateStorage;
