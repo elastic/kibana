@@ -31,7 +31,6 @@ import {
   PaginateControlsDirectiveProvider,
   watchMultiDecorator,
   KbnAccessibleClickProvider,
-  StateManagementConfigProvider,
   configureAppAngularModule,
 } from './legacy_imports';
 
@@ -70,22 +69,19 @@ function createLocalPrivateModule() {
 }
 
 function createLocalConfigModule(uiSettings: IUiSettingsClient) {
-  angular
-    .module('tableVisConfig', ['tableVisPrivate'])
-    .provider('stateManagementConfig', StateManagementConfigProvider)
-    .provider('config', function() {
-      return {
-        $get: () => ({
-          get: (value: string) => {
-            return uiSettings ? uiSettings.get(value) : undefined;
-          },
-          // set method is used in agg_table mocha test
-          set: (key: string, value: string) => {
-            return uiSettings ? uiSettings.set(key, value) : undefined;
-          },
-        }),
-      };
-    });
+  angular.module('tableVisConfig', []).provider('config', function() {
+    return {
+      $get: () => ({
+        get: (value: string) => {
+          return uiSettings ? uiSettings.get(value) : undefined;
+        },
+        // set method is used in agg_table mocha test
+        set: (key: string, value: string) => {
+          return uiSettings ? uiSettings.set(key, value) : undefined;
+        },
+      }),
+    };
+  });
 }
 
 function createLocalI18nModule() {
