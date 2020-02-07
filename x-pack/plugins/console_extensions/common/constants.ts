@@ -7,6 +7,6 @@ import { i18n } from '@kbn/i18n';
 
 export const APP = {
   id: 'console_extensions',
-  name: i18n.translate('console_extensions.name', { defaultMessage: 'Console Extensions' }),
+  name: i18n.translate('xpack.consoleExtensions.name', { defaultMessage: 'Console Extensions' }),
   apiPathBase: '/api/console_extensions',
 };
