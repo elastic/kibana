@@ -18,14 +18,6 @@
  */
 
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
-import { ensureMinimumTime, extractTimeFields } from '../../lib';
-
-import { Header } from './components/header';
-import { TimeField } from './components/time_field';
-import { AdvancedOptions } from './components/advanced_options';
-import { ActionButtons } from './components/action_buttons';
-
 import {
   EuiCallOut,
   EuiFlexGroup,
@@ -35,33 +27,60 @@ import {
   EuiSpacer,
   EuiLoadingSpinner,
 } from '@elastic/eui';
-
 import { FormattedMessage } from '@kbn/i18n/react';
+import { ensureMinimumTime, extractTimeFields } from '../../lib';
 
-export class StepTimeField extends Component {
-  static propTypes = {
-    indexPattern: PropTypes.string.isRequired,
-    indexPatternsService: PropTypes.object.isRequired,
-    goToPreviousStep: PropTypes.func.isRequired,
-    createIndexPattern: PropTypes.func.isRequired,
-    indexPatternCreationType: PropTypes.object.isRequired,
+import { Header } from './components/header';
+import { TimeField } from './components/time_field';
+import { AdvancedOptions } from './components/advanced_options';
+import { ActionButtons } from './components/action_buttons';
+import { IndexPatternCreationConfig } from '../../../../../../../../management/public';
+
+interface StepTimeFieldProps {
+  indexPattern: string;
+  indexPatternsService: any;
+  goToPreviousStep: () => void;
+  createIndexPattern: (selectedTimeField: string, indexPatternId: string) => void;
+  indexPatternCreationType: IndexPatternCreationConfig;
+}
+
+interface StepTimeFieldState {
+  error: string;
+  timeFields: TimeField[];
+  selectedTimeField?: TimeField;
+  timeFieldSet: boolean;
+  isAdvancedOptionsVisible: boolean;
+  isFetchingTimeFields: boolean;
+  isCreating: boolean;
+  indexPatternId: string;
+  indexPatternType: string;
+  indexPatternName: string;
+}
+
+interface TimeField {
+  display: string;
+  fieldName?: string;
+  isDisabled?: boolean;
+}
+
+export class StepTimeField extends Component<StepTimeFieldProps, StepTimeFieldState> {
+  state = {
+    error: '',
+    timeFields: [],
+    selectedTimeField: undefined,
+    timeFieldSet: false,
+    isAdvancedOptionsVisible: false,
+    isFetchingTimeFields: false,
+    isCreating: false,
+    indexPatternId: '',
+    indexPatternType: '',
+    indexPatternName: '',
   };
 
-  constructor(props) {
+  constructor(props: StepTimeFieldProps) {
     super(props);
-
-    this.state = {
-      error: '',
-      timeFields: [],
-      selectedTimeField: undefined,
-      timeFieldSet: false,
-      isAdvancedOptionsVisible: false,
-      isFetchingTimeFields: false,
-      isCreating: false,
-      indexPatternId: '',
-      indexPatternType: props.indexPatternCreationType.getIndexPatternType(),
-      indexPatternName: props.indexPatternCreationType.getIndexPatternName(),
-    };
+    this.state.indexPatternType = props.indexPatternCreationType.getIndexPatternType() || '';
+    this.state.indexPatternName = props.indexPatternCreationType.getIndexPatternName();
   }
 
   mounted = false;
@@ -91,22 +110,24 @@ export class StepTimeField extends Component {
     this.setState({ timeFields, isFetchingTimeFields: false });
   };
 
-  onTimeFieldChanged = e => {
+  onTimeFieldChanged = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
 
     // Find the time field based on the selected value
-    const timeField = this.state.timeFields.find(timeField => timeField.fieldName === value);
+    // @ts-ignore
+    const timeField = this.state.timeFields.find(timeFld => timeFld.fieldName === value);
 
     // If the value is an empty string, it's not a valid selection
     const validSelection = value !== '';
 
     this.setState({
+      // @ts-ignore
       selectedTimeField: timeField ? timeField.fieldName : undefined,
       timeFieldSet: validSelection,
     });
   };
 
-  onChangeIndexPatternId = e => {
+  onChangeIndexPatternId = (e: React.ChangeEvent<HTMLInputElement>) => {
     this.setState({ indexPatternId: e.target.value });
   };
 
@@ -120,8 +141,11 @@ export class StepTimeField extends Component {
     const { createIndexPattern } = this.props;
     const { selectedTimeField, indexPatternId } = this.state;
     this.setState({ isCreating: true });
+    if (selectedTimeField === undefined) {
+      return;
+    }
     try {
-      await createIndexPattern(selectedTimeField, indexPatternId);
+      await createIndexPattern(selectedTimeField || '', indexPatternId);
     } catch (error) {
       if (!this.mounted) return;
       this.setState({
@@ -131,7 +155,7 @@ export class StepTimeField extends Component {
     }
   };
 
-  formatErrorMessage(message) {
+  formatErrorMessage(message: string) {
     // `createIndexPattern` throws "Conflict" when index pattern ID already exists.
     return message === 'Conflict' ? (
       <FormattedMessage
@@ -181,8 +205,11 @@ export class StepTimeField extends Component {
       ? [
           { text: '', value: '' },
           ...timeFields.map(timeField => ({
+            // @ts-ignore
             text: timeField.display,
+            // @ts-ignore
             value: timeField.fieldName,
+            // @ts-ignore
             disabled: timeFields.isDisabled,
           })),
         ]

@@ -32,8 +32,8 @@ export const AdvancedOptions = ({
 }: {
   isVisible: boolean;
   indexPatternId: string;
-  toggleAdvancedOptions: () => void;
-  onChangeIndexPatternId: () => void;
+  toggleAdvancedOptions: (e: React.FormEvent<HTMLButtonElement>) => void;
+  onChangeIndexPatternId: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }) => (
   <div>
     <EuiButtonEmpty

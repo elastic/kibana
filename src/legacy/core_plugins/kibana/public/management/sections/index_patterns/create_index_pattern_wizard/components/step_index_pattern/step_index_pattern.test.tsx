@@ -23,7 +23,7 @@ import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
 import { Header } from './components/header';
 
 jest.mock('../../lib/ensure_minimum_time', () => ({
-  ensureMinimumTime: async promises =>
+  ensureMinimumTime: async (promises: Array<Promise<any>>) =>
     Array.isArray(promises) ? await Promise.all(promises) : await promises,
 }));
 const mockIndexPatternCreationType = {
@@ -41,7 +41,7 @@ jest.mock('ui/chrome', () => ({
 }));
 
 jest.mock('../../lib/get_indices', () => ({
-  getIndices: (service, indexPatternCreationType, query) => {
+  getIndices: ({}, {}, query: string) => {
     if (query.startsWith('e')) {
       return [{ name: 'es' }];
     }
@@ -57,7 +57,7 @@ const savedObjectsClient = {
 };
 const goToNextStep = () => {};
 
-const createComponent = props => {
+const createComponent = (props?: Record<string, any>) => {
   return shallowWithI18nProvider(
     <StepIndexPattern
       allIndices={allIndices}
