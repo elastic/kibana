@@ -6,10 +6,10 @@ See the Kibana docs for [how to set up your dev environment](https://github.com/
 One common workflow is:
 
  1. `yarn es snapshot`
- 1. In another shell: `yarn start`
+ 1. In another shell: `yarn start --xpack.ingestManager.enabled=true` (or set in `config.yml`)
 
 ## HTTP API
-  1. `xpack.ingestManager.enabled=true` adds the `DATASOURCE_API_ROUTES` and `AGENT_CONFIG_API_ROUTES` values in [`common/constants/routes.ts`](./common/constants/routes.ts)
+  1. Nothing by default. If `xpack.ingestManager.enabled=true`, it adds the `DATASOURCE_API_ROUTES` and `AGENT_CONFIG_API_ROUTES` values in [`common/constants/routes.ts`](./common/constants/routes.ts)
   1. [Integration tests](../../test/api_integration/apis/ingest_manager/endpoints.ts)
   1. In later versions the EPM and Fleet routes will be added when their flags are enabled. See the [currently disabled logic to add those routes](https://github.com/jfsiii/kibana/blob/feature-ingest-manager/x-pack/plugins/ingest_manager/server/plugin.ts#L86-L90).
 
