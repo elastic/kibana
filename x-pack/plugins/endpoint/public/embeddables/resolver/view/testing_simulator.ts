@@ -6,6 +6,7 @@
 
 import * as ResizeObserverNamespace from 'resize-observer-polyfill';
 
+// TODO, should this be split into concerns?
 interface MockState {
   /**
    * A map of resize observers to the elements they observe.
@@ -20,6 +21,10 @@ interface MockState {
    * TODO
    */
   domRects: Map<Element, DOMRectReadOnly>;
+
+  requestAnimationFrameCounter: number;
+
+  requestAnimationFrameCallbacks: Map<number, FrameRequestCallback>;
 }
 
 /**
@@ -39,6 +44,8 @@ function mockState(): MockState {
       observed: new Map(),
       callbacks: new Map(),
       domRects: new Map(),
+      requestAnimationFrameCounter: 0,
+      requestAnimationFrameCallbacks: new Map(),
     };
   }
   return _mockState;
@@ -97,35 +104,57 @@ export const simulateElementResize: (
   }
 };
 
-const mockGetBoundingClientRectImplementation = function(this: Element) {
-  if (this) {
-    /**
-     * If the element has a `contentRect` stored, use that.
-     */
-    const mockedValue = mockState().domRects.get(this);
-    if (mockedValue) {
-      return mockedValue;
-    }
-  }
-  return {
-    width: 0,
-    height: 0,
-    left: 0,
-    top: 0,
-    right: 0,
-    bottom: 0,
-    x: 0,
-    y: 0,
-    toJSON() {
-      return this;
-    },
-  };
-};
+const mockRequestAnimationFrame = jest
+  .fn<number, [FrameRequestCallback]>()
+  .mockImplementation(callback => {
+    const id = mockState().requestAnimationFrameCounter++;
+    mockState().requestAnimationFrameCallbacks.set(id, callback);
+    return id;
+  });
 
-export const setup: (ElementConstructor: typeof Element) => void = ElementConstructor => {
+const mockCancelAnimationFrame = jest.fn<void, [number]>().mockImplementation(id => {
+  mockState().requestAnimationFrameCallbacks.delete(id);
+});
+
+const mockGetBoundingClientRectImplementation = jest
+  .fn()
+  .mockImplementation(function(this: Element) {
+    if (this) {
+      /**
+       * If the element has a `contentRect` stored, use that.
+       */
+      const mockedValue = mockState().domRects.get(this);
+      if (mockedValue) {
+        return mockedValue;
+      }
+    }
+    return {
+      width: 0,
+      height: 0,
+      left: 0,
+      top: 0,
+      right: 0,
+      bottom: 0,
+      x: 0,
+      y: 0,
+      toJSON() {
+        return this;
+      },
+    };
+  });
+
+// TODO, am i cleaning this up correctly? mockClear, mockReset? mockRestore?
+export const setup: (
+  ElementConstructor: typeof Element,
+  window: Window
+) => void = ElementConstructor => {
   jest
     .spyOn(ElementConstructor.prototype, 'getBoundingClientRect')
     .mockImplementation(mockGetBoundingClientRectImplementation);
+
+  jest.spyOn(window, 'requestAnimationFrame').mockImplementation(mockRequestAnimationFrame);
+
+  jest.spyOn(window, 'cancelAnimationFrame').mockImplementation(mockCancelAnimationFrame);
 };
 
 let MockResizeObserver: jest.Mock<ResizeObserver, [ResizeObserverCallback]> | null;
@@ -137,6 +166,15 @@ export const clear: () => void = () => {
   domRects.clear();
   if (MockResizeObserver) {
     MockResizeObserver.mockClear();
+  }
+  mockGetBoundingClientRectImplementation.mockClear();
+  mockRequestAnimationFrame.mockClear();
+  mockCancelAnimationFrame.mockClear();
+};
+
+export const animate: (timestamp: number) => void = timestamp => {
+  for (const callback of mockState().requestAnimationFrameCallbacks.values()) {
+    callback(timestamp);
   }
 };
 

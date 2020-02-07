@@ -19,7 +19,7 @@ describe('useCamera on an unpainted element', () => {
   let element: HTMLElement;
   let projectionMatrix: Matrix3;
   beforeEach(async () => {
-    setup(Element);
+    setup(Element, window);
 
     const testID = 'camera';
 
