@@ -1,0 +1,46 @@
+[[accessibility]]
+= Accessibility Statement for Kibana
+Elastic is committed to ensuring digital accessibility for people with disabilities. We are continually improving the user experience for everyone, and strive towards meeting relevant accessibility standards.
+
+== Measures to support accessibility
+Elastic takes the following measures to ensure accessibility of Kibana:
+Provides continual accessibility training for our staff.
+Employs a 3rd-party audit.
+Maintains and incorporates an accessible shared UI component library.
+
+== Conformance status
+Initially, Kibana set out to meet https://www.w3.org/WAI/WCAG21/quickref/?currentsidebar=%23col_customize&levels=aaa&technologies=server%2Csmil%2Cflash%2Csl[WCAG 2.1 level AA] compliance. While we can only claim to be partially conforming, meaning we do not fully meet all of the success criteria, we also try to take a broader view of accessibility and go above and beyond the legal and regulatory standards to provide a good experience for all of our users.
+
+== Feedback
+We welcome your feedback on the accessibility of Kibana. Please let us know if you encounter accessibility barriers on Kibana by either emailing us at accessibility@elastic.co or opening https://github.com/elastic/kibana/issues/new?labels=Project%3AAccessibility&template=Accessibility.md&title=%28Accessibility%29[an issue on GitHub].
+
+== Technical specifications
+Accessibility of Kibana relies on the following technologies to work with the particular combination of web browser and any assistive technologies or plugins installed on your computer:
+
+* HTML
+* CSS
+* JavaScript
+* WAI-ARIA
+
+== Limitations and alternatives
+Despite our best efforts to ensure accessibility of Kibana, there are some limitations. Below is a description of known limitations, and potential solutions. Please contact us if you observe an issue not listed below.
+Broad categories of limitations for Kibana:
+
+* *Charts*: We are still working on figuring out an approach for making charts accessible. See our https://github.com/elastic/elastic-charts/issues/300[current progress on GitHub].
+* *Maps*: We do not know how to make them accessible yet. Would love to hear your ideas and suggestions.
+* *Tables*: Though generally accessible and marked-up as standard HTML tables with column headers, tables rarely make use of row headers (even if they should have them) and have poor captions. We have a plan to improve this and you will see incremental improvements as various applications adopt the new accessible component.
+* *Color contrast*: Modern Kibana interfaces generally do not have color contrast issues, however older code of Kibana may fall below the recommended contrast levels. As we continue to update our older work, this issue will phase out naturally.
+
+To see individual tickets, view our https://github.com/elastic/kibana/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AProject%3AAccessibility[GitHub issues label "`Project:Accessibility`"].
+
+== Assessment approach
+Elastic assesses the accessibility of Kibana by the following approaches:
+
+* *Self-evaluation*: Our employees are familiar with accessibility standards and review new designs and implemented features to confirm they are accessible.
+* *External evaluation*: We engage external contractors to help us conduct an independent assessment and generate a formal VPAT.
+* *Automated evaluation*: https://www.deque.com/axe/[axe] is being rolled out to run on every page. See our current progress in the https://github.com/elastic/kibana/issues/51456[automated testing GitHub issue].
+
+Manual testing largely focuses on screen reader support and is done on:
+
+* VoiceOver on MacOS with Safari, Chrome and Edge
+* NVDA on Windows with Chrome and Firefox
