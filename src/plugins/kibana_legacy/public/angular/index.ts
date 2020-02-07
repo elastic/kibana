@@ -16,8 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-export { formatESMsg } from './format_es_msg';
-export { formatMsg } from './format_msg';
-export { formatStack } from './format_stack';
-export { isAngularHttpError, formatAngularHttpError } from './format_angular_http_error';
+// @ts-ignore
+export { PromiseServiceCreator } from './promises';
+// @ts-ignore
+export { watchMultiDecorator } from './watch_multi';
+export * from './angular_config';
+export { ensureDefaultIndexPattern } from './ensure_default_index_pattern';

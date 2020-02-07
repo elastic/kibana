@@ -17,9 +17,19 @@
  * under the License.
  */
 
-export interface PromiseService {
-  resolve: <T>(value: T | PromiseLike<T>) => ng.IPromise<T>;
+import { i18n } from '@kbn/i18n';
 
-  // TODO: add additional typing
-  [key: string]: any;
+// browsers format Error.stack differently; always include message
+export function formatStack(err: Record<string, any>) {
+  if (err.stack && err.stack.indexOf(err.message) === -1) {
+    return i18n.translate('kibana_legacy.notify.toaster.errorMessage', {
+      defaultMessage: `Error: {errorMessage}
+      {errorStack}`,
+      values: {
+        errorMessage: err.message,
+        errorStack: err.stack,
+      },
+    });
+  }
+  return err.stack;
 }

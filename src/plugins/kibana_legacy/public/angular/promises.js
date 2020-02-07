@@ -18,9 +18,6 @@
  */
 
 import _ from 'lodash';
-import { uiModules } from '../modules';
-
-const module = uiModules.get('kibana');
 
 export function PromiseServiceCreator($q, $timeout) {
   function Promise(fn) {
@@ -130,7 +127,3 @@ export function PromiseServiceCreator($q, $timeout) {
 
   return Promise;
 }
-
-// Provides a tiny subset of the excellent API from
-// bluebird, reimplemented using the $q service
-module.service('Promise', PromiseServiceCreator);
