@@ -182,6 +182,7 @@ export const updateRules = async ({
       params: nextParams,
     },
   });
+
   if (rule.enabled && enabled === false) {
     await alertsClient.disable({ id: rule.id });
   } else if (!rule.enabled && enabled === true) {

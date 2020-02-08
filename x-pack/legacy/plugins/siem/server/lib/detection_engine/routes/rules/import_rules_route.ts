@@ -30,12 +30,6 @@ import { KibanaRequest } from '../../../../../../../../../src/core/server';
 
 type PromiseFromStreams = ImportRuleAlertRest | Error;
 
-/*
- * We were getting some error like that possible EventEmitter memory leak detected
- * So we decide to batch the update by 10 to avoid any complication in the node side
- * https://nodejs.org/docs/latest/api/events.html#events_emitter_setmaxlisteners_n
- *
- */
 const CHUNK_PARSED_OBJECT_SIZE = 10;
 
 export const createImportRulesRoute = (server: ServerFacade): Hapi.ServerRoute => {
@@ -77,7 +71,6 @@ export const createImportRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
       const objectLimit = server.config().get<number>('savedObjects.maxImportExportSize');
       const readStream = createRulesStreamFromNdJson(request.payload.file, objectLimit);
       const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([readStream]);
-
       const uniqueParsedObjects = Array.from(
         parsedObjects
           .reduce(
@@ -122,6 +115,7 @@ export const createImportRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
                 }
                 const {
                   description,
+                  enabled,
                   false_positives: falsePositives,
                   from,
                   immutable,
@@ -166,7 +160,7 @@ export const createImportRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
                       alertsClient,
                       actionsClient,
                       description,
-                      enabled: false,
+                      enabled,
                       falsePositives,
                       from,
                       immutable,
@@ -199,7 +193,7 @@ export const createImportRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
                       actionsClient,
                       savedObjectsClient,
                       description,
-                      enabled: false,
+                      enabled,
                       falsePositives,
                       from,
                       immutable,
@@ -232,7 +226,7 @@ export const createImportRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
                       createBulkErrorObject({
                         ruleId,
                         statusCode: 409,
-                        message: `This Rule "${rule.name}" already exists`,
+                        message: `rule_id: "${ruleId}" already exists`,
                       })
                     );
                   }
