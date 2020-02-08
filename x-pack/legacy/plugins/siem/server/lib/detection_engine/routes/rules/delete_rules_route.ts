@@ -35,7 +35,7 @@ export const createDeleteRulesRoute = (getClients: GetScopedClients): Hapi.Serve
       try {
         const { actionsClient, alertsClient, savedObjectsClient } = await getClients(request);
 
-        if (!actionsClient || !alertsClient || !savedObjectsClient) {
+        if (!actionsClient || !alertsClient) {
           return headers.response().code(404);
         }
 

@@ -32,7 +32,7 @@ export const createDeleteRulesBulkRoute = (getClients: GetScopedClients): Hapi.S
     async handler(request: QueryBulkRequest, headers) {
       const { actionsClient, alertsClient, savedObjectsClient } = await getClients(request);
 
-      if (!actionsClient || !alertsClient || !savedObjectsClient) {
+      if (!actionsClient || !alertsClient) {
         return headers.response().code(404);
       }
 

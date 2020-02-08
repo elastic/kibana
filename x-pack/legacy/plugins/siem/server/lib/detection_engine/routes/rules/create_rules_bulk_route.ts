@@ -43,7 +43,7 @@ export const createCreateRulesBulkRoute = (
         savedObjectsClient,
       } = await getClients(request);
 
-      if (!actionsClient || !alertsClient || !savedObjectsClient) {
+      if (!actionsClient || !alertsClient) {
         return headers.response().code(404);
       }
 

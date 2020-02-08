@@ -44,7 +44,7 @@ export const createAddPrepackedRulesRoute = (
           spacesClient,
         } = await getClients(request);
 
-        if (!actionsClient || !alertsClient || !savedObjectsClient) {
+        if (!actionsClient || !alertsClient) {
           return headers.response().code(404);
         }
 

@@ -33,7 +33,7 @@ export const createReadRulesRoute = (getClients: GetScopedClients): Hapi.ServerR
 
     try {
       const { alertsClient, savedObjectsClient } = await getClients(request);
-      if (!alertsClient || !savedObjectsClient) {
+      if (!alertsClient) {
         return headers.response().code(404);
       }
 

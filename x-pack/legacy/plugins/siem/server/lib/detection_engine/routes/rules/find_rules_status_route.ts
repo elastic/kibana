@@ -46,7 +46,7 @@ export const createFindRulesStatusRoute = (getClients: GetScopedClients): Hapi.S
     const { query } = request;
     const { alertsClient, savedObjectsClient } = await getClients(request);
 
-    if (!alertsClient || !savedObjectsClient) {
+    if (!alertsClient) {
       return headers.response().code(404);
     }
 

@@ -35,7 +35,7 @@ export const createUpdateRulesBulkRoute = (getClients: GetScopedClients): Hapi.S
     async handler(request: BulkUpdateRulesRequest, headers) {
       const { actionsClient, alertsClient, savedObjectsClient } = await getClients(request);
 
-      if (!actionsClient || !alertsClient || !savedObjectsClient) {
+      if (!actionsClient || !alertsClient) {
         return headers.response().code(404);
       }
 
