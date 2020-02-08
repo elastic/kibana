@@ -19,7 +19,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { buildRequestPayload, formatJson, getFromLocalStorage } from '../lib/helpers';
 import { Request, Response } from '../common/types';
-import { RightPane } from './right_pane';
+import { OutputPane } from './output_pane';
 import { MainControls } from './main_controls';
 import { Editor } from './editor';
 import { RequestFlyout } from './request_flyout';
@@ -145,7 +145,7 @@ export function PainlessPlayground({
         </EuiFlexItem>
 
         <EuiFlexItem>
-          <RightPane
+          <OutputPane
             response={response}
             context={context}
             setContext={setContext}

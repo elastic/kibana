@@ -6,22 +6,22 @@
 
 import React from 'react';
 import {
-  EuiCodeBlock,
   EuiIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
   EuiPanel,
   EuiTabbedContent,
-  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { formatJson, formatResponse } from '../lib/helpers';
-import { Response } from '../common/types';
-import { Context } from './context';
+import { formatJson, formatResponse } from '../../lib/helpers';
+import { Response } from '../../common/types';
+import { OutputTab } from './output_tab';
+import { ParametersTab } from './parameters_tab';
+import { ContextTab } from './context_tab';
 
-export function RightPane({
+export function OutputPane({
   response,
   context,
   contextSetup,
@@ -60,34 +60,34 @@ export function RightPane({
           {
             id: 'output',
             name: outputTabLabel,
+            content: <OutputTab response={response} />,
+          },
+          {
+            id: 'parameters',
+            name: i18n.translate('xpack.painless_playground.parametersTabLabel', {
+              defaultMessage: 'Parameters',
+            }),
             content: (
-              <>
-                <EuiSpacer size="m" />
-                <EuiCodeBlock language="json" paddingSize="s" isCopyable>
-                  {formatResponse(response.success || response.error)}
-                </EuiCodeBlock>
-              </>
+              <ParametersTab
+                context={context}
+                contextSetup={contextSetup}
+                setContext={setContext}
+                setContextSetup={setContextSetup}
+              />
             ),
           },
           {
-            id: 'settings',
-            name: (
-              <span>
-                {i18n.translate('xpack.painless_playground.contextTabLabel', {
-                  defaultMessage: 'Context',
-                })}
-              </span>
-            ),
+            id: 'context',
+            name: i18n.translate('xpack.painless_playground.contextTabLabel', {
+              defaultMessage: 'Context',
+            }),
             content: (
-              <>
-                <EuiSpacer size="m" />
-                <Context
-                  context={context}
-                  contextSetup={contextSetup}
-                  setContext={setContext}
-                  setContextSetup={setContextSetup}
-                />
-              </>
+              <ContextTab
+                context={context}
+                contextSetup={contextSetup}
+                setContext={setContext}
+                setContextSetup={setContextSetup}
+              />
             ),
           },
         ]}

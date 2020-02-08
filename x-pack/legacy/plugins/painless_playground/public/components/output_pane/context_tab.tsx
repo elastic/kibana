@@ -3,14 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import React from 'react';
 import {
   EuiFieldText,
-  EuiForm,
   EuiFormRow,
   EuiPanel,
-  EuiSelect,
-  EuiIconTip,
   EuiSpacer,
   EuiIcon,
   EuiToolTip,
@@ -20,8 +18,9 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { CodeEditor } from '../../../../../../src/plugins/kibana_react/public';
-import { painlessContextOptions } from '../common/constants';
+
+import { CodeEditor } from '../../../../../../../src/plugins/kibana_react/public';
+import { painlessContextOptions } from '../../common/constants';
 
 interface Props {
   context: string;
@@ -31,9 +30,10 @@ interface Props {
   renderMainControls: () => React.ReactElement;
 }
 
-export function Context({ context, contextSetup, setContext, setContextSetup }: Props) {
+export function ContextTab({ context, contextSetup, setContext, setContextSetup }: Props) {
   return (
-    <EuiForm data-test-subj="painlessPlayground">
+    <>
+      <EuiSpacer size="m" />
       <EuiFormRow
         label={
           <EuiToolTip
@@ -72,59 +72,6 @@ export function Context({ context, contextSetup, setContext, setContextSetup }: 
           hasDividers
           fullWidth
         />
-      </EuiFormRow>
-
-      <EuiFormRow
-        label={
-          <EuiToolTip
-            content={i18n.translate('xpack.painless_playground.parametersFieldTooltipText', {
-              defaultMessage: 'Your script can access these values by name',
-            })}
-          >
-            <span>
-              <FormattedMessage
-                id="xpack.painless_playground.parametersFieldLabel"
-                defaultMessage="Parameters"
-              />{' '}
-              <EuiIcon type="questionInCircle" color="subdued" />
-            </span>
-          </EuiToolTip>
-        }
-        fullWidth
-        labelAppend={
-          <EuiText size="xs">
-            <EuiLink
-              href="https://www.elastic.co/guide/en/elasticsearch/reference/master/modules-scripting-using.html#prefer-params"
-              target="_blank"
-            >
-              {i18n.translate('xpack.painless_playground.parametersFieldDocLinkText', {
-                defaultMessage: 'Parameters docs',
-              })}
-            </EuiLink>
-          </EuiText>
-        }
-        helpText={i18n.translate('xpack.painless_playground.helpIconAriaLabel', {
-          defaultMessage: 'Use JSON format',
-        })}
-      >
-        <EuiPanel paddingSize="s">
-          <CodeEditor
-            languageId="javascript"
-            height={150}
-            value={contextSetup.params}
-            onChange={(value: string) => setContextSetup({ params: value })}
-            options={{
-              fontSize: 12,
-              minimap: {
-                enabled: false,
-              },
-              scrollBeyondLastLine: false,
-              wordWrap: 'on',
-              wrappingIndent: 'indent',
-              automaticLayout: true,
-            }}
-          />
-        </EuiPanel>
       </EuiFormRow>
 
       {['filter', 'score'].indexOf(context) !== -1 && (
@@ -178,7 +125,7 @@ export function Context({ context, contextSetup, setContext, setContextSetup }: 
           <EuiPanel paddingSize="s">
             <CodeEditor
               languageId="javascript"
-              height={100}
+              height={400}
               value={contextSetup.document}
               onChange={(value: string) =>
                 setContextSetup(Object.assign({}, contextSetup, { document: value }))
@@ -197,6 +144,6 @@ export function Context({ context, contextSetup, setContext, setContextSetup }: 
           </EuiPanel>
         </EuiFormRow>
       )}
-    </EuiForm>
+    </>
   );
 }
