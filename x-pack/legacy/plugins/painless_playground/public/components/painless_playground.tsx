@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import React, { useState, useEffect } from 'react';
 import { debounce } from 'lodash';
 import {
@@ -18,9 +19,10 @@ import {
 import { i18n } from '@kbn/i18n';
 import { buildRequestPayload, formatJson, getFromLocalStorage } from '../lib/helpers';
 import { Request, Response } from '../common/types';
-import { Output } from './output';
+import { RightPane } from './right_pane';
 import { MainControls } from './main_controls';
 import { Editor } from './editor';
+import { RequestFlyout } from './request_flyout';
 
 let _mostRecentRequestId = 0;
 
@@ -92,8 +94,8 @@ export function PainlessPlayground({
   executeCode: (payload: Request) => Promise<Response>;
 }) {
   const [code, setCode] = useState(getFromLocalStorage('painlessPlaygroundCode', exampleScript));
-
   const [response, setResponse] = useState<Response>({});
+  const [showRequestFlyout, setShowRequestFlyout] = useState(false);
 
   const [context, setContext] = useState(
     getFromLocalStorage('painlessPlaygroundContext', 'painless_test_without_params')
@@ -102,8 +104,6 @@ export function PainlessPlayground({
   const [contextSetup, setContextSetup] = useState(
     getFromLocalStorage('painlessPlaygroundContextSetup', {}, true)
   );
-
-  const [showRequestFlyout, setShowRequestFlyout] = useState(false);
 
   // Live-update the output as the user changes the input code.
   useEffect(() => {
@@ -130,7 +130,7 @@ export function PainlessPlayground({
         </EuiFlexItem>
 
         <EuiFlexItem>
-          <Output
+          <RightPane
             response={response}
             context={context}
             setContext={setContext}
@@ -148,22 +148,11 @@ export function PainlessPlayground({
       />
 
       {showRequestFlyout && (
-        <EuiFlyout onClose={() => setShowRequestFlyout(false)} maxWidth={640}>
-          <EuiPageContent>
-            <EuiTitle>
-              <h3>
-                {i18n.translate('xpack.painless_playground.flyoutTitle', {
-                  defaultMessage: 'Test script request',
-                })}
-              </h3>
-            </EuiTitle>
-            <EuiSpacer size="s" />
-            <EuiCodeBlock language="json" paddingSize="s" isCopyable>
-              {'POST _scripts/painless/_execute\n'}
-              {formatJson(buildRequestPayload(code, context, contextSetup))}
-            </EuiCodeBlock>
-          </EuiPageContent>
-        </EuiFlyout>
+        <RequestFlyout
+          onClose={() => setShowRequestFlyout(false)}
+          requestBody={formatJson(buildRequestPayload(code, context, contextSetup))}
+          response={formatJson(response)}
+        />
       )}
     </>
   );

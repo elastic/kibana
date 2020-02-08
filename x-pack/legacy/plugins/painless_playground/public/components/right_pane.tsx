@@ -8,9 +8,9 @@ import { EuiCodeBlock, EuiPanel, EuiTabbedContent, EuiSpacer } from '@elastic/eu
 
 import { formatJson, formatResponse } from '../lib/helpers';
 import { Response } from '../common/types';
-import { Settings } from './settings';
+import { Context } from './context';
 
-export function Output({
+export function RightPane({
   response,
   context,
   contextSetup,
@@ -43,24 +43,12 @@ export function Output({
             content: (
               <>
                 <EuiSpacer size="m" />
-                <Settings
+                <Context
                   context={context}
                   contextSetup={contextSetup}
                   setContext={setContext}
                   setContextSetup={setContextSetup}
                 />
-              </>
-            ),
-          },
-          {
-            id: 'request',
-            name: 'Response',
-            content: (
-              <>
-                <EuiSpacer size="m" />
-                <EuiCodeBlock language="json" paddingSize="s" isCopyable>
-                  {formatJson(response)}
-                </EuiCodeBlock>
               </>
             ),
           },

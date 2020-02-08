@@ -26,7 +26,7 @@ interface Props {
   renderMainControls: () => React.ReactElement;
 }
 
-export function Settings({ context, contextSetup, setContext, setContextSetup }: Props) {
+export function Context({ context, contextSetup, setContext, setContextSetup }: Props) {
   return (
     <EuiForm data-test-subj="painlessPlayground">
       <EuiFormRow

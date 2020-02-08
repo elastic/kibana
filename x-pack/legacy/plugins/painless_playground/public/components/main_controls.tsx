@@ -30,10 +30,10 @@ export function MainControls({ submit, disabled, toggleFlyout, isFlyoutOpen }: P
             >
               {isFlyoutOpen
                 ? i18n.translate('xpack.painless_playground.hideRequestButtonLabel', {
-                    defaultMessage: 'Hide request',
+                    defaultMessage: 'Hide API request',
                   })
                 : i18n.translate('xpack.painless_playground.showRequestButtonLabel', {
-                    defaultMessage: 'Show request',
+                    defaultMessage: 'Show API request',
                   })}
             </EuiButtonEmpty>
           </EuiFlexItem>
