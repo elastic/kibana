@@ -19,11 +19,11 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import './index.css';
 import App from './app';
 import * as serviceWorker from './service_worker';
 import { pretty as p } from './utils/pretty';
 import { tryCatch as tc } from './utils/either';
+import './styles/tailwind.css';
 
 const rootEl = document.getElementById.bind(document, 'root');
 const initialData = window.initialData;

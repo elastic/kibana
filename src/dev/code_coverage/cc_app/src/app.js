@@ -18,7 +18,6 @@
  */
 
 import React from 'react';
-import './app.css';
 import Header from './header';
 import TestRunnerItemList from './test_runner_item_list';
 import HistoricalList from './historical_list';

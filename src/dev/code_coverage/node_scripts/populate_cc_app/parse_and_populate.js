@@ -49,11 +49,17 @@ export const parseAndPopulate = buildNumber => srcFile => destFile => log => {
 function onComplete (initData) {
   const prettyFlush = pipe(pretty, flush);
   return function mutateInitialData (xs, log, destFile, buildNumber) {
-    initData.historicalItems = xs.filter(x => x !== '');
+    initData.historicalItems = normalize(xs);
     initData.currentJobNumber = buildNumber;
     prettyFlush(initData)(destFile);
     log.debug('### Completed');
   };
+}
+
+function normalize(xs) {
+  const dropEmpty = x => x !== '';
+  const dropDuplicates = () => [...new Set(xs.filter(dropEmpty))];
+  return dropDuplicates();
 }
 
 function flush (initData) {
