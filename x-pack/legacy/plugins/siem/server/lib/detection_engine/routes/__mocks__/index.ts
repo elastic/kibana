@@ -6,6 +6,8 @@
 
 import Hapi from 'hapi';
 
+export { clientsServiceMock } from './clients_service_mock';
+
 export const createMockServer = () => {
   const server = new Hapi.Server({ port: 0 });
 

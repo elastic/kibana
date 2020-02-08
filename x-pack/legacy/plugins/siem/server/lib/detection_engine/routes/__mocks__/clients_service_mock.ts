@@ -24,7 +24,7 @@ const createClients = () => ({
 const createGetScoped = () =>
   jest.fn(() => Promise.resolve(createClients()) as ReturnType<GetScopedClients>);
 
-export const createClientsServiceMock = () => {
+const createClientsServiceMock = () => {
   return {
     setup: jest.fn(),
     start: jest.fn(),

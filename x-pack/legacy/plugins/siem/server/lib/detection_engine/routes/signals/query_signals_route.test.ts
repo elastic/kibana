@@ -4,51 +4,57 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createMockServer } from '../__mocks__/_mock_server';
-import { querySignalsRoute } from './query_signals_route';
-import * as myUtils from '../utils';
 import { ServerInjectOptions } from 'hapi';
 
+import { querySignalsRoute } from './query_signals_route';
+import * as myUtils from '../utils';
 import {
   getSignalsQueryRequest,
   getSignalsAggsQueryRequest,
   typicalSignalsQuery,
   typicalSignalsQueryAggs,
 } from '../__mocks__/request_responses';
+import { createMockServer, createMockConfig, clientsServiceMock } from '../__mocks__';
 import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '../../../../../common/constants';
 
 describe('query for signal', () => {
-  let { inject, services, callClusterMock } = createMockServer();
+  let server = createMockServer();
+  let config = createMockConfig();
+  let getClients = clientsServiceMock.createGetScoped();
+  let clients = clientsServiceMock.createClients();
 
   beforeEach(() => {
     jest.resetAllMocks();
     jest.spyOn(myUtils, 'getIndex').mockReturnValue('fakeindex');
-    ({ inject, services, callClusterMock } = createMockServer());
-    callClusterMock.mockImplementation(() => true);
-    querySignalsRoute(services);
+
+    server = createMockServer();
+    config = createMockConfig();
+    getClients = clientsServiceMock.createGetScoped();
+    clients = clientsServiceMock.createClients();
+
+    getClients.mockResolvedValue(clients);
+    clients.clusterClient.callAsCurrentUser.mockResolvedValue(true);
+
+    querySignalsRoute(server.route, config, getClients);
   });
 
   describe('query and agg on signals index', () => {
     test('returns 200 when using single query', async () => {
-      callClusterMock.mockImplementation(
-        (endpoint: string, params: { index: string; body: object }) => {
-          expect(params.body).toMatchObject({ ...typicalSignalsQueryAggs() });
-          return true;
-        }
-      );
-      const { statusCode } = await inject(getSignalsAggsQueryRequest());
+      clients.clusterClient.callAsCurrentUser.mockImplementation((endpoint, params) => {
+        expect(params!.body).toMatchObject({ ...typicalSignalsQueryAggs() });
+        return Promise.resolve(true);
+      });
+      const { statusCode } = await server.inject(getSignalsAggsQueryRequest());
       expect(statusCode).toBe(200);
       expect(myUtils.getIndex).toHaveReturnedWith('fakeindex');
     });
 
     test('returns 200 when using single agg', async () => {
-      callClusterMock.mockImplementation(
-        (endpoint: string, params: { index: string; body: object }) => {
-          expect(params.body).toMatchObject({ ...typicalSignalsQueryAggs() });
-          return true;
-        }
-      );
-      const { statusCode } = await inject(getSignalsAggsQueryRequest());
+      clients.clusterClient.callAsCurrentUser.mockImplementation((endpoint, params) => {
+        expect(params!.body).toMatchObject({ ...typicalSignalsQueryAggs() });
+        return Promise.resolve(true);
+      });
+      const { statusCode } = await server.inject(getSignalsAggsQueryRequest());
       expect(statusCode).toBe(200);
       expect(myUtils.getIndex).toHaveReturnedWith('fakeindex');
     });
@@ -56,16 +62,14 @@ describe('query for signal', () => {
     test('returns 200 when using aggs and query together', async () => {
       const allTogether = getSignalsQueryRequest();
       allTogether.payload = { ...typicalSignalsQueryAggs(), ...typicalSignalsQuery() };
-      callClusterMock.mockImplementation(
-        (endpoint: string, params: { index: string; body: object }) => {
-          expect(params.body).toMatchObject({
-            ...typicalSignalsQueryAggs(),
-            ...typicalSignalsQuery(),
-          });
-          return true;
-        }
-      );
-      const { statusCode } = await inject(allTogether);
+      clients.clusterClient.callAsCurrentUser.mockImplementation((endpoint, params) => {
+        expect(params!.body).toMatchObject({
+          ...typicalSignalsQueryAggs(),
+          ...typicalSignalsQuery(),
+        });
+        return Promise.resolve(true);
+      });
+      const { statusCode } = await server.inject(allTogether);
       expect(statusCode).toBe(200);
       expect(myUtils.getIndex).toHaveReturnedWith('fakeindex');
     });
@@ -73,7 +77,7 @@ describe('query for signal', () => {
     test('returns 400 when missing aggs and query', async () => {
       const allTogether = getSignalsQueryRequest();
       allTogether.payload = {};
-      const { statusCode } = await inject(allTogether);
+      const { statusCode } = await server.inject(allTogether);
       expect(statusCode).toBe(400);
     });
   });
@@ -85,7 +89,7 @@ describe('query for signal', () => {
         url: DETECTION_ENGINE_QUERY_SIGNALS_URL,
         payload: typicalSignalsQuery(),
       };
-      const { statusCode } = await inject(request);
+      const { statusCode } = await server.inject(request);
       expect(statusCode).toBe(200);
     });
 
@@ -95,7 +99,7 @@ describe('query for signal', () => {
         url: DETECTION_ENGINE_QUERY_SIGNALS_URL,
         payload: typicalSignalsQueryAggs(),
       };
-      const { statusCode } = await inject(request);
+      const { statusCode } = await server.inject(request);
       expect(statusCode).toBe(200);
     });
 
@@ -105,7 +109,7 @@ describe('query for signal', () => {
         url: DETECTION_ENGINE_QUERY_SIGNALS_URL,
         payload: { ...typicalSignalsQueryAggs(), ...typicalSignalsQuery() },
       };
-      const { statusCode } = await inject(request);
+      const { statusCode } = await server.inject(request);
       expect(statusCode).toBe(200);
     });
 
@@ -115,7 +119,7 @@ describe('query for signal', () => {
         url: DETECTION_ENGINE_QUERY_SIGNALS_URL,
         payload: {},
       };
-      const { statusCode } = await inject(request);
+      const { statusCode } = await server.inject(request);
       expect(statusCode).toBe(400);
     });
   });

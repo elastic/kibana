@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createMockServer } from '../__mocks__/_mock_server';
-
-import { readRulesRoute } from './read_rules_route';
 import { ServerInjectOptions } from 'hapi';
+import { omit } from 'lodash/fp';
 
+import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
+import { readRulesRoute } from './read_rules_route';
 import {
   getFindResult,
   getResult,
@@ -16,14 +16,20 @@ import {
   getFindResultWithSingleHit,
   getFindResultStatus,
 } from '../__mocks__/request_responses';
-import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
+import { createMockServer, clientsServiceMock } from '../__mocks__';
 
 describe('read_signals', () => {
-  let { services, inject, alertsClient, savedObjectsClient } = createMockServer();
+  let server = createMockServer();
+  let getClients = clientsServiceMock.createGetScoped();
+  let clients = clientsServiceMock.createClients();
 
   beforeEach(() => {
-    ({ services, inject, alertsClient, savedObjectsClient } = createMockServer());
-    readRulesRoute(services);
+    server = createMockServer();
+    getClients = clientsServiceMock.createGetScoped();
+    clients = clientsServiceMock.createClients();
+
+    getClients.mockResolvedValue(clients);
+    readRulesRoute(server.route, getClients);
   });
 
   afterEach(() => {
@@ -32,32 +38,33 @@ describe('read_signals', () => {
 
   describe('status codes with actionClient and alertClient', () => {
     test('returns 200 when reading a single rule with a valid actionClient and alertClient', async () => {
-      alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
-      alertsClient.get.mockResolvedValue(getResult());
-      savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
-      const { statusCode } = await inject(getReadRequest());
+      clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
+      clients.alertsClient.get.mockResolvedValue(getResult());
+      clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
+      const { statusCode } = await server.inject(getReadRequest());
       expect(statusCode).toBe(200);
     });
 
     test('returns 404 if alertClient is not available on the route', async () => {
-      const { services: _services, inject: _inject } = createMockServer(false);
-      readRulesRoute(_services);
-      const { statusCode } = await _inject(getReadRequest());
+      getClients.mockResolvedValue(omit('alertsClient', clients));
+      const { route, inject } = createMockServer();
+      readRulesRoute(route, getClients);
+      const { statusCode } = await inject(getReadRequest());
       expect(statusCode).toBe(404);
     });
   });
 
   describe('validation', () => {
     test('returns 400 if given a non-existent id', async () => {
-      alertsClient.find.mockResolvedValue(getFindResult());
-      alertsClient.get.mockResolvedValue(getResult());
-      alertsClient.delete.mockResolvedValue({});
-      savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
+      clients.alertsClient.find.mockResolvedValue(getFindResult());
+      clients.alertsClient.get.mockResolvedValue(getResult());
+      clients.alertsClient.delete.mockResolvedValue({});
+      clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
       const request: ServerInjectOptions = {
         method: 'GET',
         url: DETECTION_ENGINE_RULES_URL,
       };
-      const { statusCode } = await inject(request);
+      const { statusCode } = await server.inject(request);
       expect(statusCode).toBe(400);
     });
   });
