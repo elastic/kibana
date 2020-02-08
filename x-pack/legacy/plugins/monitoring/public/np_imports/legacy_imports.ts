@@ -16,14 +16,10 @@ export { StateManagementConfigProvider } from 'ui/state_management/config_provid
 // @ts-ignore
 export { AppStateProvider } from 'ui/state_management/app_state';
 // @ts-ignore
-export { PrivateProvider } from 'ui/private/private';
-// @ts-ignore
 export { EventsProvider } from 'ui/events';
 export { PersistedState } from 'ui/persisted_state';
 // @ts-ignore
 export { createTopNavDirective, createTopNavHelper } from 'ui/kbn_top_nav/kbn_top_nav';
-// @ts-ignore
-export { PromiseServiceCreator } from 'ui/promises/promises';
 // @ts-ignore
 export { KbnUrlProvider, RedirectWhenMissingProvider } from 'ui/url';
 export { registerTimefilterWithGlobalStateFactory } from 'ui/timefilter/setup_router';

@@ -14,16 +14,19 @@ import {
   GlobalStateProvider,
   StateManagementConfigProvider,
   AppStateProvider,
-  PrivateProvider,
   EventsProvider,
   PersistedState,
   createTopNavDirective,
   createTopNavHelper,
-  PromiseServiceCreator,
   KbnUrlProvider,
   RedirectWhenMissingProvider,
   npStart,
 } from '../legacy_imports';
+
+// @ts-ignore
+import { PromiseServiceCreator } from './providers/promises';
+// @ts-ignore
+import { PrivateProvider } from './providers/private';
 
 type IPrivate = <T>(provider: (...injectable: any[]) => T) => T;
 
