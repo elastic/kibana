@@ -151,6 +151,11 @@ export function ListContainerExample({ getEmbeddableFactory }: Props) {
               The first HelloWorldEmbeddable does not emit the hasMatch output variable, so the
               container chooses to hide it.
             </p>
+
+            <p>
+              Check out the &quote;Dynamically adding children&quote; section, to see how to add
+              children to this container, and see it rendered inside an `EmbeddablePanel` component.
+            </p>
           </EuiText>
 
           <EuiSpacer />
