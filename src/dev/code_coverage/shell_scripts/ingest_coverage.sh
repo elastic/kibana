@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -e
-
 echo "### Ingesting Code Coverage"
 
 

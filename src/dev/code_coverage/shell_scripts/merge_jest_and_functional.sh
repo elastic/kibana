@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -e
-
 EXTRACT_START_DIR=tmp/extracted_coverage
 EXTRACT_END_DIR=target/kibana-coverage
 COMBINED_EXRACT_DIR=/${EXTRACT_START_DIR}/${EXTRACT_END_DIR}

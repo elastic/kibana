@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -e
-
 DOWNLOAD_DIR=/tmp/downloaded_coverage
 EXTRACT_DIR=/tmp/extracted_coverage
 
