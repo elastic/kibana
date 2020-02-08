@@ -12,6 +12,9 @@ import {
   EuiFlyout,
   EuiFlyoutHeader,
   EuiFlyoutBody,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -27,13 +30,34 @@ export function RequestFlyout({
   return (
     <EuiFlyout onClose={onClose} maxWidth={640}>
       <EuiFlyoutHeader>
-        <EuiTitle>
-          <h3>
-            {i18n.translate('xpack.painless_playground.flyoutTitle', {
-              defaultMessage: 'API request',
-            })}
-          </h3>
-        </EuiTitle>
+        <EuiFlexGroup gutterSize="xs">
+          <EuiFlexItem>
+            {/* We need an extra div to get out of flex grow */}
+            <div>
+              <EuiTitle size="m">
+                <h2>
+                  {i18n.translate('xpack.painless_playground.flyoutTitle', {
+                    defaultMessage: 'API request',
+                  })}
+                </h2>
+              </EuiTitle>
+            </div>
+          </EuiFlexItem>
+
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              size="s"
+              flush="right"
+              href="https://www.elastic.co/guide/en/elasticsearch/painless/current/painless-execute-api.html"
+              target="_blank"
+              iconType="help"
+            >
+              {i18n.translate('xpack.painless_playground.flyoutDocLink', {
+                defaultMessage: 'API documentation',
+              })}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>

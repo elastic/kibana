@@ -12,6 +12,11 @@ import {
   EuiSelect,
   EuiIconTip,
   EuiSpacer,
+  EuiIcon,
+  EuiToolTip,
+  EuiLink,
+  EuiText,
+  EuiSuperSelect,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -31,43 +36,78 @@ export function Context({ context, contextSetup, setContext, setContextSetup }: 
     <EuiForm data-test-subj="painlessPlayground">
       <EuiFormRow
         label={
-          <FormattedMessage
-            id="xpack.painless_playground.execution_context"
-            defaultMessage="Execution Context"
-          />
+          <EuiToolTip
+            content={i18n.translate('xpack.painless_playground.contextFieldTooltipText', {
+              defaultMessage: 'Different contexts provide different functions on the ctx object',
+            })}
+          >
+            <span>
+              <FormattedMessage
+                id="xpack.painless_playground.contextFieldLabel"
+                defaultMessage="Execution context"
+              />{' '}
+              <EuiIcon type="questionInCircle" color="subdued" />
+            </span>
+          </EuiToolTip>
+        }
+        labelAppend={
+          <EuiText size="xs">
+            <EuiLink
+              href="https://www.elastic.co/guide/en/elasticsearch/painless/current/painless-execute-api.html"
+              target="_blank"
+            >
+              {i18n.translate('xpack.painless_playground.contextFieldDocLinkText', {
+                defaultMessage: 'Context docs',
+              })}
+            </EuiLink>
+          </EuiText>
         }
         fullWidth
       >
-        <EuiSelect
+        <EuiSuperSelect
           options={painlessContextOptions}
-          value={context}
-          onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setContext(e.target.value)}
+          valueOfSelected={context}
+          onChange={(value: any) => setContext(value)}
+          itemLayoutAlign="top"
+          hasDividers
+          fullWidth
         />
       </EuiFormRow>
 
       <EuiFormRow
         label={
-          <FormattedMessage
-            id="xpack.painless_playground.parametersLabel"
-            defaultMessage="Parameters"
-          />
+          <EuiToolTip
+            content={i18n.translate('xpack.painless_playground.parametersFieldTooltipText', {
+              defaultMessage: 'Your script can access these values by name',
+            })}
+          >
+            <span>
+              <FormattedMessage
+                id="xpack.painless_playground.parametersFieldLabel"
+                defaultMessage="Parameters"
+              />{' '}
+              <EuiIcon type="questionInCircle" color="subdued" />
+            </span>
+          </EuiToolTip>
         }
         fullWidth
         labelAppend={
-          <EuiIconTip
-            aria-label={i18n.translate('xpack.painless_playground.helpIconAriaLabel', {
-              defaultMessage: 'Help',
-            })}
-            content={
-              <FormattedMessage
-                id="xpack.painless_playground.parametersHelp"
-                defaultMessage="Enter JSON that's available as 'params' in the code"
-              />
-            }
-          />
+          <EuiText size="xs">
+            <EuiLink
+              href="https://www.elastic.co/guide/en/elasticsearch/reference/master/modules-scripting-using.html#prefer-params"
+              target="_blank"
+            >
+              {i18n.translate('xpack.painless_playground.parametersFieldDocLinkText', {
+                defaultMessage: 'Parameters docs',
+              })}
+            </EuiLink>
+          </EuiText>
         }
+        helpText={i18n.translate('xpack.painless_playground.helpIconAriaLabel', {
+          defaultMessage: 'Use JSON format',
+        })}
       >
-        <div style={{ border: '1px solid #D3DAE6', padding: '3px' }}>
+        <EuiPanel paddingSize="s">
           <CodeEditor
             languageId="javascript"
             height={150}
@@ -84,28 +124,28 @@ export function Context({ context, contextSetup, setContext, setContextSetup }: 
               automaticLayout: true,
             }}
           />
-        </div>
+        </EuiPanel>
       </EuiFormRow>
 
       {['filter', 'score'].indexOf(context) !== -1 && (
         <EuiFormRow
           label={
-            <FormattedMessage id="xpack.painless_playground.indexLabel" defaultMessage="Index" />
+            <EuiToolTip
+              content={i18n.translate('xpack.painless_playground.indexFieldTooltipText', {
+                defaultMessage:
+                  "Index mappings must be compatible with the sample document's fields",
+              })}
+            >
+              <span>
+                <FormattedMessage
+                  id="xpack.painless_playground.indexFieldLabel"
+                  defaultMessage="Index"
+                />{' '}
+                <EuiIcon type="questionInCircle" color="subdued" />
+              </span>
+            </EuiToolTip>
           }
           fullWidth
-          labelAppend={
-            <EuiIconTip
-              aria-label={i18n.translate('xpack.painless_playground.helpIconAriaLabel', {
-                defaultMessage: 'Help',
-              })}
-              content={
-                <FormattedMessage
-                  id="xpack.painless_playground.indexHelp"
-                  defaultMessage="The name of an index containing a mapping that is compatible with the document being indexed."
-                />
-              }
-            />
-          }
         >
           <EuiFieldText
             fullWidth
@@ -119,24 +159,23 @@ export function Context({ context, contextSetup, setContext, setContextSetup }: 
       {['filter', 'score'].indexOf(context) !== -1 && (
         <EuiFormRow
           label={
-            <FormattedMessage id="xpack.painless_playground.codeLabel" defaultMessage="Document" />
+            <EuiToolTip
+              content={i18n.translate('xpack.painless_playground.documentFieldTooltipText', {
+                defaultMessage: "Your script can access this document's fields",
+              })}
+            >
+              <span>
+                <FormattedMessage
+                  id="xpack.painless_playground.documentFieldLabel"
+                  defaultMessage="Sample document"
+                />{' '}
+                <EuiIcon type="questionInCircle" color="subdued" />
+              </span>
+            </EuiToolTip>
           }
           fullWidth
-          labelAppend={
-            <EuiIconTip
-              aria-label={i18n.translate('xpack.painless_playground.helpIconAriaLabel', {
-                defaultMessage: 'Help',
-              })}
-              content={
-                <FormattedMessage
-                  id="xpack.painless_playground.documentHelp"
-                  defaultMessage="Enter document as JSON that's available as 'doc' in the code"
-                />
-              }
-            />
-          }
         >
-          <div style={{ border: '1px solid #D3DAE6', padding: '3px' }}>
+          <EuiPanel paddingSize="s">
             <CodeEditor
               languageId="javascript"
               height={100}
@@ -155,7 +194,7 @@ export function Context({ context, contextSetup, setContext, setContextSetup }: 
                 automaticLayout: true,
               }}
             />
-          </div>
+          </EuiPanel>
         </EuiFormRow>
       )}
     </EuiForm>
