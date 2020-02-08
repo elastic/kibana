@@ -10,5 +10,5 @@ echo "### Extracting kibana-xpack-tests"
 #  tar -xzf $DOWNLOAD_DIR/coverage/kibana-xpack-tests-${i}/kibana-coverage.tar.gz -C $EXTRACT_DIR
 #done
 
-# TODO-TRE: Uncomment the loop above, and remove the line below
+# TODO-TRE: Uncomment the loop above, and remove the line below...when I'm ''done'' with the app
 tar -xzf $DOWNLOAD_DIR/coverage/kibana-xpack-tests-1/kibana-coverage.tar.gz -C $EXTRACT_DIR

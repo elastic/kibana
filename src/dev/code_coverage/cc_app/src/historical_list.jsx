@@ -18,12 +18,24 @@
  */
 
 import React from "react";
+import HistoricalItem from './historical_item';
 
-export default function HistoricalList({items}) {
+export default function HistoricalList({historicalItems}) {
 
   return (
-    <div>
-      Historical List
+    <div className="App-Historical-List">
+      <ul>
+        {historicalItems.map((x, i) => renderItem(x, i))}
+      </ul>
     </div>
+     );
+}
+
+function renderItem(x, i) {
+  return (
+    <HistoricalItem
+      item={x}
+      key={i}
+    />
   );
 }

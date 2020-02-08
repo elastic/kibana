@@ -4,13 +4,15 @@ import TestRunnerItem from './test_runner_item';
 export default function TestRunnerItemList({testRunnerTypes}) {
 
   return (
-    <ul>
-      {testRunnerTypes.map(renderTestRunnerItem)}
-    </ul>
+    <div className="App-TestRunner-List">
+      <ul>
+        {testRunnerTypes.map(renderItem)}
+      </ul>
+    </div>
   );
 }
 
-function renderTestRunnerItem(item) {
+function renderItem(item) {
   return (
     <TestRunnerItem
       item={item}

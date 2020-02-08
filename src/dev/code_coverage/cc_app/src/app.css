@@ -36,7 +36,7 @@
 }
 
 .App-link {
-  color: #fa0aff;
+  color: #b20ab7;
 }
 
 @keyframes App-logo-spin {
@@ -46,4 +46,28 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+.App-TestRunner-List {
+  border-style: solid;
+  /*background-color: #282c34;*/
+  /*min-height: 100vh;*/
+  /*display: flex;*/
+  /*flex-direction: column;*/
+  /*align-items: center;*/
+  /*justify-content: center;*/
+  /*font-size: calc(10px + 2vmin);*/
+  /*color: white;*/
+}
+
+.App-Historical-List {
+  border-style: solid;
+  /*background-color: #282c34;*/
+  /*min-height: 100vh;*/
+  /*display: flex;*/
+  /*flex-direction: column;*/
+  /*align-items: center;*/
+  /*justify-content: center;*/
+  /*font-size: calc(10px + 2vmin);*/
+  /*color: white;*/
 }
