@@ -24,3 +24,6 @@ export const plugin = (initializerContext: PluginInitializerContext) =>
   new KibanaLegacyPlugin(initializerContext);
 
 export * from './plugin';
+export * from './angular';
+export * from './notify';
+export * from './utils';

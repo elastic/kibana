@@ -256,6 +256,7 @@ export default class BaseOptimizer {
       profile: this.profile || false,
 
       output: {
+        futureEmitAssets: true, // TODO: remove on webpack 5
         path: this.uiBundles.getWorkingDir(),
         filename: '[name].bundle.js',
         sourceMapFilename: '[file].map',
@@ -458,7 +459,7 @@ export default class BaseOptimizer {
       optimization: {
         minimizer: [
           new TerserPlugin({
-            parallel: this.getThreadLoaderPoolConfig().workers,
+            parallel: false,
             sourceMap: false,
             cache: false,
             extractComments: false,
