@@ -40,8 +40,6 @@ export interface SetupPlugins {
   spaces: SpacesSetup;
 }
 
-export type SetupServices = CoreSetup & SetupPlugins;
-
 export interface StartPlugins {
   actions: ActionsStart;
 }
