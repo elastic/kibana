@@ -4,22 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiButtonIcon,
   EuiDescriptionListDescription,
   EuiDescriptionListTitle,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
-  EuiText,
+  EuiDescriptionList,
+  EuiButtonToggle,
+  EuiBadge,
 } from '@elastic/eui';
 
 import styled, { css } from 'styled-components';
 import { Markdown } from '../../../../components/markdown';
-import { HeaderPage } from '../../../../components/header_page';
+import { HeaderPage } from '../../../../components/header_page_new';
 import { WrapperPage } from '../../../../components/wrapper_page';
 import * as i18n from './translations';
 import { getCaseUrl } from '../../../../components/link_to';
@@ -29,22 +30,24 @@ import { Form, useForm } from '../shared_imports';
 import { schema } from './schema';
 import { DescriptionMarkdown } from '../description_md_editor';
 import { useUpdateCase } from '../../../../containers/case/use_update_case';
-import { CommonUseField } from '../create';
-import { caseTypeOptions, stateOptions } from '../create/form_options';
 import { NewCaseFormatted } from '../../../../containers/case/types';
 import { UserActionTree } from '../user_action_tree';
 import { UserList } from '../user_list';
 import { TagList } from '../tag_list';
+import { PropertyActions } from '../property_actions';
 
 interface Props {
   caseId: string;
 }
 
-interface CaseDetail {
-  title: React.ReactNode;
-  definition: string | number | JSX.Element | null;
-  edit?: JSX.Element;
-}
+const MyDescriptionList = styled(EuiDescriptionList)`
+  ${({ theme }) => css`
+    & {
+      padding-right: ${theme.eui.euiSizeL};
+      border-right: ${theme.eui.euiBorderThin};
+    }
+  `}
+`;
 
 const MyWrapper = styled(WrapperPage)`
   padding-bottom: 0;
@@ -63,32 +66,19 @@ const BackgroundWrapper = styled.div`
   `}
 `;
 
-const getDictionary = (
-  { title, definition, edit }: CaseDetail,
-  key: number,
-  isEdit: boolean = false
-) => {
-  return definition ? (
-    <Fragment key={key}>
-      {isEdit && edit ? null : <EuiDescriptionListTitle>{title}</EuiDescriptionListTitle>}
-      <EuiDescriptionListDescription>
-        {isEdit && edit ? edit : definition}
-      </EuiDescriptionListDescription>
-    </Fragment>
-  ) : null;
-};
 export const CaseView = React.memo(({ caseId }: Props) => {
   const [{ data, isLoading, isError }, refreshCase] = useGetCase(caseId);
   if (isError) {
     return null;
   }
-  const [isEdit, setIsEdit] = useState(false);
   const [setFormData] = useUpdateCase(caseId, data);
   const { form } = useForm({
     defaultValue: data,
     options: { stripEmptyFields: false },
     schema,
   });
+  const [isEdit, setIsEdit] = useState(false);
+  const [isCaseOpen, setIsCaseOpen] = useState(data.state.toLowerCase() === 'open');
 
   const onSubmit = useCallback(async () => {
     const { isValid, data: newData } = await form.submit();
@@ -98,7 +88,39 @@ export const CaseView = React.memo(({ caseId }: Props) => {
       setIsEdit(false);
     }
   }, [form]);
-  const firstSetOfSteps = [
+  const propertyActions = [
+    {
+      iconType: 'documentEdit',
+      label: 'Edit description',
+      onClick: () => setIsEdit(true),
+    },
+    {
+      iconType: 'securitySignalResolved',
+      label: 'Close case',
+      onClick: () => null,
+    },
+    {
+      iconType: 'trash',
+      label: 'Delete case',
+      onClick: () => null,
+    },
+    {
+      iconType: 'importAction',
+      label: 'Push as ServiceNow incident',
+      onClick: () => null,
+    },
+    {
+      iconType: 'popout',
+      label: 'View ServiceNow incident',
+      onClick: () => null,
+    },
+    {
+      iconType: 'importAction',
+      label: 'Update ServiceNow incident',
+      onClick: () => null,
+    },
+  ];
+  const userActions = [
     {
       avatarName: data.created_by.username,
       title: (
@@ -111,21 +133,30 @@ export const CaseView = React.memo(({ caseId }: Props) => {
             </p>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              onClick={() => window.alert('Description actions')}
-              iconType="boxesHorizontal"
-              aria-label="description actions"
-            />
+            <PropertyActions propertyActions={propertyActions} />
           </EuiFlexItem>
         </EuiFlexGroup>
       ),
       children: isEdit ? (
-        <DescriptionMarkdown
-          descriptionInputHeight={200}
-          initialDescription={data.description}
-          isLoading={isLoading}
-          onChange={description => setFormData({ ...data, description })}
-        />
+        <>
+          <DescriptionMarkdown
+            descriptionInputHeight={200}
+            initialDescription={data.description}
+            isLoading={isLoading}
+            onChange={description => setFormData({ ...data, description })}
+          />
+
+          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
+            <EuiFlexItem grow={false}>
+              <EuiButton fill isDisabled={isLoading} isLoading={isLoading} onClick={onSubmit}>
+                {i18n.SUBMIT}
+              </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty onClick={() => setIsEdit(false)}>{i18n.CANCEL}</EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
       ) : (
         <Markdown raw={data.description} />
       ),
@@ -142,93 +173,11 @@ export const CaseView = React.memo(({ caseId }: Props) => {
       children: <p>{'alright alright alright'}</p>,
     },
   ];
-  const caseDetailsDefinitions: CaseDetail[] = [
-    {
-      title: i18n.DESCRIPTION,
-      edit: (
-        <DescriptionMarkdown
-          descriptionInputHeight={200}
-          initialDescription={data.description}
-          isLoading={isLoading}
-          onChange={description => setFormData({ ...data, description })}
-        />
-      ),
-      definition: <Markdown raw={data.description} />,
-    },
-    {
-      title: i18n.CASE_TYPE,
-      edit: (
-        <CommonUseField
-          path="case_type"
-          componentProps={{
-            idAria: 'caseType',
-            'data-test-subj': 'caseType',
-            euiFieldProps: {
-              fullWidth: false,
-              options: caseTypeOptions,
-            },
-            isDisabled: isLoading,
-          }}
-        />
-      ),
-      definition: data.case_type,
-    },
-    {
-      title: i18n.STATE,
-      edit: (
-        <CommonUseField
-          path="state"
-          componentProps={{
-            idAria: 'state',
-            'data-test-subj': 'state',
-            euiFieldProps: {
-              fullWidth: false,
-              options: stateOptions,
-            },
-            isDisabled: isLoading,
-          }}
-        />
-      ),
-      definition: data.state,
-    },
-    {
-      title: i18n.LAST_UPDATED,
-      definition: <FormattedRelativePreferenceDate value={data.updated_at} />,
-    },
-    {
-      title: i18n.CREATED_AT,
-      definition: <FormattedRelativePreferenceDate value={data.created_at} />,
-    },
-    {
-      title: i18n.REPORTER,
-      definition: data.created_by.username,
-    },
-    {
-      title: i18n.TAGS,
-      edit: (
-        <CommonUseField
-          path="tags"
-          componentProps={{
-            idAria: 'caseTags',
-            'data-test-subj': 'caseTags',
-            euiFieldProps: {
-              fullWidth: true,
-              placeholder: '',
-            },
-            isDisabled: isLoading,
-          }}
-        />
-      ),
-      definition:
-        data.tags.length > 0 ? (
-          <ul>
-            {data.tags.map((tag: string, key: number) => (
-              <li key={key + tag}>{tag}</li>
-            ))}
-          </ul>
-        ) : null,
-    },
-  ];
+
+  useEffect(() => {
+    setIsCaseOpen(data.state.toLowerCase() === 'open');
+  }, [data.state]);
+
   return isLoading ? (
     <EuiFlexGroup justifyContent="center" alignItems="center">
       <EuiFlexItem grow={false}>
@@ -245,18 +194,39 @@ export const CaseView = React.memo(({ caseId }: Props) => {
           }}
           title={data.title}
         >
-          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
-            {isEdit ? (
-              <EuiFlexItem grow={false}>
-                <EuiButton fill isDisabled={isLoading} isLoading={isLoading} onClick={onSubmit}>
-                  {i18n.SUBMIT}
-                </EuiButton>
-              </EuiFlexItem>
-            ) : null}
+          <EuiFlexGroup gutterSize="l" justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty onClick={() => setIsEdit(!isEdit)}>
-                {isEdit ? i18n.CANCEL : i18n.EDIT}
-              </EuiButtonEmpty>
+              <MyDescriptionList compressed>
+                <EuiFlexGroup>
+                  <EuiFlexItem grow={false}>
+                    <EuiDescriptionListTitle>{i18n.STATUS}</EuiDescriptionListTitle>
+                    <EuiDescriptionListDescription>
+                      <EuiBadge color={isCaseOpen ? 'secondary' : 'danger'}>{data.state}</EuiBadge>
+                    </EuiDescriptionListDescription>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiDescriptionListTitle>{i18n.CASE_OPENED}</EuiDescriptionListTitle>
+                    <EuiDescriptionListDescription>
+                      <FormattedRelativePreferenceDate value={data.created_at} />
+                    </EuiDescriptionListDescription>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </MyDescriptionList>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup gutterSize="l" alignItems="center">
+                <EuiFlexItem>
+                  <EuiButtonToggle
+                    label={isCaseOpen ? 'Close case' : 'Reopen case'}
+                    iconType={isCaseOpen ? 'checkInCircleFilled' : 'magnet'}
+                    onChange={() => setIsCaseOpen(!isCaseOpen)}
+                    isSelected={isCaseOpen}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <PropertyActions propertyActions={propertyActions} />
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
         </HeaderPage>
@@ -265,29 +235,19 @@ export const CaseView = React.memo(({ caseId }: Props) => {
         <MyWrapper>
           <EuiFlexGroup>
             <EuiFlexItem grow={6}>
-              <UserActionTree userActions={firstSetOfSteps} />
+              {isEdit ? (
+                <Form form={form}>
+                  <UserActionTree userActions={userActions} />
+                </Form>
+              ) : (
+                <UserActionTree userActions={userActions} />
+              )}
             </EuiFlexItem>
             <EuiFlexItem grow={2}>
               <UserList headline={i18n.REPORTER} users={[data.created_by]} />
               <TagList tags={data.tags} />
             </EuiFlexItem>
           </EuiFlexGroup>
-
-          {/* {isEdit ? (*/}
-          {/*  <Form form={form}>*/}
-          {/*    <EuiDescriptionList compressed>*/}
-          {/*      {caseDetailsDefinitions.map((dictionaryItem, key) =>*/}
-          {/*        getDictionary(dictionaryItem, key, isEdit)*/}
-          {/*      )}*/}
-          {/*    </EuiDescriptionList>*/}
-          {/*  </Form>*/}
-          {/* ) : (*/}
-          {/*  <EuiDescriptionList compressed>*/}
-          {/*    {caseDetailsDefinitions.map((dictionaryItem, key) =>*/}
-          {/*      getDictionary(dictionaryItem, key, isEdit)*/}
-          {/*    )}*/}
-          {/*  </EuiDescriptionList>*/}
-          {/* )}*/}
         </MyWrapper>
       </BackgroundWrapper>
     </>

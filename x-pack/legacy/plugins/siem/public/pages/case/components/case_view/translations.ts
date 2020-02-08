@@ -35,3 +35,11 @@ export const EDITED_DESCRIPTION = i18n.translate(
 export const ADDED_COMMENT = i18n.translate('xpack.siem.case.caseView.actionLabel.addComment', {
   defaultMessage: 'added comment',
 });
+
+export const STATUS = i18n.translate('xpack.siem.case.caseView.statusLabel', {
+  defaultMessage: 'Status',
+});
+
+export const CASE_OPENED = i18n.translate('xpack.siem.case.caseView.caseOpened', {
+  defaultMessage: 'Case opened',
+});
