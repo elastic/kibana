@@ -4,14 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexItem, EuiPanel, EuiTabbedContent } from '@elastic/eui';
+import { EuiFlexItem, EuiPanel, EuiTabbedContent, EuiTextArea } from '@elastic/eui';
 import React, { useState } from 'react';
 import styled from 'styled-components';
 
 import { Markdown } from '../../../../components/markdown';
 import * as i18n from '../../translations';
-import { CommonUseField } from '../create';
 import { MarkdownHint } from '../../../../components/markdown/markdown_hint';
+import { CommonUseField } from '../create';
+
+const TextArea = styled(EuiTextArea)<{ height: number }>`
+  min-height: ${({ height }) => `${height}px`};
+  width: 100%;
+`;
+
+TextArea.displayName = 'TextArea';
 
 const DescriptionContainer = styled.div`
   margin-top: 15px;
@@ -36,14 +43,15 @@ export const DescriptionMarkdown = React.memo<{
   descriptionInputHeight: number;
   initialDescription: string;
   isLoading: boolean;
+  formHook?: boolean;
   onChange: (description: string) => void;
-}>(({ initialDescription, isLoading, descriptionInputHeight, onChange }) => {
+}>(({ initialDescription, isLoading, descriptionInputHeight, onChange, formHook = false }) => {
   const [description, setDescription] = useState(initialDescription);
   const tabs = [
     {
       id: 'description',
       name: i18n.DESCRIPTION,
-      content: (
+      content: formHook ? (
         <CommonUseField
           path="description"
           onChange={e => {
@@ -56,6 +64,19 @@ export const DescriptionMarkdown = React.memo<{
             isDisabled: isLoading,
             spellcheck: false,
           }}
+        />
+      ) : (
+        <TextArea
+          onChange={e => {
+            setDescription(e.target.value);
+            onChange(e.target.value);
+          }}
+          fullWidth={true}
+          height={descriptionInputHeight}
+          aria-label={i18n.DESCRIPTION}
+          disabled={isLoading}
+          spellCheck={false}
+          value={description}
         />
       ),
     },

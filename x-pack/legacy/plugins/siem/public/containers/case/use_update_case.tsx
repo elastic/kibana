@@ -4,23 +4,38 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Dispatch, SetStateAction, useEffect, useReducer, useState } from 'react';
+import { useEffect, useReducer } from 'react';
 import { useStateToaster } from '../../components/toasters';
 import { errorToToaster } from '../../components/ml/api/error_to_toaster';
 import * as i18n from './translations';
-import { FETCH_FAILURE, FETCH_INIT, FETCH_SUCCESS, UPDATE_CASE } from './constants';
-import { CaseSavedObject, NewCaseFormatted } from './types';
-import { updateCase } from './api';
+import {
+  FETCH_FAILURE,
+  FETCH_INIT,
+  FETCH_SUCCESS,
+  UPDATE_CASE,
+  UPDATE_CASE_PROPERTY,
+} from './constants';
+import { CaseSavedObject, FlattenedCaseSavedObject, UpdateCase } from './types';
+import { updateCaseProperty } from './api';
+
+type UpdateKey = keyof UpdateCase;
 
 interface NewCaseState {
-  data: NewCaseFormatted;
+  data: FlattenedCaseSavedObject;
   newCase?: CaseSavedObject;
   isLoading: boolean;
   isError: boolean;
+  updateKey?: UpdateKey | null;
 }
+
+interface UpdateByKey {
+  updateKey: UpdateKey;
+  updateValue: UpdateCase[UpdateKey];
+}
+
 interface Action {
   type: string;
-  payload?: NewCaseFormatted | CaseSavedObject;
+  payload?: UpdateCase | CaseSavedObject | UpdateByKey;
 }
 
 const dataFetchReducer = (state: NewCaseState, action: Action): NewCaseState => {
@@ -31,22 +46,39 @@ const dataFetchReducer = (state: NewCaseState, action: Action): NewCaseState => 
         ...state,
         isLoading: true,
         isError: false,
+        updateKey: null,
       };
     case UPDATE_CASE:
-      getTypedPayload = (a: Action['payload']) => a as NewCaseFormatted;
+      getTypedPayload = (a: Action['payload']) => a as FlattenedCaseSavedObject;
       return {
         ...state,
         isLoading: false,
         isError: false,
         data: getTypedPayload(action.payload),
       };
-    case FETCH_SUCCESS:
-      getTypedPayload = (a: Action['payload']) => a as CaseSavedObject;
+    case UPDATE_CASE_PROPERTY:
+      getTypedPayload = (a: Action['payload']) => a as UpdateByKey;
+      const { updateKey, updateValue } = getTypedPayload(action.payload);
       return {
         ...state,
         isLoading: false,
         isError: false,
-        newCase: getTypedPayload(action.payload),
+        data: {
+          ...state.data,
+          [updateKey]: updateValue,
+        },
+        updateKey,
+      };
+    case FETCH_SUCCESS:
+      getTypedPayload = (a: Action['payload']) => a as UpdateCase;
+      return {
+        ...state,
+        isLoading: false,
+        isError: false,
+        data: {
+          ...state.data,
+          ...getTypedPayload(action.payload),
+        },
       };
     case FETCH_FAILURE:
       return {
@@ -61,36 +93,37 @@ const dataFetchReducer = (state: NewCaseState, action: Action): NewCaseState => 
 
 export const useUpdateCase = (
   caseId: string,
-  initialData: NewCaseFormatted
-): [Dispatch<SetStateAction<NewCaseFormatted>>] => {
+  initialData: FlattenedCaseSavedObject
+): [{ data: FlattenedCaseSavedObject }, (updates: UpdateByKey) => void] => {
   const [state, dispatch] = useReducer(dataFetchReducer, {
     isLoading: false,
     isError: false,
     data: initialData,
   });
-  const [formData, setFormData] = useState(initialData);
   const [, dispatchToaster] = useStateToaster();
 
-  useEffect(() => {
-    dispatch({ type: UPDATE_CASE, payload: formData });
-  }, [formData]);
+  const dispatchUpdateCaseProperty = ({ updateKey, updateValue }: UpdateByKey) => {
+    dispatch({
+      type: UPDATE_CASE_PROPERTY,
+      payload: { updateKey, updateValue },
+    });
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchData = async (updateKey: keyof UpdateCase) => {
       dispatch({ type: FETCH_INIT });
       try {
-        const dataWithoutIsNew = state.data;
-        delete dataWithoutIsNew.isNew;
-        const response = await updateCase(caseId, dataWithoutIsNew);
-        dispatch({ type: FETCH_SUCCESS, payload: response });
+        const response = await updateCaseProperty(caseId, { [updateKey]: state.data[updateKey] });
+        dispatch({ type: FETCH_SUCCESS, payload: response.attributes });
       } catch (error) {
         errorToToaster({ title: i18n.ERROR_TITLE, error, dispatchToaster });
         dispatch({ type: FETCH_FAILURE });
       }
     };
-    if (state.data.isNew) {
-      fetchData();
+    if (state.updateKey) {
+      fetchData(state.updateKey);
     }
-  }, [state.data.isNew]);
-  return [setFormData];
+  }, [state.updateKey]);
+
+  return [{ data: state.data }, dispatchUpdateCaseProperty];
 };

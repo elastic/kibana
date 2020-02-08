@@ -11,6 +11,8 @@ import {
   NewCase,
   NewCaseFormatted,
   SortFieldCase,
+  UpdateCase,
+  UpdateCaseSavedObject,
 } from './types';
 import { Direction } from '../../graphql/types';
 import { throwIfNotOk } from '../../hooks/api/api';
@@ -86,10 +88,10 @@ export const createCase = async (newCase: NewCase): Promise<NewCaseFormatted> =>
   return response.json();
 };
 
-export const updateCase = async (
+export const updateCaseProperty = async (
   caseId: string,
-  updatedCase: NewCaseFormatted
-): Promise<NewCaseFormatted> => {
+  updatedCase: UpdateCase
+): Promise<UpdateCaseSavedObject> => {
   const response = await fetch(`${chrome.getBasePath()}${CASES_URL}/${caseId}`, {
     method: 'POST',
     credentials: 'same-origin',

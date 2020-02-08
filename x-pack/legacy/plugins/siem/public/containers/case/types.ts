@@ -20,6 +20,16 @@ export interface NewCase extends FormData {
 
 export interface NewCaseFormatted extends NewCase {
   state: string;
+  updated_at: number;
+}
+
+export interface UpdateCase {
+  case_type?: string;
+  description?: string;
+  state?: string;
+  tags?: string[];
+  title?: string;
+  updated_at?: number;
 }
 
 interface Case {
@@ -40,6 +50,14 @@ export interface CasesSavedObjects {
   total: number;
 }
 
+export interface UpdateCaseSavedObject {
+  attributes: UpdateCase;
+  id: string;
+  type: string;
+  updated_at: string;
+  version: string;
+}
+
 export interface CaseSavedObject {
   attributes: CaseResult;
   id: string;
@@ -47,6 +65,7 @@ export interface CaseSavedObject {
   updated_at: string;
   version: string;
 }
+
 export interface CaseResult {
   case_type: string;
   created_at: number;

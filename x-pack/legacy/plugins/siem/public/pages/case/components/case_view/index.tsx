@@ -6,16 +6,16 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import {
+  EuiBadge,
   EuiButton,
   EuiButtonEmpty,
+  EuiButtonToggle,
+  EuiDescriptionList,
   EuiDescriptionListDescription,
   EuiDescriptionListTitle,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
-  EuiDescriptionList,
-  EuiButtonToggle,
-  EuiBadge,
 } from '@elastic/eui';
 
 import styled, { css } from 'styled-components';
@@ -24,13 +24,11 @@ import { HeaderPage } from '../../../../components/header_page_new';
 import { WrapperPage } from '../../../../components/wrapper_page';
 import * as i18n from './translations';
 import { getCaseUrl } from '../../../../components/link_to';
-import { useGetCase } from '../../../../containers/case/use_get_case';
+import { useGetCase, RefreshCase } from '../../../../containers/case/use_get_case';
 import { FormattedRelativePreferenceDate } from '../../../../components/formatted_date';
-import { Form, useForm } from '../shared_imports';
-import { schema } from './schema';
 import { DescriptionMarkdown } from '../description_md_editor';
 import { useUpdateCase } from '../../../../containers/case/use_update_case';
-import { NewCaseFormatted } from '../../../../containers/case/types';
+import { FlattenedCaseSavedObject } from '../../../../containers/case/types';
 import { UserActionTree } from '../user_action_tree';
 import { UserList } from '../user_list';
 import { TagList } from '../tag_list';
@@ -66,33 +64,42 @@ const BackgroundWrapper = styled.div`
   `}
 `;
 
-export const CaseView = React.memo(({ caseId }: Props) => {
-  const [{ data, isLoading, isError }, refreshCase] = useGetCase(caseId);
-  if (isError) {
-    return null;
-  }
-  const [setFormData] = useUpdateCase(caseId, data);
-  const { form } = useForm({
-    defaultValue: data,
-    options: { stripEmptyFields: false },
-    schema,
-  });
-  const [isEdit, setIsEdit] = useState(false);
-  const [isCaseOpen, setIsCaseOpen] = useState(data.state.toLowerCase() === 'open');
+interface CasesProps {
+  caseId: string;
+  initialData: FlattenedCaseSavedObject;
+  isLoading: boolean;
+  refreshCase: RefreshCase;
+}
 
-  const onSubmit = useCallback(async () => {
-    const { isValid, data: newData } = await form.submit();
-    if (isValid) {
-      setFormData({ ...newData, isNew: true } as NewCaseFormatted);
-      refreshCase(newData as NewCaseFormatted);
-      setIsEdit(false);
+export const Cases = React.memo<CasesProps>(({ caseId, initialData, isLoading, refreshCase }) => {
+  const [{ data }, dispatchUpdateCaseProperty] = useUpdateCase(caseId, initialData);
+  const [isEditDescription, setIsEditDescription] = useState(false);
+  const [isCaseOpen, setIsCaseOpen] = useState(data.state === 'open');
+  const [description, setDescription] = useState(data.description);
+
+  const onUpdateDescription = useCallback(async () => {
+    if (description.length > 0) {
+      dispatchUpdateCaseProperty({
+        updateKey: 'description',
+        updateValue: description,
+      });
+      setIsEditDescription(false);
     }
-  }, [form]);
+  }, [dispatchUpdateCaseProperty]);
+  useEffect(() => {
+    const caseState = isCaseOpen ? 'open' : 'closed';
+    if (data.state !== caseState) {
+      dispatchUpdateCaseProperty({
+        updateKey: 'state',
+        updateValue: caseState,
+      });
+    }
+  }, [isCaseOpen]);
   const propertyActions = [
     {
       iconType: 'documentEdit',
       label: 'Edit description',
-      onClick: () => setIsEdit(true),
+      onClick: () => setIsEditDescription(true),
     },
     {
       iconType: 'securitySignalResolved',
@@ -137,23 +144,30 @@ export const CaseView = React.memo(({ caseId }: Props) => {
           </EuiFlexItem>
         </EuiFlexGroup>
       ),
-      children: isEdit ? (
+      children: isEditDescription ? (
         <>
           <DescriptionMarkdown
             descriptionInputHeight={200}
             initialDescription={data.description}
             isLoading={isLoading}
-            onChange={description => setFormData({ ...data, description })}
+            onChange={updatedDescription => setDescription(updatedDescription)}
           />
 
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
             <EuiFlexItem grow={false}>
-              <EuiButton fill isDisabled={isLoading} isLoading={isLoading} onClick={onSubmit}>
+              <EuiButton
+                fill
+                isDisabled={isLoading}
+                isLoading={isLoading}
+                onClick={onUpdateDescription}
+              >
                 {i18n.SUBMIT}
               </EuiButton>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty onClick={() => setIsEdit(false)}>{i18n.CANCEL}</EuiButtonEmpty>
+              <EuiButtonEmpty onClick={() => setIsEditDescription(false)}>
+                {i18n.CANCEL}
+              </EuiButtonEmpty>
             </EuiFlexItem>
           </EuiFlexGroup>
         </>
@@ -173,18 +187,7 @@ export const CaseView = React.memo(({ caseId }: Props) => {
       children: <p>{'alright alright alright'}</p>,
     },
   ];
-
-  useEffect(() => {
-    setIsCaseOpen(data.state.toLowerCase() === 'open');
-  }, [data.state]);
-
-  return isLoading ? (
-    <EuiFlexGroup justifyContent="center" alignItems="center">
-      <EuiFlexItem grow={false}>
-        <EuiLoadingSpinner size="xl" />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  ) : (
+  return (
     <>
       <MyWrapper>
         <HeaderPage
@@ -235,13 +238,7 @@ export const CaseView = React.memo(({ caseId }: Props) => {
         <MyWrapper>
           <EuiFlexGroup>
             <EuiFlexItem grow={6}>
-              {isEdit ? (
-                <Form form={form}>
-                  <UserActionTree userActions={userActions} />
-                </Form>
-              ) : (
-                <UserActionTree userActions={userActions} />
-              )}
+              <UserActionTree userActions={userActions} />
             </EuiFlexItem>
             <EuiFlexItem grow={2}>
               <UserList headline={i18n.REPORTER} users={[data.created_by]} />
@@ -251,6 +248,26 @@ export const CaseView = React.memo(({ caseId }: Props) => {
         </MyWrapper>
       </BackgroundWrapper>
     </>
+  );
+});
+
+export const CaseView = React.memo(({ caseId }: Props) => {
+  const [{ data, isLoading, isError }, refreshCase] = useGetCase(caseId);
+  if (isError) {
+    return null;
+  }
+  if (isLoading) {
+    return (
+      <EuiFlexGroup justifyContent="center" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiLoadingSpinner size="xl" />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+
+  return (
+    <Cases caseId={caseId} initialData={data} refreshCase={refreshCase} isLoading={isLoading} />
   );
 });
 

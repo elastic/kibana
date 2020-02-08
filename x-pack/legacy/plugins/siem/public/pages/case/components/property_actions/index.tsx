@@ -88,6 +88,7 @@ export const PropertyActions = React.memo<PropertyActionsProps>(({ propertyActio
           button={
             <EuiButtonIcon
               data-test-subj="ellipses"
+              aria-label="Actions"
               iconType="boxesHorizontal"
               onClick={onButtonClick}
             />
@@ -97,8 +98,8 @@ export const PropertyActions = React.memo<PropertyActionsProps>(({ propertyActio
           closePopover={onClosePopover}
         >
           <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="none">
-            {propertyActions.map(action => (
-              <EuiFlexItem grow={false}>
+            {propertyActions.map((action, key) => (
+              <EuiFlexItem grow={false} key={`${action.label}${key}`}>
                 <PropertyActionButton
                   iconType={action.iconType}
                   label={action.label}

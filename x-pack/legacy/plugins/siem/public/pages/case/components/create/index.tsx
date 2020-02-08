@@ -69,6 +69,7 @@ export const Create = React.memo(() => {
         />
         <DescriptionMarkdown
           descriptionInputHeight={200}
+          formHook={true}
           initialDescription={data.description}
           isLoading={isLoading}
           onChange={description => setFormData({ ...data, description })}

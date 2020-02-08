@@ -83,12 +83,13 @@ const initialRefreshData: NewCaseFormatted = {
   state: '',
   tags: [],
   title: '',
+  updated_at: 0,
 };
-export const useGetCase = (
-  initialCaseId: string
-): [CaseState, Dispatch<SetStateAction<NewCaseFormatted>>] => {
+
+export type RefreshCase = Dispatch<SetStateAction<NewCaseFormatted>>;
+export const useGetCase = (initialCaseId: string): [CaseState, RefreshCase] => {
   const [state, dispatch] = useReducer(dataFetchReducer, {
-    isLoading: false,
+    isLoading: true,
     isError: false,
     data: initialData,
   });
