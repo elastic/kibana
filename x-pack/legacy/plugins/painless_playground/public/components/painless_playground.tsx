@@ -26,25 +26,39 @@ import { RequestFlyout } from './request_flyout';
 
 let _mostRecentRequestId = 0;
 
-const submit = async (code, context, contextSetup, executeCode, setResponse) => {
+const submit = async (code, context, contextSetup, executeCode, setResponse, setIsLoading) => {
   // Prevent an older request that resolves after a more recent request from clobbering it.
   // We store the resulting ID in this closure for comparison when the request resolves.
   const requestId = ++_mostRecentRequestId;
+  setIsLoading(true);
 
   try {
     localStorage.setItem('painlessPlaygroundCode', code);
     localStorage.setItem('painlessPlaygroundContext', context);
     localStorage.setItem('painlessPlaygroundContextSetup', JSON.stringify(contextSetup));
-    const res = await executeCode(buildRequestPayload(code, context, contextSetup));
+    const response = await executeCode(buildRequestPayload(code, context, contextSetup));
 
     if (_mostRecentRequestId === requestId) {
-      setResponse(res);
+      if (response.error) {
+        setResponse({
+          success: undefined,
+          error: response.error,
+        });
+      } else {
+        setResponse({
+          success: response,
+          error: undefined,
+        });
+      }
+      setIsLoading(false);
     }
   } catch (error) {
     if (_mostRecentRequestId === requestId) {
       setResponse({
-        error,
+        success: undefined,
+        error: { error },
       });
+      setIsLoading(false);
     }
   }
 };
@@ -94,8 +108,9 @@ export function PainlessPlayground({
   executeCode: (payload: Request) => Promise<Response>;
 }) {
   const [code, setCode] = useState(getFromLocalStorage('painlessPlaygroundCode', exampleScript));
-  const [response, setResponse] = useState<Response>({});
+  const [response, setResponse] = useState<Response>({ error: undefined, success: undefined });
   const [showRequestFlyout, setShowRequestFlyout] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const [context, setContext] = useState(
     getFromLocalStorage('painlessPlaygroundContext', 'painless_test_without_params')
@@ -107,7 +122,7 @@ export function PainlessPlayground({
 
   // Live-update the output as the user changes the input code.
   useEffect(() => {
-    debouncedSubmit(code, context, contextSetup, executeCode, setResponse);
+    debouncedSubmit(code, context, contextSetup, executeCode, setResponse, setIsLoading);
   }, [code, context, contextSetup, executeCode]);
 
   const toggleViewRequestFlyout = () => {
@@ -136,13 +151,14 @@ export function PainlessPlayground({
             setContext={setContext}
             contextSetup={contextSetup}
             setContextSetup={setContextSetup}
+            isLoading={isLoading}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
 
       <MainControls
         submit={() => submit(code, context, contextSetup, executeCode, setResponse)}
-        disabled={code.trim() === ''}
+        isLoading={isLoading}
         toggleFlyout={toggleViewRequestFlyout}
         isFlyoutOpen={showRequestFlyout}
       />
@@ -151,7 +167,7 @@ export function PainlessPlayground({
         <RequestFlyout
           onClose={() => setShowRequestFlyout(false)}
           requestBody={formatJson(buildRequestPayload(code, context, contextSetup))}
-          response={formatJson(response)}
+          response={formatJson(response.success || response.error)}
         />
       )}
     </>

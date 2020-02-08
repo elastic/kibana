@@ -3,8 +3,19 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import React from 'react';
-import { EuiCodeBlock, EuiPanel, EuiTabbedContent, EuiSpacer } from '@elastic/eui';
+import {
+  EuiCodeBlock,
+  EuiIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiPanel,
+  EuiTabbedContent,
+  EuiSpacer,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { formatJson, formatResponse } from '../lib/helpers';
 import { Response } from '../common/types';
@@ -16,9 +27,30 @@ export function RightPane({
   contextSetup,
   setContext,
   setContextSetup,
+  isLoading,
 }: {
   response?: Response;
 }) {
+  const outputTabLabel = (
+    <EuiFlexGroup gutterSize="s" alignItems="center">
+      <EuiFlexItem grow={false}>
+        {isLoading ? (
+          <EuiLoadingSpinner size="m" />
+        ) : response.error ? (
+          <EuiIcon type="alert" color="danger" />
+        ) : (
+          <EuiIcon type="check" color="secondary" />
+        )}
+      </EuiFlexItem>
+
+      <EuiFlexItem grow={false}>
+        {i18n.translate('xpack.painless_playground.outputTabLabel', {
+          defaultMessage: 'Output',
+        })}
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+
   return (
     <EuiPanel className="painlessPlaygroundRightPane">
       <EuiTabbedContent
@@ -27,19 +59,25 @@ export function RightPane({
         tabs={[
           {
             id: 'output',
-            name: 'Output',
+            name: outputTabLabel,
             content: (
               <>
                 <EuiSpacer size="m" />
                 <EuiCodeBlock language="json" paddingSize="s" isCopyable>
-                  {formatResponse(response)}
+                  {formatResponse(response.success || response.error)}
                 </EuiCodeBlock>
               </>
             ),
           },
           {
             id: 'settings',
-            name: 'Context',
+            name: (
+              <span>
+                {i18n.translate('xpack.painless_playground.contextTabLabel', {
+                  defaultMessage: 'Context',
+                })}
+              </span>
+            ),
             content: (
               <>
                 <EuiSpacer size="m" />

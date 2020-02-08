@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { EuiBottomBar, EuiButton, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
+import { EuiBottomBar, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
@@ -12,9 +12,11 @@ interface Props {
   submit: () => void;
   disabled: boolean;
   toggleFlyout: () => void;
+  isFlyoutOpen: boolean;
+  isLoading: boolean;
 }
 
-export function MainControls({ submit, disabled, toggleFlyout, isFlyoutOpen }: Props) {
+export function MainControls({ submit, toggleFlyout, isFlyoutOpen, isLoading }: Props) {
   return (
     <>
       <div className="painlessPlaygroundBottomBarPlaceholder" />
@@ -22,12 +24,7 @@ export function MainControls({ submit, disabled, toggleFlyout, isFlyoutOpen }: P
       <EuiBottomBar>
         <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              color="ghost"
-              onClick={toggleFlyout}
-              isDisabled={disabled}
-              data-test-subj="btnViewRequest"
-            >
+            <EuiButtonEmpty color="ghost" onClick={toggleFlyout} data-test-subj="btnViewRequest">
               {isFlyoutOpen
                 ? i18n.translate('xpack.painless_playground.hideRequestButtonLabel', {
                     defaultMessage: 'Hide API request',
@@ -36,15 +33,6 @@ export function MainControls({ submit, disabled, toggleFlyout, isFlyoutOpen }: P
                     defaultMessage: 'Show API request',
                   })}
             </EuiButtonEmpty>
-          </EuiFlexItem>
-
-          <EuiFlexItem grow={false}>
-            <EuiButton fill onClick={submit} isDisabled={disabled} data-test-subj="btnExecute">
-              <FormattedMessage
-                id="xpack.painless_playground.executeButtonLabel"
-                defaultMessage="Test"
-              />
-            </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiBottomBar>
