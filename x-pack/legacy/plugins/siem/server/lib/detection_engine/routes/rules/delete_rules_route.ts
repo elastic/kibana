@@ -62,12 +62,34 @@ export const createDeleteRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
           ruleStatuses.saved_objects.forEach(async obj =>
             savedObjectsClient.delete(ruleStatusSavedObjectType, obj.id)
           );
-          return transformOrError(rule, ruleStatuses.saved_objects[0]);
+          const transformedOrError = transformOrError(rule, ruleStatuses.saved_objects[0]);
+          if (transformedOrError == null) {
+            return headers
+              .response({
+                message: 'Internal error transforming rules',
+                status_code: 500,
+              })
+              .code(500);
+          } else {
+            return transformedOrError;
+          }
         } else {
-          return getIdError({ id, ruleId });
+          const error = getIdError({ id, ruleId });
+          return headers
+            .response({
+              message: error.message,
+              status_code: error.statusCode,
+            })
+            .code(error.statusCode);
         }
       } catch (err) {
-        return transformError(err);
+        const error = transformError(err);
+        return headers
+          .response({
+            message: error.message,
+            status_code: error.statusCode,
+          })
+          .code(error.statusCode);
       }
     },
   };

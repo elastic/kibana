@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
 import Hapi from 'hapi';
 import { chunk, isEmpty, isFunction } from 'lodash/fp';
 import { extname } from 'path';
@@ -65,7 +64,12 @@ export const createImportRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
       const { filename } = request.payload.file.hapi;
       const fileExtension = extname(filename).toLowerCase();
       if (fileExtension !== '.ndjson') {
-        return Boom.badRequest(`Invalid file extension ${fileExtension}`);
+        return headers
+          .response({
+            message: `Invalid file extension ${fileExtension}`,
+            status_code: 400,
+          })
+          .code(400);
       }
 
       const objectLimit = server.config().get<number>('savedObjects.maxImportExportSize');

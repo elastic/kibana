@@ -62,9 +62,25 @@ export const createFindRulesRoute = (): Hapi.ServerRoute => {
             return results;
           })
         );
-        return transformFindAlertsOrError(rules, ruleStatuses);
+        const errorOrAlerts = transformFindAlertsOrError(rules, ruleStatuses);
+        if (errorOrAlerts == null) {
+          return headers
+            .response({
+              message: 'unknown data type, error transforming alert',
+              status_code: 500,
+            })
+            .code(500);
+        } else {
+          return errorOrAlerts;
+        }
       } catch (err) {
-        return transformError(err);
+        const error = transformError(err);
+        return headers
+          .response({
+            message: error.message,
+            status_code: error.statusCode,
+          })
+          .code(error.statusCode);
       }
     },
   };

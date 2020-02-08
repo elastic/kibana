@@ -98,8 +98,7 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(404);
 
         expect(body).to.eql({
-          statusCode: 404, // TODO: statusCode should be snake_case
-          error: 'Not Found',
+          status_code: 404,
           message: 'id: "fake_id" not found',
         });
       });
@@ -112,8 +111,7 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(404);
 
         expect(body).to.eql({
-          statusCode: 404, // TODO: statusCode should be snake_case
-          error: 'Not Found',
+          status_code: 404,
           message: 'rule_id: "fake_id" not found',
         });
       });

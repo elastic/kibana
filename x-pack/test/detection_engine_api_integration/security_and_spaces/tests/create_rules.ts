@@ -35,10 +35,9 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(400);
 
         expect(body).to.eql({
-          error: 'Bad Request',
           message:
             'To create a rule, the index must exist first. Index .siem-signals-default does not exist',
-          statusCode: 400,
+          status_code: 400,
         });
       });
     });
@@ -89,9 +88,8 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(409);
 
         expect(body).to.eql({
-          error: 'Conflict',
           message: 'rule_id: "rule-1" already exists',
-          statusCode: 409, // TODO: This is a camelcase issue, and we really should be returning snake_case
+          status_code: 409,
         });
       });
     });

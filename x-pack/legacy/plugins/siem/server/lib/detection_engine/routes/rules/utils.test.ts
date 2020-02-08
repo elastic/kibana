@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
-
 import {
   transformAlertToRule,
   getIdError,
@@ -547,44 +545,76 @@ describe('utils', () => {
   });
 
   describe('getIdError', () => {
+    test('it should have a status code', () => {
+      const error = getIdError({ id: '123', ruleId: undefined });
+      expect(error).toEqual({
+        message: 'id: "123" not found',
+        statusCode: 404,
+      });
+    });
+
     test('outputs message about id not being found if only id is defined and ruleId is undefined', () => {
-      const boom = getIdError({ id: '123', ruleId: undefined });
-      expect(boom.message).toEqual('id: "123" not found');
+      const error = getIdError({ id: '123', ruleId: undefined });
+      expect(error).toEqual({
+        message: 'id: "123" not found',
+        statusCode: 404,
+      });
     });
 
     test('outputs message about id not being found if only id is defined and ruleId is null', () => {
-      const boom = getIdError({ id: '123', ruleId: null });
-      expect(boom.message).toEqual('id: "123" not found');
+      const error = getIdError({ id: '123', ruleId: null });
+      expect(error).toEqual({
+        message: 'id: "123" not found',
+        statusCode: 404,
+      });
     });
 
     test('outputs message about ruleId not being found if only ruleId is defined and id is undefined', () => {
-      const boom = getIdError({ id: undefined, ruleId: 'rule-id-123' });
-      expect(boom.message).toEqual('rule_id: "rule-id-123" not found');
+      const error = getIdError({ id: undefined, ruleId: 'rule-id-123' });
+      expect(error).toEqual({
+        message: 'rule_id: "rule-id-123" not found',
+        statusCode: 404,
+      });
     });
 
     test('outputs message about ruleId not being found if only ruleId is defined and id is null', () => {
-      const boom = getIdError({ id: null, ruleId: 'rule-id-123' });
-      expect(boom.message).toEqual('rule_id: "rule-id-123" not found');
+      const error = getIdError({ id: null, ruleId: 'rule-id-123' });
+      expect(error).toEqual({
+        message: 'rule_id: "rule-id-123" not found',
+        statusCode: 404,
+      });
     });
 
     test('outputs message about both being not defined when both are undefined', () => {
-      const boom = getIdError({ id: undefined, ruleId: undefined });
-      expect(boom.message).toEqual('id or rule_id should have been defined');
+      const error = getIdError({ id: undefined, ruleId: undefined });
+      expect(error).toEqual({
+        message: 'id or rule_id should have been defined',
+        statusCode: 404,
+      });
     });
 
     test('outputs message about both being not defined when both are null', () => {
-      const boom = getIdError({ id: null, ruleId: null });
-      expect(boom.message).toEqual('id or rule_id should have been defined');
+      const error = getIdError({ id: null, ruleId: null });
+      expect(error).toEqual({
+        message: 'id or rule_id should have been defined',
+        statusCode: 404,
+      });
     });
 
     test('outputs message about both being not defined when id is null and ruleId is undefined', () => {
-      const boom = getIdError({ id: null, ruleId: undefined });
-      expect(boom.message).toEqual('id or rule_id should have been defined');
+      const error = getIdError({ id: null, ruleId: undefined });
+      expect(error).toEqual({
+        message: 'id or rule_id should have been defined',
+        statusCode: 404,
+      });
     });
 
     test('outputs message about both being not defined when id is undefined and ruleId is null', () => {
-      const boom = getIdError({ id: undefined, ruleId: null });
-      expect(boom.message).toEqual('id or rule_id should have been defined');
+      const error = getIdError({ id: undefined, ruleId: null });
+      expect(error).toEqual({
+        message: 'id or rule_id should have been defined',
+        statusCode: 404,
+      });
     });
   });
 
@@ -664,7 +694,7 @@ describe('utils', () => {
 
     test('returns 500 if the data is not of type siem alert', () => {
       const output = transformFindAlertsOrError({ data: [{ random: 1 }] });
-      expect((output as Boom).message).toEqual('Internal error transforming');
+      expect(output).toBeNull();
     });
   });
 
@@ -735,7 +765,7 @@ describe('utils', () => {
 
     test('returns 500 if the data is not of type siem alert', () => {
       const output = transformOrError({ data: [{ random: 1 }] });
-      expect((output as Boom).message).toEqual('Internal error transforming');
+      expect(output).toBeNull();
     });
   });
 

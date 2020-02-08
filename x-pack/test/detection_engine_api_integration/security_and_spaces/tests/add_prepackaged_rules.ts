@@ -25,10 +25,9 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(400);
 
         expect(body).to.eql({
-          error: 'Bad Request',
           message:
             'Pre-packaged rules cannot be installed until the space index is created: .siem-signals-default',
-          statusCode: 400,
+          status_code: 400,
         });
       });
     });

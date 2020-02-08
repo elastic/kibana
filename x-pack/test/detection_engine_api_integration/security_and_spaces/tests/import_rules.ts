@@ -54,8 +54,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(400);
 
         expect(body).to.eql({
-          statusCode: 400,
-          error: 'Bad Request',
+          status_code: 400,
           message: 'Invalid file extension .txt',
         });
       });
