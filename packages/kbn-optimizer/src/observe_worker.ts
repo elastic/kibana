@@ -122,6 +122,12 @@ function observeStdio$(stream: Readable, name: WorkerStdio['stream']) {
   );
 }
 
+/**
+ * Start a worker process with the specified `workerConfig` and
+ * `bundles` and return an observable of the events related to
+ * that worker, including the messages sent to us by that worker
+ * and the status of the process (stdio, started).
+ */
 export function observeWorker(
   config: OptimizerConfig,
   workerConfig: WorkerConfig,

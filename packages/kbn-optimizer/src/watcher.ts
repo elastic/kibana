@@ -18,10 +18,10 @@
  */
 
 import * as Rx from 'rxjs';
-import { take, tap, debounceTime, map } from 'rxjs/operators';
+import { take, map } from 'rxjs/operators';
 import Watchpack from 'watchpack';
 
-import { pipeClosure, Bundle } from './common';
+import { debounceTimeBuffer, Bundle } from './common';
 
 export interface ChangesStarted {
   type: 'changes detected';
@@ -32,22 +32,12 @@ export interface Changes {
   bundles: Bundle[];
 }
 
-const debounceTimeBuffer = <T>(time: number) =>
-  pipeClosure((source$: Rx.Observable<T>) => {
-    const buffer = new Set<T>();
-    return source$.pipe(
-      tap(item => buffer.add(item)),
-      debounceTime(time),
-      map(() => {
-        const items = Array.from(buffer);
-        buffer.clear();
-        return items;
-      })
-    );
-  });
-
 export class Watcher {
-  // Use watcher as an RxJS Resource so that it is automatically closed
+  /**
+   * Use watcher as an RxJS Resource, which is a special type of observable
+   * that calls unsubscribe on the resource (the Watcher instance in this case)
+   * when the observable is unsubscribed.
+   */
   static using<T>(fn: (watcher: Watcher) => Rx.Observable<T>) {
     return Rx.using(
       () => new Watcher(),
@@ -62,7 +52,7 @@ export class Watcher {
 
   private readonly change$ = Rx.fromEvent<[string]>(this.watchpack, 'change');
 
-  public getNextChange(bundles: Iterable<Bundle>) {
+  public getNextChange$(bundles: Iterable<Bundle>, startTime: number) {
     return Rx.merge(
       // emit ChangesStarted as soon as we have been triggered
       this.change$.pipe(
@@ -112,17 +102,17 @@ export class Watcher {
           }
         }
 
-        this.watchpack.watch(watchPaths, [], Date.now());
+        this.watchpack.watch(watchPaths, [], startTime);
         return Rx.EMPTY;
       })
     );
   }
 
-  close() {
-    this.watchpack.close();
-  }
-
+  /**
+   * Called automatically by RxJS when Watcher instances
+   * are used as resources
+   */
   unsubscribe() {
-    this.close();
+    this.watchpack.close();
   }
 }

@@ -80,22 +80,3 @@ export const debounceTimeBuffer = <T>(ms: number) =>
       })
     );
   });
-
-/**
- * Basically the same as the `scan()` function from RxJS but with the seed
- * argument first and the types working properly.
- */
-export const scanBetter = <T1, T2, T3>(
-  seed: T1,
-  fn: (acc: T1 | T3, item: T2) => T3
-): Operator<T2, T3> => {
-  return pipeClosure(source$ => {
-    let acc: T1 | T3 = seed;
-    return source$.pipe(
-      map(item => {
-        acc = fn(acc, item);
-        return acc;
-      })
-    );
-  });
-};

@@ -20,7 +20,7 @@
 import { inspect } from 'util';
 
 import * as Rx from 'rxjs';
-import { map, mergeMap, share } from 'rxjs/operators';
+import { scan, mergeMap, share, distinctUntilChanged } from 'rxjs/operators';
 
 import { observeWorker, WorkerStatus } from './observe_worker';
 import { OptimizerConfig } from './optimizer_config';
@@ -30,9 +30,20 @@ import { assignBundlesToWorkers } from './assign_bundles_to_workers';
 import { Watcher, ChangesStarted, Changes } from './watcher';
 import { getMtimes } from './get_mtimes';
 
+export interface OptimizerInitializedEvent {
+  type: 'optimizer initialized';
+}
+
+export type OptimizerEvent =
+  | OptimizerInitializedEvent
+  | ChangesStarted
+  | Changes
+  | WorkerMsg
+  | WorkerStatus;
+
 export interface OptimizerMsg {
   state: OptimizerState;
-  event?: ChangesStarted | Changes | WorkerMsg | WorkerStatus;
+  event?: OptimizerEvent;
 }
 
 export interface OptimizerState {
@@ -60,28 +71,10 @@ export type OptimizerNotif = OptimizerStartedWorker;
 
 const msToSec = (ms: number) => Math.round(ms / 100) / 10;
 
-const getPhase = (states: CompilerMsg[]): OptimizerState['phase'] => {
-  const types = states.map(s => s.type);
-
-  if (types.includes('running')) {
-    return 'running';
-  }
-
-  if (types.includes('compiler issue')) {
-    return 'issue';
-  }
-
-  if (types.every(s => s === 'compiler success')) {
-    return 'success';
-  }
-
-  throw new Error(`unable to summarize bundle states: ${JSON.stringify(states)}`);
-};
-
 export class Optimizer {
   constructor(private readonly config: OptimizerConfig) {}
 
-  async getCachedBundles(optimizerVersion: string) {
+  private async getCachedBundles(optimizerVersion: string) {
     const eligible = this.config.bundles.filter(
       // only get the mtimes for files if the bundle was built
       // with our version of the optimizer and there is a cache key
@@ -109,48 +102,236 @@ export class Optimizer {
   }
 
   /**
-   * Produce an observable that emits bundle objects when they
-   * should become "online", meaning that the cache on disk is
-   * no longer valid
+   * Create an observable that emits change events for offline
+   * bundles.
+   *
+   * Once changes are seen in a bundle that bundles
+   * files will no longer be watched.
+   *
+   * Once changes have been seen in all bundles changeEvent$
+   * will complete.
+   *
+   * If there are no bundles to watch or we config.watch === false
+   * the observable completes without sending any notifications.
    */
-  watchBundlesForChanges$(bundles: Iterable<Bundle>) {
+  private watchBundlesForChanges$(initialBundles: Bundle[], initialStartTime: number) {
+    if (!this.config.watch || !initialBundles.length) {
+      return Rx.EMPTY;
+    }
+
     return Watcher.using(watcher => {
-      // copy the list of offline bundles
-      const stillOffline = new Set(bundles);
+      /**
+       * Recursively call watcher.getNextChange$, passing it
+       * just the bundles that haven't been changed yet until
+       * all bundles have changed, then exit
+       */
+      const recursiveGetNextChange$ = (
+        bundles: Bundle[],
+        startTime: number
+      ): ReturnType<Watcher['getNextChange$']> =>
+        !bundles.length
+          ? Rx.EMPTY
+          : watcher.getNextChange$(bundles, startTime).pipe(
+              mergeMap(event => {
+                if (event.type === 'changes detected') {
+                  return Rx.of(event);
+                }
 
-      // recursively watch for changes in offline bundles until all the
-      // offline bundles have gone online
-      const nextBundlesToBringOnline$ = Rx.defer(() =>
-        stillOffline.size ? watcher.getNextChange(stillOffline) : Rx.EMPTY
-      ).pipe(
-        mergeMap(
-          (event): ReturnType<Watcher['getNextChange']> => {
-            if (event.type === 'changes detected') {
-              return Rx.of(event);
-            }
+                return Rx.concat(
+                  Rx.of(event),
 
-            for (const bundle of event.bundles) {
-              stillOffline.delete(bundle);
-            }
+                  recursiveGetNextChange$(
+                    bundles.filter(b => !event.bundles.includes(b)),
+                    Date.now()
+                  )
+                );
+              })
+            );
 
-            return Rx.concat([event], nextBundlesToBringOnline$);
-          }
-        )
-      );
-
-      return nextBundlesToBringOnline$;
+      return recursiveGetNextChange$(initialBundles, initialStartTime);
     });
   }
 
+  /**
+   * Create a stream of all worker events, these include messages
+   * from workers and events about the status of workers. To get
+   * these events we assign the bundles to workers via
+   * `assignBundlesToWorkers()` and then start a worler for each
+   * assignment with `observeWorker()`.
+   *
+   * Subscribes to `changeEvent$` in order to determine when more
+   * bundles should be assigned to workers.
+   *
+   * Completes when all workers have exitted. If we are running in
+   * watch mode this observable will never exit.
+   */
+  private runWorkers(
+    initState: OptimizerState,
+    changeEvent$: Rx.Observable<Changes | ChangesStarted>
+  ) {
+    return Rx.concat(
+      // first batch of bundles are based on how up-to-date the cache is
+      Rx.of(initState.onlineBundles),
+      // subsequent batches are defined by changeEvent$
+      changeEvent$.pipe(maybeMap(c => (c.type === 'changes' ? c.bundles : undefined)))
+    ).pipe(
+      mergeMap(bundles =>
+        Rx.from(assignBundlesToWorkers(bundles, this.config.maxWorkerCount)).pipe(
+          mergeMap(assignment =>
+            observeWorker(
+              this.config,
+              this.config.getWorkerConfig(initState.version),
+              assignment.bundles
+            )
+          )
+        )
+      )
+    );
+  }
+
+  /**
+   * merge a state and some updates into a new optimizer state, apply some
+   * standard updates related to timing, and wrap it up with an event to
+   * create an OptimizerMsg
+   */
+  private createOptimizerMsg(
+    prevState: OptimizerState,
+    event?: OptimizerEvent,
+    stateUpdate?: Partial<Omit<OptimizerState, 'version' | 'durSec' | 'startTime'>>
+  ): OptimizerMsg {
+    // reset start time if we are transitioning into running
+    const startTime =
+      (prevState.phase === 'success' || prevState.phase === 'issue') &&
+      (stateUpdate?.phase === 'running' || stateUpdate?.phase === 'reallocating')
+        ? Date.now()
+        : prevState.startTime;
+
+    return {
+      event,
+      state: {
+        ...prevState,
+        ...stateUpdate,
+        startTime,
+        durSec: msToSec(Date.now() - startTime),
+      },
+    };
+  }
+
+  /**
+   * calculate the total state, given a set of compiler messages
+   */
+  private getStatePhase(states: CompilerMsg[]) {
+    const types = states.map(s => s.type);
+
+    if (types.includes('running')) {
+      return 'running';
+    }
+
+    if (types.includes('compiler issue')) {
+      return 'issue';
+    }
+
+    if (types.every(s => s === 'compiler success')) {
+      return 'success';
+    }
+
+    throw new Error(`unable to summarize bundle states: ${JSON.stringify(states)}`);
+  }
+
+  /**
+   * Convert a stream of OptimizerEvents into the public stream of
+   * OptimizerMsgs. The resulting state reflects the total state
+   * of all bundles and workers.
+   */
+  private summarizeOptimizerEvent$(initMsg: OptimizerMsg, event$: Rx.Observable<OptimizerEvent>) {
+    return event$.pipe(
+      scan((prevMsg, event) => {
+        const { state } = prevMsg;
+
+        if (event.type === 'optimizer initialized') {
+          if (state.onlineBundles.length === 0) {
+            // all bundles are cached so we transition to success
+            return this.createOptimizerMsg(state, event, {
+              phase: 'success',
+            });
+          }
+
+          // no state change necessary
+          return prevMsg;
+        }
+
+        if (event.type === 'worker error' || event.type === 'compiler error') {
+          // unrecoverable error states
+          const error = new Error(event.errorMsg);
+          error.stack = event.errorStack;
+          throw error;
+        }
+
+        if (event.type === 'worker stdio' || event.type === 'worker started') {
+          return this.createOptimizerMsg(state, event);
+        }
+
+        if (event.type === 'changes detected') {
+          // switch to running early, before workers are started, so that
+          // base path proxy can prevent requests in the delay between changes
+          // and workers started
+          return this.createOptimizerMsg(state, event, {
+            phase: 'reallocating',
+          });
+        }
+
+        if (event.type === 'changes') {
+          const onlineBundles: Bundle[] = [];
+          const offlineBundles: Bundle[] = [];
+          for (const bundle of this.config.bundles) {
+            if (state.onlineBundles.includes(bundle) || event.bundles.includes(bundle)) {
+              onlineBundles.push(bundle);
+            } else {
+              offlineBundles.push(bundle);
+            }
+          }
+
+          return this.createOptimizerMsg(state, event, {
+            phase: 'running',
+            onlineBundles,
+            offlineBundles,
+          });
+        }
+
+        if (
+          event.type === 'compiler issue' ||
+          event.type === 'compiler success' ||
+          event.type === 'running'
+        ) {
+          const compilerStates: CompilerMsg[] = [
+            ...state.compilerStates.filter(c => c.bundleId !== event.bundleId),
+            event,
+          ];
+          return this.createOptimizerMsg(state, event, {
+            phase: this.getStatePhase(compilerStates),
+            compilerStates,
+          });
+        }
+
+        throw new Error(`unexpected optimizer event ${inspect(event)}`);
+      }, initMsg),
+
+      // returning the previous message is how we indicate
+      // that an event should be dropped
+      distinctUntilChanged()
+    );
+  }
+
   run() {
-    return Rx.defer(
-      async (): Promise<OptimizerState> => {
+    // initialize the optimizer by figuring out which bundles are cached, which bundles
+    const init$ = Rx.defer(
+      async (): Promise<OptimizerMsg> => {
         const startTime = Date.now();
         const version = await getOptimizerVersion(this.config);
         const offlineBundles = this.config.cache ? await this.getCachedBundles(version) : [];
         const onlineBundles = this.config.bundles.filter(b => !offlineBundles.includes(b));
 
-        return {
+        return this.createOptimizerMsg({
           phase: 'initialized',
           version,
           compilerStates: [],
@@ -158,133 +339,31 @@ export class Optimizer {
           offlineBundles,
           onlineBundles,
           startTime,
-        };
+        });
       }
-    ).pipe(
-      mergeMap(
-        (initState): Rx.Observable<OptimizerMsg> => {
-          const change$ = this.config.watch
-            ? this.watchBundlesForChanges$(initState.offlineBundles).pipe(share())
-            : Rx.EMPTY;
+    );
 
-          const workerMsg$ = Rx.concat(
-            // first batch is all the workers which weren't initially cached
-            Rx.of(initState.onlineBundles),
-            // subsequent batches are defined by our change listener
-            change$.pipe(maybeMap(c => (c.type === 'changes' ? c.bundles : undefined)))
-          ).pipe(
-            mergeMap(bundles =>
-              Rx.from(assignBundlesToWorkers(bundles, this.config.maxWorkerCount)).pipe(
-                mergeMap(assignment =>
-                  observeWorker(
-                    this.config,
-                    this.config.getWorkerConfig(initState.version),
-                    assignment.bundles
-                  )
-                )
-              )
-            )
-          );
+    return init$.pipe(
+      mergeMap(
+        (init): Rx.Observable<OptimizerMsg> => {
+          const { state: initState } = init;
+
+          const changeEvent$ = this.watchBundlesForChanges$(
+            initState.offlineBundles,
+            initState.startTime
+          ).pipe(share());
+          const workerEvent$ = this.runWorkers(initState, changeEvent$);
+
+          // event to kick off the summarizer
+          const initEvent: OptimizerInitializedEvent = {
+            type: 'optimizer initialized',
+          };
 
           return Rx.concat(
-            Rx.from([
-              { state: initState },
-              // emit a success state if there are no online bundles
-              ...(!initState.onlineBundles.length
-                ? [{ state: { ...initState, phase: 'success' as const } }]
-                : []),
-            ]),
-            Rx.merge(change$, workerMsg$).pipe(
-              pipeClosure(event$ => {
-                let prevState = initState;
-
-                const update = (
-                  event: NonNullable<OptimizerMsg['event']>,
-                  stateChanges?: Partial<Omit<OptimizerState, 'version' | 'durSec' | 'startTime'>>
-                ) => {
-                  // reset start time if we are transitioning into running
-                  const startTime =
-                    (prevState.phase === 'success' || prevState.phase === 'issue') &&
-                    (stateChanges?.phase === 'running' || stateChanges?.phase === 'reallocating')
-                      ? Date.now()
-                      : prevState.startTime;
-
-                  const next: OptimizerMsg = {
-                    event,
-                    state: {
-                      ...prevState,
-                      ...stateChanges,
-                      startTime,
-                      durSec: msToSec(Date.now() - startTime),
-                    },
-                  };
-
-                  prevState = next.state;
-                  return next;
-                };
-
-                return event$.pipe(
-                  map(event => {
-                    if (event.type === 'worker error' || event.type === 'compiler error') {
-                      // unrecoverable error states
-                      const error = new Error(event.errorMsg);
-                      error.stack = event.errorStack;
-                      throw error;
-                    }
-
-                    if (event.type === 'worker stdio' || event.type === 'worker started') {
-                      return update(event);
-                    }
-
-                    if (event.type === 'changes detected') {
-                      // switch to running early, before workers are started, so that
-                      // base path proxy can prevent requests in the delay between changes
-                      // and workers started
-                      return update(event, {
-                        phase: 'reallocating',
-                      });
-                    }
-
-                    if (event.type === 'changes') {
-                      const onlineBundles: Bundle[] = [];
-                      const offlineBundles: Bundle[] = [];
-                      for (const bundle of this.config.bundles) {
-                        if (
-                          prevState.onlineBundles.includes(bundle) ||
-                          event.bundles.includes(bundle)
-                        ) {
-                          onlineBundles.push(bundle);
-                        } else {
-                          offlineBundles.push(bundle);
-                        }
-                      }
-
-                      return update(event, {
-                        phase: 'running',
-                        onlineBundles,
-                        offlineBundles,
-                      });
-                    }
-
-                    if (
-                      event.type === 'compiler issue' ||
-                      event.type === 'compiler success' ||
-                      event.type === 'running'
-                    ) {
-                      const compilerStates: CompilerMsg[] = [
-                        ...prevState.compilerStates.filter(c => c.bundleId !== event.bundleId),
-                        event,
-                      ];
-                      return update(event, {
-                        phase: getPhase(compilerStates),
-                        compilerStates,
-                      });
-                    }
-
-                    throw new Error(`unexpected optimizer event ${inspect(event)}`);
-                  })
-                );
-              })
+            Rx.of(init),
+            this.summarizeOptimizerEvent$(
+              init,
+              Rx.merge(Rx.of(initEvent), changeEvent$, workerEvent$)
             )
           );
         }
