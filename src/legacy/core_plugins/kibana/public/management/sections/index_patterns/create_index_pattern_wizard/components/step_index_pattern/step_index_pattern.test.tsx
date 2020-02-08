@@ -21,17 +21,19 @@ import React from 'react';
 import { StepIndexPattern } from '../step_index_pattern';
 import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
 import { Header } from './components/header';
+import { IndexPatternCreationConfig } from '../../../../../../../../management/public';
+import { coreMock } from '../../../../../../../../../../core/public/mocks';
+import { dataPluginMock } from '../../../../../../../../../../plugins/data/public/mocks';
 
 jest.mock('../../lib/ensure_minimum_time', () => ({
   ensureMinimumTime: async (promises: Array<Promise<any>>) =>
     Array.isArray(promises) ? await Promise.all(promises) : await promises,
 }));
-const mockIndexPatternCreationType = {
-  getIndexPatternType: () => 'default',
-  getIndexPatternName: () => 'name',
-  checkIndicesForErrors: () => false,
-  getShowSystemIndices: () => false,
-};
+
+const mockIndexPatternCreationType = new IndexPatternCreationConfig({
+  type: 'default',
+  name: 'name',
+});
 
 jest.mock('ui/chrome', () => ({
   getUiSettingsClient: () => ({
@@ -51,10 +53,7 @@ jest.mock('../../lib/get_indices', () => ({
 }));
 
 const allIndices = [{ name: 'kibana' }, { name: 'es' }];
-const esService = {};
-const savedObjectsClient = {
-  find: () => ({ savedObjects: [] }),
-};
+
 const goToNextStep = () => {};
 
 const createComponent = (props?: Record<string, any>) => {
@@ -62,8 +61,9 @@ const createComponent = (props?: Record<string, any>) => {
     <StepIndexPattern
       allIndices={allIndices}
       isIncludingSystemIndices={false}
-      esService={esService}
-      savedObjectsClient={savedObjectsClient}
+      esService={dataPluginMock.createStartContract().search.__LEGACY.esClient}
+      // @ts-ignore
+      savedObjectsClient={coreMock.createStart().savedObjects.client}
       goToNextStep={goToNextStep}
       indexPatternCreationType={mockIndexPatternCreationType}
       {...props}
@@ -93,8 +93,8 @@ describe('StepIndexPattern', () => {
 
   it('renders errors when input is invalid', async () => {
     const component = createComponent();
-    const instance = component.instance();
-    instance.onQueryChanged({ target: { value: '?' } });
+    const instance = component.instance() as StepIndexPattern;
+    instance.onQueryChanged({ target: { value: '?' } } as React.ChangeEvent<HTMLInputElement>);
 
     // Ensure all promises resolve
     await new Promise(resolve => process.nextTick(resolve));
@@ -107,8 +107,8 @@ describe('StepIndexPattern', () => {
 
   it('renders matching indices when input is valid', async () => {
     const component = createComponent();
-    const instance = component.instance();
-    instance.onQueryChanged({ target: { value: 'k' } });
+    const instance = component.instance() as StepIndexPattern;
+    instance.onQueryChanged({ target: { value: 'k' } } as React.ChangeEvent<HTMLInputElement>);
 
     // Ensure all promises resolve
     await new Promise(resolve => process.nextTick(resolve));
@@ -122,8 +122,8 @@ describe('StepIndexPattern', () => {
 
   it('appends a wildcard automatically to queries', async () => {
     const component = createComponent();
-    const instance = component.instance();
-    instance.onQueryChanged({ target: { value: 'k' } });
+    const instance = component.instance() as StepIndexPattern;
+    instance.onQueryChanged({ target: { value: 'k' } } as React.ChangeEvent<HTMLInputElement>);
     expect(component.state('query')).toBe('k*');
   });
 
@@ -135,8 +135,8 @@ describe('StepIndexPattern', () => {
 
   it('ensures the response of the latest request is persisted', async () => {
     const component = createComponent();
-    const instance = component.instance();
-    instance.onQueryChanged({ target: { value: 'e' } });
+    const instance = component.instance() as StepIndexPattern;
+    instance.onQueryChanged({ target: { value: 'e' } } as React.ChangeEvent<HTMLInputElement>);
     instance.lastQuery = 'k';
     await new Promise(resolve => process.nextTick(resolve));
 
@@ -149,7 +149,7 @@ describe('StepIndexPattern', () => {
     // Ensure it works in the other code flow too (the other early return)
 
     // Provide `es` so we do not auto append * and enter our other code flow
-    instance.onQueryChanged({ target: { value: 'es' } });
+    instance.onQueryChanged({ target: { value: 'es' } } as React.ChangeEvent<HTMLInputElement>);
     instance.lastQuery = 'k';
     await new Promise(resolve => process.nextTick(resolve));
     expect(component.state('exactMatchedIndices')).toEqual([]);
