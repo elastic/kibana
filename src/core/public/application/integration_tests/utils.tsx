@@ -23,7 +23,7 @@ import { mount } from 'enzyme';
 import { I18nProvider } from '@kbn/i18n/react';
 
 import { App, LegacyApp, AppMountParameters } from '../types';
-import { EitherApp, MockedMounter, MockedMounterTuple, Mountable } from '../test_types';
+import { MockedMounter, MockedMounterTuple } from '../test_types';
 
 type Dom = ReturnType<typeof mount> | null;
 type Renderer = () => Dom | Promise<Dom>;
@@ -80,7 +80,3 @@ export const createLegacyAppMounter = (
     unmount: jest.fn(),
   },
 ];
-
-export function getUnmounter(app: Mountable<EitherApp>) {
-  return app.mounter.mount.mock.results[0].value;
-}
