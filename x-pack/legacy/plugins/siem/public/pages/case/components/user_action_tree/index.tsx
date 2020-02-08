@@ -5,12 +5,12 @@
  */
 
 import React, { ReactNode } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiAvatar, EuiPanel, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiAvatar, EuiPanel, EuiText } from '@elastic/eui';
 import styled, { css } from 'styled-components';
 
 export interface UserActionItem {
   avatarName: string;
-  children: ReactNode;
+  children?: ReactNode;
   title: ReactNode;
 }
 
@@ -46,9 +46,13 @@ const UserAction = styled(EuiFlexGroup)`
       padding: ${theme.eui.euiSizeS} ${theme.eui.euiSizeL};
       background: ${theme.eui.euiColorLightestShade};
       border-bottom: ${theme.eui.euiBorderThin};
+      border-radius: ${theme.eui.euiBorderRadius} ${theme.eui.euiBorderRadius} 0 0;
     }
     .userAction__content {
       padding: ${theme.eui.euiSizeM} ${theme.eui.euiSizeL};
+    }
+    .euiText--small * {
+      margin-bottom: 0;
     }
   `}
 `;
@@ -61,12 +65,10 @@ const renderUserActions = (userActions: UserActionItem[]) => {
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiPanel className="userAction__panel" paddingSize="none">
-          <div className="userAction__titleWrapper">
-            <EuiTitle size="xxs" className="userAction__title">
-              <h3>{title}</h3>
-            </EuiTitle>
-          </div>
-          <div className="userAction__content">{children}</div>
+          <EuiText size="s" className="userAction__title">
+            {title}
+          </EuiText>
+          {children && <div className="userAction__content">{children}</div>}
         </EuiPanel>
       </EuiFlexItem>
     </UserAction>

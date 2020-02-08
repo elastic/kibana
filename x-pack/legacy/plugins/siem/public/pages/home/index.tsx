@@ -43,6 +43,11 @@ const WrappedByAutoSizer = styled.div`
 `;
 WrappedByAutoSizer.displayName = 'WrappedByAutoSizer';
 
+const Main = styled.main`
+  height: 100%;
+`;
+Main.displayName = 'Main';
+
 const usersViewing = ['elastic']; // TODO: get the users viewing this timeline from Elasticsearch (persistance)
 
 /** the global Kibana navigation at the top of every page */
@@ -62,7 +67,7 @@ export const HomePage: React.FC = () => (
       <WrappedByAutoSizer data-test-subj="wrapped-by-auto-sizer" ref={measureRef}>
         <HeaderGlobal />
 
-        <main data-test-subj="pageContainer">
+        <Main data-test-subj="pageContainer">
           <WithSource sourceId="default">
             {({ browserFields, indexPattern, indicesExist }) => (
               <DragDropContextWrapper browserFields={browserFields}>
@@ -141,7 +146,7 @@ export const HomePage: React.FC = () => (
               </DragDropContextWrapper>
             )}
           </WithSource>
-        </main>
+        </Main>
 
         <HelpMenu />
 

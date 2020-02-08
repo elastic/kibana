@@ -60,7 +60,7 @@ export const getCasesColumns = (): CasesColumns[] => [
   },
   {
     field: 'created_by.username',
-    name: i18n.CREATED_BY,
+    name: i18n.REPORTER,
     render: (createdBy: FlattenedCaseSavedObject['created_by']['username']) =>
       renderStringField(createdBy),
   },

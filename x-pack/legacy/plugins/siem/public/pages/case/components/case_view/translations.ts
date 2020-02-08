@@ -18,14 +18,20 @@ export const SHOWING_CASES = (actionDate: string, actionName: string, userName: 
     defaultMessage: '{userName} {actionName} on {actionDate}',
   });
 
-export const ADDED_DESCRIPTION = i18n.translate('xpack.siem.case.caseTable.noCases.body', {
-  defaultMessage: 'added description',
-});
+export const ADDED_DESCRIPTION = i18n.translate(
+  'xpack.siem.case.caseView.actionLabel.addDescription',
+  {
+    defaultMessage: 'added description',
+  }
+);
 
-export const ADDED_TAGS = i18n.translate('xpack.siem.case.caseTable.noCases.body', {
-  defaultMessage: 'added tags',
-});
+export const EDITED_DESCRIPTION = i18n.translate(
+  'xpack.siem.case.caseView.actionLabel.editDescription',
+  {
+    defaultMessage: 'edited description',
+  }
+);
 
-export const CHANGED_STATE = i18n.translate('xpack.siem.case.caseTable.noCases.body', {
-  defaultMessage: 'changed state',
+export const ADDED_COMMENT = i18n.translate('xpack.siem.case.caseView.actionLabel.addComment', {
+  defaultMessage: 'added comment',
 });

@@ -33,8 +33,8 @@ export const CREATED_AT = i18n.translate('xpack.siem.case.caseView.created_at', 
   defaultMessage: 'Created at',
 });
 
-export const CREATED_BY = i18n.translate('xpack.siem.case.caseView.created_by', {
-  defaultMessage: 'Created by',
+export const REPORTER = i18n.translate('xpack.siem.case.caseView.created_by', {
+  defaultMessage: 'Reporter',
 });
 
 export const CREATE_BC_TITLE = i18n.translate('xpack.siem.case.caseView.breadcrumb', {

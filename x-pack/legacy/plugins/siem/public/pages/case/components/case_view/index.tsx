@@ -8,6 +8,7 @@ import React, { Fragment, useCallback, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiButtonIcon,
   EuiDescriptionListDescription,
   EuiDescriptionListTitle,
   EuiFlexGroup,
@@ -32,6 +33,8 @@ import { CommonUseField } from '../create';
 import { caseTypeOptions, stateOptions } from '../create/form_options';
 import { NewCaseFormatted } from '../../../../containers/case/types';
 import { UserActionTree } from '../user_action_tree';
+import { UserList } from '../user_list';
+import { TagList } from '../tag_list';
 
 interface Props {
   caseId: string;
@@ -54,7 +57,9 @@ const MyWrapper = styled(WrapperPage)`
 `;
 const BackgroundWrapper = styled.div`
   ${({ theme }) => css`
-    background-color: ${theme.eui.euiSizeM};
+    background-color: ${theme.eui.euiColorEmptyShade};
+    border-top: ${theme.eui.euiBorderThin};
+    height: 100%;
   `}
 `;
 
@@ -97,13 +102,22 @@ export const CaseView = React.memo(({ caseId }: Props) => {
     {
       avatarName: data.created_by.username,
       title: (
-        <EuiText>
-          <p>
-            <strong>{`${data.created_by.username}`}</strong>
-            {` ${i18n.ADDED_DESCRIPTION} `}{' '}
-            <FormattedRelativePreferenceDate value={data.created_at} labelOn />
-          </p>
-        </EuiText>
+        <EuiFlexGroup alignItems="baseline" gutterSize="none" justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <p>
+              <strong>{`${data.created_by.username}`}</strong>
+              {` ${i18n.ADDED_DESCRIPTION} `}{' '}
+              <FormattedRelativePreferenceDate value={data.created_at} labelOn />
+            </p>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonIcon
+              onClick={() => window.alert('Description actions')}
+              iconType="boxesHorizontal"
+              aria-label="description actions"
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       ),
       children: isEdit ? (
         <DescriptionMarkdown
@@ -119,13 +133,11 @@ export const CaseView = React.memo(({ caseId }: Props) => {
     {
       avatarName: `steph`,
       title: (
-        <EuiText>
-          <p>
-            <strong>{`${data.created_by.username}`}</strong>
-            {` ${i18n.ADDED_DESCRIPTION} `}{' '}
-            <FormattedRelativePreferenceDate value={data.created_at} labelOn />
-          </p>
-        </EuiText>
+        <p>
+          <strong>{`steph`}</strong>
+          {` ${i18n.ADDED_COMMENT} `}{' '}
+          <FormattedRelativePreferenceDate value={data.created_at} labelOn />
+        </p>
       ),
       children: <p>{'alright alright alright'}</p>,
     },
@@ -188,7 +200,7 @@ export const CaseView = React.memo(({ caseId }: Props) => {
       definition: <FormattedRelativePreferenceDate value={data.created_at} />,
     },
     {
-      title: i18n.CREATED_BY,
+      title: i18n.REPORTER,
       definition: data.created_by.username,
     },
     {
@@ -251,7 +263,16 @@ export const CaseView = React.memo(({ caseId }: Props) => {
       </MyWrapper>
       <BackgroundWrapper>
         <MyWrapper>
-          <UserActionTree userActions={firstSetOfSteps} />
+          <EuiFlexGroup>
+            <EuiFlexItem grow={6}>
+              <UserActionTree userActions={firstSetOfSteps} />
+            </EuiFlexItem>
+            <EuiFlexItem grow={2}>
+              <UserList headline={i18n.REPORTER} users={[data.created_by]} />
+              <TagList tags={data.tags} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+
           {/* {isEdit ? (*/}
           {/*  <Form form={form}>*/}
           {/*    <EuiDescriptionList compressed>*/}
