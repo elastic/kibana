@@ -25,7 +25,7 @@ import { scan, mergeMap, share, distinctUntilChanged } from 'rxjs/operators';
 import { observeWorker, WorkerStatus } from './observe_worker';
 import { OptimizerConfig } from './optimizer_config';
 import { getOptimizerVersion } from './get_optimizer_version';
-import { CompilerMsg, WorkerMsg, pipeClosure, Bundle, maybeMap } from './common';
+import { CompilerMsg, WorkerMsg, Bundle, maybeMap } from './common';
 import { assignBundlesToWorkers } from './assign_bundles_to_workers';
 import { Watcher, ChangesStarted, Changes } from './watcher';
 import { getMtimes } from './get_mtimes';
