@@ -177,32 +177,30 @@ export const PolicyStepReview: React.FunctionComponent<StepProps> = ({
                         </EuiTitle>
                       </li>
                     ))}
-                    {hiddenIndicesCount ? (
-                      <li key="hiddenIndicesCount">
-                        <EuiTitle size="xs">
-                          {isShowingFullIndicesList ? (
-                            <EuiLink onClick={() => setIsShowingFullIndicesList(false)}>
-                              <FormattedMessage
-                                id="xpack.snapshotRestore.policyForm.stepReview.summaryTab.indicesCollapseAllLink"
-                                defaultMessage="Hide {count, plural, one {# index} other {# indices}}"
-                                values={{ count: hiddenIndicesCount }}
-                              />{' '}
-                              <EuiIcon type="arrowUp" />
-                            </EuiLink>
-                          ) : (
-                            <EuiLink onClick={() => setIsShowingFullIndicesList(true)}>
-                              <FormattedMessage
-                                id="xpack.snapshotRestore.policyForm.stepReview.summaryTab.indicesShowAllLink"
-                                defaultMessage="Show {count} more {count, plural, one {index} other {indices}}"
-                                values={{ count: hiddenIndicesCount }}
-                              />{' '}
-                              <EuiIcon type="arrowDown" />
-                            </EuiLink>
-                          )}
-                        </EuiTitle>
-                      </li>
-                    ) : null}
                   </ul>
+                  {hiddenIndicesCount ? (
+                    <EuiTitle size="xs">
+                      {isShowingFullIndicesList ? (
+                        <EuiLink onClick={() => setIsShowingFullIndicesList(false)}>
+                          <FormattedMessage
+                            id="xpack.snapshotRestore.policyForm.stepReview.summaryTab.indicesCollapseAllLink"
+                            defaultMessage="Hide {count, plural, one {# index} other {# indices}}"
+                            values={{ count: hiddenIndicesCount }}
+                          />{' '}
+                          <EuiIcon type="arrowUp" />
+                        </EuiLink>
+                      ) : (
+                        <EuiLink onClick={() => setIsShowingFullIndicesList(true)}>
+                          <FormattedMessage
+                            id="xpack.snapshotRestore.policyForm.stepReview.summaryTab.indicesShowAllLink"
+                            defaultMessage="Show {count} more {count, plural, one {index} other {indices}}"
+                            values={{ count: hiddenIndicesCount }}
+                          />{' '}
+                          <EuiIcon type="arrowDown" />
+                        </EuiLink>
+                      )}
+                    </EuiTitle>
+                  ) : null}
                 </EuiText>
               ) : (
                 <FormattedMessage

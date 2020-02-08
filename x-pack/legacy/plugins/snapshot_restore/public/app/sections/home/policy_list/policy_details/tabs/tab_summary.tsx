@@ -72,21 +72,21 @@ export const TabSummary: React.FunctionComponent<Props> = ({ policy }) => {
               </EuiTitle>
             </li>
           ))}
-          {hiddenIndicesCount ? (
-            <li key="hiddenIndicesCount">
-              <EuiTitle size="xs">
-                <EuiLink onClick={() => setIsShowingFullIndicesList(true)}>
-                  <FormattedMessage
-                    id="xpack.snapshotRestore.policyDetails.indicesShowAllLink"
-                    defaultMessage="Show {count} more {count, plural, one {index} other {indices}}"
-                    values={{ count: hiddenIndicesCount }}
-                  />{' '}
-                  <EuiIcon type="arrowDown" />
-                </EuiLink>
-              </EuiTitle>
-            </li>
-          ) : null}
         </ul>
+        {hiddenIndicesCount ? (
+          <div>
+            <EuiTitle size="xs">
+              <EuiLink onClick={() => setIsShowingFullIndicesList(true)}>
+                <FormattedMessage
+                  id="xpack.snapshotRestore.policyDetails.indicesShowAllLink"
+                  defaultMessage="Show {count} more {count, plural, one {index} other {indices}}"
+                  values={{ count: hiddenIndicesCount }}
+                />{' '}
+                <EuiIcon type="arrowDown" />
+              </EuiLink>
+            </EuiTitle>
+          </div>
+        ) : null}
       </EuiText>
     ) : (
       <FormattedMessage
@@ -105,21 +105,21 @@ export const TabSummary: React.FunctionComponent<Props> = ({ policy }) => {
               </EuiTitle>
             </li>
           ))}
-          {hiddenIndicesCount ? (
-            <li key="hiddenIndicesCount">
-              <EuiTitle size="xs">
-                <EuiLink onClick={() => setIsShowingFullIndicesList(false)}>
-                  <FormattedMessage
-                    id="xpack.snapshotRestore.policyDetails.indicesCollapseAllLink"
-                    defaultMessage="Hide {count, plural, one {# index} other {# indices}}"
-                    values={{ count: hiddenIndicesCount }}
-                  />{' '}
-                  <EuiIcon type="arrowUp" />
-                </EuiLink>
-              </EuiTitle>
-            </li>
-          ) : null}
         </ul>
+        {hiddenIndicesCount ? (
+          <div>
+            <EuiTitle size="xs">
+              <EuiLink onClick={() => setIsShowingFullIndicesList(false)}>
+                <FormattedMessage
+                  id="xpack.snapshotRestore.policyDetails.indicesCollapseAllLink"
+                  defaultMessage="Hide {count, plural, one {# index} other {# indices}}"
+                  values={{ count: hiddenIndicesCount }}
+                />{' '}
+                <EuiIcon type="arrowUp" />
+              </EuiLink>
+            </EuiTitle>
+          </div>
+        ) : null}
       </EuiText>
     ) : null;
 

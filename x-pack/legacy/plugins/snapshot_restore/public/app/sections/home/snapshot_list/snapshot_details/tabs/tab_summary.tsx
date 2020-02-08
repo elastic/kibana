@@ -56,29 +56,31 @@ export const TabSummary: React.FC<Props> = ({ snapshotDetails }) => {
   const [isShowingFullIndicesList, setIsShowingFullIndicesList] = useState<boolean>(false);
   const hiddenIndicesCount = indices.length > 10 ? indices.length - 10 : 0;
   const shortIndicesList = indices.length ? (
-    <ul>
-      {[...indices].splice(0, 10).map((index: string) => (
-        <li key={index}>
-          <EuiTitle size="xs">
-            <span>{index}</span>
-          </EuiTitle>
-        </li>
-      ))}
+    <EuiText size="m">
+      <ul>
+        {[...indices].splice(0, 10).map((index: string) => (
+          <li key={index}>
+            <EuiTitle size="xs">
+              <span>{index}</span>
+            </EuiTitle>
+          </li>
+        ))}
+      </ul>
       {hiddenIndicesCount ? (
-        <li key="hiddenIndicesCount">
+        <div>
           <EuiTitle size="xs">
             <EuiLink onClick={() => setIsShowingFullIndicesList(true)}>
               <FormattedMessage
-                id="xpack.snapshotRestore.snapshotDetails.itemIndicesShowAllLink"
+                id="xpack.snapshotRestore.policyDetails.indicesShowAllLink"
                 defaultMessage="Show {count} more {count, plural, one {index} other {indices}}"
                 values={{ count: hiddenIndicesCount }}
               />{' '}
               <EuiIcon type="arrowDown" />
             </EuiLink>
           </EuiTitle>
-        </li>
+        </div>
       ) : null}
-    </ul>
+    </EuiText>
   ) : (
     <FormattedMessage
       id="xpack.snapshotRestore.snapshotDetails.itemIndicesNoneLabel"
@@ -87,16 +89,18 @@ export const TabSummary: React.FC<Props> = ({ snapshotDetails }) => {
   );
   const fullIndicesList =
     indices.length && indices.length > 10 ? (
-      <ul>
-        {indices.map((index: string) => (
-          <li key={index}>
-            <EuiTitle size="xs">
-              <span>{index}</span>
-            </EuiTitle>
-          </li>
-        ))}
+      <EuiText size="m">
+        <ul>
+          {indices.map((index: string) => (
+            <li key={index}>
+              <EuiTitle size="xs">
+                <span>{index}</span>
+              </EuiTitle>
+            </li>
+          ))}
+        </ul>
         {hiddenIndicesCount ? (
-          <li key="hiddenIndicesCount">
+          <div>
             <EuiTitle size="xs">
               <EuiLink onClick={() => setIsShowingFullIndicesList(false)}>
                 <FormattedMessage
@@ -107,9 +111,9 @@ export const TabSummary: React.FC<Props> = ({ snapshotDetails }) => {
                 <EuiIcon type="arrowUp" />
               </EuiLink>
             </EuiTitle>
-          </li>
+          </div>
         ) : null}
-      </ul>
+      </EuiText>
     ) : null;
 
   // Reset indices list state when clicking through different snapshots
