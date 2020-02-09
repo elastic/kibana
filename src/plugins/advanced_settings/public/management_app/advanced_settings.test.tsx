@@ -23,7 +23,7 @@ import { shallow } from 'enzyme';
 import dedent from 'dedent';
 import { UiSettingsParams, UserProvidedValues, UiSettingsType } from '../../../../core/public';
 import { FieldSetting } from './types';
-import { AdvancedSettings } from './advanced_settings';
+import { AdvancedSettingsComponent } from './advanced_settings';
 import {
   notificationServiceMock,
   docLinksServiceMock,
@@ -235,7 +235,8 @@ function mockConfig() {
 describe('AdvancedSettings', () => {
   it('should render specific setting if given setting key', async () => {
     const component = shallow(
-      <AdvancedSettings
+      <AdvancedSettingsComponent
+        queryText="test:string:setting"
         enableSaving={true}
         toasts={notificationServiceMock.createStartContract().toasts}
         dockLinks={docLinksServiceMock.createStartContract().links}
@@ -249,7 +250,8 @@ describe('AdvancedSettings', () => {
 
   it('should render read-only when saving is disabled', async () => {
     const component = shallow(
-      <AdvancedSettings
+      <AdvancedSettingsComponent
+        queryText="test:string:setting"
         enableSaving={false}
         toasts={notificationServiceMock.createStartContract().toasts}
         dockLinks={docLinksServiceMock.createStartContract().links}

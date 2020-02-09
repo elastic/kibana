@@ -28,7 +28,8 @@ import {
   Query,
 } from '@elastic/eui';
 
-import { withRouter, RouteComponentProps } from 'react-router-dom';
+// import { withRouter, RouteComponentProps, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { CallOuts } from './components/call_outs';
 import { Search } from './components/search';
 import { Form } from './components/form';
@@ -40,7 +41,7 @@ import { getAriaName, toEditableConfig, DEFAULT_CATEGORY } from './lib';
 
 import { FieldSetting, IQuery } from './types';
 
-interface AdvancedSettingsProps extends RouteComponentProps<MatchParams> {
+interface AdvancedSettingsProps {
   enableSaving: boolean;
   uiSettings: IUiSettingsClient;
   dockLinks: DocLinksStart['links'];
@@ -48,8 +49,8 @@ interface AdvancedSettingsProps extends RouteComponentProps<MatchParams> {
   componentRegistry: ComponentRegistry['start'];
 }
 
-interface MatchParams {
-  query?: string;
+interface AdvancedSettingsComponentProps extends AdvancedSettingsProps {
+  queryText: string;
 }
 
 interface AdvancedSettingsState {
@@ -61,7 +62,7 @@ interface AdvancedSettingsState {
 type GroupedSettings = Record<string, FieldSetting[]>;
 
 export class AdvancedSettingsComponent extends Component<
-  AdvancedSettingsProps,
+  AdvancedSettingsComponentProps,
   AdvancedSettingsState
 > {
   private settings: FieldSetting[];
@@ -70,9 +71,10 @@ export class AdvancedSettingsComponent extends Component<
   private categories: string[] = [];
   private uiSettingsSubscription?: Subscription;
 
-  constructor(props: AdvancedSettingsProps) {
+  constructor(props: AdvancedSettingsComponentProps) {
     super(props);
-    const queryText = this.props.match.params.query || '';
+    // const queryText = this.props.match.params.query || '';
+    const { queryText } = this.props;
     // const parsedQuery = Query.parse(queryText ? `ariaName:"${getAriaName(queryText)}"` : '');
     const parsedQuery = Query.parse(queryText);
 
@@ -228,4 +230,16 @@ export class AdvancedSettingsComponent extends Component<
   }
 }
 
-export const AdvancedSettings = withRouter(AdvancedSettingsComponent);
+export const AdvancedSettings = (props: AdvancedSettingsProps) => {
+  const { query } = useParams();
+  return (
+    <AdvancedSettingsComponent
+      queryText={query || ''}
+      enableSaving={props.enableSaving}
+      uiSettings={props.uiSettings}
+      dockLinks={props.dockLinks}
+      toasts={props.toasts}
+      componentRegistry={props.componentRegistry}
+    />
+  );
+};
