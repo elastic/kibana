@@ -11,7 +11,7 @@ const MAP_EMBEDDABLE_INPUT_KEYS = [
   'hideFilterActions',
   'isLayerTOCOpen',
   'openTOCDetails',
-  'mapCenter'
+  'mapCenter',
 ];
 
 export function mergeInputWithSavedMap(input, savedMap) {

@@ -29,6 +29,7 @@ import { MLLink } from '../../../../shared/Links/MachineLearningLinks/MLLink';
 import { TransactionSelect } from './TransactionSelect';
 import { IUrlParams } from '../../../../../context/UrlParamsContext/types';
 import { useServiceTransactionTypes } from '../../../../../hooks/useServiceTransactionTypes';
+import { useApmPluginContext } from '../../../../../hooks/useApmPluginContext';
 
 interface Props {
   isCreatingJob: boolean;
@@ -49,14 +50,18 @@ export function MachineLearningFlyoutView({
   const [selectedTransactionType, setSelectedTransactionType] = useState<
     string | undefined
   >(undefined);
+
+  const { http } = useApmPluginContext().core;
+
   const { data: hasMLJob = false, status } = useFetcher(() => {
     if (serviceName && selectedTransactionType) {
       return getHasMLJob({
         serviceName,
-        transactionType: selectedTransactionType
+        transactionType: selectedTransactionType,
+        http
       });
     }
-  }, [serviceName, selectedTransactionType]);
+  }, [serviceName, selectedTransactionType, http]);
 
   // update selectedTransactionType when list of transaction types has loaded
   useEffect(() => {

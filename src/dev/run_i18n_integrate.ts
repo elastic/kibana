@@ -88,7 +88,7 @@ run(
           new Listr(extractDefaultMessages(config, srcPaths), { exitOnError: true }),
       },
       {
-        title: 'Intregrating Locale File',
+        title: 'Integrating Locale File',
         task: async ({ messages, config }) => {
           await integrateLocaleFiles(messages, {
             sourceFileName: source,
@@ -121,6 +121,7 @@ run(
   {
     flags: {
       allowUnexpected: true,
+      guessTypesForUnexpectedFlags: true,
     },
   }
 );

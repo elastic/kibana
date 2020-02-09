@@ -55,7 +55,10 @@ export interface OnPostAuthToolkit {
   next: () => OnPostAuthResult;
 }
 
-/** @public */
+/**
+ * See {@link OnPostAuthToolkit}.
+ * @public
+ */
 export type OnPostAuthHandler = (
   request: KibanaRequest,
   response: LifecycleResponseFactory,

@@ -5,8 +5,6 @@
  */
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import axiosXhrAdapter from 'axios/lib/adapters/xhr';
-import axios from 'axios';
 
 import { setupEnvironment, pageHelpers, nextTick } from './helpers';
 import { TemplateFormTestBed } from './helpers/template_form.helpers';
@@ -20,27 +18,7 @@ import {
 
 const { setup } = pageHelpers.templateCreate;
 
-const mockHttpClient = axios.create({ adapter: axiosXhrAdapter });
-
-jest.mock('ui/index_patterns', () => ({
-  ILLEGAL_CHARACTERS: 'ILLEGAL_CHARACTERS',
-  CONTAINS_SPACES: 'CONTAINS_SPACES',
-  validateIndexPattern: () => {
-    return {
-      errors: {},
-    };
-  },
-}));
-
-jest.mock('ui/chrome', () => ({
-  breadcrumbs: { set: () => {} },
-  addBasePath: (path: string) => path || '/api/index_management',
-}));
-
-jest.mock('../../public/services/api', () => ({
-  ...jest.requireActual('../../public/services/api'),
-  getHttpClient: () => mockHttpClient,
-}));
+jest.mock('ui/new_platform');
 
 jest.mock('@elastic/eui', () => ({
   ...jest.requireActual('@elastic/eui'),
@@ -65,9 +43,22 @@ jest.mock('@elastic/eui', () => ({
   ),
 }));
 
-// We need to skip the tests until react 16.9.0 is released
-// which supports asynchronous code inside act()
-describe.skip('<TemplateCreate />', () => {
+const TEXT_MAPPING_FIELD = {
+  name: 'text_datatype',
+  type: 'text',
+};
+
+const BOOLEAN_MAPPING_FIELD = {
+  name: 'boolean_datatype',
+  type: 'boolean',
+};
+
+const KEYWORD_MAPPING_FIELD = {
+  name: 'keyword_datatype',
+  type: 'keyword',
+};
+
+describe('<TemplateCreate />', () => {
   let testBed: TemplateFormTestBed;
 
   const { server, httpRequestsMockHelpers } = setupEnvironment();
@@ -93,7 +84,6 @@ describe.skip('<TemplateCreate />', () => {
 
       expect(find('nextButton').props().disabled).toEqual(false);
 
-      // @ts-ignore (remove when react 16.9.0 is released)
       await act(async () => {
         actions.clickNextButton();
         await nextTick();
@@ -112,14 +102,13 @@ describe.skip('<TemplateCreate />', () => {
         beforeEach(async () => {
           const { actions } = testBed;
 
-          // @ts-ignore (remove when react 16.9.0 is released)
           await act(async () => {
             // Complete step 1 (logistics)
             await actions.completeStepOne({ name: TEMPLATE_NAME, indexPatterns: ['index1'] });
           });
         });
 
-        it('should set the correct page title', async () => {
+        it('should set the correct page title', () => {
           const { exists, find } = testBed;
 
           expect(exists('stepSettings')).toBe(true);
@@ -129,7 +118,6 @@ describe.skip('<TemplateCreate />', () => {
         it('should not allow invalid json', async () => {
           const { form, actions } = testBed;
 
-          // @ts-ignore (remove when react 16.9.0 is released)
           await act(async () => {
             actions.completeStepTwo('{ invalidJsonString ');
           });
@@ -142,7 +130,6 @@ describe.skip('<TemplateCreate />', () => {
         beforeEach(async () => {
           const { actions } = testBed;
 
-          // @ts-ignore (remove when react 16.9.0 is released)
           await act(async () => {
             // Complete step 1 (logistics)
             await actions.completeStepOne({ name: TEMPLATE_NAME, indexPatterns: ['index1'] });
@@ -152,23 +139,40 @@ describe.skip('<TemplateCreate />', () => {
           });
         });
 
-        it('should set the correct page title', async () => {
+        it('should set the correct page title', () => {
           const { exists, find } = testBed;
 
           expect(exists('stepMappings')).toBe(true);
           expect(find('stepTitle').text()).toEqual('Mappings (optional)');
         });
 
-        it('should not allow invalid json', async () => {
-          const { actions, form } = testBed;
+        it('should allow the user to define document fields for a mapping', async () => {
+          const { actions, find } = testBed;
 
-          // @ts-ignore (remove when react 16.9.0 is released)
           await act(async () => {
-            // Complete step 3 (mappings) with invalid json
-            await actions.completeStepThree('{ invalidJsonString ');
+            await actions.addMappingField('field_1', 'text');
+            await actions.addMappingField('field_2', 'text');
+            await actions.addMappingField('field_3', 'text');
           });
 
-          expect(form.getErrorsMessages()).toContain('Invalid JSON format.');
+          expect(find('fieldsListItem').length).toBe(3);
+        });
+
+        it('should allow the user to remove a document field from a mapping', async () => {
+          const { actions, find } = testBed;
+
+          await act(async () => {
+            await actions.addMappingField('field_1', 'text');
+            await actions.addMappingField('field_2', 'text');
+          });
+
+          expect(find('fieldsListItem').length).toBe(2);
+
+          actions.clickCancelCreateFieldButton();
+          // Remove first field
+          actions.clickRemoveButtonAtField(0);
+
+          expect(find('fieldsListItem').length).toBe(1);
         });
       });
 
@@ -176,7 +180,6 @@ describe.skip('<TemplateCreate />', () => {
         beforeEach(async () => {
           const { actions } = testBed;
 
-          // @ts-ignore (remove when react 16.9.0 is released)
           await act(async () => {
             // Complete step 1 (logistics)
             await actions.completeStepOne({ name: TEMPLATE_NAME, indexPatterns: ['index1'] });
@@ -185,11 +188,11 @@ describe.skip('<TemplateCreate />', () => {
             await actions.completeStepTwo('{}');
 
             // Complete step 3 (mappings)
-            await actions.completeStepThree('{}');
+            await actions.completeStepThree();
           });
         });
 
-        it('should set the correct page title', async () => {
+        it('should set the correct page title', () => {
           const { exists, find } = testBed;
 
           expect(exists('stepAliases')).toBe(true);
@@ -199,7 +202,6 @@ describe.skip('<TemplateCreate />', () => {
         it('should not allow invalid json', async () => {
           const { actions, form } = testBed;
 
-          // @ts-ignore (remove when react 16.9.0 is released)
           await act(async () => {
             // Complete step 4 (aliases) with invalid json
             await actions.completeStepFour('{ invalidJsonString ');
@@ -216,7 +218,6 @@ describe.skip('<TemplateCreate />', () => {
 
         const { actions } = testBed;
 
-        // @ts-ignore (remove when react 16.9.0 is released)
         await act(async () => {
           // Complete step 1 (logistics)
           await actions.completeStepOne({
@@ -228,7 +229,7 @@ describe.skip('<TemplateCreate />', () => {
           await actions.completeStepTwo(JSON.stringify(SETTINGS));
 
           // Complete step 3 (mappings)
-          await actions.completeStepThree(JSON.stringify(MAPPINGS));
+          await actions.completeStepThree();
 
           // Complete step 4 (aliases)
           await actions.completeStepFour(JSON.stringify(ALIASES));
@@ -271,7 +272,6 @@ describe.skip('<TemplateCreate />', () => {
 
         const { actions, exists, find } = testBed;
 
-        // @ts-ignore (remove when react 16.9.0 is released)
         await act(async () => {
           // Complete step 1 (logistics)
           await actions.completeStepOne({
@@ -283,7 +283,7 @@ describe.skip('<TemplateCreate />', () => {
           await actions.completeStepTwo(JSON.stringify({}));
 
           // Complete step 3 (mappings)
-          await actions.completeStepThree(JSON.stringify({}));
+          await actions.completeStepThree();
 
           // Complete step 4 (aliases)
           await actions.completeStepFour(JSON.stringify({}));
@@ -302,7 +302,8 @@ describe.skip('<TemplateCreate />', () => {
 
         const { actions } = testBed;
 
-        // @ts-ignore (remove when react 16.9.0 is released)
+        const MAPPING_FIELDS = [BOOLEAN_MAPPING_FIELD, TEXT_MAPPING_FIELD, KEYWORD_MAPPING_FIELD];
+
         await act(async () => {
           // Complete step 1 (logistics)
           await actions.completeStepOne({
@@ -314,17 +315,18 @@ describe.skip('<TemplateCreate />', () => {
           await actions.completeStepTwo(JSON.stringify(SETTINGS));
 
           // Complete step 3 (mappings)
-          await actions.completeStepThree(JSON.stringify(MAPPINGS));
+          await actions.completeStepThree(MAPPING_FIELDS);
 
           // Complete step 4 (aliases)
+          await nextTick(100);
           await actions.completeStepFour(JSON.stringify(ALIASES));
         });
       });
 
-      it('should send the correct payload', async () => {
+      // Flaky
+      it.skip('should send the correct payload', async () => {
         const { actions } = testBed;
 
-        // @ts-ignore (remove when react 16.9.0 is released)
         await act(async () => {
           actions.clickSubmitButton();
           await nextTick();
@@ -332,15 +334,29 @@ describe.skip('<TemplateCreate />', () => {
 
         const latestRequest = server.requests[server.requests.length - 1];
 
-        const expected = {
+        const expected = JSON.stringify({
+          isManaged: false,
           name: TEMPLATE_NAME,
           indexPatterns: DEFAULT_INDEX_PATTERNS,
           settings: SETTINGS,
-          mappings: MAPPINGS,
+          mappings: {
+            ...MAPPINGS,
+            properties: {
+              [BOOLEAN_MAPPING_FIELD.name]: {
+                type: BOOLEAN_MAPPING_FIELD.type,
+              },
+              [TEXT_MAPPING_FIELD.name]: {
+                type: TEXT_MAPPING_FIELD.type,
+              },
+              [KEYWORD_MAPPING_FIELD.name]: {
+                type: KEYWORD_MAPPING_FIELD.type,
+              },
+            },
+          },
           aliases: ALIASES,
-          isManaged: false,
-        };
-        expect(JSON.parse(latestRequest.requestBody)).toEqual(expected);
+        });
+
+        expect(JSON.parse(latestRequest.requestBody).body).toEqual(expected);
       });
 
       it('should surface the API errors from the put HTTP request', async () => {
@@ -354,7 +370,6 @@ describe.skip('<TemplateCreate />', () => {
 
         httpRequestsMockHelpers.setCreateTemplateResponse(undefined, { body: error });
 
-        // @ts-ignore (remove when react 16.9.0 is released)
         await act(async () => {
           actions.clickSubmitButton();
           await nextTick();

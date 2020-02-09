@@ -21,18 +21,17 @@ export const SourceTooltip = ({ isCopiedFromPrimary, sourceTransportAddress, chi
         id="xpack.monitoring.elasticsearch.shardActivity.sourceTooltip"
         defaultMessage="Copied from {copiedFrom} shard"
         values={{
-          copiedFrom: isCopiedFromPrimary ?
-            (
-              <FormattedMessage
-                id="xpack.monitoring.elasticsearch.shardActivity.sourceTooltip.primarySourceText"
-                defaultMessage="primary"
-              />
-            ) : (
-              <FormattedMessage
-                id="xpack.monitoring.elasticsearch.shardActivity.sourceTooltip.replicaSourceText"
-                defaultMessage="replica"
-              />
-            ),
+          copiedFrom: isCopiedFromPrimary ? (
+            <FormattedMessage
+              id="xpack.monitoring.elasticsearch.shardActivity.sourceTooltip.primarySourceText"
+              defaultMessage="primary"
+            />
+          ) : (
+            <FormattedMessage
+              id="xpack.monitoring.elasticsearch.shardActivity.sourceTooltip.replicaSourceText"
+              defaultMessage="replica"
+            />
+          ),
         }}
       />
     </Fragment>

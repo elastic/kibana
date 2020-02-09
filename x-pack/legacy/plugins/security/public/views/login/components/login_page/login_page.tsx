@@ -19,7 +19,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import classNames from 'classnames';
-import { LoginState } from '../../../../../common/login_state';
+import { LoginState } from '../../login_state';
 import { BasicLoginForm } from '../basic_login_form';
 import { DisabledLoginForm } from '../disabled_login_form';
 
@@ -31,6 +31,7 @@ interface Props {
   loginState: LoginState;
   isSecureConnection: boolean;
   requiresSecureConnection: boolean;
+  loginAssistanceMessage: string;
 }
 
 export class LoginPage extends Component<Props, {}> {

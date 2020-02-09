@@ -7,6 +7,8 @@
 export enum RouteName {
   HOME = 'home',
   SERVICES = 'services',
+  SERVICE_MAP = 'service-map',
+  SINGLE_SERVICE_MAP = 'single-service-map',
   TRACES = 'traces',
   SERVICE = 'service',
   TRANSACTIONS = 'transactions',
@@ -17,5 +19,8 @@ export enum RouteName {
   TRANSACTION_TYPE = 'transaction_type',
   TRANSACTION_NAME = 'transaction_name',
   SETTINGS = 'settings',
-  SERVICE_NODES = 'nodes'
+  AGENT_CONFIGURATION = 'agent_configuration',
+  INDICES = 'indices',
+  SERVICE_NODES = 'nodes',
+  LINK_TO_TRACE = 'link_to_trace'
 }

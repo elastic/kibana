@@ -7,7 +7,7 @@
 import { cloneDeep } from 'lodash';
 import ci from './ci.json';
 import shirts from './shirts.json';
-import { getFunctionErrors } from '../../../strings';
+import { getFunctionErrors } from '../../../../i18n';
 
 export enum DemoRows {
   CI = 'ci',

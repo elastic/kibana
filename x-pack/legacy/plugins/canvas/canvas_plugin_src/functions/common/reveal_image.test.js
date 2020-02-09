@@ -7,7 +7,7 @@
 import { functionWrapper } from '../../../__tests__/helpers/function_wrapper';
 import { elasticOutline } from '../../lib/elastic_outline';
 import { elasticLogo } from '../../lib/elastic_logo';
-import { getFunctionErrors } from '../../strings';
+import { getFunctionErrors } from '../../../i18n';
 import { revealImage } from './revealImage';
 
 const errors = getFunctionErrors().revealImage;

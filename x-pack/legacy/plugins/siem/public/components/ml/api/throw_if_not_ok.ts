@@ -10,11 +10,7 @@ import * as i18n from './translations';
 import { MlError } from '../types';
 import { SetupMlResponse } from '../../ml_popover/types';
 
-export interface MessageBody {
-  error?: string;
-  message?: string;
-  statusCode?: number;
-}
+export { MessageBody, parseJsonFromBody } from '../../../utils/api';
 
 export interface MlStartJobError {
   error: MlError;
@@ -35,30 +31,6 @@ export class ToasterErrors extends Error implements ToasterErrorsType {
   }
 }
 
-export const throwIfNotOk = async (response: Response): Promise<void> => {
-  if (!response.ok) {
-    const body = await parseJsonFromBody(response);
-    if (body != null && body.message) {
-      if (body.statusCode != null) {
-        throw new ToasterErrors([body.message, `${i18n.STATUS_CODE} ${body.statusCode}`]);
-      } else {
-        throw new ToasterErrors([body.message]);
-      }
-    } else {
-      throw new ToasterErrors([`${i18n.NETWORK_ERROR} ${response.statusText}`]);
-    }
-  }
-};
-
-export const parseJsonFromBody = async (response: Response): Promise<MessageBody | null> => {
-  try {
-    const text = await response.text();
-    return JSON.parse(text);
-  } catch (error) {
-    return null;
-  }
-};
-
 export const tryParseResponse = (response: string): string => {
   try {
     return JSON.stringify(JSON.parse(response), null, 2);
@@ -67,10 +39,13 @@ export const tryParseResponse = (response: string): string => {
   }
 };
 
-export const throwIfErrorAttachedToSetup = (setupResponse: SetupMlResponse): void => {
+export const throwIfErrorAttachedToSetup = (
+  setupResponse: SetupMlResponse,
+  jobIdErrorFilter: string[] = []
+): void => {
   const jobErrors = setupResponse.jobs.reduce<string[]>(
     (accum, job) =>
-      job.error != null
+      job.error != null && jobIdErrorFilter.includes(job.id)
         ? [
             ...accum,
             job.error.msg,
@@ -83,7 +58,7 @@ export const throwIfErrorAttachedToSetup = (setupResponse: SetupMlResponse): voi
 
   const dataFeedErrors = setupResponse.datafeeds.reduce<string[]>(
     (accum, dataFeed) =>
-      dataFeed.error != null
+      dataFeed.error != null && jobIdErrorFilter.includes(dataFeed.id.substr('datafeed-'.length))
         ? [
             ...accum,
             dataFeed.error.msg,

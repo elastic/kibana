@@ -26,6 +26,7 @@ const providerOptionsSchema = (providerType: string, optionsSchema: Type<any>) =
 
 export const ConfigSchema = schema.object(
   {
+    loginAssistanceMessage: schema.string({ defaultValue: '' }),
     cookieName: schema.string({ defaultValue: 'sid' }),
     encryptionKey: schema.conditional(
       schema.contextRef('dist'),
@@ -33,12 +34,21 @@ export const ConfigSchema = schema.object(
       schema.maybe(schema.string({ minLength: 32 })),
       schema.string({ minLength: 32, defaultValue: 'a'.repeat(32) })
     ),
-    sessionTimeout: schema.oneOf([schema.number(), schema.literal(null)], { defaultValue: null }),
+    session: schema.object({
+      idleTimeout: schema.nullable(schema.duration()),
+      lifespan: schema.nullable(schema.duration()),
+    }),
     secureCookies: schema.boolean({ defaultValue: false }),
     authc: schema.object({
       providers: schema.arrayOf(schema.string(), { defaultValue: ['basic'], minSize: 1 }),
       oidc: providerOptionsSchema('oidc', schema.maybe(schema.object({ realm: schema.string() }))),
-      saml: providerOptionsSchema('saml', schema.maybe(schema.object({ realm: schema.string() }))),
+      saml: providerOptionsSchema(
+        'saml',
+        schema.object({
+          realm: schema.string(),
+          maxRedirectURLSize: schema.byteSize({ defaultValue: '2kb' }),
+        })
+      ),
     }),
   },
   // This option should be removed as soon as we entirely migrate config from legacy Security plugin.

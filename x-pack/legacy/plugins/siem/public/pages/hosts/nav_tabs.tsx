@@ -8,8 +8,9 @@ import { omit } from 'lodash/fp';
 import * as i18n from './translations';
 import { HostsTableType } from '../../store/hosts/model';
 import { HostsNavTab } from './navigation/types';
+import { SiemPageName } from '../home/types';
 
-const getTabsOnHostsUrl = (tabName: HostsTableType) => `#/hosts/${tabName}`;
+const getTabsOnHostsUrl = (tabName: HostsTableType) => `#/${SiemPageName.hosts}/${tabName}`;
 
 export const navTabsHosts = (hasMlUserPermissions: boolean): HostsNavTab => {
   const hostsNavTabs = {
@@ -45,6 +46,13 @@ export const navTabsHosts = (hasMlUserPermissions: boolean): HostsNavTab => {
       id: HostsTableType.events,
       name: i18n.NAVIGATION_EVENTS_TITLE,
       href: getTabsOnHostsUrl(HostsTableType.events),
+      disabled: false,
+      urlKey: 'host',
+    },
+    [HostsTableType.alerts]: {
+      id: HostsTableType.alerts,
+      name: i18n.NAVIGATION_ALERTS_TITLE,
+      href: getTabsOnHostsUrl(HostsTableType.alerts),
       disabled: false,
       urlKey: 'host',
     },

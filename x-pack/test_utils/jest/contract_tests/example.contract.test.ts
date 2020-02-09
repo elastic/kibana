@@ -10,7 +10,7 @@ import { createKibanaServer } from './servers';
 import { getEsArchiver } from './services/es_archiver';
 import { EsArchiver } from 'src/es_archiver';
 import * as path from 'path';
-import elasticsearch from 'elasticsearch';
+import * as legacyElasticsearch from 'elasticsearch';
 
 const { callWhenOnline, memorize } = Slapshot;
 
@@ -50,7 +50,7 @@ describe.skip('Example contract tests', () => {
     const dataInES: any = await memorize('sample_data', () => {
       // To keep things simple in this example, getting the connection infor the the JEST contract test ES server
       const esConfig = JSON.parse(process.env.__JEST__ESServer || '');
-      const client = new elasticsearch.Client({
+      const client = new legacyElasticsearch.Client({
         hosts: esConfig.hosts,
         httpAuth: esConfig.username ? `${esConfig.username}:${esConfig.password}` : undefined,
       });

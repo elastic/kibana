@@ -2,6 +2,20 @@
 
 exports[`BasicLoginForm renders as expected 1`] = `
 <Fragment>
+  <EuiText
+    size="s"
+  >
+    <ReactMarkdown
+      astPlugins={Array []}
+      escapeHtml={true}
+      plugins={Array []}
+      rawSourcePos={false}
+      renderers={Object {}}
+      skipHtml={false}
+      sourcePos={false}
+      transformLinkUri={[Function]}
+    />
+  </EuiText>
   <EuiPanel>
     <form
       onSubmit={[Function]}
@@ -10,6 +24,7 @@ exports[`BasicLoginForm renders as expected 1`] = `
         describedByIds={Array []}
         display="row"
         fullWidth={false}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         label={
           <FormattedMessage
@@ -22,14 +37,11 @@ exports[`BasicLoginForm renders as expected 1`] = `
       >
         <EuiFieldText
           aria-required={true}
-          compressed={false}
           data-test-subj="loginUsername"
           disabled={false}
-          fullWidth={false}
           id="username"
           inputRef={[Function]}
           isInvalid={false}
-          isLoading={false}
           name="username"
           onChange={[Function]}
           value=""
@@ -39,6 +51,7 @@ exports[`BasicLoginForm renders as expected 1`] = `
         describedByIds={Array []}
         display="row"
         fullWidth={false}
+        hasChildLabel={true}
         hasEmptyLabelSpace={false}
         label={
           <FormattedMessage
@@ -51,13 +64,10 @@ exports[`BasicLoginForm renders as expected 1`] = `
       >
         <EuiFieldText
           aria-required={true}
-          compressed={false}
           data-test-subj="loginPassword"
           disabled={false}
-          fullWidth={false}
           id="password"
           isInvalid={false}
-          isLoading={false}
           name="password"
           onChange={[Function]}
           type="password"

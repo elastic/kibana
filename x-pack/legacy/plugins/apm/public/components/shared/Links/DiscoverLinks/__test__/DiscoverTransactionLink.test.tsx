@@ -4,13 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import 'jest-styled-components';
 import { Transaction } from '../../../../../../typings/es_schemas/ui/Transaction';
 // @ts-ignore
 import configureStore from '../../../../../store/config/configureStore';
 import { getDiscoverQuery } from '../DiscoverTransactionLink';
-
-jest.mock('ui/kfetch');
 
 function getMockTransaction() {
   return {

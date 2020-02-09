@@ -25,3 +25,25 @@ export const httpOk: Transaction = {
     duration: { us: 0 }
   }
 };
+
+export const httpRumOK: Transaction = {
+  '@timestamp': '0',
+  agent: { name: 'rum-js', version: '0' },
+  http: {
+    response: { status_code: 200 }
+  },
+  processor: { event: 'transaction', name: 'transaction' },
+  service: { name: 'testServiceName' },
+  timestamp: { us: 0 },
+  trace: { id: 'testTrace' },
+  transaction: {
+    page: {
+      url: 'elastic.co'
+    },
+    name: 'testTransaction',
+    id: 'testId',
+    sampled: false,
+    type: 'testType',
+    duration: { us: 0 }
+  }
+};

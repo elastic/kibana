@@ -85,12 +85,48 @@ export class ElasticsearchOverviewAdapter implements OverviewAdapter {
       auditbeatPackage: getOr(null, 'aggregations.system_module.package_count.doc_count', response),
       auditbeatProcess: getOr(null, 'aggregations.system_module.process_count.doc_count', response),
       auditbeatUser: getOr(null, 'aggregations.system_module.user_count.doc_count', response),
+      endgameDns: getOr(null, 'aggregations.endgame_module.dns_event_count.doc_count', response),
+      endgameFile: getOr(null, 'aggregations.endgame_module.file_event_count.doc_count', response),
+      endgameImageLoad: getOr(
+        null,
+        'aggregations.endgame_module.image_load_event_count.doc_count',
+        response
+      ),
+      endgameNetwork: getOr(
+        null,
+        'aggregations.endgame_module.network_event_count.doc_count',
+        response
+      ),
+      endgameProcess: getOr(
+        null,
+        'aggregations.endgame_module.process_event_count.doc_count',
+        response
+      ),
+      endgameRegistry: getOr(
+        null,
+        'aggregations.endgame_module.registry_event.doc_count',
+        response
+      ),
+      endgameSecurity: getOr(
+        null,
+        'aggregations.endgame_module.security_event_count.doc_count',
+        response
+      ),
       filebeatSystemModule: getOr(
         null,
         'aggregations.system_module.filebeat_count.doc_count',
         response
       ),
-      winlogbeat: getOr(null, 'aggregations.winlog_count.doc_count', response),
+      winlogbeatSecurity: getOr(
+        null,
+        'aggregations.winlog_module.security_event_count.doc_count',
+        response
+      ),
+      winlogbeatMWSysmonOperational: getOr(
+        null,
+        'aggregations.winlog_module.mwsysmon_operational_event_count.doc_count',
+        response
+      ),
     };
   }
 }

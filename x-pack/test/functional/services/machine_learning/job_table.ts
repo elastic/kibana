@@ -10,7 +10,6 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export function MachineLearningJobTableProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
-  const find = getService('find');
 
   return new (class MlJobTable {
     public async parseJobTable() {
@@ -141,34 +140,31 @@ export function MachineLearningJobTableProvider({ getService }: FtrProviderConte
     }
 
     public async ensureDetailsOpen(jobId: string) {
-      await retry.try(async () => {
+      await retry.tryForTime(10000, async () => {
         if (!(await testSubjects.exists(this.detailsSelector(jobId)))) {
           await testSubjects.click(this.rowSelector(jobId, 'mlJobListRowDetailsToggle'));
+          await testSubjects.existOrFail(this.detailsSelector(jobId), { timeout: 1000 });
         }
-
-        await testSubjects.existOrFail(this.detailsSelector(jobId));
       });
     }
 
     public async ensureDetailsClosed(jobId: string) {
-      await retry.try(async () => {
+      await retry.tryForTime(10000, async () => {
         if (await testSubjects.exists(this.detailsSelector(jobId))) {
           await testSubjects.click(this.rowSelector(jobId, 'mlJobListRowDetailsToggle'));
-          await testSubjects.missingOrFail(this.detailsSelector(jobId));
+          await testSubjects.missingOrFail(this.detailsSelector(jobId), { timeout: 1000 });
         }
       });
     }
 
-    public async waitForJobsToLoad() {
-      await retry.waitFor(
-        'jobs table to exist',
-        async () => await testSubjects.exists('~mlJobListTable')
-      );
+    public async refreshJobList() {
+      await testSubjects.click('mlRefreshJobListButton');
+      await this.waitForJobsToLoad();
+    }
 
-      await retry.waitFor(
-        'jobs table to be done loading',
-        async () => await testSubjects.exists('mlJobListTable loaded')
-      );
+    public async waitForJobsToLoad() {
+      await testSubjects.existOrFail('~mlJobListTable', { timeout: 60 * 1000 });
+      await testSubjects.existOrFail('mlJobListTable loaded', { timeout: 30 * 1000 });
     }
 
     public async filterWithSearchString(filter: string) {
@@ -180,6 +176,7 @@ export function MachineLearningJobTableProvider({ getService }: FtrProviderConte
     }
 
     public async assertJobRowFields(jobId: string, expectedRow: object) {
+      await this.refreshJobList();
       const rows = await this.parseJobTable();
       const jobRow = rows.filter(row => row.id === jobId)[0];
       expect(jobRow).to.eql(expectedRow);
@@ -215,16 +212,39 @@ export function MachineLearningJobTableProvider({ getService }: FtrProviderConte
     }
 
     public async clickActionsMenu(jobId: string) {
-      await testSubjects.click(this.rowSelector(jobId, 'euiCollapsedItemActionsButton'));
-      if (!(await find.existsByDisplayedByCssSelector('[class~=euiContextMenuPanel]'))) {
-        throw new Error(`expected euiContextMenuPanel to exist`);
-      }
+      await retry.tryForTime(30 * 1000, async () => {
+        if (!(await testSubjects.exists('mlActionButtonDeleteJob'))) {
+          await testSubjects.click(this.rowSelector(jobId, 'euiCollapsedItemActionsButton'));
+          await testSubjects.existOrFail('mlActionButtonDeleteJob', { timeout: 5000 });
+        }
+      });
     }
 
     public async clickCloneJobAction(jobId: string) {
       await this.clickActionsMenu(jobId);
       await testSubjects.click('mlActionButtonCloneJob');
       await testSubjects.existOrFail('~mlPageJobWizard');
+    }
+
+    public async clickDeleteJobAction(jobId: string) {
+      await this.clickActionsMenu(jobId);
+      await testSubjects.click('mlActionButtonDeleteJob');
+      await testSubjects.existOrFail('mlDeleteJobConfirmModal');
+    }
+
+    public async confirmDeleteJobModal() {
+      await testSubjects.click('mlDeleteJobConfirmModal > confirmModalConfirmButton');
+      await testSubjects.missingOrFail('mlDeleteJobConfirmModal', { timeout: 30 * 1000 });
+    }
+
+    public async clickOpenJobInSingleMetricViewerButton(jobId: string) {
+      await testSubjects.click(`~openJobsInSingleMetricViewer-${jobId}`);
+      await testSubjects.existOrFail('~mlPageSingleMetricViewer');
+    }
+
+    public async clickOpenJobInAnomalyExplorerButton(jobId: string) {
+      await testSubjects.click(`~openJobsInSingleAnomalyExplorer-${jobId}`);
+      await testSubjects.existOrFail('~mlPageAnomalyExplorer');
     }
   })();
 }

@@ -4,60 +4,24 @@ exports[`local ui filter queries fetches local ui filter aggregations 1`] = `
 Object {
   "body": Object {
     "aggs": Object {
-      "host": Object {
+      "by_terms": Object {
         "aggs": Object {
-          "by_terms": Object {
-            "aggs": Object {
-              "bucket_count": Object {
-                "cardinality": Object {
-                  "field": "service.name",
-                },
-              },
-            },
-            "terms": Object {
-              "field": "host.hostname",
-              "order": Object {
-                "_count": "desc",
-              },
+          "bucket_count": Object {
+            "cardinality": Object {
+              "field": "service.name",
             },
           },
         },
-        "filter": Object {
-          "bool": Object {
-            "filter": Array [
-              Object {
-                "terms": Object {
-                  "transaction.result": Array [
-                    "2xx",
-                  ],
-                },
-              },
-            ],
+        "terms": Object {
+          "field": "transaction.result",
+          "order": Object {
+            "_count": "desc",
           },
         },
       },
-      "transactionResult": Object {
-        "aggs": Object {
-          "by_terms": Object {
-            "aggs": Object {
-              "bucket_count": Object {
-                "cardinality": Object {
-                  "field": "service.name",
-                },
-              },
-            },
-            "terms": Object {
-              "field": "transaction.result",
-              "order": Object {
-                "_count": "desc",
-              },
-            },
-          },
-        },
-        "filter": Object {
-          "bool": Object {
-            "filter": Array [],
-          },
+      "services": Object {
+        "terms": Object {
+          "field": "service.name",
         },
       },
     },

@@ -27,8 +27,8 @@ export function formatStack(err) {
       {errorStack}`,
       values: {
         errorMessage: err.message,
-        errorStack: err.stack
-      }
+        errorStack: err.stack,
+      },
     });
   }
   return err.stack;

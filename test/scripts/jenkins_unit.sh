@@ -1,11 +1,17 @@
 #!/usr/bin/env bash
 
-set -e
+source test/scripts/jenkins_test_setup.sh
 
-if [[ -z "$IS_PIPELINE_JOB" ]] ; then
-  trap 'node "$KIBANA_DIR/src/dev/failed_tests/cli"' EXIT
+if [[ -z "$CODE_COVERAGE" ]] ; then
+  "$(FORCE_COLOR=0 yarn bin)/grunt" jenkins:unit --dev;
+else
+  echo "NODE_ENV=$NODE_ENV"
+  echo " -> Running jest tests with coverage"
+  node scripts/jest --ci --verbose --coverage
+  echo ""
+  echo ""
+  echo " -> Running mocha tests with coverage"
+  yarn run grunt "test:mochaCoverage";
+  echo ""
+  echo ""
 fi
-
-export TEST_BROWSER_HEADLESS=1
-
-"$(FORCE_COLOR=0 yarn bin)/grunt" jenkins:unit --dev;

@@ -5,10 +5,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { get } from 'lodash/fp';
 import { resolve } from 'path';
 import { Server } from 'hapi';
+import { Root } from 'joi';
 
-import { initServerWithKibana } from './server/kibana.index';
+import { PluginInitializerContext } from '../../../../src/core/server';
+import { plugin } from './server';
 import { savedObjectMappings } from './server/saved_objects';
 
 import {
@@ -22,27 +25,29 @@ import {
   DEFAULT_INTERVAL_VALUE,
   DEFAULT_FROM,
   DEFAULT_TO,
+  DEFAULT_SIGNALS_INDEX,
+  ENABLE_NEWS_FEED_SETTING,
+  NEWS_FEED_URL_SETTING,
+  NEWS_FEED_URL_SETTING_DEFAULT,
+  SIGNALS_INDEX_KEY,
 } from './common/constants';
-import { signalsAlertType } from './server/lib/detection_engine/alerts/signals_alert_type';
+import { defaultIndexPattern } from './default_index_pattern';
+import { initServerWithKibana } from './server/kibana.index';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function siem(kibana: any) {
+export const siem = (kibana: any) => {
   return new kibana.Plugin({
     id: APP_ID,
     configPrefix: 'xpack.siem',
     publicDir: resolve(__dirname, 'public'),
-    require: ['kibana', 'elasticsearch'],
-    // Uncomment these lines to turn on alerting and action for detection engine and comment the other
-    // require statement out. These are hidden behind feature flags at the moment so if you turn
-    // these on without the feature flags turned on then Kibana will crash since we are a legacy plugin
-    // and legacy plugins cannot have optional requirements.
-    // require: ['kibana', 'elasticsearch', 'alerting', 'actions'],
+    require: ['kibana', 'elasticsearch', 'alerting', 'actions'],
     uiExports: {
       app: {
         description: i18n.translate('xpack.siem.securityDescription', {
           defaultMessage: 'Explore your SIEM App',
         }),
-        main: 'plugins/siem/app',
+        main: 'plugins/siem/legacy',
         euiIconType: 'securityAnalyticsApp',
         title: APP_NAME,
         listed: false,
@@ -59,6 +64,7 @@ export function siem(kibana: any) {
           order: 9000,
           title: APP_NAME,
           url: `/app/${APP_ID}`,
+          category: DEFAULT_APP_CATEGORIES.security,
         },
       ],
       uiSettingDefaults: {
@@ -97,7 +103,7 @@ export function siem(kibana: any) {
           name: i18n.translate('xpack.siem.uiSettings.defaultIndexLabel', {
             defaultMessage: 'Elasticsearch indices',
           }),
-          value: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+          value: defaultIndexPattern,
           description: i18n.translate('xpack.siem.uiSettings.defaultIndexDescription', {
             defaultMessage:
               '<p>Comma-delimited list of Elasticsearch indices from which the SIEM app collects events.</p>',
@@ -118,15 +124,66 @@ export function siem(kibana: any) {
           category: ['siem'],
           requiresPageReload: true,
         },
+        [ENABLE_NEWS_FEED_SETTING]: {
+          name: i18n.translate('xpack.siem.uiSettings.enableNewsFeedLabel', {
+            defaultMessage: 'News feed',
+          }),
+          value: true,
+          description: i18n.translate('xpack.siem.uiSettings.enableNewsFeedDescription', {
+            defaultMessage: '<p>Enables the News feed</p>',
+          }),
+          type: 'boolean',
+          category: ['siem'],
+          requiresPageReload: true,
+        },
+        [NEWS_FEED_URL_SETTING]: {
+          name: i18n.translate('xpack.siem.uiSettings.newsFeedUrl', {
+            defaultMessage: 'News feed URL',
+          }),
+          value: NEWS_FEED_URL_SETTING_DEFAULT,
+          description: i18n.translate('xpack.siem.uiSettings.newsFeedUrlDescription', {
+            defaultMessage: '<p>News feed content will be retrieved from this URL</p>',
+          }),
+          category: ['siem'],
+          requiresPageReload: true,
+        },
       },
       mappings: savedObjectMappings,
     },
     init(server: Server) {
-      if (server.plugins.alerting != null) {
-        server.plugins.alerting.registerType(signalsAlertType);
-      }
-      server.injectUiAppVars('siem', async () => server.getInjectedUiAppVars('kibana'));
-      initServerWithKibana(server);
+      const { config, newPlatform, plugins, route } = server;
+      const { coreContext, env, setup } = newPlatform;
+      const initializerContext = { ...coreContext, env } as PluginInitializerContext;
+      const serverFacade = {
+        config,
+        usingEphemeralEncryptionKey:
+          get('usingEphemeralEncryptionKey', newPlatform.setup.plugins.encryptedSavedObjects) ??
+          false,
+        plugins: {
+          alerting: plugins.alerting,
+          actions: newPlatform.start.plugins.actions,
+          elasticsearch: plugins.elasticsearch,
+          spaces: plugins.spaces,
+          savedObjects: server.savedObjects.SavedObjectsClient,
+        },
+        route: route.bind(server),
+      };
+      // @ts-ignore-next-line: setup.plugins is too loosely typed
+      plugin(initializerContext).setup(setup.core, setup.plugins);
+
+      initServerWithKibana(initializerContext, serverFacade);
+    },
+    config(Joi: Root) {
+      // See x-pack/plugins/siem/server/config.ts if you're adding another
+      // value where the configuration has to be duplicated at the moment.
+      // When we move over to the new platform completely this will be
+      // removed and only server/config.ts should be used.
+      return Joi.object()
+        .keys({
+          enabled: Joi.boolean().default(true),
+          [SIGNALS_INDEX_KEY]: Joi.string().default(DEFAULT_SIGNALS_INDEX),
+        })
+        .default();
     },
   });
-}
+};

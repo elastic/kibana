@@ -7,7 +7,10 @@
 import { resolve } from 'path';
 import { i18n } from '@kbn/i18n';
 import KbnServer, { Server } from 'src/legacy/server/kbn_server';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { plugin } from './server/new_platform';
+import { CloudSetup } from '../../../plugins/cloud/server';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
 import {
   MlInitializerContext,
   MlCoreSetup,
@@ -28,7 +31,7 @@ export const ml = (kibana: any) => {
     publicDir: resolve(__dirname, 'public'),
 
     uiExports: {
-      managementSections: ['plugins/ml/management'],
+      managementSections: ['plugins/ml/application/management'],
       app: {
         title: i18n.translate('xpack.ml.mlNavTitle', {
           defaultMessage: 'Machine Learning',
@@ -36,12 +39,13 @@ export const ml = (kibana: any) => {
         description: i18n.translate('xpack.ml.mlNavDescription', {
           defaultMessage: 'Machine Learning for the Elastic Stack',
         }),
-        icon: 'plugins/ml/ml.svg',
+        icon: 'plugins/ml/application/ml.svg',
         euiIconType: 'machineLearningApp',
-        main: 'plugins/ml/app',
+        main: 'plugins/ml/legacy',
+        category: DEFAULT_APP_CATEGORIES.analyze,
       },
-      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
-      hacks: ['plugins/ml/hacks/toggle_app_link_in_nav'],
+      styleSheetPaths: resolve(__dirname, 'public/application/index.scss'),
+      hacks: ['plugins/ml/application/hacks/toggle_app_link_in_nav'],
       savedObjectSchemas: {
         'ml-telemetry': {
           isNamespaceAgnostic: true,
@@ -75,18 +79,20 @@ export const ml = (kibana: any) => {
       };
 
       const core: MlCoreSetup = {
-        addAppLinksToSampleDataset: server.addAppLinksToSampleDataset,
         injectUiAppVars: server.injectUiAppVars,
         http: mlHttpService,
         savedObjects: server.savedObjects,
-        usage: server.usage,
+        elasticsearch: kbnServer.newPlatform.setup.core.elasticsearch, // NP
       };
-
+      const { usageCollection, cloud, home } = kbnServer.newPlatform.setup.plugins;
       const plugins = {
-        elasticsearch: server.plugins.elasticsearch,
+        elasticsearch: server.plugins.elasticsearch, // legacy
         security: server.plugins.security,
         xpackMain: server.plugins.xpack_main,
         spaces: server.plugins.spaces,
+        home,
+        usageCollection: usageCollection as UsageCollectionSetup,
+        cloud: cloud as CloudSetup,
         ml: this,
       };
 

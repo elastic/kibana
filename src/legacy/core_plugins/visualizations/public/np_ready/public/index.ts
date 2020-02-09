@@ -33,8 +33,7 @@ import { PluginInitializerContext } from 'src/core/public';
 import { VisualizationsPlugin, VisualizationsSetup, VisualizationsStart } from './plugin';
 
 /** @public */
-export type VisualizationsSetup = VisualizationsSetup;
-export type VisualizationsStart = VisualizationsStart;
+export { VisualizationsSetup, VisualizationsStart };
 
 /** @public types */
 export { VisTypeAlias, VisType } from './types';
@@ -44,4 +43,13 @@ export function plugin(initializerContext: PluginInitializerContext) {
 }
 
 /** @public static code */
-// TODO once items are moved from ui/vis into this service
+export { Vis, VisParams, VisState } from './vis';
+export { TypesService } from './types/types_service';
+
+export { Status } from './legacy/update_status';
+export { buildPipeline, buildVislibDimensions, SchemaConfig } from './legacy/build_pipeline';
+
+// @ts-ignore
+export { updateOldState } from './legacy/vis_update_state';
+export { calculateObjectHash } from './legacy/calculate_object_hash';
+export { createSavedVisLoader } from '../../saved_visualizations/saved_visualizations';

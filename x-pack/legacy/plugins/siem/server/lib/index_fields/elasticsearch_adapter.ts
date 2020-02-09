@@ -15,7 +15,6 @@ import {
   IndexAlias,
 } from '../../utils/beat_schema';
 import { FrameworkAdapter, FrameworkRequest } from '../framework';
-
 import { FieldsAdapter, IndexFieldDescriptor } from './types';
 
 type IndexesAliasIndices = Record<string, string[]>;
@@ -27,7 +26,8 @@ export class ElasticsearchIndexFieldAdapter implements FieldsAdapter {
     const indexPatternsService = this.framework.getIndexPatternsService(request);
     const indexesAliasIndices: IndexesAliasIndices = indices.reduce(
       (accumulator: IndexesAliasIndices, indice: string) => {
-        const key: string = getIndexAlias(request.payload.variables.defaultIndex, indice);
+        const key = getIndexAlias(indices, indice);
+
         if (get(key, accumulator)) {
           accumulator[key] = [...accumulator[key], indice];
         } else {
@@ -44,9 +44,10 @@ export class ElasticsearchIndexFieldAdapter implements FieldsAdapter {
         })
       )
     );
-    return formatIndexFields(responsesIndexFields, Object.keys(
-      indexesAliasIndices
-    ) as IndexAlias[]);
+    return formatIndexFields(
+      responsesIndexFields,
+      Object.keys(indexesAliasIndices) as IndexAlias[]
+    );
   }
 }
 

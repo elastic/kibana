@@ -17,15 +17,15 @@
  * under the License.
  */
 
-import { pick } from 'lodash';
-
 import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
 import { PluginWrapper } from './plugin';
-import { DiscoveredPlugin, DiscoveredPluginInternal, PluginName, PluginOpaqueId } from './types';
+import { DiscoveredPlugin, PluginName, PluginOpaqueId } from './types';
 import { createPluginSetupContext, createPluginStartContext } from './plugin_context';
 import { PluginsServiceSetupDeps, PluginsServiceStartDeps } from './plugins_service';
+import { withTimeout } from '../../utils';
 
+const Sec = 1000;
 /** @internal */
 export class PluginsSystem {
   private readonly plugins = new Map<PluginName, PluginWrapper>();
@@ -77,27 +77,26 @@ export class PluginsSystem {
 
       this.log.debug(`Setting up plugin "${pluginName}"...`);
       const pluginDeps = new Set([...plugin.requiredPlugins, ...plugin.optionalPlugins]);
-      const pluginDepContracts = Array.from(pluginDeps).reduce(
-        (depContracts, dependencyName) => {
-          // Only set if present. Could be absent if plugin does not have server-side code or is a
-          // missing optional dependency.
-          if (contracts.has(dependencyName)) {
-            depContracts[dependencyName] = contracts.get(dependencyName);
-          }
+      const pluginDepContracts = Array.from(pluginDeps).reduce((depContracts, dependencyName) => {
+        // Only set if present. Could be absent if plugin does not have server-side code or is a
+        // missing optional dependency.
+        if (contracts.has(dependencyName)) {
+          depContracts[dependencyName] = contracts.get(dependencyName);
+        }
 
-          return depContracts;
-        },
-        {} as Record<PluginName, unknown>
-      );
+        return depContracts;
+      }, {} as Record<PluginName, unknown>);
 
-      contracts.set(
-        pluginName,
-        await plugin.setup(
+      const contract = await withTimeout({
+        promise: plugin.setup(
           createPluginSetupContext(this.coreContext, deps, plugin),
           pluginDepContracts
-        )
-      );
+        ),
+        timeout: 30 * Sec,
+        errorMessage: `Setup lifecycle of "${pluginName}" plugin wasn't completed in 30sec. Consider disabling the plugin and re-start.`,
+      });
 
+      contracts.set(pluginName, contract);
       this.satupPlugins.push(pluginName);
     }
 
@@ -116,26 +115,26 @@ export class PluginsSystem {
       this.log.debug(`Starting plugin "${pluginName}"...`);
       const plugin = this.plugins.get(pluginName)!;
       const pluginDeps = new Set([...plugin.requiredPlugins, ...plugin.optionalPlugins]);
-      const pluginDepContracts = Array.from(pluginDeps).reduce(
-        (depContracts, dependencyName) => {
-          // Only set if present. Could be absent if plugin does not have server-side code or is a
-          // missing optional dependency.
-          if (contracts.has(dependencyName)) {
-            depContracts[dependencyName] = contracts.get(dependencyName);
-          }
+      const pluginDepContracts = Array.from(pluginDeps).reduce((depContracts, dependencyName) => {
+        // Only set if present. Could be absent if plugin does not have server-side code or is a
+        // missing optional dependency.
+        if (contracts.has(dependencyName)) {
+          depContracts[dependencyName] = contracts.get(dependencyName);
+        }
 
-          return depContracts;
-        },
-        {} as Record<PluginName, unknown>
-      );
+        return depContracts;
+      }, {} as Record<PluginName, unknown>);
 
-      contracts.set(
-        pluginName,
-        await plugin.start(
+      const contract = await withTimeout({
+        promise: plugin.start(
           createPluginStartContext(this.coreContext, deps, plugin),
           pluginDepContracts
-        )
-      );
+        ),
+        timeout: 30 * Sec,
+        errorMessage: `Start lifecycle of "${pluginName}" plugin wasn't completed in 30sec. Consider disabling the plugin and re-start.`,
+      });
+
+      contracts.set(pluginName, contract);
     }
 
     return contracts;
@@ -161,35 +160,25 @@ export class PluginsSystem {
    * Get a Map of all discovered UI plugins in topological order.
    */
   public uiPlugins() {
-    const internal = new Map<PluginName, DiscoveredPluginInternal>(
-      [...this.getTopologicallySortedPluginNames().keys()]
-        .filter(pluginName => this.plugins.get(pluginName)!.includesUiPlugin)
-        .map(pluginName => {
-          const plugin = this.plugins.get(pluginName)!;
-          return [
-            pluginName,
-            {
-              id: pluginName,
-              path: plugin.path,
-              configPath: plugin.manifest.configPath,
-              requiredPlugins: plugin.manifest.requiredPlugins,
-              optionalPlugins: plugin.manifest.optionalPlugins,
-            },
-          ] as [PluginName, DiscoveredPluginInternal];
-        })
+    const uiPluginNames = [...this.getTopologicallySortedPluginNames().keys()].filter(
+      pluginName => this.plugins.get(pluginName)!.includesUiPlugin
     );
-
     const publicPlugins = new Map<PluginName, DiscoveredPlugin>(
-      [...internal.entries()].map(
-        ([pluginName, plugin]) =>
-          [
-            pluginName,
-            pick(plugin, ['id', 'configPath', 'requiredPlugins', 'optionalPlugins']),
-          ] as [PluginName, DiscoveredPlugin]
-      )
+      uiPluginNames.map(pluginName => {
+        const plugin = this.plugins.get(pluginName)!;
+        return [
+          pluginName,
+          {
+            id: pluginName,
+            configPath: plugin.manifest.configPath,
+            requiredPlugins: plugin.manifest.requiredPlugins.filter(p => uiPluginNames.includes(p)),
+            optionalPlugins: plugin.manifest.optionalPlugins.filter(p => uiPluginNames.includes(p)),
+          },
+        ];
+      })
     );
 
-    return { public: publicPlugins, internal };
+    return publicPlugins;
   }
 
   /**
@@ -244,9 +233,9 @@ export class PluginsSystem {
     }
 
     if (pluginsDependenciesGraph.size > 0) {
-      const edgesLeft = JSON.stringify([...pluginsDependenciesGraph.entries()]);
+      const edgesLeft = JSON.stringify([...pluginsDependenciesGraph.keys()]);
       throw new Error(
-        `Topological ordering of plugins did not complete, these edges could not be ordered: ${edgesLeft}`
+        `Topological ordering of plugins did not complete, these plugins have cyclic or missing dependencies: ${edgesLeft}`
       );
     }
 

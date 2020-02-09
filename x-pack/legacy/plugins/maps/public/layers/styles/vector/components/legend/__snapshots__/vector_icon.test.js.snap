@@ -1,0 +1,45 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Renders CircleIcon 1`] = `
+<CircleIcon
+  style={
+    Object {
+      "fill": "#ff0000",
+      "stroke": "rgb(106,173,213)",
+      "strokeWidth": "1px",
+    }
+  }
+/>
+`;
+
+exports[`Renders LineIcon 1`] = `
+<LineIcon
+  style={
+    Object {
+      "stroke": "rgb(106,173,213)",
+      "strokeWidth": "4px",
+    }
+  }
+/>
+`;
+
+exports[`Renders PolygonIcon 1`] = `
+<PolygonIcon
+  style={
+    Object {
+      "fill": "#ff0000",
+      "stroke": "rgb(106,173,213)",
+      "strokeWidth": "1px",
+    }
+  }
+/>
+`;
+
+exports[`Renders SymbolIcon 1`] = `
+<SymbolIcon
+  fill="#ff0000"
+  stroke="rgb(106,173,213)"
+  strokeWidth="1px"
+  symbolId="airfield-15"
+/>
+`;

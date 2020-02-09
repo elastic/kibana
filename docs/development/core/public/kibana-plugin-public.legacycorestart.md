@@ -16,13 +16,13 @@ Start interface exposed to the legacy platform via the `ui/new_platform` module.
 export interface LegacyCoreStart extends CoreStart 
 ```
 
+## Remarks
+
+Some methods are not supported in the legacy platform and while present to make this type compatibile with [CoreStart](./kibana-plugin-public.corestart.md)<!-- -->, unsupported methods will throw exceptions when called.
+
 ## Properties
 
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [injectedMetadata](./kibana-plugin-public.legacycorestart.injectedmetadata.md) | <code>InjectedMetadataStart</code> |  |
-
-## Remarks
-
-Some methods are not supported in the legacy platform and while present to make this type compatibile with [CoreStart](./kibana-plugin-public.corestart.md)<!-- -->, unsupported methods will throw exceptions when called.
 

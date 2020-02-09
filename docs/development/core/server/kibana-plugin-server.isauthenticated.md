@@ -4,7 +4,7 @@
 
 ## IsAuthenticated type
 
-Return authentication status for a request.
+Returns authentication status for a request.
 
 <b>Signature:</b>
 

@@ -17,11 +17,13 @@ import PropTypes from 'prop-types';
 import React, { PureComponent } from 'react';
 import { last } from 'lodash';
 import { rgba } from 'polished';
+import { scaleUtc } from 'd3-scale';
 
 import StatusText from './StatusText';
 import { SharedPlot } from './plotUtils';
 import { i18n } from '@kbn/i18n';
 import { isValidCoordinateValue } from '../../../../utils/isValidCoordinateValue';
+import { getTimezoneOffsetInMs } from './getTimezoneOffsetInMs';
 
 // undefined values are converted by react-vis into NaN when stacking
 // see https://github.com/uber/react-vis/issues/1214
@@ -42,7 +44,7 @@ class StaticPlot extends PureComponent {
           <LineSeries
             getNull={getNull}
             key={serie.title}
-            xType="time"
+            xType="time-utc"
             curve={'curveMonotoneX'}
             data={serie.data}
             color={serie.color}
@@ -54,7 +56,7 @@ class StaticPlot extends PureComponent {
           <AreaSeries
             getNull={getNull}
             key={serie.title}
-            xType="time"
+            xType="time-utc"
             curve={'curveMonotoneX'}
             data={serie.data}
             color={serie.color}
@@ -78,7 +80,7 @@ class StaticPlot extends PureComponent {
           <AreaSeries
             getNull={getNull}
             key={`${serie.title}-area`}
-            xType="time"
+            xType="time-utc"
             curve={'curveMonotoneX'}
             data={data}
             color={serie.color}
@@ -90,7 +92,7 @@ class StaticPlot extends PureComponent {
           <LineSeries
             getNull={getNull}
             key={`${serie.title}-line`}
-            xType="time"
+            xType="time-utc"
             curve={'curveMonotoneX'}
             data={data}
             color={serie.color}
@@ -113,7 +115,7 @@ class StaticPlot extends PureComponent {
           <VerticalRectSeries
             getNull={getNull}
             key={serie.title}
-            xType="time"
+            xType="time-utc"
             curve={'curveMonotoneX'}
             data={data}
             color={serie.color}
@@ -126,7 +128,7 @@ class StaticPlot extends PureComponent {
           <LineMarkSeries
             getNull={getNull}
             key={serie.title}
-            xType="time"
+            xType="time-utc"
             curve={'curveMonotoneX'}
             data={serie.data}
             color={serie.color}
@@ -138,24 +140,37 @@ class StaticPlot extends PureComponent {
     }
   }
 
-  render() {
-    const {
-      width,
-      series,
-      tickFormatX,
-      tickFormatY,
-      plotValues,
-      noHits
-    } = this.props;
-    const { yTickValues } = plotValues;
+  /**
+   * A tick format function that takes the timezone from Kibana's settings into
+   * account. Used if no tickFormatX prop is supplied.
+   *
+   * This produces the same results as the built-in formatter from D3, which is
+   * what react-vis uses, but shifts the timezone.
+   */
+  tickFormatXTime = value => {
+    const xDomain = this.props.plotValues.x.domain();
 
-    // approximate number of x-axis ticks based on the width of the plot. There should by approx 1 tick per 100px
-    // d3 will determine the exact number of ticks based on the selected range
-    const xTickTotal = Math.floor(width / 100);
+    const time = value.getTime();
+
+    return scaleUtc()
+      .domain(xDomain)
+      .tickFormat()(new Date(time - getTimezoneOffsetInMs(time)));
+  };
+
+  render() {
+    const { series, tickFormatY, plotValues, noHits } = this.props;
+    const { xTickValues, yTickValues } = plotValues;
+
+    const tickFormatX = this.props.tickFormatX || this.tickFormatXTime;
 
     return (
       <SharedPlot plotValues={plotValues}>
-        <XAxis tickSize={0} tickTotal={xTickTotal} tickFormat={tickFormatX} />
+        <XAxis
+          type="time-utc"
+          tickSize={0}
+          tickFormat={tickFormatX}
+          tickValues={xTickValues}
+        />
         {noHits ? (
           <StatusText
             marginLeft={30}

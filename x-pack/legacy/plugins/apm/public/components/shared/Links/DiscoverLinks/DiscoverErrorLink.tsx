@@ -24,7 +24,7 @@ function getDiscoverQuery(error: APMError, kuery?: string) {
     _a: {
       interval: 'auto',
       query: {
-        language: 'lucene',
+        language: 'kuery',
         query
       },
       sort: { '@timestamp': 'desc' }
@@ -32,7 +32,7 @@ function getDiscoverQuery(error: APMError, kuery?: string) {
   };
 }
 
-const DiscoverErrorLink: React.SFC<{
+const DiscoverErrorLink: React.FC<{
   readonly error: APMError;
   readonly kuery?: string;
 }> = ({ error, kuery, children }) => {

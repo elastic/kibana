@@ -17,11 +17,10 @@
  * under the License.
  */
 
-import { IndexPatternsService } from './service';
+import { IndexPatternsFetcher } from '../../../plugins/data/server';
 import KbnServer from '../kbn_server';
-import { APICaller } from '../../../core/server';
+import { APICaller, CallAPIOptions } from '../../../core/server';
 import { Legacy } from '../../../../kibana';
-import { registerRoutes } from './routes';
 
 export function indexPatternsMixin(kbnServer: KbnServer, server: Legacy.Server) {
   /**
@@ -31,7 +30,7 @@ export function indexPatternsMixin(kbnServer: KbnServer, server: Legacy.Server) 
    *  @type {IndexPatternsService}
    */
   server.decorate('server', 'indexPatternsServiceFactory', ({ callCluster }) => {
-    return new IndexPatternsService(callCluster);
+    return new IndexPatternsFetcher(callCluster);
   });
 
   /**
@@ -43,14 +42,15 @@ export function indexPatternsMixin(kbnServer: KbnServer, server: Legacy.Server) 
    */
   server.addMemoizedFactoryToRequest('getIndexPatternsService', (request: Legacy.Request) => {
     const { callWithRequest } = request.server.plugins.elasticsearch.getCluster('data');
-    const callCluster: APICaller = (endpoint, params, options) =>
-      callWithRequest(request, endpoint, params, options);
+    const callCluster: APICaller = (
+      endpoint: string,
+      params?: Record<string, any>,
+      options?: CallAPIOptions
+    ) => callWithRequest(request, endpoint, params, options);
     return server.indexPatternsServiceFactory({ callCluster });
   });
-
-  registerRoutes(kbnServer.newPlatform.setup.core);
 }
 
 export type IndexPatternsServiceFactory = (args: {
   callCluster: (endpoint: string, clientParams: any, options: any) => Promise<any>;
-}) => IndexPatternsService;
+}) => IndexPatternsFetcher;

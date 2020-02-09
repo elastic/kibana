@@ -18,7 +18,7 @@
  */
 import { applicationServiceMock } from './application/application_service.mock';
 import { chromeServiceMock } from './chrome/chrome_service.mock';
-import { CoreSetup, CoreStart, PluginInitializerContext } from '.';
+import { CoreContext, PluginInitializerContext } from '.';
 import { docLinksServiceMock } from './doc_links/doc_links_service.mock';
 import { fatalErrorsServiceMock } from './fatal_errors/fatal_errors_service.mock';
 import { httpServiceMock } from './http/http_service.mock';
@@ -41,12 +41,15 @@ export { notificationServiceMock } from './notifications/notifications_service.m
 export { overlayServiceMock } from './overlays/overlay_service.mock';
 export { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
 
-function createCoreSetupMock() {
-  const mock: MockedKeys<CoreSetup> = {
+function createCoreSetupMock({ basePath = '' } = {}) {
+  const mock = {
     application: applicationServiceMock.createSetupContract(),
     context: contextServiceMock.createSetupContract(),
     fatalErrors: fatalErrorsServiceMock.createSetupContract(),
-    http: httpServiceMock.createSetupContract(),
+    getStartServices: jest.fn<Promise<[ReturnType<typeof createCoreStartMock>, object]>, []>(() =>
+      Promise.resolve([createCoreStartMock({ basePath }), {}])
+    ),
+    http: httpServiceMock.createSetupContract({ basePath }),
     notifications: notificationServiceMock.createSetupContract(),
     uiSettings: uiSettingsServiceMock.createSetupContract(),
     injectedMetadata: {
@@ -57,12 +60,12 @@ function createCoreSetupMock() {
   return mock;
 }
 
-function createCoreStartMock() {
-  const mock: MockedKeys<CoreStart> = {
+function createCoreStartMock({ basePath = '' } = {}) {
+  const mock = {
     application: applicationServiceMock.createStartContract(),
     chrome: chromeServiceMock.createStartContract(),
     docLinks: docLinksServiceMock.createStartContract(),
-    http: httpServiceMock.createStartContract(),
+    http: httpServiceMock.createStartContract({ basePath }),
     i18n: i18nServiceMock.createStartContract(),
     notifications: notificationServiceMock.createStartContract(),
     overlays: overlayServiceMock.createStartContract(),
@@ -71,13 +74,73 @@ function createCoreStartMock() {
     injectedMetadata: {
       getInjectedVar: injectedMetadataServiceMock.createStartContract().getInjectedVar,
     },
+    fatalErrors: fatalErrorsServiceMock.createStartContract(),
   };
 
   return mock;
 }
 
+function pluginInitializerContextMock() {
+  const mock: PluginInitializerContext = {
+    opaqueId: Symbol(),
+    env: {
+      mode: {
+        dev: true,
+        name: 'development',
+        prod: false,
+      },
+      packageInfo: {
+        version: 'version',
+        branch: 'branch',
+        buildNum: 100,
+        buildSha: 'buildSha',
+        dist: false,
+      },
+    },
+    config: {
+      get: <T>() => ({} as T),
+    },
+  };
+
+  return mock;
+}
+
+function createCoreContext(): CoreContext {
+  return {
+    coreId: Symbol('core context mock'),
+    env: {
+      mode: {
+        dev: true,
+        name: 'development',
+        prod: false,
+      },
+      packageInfo: {
+        version: 'version',
+        branch: 'branch',
+        buildNum: 100,
+        buildSha: 'buildSha',
+        dist: false,
+      },
+    },
+  };
+}
+
+function createStorageMock() {
+  const storageMock: jest.Mocked<Storage> = {
+    getItem: jest.fn(),
+    setItem: jest.fn(),
+    removeItem: jest.fn(),
+    clear: jest.fn(),
+    key: jest.fn(),
+    length: 10,
+  };
+  return storageMock;
+}
+
 export const coreMock = {
+  createCoreContext,
   createSetup: createCoreSetupMock,
   createStart: createCoreStartMock,
-  createPluginInitializerContext: jest.fn() as jest.Mock<PluginInitializerContext>,
+  createPluginInitializerContext: pluginInitializerContextMock,
+  createStorage: createStorageMock,
 };

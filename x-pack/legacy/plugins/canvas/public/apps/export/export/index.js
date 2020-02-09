@@ -25,9 +25,6 @@ const mapDispatchToProps = dispatch => ({
 const branches = [branch(({ workpad }) => workpad == null, renderComponent(LoadWorkpad))];
 
 export const ExportApp = compose(
-  connect(
-    mapStateToProps,
-    mapDispatchToProps
-  ),
+  connect(mapStateToProps, mapDispatchToProps),
   ...branches
 )(Component);

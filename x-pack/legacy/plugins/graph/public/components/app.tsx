@@ -4,18 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { Provider } from 'react-redux';
 import React, { useState } from 'react';
 import { I18nProvider } from '@kbn/i18n/react';
-import { Storage } from 'ui/storage';
 import { CoreStart } from 'kibana/public';
+import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { FieldManager } from './field_manager';
 import { SearchBarProps, SearchBar } from './search_bar';
 import { GraphStore } from '../state_management';
 import { GuidancePanel } from './guidance_panel';
+import { GraphTitle } from './graph_title';
 
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 
@@ -23,41 +24,44 @@ export interface GraphAppProps extends SearchBarProps {
   coreStart: CoreStart;
   // This is not named dataStart because of Angular treating data- prefix differently
   pluginDataStart: DataPublicPluginStart;
-  store: Storage;
+  storage: IStorageWrapper;
   reduxStore: GraphStore;
   isInitialized: boolean;
-  onFillWorkspace: () => void;
+  noIndexPatterns: boolean;
 }
 
 export function GraphApp(props: GraphAppProps) {
   const [pickerOpen, setPickerOpen] = useState(false);
-  const { coreStart, pluginDataStart, store, reduxStore, ...searchBarProps } = props;
+  const {
+    coreStart,
+    pluginDataStart,
+    storage,
+    reduxStore,
+    noIndexPatterns,
+    ...searchBarProps
+  } = props;
 
   return (
     <I18nProvider>
       <KibanaContextProvider
         services={{
           appName: 'graph',
-          store,
+          storage,
           data: pluginDataStart,
           ...coreStart,
         }}
       >
         <Provider store={reduxStore}>
           <>
+            {props.isInitialized && <GraphTitle />}
             <div className="gphGraph__bar">
-              <EuiFlexGroup direction="column" gutterSize="s">
-                <EuiFlexItem>
-                  <SearchBar {...searchBarProps} />
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <FieldManager pickerOpen={pickerOpen} setPickerOpen={setPickerOpen} />
-                </EuiFlexItem>
-              </EuiFlexGroup>
+              <SearchBar {...searchBarProps} />
+              <EuiSpacer size="s" />
+              <FieldManager pickerOpen={pickerOpen} setPickerOpen={setPickerOpen} />
             </div>
             {!props.isInitialized && (
               <GuidancePanel
-                onFillWorkspace={props.onFillWorkspace}
+                noIndexPatterns={noIndexPatterns}
                 onOpenFieldPicker={() => {
                   setPickerOpen(true);
                 }}

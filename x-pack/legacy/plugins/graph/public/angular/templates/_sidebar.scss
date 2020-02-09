@@ -13,6 +13,7 @@
 
   .help-block {
     font-size: $euiFontSizeXS;
+    color: $euiTextColor;
   }
 }
 
@@ -27,7 +28,7 @@
 
 .gphSidebar__panel{
   max-height: $euiSizeL * 10;
-  overflow-y: auto;
+  overflow-y: hidden auto;
 }
 
 /**
@@ -47,6 +48,10 @@
   background-color: $euiColorLightestShade;
   overflow: auto;
   margin-bottom: 0;
+}
+
+.gphSelectionList__icon {
+  font-size: $euiFontSizeXS;
 }
 
 .gphSelectionList__field {

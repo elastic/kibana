@@ -1,0 +1,115 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Storyshots shareables/Footer/Settings component 1`] = `
+<div
+  className="kbnCanvas"
+  style={
+    Object {
+      "background": "#333",
+      "height": undefined,
+      "overflow": "hidden",
+      "padding": 10,
+      "position": "relative",
+      "width": undefined,
+    }
+  }
+>
+  <div
+    className="euiFlexGroup euiFlexGroup--alignItemsFlexEnd euiFlexGroup--justifyContentCenter euiFlexGroup--directionColumn euiFlexGroup--responsive"
+  >
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <div
+        className="euiPopover euiPopover--anchorUpRight euiPopover--withTitle"
+        id="settings"
+        onKeyDown={[Function]}
+        onMouseDown={[Function]}
+        onMouseUp={[Function]}
+        onTouchEnd={[Function]}
+        onTouchStart={[Function]}
+      >
+        <div
+          className="euiPopover__anchor"
+        >
+          <button
+            aria-label="Settings"
+            className="euiButtonIcon euiButtonIcon--ghost"
+            onClick={[Function]}
+            type="button"
+          >
+            <svg
+              aria-hidden={true}
+              className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
+              focusable="false"
+              height={16}
+              role="img"
+              style={null}
+              viewBox="0 0 16 16"
+              width={16}
+              xmlns="http://www.w3.org/2000/svg"
+            />
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Storyshots shareables/Footer/Settings contextual 1`] = `
+<div
+  className="kbnCanvas"
+  style={
+    Object {
+      "background": "#333",
+      "height": undefined,
+      "overflow": "hidden",
+      "padding": 10,
+      "position": "relative",
+      "width": undefined,
+    }
+  }
+>
+  <div
+    className="euiFlexGroup euiFlexGroup--alignItemsFlexEnd euiFlexGroup--justifyContentCenter euiFlexGroup--directionColumn euiFlexGroup--responsive"
+  >
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <div
+        className="euiPopover euiPopover--anchorUpRight euiPopover--withTitle"
+        id="settings"
+        onKeyDown={[Function]}
+        onMouseDown={[Function]}
+        onMouseUp={[Function]}
+        onTouchEnd={[Function]}
+        onTouchStart={[Function]}
+      >
+        <div
+          className="euiPopover__anchor"
+        >
+          <button
+            aria-label="Settings"
+            className="euiButtonIcon euiButtonIcon--ghost"
+            onClick={[Function]}
+            type="button"
+          >
+            <svg
+              aria-hidden={true}
+              className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
+              focusable="false"
+              height={16}
+              role="img"
+              style={null}
+              viewBox="0 0 16 16"
+              width={16}
+              xmlns="http://www.w3.org/2000/svg"
+            />
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;

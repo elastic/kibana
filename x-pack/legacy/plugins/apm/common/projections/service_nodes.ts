@@ -4,43 +4,40 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Setup } from '../../server/lib/helpers/setup_request';
 import {
-  SERVICE_NAME,
-  SERVICE_NODE_NAME,
-  PROCESSOR_EVENT
-} from '../elasticsearch_fieldnames';
-import { rangeFilter } from '../../server/lib/helpers/range_filter';
+  Setup,
+  SetupTimeRange,
+  SetupUIFilters
+} from '../../server/lib/helpers/setup_request';
+import { SERVICE_NODE_NAME } from '../elasticsearch_fieldnames';
+import { mergeProjection } from './util/merge_projection';
+import { getMetricsProjection } from './metrics';
 
 export function getServiceNodesProjection({
   setup,
-  serviceName
+  serviceName,
+  serviceNodeName
 }: {
-  setup: Setup;
+  setup: Setup & SetupTimeRange & SetupUIFilters;
   serviceName: string;
+  serviceNodeName?: string;
 }) {
-  const { start, end, uiFiltersES, config } = setup;
-
-  return {
-    index: config.get<string>('apm_oss.metricsIndices'),
-    body: {
-      query: {
-        bool: {
-          filter: [
-            { term: { [SERVICE_NAME]: serviceName } },
-            { term: { [PROCESSOR_EVENT]: 'metric' } },
-            { range: rangeFilter(start, end) },
-            ...uiFiltersES
-          ]
-        }
-      },
-      aggs: {
-        nodes: {
-          terms: {
-            field: SERVICE_NODE_NAME
+  return mergeProjection(
+    getMetricsProjection({
+      setup,
+      serviceName,
+      serviceNodeName
+    }),
+    {
+      body: {
+        aggs: {
+          nodes: {
+            terms: {
+              field: SERVICE_NODE_NAME
+            }
           }
         }
       }
     }
-  };
+  );
 }

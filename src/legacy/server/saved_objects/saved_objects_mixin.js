@@ -19,19 +19,16 @@
 
 // Disable lint errors for imports from src/core/server/saved_objects until SavedObjects migration is complete
 /* eslint-disable @kbn/eslint/no-restricted-paths */
-
 import { SavedObjectsSchema } from '../../../core/server/saved_objects/schema';
-import { SavedObjectsSerializer } from '../../../core/server/saved_objects/serialization';
 import {
   SavedObjectsClient,
   SavedObjectsRepository,
-  ScopedSavedObjectsClientProvider,
-  SavedObjectsCacheIndexPatterns,
   getSortedObjectsForExport,
   importSavedObjects,
   resolveImportErrors,
 } from '../../../core/server/saved_objects';
 import { getRootPropertiesObjects } from '../../../core/server/saved_objects/mappings';
+import { convertTypesToLegacySchema } from '../../../core/server/saved_objects/utils';
 import { SavedObjectsManagement } from '../../../core/server/saved_objects/management';
 
 import {
@@ -42,6 +39,7 @@ import {
   createFindRoute,
   createGetRoute,
   createUpdateRoute,
+  createBulkUpdateRoute,
   createExportRoute,
   createImportRoute,
   createResolveImportErrorsRoute,
@@ -58,13 +56,13 @@ function getImportableAndExportableTypes({ kbnServer, visibleTypes }) {
 }
 
 export function savedObjectsMixin(kbnServer, server) {
-  const migrator = kbnServer.newPlatform.start.core.savedObjects.migrator;
+  const migrator = kbnServer.newPlatform.__internals.kibanaMigrator;
+  const typeRegistry = kbnServer.newPlatform.__internals.typeRegistry;
   const mappings = migrator.getActiveMappings();
   const allTypes = Object.keys(getRootPropertiesObjects(mappings));
-  const schema = new SavedObjectsSchema(kbnServer.uiExports.savedObjectSchemas);
+  const schema = new SavedObjectsSchema(convertTypesToLegacySchema(typeRegistry.getAllTypes()));
   const visibleTypes = allTypes.filter(type => !schema.isHiddenType(type));
   const importableAndExportableTypes = getImportableAndExportableTypes({ kbnServer, visibleTypes });
-  const cacheIndexPatterns = new SavedObjectsCacheIndexPatterns();
 
   server.decorate('server', 'kibanaMigrator', migrator);
   server.decorate(
@@ -91,6 +89,7 @@ export function savedObjectsMixin(kbnServer, server) {
   };
   server.route(createBulkCreateRoute(prereqs));
   server.route(createBulkGetRoute(prereqs));
+  server.route(createBulkUpdateRoute(prereqs));
   server.route(createCreateRoute(prereqs));
   server.route(createDeleteRoute(prereqs));
   server.route(createFindRoute(prereqs));
@@ -101,7 +100,7 @@ export function savedObjectsMixin(kbnServer, server) {
   server.route(createResolveImportErrorsRoute(prereqs, server, importableAndExportableTypes));
   server.route(createLogLegacyImportRoute());
 
-  const serializer = new SavedObjectsSerializer(schema);
+  const serializer = kbnServer.newPlatform.start.core.savedObjects.createSerializer();
 
   const createRepository = (callCluster, extraTypes = []) => {
     if (typeof callCluster !== 'function') {
@@ -116,37 +115,20 @@ export function savedObjectsMixin(kbnServer, server) {
     const combinedTypes = visibleTypes.concat(extraTypes);
     const allowedTypes = [...new Set(combinedTypes)];
 
-    if (cacheIndexPatterns.getIndexPatternsService() == null) {
-      cacheIndexPatterns.setIndexPatternsService(
-        server.indexPatternsServiceFactory({ callCluster })
-      );
-    }
     const config = server.config();
 
     return new SavedObjectsRepository({
       index: config.get('kibana.index'),
-      config,
-      cacheIndexPatterns,
       migrator,
       mappings,
-      schema,
+      typeRegistry,
       serializer,
       allowedTypes,
       callCluster,
     });
   };
 
-  const provider = new ScopedSavedObjectsClientProvider({
-    index: server.config().get('kibana.index'),
-    mappings,
-    defaultClientFactory({ request }) {
-      const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
-      const callCluster = (...args) => callWithRequest(request, ...args);
-      const repository = createRepository(callCluster);
-
-      return new SavedObjectsClient(repository);
-    },
-  });
+  const provider = kbnServer.newPlatform.__internals.savedObjectsClientProvider;
 
   const service = {
     types: visibleTypes,

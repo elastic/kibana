@@ -22,9 +22,9 @@ import { addSystemApiHeader, isSystemApiRequest } from '../system_api';
 
 describe('system_api', () => {
   describe('#addSystemApiHeader', () => {
-    it ('adds the correct system API header', () => {
+    it('adds the correct system API header', () => {
       const headers = {
-        'kbn-version': '4.6.0'
+        'kbn-version': '4.6.0',
       };
       const newHeaders = addSystemApiHeader(headers);
 
@@ -37,18 +37,18 @@ describe('system_api', () => {
   });
 
   describe('#isSystemApiRequest', () => {
-    it ('returns true for a system API HTTP request', () => {
+    it('returns true for a system API HTTP request', () => {
       const mockRequest = {
         headers: {
-          'kbn-system-api': true
-        }
+          'kbn-system-api': true,
+        },
       };
       expect(isSystemApiRequest(mockRequest)).to.be(true);
     });
 
-    it ('returns false for a non-system API HTTP request', () => {
+    it('returns false for a non-system API HTTP request', () => {
       const mockRequest = {
-        headers: {}
+        headers: {},
       };
       expect(isSystemApiRequest(mockRequest)).to.be(false);
     });

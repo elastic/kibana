@@ -20,22 +20,20 @@
 import { i18n } from '@kbn/i18n';
 import React, { PureComponent } from 'react';
 import { EuiScreenReaderOnly, keyCodes } from '@elastic/eui';
+import { EuiIcon } from '@elastic/eui';
 
-// @ts-ignore
-import { KuiButton } from '@kbn/ui-framework/components';
-
-interface Props {
+export interface ExitFullScreenButtonProps {
   onExitFullScreenMode: () => void;
 }
 
-class ExitFullScreenButtonUi extends PureComponent<Props> {
+class ExitFullScreenButtonUi extends PureComponent<ExitFullScreenButtonProps> {
   public onKeyDown = (e: KeyboardEvent) => {
     if (e.keyCode === keyCodes.ESCAPE) {
       this.props.onExitFullScreenMode();
     }
   };
 
-  public componentWillMount() {
+  public UNSAFE_componentWillMount() {
     document.addEventListener('keydown', this.onKeyDown, false);
   }
 
@@ -53,16 +51,15 @@ class ExitFullScreenButtonUi extends PureComponent<Props> {
             })}
           </p>
         </EuiScreenReaderOnly>
-        <div className="dshExitFullScreenButton">
-          <KuiButton
-            type="hollow"
+        <div>
+          <button
             aria-label={i18n.translate(
-              'kibana-react.exitFullScreenButton.exitFullScreenModeButtonAreaLabel',
+              'kibana-react.exitFullScreenButton.exitFullScreenModeButtonAriaLabel',
               {
                 defaultMessage: 'Exit full screen mode',
               }
             )}
-            className="dshExitFullScreenButton__mode"
+            className="dshExitFullScreenButton"
             onClick={this.props.onExitFullScreenMode}
           >
             <span
@@ -73,9 +70,9 @@ class ExitFullScreenButtonUi extends PureComponent<Props> {
               {i18n.translate('kibana-react.exitFullScreenButton.exitFullScreenModeButtonLabel', {
                 defaultMessage: 'Exit full screen',
               })}
-              <span className="kuiIcon fa fa-angle-left" />
+              <EuiIcon type="arrowLeft" size="s" />
             </span>
-          </KuiButton>
+          </button>
         </div>
       </div>
     );

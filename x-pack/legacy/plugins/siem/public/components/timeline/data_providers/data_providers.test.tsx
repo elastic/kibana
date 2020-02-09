@@ -4,17 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount, shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
-import * as React from 'react';
+import { shallow } from 'enzyme';
+import React from 'react';
 
 import { TestProviders } from '../../../mock/test_providers';
+import { useMountAppended } from '../../../utils/use_mount_appended';
 
 import { DataProviders } from '.';
 import { DataProvider } from './data_provider';
 import { mockDataProviders } from './mock/mock_data_providers';
 
 describe('DataProviders', () => {
+  const mount = useMountAppended();
+
   describe('rendering', () => {
     const dropMessage = ['Drop', 'query', 'build', 'here'];
 
@@ -33,7 +35,7 @@ describe('DataProviders', () => {
           show={true}
         />
       );
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(wrapper).toMatchSnapshot();
     });
 
     test('it should render a placeholder when there are zero data providers', () => {

@@ -1,126 +1,167 @@
-Temporary README.md for developers working on the backend detection engine
-for how to get started.
+README.md for developers working on the backend detection engine on how to get started
+using the CURL scripts in the scripts folder.
 
-See these two other pages for references:
+The scripts rely on CURL and jq:
+
+- [CURL](https://curl.haxx.se)
+- [jq](https://stedolan.github.io/jq/)
+
+Install curl and jq
+
+```sh
+brew update
+brew install curl
+brew install jq
+```
+
+Open `$HOME/.zshrc` or `${HOME}.bashrc` depending on your SHELL output from `echo $SHELL`
+and add these environment variables:
+
+```sh
+export ELASTICSEARCH_USERNAME=${user}
+export ELASTICSEARCH_PASSWORD=${password}
+export ELASTICSEARCH_URL=https://${ip}:9200
+export KIBANA_URL=http://localhost:5601
+export TASK_MANAGER_INDEX=.kibana-task-manager-${your user id}
+export KIBANA_INDEX=.kibana-${your user id}
+```
+
+source `$HOME/.zshrc` or `${HOME}.bashrc` to ensure variables are set:
+
+```sh
+source ~/.zshrc
+```
+
+Open your `kibana.dev.yml` file and add these lines:
+
+```sh
+xpack.siem.signalsIndex: .siem-signals-${your user id}
+```
+
+Restart Kibana and ensure that you are using `--no-base-path` as changing the base path is a feature but will
+get in the way of the CURL scripts written as is. You should see alerting and actions starting up like so afterwards
+
+```sh
+server log [22:05:22.277] [info][status][plugin:alerting@8.0.0] Status changed from uninitialized to green - Ready
+server log [22:05:22.270] [info][status][plugin:actions@8.0.0] Status changed from uninitialized to green - Ready
+```
+
+Go to the scripts folder `cd kibana/x-pack/legacy/plugins/siem/server/lib/detection_engine/scripts` and run:
+
+```sh
+./hard_reset.sh
+./post_rule.sh
+```
+
+which will:
+
+- Delete any existing actions you have
+- Delete any existing alerts you have
+- Delete any existing alert tasks you have
+- Delete any existing signal mapping, policies, and template, you might have previously had.
+- Add the latest signal index and its mappings using your settings from `kibana.dev.yml` environment variable of `xpack.siem.signalsIndex`.
+- Posts the sample rule from `./rules/queries/query_with_rule_id.json`
+- The sample rule checks for root or admin every 5 minutes and reports that as a signal if it is a positive hit
+
+Now you can run
+
+```sh
+./find_rules.sh
+```
+
+You should see the new rules created like so:
+
+```sh
+{
+  "page": 1,
+  "perPage": 20,
+  "total": 1,
+  "data": [
+    {
+      "created_by": "elastic",
+      "description": "Detecting root and admin users",
+      "enabled": true,
+      "false_positives": [],
+      "from": "now-6m",
+      "id": "a556065c-0656-4ba1-ad64-a77ca9d2013b",
+      "immutable": false,
+      "index": [
+        "auditbeat-*",
+        "filebeat-*",
+        "packetbeat-*",
+        "winlogbeat-*"
+      ],
+      "interval": "5m",
+      "rule_id": "rule-1",
+      "language": "kuery",
+      "output_index": ".siem-signals-some-name",
+      "max_signals": 100,
+      "risk_score": 1,
+      "name": "Detect Root/Admin Users",
+      "query": "user.name: root or user.name: admin",
+      "references": [
+        "http://www.example.com",
+        "https://ww.example.com"
+      ],
+      "severity": "high",
+      "updated_by": "elastic",
+      "tags": [],
+      "to": "now",
+      "type": "query"
+    }
+  ]
+}
+```
+
+Every 5 minutes if you get positive hits you will see messages on info like so:
+
+```sh
+server log [09:54:59.013] [info][plugins][siem] Total signals found from signal rule "id: a556065c-0656-4ba1-ad64-a77ca9d2013b", "ruleId: rule-1": 10000
+```
+
+Rules are [space aware](https://www.elastic.co/guide/en/kibana/master/xpack-spaces.html) and default
+to the "default" (empty) URL space if you do not export the variable of `SPACE_URL`. Example, if you want to
+post rules to `test-space` you set `SPACE_URL` to be:
+
+```sh
+export SPACE_URL=/s/test-space
+```
+
+The `${SPACE_URL}` is in front of all the APIs to correctly create, modify, delete, and update
+them from within the defined space. If this variable is not defined the default which is the url of an
+empty string will be used.
+
+Add the `.siem-signals-${your user id}` to your advanced SIEM settings to see any signals
+created which should update once every 5 minutes at this point.
+
+Also add the `.siem-signals-${your user id}` as a kibana index for Maps to be able to see the
+signals
+
+Optionally you can add these debug statements to your `kibana.dev.yml` to see more information when running the detection
+engine
+
+```sh
+logging.verbose: true
+logging.events:
+  {
+    log: ['siem', 'info', 'warning', 'error', 'fatal'],
+    request: ['info', 'warning', 'error', 'fatal'],
+    error: '*',
+    ops: __no-ops__,
+  }
+```
+
+See these two README.md's pages for more references on the alerting and actions API:
 https://github.com/elastic/kibana/blob/master/x-pack/legacy/plugins/alerting/README.md
 https://github.com/elastic/kibana/tree/master/x-pack/legacy/plugins/actions
 
-Since there is no UI yet and a lot of backend areas that are not created, you 
-should install the kbn-action and kbn-alert project from here:
-https://github.com/pmuellr/kbn-action
+### Signals API
 
-Add your signal mappings into your Kibana instance manually by opening
-
-```
-x-pack/legacy/plugins/siem/server/lib/detection_engine/signals_mapping.json
-```
-
-And copying that to your DEV tools so it looks something like:
-```
-PUT /.siem-signals-10-01-2019
-{
-  "mappings": {
-    "dynamic": false,
-...
-```
-
-We will solve the above issue here:
-https://github.com/elastic/kibana/issues/47002
-
-Add these lines to your `kibana.dev.yml` to turn on the feature toggles of alerting and actions:
-```
-# Feature flag to turn on alerting
-xpack.alerting.enabled: true
-
-# Feature flag to turn on actions which goes with alerting
-xpack.actions.enabled: true
-
-# White list everything for ease of development (do not do in production)
-xpack.actions.whitelistedHosts: ['*']
-```
-
-Open `x-pack/legacy/plugins/siem/index.ts` and find these lines and add the require statement
-while commenting out the other require statement:
-
-```
-// Uncomment these lines to turn on alerting and action for detection engine and comment the other
-// require statement out. These are hidden behind feature flags at the moment so if you turn
-// these on without the feature flags turned on then Kibana will crash since we are a legacy plugin
-// and legacy plugins cannot have optional requirements.
-// require: ['kibana', 'elasticsearch', 'alerting', 'actions'],
-```
-
-Restart Kibana and you should see alerting and actions starting up
-```
-server    log   [22:05:22.277] [info][status][plugin:alerting@8.0.0] Status changed from uninitialized to green - Ready
-server    log   [22:05:22.270] [info][status][plugin:actions@8.0.0] Status changed from uninitialized to green - Ready
-```
-
-Open a terminal and run
-
-```sh
-kbn-alert ls-types
-```
-
-You should see the new alert type of:
-
-```ts
-[
-    {
-        "id": "siem.signals",
-        "name": "SIEM Signals"
-    }
-]
-```
-
-Setup SIEM Alerts Log action through
-
-```ts
-kbn-action create .server-log "SIEM Alerts Log" {} {}
-{
-    "id": "7edd7e98-9286-4fdb-a5c5-16de776bc7c7",
-    "actionTypeId": ".server-log",
-    "description": "SIEM Alerts Log",
-    "config": {}
-}
-```
-
-Take note of the `id` GUID above and copy and paste that into a create alert like so
-
-```ts
-kbn-alert create siem.signals 5m '{}' "[{group:default id:'7edd7e98-9286-4fdb-a5c5-16de776bc7c7' params:{message: 'SIEM Alert Fired'}}]"
-```
-
-You should get back a response like so
-```ts
-{
-    "id": "908a6af1-ac63-4d52-a856-fc635a00db0f",
-    "alertTypeId": "siem.signals",
-    "interval": "5m",
-    "actions": [
-        {
-            "group": "default",
-            "params": {
-                "message": "SIEM Alert Fired"
-            },
-            "id": "7edd7e98-9286-4fdb-a5c5-16de776bc7c7"
-        }
-    ],
-    "alertTypeParams": {},
-    "enabled": true,
-    "throttle": null,
-    "createdBy": "elastic",
-    "updatedBy": "elastic",
-    "apiKeyOwner": "elastic",
-    "scheduledTaskId": "4f401ca0-e402-11e9-94ed-051d758a6c79"
-}
-```
-
-Every 5 minutes you should see this message in your terminal now:
-
-```
-server    log   [22:17:33.945] [info][alerting] SIEM Alert Fired
-```
-
-Add the `.siem-signals-10-01-2019` to your advanced SIEM settings to see any signals
-created which should update once every 5 minutes at this point.
+To update the status of a signal or group of signals, the following scripts provide an example of how to
+go about doing so.
+`cd x-pack/legacy/plugins/siem/server/lib/detection_engine/scripts`
+`./signals/put_signal_doc.sh` will post a sample signal doc into the signals index to play with
+`./signals/set_status_with_id.sh closed` will update the status of the sample signal to closed
+`./signals/set_status_with_id.sh open` will update the status of the sample signal to open
+`./signals/set_status_with_query.sh closed` will update the status of the signals in the result of the query to closed.
+`./signals/set_status_with_query.sh open` will update the status of the signals in the result of the query to open.

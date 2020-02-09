@@ -9,12 +9,10 @@ import { SearchBar, OuterSearchBarProps } from './search_bar';
 import React, { ReactElement } from 'react';
 import { CoreStart } from 'src/core/public';
 import { act } from 'react-dom/test-utils';
-import { QueryBarInput, IndexPattern } from 'src/legacy/core_plugins/data/public';
+import { IndexPattern, QueryStringInput } from '../../../../../../src/plugins/data/public';
 
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 import { I18nProvider } from '@kbn/i18n/react';
-
-jest.mock('ui/new_platform');
 
 import { openSourceModal } from '../services/source_modal';
 
@@ -23,10 +21,8 @@ import { ReactWrapper } from 'enzyme';
 import { createMockGraphStore } from '../state_management/mocks';
 import { Provider } from 'react-redux';
 
+jest.mock('ui/new_platform');
 jest.mock('../services/source_modal', () => ({ openSourceModal: jest.fn() }));
-jest.mock('../../../../../../src/legacy/core_plugins/data/public', () => ({
-  QueryBarInput: () => null,
-}));
 
 const waitForIndexPatternFetch = () => new Promise(r => setTimeout(r));
 
@@ -39,10 +35,25 @@ function wrapSearchBarInContext(testProps: OuterSearchBarProps) {
     } as CoreStart['uiSettings'],
     savedObjects: {} as CoreStart['savedObjects'],
     notifications: {} as CoreStart['notifications'],
+    docLinks: {
+      links: {
+        query: {
+          kueryQuerySyntax: '',
+        },
+      },
+    } as CoreStart['docLinks'],
     http: {} as CoreStart['http'],
     overlays: {} as CoreStart['overlays'],
-    store: {
+    storage: {
       get: () => {},
+    },
+    data: {
+      query: {
+        savedQueries: {},
+      },
+      autocomplete: {
+        hasQuerySuggestions: () => false,
+      },
     },
   };
 
@@ -70,7 +81,7 @@ describe('search_bar', () => {
   let store: GraphStore;
 
   beforeEach(() => {
-    store = createMockGraphStore({ includeSagas: false }).store;
+    store = createMockGraphStore({}).store;
     store.dispatch(
       setDatasource({
         type: 'indexpattern',
@@ -80,26 +91,28 @@ describe('search_bar', () => {
     );
   });
 
-  function mountSearchBar() {
+  async function mountSearchBar() {
     jest.clearAllMocks();
     const wrappedSearchBar = wrapSearchBarInContext({ ...defaultProps });
 
-    instance = mountWithIntl(<Provider store={store}>{wrappedSearchBar}</Provider>);
+    await act(async () => {
+      instance = mountWithIntl(<Provider store={store}>{wrappedSearchBar}</Provider>);
+    });
   }
 
-  it('should render search bar and fetch index pattern', () => {
-    mountSearchBar();
+  it('should render search bar and fetch index pattern', async () => {
+    await mountSearchBar();
 
     expect(defaultProps.indexPatternProvider.get).toHaveBeenCalledWith('123');
   });
 
   it('should render search bar and submit queries', async () => {
-    mountSearchBar();
+    await mountSearchBar();
 
     await waitForIndexPatternFetch();
 
     act(() => {
-      instance.find(QueryBarInput).prop('onChange')!({ language: 'lucene', query: 'testQuery' });
+      instance.find(QueryStringInput).prop('onChange')!({ language: 'lucene', query: 'testQuery' });
     });
 
     act(() => {
@@ -110,12 +123,12 @@ describe('search_bar', () => {
   });
 
   it('should translate kql query into JSON dsl', async () => {
-    mountSearchBar();
+    await mountSearchBar();
 
     await waitForIndexPatternFetch();
 
     act(() => {
-      instance.find(QueryBarInput).prop('onChange')!({ language: 'kuery', query: 'test: abc' });
+      instance.find(QueryStringInput).prop('onChange')!({ language: 'kuery', query: 'test: abc' });
     });
 
     act(() => {
@@ -128,12 +141,14 @@ describe('search_bar', () => {
     });
   });
 
-  it('should open index pattern picker', () => {
-    mountSearchBar();
+  it('should open index pattern picker', async () => {
+    await mountSearchBar();
 
     // pick the button component out of the tree because
     // it's part of a popover and thus not covered by enzyme
-    (instance.find(QueryBarInput).prop('prepend') as ReactElement).props.children.props.onClick();
+    (instance
+      .find(QueryStringInput)
+      .prop('prepend') as ReactElement).props.children.props.onClick();
 
     expect(openSourceModal).toHaveBeenCalled();
   });

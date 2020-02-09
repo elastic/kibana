@@ -22,7 +22,6 @@ import 'leaflet-vega';
 import { KibanaMapLayer } from 'ui/vis/map/kibana_map_layer';
 
 export class VegaMapLayer extends KibanaMapLayer {
-
   constructor(spec, options) {
     super();
 

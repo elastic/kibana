@@ -17,16 +17,31 @@
  * under the License.
  */
 
-import { KibanaMigrator, mergeProperties } from './kibana_migrator';
+import { KibanaMigrator } from './kibana_migrator';
 import { buildActiveMappings } from '../core';
-import { SavedObjectsMapping } from '../../mappings';
+const { mergeTypes } = jest.requireActual('./kibana_migrator');
+import { SavedObjectsType } from '../../types';
+
+const defaultSavedObjectTypes: SavedObjectsType[] = [
+  {
+    name: 'testtype',
+    hidden: false,
+    namespaceAgnostic: false,
+    mappings: {
+      properties: {
+        name: { type: 'keyword' },
+      },
+    },
+    migrations: {},
+  },
+];
 
 const createMigrator = (
   {
-    savedObjectMappings,
+    types,
   }: {
-    savedObjectMappings: SavedObjectsMapping[];
-  } = { savedObjectMappings: [] }
+    types: SavedObjectsType[];
+  } = { types: defaultSavedObjectTypes }
 ) => {
   const mockMigrator: jest.Mocked<PublicMethodsOf<KibanaMigrator>> = {
     runMigrations: jest.fn(),
@@ -34,9 +49,7 @@ const createMigrator = (
     migrateDocument: jest.fn(),
   };
 
-  mockMigrator.getActiveMappings.mockReturnValue(
-    buildActiveMappings({ properties: mergeProperties(savedObjectMappings) })
-  );
+  mockMigrator.getActiveMappings.mockReturnValue(buildActiveMappings(mergeTypes(types)));
   mockMigrator.migrateDocument.mockImplementation(doc => doc);
   return mockMigrator;
 };

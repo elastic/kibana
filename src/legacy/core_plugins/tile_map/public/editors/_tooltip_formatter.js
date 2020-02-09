@@ -31,24 +31,28 @@ export function TileMapTooltipFormatterProvider($injector) {
 
   $compile($el)($tooltipScope);
 
-  return function tooltipFormatter(aggConfig, metricAgg, feature) {
+  return function tooltipFormatter(metricTitle, metricFormat, feature) {
     if (!feature) {
       return '';
     }
 
     $tooltipScope.details = [
       {
-        label: metricAgg.makeLabel(),
-        value: metricAgg.fieldFormatter()(feature.properties.value)
+        label: metricTitle,
+        value: metricFormat(feature.properties.value),
       },
       {
-        label: i18n.translate('tileMap.tooltipFormatter.latitudeLabel', { defaultMessage: 'Latitude' }),
-        value: feature.geometry.coordinates[1]
+        label: i18n.translate('tileMap.tooltipFormatter.latitudeLabel', {
+          defaultMessage: 'Latitude',
+        }),
+        value: feature.geometry.coordinates[1],
       },
       {
-        label: i18n.translate('tileMap.tooltipFormatter.longitudeLabel', { defaultMessage: 'Longitude' }),
-        value: feature.geometry.coordinates[0]
-      }
+        label: i18n.translate('tileMap.tooltipFormatter.longitudeLabel', {
+          defaultMessage: 'Longitude',
+        }),
+        value: feature.geometry.coordinates[0],
+      },
     ];
 
     $tooltipScope.$apply();

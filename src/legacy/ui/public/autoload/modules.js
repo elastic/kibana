@@ -20,15 +20,12 @@
 import 'angular';
 import '../chrome';
 import '../config';
-import '../courier';
-import '../es';
 import '../notify';
 import '../private';
 import '../promises';
 import '../modals';
 import '../state_management/app_state';
 import '../state_management/global_state';
-import '../storage';
 import '../style_compile';
 import '../url';
 import '../directives/watch_multi';

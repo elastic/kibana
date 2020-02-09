@@ -34,7 +34,6 @@ export interface WorkspaceNode {
 export interface WorkspaceEdge {
   weight: number;
   width: number;
-  inferred: boolean;
   label: string;
   source: WorkspaceNode;
   target: WorkspaceNode;
@@ -60,7 +59,6 @@ export interface ServerResultEdge {
   weight: number;
   width: number;
   doc_count?: number;
-  inferred: boolean;
 }
 
 export interface GraphData {
@@ -90,6 +88,12 @@ export interface Workspace {
    * @param newData
    */
   mergeGraph(newData: GraphData): void;
+
+  /**
+   * Fills in missing connections between the selected nodes.
+   * @param connections The number of connections to fill in. Defaults to 10
+   */
+  fillInGraph(connections?: number): void;
 
   runLayout(): void;
   stopLayout(): void;

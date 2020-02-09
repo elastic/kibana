@@ -20,51 +20,60 @@
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import LogstashIndexPatternStubProvider from 'fixtures/stubbed_logstash_index_pattern';
-import * as visModule from 'ui/vis';
+import { Vis } from '../../../../visualizations/public/np_ready/public/vis';
 import { ImageComparator } from 'test_utils/image_comparator';
-import { TagCloudVisualization } from '../tag_cloud_visualization';
+import { createTagCloudVisualization } from '../tag_cloud_visualization';
 import basicdrawPng from './basicdraw.png';
 import afterresizePng from './afterresize.png';
 import afterparamChange from './afterparamchange.png';
 
+// Replace with mock when converting to jest tests
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { seedColors } from '../../../../../../plugins/charts/public/services/colors/seed_colors';
+
 const THRESHOLD = 0.65;
 const PIXEL_DIFF = 64;
 
-describe('TagCloudVisualizationTest', function () {
-
+describe('TagCloudVisualizationTest', function() {
   let domNode;
-  let Vis;
   let indexPattern;
   let vis;
   let imageComparator;
 
   const dummyTableGroup = {
-    columns: [{
-      id: 'col-0',
-      title: 'geo.dest: Descending'
-    }, {
-      id: 'col-1',
-      title: 'Count'
-    }],
+    columns: [
+      {
+        id: 'col-0',
+        title: 'geo.dest: Descending',
+      },
+      {
+        id: 'col-1',
+        title: 'Count',
+      },
+    ],
     rows: [
       { 'col-0': 'CN', 'col-1': 26 },
       { 'col-0': 'IN', 'col-1': 17 },
       { 'col-0': 'US', 'col-1': 6 },
       { 'col-0': 'DE', 'col-1': 4 },
-      { 'col-0': 'BR', 'col-1': 3 }
-    ]
+      { 'col-0': 'BR', 'col-1': 3 },
+    ],
   };
+  const TagCloudVisualization = createTagCloudVisualization({
+    colors: {
+      seedColors,
+    },
+  });
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject((Private) => {
-    Vis = Private(visModule.VisProvider);
-    indexPattern = Private(LogstashIndexPatternStubProvider);
-  }));
+  beforeEach(
+    ngMock.inject(Private => {
+      indexPattern = Private(LogstashIndexPatternStubProvider);
+    })
+  );
 
-
-  describe('TagCloudVisualization - basics', function () {
-
-    beforeEach(async function () {
+  describe('TagCloudVisualization - basics', function() {
+    beforeEach(async function() {
       setupDOM('512px', '512px');
       imageComparator = new ImageComparator();
       vis = new Vis(indexPattern, {
@@ -74,15 +83,14 @@ describe('TagCloudVisualizationTest', function () {
           metric: { accessor: 0, format: {} },
         },
       });
-
     });
 
-    afterEach(function () {
+    afterEach(function() {
       teardownDOM();
       imageComparator.destroy();
     });
 
-    it('simple draw', async function () {
+    it('simple draw', async function() {
       const tagcloudVisualization = new TagCloudVisualization(domNode, vis);
 
       await tagcloudVisualization.render(dummyTableGroup, vis.params, {
@@ -90,23 +98,28 @@ describe('TagCloudVisualizationTest', function () {
         params: true,
         aggs: true,
         data: true,
-        uiState: false
+        uiState: false,
       });
 
       const svgNode = domNode.querySelector('svg');
-      const mismatchedPixels = await imageComparator.compareDOMContents(svgNode.outerHTML, 512, 512, basicdrawPng, THRESHOLD);
+      const mismatchedPixels = await imageComparator.compareDOMContents(
+        svgNode.outerHTML,
+        512,
+        512,
+        basicdrawPng,
+        THRESHOLD
+      );
       expect(mismatchedPixels).to.be.lessThan(PIXEL_DIFF);
     });
 
-    it('with resize', async function () {
-
+    it('with resize', async function() {
       const tagcloudVisualization = new TagCloudVisualization(domNode, vis);
       await tagcloudVisualization.render(dummyTableGroup, vis.params, {
         resize: false,
         params: true,
         aggs: true,
         data: true,
-        uiState: false
+        uiState: false,
       });
 
       domNode.style.width = '256px';
@@ -116,23 +129,28 @@ describe('TagCloudVisualizationTest', function () {
         params: false,
         aggs: false,
         data: false,
-        uiState: false
+        uiState: false,
       });
 
       const svgNode = domNode.querySelector('svg');
-      const mismatchedPixels = await imageComparator.compareDOMContents(svgNode.outerHTML, 256, 368, afterresizePng, THRESHOLD);
+      const mismatchedPixels = await imageComparator.compareDOMContents(
+        svgNode.outerHTML,
+        256,
+        368,
+        afterresizePng,
+        THRESHOLD
+      );
       expect(mismatchedPixels).to.be.lessThan(PIXEL_DIFF);
     });
 
-    it('with param change', async function () {
-
+    it('with param change', async function() {
       const tagcloudVisualization = new TagCloudVisualization(domNode, vis);
       await tagcloudVisualization.render(dummyTableGroup, vis.params, {
         resize: false,
         params: true,
         aggs: true,
         data: true,
-        uiState: false
+        uiState: false,
       });
 
       domNode.style.width = '256px';
@@ -144,17 +162,20 @@ describe('TagCloudVisualizationTest', function () {
         params: true,
         aggs: false,
         data: false,
-        uiState: false
+        uiState: false,
       });
 
       const svgNode = domNode.querySelector('svg');
-      const mismatchedPixels = await imageComparator.compareDOMContents(svgNode.outerHTML, 256, 368, afterparamChange, THRESHOLD);
+      const mismatchedPixels = await imageComparator.compareDOMContents(
+        svgNode.outerHTML,
+        256,
+        368,
+        afterparamChange,
+        THRESHOLD
+      );
       expect(mismatchedPixels).to.be.lessThan(PIXEL_DIFF);
     });
-
-
   });
-
 
   function setupDOM(width, height) {
     domNode = document.createElement('div');
@@ -172,6 +193,4 @@ describe('TagCloudVisualizationTest', function () {
     domNode.innerHTML = '';
     document.body.removeChild(domNode);
   }
-
 });
-

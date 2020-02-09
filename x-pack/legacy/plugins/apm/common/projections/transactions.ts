@@ -4,7 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Setup } from '../../server/lib/helpers/setup_request';
+import {
+  Setup,
+  SetupTimeRange,
+  SetupUIFilters
+} from '../../server/lib/helpers/setup_request';
 import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
@@ -19,12 +23,12 @@ export function getTransactionsProjection({
   transactionName,
   transactionType
 }: {
-  setup: Setup;
+  setup: Setup & SetupTimeRange & SetupUIFilters;
   serviceName?: string;
   transactionName?: string;
   transactionType?: string;
 }) {
-  const { start, end, uiFiltersES, config } = setup;
+  const { start, end, uiFiltersES, indices } = setup;
 
   const transactionNameFilter = transactionName
     ? [{ term: { [TRANSACTION_NAME]: transactionName } }]
@@ -48,7 +52,7 @@ export function getTransactionsProjection({
   };
 
   return {
-    index: config.get<string>('apm_oss.transactionIndices'),
+    index: indices['apm_oss.transactionIndices'],
     body: {
       query: {
         bool

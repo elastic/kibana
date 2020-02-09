@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { GridData } from '../types';
+import { GridData } from '../np_ready/types';
 import { Doc, DocPre700 } from '../../../migrations/types';
 
 export interface SavedObjectAttributes {

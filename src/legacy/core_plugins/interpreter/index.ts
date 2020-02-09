@@ -31,6 +31,7 @@ export default function InterpreterPlugin(kibana: any) {
       injectDefaultVars: server => ({
         serverBasePath: server.config().get('server.basePath'),
       }),
+      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
     },
     config: (Joi: any) => {
       return Joi.object({

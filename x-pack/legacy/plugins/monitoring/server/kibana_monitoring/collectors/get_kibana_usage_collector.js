@@ -19,13 +19,12 @@ const TYPES = [
 /**
  * Fetches saved object counts by querying the .kibana index
  */
-export function getKibanaUsageCollector(server) {
-  const { collectorSet } = server.usage;
-  return collectorSet.makeUsageCollector({
+export function getKibanaUsageCollector(usageCollection, config) {
+  return usageCollection.makeUsageCollector({
     type: KIBANA_USAGE_TYPE,
     isReady: () => true,
     async fetch(callCluster) {
-      const index = server.config().get('kibana.index');
+      const index = config.get('kibana.index');
       const savedObjectCountSearchParams = {
         index,
         ignoreUnavailable: true,
@@ -37,29 +36,36 @@ export function getKibanaUsageCollector(server) {
           },
           aggs: {
             types: {
-              terms: { field: 'type', size: TYPES.length }
-            }
-          }
-        }
+              terms: { field: 'type', size: TYPES.length },
+            },
+          },
+        },
       };
 
       const resp = await callCluster('search', savedObjectCountSearchParams);
       const buckets = get(resp, 'aggregations.types.buckets', []);
 
       // get the doc_count from each bucket
-      const bucketCounts = buckets.reduce((acc, bucket) => ({
-        ...acc,
-        [bucket.key]: bucket.doc_count,
-      }), {});
+      const bucketCounts = buckets.reduce(
+        (acc, bucket) => ({
+          ...acc,
+          [bucket.key]: bucket.doc_count,
+        }),
+        {}
+      );
 
       return {
         index,
-        ...TYPES.reduce((acc, type) => ({ // combine the bucketCounts and 0s for types that don't have documents
-          ...acc,
-          [snakeCase(type)]: {
-            total: bucketCounts[type] || 0
-          }
-        }), {})
+        ...TYPES.reduce(
+          (acc, type) => ({
+            // combine the bucketCounts and 0s for types that don't have documents
+            ...acc,
+            [snakeCase(type)]: {
+              total: bucketCounts[type] || 0,
+            },
+          }),
+          {}
+        ),
       };
     },
 
@@ -72,9 +78,9 @@ export function getKibanaUsageCollector(server) {
       return {
         type: KIBANA_STATS_TYPE_MONITORING,
         payload: {
-          usage: result
-        }
+          usage: result,
+        },
       };
-    }
+    },
   });
 }

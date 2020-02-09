@@ -34,6 +34,7 @@ import { PROJECTION } from '../../../../common/projections/typings';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { useServiceTransactionTypes } from '../../../hooks/useServiceTransactionTypes';
 import { TransactionTypeFilter } from '../../shared/LocalUIFilters/TransactionTypeFilter';
+import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
 
 function getRedirectLocation({
   urlParams,
@@ -85,17 +86,23 @@ export function TransactionOverview() {
     status: transactionListStatus
   } = useTransactionList(urlParams);
 
+  const { http } = useApmPluginContext().core;
+
   const { data: hasMLJob = false } = useFetcher(() => {
     if (serviceName && transactionType) {
-      return getHasMLJob({ serviceName, transactionType });
+      return getHasMLJob({ serviceName, transactionType, http });
     }
-  }, [serviceName, transactionType]);
+  }, [http, serviceName, transactionType]);
 
-  const localFiltersConfig: React.ComponentProps<
-    typeof LocalUIFilters
-  > = useMemo(
+  const localFiltersConfig: React.ComponentProps<typeof LocalUIFilters> = useMemo(
     () => ({
-      filterNames: ['transactionResult', 'host', 'containerId', 'podName'],
+      filterNames: [
+        'transactionResult',
+        'host',
+        'containerId',
+        'podName',
+        'serviceVersion'
+      ],
       params: {
         serviceName,
         transactionType
@@ -112,41 +119,44 @@ export function TransactionOverview() {
   }
 
   return (
-    <EuiFlexGroup>
-      <EuiFlexItem grow={1}>
-        <LocalUIFilters {...localFiltersConfig}>
-          <TransactionTypeFilter transactionTypes={serviceTransactionTypes} />
-          <EuiSpacer size="xl" />
-          <EuiHorizontalRule margin="none" />
-        </LocalUIFilters>
-      </EuiFlexItem>
-      <EuiFlexItem grow={7}>
-        <ChartsSyncContextProvider>
-          <TransactionBreakdown initialIsOpen={true} />
+    <>
+      <EuiSpacer />
+      <EuiFlexGroup>
+        <EuiFlexItem grow={1}>
+          <LocalUIFilters {...localFiltersConfig}>
+            <TransactionTypeFilter transactionTypes={serviceTransactionTypes} />
+            <EuiSpacer size="xl" />
+            <EuiHorizontalRule margin="none" />
+          </LocalUIFilters>
+        </EuiFlexItem>
+        <EuiFlexItem grow={7}>
+          <ChartsSyncContextProvider>
+            <TransactionBreakdown initialIsOpen={true} />
+
+            <EuiSpacer size="s" />
+
+            <TransactionCharts
+              hasMLJob={hasMLJob}
+              charts={transactionCharts}
+              location={location}
+              urlParams={urlParams}
+            />
+          </ChartsSyncContextProvider>
 
           <EuiSpacer size="s" />
 
-          <TransactionCharts
-            hasMLJob={hasMLJob}
-            charts={transactionCharts}
-            location={location}
-            urlParams={urlParams}
-          />
-        </ChartsSyncContextProvider>
-
-        <EuiSpacer size="s" />
-
-        <EuiPanel>
-          <EuiTitle size="xs">
-            <h3>Transactions</h3>
-          </EuiTitle>
-          <EuiSpacer size="s" />
-          <TransactionList
-            isLoading={transactionListStatus === 'loading'}
-            items={transactionListData}
-          />
-        </EuiPanel>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+          <EuiPanel>
+            <EuiTitle size="xs">
+              <h3>Transactions</h3>
+            </EuiTitle>
+            <EuiSpacer size="s" />
+            <TransactionList
+              isLoading={transactionListStatus === 'loading'}
+              items={transactionListData}
+            />
+          </EuiPanel>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </>
   );
 }

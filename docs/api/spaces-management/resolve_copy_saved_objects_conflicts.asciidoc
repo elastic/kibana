@@ -5,7 +5,7 @@
 <titleabbrev>Resolve copy to space conflicts</titleabbrev>
 ++++
 
-Overwrites specific saved objects that were returned as errors from the <<spaces-api-copy-saved-objects, Copy Saved Objects to Space API>>.
+Overwrite specific saved objects that were returned as errors from the <<spaces-api-copy-saved-objects, Copy Saved Objects to Space API>>.
 
 experimental["The underlying Spaces concepts are stable, but the APIs for managing Spaces are experimental."]
 

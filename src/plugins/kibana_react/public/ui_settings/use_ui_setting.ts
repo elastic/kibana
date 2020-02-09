@@ -18,8 +18,8 @@
  */
 
 import { useCallback, useMemo } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 import { useKibana } from '../context';
-import { useObservable } from '../util/use_observable';
 
 /**
  * Returns the current UI-settings value.
@@ -65,6 +65,7 @@ export const useUiSetting$ = <T>(key: string, defaultValue?: T): [T, Setter<T>] 
   const observable$ = useMemo(() => services.uiSettings!.get$(key, defaultValue), [
     key,
     defaultValue,
+    services.uiSettings,
   ]);
   const value = useObservable<T>(observable$, services.uiSettings!.get(key, defaultValue));
   const set = useCallback((newValue: T) => services.uiSettings!.set(key, newValue), [key]);

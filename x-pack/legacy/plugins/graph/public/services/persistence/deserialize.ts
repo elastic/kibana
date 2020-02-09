@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IndexPattern } from 'src/legacy/core_plugins/data/public/index_patterns/index_patterns';
 import {
   SerializedNode,
   UrlTemplate,
@@ -25,6 +24,7 @@ import {
   colorChoices,
   iconChoicesByClass,
 } from '../../helpers/style_choices';
+import { IndexPattern, isNestedField } from '../../../../../../../src/plugins/data/public';
 
 const defaultAdvancedSettings: AdvancedSettings = {
   useSignificance: true,
@@ -80,7 +80,7 @@ export function mapFields(indexPattern: IndexPattern): WorkspaceField[] {
 
   return indexPattern
     .getNonScriptedFields()
-    .filter(field => !blockedFieldNames.includes(field.name))
+    .filter(field => !blockedFieldNames.includes(field.name) && !isNestedField(field))
     .map((field, index) => ({
       name: field.name,
       hopSize: defaultHopSize,
@@ -89,6 +89,7 @@ export function mapFields(indexPattern: IndexPattern): WorkspaceField[] {
       color: colorChoices[index % colorChoices.length],
       selected: false,
       type: field.type,
+      aggregatable: Boolean(field.aggregatable),
     }))
     .sort((a, b) => {
       if (a.name < b.name) {

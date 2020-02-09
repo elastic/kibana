@@ -25,6 +25,6 @@ import { rename, unused } from './deprecations';
 export async function getTransform(spec) {
   const deprecationsProvider = spec.getDeprecationsProvider() || noop;
   if (!deprecationsProvider) return;
-  const transforms = await deprecationsProvider({ rename, unused }) || [];
+  const transforms = (await deprecationsProvider({ rename, unused })) || [];
   return createTransform(transforms);
 }

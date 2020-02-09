@@ -17,5 +17,6 @@
  * under the License.
  */
 
-export { FieldFormat } from './field_format';
-export { getHighlightRequest, asPrettyString, getHighlightHtml } from './utils';
+import * as fieldFormats from './static';
+
+export { fieldFormats };

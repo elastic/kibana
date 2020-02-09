@@ -28,17 +28,17 @@ describe('Overview', () => {
     const latestTypes = [
       { type: 'Packetbeat', count: 4 },
       { type: 'Metricbeat', count: 4 },
-      { type: 'Heartbeat', count: 2 }
+      { type: 'Heartbeat', count: 2 },
     ];
     const latestVersions = [
       { version: '6.3.1', count: 8 },
-      { version: '6.3.0', count: 2 }
+      { version: '6.3.0', count: 2 },
     ];
     const metrics = {
       beat_event_rates: 1,
       beat_fail_rates: 1,
       beat_throughput_rates: 1,
-      beat_output_errors: 1
+      beat_output_errors: 1,
     };
 
     const component = shallow(
@@ -59,15 +59,10 @@ describe('Overview', () => {
       beat_event_rates: 1,
       beat_fail_rates: 1,
       beat_throughput_rates: 1,
-      beat_output_errors: 1
+      beat_output_errors: 1,
     };
 
-    const component = shallow(
-      <BeatsOverview
-        stats={[]}
-        metrics={metrics}
-      />
-    );
+    const component = shallow(<BeatsOverview stats={[]} metrics={metrics} />);
 
     expect(component).toMatchSnapshot();
   });

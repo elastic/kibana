@@ -30,6 +30,10 @@ export const FIELDS_BROWSER_FILTER_INPUT = '[data-test-subj="field-search"]';
  */
 export const FIELDS_BROWSER_CATEGORIES_COUNT = '[data-test-subj="categories-count"]';
 
+export const FIELDS_BROWSER_HOST_CATEGORIES_COUNT = '[data-test-subj="host-category-count"]';
+
+export const FIELDS_BROWSER_SYSTEM_CATEGORIES_COUNT = '[data-test-subj="system-category-count"]';
+
 /**
  * This label displays a count of the fields that match the filter criteria
  */

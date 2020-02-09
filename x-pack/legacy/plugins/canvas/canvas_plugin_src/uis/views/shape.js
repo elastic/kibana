@@ -5,7 +5,7 @@
  */
 
 import { shapes } from '../../renderers/shape/shapes';
-import { ViewStrings } from '../../strings';
+import { ViewStrings } from '../../../i18n';
 
 const { Shape: strings } = ViewStrings;
 

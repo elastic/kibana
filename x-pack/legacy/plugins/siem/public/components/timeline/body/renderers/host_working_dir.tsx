@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as React from 'react';
-import { pure } from 'recompose';
+import React from 'react';
 
 import { DraggableBadge } from '../../../draggables';
 
@@ -19,8 +18,8 @@ interface Props {
   workingDirectory: string | null | undefined;
 }
 
-export const HostWorkingDir = pure<Props>(({ contextId, eventId, hostName, workingDirectory }) => {
-  return (
+export const HostWorkingDir = React.memo<Props>(
+  ({ contextId, eventId, hostName, workingDirectory }) => (
     <>
       <TokensFlexItem grow={false} component="span">
         <DraggableBadge
@@ -45,7 +44,7 @@ export const HostWorkingDir = pure<Props>(({ contextId, eventId, hostName, worki
         />
       </TokensFlexItem>
     </>
-  );
-});
+  )
+);
 
 HostWorkingDir.displayName = 'HostWorkingDir';

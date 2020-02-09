@@ -12,14 +12,6 @@ export interface AuditMessageBase {
   text?: string;
 }
 
-export interface AnalyticsMessage extends AuditMessageBase {
-  analytics_id: string;
-}
-
-export interface TransformMessage extends AuditMessageBase {
-  transform_id: string;
-}
-
 export interface JobMessage extends AuditMessageBase {
   job_id: string;
 }

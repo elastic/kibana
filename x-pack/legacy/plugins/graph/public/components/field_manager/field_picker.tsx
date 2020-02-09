@@ -9,8 +9,7 @@ import { EuiPopover, EuiSelectable, EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
 import { WorkspaceField } from '../../types';
-
-import { FieldIcon } from './field_icon';
+import { FieldIcon } from '../../../../../../../src/plugins/kibana_react/public';
 
 export interface FieldPickerProps {
   fieldMap: Record<string, WorkspaceField>;
@@ -28,8 +27,6 @@ export function FieldPicker({
   setOpen,
 }: FieldPickerProps) {
   const allFields = Object.values(fieldMap);
-  const unselectedFields = allFields.filter(field => !field.selected);
-  const hasSelectedFields = unselectedFields.length < allFields.length;
 
   const hasFields = allFields.length > 0;
 
@@ -40,17 +37,13 @@ export function FieldPicker({
       // only update the field options if the popover is not open currently.
       // This is necessary because EuiSelectable assumes options don't change
       // on their own.
-      setFieldOptions(toOptions(allFields));
+      setFieldOptions(toOptions(Object.values(fieldMap)));
     }
-  }, [fieldMap]);
+  }, [fieldMap, open]);
 
-  const badgeDescription = hasSelectedFields
-    ? i18n.translate('xpack.graph.bar.pickMoreFieldsLabel', {
-        defaultMessage: 'Add more fields',
-      })
-    : i18n.translate('xpack.graph.bar.pickFieldsLabel', {
-        defaultMessage: 'Add fields',
-      });
+  const badgeDescription = i18n.translate('xpack.graph.bar.pickFieldsLabel', {
+    defaultMessage: 'Add fields',
+  });
 
   return (
     <EuiPopover
@@ -60,6 +53,7 @@ export function FieldPicker({
       panelPaddingSize="none"
       button={
         <EuiBadge
+          data-test-subj="graph-add-field-button"
           className={classNames('gphFieldPicker__button', {
             'gphFieldPicker__button--disabled': !hasFields,
           })}
@@ -84,9 +78,10 @@ export function FieldPicker({
         <EuiSelectable
           searchProps={{
             placeholder: i18n.translate('xpack.graph.fieldManager.fieldSearchPlaceholder', {
-              defaultMessage: 'Filter fields',
+              defaultMessage: 'Filter by',
             }),
             compressed: true,
+            'data-test-subj': 'graph-field-search',
           }}
           listProps={{
             className: 'gphFieldPicker__selectableList',
@@ -119,9 +114,26 @@ export function FieldPicker({
 function toOptions(
   fields: WorkspaceField[]
 ): Array<{ label: string; checked?: 'on' | 'off'; prepend?: ReactNode }> {
-  return fields.map(field => ({
-    label: field.name,
-    prepend: <FieldIcon type={field.type} />,
-    checked: field.selected ? 'on' : undefined,
-  }));
+  return (
+    fields
+      // don't show non-aggregatable fields, except for the case when they are already selected.
+      // this is necessary to ensure backwards compatibility with existing workspaces that might
+      // contain non-aggregatable fields.
+      .filter(field => isExplorable(field) || field.selected)
+      .map(field => ({
+        label: field.name,
+        prepend: <FieldIcon type={field.type} size="m" useColor />,
+        checked: field.selected ? 'on' : undefined,
+      }))
+  );
+}
+
+const explorableTypes = ['string', 'number', 'date', 'ip', 'boolean'];
+
+function isExplorable(field: WorkspaceField) {
+  if (!field.aggregatable) {
+    return false;
+  }
+
+  return explorableTypes.includes(field.type);
 }

@@ -6,16 +6,14 @@
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { SavedObjectAttributes } from 'src/core/server';
-import { Filter } from '@kbn/es-query';
-import { Query } from 'src/plugins/data/common';
-import { FramePublicAPI } from '../types';
+import { Query, esFilters } from '../../../../../../src/plugins/data/public';
 
 export interface Document {
   id?: string;
   type?: string;
   visualizationType: string | null;
   title: string;
-  expression: string;
+  expression: string | null;
   state: {
     datasourceMetaData: {
       filterableIndexPatterns: Array<{ id: string; title: string }>;
@@ -23,8 +21,7 @@ export interface Document {
     datasourceStates: Record<string, unknown>;
     visualization: unknown;
     query: Query;
-    filters: Filter[];
-    dateRange?: FramePublicAPI['dateRange'];
+    filters: esFilters.Filter[];
   };
 }
 

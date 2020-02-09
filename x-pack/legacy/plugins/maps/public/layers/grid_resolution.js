@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 export const GRID_RESOLUTION = {
-  'COARSE': 'COARSE',
-  'FINE': 'FINE',
-  'MOST_FINE': 'MOST_FINE'
+  COARSE: 'COARSE',
+  FINE: 'FINE',
+  MOST_FINE: 'MOST_FINE',
 };

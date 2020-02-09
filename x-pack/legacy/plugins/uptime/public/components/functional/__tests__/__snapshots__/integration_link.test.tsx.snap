@@ -30,9 +30,7 @@ exports[`IntegrationLink component renders a disabled link when href is undefine
 exports[`IntegrationLink component renders without errors 1`] = `
 <EuiLink
   aria-label="foo"
-  color="primary"
   href="/app/foo?kuery=localhost"
-  type="button"
 >
   <EuiFlexGroup
     responsive={false}

@@ -41,19 +41,9 @@ module.exports = function rewritePackage(buildSource, buildVersion, kibanaVersio
       delete pkg.scripts;
       delete pkg.devDependencies;
 
-      file.contents = toBuffer(JSON.stringify(pkg, null, 2));
+      file.contents = Buffer.from(JSON.stringify(pkg, null, 2));
     }
 
     return file;
   });
 };
-
-function toBuffer(string) {
-  if (typeof Buffer.from === 'function') {
-    return Buffer.from(string, 'utf8');
-  } else {
-    // this was deprecated in node v5 in favor
-    // of Buffer.from(string, encoding)
-    return new Buffer(string, 'utf8');
-  }
-}

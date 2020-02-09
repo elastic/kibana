@@ -23,12 +23,7 @@ import chalk from 'chalk';
 import { watchStdioForLine } from '../../../legacy/utils';
 
 export async function exec(log, cmd, args, options = {}) {
-  const {
-    level = 'debug',
-    cwd,
-    env,
-    exitAfter,
-  } = options;
+  const { level = 'debug', cwd, env, exitAfter } = options;
 
   log[level](chalk.dim('$'), cmd, ...args);
 
@@ -36,6 +31,7 @@ export async function exec(log, cmd, args, options = {}) {
     stdio: ['ignore', 'pipe', 'pipe'],
     cwd,
     env,
+    preferLocal: true,
   });
 
   await watchStdioForLine(proc, line => log[level](line), exitAfter);

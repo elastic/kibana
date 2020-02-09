@@ -19,6 +19,10 @@
 
 import { IconType } from '@elastic/eui';
 import { visTypeAliasRegistry, VisTypeAlias } from './vis_type_alias_registry';
+// @ts-ignore
+import { BaseVisType } from './base_vis_type';
+// @ts-ignore
+import { ReactVisType } from './react_vis_type';
 
 export interface VisType {
   name: string;
@@ -30,7 +34,7 @@ export interface VisType {
   responseHandler: string;
   icon?: IconType;
   image?: string;
-  stage: 'experimental' | 'production';
+  stage: 'experimental' | 'beta' | 'production';
   requiresSearch: boolean;
   hidden: boolean;
 
@@ -48,16 +52,39 @@ export interface VisType {
  */
 export class TypesService {
   private types: Record<string, VisType> = {};
+  private unregisteredHiddenTypes: string[] = [];
+
   public setup() {
+    const registerVisualization = (registerFn: () => VisType) => {
+      const visDefinition = registerFn();
+      if (this.unregisteredHiddenTypes.includes(visDefinition.name)) {
+        visDefinition.hidden = true;
+      }
+
+      if (this.types[visDefinition.name]) {
+        throw new Error('type already exists!');
+      }
+      this.types[visDefinition.name] = visDefinition;
+    };
     return {
-      registerVisualization: (registerFn: () => VisType) => {
-        const visDefinition = registerFn();
-        if (this.types[visDefinition.name]) {
-          throw new Error('type already exists!');
-        }
-        this.types[visDefinition.name] = visDefinition;
+      createBaseVisualization: (config: any) => {
+        const vis = new BaseVisType(config);
+        registerVisualization(() => vis);
+      },
+      createReactVisualization: (config: any) => {
+        const vis = new ReactVisType(config);
+        registerVisualization(() => vis);
       },
       registerAlias: visTypeAliasRegistry.add,
+      hideTypes: (typeNames: string[]) => {
+        typeNames.forEach((name: string) => {
+          if (this.types[name]) {
+            this.types[name].hidden = true;
+          } else {
+            this.unregisteredHiddenTypes.push(name);
+          }
+        });
+      },
     };
   }
 
@@ -83,7 +110,7 @@ export type TypesSetup = ReturnType<TypesService['setup']>;
 export type TypesStart = ReturnType<TypesService['start']>;
 
 /** @public types */
-export type VisTypeAlias = VisTypeAlias;
+export { VisTypeAlias };
 
 /** @public static code */
 // TODO once items are moved from ui/vis into this service

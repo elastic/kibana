@@ -31,7 +31,4 @@ const mapDispatchToProps = {
   setWorkpadCSS: css => setWorkpadCSS(css),
 };
 
-export const WorkpadConfig = connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(Component);
+export const WorkpadConfig = connect(mapStateToProps, mapDispatchToProps)(Component);

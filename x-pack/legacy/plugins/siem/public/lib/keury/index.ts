@@ -4,22 +4,42 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { isEmpty, isString, flow } from 'lodash/fp';
-import { StaticIndexPattern } from 'ui/index_patterns';
+import {
+  Query,
+  esFilters,
+  esQuery,
+  esKuery,
+  IIndexPattern,
+} from '../../../../../../../src/plugins/data/public';
 
 import { KueryFilterQuery } from '../../store';
 
 export const convertKueryToElasticSearchQuery = (
   kueryExpression: string,
-  indexPattern: StaticIndexPattern
+  indexPattern?: IIndexPattern
 ) => {
   try {
     return kueryExpression
-      ? JSON.stringify(toElasticsearchQuery(fromKueryExpression(kueryExpression), indexPattern))
+      ? JSON.stringify(
+          esKuery.toElasticsearchQuery(esKuery.fromKueryExpression(kueryExpression), indexPattern)
+        )
       : '';
   } catch (err) {
     return '';
+  }
+};
+
+export const convertKueryToDslFilter = (
+  kueryExpression: string,
+  indexPattern: IIndexPattern
+): esKuery.JsonObject => {
+  try {
+    return kueryExpression
+      ? esKuery.toElasticsearchQuery(esKuery.fromKueryExpression(kueryExpression), indexPattern)
+      : {};
+  } catch (err) {
+    return {};
   }
 };
 
@@ -37,7 +57,7 @@ export const escapeQueryValue = (val: number | string = ''): string | number => 
 export const isFromKueryExpressionValid = (kqlFilterQuery: KueryFilterQuery | null): boolean => {
   if (kqlFilterQuery && kqlFilterQuery.kind === 'kuery') {
     try {
-      fromKueryExpression(kqlFilterQuery.expression);
+      esKuery.fromKueryExpression(kqlFilterQuery.expression);
     } catch (err) {
       return false;
     }
@@ -59,9 +79,32 @@ const escapeAndOr = (val: string) => val.replace(/(\s+)(and|or)(\s+)/gi, '$1\\$2
 
 const escapeNot = (val: string) => val.replace(/not(\s+)/gi, '\\$&');
 
-export const escapeKuery = flow(
-  escapeSpecialCharacters,
-  escapeAndOr,
-  escapeNot,
-  escapeWhitespace
-);
+export const escapeKuery = flow(escapeSpecialCharacters, escapeAndOr, escapeNot, escapeWhitespace);
+
+export const convertToBuildEsQuery = ({
+  config,
+  indexPattern,
+  queries,
+  filters,
+}: {
+  config: esQuery.EsQueryConfig;
+  indexPattern: IIndexPattern;
+  queries: Query[];
+  filters: esFilters.Filter[];
+}) => {
+  try {
+    return JSON.stringify(
+      esQuery.buildEsQuery(
+        indexPattern,
+        queries,
+        filters.filter(f => f.meta.disabled === false),
+        {
+          ...config,
+          dateFormatTZ: undefined,
+        }
+      )
+    );
+  } catch (exp) {
+    return '';
+  }
+};

@@ -236,6 +236,12 @@ export function ComboBoxProvider({ getService, getPageObjects }: FtrProviderCont
       return found.length > 0;
     }
 
+    public async checkValidity(comboBoxElement: WebElementWrapper): Promise<boolean> {
+      const invalidClassName = 'euiComboBox-isInvalid';
+
+      return !(await comboBoxElement.elementHasClass(invalidClassName));
+    }
+
     /**
      * Closes options list
      *

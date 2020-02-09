@@ -1,0 +1,197 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`MonitorListDrawer component renders a MonitorListDrawer when there are many checks 1`] = `
+<ContextProvider
+  value={
+    Object {
+      "history": Object {
+        "action": "POP",
+        "block": [Function],
+        "canGo": [Function],
+        "createHref": [Function],
+        "entries": Array [
+          Object {
+            "hash": "",
+            "key": "TestKeyForTesting",
+            "pathname": "/",
+            "search": "",
+            "state": undefined,
+          },
+        ],
+        "go": [Function],
+        "goBack": [Function],
+        "goForward": [Function],
+        "index": 0,
+        "length": 1,
+        "listen": [Function],
+        "location": Object {
+          "hash": "",
+          "key": "TestKeyForTesting",
+          "pathname": "/",
+          "search": "",
+          "state": undefined,
+        },
+        "push": [Function],
+        "replace": [Function],
+      },
+      "location": Object {
+        "hash": "",
+        "key": "TestKeyForTesting",
+        "pathname": "/",
+        "search": "",
+        "state": undefined,
+      },
+      "match": Object {
+        "isExact": true,
+        "params": Object {},
+        "path": "/",
+        "url": "/",
+      },
+      "staticContext": undefined,
+    }
+  }
+>
+  <MonitorListDrawerComponent
+    loadMonitorDetails={[Function]}
+    monitorDetails={
+      Object {
+        "error": Object {
+          "message": "Get https://expired.badssl.com: x509: certificate has expired or is not yet valid",
+          "type": "io",
+        },
+        "monitorId": "bad-ssl",
+      }
+    }
+    summary={
+      Object {
+        "monitor_id": "foo",
+        "state": Object {
+          "checks": Array [
+            Object {
+              "monitor": Object {
+                "ip": "127.0.0.1",
+                "status": "up",
+              },
+              "timestamp": "121",
+            },
+            Object {
+              "monitor": Object {
+                "ip": "127.0.0.2",
+                "status": "down",
+              },
+              "timestamp": "123",
+            },
+            Object {
+              "monitor": Object {
+                "ip": "127.0.0.3",
+                "status": "up",
+              },
+              "timestamp": "125",
+            },
+          ],
+          "summary": Object {
+            "down": 0,
+            "up": 1,
+          },
+          "timestamp": "123",
+          "url": Object {
+            "domain": "expired.badssl.com",
+            "full": "https://expired.badssl.com",
+          },
+        },
+      }
+    }
+  />
+</ContextProvider>
+`;
+
+exports[`MonitorListDrawer component renders a MonitorListDrawer when there is only one check 1`] = `
+<ContextProvider
+  value={
+    Object {
+      "history": Object {
+        "action": "POP",
+        "block": [Function],
+        "canGo": [Function],
+        "createHref": [Function],
+        "entries": Array [
+          Object {
+            "hash": "",
+            "key": "TestKeyForTesting",
+            "pathname": "/",
+            "search": "",
+            "state": undefined,
+          },
+        ],
+        "go": [Function],
+        "goBack": [Function],
+        "goForward": [Function],
+        "index": 0,
+        "length": 1,
+        "listen": [Function],
+        "location": Object {
+          "hash": "",
+          "key": "TestKeyForTesting",
+          "pathname": "/",
+          "search": "",
+          "state": undefined,
+        },
+        "push": [Function],
+        "replace": [Function],
+      },
+      "location": Object {
+        "hash": "",
+        "key": "TestKeyForTesting",
+        "pathname": "/",
+        "search": "",
+        "state": undefined,
+      },
+      "match": Object {
+        "isExact": true,
+        "params": Object {},
+        "path": "/",
+        "url": "/",
+      },
+      "staticContext": undefined,
+    }
+  }
+>
+  <MonitorListDrawerComponent
+    loadMonitorDetails={[Function]}
+    monitorDetails={
+      Object {
+        "error": Object {
+          "message": "Get https://expired.badssl.com: x509: certificate has expired or is not yet valid",
+          "type": "io",
+        },
+        "monitorId": "bad-ssl",
+      }
+    }
+    summary={
+      Object {
+        "monitor_id": "foo",
+        "state": Object {
+          "checks": Array [
+            Object {
+              "monitor": Object {
+                "ip": "127.0.0.1",
+                "status": "up",
+              },
+              "timestamp": "121",
+            },
+          ],
+          "summary": Object {
+            "down": 0,
+            "up": 1,
+          },
+          "timestamp": "123",
+          "url": Object {
+            "domain": "expired.badssl.com",
+            "full": "https://expired.badssl.com",
+          },
+        },
+      }
+    }
+  />
+</ContextProvider>
+`;

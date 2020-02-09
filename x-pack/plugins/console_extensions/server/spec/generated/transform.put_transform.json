@@ -1,0 +1,14 @@
+{
+  "transform.put_transform": {
+    "url_params": {
+      "defer_validation": "__flag__"
+    },
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "_transform/{transform_id}"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/put-transform.html"
+  }
+}

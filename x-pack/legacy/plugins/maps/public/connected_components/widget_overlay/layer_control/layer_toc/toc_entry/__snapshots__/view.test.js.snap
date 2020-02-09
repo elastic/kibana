@@ -19,13 +19,14 @@ exports[`TOCEntry is rendered 1`] = `
         Object {
           "getDisplayName": [Function],
           "getId": [Function],
-          "getLegendDetails": [Function],
           "hasErrors": [Function],
           "hasLegendDetails": [Function],
           "isVisible": [Function],
+          "renderLegendDetails": [Function],
           "showAtZoomLevel": [Function],
         }
       }
+      removeLayer={[Function]}
       toggleVisible={[Function]}
       zoom={0}
     />
@@ -86,13 +87,14 @@ exports[`TOCEntry props isReadOnly 1`] = `
         Object {
           "getDisplayName": [Function],
           "getId": [Function],
-          "getLegendDetails": [Function],
           "hasErrors": [Function],
           "hasLegendDetails": [Function],
           "isVisible": [Function],
+          "renderLegendDetails": [Function],
           "showAtZoomLevel": [Function],
         }
       }
+      removeLayer={[Function]}
       toggleVisible={[Function]}
       zoom={0}
     />
@@ -135,13 +137,14 @@ exports[`TOCEntry props should display layer details when isLegendDetailsOpen is
         Object {
           "getDisplayName": [Function],
           "getId": [Function],
-          "getLegendDetails": [Function],
           "hasErrors": [Function],
           "hasLegendDetails": [Function],
           "isVisible": [Function],
+          "renderLegendDetails": [Function],
           "showAtZoomLevel": [Function],
         }
       }
+      removeLayer={[Function]}
       toggleVisible={[Function]}
       zoom={0}
     />

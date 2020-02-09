@@ -5,32 +5,33 @@
  */
 
 import _ from 'lodash';
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { Storage } from 'ui/storage';
-import { DataPublicPluginStart } from 'src/plugins/data/public';
-
-import { CoreStart, NotificationsStart } from 'src/core/public';
-import {
-  DataStart,
-  IndexPattern as IndexPatternInstance,
-  IndexPatterns as IndexPatternsService,
-  SavedQuery,
-  Query,
-} from 'src/legacy/core_plugins/data/public';
-import { Filter } from '@kbn/es-query';
-import { TopNavMenu } from '../../../../../../src/legacy/core_plugins/kibana_react/public';
+import { Query, DataPublicPluginStart } from 'src/plugins/data/public';
+import { AppMountContext, NotificationsStart } from 'src/core/public';
+import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
+import { npStart } from 'ui/new_platform';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
+import { SavedObjectSaveModal } from '../../../../../../src/plugins/saved_objects/public';
 import { Document, SavedObjectStore } from '../persistence';
 import { EditorFrameInstance } from '../types';
 import { NativeRenderer } from '../native_renderer';
+import { trackUiEvent } from '../lens_ui_telemetry';
+import {
+  esFilters,
+  IndexPattern as IndexPatternInstance,
+  IndexPatternsContract,
+  SavedQuery,
+} from '../../../../../../src/plugins/data/public';
 
 interface State {
   isLoading: boolean;
-  isDirty: boolean;
+  isSaveModalVisible: boolean;
   indexPatternsForTopNav: IndexPatternInstance[];
   persistedDoc?: Document;
+  lastKnownDoc?: Document;
 
   // Properties needed to interface with TopNav
   dateRange: {
@@ -38,56 +39,62 @@ interface State {
     toDate: string;
   };
   query: Query;
-  filters: Filter[];
+  filters: esFilters.Filter[];
   savedQuery?: SavedQuery;
 }
 
 export function App({
   editorFrame,
   data,
-  dataShim,
   core,
-  store,
+  storage,
   docId,
   docStorage,
   redirectTo,
+  addToDashboardMode,
 }: {
   editorFrame: EditorFrameInstance;
   data: DataPublicPluginStart;
-  core: CoreStart;
-  dataShim: DataStart;
-  store: Storage;
+  core: AppMountContext['core'];
+  storage: IStorageWrapper;
   docId?: string;
   docStorage: SavedObjectStore;
   redirectTo: (id?: string) => void;
+  addToDashboardMode?: boolean;
 }) {
-  const timeDefaults = core.uiSettings.get('timepicker:timeDefaults');
   const language =
-    store.get('kibana.userQueryLanguage') || core.uiSettings.get('search:queryLanguage');
+    storage.get('kibana.userQueryLanguage') || core.uiSettings.get('search:queryLanguage');
 
-  const [state, setState] = useState<State>({
-    isLoading: !!docId,
-    isDirty: false,
-    indexPatternsForTopNav: [],
-
-    query: { query: '', language },
-    dateRange: {
-      fromDate: timeDefaults.from,
-      toDate: timeDefaults.to,
-    },
-    filters: [],
+  const [state, setState] = useState<State>(() => {
+    const currentRange = data.query.timefilter.timefilter.getTime();
+    return {
+      isLoading: !!docId,
+      isSaveModalVisible: false,
+      indexPatternsForTopNav: [],
+      query: { query: '', language },
+      dateRange: {
+        fromDate: currentRange.from,
+        toDate: currentRange.to,
+      },
+      filters: [],
+    };
   });
 
-  const lastKnownDocRef = useRef<Document | undefined>(undefined);
+  const { lastKnownDoc } = state;
 
   useEffect(() => {
-    const subscription = dataShim.filter.filterManager.getUpdates$().subscribe({
+    // Clear app-specific filters when navigating to Lens. Necessary because Lens
+    // can be loaded without a full page refresh
+    data.query.filterManager.setAppFilters([]);
+
+    const filterSubscription = data.query.filterManager.getUpdates$().subscribe({
       next: () => {
-        setState(s => ({ ...s, filters: dataShim.filter.filterManager.getFilters() }));
+        setState(s => ({ ...s, filters: data.query.filterManager.getFilters() }));
+        trackUiEvent('app_filters_updated');
       },
     });
     return () => {
-      subscription.unsubscribe();
+      filterSubscription.unsubscribe();
     };
   }, []);
 
@@ -116,17 +123,18 @@ export function App({
         .then(doc => {
           getAllIndexPatterns(
             doc.state.datasourceMetaData.filterableIndexPatterns,
-            dataShim.indexPatterns.indexPatterns,
+            data.indexPatterns,
             core.notifications
           )
             .then(indexPatterns => {
+              // Don't overwrite any pinned filters
+              data.query.filterManager.setAppFilters(doc.state.filters);
               setState(s => ({
                 ...s,
                 isLoading: false,
                 persistedDoc: doc,
+                lastKnownDoc: doc,
                 query: doc.state.query,
-                filters: doc.state.filters,
-                dateRange: doc.state.dateRange || s.dateRange,
                 indexPatternsForTopNav: indexPatterns,
               }));
             })
@@ -140,7 +148,7 @@ export function App({
           setState(s => ({ ...s, isLoading: false }));
 
           core.notifications.toasts.addDanger(
-            i18n.translate('xpack.lens.editorFrame.docLoadingError', {
+            i18n.translate('xpack.lens.app.docLoadingError', {
               defaultMessage: 'Error loading saved document',
             })
           );
@@ -150,10 +158,11 @@ export function App({
     }
   }, [docId]);
 
-  // Can save if the frame has told us what it has, and there is either:
-  // a) No saved doc
-  // b) A saved doc that differs from the frame state
-  const isSaveable = state.isDirty && (core.application.capabilities.lens.save as boolean);
+  const isSaveable =
+    lastKnownDoc &&
+    lastKnownDoc.expression &&
+    lastKnownDoc.expression.length > 0 &&
+    core.application.capabilities.visualize.save;
 
   const onError = useCallback(
     (e: { message: string }) =>
@@ -163,13 +172,22 @@ export function App({
     []
   );
 
+  const { TopNavMenu } = npStart.plugins.navigation.ui;
+
+  const confirmButton = addToDashboardMode ? (
+    <FormattedMessage
+      id="xpack.lens.app.saveAddToDashboard"
+      defaultMessage="Save and add to dashboard"
+    />
+  ) : null;
+
   return (
     <I18nProvider>
       <KibanaContextProvider
         services={{
           appName: 'lens',
           data,
-          store,
+          storage,
           ...core,
         }}
       >
@@ -178,32 +196,12 @@ export function App({
             <TopNavMenu
               config={[
                 {
-                  label: i18n.translate('xpack.lens.editorFrame.save', {
+                  label: i18n.translate('xpack.lens.app.save', {
                     defaultMessage: 'Save',
                   }),
                   run: () => {
-                    if (isSaveable && lastKnownDocRef.current) {
-                      docStorage
-                        .save(lastKnownDocRef.current)
-                        .then(({ id }) => {
-                          // Prevents unnecessary network request and disables save button
-                          const newDoc = { ...lastKnownDocRef.current!, id };
-                          setState(s => ({
-                            ...s,
-                            isDirty: false,
-                            persistedDoc: newDoc,
-                          }));
-                          if (docId !== id) {
-                            redirectTo(id);
-                          }
-                        })
-                        .catch(() => {
-                          core.notifications.toasts.addDanger(
-                            i18n.translate('xpack.lens.editorFrame.docSavingError', {
-                              defaultMessage: 'Error saving document',
-                            })
-                          );
-                        });
+                    if (isSaveable && lastKnownDoc) {
+                      setState(s => ({ ...s, isSaveModalVisible: true }));
                     }
                   },
                   testId: 'lnsApp_saveButton',
@@ -214,6 +212,17 @@ export function App({
               screenTitle={'lens'}
               onQuerySubmit={payload => {
                 const { dateRange, query } = payload;
+
+                if (
+                  dateRange.from !== state.dateRange.fromDate ||
+                  dateRange.to !== state.dateRange.toDate
+                ) {
+                  data.query.timefilter.timefilter.setTime(dateRange);
+                  trackUiEvent('app_date_change');
+                } else {
+                  trackUiEvent('app_query_change');
+                }
+
                 setState(s => ({
                   ...s,
                   dateRange: {
@@ -229,15 +238,15 @@ export function App({
               showDatePicker={true}
               showQueryBar={true}
               showFilterBar={true}
-              showSaveQuery={core.application.capabilities.lens.saveQuery as boolean}
+              showSaveQuery={core.application.capabilities.visualize.saveQuery as boolean}
               savedQuery={state.savedQuery}
               onSaved={savedQuery => {
                 setState(s => ({ ...s, savedQuery }));
               }}
               onSavedQueryUpdated={savedQuery => {
-                dataShim.filter.filterManager.setFilters(
-                  savedQuery.attributes.filters || state.filters
-                );
+                const savedQueryFilters = savedQuery.attributes.filters || [];
+                const globalFilters = data.query.filterManager.getGlobalFilters();
+                data.query.filterManager.setFilters([...globalFilters, ...savedQueryFilters]);
                 setState(s => ({
                   ...s,
                   savedQuery: { ...savedQuery }, // Shallow query for reference issues
@@ -250,20 +259,22 @@ export function App({
                 }));
               }}
               onClearSavedQuery={() => {
-                dataShim.filter.filterManager.removeAll();
+                data.query.filterManager.setFilters(data.query.filterManager.getGlobalFilters());
                 setState(s => ({
                   ...s,
                   savedQuery: undefined,
-                  filters: [],
+                  filters: data.query.filterManager.getGlobalFilters(),
                   query: {
                     query: '',
                     language:
-                      store.get('kibana.userQueryLanguage') ||
+                      storage.get('kibana.userQueryLanguage') ||
                       core.uiSettings.get('search:queryLanguage'),
                   },
                 }));
               }}
               query={state.query}
+              dateRangeFrom={state.dateRange.fromDate}
+              dateRangeTo={state.dateRange.toDate}
             />
           </div>
 
@@ -279,10 +290,8 @@ export function App({
                 doc: state.persistedDoc,
                 onError,
                 onChange: ({ filterableIndexPatterns, doc }) => {
-                  lastKnownDocRef.current = doc;
-
                   if (!_.isEqual(state.persistedDoc, doc)) {
-                    setState(s => ({ ...s, isDirty: true }));
+                    setState(s => ({ ...s, lastKnownDoc: doc }));
                   }
 
                   // Update the cached index patterns if the user made a change to any of them
@@ -295,7 +304,7 @@ export function App({
                   ) {
                     getAllIndexPatterns(
                       filterableIndexPatterns,
-                      dataShim.indexPatterns.indexPatterns,
+                      data.indexPatterns,
                       core.notifications
                     ).then(indexPatterns => {
                       if (indexPatterns) {
@@ -308,6 +317,51 @@ export function App({
             />
           )}
         </div>
+        {lastKnownDoc && state.isSaveModalVisible && (
+          <SavedObjectSaveModal
+            onSave={props => {
+              const doc = {
+                ...lastKnownDoc,
+                id: props.newCopyOnSave ? undefined : lastKnownDoc.id,
+                title: props.newTitle,
+              };
+
+              docStorage
+                .save(doc)
+                .then(({ id }) => {
+                  // Prevents unnecessary network request and disables save button
+                  const newDoc = { ...doc, id };
+                  setState(s => ({
+                    ...s,
+                    isSaveModalVisible: false,
+                    persistedDoc: newDoc,
+                    lastKnownDoc: newDoc,
+                  }));
+                  if (docId !== id) {
+                    redirectTo(id);
+                  }
+                })
+                .catch(e => {
+                  // eslint-disable-next-line no-console
+                  console.dir(e);
+                  trackUiEvent('save_failed');
+                  core.notifications.toasts.addDanger(
+                    i18n.translate('xpack.lens.app.docSavingError', {
+                      defaultMessage: 'Error saving document',
+                    })
+                  );
+                  setState(s => ({ ...s, isSaveModalVisible: false }));
+                });
+            }}
+            onClose={() => setState(s => ({ ...s, isSaveModalVisible: false }))}
+            title={lastKnownDoc.title || ''}
+            showCopyOnSave={!addToDashboardMode}
+            objectType={i18n.translate('xpack.lens.app.saveModalType', {
+              defaultMessage: 'Lens visualization',
+            })}
+            confirmButtonLabel={confirmButton}
+          />
+        )}
       </KibanaContextProvider>
     </I18nProvider>
   );
@@ -315,14 +369,14 @@ export function App({
 
 export async function getAllIndexPatterns(
   ids: Array<{ id: string }>,
-  indexPatternsService: IndexPatternsService,
+  indexPatternsService: IndexPatternsContract,
   notifications: NotificationsStart
 ): Promise<IndexPatternInstance[]> {
   try {
     return await Promise.all(ids.map(({ id }) => indexPatternsService.get(id)));
   } catch (e) {
     notifications.toasts.addDanger(
-      i18n.translate('xpack.lens.editorFrame.indexPatternLoadingError', {
+      i18n.translate('xpack.lens.app.indexPatternLoadingError', {
         defaultMessage: 'Error loading index patterns',
       })
     );

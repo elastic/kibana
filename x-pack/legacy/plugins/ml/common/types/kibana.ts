@@ -6,6 +6,8 @@
 
 // custom edits or fixes for default kibana types which are incomplete
 
+import { SavedObjectAttributes, SimpleSavedObject } from 'kibana/public';
+
 export type IndexPatternTitle = string;
 
 export type callWithRequestType = (action: string, params?: any) => Promise<any>;
@@ -13,4 +15,13 @@ export type callWithRequestType = (action: string, params?: any) => Promise<any>
 export interface Route {
   id: string;
   k7Breadcrumbs: () => any;
+}
+
+export type IndexPatternSavedObject = SimpleSavedObject<SavedObjectAttributes>;
+export type SavedSearchSavedObject = SimpleSavedObject<SavedObjectAttributes>;
+
+export function isSavedSearchSavedObject(
+  ss: SavedSearchSavedObject | null
+): ss is SavedSearchSavedObject {
+  return ss !== null;
 }

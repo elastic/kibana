@@ -2842,7 +2842,19 @@ Object {
     "units": "ms",
     "uuidField": "kibana_stats.kibana.uuid",
   },
-  "kibana_requests": KibanaMetric {
+  "kibana_requests_disconnects": KibanaMetric {
+    "app": "kibana",
+    "derivative": false,
+    "description": "Total number of client disconnects to the Kibana instance.",
+    "field": "kibana_stats.requests.disconnects",
+    "format": "0.[00]",
+    "label": "Client Disconnects",
+    "metricAgg": "max",
+    "timestampField": "kibana_stats.timestamp",
+    "units": "",
+    "uuidField": "kibana_stats.kibana.uuid",
+  },
+  "kibana_requests_total": KibanaMetric {
     "app": "kibana",
     "derivative": false,
     "description": "Total number of client requests received by the Kibana instance.",
@@ -3008,8 +3020,7 @@ Object {
   },
   "logstash_cluster_pipeline_throughput": LogstashPipelineThroughputMetric {
     "app": "logstash",
-    "calculation": [Function],
-    "derivative": false,
+    "derivative": true,
     "description": "Number of events emitted per second by the Logstash pipeline at the outputs stage.",
     "field": "logstash_stats.pipelines.events.out",
     "format": "0,0.[00]",
@@ -3284,8 +3295,7 @@ Object {
   },
   "logstash_node_pipeline_throughput": LogstashPipelineThroughputMetric {
     "app": "logstash",
-    "calculation": [Function],
-    "derivative": false,
+    "derivative": true,
     "description": "Number of events emitted per second by the Logstash pipeline at the outputs stage.",
     "field": "logstash_stats.pipelines.events.out",
     "format": "0,0.[00]",

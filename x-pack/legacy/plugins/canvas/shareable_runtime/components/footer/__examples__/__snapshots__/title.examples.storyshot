@@ -1,0 +1,214 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Storyshots shareables/Footer/Title component 1`] = `
+<div
+  className="kbnCanvas"
+  style={
+    Object {
+      "background": "#333",
+      "height": undefined,
+      "overflow": "hidden",
+      "padding": 10,
+      "position": "relative",
+      "width": undefined,
+    }
+  }
+>
+  <div
+    className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+  >
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+      style={
+        Object {
+          "flexShrink": 0,
+        }
+      }
+    >
+      <a
+        className="euiLink euiLink--primary"
+        href="https://www.elastic.co"
+        rel=""
+        title="Powered by Elastic.co"
+      >
+        <svg
+          aria-hidden={true}
+          className="euiIcon euiIcon--large euiIcon-isLoading"
+          focusable="false"
+          height={16}
+          role="img"
+          style={null}
+          viewBox="0 0 16 16"
+          width={16}
+          xmlns="http://www.w3.org/2000/svg"
+        />
+      </a>
+    </div>
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+      style={
+        Object {
+          "cursor": "default",
+          "minWidth": 0,
+        }
+      }
+    >
+      <div
+        className="euiText euiText--small"
+      >
+        <div
+          className="euiTextColor euiTextColor--ghost"
+        >
+          <div
+            className="eui-textTruncate"
+          >
+            This is a test title.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Storyshots shareables/Footer/Title contextual: austin 1`] = `
+<div
+  className="kbnCanvas"
+  style={
+    Object {
+      "background": "#333",
+      "height": undefined,
+      "overflow": "hidden",
+      "padding": 10,
+      "position": "relative",
+      "width": undefined,
+    }
+  }
+>
+  <div
+    className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+  >
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+      style={
+        Object {
+          "flexShrink": 0,
+        }
+      }
+    >
+      <a
+        className="euiLink euiLink--primary"
+        href="https://www.elastic.co"
+        rel=""
+        title="Powered by Elastic.co"
+      >
+        <svg
+          aria-hidden={true}
+          className="euiIcon euiIcon--large euiIcon-isLoading"
+          focusable="false"
+          height={16}
+          role="img"
+          style={null}
+          viewBox="0 0 16 16"
+          width={16}
+          xmlns="http://www.w3.org/2000/svg"
+        />
+      </a>
+    </div>
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+      style={
+        Object {
+          "cursor": "default",
+          "minWidth": 0,
+        }
+      }
+    >
+      <div
+        className="euiText euiText--small"
+      >
+        <div
+          className="euiTextColor euiTextColor--ghost"
+        >
+          <div
+            className="eui-textTruncate"
+          >
+            Elastic{ON} - Austin from Clint Andrew Hall with a title that just goes and goes and goes
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Storyshots shareables/Footer/Title contextual: hello 1`] = `
+<div
+  className="kbnCanvas"
+  style={
+    Object {
+      "background": "#333",
+      "height": undefined,
+      "overflow": "hidden",
+      "padding": 10,
+      "position": "relative",
+      "width": undefined,
+    }
+  }
+>
+  <div
+    className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+  >
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+      style={
+        Object {
+          "flexShrink": 0,
+        }
+      }
+    >
+      <a
+        className="euiLink euiLink--primary"
+        href="https://www.elastic.co"
+        rel=""
+        title="Powered by Elastic.co"
+      >
+        <svg
+          aria-hidden={true}
+          className="euiIcon euiIcon--large euiIcon-isLoading"
+          focusable="false"
+          height={16}
+          role="img"
+          style={null}
+          viewBox="0 0 16 16"
+          width={16}
+          xmlns="http://www.w3.org/2000/svg"
+        />
+      </a>
+    </div>
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+      style={
+        Object {
+          "cursor": "default",
+          "minWidth": 0,
+        }
+      }
+    >
+      <div
+        className="euiText euiText--small"
+      >
+        <div
+          className="euiTextColor euiTextColor--ghost"
+        >
+          <div
+            className="eui-textTruncate"
+          >
+            My Canvas Workpad
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;

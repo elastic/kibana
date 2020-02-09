@@ -25,7 +25,7 @@ import path from 'path';
 import { cleanPrevious, cleanArtifacts } from './cleanup';
 import { extract, getPackData } from './pack';
 import { renamePlugin } from './rename';
-import { sync as rimrafSync } from 'rimraf';
+import del from 'del';
 import { errorIfXPackInstall } from '../lib/error_if_x_pack';
 import { existingInstall, assertVersion } from './kibana';
 import { prepareExternalProjectDependencies } from '@kbn/pm';
@@ -46,7 +46,7 @@ export default async function install(settings, logger) {
 
     await extract(settings, logger);
 
-    rimrafSync(settings.tempArchiveFile);
+    del.sync(settings.tempArchiveFile);
 
     existingInstall(settings, logger);
 
@@ -54,7 +54,10 @@ export default async function install(settings, logger) {
 
     await prepareExternalProjectDependencies(settings.workingPath);
 
-    await renamePlugin(settings.workingPath, path.join(settings.pluginDir, settings.plugins[0].name));
+    await renamePlugin(
+      settings.workingPath,
+      path.join(settings.pluginDir, settings.plugins[0].name)
+    );
 
     logger.log('Plugin installation complete');
   } catch (err) {

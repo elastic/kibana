@@ -4,6 +4,7 @@
 
 ## OnPostAuthHandler type
 
+See [OnPostAuthToolkit](./kibana-plugin-server.onpostauthtoolkit.md)<!-- -->.
 
 <b>Signature:</b>
 

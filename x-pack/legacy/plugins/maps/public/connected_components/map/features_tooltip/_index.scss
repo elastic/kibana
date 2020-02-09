@@ -1,0 +1,20 @@
+.mapFeatureTooltip_table {
+  width: 100%;
+
+  td {
+    padding: $euiSizeXS;
+  }
+}
+
+.mapFeatureTooltip_actionLinks {
+  padding: $euiSizeXS;
+}
+
+.mapFeatureTooltip_backButton {
+  padding-left: 0;
+}
+
+.mapFeatureTooltip__propertyLabel {
+  max-width: $euiSizeXL * 4;
+  font-weight: $euiFontWeightSemiBold;
+}

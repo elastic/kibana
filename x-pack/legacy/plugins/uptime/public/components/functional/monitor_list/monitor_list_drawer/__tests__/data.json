@@ -1,0 +1,621 @@
+{
+  "data": {
+    "monitorStates": {
+      "prevPagePagination": null,
+      "nextPagePagination": null,
+      "totalSummaryCount": { "count": 147428, "__typename": "DocCount" },
+      "summaries": [
+        {
+          "monitor_id": "andrewvc-com",
+          "histogram": {
+            "count": 60,
+            "points": [
+              {
+                "timestamp": 1570538088000,
+                "up": 8,
+                "down": 0,
+                "__typename": "SummaryHistogramPoint"
+              },
+              {
+                "timestamp": 1570538124000,
+                "up": 16,
+                "down": 0,
+                "__typename": "SummaryHistogramPoint"
+              },
+              {
+                "timestamp": 1570538160000,
+                "up": 12,
+                "down": 0,
+                "__typename": "SummaryHistogramPoint"
+              },
+              {
+                "timestamp": 1570538196000,
+                "up": 16,
+                "down": 0,
+                "__typename": "SummaryHistogramPoint"
+              },
+              {
+                "timestamp": 1570538232000,
+                "up": 8,
+                "down": 0,
+                "__typename": "SummaryHistogramPoint"
+              }
+            ],
+            "__typename": "SummaryHistogram"
+          },
+          "state": {
+            "agent": null,
+            "checks": [
+              {
+                "agent": { "id": "8f9a37fb-573a-4fdc-9895-440a5b39c250", "__typename": "Agent" },
+                "container": null,
+                "kubernetes": null,
+                "monitor": {
+                  "ip": "185.199.108.153",
+                  "name": "",
+                  "status": "up",
+                  "__typename": "CheckMonitor"
+                },
+                "observer": {
+                  "geo": { "name": null, "location": null, "__typename": "CheckGeo" },
+                  "__typename": "CheckObserver"
+                },
+                "timestamp": "1570538246145",
+                "__typename": "Check"
+              },
+              {
+                "agent": { "id": "8f9a37fb-573a-4fdc-9895-440a5b39c250", "__typename": "Agent" },
+                "container": null,
+                "kubernetes": null,
+                "monitor": {
+                  "ip": "185.199.109.153",
+                  "name": "",
+                  "status": "up",
+                  "__typename": "CheckMonitor"
+                },
+                "observer": {
+                  "geo": { "name": null, "location": null, "__typename": "CheckGeo" },
+                  "__typename": "CheckObserver"
+                },
+                "timestamp": "1570538246145",
+                "__typename": "Check"
+              },
+              {
+                "agent": { "id": "8f9a37fb-573a-4fdc-9895-440a5b39c250", "__typename": "Agent" },
+                "container": null,
+                "kubernetes": null,
+                "monitor": {
+                  "ip": "185.199.110.153",
+                  "name": "",
+                  "status": "up",
+                  "__typename": "CheckMonitor"
+                },
+                "observer": {
+                  "geo": { "name": null, "location": null, "__typename": "CheckGeo" },
+                  "__typename": "CheckObserver"
+                },
+                "timestamp": "1570538246145",
+                "__typename": "Check"
+              },
+              {
+                "agent": { "id": "8f9a37fb-573a-4fdc-9895-440a5b39c250", "__typename": "Agent" },
+                "container": null,
+                "kubernetes": null,
+                "monitor": {
+                  "ip": "185.199.111.153",
+                  "name": "",
+                  "status": "up",
+                  "__typename": "CheckMonitor"
+                },
+                "observer": {
+                  "geo": { "name": null, "location": null, "__typename": "CheckGeo" },
+                  "__typename": "CheckObserver"
+                },
+                "timestamp": "1570538246145",
+                "__typename": "Check"
+              }
+            ],
+            "geo": null,
+            "observer": {
+              "geo": { "name": [], "location": null, "__typename": "StateGeo" },
+              "__typename": "StateObserver"
+            },
+            "monitor": {
+              "id": null,
+              "name": null,
+              "status": "up",
+              "type": null,
+              "__typename": "MonitorState"
+            },
+            "summary": { "up": 4, "down": 0, "geo": null, "__typename": "Summary" },
+            "url": {
+              "full": "http://blog.andrewvc.com",
+              "domain": "blog.andrewvc.com",
+              "__typename": "StateUrl"
+            },
+            "timestamp": 1570538246145,
+            "error": null,
+            "__typename": "State"
+          },
+          "__typename": "MonitorSummary"
+        },
+        {
+          "monitor_id": "bad-ssl",
+          "histogram": {
+            "count": 16,
+            "points": [
+              {
+                "timestamp": 1570538088000,
+                "up": 0,
+                "down": 3,
+                "__typename": "SummaryHistogramPoint"
+              },
+              {
+                "timestamp": 1570538124000,
+                "up": 0,
+                "down": 4,
+                "__typename": "SummaryHistogramPoint"
+              },
+              {
+                "timestamp": 1570538160000,
+                "up": 0,
+                "down": 3,
+                "__typename": "SummaryHistogramPoint"
+              },
+              {
+                "timestamp": 1570538196000,
+                "up": 0,
+                "down": 4,
+                "__typename": "SummaryHistogramPoint"
+              },
+              {
+                "timestamp": 1570538232000,
+                "up": 0,
+                "down": 2,
+                "__typename": "SummaryHistogramPoint"
+              }
+            ],
+            "__typename": "SummaryHistogram"
+          },
+          "state": {
+            "agent": null,
+            "checks": [
+              {
+                "agent": { "id": "8f9a37fb-573a-4fdc-9895-440a5b39c250", "__typename": "Agent" },
+                "container": null,
+                "kubernetes": null,
+                "monitor": {
+                  "ip": "104.154.89.105",
+                  "name": "",
+                  "status": "down",
+                  "__typename": "CheckMonitor"
+                },
+                "observer": {
+                  "geo": { "name": null, "location": null, "__typename": "CheckGeo" },
+                  "__typename": "CheckObserver"
+                },
+                "timestamp": "1570538246144",
+                "__typename": "Check"
+              }
+            ],
+            "geo": null,
+            "observer": {
+              "geo": { "name": [], "location": null, "__typename": "StateGeo" },
+              "__typename": "StateObserver"
+            },
+            "monitor": {
+              "id": null,
+              "name": null,
+              "status": "down",
+              "type": null,
+              "__typename": "MonitorState"
+            },
+            "summary": { "up": 0, "down": 1, "geo": null, "__typename": "Summary" },
+            "url": {
+              "full": "https://expired.badssl.com",
+              "domain": "expired.badssl.com",
+              "__typename": "StateUrl"
+            },
+            "timestamp": 1570538246144,
+            "error": null,
+            "__typename": "State"
+          },
+          "__typename": "MonitorSummary"
+        },
+        {
+          "monitor_id": "elastic-co",
+          "histogram": {
+            "count": 72,
+            "points": [
+              {
+                "timestamp": 1570538088000,
+                "up": 4,
+                "down": 4,
+                "__typename": "SummaryHistogramPoint"
+              },
+              {
+                "timestamp": 1570538124000,
+                "up": 8,
+                "down": 8,
+                "__typename": "SummaryHistogramPoint"
+              },
+              {
+                "timestamp": 1570538160000,
+                "up": 8,
+                "down": 8,
+                "__typename": "SummaryHistogramPoint"
+              },
+              {
+                "timestamp": 1570538196000,
+                "up": 12,
+                "down": 12,
+                "__typename": "SummaryHistogramPoint"
+              },
+              {
+                "timestamp": 1570538232000,
+                "up": 4,
+                "down": 4,
+                "__typename": "SummaryHistogramPoint"
+              }
+            ],
+            "__typename": "SummaryHistogram"
+          },
+          "state": {
+            "agent": null,
+            "checks": ,
+            "geo": null,
+            "observer": {
+              "geo": { "name": [], "location": null, "__typename": "StateGeo" },
+              "__typename": "StateObserver"
+            },
+            "monitor": {
+              "id": null,
+              "name": "elastic",
+              "type": null,
+              "__typename": "MonitorState"
+            },
+            "summary": { "up": 4, "down": 4, "geo": null, "__typename": "Summary" },
+            "url": {
+              "full": "https://www.elastic.co",
+              "domain": "www.elastic.co",
+              "__typename": "StateUrl"
+            },
+            "timestamp": 1570538236414,
+            "error": null,
+            "__typename": "State"
+          },
+          "__typename": "MonitorSummary"
+        },
+        {
+          "monitor_id": "kibana-local",
+          "histogram": {
+            "count": 66,
+            "points": [
+              {
+                "timestamp": 1570538052000,
+                "up": 1,
+                "down": 1,
+                "__typename": "SummaryHistogramPoint"
+              },
+              {
+                "timestamp": 1570538088000,
+                "up": 7,
+                "down": 7,
+                "__typename": "SummaryHistogramPoint"
+              },
+              {
+                "timestamp": 1570538124000,
+                "up": 7,
+                "down": 7,
+                "__typename": "SummaryHistogramPoint"
+              },
+              {
+                "timestamp": 1570538160000,
+                "up": 7,
+                "down": 7,
+                "__typename": "SummaryHistogramPoint"
+              },
+              {
+                "timestamp": 1570538196000,
+                "up": 8,
+                "down": 8,
+                "__typename": "SummaryHistogramPoint"
+              },
+              {
+                "timestamp": 1570538232000,
+                "up": 3,
+                "down": 3,
+                "__typename": "SummaryHistogramPoint"
+              }
+            ],
+            "__typename": "SummaryHistogram"
+          },
+          "state": {
+            "agent": null,
+            "checks": [
+              {
+                "agent": { "id": "8f9a37fb-573a-4fdc-9895-440a5b39c250", "__typename": "Agent" },
+                "container": null,
+                "kubernetes": null,
+                "monitor": {
+                  "ip": "127.0.0.1",
+                  "name": "",
+                  "status": "up",
+                  "__typename": "CheckMonitor"
+                },
+                "observer": {
+                  "geo": { "name": null, "location": null, "__typename": "CheckGeo" },
+                  "__typename": "CheckObserver"
+                },
+                "timestamp": "1570538246144",
+                "__typename": "Check"
+              },
+              {
+                "agent": { "id": "8f9a37fb-573a-4fdc-9895-440a5b39c250", "__typename": "Agent" },
+                "container": null,
+                "kubernetes": null,
+                "monitor": {
+                  "ip": "::1",
+                  "name": "",
+                  "status": "down",
+                  "__typename": "CheckMonitor"
+                },
+                "observer": {
+                  "geo": { "name": null, "location": null, "__typename": "CheckGeo" },
+                  "__typename": "CheckObserver"
+                },
+                "timestamp": "1570538246145",
+                "__typename": "Check"
+              }
+            ],
+            "geo": null,
+            "observer": {
+              "geo": { "name": [], "location": null, "__typename": "StateGeo" },
+              "__typename": "StateObserver"
+            },
+            "monitor": {
+              "id": null,
+              "name": null,
+              "type": null,
+              "__typename": "MonitorState"
+            },
+            "summary": { "up": 1, "down": 1, "geo": null, "__typename": "Summary" },
+            "url": {
+              "full": "http://localhost:5601/",
+              "domain": "localhost",
+              "__typename": "StateUrl"
+            },
+            "timestamp": 1570538246145,
+            "error": null,
+            "__typename": "State"
+          },
+          "__typename": "MonitorSummary"
+        },
+        {
+          "monitor_id": "localhost",
+          "histogram": {
+            "count": 28,
+            "points": [
+              {
+                "timestamp": 1570538052000,
+                "up": 12,
+                "down": 0,
+                "__typename": "SummaryHistogramPoint"
+              },
+              {
+                "timestamp": 1570538088000,
+                "up": 3,
+                "down": 0,
+                "__typename": "SummaryHistogramPoint"
+              },
+              {
+                "timestamp": 1570538124000,
+                "up": 4,
+                "down": 0,
+                "__typename": "SummaryHistogramPoint"
+              },
+              {
+                "timestamp": 1570538160000,
+                "up": 3,
+                "down": 0,
+                "__typename": "SummaryHistogramPoint"
+              },
+              {
+                "timestamp": 1570538196000,
+                "up": 4,
+                "down": 0,
+                "__typename": "SummaryHistogramPoint"
+              },
+              {
+                "timestamp": 1570538232000,
+                "up": 2,
+                "down": 0,
+                "__typename": "SummaryHistogramPoint"
+              }
+            ],
+            "__typename": "SummaryHistogram"
+          },
+          "state": {
+            "agent": null,
+            "checks": [
+              {
+                "agent": { "id": "8f9a37fb-573a-4fdc-9895-440a5b39c250", "__typename": "Agent" },
+                "container": null,
+                "kubernetes": null,
+                "monitor": {
+                  "ip": "127.0.0.1",
+                  "name": "localhost",
+                  "status": "up",
+                  "__typename": "CheckMonitor"
+                },
+                "observer": {
+                  "geo": { "name": null, "location": null, "__typename": "CheckGeo" },
+                  "__typename": "CheckObserver"
+                },
+                "timestamp": "1570538246143",
+                "__typename": "Check"
+              }
+            ],
+            "geo": null,
+            "observer": {
+              "geo": { "name": [], "location": null, "__typename": "StateGeo" },
+              "__typename": "StateObserver"
+            },
+            "monitor": {
+              "id": null,
+              "name": "localhost",
+              "status": "up",
+              "type": null,
+              "__typename": "MonitorState"
+            },
+            "summary": { "up": 1, "down": 0, "geo": null, "__typename": "Summary" },
+            "url": {
+              "full": "http://localhost:9200",
+              "domain": "localhost",
+              "__typename": "StateUrl"
+            },
+            "timestamp": 1570538246143,
+            "error": null,
+            "__typename": "State"
+          },
+          "__typename": "MonitorSummary"
+        },
+        {
+          "monitor_id": "secure-avc",
+          "histogram": {
+            "count": 64,
+            "points": [
+              {
+                "timestamp": 1570538088000,
+                "up": 12,
+                "down": 0,
+                "__typename": "SummaryHistogramPoint"
+              },
+              {
+                "timestamp": 1570538124000,
+                "up": 16,
+                "down": 0,
+                "__typename": "SummaryHistogramPoint"
+              },
+              {
+                "timestamp": 1570538160000,
+                "up": 12,
+                "down": 0,
+                "__typename": "SummaryHistogramPoint"
+              },
+              {
+                "timestamp": 1570538196000,
+                "up": 16,
+                "down": 0,
+                "__typename": "SummaryHistogramPoint"
+              },
+              {
+                "timestamp": 1570538232000,
+                "up": 8,
+                "down": 0,
+                "__typename": "SummaryHistogramPoint"
+              }
+            ],
+            "__typename": "SummaryHistogram"
+          },
+          "state": {
+            "agent": null,
+            "checks": [
+              {
+                "agent": { "id": "8f9a37fb-573a-4fdc-9895-440a5b39c250", "__typename": "Agent" },
+                "container": null,
+                "kubernetes": null,
+                "monitor": {
+                  "ip": "185.199.108.153",
+                  "name": "",
+                  "status": "up",
+                  "__typename": "CheckMonitor"
+                },
+                "observer": {
+                  "geo": { "name": null, "location": null, "__typename": "CheckGeo" },
+                  "__typename": "CheckObserver"
+                },
+                "timestamp": "1570538246145",
+                "__typename": "Check"
+              },
+              {
+                "agent": { "id": "8f9a37fb-573a-4fdc-9895-440a5b39c250", "__typename": "Agent" },
+                "container": null,
+                "kubernetes": null,
+                "monitor": {
+                  "ip": "185.199.109.153",
+                  "name": "",
+                  "status": "up",
+                  "__typename": "CheckMonitor"
+                },
+                "observer": {
+                  "geo": { "name": null, "location": null, "__typename": "CheckGeo" },
+                  "__typename": "CheckObserver"
+                },
+                "timestamp": "1570538246145",
+                "__typename": "Check"
+              },
+              {
+                "agent": { "id": "8f9a37fb-573a-4fdc-9895-440a5b39c250", "__typename": "Agent" },
+                "container": null,
+                "kubernetes": null,
+                "monitor": {
+                  "ip": "185.199.110.153",
+                  "name": "",
+                  "status": "up",
+                  "__typename": "CheckMonitor"
+                },
+                "observer": {
+                  "geo": { "name": null, "location": null, "__typename": "CheckGeo" },
+                  "__typename": "CheckObserver"
+                },
+                "timestamp": "1570538246145",
+                "__typename": "Check"
+              },
+              {
+                "agent": { "id": "8f9a37fb-573a-4fdc-9895-440a5b39c250", "__typename": "Agent" },
+                "container": null,
+                "kubernetes": null,
+                "monitor": {
+                  "ip": "185.199.111.153",
+                  "name": "",
+                  "status": "up",
+                  "__typename": "CheckMonitor"
+                },
+                "observer": {
+                  "geo": { "name": null, "location": null, "__typename": "CheckGeo" },
+                  "__typename": "CheckObserver"
+                },
+                "timestamp": "1570538246145",
+                "__typename": "Check"
+              }
+            ],
+            "geo": null,
+            "observer": {
+              "geo": { "name": [], "location": null, "__typename": "StateGeo" },
+              "__typename": "StateObserver"
+            },
+            "monitor": {
+              "id": null,
+              "name": null,
+              "status": "up",
+              "type": null,
+              "__typename": "MonitorState"
+            },
+            "summary": { "up": 4, "down": 0, "geo": null, "__typename": "Summary" },
+            "url": {
+              "full": "https://blog.andrewvc.com",
+              "domain": "blog.andrewvc.com",
+              "__typename": "StateUrl"
+            },
+            "timestamp": 1570538246145,
+            "error": null,
+            "__typename": "State"
+          },
+          "__typename": "MonitorSummary"
+        }
+      ],
+      "__typename": "MonitorSummaryResult"
+    }
+  }
+}

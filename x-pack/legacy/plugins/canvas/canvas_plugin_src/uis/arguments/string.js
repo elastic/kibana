@@ -11,7 +11,7 @@ import { EuiFlexItem, EuiFlexGroup, EuiFieldText, EuiButton } from '@elastic/eui
 import { get } from 'lodash';
 import { createStatefulPropHoc } from '../../../public/components/enhance/stateful_prop';
 import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
-import { ArgumentStrings } from '../../strings';
+import { ArgumentStrings } from '../../../i18n';
 
 const { String: strings } = ArgumentStrings;
 
@@ -26,7 +26,7 @@ const StringArgInput = ({ updateValue, value, confirm, commit, argId }) => (
       />
     </EuiFlexItem>
     {confirm && (
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem grow={false} className="canvasSidebar__panel-noMinWidth">
         <EuiButton size="s" onClick={() => commit(value)}>
           {confirm}
         </EuiButton>

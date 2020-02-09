@@ -8,19 +8,33 @@ import React from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 
 import { RedirectWrapper } from './redirect_wrapper';
+import { SiemPageName } from '../../pages/home/types';
+import { FlowTarget, FlowTargetSourceDest } from '../../graphql/types';
 
 export type NetworkComponentProps = RouteComponentProps<{
-  detailName: string;
+  detailName?: string;
+  flowTarget?: string;
   search: string;
 }>;
 
 export const RedirectToNetworkPage = ({
   match: {
-    params: { detailName },
+    params: { detailName, flowTarget },
   },
   location: { search },
 }: NetworkComponentProps) => (
-  <RedirectWrapper to={detailName ? `/network/ip/${detailName}${search}` : `/network${search}`} />
+  <RedirectWrapper
+    to={
+      detailName
+        ? `/${SiemPageName.network}/ip/${detailName}/${flowTarget}${search}`
+        : `/${SiemPageName.network}${search}`
+    }
+  />
 );
 
-export const getNetworkUrl = () => '#/link-to/network';
+const baseNetworkUrl = `#/link-to/${SiemPageName.network}`;
+export const getNetworkUrl = () => baseNetworkUrl;
+export const getIPDetailsUrl = (
+  detailName: string,
+  flowTarget?: FlowTarget | FlowTargetSourceDest
+) => `${baseNetworkUrl}/ip/${detailName}/${flowTarget || FlowTarget.source}`;

@@ -39,18 +39,26 @@ export default function createFindTests({ getService }: FtrProviderContext) {
       const match = response.body.data.find((obj: any) => obj.id === createdAlert.id);
       expect(match).to.eql({
         id: createdAlert.id,
+        name: 'abc',
+        tags: ['foo'],
         alertTypeId: 'test.noop',
-        interval: '10s',
+        consumer: 'bar',
+        schedule: { interval: '1m' },
         enabled: true,
         actions: [],
-        alertTypeParams: {},
+        params: {},
         createdBy: null,
+        apiKeyOwner: null,
         scheduledTaskId: match.scheduledTaskId,
         updatedBy: null,
         throttle: '1m',
         muteAll: false,
         mutedInstanceIds: [],
+        createdAt: match.createdAt,
+        updatedAt: match.updatedAt,
       });
+      expect(Date.parse(match.createdAt)).to.be.greaterThan(0);
+      expect(Date.parse(match.updatedAt)).to.be.greaterThan(0);
     });
 
     it(`shouldn't find alert from another space`, async () => {

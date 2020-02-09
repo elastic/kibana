@@ -1,0 +1,140 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Storyshots shareables/Footer/components PageControls 1`] = `
+<div
+  className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+  style={
+    Object {
+      "margin": "0 12px",
+    }
+  }
+>
+  <div
+    className="euiFlexItem euiFlexItem--flexGrowZero"
+  >
+    <button
+      aria-label="Previous Page"
+      className="euiButtonIcon euiButtonIcon--ghost"
+      data-test-subj="pageControlsPrevPage"
+      disabled={true}
+      onClick={[Function]}
+      type="button"
+    >
+      <svg
+        aria-hidden="true"
+        className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
+        focusable="false"
+        height={16}
+        style={null}
+        viewBox="0 0 16 16"
+        width={16}
+        xmlns="http://www.w3.org/2000/svg"
+      />
+    </button>
+  </div>
+  <div
+    className="euiFlexItem euiFlexItem--flexGrowZero"
+  >
+    <button
+      className="euiButtonEmpty euiButtonEmpty--ghost euiButtonEmpty--small"
+      data-test-subj="pageControlsCurrentPage"
+      onClick={[Function]}
+      type="button"
+    >
+      <span
+        className="euiButtonEmpty__content"
+      >
+        <span
+          className="euiButtonEmpty__text"
+        >
+          <div
+            className="euiText euiText--small"
+          >
+            <div
+              className="euiTextColor euiTextColor--ghost"
+            >
+              Page 
+              1
+            </div>
+          </div>
+        </span>
+      </span>
+    </button>
+  </div>
+  <div
+    className="euiFlexItem euiFlexItem--flexGrowZero"
+  >
+    <button
+      aria-label="Next Page"
+      className="euiButtonIcon euiButtonIcon--ghost"
+      data-test-subj="pageControlsNextPage"
+      disabled={true}
+      onClick={[Function]}
+      type="button"
+    >
+      <svg
+        aria-hidden="true"
+        className="euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon"
+        focusable="false"
+        height={16}
+        style={null}
+        viewBox="0 0 16 16"
+        width={16}
+        xmlns="http://www.w3.org/2000/svg"
+      />
+    </button>
+  </div>
+</div>
+`;
+
+exports[`Storyshots shareables/Footer/components Title 1`] = `
+<div
+  style={
+    Object {
+      "background": "#333",
+      "padding": 10,
+    }
+  }
+>
+  <div
+    className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+  >
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <svg
+        className="euiIcon euiIcon--medium euiIcon-isLoading"
+        focusable="false"
+        height={16}
+        style={null}
+        viewBox="0 0 16 16"
+        width={16}
+        xmlns="http://www.w3.org/2000/svg"
+      />
+    </div>
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+      style={
+        Object {
+          "cursor": "default",
+          "minWidth": 0,
+        }
+      }
+    >
+      <div
+        className="euiText euiText--small"
+      >
+        <div
+          className="euiTextColor euiTextColor--ghost"
+        >
+          <div
+            className="eui-textTruncate"
+          >
+            This is a test title.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;

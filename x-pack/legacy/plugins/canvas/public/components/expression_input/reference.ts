@@ -5,6 +5,10 @@
  */
 import { CanvasFunction, CanvasArgValue } from '../../../types';
 
+import { ComponentStrings } from '../../../i18n';
+
+const { ExpressionInput: strings } = ComponentStrings;
+
 /**
  * Given a function definition, this function returns a markdown string
  * that includes the context the function accepts, what the function returns
@@ -12,9 +16,13 @@ import { CanvasFunction, CanvasArgValue } from '../../../types';
  */
 export function getFunctionReferenceStr(fnDef: CanvasFunction) {
   const { help, context, type } = fnDef;
-  const doc = `**Accepts**: ${
-    context && context.types ? context.types.join(' | ') : 'null'
-  }, **Returns**: ${type ? type : 'null'}
+
+  const acceptTypes = context && context.types ? context.types.join(' | ') : 'null';
+  const returnType = type ? type : 'null';
+
+  const doc = `${strings.getFunctionReferenceAcceptsDetail(
+    acceptTypes
+  )} ${strings.getFunctionReferenceReturnsDetail(returnType)}
 \n\n${help}`;
 
   return doc;
@@ -32,17 +40,21 @@ export function getArgReferenceStr(argDef: CanvasArgValue) {
   const secondLineArr = [];
 
   if (def != null) {
-    secondLineArr.push(`**Default**: ${def}`);
+    secondLineArr.push(strings.getArgReferenceDefaultDetail(String(def)));
   }
 
   if (aliases && aliases.length) {
-    secondLineArr.push(`**Aliases**: ${aliases.join(' | ')}`);
+    secondLineArr.push(strings.getArgReferenceAliasesDetail(aliases.join(' | ')));
   }
 
-  const ref = `**Types**: ${types && types.length ? types.join(' | ') : 'null'},
- **Required**: ${String(Boolean(required))}
-\n\n${secondLineArr.join(', ')}
-\n\n${help}`;
+  const typesStr = types && types.length ? types.join(' | ') : 'null';
+  const requiredStr = String(Boolean(required));
+
+  const ref = `${strings.getArgReferenceTypesDetail(
+    typesStr
+  )} ${strings.getArgReferenceRequiredDetail(requiredStr)}
+  \n\n${secondLineArr.join(' ')}
+  \n\n${help}`;
 
   return ref;
 }

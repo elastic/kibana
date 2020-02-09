@@ -19,27 +19,18 @@
 
 import React from 'react';
 
-import {
-  KuiButton,
-} from '../../../../components';
+import { KuiButton } from '../../../../components';
 
 export default () => (
   <div>
-    <KuiButton
-      buttonType="basic"
-      onClick={() => window.alert('Button clicked')}
-    >
+    <KuiButton buttonType="basic" onClick={() => window.alert('Button clicked')}>
       Basic button
     </KuiButton>
 
     <br />
     <br />
 
-    <KuiButton
-      buttonType="basic"
-      onClick={() => window.alert('Button clicked')}
-      disabled
-    >
+    <KuiButton buttonType="basic" onClick={() => window.alert('Button clicked')} disabled>
       Basic button, disabled
     </KuiButton>
   </div>

@@ -10,6 +10,15 @@ import {
   BaseIndexPatternColumn,
   FieldBasedIndexPatternColumn,
 } from './operations/definitions/column_types';
+import { DataType } from '../types';
+
+/**
+ * Normalizes the specified operation type. (e.g. document operations
+ * produce 'number')
+ */
+export function normalizeOperationDataType(type: DataType) {
+  return type === 'document' ? 'number' : type;
+}
 
 export function hasField(column: BaseIndexPatternColumn): column is FieldBasedIndexPatternColumn {
   return 'sourceField' in column;

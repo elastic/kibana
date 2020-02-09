@@ -18,33 +18,43 @@
  */
 import { PriorityCollection } from './priority_collection';
 import { SavedObjectsClientContract } from '../../types';
+import { SavedObjectsRepositoryFactory } from '../../saved_objects_service';
+import { KibanaRequest } from '../../../http';
 
 /**
  * Options passed to each SavedObjectsClientWrapperFactory to aid in creating the wrapper instance.
  * @public
  */
-export interface SavedObjectsClientWrapperOptions<Request = unknown> {
+export interface SavedObjectsClientWrapperOptions {
   client: SavedObjectsClientContract;
-  request: Request;
+  request: KibanaRequest;
 }
 
 /**
  * Describes the factory used to create instances of Saved Objects Client Wrappers.
  * @public
  */
-export type SavedObjectsClientWrapperFactory<Request = unknown> = (
-  options: SavedObjectsClientWrapperOptions<Request>
+export type SavedObjectsClientWrapperFactory = (
+  options: SavedObjectsClientWrapperOptions
 ) => SavedObjectsClientContract;
 
 /**
  * Describes the factory used to create instances of the Saved Objects Client.
  * @public
  */
-export type SavedObjectsClientFactory<Request = unknown> = ({
+export type SavedObjectsClientFactory = ({
   request,
 }: {
-  request: Request;
+  request: KibanaRequest;
 }) => SavedObjectsClientContract;
+
+/**
+ * Provider to invoke to retrieve a {@link SavedObjectsClientFactory}.
+ * @public
+ */
+export type SavedObjectsClientFactoryProvider = (
+  repositoryFactory: SavedObjectsRepositoryFactory
+) => SavedObjectsClientFactory;
 
 /**
  * Options to control the creation of the Saved Objects Client.
@@ -55,28 +65,34 @@ export interface SavedObjectsClientProviderOptions {
 }
 
 /**
- * Provider for the Scoped Saved Object Client.
+ * @internal
  */
-export class ScopedSavedObjectsClientProvider<Request = unknown> {
+export type ISavedObjectsClientProvider = Pick<
+  SavedObjectsClientProvider,
+  keyof SavedObjectsClientProvider
+>;
+
+/**
+ * Provider for the Scoped Saved Objects Client.
+ *
+ * @internal
+ */
+export class SavedObjectsClientProvider {
   private readonly _wrapperFactories = new PriorityCollection<{
     id: string;
-    factory: SavedObjectsClientWrapperFactory<Request>;
+    factory: SavedObjectsClientWrapperFactory;
   }>();
-  private _clientFactory: SavedObjectsClientFactory<Request>;
-  private readonly _originalClientFactory: SavedObjectsClientFactory<Request>;
+  private _clientFactory: SavedObjectsClientFactory;
+  private readonly _originalClientFactory: SavedObjectsClientFactory;
 
-  constructor({
-    defaultClientFactory,
-  }: {
-    defaultClientFactory: SavedObjectsClientFactory<Request>;
-  }) {
+  constructor({ defaultClientFactory }: { defaultClientFactory: SavedObjectsClientFactory }) {
     this._originalClientFactory = this._clientFactory = defaultClientFactory;
   }
 
   addClientWrapperFactory(
     priority: number,
     id: string,
-    factory: SavedObjectsClientWrapperFactory<Request>
+    factory: SavedObjectsClientWrapperFactory
   ): void {
     if (this._wrapperFactories.has(entry => entry.id === id)) {
       throw new Error(`wrapper factory with id ${id} is already defined`);
@@ -94,7 +110,7 @@ export class ScopedSavedObjectsClientProvider<Request = unknown> {
   }
 
   getClient(
-    request: Request,
+    request: KibanaRequest,
     options: SavedObjectsClientProviderOptions = {}
   ): SavedObjectsClientContract {
     const client = this._clientFactory({

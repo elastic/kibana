@@ -4,15 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SearchParams } from 'elasticsearch';
+import {
+  ESSearchRequest,
+  ESSearchBody
+} from '../../../../../plugins/apm/typings/elasticsearch';
+import {
+  AggregationOptionsByType,
+  AggregationInputMap
+} from '../../../../../plugins/apm/typings/elasticsearch/aggregations';
 
-export type Projection = Omit<SearchParams, 'body' | 'aggs'> & {
-  body: {
-    query: any;
-  } & {
+export type Projection = Omit<ESSearchRequest, 'body'> & {
+  body: Omit<ESSearchBody, 'aggs'> & {
     aggs?: {
       [key: string]: {
-        terms: any;
+        terms: AggregationOptionsByType['terms'];
+        aggs?: AggregationInputMap;
       };
     };
   };

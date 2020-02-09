@@ -20,7 +20,7 @@
 import BaseOptimizer from '../base_optimizer';
 import { createBundlesRoute } from '../bundles_route';
 import { DllCompiler } from '../dynamic_dll_plugin';
-import { fromRoot } from '../../legacy/utils';
+import { fromRoot } from '../../core/server/utils';
 import * as Rx from 'rxjs';
 import { mergeMap, take } from 'rxjs/operators';
 
@@ -66,7 +66,7 @@ export default class WatchOptimizer extends BaseOptimizer {
    * calling extended function also adding a new register function
    *
    * It gets called by super.init()
-  */
+   */
   registerCompilerHooks() {
     super.registerCompilerHooks();
     this.registerCompilerWatchRunHook();
@@ -75,7 +75,7 @@ export default class WatchOptimizer extends BaseOptimizer {
   registerCompilerWatchRunHook() {
     this.compiler.hooks.watchRun.tap('watch_optimizer-watchRun', () => {
       this.status$.next({
-        type: STATUS.RUNNING
+        type: STATUS.RUNNING,
       });
     });
   }
@@ -95,7 +95,7 @@ export default class WatchOptimizer extends BaseOptimizer {
         this.status$.next({
           type: STATUS.FAILURE,
           seconds,
-          error: this.failedStatsToError(stats)
+          error: this.failedStatsToError(stats),
         });
       } else {
         this.status$.next({
@@ -115,20 +115,18 @@ export default class WatchOptimizer extends BaseOptimizer {
       return h.continue;
     });
 
-    server.route(createBundlesRoute({
-      regularBundlesPath: this.compiler.outputPath,
-      dllBundlesPath: DllCompiler.getRawDllConfig().outputPath,
-      basePublicPath: basePath,
-      builtCssPath: fromRoot('built_assets/css'),
-    }));
+    server.route(
+      createBundlesRoute({
+        regularBundlesPath: this.compiler.outputPath,
+        dllBundlesPath: DllCompiler.getRawDllConfig().outputPath,
+        basePublicPath: basePath,
+        builtCssPath: fromRoot('built_assets/css'),
+      })
+    );
   }
 
   async onceBuildOutcome() {
-    return await this.status$.pipe(
-      mergeMap(this.mapStatusToOutcomes),
-      take(1)
-    )
-      .toPromise();
+    return await this.status$.pipe(mergeMap(this.mapStatusToOutcomes), take(1)).toPromise();
   }
 
   mapStatusToOutcomes({ type, error }) {
@@ -145,11 +143,11 @@ export default class WatchOptimizer extends BaseOptimizer {
     }
   }
 
-  compilerWatchErrorHandler = (error) => {
+  compilerWatchErrorHandler = error => {
     if (error) {
       this.status$.next({
         type: STATUS.FATAL,
-        error
+        error,
       });
     }
   };
@@ -159,7 +157,7 @@ export default class WatchOptimizer extends BaseOptimizer {
       case STATUS.RUNNING:
         if (!this.initialBuildComplete) {
           this.logWithMetadata(['info', 'optimize'], `Optimization started`, {
-            bundles: this.uiBundles.getIds()
+            bundles: this.uiBundles.getIds(),
           });
         }
         break;
@@ -168,7 +166,7 @@ export default class WatchOptimizer extends BaseOptimizer {
         this.logWithMetadata(['info', 'optimize'], `Optimization success in ${seconds} seconds`, {
           bundles: this.uiBundles.getIds(),
           status: 'success',
-          seconds
+          seconds,
         });
         break;
 
@@ -176,12 +174,16 @@ export default class WatchOptimizer extends BaseOptimizer {
         // errors during initialization to the server, unlike the rest of the
         // errors produced here. Lets not muddy the console with extra errors
         if (!this.initializing) {
-          this.logWithMetadata(['fatal', 'optimize'], `Optimization failed in ${seconds} seconds${error}`, {
-            bundles: this.uiBundles.getIds(),
-            status: 'failed',
-            seconds,
-            err: error
-          });
+          this.logWithMetadata(
+            ['fatal', 'optimize'],
+            `Optimization failed in ${seconds} seconds${error}`,
+            {
+              bundles: this.uiBundles.getIds(),
+              status: 'failed',
+              seconds,
+              err: error,
+            }
+          );
         }
         break;
 
@@ -190,5 +192,5 @@ export default class WatchOptimizer extends BaseOptimizer {
         process.exit(1);
         break;
     }
-  }
+  };
 }

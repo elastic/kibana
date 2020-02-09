@@ -10,11 +10,13 @@ import {
   HostItem,
   HostsData,
   HostsSortField,
+  Maybe,
+  OsEcsFields,
   SourceConfiguration,
   TimerangeInput,
 } from '../../graphql/types';
 import { FrameworkRequest, RequestOptionsPaginated } from '../framework';
-import { Hit, Hits, SearchHit } from '../types';
+import { Hit, Hits, SearchHit, TotalValue } from '../types';
 
 export interface HostsAdapter {
   getHosts(req: FrameworkRequest, options: HostsRequestOptions): Promise<HostsData>;
@@ -71,23 +73,38 @@ export interface HostBuckets {
   buckets: HostBucketItem[];
 }
 
+export interface HostOsHitsItem {
+  hits: {
+    total: TotalValue | number;
+    max_score: number | null;
+    hits: Array<{
+      _source: { host: { os: Maybe<OsEcsFields> } };
+      sort?: [number];
+      _index?: string;
+      _type?: string;
+      _id?: string;
+      _score?: number | null;
+    }>;
+  };
+}
+
 export interface HostAggEsItem {
   cloud_instance_id?: HostBuckets;
   cloud_machine_type?: HostBuckets;
   cloud_provider?: HostBuckets;
   cloud_region?: HostBuckets;
-  key?: string;
   firstSeen?: HostValue;
-  lastSeen?: HostValue;
   host_architecture?: HostBuckets;
   host_id?: HostBuckets;
   host_ip?: HostBuckets;
   host_mac?: HostBuckets;
   host_name?: HostBuckets;
-  host_os?: HostBuckets;
   host_os_name?: HostBuckets;
   host_os_version?: HostBuckets;
   host_type?: HostBuckets;
+  key?: string;
+  lastSeen?: HostValue;
+  os?: HostOsHitsItem;
 }
 
 export interface HostEsData extends SearchHit {

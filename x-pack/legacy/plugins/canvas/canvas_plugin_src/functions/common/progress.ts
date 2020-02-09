@@ -5,10 +5,9 @@
  */
 
 import { get } from 'lodash';
-import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
 import { openSans } from '../../../common/lib/fonts';
-import { Render, Style } from '../../../types';
-import { getFunctionHelp, getFunctionErrors } from '../../strings';
+import { Render, Style, ExpressionFunction } from '../../../types';
+import { getFunctionHelp, getFunctionErrors } from '../../../i18n';
 
 export enum Shape {
   GAUGE = 'gauge',

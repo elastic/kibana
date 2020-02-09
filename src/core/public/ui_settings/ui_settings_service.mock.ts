@@ -17,10 +17,11 @@
  * under the License.
  */
 import * as Rx from 'rxjs';
-import { UiSettingsService, UiSettingsClientContract } from './';
+import { UiSettingsService } from './';
+import { IUiSettingsClient } from './types';
 
 const createSetupContractMock = () => {
-  const setupContract: jest.Mocked<UiSettingsClientContract> = {
+  const setupContract: jest.Mocked<IUiSettingsClient> = {
     getAll: jest.fn(),
     get: jest.fn(),
     get$: jest.fn(),
@@ -34,7 +35,6 @@ const createSetupContractMock = () => {
     getUpdate$: jest.fn(),
     getSaved$: jest.fn(),
     getUpdateErrors$: jest.fn(),
-    stop: jest.fn(),
   };
   setupContract.get$.mockReturnValue(new Rx.Subject<any>());
   setupContract.getUpdate$.mockReturnValue(new Rx.Subject<any>());

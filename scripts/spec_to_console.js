@@ -17,5 +17,4 @@
  * under the License.
  */
 
-
 require('../packages/kbn-spec-to-console/bin/spec_to_console');

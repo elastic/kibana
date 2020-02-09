@@ -6,10 +6,10 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { asTime, asInteger } from '../../../../../utils/formatters';
+import { asDuration, asInteger } from '../../../../../utils/formatters';
 import { fontSizes } from '../../../../../style/variables';
 
-export const ChoroplethToolTip: React.SFC<{
+export const ChoroplethToolTip: React.FC<{
   name: string;
   value: number;
   docCount: number;
@@ -19,19 +19,19 @@ export const ChoroplethToolTip: React.SFC<{
       <div style={{ fontSize: fontSizes.large }}>{name}</div>
       <div>
         {i18n.translate(
-          'xpack.apm.metrics.pageLoadCharts.RegionMapChart.ToolTip.avgPageLoadDuration',
+          'xpack.apm.metrics.durationByCountryMap.RegionMapChart.ToolTip.avgPageLoadDuration',
           {
             defaultMessage: 'Avg. page load duration:'
           }
         )}
       </div>
       <div style={{ fontWeight: 'bold', fontSize: fontSizes.large }}>
-        {asTime(value)}
+        {asDuration(value)}
       </div>
       <div>
         (
         {i18n.translate(
-          'xpack.apm.metrics.pageLoadCharts.RegionMapChart.ToolTip.countPageLoads',
+          'xpack.apm.metrics.durationByCountryMap.RegionMapChart.ToolTip.countPageLoads',
           {
             values: { docCount: asInteger(docCount) },
             defaultMessage: '{docCount} page loads'

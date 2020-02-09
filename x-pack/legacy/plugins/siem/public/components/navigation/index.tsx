@@ -4,150 +4,97 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEqual } from 'lodash/fp';
+import isEqual from 'lodash/fp/isEqual';
+import deepEqual from 'fast-deep-equal';
 import React, { useEffect } from 'react';
-import { compose } from 'redux';
 import { connect } from 'react-redux';
+import { compose } from 'redux';
 
+import { useKibana } from '../../lib/kibana';
 import { RouteSpyState } from '../../utils/route/types';
 import { useRouteSpy } from '../../utils/route/use_route_spy';
-import { CONSTANTS } from '../url_state/constants';
-import {
-  inputsSelectors,
-  hostsSelectors,
-  networkSelectors,
-  timelineSelectors,
-  State,
-  hostsModel,
-  networkModel,
-} from '../../store';
-
+import { makeMapStateToProps } from '../url_state/helpers';
 import { setBreadcrumbs } from './breadcrumbs';
 import { TabNavigation } from './tab_navigation';
-import { TabNavigationProps } from './tab_navigation/types';
-import { SiemNavigationComponentProps } from './types';
+import { SiemNavigationProps, SiemNavigationComponentProps } from './types';
 
-export const SiemNavigationComponent = React.memo<TabNavigationProps & RouteSpyState>(
-  ({
-    detailName,
-    display,
-    hostDetails,
-    hosts,
-    navTabs,
-    network,
-    pageName,
-    pathName,
-    search,
-    showBorder,
-    tabName,
-    timelineId,
-    timerange,
-  }) => {
-    useEffect(() => {
-      if (pathName) {
-        setBreadcrumbs({
+export const SiemNavigationComponent: React.FC<SiemNavigationComponentProps &
+  SiemNavigationProps &
+  RouteSpyState> = ({
+  detailName,
+  display,
+  navTabs,
+  pageName,
+  pathName,
+  search,
+  tabName,
+  urlState,
+  flowTarget,
+  state,
+}) => {
+  const { chrome } = useKibana().services;
+
+  useEffect(() => {
+    if (pathName) {
+      setBreadcrumbs(
+        {
+          query: urlState.query,
           detailName,
-          hosts,
-          hostDetails,
+          filters: urlState.filters,
           navTabs,
-          network,
           pageName,
           pathName,
+          savedQuery: urlState.savedQuery,
           search,
           tabName,
-          timerange,
-          timelineId,
-        });
-      }
-    }, [pathName, search, hosts, hostDetails, network, navTabs, timerange, timelineId]);
-
-    return (
-      <TabNavigation
-        display={display}
-        hosts={hosts}
-        hostDetails={hostDetails}
-        navTabs={navTabs}
-        network={network}
-        pageName={pageName}
-        pathName={pathName}
-        showBorder={showBorder}
-        tabName={tabName}
-        timelineId={timelineId}
-        timerange={timerange}
-      />
-    );
-  },
-  (prevProps, nextProps) => {
-    return (
-      prevProps.pathName === nextProps.pathName &&
-      prevProps.search === nextProps.search &&
-      isEqual(prevProps.hosts, nextProps.hosts) &&
-      isEqual(prevProps.hostDetails, nextProps.hostDetails) &&
-      isEqual(prevProps.network, nextProps.network) &&
-      isEqual(prevProps.navTabs, nextProps.navTabs) &&
-      isEqual(prevProps.timerange, nextProps.timerange) &&
-      isEqual(prevProps.timelineId, nextProps.timelineId)
-    );
-  }
-);
-
-SiemNavigationComponent.displayName = 'SiemNavigationComponent';
-
-const makeMapStateToProps = () => {
-  const getInputsSelector = inputsSelectors.inputsSelector();
-  const getHostsFilterQueryAsKuery = hostsSelectors.hostsFilterQueryAsKuery();
-  const getNetworkFilterQueryAsKuery = networkSelectors.networkFilterQueryAsKuery();
-  const getTimelines = timelineSelectors.getTimelines();
-  const mapStateToProps = (state: State) => {
-    const inputState = getInputsSelector(state);
-    const { linkTo: globalLinkTo, timerange: globalTimerange } = inputState.global;
-    const { linkTo: timelineLinkTo, timerange: timelineTimerange } = inputState.timeline;
-
-    const openTimelineId = Object.entries(getTimelines(state)).reduce(
-      (useTimelineId, [timelineId, timelineObj]) =>
-        timelineObj.savedObjectId != null ? timelineObj.savedObjectId : useTimelineId,
-      ''
-    );
-
-    return {
-      hosts: {
-        filterQuery: getHostsFilterQueryAsKuery(state, hostsModel.HostsType.page),
-        queryLocation: CONSTANTS.hostsPage,
-      },
-      hostDetails: {
-        filterQuery: getHostsFilterQueryAsKuery(state, hostsModel.HostsType.details),
-        queryLocation: CONSTANTS.hostsDetails,
-      },
-      network: {
-        filterQuery: getNetworkFilterQueryAsKuery(state, networkModel.NetworkType.page),
-        queryLocation: CONSTANTS.networkPage,
-      },
-      [CONSTANTS.timerange]: {
-        global: {
-          [CONSTANTS.timerange]: globalTimerange,
-          linkTo: globalLinkTo,
+          flowTarget,
+          timerange: urlState.timerange,
+          timeline: urlState.timeline,
+          state,
         },
-        timeline: {
-          [CONSTANTS.timerange]: timelineTimerange,
-          linkTo: timelineLinkTo,
-        },
-      },
-      [CONSTANTS.timelineId]: openTimelineId,
-    };
-  };
+        chrome
+      );
+    }
+  }, [chrome, pathName, search, navTabs, urlState, state]);
 
-  return mapStateToProps;
+  return (
+    <TabNavigation
+      query={urlState.query}
+      display={display}
+      filters={urlState.filters}
+      navTabs={navTabs}
+      pageName={pageName}
+      pathName={pathName}
+      savedQuery={urlState.savedQuery}
+      tabName={tabName}
+      timeline={urlState.timeline}
+      timerange={urlState.timerange}
+    />
+  );
 };
 
 export const SiemNavigationRedux = compose<
-  React.ComponentClass<SiemNavigationComponentProps & RouteSpyState>
->(connect(makeMapStateToProps))(SiemNavigationComponent);
+  React.ComponentClass<SiemNavigationProps & RouteSpyState>
+>(connect(makeMapStateToProps))(
+  React.memo(
+    SiemNavigationComponent,
+    (prevProps, nextProps) =>
+      prevProps.pathName === nextProps.pathName &&
+      prevProps.search === nextProps.search &&
+      isEqual(prevProps.navTabs, nextProps.navTabs) &&
+      isEqual(prevProps.urlState, nextProps.urlState) &&
+      deepEqual(prevProps.state, nextProps.state)
+  )
+);
 
-export const SiemNavigation = React.memo<SiemNavigationComponentProps>(props => {
+const SiemNavigationContainer: React.FC<SiemNavigationProps> = props => {
   const [routeProps] = useRouteSpy();
-  const stateNavReduxProps: RouteSpyState & SiemNavigationComponentProps = {
+  const stateNavReduxProps: RouteSpyState & SiemNavigationProps = {
     ...routeProps,
     ...props,
   };
+
   return <SiemNavigationRedux {...stateNavReduxProps} />;
-});
+};
+
+export const SiemNavigation = SiemNavigationContainer;

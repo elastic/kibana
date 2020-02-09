@@ -24,15 +24,13 @@ import { schema } from '@kbn/config-schema';
 import { Env } from '../config';
 import { getEnvOptions } from '../config/__mocks__/env';
 import { CoreContext } from '../core_context';
+import { coreMock } from '../mocks';
 import { configServiceMock } from '../config/config_service.mock';
-import { elasticsearchServiceMock } from '../elasticsearch/elasticsearch_service.mock';
-import { httpServiceMock } from '../http/http_service.mock';
 import { loggingServiceMock } from '../logging/logging_service.mock';
 
 import { PluginWrapper } from './plugin';
 import { PluginManifest } from './types';
 import { createPluginInitializerContext, createPluginSetupContext } from './plugin_context';
-import { contextServiceMock } from '../context/context_service.mock';
 
 const mockPluginInitializer = jest.fn();
 const logger = loggingServiceMock.create();
@@ -68,11 +66,9 @@ configService.atPath.mockReturnValue(new BehaviorSubject({ initialize: true }));
 let coreId: symbol;
 let env: Env;
 let coreContext: CoreContext;
-const setupDeps = {
-  context: contextServiceMock.createSetupContract(),
-  elasticsearch: elasticsearchServiceMock.createSetupContract(),
-  http: httpServiceMock.createSetupContract(),
-};
+
+const setupDeps = coreMock.createInternalSetup();
+
 beforeEach(() => {
   coreId = Symbol('core');
   env = Env.createDefault(getEnvOptions());
@@ -241,6 +237,43 @@ test('`start` calls plugin.start with context and dependencies', async () => {
   expect(mockPluginInstance.start).toHaveBeenCalledWith(context, deps);
 });
 
+test("`start` resolves `startDependencies` Promise after plugin's start", async () => {
+  expect.assertions(2);
+
+  const manifest = createPluginManifest();
+  const opaqueId = Symbol();
+  const plugin = new PluginWrapper({
+    path: 'plugin-with-initializer-path',
+    manifest,
+    opaqueId,
+    initializerContext: createPluginInitializerContext(coreContext, opaqueId, manifest),
+  });
+  const startContext = { any: 'thing' } as any;
+  const pluginDeps = { someDep: 'value' };
+
+  let startDependenciesResolved = false;
+
+  const mockPluginInstance = {
+    setup: jest.fn(),
+    start: async () => {
+      // delay to ensure startDependencies is not resolved until after the plugin instance's start resolves.
+      await new Promise(resolve => setTimeout(resolve, 10));
+      expect(startDependenciesResolved).toBe(false);
+    },
+  };
+  mockPluginInitializer.mockReturnValue(mockPluginInstance);
+
+  await plugin.setup({} as any, {} as any);
+
+  const startDependenciesCheck = plugin.startDependencies.then(resolvedStartDeps => {
+    startDependenciesResolved = true;
+    expect(resolvedStartDeps).toEqual([startContext, pluginDeps]);
+  });
+
+  await plugin.start(startContext, pluginDeps);
+  await startDependenciesCheck;
+});
+
 test('`stop` fails if plugin is not set up', async () => {
   const manifest = createPluginManifest();
   const opaqueId = Symbol();
@@ -297,12 +330,13 @@ test('`stop` calls `stop` defined by the plugin instance', async () => {
 describe('#getConfigSchema()', () => {
   it('reads config schema from plugin', () => {
     const pluginSchema = schema.any();
+    const configDescriptor = {
+      schema: pluginSchema,
+    };
     jest.doMock(
       'plugin-with-schema/server',
       () => ({
-        config: {
-          schema: pluginSchema,
-        },
+        config: configDescriptor,
       }),
       { virtual: true }
     );
@@ -315,7 +349,7 @@ describe('#getConfigSchema()', () => {
       initializerContext: createPluginInitializerContext(coreContext, opaqueId, manifest),
     });
 
-    expect(plugin.getConfigSchema()).toBe(pluginSchema);
+    expect(plugin.getConfigDescriptor()).toBe(configDescriptor);
   });
 
   it('returns null if config definition not specified', () => {
@@ -328,7 +362,7 @@ describe('#getConfigSchema()', () => {
       opaqueId,
       initializerContext: createPluginInitializerContext(coreContext, opaqueId, manifest),
     });
-    expect(plugin.getConfigSchema()).toBe(null);
+    expect(plugin.getConfigDescriptor()).toBe(null);
   });
 
   it('returns null for plugins without a server part', () => {
@@ -340,7 +374,7 @@ describe('#getConfigSchema()', () => {
       opaqueId,
       initializerContext: createPluginInitializerContext(coreContext, opaqueId, manifest),
     });
-    expect(plugin.getConfigSchema()).toBe(null);
+    expect(plugin.getConfigDescriptor()).toBe(null);
   });
 
   it('throws if plugin contains invalid schema', () => {
@@ -363,7 +397,7 @@ describe('#getConfigSchema()', () => {
       opaqueId,
       initializerContext: createPluginInitializerContext(coreContext, opaqueId, manifest),
     });
-    expect(() => plugin.getConfigSchema()).toThrowErrorMatchingInlineSnapshot(
+    expect(() => plugin.getConfigDescriptor()).toThrowErrorMatchingInlineSnapshot(
       `"Configuration schema expected to be an instance of Type"`
     );
   });

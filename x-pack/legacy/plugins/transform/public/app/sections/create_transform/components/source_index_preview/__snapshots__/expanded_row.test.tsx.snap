@@ -1,0 +1,71 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Transform: <ExpandedRow /> Test against strings, objects and arrays. 1`] = `
+<EuiText>
+  <span
+    key="name"
+  >
+    <EuiBadge>
+      name
+      :
+    </EuiBadge>
+    <small>
+       
+      the-name
+        
+    </small>
+  </span>
+  <span
+    key="nested.inner1"
+  >
+    <EuiBadge>
+      nested.inner1
+      :
+    </EuiBadge>
+    <small>
+       
+      the-inner-1
+        
+    </small>
+  </span>
+  <span
+    key="nested.inner2"
+  >
+    <EuiBadge>
+      nested.inner2
+      :
+    </EuiBadge>
+    <small>
+       
+      the-inner-2
+        
+    </small>
+  </span>
+  <span
+    key="arrayString"
+  >
+    <EuiBadge>
+      arrayString
+      :
+    </EuiBadge>
+    <small>
+       
+      ["the-array-string-1","the-array-string-2"]
+        
+    </small>
+  </span>
+  <span
+    key="arrayObject"
+  >
+    <EuiBadge>
+      arrayObject
+      :
+    </EuiBadge>
+    <small>
+       
+      [{"object1":"the-object-1"},{"object2":"the-objects-2"}]
+        
+    </small>
+  </span>
+</EuiText>
+`;

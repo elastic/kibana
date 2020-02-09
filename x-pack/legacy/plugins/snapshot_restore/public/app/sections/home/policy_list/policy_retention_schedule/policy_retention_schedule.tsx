@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment } from 'react';
+import React, { Fragment, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -16,10 +16,17 @@ import {
   EuiSpacer,
   EuiToolTip,
   EuiCallOut,
+  EuiContextMenu,
+  EuiPopover,
 } from '@elastic/eui';
 
 import { useAppDependencies } from '../../../../index';
-import { UpdateRetentionModalProvider, UpdateRetentionSetting } from '../../../../components';
+import {
+  RetentionSettingsUpdateModalProvider,
+  UpdateRetentionSettings,
+  RetentionExecuteModalProvider,
+  ExecuteRetention,
+} from '../../../../components';
 
 interface Props {
   retentionSettings: {
@@ -40,7 +47,194 @@ export const PolicyRetentionSchedule: React.FunctionComponent<Props> = ({
     core: { i18n },
   } = useAppDependencies();
 
+  const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
+
   const { FormattedMessage } = i18n;
+
+  const renderRetentionPanel = (cronSchedule: string) => (
+    <>
+      <EuiPanel>
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiText>
+              <p>
+                <FormattedMessage
+                  id="xpack.snapshotRestore.policyRetentionSchedulePanel.retentionScheduleDescription"
+                  defaultMessage="The cron schedule for retaining snapshots is: {cronSchedule}."
+                  values={{ cronSchedule: <strong>{cronSchedule}</strong> }}
+                />
+              </p>
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="s">
+              {/** Run retention schedule prompt */}
+              <EuiFlexItem grow={false}>
+                <RetentionExecuteModalProvider>
+                  {(executeRetentionPrompt: ExecuteRetention) => {
+                    return (
+                      <EuiToolTip
+                        position="top"
+                        content={
+                          <FormattedMessage
+                            id="xpack.snapshotRestore.policyRetentionSchedulePanel.retentionScheduleExecuteLinkTooltip"
+                            defaultMessage="Run retention now"
+                          />
+                        }
+                      >
+                        <EuiButtonIcon
+                          iconType="play"
+                          onClick={() => executeRetentionPrompt()}
+                          aria-label={i18n.translate(
+                            'xpack.snapshotRestore.policyRetentionSchedulePanel.retentionScheduleExecuteLinkAriaLabel',
+                            {
+                              defaultMessage: 'Run retention now',
+                            }
+                          )}
+                        />
+                      </EuiToolTip>
+                    );
+                  }}
+                </RetentionExecuteModalProvider>
+              </EuiFlexItem>
+              {/** Edit retention schedule prompt */}
+              <EuiFlexItem grow={false}>
+                <RetentionSettingsUpdateModalProvider>
+                  {(updateRetentionPrompt: UpdateRetentionSettings) => {
+                    return (
+                      <EuiToolTip
+                        position="top"
+                        content={
+                          <FormattedMessage
+                            id="xpack.snapshotRestore.policyRetentionSchedulePanel.retentionScheduleEditLinkTooltip"
+                            defaultMessage="Edit retention schedule"
+                          />
+                        }
+                      >
+                        <EuiButtonIcon
+                          iconType="pencil"
+                          onClick={() =>
+                            updateRetentionPrompt(cronSchedule, onRetentionScheduleUpdated)
+                          }
+                          aria-label={i18n.translate(
+                            'xpack.snapshotRestore.policyRetentionSchedulePanel.retentionScheduleEditLinkAriaLabel',
+                            {
+                              defaultMessage: 'Edit retention schedule',
+                            }
+                          )}
+                        />
+                      </EuiToolTip>
+                    );
+                  }}
+                </RetentionSettingsUpdateModalProvider>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPanel>
+      <EuiSpacer />
+    </>
+  );
+
+  const renderRetentionNotConfiguredCallout = () => (
+    <>
+      <EuiCallOut
+        title={
+          <FormattedMessage
+            id="xpack.snapshotRestore.policyRetentionSchedulePanel.noScheduleConfiguredWarningTitle"
+            defaultMessage="Retention not scheduled"
+          />
+        }
+        color="warning"
+        iconType="alert"
+      >
+        <p>
+          <FormattedMessage
+            id="xpack.snapshotRestore.policyRetentionSchedulePanel.noScheduleConfiguredWarningDescription"
+            defaultMessage="One or more policies have a retention period, but no retention is scheduled."
+          />
+        </p>
+        <RetentionExecuteModalProvider>
+          {executeRetentionPrompt => {
+            return (
+              <RetentionSettingsUpdateModalProvider>
+                {updateRetentionSettingsPrompt => {
+                  return (
+                    <EuiPopover
+                      id="retentionActionMenu"
+                      button={
+                        <EuiButton
+                          data-test-subj="retentionActionMenuButton"
+                          iconSide="right"
+                          color="warning"
+                          onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+                          iconType="arrowDown"
+                        >
+                          <FormattedMessage
+                            id="xpack.snapshotRestore.policyRetentionSchedulePanel.manageRetentionButtonLabel"
+                            defaultMessage="Manage retention"
+                          />
+                        </EuiButton>
+                      }
+                      isOpen={isPopoverOpen}
+                      closePopover={() => setIsPopoverOpen(false)}
+                      panelPaddingSize="none"
+                      withTitle
+                      anchorPosition="rightUp"
+                      repositionOnScroll
+                    >
+                      <EuiContextMenu
+                        data-test-subj="retentionActionContextMenu"
+                        initialPanelId={0}
+                        panels={[
+                          {
+                            id: 0,
+                            title: i18n.translate(
+                              'xpack.snapshotRestore.policyRetentionSchedulePanel.managePanelTitle',
+                              {
+                                defaultMessage: 'Retention options',
+                              }
+                            ),
+                            items: [
+                              {
+                                name: i18n.translate(
+                                  'xpack.snapshotRestore.policyRetentionSchedulePanel.executeButtonLabel',
+                                  {
+                                    defaultMessage: 'Run now',
+                                  }
+                                ),
+                                icon: 'play',
+                                onClick: () => executeRetentionPrompt(),
+                              },
+                              {
+                                name: i18n.translate(
+                                  'xpack.snapshotRestore.policyRetentionSchedulePanel.addButtonLabel',
+                                  {
+                                    defaultMessage: 'Schedule',
+                                  }
+                                ),
+                                icon: 'plusInCircle',
+                                onClick: () =>
+                                  updateRetentionSettingsPrompt(
+                                    undefined,
+                                    onRetentionScheduleUpdated
+                                  ),
+                              },
+                            ],
+                          },
+                        ]}
+                      />
+                    </EuiPopover>
+                  );
+                }}
+              </RetentionSettingsUpdateModalProvider>
+            );
+          }}
+        </RetentionExecuteModalProvider>
+      </EuiCallOut>
+      <EuiSpacer />
+    </>
+  );
 
   if (isLoading) {
     return (
@@ -80,96 +274,7 @@ export const PolicyRetentionSchedule: React.FunctionComponent<Props> = ({
   }
 
   if (retentionSettings && retentionSettings.retentionSchedule) {
-    const { retentionSchedule } = retentionSettings;
-
-    return (
-      <Fragment>
-        <EuiPanel>
-          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <EuiText>
-                <p>
-                  <FormattedMessage
-                    id="xpack.snapshotRestore.policyRetentionSchedulePanel.retentionScheduleDescription"
-                    defaultMessage="Snapshot retention will run on the cron schedule: {cronSchedule}."
-                    values={{ cronSchedule: <strong>{retentionSchedule}</strong> }}
-                  />
-                </p>
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <UpdateRetentionModalProvider>
-                {(updateRetentionPrompt: UpdateRetentionSetting) => {
-                  return (
-                    <EuiToolTip
-                      position="top"
-                      content={
-                        <FormattedMessage
-                          id="xpack.snapshotRestore.policyRetentionSchedulePanel.retentionScheduleEditLinkTooltip"
-                          defaultMessage="Edit retention schedule"
-                        />
-                      }
-                    >
-                      <EuiButtonIcon
-                        iconType="pencil"
-                        onClick={() =>
-                          updateRetentionPrompt(retentionSchedule, onRetentionScheduleUpdated)
-                        }
-                        aria-label={i18n.translate(
-                          'xpack.snapshotRestore.policyRetentionSchedulePanel.retentionScheduleEditLinkAriaLabel',
-                          {
-                            defaultMessage: 'Edit retention schedule',
-                          }
-                        )}
-                      />
-                    </EuiToolTip>
-                  );
-                }}
-              </UpdateRetentionModalProvider>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPanel>
-        <EuiSpacer />
-      </Fragment>
-    );
-  } else {
-    return (
-      <Fragment>
-        <EuiCallOut
-          title={
-            <FormattedMessage
-              id="xpack.snapshotRestore.policyRetentionSchedulePanel.noScheduleConfiguredWarningTitle"
-              defaultMessage="Retention schedule not configured"
-            />
-          }
-          color="warning"
-          iconType="alert"
-        >
-          <p>
-            <FormattedMessage
-              id="xpack.snapshotRestore.policyRetentionSchedulePanel.noScheduleConfiguredWarningDescription"
-              defaultMessage="You have one or more policies with retention, but you do not have a retention schedule configured."
-            />
-          </p>
-          <UpdateRetentionModalProvider>
-            {(updateRetentionPrompt: UpdateRetentionSetting) => {
-              return (
-                <EuiButton
-                  iconType="plusInCircle"
-                  color="warning"
-                  onClick={() => updateRetentionPrompt(undefined, onRetentionScheduleUpdated)}
-                >
-                  <FormattedMessage
-                    id="xpack.snapshotRestore.policyRetentionSchedulePanel.retentionScheduleAddButtonLabel"
-                    defaultMessage="Add retention schedule"
-                  />
-                </EuiButton>
-              );
-            }}
-          </UpdateRetentionModalProvider>
-        </EuiCallOut>
-        <EuiSpacer />
-      </Fragment>
-    );
+    return renderRetentionPanel(retentionSettings.retentionSchedule);
   }
+  return renderRetentionNotConfiguredCallout();
 };

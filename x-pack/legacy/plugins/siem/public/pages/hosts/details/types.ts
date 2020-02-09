@@ -5,43 +5,43 @@
  */
 
 import { ActionCreator } from 'typescript-fsa';
-
+import { Query, IIndexPattern, esFilters } from 'src/plugins/data/public';
 import { InputsModelId } from '../../../store/inputs/constants';
 import { HostComponentProps } from '../../../components/link_to/redirect_to_hosts';
 import { HostsTableType } from '../../../store/hosts/model';
-import { HostsQueryProps } from '../hosts';
+import { HostsQueryProps } from '../types';
 import { NavTab } from '../../../components/navigation/types';
-import {
-  AnomaliesChildren,
-  CommonChildren,
-  KeyHostsNavTabWithoutMlPermission,
-} from '../navigation/types';
+import { KeyHostsNavTabWithoutMlPermission } from '../navigation/types';
+import { hostsModel } from '../../../store';
 
 interface HostDetailsComponentReduxProps {
-  filterQueryExpression: string;
+  query: Query;
+  filters: esFilters.Filter[];
 }
 
-interface HostDetailsComponentDispatchProps {
+interface HostBodyComponentDispatchProps {
   setAbsoluteRangeDatePicker: ActionCreator<{
     id: InputsModelId;
     from: number;
     to: number;
   }>;
   detailName: string;
+  hostDetailsPagePath: string;
 }
 
-export interface HostDetailsBodyProps extends HostsQueryProps {
-  children: CommonChildren | AnomaliesChildren;
+interface HostDetailsComponentDispatchProps extends HostBodyComponentDispatchProps {
+  setHostDetailsTablesActivePageToZero: ActionCreator<null>;
+}
+
+export interface HostDetailsProps extends HostsQueryProps {
+  detailName: string;
+  hostDetailsPagePath: string;
 }
 
 export type HostDetailsComponentProps = HostDetailsComponentReduxProps &
   HostDetailsComponentDispatchProps &
   HostComponentProps &
   HostsQueryProps;
-
-export type HostDetailsBodyComponentProps = HostDetailsComponentReduxProps &
-  HostDetailsComponentDispatchProps &
-  HostDetailsBodyProps;
 
 type KeyHostDetailsNavTabWithoutMlPermission = HostsTableType.authentications &
   HostsTableType.uncommonProcesses &
@@ -55,3 +55,17 @@ type KeyHostDetailsNavTab =
   | KeyHostDetailsNavTabWithMlPermission;
 
 export type HostDetailsNavTab = Record<KeyHostDetailsNavTab, NavTab>;
+
+export type HostDetailsTabsProps = HostBodyComponentDispatchProps &
+  HostsQueryProps & {
+    pageFilters?: esFilters.Filter[];
+    filterQuery: string;
+    indexPattern: IIndexPattern;
+    type: hostsModel.HostsType;
+  };
+
+export type SetAbsoluteRangeDatePicker = ActionCreator<{
+  id: InputsModelId;
+  from: number;
+  to: number;
+}>;

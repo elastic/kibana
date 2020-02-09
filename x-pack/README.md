@@ -19,11 +19,11 @@ By default, this will also set the password for native realm accounts to the pas
 | Test runner  | Test location                                                                       | Runner command (working directory is kibana/x-pack)                                     |
 | ------------ | ----------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
 | Jest         | `x-pack/**/*.test.js`<br>`x-pack/**/*.test.ts`                                      | `cd x-pack && node scripts/jest -t regexp [test path]`                                     |
-| Functional   | `x-pack/test/*integration/**/config.js`<br>`x-pack/test/*functional/config.js`      | `node scripts/functional_tests_server --config x-pack/test/[directory]/config.js`<br>`node scripts/functional_test_runner --config x-pack/test/[directory]/config.js --grep=regexp`       |
+| Functional   | `x-pack/test/*integration/**/config.js`<br>`x-pack/test/*functional/config.js`<br>`x-pack/test/accessibility/config.js`      | `node scripts/functional_tests_server --config x-pack/test/[directory]/config.js`<br>`node scripts/functional_test_runner --config x-pack/test/[directory]/config.js --grep=regexp`       |
 
 Examples:
   - Run the jest test case whose description matches 'filtering should skip values of null':
-    `cd x-pack && yarn test:jest -t 'filtering should skip values of null' plugins/ml/public/explorer/explorer_charts/explorer_charts_container_service.test.js`
+    `cd x-pack && yarn test:jest -t 'filtering should skip values of null' plugins/ml/public/application/explorer/explorer_charts/explorer_charts_container_service.test.js`
   - Run the x-pack api integration test case whose description matches the given string:
     `node scripts/functional_tests_server --config x-pack/test/api_integration/config.js`
     `node scripts/functional_test_runner --config x-pack/test/api_integration/config.js --grep='apis Monitoring Beats list with restarted beat instance should load multiple clusters'`

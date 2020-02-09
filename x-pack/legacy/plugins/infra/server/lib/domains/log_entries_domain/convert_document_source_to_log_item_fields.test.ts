@@ -17,7 +17,10 @@ describe('convertDocumentSourceToLogItemFields', () => {
         version: '7.0.0',
       },
       tags: ['prod', 'web'],
-      metadata: [{ key: 'env', value: 'prod' }, { key: 'stack', value: 'web' }],
+      metadata: [
+        { key: 'env', value: 'prod' },
+        { key: 'stack', value: 'web' },
+      ],
       host: {
         hostname: 'packer-virtualbox-iso-1546820004',
         name: 'demo-stack-client-01',

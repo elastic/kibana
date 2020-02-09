@@ -17,5 +17,4 @@ export const {
   sortByField,
   hasField,
   updateLayerIndexPattern,
-  isLayerTransferable,
 } = actual;

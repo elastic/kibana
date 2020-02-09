@@ -32,19 +32,19 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
-export const TimeFieldComponent = ({
+export const TimeField = ({
   isVisible,
   fetchTimeFields,
   timeFieldOptions,
   isLoading,
   selectedTimeField,
   onTimeFieldChanged,
-  intl,
 }) => (
   <EuiForm>
-    { isVisible ?
+    {isVisible ? (
       <EuiFormRow
         label={
           <EuiFlexGroup gutterSize="xs" justifyContent="spaceBetween" alignItems="center">
@@ -57,21 +57,16 @@ export const TimeFieldComponent = ({
               </span>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              { isLoading ? (
-                <EuiLoadingSpinner size="s"/>
-              )
-                : (
-                  <EuiLink
-                    className="timeFieldRefreshButton"
-                    onClick={fetchTimeFields}
-                  >
-                    <FormattedMessage
-                      id="kbn.management.createIndexPattern.stepTime.refreshButton"
-                      defaultMessage="Refresh"
-                    />
-                  </EuiLink>
-                )
-              }
+              {isLoading ? (
+                <EuiLoadingSpinner size="s" />
+              ) : (
+                <EuiLink className="timeFieldRefreshButton" onClick={fetchTimeFields}>
+                  <FormattedMessage
+                    id="kbn.management.createIndexPattern.stepTime.refreshButton"
+                    defaultMessage="Refresh"
+                  />
+                </EuiLink>
+              )}
             </EuiFlexItem>
           </EuiFlexGroup>
         }
@@ -92,18 +87,20 @@ export const TimeFieldComponent = ({
           </div>
         }
       >
-        { isLoading ? (
+        {isLoading ? (
           <EuiSelect
             name="timeField"
             data-test-subj="createIndexPatternTimeFieldSelect"
             options={[
               {
-                text: intl.formatMessage({
-                  id: 'kbn.management.createIndexPattern.stepTime.field.loadingDropDown',
-                  defaultMessage: 'Loading…'
-                }),
-                value: ''
-              }
+                text: i18n.translate(
+                  'kbn.management.createIndexPattern.stepTime.field.loadingDropDown',
+                  {
+                    defaultMessage: 'Loading…',
+                  }
+                ),
+                value: '',
+              },
             ]}
             disabled={true}
           />
@@ -119,7 +116,7 @@ export const TimeFieldComponent = ({
           />
         )}
       </EuiFormRow>
-      :
+    ) : (
       <EuiText>
         <p>
           <FormattedMessage
@@ -128,8 +125,6 @@ export const TimeFieldComponent = ({
           />
         </p>
       </EuiText>
-    }
+    )}
   </EuiForm>
 );
-
-export const TimeField = injectI18n(TimeFieldComponent);

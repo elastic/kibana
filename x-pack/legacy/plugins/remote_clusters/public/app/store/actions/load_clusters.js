@@ -6,18 +6,11 @@
 
 import { i18n } from '@kbn/i18n';
 
-import {
-  loadClusters as sendLoadClustersRequest,
-  showApiError,
-} from '../../services';
+import { loadClusters as sendLoadClustersRequest, showApiError } from '../../services';
 
-import {
-  LOAD_CLUSTERS_START,
-  LOAD_CLUSTERS_SUCCESS,
-  LOAD_CLUSTERS_FAILURE,
-} from '../action_types';
+import { LOAD_CLUSTERS_START, LOAD_CLUSTERS_SUCCESS, LOAD_CLUSTERS_FAILURE } from '../action_types';
 
-export const loadClusters = () => async (dispatch) => {
+export const loadClusters = () => async dispatch => {
   dispatch({
     type: LOAD_CLUSTERS_START,
   });
@@ -28,16 +21,19 @@ export const loadClusters = () => async (dispatch) => {
   } catch (error) {
     dispatch({
       type: LOAD_CLUSTERS_FAILURE,
-      payload: { error }
+      payload: { error },
     });
 
-    return showApiError(error, i18n.translate('xpack.remoteClusters.loadAction.errorTitle', {
-      defaultMessage: 'Error loading remote clusters',
-    }));
+    return showApiError(
+      error,
+      i18n.translate('xpack.remoteClusters.loadAction.errorTitle', {
+        defaultMessage: 'Error loading remote clusters',
+      })
+    );
   }
 
   dispatch({
     type: LOAD_CLUSTERS_SUCCESS,
-    payload: { clusters }
+    payload: { clusters },
   });
 };

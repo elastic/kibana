@@ -32,7 +32,7 @@ function create({
   env?: Env;
   logger?: jest.Mocked<ILoggingService>;
   configService?: jest.Mocked<IConfigService>;
-} = {}): CoreContext {
+} = {}): DeeplyMockedKeys<CoreContext> {
   return { coreId: Symbol(), env, logger, configService };
 }
 

@@ -45,22 +45,20 @@ exports[`CcrShard that is renders an exception properly 1`] = `
     }
     noItemsMessage="No items found"
     responsive={true}
+    tableLayout="fixed"
   />
 </EuiPanel>
 `;
 
 exports[`CcrShard that it renders normally 1`] = `
 <EuiPage
-  restrictWidth={false}
   style={
     Object {
       "backgroundColor": "white",
     }
   }
 >
-  <EuiPageBody
-    restrictWidth={false}
-  >
+  <EuiPageBody>
     <Status
       formattedLeader="leader on remote"
       oldestStat={
@@ -148,9 +146,9 @@ exports[`CcrShard that it renders normally 1`] = `
       <EuiTitle
         size="s"
       >
-        <h4>
+        <h2>
           September 27, 2018 9:32:09 AM
-        </h4>
+        </h2>
       </EuiTitle>
       <EuiHorizontalRule />
       <EuiCodeBlock

@@ -12,4 +12,5 @@ export const defaultSettings = {
     number_of_shards: 1,
     auto_expand_replicas: '0-1',
   },
+  DEFAULT_WORKER_CHECK_SIZE: 1,
 };

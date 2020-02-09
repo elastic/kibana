@@ -1,0 +1,18 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AddToFilterListLink renders the add to filter list link for a value 1`] = `
+<EuiLink
+  onClick={[Function]}
+>
+  <FormattedMessage
+    defaultMessage="Add {fieldValue} to {filterId}"
+    id="xpack.ml.ruleEditor.addValueToFilterListLinkText"
+    values={
+      Object {
+        "fieldValue": "elastic.co",
+        "filterId": "safe_domains",
+      }
+    }
+  />
+</EuiLink>
+`;

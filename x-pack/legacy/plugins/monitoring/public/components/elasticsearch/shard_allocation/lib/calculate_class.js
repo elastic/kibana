@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 export function calculateClass(item, initial) {
   const classes = [item.type];
   if (initial) {
@@ -14,7 +12,7 @@ export function calculateClass(item, initial) {
   if (item.type === 'shard') {
     classes.push((item.primary && 'primary') || 'replica');
     classes.push(item.state.toLowerCase());
-    if (item.state === 'UNASSIGNED' &&  item.primary) {
+    if (item.state === 'UNASSIGNED' && item.primary) {
       classes.push('emergency');
     }
   }

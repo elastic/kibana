@@ -97,11 +97,7 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
 };
 
 export const App = compose(
-  connect(
-    mapStateToProps,
-    mapDispatchToProps,
-    mergeProps
-  ),
+  connect(mapStateToProps, mapDispatchToProps, mergeProps),
   withProps(() => ({
     onRouteChange: trackRouteChange,
   }))

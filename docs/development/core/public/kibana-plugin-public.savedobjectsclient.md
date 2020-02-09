@@ -12,6 +12,10 @@ Saved Objects is Kibana's data persisentence mechanism allowing plugins to use E
 export declare class SavedObjectsClient 
 ```
 
+## Remarks
+
+The constructor for this class is marked as internal. Third-party code should not call the constructor directly or create subclasses that extend the `SavedObjectsClient` class.
+
 ## Properties
 
 |  Property | Modifiers | Type | Description |
@@ -27,9 +31,6 @@ export declare class SavedObjectsClient
 
 |  Method | Modifiers | Description |
 |  --- | --- | --- |
+|  [bulkUpdate(objects)](./kibana-plugin-public.savedobjectsclient.bulkupdate.md) |  | Update multiple documents at once |
 |  [update(type, id, attributes, { version, migrationVersion, references })](./kibana-plugin-public.savedobjectsclient.update.md) |  | Updates an object |
-
-## Remarks
-
-The constructor for this class is marked as internal. Third-party code should not call the constructor directly or create subclasses that extend the `SavedObjectsClient` class.
 

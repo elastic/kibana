@@ -17,5 +17,4 @@
  * under the License.
  */
 
-export { buildPipeline } from './build_pipeline';
-export { runPipeline } from './run_pipeline';
+export { buildPipeline } from '../../../../../core_plugins/visualizations/public/np_ready/public/legacy/build_pipeline';

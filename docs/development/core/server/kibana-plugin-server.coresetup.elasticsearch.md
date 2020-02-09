@@ -4,12 +4,10 @@
 
 ## CoreSetup.elasticsearch property
 
+[ElasticsearchServiceSetup](./kibana-plugin-server.elasticsearchservicesetup.md)
+
 <b>Signature:</b>
 
 ```typescript
-elasticsearch: {
-        adminClient$: Observable<ClusterClient>;
-        dataClient$: Observable<ClusterClient>;
-        createClient: (type: string, clientConfig?: Partial<ElasticsearchClientConfig>) => ClusterClient;
-    };
+elasticsearch: ElasticsearchServiceSetup;
 ```

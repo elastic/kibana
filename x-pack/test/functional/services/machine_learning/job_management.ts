@@ -5,8 +5,14 @@
  */
 
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { MlApi } from './api';
 
-export function MachineLearningJobManagementProvider({ getService }: FtrProviderContext) {
+import { JOB_STATE, DATAFEED_STATE } from '../../../../legacy/plugins/ml/common/constants/states';
+
+export function MachineLearningJobManagementProvider(
+  { getService }: FtrProviderContext,
+  mlApi: MlApi
+) {
   const testSubjects = getService('testSubjects');
 
   return {
@@ -25,6 +31,20 @@ export function MachineLearningJobManagementProvider({ getService }: FtrProvider
 
     async assertJobStatsBarExists() {
       await testSubjects.existOrFail('~mlJobStatsBar');
+    },
+
+    async assertStartDatafeedModalExists() {
+      await testSubjects.existOrFail('mlStartDatafeedModal', { timeout: 5000 });
+    },
+
+    async confirmStartDatafeedModal() {
+      await testSubjects.click('mlStartDatafeedModalStartButton');
+      await testSubjects.missingOrFail('mlStartDatafeedModal');
+    },
+
+    async waitForJobCompletion(jobId: string) {
+      await mlApi.waitForDatafeedState(`datafeed-${jobId}`, DATAFEED_STATE.STOPPED);
+      await mlApi.waitForJobState(jobId, JOB_STATE.CLOSED);
     },
   };
 }

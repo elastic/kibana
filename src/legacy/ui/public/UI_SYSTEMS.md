@@ -6,7 +6,3 @@ In this directory you'll find various UI systems you can use to craft effective 
 
 * [banners](notify/banners/BANNERS.md)
 * [toastNotifications](notify/toasts/TOAST_NOTIFICATIONS.md)
-
-## ui/vislib
-
-* [VisLib](vislib/VISLIB.md)

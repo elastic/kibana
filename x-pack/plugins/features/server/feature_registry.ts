@@ -5,8 +5,7 @@
  */
 
 import { cloneDeep, uniq } from 'lodash';
-import { FeatureKibanaPrivileges } from './feature_kibana_privileges';
-import { Feature, FeatureWithAllOrReadPrivileges } from './feature';
+import { Feature, FeatureWithAllOrReadPrivileges, FeatureKibanaPrivileges } from '../common';
 import { validateFeature } from './feature_schema';
 
 export class FeatureRegistry {
@@ -15,7 +14,9 @@ export class FeatureRegistry {
 
   public register(feature: FeatureWithAllOrReadPrivileges) {
     if (this.locked) {
-      throw new Error(`Features are locked, can't register new features`);
+      throw new Error(
+        `Features are locked, can't register new features. Attempt to register ${feature.id} failed.`
+      );
     }
 
     validateFeature(feature);

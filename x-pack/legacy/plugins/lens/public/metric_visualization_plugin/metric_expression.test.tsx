@@ -9,7 +9,7 @@ import { LensMultiTable } from '../types';
 import React from 'react';
 import { shallow } from 'enzyme';
 import { MetricConfig } from './types';
-import { FieldFormat } from 'ui/registry/field_formats';
+import { fieldFormats } from '../../../../../../src/plugins/data/public';
 
 function sampleArgs() {
   const data: LensMultiTable = {
@@ -17,7 +17,11 @@ function sampleArgs() {
     tables: {
       l1: {
         type: 'kibana_datatable',
-        columns: [{ id: 'a', name: 'a' }, { id: 'b', name: 'b' }, { id: 'c', name: 'c' }],
+        columns: [
+          { id: 'a', name: 'a' },
+          { id: 'b', name: 'b' },
+          { id: 'c', name: 'c' },
+        ],
         rows: [{ a: 10110, b: 2, c: 3 }],
       },
     },
@@ -50,8 +54,11 @@ describe('metric_expression', () => {
     test('it renders the title and value', () => {
       const { data, args } = sampleArgs();
 
-      expect(shallow(<MetricChart data={data} args={args} formatFactory={x => x as FieldFormat} />))
-        .toMatchInlineSnapshot(`
+      expect(
+        shallow(
+          <MetricChart data={data} args={args} formatFactory={x => x as fieldFormats.FieldFormat} />
+        )
+      ).toMatchInlineSnapshot(`
         <VisualizationContainer
           className="lnsMetricExpression__container"
           reportTitle="My fanci metric chart"
@@ -91,7 +98,7 @@ describe('metric_expression', () => {
           <MetricChart
             data={data}
             args={{ ...args, mode: 'reduced' }}
-            formatFactory={x => x as FieldFormat}
+            formatFactory={x => x as fieldFormats.FieldFormat}
           />
         )
       ).toMatchInlineSnapshot(`

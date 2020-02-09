@@ -8,12 +8,12 @@ import { errors } from 'elasticsearch';
 
 import { elasticsearchServiceMock, loggingServiceMock } from '../../../../../src/core/server/mocks';
 
-import { ClusterClient, ElasticsearchErrorHelpers } from '../../../../../src/core/server';
+import { IClusterClient, ElasticsearchErrorHelpers } from '../../../../../src/core/server';
 import { Tokens } from './tokens';
 
 describe('Tokens', () => {
   let tokens: Tokens;
-  let mockClusterClient: jest.Mocked<PublicMethodsOf<ClusterClient>>;
+  let mockClusterClient: jest.Mocked<IClusterClient>;
   beforeEach(() => {
     mockClusterClient = elasticsearchServiceMock.createClusterClient();
 
@@ -41,10 +41,6 @@ describe('Tokens', () => {
       { statusCode: 401 },
       ElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error()),
       new errors.AuthenticationException(),
-      {
-        statusCode: 500,
-        body: { error: { reason: 'token document is missing and must be present' } },
-      },
     ];
     for (const error of expirationErrors) {
       expect(Tokens.isAccessTokenExpiredError(error)).toBe(true);

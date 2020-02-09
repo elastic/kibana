@@ -15,7 +15,7 @@ import {
   createMockFramePublicAPI,
 } from '../mocks';
 import { act } from 'react-dom/test-utils';
-import { ExpressionRenderer } from '../../../../../../../src/legacy/core_plugins/expressions/public';
+import { ExpressionRenderer } from '../../../../../../../src/plugins/expressions/public';
 import { SuggestionPanel, SuggestionPanelProps } from './suggestion_panel';
 import { getSuggestions, Suggestion } from './suggestion_helpers';
 import { EuiIcon, EuiPanel, EuiToolTip } from '@elastic/eui';
@@ -216,36 +216,6 @@ describe('suggestion_panel', () => {
         initialState: suggestion1State,
       })
     );
-  });
-
-  it('should remove unused layers if suggestion is clicked', () => {
-    defaultProps.frame.datasourceLayers.a = mockDatasource.publicAPIMock;
-    defaultProps.frame.datasourceLayers.b = mockDatasource.publicAPIMock;
-    const wrapper = mount(
-      <SuggestionPanel
-        {...defaultProps}
-        stagedPreview={{ visualization: { state: {}, activeId: 'vis' }, datasourceStates: {} }}
-        activeVisualizationId="vis2"
-      />
-    );
-
-    act(() => {
-      wrapper
-        .find('button[data-test-subj="lnsSuggestion"]')
-        .at(1)
-        .simulate('click');
-    });
-
-    wrapper.update();
-
-    act(() => {
-      wrapper
-        .find('[data-test-subj="lensSubmitSuggestion"]')
-        .first()
-        .simulate('click');
-    });
-
-    expect(defaultProps.frame.removeLayers).toHaveBeenCalledWith(['b']);
   });
 
   it('should render preview expression if there is one', () => {

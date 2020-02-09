@@ -23,23 +23,23 @@ describe('get_kibana_info', () => {
               kibana_stats: {
                 timestamp: moment().format(),
                 kibana: {
-                  data: 123
+                  data: 123,
                 },
                 os: {
                   memory: {
-                    free_in_bytes: 123000
-                  }
-                }
-              }
-            }
-          }
-        ]
-      }
+                    free_in_bytes: 123000,
+                  },
+                },
+              },
+            },
+          },
+        ],
+      },
     });
     expect(result).to.be.eql({
       availability: true,
       data: 123,
-      os_memory_free: 123000
+      os_memory_free: 123000,
     });
   });
 
@@ -50,25 +50,27 @@ describe('get_kibana_info', () => {
           {
             _source: {
               kibana_stats: {
-                timestamp: moment().subtract(11, 'minutes').format(),
+                timestamp: moment()
+                  .subtract(11, 'minutes')
+                  .format(),
                 kibana: {
-                  data: 123
+                  data: 123,
                 },
                 os: {
                   memory: {
-                    free_in_bytes: 123000
-                  }
-                }
-              }
-            }
-          }
-        ]
-      }
+                    free_in_bytes: 123000,
+                  },
+                },
+              },
+            },
+          },
+        ],
+      },
     });
     expect(result).to.be.eql({
       availability: false,
       data: 123,
-      os_memory_free: 123000
+      os_memory_free: 123000,
     });
   });
 });

@@ -4,16 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface AgentConfigurationIntake {
-  settings: {
-    transaction_sample_rate: number;
-  };
+export interface AgentConfiguration {
+  '@timestamp': number;
+  applied_by_agent?: boolean;
+  etag?: string;
+  agent_name?: string;
   service: {
-    name: string;
+    name?: string;
     environment?: string;
   };
-}
-
-export interface AgentConfiguration extends AgentConfigurationIntake {
-  '@timestamp': number;
+  settings: {
+    transaction_sample_rate?: number;
+    capture_body?: string;
+    transaction_max_spans?: number;
+  };
 }

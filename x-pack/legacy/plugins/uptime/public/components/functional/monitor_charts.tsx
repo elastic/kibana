@@ -11,8 +11,7 @@ import { MonitorChart } from '../../../common/graphql/types';
 import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../higher_order';
 import { monitorChartsQuery } from '../../queries';
 import { DurationChart } from './charts';
-import { SnapshotHistogram } from './charts/snapshot_histogram';
-import { useUrlParams } from '../../hooks';
+import { PingHistogram } from '../connected';
 
 interface MonitorChartsQueryResult {
   monitorChartsData?: MonitorChart;
@@ -24,50 +23,30 @@ interface MonitorChartsProps {
   mean: string;
   range: string;
   success: string;
-  dateRangeStart: string;
-  dateRangeEnd: string;
 }
 
 type Props = MonitorChartsProps & UptimeGraphQLQueryProps<MonitorChartsQueryResult>;
 
-export const MonitorChartsComponent = ({
-  data,
-  mean,
-  range,
-  monitorId,
-  dateRangeStart,
-  dateRangeEnd,
-  loading,
-}: Props) => {
+export const MonitorChartsComponent = ({ data, mean, range, monitorId, loading }: Props) => {
   if (data && data.monitorChartsData) {
     const {
       monitorChartsData: { locationDurationLines },
     } = data;
 
-    const [getUrlParams] = useUrlParams();
-    const { absoluteDateRangeStart, absoluteDateRangeEnd } = getUrlParams();
-
     return (
-      <Fragment>
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <DurationChart
-              locationDurationLines={locationDurationLines}
-              meanColor={mean}
-              rangeColor={range}
-              loading={loading}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <SnapshotHistogram
-              absoluteStartDate={absoluteDateRangeStart}
-              absoluteEndDate={absoluteDateRangeEnd}
-              variables={{ dateRangeStart, dateRangeEnd, monitorId }}
-              height="400px"
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </Fragment>
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <DurationChart
+            locationDurationLines={locationDurationLines}
+            meanColor={mean}
+            rangeColor={range}
+            loading={loading}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <PingHistogram height="400px" isResponsive={false} monitorId={monitorId} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
   return (

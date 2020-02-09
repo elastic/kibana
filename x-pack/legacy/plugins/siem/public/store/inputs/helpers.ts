@@ -71,27 +71,27 @@ export const upsertQuery = ({
   refetch,
   state,
 }: UpdateQueryParams): InputsModel => {
-  const queryIndex = state[inputId].query.findIndex(q => q.id === id);
+  const queryIndex = state[inputId].queries.findIndex(q => q.id === id);
   return {
     ...state,
     [inputId]: {
       ...get(inputId, state),
-      query:
+      queries:
         queryIndex > -1
           ? [
-              ...state[inputId].query.slice(0, queryIndex),
+              ...state[inputId].queries.slice(0, queryIndex),
               {
                 id,
                 inspect,
-                isInspected: state[inputId].query[queryIndex].isInspected,
+                isInspected: state[inputId].queries[queryIndex].isInspected,
                 loading,
                 refetch,
-                selectedInspectIndex: state[inputId].query[queryIndex].selectedInspectIndex,
+                selectedInspectIndex: state[inputId].queries[queryIndex].selectedInspectIndex,
               },
-              ...state[inputId].query.slice(queryIndex + 1),
+              ...state[inputId].queries.slice(queryIndex + 1),
             ]
           : [
-              ...state[inputId].query,
+              ...state[inputId].queries,
               { id, inspect, isInspected: false, loading, refetch, selectedInspectIndex: 0 },
             ],
     },
@@ -113,21 +113,21 @@ export const setIsInspected = ({
   selectedInspectIndex,
   state,
 }: SetIsInspectedParams): InputsModel => {
-  const myQueryIndex = state[inputId].query.findIndex(q => q.id === id);
-  const myQuery = myQueryIndex > -1 ? state[inputId].query[myQueryIndex] : null;
+  const myQueryIndex = state[inputId].queries.findIndex(q => q.id === id);
+  const myQuery = myQueryIndex > -1 ? state[inputId].queries[myQueryIndex] : null;
 
   return {
     ...state,
     [inputId]: {
       ...get(inputId, state),
-      query:
+      queries:
         myQueryIndex > -1
           ? [
-              ...state[inputId].query.slice(0, myQueryIndex),
+              ...state[inputId].queries.slice(0, myQueryIndex),
               { ...myQuery, isInspected, selectedInspectIndex },
-              ...state[inputId].query.slice(myQueryIndex + 1),
+              ...state[inputId].queries.slice(myQueryIndex + 1),
             ]
-          : [...state[inputId].query],
+          : [...state[inputId].queries],
     },
   };
 };
@@ -171,18 +171,18 @@ export interface DeleteOneQueryParams {
 }
 
 export const deleteOneQuery = ({ inputId, id, state }: DeleteOneQueryParams): InputsModel => {
-  const queryIndex = state[inputId].query.findIndex(q => q.id === id);
+  const queryIndex = state[inputId].queries.findIndex(q => q.id === id);
   return {
     ...state,
     [inputId]: {
       ...get(inputId, state),
-      query:
+      queries:
         queryIndex > -1
           ? [
-              ...state[inputId].query.slice(0, queryIndex),
-              ...state[inputId].query.slice(queryIndex + 1),
+              ...state[inputId].queries.slice(0, queryIndex),
+              ...state[inputId].queries.slice(queryIndex + 1),
             ]
-          : [...state[inputId].query],
+          : [...state[inputId].queries],
     },
   };
 };

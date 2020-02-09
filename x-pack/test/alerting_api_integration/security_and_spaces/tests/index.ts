@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SpacesService, SecurityService } from '../../../common/services';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { isCustomRoleSpecification } from '../../common/types';
 import { Spaces, Users } from '../scenarios';
@@ -14,8 +13,8 @@ export default function alertingApiIntegrationTests({
   loadTestFile,
   getService,
 }: FtrProviderContext) {
-  const securityService: SecurityService = getService('security');
-  const spacesService: SpacesService = getService('spaces');
+  const securityService = getService('security');
+  const spacesService = getService('spaces');
   const esArchiver = getService('esArchiver');
 
   describe('alerting api integration security and spaces enabled', function() {

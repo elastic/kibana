@@ -12,16 +12,16 @@ import { hasDirtyState } from '../../../selectors/map_selectors';
 import {
   setSelectedLayer,
   removeSelectedLayer,
-  removeTrackedLayerStateForSelectedLayer
+  removeTrackedLayerStateForSelectedLayer,
 } from '../../../actions/map_actions';
 
 function mapStateToProps(state = {}) {
   return {
-    hasStateChanged: hasDirtyState(state)
+    hasStateChanged: hasDirtyState(state),
   };
 }
 
-const mapDispatchToProps = (dispatch) => {
+const mapDispatchToProps = dispatch => {
   return {
     cancelLayerPanel: () => {
       dispatch(updateFlyout(FLYOUT_STATE.NONE));
@@ -33,9 +33,8 @@ const mapDispatchToProps = (dispatch) => {
       dispatch(setSelectedLayer(null));
     },
     removeLayer: () => {
-      dispatch(updateFlyout(FLYOUT_STATE.NONE));
       dispatch(removeSelectedLayer());
-    }
+    },
   };
 };
 

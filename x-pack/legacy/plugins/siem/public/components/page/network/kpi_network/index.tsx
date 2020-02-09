@@ -6,7 +6,13 @@
 
 import React from 'react';
 
-import { EuiFlexItem, EuiLoadingSpinner, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
+import {
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiFlexGroup,
+  EuiSpacer,
+  euiPaletteColorBlind,
+} from '@elastic/eui';
 import styled from 'styled-components';
 import { chunk as _chunk } from 'lodash/fp';
 import {
@@ -23,9 +29,10 @@ import { UpdateDateRange } from '../../../charts/common';
 const kipsPerRow = 2;
 const kpiWidgetHeight = 228;
 
-const euiColorVis1 = '#3185FC';
-const euiColorVis2 = '#DB1374';
-const euiColorVis3 = '#490092';
+const euiVisColorPalette = euiPaletteColorBlind();
+const euiColorVis1 = euiVisColorPalette[1];
+const euiColorVis2 = euiVisColorPalette[2];
+const euiColorVis3 = euiVisColorPalette[3];
 
 interface KpiNetworkProps {
   data: KpiNetworkData;
@@ -39,7 +46,7 @@ interface KpiNetworkProps {
 export const fieldTitleChartMapping: Readonly<StatItems[]> = [
   {
     key: 'UniqueIps',
-    index: 4,
+    index: 2,
     fields: [
       {
         key: 'uniqueSourcePrivateIps',
@@ -92,7 +99,7 @@ const fieldTitleMatrixMapping: Readonly<StatItems[]> = [
   },
   {
     key: 'uniqueFlowId',
-    index: 2,
+    index: 3,
     fields: [
       {
         key: 'uniqueFlowId',
@@ -103,7 +110,7 @@ const fieldTitleMatrixMapping: Readonly<StatItems[]> = [
   },
   {
     key: 'tlsHandshakes',
-    index: 3,
+    index: 4,
     fields: [
       {
         key: 'tlsHandshakes',
@@ -145,6 +152,8 @@ export const KpiNetworkBaseComponent = React.memo<{
     </EuiFlexGroup>
   );
 });
+
+KpiNetworkBaseComponent.displayName = 'KpiNetworkBaseComponent';
 
 export const KpiNetworkComponent = React.memo<KpiNetworkProps>(
   ({ data, from, id, loading, to, narrowDateRange }) => {

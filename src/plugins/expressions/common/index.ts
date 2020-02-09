@@ -17,4 +17,6 @@
  * under the License.
  */
 
-export * from './expressions';
+export * from './type';
+export * from './types';
+export * from './expression_types';

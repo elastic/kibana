@@ -9,7 +9,6 @@ import PropTypes from 'prop-types';
 import Suggestions from './Suggestions';
 import ClickOutside from './ClickOutside';
 import { EuiFieldSearch, EuiProgress } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 
 const KEY_CODES = {
   LEFT: 37,
@@ -157,7 +156,7 @@ export class Typeahead extends Component {
   };
 
   render() {
-    const { queryExample } = this.props;
+    const { placeholder } = this.props;
 
     return (
       <ClickOutside
@@ -170,16 +169,7 @@ export class Typeahead extends Component {
             style={{
               backgroundImage: 'none'
             }}
-            placeholder={i18n.translate(
-              'xpack.apm.kueryBar.searchPlaceholder',
-              {
-                defaultMessage:
-                  'Search transactions, errors and metrics… (E.g. {queryExample})',
-                values: {
-                  queryExample
-                }
-              }
-            )}
+            placeholder={placeholder}
             inputRef={node => {
               if (node) {
                 this.inputRef = node;
@@ -227,7 +217,7 @@ Typeahead.propTypes = {
   onChange: PropTypes.func.isRequired,
   onSubmit: PropTypes.func.isRequired,
   suggestions: PropTypes.array.isRequired,
-  queryExample: PropTypes.string.isRequired
+  placeholder: PropTypes.string.isRequired
 };
 
 Typeahead.defaultProps = {

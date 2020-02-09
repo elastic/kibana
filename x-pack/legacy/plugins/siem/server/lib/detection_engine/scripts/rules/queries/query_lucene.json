@@ -1,0 +1,9 @@
+{
+  "name": "Query with the language set to lucene",
+  "description": "Query with the language set to lucene",
+  "risk_score": 1,
+  "severity": "high",
+  "type": "query",
+  "query": "user.name: root or user.name: admin",
+  "language": "lucene"
+}

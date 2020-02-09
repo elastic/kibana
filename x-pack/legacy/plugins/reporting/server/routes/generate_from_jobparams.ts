@@ -6,28 +6,40 @@
 
 import boom from 'boom';
 import Joi from 'joi';
-import { Request, ResponseToolkit } from 'hapi';
+import { Legacy } from 'kibana';
 import rison from 'rison-node';
 import { API_BASE_URL } from '../../common/constants';
-import { KbnServer } from '../../types';
-import { getRouteConfigFactoryReportingPre } from './lib/route_config_factories';
+import { Logger, ReportingResponseToolkit, ServerFacade } from '../../types';
+import { ReportingSetupDeps } from '../plugin';
+import { makeRequestFacade } from './lib/make_request_facade';
+import {
+  GetRouteConfigFactoryFn,
+  getRouteConfigFactoryReportingPre,
+  RouteConfigFactory,
+} from './lib/route_config_factories';
 import { HandlerErrorFunction, HandlerFunction } from './types';
 
 const BASE_GENERATE = `${API_BASE_URL}/generate`;
 
 export function registerGenerateFromJobParams(
-  server: KbnServer,
+  server: ServerFacade,
+  plugins: ReportingSetupDeps,
   handler: HandlerFunction,
-  handleError: HandlerErrorFunction
+  handleError: HandlerErrorFunction,
+  logger: Logger
 ) {
-  const getRouteConfig = getRouteConfigFactoryReportingPre(server);
+  const getRouteConfig = () => {
+    const getOriginalRouteConfig: GetRouteConfigFactoryFn = getRouteConfigFactoryReportingPre(
+      server,
+      plugins,
+      logger
+    );
+    const routeConfigFactory: RouteConfigFactory = getOriginalRouteConfig(
+      ({ params: { exportType } }) => exportType
+    );
 
-  // generate report
-  server.route({
-    path: `${BASE_GENERATE}/{exportType}`,
-    method: 'POST',
-    config: {
-      ...getRouteConfig(request => request.params.exportType),
+    return {
+      ...routeConfigFactory,
       validate: {
         params: Joi.object({
           exportType: Joi.string().required(),
@@ -41,8 +53,16 @@ export function registerGenerateFromJobParams(
           jobParams: Joi.string().default(null),
         }).default(),
       },
-    },
-    handler: async (request: Request, h: ResponseToolkit) => {
+    };
+  };
+
+  // generate report
+  server.route({
+    path: `${BASE_GENERATE}/{exportType}`,
+    method: 'POST',
+    options: getRouteConfig(),
+    handler: async (legacyRequest: Legacy.Request, h: ReportingResponseToolkit) => {
+      const request = makeRequestFacade(legacyRequest);
       let jobParamsRison: string | null;
 
       if (request.payload) {
@@ -64,8 +84,11 @@ export function registerGenerateFromJobParams(
       const { exportType } = request.params;
       let response;
       try {
-        const jobParams = rison.decode(jobParamsRison);
-        response = await handler(exportType, jobParams, request, h);
+        const jobParams = rison.decode(jobParamsRison) as object | null;
+        if (!jobParams) {
+          throw new Error('missing jobParams!');
+        }
+        response = await handler(exportType, jobParams, legacyRequest, h);
       } catch (err) {
         throw boom.badRequest(`invalid rison: ${jobParamsRison}`);
       }
@@ -73,11 +96,10 @@ export function registerGenerateFromJobParams(
     },
   });
 
-  // show error about GET method to user
+  // Get route to generation endpoint: show error about GET method to user
   server.route({
     path: `${BASE_GENERATE}/{p*}`,
     method: 'GET',
-    config: getRouteConfig(),
     handler: () => {
       const err = boom.methodNotAllowed('GET is not allowed');
       err.output.headers.allow = 'POST';

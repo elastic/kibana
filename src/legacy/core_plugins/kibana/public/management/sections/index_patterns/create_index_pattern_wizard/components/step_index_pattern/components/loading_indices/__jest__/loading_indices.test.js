@@ -23,9 +23,7 @@ import { shallow } from 'enzyme';
 
 describe('LoadingIndices', () => {
   it('should render normally', () => {
-    const component = shallow(
-      <LoadingIndices/>
-    );
+    const component = shallow(<LoadingIndices />);
 
     expect(component).toMatchSnapshot();
   });

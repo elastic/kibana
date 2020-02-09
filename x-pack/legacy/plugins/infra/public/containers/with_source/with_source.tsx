@@ -6,7 +6,7 @@
 
 import React, { useContext } from 'react';
 
-import { StaticIndexPattern } from 'ui/index_patterns';
+import { IIndexPattern } from 'src/plugins/data/public';
 import { SourceQuery, UpdateSourceInput } from '../../graphql/types';
 import { RendererFunction } from '../../utils/typed_react';
 import { Source } from '../source';
@@ -15,7 +15,7 @@ interface WithSourceProps {
   children: RendererFunction<{
     configuration?: SourceQuery.Query['source']['configuration'];
     create: (sourceProperties: UpdateSourceInput) => Promise<any> | undefined;
-    createDerivedIndexPattern: (type: 'logs' | 'metrics' | 'both') => StaticIndexPattern;
+    createDerivedIndexPattern: (type: 'logs' | 'metrics' | 'both') => IIndexPattern;
     exists?: boolean;
     hasFailed: boolean;
     isLoading: boolean;

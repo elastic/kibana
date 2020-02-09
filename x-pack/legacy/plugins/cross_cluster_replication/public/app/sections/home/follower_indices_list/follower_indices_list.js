@@ -38,7 +38,7 @@ export class FollowerIndicesList extends PureComponent {
     followerIndices: PropTypes.array,
     apiStatus: PropTypes.string,
     apiError: PropTypes.object,
-  }
+  };
 
   static getDerivedStateFromProps({ followerIndexId }, { lastFollowerIndexId }) {
     if (followerIndexId !== lastFollowerIndexId) {
@@ -77,7 +77,7 @@ export class FollowerIndicesList extends PureComponent {
      * we persist the follower index id to query params for deep linking
      */
     if (lastFollowerIndexId !== prevState.lastFollowerIndexId) {
-      if(!lastFollowerIndexId) {
+      if (!lastFollowerIndexId) {
         history.replace({
           search: '',
         });
@@ -138,12 +138,12 @@ export class FollowerIndicesList extends PureComponent {
     if (!isAuthorized) {
       return (
         <SectionUnauthorized
-          title={(
+          title={
             <FormattedMessage
               id="xpack.crossClusterReplication.followerIndexList.permissionErrorTitle"
               defaultMessage="Permission error"
             />
-          )}
+          }
         >
           <FormattedMessage
             id="xpack.crossClusterReplication.followerIndexList.noPermissionText"
@@ -154,9 +154,12 @@ export class FollowerIndicesList extends PureComponent {
     }
 
     if (apiError) {
-      const title = i18n.translate('xpack.crossClusterReplication.followerIndexList.loadingErrorTitle', {
-        defaultMessage: 'Error loading follower indices'
-      });
+      const title = i18n.translate(
+        'xpack.crossClusterReplication.followerIndexList.loadingErrorTitle',
+        {
+          defaultMessage: 'Error loading follower indices',
+        }
+      );
 
       return (
         <Fragment>
@@ -181,14 +184,14 @@ export class FollowerIndicesList extends PureComponent {
     return (
       <EuiEmptyPrompt
         iconType="managementApp"
-        title={(
+        title={
           <h1>
             <FormattedMessage
               id="xpack.crossClusterReplication.followerIndexList.emptyPromptTitle"
               defaultMessage="Create your first follower index"
             />
           </h1>
-        )}
+        }
         body={
           <Fragment>
             <p>
@@ -229,10 +232,7 @@ export class FollowerIndicesList extends PureComponent {
   }
 
   renderList() {
-    const {
-      selectFollowerIndex,
-      followerIndices,
-    } = this.props;
+    const { selectFollowerIndex, followerIndices } = this.props;
 
     const { isDetailPanelOpen } = this.state;
 

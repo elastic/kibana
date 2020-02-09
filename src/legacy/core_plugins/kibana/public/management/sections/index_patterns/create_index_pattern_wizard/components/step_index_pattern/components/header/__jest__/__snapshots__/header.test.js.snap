@@ -35,6 +35,7 @@ exports[`Header should mark the input as invalid 1`] = `
             ]
           }
           fullWidth={false}
+          hasChildLabel={true}
           hasEmptyLabelSpace={false}
           helpText={
             <div>
@@ -77,11 +78,8 @@ exports[`Header should mark the input as invalid 1`] = `
           labelType="label"
         >
           <EuiFieldText
-            compressed={false}
             data-test-subj="createIndexPatternNameInput"
-            fullWidth={false}
             isInvalid={true}
-            isLoading={false}
             name="indexPattern"
             onChange={[Function]}
             placeholder="index-name-*"
@@ -141,6 +139,7 @@ exports[`Header should render normally 1`] = `
           display="row"
           error={Array []}
           fullWidth={false}
+          hasChildLabel={true}
           hasEmptyLabelSpace={false}
           helpText={
             <div>
@@ -183,11 +182,8 @@ exports[`Header should render normally 1`] = `
           labelType="label"
         >
           <EuiFieldText
-            compressed={false}
             data-test-subj="createIndexPatternNameInput"
-            fullWidth={false}
             isInvalid={false}
-            isLoading={false}
             name="indexPattern"
             onChange={[Function]}
             placeholder="index-name-*"

@@ -5,25 +5,27 @@
  */
 
 import ApolloClient from 'apollo-client';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { connect } from 'react-redux';
 
 import { Dispatch } from 'redux';
 import { defaultHeaders } from '../../components/timeline/body/column_headers/default_headers';
 import { deleteTimelineMutation } from '../../containers/timeline/delete/persist.gql_query';
 import { AllTimelinesVariables, AllTimelinesQuery } from '../../containers/timeline/all';
-
 import { allTimelinesQuery } from '../../containers/timeline/all/index.gql_query';
 import { DeleteTimelineMutation, SortFieldTimeline, Direction } from '../../graphql/types';
 import { State, timelineSelectors } from '../../store';
+import { timelineDefaults, TimelineModel } from '../../store/timeline/model';
 import {
   createTimeline as dispatchCreateNewTimeline,
   updateIsLoading as dispatchUpdateIsLoading,
 } from '../../store/timeline/actions';
+import { ColumnHeader } from '../timeline/body/column_headers/column_header';
 import { OpenTimeline } from './open_timeline';
 import { OPEN_TIMELINE_CLASS_NAME, queryTimelineById, dispatchUpdateTimeline } from './helpers';
-import { OpenTimelineModal } from './open_timeline_modal/open_timeline_modal';
+import { OpenTimelineModalBody } from './open_timeline_modal/open_timeline_modal_body';
 import {
+  ActionTimelineToShow,
   DeleteTimelines,
   EuiSearchBarQuery,
   OnDeleteSelected,
@@ -41,13 +43,14 @@ import {
   OpenTimelineReduxProps,
 } from './types';
 import { DEFAULT_SORT_FIELD, DEFAULT_SORT_DIRECTION } from './constants';
-import { ColumnHeader } from '../timeline/body/column_headers/column_header';
 
 interface OwnProps<TCache = object> {
   apolloClient: ApolloClient<TCache>;
   /** Displays open timeline in modal */
   isModal: boolean;
   closeModalTimeline?: () => void;
+  hideActions?: ActionTimelineToShow[];
+  onOpenTimeline?: (timeline: TimelineModel) => void;
 }
 
 export type OpenTimelineOwnProps = OwnProps &
@@ -68,15 +71,17 @@ export const getSelectedTimelineIds = (selectedItems: OpenTimelineResult[]): str
 /** Manages the state (e.g table selection) of the (pure) `OpenTimeline` component */
 export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
   ({
-    defaultPageSize,
-    isModal = false,
-    title,
     apolloClient,
     closeModalTimeline,
+    createNewTimeline,
+    defaultPageSize,
+    hideActions = [],
+    isModal = false,
+    onOpenTimeline,
+    timeline,
+    title,
     updateTimeline,
     updateIsLoading,
-    timeline,
-    createNewTimeline,
   }) => {
     /** Required by EuiTable for expandable rows: a map of `TimelineResult.savedObjectId` to rendered notes */
     const [itemIdToExpandedNotesRowMap, setItemIdToExpandedNotesRowMap] = useState<
@@ -98,9 +103,9 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
     const [sortField, setSortField] = useState(DEFAULT_SORT_FIELD);
 
     /** Invoked when the user presses enters to submit the text in the search input */
-    const onQueryChange: OnQueryChange = (query: EuiSearchBarQuery) => {
+    const onQueryChange: OnQueryChange = useCallback((query: EuiSearchBarQuery) => {
       setSearch(query.queryText.trim());
-    };
+    }, []);
 
     /** Focuses the input that filters the field browser */
     const focusInput = () => {
@@ -126,23 +131,26 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
     // }
     // };
 
-    const onDeleteOneTimeline: OnDeleteOneTimeline = (timelineIds: string[]) => {
-      deleteTimelines(timelineIds, {
-        search,
-        pageInfo: {
-          pageIndex: pageIndex + 1,
-          pageSize,
-        },
-        sort: {
-          sortField: sortField as SortFieldTimeline,
-          sortOrder: sortDirection as Direction,
-        },
-        onlyUserFavorite: onlyFavorites,
-      });
-    };
+    const onDeleteOneTimeline: OnDeleteOneTimeline = useCallback(
+      (timelineIds: string[]) => {
+        deleteTimelines(timelineIds, {
+          search,
+          pageInfo: {
+            pageIndex: pageIndex + 1,
+            pageSize,
+          },
+          sort: {
+            sortField: sortField as SortFieldTimeline,
+            sortOrder: sortDirection as Direction,
+          },
+          onlyUserFavorite: onlyFavorites,
+        });
+      },
+      [search, pageIndex, pageSize, sortField, sortDirection, onlyFavorites]
+    );
 
     /** Invoked when the user clicks the action to delete the selected timelines */
-    const onDeleteSelected: OnDeleteSelected = () => {
+    const onDeleteSelected: OnDeleteSelected = useCallback(() => {
       deleteTimelines(getSelectedTimelineIds(selectedItems), {
         search,
         pageInfo: {
@@ -161,79 +169,82 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
       resetSelectionState();
 
       // TODO: the query must re-execute to show the results of the deletion
-    };
+    }, [selectedItems, search, pageIndex, pageSize, sortField, sortDirection, onlyFavorites]);
 
     /** Invoked when the user selects (or de-selects) timelines */
-    const onSelectionChange: OnSelectionChange = (newSelectedItems: OpenTimelineResult[]) => {
-      setSelectedItems(newSelectedItems); // <-- this is NOT passed down as props to the table: https://github.com/elastic/eui/issues/1077
-    };
+    const onSelectionChange: OnSelectionChange = useCallback(
+      (newSelectedItems: OpenTimelineResult[]) => {
+        setSelectedItems(newSelectedItems); // <-- this is NOT passed down as props to the table: https://github.com/elastic/eui/issues/1077
+      },
+      []
+    );
 
     /** Invoked by the EUI table implementation when the user interacts with the table (i.e. to update sorting) */
-    const onTableChange: OnTableChange = ({ page, sort }: OnTableChangeParams) => {
+    const onTableChange: OnTableChange = useCallback(({ page, sort }: OnTableChangeParams) => {
       const { index, size } = page;
       const { field, direction } = sort;
       setPageIndex(index);
       setPageSize(size);
       setSortDirection(direction);
       setSortField(field);
-    };
+    }, []);
 
     /** Invoked when the user toggles the option to only view favorite timelines */
-    const onToggleOnlyFavorites: OnToggleOnlyFavorites = () => {
+    const onToggleOnlyFavorites: OnToggleOnlyFavorites = useCallback(() => {
       setOnlyFavorites(!onlyFavorites);
-    };
+    }, [onlyFavorites]);
 
     /** Invoked when the user toggles the expansion or collapse of inline notes in a table row */
-    const onToggleShowNotes: OnToggleShowNotes = (
-      newItemIdToExpandedNotesRowMap: Record<string, JSX.Element>
-    ) => {
-      setItemIdToExpandedNotesRowMap(newItemIdToExpandedNotesRowMap);
-    };
+    const onToggleShowNotes: OnToggleShowNotes = useCallback(
+      (newItemIdToExpandedNotesRowMap: Record<string, JSX.Element>) => {
+        setItemIdToExpandedNotesRowMap(newItemIdToExpandedNotesRowMap);
+      },
+      []
+    );
 
     /** Resets the selection state such that all timelines are unselected */
-    const resetSelectionState = () => {
+    const resetSelectionState = useCallback(() => {
       setSelectedItems([]);
-    };
+    }, []);
 
-    const openTimeline: OnOpenTimeline = ({
-      duplicate,
-      timelineId,
-    }: {
-      duplicate: boolean;
-      timelineId: string;
-    }) => {
-      if (isModal && closeModalTimeline != null) {
-        closeModalTimeline();
-      }
+    const openTimeline: OnOpenTimeline = useCallback(
+      ({ duplicate, timelineId }: { duplicate: boolean; timelineId: string }) => {
+        if (isModal && closeModalTimeline != null) {
+          closeModalTimeline();
+        }
 
-      queryTimelineById({
-        apolloClient,
-        duplicate,
-        timelineId,
-        updateIsLoading,
-        updateTimeline,
-      });
-    };
+        queryTimelineById({
+          apolloClient,
+          duplicate,
+          onOpenTimeline,
+          timelineId,
+          updateIsLoading,
+          updateTimeline,
+        });
+      },
+      [apolloClient, updateIsLoading, updateTimeline]
+    );
 
-    const deleteTimelines: DeleteTimelines = (
-      timelineIds: string[],
-      variables?: AllTimelinesVariables
-    ) => {
-      if (timelineIds.includes(timeline.savedObjectId || '')) {
-        createNewTimeline({ id: 'timeline-1', columns: defaultHeaders, show: false });
-      }
-      apolloClient.mutate<DeleteTimelineMutation.Mutation, DeleteTimelineMutation.Variables>({
-        mutation: deleteTimelineMutation,
-        fetchPolicy: 'no-cache',
-        variables: { id: timelineIds },
-        refetchQueries: [
-          {
-            query: allTimelinesQuery,
-            variables,
-          },
-        ],
-      });
-    };
+    const deleteTimelines: DeleteTimelines = useCallback(
+      (timelineIds: string[], variables?: AllTimelinesVariables) => {
+        if (timelineIds.includes(timeline.savedObjectId || '')) {
+          createNewTimeline({ id: 'timeline-1', columns: defaultHeaders, show: false });
+        }
+        apolloClient.mutate<DeleteTimelineMutation.Mutation, DeleteTimelineMutation.Variables>({
+          mutation: deleteTimelineMutation,
+          fetchPolicy: 'no-cache',
+          variables: { id: timelineIds },
+          refetchQueries: [
+            {
+              query: allTimelinesQuery,
+              variables,
+            },
+          ],
+        });
+      },
+      [apolloClient, createNewTimeline, timeline]
+    );
+
     useEffect(() => {
       focusInput();
     }, []);
@@ -276,10 +287,11 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
               totalSearchResultsCount={totalCount}
             />
           ) : (
-            <OpenTimelineModal
+            <OpenTimelineModalBody
               data-test-subj={'open-timeline-modal'}
               deleteTimelines={onDeleteOneTimeline}
               defaultPageSize={defaultPageSize}
+              hideActions={hideActions}
               isLoading={loading}
               itemIdToExpandedNotesRowMap={itemIdToExpandedNotesRowMap}
               onAddTimelinesToFavorites={undefined}
@@ -310,7 +322,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
 const makeMapStateToProps = () => {
   const getTimeline = timelineSelectors.getTimelineByIdSelector();
   const mapStateToProps = (state: State) => {
-    const timeline = getTimeline(state, 'timeline-1');
+    const timeline = getTimeline(state, 'timeline-1') ?? timelineDefaults;
 
     return {
       timeline,

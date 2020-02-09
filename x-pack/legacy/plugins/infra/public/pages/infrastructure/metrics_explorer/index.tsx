@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 
 import React from 'react';
-import { StaticIndexPattern } from 'ui/index_patterns';
+import { IIndexPattern } from 'src/plugins/data/public';
 import { DocumentTitle } from '../../../components/document_title';
 import { MetricsExplorerCharts } from '../../../components/metrics_explorer/charts';
 import { MetricsExplorerToolbar } from '../../../components/metrics_explorer/toolbar';
@@ -17,15 +17,11 @@ import { useMetricsExplorerState } from './use_metric_explorer_state';
 import { useTrackPageview } from '../../../hooks/use_track_metric';
 
 interface MetricsExplorerPageProps {
-  source: SourceQuery.Query['source']['configuration'] | undefined;
-  derivedIndexPattern: StaticIndexPattern;
+  source: SourceQuery.Query['source']['configuration'];
+  derivedIndexPattern: IIndexPattern;
 }
 
 export const MetricsExplorerPage = ({ source, derivedIndexPattern }: MetricsExplorerPageProps) => {
-  if (!source) {
-    return null;
-  }
-
   const {
     loading,
     error,
@@ -41,6 +37,8 @@ export const MetricsExplorerPage = ({ source, derivedIndexPattern }: MetricsExpl
     handleTimeChange,
     handleRefresh,
     handleLoadMore,
+    defaultViewState,
+    onViewStateChange,
   } = useMetricsExplorerState(source, derivedIndexPattern);
 
   useTrackPageview({ app: 'infra_metrics', path: 'metrics_explorer' });
@@ -70,6 +68,8 @@ export const MetricsExplorerPage = ({ source, derivedIndexPattern }: MetricsExpl
         onMetricsChange={handleMetricsChange}
         onAggregationChange={handleAggregationChange}
         onChartOptionsChange={setChartOptions}
+        defaultViewState={defaultViewState}
+        onViewStateChange={onViewStateChange}
       />
       {error ? (
         <NoData

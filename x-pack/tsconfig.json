@@ -37,7 +37,9 @@
       ],
       "monitoring/common/*": [
         "x-pack/monitoring/common/*"
-      ]
+      ],
+      "plugins/*": ["src/legacy/core_plugins/*/public/"],
+      "fixtures/*": ["src/fixtures/*"]
     },
     "types": [
       "node",

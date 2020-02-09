@@ -16,8 +16,8 @@ export const tracesRoute = createRoute(() => ({
   params: {
     query: t.intersection([rangeRt, uiFiltersRt])
   },
-  handler: async req => {
-    const setup = await setupRequest(req);
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
     return getTransactionGroupList({ type: 'top_traces' }, setup);
   }
 }));
@@ -30,9 +30,8 @@ export const tracesByIdRoute = createRoute(() => ({
     }),
     query: rangeRt
   },
-  handler: async (req, { path }) => {
-    const { traceId } = path;
-    const setup = await setupRequest(req);
-    return getTrace(traceId, setup);
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
+    return getTrace(context.params.path.traceId, setup);
   }
 }));

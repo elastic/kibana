@@ -5,76 +5,72 @@
  */
 
 import expect from '@kbn/expect';
+
 import { pairs } from 'd3-array';
-import gql from 'graphql-tag';
+
+import { pipe } from 'fp-ts/lib/pipeable';
+import { identity } from 'fp-ts/lib/function';
+import { fold } from 'fp-ts/lib/Either';
+
+import {
+  createPlainError,
+  throwErrors,
+} from '../../../../legacy/plugins/infra/common/runtime_types';
+
+import {
+  LOG_ENTRIES_SUMMARY_PATH,
+  logEntriesSummaryRequestRT,
+  logEntriesSummaryResponseRT,
+} from '../../../../legacy/plugins/infra/common/http_api/log_entries';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const EARLIEST_TIME_WITH_DATA = new Date('2018-10-17T19:42:22.000Z').valueOf();
 const LATEST_TIME_WITH_DATA = new Date('2018-10-17T19:57:21.611Z').valueOf();
 
-const logSummaryBetweenQuery = gql`
-  query LogSummary(
-    $sourceId: ID = "default"
-    $start: Float!
-    $end: Float!
-    $bucketSize: Float!
-    $filterQuery: String
-  ) {
-    source(id: $sourceId) {
-      id
-      logSummaryBetween(
-        start: $start
-        end: $end
-        bucketSize: $bucketSize
-        filterQuery: $filterQuery
-      ) {
-        start
-        end
-        buckets {
-          start
-          end
-          entriesCount
-        }
-      }
-    }
-  }
-`;
+const COMMON_HEADERS = {
+  'kbn-xsrf': 'some-xsrf-token',
+};
 
 export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const client = getService('infraOpsGraphQLClient');
+  const supertest = getService('supertest');
 
   describe('logSummaryBetween', () => {
     before(() => esArchiver.load('infra/metrics_and_logs'));
     after(() => esArchiver.unload('infra/metrics_and_logs'));
 
     it('should return empty and non-empty consecutive buckets', async () => {
-      const start = EARLIEST_TIME_WITH_DATA;
-      const end = LATEST_TIME_WITH_DATA + (LATEST_TIME_WITH_DATA - EARLIEST_TIME_WITH_DATA);
-      const bucketSize = Math.ceil((end - start) / 10);
+      const startDate = EARLIEST_TIME_WITH_DATA;
+      const endDate = LATEST_TIME_WITH_DATA + (LATEST_TIME_WITH_DATA - EARLIEST_TIME_WITH_DATA);
+      const bucketSize = Math.ceil((endDate - startDate) / 10);
 
-      const {
-        data: {
-          source: { logSummaryBetween },
-        },
-      } = await client.query<any>({
-        query: logSummaryBetweenQuery,
-        variables: {
-          start,
-          end,
-          bucketSize,
-        },
-      });
+      const { body } = await supertest
+        .post(LOG_ENTRIES_SUMMARY_PATH)
+        .set(COMMON_HEADERS)
+        .send(
+          logEntriesSummaryRequestRT.encode({
+            sourceId: 'default',
+            startDate,
+            endDate,
+            bucketSize,
+            query: null,
+          })
+        )
+        .expect(200);
 
-      expect(logSummaryBetween).to.have.property('buckets');
-      expect(logSummaryBetween.buckets).to.have.length(10);
+      const logSummaryResponse = pipe(
+        logEntriesSummaryResponseRT.decode(body),
+        fold(throwErrors(createPlainError), identity)
+      );
+
+      expect(logSummaryResponse.data.buckets).to.have.length(10);
       expect(
-        logSummaryBetween.buckets.filter((bucket: any) => bucket.entriesCount > 0)
+        logSummaryResponse.data.buckets.filter((bucket: any) => bucket.entriesCount > 0)
       ).to.have.length(5);
       expect(
         pairs(
-          logSummaryBetween.buckets,
+          logSummaryResponse.data.buckets,
           (first: any, second: any) => first.end === second.start
         ).every(pair => pair)
       ).to.equal(true);

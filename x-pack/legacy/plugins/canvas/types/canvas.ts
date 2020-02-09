@@ -51,3 +51,8 @@ export interface CanvasWorkpad {
   pages: CanvasPage[];
   width: number;
 }
+
+export type CanvasTemplate = CanvasWorkpad & {
+  help: string;
+  tags: string[];
+};

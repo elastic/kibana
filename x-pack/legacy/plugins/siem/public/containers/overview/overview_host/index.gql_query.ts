@@ -23,8 +23,16 @@ export const overviewHostQuery = gql`
         auditbeatPackage
         auditbeatProcess
         auditbeatUser
+        endgameDns
+        endgameFile
+        endgameImageLoad
+        endgameNetwork
+        endgameProcess
+        endgameRegistry
+        endgameSecurity
         filebeatSystemModule
-        winlogbeat
+        winlogbeatSecurity
+        winlogbeatMWSysmonOperational
         inspect @include(if: $inspect) {
           dsl
           response

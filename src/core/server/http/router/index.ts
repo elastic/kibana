@@ -18,15 +18,24 @@
  */
 
 export { Headers, filterHeaders, ResponseHeaders, KnownHeaders } from './headers';
-export { Router, RequestHandler, IRouter } from './router';
+export { Router, RequestHandler, IRouter, RouteRegistrar } from './router';
 export {
   KibanaRequest,
+  KibanaRequestEvents,
   KibanaRequestRoute,
+  KibanaRequestRouteOptions,
   isRealRequest,
   LegacyRequest,
   ensureRawRequest,
 } from './request';
-export { RouteMethod, RouteConfig, RouteConfigOptions } from './route';
+export {
+  RouteMethod,
+  RouteConfig,
+  RouteConfigOptions,
+  RouteContentType,
+  RouteConfigOptionsBody,
+  validBodyOutput,
+} from './route';
 export { HapiResponseAdapter } from './response_adapter';
 export {
   CustomHttpResponseOptions,
@@ -37,10 +46,22 @@ export {
   ResponseError,
   ResponseErrorAttributes,
   KibanaResponse,
+  IKibanaResponse,
   kibanaResponseFactory,
   KibanaResponseFactory,
   lifecycleResponseFactory,
   LifecycleResponseFactory,
+  isKibanaResponse,
 } from './response';
 
 export { IKibanaSocket } from './socket';
+
+export {
+  RouteValidatorConfig,
+  RouteValidationSpec,
+  RouteValidationFunction,
+  RouteValidatorOptions,
+  RouteValidationError,
+  RouteValidatorFullConfig,
+  RouteValidationResultFactory,
+} from './validator';

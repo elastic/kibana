@@ -20,7 +20,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
 import { CoreStart } from 'src/core/public';
-import { TGetActionsCompatibleWithTrigger } from 'src/plugins/ui_actions/public';
+import { GetActionsCompatibleWithTrigger } from 'src/plugins/ui_actions/public';
 import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
 import { Container, ViewMode, ContainerInput } from '../..';
 import { HelloWorldContainerComponent } from './hello_world_container_component';
@@ -33,7 +33,7 @@ export const HELLO_WORLD_CONTAINER = 'HELLO_WORLD_CONTAINER';
  * https://github.com/microsoft/TypeScript/issues/15300 is fixed so we use a type
  * here instead
  */
-// eslint-disable-next-line @typescript-eslint/prefer-interface
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 type InheritedInput = {
   id: string;
   viewMode: ViewMode;
@@ -45,7 +45,7 @@ interface HelloWorldContainerInput extends ContainerInput {
 }
 
 interface HelloWorldContainerOptions {
-  getActions: TGetActionsCompatibleWithTrigger;
+  getActions: GetActionsCompatibleWithTrigger;
   getEmbeddableFactory: GetEmbeddableFactory;
   getAllEmbeddableFactories: GetEmbeddableFactories;
   overlays: CoreStart['overlays'];

@@ -4,31 +4,53 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as React from 'react';
-import { pure } from 'recompose';
+import React from 'react';
 
 import { DraggableBadge } from '../../../draggables';
-import { TokensFlexItem } from './helpers';
+import { isNillEmptyOrNotFinite, TokensFlexItem } from './helpers';
 
 interface Props {
-  eventId: string;
+  args: string[] | null | undefined;
   contextId: string;
-  args: string | null | undefined;
+  eventId: string;
   processTitle: string | null | undefined;
 }
 
-export const Args = pure<Props>(({ eventId, contextId, args, processTitle }) =>
-  args != null ? (
-    <TokensFlexItem grow={false} component="span">
-      <DraggableBadge
-        contextId={contextId}
-        eventId={eventId}
-        field="process.title"
-        queryValue={processTitle != null ? processTitle : ''}
-        value={args}
-      />
-    </TokensFlexItem>
-  ) : null
-);
+export const ArgsComponent = ({ args, contextId, eventId, processTitle }: Props) => {
+  if (isNillEmptyOrNotFinite(args) && isNillEmptyOrNotFinite(processTitle)) {
+    return null;
+  }
+
+  return (
+    <>
+      {args != null &&
+        args.map((arg, i) => (
+          <TokensFlexItem key={`${contextId}-args-${i}-${arg}`} grow={false} component="span">
+            <DraggableBadge
+              contextId={`${contextId}-args-${i}-${arg}`}
+              eventId={eventId}
+              field="process.args"
+              value={arg}
+            />
+          </TokensFlexItem>
+        ))}
+
+      {!isNillEmptyOrNotFinite(processTitle) && (
+        <TokensFlexItem grow={false} component="span">
+          <DraggableBadge
+            contextId={contextId}
+            eventId={eventId}
+            field="process.title"
+            value={processTitle}
+          />
+        </TokensFlexItem>
+      )}
+    </>
+  );
+};
+
+ArgsComponent.displayName = 'ArgsComponent';
+
+export const Args = React.memo(ArgsComponent);
 
 Args.displayName = 'Args';

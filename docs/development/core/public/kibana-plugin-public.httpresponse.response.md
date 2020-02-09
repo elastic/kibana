@@ -4,8 +4,10 @@
 
 ## HttpResponse.response property
 
+Raw response received, may be undefined if there was an error.
+
 <b>Signature:</b>
 
 ```typescript
-response?: Response;
+readonly response?: Readonly<Response>;
 ```

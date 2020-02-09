@@ -17,21 +17,27 @@
  * under the License.
  */
 
-import { isFunction, transform, size, cloneDeep, get, defaults } from 'lodash';
+import { transform, size, cloneDeep, get, defaults } from 'lodash';
 import { createCustomFieldFormat } from './converters/custom';
-import { ContentType, FieldFormatConvert, FieldFormatConvertFunction } from './types';
-
+import {
+  GetConfigFn,
+  ContentType,
+  IFieldFormatType,
+  FieldFormatConvert,
+  FieldFormatConvertFunction,
+  HtmlContextTypeOptions,
+  TextContextTypeOptions,
+  IFieldFormatMetaParams,
+} from './types';
 import {
   htmlContentTypeSetup,
   textContentTypeSetup,
   TEXT_CONTEXT_TYPE,
   HTML_CONTEXT_TYPE,
 } from './content_types';
+import { HtmlContextTypeConvert, TextContextTypeConvert } from './types';
 
-const DEFAULT_CONTEXT_TYPE = 'text';
-
-export const isFieldFormatConvertFn = (convert: any): convert is FieldFormatConvertFunction =>
-  isFunction(convert);
+const DEFAULT_CONTEXT_TYPE = TEXT_CONTEXT_TYPE;
 
 export abstract class FieldFormat {
   /**
@@ -62,12 +68,37 @@ export abstract class FieldFormat {
   convertObject: FieldFormatConvert | undefined;
 
   /**
+   * @property {htmlConvert}
+   * @protected
+   * have to remove the protected because of
+   * https://github.com/Microsoft/TypeScript/issues/17293
+   */
+  htmlConvert: HtmlContextTypeConvert | undefined;
+
+  /**
+   * @property {textConvert}
+   * @protected
+   * have to remove the protected because of
+   * https://github.com/Microsoft/TypeScript/issues/17293
+   */
+  textConvert: TextContextTypeConvert | undefined;
+
+  /**
    * @property {Function} - ref to child class
    * @private
    */
   public type: any = this.constructor;
 
-  constructor(public _params: any = {}) {}
+  protected readonly _params: any;
+  protected getConfig: GetConfigFn | undefined;
+
+  constructor(_params: IFieldFormatMetaParams = {}, getConfig?: GetConfigFn) {
+    this._params = _params;
+
+    if (getConfig) {
+      this.getConfig = getConfig;
+    }
+  }
 
   /**
    * Convert a raw value to a formatted string
@@ -79,11 +110,15 @@ export abstract class FieldFormat {
    *                    injecting into the DOM or a DOM attribute
    * @public
    */
-  convert(value: any, contentType: ContentType = DEFAULT_CONTEXT_TYPE): string {
+  convert(
+    value: any,
+    contentType: ContentType = DEFAULT_CONTEXT_TYPE,
+    options?: HtmlContextTypeOptions | TextContextTypeOptions
+  ): string {
     const converter = this.getConverterFor(contentType);
 
     if (converter) {
-      return converter.call(this, value);
+      return converter.call(this, value, options);
     }
 
     return value;
@@ -99,7 +134,7 @@ export abstract class FieldFormat {
     contentType: ContentType = DEFAULT_CONTEXT_TYPE
   ): FieldFormatConvertFunction | null {
     if (!this.convertObject) {
-      this.convertObject = FieldFormat.setupContentType(this, get(this, '_convert'));
+      this.convertObject = this.setupContentType();
     }
 
     return this.convertObject[contentType] || null;
@@ -169,40 +204,18 @@ export abstract class FieldFormat {
     };
   }
 
-  static from(convertFn: FieldFormatConvertFunction) {
+  static from(convertFn: FieldFormatConvertFunction): IFieldFormatType {
     return createCustomFieldFormat(convertFn);
   }
 
-  /*
-   * have to remove the private because of
-   * https://github.com/Microsoft/TypeScript/issues/17293
-   */
-  static setupContentType(
-    fieldFormat: IFieldFormat,
-    convert: Partial<FieldFormatConvert> | FieldFormatConvertFunction = {}
-  ): FieldFormatConvert {
-    const convertObject = isFieldFormatConvertFn(convert)
-      ? FieldFormat.toConvertObject(convert)
-      : convert;
-
+  setupContentType(): FieldFormatConvert {
     return {
-      [TEXT_CONTEXT_TYPE]: textContentTypeSetup(fieldFormat, convertObject),
-      [HTML_CONTEXT_TYPE]: htmlContentTypeSetup(fieldFormat, convertObject),
+      [TEXT_CONTEXT_TYPE]: textContentTypeSetup(this, this.textConvert),
+      [HTML_CONTEXT_TYPE]: htmlContentTypeSetup(this, this.htmlConvert),
     };
   }
 
-  /*
-   * have to remove the private because of
-   * https://github.com/Microsoft/TypeScript/issues/17293
-   */
-  static toConvertObject(convert: FieldFormatConvertFunction): Partial<FieldFormatConvert> {
-    if (isFieldFormatConvertFn(convert)) {
-      return {
-        [TEXT_CONTEXT_TYPE]: convert,
-      };
-    }
-    return convert;
+  static isInstanceOfFieldFormat(fieldFormat: any): fieldFormat is FieldFormat {
+    return Boolean(fieldFormat && fieldFormat.convert);
   }
 }
-
-export type IFieldFormat = PublicMethodsOf<FieldFormat>;

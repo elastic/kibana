@@ -21,7 +21,7 @@ interface Processor {
   event: 'error';
 }
 
-interface Exception {
+export interface Exception {
   message?: string; // either message or type are given
   type?: string;
   module?: string;
@@ -49,6 +49,7 @@ export interface ErrorRaw extends APMBaseDoc {
     exception?: Exception[];
     page?: Page; // special property for RUM: shared by error and transaction
     log?: Log;
+    custom?: Record<string, unknown>;
   };
 
   // Shared by errors and transactions

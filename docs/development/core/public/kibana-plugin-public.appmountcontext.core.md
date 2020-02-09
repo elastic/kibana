@@ -17,7 +17,8 @@ core: {
         i18n: I18nStart;
         notifications: NotificationsStart;
         overlays: OverlayStart;
-        uiSettings: UiSettingsClientContract;
+        savedObjects: SavedObjectsStart;
+        uiSettings: IUiSettingsClient;
         injectedMetadata: {
             getInjectedVar: (name: string, defaultValue?: any) => unknown;
         };

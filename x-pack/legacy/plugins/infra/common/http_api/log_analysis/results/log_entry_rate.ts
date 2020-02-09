@@ -29,7 +29,7 @@ export type GetLogEntryRateRequestPayload = rt.TypeOf<typeof getLogEntryRateRequ
  * response
  */
 
-export const logEntryRateAnomaly = rt.type({
+export const logEntryRateAnomalyRT = rt.type({
   actualLogEntryRate: rt.number,
   anomalyScore: rt.number,
   duration: rt.number,
@@ -37,22 +37,29 @@ export const logEntryRateAnomaly = rt.type({
   typicalLogEntryRate: rt.number,
 });
 
-export const logEntryRateDataSetRT = rt.type({
+export const logEntryRatePartitionRT = rt.type({
   analysisBucketCount: rt.number,
-  anomalies: rt.array(logEntryRateAnomaly),
+  anomalies: rt.array(logEntryRateAnomalyRT),
   averageActualLogEntryRate: rt.number,
-  dataSetId: rt.string,
+  maximumAnomalyScore: rt.number,
+  numberOfLogEntries: rt.number,
+  partitionId: rt.string,
 });
 
-export const logEntryRateHistogramBucket = rt.type({
-  dataSets: rt.array(logEntryRateDataSetRT),
+export type LogEntryRatePartition = rt.TypeOf<typeof logEntryRatePartitionRT>;
+
+export const logEntryRateHistogramBucketRT = rt.type({
+  partitions: rt.array(logEntryRatePartitionRT),
   startTime: rt.number,
 });
+
+export type LogEntryRateHistogramBucket = rt.TypeOf<typeof logEntryRateHistogramBucketRT>;
 
 export const getLogEntryRateSuccessReponsePayloadRT = rt.type({
   data: rt.type({
     bucketDuration: rt.number,
-    histogramBuckets: rt.array(logEntryRateHistogramBucket),
+    histogramBuckets: rt.array(logEntryRateHistogramBucketRT),
+    totalNumberOfLogEntries: rt.number,
   }),
 });
 

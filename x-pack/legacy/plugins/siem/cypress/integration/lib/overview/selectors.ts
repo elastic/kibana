@@ -9,6 +9,34 @@ export const STAT_AUDITD = {
   value: '123',
   domId: '[data-test-subj="host-stat-auditbeatAuditd"]',
 };
+export const ENDGAME_DNS = {
+  value: '391',
+  domId: '[data-test-subj="host-stat-endgameDns"]',
+};
+export const ENDGAME_FILE = {
+  value: '392',
+  domId: '[data-test-subj="host-stat-endgameFile"]',
+};
+export const ENDGAME_IMAGE_LOAD = {
+  value: '393',
+  domId: '[data-test-subj="host-stat-endgameImageLoad"]',
+};
+export const ENDGAME_NETWORK = {
+  value: '394',
+  domId: '[data-test-subj="host-stat-endgameNetwork"]',
+};
+export const ENDGAME_PROCESS = {
+  value: '395',
+  domId: '[data-test-subj="host-stat-endgameProcess"]',
+};
+export const ENDGAME_REGISTRY = {
+  value: '396',
+  domId: '[data-test-subj="host-stat-endgameRegistry"]',
+};
+export const ENDGAME_SECURITY = {
+  value: '397',
+  domId: '[data-test-subj="host-stat-endgameSecurity"]',
+};
 export const STAT_FILEBEAT = {
   value: '890',
   domId: '[data-test-subj="host-stat-filebeatSystemModule"]',
@@ -33,20 +61,32 @@ export const STAT_USER = {
   value: '789',
   domId: '[data-test-subj="host-stat-auditbeatUser"]',
 };
-export const STAT_WINLOGBEAT = {
-  value: '100',
-  domId: '[data-test-subj="host-stat-winlogbeat"]',
+export const STAT_WINLOGBEAT_SECURITY = {
+  value: '70',
+  domId: '[data-test-subj="host-stat-winlogbeatSecurity"]',
+};
+export const STAT_WINLOGBEAT_MWSYSMON_OPERATIONAL = {
+  value: '30',
+  domId: '[data-test-subj="host-stat-winlogbeatMWSysmonOperational"]',
 };
 
 export const HOST_STATS = [
   STAT_AUDITD,
+  ENDGAME_DNS,
+  ENDGAME_FILE,
+  ENDGAME_IMAGE_LOAD,
+  ENDGAME_NETWORK,
+  ENDGAME_PROCESS,
+  ENDGAME_REGISTRY,
+  ENDGAME_SECURITY,
   STAT_FILEBEAT,
   STAT_FIM,
   STAT_LOGIN,
   STAT_PACKAGE,
   STAT_PROCESS,
   STAT_USER,
-  STAT_WINLOGBEAT,
+  STAT_WINLOGBEAT_SECURITY,
+  STAT_WINLOGBEAT_MWSYSMON_OPERATIONAL,
 ];
 
 // Network Stats
@@ -98,3 +138,7 @@ export const NETWORK_STATS = [
   STAT_FLOW,
   STAT_TLS,
 ];
+
+export const OVERVIEW_HOST_STATS = '[data-test-subj="overview-hosts-stats"]';
+
+export const OVERVIEW_NETWORK_STATS = '[data-test-subj="overview-network-stats"]';

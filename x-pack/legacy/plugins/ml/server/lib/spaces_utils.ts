@@ -5,7 +5,7 @@
  */
 
 import { Request } from 'hapi';
-import { SpacesPlugin } from '../../../spaces';
+import { LegacySpacesPlugin } from '../../../spaces';
 import { Space } from '../../../spaces/common/model/space';
 
 interface GetActiveSpaceResponse {
@@ -13,7 +13,7 @@ interface GetActiveSpaceResponse {
   space?: Space;
 }
 
-export function spacesUtilsProvider(spacesPlugin: SpacesPlugin, request: Request) {
+export function spacesUtilsProvider(spacesPlugin: LegacySpacesPlugin, request: Request) {
   async function activeSpace(): Promise<GetActiveSpaceResponse> {
     try {
       return {

@@ -17,26 +17,104 @@
  * under the License.
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/public';
-import { AutocompleteProviderRegister } from './autocomplete_provider';
-import { DataPublicPluginSetup, DataPublicPluginStart } from './types';
-import { getSuggestionsProvider } from './suggestions_provider';
+import {
+  PluginInitializerContext,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  PackageInfo,
+} from 'src/core/public';
+import { Storage, IStorageWrapper } from '../../kibana_utils/public';
+import {
+  DataPublicPluginSetup,
+  DataPublicPluginStart,
+  DataSetupDependencies,
+  DataStartDependencies,
+} from './types';
+import { AutocompleteService } from './autocomplete';
+import { SearchService } from './search/search_service';
+import { FieldFormatsService } from './field_formats';
+import { QueryService } from './query';
+import { createIndexPatternSelect } from './ui/index_pattern_select';
+import { IndexPatterns } from './index_patterns';
+import {
+  setNotifications,
+  setFieldFormats,
+  setOverlays,
+  setIndexPatterns,
+  setUiSettings,
+} from './services';
+import { createFilterAction, GLOBAL_APPLY_FILTER_ACTION } from './actions';
+import { APPLY_FILTER_TRIGGER } from '../../embeddable/public';
+import { createSearchBar } from './ui/search_bar/create_search_bar';
 
 export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPublicPluginStart> {
-  private readonly autocomplete = new AutocompleteProviderRegister();
+  private readonly autocomplete = new AutocompleteService();
+  private readonly searchService: SearchService;
+  private readonly fieldFormatsService: FieldFormatsService;
+  private readonly queryService: QueryService;
+  private readonly storage: IStorageWrapper;
+  private readonly packageInfo: PackageInfo;
 
-  constructor(initializerContext: PluginInitializerContext) {}
+  constructor(initializerContext: PluginInitializerContext) {
+    this.searchService = new SearchService(initializerContext);
+    this.queryService = new QueryService();
+    this.fieldFormatsService = new FieldFormatsService();
+    this.storage = new Storage(window.localStorage);
+    this.packageInfo = initializerContext.env.packageInfo;
+  }
 
-  public setup(core: CoreSetup): DataPublicPluginSetup {
+  public setup(core: CoreSetup, { uiActions }: DataSetupDependencies): DataPublicPluginSetup {
+    const queryService = this.queryService.setup({
+      uiSettings: core.uiSettings,
+      storage: this.storage,
+    });
+
+    uiActions.registerAction(
+      createFilterAction(queryService.filterManager, queryService.timefilter.timefilter)
+    );
+
     return {
-      autocomplete: this.autocomplete,
+      autocomplete: this.autocomplete.setup(core),
+      search: this.searchService.setup(core, this.packageInfo),
+      fieldFormats: this.fieldFormatsService.setup(core),
+      query: queryService,
     };
   }
 
-  public start(core: CoreStart): DataPublicPluginStart {
+  public start(core: CoreStart, { uiActions }: DataStartDependencies): DataPublicPluginStart {
+    const { uiSettings, http, notifications, savedObjects, overlays } = core;
+    const fieldFormats = this.fieldFormatsService.start();
+    setNotifications(notifications);
+    setFieldFormats(fieldFormats);
+    setOverlays(overlays);
+    setUiSettings(core.uiSettings);
+
+    const indexPatternsService = new IndexPatterns(uiSettings, savedObjects.client, http);
+    setIndexPatterns(indexPatternsService);
+
+    uiActions.attachAction(APPLY_FILTER_TRIGGER, GLOBAL_APPLY_FILTER_ACTION);
+
+    const dataServices = {
+      autocomplete: this.autocomplete.start(),
+      search: this.searchService.start(core),
+      fieldFormats,
+      query: this.queryService.start(core.savedObjects),
+      indexPatterns: indexPatternsService,
+    };
+
+    const SearchBar = createSearchBar({
+      core,
+      data: dataServices,
+      storage: this.storage,
+    });
+
     return {
-      autocomplete: this.autocomplete,
-      getSuggestions: getSuggestionsProvider(core.uiSettings, core.http),
+      ...dataServices,
+      ui: {
+        IndexPatternSelect: createIndexPatternSelect(core.savedObjects.client),
+        SearchBar,
+      },
     };
   }
 

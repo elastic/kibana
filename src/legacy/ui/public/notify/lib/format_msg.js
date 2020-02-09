@@ -48,9 +48,10 @@ export function formatMsg(err, source) {
     if (err.status === -1) {
       // status = -1 indicates that the request was failed to reach the server
       message += i18n.translate('common.ui.notify.toaster.unavailableServerErrorMessage', {
-        defaultMessage: 'An HTTP request has failed to connect. ' +
-        'Please check if the Kibana server is running and that your browser has a working connection, ' +
-        'or contact your system administrator.',
+        defaultMessage:
+          'An HTTP request has failed to connect. ' +
+          'Please check if the Kibana server is running and that your browser has a working connection, ' +
+          'or contact your system administrator.',
       });
     } else {
       message += i18n.translate('common.ui.notify.toaster.errorStatusMessage', {
@@ -58,8 +59,8 @@ export function formatMsg(err, source) {
         values: {
           errStatus: err.status,
           errStatusText: err.statusText,
-          errMessage: err.data.message
-        }
+          errMessage: err.data.message,
+        },
       });
     }
   }
@@ -67,7 +68,7 @@ export function formatMsg(err, source) {
   return message;
 }
 
-formatMsg.describeError = function (err) {
+formatMsg.describeError = function(err) {
   if (!err) return undefined;
   if (err.shortMessage) return err.shortMessage;
   if (err.body && err.body.message) return err.body.message;

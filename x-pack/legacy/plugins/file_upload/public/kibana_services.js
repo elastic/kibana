@@ -4,10 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { uiModules } from 'ui/modules';
+import { npStart } from 'ui/new_platform';
+import { DEFAULT_KBN_VERSION } from '../common/constants/file_import';
 
-export let indexPatternService;
+export const indexPatternService = npStart.plugins.data.indexPatterns;
 
-uiModules.get('app/file_upload').run(($injector) => {
-  indexPatternService = $injector.get('indexPatterns');
-});
+export let savedObjectsClient;
+export let basePath;
+export let kbnVersion;
+export let kbnFetch;
+
+export const initServicesAndConstants = ({ savedObjects, http, injectedMetadata }) => {
+  savedObjectsClient = savedObjects.client;
+  basePath = http.basePath.basePath;
+  kbnVersion = injectedMetadata.getKibanaVersion(DEFAULT_KBN_VERSION);
+  kbnFetch = http.fetch;
+};

@@ -5,7 +5,7 @@
  */
 
 import { get } from 'lodash';
-import { State } from '../../../types';
+import { State, AssetType } from '../../../types';
 
 const assetRoot = 'assets';
 
@@ -17,6 +17,6 @@ export function getAssetIds(state: State): Array<keyof State['assets']> {
   return Object.keys(getAssets(state));
 }
 
-export function getAssetById(state: State, id: string) {
+export function getAssetById(state: State, id: string): AssetType | undefined {
   return state[assetRoot][id];
 }

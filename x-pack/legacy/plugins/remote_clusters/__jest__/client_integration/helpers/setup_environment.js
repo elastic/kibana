@@ -15,17 +15,16 @@ import { init as initHttp } from '../../../public/app/services/http';
 import { init as initNotification } from '../../../public/app/services/notification';
 import { init as initUiMetric } from '../../../public/app/services/ui_metric';
 import { init as initHttpRequests } from './http_requests';
-import { createUiStatsReporter } from '../../../../../../../src/legacy/core_plugins/ui_metric/public';
 
 export const setupEnvironment = () => {
   chrome.breadcrumbs = {
     set: () => {},
   };
   // axios has a $http like interface so using it to simulate $http
-  initHttp(axios.create({ adapter: axiosXhrAdapter }), (path) => path);
+  initHttp(axios.create({ adapter: axiosXhrAdapter }), path => path);
   initBreadcrumb(() => {}, MANAGEMENT_BREADCRUMB);
   initNotification(toastNotifications, fatalError);
-  initUiMetric(createUiStatsReporter);
+  initUiMetric(() => () => {});
 
   const { server, httpRequestsMockHelpers } = initHttpRequests();
 

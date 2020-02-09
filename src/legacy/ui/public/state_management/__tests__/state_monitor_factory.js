@@ -23,13 +23,9 @@ import { cloneDeep } from 'lodash';
 import { stateMonitorFactory } from '../state_monitor_factory';
 import { SimpleEmitter } from '../../utils/simple_emitter';
 
-describe('stateMonitorFactory', function () {
+describe('stateMonitorFactory', function() {
   const noop = () => {};
-  const eventTypes = [
-    'save_with_changes',
-    'reset_with_changes',
-    'fetch_with_changes',
-  ];
+  const eventTypes = ['save_with_changes', 'reset_with_changes', 'fetch_with_changes'];
 
   let mockState;
 
@@ -48,27 +44,27 @@ describe('stateMonitorFactory', function () {
     mockState = createMockState({});
   });
 
-  it('should have a create method', function () {
+  it('should have a create method', function() {
     expect(stateMonitorFactory).to.have.property('create');
     expect(stateMonitorFactory.create).to.be.a('function');
   });
 
-  describe('factory creation', function () {
-    it('should not call onChange with only the state', function () {
+  describe('factory creation', function() {
+    it('should not call onChange with only the state', function() {
       const monitor = stateMonitorFactory.create(mockState);
       const changeStub = sinon.stub();
       monitor.onChange(changeStub);
       sinon.assert.notCalled(changeStub);
     });
 
-    it('should not call onChange with matching defaultState', function () {
+    it('should not call onChange with matching defaultState', function() {
       const monitor = stateMonitorFactory.create(mockState, {});
       const changeStub = sinon.stub();
       monitor.onChange(changeStub);
       sinon.assert.notCalled(changeStub);
     });
 
-    it('should call onChange with differing defaultState', function () {
+    it('should call onChange with differing defaultState', function() {
       const monitor = stateMonitorFactory.create(mockState, { test: true });
       const changeStub = sinon.stub();
       monitor.onChange(changeStub);
@@ -76,21 +72,21 @@ describe('stateMonitorFactory', function () {
     });
   });
 
-  describe('instance', function () {
+  describe('instance', function() {
     let monitor;
 
     beforeEach(() => {
       monitor = stateMonitorFactory.create(mockState);
     });
 
-    describe('onChange', function () {
-      it('should throw if not given a handler function', function () {
+    describe('onChange', function() {
+      it('should throw if not given a handler function', function() {
         const fn = () => monitor.onChange('not a function');
         expect(fn).to.throwException(/must be a function/);
       });
 
-      eventTypes.forEach((eventType) => {
-        describe(`when ${eventType} is emitted`, function () {
+      eventTypes.forEach(eventType => {
+        describe(`when ${eventType} is emitted`, function() {
           let handlerFn;
 
           beforeEach(() => {
@@ -99,24 +95,24 @@ describe('stateMonitorFactory', function () {
             sinon.assert.notCalled(handlerFn);
           });
 
-          it('should get called', function () {
+          it('should get called', function() {
             mockState.emit(eventType);
             sinon.assert.calledOnce(handlerFn);
           });
 
-          it('should be given the state status', function () {
+          it('should be given the state status', function() {
             mockState.emit(eventType);
             const args = handlerFn.firstCall.args;
             expect(args[0]).to.be.an('object');
           });
 
-          it('should be given the event type', function () {
+          it('should be given the event type', function() {
             mockState.emit(eventType);
             const args = handlerFn.firstCall.args;
             expect(args[1]).to.equal(eventType);
           });
 
-          it('should be given the changed keys', function () {
+          it('should be given the changed keys', function() {
             const keys = ['one', 'two', 'three'];
             mockState.emit(eventType, keys);
             const args = handlerFn.firstCall.args;
@@ -126,8 +122,8 @@ describe('stateMonitorFactory', function () {
       });
     });
 
-    describe('ignoreProps', function () {
-      it('should not set status to dirty when ignored properties change', function () {
+    describe('ignoreProps', function() {
+      it('should not set status to dirty when ignored properties change', function() {
         let status;
         const mockState = createMockState({ messages: { world: 'hello', foo: 'bar' } });
         const monitor = stateMonitorFactory.create(mockState);
@@ -152,7 +148,7 @@ describe('stateMonitorFactory', function () {
       });
     });
 
-    describe('setInitialState', function () {
+    describe('setInitialState', function() {
       let changeStub;
 
       beforeEach(() => {
@@ -161,22 +157,22 @@ describe('stateMonitorFactory', function () {
         sinon.assert.notCalled(changeStub);
       });
 
-      it('should throw if no state is provided', function () {
+      it('should throw if no state is provided', function() {
         const fn = () => monitor.setInitialState();
         expect(fn).to.throwException(/must be an object/);
       });
 
-      it('should throw if given the wrong type', function () {
+      it('should throw if given the wrong type', function() {
         const fn = () => monitor.setInitialState([]);
         expect(fn).to.throwException(/must be an object/);
       });
 
-      it('should trigger the onChange handler', function () {
+      it('should trigger the onChange handler', function() {
         monitor.setInitialState({ new: 'state' });
         sinon.assert.calledOnce(changeStub);
       });
 
-      it('should change the status with differing state', function () {
+      it('should change the status with differing state', function() {
         monitor.setInitialState({ new: 'state' });
         sinon.assert.calledOnce(changeStub);
 
@@ -185,13 +181,13 @@ describe('stateMonitorFactory', function () {
         expect(status).to.have.property('dirty', true);
       });
 
-      it('should not trigger the onChange handler without state change', function () {
+      it('should not trigger the onChange handler without state change', function() {
         monitor.setInitialState(cloneDeep(mockState.toJSON()));
         sinon.assert.notCalled(changeStub);
       });
     });
 
-    describe('status object', function () {
+    describe('status object', function() {
       let handlerFn;
 
       beforeEach(() => {
@@ -199,21 +195,21 @@ describe('stateMonitorFactory', function () {
         monitor.onChange(handlerFn);
       });
 
-      it('should be clean by default', function () {
+      it('should be clean by default', function() {
         mockState.emit(eventTypes[0]);
         const status = handlerFn.firstCall.args[0];
         expect(status).to.have.property('clean', true);
         expect(status).to.have.property('dirty', false);
       });
 
-      it('should be dirty when state changes', function () {
+      it('should be dirty when state changes', function() {
         setState(mockState, { message: 'i am dirty now' });
         const status = handlerFn.firstCall.args[0];
         expect(status).to.have.property('clean', false);
         expect(status).to.have.property('dirty', true);
       });
 
-      it('should be clean when state is reset', function () {
+      it('should be clean when state is reset', function() {
         const defaultState = { message: 'i am the original state' };
         const handlerFn = sinon.stub();
 
@@ -241,7 +237,7 @@ describe('stateMonitorFactory', function () {
       });
     });
 
-    describe('destroy', function () {
+    describe('destroy', function() {
       let stateSpy;
 
       beforeEach(() => {
@@ -249,16 +245,16 @@ describe('stateMonitorFactory', function () {
         sinon.assert.notCalled(stateSpy);
       });
 
-      it('should remove the listeners', function () {
+      it('should remove the listeners', function() {
         monitor.onChange(noop);
         monitor.destroy();
         sinon.assert.callCount(stateSpy, eventTypes.length);
-        eventTypes.forEach((eventType) => {
+        eventTypes.forEach(eventType => {
           sinon.assert.calledWith(stateSpy, eventType);
         });
       });
 
-      it('should stop the instance from being used any more', function () {
+      it('should stop the instance from being used any more', function() {
         monitor.onChange(noop);
         monitor.destroy();
         const fn = () => monitor.onChange(noop);

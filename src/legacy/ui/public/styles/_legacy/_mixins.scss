@@ -3,8 +3,6 @@
 
 // DO NOT CONTINUE TO USE THESE MIXINS
 
-@import '@elastic/eui/src/components/form/variables';
-
 @mixin __legacyInputStyles__bad {
   &:not([type='range']) {
     appearance: none;

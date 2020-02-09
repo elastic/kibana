@@ -19,11 +19,7 @@ describe('Latest Active', () => {
       { range: 'last1d', count: 10 },
     ];
 
-    const component = shallow(
-      <LatestActive
-        latestActive={latestActive}
-      />
-    );
+    const component = shallow(<LatestActive latestActive={latestActive} />);
 
     expect(component).toMatchSnapshot();
   });

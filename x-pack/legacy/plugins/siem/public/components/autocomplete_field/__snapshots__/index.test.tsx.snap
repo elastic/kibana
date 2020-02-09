@@ -10,6 +10,7 @@ exports[`Autocomplete rendering it renders against snapshot 1`] = `
       fullWidth={true}
       incremental={false}
       inputRef={[Function]}
+      isClearable={true}
       isInvalid={true}
       isLoading={false}
       onChange={[Function]}

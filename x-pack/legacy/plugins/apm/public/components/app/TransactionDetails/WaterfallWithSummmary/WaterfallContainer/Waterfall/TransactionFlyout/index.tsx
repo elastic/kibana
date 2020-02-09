@@ -11,7 +11,8 @@ import {
   EuiFlyoutHeader,
   EuiPortal,
   EuiSpacer,
-  EuiTitle
+  EuiTitle,
+  EuiHorizontalRule
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
@@ -26,8 +27,8 @@ import { DroppedSpansWarning } from './DroppedSpansWarning';
 interface Props {
   onClose: () => void;
   transaction?: Transaction;
-  errorCount: number;
-  traceRootDuration?: number;
+  errorCount?: number;
+  rootTransactionDuration?: number;
 }
 
 function TransactionPropertiesTable({
@@ -40,7 +41,6 @@ function TransactionPropertiesTable({
       <EuiTitle size="s">
         <h4>Metadata</h4>
       </EuiTitle>
-      <EuiSpacer />
       <TransactionMetadata transaction={transaction} />
     </div>
   );
@@ -49,8 +49,8 @@ function TransactionPropertiesTable({
 export function TransactionFlyout({
   transaction: transactionDoc,
   onClose,
-  errorCount,
-  traceRootDuration
+  errorCount = 0,
+  rootTransactionDuration
 }: Props) {
   if (!transactionDoc) {
     return null;
@@ -84,10 +84,10 @@ export function TransactionFlyout({
           <EuiSpacer size="m" />
           <TransactionSummary
             transaction={transactionDoc}
-            totalDuration={traceRootDuration}
+            totalDuration={rootTransactionDuration}
             errorCount={errorCount}
           />
-          <EuiSpacer size="m" />
+          <EuiHorizontalRule margin="m" />
           <DroppedSpansWarning transactionDoc={transactionDoc} />
           <TransactionPropertiesTable transaction={transactionDoc} />
         </EuiFlyoutBody>

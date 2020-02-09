@@ -6,7 +6,7 @@
 
 import * as rt from 'io-ts';
 
-const ML_ANOMALY_INDEX_PREFIX = '.ml-anomalies-';
+import { defaultRequestParameters, getMlResultIndex } from './common';
 
 export const createLogEntryRateQuery = (
   logRateJobId: string,
@@ -14,9 +14,9 @@ export const createLogEntryRateQuery = (
   endTime: number,
   bucketDuration: number,
   size: number,
-  afterKey?: CompositeTimestampDataSetKey
+  afterKey?: CompositeTimestampPartitionKey
 ) => ({
-  allowNoIndices: true,
+  ...defaultRequestParameters,
   body: {
     query: {
       bool: {
@@ -45,7 +45,7 @@ export const createLogEntryRateQuery = (
       },
     },
     aggs: {
-      timestamp_data_set_buckets: {
+      timestamp_partition_buckets: {
         composite: {
           after: afterKey,
           size,
@@ -60,7 +60,7 @@ export const createLogEntryRateQuery = (
               },
             },
             {
-              data_set: {
+              partition: {
                 terms: {
                   field: 'partition_field_value',
                   order: 'asc',
@@ -82,6 +82,11 @@ export const createLogEntryRateQuery = (
                   field: 'actual',
                 },
               },
+              sum_actual: {
+                sum: {
+                  field: 'actual',
+                },
+              },
             },
           },
           filter_records: {
@@ -91,6 +96,11 @@ export const createLogEntryRateQuery = (
               },
             },
             aggs: {
+              maximum_record_score: {
+                max: {
+                  field: 'record_score',
+                },
+              },
               top_hits_record: {
                 top_hits: {
                   _source: Object.keys(logRateMlRecordRT.props),
@@ -108,11 +118,8 @@ export const createLogEntryRateQuery = (
       },
     },
   },
-  ignoreUnavailable: true,
-  index: `${ML_ANOMALY_INDEX_PREFIX}${logRateJobId}`,
+  index: getMlResultIndex(logRateJobId),
   size: 0,
-  trackScores: false,
-  trackTotalHits: false,
 });
 
 const logRateMlRecordRT = rt.type({
@@ -124,20 +131,21 @@ const logRateMlRecordRT = rt.type({
 });
 
 const metricAggregationRT = rt.type({
-  value: rt.number,
+  value: rt.union([rt.number, rt.null]),
 });
 
-const compositeTimestampDataSetKeyRT = rt.type({
-  data_set: rt.string,
+const compositeTimestampPartitionKeyRT = rt.type({
+  partition: rt.string,
   timestamp: rt.number,
 });
 
-export type CompositeTimestampDataSetKey = rt.TypeOf<typeof compositeTimestampDataSetKeyRT>;
+export type CompositeTimestampPartitionKey = rt.TypeOf<typeof compositeTimestampPartitionKeyRT>;
 
 export const logRateModelPlotBucketRT = rt.type({
-  key: compositeTimestampDataSetKeyRT,
+  key: compositeTimestampPartitionKeyRT,
   filter_records: rt.type({
     doc_count: rt.number,
+    maximum_record_score: metricAggregationRT,
     top_hits_record: rt.type({
       hits: rt.type({
         hits: rt.array(
@@ -151,6 +159,7 @@ export const logRateModelPlotBucketRT = rt.type({
   filter_model_plot: rt.type({
     doc_count: rt.number,
     average_actual: metricAggregationRT,
+    sum_actual: metricAggregationRT,
   }),
 });
 
@@ -158,12 +167,12 @@ export type LogRateModelPlotBucket = rt.TypeOf<typeof logRateModelPlotBucketRT>;
 
 export const logRateModelPlotResponseRT = rt.type({
   aggregations: rt.type({
-    timestamp_data_set_buckets: rt.intersection([
+    timestamp_partition_buckets: rt.intersection([
       rt.type({
         buckets: rt.array(logRateModelPlotBucketRT),
       }),
       rt.partial({
-        after_key: compositeTimestampDataSetKeyRT,
+        after_key: compositeTimestampPartitionKeyRT,
       }),
     ]),
   }),

@@ -4,7 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import * as chromiumDefinition from './chromium';
+
 export { ensureAllBrowsersDownloaded } from './download';
 export { createBrowserDriverFactory } from './create_browser_driver_factory';
 export { getDefaultChromiumSandboxDisabled } from './default_chromium_sandbox_disabled';
-export { CHROMIUM } from './browser_types';
+
+export const chromium = {
+  paths: chromiumDefinition.paths,
+  createDriverFactory: chromiumDefinition.createDriverFactory,
+};

@@ -21,7 +21,12 @@ function importData(callWithRequest, id, index, settings, mappings, ingestPipeli
   return importDataFunc(id, index, settings, mappings, ingestPipeline, data);
 }
 
-export function fileDataVisualizerRoutes({ commonRouteConfig, elasticsearchPlugin, route, savedObjects }) {
+export function fileDataVisualizerRoutes({
+  commonRouteConfig,
+  elasticsearchPlugin,
+  route,
+  savedObjects,
+}) {
   route({
     method: 'POST',
     path: '/api/ml/file_data_visualizer/analyze_file',
@@ -29,13 +34,12 @@ export function fileDataVisualizerRoutes({ commonRouteConfig, elasticsearchPlugi
       const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       const data = request.payload;
 
-      return analyzeFiles(callWithRequest, data, request.query)
-        .catch(wrapError);
+      return analyzeFiles(callWithRequest, data, request.query).catch(wrapError);
     },
     config: {
       ...commonRouteConfig,
       payload: { maxBytes: MAX_BYTES },
-    }
+    },
   });
 
   route({
@@ -53,12 +57,13 @@ export function fileDataVisualizerRoutes({ commonRouteConfig, elasticsearchPlugi
         incrementFileDataVisualizerIndexCreationCount(elasticsearchPlugin, savedObjects);
       }
 
-      return importData(callWithRequest, id, index, settings, mappings, ingestPipeline, data)
-        .catch(wrapError);
+      return importData(callWithRequest, id, index, settings, mappings, ingestPipeline, data).catch(
+        wrapError
+      );
     },
     config: {
       ...commonRouteConfig,
       payload: { maxBytes: MAX_BYTES },
-    }
+    },
   });
 }

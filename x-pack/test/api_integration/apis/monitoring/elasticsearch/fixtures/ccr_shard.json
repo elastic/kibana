@@ -2,7 +2,7 @@
   "formattedLeader": "leader",
   "metrics": {
     "ccr_sync_lag_time": [{
-      "bucket_size": "10 min",
+      "bucket_size": "10 mins",
       "timeRange": {
         "min": 1537315200000,
         "max": 1537401599000
@@ -22,7 +22,7 @@
       "data": []
     }],
     "ccr_sync_lag_ops": [{
-      "bucket_size": "10 min",
+      "bucket_size": "10 mins",
       "timeRange": {
         "min": 1537315200000,
         "max": 1537401599000

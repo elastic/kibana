@@ -1,0 +1,4 @@
+##
+# Disabled plugins
+########################
+logging.verbose: true

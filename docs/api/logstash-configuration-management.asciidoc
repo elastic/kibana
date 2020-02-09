@@ -6,12 +6,19 @@ Programmatically integrate with the Logstash configuration management feature.
 
 WARNING: Do not directly access the `.logstash` index. The structure of the `.logstash` index is subject to change, which could cause your integration to break. Instead, use the Logstash configuration management APIs. 
 
-* <<logstash-configuration-management-api-create, Create Logstash pipeline API>>
-* <<logstash-configuration-management-api-retrieve, Retrieve pipeline API>>
-* <<logstash-configuration-management-api-delete, Delete Logstash pipeline API>>
-* <<logstash-configuration-management-api-list, List Logstash pipeline API>>
+The following Logstash configuration management APIs are available:
 
-include::logstash-configuration-management/create.asciidoc[]
-include::logstash-configuration-management/retrieve.asciidoc[]
-include::logstash-configuration-management/delete.asciidoc[]
-include::logstash-configuration-management/list.asciidoc[]
+* <<logstash-configuration-management-api-delete, Delete Logstash pipeline API>> to delete a centrally-managed Logstash pipeline
+
+* <<logstash-configuration-management-api-list, List Logstash pipeline API>> to list all centrally-managed Logstash pipelines
+
+* <<logstash-configuration-management-api-create, Create Logstash pipeline API>> to create a centrally-managed Logstash pipeline, or update an existing pipeline
+
+* <<logstash-configuration-management-api-retrieve, Retrieve pipeline API>> to retrieve a centrally-managed Logstash pipeline
+
+include::logstash-configuration-management/delete-pipeline.asciidoc[]
+include::logstash-configuration-management/list-pipeline.asciidoc[]
+include::logstash-configuration-management/create-logstash.asciidoc[]
+include::logstash-configuration-management/retrieve-pipeline.asciidoc[]
+
+

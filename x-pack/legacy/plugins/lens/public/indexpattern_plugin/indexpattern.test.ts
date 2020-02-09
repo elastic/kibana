@@ -5,16 +5,13 @@
  */
 
 import chromeMock from 'ui/chrome';
-import { Storage } from 'ui/storage';
-import {
-  getIndexPatternDatasource,
-  IndexPatternPersistedState,
-  IndexPatternPrivateState,
-  IndexPatternColumn,
-  uniqueLabels,
-} from './indexpattern';
+import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
+import { SavedObjectsClientContract } from 'kibana/public';
+import { getIndexPatternDatasource, IndexPatternColumn, uniqueLabels } from './indexpattern';
 import { DatasourcePublicAPI, Operation, Datasource } from '../types';
 import { coreMock } from 'src/core/public/mocks';
+import { pluginsMock } from 'ui/new_platform/__mocks__/helpers';
+import { IndexPatternPersistedState, IndexPatternPrivateState } from './types';
 
 jest.mock('./loader');
 jest.mock('../id_generator');
@@ -126,6 +123,19 @@ const expectedIndexPatterns = {
   },
 };
 
+function stateFromPersistedState(
+  persistedState: IndexPatternPersistedState
+): IndexPatternPrivateState {
+  return {
+    currentIndexPatternId: persistedState.currentIndexPatternId,
+    layers: persistedState.layers,
+    indexPatterns: expectedIndexPatterns,
+    indexPatternRefs: [],
+    existingFields: {},
+    showEmptyFields: true,
+  };
+}
+
 describe('IndexPattern Data Source', () => {
   let persistedState: IndexPatternPersistedState;
   let indexPatternDatasource: Datasource<IndexPatternPrivateState, IndexPatternPersistedState>;
@@ -133,8 +143,10 @@ describe('IndexPattern Data Source', () => {
   beforeEach(() => {
     indexPatternDatasource = getIndexPatternDatasource({
       chrome: chromeMock,
-      storage: {} as Storage,
+      storage: {} as IStorageWrapper,
       core: coreMock.createStart(),
+      savedObjectsClient: {} as SavedObjectsClientContract,
+      data: pluginsMock.createStart().data,
     });
 
     persistedState = {
@@ -171,6 +183,7 @@ describe('IndexPattern Data Source', () => {
         isBucketed: false,
         label: 'Foo',
         operationType: 'count',
+        sourceField: 'Records',
       };
       const map = uniqueLabels({
         a: {
@@ -205,30 +218,9 @@ describe('IndexPattern Data Source', () => {
     });
   });
 
-  describe('#initialize', () => {
-    it('should load a default state', async () => {
-      const state = await indexPatternDatasource.initialize();
-      expect(state).toEqual({
-        currentIndexPatternId: '1',
-        indexPatterns: expectedIndexPatterns,
-        layers: {},
-        showEmptyFields: false,
-      });
-    });
-
-    it('should initialize from saved state', async () => {
-      const state = await indexPatternDatasource.initialize(persistedState);
-      expect(state).toEqual({
-        ...persistedState,
-        indexPatterns: expectedIndexPatterns,
-        showEmptyFields: false,
-      });
-    });
-  });
-
   describe('#getPersistedState', () => {
     it('should persist from saved state', async () => {
-      const state = await indexPatternDatasource.initialize(persistedState);
+      const state = stateFromPersistedState(persistedState);
 
       expect(indexPatternDatasource.getPersistableState(state)).toEqual(persistedState);
     });
@@ -249,19 +241,16 @@ describe('IndexPattern Data Source', () => {
             columnOrder: ['col1', 'col2'],
             columns: {
               col1: {
-                label: 'Count of Documents',
+                label: 'Count of records',
                 dataType: 'number',
                 isBucketed: false,
-
-                // Private
+                sourceField: 'Records',
                 operationType: 'count',
               },
               col2: {
                 label: 'Date',
                 dataType: 'date',
                 isBucketed: true,
-
-                // Private
                 operationType: 'date_histogram',
                 sourceField: 'timestamp',
                 params: {
@@ -272,21 +261,25 @@ describe('IndexPattern Data Source', () => {
           },
         },
       };
-      const state = await indexPatternDatasource.initialize(queryPersistedState);
+
+      const state = stateFromPersistedState(queryPersistedState);
+
       expect(indexPatternDatasource.toExpression(state, 'first')).toMatchInlineSnapshot(`
-                "esaggs
-                      index=\\"1\\"
-                      metricsAtAllLevels=false
-                      partialRows=false
-                      includeFormatHints=true
-                      aggConfigs='[{\\"id\\":\\"col1\\",\\"enabled\\":true,\\"type\\":\\"count\\",\\"schema\\":\\"metric\\",\\"params\\":{}},{\\"id\\":\\"col2\\",\\"enabled\\":true,\\"type\\":\\"date_histogram\\",\\"schema\\":\\"segment\\",\\"params\\":{\\"field\\":\\"timestamp\\",\\"useNormalizedEsInterval\\":true,\\"interval\\":\\"1d\\",\\"drop_partials\\":false,\\"min_doc_count\\":1,\\"extended_bounds\\":{}}}]' | lens_rename_columns idMap='{\\"col-0-col1\\":\\"col1\\",\\"col-1-col2\\":\\"col2\\"}'"
-            `);
+        "esaggs
+              index=\\"1\\"
+              metricsAtAllLevels=false
+              partialRows=false
+              includeFormatHints=true
+              aggConfigs={lens_auto_date aggConfigs='[{\\"id\\":\\"col1\\",\\"enabled\\":true,\\"type\\":\\"count\\",\\"schema\\":\\"metric\\",\\"params\\":{}},{\\"id\\":\\"col2\\",\\"enabled\\":true,\\"type\\":\\"date_histogram\\",\\"schema\\":\\"segment\\",\\"params\\":{\\"field\\":\\"timestamp\\",\\"useNormalizedEsInterval\\":true,\\"interval\\":\\"1d\\",\\"drop_partials\\":false,\\"min_doc_count\\":0,\\"extended_bounds\\":{}}}]'} | lens_rename_columns idMap='{\\"col-0-col1\\":{\\"label\\":\\"Count of records\\",\\"dataType\\":\\"number\\",\\"isBucketed\\":false,\\"sourceField\\":\\"Records\\",\\"operationType\\":\\"count\\",\\"id\\":\\"col1\\"},\\"col-1-col2\\":{\\"label\\":\\"Date\\",\\"dataType\\":\\"date\\",\\"isBucketed\\":true,\\"operationType\\":\\"date_histogram\\",\\"sourceField\\":\\"timestamp\\",\\"params\\":{\\"interval\\":\\"1d\\"},\\"id\\":\\"col2\\"}}'"
+      `);
     });
   });
 
   describe('#insertLayer', () => {
     it('should insert an empty layer into the previous state', () => {
       const state = {
+        indexPatternRefs: [],
+        existingFields: {},
         indexPatterns: expectedIndexPatterns,
         layers: {
           first: {
@@ -320,6 +313,8 @@ describe('IndexPattern Data Source', () => {
   describe('#removeLayer', () => {
     it('should remove a layer', () => {
       const state = {
+        indexPatternRefs: [],
+        existingFields: {},
         showEmptyFields: false,
         indexPatterns: expectedIndexPatterns,
         layers: {
@@ -353,6 +348,8 @@ describe('IndexPattern Data Source', () => {
     it('should list the current layers', () => {
       expect(
         indexPatternDatasource.getLayers({
+          indexPatternRefs: [],
+          existingFields: {},
           showEmptyFields: false,
           indexPatterns: expectedIndexPatterns,
           layers: {
@@ -377,6 +374,8 @@ describe('IndexPattern Data Source', () => {
     it('should return the title of the index patterns', () => {
       expect(
         indexPatternDatasource.getMetaData({
+          indexPatternRefs: [],
+          existingFields: {},
           showEmptyFields: false,
           indexPatterns: expectedIndexPatterns,
           layers: {
@@ -412,8 +411,16 @@ describe('IndexPattern Data Source', () => {
     let publicAPI: DatasourcePublicAPI;
 
     beforeEach(async () => {
-      const initialState = await indexPatternDatasource.initialize(persistedState);
-      publicAPI = indexPatternDatasource.getPublicAPI(initialState, () => {}, 'first');
+      const initialState = stateFromPersistedState(persistedState);
+      publicAPI = indexPatternDatasource.getPublicAPI({
+        state: initialState,
+        setState: () => {},
+        layerId: 'first',
+        dateRange: {
+          fromDate: 'now-30d',
+          toDate: 'now',
+        },
+      });
     });
 
     describe('getTableSpec', () => {
@@ -423,57 +430,6 @@ describe('IndexPattern Data Source', () => {
             columnId: 'col1',
           },
         ]);
-      });
-    });
-
-    describe('removeColumnInTableSpec', () => {
-      it('should remove the specified column', async () => {
-        const initialState = await indexPatternDatasource.initialize(persistedState);
-        const setState = jest.fn();
-        const sampleColumn: IndexPatternColumn = {
-          dataType: 'number',
-          isBucketed: false,
-          label: 'foo',
-          operationType: 'max',
-          sourceField: 'baz',
-          suggestedPriority: 0,
-        };
-        const columns: Record<string, IndexPatternColumn> = {
-          a: {
-            ...sampleColumn,
-            suggestedPriority: 0,
-          },
-          b: {
-            ...sampleColumn,
-            suggestedPriority: 1,
-          },
-          c: {
-            ...sampleColumn,
-            suggestedPriority: 2,
-          },
-        };
-        const api = indexPatternDatasource.getPublicAPI(
-          {
-            ...initialState,
-            layers: {
-              first: {
-                ...initialState.layers.first,
-                columns,
-                columnOrder: ['a', 'b', 'c'],
-              },
-            },
-          },
-          setState,
-          'first'
-        );
-
-        api.removeColumnInTableSpec('b');
-
-        expect(setState.mock.calls[0][0].layers.first.columnOrder).toEqual(['a', 'c']);
-        expect(setState.mock.calls[0][0].layers.first.columns).toEqual({
-          a: columns.a,
-          c: columns.c,
-        });
       });
     });
 

@@ -24,8 +24,8 @@ export function ApmStatusIcon({ status, availability = true }) {
       label={i18n.translate('xpack.monitoring.apm.healthStatusLabel', {
         defaultMessage: 'Health: {status}',
         values: {
-          status
-        }
+          status,
+        },
       })}
     />
   );

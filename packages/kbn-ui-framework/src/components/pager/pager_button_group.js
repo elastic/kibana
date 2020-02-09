@@ -22,7 +22,14 @@ import React from 'react';
 
 import { KuiButton, KuiButtonIcon, KuiButtonGroup } from '../button';
 
-export function KuiPagerButtonGroup({ className, onPrevious, onNext, hasNext, hasPrevious, ...rest }) {
+export function KuiPagerButtonGroup({
+  className,
+  onPrevious,
+  onNext,
+  hasNext,
+  hasPrevious,
+  ...rest
+}) {
   return (
     <KuiButtonGroup isUnited className={className} {...rest}>
       <KuiButton
@@ -50,5 +57,5 @@ KuiPagerButtonGroup.propTypes = {
   onNext: PropTypes.func.isRequired,
   hasNext: PropTypes.bool.isRequired,
   hasPrevious: PropTypes.bool.isRequired,
-  className: PropTypes.string
+  className: PropTypes.string,
 };

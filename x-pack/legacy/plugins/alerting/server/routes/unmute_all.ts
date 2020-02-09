@@ -12,20 +12,18 @@ interface UnmuteAllRequest extends Hapi.Request {
   };
 }
 
-export function unmuteAllAlertRoute(server: Hapi.Server) {
-  server.route({
-    method: 'POST',
-    path: '/api/alert/{id}/_unmute_all',
-    options: {
-      tags: ['access:alerting-all'],
-      response: {
-        emptyStatusCode: 204,
-      },
+export const unmuteAllAlertRoute = {
+  method: 'POST',
+  path: '/api/alert/{id}/_unmute_all',
+  config: {
+    tags: ['access:alerting-all'],
+    response: {
+      emptyStatusCode: 204,
     },
-    async handler(request: UnmuteAllRequest, h: Hapi.ResponseToolkit) {
-      const alertsClient = request.getAlertsClient!();
-      await alertsClient.unmuteAll(request.params);
-      return h.response();
-    },
-  });
-}
+  },
+  async handler(request: UnmuteAllRequest, h: Hapi.ResponseToolkit) {
+    const alertsClient = request.getAlertsClient!();
+    await alertsClient.unmuteAll(request.params);
+    return h.response();
+  },
+};

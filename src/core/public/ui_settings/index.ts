@@ -18,5 +18,5 @@
  */
 
 export { UiSettingsService } from './ui_settings_service';
-export { UiSettingsClient, UiSettingsClientContract } from './ui_settings_client';
-export { UiSettingsState } from './types';
+export { UiSettingsClient } from './ui_settings_client';
+export { UiSettingsState, IUiSettingsClient } from './types';

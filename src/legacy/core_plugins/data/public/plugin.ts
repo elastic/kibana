@@ -17,30 +17,45 @@
  * under the License.
  */
 
-import { CoreSetup, CoreStart, Plugin } from '../../../../core/public';
-import { SearchService, SearchSetup, createSearchBar, StatetfulSearchBarProps } from './search';
-import { QueryService, QuerySetup } from './query';
-import { FilterService, FilterSetup } from './filter';
-import { TimefilterService, TimefilterSetup } from './timefilter';
-import { IndexPatternsService, IndexPatternsSetup } from './index_patterns';
+import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
 import {
-  LegacyDependenciesPluginSetup,
-  LegacyDependenciesPluginStart,
-} from './shim/legacy_dependencies_plugin';
-import { DataPublicPluginStart } from '../../../../plugins/data/public';
+  DataPublicPluginStart,
+  addSearchStrategy,
+  defaultSearchStrategy,
+  DataPublicPluginSetup,
+} from '../../../../plugins/data/public';
+import { ExpressionsSetup } from '../../../../plugins/expressions/public';
 
-/**
- * Interface for any dependencies on other plugins' `setup` contracts.
- *
- * @internal
- */
+import {
+  setIndexPatterns,
+  setQueryService,
+  setUiSettings,
+  setInjectedMetadata,
+  setFieldFormats,
+  setSearchService,
+  setOverlays,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../plugins/data/public/services';
+import { SELECT_RANGE_ACTION, selectRangeAction } from './actions/select_range_action';
+import { VALUE_CLICK_ACTION, valueClickAction } from './actions/value_click_action';
+import {
+  SELECT_RANGE_TRIGGER,
+  VALUE_CLICK_TRIGGER,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../plugins/embeddable/public/lib/triggers';
+import { UiActionsSetup, UiActionsStart } from '../../../../plugins/ui_actions/public';
+
+import { SearchSetup, SearchStart, SearchService } from './search/search_service';
+
 export interface DataPluginSetupDependencies {
-  __LEGACY: LegacyDependenciesPluginSetup;
+  data: DataPublicPluginSetup;
+  expressions: ExpressionsSetup;
+  uiActions: UiActionsSetup;
 }
 
 export interface DataPluginStartDependencies {
   data: DataPublicPluginStart;
-  __LEGACY: LegacyDependenciesPluginStart;
+  uiActions: UiActionsStart;
 }
 
 /**
@@ -49,11 +64,7 @@ export interface DataPluginStartDependencies {
  * @public
  */
 export interface DataSetup {
-  indexPatterns: IndexPatternsSetup;
-  filter: FilterSetup;
-  query: QuerySetup;
   search: SearchSetup;
-  timefilter: TimefilterSetup;
 }
 
 /**
@@ -62,14 +73,7 @@ export interface DataSetup {
  * @public
  */
 export interface DataStart {
-  indexPatterns: IndexPatternsSetup;
-  filter: FilterSetup;
-  query: QuerySetup;
-  search: SearchSetup;
-  timefilter: TimefilterSetup;
-  ui: {
-    SearchBar: React.ComponentType<StatetfulSearchBarProps>;
-  };
+  search: SearchStart;
 }
 
 /**
@@ -83,69 +87,45 @@ export interface DataStart {
  * in the setup/start interfaces. The remaining items exported here are either types,
  * or static code.
  */
+
 export class DataPlugin
   implements
     Plugin<DataSetup, DataStart, DataPluginSetupDependencies, DataPluginStartDependencies> {
-  // Exposed services, sorted alphabetically
-  private readonly filter: FilterService = new FilterService();
-  private readonly indexPatterns: IndexPatternsService = new IndexPatternsService();
-  private readonly query: QueryService = new QueryService();
-  private readonly search: SearchService = new SearchService();
-  private readonly timefilter: TimefilterService = new TimefilterService();
+  private readonly search = new SearchService();
 
-  private setupApi!: DataSetup;
+  public setup(core: CoreSetup, { data, uiActions }: DataPluginSetupDependencies) {
+    setInjectedMetadata(core.injectedMetadata);
 
-  public setup(core: CoreSetup, { __LEGACY }: DataPluginSetupDependencies): DataSetup {
-    const { uiSettings, http } = core;
-    const savedObjectsClient = __LEGACY.savedObjectsClient;
+    // This is to be deprecated once we switch to the new search service fully
+    addSearchStrategy(defaultSearchStrategy);
 
-    const indexPatternsService = this.indexPatterns.setup({
-      uiSettings,
-      savedObjectsClient,
-      http,
-    });
-
-    const timefilterService = this.timefilter.setup({
-      uiSettings,
-      store: __LEGACY.storage,
-    });
-    this.setupApi = {
-      indexPatterns: indexPatternsService,
-      filter: this.filter.setup({
-        uiSettings,
-        indexPatterns: indexPatternsService.indexPatterns,
-        timefilter: timefilterService.timefilter,
-      }),
-      query: this.query.setup(),
-      search: this.search.setup(savedObjectsClient),
-      timefilter: timefilterService,
-    };
-
-    return this.setupApi;
-  }
-
-  public start(core: CoreStart, { __LEGACY, data }: DataPluginStartDependencies) {
-    const SearchBar = createSearchBar({
-      core,
-      data,
-      store: __LEGACY.storage,
-      timefilter: this.setupApi.timefilter,
-      filterManager: this.setupApi.filter.filterManager,
-    });
+    uiActions.registerAction(
+      selectRangeAction(data.query.filterManager, data.query.timefilter.timefilter)
+    );
+    uiActions.registerAction(
+      valueClickAction(data.query.filterManager, data.query.timefilter.timefilter)
+    );
 
     return {
-      ...this.setupApi!,
-      ui: {
-        SearchBar,
-      },
+      search: this.search.setup(core),
     };
   }
 
-  public stop() {
-    this.indexPatterns.stop();
-    this.filter.stop();
-    this.query.stop();
-    this.search.stop();
-    this.timefilter.stop();
+  public start(core: CoreStart, { data, uiActions }: DataPluginStartDependencies): DataStart {
+    setUiSettings(core.uiSettings);
+    setQueryService(data.query);
+    setIndexPatterns(data.indexPatterns);
+    setFieldFormats(data.fieldFormats);
+    setSearchService(data.search);
+    setOverlays(core.overlays);
+
+    uiActions.attachAction(SELECT_RANGE_TRIGGER, SELECT_RANGE_ACTION);
+    uiActions.attachAction(VALUE_CLICK_TRIGGER, VALUE_CLICK_ACTION);
+
+    return {
+      search: this.search.start(core),
+    };
   }
+
+  public stop() {}
 }

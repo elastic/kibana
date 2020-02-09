@@ -33,5 +33,5 @@
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
   htmlIdGenerator: (prefix = 'staticGenerator') => {
     return (suffix = 'staticId') => `${prefix}_${suffix}`;
-  }
+  },
 }));

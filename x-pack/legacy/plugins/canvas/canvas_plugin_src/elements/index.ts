@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { applyElementStrings } from '../strings';
+import { applyElementStrings } from '../../i18n/elements';
 import { areaChart } from './area_chart';
 import { bubbleChart } from './bubble_chart';
 import { debug } from './debug';

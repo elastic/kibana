@@ -5,21 +5,19 @@
  */
 import path from 'path';
 import { LayoutTypes } from '../constants';
-import { Layout, LayoutSelectorDictionary, PageSizeParams, Size } from './layout';
+import {
+  getDefaultLayoutSelectors,
+  Layout,
+  LayoutSelectorDictionary,
+  PageSizeParams,
+  Size,
+} from './layout';
 
 // We use a zoom of two to bump up the resolution of the screenshot a bit.
 const ZOOM: number = 2;
 
 export class PreserveLayout extends Layout {
-  public readonly selectors: LayoutSelectorDictionary = {
-    screenshot: '[data-shared-items-container]',
-    renderComplete: '[data-shared-item]',
-    itemsCountAttribute: 'data-shared-items-count',
-    timefilterFromAttribute: 'data-shared-timefilter-from',
-    timefilterToAttribute: 'data-shared-timefilter-to',
-    toastHeader: '[data-test-subj="euiToastHeader"]',
-  };
-
+  public readonly selectors: LayoutSelectorDictionary = getDefaultLayoutSelectors();
   public readonly groupCount = 1;
   private readonly height: number;
   private readonly width: number;

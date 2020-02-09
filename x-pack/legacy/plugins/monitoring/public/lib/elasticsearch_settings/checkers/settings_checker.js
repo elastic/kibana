@@ -53,7 +53,7 @@ export class SettingsChecker {
       return {
         error: true,
         found: false,
-        errorReason: data
+        errorReason: data,
       };
     }
   }

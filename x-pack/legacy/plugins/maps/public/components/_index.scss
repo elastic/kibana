@@ -1,35 +1,3 @@
-.mapMetricEditorPanel {
-  margin-bottom: $euiSizeS;
-}
-
-.mapMetricEditorPanel__metricEditor {
-  padding: $euiSizeM 0;
-  border-top:  $euiBorderThin;
-
-  &:first-child {
-    padding-top: 0;
-    border-top: none;
-  }
-
-  &:last-child {
-    margin-bottom: $euiSizeM;
-    border-bottom: 1px solid $euiColorLightShade;
-  }
-}
-
-.mapMetricEditorPanel__metricRemoveButton {
-  padding-top: $euiSizeM;
-  text-align: right;
-}
-
-.mapGeometryFilter__geoFieldSuperSelect {
-  height: $euiSizeL * 2;
-}
-
-.mapGeometryFilter__geoFieldSuperSelectWrapper {
-  height: $euiSizeL * 3;
-}
-
-.mapGeometryFilter__geoFieldItem {
-  padding: $euiSizeXS;
-}
+@import './metric_editors';
+@import './geometry_filter';
+@import './tooltip_selector';

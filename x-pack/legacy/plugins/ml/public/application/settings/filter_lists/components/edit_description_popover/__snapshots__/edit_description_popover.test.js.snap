@@ -1,0 +1,171 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`FilterListUsagePopover opens the popover onButtonClick 1`] = `
+<div>
+  <EuiPopover
+    anchorPosition="downCenter"
+    button={
+      <EuiButtonIcon
+        aria-label="Edit description"
+        color="primary"
+        iconType="pencil"
+        isDisabled={false}
+        onClick={[Function]}
+        size="s"
+      />
+    }
+    closePopover={[Function]}
+    display="inlineBlock"
+    hasArrow={true}
+    id="filter_list_description_popover"
+    isOpen={true}
+    ownFocus={true}
+    panelPaddingSize="m"
+  >
+    <div
+      style={
+        Object {
+          "width": "300px",
+        }
+      }
+    >
+      <EuiForm>
+        <EuiFormRow
+          describedByIds={Array []}
+          display="row"
+          fullWidth={false}
+          hasChildLabel={true}
+          hasEmptyLabelSpace={false}
+          label={
+            <FormattedMessage
+              defaultMessage="Filter list description"
+              id="xpack.ml.settings.filterLists.editDescriptionPopover.filterListDescriptionAriaLabel"
+              values={Object {}}
+            />
+          }
+          labelType="label"
+        >
+          <EuiFieldText
+            name="filter_list_description"
+            onChange={[Function]}
+            value="A list of known safe domains"
+          />
+        </EuiFormRow>
+      </EuiForm>
+    </div>
+  </EuiPopover>
+</div>
+`;
+
+exports[`FilterListUsagePopover renders the popover with a description 1`] = `
+<div>
+  <EuiPopover
+    anchorPosition="downCenter"
+    button={
+      <EuiButtonIcon
+        aria-label="Edit description"
+        color="primary"
+        iconType="pencil"
+        isDisabled={false}
+        onClick={[Function]}
+        size="s"
+      />
+    }
+    closePopover={[Function]}
+    display="inlineBlock"
+    hasArrow={true}
+    id="filter_list_description_popover"
+    isOpen={false}
+    ownFocus={true}
+    panelPaddingSize="m"
+  >
+    <div
+      style={
+        Object {
+          "width": "300px",
+        }
+      }
+    >
+      <EuiForm>
+        <EuiFormRow
+          describedByIds={Array []}
+          display="row"
+          fullWidth={false}
+          hasChildLabel={true}
+          hasEmptyLabelSpace={false}
+          label={
+            <FormattedMessage
+              defaultMessage="Filter list description"
+              id="xpack.ml.settings.filterLists.editDescriptionPopover.filterListDescriptionAriaLabel"
+              values={Object {}}
+            />
+          }
+          labelType="label"
+        >
+          <EuiFieldText
+            name="filter_list_description"
+            onChange={[Function]}
+            value="A list of known safe domains"
+          />
+        </EuiFormRow>
+      </EuiForm>
+    </div>
+  </EuiPopover>
+</div>
+`;
+
+exports[`FilterListUsagePopover renders the popover with no description 1`] = `
+<div>
+  <EuiPopover
+    anchorPosition="downCenter"
+    button={
+      <EuiButtonIcon
+        aria-label="Edit description"
+        color="primary"
+        iconType="pencil"
+        isDisabled={false}
+        onClick={[Function]}
+        size="s"
+      />
+    }
+    closePopover={[Function]}
+    display="inlineBlock"
+    hasArrow={true}
+    id="filter_list_description_popover"
+    isOpen={false}
+    ownFocus={true}
+    panelPaddingSize="m"
+  >
+    <div
+      style={
+        Object {
+          "width": "300px",
+        }
+      }
+    >
+      <EuiForm>
+        <EuiFormRow
+          describedByIds={Array []}
+          display="row"
+          fullWidth={false}
+          hasChildLabel={true}
+          hasEmptyLabelSpace={false}
+          label={
+            <FormattedMessage
+              defaultMessage="Filter list description"
+              id="xpack.ml.settings.filterLists.editDescriptionPopover.filterListDescriptionAriaLabel"
+              values={Object {}}
+            />
+          }
+          labelType="label"
+        >
+          <EuiFieldText
+            name="filter_list_description"
+            onChange={[Function]}
+          />
+        </EuiFormRow>
+      </EuiForm>
+    </div>
+  </EuiPopover>
+</div>
+`;

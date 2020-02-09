@@ -23,13 +23,13 @@ import murmurHash3 from 'murmurhash3js';
 const MAX_HASH = Math.pow(2, 32);
 
 /**
-*  Determine the shard number for a suite by hashing
-*  its name and placing it based on the hash
-*
-*  @param {number} shardTotal - the total number of shards
-*  @param {string} suiteName - the suite name to hash
-*  @return {number} shardNum - 1-based shard number
-*/
+ *  Determine the shard number for a suite by hashing
+ *  its name and placing it based on the hash
+ *
+ *  @param {number} shardTotal - the total number of shards
+ *  @param {string} suiteName - the suite name to hash
+ *  @return {number} shardNum - 1-based shard number
+ */
 export function getShardNum(shardTotal, suiteName) {
   const hashIntsPerShard = MAX_HASH / shardTotal;
 

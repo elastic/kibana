@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiTab, EuiTabs, EuiLink } from '@elastic/eui';
+import { EuiLink, EuiTab, EuiTabs } from '@elastic/eui';
 import React from 'react';
 import { Route } from 'react-router-dom';
+
 import euiStyled from '../../../../../common/eui_styled_components';
 
 interface TabConfiguration {
@@ -36,7 +37,8 @@ export class RoutedTabs extends React.Component<RoutedTabsProps> {
               {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
               <EuiLink
                 href={`#${tab.path}`}
-                onClick={e => {
+                data-test-subj={`infrastructureNavLink_${tab.path}`}
+                onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
                   e.preventDefault();
                   history.push(tab.path);
                 }}

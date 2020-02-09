@@ -4,17 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import actionCreatorFactory, { Action } from 'typescript-fsa';
+import actionCreatorFactory from 'typescript-fsa';
 import { reducerWithInitialState } from 'typescript-fsa-reducers/dist';
-import { takeLatest, put, call, select } from 'redux-saga/effects';
-import { i18n } from '@kbn/i18n';
-import { IndexPattern } from 'src/legacy/core_plugins/data/public';
 import { createSelector } from 'reselect';
-import { GraphState, GraphStoreDependencies } from './store';
+import { GraphState } from './store';
 import { reset } from './global';
-import { loadFields } from './fields';
-import { mapFields } from '../services/persistence';
-import { settingsSelector } from './advanced_settings';
 
 const actionCreator = actionCreatorFactory('x-pack/graph/datasource');
 
@@ -25,11 +19,6 @@ export interface IndexpatternDatasource {
   type: 'indexpattern';
   id: string;
   title: string;
-}
-
-export interface DatasourceState {
-  current: NoDatasource | IndexpatternDatasource;
-  loading: boolean;
 }
 
 /**
@@ -47,6 +36,11 @@ export const requestDatasource = actionCreator<IndexpatternDatasource>('SET_DATA
  * Datasource loading finished successfully.
  */
 export const datasourceLoaded = actionCreator<void>('SET_DATASOURCE_SUCCESS');
+
+export interface DatasourceState {
+  current: NoDatasource | IndexpatternDatasource;
+  loading: boolean;
+}
 
 const initialDatasource: DatasourceState = {
   current: { type: 'none' },
@@ -74,37 +68,3 @@ export const hasDatasourceSelector = createSelector(
   datasourceSelector,
   datasource => datasource.current.type !== 'none'
 );
-
-/**
- * Saga loading field information when the datasource is switched. This will overwrite current settings
- * in fields.
- *
- * TODO: Carry over fields than can be carried over because they also exist in the target index pattern
- */
-export const datasourceSaga = ({
-  indexPatternProvider,
-  notifications,
-  createWorkspace,
-}: GraphStoreDependencies) => {
-  function* fetchFields(action: Action<IndexpatternDatasource>) {
-    try {
-      const indexPattern: IndexPattern = yield call(indexPatternProvider.get, action.payload.id);
-      yield put(loadFields(mapFields(indexPattern)));
-      yield put(datasourceLoaded());
-      const advancedSettings = settingsSelector(yield select());
-      createWorkspace(indexPattern.title, advancedSettings);
-    } catch (e) {
-      // in case of errors, reset the datasource and show notification
-      yield put(setDatasource({ type: 'none' }));
-      notifications.toasts.addDanger(
-        i18n.translate('xpack.graph.loadWorkspace.missingIndexPatternErrorMessage', {
-          defaultMessage: 'Index pattern not found',
-        })
-      );
-    }
-  }
-
-  return function*() {
-    yield takeLatest(requestDatasource.match, fetchFields);
-  };
-};

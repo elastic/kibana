@@ -19,69 +19,68 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { I18nContext } from 'ui/i18n';
 import { fetchIndexPatternFields } from './lib/fetch_fields';
+import { getSavedObjectsClient, getUISettings, getI18n } from './services';
 
-export function createEditorController(config, savedObjectsClient) {
-  return class {
-    constructor(el, savedObj) {
-      this.el = el;
+export class EditorController {
+  constructor(el, savedObj) {
+    this.el = el;
 
-      this.state = {
-        savedObj: savedObj,
-        vis: savedObj.vis,
-        isLoaded: false,
-      };
-    }
-
-    fetchDefaultIndexPattern = async () => {
-      const indexPattern = await savedObjectsClient.get(
-        'index-pattern',
-        config.get('defaultIndex')
-      );
-
-      return indexPattern.attributes;
+    this.state = {
+      savedObj: savedObj,
+      vis: savedObj.vis,
+      isLoaded: false,
     };
+  }
 
-    fetchDefaultParams = async () => {
-      const { title, timeFieldName } = await this.fetchDefaultIndexPattern();
+  fetchDefaultIndexPattern = async () => {
+    const indexPattern = await getSavedObjectsClient().client.get(
+      'index-pattern',
+      getUISettings().get('defaultIndex')
+    );
 
-      this.state.vis.params.default_index_pattern = title;
-      this.state.vis.params.default_timefield = timeFieldName;
-      this.state.vis.fields = await fetchIndexPatternFields(this.state.vis);
-
-      this.state.isLoaded = true;
-    };
-
-    getComponent = () => {
-      return this.state.vis.type.editorConfig.component;
-    };
-
-    async render(params) {
-      const Component = this.getComponent();
-
-      !this.state.isLoaded && (await this.fetchDefaultParams());
-
-      render(
-        <I18nContext>
-          <Component
-            config={config}
-            vis={this.state.vis}
-            visFields={this.state.vis.fields}
-            visParams={this.state.vis.params}
-            savedObj={this.state.savedObj}
-            timeRange={params.timeRange}
-            renderComplete={() => {}}
-            isEditorMode={true}
-            appState={params.appState}
-          />
-        </I18nContext>,
-        this.el
-      );
-    }
-
-    destroy() {
-      unmountComponentAtNode(this.el);
-    }
+    return indexPattern.attributes;
   };
+
+  fetchDefaultParams = async () => {
+    const { title, timeFieldName } = await this.fetchDefaultIndexPattern();
+
+    this.state.vis.params.default_index_pattern = title;
+    this.state.vis.params.default_timefield = timeFieldName;
+    this.state.vis.fields = await fetchIndexPatternFields(this.state.vis);
+
+    this.state.isLoaded = true;
+  };
+
+  getComponent = () => {
+    return this.state.vis.type.editorConfig.component;
+  };
+
+  async render(params) {
+    const Component = this.getComponent();
+    const I18nContext = getI18n().Context;
+
+    !this.state.isLoaded && (await this.fetchDefaultParams());
+
+    render(
+      <I18nContext>
+        <Component
+          config={getUISettings()}
+          vis={this.state.vis}
+          visFields={this.state.vis.fields}
+          visParams={this.state.vis.params}
+          savedObj={this.state.savedObj}
+          timeRange={params.timeRange}
+          renderComplete={() => {}}
+          isEditorMode={true}
+          appState={params.appState}
+        />
+      </I18nContext>,
+      this.el
+    );
+  }
+
+  destroy() {
+    unmountComponentAtNode(this.el);
+  }
 }

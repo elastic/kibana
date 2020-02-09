@@ -8,7 +8,7 @@ import { createMockServer } from './_mock_server';
 import { updateApiKeyRoute } from './update_api_key';
 
 const { server, alertsClient } = createMockServer();
-updateApiKeyRoute(server);
+server.route(updateApiKeyRoute);
 
 test('updates api key for an alert', async () => {
   const request = {

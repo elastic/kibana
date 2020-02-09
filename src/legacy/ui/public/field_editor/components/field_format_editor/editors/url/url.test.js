@@ -24,12 +24,12 @@ import { UrlFormatEditor } from './url';
 
 const fieldType = 'string';
 const format = {
-  getConverterFor: jest.fn().mockImplementation(() => (input) => `converted url for ${input}`),
+  getConverterFor: jest.fn().mockImplementation(() => input => `converted url for ${input}`),
   type: {
     urlTypes: [
       { kind: 'a', text: 'Link' },
       { kind: 'img', text: 'Image' },
-      { kind: 'audio', text: 'Audio' }
+      { kind: 'audio', text: 'Audio' },
     ],
   },
 };
@@ -40,7 +40,6 @@ const onError = jest.fn();
 jest.mock('ui/chrome', () => ({
   getBasePath: () => 'http://localhost/',
 }));
-
 
 describe('UrlFormatEditor', () => {
   it('should have a formatId', () => {
@@ -90,6 +89,19 @@ describe('UrlFormatEditor', () => {
 
     component.instance().showLabelTemplateHelp();
     component.update();
+    expect(component).toMatchSnapshot();
+  });
+
+  it('should render width and height fields if image', async () => {
+    const component = shallow(
+      <UrlFormatEditor
+        fieldType={fieldType}
+        format={format}
+        formatParams={{ ...formatParams, type: 'img' }}
+        onChange={onChange}
+        onError={onError}
+      />
+    );
     expect(component).toMatchSnapshot();
   });
 });

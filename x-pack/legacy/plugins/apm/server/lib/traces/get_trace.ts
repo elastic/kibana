@@ -5,16 +5,15 @@
  */
 
 import { PromiseReturnType } from '../../../typings/common';
-import { getTraceErrorsPerTransaction } from '../errors/get_trace_errors_per_transaction';
-import { Setup } from '../helpers/setup_request';
+import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { getTraceItems } from './get_trace_items';
 
 export type TraceAPIResponse = PromiseReturnType<typeof getTrace>;
-export async function getTrace(traceId: string, setup: Setup) {
-  const [trace, errorsPerTransaction] = await Promise.all([
-    getTraceItems(traceId, setup),
-    getTraceErrorsPerTransaction(traceId, setup)
-  ]);
+export async function getTrace(traceId: string, setup: Setup & SetupTimeRange) {
+  const { errorsPerTransaction, ...trace } = await getTraceItems(
+    traceId,
+    setup
+  );
 
   return {
     trace,

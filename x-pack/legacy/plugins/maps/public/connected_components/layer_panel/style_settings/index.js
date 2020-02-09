@@ -11,7 +11,7 @@ import { updateLayerStyleForSelectedLayer } from '../../../actions/map_actions';
 
 function mapStateToProps(state = {}) {
   return {
-    layer: getSelectedLayer(state)
+    layer: getSelectedLayer(state),
   };
 }
 
@@ -19,7 +19,7 @@ function mapDispatchToProps(dispatch) {
   return {
     updateStyleDescriptor: styleDescriptor => {
       dispatch(updateLayerStyleForSelectedLayer(styleDescriptor));
-    }
+    },
   };
 }
 

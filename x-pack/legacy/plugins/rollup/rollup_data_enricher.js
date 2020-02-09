@@ -18,12 +18,11 @@ export const rollupDataEnricher = async (indicesList, callWithRequest) => {
       const isRollupIndex = !!rollupJobData[index.name];
       return {
         ...index,
-        isRollupIndex
+        isRollupIndex,
       };
     });
   } catch (e) {
     //swallow exceptions and return original list
     return indicesList;
   }
-
 };

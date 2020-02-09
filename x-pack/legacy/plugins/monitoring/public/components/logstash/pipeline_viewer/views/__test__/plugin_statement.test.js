@@ -70,9 +70,7 @@ describe('PluginStatement component', () => {
 
   it('adds warning highlight for cpu time', () => {
     props.statement = processorStatement;
-    props.statement.vertex.isTimeConsuming = jest
-      .fn()
-      .mockImplementation(() => true);
+    props.statement.vertex.isTimeConsuming = jest.fn().mockImplementation(() => true);
     expect(render(props)).toMatchSnapshot();
   });
 

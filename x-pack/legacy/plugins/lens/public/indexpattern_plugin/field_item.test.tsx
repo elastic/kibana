@@ -10,63 +10,58 @@ import { EuiLoadingSpinner, EuiPopover } from '@elastic/eui';
 import { FieldItem, FieldItemProps } from './field_item';
 import { coreMock } from 'src/core/public/mocks';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { npStart } from 'ui/new_platform';
+import { FieldFormatsStart } from '../../../../../../src/plugins/data/public';
+import { IndexPattern } from './types';
 
 jest.mock('ui/new_platform');
 
-// Formatter must be mocked to return a string, or the rendering will fail
-jest.mock('../../../../../../src/legacy/ui/public/registry/field_formats', () => ({
-  fieldFormats: {
-    getDefaultInstance: jest.fn().mockReturnValue({
-      convert: jest.fn().mockReturnValue((s: unknown) => JSON.stringify(s)),
-    }),
-  },
-}));
-
 const waitForPromises = () => new Promise(resolve => setTimeout(resolve));
-
-const indexPattern = {
-  id: '1',
-  title: 'my-fake-index-pattern',
-  timeFieldName: 'timestamp',
-  fields: [
-    {
-      name: 'timestamp',
-      type: 'date',
-      aggregatable: true,
-      searchable: true,
-    },
-    {
-      name: 'bytes',
-      type: 'number',
-      aggregatable: true,
-      searchable: true,
-    },
-    {
-      name: 'memory',
-      type: 'number',
-      aggregatable: true,
-      searchable: true,
-    },
-    {
-      name: 'unsupported',
-      type: 'geo',
-      aggregatable: true,
-      searchable: true,
-    },
-    {
-      name: 'source',
-      type: 'string',
-      aggregatable: true,
-      searchable: true,
-    },
-  ],
-};
 
 describe('IndexPattern Field Item', () => {
   let defaultProps: FieldItemProps;
+  let indexPattern: IndexPattern;
   let core: ReturnType<typeof coreMock['createSetup']>;
 
   beforeEach(() => {
+    indexPattern = {
+      id: '1',
+      title: 'my-fake-index-pattern',
+      timeFieldName: 'timestamp',
+      fields: [
+        {
+          name: 'timestamp',
+          type: 'date',
+          aggregatable: true,
+          searchable: true,
+        },
+        {
+          name: 'bytes',
+          type: 'number',
+          aggregatable: true,
+          searchable: true,
+        },
+        {
+          name: 'memory',
+          type: 'number',
+          aggregatable: true,
+          searchable: true,
+        },
+        {
+          name: 'unsupported',
+          type: 'geo',
+          aggregatable: true,
+          searchable: true,
+        },
+        {
+          name: 'source',
+          type: 'string',
+          aggregatable: true,
+          searchable: true,
+        },
+      ],
+    } as IndexPattern;
+
     core = coreMock.createSetup();
     core.http.post.mockClear();
     defaultProps = {
@@ -87,6 +82,30 @@ describe('IndexPattern Field Item', () => {
       },
       exists: true,
     };
+
+    npStart.plugins.data.fieldFormats = ({
+      getDefaultInstance: jest.fn(() => ({
+        convert: jest.fn((s: unknown) => JSON.stringify(s)),
+      })),
+    } as unknown) as FieldFormatsStart;
+  });
+
+  it('should request field stats without a time field, if the index pattern has none', async () => {
+    indexPattern.timeFieldName = undefined;
+    core.http.post.mockImplementationOnce(() => {
+      return Promise.resolve({});
+    });
+    const wrapper = mountWithIntl(<FieldItem {...defaultProps} />);
+    wrapper.find('[data-test-subj="lnsFieldListPanelField-bytes"]').simulate('click');
+
+    expect(core.http.post).toHaveBeenCalledWith(
+      '/api/lens/index_stats/my-fake-index-pattern/field',
+      expect.anything()
+    );
+    // Function argument types not detected correctly (https://github.com/microsoft/TypeScript/issues/26591)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { body } = (core.http.post.mock.calls[0] as any)[1];
+    expect(JSON.parse(body)).not.toHaveProperty('timeFieldName');
   });
 
   it('should request field stats every time the button is clicked', async () => {

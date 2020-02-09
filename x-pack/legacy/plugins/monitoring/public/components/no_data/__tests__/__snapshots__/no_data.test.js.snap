@@ -4,7 +4,12 @@ exports[`NoData should show a default message if reason is unknown 1`] = `
 <div
   class="euiPage"
 >
-  <div
+  <h1
+    class="euiScreenReaderOnly"
+  >
+    No monitoring data found.
+  </h1>
+  <main
     class="euiPageBody euiPageBody--restrictWidth-custom"
     style="max-width:600px"
   >
@@ -12,9 +17,11 @@ exports[`NoData should show a default message if reason is unknown 1`] = `
       class="euiPanel euiPanel--paddingLarge euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter eui-textCenter"
     >
       <svg
+        aria-hidden="true"
         class="euiIcon euiIcon--xxLarge euiIcon--app euiIcon-isLoading"
         focusable="false"
         height="16"
+        role="img"
         viewBox="0 0 16 16"
         width="16"
         xmlns="http://www.w3.org/2000/svg"
@@ -86,7 +93,7 @@ exports[`NoData should show a default message if reason is unknown 1`] = `
         </span>
       </button>
     </div>
-  </div>
+  </main>
 </div>
 `;
 
@@ -94,7 +101,12 @@ exports[`NoData should show text next to the spinner while checking a setting 1`
 <div
   class="euiPage"
 >
-  <div
+  <h1
+    class="euiScreenReaderOnly"
+  >
+    No monitoring data found.
+  </h1>
+  <main
     class="euiPageBody euiPageBody--restrictWidth-custom"
     style="max-width:600px"
   >
@@ -102,9 +114,11 @@ exports[`NoData should show text next to the spinner while checking a setting 1`
       class="euiPanel euiPanel--paddingLarge euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter eui-textCenter"
     >
       <svg
+        aria-hidden="true"
         class="euiIcon euiIcon--xxLarge euiIcon--app euiIcon-isLoading"
         focusable="false"
         height="16"
+        role="img"
         viewBox="0 0 16 16"
         width="16"
         xmlns="http://www.w3.org/2000/svg"
@@ -176,6 +190,6 @@ exports[`NoData should show text next to the spinner while checking a setting 1`
         </span>
       </button>
     </div>
-  </div>
+  </main>
 </div>
 `;

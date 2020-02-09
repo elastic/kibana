@@ -7,6 +7,7 @@
 import { get } from 'lodash/fp';
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
+import { getIntervalSettings, getTimeRangeSettings } from '../../utils/default_date_settings';
 import {
   deleteAllQuery,
   setAbsoluteRangeDatePicker,
@@ -23,6 +24,9 @@ import {
   addGlobalLinkTo,
   addTimelineLinkTo,
   deleteOneQuery,
+  setFilterQuery,
+  setSavedQuery,
+  setSearchBarFilter,
 } from './actions';
 import {
   setIsInspected,
@@ -36,14 +40,6 @@ import {
   deleteOneQuery as helperDeleteOneQuery,
 } from './helpers';
 import { InputsModel, TimeRange } from './model';
-import {
-  getDefaultFromValue,
-  getDefaultToValue,
-  getDefaultFromString,
-  getDefaultToString,
-  getDefaultIntervalKind,
-  getDefaultIntervalDuration,
-} from '../../utils/default_date_settings';
 
 export type InputsState = InputsModel;
 
@@ -51,33 +47,79 @@ export const initialInputsState: InputsState = {
   global: {
     timerange: {
       kind: 'relative',
-      fromStr: getDefaultFromString(),
-      toStr: getDefaultToString(),
-      from: getDefaultFromValue(),
-      to: getDefaultToValue(),
+      ...getTimeRangeSettings(false),
     },
-    query: [],
-    policy: {
-      kind: getDefaultIntervalKind(),
-      duration: getDefaultIntervalDuration(),
-    },
+    queries: [],
+    policy: getIntervalSettings(false),
     linkTo: ['timeline'],
+    query: {
+      query: '',
+      language: 'kuery',
+    },
+    filters: [],
   },
   timeline: {
     timerange: {
       kind: 'relative',
-      fromStr: getDefaultFromString(),
-      toStr: getDefaultToString(),
-      from: getDefaultFromValue(),
-      to: getDefaultToValue(),
+      ...getTimeRangeSettings(false),
     },
-    query: [],
-    policy: {
-      kind: getDefaultIntervalKind(),
-      duration: getDefaultIntervalDuration(),
-    },
+    queries: [],
+    policy: getIntervalSettings(false),
     linkTo: ['global'],
+    query: {
+      query: '',
+      language: 'kuery',
+    },
+    filters: [],
   },
+};
+
+export const createInitialInputsState = (): InputsState => {
+  const { from, fromStr, to, toStr } = getTimeRangeSettings();
+  const { kind, duration } = getIntervalSettings();
+
+  return {
+    global: {
+      timerange: {
+        kind: 'relative',
+        fromStr,
+        toStr,
+        from,
+        to,
+      },
+      queries: [],
+      policy: {
+        kind,
+        duration,
+      },
+      linkTo: ['timeline'],
+      query: {
+        query: '',
+        language: 'kuery',
+      },
+      filters: [],
+    },
+    timeline: {
+      timerange: {
+        kind: 'relative',
+        fromStr,
+        toStr,
+        from,
+        to,
+      },
+      queries: [],
+      policy: {
+        kind,
+        duration,
+      },
+      linkTo: ['global'],
+      query: {
+        query: '',
+        language: 'kuery',
+      },
+      filters: [],
+    },
+  };
 };
 
 export const inputsReducer = reducerWithInitialState(initialInputsState)
@@ -125,7 +167,7 @@ export const inputsReducer = reducerWithInitialState(initialInputsState)
     ...state,
     [id]: {
       ...get(id, state),
-      query: state.global.query.slice(state.global.query.length),
+      queries: state.global.queries.slice(state.global.queries.length),
     },
   }))
   .case(setQuery, (state, { inputId, id, inspect, loading, refetch }) =>
@@ -170,4 +212,28 @@ export const inputsReducer = reducerWithInitialState(initialInputsState)
   .case(addGlobalLinkTo, (state, { linkToId }) => addGlobalLink(linkToId, state))
   .case(removeTimelineLinkTo, state => removeTimelineLink(state))
   .case(addTimelineLinkTo, (state, { linkToId }) => addTimelineLink(linkToId, state))
+  .case(setFilterQuery, (state, { id, query, language }) => ({
+    ...state,
+    [id]: {
+      ...get(id, state),
+      query: {
+        query,
+        language,
+      },
+    },
+  }))
+  .case(setSavedQuery, (state, { id, savedQuery }) => ({
+    ...state,
+    [id]: {
+      ...get(id, state),
+      savedQuery,
+    },
+  }))
+  .case(setSearchBarFilter, (state, { id, filters }) => ({
+    ...state,
+    [id]: {
+      ...get(id, state),
+      filters,
+    },
+  }))
   .build();

@@ -4,12 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Legacy } from 'kibana';
 import { getOr } from 'lodash/fp';
 
-import { SavedObjectsFindOptions } from 'src/core/server';
-
-import { Pick3 } from '../../../common/utility_types';
+import { SavedObjectsFindOptions } from '../../../../../../../src/core/server';
+import { UNAUTHENTICATED_USER } from '../../../common/constants';
 import {
   ResponseTimeline,
   PageInfoTimeline,
@@ -17,16 +15,15 @@ import {
   ResponseFavoriteTimeline,
   TimelineResult,
 } from '../../graphql/types';
-import { FrameworkRequest, internalFrameworkRequest } from '../framework';
+import { FrameworkRequest } from '../framework';
+import { Note } from '../note/saved_object';
 import { NoteSavedObject } from '../note/types';
 import { PinnedEventSavedObject } from '../pinned_event/types';
-
-import { SavedTimeline, TimelineSavedObject } from './types';
-import { Note } from '../note/saved_object';
 import { PinnedEvent } from '../pinned_event/saved_object';
-import { timelineSavedObjectType } from './saved_object_mappings';
-import { pickSavedTimeline } from './pick_saved_timeline';
 import { convertSavedObjectToSavedTimeline } from './convert_saved_object_to_savedtimeline';
+import { pickSavedTimeline } from './pick_saved_timeline';
+import { timelineSavedObjectType } from './saved_object_mappings';
+import { SavedTimeline, TimelineSavedObject } from './types';
 
 interface ResponseTimelines {
   timeline: TimelineSavedObject[];
@@ -34,17 +31,8 @@ interface ResponseTimelines {
 }
 
 export class Timeline {
-  private readonly note: Note;
-  private readonly pinnedEvent: PinnedEvent;
-  constructor(
-    private readonly libs: {
-      savedObjects: Pick<Legacy.SavedObjectsService, 'getScopedSavedObjectsClient'> &
-        Pick3<Legacy.SavedObjectsService, 'SavedObjectsClient', 'errors', 'isConflictError'>;
-    }
-  ) {
-    this.note = new Note({ savedObjects: this.libs.savedObjects });
-    this.pinnedEvent = new PinnedEvent({ savedObjects: this.libs.savedObjects });
-  }
+  private readonly note = new Note();
+  private readonly pinnedEvent = new PinnedEvent();
 
   public async getTimeline(
     request: FrameworkRequest,
@@ -79,8 +67,8 @@ export class Timeline {
     request: FrameworkRequest,
     timelineId: string | null
   ): Promise<ResponseFavoriteTimeline> {
-    const userName = getOr(null, 'credentials.username', request[internalFrameworkRequest].auth);
-    const fullName = getOr(null, 'credentials.fullname', request[internalFrameworkRequest].auth);
+    const userName = request.user?.username ?? UNAUTHENTICATED_USER;
+    const fullName = request.user?.full_name ?? '';
     try {
       let timeline: SavedTimeline = {};
       if (timelineId != null) {
@@ -149,6 +137,8 @@ export class Timeline {
     version: string | null,
     timeline: SavedTimeline
   ): Promise<ResponseTimeline> {
+    const savedObjectsClient = request.context.core.savedObjects.client;
+
     try {
       if (timelineId == null) {
         // Create new timeline
@@ -156,40 +146,29 @@ export class Timeline {
           code: 200,
           message: 'success',
           timeline: convertSavedObjectToSavedTimeline(
-            await this.libs.savedObjects
-              .getScopedSavedObjectsClient(request[internalFrameworkRequest])
-              .create(
-                timelineSavedObjectType,
-                pickSavedTimeline(
-                  timelineId,
-                  timeline,
-                  request[internalFrameworkRequest].auth || null
-                )
-              )
+            await savedObjectsClient.create(
+              timelineSavedObjectType,
+              pickSavedTimeline(timelineId, timeline, request.user)
+            )
           ),
         };
       }
       // Update Timeline
-      await this.libs.savedObjects
-        .getScopedSavedObjectsClient(request[internalFrameworkRequest])
-        .update(
-          timelineSavedObjectType,
-          timelineId,
-          pickSavedTimeline(timelineId, timeline, request[internalFrameworkRequest].auth || null),
-          {
-            version: version || undefined,
-          }
-        );
+      await savedObjectsClient.update(
+        timelineSavedObjectType,
+        timelineId,
+        pickSavedTimeline(timelineId, timeline, request.user),
+        {
+          version: version || undefined,
+        }
+      );
       return {
         code: 200,
         message: 'success',
         timeline: await this.getSavedTimeline(request, timelineId),
       };
     } catch (err) {
-      if (
-        timelineId != null &&
-        this.libs.savedObjects.SavedObjectsClient.errors.isConflictError(err)
-      ) {
+      if (timelineId != null && savedObjectsClient.errors.isConflictError(err)) {
         return {
           code: 409,
           message: err.message,
@@ -212,12 +191,12 @@ export class Timeline {
   }
 
   public async deleteTimeline(request: FrameworkRequest, timelineIds: string[]) {
+    const savedObjectsClient = request.context.core.savedObjects.client;
+
     await Promise.all(
       timelineIds.map(timelineId =>
         Promise.all([
-          this.libs.savedObjects
-            .getScopedSavedObjectsClient(request[internalFrameworkRequest])
-            .delete(timelineSavedObjectType, timelineId),
+          savedObjectsClient.delete(timelineSavedObjectType, timelineId),
           this.note.deleteNoteByTimelineId(request, timelineId),
           this.pinnedEvent.deleteAllPinnedEventsOnTimeline(request, timelineId),
         ])
@@ -226,22 +205,16 @@ export class Timeline {
   }
 
   private async getBasicSavedTimeline(request: FrameworkRequest, timelineId: string) {
-    const savedObjectsClient = this.libs.savedObjects.getScopedSavedObjectsClient(
-      request[internalFrameworkRequest]
-    );
-
+    const savedObjectsClient = request.context.core.savedObjects.client;
     const savedObject = await savedObjectsClient.get(timelineSavedObjectType, timelineId);
 
     return convertSavedObjectToSavedTimeline(savedObject);
   }
 
   private async getSavedTimeline(request: FrameworkRequest, timelineId: string) {
-    const userName = getOr(null, 'credentials.username', request[internalFrameworkRequest].auth);
+    const userName = request.user?.username ?? UNAUTHENTICATED_USER;
 
-    const savedObjectsClient = this.libs.savedObjects.getScopedSavedObjectsClient(
-      request[internalFrameworkRequest]
-    );
-
+    const savedObjectsClient = request.context.core.savedObjects.client;
     const savedObject = await savedObjectsClient.get(timelineSavedObjectType, timelineId);
     const timelineSaveObject = convertSavedObjectToSavedTimeline(savedObject);
     const timelineWithNotesAndPinnedEvents = await Promise.all([
@@ -256,11 +229,8 @@ export class Timeline {
   }
 
   private async getAllSavedTimeline(request: FrameworkRequest, options: SavedObjectsFindOptions) {
-    const userName = getOr(null, 'credentials.username', request[internalFrameworkRequest].auth);
-
-    const savedObjectsClient = this.libs.savedObjects.getScopedSavedObjectsClient(
-      request[internalFrameworkRequest]
-    );
+    const userName = request.user?.username ?? UNAUTHENTICATED_USER;
+    const savedObjectsClient = request.context.core.savedObjects.client;
     if (options.searchFields != null && options.searchFields.includes('favorite.keySearch')) {
       options.search = `${options.search != null ? options.search : ''} ${
         userName != null ? convertStringToBase64(userName) : null

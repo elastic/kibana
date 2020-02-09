@@ -7,9 +7,11 @@
 import moment from 'moment';
 import React from 'react';
 
-import { InfraSnapshotMetricType } from '../graphql/types';
+import { euiPaletteColorBlind } from '@elastic/eui';
 import { InfraFormatterType, InfraOptions, InfraWaffleMapLegendMode } from '../lib/lib';
 import { RendererFunction } from '../utils/typed_react';
+
+const euiVisColorPalette = euiPaletteColorBlind();
 
 const initialState = {
   options: {
@@ -24,7 +26,7 @@ const initialState = {
     wafflemap: {
       formatter: InfraFormatterType.percent,
       formatTemplate: '{{value}}',
-      metric: { type: InfraSnapshotMetricType.cpu },
+      metric: { type: 'cpu' },
       groupBy: [],
       legend: {
         type: InfraWaffleMapLegendMode.gradient,
@@ -35,7 +37,7 @@ const initialState = {
           },
           {
             value: 1,
-            color: '#3185FC',
+            color: euiVisColorPalette[1],
           },
         ],
       },

@@ -1,0 +1,457 @@
+{
+  "defaultPagination": [
+    "cli1-41-az10-dc-ent",
+    "cli1-42-az10-dc-ent",
+    "esh1-31-az10-dc-ent",
+    "esh1-32-az10-dc-ent",
+    "esh1-33-az10-dc-ent",
+    "esh1-34-az10-dc-ent",
+    "esh1-35-az10-dc-ent",
+    "esh1-36-az10-dc-ent",
+    "esh2-31-az10-dc-ent",
+    "esh2-32-az10-dc-ent"
+  ],
+  "secondPagePagination": [
+    "esh2-35-az10-dc-ent",
+    "esh2-36-az10-dc-ent",
+    "esh3-31-az10-dc-ent",
+    "esh3-32-az10-dc-ent",
+    "esh3-33-az10-dc-ent",
+    "esh3-34-az10-dc-ent",
+    "esh3-35-az10-dc-ent",
+    "esh3-36-az10-dc-ent",
+    "esw1-19-az10-dc-ent",
+    "esw1-20-az10-dc-ent",
+    "esw1-21-az10-dc-ent",
+    "esw1-22-az10-dc-ent"
+  ],
+  "sortByNameAsc": [
+    "cli1-41-az10-dc-ent",
+    "cli1-42-az10-dc-ent",
+    "esh1-31-az10-dc-ent",
+    "esh1-32-az10-dc-ent",
+    "esh1-33-az10-dc-ent",
+    "esh1-34-az10-dc-ent",
+    "esh1-35-az10-dc-ent",
+    "esh1-36-az10-dc-ent",
+    "esh2-31-az10-dc-ent",
+    "esh2-32-az10-dc-ent"
+  ],
+  "sortByNameDesc": [
+    "mas1-42-az10-dc-ent",
+    "mas1-41-az10-dc-ent",
+    "mas1-40-az10-dc-ent",
+    "esw3-30-az10-dc-ent",
+    "esw3-29-az10-dc-ent",
+    "esw3-28-az10-dc-ent",
+    "esw3-27-az10-dc-ent",
+    "esw3-26-az10-dc-ent",
+    "esw3-25-az10-dc-ent",
+    "esw3-24-az10-dc-ent"
+  ],
+  "sortByCpuUsage": [
+  {
+    "name": "cli1-41-az10-dc-ent",
+    "cpu_usage":
+    {
+      "minVal": 0,
+      "maxVal": 0,
+      "lastVal": 0,
+      "slope": -1
+    }
+  },
+  {
+    "name": "cli1-42-az10-dc-ent",
+    "cpu_usage":
+    {
+      "minVal": 0,
+      "maxVal": 0,
+      "lastVal": 0,
+      "slope": -1
+    }
+  },
+  {
+    "name": "mas1-41-az10-dc-ent",
+    "cpu_usage":
+    {
+      "minVal": 0,
+      "maxVal": 0,
+      "lastVal": 0,
+      "slope": -1
+    }
+  },
+  {
+    "name": "mas1-42-az10-dc-ent",
+    "cpu_usage":
+    {
+      "minVal": 0,
+      "maxVal": 0,
+      "lastVal": 0,
+      "slope": -1
+    }
+  },
+  {
+    "name": "mas1-40-az10-dc-ent",
+    "cpu_usage":
+    {
+      "minVal": 1,
+      "maxVal": 1,
+      "lastVal": 1,
+      "slope": -1
+    }
+  },
+  {
+    "name": "esw2-29-az10-dc-ent",
+    "cpu_usage":
+    {
+      "minVal": 5,
+      "maxVal": 5,
+      "lastVal": 5,
+      "slope": -1
+    }
+  },
+  {
+    "name": "esw1-30-az10-dc-ent",
+    "cpu_usage":
+    {
+      "minVal": 6,
+      "maxVal": 6,
+      "lastVal": 6,
+      "slope": -1
+    }
+  },
+  {
+    "name": "esw3-27-az10-dc-ent",
+    "cpu_usage":
+    {
+      "minVal": 6,
+      "maxVal": 6,
+      "lastVal": 6,
+      "slope": -1
+    }
+  },
+  {
+    "name": "esw3-29-az10-dc-ent",
+    "cpu_usage":
+    {
+      "minVal": 6,
+      "maxVal": 6,
+      "lastVal": 6,
+      "slope": -1
+    }
+  },
+  {
+    "name": "esw1-27-az10-dc-ent",
+    "cpu_usage":
+    {
+      "minVal": 7,
+      "maxVal": 7,
+      "lastVal": 7,
+      "slope": -1
+    }
+  }],
+  "sortByLoadAverage": [
+  {
+    "name": "mas1-41-az10-dc-ent",
+    "load_average":
+    {
+      "minVal": 0,
+      "maxVal": 0,
+      "lastVal": 0,
+      "slope": -1
+    }
+  },
+  {
+    "name": "mas1-42-az10-dc-ent",
+    "load_average":
+    {
+      "minVal": 0.01000213623046875,
+      "maxVal": 0.01000213623046875,
+      "lastVal": 0.01000213623046875,
+      "slope": -1
+    }
+  },
+  {
+    "name": "cli1-41-az10-dc-ent",
+    "load_average":
+    {
+      "minVal": 0.040008544921875,
+      "maxVal": 0.040008544921875,
+      "lastVal": 0.040008544921875,
+      "slope": -1
+    }
+  },
+  {
+    "name": "cli1-42-az10-dc-ent",
+    "load_average":
+    {
+      "minVal": 0.0999755859375,
+      "maxVal": 0.0999755859375,
+      "lastVal": 0.0999755859375,
+      "slope": -1
+    }
+  },
+  {
+    "name": "esw3-27-az10-dc-ent",
+    "load_average":
+    {
+      "minVal": 0.199951171875,
+      "maxVal": 0.199951171875,
+      "lastVal": 0.199951171875,
+      "slope": -1
+    }
+  },
+  {
+    "name": "mas1-40-az10-dc-ent",
+    "load_average":
+    {
+      "minVal": 0.25,
+      "maxVal": 0.25,
+      "lastVal": 0.25,
+      "slope": -1
+    }
+  },
+  {
+    "name": "esw1-22-az10-dc-ent",
+    "load_average":
+    {
+      "minVal": 0.35009765625,
+      "maxVal": 0.35009765625,
+      "lastVal": 0.35009765625,
+      "slope": -1
+    }
+  },
+  {
+    "name": "esw2-29-az10-dc-ent",
+    "load_average":
+    {
+      "minVal": 0.429931640625,
+      "maxVal": 0.429931640625,
+      "lastVal": 0.429931640625,
+      "slope": -1
+    }
+  },
+  {
+    "name": "esw2-22-az10-dc-ent",
+    "load_average":
+    {
+      "minVal": 0.4599609375,
+      "maxVal": 0.4599609375,
+      "lastVal": 0.4599609375,
+      "slope": -1
+    }
+  },
+  {
+    "name": "esw1-21-az10-dc-ent",
+    "load_average":
+    {
+      "minVal": 0.469970703125,
+      "maxVal": 0.469970703125,
+      "lastVal": 0.469970703125,
+      "slope": -1
+    }
+  }],
+  "sortByJvmMemory": [
+  {
+    "name": "mas1-41-az10-dc-ent",
+    "jvm_memory":
+    {
+      "minVal": 4,
+      "maxVal": 4,
+      "lastVal": 4,
+      "slope": -1
+    }
+  },
+  {
+    "name": "mas1-42-az10-dc-ent",
+    "jvm_memory":
+    {
+      "minVal": 5,
+      "maxVal": 5,
+      "lastVal": 5,
+      "slope": -1
+    }
+  },
+  {
+    "name": "esw2-19-az10-dc-ent",
+    "jvm_memory":
+    {
+      "minVal": 20,
+      "maxVal": 20,
+      "lastVal": 20,
+      "slope": -1
+    }
+  },
+  {
+    "name": "esw2-22-az10-dc-ent",
+    "jvm_memory":
+    {
+      "minVal": 20,
+      "maxVal": 20,
+      "lastVal": 20,
+      "slope": -1
+    }
+  },
+  {
+    "name": "esh3-34-az10-dc-ent",
+    "jvm_memory":
+    {
+      "minVal": 23,
+      "maxVal": 23,
+      "lastVal": 23,
+      "slope": -1
+    }
+  },
+  {
+    "name": "esw1-27-az10-dc-ent",
+    "jvm_memory":
+    {
+      "minVal": 23,
+      "maxVal": 23,
+      "lastVal": 23,
+      "slope": -1
+    }
+  },
+  {
+    "name": "esw2-21-az10-dc-ent",
+    "jvm_memory":
+    {
+      "minVal": 28,
+      "maxVal": 28,
+      "lastVal": 28,
+      "slope": -1
+    }
+  },
+  {
+    "name": "esh1-36-az10-dc-ent",
+    "jvm_memory":
+    {
+      "minVal": 29,
+      "maxVal": 29,
+      "lastVal": 29,
+      "slope": -1
+    }
+  },
+  {
+    "name": "esh3-31-az10-dc-ent",
+    "jvm_memory":
+    {
+      "minVal": 30,
+      "maxVal": 30,
+      "lastVal": 30,
+      "slope": -1
+    }
+  },
+  {
+    "name": "esh3-32-az10-dc-ent",
+    "jvm_memory":
+    {
+      "minVal": 30,
+      "maxVal": 30,
+      "lastVal": 30,
+      "slope": -1
+    }
+  }],
+  "sortByFreeSpace": [
+  {
+    "name": "mas1-40-az10-dc-ent",
+    "free_space":
+    {
+      "minVal": 3864698880,
+      "maxVal": 3864698880,
+      "lastVal": 3864698880,
+      "slope": -1
+    }
+  },
+  {
+    "name": "mas1-42-az10-dc-ent",
+    "free_space":
+    {
+      "minVal": 13606580224,
+      "maxVal": 13606580224,
+      "lastVal": 13606580224,
+      "slope": -1
+    }
+  },
+  {
+    "name": "cli1-41-az10-dc-ent",
+    "free_space":
+    {
+      "minVal": 14311346176,
+      "maxVal": 14311346176,
+      "lastVal": 14311346176,
+      "slope": -1
+    }
+  },
+  {
+    "name": "mas1-41-az10-dc-ent",
+    "free_space":
+    {
+      "minVal": 14353600512,
+      "maxVal": 14353600512,
+      "lastVal": 14353600512,
+      "slope": -1
+    }
+  },
+  {
+    "name": "cli1-42-az10-dc-ent",
+    "free_space":
+    {
+      "minVal": 14371360768,
+      "maxVal": 14371360768,
+      "lastVal": 14371360768,
+      "slope": -1
+    }
+  },
+  {
+    "name": "esh1-35-az10-dc-ent",
+    "free_space":
+    {
+      "minVal": 492870189056,
+      "maxVal": 492870189056,
+      "lastVal": 492870189056,
+      "slope": -1
+    }
+  },
+  {
+    "name": "esh3-32-az10-dc-ent",
+    "free_space":
+    {
+      "minVal": 564820008960,
+      "maxVal": 564820008960,
+      "lastVal": 564820008960,
+      "slope": -1
+    }
+  },
+  {
+    "name": "esh3-36-az10-dc-ent",
+    "free_space":
+    {
+      "minVal": 569347727360,
+      "maxVal": 569347727360,
+      "lastVal": 569347727360,
+      "slope": -1
+    }
+  },
+  {
+    "name": "esh3-33-az10-dc-ent",
+    "free_space":
+    {
+      "minVal": 569830297600,
+      "maxVal": 569830297600,
+      "lastVal": 569830297600,
+      "slope": -1
+    }
+  },
+  {
+    "name": "esh3-31-az10-dc-ent",
+    "free_space":
+    {
+      "minVal": 570010165248,
+      "maxVal": 570010165248,
+      "lastVal": 570010165248,
+      "slope": -1
+    }
+  }],
+  "simpleQuery": ["cli1-41-az10-dc-ent", "mas1-41-az10-dc-ent"]
+}

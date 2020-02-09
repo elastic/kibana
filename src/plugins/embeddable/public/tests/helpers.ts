@@ -17,11 +17,27 @@
  * under the License.
  */
 
-export const expectError = (fn: (...args: any) => any) => {
+export const expectErrorAsync = (fn: (...args: unknown[]) => Promise<unknown>): Promise<Error> => {
+  return fn()
+    .then(() => {
+      throw new Error('Expected an error throw.');
+    })
+    .catch(error => {
+      if (error.message === 'Expected an error throw.') {
+        throw error;
+      }
+      return error;
+    });
+};
+
+export const expectError = (fn: (...args: any) => any): Error => {
   try {
     fn();
     throw new Error('Expected an error throw.');
   } catch (error) {
+    if (error.message === 'Expected an error throw.') {
+      throw error;
+    }
     return error;
   }
 };

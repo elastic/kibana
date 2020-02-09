@@ -2,7 +2,7 @@
 === {component} TLS/SSL settings
 You can configure the following TLS/SSL settings. If the settings are not
 configured, the default values are used. See
-{stack-ov}/security-settings.html[Default TLS/SSL Settings].
+{ref}/security-settings.html[Default TLS/SSL Settings].
 
 ifdef::server[]
 +{ssl-prefix}.ssl.enabled+::
@@ -45,7 +45,7 @@ Java Cryptography Architecture documentation]. Defaults to the value of
 The following settings are used to specify a private key, certificate, and the
 trusted certificates that should be used when communicating over an SSL/TLS connection.
 If none of the settings below are specified, the default values are used.
-See {stack-ov}/security-settings.html[Default TLS/SSL settings].
+See {ref}/security-settings.html[Default TLS/SSL settings].
 
 ifdef::server[]
 A private key and certificate must be configured.
@@ -55,7 +55,7 @@ A private key and certificate are optional and would be used if the server requi
 authentication.
 endif::server[]
 If none of the settings below are specified, the defaults values are used.
-See {stack-ov}/security-settings.html[Default TLS/SSL settings]. 
+See {ref}/security-settings.html[Default TLS/SSL settings]. 
 
 [float]
 ===== PEM encoded files

@@ -8,22 +8,20 @@ import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiPopover, EuiText } from '
 import { FormattedMessage } from '@kbn/i18n/react';
 import { getOr } from 'lodash/fp';
 import React, { Fragment, useState } from 'react';
-import { pure } from 'recompose';
+import styled from 'styled-components';
 
-import {
-  AutonomousSystem,
-  FlowTarget,
-  HostEcsFields,
-  IpOverviewData,
-  Overview,
-} from '../../graphql/types';
+import { AutonomousSystem, FlowTarget, HostEcsFields, IpOverviewData } from '../../graphql/types';
 import { escapeDataProviderId } from '../drag_and_drop/helpers';
 import { DefaultDraggable } from '../draggables';
 import { getEmptyTagValue } from '../empty_value';
-import { FormattedDate } from '../formatted_date';
+import { FormattedRelativePreferenceDate } from '../formatted_date';
 import { HostDetailsLink, ReputationLink, VirusTotalLink, WhoIsLink } from '../links';
 import { Spacer } from '../page';
 import * as i18n from '../page/network/ip_overview/translations';
+
+const DraggableContainerFlexGroup = styled(EuiFlexGroup)`
+  flex-grow: unset;
+`;
 
 export const IpOverviewId = 'ip-overview';
 
@@ -53,8 +51,8 @@ export const locationRenderer = (fieldNames: string[], data: IpOverviewData): Re
     getEmptyTagValue()
   );
 
-export const dateRenderer = (fieldName: string, data: Overview): React.ReactElement => (
-  <FormattedDate value={getOr(null, fieldName, data)} fieldName={fieldName} />
+export const dateRenderer = (timestamp?: string | null): React.ReactElement => (
+  <FormattedRelativePreferenceDate value={timestamp} />
 );
 
 export const autonomousSystemRenderer = (
@@ -152,7 +150,7 @@ interface DefaultFieldRendererProps {
 
 // TODO: This causes breaks between elements until the ticket below is fixed
 // https://github.com/elastic/ingest-dev/issues/474
-export const DefaultFieldRenderer = pure<DefaultFieldRendererProps>(
+export const DefaultFieldRenderer = React.memo<DefaultFieldRendererProps>(
   ({
     attrName,
     displayCount = 1,
@@ -182,7 +180,7 @@ export const DefaultFieldRenderer = pure<DefaultFieldRendererProps>(
       });
 
       return draggables.length > 0 ? (
-        <EuiFlexGroup alignItems="center" gutterSize="none">
+        <DraggableContainerFlexGroup alignItems="center" gutterSize="none" component="span">
           {draggables}{' '}
           {
             <DefaultFieldRendererOverflow
@@ -193,7 +191,7 @@ export const DefaultFieldRenderer = pure<DefaultFieldRendererProps>(
               moreMaxHeight={moreMaxHeight}
             />
           }
-        </EuiFlexGroup>
+        </DraggableContainerFlexGroup>
       ) : (
         getEmptyTagValue()
       );
@@ -247,7 +245,7 @@ export const DefaultFieldRendererOverflow = React.memo<DefaultFieldRendererOverf
   ({ idPrefix, moreMaxHeight, overflowIndexStart = 5, render, rowItems }) => {
     const [isOpen, setIsOpen] = useState(false);
     return (
-      <>
+      <EuiFlexItem grow={false}>
         {rowItems.length > overflowIndexStart && (
           <EuiPopover
             id="popover"
@@ -272,10 +270,10 @@ export const DefaultFieldRendererOverflow = React.memo<DefaultFieldRendererOverf
               rowItems={rowItems}
               moreMaxHeight={moreMaxHeight}
               overflowIndexStart={overflowIndexStart}
-            ></MoreContainer>
+            />
           </EuiPopover>
         )}
-      </>
+      </EuiFlexItem>
     );
   }
 );

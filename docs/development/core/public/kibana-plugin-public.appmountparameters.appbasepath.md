@@ -4,7 +4,7 @@
 
 ## AppMountParameters.appBasePath property
 
-The base path for configuring the application's router.
+The route path for configuring navigation to the application. This string should not include the base path from HTTP.
 
 <b>Signature:</b>
 
@@ -21,12 +21,14 @@ How to configure react-router with a base path:
 export class MyPlugin implements Plugin {
   setup({ application }) {
     application.register({
-    id: 'my-app',
-    async mount(context, params) {
-      const { renderApp } = await import('./application');
-      return renderApp(context, params);
-    },
-  });
+     id: 'my-app',
+     appRoute: '/my-app',
+     async mount(params) {
+       const { renderApp } = await import('./application');
+       return renderApp(params);
+     },
+   });
+ }
 }
 
 ```
@@ -37,7 +39,10 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { BrowserRouter, Route } from 'react-router-dom';
 
-export renderApp = (context, { appBasePath, element }) => {
+import { CoreStart, AppMountParams } from 'src/core/public';
+import { MyPluginDepsStart } from './plugin';
+
+export renderApp = ({ appBasePath, element }: AppMountParams) => {
   ReactDOM.render(
     // pass `appBasePath` to `basename`
     <BrowserRouter basename={appBasePath}>

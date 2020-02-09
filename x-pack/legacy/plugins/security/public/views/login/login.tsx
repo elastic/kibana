@@ -6,17 +6,14 @@
 
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
-import { parseNext } from 'plugins/security/lib/parse_next';
 import { LoginPage } from 'plugins/security/views/login/components';
-// @ts-ignore
-import template from 'plugins/security/views/login/login.html';
 import React from 'react';
 import { render } from 'react-dom';
-import 'ui/autoload/styles';
 import chrome from 'ui/chrome';
 import { I18nContext } from 'ui/i18n';
 import { parse } from 'url';
-import { LoginState } from '../../../common/login_state';
+import { parseNext } from './parse_next';
+import { LoginState } from './login_state';
 const messageMap = {
   SESSION_EXPIRED: i18n.translate('xpack.security.login.sessionExpiredDescription', {
     defaultMessage: 'Your session has timed out. Please log in again.',
@@ -32,7 +29,7 @@ interface AnyObject {
 
 (chrome as AnyObject)
   .setVisible(false)
-  .setRootTemplate(template)
+  .setRootTemplate('<div id="reactLoginRoot" />')
   .setRootController(
     'login',
     (
@@ -40,7 +37,8 @@ interface AnyObject {
       $http: AnyObject,
       $window: AnyObject,
       secureCookies: boolean,
-      loginState: LoginState
+      loginState: LoginState,
+      loginAssistanceMessage: string
     ) => {
       const basePath = chrome.getBasePath();
       const next = parseNext($window.location.href, basePath);
@@ -60,6 +58,7 @@ interface AnyObject {
               loginState={loginState}
               isSecureConnection={isSecure}
               requiresSecureConnection={secureCookies}
+              loginAssistanceMessage={loginAssistanceMessage}
               next={next}
             />
           </I18nContext>,

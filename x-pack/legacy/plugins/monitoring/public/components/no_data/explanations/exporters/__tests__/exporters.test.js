@@ -13,23 +13,17 @@ describe('ExplainExporters', () => {
     const reason = {
       property: 'xpack.monitoring.exporters',
       data: 'myMonitoringClusterExporter1',
-      context: 'esProd001'
+      context: 'esProd001',
     };
 
-    const component = renderWithIntl(
-      <ExplainExporters
-        {...{ reason }}
-      />
-    );
+    const component = renderWithIntl(<ExplainExporters {...{ reason }} />);
     expect(component).toMatchSnapshot();
   });
 });
 
 describe('ExplainExportersCloud', () => {
   test('should explain about xpack.monitoring.exporters setting in a cloud environment', () => {
-    const component = renderWithIntl(
-      <ExplainExportersCloud />
-    );
+    const component = renderWithIntl(<ExplainExportersCloud />);
     expect(component).toMatchSnapshot();
   });
 });

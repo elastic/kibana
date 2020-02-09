@@ -1,0 +1,77 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Transform: <GroupByLabelSummary /> Date histogram aggregation 1`] = `
+<EuiFlexGroup
+  alignItems="center"
+  gutterSize="s"
+  responsive={false}
+>
+  <EuiFlexItem
+    className="transform__GroupByLabel--text"
+  >
+    <span
+      className="eui-textTruncate"
+    >
+      the-options-data-id
+    </span>
+  </EuiFlexItem>
+  <EuiFlexItem
+    className="transform__GroupByLabel--text transform__GroupByLabel--interval"
+    grow={false}
+  >
+    <EuiTextColor
+      className="eui-textTruncate"
+      color="subdued"
+    >
+      1m
+    </EuiTextColor>
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;
+
+exports[`Transform: <GroupByLabelSummary /> Histogram aggregation 1`] = `
+<EuiFlexGroup
+  alignItems="center"
+  gutterSize="s"
+  responsive={false}
+>
+  <EuiFlexItem
+    className="transform__GroupByLabel--text"
+  >
+    <span
+      className="eui-textTruncate"
+    >
+      the-options-data-id
+    </span>
+  </EuiFlexItem>
+  <EuiFlexItem
+    className="transform__GroupByLabel--text transform__GroupByLabel--interval"
+    grow={false}
+  >
+    <EuiTextColor
+      className="eui-textTruncate"
+      color="subdued"
+    >
+      100
+    </EuiTextColor>
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;
+
+exports[`Transform: <GroupByLabelSummary /> Terms aggregation 1`] = `
+<EuiFlexGroup
+  alignItems="center"
+  gutterSize="s"
+  responsive={false}
+>
+  <EuiFlexItem
+    className="transform__GroupByLabel--text"
+  >
+    <span
+      className="eui-textTruncate"
+    >
+      the-options-data-id
+    </span>
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;

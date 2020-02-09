@@ -5,9 +5,8 @@
  */
 
 import React, { useState } from 'react';
-import { npStart } from 'ui/new_platform';
-import { StaticIndexPattern } from 'ui/index_patterns';
-import { AutocompleteSuggestion } from '../../../../../../../src/plugins/data/public';
+import { autocomplete, IIndexPattern } from '../../../../../../../src/plugins/data/public';
+import { useKibana } from '../../lib/kibana';
 
 type RendererResult = React.ReactElement<JSX.Element> | null;
 type RendererFunction<RenderArgs, Result = RendererResult> = (args: RenderArgs) => Result;
@@ -16,9 +15,9 @@ interface KueryAutocompletionLifecycleProps {
   children: RendererFunction<{
     isLoadingSuggestions: boolean;
     loadSuggestions: (expression: string, cursorPosition: number, maxSuggestions?: number) => void;
-    suggestions: AutocompleteSuggestion[];
+    suggestions: autocomplete.QuerySuggestion[];
   }>;
-  indexPattern: StaticIndexPattern;
+  indexPattern: IIndexPattern;
 }
 
 interface KueryAutocompletionCurrentRequest {
@@ -26,35 +25,24 @@ interface KueryAutocompletionCurrentRequest {
   cursorPosition: number;
 }
 
-const getAutocompleteProvider = (language: string) =>
-  npStart.plugins.data.autocomplete.getProvider(language);
-
 export const KueryAutocompletion = React.memo<KueryAutocompletionLifecycleProps>(
   ({ children, indexPattern }) => {
     const [currentRequest, setCurrentRequest] = useState<KueryAutocompletionCurrentRequest | null>(
       null
     );
-
-    const [suggestions, setSuggestions] = useState<AutocompleteSuggestion[]>([]);
-
+    const [suggestions, setSuggestions] = useState<autocomplete.QuerySuggestion[]>([]);
+    const kibana = useKibana();
     const loadSuggestions = async (
       expression: string,
       cursorPosition: number,
       maxSuggestions?: number
     ) => {
-      const autocompletionProvider = getAutocompleteProvider('kuery');
-      const config = {
-        get: () => true,
-      };
-      if (!autocompletionProvider) {
+      const language = 'kuery';
+
+      if (!kibana.services.data.autocomplete.hasQuerySuggestions(language)) {
         return;
       }
 
-      const getSuggestions = autocompletionProvider({
-        config,
-        indexPatterns: [indexPattern],
-        boolFilter: [],
-      });
       const futureRequest = {
         expression,
         cursorPosition,
@@ -64,16 +52,22 @@ export const KueryAutocompletion = React.memo<KueryAutocompletionLifecycleProps>
         cursorPosition,
       });
       setSuggestions([]);
-      const newSuggestions = await getSuggestions({
-        query: expression,
-        selectionStart: cursorPosition,
-        selectionEnd: cursorPosition,
-      });
+
       if (
         futureRequest &&
         futureRequest.expression !== (currentRequest && currentRequest.expression) &&
         futureRequest.cursorPosition !== (currentRequest && currentRequest.cursorPosition)
       ) {
+        const newSuggestions =
+          (await kibana.services.data.autocomplete.getQuerySuggestions({
+            language: 'kuery',
+            indexPatterns: [indexPattern],
+            boolFilter: [],
+            query: expression,
+            selectionStart: cursorPosition,
+            selectionEnd: cursorPosition,
+          })) || [];
+
         setCurrentRequest(null);
         setSuggestions(maxSuggestions ? newSuggestions.slice(0, maxSuggestions) : newSuggestions);
       }

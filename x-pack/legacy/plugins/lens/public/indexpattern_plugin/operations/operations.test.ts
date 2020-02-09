@@ -5,9 +5,10 @@
  */
 
 import { getOperationTypesForField, getAvailableOperationsByMetadata, buildColumn } from '.';
-import { IndexPatternPrivateState } from '../indexpattern';
 import { AvgIndexPatternColumn, MinIndexPatternColumn } from './definitions/metrics';
 import { CountIndexPatternColumn } from './definitions/count';
+import { IndexPatternPrivateState } from '../types';
+import { documentField } from '../document_field';
 
 jest.mock('ui/new_platform');
 jest.mock('../loader');
@@ -145,6 +146,8 @@ describe('getOperationTypesForField', () => {
 
   describe('buildColumn', () => {
     const state: IndexPatternPrivateState = {
+      indexPatternRefs: [],
+      existingFields: {},
       currentIndexPatternId: '1',
       showEmptyFields: false,
       indexPatterns: expectedIndexPatterns,
@@ -177,6 +180,7 @@ describe('getOperationTypesForField', () => {
         columns: state.layers.first.columns,
         suggestedPriority: 0,
         op: 'count',
+        field: documentField,
       });
       expect(column.operationType).toEqual('count');
     });
@@ -214,7 +218,7 @@ describe('getOperationTypesForField', () => {
         indexPattern: expectedIndexPatterns[1],
         columns: state.layers.first.columns,
         suggestedPriority: 0,
-        asDocumentOperation: true,
+        field: documentField,
       }) as CountIndexPatternColumn;
       expect(column.operationType).toEqual('count');
     });
@@ -224,6 +228,20 @@ describe('getOperationTypesForField', () => {
     it('should list out all field-operation tuples for different operation meta data', () => {
       expect(getAvailableOperationsByMetadata(expectedIndexPatterns[1])).toMatchInlineSnapshot(`
         Array [
+          Object {
+            "operationMetaData": Object {
+              "dataType": "number",
+              "isBucketed": true,
+              "scale": "ordinal",
+            },
+            "operations": Array [
+              Object {
+                "field": "bytes",
+                "operationType": "terms",
+                "type": "field",
+              },
+            ],
+          },
           Object {
             "operationMetaData": Object {
               "dataType": "string",
@@ -293,14 +311,6 @@ describe('getOperationTypesForField', () => {
                 "field": "bytes",
                 "operationType": "sum",
                 "type": "field",
-              },
-              Object {
-                "operationType": "count",
-                "type": "document",
-              },
-              Object {
-                "operationType": "filter_ratio",
-                "type": "document",
               },
             ],
           },

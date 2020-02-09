@@ -4,8 +4,10 @@
 
 ## HttpResponse.body property
 
+Parsed body received, may be undefined if there was an error.
+
 <b>Signature:</b>
 
 ```typescript
-body?: HttpBody;
+readonly body?: TResponseBody;
 ```

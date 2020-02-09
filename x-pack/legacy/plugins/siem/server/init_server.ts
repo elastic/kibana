@@ -6,6 +6,7 @@
 import { IResolvers, makeExecutableSchema } from 'graphql-tools';
 
 import { schemas } from './graphql';
+import { createAnomaliesResolvers } from './graphql/anomalies';
 import { createAuthenticationsResolvers } from './graphql/authentications';
 import { createScalarToStringArrayValueResolvers } from './graphql/ecs';
 import { createEsValueResolvers, createEventsResolvers } from './graphql/events';
@@ -18,6 +19,7 @@ import { createNoteResolvers } from './graphql/note';
 import { createPinnedEventResolvers } from './graphql/pinned_event';
 import { createOverviewResolvers } from './graphql/overview';
 import { createScalarDateResolvers } from './graphql/scalar_date';
+import { createScalarToAnyValueResolvers } from './graphql/scalar_to_any';
 import { createScalarToBooleanArrayValueResolvers } from './graphql/scalar_to_boolean_array';
 import { createScalarToDateArrayValueResolvers } from './graphql/scalar_to_date_array';
 import { createScalarToNumberArrayValueResolvers } from './graphql/scalar_to_number_array';
@@ -27,16 +29,14 @@ import { createTimelineResolvers } from './graphql/timeline';
 import { createUncommonProcessesResolvers } from './graphql/uncommon_processes';
 import { createWhoAmIResolvers } from './graphql/who_am_i';
 import { AppBackendLibs } from './lib/types';
-import { Logger } from './utils/logger';
+import { createTlsResolvers } from './graphql/tls';
+import { createAlertsResolvers } from './graphql/alerts';
 
-export interface Config {
-  mocking: boolean;
-  logger: Logger;
-}
-
-export const initServer = (libs: AppBackendLibs, config: Config) => {
+export const initServer = (libs: AppBackendLibs) => {
   const schema = makeExecutableSchema({
     resolvers: [
+      createAlertsResolvers(libs) as IResolvers,
+      createAnomaliesResolvers(libs) as IResolvers,
       createAuthenticationsResolvers(libs) as IResolvers,
       createEsValueResolvers() as IResolvers,
       createEventsResolvers(libs) as IResolvers,
@@ -51,11 +51,13 @@ export const initServer = (libs: AppBackendLibs, config: Config) => {
       createNetworkResolvers(libs) as IResolvers,
       createScalarDateResolvers() as IResolvers,
       createScalarToDateArrayValueResolvers() as IResolvers,
+      createScalarToAnyValueResolvers() as IResolvers,
       createScalarToBooleanArrayValueResolvers() as IResolvers,
       createScalarToNumberArrayValueResolvers() as IResolvers,
       createSourcesResolvers(libs) as IResolvers,
       createSourceStatusResolvers(libs) as IResolvers,
       createTimelineResolvers(libs) as IResolvers,
+      createTlsResolvers(libs) as IResolvers,
       createUncommonProcessesResolvers(libs) as IResolvers,
       createWhoAmIResolvers() as IResolvers,
       createKpiHostsResolvers(libs) as IResolvers,

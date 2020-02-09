@@ -4,6 +4,8 @@
 
 ## HttpRequestInit.cache property
 
+The cache mode associated with request, which is a string indicating how the request will interact with the browser's cache when fetching.
+
 <b>Signature:</b>
 
 ```typescript

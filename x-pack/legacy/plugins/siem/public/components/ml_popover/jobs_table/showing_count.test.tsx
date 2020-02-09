@@ -5,13 +5,12 @@
  */
 
 import { shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
-import * as React from 'react';
-import { ShowingCount } from './showing_count';
+import React from 'react';
+import { ShowingCountComponent } from './showing_count';
 
 describe('ShowingCount', () => {
   test('renders correctly against snapshot', () => {
-    const wrapper = shallow(<ShowingCount filterResultsLength={2} />);
-    expect(toJson(wrapper)).toMatchSnapshot();
+    const wrapper = shallow(<ShowingCountComponent filterResultsLength={2} />);
+    expect(wrapper).toMatchSnapshot();
   });
 });

@@ -18,24 +18,20 @@
  */
 
 import React from 'react';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
 
-import { AddFilterComponent } from '../add_filter';
+import { AddFilter } from '../add_filter';
 
 describe('AddFilter', () => {
   it('should render normally', async () => {
-    const component = shallowWithIntl(
-      <AddFilterComponent onAddFilter={() => {}}/>
-    );
+    const component = shallowWithI18nProvider(<AddFilter onAddFilter={() => {}} />);
 
     expect(component).toMatchSnapshot();
   });
 
   it('should allow adding a filter', async () => {
     const onAddFilter = jest.fn();
-    const component = shallowWithIntl(
-      <AddFilterComponent onAddFilter={onAddFilter}/>
-    );
+    const component = shallowWithI18nProvider(<AddFilter onAddFilter={onAddFilter} />);
 
     // Set a value in the input field
     component.setState({ filter: 'tim*' });
@@ -48,9 +44,7 @@ describe('AddFilter', () => {
   });
 
   it('should ignore strings with just spaces', async () => {
-    const component = shallowWithIntl(
-      <AddFilterComponent onAddFilter={() => {}}/>
-    );
+    const component = shallowWithI18nProvider(<AddFilter onAddFilter={() => {}} />);
 
     // Set a value in the input field
     component.find('EuiFieldText').simulate('keypress', ' ');

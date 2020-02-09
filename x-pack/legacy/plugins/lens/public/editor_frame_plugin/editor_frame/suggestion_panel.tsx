@@ -24,9 +24,10 @@ import classNames from 'classnames';
 import { Action, PreviewState } from './state_management';
 import { Datasource, Visualization, FramePublicAPI, DatasourcePublicAPI } from '../../types';
 import { getSuggestions, switchToSuggestion } from './suggestion_helpers';
-import { ExpressionRenderer } from '../../../../../../../src/legacy/core_plugins/expressions/public';
+import { ExpressionRenderer } from '../../../../../../../src/plugins/expressions/public';
 import { prependDatasourceExpression, prependKibanaContext } from './expression_helpers';
 import { debouncedComponent } from '../../debounced_component';
+import { trackUiEvent, trackSuggestionEvent } from '../../lens_ui_telemetry';
 
 const MAX_SUGGESTIONS_DISPLAYED = 5;
 
@@ -62,38 +63,35 @@ const PreviewRenderer = ({
   expression: string;
   ExpressionRendererComponent: ExpressionRenderer;
 }) => {
-  const [expressionError, setExpressionError] = useState<boolean>(false);
-
-  useEffect(() => {
-    setExpressionError(false);
-  }, [expression]);
-
-  return expressionError ? (
-    <div className="lnsSuggestionPanel__suggestionIcon">
-      <EuiIconTip
-        size="xl"
-        color="danger"
-        type="alert"
-        aria-label={i18n.translate('xpack.lens.editorFrame.previewErrorLabel', {
-          defaultMessage: 'Preview rendering failed',
-        })}
-        content={i18n.translate('xpack.lens.editorFrame.previewErrorTooltip', {
-          defaultMessage: 'Preview rendering failed',
-        })}
-      />
-    </div>
-  ) : (
-    <ExpressionRendererComponent
+  return (
+    <div
       className={classNames('lnsSuggestionPanel__chartWrapper', {
         'lnsSuggestionPanel__chartWrapper--withLabel': withLabel,
       })}
-      expression={expression}
-      onRenderFailure={(e: unknown) => {
-        // eslint-disable-next-line no-console
-        console.error(`Failed to render preview: `, e);
-        setExpressionError(true);
-      }}
-    />
+    >
+      <ExpressionRendererComponent
+        className="lnsSuggestionPanel__expressionRenderer"
+        padding="s"
+        expression={expression}
+        renderError={() => {
+          return (
+            <div className="lnsSuggestionPanel__suggestionIcon">
+              <EuiIconTip
+                size="xl"
+                color="danger"
+                type="alert"
+                aria-label={i18n.translate('xpack.lens.editorFrame.previewErrorLabel', {
+                  defaultMessage: 'Preview rendering failed',
+                })}
+                content={i18n.translate('xpack.lens.editorFrame.previewErrorLabel', {
+                  defaultMessage: 'Preview rendering failed',
+                })}
+              />
+            </div>
+          );
+        }}
+      />
+    </div>
   );
 };
 
@@ -227,6 +225,7 @@ export function SuggestionPanel({
 
   function rollbackToCurrentVisualization() {
     if (lastSelectedSuggestion !== -1) {
+      trackSuggestionEvent('back_to_current');
       setLastSelectedSuggestion(-1);
       dispatch({
         type: 'ROLLBACK_SUGGESTION',
@@ -257,19 +256,27 @@ export function SuggestionPanel({
         </EuiFlexItem>
         {stagedPreview && (
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              data-test-subj="lensSubmitSuggestion"
-              size="xs"
-              onClick={() => {
-                dispatch({
-                  type: 'SUBMIT_SUGGESTION',
-                });
-              }}
-            >
-              {i18n.translate('xpack.lens.sugegstion.confirmSuggestionLabel', {
-                defaultMessage: 'Reload suggestions',
+            <EuiToolTip
+              content={i18n.translate('xpack.lens.suggestion.refreshSuggestionTooltip', {
+                defaultMessage: 'Refresh the suggestions based on the selected visualization.',
               })}
-            </EuiButtonEmpty>
+            >
+              <EuiButtonEmpty
+                data-test-subj="lensSubmitSuggestion"
+                size="xs"
+                iconType="refresh"
+                onClick={() => {
+                  trackUiEvent('suggestion_confirmed');
+                  dispatch({
+                    type: 'SUBMIT_SUGGESTION',
+                  });
+                }}
+              >
+                {i18n.translate('xpack.lens.sugegstion.refreshSuggestionLabel', {
+                  defaultMessage: 'Refresh',
+                })}
+              </EuiButtonEmpty>
+            </EuiToolTip>
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
@@ -307,11 +314,13 @@ export function SuggestionPanel({
               ExpressionRenderer={ExpressionRendererComponent}
               key={index}
               onSelect={() => {
+                trackUiEvent('suggestion_clicked');
                 if (lastSelectedSuggestion === index) {
                   rollbackToCurrentVisualization();
                 } else {
+                  trackSuggestionEvent(`position_${index}_of_${suggestions.length}`);
                   setLastSelectedSuggestion(index);
-                  switchToSuggestion(frame, dispatch, suggestion);
+                  switchToSuggestion(dispatch, suggestion);
                 }
               }}
               selected={index === lastSelectedSuggestion}
@@ -360,7 +369,12 @@ function getPreviewExpression(
     const changedLayers = datasource.getLayers(visualizableState.datasourceState);
     changedLayers.forEach(layerId => {
       if (updatedLayerApis[layerId]) {
-        updatedLayerApis[layerId] = datasource.getPublicAPI(datasourceState, () => {}, layerId);
+        updatedLayerApis[layerId] = datasource.getPublicAPI({
+          layerId,
+          dateRange: frame.dateRange,
+          state: datasourceState,
+          setState: () => {},
+        });
       }
     });
   }

@@ -8,9 +8,10 @@ import { omit } from 'lodash/fp';
 import * as i18n from './../translations';
 import { HostDetailsNavTab } from './types';
 import { HostsTableType } from '../../../store/hosts/model';
+import { SiemPageName } from '../../home/types';
 
 const getTabsOnHostDetailsUrl = (hostName: string, tabName: HostsTableType) =>
-  `#/hosts/${hostName}/${tabName}`;
+  `#/${SiemPageName.hosts}/${hostName}/${tabName}`;
 
 export const navTabsHostDetails = (
   hostName: string,
@@ -48,6 +49,13 @@ export const navTabsHostDetails = (
       disabled: false,
       urlKey: 'host',
       isDetailPage: true,
+    },
+    [HostsTableType.alerts]: {
+      id: HostsTableType.alerts,
+      name: i18n.NAVIGATION_ALERTS_TITLE,
+      href: getTabsOnHostDetailsUrl(hostName, HostsTableType.alerts),
+      disabled: false,
+      urlKey: 'host',
     },
   };
 

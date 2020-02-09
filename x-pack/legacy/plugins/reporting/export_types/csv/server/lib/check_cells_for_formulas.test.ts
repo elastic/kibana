@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import { checkIfRowsHaveFormulas } from './check_cells_for_formulas';
 
 const formulaValues = ['=', '+', '-', '@'];
@@ -84,8 +85,8 @@ describe(`Check CSV Injected values`, () => {
         checkIfRowsHaveFormulas(
           {
             _doc: 'foo-bar',
-            // @ts-ignore need to assert non-string values still return false
-            value: nonRow,
+            // need to assert non-string values still return false
+            value: (nonRow as unknown) as string,
             title: 'nice',
           },
           ['_doc', 'value', 'title']

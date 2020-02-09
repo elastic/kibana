@@ -9,18 +9,21 @@ import { GenericMetricsChart } from '../../../../../server/lib/metrics/transform
 // @ts-ignore
 import CustomPlot from '../CustomPlot';
 import {
-  asDynamicBytes,
+  asDecimal,
   asPercent,
+  asInteger,
+  asDynamicBytes,
   getFixedByteFormatter,
-  asDecimal
+  asDuration
 } from '../../../../utils/formatters';
 import { Coordinate } from '../../../../../typings/timeseries';
 import { isValidCoordinateValue } from '../../../../utils/isValidCoordinateValue';
 import { useChartsSync } from '../../../../hooks/useChartsSync';
+import { Maybe } from '../../../../../typings/common';
 
 interface Props {
-  start: number | string | undefined;
-  end: number | string | undefined;
+  start: Maybe<number | string>;
+  end: Maybe<number | string>;
   chart: GenericMetricsChart;
 }
 
@@ -62,10 +65,17 @@ function getYTickFormatter(chart: GenericMetricsChart) {
       return getFixedByteFormatter(max);
     }
     case 'percent': {
-      return (y: number | null | undefined) => asPercent(y || 0, 1);
+      return (y: Maybe<number>) => asPercent(y || 0, 1);
+    }
+    case 'time': {
+      return (y: Maybe<number>) => asDuration(y);
+    }
+    case 'integer': {
+      return (y: Maybe<number>) =>
+        isValidCoordinateValue(y) ? asInteger(y) : y;
     }
     default: {
-      return (y: number | null | undefined) =>
+      return (y: Maybe<number>) =>
         isValidCoordinateValue(y) ? asDecimal(y) : y;
     }
   }
@@ -78,6 +88,13 @@ function getTooltipFormatter({ yUnit }: GenericMetricsChart) {
     }
     case 'percent': {
       return (c: Coordinate) => asPercent(c.y || 0, 1);
+    }
+    case 'time': {
+      return (c: Coordinate) => asDuration(c.y);
+    }
+    case 'integer': {
+      return (c: Coordinate) =>
+        isValidCoordinateValue(c.y) ? asInteger(c.y) : c.y;
     }
     default: {
       return (c: Coordinate) =>

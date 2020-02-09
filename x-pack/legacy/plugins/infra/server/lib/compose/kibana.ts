@@ -3,12 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import { Server } from 'hapi';
-
-import { InfraKibanaConfigurationAdapter } from '../adapters/configuration/kibana_configuration_adapter';
 import { FrameworkFieldsAdapter } from '../adapters/fields/framework_fields_adapter';
-import { InfraKibanaBackendFrameworkAdapter } from '../adapters/framework/kibana_framework_adapter';
+import { KibanaFramework } from '../adapters/framework/kibana_framework_adapter';
 import { InfraKibanaLogEntriesAdapter } from '../adapters/log_entries/kibana_log_entries_adapter';
 import { KibanaMetricsAdapter } from '../adapters/metrics/kibana_metrics_adapter';
 import { InfraElasticsearchSourceStatusAdapter } from '../adapters/source_status';
@@ -16,24 +12,27 @@ import { InfraFieldsDomain } from '../domains/fields_domain';
 import { InfraLogEntriesDomain } from '../domains/log_entries_domain';
 import { InfraMetricsDomain } from '../domains/metrics_domain';
 import { InfraBackendLibs, InfraDomainLibs } from '../infra_types';
-import { InfraLogAnalysis } from '../log_analysis';
+import { LogEntryCategoriesAnalysis, LogEntryRateAnalysis } from '../log_analysis';
 import { InfraSnapshot } from '../snapshot';
 import { InfraSourceStatus } from '../source_status';
 import { InfraSources } from '../sources';
+import { InfraConfig } from '../../../../../../plugins/infra/server';
+import { CoreSetup } from '../../../../../../../src/core/server';
+import { InfraServerPluginDeps } from '../adapters/framework/adapter_types';
 
-export function compose(server: Server): InfraBackendLibs {
-  const configuration = new InfraKibanaConfigurationAdapter(server);
-  const framework = new InfraKibanaBackendFrameworkAdapter(server);
+export function compose(core: CoreSetup, config: InfraConfig, plugins: InfraServerPluginDeps) {
+  const framework = new KibanaFramework(core, config, plugins);
   const sources = new InfraSources({
-    configuration,
-    savedObjects: framework.getSavedObjectsService(),
+    config,
   });
   const sourceStatus = new InfraSourceStatus(new InfraElasticsearchSourceStatusAdapter(framework), {
     sources,
   });
   const snapshot = new InfraSnapshot({ sources, framework });
-  const logAnalysis = new InfraLogAnalysis({ framework });
+  const logEntryCategoriesAnalysis = new LogEntryCategoriesAnalysis({ framework });
+  const logEntryRateAnalysis = new LogEntryRateAnalysis({ framework });
 
+  // TODO: separate these out individually and do away with "domains" as a temporary group
   const domainLibs: InfraDomainLibs = {
     fields: new InfraFieldsDomain(new FrameworkFieldsAdapter(framework), {
       sources,
@@ -45,9 +44,10 @@ export function compose(server: Server): InfraBackendLibs {
   };
 
   const libs: InfraBackendLibs = {
-    configuration,
+    configuration: config, // NP_TODO: Do we ever use this anywhere?
     framework,
-    logAnalysis,
+    logEntryCategoriesAnalysis,
+    logEntryRateAnalysis,
     snapshot,
     sources,
     sourceStatus,

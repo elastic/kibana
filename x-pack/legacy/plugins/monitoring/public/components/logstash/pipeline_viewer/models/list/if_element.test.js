@@ -13,7 +13,7 @@ describe('IfElement', () => {
 
   beforeEach(() => {
     statement = {
-      id: 'statement_id'
+      id: 'statement_id',
     };
 
     depth = 1;

@@ -8,7 +8,10 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiCallOut } from '@elastic/eui';
 import { get } from 'lodash';
+import { ComponentStrings } from '../../../i18n';
 import { ShowDebugging } from './show_debugging';
+
+const { Error: strings } = ComponentStrings;
 
 export const Error = ({ payload }) => {
   const message = get(payload, 'error.message');
@@ -18,9 +21,9 @@ export const Error = ({ payload }) => {
       style={{ maxWidth: 500 }}
       color="danger"
       iconType="cross"
-      title="Whoops! Expression failed"
+      title={strings.getTitle()}
     >
-      <p>{message ? 'Expression failed with the message:' : ''}</p>
+      <p>{message ? strings.getDescription() : ''}</p>
       {message && <p style={{ padding: '0 16px' }}>{message}</p>}
 
       <ShowDebugging payload={payload} />

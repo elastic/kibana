@@ -8,14 +8,15 @@
 <b>Signature:</b>
 
 ```typescript
-export interface HttpResponse 
+export interface HttpResponse<TResponseBody = any> 
 ```
 
 ## Properties
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [body](./kibana-plugin-public.httpresponse.body.md) | <code>HttpBody</code> |  |
-|  [request](./kibana-plugin-public.httpresponse.request.md) | <code>Request</code> |  |
-|  [response](./kibana-plugin-public.httpresponse.response.md) | <code>Response</code> |  |
+|  [body](./kibana-plugin-public.httpresponse.body.md) | <code>TResponseBody</code> | Parsed body received, may be undefined if there was an error. |
+|  [fetchOptions](./kibana-plugin-public.httpresponse.fetchoptions.md) | <code>Readonly&lt;HttpFetchOptionsWithPath&gt;</code> | The original [HttpFetchOptionsWithPath](./kibana-plugin-public.httpfetchoptionswithpath.md) used to send this request. |
+|  [request](./kibana-plugin-public.httpresponse.request.md) | <code>Readonly&lt;Request&gt;</code> | Raw request sent to Kibana server. |
+|  [response](./kibana-plugin-public.httpresponse.response.md) | <code>Readonly&lt;Response&gt;</code> | Raw response received, may be undefined if there was an error. |
 

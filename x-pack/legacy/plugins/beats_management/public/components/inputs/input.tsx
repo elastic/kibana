@@ -3,12 +3,15 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { EuiFieldText, EuiFieldTextProps, EuiFormRow } from '@elastic/eui';
+import { EuiFieldText, EuiFormRow } from '@elastic/eui';
 import { CommonProps } from '@elastic/eui/src/components/common';
 import { FormsyInputProps, withFormsy } from 'formsy-react';
 import React, { Component, InputHTMLAttributes } from 'react';
 
-interface ComponentProps extends FormsyInputProps, CommonProps, EuiFieldTextProps {
+interface ComponentProps
+  extends FormsyInputProps,
+    CommonProps,
+    Omit<React.ComponentProps<typeof EuiFieldText>, 'onChange' | 'onBlur'> {
   instantValidation?: boolean;
   label: string;
   errorText: string;
@@ -40,7 +43,7 @@ class FieldText extends Component<
     }
   }
 
-  public componentWillReceiveProps(nextProps: ComponentProps) {
+  public UNSAFE_componentWillReceiveProps(nextProps: ComponentProps) {
     if (nextProps.isFormSubmitted()) {
       this.showError();
     }

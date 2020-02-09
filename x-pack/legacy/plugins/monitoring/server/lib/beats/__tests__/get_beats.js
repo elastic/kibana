@@ -24,8 +24,8 @@ describe('beats/get_beats', () => {
         total_events_rate: 2.8548258969945715,
         type: 'Filebeat',
         uuid: 'fooUuid',
-        version: '6.2.0'
-      }
+        version: '6.2.0',
+      },
     ]);
   });
 

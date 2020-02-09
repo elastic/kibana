@@ -1,0 +1,15 @@
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana",
+    "id": "index-pattern:91200a00-9efd-11e7-acb3-3dab96693fab",
+    "source": {
+      "type": "index-pattern",
+      "updated_at": "2017-09-21T18:49:16.270Z",
+      "index-pattern": {
+        "title": "basic_index",
+        "fields": "[{\"name\":\"bar\",\"type\":\"boolean\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"baz\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"baz.keyword\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"foo\",\"type\":\"number\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"nestedField.child\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":{\"nested\":{\"path\":\"nestedField\"}}}]"
+      }
+    }
+  }
+}

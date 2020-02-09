@@ -35,7 +35,7 @@ const createTickRender = (bounds: InfraWaffleMapBounds, formatter: InfraFormatte
   );
 };
 
-export const GradientLegend: React.SFC<Props> = ({ legend, bounds, formatter }) => {
+export const GradientLegend: React.FC<Props> = ({ legend, bounds, formatter }) => {
   const maxValue = legend.rules.reduce((acc, rule) => {
     return acc < rule.value ? rule.value : acc;
   }, 0);

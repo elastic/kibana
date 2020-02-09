@@ -24,32 +24,34 @@ export function routeInitProvider(Private, monitoringClusters, globalState, lice
    */
   return function routeInit({ codePaths, fetchAllClusters }) {
     const clusterUuid = fetchAllClusters ? null : globalState.cluster_uuid;
-    return monitoringClusters(clusterUuid, undefined, codePaths)
-    // Set the clusters collection and current cluster in globalState
-      .then(async (clusters) => {
-        const inSetupMode = await isInSetupMode();
-        const cluster = getClusterFromClusters(clusters, globalState);
-        if (!cluster && !inSetupMode) {
-          return kbnUrl.redirect('/no-data');
-        }
-
-        if (cluster) {
-          license.setLicense(cluster.license);
-
-          // check if we need to redirect because of license problems
-          if (!(isOnPage('license') || isOnPage('home')) && license.isExpired()) {
-            return kbnUrl.redirect('/license');
+    return (
+      monitoringClusters(clusterUuid, undefined, codePaths)
+        // Set the clusters collection and current cluster in globalState
+        .then(async clusters => {
+          const inSetupMode = await isInSetupMode();
+          const cluster = getClusterFromClusters(clusters, globalState);
+          if (!cluster && !inSetupMode) {
+            return kbnUrl.redirect('/no-data');
           }
 
-          // check if we need to redirect because of attempt at unsupported multi-cluster monitoring
-          const clusterSupported = cluster.isSupported || clusters.length === 1;
-          if (!isOnPage('home') && !clusterSupported) {
-            return kbnUrl.redirect('/home');
-          }
-        }
+          if (cluster) {
+            license.setLicense(cluster.license);
 
-        return clusters;
-      })
-      .catch(ajaxErrorHandlers);
+            // check if we need to redirect because of license problems
+            if (!(isOnPage('license') || isOnPage('home')) && license.isExpired()) {
+              return kbnUrl.redirect('/license');
+            }
+
+            // check if we need to redirect because of attempt at unsupported multi-cluster monitoring
+            const clusterSupported = cluster.isSupported || clusters.length === 1;
+            if (!isOnPage('home') && !clusterSupported) {
+              return kbnUrl.redirect('/home');
+            }
+          }
+
+          return clusters;
+        })
+        .catch(ajaxErrorHandlers)
+    );
   };
 }

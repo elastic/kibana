@@ -17,6 +17,34 @@ Object {
     "concurrency": 4,
     "loadDelay": 3000,
     "maxAttempts": 1,
+    "networkPolicy": Object {
+      "enabled": true,
+      "rules": Array [
+        Object {
+          "allow": true,
+          "protocol": "http:",
+        },
+        Object {
+          "allow": true,
+          "protocol": "https:",
+        },
+        Object {
+          "allow": true,
+          "protocol": "ws:",
+        },
+        Object {
+          "allow": true,
+          "protocol": "wss:",
+        },
+        Object {
+          "allow": true,
+          "protocol": "data:",
+        },
+        Object {
+          "allow": false,
+        },
+      ],
+    },
     "settleTime": 1000,
     "timeout": 20000,
     "viewport": Object {
@@ -80,6 +108,34 @@ Object {
     "concurrency": 4,
     "loadDelay": 3000,
     "maxAttempts": 3,
+    "networkPolicy": Object {
+      "enabled": true,
+      "rules": Array [
+        Object {
+          "allow": true,
+          "protocol": "http:",
+        },
+        Object {
+          "allow": true,
+          "protocol": "https:",
+        },
+        Object {
+          "allow": true,
+          "protocol": "ws:",
+        },
+        Object {
+          "allow": true,
+          "protocol": "wss:",
+        },
+        Object {
+          "allow": true,
+          "protocol": "data:",
+        },
+        Object {
+          "allow": false,
+        },
+      ],
+    },
     "settleTime": 1000,
     "timeout": 20000,
     "viewport": Object {
@@ -142,6 +198,34 @@ Object {
     "concurrency": 4,
     "loadDelay": 3000,
     "maxAttempts": 1,
+    "networkPolicy": Object {
+      "enabled": true,
+      "rules": Array [
+        Object {
+          "allow": true,
+          "protocol": "http:",
+        },
+        Object {
+          "allow": true,
+          "protocol": "https:",
+        },
+        Object {
+          "allow": true,
+          "protocol": "ws:",
+        },
+        Object {
+          "allow": true,
+          "protocol": "wss:",
+        },
+        Object {
+          "allow": true,
+          "protocol": "data:",
+        },
+        Object {
+          "allow": false,
+        },
+      ],
+    },
     "settleTime": 1000,
     "timeout": 20000,
     "viewport": Object {
@@ -205,6 +289,34 @@ Object {
     "concurrency": 4,
     "loadDelay": 3000,
     "maxAttempts": 3,
+    "networkPolicy": Object {
+      "enabled": true,
+      "rules": Array [
+        Object {
+          "allow": true,
+          "protocol": "http:",
+        },
+        Object {
+          "allow": true,
+          "protocol": "https:",
+        },
+        Object {
+          "allow": true,
+          "protocol": "ws:",
+        },
+        Object {
+          "allow": true,
+          "protocol": "wss:",
+        },
+        Object {
+          "allow": true,
+          "protocol": "data:",
+        },
+        Object {
+          "allow": false,
+        },
+      ],
+    },
     "settleTime": 1000,
     "timeout": 20000,
     "viewport": Object {

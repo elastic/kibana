@@ -2,7 +2,7 @@
 [[metrics-explorer]]
 == Metrics Explorer
 
-Metrics Explorer in the Infrastructure app in Kibana allows you to group and visualise multiple customisable metrics for one or more components in a graphical format.
+Metrics Explorer in the Metrics app in Kibana allows you to group and visualise multiple customisable metrics for one or more components in a graphical format.
 This can be a starting point for further investigations.
 You can also save your views and add them to {kibana-ref}/dashboard.html[dashboards].
 
@@ -14,8 +14,8 @@ image::infrastructure/images/metrics-explorer-screen.png[Metrics Explorer in Kib
 === Metrics Explorer requirements and considerations
 
 * Metrics Explorer uses data collected from {metricbeat-ref}/metricbeat-overview.html[Metricbeat].
-* You need read permissions on `metricbeat-*` or the metric index specified in the Infrastructure configuration.
-* Metrics Explorer uses the timestamp field set in the Infrastructure configuration.
+* You need read permissions on `metricbeat-*` or the metric index specified in the Metrics configuration.
+* Metrics Explorer uses the timestamp field from the *Settings* tab.
 By default that is set to `@timestamp`.
 * The interval for the X Axis is set to `auto`.
 The bucket size is determined by the time range.
@@ -30,7 +30,7 @@ After that, we'll filter down to a specific host and explore the outbound traffi
 Before we start, if you don't have any Metricbeat data, you'll need to head over to our
 {metricbeat-ref}/metricbeat-overview.html[Metricbeat documentation] to install Metricbeat and start collecting data.
 
-1. When you have Metricbeat running and collecting data, open Kibana and navigate to *Infrastructure*.
+1. When you have Metricbeat running and collecting data, open Kibana and navigate to *Metrics*.
 The *Inventory* tab shows the host or hosts you are monitoring.
 
 2. Select the *Metrics Explorer* tab.

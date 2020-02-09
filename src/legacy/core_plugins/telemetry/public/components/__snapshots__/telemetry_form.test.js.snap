@@ -1,0 +1,80 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`TelemetryForm doesn't render form when not allowed to change optIn status 1`] = `""`;
+
+exports[`TelemetryForm renders as expected when allows to change optIn status 1`] = `
+<Fragment>
+  <EuiPanel
+    paddingSize="l"
+  >
+    <EuiForm>
+      <EuiText>
+        <EuiFlexGroup
+          alignItems="baseline"
+        >
+          <EuiFlexItem
+            grow={false}
+          >
+            <h2>
+              <FormattedMessage
+                defaultMessage="Usage Data"
+                id="telemetry.usageDataTitle"
+                values={Object {}}
+              />
+            </h2>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiText>
+      <EuiSpacer
+        size="s"
+      />
+      <Field
+        clear={[Function]}
+        enableSaving={true}
+        save={[Function]}
+        setting={
+          Object {
+            "ariaName": "Provide usage statistics",
+            "defVal": true,
+            "description": <React.Fragment>
+              <p>
+                <FormattedMessage
+                  defaultMessage="Enabling data usage collection helps us manage and improve our products and services. See our {privacyStatementLink} for more details."
+                  id="telemetry.telemetryConfigAndLinkDescription"
+                  values={
+                    Object {
+                      "privacyStatementLink": <ForwardRef
+                        href="https://www.elastic.co/legal/privacy-statement"
+                        target="_blank"
+                      >
+                        <FormattedMessage
+                          defaultMessage="Privacy Statement"
+                          id="telemetry.readOurUsageDataPrivacyStatementLinkText"
+                          values={Object {}}
+                        />
+                      </ForwardRef>,
+                    }
+                  }
+                />
+              </p>
+              <p>
+                <ForwardRef
+                  onClick={[Function]}
+                >
+                  <FormattedMessage
+                    defaultMessage="See an example of what we collect"
+                    id="telemetry.seeExampleOfWhatWeCollectLinkText"
+                    values={Object {}}
+                  />
+                </ForwardRef>
+              </p>
+            </React.Fragment>,
+            "type": "boolean",
+            "value": false,
+          }
+        }
+      />
+    </EuiForm>
+  </EuiPanel>
+</Fragment>
+`;

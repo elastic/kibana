@@ -19,8 +19,8 @@
 
 import Boom from 'boom';
 import { createListStream } from '../../../../legacy/utils/streams';
-import { SavedObjectsClientContract } from '../types';
-import { injectNestedDependencies } from './inject_nested_depdendencies';
+import { SavedObjectsClientContract, SavedObject } from '../types';
+import { fetchNestedDependencies } from './inject_nested_depdendencies';
 import { sortObjects } from './sort_objects';
 
 /**
@@ -28,26 +28,58 @@ import { sortObjects } from './sort_objects';
  * @public
  */
 export interface SavedObjectsExportOptions {
+  /** optional array of saved object types. */
   types?: string[];
+  /** optional array of objects to export. */
   objects?: Array<{
+    /** the saved object id. */
     id: string;
+    /** the saved object type. */
     type: string;
   }>;
+  /** optional query string to filter exported objects. */
+  search?: string;
+  /** an instance of the SavedObjectsClient. */
   savedObjectsClient: SavedObjectsClientContract;
+  /** the maximum number of objects to export. */
   exportSizeLimit: number;
+  /** flag to also include all related saved objects in the export stream. */
   includeReferencesDeep?: boolean;
+  /** flag to not append {@link SavedObjectsExportResultDetails | export details} to the end of the export stream. */
+  excludeExportDetails?: boolean;
+  /** optional namespace to override the namespace used by the savedObjectsClient. */
   namespace?: string;
+}
+
+/**
+ * Structure of the export result details entry
+ * @public
+ */
+export interface SavedObjectsExportResultDetails {
+  /** number of successfully exported objects */
+  exportedCount: number;
+  /** number of missing references */
+  missingRefCount: number;
+  /** missing references details */
+  missingReferences: Array<{
+    /** the missing reference id. */
+    id: string;
+    /** the missing reference type. */
+    type: string;
+  }>;
 }
 
 async function fetchObjectsToExport({
   objects,
   types,
+  search,
   exportSizeLimit,
   savedObjectsClient,
   namespace,
 }: {
   objects?: SavedObjectsExportOptions['objects'];
   types?: string[];
+  search?: string;
   exportSizeLimit: number;
   savedObjectsClient: SavedObjectsClientContract;
   namespace?: string;
@@ -55,6 +87,9 @@ async function fetchObjectsToExport({
   if (objects && objects.length > 0) {
     if (objects.length > exportSizeLimit) {
       throw Boom.badRequest(`Can't export more than ${exportSizeLimit} objects`);
+    }
+    if (typeof search === 'string') {
+      throw Boom.badRequest(`Can't specify both "search" and "objects" properties when exporting`);
     }
     const bulkGetResult = await savedObjectsClient.bulkGet(objects, { namespace });
     const erroredObjects = bulkGetResult.saved_objects.filter(obj => !!obj.error);
@@ -69,15 +104,18 @@ async function fetchObjectsToExport({
   } else if (types && types.length > 0) {
     const findResponse = await savedObjectsClient.find({
       type: types,
-      sortField: '_id',
-      sortOrder: 'asc',
+      search,
       perPage: exportSizeLimit,
       namespace,
     });
     if (findResponse.total > exportSizeLimit) {
       throw Boom.badRequest(`Can't export more than ${exportSizeLimit} objects`);
     }
-    return findResponse.saved_objects;
+
+    // sorts server-side by _id, since it's only available in fielddata
+    return findResponse.saved_objects.sort((a: SavedObject, b: SavedObject) =>
+      a.id > b.id ? 1 : -1
+    );
   } else {
     throw Boom.badRequest('Either `type` or `objects` are required.');
   }
@@ -86,24 +124,36 @@ async function fetchObjectsToExport({
 export async function getSortedObjectsForExport({
   types,
   objects,
+  search,
   savedObjectsClient,
   exportSizeLimit,
   includeReferencesDeep = false,
+  excludeExportDetails = false,
   namespace,
 }: SavedObjectsExportOptions) {
-  const objectsToExport = await fetchObjectsToExport({
+  const rootObjects = await fetchObjectsToExport({
     types,
     objects,
+    search,
     savedObjectsClient,
     exportSizeLimit,
     namespace,
   });
+  let exportedObjects = [];
+  let missingReferences: SavedObjectsExportResultDetails['missingReferences'] = [];
 
-  const exportedObjects = sortObjects(
-    includeReferencesDeep
-      ? await injectNestedDependencies(objectsToExport, savedObjectsClient, namespace)
-      : objectsToExport
-  );
+  if (includeReferencesDeep) {
+    const fetchResult = await fetchNestedDependencies(rootObjects, savedObjectsClient, namespace);
+    exportedObjects = sortObjects(fetchResult.objects);
+    missingReferences = fetchResult.missingRefs;
+  } else {
+    exportedObjects = sortObjects(rootObjects);
+  }
 
-  return createListStream(exportedObjects);
+  const exportDetails: SavedObjectsExportResultDetails = {
+    exportedCount: exportedObjects.length,
+    missingRefCount: missingReferences.length,
+    missingReferences,
+  };
+  return createListStream([...exportedObjects, ...(excludeExportDetails ? [] : [exportDetails])]);
 }

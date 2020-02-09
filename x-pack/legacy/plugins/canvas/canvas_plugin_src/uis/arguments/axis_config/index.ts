@@ -7,7 +7,7 @@
 import { templateFromReactComponent } from '../../../../public/lib/template_from_react_component';
 import { SimpleTemplate } from './simple_template';
 import { ExtendedTemplate } from './extended_template';
-import { ArgumentStrings } from '../../../strings';
+import { ArgumentStrings } from '../../../../i18n';
 
 const { AxisConfig: strings } = ArgumentStrings;
 

@@ -3,13 +3,13 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { KbnServer } from '../../../types';
+import { ServerFacade } from '../../../types';
 import { LayoutTypes } from '../constants';
 import { Layout, LayoutParams } from './layout';
 import { PreserveLayout } from './preserve_layout';
 import { PrintLayout } from './print_layout';
 
-export function createLayout(server: KbnServer, layoutParams?: LayoutParams): Layout {
+export function createLayout(server: ServerFacade, layoutParams?: LayoutParams): Layout {
   if (layoutParams && layoutParams.id === LayoutTypes.PRESERVE_LAYOUT) {
     return new PreserveLayout(layoutParams.dimensions);
   }

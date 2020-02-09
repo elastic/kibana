@@ -4,12 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import chrome from 'ui/chrome';
-
-import { useKibanaUiSetting } from '../../../lib/settings/use_kibana_ui_setting';
-import { DEFAULT_KBN_VERSION } from '../../../../common/constants';
 import { Anomalies, InfluencerInput, CriteriaFields } from '../types';
-import { throwIfNotOk } from './throw_if_not_ok';
+import { throwIfNotOk } from '../../../hooks/api/api';
+import { KibanaServices } from '../../../lib/kibana';
+
 export interface Body {
   jobIds: string[];
   criteriaFields: CriteriaFields[];
@@ -23,24 +21,18 @@ export interface Body {
   maxExamples: number;
 }
 
-export const anomaliesTableData = async (
-  body: Body,
-  headers: Record<string, string | undefined>,
-  signal: AbortSignal
-): Promise<Anomalies> => {
-  const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
-  const response = await fetch(`${chrome.getBasePath()}/api/ml/results/anomalies_table_data`, {
-    method: 'POST',
-    credentials: 'same-origin',
-    body: JSON.stringify(body),
-    headers: {
-      'kbn-system-api': 'true',
-      'content-Type': 'application/json',
-      'kbn-xsrf': kbnVersion,
-      ...headers,
-    },
-    signal,
-  });
-  await throwIfNotOk(response);
-  return response.json();
+export const anomaliesTableData = async (body: Body, signal: AbortSignal): Promise<Anomalies> => {
+  const response = await KibanaServices.get().http.fetch<Anomalies>(
+    '/api/ml/results/anomalies_table_data',
+    {
+      method: 'POST',
+      body: JSON.stringify(body),
+      asResponse: true,
+      asSystemRequest: true,
+      signal,
+    }
+  );
+
+  await throwIfNotOk(response.response);
+  return response.body!;
 };

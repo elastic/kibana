@@ -38,7 +38,6 @@ export function convertDurationToNormalizedEsInterval(duration) {
     const val = duration.as(unit);
     // find a unit that rounds neatly
     if (val >= 1 && Math.floor(val) === val) {
-
       // if the unit is "large", like years, but
       // isn't set to 1 ES will puke. So keep going until
       // we get out of the "large" units
@@ -49,7 +48,7 @@ export function convertDurationToNormalizedEsInterval(duration) {
       return {
         value: val,
         unit: unit,
-        expression: val + unit
+        expression: val + unit,
       };
     }
   }
@@ -58,7 +57,7 @@ export function convertDurationToNormalizedEsInterval(duration) {
   return {
     value: ms,
     unit: 'ms',
-    expression: ms + 'ms'
+    expression: ms + 'ms',
   };
 }
 

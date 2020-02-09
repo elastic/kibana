@@ -34,10 +34,10 @@ export const replacer = (match: string, ...parts: Array<string | null | undefine
 export const removeKqlVariables = (kqlQuery: string): string => {
   const value: RisonValue = decodeRison(kqlQuery);
   if (isRisonObject(value)) {
-    const filterQuery = value.filterQuery;
-    if (isRisonObject(filterQuery)) {
-      if (isRegularString(filterQuery.expression)) {
-        filterQuery.expression = removeKqlVariablesUsingRegex(filterQuery.expression);
+    const appQuery = value;
+    if (isRisonObject(appQuery)) {
+      if (isRegularString(appQuery.query)) {
+        appQuery.query = removeKqlVariablesUsingRegex(appQuery.query);
         return encode(value);
       }
     }

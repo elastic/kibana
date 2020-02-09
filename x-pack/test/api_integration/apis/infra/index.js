@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export default function ({ loadTestFile }) {
+export default function({ loadTestFile }) {
   describe('InfraOps Endpoints', () => {
     loadTestFile(require.resolve('./metadata'));
     loadTestFile(require.resolve('./log_analysis'));

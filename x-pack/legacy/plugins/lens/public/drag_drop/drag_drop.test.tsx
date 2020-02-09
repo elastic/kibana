@@ -71,7 +71,7 @@ describe('DragDrop', () => {
 
     const component = mount(
       <ChildDragDropProvider dragging="hola" setDragging={setDragging}>
-        <DragDrop onDrop={onDrop} value={value}>
+        <DragDrop onDrop={onDrop} droppable={true} value={value}>
           Hello!
         </DragDrop>
       </ChildDragDropProvider>
@@ -85,6 +85,30 @@ describe('DragDrop', () => {
     expect(stopPropagation).toBeCalled();
     expect(setDragging).toBeCalledWith(undefined);
     expect(onDrop).toBeCalledWith('hola');
+  });
+
+  test('drop function is not called on droppable=false', async () => {
+    const preventDefault = jest.fn();
+    const stopPropagation = jest.fn();
+    const setDragging = jest.fn();
+    const onDrop = jest.fn();
+
+    const component = mount(
+      <ChildDragDropProvider dragging="hola" setDragging={setDragging}>
+        <DragDrop onDrop={onDrop} droppable={false} value={{}}>
+          Hello!
+        </DragDrop>
+      </ChildDragDropProvider>
+    );
+
+    component
+      .find('[data-test-subj="lnsDragDrop"]')
+      .simulate('drop', { preventDefault, stopPropagation });
+
+    expect(preventDefault).toBeCalled();
+    expect(stopPropagation).toBeCalled();
+    expect(setDragging).toBeCalledWith(undefined);
+    expect(onDrop).not.toHaveBeenCalled();
   });
 
   test('droppable is reflected in the className', () => {

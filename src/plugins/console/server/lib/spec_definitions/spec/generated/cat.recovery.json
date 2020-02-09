@@ -1,0 +1,44 @@
+{
+  "cat.recovery": {
+    "url_params": {
+      "format": "",
+      "active_only": "__flag__",
+      "bytes": [
+        "b",
+        "k",
+        "kb",
+        "m",
+        "mb",
+        "g",
+        "gb",
+        "t",
+        "tb",
+        "p",
+        "pb"
+      ],
+      "detailed": "__flag__",
+      "h": [],
+      "help": "__flag__",
+      "index": [],
+      "s": [],
+      "time": [
+        "d",
+        "h",
+        "m",
+        "s",
+        "ms",
+        "micros",
+        "nanos"
+      ],
+      "v": "__flag__"
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_cat/recovery",
+      "_cat/recovery/{indices}"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/cat-recovery.html"
+  }
+}

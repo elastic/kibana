@@ -58,12 +58,17 @@ export function UrlTemplateForm(props: UrlTemplateFormProps) {
 
   const [currentTemplate, setCurrentTemplate] = useState(getInitialTemplate);
 
+  const persistedTemplateState = isUpdateForm(props) && props.initialTemplate;
+
   // reset local form if template passed in from parent component changes
   useEffect(() => {
     if (isUpdateForm(props) && currentTemplate !== props.initialTemplate) {
       setCurrentTemplate(props.initialTemplate);
     }
-  }, [isUpdateForm(props) && props.initialTemplate]);
+    // this hook only updates on change of the prop
+    // it's meant to reset the internal state on changes outside of the component.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [persistedTemplateState]);
 
   const [touched, setTouched] = useState({
     description: false,
@@ -115,7 +120,7 @@ export function UrlTemplateForm(props: UrlTemplateFormProps) {
         isUpdateForm(props)
           ? props.initialTemplate.description
           : i18n.translate('xpack.graph.templates.addLabel', {
-              defaultMessage: 'New drill-down',
+              defaultMessage: 'New drilldown',
             })
       }
       extraAction={
@@ -176,7 +181,7 @@ export function UrlTemplateForm(props: UrlTemplateFormProps) {
                       <strong>
                         {i18n.translate(
                           'xpack.graph.settings.drillDowns.kibanaUrlWarningConvertOptionLinkText',
-                          { defaultMessage: 'convert it' }
+                          { defaultMessage: 'convert it.' }
                         )}
                       </strong>
                     </EuiLink>
@@ -185,7 +190,7 @@ export function UrlTemplateForm(props: UrlTemplateFormProps) {
               )}
               {i18n.translate('xpack.graph.settings.drillDowns.urlInputHelpText', {
                 defaultMessage:
-                  'Define template URLs using {gquery} where the selected vertex terms are inserted',
+                  'Define template URLs using {gquery} where the selected vertex terms are inserted.',
                 values: { gquery: '{{gquery}}' },
               })}
             </>
@@ -196,7 +201,7 @@ export function UrlTemplateForm(props: UrlTemplateFormProps) {
             urlPlaceholderMissing
               ? [
                   i18n.translate('xpack.graph.settings.drillDowns.invalidUrlWarningText', {
-                    defaultMessage: 'The URL must contain a {placeholder} string',
+                    defaultMessage: 'The URL must contain a {placeholder} string.',
                     values: { placeholder: '{{gquery}}' },
                   }),
                 ]
@@ -279,9 +284,13 @@ export function UrlTemplateForm(props: UrlTemplateFormProps) {
                 }}
                 data-test-subj="graphRemoveUrlTemplate"
               >
-                {i18n.translate('xpack.graph.settings.drillDowns.removeButtonLabel', {
-                  defaultMessage: 'Remove',
-                })}
+                {isUpdateForm(props)
+                  ? i18n.translate('xpack.graph.settings.drillDowns.removeButtonLabel', {
+                      defaultMessage: 'Remove',
+                    })
+                  : i18n.translate('xpack.graph.settings.drillDowns.cancelButtonLabel', {
+                      defaultMessage: 'Cancel',
+                    })}
               </EuiButtonEmpty>
             }
           </EuiFlexItem>
@@ -297,10 +306,10 @@ export function UrlTemplateForm(props: UrlTemplateFormProps) {
             <EuiButton type="submit" fill isDisabled={urlPlaceholderMissing || formIncomplete}>
               {isUpdateForm(props)
                 ? i18n.translate('xpack.graph.settings.drillDowns.updateSaveButtonLabel', {
-                    defaultMessage: 'Update drill-down',
+                    defaultMessage: 'Update drilldown',
                   })
                 : i18n.translate('xpack.graph.settings.drillDowns.newSaveButtonLabel', {
-                    defaultMessage: 'Add drill-down',
+                    defaultMessage: 'Save drilldown',
                   })}
             </EuiButton>
           </EuiFlexItem>

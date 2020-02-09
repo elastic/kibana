@@ -9,3 +9,6 @@ export { getUrlPrefix } from './space_test_utils';
 export { ES_TEST_INDEX_NAME, ESTestIndexTool } from './es_test_index_tool';
 export { getTestAlertData } from './get_test_alert_data';
 export { AlertUtils } from './alert_utils';
+export { TaskManagerUtils } from './task_manager_utils';
+export * from './test_assertions';
+export { checkAAD } from './check_aad';

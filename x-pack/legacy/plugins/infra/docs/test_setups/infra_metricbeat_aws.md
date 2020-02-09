@@ -4,7 +4,7 @@ This guide explains how to set up
 * `metricbeat` on a AWS instance to report `system` metrics
 * `metricbeat` on your local machine to report `aws` metrics through CloudWatch and the `aws` module
 
-This is helpful to develop and test the following features in the Kibana Infrastructure UI:
+This is helpful to develop and test the following features in the Kibana Metrics UI:
 * returning cloud metrics from the `metadata` and `metrics` endpoints
 * showing cloud metrics on the node detail page
 * showing cloud metrics on the inventory overview page (waffle map and list view)

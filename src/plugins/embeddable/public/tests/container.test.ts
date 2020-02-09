@@ -26,13 +26,13 @@ import {
   FILTERABLE_EMBEDDABLE,
 } from '../lib/test_samples/embeddables/filterable_embeddable';
 import { ERROR_EMBEDDABLE_TYPE } from '../lib/embeddables/error_embeddable';
-import { Filter, FilterStateStore } from '@kbn/es-query';
-import { PanelNotFoundError } from '../lib/errors';
 import { FilterableEmbeddableFactory } from '../lib/test_samples/embeddables/filterable_embeddable_factory';
 import { CONTACT_CARD_EMBEDDABLE } from '../lib/test_samples/embeddables/contact_card/contact_card_embeddable_factory';
 import { SlowContactCardEmbeddableFactory } from '../lib/test_samples/embeddables/contact_card/slow_contact_card_embeddable_factory';
-import { HELLO_WORLD_EMBEDDABLE_TYPE } from '../lib/test_samples/embeddables/hello_world/hello_world_embeddable';
-import { HelloWorldEmbeddableFactory } from '../lib/test_samples/embeddables/hello_world/hello_world_embeddable_factory';
+import {
+  HELLO_WORLD_EMBEDDABLE,
+  HelloWorldEmbeddableFactory,
+} from '../../../../../examples/embeddable_examples/public';
 import { HelloWorldContainer } from '../lib/test_samples/embeddables/hello_world_container';
 import {
   ContactCardEmbeddableInput,
@@ -47,6 +47,7 @@ import {
 import { coreMock } from '../../../../core/public/mocks';
 import { testPlugin } from './test_plugin';
 import { of } from './helpers';
+import { esFilters } from '../../../../plugins/data/public';
 
 async function creatHelloWorldContainerAndEmbeddable(
   containerInput: ContainerInput = { id: 'hello', panels: {} },
@@ -438,8 +439,8 @@ test('Test nested reactions', async done => {
 
 test('Explicit embeddable input mapped to undefined will default to inherited', async () => {
   const { start } = await creatHelloWorldContainerAndEmbeddable();
-  const derivedFilter: Filter = {
-    $state: { store: FilterStateStore.APP_STATE },
+  const derivedFilter: esFilters.Filter = {
+    $state: { store: esFilters.FilterStateStore.APP_STATE },
     meta: { disabled: false, alias: 'name', negate: false },
     query: { match: {} },
   };
@@ -731,7 +732,7 @@ test('untilEmbeddableLoaded() resolves if child is loaded in the container', asy
       id: 'hello',
       panels: {
         '123': {
-          type: HELLO_WORLD_EMBEDDABLE_TYPE,
+          type: HELLO_WORLD_EMBEDDABLE,
           explicitInput: { id: '123' },
         },
       },
@@ -749,11 +750,11 @@ test('untilEmbeddableLoaded() resolves if child is loaded in the container', asy
 
   const child = await container.untilEmbeddableLoaded('123');
   expect(child).toBeDefined();
-  expect(child.type).toBe(HELLO_WORLD_EMBEDDABLE_TYPE);
+  expect(child.type).toBe(HELLO_WORLD_EMBEDDABLE);
   done();
 });
 
-test('untilEmbeddableLoaded rejects with an error if child is subsequently removed', async done => {
+test('untilEmbeddableLoaded resolves with undefined if child is subsequently removed', async done => {
   const { doStart, coreStart, uiActions } = testPlugin(
     coreMock.createSetup(),
     coreMock.createStart()
@@ -785,8 +786,8 @@ test('untilEmbeddableLoaded rejects with an error if child is subsequently remov
     }
   );
 
-  container.untilEmbeddableLoaded('123').catch(error => {
-    expect(error).toBeInstanceOf(PanelNotFoundError);
+  container.untilEmbeddableLoaded('123').then(embed => {
+    expect(embed).toBeUndefined();
     done();
   });
 

@@ -183,10 +183,7 @@ describe('#getLoadingCount$()', () => {
     const done$ = new Rx.Subject();
     const promise = uiSettingsApi
       .getLoadingCount$()
-      .pipe(
-        takeUntil(done$),
-        toArray()
-      )
+      .pipe(takeUntil(done$), toArray())
       .toPromise();
 
     await uiSettingsApi.batchSet('foo', 'bar');
@@ -214,10 +211,7 @@ describe('#getLoadingCount$()', () => {
     const done$ = new Rx.Subject();
     const promise = uiSettingsApi
       .getLoadingCount$()
-      .pipe(
-        takeUntil(done$),
-        toArray()
-      )
+      .pipe(takeUntil(done$), toArray())
       .toPromise();
 
     await uiSettingsApi.batchSet('foo', 'bar');
@@ -250,7 +244,10 @@ describe('#stop', () => {
     uiSettingsApi.stop();
 
     // both observables should emit the same values, and complete before the request is done loading
-    await expect(promise).resolves.toEqual([[0, 1], [0, 1]]);
+    await expect(promise).resolves.toEqual([
+      [0, 1],
+      [0, 1],
+    ]);
     await batchSetPromise;
   });
 });

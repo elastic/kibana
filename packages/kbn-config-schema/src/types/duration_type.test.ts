@@ -23,7 +23,15 @@ import { schema } from '..';
 const { duration, object, contextRef, siblingRef } = schema;
 
 test('returns value by default', () => {
-  expect(duration().validate('123s')).toMatchSnapshot();
+  expect(duration().validate('123s')).toEqual(momentDuration(123000));
+});
+
+test('handles numeric string', () => {
+  expect(duration().validate('123000')).toEqual(momentDuration(123000));
+});
+
+test('handles number', () => {
+  expect(duration().validate(123000)).toEqual(momentDuration(123000));
 });
 
 test('is required by default', () => {
@@ -47,6 +55,14 @@ describe('#defaultValue', () => {
     expect(
       duration({
         defaultValue: '1h',
+      }).validate(undefined)
+    ).toMatchSnapshot();
+  });
+
+  test('can be a string-formatted number', () => {
+    expect(
+      duration({
+        defaultValue: '600',
       }).validate(undefined)
     ).toMatchSnapshot();
   });
@@ -124,7 +140,7 @@ Object {
   });
 });
 
-test('returns error when not string or non-safe positive integer', () => {
+test('returns error when not valid string or non-safe positive integer', () => {
   expect(() => duration().validate(-123)).toThrowErrorMatchingSnapshot();
 
   expect(() => duration().validate(NaN)).toThrowErrorMatchingSnapshot();
@@ -136,4 +152,8 @@ test('returns error when not string or non-safe positive integer', () => {
   expect(() => duration().validate([1, 2, 3])).toThrowErrorMatchingSnapshot();
 
   expect(() => duration().validate(/abc/)).toThrowErrorMatchingSnapshot();
+
+  expect(() => duration().validate('123foo')).toThrowErrorMatchingSnapshot();
+
+  expect(() => duration().validate('123 456')).toThrowErrorMatchingSnapshot();
 });

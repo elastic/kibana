@@ -20,35 +20,33 @@
 import 'uiExports/interpreter';
 // @ts-ignore
 import { register, registryFactory } from '@kbn/interpreter/common';
-import { initializeInterpreter } from './lib/interpreter';
+import { npSetup } from 'ui/new_platform';
 import { registries } from './registries';
-import { functions } from './functions';
-import { visualization } from './renderers/visualization';
-import { typeSpecs } from '../../../../plugins/expressions/common';
+import {
+  ExpressionInterpretWithHandlers,
+  ExpressionExecutor,
+} from '../../../../plugins/expressions/public';
 
 // Expose kbnInterpreter.register(specs) and kbnInterpreter.registries() globally so that plugins
 // can register without a transpile step.
+// TODO: This will be left behind in then legacy platform?
 (global as any).kbnInterpreter = Object.assign(
   (global as any).kbnInterpreter || {},
   registryFactory(registries)
 );
 
-register(registries, {
-  types: typeSpecs,
-  browserFunctions: functions,
-  renderers: [visualization],
-});
-
-let interpreterPromise: Promise<any> | undefined;
-
+// TODO: This function will be left behind in the legacy platform.
+let executorPromise: Promise<ExpressionExecutor> | undefined;
 export const getInterpreter = async () => {
-  if (!interpreterPromise) {
-    interpreterPromise = initializeInterpreter();
+  if (!executorPromise) {
+    const executor = npSetup.plugins.expressions.__LEGACY.getExecutor();
+    executorPromise = Promise.resolve(executor);
   }
-  return await interpreterPromise;
+  return await executorPromise;
 };
 
-export const interpretAst = async (...params: any) => {
+// TODO: This function will be left behind in the legacy platform.
+export const interpretAst: ExpressionInterpretWithHandlers = async (ast, context, handlers) => {
   const { interpreter } = await getInterpreter();
-  return await interpreter.interpretAst(...params);
+  return await interpreter.interpretAst(ast, context, handlers);
 };

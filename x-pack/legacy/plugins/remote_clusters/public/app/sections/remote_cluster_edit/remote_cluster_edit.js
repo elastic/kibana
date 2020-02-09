@@ -21,12 +21,7 @@ import {
 } from '@elastic/eui';
 
 import { CRUD_APP_BASE_PATH } from '../../constants';
-import {
-  extractQueryParams,
-  getRouter,
-  getRouterLinkProps,
-  redirect,
-} from '../../services';
+import { extractQueryParams, getRouter, getRouterLinkProps, redirect } from '../../services';
 import { setBreadcrumbs } from '../../services/breadcrumb';
 import { RemoteClusterPageTitle, RemoteClusterForm, ConfiguredByNodeWarning } from '../components';
 
@@ -45,16 +40,14 @@ export class RemoteClusterEdit extends Component {
     getEditClusterError: PropTypes.string,
     clearEditClusterErrors: PropTypes.func,
     openDetailPanel: PropTypes.func,
-  }
+  };
 
   constructor(props) {
     super(props);
 
     const {
       match: {
-        params: {
-          name,
-        },
+        params: { name },
       },
     } = props;
 
@@ -77,14 +70,19 @@ export class RemoteClusterEdit extends Component {
     this.props.stopEditingCluster();
   }
 
-  save = (clusterConfig) => {
+  save = clusterConfig => {
     this.props.editCluster(clusterConfig);
   };
 
   cancel = () => {
     const { openDetailPanel } = this.props;
     const { clusterName } = this.state;
-    const { history, route: { location: { search } } } = getRouter();
+    const {
+      history,
+      route: {
+        location: { search },
+      },
+    } = getRouter();
     const { redirect: redirectUrl } = extractQueryParams(search);
 
     if (redirectUrl) {
@@ -97,24 +95,13 @@ export class RemoteClusterEdit extends Component {
   };
 
   renderContent() {
-    const {
-      clusterName,
-    } = this.state;
+    const { clusterName } = this.state;
 
-    const {
-      isLoading,
-      cluster,
-      isEditingCluster,
-      getEditClusterError,
-    } = this.props;
+    const { isLoading, cluster, isEditingCluster, getEditClusterError } = this.props;
 
     if (isLoading) {
       return (
-        <EuiFlexGroup
-          justifyContent="flexStart"
-          alignItems="center"
-          gutterSize="s"
-        >
+        <EuiFlexGroup justifyContent="flexStart" alignItems="center" gutterSize="s">
           <EuiFlexItem grow={false}>
             <EuiLoadingSpinner size="m" />
           </EuiFlexItem>
@@ -137,12 +124,12 @@ export class RemoteClusterEdit extends Component {
       return (
         <Fragment>
           <EuiCallOut
-            title={(
+            title={
               <FormattedMessage
                 id="xpack.remoteClusters.edit.loadingErrorTitle"
                 defaultMessage="Error loading remote cluster"
               />
-            )}
+            }
             color="danger"
             iconType="alert"
           >
@@ -180,10 +167,7 @@ export class RemoteClusterEdit extends Component {
 
           <EuiSpacer size="s" />
 
-          <EuiButtonEmpty
-            color="primary"
-            onClick={this.cancel}
-          >
+          <EuiButtonEmpty color="primary" onClick={this.cancel}>
             <FormattedMessage
               id="xpack.remoteClusters.edit.backToRemoteClustersButtonLabel"
               defaultMessage="Back to remote clusters"
@@ -207,17 +191,14 @@ export class RemoteClusterEdit extends Component {
 
   render() {
     return (
-      <EuiPageContent
-        horizontalPosition="center"
-        className="remoteClusterAddPage"
-      >
+      <EuiPageContent horizontalPosition="center" className="remoteClusterAddPage">
         <RemoteClusterPageTitle
-          title={(
+          title={
             <FormattedMessage
               id="xpack.remoteClusters.editTitle"
               defaultMessage="Edit remote cluster"
             />
-          )}
+          }
         />
 
         {this.renderContent()}

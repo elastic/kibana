@@ -9,7 +9,7 @@ import { EuiTab, EuiListGroupItem, EuiButton, EuiAccordion, EuiFieldText } from 
 import * as Rx from 'rxjs';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { Settings, AngularProps } from './settings';
-import { act } from 'react-testing-library';
+import { act } from '@testing-library/react';
 import { ReactWrapper } from 'enzyme';
 import { UrlTemplateForm } from './url_template_form';
 import {
@@ -90,7 +90,7 @@ describe('settings', () => {
   let instance: ReactWrapper;
 
   beforeEach(() => {
-    store = createMockGraphStore({ includeSagas: false }).store;
+    store = createMockGraphStore({}).store;
     store.dispatch(
       updateSettings({
         maxValuesPerDoc: 5,
@@ -112,6 +112,7 @@ describe('settings', () => {
             code: '1',
             label: 'test',
           },
+          aggregatable: true,
         },
         {
           selected: false,
@@ -123,6 +124,7 @@ describe('settings', () => {
             code: '1',
             label: 'test',
           },
+          aggregatable: true,
         },
       ])
     );
@@ -179,7 +181,7 @@ describe('settings', () => {
 
   describe('blacklist', () => {
     beforeEach(() => {
-      toTab('Blacklist');
+      toTab('Block list');
     });
 
     it('should switch tab to blacklist', () => {
@@ -259,7 +261,7 @@ describe('settings', () => {
     }
 
     beforeEach(() => {
-      toTab('Drill-downs');
+      toTab('Drilldowns');
     });
 
     it('should switch tab to url templates', () => {

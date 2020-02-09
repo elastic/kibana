@@ -35,17 +35,17 @@ describe('getCapabilities', () => {
               </Capability>
             </WMT_MS_Capabilities>
           `;
-        }
+        },
       };
     };
     const capabilities = await wmsClient.getCapabilities();
     expect(capabilities.layers).toEqual([
       { label: 'layer1 (1)', value: '1' },
-      { label: 'layer2 (2)', value: '2' }
+      { label: 'layer2 (2)', value: '2' },
     ]);
     expect(capabilities.styles).toEqual([
       { label: 'defaultStyle (default)', value: 'default' },
-      { label: 'fancyStyle (fancy)', value: 'fancy' }
+      { label: 'fancyStyle (fancy)', value: 'fancy' },
     ]);
   });
 
@@ -92,18 +92,21 @@ describe('getCapabilities', () => {
               </Capability>
             </WMT_MS_Capabilities>
           `;
-        }
+        },
       };
     };
     const capabilities = await wmsClient.getCapabilities();
     expect(capabilities.layers).toEqual([
       { label: 'hierarchyLevel1PathA - hierarchyLevel2 - layer1 (1)', value: '1' },
       { label: 'hierarchyLevel1PathA - hierarchyLevel2 - layer2 (2)', value: '2' },
-      { label: 'hierarchyLevel1PathB - layer3 (3)', value: '3' }
+      { label: 'hierarchyLevel1PathB - layer3 (3)', value: '3' },
     ]);
     expect(capabilities.styles).toEqual([
-      { label: 'hierarchyLevel1PathA - hierarchyLevel2 - defaultStyle (default)', value: 'default' },
-      { label: 'hierarchyLevel1PathB - fancyStyle (fancy)', value: 'fancy' }
+      {
+        label: 'hierarchyLevel1PathA - hierarchyLevel2 - defaultStyle (default)',
+        value: 'default',
+      },
+      { label: 'hierarchyLevel1PathB - fancyStyle (fancy)', value: 'fancy' },
     ]);
   });
 
@@ -147,7 +150,7 @@ describe('getCapabilities', () => {
               </Capability>
             </WMT_MS_Capabilities>
           `;
-        }
+        },
       };
     };
     const capabilities = await wmsClient.getCapabilities();
@@ -157,8 +160,8 @@ describe('getCapabilities', () => {
         options: [
           { label: 'layer1 (1)', value: '1' },
           { label: 'layer2 (2)', value: '2' },
-        ]
-      }
+        ],
+      },
     ]);
     expect(capabilities.styles).toEqual([
       {
@@ -166,8 +169,8 @@ describe('getCapabilities', () => {
         options: [
           { label: 'defaultStyle (default)', value: 'default' },
           { label: 'fancyStyle (fancy)', value: 'fancy' },
-        ]
-      }
+        ],
+      },
     ]);
   });
 
@@ -207,7 +210,7 @@ describe('getCapabilities', () => {
               </Capability>
             </WMT_MS_Capabilities>
           `;
-        }
+        },
       };
     };
     const capabilities = await wmsClient.getCapabilities();
@@ -234,19 +237,18 @@ describe('getCapabilities', () => {
               </Capability>
             </WMT_MS_Capabilities>
           `;
-        }
+        },
       };
     };
     const capabilities = await wmsClient.getCapabilities();
-    expect(capabilities.layers).toEqual([
-      { label: 'layer1 (1)', value: '1' },
-    ]);
+    expect(capabilities.layers).toEqual([{ label: 'layer1 (1)', value: '1' }]);
   });
 });
 
 describe('getUrlTemplate', () => {
   it('Should not overwrite specific query parameters when defined in the url', async () => {
-    const urlWithQuery = 'http://example.com/wms?map=MyMap&format=image/jpeg&service=NotWMS&version=0&request=GetNull&srs=Invalid&transparent=false&width=1024&height=640';
+    const urlWithQuery =
+      'http://example.com/wms?map=MyMap&format=image/jpeg&service=NotWMS&version=0&request=GetNull&srs=Invalid&transparent=false&width=1024&height=640';
     const wmsClient = new WmsClient({ serviceUrl: urlWithQuery });
     const urlTemplate = await wmsClient.getUrlTemplate('MyLayer', 'MyStyle');
     expect(urlTemplate).toEqual(

@@ -7,11 +7,11 @@
 import expect from '@kbn/expect';
 import { getTitle } from '../get_title';
 
-describe('getTitle', function () {
+describe('getTitle', function() {
   it('with metric.title', () => {
     const series = [
       { metric: { title: 'Foo', label: 'Bar X' } },
-      { metric: { title: 'Foo', label: 'Bar Y' } }
+      { metric: { title: 'Foo', label: 'Bar Y' } },
     ];
     expect(getTitle(series)).to.be('Foo');
   });
@@ -20,7 +20,7 @@ describe('getTitle', function () {
     const series = [
       { metric: { label: 'Bar A' } },
       { metric: { label: 'Bar B' } },
-      { metric: { label: 'Bar B' } }
+      { metric: { label: 'Bar B' } },
     ];
     expect(getTitle(series)).to.be('Bar A');
   });

@@ -5,9 +5,19 @@
  */
 
 import React, { PureComponent } from 'react';
-import { EuiPage, EuiPageBody, EuiPageContent, EuiPanel, EuiSpacer, EuiFlexGrid, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiPage,
+  EuiPageBody,
+  EuiPageContent,
+  EuiPanel,
+  EuiSpacer,
+  EuiFlexGrid,
+  EuiFlexItem,
+  EuiScreenReaderOnly,
+} from '@elastic/eui';
 import { ClusterStatus } from '../cluster_status';
 import { MonitoringTimeseriesContainer } from '../../chart';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export class Overview extends PureComponent {
   render() {
@@ -15,12 +25,20 @@ export class Overview extends PureComponent {
     const metricsToShow = [
       metrics.logstash_cluster_events_input_rate,
       metrics.logstash_cluster_events_output_rate,
-      metrics.logstash_cluster_events_latency
+      metrics.logstash_cluster_events_latency,
     ];
 
     return (
       <EuiPage>
         <EuiPageBody>
+          <EuiScreenReaderOnly>
+            <h1>
+              <FormattedMessage
+                id="xpack.monitoring.logstash.overview.heading"
+                defaultMessage="Logstash Overview"
+              />
+            </h1>
+          </EuiScreenReaderOnly>
           <EuiPanel>
             <ClusterStatus stats={stats} />
           </EuiPanel>
@@ -29,10 +47,7 @@ export class Overview extends PureComponent {
             <EuiFlexGrid columns={2} gutterSize="s">
               {metricsToShow.map((metric, index) => (
                 <EuiFlexItem key={index}>
-                  <MonitoringTimeseriesContainer
-                    series={metric}
-                    {...props}
-                  />
+                  <MonitoringTimeseriesContainer series={metric} {...props} />
                   <EuiSpacer />
                 </EuiFlexItem>
               ))}

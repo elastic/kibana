@@ -4,7 +4,7 @@
 <titleabbrev>Update space</titleabbrev>
 ++++
 
-Updates an existing {kib} space.
+Update an existing {kib} space.
 
 experimental["The underlying Spaces concepts are stable, but the APIs for managing Spaces are experimental."]
 

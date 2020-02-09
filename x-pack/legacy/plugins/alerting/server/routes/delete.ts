@@ -13,25 +13,23 @@ interface DeleteRequest extends Hapi.Request {
   };
 }
 
-export function deleteAlertRoute(server: Hapi.Server) {
-  server.route({
-    method: 'DELETE',
-    path: '/api/alert/{id}',
-    options: {
-      tags: ['access:alerting-all'],
-      validate: {
-        params: Joi.object()
-          .keys({
-            id: Joi.string().required(),
-          })
-          .required(),
-      },
+export const deleteAlertRoute = {
+  method: 'DELETE',
+  path: '/api/alert/{id}',
+  config: {
+    tags: ['access:alerting-all'],
+    validate: {
+      params: Joi.object()
+        .keys({
+          id: Joi.string().required(),
+        })
+        .required(),
     },
-    async handler(request: DeleteRequest, h: Hapi.ResponseToolkit) {
-      const { id } = request.params;
-      const alertsClient = request.getAlertsClient!();
-      await alertsClient.delete({ id });
-      return h.response().code(204);
-    },
-  });
-}
+  },
+  async handler(request: DeleteRequest, h: Hapi.ResponseToolkit) {
+    const { id } = request.params;
+    const alertsClient = request.getAlertsClient!();
+    await alertsClient.delete({ id });
+    return h.response().code(204);
+  },
+};
