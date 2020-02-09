@@ -17,11 +17,11 @@
  * under the License.
  */
 import { has } from 'lodash';
-import { fieldFormats, FieldFormatsRegistry, IFieldFormatType } from '../../common/field_formats';
+import { FieldFormatsRegistry, IFieldFormatType, baseFormatters } from '../../common/field_formats';
 import { IUiSettingsClient } from '../../../../core/server';
 
 export class FieldFormatsService {
-  private readonly fieldFormatClasses: IFieldFormatType[] = fieldFormats.baseFormatters;
+  private readonly fieldFormatClasses: IFieldFormatType[] = baseFormatters;
 
   public setup() {
     return {
