@@ -19,20 +19,20 @@ import {
 } from '@elastic/eui';
 
 import styled, { css } from 'styled-components';
-import { Markdown } from '../../../../components/markdown';
-import { HeaderPage } from '../../../../components/header_page_new';
-import { WrapperPage } from '../../../../components/wrapper_page';
 import * as i18n from './translations';
-import { getCaseUrl } from '../../../../components/link_to';
-import { useGetCase, RefreshCase } from '../../../../containers/case/use_get_case';
-import { FormattedRelativePreferenceDate } from '../../../../components/formatted_date';
 import { DescriptionMarkdown } from '../description_md_editor';
-import { useUpdateCase } from '../../../../containers/case/use_update_case';
-import { FlattenedCaseSavedObject } from '../../../../containers/case/types';
+import { FlattenedCaseSavedObject, UpdateCase } from '../../../../containers/case/types';
+import { FormattedRelativePreferenceDate } from '../../../../components/formatted_date';
+import { getCaseUrl } from '../../../../components/link_to';
+import { HeaderPage } from '../../../../components/header_page_new';
+import { Markdown } from '../../../../components/markdown';
+import { PropertyActions } from '../property_actions';
+import { TagList } from '../tag_list';
+import { useGetCase, RefreshCase } from '../../../../containers/case/use_get_case';
 import { UserActionTree } from '../user_action_tree';
 import { UserList } from '../user_list';
-import { TagList } from '../tag_list';
-import { PropertyActions } from '../property_actions';
+import { useUpdateCase } from '../../../../containers/case/use_update_case';
+import { WrapperPage } from '../../../../components/wrapper_page';
 
 interface Props {
   caseId: string;
@@ -49,12 +49,12 @@ const MyDescriptionList = styled(EuiDescriptionList)`
 
 const MyWrapper = styled(WrapperPage)`
   padding-bottom: 0;
-  ${({ theme }) => css`
-    @media only screen and (min-width: ${theme.eui.euiBreakpoints.l}) {
-      margin: 0 auto;
-      width: 85%;
-    }
-  `}
+  // ${({ theme }) => css`
+  //   @media only screen and (min-width: ${theme.eui.euiBreakpoints.l}) {
+  //     margin: 0 auto;
+  //     width: 85%;
+  //   }
+  // `}
 `;
 const BackgroundWrapper = styled.div`
   ${({ theme }) => css`
@@ -74,18 +74,51 @@ interface CasesProps {
 export const Cases = React.memo<CasesProps>(({ caseId, initialData, isLoading, refreshCase }) => {
   const [{ data }, dispatchUpdateCaseProperty] = useUpdateCase(caseId, initialData);
   const [isEditDescription, setIsEditDescription] = useState(false);
+  const [isEditTitle, setIsEditTitle] = useState(false);
+  const [isEditTags, setIsEditTags] = useState(false);
   const [isCaseOpen, setIsCaseOpen] = useState(data.state === 'open');
   const [description, setDescription] = useState(data.description);
+  const [title, setTitle] = useState(data.title);
+  const [tags, setTags] = useState(data.tags);
 
-  const onUpdateDescription = useCallback(async () => {
-    if (description.length > 0) {
-      dispatchUpdateCaseProperty({
-        updateKey: 'description',
-        updateValue: description,
-      });
-      setIsEditDescription(false);
-    }
-  }, [dispatchUpdateCaseProperty]);
+  const onUpdateField = useCallback(
+    async (updateKey: keyof UpdateCase, updateValue?: string[]) => {
+      switch (updateKey) {
+        case 'title':
+          if (title.length > 0) {
+            dispatchUpdateCaseProperty({
+              updateKey: 'title',
+              updateValue: title,
+            });
+            setIsEditTitle(false);
+          }
+          break;
+        case 'description':
+          if (description.length > 0) {
+            dispatchUpdateCaseProperty({
+              updateKey: 'description',
+              updateValue: description,
+            });
+            setIsEditDescription(false);
+          }
+          break;
+        case 'tags':
+          setTags(updateValue as string[]);
+          if (title.length > 0) {
+            dispatchUpdateCaseProperty({
+              updateKey: 'tags',
+              updateValue,
+            });
+            setIsEditTags(false);
+          }
+          break;
+        default:
+          return null;
+      }
+    },
+    [dispatchUpdateCaseProperty]
+  );
+
   useEffect(() => {
     const caseState = isCaseOpen ? 'open' : 'closed';
     if (data.state !== caseState) {
@@ -159,7 +192,7 @@ export const Cases = React.memo<CasesProps>(({ caseId, initialData, isLoading, r
                 fill
                 isDisabled={isLoading}
                 isLoading={isLoading}
-                onClick={onUpdateDescription}
+                onClick={() => onUpdateField('description')}
               >
                 {i18n.SUBMIT}
               </EuiButton>
@@ -195,7 +228,15 @@ export const Cases = React.memo<CasesProps>(({ caseId, initialData, isLoading, r
             href: getCaseUrl(),
             text: i18n.BACK_TO_ALL,
           }}
-          title={data.title}
+          iconAction={{
+            'aria-label': title,
+            iconType: 'pencil',
+            onChange: newTitle => setTitle(newTitle),
+            onSubmit: () => onUpdateField('title'),
+            onClick: isEdit => setIsEditTitle(isEdit),
+          }}
+          isEditTitle={isEditTitle}
+          title={title}
         >
           <EuiFlexGroup gutterSize="l" justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
@@ -242,7 +283,16 @@ export const Cases = React.memo<CasesProps>(({ caseId, initialData, isLoading, r
             </EuiFlexItem>
             <EuiFlexItem grow={2}>
               <UserList headline={i18n.REPORTER} users={[data.created_by]} />
-              <TagList tags={data.tags} />
+              <TagList
+                tags={tags}
+                iconAction={{
+                  'aria-label': title,
+                  iconType: 'pencil',
+                  onSubmit: newTags => onUpdateField('tags', newTags),
+                  onClick: isEdit => setIsEditTags(isEdit),
+                }}
+                isEditTags={isEditTags}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         </MyWrapper>

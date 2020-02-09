@@ -5,8 +5,12 @@
  */
 
 import {
-  EuiBetaBadge,
   EuiBadge,
+  EuiBetaBadge,
+  EuiButton,
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiProgress,
@@ -18,6 +22,7 @@ import styled, { css } from 'styled-components';
 import { DefaultDraggable } from '../draggables';
 import { LinkIcon, LinkIconProps } from '../link_icon';
 import { Subtitle, SubtitleProps } from '../subtitle';
+import * as i18n from './translations';
 
 interface HeaderProps {
   border?: boolean;
@@ -69,6 +74,14 @@ const StyledEuiBetaBadge = styled(EuiBetaBadge)`
 
 StyledEuiBetaBadge.displayName = 'StyledEuiBetaBadge';
 
+const StyledEuiButtonIcon = styled(EuiButtonIcon)`
+  ${({ theme }) => css`
+    margin-left: ${theme.eui.euiSize};
+  `}
+`;
+
+StyledEuiButtonIcon.displayName = 'StyledEuiButtonIcon';
+
 interface BackOptions {
   href: LinkIconProps['href'];
   text: LinkIconProps['children'];
@@ -84,14 +97,23 @@ interface DraggableArguments {
   field: string;
   value: string;
 }
+interface IconAction {
+  'aria-label': string;
+  iconType: string;
+  onChange: (a: string) => void;
+  onClick: (b: boolean) => void;
+  onSubmit: () => void;
+}
 
 export interface HeaderPageProps extends HeaderProps {
   backOptions?: BackOptions;
   badgeOptions?: BadgeOptions;
   children?: React.ReactNode;
   draggableArguments?: DraggableArguments;
-  subtitle?: SubtitleProps['items'];
+  isEditTitle?: boolean;
+  iconAction?: IconAction;
   subtitle2?: SubtitleProps['items'];
+  subtitle?: SubtitleProps['items'];
   title: string | React.ReactNode;
 }
 
@@ -101,64 +123,104 @@ const HeaderPageComponent: React.FC<HeaderPageProps> = ({
   border,
   children,
   draggableArguments,
+  isEditTitle,
+  iconAction,
   isLoading,
   subtitle,
   subtitle2,
   title,
   ...rest
-}) => (
-  <Header border={border} {...rest}>
-    <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-      <FlexItem grow={false}>
-        {backOptions && (
-          <LinkBack>
-            <LinkIcon href={backOptions.href} iconType="arrowLeft">
-              {backOptions.text}
-            </LinkIcon>
-          </LinkBack>
-        )}
+}) => {
+  return (
+    <Header border={border} {...rest}>
+      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+        <FlexItem grow={false}>
+          {backOptions && (
+            <LinkBack>
+              <LinkIcon href={backOptions.href} iconType="arrowLeft">
+                {backOptions.text}
+              </LinkIcon>
+            </LinkBack>
+          )}
 
-        <EuiTitle size="l">
-          <h1 data-test-subj="header-page-title">
-            {!draggableArguments ? (
-              title
-            ) : (
-              <DefaultDraggable
-                data-test-subj="header-page-draggable"
-                id={`header-page-draggable-${draggableArguments.field}-${draggableArguments.value}`}
-                field={draggableArguments.field}
-                value={`${draggableArguments.value}`}
-              />
-            )}
-            {badgeOptions && (
-              <>
-                {' '}
-                {badgeOptions.beta ? (
-                  <StyledEuiBetaBadge
-                    label={badgeOptions.text}
-                    tooltipContent={badgeOptions.tooltip}
-                    tooltipPosition="bottom"
-                  />
+          {isEditTitle && iconAction ? (
+            <EuiFlexGroup alignItems="center" gutterSize="m" justifyContent="spaceBetween">
+              <EuiFlexItem grow={false}>
+                <EuiFieldText
+                  onChange={e => iconAction.onChange(e.target.value)}
+                  value={`${title}`}
+                />
+              </EuiFlexItem>
+              <EuiFlexGroup gutterSize="none" responsive={false} wrap={true}>
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    fill
+                    isDisabled={isLoading}
+                    isLoading={isLoading}
+                    onClick={iconAction.onSubmit}
+                  >
+                    {i18n.SUBMIT}
+                  </EuiButton>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty onClick={() => iconAction.onClick(false)}>
+                    {i18n.CANCEL}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              <EuiFlexItem />
+            </EuiFlexGroup>
+          ) : (
+            <EuiTitle size="l">
+              <h1 data-test-subj="header-page-title">
+                {!draggableArguments ? (
+                  title
                 ) : (
-                  <Badge color="hollow">{badgeOptions.text}</Badge>
+                  <DefaultDraggable
+                    data-test-subj="header-page-draggable"
+                    id={`header-page-draggable-${draggableArguments.field}-${draggableArguments.value}`}
+                    field={draggableArguments.field}
+                    value={`${draggableArguments.value}`}
+                  />
                 )}
-              </>
-            )}
-          </h1>
-        </EuiTitle>
+                {badgeOptions && (
+                  <>
+                    {' '}
+                    {badgeOptions.beta ? (
+                      <StyledEuiBetaBadge
+                        label={badgeOptions.text}
+                        tooltipContent={badgeOptions.tooltip}
+                        tooltipPosition="bottom"
+                      />
+                    ) : (
+                      <Badge color="hollow">{badgeOptions.text}</Badge>
+                    )}
+                  </>
+                )}
+                {iconAction && (
+                  <StyledEuiButtonIcon
+                    aria-label={iconAction['aria-label']}
+                    iconType={iconAction.iconType}
+                    onClick={() => iconAction.onClick(true)}
+                  />
+                )}
+              </h1>
+            </EuiTitle>
+          )}
 
-        {subtitle && <Subtitle data-test-subj="header-page-subtitle" items={subtitle} />}
-        {subtitle2 && <Subtitle data-test-subj="header-page-subtitle-2" items={subtitle2} />}
-        {border && isLoading && <EuiProgress size="xs" color="accent" />}
-      </FlexItem>
-
-      {children && (
-        <FlexItem data-test-subj="header-page-supplements" grow={true}>
-          {children}
+          {subtitle && <Subtitle data-test-subj="header-page-subtitle" items={subtitle} />}
+          {subtitle2 && <Subtitle data-test-subj="header-page-subtitle-2" items={subtitle2} />}
+          {border && isLoading && <EuiProgress size="xs" color="accent" />}
         </FlexItem>
-      )}
-    </EuiFlexGroup>
-  </Header>
-);
+
+        {children && (
+          <FlexItem data-test-subj="header-page-supplements" grow={true}>
+            {children}
+          </FlexItem>
+        )}
+      </EuiFlexGroup>
+    </Header>
+  );
+};
 
 export const HeaderPage = React.memo(HeaderPageComponent);
