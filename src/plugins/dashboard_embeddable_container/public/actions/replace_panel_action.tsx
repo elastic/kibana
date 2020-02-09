@@ -21,7 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { CoreStart } from '../../../../core/public';
 import { IEmbeddable, ViewMode, IEmbeddableStart } from '../embeddable_plugin';
 import { DASHBOARD_CONTAINER_TYPE, DashboardContainer } from '../embeddable';
-import { IAction, IncompatibleActionError } from '../ui_actions_plugin';
+import { Action, IncompatibleActionError } from '../ui_actions_plugin';
 import { openReplacePanelFlyout } from './open_replace_panel_flyout';
 
 export const REPLACE_PANEL_ACTION = 'replacePanel';
@@ -34,7 +34,7 @@ interface ActionContext {
   embeddable: IEmbeddable;
 }
 
-export class ReplacePanelAction implements IAction<ActionContext> {
+export class ReplacePanelAction implements Action<ActionContext> {
   public readonly type = REPLACE_PANEL_ACTION;
   public readonly id = REPLACE_PANEL_ACTION;
   public order = 11;
