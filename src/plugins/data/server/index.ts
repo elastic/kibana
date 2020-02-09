@@ -20,6 +20,25 @@
 import { PluginInitializerContext } from '../../../core/server';
 import { DataServerPlugin, DataPluginSetup, DataPluginStart } from './plugin';
 
+import {
+  nodeTypes,
+  fromKueryExpression,
+  toElasticsearchQuery,
+  buildEsQuery,
+  getEsQueryConfig,
+} from '../common';
+
+export const esKuery = {
+  nodeTypes,
+  fromKueryExpression,
+  toElasticsearchQuery,
+};
+
+export const esQuery = {
+  getEsQueryConfig,
+  buildEsQuery,
+};
+
 export function plugin(initializerContext: PluginInitializerContext) {
   return new DataServerPlugin(initializerContext);
 }
@@ -31,11 +50,11 @@ export function plugin(initializerContext: PluginInitializerContext) {
 export { IRequestTypesMap, IResponseTypesMap } from './search';
 
 export {
+  EsQueryConfig,
   // es query
   esFilters,
-  esKuery,
-  esQuery,
   fieldFormats,
+  KueryNode,
   // kbn field types
   castEsToKbnFieldTypeName,
   getKbnFieldType,

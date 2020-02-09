@@ -5,11 +5,11 @@
  */
 
 import { CoreSetup } from 'kibana/public';
-import { esKuery, autocomplete } from '../../../../../../../src/plugins/data/public';
+import { KueryNode, autocomplete } from '../../../../../../../src/plugins/data/public';
 
 export type KqlQuerySuggestionProvider<T = autocomplete.BasicQuerySuggestion> = (
   core: CoreSetup
 ) => (
   querySuggestionsGetFnArgs: autocomplete.QuerySuggestionsGetFnArgs,
-  kueryNode: esKuery.KueryNode
+  kueryNode: KueryNode
 ) => Promise<T[]>;

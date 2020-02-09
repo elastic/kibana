@@ -6,11 +6,14 @@
 import indexPatternResponse from './__fixtures__/index_pattern_response.json';
 
 import { setupGetFieldSuggestions } from './field';
-import { isFilterable, autocomplete, esKuery } from '../../../../../../../src/plugins/data/public';
+import {
+  isFilterable,
+  autocomplete,
+  KueryNode,
+} from '../../../../../../../src/plugins/data/public';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 
-const mockKueryNode = (kueryNode: Partial<esKuery.KueryNode>) =>
-  (kueryNode as unknown) as esKuery.KueryNode;
+const mockKueryNode = (kueryNode: Partial<KueryNode>) => (kueryNode as unknown) as KueryNode;
 
 describe('Kuery field suggestions', () => {
   let querySuggestionsArgs: autocomplete.QuerySuggestionsGetFnArgs;

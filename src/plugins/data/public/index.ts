@@ -19,6 +19,33 @@
 
 import { PluginInitializerContext } from '../../../core/public';
 
+import {
+  doesKueryExpressionHaveLuceneSyntaxError,
+  fromKueryExpression,
+  toElasticsearchQuery,
+  nodeTypes,
+  buildEsQuery,
+  getEsQueryConfig,
+  buildQueryFromFilters,
+  luceneStringToDsl,
+  decorateQuery,
+} from '../common';
+
+export const esKuery = {
+  nodeTypes,
+  doesKueryExpressionHaveLuceneSyntaxError,
+  fromKueryExpression,
+  toElasticsearchQuery,
+};
+
+export const esQuery = {
+  buildEsQuery,
+  getEsQueryConfig,
+  buildQueryFromFilters,
+  luceneStringToDsl,
+  decorateQuery,
+};
+
 export function plugin(initializerContext: PluginInitializerContext) {
   return new DataPublicPlugin(initializerContext);
 }
@@ -30,6 +57,7 @@ export function plugin(initializerContext: PluginInitializerContext) {
 export { IRequestTypesMap, IResponseTypesMap } from './search';
 export * from './types';
 export {
+  EsQueryConfig,
   // index patterns
   IIndexPattern,
   IFieldType,
@@ -52,9 +80,8 @@ export * from './ui';
 export {
   // es query
   esFilters,
-  esKuery,
-  esQuery,
   fieldFormats,
+  KueryNode,
   // index patterns
   isFilterable,
   // kbn field types
