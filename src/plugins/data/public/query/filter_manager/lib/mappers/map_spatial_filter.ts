@@ -20,7 +20,6 @@ import { esFilters } from '../../../../../common';
 
 // Use mapSpatialFilter mapper to avoid bloated meta with value and params for spatial filters.
 export const mapSpatialFilter = (filter: esFilters.Filter) => {
-  const metaProperty = /(^\$|meta)/;
   if (
     filter.meta &&
     filter.meta.key &&
