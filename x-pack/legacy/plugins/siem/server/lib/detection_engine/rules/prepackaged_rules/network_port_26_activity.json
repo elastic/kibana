@@ -1,18 +1,15 @@
 {
-  "description": "This signal detects events that may indicate use of SMTP on TCP port 26. This\nport is commonly used by several popular mail transfer agents to deconflict\nwith the default SMTP port 25. This port has also been used by a malware family\ncalled BadPatch for command and control of Windows systems.\n",
+  "description": "This rule detects events that may indicate use of SMTP on TCP port 26. This\nport is commonly used by several popular mail transfer agents to deconflict\nwith the default SMTP port 25. This port has also been used by a malware family\ncalled BadPatch for command and control of Windows systems.\n",
   "false_positives": [
-    "Servers that process email traffic may cause false positives and should be excluded from this rule as this is expected behavior for them."
+    "Servers that process email traffic may cause false positives and should be excluded from this rule as this is expected behavior."
   ],
   "index": [
-    "auditbeat-*",
-    "endgame-*",
-    "filebeat-*",
-    "packetbeat-*",
-    "winlogbeat-*"
+    "filebeat-*"
   ],
   "language": "kuery",
+  "max_signals": 100,
   "name": "SMTP on Port 26/TCP",
-  "query": "network.transport: tcp and destination.port: 26",
+  "query": "network.transport: tcp and destination.port: 26\n",
   "references": [
     "https://unit42.paloaltonetworks.com/unit42-badpatch/",
     "https://isc.sans.edu/forums/diary/Next+up+whats+up+with+TCP+port+26/25564/"
@@ -22,7 +19,7 @@
   "severity": "low",
   "tags": [
     "Elastic",
-    "network"
+    "Network"
   ],
   "threat": [
     {
@@ -57,5 +54,5 @@
     }
   ],
   "type": "query",
-  "version": 1
+  "version": 2
 }
