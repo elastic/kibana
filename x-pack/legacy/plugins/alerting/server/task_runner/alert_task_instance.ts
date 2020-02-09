@@ -33,7 +33,7 @@ const alertParamsSchema = t.intersection([
 ]);
 export type AlertTaskParams = t.TypeOf<typeof alertParamsSchema>;
 
-const enumarateErrorFields = (e: t.Errors) =>
+const enumerateErrorFields = (e: t.Errors) =>
   `${e.map(({ context }) => context.map(({ key }) => key).join('.'))}`;
 
 export function taskInstanceToAlertTaskInstance(
@@ -48,7 +48,7 @@ export function taskInstanceToAlertTaskInstance(
         throw new Error(
           `Task "${taskInstance.id}" ${
             alert ? `(underlying Alert "${alert.id}") ` : ''
-          }has an invalid param at ${enumarateErrorFields(e)}`
+          }has an invalid param at ${enumerateErrorFields(e)}`
         );
       }, t.identity)
     ),
@@ -58,7 +58,7 @@ export function taskInstanceToAlertTaskInstance(
         throw new Error(
           `Task "${taskInstance.id}" ${
             alert ? `(underlying Alert "${alert.id}") ` : ''
-          }has invalid state at ${enumarateErrorFields(e)}`
+          }has invalid state at ${enumerateErrorFields(e)}`
         );
       }, t.identity)
     ),
