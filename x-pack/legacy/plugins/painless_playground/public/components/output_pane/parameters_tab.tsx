@@ -34,7 +34,7 @@ export function ParametersTab({ context, contextSetup, setContext, setContextSet
         label={
           <EuiToolTip
             content={i18n.translate('xpack.painless_playground.parametersFieldTooltipText', {
-              defaultMessage: 'Your script can access these values by name',
+              defaultMessage: 'These variables are assigned to the "params" object in your script',
             })}
           >
             <span>
