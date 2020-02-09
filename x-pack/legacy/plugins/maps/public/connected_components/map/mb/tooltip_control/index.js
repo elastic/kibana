@@ -6,9 +6,14 @@
 
 import { connect } from 'react-redux';
 import { TooltipControl } from './tooltip_control';
-import { setTooltipState } from '../../../../actions/map_actions';
+import {
+  closeLockedTooltip,
+  openLockedTooltip,
+  setTooltipState,
+} from '../../../../actions/map_actions';
 import {
   getLayerList,
+  getLockedTooltips,
   getTooltipState,
   isDrawingFilter,
 } from '../../../../selectors/map_selectors';
@@ -18,11 +23,18 @@ function mapStateToProps(state = {}) {
     layerList: getLayerList(state),
     tooltipState: getTooltipState(state),
     isDrawingFilter: isDrawingFilter(state),
+    lockedTooltips: getLockedTooltips(state),
   };
 }
 
 function mapDispatchToProps(dispatch) {
   return {
+    closeLockedTooltip(tooltipId) {
+      dispatch(closeLockedTooltip(tooltipId));
+    },
+    openLockedTooltip({ features, location }) {
+      dispatch(openLockedTooltip({ features, location }));
+    },
     setTooltipState(tooltipState) {
       dispatch(setTooltipState(tooltipState));
     },

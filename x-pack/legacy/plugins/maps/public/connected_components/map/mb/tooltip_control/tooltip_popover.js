@@ -9,11 +9,6 @@ import { LAT_INDEX, LON_INDEX } from '../../../../../common/constants';
 import { FeaturesTooltip } from '../../features_tooltip/features_tooltip';
 import { EuiPopover, EuiText } from '@elastic/eui';
 
-export const TOOLTIP_TYPE = {
-  HOVER: 'HOVER',
-  LOCKED: 'LOCKED',
-};
-
 const noop = () => {};
 
 export class TooltipPopover extends Component {
@@ -28,26 +23,13 @@ export class TooltipPopover extends Component {
     this._popoverRef = React.createRef();
   }
 
-  static getDerivedStateFromProps(nextProps, prevState) {
-    if (nextProps.tooltipState) {
-      const nextPoint = nextProps.mbMap.project(nextProps.tooltipState.location);
-      if (nextPoint.x !== prevState.x || nextPoint.y !== prevState.y) {
-        return {
-          x: nextPoint.x,
-          y: nextPoint.y,
-        };
-      }
-    }
-
-    return null;
-  }
-
   componentDidMount() {
+    this._updatePopoverPosition();
     this.props.mbMap.on('move', this._updatePopoverPosition);
   }
 
   componentDidUpdate() {
-    if (this.props.tooltipState && this._popoverRef.current) {
+    if (this._popoverRef.current) {
       this._popoverRef.current.positionPopoverFluid();
     }
   }
@@ -57,13 +39,9 @@ export class TooltipPopover extends Component {
   }
 
   _updatePopoverPosition = () => {
-    if (!this.props.tooltipState) {
-      return;
-    }
-
-    const nextPoint = this.props.mbMap.project(this.props.tooltipState.location);
-    const lat = this.props.tooltipState.location[LAT_INDEX];
-    const lon = this.props.tooltipState.location[LON_INDEX];
+    const nextPoint = this.props.mbMap.project(this.props.location);
+    const lat = this.props.location[LAT_INDEX];
+    const lon = this.props.location[LON_INDEX];
     const bounds = this.props.mbMap.getBounds();
     this.setState({
       x: nextPoint.x,
@@ -137,9 +115,9 @@ export class TooltipPopover extends Component {
   _renderTooltipContent = () => {
     const publicProps = {
       addFilters: this.props.addFilters,
-      closeTooltip: this.props.clearTooltipState,
-      features: this.props.tooltipState.features,
-      isLocked: this.props.tooltipState.type === TOOLTIP_TYPE.LOCKED,
+      closeTooltip: this.props.closeTooltip,
+      features: this.props.features,
+      isLocked: this.props.isLocked,
       loadFeatureProperties: this._loadFeatureProperties,
       loadFeatureGeometry: this._loadFeatureGeometry,
       getLayerName: this._getLayerName,
@@ -162,13 +140,11 @@ export class TooltipPopover extends Component {
   };
 
   render() {
-    if (!this.props.tooltipState || !this.state.isVisible) {
+    if (!this.state.isVisible) {
       return null;
     }
 
-    const tooltipAnchor = (
-      <div style={{ height: '26px', width: '26px', background: 'transparent' }} />
-    );
+    const tooltipAnchor = <div style={{ height: '26px', width: '26px', background: 'none' }} />;
     return (
       <EuiPopover
         id="mapTooltip"

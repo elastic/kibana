@@ -6,6 +6,7 @@
 
 import turf from 'turf';
 import turfBooleanContains from '@turf/boolean-contains';
+import uuid from 'uuid/v4';
 import {
   getLayerList,
   getLayerListRaw,
@@ -15,6 +16,7 @@ import {
   getWaitingForMapReadyLayerListRaw,
   getTransientLayerId,
   getTooltipState,
+  getLockedTooltips,
   getQuery,
 } from '../selectors/map_selectors';
 import { FLYOUT_STATE } from '../reducers/ui';
@@ -412,7 +414,41 @@ export function mapExtentChanged(newMapConstants) {
   };
 }
 
+export function openLockedTooltip({ features, location }) {
+  return (dispatch, getState) => {
+    const lockedTooltips = getLockedTooltips(getState());
+    lockedTooltips.push({
+      features,
+      location,
+      id: uuid(),
+    });
+
+    dispatch({
+      type: SET_TOOLTIP_STATE,
+      tooltipState: {
+        ...getTooltipState(getState()),
+        lockedTooltips,
+      },
+    });
+  };
+}
+
+export function closeLockedTooltip(tooltipId) {
+  return (dispatch, getState) => {
+    dispatch({
+      type: SET_TOOLTIP_STATE,
+      tooltipState: {
+        ...getTooltipState(getState()),
+        lockedTooltips: getLockedTooltips(getState()).filter(({ id }) => {
+          return tooltipId !== id;
+        }),
+      },
+    });
+  };
+}
+
 export function setTooltipState(tooltipState) {
+  console.log(tooltipState);
   return {
     type: 'SET_TOOLTIP_STATE',
     tooltipState: tooltipState,

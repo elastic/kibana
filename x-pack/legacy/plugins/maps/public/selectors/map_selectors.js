@@ -46,6 +46,10 @@ export const getTooltipState = ({ map }) => {
   return map.tooltipState;
 };
 
+export const getLockedTooltips = ({ map }) => {
+  return map.tooltipState && map.tooltipState.lockedTooltips ? map.tooltipState.lockedTooltips : [];
+};
+
 export const getMapReady = ({ map }) => map && map.ready;
 
 export const getMapInitError = ({ map }) => map.mapInitError;

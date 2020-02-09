@@ -46,7 +46,7 @@ export class TooltipControl extends React.Component {
 
   _onMouseout = () => {
     this._updateHoverTooltipState.cancel();
-    if (this.props.tooltipState && this.props.tooltipState.type !== TOOLTIP_TYPE.LOCKED) {
+    if (this.props.lockedTooltips.length === 0) {
       this.props.clearTooltipState();
     }
   };
@@ -104,8 +104,7 @@ export class TooltipControl extends React.Component {
     const popupAnchorLocation = justifyAnchorLocation(e.lngLat, targetMbFeataure);
 
     const features = this._getIdsForFeatures(mbFeatures);
-    this.props.setTooltipState({
-      type: TOOLTIP_TYPE.LOCKED,
+    this.props.openLockedTooltip({
       features: features,
       location: popupAnchorLocation,
     });
@@ -117,7 +116,7 @@ export class TooltipControl extends React.Component {
       return;
     }
 
-    if (this.props.tooltipState && this.props.tooltipState.type === TOOLTIP_TYPE.LOCKED) {
+    if (this.props.lockedTooltips.length) {
       //ignore hover events when tooltip is locked
       return;
     }
@@ -181,20 +180,28 @@ export class TooltipControl extends React.Component {
   }
 
   render() {
-    if (!this.props.tooltipState) {
-      return null;
+    if (this.props.lockedTooltips.length) {
+      return this.props.lockedTooltips.map(({ features, location, id }) => {
+        const closeTooltip = () => {
+          this.props.closeLockedTooltip(id);
+        };
+        return (
+          <TooltipPopover
+            key={id}
+            mbMap={this.props.mbMap}
+            layerList={this.props.layerList}
+            addFilters={this.props.addFilters}
+            renderTooltipContent={this.props.renderTooltipContent}
+            geoFields={this.props.geoFields}
+            features={features}
+            location={location}
+            closeTooltip={closeTooltip}
+            isLocked={true}
+          />
+        );
+      });
     }
 
-    return (
-      <TooltipPopover
-        mbMap={this.props.mbMap}
-        tooltipState={this.props.tooltipState}
-        layerList={this.props.layerList}
-        addFilters={this.props.addFilters}
-        clearTooltipState={this.props.clearTooltipState}
-        renderTooltipContent={this.props.renderTooltipContent}
-        geoFields={this.props.geoFields}
-      />
-    );
+    return null;
   }
 }
