@@ -21,7 +21,7 @@ import { get, map } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { IRouter } from 'kibana/server';
 
-import { IFieldType, indexPatterns, esFilters } from '../index';
+import { IFieldType, indexPatterns, Filter } from '../index';
 
 export function registerValueSuggestionsRoute(router: IRouter) {
   router.post(
@@ -82,7 +82,7 @@ async function getBody(
   { timeout, terminate_after }: Record<string, any>,
   field: IFieldType | string,
   query: string,
-  boolFilter: esFilters.Filter[] = []
+  boolFilter: Filter[] = []
 ) {
   const isFieldObject = (f: any): f is IFieldType => Boolean(f && f.name);
 

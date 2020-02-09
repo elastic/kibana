@@ -18,7 +18,7 @@
  */
 
 import { ExpressionInterpret } from '../interpreter_provider';
-import { TimeRange, Query, esFilters } from '../../../data/public';
+import { TimeRange, Query, Filter } from '../../../data/public';
 import { Adapters } from '../../../inspector/public';
 import { ExpressionRenderDefinition } from '../registries';
 
@@ -43,7 +43,7 @@ export type Context = object;
 
 export interface SearchContext {
   type: 'kibana_context';
-  filters?: esFilters.Filter[];
+  filters?: Filter[];
   query?: Query;
   timeRange?: TimeRange;
 }

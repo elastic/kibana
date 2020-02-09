@@ -32,7 +32,7 @@ import {
   SearchSource,
   Query,
   TimeRange,
-  esFilters,
+  Filter,
   getTime,
   FilterManager,
 } from '../../../../../../plugins/data/public';
@@ -53,7 +53,7 @@ export interface RequestHandlerParams {
   aggs: IAggConfigs;
   timeRange?: TimeRange;
   query?: Query;
-  filters?: esFilters.Filter[];
+  filters?: Filter[];
   forceFetch: boolean;
   filterManager: FilterManager;
   uiState?: PersistedState;

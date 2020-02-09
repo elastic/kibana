@@ -18,15 +18,15 @@
  */
 
 import { mapSpatialFilter } from './map_spatial_filter';
-import { esFilters } from '../../../../../common';
+import { FilterMeta, Filter, FILTERS } from '../../../../../common';
 
 describe('mapSpatialFilter()', () => {
   test('should return the key for matching multi polygon filter', async () => {
     const filter = {
       meta: {
         alias: 'my spatial filter',
-        type: esFilters.FILTERS.SPATIAL_FILTER,
-      } as esFilters.FilterMeta,
+        type: FILTERS.SPATIAL_FILTER,
+      } as FilterMeta,
       query: {
         bool: {
           should: [
@@ -38,40 +38,40 @@ describe('mapSpatialFilter()', () => {
           ],
         },
       },
-    } as esFilters.Filter;
+    } as Filter;
     const result = mapSpatialFilter(filter);
 
     expect(result).toHaveProperty('key', 'query');
     expect(result).toHaveProperty('value', '');
-    expect(result).toHaveProperty('type', esFilters.FILTERS.SPATIAL_FILTER);
+    expect(result).toHaveProperty('type', FILTERS.SPATIAL_FILTER);
   });
 
   test('should return the key for matching polygon filter', async () => {
     const filter = {
       meta: {
         alias: 'my spatial filter',
-        type: esFilters.FILTERS.SPATIAL_FILTER,
-      } as esFilters.FilterMeta,
+        type: FILTERS.SPATIAL_FILTER,
+      } as FilterMeta,
       geo_polygon: {
         geoCoordinates: { points: [] },
       },
-    } as esFilters.Filter;
+    } as Filter;
     const result = mapSpatialFilter(filter);
 
     expect(result).toHaveProperty('key', 'geo_polygon');
     expect(result).toHaveProperty('value', '');
-    expect(result).toHaveProperty('type', esFilters.FILTERS.SPATIAL_FILTER);
+    expect(result).toHaveProperty('type', FILTERS.SPATIAL_FILTER);
   });
 
   test('should return undefined for none matching', async done => {
     const filter = {
       meta: {
         alias: 'my spatial filter',
-      } as esFilters.FilterMeta,
+      } as FilterMeta,
       geo_polygon: {
         geoCoordinates: { points: [] },
       },
-    } as esFilters.Filter;
+    } as Filter;
 
     try {
       mapSpatialFilter(filter);

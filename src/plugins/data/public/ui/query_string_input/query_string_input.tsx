@@ -38,17 +38,13 @@ import {
   autocomplete,
   IDataPluginServices,
   IIndexPattern,
-  PersistedLog,
   SuggestionsComponent,
-  toUser,
-  fromUser,
-  matchPairs,
-  getQueryLog,
   Query,
 } from '../..';
 import { withKibana, KibanaReactContextValue, toMountPoint } from '../../../../kibana_react/public';
 import { fetchIndexPatterns } from './fetch_index_patterns';
 import { QueryLanguageSwitcher } from './language_switcher';
+import { PersistedLog, getQueryLog, matchPairs, toUser, fromUser } from '../../query';
 
 interface Props {
   kibana: KibanaReactContextValue<IDataPluginServices>;

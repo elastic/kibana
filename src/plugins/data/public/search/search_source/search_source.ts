@@ -73,12 +73,12 @@ import _ from 'lodash';
 import { normalizeSortRequest } from './normalize_sort_request';
 import { filterDocvalueFields } from './filter_docvalue_fields';
 import { fieldWildcardFilter } from '../../../../kibana_utils/public';
-import { fieldFormats, esFilters, SearchRequest } from '../..';
+import { fieldFormats, SearchRequest } from '../..';
 import { SearchSourceOptions, SearchSourceFields } from './types';
 import { fetchSoon, FetchOptions, RequestFailure } from '../fetch';
 
 import { getSearchService, getUiSettings, getInjectedMetadata } from '../../services';
-import { getEsQueryConfig, buildEsQuery } from '../../../common/es_query';
+import { getEsQueryConfig, buildEsQuery, Filter } from '../../../common';
 
 export type ISearchSource = Pick<SearchSource, keyof SearchSource>;
 
@@ -390,7 +390,7 @@ export class SearchSource {
       delete searchRequest.highlightAll;
     }
 
-    const translateToQuery = (filter: esFilters.Filter) => filter && (filter.query || filter);
+    const translateToQuery = (filter: Filter) => filter && (filter.query || filter);
 
     // re-write filters within filter aggregations
     (function recurse(aggBranch) {

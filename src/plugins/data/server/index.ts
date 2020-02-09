@@ -26,6 +26,15 @@ import {
   toElasticsearchQuery,
   buildEsQuery,
   getEsQueryConfig,
+  buildQueryFilter,
+  buildCustomFilter,
+  buildEmptyFilter,
+  buildExistsFilter,
+  buildFilter,
+  buildPhraseFilter,
+  buildPhrasesFilter,
+  buildRangeFilter,
+  isFilterDisabled,
 } from '../common';
 
 export const esKuery = {
@@ -37,6 +46,18 @@ export const esKuery = {
 export const esQuery = {
   getEsQueryConfig,
   buildEsQuery,
+};
+
+export const esFilters = {
+  buildQueryFilter,
+  buildCustomFilter,
+  buildEmptyFilter,
+  buildExistsFilter,
+  buildFilter,
+  buildPhraseFilter,
+  buildPhrasesFilter,
+  buildRangeFilter,
+  isFilterDisabled,
 };
 
 export function plugin(initializerContext: PluginInitializerContext) {
@@ -52,7 +73,6 @@ export { IRequestTypesMap, IResponseTypesMap } from './search';
 export {
   EsQueryConfig,
   // es query
-  esFilters,
   fieldFormats,
   KueryNode,
   // kbn field types
@@ -68,6 +88,7 @@ export {
   ES_FIELD_TYPES,
   KBN_FIELD_TYPES,
   // query
+  Filter,
   Query,
   // timefilter
   RefreshInterval,

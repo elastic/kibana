@@ -29,7 +29,78 @@ import {
   buildQueryFromFilters,
   luceneStringToDsl,
   decorateQuery,
+
+  // filters
+  FILTERS,
+  buildEmptyFilter,
+  buildPhrasesFilter,
+  buildExistsFilter,
+  buildPhraseFilter,
+  buildQueryFilter,
+  buildRangeFilter,
+  toggleFilterNegated,
+  disableFilter,
+  FilterStateStore,
+  getPhraseFilterField,
+  getPhraseFilterValue,
+  isPhraseFilter,
+  isExistsFilter,
+  isPhrasesFilter,
+  isRangeFilter,
+  isMatchAllFilter,
+  isMissingFilter,
+  isQueryStringFilter,
+  getDisplayValueFromFilter,
 } from '../common';
+
+import { FilterLabel } from './ui/filter_bar';
+
+import {
+  compareFilters,
+  COMPARE_ALL_OPTIONS,
+  generateFilters,
+  onlyDisabledFiltersChanged,
+  changeTimeFilter,
+  mapAndFlattenFilters,
+  extractTimeFilter,
+} from './query';
+
+export const esFilters = {
+  FilterLabel,
+
+  FILTERS,
+  FilterStateStore,
+
+  buildEmptyFilter,
+  buildPhrasesFilter,
+  buildExistsFilter,
+  buildPhraseFilter,
+  buildQueryFilter,
+  buildRangeFilter,
+
+  isPhraseFilter,
+  isExistsFilter,
+  isPhrasesFilter,
+  isRangeFilter,
+  isMatchAllFilter,
+  isMissingFilter,
+  isQueryStringFilter,
+
+  toggleFilterNegated,
+  disableFilter,
+  getPhraseFilterField,
+  getPhraseFilterValue,
+  getDisplayValueFromFilter,
+
+  compareFilters,
+  COMPARE_ALL_OPTIONS,
+  generateFilters,
+  onlyDisabledFiltersChanged,
+
+  changeTimeFilter,
+  mapAndFlattenFilters,
+  extractTimeFilter,
+};
 
 export const esKuery = {
   nodeTypes,
@@ -65,6 +136,17 @@ export {
   // kbn field types
   ES_FIELD_TYPES,
   KBN_FIELD_TYPES,
+  IFilterType,
+  Filter,
+  ExistsFilter,
+  RangeFilter,
+  PhraseFilter,
+  PhrasesFilter,
+  RangeFilterMeta,
+  RangeFilterParams,
+  GeoBoundingBoxFilter,
+  GeoPolygonFilter,
+  MatchAllFilter,
   // query
   Query,
   // timefilter
@@ -75,11 +157,27 @@ export { autocomplete } from './autocomplete';
 export * from './field_formats';
 export * from './index_patterns';
 export * from './search';
-export * from './query';
+export {
+  createSavedQueryService,
+  syncAppFilters,
+  syncQuery,
+  getTime,
+  getQueryLog,
+  getQueryStateContainer,
+  FilterManager,
+  SavedQuery,
+  SavedQueryService,
+  SavedQueryTimeFilter,
+  SavedQueryAttributes,
+  InputTimeRange,
+  TimefilterSetup,
+  TimeHistory,
+  TimefilterContract,
+  TimeHistoryContract,
+} from './query';
 export * from './ui';
 export {
   // es query
-  esFilters,
   fieldFormats,
   KueryNode,
   // index patterns

@@ -9,7 +9,7 @@ import actionCreatorFactory from 'typescript-fsa';
 import { SavedQuery } from 'src/legacy/core_plugins/data/public';
 import { InspectQuery, Refetch } from './model';
 import { InputsModelId } from './constants';
-import { esFilters } from '../../../../../../../src/plugins/data/public';
+import { Filter } from '../../../../../../../src/plugins/data/public';
 
 const actionCreator = actionCreatorFactory('x-pack/siem/local/inputs');
 
@@ -83,5 +83,5 @@ export const setSavedQuery = actionCreator<{
 
 export const setSearchBarFilter = actionCreator<{
   id: InputsModelId;
-  filters: esFilters.Filter[];
+  filters: Filter[];
 }>('SET_SEARCH_BAR_FILTER');
