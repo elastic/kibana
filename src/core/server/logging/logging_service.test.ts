@@ -29,7 +29,7 @@ jest.mock('../../../legacy/server/logging/rotate', () => ({
   setupLoggingRotate: jest.fn().mockImplementation(() => Promise.resolve({})),
 }));
 
-const timestamp = new Date(Date.UTC(2012, 1, 1));
+const timestamp = new Date(Date.UTC(2012, 1, 1, 14, 33, 22, 11));
 let mockConsoleLog: jest.SpyInstance;
 
 import { createWriteStream } from 'fs';

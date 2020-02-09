@@ -22,6 +22,7 @@ import { LogLevel } from '../log_level';
 import { LogRecord } from '../log_record';
 import { PatternLayout, patternSchema } from './pattern_layout';
 
+const timestamp = new Date(Date.UTC(2012, 1, 1, 14, 30, 22, 11));
 const records: LogRecord[] = [
   {
     context: 'context-1',
@@ -32,42 +33,42 @@ const records: LogRecord[] = [
     },
     level: LogLevel.Fatal,
     message: 'message-1',
-    timestamp: new Date(Date.UTC(2012, 1, 1)),
+    timestamp,
     pid: 5355,
   },
   {
     context: 'context-2',
     level: LogLevel.Error,
     message: 'message-2',
-    timestamp: new Date(Date.UTC(2012, 1, 1)),
+    timestamp,
     pid: 5355,
   },
   {
     context: 'context-3',
     level: LogLevel.Warn,
     message: 'message-3',
-    timestamp: new Date(Date.UTC(2012, 1, 1)),
+    timestamp,
     pid: 5355,
   },
   {
     context: 'context-4',
     level: LogLevel.Debug,
     message: 'message-4',
-    timestamp: new Date(Date.UTC(2012, 1, 1)),
+    timestamp,
     pid: 5355,
   },
   {
     context: 'context-5',
     level: LogLevel.Info,
     message: 'message-5',
-    timestamp: new Date(Date.UTC(2012, 1, 1)),
+    timestamp,
     pid: 5355,
   },
   {
     context: 'context-6',
     level: LogLevel.Trace,
     message: 'message-6',
-    timestamp: new Date(Date.UTC(2012, 1, 1)),
+    timestamp,
     pid: 5355,
   },
 ];
@@ -126,35 +127,35 @@ test('`format()` correctly formats record with meta data.', () => {
       context: 'context-meta',
       level: LogLevel.Debug,
       message: 'message-meta',
-      timestamp: new Date(Date.UTC(2012, 1, 1)),
+      timestamp,
       pid: 5355,
       meta: {
         from: 'v7',
         to: 'v8',
       },
     })
-  ).toBe('[2012-02-01T00:00:00.000Z][DEBUG][context-meta][{"from":"v7","to":"v8"}] message-meta');
+  ).toBe('[2012-02-01T14:30:22.011Z][DEBUG][context-meta][{"from":"v7","to":"v8"}] message-meta');
 
   expect(
     layout.format({
       context: 'context-meta',
       level: LogLevel.Debug,
       message: 'message-meta',
-      timestamp: new Date(Date.UTC(2012, 1, 1)),
+      timestamp,
       pid: 5355,
       meta: {},
     })
-  ).toBe('[2012-02-01T00:00:00.000Z][DEBUG][context-meta][{}] message-meta');
+  ).toBe('[2012-02-01T14:30:22.011Z][DEBUG][context-meta][{}] message-meta');
 
   expect(
     layout.format({
       context: 'context-meta',
       level: LogLevel.Debug,
       message: 'message-meta',
-      timestamp: new Date(Date.UTC(2012, 1, 1)),
+      timestamp,
       pid: 5355,
     })
-  ).toBe('[2012-02-01T00:00:00.000Z][DEBUG][context-meta] message-meta');
+  ).toBe('[2012-02-01T14:30:22.011Z][DEBUG][context-meta] message-meta');
 });
 
 test('`format()` correctly formats record with highlighting.', () => {
@@ -179,7 +180,7 @@ test('`format()` allows specifying pattern with meta.', () => {
     context: 'context',
     level: LogLevel.Debug,
     message: 'message',
-    timestamp: new Date(Date.UTC(2012, 1, 1)),
+    timestamp,
     pid: 5355,
     meta: {
       from: 'v7',
@@ -195,47 +196,44 @@ describe('format', () => {
       context: 'context',
       level: LogLevel.Debug,
       message: 'message',
-      timestamp: new Date(Date.UTC(2012, 1, 1)),
+      timestamp,
       pid: 5355,
     };
     it('uses ISO8601 as default', () => {
       const layout = new PatternLayout();
 
-      expect(layout.format(record)).toMatchInlineSnapshot(
-        `"[2012-02-01T00:00:00.000Z][DEBUG][context] message"`
-      );
+      expect(layout.format(record)).toBe('[2012-02-01T14:30:22.011Z][DEBUG][context] message');
     });
+
     describe('supports specifying a predefined format', () => {
       it('ISO8601', () => {
         const layout = new PatternLayout('[{timestamp{ISO8601}}][{context}]');
 
-        expect(layout.format(record)).toBe('[2012-02-01T00:00:00.000Z][context]');
+        expect(layout.format(record)).toBe('[2012-02-01T14:30:22.011Z][context]');
       });
 
       it('ISO8601_TZ', () => {
-        const layout = new PatternLayout(
-          '[{timestamp{ISO8601_TZ}{America/Los_Angeles}}][{context}]'
-        );
+        const layout = new PatternLayout('[{timestamp{ISO8601_TZ}}][{context}]');
 
-        expect(layout.format(record)).toBe('[2012-01-31T16:00:00,000-0800][context]');
+        expect(layout.format(record)).toBe('[2012-02-01T09:30:22.011-05:00][context]');
       });
 
       it('ABSOLUTE', () => {
         const layout = new PatternLayout('[{timestamp{ABSOLUTE}}][{context}]');
 
-        expect(layout.format(record)).toBe('[01:00:00,000][context]');
+        expect(layout.format(record)).toBe('[09:30:22.011][context]');
       });
 
       it('UNIX', () => {
         const layout = new PatternLayout('[{timestamp{UNIX}}][{context}]');
 
-        expect(layout.format(record)).toBe('[1328054400][context]');
+        expect(layout.format(record)).toBe('[1328106622][context]');
       });
 
       it('UNIX_MILLIS', () => {
         const layout = new PatternLayout('[{timestamp{UNIX_MILLIS}}][{context}]');
 
-        expect(layout.format(record)).toBe('[1328054400000][context]');
+        expect(layout.format(record)).toBe('[1328106622011][context]');
       });
     });
 
@@ -243,7 +241,7 @@ describe('format', () => {
       it('ISO8601', () => {
         const layout = new PatternLayout('[{timestamp{ISO8601}{America/Los_Angeles}}][{context}]');
 
-        expect(layout.format(record)).toBe('[2012-02-01T00:00:00.000Z][context]');
+        expect(layout.format(record)).toBe('[2012-02-01T14:30:22.011Z][context]');
       });
 
       it('ISO8601_TZ', () => {
@@ -251,19 +249,19 @@ describe('format', () => {
           '[{timestamp{ISO8601_TZ}{America/Los_Angeles}}][{context}]'
         );
 
-        expect(layout.format(record)).toBe('[2012-01-31T16:00:00,000-0800][context]');
+        expect(layout.format(record)).toBe('[2012-02-01T06:30:22.011-08:00][context]');
       });
 
       it('ABSOLUTE', () => {
         const layout = new PatternLayout('[{timestamp{ABSOLUTE}{America/Los_Angeles}}][{context}]');
 
-        expect(layout.format(record)).toBe('[16:00:00,000][context]');
+        expect(layout.format(record)).toBe('[06:30:22.011][context]');
       });
 
       it('UNIX', () => {
         const layout = new PatternLayout('[{timestamp{UNIX}{America/Los_Angeles}}][{context}]');
 
-        expect(layout.format(record)).toBe('[1328054400][context]');
+        expect(layout.format(record)).toBe('[1328106622][context]');
       });
 
       it('UNIX_MILLIS', () => {
@@ -271,7 +269,7 @@ describe('format', () => {
           '[{timestamp{UNIX_MILLIS}{America/Los_Angeles}}][{context}]'
         );
 
-        expect(layout.format(record)).toBe('[1328054400000][context]');
+        expect(layout.format(record)).toBe('[1328106622011][context]');
       });
     });
     it('formats several conversions patterns correctly', () => {
@@ -279,7 +277,7 @@ describe('format', () => {
         '[{timestamp{ABSOLUTE}{America/Los_Angeles}}][{context}][{timestamp{UNIX}}]'
       );
 
-      expect(layout.format(record)).toBe('[16:00:00,000][context][1328054400]');
+      expect(layout.format(record)).toBe('[06:30:22.011][context][1328106622]');
     });
   });
 });
