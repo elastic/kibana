@@ -225,7 +225,7 @@ export class JobsListView extends Component {
   };
 
   async refreshJobSummaryList(forceRefresh = false) {
-    if (forceRefresh === true || this.props.blockRefresh === false) {
+    if (forceRefresh === true || this.props.blockRefresh !== true) {
       // Set loading to true for jobs_list table for initial job loading
       if (this.state.loading === null) {
         this.setState({ loading: true });
