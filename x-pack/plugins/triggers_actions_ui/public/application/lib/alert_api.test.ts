@@ -16,6 +16,7 @@ import {
   enableAlert,
   loadAlert,
   loadAlerts,
+  loadAlertState,
   loadAlertTypes,
   muteAlerts,
   unmuteAlerts,
@@ -96,7 +97,7 @@ describe('loadAlertState', () => {
     };
     http.get.mockResolvedValueOnce(resolvedValue);
 
-    expect(await loadAlert({ http, alertId })).toEqual(resolvedValue);
+    expect(await loadAlertState({ http, alertId })).toEqual(resolvedValue);
     expect(http.get).toHaveBeenCalledWith(`/api/alert/${alertId}/state`);
   });
 });
