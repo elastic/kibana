@@ -25,6 +25,7 @@ const DEFAULT_ICON_STOPS = [
 ];
 
 export function IconStops({
+  field,
   getValueSuggestions,
   iconStops = DEFAULT_ICON_STOPS,
   isDarkMode,
@@ -98,7 +99,12 @@ export function IconStops({
           compressed
         />
       ) : (
-        <StopInput getValueSuggestions={getValueSuggestions} value={stop} onChange={onStopChange} />
+        <StopInput
+          field={field}
+          getValueSuggestions={getValueSuggestions}
+          value={stop}
+          onChange={onStopChange}
+        />
       );
 
     return (

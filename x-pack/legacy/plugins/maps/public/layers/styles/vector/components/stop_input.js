@@ -7,22 +7,45 @@
 import _ from 'lodash';
 import React, { Component } from 'react';
 
-import { EuiComboBox } from '@elastic/eui';
+import { EuiComboBox, EuiFieldText } from '@elastic/eui';
 
 export class StopInput extends Component {
-  state = {
-    suggestions: [],
-    isLoadingSuggestions: false,
-    hasPrevFocus: false,
-  };
+  constructor(props) {
+    super(props);
+    this.state = {
+      suggestions: [],
+      isLoadingSuggestions: false,
+      hasPrevFocus: false,
+      fieldDataType: undefined,
+      localFieldTextValue: props.value,
+    };
+  }
 
   componentDidMount() {
     this._isMounted = true;
+    this._prevFieldName = undefined;
+    this._loadFieldDataType();
+  }
+
+  componentDidUpdate() {
+    this._loadFieldDataType();
   }
 
   componentWillUnmount() {
     this._isMounted = false;
     this._loadSuggestions.cancel();
+  }
+
+  async _loadFieldDataType() {
+    if (this.props.field.getName() === this._prevFieldName) {
+      return;
+    }
+
+    this._prevFieldName = this.props.field.getName();
+    const fieldDataType = await this.props.field.getDataType();
+    if (this._isMounted) {
+      this.setState({ fieldDataType });
+    }
   }
 
   _onFocus = () => {
@@ -68,7 +91,17 @@ export class StopInput extends Component {
     }
   }, 300);
 
-  render() {
+  _onFieldTextChange = event => {
+    this.setState({ localFieldTextValue: event.target.value });
+    // onChange can cause UI lag, ensure smooth input typing by debouncing onChange
+    this._debouncedOnFieldTextChange();
+  };
+
+  _debouncedOnFieldTextChange = _.debounce(() => {
+    this.props.onChange(this.state.localFieldTextValue);
+  }, 500);
+
+  _renderSuggestionInput() {
     const suggestionOptions = this.state.suggestions.map(suggestion => {
       return { label: `${suggestion}` };
     });
@@ -99,5 +132,27 @@ export class StopInput extends Component {
         compressed
       />
     );
+  }
+
+  _renderTextInput() {
+    return (
+      <EuiFieldText
+        value={this.state.localFieldTextValue}
+        onChange={this._onFieldTextChange}
+        compressed
+      />
+    );
+  }
+
+  render() {
+    if (!this.state.fieldDataType) {
+      return null;
+    }
+
+    // autocomplete service can not provide suggestions for non string fields (and boolean) because it uses
+    // term aggregation include parameter. Include paramerter uses a regular expressions that only supports string type
+    return this.state.fieldDataType === 'string' || this.state.fieldDataType === 'boolean'
+      ? this._renderSuggestionInput()
+      : this._renderTextInput();
   }
 }

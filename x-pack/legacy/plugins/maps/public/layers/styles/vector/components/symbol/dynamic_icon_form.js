@@ -43,7 +43,7 @@ export function DynamicIconForm({
     return (
       <IconMapSelect
         {...styleOptions}
-        getValueSuggestions={styleProperty.getValueSuggestions}
+        styleProperty={styleProperty}
         onChange={onIconMapChange}
         isDarkMode={isDarkMode}
         symbolOptions={symbolOptions}

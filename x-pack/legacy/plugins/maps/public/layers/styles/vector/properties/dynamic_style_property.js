@@ -17,19 +17,17 @@ import { OrdinalFieldMetaOptionsPopover } from '../components/ordinal_field_meta
 export class DynamicStyleProperty extends AbstractStyleProperty {
   static type = STYLE_TYPE.DYNAMIC;
 
-  constructor(options, styleName, field, getFieldMeta, getFieldFormatter, getValueSuggestions) {
+  constructor(options, styleName, field, getFieldMeta, getFieldFormatter, source) {
     super(options, styleName);
     this._field = field;
     this._getFieldMeta = getFieldMeta;
     this._getFieldFormatter = getFieldFormatter;
-    this._getValueSuggestions = getValueSuggestions;
+    this._source = source;
   }
 
   getValueSuggestions = query => {
     const fieldName = this.getFieldName();
-    return this._getValueSuggestions && fieldName
-      ? this._getValueSuggestions(fieldName, query)
-      : [];
+    return this._source && fieldName ? this._source.getValueSuggestions(fieldName, query) : [];
   };
 
   getFieldMeta() {

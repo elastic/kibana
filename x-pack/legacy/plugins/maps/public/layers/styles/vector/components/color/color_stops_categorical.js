@@ -24,6 +24,7 @@ export const ColorStopsCategorical = ({
     { stop: null, color: DEFAULT_CUSTOM_COLOR }, //first stop is the "other" color
     { stop: '', color: DEFAULT_NEXT_COLOR },
   ],
+  field,
   onChange,
   getValueSuggestions,
 }) => {
@@ -57,6 +58,7 @@ export const ColorStopsCategorical = ({
 
     return (
       <StopInput
+        field={field}
         getValueSuggestions={getValueSuggestions}
         value={stopValue}
         onChange={onStopChange}
