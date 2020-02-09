@@ -181,7 +181,7 @@ export class TooltipControl extends React.Component {
 
   render() {
     if (this.props.lockedTooltips.length) {
-      return this.props.lockedTooltips.map(({ features, location, id }) => {
+      return this.props.lockedTooltips.map(({ features, location, id }, index) => {
         const closeTooltip = () => {
           this.props.closeLockedTooltip(id);
         };
@@ -197,6 +197,7 @@ export class TooltipControl extends React.Component {
             location={location}
             closeTooltip={closeTooltip}
             isLocked={true}
+            index={index}
           />
         );
       });

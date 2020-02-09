@@ -145,6 +145,10 @@ export class TooltipPopover extends Component {
     }
 
     const tooltipAnchor = <div style={{ height: '26px', width: '26px', background: 'none' }} />;
+    // Although tooltip anchors are not visible, they take up horizontal space.
+    // This horizontal spacing needs to be accounted for in the translate function,
+    // otherwise the anchors get increasingly pushed to the right away from the actual location.
+    const offset = this.props.index * 26;
     return (
       <EuiPopover
         id="mapTooltip"
@@ -155,7 +159,7 @@ export class TooltipPopover extends Component {
         ref={this._popoverRef}
         style={{
           pointerEvents: 'none',
-          transform: `translate(${this.state.x - 13}px, ${this.state.y - 13}px)`,
+          transform: `translate(${this.state.x - 13 - offset}px, ${this.state.y - 13}px)`,
         }}
       >
         {this._renderTooltipContent()}
