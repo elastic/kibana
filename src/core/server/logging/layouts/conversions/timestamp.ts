@@ -17,11 +17,12 @@
  * under the License.
  */
 import moment from 'moment-timezone';
+import { last } from 'lodash';
 
 import { Conversion } from './type';
 import { LogRecord } from '../../log_record';
 
-const timestampRegExp = /{timestamp({([^}]+)})?({([^}]+)})?}/gi;
+const timestampRegExp = /{timestamp({(?<format>[^}]+)})?({(?<timezone>[^}]+)})?}/gi;
 
 const formats = {
   ISO8601: 'ISO8601',
@@ -40,9 +41,9 @@ function formatDate(date: Date, dateFormat: string = formats.ISO8601, timezone?:
     case formats.ISO8601:
       return momentDate.toISOString();
     case formats.ISO8601_TZ:
-      return momentDate.format('YYYY-MM-DDTHH:mm:ss,SSSZZ');
+      return momentDate.format('YYYY-MM-DDTHH:mm:ss.SSSZ');
     case formats.ABSOLUTE:
-      return momentDate.format('HH:mm:ss,SSS');
+      return momentDate.format('HH:mm:ss.SSS');
     case formats.UNIX:
       return momentDate.format('X');
     case formats.UNIX_MILLIS:
@@ -66,10 +67,10 @@ function validateTimezone(timezone: string) {
 
 function validate(rawString: string) {
   for (const matched of rawString.matchAll(timestampRegExp)) {
-    const [, , dateFormat, , timezone] = matched;
+    const { format, timezone } = matched.groups!;
 
-    if (dateFormat) {
-      validateDateFormat(dateFormat);
+    if (format) {
+      validateDateFormat(format);
     }
     if (timezone) {
       validateTimezone(timezone);
@@ -79,9 +80,11 @@ function validate(rawString: string) {
 
 export const TimestampConversion: Conversion = {
   pattern: timestampRegExp,
-  formatter(record: LogRecord, highlight: boolean, ...matched: string[]) {
-    const [, , dateFormat, , timezone] = matched;
-    return formatDate(record.timestamp, dateFormat, timezone);
+  formatter(record: LogRecord, highlight: boolean, ...matched: any[]) {
+    const groups: Record<string, string | undefined> = last(matched);
+    const { format, timezone } = groups;
+
+    return formatDate(record.timestamp, format, timezone);
   },
   validate,
 };
