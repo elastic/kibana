@@ -27,6 +27,7 @@ A high level overview of our contributing guidelines.
     - [Instrumenting with Elastic APM](#instrumenting-with-elastic-apm)
   - [Debugging Unit Tests](#debugging-unit-tests)
   - [Unit Testing Plugins](#unit-testing-plugins)
+  - [Automated Accessibility Testing](#automated-accessibility-testing)
   - [Cross-browser compatibility](#cross-browser-compatibility)
     - [Testing compatibility locally](#testing-compatibility-locally)
     - [Running Browser Automation Tests](#running-browser-automation-tests)
@@ -552,6 +553,23 @@ To run the tests for just your particular plugin run the following command from 
 yarn test:mocha
 yarn test:browser --dev # remove the --dev flag to run them once and close
 ```
+
+### Automated Accessibility Testing
+
+To run the tests locally:
+
+1. In one terminal window run `node scripts/functional_tests_server --config test/accessibility/config.ts`
+2. In another terminal window run `node scripts/functional_test_runner.js --config test/accessibility/config.ts`
+
+To run the x-pack tests, swap the config file out for `x-pack/test/accessibility/config.ts`.
+
+After the server is up, you can go to this instance of Kibana at `localhost:5620`.
+
+The testing is done using [axe](https://github.com/dequelabs/axe-core). The same thing that runs in CI,
+can be run locally using their browser plugins:
+
+- [Chrome](https://chrome.google.com/webstore/detail/axe-web-accessibility-tes/lhdoppojpmngadmnindnejefpokejbdd?hl=en-US)
+- [Firefox](https://addons.mozilla.org/en-US/firefox/addon/axe-devtools/)
 
 ### Cross-browser Compatibility
 
