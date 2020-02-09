@@ -33,8 +33,8 @@ const renderItem = currentJobNumber => (x, i) => {
 export default function HistoricalList({historicalItems, currentJobNumber }) {
 
   return (
-    <div className="App-Historical-List">
-      Historical Items
+    <div className="font-bold text-xl mb-2">
+      Historical Items - Compare to Current? [{currentJobNumber}]
       <ul>
         {historicalItems.map((x, i) => renderItem(currentJobNumber)(x, i))}
       </ul>
