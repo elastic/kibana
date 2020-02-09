@@ -28,24 +28,28 @@ import {
   Query,
 } from '@elastic/eui';
 
+import { withRouter, RouteComponentProps } from 'react-router-dom';
 import { CallOuts } from './components/call_outs';
 import { Search } from './components/search';
 import { Form } from './components/form';
 import { AdvancedSettingsVoiceAnnouncement } from './components/advanced_settings_voice_announcement';
 import { IUiSettingsClient, DocLinksStart, ToastsStart } from '../../../../core/public/';
 import { ComponentRegistry } from '../';
-
+// @ts-ignore
 import { getAriaName, toEditableConfig, DEFAULT_CATEGORY } from './lib';
 
 import { FieldSetting, IQuery } from './types';
 
-interface AdvancedSettingsProps {
-  queryText: string;
+interface AdvancedSettingsProps extends RouteComponentProps<MatchParams> {
   enableSaving: boolean;
   uiSettings: IUiSettingsClient;
   dockLinks: DocLinksStart['links'];
   toasts: ToastsStart;
   componentRegistry: ComponentRegistry['start'];
+}
+
+interface MatchParams {
+  query?: string;
 }
 
 interface AdvancedSettingsState {
@@ -56,7 +60,10 @@ interface AdvancedSettingsState {
 
 type GroupedSettings = Record<string, FieldSetting[]>;
 
-export class AdvancedSettings extends Component<AdvancedSettingsProps, AdvancedSettingsState> {
+export class AdvancedSettingsComponent extends Component<
+  AdvancedSettingsProps,
+  AdvancedSettingsState
+> {
   private settings: FieldSetting[];
   private groupedSettings: GroupedSettings;
   private categoryCounts: Record<string, number>;
@@ -65,8 +72,9 @@ export class AdvancedSettings extends Component<AdvancedSettingsProps, AdvancedS
 
   constructor(props: AdvancedSettingsProps) {
     super(props);
-    const { queryText } = this.props;
-    const parsedQuery = Query.parse(queryText ? `ariaName:"${getAriaName(queryText)}"` : '');
+    const queryText = this.props.match.params.query || '';
+    // const parsedQuery = Query.parse(queryText ? `ariaName:"${getAriaName(queryText)}"` : '');
+    const parsedQuery = Query.parse(queryText);
 
     this.settings = this.initSettings(this.props.uiSettings);
     this.groupedSettings = this.initGroupedSettings(this.settings);
@@ -219,3 +227,5 @@ export class AdvancedSettings extends Component<AdvancedSettingsProps, AdvancedS
     );
   }
 }
+
+export const AdvancedSettings = withRouter(AdvancedSettingsComponent);

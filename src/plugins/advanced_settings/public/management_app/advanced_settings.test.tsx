@@ -236,7 +236,6 @@ describe('AdvancedSettings', () => {
   it('should render specific setting if given setting key', async () => {
     const component = shallow(
       <AdvancedSettings
-        queryText="test:string:setting"
         enableSaving={true}
         toasts={notificationServiceMock.createStartContract().toasts}
         dockLinks={docLinksServiceMock.createStartContract().links}
@@ -251,7 +250,6 @@ describe('AdvancedSettings', () => {
   it('should render read-only when saving is disabled', async () => {
     const component = shallow(
       <AdvancedSettings
-        queryText="test:string:setting"
         enableSaving={false}
         toasts={notificationServiceMock.createStartContract().toasts}
         dockLinks={docLinksServiceMock.createStartContract().links}

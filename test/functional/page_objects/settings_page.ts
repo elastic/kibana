@@ -41,7 +41,7 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
       await find.clickByDisplayedLinkText(text);
     }
     async clickKibanaSettings() {
-      await testSubjects.click('Advanced Settings');
+      await testSubjects.click('settings');
       await PageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.existOrFail('managementSettingsTitle');
     }

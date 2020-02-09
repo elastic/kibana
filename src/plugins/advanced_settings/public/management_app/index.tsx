@@ -19,21 +19,13 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { HashRouter, Switch, Route } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n/react';
 import { AdvancedSettings } from './advanced_settings';
 import { ManagementSetup } from '../../../management/public';
 import { CoreSetup } from '../../../../core/public';
 import { ComponentRegistry } from '../types';
-
-export const toBeUsed = {
-  text: i18n.translate('advancedSettings.badge.readOnly.text', {
-    defaultMessage: 'Read only',
-  }),
-  tooltip: i18n.translate('advancedSettings.badge.readOnly.tooltip', {
-    defaultMessage: 'Unable to save advanced settings',
-  }),
-};
 
 export async function registerAdvSettingsMgmntApp({
   management,
@@ -54,30 +46,44 @@ export async function registerAdvSettingsMgmntApp({
   }
 
   const advancedSettingsManagementApp = kibanaSection.registerApp({
-    id: i18n.translate('advancedSettings.sectionLabel', {
-      defaultMessage: 'Advanced Settings',
-    }),
+    id: 'settings',
     title,
     order: 20,
     async mount(params) {
       params.setBreadcrumbs([{ text: title }]);
-      const [{ uiSettings, notifications, docLinks, application }] = await getStartServices();
-      // todo badge
+      const [
+        { uiSettings, notifications, docLinks, application, chrome },
+      ] = await getStartServices();
+
+      const canSave = application.capabilities.advancedSettings.save as boolean;
+
+      if (!canSave) {
+        chrome.setBadge({
+          text: i18n.translate('kbn.management.advancedSettings.badge.readOnly.text', {
+            defaultMessage: 'Read only',
+          }),
+          tooltip: i18n.translate('kbn.management.advancedSettings.badge.readOnly.tooltip', {
+            defaultMessage: 'Unable to save advanced settings',
+          }),
+          iconType: 'glasses',
+        });
+      }
+
       ReactDOM.render(
         <I18nProvider>
-          <AdvancedSettings
-            // todo - is this right?
-            /*
-            $scope.query = $route.current.params.setting || '';
-            $route.updateParams({ setting: null });
-            */
-            queryText={''}
-            enableSaving={application.capabilities.advancedSettings.save as boolean}
-            toasts={notifications.toasts}
-            dockLinks={docLinks.links}
-            uiSettings={uiSettings}
-            componentRegistry={componentRegistry}
-          />
+          <HashRouter basename={params.basePath}>
+            <Switch>
+              <Route path={['/:query', '/']}>
+                <AdvancedSettings
+                  enableSaving={canSave}
+                  toasts={notifications.toasts}
+                  dockLinks={docLinks.links}
+                  uiSettings={uiSettings}
+                  componentRegistry={componentRegistry}
+                />
+              </Route>
+            </Switch>
+          </HashRouter>
         </I18nProvider>,
         params.element
       );
@@ -87,44 +93,7 @@ export async function registerAdvSettingsMgmntApp({
     },
   });
   const [{ application }] = await getStartServices();
-  // console.log('application.capabilities', application.capabilities);
   if (!application.capabilities.management.kibana.settings) {
     advancedSettingsManagementApp.disable();
   }
 }
-/*
-import { getBreadcrumbs } from './breadcrumbs';
-
-uiRoutes.when('/management/kibana/settings/:setting?', {
-  template: indexTemplate,
-  k7Breadcrumbs: getBreadcrumbs,
-  requireUICapability: 'management.kibana.settings',
-  badge: uiCapabilities => {
-    if (uiCapabilities.advancedSettings.save) {
-      return undefined;
-    }
-
-    return {
-      text: i18n.translate('kbn.management.advancedSettings.badge.readOnly.text', {
-        defaultMessage: 'Read only',
-      }),
-      tooltip: i18n.translate('kbn.management.advancedSettings.badge.readOnly.tooltip', {
-        defaultMessage: 'Unable to save advanced settings',
-      }),
-      iconType: 'glasses',
-    };
-  },
-});
-
-uiModules.get('apps/management').directive('kbnManagementAdvanced', function($route) {
-  return {
-    restrict: 'E',
-    link: function($scope) {
-      $scope.query = $route.current.params.setting || '';
-      $route.updateParams({ setting: null });
-    },
-  };
-});
-
-
-*/
