@@ -45,6 +45,9 @@ const PageWrapper: FC<PageProps> = ({ config, deps }) => {
   const blockRefresh = refreshValue === 0 || refreshPause === true;
 
   useEffect(() => {
+    timefilter.disableTimeRangeSelector();
+    timefilter.enableAutoRefreshSelector();
+
     const { value } = timefilter.getRefreshInterval();
     if (value === 0) {
       // the auto refresher starts in an off state

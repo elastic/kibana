@@ -5,7 +5,6 @@
  */
 
 import React, { Component } from 'react';
-import { timefilter } from 'ui/timefilter';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiFlexGroup,
@@ -65,12 +64,9 @@ export class JobsListView extends Component {
   }
 
   componentDidMount() {
-    if (this.props.isManagementTable === true) {
-      this.refreshJobSummaryList(true);
-    } else {
-      timefilter.disableTimeRangeSelector();
-      timefilter.enableAutoRefreshSelector();
+    this.refreshJobSummaryList(true);
 
+    if (this.props.isManagementTable !== true) {
       // check to see if we need to open the start datafeed modal
       // after the page has rendered. This will happen if the user
       // has just created a job in the advanced wizard and selected to
