@@ -4,10 +4,43 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { RequestHandlerContext } from 'kibana/server';
 import { INDEX_META_DATA_CREATED_BY } from '../../../common/constants/file_datavisualizer';
+import { InputData } from './file_data_visualizer';
 
-export function importDataProvider(callWithRequest) {
-  async function importData(id, index, settings, mappings, ingestPipeline, data) {
+export interface Settings {
+  pipeline?: string;
+  index: string;
+  body: any[];
+  [key: string]: any;
+}
+
+export interface Mappings {
+  [key: string]: any;
+}
+
+export interface InjectPipeline {
+  id: string;
+  pipeline: any;
+}
+
+interface Failure {
+  item: number;
+  reason: string;
+  doc: any;
+}
+
+export function importDataProvider(context: RequestHandlerContext) {
+  const callAsCurrentUser = context.ml!.mlClient.callAsCurrentUser;
+
+  async function importData(
+    id: string,
+    index: string,
+    settings: Settings,
+    mappings: Mappings,
+    ingestPipeline: InjectPipeline,
+    data: InputData
+  ) {
     let createdIndex;
     let createdPipelineId;
     const docCount = data.length;
@@ -35,7 +68,7 @@ export function importDataProvider(callWithRequest) {
         createdPipelineId = pipelineId;
       }
 
-      let failures = [];
+      let failures: Failure[] = [];
       if (data.length) {
         const resp = await indexData(index, createdPipelineId, data);
         if (resp.success === false) {
@@ -72,8 +105,8 @@ export function importDataProvider(callWithRequest) {
     }
   }
 
-  async function createIndex(index, settings, mappings) {
-    const body = {
+  async function createIndex(index: string, settings: Settings, mappings: Mappings) {
+    const body: { mappings: Mappings; settings?: Settings } = {
       mappings: {
         _meta: {
           created_by: INDEX_META_DATA_CREATED_BY,
@@ -86,10 +119,10 @@ export function importDataProvider(callWithRequest) {
       body.settings = settings;
     }
 
-    await callWithRequest('indices.create', { index, body });
+    await callAsCurrentUser('indices.create', { index, body });
   }
 
-  async function indexData(index, pipelineId, data) {
+  async function indexData(index: string, pipelineId: string, data: InputData) {
     try {
       const body = [];
       for (let i = 0; i < data.length; i++) {
@@ -97,12 +130,12 @@ export function importDataProvider(callWithRequest) {
         body.push(data[i]);
       }
 
-      const settings = { index, body };
+      const settings: Settings = { index, body };
       if (pipelineId !== undefined) {
         settings.pipeline = pipelineId;
       }
 
-      const resp = await callWithRequest('bulk', settings);
+      const resp = await callAsCurrentUser('bulk', settings);
       if (resp.errors) {
         throw resp;
       } else {
@@ -113,7 +146,7 @@ export function importDataProvider(callWithRequest) {
         };
       }
     } catch (error) {
-      let failures = [];
+      let failures: Failure[] = [];
       let ingestError = false;
       if (error.errors !== undefined && Array.isArray(error.items)) {
         // an expected error where some or all of the bulk request
@@ -134,11 +167,11 @@ export function importDataProvider(callWithRequest) {
     }
   }
 
-  async function createPipeline(id, pipeline) {
-    return await callWithRequest('ingest.putPipeline', { id, body: pipeline });
+  async function createPipeline(id: string, pipeline: any) {
+    return await callAsCurrentUser('ingest.putPipeline', { id, body: pipeline });
   }
 
-  function getFailures(items, data) {
+  function getFailures(items: any[], data: InputData): Failure[] {
     const failures = [];
     for (let i = 0; i < items.length; i++) {
       const item = items[i];
