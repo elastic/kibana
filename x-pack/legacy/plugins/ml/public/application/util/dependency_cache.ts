@@ -84,111 +84,111 @@ export function setDependencyCache(deps: DependencyCache) {
 
 export function getTimefilter() {
   if (cache.timefilter === null) {
-    throw new Error();
+    throw new Error("timefilter hasn't been initialized");
   }
   return cache.timefilter.timefilter;
 }
 export function getTimeHistory() {
   if (cache.timefilter === null) {
-    throw new Error();
+    throw new Error("timefilter hasn't been initialized");
   }
   return cache.timefilter.history;
 }
 
 export function getDocLinks() {
   if (cache.docLinks === null) {
-    throw new Error();
+    throw new Error("docLinks hasn't been initialized");
   }
   return cache.docLinks;
 }
 
 export function getToastNotifications() {
   if (cache.toastNotifications === null) {
-    throw new Error();
+    throw new Error("toast notifications haven't been initialized");
   }
   return cache.toastNotifications;
 }
 
 export function getOverlays() {
   if (cache.overlays === null) {
-    throw new Error();
+    throw new Error("overlays haven't been initialized");
   }
   return cache.overlays;
 }
 
 export function getUiSettings() {
   if (cache.config === null) {
-    throw new Error();
+    throw new Error("uiSettings hasn't been initialized");
   }
   return cache.config;
 }
 
 export function getRecentlyAccessed() {
   if (cache.recentlyAccessed === null) {
-    throw new Error();
+    throw new Error("recentlyAccessed hasn't been initialized");
   }
   return cache.recentlyAccessed;
 }
 
 export function getFieldFormats() {
   if (cache.fieldFormats === null) {
-    throw new Error();
+    throw new Error("fieldFormats hasn't been initialized");
   }
   return cache.fieldFormats;
 }
 
 export function getAutocomplete() {
   if (cache.autocomplete === null) {
-    throw new Error();
+    throw new Error("autocomplete hasn't been initialized");
   }
   return cache.autocomplete;
 }
 
 export function getChrome() {
   if (cache.chrome === null) {
-    throw new Error();
+    throw new Error("chrome hasn't been initialized");
   }
   return cache.chrome;
 }
 
 export function getBasePath() {
   if (cache.basePath === null) {
-    throw new Error();
+    throw new Error("basePath hasn't been initialized");
   }
   return cache.basePath;
 }
 
 export function getSavedObjectsClient() {
   if (cache.savedObjectsClient === null) {
-    throw new Error();
+    throw new Error("savedObjectsClient hasn't been initialized");
   }
   return cache.savedObjectsClient;
 }
 
 export function getXSRF() {
   if (cache.XSRF === null) {
-    throw new Error();
+    throw new Error("xsrf hasn't been initialized");
   }
   return cache.XSRF;
 }
 
 export function getAppUrl() {
   if (cache.APP_URL === null) {
-    throw new Error();
+    throw new Error("app url hasn't been initialized");
   }
   return cache.APP_URL;
 }
 
 export function getApplication() {
   if (cache.application === null) {
-    throw new Error();
+    throw new Error("application hasn't been initialized");
   }
   return cache.application;
 }
 
 export function getHttp() {
   if (cache.http === null) {
-    throw new Error();
+    throw new Error("http hasn't been initialized");
   }
   return cache.http;
 }
