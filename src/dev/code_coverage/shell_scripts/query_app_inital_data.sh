@@ -10,7 +10,7 @@ CURRENT_BUILD_ID=$1
 export CURRENT_BUILD_ID
 PAST_BUILD_ID=$((CURRENT_BUILD_ID - 29))
 export PAST_BUILD_ID
-OUT_FILE='bootstrapped.txt'
+OUT_FILE='bootstrapped.dat'
 export OUT_FILE
 
 clearOutFile() {
