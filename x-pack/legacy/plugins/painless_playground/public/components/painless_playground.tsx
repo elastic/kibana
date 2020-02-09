@@ -109,7 +109,7 @@ export function PainlessPlayground({
 }) {
   const [code, setCode] = useState(getFromLocalStorage('painlessPlaygroundCode', exampleScript));
   const [response, setResponse] = useState<Response>({ error: undefined, success: undefined });
-  const [showRequestFlyout, setShowRequestFlyout] = useState(false);
+  const [isRequestFlyoutOpen, setRequestFlyoutOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const [context, setContext] = useState(
@@ -125,8 +125,8 @@ export function PainlessPlayground({
     debouncedSubmit(code, context, contextSetup, executeCode, setResponse, setIsLoading);
   }, [code, context, contextSetup, executeCode]);
 
-  const toggleViewRequestFlyout = () => {
-    setShowRequestFlyout(!showRequestFlyout);
+  const toggleRequestFlyout = () => {
+    setRequestFlyoutOpen(!isRequestFlyoutOpen);
   };
 
   return (
@@ -159,13 +159,14 @@ export function PainlessPlayground({
       <MainControls
         submit={() => submit(code, context, contextSetup, executeCode, setResponse)}
         isLoading={isLoading}
-        toggleFlyout={toggleViewRequestFlyout}
-        isFlyoutOpen={showRequestFlyout}
+        toggleRequestFlyout={toggleRequestFlyout}
+        isRequestFlyoutOpen={isRequestFlyoutOpen}
+        reset={() => setCode(exampleScript)}
       />
 
-      {showRequestFlyout && (
+      {isRequestFlyoutOpen && (
         <RequestFlyout
-          onClose={() => setShowRequestFlyout(false)}
+          onClose={() => setRequestFlyoutOpen(false)}
           requestBody={formatJson(buildRequestPayload(code, context, contextSetup))}
           response={formatJson(response.success || response.error)}
         />
