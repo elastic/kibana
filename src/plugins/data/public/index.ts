@@ -136,7 +136,6 @@ export {
   // kbn field types
   ES_FIELD_TYPES,
   KBN_FIELD_TYPES,
-  IFilterType,
   Filter,
   ExistsFilter,
   RangeFilter,
