@@ -20,22 +20,26 @@
 import React from "react";
 import HistoricalItem from './historical_item';
 
-export default function HistoricalList({historicalItems}) {
+const renderItem = currentJobNumber => (x, i) => {
+  return (
+    <HistoricalItem
+      item={x}
+      key={i}
+      currentJobNumber={currentJobNumber}
+    />
+  );
+}
+
+export default function HistoricalList({historicalItems, currentJobNumber }) {
 
   return (
     <div className="App-Historical-List">
+      Historical Items
       <ul>
-        {historicalItems.map((x, i) => renderItem(x, i))}
+        {historicalItems.map((x, i) => renderItem(currentJobNumber)(x, i))}
       </ul>
     </div>
      );
 }
 
-function renderItem(x, i) {
-  return (
-    <HistoricalItem
-      item={x}
-      key={i}
-    />
-  );
-}
+

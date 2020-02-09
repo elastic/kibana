@@ -23,14 +23,14 @@ import TestRunnerItemList from './test_runner_item_list';
 import HistoricalList from './historical_list';
 import Footer from './footer';
 
-export default function App({ testRunnerTypes, buildStats, historicalItems }) {
+export default function App({ testRunnerTypes, buildStats, historicalItems, currentJobNumber}) {
   const { url } = buildStats;
   return (
     <div>
       <Header url={url} />
       <div>
         <TestRunnerItemList testRunnerTypes={testRunnerTypes} />
-        <HistoricalList historicalItems={historicalItems} />
+        <HistoricalList historicalItems={historicalItems} currentJobNumber={currentJobNumber} />
       </div>
       <Footer />
     </div>
