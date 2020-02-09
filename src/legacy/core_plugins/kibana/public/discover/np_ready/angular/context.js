@@ -24,6 +24,7 @@ import './context_app';
 import { getAppState } from './context_state';
 import contextAppRouteTemplate from './context.html';
 import { getRootBreadcrumbs } from '../helpers/breadcrumbs';
+import { FilterStateManager } from '../../../../../data/public';
 
 const k7Breadcrumbs = $route => {
   const { indexPattern } = $route.current.locals;
@@ -66,7 +67,7 @@ getAngularModule().config($routeProvider => {
     });
 });
 
-function ContextAppRouteController($routeParams, $scope, config, $route) {
+function ContextAppRouteController($routeParams, $scope, config, $route, globalState) {
   const filterManager = getServices().filterManager;
   const indexPattern = $route.current.locals.indexPattern.ip;
   const { start, stop, stateContainer, initialState } = getAppState(
@@ -75,6 +76,22 @@ function ContextAppRouteController($routeParams, $scope, config, $route) {
   );
   this.state = _.cloneDeep(initialState);
   this.filters = this.state.filters;
+  const self = this;
+  const filterStateManager = new FilterStateManager(
+    globalState,
+    () => {
+      return {
+        set filters(_filters) {
+          self.filters = _filters;
+          stateContainer.set({ ...self.filters, ...{ filters: _filters } }, { replace: true });
+        },
+        get filters() {
+          return self.filters;
+        },
+      };
+    },
+    filterManager
+  );
   start();
   const updateState = newStateVars => {
     const newState = _.cloneDeep({ ...this.state, ...newStateVars });
@@ -107,11 +124,12 @@ function ContextAppRouteController($routeParams, $scope, config, $route) {
   const updateSubscription = subscribeWithScope($scope, filterManager.getUpdates$(), {
     next: () => {
       const newState = updateState({ filters: filterManager.getFilters() });
-      stateContainer.set(newState);
+      stateContainer.set(newState, { replace: true });
     },
   });
 
   $scope.$on('$destroy', () => {
+    filterStateManager.destroy();
     updateSubscription.unsubscribe();
     stop();
   });
