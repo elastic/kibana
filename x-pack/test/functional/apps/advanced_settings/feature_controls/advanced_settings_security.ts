@@ -178,7 +178,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         expect(navLinks).to.eql(['Discover', 'Stack Management']);
       });
 
-      it(`does not allow navigation to advanced settings; redirects to Kibana home`, async () => {
+      it(`does not allow navigation to advanced settings; redirects to management home`, async () => {
         await PageObjects.common.navigateToActualUrl('kibana', 'management/kibana/settings', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,

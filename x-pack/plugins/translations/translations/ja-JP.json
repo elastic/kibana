@@ -1618,7 +1618,6 @@
     "advancedSettings.pageTitle": "設定",
     "advancedSettings.searchBar.unableToParseQueryErrorMessage": "クエリをパースできません",
     "advancedSettings.searchBarAriaLabel": "高度な設定を検索",
-    "advancedSettings.sectionLabel": "高度な設定",
     "kbn.managementTitle": "管理",
     "advancedSettings.voiceAnnouncement.searchResultScreenReaderMessage": "{query} を検索しました。{sectionLenght, plural, one {# セクション} other {# セクション}}に{optionLenght, plural, one {# オプション} other { # オプション}}があります。",
     "kbn.topNavMenu.openInspectorButtonLabel": "検査",

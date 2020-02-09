@@ -1618,7 +1618,6 @@
     "advancedSettings.pageTitle": "设置",
     "advancedSettings.searchBar.unableToParseQueryErrorMessage": "无法解析查询",
     "advancedSettings.searchBarAriaLabel": "搜索高级设置",
-    "advancedSettings.sectionLabel": "高级设置",
     "kbn.managementTitle": "管理",
     "advancedSettings.voiceAnnouncement.searchResultScreenReaderMessage": "您已搜索 {query}。{sectionLenght, plural, one {# 个部分} other {# 个部分}}中有 {optionLenght, plural, one {# 个选项} other {# 个选项}}",
     "kbn.topNavMenu.openInspectorButtonLabel": "检查",
