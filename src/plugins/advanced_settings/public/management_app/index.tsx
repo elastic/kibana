@@ -27,6 +27,21 @@ import { ManagementSetup } from '../../../management/public';
 import { CoreSetup } from '../../../../core/public';
 import { ComponentRegistry } from '../types';
 
+const title = i18n.translate('advancedSettings.advancedSettingsLabel', {
+  defaultMessage: 'Advanced Settings',
+});
+const crumb = [{ text: title }];
+
+const readOnlyBadge = {
+  text: i18n.translate('advancedSettings.badge.readOnly.text', {
+    defaultMessage: 'Read only',
+  }),
+  tooltip: i18n.translate('advancedSettings.badge.readOnly.tooltip', {
+    defaultMessage: 'Unable to save advanced settings',
+  }),
+  iconType: 'glasses',
+};
+
 export async function registerAdvSettingsMgmntApp({
   management,
   getStartServices,
@@ -37,10 +52,6 @@ export async function registerAdvSettingsMgmntApp({
   componentRegistry: ComponentRegistry['start'];
 }) {
   const kibanaSection = management.sections.getSection('kibana');
-  const title = i18n.translate('advancedSettings.advancedSettingsLabel', {
-    defaultMessage: 'Advanced Settings',
-  });
-
   if (!kibanaSection) {
     throw new Error('`kibana` management section not found.');
   }
@@ -50,7 +61,7 @@ export async function registerAdvSettingsMgmntApp({
     title,
     order: 20,
     async mount(params) {
-      params.setBreadcrumbs([{ text: title }]);
+      params.setBreadcrumbs(crumb);
       const [
         { uiSettings, notifications, docLinks, application, chrome },
       ] = await getStartServices();
@@ -58,15 +69,7 @@ export async function registerAdvSettingsMgmntApp({
       const canSave = application.capabilities.advancedSettings.save as boolean;
 
       if (!canSave) {
-        chrome.setBadge({
-          text: i18n.translate('advancedSettings.badge.readOnly.text', {
-            defaultMessage: 'Read only',
-          }),
-          tooltip: i18n.translate('advancedSettings.badge.readOnly.tooltip', {
-            defaultMessage: 'Unable to save advanced settings',
-          }),
-          iconType: 'glasses',
-        });
+        chrome.setBadge(readOnlyBadge);
       }
 
       ReactDOM.render(

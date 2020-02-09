@@ -28,7 +28,6 @@ import {
   Query,
 } from '@elastic/eui';
 
-// import { withRouter, RouteComponentProps, useParams } from 'react-router-dom';
 import { useParams } from 'react-router-dom';
 import { CallOuts } from './components/call_outs';
 import { Search } from './components/search';
@@ -73,7 +72,6 @@ export class AdvancedSettingsComponent extends Component<
 
   constructor(props: AdvancedSettingsComponentProps) {
     super(props);
-    // const queryText = this.props.match.params.query || '';
     const { queryText } = this.props;
     // const parsedQuery = Query.parse(queryText ? `ariaName:"${getAriaName(queryText)}"` : '');
     const parsedQuery = Query.parse(queryText);
