@@ -59,10 +59,10 @@ export async function registerAdvSettingsMgmntApp({
 
       if (!canSave) {
         chrome.setBadge({
-          text: i18n.translate('kbn.management.advancedSettings.badge.readOnly.text', {
+          text: i18n.translate('advancedSettings.badge.readOnly.text', {
             defaultMessage: 'Read only',
           }),
-          tooltip: i18n.translate('kbn.management.advancedSettings.badge.readOnly.tooltip', {
+          tooltip: i18n.translate('advancedSettings.badge.readOnly.tooltip', {
             defaultMessage: 'Unable to save advanced settings',
           }),
           iconType: 'glasses',

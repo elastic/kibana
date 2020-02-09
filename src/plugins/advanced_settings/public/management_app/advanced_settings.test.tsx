@@ -221,7 +221,11 @@ function mockConfig() {
     plugins: {
       advancedSettings: {
         componentRegistry: {
-          get: () => <div>Hello</div>,
+          get: () => {
+            const foo: React.ComponentType = () => <div>Hello</div>;
+            foo.displayName = 'foo_component';
+            return foo;
+          },
           componentType: {
             PAGE_TITLE_COMPONENT: 'page_title_component',
             PAGE_SUBTITLE_COMPONENT: 'page_subtitle_component',
