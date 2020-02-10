@@ -42,32 +42,115 @@ export const ProcessEventDot = styled(
        */
       const [left, top] = applyMatrix3(position, projectionMatrix);
 
+      const [magFactorX] = projectionMatrix;
       const style = {
-        left: (left - 20).toString() + 'px',
-        top: (top - 20).toString() + 'px',
+        left: `${left}px`,
+        top: `${top}px`,
+        transform: `translateY(-50%) translateX(-50%) scale(${magFactorX})`,
       };
+
+      const maskHref = `${event.data_buffer.node_id}_mask`;
+
       return (
-        <span className={className} style={style}>
-          name: {event.data_buffer.process_name}
-          <br />
-          x: {position[0]}
-          <br />
-          y: {position[1]}
-        </span>
+        <svg
+          className={className}
+          style={style}
+          viewBox="-15 -5 30 10"
+          preserveAspectRatio="xMidYMid slice"
+        >
+          <use xlinkHref={`#node_icon_curve`} x="-15.5" y="-5" width="31" height="10" opacity="1" />
+          <text
+            x="0"
+            y="0"
+            textAnchor="middle"
+            dominantBaseline="middle"
+            fontSize="3"
+            fill="white"
+            stroke="#777"
+            strokeWidth=".35"
+            paintOrder="stroke"
+          >
+            {event.data_buffer.process_name}
+          </text>
+
+          {magFactorX >= 1.75 ? (
+            <>
+              <mask id={maskHref}>
+                <rect fill="#fff" x="-15" y="-5" width="30" height="10" />
+                <rect fill="#000" x="-15" y="-5" width="30" height="10" opacity="1">
+                  <animate
+                    attributeName="x"
+                    from="-15"
+                    to="15"
+                    begin="DOMNodeInsertedIntoDocument"
+                    dur="1.5s"
+                    fill="freeze"
+                    repeatCount="1"
+                  />
+                </rect>
+              </mask>
+              <text
+                x="0"
+                y="-2.1"
+                textAnchor="middle"
+                dominantBaseline="middle"
+                fontSize="1.25"
+                fill="#fff"
+                stroke="#999"
+                strokeWidth=".25"
+                paintOrder="stroke"
+                mask={`url(#${maskHref})`}
+              >
+                Process
+              </text>
+            </>
+          ) : null}
+          {magFactorX >= 2.75 && event.data_buffer.signature_status !== 'trusted' ? (
+            <>
+              <mask id={`${maskHref}_trusted`}>
+                <rect fill="#fff" x="-15" y="-5" width="30" height="10" />
+                <rect fill="#000" x="-15" y="-5" width="30" height="10" opacity="1">
+                  <animate
+                    attributeName="x"
+                    from="-15"
+                    to="15"
+                    begin="DOMNodeInsertedIntoDocument"
+                    dur="1.5s"
+                    fill="freeze"
+                    repeatCount="1"
+                  />
+                </rect>
+              </mask>
+              <text
+                x="0"
+                y="2.45"
+                textAnchor="middle"
+                dominantBaseline="middle"
+                fontSize="1.25"
+                fill="yellow"
+                stroke="#777"
+                strokeWidth=".25"
+                paintOrder="stroke"
+                mask={`url(#${`${maskHref}_trusted`})`}
+              >
+                No Trusted Signature
+              </text>
+            </>
+          ) : (
+            <></>
+          )}
+        </svg>
       );
     }
   )
 )`
   position: absolute;
-  width: 40px;
+  display: block;
+  width: 120px;
   height: 40px;
   text-align: left;
   font-size: 10px;
-  /**
-   * Give the element a button-like appearance.
-   */
   user-select: none;
-  border: 1px solid black;
   box-sizing: border-box;
   border-radius: 10%;
   padding: 4px;
