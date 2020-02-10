@@ -662,9 +662,16 @@ export function getActionType(): ActionTypeModel {
   };
 }
 ```
+![Email connector card](https://i.imgur.com/d8kCbjQ.png)
+
+![Email connector form](https://i.imgur.com/Uf6HU7X.png)
+
+and action params form available in Create Alert form:
+![Email action form](https://i.imgur.com/lhkUEHf.png)
 
 ### Slack
 
+Action type model definition:
 ```
 export function getActionType(): ActionTypeModel {
   return {
@@ -694,8 +701,16 @@ export function getActionType(): ActionTypeModel {
 }
 ```
 
+![Slack connector card](https://i.imgur.com/JbvmNOy.png)
+
+![Slack connector form](https://i.imgur.com/IqdnmF9.png)
+
+and action params form available in Create Alert form:
+![Slack action form](https://i.imgur.com/GUEVZWK.png)
+
 ### Index
 
+Action type model definition:
 ```
 export function getActionType(): ActionTypeModel {
   return {
@@ -719,14 +734,50 @@ export function getActionType(): ActionTypeModel {
 }
 ```
 
+![Index connector card](https://i.imgur.com/fflsmu5.png)
+
+![Index connector form](https://i.imgur.com/tbgyvAL.png)
+
+and action params form available in Create Alert form:
+![Index action form](https://i.imgur.com/VsWMLeU.png)
+
 ### Webhook
 
+Action type model definition:
+```
+export function getActionType(): ActionTypeModel {
+  return {
+    id: '.webhook',
+    iconClass: 'logoWebhook',
+    selectMessage: i18n.translate(
+      'xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.selectMessageText',
+      {
+        defaultMessage: 'Send a request to a web service.',
+      }
+    ),
+    validateConnector: (action: WebhookActionConnector): ValidationResult => {
+      // validation of connector properties implementation
+    },
+    validateParams: (actionParams: WebhookActionParams): ValidationResult => {
+      // validation of action params implementation
+    },
+    actionConnectorFields: WebhookActionConnectorFields,
+    actionParamsFields: WebhookParamsFields,
+  };
+}
 ```
 
-```
+![Webhook connector card](https://i.imgur.com/IBgn75T.png)
+
+![Webhook connector form](https://i.imgur.com/xqORAJ7.png)
+
+and action params form available in Create Alert form:
+![Webhook action form](https://i.imgur.com/mBGfeuC.png)
+
 
 ### PagerDuty
 
+Action type model definition:
 ```
 export function getActionType(): ActionTypeModel {
   return {
@@ -756,5 +807,193 @@ export function getActionType(): ActionTypeModel {
 }
 ```
 
+![PagerDuty connector card](https://i.imgur.com/Br8MuKG.png)
+
+![PagerDuty connector form](https://i.imgur.com/DZpCfRv.png)
+
+and action params form available in Create Alert form:
+![PagerDuty action form](https://i.imgur.com/xxXmhMK.png)
+
+
 ## Create and register new action type UI
 
+Action type UI is expected to be defined as `ActionTypeModel` object.
+
+Below is a list of steps that should be done to build and register a new action type with the name `Example Action Type`:
+
+1. At any suitable place in Kibana create a file, which will expose an object implementing interface [ActionTypeModel]:
+```
+import React, { Fragment } from 'react';
+import { i18n } from '@kbn/i18n';
+import {
+  ActionTypeModel,
+  ValidationResult,
+  ActionConnectorFieldsProps,
+  ActionParamsProps,
+} from '../../../types';
+
+interface ExampleActionParams {
+  message: string;
+}
+
+export function getActionType(): ActionTypeModel {
+  return {
+    id: '.example-action',
+    iconClass: 'logoGmail',
+    selectMessage: i18n.translate(
+      'xpack.triggersActionsUI.components.builtinActionTypes.exampleAction.selectMessageText',
+      {
+        defaultMessage: 'Example Action is used to show how to create new action type UI.',
+      }
+    ),
+    actionTypeTitle: i18n.translate(
+      'xpack.triggersActionsUI.components.builtinActionTypes.exampleAction.actionTypeTitle',
+      {
+        defaultMessage: 'Example Action',
+      }
+    ),
+    validateConnector: (action: ExampleActionConnector): ValidationResult => {
+      const validationResult = { errors: {} };
+      const errors = {
+        someConnectorField: new Array<string>(),
+      };
+      validationResult.errors = errors;
+      if (!action.config.someConnectorField) {
+        errors.someConnectorField.push(
+          i18n.translate(
+            'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredSomeConnectorFieldeText',
+            {
+              defaultMessage: 'SomeConnectorField is required.',
+            }
+          )
+        );
+      }
+      return validationResult;
+    },
+    validateParams: (actionParams: ExampleActionParams): ValidationResult => {
+      const validationResult = { errors: {} };
+      const errors = {
+        message: new Array<string>(),
+      };
+      validationResult.errors = errors;
+      if (!actionParams.message?.length) {
+        errors.message.push(
+          i18n.translate(
+            'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredExampleMessageText',
+            {
+              defaultMessage: 'Message is required.',
+            }
+          )
+        );
+      }
+      return validationResult;
+    },
+    actionConnectorFields: ExampleConnectorFields,
+    actionParamsFields: ExampleParamsFields,
+  };
+}
+```
+
+2. Define `actionConnectorFields` as `React.FunctionComponent` - this is the form for action connector.
+```
+import React, { Fragment } from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiFieldText } from '@elastic/eui';
+import { EuiTextArea } from '@elastic/eui';
+import {
+  ActionTypeModel,
+  ValidationResult,
+  ActionConnectorFieldsProps,
+  ActionParamsProps,
+} from '../../../types';
+
+interface ExampleActionConnector {
+  config: {
+    someConnectorField: string;
+  };
+}
+
+const ExampleConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps<
+  ExampleActionConnector
+>> = ({ action, editActionConfig, errors }) => {
+  const { someConnectorField } = action.config;
+  return (
+    <Fragment>
+      <EuiFieldText
+        fullWidth
+        isInvalid={errors.someConnectorField.length > 0 && someConnectorField !== undefined}
+        name="someConnectorField"
+        value={someConnectorField || ''}
+        onChange={e => {
+          editActionConfig('someConnectorField', e.target.value);
+        }}
+        onBlur={() => {
+          if (!someConnectorField) {
+            editActionConfig('someConnectorField', '');
+          }
+        }}
+      />
+    </Fragment>
+  );
+};
+```
+
+3. Define action type params fields using the property of `AlertTypeModel` `actionParamsFields`: 
+```
+import React, { Fragment } from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiFieldText } from '@elastic/eui';
+import { EuiTextArea } from '@elastic/eui';
+import {
+  ActionTypeModel,
+  ValidationResult,
+  ActionConnectorFieldsProps,
+  ActionParamsProps,
+} from '../../../types';
+
+interface ExampleActionParams {
+  message: string;
+}
+
+const ExampleParamsFields: React.FunctionComponent<ActionParamsProps<ExampleActionParams>> = ({
+  actionParams,
+  editAction,
+  index,
+  errors,
+}) => {
+  const { message } = actionParams;
+  return (
+    <Fragment>
+      <EuiTextArea
+        fullWidth
+        isInvalid={errors.message.length > 0 && message !== undefined}
+        name="message"
+        value={message || ''}
+        onChange={e => {
+          editAction('message', e.target.value, index);
+        }}
+        onBlur={() => {
+          if (!message) {
+            editAction('message', '', index);
+          }
+        }}
+      />
+    </Fragment>
+  );
+};
+```
+
+4. Extend registration code with the new action type register in the file `x-pack/plugins/triggers_actions_ui/public/application/components/builtin_action_types/index.ts`
+```
+import { getActionType as getExampledActionType } from './example';
+...
+
+...
+actionTypeRegistry.register(getExampledActionType());
+```
+
+After this four steps new `Example Action Type` is available in UI of Create connector and Create Alert flyout:
+![Example Action Type is in the select cards list](https://i.imgur.com/PTYdBos.png)
+
+Click on select cart for `Example Action Type` will open connector form that was created in step 2:
+![Example Action Type connector](https://i.imgur.com/KdxAXAs.png)
