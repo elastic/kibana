@@ -19,7 +19,6 @@
 
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { PersistedState } from 'ui/persisted_state';
 import {
   ExpressionFunctionDefinition,
   KibanaContext,
@@ -28,6 +27,7 @@ import {
 
 // @ts-ignore
 import { metricsRequestHandler } from './request_handler';
+import { PersistedState } from './legacy_imports';
 
 type Input = KibanaContext | null;
 type Output = Promise<Render<RenderValue>>;
