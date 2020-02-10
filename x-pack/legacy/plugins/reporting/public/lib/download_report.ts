@@ -12,5 +12,12 @@ const { core } = npStart;
 export function getReportURL(jobId: string) {
   const apiBaseUrl = core.http.basePath.prepend(API_BASE_URL);
   const downloadLink = `${apiBaseUrl}/jobs/download/${jobId}`;
-  window.open(downloadLink);
+
+  return downloadLink;
+}
+
+export function downloadReport(jobId: string) {
+  const location = getReportURL(jobId);
+
+  window.open(location);
 }
