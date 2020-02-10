@@ -18,6 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { KibanaDatatable } from 'src/plugins/expressions/public';
 import { toMountPoint } from '../../../../../plugins/kibana_react/public';
 import {
   Action,
@@ -41,9 +42,18 @@ import {
 
 export const VALUE_CLICK_ACTION = 'VALUE_CLICK_ACTION';
 
+interface EventData {
+  row: number;
+  column: number;
+  value: unknown;
+  table: KibanaDatatable;
+}
+
 interface ActionContext {
-  data: any;
-  timeFieldName: string;
+  data: {
+    data: EventData | EventData[];
+  };
+  timeFieldName?: string;
 }
 
 async function isCompatible(context: ActionContext) {
@@ -68,12 +78,12 @@ export function valueClickAction(
       });
     },
     isCompatible,
-    execute: async ({ timeFieldName, data }: ActionContext) => {
-      if (!(await isCompatible({ timeFieldName, data }))) {
+    execute: async (context: ActionContext) => {
+      if (!(await isCompatible(context))) {
         throw new IncompatibleActionError();
       }
 
-      const filters: esFilters.Filter[] = (await createFiltersFromEvent(data)) || [];
+      const filters: esFilters.Filter[] = (await createFiltersFromEvent(context.data)) || [];
 
       let selectedFilters: esFilters.Filter[] = mapAndFlattenFilters(filters);
 
@@ -109,9 +119,9 @@ export function valueClickAction(
         selectedFilters = await filterSelectionPromise;
       }
 
-      if (timeFieldName) {
+      if (context.timeFieldName) {
         const { timeRangeFilter, restOfFilters } = extractTimeFilter(
-          timeFieldName,
+          context.timeFieldName,
           selectedFilters
         );
         filterManager.addFilters(restOfFilters);

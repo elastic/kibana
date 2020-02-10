@@ -26,7 +26,13 @@ import {
 import { EuiIcon, EuiText, IconType, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { npStart } from 'ui/new_platform';
 import { EUI_CHARTS_THEME_DARK, EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist/eui_charts_theme';
+import {
+  Embeddable,
+  APPLY_FILTER_TRIGGER,
+} from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
+import { createAction } from '../../../../../../src/plugins/ui_actions/public';
 import { FormatFactory } from '../../../../../../src/legacy/ui/public/visualize/loader/pipeline_helpers/utilities';
 import { LensMultiTable } from '../types';
 import { XYArgs, SeriesType, visualizationTypes } from './types';
@@ -110,7 +116,7 @@ export const getXyChartRenderer = (dependencies: {
     handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
     ReactDOM.render(
       <I18nProvider>
-        <XYChartReportable {...config} {...dependencies} />
+        <XYChartReportable {...config} {...dependencies} handlers={handlers} />
       </I18nProvider>,
       domNode,
       () => handlers.done()
@@ -124,7 +130,9 @@ function getIconForSeriesType(seriesType: SeriesType): IconType {
 
 const MemoizedChart = React.memo(XYChart);
 
-export function XYChartReportable(props: XYChartRenderProps) {
+export function XYChartReportable(
+  props: XYChartRenderProps & { handlers: IInterpreterRenderHandlers }
+) {
   const [state, setState] = useState({
     isReady: false,
   });
@@ -142,7 +150,15 @@ export function XYChartReportable(props: XYChartRenderProps) {
   );
 }
 
-export function XYChart({ data, args, formatFactory, timeZone }: XYChartRenderProps) {
+export function XYChart({
+  data,
+  args,
+  formatFactory,
+  timeZone,
+  handlers,
+}: XYChartRenderProps & {
+  handlers: IInterpreterRenderHandlers;
+}) {
   const { legend, layers } = args;
 
   if (Object.values(data.tables).every(table => table.rows.length === 0)) {
@@ -200,6 +216,41 @@ export function XYChart({ data, args, formatFactory, timeZone }: XYChartRenderPr
               }
             : undefined
         }
+        onElementClick={([[geometry, series]]) => {
+          const layer = layers.find(l =>
+            series.seriesKeys.some(key => l.accessors.includes(key as string))
+          )!;
+          const table = data.tables[layer.layerId];
+
+          const points = [
+            {
+              row: table.rows.findIndex(row => row[layer.xAccessor] === geometry.x),
+              column: table.columns.findIndex(col => col.id === layer.xAccessor),
+              value: geometry.x,
+            },
+          ];
+
+          if (series.seriesKeys.length > 1) {
+            const pointValue = series.seriesKeys[0];
+
+            points.push({
+              row: table.rows.findIndex(row => row[layer.splitAccessor] === pointValue),
+              column: table.columns.findIndex(col => col.id === layer.splitAccessor),
+              value: pointValue,
+            });
+          }
+
+          npStart.plugins.uiActions.executeTriggerActions('VALUE_CLICK_TRIGGER', {
+            data: {
+              data: points.map(point => ({
+                row: point.row,
+                column: point.column,
+                value: point.value,
+                table,
+              })),
+            },
+          });
+        }}
       />
 
       <Axis
@@ -244,28 +295,27 @@ export function XYChart({ data, args, formatFactory, timeZone }: XYChartRenderPr
           }
 
           const columnToLabelMap = columnToLabel ? JSON.parse(columnToLabel) : {};
-          const splitAccessorLabel = columnToLabelMap[splitAccessor];
-          const yAccessors = accessors.map(accessor => columnToLabelMap[accessor] || accessor);
-          const idForLegend = splitAccessorLabel || yAccessors;
-          const sanitized = sanitizeRows({
-            splitAccessor,
-            formatFactory,
-            columnToLabelMap,
-            table: data.tables[layerId],
-          });
+          const idForLegend = accessors;
+          const table = data.tables[layerId];
 
           const seriesProps = {
             key: index,
-            splitSeriesAccessors: sanitized.splitAccessor ? [sanitized.splitAccessor] : [],
+            splitSeriesAccessors: splitAccessor ? [splitAccessor] : [],
             stackAccessors: seriesType.includes('stacked') ? [xAccessor] : [],
             id: idForLegend,
             xAccessor,
-            yAccessors,
-            data: sanitized.rows,
+            yAccessors: accessors,
+            data: table.rows,
             xScaleType,
             yScaleType,
             enableHistogramMode: isHistogram && (seriesType.includes('stacked') || !splitAccessor),
             timeZone,
+            customSeriesLabel: d => {
+              if (accessors.length > 1) {
+                return d.seriesKeys.map(key => columnToLabelMap[key] || key).join(' - ');
+              }
+              return columnToLabelMap[d.seriesKeys[0]] || null;
+            },
           };
 
           return seriesType === 'line' ? (
