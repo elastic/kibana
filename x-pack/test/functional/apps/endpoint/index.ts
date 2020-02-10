@@ -10,6 +10,7 @@ export default function({ loadTestFile }: FtrProviderContext) {
     this.tags('ciGroup7');
 
     loadTestFile(require.resolve('./feature_controls'));
+    loadTestFile(require.resolve('./landing_page'));
     loadTestFile(require.resolve('./policy_list'));
   });
 }
