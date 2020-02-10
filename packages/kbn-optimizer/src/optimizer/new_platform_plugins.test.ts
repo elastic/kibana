@@ -25,7 +25,7 @@ import { findNewPlatformPlugins } from './new_platform_plugins';
 
 expect.addSnapshotSerializer(createAbsolutePathSerializer());
 
-const FIXTURES_PATH = Path.resolve(__dirname, './__fixtures__');
+const FIXTURES_PATH = Path.resolve(__dirname, '../__fixtures__');
 
 it('parses kibana.json files of plugins found in pluginDirs', () => {
   expect(
