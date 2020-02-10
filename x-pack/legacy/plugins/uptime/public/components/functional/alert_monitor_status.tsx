@@ -5,9 +5,8 @@
  */
 
 import React, { useState } from 'react';
-import { EuiExpression } from '@elastic/eui';
+import { EuiExpression, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { KueryBar } from '../connected';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 
 interface AlertMonitorStatusProps {
   autocomplete: any;
@@ -21,18 +20,45 @@ interface AlertMonitorStatusProps {
   };
 }
 
+// WHEN ANY PING MATCHING [kql]
+// IS [status] MORE THAN [numtimes] times
+// WITHIN [timerange]
+// IN [location option]
+
 export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = (props: any) => {
-  console.log('from presentational component', props);
+  const [numTimes, setNumTimes] = useState<number>(5);
   return (
     <>
       <KueryBar autocomplete={props.autocomplete} />
-      <EuiExpression
-        description="Description"
-        isActive={false}
-        value="WHEN"
-        onClick={() => console.log('hi world')}
-        color="secondary"
-      />
+      <EuiFlexGroup direction="column">
+        <EuiFlexItem grow={false}>
+          <EuiExpression
+            description="alert when any ping is down more than"
+            isActive={false}
+            value={`${numTimes} times`}
+            onClick={() => console.log('hi world')}
+            color="secondary"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiExpression
+            description="WITHIN"
+            isActive={false}
+            value="last 15 minutes"
+            onClick={() => console.log('hi world')}
+            color="secondary"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiExpression
+            description="in"
+            isActive={false}
+            value="fairbanks, us-east-2"
+            onClick={() => console.log('hi')}
+            color="secondary"
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </>
   );
 };
