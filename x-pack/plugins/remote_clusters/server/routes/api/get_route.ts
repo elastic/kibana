@@ -14,7 +14,7 @@ import { isEsError } from '../../lib/is_es_error';
 import { RouteDependencies } from '../../types';
 
 export const register = (deps: RouteDependencies): void => {
-  const allHandler: RequestHandler<any, any, any> = async (ctx, request, response) => {
+  const allHandler: RequestHandler<unknown, unknown, unknown> = async (ctx, request, response) => {
     try {
       const callAsCurrentUser = await ctx.core.elasticsearch.dataClient.callAsCurrentUser;
       const clusterSettings = await callAsCurrentUser('cluster.getSettings');

@@ -14,7 +14,7 @@ import { RouteDependencies } from '../../types';
 
 export const licensePreRoutingFactory = (
   { getLicenseStatus }: RouteDependencies,
-  handler: RequestHandler
+  handler: RequestHandler<any, any, any>
 ) => {
   return function licenseCheck(
     ctx: RequestHandlerContext,

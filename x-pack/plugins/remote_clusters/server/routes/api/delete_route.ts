@@ -5,7 +5,7 @@
  */
 
 import { get } from 'lodash';
-import { schema } from '@kbn/config-schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { RequestHandler } from 'src/core/server';
 
@@ -16,8 +16,18 @@ import { doesClusterExist } from '../../lib/does_cluster_exist';
 import { licensePreRoutingFactory } from '../../lib/license_pre_routing_factory';
 import { isEsError } from '../../lib/is_es_error';
 
+const paramsValidation = schema.object({
+  nameOrNames: schema.string(),
+});
+
+type RouteParams = TypeOf<typeof paramsValidation>;
+
 export const register = (deps: RouteDependencies): void => {
-  const deleteHandler: RequestHandler<any, any, any> = async (ctx, request, response) => {
+  const deleteHandler: RequestHandler<RouteParams, unknown, unknown> = async (
+    ctx,
+    request,
+    response
+  ) => {
     try {
       const callAsCurrentUser = ctx.core.elasticsearch.dataClient.callAsCurrentUser;
 
@@ -57,6 +67,7 @@ export const register = (deps: RouteDependencies): void => {
           const acknowledged = get(updateClusterResponse, 'acknowledged');
           const cluster = get(updateClusterResponse, `persistent.cluster.remote.${name}`);
 
+          // Deletion was successful
           if (acknowledged && !cluster) {
             return null;
           }
@@ -119,9 +130,7 @@ export const register = (deps: RouteDependencies): void => {
     {
       path: `${API_BASE_PATH}/{nameOrNames}`,
       validate: {
-        params: schema.object({
-          nameOrNames: schema.string(),
-        }),
+        params: paramsValidation,
       },
     },
     licensePreRoutingFactory(deps, deleteHandler)

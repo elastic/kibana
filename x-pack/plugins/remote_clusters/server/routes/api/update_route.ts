@@ -5,7 +5,7 @@
  */
 
 import { get } from 'lodash';
-import { schema } from '@kbn/config-schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { RequestHandler } from 'src/core/server';
 
@@ -16,8 +16,25 @@ import { RouteDependencies } from '../../types';
 import { licensePreRoutingFactory } from '../../lib/license_pre_routing_factory';
 import { isEsError } from '../../lib/is_es_error';
 
+const bodyValidation = schema.object({
+  seeds: schema.arrayOf(schema.string()),
+  skipUnavailable: schema.boolean(),
+});
+
+const paramsValidation = schema.object({
+  name: schema.string(),
+});
+
+type RouteParams = TypeOf<typeof paramsValidation>;
+
+type RouteBody = TypeOf<typeof bodyValidation>;
+
 export const register = (deps: RouteDependencies): void => {
-  const updateHandler: RequestHandler<any, any, any> = async (ctx, request, response) => {
+  const updateHandler: RequestHandler<RouteParams, unknown, RouteBody> = async (
+    ctx,
+    request,
+    response
+  ) => {
     try {
       const callAsCurrentUser = ctx.core.elasticsearch.dataClient.callAsCurrentUser;
 
@@ -82,13 +99,8 @@ export const register = (deps: RouteDependencies): void => {
     {
       path: `${API_BASE_PATH}/{name}`,
       validate: {
-        params: schema.object({
-          name: schema.string(),
-        }),
-        body: schema.object({
-          seeds: schema.arrayOf(schema.string()),
-          skipUnavailable: schema.boolean(),
-        }),
+        params: paramsValidation,
+        body: bodyValidation,
       },
     },
     licensePreRoutingFactory(deps, updateHandler)
