@@ -73,7 +73,7 @@ describe('RedirectToNodeLogs component', () => {
 
     expect(component).toMatchInlineSnapshot(`
       <Redirect
-        to="/logs?sourceId=default&logPosition=(position:(tiebreaker:0,time:1550671089404))&logFilter=(expression:'HOST_FIELD:%20HOST_NAME',kind:kuery)"
+        to="/logs?sourceId=default&logPosition=(position:(tiebreaker:0,time:1550671089404),streamLive:!f)&logFilter=(expression:'HOST_FIELD:%20HOST_NAME',kind:kuery)"
       />
     `);
   });
@@ -89,7 +89,7 @@ describe('RedirectToNodeLogs component', () => {
 
     expect(component).toMatchInlineSnapshot(`
       <Redirect
-        to="/logs?sourceId=default&logPosition=(position:(tiebreaker:0,time:1550671089404))&logFilter=(expression:'(HOST_FIELD:%20HOST_NAME)%20and%20(FILTER_FIELD:FILTER_VALUE)',kind:kuery)"
+        to="/logs?sourceId=default&logPosition=(position:(tiebreaker:0,time:1550671089404),streamLive:!f)&logFilter=(expression:'(HOST_FIELD:%20HOST_NAME)%20and%20(FILTER_FIELD:FILTER_VALUE)',kind:kuery)"
       />
     `);
   });

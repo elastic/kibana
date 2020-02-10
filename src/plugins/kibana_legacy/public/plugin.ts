@@ -17,9 +17,16 @@
  * under the License.
  */
 
-import { App, AppBase, PluginInitializerContext, AppUpdatableFields } from 'kibana/public';
+import {
+  App,
+  AppBase,
+  PluginInitializerContext,
+  AppUpdatableFields,
+  CoreStart,
+} from 'kibana/public';
 import { Observable } from 'rxjs';
 import { ConfigSchema } from '../config';
+import { getDashboardConfig } from './dashboard_config';
 
 interface ForwardDefinition {
   legacyAppId: string;
@@ -104,7 +111,7 @@ export class KibanaLegacyPlugin {
     };
   }
 
-  public start() {
+  public start({ application }: CoreStart) {
     return {
       /**
        * @deprecated
@@ -117,6 +124,7 @@ export class KibanaLegacyPlugin {
        */
       getForwards: () => this.forwards,
       config: this.initializerContext.config.get(),
+      dashboardConfig: getDashboardConfig(!application.capabilities.dashboard.showWriteControls),
     };
   }
 }
