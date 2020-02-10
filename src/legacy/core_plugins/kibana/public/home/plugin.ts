@@ -25,8 +25,9 @@ import { KibanaLegacySetup } from '../../../../../plugins/kibana_legacy/public';
 import { UsageCollectionSetup } from '../../../../../plugins/usage_collection/public';
 import {
   Environment,
-  FeatureCatalogueEntry,
   HomePublicPluginStart,
+  HomePublicPluginSetup,
+  FeatureCatalogueEntry,
 } from '../../../../../plugins/home/public';
 
 export interface LegacyAngularInjectedDependencies {
@@ -54,27 +55,29 @@ export interface HomePluginSetupDependencies {
       devMode: boolean;
       uiSettings: { defaults: UiSettingsState; user?: UiSettingsState | undefined };
     };
-    getFeatureCatalogueEntries: () => Promise<readonly FeatureCatalogueEntry[]>;
     getAngularDependencies: () => Promise<LegacyAngularInjectedDependencies>;
   };
   usageCollection: UsageCollectionSetup;
-  kibana_legacy: KibanaLegacySetup;
+  kibanaLegacy: KibanaLegacySetup;
+  home: HomePublicPluginSetup;
 }
 
 export class HomePlugin implements Plugin {
   private dataStart: DataPublicPluginStart | null = null;
   private savedObjectsClient: any = null;
   private environment: Environment | null = null;
+  private directories: readonly FeatureCatalogueEntry[] | null = null;
 
   setup(
     core: CoreSetup,
     {
-      kibana_legacy,
+      home,
+      kibanaLegacy,
       usageCollection,
       __LEGACY: { getAngularDependencies, ...legacyServices },
     }: HomePluginSetupDependencies
   ) {
-    kibana_legacy.registerLegacyApp({
+    kibanaLegacy.registerLegacyApp({
       id: 'home',
       title: 'Home',
       mount: async ({ core: contextCore }, params) => {
@@ -95,6 +98,9 @@ export class HomePlugin implements Plugin {
           getBasePath: core.http.basePath.get,
           indexPatternService: this.dataStart!.indexPatterns,
           environment: this.environment!,
+          config: kibanaLegacy.config,
+          homeConfig: home.config,
+          directories: this.directories!,
           ...angularDependencies,
         });
         const { renderApp } = await import('./np_ready/application');
@@ -105,6 +111,7 @@ export class HomePlugin implements Plugin {
 
   start(core: CoreStart, { data, home }: HomePluginStartDependencies) {
     this.environment = home.environment.get();
+    this.directories = home.featureCatalogue.get();
     this.dataStart = data;
     this.savedObjectsClient = core.savedObjects.client;
   }

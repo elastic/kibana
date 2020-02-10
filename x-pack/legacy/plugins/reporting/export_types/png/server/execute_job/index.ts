@@ -5,6 +5,7 @@
  */
 
 import * as Rx from 'rxjs';
+import { ElasticsearchServiceSetup } from 'kibana/server';
 import { catchError, map, mergeMap, takeUntil } from 'rxjs/operators';
 import { PNG_JOB_TYPE } from '../../../../common/constants';
 import {
@@ -27,6 +28,7 @@ type QueuedPngExecutorFactory = ExecuteJobFactory<ESQueueWorkerExecuteFn<JobDocP
 
 export const executeJobFactory: QueuedPngExecutorFactory = function executeJobFactoryFn(
   server: ServerFacade,
+  elasticsearch: ElasticsearchServiceSetup,
   parentLogger: Logger,
   { browserDriverFactory }: { browserDriverFactory: HeadlessChromiumDriverFactory }
 ) {

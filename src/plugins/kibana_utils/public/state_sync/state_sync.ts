@@ -23,7 +23,7 @@ import defaultComparator from 'fast-deep-equal';
 import { IStateSyncConfig } from './types';
 import { IStateStorage } from './state_sync_state_storage';
 import { distinctUntilChangedWithInitialValue } from '../../common';
-import { BaseState } from '../state_containers';
+import { BaseState } from '../../common/state_containers';
 import { applyDiff } from '../state_management/utils/diff_object';
 
 /**

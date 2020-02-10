@@ -35,7 +35,6 @@ import { InjectedIntl, injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import { debounce, compact, isEqual } from 'lodash';
 import { Toast } from 'src/core/public';
 import {
-  autocomplete,
   IDataPluginServices,
   IIndexPattern,
   PersistedLog,
@@ -46,6 +45,8 @@ import {
   getQueryLog,
   Query,
 } from '../..';
+import { QuerySuggestion, QuerySuggestionTypes } from '../../autocomplete';
+
 import { withKibana, KibanaReactContextValue, toMountPoint } from '../../../../kibana_react/public';
 import { fetchIndexPatterns } from './fetch_index_patterns';
 import { QueryLanguageSwitcher } from './language_switcher';
@@ -70,7 +71,7 @@ interface Props {
 interface State {
   isSuggestionsVisible: boolean;
   index: number | null;
-  suggestions: autocomplete.QuerySuggestion[];
+  suggestions: QuerySuggestion[];
   suggestionLimit: number;
   selectionStart: number | null;
   selectionEnd: number | null;
@@ -88,8 +89,6 @@ const KEY_CODES = {
   HOME: 36,
   END: 35,
 };
-
-const recentSearchType: autocomplete.QuerySuggestionType = 'recentSearch';
 
 export class QueryStringInputUI extends Component<Props, State> {
   public state: State = {
@@ -193,7 +192,7 @@ export class QueryStringInputUI extends Component<Props, State> {
       const text = toUser(recentSearch);
       const start = 0;
       const end = query.length;
-      return { type: recentSearchType, text, start, end };
+      return { type: QuerySuggestionTypes.RecentSearch, text, start, end };
     });
   };
 
@@ -319,7 +318,7 @@ export class QueryStringInputUI extends Component<Props, State> {
     }
   };
 
-  private selectSuggestion = (suggestion: autocomplete.QuerySuggestion) => {
+  private selectSuggestion = (suggestion: QuerySuggestion) => {
     if (!this.inputRef) {
       return;
     }
@@ -343,13 +342,13 @@ export class QueryStringInputUI extends Component<Props, State> {
       selectionEnd: start + (cursorIndex ? cursorIndex : text.length),
     });
 
-    if (type === recentSearchType) {
+    if (type === QuerySuggestionTypes.RecentSearch) {
       this.setState({ isSuggestionsVisible: false, index: null });
       this.onSubmit({ query: newQueryString, language: this.props.query.language });
     }
   };
 
-  private handleNestedFieldSyntaxNotification = (suggestion: autocomplete.QuerySuggestion) => {
+  private handleNestedFieldSyntaxNotification = (suggestion: QuerySuggestion) => {
     if (
       'field' in suggestion &&
       suggestion.field.subType &&
@@ -451,7 +450,7 @@ export class QueryStringInputUI extends Component<Props, State> {
     }
   };
 
-  private onClickSuggestion = (suggestion: autocomplete.QuerySuggestion) => {
+  private onClickSuggestion = (suggestion: QuerySuggestion) => {
     if (!this.inputRef) {
       return;
     }

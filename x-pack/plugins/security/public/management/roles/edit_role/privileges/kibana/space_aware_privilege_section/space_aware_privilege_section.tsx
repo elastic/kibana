@@ -15,7 +15,7 @@ import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import _ from 'lodash';
 import React, { Component, Fragment } from 'react';
 import { Capabilities } from 'src/core/public';
-import { Space } from '../../../../../../../../spaces/common/model/space';
+import { Space } from '../../../../../../../../spaces/public';
 import { Feature } from '../../../../../../../../features/public';
 import { KibanaPrivileges, Role, isReservedRole } from '../../../../../../../common/model';
 import { KibanaPrivilegeCalculatorFactory } from '../kibana_privilege_calculator';
@@ -95,13 +95,13 @@ class SpaceAwarePrivilegeSectionUI extends Component<Props, State> {
             <FormattedMessage
               id="xpack.security.management.editRole.spaceAwarePrivilegeForm.ensureAccountHasAllPrivilegesGrantedDescription"
               defaultMessage="Please ensure your account has all privileges granted by the
-              {kibanaUser} role, and try again."
+              {kibanaAdmin} role, and try again."
               values={{
-                kibanaUser: (
+                kibanaAdmin: (
                   <strong>
                     <FormattedMessage
-                      id="xpack.security.management.editRole.spaceAwarePrivilegeForm.kibanaUserTitle"
-                      defaultMessage="kibana_user"
+                      id="xpack.security.management.editRole.spaceAwarePrivilegeForm.kibanaAdminTitle"
+                      defaultMessage="kibana_admin"
                     />
                   </strong>
                 ),

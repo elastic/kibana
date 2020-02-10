@@ -8,6 +8,7 @@ export { createAlertRoute } from './create';
 export { deleteAlertRoute } from './delete';
 export { findAlertRoute } from './find';
 export { getAlertRoute } from './get';
+export { getAlertStateRoute } from './get_alert_state';
 export { listAlertTypesRoute } from './list_alert_types';
 export { updateAlertRoute } from './update';
 export { enableAlertRoute } from './enable';

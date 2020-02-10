@@ -17,5 +17,13 @@
  * under the License.
  */
 
-export { AutocompleteService } from './autocomplete_service';
-export { QuerySuggestion, QuerySuggestionType, QuerySuggestionsGetFn } from './types';
+export {
+  QuerySuggestion,
+  QuerySuggestionTypes,
+  QuerySuggestionGetFn,
+  QuerySuggestionGetFnArgs,
+  QuerySuggestionBasic,
+  QuerySuggestionField,
+} from './providers/query_suggestion_provider';
+
+export { AutocompleteService, AutocompleteSetup, AutocompleteStart } from './autocomplete_service';

@@ -44,7 +44,6 @@ export function plugin(initializerContext: PluginInitializerContext) {
 
 /** @public static code */
 export { Vis, VisParams, VisState } from './vis';
-export * from './filters';
 export { TypesService } from './types/types_service';
 
 export { Status } from './legacy/update_status';
@@ -53,6 +52,4 @@ export { buildPipeline, buildVislibDimensions, SchemaConfig } from './legacy/bui
 // @ts-ignore
 export { updateOldState } from './legacy/vis_update_state';
 export { calculateObjectHash } from './legacy/calculate_object_hash';
-// @ts-ignore
-export { createFiltersFromEvent } from './filters/vis_filters';
 export { createSavedVisLoader } from '../../saved_visualizations/saved_visualizations';

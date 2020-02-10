@@ -7,7 +7,7 @@
     "winlogbeat-*"
   ],
   "language": "kuery",
-  "max_signals": 33,
+  "max_signals": 100,
   "name": "Process Activity via Compiled HTML File",
   "query": "event.code:1 and process.name:hh.exe",
   "risk_score": 21,
