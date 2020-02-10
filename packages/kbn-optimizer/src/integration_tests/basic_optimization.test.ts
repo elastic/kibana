@@ -90,6 +90,9 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
     runningStates.length === 2 || runningStates.length === 3
   );
 
+  const bundleNotCachedEvents = msgs.filter(msg => msg.event?.type === 'bundle not cached');
+  assert('produce two "bundle not cached" events', bundleNotCachedEvents.length === 2);
+
   const successStates = msgs.filter(msg => msg.state.phase === 'success');
   assert(
     'produce one or two "compiler success" states',
@@ -100,7 +103,8 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
     msg =>
       msg.state.phase !== 'success' &&
       msg.state.phase !== 'running' &&
-      msg.state.phase !== 'initialized'
+      msg.state.phase !== 'initialized' &&
+      msg.event?.type !== 'bundle not cached'
   );
   assert('produce zero unexpected states', otherStates.length === 0, otherStates);
 

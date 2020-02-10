@@ -68,9 +68,12 @@ export function logOptimizerState(log: ToolingLog, config: OptimizerConfig) {
         if (state.phase === 'initialized') {
           if (!loggedInit) {
             loggedInit = true;
-            log.info(`intialized, ${state.offlineBundles.length} bundles cached`);
+            log.info(`initialized, ${state.offlineBundles.length} bundles cached`);
           }
 
+          if (state.onlineBundles.length === 0) {
+            log.success(`all bundles cached, success after ${state.durSec}`);
+          }
           return;
         }
 
@@ -87,7 +90,7 @@ export function logOptimizerState(log: ToolingLog, config: OptimizerConfig) {
           );
         }
 
-        if (state.phase === 'running') {
+        if (state.phase === 'running' || state.phase === 'initializing') {
           return true;
         }
 

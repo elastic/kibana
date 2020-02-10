@@ -46,7 +46,7 @@ export interface OptimizerMsg {
 }
 
 export interface OptimizerState {
-  phase: 'initialized' | 'reallocating' | 'success' | 'running' | 'issue';
+  phase: 'initializing' | 'initialized' | 'reallocating' | 'success' | 'running' | 'issue';
   startTime: number;
   durSec: number;
   compilerStates: CompilerMsg[];
@@ -121,15 +121,9 @@ export function summarizeOptimizerEvent$(
         const { state } = prevMsg;
 
         if (event.type === 'optimizer initialized') {
-          if (state.onlineBundles.length === 0) {
-            // all bundles are cached so we transition to success
-            return createOptimizerMsg(state, event, {
-              phase: 'success',
-            });
-          }
-
-          // no state change necessary
-          return prevMsg;
+          return createOptimizerMsg(state, event, {
+            phase: 'initialized',
+          });
         }
 
         if (event.type === 'worker error' || event.type === 'compiler error') {
@@ -173,7 +167,7 @@ export function summarizeOptimizerEvent$(
           }
 
           return createOptimizerMsg(state, event, {
-            phase: 'running',
+            phase: state.phase === 'initializing' ? 'initializing' : 'running',
             onlineBundles,
             offlineBundles,
           });
@@ -201,7 +195,7 @@ export function summarizeOptimizerEvent$(
         durSec: 0,
         offlineBundles: [],
         onlineBundles: [],
-        phase: 'success',
+        phase: 'initializing',
         startTime: initialStartTime,
       })
     ),
