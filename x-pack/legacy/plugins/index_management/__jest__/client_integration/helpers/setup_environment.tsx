@@ -3,14 +3,19 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import React from 'react';
 import axios from 'axios';
 import axiosXhrAdapter from 'axios/lib/adapters/xhr';
 import { init as initHttpRequests } from './http_requests';
+import { AppContextProvider } from '../../../public/application/app_context';
 import { httpService } from '../../../public/application/services/http';
 import { breadcrumbService } from '../../../public/application/services/breadcrumbs';
 import { documentationService } from '../../../public/application/services/documentation';
 import { notificationService } from '../../../public/application/services/notification';
+import { ExtensionsService } from '../../../public/services';
+import { UiMetricService } from '../../../public/application/services/ui_metric';
+import { setUiMetricService } from '../../../public/application/services/api';
+import { setExtensionsService } from '../../../public/application/store/selectors';
 
 /* eslint-disable @kbn/eslint/no-restricted-paths */
 import { notificationServiceMock } from '../../../../../../../src/core/public/notifications/notifications_service.mock';
@@ -18,6 +23,15 @@ import { chromeServiceMock } from '../../../../../../../src/core/public/chrome/c
 import { docLinksServiceMock } from '../../../../../../../src/core/public/doc_links/doc_links_service.mock';
 
 const mockHttpClient = axios.create({ adapter: axiosXhrAdapter });
+
+export const services = {
+  extensions: new ExtensionsService(),
+  uiMetric: new UiMetricService('index_management'),
+};
+services.uiMetric.setup({ reportUiStats() {} } as any);
+setExtensionsService(services.extensions);
+setUiMetricService(services.uiMetric);
+const appDependencies = { services };
 
 export const setupEnvironment = () => {
   // Mock initialization of services
@@ -34,3 +48,9 @@ export const setupEnvironment = () => {
     httpRequestsMockHelpers,
   };
 };
+
+export const WithAppDependencies = (Comp: any) => (props: any[]) => (
+  <AppContextProvider value={appDependencies}>
+    <Comp {...props} />
+  </AppContextProvider>
+);

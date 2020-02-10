@@ -17,9 +17,10 @@ import { IndexManagementHome } from '../../../public/application/sections/home';
 import { BASE_PATH } from '../../../common/constants';
 import { indexManagementStore } from '../../../public/application/store';
 import { Template } from '../../../common/types';
+import { WithAppDependencies, services } from './setup_environment';
 
 const testBedConfig: TestBedConfig = {
-  store: indexManagementStore,
+  store: () => indexManagementStore(services),
   memoryRouter: {
     initialEntries: [`${BASE_PATH}indices`],
     componentRoutePath: `${BASE_PATH}:section(indices|templates)`,
@@ -27,7 +28,7 @@ const testBedConfig: TestBedConfig = {
   doMountAsync: true,
 };
 
-const initTestBed = registerTestBed(IndexManagementHome, testBedConfig);
+const initTestBed = registerTestBed(WithAppDependencies(IndexManagementHome), testBedConfig);
 
 export interface IdxMgmtHomeTestBed extends TestBed<IdxMgmtTestSubjects> {
   findAction: (action: 'edit' | 'clone' | 'delete') => ReactWrapper;

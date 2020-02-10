@@ -116,7 +116,7 @@ describe('index table', () => {
     };
     services.uiMetric.setup({ reportUiStats() {} });
     setExtensionsService(services.extensions);
-    setUiMetricService(services.uiMetrics);
+    setUiMetricService(services.uiMetric);
 
     // @ts-ignore
     httpService.setup(mockHttpClient);
