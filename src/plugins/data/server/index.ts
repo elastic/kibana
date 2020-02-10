@@ -64,7 +64,7 @@ export {
  */
 export {
   IndexPatternsFetcher,
-  FieldDescriptor,
+  FieldDescriptor as IndexPatternFieldDescriptor,
   shouldReadFieldFromDocValues,
   indexPatterns,
 } from './index_patterns';

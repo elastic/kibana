@@ -45,7 +45,14 @@ export {
 } from '../common';
 export { autocomplete } from './autocomplete';
 export * from './field_formats';
-export * from './index_patterns';
+export {
+  indexPatterns,
+  IndexPatternsContract,
+  IndexPattern,
+  IndexPatternField,
+  TypeMeta as IndexPatternTypeMeta,
+  AggregationRestrictions as IndexPatternAggRestrictions,
+} from './index_patterns';
 export * from './search';
 export * from './query';
 export * from './ui';

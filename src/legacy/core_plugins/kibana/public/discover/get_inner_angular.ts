@@ -40,7 +40,7 @@ import { StateManagementConfigProvider } from 'ui/state_management/config_provid
 import { KbnUrlProvider, RedirectWhenMissingProvider } from 'ui/url';
 // @ts-ignore
 import { createTopNavDirective, createTopNavHelper } from 'ui/kbn_top_nav/kbn_top_nav';
-import { IndexPatterns, DataPublicPluginStart } from '../../../../../plugins/data/public';
+import { DataPublicPluginStart } from '../../../../../plugins/data/public';
 import { Storage } from '../../../../../plugins/kibana_utils/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../../plugins/navigation/public';
 import { createDocTableDirective } from './np_ready/angular/doc_table/doc_table';
@@ -124,7 +124,6 @@ export function initializeInnerAngularModule(
     createLocalAppStateModule();
     createLocalStorageModule();
     createElasticSearchModule(data);
-    createIndexPatternsModule();
     createPagerFactoryModule();
     createDocTableModule();
     initialized = true;
@@ -163,7 +162,6 @@ export function initializeInnerAngularModule(
       'discoverGlobalState',
       'discoverAppState',
       'discoverLocalStorageProvider',
-      'discoverIndexPatterns',
       'discoverEs',
       'discoverDocTable',
       'discoverPagerFactory',
@@ -296,10 +294,6 @@ function createElasticSearchModule(data: DataPublicPluginStart) {
     .service('es', () => {
       return data.search.__LEGACY.esClient;
     });
-}
-
-function createIndexPatternsModule() {
-  angular.module('discoverIndexPatterns', []).value('indexPatterns', IndexPatterns);
 }
 
 function createPagerFactoryModule() {
