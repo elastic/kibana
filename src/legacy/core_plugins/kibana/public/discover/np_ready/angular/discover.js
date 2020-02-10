@@ -25,6 +25,7 @@ import moment from 'moment';
 import dateMath from '@elastic/datemath';
 import { i18n } from '@kbn/i18n';
 import '../components/field_chooser/field_chooser';
+import { getAppState as getAppStateNew } from './discover_state';
 
 import { RequestAdapter } from '../../../../../../../plugins/inspector/public';
 import {
@@ -53,7 +54,6 @@ import {
   intervalOptions,
   migrateLegacyQuery,
   unhashUrl,
-  stateMonitorFactory,
   subscribeWithScope,
   tabifyAggResponse,
   getAngularModule,
@@ -119,7 +119,7 @@ app.config($routeProvider => {
     template: indexTemplate,
     reloadOnSearch: false,
     resolve: {
-      savedObjects: function(redirectWhenMissing, $route, kbnUrl, Promise, $rootScope, State) {
+      savedObjects: function(redirectWhenMissing, $route, kbnUrl, Promise, $rootScope) {
         const indexPatterns = getServices().indexPatterns;
         const savedSearchId = $route.current.params.id;
         return ensureDefaultIndexPattern(core, getServices().data, $rootScope, kbnUrl).then(() => {
@@ -134,18 +134,16 @@ app.config($routeProvider => {
                *
                *  @type {State}
                */
-              const state = new State('_a', {});
-              const id = getIndexPatternId(
-                state.index,
-                indexPatternList,
-                uiSettings.get('defaultIndex')
-              );
-              state.destroy();
+              const { initialState, start, stop } = getAppStateNew({});
+              start();
+              const { index } = initialState;
+              const id = getIndexPatternId(index, indexPatternList, uiSettings.get('defaultIndex'));
+              stop();
               return Promise.props({
                 list: indexPatternList,
                 loaded: indexPatterns.get(id),
-                stateVal: state.index,
-                stateValFound: !!state.index && id === state.index,
+                stateVal: index,
+                stateValFound: !!index && id === index,
               });
             }),
             savedSearch: getServices()
@@ -197,7 +195,57 @@ function discoverController(
   getAppState,
   globalState
 ) {
-  const filterStateManager = new FilterStateManager(globalState, getAppState, filterManager);
+  // the actual courier.SearchSource
+  // the saved savedSearch
+  const savedSearch = $route.current.locals.savedObjects.savedSearch;
+  $scope.searchSource = savedSearch.searchSource;
+  $scope.indexPattern = resolveIndexPatternLoading();
+  const { stateContainer, start, stop } = getAppStateNew(getStateDefaults());
+  stateContainer.subscribe(newState => {
+    if (!_.isEqual(newState, $scope.state)) {
+      $scope.state = { ...newState };
+      $scope.$digest();
+    }
+  });
+
+  const $state = { ...stateContainer.getState() };
+  $scope.state = $state;
+  const syncState = partial => {
+    const newState = { ...$state, ...partial };
+    if (!_.isEqual(stateContainer.getState(), newState)) {
+      stateContainer.set(newState);
+    }
+  };
+  $scope.$watch('state.sort', sort => {
+    syncState({ sort });
+  });
+  $scope.$watch('state.index', (index, prevIndex) => {
+    syncState({ index });
+    if (prevIndex == null || prevIndex === index) return;
+    $route.reload();
+  });
+
+  $scope.$watchCollection('state.columns', function(val) {
+    if (!_.isEqual(val, stateContainer.get().columns)) {
+      stateContainer.set({ ...$state, ...{ columns: val } });
+    }
+  });
+  start();
+  const filterStateManager = new FilterStateManager(
+    globalState,
+    () => {
+      return {
+        set filters(_filters) {
+          $scope.state.filters = _filters;
+          stateContainer.set({ ...$state, ...{ filters: _filters } });
+        },
+        get filters() {
+          return $scope.state.filters;
+        },
+      };
+    },
+    filterManager
+  );
 
   const inspectorAdapters = {
     requests: new RequestAdapter(),
@@ -229,15 +277,13 @@ function discoverController(
     return interval.val !== 'custom';
   };
 
-  // the saved savedSearch
-  const savedSearch = $route.current.locals.savedObjects.savedSearch;
-
   let abortController;
   $scope.$on('$destroy', () => {
     if (abortController) abortController.abort();
     savedSearch.destroy();
     subscriptions.unsubscribe();
     filterStateManager.destroy();
+    stop();
   });
 
   const $appStatus = ($scope.appStatus = this.appStatus = {
@@ -384,10 +430,6 @@ function discoverController(
 
   $scope.topNavMenu = getTopNavLinks();
 
-  // the actual courier.SearchSource
-  $scope.searchSource = savedSearch.searchSource;
-  $scope.indexPattern = resolveIndexPatternLoading();
-
   $scope.searchSource
     .setField('index', $scope.indexPattern)
     .setField('highlightAll', true)
@@ -430,9 +472,6 @@ function discoverController(
     ]);
   }
 
-  let stateMonitor;
-
-  const $state = ($scope.state = new AppState(getStateDefaults()));
   const $fetchObservable = new Subject();
 
   $scope.screenTitle = savedSearch.title;
@@ -506,9 +545,6 @@ function discoverController(
       indexPatternId: searchSource.getField('index').id,
     };
   };
-
-  $scope.uiState = $state.makeStateful('uiState');
-
   function getStateDefaults() {
     return {
       query: ($scope.savedQuery && $scope.savedQuery.attributes.query) ||
@@ -549,10 +585,6 @@ function discoverController(
     });
   };
 
-  $scope.$watchCollection('state.columns', function() {
-    $state.save();
-  });
-
   $scope.opts = {
     // number of records to fetch, then paginate through
     sampleSize: config.get('discover:sampleSize'),
@@ -573,11 +605,11 @@ function discoverController(
   };
 
   const init = _.once(function() {
-    stateMonitor = stateMonitorFactory.create($state, getStateDefaults());
-    stateMonitor.onChange(status => {
-      $appStatus.dirty = status.dirty || !savedSearch.id;
-    });
-    $scope.$on('$destroy', () => stateMonitor.destroy());
+    //stateMonitor = stateMonitorFactory.create($state, getStateDefaults());
+    // stateMonitor.onChange(status => {
+    //   $appStatus.dirty = status.dirty || !savedSearch.id;
+    // });
+    // $scope.$on('$destroy', () => stateMonitor.destroy());
 
     $scope.updateDataSource().then(function() {
       const searchBarChanges = merge(
@@ -616,16 +648,16 @@ function discoverController(
         subscribeWithScope($scope, filterManager.getUpdates$(), {
           next: () => {
             $scope.updateDataSource().then(function() {
-              $state.save();
+              //$state.save();
             });
           },
         })
       );
 
       // update data source when hitting forward/back and the query changes
-      $scope.$listen($state, 'fetch_with_changes', function(diff) {
-        if (diff.indexOf('query') >= 0) $fetchObservable.next();
-      });
+      //$scope.$listen($state, 'fetch_with_changes', function(diff) {
+      //  if (diff.indexOf('query') >= 0) $fetchObservable.next();
+      //});
 
       $scope.$watch('opts.timefield', function(timefield) {
         $scope.enableTimeRangeSelector = !!timefield;
@@ -709,7 +741,7 @@ function discoverController(
       }
 
       init.complete = true;
-      $state.replace();
+      //$state.replace();
 
       if (shouldSearchOnPageLoad()) {
         $fetchObservable.next();
@@ -726,7 +758,7 @@ function discoverController(
     try {
       const id = await savedSearch.save(saveOptions);
       $scope.$evalAsync(() => {
-        stateMonitor.setInitialState($state.toJSON());
+        //stateMonitor.setInitialState($state.toJSON());
         if (id) {
           toastNotifications.addSuccess({
             title: i18n.translate('kbn.discover.notifications.savedSearchTitle', {
@@ -778,7 +810,7 @@ function discoverController(
       .updateDataSource()
       .then(setupVisualization)
       .then(function() {
-        $state.save();
+        //$state.save();
         $scope.fetchStatus = fetchStatuses.LOADING;
         logInspectorRequest();
         return $scope.searchSource.fetch({
@@ -807,6 +839,7 @@ function discoverController(
 
   $scope.updateQuery = function({ query }) {
     $state.query = query;
+    syncState({ query });
     $fetchObservable.next();
   };
 
@@ -911,18 +944,27 @@ function discoverController(
     return filterManager.addFilters(newFilters);
   };
 
+  function getColumns(columns) {
+    if (columns.length > 1 && columns.indexOf('_source') !== -1) {
+      return columns.filter(col => col !== '_source');
+    } else if (columns.length !== 0) {
+      return columns;
+    }
+    return ['_source'];
+  }
+
   $scope.addColumn = function addColumn(columnName) {
     $scope.indexPattern.popularizeField(columnName, 1);
-    columnActions.addColumn($scope.state.columns, columnName);
+    $scope.state.columns = getColumns(columnActions.addColumn($scope.state.columns, columnName));
   };
 
   $scope.removeColumn = function removeColumn(columnName) {
-    $scope.indexPattern.popularizeField(columnName, 1);
-    columnActions.removeColumn($scope.state.columns, columnName);
+    // $scope.indexPattern.popularizeField(columnName, 1);
+    $scope.state.columns = getColumns(columnActions.removeColumn($scope.state.columns, columnName));
   };
 
   $scope.moveColumn = function moveColumn(columnName, newIndex) {
-    columnActions.moveColumn($scope.state.columns, columnName, newIndex);
+    $scope.state.columns = columnActions.moveColumn($scope.state.columns, columnName, newIndex);
   };
 
   $scope.scrollToTop = function() {
@@ -946,7 +988,7 @@ function discoverController(
     } else {
       delete $state.savedQuery;
     }
-    $state.save();
+    syncState({ savedQuery: $state.savedQuery });
   };
 
   async function setupVisualization() {

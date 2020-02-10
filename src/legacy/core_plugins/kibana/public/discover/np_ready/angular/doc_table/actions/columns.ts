@@ -19,33 +19,24 @@
 
 export function addColumn(columns: string[], columnName: string) {
   if (columns.includes(columnName)) {
-    return;
+    return columns;
   }
-
-  columns.push(columnName);
+  return [...columns, columnName];
 }
 
 export function removeColumn(columns: string[], columnName: string) {
   if (!columns.includes(columnName)) {
-    return;
+    return columns;
   }
-
-  columns.splice(columns.indexOf(columnName), 1);
+  return columns.filter(col => col !== columnName);
 }
 
 export function moveColumn(columns: string[], columnName: string, newIndex: number) {
-  if (newIndex < 0) {
-    return;
+  if (newIndex < 0 || newIndex >= columns.length || !columns.includes(columnName)) {
+    return columns;
   }
-
-  if (newIndex >= columns.length) {
-    return;
-  }
-
-  if (!columns.includes(columnName)) {
-    return;
-  }
-
-  columns.splice(columns.indexOf(columnName), 1); // remove at old index
-  columns.splice(newIndex, 0, columnName); // insert before new index
+  const modifiedColumns = [...columns];
+  modifiedColumns.splice(modifiedColumns.indexOf(columnName), 1); // remove at old index
+  modifiedColumns.splice(newIndex, 0, columnName); // insert before new index
+  return modifiedColumns;
 }
