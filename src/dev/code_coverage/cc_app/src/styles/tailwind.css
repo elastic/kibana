@@ -13259,6 +13259,10 @@ video {
           transition-duration: 1000ms;
 }
 
+.App-link {
+  color: #b20ab7;
+}
+
 @media (min-width: 640px) {
   .sm\:sr-only {
     position: absolute;

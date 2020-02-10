@@ -3,3 +3,7 @@
 @tailwind components;
 
 @tailwind utilities;
+
+.App-link {
+  color: #b20ab7;
+}
