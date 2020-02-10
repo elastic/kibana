@@ -79,15 +79,20 @@ function getMockData(overwrites: Record<string, any> = {}) {
 }
 
 describe('create()', () => {
-  test('creates an alert', async () => {
-    const alertsClient = new AlertsClient(alertsClientParams);
-    const data = getMockData();
-    alertTypeRegistry.get.mockReturnValueOnce({
+  let alertsClient: AlertsClient;
+
+  beforeEach(() => {
+    alertsClient = new AlertsClient(alertsClientParams);
+    alertTypeRegistry.get.mockReturnValue({
       id: '123',
       name: 'Test',
       actionGroups: ['default'],
       async executor() {},
     });
+  });
+
+  test('creates an alert', async () => {
+    const data = getMockData();
     savedObjectsClient.bulkGet.mockResolvedValueOnce({
       saved_objects: [
         {
@@ -263,7 +268,6 @@ describe('create()', () => {
   });
 
   test('creates an alert with multiple actions', async () => {
-    const alertsClient = new AlertsClient(alertsClientParams);
     const data = getMockData({
       actions: [
         {
@@ -288,12 +292,6 @@ describe('create()', () => {
           },
         },
       ],
-    });
-    alertTypeRegistry.get.mockReturnValueOnce({
-      id: '123',
-      name: 'Test',
-      actionGroups: ['default'],
-      async executor() {},
     });
     savedObjectsClient.bulkGet.mockResolvedValueOnce({
       saved_objects: [
@@ -446,14 +444,7 @@ describe('create()', () => {
   });
 
   test('creates a disabled alert', async () => {
-    const alertsClient = new AlertsClient(alertsClientParams);
     const data = getMockData({ enabled: false });
-    alertTypeRegistry.get.mockReturnValueOnce({
-      id: '123',
-      name: 'Test',
-      actionGroups: ['default'],
-      async executor() {},
-    });
     savedObjectsClient.bulkGet.mockResolvedValueOnce({
       saved_objects: [
         {
@@ -527,9 +518,8 @@ describe('create()', () => {
   });
 
   test('should validate params', async () => {
-    const alertsClient = new AlertsClient(alertsClientParams);
     const data = getMockData();
-    alertTypeRegistry.get.mockReturnValueOnce({
+    alertTypeRegistry.get.mockReturnValue({
       id: '123',
       name: 'Test',
       actionGroups: [],
@@ -547,14 +537,7 @@ describe('create()', () => {
   });
 
   test('throws error if loading actions fails', async () => {
-    const alertsClient = new AlertsClient(alertsClientParams);
     const data = getMockData();
-    alertTypeRegistry.get.mockReturnValueOnce({
-      id: '123',
-      name: 'Test',
-      actionGroups: ['default'],
-      async executor() {},
-    });
     savedObjectsClient.bulkGet.mockRejectedValueOnce(new Error('Test Error'));
     await expect(alertsClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Test Error"`
@@ -564,14 +547,7 @@ describe('create()', () => {
   });
 
   test('throws error if create saved object fails', async () => {
-    const alertsClient = new AlertsClient(alertsClientParams);
     const data = getMockData();
-    alertTypeRegistry.get.mockReturnValueOnce({
-      id: '123',
-      name: 'Test',
-      actionGroups: ['default'],
-      async executor() {},
-    });
     savedObjectsClient.bulkGet.mockResolvedValueOnce({
       saved_objects: [
         {
@@ -592,14 +568,7 @@ describe('create()', () => {
   });
 
   test('attempts to remove saved object if scheduling failed', async () => {
-    const alertsClient = new AlertsClient(alertsClientParams);
     const data = getMockData();
-    alertTypeRegistry.get.mockReturnValueOnce({
-      id: '123',
-      name: 'Test',
-      actionGroups: ['default'],
-      async executor() {},
-    });
     savedObjectsClient.bulkGet.mockResolvedValueOnce({
       saved_objects: [
         {
@@ -655,14 +624,7 @@ describe('create()', () => {
   });
 
   test('returns task manager error if cleanup fails, logs to console', async () => {
-    const alertsClient = new AlertsClient(alertsClientParams);
     const data = getMockData();
-    alertTypeRegistry.get.mockReturnValueOnce({
-      id: '123',
-      name: 'Test',
-      actionGroups: ['default'],
-      async executor() {},
-    });
     savedObjectsClient.bulkGet.mockResolvedValueOnce({
       saved_objects: [
         {
@@ -714,7 +676,6 @@ describe('create()', () => {
   });
 
   test('throws an error if alert type not registerd', async () => {
-    const alertsClient = new AlertsClient(alertsClientParams);
     const data = getMockData();
     alertTypeRegistry.get.mockImplementation(() => {
       throw new Error('Invalid type');
@@ -725,14 +686,7 @@ describe('create()', () => {
   });
 
   test('calls the API key function', async () => {
-    const alertsClient = new AlertsClient(alertsClientParams);
     const data = getMockData();
-    alertTypeRegistry.get.mockReturnValueOnce({
-      id: '123',
-      name: 'Test',
-      actionGroups: ['default'],
-      async executor() {},
-    });
     alertsClientParams.createAPIKey.mockResolvedValueOnce({
       apiKeysEnabled: true,
       result: { id: '123', api_key: 'abc' },
@@ -828,6 +782,117 @@ describe('create()', () => {
         createdAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
         enabled: true,
+        schedule: { interval: '10s' },
+        throttle: null,
+        muteAll: false,
+        mutedInstanceIds: [],
+        tags: ['foo'],
+      },
+      {
+        references: [
+          {
+            id: '1',
+            name: 'action_0',
+            type: 'action',
+          },
+        ],
+      }
+    );
+  });
+
+  test(`doesn't create API key for disabled alerts`, async () => {
+    const data = getMockData({ enabled: false });
+    savedObjectsClient.bulkGet.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          id: '1',
+          type: 'action',
+          attributes: {
+            actionTypeId: 'test',
+          },
+          references: [],
+        },
+      ],
+    });
+    savedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        alertTypeId: '123',
+        schedule: { interval: '10s' },
+        params: {
+          bar: true,
+        },
+        actions: [
+          {
+            group: 'default',
+            actionRef: 'action_0',
+            actionTypeId: 'test',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+      },
+      references: [
+        {
+          name: 'action_0',
+          type: 'action',
+          id: '1',
+        },
+      ],
+    });
+    taskManager.schedule.mockResolvedValueOnce({
+      id: 'task-123',
+      taskType: 'alerting:123',
+      scheduledAt: new Date(),
+      attempts: 1,
+      status: TaskStatus.Idle,
+      runAt: new Date(),
+      startedAt: null,
+      retryAt: null,
+      state: {},
+      params: {},
+      ownerId: null,
+    });
+    savedObjectsClient.update.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        scheduledTaskId: 'task-123',
+      },
+      references: [
+        {
+          id: '1',
+          name: 'action_0',
+          type: 'action',
+        },
+      ],
+    });
+    await alertsClient.create({ data });
+
+    expect(alertsClientParams.createAPIKey).not.toHaveBeenCalled();
+    expect(savedObjectsClient.create).toHaveBeenCalledWith(
+      'alert',
+      {
+        actions: [
+          {
+            actionRef: 'action_0',
+            group: 'default',
+            actionTypeId: 'test',
+            params: { foo: true },
+          },
+        ],
+        alertTypeId: '123',
+        consumer: 'bar',
+        name: 'abc',
+        params: { bar: true },
+        apiKey: null,
+        apiKeyOwner: null,
+        createdBy: 'elastic',
+        createdAt: '2019-02-12T21:01:22.479Z',
+        updatedBy: 'elastic',
+        enabled: false,
         schedule: { interval: '10s' },
         throttle: null,
         muteAll: false,
