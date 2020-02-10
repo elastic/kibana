@@ -41,8 +41,6 @@ export { KbnUrlProvider, RedirectWhenMissingProvider } from 'ui/url/index';
 export { confirmModalFactory } from 'ui/modals/confirm_modal';
 export { IInjector } from 'ui/chrome';
 export { SavedObjectLoader } from 'ui/saved_objects';
-export { VISUALIZE_EMBEDDABLE_TYPE } from '../../../visualizations/public/embeddable';
-export { registerTimefilterWithGlobalStateFactory } from 'ui/timefilter/setup_router';
 export { absoluteToParsedUrl } from 'ui/url/absolute_to_parsed_url';
 export {
   configureAppAngularModule,
