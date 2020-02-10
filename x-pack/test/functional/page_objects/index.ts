@@ -45,7 +45,6 @@ import { LensPageProvider } from './lens_page';
 import { InfraMetricExplorerProvider } from './infra_metric_explorer';
 import { RoleMappingsPageProvider } from './role_mappings_page';
 import { SpaceSelectorPageProvider } from './space_selector_page';
-import { EndpointPageProvider } from './endpoint_page';
 
 // just like services, PageObjects are defined as a map of
 // names to Providers. Merge in Kibana's or pick specific ones
