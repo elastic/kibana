@@ -34,6 +34,7 @@ export const plugin: PluginInitializer<void, void, PluginsSetup, PluginsStart> =
         properties: {
           publicProperty: { type: 'keyword' },
           publicPropertyExcludedFromAAD: { type: 'keyword' },
+          publicPropertyStoredEncrypted: { type: 'binary' },
           privateProperty: { type: 'binary' },
         },
       }),
@@ -41,7 +42,10 @@ export const plugin: PluginInitializer<void, void, PluginsSetup, PluginsStart> =
 
     deps.encryptedSavedObjects.registerType({
       type: SAVED_OBJECT_WITH_SECRET_TYPE,
-      attributesToEncrypt: new Set(['privateProperty']),
+      attributesToEncrypt: new Set([
+        'privateProperty',
+        { key: 'publicPropertyStoredEncrypted', dangerouslyExposeValue: true },
+      ]),
       attributesToExcludeFromAAD: new Set(['publicPropertyExcludedFromAAD']),
     });
 
