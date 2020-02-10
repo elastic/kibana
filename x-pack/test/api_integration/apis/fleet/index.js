@@ -11,7 +11,6 @@ export default function loadTests({ loadTestFile }) {
     loadTestFile(require.resolve('./unenroll_agent'));
     loadTestFile(require.resolve('./agents/enroll'));
     loadTestFile(require.resolve('./agents/checkin'));
-    loadTestFile(require.resolve('./agents/actions'));
     loadTestFile(require.resolve('./agents/events'));
     loadTestFile(require.resolve('./agents/acks'));
     loadTestFile(require.resolve('./enrollment_api_keys/crud'));

@@ -26,6 +26,7 @@ import {
   registerFleetSetupRoutes,
   registerAgentRoutes,
   registerEnrollmentApiKeyRoutes,
+  registerInstallScriptRoutes,
 } from './routes';
 import { IngestManagerConfigType } from './';
 
@@ -107,6 +108,7 @@ export class IngestManagerPlugin implements Plugin {
     registerFleetSetupRoutes(router);
     registerAgentRoutes(router);
     registerEnrollmentApiKeyRoutes(router);
+    registerInstallScriptRoutes(router);
   }
 
   public async start(

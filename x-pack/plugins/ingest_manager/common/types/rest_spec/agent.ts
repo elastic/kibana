@@ -88,3 +88,9 @@ export const UpdateAgentRequestSchema = {
     user_provided_metadata: schema.recordOf(schema.string(), schema.any()),
   }),
 };
+
+export const GetAgentStatusForPolicySchema = {
+  params: schema.object({
+    policyId: schema.string(),
+  }),
+};

@@ -22,7 +22,8 @@ export class RestAgentAdapter extends AgentAdapter {
 
   public async get(id: string): Promise<Agent | null> {
     try {
-      return (await this.REST.get<ReturnTypeGet<Agent>>(`/api/fleet/agents/${id}`)).item;
+      return (await this.REST.get<ReturnTypeGet<Agent>>(`/api/ingest_manager/fleet/agents/${id}`))
+        .item;
     } catch (e) {
       return null;
     }
@@ -38,7 +39,7 @@ export class RestAgentAdapter extends AgentAdapter {
     list: AgentEvent[];
   }> {
     const { total, list } = await this.REST.get<ReturnTypeList<AgentEvent>>(
-      `/api/fleet/agents/${id}/events`,
+      `/api/ingest_manager/fleet/agents/${id}/events`,
       {
         query: {
           page,
@@ -57,7 +58,9 @@ export class RestAgentAdapter extends AgentAdapter {
   public async getWithToken(enrollmentToken: string): Promise<Agent | null> {
     try {
       return (
-        await this.REST.get<ReturnTypeGet<Agent>>(`/api/fleet/agent/unknown/${enrollmentToken}`)
+        await this.REST.get<ReturnTypeGet<Agent>>(
+          `/api/ingest_manager/fleet/agent/unknown/${enrollmentToken}`
+        )
       ).item;
     } catch (e) {
       return null;
@@ -71,7 +74,7 @@ export class RestAgentAdapter extends AgentAdapter {
     showInactive: boolean = false
   ): Promise<ReturnTypeList<Agent>> {
     try {
-      return await this.REST.get<ReturnTypeList<Agent>>('/api/fleet/agents', {
+      return await this.REST.get<ReturnTypeList<Agent>>('/api/ingest_manager/fleet/agents', {
         query: {
           page,
           perPage,
@@ -92,26 +95,36 @@ export class RestAgentAdapter extends AgentAdapter {
 
   public async getOnConfig(tagId: string): Promise<Agent[]> {
     try {
-      return (await this.REST.get<ReturnTypeList<Agent>>(`/api/fleet/agents/tag/${tagId}`)).list;
+      return (
+        await this.REST.get<ReturnTypeList<Agent>>(`/api/ingest_manager/fleet/agents/tag/${tagId}`)
+      ).list;
     } catch (e) {
       return [];
     }
   }
 
   public async update(id: string, beatData: Partial<Agent>): Promise<boolean> {
-    await this.REST.put<ReturnTypeUpdate<Agent>>(`/api/fleet/agents/${id}`, { body: beatData });
+    await this.REST.put<ReturnTypeUpdate<Agent>>(`/api/ingest_manager/fleet/agents/${id}`, {
+      body: beatData,
+    });
     return true;
   }
 
   public async unenrollByIds(ids: string[]): Promise<ReturnTypeBulkUnenroll> {
-    return await this.REST.post<ReturnTypeBulkUnenroll>(`/api/fleet/agents/unenroll`, {
-      body: { ids },
-    });
+    return await this.REST.post<ReturnTypeBulkUnenroll>(
+      `/api/ingest_manager/fleet/agents/unenroll`,
+      {
+        body: { ids },
+      }
+    );
   }
 
   public async unenrollByKuery(kuery: string): Promise<ReturnTypeBulkUnenroll> {
-    return await this.REST.post<ReturnTypeBulkUnenroll>(`/api/fleet/agents/unenroll`, {
-      body: { kuery },
-    });
+    return await this.REST.post<ReturnTypeBulkUnenroll>(
+      `/api/ingest_manager/fleet/agents/unenroll`,
+      {
+        body: { kuery },
+      }
+    );
   }
 }

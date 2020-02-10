@@ -18,27 +18,32 @@ export class EnrollmentApiKeyLib {
   constructor(private readonly rest: RestAPIAdapter) {}
 
   public async listKeys(pagination: Pagination) {
-    return await this.rest.get<ReturnTypeList<EnrollmentApiKey>>('/api/fleet/enrollment-api-keys', {
-      query: {
-        page: pagination.currentPage,
-        perPage: pagination.pageSize,
-      },
-    });
+    return await this.rest.get<ReturnTypeList<EnrollmentApiKey>>(
+      '/api/ingest_manager/fleet/enrollment-api-keys',
+      {
+        query: {
+          page: pagination.currentPage,
+          perPage: pagination.pageSize,
+        },
+      }
+    );
   }
 
   public async get(keyId: string) {
     return await this.rest.get<ReturnTypeGet<EnrollmentApiKey>>(
-      `/api/fleet/enrollment-api-keys/${keyId}`
+      `/api/ingest_manager/fleet/enrollment-api-keys/${keyId}`
     );
   }
 
   public async delete(keyId: string) {
-    return await this.rest.delete<ReturnTypeDelete>(`/api/fleet/enrollment-api-keys/${keyId}`);
+    return await this.rest.delete<ReturnTypeDelete>(
+      `/api/ingest_manager/fleet/enrollment-api-keys/${keyId}`
+    );
   }
 
   public async create(data: { name: string; policyId: string }) {
     return await this.rest.post<ReturnTypeCreate<EnrollmentApiKey>>(
-      `/api/fleet/enrollment-api-keys`,
+      `/api/ingest_manager/fleet/enrollment-api-keys`,
       {
         body: {
           name: data.name,

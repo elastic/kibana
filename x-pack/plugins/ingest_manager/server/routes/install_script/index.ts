@@ -6,12 +6,13 @@
 import { IRouter, RequestHandler } from 'kibana/server';
 import { PLUGIN_ID, INSTALL_SCRIPT_API_ROUTES } from '../../constants';
 import { getScript } from '../../services/install_script';
+import { InstallScriptRequestSchema } from '../../types';
 
 export const registerRoutes = (router: IRouter) => {
   router.get(
     {
       path: INSTALL_SCRIPT_API_ROUTES,
-      validate: false,
+      validate: InstallScriptRequestSchema,
       options: { tags: [`access:${PLUGIN_ID}`] },
     },
     getInstallScriptHandler

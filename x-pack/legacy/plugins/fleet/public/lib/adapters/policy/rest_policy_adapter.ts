@@ -64,6 +64,8 @@ export class RestPolicyAdapter extends PolicyAdapter {
   }
 
   public async getAgentStatus(policyId: string) {
-    return await this.REST.get<ReturnTypeAction>(`/api/fleet/policy/${policyId}/agent-status`);
+    return await this.REST.get<ReturnTypeAction>(
+      `/api/ingest_manager/fleet/policy/${policyId}/agent-status`
+    );
   }
 }

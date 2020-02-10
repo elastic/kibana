@@ -4,7 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FleetServerLib } from '../types';
-import { FrameworkRequest } from '../../adapters/framework/adapter_types';
+import { schema } from '@kbn/config-schema';
 
-export type FleetServerLibRequestFactory = (request: FrameworkRequest) => FleetServerLib;
+export const InstallScriptRequestSchema = {
+  params: schema.object({
+    osType: schema.string(),
+  }),
+};

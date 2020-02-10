@@ -56,7 +56,7 @@ run(
 );
 
 async function checkin(kibanaURL: string, agent: Agent, log: ToolingLog) {
-  const res = await fetch(`${kibanaURL}/api/fleet/agents/${agent.id}/checkin`, {
+  const res = await fetch(`${kibanaURL}/api/ingest_manager/fleet/agents/${agent.id}/checkin`, {
     method: 'POST',
     body: JSON.stringify({
       events: [
@@ -73,6 +73,7 @@ async function checkin(kibanaURL: string, agent: Agent, log: ToolingLog) {
     headers: {
       'kbn-xsrf': 'xxx',
       Authorization: `ApiKey ${agent.access_api_key}`,
+      'Content-Type': 'application/json',
     },
   });
 
@@ -87,7 +88,7 @@ async function checkin(kibanaURL: string, agent: Agent, log: ToolingLog) {
 }
 
 async function enroll(kibanaURL: string, apiKey: string, log: ToolingLog): Promise<Agent> {
-  const res = await fetch(`${kibanaURL}/api/fleet/agents/enroll`, {
+  const res = await fetch(`${kibanaURL}/api/ingest_manager/fleet/agents/enroll`, {
     method: 'POST',
     body: JSON.stringify({
       type: 'PERMANENT',
@@ -107,6 +108,7 @@ async function enroll(kibanaURL: string, apiKey: string, log: ToolingLog): Promi
     headers: {
       'kbn-xsrf': 'xxx',
       Authorization: `ApiKey ${apiKey}`,
+      'Content-Type': 'application/json',
     },
   });
   const json = await res.json();

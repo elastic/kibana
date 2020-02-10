@@ -39,6 +39,7 @@ export {
   PostAgentUnenrollRequestSchema,
   PostAgentEnrollRequestSchema,
   PostAgentAcksRequestSchema,
+  GetAgentStatusForPolicySchema,
   // Agent config schemas
   GetAgentConfigsRequestSchema,
   GetAgentConfigsResponse,
@@ -65,6 +66,8 @@ export {
   PostEnrollmentAPIKeyRequestSchema,
   DeleteEnrollmentAPIKeyRequestSchema,
   GetOneEnrollmentAPIKeyRequestSchema,
+  // Install Script schema
+  InstallScriptRequestSchema,
 } from '../../common';
 
 export type AgentConfigUpdateHandler = (

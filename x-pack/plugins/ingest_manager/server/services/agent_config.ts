@@ -15,29 +15,22 @@ import {
   NewAgentConfig,
   AgentConfig,
   AgentConfigStatus,
-  AgentConfigUpdateHandler,
   ListWithKuery,
   DeleteAgentConfigsResponse,
 } from '../types';
 import { datasourceService } from './datasource';
 import { outputService } from './output';
+import { agentConfigUpdateEventHandler } from './agent_config_update';
 
 const SAVED_OBJECT_TYPE = AGENT_CONFIG_SAVED_OBJECT_TYPE;
 
 class AgentConfigService {
-  private eventsHandler: AgentConfigUpdateHandler[] = [];
-
-  public registerAgentConfigUpdateHandler(handler: AgentConfigUpdateHandler) {
-    this.eventsHandler.push(handler);
-  }
-
-  public triggerAgentConfigUpdatedEvent: AgentConfigUpdateHandler = async (
-    action,
-    agentConfigId
+  private triggerAgentConfigUpdatedEvent = async (
+    soClient: SavedObjectsClientContract,
+    action: string,
+    agentConfigId: string
   ) => {
-    for (const handler of this.eventsHandler) {
-      await handler(action, agentConfigId);
-    }
+    return agentConfigUpdateEventHandler(soClient, action, agentConfigId);
   };
 
   private async _update(
@@ -52,7 +45,7 @@ class AgentConfigService {
       updated_by: user ? user.username : 'system',
     });
 
-    await this.triggerAgentConfigUpdatedEvent('updated', id);
+    await this.triggerAgentConfigUpdatedEvent(soClient, 'updated', id);
 
     return (await this.get(soClient, id)) as AgentConfig;
   }
@@ -94,7 +87,7 @@ class AgentConfigService {
       options
     );
 
-    await this.triggerAgentConfigUpdatedEvent('created', newSo.id);
+    await this.triggerAgentConfigUpdatedEvent(soClient, 'created', newSo.id);
 
     return {
       id: newSo.id,
@@ -240,7 +233,7 @@ class AgentConfigService {
     for (const id of ids) {
       try {
         await soClient.delete(SAVED_OBJECT_TYPE, id);
-        await this.triggerAgentConfigUpdatedEvent('deleted', id);
+        await this.triggerAgentConfigUpdatedEvent(soClient, 'deleted', id);
         result.push({
           id,
           success: true,

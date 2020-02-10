@@ -16,6 +16,7 @@ import {
   PostAgentEnrollRequestSchema,
   PostAgentAcksRequestSchema,
   PostAgentUnenrollRequestSchema,
+  GetAgentStatusForPolicySchema,
 } from '../../types';
 import * as AgentService from '../../services/agents';
 import { appContextService } from '../../services/app_context';
@@ -377,6 +378,24 @@ export const postAgentsUnenrollHandler: RequestHandler<
       results,
       success: results.every(result => result.success),
     };
+    return response.ok({ body });
+  } catch (e) {
+    return response.customError({
+      statusCode: 500,
+      body: { message: e.message },
+    });
+  }
+};
+
+export const getAgentStatusForPolicyHandler: RequestHandler<TypeOf<
+  typeof GetAgentStatusForPolicySchema.params
+>> = async (context, request, response) => {
+  const soClient = context.core.savedObjects.client;
+  try {
+    const result = await AgentService.getAgentsStatusForPolicy(soClient, request.params.policyId);
+
+    const body = { result, success: true };
+
     return response.ok({ body });
   } catch (e) {
     return response.customError({

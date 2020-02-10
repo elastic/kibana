@@ -114,7 +114,7 @@ export const PolicyDeleteProvider: React.FunctionComponent<Props> = ({ children 
     const {
       data: { total },
     } = await sendRequest(libs.httpClient, {
-      path: `/api/fleet/agents`,
+      path: `/api/ingest_manager/fleet/agents`,
       method: 'get',
       query: {
         kuery: `agents.policy_id : (${policiesToCheck.join(' or ')})`,

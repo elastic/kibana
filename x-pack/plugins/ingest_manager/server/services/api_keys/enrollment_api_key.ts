@@ -55,6 +55,29 @@ export async function deleteEnrollmentApiKey(soClient: SavedObjectsClientContrac
   await soClient.delete(ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE, id);
 }
 
+export async function deleteEnrollmentApiKeyForPolicyId(
+  soClient: SavedObjectsClientContract,
+  policyId: string
+) {
+  let hasMore = true;
+  let page = 1;
+  while (hasMore) {
+    const { items } = await listEnrollmentApiKeys(soClient, {
+      page: page++,
+      perPage: 100,
+      kuery: `enrollment_api_keys.policy_id:${policyId}`,
+    });
+
+    if (items.length === 0) {
+      hasMore = false;
+    }
+
+    for (const apiKey of items) {
+      await deleteEnrollmentApiKey(soClient, apiKey.id);
+    }
+  }
+}
+
 export async function generateEnrollmentAPIKey(
   soClient: SavedObjectsClientContract,
   data: {

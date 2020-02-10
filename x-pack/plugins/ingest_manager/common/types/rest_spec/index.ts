@@ -10,3 +10,4 @@ export * from './agent_config';
 export * from './fleet_setup';
 export * from './epm';
 export * from './enrollment_api_key';
+export * from './install_script';
