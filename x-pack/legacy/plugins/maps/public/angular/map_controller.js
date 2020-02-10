@@ -5,7 +5,7 @@
  */
 
 import _ from 'lodash';
-import { Subscription, merge } from 'rxjs';
+import { Subscription } from 'rxjs';
 import chrome from 'ui/chrome';
 import 'ui/directives/listen';
 import 'ui/directives/storage';
@@ -49,8 +49,6 @@ import { indexPatternService, getInspector } from '../kibana_services';
 import { toastNotifications } from 'ui/notify';
 import { getInitialLayers } from './get_initial_layers';
 import { getInitialQuery } from './get_initial_query';
-import { getInitialTimeFilters } from './get_initial_time_filters';
-import { getInitialRefreshConfig } from './get_initial_refresh_config';
 import { MAP_SAVED_OBJECT_TYPE, MAP_APP_PATH } from '../../common/constants';
 import { npStart } from 'ui/new_platform';
 import { esFilters } from '../../../../../../src/plugins/data/public';
@@ -58,8 +56,6 @@ import {
   SavedObjectSaveModal,
   showSaveModal,
 } from '../../../../../../src/plugins/saved_objects/public';
-
-const savedQueryService = npStart.plugins.data.query.savedQueries;
 
 const REACT_ANCHOR_DOM_ELEMENT_ID = 'react-maps-root';
 
@@ -71,6 +67,7 @@ app.controller(
     const subscriptions = new Subscription();
     const { filterManager } = npStart.plugins.data.query;
     const savedMap = $route.current.locals.map;
+    const mapState = savedMap ? JSON.parse(savedMap.mapStateJSON) : null;
     $scope.screenTitle = savedMap.title;
     let unsubscribe;
     let initialLayerListConfig;
@@ -81,60 +78,67 @@ app.controller(
       return _.get($state, 'filters', []);
     }
 
-    subscriptions.add(timefilter.getRefreshIntervalUpdate$().subscribe({
-      next: () => {
-        onRefreshChange({
-          isPaused: timefilter.getRefreshInterval().pause,
-          refreshInterval: timefilter.getRefreshInterval().value
-        });
-      },
-    }));
-    subscriptions.add(filterManager.getUpdates$().subscribe({
-      next: () => {
-        onQueryChange({});
-      },
-    }));
+    subscriptions.add(
+      timefilter.getRefreshIntervalUpdate$().subscribe({
+        next: () => {
+          store.dispatch(
+            setRefreshConfig({
+              isPaused: timefilter.getRefreshInterval().pause,
+              refreshInterval: timefilter.getRefreshInterval().value,
+            })
+          );
+        },
+      })
+    );
+    subscriptions.add(
+      filterManager.getUpdates$().subscribe({
+        next: () => {
+          onQueryChange();
+        },
+      })
+    );
 
     $scope.$listen($state, 'fetch_with_changes', function(diff) {
-      if ((diff.includes('query') || diff.includes('filters')) && $state.query) {
-        onQueryChange({
-          filters: [...globalState.filters, ...getAppStateFilters()],
-          query: $state.query,
-        });
+      if (diff.includes('filters')) {
+        filterManager.setFilters([...globalState.filters, ...getAppStateFilters()]);
+      }
+      if (diff.includes('query') && $state.query) {
+        onQueryChange();
       }
     });
 
     function syncAppAndGlobalState() {
       $scope.$evalAsync(() => {
         // appState
-        $state.query = $scope.query;
         $state.filters = filterManager.getAppFilters();
         $state.save();
 
         // globalState
-        globalState.time = $scope.time;
-        globalState.refreshInterval = {
-          pause: $scope.refreshConfig.isPaused,
-          value: $scope.refreshConfig.interval,
-        };
+        // globalState time and refreshInterval are manageded by timefilter
         globalState.filters = filterManager.getGlobalFilters();
         globalState.save();
       });
     }
 
-    $scope.query = getInitialQuery({
+    $state.query = getInitialQuery({
       mapStateJSON: savedMap.mapStateJSON,
       appState: $state,
       userQueryLanguage: localStorage.get('kibana.userQueryLanguage'),
     });
-    $scope.time = getInitialTimeFilters({
-      mapStateJSON: savedMap.mapStateJSON,
-      globalState: globalState,
-    });
-    $scope.refreshConfig = getInitialRefreshConfig({
-      mapStateJSON: savedMap.mapStateJSON,
-      globalState: globalState,
-    });
+    if (mapState) {
+      if (mapState.timeFilters) {
+        timefilter.setTime(mapState.timeFilters);
+      }
+      if (mapState.refreshConfig) {
+        timefilter.setRefreshInterval({
+          pause: mapState.refreshConfig.isPaused,
+          value: mapState.refreshConfig.interval,
+        });
+      }
+      if (mapState.filters) {
+        addFilters(mapState.filters);
+      }
+    }
 
     /* Saved Queries */
     $scope.showSaveQuery = capabilities.get().maps.saveQuery;
@@ -155,37 +159,26 @@ app.controller(
       $state.save();
     };
     /* End of Saved Queries */
-    async function onQueryChange({ filters, query, time, refresh }) {
+    function onQueryChange(forceRefresh) {
       syncAppAndGlobalState();
-      dispatchSetQuery(refresh);
+      dispatchSetQuery(forceRefresh);
     }
 
-    function dispatchSetQuery(refresh) {
+    function dispatchSetQuery(forceRefresh) {
       store.dispatch(
         setQuery({
           filters: filterManager.getFilters(),
-          query: $scope.query,
-          timeFilters: $scope.time,
-          refresh,
+          query: $state.query,
+          timeFilters: timefilter.getTime(),
+          refresh: forceRefresh,
         })
       );
     }
 
     $scope.indexPatterns = [];
     $scope.onQuerySubmit = function({ query }) {
-      $scope.query = query;
-      onQueryChange({
-        refresh: true,
-      });
-    };
-    const onRefreshChange = function({ isPaused, refreshInterval }) {
-      $scope.refreshConfig = {
-        isPaused,
-        interval: refreshInterval ? refreshInterval : $scope.refreshConfig.interval,
-      };
-      syncAppAndGlobalState();
-
-      store.dispatch(setRefreshConfig($scope.refreshConfig));
+      $state.query = query;
+      onQueryChange(true);
     };
 
     function addFilters(newFilters) {
@@ -234,10 +227,7 @@ app.controller(
         handleStoreChanges(store);
       });
 
-      // sync store with savedMap mapState
-      let savedObjectFilters = [];
-      if (savedMap.mapStateJSON) {
-        const mapState = JSON.parse(savedMap.mapStateJSON);
+      if (mapState) {
         store.dispatch(
           setGotoWithCenter({
             lat: mapState.center.lat,
@@ -245,9 +235,6 @@ app.controller(
             zoom: mapState.zoom,
           })
         );
-        if (mapState.filters) {
-          savedObjectFilters = mapState.filters;
-        }
       }
 
       if (savedMap.uiStateJSON) {
@@ -261,14 +248,6 @@ app.controller(
       const layerList = getInitialLayers(savedMap.layerListJSON);
       initialLayerListConfig = copyPersistentState(layerList);
       store.dispatch(replaceLayerList(layerList));
-      store.dispatch(setRefreshConfig($scope.refreshConfig));
-
-      const initialFilters = [
-        ..._.get(globalState, 'filters', []),
-        ...getAppStateFilters(),
-        ...savedObjectFilters,
-      ];
-      await onQueryChange({ filters: initialFilters });
 
       const root = document.getElementById(REACT_ANCHOR_DOM_ELEMENT_ID);
       render(

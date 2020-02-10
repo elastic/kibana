@@ -405,6 +405,7 @@ export class ESSearchSource extends AbstractESSource {
   }
 
   async getGeoJsonWithMeta(layerName, searchFilters, registerCancelCallback) {
+    console.log('fetch getGeoJsonWithMeta');
     const indexPattern = await this.getIndexPattern();
 
     const indexSettings = await loadIndexSettings(indexPattern.title);
