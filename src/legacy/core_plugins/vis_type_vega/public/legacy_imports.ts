@@ -17,7 +17,9 @@
  * under the License.
  */
 
-import chrome from 'ui/chrome';
-
-export const getEsShardTimeout = () => chrome.getInjected('esShardTimeout');
-export const getEnableExternalUrls = () => chrome.getInjected('enableExternalUrls');
+// @ts-ignore
+export { defaultFeedbackMessage } from 'ui/vis/default_feedback_message';
+// @ts-ignore
+export { KibanaMapLayer } from 'ui/vis/map/kibana_map_layer';
+// @ts-ignore
+export { KibanaMap } from 'ui/vis/map/kibana_map';
