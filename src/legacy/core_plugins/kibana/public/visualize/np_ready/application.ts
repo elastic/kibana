@@ -18,7 +18,6 @@
  */
 
 import angular, { IModule } from 'angular';
-import { EuiConfirmModal } from '@elastic/eui';
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
 
 import { AppMountContext, LegacyCoreStart } from 'kibana/public';
@@ -26,7 +25,6 @@ import {
   AppStateProvider,
   AppState,
   configureAppAngularModule,
-  confirmModalFactory,
   createTopNavDirective,
   createTopNavHelper,
   EventsProvider,
@@ -93,7 +91,6 @@ function createLocalAngularModule(core: AppMountContext['core'], navigation: Nav
   createLocalStateModule();
   createLocalPersistedStateModule();
   createLocalTopNavModule(navigation);
-  createLocalConfirmModalModule();
 
   const visualizeAngularModule: IModule = angular.module(moduleName, [
     ...thirdPartyAngularDependencies,
@@ -103,16 +100,8 @@ function createLocalAngularModule(core: AppMountContext['core'], navigation: Nav
     'app/visualize/PersistedState',
     'app/visualize/TopNav',
     'app/visualize/State',
-    'app/visualize/ConfirmModal',
   ]);
   return visualizeAngularModule;
-}
-
-function createLocalConfirmModalModule() {
-  angular
-    .module('app/visualize/ConfirmModal', ['react'])
-    .factory('confirmModal', confirmModalFactory)
-    .directive('confirmModal', reactDirective => reactDirective(EuiConfirmModal));
 }
 
 function createLocalStateModule() {
