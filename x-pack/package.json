@@ -140,7 +140,6 @@
     "jest": "^24.9.0",
     "jest-cli": "^24.9.0",
     "jest-styled-components": "^7.0.0",
-    "js-yaml": "^3.13.1",
     "jsdom": "^15.2.1",
     "madge": "3.4.4",
     "marge": "^1.0.1",
