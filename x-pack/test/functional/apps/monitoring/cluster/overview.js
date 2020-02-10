@@ -11,6 +11,13 @@ export default function({ getService, getPageObjects }) {
   const overview = getService('monitoringClusterOverview');
 
   describe('Cluster overview', () => {
+    describe('DNE', () => {
+      // this.tags('DNE');
+      it('passes', () => {
+        expect(true).to.be(true);
+      });
+    });
+
     describe('for Green cluster with Gold license', () => {
       const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
 

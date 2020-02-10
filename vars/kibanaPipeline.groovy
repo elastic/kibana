@@ -17,7 +17,8 @@ def withWorkers(machineName, preWorkerClosure = {}, inParallel = {}, workerClosu
                 return {
                   // This delay helps smooth out CPU load caused by ES/Kibana instances starting up at the same time
                   def delay = (workerNumber-1)*7 // TODO
-                  sleep(delay)
+                  Thread.sleep(delay*1000)
+                  // sleep(delay)
 
                   workerClosure(workerNumber)
                 }
@@ -361,9 +362,8 @@ def processOssQueue(queue, finishedSuites, workerNumber) {
           throw ex
         }
       }
+      finishedSuites << testSuite
     }
-
-    finishedSuites << testSuite
   }
 }
 
@@ -413,8 +413,8 @@ def processXpackQueue(queue, finishedSuites, workerNumber) {
           throw ex
         }
       }
+      finishedSuites << testSuite
     }
-    finishedSuites << testSuite
   }
 }
 
@@ -426,7 +426,7 @@ def getFunctionalQueueWorker(queue, finishedSuites, workerNumber) {
 
     // timeout
     while(!queue.containsKey('xpack')) {
-      sleep 60
+      sleep Thread.sleep(60000) // Move this to kibana-pipeline-library
     }
 
     dir('../kibana-xpack') {
