@@ -11,14 +11,11 @@ experimental[]
 The Controls widget enables you to add interactive inputs
 on a dashboard.
 
-[[add-input-controls]]
 You can create two types of controls:
 
 * Range slider - Filters data within a specified range of numbers. The minimum and maximum values are dynamically populated with the results of a min and max aggregation.
 
 * Options list - Filters content based on one or more specified options. The dropdown menu is dynamically populated with the results of a terms aggregation.
-
-[[global-options]]
 
 [role="screenshot"]
 image::images/dashboard-controls.png[]
@@ -27,7 +24,7 @@ image::images/dashboard-controls.png[]
 [[markdown-widget]]
 === Markdown
 
-The Markdown widget is a text entry field that accepts GitHub-flavored Markdown text. When you enter text, the widget displays the results on the dashboard.
+The Markdown control is a text entry field that accepts GitHub-flavored Markdown text. When you enter your text, the control populates the results on the dashboard.
 
 For example, when you enter:
 
@@ -42,4 +39,4 @@ The following is displayed:
 [role="screenshot"]
 image::images/markdown-example.png[]
 
-For information about GitHub-flavored Markdown, click *Help*.
+For information about GitHub-flavored Markdown text, click *Help*.
