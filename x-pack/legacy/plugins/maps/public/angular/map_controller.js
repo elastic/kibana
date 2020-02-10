@@ -64,7 +64,6 @@ const app = uiModules.get(MAP_APP_PATH, []);
 app.controller(
   'GisMapController',
   ($scope, $route, kbnUrl, localStorage, AppState, globalState) => {
-    const subscriptions = new Subscription();
     const { filterManager } = npStart.plugins.data.query;
     const savedMap = $route.current.locals.map;
     const mapState = savedMap ? JSON.parse(savedMap.mapStateJSON) : null;
@@ -74,10 +73,30 @@ app.controller(
     const $state = ($scope.state = new AppState());
     const store = createMapStore();
 
-    function getAppStateFilters() {
-      return _.get($state, 'filters', []);
-    }
+    const onQueryChange = _.debounce((forceRefresh = false) => {
+      console.log('onQueryChange');
+      $scope.$evalAsync(() => {
+        // appState
+        $state.filters = filterManager.getAppFilters();
+        $state.save();
 
+        // globalState
+        // globalState time and refreshInterval are manageded by timefilter
+        globalState.filters = filterManager.getGlobalFilters();
+        globalState.save();
+      });
+
+      store.dispatch(
+        setQuery({
+          filters: filterManager.getFilters(),
+          query: $state.query,
+          timeFilters: timefilter.getTime(),
+          refresh: forceRefresh,
+        })
+      );
+    }, 200);
+
+    const subscriptions = new Subscription();
     subscriptions.add(
       timefilter.getRefreshIntervalUpdate$().subscribe({
         next: () => {
@@ -100,25 +119,12 @@ app.controller(
 
     $scope.$listen($state, 'fetch_with_changes', function(diff) {
       if (diff.includes('filters')) {
-        filterManager.setFilters([...globalState.filters, ...getAppStateFilters()]);
+        filterManager.setFilters([...globalState.filters, ..._.get($state, 'filters', [])]);
       }
-      if (diff.includes('query') && $state.query) {
+      if (diff.includes('query')) {
         onQueryChange();
       }
     });
-
-    function syncAppAndGlobalState() {
-      $scope.$evalAsync(() => {
-        // appState
-        $state.filters = filterManager.getAppFilters();
-        $state.save();
-
-        // globalState
-        // globalState time and refreshInterval are manageded by timefilter
-        globalState.filters = filterManager.getGlobalFilters();
-        globalState.save();
-      });
-    }
 
     $state.query = getInitialQuery({
       mapStateJSON: savedMap.mapStateJSON,
@@ -159,21 +165,6 @@ app.controller(
       $state.save();
     };
     /* End of Saved Queries */
-    function onQueryChange(forceRefresh) {
-      syncAppAndGlobalState();
-      dispatchSetQuery(forceRefresh);
-    }
-
-    function dispatchSetQuery(forceRefresh) {
-      store.dispatch(
-        setQuery({
-          filters: filterManager.getFilters(),
-          query: $state.query,
-          timeFilters: timefilter.getTime(),
-          refresh: forceRefresh,
-        })
-      );
-    }
 
     $scope.indexPatterns = [];
     $scope.onQuerySubmit = function({ query }) {
