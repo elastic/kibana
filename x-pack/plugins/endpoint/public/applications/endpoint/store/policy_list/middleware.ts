@@ -26,7 +26,7 @@ export const policyListMiddlewareFactory: MiddlewareFactory<PolicyListState> = c
             total: 0,
           },
         });
-      }, 50);
+      }, 10);
     }
   };
 };

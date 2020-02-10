@@ -30,7 +30,10 @@ export const policyListReducer: Reducer<PolicyListState, AppAction> = (
     };
   }
 
-  if (action.type === 'userPaginatedPolicyListTable') {
+  if (
+    action.type === 'userPaginatedPolicyListTable' ||
+    (action.type === 'userNavigatedToPage' && action.payload === 'policyListPage')
+  ) {
     return {
       ...state,
       isLoading: true,
