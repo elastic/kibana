@@ -19,7 +19,6 @@
 
 import React from 'react';
 import Header from './header';
-import TestRunnerItemList from './test_runner_item_list';
 import HistoricalList from './historical_list';
 import Footer from './footer';
 
@@ -29,8 +28,11 @@ export default function App({ testRunnerTypes, buildStats, historicalItems, curr
     <div>
       <Header url={url} />
       <div>
-        <TestRunnerItemList testRunnerTypes={testRunnerTypes} />
-        <HistoricalList historicalItems={historicalItems} currentJobNumber={currentJobNumber} />
+        <HistoricalList
+          testRunnerTypes={testRunnerTypes}
+          historicalItems={historicalItems}
+          currentJobNumber={currentJobNumber}
+        />
       </div>
       <Footer />
     </div>

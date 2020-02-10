@@ -19,27 +19,28 @@
 
 import React from "react";
 import HistoricalItem from './historical_item';
+// import TestRunnerItemList from './test_runner_item_list';
 
-const renderItem = currentJobNumber => (x, i) => {
+const renderItem = testRunnerTypes => currentJobNumber => (x, i) => {
+  console.log(`\n### testRunnerTypes: \n\t${testRunnerTypes}`);
   return (
-    <HistoricalItem
-      item={x}
-      key={i}
-      currentJobNumber={currentJobNumber}
-    />
-  );
-}
+      <HistoricalItem
+        item={x}
+        key={i}
+        currentJobNumber={currentJobNumber}
+      />
+      // {/*<TestRunnerItemList testRunnerTypes={testRunnerTypes} />*/}
+);
+};
 
-export default function HistoricalList({historicalItems, currentJobNumber }) {
-
+export default function HistoricalList({testRunnerTypes, historicalItems, currentJobNumber }) {
+  const renderWithRunners = renderItem(testRunnerTypes);
   return (
     <div className="font-bold text-xl mb-2">
       Historical Items - Compare to Current? [{currentJobNumber}]
       <ul>
-        {historicalItems.map((x, i) => renderItem(currentJobNumber)(x, i))}
+        {historicalItems.map((x, i) => renderWithRunners(currentJobNumber)(x, i))}
       </ul>
     </div>
      );
 }
-
-
