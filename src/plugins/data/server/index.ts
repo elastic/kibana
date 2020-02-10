@@ -48,6 +48,7 @@ export const esQuery = {
  */
 
 import {
+  FieldFormatsRegistry,
   FieldFormat,
   BoolFormat,
   BytesFormat,
@@ -67,6 +68,7 @@ import {
 } from '../common/field_formats';
 
 export const fieldFormats = {
+  FieldFormatsRegistry,
   FieldFormat,
 
   BoolFormat,
