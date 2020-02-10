@@ -130,7 +130,7 @@ describe('config validation', () => {
       validateConfig(actionType, config);
     }).toThrowErrorMatchingInlineSnapshot(`
 "error validating action type config: [headers]: types that failed validation:
-- [headers.0]: expected value of type [object] but got [string]
+- [headers.0]: could not parse record value from [application/json]
 - [headers.1]: expected value to equal [null] but got [application/json]"
 `);
   });
