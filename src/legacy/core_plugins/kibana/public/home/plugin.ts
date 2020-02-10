@@ -55,7 +55,7 @@ export interface HomePluginSetupDependencies {
     getFeatureCatalogueEntries: () => Promise<readonly FeatureCatalogueEntry[]>;
   };
   usageCollection: UsageCollectionSetup;
-  kibana_legacy: KibanaLegacySetup;
+  kibanaLegacy: KibanaLegacySetup;
   home: HomePublicPluginSetup;
 }
 
@@ -69,12 +69,12 @@ export class HomePlugin implements Plugin {
     core: CoreSetup,
     {
       home,
-      kibana_legacy,
+      kibanaLegacy,
       usageCollection,
       __LEGACY: { ...legacyServices },
     }: HomePluginSetupDependencies
   ) {
-    kibana_legacy.registerLegacyApp({
+    kibanaLegacy.registerLegacyApp({
       id: 'home',
       title: 'Home',
       mount: async ({ core: contextCore }, params) => {
@@ -95,7 +95,7 @@ export class HomePlugin implements Plugin {
           getBasePath: core.http.basePath.get,
           indexPatternService: this.dataStart!.indexPatterns,
           environment: this.environment!,
-          config: kibana_legacy.config,
+          config: kibanaLegacy.config,
           homeConfig: home.config,
         });
         const { renderApp } = await import('./np_ready/application');

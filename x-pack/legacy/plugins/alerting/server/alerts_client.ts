@@ -226,27 +226,30 @@ export class AlertsClient {
   }
 
   public async delete({ id }: { id: string }) {
-    const [taskIdToRemove, apiKeyToInvalidate] = await Promise.all([
-      this.savedObjectsClient
-        .get<RawAlert>('alert', id)
-        .then(result => result.attributes.scheduledTaskId),
-      // We'll try and load the decrypted saved object but if this fails we'll only log
-      // and skip invalidating the API key.
-      this.encryptedSavedObjectsPlugin
-        .getDecryptedAsInternalUser<RawAlert>('alert', id, { namespace: this.namespace })
-        .then(result => result.attributes.apiKey)
-        .catch(e =>
-          this.logger.error(
-            `delete(): Failed to load API key to invalidate on alert ${id}: ${e.message}`
-          )
-        ),
-    ]);
+    let taskIdToRemove: string | undefined;
+    let apiKeyToInvalidate: string | null = null;
+
+    try {
+      const decryptedAlert = await this.encryptedSavedObjectsPlugin.getDecryptedAsInternalUser<
+        RawAlert
+      >('alert', id, { namespace: this.namespace });
+      apiKeyToInvalidate = decryptedAlert.attributes.apiKey;
+      taskIdToRemove = decryptedAlert.attributes.scheduledTaskId;
+    } catch (e) {
+      // We'll skip invalidating the API key since we failed to load the decrypted saved object
+      this.logger.error(
+        `delete(): Failed to load API key to invalidate on alert ${id}: ${e.message}`
+      );
+      // Still attempt to load the scheduledTaskId using SOC
+      const alert = await this.savedObjectsClient.get<RawAlert>('alert', id);
+      taskIdToRemove = alert.attributes.scheduledTaskId;
+    }
 
     const removeResult = await this.savedObjectsClient.delete('alert', id);
 
     await Promise.all([
-      taskIdToRemove && this.taskManager.remove(taskIdToRemove),
-      apiKeyToInvalidate && this.invalidateApiKey({ apiKey: apiKeyToInvalidate }),
+      taskIdToRemove ? this.taskManager.remove(taskIdToRemove) : null,
+      apiKeyToInvalidate ? this.invalidateApiKey({ apiKey: apiKeyToInvalidate }) : null,
     ]);
 
     return removeResult;

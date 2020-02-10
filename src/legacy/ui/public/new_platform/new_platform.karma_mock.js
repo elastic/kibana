@@ -120,10 +120,10 @@ export const npSetup = {
     share: {
       register: () => {},
     },
-    dev_tools: {
+    devTools: {
       register: () => {},
     },
-    kibana_legacy: {
+    kibanaLegacy: {
       registerLegacyApp: () => {},
       forwardApp: () => {},
       config: {
@@ -203,10 +203,10 @@ export const npStart = {
       registerRenderer: sinon.fake(),
       registerType: sinon.fake(),
     },
-    dev_tools: {
+    devTools: {
       getSortedDevTools: () => [],
     },
-    kibana_legacy: {
+    kibanaLegacy: {
       getApps: () => [],
       getForwards: () => [],
       config: {

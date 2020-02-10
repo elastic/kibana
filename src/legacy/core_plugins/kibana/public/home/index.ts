@@ -20,8 +20,8 @@
 import { FeatureCatalogueRegistryProvider } from 'ui/registry/feature_catalogue';
 import { npSetup, npStart } from 'ui/new_platform';
 import chrome from 'ui/chrome';
-import { IPrivate } from 'ui/private';
 import { HomePlugin } from './plugin';
+import { IPrivate } from '../../../../../plugins/kibana_legacy/public';
 
 let copiedLegacyCatalogue = false;
 

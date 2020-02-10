@@ -13,6 +13,7 @@ const XPACK_INFO_KEY = 'xpackMain.info';
 
 export class XPackInfo {
   constructor(initialInfo = {}) {
+    console.log('oinit!@#');
     this.inProgressRefreshPromise = null;
     this.setAll(initialInfo);
   }
@@ -24,6 +25,7 @@ export class XPackInfo {
   };
 
   setAll = updatedXPackInfo => {
+    console.log('updatedXPackInfo!@#!@#');
     // The decision to convert kebab-case/snake-case keys to camel-case keys stemmed from an old
     // convention of using kebabe-case/snake-case in API response bodies but camel-case in JS
     // objects. See pull #29304 for more info.
@@ -34,6 +36,7 @@ export class XPackInfo {
   };
 
   clear = () => {
+    console.log('celeansdf!@#');
     sessionStorage.removeItem(XPACK_INFO_KEY);
   };
 
@@ -48,6 +51,7 @@ export class XPackInfo {
     this.inProgressRefreshPromise = $http
       .get(chrome.addBasePath('/api/xpack/v1/info'))
       .catch(err => {
+        console.log('ok err!@#', err);
         // if we are unable to fetch the updated info, we should
         // prevent reusing stale info
         this.clear();
@@ -55,6 +59,7 @@ export class XPackInfo {
         throw err;
       })
       .then(xpackInfoResponse => {
+        console.log('got response!@#');
         this.setAll(xpackInfoResponse.data);
         xpackInfoSignature.set(xpackInfoResponse.headers('kbn-xpack-sig'));
       })
@@ -65,6 +70,7 @@ export class XPackInfo {
   };
 
   getLicense = () => {
+    console.log('getting license!@#');
     return this.get('license', {
       isActive: false,
       type: undefined,
