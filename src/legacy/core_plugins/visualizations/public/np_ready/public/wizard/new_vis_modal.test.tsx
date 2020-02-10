@@ -155,6 +155,26 @@ describe('NewVisModal', () => {
       expect(window.location.assign).toBeCalledWith('testbasepath/aliasUrl?addToDashboard');
       expect(onClose).toHaveBeenCalled();
     });
+
+    it('closes and redirects properly if visualization with aliasUrl and without addToDashboard in editorParams', () => {
+      const onClose = jest.fn();
+      window.location.assign = jest.fn();
+      const wrapper = mountWithIntl(
+        <NewVisModal
+          isOpen={true}
+          onClose={onClose}
+          visTypesRegistry={visTypes}
+          editorParams={['foo=true', 'bar=42']}
+          addBasePath={addBasePath}
+          uiSettings={uiSettings}
+          savedObjects={{} as SavedObjectsStart}
+        />
+      );
+      const visButton = wrapper.find('button[data-test-subj="visType-visWithAliasUrl"]');
+      visButton.simulate('click');
+      expect(window.location.assign).toBeCalledWith('testbasepath/aliasUrl');
+      expect(onClose).toHaveBeenCalled();
+    });
   });
 
   describe('filter for visualization types', () => {

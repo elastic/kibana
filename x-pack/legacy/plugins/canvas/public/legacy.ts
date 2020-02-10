@@ -12,7 +12,7 @@ import chrome, { loadingCount } from 'ui/chrome'; // eslint-disable-line import/
 import { absoluteToParsedUrl } from 'ui/url/absolute_to_parsed_url'; // eslint-disable-line import/order
 import { Storage } from '../../../../../src/plugins/kibana_utils/public'; // eslint-disable-line import/order
 // @ts-ignore Untyped Kibana Lib
-import { formatMsg } from 'ui/notify/lib/format_msg'; // eslint-disable-line import/order
+import { formatMsg } from '../../../../../src/plugins/kibana_legacy/public'; // eslint-disable-line import/order
 // @ts-ignore Untyped Kibana Lib
 import { QueryString } from 'ui/utils/query_string'; // eslint-disable-line import/order
 
