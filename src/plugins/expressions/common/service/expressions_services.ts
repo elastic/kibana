@@ -22,6 +22,9 @@ import { ExpressionRendererRegistry } from '../expression_renderers';
 
 export interface ExpressionsServiceSetup {
   readonly getFunctions: Executor['getFunctions'];
+  readonly getRenderer: ExpressionRendererRegistry['get'];
+  readonly getRenderers: ExpressionRendererRegistry['toJS'];
+  readonly getTypes: Executor['getTypes'];
   readonly registerFunction: Executor['registerFunction'];
   readonly registerRenderer: ExpressionRendererRegistry['register'];
   readonly registerType: Executor['registerType'];
@@ -30,8 +33,9 @@ export interface ExpressionsServiceSetup {
 
 export interface ExpressionsServiceStart {
   readonly getFunctions: Executor['getFunctions'];
-  readonly getTypes: Executor['getTypes'];
   readonly getRenderer: ExpressionRendererRegistry['get'];
+  readonly getRenderers: ExpressionRendererRegistry['toJS'];
+  readonly getTypes: Executor['getTypes'];
   readonly run: Executor['run'];
 }
 
@@ -39,10 +43,13 @@ export class ExpressionsService {
   public readonly executor = Executor.createWithDefaults();
   public readonly renderers = new ExpressionRendererRegistry();
 
-  public setup() {
+  public setup(): ExpressionsServiceSetup {
     const { executor, renderers } = this;
 
     const getFunctions = executor.getFunctions.bind(executor);
+    const getRenderer = renderers.get.bind(renderers);
+    const getRenderers = renderers.toJS.bind(renderers);
+    const getTypes = executor.getTypes.bind(executor);
     const registerFunction = executor.registerFunction.bind(executor);
     const registerRenderer = renderers.register.bind(renderers);
     const registerType = executor.registerType.bind(executor);
@@ -50,6 +57,9 @@ export class ExpressionsService {
 
     return {
       getFunctions,
+      getRenderer,
+      getRenderers,
+      getTypes,
       registerFunction,
       registerRenderer,
       registerType,
@@ -57,18 +67,20 @@ export class ExpressionsService {
     };
   }
 
-  public start() {
+  public start(): ExpressionsServiceStart {
     const { executor, renderers } = this;
 
     const getFunctions = executor.getFunctions.bind(executor);
-    const getTypes = executor.getTypes.bind(executor);
     const getRenderer = renderers.get.bind(renderers);
+    const getRenderers = renderers.toJS.bind(renderers);
+    const getTypes = executor.getTypes.bind(executor);
     const run = executor.run.bind(executor);
 
     return {
       getFunctions,
-      getTypes,
       getRenderer,
+      getRenderers,
+      getTypes,
       run,
     };
   }

@@ -54,11 +54,39 @@ export interface ExpressionsStartDeps {
 }
 
 export interface ExpressionsSetup extends ExpressionsServiceSetup {
+  /**
+   * @todo Get rid of these `__LEGACY` APIs.
+   *
+   * `__LEGACY` APIs are used by Canvas. It should be possible to stop
+   * using all of them (except `loadLegacyServerFunctionWrappers`) and use
+   * Kibana Platform plugin contracts instead.
+   */
   __LEGACY: {
+    /**
+     * Use `registerType` and `getTypes` instead.
+     */
     types: TypesRegistry;
+
+    /**
+     * Use `registerFunction` and `getFunctions` instead.
+     */
     functions: FunctionsRegistry;
+
+    /**
+     * Use `registerRenderer` and `getRenderers`, and `getRenderer` instead.
+     */
     renderers: ExpressionRendererRegistry;
+
+    /**
+     * Use `run` function instead.
+     */
     getExecutor: () => ExpressionExecutor;
+
+    /**
+     * This function is used by Canvas to load server-side function and create
+     * browser-side "wrapper" for each one. This function can be removed once
+     * we enable expressions on server-side: https://github.com/elastic/kibana/issues/46906
+     */
     loadLegacyServerFunctionWrappers: () => Promise<void>;
   };
 }
