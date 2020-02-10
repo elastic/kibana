@@ -4,5 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const TIMELINES_PAGE = '/app/siem#/timelines';
-export const OVERVIEW_PAGE = '/app/siem#/overview';
+declare namespace Cypress {
+  interface Chainable<Subject> {
+    stubSIEMapi(dataFileName: string): Chainable<Subject>;
+  }
+}
