@@ -4,5 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { AlertInstance, RawAlertInstance, rawAlertInstance } from './alert_instance';
-export { createAlertInstanceFactory } from './create_alert_instance_factory';
+import { npSetup } from 'ui/new_platform';
+import { featureCatalogueEntry } from './feature_catalogue_entry';
+
+const {
+  plugins: { home },
+} = npSetup;
+
+home.featureCatalogue.register(featureCatalogueEntry);
