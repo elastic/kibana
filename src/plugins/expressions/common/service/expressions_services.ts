@@ -20,40 +20,104 @@
 import { Executor } from '../executor';
 import { ExpressionRendererRegistry } from '../expression_renderers';
 
-export interface ExpressionsServiceSetup {
-  readonly getFunctions: Executor['getFunctions'];
-  readonly getRenderer: ExpressionRendererRegistry['get'];
-  readonly getRenderers: ExpressionRendererRegistry['toJS'];
-  readonly getTypes: Executor['getTypes'];
-  readonly registerFunction: Executor['registerFunction'];
-  readonly registerRenderer: ExpressionRendererRegistry['register'];
-  readonly registerType: Executor['registerType'];
-  readonly run: Executor['run'];
-}
+export type ExpressionsServiceSetup = ReturnType<ExpressionsService['setup']>;
+export type ExpressionsServiceStart = ReturnType<ExpressionsService['start']>;
 
-export interface ExpressionsServiceStart {
-  readonly getFunctions: Executor['getFunctions'];
-  readonly getRenderer: ExpressionRendererRegistry['get'];
-  readonly getRenderers: ExpressionRendererRegistry['toJS'];
-  readonly getTypes: Executor['getTypes'];
-  readonly run: Executor['run'];
-}
-
+/**
+ * `ExpressionsService` is class is used for multiple purposes:
+ *
+ * 1. It implements the same Expressions service that can be used on both:
+ *    (1) server-side and (2) browser-side.
+ * 2. It implements the same Expressions service that users can fork/clone,
+ *    thus have their own instance of the Expressions plugin.
+ * 3. `ExpressionsService` defines the public contracts of *setup* and *start*
+ *    Kibana Platform life-cycles for ease-of-use on server-side and browser-side.
+ * 4. `ExpressionsService` creates a bound version of all exported contract functions.
+ * 5. Functions are bound the way there are:
+ *
+ *    ```ts
+ *    registerFunction = (...args: Parameters<Executor['registerFunction']>
+ *      ): ReturnType<Executor['registerFunction']> => this.executor.registerFunction(...args);
+ *    ```
+ *
+ *    so that JSDoc appears in developers IDE when they use those `plugins.expressions.registerFunction(`.
+ */
 export class ExpressionsService {
   public readonly executor = Executor.createWithDefaults();
   public readonly renderers = new ExpressionRendererRegistry();
 
-  public setup(): ExpressionsServiceSetup {
-    const { executor, renderers } = this;
+  /**
+   * Register an expression function, which will be possible to execute as
+   * part of the expression pipeline.
+   *
+   * Below we register a function which simply sleeps for given number of
+   * milliseconds to delay the execution and outputs its input as-is.
+   *
+   * ```ts
+   * expressions.registerFunction({
+   *   name: 'sleep',
+   *   args: {
+   *     time: {
+   *       aliases: ['_'],
+   *       help: 'Time in milliseconds for how long to sleep',
+   *       types: ['number'],
+   *     },
+   *   },
+   *   help: '',
+   *   fn: async (input, args, context) => {
+   *     await new Promise(r => setTimeout(r, args.time));
+   *     return input;
+   *   },
+   * }
+   * ```
+   *
+   * The actual function is defined in the `fn` key. The function can be *async*.
+   * It receives three arguments: (1) `input` is the output of the previous function
+   * or the initial input of the expression if the function is first in chain;
+   * (2) `args` are function arguments as defined in expression string, that can
+   * be edited by user (e.g in case of Canvas); (3) `context` is a shared object
+   * passed to all functions that can be used for side-effects.
+   */
+  public readonly registerFunction = (
+    ...args: Parameters<Executor['registerFunction']>
+  ): ReturnType<Executor['registerFunction']> => this.executor.registerFunction(...args);
+
+  /**
+   * Executes expression string or a parsed expression AST and immediately
+   * returns the result.
+   *
+   * Below example will execute `sleep 100 | clog` expression with `123` initial
+   * input to the first function.
+   *
+   * ```ts
+   * expressions.run('sleep 100 | clog', 123);
+   * ```
+   *
+   * - `sleep 100` will delay execution by 100 milliseconds and pass the `123` input as
+   *   its output.
+   * - `clog` will print to console `123` and pass it as its output.
+   * - The final result of the execution will be `123`.
+   *
+   * Optionally, you can pass an object as the third argument which will be used
+   * to extend the `ExecutionContext`&mdash;an object passed to each function
+   * as the third argument, that allows functions to perform side-effects.
+   *
+   * ```ts
+   * expressions.run('...', null, { elasticsearchClient });
+   * ```
+   */
+  public readonly run = (...args: Parameters<Executor['run']>): ReturnType<Executor['run']> =>
+    this.executor.run(...args);
+
+  public setup() {
+    const { executor, renderers, registerFunction, run } = this;
 
     const getFunctions = executor.getFunctions.bind(executor);
     const getRenderer = renderers.get.bind(renderers);
     const getRenderers = renderers.toJS.bind(renderers);
     const getTypes = executor.getTypes.bind(executor);
-    const registerFunction = executor.registerFunction.bind(executor);
     const registerRenderer = renderers.register.bind(renderers);
     const registerType = executor.registerType.bind(executor);
-    const run = executor.run.bind(executor);
 
     return {
       getFunctions,
@@ -67,14 +131,13 @@ export class ExpressionsService {
     };
   }
 
-  public start(): ExpressionsServiceStart {
-    const { executor, renderers } = this;
+  public start() {
+    const { executor, renderers, run } = this;
 
     const getFunctions = executor.getFunctions.bind(executor);
     const getRenderer = renderers.get.bind(renderers);
     const getRenderers = renderers.toJS.bind(renderers);
     const getTypes = executor.getTypes.bind(executor);
-    const run = executor.run.bind(executor);
 
     return {
       getFunctions,
