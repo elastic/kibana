@@ -107,10 +107,11 @@ export class SecurityPlugin
     return {
       authc: this.authc,
       sessionTimeout: this.sessionTimeout,
+      license,
     };
   }
 
-  public start(core: CoreStart, { data, management }: PluginStartDependencies) {
+  public start(core: CoreStart, { management }: PluginStartDependencies) {
     this.sessionTimeout.start();
     this.navControlService.start({ core });
 
