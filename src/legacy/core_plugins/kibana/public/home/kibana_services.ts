@@ -29,7 +29,7 @@ import {
   UiSettingsState,
 } from 'kibana/public';
 import { UiStatsMetricType } from '@kbn/analytics';
-import { TelemetryPluginSetup } from '../../../../../plugins/telemetry/public';
+import { TelemetryPluginStart } from '../../../../../plugins/telemetry/public';
 import {
   Environment,
   HomePublicPluginSetup,
@@ -67,7 +67,7 @@ export interface HomeKibanaServices {
   docLinks: DocLinksStart;
   addBasePath: (url: string) => string;
   environment: Environment;
-  telemetry?: TelemetryPluginSetup;
+  telemetry?: TelemetryPluginStart;
 }
 
 let services: HomeKibanaServices | null = null;

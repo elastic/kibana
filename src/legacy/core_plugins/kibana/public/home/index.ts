@@ -18,17 +18,16 @@
  */
 
 import { npSetup, npStart } from 'ui/new_platform';
-import chrome from 'ui/chrome';
 import { HomePlugin } from './plugin';
-import { IPrivate } from '../../../../../plugins/kibana_legacy/public';
 
 (async () => {
   const instance = new HomePlugin();
   instance.setup(npSetup.core, {
-    ...npSetup.plugins,
+    ...(npSetup.plugins as any),
     __LEGACY: {
       metadata: npStart.core.injectedMetadata.getLegacyMetadata(),
     },
   });
-  instance.start(npStart.core, npStart.plugins as any);
+
+  instance.start(npStart.core, npStart.plugins);
 })();
