@@ -137,15 +137,3 @@ export interface StagedFilter {
   operator: string;
   index: string;
 }
-
-export type ConfirmModalFn = (
-  message: string,
-  confirmOptions: {
-    onConfirm: () => void;
-    onCancel: () => void;
-    confirmButtonText: string;
-    cancelButtonText: string;
-    defaultFocusedButton: string;
-    title: string;
-  }
-) => void;

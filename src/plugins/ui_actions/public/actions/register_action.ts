@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { IUiActionsApiPure } from '../types';
+import { UiActionsApiPure } from '../types';
 
-export const registerAction: IUiActionsApiPure['registerAction'] = ({ actions }) => action => {
+export const registerAction: UiActionsApiPure['registerAction'] = ({ actions }) => action => {
   if (actions.has(action.id)) {
     throw new Error(`Action [action.id = ${action.id}] already registered.`);
   }

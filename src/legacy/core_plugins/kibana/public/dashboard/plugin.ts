@@ -45,14 +45,11 @@ import { SharePluginStart } from '../../../../../plugins/share/public';
 import {
   AngularRenderedAppUpdater,
   KibanaLegacySetup,
+  KibanaLegacyStart,
 } from '../../../../../plugins/kibana_legacy/public';
 import { createSavedDashboardLoader } from './saved_dashboard/saved_dashboards';
 import { createKbnUrlTracker } from '../../../../../plugins/kibana_utils/public';
 import { getQueryStateContainer } from '../../../../../plugins/data/public';
-
-export interface LegacyAngularInjectedDependencies {
-  dashboardConfig: any;
-}
 
 export interface DashboardPluginStartDependencies {
   data: DataStart;
@@ -60,15 +57,13 @@ export interface DashboardPluginStartDependencies {
   embeddables: IEmbeddableStart;
   navigation: NavigationStart;
   share: SharePluginStart;
+  kibanaLegacy: KibanaLegacyStart;
 }
 
 export interface DashboardPluginSetupDependencies {
-  __LEGACY: {
-    getAngularDependencies: () => Promise<LegacyAngularInjectedDependencies>;
-  };
   home: HomePublicPluginSetup;
-  kibana_legacy: KibanaLegacySetup;
-  npData: NpDataSetup;
+  kibanaLegacy: KibanaLegacySetup;
+  data: NpDataSetup;
 }
 
 export class DashboardPlugin implements Plugin {
@@ -78,6 +73,7 @@ export class DashboardPlugin implements Plugin {
     embeddables: IEmbeddableStart;
     navigation: NavigationStart;
     share: SharePluginStart;
+    dashboardConfig: KibanaLegacyStart['dashboardConfig'];
   } | null = null;
 
   private appStateUpdater = new BehaviorSubject<AngularRenderedAppUpdater>(() => ({}));
@@ -85,12 +81,7 @@ export class DashboardPlugin implements Plugin {
 
   public setup(
     core: CoreSetup,
-    {
-      __LEGACY: { getAngularDependencies },
-      home,
-      kibana_legacy,
-      npData,
-    }: DashboardPluginSetupDependencies
+    { home, kibanaLegacy, data: npData }: DashboardPluginSetupDependencies
   ) {
     const { querySyncStateContainer, stop: stopQuerySyncStateContainer } = getQueryStateContainer(
       npData.query
@@ -126,8 +117,8 @@ export class DashboardPlugin implements Plugin {
           navigation,
           share,
           npDataStart,
+          dashboardConfig,
         } = this.startDependencies;
-        const angularDependencies = await getAngularDependencies();
         const savedDashboards = createSavedDashboardLoader({
           savedObjectsClient,
           indexPatterns: npDataStart.indexPatterns,
@@ -137,7 +128,7 @@ export class DashboardPlugin implements Plugin {
 
         const deps: RenderDeps = {
           core: contextCore as LegacyCoreStart,
-          ...angularDependencies,
+          dashboardConfig,
           navigation,
           share,
           npDataStart,
@@ -146,7 +137,7 @@ export class DashboardPlugin implements Plugin {
           chrome: contextCore.chrome,
           addBasePath: contextCore.http.basePath.prepend,
           uiSettings: contextCore.uiSettings,
-          config: kibana_legacy.config,
+          config: kibanaLegacy.config,
           savedQueryService: npDataStart.query.savedQueries,
           embeddables,
           dashboardCapabilities: contextCore.application.capabilities.dashboard,
@@ -160,14 +151,14 @@ export class DashboardPlugin implements Plugin {
         };
       },
     };
-    kibana_legacy.registerLegacyApp({
+    kibanaLegacy.registerLegacyApp({
       ...app,
       id: 'dashboard',
       // only register the updater in once app, otherwise all updates would happen twice
       updater$: this.appStateUpdater.asObservable(),
       navLinkId: 'kibana:dashboard',
     });
-    kibana_legacy.registerLegacyApp({ ...app, id: 'dashboards' });
+    kibanaLegacy.registerLegacyApp({ ...app, id: 'dashboards' });
 
     home.featureCatalogue.register({
       id: 'dashboard',
@@ -186,7 +177,14 @@ export class DashboardPlugin implements Plugin {
 
   start(
     { savedObjects: { client: savedObjectsClient } }: CoreStart,
-    { data: dataStart, embeddables, navigation, npData, share }: DashboardPluginStartDependencies
+    {
+      data: dataStart,
+      embeddables,
+      navigation,
+      npData,
+      share,
+      kibanaLegacy: { dashboardConfig },
+    }: DashboardPluginStartDependencies
   ) {
     this.startDependencies = {
       npDataStart: npData,
@@ -194,6 +192,7 @@ export class DashboardPlugin implements Plugin {
       embeddables,
       navigation,
       share,
+      dashboardConfig,
     };
   }
 
