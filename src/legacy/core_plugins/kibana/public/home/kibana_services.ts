@@ -31,14 +31,13 @@ import {
 import { UiStatsMetricType } from '@kbn/analytics';
 import {
   Environment,
-  FeatureCatalogueEntry,
   HomePublicPluginSetup,
+  FeatureCatalogueEntry,
 } from '../../../../../plugins/home/public';
 import { KibanaLegacySetup } from '../../../../../plugins/kibana_legacy/public';
 
 export interface HomeKibanaServices {
   indexPatternService: any;
-  getFeatureCatalogueEntries: () => Promise<readonly FeatureCatalogueEntry[]>;
   metadata: {
     app: unknown;
     bundleId: string;
@@ -58,6 +57,7 @@ export interface HomeKibanaServices {
   uiSettings: IUiSettingsClient;
   config: KibanaLegacySetup['config'];
   homeConfig: HomePublicPluginSetup['config'];
+  directories: readonly FeatureCatalogueEntry[];
   http: HttpStart;
   savedObjectsClient: SavedObjectsClientContract;
   toastNotifications: NotificationsSetup['toasts'];
