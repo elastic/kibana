@@ -5,8 +5,9 @@
  */
 
 import expect from '@kbn/expect';
+import { FtrProviderContext } from '../ftr_provider_context';
 
-export function SpaceSelectorPageProvider({ getService, getPageObjects }) {
+export function SpaceSelectorPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const log = getService('log');
   const testSubjects = getService('testSubjects');
@@ -19,7 +20,7 @@ export function SpaceSelectorPageProvider({ getService, getPageObjects }) {
       log.debug('SpaceSelectorPage:initTests');
     }
 
-    async clickSpaceCard(spaceId) {
+    async clickSpaceCard(spaceId: string) {
       return await retry.try(async () => {
         log.info(`SpaceSelectorPage:clickSpaceCard(${spaceId})`);
         await testSubjects.click(`space-card-${spaceId}`);
@@ -27,11 +28,11 @@ export function SpaceSelectorPageProvider({ getService, getPageObjects }) {
       });
     }
 
-    async expectHomePage(spaceId) {
+    async expectHomePage(spaceId: string) {
       return await this.expectRoute(spaceId, `/app/kibana#/home`);
     }
 
-    async expectRoute(spaceId, route) {
+    async expectRoute(spaceId: string, route: string) {
       return await retry.try(async () => {
         log.debug(`expectRoute(${spaceId}, ${route})`);
         await find.byCssSelector('[data-test-subj="kibanaChrome"] nav:not(.ng-hide) ', 20000);
@@ -49,7 +50,7 @@ export function SpaceSelectorPageProvider({ getService, getPageObjects }) {
       return await testSubjects.click('spacesNavSelector');
     }
 
-    async clickSpaceAvatar(spaceId) {
+    async clickSpaceAvatar(spaceId: string) {
       return await retry.try(async () => {
         log.info(`SpaceSelectorPage:clickSpaceAvatar(${spaceId})`);
         await testSubjects.click(`space-avatar-${spaceId}`);
