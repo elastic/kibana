@@ -29,7 +29,7 @@ The Markdown control is a text entry field that accepts GitHub-flavored Markdown
 Markdown is helpful when you want to include important information or instructions on your dashboard. For example, when you enter:
 
 `### Sample Flight data
-This dashboard contains sample data for you to play with. You can view it, search it, and interact with the visualizations. For more information about Kibana, check our [docs](https://www.elastic.co/guide/en/kibana/current/index.html).`
+This dashboard contains sample data for you to play with. You can view it, search it, and interact with the visualizations. For more information about Kibana, check our [docs](https://www.elastic.co/guide/en/kibana/current/index).`
 
 The following displays:
 
