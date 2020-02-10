@@ -245,7 +245,7 @@ describe('AdvancedSettings', () => {
         toasts={notificationServiceMock.createStartContract().toasts}
         dockLinks={docLinksServiceMock.createStartContract().links}
         uiSettings={uiSettingsServiceMock.createStartContract()}
-        componentRegistry={advancedSettingsMock.createStartContract()}
+        componentRegistry={advancedSettingsMock.createStartContract().component}
       />
     );
 
@@ -260,7 +260,7 @@ describe('AdvancedSettings', () => {
         toasts={notificationServiceMock.createStartContract().toasts}
         dockLinks={docLinksServiceMock.createStartContract().links}
         uiSettings={uiSettingsServiceMock.createStartContract()}
-        componentRegistry={advancedSettingsMock.createStartContract()}
+        componentRegistry={advancedSettingsMock.createStartContract().component}
       />
     );
 
