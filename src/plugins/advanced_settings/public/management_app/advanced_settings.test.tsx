@@ -29,6 +29,7 @@ import {
   docLinksServiceMock,
   uiSettingsServiceMock,
 } from '../../../../core/public/mocks';
+import { ComponentRegistry } from '../component_registry';
 
 import { advancedSettingsMock } from '../mocks';
 
@@ -242,13 +243,12 @@ describe('AdvancedSettings', () => {
       <AdvancedSettingsComponent
         queryText="test:string:setting"
         enableSaving={true}
-        toasts={notificationServiceMock.createStartContract().toasts}
-        dockLinks={docLinksServiceMock.createStartContract().links}
+        toasts={{} as any}
+        dockLinks={{} as any}
         uiSettings={uiSettingsServiceMock.createStartContract()}
-        componentRegistry={advancedSettingsMock.createStartContract().component}
+        componentRegistry={new ComponentRegistry().start}
       />
     );
-
     expect(component).toMatchSnapshot();
   });
 
@@ -264,6 +264,6 @@ describe('AdvancedSettings', () => {
       />
     );
 
-    expect(component).toMatchSnapshot();
+    expect(component.find('Form').prop('enableSaving')).toBe(false);
   });
 });

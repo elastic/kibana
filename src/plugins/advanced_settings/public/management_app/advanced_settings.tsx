@@ -35,8 +35,8 @@ import { Form } from './components/form';
 import { AdvancedSettingsVoiceAnnouncement } from './components/advanced_settings_voice_announcement';
 import { IUiSettingsClient, DocLinksStart, ToastsStart } from '../../../../core/public/';
 import { ComponentRegistry } from '../';
-// @ts-ignore
-import { getAriaName, toEditableConfig, DEFAULT_CATEGORY } from './lib';
+
+import { toEditableConfig, DEFAULT_CATEGORY } from './lib';
 
 import { FieldSetting, IQuery } from './types';
 
@@ -72,15 +72,13 @@ export class AdvancedSettingsComponent extends Component<
 
   constructor(props: AdvancedSettingsComponentProps) {
     super(props);
-    const { queryText } = this.props;
-    // const parsedQuery = Query.parse(queryText ? `ariaName:"${getAriaName(queryText)}"` : '');
-    const parsedQuery = Query.parse(queryText || '');
 
     this.settings = this.initSettings(this.props.uiSettings);
     this.groupedSettings = this.initGroupedSettings(this.settings);
     this.categories = this.initCategories(this.groupedSettings);
     this.categoryCounts = this.initCategoryCounts(this.groupedSettings);
 
+    const parsedQuery = Query.parse(this.props.queryText || '');
     this.state = {
       query: parsedQuery,
       footerQueryMatched: false,
