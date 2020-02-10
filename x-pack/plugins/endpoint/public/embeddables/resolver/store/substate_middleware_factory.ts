@@ -5,17 +5,16 @@
  */
 
 import { Middleware, Dispatch, MiddlewareAPI } from 'redux';
-import { AppAction } from './action';
-import { GlobalState } from '../types';
+import { ResolverState, ResolverAction } from '../types';
 
 export type Selector<S, R> = (state: S) => R;
 
 export const substateMiddlewareFactory = <Substate>(
-  selector: Selector<GlobalState, Substate>,
-  middleware: Middleware<{}, Substate, Dispatch<AppAction>>
-): Middleware<{}, GlobalState, Dispatch<AppAction>> => {
+  selector: Selector<ResolverState, Substate>,
+  middleware: Middleware<{}, Substate, Dispatch<ResolverAction>>
+): Middleware<{}, ResolverState, Dispatch<ResolverAction>> => {
   return api => {
-    const substateAPI: MiddlewareAPI<Dispatch<AppAction>, Substate> = {
+    const substateAPI: MiddlewareAPI<Dispatch<ResolverAction>, Substate> = {
       ...api,
       getState() {
         return selector(api.getState());

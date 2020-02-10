@@ -11,6 +11,7 @@ import React from 'react';
 import { render, act, RenderResult, fireEvent } from '@testing-library/react';
 import { useCamera } from './use_camera';
 import { Provider } from 'react-redux';
+import * as selectors from '../store/selectors';
 import { storeFactory } from '../store';
 import {
   Matrix3,
@@ -18,6 +19,7 @@ import {
   ResolverMiddleware,
   ResolverAction,
   ResolverStore,
+  ProcessEvent,
 } from '../types';
 import { MockResizeObserver } from './mock_resize_observer';
 import { SideEffectContext } from './side_effect_context';
@@ -29,11 +31,14 @@ describe('useCamera on an unpainted element', () => {
   let time: number;
   let frameRequestedCallbacksIDCounter: number;
   let frameRequestedCallbacks: Map<number, FrameRequestCallback>;
+  let provideAnimationFrame: () => void;
   const testID = 'camera';
-  let reactRenderQueries: RenderResult;
+  let reactRenderResult: RenderResult;
   let simulateElementResize: (target: Element, contentRect: DOMRect) => void;
   let actions: ResolverAction[];
   let store: ResolverStore;
+  let sideEffectors: jest.Mocked<Omit<SideEffectors, 'ResizeObserver'>> &
+    Pick<SideEffectors, 'ResizeObserver'>;
   beforeEach(async () => {
     actions = [];
     const middleware: ResolverMiddleware = () => next => action => {
@@ -52,6 +57,19 @@ describe('useCamera on an unpainted element', () => {
     time = 0;
     frameRequestedCallbacksIDCounter = 0;
     frameRequestedCallbacks = new Map();
+    provideAnimationFrame = () => {
+      // TODO should we 'act'?
+      act(() => {
+        /**
+         * Iterate the values, and clear the data set before calling the callbacks because the callbacks will repopulate the dataset synchronously in this testing framework.
+         */
+        const values = [...frameRequestedCallbacks.values()];
+        frameRequestedCallbacks.clear();
+        for (const callback of values) {
+          callback(time);
+        }
+      });
+    };
 
     jest
       .spyOn(Element.prototype, 'getBoundingClientRect')
@@ -59,19 +77,20 @@ describe('useCamera on an unpainted element', () => {
         return MockResizeObserver.contentRectForElement(this);
       });
 
-    const sideEffectors: SideEffectors = {
-      timestamp: jest.fn().mockImplementation(),
-      requestAnimationFrame: jest
-        .fn()
-        .mockImplementation((callback: FrameRequestCallback): number => {
-          const id = frameRequestedCallbacksIDCounter++;
-          frameRequestedCallbacks.set(id, callback);
-          return id;
-        }),
+    sideEffectors = {
+      timestamp: jest.fn(() => time),
+      requestAnimationFrame: jest.fn((callback: FrameRequestCallback): number => {
+        const id = frameRequestedCallbacksIDCounter++;
+        frameRequestedCallbacks.set(id, callback);
+        return id;
+      }),
+      cancelAnimationFrame: jest.fn((id: number) => {
+        frameRequestedCallbacks.delete(id);
+      }),
       ResizeObserver: MockResizeObserver,
     };
 
-    reactRenderQueries = render(
+    reactRenderResult = render(
       <Provider store={store}>
         <SideEffectContext.Provider value={sideEffectors}>
           <Test />
@@ -80,7 +99,7 @@ describe('useCamera on an unpainted element', () => {
     );
 
     simulateElementResize = MockResizeObserver.simulateElementResize;
-    const { findByTestId } = reactRenderQueries;
+    const { findByTestId } = reactRenderResult;
     element = await findByTestId(testID);
   });
   afterEach(() => {
@@ -90,21 +109,9 @@ describe('useCamera on an unpainted element', () => {
     expect(element).toBeInTheDocument();
   });
   test('returns a projectionMatrix that changes everything to 0', () => {
-    expect(projectionMatrix).toMatchInlineSnapshot(`
-      Array [
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-      ]
-    `);
+    expect(applyMatrix3([0, 0], projectionMatrix)).toEqual([0, 0]);
   });
-  describe('which has been resize to 800x400', () => {
+  describe('which has been resized to 800x600', () => {
     const width = 800;
     const height = 600;
     const leftMargin = 20;
@@ -128,20 +135,8 @@ describe('useCamera on an unpainted element', () => {
         });
       });
     });
-    test('provides a projection matrix', () => {
-      expect(projectionMatrix).toMatchInlineSnapshot(`
-        Array [
-          1,
-          0,
-          400,
-          0,
-          -1,
-          300,
-          0,
-          0,
-          0,
-        ]
-      `);
+    test('provides a projection matrix that inverts the y axis and translates 400,300 (center of the element)', () => {
+      expect(applyMatrix3([0, 0], projectionMatrix)).toEqual([400, 300]);
     });
     describe('when the user presses the mousedown button in the middle of the element', () => {
       beforeEach(() => {
@@ -160,6 +155,77 @@ describe('useCamera on an unpainted element', () => {
         it('should project [0, 0] in world corrdinates 50 pixels to the right of the center of the element', () => {
           expect(applyMatrix3([0, 0], projectionMatrix)).toEqual([450, 300]);
         });
+      });
+    });
+
+    describe('when the user uses the mousewheel w/ ctrl held down', () => {
+      beforeEach(() => {
+        fireEvent.wheel(element, {
+          ctrlKey: true,
+          deltaY: -10,
+          deltaMode: 0,
+        });
+      });
+      it('should zoom in', () => {
+        expect(projectionMatrix).toMatchInlineSnapshot(`
+          Array [
+            1.0635255481707058,
+            0,
+            400,
+            0,
+            -1.0635255481707058,
+            300,
+            0,
+            0,
+            0,
+          ]
+        `);
+      });
+    });
+
+    // TODO, move to new module
+    it('should not initially request an animation frame', () => {
+      expect(sideEffectors.requestAnimationFrame).not.toHaveBeenCalled();
+    });
+    describe('when the camera begins animation', () => {
+      const initialTime = 0;
+      let process: ProcessEvent;
+      beforeEach(() => {
+        /**
+         * At this time, processes are provided via mock data. In the future, this test will have to provide those mocks.
+         */
+        const processes: ProcessEvent[] = [
+          ...selectors
+            .processNodePositionsAndEdgeLineSegments(store.getState())
+            .processNodePositions.keys(),
+        ];
+        process = processes[processes.length - 1];
+        const action: ResolverAction = {
+          type: 'userBroughtProcessIntoView',
+          payload: {
+            time: initialTime,
+            process,
+          },
+        };
+        // does this need to be in act? prolly
+        act(() => {
+          store.dispatch(action);
+        });
+      });
+
+      it('should request animation frames in a loop', () => {
+        expect(sideEffectors.requestAnimationFrame).toHaveBeenCalledTimes(1);
+        time = 100;
+        provideAnimationFrame();
+        expect(sideEffectors.requestAnimationFrame).toHaveBeenCalledTimes(2);
+        time = 900;
+        provideAnimationFrame();
+        expect(sideEffectors.requestAnimationFrame).toHaveBeenCalledTimes(3);
+        // Animation lasts 1000ms, so this should end it
+        time = 1001;
+        provideAnimationFrame();
+        // Doesn't ask again, still 3
+        expect(sideEffectors.requestAnimationFrame).toHaveBeenCalledTimes(3);
       });
     });
   });

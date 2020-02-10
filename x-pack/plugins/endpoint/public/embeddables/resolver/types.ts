@@ -249,6 +249,7 @@ export interface SideEffectors {
    */
   timestamp: () => number;
   requestAnimationFrame: typeof window.requestAnimationFrame;
+  cancelAnimationFrame: typeof window.cancelAnimationFrame;
   ResizeObserver: ResizeObserverConstructor;
 }
 

@@ -9,7 +9,12 @@ import { SideEffectors } from '../types';
 
 const sideEffectors: SideEffectors = {
   timestamp: () => Date.now(),
-  requestAnimationFrame: window.requestAnimationFrame,
+  requestAnimationFrame(...args) {
+    return window.requestAnimationFrame(...args);
+  },
+  cancelAnimationFrame(...args) {
+    return window.cancelAnimationFrame(...args);
+  },
   ResizeObserver,
 };
 export const SideEffectContext: Context<SideEffectors> = createContext(sideEffectors);

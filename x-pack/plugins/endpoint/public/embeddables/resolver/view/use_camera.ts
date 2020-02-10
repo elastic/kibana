@@ -210,15 +210,15 @@ export function useCamera(): {
           setProjectionMatrix(projectionMatrixAtTimeRef.current(date));
         }
         if (isAnimatingAtTime(date)) {
-          rafRef = requestAnimationFrame(handleFrame);
+          rafRef = sideEffectors.requestAnimationFrame(handleFrame);
         } else {
           rafRef = null;
         }
       };
-      rafRef = requestAnimationFrame(handleFrame);
+      rafRef = sideEffectors.requestAnimationFrame(handleFrame);
       return () => {
         if (rafRef !== null) {
-          cancelAnimationFrame(rafRef);
+          sideEffectors.cancelAnimationFrame(rafRef);
         }
       };
     }
