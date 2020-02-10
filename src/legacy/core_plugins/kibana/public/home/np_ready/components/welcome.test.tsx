@@ -20,6 +20,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import { Welcome } from './welcome';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { telemetryPluginMock } from '../../../../../../../plugins/telemetry/public/telemetry.mock';
 jest.mock('../../kibana_services', () => ({
   getServices: () => ({
