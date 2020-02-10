@@ -10,6 +10,8 @@ describe('getCommitBySha', () => {
   it('should return a single commit without PR', async () => {
     const axiosSpy = mockCommitItems([commitByShaMock]);
     const commit = await getCommitBySha({
+      username: 'sqren',
+      accessToken: 'myAccessToken',
       repoOwner: 'elastic',
       repoName: 'kibana',
       sha: 'myCommitSha',
@@ -24,8 +26,11 @@ describe('getCommitBySha', () => {
     });
 
     expect(axiosSpy).toHaveBeenCalledWith(
-      'https://api.github.com/search/commits?q=hash:myCommitSha%20repo:elastic/kibana&per_page=1&access_token=undefined',
-      { headers: { Accept: 'application/vnd.github.cloak-preview' } }
+      'https://api.github.com/search/commits?q=hash:myCommitSha%20repo:elastic/kibana&per_page=1',
+      {
+        headers: { Accept: 'application/vnd.github.cloak-preview' },
+        auth: { password: 'myAccessToken', username: 'sqren' }
+      }
     );
   });
 

@@ -10,11 +10,22 @@ import { getFormattedCommitMessage } from './commitFormatters';
 export async function fetchCommitBySha(
   options: BackportOptions & { sha: string }
 ): Promise<CommitSelected> {
-  const { apiHostname, repoName, repoOwner, sha, accessToken } = options;
+  const {
+    apiHostname,
+    repoName,
+    repoOwner,
+    sha,
+    accessToken,
+    username
+  } = options;
   try {
     const res = await axios.get<GithubSearch<GithubCommit>>(
-      `https://${apiHostname}/search/commits?q=hash:${sha}%20repo:${repoOwner}/${repoName}&per_page=1&access_token=${accessToken}`,
+      `https://${apiHostname}/search/commits?q=hash:${sha}%20repo:${repoOwner}/${repoName}&per_page=1`,
       {
+        auth: {
+          username: username,
+          password: accessToken
+        },
         headers: {
           Accept: 'application/vnd.github.cloak-preview'
         }

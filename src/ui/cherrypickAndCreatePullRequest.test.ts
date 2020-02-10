@@ -75,7 +75,7 @@ describe('cherrypickAndCreatePullRequest', () => {
       expect(axiosPostMock).toHaveBeenCalledTimes(2);
       const [apiEndpoint, payload] = axiosPostMock.mock.calls[0];
       expect(apiEndpoint).toBe(
-        'https://api.github.com/repos/elastic/kibana/pulls?access_token=undefined'
+        'https://api.github.com/repos/elastic/kibana/pulls'
       );
       expect(payload.title).toBe(
         '[6.x] myCommitMessage (#1000) | myOtherCommitMessage (#2000)'
@@ -95,7 +95,7 @@ myPrSuffix`
       const [apiEndpoint, labels] = axiosPostMock.mock.calls[1];
 
       expect(apiEndpoint).toBe(
-        'https://api.github.com/repos/elastic/kibana/issues/1337/labels?access_token=undefined'
+        'https://api.github.com/repos/elastic/kibana/issues/1337/labels'
       );
       expect(labels).toEqual(['backport']);
     });
@@ -126,7 +126,7 @@ myPrSuffix`
       expect(axiosPostMock).toHaveBeenCalledTimes(2);
       const [apiEndpoint, payload] = axiosPostMock.mock.calls[0];
       expect(apiEndpoint).toBe(
-        'https://api.github.com/repos/elastic/kibana/pulls?access_token=undefined'
+        'https://api.github.com/repos/elastic/kibana/pulls'
       );
       expect(payload.title).toBe('[6.x] myCommitMessage (mySha)');
       expect(payload.body).toBe(
@@ -141,7 +141,7 @@ myPrSuffix`
       const [apiEndpoint, labels] = axiosPostMock.mock.calls[1];
 
       expect(apiEndpoint).toBe(
-        'https://api.github.com/repos/elastic/kibana/issues/1337/labels?access_token=undefined'
+        'https://api.github.com/repos/elastic/kibana/issues/1337/labels'
       );
       expect(labels).toEqual(['backport']);
     });

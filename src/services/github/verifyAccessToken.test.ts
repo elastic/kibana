@@ -19,7 +19,8 @@ describe('verifyAccessToken', () => {
     await verifyAccessToken(getDefaultOptions(options));
 
     expect(spy).toHaveBeenCalledWith(
-      'https://api.github.com/repos/elastic/kibana?access_token=myAccessToken'
+      'https://api.github.com/repos/elastic/kibana',
+      { auth: { password: 'myAccessToken', username: 'sqren' } }
     );
   });
 

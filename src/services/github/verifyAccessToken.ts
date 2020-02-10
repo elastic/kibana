@@ -15,6 +15,7 @@ function getSSOAuthUrl(error: GithubApiError) {
 }
 
 export async function verifyAccessToken({
+  username,
   accessToken,
   apiHostname,
   repoName,
@@ -22,7 +23,13 @@ export async function verifyAccessToken({
 }: ReturnType<typeof validateRequiredOptions>) {
   try {
     return await axios.head(
-      `https://${apiHostname}/repos/${repoOwner}/${repoName}?access_token=${accessToken}`
+      `https://${apiHostname}/repos/${repoOwner}/${repoName}`,
+      {
+        auth: {
+          username: username,
+          password: accessToken
+        }
+      }
     );
   } catch (e) {
     const error = e as GithubApiError;

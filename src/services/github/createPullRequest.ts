@@ -5,7 +5,7 @@ import { handleGithubError } from './handleGithubError';
 import { logger } from '../logger';
 
 export async function createPullRequest(
-  { apiHostname, repoName, repoOwner, accessToken }: BackportOptions,
+  { apiHostname, repoName, repoOwner, accessToken, username }: BackportOptions,
   payload: {
     title: string;
     body: string;
@@ -19,8 +19,14 @@ export async function createPullRequest(
 
   try {
     const res: AxiosResponse<GithubIssue> = await axios.post(
-      `https://${apiHostname}/repos/${repoOwner}/${repoName}/pulls?access_token=${accessToken}`,
-      payload
+      `https://${apiHostname}/repos/${repoOwner}/${repoName}/pulls`,
+      payload,
+      {
+        auth: {
+          username: username,
+          password: accessToken
+        }
+      }
     );
     return {
       html_url: res.data.html_url,

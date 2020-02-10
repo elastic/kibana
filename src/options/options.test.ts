@@ -35,7 +35,8 @@ describe('getOptions', () => {
   it('should check whether access token is valid', () => {
     expect(axiosHeadSpy).toHaveBeenCalledTimes(1);
     expect(axiosHeadSpy).toHaveBeenCalledWith(
-      'https://api.github.com/repos/elastic/kibana?access_token=myAccessToken'
+      'https://api.github.com/repos/elastic/kibana',
+      { auth: { password: 'myAccessToken', username: 'sqren' } }
     );
   });
 
