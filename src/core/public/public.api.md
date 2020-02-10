@@ -99,6 +99,7 @@ export interface ApplicationStart {
     capabilities: RecursiveReadonly<Capabilities>;
     getUrlForApp(appId: string, options?: {
         path?: string;
+        absolute?: boolean;
     }): string;
     navigateToApp(appId: string, options?: {
         path?: string;
