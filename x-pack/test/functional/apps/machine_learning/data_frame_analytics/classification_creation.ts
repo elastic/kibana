@@ -11,41 +11,41 @@ export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
-  describe('regression creation', function() {
+  describe('classification creation', function() {
     this.tags(['smoke']);
     before(async () => {
-      await esArchiver.load('ml/egs_regression');
+      await esArchiver.load('ml/bm_classification');
     });
 
     after(async () => {
       await ml.api.cleanMlIndices();
-      await esArchiver.unload('ml/egs_regression');
+      await esArchiver.unload('ml/bm_classification');
     });
 
     const testDataList = [
       {
-        suiteTitle: 'electrical grid stability',
-        jobType: 'regression',
-        jobId: `egs_1_${Date.now()}`,
-        jobDescription: 'This is the job description',
-        source: 'egs_regression',
+        suiteTitle: 'bank marketing',
+        jobType: 'classification',
+        jobId: `bm_1_${Date.now()}`,
+        jobDescription:
+          "Classification job based on 'bank-marketing' dataset with dependentVariable 'y' and trainingPercent '20'",
+        source: 'bank-marketing*',
         get destinationIndex(): string {
           return `dest_${this.jobId}`;
         },
-        dependentVariable: 'stab',
+        dependentVariable: 'y',
         trainingPercent: '20',
         modelMemory: '105mb',
         createIndexPattern: true,
         expected: {
           row: {
-            type: 'regression',
+            type: 'classification',
             status: 'stopped',
             progress: '100',
           },
         },
       },
     ];
-
     for (const testData of testDataList) {
       describe(`${testData.suiteTitle}`, function() {
         after(async () => {
@@ -165,8 +165,8 @@ export default function({ getService }: FtrProviderContext) {
 
         it('displays the results view for created job', async () => {
           await ml.dataFrameAnalyticsTable.openResultsView();
-          await ml.dataFrameAnalytics.assertRegressionEvaluatePanelElementsExists();
-          await ml.dataFrameAnalytics.assertRegressionTablePanelExists();
+          await ml.dataFrameAnalytics.assertClassificationEvaluatePanelElementsExists();
+          await ml.dataFrameAnalytics.assertClassificationTablePanelExists();
         });
       });
     }
