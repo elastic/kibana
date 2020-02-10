@@ -23,7 +23,7 @@ import { HomePlugin } from './plugin';
 (async () => {
   const instance = new HomePlugin();
   instance.setup(npSetup.core, {
-    ...(npSetup.plugins as any),
+    ...npSetup.plugins,
     __LEGACY: {
       metadata: npStart.core.injectedMetadata.getLegacyMetadata(),
     },

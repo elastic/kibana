@@ -51,12 +51,10 @@ export default function() {
         '--optimize.watchPrebuild=true',
         '--status.allowAnonymous=true',
         '--optimize.enabled=true',
-        '--usageCollection.uiMetric.enabled=false',
         `--elasticsearch.hosts=${formatUrl(servers.elasticsearch)}`,
         `--elasticsearch.username=${kibanaServerTestUser.username}`,
         `--elasticsearch.password=${kibanaServerTestUser.password}`,
         `--home.disableWelcomeScreen=true`,
-        '--telemetry.enabled=false',
         '--telemetry.banner=false',
         `--server.maxPayloadBytes=1679958`,
         // newsfeed mock service
