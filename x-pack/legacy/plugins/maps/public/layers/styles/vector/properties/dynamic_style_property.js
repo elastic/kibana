@@ -7,7 +7,11 @@
 import _ from 'lodash';
 import { AbstractStyleProperty } from './style_property';
 import { DEFAULT_SIGMA } from '../vector_style_defaults';
-import { COLOR_PALETTE_MAX_SIZE, STYLE_TYPE } from '../../../../../common/constants';
+import {
+  COLOR_PALETTE_MAX_SIZE,
+  DEFAULT_COUNTABLE_SCALE,
+  STYLE_TYPE,
+} from '../../../../../common/constants';
 import { scaleValue, getComputedFieldName } from '../style_util';
 import React from 'react';
 import { OrdinalLegend } from './components/ordinal_legend';
@@ -182,7 +186,7 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
 
     if (fieldMetaData.type_count && typeof fieldMetaData.type_count.value === 'number') {
       const min = 0;
-      const max = Math.ceil(fieldMetaData.type_count.value / 1024);
+      const max = Math.ceil(fieldMetaData.type_count.value / DEFAULT_COUNTABLE_SCALE);
       return {
         min: min,
         max: max,

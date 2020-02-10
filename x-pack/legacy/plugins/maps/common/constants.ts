@@ -56,7 +56,7 @@ export const SORT_ORDER = {
   DESC: 'desc',
 };
 
-//sources
+// sources
 export const EMS_TMS = 'EMS_TMS';
 export const EMS_FILE = 'EMS_FILE';
 export const ES_GEO_GRID = 'ES_GEO_GRID';
@@ -168,3 +168,5 @@ export const SYMBOLIZE_AS_TYPES = {
 };
 
 export const DEFAULT_ICON = 'airfield';
+
+export const DEFAULT_COUNTABLE_SCALE = 2048;
