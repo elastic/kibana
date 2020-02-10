@@ -20,7 +20,7 @@
 import React from 'react';
 import Header from './header';
 import HistoricalList from './historical_list';
-import Footer from './footer';
+// import Footer from './footer';
 
 export default function App({ testRunnerTypes, buildStats, historicalItems, currentJobNumber}) {
   const { url } = buildStats;
@@ -34,7 +34,7 @@ export default function App({ testRunnerTypes, buildStats, historicalItems, curr
           currentJobNumber={currentJobNumber}
         />
       </div>
-      <Footer />
+      {/*<Footer />*/}
     </div>
   );
 }

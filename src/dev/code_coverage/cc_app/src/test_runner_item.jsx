@@ -17,5 +17,5 @@ export default function TestRunnerItem ({item}) {
 }
 
 function href(item) {
- return `target/kibana-coverage/${item.type}-combined/index.html`;
+  return `target/kibana-coverage/${item.type}-combined/index.html`;
 }
