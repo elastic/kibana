@@ -13,7 +13,7 @@ import { actionTypeRegistryMock } from '../action_type_registry.mock';
 import { actionExecutorMock } from './action_executor.mock';
 import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/mocks';
 import { savedObjectsClientMock, loggingServiceMock } from 'src/core/server/mocks';
-import { createEventLoggerMock } from '../../../event_log/server/event_logger.mock';
+import { eventLoggerMock } from '../../../event_log/server/mocks';
 
 const spaceIdToNamespace = jest.fn();
 const actionTypeRegistry = actionTypeRegistryMock.create();
@@ -59,7 +59,7 @@ const actionExecutorInitializerParams = {
   getServices: jest.fn().mockReturnValue(services),
   actionTypeRegistry,
   encryptedSavedObjectsPlugin: mockedEncryptedSavedObjectsPlugin,
-  eventLogger: createEventLoggerMock(),
+  eventLogger: eventLoggerMock.create(),
 };
 const taskRunnerFactoryInitializerParams = {
   spaceIdToNamespace,
