@@ -11,9 +11,12 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
 
   describe('Endpoint Policy List', () => {
-    it('Loads the Policy List Page', async () => {
+    it('loads the Policy List Page', async () => {
       await pageObjects.common.navigateToUrlWithBrowserHistory('endpoint', '/policy');
-      await testSubjects.existOrFail('policyViewTitle');
+      await testSubjects.existOrFail('policyListPage');
+    });
+    it('displays page title', async () => {
+      await pageObjects.common.navigateToUrlWithBrowserHistory('endpoint', '/policy');
       const policyTitle = await testSubjects.getVisibleText('policyViewTitle');
       expect(policyTitle).to.equal('Policies');
     });

@@ -141,7 +141,7 @@ export const PolicyList = React.memo(() => {
   );
 
   return (
-    <EuiPage>
+    <EuiPage data-test-subj="policyListPage">
       <EuiPageBody>
         <EuiPageContent>
           <EuiPageContentHeader>
