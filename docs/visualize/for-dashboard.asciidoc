@@ -27,12 +27,6 @@ The Markdown tool is a text entry field that accepts GitHub-flavored Markdown te
 
 For example, when you enter:
 
-[source,text]
-----------------------------------
-### Sample Flight data
-This dashboard contains sample data for you to play with. You can view it, search it, and interact with the visualizations. For more information about Kibana, check our [docs](https://www.elastic.co/guide/en/kibana/current/index.html).
-----------------------------------
-
 The following displays:
 
 [role="screenshot"]
