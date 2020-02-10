@@ -47,13 +47,8 @@ interface SearchBarInjectedDeps {
   timeHistory: TimeHistoryContract;
   // Filter bar
   onFiltersUpdated?: (filters: esFilters.Filter[]) => void;
-  // Date picker
-  dateRangeFrom?: string;
-  dateRangeTo?: string;
   // Autorefresh
   onRefreshChange?: (options: { isPaused: boolean; refreshInterval: number }) => void;
-  isRefreshPaused?: boolean;
-  refreshInterval?: number;
 }
 
 export interface SearchBarOwnProps {
@@ -69,6 +64,11 @@ export interface SearchBarOwnProps {
   showDatePicker?: boolean;
   showAutoRefreshOnly?: boolean;
   filters?: esFilters.Filter[];
+  // Date picker
+  isRefreshPaused?: boolean;
+  refreshInterval?: number;
+  dateRangeFrom?: string;
+  dateRangeTo?: string;
   // Query bar - should be in SearchBarInjectedDeps
   query?: Query;
   // Show when user has privileges to save
