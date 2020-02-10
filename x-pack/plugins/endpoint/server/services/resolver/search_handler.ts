@@ -67,5 +67,5 @@ export abstract class BaseSearchHandler {
     };
   }
 
-  abstract buildResponse(hits: ResolverDataHit[], total: Total): Promise<ResolverResponse>;
+  abstract async buildResponse(hits: ResolverDataHit[], total: Total): Promise<ResolverResponse>;
 }

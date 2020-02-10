@@ -3,6 +3,13 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
+/**
+ * Including multiple test classes in this file to avoid having to put them in their own *.test.ts file. If I do that
+ * CI will complain about having a test file without any tests.
+ */
+/* eslint-disable max-classes-per-file */
+
 import {
   elasticsearchServiceMock,
   loggingServiceMock,
@@ -16,9 +23,89 @@ import { PaginationInfo, getPagination } from './query_builder';
 import { CountResponse } from 'elasticsearch';
 import { ResolverDataHit, parseLegacyEntityID, buildLegacyEntityID } from './common';
 import { ResolverData, BaseResult } from '../../../common/types';
-import { EventBuilder } from './event_builder.test';
-import { LegacyBuilder } from './legacy_builder.test';
-import { ElasticEndpointBuilder } from './es_endpoint_builder.test';
+
+export interface EventBuilder {
+  startNewChildNode(): void;
+  buildChildEvent(): ResolverData;
+  buildOriginEvent(): ResolverData;
+}
+
+export class LegacyBuilder implements EventBuilder {
+  private childEntityID: number;
+
+  constructor(
+    private readonly endpointID: string,
+    private readonly originEntityID: number,
+    private readonly originParentEntityID: number
+  ) {
+    this.childEntityID = this.originEntityID + 1;
+  }
+
+  private createEvent(entityID: number, parentEntityID: number) {
+    return {
+      endgame: {
+        event_type_full: 'process_event',
+        event_subtype_full: 'creation_event',
+        unique_pid: entityID,
+        unique_ppid: parentEntityID,
+      },
+      agent: {
+        id: this.endpointID,
+      },
+    };
+  }
+
+  buildChildEvent(): ResolverData {
+    const entityID = this.childEntityID;
+    return this.createEvent(entityID, this.originEntityID);
+  }
+
+  startNewChildNode() {
+    this.childEntityID += 1;
+  }
+
+  buildOriginEvent(): ResolverData {
+    return this.createEvent(this.originEntityID, this.originParentEntityID);
+  }
+}
+
+class ElasticEndpointBuilder implements EventBuilder {
+  private childCounter: number = 0;
+  constructor(
+    private readonly originEntityID: string,
+    private readonly originParentEntityID: string
+  ) {}
+
+  createEvent(entityID: string, parentEntityID: string) {
+    return {
+      event: {
+        category: 'process',
+        type: 'start',
+      },
+      endpoint: {
+        process: {
+          entity_id: entityID,
+          parent: {
+            entity_id: parentEntityID,
+          },
+        },
+      },
+    };
+  }
+
+  buildChildEvent(): ResolverData {
+    const entityID = this.originEntityID + String(this.childCounter);
+    return this.createEvent(entityID, this.originEntityID);
+  }
+
+  startNewChildNode() {
+    this.childCounter += 1;
+  }
+
+  buildOriginEvent(): ResolverData {
+    return this.createEvent(this.originEntityID, this.originParentEntityID);
+  }
+}
 
 function buildPageInfo(page?: number, pageSize?: number): PaginationInfo {
   return {
