@@ -15,7 +15,7 @@ import { fieldToName } from '../waffle/lib/field_to_display_name';
 import { NodeContextMenu } from '../waffle/node_context_menu';
 import { InventoryItemType } from '../../../common/inventory_models/types';
 import { SnapshotNode, SnapshotNodePath } from '../../../common/http_api/snapshot_api';
-import { ROOT_ELEMENT_ID } from '../../app';
+import { CONTAINER_CLASSNAME } from '../../apps/start_app';
 
 interface Props {
   nodes: SnapshotNode[];
@@ -57,10 +57,13 @@ export const TableView = (props: Props) => {
   );
 
   useEffect(() => {
-    if (openPopovers.length > 0) {
-      document.getElementById(ROOT_ELEMENT_ID)!.style.overflowY = 'hidden';
-    } else {
-      document.getElementById(ROOT_ELEMENT_ID)!.style.overflowY = 'auto';
+    const el = document.getElementsByClassName(CONTAINER_CLASSNAME)[0];
+    if (el instanceof HTMLElement) {
+      if (openPopovers.length > 0) {
+        el.style.overflowY = 'hidden';
+      } else {
+        el.style.overflowY = 'auto';
+      }
     }
   }, [openPopovers]);
 

@@ -27,6 +27,8 @@ import {
   KibanaContextProvider,
 } from '../../../../../src/plugins/kibana_react/public';
 
+export const CONTAINER_CLASSNAME = 'infra-container-element';
+
 // Get the basePath with space ID etc, but without the actual route.
 const getRouterBasePath = (appBasePath: string) => {
   let basePath: string = '';
@@ -85,6 +87,7 @@ export async function startApp(
   // expected.
   element.style.height = '100%';
   element.style.display = 'flex';
+  element.className += ` ${CONTAINER_CLASSNAME}`;
 
   ReactDOM.render(<App />, element);
 
