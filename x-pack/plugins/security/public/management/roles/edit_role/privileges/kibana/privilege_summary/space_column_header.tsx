@@ -6,9 +6,7 @@
 import React, { Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { SpaceAvatar } from 'plugins/spaces/space_avatar';
-import { Space } from '../../../../../../../../spaces/common/model/space';
-
+import { Space, SpaceAvatar } from '../../../../../../../../spaces/public';
 import { RoleKibanaPrivilege } from '../../../../../../../common/model';
 import { isGlobalPrivilegeDefinition } from '../../../privilege_utils';
 import { SpacesPopoverList } from '../../../spaces_popover_list';

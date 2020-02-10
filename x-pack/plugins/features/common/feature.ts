@@ -38,6 +38,10 @@ export class Feature {
     return this.config.icon;
   }
 
+  public get validLicenses() {
+    return this.config.validLicenses;
+  }
+
   public get privileges() {
     return this.config.privileges;
   }

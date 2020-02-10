@@ -26,16 +26,7 @@ import {
 import { FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
 import React, { Component, Fragment } from 'react';
 import { Space } from '../../../../../../../../spaces/public';
-import { Feature } from '../../../../../../../../features/public';
-import { KibanaPrivileges, Role, copyRole } from '../../../../../../../common/model';
-import {
-  AllowedPrivilege,
-  KibanaPrivilegeCalculatorFactory,
-  PrivilegeExplanation,
-} from '../kibana_privilege_calculator';
-import { hasAssignedFeaturePrivileges } from '../../../privilege_utils';
-import { CUSTOM_PRIVILEGE_VALUE } from '../constants';
-import { FeatureTable } from '../feature_table';
+import { Role, copyRole } from '../../../../../../../common/model';
 import { SpaceSelector } from './space_selector';
 import { FeatureTable } from '../feature_table';
 import { CUSTOM_PRIVILEGE_VALUE } from '../constants';

@@ -17,15 +17,13 @@ import _ from 'lodash';
 import React, { Component, Fragment } from 'react';
 import { Capabilities } from 'src/core/public';
 import { Space } from '../../../../../../../../spaces/public';
-import { Feature } from '../../../../../../../../features/public';
-import { KibanaPrivileges, Role, isReservedRole } from '../../../../../../../common/model';
-import { KibanaPrivilegeCalculatorFactory } from '../kibana_privilege_calculator';
+import { Role, isReservedRole } from '../../../../../../../common/model';
 import { RoleValidator } from '../../../validate_role';
 import { PrivilegeSpaceTable } from './privilege_space_table';
 import { PrivilegeSpaceForm } from './privilege_space_form';
 import { PrivilegeTableCalculator } from '../privilege_calculator';
 import { PrivilegeSummary } from '../privilege_summary';
-import { KibanaPrivileges, SecuredFeature } from '../../../../model';
+import { SecuredFeature, KibanaPrivileges } from '../../../../model';
 
 interface Props {
   kibanaPrivileges: KibanaPrivileges;
