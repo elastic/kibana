@@ -27,7 +27,6 @@ exports[`TooltipControl render should render hover tooltip 1`] = `
     Array [
       Object {
         "canShowTooltip": [Function],
-        "getFeatureById": [Function],
         "getId": [Function],
         "getMbLayerIds": [Function],
       },
@@ -41,11 +40,9 @@ exports[`TooltipControl render should render hover tooltip 1`] = `
   }
   mbMap={
     Object {
-      "getBounds": [Function],
       "getLayer": [Function],
       "off": [Function],
       "on": [Function],
-      "project": [Function],
       "queryRenderedFeatures": [Function],
     }
   }
@@ -77,7 +74,6 @@ exports[`TooltipControl render should render locked tooltip 1`] = `
     Array [
       Object {
         "canShowTooltip": [Function],
-        "getFeatureById": [Function],
         "getId": [Function],
         "getMbLayerIds": [Function],
       },
@@ -91,11 +87,9 @@ exports[`TooltipControl render should render locked tooltip 1`] = `
   }
   mbMap={
     Object {
-      "getBounds": [Function],
       "getLayer": [Function],
       "off": [Function],
       "on": [Function],
-      "project": [Function],
       "queryRenderedFeatures": [Function],
     }
   }

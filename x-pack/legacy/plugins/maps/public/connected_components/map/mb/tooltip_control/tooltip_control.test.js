@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-jest.mock('../../features_tooltip/features_tooltip', () => ({
-  FeaturesTooltip: () => {
-    return <div>mockFeaturesTooltip</div>;
+jest.mock('./tooltip_popover', () => ({
+  TooltipPopover: () => {
+    return <div>mockTooltipPopover</div>;
   },
 }));
 
@@ -17,8 +17,6 @@ import { TooltipControl } from './tooltip_control';
 
 // mutable map state
 let featuresAtLocation;
-let mapCenter;
-let mockMbMapBounds;
 
 const layerId = 'tfi3f';
 const mbLayerId = 'tfi3f_circle';
@@ -32,47 +30,15 @@ const mockLayer = {
   canShowTooltip: () => {
     return true;
   },
-  getFeatureById: () => {
-    return {
-      geometry: {
-        type: 'Point',
-        coordinates: [102.0, 0.5],
-      },
-    };
-  },
 };
 
 const mockMbMapHandlers = {};
 const mockMBMap = {
-  project: lonLatArray => {
-    const lonDistanceFromCenter = Math.abs(lonLatArray[0] - mapCenter[0]);
-    const latDistanceFromCenter = Math.abs(lonLatArray[1] - mapCenter[1]);
-    return {
-      x: lonDistanceFromCenter * 100,
-      y: latDistanceFromCenter * 100,
-    };
-  },
   on: (eventName, callback) => {
     mockMbMapHandlers[eventName] = callback;
   },
   off: eventName => {
     delete mockMbMapHandlers[eventName];
-  },
-  getBounds: () => {
-    return {
-      getNorth: () => {
-        return mockMbMapBounds.north;
-      },
-      getSouth: () => {
-        return mockMbMapBounds.south;
-      },
-      getWest: () => {
-        return mockMbMapBounds.west;
-      },
-      getEast: () => {
-        return mockMbMapBounds.east;
-      },
-    };
   },
   getLayer: () => {},
   queryRenderedFeatures: () => {
@@ -123,13 +89,6 @@ const lockedTooltipState = {
 describe('TooltipControl', () => {
   beforeEach(() => {
     featuresAtLocation = [];
-    mapCenter = [0, 0];
-    mockMbMapBounds = {
-      west: -180,
-      east: 180,
-      north: 90,
-      south: -90,
-    };
   });
 
   describe('render', () => {

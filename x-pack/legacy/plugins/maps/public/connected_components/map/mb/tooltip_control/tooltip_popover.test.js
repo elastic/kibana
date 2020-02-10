@@ -20,26 +20,6 @@ let mapCenter;
 let mockMbMapBounds;
 
 const layerId = 'tfi3f';
-const mbLayerId = 'tfi3f_circle';
-const mockLayer = {
-  getMbLayerIds: () => {
-    return [mbLayerId];
-  },
-  getId: () => {
-    return layerId;
-  },
-  canShowTooltip: () => {
-    return true;
-  },
-  getFeatureById: () => {
-    return {
-      geometry: {
-        type: 'Point',
-        coordinates: [102.0, 0.5],
-      },
-    };
-  },
-};
 
 const mockMbMapHandlers = {};
 const mockMBMap = {
@@ -73,13 +53,12 @@ const mockMBMap = {
       },
     };
   },
-  getLayer: () => {},
 };
 
 const defaultProps = {
   mbMap: mockMBMap,
   closeTooltip: () => {},
-  layerList: [mockLayer],
+  layerList: [],
   isDrawingFilter: false,
   addFilters: () => {},
   geoFields: [{}],
