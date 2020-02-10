@@ -1,0 +1,238 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`TooltipHeader multiple features, multiple layers: locked should show pagination controls, features count, layer select, and close button 1`] = `
+<Fragment>
+  <EuiFlexGroup
+    alignItems="center"
+    gutterSize="s"
+  >
+    <EuiFlexItem
+      grow={false}
+      key="pagination"
+    >
+      <EuiPagination
+        activePage={0}
+        compressed={true}
+        onPageClick={[Function]}
+        pageCount={3}
+      />
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+      key="pageNumber"
+    >
+      <EuiTextColor
+        color="subdued"
+      >
+        <FormattedMessage
+          defaultMessage="{pageNumber} of {total}"
+          id="xpack.maps.tooltip.pageNumerText"
+          values={
+            Object {
+              "pageNumber": 1,
+              "total": 3,
+            }
+          }
+        />
+      </EuiTextColor>
+    </EuiFlexItem>
+    <EuiFlexItem
+      key="layerSelect"
+    >
+      <EuiFormRow
+        describedByIds={Array []}
+        display="rowCompressed"
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        labelType="label"
+      >
+        <EuiSelect
+          aria-label="Filter results by layer"
+          compressed={true}
+          fullWidth={true}
+          onChange={[Function]}
+          options={
+            Array [
+              Object {
+                "text": "All layers",
+                "value": "_ALL_LAYERS_",
+              },
+              Object {
+                "text": "(2) display + layer1",
+                "value": "layer1",
+              },
+              Object {
+                "text": "(1) display + layer2",
+                "value": "layer2",
+              },
+            ]
+          }
+          value="_ALL_LAYERS_"
+        />
+      </EuiFormRow>
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+      key="closeButton"
+    >
+      <EuiButtonIcon
+        aria-label="Close tooltip"
+        data-test-subj="mapTooltipCloseButton"
+        iconType="cross"
+        onClick={[Function]}
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiHorizontalRule
+    margin="xs"
+  />
+</Fragment>
+`;
+
+exports[`TooltipHeader multiple features, multiple layers: mouseover (unlocked) should only show features count 1`] = `
+<Fragment>
+  <EuiFlexGroup
+    alignItems="center"
+    gutterSize="s"
+  >
+    <EuiFlexItem
+      grow={true}
+      key="pageNumber"
+    >
+      <EuiTextColor
+        color="subdued"
+      >
+        <FormattedMessage
+          defaultMessage="{pageNumber} of {total}"
+          id="xpack.maps.tooltip.pageNumerText"
+          values={
+            Object {
+              "pageNumber": 1,
+              "total": 3,
+            }
+          }
+        />
+      </EuiTextColor>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiHorizontalRule
+    margin="xs"
+  />
+</Fragment>
+`;
+
+exports[`TooltipHeader multiple features, single layer: locked should show pagination controls, features count, and close button 1`] = `
+<Fragment>
+  <EuiFlexGroup
+    alignItems="center"
+    gutterSize="s"
+  >
+    <EuiFlexItem
+      grow={false}
+      key="pagination"
+    >
+      <EuiPagination
+        activePage={0}
+        compressed={true}
+        onPageClick={[Function]}
+        pageCount={2}
+      />
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={true}
+      key="pageNumber"
+    >
+      <EuiTextColor
+        color="subdued"
+      >
+        <FormattedMessage
+          defaultMessage="{pageNumber} of {total}"
+          id="xpack.maps.tooltip.pageNumerText"
+          values={
+            Object {
+              "pageNumber": 1,
+              "total": 2,
+            }
+          }
+        />
+      </EuiTextColor>
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+      key="closeButton"
+    >
+      <EuiButtonIcon
+        aria-label="Close tooltip"
+        data-test-subj="mapTooltipCloseButton"
+        iconType="cross"
+        onClick={[Function]}
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiHorizontalRule
+    margin="xs"
+  />
+</Fragment>
+`;
+
+exports[`TooltipHeader multiple features, single layer: mouseover (unlocked) should only show features count 1`] = `
+<Fragment>
+  <EuiFlexGroup
+    alignItems="center"
+    gutterSize="s"
+  >
+    <EuiFlexItem
+      grow={true}
+      key="pageNumber"
+    >
+      <EuiTextColor
+        color="subdued"
+      >
+        <FormattedMessage
+          defaultMessage="{pageNumber} of {total}"
+          id="xpack.maps.tooltip.pageNumerText"
+          values={
+            Object {
+              "pageNumber": 1,
+              "total": 2,
+            }
+          }
+        />
+      </EuiTextColor>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiHorizontalRule
+    margin="xs"
+  />
+</Fragment>
+`;
+
+exports[`TooltipHeader single feature: locked should show close button when locked 1`] = `
+<Fragment>
+  <EuiFlexGroup
+    alignItems="center"
+    gutterSize="s"
+  >
+    <EuiFlexItem
+      key="spacer"
+    />
+    <EuiFlexItem
+      grow={false}
+      key="closeButton"
+    >
+      <EuiButtonIcon
+        aria-label="Close tooltip"
+        data-test-subj="mapTooltipCloseButton"
+        iconType="cross"
+        onClick={[Function]}
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiHorizontalRule
+    margin="xs"
+  />
+</Fragment>
+`;
+
+exports[`TooltipHeader single feature: mouseover (unlocked) should not render header 1`] = `""`;

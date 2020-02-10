@@ -11,13 +11,14 @@ import { MapEmbeddable } from './map_embeddable';
 import { indexPatternService } from '../kibana_services';
 import { createMapPath, MAP_SAVED_OBJECT_TYPE, APP_ICON } from '../../common/constants';
 import { mergeInputWithSavedMap } from './merge_input_with_saved_map';
-import '../angular/services/gis_map_saved_object_loader';
 
-// Legacy maps dependencies
 import { createMapStore } from '../reducers/store';
 import { addLayerWithoutDataSync } from '../actions/map_actions';
 import { getQueryableUniqueIndexPatternIds } from '../selectors/map_selectors';
-import { getInitialLayers } from '../angular/get_initial_layers';
+
+// TODO
+// import '../angular/services/gis_map_saved_object_loader';
+// import { getInitialLayers } from '../angular/get_initial_layers';
 
 export class MapEmbeddableFactory extends EmbeddableFactory {
   type = MAP_SAVED_OBJECT_TYPE;
@@ -94,12 +95,12 @@ export class MapEmbeddableFactory extends EmbeddableFactory {
 
   async createFromSavedObject(savedObjectId, input, parent) {
     const savedMap = await this._fetchSavedMap(savedObjectId);
-    const layerList = getInitialLayers(savedMap.layerListJSON);
+    // const layerList = getInitialLayers(savedMap.layerListJSON);
     const indexPatterns = await this._getIndexPatterns(layerList);
 
     const embeddable = new MapEmbeddable(
       {
-        layerList,
+        // layerList,
         title: savedMap.title,
         editUrl: this.addBasePath(createMapPath(savedObjectId)),
         indexPatterns,

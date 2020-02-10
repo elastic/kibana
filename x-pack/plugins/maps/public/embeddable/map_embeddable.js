@@ -13,14 +13,11 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import {
   Embeddable,
   APPLY_FILTER_TRIGGER,
-} from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
-import { onlyDisabledFiltersChanged } from '../../../../../../src/plugins/data/public';
-
-import { I18nContext } from 'ui/i18n';
+} from '../../../../../src/plugins/embeddable/public';
+import { onlyDisabledFiltersChanged } from '../../../../../src/plugins/data/public';
 
 import { GisMap } from '../connected_components/gis_map';
 import { createMapStore } from '../reducers/store';
-import { npStart } from 'ui/new_platform';
 import {
   setGotoWithCenter,
   replaceLayerList,
@@ -39,6 +36,11 @@ import { getIsLayerTOCOpen, getOpenTOCDetails } from '../selectors/ui_selectors'
 import { getInspectorAdapters, setEventHandlers } from '../reducers/non_serializable_instances';
 import { getMapCenter, getMapZoom, getHiddenLayerIds } from '../selectors/map_selectors';
 import { MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
+
+// TODO
+import { I18nContext } from 'ui/i18n';
+import { npStart } from 'ui/new_platform';
+
 
 export class MapEmbeddable extends Embeddable {
   type = MAP_SAVED_OBJECT_TYPE;
