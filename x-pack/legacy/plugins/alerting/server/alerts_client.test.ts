@@ -802,10 +802,6 @@ describe('create()', () => {
 
   test(`doesn't create API key for disabled alerts`, async () => {
     const data = getMockData({ enabled: false });
-    alertsClientParams.createAPIKey.mockResolvedValueOnce({
-      apiKeysEnabled: true,
-      result: { id: '123', api_key: 'abc' },
-    });
     savedObjectsClient.bulkGet.mockResolvedValueOnce({
       saved_objects: [
         {
