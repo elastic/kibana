@@ -14,7 +14,7 @@ import { useUrlParams } from '../../../hooks';
 import {
   esKuery,
   IIndexPattern,
-  autocomplete,
+  QuerySuggestion,
   DataPublicPluginStart,
 } from '../../../../../../../../src/plugins/data/public';
 
@@ -23,7 +23,7 @@ const Container = styled.div`
 `;
 
 interface State {
-  suggestions: autocomplete.QuerySuggestion[];
+  suggestions: QuerySuggestion[];
   isLoadingIndexPattern: boolean;
 }
 
