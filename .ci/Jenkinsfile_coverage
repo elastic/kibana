@@ -66,6 +66,9 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
                   # Return to project root
                   cd ..
 
+                  echo '### List ./target/kibana-coverage'
+                  ls -R ./target/kibana-coverage
+
                   . src/dev/code_coverage/shell_scripts/extract_archives.sh
 
                   . src/dev/code_coverage/shell_scripts/extract_xpack_tests.sh
