@@ -54,7 +54,7 @@ export interface RenderDeps {
   navigation: NavigationStart;
   savedObjectsClient: SavedObjectsClientContract;
   savedDashboards: SavedObjectLoader;
-  dashboardConfig: any;
+  dashboardConfig: KibanaLegacyStart['dashboardConfig'];
   dashboardCapabilities: any;
   uiSettings: IUiSettingsClient;
   chrome: ChromeStart;

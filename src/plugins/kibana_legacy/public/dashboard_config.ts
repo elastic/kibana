@@ -17,11 +17,13 @@
  * under the License.
  */
 
-import { uiModules } from 'ui/modules';
-import { capabilities } from 'ui/capabilities';
+export interface DashboardConfig {
+  turnHideWriteControlsOn(): void;
+  getHideWriteControls(): boolean;
+}
 
-export function dashboardConfigProvider() {
-  let hideWriteControls = !capabilities.get().dashboard.showWriteControls;
+export function getDashboardConfig(hideWriteControls: boolean): DashboardConfig {
+  let _hideWriteControls = hideWriteControls;
 
   return {
     /**
@@ -29,16 +31,10 @@ export function dashboardConfigProvider() {
      * @type {boolean}
      */
     turnHideWriteControlsOn() {
-      hideWriteControls = true;
+      _hideWriteControls = true;
     },
-    $get() {
-      return {
-        getHideWriteControls() {
-          return hideWriteControls;
-        },
-      };
+    getHideWriteControls() {
+      return _hideWriteControls;
     },
   };
 }
-
-uiModules.get('kibana').provider('dashboardConfig', dashboardConfigProvider);
