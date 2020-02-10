@@ -39,7 +39,7 @@ export default function HistoricalList({testRunnerTypes, historicalItems, curren
     <div className="font-bold text-xl mb-2">
       Historical Items - Compare to Current? [{currentJobNumber}]
       <ul>
-        {historicalItems.map((x, i) => renderWithRunners(currentJobNumber)(x, i))}
+        {historicalItems.reverse().map((x, i) => renderWithRunners(currentJobNumber)(x, i))}
       </ul>
     </div>
      );
