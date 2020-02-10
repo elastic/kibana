@@ -9,6 +9,7 @@ import { coreMock, httpServerMock } from '../../../../src/core/server/mocks';
 import { licensingMock } from '../../licensing/server/mocks';
 import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/mocks';
 import { taskManagerMock } from '../../task_manager/server/mocks';
+import { eventLogMock } from '../../event_log/server/mocks';
 
 describe('Actions Plugin', () => {
   describe('setup()', () => {
@@ -24,16 +25,7 @@ describe('Actions Plugin', () => {
         taskManager: taskManagerMock.createSetup(),
         encryptedSavedObjects: encryptedSavedObjectsMock.createSetup(),
         licensing: licensingMock.createSetup(),
-        // TODO: Pull event log mock once https://github.com/elastic/kibana/pull/57048 merged
-        event_log: {
-          isEnabled: jest.fn(),
-          isLoggingEntries: jest.fn(),
-          isIndexingEntries: jest.fn(),
-          registerProviderActions: jest.fn(),
-          isProviderActionRegistered: jest.fn(),
-          getProviderActions: jest.fn(),
-          getLogger: jest.fn(),
-        },
+        event_log: eventLogMock.createSetup(),
       };
     });
 
@@ -105,16 +97,7 @@ describe('Actions Plugin', () => {
         taskManager: taskManagerMock.createSetup(),
         encryptedSavedObjects: encryptedSavedObjectsMock.createSetup(),
         licensing: licensingMock.createSetup(),
-        // TODO: Pull event log mock once https://github.com/elastic/kibana/pull/57048 merged
-        event_log: {
-          isEnabled: jest.fn(),
-          isLoggingEntries: jest.fn(),
-          isIndexingEntries: jest.fn(),
-          registerProviderActions: jest.fn(),
-          isProviderActionRegistered: jest.fn(),
-          getProviderActions: jest.fn(),
-          getLogger: jest.fn(),
-        },
+        event_log: eventLogMock.createSetup(),
       };
       pluginsStart = {
         taskManager: taskManagerMock.createStart(),
