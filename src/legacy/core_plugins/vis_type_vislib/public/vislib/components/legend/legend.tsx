@@ -22,7 +22,7 @@ import { compact, uniq, map } from 'lodash';
 
 import { i18n } from '@kbn/i18n';
 import { EuiPopoverProps, EuiIcon, keyCodes, htmlIdGenerator } from '@elastic/eui';
-import { IAggConfig } from 'ui/agg_types';
+import { IAggConfig } from '../../../../../data/public';
 
 // @ts-ignore
 import { createFiltersFromEvent } from '../../../../../data/public/actions/filters/create_filters_from_event';
@@ -31,6 +31,7 @@ import { VisLegendItem } from './legend_item';
 import { getPieNames } from './pie_utils';
 
 import { Vis } from '../../../../../visualizations/public';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { tabifyGetColumns } from '../../../../../../ui/public/agg_response/tabify/_get_columns';
 
 const getTableAggs = (vis: Vis): IAggConfig[] => {

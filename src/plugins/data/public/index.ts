@@ -45,11 +45,14 @@ import {
   UrlFormat,
   StringFormat,
   TruncateFormat,
+  serializeFieldFormat,
 } from '../common/field_formats';
 
 export const fieldFormats = {
   FieldFormat,
   FieldFormatsRegistry, // exported only for tests. Consider mock.
+
+  serializeFieldFormat,
 
   DEFAULT_CONVERTER_COLOR,
   HTML_CONTEXT_TYPE,
@@ -109,6 +112,7 @@ export * from './index_patterns';
 export * from './search';
 export * from './query';
 export * from './ui';
+export * from './field_formats';
 export {
   // es query
   esFilters,

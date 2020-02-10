@@ -17,15 +17,11 @@
  * under the License.
  */
 
-import { FieldFormatsStart } from '../../../public/field_formats';
 import { SerializedFieldFormat } from '../../../../expressions/common/types';
-import { fieldFormats } from '../index';
+import { IFieldFormat } from '../index';
 
 export { asPrettyString } from './as_pretty_string';
 export { getHighlightHtml, getHighlightRequest } from './highlight';
 export { serializeFieldFormat } from './serialize';
 
-export type FormatFactory = (
-  fieldFormatsService: FieldFormatsStart,
-  mapping?: SerializedFieldFormat
-) => fieldFormats.FieldFormat;
+export type FormatFactory = (mapping?: SerializedFieldFormat) => IFieldFormat;

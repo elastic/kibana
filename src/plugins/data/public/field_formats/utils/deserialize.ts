@@ -28,7 +28,8 @@ import {
   IpRangeKey,
 } from '../../../../../legacy/core_plugins/data/public/search/aggs/buckets/lib/ip_range';
 import { SerializedFieldFormat } from '../../../../expressions/common/types';
-import { fieldFormats } from '../../../common/index';
+import { FieldFormatId, FieldFormatsContentType, IFieldFormat } from '../..';
+import { FieldFormat } from '../../../common';
 import { FieldFormatsStart } from '../../../public/field_formats';
 import { getUiSettings } from '../../../public/services';
 import { FormatFactory } from '../../../common/field_formats/utils';
@@ -47,13 +48,13 @@ function isTermsFieldFormat(
 
 const getConfig = (key: string, defaultOverride?: any): any =>
   getUiSettings().get(key, defaultOverride);
-const DefaultFieldFormat = fieldFormats.FieldFormat.from(identity);
+const DefaultFieldFormat = FieldFormat.from(identity);
 
 const getFieldFormat = (
   fieldFormatsService: FieldFormatsStart,
-  id?: fieldFormats.IFieldFormatId,
+  id?: FieldFormatId,
   params: object = {}
-): fieldFormats.FieldFormat => {
+): IFieldFormat => {
   if (id) {
     const Format = fieldFormatsService.getType(id);
 
@@ -65,14 +66,17 @@ const getFieldFormat = (
   return new DefaultFieldFormat();
 };
 
-export const deserializeFieldFormat: FormatFactory = (fieldFormatsService, mapping) => {
+export const deserializeFieldFormat: FormatFactory = function(
+  this: FieldFormatsStart,
+  mapping?: SerializedFieldFormat
+) {
   if (!mapping) {
     return new DefaultFieldFormat();
   }
   const { id } = mapping;
   if (id === 'range') {
-    const RangeFormat = fieldFormats.FieldFormat.from((range: any) => {
-      const format = getFieldFormat(fieldFormatsService, id, mapping.params);
+    const RangeFormat = FieldFormat.from((range: any) => {
+      const format = getFieldFormat(this, id, mapping.params);
       const gte = '\u2265';
       const lt = '\u003c';
       return i18n.translate('data.aggTypes.buckets.ranges.rangesFormatMessage', {
@@ -88,30 +92,22 @@ export const deserializeFieldFormat: FormatFactory = (fieldFormatsService, mappi
     return new RangeFormat();
   } else if (id === 'date_range') {
     const nestedFormatter = mapping.params as SerializedFieldFormat;
-    const DateRangeFormat = fieldFormats.FieldFormat.from((range: DateRangeKey) => {
-      const format = getFieldFormat(
-        fieldFormatsService,
-        nestedFormatter.id,
-        nestedFormatter.params
-      );
+    const DateRangeFormat = FieldFormat.from((range: DateRangeKey) => {
+      const format = getFieldFormat(this, nestedFormatter.id, nestedFormatter.params);
       return convertDateRangeToString(range, format.convert.bind(format));
     });
     return new DateRangeFormat();
   } else if (id === 'ip_range') {
     const nestedFormatter = mapping.params as SerializedFieldFormat;
-    const IpRangeFormat = fieldFormats.FieldFormat.from((range: IpRangeKey) => {
-      const format = getFieldFormat(
-        fieldFormatsService,
-        nestedFormatter.id,
-        nestedFormatter.params
-      );
+    const IpRangeFormat = FieldFormat.from((range: IpRangeKey) => {
+      const format = getFieldFormat(this, nestedFormatter.id, nestedFormatter.params);
       return convertIPRangeToString(range, format.convert.bind(format));
     });
     return new IpRangeFormat();
   } else if (isTermsFieldFormat(mapping) && mapping.params) {
     const { params } = mapping;
-    const convert = (val: string, type: fieldFormats.ContentType) => {
-      const format = getFieldFormat(fieldFormatsService, params.id, mapping.params);
+    const convert = (val: string, type: FieldFormatsContentType) => {
+      const format = getFieldFormat(this, params.id, mapping.params);
 
       if (val === '__other__') {
         return params.otherBucketLabel;
@@ -125,9 +121,9 @@ export const deserializeFieldFormat: FormatFactory = (fieldFormatsService, mappi
 
     return {
       convert,
-      getConverterFor: (type: fieldFormats.ContentType) => (val: string) => convert(val, type),
-    } as fieldFormats.FieldFormat;
+      getConverterFor: (type: FieldFormatsContentType) => (val: string) => convert(val, type),
+    } as IFieldFormat;
   } else {
-    return getFieldFormat(fieldFormatsService, id, mapping.params);
+    return getFieldFormat(this, id, mapping.params);
   }
 };
