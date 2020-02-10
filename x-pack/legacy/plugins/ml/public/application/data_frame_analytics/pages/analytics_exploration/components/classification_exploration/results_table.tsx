@@ -401,7 +401,11 @@ export const ResultsTable: FC<Props> = React.memo(
         : searchError;
 
     return (
-      <EuiPanel grow={false} id="mlDataFrameAnalyticsTableResultsPanel">
+      <EuiPanel
+        grow={false}
+        id="mlDataFrameAnalyticsTableResultsPanel"
+        data-test-subj="mlDFAnalyticsClassificationExplorationTablePanel"
+      >
         <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="s">

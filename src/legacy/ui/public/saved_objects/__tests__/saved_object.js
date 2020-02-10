@@ -26,7 +26,7 @@ import { createSavedObjectClass } from '../saved_object';
 import StubIndexPattern from 'test_utils/stub_index_pattern';
 import { npStart } from 'ui/new_platform';
 import { InvalidJSONProperty } from '../../../../../plugins/kibana_utils/public';
-import { npSetup } from '../../new_platform/new_platform.karma_mock';
+import { npSetup, npStart as npStartMock } from '../../new_platform/new_platform.karma_mock';
 
 const getConfig = cfg => cfg;
 
@@ -89,18 +89,12 @@ describe('Saved Object', function() {
     obj[fName].restore && obj[fName].restore();
   }
 
-  beforeEach(
-    ngMock.module(
-      'kibana',
-      // Use the native window.confirm instead of our specialized version to make testing
-      // this easier.
-      function($provide) {
-        const overrideConfirm = message =>
-          window.confirm(message) ? Promise.resolve() : Promise.reject();
-        $provide.decorator('confirmModalPromise', () => overrideConfirm);
-      }
-    )
-  );
+  beforeEach(() => {
+    // Use the native window.confirm instead of our specialized version to make testing
+    // this easier.
+    npStartMock.core.overlays.openModal = message =>
+      window.confirm(message) ? Promise.resolve() : Promise.reject();
+  });
 
   beforeEach(
     ngMock.inject(function($window) {
