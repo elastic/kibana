@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-export * from './agent_config';
-export * from './datasource';
-export * from './output';
-export * from './epm';
+
+export const SAVED_OBJECT_TYPE_PACKAGES = 'epm-package';
+export const SAVED_OBJECT_TYPE_INDEX_PATTERN = 'index-pattern';

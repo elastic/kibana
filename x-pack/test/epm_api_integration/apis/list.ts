@@ -55,17 +55,16 @@ export default function({ getService }: FtrProviderContext) {
       const supertest = getService('supertest');
       const fetchPackageList = async () => {
         const response = await supertest
-          .get('/api/epm/list')
+          .get('/api/ingest_manager/epm/list')
           .set('kbn-xsrf', 'xxx')
           .expect(200);
         return response.body;
       };
 
       const listResponse = await fetchPackageList();
-
-      expect(listResponse.length).to.be(2);
-      expect(listResponse[0]).to.eql({ ...searchResponse[0], status: 'not_installed' });
-      expect(listResponse[1]).to.eql({ ...searchResponse[1], status: 'not_installed' });
+      expect(listResponse.response.length).to.be(2);
+      expect(listResponse.response[0]).to.eql({ ...searchResponse[0], status: 'not_installed' });
+      expect(listResponse.response[1]).to.eql({ ...searchResponse[1], status: 'not_installed' });
     });
 
     it('sorts the packages even if the registry sends them unsorted', async () => {
@@ -108,7 +107,7 @@ export default function({ getService }: FtrProviderContext) {
       const supertest = getService('supertest');
       const fetchPackageList = async () => {
         const response = await supertest
-          .get('/api/epm/list')
+          .get('/api/ingest_manager/epm/list')
           .set('kbn-xsrf', 'xxx')
           .expect(200);
         return response.body;
@@ -116,10 +115,10 @@ export default function({ getService }: FtrProviderContext) {
 
       const listResponse = await fetchPackageList();
 
-      expect(listResponse.length).to.be(3);
-      expect(listResponse[0].name).to.eql('aaa');
-      expect(listResponse[1].name).to.eql('bbb');
-      expect(listResponse[2].name).to.eql('ccc');
+      expect(listResponse.response.length).to.be(3);
+      expect(listResponse.response[0].name).to.eql('aaa');
+      expect(listResponse.response[1].name).to.eql('bbb');
+      expect(listResponse.response[2].name).to.eql('ccc');
     });
   });
 }
