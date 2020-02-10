@@ -15,7 +15,7 @@ import { ChartBase } from './types';
 import { transformDataToMetricsChart } from './transform_metrics_chart';
 import { getMetricsProjection } from '../../../common/projections/metrics';
 import { mergeProjection } from '../../../common/projections/util/merge_projection';
-import { AggregationOptionsByType } from '../../../typings/elasticsearch/aggregations';
+import { AggregationOptionsByType } from '../../../../../../plugins/apm/typings/elasticsearch/aggregations';
 
 interface Aggs {
   [key: string]: Unionize<{

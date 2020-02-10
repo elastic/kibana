@@ -7,18 +7,19 @@
 import React, { PureComponent, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 import {
-  EuiButton,
-  EuiButtonIcon,
   EuiInMemoryTable,
   EuiLink,
   EuiLoadingKibana,
-  EuiToolTip,
   EuiOverlayMask,
+  EuiHealth,
+  EuiIcon,
 } from '@elastic/eui';
 import { API_STATUS, UIM_AUTO_FOLLOW_PATTERN_SHOW_DETAILS_CLICK } from '../../../../../constants';
-import { AutoFollowPatternDeleteProvider } from '../../../../../components';
+import {
+  AutoFollowPatternDeleteProvider,
+  AutoFollowPatternActionMenu,
+} from '../../../../../components';
 import routing from '../../../../../services/routing';
 import { trackUiMetric, METRIC_TYPE } from '../../../../../services/track_ui_metric';
 
@@ -26,6 +27,8 @@ export class AutoFollowPatternTable extends PureComponent {
   static propTypes = {
     autoFollowPatterns: PropTypes.array,
     selectAutoFollowPattern: PropTypes.func.isRequired,
+    pauseAutoFollowPattern: PropTypes.func.isRequired,
+    resumeAutoFollowPattern: PropTypes.func.isRequired,
   };
 
   state = {
@@ -94,6 +97,35 @@ export class AutoFollowPatternTable extends PureComponent {
         },
       },
       {
+        field: 'active',
+        dataType: 'boolean',
+        name: i18n.translate(
+          'xpack.crossClusterReplication.autoFollowPatternList.table.statusTitle',
+          {
+            defaultMessage: 'Status',
+          }
+        ),
+        render: active => {
+          const statusText = active
+            ? i18n.translate(
+                'xpack.crossClusterReplication.autoFollowPatternList.table.statusTextActive',
+                { defaultMessage: 'Active' }
+              )
+            : i18n.translate(
+                'xpack.crossClusterReplication.autoFollowPatternList.table.statusTextPaused',
+                { defaultMessage: 'Paused' }
+              );
+
+          return (
+            <>
+              <EuiHealth color={active ? 'success' : 'subdued'} />
+              &nbsp;{statusText}
+            </>
+          );
+        },
+        sortable: true,
+      },
+      {
         field: 'remoteCluster',
         name: i18n.translate(
           'xpack.crossClusterReplication.autoFollowPatternList.table.clusterColumnTitle',
@@ -143,6 +175,46 @@ export class AutoFollowPatternTable extends PureComponent {
         ),
         actions: [
           {
+            render: ({ name, active }) => {
+              const label = active
+                ? i18n.translate(
+                    'xpack.crossClusterReplication.autoFollowPatternList.table.actionPauseDescription',
+                    {
+                      defaultMessage: 'Pause replication',
+                    }
+                  )
+                : i18n.translate(
+                    'xpack.crossClusterReplication.autoFollowPatternList.table.actionResumeDescription',
+                    {
+                      defaultMessage: 'Resume replication',
+                    }
+                  );
+
+              return (
+                <span
+                  onClick={event => {
+                    if (event.stopPropagation) {
+                      event.stopPropagation();
+                    }
+                    if (active) {
+                      this.props.pauseAutoFollowPattern(name);
+                    } else {
+                      this.props.resumeAutoFollowPattern(name);
+                    }
+                  }}
+                  data-test-subj={active ? 'contextMenuPauseButton' : 'contextMenuResumeButton'}
+                >
+                  <EuiIcon
+                    aria-label={label}
+                    type={active ? 'pause' : 'play'}
+                    className="euiContextMenu__icon"
+                  />
+                  <span>{label}</span>
+                </span>
+              );
+            },
+          },
+          {
             render: ({ name }) => {
               const label = i18n.translate(
                 'xpack.crossClusterReplication.autoFollowPatternList.table.actionEditDescription',
@@ -152,15 +224,13 @@ export class AutoFollowPatternTable extends PureComponent {
               );
 
               return (
-                <EuiToolTip content={label} delay="long">
-                  <EuiButtonIcon
-                    aria-label={label}
-                    iconType="pencil"
-                    color="primary"
-                    href={routing.getAutoFollowPatternPath(name)}
-                    data-test-subj="editButton"
-                  />
-                </EuiToolTip>
+                <span
+                  onClick={() => (window.location.hash = routing.getAutoFollowPatternPath(name))}
+                  data-test-subj="contextMenuEditButton"
+                >
+                  <EuiIcon aria-label={label} type="pencil" className="euiContextMenu__icon" />
+                  <span>{label}</span>
+                </span>
               );
             },
           },
@@ -174,19 +244,17 @@ export class AutoFollowPatternTable extends PureComponent {
               );
 
               return (
-                <EuiToolTip content={label} delay="long">
-                  <AutoFollowPatternDeleteProvider>
-                    {deleteAutoFollowPattern => (
-                      <EuiButtonIcon
-                        aria-label={label}
-                        iconType="trash"
-                        color="danger"
-                        onClick={() => deleteAutoFollowPattern(name)}
-                        data-test-subj="deleteButton"
-                      />
-                    )}
-                  </AutoFollowPatternDeleteProvider>
-                </EuiToolTip>
+                <AutoFollowPatternDeleteProvider>
+                  {deleteAutoFollowPattern => (
+                    <span
+                      onClick={() => deleteAutoFollowPattern(name)}
+                      data-test-subj="contextMenuDeleteButton"
+                    >
+                      <EuiIcon aria-label={label} type="trash" className="euiContextMenu__icon" />
+                      <span>{label}</span>
+                    </span>
+                  )}
+                </AutoFollowPatternDeleteProvider>
               );
             },
           },
@@ -225,29 +293,18 @@ export class AutoFollowPatternTable extends PureComponent {
     };
 
     const selection = {
-      onSelectionChange: selectedItems => this.setState({ selectedItems }),
+      onSelectionChange: selectedItems =>
+        this.setState({ selectedItems: selectedItems.map(({ name }) => name) }),
     };
+
+    const items = this.getFilteredPatterns();
 
     const search = {
       toolsLeft: selectedItems.length ? (
-        <AutoFollowPatternDeleteProvider>
-          {deleteAutoFollowPattern => (
-            <EuiButton
-              iconType="trash"
-              color="danger"
-              onClick={() => deleteAutoFollowPattern(selectedItems.map(({ name }) => name))}
-              data-test-subj="bulkDeleteButton"
-            >
-              <FormattedMessage
-                id="xpack.crossClusterReplication.deleteAutoFollowPatternButtonLabel"
-                defaultMessage="Delete auto-follow {total, plural, one {pattern} other {patterns}}"
-                values={{
-                  total: selectedItems.length,
-                }}
-              />
-            </EuiButton>
-          )}
-        </AutoFollowPatternDeleteProvider>
+        <AutoFollowPatternActionMenu
+          arrowDirection="down"
+          patterns={this.state.selectedItems.map(name => items.find(item => item.name === name))}
+        />
       ) : (
         undefined
       ),
@@ -260,7 +317,7 @@ export class AutoFollowPatternTable extends PureComponent {
     return (
       <Fragment>
         <EuiInMemoryTable
-          items={this.getFilteredPatterns()}
+          items={items}
           itemId="name"
           columns={this.getTableColumns()}
           search={search}

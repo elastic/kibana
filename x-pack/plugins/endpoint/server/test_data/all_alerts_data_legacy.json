@@ -1,0 +1,15 @@
+{
+    "_shards": {
+        "failed": 0,
+        "skipped": 0,
+        "successful": 1,
+        "total": 1
+    },
+    "hits": {
+        "hits": [],
+        "max_score": 1.0,
+        "total": 21
+    },
+    "timed_out": false,
+    "took": 2
+}

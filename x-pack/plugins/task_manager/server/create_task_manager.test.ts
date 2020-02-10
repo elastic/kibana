@@ -6,8 +6,11 @@
 
 import { createTaskManager, LegacyDeps } from './create_task_manager';
 import { mockLogger } from './test_utils';
-import { CoreSetup, UuidServiceSetup } from 'kibana/server';
-import { savedObjectsRepositoryMock } from '../../../../src/core/server/mocks';
+import { CoreSetup, SavedObjectsSerializer, UuidServiceSetup } from '../../../../src/core/server';
+import {
+  savedObjectsRepositoryMock,
+  savedObjectsTypeRegistryMock,
+} from '../../../../src/core/server/mocks';
 
 jest.mock('./task_manager');
 
@@ -23,7 +26,7 @@ describe('createTaskManager', () => {
 
   const getMockLegacyDeps = (): LegacyDeps => ({
     config: {},
-    savedObjectSchemas: {},
+    savedObjectsSerializer: new SavedObjectsSerializer(savedObjectsTypeRegistryMock.create()),
     elasticsearch: {
       callAsInternalUser: jest.fn(),
     },
@@ -39,20 +42,21 @@ describe('createTaskManager', () => {
     const mockLegacyDeps = getMockLegacyDeps();
     const setupResult = createTaskManager(mockCoreSetup, mockLegacyDeps);
     expect(setupResult).toMatchInlineSnapshot(`
-          TaskManager {
-            "addMiddleware": [MockFunction],
-            "assertUninitialized": [MockFunction],
-            "attemptToRun": [MockFunction],
-            "ensureScheduled": [MockFunction],
-            "fetch": [MockFunction],
-            "registerTaskDefinitions": [MockFunction],
-            "remove": [MockFunction],
-            "runNow": [MockFunction],
-            "schedule": [MockFunction],
-            "start": [MockFunction],
-            "stop": [MockFunction],
-            "waitUntilStarted": [MockFunction],
-          }
-        `);
+      TaskManager {
+        "addMiddleware": [MockFunction],
+        "assertUninitialized": [MockFunction],
+        "attemptToRun": [MockFunction],
+        "ensureScheduled": [MockFunction],
+        "fetch": [MockFunction],
+        "get": [MockFunction],
+        "registerTaskDefinitions": [MockFunction],
+        "remove": [MockFunction],
+        "runNow": [MockFunction],
+        "schedule": [MockFunction],
+        "start": [MockFunction],
+        "stop": [MockFunction],
+        "waitUntilStarted": [MockFunction],
+      }
+    `);
   });
 });
