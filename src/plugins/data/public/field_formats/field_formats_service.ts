@@ -18,10 +18,10 @@
  */
 
 import { CoreSetup } from 'src/core/public';
-import { fieldFormats } from '../../common/field_formats';
+import { FieldFormatsRegistry } from '../../common/field_formats';
 
 export class FieldFormatsService {
-  private readonly fieldFormatsRegistry: fieldFormats.FieldFormatsRegistry = new fieldFormats.FieldFormatsRegistry();
+  private readonly fieldFormatsRegistry: FieldFormatsRegistry = new FieldFormatsRegistry();
 
   public setup(core: CoreSetup) {
     core.uiSettings.getUpdate$().subscribe(({ key, newValue }) => {
@@ -49,7 +49,7 @@ export class FieldFormatsService {
 }
 
 /** @public */
-export type FieldFormatsSetup = Pick<fieldFormats.FieldFormatsRegistry, 'register'>;
+export type FieldFormatsSetup = Pick<FieldFormatsRegistry, 'register'>;
 
 /** @public */
-export type FieldFormatsStart = Omit<fieldFormats.FieldFormatsRegistry, 'init' & 'register'>;
+export type FieldFormatsStart = Omit<FieldFormatsRegistry, 'init' & 'register'>;
