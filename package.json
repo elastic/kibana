@@ -218,7 +218,7 @@
     "ngreact": "0.5.1",
     "node-fetch": "1.7.3",
     "node-forge": "^0.9.1",
-    "object-prototype": "^3.0.0",
+    "object-prototype": "^3.0.1",
     "opn": "^5.5.0",
     "oppsy": "^2.0.0",
     "pegjs": "0.10.0",
