@@ -20,8 +20,13 @@
 import dateMath from '@elastic/datemath';
 import { Ipv4Address } from '../../../../../../kibana_utils/public';
 import { FILTER_OPERATORS, Operator } from './filter_operators';
-import { IIndexPattern, IFieldType, isFilterable } from '../../../..';
-import { FieldFilter, Filter } from '../../../../../common';
+import {
+  FieldFilter,
+  Filter,
+  IFieldType,
+  IIndexPattern,
+  isFilterable,
+} from '../../../../../common';
 
 export function getFieldFromFilter(filter: FieldFilter, indexPattern: IIndexPattern) {
   return indexPattern.fields.find(field => field.name === filter.meta.key);

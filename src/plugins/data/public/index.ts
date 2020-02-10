@@ -51,6 +51,7 @@ import {
   isMissingFilter,
   isQueryStringFilter,
   getDisplayValueFromFilter,
+  isFilterPinned,
 } from '../common';
 
 import { FilterLabel } from './ui/filter_bar';
@@ -85,6 +86,7 @@ export const esFilters = {
   isMatchAllFilter,
   isMissingFilter,
   isQueryStringFilter,
+  isFilterPinned,
 
   toggleFilterNegated,
   disableFilter,
