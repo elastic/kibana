@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import chrome, { Breadcrumb } from 'ui/chrome';
-
 import { getOr, omit } from 'lodash/fp';
+
+import { ChromeBreadcrumb } from '../../../../../../../../src/core/public';
 import { APP_NAME } from '../../../../common/constants';
+import { StartServices } from '../../../plugin';
 import { getBreadcrumbs as getHostDetailsBreadcrumbs } from '../../../pages/hosts/details/utils';
 import { getBreadcrumbs as getIPDetailsBreadcrumbs } from '../../../pages/network/ip_details';
 import { getBreadcrumbs as getDetectionRulesBreadcrumbs } from '../../../pages/detection_engine/rules/utils';
@@ -19,14 +20,17 @@ import { TabNavigationProps } from '../tab_navigation/types';
 import { getSearch } from '../helpers';
 import { SearchNavTab } from '../types';
 
-export const setBreadcrumbs = (spyState: RouteSpyState & TabNavigationProps) => {
+export const setBreadcrumbs = (
+  spyState: RouteSpyState & TabNavigationProps,
+  chrome: StartServices['chrome']
+) => {
   const breadcrumbs = getBreadcrumbsForRoute(spyState);
   if (breadcrumbs) {
-    chrome.breadcrumbs.set(breadcrumbs);
+    chrome.setBreadcrumbs(breadcrumbs);
   }
 };
 
-export const siemRootBreadcrumb: Breadcrumb[] = [
+export const siemRootBreadcrumb: ChromeBreadcrumb[] = [
   {
     text: APP_NAME,
     href: getOverviewUrl(),
@@ -44,7 +48,7 @@ const isDetectionsRoutes = (spyState: RouteSpyState) =>
 
 export const getBreadcrumbsForRoute = (
   object: RouteSpyState & TabNavigationProps
-): Breadcrumb[] | null => {
+): ChromeBreadcrumb[] | null => {
   const spyState: RouteSpyState = omit('navTabs', object);
   if (isHostsRoutes(spyState) && object.navTabs) {
     const tempNav: SearchNavTab = { urlKey: 'host', isDetailPage: false };

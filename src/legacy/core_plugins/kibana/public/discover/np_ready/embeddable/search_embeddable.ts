@@ -20,7 +20,7 @@ import _ from 'lodash';
 import * as Rx from 'rxjs';
 import { Subscription } from 'rxjs';
 import { i18n } from '@kbn/i18n';
-import { TExecuteTriggerActions } from 'src/plugins/ui_actions/public';
+import { ExecuteTriggerActions } from 'src/plugins/ui_actions/public';
 import { RequestAdapter, Adapters } from '../../../../../../../plugins/inspector/public';
 import {
   esFilters,
@@ -111,7 +111,7 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
       filterManager,
     }: SearchEmbeddableConfig,
     initialInput: SearchInput,
-    private readonly executeTriggerActions: TExecuteTriggerActions,
+    private readonly executeTriggerActions: ExecuteTriggerActions,
     parent?: Container
   ) {
     super(

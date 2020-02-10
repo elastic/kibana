@@ -17,5 +17,6 @@ export interface SavedObjectsMigrationLogger
 |  --- | --- | --- |
 |  [debug](./kibana-plugin-server.savedobjectsmigrationlogger.debug.md) | <code>(msg: string) =&gt; void</code> |  |
 |  [info](./kibana-plugin-server.savedobjectsmigrationlogger.info.md) | <code>(msg: string) =&gt; void</code> |  |
+|  [warn](./kibana-plugin-server.savedobjectsmigrationlogger.warn.md) | <code>(msg: string) =&gt; void</code> |  |
 |  [warning](./kibana-plugin-server.savedobjectsmigrationlogger.warning.md) | <code>(msg: string) =&gt; void</code> |  |
 

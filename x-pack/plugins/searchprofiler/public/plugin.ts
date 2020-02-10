@@ -19,7 +19,7 @@ export class SearchProfilerUIPlugin implements Plugin<void, void, AppPublicPlugi
 
   async setup(
     { http, getStartServices }: CoreSetup,
-    { dev_tools, home, licensing }: AppPublicPluginDependencies
+    { devTools, home, licensing }: AppPublicPluginDependencies
   ) {
     home.featureCatalogue.register({
       id: PLUGIN.id,
@@ -35,7 +35,7 @@ export class SearchProfilerUIPlugin implements Plugin<void, void, AppPublicPlugi
       category: FeatureCatalogueCategory.ADMIN,
     });
 
-    dev_tools.register({
+    devTools.register({
       id: 'searchprofiler',
       title: i18n.translate('xpack.searchProfiler.pageDisplayName', {
         defaultMessage: 'Search Profiler',

@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { IUiActionsApiPure } from '../types';
+import { UiActionsApiPure } from '../types';
 
-export const attachAction: IUiActionsApiPure['attachAction'] = ({ triggers }) => (
+export const attachAction: UiActionsApiPure['attachAction'] = ({ triggers }) => (
   triggerId,
   actionId
 ) => {

@@ -26,3 +26,6 @@ export const plugin = (initializerContext: PluginInitializerContext) =>
 export * from './plugin';
 
 export { initAngularBootstrap } from './angular_bootstrap';
+export * from './angular';
+export * from './notify';
+export * from './utils';
