@@ -66,11 +66,7 @@ export const datatable: ExpressionFunctionDefinition<
       type: 'render',
       as: 'lens_datatable_renderer',
       value: {
-        data: {
-          ...data,
-          type: 'lens_multitable',
-          tables: {},
-        },
+        data,
         args,
       },
     };
