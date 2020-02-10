@@ -74,7 +74,7 @@ export class AdvancedSettingsComponent extends Component<
     super(props);
     const { queryText } = this.props;
     // const parsedQuery = Query.parse(queryText ? `ariaName:"${getAriaName(queryText)}"` : '');
-    const parsedQuery = Query.parse(queryText);
+    const parsedQuery = Query.parse(queryText || '');
 
     this.settings = this.initSettings(this.props.uiSettings);
     this.groupedSettings = this.initGroupedSettings(this.settings);
