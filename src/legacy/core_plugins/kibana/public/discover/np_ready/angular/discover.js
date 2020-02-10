@@ -204,7 +204,6 @@ function discoverController(
   stateContainer.subscribe(newState => {
     if (!_.isEqual(newState, $scope.state)) {
       $scope.state = { ...newState };
-      $scope.$digest();
     }
   });
 
@@ -637,9 +636,11 @@ function discoverController(
 
         // get the current sort from searchSource as array of arrays
         const currentSort = getSortArray($scope.searchSource.getField('sort'), $scope.indexPattern);
-
         // if the searchSource doesn't know, tell it so
-        if (!angular.equals(sort, currentSort)) $fetchObservable.next();
+        if (!angular.equals(sort, currentSort)) {
+          syncState({ sort });
+          $fetchObservable.next();
+        }
       });
 
       // update data source when filters update
