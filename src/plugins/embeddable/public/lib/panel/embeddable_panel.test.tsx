@@ -25,7 +25,7 @@ import { nextTick } from 'test_utils/enzyme_helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { I18nProvider } from '@kbn/i18n/react';
 import { CONTEXT_MENU_TRIGGER } from '../triggers';
-import { IAction, ITrigger, IUiActionsApi } from 'src/plugins/ui_actions/public';
+import { Action, UiActionsApi } from 'src/plugins/ui_actions/public';
 import { Trigger, GetEmbeddableFactory, ViewMode } from '../types';
 import { EmbeddableFactory, isErrorEmbeddable } from '../embeddables';
 import { EmbeddablePanel } from './embeddable_panel';
@@ -44,8 +44,8 @@ import {
 import { inspectorPluginMock } from 'src/plugins/inspector/public/mocks';
 import { EuiBadge } from '@elastic/eui';
 
-const actionRegistry = new Map<string, IAction>();
-const triggerRegistry = new Map<string, ITrigger>();
+const actionRegistry = new Map<string, Action>();
+const triggerRegistry = new Map<string, Trigger>();
 const embeddableFactories = new Map<string, EmbeddableFactory>();
 const getEmbeddableFactory: GetEmbeddableFactory = (id: string) => embeddableFactories.get(id);
 
@@ -177,7 +177,7 @@ test('HelloWorldContainer in view mode hides edit mode actions', async () => {
 
 const renderInEditModeAndOpenContextMenu = async (
   embeddableInputs: any,
-  getActions: IUiActionsApi['getTriggerCompatibleActions'] = () => Promise.resolve([])
+  getActions: UiActionsApi['getTriggerCompatibleActions'] = () => Promise.resolve([])
 ) => {
   const inspector = inspectorPluginMock.createStartContract();
 
