@@ -8,32 +8,26 @@ export default function HistoricalItem({item, currentJobNumber, testRunnerTypes}
         {/*<img className="w-full" src="/img/card-top.jpg" alt="Sunset in the mountains"></img>*/}
           <div className="px-6 py-4">
             <div className="font-bold text-xl mb-2">
-              Job - {title(item)}
+              {anchor(item)}
             </div>
             <div className="text-gray-700 text-base">
               <TestRunnerItemList testRunnerTypes={testRunnerTypes} />
-              <a
-                className="App-link"
-                href={href(item)}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                GCP Bucket
-              </a>
             </div>
           </div>
-          {/*<div className="px-6 py-4">*/}
-          {/*  <span*/}
-          {/*    className="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2">#photography</span>*/}
-          {/*  <span*/}
-          {/*    className="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2">#travel</span>*/}
-          {/*  <span*/}
-          {/*    className="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700">#winter</span>*/}
-          {/*</div>*/}
-
       </div>
     </>
   );
+}
+
+function anchor(item) {
+  return (<a
+    className="App-link"
+    href={href(item)}
+    target="_blank"
+    rel="noopener noreferrer"
+  >
+    Job - {title(item)}
+  </a>);
 }
 
 function title(item) {
