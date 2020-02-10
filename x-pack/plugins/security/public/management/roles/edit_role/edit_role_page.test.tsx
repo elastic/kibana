@@ -9,7 +9,7 @@ import React from 'react';
 import { act } from '@testing-library/react';
 import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
 import { Capabilities } from 'src/core/public';
-import { Feature } from '../../../../../features/public';
+import { Feature, IFeature } from '../../../../../features/public';
 // These modules should be moved into a common directory
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { Actions } from '../../../../server/authorization/actions';
@@ -45,6 +45,14 @@ const buildFeatures = () => {
             read: [],
           },
         },
+        read: {
+          app: ['feature1App'],
+          ui: ['feature1-ui'],
+          savedObject: {
+            all: [],
+            read: [],
+          },
+        },
       },
     },
     {
@@ -61,14 +69,22 @@ const buildFeatures = () => {
             read: ['config'],
           },
         },
+        read: {
+          app: ['feature2App'],
+          ui: ['feature2-ui'],
+          savedObject: {
+            all: [],
+            read: ['config'],
+          },
+        },
       },
     },
-  ] as Feature[];
+  ] as IFeature[];
 };
 
 const buildRawKibanaPrivileges = () => {
   return privilegesFactory(new Actions('unit_test_version'), {
-    getFeatures: () => buildFeatures(),
+    getFeatures: () => buildFeatures().map(config => new Feature(config)),
   }).get();
 };
 
@@ -200,10 +216,7 @@ describe('<EditRolePage />', () => {
         />
       );
 
-      await act(async () => {
-        await nextTick();
-        wrapper.update();
-      });
+      await waitForRender(wrapper);
 
       expect(wrapper.find('[data-test-subj="reservedRoleBadgeTooltip"]')).toHaveLength(1);
       expect(wrapper.find(SpaceAwarePrivilegeSection)).toHaveLength(1);
@@ -226,10 +239,7 @@ describe('<EditRolePage />', () => {
         />
       );
 
-      await act(async () => {
-        await nextTick();
-        wrapper.update();
-      });
+      await waitForRender(wrapper);
 
       expect(wrapper.find('[data-test-subj="reservedRoleBadgeTooltip"]')).toHaveLength(0);
       expect(wrapper.find(SpaceAwarePrivilegeSection)).toHaveLength(1);
@@ -240,10 +250,7 @@ describe('<EditRolePage />', () => {
     it('can render when creating a new role', async () => {
       const wrapper = mountWithIntl(<EditRolePage {...getProps({ action: 'edit' })} />);
 
-      await act(async () => {
-        await nextTick();
-        wrapper.update();
-      });
+      await waitForRender(wrapper);
 
       expect(wrapper.find(SpaceAwarePrivilegeSection)).toHaveLength(1);
       expect(wrapper.find('[data-test-subj="userCannotManageSpacesCallout"]')).toHaveLength(0);
@@ -275,10 +282,7 @@ describe('<EditRolePage />', () => {
         />
       );
 
-      await act(async () => {
-        await nextTick();
-        wrapper.update();
-      });
+      await waitForRender(wrapper);
 
       expect(wrapper.find(SpaceAwarePrivilegeSection)).toHaveLength(1);
       expect(wrapper.find('[data-test-subj="userCannotManageSpacesCallout"]')).toHaveLength(0);
@@ -301,10 +305,7 @@ describe('<EditRolePage />', () => {
         />
       );
 
-      await act(async () => {
-        await nextTick();
-        wrapper.update();
-      });
+      await waitForRender(wrapper);
 
       expect(wrapper.find('[data-test-subj="reservedRoleBadgeTooltip"]')).toHaveLength(0);
 
@@ -333,10 +334,7 @@ describe('<EditRolePage />', () => {
         />
       );
 
-      await act(async () => {
-        await nextTick();
-        wrapper.update();
-      });
+      await waitForRender(wrapper);
 
       expect(wrapper.find(TransformErrorSection)).toHaveLength(1);
       expectReadOnlyFormButtons(wrapper);
@@ -360,10 +358,7 @@ describe('<EditRolePage />', () => {
         />
       );
 
-      await act(async () => {
-        await nextTick();
-        wrapper.update();
-      });
+      await waitForRender(wrapper);
 
       expect(wrapper.find('[data-test-subj="reservedRoleBadgeTooltip"]')).toHaveLength(1);
       expect(wrapper.find(SimplePrivilegeSection)).toHaveLength(1);
@@ -387,10 +382,7 @@ describe('<EditRolePage />', () => {
         />
       );
 
-      await act(async () => {
-        await nextTick();
-        wrapper.update();
-      });
+      await waitForRender(wrapper);
 
       expect(wrapper.find('[data-test-subj="reservedRoleBadgeTooltip"]')).toHaveLength(0);
       expect(wrapper.find(SimplePrivilegeSection)).toHaveLength(1);
@@ -403,10 +395,7 @@ describe('<EditRolePage />', () => {
         <EditRolePage {...getProps({ action: 'edit', spacesEnabled: false })} />
       );
 
-      await act(async () => {
-        await nextTick();
-        wrapper.update();
-      });
+      await waitForRender(wrapper);
 
       expect(wrapper.find(SimplePrivilegeSection)).toHaveLength(1);
       expectSaveFormButtons(wrapper);
@@ -438,10 +427,7 @@ describe('<EditRolePage />', () => {
         />
       );
 
-      await act(async () => {
-        await nextTick();
-        wrapper.update();
-      });
+      await waitForRender(wrapper);
 
       expect(wrapper.find(SimplePrivilegeSection)).toHaveLength(1);
       expectSaveFormButtons(wrapper);
@@ -464,10 +450,7 @@ describe('<EditRolePage />', () => {
         />
       );
 
-      await act(async () => {
-        await nextTick();
-        wrapper.update();
-      });
+      await waitForRender(wrapper);
 
       expect(wrapper.find('[data-test-subj="reservedRoleBadgeTooltip"]')).toHaveLength(0);
 
@@ -497,10 +480,7 @@ describe('<EditRolePage />', () => {
         />
       );
 
-      await act(async () => {
-        await nextTick();
-        wrapper.update();
-      });
+      await waitForRender(wrapper);
 
       expect(wrapper.find(TransformErrorSection)).toHaveLength(1);
       expectReadOnlyFormButtons(wrapper);
@@ -522,10 +502,7 @@ describe('<EditRolePage />', () => {
 
     const wrapper = mountWithIntl(<EditRolePage {...{ ...getProps({ action: 'edit' }), http }} />);
 
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
+    await waitForRender(wrapper);
 
     expect(wrapper.find(SpaceAwarePrivilegeSection)).toHaveLength(1);
     expect(wrapper.find('[data-test-subj="userCannotManageSpacesCallout"]')).toHaveLength(0);
@@ -540,13 +517,21 @@ describe('<EditRolePage />', () => {
       <EditRolePage {...{ ...getProps({ action: 'edit' }), indexPatterns }} />
     );
 
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
+    await waitForRender(wrapper);
 
     expect(wrapper.find(SpaceAwarePrivilegeSection)).toHaveLength(1);
     expect(wrapper.find('[data-test-subj="userCannotManageSpacesCallout"]')).toHaveLength(0);
     expectSaveFormButtons(wrapper);
   });
 });
+
+async function waitForRender(wrapper: ReactWrapper<any>) {
+  await act(async () => {
+    await nextTick();
+  });
+
+  await act(async () => {
+    await nextTick();
+    wrapper.update();
+  });
+}

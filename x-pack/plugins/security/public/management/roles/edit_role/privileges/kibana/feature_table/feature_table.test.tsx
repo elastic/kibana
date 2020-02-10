@@ -159,45 +159,6 @@ describe('FeatureTable', () => {
     `);
   });
 
-  it('renders with all privileges granted at the space when global base privilege is "all"', () => {
-    const role = createRole([
-      {
-        spaces: ['*'],
-        base: ['all'],
-        feature: {},
-      },
-      {
-        spaces: ['foo'],
-        base: [],
-        feature: {},
-      },
-    ]);
-
-    const { displayedPrivileges } = setup({ role, features: kibanaFeatures, spacesIndex: 1 });
-    expect(displayedPrivileges).toMatchInlineSnapshot(`
-      Object {
-        "excluded_from_base": Object {
-          "primaryFeaturePrivilege": "none",
-          "subFeaturePrivileges": Array [],
-        },
-        "no_sub_features": Object {
-          "primaryFeaturePrivilege": "all",
-        },
-        "with_excluded_sub_features": Object {
-          "primaryFeaturePrivilege": "all",
-          "subFeaturePrivileges": Array [],
-        },
-        "with_sub_features": Object {
-          "primaryFeaturePrivilege": "all",
-          "subFeaturePrivileges": Array [
-            "cool_toggle_1",
-            "cool_all",
-          ],
-        },
-      }
-    `);
-  });
-
   it('renders with all privileges granted at the space when space base privilege is "all"', () => {
     const role = createRole([
       {
@@ -228,8 +189,8 @@ describe('FeatureTable', () => {
         "with_sub_features": Object {
           "primaryFeaturePrivilege": "all",
           "subFeaturePrivileges": Array [
-            "cool_toggle_1",
-            "cool_toggle_2",
+            "with_sub_features_cool_toggle_1",
+            "with_sub_features_cool_toggle_2",
             "cool_all",
           ],
         },
