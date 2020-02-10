@@ -35,13 +35,9 @@ export const createCreateRulesBulkRoute = (
       },
     },
     async handler(request: BulkRulesRequest, headers) {
-      const {
-        actionsClient,
-        alertsClient,
-        clusterClient,
-        spacesClient,
-        savedObjectsClient,
-      } = await getClients(request);
+      const { actionsClient, alertsClient, clusterClient, spacesClient } = await getClients(
+        request
+      );
 
       if (!actionsClient || !alertsClient) {
         return headers.response().code(404);
