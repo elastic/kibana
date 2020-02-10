@@ -26,18 +26,19 @@ export type ApplicationServiceContract = PublicMethodsOf<ApplicationService>;
 export type EitherApp = App | LegacyApp;
 /** @internal */
 export type MockedUnmount = jest.Mocked<AppUnmount>;
+
+/** @internal */
+export interface Mountable<T extends EitherApp> {
+  mounter: MockedMounter<T>;
+  unmount: MockedUnmount;
+}
+
 /** @internal */
 export type MockedMounter<T extends EitherApp> = jest.Mocked<Mounter<jest.Mocked<T>>>;
 /** @internal */
-export type MockedMounterTuple<T extends EitherApp> = [
-  string,
-  { mounter: MockedMounter<T>; unmount: MockedUnmount }
-];
+export type MockedMounterTuple<T extends EitherApp> = [string, Mountable<T>];
 /** @internal */
-export type MockedMounterMap<T extends EitherApp> = Map<
-  string,
-  { mounter: MockedMounter<T>; unmount: MockedUnmount }
->;
+export type MockedMounterMap<T extends EitherApp> = Map<string, Mountable<T>>;
 /** @internal */
 export type MockLifecycle<
   T extends keyof ApplicationService,

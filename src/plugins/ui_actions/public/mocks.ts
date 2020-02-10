@@ -17,13 +17,13 @@
  * under the License.
  */
 
-import { IUiActionsSetup, IUiActionsStart } from '.';
+import { UiActionsSetup, UiActionsStart } from '.';
 import { plugin as pluginInitializer } from '.';
 // eslint-disable-next-line
 import { coreMock } from '../../../core/public/mocks';
 
-export type Setup = jest.Mocked<IUiActionsSetup>;
-export type Start = jest.Mocked<IUiActionsStart>;
+export type Setup = jest.Mocked<UiActionsSetup>;
+export type Start = jest.Mocked<UiActionsStart>;
 
 const createSetupContract = (): Setup => {
   const setupContract: Setup = {
