@@ -6,6 +6,7 @@
 
 import React, { Fragment, FC, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { I18nContext } from 'ui/i18n';
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -17,7 +18,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { useMlKibana } from '../../../../contexts/kibana';
+import { getDocLinks } from '../../../../util/dependency_cache';
 
 // @ts-ignore undeclared module
 import { JobsListView } from '../../../../jobs/jobs_list/components/jobs_list_view/index';
@@ -65,9 +66,7 @@ function getTabs(isMlEnabledInSpace: boolean): Tab[] {
 }
 
 export const JobsListPage: FC<Props> = ({ isMlEnabledInSpace }) => {
-  const {
-    services: { docLinks },
-  } = useMlKibana();
+  const docLinks = getDocLinks();
   const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = docLinks;
   const tabs = getTabs(isMlEnabledInSpace);
   const [currentTabId, setCurrentTabId] = useState(tabs[0].id);
@@ -98,43 +97,47 @@ export const JobsListPage: FC<Props> = ({ isMlEnabledInSpace }) => {
   }
 
   return (
-    <EuiPageContent>
-      <EuiTitle size="l">
-        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <h1>
-              {i18n.translate('xpack.ml.management.jobsList.jobsListTitle', {
-                defaultMessage: 'Machine Learning Jobs',
-              })}
-            </h1>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              target="_blank"
-              iconType="help"
-              iconSide="left"
-              color="primary"
-              href={
-                currentTabId === 'anomaly_detection_jobs' ? anomalyDetectionJobsUrl : anomalyJobsUrl
-              }
-            >
-              {currentTabId === 'anomaly_detection_jobs'
-                ? anomalyDetectionDocsLabel
-                : analyticsDocsLabel}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiTitle>
-      <EuiSpacer size="s" />
-      <EuiTitle size="s">
-        <EuiText color="subdued">
-          {i18n.translate('xpack.ml.management.jobsList.jobsListTagline', {
-            defaultMessage: 'View machine learning analytics and anomaly detection jobs.',
-          })}
-        </EuiText>
-      </EuiTitle>
-      <EuiSpacer size="l" />
-      <EuiPageContentBody>{renderTabs()}</EuiPageContentBody>
-    </EuiPageContent>
+    <I18nContext>
+      <EuiPageContent>
+        <EuiTitle size="l">
+          <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+            <EuiFlexItem grow={false}>
+              <h1>
+                {i18n.translate('xpack.ml.management.jobsList.jobsListTitle', {
+                  defaultMessage: 'Machine Learning Jobs',
+                })}
+              </h1>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                target="_blank"
+                iconType="help"
+                iconSide="left"
+                color="primary"
+                href={
+                  currentTabId === 'anomaly_detection_jobs'
+                    ? anomalyDetectionJobsUrl
+                    : anomalyJobsUrl
+                }
+              >
+                {currentTabId === 'anomaly_detection_jobs'
+                  ? anomalyDetectionDocsLabel
+                  : analyticsDocsLabel}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiTitle>
+        <EuiSpacer size="s" />
+        <EuiTitle size="s">
+          <EuiText color="subdued">
+            {i18n.translate('xpack.ml.management.jobsList.jobsListTagline', {
+              defaultMessage: 'View machine learning analytics and anomaly detection jobs.',
+            })}
+          </EuiText>
+        </EuiTitle>
+        <EuiSpacer size="l" />
+        <EuiPageContentBody>{renderTabs()}</EuiPageContentBody>
+      </EuiPageContent>
+    </I18nContext>
   );
 };

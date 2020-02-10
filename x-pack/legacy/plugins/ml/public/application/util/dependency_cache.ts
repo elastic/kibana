@@ -63,23 +63,23 @@ const cache: DependencyCache = {
   http: null,
 };
 
-export function setDependencyCache(deps: DependencyCache) {
-  cache.timefilter = deps.timefilter;
-  cache.config = deps.config;
-  cache.chrome = deps.chrome;
-  cache.indexPatterns = deps.indexPatterns;
-  cache.docLinks = deps.docLinks;
-  cache.toastNotifications = deps.toastNotifications;
-  cache.overlays = deps.overlays;
-  cache.recentlyAccessed = deps.recentlyAccessed;
-  cache.fieldFormats = deps.fieldFormats;
-  cache.autocomplete = deps.autocomplete;
-  cache.basePath = deps.basePath;
-  cache.savedObjectsClient = deps.savedObjectsClient;
-  cache.XSRF = deps.XSRF;
-  cache.APP_URL = deps.APP_URL;
-  cache.application = deps.application;
-  cache.http = deps.http;
+export function setDependencyCache(deps: Partial<DependencyCache>) {
+  cache.timefilter = deps.timefilter || null;
+  cache.config = deps.config || null;
+  cache.chrome = deps.chrome || null;
+  cache.indexPatterns = deps.indexPatterns || null;
+  cache.docLinks = deps.docLinks || null;
+  cache.toastNotifications = deps.toastNotifications || null;
+  cache.overlays = deps.overlays || null;
+  cache.recentlyAccessed = deps.recentlyAccessed || null;
+  cache.fieldFormats = deps.fieldFormats || null;
+  cache.autocomplete = deps.autocomplete || null;
+  cache.basePath = deps.basePath || null;
+  cache.savedObjectsClient = deps.savedObjectsClient || null;
+  cache.XSRF = deps.XSRF || null;
+  cache.APP_URL = deps.APP_URL || null;
+  cache.application = deps.application || null;
+  cache.http = deps.http || null;
 }
 
 export function getTimefilter() {
