@@ -7,11 +7,12 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function({ getPageObjects, getService }: FtrProviderContext) {
-  const pageObjects = getPageObjects(['common']);
+  const pageObjects = getPageObjects(['common', 'endpoint']);
   const testSubjects = getService('testSubjects');
 
-  describe('Endpoint Policy List', () => {
-    beforeEach(async () => {
+  describe('Endpoint Policy List', function() {
+    this.tags(['ciGroup7']);
+    before(async () => {
       await pageObjects.common.navigateToUrlWithBrowserHistory('endpoint', '/policy');
     });
 
@@ -28,6 +29,19 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
     });
     it('includes policy list table', async () => {
       await testSubjects.existOrFail('policyTable');
+    });
+    it('has correct table headers', async () => {
+      const allHeaderCells = await pageObjects.endpoint.tableHeaderVisibleText('policyTable');
+      expect(allHeaderCells).to.eql([
+        'Policy Name',
+        'Total',
+        'Pending',
+        'Failed',
+        'Created By',
+        'Created',
+        'Last Updated By',
+        'Last Updated',
+      ]);
     });
   });
 }
