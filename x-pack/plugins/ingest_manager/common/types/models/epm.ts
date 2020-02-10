@@ -11,7 +11,6 @@ import {
   SavedObjectAttributes,
   SavedObjectReference,
 } from '../../../../../../src/core/public';
-import { AssetType as IngestAssetType } from '../../../../../legacy/plugins/ingest/common/types/domain_data';
 
 export enum InstallationStatus {
   installed = 'installed',
@@ -169,3 +168,15 @@ export type NotInstalled<T = {}> = T & {
 export type AssetReference = Pick<SavedObjectReference, 'id'> & {
   type: AssetType | IngestAssetType;
 };
+
+/**
+ * Types of assets which can be installed/removed
+ */
+export enum IngestAssetType {
+  DataFrameTransform = 'data-frame-transform',
+  IlmPolicy = 'ilm-policy',
+  IndexTemplate = 'index-template',
+  IngestPipeline = 'ingest-pipeline',
+  MlJob = 'ml-job',
+  RollupJob = 'rollup-job',
+}

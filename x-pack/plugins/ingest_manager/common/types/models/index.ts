@@ -6,3 +6,4 @@
 export * from './agent_config';
 export * from './datasource';
 export * from './output';
+export * from './epm';

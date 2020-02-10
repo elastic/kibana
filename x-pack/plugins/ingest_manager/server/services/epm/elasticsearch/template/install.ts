@@ -4,8 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AssetType } from '../../../../../../../legacy/plugins/ingest/common/types/domain_data';
-import { AssetReference, Dataset, RegistryPackage } from '../../../../../common/types';
+import {
+  AssetReference,
+  Dataset,
+  RegistryPackage,
+  IngestAssetType,
+} from '../../../../../common/types';
 import { CallESAsCurrentUser } from '../../cluster_access';
 import { Field, loadFieldsFromYaml } from '../../fields/field';
 import { getPipelineNameForInstallation } from '../ingest_pipeline/ingest_pipelines';
@@ -62,5 +66,5 @@ export async function installTemplate({
   });
 
   // The id of a template is its name
-  return { id: templateName, type: AssetType.IndexTemplate };
+  return { id: templateName, type: IngestAssetType.IndexTemplate };
 }
