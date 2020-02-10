@@ -19,7 +19,6 @@ import {
 import { I18nProvider } from '@kbn/i18n/react';
 import {
   ExpressionFunction,
-  KibanaDatatable,
   IInterpreterRenderHandlers,
   IInterpreterRenderFunction,
 } from 'src/plugins/expressions/public';
@@ -28,11 +27,6 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { npStart } from 'ui/new_platform';
 import { EUI_CHARTS_THEME_DARK, EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist/eui_charts_theme';
-import {
-  Embeddable,
-  APPLY_FILTER_TRIGGER,
-} from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
-import { createAction } from '../../../../../../src/plugins/ui_actions/public';
 import { FormatFactory } from '../../../../../../src/legacy/ui/public/visualize/loader/pipeline_helpers/utilities';
 import { LensMultiTable } from '../types';
 import { XYArgs, SeriesType, visualizationTypes } from './types';
@@ -41,6 +35,11 @@ import { isHorizontalChart } from './state_helpers';
 
 const IS_DARK_THEME = chrome.getUiSettingsClient().get('theme:darkMode');
 const chartTheme = IS_DARK_THEME ? EUI_CHARTS_THEME_DARK.theme : EUI_CHARTS_THEME_LIGHT.theme;
+
+type InferPropType<T> = T extends React.FunctionComponent<infer P> ? P : T;
+type SeriesSpec = InferPropType<typeof LineSeries> &
+  InferPropType<typeof BarSeries> &
+  InferPropType<typeof AreaSeries>;
 
 export interface XYChartProps {
   data: LensMultiTable;
@@ -116,7 +115,7 @@ export const getXyChartRenderer = (dependencies: {
     handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
     ReactDOM.render(
       <I18nProvider>
-        <XYChartReportable {...config} {...dependencies} handlers={handlers} />
+        <XYChartReportable {...config} {...dependencies} />
       </I18nProvider>,
       domNode,
       () => handlers.done()
@@ -130,9 +129,7 @@ function getIconForSeriesType(seriesType: SeriesType): IconType {
 
 const MemoizedChart = React.memo(XYChart);
 
-export function XYChartReportable(
-  props: XYChartRenderProps & { handlers: IInterpreterRenderHandlers }
-) {
+export function XYChartReportable(props: XYChartRenderProps) {
   const [state, setState] = useState({
     isReady: false,
   });
@@ -150,15 +147,7 @@ export function XYChartReportable(
   );
 }
 
-export function XYChart({
-  data,
-  args,
-  formatFactory,
-  timeZone,
-  handlers,
-}: XYChartRenderProps & {
-  handlers: IInterpreterRenderHandlers;
-}) {
+export function XYChart({ data, args, formatFactory, timeZone }: XYChartRenderProps & {}) {
   const { legend, layers } = args;
 
   if (Object.values(data.tables).every(table => table.rows.length === 0)) {
@@ -298,11 +287,10 @@ export function XYChart({
           const idForLegend = accessors;
           const table = data.tables[layerId];
 
-          const seriesProps = {
-            key: index,
+          const seriesProps: SeriesSpec = {
             splitSeriesAccessors: splitAccessor ? [splitAccessor] : [],
             stackAccessors: seriesType.includes('stacked') ? [xAccessor] : [],
-            id: idForLegend,
+            id: idForLegend.join(','),
             xAccessor,
             yAccessors: accessors,
             data: table.rows,
@@ -319,54 +307,17 @@ export function XYChart({
           };
 
           return seriesType === 'line' ? (
-            <LineSeries {...seriesProps} />
+            <LineSeries key={index} {...seriesProps} />
           ) : seriesType === 'bar' ||
             seriesType === 'bar_stacked' ||
             seriesType === 'bar_horizontal' ||
             seriesType === 'bar_horizontal_stacked' ? (
-            <BarSeries {...seriesProps} />
+            <BarSeries key={index} {...seriesProps} />
           ) : (
-            <AreaSeries {...seriesProps} />
+            <AreaSeries key={index} {...seriesProps} />
           );
         }
       )}
     </Chart>
   );
-}
-
-/**
- * Renames the columns to match the user-configured accessors in
- * columnToLabelMap. If a splitAccessor is provided, formats the
- * values in that column.
- */
-function sanitizeRows({
-  splitAccessor,
-  table,
-  formatFactory,
-  columnToLabelMap,
-}: {
-  splitAccessor?: string;
-  table: KibanaDatatable;
-  formatFactory: FormatFactory;
-  columnToLabelMap: Record<string, string | undefined>;
-}) {
-  const column = table.columns.find(c => c.id === splitAccessor);
-  const formatter = formatFactory(column && column.formatHint);
-
-  return {
-    splitAccessor: column && column.id,
-    rows: table.rows.map(r => {
-      const newRow: typeof r = {};
-
-      if (column) {
-        newRow[column.id] = formatter.convert(r[column.id]);
-      }
-
-      Object.keys(r).forEach(key => {
-        const newKey = columnToLabelMap[key] || key;
-        newRow[newKey] = r[key];
-      });
-      return newRow;
-    }),
-  };
 }
