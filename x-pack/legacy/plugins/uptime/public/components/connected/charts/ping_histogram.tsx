@@ -19,7 +19,7 @@ import { useUrlParams } from '../../../hooks';
 
 type Props = ResponsiveWrapperProps &
   Pick<PingHistogramComponentProps, 'height' | 'data' | 'loading'> &
-  DispatchProps & { lastRefresh: number; monitorId?: string };
+  DispatchProps & { lastRefresh: number; monitorId?: string; esKuery?: string };
 
 const PingHistogramContainer: React.FC<Props> = ({
   data,
@@ -28,6 +28,7 @@ const PingHistogramContainer: React.FC<Props> = ({
   lastRefresh,
   height,
   loading,
+  esKuery,
 }) => {
   const [getUrlParams] = useUrlParams();
   const {
@@ -36,12 +37,11 @@ const PingHistogramContainer: React.FC<Props> = ({
     dateRangeStart: dateStart,
     dateRangeEnd: dateEnd,
     statusFilter,
-    filters,
   } = getUrlParams();
 
   useEffect(() => {
-    loadData({ monitorId, dateStart, dateEnd, statusFilter, filters });
-  }, [loadData, dateStart, dateEnd, monitorId, filters, statusFilter, lastRefresh]);
+    loadData({ monitorId, dateStart, dateEnd, statusFilter, filters: esKuery });
+  }, [loadData, dateStart, dateEnd, monitorId, statusFilter, lastRefresh, esKuery]);
   return (
     <PingHistogramComponent
       data={data}
@@ -57,6 +57,7 @@ interface StateProps {
   data: HistogramResult | null;
   loading: boolean;
   lastRefresh: number;
+  esKuery: string;
 }
 
 interface DispatchProps {

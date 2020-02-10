@@ -19,6 +19,7 @@
 
 import _, { uniq } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { EUI_MODAL_CANCEL_BUTTON } from '@elastic/eui';
 import React from 'react';
 import angular from 'angular';
 
@@ -27,14 +28,7 @@ import { map } from 'rxjs/operators';
 import { History } from 'history';
 import { DashboardEmptyScreen, DashboardEmptyScreenProps } from './dashboard_empty_screen';
 
-import {
-  ConfirmationButtonTypes,
-  migrateLegacyQuery,
-  SavedObjectSaveOpts,
-  SaveResult,
-  showSaveModal,
-  subscribeWithScope,
-} from '../legacy_imports';
+import { migrateLegacyQuery, SavedObjectSaveOpts, subscribeWithScope } from '../legacy_imports';
 import {
   COMPARE_ALL_OPTIONS,
   compareFilters,
@@ -45,6 +39,11 @@ import {
   syncAppFilters,
   syncQuery,
 } from '../../../../../../plugins/data/public';
+import {
+  SaveResult,
+  showSaveModal,
+  getSavedObjectFinder,
+} from '../../../../../../plugins/saved_objects/public';
 
 import {
   DASHBOARD_CONTAINER_TYPE,
@@ -60,7 +59,7 @@ import {
   openAddPanelFlyout,
   ViewMode,
 } from '../../../../embeddable_api/public/np_ready/public';
-import { ConfirmModalFn, NavAction, SavedDashboardPanel } from './types';
+import { NavAction, SavedDashboardPanel } from './types';
 
 import { showOptionsPopover } from './top_nav/show_options_popover';
 import { DashboardSaveModal } from './top_nav/save_modal';
@@ -75,22 +74,18 @@ import { DashboardAppScope } from './dashboard_app';
 import { convertSavedDashboardPanelToPanelState } from './lib/embeddable_saved_object_converters';
 import { RenderDeps } from './application';
 import {
-  SavedObjectFinderProps,
-  SavedObjectFinderUi,
-} from '../../../../../../plugins/kibana_react/public';
-import {
   IKbnUrlStateStorage,
   removeQueryParam,
   unhashUrl,
 } from '../../../../../../plugins/kibana_utils/public';
+import { KibanaLegacyStart } from '../../../../../../plugins/kibana_legacy/public';
 
 export interface DashboardAppControllerDependencies extends RenderDeps {
   $scope: DashboardAppScope;
   $route: any;
   $routeParams: any;
   indexPatterns: IndexPatternsContract;
-  dashboardConfig: any;
-  confirmModal: ConfirmModalFn;
+  dashboardConfig: KibanaLegacyStart['dashboardConfig'];
   history: History;
   kbnUrlStateStorage: IKbnUrlStateStorage;
 }
@@ -108,13 +103,21 @@ export class DashboardAppController {
     dashboardConfig,
     localStorage,
     indexPatterns,
-    confirmModal,
     savedQueryService,
     embeddables,
     share,
     dashboardCapabilities,
     npDataStart: { query: queryService },
-    core: { notifications, overlays, chrome, injectedMetadata, uiSettings, savedObjects, http },
+    core: {
+      notifications,
+      overlays,
+      chrome,
+      injectedMetadata,
+      uiSettings,
+      savedObjects,
+      http,
+      i18n: i18nStart,
+    },
     history,
     kbnUrlStateStorage,
   }: DashboardAppControllerDependencies) {
@@ -626,27 +629,31 @@ export class DashboardAppController {
         }
       }
 
-      confirmModal(
-        i18n.translate('kbn.dashboard.changeViewModeConfirmModal.discardChangesDescription', {
-          defaultMessage: `Once you discard your changes, there's no getting them back.`,
-        }),
-        {
-          onConfirm: revertChangesAndExitEditMode,
-          onCancel: _.noop,
-          confirmButtonText: i18n.translate(
-            'kbn.dashboard.changeViewModeConfirmModal.confirmButtonLabel',
-            { defaultMessage: 'Discard changes' }
-          ),
-          cancelButtonText: i18n.translate(
-            'kbn.dashboard.changeViewModeConfirmModal.cancelButtonLabel',
-            { defaultMessage: 'Continue editing' }
-          ),
-          defaultFocusedButton: ConfirmationButtonTypes.CANCEL,
-          title: i18n.translate('kbn.dashboard.changeViewModeConfirmModal.discardChangesTitle', {
-            defaultMessage: 'Discard changes to dashboard?',
+      overlays
+        .openConfirm(
+          i18n.translate('kbn.dashboard.changeViewModeConfirmModal.discardChangesDescription', {
+            defaultMessage: `Once you discard your changes, there's no getting them back.`,
           }),
-        }
-      );
+          {
+            confirmButtonText: i18n.translate(
+              'kbn.dashboard.changeViewModeConfirmModal.confirmButtonLabel',
+              { defaultMessage: 'Discard changes' }
+            ),
+            cancelButtonText: i18n.translate(
+              'kbn.dashboard.changeViewModeConfirmModal.cancelButtonLabel',
+              { defaultMessage: 'Continue editing' }
+            ),
+            defaultFocusedButton: EUI_MODAL_CANCEL_BUTTON,
+            title: i18n.translate('kbn.dashboard.changeViewModeConfirmModal.discardChangesTitle', {
+              defaultMessage: 'Discard changes to dashboard?',
+            }),
+          }
+        )
+        .then(isConfirmed => {
+          if (isConfirmed) {
+            revertChangesAndExitEditMode();
+          }
+        });
     };
 
     /**
@@ -777,7 +784,7 @@ export class DashboardAppController {
           showCopyOnSave={dash.id ? true : false}
         />
       );
-      showSaveModal(dashboardSaveModal);
+      showSaveModal(dashboardSaveModal, i18nStart.Context);
     };
     navActions[TopNavIds.CLONE] = () => {
       const currentTitle = dashboardStateManager.getTitle();
@@ -806,17 +813,13 @@ export class DashboardAppController {
     };
     navActions[TopNavIds.ADD] = () => {
       if (dashboardContainer && !isErrorEmbeddable(dashboardContainer)) {
-        const SavedObjectFinder = (props: SavedObjectFinderProps) => (
-          <SavedObjectFinderUi {...props} savedObjects={savedObjects} uiSettings={uiSettings} />
-        );
-
         openAddPanelFlyout({
           embeddable: dashboardContainer,
           getAllFactories: embeddables.getEmbeddableFactories,
           getFactory: embeddables.getEmbeddableFactory,
           notifications,
           overlays,
-          SavedObjectFinder,
+          SavedObjectFinder: getSavedObjectFinder(savedObjects, uiSettings),
         });
       }
     };
