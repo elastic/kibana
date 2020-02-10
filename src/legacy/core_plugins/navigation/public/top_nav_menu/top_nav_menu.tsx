@@ -65,6 +65,9 @@ export function TopNavMenu(props: TopNavMenuProps) {
   function renderLayout() {
     return (
       <span className="kbnTopNavMenu__wrapper">
+        <h1 className="kuiLocalBreadcrumb" style={{ fontSize: '18px', padding: '12px 0 0 8px' }}>
+          {props.screenTitle}
+        </h1>
         <EuiFlexGroup
           data-test-subj="top-nav"
           justifyContent="flexStart"

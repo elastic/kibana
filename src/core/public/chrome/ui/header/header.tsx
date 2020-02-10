@@ -22,6 +22,9 @@ import Url from 'url';
 import React, { Component, createRef } from 'react';
 import * as Rx from 'rxjs';
 
+import 'tether';
+import 'bootstrap';
+
 import {
   // TODO: add type annotations
   // @ts-ignore
@@ -50,6 +53,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import LogRhythmNavbar from '../../../../../netmon/components/navbar';
 
 import { HeaderBadge } from './header_badge';
 import { HeaderBreadcrumbs } from './header_breadcrumbs';
@@ -379,7 +383,9 @@ class HeaderUI extends Component<Props, State> {
 
     return (
       <header>
-        <EuiHeader>
+        <LogRhythmNavbar />
+
+        {/* <EuiHeader>
           <EuiHeaderSection grow={false}>
             <EuiShowFor sizes={['xs', 's']}>
               <EuiHeaderSectionItem border="right">{this.renderMenuTrigger()}</EuiHeaderSectionItem>
@@ -403,7 +409,7 @@ class HeaderUI extends Component<Props, State> {
 
             <HeaderNavControls side="right" navControls={navControlsRight} />
           </EuiHeaderSection>
-        </EuiHeader>
+        </EuiHeader> */}
 
         <EuiNavDrawer
           ref={this.navDrawerRef}
