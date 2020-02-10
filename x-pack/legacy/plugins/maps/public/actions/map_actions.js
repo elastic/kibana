@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import _ from 'lodash';
 import turf from 'turf';
 import turfBooleanContains from '@turf/boolean-contains';
 import uuid from 'uuid/v4';
@@ -428,8 +429,12 @@ export function closeOnClickTooltip(tooltipId) {
 
 export function openOnClickTooltip(tooltipState) {
   return (dispatch, getState) => {
-    const openTooltips = getOpenTooltips(getState()).filter(({ isLocked }) => {
-      return isLocked;
+    const openTooltips = getOpenTooltips(getState()).filter(({ features, location, isLocked }) => {
+      return (
+        isLocked &&
+        !_.isEqual(location, tooltipState.location) &&
+        !_.isEqual(features, tooltipState.features)
+      );
     });
 
     openTooltips.push({
