@@ -25,7 +25,7 @@ export const alertListReducer: Reducer<AlertListState, AppAction> = (
   if (action.type === 'serverReturnedAlertsData') {
     return {
       ...state,
-      alerts: action.payload.alerts,
+      ...action.payload,
     };
   }
 
