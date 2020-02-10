@@ -20,21 +20,20 @@
 import { CoreSetup, CoreStart, LegacyNavLink, Plugin, UiSettingsState } from 'kibana/public';
 
 import { DataPublicPluginStart } from 'src/plugins/data/public';
-import { TelemetryPluginStart } from 'src/plugins/telemetry/public';
+import { TelemetryPluginSetup } from 'src/plugins/telemetry/public';
 import { setServices } from './kibana_services';
 import { KibanaLegacySetup } from '../../../../../plugins/kibana_legacy/public';
 import { UsageCollectionSetup } from '../../../../../plugins/usage_collection/public';
 import {
   Environment,
-  FeatureCatalogueEntry,
   HomePublicPluginStart,
   HomePublicPluginSetup,
+  FeatureCatalogueEntry,
 } from '../../../../../plugins/home/public';
 
 export interface HomePluginStartDependencies {
   data: DataPublicPluginStart;
   home: HomePublicPluginStart;
-  telemetry: TelemetryPluginStart;
 }
 
 export interface HomePluginSetupDependencies {
@@ -52,8 +51,8 @@ export interface HomePluginSetupDependencies {
       devMode: boolean;
       uiSettings: { defaults: UiSettingsState; user?: UiSettingsState | undefined };
     };
-    getFeatureCatalogueEntries: () => Promise<readonly FeatureCatalogueEntry[]>;
   };
+  telemetry: TelemetryPluginSetup;
   usageCollection: UsageCollectionSetup;
   kibanaLegacy: KibanaLegacySetup;
   home: HomePublicPluginSetup;
@@ -62,8 +61,8 @@ export interface HomePluginSetupDependencies {
 export class HomePlugin implements Plugin {
   private dataStart: DataPublicPluginStart | null = null;
   private savedObjectsClient: any = null;
-  private telemetry: TelemetryPluginStart | null = null;
   private environment: Environment | null = null;
+  private directories: readonly FeatureCatalogueEntry[] | null = null;
 
   setup(
     core: CoreSetup,
@@ -71,6 +70,7 @@ export class HomePlugin implements Plugin {
       home,
       kibanaLegacy,
       usageCollection,
+      telemetry,
       __LEGACY: { ...legacyServices },
     }: HomePluginSetupDependencies
   ) {
@@ -88,7 +88,6 @@ export class HomePlugin implements Plugin {
           getInjected: core.injectedMetadata.getInjectedVar,
           docLinks: contextCore.docLinks,
           savedObjectsClient: this.savedObjectsClient!,
-          telemetry: this.telemetry!,
           chrome: contextCore.chrome,
           uiSettings: core.uiSettings,
           addBasePath: core.http.basePath.prepend,
@@ -97,6 +96,8 @@ export class HomePlugin implements Plugin {
           environment: this.environment!,
           config: kibanaLegacy.config,
           homeConfig: home.config,
+          directories: this.directories!,
+          telemetry,
         });
         const { renderApp } = await import('./np_ready/application');
         return await renderApp(params.element);
@@ -106,6 +107,7 @@ export class HomePlugin implements Plugin {
 
   start(core: CoreStart, { data, home, telemetry }: HomePluginStartDependencies) {
     this.environment = home.environment.get();
+    this.directories = home.featureCatalogue.get();
     this.dataStart = data;
     this.telemetry = telemetry;
     this.savedObjectsClient = core.savedObjects.client;

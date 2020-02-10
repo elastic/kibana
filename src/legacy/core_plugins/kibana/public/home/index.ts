@@ -17,13 +17,10 @@
  * under the License.
  */
 
-import { FeatureCatalogueRegistryProvider } from 'ui/registry/feature_catalogue';
 import { npSetup, npStart } from 'ui/new_platform';
 import chrome from 'ui/chrome';
 import { HomePlugin } from './plugin';
 import { IPrivate } from '../../../../../plugins/kibana_legacy/public';
-
-let copiedLegacyCatalogue = false;
 
 (async () => {
   const instance = new HomePlugin();
@@ -31,21 +28,7 @@ let copiedLegacyCatalogue = false;
     ...npSetup.plugins,
     __LEGACY: {
       metadata: npStart.core.injectedMetadata.getLegacyMetadata(),
-      getFeatureCatalogueEntries: async () => {
-        if (!copiedLegacyCatalogue) {
-          const injector = await chrome.dangerouslyGetActiveInjector();
-          const Private = injector.get<IPrivate>('Private');
-          // Merge legacy registry with new registry
-          (Private(FeatureCatalogueRegistryProvider as any) as any).inTitleOrder.map(
-            npSetup.plugins.home.featureCatalogue.register
-          );
-          copiedLegacyCatalogue = true;
-        }
-        return npStart.plugins.home.featureCatalogue.get();
-      },
     },
   });
-  instance.start(npStart.core, {
-    ...npStart.plugins,
-  } as any);
+  instance.start(npStart.core, npStart.plugins as any);
 })();
