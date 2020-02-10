@@ -11,6 +11,7 @@ import {
   transformBulkError,
   BulkError,
   createSuccessObject,
+  getIndex,
   ImportSuccessError,
   createImportErrorObject,
   transformImportError,
@@ -272,6 +273,38 @@ describe('utils', () => {
         ],
       };
       expect(transformed).toEqual(expected);
+    });
+  });
+
+  describe('getIndex', () => {
+    it('appends the space ID to the configured index if spaces are enabled', () => {
+      const mockGet = jest.fn();
+      const mockGetSpaceId = jest.fn();
+      const config = jest.fn(() => ({ get: mockGet, has: jest.fn() }));
+      const server = { plugins: { spaces: { getSpaceId: mockGetSpaceId } }, config };
+
+      mockGet.mockReturnValue('mockSignalsIndex');
+      mockGetSpaceId.mockReturnValue('myspace');
+      // @ts-ignore-next-line TODO these dependencies are simplified on
+      // https://github.com/elastic/kibana/pull/56814. We're currently mocking
+      // out what we need.
+      const index = getIndex(null, server);
+
+      expect(index).toEqual('mockSignalsIndex-myspace');
+    });
+
+    it('appends the default space ID to the configured index if spaces are disabled', () => {
+      const mockGet = jest.fn();
+      const config = jest.fn(() => ({ get: mockGet, has: jest.fn() }));
+      const server = { plugins: {}, config };
+
+      mockGet.mockReturnValue('mockSignalsIndex');
+      // @ts-ignore-next-line TODO these dependencies are simplified on
+      // https://github.com/elastic/kibana/pull/56814. We're currently mocking
+      // out what we need.
+      const index = getIndex(null, server);
+
+      expect(index).toEqual('mockSignalsIndex-default');
     });
   });
 });
