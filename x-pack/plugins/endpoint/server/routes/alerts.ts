@@ -84,6 +84,27 @@ export function registerAlertRoutes(router: IRouter, endpointAppContext: Endpoin
     }
   };
 
+  const alertDetailHandler: RequestHandler<unknown, unknown> = async (ctx, req, res) => {
+    try {
+      function mapHit(entry: AlertDataWrapper): AlertData {
+        return {
+          id: entry._id,
+          ...entry._source,
+        };
+      }
+
+      const alertId = req.params.id;
+      const response = (await ctx.core.elasticsearch.dataClient.callAsCurrentUser('get', {
+        index: 'my-index',
+        id: alertId,
+      })) as SearchResponse<AlertData>;
+
+      return res.ok({ body: mapHit(response) });
+    } catch (err) {
+      return res.internalError({ body: err });
+    }
+  };
+
   router.get(
     {
       path: ALERTS_ROUTE,
@@ -93,6 +114,19 @@ export function registerAlertRoutes(router: IRouter, endpointAppContext: Endpoin
       options: { authRequired: true },
     },
     alertsHandler
+  );
+
+  router.get(
+    {
+      path: ALERTS_ROUTE + '/{id}',
+      validate: {
+        params: schema.object({
+          id: schema.string(),
+        }),
+      },
+      options: { authRequired: true },
+    },
+    alertDetailHandler
   );
 
   router.post(
@@ -117,11 +151,12 @@ function mapToAlertResultList(
     relation: string;
   }
 
-  interface AlertSource {
+  interface AlertDataWrapper {
+    _id: string;
     _source: AlertData;
   }
 
-  type AlertHits = AlertSource[];
+  type AlertHits = AlertDataWrapper[];
 
   let totalNumberOfAlerts: number = 0;
   let totalIsLowerBound: boolean = false;
@@ -169,13 +204,20 @@ function mapToAlertResultList(
   next += '&after=' + lastTimestamp + '&after=' + lastEventId;
   prev += '&before=' + firstTimestamp + '&before=' + firstEventId;
 
+  function mapHit(entry: AlertDataWrapper): AlertData {
+    return {
+      id: entry._id,
+      ...entry._source,
+    };
+  }
+
   return {
     request_page_size: reqData.pageSize,
     request_page_index: reqData.pageIndex,
     result_from_index: reqData.fromIndex,
     next,
     prev,
-    alerts: hits.map((entry: AlertSource) => entry._source),
+    alerts: hits.map(mapHit),
     total: totalNumberOfAlerts,
   };
 }
