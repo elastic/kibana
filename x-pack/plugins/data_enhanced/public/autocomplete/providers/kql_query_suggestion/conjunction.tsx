@@ -9,7 +9,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { KqlQuerySuggestionProvider } from './types';
 import {
   QuerySuggestion,
-  QuerySuggestionsTypes,
+  QuerySuggestionTypes,
 } from '../../../../../../../src/plugins/data/public';
 
 const bothArgumentsText = (
@@ -65,7 +65,7 @@ export const setupGetConjunctionSuggestions: KqlQuerySuggestionProvider = core =
 
     if (text.endsWith(' ')) {
       suggestions = Object.keys(conjunctions).map((key: $Keys<typeof conjunctions>) => ({
-        type: QuerySuggestionsTypes.Conjunction,
+        type: QuerySuggestionTypes.Conjunction,
         text: `${key} `,
         description: conjunctions[key],
         start: end,

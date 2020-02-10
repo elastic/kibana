@@ -46,9 +46,9 @@ export {
 
 export {
   QuerySuggestion,
-  QuerySuggestionsTypes,
-  QuerySuggestionsGetFn,
-  QuerySuggestionsGetFnArgs,
+  QuerySuggestionTypes,
+  QuerySuggestionGetFn,
+  QuerySuggestionGetFnArgs,
   QuerySuggestionBasic,
   QuerySuggestionField,
 } from './autocomplete';

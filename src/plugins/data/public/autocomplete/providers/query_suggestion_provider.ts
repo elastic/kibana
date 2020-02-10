@@ -19,7 +19,7 @@
 
 import { IFieldType, IIndexPattern } from '../../../common/index_patterns';
 
-export enum QuerySuggestionsTypes {
+export enum QuerySuggestionTypes {
   Field = 'field',
   Value = 'value',
   Operator = 'operator',
@@ -27,12 +27,12 @@ export enum QuerySuggestionsTypes {
   RecentSearch = 'recentSearch',
 }
 
-export type QuerySuggestionsGetFn = (
-  args: QuerySuggestionsGetFnArgs
+export type QuerySuggestionGetFn = (
+  args: QuerySuggestionGetFnArgs
 ) => Promise<QuerySuggestion[]> | undefined;
 
 /** @public **/
-export interface QuerySuggestionsGetFnArgs {
+export interface QuerySuggestionGetFnArgs {
   language: string;
   indexPatterns: IIndexPattern[];
   query: string;
@@ -44,7 +44,7 @@ export interface QuerySuggestionsGetFnArgs {
 
 /** @public **/
 export interface QuerySuggestionBasic {
-  type: QuerySuggestionsTypes;
+  type: QuerySuggestionTypes;
   description?: string | JSX.Element;
   end: number;
   start: number;
@@ -54,7 +54,7 @@ export interface QuerySuggestionBasic {
 
 /** @public **/
 export interface QuerySuggestionField extends QuerySuggestionBasic {
-  type: QuerySuggestionsTypes.Field;
+  type: QuerySuggestionTypes.Field;
   field: IFieldType;
 }
 

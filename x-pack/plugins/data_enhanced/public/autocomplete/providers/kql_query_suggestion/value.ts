@@ -10,14 +10,14 @@ import { KqlQuerySuggestionProvider } from './types';
 import { getAutocompleteService } from '../../../services';
 import {
   QuerySuggestion,
-  QuerySuggestionsTypes,
+  QuerySuggestionTypes,
 } from '../../../../../../../src/plugins/data/public';
 
 const wrapAsSuggestions = (start: number, end: number, query: string, values: string[]) =>
   values
     .filter(value => value.toLowerCase().includes(query.toLowerCase()))
     .map(value => ({
-      type: QuerySuggestionsTypes.Value,
+      type: QuerySuggestionTypes.Value,
       text: `${value} `,
       start,
       end,

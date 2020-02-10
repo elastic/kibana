@@ -10,7 +10,7 @@ import { ThemeProvider } from 'styled-components';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import {
   QuerySuggestion,
-  QuerySuggestionsTypes,
+  QuerySuggestionTypes,
 } from '../../../../../../../../src/plugins/data/public';
 import { SuggestionItem } from '../suggestion_item';
 
@@ -19,7 +19,7 @@ const suggestion: QuerySuggestion = {
   end: 3,
   start: 1,
   text: 'Text...',
-  type: QuerySuggestionsTypes.Value,
+  type: QuerySuggestionTypes.Value,
 };
 
 storiesOf('components/SuggestionItem', module).add('example', () => (

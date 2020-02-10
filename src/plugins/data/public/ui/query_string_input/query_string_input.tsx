@@ -45,7 +45,7 @@ import {
   getQueryLog,
   Query,
 } from '../..';
-import { QuerySuggestion, QuerySuggestionsTypes } from '../../autocomplete';
+import { QuerySuggestion, QuerySuggestionTypes } from '../../autocomplete';
 
 import { withKibana, KibanaReactContextValue, toMountPoint } from '../../../../kibana_react/public';
 import { fetchIndexPatterns } from './fetch_index_patterns';
@@ -192,7 +192,7 @@ export class QueryStringInputUI extends Component<Props, State> {
       const text = toUser(recentSearch);
       const start = 0;
       const end = query.length;
-      return { type: QuerySuggestionsTypes.RecentSearch, text, start, end };
+      return { type: QuerySuggestionTypes.RecentSearch, text, start, end };
     });
   };
 
@@ -342,7 +342,7 @@ export class QueryStringInputUI extends Component<Props, State> {
       selectionEnd: start + (cursorIndex ? cursorIndex : text.length),
     });
 
-    if (type === QuerySuggestionsTypes.RecentSearch) {
+    if (type === QuerySuggestionTypes.RecentSearch) {
       this.setState({ isSuggestionsVisible: false, index: null });
       this.onSubmit({ query: newQueryString, language: this.props.query.language });
     }

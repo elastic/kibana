@@ -14,8 +14,8 @@ import { setupGetConjunctionSuggestions } from './conjunction';
 import {
   esKuery,
   QuerySuggestion,
-  QuerySuggestionsGetFnArgs,
-  QuerySuggestionsGetFn,
+  QuerySuggestionGetFnArgs,
+  QuerySuggestionGetFn,
 } from '../../../../../../../src/plugins/data/public';
 
 const cursorSymbol = '@kuery-cursor@';
@@ -25,7 +25,7 @@ const dedup = (suggestions: QuerySuggestion[]): QuerySuggestion[] =>
 
 export const KUERY_LANGUAGE_NAME = 'kuery';
 
-export const setupKqlQuerySuggestionProvider = (core: CoreSetup): QuerySuggestionsGetFn => {
+export const setupKqlQuerySuggestionProvider = (core: CoreSetup): QuerySuggestionGetFn => {
   const providers = {
     field: setupGetFieldSuggestions(core),
     value: setupGetValueSuggestions(core),
@@ -35,7 +35,7 @@ export const setupKqlQuerySuggestionProvider = (core: CoreSetup): QuerySuggestio
 
   const getSuggestionsByType = (
     cursoredQuery: string,
-    querySuggestionsArgs: QuerySuggestionsGetFnArgs
+    querySuggestionsArgs: QuerySuggestionGetFnArgs
   ): Array<Promise<QuerySuggestion[]>> | [] => {
     try {
       const cursorNode = esKuery.fromKueryExpression(cursoredQuery, {

@@ -19,7 +19,7 @@
 
 import { mount, shallow } from 'enzyme';
 import React from 'react';
-import { QuerySuggestion, QuerySuggestionsTypes } from '../../autocomplete';
+import { QuerySuggestion, QuerySuggestionTypes } from '../../autocomplete';
 import { SuggestionComponent } from './suggestion_component';
 import { SuggestionsComponent } from './suggestions_component';
 
@@ -33,14 +33,14 @@ const mockSuggestions: QuerySuggestion[] = [
     end: 0,
     start: 42,
     text: 'as promised, not helpful',
-    type: QuerySuggestionsTypes.Value,
+    type: QuerySuggestionTypes.Value,
   },
   {
     description: 'This is another unhelpful suggestion',
     end: 0,
     start: 42,
     text: 'yep',
-    type: QuerySuggestionsTypes.Field,
+    type: QuerySuggestionTypes.Field,
   },
 ];
 

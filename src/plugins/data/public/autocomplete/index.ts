@@ -19,9 +19,9 @@
 
 export {
   QuerySuggestion,
-  QuerySuggestionsTypes,
-  QuerySuggestionsGetFn,
-  QuerySuggestionsGetFnArgs,
+  QuerySuggestionTypes,
+  QuerySuggestionGetFn,
+  QuerySuggestionGetFnArgs,
   QuerySuggestionBasic,
   QuerySuggestionField,
 } from './providers/query_suggestion_provider';

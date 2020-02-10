@@ -12,7 +12,7 @@ import {
   IFieldType,
   isFilterable,
   QuerySuggestionField,
-  QuerySuggestionsTypes,
+  QuerySuggestionTypes,
 } from '../../../../../../../src/plugins/data/public';
 import { KqlQuerySuggestionProvider } from './types';
 
@@ -78,7 +78,7 @@ export const setupGetFieldSuggestions: KqlQuerySuggestionProvider<QuerySuggestio
           : text.length;
 
       return {
-        type: QuerySuggestionsTypes.Field,
+        type: QuerySuggestionTypes.Field,
         text,
         description,
         start,
