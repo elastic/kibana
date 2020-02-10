@@ -35,10 +35,10 @@ import {
 import { CoreStart } from '../../../../../../../../src/core/public';
 import { dashboardInput } from './dashboard_input';
 import { Start as InspectorStartContract } from '../../../../../../../../src/plugins/inspector/public';
-import { TGetActionsCompatibleWithTrigger } from '../../../../../../../../src/plugins/ui_actions/public';
+import { GetActionsCompatibleWithTrigger } from '../../../../../../../../src/plugins/ui_actions/public';
 
 interface Props {
-  getActions: TGetActionsCompatibleWithTrigger;
+  getActions: GetActionsCompatibleWithTrigger;
   getEmbeddableFactory: GetEmbeddableFactory;
   getAllEmbeddableFactories: GetEmbeddableFactories;
   overlays: CoreStart['overlays'];
