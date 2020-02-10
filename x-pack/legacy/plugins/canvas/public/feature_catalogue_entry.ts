@@ -5,21 +5,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { npSetup } from 'ui/new_platform';
 import { FeatureCatalogueCategory } from '../../../../../src/plugins/home/public';
 
-const {
-  plugins: { home },
-} = npSetup;
-
-home.featureCatalogue.register({
-  id: 'uptime',
-  title: i18n.translate('xpack.uptime.uptimeFeatureCatalogueTitle', { defaultMessage: 'Uptime' }),
-  description: i18n.translate('xpack.uptime.featureCatalogueDescription', {
-    defaultMessage: 'Perform endpoint health checks and uptime monitoring.',
+export const featureCatalogueEntry = {
+  id: 'canvas',
+  title: 'Canvas',
+  description: i18n.translate('xpack.canvas.appDescription', {
+    defaultMessage: 'Showcase your data in a pixel-perfect way.',
   }),
-  icon: 'uptimeApp',
-  path: `uptime#/`,
+  icon: 'canvasApp',
+  path: '/app/canvas',
   showOnHomePage: true,
   category: FeatureCatalogueCategory.DATA,
-});
+};

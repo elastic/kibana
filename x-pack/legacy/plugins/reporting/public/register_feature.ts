@@ -13,13 +13,15 @@ const {
 } = npSetup;
 
 home.featureCatalogue.register({
-  id: 'uptime',
-  title: i18n.translate('xpack.uptime.uptimeFeatureCatalogueTitle', { defaultMessage: 'Uptime' }),
-  description: i18n.translate('xpack.uptime.featureCatalogueDescription', {
-    defaultMessage: 'Perform endpoint health checks and uptime monitoring.',
+  id: 'reporting',
+  title: i18n.translate('xpack.reporting.registerFeature.reportingTitle', {
+    defaultMessage: 'Reporting',
   }),
-  icon: 'uptimeApp',
-  path: `uptime#/`,
-  showOnHomePage: true,
-  category: FeatureCatalogueCategory.DATA,
+  description: i18n.translate('xpack.reporting.registerFeature.reportingDescription', {
+    defaultMessage: 'Manage your reports generated from Discover, Visualize, and Dashboard.',
+  }),
+  icon: 'reportingApp',
+  path: '/app/kibana#/management/kibana/reporting',
+  showOnHomePage: false,
+  category: FeatureCatalogueCategory.ADMIN,
 });
