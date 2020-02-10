@@ -89,7 +89,7 @@ export const VerticalScrollPanel: React.FC<VerticalScrollPanelProps> = ({
       windowRef.current?.scrollToRow(targetChild, 'end');
     }
   }, [isScrollLocked, windowRef.current, targetChild]);
-  useEffect(() => scrollToTargetEffect, [targetChild]);
+  useEffect(() => scrollToTargetEffect, [target]);
 
   const childrenIDStringLookup = useMemo(
     () =>
@@ -106,9 +106,12 @@ export const VerticalScrollPanel: React.FC<VerticalScrollPanelProps> = ({
   );
 
   // Recompute item sizes when new entries are loaded at the beginning or if the page window resizes
-  const resizeItemsEffect = useCallback(() => cache.clearAll(), [cache]);
-  useEffect(resizeItemsEffect, [childrenArray[1]]);
-  useEffect(debounce(250, resizeItemsEffect), [width]);
+  const resizeItemsEffect = useCallback(() => {
+    cache.clearAll();
+    requestAnimationFrame(scrollToTargetEffect);
+  }, [cache]);
+  useEffect(resizeItemsEffect, [childrenIDStringLookup[1]]);
+  useEffect(debounce(100, resizeItemsEffect), [width]);
 
   // const handleScrollWhileStreaming = useCallback()
 
@@ -143,7 +146,7 @@ export const VerticalScrollPanel: React.FC<VerticalScrollPanelProps> = ({
   // ]);
 
   const onItemsRendered = useCallback(
-    debounce(500, ({ startIndex, stopIndex }: { startIndex: number; stopIndex: number }) => {
+    debounce(100, ({ startIndex, stopIndex }: { startIndex: number; stopIndex: number }) => {
       const visibleChildren = getVisibleChildren({
         visibleStartIndex: startIndex,
         visibleStopIndex: stopIndex,
