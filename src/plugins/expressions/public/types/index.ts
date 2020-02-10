@@ -19,10 +19,10 @@
 
 import { Adapters } from '../../../inspector/public';
 import {
-  Executor,
   IInterpreterRenderHandlers,
   ExpressionValue,
   ExecutionContextSearch,
+  ExpressionsService,
 } from '../../common';
 
 /**
@@ -38,7 +38,7 @@ export interface ExpressionExecutor {
  * @deprecated
  */
 export interface ExpressionInterpreter {
-  interpretAst: Executor['run'];
+  interpretAst: ExpressionsService['run'];
 }
 
 export interface IExpressionLoaderParams {

@@ -19,6 +19,7 @@
 
 import { Executor } from '../executor';
 import { ExpressionRendererRegistry } from '../expression_renderers';
+import { ExpressionAstExpression } from '../ast';
 
 export type ExpressionsServiceSetup = ReturnType<ExpressionsService['setup']>;
 export type ExpressionsServiceStart = ReturnType<ExpressionsService['start']>;
@@ -106,8 +107,15 @@ export class ExpressionsService {
    * expressions.run('...', null, { elasticsearchClient });
    * ```
    */
-  public readonly run = (...args: Parameters<Executor['run']>): ReturnType<Executor['run']> =>
-    this.executor.run(...args);
+  public readonly run = <
+    Input,
+    Output,
+    ExtraContext extends Record<string, unknown> = Record<string, unknown>
+  >(
+    ast: string | ExpressionAstExpression,
+    input: Input,
+    context?: ExtraContext
+  ): Promise<Output> => this.executor.run<Input, Output, ExtraContext>(ast, input, context);
 
   public setup() {
     const { executor, renderers, registerFunction, run } = this;
