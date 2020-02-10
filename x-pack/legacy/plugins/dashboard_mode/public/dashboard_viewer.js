@@ -40,9 +40,7 @@ import { localApplicationService } from 'plugins/kibana/local_application_servic
 import { showAppRedirectNotification } from 'ui/notify';
 import { DashboardConstants, createDashboardEditUrl } from 'plugins/kibana/dashboard';
 
-uiModules
-  .get('kibana')
-  .config(dashboardConfigProvider => dashboardConfigProvider.turnHideWriteControlsOn());
+npStart.plugins.kibanaLegacy.dashboardConfig.turnHideWriteControlsOn();
 
 localApplicationService.attachToAngular(routes);
 
