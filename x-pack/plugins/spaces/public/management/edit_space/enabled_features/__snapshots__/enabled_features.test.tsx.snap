@@ -86,19 +86,23 @@ exports[`EnabledFeatures renders as expected 1`] = `
       <FeatureTable
         features={
           Array [
-            Object {
-              "app": Array [],
-              "icon": "spacesApp",
-              "id": "feature-1",
-              "name": "Feature 1",
-              "privileges": Object {},
+            Feature {
+              "config": Object {
+                "app": Array [],
+                "icon": "spacesApp",
+                "id": "feature-1",
+                "name": "Feature 1",
+                "privileges": "none",
+              },
             },
-            Object {
-              "app": Array [],
-              "icon": "spacesApp",
-              "id": "feature-2",
-              "name": "Feature 2",
-              "privileges": Object {},
+            Feature {
+              "config": Object {
+                "app": Array [],
+                "icon": "spacesApp",
+                "id": "feature-2",
+                "name": "Feature 2",
+                "privileges": "none",
+              },
             },
           ]
         }
