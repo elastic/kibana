@@ -1,27 +1,26 @@
 import React from "react";
+import TestRunnerItemList from './test_runner_item_list';
 
-export default function HistoricalItem({item, currentJobNumber}) {
-
-  console.log(`\n### currentJobNumber: \n\t${currentJobNumber}`);
-
+export default function HistoricalItem({item, currentJobNumber, testRunnerTypes}) {
   return (
-    <div>
+    <>
       <div className="max-w-sm rounded overflow-hidden shadow-lg">
         {/*<img className="w-full" src="/img/card-top.jpg" alt="Sunset in the mountains"></img>*/}
           <div className="px-6 py-4">
             <div className="font-bold text-xl mb-2">
-              Job Number - {title(item)}
+              Job - {title(item)}
             </div>
-            <p className="text-gray-700 text-base">
+            <div className="text-gray-700 text-base">
+              <TestRunnerItemList testRunnerTypes={testRunnerTypes} />
               <a
                 className="App-link"
                 href={href(item)}
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                {item}
+                GCP Bucket
               </a>
-            </p>
+            </div>
           </div>
           {/*<div className="px-6 py-4">*/}
           {/*  <span*/}
@@ -33,7 +32,7 @@ export default function HistoricalItem({item, currentJobNumber}) {
           {/*</div>*/}
 
       </div>
-    </div>
+    </>
   );
 }
 

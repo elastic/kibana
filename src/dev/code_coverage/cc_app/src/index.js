@@ -49,7 +49,7 @@ function boot(testRunnerTypes) {
 }
 
 function initPrint(x) {
-  console.log(`\n### initial data: \n\n${p(x)}`);
+  // console.log(`\n### initial data: \n\n${p(x)}`);
 }
 
 // If you want your app to work offline and load faster, you can change

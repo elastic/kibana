@@ -1,8 +1,21 @@
 import React from "react";
 
-export default function TestRunnerItem({item}) {
+export default function TestRunnerItem ({item}) {
 
   return (
-    <div>{item.type}</div>
+    <div>
+      <a
+        className="App-link"
+        href={href(item)}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        {item.type}
+      </a>
+    </div>
   );
+}
+
+function href(item) {
+ return `target/kibana-coverage/${item.type}-combined/index.html`;
 }

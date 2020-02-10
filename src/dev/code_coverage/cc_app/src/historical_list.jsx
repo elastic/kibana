@@ -22,12 +22,12 @@ import HistoricalItem from './historical_item';
 // import TestRunnerItemList from './test_runner_item_list';
 
 const renderItem = testRunnerTypes => currentJobNumber => (x, i) => {
-  console.log(`\n### testRunnerTypes: \n\t${testRunnerTypes}`);
   return (
       <HistoricalItem
         item={x}
         key={i}
         currentJobNumber={currentJobNumber}
+        testRunnerTypes={testRunnerTypes}
       />
       // {/*<TestRunnerItemList testRunnerTypes={testRunnerTypes} />*/}
 );

@@ -13,7 +13,6 @@ export default function TestRunnerItemList({testRunnerTypes}) {
 }
 
 function renderItem(item) {
-  console.dir(item);
   return (
     <TestRunnerItem
       item={item}
