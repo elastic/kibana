@@ -132,6 +132,7 @@ export class FeatureTable extends Component<Props, State> {
     const columns = [
       {
         field: 'feature',
+        width: '200px',
         name: i18n.translate(
           'xpack.security.management.editRole.featureTable.enabledRoleFeaturesFeatureColumnTitle',
           {
@@ -144,7 +145,7 @@ export class FeatureTable extends Component<Props, State> {
       },
       {
         field: 'privilege',
-        width: '*',
+        width: '200px',
         name: (
           <span>
             <FormattedMessage

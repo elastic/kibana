@@ -59,7 +59,7 @@ export const SubFeatureForm = (props: Props) => {
           return (
             <EuiCheckbox
               key={privilege.id}
-              id={privilege.id}
+              id={`${props.featureId}_${privilege.id}`}
               label={privilege.name}
               data-test-subj="independentSubFeaturePrivilegeControl"
               onChange={e => {
