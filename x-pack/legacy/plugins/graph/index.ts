@@ -53,6 +53,7 @@ export const graph: LegacyPluginInitializer = kibana => {
         navLinkId: 'graph',
         app: ['graph', 'kibana'],
         catalogue: ['graph'],
+        validLicenses: ['platinum', 'enterprise', 'trial'],
         privileges: {
           all: {
             savedObject: {
