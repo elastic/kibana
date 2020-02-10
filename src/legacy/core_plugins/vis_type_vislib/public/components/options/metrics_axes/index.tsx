@@ -21,7 +21,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { cloneDeep, uniq, get } from 'lodash';
 import { EuiSpacer } from '@elastic/eui';
 
-import { AggConfig } from '../../../legacy_imports';
+import { IAggConfig } from '../../../legacy_imports';
 import { BasicVislibParams, ValueAxis, SeriesParam, Axis } from '../../../types';
 import { ValidationVisOptionsProps } from '../../common';
 import { SeriesPanel } from './series_panel';
@@ -99,7 +99,7 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
 
     stateParams.valueAxes.forEach((axis, axisNumber) => {
       let newCustomLabel = '';
-      const matchingSeries: AggConfig[] = [];
+      const matchingSeries: IAggConfig[] = [];
 
       series.forEach((serie, seriesIndex) => {
         if ((axisNumber === 0 && !serie.valueAxis) || serie.valueAxis === axis.id) {

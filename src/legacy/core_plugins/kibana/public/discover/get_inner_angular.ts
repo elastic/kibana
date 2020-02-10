@@ -22,48 +22,24 @@
 // They can stay even after NP cutover
 import angular from 'angular';
 import 'ui/angular-bootstrap';
-import { IPrivate } from 'ui/private';
 import { EuiIcon } from '@elastic/eui';
 // @ts-ignore
 import { StateProvider } from 'ui/state_management/state';
 // @ts-ignore
 import { EventsProvider } from 'ui/events';
 import { PersistedState } from 'ui/persisted_state';
-// @ts-ignore
-import { PromiseServiceCreator } from 'ui/promises/promises';
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
-// @ts-ignore
-import { PrivateProvider } from 'ui/private/private';
 import { CoreStart, LegacyCoreStart, IUiSettingsClient } from 'kibana/public';
-// @ts-ignore
-import { watchMultiDecorator } from 'ui/directives/watch_multi/watch_multi';
-// @ts-ignore
-import { registerListenEventListener } from 'ui/directives/listen/listen';
-// @ts-ignore
-import { KbnAccessibleClickProvider } from 'ui/accessibility/kbn_accessible_click';
-// @ts-ignore
-import { FieldNameDirectiveProvider } from 'ui/directives/field_name';
-// @ts-ignore
-import { CollapsibleSidebarProvider } from 'ui/collapsible_sidebar/collapsible_sidebar';
-// @ts-ignore
-import { CssTruncateProvide } from 'ui/directives/css_truncate';
-// @ts-ignore
-import { FixedScrollProvider } from 'ui/fixed_scroll';
-// @ts-ignore
-import { DebounceProviderTimeout } from 'ui/directives/debounce/debounce';
 // @ts-ignore
 import { AppStateProvider } from 'ui/state_management/app_state';
 // @ts-ignore
 import { GlobalStateProvider } from 'ui/state_management/global_state';
-// @ts-ignore
-import { createRenderCompleteDirective } from 'ui/render_complete/directive';
 // @ts-ignore
 import { StateManagementConfigProvider } from 'ui/state_management/config_provider';
 // @ts-ignore
 import { KbnUrlProvider, RedirectWhenMissingProvider } from 'ui/url';
 // @ts-ignore
 import { createTopNavDirective, createTopNavHelper } from 'ui/kbn_top_nav/kbn_top_nav';
-import { configureAppAngularModule } from 'ui/legacy_compat';
 import { IndexPatterns, DataPublicPluginStart } from '../../../../../plugins/data/public';
 import { Storage } from '../../../../../plugins/kibana_utils/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../../plugins/navigation/public';
@@ -81,11 +57,28 @@ import { createFieldSearchDirective } from './np_ready/components/field_chooser/
 import { createIndexPatternSelectDirective } from './np_ready/components/field_chooser/discover_index_pattern_directive';
 import { createStringFieldProgressBarDirective } from './np_ready/components/field_chooser/string_progress_bar';
 // @ts-ignore
+import { FieldNameDirectiveProvider } from './np_ready/angular/directives/field_name';
+// @ts-ignore
 import { createFieldChooserDirective } from './np_ready/components/field_chooser/field_chooser';
-
 // @ts-ignore
 import { createDiscoverFieldDirective } from './np_ready/components/field_chooser/discover_field';
+import { CollapsibleSidebarProvider } from './np_ready/angular/directives/collapsible_sidebar/collapsible_sidebar';
 import { DiscoverStartPlugins } from './plugin';
+import { createCssTruncateDirective } from './np_ready/angular/directives/css_truncate';
+// @ts-ignore
+import { FixedScrollProvider } from './np_ready/angular/directives/fixed_scroll';
+// @ts-ignore
+import { DebounceProviderTimeout } from './np_ready/angular/directives/debounce/debounce';
+import { createRenderCompleteDirective } from './np_ready/angular/directives/render_complete';
+import {
+  configureAppAngularModule,
+  IPrivate,
+  KbnAccessibleClickProvider,
+  PrivateProvider,
+  PromiseServiceCreator,
+  registerListenEventListener,
+  watchMultiDecorator,
+} from '../../../../../plugins/kibana_legacy/public';
 
 /**
  * returns the main inner angular module, it contains all the parts of Angular Discover
@@ -181,7 +174,7 @@ export function initializeInnerAngularModule(
     .directive('kbnAccessibleClick', KbnAccessibleClickProvider)
     .directive('fieldName', FieldNameDirectiveProvider)
     .directive('collapsibleSidebar', CollapsibleSidebarProvider)
-    .directive('cssTruncate', CssTruncateProvide)
+    .directive('cssTruncate', createCssTruncateDirective)
     .directive('fixedScroll', FixedScrollProvider)
     .directive('renderComplete', createRenderCompleteDirective)
     .directive('discoverFieldSearch', createFieldSearchDirective)

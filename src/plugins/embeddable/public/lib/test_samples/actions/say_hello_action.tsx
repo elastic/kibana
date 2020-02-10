@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { IAction, IncompatibleActionError } from '../../ui_actions';
+import { Action, IncompatibleActionError } from '../../ui_actions';
 import { EmbeddableInput, Embeddable, EmbeddableOutput, IEmbeddable } from '../../embeddables';
 
 export const SAY_HELLO_ACTION = 'SAY_HELLO_ACTION';
@@ -40,7 +40,7 @@ interface ActionContext {
   message?: string;
 }
 
-export class SayHelloAction implements IAction<ActionContext> {
+export class SayHelloAction implements Action<ActionContext> {
   public readonly type = SAY_HELLO_ACTION;
   public readonly id = SAY_HELLO_ACTION;
 
