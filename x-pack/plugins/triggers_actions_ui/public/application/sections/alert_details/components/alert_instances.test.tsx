@@ -18,7 +18,15 @@ import { EuiBasicTable } from '@elastic/eui';
 const fakeNow = new Date('2020-02-09T23:15:41.941Z');
 const fake2MinutesAgo = new Date('2020-02-09T23:13:41.941Z');
 
+const mockAPIs = {
+  muteAlertInstance: jest.fn(),
+  unmuteAlertInstance: jest.fn(),
+  requestRefresh: jest.fn(),
+};
+const onMuteAction = jest.fn();
+
 beforeAll(() => {
+  jest.resetAllMocks();
   global.Date.now = jest.fn(() => fakeNow.getTime());
 });
 
@@ -35,15 +43,15 @@ describe('alert_instances', () => {
 
     const alertState = mockAlertState();
     const instances: AlertInstanceListItem[] = [
-      alertInstanceToListItem('first_instance', alertState.alertInstances!.first_instance),
-      alertInstanceToListItem('second_instance', alertState.alertInstances!.second_instance),
+      alertInstanceToListItem(alert, 'first_instance', alertState.alertInstances!.first_instance),
+      alertInstanceToListItem(alert, 'second_instance', alertState.alertInstances!.second_instance),
     ];
 
     expect(
-      shallow(<AlertInstances alert={alert} alertState={alertState} />).containsMatchingElement(
+      shallow(<AlertInstances {...mockAPIs} alert={alert} alertState={alertState} />).equals(
         <EuiBasicTable
           items={instances}
-          columns={alertInstancesTableColumns}
+          columns={alertInstancesTableColumns(onMuteAction)}
           data-test-subj="alertInstancesList"
         />
       )
@@ -64,10 +72,10 @@ describe('alert_instances', () => {
       },
       ['us-east']: {},
     };
-
     expect(
       shallow(
         <AlertInstances
+          {...mockAPIs}
           alert={alert}
           alertState={mockAlertState({
             alertInstances: instances,
@@ -76,10 +84,10 @@ describe('alert_instances', () => {
       ).containsMatchingElement(
         <EuiBasicTable
           items={[
-            alertInstanceToListItem('us-central', instances['us-central']),
-            alertInstanceToListItem('us-east', instances['us-east']),
+            alertInstanceToListItem(alert, 'us-central', instances['us-central']),
+            alertInstanceToListItem(alert, 'us-east', instances['us-east']),
           ]}
-          columns={alertInstancesTableColumns}
+          columns={alertInstancesTableColumns(onMuteAction)}
           data-test-subj="alertInstancesList"
         />
       )
@@ -94,6 +102,7 @@ describe('alert_instances', () => {
     expect(
       shallow(
         <AlertInstances
+          {...mockAPIs}
           alert={alert}
           alertState={mockAlertState({
             alertInstances: {},
@@ -101,8 +110,11 @@ describe('alert_instances', () => {
         />
       ).containsMatchingElement(
         <EuiBasicTable
-          items={[alertInstanceToListItem('us-west'), alertInstanceToListItem('us-east')]}
-          columns={alertInstancesTableColumns}
+          items={[
+            alertInstanceToListItem(alert, 'us-west'),
+            alertInstanceToListItem(alert, 'us-east'),
+          ]}
+          columns={alertInstancesTableColumns(onMuteAction)}
           data-test-subj="alertInstancesList"
         />
       )
@@ -112,6 +124,7 @@ describe('alert_instances', () => {
 
 describe('alertInstanceToListItem', () => {
   it('handles active instances', () => {
+    const alert = mockAlert();
     const start = fake2MinutesAgo;
     const instance: RawAlertInstance = {
       meta: {
@@ -122,7 +135,7 @@ describe('alertInstanceToListItem', () => {
       },
     };
 
-    expect(alertInstanceToListItem('id', instance)).toEqual({
+    expect(alertInstanceToListItem(alert, 'id', instance)).toEqual({
       instance: 'id',
       status: 'Active',
       start,
@@ -131,10 +144,34 @@ describe('alertInstanceToListItem', () => {
     });
   });
 
+  it('handles active muted instances', () => {
+    const alert = mockAlert({
+      mutedInstanceIds: ['id'],
+    });
+    const start = fake2MinutesAgo;
+    const instance: RawAlertInstance = {
+      meta: {
+        lastScheduledActions: {
+          date: start,
+          group: 'default',
+        },
+      },
+    };
+
+    expect(alertInstanceToListItem(alert, 'id', instance)).toEqual({
+      instance: 'id',
+      status: 'Active',
+      start,
+      duration: fakeNow.getTime() - fake2MinutesAgo.getTime(),
+      isMuted: true,
+    });
+  });
+
   it('handles active instances with no meta', () => {
+    const alert = mockAlert();
     const instance: RawAlertInstance = {};
 
-    expect(alertInstanceToListItem('id', instance)).toEqual({
+    expect(alertInstanceToListItem(alert, 'id', instance)).toEqual({
       instance: 'id',
       status: 'Active',
       start: undefined,
@@ -144,11 +181,12 @@ describe('alertInstanceToListItem', () => {
   });
 
   it('handles active instances with no lastScheduledActions', () => {
+    const alert = mockAlert();
     const instance: RawAlertInstance = {
       meta: {},
     };
 
-    expect(alertInstanceToListItem('id', instance)).toEqual({
+    expect(alertInstanceToListItem(alert, 'id', instance)).toEqual({
       instance: 'id',
       status: 'Active',
       start: undefined,
@@ -157,8 +195,11 @@ describe('alertInstanceToListItem', () => {
     });
   });
 
-  it('handles muted instances', () => {
-    expect(alertInstanceToListItem('id')).toEqual({
+  it('handles muted inactive instances', () => {
+    const alert = mockAlert({
+      mutedInstanceIds: ['id'],
+    });
+    expect(alertInstanceToListItem(alert, 'id')).toEqual({
       instance: 'id',
       status: 'Inactive',
       start: undefined,

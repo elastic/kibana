@@ -23,6 +23,8 @@ import {
   muteAlert,
   unmuteAlert,
   updateAlert,
+  muteAlertInstance,
+  unmuteAlertInstance,
 } from './alert_api';
 import uuid from 'uuid';
 
@@ -461,6 +463,34 @@ describe('disableAlert', () => {
       Array [
         Array [
           "/api/alert/1/_disable",
+        ],
+      ]
+    `);
+  });
+});
+
+describe('muteAlertInstance', () => {
+  test('should call mute instance alert API', async () => {
+    const result = await muteAlertInstance({ http, id: '1', instanceId: '123' });
+    expect(result).toEqual(undefined);
+    expect(http.post.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          "/api/alert/1/alert_instance/123/_mute",
+        ],
+      ]
+    `);
+  });
+});
+
+describe('unmuteAlertInstance', () => {
+  test('should call mute instance alert API', async () => {
+    const result = await unmuteAlertInstance({ http, id: '1', instanceId: '123' });
+    expect(result).toEqual(undefined);
+    expect(http.post.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          "/api/alert/1/alert_instance/123/_unmute",
         ],
       ]
     `);

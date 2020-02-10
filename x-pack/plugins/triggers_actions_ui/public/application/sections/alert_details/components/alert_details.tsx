@@ -36,6 +36,7 @@ type AlertDetailsProps = {
   alert: Alert;
   alertType: AlertType;
   actionTypes: ActionType[];
+  requestRefresh: () => Promise<void>;
 } & Pick<BulkOperationsComponentOpts, 'disableAlert' | 'enableAlert' | 'unmuteAlert' | 'muteAlert'>;
 
 export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
@@ -46,6 +47,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
   enableAlert,
   unmuteAlert,
   muteAlert,
+  requestRefresh,
 }) => {
   const { capabilities } = useAppDependencies();
 
@@ -134,6 +136,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                           setIsEnabled(true);
                           await enableAlert(alert);
                         }
+                        requestRefresh();
                       }}
                       label={
                         <FormattedMessage
@@ -157,6 +160,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                           setIsMuted(true);
                           await muteAlert(alert);
                         }
+                        requestRefresh();
                       }}
                       label={
                         <FormattedMessage
@@ -173,7 +177,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
               <EuiSpacer size="m" />
               <EuiFlexItem>
                 {alert.enabled ? (
-                  <AlertInstancesRouteWithApi alert={alert} />
+                  <AlertInstancesRouteWithApi requestRefresh={requestRefresh} alert={alert} />
                 ) : (
                   <EuiCallOut title="Disabled Alert" color="warning" iconType="help">
                     <p>

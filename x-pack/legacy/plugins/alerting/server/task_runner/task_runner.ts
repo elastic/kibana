@@ -10,10 +10,17 @@ import { SavedObject } from '../../../../../../src/core/server';
 import { TaskRunnerContext } from './task_runner_factory';
 import { ConcreteTaskInstance } from '../../../../../plugins/task_manager/server';
 import { createExecutionHandler } from './create_execution_handler';
-import { AlertInstance, createAlertInstanceFactory, RawAlertInstance } from '../alert_instance';
+import { AlertInstance, createAlertInstanceFactory } from '../alert_instance';
 import { getNextRunAt } from './get_next_run_at';
 import { validateAlertTypeParams } from '../lib';
-import { AlertType, RawAlert, IntervalSchedule, Services, AlertInfoParams } from '../types';
+import {
+  AlertType,
+  RawAlert,
+  IntervalSchedule,
+  Services,
+  AlertInfoParams,
+  RawAlertInstance,
+} from '../types';
 import { promiseResult, map, Resultable, asOk, asErr, resolveErr } from '../lib/result_type';
 import {
   AlertTaskState,

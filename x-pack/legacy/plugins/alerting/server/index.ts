@@ -11,5 +11,4 @@ export type AlertsClient = PublicMethodsOf<AlertsClientClass>;
 export { init } from './init';
 export { AlertType, AlertingPlugin, AlertExecutorOptions } from './types';
 export { AlertTaskState } from './task_runner';
-export { RawAlertInstance } from './alert_instance';
 export { PluginSetupContract, PluginStartContract } from './plugin';

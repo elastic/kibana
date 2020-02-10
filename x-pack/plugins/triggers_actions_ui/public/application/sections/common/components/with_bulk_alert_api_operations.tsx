@@ -19,6 +19,8 @@ import {
   enableAlert,
   muteAlert,
   unmuteAlert,
+  muteAlertInstance,
+  unmuteAlertInstance,
   loadAlert,
   loadAlertState,
   loadAlertTypes,
@@ -32,6 +34,8 @@ export interface ComponentOpts {
   deleteAlerts: (alerts: Alert[]) => Promise<void>;
   muteAlert: (alert: Alert) => Promise<void>;
   unmuteAlert: (alert: Alert) => Promise<void>;
+  muteAlertInstance: (alert: Alert, alertInstanceId: string) => Promise<void>;
+  unmuteAlertInstance: (alert: Alert, alertInstanceId: string) => Promise<void>;
   enableAlert: (alert: Alert) => Promise<void>;
   disableAlert: (alert: Alert) => Promise<void>;
   deleteAlert: (alert: Alert) => Promise<void>;
@@ -78,6 +82,16 @@ export function withBulkAlertOperations<T>(
             return unmuteAlert({ http, id: alert.id });
           }
         }}
+        muteAlertInstance={async (alert: Alert, instanceId: string) => {
+          if (!isAlertInstanceMuted(alert, instanceId)) {
+            return muteAlertInstance({ http, id: alert.id, instanceId });
+          }
+        }}
+        unmuteAlertInstance={async (alert: Alert, instanceId: string) => {
+          if (isAlertInstanceMuted(alert, instanceId)) {
+            return unmuteAlertInstance({ http, id: alert.id, instanceId });
+          }
+        }}
         enableAlert={async (alert: Alert) => {
           if (isAlertDisabled(alert)) {
             return enableAlert({ http, id: alert.id });
@@ -103,4 +117,8 @@ function isAlertDisabled(alert: Alert) {
 
 function isAlertMuted(alert: Alert) {
   return alert.muteAll === true;
+}
+
+function isAlertInstanceMuted(alert: Alert, instanceId: string) {
+  return alert.mutedInstanceIds.findIndex(muted => muted === instanceId) >= 0;
 }

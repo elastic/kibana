@@ -4,19 +4,28 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { Fragment } from 'react';
 import moment, { Duration } from 'moment';
 import { i18n } from '@kbn/i18n';
-import { EuiBasicTable } from '@elastic/eui';
-import { padLeft } from 'lodash';
-import { RawAlertInstance } from '../../../../../../../legacy/plugins/alerting/server';
+import { EuiBasicTable, EuiButtonToggle, EuiBadge, RIGHT_ALIGNMENT } from '@elastic/eui';
+import { padLeft, difference } from 'lodash';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { RawAlertInstance } from '../../../../../../../legacy/plugins/alerting/common';
 import { Alert, AlertTaskState } from '../../../../types';
-interface AlertInstancesProps {
+import {
+  ComponentOpts as AlertApis,
+  withBulkAlertOperations,
+} from '../../common/components/with_bulk_alert_api_operations';
+
+type AlertInstancesProps = {
   alert: Alert;
   alertState: AlertTaskState;
-}
+  requestRefresh: () => Promise<void>;
+} & Pick<AlertApis, 'muteAlertInstance' | 'unmuteAlertInstance'>;
 
-export const alertInstancesTableColumns = [
+export const alertInstancesTableColumns = (
+  onMuteAction: (instance: AlertInstanceListItem) => Promise<void>
+) => [
   {
     field: 'instance',
     name: i18n.translate(
@@ -60,6 +69,40 @@ export const alertInstancesTableColumns = [
     sortable: false,
     'data-test-subj': 'alertInstancesTableCell-duration',
   },
+  {
+    field: '',
+    alignment: RIGHT_ALIGNMENT,
+    render: (instance: AlertInstanceListItem) => {
+      return (
+        <Fragment>
+          {instance.isMuted ? (
+            <EuiBadge data-test-subj="mutedAlertInstanceLabel">
+              <FormattedMessage
+                id="xpack.triggersActionsUI.sections.alertDetails.alertInstances.mutedAlert"
+                defaultMessage="Muted"
+              />
+            </EuiBadge>
+          ) : (
+            <Fragment />
+          )}
+          <EuiButtonToggle
+            label={instance.isMuted ? 'Unmute' : 'Mute'}
+            iconType={instance.isMuted ? 'eyeClosed' : 'eye'}
+            onChange={() => onMuteAction(instance)}
+            isSelected={instance.isMuted}
+            isEmpty
+            isIconOnly
+          />
+        </Fragment>
+      );
+    },
+    name: i18n.translate(
+      'xpack.triggersActionsUI.sections.alertDetails.alertInstancesList.columns.actions',
+      { defaultMessage: 'Actions' }
+    ),
+    sortable: false,
+    'data-test-subj': 'alertInstancesTableCell-actions',
+  },
 ];
 
 function durationAsString(duration: Duration): string {
@@ -69,22 +112,34 @@ function durationAsString(duration: Duration): string {
 }
 
 export function AlertInstances({
-  alert: { mutedInstanceIds },
+  alert,
   alertState: { alertInstances = {} },
+  muteAlertInstance,
+  unmuteAlertInstance,
+  requestRefresh,
 }: AlertInstancesProps) {
+  const onMuteAction = async (instance: AlertInstanceListItem) => {
+    await (instance.isMuted
+      ? unmuteAlertInstance(alert, instance.instance)
+      : muteAlertInstance(alert, instance.instance));
+    requestRefresh();
+  };
   return (
     <EuiBasicTable
       items={[
         ...Object.entries(alertInstances).map(([instanceId, instance]) =>
-          alertInstanceToListItem(instanceId, instance)
+          alertInstanceToListItem(alert, instanceId, instance)
         ),
-        ...mutedInstanceIds.map(instanceId => alertInstanceToListItem(instanceId)),
+        ...difference(alert.mutedInstanceIds, Object.keys(alertInstances)).map(instanceId =>
+          alertInstanceToListItem(alert, instanceId)
+        ),
       ]}
-      columns={alertInstancesTableColumns}
+      columns={alertInstancesTableColumns(onMuteAction)}
       data-test-subj="alertInstancesList"
     />
   );
 }
+export const AlertInstancesWithApi = withBulkAlertOperations(AlertInstances);
 
 export interface AlertInstanceListItem {
   instance: string;
@@ -105,15 +160,18 @@ const INACTIVE_LABEL = i18n.translate(
 );
 
 const durationSince = (start?: Date) => (start ? Date.now() - start.getTime() : 0);
+
 export function alertInstanceToListItem(
+  alert: Alert,
   instanceId: string,
   instance?: RawAlertInstance
 ): AlertInstanceListItem {
+  const isMuted = alert.mutedInstanceIds.findIndex(muted => muted === instanceId) >= 0;
   return {
     instance: instanceId,
     status: instance ? ACTIVE_LABEL : INACTIVE_LABEL,
     start: instance?.meta?.lastScheduledActions?.date,
     duration: durationSince(instance?.meta?.lastScheduledActions?.date),
-    isMuted: instance ? false : true,
+    isMuted,
   };
 }

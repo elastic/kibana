@@ -14,14 +14,16 @@ import {
   ComponentOpts as AlertApis,
   withBulkAlertOperations,
 } from '../../common/components/with_bulk_alert_api_operations';
-import { AlertInstances } from './alert_instances';
+import { AlertInstancesWithApi as AlertInstances } from './alert_instances';
 
 type WithAlertStateProps = {
   alert: Alert;
+  requestRefresh: () => Promise<void>;
 } & Pick<AlertApis, 'loadAlertState'>;
 
 export const AlertInstancesRoute: React.FunctionComponent<WithAlertStateProps> = ({
   alert,
+  requestRefresh,
   loadAlertState,
 }) => {
   const { http, toastNotifications } = useAppDependencies();
@@ -33,7 +35,7 @@ export const AlertInstancesRoute: React.FunctionComponent<WithAlertStateProps> =
   }, [alert, http, loadAlertState, toastNotifications]);
 
   return alertState ? (
-    <AlertInstances alert={alert} alertState={alertState} />
+    <AlertInstances requestRefresh={requestRefresh} alert={alert} alertState={alertState} />
   ) : (
     <div
       style={{
