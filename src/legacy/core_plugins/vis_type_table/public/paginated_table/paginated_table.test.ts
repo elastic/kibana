@@ -28,7 +28,7 @@ import { initTableVisLegacyModule } from '../table_vis_legacy_module';
 import { coreMock } from '../../../../../core/public/mocks';
 
 jest.mock('ui/new_platform');
-jest.mock('ui/legacy_compat', () => ({
+jest.mock('../../../../../plugins/kibana_legacy/public/angular/angular_config', () => ({
   configureAppAngularModule: () => {},
 }));
 
