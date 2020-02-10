@@ -21,3 +21,10 @@ export const loginAndWaitForPage = (url: string) => {
   );
   cy.contains('a', 'SIEM', { timeout: DEFAULT_TIMEOUT });
 };
+
+export const loginAndWaitForPageUrlState = (url: string) => {
+  login();
+  cy.viewport('macbook-15');
+  cy.visit(url);
+  cy.contains('a', 'SIEM', { timeout: DEFAULT_TIMEOUT });
+};
