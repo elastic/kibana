@@ -13,6 +13,7 @@ import { Panel } from './panel';
 import { GraphControls } from './graph_controls';
 import { ProcessEventDot } from './process_event_dot';
 import { useCamera } from './use_camera';
+import { SymbolDefinitions } from './defs';
 
 const StyledPanel = styled(Panel)`
   position: absolute;
@@ -23,6 +24,7 @@ const StyledPanel = styled(Panel)`
   width: 25em;
   max-width: 50%;
 `;
+
 
 const StyledGraphControls = styled(GraphControls)`
   position: absolute;
@@ -40,15 +42,10 @@ export const Resolver = styled(
 
     return (
       <div data-test-subj="resolverEmbeddable" className={className}>
+        <SymbolDefinitions />
+        <GraphControls />
         <div className="resolver-graph" onMouseDown={onMouseDown} ref={ref}>
-          {Array.from(processNodePositions).map(([processEvent, position], index) => (
-            <ProcessEventDot
-              key={index}
-              position={position}
-              projectionMatrix={projectionMatrix}
-              event={processEvent}
-            />
-          ))}
+          {/* Paint lines first so they appear underneath the nodes */}
           {edgeLineSegments.map(([startPosition, endPosition], index) => (
             <EdgeLine
               key={index}
@@ -56,6 +53,14 @@ export const Resolver = styled(
               endPosition={endPosition}
               projectionMatrix={projectionMatrix}
             />
+          ))}
+          {Array.from(processNodePositions).map(([processEvent, position], index) => (
+            <ProcessEventDot
+            key={index}
+            position={position}
+            projectionMatrix={projectionMatrix}
+            event={processEvent}
+          />
           ))}
         </div>
         <StyledPanel />
@@ -65,7 +70,7 @@ export const Resolver = styled(
   })
 )`
   /**
-   * Take up all availble space
+   * Take up all available space
    */
   &,
   .resolver-graph {
