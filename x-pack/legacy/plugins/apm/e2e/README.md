@@ -1,63 +1,59 @@
-### How to run
+# End-To-End (e2e) Test for APM UI
+
+## Ingest static data into Elasticsearch via APM Server
+
+1. Start Elasticsearch and APM Server, using [apm-integration-testing](https://github.com/elastic/apm-integration-testing):
+
+```shell
+$ git clone https://github.com/elastic/apm-integration-testing.git
+$ cd apm-integration-testing
+./scripts/compose.py start master --all --apm-server-record
+```
+
+2. Download [static data file](https://storage.googleapis.com/apm-ui-e2e-static-data/events.json)
+
+```shell
+$ cd x-pack/legacy/plugins/apm/e2e/cypress/ingest-data
+$ curl https://storage.googleapis.com/apm-ui-e2e-static-data/events.json --output events.json
+```
+
+3. Post to APM Server
+
+```shell
+$ cd x-pack/legacy/plugins/apm/e2e/cypress/ingest-data
+$ node ingest-data/replay.js --server-url http://localhost:8200 --secret-token abcd --events ./events.json
+```
+>This process will take a few minutes to ingest all data
+
+4. Start Kibana
+
+```shell
+$ yarn start --no-base-path --csp.strict=false
+```
+
+> Content Security Policy (CSP) Settings: Your Kibana instance must have the `csp.strict: false`.
+
+## How to run the tests
 
 _Note: Run the following commands from `kibana/x-pack/legacy/plugins/apm/e2e/cypress`._
 
-#### Interactive mode
+### Interactive mode
 
 ```
 yarn cypress open
 ```
 
-#### Headless mode
+### Headless mode
 
 ```
 yarn cypress run
 ```
 
-### Connect to Elasticsearch on Cloud (internal devs only)
+## Connect to Elasticsearch on Cloud (internal devs only)
 
 Find the credentials for the cluster [here](https://github.com/elastic/apm-dev/blob/master/docs/credentials/apm-ui-clusters.md#e2e-cluster). The cloud instance contains the static data set
-
-### Kibana
-
-#### `--no-base-path`
-
-Kibana must be started with `yarn start --no-base-path`
-
-#### Content Security Policy (CSP) Settings
-
-Your local or cloud Kibana server must have the `csp.strict: false` setting
-configured in `kibana.dev.yml`, or `kibana.yml`, as shown in the example below:
-
-```yaml
-csp.strict: false
-```
 
 The above setting is required to prevent the _Please upgrade
 your browser_ / _This Kibana installation has strict security requirements
 enabled that your current browser does not meet._ warning that's displayed for
 unsupported user agents, like the one reported by Cypress when running tests.
-
-### Ingest static data into Elasticsearch via APM Server
-
-1. Download [static data file](https://storage.googleapis.com/apm-ui-e2e-static-data/events.json)
-
-2. Post to APM Server
-
-```
-node ingest-data/replay.js --server-url http://localhost:8200 --secret-token abcd --events ./events.json
-```
-
-### Generate static data
-
-Capture data from all agents with [apm-integration-testing](https://github.com/elastic/apm-integration-testing):
-
-```
-./scripts/compose.py start master --all --apm-server-record
-```
-
-To copy the captured data from the container to the host:
-
-```
-docker cp localtesting_8.0.0_apm-server-2:/app/events.json .
-```
