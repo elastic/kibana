@@ -19,13 +19,13 @@
 
 import { I18nStart, SavedObjectsStart, IUiSettingsClient, CoreStart } from 'src/core/public';
 import { createGetterSetter } from '../../../../plugins/kibana_utils/public';
-import { DataPublicPluginStart, FieldFormatsStart } from '../../../../plugins/data/public';
+import { DataPublicPluginStart } from '../../../../plugins/data/public';
 
 export const [getUISettings, setUISettings] = createGetterSetter<IUiSettingsClient>('UISettings');
 
-export const [getFieldFormats, setFieldFormats] = createGetterSetter<FieldFormatsStart>(
-  'FieldFormats'
-);
+export const [getFieldFormats, setFieldFormats] = createGetterSetter<
+  DataPublicPluginStart['fieldFormats']
+>('FieldFormats');
 
 export const [getSavedObjectsClient, setSavedObjectsClient] = createGetterSetter<SavedObjectsStart>(
   'SavedObjectsClient'
