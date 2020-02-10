@@ -33,4 +33,4 @@ npm install wait-on
 ./node_modules/.bin/wait-on ${CYPRESS_BASE_URL}/status && echo 'Kibana is up and running'
 
 # Run cypress
-./node_modules/.bin/cypress run
+npm run cypress:run
