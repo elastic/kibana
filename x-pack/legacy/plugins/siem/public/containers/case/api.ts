@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import chrome from 'ui/chrome';
+import { KibanaServices } from '../../lib/kibana';
 import {
   FetchCasesProps,
   FetchCasesResponse,
@@ -19,8 +19,8 @@ import { throwIfNotOk } from '../../hooks/api/api';
 import { CASES_URL } from './constants';
 
 export const getCase = async (caseId: string, includeComments: boolean) => {
-  const response = await fetch(
-    `${chrome.getBasePath()}/api/cases/${caseId}?includeComments=${includeComments}`,
+  const response = await KibanaServices.get().http.fetch(
+    `${CASES_URL}/${caseId}?includeComments=${includeComments}`,
     {
       method: 'GET',
       credentials: 'same-origin',
@@ -60,7 +60,7 @@ export const getCases = async ({
     filterOptions.search // filterOptions.search.length > 0 ? `*${filterOptions.search}*` : filterOptions.search
   }&`;
   queryParams = `${queryParams}${tagParams}${searchParams}`;
-  const response = await fetch(`${chrome.getBasePath()}${CASES_URL}${queryParams}`, {
+  const response = await KibanaServices.get().http.fetch(`${CASES_URL}${queryParams}`, {
     method: 'GET',
     credentials: 'same-origin',
     headers: {
@@ -74,7 +74,7 @@ export const getCases = async ({
 };
 
 export const createCase = async (newCase: NewCase): Promise<NewCaseFormatted> => {
-  const response = await fetch(`${chrome.getBasePath()}${CASES_URL}`, {
+  const response = await KibanaServices.get().http.fetch(`${CASES_URL}`, {
     method: 'POST',
     credentials: 'same-origin',
     headers: {
@@ -92,7 +92,7 @@ export const updateCaseProperty = async (
   caseId: string,
   updatedCase: UpdateCase
 ): Promise<UpdateCaseSavedObject> => {
-  const response = await fetch(`${chrome.getBasePath()}${CASES_URL}/${caseId}`, {
+  const response = await KibanaServices.get().http.fetch(`${CASES_URL}/${caseId}`, {
     method: 'POST',
     credentials: 'same-origin',
     headers: {
