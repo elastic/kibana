@@ -34,7 +34,7 @@ function getAnnotationsFeatureUnavailableErrorMessage() {
 /**
  * Routes for annotations
  */
-export function annotationRoutes({ xpackMainPlugin, router }: RouteInitialization) {
+export function annotationRoutes({ xpackMainPlugin, router, securityPlugin }: RouteInitialization) {
   /**
    * @apiGroup Annotations
    *
@@ -98,8 +98,8 @@ export function annotationRoutes({ xpackMainPlugin, router }: RouteInitializatio
         }
 
         const { indexAnnotation } = annotationServiceProvider(context);
-        const username = _.get(request, 'auth.credentials.username', ANNOTATION_USER_UNKNOWN);
-        const resp = await indexAnnotation(request.body, username);
+        const user = securityPlugin.authc.getCurrentUser(request) || {};
+        const resp = await indexAnnotation(request.body, user.username || ANNOTATION_USER_UNKNOWN);
 
         return response.ok({
           body: resp,
