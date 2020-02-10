@@ -352,7 +352,6 @@
     "common.ui.flotCharts.thuLabel": "周四",
     "common.ui.flotCharts.tueLabel": "周二",
     "common.ui.flotCharts.wedLabel": "周三",
-    "common.ui.modals.cancelButtonLabel": "取消",
     "common.ui.paginateControls.pageSizeLabel": "页面大小",
     "common.ui.paginateControls.scrollTopButtonLabel": "滚动至顶部",
     "common.ui.savedObjects.confirmModal.overwriteButtonLabel": "覆盖",
