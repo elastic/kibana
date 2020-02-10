@@ -65,9 +65,7 @@ export class SecurityNavControlService {
       mount: (el: HTMLElement) => {
         const I18nContext = core.i18n.Context;
 
-        const serverBasePath = core.injectedMetadata.getInjectedVar('serverBasePath') as string;
-
-        const logoutUrl = `${serverBasePath}/logout`;
+        const logoutUrl = core.injectedMetadata.getInjectedVar('logoutUrl') as string;
 
         const props = {
           user: currentUserPromise,
