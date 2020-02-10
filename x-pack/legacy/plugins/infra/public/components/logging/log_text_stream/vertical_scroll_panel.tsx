@@ -6,8 +6,8 @@
 
 import debounce from 'lodash/fp/debounce';
 import { VariableSizeList, ListChildComponentProps } from 'react-window';
+import { List, CellMeasurer, CellMeasurerCache, ListRowRenderer } from 'react-virtualized';
 import { useMeasure } from 'react-use';
-import { LogTextStreamLoadingItemView } from './loading_item_view';
 import { LogTextStreamJumpToTail } from './jump_to_tail';
 import React, { useCallback, useRef, useEffect, useMemo, useState, useLayoutEffect } from 'react';
 
@@ -46,12 +46,17 @@ export const VerticalScrollPanel: React.FC<VerticalScrollPanelProps> = ({
   onScrollLockChange,
   isStreaming,
 }) => {
+  const [cache] = useState(
+    new CellMeasurerCache({
+      defaultWidth: 700,
+      minWidth: 100,
+      fixedWidth: true,
+    })
+  );
+
   const maxDisplayedItems = Math.ceil(height / DEFAULT_ITEM_HEIGHT);
 
-  const windowRef = useRef<VariableSizeList>(null);
-  const innerRef = useRef<HTMLDivElement>(null);
-
-  const [childHeightsLookup, recordChildHeight] = useImmutableChildHeightLookup();
+  const windowRef = useRef<List>(null);
 
   const [isScrollLocked, setIsScrollLocked] = useState(false);
   useEffect(() => onScrollLockChange(isScrollLocked), [isScrollLocked]);
@@ -81,7 +86,7 @@ export const VerticalScrollPanel: React.FC<VerticalScrollPanelProps> = ({
   const scrollToTargetEffect = useCallback(() => {
     if (!isScrollLocked) {
       console.log('scrollToTarget', targetChild);
-      windowRef.current?.scrollToItem(targetChild, 'end');
+      windowRef.current?.scrollToRow(targetChild, 'end');
     }
   }, [isScrollLocked, windowRef.current, targetChild]);
   useEffect(() => scrollToTargetEffect, [targetChild]);
@@ -100,10 +105,10 @@ export const VerticalScrollPanel: React.FC<VerticalScrollPanelProps> = ({
     [childrenArray]
   );
 
-  const resizeItemsEffect = useCallback(() => {
-    windowRef.current?.resetAfterIndex(0, true);
-  }, [windowRef.current]);
-  useEffect(resizeItemsEffect, [windowRef.current, childHeightsLookup]);
+  // Recompute item sizes when new entries are loaded at the beginning or if the page window resizes
+  const resizeItemsEffect = useCallback(() => cache.clearAll(), [cache]);
+  useEffect(resizeItemsEffect, [childrenArray[1]]);
+  useEffect(debounce(250, resizeItemsEffect), [width]);
 
   // const handleScrollWhileStreaming = useCallback()
 
@@ -122,7 +127,7 @@ export const VerticalScrollPanel: React.FC<VerticalScrollPanelProps> = ({
   // useEffect(scrollEffect, [visibleChildren]);
 
   const jumpToTail = useCallback(() => {
-    windowRef.current?.scrollTo(childHeights.boundingBoxes.totalHeight);
+    windowRef.current?.scrollToPosition(childHeights.boundingBoxes.totalHeight);
     setIsScrollLocked(false);
   }, [childrenArray, windowRef.current]);
 
@@ -138,26 +143,25 @@ export const VerticalScrollPanel: React.FC<VerticalScrollPanelProps> = ({
   // ]);
 
   const onItemsRendered = useCallback(
-    debounce(
-      500,
-      ({
-        visibleStartIndex,
-        visibleStopIndex,
-      }: {
-        visibleStartIndex: number;
-        visibleStopIndex: number;
-      }) => {
-        const visibleChildren = getVisibleChildren({
-          visibleStartIndex,
-          visibleStopIndex,
-          childrenIDStringLookup,
-        });
-        onVisibleChildrenChange(visibleChildren);
-      }
-    ),
+    debounce(500, ({ startIndex, stopIndex }: { startIndex: number; stopIndex: number }) => {
+      const visibleChildren = getVisibleChildren({
+        visibleStartIndex: startIndex,
+        visibleStopIndex: stopIndex,
+        childrenIDStringLookup,
+      });
+      onVisibleChildrenChange(visibleChildren);
+    }),
     [childrenIDStringLookup]
   );
 
+  const rowRenderer: ListRowRenderer = props => {
+    const { key, index, parent, style } = props;
+    return (
+      <CellMeasurer cache={cache} rowIndex={index} key={key} parent={parent} columnIndex={0}>
+        <div style={{ ...style, width }}>{childrenArray[index]}</div>
+      </CellMeasurer>
+    );
+  };
   return (
     <>
       <ScrollPanelWrapper
@@ -165,37 +169,19 @@ export const VerticalScrollPanel: React.FC<VerticalScrollPanelProps> = ({
         height={height}
         width={width}
         ref={windowRef}
-        innerRef={innerRef}
-        itemCount={childrenArray.length}
-        itemSize={index =>
-          childHeightsLookup.get(childrenIDStringLookup[index]) || DEFAULT_ITEM_HEIGHT
-        }
-        itemData={{ childrenArray, recordChildHeight, childrenIDStringLookup }}
-        onItemsRendered={onItemsRendered}
-        estimatedItemSize={DEFAULT_ITEM_HEIGHT}
-        overscanCount={isStreaming && !isScrollLocked ? 9999 : OVERSCAN_COUNT}
+        rowCount={childrenArray.length}
+        onRowsRendered={onItemsRendered}
+        overscanRowCount={OVERSCAN_COUNT}
         fixStreamToBottom={isStreaming && !isScrollLocked}
-      >
-        {ListItem}
-      </ScrollPanelWrapper>
+        rowRenderer={rowRenderer}
+        estimatedRowSize={DEFAULT_ITEM_HEIGHT * 4}
+        rowHeight={cache.rowHeight}
+        deferredMeasurementCache={cache}
+      />
       {isStreaming && isScrollLocked && (
         <LogTextStreamJumpToTail width={width} onClickJump={() => jumpToTail()} />
       )}
     </>
-  );
-};
-
-const ListItem: React.FC<ListChildComponentProps> = ({ index, style, data }) => {
-  const { childrenArray, recordChildHeight, childrenIDStringLookup } = data;
-  const [ref, { height }] = useMeasure();
-  const idString = childrenIDStringLookup[index];
-  useEffect(() => recordChildHeight(idString, height), [height, idString, recordChildHeight]);
-  return (
-    <div style={style}>
-      <div style={{ visibility: height > 0 ? 'visible' : 'hidden' }} ref={ref}>
-        {childrenArray[index]}
-      </div>
-    </div>
   );
 };
 
@@ -221,44 +207,12 @@ const getVisibleChildren = ({
   entriesAfterEnd: childrenIDStringLookup.length - visibleStopIndex,
 });
 
-const useImmutableChildHeightLookup: () => [
-  Map<string, number>,
-  (id: string, height: number) => void
-] = () => {
-  const [mutableLookup] = useState(new Map<string, number>());
-  const getNewProxy = () =>
-    new Proxy(mutableLookup, {
-      get(target, prop) {
-        if (prop === 'get') return (id: string) => target.get(id);
-        if (prop === '_target') return target;
-      },
-    });
-  const [currentProxy, setCurrentProxy] = useState(getNewProxy());
-
-  const refreshProxy = useCallback(
-    debounce(100, () => {
-      setCurrentProxy(getNewProxy());
-    }),
-    [setCurrentProxy, getNewProxy]
-  );
-
-  return [
-    currentProxy as Map<string, number>,
-    (id: string, height: number) => {
-      if (!mutableLookup.has(id) || mutableLookup.get(id) !== height) {
-        mutableLookup.set(id, height);
-        refreshProxy();
-      }
-    },
-  ];
-};
-
 interface ScrollPanelWrapperProps {
   isHidden: boolean;
   fixStreamToBottom: boolean;
 }
 
-const ScrollPanelWrapper = euiStyled(VariableSizeList)<ScrollPanelWrapperProps>`
+const ScrollPanelWrapper = euiStyled(List)<ScrollPanelWrapperProps>`
   position: relative;
   visibility: ${props => (props.isHidden ? 'hidden' : 'visible')};
   & * {
