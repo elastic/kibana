@@ -11,7 +11,7 @@ import { aggTypeFieldFilters } from 'ui/agg_types';
 import { addSearchStrategy } from '../../../../../src/plugins/data/public';
 import { RollupPlugin } from './plugin';
 import { setup as management } from '../../../../../src/legacy/core_plugins/management/public/legacy';
-import { addBadgeExtension, addToggleExtension } from '../../index_management/public';
+import { extensions } from '../../index_management/public';
 
 const plugin = new RollupPlugin();
 
@@ -22,8 +22,7 @@ export const setup = plugin.setup(npSetup.core, {
     aggTypeFieldFilters,
     editorConfigProviders,
     addSearchStrategy,
-    addBadgeExtension,
-    addToggleExtension,
+    indexManagementExtensions: extensions,
     managementLegacy: management,
   },
 });

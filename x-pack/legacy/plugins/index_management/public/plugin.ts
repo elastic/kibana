@@ -23,7 +23,7 @@ import { MANAGEMENT_BREADCRUMB } from './_legacy';
 import { ExtensionsService } from './services';
 
 export interface IndexMgmtSetup {
-  indexManagementExtensions: ExtensionsService;
+  extensions: ExtensionsService;
 }
 
 export class IndexMgmtUIPlugin {
@@ -70,7 +70,7 @@ export class IndexMgmtUIPlugin {
     });
 
     return {
-      indexManagementExtensions: this.extensionsService,
+      extensions: this.extensionsService,
     };
   }
 

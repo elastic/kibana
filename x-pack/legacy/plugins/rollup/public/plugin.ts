@@ -33,6 +33,7 @@ import {
 // @ts-ignore
 import { CRUD_APP_BASE_PATH } from './crud_app/constants';
 import { ManagementSetup } from '../../../../../src/plugins/management/public';
+import { IndexMgmtSetup } from '../../index_management/public';
 // @ts-ignore
 import { setEsBaseAndXPackBase, setHttp } from './crud_app/services';
 import { setNotifications, setFatalErrors } from './kibana_services';
@@ -45,8 +46,7 @@ export interface RollupPluginSetupDependencies {
     editorConfigProviders: EditorConfigProviderRegistry;
     addSearchStrategy: (searchStrategy: SearchStrategyProvider) => void;
     managementLegacy: ManagementSetupLegacy;
-    addBadgeExtension: (badgeExtension: any) => void;
-    addToggleExtension: (toggleExtension: any) => void;
+    indexManagementExtensions: IndexMgmtSetup['extensions'];
   };
   home?: HomePublicPluginSetup;
   management: ManagementSetup;
@@ -62,16 +62,15 @@ export class RollupPlugin implements Plugin {
         editorConfigProviders,
         addSearchStrategy,
         managementLegacy,
-        addBadgeExtension,
-        addToggleExtension,
+        indexManagementExtensions,
       },
       home,
       management,
     }: RollupPluginSetupDependencies
   ) {
     setFatalErrors(core.fatalErrors);
-    addBadgeExtension(rollupBadgeExtension);
-    addToggleExtension(rollupToggleExtension);
+    indexManagementExtensions.addBadge(rollupBadgeExtension);
+    indexManagementExtensions.addToggle(rollupToggleExtension);
 
     const isRollupIndexPatternsEnabled = core.uiSettings.get(CONFIG_ROLLUPS);
 

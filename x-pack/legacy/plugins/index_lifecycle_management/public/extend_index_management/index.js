@@ -9,12 +9,7 @@ import { AddLifecyclePolicyConfirmModal } from './components/add_lifecycle_confi
 import { RemoveLifecyclePolicyConfirmModal } from './components/remove_lifecycle_confirm_modal';
 import { get, every, any } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import {
-  addSummaryExtension,
-  addBannerExtension,
-  addActionExtension,
-  addFilterExtension,
-} from '../../../index_management/public';
+import { extensions } from '../../../index_management/public';
 import { retryLifecycleForIndex } from '../services/api';
 import { EuiSearchBar } from '@elastic/eui';
 
@@ -165,11 +160,11 @@ export const ilmFilterExtension = indices => {
 };
 
 export const addAllExtensions = () => {
-  addActionExtension(retryLifecycleActionExtension);
-  addActionExtension(removeLifecyclePolicyActionExtension);
-  addActionExtension(addLifecyclePolicyActionExtension);
+  extensions.addAction(retryLifecycleActionExtension);
+  extensions.addAction(removeLifecyclePolicyActionExtension);
+  extensions.addAction(addLifecyclePolicyActionExtension);
 
-  addBannerExtension(ilmBannerExtension);
-  addSummaryExtension(ilmSummaryExtension);
-  addFilterExtension(ilmFilterExtension);
+  extensions.addBanner(ilmBannerExtension);
+  extensions.addSummary(ilmSummaryExtension);
+  extensions.addFilter(ilmFilterExtension);
 };
