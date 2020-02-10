@@ -42,7 +42,7 @@ a| *Nested field support*
 Query on nested fields using KQL.
 You can query for a user whose first name is Tom and whose
 last name is Hanks, or a user whose first name is Tom and last name is Smith.
-<<kuery-query-nested-field, Our documentation>> contains examples for you to follow.
+{kibana-ref}/kuery-query-nested-field.html[Our documentation] contains examples for you to follow.
 
 | image:release-notes/images/7-6-nested-field.png[Nested field]
 
