@@ -5,27 +5,28 @@ Array [
   <div
     class="euiForm"
   >
-    <div
-      aria-describedby="mockId"
-      aria-labelledby="mockId-title"
+    <fieldset
       class="euiDescribedFormGroup euiDescribedFormGroup--fullWidth"
-      role="group"
     >
+      <legend
+        class="euiScreenReaderOnly"
+      />
       <div
         class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
       >
         <div
           class="euiFlexItem"
         >
-          <h2
-            class="euiTitle euiTitle--small euiTitle euiTitle--xsmall euiDescribedFormGroup__title"
-            id="mockId-title"
-          >
-            Name
-          </h2>
+          <span>
+            <h2
+              aria-hidden="true"
+              class="euiTitle euiTitle--small euiTitle euiTitle--xsmall euiDescribedFormGroup__title"
+            >
+              Name
+            </h2>
+          </span>
           <div
             class="euiText euiText--small euiDescribedFormGroup__description"
-            id="mockId"
           >
             <div
               class="euiTextColor euiTextColor--subdued"
@@ -82,28 +83,29 @@ Array [
           </div>
         </div>
       </div>
-    </div>
-    <div
-      aria-describedby="mockId"
-      aria-labelledby="mockId-title"
+    </fieldset>
+    <fieldset
       class="euiDescribedFormGroup euiDescribedFormGroup--fullWidth"
-      role="group"
     >
+      <legend
+        class="euiScreenReaderOnly"
+      />
       <div
         class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
       >
         <div
           class="euiFlexItem"
         >
-          <h2
-            class="euiTitle euiTitle--small euiTitle euiTitle--xsmall euiDescribedFormGroup__title"
-            id="mockId-title"
-          >
-            Seed nodes for cluster discovery
-          </h2>
+          <span>
+            <h2
+              aria-hidden="true"
+              class="euiTitle euiTitle--small euiTitle euiTitle--xsmall euiDescribedFormGroup__title"
+            >
+              Seed nodes for cluster discovery
+            </h2>
+          </span>
           <div
             class="euiText euiText--small euiDescribedFormGroup__description"
-            id="mockId"
           >
             <div
               class="euiTextColor euiTextColor--subdued"
@@ -194,28 +196,29 @@ Array [
           </div>
         </div>
       </div>
-    </div>
-    <div
-      aria-describedby="mockId"
-      aria-labelledby="mockId-title"
+    </fieldset>
+    <fieldset
       class="euiDescribedFormGroup euiDescribedFormGroup--fullWidth"
-      role="group"
     >
+      <legend
+        class="euiScreenReaderOnly"
+      />
       <div
         class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
       >
         <div
           class="euiFlexItem"
         >
-          <h2
-            class="euiTitle euiTitle--small euiTitle euiTitle--xsmall euiDescribedFormGroup__title"
-            id="mockId-title"
-          >
-            Make remote cluster optional
-          </h2>
+          <span>
+            <h2
+              aria-hidden="true"
+              class="euiTitle euiTitle--small euiTitle euiTitle--xsmall euiDescribedFormGroup__title"
+            >
+              Make remote cluster optional
+            </h2>
+          </span>
           <div
             class="euiText euiText--small euiDescribedFormGroup__description"
-            id="mockId"
           >
             <div
               class="euiTextColor euiTextColor--subdued"
@@ -302,7 +305,7 @@ Array [
           </div>
         </div>
       </div>
-    </div>
+    </fieldset>
   </div>,
   <div
     class="euiSpacer euiSpacer--l"
