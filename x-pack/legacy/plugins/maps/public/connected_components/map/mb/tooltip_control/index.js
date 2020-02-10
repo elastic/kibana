@@ -7,39 +7,40 @@
 import { connect } from 'react-redux';
 import { TooltipControl } from './tooltip_control';
 import {
-  closeLockedTooltip,
-  openLockedTooltip,
-  setTooltipState,
+  closeOnClickTooltip,
+  openOnClickTooltip,
+  closeOnHoverTooltip,
+  openOnHoverTooltip,
 } from '../../../../actions/map_actions';
 import {
   getLayerList,
-  getLockedTooltips,
-  getTooltipState,
+  getOpenTooltips,
+  getHasLockedTooltips,
   isDrawingFilter,
 } from '../../../../selectors/map_selectors';
 
 function mapStateToProps(state = {}) {
   return {
     layerList: getLayerList(state),
-    tooltipState: getTooltipState(state),
+    hasLockedTooltips: getHasLockedTooltips(state),
     isDrawingFilter: isDrawingFilter(state),
-    lockedTooltips: getLockedTooltips(state),
+    openTooltips: getOpenTooltips(state),
   };
 }
 
 function mapDispatchToProps(dispatch) {
   return {
-    closeLockedTooltip(tooltipId) {
-      dispatch(closeLockedTooltip(tooltipId));
+    closeOnClickTooltip(tooltipId) {
+      dispatch(closeOnClickTooltip(tooltipId));
     },
-    openLockedTooltip({ features, location }) {
-      dispatch(openLockedTooltip({ features, location }));
+    openOnClickTooltip(tooltipState) {
+      dispatch(openOnClickTooltip(tooltipState));
     },
-    setTooltipState(tooltipState) {
-      dispatch(setTooltipState(tooltipState));
+    closeOnHoverTooltip() {
+      dispatch(closeOnHoverTooltip());
     },
-    clearTooltipState() {
-      dispatch(setTooltipState(null));
+    openOnHoverTooltip(tooltipState) {
+      dispatch(openOnHoverTooltip(tooltipState));
     },
   };
 }

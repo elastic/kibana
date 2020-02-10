@@ -9,11 +9,6 @@ import React from 'react';
 import { FEATURE_ID_PROPERTY_NAME, LON_INDEX } from '../../../../../common/constants';
 import { TooltipPopover } from './tooltip_popover';
 
-export const TOOLTIP_TYPE = {
-  HOVER: 'HOVER',
-  LOCKED: 'LOCKED',
-};
-
 function justifyAnchorLocation(mbLngLat, targetFeature) {
   let popupAnchorLocation = [mbLngLat.lng, mbLngLat.lat]; // default popup location to mouse location
   if (targetFeature.geometry.type === 'Point') {
@@ -46,8 +41,8 @@ export class TooltipControl extends React.Component {
 
   _onMouseout = () => {
     this._updateHoverTooltipState.cancel();
-    if (this.props.lockedTooltips.length === 0) {
-      this.props.clearTooltipState();
+    if (!this.props.hasLockedTooltips) {
+      this.props.closeOnHoverTooltip();
     }
   };
 
@@ -88,7 +83,7 @@ export class TooltipControl extends React.Component {
 
   _lockTooltip = e => {
     if (this.props.isDrawingFilter) {
-      //ignore click events when in draw mode
+      // ignore click events when in draw mode
       return;
     }
 
@@ -96,7 +91,7 @@ export class TooltipControl extends React.Component {
 
     const mbFeatures = this._getFeaturesUnderPointer(e.point);
     if (!mbFeatures.length) {
-      this.props.clearTooltipState();
+      // No features at click location so there is no tooltip to open
       return;
     }
 
@@ -104,41 +99,36 @@ export class TooltipControl extends React.Component {
     const popupAnchorLocation = justifyAnchorLocation(e.lngLat, targetMbFeataure);
 
     const features = this._getIdsForFeatures(mbFeatures);
-    this.props.openLockedTooltip({
+    this.props.openOnClickTooltip({
       features: features,
       location: popupAnchorLocation,
     });
   };
 
   _updateHoverTooltipState = _.debounce(e => {
-    if (this.props.isDrawingFilter) {
-      //ignore hover events when in draw mode
-      return;
-    }
-
-    if (this.props.lockedTooltips.length) {
-      //ignore hover events when tooltip is locked
+    if (this.props.isDrawingFilter || this.props.hasLockedTooltips) {
+      // ignore hover events when in draw mode or when there are locked tooltips
       return;
     }
 
     const mbFeatures = this._getFeaturesUnderPointer(e.point);
     if (!mbFeatures.length) {
-      this.props.clearTooltipState();
+      this.props.closeOnHoverTooltip();
       return;
     }
 
     const targetMbFeature = mbFeatures[0];
-    if (this.props.tooltipState) {
-      const firstFeature = this.props.tooltipState.features[0];
+    if (this.props.openTooltips[0]) {
+      const firstFeature = this.props.openTooltips[0].features[0];
       if (targetMbFeature.properties[FEATURE_ID_PROPERTY_NAME] === firstFeature.id) {
+        // ignore hover events when hover tooltip is all ready opened for feature
         return;
       }
     }
 
     const popupAnchorLocation = justifyAnchorLocation(e.lngLat, targetMbFeature);
     const features = this._getIdsForFeatures(mbFeatures);
-    this.props.setTooltipState({
-      type: TOOLTIP_TYPE.HOVER,
+    this.props.openOnHoverTooltip({
       features: features,
       location: popupAnchorLocation,
     });
@@ -180,10 +170,14 @@ export class TooltipControl extends React.Component {
   }
 
   render() {
-    if (this.props.lockedTooltips.length) {
-      return this.props.lockedTooltips.map(({ features, location, id }, index) => {
+    if (this.props.openTooltips.length === 0) {
+      return null;
+    }
+
+    if (this.props.hasLockedTooltips) {
+      return this.props.openTooltips.map(({ features, location, id }, index) => {
         const closeTooltip = () => {
-          this.props.closeLockedTooltip(id);
+          this.props.closeOnClickTooltip(id);
         };
         return (
           <TooltipPopover
@@ -203,6 +197,20 @@ export class TooltipControl extends React.Component {
       });
     }
 
-    return null;
+    return (
+      <TooltipPopover
+        key={this.props.openTooltips[0].id}
+        mbMap={this.props.mbMap}
+        layerList={this.props.layerList}
+        addFilters={this.props.addFilters}
+        renderTooltipContent={this.props.renderTooltipContent}
+        geoFields={this.props.geoFields}
+        features={this.props.openTooltips[0].features}
+        location={this.props.openTooltips[0].location}
+        closeTooltip={this.props.closeOnHoverTooltip}
+        isLocked={false}
+        index={0}
+      />
+    );
   }
 }

@@ -15,8 +15,7 @@ import {
   getMapReady,
   getWaitingForMapReadyLayerListRaw,
   getTransientLayerId,
-  getTooltipState,
-  getLockedTooltips,
+  getOpenTooltips,
   getQuery,
 } from '../selectors/map_selectors';
 import { FLYOUT_STATE } from '../reducers/ui';
@@ -65,7 +64,7 @@ export const CLEAR_GOTO = 'CLEAR_GOTO';
 export const TRACK_CURRENT_LAYER_STATE = 'TRACK_CURRENT_LAYER_STATE';
 export const ROLLBACK_TO_TRACKED_LAYER_STATE = 'ROLLBACK_TO_TRACKED_LAYER_STATE';
 export const REMOVE_TRACKED_LAYER_STATE = 'REMOVE_TRACKED_LAYER_STATE';
-export const SET_TOOLTIP_STATE = 'SET_TOOLTIP_STATE';
+export const SET_OPEN_TOOLTIPS = 'SET_OPEN_TOOLTIPS';
 export const UPDATE_DRAW_STATE = 'UPDATE_DRAW_STATE';
 export const SET_SCROLL_ZOOM = 'SET_SCROLL_ZOOM';
 export const SET_MAP_INIT_ERROR = 'SET_MAP_INIT_ERROR';
@@ -223,34 +222,36 @@ function setLayerDataLoadErrorStatus(layerId, errorMessage) {
 
 export function cleanTooltipStateForLayer(layerId, layerFeatures = []) {
   return (dispatch, getState) => {
-    const tooltipState = getTooltipState(getState());
+    let featuresRemoved = false;
+    const openTooltips = getOpenTooltips(getState())
+      .map(tooltipState => {
+        const nextFeatures = tooltipState.features.filter(tooltipFeature => {
+          if (tooltipFeature.layerId !== layerId) {
+            // feature from another layer, keep it
+            return true;
+          }
 
-    if (!tooltipState) {
-      return;
-    }
+          // Keep feature if it is still in layer
+          return layerFeatures.some(layerFeature => {
+            return layerFeature.properties[FEATURE_ID_PROPERTY_NAME] === tooltipFeature.id;
+          });
+        });
 
-    const nextTooltipFeatures = tooltipState.features.filter(tooltipFeature => {
-      if (tooltipFeature.layerId !== layerId) {
-        // feature from another layer, keep it
-        return true;
-      }
+        if (tooltipState.features.length !== nextFeatures.length) {
+          featuresRemoved = true;
+        }
 
-      // Keep feature if it is still in layer
-      return layerFeatures.some(layerFeature => {
-        return layerFeature.properties[FEATURE_ID_PROPERTY_NAME] === tooltipFeature.id;
+        return { ...tooltipState, features: nextFeatures };
+      })
+      .filter(tooltipState => {
+        return tooltipState.features.length > 0;
       });
-    });
 
-    if (tooltipState.features.length === nextTooltipFeatures.length) {
-      // no features got removed, nothing to update
-      return;
-    }
-
-    if (nextTooltipFeatures.length === 0) {
-      // all features removed from tooltip, close tooltip
-      dispatch(setTooltipState(null));
-    } else {
-      dispatch(setTooltipState({ ...tooltipState, features: nextTooltipFeatures }));
+    if (featuresRemoved) {
+      dispatch({
+        type: SET_OPEN_TOOLTIPS,
+        openTooltips,
+      });
     }
   };
 }
@@ -414,44 +415,57 @@ export function mapExtentChanged(newMapConstants) {
   };
 }
 
-export function openLockedTooltip({ features, location }) {
+export function closeOnClickTooltip(tooltipId) {
   return (dispatch, getState) => {
-    const lockedTooltips = getLockedTooltips(getState());
-    lockedTooltips.push({
-      features,
-      location,
+    dispatch({
+      type: SET_OPEN_TOOLTIPS,
+      openTooltips: getOpenTooltips(getState()).filter(({ id }) => {
+        return tooltipId !== id;
+      }),
+    });
+  };
+}
+
+export function openOnClickTooltip(tooltipState) {
+  return (dispatch, getState) => {
+    const openTooltips = getOpenTooltips(getState()).filter(({ isLocked }) => {
+      return isLocked;
+    });
+
+    openTooltips.push({
+      ...tooltipState,
+      isLocked: true,
       id: uuid(),
     });
 
     dispatch({
-      type: SET_TOOLTIP_STATE,
-      tooltipState: {
-        ...getTooltipState(getState()),
-        lockedTooltips,
-      },
+      type: SET_OPEN_TOOLTIPS,
+      openTooltips,
     });
   };
 }
 
-export function closeLockedTooltip(tooltipId) {
+export function closeOnHoverTooltip() {
   return (dispatch, getState) => {
-    dispatch({
-      type: SET_TOOLTIP_STATE,
-      tooltipState: {
-        ...getTooltipState(getState()),
-        lockedTooltips: getLockedTooltips(getState()).filter(({ id }) => {
-          return tooltipId !== id;
-        }),
-      },
-    });
+    if (getOpenTooltips(getState()).length) {
+      dispatch({
+        type: SET_OPEN_TOOLTIPS,
+        openTooltips: [],
+      });
+    }
   };
 }
 
-export function setTooltipState(tooltipState) {
-  console.log(tooltipState);
+export function openOnHoverTooltip(tooltipState) {
   return {
-    type: 'SET_TOOLTIP_STATE',
-    tooltipState: tooltipState,
+    type: SET_OPEN_TOOLTIPS,
+    openTooltips: [
+      {
+        ...tooltipState,
+        isLocked: false,
+        id: uuid(),
+      },
+    ],
   };
 }
 
@@ -862,9 +876,9 @@ export function setJoinsForLayer(layer, joins) {
 }
 
 export function updateDrawState(drawState) {
-  return async dispatch => {
+  return dispatch => {
     if (drawState !== null) {
-      await dispatch(setTooltipState(null)); //tooltips just get in the way
+      dispatch({ type: SET_OPEN_TOOLTIPS, openTooltips: [] }); // tooltips just get in the way
     }
     dispatch({
       type: UPDATE_DRAW_STATE,
