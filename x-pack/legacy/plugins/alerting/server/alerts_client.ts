@@ -152,13 +152,14 @@ export class AlertsClient {
     const alertType = this.alertTypeRegistry.get(data.alertTypeId);
     const validatedAlertTypeParams = validateAlertTypeParams(alertType, data.params);
     const username = await this.getUserName();
+    const createdAPIKey = data.enabled ? await this.createAPIKey() : null;
 
     this.validateActions(alertType, data.actions);
 
     const { references, actions } = await this.denormalizeActions(data.actions);
     const rawAlert: RawAlert = {
       ...data,
-      ...this.apiKeyAsAlertAttributes(await this.createAPIKey(), username),
+      ...this.apiKeyAsAlertAttributes(createdAPIKey, username),
       actions,
       createdBy: username,
       updatedBy: username,
@@ -329,10 +330,10 @@ export class AlertsClient {
   }
 
   private apiKeyAsAlertAttributes(
-    apiKey: CreateAPIKeyResult,
+    apiKey: CreateAPIKeyResult | null,
     username: string | null
   ): Pick<RawAlert, 'apiKey' | 'apiKeyOwner'> {
-    return apiKey.apiKeysEnabled
+    return apiKey && apiKey.apiKeysEnabled
       ? {
           apiKeyOwner: username,
           apiKey: Buffer.from(`${apiKey.result.id}:${apiKey.result.api_key}`).toString('base64'),
