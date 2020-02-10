@@ -36,7 +36,7 @@ export const transformError = (err: Error & { statusCode?: number }): OutputErro
       // natively return the err and allow the regular framework
       // to deal with the error when it is a non Boom
       return {
-        message: err.message ?? '(uknown error message)',
+        message: err.message ?? '(unknown error message)',
         statusCode: 500,
       };
     }
