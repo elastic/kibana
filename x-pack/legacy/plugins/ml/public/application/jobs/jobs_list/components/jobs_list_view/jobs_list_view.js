@@ -76,7 +76,7 @@ export class JobsListView extends Component {
   }
 
   componentDidUpdate(prevProps) {
-    if (prevProps.lastRefresh !== this.props.lastRefresh && this.props.blockRefresh !== true) {
+    if (prevProps.lastRefresh !== this.props.lastRefresh) {
       this.refreshJobSummaryList();
     }
   }

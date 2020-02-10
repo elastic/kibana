@@ -37,25 +37,26 @@ export const jobListRoute: MlRoute = {
 const PageWrapper: FC<PageProps> = ({ config, deps }) => {
   const { context } = useResolver(undefined, undefined, config, basicResolvers(deps));
 
-  const [, setGlobalState] = useUrlState('_g');
+  const [globalState, setGlobalState] = useUrlState('_g');
 
   const mlTimefilterRefresh = useObservable(mlTimefilterRefresh$);
   const lastRefresh = mlTimefilterRefresh?.lastRefresh ?? 0;
-  const { value: refreshValue, pause: refreshPause } = timefilter.getRefreshInterval();
+  const refreshValue = globalState?.refreshInterval?.value ?? 0;
+  const refreshPause = globalState?.refreshInterval?.pause ?? true;
   const blockRefresh = refreshValue === 0 || refreshPause === true;
 
   useEffect(() => {
     timefilter.disableTimeRangeSelector();
     timefilter.enableAutoRefreshSelector();
 
-    const { value } = timefilter.getRefreshInterval();
-    if (value === 0) {
-      // the auto refresher starts in an off state
-      // so switch it on and set the interval to 30s
-      const refreshInterval = { pause: false, value: DEFAULT_REFRESH_INTERVAL_MS };
-      setGlobalState({ refreshInterval });
-      timefilter.setRefreshInterval(refreshInterval);
-    }
+    // If the refreshInterval defaults to 0s/pause=true, set it to 30s/pause=false,
+    // otherwise pass on the globalState's settings to the date picker.
+    const refreshInterval =
+      refreshValue === 0 && refreshPause === true
+        ? { pause: false, value: DEFAULT_REFRESH_INTERVAL_MS }
+        : { pause: refreshPause, value: refreshValue };
+    setGlobalState({ refreshInterval });
+    timefilter.setRefreshInterval(refreshInterval);
   }, []);
 
   return (
