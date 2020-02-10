@@ -24,9 +24,9 @@ function isValidMoment(m) {
  * @param {state} object - one of ""
  * @param {[type]} display [description]
  */
-function TimeBuckets(uiSettings, dataPlugin) {
+function TimeBuckets(uiSettings, dataFieldsFormats) {
   this.uiSettings = uiSettings;
-  this.dataPlugin = dataPlugin;
+  this.dataFieldsFormats = dataFieldsFormats;
   return TimeBuckets.__cached__(this);
 }
 
@@ -220,14 +220,14 @@ TimeBuckets.prototype.getInterval = function(useNormalizedEsInterval = true) {
   function readInterval() {
     const interval = self._i;
     if (moment.isDuration(interval)) return interval;
-    return calcAutoIntervalNear(this.uiSettings.get('histogram:barTarget'), Number(duration));
+    return calcAutoIntervalNear(self.uiSettings.get('histogram:barTarget'), Number(duration));
   }
 
   // check to see if the interval should be scaled, and scale it if so
   function maybeScaleInterval(interval) {
     if (!self.hasBounds()) return interval;
 
-    const maxLength = this.uiSettings.get('histogram:maxBars');
+    const maxLength = self.uiSettings.get('histogram:maxBars');
     const approxLen = duration / interval;
     let scaled;
 
@@ -294,7 +294,7 @@ TimeBuckets.prototype.getScaledDateFormat = function() {
 };
 
 TimeBuckets.prototype.getScaledDateFormatter = function() {
-  const fieldFormatsService = this.dataPlugin.fieldFormats;
+  const fieldFormatsService = this.dataFieldsFormats;
   const DateFieldFormat = fieldFormatsService.getType(fieldFormats.FIELD_FORMAT_IDS.DATE);
 
   return new DateFieldFormat(
