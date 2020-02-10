@@ -13,12 +13,22 @@ import { EncryptedSavedObjectsAuditLogger } from '../audit';
 import { EncryptionError } from './encryption_error';
 
 /**
+ * Describes the attributes to encrypt. By default, attribute values won't be exposed to end-users and
+ * can only be consumed by the internal Kibana server. If end-users should have access to the encrypted values
+ * use `dangersoulyExposeValue: true`
+ */
+export interface AttributeToEncrypt {
+  readonly key: string;
+  readonly dangerouslyExposeValue?: boolean;
+}
+
+/**
  * Describes the registration entry for the saved object type that contain attributes that need to
  * be encrypted.
  */
 export interface EncryptedSavedObjectTypeRegistration {
   readonly type: string;
-  readonly attributesToEncrypt: ReadonlySet<string>;
+  readonly attributesToEncrypt: ReadonlySet<string | AttributeToEncrypt>;
   readonly attributesToExcludeFromAAD?: ReadonlySet<string>;
 }
 

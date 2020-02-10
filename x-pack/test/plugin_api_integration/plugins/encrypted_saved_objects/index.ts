@@ -47,7 +47,10 @@ export default function esoPlugin(kibana: any) {
       (server.newPlatform.setup.plugins
         .encryptedSavedObjects as EncryptedSavedObjectsPluginSetup).registerType({
         type: SAVED_OBJECT_WITH_SECRET_TYPE,
-        attributesToEncrypt: new Set(['privateProperty']),
+        attributesToEncrypt: new Set([
+          'privateProperty',
+          { key: 'publicPropertyStoredEncrypted', dangerouslyExposeValue: true },
+        ]),
         attributesToExcludeFromAAD: new Set(['publicPropertyExcludedFromAAD']),
       });
     },

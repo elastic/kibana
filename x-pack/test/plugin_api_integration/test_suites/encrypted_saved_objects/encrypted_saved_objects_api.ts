@@ -30,6 +30,7 @@ export default function({ getService }: FtrProviderContext) {
     let savedObjectOriginalAttributes: {
       publicProperty: string;
       publicPropertyExcludedFromAAD: string;
+      publicPropertyStoredEncrypted: string;
       privateProperty: string;
     };
 
@@ -38,6 +39,7 @@ export default function({ getService }: FtrProviderContext) {
       savedObjectOriginalAttributes = {
         publicProperty: randomness.string(),
         publicPropertyExcludedFromAAD: randomness.string(),
+        publicPropertyStoredEncrypted: randomness.string(),
         privateProperty: randomness.string(),
       };
 
@@ -54,6 +56,7 @@ export default function({ getService }: FtrProviderContext) {
       expect(savedObject.attributes).to.eql({
         publicProperty: savedObjectOriginalAttributes.publicProperty,
         publicPropertyExcludedFromAAD: savedObjectOriginalAttributes.publicPropertyExcludedFromAAD,
+        publicPropertyStoredEncrypted: savedObjectOriginalAttributes.publicPropertyStoredEncrypted,
       });
 
       const rawAttributes = await getRawSavedObjectAttributes(savedObject.id);
@@ -62,6 +65,10 @@ export default function({ getService }: FtrProviderContext) {
         savedObjectOriginalAttributes.publicPropertyExcludedFromAAD
       );
 
+      expect(rawAttributes.publicPropertyStoredEncrypted).to.not.be.empty();
+      expect(rawAttributes.publicPropertyStoredEncrypted).to.not.be(
+        savedObjectOriginalAttributes.publicPropertyStoredEncrypted
+      );
       expect(rawAttributes.privateProperty).to.not.be.empty();
       expect(rawAttributes.privateProperty).to.not.be(
         savedObjectOriginalAttributes.privateProperty
@@ -75,6 +82,7 @@ export default function({ getService }: FtrProviderContext) {
           attributes: {
             publicProperty: randomness.string(),
             publicPropertyExcludedFromAAD: randomness.string(),
+            publicPropertyStoredEncrypted: randomness.string(),
             privateProperty: randomness.string(),
           },
         },
@@ -83,6 +91,7 @@ export default function({ getService }: FtrProviderContext) {
           attributes: {
             publicProperty: randomness.string(),
             publicPropertyExcludedFromAAD: randomness.string(),
+            publicPropertyStoredEncrypted: randomness.string(),
             privateProperty: randomness.string(),
           },
         },
@@ -105,11 +114,17 @@ export default function({ getService }: FtrProviderContext) {
         expect(attributesFromResponse).to.eql({
           publicProperty: attributesFromRequest.publicProperty,
           publicPropertyExcludedFromAAD: attributesFromRequest.publicPropertyExcludedFromAAD,
+          publicPropertyStoredEncrypted: attributesFromRequest.publicPropertyStoredEncrypted,
         });
 
         expect(rawAttributes.publicProperty).to.be(attributesFromRequest.publicProperty);
         expect(rawAttributes.publicPropertyExcludedFromAAD).to.be(
           attributesFromRequest.publicPropertyExcludedFromAAD
+        );
+
+        expect(rawAttributes.publicPropertyStoredEncrypted).to.not.be.empty();
+        expect(rawAttributes.publicPropertyStoredEncrypted).to.not.be(
+          attributesFromRequest.publicPropertyStoredEncrypted
         );
         expect(rawAttributes.privateProperty).to.not.be.empty();
         expect(rawAttributes.privateProperty).to.not.be(attributesFromRequest.privateProperty);
@@ -124,6 +139,7 @@ export default function({ getService }: FtrProviderContext) {
       expect(response.attributes).to.eql({
         publicProperty: savedObjectOriginalAttributes.publicProperty,
         publicPropertyExcludedFromAAD: savedObjectOriginalAttributes.publicPropertyExcludedFromAAD,
+        publicPropertyStoredEncrypted: savedObjectOriginalAttributes.publicPropertyStoredEncrypted,
       });
     });
 
@@ -139,6 +155,7 @@ export default function({ getService }: FtrProviderContext) {
       expect(savedObjects[0].attributes).to.eql({
         publicProperty: savedObjectOriginalAttributes.publicProperty,
         publicPropertyExcludedFromAAD: savedObjectOriginalAttributes.publicPropertyExcludedFromAAD,
+        publicPropertyStoredEncrypted: savedObjectOriginalAttributes.publicPropertyStoredEncrypted,
       });
     });
 
@@ -156,6 +173,7 @@ export default function({ getService }: FtrProviderContext) {
       expect(savedObjects[0].attributes).to.eql({
         publicProperty: savedObjectOriginalAttributes.publicProperty,
         publicPropertyExcludedFromAAD: savedObjectOriginalAttributes.publicPropertyExcludedFromAAD,
+        publicPropertyStoredEncrypted: savedObjectOriginalAttributes.publicPropertyStoredEncrypted,
       });
     });
 
@@ -163,6 +181,7 @@ export default function({ getService }: FtrProviderContext) {
       const updatedAttributes = {
         publicProperty: randomness.string(),
         publicPropertyExcludedFromAAD: randomness.string(),
+        publicPropertyStoredEncrypted: randomness.string(),
         privateProperty: randomness.string(),
       };
 
@@ -175,6 +194,7 @@ export default function({ getService }: FtrProviderContext) {
       expect(response.attributes).to.eql({
         publicProperty: updatedAttributes.publicProperty,
         publicPropertyExcludedFromAAD: updatedAttributes.publicPropertyExcludedFromAAD,
+        publicPropertyStoredEncrypted: updatedAttributes.publicPropertyStoredEncrypted,
       });
 
       const rawAttributes = await getRawSavedObjectAttributes(savedObject.id);
@@ -183,6 +203,10 @@ export default function({ getService }: FtrProviderContext) {
         updatedAttributes.publicPropertyExcludedFromAAD
       );
 
+      expect(rawAttributes.publicPropertyStoredEncrypted).to.not.be.empty();
+      expect(rawAttributes.publicPropertyStoredEncrypted).to.not.be(
+        updatedAttributes.publicPropertyStoredEncrypted
+      );
       expect(rawAttributes.privateProperty).to.not.be.empty();
       expect(rawAttributes.privateProperty).to.not.be(updatedAttributes.privateProperty);
     });

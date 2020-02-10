@@ -7,6 +7,9 @@
       "publicPropertyExcludedFromAAD": {
         "type": "keyword"
       },
+      "publicPropertyStoredEncrypted": {
+        "type": "keyword"
+      },
       "privateProperty": {
         "type": "binary"
       }
