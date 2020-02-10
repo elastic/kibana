@@ -59,6 +59,7 @@ function onComplete (initData) {
 function normalize(xs) {
   const dropEmpty = x => x !== '';
   const dropDuplicates = () => [...new Set(xs.filter(dropEmpty))];
+  // const dontDropDuplicates = () => [...xs.filter(dropEmpty)];
   return dropDuplicates();
 }
 
