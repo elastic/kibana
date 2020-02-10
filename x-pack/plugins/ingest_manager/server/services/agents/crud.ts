@@ -6,13 +6,15 @@
 
 import Boom from 'boom';
 import { SavedObjectsClientContract } from 'kibana/server';
-import { AGENT_SAVED_OBJECT_TYPE } from '../../constants';
-import { AgentSOAttributes, Agent } from '../../types';
+import { AGENT_SAVED_OBJECT_TYPE, AGENT_EVENT_SAVED_OBJECT_TYPE } from '../../constants';
+import {
+  AgentSOAttributes,
+  Agent,
+  AGENT_TYPE_EPHEMERAL,
+  AGENT_POLLING_THRESHOLD_MS,
+  AgentEventSOAttributes,
+} from '../../types';
 import { savedObjectToAgent } from './saved_objects';
-
-// TODO fix
-const AGENT_TYPE_EPHEMERAL = 'EPHEMERAL';
-const AGENT_POLLING_THRESHOLD_MS = 3000;
 
 export async function listAgents(
   soClient: SavedObjectsClientContract,
@@ -101,8 +103,23 @@ export async function updateAgent(
 export async function deleteAgent(soClient: SavedObjectsClientContract, agentId: string) {
   const agent = await getAgent(soClient, agentId);
   if (agent.type === 'EPHEMERAL') {
-    // TODO implements
-    // await this.agentEvents.deleteEventsForAgent(user, agent.id);
+    // Delete events
+    let more = true;
+    while (more === true) {
+      const { saved_objects: events } = await soClient.find<AgentEventSOAttributes>({
+        type: AGENT_EVENT_SAVED_OBJECT_TYPE,
+        fields: ['id'],
+        search: agentId,
+        searchFields: ['agent_id'],
+        perPage: 1000,
+      });
+      if (events.length === 0) {
+        more = false;
+      }
+      for (const event of events) {
+        await soClient.delete(AGENT_EVENT_SAVED_OBJECT_TYPE, event.id);
+      }
+    }
     await soClient.delete(AGENT_SAVED_OBJECT_TYPE, agentId);
     return;
   }

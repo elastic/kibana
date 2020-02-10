@@ -97,7 +97,6 @@ export class IngestManagerPlugin implements Plugin {
 
     // Create router
     const router = core.http.createRouter();
-
     // Register routes
     registerAgentConfigRoutes(router);
     registerDatasourceRoutes(router);
@@ -108,7 +107,11 @@ export class IngestManagerPlugin implements Plugin {
     registerFleetSetupRoutes(router);
     registerAgentRoutes(router);
     registerEnrollmentApiKeyRoutes(router);
-    registerInstallScriptRoutes(router);
+    registerInstallScriptRoutes({
+      router,
+      serverInfo: core.http.getServerInfo(),
+      basePath: core.http.basePath,
+    });
   }
 
   public async start(

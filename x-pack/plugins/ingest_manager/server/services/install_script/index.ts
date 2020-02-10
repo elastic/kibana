@@ -6,8 +6,8 @@
 
 import { macosInstallTemplate } from './install_templates/macos';
 
-export function getScript(osType: 'macos'): string {
-  const variables = { kibanaUrl: getKibanaUrl() };
+export function getScript(osType: 'macos', kibanaUrl: string): string {
+  const variables = { kibanaUrl };
 
   switch (osType) {
     case 'macos':
@@ -15,15 +15,4 @@ export function getScript(osType: 'macos'): string {
     default:
       throw new Error(`${osType} is not supported.`);
   }
-}
-function getKibanaUrl() {
-  return 'http://localhost:5601'; // TODO fix
-  // const { host: hostname, protocol, port, basePath: pathname } = this.framework.getServerConfig();
-
-  // return url.format({
-  //   protocol,
-  //   hostname,
-  //   port,
-  //   pathname,
-  // });
 }

@@ -7,6 +7,7 @@ export {
   // Object types
   Agent,
   AgentSOAttributes,
+  AgentStatus,
   AgentType,
   AgentEvent,
   AgentEventSOAttributes,
@@ -21,6 +22,11 @@ export {
   OutputType,
   EnrollmentAPIKeySOAttributes,
   EnrollmentAPIKey,
+  // Agent constants
+  AGENT_TYPE_PERMANENT,
+  AGENT_TYPE_EPHEMERAL,
+  AGENT_TYPE_TEMPORARY,
+  AGENT_POLLING_THRESHOLD_MS,
   // Common schemas
   ListWithKuery,
   ListWithKuerySchema,

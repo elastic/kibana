@@ -7,22 +7,59 @@
 import { SavedObjectsClientContract } from 'kibana/server';
 import { listAgents } from './crud';
 import { AGENT_EVENT_SAVED_OBJECT_TYPE } from '../../constants';
+import { AgentStatus, Agent } from '../../types';
+
+import {
+  AGENT_POLLING_THRESHOLD_MS,
+  AGENT_TYPE_PERMANENT,
+  AGENT_TYPE_TEMPORARY,
+  AGENT_TYPE_EPHEMERAL,
+} from '../../types';
+
+export function getAgentStatus(agent: Agent, now: number = Date.now()): AgentStatus {
+  const { type, last_checkin: lastCheckIn } = agent;
+  const msLastCheckIn = new Date(lastCheckIn || 0).getTime();
+  const msSinceLastCheckIn = new Date().getTime() - msLastCheckIn;
+  const intervalsSinceLastCheckIn = Math.floor(msSinceLastCheckIn / AGENT_POLLING_THRESHOLD_MS);
+  if (!agent.active) {
+    return 'inactive';
+  }
+  if (agent.current_error_events.length > 0) {
+    return 'error';
+  }
+  switch (type) {
+    case AGENT_TYPE_PERMANENT:
+      if (intervalsSinceLastCheckIn >= 4) {
+        return 'error';
+      }
+      if (intervalsSinceLastCheckIn >= 2) {
+        return 'warning';
+      }
+    case AGENT_TYPE_TEMPORARY:
+      if (intervalsSinceLastCheckIn >= 3) {
+        return 'offline';
+      }
+    case AGENT_TYPE_EPHEMERAL:
+      if (intervalsSinceLastCheckIn >= 3) {
+        return 'inactive';
+      }
+  }
+  return 'online';
+}
 
 export async function getAgentsStatusForPolicy(
   soClient: SavedObjectsClientContract,
   policyId: string
 ) {
   const [all, error, offline] = await Promise.all(
-    [
-      undefined,
-      AgentStatusHelper.buildKueryForErrorAgents(),
-      AgentStatusHelper.buildKueryForOfflineAgents(),
-    ].map(kuery =>
+    [undefined, buildKueryForErrorAgents(), buildKueryForOfflineAgents()].map(kuery =>
       listAgents(soClient, {
         showInactive: true,
         perPage: 0,
         page: 1,
-        kuery: `agents.policy_id:"${policyId}"`,
+        kuery: kuery
+          ? `(${kuery}) and (agents.policy_id:"${policyId}")`
+          : `agents.policy_id:"${policyId}"`,
       })
     )
   );
@@ -50,54 +87,12 @@ async function getEventsCountForPolicyId(soClient: SavedObjectsClientContract, p
   return total;
 }
 
-// TODO FIX
-const AGENT_TYPE_PERMANENT = 'PERMANENT';
-// const AGENT_TYPE_EPHEMERAL = 'EPHEMERAL';
-const AGENT_TYPE_TEMPORARY = 'TEMPORARY';
-const AGENT_POLLING_THRESHOLD_MS = 3000;
+function buildKueryForOfflineAgents(now: number = Date.now()) {
+  return `agents.type:${AGENT_TYPE_TEMPORARY} AND agents.last_checkin < ${now -
+    3 * AGENT_POLLING_THRESHOLD_MS}`;
+}
 
-export class AgentStatusHelper {
-  public static buildKueryForOfflineAgents(now: number = Date.now()) {
-    return `agents.type:${AGENT_TYPE_TEMPORARY} AND agents.last_checkin < ${now -
-      3 * AGENT_POLLING_THRESHOLD_MS}`;
-  }
-
-  public static buildKueryForErrorAgents(now: number = Date.now()) {
-    return `agents.type:${AGENT_TYPE_PERMANENT} AND agents.last_checkin < ${now -
-      4 * AGENT_POLLING_THRESHOLD_MS}`;
-  }
-
-  // public static getAgentStatus(agent: Agent, now: number = Date.now()): AgentStatus {
-  //   const { type, last_checkin: lastCheckIn } = agent;
-  //   const msLastCheckIn = new Date(lastCheckIn || 0).getTime();
-  //   const msSinceLastCheckIn = new Date().getTime() - msLastCheckIn;
-  //   const intervalsSinceLastCheckIn = Math.floor(msSinceLastCheckIn / AGENT_POLLING_THRESHOLD_MS);
-
-  //   if (!agent.active) {
-  //     return 'inactive';
-  //   }
-
-  //   if (agent.current_error_events.length > 0) {
-  //     return 'error';
-  //   }
-
-  //   switch (type) {
-  //     case AGENT_TYPE_PERMANENT:
-  //       if (intervalsSinceLastCheckIn >= 4) {
-  //         return 'error';
-  //       }
-  //       if (intervalsSinceLastCheckIn >= 2) {
-  //         return 'warning';
-  //       }
-  //     case AGENT_TYPE_TEMPORARY:
-  //       if (intervalsSinceLastCheckIn >= 3) {
-  //         return 'offline';
-  //       }
-  //     case AGENT_TYPE_EPHEMERAL:
-  //       if (intervalsSinceLastCheckIn >= 3) {
-  //         return 'inactive';
-  //       }
-  //   }
-  //   return 'online';
-  // }
+function buildKueryForErrorAgents(now: number = Date.now()) {
+  return `agents.type:${AGENT_TYPE_PERMANENT} AND agents.last_checkin < ${now -
+    4 * AGENT_POLLING_THRESHOLD_MS}`;
 }

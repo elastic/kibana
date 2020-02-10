@@ -5,9 +5,12 @@
  */
 import { schema, TypeOf } from '@kbn/config-schema';
 
-export const AGENT_TYPE_EPHEMERAL = 'EPHEMERAL';
 export const AGENT_TYPE_PERMANENT = 'PERMANENT';
+export const AGENT_TYPE_EPHEMERAL = 'EPHEMERAL';
 export const AGENT_TYPE_TEMPORARY = 'TEMPORARY';
+
+export const AGENT_POLLING_THRESHOLD_MS = 30000;
+export const AGENT_POLLING_INTERVAL = 1000;
 
 export const AgentTypeSchema = schema.oneOf([
   schema.literal(AGENT_TYPE_EPHEMERAL),
@@ -88,7 +91,6 @@ const AgentBaseSchema = {
   config_updated_at: schema.maybe(schema.string()),
   actions: schema.arrayOf(AgentActionSchema),
   current_error_events: schema.arrayOf(AgentEventSchema),
-  // TODO actions
 };
 
 const AgentSchema = schema.object({
@@ -108,3 +110,5 @@ const AgentSOAttributesSchema = schema.object({
 
 export type Agent = TypeOf<typeof AgentSchema>;
 export type AgentSOAttributes = TypeOf<typeof AgentSOAttributesSchema>;
+
+export type AgentStatus = 'offline' | 'error' | 'online' | 'inactive' | 'warning';

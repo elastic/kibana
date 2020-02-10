@@ -32,8 +32,7 @@ export const getAgentHandler: RequestHandler<TypeOf<
     const body = {
       item: {
         ...agent,
-        // TODO fix that
-        // status: AgentStatusHelper.getAgentStatus(agent),
+        status: AgentService.getAgentStatus(agent),
       },
       success: true,
     };
@@ -132,8 +131,7 @@ export const updateAgentHandler: RequestHandler<
     const body = {
       item: {
         ...agent,
-        // TODO fix that
-        // status: AgentStatusHelper.getAgentStatus(agent),
+        status: AgentService.getAgentStatus(agent),
       },
       success: true,
     };
@@ -270,7 +268,7 @@ export const postAgentEnrollHandler: RequestHandler<
       success: true,
       item: {
         ...agent,
-        // TODO FIXstatus: AgentStatusHelper.getAgentStatus(agent)
+        status: AgentService.getAgentStatus(agent),
       },
     };
 
@@ -306,8 +304,7 @@ export const getAgentsHandler: RequestHandler<
     const body = {
       list: agents.map(agent => ({
         ...agent,
-        // TODO Fix that
-        // status: AgentStatusHelper.getAgentStatus(agent),
+        status: AgentService.getAgentStatus(agent),
       })),
       success: true,
       total,
