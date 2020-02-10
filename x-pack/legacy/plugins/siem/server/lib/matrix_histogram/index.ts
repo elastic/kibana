@@ -16,17 +16,6 @@ export class MatrixHistogram {
     req: FrameworkRequest,
     options: MatrixHistogramRequestOptions
   ): Promise<MatrixHistogramOverTimeData> {
-    switch (options.histogramType) {
-      case 'alerts':
-        return this.adapter.getAlertsHistogramData(req, options);
-      case 'anomalies':
-        return this.adapter.getAnomaliesHistogram(req, options);
-      case 'authentications':
-        return this.adapter.getAuthenticationsHistogram(req, options);
-      case 'dns':
-        return this.adapter.getDnsHistogram(req, options);
-      default:
-        return this.adapter.getEventsHistogram(req, options);
-    }
+    return this.adapter.getHistogramData(req, options);
   }
 }
