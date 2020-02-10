@@ -5,6 +5,7 @@
  */
 
 import { IEventLogService } from './types';
+import { eventLoggerMock } from './event_logger.mock';
 
 const createEventLogServiceMock = () => {
   const mock: jest.Mocked<IEventLogService> = {
@@ -14,7 +15,7 @@ const createEventLogServiceMock = () => {
     registerProviderActions: jest.fn(),
     isProviderActionRegistered: jest.fn(),
     getProviderActions: jest.fn(),
-    getLogger: jest.fn(),
+    getLogger: jest.fn().mockReturnValue(eventLoggerMock.create()),
   };
   return mock;
 };

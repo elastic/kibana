@@ -6,6 +6,9 @@
 
 import { eventLogServiceMock } from './event_log_service.mock';
 
+export { eventLogServiceMock };
+export { eventLoggerMock } from './event_logger.mock';
+
 const createSetupMock = () => {
   return eventLogServiceMock.create();
 };
