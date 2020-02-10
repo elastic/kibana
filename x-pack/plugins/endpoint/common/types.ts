@@ -146,12 +146,12 @@ export interface ResolverElasticEndpointData {
   };
 }
 
-export type ResolverData = ResolverLegacyData | ResolverElasticEndpointData;
+export type ResolverEvent = ResolverLegacyData | ResolverElasticEndpointData;
 
 export interface ResolverResultNode {
   entity_id: string | undefined;
   parent_entity_id: string | undefined;
-  events: ResolverData[];
+  events: ResolverEvent[];
 }
 
 export interface ResolverChildrenResponse extends BaseResult {
@@ -161,6 +161,16 @@ export interface ResolverChildrenResponse extends BaseResult {
 
 export interface ResolverNodeDetailsResponse extends BaseResult {
   node: ResolverResultNode;
+}
+
+export interface ResolverAssociatedEventsResponse {
+  lifecycle: ResolverEvent[];
+  events: ResolverEvent[];
+  pagination: {
+    next: string;
+    total: number;
+    limit: number;
+  };
 }
 
 export type ResolverResponse = ResolverNodeDetailsResponse | ResolverChildrenResponse;

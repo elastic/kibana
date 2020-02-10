@@ -150,8 +150,9 @@ export function registerResolverRoutes(router: IRouter, endpointAppContext: Endp
 
   router.get(
     {
-      path: '/api/endpoint/resolver/node',
+      path: '/api/endpoint/resolver/{id}',
       validate: {
+        params: schema.object({ id: schema.string() }),
         query: validateQueryObject,
       },
       options: { authRequired: true },

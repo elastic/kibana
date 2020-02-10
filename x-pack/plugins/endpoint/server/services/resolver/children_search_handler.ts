@@ -5,10 +5,86 @@
  */
 import { BaseSearchHandler, ParentAndResolverData } from './search_handler';
 import { ResolverData, ResolverChildrenResponse, ResolverResultNode } from '../../../common/types';
-import { ResolverDataHit } from './common';
-import { Total } from '../../types';
+import { ResolverDataHit, PaginationInfo, isLegacyEntityID, parseLegacyEntityID } from './common';
+import { Total, EndpointAppContext, JSONish } from '../../types';
 
 export class ChildrenSearchHandler extends BaseSearchHandler {
+  private buildLegacyChildrenQuery(endpointID: string, uniquePID: string) {
+    return {
+      bool: {
+        filter: {
+          bool: {
+            should: [
+              {
+                bool: {
+                  filter: [
+                    {
+                      term: { 'endgame.unique_pid': uniquePID },
+                    },
+                    {
+                      // had to change these to match queries otherwise I can't get results back, using the kibana
+                      // developer mode it works fine AND the api tests when it's also a term...not sure why
+                      match: { 'agent.id': endpointID },
+                    },
+                  ],
+                },
+              },
+              {
+                bool: {
+                  filter: [
+                    {
+                      term: { 'endgame.unique_ppid': uniquePID },
+                    },
+                    {
+                      match: { 'agent.id': endpointID },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        },
+      },
+    };
+  }
+
+  private buildESEndpointChildrenQuery(entityID: string) {
+    return {
+      bool: {
+        filter: {
+          bool: {
+            should: [
+              {
+                match: { 'endpoint.process.entity_id': entityID },
+              },
+              {
+                match: { 'endpoint.process.parent.entity_id': entityID },
+              },
+            ],
+          },
+        },
+      },
+    };
+  }
+
+  async getESChildrenQuery(
+    context: EndpointAppContext,
+    entityID: string,
+    paginationInfo: PaginationInfo
+  ) {
+    const index = this.getIndex(entityID);
+    const query = this.getESChildrenCountQuery(entityID);
+    return await this.buildSearchBody(context, query, paginationInfo, index);
+  }
+
+  getESChildrenCountQuery(entityID: string): JSONish {
+    if (isLegacyEntityID(entityID)) {
+      const { endpointID, uniquePID } = parseLegacyEntityID(entityID);
+      return this.buildLegacyChildrenQuery(endpointID, uniquePID);
+    }
+    return this.buildESEndpointChildrenQuery(entityID);
+  }
+
   public async buildResponse(
     hits: ResolverDataHit[],
     total: Total

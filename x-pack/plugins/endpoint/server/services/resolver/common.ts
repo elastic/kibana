@@ -6,12 +6,17 @@
 import {
   ResolverLegacyData,
   ResolverElasticEndpointData,
-  ResolverData,
+  ResolverEvent,
 } from '../../../common/types';
 import { JSONish } from '../../types';
 
 export const legacyEntityIDDelimiter = '|';
 export const legacyEntityPrefix = 'endgame' + legacyEntityIDDelimiter;
+
+export interface PaginationInfo {
+  page: number | undefined;
+  pageSize: number | undefined;
+}
 
 export interface CountQueryInfo {
   index: string;
@@ -24,8 +29,8 @@ export interface ResolverNode {
   esData: ResolverLegacyData | ResolverElasticEndpointData;
 }
 
-export interface ResolverDataHit {
-  _source: ResolverData;
+export interface ResolverEventHit {
+  _source: ResolverEvent;
 }
 
 export class EntityParseError extends Error {
