@@ -6,7 +6,7 @@
 import { setupGetValueSuggestions } from './value';
 import indexPatternResponse from './__fixtures__/index_pattern_response.json';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
-import { autocomplete, esKuery } from '../../../../../../../src/plugins/data/public';
+import { QuerySuggestionGetFnArgs, esKuery } from '../../../../../../../src/plugins/data/public';
 import { setAutocompleteService } from '../../../services';
 
 const mockKueryNode = (kueryNode: Partial<esKuery.KueryNode>) =>
@@ -14,14 +14,14 @@ const mockKueryNode = (kueryNode: Partial<esKuery.KueryNode>) =>
 
 describe('Kuery value suggestions', () => {
   let getSuggestions: ReturnType<typeof setupGetValueSuggestions>;
-  let querySuggestionsArgs: autocomplete.QuerySuggestionsGetFnArgs;
+  let querySuggestionsArgs: QuerySuggestionGetFnArgs;
   let autocompleteServiceMock: any;
 
   beforeEach(() => {
     getSuggestions = setupGetValueSuggestions(coreMock.createSetup());
     querySuggestionsArgs = ({
       indexPatterns: [indexPatternResponse],
-    } as unknown) as autocomplete.QuerySuggestionsGetFnArgs;
+    } as unknown) as QuerySuggestionGetFnArgs;
 
     autocompleteServiceMock = {
       getValueSuggestions: jest.fn(({ field }) => {
