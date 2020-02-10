@@ -7,8 +7,8 @@
 import {
   transformAlertToRule,
   getIdError,
-  transformFindAlertsOrError,
-  transformOrError,
+  transformFindAlerts,
+  transform,
   transformTags,
   getIdBulkError,
   transformOrBulkError,
@@ -618,14 +618,14 @@ describe('utils', () => {
     });
   });
 
-  describe('transformFindAlertsOrError', () => {
+  describe('transformFindAlerts', () => {
     test('outputs empty data set when data set is empty correct', () => {
-      const output = transformFindAlertsOrError({ data: [] });
+      const output = transformFindAlerts({ data: [] });
       expect(output).toEqual({ data: [] });
     });
 
     test('outputs 200 if the data is of type siem alert', () => {
-      const output = transformFindAlertsOrError({
+      const output = transformFindAlerts({
         data: [getResult()],
       });
       const expected: OutputRuleAlertRest = {
@@ -693,14 +693,14 @@ describe('utils', () => {
     });
 
     test('returns 500 if the data is not of type siem alert', () => {
-      const output = transformFindAlertsOrError({ data: [{ random: 1 }] });
+      const output = transformFindAlerts({ data: [{ random: 1 }] });
       expect(output).toBeNull();
     });
   });
 
   describe('transformOrError', () => {
     test('outputs 200 if the data is of type siem alert', () => {
-      const output = transformOrError(getResult());
+      const output = transform(getResult());
       const expected: OutputRuleAlertRest = {
         created_by: 'elastic',
         created_at: '2019-12-13T16:40:33.400Z',
@@ -764,7 +764,7 @@ describe('utils', () => {
     });
 
     test('returns 500 if the data is not of type siem alert', () => {
-      const output = transformOrError({ data: [{ random: 1 }] });
+      const output = transform({ data: [{ random: 1 }] });
       expect(output).toBeNull();
     });
   });

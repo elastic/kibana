@@ -11,7 +11,7 @@ import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { deleteRules } from '../../rules/delete_rules';
 import { ServerFacade } from '../../../../types';
 import { queryRulesSchema } from '../schemas/query_rules_schema';
-import { getIdError, transformOrError } from './utils';
+import { getIdError, transform } from './utils';
 import { transformError } from '../utils';
 import { QueryRequest, IRuleSavedAttributesSavedObjectAttributes } from '../../rules/types';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
@@ -62,8 +62,8 @@ export const createDeleteRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
           ruleStatuses.saved_objects.forEach(async obj =>
             savedObjectsClient.delete(ruleStatusSavedObjectType, obj.id)
           );
-          const transformedOrError = transformOrError(rule, ruleStatuses.saved_objects[0]);
-          if (transformedOrError == null) {
+          const transformed = transform(rule, ruleStatuses.saved_objects[0]);
+          if (transformed == null) {
             return headers
               .response({
                 message: 'Internal error transforming rules',
@@ -71,7 +71,7 @@ export const createDeleteRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
               })
               .code(500);
           } else {
-            return transformedOrError;
+            return transformed;
           }
         } else {
           const error = getIdError({ id, ruleId });

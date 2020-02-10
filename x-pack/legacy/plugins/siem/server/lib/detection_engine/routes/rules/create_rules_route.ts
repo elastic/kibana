@@ -14,7 +14,7 @@ import { createRulesSchema } from '../schemas/create_rules_schema';
 import { ServerFacade } from '../../../../types';
 import { readRules } from '../../rules/read_rules';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
-import { transformOrError } from './utils';
+import { transform } from './utils';
 import { getIndexExists } from '../../index/get_index_exists';
 import { callWithRequestFactory, getIndex, transformError } from '../utils';
 import { KibanaRequest } from '../../../../../../../../../src/core/server';
@@ -133,8 +133,8 @@ export const createCreateRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
           search: `${createdRule.id}`,
           searchFields: ['alertId'],
         });
-        const transformedOrError = transformOrError(createdRule, ruleStatuses.saved_objects[0]);
-        if (transformedOrError == null) {
+        const transformed = transform(createdRule, ruleStatuses.saved_objects[0]);
+        if (transformed == null) {
           return headers
             .response({
               message: 'Internal error transforming rules',
@@ -142,7 +142,7 @@ export const createCreateRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
             })
             .code(500);
         } else {
-          return transformedOrError;
+          return transformed;
         }
       } catch (err) {
         const error = transformError(err);

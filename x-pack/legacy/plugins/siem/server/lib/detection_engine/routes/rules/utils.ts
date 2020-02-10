@@ -145,7 +145,7 @@ export const transformAlertsToRules = (
   return alerts.map(alert => transformAlertToRule(alert));
 };
 
-export const transformFindAlertsOrError = (
+export const transformFindAlerts = (
   findResults: { data: unknown[] },
   ruleStatuses?: unknown[]
 ): unknown | null => {
@@ -163,7 +163,7 @@ export const transformFindAlertsOrError = (
   }
 };
 
-export const transformOrError = (
+export const transform = (
   alert: unknown,
   ruleStatus?: unknown
 ): Partial<OutputRuleAlertRest> | null => {
