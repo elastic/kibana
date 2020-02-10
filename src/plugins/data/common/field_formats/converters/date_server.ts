@@ -25,7 +25,7 @@ import { FieldFormat } from '../field_format';
 import {
   TextContextTypeConvert,
   FIELD_FORMAT_IDS,
-  GetConfigFn,
+  FieldFormatsGetConfigFn,
   IFieldFormatMetaParams,
 } from '../types';
 
@@ -40,7 +40,7 @@ export class DateFormat extends FieldFormat {
   private memoizedPattern: string = '';
   private timeZone: string = '';
 
-  constructor(params: IFieldFormatMetaParams, getConfig?: GetConfigFn) {
+  constructor(params: IFieldFormatMetaParams, getConfig?: FieldFormatsGetConfigFn) {
     super(params, getConfig);
 
     this.memoizedConverter = memoize((val: any) => {
