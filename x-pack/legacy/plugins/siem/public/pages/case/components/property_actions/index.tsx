@@ -33,39 +33,6 @@ export interface PropertyActionsProps {
   propertyActions: PropertyActionButtonProps[];
 }
 
-// const propertyActions = [
-//   {
-//     iconType: 'documentEdit',
-//     label: 'Edit description',
-//     onClick: () => null,
-//   },
-//   {
-//     iconType: 'securitySignalResolved',
-//     label: 'Close case',
-//     onClick: () => null,
-//   },
-//   {
-//     iconType: 'trash',
-//     label: 'Delete case',
-//     onClick: () => null,
-//   },
-//   {
-//     iconType: 'importAction',
-//     label: 'Push as ServiceNow incident',
-//     onClick: () => null,
-//   },
-//   {
-//     iconType: 'popout',
-//     label: 'View ServiceNow incident',
-//     onClick: () => null,
-//   },
-//   {
-//     iconType: 'importAction',
-//     label: 'Update ServiceNow incident',
-//     onClick: () => null,
-//   },
-// ];
-
 export const PropertyActions = React.memo<PropertyActionsProps>(({ propertyActions }) => {
   const [showActions, setShowActions] = useState(false);
 

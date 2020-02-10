@@ -127,7 +127,7 @@ export const FormattedRelativePreferenceDate = ({
         .isBefore(new Date()) ? (
         <>
           {labelOn &&
-            i18n.translate('xpack.siem.alertsView.alertsGraphTitle', {
+            i18n.translate('xpack.siem.preferenceTime.formattedDate.onLabel', {
               defaultMessage: 'on ',
             })}
           <PreferenceFormattedDate data-test-subj="preference-time" value={date} />

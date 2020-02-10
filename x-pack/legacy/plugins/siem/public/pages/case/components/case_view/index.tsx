@@ -208,17 +208,6 @@ export const Cases = React.memo<CasesProps>(({ caseId, initialData, isLoading, r
         <Markdown raw={data.description} />
       ),
     },
-    {
-      avatarName: `steph`,
-      title: (
-        <p>
-          <strong>{`steph`}</strong>
-          {` ${i18n.ADDED_COMMENT} `}{' '}
-          <FormattedRelativePreferenceDate value={data.created_at} labelOn />
-        </p>
-      ),
-      children: <p>{'alright alright alright'}</p>,
-    },
   ];
   return (
     <>
