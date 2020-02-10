@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export { AlertMonitorStatusComponent } from './alert_monitor_status';
 export { DonutChart } from './charts/donut_chart';
 export { EmptyState } from './empty_state';
 export { KueryBarComponent } from './kuery_bar/kuery_bar';

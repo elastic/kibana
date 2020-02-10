@@ -4,12 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ChromeBreadcrumb, CoreStart } from 'src/core/public';
+import { EuiExpression } from '@elastic/eui';
+import { ChromeBreadcrumb, LegacyCoreStart } from 'src/core/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { get } from 'lodash';
 import { i18n as i18nFormatter } from '@kbn/i18n';
-import { PluginsSetup } from 'ui/new_platform/new_platform';
+import { PluginsStart } from 'ui/new_platform/new_platform';
+import { AlertMonitorStatus } from '../../../components/connected';
+import {
+  AlertTypeModel,
+  ValidationResult,
+} from '../../../../../../../plugins/triggers_actions_ui/public/types';
+import { CreateGraphQLClient } from './framework_adapter_types';
 import { UptimeApp, UptimeAppProps } from '../../../uptime_app';
 import { getIntegratedAppAvailability } from './capabilities_adapter';
 import {
@@ -32,6 +39,15 @@ export const getKibanaFrameworkAdapter = (
     http: { basePath },
     i18n,
   } = core;
+  const { triggers_actions_ui } = plugins;
+  const getAlertyType = (): AlertTypeModel => ({
+    id: 'uptime',
+    name: 'Uptime Monitor Status',
+    iconClass: 'alert',
+    alertParamsExpression: () => <AlertMonitorStatus autocomplete={plugins.data.autocomplete} />,
+    validate: (alertParams: any): ValidationResult => ({ errors: {} }),
+  });
+  triggers_actions_ui.alertTypeRegistry.register(getAlertyType());
   let breadcrumbs: ChromeBreadcrumb[] = [];
   core.chrome.getBreadcrumbs$().subscribe((nextBreadcrumbs?: ChromeBreadcrumb[]) => {
     breadcrumbs = nextBreadcrumbs || [];
@@ -76,7 +92,11 @@ export const getKibanaFrameworkAdapter = (
   };
 
   return {
+    // TODO: these parameters satisfy the interface but are no longer needed
     render: async (element: any) => {
+      console.log('the thing', props);
+      console.log('element from the other thing', element);
+      // const node = await document.getElementById('react-uptime-root');
       if (element) {
         ReactDOM.render(<UptimeApp {...props} />, element);
       }

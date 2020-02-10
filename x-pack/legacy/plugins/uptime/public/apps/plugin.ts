@@ -11,6 +11,7 @@ import {
   AppMountParameters,
 } from 'src/core/public';
 import { PluginsStart, PluginsSetup } from 'ui/new_platform/new_platform';
+import { Chrome } from 'ui/chrome';
 import { FeatureCatalogueCategory } from '../../../../../../src/plugins/home/public';
 import { UMFrontendLibs } from '../lib/lib';
 import { PLUGIN } from '../../common/constants';
@@ -45,6 +46,7 @@ export class Plugin {
       showOnHomePage: true,
       title: PLUGIN.TITLE,
     });
+
     core.application.register({
       id: PLUGIN.ID,
       euiIconType: 'uptimeApp',
