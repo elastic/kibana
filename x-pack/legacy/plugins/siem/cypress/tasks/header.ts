@@ -12,7 +12,7 @@ export const navigateFromHeaderTo = (page: string) => {
 };
 
 export const clearSearchBar = () => {
-  cy.get(KQL_INPUT, { DEFAULT_TIMEOUT })
+  cy.get(KQL_INPUT, { timeout: DEFAULT_TIMEOUT })
     .clear()
     .type('{enter}');
 };

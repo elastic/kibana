@@ -14,7 +14,7 @@ import {
 import { HOSTS_PAGE } from '../../lib/urls';
 import { loginAndWaitForPage } from '../../../tasks/login';
 import { openEventsViewerFieldsBrowser, filterSearchBar } from '../../lib/events_viewer/helpers';
-import { closeFieldsBrowser, filterFieldsBrowser } from '../../../tasks/hosts/fields_browsers';
+import { closeFieldsBrowser } from '../../../tasks/hosts/fields_browsers';
 import { openEvents } from '../../../tasks/hosts/main';
 import {
   closeModal,
