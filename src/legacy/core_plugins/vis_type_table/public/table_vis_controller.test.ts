@@ -38,7 +38,7 @@ import { AggConfigs } from 'ui/agg_types';
 import { tabifyAggResponse, IAggConfig } from './legacy_imports';
 
 jest.mock('ui/new_platform');
-jest.mock('ui/legacy_compat', () => ({
+jest.mock('../../../../plugins/kibana_legacy/public/angular/angular_config', () => ({
   configureAppAngularModule: () => {},
 }));
 
