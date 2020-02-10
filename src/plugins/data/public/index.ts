@@ -223,7 +223,17 @@ export {
   FieldFormatConfig,
   FieldFormatId,
 } from '../common';
-export { autocomplete } from './autocomplete';
+
+export {
+  QuerySuggestion,
+  QuerySuggestionTypes,
+  QuerySuggestionGetFn,
+  QuerySuggestionGetFnArgs,
+  QuerySuggestionBasic,
+  QuerySuggestionField,
+} from './autocomplete';
+
+export * from './field_formats';
 export * from './index_patterns';
 export * from './search';
 export {
