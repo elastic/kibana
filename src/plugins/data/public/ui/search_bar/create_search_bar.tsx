@@ -132,6 +132,10 @@ export function createSearchBar({ core, storage, data }: StatefulSearchBarDeps) 
       filterManager: data.query.filterManager,
     });
     const { timeRange, refreshInterval } = useTimefilter({
+      dateRangeFrom: props.dateRangeFrom,
+      dateRangeTo: props.dateRangeTo,
+      refreshInterval: props.refreshInterval,
+      isRefreshPaused: props.isRefreshPaused,
       timefilter: data.query.timefilter.timefilter,
     });
 
