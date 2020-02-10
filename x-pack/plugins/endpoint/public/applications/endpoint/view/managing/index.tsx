@@ -13,10 +13,9 @@ import {
   EuiPageContentBody,
   EuiPageContentHeader,
   EuiPageContentHeaderSection,
-  EuiPageHeader,
-  EuiPageHeaderSection,
   EuiTitle,
   EuiBasicTable,
+  EuiTextColor,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -135,11 +134,20 @@ export const EndpointList = () => {
               <EuiTitle>
                 <h2 data-test-subj="managementViewTitle">
                   <FormattedMessage
-                    id="xpack.endpoint.management.list.hosts"
+                    id="xpack.endpoint.managementList.hosts"
                     defaultMessage="Hosts"
                   />
                 </h2>
               </EuiTitle>
+              <h4>
+                <EuiTextColor color="subdued">
+                  <FormattedMessage
+                    id="xpack.endpoint.managementList.totalCount"
+                    defaultMessage="{totalItemCount} Hosts"
+                    values={{ totalItemCount }}
+                  />
+                </EuiTextColor>
+              </h4>
             </EuiPageContentHeaderSection>
           </EuiPageContentHeader>
           <EuiPageContentBody>
