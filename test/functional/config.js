@@ -52,6 +52,7 @@ export default async function({ readConfigFile }) {
         'accessibility:disableAnimations': true,
         'dateFormat:tz': 'UTC',
         'telemetry:optIn': false,
+        pageNavigation: 'individual',
       },
     },
 
@@ -245,6 +246,21 @@ export default async function({ readConfigFile }) {
             indices: [
               {
                 names: ['long-window-logstash-*'],
+                privileges: ['read', 'view_index_metadata'],
+                field_security: { grant: ['*'], except: [] },
+              },
+            ],
+            run_as: [],
+          },
+          kibana: [],
+        },
+
+        animals: {
+          elasticsearch: {
+            cluster: [],
+            indices: [
+              {
+                names: ['animals-*'],
                 privileges: ['read', 'view_index_metadata'],
                 field_security: { grant: ['*'], except: [] },
               },
