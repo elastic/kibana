@@ -7,7 +7,7 @@
     "winlogbeat-*"
   ],
   "language": "kuery",
-  "max_signals": 33,
+  "max_signals": 100,
   "name": "Whoami Process Activity",
   "query": "process.name:whoami.exe and event.code:1",
   "risk_score": 21,

@@ -20,7 +20,7 @@ import {
 } from '../helpers/setup_request';
 import { getErrorGroupsProjection } from '../../../common/projections/errors';
 import { mergeProjection } from '../../../common/projections/util/merge_projection';
-import { SortOptions } from '../../../typings/elasticsearch/aggregations';
+import { SortOptions } from '../../../../../../plugins/apm/typings/elasticsearch/aggregations';
 
 export type ErrorGroupListAPIResponse = PromiseReturnType<
   typeof getErrorGroups
