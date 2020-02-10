@@ -55,11 +55,6 @@ import { i18n } from '@kbn/i18n';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import LogRhythmNavbar from '../../../../../netmon/components/navbar';
 
-import { HeaderBadge } from './header_badge';
-import { HeaderBreadcrumbs } from './header_breadcrumbs';
-import { HeaderHelpMenu } from './header_help_menu';
-import { HeaderNavControls } from './header_nav_controls';
-
 import {
   ChromeBadge,
   ChromeBreadcrumb,
@@ -289,29 +284,8 @@ class HeaderUI extends Component<Props, State> {
   }
 
   public render() {
-    const {
-      application,
-      badge$,
-      basePath,
-      breadcrumbs$,
-      helpExtension$,
-      intl,
-      isLocked,
-      kibanaDocLink,
-      kibanaVersion,
-      onIsLockedUpdate,
-      legacyMode,
-      isCloudEnabled,
-    } = this.props;
-    const {
-      appTitle,
-      currentAppId,
-      isVisible,
-      navControlsLeft,
-      navControlsRight,
-      navLinks,
-      recentlyAccessed,
-    } = this.state;
+    const { application, basePath, intl, isLocked, onIsLockedUpdate, legacyMode } = this.props;
+    const { currentAppId, isVisible, navLinks, recentlyAccessed } = this.state;
 
     if (!isVisible) {
       return null;
