@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Plugin, CoreSetup, AppMountParameters, CoreStart } from 'kibana/public';
+import { Plugin, CoreSetup, AppMountParameters } from 'kibana/public';
 import { UiActionsStart, UiActionsSetup } from 'src/plugins/ui_actions/public';
 import { ISearchAppMountContext } from '../../../src/plugins/data/public';
 import {
