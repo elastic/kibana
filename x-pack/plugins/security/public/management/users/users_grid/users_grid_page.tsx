@@ -40,6 +40,7 @@ interface Props {
 
 interface State {
   users: User[];
+  visibleUsers: User[];
   roles: null | Role[];
   selection: User[];
   showDeleteConfirmation: boolean;
@@ -53,6 +54,7 @@ export class UsersGridPage extends Component<Props, State> {
     super(props);
     this.state = {
       users: [],
+      visibleUsers: [],
       roles: [],
       selection: [],
       showDeleteConfirmation: false,
@@ -67,14 +69,7 @@ export class UsersGridPage extends Component<Props, State> {
   }
 
   public render() {
-    const {
-      users,
-      roles,
-      filter,
-      permissionDenied,
-      showDeleteConfirmation,
-      selection,
-    } = this.state;
+    const { users, roles, permissionDenied, showDeleteConfirmation, selection } = this.state;
     if (permissionDenied) {
       return (
         <EuiFlexGroup gutterSize="none">
@@ -187,6 +182,11 @@ export class UsersGridPage extends Component<Props, State> {
       onChange: (query: any) => {
         this.setState({
           filter: query.queryText,
+          visibleUsers: this.getVisibleUsers(
+            this.state.users,
+            query.queryText,
+            this.state.includeReservedUsers
+          ),
         });
       },
     };
@@ -201,16 +201,6 @@ export class UsersGridPage extends Component<Props, State> {
         'data-test-subj': 'userRow',
       };
     };
-    const usersToShow = users.filter(
-      ({ username, roles: userRoles, full_name: fullName = '', email = '', metadata = {} }) => {
-        const normalized = `${username} ${userRoles.join(' ')} ${fullName} ${email}`.toLowerCase();
-        const normalizedQuery = filter.toLowerCase();
-        return (
-          normalized.indexOf(normalizedQuery) !== -1 &&
-          (this.state.includeReservedUsers || !metadata._reserved)
-        );
-      }
-    );
 
     return (
       <div className="secUsersListingPage">
@@ -252,7 +242,7 @@ export class UsersGridPage extends Component<Props, State> {
                 columns={columns}
                 selection={selectionConfig}
                 pagination={pagination}
-                items={usersToShow}
+                items={this.state.visibleUsers}
                 loading={users.length === 0}
                 search={search}
                 sorting={sorting}
@@ -277,13 +267,34 @@ export class UsersGridPage extends Component<Props, State> {
     });
   };
 
+  private getVisibleUsers = (users: User[], filter: string, includeReservedUsers: boolean) => {
+    return users.filter(
+      ({ username, roles: userRoles, full_name: fullName = '', email = '', metadata = {} }) => {
+        const normalized = `${username} ${userRoles.join(' ')} ${fullName} ${email}`.toLowerCase();
+        const normalizedQuery = filter.toLowerCase();
+        return (
+          normalized.indexOf(normalizedQuery) !== -1 &&
+          (includeReservedUsers || !metadata._reserved)
+        );
+      }
+    );
+  };
+
   private async loadUsersAndRoles() {
     try {
       const [users, roles] = await Promise.all([
         this.props.userAPIClient.getUsers(),
         this.props.rolesAPIClient.getRoles(),
       ]);
-      this.setState({ users, roles });
+      this.setState({
+        users,
+        roles,
+        visibleUsers: this.getVisibleUsers(
+          users,
+          this.state.filter,
+          this.state.includeReservedUsers
+        ),
+      });
     } catch (e) {
       if (e.body.statusCode === 403) {
         this.setState({ permissionDenied: true });
@@ -324,6 +335,7 @@ export class UsersGridPage extends Component<Props, State> {
   private onIncludeReservedUsersChange = (e: EuiSwitchEvent) => {
     this.setState({
       includeReservedUsers: e.target.checked,
+      visibleUsers: this.getVisibleUsers(this.state.users, this.state.filter, e.target.checked),
     });
   };
 

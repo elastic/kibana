@@ -21,7 +21,10 @@ export const RoleTableDisplay = ({ role }: Props) => {
     href = getEditRoleHref(role);
   } else if (isRoleDeprecated(role)) {
     content = (
-      <EuiToolTip content={getExtendedRoleDeprecationNotice(role)}>
+      <EuiToolTip
+        content={getExtendedRoleDeprecationNotice(role)}
+        data-test-subj="roleDeprecationTooltip"
+      >
         <div>
           {role.name} <EuiIcon type="alert" color="warning" size="s" className={'eui-alignTop'} />
         </div>

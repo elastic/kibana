@@ -46,6 +46,7 @@ interface Props {
 
 interface State {
   roles: Role[];
+  visibleRoles: Role[];
   selection: Role[];
   filter: string;
   showDeleteConfirmation: boolean;
@@ -62,6 +63,7 @@ export class RolesGridPage extends Component<Props, State> {
     super(props);
     this.state = {
       roles: [],
+      visibleRoles: [],
       selection: [],
       filter: '',
       showDeleteConfirmation: false,
@@ -138,7 +140,7 @@ export class RolesGridPage extends Component<Props, State> {
                 initialPageSize: 20,
                 pageSizeOptions: [10, 20, 30, 50, 100],
               }}
-              items={this.getVisibleRoles()}
+              items={this.state.visibleRoles}
               loading={roles.length === 0}
               search={{
                 toolsLeft: this.renderToolsLeft(),
@@ -149,6 +151,11 @@ export class RolesGridPage extends Component<Props, State> {
                 onChange: (query: Record<string, any>) => {
                   this.setState({
                     filter: query.queryText,
+                    visibleRoles: this.getVisibleRoles(
+                      this.state.roles,
+                      query.queryText,
+                      this.state.includeReservedRoles
+                    ),
                   });
                 },
               }}
@@ -251,9 +258,7 @@ export class RolesGridPage extends Component<Props, State> {
     ] as Array<EuiBasicTableColumn<Role>>;
   };
 
-  private getVisibleRoles = () => {
-    const { roles, filter = '', includeReservedRoles } = this.state;
-
+  private getVisibleRoles = (roles: Role[], filter: string, includeReservedRoles: boolean) => {
     return roles.filter(role => {
       const normalized = `${role.name}`.toLowerCase();
       const normalizedQuery = filter.toLowerCase();
@@ -267,6 +272,7 @@ export class RolesGridPage extends Component<Props, State> {
   private onIncludeReservedRolesChange = (e: EuiSwitchEvent) => {
     this.setState({
       includeReservedRoles: e.target.checked,
+      visibleRoles: this.getVisibleRoles(this.state.roles, this.state.filter, e.target.checked),
     });
   };
 
@@ -324,7 +330,14 @@ export class RolesGridPage extends Component<Props, State> {
     try {
       const roles = await this.props.rolesAPIClient.getRoles();
 
-      this.setState({ roles });
+      this.setState({
+        roles,
+        visibleRoles: this.getVisibleRoles(
+          roles,
+          this.state.filter,
+          this.state.includeReservedRoles
+        ),
+      });
     } catch (e) {
       if (_.get(e, 'body.statusCode') === 403) {
         this.setState({ permissionDenied: true });

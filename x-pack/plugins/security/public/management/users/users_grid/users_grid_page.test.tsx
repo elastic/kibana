@@ -71,6 +71,73 @@ describe('UsersGridPage', () => {
     expect(wrapper.find('[data-test-subj="permissionDeniedMessage"]')).toHaveLength(1);
     expect(wrapper.find('EuiInMemoryTable')).toHaveLength(0);
   });
+
+  it('renders a warning when a user is assigned a deprecated role', async () => {
+    const apiClientMock = userAPIClientMock.create();
+    apiClientMock.getUsers.mockImplementation(() => {
+      return Promise.resolve<User[]>([
+        {
+          username: 'foo',
+          email: 'foo@bar.net',
+          full_name: 'foo bar',
+          roles: ['kibana_user'],
+          enabled: true,
+        },
+        {
+          username: 'reserved',
+          email: 'reserved@bar.net',
+          full_name: '',
+          roles: ['superuser'],
+          enabled: true,
+          metadata: {
+            _reserved: true,
+          },
+        },
+      ]);
+    });
+
+    const roleAPIClientMock = rolesAPIClientMock.create();
+    roleAPIClientMock.getRoles.mockResolvedValue([
+      {
+        name: 'kibana_user',
+        metadata: {
+          _deprecated: true,
+          _deprecated_reason: `I don't like you.`,
+        },
+      },
+    ]);
+
+    const wrapper = mountWithIntl(
+      <UsersGridPage
+        userAPIClient={apiClientMock}
+        rolesAPIClient={roleAPIClientMock}
+        notifications={coreMock.createStart().notifications}
+      />
+    );
+
+    await waitForRender(wrapper);
+
+    const deprecationTooltip = wrapper.find('[data-test-subj="roleDeprecationTooltip"]').props();
+
+    expect(deprecationTooltip).toMatchInlineSnapshot(`
+      Object {
+        "children": <div>
+          kibana_user
+           
+          <EuiIcon
+            className="eui-alignTop"
+            color="warning"
+            size="s"
+            type="alert"
+          />
+        </div>,
+        "content": "This role is deprecated and should no longer be assigned. I don't like you.",
+        "data-test-subj": "roleDeprecationTooltip",
+        "delay": "regular",
+        "position": "top",
+      }
+    `);
+  });
 });
 
 async function waitForRender(wrapper: ReactWrapper<any, any>) {
