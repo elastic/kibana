@@ -37,7 +37,7 @@ import {
 import { RolesAPIClient } from '../roles_api_client';
 import { ConfirmDelete } from './confirm_delete';
 import { PermissionDenied } from './permission_denied';
-import { EnabledBadge, DisabledBadge, DeprecatedBadge, ReservedBadge } from '../../badges';
+import { DisabledBadge, DeprecatedBadge, ReservedBadge } from '../../badges';
 
 interface Props {
   notifications: NotificationsStart;
@@ -276,9 +276,7 @@ export class RolesGridPage extends Component<Props, State> {
     const reserved = isRoleReserved(role);
 
     const badges = [];
-    if (enabled) {
-      badges.push(<EnabledBadge data-test-subj="roleEnabled" />);
-    } else {
+    if (!enabled) {
       badges.push(<DisabledBadge data-test-subj="roleDisabled" />);
     }
     if (reserved) {

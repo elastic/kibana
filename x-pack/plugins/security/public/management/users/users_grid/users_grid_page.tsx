@@ -27,7 +27,7 @@ import { NotificationsStart } from 'src/core/public';
 import { User, Role } from '../../../../common/model';
 import { ConfirmDeleteUsers } from '../components';
 import { isUserReserved } from '../user_utils';
-import { EnabledBadge, DisabledBadge, ReservedBadge } from '../../badges';
+import { DisabledBadge, ReservedBadge } from '../../badges';
 import { RoleTableDisplay } from '../../role_table_display';
 import { RolesAPIClient } from '../../roles';
 import { UserAPIClient } from '..';
@@ -352,9 +352,7 @@ export class UsersGridPage extends Component<Props, State> {
     const reserved = isUserReserved(user);
 
     const badges = [];
-    if (enabled) {
-      badges.push(<EnabledBadge data-test-subj="userEnabled" />);
-    } else {
+    if (!enabled) {
       badges.push(<DisabledBadge data-test-subj="userDisabled" />);
     }
     if (reserved) {
