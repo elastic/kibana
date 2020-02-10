@@ -5,4 +5,4 @@
  */
 export * from './models';
 export * from './rest_spec';
-export * from './epm';
+export * from './models/epm';

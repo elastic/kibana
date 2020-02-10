@@ -10,8 +10,8 @@ import {
   SavedObject,
   SavedObjectAttributes,
   SavedObjectReference,
-} from '../../../../../src/core/public';
-import { AssetType as IngestAssetType } from '../../../../legacy/plugins/ingest/common/types/domain_data';
+} from '../../../../../../src/core/public';
+import { AssetType as IngestAssetType } from '../../../../../legacy/plugins/ingest/common/types/domain_data';
 
 export enum InstallationStatus {
   installed = 'installed',

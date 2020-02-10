@@ -11,7 +11,7 @@ import {
   RegistryPackage,
   Installed,
   NotInstalled,
-} from '../epm';
+} from '../models/epm';
 
 export interface GetCategoriesResponse {
   response: CategorySummaryList;
