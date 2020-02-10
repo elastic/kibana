@@ -3,7 +3,6 @@
   "version": "0.1.0",
   "description": "ML Kibana API",
   "title": "ML Kibana API",
-  "url" : "/api/ml/",
   "order": [
     "DataFrameAnalytics",
     "GetDataFrameAnalytics",
@@ -34,6 +33,9 @@
     "ForecastAnomalyDetector",
     "GetOverallBuckets",
     "GetCategories",
+    "FileDataVisualizer",
+    "AnalyzeFile",
+    "ImportFile"
     "ResultsService",
     "GetAnomaliesTableData",
     "GetCategoryDefinition",
