@@ -90,6 +90,7 @@ describe('getAlertState useEffect handler', () => {
 function mockApis() {
   return {
     loadAlertState: jest.fn(),
+    requestRefresh: jest.fn(),
   };
 }
 

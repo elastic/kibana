@@ -48,14 +48,10 @@ describe('alert_instances', () => {
     ];
 
     expect(
-      shallow(<AlertInstances {...mockAPIs} alert={alert} alertState={alertState} />).equals(
-        <EuiBasicTable
-          items={instances}
-          columns={alertInstancesTableColumns(onMuteAction)}
-          data-test-subj="alertInstancesList"
-        />
-      )
-    ).toBeTruthy();
+      shallow(<AlertInstances {...mockAPIs} alert={alert} alertState={alertState} />)
+        .find(EuiBasicTable)
+        .prop('items')
+    ).toEqual(instances);
   });
 
   it('render all active alert instances', () => {
@@ -81,17 +77,13 @@ describe('alert_instances', () => {
             alertInstances: instances,
           })}
         />
-      ).containsMatchingElement(
-        <EuiBasicTable
-          items={[
-            alertInstanceToListItem(alert, 'us-central', instances['us-central']),
-            alertInstanceToListItem(alert, 'us-east', instances['us-east']),
-          ]}
-          columns={alertInstancesTableColumns(onMuteAction)}
-          data-test-subj="alertInstancesList"
-        />
       )
-    ).toBeTruthy();
+        .find(EuiBasicTable)
+        .prop('items')
+    ).toEqual([
+      alertInstanceToListItem(alert, 'us-central', instances['us-central']),
+      alertInstanceToListItem(alert, 'us-east', instances['us-east']),
+    ]);
   });
 
   it('render all inactive alert instances', () => {
@@ -108,17 +100,13 @@ describe('alert_instances', () => {
             alertInstances: {},
           })}
         />
-      ).containsMatchingElement(
-        <EuiBasicTable
-          items={[
-            alertInstanceToListItem(alert, 'us-west'),
-            alertInstanceToListItem(alert, 'us-east'),
-          ]}
-          columns={alertInstancesTableColumns(onMuteAction)}
-          data-test-subj="alertInstancesList"
-        />
       )
-    ).toBeTruthy();
+        .find(EuiBasicTable)
+        .prop('items')
+    ).toEqual([
+      alertInstanceToListItem(alert, 'us-west'),
+      alertInstanceToListItem(alert, 'us-east'),
+    ]);
   });
 });
 
