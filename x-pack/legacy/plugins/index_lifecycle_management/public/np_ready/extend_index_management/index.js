@@ -9,13 +9,7 @@ import { get, every, any } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EuiSearchBar } from '@elastic/eui';
 
-import {
-  addSummaryExtension,
-  addBannerExtension,
-  addActionExtension,
-  addFilterExtension,
-} from '../../../../index_management/public';
-
+import { extensions } from '../../../../index_management/public';
 import { init as initUiMetric } from '../application/services/ui_metric';
 import { init as initNotification } from '../application/services/notification';
 import { retryLifecycleForIndex } from '../application/services/api';
@@ -207,11 +201,11 @@ export const ilmFilterExtension = indices => {
 };
 
 export const addAllExtensions = () => {
-  addActionExtension(retryLifecycleActionExtension);
-  addActionExtension(removeLifecyclePolicyActionExtension);
-  addActionExtension(addLifecyclePolicyActionExtension);
+  extensions.addAction(retryLifecycleActionExtension);
+  extensions.addAction(removeLifecyclePolicyActionExtension);
+  extensions.addAction(addLifecyclePolicyActionExtension);
 
-  addBannerExtension(ilmBannerExtension);
-  addSummaryExtension(ilmSummaryExtension);
-  addFilterExtension(ilmFilterExtension);
+  extensions.addBanner(ilmBannerExtension);
+  extensions.addSummary(ilmSummaryExtension);
+  extensions.addFilter(ilmFilterExtension);
 };
