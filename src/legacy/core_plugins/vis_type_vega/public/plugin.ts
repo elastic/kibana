@@ -21,7 +21,13 @@ import { LegacyDependenciesPlugin, LegacyDependenciesPluginSetup } from './shim'
 import { Plugin as ExpressionsPublicPlugin } from '../../../../plugins/expressions/public';
 import { Plugin as DataPublicPlugin } from '../../../../plugins/data/public';
 import { VisualizationsSetup } from '../../visualizations/public';
-import { setNotifications, setData, setSavedObjects } from './services';
+import {
+  setNotifications,
+  setData,
+  setSavedObjects,
+  setInjectedVars,
+  setUISettings,
+} from './services';
 
 import { createVegaFn } from './vega_fn';
 import { createVegaTypeDefinition } from './vega_type';
@@ -59,6 +65,13 @@ export class VegaPlugin implements Plugin<Promise<void>, void> {
     core: CoreSetup,
     { data, expressions, visualizations, __LEGACY }: VegaPluginSetupDependencies
   ) {
+    setInjectedVars({
+      esShardTimeout: core.injectedMetadata.getInjectedVar('esShardTimeout') as number,
+      enableExternalUrls: core.injectedMetadata.getInjectedVar('enableExternalUrls') as boolean,
+      emsTileLayerId: core.injectedMetadata.getInjectedVar('emsTileLayerId', true),
+    });
+    setUISettings(core.uiSettings);
+
     const visualizationDependencies: Readonly<VegaVisualizationDependencies> = {
       core,
       plugins: {
