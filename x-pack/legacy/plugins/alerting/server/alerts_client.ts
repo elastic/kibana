@@ -31,6 +31,7 @@ import {
 } from '../../../../plugins/security/server';
 import { EncryptedSavedObjectsPluginStart } from '../../../../plugins/encrypted_saved_objects/server';
 import { TaskManagerStartContract } from '../../../../plugins/task_manager/server';
+import { AlertTaskState, taskInstanceToAlertTaskInstance } from './task_runner/alert_task_instance';
 
 type NormalizedAlertAction = Omit<AlertAction, 'actionTypeId'>;
 export type CreateAPIKeyResult =
@@ -202,6 +203,17 @@ export class AlertsClient {
   public async get({ id }: { id: string }): Promise<SanitizedAlert> {
     const result = await this.savedObjectsClient.get('alert', id);
     return this.getAlertFromRaw(result.id, result.attributes, result.updated_at, result.references);
+  }
+
+  public async getAlertState({ id }: { id: string }): Promise<AlertTaskState | void> {
+    const alert = await this.get({ id });
+    if (alert.scheduledTaskId) {
+      const { state } = taskInstanceToAlertTaskInstance(
+        await this.taskManager.get(alert.scheduledTaskId),
+        alert
+      );
+      return state;
+    }
   }
 
   public async find({ options = {} }: FindOptions = {}): Promise<FindResult> {
