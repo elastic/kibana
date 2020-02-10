@@ -66,6 +66,10 @@ import {
   extractTimeFilter,
 } from './query';
 
+/*
+ * Filter helper namespace:
+ */
+
 export const esFilters = {
   FilterLabel,
 
@@ -104,6 +108,10 @@ export const esFilters = {
   extractTimeFilter,
 };
 
+/*
+ * esQuery\esKuery namespaces:
+ */
+
 export const esKuery = {
   nodeTypes,
   doesKueryExpressionHaveLuceneSyntaxError,
@@ -117,6 +125,60 @@ export const esQuery = {
   buildQueryFromFilters,
   luceneStringToDsl,
   decorateQuery,
+};
+
+/*
+ * Field Formatters helper namespace:
+ */
+
+import {
+  FieldFormat,
+  FieldFormatsRegistry, // exported only for tests. Consider mock.
+  DEFAULT_CONVERTER_COLOR,
+  HTML_CONTEXT_TYPE,
+  TEXT_CONTEXT_TYPE,
+  FIELD_FORMAT_IDS,
+  BoolFormat,
+  BytesFormat,
+  ColorFormat,
+  DateFormat,
+  DateNanosFormat,
+  DurationFormat,
+  IpFormat,
+  NumberFormat,
+  PercentFormat,
+  RelativeDateFormat,
+  SourceFormat,
+  StaticLookupFormat,
+  UrlFormat,
+  StringFormat,
+  TruncateFormat,
+} from '../common/field_formats';
+
+export const fieldFormats = {
+  FieldFormat,
+  FieldFormatsRegistry, // exported only for tests. Consider mock.
+
+  DEFAULT_CONVERTER_COLOR,
+  HTML_CONTEXT_TYPE,
+  TEXT_CONTEXT_TYPE,
+  FIELD_FORMAT_IDS,
+
+  BoolFormat,
+  BytesFormat,
+  ColorFormat,
+  DateFormat,
+  DateNanosFormat,
+  DurationFormat,
+  IpFormat,
+  NumberFormat,
+  PercentFormat,
+  RelativeDateFormat,
+  SourceFormat,
+  StaticLookupFormat,
+  UrlFormat,
+  StringFormat,
+  TruncateFormat,
 };
 
 export function plugin(initializerContext: PluginInitializerContext) {
@@ -153,9 +215,15 @@ export {
   // timefilter
   RefreshInterval,
   TimeRange,
+  // Field Formats
+  IFieldFormat,
+  IFieldFormatsRegistry,
+  FieldFormatsContentType,
+  FieldFormatsGetConfigFn,
+  FieldFormatConfig,
+  FieldFormatId,
 } from '../common';
 export { autocomplete } from './autocomplete';
-export * from './field_formats';
 export * from './index_patterns';
 export * from './search';
 export {
@@ -179,7 +247,6 @@ export {
 export * from './ui';
 export {
   // es query
-  fieldFormats,
   KueryNode,
   // index patterns
   isFilterable,

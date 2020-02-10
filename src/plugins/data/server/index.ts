@@ -37,6 +37,10 @@ import {
   isFilterDisabled,
 } from '../common';
 
+/*
+ * esQuery\esKuery namespaces:
+ */
+
 export const esKuery = {
   nodeTypes,
   fromKueryExpression,
@@ -47,6 +51,10 @@ export const esQuery = {
   getEsQueryConfig,
   buildEsQuery,
 };
+
+/*
+ * Filter helper namespace:
+ */
 
 export const esFilters = {
   buildQueryFilter,
@@ -60,6 +68,50 @@ export const esFilters = {
   isFilterDisabled,
 };
 
+/*
+ * Field Formatters helper namespace:
+ */
+
+import {
+  FieldFormat,
+  FieldFormatsRegistry, // exported only for tests. Consider mock.
+  BoolFormat,
+  BytesFormat,
+  ColorFormat,
+  DateFormat,
+  DateNanosFormat,
+  DurationFormat,
+  IpFormat,
+  NumberFormat,
+  PercentFormat,
+  RelativeDateFormat,
+  SourceFormat,
+  StaticLookupFormat,
+  UrlFormat,
+  StringFormat,
+  TruncateFormat,
+} from '../common/field_formats';
+
+export const fieldFormats = {
+  FieldFormat,
+  FieldFormatsRegistry, // exported only for tests. Consider mock.
+
+  BoolFormat,
+  BytesFormat,
+  ColorFormat,
+  DateFormat,
+  DateNanosFormat,
+  DurationFormat,
+  IpFormat,
+  NumberFormat,
+  PercentFormat,
+  RelativeDateFormat,
+  SourceFormat,
+  StaticLookupFormat,
+  UrlFormat,
+  StringFormat,
+  TruncateFormat,
+};
 export function plugin(initializerContext: PluginInitializerContext) {
   return new DataServerPlugin(initializerContext);
 }
@@ -73,7 +125,6 @@ export { IRequestTypesMap, IResponseTypesMap } from './search';
 export {
   EsQueryConfig,
   // es query
-  fieldFormats,
   KueryNode,
   // kbn field types
   castEsToKbnFieldTypeName,
@@ -96,6 +147,9 @@ export {
   // utils
   parseInterval,
   isNestedField,
+  IFieldFormatsRegistry,
+  FieldFormatsGetConfigFn,
+  FieldFormatConfig,
 } from '../common';
 
 /**
