@@ -5,11 +5,26 @@
  */
 
 import React, { useContext, createContext } from 'react';
+import { HttpSetup, IUiSettingsClient, ToastsApi } from 'kibana/public';
+import { ChartsPluginSetup } from 'src/plugins/charts/public';
+import { FieldFormatsRegistry } from 'src/plugins/data/common/field_formats';
+import { TypeRegistry } from '../type_registry';
+import { AlertTypeModel, ActionTypeModel } from '../../types';
 
 export interface AlertsContextValue {
   addFlyoutVisible: boolean;
   setAddFlyoutVisibility: React.Dispatch<React.SetStateAction<boolean>>;
-  reloadAlerts: () => Promise<void>;
+  reloadAlerts?: () => Promise<void>;
+  http: HttpSetup;
+  alertTypeRegistry: TypeRegistry<AlertTypeModel>;
+  actionTypeRegistry: TypeRegistry<ActionTypeModel>;
+  uiSettings?: IUiSettingsClient;
+  toastNotifications?: Pick<
+    ToastsApi,
+    'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'
+  >;
+  charts?: ChartsPluginSetup;
+  dataFieldsFormats?: Pick<FieldFormatsRegistry, 'register'>;
 }
 
 const AlertsContext = createContext<AlertsContextValue>(null as any);

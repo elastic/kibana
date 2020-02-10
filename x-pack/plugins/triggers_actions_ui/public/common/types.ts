@@ -23,17 +23,3 @@ export interface GroupByType {
   value: string;
   validNormalizedTypes: string[];
 }
-
-export interface IndexThresholdAlertParams {
-  index: string[];
-  timeField?: string;
-  aggType: string;
-  aggField?: string;
-  groupBy?: string;
-  termSize?: number;
-  termField?: string;
-  thresholdComparator?: string;
-  threshold: number[];
-  timeWindowSize: number;
-  timeWindowUnit: string;
-}

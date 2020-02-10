@@ -119,6 +119,7 @@ export * from './index_patterns';
 export * from './search';
 export * from './query';
 export * from './ui';
+export * from './field_formats';
 export {
   // es query
   esFilters,
