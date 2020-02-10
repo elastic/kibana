@@ -141,9 +141,6 @@ export class StepTimeField extends Component<StepTimeFieldProps, StepTimeFieldSt
     const { createIndexPattern } = this.props;
     const { selectedTimeField, indexPatternId } = this.state;
     this.setState({ isCreating: true });
-    if (selectedTimeField === undefined) {
-      return;
-    }
     try {
       await createIndexPattern(selectedTimeField || '', indexPatternId);
     } catch (error) {
