@@ -25,7 +25,7 @@ import del from 'del';
 
 import { toArray, tap } from 'rxjs/operators';
 import { createAbsolutePathSerializer } from '@kbn/dev-utils';
-import { Optimizer, OptimizerConfig, OptimizerMsg } from '@kbn/optimizer';
+import { runOptimizer, OptimizerConfig, OptimizerMsg } from '@kbn/optimizer';
 
 const TMP_DIR = Path.resolve(__dirname, '../__fixtures__/__tmp__');
 const MOCK_REPO_SRC = Path.resolve(__dirname, '../__fixtures__/mock_repo');
@@ -55,10 +55,7 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
 
   expect(config).toMatchSnapshot('OptimizerConfig');
 
-  const optimizer = new Optimizer(config);
-
-  const msgs = await optimizer
-    .run()
+  const msgs = await runOptimizer(config)
     .pipe(
       tap(state => {
         if (state.event?.type === 'worker stdio') {

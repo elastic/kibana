@@ -28,7 +28,7 @@ export interface WorkerConfig {
   readonly cache: boolean;
   readonly profileWebpack: boolean;
   readonly browserslistEnv: string;
-  readonly optimizerVersion: string;
+  readonly optimizerCacheKey: unknown;
 }
 
 export function parseWorkerConfig(json: string): WorkerConfig {
@@ -68,9 +68,9 @@ export function parseWorkerConfig(json: string): WorkerConfig {
       throw new Error('`profileWebpack` must be a boolean');
     }
 
-    const optimizerVersion = parsed.optimizerVersion;
-    if (typeof optimizerVersion !== 'string') {
-      throw new Error('`optimizerVersion` must be a string');
+    const optimizerCacheKey = parsed.optimizerCacheKey;
+    if (optimizerCacheKey === undefined) {
+      throw new Error('`optimizerCacheKey` must be defined');
     }
 
     const browserslistEnv = parsed.browserslistEnv;
@@ -84,7 +84,7 @@ export function parseWorkerConfig(json: string): WorkerConfig {
       watch,
       dist,
       profileWebpack,
-      optimizerVersion,
+      optimizerCacheKey,
       browserslistEnv,
     };
   } catch (error) {

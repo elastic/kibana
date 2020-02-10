@@ -21,6 +21,7 @@ import * as Rx from 'rxjs';
 import { mergeMap } from 'rxjs/operators';
 
 import { parseBundles, parseWorkerConfig, WorkerMsg, isWorkerMsg, WorkerMsgs } from '../common';
+
 import { runCompilers } from './run_compilers';
 
 /**

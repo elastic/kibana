@@ -24,8 +24,8 @@ import Path from 'path';
 import { run, REPO_ROOT, createFlagError } from '@kbn/dev-utils';
 
 import { logOptimizerState } from './log_optimizer_state';
-import { OptimizerConfig } from './optimizer_config';
-import { Optimizer } from './optimizer';
+import { OptimizerConfig } from './optimizer';
+import { runOptimizer } from './run_optimizer';
 
 run(
   async ({ log, flags }) => {
@@ -89,8 +89,7 @@ run(
       inspectWorkers,
     });
 
-    await new Optimizer(config)
-      .run()
+    await runOptimizer(config)
       .pipe(logOptimizerState(log, config))
       .toPromise();
   },

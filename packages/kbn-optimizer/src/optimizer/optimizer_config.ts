@@ -20,8 +20,9 @@
 import Path from 'path';
 import Os from 'os';
 
+import { Bundle, WorkerConfig } from '../common';
+
 import { findNewPlatformPlugins, NewPlatformPlugin } from './new_platform_plugins';
-import { Bundle, WorkerConfig } from './common';
 import { getBundles } from './get_bundles';
 
 interface Options {
@@ -157,14 +158,14 @@ export class OptimizerConfig {
     public readonly profileWebpack: boolean
   ) {}
 
-  getWorkerConfig(optimizerVersion: string): WorkerConfig {
+  getWorkerConfig(optimizerCacheKey: unknown): WorkerConfig {
     return {
       cache: this.cache,
       dist: this.dist,
       profileWebpack: this.profileWebpack,
       repoRoot: this.repoRoot,
       watch: this.watch,
-      optimizerVersion,
+      optimizerCacheKey,
       browserslistEnv: this.dist ? 'production' : process.env.BROWSERSLIST_ENV || 'dev',
     };
   }

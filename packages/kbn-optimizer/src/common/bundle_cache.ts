@@ -21,8 +21,8 @@ import Fs from 'fs';
 import Path from 'path';
 
 interface State {
-  optimizerVersion?: string;
-  key?: string;
+  optimizerCacheKey?: unknown;
+  cacheKey?: unknown;
   moduleCount?: number;
   files?: string[];
 }
@@ -95,11 +95,11 @@ export class BundleCache {
     return this.get().files;
   }
 
-  public getKey() {
-    return this.get().key;
+  public getCacheKeys() {
+    return this.get().cacheKey;
   }
 
-  public getOptimizerVersion() {
-    return this.get().optimizerVersion;
+  public getOptimizerCacheKey() {
+    return this.get().optimizerCacheKey;
   }
 }

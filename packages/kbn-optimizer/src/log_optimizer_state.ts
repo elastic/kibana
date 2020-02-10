@@ -23,8 +23,7 @@ import { ToolingLog } from '@kbn/dev-utils';
 import * as Rx from 'rxjs';
 import { tap } from 'rxjs/operators';
 
-import { OptimizerConfig } from './optimizer_config';
-import { OptimizerMsg } from './optimizer';
+import { OptimizerConfig, OptimizerMsg } from './optimizer';
 import { CompilerMsg, pipeClosure } from './common';
 
 export function logOptimizerState(log: ToolingLog, config: OptimizerConfig) {
@@ -45,6 +44,18 @@ export function logOptimizerState(log: ToolingLog, config: OptimizerConfig) {
           );
         }
 
+        if (event?.type === 'bundle not cached') {
+          log.debug(
+            `[${event.bundle.id}] bundle not cached because [${event.reason}]${
+              event.diff ? `, diff:\n${event.diff}` : ''
+            }`
+          );
+        }
+
+        if (event?.type === 'bundle cached') {
+          log.debug(`[${event.bundle.id}] bundle cached`);
+        }
+
         if (event?.type === 'worker started') {
           log.info(`worker started for bundles ${event.bundles.map(b => b.id).join(', ')}`);
         }
@@ -58,8 +69,6 @@ export function logOptimizerState(log: ToolingLog, config: OptimizerConfig) {
           if (!loggedInit) {
             loggedInit = true;
             log.info(`intialized, ${state.offlineBundles.length} bundles cached`);
-            log.debug(`version: ${state.version}`);
-            log.debug(`cached: ${state.offlineBundles.map(b => b.id)}`);
           }
 
           return;

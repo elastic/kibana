@@ -143,8 +143,8 @@ const observeCompiler = (
       );
 
       bundle.cache.set({
-        optimizerVersion: workerConfig.optimizerVersion,
-        key: bundle.createCacheKey(files, mtimes),
+        optimizerCacheKey: workerConfig.optimizerCacheKey,
+        cacheKey: bundle.createCacheKey(files, mtimes),
         moduleCount: normalModules.length,
         files,
       });

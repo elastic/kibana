@@ -21,7 +21,7 @@ import * as Rx from 'rxjs';
 import { take, map } from 'rxjs/operators';
 import Watchpack from 'watchpack';
 
-import { debounceTimeBuffer, Bundle } from './common';
+import { debounceTimeBuffer, Bundle } from '../common';
 
 export interface ChangesStarted {
   type: 'changes detected';
@@ -31,6 +31,8 @@ export interface Changes {
   type: 'changes';
   bundles: Bundle[];
 }
+
+export type ChangeEvent = ChangesStarted | Changes;
 
 export class Watcher {
   /**

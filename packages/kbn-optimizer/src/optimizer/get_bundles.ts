@@ -19,8 +19,9 @@
 
 import Path from 'path';
 
+import { Bundle } from '../common';
+
 import { NewPlatformPlugin } from './new_platform_plugins';
-import { Bundle } from './common';
 
 export function getBundles(plugins: NewPlatformPlugin[], repoRoot: string) {
   return plugins

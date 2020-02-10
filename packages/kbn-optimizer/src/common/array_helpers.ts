@@ -78,3 +78,14 @@ export const invert = <T, T2 extends T>(fn: (x: T) => x is T2) => (x: T): x is E
  * Alternate Array#includes() implementation with sane types, functions as a type guard
  */
 export const includes = <T>(array: T[], value: any): value is T => array.includes(value);
+
+/**
+ * Ponyfill for Object.fromEntries()
+ */
+export const entriesToObject = <T>(entries: Array<readonly [string, T]>): Record<string, T> => {
+  const object: Record<string, T> = {};
+  for (const [key, value] of entries) {
+    object[key] = value;
+  }
+  return object;
+};

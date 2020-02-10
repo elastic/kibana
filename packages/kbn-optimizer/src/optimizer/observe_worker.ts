@@ -24,7 +24,8 @@ import { inspect } from 'util';
 import * as Rx from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
 
-import { isWorkerMsg, WorkerConfig, WorkerMsg, Bundle } from './common';
+import { isWorkerMsg, WorkerConfig, WorkerMsg, Bundle } from '../common';
+
 import { OptimizerConfig } from './optimizer_config';
 
 export interface WorkerStdio {
@@ -75,7 +76,7 @@ function usingWorkerProc<T>(
     (): ProcResource => {
       const args = [JSON.stringify(workerConfig), JSON.stringify(bundles.map(b => b.toSpec()))];
 
-      const proc = fork(require.resolve('./worker/run_worker'), args, {
+      const proc = fork(require.resolve('../worker/run_worker'), args, {
         stdio: ['ignore', 'pipe', 'pipe', 'ipc'],
         execArgv: [
           ...(inspectFlag && config.inspectWorkers

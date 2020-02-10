@@ -21,7 +21,7 @@ import Path from 'path';
 
 import { BundleCache } from './bundle_cache';
 import { UnknownVals } from './ts_helpers';
-import { includes, ascending } from './array_helpers';
+import { includes, ascending, entriesToObject } from './array_helpers';
 
 export const VALID_BUNDLE_TYPES = ['plugin' as const];
 
@@ -116,12 +116,12 @@ export class Bundle {
    * @param mtimes pre-fetched mtimes (ms || undefined) for all referenced files
    */
   createCacheKey(files: string[], mtimes: Map<string, number | undefined>) {
-    return [
-      `bundleSpec:${JSON.stringify(this.toSpec())}`,
-      ...files.map(p => `path:${p}:${mtimes.get(p)}`),
-    ]
-      .sort(ascending(l => l))
-      .join('\n');
+    return {
+      spec: this.toSpec(),
+      mtimes: entriesToObject(
+        files.map(p => [p, mtimes.get(p)] as const).sort(ascending(e => e[0]))
+      ),
+    };
   }
 
   /**

@@ -17,9 +17,10 @@
  * under the License.
  */
 
+import { Bundle } from '../common';
+
 import { getBundles } from './get_bundles';
 import { assignBundlesToWorkers, Assignments } from './assign_bundles_to_workers';
-import { Bundle } from './common';
 
 const REPO = '/repo';
 const BIG_BUNDLES = 'dqv'.split('');

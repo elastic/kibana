@@ -20,7 +20,7 @@
 import Fs from 'fs';
 import { promisify } from 'util';
 
-import { concurrentMap } from './common';
+import { concurrentMap } from '../common';
 
 const statAsync = promisify(Fs.stat);
 
