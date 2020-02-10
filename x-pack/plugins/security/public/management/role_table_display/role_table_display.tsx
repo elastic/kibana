@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { EuiLink, EuiToolTip, EuiIcon, EuiLinkProps } from '@elastic/eui';
+import { EuiLink, EuiToolTip, EuiIcon } from '@elastic/eui';
 import { Role, isRoleDeprecated, getExtendedRoleDeprecationNotice } from '../../../common/model';
 import { getEditRoleHref } from '../management_urls';
 
@@ -16,27 +16,21 @@ interface Props {
 export const RoleTableDisplay = ({ role }: Props) => {
   let content;
   let href;
-  let color: EuiLinkProps['color'] = 'primary';
   if (typeof role === 'string') {
-    content = <span>{role}</span>;
+    content = <div>{role}</div>;
     href = getEditRoleHref(role);
   } else if (isRoleDeprecated(role)) {
-    color = 'warning';
     content = (
       <EuiToolTip content={getExtendedRoleDeprecationNotice(role)}>
-        <span>
+        <div>
           {role.name} <EuiIcon type="alert" color="warning" size="s" className={'eui-alignTop'} />
-        </span>
+        </div>
       </EuiToolTip>
     );
     href = getEditRoleHref(role.name);
   } else {
-    content = <span>{role.name}</span>;
+    content = <div>{role.name}</div>;
     href = getEditRoleHref(role.name);
   }
-  return (
-    <EuiLink href={href} color={color}>
-      {content}
-    </EuiLink>
-  );
+  return <EuiLink href={href}>{content}</EuiLink>;
 };

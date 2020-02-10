@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 import {
   EuiButton,
   EuiLink,
@@ -148,12 +148,7 @@ export class UsersGridPage extends Component<Props, State> {
         render: (rolenames: string[]) => {
           const roleLinks = rolenames.map((rolename, index) => {
             const roleDefinition = roles?.find(role => role.name === rolename) ?? rolename;
-            return (
-              <Fragment key={rolename}>
-                <RoleTableDisplay role={roleDefinition} />
-                {index === rolenames.length - 1 ? null : ', '}
-              </Fragment>
-            );
+            return <RoleTableDisplay role={roleDefinition} key={rolename} />;
           });
           return <div data-test-subj="userRowRoles">{roleLinks}</div>;
         },
@@ -370,7 +365,7 @@ export class UsersGridPage extends Component<Props, State> {
     }
 
     return (
-      <EuiFlexGroup gutterSize="xs">
+      <EuiFlexGroup gutterSize="s">
         {badges.map((badge, index) => (
           <EuiFlexItem key={index} grow={false}>
             {badge}

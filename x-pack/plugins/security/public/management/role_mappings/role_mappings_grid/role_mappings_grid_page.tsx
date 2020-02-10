@@ -327,12 +327,7 @@ export class RoleMappingsGridPage extends Component<Props, State> {
             const role: Role | string =
               this.state.roles?.find(r => r.name === rolename) ?? rolename;
 
-            return (
-              <Fragment key={rolename}>
-                <RoleTableDisplay role={role} />
-                {index === assignedRoleNames.length - 1 ? null : ', '}
-              </Fragment>
-            );
+            return <RoleTableDisplay role={role} key={rolename} />;
           });
           return <div data-test-subj="roleMappingRoles">{roleLinks}</div>;
         },

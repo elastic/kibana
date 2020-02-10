@@ -302,7 +302,7 @@ export class RolesGridPage extends Component<Props, State> {
     }
 
     return (
-      <EuiFlexGroup gutterSize="xs">
+      <EuiFlexGroup gutterSize="s">
         {badges.map((badge, index) => (
           <EuiFlexItem key={index} grow={false}>
             {badge}
