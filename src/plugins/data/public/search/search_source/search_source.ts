@@ -73,12 +73,15 @@ import _ from 'lodash';
 import { normalizeSortRequest } from './normalize_sort_request';
 import { filterDocvalueFields } from './filter_docvalue_fields';
 import { fieldWildcardFilter } from '../../../../kibana_utils/public';
-import { fieldFormats, esFilters, SearchRequest } from '../..';
+
+import { esFilters, SearchRequest } from '../..';
+
 import { SearchSourceOptions, SearchSourceFields } from './types';
 import { fetchSoon, FetchOptions, RequestFailure } from '../fetch';
 
 import { getSearchService, getUiSettings, getInjectedMetadata } from '../../services';
 import { getEsQueryConfig, buildEsQuery } from '../../../common/es_query';
+import { getHighlightRequest } from '../../../common/field_formats';
 
 export type ISearchSource = Pick<SearchSource, keyof SearchSource>;
 
@@ -383,10 +386,7 @@ export class SearchSource {
     body.query = buildEsQuery(index, query, filters, esQueryConfigs);
 
     if (highlightAll && body.query) {
-      body.highlight = fieldFormats.getHighlightRequest(
-        body.query,
-        getUiSettings().get('doc_table:highlight')
-      );
+      body.highlight = getHighlightRequest(body.query, getUiSettings().get('doc_table:highlight'));
       delete searchRequest.highlightAll;
     }
 

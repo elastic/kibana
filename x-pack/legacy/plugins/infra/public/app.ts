@@ -9,7 +9,7 @@
 // actually mount and run our application. Once in the NP this won't be an issue
 // as the NP will look for an export named "plugin" and run that from the index file.
 
-import { npStart } from 'ui/new_platform';
+import { npStart, npSetup } from 'ui/new_platform';
 import { PluginInitializerContext } from 'kibana/public';
 import chrome from 'ui/chrome';
 // @ts-ignore
@@ -50,5 +50,7 @@ const checkForRoot = () => {
 };
 
 checkForRoot().then(() => {
-  plugin({} as PluginInitializerContext).start(core, plugins, __LEGACY);
+  const pluginInstance = plugin({} as PluginInitializerContext);
+  pluginInstance.setup(npSetup.core, { home: npSetup.plugins.home });
+  pluginInstance.start(core, plugins, __LEGACY);
 });

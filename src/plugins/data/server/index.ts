@@ -20,6 +20,10 @@
 import { PluginInitializerContext } from '../../../core/server';
 import { DataServerPlugin, DataPluginSetup, DataPluginStart } from './plugin';
 
+/*
+ * esQuery and esKuery helper namespaces:
+ */
+
 import {
   nodeTypes,
   fromKueryExpression,
@@ -39,6 +43,48 @@ export const esQuery = {
   buildEsQuery,
 };
 
+/*
+ * Field Formatters helper namespace:
+ */
+
+import {
+  FieldFormat,
+  BoolFormat,
+  BytesFormat,
+  ColorFormat,
+  DateFormat,
+  DateNanosFormat,
+  DurationFormat,
+  IpFormat,
+  NumberFormat,
+  PercentFormat,
+  RelativeDateFormat,
+  SourceFormat,
+  StaticLookupFormat,
+  UrlFormat,
+  StringFormat,
+  TruncateFormat,
+} from '../common/field_formats';
+
+export const fieldFormats = {
+  FieldFormat,
+
+  BoolFormat,
+  BytesFormat,
+  ColorFormat,
+  DateFormat,
+  DateNanosFormat,
+  DurationFormat,
+  IpFormat,
+  NumberFormat,
+  PercentFormat,
+  RelativeDateFormat,
+  SourceFormat,
+  StaticLookupFormat,
+  UrlFormat,
+  StringFormat,
+  TruncateFormat,
+};
 export function plugin(initializerContext: PluginInitializerContext) {
   return new DataServerPlugin(initializerContext);
 }
@@ -53,7 +99,6 @@ export {
   EsQueryConfig,
   // es query
   esFilters,
-  fieldFormats,
   KueryNode,
   // kbn field types
   castEsToKbnFieldTypeName,
@@ -75,6 +120,9 @@ export {
   // utils
   parseInterval,
   isNestedField,
+  IFieldFormatsRegistry,
+  FieldFormatsGetConfigFn,
+  FieldFormatConfig,
 } from '../common';
 
 /**
