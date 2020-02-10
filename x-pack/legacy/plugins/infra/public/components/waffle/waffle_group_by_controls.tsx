@@ -61,6 +61,10 @@ export const WaffleGroupByControls = class extends React.PureComponent<Props, St
         })
       );
     }
+    const isMaxGroupingsSelected = groupBy.length >= 2;
+    const maxGroupByTooltip = i18n.translate('xpack.infra.waffle.maxGroupByTooltip', {
+      defaultMessage: 'Only two groupings can be selected at a time',
+    });
     const panels: EuiContextMenuPanelDescriptor[] = [
       {
         id: 'firstPanel',
@@ -72,6 +76,8 @@ export const WaffleGroupByControls = class extends React.PureComponent<Props, St
             name: i18n.translate('xpack.infra.waffle.customGroupByOptionName', {
               defaultMessage: 'Custom field',
             }),
+            disabled: isMaxGroupingsSelected,
+            toolTipContent: isMaxGroupingsSelected ? maxGroupByTooltip : null,
             icon: 'empty',
             panel: 'customPanel',
           },
@@ -85,6 +91,10 @@ export const WaffleGroupByControls = class extends React.PureComponent<Props, St
             if (o.toolTipContent) {
               panel.toolTipContent = o.toolTipContent;
             }
+            if (isMaxGroupingsSelected && icon === 'empty') {
+              panel.toolTipContent = maxGroupByTooltip;
+              panel.disabled = true;
+            }
             return panel;
           }),
         ],
@@ -94,7 +104,13 @@ export const WaffleGroupByControls = class extends React.PureComponent<Props, St
         title: i18n.translate('xpack.infra.waffle.customGroupByPanelTitle', {
           defaultMessage: 'Group By Custom Field',
         }),
-        content: <CustomFieldPanel onSubmit={this.handleCustomField} fields={this.props.fields} />,
+        content: (
+          <CustomFieldPanel
+            currentOptions={this.props.customOptions}
+            onSubmit={this.handleCustomField}
+            fields={this.props.fields}
+          />
+        ),
       },
     ];
     const buttonBody =
@@ -167,8 +183,8 @@ export const WaffleGroupByControls = class extends React.PureComponent<Props, St
       this.handleRemove(field)();
     } else if (this.props.groupBy.length < 2) {
       this.props.onChange([...groupBy, { field }]);
-      this.handleClose();
     }
+    this.handleClose();
   };
 };
 

@@ -1356,6 +1356,120 @@ describe('get()', () => {
   });
 });
 
+describe('getAlertState()', () => {
+  test('calls saved objects client with given params', async () => {
+    const alertsClient = new AlertsClient(alertsClientParams);
+    savedObjectsClient.get.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        alertTypeId: '123',
+        schedule: { interval: '10s' },
+        params: {
+          bar: true,
+        },
+        actions: [
+          {
+            group: 'default',
+            actionRef: 'action_0',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+      },
+      references: [
+        {
+          name: 'action_0',
+          type: 'action',
+          id: '1',
+        },
+      ],
+    });
+
+    taskManager.get.mockResolvedValueOnce({
+      id: '1',
+      taskType: 'alerting:123',
+      scheduledAt: new Date(),
+      attempts: 1,
+      status: TaskStatus.Idle,
+      runAt: new Date(),
+      startedAt: null,
+      retryAt: null,
+      state: {},
+      params: {},
+      ownerId: null,
+    });
+
+    await alertsClient.getAlertState({ id: '1' });
+    expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
+    expect(savedObjectsClient.get.mock.calls[0]).toMatchInlineSnapshot(`
+                                                                                                                  Array [
+                                                                                                                    "alert",
+                                                                                                                    "1",
+                                                                                                                  ]
+                                                                            `);
+  });
+
+  test('gets the underlying task from TaskManager', async () => {
+    const alertsClient = new AlertsClient(alertsClientParams);
+
+    const scheduledTaskId = 'task-123';
+
+    savedObjectsClient.get.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        alertTypeId: '123',
+        schedule: { interval: '10s' },
+        params: {
+          bar: true,
+        },
+        actions: [
+          {
+            group: 'default',
+            actionRef: 'action_0',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+        enabled: true,
+        scheduledTaskId,
+        mutedInstanceIds: [],
+        muteAll: true,
+      },
+      references: [
+        {
+          name: 'action_0',
+          type: 'action',
+          id: '1',
+        },
+      ],
+    });
+
+    taskManager.get.mockResolvedValueOnce({
+      id: scheduledTaskId,
+      taskType: 'alerting:123',
+      scheduledAt: new Date(),
+      attempts: 1,
+      status: TaskStatus.Idle,
+      runAt: new Date(),
+      startedAt: null,
+      retryAt: null,
+      state: {},
+      params: {
+        alertId: '1',
+      },
+      ownerId: null,
+    });
+
+    await alertsClient.getAlertState({ id: '1' });
+    expect(taskManager.get).toHaveBeenCalledTimes(1);
+    expect(taskManager.get).toHaveBeenCalledWith(scheduledTaskId);
+  });
+});
+
 describe('find()', () => {
   test('calls saved objects client with given params', async () => {
     const alertsClient = new AlertsClient(alertsClientParams);
@@ -1465,6 +1579,13 @@ describe('delete()', () => {
       },
     ],
   };
+  const existingDecryptedAlert = {
+    ...existingAlert,
+    attributes: {
+      ...existingAlert.attributes,
+      apiKey: Buffer.from('123:abc').toString('base64'),
+    },
+  };
 
   beforeEach(() => {
     alertsClient = new AlertsClient(alertsClientParams);
@@ -1472,13 +1593,7 @@ describe('delete()', () => {
     savedObjectsClient.delete.mockResolvedValue({
       success: true,
     });
-    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue({
-      ...existingAlert,
-      attributes: {
-        ...existingAlert.attributes,
-        apiKey: Buffer.from('123:abc').toString('base64'),
-      },
-    });
+    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue(existingDecryptedAlert);
   });
 
   test('successfully removes an alert', async () => {
@@ -1487,13 +1602,31 @@ describe('delete()', () => {
     expect(savedObjectsClient.delete).toHaveBeenCalledWith('alert', '1');
     expect(taskManager.remove).toHaveBeenCalledWith('task-123');
     expect(alertsClientParams.invalidateAPIKey).toHaveBeenCalledWith({ id: '123' });
+    expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith('alert', '1', {
+      namespace: 'default',
+    });
+    expect(savedObjectsClient.get).not.toHaveBeenCalled();
+  });
+
+  test('falls back to SOC.get when getDecryptedAsInternalUser throws an error', async () => {
+    encryptedSavedObjects.getDecryptedAsInternalUser.mockRejectedValue(new Error('Fail'));
+
+    const result = await alertsClient.delete({ id: '1' });
+    expect(result).toEqual({ success: true });
+    expect(savedObjectsClient.delete).toHaveBeenCalledWith('alert', '1');
+    expect(taskManager.remove).toHaveBeenCalledWith('task-123');
+    expect(alertsClientParams.invalidateAPIKey).not.toHaveBeenCalled();
+    expect(savedObjectsClient.get).toHaveBeenCalledWith('alert', '1');
+    expect(alertsClientParams.logger.error).toHaveBeenCalledWith(
+      'delete(): Failed to load API key to invalidate on alert 1: Fail'
+    );
   });
 
   test(`doesn't remove a task when scheduledTaskId is null`, async () => {
-    savedObjectsClient.get.mockResolvedValue({
-      ...existingAlert,
+    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue({
+      ...existingDecryptedAlert,
       attributes: {
-        ...existingAlert.attributes,
+        ...existingDecryptedAlert.attributes,
         scheduledTaskId: null,
       },
     });
@@ -1536,6 +1669,7 @@ describe('delete()', () => {
   });
 
   test('throws error when savedObjectsClient.get throws an error', async () => {
+    encryptedSavedObjects.getDecryptedAsInternalUser.mockRejectedValue(new Error('Fail'));
     savedObjectsClient.get.mockRejectedValue(new Error('SOC Fail'));
 
     await expect(alertsClient.delete({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
