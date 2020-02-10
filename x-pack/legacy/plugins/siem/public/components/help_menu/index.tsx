@@ -30,7 +30,7 @@ export const HelpMenu = React.memo(() => {
           content: i18n.translate('xpack.siem.chrome.helpMenu.documentation.ecs', {
             defaultMessage: 'ECS documentation',
           }),
-          href: `${docLinks.ELASTIC_WEBSITE_URL}guide/en/ecs/current/index.html`,
+          href: 'https://www.elastic.co/guide/en/ecs/current/index.html',
           iconType: 'documents',
           linkType: 'custom',
           target: '_blank',
