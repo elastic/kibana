@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Plugin, CoreSetup, AppMountParameters } from 'kibana/public';
+import { Plugin, CoreSetup, AppMountParameters, CoreStart } from 'kibana/public';
 import { UiActionsStart, UiActionsSetup } from 'src/plugins/ui_actions/public';
 import { ISearchAppMountContext } from '../../../src/plugins/data/public';
 import {
@@ -66,30 +66,25 @@ export class UiActionsExplorerPlugin implements Plugin<void, void, {}, StartDeps
       id: USER_TRIGGER,
       actionIds: [],
     });
+    deps.uiActions.registerAction(lookUpWeatherAction);
+    deps.uiActions.registerAction(viewInMapsAction);
+    deps.uiActions.registerAction(makePhoneCallAction);
+    deps.uiActions.registerAction(showcasePluggability);
+
+    // What's missing here is type analysis to ensure the context emitted by the trigger
+    // is the same context that the action requires.
+    deps.uiActions.attachAction(COUNTRY_TRIGGER, VIEW_IN_MAPS_ACTION);
+    deps.uiActions.attachAction(COUNTRY_TRIGGER, TRAVEL_GUIDE_ACTION);
+    deps.uiActions.attachAction(COUNTRY_TRIGGER, SHOWCASE_PLUGGABILITY_ACTION);
+    deps.uiActions.attachAction(PHONE_TRIGGER, CALL_PHONE_NUMBER_ACTION);
+    deps.uiActions.attachAction(PHONE_TRIGGER, SHOWCASE_PLUGGABILITY_ACTION);
+    deps.uiActions.attachAction(USER_TRIGGER, SHOWCASE_PLUGGABILITY_ACTION);
 
     core.application.register({
       id: 'uiActionsExplorer',
       title: 'Ui Actions Explorer',
       async mount(params: AppMountParameters) {
         const [coreStart, depsStart] = await core.getStartServices();
-        deps.uiActions.registerAction(createPhoneUserAction(depsStart.uiActions));
-        deps.uiActions.registerAction(lookUpWeatherAction);
-        deps.uiActions.registerAction(viewInMapsAction);
-        deps.uiActions.registerAction(createEditUserAction(coreStart.overlays.openModal));
-        deps.uiActions.registerAction(makePhoneCallAction);
-        deps.uiActions.registerAction(showcasePluggability);
-
-        // What's missing here is type analysis to ensure the context emitted by the trigger
-        // is the same context that the action requires.
-        deps.uiActions.attachAction(PHONE_TRIGGER, CALL_PHONE_NUMBER_ACTION);
-        deps.uiActions.attachAction(PHONE_TRIGGER, SHOWCASE_PLUGGABILITY_ACTION);
-        deps.uiActions.attachAction(COUNTRY_TRIGGER, VIEW_IN_MAPS_ACTION);
-        deps.uiActions.attachAction(COUNTRY_TRIGGER, TRAVEL_GUIDE_ACTION);
-        deps.uiActions.attachAction(COUNTRY_TRIGGER, SHOWCASE_PLUGGABILITY_ACTION);
-        deps.uiActions.attachAction(USER_TRIGGER, PHONE_USER_ACTION);
-        deps.uiActions.attachAction(USER_TRIGGER, EDIT_USER_ACTION);
-        deps.uiActions.attachAction(USER_TRIGGER, SHOWCASE_PLUGGABILITY_ACTION);
-
         const { renderApp } = await import('./app');
         return renderApp(
           { uiActionsApi: depsStart.uiActions, openModal: coreStart.overlays.openModal },
@@ -99,6 +94,12 @@ export class UiActionsExplorerPlugin implements Plugin<void, void, {}, StartDeps
     });
   }
 
-  public start() {}
+  public start(core: CoreStart, deps: StartDeps) {
+    deps.uiActions.registerAction(createPhoneUserAction(deps.uiActions));
+    deps.uiActions.registerAction(createEditUserAction(core.overlays.openModal));
+    deps.uiActions.attachAction(USER_TRIGGER, PHONE_USER_ACTION);
+    deps.uiActions.attachAction(USER_TRIGGER, EDIT_USER_ACTION);
+  }
+
   public stop() {}
 }
