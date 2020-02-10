@@ -23,8 +23,6 @@ import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
 
 import { AppMountContext, LegacyCoreStart } from 'kibana/public';
 import {
-  AppStateProvider,
-  AppState,
   configureAppAngularModule,
   confirmModalFactory,
   createTopNavDirective,
@@ -124,12 +122,6 @@ function createLocalStateModule() {
       'app/visualize/Promise',
       'app/visualize/PersistedState',
     ])
-    .factory('AppState', function(Private: IPrivate) {
-      return Private(AppStateProvider);
-    })
-    .service('getAppState', function(Private: IPrivate) {
-      return Private<AppState>(AppStateProvider).getAppState;
-    })
     .service('globalState', function(Private: IPrivate) {
       return Private(GlobalStateProvider);
     });

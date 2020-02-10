@@ -17,4 +17,5 @@
  * under the License.
  */
 
-export { migrateAppState } from './migrate_app_state';
+export { useVisualizeAppState } from './visualize_app_state';
+export { makeStateful } from './make_stateful';

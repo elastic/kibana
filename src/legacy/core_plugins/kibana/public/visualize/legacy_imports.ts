@@ -29,14 +29,11 @@ import chrome from 'ui/chrome';
 export const legacyChrome = chrome;
 export { Chrome } from 'ui/chrome';
 
-// @ts-ignore
-export { AppState, AppStateProvider } from 'ui/state_management/app_state';
 export { State } from 'ui/state_management/state';
 // @ts-ignore
 export { GlobalStateProvider } from 'ui/state_management/global_state';
 // @ts-ignore
 export { StateManagementConfigProvider } from 'ui/state_management/config_provider';
-export { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
 export { PersistedState } from 'ui/persisted_state';
 
 export { npSetup, npStart } from 'ui/new_platform';
