@@ -60,6 +60,7 @@ describe('PageHeaderComponent', () => {
     const component = shallowWithRouter(<PageHeaderComponent setBreadcrumbs={jest.fn()} />);
     expect(component).toMatchSnapshot();
   });
+
   it('renders expected elements for valid props', () => {
     const component = renderWithRouter(<PageHeaderComponent setBreadcrumbs={jest.fn()} />);
     expect(component).toMatchSnapshot();
