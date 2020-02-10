@@ -96,7 +96,7 @@ Each alert type should be defined as `AlertTypeModel` object with the next prope
 ```
 |Property|Description|
 |---|---|
-|id|Alert type id|
+|id|Alert type id. Should be the same as on the server side.|
 |name|Name of alert type, that will be displayed on the select card in UI|
 |iconClass|Icon of alert type, that will be displayed on the select card in UI|
 |validate|Validation function for alert params|
@@ -814,8 +814,34 @@ export function getActionType(): ActionTypeModel {
 and action params form available in Create Alert form:
 ![PagerDuty action form](https://i.imgur.com/xxXmhMK.png)
 
+## Action type model definition
+
+Each action type should be defined as `ActionTypeModel` object with the next properties:
+```
+  id: string;
+  iconClass: string;
+  selectMessage: string;
+  actionTypeTitle?: string;
+  validateConnector: (connector: any) => ValidationResult;
+  validateParams: (actionParams: any) => ValidationResult;
+  actionConnectorFields: React.FunctionComponent<any> | null;
+  actionParamsFields: any;
+```
+|Property|Description|
+|---|---|
+|id|Action type id. Should be the same as on server side.|
+|iconClass|Icon of action type, that will be displayed on the select card in UI.|
+|selectMessage|Short description of action type responsibility, that will be displayed on the select card in UI.|
+|validateConnector|Validation function for action connector.|
+|validateParams|Validation function for action params.|
+|actionConnectorFields|React functional component for building UI of current action type connector.|
+|actionParamsFields|React functional component for building UI of current action type params. Displayed as a part of Create Alert flyout.|
+
+
 
 ## Create and register new action type UI
+
+Before starting the UI implementation, the proper [server side registration](https://github.com/elastic/kibana/tree/master/x-pack/plugins/actions#kibana-actions-configuration) should be done first.
 
 Action type UI is expected to be defined as `ActionTypeModel` object.
 
@@ -938,7 +964,7 @@ const ExampleConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps
 };
 ```
 
-3. Define action type params fields using the property of `AlertTypeModel` `actionParamsFields`: 
+3. Define action type params fields using the property of `ActionTypeModel` `actionParamsFields`: 
 ```
 import React, { Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
@@ -992,8 +1018,18 @@ import { getActionType as getExampledActionType } from './example';
 actionTypeRegistry.register(getExampledActionType());
 ```
 
-After this four steps new `Example Action Type` is available in UI of Create connector and Create Alert flyout:
+After this four steps new `Example Action Type` is available in UI of Create connector:
 ![Example Action Type is in the select cards list](https://i.imgur.com/PTYdBos.png)
 
 Click on select cart for `Example Action Type` will open connector form that was created in step 2:
 ![Example Action Type connector](https://i.imgur.com/KdxAXAs.png)
+
+Example Action Type is in the select cards list of Create Alert flyout:
+![Example Action Type is in the select cards list of Create Alert flyout](https://i.imgur.com/CSRBkFe.png)
+
+Click on select cart for `Example Action Type` will open action type Add Action form 
+with possibility to select an existing connector of this type:
+![Example Action Type with existing connectors list](https://i.imgur.com/8FA3NAW.png)
+
+or create a new connector:
+![Example Action Type with empty connectors list](https://i.imgur.com/EamA9Xv.png)
