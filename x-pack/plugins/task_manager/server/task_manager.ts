@@ -334,6 +334,17 @@ export class TaskManager {
   }
 
   /**
+   * Get the current state of a specified task.
+   *
+   * @param {string} id
+   * @returns {Promise<RemoveResult>}
+   */
+  public async get(id: string): Promise<ConcreteTaskInstance> {
+    await this.waitUntilStarted();
+    return this.store.get(id);
+  }
+
+  /**
    * Removes the specified task from the index.
    *
    * @param {string} id
