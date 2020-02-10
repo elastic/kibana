@@ -246,7 +246,7 @@ export class Plugin {
     jobValidationRoutes(extendedRouteInitializationDeps);
     notificationRoutes(routeInitializationDeps);
     systemRoutes(extendedRouteInitializationDeps);
-    dataRecognizer(routeInitializationDeps);
+    dataRecognizer(extendedRouteInitializationDeps);
     dataVisualizerRoutes(routeInitializationDeps);
     calendars(routeInitializationDeps);
     fieldsService(routeInitializationDeps);

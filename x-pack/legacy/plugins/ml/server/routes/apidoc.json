@@ -35,7 +35,7 @@
     "GetCategories",
     "FileDataVisualizer",
     "AnalyzeFile",
-    "ImportFile"
+    "ImportFile",
     "ResultsService",
     "GetAnomaliesTableData",
     "GetCategoryDefinition",
