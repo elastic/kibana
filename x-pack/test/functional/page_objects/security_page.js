@@ -235,7 +235,7 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
           username: await usernameElement.getVisibleText(),
           fullname: await fullnameElement.getVisibleText(),
           email: await emailElement.getVisibleText(),
-          roles: (await rolesElement.getVisibleText()).split(',').map(role => role.trim()),
+          roles: (await rolesElement.getVisibleText()).split('\n').map(role => role.trim()),
           reserved: isUserReserved,
         };
       });
