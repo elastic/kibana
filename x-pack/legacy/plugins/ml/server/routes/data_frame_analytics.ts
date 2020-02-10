@@ -156,7 +156,7 @@ export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }: RouteIniti
         params: schema.object({
           analyticsId: schema.string(),
         }),
-        body: schema.object({ ...dataAnalyticsJobConfigSchema }),
+        body: schema.object(dataAnalyticsJobConfigSchema),
       },
     },
     licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
