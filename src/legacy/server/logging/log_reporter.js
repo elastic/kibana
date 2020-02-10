@@ -19,7 +19,6 @@
 
 import { Squeeze } from 'good-squeeze';
 import { createWriteStream as writeStr } from 'fs';
-import { PassThrough } from 'stream';
 
 import LogFormatJson from './log_format_json';
 import LogFormatString from './log_format_string';
@@ -30,10 +29,8 @@ import { LogInterceptor } from './log_interceptor';
 // default limit of 10 for process.stdout which starts a long warning/error
 // thrown every time we start the server.
 // In order to keep using the legacy logger until we remove it I'm just adding
-// a new hard limit here in a PassThrough stream.
-const stdoutProxy = new PassThrough();
-stdoutProxy.pipe(process.stdout);
-stdoutProxy.setMaxListeners(15);
+// a new hard limit here.
+process.stdout.setMaxListeners(15);
 
 export function getLoggerStream({ events, config }) {
   const squeeze = new Squeeze(events);
@@ -42,7 +39,7 @@ export function getLoggerStream({ events, config }) {
 
   let dest;
   if (config.dest === 'stdout') {
-    dest = stdoutProxy;
+    dest = process.stdout;
   } else {
     dest = writeStr(config.dest, {
       flags: 'a',
