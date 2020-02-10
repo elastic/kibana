@@ -73,6 +73,15 @@ export function dataRecognizer({
   elasticsearchPlugin,
   savedObjects,
 }: RouteInitialization) {
+  /**
+   * @apiGroup DataRecognizer
+   *
+   * @api {get} /api/ml/modules/recognize/:indexPatternTitle Recognize index pattern
+   * @apiName RecognizeIndex
+   * @apiDescription Returns the list of modules that matching the index pattern.
+   *
+   * @apiParam {String} indexPatternTitle Index pattern title.
+   */
   router.get(
     {
       path: '/api/ml/modules/recognize/{indexPatternTitle}',
@@ -94,6 +103,15 @@ export function dataRecognizer({
     })
   );
 
+  /**
+   * @apiGroup DataRecognizer
+   *
+   * @api {get} /api/ml/modules/get_module/:moduleId Get module
+   * @apiName GetModule
+   * @apiDescription Returns module by id.
+   *
+   * @apiParam {String} [moduleId] Module id
+   */
   router.get(
     {
       path: '/api/ml/modules/get_module/{moduleId?}',
@@ -120,6 +138,15 @@ export function dataRecognizer({
     })
   );
 
+  /**
+   * @apiGroup DataRecognizer
+   *
+   * @api {post} /api/ml/modules/setup/:moduleId Setup module
+   * @apiName SetupModule
+   * @apiDescription Created module items.
+   *
+   * @apiParam {String} moduleId Module id
+   */
   router.post(
     {
       path: '/api/ml/modules/setup/{moduleId}',
@@ -181,6 +208,15 @@ export function dataRecognizer({
     })
   );
 
+  /**
+   * @apiGroup DataRecognizer
+   *
+   * @api {post} /api/ml/modules/jobs_exist/:moduleId Check if module jobs exist
+   * @apiName CheckExistingModuleJobs
+   * @apiDescription Checks if the jobs in the module have been created.
+   *
+   * @apiParam {String} moduleId Module id
+   */
   router.get(
     {
       path: '/api/ml/modules/jobs_exist/{moduleId}',
