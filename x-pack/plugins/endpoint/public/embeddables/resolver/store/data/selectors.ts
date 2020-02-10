@@ -27,7 +27,7 @@ import {
 } from '../../models/indexed_process_tree';
 
 const unit = 100;
-const distanceBetweenNodesInUnits = 1;
+const distanceBetweenNodesInUnits = 2;
 
 /**
  * An isometric projection is a method for representing three dimensional objects in 2 dimensions.
