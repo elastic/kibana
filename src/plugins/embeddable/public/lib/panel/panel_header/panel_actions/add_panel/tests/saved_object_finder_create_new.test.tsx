@@ -28,8 +28,12 @@ describe('SavedObjectFinderCreateNew', () => {
     expect(wrapper.find(EuiPopover).length).toEqual(1);
     const menuPanel = wrapper.find(EuiContextMenuPanel);
     expect(menuPanel.length).toEqual(1);
-    // @ts-ignore
-    expect(menuPanel.prop('items').length).toEqual(0);
+    const panelItems = menuPanel.prop('items');
+    if (panelItems) {
+      expect(panelItems.length).toEqual(0);
+    } else {
+      fail('Expect paneltems to be defined');
+    }
   });
 
   test('renders correctly with items', () => {
@@ -46,7 +50,6 @@ describe('SavedObjectFinderCreateNew', () => {
     }
 
     const wrapper = shallow(<SavedObjectFinderCreateNew menuItems={items} />);
-    expect(wrapper).toMatchSnapshot();
     expect(wrapper.find(EuiPopover).length).toEqual(1);
     const menuPanel = wrapper.find(EuiContextMenuPanel);
     expect(menuPanel.length).toEqual(1);

@@ -54,8 +54,6 @@ export { buildVislibDimensions } from '../../../visualizations/public';
 export { getRequestInspectorStats, getResponseInspectorStats } from '../../../data/public';
 // @ts-ignore
 export { intervalOptions } from 'ui/agg_types';
-// @ts-ignore
-export { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
 export { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
 export { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 // @ts-ignore

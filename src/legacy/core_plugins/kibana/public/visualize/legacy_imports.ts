@@ -40,9 +40,6 @@ export { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
 export { PersistedState } from 'ui/persisted_state';
 
 export { npSetup, npStart } from 'ui/new_platform';
-export { IPrivate } from 'ui/private';
-// @ts-ignore
-export { PrivateProvider } from 'ui/private/private';
 
 export { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 // @ts-ignore

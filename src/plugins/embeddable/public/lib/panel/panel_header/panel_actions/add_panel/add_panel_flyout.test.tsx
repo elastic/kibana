@@ -31,21 +31,17 @@ import { mountWithIntl as mount } from 'test_utils/enzyme_helpers';
 import { ReactWrapper } from 'enzyme';
 // eslint-disable-next-line
 import { coreMock } from '../../../../../../../../core/public/mocks';
-<<<<<<< HEAD
 // @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
 
-// @ts-ignore
-function DummySavedObjectFinder(props) {
+function DummySavedObjectFinder(props: { children: React.ReactNode }) {
   return (
     <div>
       <div>Hello World</div>
       {props.children}
     </div>
-  );
+  ) as JSX.Element;
 }
-=======
->>>>>>> [Add panel flyout] Moving create new to the top of SavedObjectFinder
 
 test('createNewEmbeddable() add embeddable to container', async () => {
   const core = coreMock.createStart();
@@ -91,7 +87,6 @@ test('createNewEmbeddable() add embeddable to container', async () => {
     lastName: 'bar',
   });
 });
-<<<<<<< HEAD
 
 test('selecting embeddable in "Create new ..." list calls createNewEmbeddable()', async () => {
   const core = coreMock.createStart();
@@ -134,5 +129,3 @@ test('selecting embeddable in "Create new ..." list calls createNewEmbeddable()'
 
   expect(spy).toHaveBeenCalledTimes(1);
 });
-=======
->>>>>>> [Add panel flyout] Moving create new to the top of SavedObjectFinder

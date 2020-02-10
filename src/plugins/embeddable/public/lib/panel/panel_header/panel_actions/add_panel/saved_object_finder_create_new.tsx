@@ -54,7 +54,7 @@ export function SavedObjectFinderCreateNew({ menuItems }: Props) {
       isOpen={isCreateMenuOpen}
       closePopover={closeCreateMenu}
       panelPaddingSize="none"
-      anchorPosition="upLeft"
+      anchorPosition="downRight"
     >
       <EuiContextMenuPanel items={menuItems} />
     </EuiPopover>
