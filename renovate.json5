@@ -188,6 +188,14 @@
         ],
       },
       {
+        groupSlug: 'cypress-cucumber-preprocessor',
+        groupName: 'cypress-cucumber-preprocessor related packages',
+        packageNames: [
+          'cypress-cucumber-preprocessor',
+          '@types/cypress-cucumber-preprocessor',
+        ],
+      },
+      {
         groupSlug: 'cytoscape',
         groupName: 'cytoscape related packages',
         packageNames: [
