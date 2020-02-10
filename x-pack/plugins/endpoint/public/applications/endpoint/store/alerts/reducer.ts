@@ -11,6 +11,8 @@ import { AppAction } from '../action';
 const initialState = (): AlertListState => {
   return {
     alerts: [],
+    next: '',
+    prev: '',
     request_page_size: 10,
     request_page_index: 0,
     result_from_index: 0,

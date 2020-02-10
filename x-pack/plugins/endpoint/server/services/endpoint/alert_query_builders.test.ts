@@ -29,6 +29,11 @@ describe('test query builder', () => {
                 order: 'desc',
               },
             },
+            {
+              'event.id': {
+                order: 'desc',
+              },
+            },
           ],
           track_total_hits: 10000,
         },
@@ -59,6 +64,11 @@ describe('test query builder', () => {
           sort: [
             {
               '@timestamp': {
+                order: 'desc',
+              },
+            },
+            {
+              'event.id': {
                 order: 'desc',
               },
             },

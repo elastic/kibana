@@ -18,6 +18,7 @@ export const EndpointConfigSchema = schema.object({
   alertResultListDefaultFirstPageIndex: schema.number({ defaultValue: 0 }),
   alertResultListDefaultPageSize: schema.number({ defaultValue: 10 }),
   alertResultListDefaultFilters: schema.string({ defaultValue: '' }),
+  alertResultListDefaultQuery: schema.string({ defaultValue: '' }),
   alertResultListDefaultSort: schema.string({ defaultValue: '@timestamp' }),
   alertResultListDefaultOrder: schema.string({ defaultValue: 'desc' }),
 });

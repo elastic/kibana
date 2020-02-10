@@ -52,6 +52,9 @@ export interface AlertResultList {
    * The offset of the requested page, starting at 0.
    */
   result_from_index: number | undefined;
+
+  next: string;
+  prev: string;
 }
 
 export interface EndpointResultList {
@@ -72,6 +75,7 @@ export interface AlertData {
     version: string;
   };
   event: {
+    id: number;
     action: string;
   };
   file_classification: {
@@ -85,6 +89,9 @@ export interface AlertData {
     os: {
       name: string;
     };
+  };
+  process: {
+    pid: number;
   };
   thread: {};
 }
