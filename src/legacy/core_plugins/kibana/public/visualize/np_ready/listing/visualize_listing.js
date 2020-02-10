@@ -32,7 +32,7 @@ export function initListingDirective(app) {
   );
 }
 
-export function VisualizeListingController($injector, createNewVis) {
+export function VisualizeListingController($injector, $scope, createNewVis) {
   const {
     addBasePath,
     chrome,
@@ -59,7 +59,7 @@ export function VisualizeListingController($injector, createNewVis) {
   this.savedObjects = savedObjects;
 
   this.createNewVis = () => {
-    visualizations.showNewVisModal();
+    this.closeNewVisModal = visualizations.showNewVisModal();
   };
 
   this.editItem = ({ editUrl }) => {
@@ -73,7 +73,7 @@ export function VisualizeListingController($injector, createNewVis) {
 
   if (createNewVis) {
     // In case the user navigated to the page via the /visualize/new URL we start the dialog immediately
-    visualizations.showNewVisModal({
+    this.closeNewVisModal = visualizations.showNewVisModal({
       onClose: () => {
         // In case the user came via a URL to this page, change the URL to the regular landing page URL after closing the modal
         kbnUrl.changePath(VisualizeConstants.LANDING_PAGE_PATH);
@@ -124,4 +124,10 @@ export function VisualizeListingController($injector, createNewVis) {
   this.listingLimit = uiSettings.get('savedObjects:listingLimit');
 
   addHelpMenuToAppChrome(chrome, docLinks);
+
+  $scope.$on('$destroy', () => {
+    if (this.closeNewVisModal) {
+      this.closeNewVisModal();
+    }
+  });
 }
