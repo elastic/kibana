@@ -15,10 +15,12 @@ export {
   RoleIndexPrivilege,
   RoleKibanaPrivilege,
   copyRole,
-  isReadOnlyRole,
-  isReservedRole,
+  isRoleDeprecated,
+  isRoleReadOnly,
+  isRoleReserved,
   isRoleEnabled,
   prepareRoleClone,
+  getExtendedRoleDeprecationNotice,
 } from './role';
 export { KibanaPrivileges } from './kibana_privileges';
 export {

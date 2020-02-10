@@ -127,7 +127,7 @@ export class SecurityPlugin
               <AccountManagementPage
                 authc={this.authc}
                 notifications={core.notifications}
-                apiClient={new UserAPIClient(core.http)}
+                userAPIClient={new UserAPIClient(core.http)}
               />
             </core.i18n.Context>
           ),

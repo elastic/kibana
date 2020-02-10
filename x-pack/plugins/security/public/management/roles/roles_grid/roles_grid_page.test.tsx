@@ -14,6 +14,7 @@ import { RolesGridPage } from './roles_grid_page';
 
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { rolesAPIClientMock } from '../index.mock';
+import { ReservedBadge, DisabledBadge } from '../../badges';
 
 const mock403 = () => ({ body: { statusCode: 403 } });
 
@@ -76,8 +77,24 @@ describe('<RolesGridPage />', () => {
     });
 
     expect(wrapper.find(PermissionDenied)).toHaveLength(0);
-    expect(wrapper.find('EuiIcon[data-test-subj="reservedRole"]')).toHaveLength(1);
-    expect(wrapper.find('EuiCheckbox[title="Role is reserved"]')).toHaveLength(1);
+    expect(wrapper.find(ReservedBadge)).toHaveLength(1);
+  });
+
+  it(`renders disabled roles as such`, async () => {
+    const wrapper = mountWithIntl(
+      <RolesGridPage
+        rolesAPIClient={apiClientMock}
+        notifications={coreMock.createStart().notifications}
+      />
+    );
+    const initialIconCount = wrapper.find(EuiIcon).length;
+
+    await waitForRender(wrapper, updatedWrapper => {
+      return updatedWrapper.find(EuiIcon).length > initialIconCount;
+    });
+
+    expect(wrapper.find(PermissionDenied)).toHaveLength(0);
+    expect(wrapper.find(DisabledBadge)).toHaveLength(1);
   });
 
   it('renders permission denied if required', async () => {

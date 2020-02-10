@@ -88,7 +88,7 @@ describe('EditUserPage', () => {
     const wrapper = mountWithIntl(
       <EditUserPage
         username={'reserved_user'}
-        apiClient={apiClient}
+        userAPIClient={apiClient}
         rolesAPIClient={rolesAPIClient}
         authc={securitySetup.authc}
         notifications={coreMock.createStart().notifications}
@@ -109,7 +109,7 @@ describe('EditUserPage', () => {
     const wrapper = mountWithIntl(
       <EditUserPage
         username={''}
-        apiClient={apiClient}
+        userAPIClient={apiClient}
         rolesAPIClient={rolesAPIClient}
         authc={securitySetup.authc}
         notifications={coreMock.createStart().notifications}
@@ -130,7 +130,7 @@ describe('EditUserPage', () => {
     const wrapper = mountWithIntl(
       <EditUserPage
         username={'existing_user'}
-        apiClient={apiClient}
+        userAPIClient={apiClient}
         rolesAPIClient={rolesAPIClient}
         authc={securitySetup.authc}
         notifications={coreMock.createStart().notifications}

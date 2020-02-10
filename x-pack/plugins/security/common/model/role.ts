@@ -5,6 +5,7 @@
  */
 
 import { cloneDeep } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import { FeaturesPrivileges } from './features_privileges';
 
 export interface RoleIndexPrivilege {
@@ -57,8 +58,40 @@ export function isRoleEnabled(role: Partial<Role>) {
  *
  * @param role Role as returned by roles API
  */
-export function isReservedRole(role: Partial<Role>) {
+export function isRoleReserved(role: Partial<Role>) {
   return (role.metadata?._reserved as boolean) ?? false;
+}
+
+/**
+ * Returns whether given role is deprecated or not.
+ *
+ * @param {role} the Role as returned by roles API
+ */
+export function isRoleDeprecated(role: Partial<Role>) {
+  return role.metadata?._deprecated ?? false;
+}
+
+/**
+ * Returns the reason this role is deprecated.
+ *
+ * @param role the Role as returned by roles API
+ */
+export function getRoleDeprecatedReason(role: Partial<Role>) {
+  return role.metadata?._deprecated_reason ?? '';
+}
+
+/**
+ * Returns the extended deprecation notice for the provided role.
+ *
+ * @param role the Role as returned by roles API
+ */
+export function getExtendedRoleDeprecationNotice(role: Partial<Role>) {
+  return i18n.translate('xpack.security.common.extendedRoleDeprecationNotice', {
+    defaultMessage: `This role is deprecated and should no longer be assigned. {reason}`,
+    values: {
+      reason: getRoleDeprecatedReason(role),
+    },
+  });
 }
 
 /**
@@ -66,8 +99,8 @@ export function isReservedRole(role: Partial<Role>) {
  *
  * @param role the Role as returned by roles API
  */
-export function isReadOnlyRole(role: Partial<Role>): boolean {
-  return isReservedRole(role) || (role._transform_error?.length ?? 0) > 0;
+export function isRoleReadOnly(role: Partial<Role>): boolean {
+  return isRoleReserved(role) || (role._transform_error?.length ?? 0) > 0;
 }
 
 /**
