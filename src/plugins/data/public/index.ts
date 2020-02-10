@@ -104,7 +104,6 @@ export {
   FieldFormatConfig,
   FieldFormatId,
 } from '../common';
-export { autocomplete } from './autocomplete';
 
 export {
   indexPatterns,
@@ -114,6 +113,15 @@ export {
   TypeMeta as IndexPatternTypeMeta,
   AggregationRestrictions as IndexPatternAggRestrictions,
 } from './index_patterns';
+
+export {
+  QuerySuggestion,
+  QuerySuggestionTypes,
+  QuerySuggestionGetFn,
+  QuerySuggestionGetFnArgs,
+  QuerySuggestionBasic,
+  QuerySuggestionField,
+} from './autocomplete';
 
 export * from './search';
 export * from './query';
