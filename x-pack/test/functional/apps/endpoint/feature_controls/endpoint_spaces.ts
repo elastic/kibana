@@ -41,14 +41,13 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await testSubjects.existOrFail('welcomeTitle');
       });
 
-      // refactor this test
-      it.skip(`endpoint management shows 'Manage Endpoints'`, async () => {
+      it(`endpoint management shows 'Manage Endpoints'`, async () => {
         await pageObjects.common.navigateToUrlWithBrowserHistory('endpoint', '/management', {
           basePath: '/s/custom_space',
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await testSubjects.existOrFail('endpointManagement');
+        await testSubjects.existOrFail('managementViewTitle');
       });
     });
 

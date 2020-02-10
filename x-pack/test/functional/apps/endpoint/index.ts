@@ -11,5 +11,6 @@ export default function({ loadTestFile }: FtrProviderContext) {
 
     loadTestFile(require.resolve('./feature_controls'));
     loadTestFile(require.resolve('./landing_page'));
+    loadTestFile(require.resolve('./management'));
   });
 }
