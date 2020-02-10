@@ -17,29 +17,27 @@ import {
   IndexPatternSavedObject,
   SavedSearchObjectAttributes,
   SearchPanel,
-  SearchRequest,
   SearchSource,
   SearchSourceQuery,
 } from '../../types';
 import {
+  SearchRequest,
   CsvResultFromSearch,
-  ESQueryConfig,
   GenerateCsvParams,
-  Filter,
-  IndexPatternField,
-  QueryFilter,
-} from '../../types';
+  JobParamsDiscoverCsv,
+} from '../../../csv/types';
+import { ESQueryConfig, Filter, IndexPatternField, QueryFilter } from '../../types';
 import { getDataSource } from './get_data_source';
 import { getFilters } from './get_filters';
-import { JobParamsDiscoverCsv } from '../../../csv/types';
 
-const getEsQueryConfig = async (config: any) => {
+const getEsQueryConfig = async (config: any): Promise<ESQueryConfig> => {
   const configs = await Promise.all([
-    config.get('query:allowLeadingWildcards'),
-    config.get('query:queryString:options'),
-    config.get('courier:ignoreFilterIfFieldNotInIndex'),
+    config.get('query:allowLeadingWildcards'), // boolean
+    config.get('query:queryString:options'), // string of json
+    config.get('courier:ignoreFilterIfFieldNotInIndex'), // boolean
   ]);
-  const [allowLeadingWildcards, queryStringOptions, ignoreFilterIfFieldNotInIndex] = configs;
+  const [allowLeadingWildcards, queryStringOptionsRaw, ignoreFilterIfFieldNotInIndex] = configs;
+  const queryStringOptions = JSON.parse(queryStringOptionsRaw);
   return { allowLeadingWildcards, queryStringOptions, ignoreFilterIfFieldNotInIndex };
 };
 
@@ -161,9 +159,12 @@ export async function generateCsvSearch(
   };
 
   const generateCsv = createGenerateCsv(logger);
+  const { content, maxSizeReached, size, csvContainsFormulas } = await generateCsv(
+    generateCsvParams
+  );
 
   return {
     type: 'CSV from Saved Search',
-    result: await generateCsv(generateCsvParams),
+    result: { content, maxSizeReached, size, csvContainsFormulas },
   };
 }

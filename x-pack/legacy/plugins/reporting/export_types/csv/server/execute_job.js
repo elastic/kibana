@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CSV_JOB_TYPE, PLUGIN_ID } from '../../../common/constants';
-import { cryptoFactory, oncePerServer, LevelLogger } from '../../../server/lib';
-import { createGenerateCsv } from './lib/generate_csv';
-import { fieldFormatMapFactory } from './lib/field_format_map';
 import { i18n } from '@kbn/i18n';
+import { CSV_JOB_TYPE, PLUGIN_ID } from '../../../common/constants';
+import { cryptoFactory, LevelLogger, oncePerServer } from '../../../server/lib';
+import { GenerateCsvParams } from '../types.d';
+import { fieldFormatMapFactory } from './lib/field_format_map';
+import { createGenerateCsv } from './lib/generate_csv';
 
 function executeJobFn(server) {
   const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
@@ -90,8 +91,7 @@ function executeJobFn(server) {
       })(),
     ]);
 
-    const generateCsv = createGenerateCsv(jobLogger);
-    const { content, maxSizeReached, size, csvContainsFormulas } = await generateCsv({
+    const generateCsvParams: GenerateCsvParams = {
       searchRequest,
       fields,
       metaFields,
@@ -105,7 +105,12 @@ function executeJobFn(server) {
         maxSizeBytes: config.get('xpack.reporting.csv.maxSizeBytes'),
         scroll: config.get('xpack.reporting.csv.scroll'),
       },
-    });
+    };
+
+    const generateCsv = createGenerateCsv(jobLogger);
+    const { content, maxSizeReached, size, csvContainsFormulas } = await generateCsv(
+      generateCsvParams
+    );
 
     return {
       content_type: 'text/csv',
