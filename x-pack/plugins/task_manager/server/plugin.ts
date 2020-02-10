@@ -21,7 +21,7 @@ export type TaskManagerSetupContract = {
 
 export type TaskManagerStartContract = Pick<
   TaskManager,
-  'fetch' | 'remove' | 'schedule' | 'runNow' | 'ensureScheduled'
+  'fetch' | 'get' | 'remove' | 'schedule' | 'runNow' | 'ensureScheduled'
 >;
 
 export class TaskManagerPlugin
@@ -69,6 +69,7 @@ export class TaskManagerPlugin
   public start(): TaskManagerStartContract {
     return {
       fetch: (...args) => this.taskManager.then(tm => tm.fetch(...args)),
+      get: (...args) => this.taskManager.then(tm => tm.get(...args)),
       remove: (...args) => this.taskManager.then(tm => tm.remove(...args)),
       schedule: (...args) => this.taskManager.then(tm => tm.schedule(...args)),
       runNow: (...args) => this.taskManager.then(tm => tm.runNow(...args)),
