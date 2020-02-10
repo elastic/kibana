@@ -43,6 +43,7 @@ import {
   SavedObjectKibanaServicesWithVisualizations,
 } from '../../saved_visualizations';
 import { SavedVisualizations } from '../../../../kibana/public/visualize/np_ready/types';
+import { showNewVisModal } from './wizard';
 /**
  * Interface for this plugin's returned setup/start contracts.
  *
@@ -55,6 +56,7 @@ export interface VisualizationsSetup {
 export interface VisualizationsStart {
   types: TypesStart;
   getSavedVisualizationsLoader: () => SavedVisualizations;
+  showNewVisModal: typeof showNewVisModal;
 }
 
 export interface VisualizationsSetupDeps {
@@ -92,7 +94,7 @@ export class VisualizationsPlugin
   public setup(
     core: CoreSetup,
     { expressions, embeddable, usageCollection }: VisualizationsSetupDeps
-  ) {
+  ): VisualizationsSetup {
     setUISettings(core.uiSettings);
     setUsageCollector(usageCollection);
 
@@ -107,7 +109,7 @@ export class VisualizationsPlugin
     };
   }
 
-  public start(core: CoreStart, { data }: VisualizationsStartDeps) {
+  public start(core: CoreStart, { data }: VisualizationsStartDeps): VisualizationsStart {
     const types = this.types.start();
     setI18n(core.i18n);
     setTypes(types);
@@ -128,6 +130,7 @@ export class VisualizationsPlugin
     return {
       types,
       getSavedVisualizationsLoader: () => this.getSavedVisualizationsLoader(),
+      showNewVisModal,
     };
   }
 
