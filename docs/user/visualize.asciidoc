@@ -51,7 +51,7 @@ data sets.
 
 <<heatmap,Heat map>>:: Display shaded cells within a matrix.
 
-* <<for-dashboard,Dashboard tools>>*
+* *<<for-dashboard,Dashboard tools>>*
 [horizontal]
 Controls:: Adds interactive inputs to a Dashboard.
 
