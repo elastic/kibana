@@ -29,7 +29,6 @@ import { ContactCardEmbeddable } from '../../../../test_samples/embeddables/cont
 import { ContainerInput } from '../../../../containers';
 import { mountWithIntl as mount } from 'test_utils/enzyme_helpers';
 import { ReactWrapper } from 'enzyme';
-// eslint-disable-next-line
 import { coreMock } from '../../../../../../../../core/public/mocks';
 // @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
