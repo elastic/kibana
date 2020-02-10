@@ -18,6 +18,7 @@
  */
 
 import { TimeCache } from './time_cache';
+jest.mock('../services');
 
 describe(`TimeCache`, () => {
   class FauxTimefilter {
