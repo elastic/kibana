@@ -23,18 +23,70 @@ export type ImmutableSet<T> = ReadonlySet<Immutable<T>>;
 export type ImmutableObject<T> = { readonly [K in keyof T]: Immutable<T[K]> };
 
 export class EndpointAppConstants {
+  static ALERT_INDEX_NAME = 'my-index';
   static ENDPOINT_INDEX_NAME = 'endpoint-agent*';
 }
 
-export interface EndpointResultList {
-  // the endpoint restricted by the page size
-  endpoints: EndpointMetadata[];
-  // the total number of unique endpoints in the index
+export interface AlertResultList {
+  /**
+   * The alerts restricted by page size.
+   */
+  alerts: AlertData[];
+
+  /**
+   * The total number of alerts on the page.
+   */
   total: number;
-  // the page size requested
+
+  /**
+   * The size of the requested page.
+   */
   request_page_size: number;
-  // the index requested
+
+  /**
+   * The index of the requested page, starting at 0.
+   */
   request_page_index: number;
+
+  /**
+   * The offset of the requested page, starting at 0.
+   */
+  result_from_index: number;
+}
+
+export interface EndpointResultList {
+  /* the endpoints restricted by the page size */
+  endpoints: EndpointMetadata[];
+  /* the total number of unique endpoints in the index */
+  total: number;
+  /* the page size requested */
+  request_page_size: number;
+  /* the page index requested */
+  request_page_index: number;
+}
+
+export interface AlertData {
+  '@timestamp': Date;
+  agent: {
+    id: string;
+    version: string;
+  };
+  event: {
+    action: string;
+  };
+  file_classification: {
+    malware_classification: {
+      score: number;
+    };
+  };
+  host: {
+    hostname: string;
+    ip: string;
+    os: {
+      name: string;
+    };
+  };
+  thread: {};
 }
 
 export interface EndpointMetadata {
@@ -59,35 +111,6 @@ export interface EndpointMetadata {
       name: string;
       full: string;
       version: string;
-    };
-  };
-}
-
-export interface AlertData {
-  value: {
-    source: {
-      endgame: {
-        data: {
-          file_operation: string;
-          malware_classification: {
-            score: number;
-          };
-        };
-        metadata: {
-          key: string;
-        };
-        timestamp_utc: Date;
-      };
-      labels: {
-        endpoint_id: string;
-      };
-      host: {
-        hostname: string;
-        ip: string;
-        os: {
-          name: string;
-        };
-      };
     };
   };
 }

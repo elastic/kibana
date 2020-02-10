@@ -1,13 +1,10 @@
 {
-  "description": "This signal detects network events that may indicate the use of RPC traffic\nto the Internet. RPC is commonly used by system administrators to remotely\ncontrol a system for maintenance or to use shared resources. It should almost\nnever be directly exposed to the Internet, as it is frequently targeted and\nexploited by threat actors as an initial access or back-door vector.\n",
+  "description": "This rule detects network events that may indicate the use of RPC traffic\nto the Internet. RPC is commonly used by system administrators to remotely\ncontrol a system for maintenance or to use shared resources. It should almost\nnever be directly exposed to the Internet, as it is frequently targeted and\nexploited by threat actors as an initial access or back-door vector.\n",
   "index": [
-    "auditbeat-*",
-    "endgame-*",
-    "filebeat-*",
-    "packetbeat-*",
-    "winlogbeat-*"
+    "filebeat-*"
   ],
   "language": "kuery",
+  "max_signals": 100,
   "name": "RPC (Remote Procedure Call) to the Internet",
   "query": "network.transport: tcp and destination.port: 135 and (\n    network.direction: outbound or (\n        source.ip: (10.0.0.0/8 or 172.16.0.0/12 or 192.168.0.0/16) and\n        not destination.ip: (10.0.0.0/8 or 172.16.0.0/12 or 192.168.0.0/16)\n    )\n)\n",
   "risk_score": 73,
@@ -15,7 +12,7 @@
   "severity": "high",
   "tags": [
     "Elastic",
-    "network"
+    "Network"
   ],
   "threat": [
     {
@@ -35,5 +32,5 @@
     }
   ],
   "type": "query",
-  "version": 1
+  "version": 2
 }
