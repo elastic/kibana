@@ -5,6 +5,7 @@
  */
 
 import _ from 'lodash';
+import { Subscription, merge } from 'rxjs';
 import chrome from 'ui/chrome';
 import 'ui/directives/listen';
 import 'ui/directives/storage';
@@ -67,29 +68,32 @@ const app = uiModules.get(MAP_APP_PATH, []);
 app.controller(
   'GisMapController',
   ($scope, $route, kbnUrl, localStorage, AppState, globalState) => {
+    const subscriptions = new Subscription();
     const { filterManager } = npStart.plugins.data.query;
     const savedMap = $route.current.locals.map;
     $scope.screenTitle = savedMap.title;
     let unsubscribe;
     let initialLayerListConfig;
-    const $state = new AppState();
+    const $state = ($scope.state = new AppState());
     const store = createMapStore();
 
     function getAppStateFilters() {
       return _.get($state, 'filters', []);
     }
 
-    $scope.$listen(globalState, 'fetch_with_changes', diff => {
-      if (diff.includes('time') || diff.includes('filters')) {
-        onQueryChange({
-          filters: [...globalState.filters, ...getAppStateFilters()],
-          time: globalState.time,
+    subscriptions.add(timefilter.getRefreshIntervalUpdate$().subscribe({
+      next: () => {
+        onRefreshChange({
+          isPaused: timefilter.getRefreshInterval().pause,
+          refreshInterval: timefilter.getRefreshInterval().value
         });
-      }
-      if (diff.includes('refreshInterval')) {
-        $scope.onRefreshChange({ isPaused: globalState.pause, refreshInterval: globalState.value });
-      }
-    });
+      },
+    }));
+    subscriptions.add(filterManager.getUpdates$().subscribe({
+      next: () => {
+        onQueryChange({});
+      },
+    }));
 
     $scope.$listen($state, 'fetch_with_changes', function(diff) {
       if ((diff.includes('query') || diff.includes('filters')) && $state.query) {
@@ -142,87 +146,16 @@ app.controller(
       }
     );
 
-    $scope.onQuerySaved = savedQuery => {
-      $scope.savedQuery = savedQuery;
-    };
-
-    $scope.onSavedQueryUpdated = savedQuery => {
-      $scope.savedQuery = { ...savedQuery };
-    };
-
-    $scope.onClearSavedQuery = () => {
-      delete $scope.savedQuery;
-      delete $state.savedQuery;
-      onQueryChange({
-        filters: filterManager.getGlobalFilters(),
-        query: {
-          query: '',
-          language: localStorage.get('kibana.userQueryLanguage'),
-        },
-      });
-    };
-
-    function updateStateFromSavedQuery(savedQuery) {
-      const savedQueryFilters = savedQuery.attributes.filters || [];
-      const globalFilters = filterManager.getGlobalFilters();
-      const allFilters = [...savedQueryFilters, ...globalFilters];
-
-      if (savedQuery.attributes.timefilter) {
-        if (savedQuery.attributes.timefilter.refreshInterval) {
-          $scope.onRefreshChange({
-            isPaused: savedQuery.attributes.timefilter.refreshInterval.pause,
-            refreshInterval: savedQuery.attributes.timefilter.refreshInterval.value,
-          });
-        }
-        onQueryChange({
-          filters: allFilters,
-          query: savedQuery.attributes.query,
-          time: savedQuery.attributes.timefilter,
-        });
+    $scope.updateSavedQueryId = newSavedQueryId => {
+      if (newSavedQueryId) {
+        $state.savedQuery = newSavedQueryId;
       } else {
-        onQueryChange({
-          filters: allFilters,
-          query: savedQuery.attributes.query,
-        });
+        delete $state.savedQuery;
       }
-    }
-
-    $scope.$watch('savedQuery', newSavedQuery => {
-      if (!newSavedQuery) return;
-
-      $state.savedQuery = newSavedQuery.id;
-      updateStateFromSavedQuery(newSavedQuery);
-    });
-
-    $scope.$watch(
-      () => $state.savedQuery,
-      newSavedQueryId => {
-        if (!newSavedQueryId) {
-          $scope.savedQuery = undefined;
-          return;
-        }
-        if ($scope.savedQuery && newSavedQueryId !== $scope.savedQuery.id) {
-          savedQueryService.getSavedQuery(newSavedQueryId).then(savedQuery => {
-            $scope.$evalAsync(() => {
-              $scope.savedQuery = savedQuery;
-              updateStateFromSavedQuery(savedQuery);
-            });
-          });
-        }
-      }
-    );
+      $state.save();
+    };
     /* End of Saved Queries */
     async function onQueryChange({ filters, query, time, refresh }) {
-      if (filters) {
-        filterManager.setFilters(filters); // Maps and merges filters
-        $scope.filters = filterManager.getFilters();
-      }
-      if (query) {
-        $scope.query = query;
-      }
-      if (time) {
-        $scope.time = time;
-      }
       syncAppAndGlobalState();
       dispatchSetQuery(refresh);
     }
@@ -230,7 +163,7 @@ app.controller(
     function dispatchSetQuery(refresh) {
       store.dispatch(
         setQuery({
-          filters: $scope.filters,
+          filters: filterManager.getFilters(),
           query: $scope.query,
           timeFilters: $scope.time,
           refresh,
@@ -239,19 +172,13 @@ app.controller(
     }
 
     $scope.indexPatterns = [];
-    $scope.onQuerySubmit = function({ dateRange, query }) {
+    $scope.onQuerySubmit = function({ query }) {
+      $scope.query = query;
       onQueryChange({
-        query,
-        time: dateRange,
         refresh: true,
       });
     };
-    $scope.updateFiltersAndDispatch = function(filters) {
-      onQueryChange({
-        filters,
-      });
-    };
-    $scope.onRefreshChange = function({ isPaused, refreshInterval }) {
+    const onRefreshChange = function({ isPaused, refreshInterval }) {
       $scope.refreshConfig = {
         isPaused,
         interval: refreshInterval ? refreshInterval : $scope.refreshConfig.interval,
@@ -265,7 +192,7 @@ app.controller(
       newFilters.forEach(filter => {
         filter.$state = esFilters.FilterStateStore.APP_STATE;
       });
-      $scope.updateFiltersAndDispatch([...$scope.filters, ...newFilters]);
+      filterManager.addFilters(newFilters);
     }
 
     function hasUnsavedChanges() {
@@ -403,6 +330,8 @@ app.controller(
     }
 
     $scope.$on('$destroy', () => {
+      subscriptions.unsubscribe();
+
       window.removeEventListener('beforeunload', beforeUnload);
 
       if (unsubscribe) {
@@ -483,8 +412,6 @@ app.controller(
     }
 
     // Hide angular timepicer/refresh UI from top nav
-    timefilter.disableTimeRangeSelector();
-    timefilter.disableAutoRefreshSelector();
     $scope.showDatePicker = true; // used by query-bar directive to enable timepikcer in query bar
     $scope.topNavMenu = [
       {

@@ -9,21 +9,16 @@
         show-search-bar="chrome.getVisible()"
         show-filter-bar="chrome.getVisible()"
         show-date-picker="showDatePicker"
-        show-save-query="showSaveQuery"
-        query="query"
-        saved-query="savedQuery"
-        on-query-submit="onQuerySubmit"
-        filters="filters"
-        on-filters-updated="updateFiltersAndDispatch"
         index-patterns="indexPatterns"
-        date-range-from="time.from"
-        date-range-to="time.to"
-        is-refresh-paused="refreshConfig.isPaused"
-        refresh-interval="refreshConfig.interval"
-        on-refresh-change="onRefreshChange"
-        on-saved="onQuerySaved"
-        on-saved-query-updated="onSavedQueryUpdated"
-        on-clear-saved-query="onClearSavedQuery"
+
+        query="query"
+        on-query-submit="onQuerySubmit"
+
+        show-save-query="showSaveQuery"
+        saved-query-id="state.savedQuery"
+        on-saved-query-id-change="updateSavedQueryId"
+
+        use-default-behaviors="true"
       >
       </kbn-top-nav>
     </div>
