@@ -78,13 +78,14 @@ import {
   removeQueryParam,
   unhashUrl,
 } from '../../../../../../plugins/kibana_utils/public';
+import { KibanaLegacyStart } from '../../../../../../plugins/kibana_legacy/public';
 
 export interface DashboardAppControllerDependencies extends RenderDeps {
   $scope: DashboardAppScope;
   $route: any;
   $routeParams: any;
   indexPatterns: IndexPatternsContract;
-  dashboardConfig: any;
+  dashboardConfig: KibanaLegacyStart['dashboardConfig'];
   history: History;
   kbnUrlStateStorage: IKbnUrlStateStorage;
 }

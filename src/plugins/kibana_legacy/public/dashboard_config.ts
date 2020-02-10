@@ -17,26 +17,24 @@
  * under the License.
  */
 
-import { I18nServiceType } from '@kbn/i18n/angular';
-
-export enum FeatureCatalogueCategory {
-  ADMIN = 'admin',
-  DATA = 'data',
-  OTHER = 'other',
+export interface DashboardConfig {
+  turnHideWriteControlsOn(): void;
+  getHideWriteControls(): boolean;
 }
 
-interface FeatureCatalogueObject {
-  id: string;
-  title: string;
-  description: string;
-  icon: string;
-  path: string;
-  showOnHomePage: boolean;
-  category: FeatureCatalogueCategory;
+export function getDashboardConfig(hideWriteControls: boolean): DashboardConfig {
+  let _hideWriteControls = hideWriteControls;
+
+  return {
+    /**
+     * Part of the exposed plugin API - do not remove without careful consideration.
+     * @type {boolean}
+     */
+    turnHideWriteControlsOn() {
+      _hideWriteControls = true;
+    },
+    getHideWriteControls() {
+      return _hideWriteControls;
+    },
+  };
 }
-
-type FeatureCatalogueRegistryFunction = (i18n: I18nServiceType) => FeatureCatalogueObject;
-
-export const FeatureCatalogueRegistryProvider: {
-  register: (fn: FeatureCatalogueRegistryFunction) => void;
-};

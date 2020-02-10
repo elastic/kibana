@@ -216,6 +216,10 @@ export const npStart = {
       config: {
         defaultAppId: 'home',
       },
+      dashboardConfig: {
+        turnHideWriteControlsOn: sinon.fake(),
+        getHideWriteControls: sinon.fake(),
+      },
     },
     data: {
       autocomplete: {
