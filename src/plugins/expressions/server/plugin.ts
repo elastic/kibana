@@ -60,6 +60,12 @@ export class ExpressionsServerPlugin
     plugins: ExpressionsServerSetupDependencies
   ): ExpressionsServerSetup {
     const logger = this.initializerContext.logger.get();
+    const { expressions } = this;
+    const { executor } = expressions;
+
+    executor.extendContext({
+      environment: 'server',
+    });
 
     const legacyApi = createLegacyServerInterpreterApi();
     createLegacyServerEndpoints(legacyApi, logger, core, plugins);
