@@ -19,7 +19,7 @@
 
 import * as Rx from 'rxjs';
 
-import { Bundle } from '../common';
+import { Bundle, fromAsyncGenerator } from '../common';
 
 import { OptimizerConfig } from './optimizer_config';
 import { getMtimes } from './get_mtimes';
@@ -47,7 +47,7 @@ export function getBundleCacheEvent$(
   config: OptimizerConfig,
   optimizerCacheKey: OptimizerCacheKey
 ) {
-  return new Rx.Observable<BundleCachedEvent | BundleNotCachedEvent>(subscriber => {
+  return fromAsyncGenerator(async function*() {
     // we only want to get the mtimes for files when the bundle was built
     // with our version of the optimizer and there is a cache key so filter
     // out some bundles early
@@ -56,31 +56,31 @@ export function getBundleCacheEvent$(
     for (const bundle of config.bundles) {
       const cachedOptimizerCacheKeys = bundle.cache.getOptimizerCacheKey();
       if (!cachedOptimizerCacheKeys) {
-        subscriber.next({
+        yield {
           type: 'bundle not cached',
           reason: 'missing optimizer cache key',
           bundle,
-        });
+        };
         continue;
       }
 
       const optimizerCacheKeyDiff = diffCacheKey(cachedOptimizerCacheKeys, optimizerCacheKey);
       if (optimizerCacheKeyDiff !== undefined) {
-        subscriber.next({
+        yield {
           type: 'bundle not cached',
           reason: 'optimizer cache key mismatch',
           diff: optimizerCacheKeyDiff,
           bundle,
-        });
+        };
         continue;
       }
 
       if (!bundle.cache.getCacheKeys()) {
-        subscriber.next({
+        yield {
           type: 'bundle not cached',
           reason: 'missing cache key',
           bundle,
-        });
+        };
         continue;
       }
 
@@ -88,52 +88,38 @@ export function getBundleCacheEvent$(
     }
 
     if (!eligible.length) {
-      subscriber.complete();
       return;
     }
 
-    getMtimes(
+    const mtimes = await getMtimes(
       new Set<string>(
         eligible.reduce(
           (acc: string[], bundle) => [...acc, ...(bundle.cache.getReferencedFiles() || [])],
           []
         )
       )
-    )
-      .then(mtimes => {
-        if (subscriber.closed) {
-          return;
-        }
+    );
 
-        for (const bundle of eligible) {
-          const diff = diffCacheKey(
-            bundle.cache.getCacheKeys(),
-            bundle.createCacheKey(bundle.cache.getReferencedFiles() || [], mtimes)
-          );
-
-          if (diff) {
-            subscriber.next({
-              type: 'bundle not cached',
-              reason: 'cache key mismatch',
-              diff,
-              bundle,
-            });
-            continue;
-          }
-
-          subscriber.next({
-            type: 'bundle cached',
-            bundle,
-          });
-        }
-      })
-      .then(
-        () => {
-          subscriber.complete();
-        },
-        error => {
-          subscriber.error(error);
-        }
+    for (const bundle of eligible) {
+      const diff = diffCacheKey(
+        bundle.cache.getCacheKeys(),
+        bundle.createCacheKey(bundle.cache.getReferencedFiles() || [], mtimes)
       );
+
+      if (diff) {
+        yield {
+          type: 'bundle not cached',
+          reason: 'cache key mismatch',
+          diff,
+          bundle,
+        };
+        continue;
+      }
+
+      yield {
+        type: 'bundle cached',
+        bundle,
+      };
+    }
   });
 }

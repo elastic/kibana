@@ -80,3 +80,35 @@ export const debounceTimeBuffer = <T>(ms: number) =>
       })
     );
   });
+
+export const fromAsyncGenerator = <T>(fn: () => AsyncGenerator<T>) => {
+  return new Rx.Observable<T>(subscriber => {
+    const iterator = fn();
+
+    function subToPromise(promise: Promise<IteratorResult<T>>) {
+      promise.then(
+        result => {
+          if (subscriber.closed) {
+            return;
+          }
+
+          if (result.done) {
+            subscriber.complete();
+          } else {
+            subscriber.next(result.value);
+            subToPromise(iterator.next());
+          }
+        },
+        error => {
+          if (subscriber.closed) {
+            return;
+          }
+
+          subscriber.error(error);
+        }
+      );
+    }
+
+    subToPromise(iterator.next());
+  });
+};
