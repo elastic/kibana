@@ -32,23 +32,27 @@ export class RoutedTabs extends React.Component<RoutedTabsProps> {
         <Route
           key={`${tab.path}-${tab.title}`}
           path={tab.path}
-          children={({ match, history }) => (
-            <TabContainer className="euiTab">
-              {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
-              <EuiLink
-                href={`#${tab.path}`}
-                data-test-subj={`infrastructureNavLink_${tab.path}`}
-                onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
-                  e.preventDefault();
-                  history.push(tab.path);
-                }}
-              >
-                <EuiTab onClick={noop} isSelected={match !== null}>
-                  {tab.title}
-                </EuiTab>
-              </EuiLink>
-            </TabContainer>
-          )}
+          children={({ match, history }) => {
+            return (
+              <TabContainer className="euiTab">
+                {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
+                <EuiLink
+                  href={history.createHref({
+                    pathname: tab.path,
+                  })}
+                  data-test-subj={`infrastructureNavLink_${tab.path}`}
+                  onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
+                    e.preventDefault();
+                    history.push(tab.path);
+                  }}
+                >
+                  <EuiTab onClick={noop} isSelected={match !== null}>
+                    {tab.title}
+                  </EuiTab>
+                </EuiLink>
+              </TabContainer>
+            );
+          }}
         />
       );
     });
