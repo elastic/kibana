@@ -23,7 +23,6 @@ import { SearchResponse } from 'elasticsearch';
 import { reqSchema, registerAlertRoutes } from './alerts';
 import { EndpointConfigSchema } from '../config';
 import * as data from '../test_data/all_alerts_data.json';
-import * as dataLegacy from '../test_data/all_alerts_data_legacy.json';
 
 describe('test alerts route', () => {
   let routerMock: jest.Mocked<IRouter>;
@@ -43,39 +42,6 @@ describe('test alerts route', () => {
       logFactory: loggingServiceMock.create(),
       config: () => Promise.resolve(EndpointConfigSchema.validate({})),
     });
-  });
-
-  it('should correctly calculate legacy alert total', async () => {
-    const mockRequest = httpServerMock.createKibanaRequest({});
-
-    const response: SearchResponse<AlertData> = (dataLegacy as unknown) as SearchResponse<
-      AlertData
-    >;
-    mockScopedClient.callAsCurrentUser.mockImplementationOnce(() => Promise.resolve(response));
-    [routeConfig, routeHandler] = routerMock.post.mock.calls.find(([{ path }]) =>
-      path.startsWith('/api/endpoint/alerts')
-    )!;
-
-    await routeHandler(
-      ({
-        core: {
-          elasticsearch: {
-            dataClient: mockScopedClient,
-          },
-        },
-      } as unknown) as RequestHandlerContext,
-      mockRequest,
-      mockResponse
-    );
-
-    expect(mockScopedClient.callAsCurrentUser).toBeCalled();
-    expect(routeConfig.options).toEqual({ authRequired: true });
-    expect(mockResponse.ok).toBeCalled();
-    const alertResultList = mockResponse.ok.mock.calls[0][0]?.body as AlertResultList;
-    expect(alertResultList.total).toEqual(21);
-    expect(alertResultList.request_page_index).toEqual(0);
-    expect(alertResultList.result_from_index).toEqual(0);
-    expect(alertResultList.request_page_size).toEqual(10);
   });
 
   it('should return the latest of all alerts', async () => {
@@ -179,7 +145,7 @@ describe('test alerts route', () => {
     expect(alertResultList.request_page_size).toEqual(3);
   });
 
-  it('should require `page_size` to be a number', async () => {
+  it('should fail to validate when `page_size` is not a number', async () => {
     const validate = () => {
       reqSchema.validate({
         page_size: 'abc',
@@ -188,31 +154,49 @@ describe('test alerts route', () => {
     expect(validate).toThrow();
   });
 
-  it('should allow either `page_index` or `search_after`, but not both', async () => {
+  it('should validate when `page_size` is a number', async () => {
+    const validate = () => {
+      reqSchema.validate({
+        page_size: 123,
+      });
+    };
+    expect(validate).not.toThrow();
+  });
+
+  it('should validate when `page_size` can be converted to a number', async () => {
+    const validate = () => {
+      reqSchema.validate({
+        page_size: '123',
+      });
+    };
+    expect(validate).not.toThrow();
+  });
+
+  it('should allow either `page_index` or `after`, but not both', async () => {
     const validate = () => {
       reqSchema.validate({
         page_index: 1,
-        search_after: 'abc',
+        after: [123, 345],
       });
     };
     expect(validate).toThrow();
   });
 
-  it('should allow either `page_index` or `search_before`, but not both', async () => {
+  it('should allow either `page_index` or `before`, but not both', async () => {
     const validate = () => {
       reqSchema.validate({
         page_index: 1,
-        search_before: 'abc',
+        before: 'abc',
       });
     };
     expect(validate).toThrow();
   });
 
-  it('should allow either `search_before` or `search_after`, but not both', async () => {
+  it('should allow either `before` or `after`, but not both', async () => {
     const validate = () => {
       reqSchema.validate({
-        search_before: 'abc',
-        search_after: 'abc',
+        before: ['abc', 'def'],
+        after: [123, 345],
       });
     };
     expect(validate).toThrow();

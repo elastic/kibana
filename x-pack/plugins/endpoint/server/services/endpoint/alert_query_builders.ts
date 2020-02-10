@@ -5,13 +5,47 @@
  */
 import { KibanaRequest } from 'kibana/server';
 import {
+  JsonObject,
   fromKueryExpression,
   toElasticsearchQuery,
-} from '../../../../../../src/plugins/data/common/es_query/kuery/ast';
+} from '../../../../../../src/plugins/data/common/es_query/kuery';
 import { EndpointAppConstants } from '../../../common/types';
-import { EndpointAppContext, AlertRequestParams, AlertRequestData, JSONish } from '../../types';
+import {
+  EndpointAppContext,
+  AlertRequestParams,
+  AlertRequestData,
+  AlertRequest,
+  AlertRequestBody,
+} from '../../types';
 
-export const buildAlertListESQuery = async (reqData: AlertRequestData): Promise<JSONish> => {
+function buildQuery(reqData: AlertRequestData): JsonObject {
+  const queries: JsonObject[] = [];
+
+  if (reqData.filters) {
+    queries.push(toElasticsearchQuery(fromKueryExpression(reqData.filters)));
+  }
+
+  if (reqData.query) {
+    queries.push(toElasticsearchQuery(fromKueryExpression(reqData.query)));
+  }
+
+  // Optimize
+  if (queries.length > 1) {
+    return {
+      bool: {
+        must: [queries[0], queries[1]],
+      },
+    };
+  } else if (queries.length === 0) {
+    return {
+      match_all: {},
+    };
+  }
+
+  return queries[0];
+}
+
+export const buildAlertListESQuery = async (reqData: AlertRequestData): Promise<JsonObject> => {
   const DEFAULT_TOTAL_HITS = 10000;
   let totalHitsMin: number = DEFAULT_TOTAL_HITS;
 
@@ -21,37 +55,54 @@ export const buildAlertListESQuery = async (reqData: AlertRequestData): Promise<
     totalHitsMin = Math.max(reqData.fromIndex + reqData.pageSize * 2, DEFAULT_TOTAL_HITS);
   }
 
-  function buildQueryBody(): JSONish {
-    if (reqData.filters !== '') {
-      return toElasticsearchQuery(fromKueryExpression(reqData.filters)) as JSONish;
-    }
-
-    return {
-      match_all: {},
-    };
-  }
-
-  const reqBody: JSONish = {
-    body: {
-      track_total_hits: totalHitsMin,
-      query: buildQueryBody(),
-      sort: [
-        {
-          '@timestamp': {
-            order: 'desc',
-          },
+  const reqBody: AlertRequestBody = {
+    track_total_hits: totalHitsMin,
+    query: buildQuery(reqData),
+    sort: [
+      // User-defined primary sort, with default to `@timestamp`
+      {
+        [reqData.sort]: {
+          order: reqData.order as 'asc' | 'desc',
         },
-      ],
-    },
+      },
+      // Secondary sort for tie-breaking
+      {
+        'event.id': {
+          order: reqData.order as 'asc' | 'desc',
+        },
+      },
+    ],
+  };
+
+  const reqWrapper: AlertRequest = {
     size: reqData.pageSize,
     index: EndpointAppConstants.ALERT_INDEX_NAME,
+    body: reqBody,
   };
 
   if (reqData.fromIndex !== undefined) {
-    reqBody.from = reqData.fromIndex;
+    reqWrapper.from = reqData.fromIndex;
   }
 
-  return reqBody;
+  if (reqData.searchAfter !== undefined) {
+    reqWrapper.body.search_after = reqData.searchAfter;
+  }
+
+  if (reqData.searchBefore !== undefined) {
+    // Reverse sort order for search_before functionality
+    const order: string = reqWrapper.body.sort[0][reqData.sort].order as string;
+    if (order === 'asc') {
+      reqWrapper.body.sort[0][reqData.sort].order = 'desc';
+      reqWrapper.body.sort[1]['event.id'].order = 'desc';
+    } else {
+      reqWrapper.body.sort[0][reqData.sort].order = 'asc';
+      reqWrapper.body.sort[1]['event.id'].order = 'asc';
+    }
+
+    reqWrapper.body.search_after = reqData.searchBefore;
+  }
+
+  return (reqWrapper as unknown) as JsonObject;
 };
 
 export const getRequestData = async (
@@ -65,18 +116,20 @@ export const getRequestData = async (
     reqData.pageIndex = request.query?.page_index;
     reqData.pageSize = request.query?.page_size || config.alertResultListDefaultPageSize;
     reqData.filters = request.query?.filters || config.alertResultListDefaultFilters;
+    reqData.query = request.query?.query || config.alertResultListDefaultQuery;
     reqData.sort = request.query?.sort || config.alertResultListDefaultSort;
     reqData.order = request.query?.order || config.alertResultListDefaultOrder;
-    reqData.searchAfter = request.query?.search_after;
-    reqData.searchBefore = request.query?.search_before;
+    reqData.searchAfter = request.query?.after;
+    reqData.searchBefore = request.query?.before;
   } else {
     reqData.pageIndex = request.body?.page_index;
     reqData.pageSize = request.body?.page_size || config.alertResultListDefaultPageSize;
     reqData.filters = request.body?.filters || config.alertResultListDefaultFilters;
+    reqData.query = request.body?.query || config.alertResultListDefaultQuery;
     reqData.sort = request.body?.sort || config.alertResultListDefaultSort;
     reqData.order = request.body?.order || config.alertResultListDefaultOrder;
-    reqData.searchAfter = request.body?.search_after;
-    reqData.searchBefore = request.body?.search_before;
+    reqData.searchAfter = request.body?.after;
+    reqData.searchBefore = request.body?.before;
   }
 
   if (reqData.searchAfter === undefined && reqData.searchBefore === undefined) {

@@ -14,48 +14,48 @@ import { AlertRequestParams, AlertRequestData, EndpointAppContext } from '../typ
 
 const ALERTS_ROUTE = '/api/endpoint/alerts';
 
-export const reqSchema = schema.object({
-  page_size: schema.maybe(schema.number()),
-  page_index: schema.maybe(
-    schema.number({
+export const reqSchema = schema.object(
+  {
+    page_size: schema.maybe(schema.number()),
+    page_index: schema.maybe(schema.number()),
+    after: schema.maybe(
+      schema.arrayOf(schema.any(), {
+        minSize: 2,
+        maxSize: 2,
+      })
+    ),
+    before: schema.maybe(
+      schema.arrayOf(schema.any(), {
+        minSize: 2,
+        maxSize: 2,
+      })
+    ),
+    sort: schema.string({ defaultValue: '@timestamp' }),
+    order: schema.string({
+      defaultValue: 'desc',
       validate(value) {
-        if (
-          schema.contextRef('search_after') !== undefined ||
-          schema.contextRef('search_before') !== undefined
-        ) {
-          return 'error';
+        if (value !== 'asc' && value !== 'desc') {
+          return 'must be `asc` or `desc`';
         }
       },
-    })
-  ),
-  search_after: schema.maybe(
-    schema.string({
-      validate(value) {
-        if (schema.contextRef('page_index') !== undefined) {
-          return 'error';
-        }
-        if (schema.contextRef('search_before') !== undefined) {
-          return 'error';
-        }
-      },
-    })
-  ),
-  search_before: schema.maybe(
-    schema.string({
-      validate(value) {
-        if (schema.contextRef('page_index') !== undefined) {
-          return 'error';
-        }
-        if (schema.contextRef('search_after') !== undefined) {
-          return 'error';
-        }
-      },
-    })
-  ),
-  sort: schema.string({ defaultValue: '@timestamp' }),
-  order: schema.string({ defaultValue: 'desc' }),
-  filters: schema.string({ defaultValue: '' }),
-});
+    }),
+    filters: schema.string({ defaultValue: '' }),
+    query: schema.string({ defaultValue: '' }),
+  },
+  {
+    validate(value) {
+      if (value.after !== undefined && value.page_index !== undefined) {
+        return '[page_index] cannot be used with [after]';
+      }
+      if (value.before !== undefined && value.page_index !== undefined) {
+        return '[page_index] cannot be used with [before]';
+      }
+      if (value.before !== undefined && value.after !== undefined) {
+        return '[before] cannot be used with [after]';
+      }
+    },
+  }
+);
 
 export function registerAlertRoutes(router: IRouter, endpointAppContext: EndpointAppContext) {
   const alertsHandler: RequestHandler<unknown, AlertRequestParams> = async (ctx, req, res) => {
@@ -65,13 +65,14 @@ export function registerAlertRoutes(router: IRouter, endpointAppContext: Endpoin
         endpointAppContext
       );
 
-      const reqBody = await buildAlertListESQuery(reqData);
-      endpointAppContext.logFactory.get('alerts').debug('ES query: ' + JSON.stringify(reqBody));
+      const reqWrapper = await buildAlertListESQuery(reqData);
+      endpointAppContext.logFactory.get('alerts').debug('ES query: ' + JSON.stringify(reqWrapper));
 
       const response = (await ctx.core.elasticsearch.dataClient.callAsCurrentUser(
         'search',
-        reqBody
+        reqWrapper
       )) as SearchResponse<AlertData>;
+
       return res.ok({ body: mapToAlertResultList(endpointAppContext, reqData, response) });
     } catch (err) {
       const e = err as Error;
@@ -116,17 +117,19 @@ function mapToAlertResultList(
     relation: string;
   }
 
+  interface AlertSource {
+    _source: AlertData;
+  }
+
+  type AlertHits = AlertSource[];
+
   let totalNumberOfAlerts: number = 0;
   let totalIsLowerBound: boolean = false;
 
-  // We handle 2 separate schemas for the response below, due to: https://github.com/elastic/kibana/issues/56694
-  if (typeof searchResponse?.hits?.total === 'object') {
-    const total: Total = searchResponse?.hits?.total as Total;
-    totalNumberOfAlerts = total?.value || 0;
-    totalIsLowerBound = total?.relation === 'gte' || false;
-  } else {
-    totalNumberOfAlerts = searchResponse?.hits?.total || 0;
-  }
+  // This case is due to: https://github.com/elastic/kibana/issues/56694
+  const total: Total = (searchResponse?.hits?.total as unknown) as Total;
+  totalNumberOfAlerts = total?.value || 0;
+  totalIsLowerBound = total?.relation === 'gte' || false;
 
   if (totalIsLowerBound) {
     // This shouldn't happen, as we always try to fetch enough hits to satisfy the current request and the next page.
@@ -135,11 +138,44 @@ function mapToAlertResultList(
       .warn('Total hits not counted accurately. Pagination numbers may be inaccurate.');
   }
 
+  const hits: AlertHits = searchResponse?.hits?.hits;
+  const hitLen: number = hits.length;
+
+  if (reqData.searchBefore !== undefined) {
+    // Reverse the hits if we used `search_before`.
+    hits.reverse();
+  }
+
+  const firstTimestamp: Date = hits[0]._source['@timestamp'];
+  const lastTimestamp: Date = hits[hitLen - 1]._source['@timestamp'];
+
+  const firstEventId: number = hits[0]._source.event.id;
+  const lastEventId: number = hits[hitLen - 1]._source.event.id;
+
+  let pageUrl: string = '/api/endpoint/alerts?';
+  pageUrl +=
+    'filters=' +
+    reqData.filters +
+    '&page_size=' +
+    reqData.pageSize +
+    '&sort=' +
+    reqData.sort +
+    '&order=' +
+    reqData.order;
+
+  let next: string = pageUrl;
+  let prev: string = pageUrl;
+
+  next += '&after=' + lastTimestamp + '&after=' + lastEventId;
+  prev += '&before=' + firstTimestamp + '&before=' + firstEventId;
+
   return {
     request_page_size: reqData.pageSize,
     request_page_index: reqData.pageIndex,
     result_from_index: reqData.fromIndex,
-    alerts: searchResponse?.hits?.hits?.map(entry => entry._source),
+    next,
+    prev,
+    alerts: hits.map((entry: AlertSource) => entry._source),
     total: totalNumberOfAlerts,
   };
 }
