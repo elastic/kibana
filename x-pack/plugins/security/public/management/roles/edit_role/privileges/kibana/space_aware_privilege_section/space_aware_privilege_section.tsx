@@ -15,7 +15,7 @@ import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import _ from 'lodash';
 import React, { Component, Fragment } from 'react';
 import { Capabilities } from 'src/core/public';
-import { Space } from '../../../../../../../../spaces/common/model/space';
+import { Space } from '../../../../../../../../spaces/public';
 import { Feature } from '../../../../../../../../features/public';
 import { KibanaPrivileges, Role, isReservedRole } from '../../../../../../../common/model';
 import { KibanaPrivilegeCalculatorFactory } from '../kibana_privilege_calculator';
