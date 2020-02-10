@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { APICaller, CoreSetup } from 'kibana/server';
+import { APICaller, CoreSetup } from 'src/core/server';
 
 import { of } from 'rxjs';
 import {

@@ -9,7 +9,6 @@ import { getClustersFromRequest } from '../../../../lib/cluster/get_clusters_fro
 import { handleError } from '../../../../lib/errors';
 import { getIndexPatterns } from '../../../../lib/cluster/get_index_patterns';
 import { verifyCcsAvailability } from '../../../../lib/elasticsearch/verify_ccs_availability';
-import { INDEX_PATTERN_FILEBEAT } from '../../../../../common/constants';
 
 export function clusterRoute(server) {
   /*
@@ -37,9 +36,10 @@ export function clusterRoute(server) {
     },
     handler: async req => {
       await verifyCcsAvailability(req);
+      const config = server.config();
 
       const indexPatterns = getIndexPatterns(server, {
-        filebeatIndexPattern: INDEX_PATTERN_FILEBEAT,
+        filebeatIndexPattern: config.get('monitoring.ui.logs.index'),
       });
       const options = {
         clusterUuid: req.params.clusterUuid,

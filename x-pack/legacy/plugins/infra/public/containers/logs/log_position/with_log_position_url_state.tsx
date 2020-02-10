@@ -16,7 +16,7 @@ import { LogPositionState, LogPositionStateParams } from './log_position_state';
 
 interface LogPositionUrlState {
   position: LogPositionStateParams['visibleMidpoint'] | undefined;
-  streamLive?: boolean | undefined;
+  streamLive: boolean;
 }
 
 export const WithLogPositionUrlState = () => {
@@ -81,7 +81,7 @@ const mapToPositionUrlState = (value: any) =>
     ? pickTimeKey(value)
     : undefined;
 
-const mapToStreamLiveUrlState = (value: any) => (typeof value === 'boolean' ? value : undefined);
+const mapToStreamLiveUrlState = (value: any) => (typeof value === 'boolean' ? value : false);
 
 export const replaceLogPositionInQueryString = (time: number) =>
   Number.isNaN(time)
@@ -91,4 +91,5 @@ export const replaceLogPositionInQueryString = (time: number) =>
           time,
           tiebreaker: 0,
         },
+        streamLive: false,
       });
