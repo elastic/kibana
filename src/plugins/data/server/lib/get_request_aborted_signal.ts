@@ -18,7 +18,8 @@
  */
 
 import { Observable } from 'rxjs';
-import { AbortController } from 'abort-controller';
+// @ts-ignore not typed
+import { AbortController } from 'abortcontroller-polyfill/dist/cjs-ponyfill';
 
 /**
  * A simple utility function that returns an `AbortSignal` corresponding to an `AbortController`
