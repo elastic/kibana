@@ -19,6 +19,8 @@ import {
   EuiPageContentBody,
   EuiButtonEmpty,
   EuiSwitch,
+  EuiCallOut,
+  EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useAppDependencies } from '../../../app_context';
@@ -135,7 +137,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                       }}
                       label={
                         <FormattedMessage
-                          id="xpack.triggersActionsUI.sections.alertsList.collapsedItemActons.enableTitle"
+                          id="xpack.triggersActionsUI.sections.alertDetails.collapsedItemActons.enableTitle"
                           defaultMessage="Enable"
                         />
                       }
@@ -158,7 +160,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                       }}
                       label={
                         <FormattedMessage
-                          id="xpack.triggersActionsUI.sections.alertsList.collapsedItemActons.muteTitle"
+                          id="xpack.triggersActionsUI.sections.alertDetails.collapsedItemActons.muteTitle"
                           defaultMessage="Mute"
                         />
                       }
@@ -168,7 +170,21 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
               </EuiFlexItem>
             </EuiFlexGroup>
             <EuiFlexGroup>
-              <AlertInstancesRouteWithApi alert={alert} />
+              <EuiSpacer size="m" />
+              <EuiFlexItem>
+                {alert.enabled ? (
+                  <AlertInstancesRouteWithApi alert={alert} />
+                ) : (
+                  <EuiCallOut title="Disabled Alert" color="warning" iconType="help">
+                    <p>
+                      <FormattedMessage
+                        id="xpack.triggersActionsUI.sections.alertDetails.alertInstances.disabledAlert"
+                        defaultMessage="Disabled Alerts do not have an active state, hence Alert Instances cannot be displayed."
+                      />
+                    </p>
+                  </EuiCallOut>
+                )}
+              </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPageContentBody>
         </EuiPageContent>

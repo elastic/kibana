@@ -9,8 +9,9 @@ import {
   SanitizedAlert as Alert,
   AlertAction,
   AlertTaskState,
+  RawAlertInstance,
 } from '../../../legacy/plugins/alerting/common';
-export { Alert, AlertAction, AlertTaskState };
+export { Alert, AlertAction, AlertTaskState, RawAlertInstance };
 export { ActionType };
 
 export type ActionTypeIndex = Record<string, ActionType>;

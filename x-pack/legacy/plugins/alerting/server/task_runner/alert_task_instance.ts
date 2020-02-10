@@ -8,8 +8,9 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { ConcreteTaskInstance } from '../../../../../plugins/task_manager/server';
 import { SanitizedAlert } from '../types';
-import { DateFromString } from '../lib/types';
-import { AlertInstance, rawAlertInstance } from '../alert_instance';
+import { DateFromString } from '../../common/date_from_string';
+import { rawAlertInstance } from '../../common';
+import { AlertInstance } from '../alert_instance';
 
 export interface AlertTaskInstance extends ConcreteTaskInstance {
   state: AlertTaskState;

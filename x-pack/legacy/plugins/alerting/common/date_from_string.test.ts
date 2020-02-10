@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DateFromString } from './types';
+import { DateFromString } from './date_from_string';
 import { right, isLeft } from 'fp-ts/lib/Either';
 
 describe('DateFromString', () => {

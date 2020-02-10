@@ -4,5 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './types';
-export { AlertTaskState } from '../server';
+export * from './alert';
+export * from './alert_instance';
+export { AlertTaskState, RawAlertInstance } from '../server';

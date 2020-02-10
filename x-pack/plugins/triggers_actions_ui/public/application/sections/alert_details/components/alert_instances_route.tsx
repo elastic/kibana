@@ -14,6 +14,7 @@ import {
   ComponentOpts as AlertApis,
   withBulkAlertOperations,
 } from '../../common/components/with_bulk_alert_api_operations';
+import { AlertInstances } from './alert_instances';
 
 type WithAlertStateProps = {
   alert: Alert;
@@ -32,7 +33,7 @@ export const AlertInstancesRoute: React.FunctionComponent<WithAlertStateProps> =
   }, [alert, http, loadAlertState, toastNotifications]);
 
   return alertState ? (
-    <div>{JSON.stringify({ alert, alertState })}</div>
+    <AlertInstances alert={alert} alertState={alertState} />
   ) : (
     <div
       style={{
