@@ -7,7 +7,7 @@ As a developer you can reuse and extend buildin alerts and actions UI functional
 - Create and register new action type.
 - Embed Create Alert flyout to Kibana plugins.
 
-To enample Alerts and Actions UI next configuration settings should be provided:
+To enable Alerts and Actions UI functionality, the next configuration settings should be provided:
 ```
 xpack.alerting.enabled: true
 xpack.actions.enabled: true
@@ -42,7 +42,9 @@ Table of Contents
       - [Index](#index)
       - [Webhook](#webhook)
       - [PagerDuty](#pagerduty)
-    - [Create and register new action type UI](#register-action-type)
+    - [Action type model definition](#action-type-model-definition)
+    - [Register action type model](#register-action-type-model)
+    - [Create and register new action type UI example](#reate-and-register-new-action-type-ui-example)
 
 ## Built-in Alert Types
 
@@ -77,10 +79,10 @@ export function getAlertType(): AlertTypeModel {
   };
 }
 ```
-alertParamsExpression form represented as an expression using `EuiExpression`:
+alertParamsExpression form represented as an expression using `EuiExpression` components:
 ![Index Threshold Alert expression form](https://i.imgur.com/Ysk1ljY.png)
 
-Index Threshold Alert validation:
+Index Threshold Alert form with validation:
 ![Index Threshold Alert validation](https://i.imgur.com/TV8c7hL.png)
 
 ## Alert type model definition
@@ -97,11 +99,11 @@ Each alert type should be defined as `AlertTypeModel` object with the next prope
 |Property|Description|
 |---|---|
 |id|Alert type id. Should be the same as on the server side.|
-|name|Name of alert type, that will be displayed on the select card in UI|
-|iconClass|Icon of alert type, that will be displayed on the select card in UI|
-|validate|Validation function for alert params|
-|alertParamsExpression|React functional component for building UI of current alert type params|
-|defaultActionMessage|Optional property for specifying default message in all actions with `message` property|
+|name|Name of alert type, that will be displayed on the select card in UI.|
+|iconClass|Icon of alert type, that will be displayed on the select card in UI.|
+|validate|Validation function for the alert params.|
+|alertParamsExpression|React functional component for building UI of the current alert type params.|
+|defaultActionMessage|Optional property for providing default message for all added actions with `message` property.|
 
 IMPORTANT! Current UI support only one default action group. 
 Action groups is mapped from server API result for [GET /api/alert/types: List alert types](https://github.com/elastic/kibana/tree/master/x-pack/legacy/plugins/alerting#get-apialerttypes-list-alert-types).
@@ -117,8 +119,8 @@ export interface AlertType {
   executor: ({ services, params, state }: AlertExecutorOptions) => Promise<State | void>;
 }
 ```
-Only one default (which means first item of the array) action group is displayed in UI.
-UI design and server API for multiple action groups is on the stage of discussion and development.
+Only one default (which means first item of the array) action group is displayed in the current UI.
+Design of user interface and server API for multiple action groups is on the stage of discussion and development.
 
 ## Register alert type model
 
@@ -837,7 +839,24 @@ Each action type should be defined as `ActionTypeModel` object with the next pro
 |actionConnectorFields|React functional component for building UI of current action type connector.|
 |actionParamsFields|React functional component for building UI of current action type params. Displayed as a part of Create Alert flyout.|
 
+## Register action type model
 
+There are two ways of registration new action type UI:
+
+1. Directly in `triggers_actions_ui` plugin. In this case action type will be available in the Alerts and Actions management section.
+Registration code for a new action type model should be added to the file `x-pack/plugins/triggers_actions_ui/public/application/components/builtin_action_types/index.ts`
+Only registered action types are available in UI.
+
+2. Register action type in other plugin. In this case action type will be available only in the current plugin UI. 
+It should be done by importing dependency `TriggersAndActionsUIPublicPluginSetup` and adding the next code on plugin setup:
+
+```
+function getSomeNewActionType() {
+  return { ... } as ActionTypeModel;
+}
+
+triggers_actions_ui.actionTypeRegistry.register(getSomeNewActionType());
+```
 
 ## Create and register new action type UI
 
