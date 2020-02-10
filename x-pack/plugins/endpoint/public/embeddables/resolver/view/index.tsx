@@ -15,6 +15,7 @@ import { useNonPassiveWheelHandler } from './use_nonpassive_wheel_handler';
 import { ProcessEventDot } from './process_event_dot';
 import { EdgeLine } from './edge_line';
 import { GraphControls } from './graph_controls';
+import { SymbolDefinitions } from './defs';
 
 export const AppRoot = React.memo(({ store }: { store: Store<ResolverState, ResolverAction> }) => {
   return (
@@ -140,13 +141,15 @@ const Resolver = styled(
 
     return (
       <div data-test-subj="resolverEmbeddable" className={className}>
+        <SymbolDefinitions />
         <GraphControls />
         <div className="resolver-graph" onMouseDown={handleMouseDown} ref={refCallback}>
-          {Array.from(processNodePositions).map(([processEvent, position], index) => (
-            <ProcessEventDot key={index} position={position} event={processEvent} />
-          ))}
+          {/* Paint lines first so they appear underneath the nodes */}
           {edgeLineSegments.map(([startPosition, endPosition], index) => (
             <EdgeLine key={index} startPosition={startPosition} endPosition={endPosition} />
+          ))}
+          {Array.from(processNodePositions).map(([processEvent, position], index) => (
+            <ProcessEventDot key={index} position={position} event={processEvent} />
           ))}
         </div>
       </div>
@@ -154,7 +157,7 @@ const Resolver = styled(
   })
 )`
   /**
-   * Take up all availble space
+   * Take up all available space
    */
   display: flex;
   flex-grow: 1;
