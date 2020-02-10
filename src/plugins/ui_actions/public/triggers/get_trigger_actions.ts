@@ -17,13 +17,13 @@
  * under the License.
  */
 
-import { IUiActionsApiPure } from '../types';
-import { IAction } from '../actions';
+import { UiActionsApiPure } from '../types';
+import { Action } from '../actions';
 
-export const getTriggerActions: IUiActionsApiPure['getTriggerActions'] = ({
+export const getTriggerActions: UiActionsApiPure['getTriggerActions'] = ({
   api,
   actions,
 }) => id => {
   const trigger = api.getTrigger!(id);
-  return trigger.actionIds.map(actionId => actions.get(actionId)).filter(Boolean) as IAction[];
+  return trigger.actionIds.map(actionId => actions.get(actionId)).filter(Boolean) as Action[];
 };
