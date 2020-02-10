@@ -20,6 +20,50 @@
 import { PluginInitializerContext } from '../../../core/server';
 import { DataServerPlugin, DataPluginSetup, DataPluginStart } from './plugin';
 
+/*
+ * Field Formatters helper namespace:
+ */
+
+import {
+  FieldFormat,
+  FieldFormatsRegistry, // exported only for tests. Consider mock.
+  BoolFormat,
+  BytesFormat,
+  ColorFormat,
+  DateFormat,
+  DateNanosFormat,
+  DurationFormat,
+  IpFormat,
+  NumberFormat,
+  PercentFormat,
+  RelativeDateFormat,
+  SourceFormat,
+  StaticLookupFormat,
+  UrlFormat,
+  StringFormat,
+  TruncateFormat,
+} from '../common/field_formats';
+
+export const fieldFormats = {
+  FieldFormat,
+  FieldFormatsRegistry, // exported only for tests. Consider mock.
+
+  BoolFormat,
+  BytesFormat,
+  ColorFormat,
+  DateFormat,
+  DateNanosFormat,
+  DurationFormat,
+  IpFormat,
+  NumberFormat,
+  PercentFormat,
+  RelativeDateFormat,
+  SourceFormat,
+  StaticLookupFormat,
+  UrlFormat,
+  StringFormat,
+  TruncateFormat,
+};
 export function plugin(initializerContext: PluginInitializerContext) {
   return new DataServerPlugin(initializerContext);
 }
@@ -35,7 +79,6 @@ export {
   esFilters,
   esKuery,
   esQuery,
-  fieldFormats,
   // kbn field types
   castEsToKbnFieldTypeName,
   getKbnFieldType,
@@ -56,6 +99,9 @@ export {
   // utils
   parseInterval,
   isNestedField,
+  IFieldFormatsRegistry,
+  FieldFormatsGetConfigFn,
+  FieldFormatConfig,
 } from '../common';
 
 /**
