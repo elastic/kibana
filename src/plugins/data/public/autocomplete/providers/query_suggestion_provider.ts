@@ -43,7 +43,7 @@ export interface QuerySuggestionsGetFnArgs {
 }
 
 /** @public **/
-export interface BasicQuerySuggestion {
+export interface QuerySuggestionBasic {
   type: QuerySuggestionsTypes;
   description?: string | JSX.Element;
   end: number;
@@ -53,10 +53,10 @@ export interface BasicQuerySuggestion {
 }
 
 /** @public **/
-export interface FieldQuerySuggestion extends BasicQuerySuggestion {
+export interface QuerySuggestionField extends QuerySuggestionBasic {
   type: QuerySuggestionsTypes.Field;
   field: IFieldType;
 }
 
 /** @public **/
-export type QuerySuggestion = BasicQuerySuggestion | FieldQuerySuggestion;
+export type QuerySuggestion = QuerySuggestionBasic | QuerySuggestionField;

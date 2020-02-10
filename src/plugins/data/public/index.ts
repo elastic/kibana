@@ -43,7 +43,16 @@ export {
   RefreshInterval,
   TimeRange,
 } from '../common';
-export { autocomplete } from './autocomplete';
+
+export {
+  QuerySuggestion,
+  QuerySuggestionsTypes,
+  QuerySuggestionsGetFn,
+  QuerySuggestionsGetFnArgs,
+  QuerySuggestionBasic,
+  QuerySuggestionField,
+} from './autocomplete';
+
 export * from './field_formats';
 export * from './index_patterns';
 export * from './search';

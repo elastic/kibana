@@ -6,7 +6,7 @@
 import indexPatternResponse from './__fixtures__/index_pattern_response.json';
 
 import { setupGetOperatorSuggestions } from './operator';
-import { autocomplete, esKuery } from '../../../../../../../src/plugins/data/public';
+import { QuerySuggestionsGetFnArgs, esKuery } from '../../../../../../../src/plugins/data/public';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 
 const mockKueryNode = (kueryNode: Partial<esKuery.KueryNode>) =>
@@ -14,12 +14,12 @@ const mockKueryNode = (kueryNode: Partial<esKuery.KueryNode>) =>
 
 describe('Kuery operator suggestions', () => {
   let getSuggestions: ReturnType<typeof setupGetOperatorSuggestions>;
-  let querySuggestionsArgs: autocomplete.QuerySuggestionsGetFnArgs;
+  let querySuggestionsArgs: QuerySuggestionsGetFnArgs;
 
   beforeEach(() => {
     querySuggestionsArgs = ({
       indexPatterns: [indexPatternResponse],
-    } as unknown) as autocomplete.QuerySuggestionsGetFnArgs;
+    } as unknown) as QuerySuggestionsGetFnArgs;
 
     getSuggestions = setupGetOperatorSuggestions(coreMock.createSetup());
   });
