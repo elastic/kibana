@@ -27,7 +27,7 @@ export function WelcomeContent() {
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiTitle size="m">
-          <h3>
+          <h1>
             <FormattedMessage
               id="xpack.ml.fileDatavisualizer.welcomeContent.visualizeDataFromLogFileTitle"
               defaultMessage="Visualize data from a log file&nbsp;{experimentalBadge}"
@@ -44,7 +44,7 @@ export function WelcomeContent() {
                 ),
               }}
             />
-          </h3>
+          </h1>
         </EuiTitle>
         <EuiSpacer size="s" />
         <EuiText>

@@ -12,7 +12,7 @@ import { Provider } from 'react-redux';
 import { isColorDark, hexToRgb } from '@elastic/eui';
 
 import { toMountPoint } from '../../../../../src/plugins/kibana_react/public';
-import { showSaveModal } from './legacy_imports';
+import { showSaveModal } from '../../../../../src/plugins/saved_objects/public';
 
 import appTemplate from './angular/templates/index.html';
 import listingTemplate from './angular/templates/listing_ng_wrapper.html';
@@ -49,6 +49,7 @@ export function initGraphApp(angularModule, deps) {
     storage,
     canEditDrillDownUrls,
     graphSavePolicy,
+    overlays,
   } = deps;
 
   const app = angularModule;
@@ -162,7 +163,7 @@ export function initGraphApp(angularModule, deps) {
   });
 
   //========  Controller for basic UI ==================
-  app.controller('graphuiPlugin', function($scope, $route, $location, confirmModal) {
+  app.controller('graphuiPlugin', function($scope, $route, $location) {
     function handleError(err) {
       const toastTitle = i18n.translate('xpack.graph.errorToastTitle', {
         defaultMessage: 'Graph Error',
@@ -290,6 +291,7 @@ export function initGraphApp(angularModule, deps) {
         $scope.$digest();
       },
       chrome,
+      I18nContext: coreStart.i18n.Context,
     });
 
     // register things on scope passed down to react components
@@ -381,23 +383,29 @@ export function initGraphApp(angularModule, deps) {
         return;
       }
       const confirmModalOptions = {
-        onConfirm: callback,
-        onCancel: () => {},
         confirmButtonText: i18n.translate('xpack.graph.leaveWorkspace.confirmButtonLabel', {
           defaultMessage: 'Leave anyway',
         }),
         title: i18n.translate('xpack.graph.leaveWorkspace.modalTitle', {
           defaultMessage: 'Unsaved changes',
         }),
+        'data-test-subj': 'confirmModal',
         ...options,
       };
-      confirmModal(
-        text ||
-          i18n.translate('xpack.graph.leaveWorkspace.confirmText', {
-            defaultMessage: 'If you leave now, you will lose unsaved changes.',
-          }),
-        confirmModalOptions
-      );
+
+      overlays
+        .openConfirm(
+          text ||
+            i18n.translate('xpack.graph.leaveWorkspace.confirmText', {
+              defaultMessage: 'If you leave now, you will lose unsaved changes.',
+            }),
+          confirmModalOptions
+        )
+        .then(isConfirmed => {
+          if (isConfirmed) {
+            callback();
+          }
+        });
     }
     $scope.confirmWipeWorkspace = canWipeWorkspace;
 

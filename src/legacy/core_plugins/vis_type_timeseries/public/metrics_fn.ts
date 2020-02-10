@@ -19,11 +19,11 @@
 
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { PersistedState } from 'ui/persisted_state';
 import { ExpressionFunction, KibanaContext, Render } from '../../../../plugins/expressions/public';
 
 // @ts-ignore
 import { metricsRequestHandler } from './request_handler';
+import { PersistedState } from './legacy_imports';
 
 const name = 'tsvb';
 type Context = KibanaContext | null;

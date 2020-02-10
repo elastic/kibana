@@ -18,13 +18,15 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { Subscription } from 'rxjs';
 import { CoreStart } from 'src/core/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { KibanaContextProvider } from '../../../../kibana_react/public';
-import { DataPublicPluginStart, esFilters } from '../..';
+import { DataPublicPluginStart, esFilters, Query, TimeRange, SavedQuery } from '../..';
 import { QueryStart } from '../../query';
 import { SearchBarOwnProps, SearchBar } from './search_bar';
+import { useFilterManager } from './lib/use_filter_manager';
+import { useTimefilter } from './lib/use_timefilter';
+import { useSavedQuery } from './lib/use_saved_query';
 
 interface StatefulSearchBarDeps {
   core: CoreStart;
@@ -34,16 +36,21 @@ interface StatefulSearchBarDeps {
 
 export type StatefulSearchBarProps = SearchBarOwnProps & {
   appName: string;
+  useDefaultBehaviors?: boolean;
+  savedQueryId?: string;
+  onSavedQueryIdChange?: (savedQueryId?: string) => void;
 };
 
-const defaultFiltersUpdated = (query: QueryStart) => {
+// Respond to user changing the filters
+const defaultFiltersUpdated = (queryService: QueryStart) => {
   return (filters: esFilters.Filter[]) => {
-    query.filterManager.setFilters(filters);
+    queryService.filterManager.setFilters(filters);
   };
 };
 
-const defaultOnRefreshChange = (query: QueryStart) => {
-  const { timefilter } = query.timefilter;
+// Respond to user changing the refresh settings
+const defaultOnRefreshChange = (queryService: QueryStart) => {
+  const { timefilter } = queryService.timefilter;
   return (options: { isPaused: boolean; refreshInterval: number }) => {
     timefilter.setRefreshInterval({
       value: options.refreshInterval,
@@ -52,53 +59,107 @@ const defaultOnRefreshChange = (query: QueryStart) => {
   };
 };
 
+// Respond to user changing the query string or time settings
+const defaultOnQuerySubmit = (
+  props: StatefulSearchBarProps,
+  queryService: QueryStart,
+  currentQuery: Query,
+  setQueryStringState: Function
+) => {
+  if (!props.useDefaultBehaviors) return props.onQuerySubmit;
+
+  const { timefilter } = queryService.timefilter;
+
+  return (payload: { dateRange: TimeRange; query?: Query }) => {
+    const isUpdate =
+      !_.isEqual(timefilter.getTime(), payload.dateRange) ||
+      !_.isEqual(payload.query, currentQuery);
+    if (isUpdate) {
+      timefilter.setTime(payload.dateRange);
+      setQueryStringState(payload.query);
+    } else {
+      // Refresh button triggered for an update
+      if (props.onQuerySubmit)
+        props.onQuerySubmit(
+          {
+            dateRange: timefilter.getTime(),
+            query: currentQuery,
+          },
+          false
+        );
+    }
+  };
+};
+
+// Respond to user clearing a saved query
+const defaultOnClearSavedQuery = (props: StatefulSearchBarProps, clearSavedQuery: Function) => {
+  if (!props.useDefaultBehaviors) return props.onClearSavedQuery;
+  return () => {
+    clearSavedQuery();
+    if (props.onSavedQueryIdChange) props.onSavedQueryIdChange();
+  };
+};
+
+// Respond to user saving or updating a saved query
+const defaultOnSavedQueryUpdated = (props: StatefulSearchBarProps, setSavedQuery: Function) => {
+  if (!props.useDefaultBehaviors) return props.onSavedQueryUpdated;
+  return (savedQuery: SavedQuery) => {
+    setSavedQuery(savedQuery);
+    if (props.onSavedQueryIdChange) props.onSavedQueryIdChange(savedQuery.id);
+  };
+};
+
+const overrideDefaultBehaviors = (props: StatefulSearchBarProps) => {
+  return props.useDefaultBehaviors ? {} : props;
+};
+
 export function createSearchBar({ core, storage, data }: StatefulSearchBarDeps) {
   // App name should come from the core application service.
   // Until it's available, we'll ask the user to provide it for the pre-wired component.
   return (props: StatefulSearchBarProps) => {
-    const { filterManager, timefilter } = data.query;
-    const tfRefreshInterval = timefilter.timefilter.getRefreshInterval();
-    const fmFilters = filterManager.getFilters();
-    const [refreshInterval, setRefreshInterval] = useState(tfRefreshInterval.value);
-    const [refreshPaused, setRefreshPaused] = useState(tfRefreshInterval.pause);
+    // Handle queries
+    const [query, setQuery] = useState<Query>(
+      props.query || {
+        query: '',
+        language: core.uiSettings.get('search:queryLanguage'),
+      }
+    );
 
-    const [filters, setFilters] = useState(fmFilters);
+    // handle service state updates.
+    // i.e. filters being added from a visualization directly to filterManager.
+    const { filters } = useFilterManager({
+      filters: props.filters,
+      filterManager: data.query.filterManager,
+    });
+    const { timeRange, refreshInterval } = useTimefilter({
+      dateRangeFrom: props.dateRangeFrom,
+      dateRangeTo: props.dateRangeTo,
+      refreshInterval: props.refreshInterval,
+      isRefreshPaused: props.isRefreshPaused,
+      timefilter: data.query.timefilter.timefilter,
+    });
 
-    // We do not really need to keep track of the time
-    // since this is just for initialization
-    const timeRange = timefilter.timefilter.getTime();
+    // Fetch and update UI from saved query
+    const { savedQuery, setSavedQuery, clearSavedQuery } = useSavedQuery({
+      queryService: data.query,
+      setQuery,
+      savedQueryId: props.savedQueryId,
+      notifications: core.notifications,
+      uiSettings: core.uiSettings,
+    });
 
+    // Fire onQuerySubmit on query or timerange change
     useEffect(() => {
-      let isSubscribed = true;
-      const subscriptions = new Subscription();
-      subscriptions.add(
-        timefilter.timefilter.getRefreshIntervalUpdate$().subscribe({
-          next: () => {
-            if (isSubscribed) {
-              const newRefreshInterval = timefilter.timefilter.getRefreshInterval();
-              setRefreshInterval(newRefreshInterval.value);
-              setRefreshPaused(newRefreshInterval.pause);
-            }
+      if (!props.useDefaultBehaviors) return;
+      if (props.onQuerySubmit)
+        props.onQuerySubmit(
+          {
+            dateRange: timeRange,
+            query,
           },
-        })
-      );
-
-      subscriptions.add(
-        filterManager.getUpdates$().subscribe({
-          next: () => {
-            if (isSubscribed) {
-              const newFilters = filterManager.getFilters();
-              setFilters(newFilters);
-            }
-          },
-        })
-      );
-
-      return () => {
-        isSubscribed = false;
-        subscriptions.unsubscribe();
-      };
-    }, [filterManager, timefilter.timefilter]);
+          true
+        );
+    }, [props, props.onQuerySubmit, props.useDefaultBehaviors, query, timeRange]);
 
     return (
       <KibanaContextProvider
@@ -110,15 +171,29 @@ export function createSearchBar({ core, storage, data }: StatefulSearchBarDeps) 
         }}
       >
         <SearchBar
-          timeHistory={timefilter.history}
+          showAutoRefreshOnly={props.showAutoRefreshOnly}
+          showDatePicker={props.showDatePicker}
+          showFilterBar={props.showFilterBar}
+          showQueryBar={props.showQueryBar}
+          showQueryInput={props.showQueryInput}
+          showSaveQuery={props.showSaveQuery}
+          screenTitle={props.screenTitle}
+          indexPatterns={props.indexPatterns}
+          timeHistory={data.query.timefilter.history}
           dateRangeFrom={timeRange.from}
           dateRangeTo={timeRange.to}
-          refreshInterval={refreshInterval}
-          isRefreshPaused={refreshPaused}
+          refreshInterval={refreshInterval.value}
+          isRefreshPaused={refreshInterval.pause}
           filters={filters}
+          query={query}
           onFiltersUpdated={defaultFiltersUpdated(data.query)}
           onRefreshChange={defaultOnRefreshChange(data.query)}
-          {...props}
+          savedQuery={savedQuery}
+          onQuerySubmit={defaultOnQuerySubmit(props, data.query, query, setQuery)}
+          onClearSavedQuery={defaultOnClearSavedQuery(props, clearSavedQuery)}
+          onSavedQueryUpdated={defaultOnSavedQueryUpdated(props, setSavedQuery)}
+          onSaved={defaultOnSavedQueryUpdated(props, setSavedQuery)}
+          {...overrideDefaultBehaviors(props)}
         />
       </KibanaContextProvider>
     );
