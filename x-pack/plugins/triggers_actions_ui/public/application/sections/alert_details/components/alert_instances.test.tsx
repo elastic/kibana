@@ -6,12 +6,7 @@
 import * as React from 'react';
 import uuid from 'uuid';
 import { shallow } from 'enzyme';
-import {
-  AlertInstances,
-  alertInstancesTableColumns,
-  AlertInstanceListItem,
-  alertInstanceToListItem,
-} from './alert_instances';
+import { AlertInstances, AlertInstanceListItem, alertInstanceToListItem } from './alert_instances';
 import { Alert, AlertTaskState, RawAlertInstance } from '../../../../types';
 import { EuiBasicTable } from '@elastic/eui';
 
@@ -23,7 +18,6 @@ const mockAPIs = {
   unmuteAlertInstance: jest.fn(),
   requestRefresh: jest.fn(),
 };
-const onMuteAction = jest.fn();
 
 beforeAll(() => {
   jest.resetAllMocks();

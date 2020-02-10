@@ -7,7 +7,9 @@
 import React, { Fragment } from 'react';
 import moment, { Duration } from 'moment';
 import { i18n } from '@kbn/i18n';
-import { EuiBasicTable, EuiButtonToggle, EuiBadge, RIGHT_ALIGNMENT } from '@elastic/eui';
+import { EuiBasicTable, EuiButtonToggle, EuiBadge } from '@elastic/eui';
+// @ts-ignore
+import { RIGHT_ALIGNMENT, CENTER_ALIGNMENT } from '@elastic/eui/lib/services';
 import { padLeft, difference } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { RawAlertInstance } from '../../../../../../../legacy/plugins/alerting/common';
@@ -59,6 +61,7 @@ export const alertInstancesTableColumns = (
   },
   {
     field: 'duration',
+    align: CENTER_ALIGNMENT,
     render: (value: number, instance: AlertInstanceListItem) => {
       return value ? durationAsString(moment.duration(value)) : '';
     },
@@ -71,7 +74,11 @@ export const alertInstancesTableColumns = (
   },
   {
     field: '',
-    alignment: RIGHT_ALIGNMENT,
+    align: RIGHT_ALIGNMENT,
+    name: i18n.translate(
+      'xpack.triggersActionsUI.sections.alertDetails.alertInstancesList.columns.actions',
+      { defaultMessage: 'Actions' }
+    ),
     render: (instance: AlertInstanceListItem) => {
       return (
         <Fragment>
@@ -96,10 +103,6 @@ export const alertInstancesTableColumns = (
         </Fragment>
       );
     },
-    name: i18n.translate(
-      'xpack.triggersActionsUI.sections.alertDetails.alertInstancesList.columns.actions',
-      { defaultMessage: 'Actions' }
-    ),
     sortable: false,
     'data-test-subj': 'alertInstancesTableCell-actions',
   },
