@@ -26,18 +26,8 @@ describe('getIndexTemplate()', () => {
     expect(indexTemplate.aliases[esNames.alias]).toEqual({});
     expect(indexTemplate.settings.number_of_shards).toBeGreaterThanOrEqual(0);
     expect(indexTemplate.settings.number_of_replicas).toBeGreaterThanOrEqual(0);
-    expect(indexTemplate.mappings).toMatchObject({});
-  });
-
-  test('returns correct index template bits for ilm when ilm is supported', () => {
-    const indexTemplate = getIndexTemplate(esNames);
     expect(indexTemplate.settings['index.lifecycle.name']).toBe(esNames.ilmPolicy);
     expect(indexTemplate.settings['index.lifecycle.rollover_alias']).toBe(esNames.alias);
-  });
-
-  test('returns correct index template bits for ilm when ilm is not supported', () => {
-    const indexTemplate = getIndexTemplate(esNames);
-    expect(indexTemplate.settings['index.lifecycle.name']).toBeUndefined();
-    expect(indexTemplate.settings['index.lifecycle.rollover_alias']).toBeUndefined();
+    expect(indexTemplate.mappings).toMatchObject({});
   });
 });
