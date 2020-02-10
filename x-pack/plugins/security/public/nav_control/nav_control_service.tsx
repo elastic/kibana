@@ -57,7 +57,7 @@ export class SecurityNavControlService {
   }
 
   private registerSecurityNavControl(
-    core: Pick<CoreStart, 'chrome' | 'http' | 'i18n' | 'application'>
+    core: Pick<CoreStart, 'chrome' | 'http' | 'i18n' | 'injectedMetadata' | 'application'>
   ) {
     const currentUserPromise = this.authc.getCurrentUser();
     core.chrome.navControls.registerRight({
@@ -65,10 +65,14 @@ export class SecurityNavControlService {
       mount: (el: HTMLElement) => {
         const I18nContext = core.i18n.Context;
 
+        const serverBasePath = core.injectedMetadata.getInjectedVar('serverBasePath') as string;
+
+        const logoutUrl = `${serverBasePath}/logout`;
+
         const props = {
           user: currentUserPromise,
           editProfileUrl: core.http.basePath.prepend('/app/kibana#/account'),
-          logoutUrl: core.http.basePath.prepend(`/logout`),
+          logoutUrl,
         };
         ReactDOM.render(
           <I18nContext>
