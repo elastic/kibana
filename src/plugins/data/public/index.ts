@@ -105,14 +105,16 @@ export {
   FieldFormatId,
 } from '../common';
 export { autocomplete } from './autocomplete';
+
 export {
   indexPatterns,
   IndexPatternsContract,
   IndexPattern,
-  IndexPatternField,
+  Field as IndexPatternField,
   TypeMeta as IndexPatternTypeMeta,
   AggregationRestrictions as IndexPatternAggRestrictions,
 } from './index_patterns';
+
 export * from './search';
 export * from './query';
 export * from './ui';
