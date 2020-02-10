@@ -131,9 +131,11 @@ export interface RequestBasicOptions {
   defaultIndex: string[];
 }
 
+export type MatrixHistogramType = 'alerts' | 'anomalies' | 'authentications' | 'dns' | 'events';
+
 export interface MatrixHistogramRequestOptions extends RequestBasicOptions {
   stackByField: Maybe<string>;
-  histogramType: string;
+  histogramType: MatrixHistogramType;
 }
 
 export interface RequestOptions extends RequestBasicOptions {
