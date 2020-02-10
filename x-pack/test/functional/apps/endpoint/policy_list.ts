@@ -11,22 +11,22 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
 
   describe('Endpoint Policy List', () => {
-    it('loads the Policy List Page', async () => {
+    beforeEach(async () => {
       await pageObjects.common.navigateToUrlWithBrowserHistory('endpoint', '/policy');
+    });
+
+    it('loads the Policy List Page', async () => {
       await testSubjects.existOrFail('policyListPage');
     });
     it('displays page title', async () => {
-      await pageObjects.common.navigateToUrlWithBrowserHistory('endpoint', '/policy');
       const policyTitle = await testSubjects.getVisibleText('policyViewTitle');
       expect(policyTitle).to.equal('Policies');
     });
     it('shows policy count total', async () => {
-      await pageObjects.common.navigateToUrlWithBrowserHistory('endpoint', '/policy');
       const policyTotal = await testSubjects.getVisibleText('policyTotalCount');
       expect(policyTotal).to.equal('0 Policies');
     });
     it('includes policy list table', async () => {
-      await pageObjects.common.navigateToUrlWithBrowserHistory('endpoint', '/policy');
       await testSubjects.existOrFail('policyTable');
     });
   });
