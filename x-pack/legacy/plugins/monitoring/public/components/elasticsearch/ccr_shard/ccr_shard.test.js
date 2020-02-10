@@ -8,6 +8,12 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { CcrShard } from './ccr_shard';
 
+jest.mock('../../../np_imports/ui/chrome', () => {
+  return {
+    getBasePath: () => '',
+  };
+});
+
 describe('CcrShard', () => {
   const props = {
     formattedLeader: 'leader on remote',
