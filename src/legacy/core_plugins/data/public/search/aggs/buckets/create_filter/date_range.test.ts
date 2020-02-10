@@ -19,7 +19,7 @@
 
 import moment from 'moment';
 import { createFilterDateRange } from './date_range';
-import { fieldFormats } from '../../../../../../../../plugins/data/public';
+import { fieldFormats, FieldFormatsGetConfigFn } from '../../../../../../../../plugins/data/public';
 import { AggConfigs } from '../../agg_configs';
 import { BUCKET_TYPES } from '../bucket_agg_types';
 import { IBucketAggConfig } from '../_bucket_agg_type';
@@ -28,7 +28,7 @@ jest.mock('ui/new_platform');
 
 describe('AggConfig Filters', () => {
   describe('Date range', () => {
-    const getConfig = (() => {}) as fieldFormats.GetConfigFn;
+    const getConfig = (() => {}) as FieldFormatsGetConfigFn;
     const getAggConfigs = () => {
       const field = {
         name: '@timestamp',
