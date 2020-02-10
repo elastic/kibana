@@ -3,6 +3,18 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+jest.mock('../../../utils/use_kibana_ui_setting', () => ({
+  _esModule: true,
+  useKibanaUiSetting: jest.fn(() => [
+    [
+      {
+        from: 'now/d',
+        to: 'now/d',
+        display: 'Today',
+      },
+    ],
+  ]),
+}));
 
 import React from 'react';
 import { MetricsTimeControls } from './time_controls';
