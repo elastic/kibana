@@ -135,7 +135,8 @@ export default function({ getService, getPageObjects }) {
         it('matches baseline report', async function() {
           this.timeout(300000);
 
-          await PageObjects.dashboard.switchToEditMode();
+          await PageObjects.common.navigateToApp('dashboard');
+          await PageObjects.dashboard.gotoDashboardEditMode('My PNG Dash');
           await PageObjects.reporting.setTimepickerInDataRange();
 
           const visualizations = PageObjects.dashboard.getTestVisualizationNames();
