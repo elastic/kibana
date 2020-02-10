@@ -104,9 +104,9 @@ export const PrivilegeSummaryTable = (props: Props) => {
   });
 
   const columns: Array<EuiBasicTableColumn<any>> = [
+    rowExpanderColumn,
     featureColumn,
     ...privilegeColumns,
-    rowExpanderColumn,
   ];
 
   const privileges = rawKibanaPrivileges.reduce((acc, entry) => {

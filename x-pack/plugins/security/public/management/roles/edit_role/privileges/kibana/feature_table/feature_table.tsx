@@ -131,6 +131,27 @@ export class FeatureTable extends Component<Props, State> {
   private getColumns = () => {
     const columns = [
       {
+        width: '30px',
+        isExpander: true,
+        field: 'featureId',
+        name: '',
+        render: (featureId: string, record: TableRow) => {
+          const { feature } = record;
+          const hasSubFeaturePrivileges = feature.getSubFeaturePrivileges().length > 0;
+          if (!hasSubFeaturePrivileges) {
+            return null;
+          }
+          return (
+            <EuiButtonIcon
+              onClick={() => this.toggleExpandedFeature(featureId)}
+              data-test-subj={`expandFeaturePrivilegeRow expandFeaturePrivilegeRow-${featureId}`}
+              aria-label={this.state.expandedFeatures.includes(featureId) ? 'Collapse' : 'Expand'}
+              iconType={this.state.expandedFeatures.includes(featureId) ? 'arrowUp' : 'arrowDown'}
+            />
+          );
+        },
+      },
+      {
         field: 'feature',
         width: '200px',
         name: i18n.translate(
@@ -218,28 +239,6 @@ export class FeatureTable extends Component<Props, State> {
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
-          );
-        },
-      },
-      {
-        align: 'right',
-        width: '40px',
-        isExpander: true,
-        field: 'featureId',
-        name: '',
-        render: (featureId: string, record: TableRow) => {
-          const { feature } = record;
-          const hasSubFeaturePrivileges = feature.getSubFeaturePrivileges().length > 0;
-          if (!hasSubFeaturePrivileges) {
-            return null;
-          }
-          return (
-            <EuiButtonIcon
-              onClick={() => this.toggleExpandedFeature(featureId)}
-              data-test-subj={`expandFeaturePrivilegeRow expandFeaturePrivilegeRow-${featureId}`}
-              aria-label={this.state.expandedFeatures.includes(featureId) ? 'Collapse' : 'Expand'}
-              iconType={this.state.expandedFeatures.includes(featureId) ? 'arrowUp' : 'arrowDown'}
-            />
           );
         },
       },

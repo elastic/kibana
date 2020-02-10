@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiCheckbox, EuiButtonGroup } from '@elastic/eui';
-import { NO_PRIVILEGE_VALUE } from '../constants';
+import React, { Fragment } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiIconTip } from '@elastic/eui';
 import { SecuredFeature, SubFeaturePrivilegeGroup, SubFeaturePrivilege } from '../../../../model';
 
 interface Props {
@@ -24,13 +23,15 @@ export const PrivilegeSummaryExpandedRow = (props: Props) => {
               <EuiFlexItem>
                 <EuiText size="s">{subFeature.name}</EuiText>
               </EuiFlexItem>
-              {props.effectiveSubFeaturePrivileges.map(privs => {
-                return (
-                  <EuiFlexItem>
-                    {subFeature.getPrivilegeGroups().map(renderPrivilegeGroup(privs))}
-                  </EuiFlexItem>
-                );
-              })}
+              <EuiFlexItem>
+                {props.effectiveSubFeaturePrivileges.map((privs, index) => {
+                  return (
+                    <Fragment key={index}>
+                      {subFeature.getPrivilegeGroups().map(renderPrivilegeGroup(privs))}
+                    </Fragment>
+                  );
+                })}
+              </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
         );
@@ -61,16 +62,18 @@ export const PrivilegeSummaryExpandedRow = (props: Props) => {
         {privilegeGroup.privileges.map((privilege: SubFeaturePrivilege) => {
           const isGranted = effectivePrivileges.includes(privilege.id);
           return (
-            <EuiCheckbox
-              key={privilege.id}
-              id={privilege.id}
-              label={privilege.name}
-              data-test-subj="independentSubFeaturePrivilegeControl"
-              onChange={() => {}}
-              checked={isGranted}
-              disabled={true}
-              compressed={true}
-            />
+            <EuiFlexGroup gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <EuiIconTip
+                  type={isGranted ? 'check' : 'cross'}
+                  color={isGranted ? 'primary' : 'danger'}
+                  content={isGranted ? 'Privilege is granted' : 'Privilege is not granted'}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiText size="s">{privilege.name}</EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           );
         })}
       </div>
@@ -84,36 +87,21 @@ export const PrivilegeSummaryExpandedRow = (props: Props) => {
   ) {
     const firstSelectedPrivilege = privilegeGroup.privileges.find(p =>
       effectivePrivileges.includes(p.id)
-    );
-
-    const options = [
-      ...privilegeGroup.privileges.map((privilege, privilegeIndex) => {
-        return {
-          id: privilege.id,
-          label: privilege.name,
-          isDisabled: true,
-        };
-      }),
-    ];
-
-    options.push({
-      id: NO_PRIVILEGE_VALUE,
-      label: 'None',
-      isDisabled: true,
-    });
+    )?.name;
 
     return (
-      <EuiButtonGroup
-        key={index}
-        buttonSize="compressed"
-        data-test-subj="mutexSubFeaturePrivilegeControl"
-        options={options}
-        idSelected={firstSelectedPrivilege?.id ?? NO_PRIVILEGE_VALUE}
-        isDisabled={true}
-        onChange={() => null}
-      />
+      <EuiFlexGroup gutterSize="s" key={index}>
+        <EuiFlexItem grow={false}>
+          <EuiIconTip
+            type={firstSelectedPrivilege ? 'check' : 'cross'}
+            color={firstSelectedPrivilege ? 'primary' : 'danger'}
+            content={firstSelectedPrivilege ? 'Privilege is granted' : 'Privilege is not granted'}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiText size="s">{firstSelectedPrivilege ?? 'None'}</EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
-
-    return <EuiText size="s">{firstSelectedPrivilege?.name ?? 'None'}</EuiText>;
   }
 };
