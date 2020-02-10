@@ -95,7 +95,7 @@ function EditUserModal({
   );
 }
 
-export const createEditUserAction = (openModal: OverlayStart['openModal']) =>
+export const createEditUserAction = (getOpenModal: () => Promise<OverlayStart['openModal']>) =>
   createAction<{
     user: User;
     update: (user: User) => void;
@@ -104,13 +104,13 @@ export const createEditUserAction = (openModal: OverlayStart['openModal']) =>
     getIconType: () => 'pencil',
     getDisplayName: () => 'Edit user',
     execute: async ({ user, update }) => {
-      const overlay = openModal(
+      const overlay = (await getOpenModal())(
         toMountPoint(<EditUserModal user={user} update={update} close={() => overlay.close()} />)
       );
     },
   });
 
-export const createPhoneUserAction = (uiActionsApi: UiActionsStart) =>
+export const createPhoneUserAction = (getUiActionsApi: () => Promise<UiActionsStart>) =>
   createAction<{
     user: User;
     update: (user: User) => void;
@@ -126,6 +126,6 @@ export const createPhoneUserAction = (uiActionsApi: UiActionsStart) =>
       // to the phone number trigger.
       // TODO: we need to figure out the best way to handle these nested actions however, since
       // we don't want multiple context menu's to pop up.
-      uiActionsApi.executeTriggerActions(PHONE_TRIGGER, { phone: user.phone });
+      (await getUiActionsApi()).executeTriggerActions(PHONE_TRIGGER, { phone: user.phone });
     },
   });

@@ -71,6 +71,16 @@ export class UiActionsExplorerPlugin implements Plugin<void, void, {}, StartDeps
     deps.uiActions.registerAction(makePhoneCallAction);
     deps.uiActions.registerAction(showcasePluggability);
 
+    const startServices = core.getStartServices();
+    deps.uiActions.registerAction(
+      createPhoneUserAction(async () => (await startServices)[1].uiActions)
+    );
+    deps.uiActions.registerAction(
+      createEditUserAction(async () => (await startServices)[0].overlays.openModal)
+    );
+    deps.uiActions.attachAction(USER_TRIGGER, PHONE_USER_ACTION);
+    deps.uiActions.attachAction(USER_TRIGGER, EDIT_USER_ACTION);
+
     // What's missing here is type analysis to ensure the context emitted by the trigger
     // is the same context that the action requires.
     deps.uiActions.attachAction(COUNTRY_TRIGGER, VIEW_IN_MAPS_ACTION);
@@ -94,12 +104,7 @@ export class UiActionsExplorerPlugin implements Plugin<void, void, {}, StartDeps
     });
   }
 
-  public start(core: CoreStart, deps: StartDeps) {
-    deps.uiActions.registerAction(createPhoneUserAction(deps.uiActions));
-    deps.uiActions.registerAction(createEditUserAction(core.overlays.openModal));
-    deps.uiActions.attachAction(USER_TRIGGER, PHONE_USER_ACTION);
-    deps.uiActions.attachAction(USER_TRIGGER, EDIT_USER_ACTION);
-  }
+  public start() {}
 
   public stop() {}
 }
