@@ -15,9 +15,8 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import React, { Component } from 'react';
-import { SpaceAvatar } from '../../../../../../../legacy/plugins/spaces/public/space_avatar';
+import { Space, SpaceAvatar } from '../../../../../../spaces/public';
 import { SPACE_SEARCH_COUNT_THRESHOLD } from '../../../../../../spaces/common';
-import { Space } from '../../../../../../spaces/common/model/space';
 
 interface Props {
   spaces: Space[];

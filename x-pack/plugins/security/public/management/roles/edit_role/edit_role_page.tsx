@@ -38,7 +38,8 @@ import {
 } from 'src/core/public';
 import { IFeature } from '../../../../../features/common';
 import { IndexPatternsContract } from '../../../../../../../src/plugins/data/public';
-import { Space } from '../../../../../spaces/common/model/space';
+import { Space } from '../../../../../spaces/public';
+import { Feature } from '../../../../../features/public';
 import {
   RawKibanaPrivileges,
   Role,

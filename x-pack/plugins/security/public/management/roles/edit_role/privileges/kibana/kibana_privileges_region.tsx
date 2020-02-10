@@ -6,7 +6,7 @@
 
 import React, { Component } from 'react';
 import { Capabilities } from 'src/core/public';
-import { Space } from '../../../../../../../spaces/common/model/space';
+import { Space } from '../../../../../../../spaces/public';
 import { Role } from '../../../../../../common/model';
 import { RoleValidator } from '../../validate_role';
 import { CollapsiblePanel } from '../../collapsible_panel';

@@ -17,7 +17,16 @@
  * under the License.
  */
 
-import { App } from 'kibana/public';
+import {
+  App,
+  AppBase,
+  PluginInitializerContext,
+  AppUpdatableFields,
+  CoreStart,
+} from 'kibana/public';
+import { Observable } from 'rxjs';
+import { ConfigSchema } from '../config';
+import { getDashboardConfig } from './dashboard_config';
 
 interface ForwardDefinition {
   legacyAppId: string;
@@ -25,9 +34,29 @@ interface ForwardDefinition {
   keepPrefix: boolean;
 }
 
+export type AngularRenderedAppUpdater = (
+  app: AppBase
+) => Partial<AppUpdatableFields & { activeUrl: string }> | undefined;
+
+export interface AngularRenderedApp extends App {
+  /**
+   * Angular rendered apps are able to update the active url in the nav link (which is currently not
+   * possible for actual NP apps). When regular applications have the same functionality, this type
+   * override can be removed.
+   */
+  updater$?: Observable<AngularRenderedAppUpdater>;
+  /**
+   * If the active url is updated via the updater$ subject, the app id is assumed to be identical with
+   * the nav link id. If this is not the case, it is possible to provide another nav link id here.
+   */
+  navLinkId?: string;
+}
+
 export class KibanaLegacyPlugin {
-  private apps: App[] = [];
+  private apps: AngularRenderedApp[] = [];
   private forwards: ForwardDefinition[] = [];
+
+  constructor(private readonly initializerContext: PluginInitializerContext<ConfigSchema>) {}
 
   public setup() {
     return {
@@ -48,7 +77,7 @@ export class KibanaLegacyPlugin {
        *
        * @param app The app descriptor
        */
-      registerLegacyApp: (app: App) => {
+      registerLegacyApp: (app: AngularRenderedApp) => {
         this.apps.push(app);
       },
 
@@ -77,10 +106,12 @@ export class KibanaLegacyPlugin {
       ) => {
         this.forwards.push({ legacyAppId, newAppId, ...options });
       },
+
+      config: this.initializerContext.config.get(),
     };
   }
 
-  public start() {
+  public start({ application }: CoreStart) {
     return {
       /**
        * @deprecated
@@ -92,6 +123,8 @@ export class KibanaLegacyPlugin {
        * Just exported for wiring up with legacy platform, should not be used.
        */
       getForwards: () => this.forwards,
+      config: this.initializerContext.config.get(),
+      dashboardConfig: getDashboardConfig(!application.capabilities.dashboard.showWriteControls),
     };
   }
 }

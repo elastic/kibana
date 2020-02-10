@@ -18,8 +18,19 @@ import {
 import { FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
 import _ from 'lodash';
 import React, { Component } from 'react';
-import { getSpaceColor } from 'plugins/spaces/space_avatar';
-import { Role, FeaturesPrivileges, copyRole } from '../../../../../../../common/model';
+import { Space, getSpaceColor } from '../../../../../../../../spaces/public';
+import {
+  FeaturesPrivileges,
+  Role,
+  RoleKibanaPrivilege,
+  copyRole,
+} from '../../../../../../../common/model';
+import { KibanaPrivilegeCalculatorFactory } from '../kibana_privilege_calculator';
+import {
+  isGlobalPrivilegeDefinition,
+  hasAssignedFeaturePrivileges,
+} from '../../../privilege_utils';
+import { CUSTOM_PRIVILEGE_VALUE, NO_PRIVILEGE_VALUE } from '../constants';
 import { SpacesPopoverList } from '../../../spaces_popover_list';
 import { PrivilegeDisplay } from './privilege_display';
 import { Space } from '../../../../../../../../spaces/common/model/space';

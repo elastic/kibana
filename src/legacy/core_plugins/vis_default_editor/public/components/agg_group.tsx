@@ -30,7 +30,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { AggConfig, aggGroupNamesMap, AggGroupNames, Schema } from '../legacy_imports';
+import { IAggConfig, aggGroupNamesMap, AggGroupNames, Schema } from '../legacy_imports';
 import { DefaultEditorAgg } from './agg';
 import { DefaultEditorAggAdd } from './agg_add';
 import { AddSchema, ReorderAggs, DefaultEditorAggCommonProps } from './agg_common_props';
@@ -69,8 +69,8 @@ function DefaultEditorAggGroup({
 }: DefaultEditorAggGroupProps) {
   const groupNameLabel = (aggGroupNamesMap() as any)[groupName];
   // e.g. buckets can have no aggs
-  const group: AggConfig[] = useMemo(
-    () => state.aggs.aggs.filter((agg: AggConfig) => agg.schema.group === groupName) || [],
+  const group: IAggConfig[] = useMemo(
+    () => state.aggs.aggs.filter((agg: IAggConfig) => agg.schema.group === groupName) || [],
     [groupName, state.aggs.aggs]
   );
 
@@ -151,7 +151,7 @@ function DefaultEditorAggGroup({
         )}
         <EuiDroppable droppableId={`agg_group_dnd_${groupName}`}>
           <>
-            {group.map((agg: AggConfig, index: number) => (
+            {group.map((agg: IAggConfig, index: number) => (
               <EuiDraggable
                 key={agg.id}
                 index={index}
