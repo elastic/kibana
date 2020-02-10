@@ -13,7 +13,7 @@ jest.mock('../../features_tooltip/features_tooltip', () => ({
 import sinon from 'sinon';
 import React from 'react';
 import { mount, shallow } from 'enzyme';
-import { TooltipControl, TOOLTIP_TYPE } from './tooltip_control';
+import { TooltipControl } from './tooltip_control';
 
 // mutable map state
 let featuresAtLocation;
@@ -82,16 +82,21 @@ const mockMBMap = {
 
 const defaultProps = {
   mbMap: mockMBMap,
-  clearTooltipState: () => {},
-  setTooltipState: () => {},
+  closeOnClickTooltip: () => {},
+  openOnClickTooltip: () => {},
+  closeOnHoverTooltip: () => {},
+  openOnHoverTooltip: () => {},
   layerList: [mockLayer],
   isDrawingFilter: false,
   addFilters: () => {},
   geoFields: [{}],
+  openTooltips: [],
+  hasLockedTooltips: false,
 };
 
 const hoverTooltipState = {
-  type: TOOLTIP_TYPE.HOVER,
+  id: '1',
+  isLocked: false,
   location: [-120, 30],
   features: [
     {
@@ -103,7 +108,8 @@ const hoverTooltipState = {
 };
 
 const lockedTooltipState = {
-  type: TOOLTIP_TYPE.LOCKED,
+  id: '2',
+  isLocked: true,
   location: [-120, 30],
   features: [
     {
@@ -127,72 +133,76 @@ describe('TooltipControl', () => {
   });
 
   describe('render', () => {
-    describe('tooltipState is not provided', () => {
-      test('should not render tooltip popover when tooltipState is not provided', () => {
-        const component = shallow(<TooltipControl {...defaultProps} />);
+    test('should not render tooltips when there are no open tooltips', () => {
+      const component = shallow(<TooltipControl {...defaultProps} />);
 
-        expect(component).toMatchSnapshot();
-      });
+      expect(component).toMatchSnapshot();
     });
 
-    describe('tooltipState is provided', () => {
-      test('should render tooltip popover with features tooltip content', () => {
-        const component = shallow(
-          <TooltipControl {...defaultProps} tooltipState={hoverTooltipState} />
-        );
+    test('should render hover tooltip', () => {
+      const component = shallow(
+        <TooltipControl {...defaultProps} openTooltips={[hoverTooltipState]} />
+      );
 
-        expect(component).toMatchSnapshot();
-      });
+      expect(component).toMatchSnapshot();
+    });
 
-      test('should render tooltip popover with custom tooltip content when renderTooltipContent provided', () => {
-        const component = shallow(
-          <TooltipControl
-            {...defaultProps}
-            tooltipState={hoverTooltipState}
-            renderTooltipContent={props => {
-              return <div {...props}>Custom tooltip content</div>;
-            }}
-          />
-        );
+    test('should render locked tooltip', () => {
+      const component = shallow(
+        <TooltipControl
+          {...defaultProps}
+          hasLockedTooltips={true}
+          openTooltips={[lockedTooltipState]}
+        />
+      );
 
-        expect(component).toMatchSnapshot();
-      });
+      expect(component).toMatchSnapshot();
+    });
+
+    test('should un-register all map callbacks on unmount', () => {
+      const component = mount(<TooltipControl {...defaultProps} />);
+
+      expect(Object.keys(mockMbMapHandlers).length).toBe(3);
+
+      component.unmount();
+      expect(Object.keys(mockMbMapHandlers).length).toBe(0);
     });
   });
 
   describe('on mouse out', () => {
-    const clearTooltipStateStub = sinon.stub();
+    const closeOnHoverTooltipStub = sinon.stub();
 
     beforeEach(() => {
-      clearTooltipStateStub.reset();
+      closeOnHoverTooltipStub.reset();
     });
 
     test('should clear hover tooltip state', () => {
       mount(
         <TooltipControl
           {...defaultProps}
-          clearTooltipState={clearTooltipStateStub}
-          tooltipState={hoverTooltipState}
+          closeOnHoverTooltip={closeOnHoverTooltipStub}
+          openTooltips={[hoverTooltipState]}
         />
       );
 
       mockMbMapHandlers.mouseout();
 
-      sinon.assert.calledOnce(clearTooltipStateStub);
+      sinon.assert.calledOnce(closeOnHoverTooltipStub);
     });
 
     test('should not clear locked tooltip state', () => {
       mount(
         <TooltipControl
           {...defaultProps}
-          clearTooltipState={clearTooltipStateStub}
-          tooltipState={lockedTooltipState}
+          closeOnHoverTooltip={closeOnHoverTooltipStub}
+          hasLockedTooltips={true}
+          openTooltips={[lockedTooltipState]}
         />
       );
 
       mockMbMapHandlers.mouseout();
 
-      sinon.assert.notCalled(clearTooltipStateStub);
+      sinon.assert.notCalled(closeOnHoverTooltipStub);
     });
   });
 
@@ -201,44 +211,44 @@ describe('TooltipControl', () => {
       point: { x: 0, y: 0 },
       lngLat: { lng: 0, lat: 0 },
     };
-    const setTooltipStateStub = sinon.stub();
-    const clearTooltipStateStub = sinon.stub();
+    const openOnClickTooltipStub = sinon.stub();
+    const closeOnClickTooltipStub = sinon.stub();
 
     beforeEach(() => {
-      setTooltipStateStub.reset();
-      clearTooltipStateStub.reset();
+      openOnClickTooltipStub.reset();
+      closeOnClickTooltipStub.reset();
     });
 
     test('should ignore clicks when map is in drawing mode', () => {
       mount(
         <TooltipControl
           {...defaultProps}
-          clearTooltipState={clearTooltipStateStub}
-          setTooltipState={setTooltipStateStub}
+          closeOnClickTooltip={closeOnClickTooltipStub}
+          openOnClickTooltip={openOnClickTooltipStub}
           isDrawingFilter={true}
         />
       );
 
       mockMbMapHandlers.click(mockMapMouseEvent);
 
-      sinon.assert.notCalled(clearTooltipStateStub);
-      sinon.assert.notCalled(setTooltipStateStub);
+      sinon.assert.notCalled(closeOnClickTooltipStub);
+      sinon.assert.notCalled(openOnClickTooltipStub);
     });
 
-    test('should clear tooltip state when there are no features at clicked location', () => {
+    test('should not open tooltip when there are no features at clicked location', () => {
       featuresAtLocation = [];
       mount(
         <TooltipControl
           {...defaultProps}
-          clearTooltipState={clearTooltipStateStub}
-          setTooltipState={setTooltipStateStub}
+          closeOnClickTooltip={closeOnClickTooltipStub}
+          openOnClickTooltip={openOnClickTooltipStub}
         />
       );
 
       mockMbMapHandlers.click(mockMapMouseEvent);
 
-      sinon.assert.calledOnce(clearTooltipStateStub);
-      sinon.assert.notCalled(setTooltipStateStub);
+      sinon.assert.notCalled(closeOnClickTooltipStub);
+      sinon.assert.notCalled(openOnClickTooltipStub);
     });
 
     test('should set tooltip state when there are features at clicked location and remove duplicate features', () => {
@@ -258,93 +268,18 @@ describe('TooltipControl', () => {
       mount(
         <TooltipControl
           {...defaultProps}
-          clearTooltipState={clearTooltipStateStub}
-          setTooltipState={setTooltipStateStub}
+          closeOnClickTooltip={closeOnClickTooltipStub}
+          openOnClickTooltip={openOnClickTooltipStub}
         />
       );
 
       mockMbMapHandlers.click(mockMapMouseEvent);
 
-      sinon.assert.notCalled(clearTooltipStateStub);
-      sinon.assert.calledWith(setTooltipStateStub, {
+      sinon.assert.notCalled(closeOnClickTooltipStub);
+      sinon.assert.calledWith(openOnClickTooltipStub, {
         features: [{ id: 1, layerId: 'tfi3f' }],
         location: [100, 30],
-        type: 'LOCKED',
       });
     });
-  });
-
-  describe('on map move', () => {
-    const clearTooltipStateStub = sinon.stub();
-
-    beforeEach(() => {
-      clearTooltipStateStub.reset();
-    });
-
-    test('should safely handle map move when there is no tooltip location', () => {
-      const component = mount(
-        <TooltipControl {...defaultProps} clearTooltipState={clearTooltipStateStub} />
-      );
-
-      mockMbMapHandlers.move();
-      component.update();
-
-      sinon.assert.notCalled(clearTooltipStateStub);
-    });
-
-    test('should update popover location', () => {
-      const component = mount(
-        <TooltipControl
-          {...defaultProps}
-          tooltipState={hoverTooltipState}
-          clearTooltipState={clearTooltipStateStub}
-        />
-      );
-
-      // ensure x and y set from original tooltipState.location
-      expect(component.state('x')).toBe(12000);
-      expect(component.state('y')).toBe(3000);
-
-      mapCenter = [25, -15];
-      mockMbMapHandlers.move();
-      component.update();
-
-      // ensure x and y updated from new map center with same tooltipState.location
-      expect(component.state('x')).toBe(14500);
-      expect(component.state('y')).toBe(4500);
-
-      sinon.assert.notCalled(clearTooltipStateStub);
-    });
-
-    test('should clear tooltip state if tooltip location is outside map bounds', () => {
-      const component = mount(
-        <TooltipControl
-          {...defaultProps}
-          tooltipState={hoverTooltipState}
-          clearTooltipState={clearTooltipStateStub}
-        />
-      );
-
-      // move map bounds outside of hoverTooltipState.location, which is [-120, 30]
-      mockMbMapBounds = {
-        west: -180,
-        east: -170,
-        north: 90,
-        south: 80,
-      };
-      mockMbMapHandlers.move();
-      component.update();
-
-      sinon.assert.calledOnce(clearTooltipStateStub);
-    });
-  });
-
-  test('should un-register all map callbacks on unmount', () => {
-    const component = mount(<TooltipControl {...defaultProps} />);
-
-    expect(Object.keys(mockMbMapHandlers).length).toBe(4);
-
-    component.unmount();
-    expect(Object.keys(mockMbMapHandlers).length).toBe(0);
   });
 });
