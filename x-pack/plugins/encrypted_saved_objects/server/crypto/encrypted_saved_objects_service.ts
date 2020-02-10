@@ -11,6 +11,7 @@ import typeDetect from 'type-detect';
 import { Logger } from 'src/core/server';
 import { EncryptedSavedObjectsAuditLogger } from '../audit';
 import { EncryptionError } from './encryption_error';
+import { EncryptedSavedObjectTypeDefinition } from './encrypted_saved_object_type_definition';
 
 /**
  * Describes the attributes to encrypt. By default, attribute values won't be exposed to end-users and
@@ -66,9 +67,9 @@ export class EncryptedSavedObjectsService {
 
   /**
    * Map of all registered saved object types where the `key` is saved object type and the `value`
-   * is the registration parameters (names of attributes that need to be encrypted etc.).
+   * is the definition (names of attributes that need to be encrypted etc.).
    */
-  private readonly typeRegistrations: Map<string, EncryptedSavedObjectTypeRegistration> = new Map();
+  private readonly typeDefinitions: Map<string, EncryptedSavedObjectTypeDefinition> = new Map();
 
   /**
    * @param encryptionKey The key used to encrypt and decrypt saved objects attributes.
@@ -95,11 +96,14 @@ export class EncryptedSavedObjectsService {
       throw new Error(`The "attributesToEncrypt" array for "${typeRegistration.type}" is empty.`);
     }
 
-    if (this.typeRegistrations.has(typeRegistration.type)) {
+    if (this.typeDefinitions.has(typeRegistration.type)) {
       throw new Error(`The "${typeRegistration.type}" saved object type is already registered.`);
     }
 
-    this.typeRegistrations.set(typeRegistration.type, typeRegistration);
+    this.typeDefinitions.set(
+      typeRegistration.type,
+      new EncryptedSavedObjectTypeDefinition(typeRegistration)
+    );
   }
 
   /**
@@ -108,7 +112,7 @@ export class EncryptedSavedObjectsService {
    * @param type Saved object type.
    */
   public isRegistered(type: string) {
-    return this.typeRegistrations.has(type);
+    return this.typeDefinitions.has(type);
   }
 
   /**
@@ -121,14 +125,14 @@ export class EncryptedSavedObjectsService {
     type: string,
     attributes: T
   ): Record<string, unknown> {
-    const typeRegistration = this.typeRegistrations.get(type);
-    if (typeRegistration === undefined) {
+    const typeDefinition = this.typeDefinitions.get(type);
+    if (typeDefinition === undefined) {
       return attributes;
     }
 
     const clonedAttributes: Record<string, unknown> = {};
     for (const [attributeName, attributeValue] of Object.entries(attributes)) {
-      if (!typeRegistration.attributesToEncrypt.has(attributeName)) {
+      if (!typeDefinition.attributesToStrip.has(attributeName)) {
         clonedAttributes[attributeName] = attributeValue;
       }
     }
@@ -148,14 +152,14 @@ export class EncryptedSavedObjectsService {
     descriptor: SavedObjectDescriptor,
     attributes: T
   ): Promise<T> {
-    const typeRegistration = this.typeRegistrations.get(descriptor.type);
-    if (typeRegistration === undefined) {
+    const typeDefinition = this.typeDefinitions.get(descriptor.type);
+    if (typeDefinition === undefined) {
       return attributes;
     }
 
-    const encryptionAAD = this.getAAD(typeRegistration, descriptor, attributes);
+    const encryptionAAD = this.getAAD(typeDefinition, descriptor, attributes);
     const encryptedAttributes: Record<string, string> = {};
-    for (const attributeName of typeRegistration.attributesToEncrypt) {
+    for (const attributeName of typeDefinition.attributesToEncrypt) {
       const attributeValue = attributes[attributeName];
       if (attributeValue != null) {
         try {
@@ -181,12 +185,12 @@ export class EncryptedSavedObjectsService {
     // Normally we expect all registered to-be-encrypted attributes to be defined, but if it's
     // not the case we should collect and log them to make troubleshooting easier.
     const encryptedAttributesKeys = Object.keys(encryptedAttributes);
-    if (encryptedAttributesKeys.length !== typeRegistration.attributesToEncrypt.size) {
+    if (encryptedAttributesKeys.length !== typeDefinition.attributesToEncrypt.size) {
       this.logger.debug(
         `The following attributes of saved object "${descriptorToArray(
           descriptor
         )}" should have been encrypted: ${Array.from(
-          typeRegistration.attributesToEncrypt
+          typeDefinition.attributesToEncrypt
         )}, but found only: ${encryptedAttributesKeys}`
       );
     }
@@ -216,14 +220,14 @@ export class EncryptedSavedObjectsService {
     descriptor: SavedObjectDescriptor,
     attributes: T
   ): Promise<T> {
-    const typeRegistration = this.typeRegistrations.get(descriptor.type);
-    if (typeRegistration === undefined) {
+    const typeDefinition = this.typeDefinitions.get(descriptor.type);
+    if (typeDefinition === undefined) {
       return attributes;
     }
 
-    const encryptionAAD = this.getAAD(typeRegistration, descriptor, attributes);
+    const encryptionAAD = this.getAAD(typeDefinition, descriptor, attributes);
     const decryptedAttributes: Record<string, string> = {};
-    for (const attributeName of typeRegistration.attributesToEncrypt) {
+    for (const attributeName of typeDefinition.attributesToEncrypt) {
       const attributeValue = attributes[attributeName];
       if (attributeValue == null) {
         continue;
@@ -258,12 +262,12 @@ export class EncryptedSavedObjectsService {
     // Normally we expect all registered to-be-encrypted attributes to be defined, but if it's
     // not the case we should collect and log them to make troubleshooting easier.
     const decryptedAttributesKeys = Object.keys(decryptedAttributes);
-    if (decryptedAttributesKeys.length !== typeRegistration.attributesToEncrypt.size) {
+    if (decryptedAttributesKeys.length !== typeDefinition.attributesToEncrypt.size) {
       this.logger.debug(
         `The following attributes of saved object "${descriptorToArray(
           descriptor
         )}" should have been decrypted: ${Array.from(
-          typeRegistration.attributesToEncrypt
+          typeDefinition.attributesToEncrypt
         )}, but found only: ${decryptedAttributesKeys}`
       );
     }
@@ -288,7 +292,7 @@ export class EncryptedSavedObjectsService {
    * @param attributes All attributes of the saved object instance of the specified type.
    */
   private getAAD(
-    typeRegistration: EncryptedSavedObjectTypeRegistration,
+    typeDefinition: EncryptedSavedObjectTypeDefinition,
     descriptor: SavedObjectDescriptor,
     attributes: Record<string, unknown>
   ) {
@@ -296,9 +300,9 @@ export class EncryptedSavedObjectsService {
     const attributesAAD: Record<string, unknown> = {};
     for (const [attributeKey, attributeValue] of Object.entries(attributes)) {
       if (
-        !typeRegistration.attributesToEncrypt.has(attributeKey) &&
-        (typeRegistration.attributesToExcludeFromAAD == null ||
-          !typeRegistration.attributesToExcludeFromAAD.has(attributeKey))
+        !typeDefinition.attributesToEncrypt.has(attributeKey) &&
+        (typeDefinition.attributesToExcludeFromAAD == null ||
+          !typeDefinition.attributesToExcludeFromAAD.has(attributeKey))
       ) {
         attributesAAD[attributeKey] = attributeValue;
       }
