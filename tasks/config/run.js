@@ -213,7 +213,7 @@ module.exports = function(grunt) {
     test_hardening: scriptWithGithubChecks({
       title: 'Node.js hardening tests',
       cmd: NODE,
-      args: ['scripts/test_hardening.js', 'test/harden/*.js'],
+      args: ['scripts/test_hardening.js'],
     }),
 
     apiIntegrationTests: scriptWithGithubChecks({

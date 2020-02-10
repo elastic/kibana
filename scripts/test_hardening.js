@@ -18,14 +18,33 @@
  */
 
 var execFileSync = require('child_process').execFileSync;
-var basename = require('path').basename;
+var readdirSync = require('fs').readdirSync;
+var path = require('path');
 var glob = require('glob');
+var program = require('commander');
 
-process.argv.slice(2).forEach(function(file) {
-  var files = glob.sync(file);
-  files.forEach(function(file) {
-    if (basename(file)[0] === '_') return;
-    console.log(process.argv[0], file);
-    execFileSync(process.argv[0], [file], { stdio: 'inherit' });
+program
+  .name('node scripts/test_hardening.js')
+  .arguments('[file...]')
+  .description(
+    'Run the tests in test/harden directory. If no files are provided, all files within the directory will be run.'
+  )
+  .action(function(files) {
+    if (files.length === 0) files = allFiles();
+    files.forEach(function(file) {
+      var files = glob.sync(file);
+      files.forEach(function(file) {
+        if (path.basename(file)[0] === '_') return;
+        console.log(process.argv[0], file);
+        execFileSync(process.argv[0], [file], { stdio: 'inherit' });
+      });
+    });
+  })
+  .parse(process.argv);
+
+function allFiles() {
+  var dir = path.join('test', 'harden');
+  return readdirSync(dir).map(function(file) {
+    return path.join(dir, file);
   });
-});
+}
