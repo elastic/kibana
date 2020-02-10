@@ -320,8 +320,15 @@ export function App({
         {lastKnownDoc && state.isSaveModalVisible && (
           <SavedObjectSaveModal
             onSave={props => {
+              const appFilters = lastKnownDoc.state.filters.filter(
+                f => !esFilters.isFilterPinned(f)
+              );
               const doc = {
                 ...lastKnownDoc,
+                state: {
+                  ...lastKnownDoc.state,
+                  filters: appFilters,
+                },
                 id: props.newCopyOnSave ? undefined : lastKnownDoc.id,
                 title: props.newTitle,
               };
