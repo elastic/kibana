@@ -14,6 +14,7 @@ import React, { useCallback, useRef, useEffect, useMemo, useState, useLayoutEffe
 import euiStyled from '../../../../../../common/eui_styled_components';
 
 const DEFAULT_ITEM_HEIGHT = 25;
+const OVERSCAN_COUNT = 20;
 const ITEM_PADDING = 4;
 const STREAM_ITEM_HEIGHT = 40;
 
@@ -82,7 +83,7 @@ export const VerticalScrollPanel: React.FC<VerticalScrollPanelProps> = ({
       console.log('scrollToTarget', targetChild);
       windowRef.current?.scrollToItem(targetChild, 'end');
     }
-  }, [isScrollLocked, windowRef.current]);
+  }, [isScrollLocked, windowRef.current, targetChild]);
   useEffect(() => scrollToTargetEffect, [targetChild]);
 
   const childrenIDStringLookup = useMemo(
@@ -99,9 +100,9 @@ export const VerticalScrollPanel: React.FC<VerticalScrollPanelProps> = ({
     [childrenArray]
   );
 
-  const resizeItemsEffect = useCallback(() => windowRef.current?.resetAfterIndex(0, true), [
-    windowRef.current,
-  ]);
+  const resizeItemsEffect = useCallback(() => {
+    windowRef.current?.resetAfterIndex(0, true);
+  }, [windowRef.current]);
   useEffect(resizeItemsEffect, [windowRef.current, childHeightsLookup]);
 
   // const handleScrollWhileStreaming = useCallback()
@@ -154,7 +155,7 @@ export const VerticalScrollPanel: React.FC<VerticalScrollPanelProps> = ({
         onVisibleChildrenChange(visibleChildren);
       }
     ),
-    [childrenIDStringLookup, hasInitializedColumnWidth]
+    [childrenIDStringLookup]
   );
 
   return (
@@ -171,8 +172,8 @@ export const VerticalScrollPanel: React.FC<VerticalScrollPanelProps> = ({
         }
         itemData={{ childrenArray, recordChildHeight, childrenIDStringLookup }}
         onItemsRendered={onItemsRendered}
-        estimatedItemSize={DEFAULT_ITEM_HEIGHT * 4}
-        overscanCount={isStreaming && !isScrollLocked ? 9999 : 4}
+        estimatedItemSize={DEFAULT_ITEM_HEIGHT}
+        overscanCount={isStreaming && !isScrollLocked ? 9999 : OVERSCAN_COUNT}
         fixStreamToBottom={isStreaming && !isScrollLocked}
       >
         {ListItem}
