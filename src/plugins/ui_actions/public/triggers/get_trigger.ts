@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { IUiActionsApiPure } from '../types';
+import { UiActionsApiPure } from '../types';
 
-export const getTrigger: IUiActionsApiPure['getTrigger'] = ({ triggers }) => id => {
+export const getTrigger: UiActionsApiPure['getTrigger'] = ({ triggers }) => id => {
   const trigger = triggers.get(id);
 
   if (!trigger) {

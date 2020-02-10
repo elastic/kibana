@@ -17,10 +17,119 @@
  * under the License.
  */
 
-// FieldMapping isn't 1:1 with the options available,
-// modify as needed.
-export interface CoreFieldMapping {
+/**
+ * Describe a saved object type mapping.
+ *
+ * @example
+ * ```ts
+ * const typeDefinition: SavedObjectsTypeMappingDefinition = {
+ *   properties: {
+ *     enabled: {
+ *       type: "boolean"
+ *     },
+ *     sendUsageFrom: {
+ *       ignore_above: 256,
+ *       type: "keyword"
+ *     },
+ *     lastReported: {
+ *       type: "date"
+ *     },
+ *     lastVersionChecked: {
+ *       ignore_above: 256,
+ *       type: "keyword"
+ *     },
+ *   }
+ * }
+ * ```
+ *
+ * @public
+ */
+export interface SavedObjectsTypeMappingDefinition {
+  properties: SavedObjectsMappingProperties;
+}
+
+/**
+ * A map of {@link SavedObjectsTypeMappingDefinition | saved object type mappings}
+ *
+ * @example
+ * ```ts
+ * const mappings: SavedObjectsTypeMappingDefinitions = {
+ *   someType: {
+ *     properties: {
+ *       enabled: {
+ *         type: "boolean"
+ *       },
+ *       field: {
+ *         type: "keyword"
+ *       },
+ *     },
+ *   },
+ *   anotherType: {
+ *     properties: {
+ *       enabled: {
+ *         type: "boolean"
+ *       },
+ *       lastReported: {
+ *         type: "date"
+ *       },
+ *     },
+ *   },
+
+ * }
+ * ```
+ * @remark This is the format for the legacy `mappings.json` savedObject mapping file.
+ *
+ * @internal
+ */
+export interface SavedObjectsTypeMappingDefinitions {
+  [type: string]: SavedObjectsTypeMappingDefinition;
+}
+
+/**
+ * Describe the fields of a {@link SavedObjectsTypeMappingDefinition | saved object type}.
+ *
+ * @public
+ */
+export interface SavedObjectsMappingProperties {
+  [field: string]: SavedObjectsFieldMapping;
+}
+
+/**
+ * Describe a {@link SavedObjectsTypeMappingDefinition | saved object type mapping} field.
+ *
+ * Please refer to {@link https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping-types.html | elasticsearch documentation}
+ * For the mapping documentation
+ *
+ * @public
+ */
+export type SavedObjectsFieldMapping =
+  | SavedObjectsCoreFieldMapping
+  | SavedObjectsComplexFieldMapping;
+
+/** @internal */
+export interface IndexMapping {
+  dynamic?: string;
+  properties: SavedObjectsMappingProperties;
+  _meta?: IndexMappingMeta;
+}
+
+/** @internal */
+export interface IndexMappingMeta {
+  // A dictionary of key -> md5 hash (e.g. 'dashboard': '24234qdfa3aefa3wa')
+  // with each key being a root-level mapping property, and each value being
+  // the md5 hash of that mapping's value when the index was created.
+  migrationMappingPropertyHashes?: { [k: string]: string };
+}
+
+/**
+ * See {@link SavedObjectsFieldMapping} for documentation.
+ *
+ * @public
+ */
+export interface SavedObjectsCoreFieldMapping {
   type: string;
+  index?: boolean;
+  enabled?: boolean;
   fields?: {
     [subfield: string]: {
       type: string;
@@ -28,36 +137,13 @@ export interface CoreFieldMapping {
   };
 }
 
-// FieldMapping isn't 1:1 with the options available,
-// modify as needed.
-export interface ComplexFieldMapping {
+/**
+ * See {@link SavedObjectsFieldMapping} for documentation.
+ *
+ * @public
+ */
+export interface SavedObjectsComplexFieldMapping {
   dynamic?: string;
   type?: string;
-  properties: MappingProperties;
-}
-
-export type FieldMapping = CoreFieldMapping | ComplexFieldMapping;
-
-export interface MappingProperties {
-  [field: string]: FieldMapping;
-}
-
-export interface SavedObjectsMapping {
-  pluginId: string;
-  properties: MappingProperties;
-}
-
-export interface MappingMeta {
-  // A dictionary of key -> md5 hash (e.g. 'dashboard': '24234qdfa3aefa3wa')
-  // with each key being a root-level mapping property, and each value being
-  // the md5 hash of that mapping's value when the index was created.
-  migrationMappingPropertyHashes?: { [k: string]: string };
-}
-
-// IndexMapping isn't 1:1 with the options available,
-// modify as needed.
-export interface IndexMapping {
-  dynamic?: string;
-  properties: MappingProperties;
-  _meta?: MappingMeta;
+  properties: SavedObjectsMappingProperties;
 }

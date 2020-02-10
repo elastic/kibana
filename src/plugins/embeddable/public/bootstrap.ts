@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { IUiActionsSetup } from 'src/plugins/ui_actions/public';
+import { UiActionsSetup } from 'src/plugins/ui_actions/public';
 import {
   CONTEXT_MENU_TRIGGER,
   APPLY_FILTER_TRIGGER,
@@ -33,7 +33,7 @@ import {
  *
  * @param api
  */
-export const bootstrap = (uiActions: IUiActionsSetup) => {
+export const bootstrap = (uiActions: UiActionsSetup) => {
   const triggerContext = {
     id: CONTEXT_MENU_TRIGGER,
     title: 'Context menu',

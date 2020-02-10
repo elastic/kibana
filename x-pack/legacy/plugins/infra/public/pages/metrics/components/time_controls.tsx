@@ -5,9 +5,11 @@
  */
 
 import { EuiSuperDatePicker, OnRefreshChangeProps, OnTimeChangeProps } from '@elastic/eui';
-import React from 'react';
+import React, { useCallback } from 'react';
 import euiStyled from '../../../../../../common/eui_styled_components';
 import { MetricsTimeInput } from '../containers/with_metrics_time';
+import { useKibanaUiSetting } from '../../../utils/use_kibana_ui_setting';
+import { mapKibanaQuickRangesToDatePickerRanges } from '../../../utils/map_timepicker_quickranges_to_datepicker_ranges';
 
 interface MetricsTimeControlsProps {
   currentTimeRange: MetricsTimeInput;
@@ -19,41 +21,58 @@ interface MetricsTimeControlsProps {
   onRefresh: () => void;
 }
 
-export class MetricsTimeControls extends React.Component<MetricsTimeControlsProps> {
-  public render() {
-    const { currentTimeRange, isLiveStreaming, refreshInterval } = this.props;
-    return (
-      <MetricsTimeControlsContainer>
-        <EuiSuperDatePicker
-          start={currentTimeRange.from}
-          end={currentTimeRange.to}
-          isPaused={!isLiveStreaming}
-          refreshInterval={refreshInterval ? refreshInterval : 0}
-          onTimeChange={this.handleTimeChange}
-          onRefreshChange={this.handleRefreshChange}
-          onRefresh={this.props.onRefresh}
-        />
-      </MetricsTimeControlsContainer>
-    );
-  }
+export const MetricsTimeControls = (props: MetricsTimeControlsProps) => {
+  const [timepickerQuickRanges] = useKibanaUiSetting('timepicker:quickRanges');
+  const {
+    onChangeTimeRange,
+    onRefresh,
+    currentTimeRange,
+    isLiveStreaming,
+    refreshInterval,
+    setAutoReload,
+    setRefreshInterval,
+  } = props;
 
-  private handleTimeChange = ({ start, end }: OnTimeChangeProps) => {
-    this.props.onChangeTimeRange({
-      from: start,
-      to: end,
-      interval: '>=1m',
-    });
-  };
+  const commonlyUsedRanges = mapKibanaQuickRangesToDatePickerRanges(timepickerQuickRanges);
 
-  private handleRefreshChange = ({ isPaused, refreshInterval }: OnRefreshChangeProps) => {
-    if (isPaused) {
-      this.props.setAutoReload(false);
-    } else {
-      this.props.setRefreshInterval(refreshInterval);
-      this.props.setAutoReload(true);
-    }
-  };
-}
+  const handleTimeChange = useCallback(
+    ({ start, end }: OnTimeChangeProps) => {
+      onChangeTimeRange({
+        from: start,
+        to: end,
+        interval: '>=1m',
+      });
+    },
+    [onChangeTimeRange]
+  );
+
+  const handleRefreshChange = useCallback(
+    ({ isPaused, refreshInterval: _refreshInterval }: OnRefreshChangeProps) => {
+      if (isPaused) {
+        setAutoReload(false);
+      } else {
+        setRefreshInterval(_refreshInterval);
+        setAutoReload(true);
+      }
+    },
+    [setAutoReload, setRefreshInterval]
+  );
+
+  return (
+    <MetricsTimeControlsContainer>
+      <EuiSuperDatePicker
+        start={currentTimeRange.from}
+        end={currentTimeRange.to}
+        isPaused={!isLiveStreaming}
+        refreshInterval={refreshInterval ? refreshInterval : 0}
+        onTimeChange={handleTimeChange}
+        onRefreshChange={handleRefreshChange}
+        onRefresh={onRefresh}
+        commonlyUsedRanges={commonlyUsedRanges}
+      />
+    </MetricsTimeControlsContainer>
+  );
+};
 
 const MetricsTimeControlsContainer = euiStyled.div`
   max-width: 750px;

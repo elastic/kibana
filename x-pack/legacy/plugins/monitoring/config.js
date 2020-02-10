@@ -18,6 +18,9 @@ export const config = Joi => {
     enabled: Joi.boolean().default(true),
     ui: Joi.object({
       enabled: Joi.boolean().default(true),
+      logs: Joi.object({
+        index: Joi.string().default('filebeat-*'),
+      }).default(),
       ccs: Joi.object({
         enabled: Joi.boolean().default(true),
       }).default(),
