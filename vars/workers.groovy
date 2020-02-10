@@ -14,7 +14,7 @@
 def base(Map params, Closure closure) {
   def config = [label: '', ramDisk: true, bootstrapped: true, name: 'unnamed-worker', scm: scm] + params
   if (!config.label) {
-    error "You must specify an agent label, such as 'tests-xl' or 'linux && immutable', when using withWorker()"
+    error "You must specify an agent label, such as 'tests-xl' or 'linux && immutable', when using workers.base()"
   }
 
   node(config.label) {
