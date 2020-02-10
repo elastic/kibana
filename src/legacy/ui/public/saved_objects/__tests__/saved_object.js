@@ -34,7 +34,6 @@ describe('Saved Object', function() {
   require('test_utils/no_digest_promises').activateForSuite();
 
   let SavedObject;
-  let esDataStub;
   let savedObjectsClientStub;
   let window;
 
@@ -90,10 +89,6 @@ describe('Saved Object', function() {
     obj[fName].restore && obj[fName].restore();
   }
 
-  const mock409FetchError = {
-    res: { status: 409 },
-  };
-
   beforeEach(
     ngMock.module(
       'kibana',
@@ -108,10 +103,9 @@ describe('Saved Object', function() {
   );
 
   beforeEach(
-    ngMock.inject(function(es, $window) {
+    ngMock.inject(function($window) {
       savedObjectsClientStub = npStart.core.savedObjects.client;
       SavedObject = createSavedObjectClass({ savedObjectsClient: savedObjectsClientStub });
-      esDataStub = es;
       window = $window;
     })
   );
@@ -130,7 +124,6 @@ describe('Saved Object', function() {
     describe('with confirmOverwrite', function() {
       function stubConfirmOverwrite() {
         window.confirm = sinon.stub().returns(true);
-        sinon.stub(esDataStub, 'create').returns(Bluebird.reject(mock409FetchError));
       }
 
       it('when false does not request overwrite', function() {

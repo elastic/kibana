@@ -7,15 +7,16 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Chrome } from 'ui/chrome';
-import { IModule } from 'angular';
 import { i18n } from '@kbn/i18n';
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 import { CoreSetup, CoreStart, Plugin } from '../../../../../src/core/public';
+import { HomePublicPluginSetup } from '../../../../../src/plugins/home/public';
 // @ts-ignore: Untyped Local
-import { initStateManagement, initLocationProvider } from './angular/config';
-import { CanvasRootControllerFactory } from './angular/controllers';
-// @ts-ignore: Untypled Local
-import { initStore } from './angular/services';
+import { CapabilitiesStrings } from '../i18n';
+const { ReadOnlyBadge: strings } = CapabilitiesStrings;
+
+import { createStore } from './store';
+
 // @ts-ignore: untyped local component
 import { HelpMenu } from './components/help_menu/help_menu';
 // @ts-ignore: untyped local
@@ -27,6 +28,7 @@ import { getDocumentationLinks } from './lib/documentation_links';
 
 // @ts-ignore: untyped local
 import { initClipboard } from './lib/clipboard';
+import { featureCatalogueEntry } from './feature_catalogue_entry';
 
 export { CoreStart };
 /**
@@ -34,18 +36,16 @@ export { CoreStart };
  * @internal
  */
 // This interface will be built out as we require other plugins for setup
-export interface CanvasSetupDeps {} // eslint-disable-line @typescript-eslint/no-empty-interface
+export interface CanvasSetupDeps {
+  home: HomePublicPluginSetup;
+}
 export interface CanvasStartDeps {
   __LEGACY: {
     absoluteToParsedUrl: (url: string, basePath: string) => any;
     formatMsg: any;
     QueryString: any;
-    setRootController: Chrome['setRootController'];
     storage: typeof Storage;
     trackSubUrlForApp: Chrome['trackSubUrlForApp'];
-    uiModules: {
-      get: (module: string) => IModule;
-    };
   };
 }
 
@@ -67,6 +67,25 @@ export class CanvasPlugin
     // Things like registering functions to the interpreter that need
     // to be available everywhere, not just in Canvas
 
+    core.application.register({
+      id: 'canvas',
+      title: 'Canvas App',
+      async mount(context, params) {
+        // Load application bundle
+        const { renderApp } = await import('./application');
+
+        // Setup our store
+        const canvasStore = await createStore(core, plugins);
+
+        // Get start services
+        const [coreStart, depsStart] = await core.getStartServices();
+
+        return renderApp(coreStart, depsStart, params, canvasStore);
+      },
+    });
+
+    plugins.home.featureCatalogue.register(featureCatalogueEntry);
+
     return {};
   }
 
@@ -74,14 +93,19 @@ export class CanvasPlugin
     loadExpressionTypes();
     loadTransitions();
 
-    initStateManagement(core, plugins);
-    initLocationProvider(core, plugins);
-    initStore(core, plugins);
     initClipboard(plugins.__LEGACY.storage);
     initLoadingIndicator(core.http.addLoadingCountSource);
 
-    const CanvasRootController = CanvasRootControllerFactory(core, plugins);
-    plugins.__LEGACY.setRootController('canvas', CanvasRootController);
+    core.chrome.setBadge(
+      core.application.capabilities.canvas && core.application.capabilities.canvas.save
+        ? undefined
+        : {
+            text: strings.getText(),
+            tooltip: strings.getTooltip(),
+            iconType: 'glasses',
+          }
+    );
+
     core.chrome.setHelpExtension({
       appName: i18n.translate('xpack.canvas.helpMenu.appName', {
         defaultMessage: 'Canvas',

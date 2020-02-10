@@ -63,13 +63,18 @@ const actionExecutorInitializerParams = {
 };
 const taskRunnerFactoryInitializerParams = {
   spaceIdToNamespace,
+  logger: loggingServiceMock.create().get(),
   encryptedSavedObjectsPlugin: mockedEncryptedSavedObjectsPlugin,
   getBasePath: jest.fn().mockReturnValue(undefined),
+  getScopedSavedObjectsClient: jest.fn().mockReturnValue(services.savedObjectsClient),
 };
 
 beforeEach(() => {
   jest.resetAllMocks();
   actionExecutorInitializerParams.getServices.mockReturnValue(services);
+  taskRunnerFactoryInitializerParams.getScopedSavedObjectsClient.mockReturnValue(
+    services.savedObjectsClient
+  );
 });
 
 test(`throws an error if factory isn't initialized`, () => {
@@ -133,6 +138,56 @@ test('executes the task by calling the executor with proper parameters', async (
       },
     },
   });
+});
+
+test('cleans up action_task_params object', async () => {
+  const taskRunner = taskRunnerFactory.create({
+    taskInstance: mockedTaskInstance,
+  });
+
+  mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok', actionId: '2' });
+  spaceIdToNamespace.mockReturnValueOnce('namespace-test');
+  mockedEncryptedSavedObjectsPlugin.getDecryptedAsInternalUser.mockResolvedValueOnce({
+    id: '3',
+    type: 'action_task_params',
+    attributes: {
+      actionId: '2',
+      params: { baz: true },
+      apiKey: Buffer.from('123:abc').toString('base64'),
+    },
+    references: [],
+  });
+
+  await taskRunner.run();
+
+  expect(services.savedObjectsClient.delete).toHaveBeenCalledWith('action_task_params', '3');
+});
+
+test('runs successfully when cleanup fails and logs the error', async () => {
+  const taskRunner = taskRunnerFactory.create({
+    taskInstance: mockedTaskInstance,
+  });
+
+  mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok', actionId: '2' });
+  spaceIdToNamespace.mockReturnValueOnce('namespace-test');
+  mockedEncryptedSavedObjectsPlugin.getDecryptedAsInternalUser.mockResolvedValueOnce({
+    id: '3',
+    type: 'action_task_params',
+    attributes: {
+      actionId: '2',
+      params: { baz: true },
+      apiKey: Buffer.from('123:abc').toString('base64'),
+    },
+    references: [],
+  });
+  services.savedObjectsClient.delete.mockRejectedValueOnce(new Error('Fail'));
+
+  await taskRunner.run();
+
+  expect(services.savedObjectsClient.delete).toHaveBeenCalledWith('action_task_params', '3');
+  expect(taskRunnerFactoryInitializerParams.logger.error).toHaveBeenCalledWith(
+    'Failed to cleanup action_task_params object [id="3"]: Fail'
+  );
 });
 
 test('throws an error with suggested retry logic when return status is error', async () => {

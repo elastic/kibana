@@ -102,7 +102,7 @@ ancestors -> An array tracking all of the parents of this particular signal. As 
 ```
 
 This is indicating that you have a single parent of an event from the signal (signal -> event) and this document has a single
-ancestor of that event. Each 30 seconds that goes it will use de-duplication techniques to ensure that this signal is not re-inserted. If after
+ancestor of that event. Each 30 seconds that goes it will use de-duplication technique to ensure that this signal is not re-inserted. If after
 each 30 seconds you DO SEE multiple signals then the bug is a de-duplication bug and a critical bug. If you ever see a duplicate rule in the
 ancestors array then that is another CRITICAL bug which needs to be fixed.
 

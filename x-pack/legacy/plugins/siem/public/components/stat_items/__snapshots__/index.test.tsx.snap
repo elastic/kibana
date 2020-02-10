@@ -49,7 +49,7 @@ exports[`Stat Items Component disable charts it renders the default widget 1`] =
               show={true}
             >
               <div
-                className="sc-AykKF iWeiGa"
+                className="sc-AykKF jvsAjF"
               >
                 <EuiPanel>
                   <div
@@ -283,7 +283,7 @@ exports[`Stat Items Component disable charts it renders the default widget 2`] =
               show={true}
             >
               <div
-                className="sc-AykKF iWeiGa"
+                className="sc-AykKF jvsAjF"
               >
                 <EuiPanel>
                   <div
@@ -587,7 +587,7 @@ exports[`Stat Items Component rendering kpis with charts it renders the default 
             show={true}
           >
             <div
-              className="sc-AykKF bIbcmW"
+              className="sc-AykKF jbBKkl"
             >
               <EuiPanel>
                 <div

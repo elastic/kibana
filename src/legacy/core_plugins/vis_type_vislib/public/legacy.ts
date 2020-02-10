@@ -20,36 +20,23 @@
 import { npSetup, npStart } from 'ui/new_platform';
 import { PluginInitializerContext } from 'kibana/public';
 
-/* eslint-disable prettier/prettier */
-import {
-  vislibSeriesResponseHandlerProvider,
-  vislibSlicesResponseHandlerProvider,
-  // @ts-ignore
-} from 'ui/vis/response_handlers/vislib';
-// @ts-ignore
-import { vislibColor } from 'ui/vis/components/color/color';
-
 import { plugin } from '.';
 import {
-  KbnVislibVisTypesPluginSetupDependencies,
-  KbnVislibVisTypesPluginStartDependencies,
+  VisTypeVislibPluginSetupDependencies,
+  VisTypeVislibPluginStartDependencies,
 } from './plugin';
 import {
   setup as visualizationsSetup,
   start as visualizationsStart,
 } from '../../visualizations/public/np_ready/public/legacy';
 
-const setupPlugins: Readonly<KbnVislibVisTypesPluginSetupDependencies> = {
+const setupPlugins: Readonly<VisTypeVislibPluginSetupDependencies> = {
   expressions: npSetup.plugins.expressions,
   visualizations: visualizationsSetup,
-  __LEGACY: {
-    vislibSeriesResponseHandlerProvider,
-    vislibSlicesResponseHandlerProvider,
-    vislibColor,
-  },
+  charts: npSetup.plugins.charts,
 };
 
-const startPlugins: Readonly<KbnVislibVisTypesPluginStartDependencies> = {
+const startPlugins: Readonly<VisTypeVislibPluginStartDependencies> = {
   expressions: npStart.plugins.expressions,
   visualizations: visualizationsStart,
 };

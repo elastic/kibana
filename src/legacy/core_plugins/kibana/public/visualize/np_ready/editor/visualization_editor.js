@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export function initVisEditorDirective(app) {
+export function initVisEditorDirective(app, deps) {
   app.directive('visualizationEditor', function($timeout, getAppState) {
     return {
       restrict: 'E',
@@ -34,6 +34,9 @@ export function initVisEditorDirective(app) {
 
         $scope.renderFunction = () => {
           editor.render({
+            core: deps.core,
+            data: deps.data,
+            embeddables: deps.embeddables,
             uiState: $scope.uiState,
             timeRange: $scope.timeRange,
             filters: $scope.filters,

@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { Observable } from 'rxjs';
 import {
   ChromeStart,
   DocLinksStart,
@@ -33,6 +34,7 @@ import { WatchList } from './sections/watch_list/components/watch_list';
 import { registerRouter } from './lib/navigation';
 import { BASE_PATH } from './constants';
 import { AppContextProvider } from './app_context';
+import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
 
 const ShareRouter = withRouter(({ children, history }: RouteComponentProps & { children: any }) => {
   registerRouter({ history });
@@ -45,14 +47,19 @@ export interface AppDeps {
   toasts: ToastsSetup;
   http: HttpSetup;
   uiSettings: IUiSettingsClient;
-  euiUtils: any;
+  theme: ChartsPluginSetup['theme'];
   createTimeBuckets: () => any;
-  getLicenseStatus: () => LicenseStatus;
+  licenseStatus$: Observable<LicenseStatus>;
   MANAGEMENT_BREADCRUMB: any;
 }
 
 export const App = (deps: AppDeps) => {
-  const { valid, message } = deps.getLicenseStatus();
+  const [{ valid, message }, setLicenseStatus] = useState<LicenseStatus>({ valid: true });
+
+  useEffect(() => {
+    const s = deps.licenseStatus$.subscribe(setLicenseStatus);
+    return () => s.unsubscribe();
+  }, [deps.licenseStatus$]);
 
   if (!valid) {
     return (

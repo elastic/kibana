@@ -74,26 +74,28 @@ describe('get_prepackaged_rule_status_route', () => {
   });
 
   describe('payload', () => {
-    test('0 rules installed, 1 rules not installed, and 1 rule not updated', async () => {
+    test('0 rules installed, 0 custom rules, 1 rules not installed, and 1 rule not updated', async () => {
       alertsClient.find.mockResolvedValue(getFindResult());
       alertsClient.get.mockResolvedValue(getResult());
       actionsClient.create.mockResolvedValue(createActionResult());
       alertsClient.create.mockResolvedValue(getResult());
       const { payload } = await server.inject(getPrepackagedRulesStatusRequest());
       expect(JSON.parse(payload)).toEqual({
+        rules_custom_installed: 0,
         rules_installed: 0,
         rules_not_installed: 1,
         rules_not_updated: 0,
       });
     });
 
-    test('1 rule installed, 0 rules not installed, and 1 rule to not updated', async () => {
+    test('1 rule installed, 1 custom rules, 0 rules not installed, and 1 rule to not updated', async () => {
       alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
       alertsClient.get.mockResolvedValue(getResult());
       actionsClient.create.mockResolvedValue(createActionResult());
       alertsClient.create.mockResolvedValue(getResult());
       const { payload } = await server.inject(getPrepackagedRulesStatusRequest());
       expect(JSON.parse(payload)).toEqual({
+        rules_custom_installed: 1,
         rules_installed: 1,
         rules_not_installed: 0,
         rules_not_updated: 1,

@@ -1,20 +1,20 @@
 {
   "description": "Identifies attempts to create new local users. This is sometimes done by attackers to increase access to a system or domain.",
-  "enabled": false,
-  "filters": [],
-  "from": "now-6m",
-  "immutable": true,
-  "interval": "5m",
+  "index": [
+    "winlogbeat-*"
+  ],
   "language": "kuery",
+  "max_signals": 100,
   "name": "User Account Creation",
   "query": " event.action:\"Process Create (rule: ProcessCreate)\" and process.name:(\"net.exe\" or \"net1.exe\") and not process.parent.name:\"net.exe\" and process.args:(\"user\" and (\"/add\" or \"/ad\")) ",
-  "risk_score": 50,
+  "risk_score": 21,
   "rule_id": "1aa9181a-492b-4c01-8b16-fa0735786b2b",
   "severity": "low",
   "tags": [
-    "EIA"
+    "Elastic",
+    "Windows"
   ],
-  "threats": [
+  "threat": [
     {
       "framework": "MITRE ATT&CK",
       "tactic": {
@@ -22,7 +22,7 @@
         "name": "Persistence",
         "reference": "https://attack.mitre.org/tactics/TA0003/"
       },
-      "techniques": [
+      "technique": [
         {
           "id": "T1136",
           "name": "Create Account",
@@ -31,7 +31,6 @@
       ]
     }
   ],
-  "to": "now",
   "type": "query",
   "version": 1
 }

@@ -453,7 +453,7 @@ export const Exploration: FC<Props> = React.memo(({ jobId, jobStatus }) => {
   const MlInMemoryTableBasic = mlInMemoryTableBasicFactory<TableItem>();
 
   return (
-    <EuiPanel grow={false}>
+    <EuiPanel grow={false} data-test-subj="mlDFAnalyticsOutlierExplorationTablePanel">
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="s">

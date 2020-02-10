@@ -25,7 +25,6 @@ import { migrations } from './migrations';
 import { importApi } from './server/routes/api/import';
 import { exportApi } from './server/routes/api/export';
 import { managementApi } from './server/routes/api/management';
-import { registerFieldFormats } from './server/field_formats/register';
 import * as systemApi from './server/lib/system_api';
 import mappings from './mappings.json';
 import { getUiSettingDefaults } from './ui_setting_defaults';
@@ -43,9 +42,7 @@ export default function(kibana) {
     config: function(Joi) {
       return Joi.object({
         enabled: Joi.boolean().default(true),
-        defaultAppId: Joi.string().default('home'),
         index: Joi.string().default('.kibana'),
-        disableWelcomeScreen: Joi.boolean().default(false),
         autocompleteTerminateAfter: Joi.number()
           .integer()
           .min(1)
@@ -65,7 +62,6 @@ export default function(kibana) {
         'plugins/kibana/visualize/legacy',
         'plugins/kibana/dashboard/legacy',
       ],
-      savedObjectTypes: ['plugins/kibana/dashboard/saved_dashboard/saved_dashboard_register'],
       app: {
         id: 'kibana',
         title: 'Kibana',
@@ -101,13 +97,8 @@ export default function(kibana) {
           }),
           order: -1001,
           url: `${kbnBaseUrl}#/dashboards`,
-          // The subUrlBase is the common substring of all urls for this app. If not given, it defaults to the url
-          // above. This app has to use a different subUrlBase, in addition to the url above, because "#/dashboard"
-          // routes to a page that creates a new dashboard. When we introduced a landing page, we needed to change
-          // the url above in order to preserve the original url for BWC. The subUrlBase helps the Chrome api nav
-          // to determine what url to use for the app link.
-          subUrlBase: `${kbnBaseUrl}#/dashboard`,
           euiIconType: 'dashboardApp',
+          disableSubUrlTracking: true,
           category: DEFAULT_APP_CATEGORIES.analyze,
         },
         {
@@ -331,7 +322,6 @@ export default function(kibana) {
       importApi(server);
       exportApi(server);
       managementApi(server);
-      registerFieldFormats(server);
       registerCspCollector(usageCollection, server);
       server.expose('systemApi', systemApi);
       server.injectUiAppVars('kibana', () => injectVars(server));

@@ -6,8 +6,9 @@
 
 import Boom from 'boom';
 import Hapi from 'hapi';
+import { chunk, isEmpty, isFunction } from 'lodash/fp';
 import { extname } from 'path';
-import { isFunction } from 'lodash/fp';
+import uuid from 'uuid';
 import { createPromiseFromStreams } from '../../../../../../../../../src/legacy/utils/streams';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { createRules } from '../../rules/create_rules';
@@ -18,16 +19,24 @@ import { getIndexExists } from '../../index/get_index_exists';
 import {
   callWithRequestFactory,
   getIndex,
-  createImportErrorObject,
-  transformImportError,
-  ImportSuccessError,
+  createBulkErrorObject,
+  ImportRuleResponse,
 } from '../utils';
 import { createRulesStreamFromNdJson } from '../../rules/create_rules_stream_from_ndjson';
 import { ImportRuleAlertRest } from '../../types';
-import { transformOrImportError } from './utils';
 import { updateRules } from '../../rules/update_rules';
 import { importRulesQuerySchema, importRulesPayloadSchema } from '../schemas/import_rules_schema';
 import { KibanaRequest } from '../../../../../../../../../src/core/server';
+
+type PromiseFromStreams = ImportRuleAlertRest | Error;
+
+/*
+ * We were getting some error like that possible EventEmitter memory leak detected
+ * So we decide to batch the update by 10 to avoid any complication in the node side
+ * https://nodejs.org/docs/latest/api/events.html#events_emitter_setmaxlisteners_n
+ *
+ */
+const CHUNK_PARSED_OBJECT_SIZE = 10;
 
 export const createImportRulesRoute = (server: ServerFacade): Hapi.ServerRoute => {
   return {
@@ -67,147 +76,189 @@ export const createImportRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
 
       const objectLimit = server.config().get<number>('savedObjects.maxImportExportSize');
       const readStream = createRulesStreamFromNdJson(request.payload.file, objectLimit);
-      const parsedObjects = await createPromiseFromStreams<[ImportRuleAlertRest | Error]>([
-        readStream,
-      ]);
+      const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([readStream]);
 
-      const reduced = await parsedObjects.reduce<Promise<ImportSuccessError>>(
-        async (accum, parsedRule) => {
-          const existingImportSuccessError = await accum;
-          if (parsedRule instanceof Error) {
-            // If the JSON object had a validation or parse error then we return
-            // early with the error and an (unknown) for the ruleId
-            return createImportErrorObject({
-              ruleId: '(unknown)', // TODO: Better handling where we know which ruleId is having issues with imports
-              statusCode: 400,
-              message: parsedRule.message,
-              existingImportSuccessError,
-            });
-          }
-
-          const {
-            description,
-            enabled,
-            false_positives: falsePositives,
-            from,
-            immutable,
-            query,
-            language,
-            output_index: outputIndex,
-            saved_id: savedId,
-            meta,
-            filters,
-            rule_id: ruleId,
-            index,
-            interval,
-            max_signals: maxSignals,
-            risk_score: riskScore,
-            name,
-            severity,
-            tags,
-            threats,
-            to,
-            type,
-            references,
-            timeline_id: timelineId,
-            timeline_title: timelineTitle,
-            version,
-          } = parsedRule;
-          try {
-            const finalIndex = outputIndex != null ? outputIndex : getIndex(request, server);
-            const callWithRequest = callWithRequestFactory(request, server);
-            const indexExists = await getIndexExists(callWithRequest, finalIndex);
-            if (!indexExists) {
-              return createImportErrorObject({
-                ruleId,
-                statusCode: 409,
-                message: `To create a rule, the index must exist first. Index ${finalIndex} does not exist`,
-                existingImportSuccessError,
-              });
-            }
-            const rule = await readRules({ alertsClient, ruleId });
-            if (rule == null) {
-              const createdRule = await createRules({
-                alertsClient,
-                actionsClient,
-                createdAt: new Date().toISOString(),
-                description,
-                enabled,
-                falsePositives,
-                from,
-                immutable,
-                query,
-                language,
-                outputIndex: finalIndex,
-                savedId,
-                timelineId,
-                timelineTitle,
-                meta,
-                filters,
-                ruleId,
-                index,
-                interval,
-                maxSignals,
-                riskScore,
-                name,
-                severity,
-                tags,
-                to,
-                type,
-                threats,
-                updatedAt: new Date().toISOString(),
-                references,
-                version,
-              });
-              return transformOrImportError(ruleId, createdRule, existingImportSuccessError);
-            } else if (rule != null && request.query.overwrite) {
-              const updatedRule = await updateRules({
-                alertsClient,
-                actionsClient,
-                savedObjectsClient,
-                description,
-                enabled,
-                falsePositives,
-                from,
-                immutable,
-                query,
-                language,
-                outputIndex,
-                savedId,
-                timelineId,
-                timelineTitle,
-                meta,
-                filters,
-                id: undefined,
-                ruleId,
-                index,
-                interval,
-                maxSignals,
-                riskScore,
-                name,
-                severity,
-                tags,
-                to,
-                type,
-                threats,
-                references,
-                version,
-              });
-              return transformOrImportError(ruleId, updatedRule, existingImportSuccessError);
-            } else {
-              return existingImportSuccessError;
-            }
-          } catch (err) {
-            return transformImportError(ruleId, err, existingImportSuccessError);
-          }
-        },
-        Promise.resolve({
-          success: true,
-          success_count: 0,
-          errors: [],
-        })
+      const uniqueParsedObjects = Array.from(
+        parsedObjects
+          .reduce(
+            (acc, parsedRule) => {
+              if (parsedRule instanceof Error) {
+                acc.set(uuid.v4(), parsedRule);
+              } else {
+                const { rule_id: ruleId } = parsedRule;
+                if (ruleId != null) {
+                  acc.set(ruleId, parsedRule);
+                } else {
+                  acc.set(uuid.v4(), parsedRule);
+                }
+              }
+              return acc;
+            }, // using map (preserves ordering)
+            new Map()
+          )
+          .values()
       );
-      return reduced;
+
+      const chunkParseObjects = chunk(CHUNK_PARSED_OBJECT_SIZE, uniqueParsedObjects);
+      let importRuleResponse: ImportRuleResponse[] = [];
+
+      while (chunkParseObjects.length) {
+        const batchParseObjects = chunkParseObjects.shift() ?? [];
+        const newImportRuleResponse = await Promise.all(
+          batchParseObjects.reduce<Array<Promise<ImportRuleResponse>>>((accum, parsedRule) => {
+            const importsWorkerPromise = new Promise<ImportRuleResponse>(
+              async (resolve, reject) => {
+                if (parsedRule instanceof Error) {
+                  // If the JSON object had a validation or parse error then we return
+                  // early with the error and an (unknown) for the ruleId
+                  resolve(
+                    createBulkErrorObject({
+                      ruleId: '(unknown)',
+                      statusCode: 400,
+                      message: parsedRule.message,
+                    })
+                  );
+                  return null;
+                }
+                const {
+                  description,
+                  false_positives: falsePositives,
+                  from,
+                  immutable,
+                  query,
+                  language,
+                  output_index: outputIndex,
+                  saved_id: savedId,
+                  meta,
+                  filters,
+                  rule_id: ruleId,
+                  index,
+                  interval,
+                  max_signals: maxSignals,
+                  risk_score: riskScore,
+                  name,
+                  severity,
+                  tags,
+                  threat,
+                  to,
+                  type,
+                  references,
+                  timeline_id: timelineId,
+                  timeline_title: timelineTitle,
+                  version,
+                } = parsedRule;
+                try {
+                  const finalIndex = getIndex(request, server);
+                  const callWithRequest = callWithRequestFactory(request, server);
+                  const indexExists = await getIndexExists(callWithRequest, finalIndex);
+                  if (!indexExists) {
+                    resolve(
+                      createBulkErrorObject({
+                        ruleId,
+                        statusCode: 409,
+                        message: `To create a rule, the index must exist first. Index ${finalIndex} does not exist`,
+                      })
+                    );
+                  }
+                  const rule = await readRules({ alertsClient, ruleId });
+                  if (rule == null) {
+                    await createRules({
+                      alertsClient,
+                      actionsClient,
+                      description,
+                      enabled: false,
+                      falsePositives,
+                      from,
+                      immutable,
+                      query,
+                      language,
+                      outputIndex: finalIndex,
+                      savedId,
+                      timelineId,
+                      timelineTitle,
+                      meta,
+                      filters,
+                      ruleId,
+                      index,
+                      interval,
+                      maxSignals,
+                      riskScore,
+                      name,
+                      severity,
+                      tags,
+                      to,
+                      type,
+                      threat,
+                      references,
+                      version,
+                    });
+                    resolve({ rule_id: ruleId, status_code: 200 });
+                  } else if (rule != null && request.query.overwrite) {
+                    await updateRules({
+                      alertsClient,
+                      actionsClient,
+                      savedObjectsClient,
+                      description,
+                      enabled: false,
+                      falsePositives,
+                      from,
+                      immutable,
+                      query,
+                      language,
+                      outputIndex,
+                      savedId,
+                      timelineId,
+                      timelineTitle,
+                      meta,
+                      filters,
+                      id: undefined,
+                      ruleId,
+                      index,
+                      interval,
+                      maxSignals,
+                      riskScore,
+                      name,
+                      severity,
+                      tags,
+                      to,
+                      type,
+                      threat,
+                      references,
+                      version,
+                    });
+                    resolve({ rule_id: ruleId, status_code: 200 });
+                  } else if (rule != null) {
+                    resolve(
+                      createBulkErrorObject({
+                        ruleId,
+                        statusCode: 409,
+                        message: `This Rule "${rule.name}" already exists`,
+                      })
+                    );
+                  }
+                } catch (err) {
+                  resolve(
+                    createBulkErrorObject({
+                      ruleId,
+                      statusCode: 400,
+                      message: err.message,
+                    })
+                  );
+                }
+              }
+            );
+            return [...accum, importsWorkerPromise];
+          }, [])
+        );
+        importRuleResponse = [...importRuleResponse, ...newImportRuleResponse];
+      }
+
+      const errorsResp = importRuleResponse.filter(resp => !isEmpty(resp.error));
+      return {
+        success: errorsResp.length === 0,
+        success_count: importRuleResponse.filter(resp => resp.status_code === 200).length,
+        errors: errorsResp,
+      };
     },
   };
 };

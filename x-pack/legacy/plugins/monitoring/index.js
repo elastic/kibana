@@ -10,41 +10,47 @@ import { deprecations } from './deprecations';
 import { getUiExports } from './ui_exports';
 import { Plugin } from './server/plugin';
 import { initInfraSource } from './server/lib/logs/init_infra_source';
+import { KIBANA_ALERTING_ENABLED } from './common/constants';
 
 /**
  * Invokes plugin modules to instantiate the Monitoring plugin for Kibana
  * @param kibana {Object} Kibana plugin instance
  * @return {Object} Monitoring UI Kibana plugin object
  */
+const deps = ['kibana', 'elasticsearch', 'xpack_main'];
+if (KIBANA_ALERTING_ENABLED) {
+  deps.push(...['alerting', 'actions']);
+}
 export const monitoring = kibana =>
   new kibana.Plugin({
-    require: ['kibana', 'elasticsearch', 'xpack_main'],
+    require: deps,
     id: 'monitoring',
-    configPrefix: 'xpack.monitoring',
+    configPrefix: 'monitoring',
     publicDir: resolve(__dirname, 'public'),
     init(server) {
       const configs = [
-        'xpack.monitoring.ui.enabled',
-        'xpack.monitoring.kibana.collection.enabled',
-        'xpack.monitoring.max_bucket_size',
-        'xpack.monitoring.min_interval_seconds',
+        'monitoring.ui.enabled',
+        'monitoring.kibana.collection.enabled',
+        'monitoring.ui.max_bucket_size',
+        'monitoring.ui.min_interval_seconds',
         'kibana.index',
-        'xpack.monitoring.show_license_expiration',
-        'xpack.monitoring.ui.container.elasticsearch.enabled',
-        'xpack.monitoring.ui.container.logstash.enabled',
-        'xpack.monitoring.tests.cloud_detector.enabled',
-        'xpack.monitoring.kibana.collection.interval',
-        'xpack.monitoring.elasticsearch.hosts',
-        'xpack.monitoring.elasticsearch',
-        'xpack.monitoring.xpack_api_polling_frequency_millis',
+        'monitoring.ui.show_license_expiration',
+        'monitoring.ui.container.elasticsearch.enabled',
+        'monitoring.ui.container.logstash.enabled',
+        'monitoring.tests.cloud_detector.enabled',
+        'monitoring.kibana.collection.interval',
+        'monitoring.ui.elasticsearch.hosts',
+        'monitoring.ui.elasticsearch',
+        'monitoring.xpack_api_polling_frequency_millis',
         'server.uuid',
         'server.name',
         'server.host',
         'server.port',
-        'xpack.monitoring.cluster_alerts.email_notifications.enabled',
-        'xpack.monitoring.cluster_alerts.email_notifications.email_address',
-        'xpack.monitoring.ccs.enabled',
-        'xpack.monitoring.elasticsearch.logFetchCount',
+        'monitoring.cluster_alerts.email_notifications.enabled',
+        'monitoring.cluster_alerts.email_notifications.email_address',
+        'monitoring.ui.ccs.enabled',
+        'monitoring.ui.elasticsearch.logFetchCount',
+        'monitoring.ui.logs.index',
       ];
 
       const serverConfig = server.config();
@@ -59,6 +65,7 @@ export const monitoring = kibana =>
         }),
         injectUiAppVars: server.injectUiAppVars,
         log: (...args) => server.log(...args),
+        logger: server.newPlatform.coreContext.logger,
         getOSInfo: server.getOSInfo,
         events: {
           on: (...args) => server.events.on(...args),
@@ -73,11 +80,13 @@ export const monitoring = kibana =>
         xpack_main: server.plugins.xpack_main,
         elasticsearch: server.plugins.elasticsearch,
         infra: server.plugins.infra,
+        alerting: server.plugins.alerting,
         usageCollection,
         licensing,
       };
 
-      new Plugin().setup(serverFacade, plugins);
+      const plugin = new Plugin();
+      plugin.setup(serverFacade, plugins);
     },
     config,
     deprecations,

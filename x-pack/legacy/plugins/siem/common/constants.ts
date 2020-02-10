@@ -36,7 +36,7 @@ export const ENABLE_NEWS_FEED_SETTING = 'siem:enableNewsFeed';
 export const NEWS_FEED_URL_SETTING = 'siem:newsFeedUrl';
 
 /** The default value for News feed widget */
-export const NEWS_FEED_URL_SETTING_DEFAULT = 'https://feeds.elastic.co/kibana'; // TODO: replace this with the real feed URL
+export const NEWS_FEED_URL_SETTING_DEFAULT = 'https://feeds.elastic.co/security-solution';
 
 /**
  * Id for the signals alerting type

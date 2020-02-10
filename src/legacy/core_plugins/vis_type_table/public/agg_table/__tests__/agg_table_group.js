@@ -21,17 +21,17 @@ import $ from 'jquery';
 import ngMock from 'ng_mock';
 import expect from '@kbn/expect';
 import fixtures from 'fixtures/fake_hierarchical_data';
-import { legacyResponseHandlerProvider, tabifyAggResponse, npStart } from '../../legacy_imports';
+import { tabifyAggResponse, npStart } from '../../legacy_imports';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import { Vis } from '../../../../visualizations/public';
 import { getAngularModule } from '../../get_inner_angular';
 import { initTableVisLegacyModule } from '../../table_vis_legacy_module';
+import { tableVisResponseHandler } from '../../table_vis_response_handler';
 
 describe('Table Vis - AggTableGroup Directive', function() {
   let $rootScope;
   let $compile;
   let indexPattern;
-  let tableAggResponse;
   const tabifiedData = {};
 
   const init = () => {
@@ -74,9 +74,7 @@ describe('Table Vis - AggTableGroup Directive', function() {
       visualizationsSetup.types.registerVisualization(() => createTableVisTypeDefinition(legacyDependencies));
       */
 
-      tableAggResponse = legacyResponseHandlerProvider().handler;
       indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
-
       $rootScope = $injector.get('$rootScope');
       $compile = $injector.get('$compile');
 
@@ -92,12 +90,12 @@ describe('Table Vis - AggTableGroup Directive', function() {
     $scope.$destroy();
   });
 
-  it('renders a simple split response properly', async function() {
+  it('renders a simple split response properly', function() {
     $scope.dimensions = {
       metrics: [{ accessor: 0, format: { id: 'number' }, params: {} }],
       buckets: [],
     };
-    $scope.group = await tableAggResponse(tabifiedData.metricOnly, $scope.dimensions);
+    $scope.group = tableVisResponseHandler(tabifiedData.metricOnly, $scope.dimensions);
     $scope.sort = {
       columnIndex: null,
       direction: null,
@@ -129,7 +127,7 @@ describe('Table Vis - AggTableGroup Directive', function() {
     expect($subTables.length).to.be(0);
   });
 
-  it('renders a complex response properly', async function() {
+  it('renders a complex response properly', function() {
     $scope.dimensions = {
       splitRow: [{ accessor: 0, params: {} }],
       buckets: [
@@ -142,7 +140,7 @@ describe('Table Vis - AggTableGroup Directive', function() {
         { accessor: 5, params: {} },
       ],
     };
-    const group = ($scope.group = await tableAggResponse(
+    const group = ($scope.group = tableVisResponseHandler(
       tabifiedData.threeTermBuckets,
       $scope.dimensions
     ));

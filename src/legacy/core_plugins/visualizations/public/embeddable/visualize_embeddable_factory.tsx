@@ -18,36 +18,26 @@
  */
 
 import { i18n } from '@kbn/i18n';
-
-import chrome from 'ui/chrome';
-
-import { SavedObjectAttributes } from 'kibana/server';
+import { SavedObjectAttributes } from 'kibana/public';
 import {
-  EmbeddableFactory,
-  ErrorEmbeddable,
   Container,
+  EmbeddableFactory,
   EmbeddableOutput,
+  ErrorEmbeddable,
 } from '../../../../../plugins/embeddable/public';
-import { showNewVisModal } from '../../../kibana/public/visualize/np_ready/wizard/show_new_vis';
 import { SavedVisualizations } from '../../../kibana/public/visualize/np_ready/types';
 import { DisabledLabEmbeddable } from './disabled_lab_embeddable';
 import { getIndexPattern } from './get_index_pattern';
 import {
+  VisSavedObject,
   VisualizeEmbeddable,
   VisualizeInput,
   VisualizeOutput,
-  VisSavedObject,
 } from './visualize_embeddable';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 
-import {
-  getUISettings,
-  getCapabilities,
-  getHttp,
-  getTypes,
-  getSavedObjects,
-  getUsageCollector,
-} from '../np_ready/public/services';
+import { getCapabilities, getHttp, getTypes, getUISettings } from '../np_ready/public/services';
+import { showNewVisModal } from '../np_ready/public/wizard';
 
 interface VisualizationAttributes extends SavedObjectAttributes {
   visState: string;
@@ -61,11 +51,7 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
 > {
   public readonly type = VISUALIZE_EMBEDDABLE_TYPE;
 
-  static async createVisualizeEmbeddableFactory(): Promise<VisualizeEmbeddableFactory> {
-    return new VisualizeEmbeddableFactory();
-  }
-
-  constructor() {
+  constructor(private getSavedVisualizationsLoader: () => SavedVisualizations) {
     super({
       savedObjectMetaData: {
         name: i18n.translate('visualizations.savedObjectName', { defaultMessage: 'Visualization' }),
@@ -111,8 +97,7 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
     input: Partial<VisualizeInput> & { id: string },
     parent?: Container
   ): Promise<VisualizeEmbeddable | ErrorEmbeddable | DisabledLabEmbeddable> {
-    const $injector = await chrome.dangerouslyGetActiveInjector();
-    const savedVisualizations = $injector.get<SavedVisualizations>('savedVisualizations');
+    const savedVisualizations = this.getSavedVisualizationsLoader();
 
     try {
       const visId = savedObject.id as string;
@@ -151,13 +136,10 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
     input: Partial<VisualizeInput> & { id: string },
     parent?: Container
   ): Promise<VisualizeEmbeddable | ErrorEmbeddable | DisabledLabEmbeddable> {
-    const $injector = await chrome.dangerouslyGetActiveInjector();
-    const savedVisualizations = $injector.get<SavedVisualizations>('savedVisualizations');
+    const savedVisualizations = this.getSavedVisualizationsLoader();
 
     try {
-      const visId = savedObjectId;
-
-      const savedObject = await savedVisualizations.get(visId);
+      const savedObject = await savedVisualizations.get(savedObjectId);
       return this.createFromObject(savedObject, input, parent);
     } catch (e) {
       console.error(e); // eslint-disable-line no-console
@@ -168,16 +150,9 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
   public async create() {
     // TODO: This is a bit of a hack to preserve the original functionality. Ideally we will clean this up
     // to allow for in place creation of visualizations without having to navigate away to a new URL.
-    showNewVisModal(
-      getTypes(),
-      {
-        editorParams: ['addToDashboard'],
-      },
-      getHttp().basePath.prepend,
-      getUISettings(),
-      getSavedObjects(),
-      getUsageCollector()
-    );
+    showNewVisModal({
+      editorParams: ['addToDashboard'],
+    });
     return undefined;
   }
 }

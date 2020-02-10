@@ -5,6 +5,7 @@
  */
 
 import { calculateInterval, calculateName, calculateVersion } from './update_rules';
+import { UpdateRuleParams } from './types';
 
 describe('update_rules', () => {
   describe('#calculateInterval', () => {
@@ -25,20 +26,26 @@ describe('update_rules', () => {
   });
 
   describe('#calculateVersion', () => {
-    test('given preVersion and nextVersion numbers being null it will return a 1', () => {
-      expect(calculateVersion(null, null)).toEqual(1);
+    test('returning the same version number if given an immutable but no updated version number', () => {
+      expect(calculateVersion(true, 1, { description: 'some description change' })).toEqual(1);
     });
 
-    test('given preVersion and nextVersion numbers being undefined it will return a 1', () => {
-      expect(calculateVersion(undefined, undefined)).toEqual(1);
+    test('returning an updated version number if given an immutable and an updated version number', () => {
+      expect(calculateVersion(true, 2, { description: 'some description change' })).toEqual(2);
     });
 
-    test('given prevVersion as null and nextVersion being defined, nextVersion will be returned', () => {
-      expect(calculateVersion(undefined, 5)).toEqual(5);
+    test('returning an updated version number if not given an immutable but but an updated description', () => {
+      expect(calculateVersion(false, 1, { description: 'some description change' })).toEqual(2);
     });
 
-    test('given prevVersion as being defined but nextVersion is not, prevVersion will be incremented by 1', () => {
-      expect(calculateVersion(5, undefined)).toEqual(6);
+    test('returning the same version number but a undefined description', () => {
+      expect(calculateVersion(false, 1, { description: undefined })).toEqual(1);
+    });
+
+    test('returning an updated version number if not given an immutable but an updated falsy value', () => {
+      expect(
+        calculateVersion(false, 1, ({ description: false } as unknown) as UpdateRuleParams)
+      ).toEqual(2);
     });
   });
 

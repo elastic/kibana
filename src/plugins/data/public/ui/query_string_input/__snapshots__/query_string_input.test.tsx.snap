@@ -163,7 +163,6 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
               },
               "fieldFormats": Object {
                 "getByFieldType": [MockFunction],
-                "getConfig": [MockFunction],
                 "getDefaultConfig": [MockFunction],
                 "getDefaultInstance": [MockFunction],
                 "getDefaultInstanceCacheResolver": [MockFunction],
@@ -805,7 +804,6 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
                       },
                       "fieldFormats": Object {
                         "getByFieldType": [MockFunction],
-                        "getConfig": [MockFunction],
                         "getDefaultConfig": [MockFunction],
                         "getDefaultInstance": [MockFunction],
                         "getDefaultInstanceCacheResolver": [MockFunction],
@@ -1429,7 +1427,6 @@ exports[`QueryStringInput Should pass the query language to the language switche
               },
               "fieldFormats": Object {
                 "getByFieldType": [MockFunction],
-                "getConfig": [MockFunction],
                 "getDefaultConfig": [MockFunction],
                 "getDefaultInstance": [MockFunction],
                 "getDefaultInstanceCacheResolver": [MockFunction],
@@ -2068,7 +2065,6 @@ exports[`QueryStringInput Should pass the query language to the language switche
                       },
                       "fieldFormats": Object {
                         "getByFieldType": [MockFunction],
-                        "getConfig": [MockFunction],
                         "getDefaultConfig": [MockFunction],
                         "getDefaultInstance": [MockFunction],
                         "getDefaultInstanceCacheResolver": [MockFunction],
@@ -2692,7 +2688,6 @@ exports[`QueryStringInput Should render the given query 1`] = `
               },
               "fieldFormats": Object {
                 "getByFieldType": [MockFunction],
-                "getConfig": [MockFunction],
                 "getDefaultConfig": [MockFunction],
                 "getDefaultInstance": [MockFunction],
                 "getDefaultInstanceCacheResolver": [MockFunction],
@@ -3331,7 +3326,6 @@ exports[`QueryStringInput Should render the given query 1`] = `
                       },
                       "fieldFormats": Object {
                         "getByFieldType": [MockFunction],
-                        "getConfig": [MockFunction],
                         "getDefaultConfig": [MockFunction],
                         "getDefaultInstance": [MockFunction],
                         "getDefaultInstanceCacheResolver": [MockFunction],

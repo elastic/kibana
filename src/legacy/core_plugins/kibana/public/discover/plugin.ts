@@ -19,7 +19,7 @@
 import { i18n } from '@kbn/i18n';
 import { AppMountParameters, CoreSetup, CoreStart, Plugin } from 'kibana/public';
 import angular, { auto } from 'angular';
-import { IUiActionsSetup, IUiActionsStart } from 'src/plugins/ui_actions/public';
+import { UiActionsSetup, UiActionsStart } from 'src/plugins/ui_actions/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { registerFeature } from './np_ready/register_feature';
 import './kibana_services';
@@ -27,7 +27,7 @@ import { IEmbeddableStart, IEmbeddableSetup } from '../../../../../plugins/embed
 import { getInnerAngularModule, getInnerAngularModuleEmbeddable } from './get_inner_angular';
 import { setAngularModule, setServices } from './kibana_services';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../../plugins/navigation/public';
-import { EuiUtilsStart } from '../../../../../plugins/eui_utils/public';
+import { ChartsPluginStart } from '../../../../../plugins/charts/public';
 import { buildServices } from './build_services';
 import { SharePluginStart } from '../../../../../plugins/share/public';
 import { KibanaLegacySetup } from '../../../../../plugins/kibana_legacy/public';
@@ -47,16 +47,16 @@ export interface DiscoverSetup {
 }
 export type DiscoverStart = void;
 export interface DiscoverSetupPlugins {
-  uiActions: IUiActionsSetup;
+  uiActions: UiActionsSetup;
   embeddable: IEmbeddableSetup;
-  kibana_legacy: KibanaLegacySetup;
+  kibanaLegacy: KibanaLegacySetup;
   home: HomePublicPluginSetup;
 }
 export interface DiscoverStartPlugins {
-  uiActions: IUiActionsStart;
+  uiActions: UiActionsStart;
   embeddable: IEmbeddableStart;
   navigation: NavigationStart;
-  eui_utils: EuiUtilsStart;
+  charts: ChartsPluginStart;
   data: DataPublicPluginStart;
   share: SharePluginStart;
   inspector: any;
@@ -99,7 +99,7 @@ export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
       order: 20,
       component: JsonCodeBlock,
     });
-    plugins.kibana_legacy.registerLegacyApp({
+    plugins.kibanaLegacy.registerLegacyApp({
       id: 'discover',
       title: 'Discover',
       order: -1004,

@@ -155,7 +155,7 @@ function getProps({
 
   const { fatalErrors } = coreMock.createSetup();
   const { http, docLinks, notifications } = coreMock.createStart();
-  http.get.mockImplementation(async path => {
+  http.get.mockImplementation(async (path: any) => {
     if (path === '/api/features') {
       return buildFeatures();
     }
@@ -509,7 +509,7 @@ describe('<EditRolePage />', () => {
 
   it('can render if features are not available', async () => {
     const { http } = coreMock.createStart();
-    http.get.mockImplementation(async path => {
+    http.get.mockImplementation(async (path: any) => {
       if (path === '/api/features') {
         const error = { response: { status: 404 } };
         throw error;

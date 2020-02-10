@@ -4,26 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import Hapi from 'hapi';
 import { i18n } from '@kbn/i18n';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { KibanaRequest } from '../../../../../../../src/core/server';
+import { ElasticsearchServiceSetup, KibanaRequest } from '../../../../../../../src/core/server';
 import { CSV_JOB_TYPE } from '../../../common/constants';
 import { cryptoFactory } from '../../../server/lib';
-import {
-  ESQueueWorkerExecuteFn,
-  ExecuteJobFactory,
-  FieldFormats,
-  Logger,
-  ServerFacade,
-} from '../../../types';
+import { ESQueueWorkerExecuteFn, ExecuteJobFactory, Logger, ServerFacade } from '../../../types';
 import { JobDocPayloadDiscoverCsv } from '../types';
 import { fieldFormatMapFactory } from './lib/field_format_map';
 import { createGenerateCsv } from './lib/generate_csv';
+import { getFieldFormats } from '../../../server/services';
 
 export const executeJobFactory: ExecuteJobFactory<ESQueueWorkerExecuteFn<
   JobDocPayloadDiscoverCsv
->> = function executeJobFactoryFn(server: ServerFacade, parentLogger: Logger) {
-  const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
+>> = function executeJobFactoryFn(
+  server: ServerFacade,
+  elasticsearch: ElasticsearchServiceSetup,
+  parentLogger: Logger
+) {
   const crypto = cryptoFactory(server);
   const config = server.config();
   const logger = parentLogger.clone([CSV_JOB_TYPE, 'execute-job']);
@@ -81,8 +79,11 @@ export const executeJobFactory: ExecuteJobFactory<ESQueueWorkerExecuteFn<
       },
     };
 
+    const { callAsCurrentUser } = elasticsearch.dataClient.asScoped(
+      KibanaRequest.from(fakeRequest as Hapi.Request)
+    );
     const callEndpoint = (endpoint: string, clientParams = {}, options = {}) => {
-      return callWithRequest(fakeRequest, endpoint, clientParams, options);
+      return callAsCurrentUser(endpoint, clientParams, options);
     };
     const savedObjects = server.savedObjects;
     const savedObjectsClient = savedObjects.getScopedSavedObjectsClient(
@@ -94,7 +95,7 @@ export const executeJobFactory: ExecuteJobFactory<ESQueueWorkerExecuteFn<
 
     const [formatsMap, uiSettings] = await Promise.all([
       (async () => {
-        const fieldFormats = (await server.fieldFormatServiceFactory(uiConfig)) as FieldFormats;
+        const fieldFormats = await getFieldFormats().fieldFormatServiceFactory(uiConfig);
         return fieldFormatMapFactory(indexPatternSavedObject, fieldFormats);
       })(),
       (async () => {

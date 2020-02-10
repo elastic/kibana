@@ -132,10 +132,9 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup> {
 
   private fetchLicense = async (core: CoreSetup): Promise<ILicense> => {
     try {
-      const response = await core.http.get(this.infoEndpoint, {
-        headers: {
-          'kbn-system-api': 'true',
-        },
+      const response = await core.http.get({
+        path: this.infoEndpoint,
+        asSystemRequest: true,
       });
       return new License({
         license: response.license,

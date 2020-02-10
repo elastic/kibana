@@ -15,12 +15,12 @@ import {
   IndexPatternPersistedState,
   IndexPatternPrivateState,
   IndexPatternField,
-  AggregationRestrictions,
 } from './types';
 import { updateLayerIndexPattern } from './state_helpers';
-import { DateRange, ExistingFields } from '../../common/types';
-import { BASE_API_URL } from '../../common';
+import { DateRange, ExistingFields } from '../../../../../plugins/lens/common/types';
+import { BASE_API_URL } from '../../../../../plugins/lens/common';
 import { documentField } from './document_field';
+import { isNestedField, IFieldType, TypeMeta } from '../../../../../../src/plugins/data/public';
 
 interface SavedIndexPatternAttributes extends SavedObjectAttributes {
   title: string;
@@ -30,12 +30,7 @@ interface SavedIndexPatternAttributes extends SavedObjectAttributes {
   typeMeta: string;
 }
 
-interface SavedRestrictionsObject {
-  aggs: Record<string, AggregationRestrictions>;
-}
-
 type SetState = StateSetter<IndexPatternPrivateState>;
-type SavedRestrictionsInfo = SavedRestrictionsObject | undefined;
 type SavedObjectsClient = Pick<SavedObjectsClientContract, 'find' | 'bulkGet'>;
 type ErrorHandler = (err: Error) => void;
 
@@ -234,7 +229,8 @@ export async function syncExistingFields({
         query.timeFieldName = pattern.timeFieldName;
       }
 
-      return fetchJson(`${BASE_API_URL}/existing_fields/${pattern.id}`, {
+      return fetchJson({
+        path: `${BASE_API_URL}/existing_fields/${pattern.id}`,
         query,
       }) as Promise<ExistingFields>;
     })
@@ -270,12 +266,10 @@ function fromSavedObject(
     id,
     type,
     title: attributes.title,
-    fields: (JSON.parse(attributes.fields) as IndexPatternField[])
-      .filter(({ aggregatable, scripted }) => !!aggregatable || !!scripted)
-      .concat(documentField),
-    typeMeta: attributes.typeMeta
-      ? (JSON.parse(attributes.typeMeta) as SavedRestrictionsInfo)
-      : undefined,
+    fields: (JSON.parse(attributes.fields) as IFieldType[])
+      .filter(field => !isNestedField(field) && (!!field.aggregatable || !!field.scripted))
+      .concat(documentField) as IndexPatternField[],
+    typeMeta: attributes.typeMeta ? (JSON.parse(attributes.typeMeta) as TypeMeta) : undefined,
     fieldFormatMap: attributes.fieldFormatMap ? JSON.parse(attributes.fieldFormatMap) : undefined,
   };
 
@@ -284,21 +278,23 @@ function fromSavedObject(
     return indexPattern;
   }
 
-  const aggs = Object.keys(typeMeta.aggs);
-
   const newFields = [...(indexPattern.fields as IndexPatternField[])];
-  newFields.forEach((field, index) => {
-    const restrictionsObj: IndexPatternField['aggregationRestrictions'] = {};
-    aggs.forEach(agg => {
-      const restriction = typeMeta.aggs[agg] && typeMeta.aggs[agg][field.name];
-      if (restriction) {
-        restrictionsObj[agg] = restriction;
+
+  if (typeMeta.aggs) {
+    const aggs = Object.keys(typeMeta.aggs);
+    newFields.forEach((field, index) => {
+      const restrictionsObj: IndexPatternField['aggregationRestrictions'] = {};
+      aggs.forEach(agg => {
+        const restriction = typeMeta.aggs && typeMeta.aggs[agg] && typeMeta.aggs[agg][field.name];
+        if (restriction) {
+          restrictionsObj[agg] = restriction;
+        }
+      });
+      if (Object.keys(restrictionsObj).length) {
+        newFields[index] = { ...field, aggregationRestrictions: restrictionsObj };
       }
     });
-    if (Object.keys(restrictionsObj).length) {
-      newFields[index] = { ...field, aggregationRestrictions: restrictionsObj };
-    }
-  });
+  }
 
   return {
     id: indexPattern.id,

@@ -21,6 +21,7 @@ import {
   AlertAction,
   AlertType,
   IntervalSchedule,
+  SanitizedAlert,
 } from './types';
 import { validateAlertTypeParams } from './lib';
 import {
@@ -28,8 +29,9 @@ import {
   CreateAPIKeyResult as SecurityPluginCreateAPIKeyResult,
   InvalidateAPIKeyResult as SecurityPluginInvalidateAPIKeyResult,
 } from '../../../../plugins/security/server';
-import { PluginStartContract as EncryptedSavedObjectsStartContract } from '../../../../plugins/encrypted_saved_objects/server';
+import { EncryptedSavedObjectsPluginStart } from '../../../../plugins/encrypted_saved_objects/server';
 import { TaskManagerStartContract } from '../../../../plugins/task_manager/server';
+import { AlertTaskState, taskInstanceToAlertTaskInstance } from './task_runner/alert_task_instance';
 
 type NormalizedAlertAction = Omit<AlertAction, 'actionTypeId'>;
 export type CreateAPIKeyResult =
@@ -44,7 +46,7 @@ interface ConstructorOptions {
   taskManager: TaskManagerStartContract;
   savedObjectsClient: SavedObjectsClientContract;
   alertTypeRegistry: AlertTypeRegistry;
-  encryptedSavedObjectsPlugin: EncryptedSavedObjectsStartContract;
+  encryptedSavedObjectsPlugin: EncryptedSavedObjectsPluginStart;
   spaceId?: string;
   namespace?: string;
   getUserName: () => Promise<string | null>;
@@ -74,7 +76,7 @@ export interface FindResult {
   page: number;
   perPage: number;
   total: number;
-  data: Alert[];
+  data: SanitizedAlert[];
 }
 
 interface CreateOptions {
@@ -119,7 +121,7 @@ export class AlertsClient {
   private readonly invalidateAPIKey: (
     params: InvalidateAPIKeyParams
   ) => Promise<InvalidateAPIKeyResult>;
-  encryptedSavedObjectsPlugin: EncryptedSavedObjectsStartContract;
+  encryptedSavedObjectsPlugin: EncryptedSavedObjectsPluginStart;
 
   constructor({
     alertTypeRegistry,
@@ -198,9 +200,20 @@ export class AlertsClient {
     );
   }
 
-  public async get({ id }: { id: string }): Promise<Alert> {
+  public async get({ id }: { id: string }): Promise<SanitizedAlert> {
     const result = await this.savedObjectsClient.get('alert', id);
     return this.getAlertFromRaw(result.id, result.attributes, result.updated_at, result.references);
+  }
+
+  public async getAlertState({ id }: { id: string }): Promise<AlertTaskState | void> {
+    const alert = await this.get({ id });
+    if (alert.scheduledTaskId) {
+      const { state } = taskInstanceToAlertTaskInstance(
+        await this.taskManager.get(alert.scheduledTaskId),
+        alert
+      );
+      return state;
+    }
   }
 
   public async find({ options = {} }: FindOptions = {}): Promise<FindResult> {
@@ -225,14 +238,32 @@ export class AlertsClient {
   }
 
   public async delete({ id }: { id: string }) {
-    const decryptedAlertSavedObject = await this.encryptedSavedObjectsPlugin.getDecryptedAsInternalUser<
-      RawAlert
-    >('alert', id, { namespace: this.namespace });
-    const removeResult = await this.savedObjectsClient.delete('alert', id);
-    if (decryptedAlertSavedObject.attributes.scheduledTaskId) {
-      await this.taskManager.remove(decryptedAlertSavedObject.attributes.scheduledTaskId);
+    let taskIdToRemove: string | undefined;
+    let apiKeyToInvalidate: string | null = null;
+
+    try {
+      const decryptedAlert = await this.encryptedSavedObjectsPlugin.getDecryptedAsInternalUser<
+        RawAlert
+      >('alert', id, { namespace: this.namespace });
+      apiKeyToInvalidate = decryptedAlert.attributes.apiKey;
+      taskIdToRemove = decryptedAlert.attributes.scheduledTaskId;
+    } catch (e) {
+      // We'll skip invalidating the API key since we failed to load the decrypted saved object
+      this.logger.error(
+        `delete(): Failed to load API key to invalidate on alert ${id}: ${e.message}`
+      );
+      // Still attempt to load the scheduledTaskId using SOC
+      const alert = await this.savedObjectsClient.get<RawAlert>('alert', id);
+      taskIdToRemove = alert.attributes.scheduledTaskId;
     }
-    await this.invalidateApiKey({ apiKey: decryptedAlertSavedObject.attributes.apiKey });
+
+    const removeResult = await this.savedObjectsClient.delete('alert', id);
+
+    await Promise.all([
+      taskIdToRemove ? this.taskManager.remove(taskIdToRemove) : null,
+      apiKeyToInvalidate ? this.invalidateApiKey({ apiKey: apiKeyToInvalidate }) : null,
+    ]);
+
     return removeResult;
   }
 

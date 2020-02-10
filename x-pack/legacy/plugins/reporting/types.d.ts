@@ -4,18 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ResponseObject } from 'hapi';
 import { EventEmitter } from 'events';
+import { ResponseObject } from 'hapi';
+import { ElasticsearchServiceSetup } from 'kibana/server';
 import { Legacy } from 'kibana';
-import {
-  ElasticsearchPlugin,
-  CallCluster,
-} from '../../../../src/legacy/core_plugins/elasticsearch';
+import { CallCluster } from '../../../../src/legacy/core_plugins/elasticsearch';
 import { CancellationToken } from './common/cancellation_token';
-import { LevelLogger } from './server/lib/level_logger';
 import { HeadlessChromiumDriverFactory } from './server/browsers/chromium/driver_factory';
 import { BrowserType } from './server/browsers/types';
-import { LegacySetup } from './server/plugin';
+import { LevelLogger } from './server/lib/level_logger';
+import { LegacySetup, ReportingSetupDeps } from './server/plugin';
 
 export type ReportingPlugin = object; // For Plugin contract
 
@@ -279,10 +277,12 @@ export interface ESQueueInstance<JobParamsType, JobDocPayloadType> {
 
 export type CreateJobFactory<CreateJobFnType> = (
   server: ServerFacade,
+  elasticsearch: ElasticsearchServiceSetup,
   logger: LevelLogger
 ) => CreateJobFnType;
 export type ExecuteJobFactory<ExecuteJobFnType> = (
   server: ServerFacade,
+  elasticsearch: ElasticsearchServiceSetup,
   logger: LevelLogger,
   opts: {
     browserDriverFactory: HeadlessChromiumDriverFactory;
@@ -305,10 +305,10 @@ export interface ExportTypeDefinition<
   validLicenses: string[];
 }
 
-export { ExportTypesRegistry } from './server/lib/export_types_registry';
+export { CancellationToken } from './common/cancellation_token';
 export { HeadlessChromiumDriver } from './server/browsers/chromium/driver';
 export { HeadlessChromiumDriverFactory } from './server/browsers/chromium/driver_factory';
-export { CancellationToken } from './common/cancellation_token';
+export { ExportTypesRegistry } from './server/lib/export_types_registry';
 
 // Prefer to import this type using: `import { LevelLogger } from 'relative/path/server/lib';`
 export { LevelLogger as Logger };
@@ -333,10 +333,4 @@ export interface InterceptedRequest {
   };
   frameId: string;
   resourceType: string;
-}
-
-export interface FieldFormats {
-  getConfig: number;
-  getInstance: (config: any) => any;
-  getDefaultInstance: (key: string) => any;
 }

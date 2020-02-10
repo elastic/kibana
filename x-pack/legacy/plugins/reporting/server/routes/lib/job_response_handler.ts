@@ -5,10 +5,11 @@
  */
 
 import Boom from 'boom';
+import { ElasticsearchServiceSetup } from 'kibana/server';
 import { ResponseToolkit } from 'hapi';
-import { ServerFacade, ExportTypesRegistry } from '../../../types';
-import { jobsQueryFactory } from '../../lib/jobs_query';
 import { WHITELISTED_JOB_CONTENT_TYPES } from '../../../common/constants';
+import { ExportTypesRegistry, ServerFacade } from '../../../types';
+import { jobsQueryFactory } from '../../lib/jobs_query';
 import { getDocumentPayloadFactory } from './get_document_payload';
 
 interface JobResponseHandlerParams {
@@ -21,9 +22,10 @@ interface JobResponseHandlerOpts {
 
 export function jobResponseHandlerFactory(
   server: ServerFacade,
+  elasticsearch: ElasticsearchServiceSetup,
   exportTypesRegistry: ExportTypesRegistry
 ) {
-  const jobsQuery = jobsQueryFactory(server);
+  const jobsQuery = jobsQueryFactory(server, elasticsearch);
   const getDocumentPayload = getDocumentPayloadFactory(server, exportTypesRegistry);
 
   return function jobResponseHandler(

@@ -99,11 +99,8 @@ const INITIAL_STATE = {
   goto: null,
   tooltipState: null,
   mapState: {
-    zoom: 4,
-    center: {
-      lon: -100.41,
-      lat: 32.82,
-    },
+    zoom: null, // setting this value does not adjust map zoom, read only value used to store current map zoom for persisting between sessions
+    center: null, // setting this value does not adjust map view, read only value used to store current map center for persisting between sessions
     scrollZoom: true,
     extent: null,
     mouseCoordinates: null,
@@ -447,16 +444,28 @@ function updateWithDataResponse(state, action) {
   return resetDataRequest(state, action, dataRequest);
 }
 
-function resetDataRequest(state, action, request) {
+export function resetDataRequest(state, action, request) {
   const dataRequest = request || getValidDataRequest(state, action);
   if (!dataRequest) {
     return state;
   }
 
-  dataRequest.dataRequestToken = null;
-  dataRequest.dataId = action.dataId;
-  const layerList = [...state.layerList];
-  return { ...state, layerList };
+  const layer = findLayerById(state, action.layerId);
+  const dataRequestIndex = layer.__dataRequests.indexOf(dataRequest);
+
+  const newDataRequests = [...layer.__dataRequests];
+  newDataRequests[dataRequestIndex] = {
+    ...dataRequest,
+    dataRequestToken: null,
+  };
+
+  const layerIndex = state.layerList.indexOf(layer);
+  const newLayerList = [...state.layerList];
+  newLayerList[layerIndex] = {
+    ...layer,
+    __dataRequests: newDataRequests,
+  };
+  return { ...state, layerList: newLayerList };
 }
 
 function getValidDataRequest(state, action, checkRequestToken = true) {

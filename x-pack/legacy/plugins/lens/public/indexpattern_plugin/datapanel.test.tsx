@@ -278,8 +278,8 @@ describe('IndexPattern Data Panel', () => {
 
     function testProps() {
       const setState = jest.fn();
-      core.http.get.mockImplementation(async (url: string) => {
-        const parts = url.split('/');
+      core.http.get.mockImplementation(async ({ path }) => {
+        const parts = path.split('/');
         const indexPatternTitle = parts[parts.length - 1];
         return {
           indexPatternTitle: `${indexPatternTitle}_testtitle`,
@@ -397,7 +397,8 @@ describe('IndexPattern Data Panel', () => {
       expect(setState).toHaveBeenCalledTimes(2);
       expect(core.http.get).toHaveBeenCalledTimes(2);
 
-      expect(core.http.get).toHaveBeenCalledWith('/api/lens/existing_fields/a', {
+      expect(core.http.get).toHaveBeenCalledWith({
+        path: '/api/lens/existing_fields/a',
         query: {
           fromDate: '2019-01-01',
           toDate: '2020-01-01',
@@ -405,7 +406,8 @@ describe('IndexPattern Data Panel', () => {
         },
       });
 
-      expect(core.http.get).toHaveBeenCalledWith('/api/lens/existing_fields/a', {
+      expect(core.http.get).toHaveBeenCalledWith({
+        path: '/api/lens/existing_fields/a',
         query: {
           fromDate: '2019-01-01',
           toDate: '2020-01-02',
@@ -436,7 +438,8 @@ describe('IndexPattern Data Panel', () => {
 
       expect(setState).toHaveBeenCalledTimes(2);
 
-      expect(core.http.get).toHaveBeenCalledWith('/api/lens/existing_fields/a', {
+      expect(core.http.get).toHaveBeenCalledWith({
+        path: '/api/lens/existing_fields/a',
         query: {
           fromDate: '2019-01-01',
           toDate: '2020-01-01',
@@ -444,7 +447,8 @@ describe('IndexPattern Data Panel', () => {
         },
       });
 
-      expect(core.http.get).toHaveBeenCalledWith('/api/lens/existing_fields/b', {
+      expect(core.http.get).toHaveBeenCalledWith({
+        path: '/api/lens/existing_fields/b',
         query: {
           fromDate: '2019-01-01',
           toDate: '2020-01-01',
@@ -484,13 +488,13 @@ describe('IndexPattern Data Panel', () => {
       let overlapCount = 0;
       const props = testProps();
 
-      core.http.get.mockImplementation((url: string) => {
+      core.http.get.mockImplementation(({ path }) => {
         if (queryCount) {
           ++overlapCount;
         }
         ++queryCount;
 
-        const parts = url.split('/');
+        const parts = path.split('/');
         const indexPatternTitle = parts[parts.length - 1];
         const result = Promise.resolve({
           indexPatternTitle,
