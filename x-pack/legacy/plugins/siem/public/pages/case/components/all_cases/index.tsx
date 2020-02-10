@@ -38,7 +38,7 @@ import {
 import { getCreateCaseUrl } from '../../../../components/link_to';
 
 export const AllCases = React.memo(() => {
-  const [{ data, isLoading, pagination, filterOptions }, doFetch, setFilters] = useGetCases();
+  const [{ data, isLoading, queryParams, filterOptions }, doFetch, setFilters] = useGetCases();
 
   const tableOnChangeCallback = useCallback(
     ({ page, sort }: EuiBasicTableOnChange) => {
@@ -73,21 +73,27 @@ export const AllCases = React.memo(() => {
       }
       doFetch(newPagination);
     },
-    [doFetch, pagination]
+    [doFetch, queryParams]
   );
 
-  const onFilterChangedCallback = useCallback((newFilterOptions: Partial<FilterOptions>) => {
-    setFilters({ ...filterOptions, ...newFilterOptions });
-  }, []);
+  const onFilterChangedCallback = useCallback(
+    (newFilterOptions: Partial<FilterOptions>) => {
+      setFilters({ ...filterOptions, ...newFilterOptions });
+    },
+    [setFilters]
+  );
 
   const sorting: EuiTableSortingType<FlattenedCaseSavedObject> = {
-    sort: { field: pagination.sortField, direction: pagination.sortOrder },
+    sort: { field: queryParams.sortField, direction: queryParams.sortOrder },
   };
 
   return (
     <Panel loading={isLoading}>
       <HeaderSection split title={i18n.ALL_CASES}>
-        <CasesTableFilters onFilterChanged={onFilterChangedCallback} />
+        <CasesTableFilters
+          onFilterChanged={onFilterChangedCallback}
+          initial={{ search: filterOptions.search, tags: filterOptions.tags }}
+        />
       </HeaderSection>
       {isLoading && isEmpty(data.saved_objects) && (
         <EuiLoadingContent data-test-subj="initialLoadingPanelAllCases" lines={10} />
@@ -119,8 +125,8 @@ export const AllCases = React.memo(() => {
             }
             onChange={tableOnChangeCallback}
             pagination={{
-              pageIndex: pagination.page - 1,
-              pageSize: pagination.perPage,
+              pageIndex: queryParams.page - 1,
+              pageSize: queryParams.perPage,
               totalItemCount: data.total,
               pageSizeOptions: [5, 10, 20, 50, 100, 200, 300],
             }}

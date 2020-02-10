@@ -19,19 +19,15 @@ import { throwIfNotOk } from '../../hooks/api/api';
 import { CASES_URL } from './constants';
 
 export const getCase = async (caseId: string, includeComments: boolean) => {
-  const response = await KibanaServices.get().http.fetch(
-    `${CASES_URL}/${caseId}?includeComments=${includeComments}`,
-    {
-      method: 'GET',
-      credentials: 'same-origin',
-      headers: {
-        'content-type': 'application/json',
-        'kbn-system-api': 'true',
-      },
-    }
-  );
-  await throwIfNotOk(response);
-  return response.json();
+  const response = await KibanaServices.get().http.fetch(`${CASES_URL}/${caseId}`, {
+    method: 'GET',
+    asResponse: true,
+    query: {
+      includeComments,
+    },
+  });
+  await throwIfNotOk(response.response);
+  return response.body!;
 };
 
 export const getCases = async ({
@@ -39,53 +35,36 @@ export const getCases = async ({
     search: '',
     tags: [],
   },
-  pagination = {
+  queryParams = {
     page: 1,
     perPage: 20,
     sortField: SortFieldCase.createdAt,
     sortOrder: Direction.desc,
   },
 }: FetchCasesProps): Promise<FetchCasesResponse> => {
-  let queryParams = Object.entries(pagination).reduce(
-    (acc, [key, value]) => `${acc}${key}=${value}&`,
-    '?'
-  );
-  const tags = [
-    ...(filterOptions.tags?.map(t => `case-workflow.attributes.tags:${encodeURIComponent(t)}`) ??
-      []),
-  ];
-
-  const tagParams = `filter=${tags.join('%20AND%20')}&`;
-  const searchParams = `search=${
-    filterOptions.search // filterOptions.search.length > 0 ? `*${filterOptions.search}*` : filterOptions.search
-  }&`;
-  queryParams = `${queryParams}${tagParams}${searchParams}`;
-  const response = await KibanaServices.get().http.fetch(`${CASES_URL}${queryParams}`, {
+  const tags = [...(filterOptions.tags?.map(t => `case-workflow.attributes.tags: ${t}`) ?? [])];
+  const query = {
+    ...queryParams,
+    filter: tags.join(' AND '),
+    search: filterOptions.search,
+  };
+  const response = await KibanaServices.get().http.fetch(`${CASES_URL}`, {
     method: 'GET',
-    credentials: 'same-origin',
-    headers: {
-      'content-type': 'application/json',
-      'kbn-system-api': 'true',
-      'kbn-xsrf': 'true',
-    },
+    query,
+    asResponse: true,
   });
-  await throwIfNotOk(response);
-  return response.json();
+  await throwIfNotOk(response.response);
+  return response.body!;
 };
 
 export const createCase = async (newCase: NewCase): Promise<NewCaseFormatted> => {
   const response = await KibanaServices.get().http.fetch(`${CASES_URL}`, {
     method: 'POST',
-    credentials: 'same-origin',
-    headers: {
-      'content-type': 'application/json',
-      'kbn-system-api': 'true',
-      'kbn-xsrf': 'true',
-    },
+    asResponse: true,
     body: JSON.stringify(newCase),
   });
-  await throwIfNotOk(response);
-  return response.json();
+  await throwIfNotOk(response.response);
+  return response.body!;
 };
 
 export const updateCaseProperty = async (
@@ -94,14 +73,9 @@ export const updateCaseProperty = async (
 ): Promise<UpdateCaseSavedObject> => {
   const response = await KibanaServices.get().http.fetch(`${CASES_URL}/${caseId}`, {
     method: 'POST',
-    credentials: 'same-origin',
-    headers: {
-      'content-type': 'application/json',
-      'kbn-system-api': 'true',
-      'kbn-xsrf': 'true',
-    },
+    asResponse: true,
     body: JSON.stringify(updatedCase),
   });
-  await throwIfNotOk(response);
-  return response.json();
+  await throwIfNotOk(response.response);
+  return response.body!;
 };

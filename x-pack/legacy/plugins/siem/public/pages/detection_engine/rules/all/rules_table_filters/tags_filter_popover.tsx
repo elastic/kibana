@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import React, { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react';
 import {
   EuiFilterButton,
   EuiFilterSelectItem,
@@ -41,9 +41,11 @@ export const TagsFilterPopoverComponent = ({
 }: TagsFilterPopoverProps) => {
   const [isTagPopoverOpen, setIsTagPopoverOpen] = useState(false);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const didMountRef = useRef(false);
 
   useEffect(() => {
-    onSelectedTagsChanged(selectedTags);
+    if (didMountRef.current) onSelectedTagsChanged(selectedTags);
+    else didMountRef.current = true;
   }, [selectedTags.sort().join()]);
 
   return (

@@ -77,7 +77,7 @@ export interface CaseResult {
   updated_at: number;
 }
 
-export interface PaginationOptions {
+export interface QueryParams {
   page: number;
   perPage: number;
   sortField: SortFieldCase;
@@ -91,11 +91,11 @@ export interface QueryArgs {
   sortOrder?: Direction;
 }
 
-export interface CasesState {
+export interface UseGetCasesState {
   data: FlattenedCasesSavedObjects;
   isLoading: boolean;
   isError: boolean;
-  pagination: PaginationOptions;
+  queryParams: QueryParams;
   filterOptions: FilterOptions;
 }
 export interface Action {
@@ -105,7 +105,7 @@ export interface Action {
 
 export interface FilterOptions {
   search: string;
-  tags?: string[];
+  tags: string[];
 }
 
 export interface FlattenedCaseSavedObject extends CaseResult {
@@ -150,7 +150,7 @@ export interface ElasticUser {
 }
 
 export interface FetchCasesProps {
-  pagination?: PaginationOptions;
+  queryParams?: QueryParams;
   filterOptions?: FilterOptions;
 }
 

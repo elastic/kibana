@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Dispatch, SetStateAction, useEffect, useReducer, useState } from 'react';
+import { Dispatch, SetStateAction, useEffect, useReducer, useRef, useState } from 'react';
 
 import {
   DEFAULT_TABLE_ACTIVE_PAGE,
@@ -12,13 +12,13 @@ import {
   FETCH_FAILURE,
   FETCH_INIT,
   FETCH_SUCCESS,
-  UPDATE_PAGINATION,
+  UPDATE_QUERY_PARAMS,
   UPDATE_FILTER_OPTIONS,
 } from './constants';
 import {
   FlattenedCasesSavedObjects,
   SortFieldCase,
-  CasesState,
+  UseGetCasesState,
   QueryArgs,
   Action,
   FilterOptions,
@@ -30,7 +30,7 @@ import * as i18n from './translations';
 import { flattenSavedObjects } from './utils';
 import { getCases } from './api';
 
-const dataFetchReducer = (state: CasesState, action: Action): CasesState => {
+const dataFetchReducer = (state: UseGetCasesState, action: Action): UseGetCasesState => {
   let getTypedPayload;
   switch (action.type) {
     case FETCH_INIT:
@@ -53,11 +53,11 @@ const dataFetchReducer = (state: CasesState, action: Action): CasesState => {
         isLoading: false,
         isError: true,
       };
-    case UPDATE_PAGINATION:
+    case UPDATE_QUERY_PARAMS:
       return {
         ...state,
-        pagination: {
-          ...state.pagination,
+        queryParams: {
+          ...state.queryParams,
           ...action.payload,
         },
       };
@@ -71,6 +71,16 @@ const dataFetchReducer = (state: CasesState, action: Action): CasesState => {
       throw new Error();
   }
 };
+
+function useDidUpdateEffect(fn: () => void, inputs: unknown[]) {
+  const didUpdateRef = useRef(false);
+
+  useEffect(() => {
+    if (didUpdateRef.current) fn();
+    else didUpdateRef.current = true;
+  }, inputs);
+}
+
 const initialData: FlattenedCasesSavedObjects = {
   page: 0,
   per_page: 0,
@@ -78,7 +88,7 @@ const initialData: FlattenedCasesSavedObjects = {
   saved_objects: [],
 };
 export const useGetCases = (): [
-  CasesState,
+  UseGetCasesState,
   Dispatch<SetStateAction<QueryArgs>>,
   Dispatch<SetStateAction<FilterOptions>>
 ] => {
@@ -88,23 +98,24 @@ export const useGetCases = (): [
     data: initialData,
     filterOptions: {
       search: '',
+      tags: [],
     },
-    pagination: {
+    queryParams: {
       page: DEFAULT_TABLE_ACTIVE_PAGE,
       perPage: DEFAULT_TABLE_LIMIT,
       sortField: SortFieldCase.createdAt,
       sortOrder: Direction.desc,
     },
   });
-  const [query, setQuery] = useState(state.pagination as QueryArgs);
+  const [query, setQuery] = useState(state.queryParams as QueryArgs);
   const [filterQuery, setFilters] = useState(state.filterOptions as FilterOptions);
   const [, dispatchToaster] = useStateToaster();
 
-  useEffect(() => {
-    dispatch({ type: UPDATE_PAGINATION, payload: query });
+  useDidUpdateEffect(() => {
+    dispatch({ type: UPDATE_QUERY_PARAMS, payload: query });
   }, [query]);
 
-  useEffect(() => {
+  useDidUpdateEffect(() => {
     dispatch({ type: UPDATE_FILTER_OPTIONS, payload: filterQuery });
   }, [filterQuery]);
 
@@ -115,7 +126,7 @@ export const useGetCases = (): [
       try {
         const response = await getCases({
           filterOptions: state.filterOptions,
-          pagination: state.pagination,
+          queryParams: state.queryParams,
         });
         if (!didCancel) {
           dispatch({
@@ -137,6 +148,6 @@ export const useGetCases = (): [
     return () => {
       didCancel = true;
     };
-  }, [state.pagination, state.filterOptions]);
+  }, [state.queryParams, state.filterOptions]);
   return [state, setQuery, setFilters];
 };
