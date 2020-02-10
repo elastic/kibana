@@ -6,27 +6,26 @@
 
 import {
   EuiComboBox,
-  EuiDescribedFormGroup,
   EuiFormRow,
   EuiSuperSelect,
   EuiText,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component, Fragment } from 'react';
-
-import { Feature } from '../../../../../../../../features/public';
 import { Role, RoleKibanaPrivilege, copyRole } from '../../../../../../../common/model';
 import { isGlobalPrivilegeDefinition } from '../../../privilege_utils';
 import { CUSTOM_PRIVILEGE_VALUE, NO_PRIVILEGE_VALUE } from '../constants';
 import { FeatureTable } from '../feature_table';
 import { UnsupportedSpacePrivilegesWarning } from './unsupported_space_privileges_warning';
-import { KibanaPrivileges } from '../../../../model';
+import { KibanaPrivileges, SecuredFeature } from '../../../../model';
 import { PrivilegeFormCalculator } from '../privilege_calculator';
 
 interface Props {
   role: Role;
   kibanaPrivileges: KibanaPrivileges;
-  features: Feature[];
+  features: SecuredFeature[];
   onChange: (role: Role) => void;
   editable: boolean;
 }
@@ -53,8 +52,14 @@ export class SimplePrivilegeSection extends Component<Props, State> {
   public render() {
     const kibanaPrivilege = this.getDisplayedBasePrivilege();
 
-    // TODO: bad logic here.
-    const hasReservedPrivileges = false;
+    const reservedPrivileges = this.props.role.kibana[this.state.globalPrivsIndex]?._reserved ?? [];
+
+    const title = (
+      <FormattedMessage
+        id="xpack.security.management.editRole.simplePrivilegeForm.kibanaPrivilegesTitle"
+        defaultMessage="Kibana privileges"
+      />
+    );
 
     const description = (
       <p>
@@ -67,159 +72,162 @@ export class SimplePrivilegeSection extends Component<Props, State> {
 
     return (
       <Fragment>
-        <EuiDescribedFormGroup
-          title={
-            <h3>
-              <FormattedMessage
-                id="xpack.security.management.editRole.simplePrivilegeForm.kibanaPrivilegesTitle"
-                defaultMessage="Kibana privileges"
-              />
-            </h3>
-          }
-          description={description}
-        >
-          <EuiFormRow hasEmptyLabelSpace>
-            {hasReservedPrivileges ? (
-              <EuiComboBox fullWidth selectedOptions={[]} isDisabled />
-            ) : (
-              <EuiSuperSelect
-                disabled={!this.props.editable}
-                onChange={this.onKibanaPrivilegeChange}
-                options={[
-                  {
-                    value: NO_PRIVILEGE_VALUE,
-                    inputDisplay: (
-                      <EuiText>
-                        <FormattedMessage
-                          id="xpack.security.management.editRole.simplePrivilegeForm.noPrivilegeInput"
-                          defaultMessage="None"
-                        />
-                      </EuiText>
-                    ),
-                    dropdownDisplay: (
-                      <EuiText>
-                        <strong>
+        <EuiFlexGroup direction="column">
+          <EuiFlexItem>
+            <EuiText size="s" color="subdued">
+              {description}
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiFormRow label={title}>
+              {reservedPrivileges.length > 0 ? (
+                <EuiComboBox
+                  fullWidth
+                  selectedOptions={reservedPrivileges.map(rp => ({ label: rp }))}
+                  isDisabled
+                />
+              ) : (
+                <EuiSuperSelect
+                  disabled={!this.props.editable}
+                  onChange={this.onKibanaPrivilegeChange}
+                  options={[
+                    {
+                      value: NO_PRIVILEGE_VALUE,
+                      inputDisplay: (
+                        <EuiText>
                           <FormattedMessage
-                            id="xpack.security.management.editRole.simplePrivilegeForm.noPrivilegeDropdown"
+                            id="xpack.security.management.editRole.simplePrivilegeForm.noPrivilegeInput"
                             defaultMessage="None"
                           />
-                        </strong>
-                        <p>
+                        </EuiText>
+                      ),
+                      dropdownDisplay: (
+                        <EuiText>
+                          <strong>
+                            <FormattedMessage
+                              id="xpack.security.management.editRole.simplePrivilegeForm.noPrivilegeDropdown"
+                              defaultMessage="None"
+                            />
+                          </strong>
+                          <p>
+                            <FormattedMessage
+                              id="xpack.security.management.editRole.simplePrivilegeForm.noPrivilegeDropdownDescription"
+                              defaultMessage="No access to Kibana"
+                            />
+                          </p>
+                        </EuiText>
+                      ),
+                    },
+                    {
+                      value: CUSTOM_PRIVILEGE_VALUE,
+                      inputDisplay: (
+                        <EuiText>
                           <FormattedMessage
-                            id="xpack.security.management.editRole.simplePrivilegeForm.noPrivilegeDropdownDescription"
-                            defaultMessage="No access to Kibana"
-                          />
-                        </p>
-                      </EuiText>
-                    ),
-                  },
-                  {
-                    value: CUSTOM_PRIVILEGE_VALUE,
-                    inputDisplay: (
-                      <EuiText>
-                        <FormattedMessage
-                          id="xpack.security.management.editRole.simplePrivilegeForm.customPrivilegeInput"
-                          defaultMessage="Custom"
-                        />
-                      </EuiText>
-                    ),
-                    dropdownDisplay: (
-                      <EuiText>
-                        <strong>
-                          <FormattedMessage
-                            id="xpack.security.management.editRole.simplePrivilegeForm.customPrivilegeDropdown"
+                            id="xpack.security.management.editRole.simplePrivilegeForm.customPrivilegeInput"
                             defaultMessage="Custom"
                           />
-                        </strong>
-                        <p>
+                        </EuiText>
+                      ),
+                      dropdownDisplay: (
+                        <EuiText>
+                          <strong>
+                            <FormattedMessage
+                              id="xpack.security.management.editRole.simplePrivilegeForm.customPrivilegeDropdown"
+                              defaultMessage="Custom"
+                            />
+                          </strong>
+                          <p>
+                            <FormattedMessage
+                              id="xpack.security.management.editRole.simplePrivilegeForm.customPrivilegeDropdownDescription"
+                              defaultMessage="Customize access to Kibana"
+                            />
+                          </p>
+                        </EuiText>
+                      ),
+                    },
+                    {
+                      value: 'read',
+                      inputDisplay: (
+                        <EuiText>
                           <FormattedMessage
-                            id="xpack.security.management.editRole.simplePrivilegeForm.customPrivilegeDropdownDescription"
-                            defaultMessage="Customize access to Kibana"
-                          />
-                        </p>
-                      </EuiText>
-                    ),
-                  },
-                  {
-                    value: 'read',
-                    inputDisplay: (
-                      <EuiText>
-                        <FormattedMessage
-                          id="xpack.security.management.editRole.simplePrivilegeForm.readPrivilegeInput"
-                          defaultMessage="Read"
-                        />
-                      </EuiText>
-                    ),
-                    dropdownDisplay: (
-                      <EuiText>
-                        <strong>
-                          <FormattedMessage
-                            id="xpack.security.management.editRole.simplePrivilegeForm.readPrivilegeDropdown"
+                            id="xpack.security.management.editRole.simplePrivilegeForm.readPrivilegeInput"
                             defaultMessage="Read"
                           />
-                        </strong>
-                        <p>
+                        </EuiText>
+                      ),
+                      dropdownDisplay: (
+                        <EuiText>
+                          <strong>
+                            <FormattedMessage
+                              id="xpack.security.management.editRole.simplePrivilegeForm.readPrivilegeDropdown"
+                              defaultMessage="Read"
+                            />
+                          </strong>
+                          <p>
+                            <FormattedMessage
+                              id="xpack.security.management.editRole.simplePrivilegeForm.readPrivilegeDropdownDescription"
+                              defaultMessage="Grants read-only access to all of Kibana"
+                            />
+                          </p>
+                        </EuiText>
+                      ),
+                    },
+                    {
+                      value: 'all',
+                      inputDisplay: (
+                        <EuiText>
                           <FormattedMessage
-                            id="xpack.security.management.editRole.simplePrivilegeForm.readPrivilegeDropdownDescription"
-                            defaultMessage="Grants read-only access to all of Kibana"
-                          />
-                        </p>
-                      </EuiText>
-                    ),
-                  },
-                  {
-                    value: 'all',
-                    inputDisplay: (
-                      <EuiText>
-                        <FormattedMessage
-                          id="xpack.security.management.editRole.simplePrivilegeForm.allPrivilegeInput"
-                          defaultMessage="All"
-                        />
-                      </EuiText>
-                    ),
-                    dropdownDisplay: (
-                      <EuiText>
-                        <strong>
-                          <FormattedMessage
-                            id="xpack.security.management.editRole.simplePrivilegeForm.allPrivilegeDropdown"
+                            id="xpack.security.management.editRole.simplePrivilegeForm.allPrivilegeInput"
                             defaultMessage="All"
                           />
-                        </strong>
-                        <p>
-                          <FormattedMessage
-                            id="xpack.security.management.editRole.simplePrivilegeForm.allPrivilegeDropdownDescription"
-                            defaultMessage="Grants full access to all of Kibana"
-                          />
-                        </p>
-                      </EuiText>
-                    ),
-                  },
-                ]}
-                hasDividers
-                valueOfSelected={kibanaPrivilege}
-              />
-            )}
-          </EuiFormRow>
-          {this.state.isCustomizingGlobalPrivilege && (
-            <EuiFormRow>
-              <FeatureTable
-                role={this.props.role}
-                kibanaPrivileges={this.props.kibanaPrivileges}
-                privilegeCalculator={
-                  new PrivilegeFormCalculator(
-                    this.props.kibanaPrivileges,
-                    this.props.role,
-                    this.props.role.kibana.findIndex(k => isGlobalPrivilegeDefinition(k))
-                  )
-                }
-                onChange={this.onFeaturePrivilegeChange}
-                onChangeAll={this.onChangeAllFeaturePrivileges}
-                spacesIndex={this.props.role.kibana.findIndex(k => isGlobalPrivilegeDefinition(k))}
-              />
+                        </EuiText>
+                      ),
+                      dropdownDisplay: (
+                        <EuiText>
+                          <strong>
+                            <FormattedMessage
+                              id="xpack.security.management.editRole.simplePrivilegeForm.allPrivilegeDropdown"
+                              defaultMessage="All"
+                            />
+                          </strong>
+                          <p>
+                            <FormattedMessage
+                              id="xpack.security.management.editRole.simplePrivilegeForm.allPrivilegeDropdownDescription"
+                              defaultMessage="Grants full access to all of Kibana"
+                            />
+                          </p>
+                        </EuiText>
+                      ),
+                    },
+                  ]}
+                  hasDividers
+                  valueOfSelected={kibanaPrivilege}
+                />
+              )}
             </EuiFormRow>
-          )}
-          {this.maybeRenderSpacePrivilegeWarning()}
-        </EuiDescribedFormGroup>
+            {this.state.isCustomizingGlobalPrivilege && (
+              <EuiFormRow fullWidth>
+                <FeatureTable
+                  role={this.props.role}
+                  kibanaPrivileges={this.props.kibanaPrivileges}
+                  privilegeCalculator={
+                    new PrivilegeFormCalculator(
+                      this.props.kibanaPrivileges,
+                      this.props.role,
+                      this.props.role.kibana.findIndex(k => isGlobalPrivilegeDefinition(k))
+                    )
+                  }
+                  onChange={this.onFeaturePrivilegeChange}
+                  onChangeAll={this.onChangeAllFeaturePrivileges}
+                  spacesIndex={this.props.role.kibana.findIndex(k =>
+                    isGlobalPrivilegeDefinition(k)
+                  )}
+                />
+              </EuiFormRow>
+            )}
+            {this.maybeRenderSpacePrivilegeWarning()}
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </Fragment>
     );
   }

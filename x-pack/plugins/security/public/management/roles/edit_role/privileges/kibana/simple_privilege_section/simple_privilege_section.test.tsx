@@ -7,13 +7,39 @@
 import { EuiButtonGroup, EuiButtonGroupProps, EuiComboBox, EuiSuperSelect } from '@elastic/eui';
 import React from 'react';
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
-import { Feature } from '../../../../../../../../features/public';
 import { Role } from '../../../../../../../common/model';
 import { SimplePrivilegeSection } from './simple_privilege_section';
 import { UnsupportedSpacePrivilegesWarning } from './unsupported_space_privileges_warning';
-import { KibanaPrivileges } from '../../../../model';
+import { KibanaPrivileges, SecuredFeature } from '../../../../model';
 
 const buildProps = (customProps: any = {}) => {
+  const features = [
+    new SecuredFeature({
+      id: 'feature1',
+      name: 'Feature 1',
+      app: ['app'],
+      icon: 'spacesApp',
+      privileges: {
+        all: {
+          app: ['app'],
+          savedObject: {
+            all: ['foo'],
+            read: [],
+          },
+          ui: ['app-ui'],
+        },
+        read: {
+          app: ['app'],
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: ['app-ui'],
+        },
+      },
+    }),
+  ] as SecuredFeature[];
+
   const kibanaPrivileges = new KibanaPrivileges(
     {
       features: {
@@ -26,7 +52,7 @@ const buildProps = (customProps: any = {}) => {
       space: {},
       reserved: {},
     },
-    []
+    features
   );
 
   const role = {
@@ -43,32 +69,7 @@ const buildProps = (customProps: any = {}) => {
   return {
     editable: true,
     kibanaPrivileges,
-    features: [
-      new Feature({
-        id: 'feature1',
-        name: 'Feature 1',
-        app: ['app'],
-        icon: 'spacesApp',
-        privileges: {
-          all: {
-            app: ['app'],
-            savedObject: {
-              all: ['foo'],
-              read: [],
-            },
-            ui: ['app-ui'],
-          },
-          read: {
-            app: ['app'],
-            savedObject: {
-              all: [],
-              read: [],
-            },
-            ui: ['app-ui'],
-          },
-        },
-      }),
-    ] as Feature[],
+    features,
     onChange: jest.fn(),
     ...customProps,
     role,
