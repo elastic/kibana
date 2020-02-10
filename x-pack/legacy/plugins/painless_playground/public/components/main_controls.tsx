@@ -87,7 +87,7 @@ export function MainControls({
     <>
       <div className="painlessPlaygroundBottomBarPlaceholder" />
 
-      <EuiBottomBar>
+      <EuiBottomBar paddingSize="none">
         <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="s" justifyContent="flexStart">
@@ -96,6 +96,7 @@ export function MainControls({
                   id="painlessPlaygroundHelpContextMenu"
                   button={
                     <EuiButtonEmpty
+                      size="s"
                       iconType="help"
                       iconSide="left"
                       color="ghost"
@@ -119,6 +120,7 @@ export function MainControls({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
+              size="s"
               color="ghost"
               onClick={toggleRequestFlyout}
               data-test-subj="btnViewRequest"
