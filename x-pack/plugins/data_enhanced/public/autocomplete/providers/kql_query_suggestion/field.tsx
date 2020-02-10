@@ -11,7 +11,8 @@ import { sortPrefixFirst } from './sort_prefix_first';
 import {
   IFieldType,
   isFilterable,
-  autocomplete,
+  QuerySuggestionField,
+  QuerySuggestionTypes,
 } from '../../../../../../../src/plugins/data/public';
 import { KqlQuerySuggestionProvider } from './types';
 
@@ -38,7 +39,7 @@ const keywordComparator = (first: IFieldType, second: IFieldType) => {
   return first.name.localeCompare(second.name);
 };
 
-export const setupGetFieldSuggestions: KqlQuerySuggestionProvider<autocomplete.FieldQuerySuggestion> = core => {
+export const setupGetFieldSuggestions: KqlQuerySuggestionProvider<QuerySuggestionField> = core => {
   return ({ indexPatterns }, { start, end, prefix, suffix, nestedPath = '' }) => {
     const allFields = flatten(
       indexPatterns.map(indexPattern => {
@@ -59,7 +60,7 @@ export const setupGetFieldSuggestions: KqlQuerySuggestionProvider<autocomplete.F
     });
     const sortedFields = sortPrefixFirst(matchingFields.sort(keywordComparator), search, 'name');
 
-    const suggestions: autocomplete.FieldQuerySuggestion[] = sortedFields.map(field => {
+    const suggestions: QuerySuggestionField[] = sortedFields.map(field => {
       const remainingPath =
         field.subType && field.subType.nested
           ? field.subType.nested.path.slice(nestedPath ? nestedPath.length + 1 : 0)
@@ -77,7 +78,7 @@ export const setupGetFieldSuggestions: KqlQuerySuggestionProvider<autocomplete.F
           : text.length;
 
       return {
-        type: autocomplete.QuerySuggestionsTypes.Field,
+        type: QuerySuggestionTypes.Field,
         text,
         description,
         start,

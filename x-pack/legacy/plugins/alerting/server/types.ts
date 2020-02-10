@@ -31,7 +31,7 @@ export interface AlertServices extends Services {
 export interface AlertExecutorOptions {
   alertId: string;
   startedAt: Date;
-  previousStartedAt?: Date;
+  previousStartedAt: Date | null;
   services: AlertServices;
   params: Record<string, any>;
   state: State;
