@@ -90,7 +90,7 @@ export class Welcome extends React.Component<Props> {
         <Fragment>
           <FormattedMessage
             id="kbn.home.dataManagementDisableCollection"
-            defaultMessage="To stop collection, "
+            defaultMessage=" To stop collection, "
           />
           <EuiLink href="#/management/kibana/settings">
             <FormattedMessage

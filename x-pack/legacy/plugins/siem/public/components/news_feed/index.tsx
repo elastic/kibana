@@ -8,7 +8,7 @@ import React, { useEffect, useState } from 'react';
 import chrome from 'ui/chrome';
 
 import { fetchNews, getNewsFeedUrl, getNewsItemsFromApiResponse } from './helpers';
-import { useUiSetting$ } from '../../lib/kibana';
+import { useKibana, useUiSetting$ } from '../../lib/kibana';
 import { NewsFeed } from './news_feed';
 import { NewsItem } from './types';
 
@@ -16,9 +16,13 @@ export const StatefulNewsFeed = React.memo<{
   enableNewsFeedSetting: string;
   newsFeedSetting: string;
 }>(({ enableNewsFeedSetting, newsFeedSetting }) => {
+  const kibanaNewsfeedEnabled = useKibana().services.newsfeed;
   const [enableNewsFeed] = useUiSetting$<boolean>(enableNewsFeedSetting);
   const [newsFeedUrlSetting] = useUiSetting$<string>(newsFeedSetting);
   const [news, setNews] = useState<NewsItem[] | null>(null);
+
+  // respect kibana's global newsfeed.enabled setting
+  const newsfeedEnabled = kibanaNewsfeedEnabled && enableNewsFeed;
 
   const newsFeedUrl = getNewsFeedUrl({
     newsFeedUrlSetting,
@@ -42,16 +46,16 @@ export const StatefulNewsFeed = React.memo<{
       }
     };
 
-    if (enableNewsFeed) {
+    if (newsfeedEnabled) {
       fetchData();
     }
 
     return () => {
       canceled = true;
     };
-  }, [enableNewsFeed, newsFeedUrl]);
+  }, [newsfeedEnabled, newsFeedUrl]);
 
-  return <>{enableNewsFeed ? <NewsFeed news={news} /> : null}</>;
+  return <>{newsfeedEnabled ? <NewsFeed news={news} /> : null}</>;
 });
 
 StatefulNewsFeed.displayName = 'StatefulNewsFeed';

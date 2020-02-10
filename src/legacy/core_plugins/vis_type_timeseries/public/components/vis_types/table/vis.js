@@ -20,16 +20,16 @@
 import _, { isArray, last, get } from 'lodash';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { npStart } from 'ui/new_platform';
 import { createTickFormatter } from '../../lib/tick_formatter';
-import { calculateLabel } from '../../../../common/calculate_label';
+import { calculateLabel } from '../../../../../../../plugins/vis_type_timeseries/common/calculate_label';
 import { isSortable } from './is_sortable';
 import { EuiToolTip, EuiIcon } from '@elastic/eui';
 import { replaceVars } from '../../lib/replace_vars';
 import { fieldFormats } from '../../../../../../../plugins/data/public';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { getFieldFormats } from '../../../services';
 
-import { METRIC_TYPES } from '../../../../common/metric_types';
+import { METRIC_TYPES } from '../../../../../../../plugins/vis_type_timeseries/common/metric_types';
 
 function getColor(rules, colorKey, value) {
   let color;
@@ -49,7 +49,7 @@ export class TableVis extends Component {
   constructor(props) {
     super(props);
 
-    const fieldFormatsService = npStart.plugins.data.fieldFormats;
+    const fieldFormatsService = getFieldFormats();
     const DateFormat = fieldFormatsService.getType(fieldFormats.FIELD_FORMAT_IDS.DATE);
 
     this.dateFormatter = new DateFormat({}, this.props.getConfig);

@@ -24,8 +24,6 @@ export interface Query {
 
   getSnapshot?: Snapshot | null;
 
-  getSnapshotHistogram: HistogramDataPoint[];
-
   getMonitorChartsData?: MonitorChart | null;
   /** Fetch the most recent event data for a monitor ID, date range, location. */
   getLatestMonitors: Ping[];
@@ -419,17 +417,7 @@ export interface SnapshotCount {
   total: number;
 }
 
-export interface HistogramDataPoint {
-  upCount?: number | null;
 
-  downCount?: number | null;
-
-  x?: UnsignedInteger | null;
-
-  x0?: UnsignedInteger | null;
-
-  y?: UnsignedInteger | null;
-}
 /** The data used to populate the monitor charts. */
 export interface MonitorChart {
   /** The average values for the monitor duration. */
@@ -616,47 +604,6 @@ export interface StatesIndexStatus {
   docCount?: DocCount | null;
 }
 
-export interface DataPoint {
-  x?: UnsignedInteger | null;
-
-  y?: number | null;
-}
-/** Represents a monitor's duration performance in microseconds at a point in time. */
-export interface MonitorDurationAreaPoint {
-  /** The timeseries value for this point in time. */
-  x: UnsignedInteger;
-  /** The min duration value in microseconds at this time. */
-  yMin?: number | null;
-  /** The max duration value in microseconds at this point. */
-  yMax?: number | null;
-}
-
-export interface MonitorSummaryUrl {
-  domain?: string | null;
-
-  fragment?: string | null;
-
-  full?: string | null;
-
-  original?: string | null;
-
-  password?: string | null;
-
-  path?: string | null;
-
-  port?: number | null;
-
-  query?: string | null;
-
-  scheme?: string | null;
-
-  username?: string | null;
-}
-
-// ====================================================
-// Arguments
-// ====================================================
-
 export interface AllPingsQueryArgs {
   /** Optional: the direction to sort by. Accepts 'asc' and 'desc'. Defaults to 'desc'. */
   sort?: string | null;
@@ -673,35 +620,7 @@ export interface AllPingsQueryArgs {
   /** Optional: agent location to filter by. */
   location?: string | null;
 }
-export interface GetMonitorsQueryArgs {
-  dateRangeStart: string;
 
-  dateRangeEnd: string;
-
-  filters?: string | null;
-
-  statusFilter?: string | null;
-}
-export interface GetSnapshotQueryArgs {
-  dateRangeStart: string;
-
-  dateRangeEnd: string;
-
-  filters?: string | null;
-
-  statusFilter?: string | null;
-}
-export interface GetSnapshotHistogramQueryArgs {
-  dateRangeStart: string;
-
-  dateRangeEnd: string;
-
-  filters?: string | null;
-
-  statusFilter?: string | null;
-
-  monitorId?: string | null;
-}
 export interface GetMonitorChartsDataQueryArgs {
   monitorId: string;
 
@@ -710,11 +629,6 @@ export interface GetMonitorChartsDataQueryArgs {
   dateRangeEnd: string;
 
   location?: string | null;
-}
-export interface GetFilterBarQueryArgs {
-  dateRangeStart: string;
-
-  dateRangeEnd: string;
 }
 
 export interface GetMonitorStatesQueryArgs {

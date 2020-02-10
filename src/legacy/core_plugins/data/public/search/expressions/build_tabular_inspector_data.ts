@@ -19,9 +19,9 @@
 
 import { set } from 'lodash';
 // @ts-ignore
-import { createFilter } from '../../../../visualizations/public';
 import { FormattedData } from '../../../../../../plugins/inspector/public';
-
+// @ts-ignore
+import { createFilter } from './create_filter';
 interface Column {
   id: string;
   name: string;

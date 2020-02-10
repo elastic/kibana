@@ -6,6 +6,7 @@
 
 import { indexPatternService } from './kibana_services';
 import { isNestedField } from '../../../../../src/plugins/data/public';
+import { ES_GEO_FIELD_TYPE } from '../common/constants';
 
 export async function getIndexPatternsFromIds(indexPatternIds = []) {
   const promises = [];
@@ -25,6 +26,18 @@ export function getTermsFields(fields) {
       field.aggregatable &&
       !isNestedField(field) &&
       ['number', 'boolean', 'date', 'ip', 'string'].includes(field.type)
+    );
+  });
+}
+
+export const AGGREGATABLE_GEO_FIELD_TYPES = [ES_GEO_FIELD_TYPE.GEO_POINT];
+
+export function getAggregatableGeoFields(fields) {
+  return fields.filter(field => {
+    return (
+      field.aggregatable &&
+      !isNestedField(field) &&
+      AGGREGATABLE_GEO_FIELD_TYPES.includes(field.type)
     );
   });
 }

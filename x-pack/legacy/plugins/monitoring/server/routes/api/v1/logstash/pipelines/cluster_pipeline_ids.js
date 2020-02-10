@@ -36,7 +36,7 @@ export function logstashClusterPipelineIdsRoute(server) {
       const { ccs } = req.payload;
       const clusterUuid = req.params.clusterUuid;
       const lsIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_LOGSTASH, ccs);
-      const size = config.get('xpack.monitoring.max_bucket_size');
+      const size = config.get('monitoring.ui.max_bucket_size');
 
       try {
         const pipelines = await getLogstashPipelineIds(req, lsIndexPattern, { clusterUuid }, size);

@@ -318,6 +318,10 @@ export const signalFieldsMap: Readonly<Record<string, string>> = {
   'signal.rule.version': 'signal.rule.version',
 };
 
+export const ruleFieldsMap: Readonly<Record<string, string>> = {
+  'rule.reference': 'rule.reference',
+};
+
 export const eventFieldsMap: Readonly<Record<string, string>> = {
   timestamp: '@timestamp',
   '@timestamp': '@timestamp',
@@ -331,6 +335,7 @@ export const eventFieldsMap: Readonly<Record<string, string>> = {
   ...{ ...geoFieldsMap },
   ...{ ...hostFieldsMap },
   ...{ ...networkFieldsMap },
+  ...{ ...ruleFieldsMap },
   ...{ ...signalFieldsMap },
   ...{ ...sourceFieldsMap },
   ...{ ...suricataFieldsMap },

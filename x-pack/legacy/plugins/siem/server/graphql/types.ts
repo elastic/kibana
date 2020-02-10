@@ -793,6 +793,8 @@ export interface Ecs {
 
   network?: Maybe<NetworkEcsField>;
 
+  rule?: Maybe<RuleEcsField>;
+
   signal?: Maybe<SignalField>;
 
   source?: Maybe<SourceEcsFields>;
@@ -970,6 +972,10 @@ export interface NetworkEcsField {
   protocol?: Maybe<string[] | string>;
 
   transport?: Maybe<string[] | string>;
+}
+
+export interface RuleEcsField {
+  reference?: Maybe<string[] | string>;
 }
 
 export interface SignalField {
@@ -4279,6 +4285,8 @@ export namespace EcsResolvers {
 
     network?: NetworkResolver<Maybe<NetworkEcsField>, TypeParent, TContext>;
 
+    rule?: RuleResolver<Maybe<RuleEcsField>, TypeParent, TContext>;
+
     signal?: SignalResolver<Maybe<SignalField>, TypeParent, TContext>;
 
     source?: SourceResolver<Maybe<SourceEcsFields>, TypeParent, TContext>;
@@ -4355,6 +4363,11 @@ export namespace EcsResolvers {
   > = Resolver<R, Parent, TContext>;
   export type NetworkResolver<
     R = Maybe<NetworkEcsField>,
+    Parent = Ecs,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type RuleResolver<
+    R = Maybe<RuleEcsField>,
     Parent = Ecs,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
@@ -4931,6 +4944,18 @@ export namespace NetworkEcsFieldResolvers {
   export type TransportResolver<
     R = Maybe<string[] | string>,
     Parent = NetworkEcsField,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+}
+
+export namespace RuleEcsFieldResolvers {
+  export interface Resolvers<TContext = SiemContext, TypeParent = RuleEcsField> {
+    reference?: ReferenceResolver<Maybe<string[] | string>, TypeParent, TContext>;
+  }
+
+  export type ReferenceResolver<
+    R = Maybe<string[] | string>,
+    Parent = RuleEcsField,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
 }
@@ -9231,6 +9256,7 @@ export type IResolvers<TContext = SiemContext> = {
   EndgameEcsFields?: EndgameEcsFieldsResolvers.Resolvers<TContext>;
   EventEcsFields?: EventEcsFieldsResolvers.Resolvers<TContext>;
   NetworkEcsField?: NetworkEcsFieldResolvers.Resolvers<TContext>;
+  RuleEcsField?: RuleEcsFieldResolvers.Resolvers<TContext>;
   SignalField?: SignalFieldResolvers.Resolvers<TContext>;
   RuleField?: RuleFieldResolvers.Resolvers<TContext>;
   SuricataEcsFields?: SuricataEcsFieldsResolvers.Resolvers<TContext>;

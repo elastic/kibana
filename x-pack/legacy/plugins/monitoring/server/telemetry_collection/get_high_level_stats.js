@@ -217,7 +217,7 @@ export async function fetchHighLevelStats(server, callCluster, clusterUuids, sta
 
   const params = {
     index: getIndexPatternForStackProduct(product),
-    size: config.get('xpack.monitoring.max_bucket_size'),
+    size: config.get('monitoring.ui.max_bucket_size'),
     headers: {
       'X-QUERY-SOURCE': TELEMETRY_QUERY_SOURCE,
     },

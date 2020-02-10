@@ -15,7 +15,20 @@ import {
   dataAnalyticsExplainSchema,
 } from '../new_platform/data_analytics_schema';
 
+/**
+ * Routes for the data frame analytics
+ */
 export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }: RouteInitialization) {
+  /**
+   * @apiGroup DataFrameAnalytics
+   *
+   * @api {get} /api/ml/data_frame/analytics Get analytics data
+   * @apiName GetDataFrameAnalytics
+   * @apiDescription Returns the list of data frame analytics jobs.
+   *
+   * @apiSuccess {Number} count
+   * @apiSuccess {Object[]} data_frame_analytics
+   */
   router.get(
     {
       path: '/api/ml/data_frame/analytics',
@@ -35,6 +48,15 @@ export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }: RouteIniti
     })
   );
 
+  /**
+   * @apiGroup DataFrameAnalytics
+   *
+   * @api {get} /api/ml/data_frame/analytics/:analyticsId Get analytics data by id
+   * @apiName GetDataFrameAnalyticsById
+   * @apiDescription Returns the data frame analytics job.
+   *
+   * @apiParam {String} analyticsId Analytics ID.
+   */
   router.get(
     {
       path: '/api/ml/data_frame/analytics/{analyticsId}',
@@ -57,6 +79,13 @@ export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }: RouteIniti
     })
   );
 
+  /**
+   * @apiGroup DataFrameAnalytics
+   *
+   * @api {get} /api/ml/data_frame/analytics/_stats Get analytics stats
+   * @apiName GetDataFrameAnalyticsStats
+   * @apiDescription Returns data frame analytics jobs statistics.
+   */
   router.get(
     {
       path: '/api/ml/data_frame/analytics/_stats',
@@ -76,6 +105,15 @@ export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }: RouteIniti
     })
   );
 
+  /**
+   * @apiGroup DataFrameAnalytics
+   *
+   * @api {get} /api/ml/data_frame/analytics/:analyticsId/_stats Get stats for requested analytics job
+   * @apiName GetDataFrameAnalyticsStatsById
+   * @apiDescription Returns data frame analytics job statistics.
+   *
+   * @apiParam {String} analyticsId Analytics ID.
+   */
   router.get(
     {
       path: '/api/ml/data_frame/analytics/{analyticsId}/_stats',
@@ -101,6 +139,16 @@ export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }: RouteIniti
     })
   );
 
+  /**
+   * @apiGroup DataFrameAnalytics
+   *
+   * @api {put} /api/ml/data_frame/analytics/:analyticsId Instantiate a data frame analytics job
+   * @apiName UpdateDataFrameAnalytics
+   * @apiDescription This API creates a data frame analytics job that performs an analysis
+   *                 on the source index and stores the outcome in a destination index.
+   *
+   * @apiParam {String} analyticsId Analytics ID.
+   */
   router.put(
     {
       path: '/api/ml/data_frame/analytics/{analyticsId}',
@@ -108,7 +156,7 @@ export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }: RouteIniti
         params: schema.object({
           analyticsId: schema.string(),
         }),
-        body: schema.object({ ...dataAnalyticsJobConfigSchema }),
+        body: schema.object(dataAnalyticsJobConfigSchema),
       },
     },
     licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
@@ -130,6 +178,13 @@ export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }: RouteIniti
     })
   );
 
+  /**
+   * @apiGroup DataFrameAnalytics
+   *
+   * @api {post} /api/ml/data_frame/_evaluate Evaluate the data frame analytics for an annotated index
+   * @apiName EvaluateDataFrameAnalytics
+   * @apiDescription Evaluates the data frame analytics for an annotated index.
+   */
   router.post(
     {
       path: '/api/ml/data_frame/_evaluate',
@@ -154,6 +209,22 @@ export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }: RouteIniti
     })
   );
 
+  /**
+   * @apiGroup DataFrameAnalytics
+   *
+   * @api {post} /api/ml/data_frame/_explain Explain a data frame analytics config
+   * @apiName ExplainDataFrameAnalytics
+   * @apiDescription This API provides explanations for a data frame analytics config
+   *                 that either exists already or one that has not been created yet.
+   *
+   * @apiParam {String} [description]
+   * @apiParam {Object} [dest]
+   * @apiParam {Object} source
+   * @apiParam {String} source.index
+   * @apiParam {Object} analysis
+   * @apiParam {Object} [analyzed_fields]
+   * @apiParam {String} [model_memory_limit]
+   */
   router.post(
     {
       path: '/api/ml/data_frame/analytics/_explain',
@@ -178,6 +249,15 @@ export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }: RouteIniti
     })
   );
 
+  /**
+   * @apiGroup DataFrameAnalytics
+   *
+   * @api {delete} /api/ml/data_frame/analytics/:analyticsId Delete specified analytics job
+   * @apiName DeleteDataFrameAnalytics
+   * @apiDescription Deletes specified data frame analytics job.
+   *
+   * @apiParam {String} analyticsId Analytics ID.
+   */
   router.delete(
     {
       path: '/api/ml/data_frame/analytics/{analyticsId}',
@@ -205,6 +285,15 @@ export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }: RouteIniti
     })
   );
 
+  /**
+   * @apiGroup DataFrameAnalytics
+   *
+   * @api {post} /api/ml/data_frame/analytics/:analyticsId/_start Start specified analytics job
+   * @apiName StartDataFrameAnalyticsJob
+   * @apiDescription Starts a data frame analytics job.
+   *
+   * @apiParam {String} analyticsId Analytics ID.
+   */
   router.post(
     {
       path: '/api/ml/data_frame/analytics/{analyticsId}/_start',
@@ -229,6 +318,15 @@ export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }: RouteIniti
     })
   );
 
+  /**
+   * @apiGroup DataFrameAnalytics
+   *
+   * @api {post} /api/ml/data_frame/analytics/:analyticsId/_stop Stop specified analytics job
+   * @apiName StopsDataFrameAnalyticsJob
+   * @apiDescription Stops a data frame analytics job.
+   *
+   * @apiParam {String} analyticsId Analytics ID.
+   */
   router.post(
     {
       path: '/api/ml/data_frame/analytics/{analyticsId}/_stop',
@@ -263,6 +361,15 @@ export function dataFrameAnalyticsRoutes({ xpackMainPlugin, router }: RouteIniti
     })
   );
 
+  /**
+   * @apiGroup DataFrameAnalytics
+   *
+   * @api {get} /api/ml/data_frame/analytics/:analyticsId/messages Get analytics job messages
+   * @apiName GetDataFrameAnalyticsMessages
+   * @apiDescription Returns the list of audit messages for data frame analytics jobs.
+   *
+   * @apiParam {String} analyticsId Analytics ID.
+   */
   router.get(
     {
       path: '/api/ml/data_frame/analytics/{analyticsId}/messages',

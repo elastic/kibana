@@ -18,7 +18,7 @@ import {
 } from '../../../../../../../../../src/plugins/es_ui_shared/static/forms/components';
 import { documentationService } from '../../../services/documentation';
 import { StepProps } from '../types';
-import { schemas } from '../template_form_schemas';
+import { schemas, nameConfig, nameConfigWithoutValidations } from '../template_form_schemas';
 
 // Create or Form components with partial props that are common to all instances
 const UseField = getUseField({ component: Field });
@@ -131,6 +131,7 @@ export const StepLogistics: React.FunctionComponent<StepProps> = ({
             ['data-test-subj']: name.testSubject,
             euiFieldProps: { disabled: isEditing },
           }}
+          config={isEditing ? nameConfigWithoutValidations : nameConfig}
         />
       </FormRow>
       {/* Index patterns */}

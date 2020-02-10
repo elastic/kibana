@@ -5,3 +5,11 @@
  */
 
 export const KQL_INPUT = '[data-test-subj="queryInput"]';
+
+export const HOSTS = '[data-test-subj="navigation-hosts"]';
+
+export const NETWORK = '[data-test-subj="navigation-network"]';
+
+export const OVERVIEW = '[data-test-subj="navigation-overview"]';
+
+export const TIMELINES = '[data-test-subj="navigation-timelines"]';

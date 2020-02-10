@@ -37,10 +37,11 @@ import { getConfigFromInjectedMetadata } from './getConfigFromInjectedMetadata';
 import { setHelpExtension } from './setHelpExtension';
 import { toggleAppLinkInNav } from './toggleAppLinkInNav';
 import { setReadonlyBadge } from './updateBadge';
+import { Permission } from '../components/app/Permission';
 
 export const REACT_APP_ROOT_ID = 'react-apm-root';
 
-const MainContainer = styled.main`
+const MainContainer = styled.div`
   min-width: ${px(unit * 50)};
   padding: ${px(units.plus)};
   height: 100%;
@@ -48,14 +49,17 @@ const MainContainer = styled.main`
 
 const App = () => {
   return (
-    <MainContainer data-test-subj="apmMainContainer">
+    <MainContainer data-test-subj="apmMainContainer" role="main">
       <UpdateBreadcrumbs routes={routes} />
       <Route component={ScrollToTopOnPathChange} />
-      <Switch>
-        {routes.map((route, i) => (
-          <ApmRoute key={i} {...route} />
-        ))}
-      </Switch>
+      {/* Check if user has the appropriate permissions to use the APM UI. */}
+      <Permission>
+        <Switch>
+          {routes.map((route, i) => (
+            <ApmRoute key={i} {...route} />
+          ))}
+        </Switch>
+      </Permission>
     </MainContainer>
   );
 };

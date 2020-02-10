@@ -28,7 +28,7 @@ interface UserZoomed {
    * A value to zoom in by. Should be a fraction of `1`. For a `'wheel'` event when `event.deltaMode` is `'pixel'`,
    * pass `event.deltaY / -renderHeight` where `renderHeight` is the height of the Resolver element in pixels.
    */
-  payload: number;
+  readonly payload: number;
 }
 
 interface UserSetRasterSize {
