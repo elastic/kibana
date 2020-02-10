@@ -287,14 +287,7 @@ describe('utils', () => {
       });
     });
 
-    it('returns the configured index if spaces are disabled', () => {
-      const getSpaceId = jest.fn(() => undefined);
-      const index = getIndex(getSpaceId, mockConfig);
-
-      expect(index).toEqual('mockSignalsIndex');
-    });
-
-    it('appends the space id to the configured index if spaces are enabled', () => {
+    it('appends the space id to the configured index', () => {
       const getSpaceId = jest.fn(() => 'myspace');
       const index = getIndex(getSpaceId, mockConfig);
 

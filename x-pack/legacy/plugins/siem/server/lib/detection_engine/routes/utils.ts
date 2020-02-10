@@ -157,12 +157,9 @@ export const transformBulkError = (
   }
 };
 
-export const getIndex = (
-  getSpaceId: () => string | undefined,
-  config: LegacyServices['config']
-): string => {
-  const spaceId = getSpaceId();
+export const getIndex = (getSpaceId: () => string, config: LegacyServices['config']): string => {
   const signalsIndex = config().get<string>(`xpack.${APP_ID}.${SIGNALS_INDEX_KEY}`);
+  const spaceId = getSpaceId();
 
-  return spaceId ? `${signalsIndex}-${spaceId}` : signalsIndex;
+  return `${signalsIndex}-${spaceId}`;
 };

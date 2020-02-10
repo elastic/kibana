@@ -18,7 +18,7 @@ import { CoreStart, StartPlugins, SetupPlugins } from '../plugin';
 export interface Clients {
   actionsClient?: ActionsClient;
   clusterClient: IScopedClusterClient;
-  spacesClient: { getSpaceId: () => string | undefined };
+  spacesClient: { getSpaceId: () => string };
   savedObjectsClient: SavedObjectsClientContract;
 }
 interface LegacyClients {
@@ -58,7 +58,9 @@ export class ClientsService {
         actionsClient: await this.actions?.getActionsClientWithRequest?.(kibanaRequest),
         clusterClient: this.clusterClient!.asScoped(kibanaRequest),
         savedObjectsClient: this.savedObjects!.getScopedClient(kibanaRequest),
-        spacesClient: { getSpaceId: () => this.spacesService?.getSpaceId?.(kibanaRequest) },
+        spacesClient: {
+          getSpaceId: () => this.spacesService?.getSpaceId?.(kibanaRequest) ?? 'default',
+        },
       };
     };
   }
