@@ -25,7 +25,7 @@ import { IInjector } from '../legacy_imports';
 
 import { ViewMode } from '../../../../embeddable_api/public/np_ready/public';
 import { SavedObjectDashboard } from '../saved_dashboard/saved_dashboard';
-import { DashboardAppState, SavedDashboardPanel, ConfirmModalFn } from './types';
+import { DashboardAppState, SavedDashboardPanel } from './types';
 import {
   IIndexPattern,
   TimeRange,
@@ -87,9 +87,6 @@ export interface DashboardAppScope extends ng.IScope {
 
 export function initDashboardAppDirective(app: any, deps: RenderDeps) {
   app.directive('dashboardApp', function($injector: IInjector) {
-    const confirmModal = $injector.get<ConfirmModalFn>('confirmModal');
-    const config = deps.uiSettings;
-
     return {
       restrict: 'E',
       controllerAs: 'dashboardApp',
@@ -106,8 +103,6 @@ export function initDashboardAppDirective(app: any, deps: RenderDeps) {
           $route,
           $scope,
           $routeParams,
-          config,
-          confirmModal,
           indexPatterns: deps.npDataStart.indexPatterns,
           kbnUrlStateStorage,
           history,

@@ -11,6 +11,7 @@ import { CancellationToken } from '../../../common/cancellation_token';
 import { fieldFormats } from '../../../../../../../src/plugins/data/server';
 import { LevelLogger } from '../../../server/lib/level_logger';
 import { executeJobFactory } from './execute_job';
+import { setFieldFormats } from '../../../server/services';
 
 const delay = ms => new Promise(resolve => setTimeout(() => resolve(), ms));
 
@@ -73,7 +74,7 @@ describe('CSV Execute Job', function() {
     uiSettingsGetStub.withArgs('csv:separator').returns(',');
     uiSettingsGetStub.withArgs('csv:quoteValues').returns(true);
 
-    mockServer = {
+    setFieldFormats({
       fieldFormatServiceFactory: function() {
         const uiConfigMock = {};
         uiConfigMock['format:defaultTypeMap'] = {
@@ -85,6 +86,17 @@ describe('CSV Execute Job', function() {
         fieldFormatsRegistry.init(key => uiConfigMock[key], {}, [fieldFormats.StringFormat]);
 
         return fieldFormatsRegistry;
+      },
+    });
+
+    mockServer = {
+      expose: function() {},
+      plugins: {
+        elasticsearch: {
+          getCluster: function() {
+            return clusterStub;
+          },
+        },
       },
       config: function() {
         return {

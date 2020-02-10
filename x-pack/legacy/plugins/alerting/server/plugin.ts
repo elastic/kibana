@@ -25,6 +25,7 @@ import {
   deleteAlertRoute,
   findAlertRoute,
   getAlertRoute,
+  getAlertStateRoute,
   listAlertTypesRoute,
   updateAlertRoute,
   enableAlertRoute,
@@ -42,7 +43,7 @@ export interface PluginSetupContract {
 }
 export interface PluginStartContract {
   listTypes: AlertTypeRegistry['list'];
-  getAlertsClientWithRequest(request: Hapi.Request): AlertsClient;
+  getAlertsClientWithRequest(request: Hapi.Request): PublicMethodsOf<AlertsClient>;
 }
 
 export class Plugin {
@@ -52,6 +53,7 @@ export class Plugin {
   private adminClient?: IClusterClient;
   private serverBasePath?: string;
   private licenseState: LicenseState | null = null;
+  private isESOUsingEphemeralEncryptionKey?: boolean;
 
   constructor(initializerContext: AlertingPluginInitializerContext) {
     this.logger = initializerContext.logger.get('plugins', 'alerting');
@@ -63,8 +65,9 @@ export class Plugin {
     plugins: AlertingPluginsSetup
   ): Promise<PluginSetupContract> {
     this.adminClient = core.elasticsearch.adminClient;
-
     this.licenseState = new LicenseState(plugins.licensing.license$);
+    this.isESOUsingEphemeralEncryptionKey =
+      plugins.encryptedSavedObjects.usingEphemeralEncryptionKey;
 
     // Encrypted attributes
     plugins.encryptedSavedObjects.registerType({
@@ -90,6 +93,7 @@ export class Plugin {
     core.http.route(extendRouteWithLicenseCheck(deleteAlertRoute, this.licenseState));
     core.http.route(extendRouteWithLicenseCheck(findAlertRoute, this.licenseState));
     core.http.route(extendRouteWithLicenseCheck(getAlertRoute, this.licenseState));
+    core.http.route(extendRouteWithLicenseCheck(getAlertStateRoute, this.licenseState));
     core.http.route(extendRouteWithLicenseCheck(listAlertTypesRoute, this.licenseState));
     core.http.route(extendRouteWithLicenseCheck(updateAlertRoute, this.licenseState));
     core.http.route(extendRouteWithLicenseCheck(enableAlertRoute, this.licenseState));
@@ -106,7 +110,7 @@ export class Plugin {
   }
 
   public start(core: AlertingCoreStart, plugins: AlertingPluginsStart): PluginStartContract {
-    const { adminClient, serverBasePath } = this;
+    const { adminClient, serverBasePath, isESOUsingEphemeralEncryptionKey } = this;
 
     function spaceIdToNamespace(spaceId?: string): string | undefined {
       const spacesPlugin = plugins.spaces();
@@ -147,8 +151,14 @@ export class Plugin {
 
     return {
       listTypes: this.alertTypeRegistry!.list.bind(this.alertTypeRegistry!),
-      getAlertsClientWithRequest: (request: Hapi.Request) =>
-        alertsClientFactory!.create(KibanaRequest.from(request), request),
+      getAlertsClientWithRequest: (request: Hapi.Request) => {
+        if (isESOUsingEphemeralEncryptionKey === true) {
+          throw new Error(
+            `Unable to create alerts client due to the Encrypted Saved Objects plugin using an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in kibana.yml`
+          );
+        }
+        return alertsClientFactory!.create(KibanaRequest.from(request), request);
+      },
     };
   }
 
