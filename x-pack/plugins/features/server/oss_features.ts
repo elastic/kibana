@@ -20,10 +20,12 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
       }),
       icon: 'discoverApp',
       navLinkId: 'kibana:discover',
-      app: ['kibana'],
+      app: ['kibana', 'createShortURLs'],
       catalogue: ['discover'],
       privileges: {
         all: {
+          app: ['kibana', 'createShortURLs'],
+          catalogue: ['discover'],
           savedObject: {
             all: ['search', 'query'],
             read: ['index-pattern'],
@@ -31,6 +33,8 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
           ui: ['show', 'save', 'saveQuery'],
         },
         read: {
+          app: ['kibana', 'createShortURLs'],
+          catalogue: ['discover'],
           savedObject: {
             all: [],
             read: ['index-pattern', 'search', 'query'],
@@ -48,7 +52,7 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
                 {
                   id: 'url_create',
                   name: 'Create Short URLs',
-                  includeIn: 'all',
+                  includeIn: 'none',
                   savedObject: {
                     all: ['url'],
                     read: [],
@@ -117,6 +121,8 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
       catalogue: ['visualize'],
       privileges: {
         all: {
+          app: ['kibana', 'lens'],
+          catalogue: ['visualize'],
           savedObject: {
             all: ['visualization', 'url', 'query', 'lens'],
             read: ['index-pattern', 'search'],
@@ -124,6 +130,8 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
           ui: ['show', 'createShortUrl', 'delete', 'save', 'saveQuery'],
         },
         read: {
+          app: ['kibana', 'lens'],
+          catalogue: ['visualize'],
           savedObject: {
             all: [],
             read: ['index-pattern', 'search', 'visualization', 'query', 'lens'],
@@ -210,6 +218,8 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
       catalogue: ['dashboard'],
       privileges: {
         all: {
+          app: ['kibana'],
+          catalogue: ['dashboard'],
           savedObject: {
             all: ['dashboard', 'url', 'query'],
             read: [
@@ -225,6 +235,8 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
           ui: ['createNew', 'show', 'showWriteControls', 'saveQuery'],
         },
         read: {
+          app: ['kibana'],
+          catalogue: ['dashboard'],
           savedObject: {
             all: [],
             read: [
@@ -253,6 +265,8 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
       catalogue: ['console', 'searchprofiler', 'grokdebugger'],
       privileges: {
         all: {
+          app: ['kibana'],
+          catalogue: ['console', 'searchprofiler', 'grokdebugger'],
           api: ['console'],
           savedObject: {
             all: [],
@@ -261,6 +275,8 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
           ui: ['show', 'save'],
         },
         read: {
+          app: ['kibana'],
+          catalogue: ['console', 'searchprofiler', 'grokdebugger'],
           api: ['console'],
           savedObject: {
             all: [],
@@ -287,6 +303,11 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
       },
       privileges: {
         all: {
+          app: ['kibana'],
+          catalogue: ['advanced_settings'],
+          management: {
+            kibana: ['settings'],
+          },
           savedObject: {
             all: ['config'],
             read: [],
@@ -294,6 +315,11 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
           ui: ['save'],
         },
         read: {
+          app: ['kibana'],
+          catalogue: ['advanced_settings'],
+          management: {
+            kibana: ['settings'],
+          },
           savedObject: {
             all: [],
             read: [],
@@ -315,6 +341,11 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
       },
       privileges: {
         all: {
+          app: ['kibana'],
+          catalogue: ['index_patterns'],
+          management: {
+            kibana: ['index_patterns'],
+          },
           savedObject: {
             all: ['index-pattern'],
             read: [],
@@ -322,6 +353,11 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
           ui: ['save'],
         },
         read: {
+          app: ['kibana'],
+          catalogue: ['index_patterns'],
+          management: {
+            kibana: ['index_patterns'],
+          },
           savedObject: {
             all: [],
             read: ['index-pattern'],
@@ -343,6 +379,11 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
       },
       privileges: {
         all: {
+          app: ['kibana'],
+          catalogue: ['saved_objects'],
+          management: {
+            kibana: ['objects'],
+          },
           api: ['copySavedObjectsToSpaces'],
           savedObject: {
             all: [...savedObjectTypes],
@@ -351,6 +392,11 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
           ui: ['read', 'edit', 'delete', 'copyIntoSpace'],
         },
         read: {
+          app: ['kibana'],
+          catalogue: ['saved_objects'],
+          management: {
+            kibana: ['objects'],
+          },
           api: ['copySavedObjectsToSpaces'],
           savedObject: {
             all: [],
@@ -373,6 +419,8 @@ const timelionFeature: IFeature = {
   catalogue: ['timelion'],
   privileges: {
     all: {
+      app: ['timelion', 'kibana'],
+      catalogue: ['timelion'],
       savedObject: {
         all: ['timelion-sheet'],
         read: ['index-pattern'],
@@ -380,6 +428,8 @@ const timelionFeature: IFeature = {
       ui: ['save'],
     },
     read: {
+      app: ['timelion', 'kibana'],
+      catalogue: ['timelion'],
       savedObject: {
         all: [],
         read: ['index-pattern', 'timelion-sheet'],

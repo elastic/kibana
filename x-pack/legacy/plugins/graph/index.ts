@@ -63,6 +63,8 @@ export const graph: LegacyPluginInitializer = kibana => {
         catalogue: ['graph'],
         privileges: {
           all: {
+            app: ['graph', 'kibana'],
+            catalogue: ['graph'],
             savedObject: {
               all: ['graph-workspace'],
               read: ['index-pattern'],
@@ -70,6 +72,8 @@ export const graph: LegacyPluginInitializer = kibana => {
             ui: ['save', 'delete'],
           },
           read: {
+            app: ['graph', 'kibana'],
+            catalogue: ['graph'],
             savedObject: {
               all: [],
               read: ['index-pattern', 'graph-workspace'],

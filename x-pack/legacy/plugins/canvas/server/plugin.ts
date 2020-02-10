@@ -27,6 +27,8 @@ export class Plugin {
       catalogue: ['canvas'],
       privileges: {
         all: {
+          app: ['canvas', 'kibana'],
+          catalogue: ['canvas'],
           savedObject: {
             all: ['canvas-workpad', 'canvas-element'],
             read: ['index-pattern'],
@@ -34,6 +36,8 @@ export class Plugin {
           ui: ['save', 'show'],
         },
         read: {
+          app: ['canvas', 'kibana'],
+          catalogue: ['canvas'],
           savedObject: {
             all: [],
             read: ['index-pattern', 'canvas-workpad', 'canvas-element'],

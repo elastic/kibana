@@ -59,6 +59,8 @@ export default function (kibana) {
           catalogue: [],
           privileges: {
             all: {
+              app: [featureId, 'kibana'],
+              catalogue: [],
               api: [],
               savedObject: {
                 all: [],
@@ -67,6 +69,8 @@ export default function (kibana) {
               ui: ['show'],
             },
             read: {
+              app: [featureId, 'kibana'],
+              catalogue: [],
               api: [],
               savedObject: {
                 all: [],

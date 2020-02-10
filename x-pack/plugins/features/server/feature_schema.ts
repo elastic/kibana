@@ -9,7 +9,6 @@ import Joi from 'joi';
 import { difference } from 'lodash';
 import { Capabilities as UICapabilities } from '../../../../src/core/server';
 import { IFeature } from '../common/feature';
-import { FeatureKibanaPrivileges } from '../common';
 
 // Each feature gets its own property on the UICapabilities object,
 // but that object has a few built-in properties which should not be overwritten.
@@ -48,7 +47,6 @@ const subFeaturePrivilegeSchema = Joi.object({
   id: Joi.string(),
   name: Joi.string(),
   includeIn: Joi.string().allow('all', 'read', 'none'),
-  excludeFromBasePrivileges: Joi.boolean(),
   management: managementSchema,
   catalogue: catalogueSchema,
   api: Joi.array().items(Joi.string()),
@@ -118,20 +116,25 @@ export function validateFeature(feature: IFeature) {
   // the following validation can't be enforced by the Joi schema, since it'd require us looking "up" the object graph for the list of valid value, which they explicitly forbid.
   const { app = [], management = {}, catalogue = [] } = feature;
 
-  const privilegeEntries = [...Object.entries(feature.privileges || {})];
-  if (feature.reserved) {
-    privilegeEntries.push(['reserved', feature.reserved.privilege]);
+  const featureApps = new Set(app);
+
+  const managementSets = Object.entries(management).map(entry => [
+    entry[0],
+    new Set(entry[1]),
+  ]) as Array<[string, Set<string>]>;
+
+  const featureManagement = new Map<string, Set<string>>(managementSets);
+
+  const featureCatalogue = new Set(catalogue);
+
+  if (feature.privileges === 'none') {
+    return;
   }
 
-  privilegeEntries.forEach(([privilegeId, privilegeDefinition]) => {
-    if (!privilegeDefinition) {
-      throw new Error('Privilege definition may not be null or undefined');
-    }
+  function validateAppEntry(privilegeId: string, entry: string[] = []) {
+    entry.forEach(privilegeApp => featureApps.delete(privilegeApp));
 
-    // TODO
-    const def = privilegeDefinition as FeatureKibanaPrivileges;
-
-    const unknownAppEntries = difference(def.app || [], app);
+    const unknownAppEntries = difference(entry, app);
     if (unknownAppEntries.length > 0) {
       throw new Error(
         `Feature privilege ${
@@ -139,8 +142,12 @@ export function validateFeature(feature: IFeature) {
         }.${privilegeId} has unknown app entries: ${unknownAppEntries.join(', ')}`
       );
     }
+  }
 
-    const unknownCatalogueEntries = difference(def.catalogue || [], catalogue);
+  function validateCatalogueEntry(privilegeId: string, entry: string[] = []) {
+    entry.forEach(privilegeCatalogue => featureCatalogue.delete(privilegeCatalogue));
+
+    const unknownCatalogueEntries = difference(entry || [], catalogue);
     if (unknownCatalogueEntries.length > 0) {
       throw new Error(
         `Feature privilege ${
@@ -148,15 +155,31 @@ export function validateFeature(feature: IFeature) {
         }.${privilegeId} has unknown catalogue entries: ${unknownCatalogueEntries.join(', ')}`
       );
     }
+  }
 
-    Object.entries(def.management || {}).forEach(([managementSectionId, managementEntry]) => {
+  function validateManagementEntry(
+    privilegeId: string,
+    managementEntry: Record<string, string[]> = {}
+  ) {
+    Object.entries(managementEntry).forEach(([managementSectionId, managementSectionEntry]) => {
+      if (featureManagement.has(managementSectionId)) {
+        managementSectionEntry.forEach(entry => {
+          featureManagement.get(managementSectionId)!.delete(entry);
+          if (featureManagement.get(managementSectionId)?.size === 0) {
+            featureManagement.delete(managementSectionId);
+          }
+        });
+      }
       if (!management[managementSectionId]) {
         throw new Error(
           `Feature privilege ${feature.id}.${privilegeId} has unknown management section: ${managementSectionId}`
         );
       }
 
-      const unknownSectionEntries = difference(managementEntry, management[managementSectionId]);
+      const unknownSectionEntries = difference(
+        managementSectionEntry,
+        management[managementSectionId]
+      );
 
       if (unknownSectionEntries.length > 0) {
         throw new Error(
@@ -168,5 +191,70 @@ export function validateFeature(feature: IFeature) {
         );
       }
     });
+  }
+
+  const privilegeEntries = [...Object.entries(feature.privileges || {})];
+  if (feature.reserved) {
+    privilegeEntries.push(['reserved', feature.reserved.privilege]);
+  }
+
+  privilegeEntries.forEach(([privilegeId, privilegeDefinition]) => {
+    if (!privilegeDefinition) {
+      throw new Error('Privilege definition may not be null or undefined');
+    }
+
+    validateAppEntry(privilegeId, privilegeDefinition.app);
+
+    validateCatalogueEntry(privilegeId, privilegeDefinition.catalogue);
+
+    validateManagementEntry(privilegeId, privilegeDefinition.management);
   });
+
+  const subFeatureEntries = feature.subFeatures ?? [];
+  subFeatureEntries.forEach(subFeature => {
+    subFeature.privilegeGroups.forEach(subFeaturePrivilegeGroup => {
+      subFeaturePrivilegeGroup.privileges.forEach(subFeaturePrivilege => {
+        validateAppEntry(subFeaturePrivilege.id, subFeaturePrivilege.app);
+        validateCatalogueEntry(subFeaturePrivilege.id, subFeaturePrivilege.catalogue);
+        validateManagementEntry(subFeaturePrivilege.id, subFeaturePrivilege.management);
+      });
+    });
+  });
+
+  if (featureApps.size > 0) {
+    throw new Error(
+      `Feature ${
+        feature.id
+      } specifies app entries which are not granted to any privileges: ${Array.from(
+        featureApps.values()
+      ).join(',')}`
+    );
+  }
+
+  if (featureCatalogue.size > 0) {
+    throw new Error(
+      `Feature ${
+        feature.id
+      } specifies catalogue entries which are not granted to any privileges: ${Array.from(
+        featureCatalogue.values()
+      ).join(',')}`
+    );
+  }
+
+  if (featureManagement.size > 0) {
+    const ungrantedManagement = Array.from(featureManagement.entries()).reduce((acc, entry) => {
+      const values = Array.from(entry[1].values()).map(
+        managementPage => `${entry[0]}.${managementPage}`
+      );
+      return [...acc, ...values];
+    }, [] as string[]);
+
+    throw new Error(
+      `Feature ${
+        feature.id
+      } specifies management entries which are not granted to any privileges: ${ungrantedManagement.join(
+        ','
+      )}`
+    );
+  }
 }

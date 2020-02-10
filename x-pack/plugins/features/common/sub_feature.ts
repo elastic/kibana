@@ -15,7 +15,8 @@ export interface ISubFeaturePrivilegeGroup {
   privileges: ISubFeaturePrivilege[];
 }
 
-export interface ISubFeaturePrivilege extends FeatureKibanaPrivileges {
+export interface ISubFeaturePrivilege
+  extends Omit<FeatureKibanaPrivileges, 'excludeFromBasePrivileges'> {
   id: string;
   name: string;
   includeIn: 'all' | 'read' | 'none';

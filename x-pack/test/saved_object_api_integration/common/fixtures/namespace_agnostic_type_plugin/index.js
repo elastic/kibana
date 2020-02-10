@@ -35,6 +35,7 @@ export default function(kibana) {
         app: [],
         privileges: {
           all: {
+            app: [],
             savedObject: {
               all: ['globaltype'],
               read: [],
@@ -42,6 +43,7 @@ export default function(kibana) {
             ui: [],
           },
           read: {
+            app: [],
             savedObject: {
               all: [],
               read: ['globaltype'],

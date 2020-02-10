@@ -11,7 +11,7 @@ import { privilegesFactory } from './privileges';
 const actions = new Actions('1.0.0-zeta1');
 
 describe('features', () => {
-  test('actions defined at the feature cascade to the privileges', () => {
+  test('actions defined at the feature do not cascade to the privileges', () => {
     const features: Feature[] = [
       new Feature({
         id: 'foo-feature',
@@ -47,29 +47,10 @@ describe('features', () => {
 
     const actual = privileges.get();
     expect(actual).toHaveProperty('features.foo-feature', {
-      all: [
-        actions.login,
-        actions.version,
-        actions.app.get('app-1'),
-        actions.app.get('app-2'),
-        actions.ui.get('catalogue', 'catalogue-1'),
-        actions.ui.get('catalogue', 'catalogue-2'),
-        actions.ui.get('management', 'foo', 'management-1'),
-        actions.ui.get('management', 'foo', 'management-2'),
-        actions.ui.get('navLinks', 'kibana:foo'),
-        actions.allHack,
-      ],
-      read: [
-        actions.login,
-        actions.version,
-        actions.app.get('app-1'),
-        actions.app.get('app-2'),
-        actions.ui.get('catalogue', 'catalogue-1'),
-        actions.ui.get('catalogue', 'catalogue-2'),
-        actions.ui.get('management', 'foo', 'management-1'),
-        actions.ui.get('management', 'foo', 'management-2'),
-        actions.ui.get('navLinks', 'kibana:foo'),
-      ],
+      all: [actions.login, actions.version, actions.ui.get('navLinks', 'kibana:foo')],
+      minimal_all: [actions.login, actions.version, actions.ui.get('navLinks', 'kibana:foo')],
+      read: [actions.login, actions.version, actions.ui.get('navLinks', 'kibana:foo')],
+      minimal_read: [actions.login, actions.version, actions.ui.get('navLinks', 'kibana:foo')],
     });
   });
 
@@ -119,29 +100,34 @@ describe('features', () => {
 
     const privileges = privilegesFactory(actions, mockXPackMainPlugin as any);
 
+    const expectedAllPrivileges = [
+      actions.login,
+      actions.version,
+      actions.app.get('all-app-1'),
+      actions.app.get('all-app-2'),
+      actions.ui.get('catalogue', 'catalogue-all-1'),
+      actions.ui.get('catalogue', 'catalogue-all-2'),
+      actions.ui.get('management', 'all', 'all-management-1'),
+      actions.ui.get('management', 'all', 'all-management-2'),
+    ];
+
+    const expectedReadPrivileges = [
+      actions.login,
+      actions.version,
+      actions.app.get('read-app-1'),
+      actions.app.get('read-app-2'),
+      actions.ui.get('catalogue', 'catalogue-read-1'),
+      actions.ui.get('catalogue', 'catalogue-read-2'),
+      actions.ui.get('management', 'read', 'read-management-1'),
+      actions.ui.get('management', 'read', 'read-management-2'),
+    ];
+
     const actual = privileges.get();
     expect(actual).toHaveProperty('features.foo', {
-      all: [
-        actions.login,
-        actions.version,
-        actions.app.get('all-app-1'),
-        actions.app.get('all-app-2'),
-        actions.ui.get('catalogue', 'catalogue-all-1'),
-        actions.ui.get('catalogue', 'catalogue-all-2'),
-        actions.ui.get('management', 'all', 'all-management-1'),
-        actions.ui.get('management', 'all', 'all-management-2'),
-        actions.allHack,
-      ],
-      read: [
-        actions.login,
-        actions.version,
-        actions.app.get('read-app-1'),
-        actions.app.get('read-app-2'),
-        actions.ui.get('catalogue', 'catalogue-read-1'),
-        actions.ui.get('catalogue', 'catalogue-read-2'),
-        actions.ui.get('management', 'read', 'read-management-1'),
-        actions.ui.get('management', 'read', 'read-management-2'),
-      ],
+      all: [...expectedAllPrivileges],
+      minimal_all: [...expectedAllPrivileges],
+      read: [...expectedReadPrivileges],
+      minimal_read: [...expectedReadPrivileges],
     });
   });
 
@@ -177,65 +163,70 @@ describe('features', () => {
 
     const privileges = privilegesFactory(actions, mockXPackMainPlugin as any);
 
+    const expectedAllPrivileges = [
+      actions.login,
+      actions.version,
+      actions.savedObject.get('all-savedObject-all-1', 'bulk_get'),
+      actions.savedObject.get('all-savedObject-all-1', 'get'),
+      actions.savedObject.get('all-savedObject-all-1', 'find'),
+      actions.savedObject.get('all-savedObject-all-1', 'create'),
+      actions.savedObject.get('all-savedObject-all-1', 'bulk_create'),
+      actions.savedObject.get('all-savedObject-all-1', 'update'),
+      actions.savedObject.get('all-savedObject-all-1', 'bulk_update'),
+      actions.savedObject.get('all-savedObject-all-1', 'delete'),
+      actions.savedObject.get('all-savedObject-all-2', 'bulk_get'),
+      actions.savedObject.get('all-savedObject-all-2', 'get'),
+      actions.savedObject.get('all-savedObject-all-2', 'find'),
+      actions.savedObject.get('all-savedObject-all-2', 'create'),
+      actions.savedObject.get('all-savedObject-all-2', 'bulk_create'),
+      actions.savedObject.get('all-savedObject-all-2', 'update'),
+      actions.savedObject.get('all-savedObject-all-2', 'bulk_update'),
+      actions.savedObject.get('all-savedObject-all-2', 'delete'),
+      actions.savedObject.get('all-savedObject-read-1', 'bulk_get'),
+      actions.savedObject.get('all-savedObject-read-1', 'get'),
+      actions.savedObject.get('all-savedObject-read-1', 'find'),
+      actions.savedObject.get('all-savedObject-read-2', 'bulk_get'),
+      actions.savedObject.get('all-savedObject-read-2', 'get'),
+      actions.savedObject.get('all-savedObject-read-2', 'find'),
+      actions.ui.get('foo', 'all-ui-1'),
+      actions.ui.get('foo', 'all-ui-2'),
+    ];
+
+    const expectedReadPrivileges = [
+      actions.login,
+      actions.version,
+      actions.savedObject.get('read-savedObject-all-1', 'bulk_get'),
+      actions.savedObject.get('read-savedObject-all-1', 'get'),
+      actions.savedObject.get('read-savedObject-all-1', 'find'),
+      actions.savedObject.get('read-savedObject-all-1', 'create'),
+      actions.savedObject.get('read-savedObject-all-1', 'bulk_create'),
+      actions.savedObject.get('read-savedObject-all-1', 'update'),
+      actions.savedObject.get('read-savedObject-all-1', 'bulk_update'),
+      actions.savedObject.get('read-savedObject-all-1', 'delete'),
+      actions.savedObject.get('read-savedObject-all-2', 'bulk_get'),
+      actions.savedObject.get('read-savedObject-all-2', 'get'),
+      actions.savedObject.get('read-savedObject-all-2', 'find'),
+      actions.savedObject.get('read-savedObject-all-2', 'create'),
+      actions.savedObject.get('read-savedObject-all-2', 'bulk_create'),
+      actions.savedObject.get('read-savedObject-all-2', 'update'),
+      actions.savedObject.get('read-savedObject-all-2', 'bulk_update'),
+      actions.savedObject.get('read-savedObject-all-2', 'delete'),
+      actions.savedObject.get('read-savedObject-read-1', 'bulk_get'),
+      actions.savedObject.get('read-savedObject-read-1', 'get'),
+      actions.savedObject.get('read-savedObject-read-1', 'find'),
+      actions.savedObject.get('read-savedObject-read-2', 'bulk_get'),
+      actions.savedObject.get('read-savedObject-read-2', 'get'),
+      actions.savedObject.get('read-savedObject-read-2', 'find'),
+      actions.ui.get('foo', 'read-ui-1'),
+      actions.ui.get('foo', 'read-ui-2'),
+    ];
+
     const actual = privileges.get();
     expect(actual).toHaveProperty('features.foo', {
-      all: [
-        actions.login,
-        actions.version,
-        actions.savedObject.get('all-savedObject-all-1', 'bulk_get'),
-        actions.savedObject.get('all-savedObject-all-1', 'get'),
-        actions.savedObject.get('all-savedObject-all-1', 'find'),
-        actions.savedObject.get('all-savedObject-all-1', 'create'),
-        actions.savedObject.get('all-savedObject-all-1', 'bulk_create'),
-        actions.savedObject.get('all-savedObject-all-1', 'update'),
-        actions.savedObject.get('all-savedObject-all-1', 'bulk_update'),
-        actions.savedObject.get('all-savedObject-all-1', 'delete'),
-        actions.savedObject.get('all-savedObject-all-2', 'bulk_get'),
-        actions.savedObject.get('all-savedObject-all-2', 'get'),
-        actions.savedObject.get('all-savedObject-all-2', 'find'),
-        actions.savedObject.get('all-savedObject-all-2', 'create'),
-        actions.savedObject.get('all-savedObject-all-2', 'bulk_create'),
-        actions.savedObject.get('all-savedObject-all-2', 'update'),
-        actions.savedObject.get('all-savedObject-all-2', 'bulk_update'),
-        actions.savedObject.get('all-savedObject-all-2', 'delete'),
-        actions.savedObject.get('all-savedObject-read-1', 'bulk_get'),
-        actions.savedObject.get('all-savedObject-read-1', 'get'),
-        actions.savedObject.get('all-savedObject-read-1', 'find'),
-        actions.savedObject.get('all-savedObject-read-2', 'bulk_get'),
-        actions.savedObject.get('all-savedObject-read-2', 'get'),
-        actions.savedObject.get('all-savedObject-read-2', 'find'),
-        actions.ui.get('foo', 'all-ui-1'),
-        actions.ui.get('foo', 'all-ui-2'),
-        actions.allHack,
-      ],
-      read: [
-        actions.login,
-        actions.version,
-        actions.savedObject.get('read-savedObject-all-1', 'bulk_get'),
-        actions.savedObject.get('read-savedObject-all-1', 'get'),
-        actions.savedObject.get('read-savedObject-all-1', 'find'),
-        actions.savedObject.get('read-savedObject-all-1', 'create'),
-        actions.savedObject.get('read-savedObject-all-1', 'bulk_create'),
-        actions.savedObject.get('read-savedObject-all-1', 'update'),
-        actions.savedObject.get('read-savedObject-all-1', 'bulk_update'),
-        actions.savedObject.get('read-savedObject-all-1', 'delete'),
-        actions.savedObject.get('read-savedObject-all-2', 'bulk_get'),
-        actions.savedObject.get('read-savedObject-all-2', 'get'),
-        actions.savedObject.get('read-savedObject-all-2', 'find'),
-        actions.savedObject.get('read-savedObject-all-2', 'create'),
-        actions.savedObject.get('read-savedObject-all-2', 'bulk_create'),
-        actions.savedObject.get('read-savedObject-all-2', 'update'),
-        actions.savedObject.get('read-savedObject-all-2', 'bulk_update'),
-        actions.savedObject.get('read-savedObject-all-2', 'delete'),
-        actions.savedObject.get('read-savedObject-read-1', 'bulk_get'),
-        actions.savedObject.get('read-savedObject-read-1', 'get'),
-        actions.savedObject.get('read-savedObject-read-1', 'find'),
-        actions.savedObject.get('read-savedObject-read-2', 'bulk_get'),
-        actions.savedObject.get('read-savedObject-read-2', 'get'),
-        actions.savedObject.get('read-savedObject-read-2', 'find'),
-        actions.ui.get('foo', 'read-ui-1'),
-        actions.ui.get('foo', 'read-ui-2'),
-      ],
+      all: [...expectedAllPrivileges],
+      minimal_all: [...expectedAllPrivileges],
+      read: [...expectedReadPrivileges],
+      minimal_read: [...expectedReadPrivileges],
     });
   });
 
@@ -276,79 +267,6 @@ describe('features', () => {
   },
 ].forEach(({ group, expectManageSpaces, expectGetFeatures }) => {
   describe(`${group}`, () => {
-    test('actions defined only at the feature are included in `all` and `read`', () => {
-      const features: Feature[] = [
-        new Feature({
-          id: 'foo',
-          name: 'Foo Feature',
-          icon: 'arrowDown',
-          navLinkId: 'kibana:foo',
-          app: ['app-1', 'app-2'],
-          catalogue: ['catalogue-1', 'catalogue-2'],
-          management: {
-            foo: ['management-1', 'management-2'],
-          },
-          privileges: {
-            all: {
-              savedObject: {
-                all: [],
-                read: [],
-              },
-              ui: [],
-            },
-            read: {
-              savedObject: {
-                all: [],
-                read: [],
-              },
-              ui: [],
-            },
-          },
-        }),
-      ];
-
-      const mockXPackMainPlugin = {
-        getFeatures: jest.fn().mockReturnValue(features),
-      };
-
-      const privileges = privilegesFactory(actions, mockXPackMainPlugin as any);
-
-      const actual = privileges.get();
-      expect(actual).toHaveProperty(group, {
-        all: [
-          actions.login,
-          actions.version,
-          ...(expectGetFeatures ? [actions.api.get('features')] : []),
-          ...(expectManageSpaces
-            ? [
-                actions.space.manage,
-                actions.ui.get('spaces', 'manage'),
-                actions.ui.get('management', 'kibana', 'spaces'),
-              ]
-            : []),
-          actions.app.get('app-1'),
-          actions.app.get('app-2'),
-          actions.ui.get('catalogue', 'catalogue-1'),
-          actions.ui.get('catalogue', 'catalogue-2'),
-          actions.ui.get('management', 'foo', 'management-1'),
-          actions.ui.get('management', 'foo', 'management-2'),
-          actions.ui.get('navLinks', 'kibana:foo'),
-          actions.allHack,
-        ],
-        read: [
-          actions.login,
-          actions.version,
-          actions.app.get('app-1'),
-          actions.app.get('app-2'),
-          actions.ui.get('catalogue', 'catalogue-1'),
-          actions.ui.get('catalogue', 'catalogue-2'),
-          actions.ui.get('management', 'foo', 'management-1'),
-          actions.ui.get('management', 'foo', 'management-2'),
-          actions.ui.get('navLinks', 'kibana:foo'),
-        ],
-      });
-    });
-
     test('actions defined in any feature privilege are included in `all`', () => {
       const features: Feature[] = [
         new Feature({
@@ -406,11 +324,11 @@ describe('features', () => {
               actions.ui.get('management', 'kibana', 'spaces'),
             ]
           : []),
-        actions.ui.get('navLinks', 'kibana:foo'),
         actions.ui.get('catalogue', 'all-catalogue-1'),
         actions.ui.get('catalogue', 'all-catalogue-2'),
         actions.ui.get('management', 'all-management', 'all-management-1'),
         actions.ui.get('management', 'all-management', 'all-management-2'),
+        actions.ui.get('navLinks', 'kibana:foo'),
         actions.savedObject.get('all-savedObject-all-1', 'bulk_get'),
         actions.savedObject.get('all-savedObject-all-1', 'get'),
         actions.savedObject.get('all-savedObject-all-1', 'find'),
@@ -463,7 +381,6 @@ describe('features', () => {
         actions.savedObject.get('read-savedObject-read-2', 'find'),
         actions.ui.get('foo', 'read-ui-1'),
         actions.ui.get('foo', 'read-ui-2'),
-        actions.allHack,
       ]);
     });
 
@@ -592,7 +509,6 @@ describe('features', () => {
               actions.ui.get('management', 'kibana', 'spaces'),
             ]
           : []),
-        actions.allHack,
       ]);
       expect(actual).toHaveProperty(`${group}.read`, [actions.login, actions.version]);
     });
@@ -655,7 +571,6 @@ describe('features', () => {
               actions.ui.get('management', 'kibana', 'spaces'),
             ]
           : []),
-        actions.allHack,
       ]);
       expect(actual).toHaveProperty(`${group}.read`, [actions.login, actions.version]);
     });
@@ -719,7 +634,6 @@ describe('features', () => {
               actions.ui.get('management', 'kibana', 'spaces'),
             ]
           : []),
-        actions.allHack,
       ]);
       expect(actual).toHaveProperty(`${group}.read`, [actions.login, actions.version]);
     });
@@ -727,7 +641,7 @@ describe('features', () => {
 });
 
 describe('reserved', () => {
-  test('actions defined at the feature cascade to the privileges', () => {
+  test('actions defined at the feature do not cascade to the privileges', () => {
     const features: Feature[] = [
       new Feature({
         id: 'foo',
@@ -762,12 +676,6 @@ describe('reserved', () => {
     const actual = privileges.get();
     expect(actual).toHaveProperty('reserved.foo', [
       actions.version,
-      actions.app.get('app-1'),
-      actions.app.get('app-2'),
-      actions.ui.get('catalogue', 'catalogue-1'),
-      actions.ui.get('catalogue', 'catalogue-2'),
-      actions.ui.get('management', 'foo', 'management-1'),
-      actions.ui.get('management', 'foo', 'management-2'),
       actions.ui.get('navLinks', 'kibana:foo'),
     ]);
   });

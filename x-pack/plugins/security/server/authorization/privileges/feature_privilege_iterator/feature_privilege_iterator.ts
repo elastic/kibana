@@ -34,7 +34,6 @@ export function* featurePrivilegeIterator(
   }
 }
 
-// TODO: determine how this merge logic should work
 function mergeWithSubFeatures(
   privilegeId: string,
   privilege: FeatureKibanaPrivileges,
@@ -46,35 +45,41 @@ function mergeWithSubFeatures(
       continue;
     }
 
-    mergedConfig.api = mergedConfig.api && [
-      ...mergedConfig.api,
-      ...(subFeaturePrivilege.api || []),
-    ];
+    mergedConfig.api = mergeArrays(mergedConfig.api, subFeaturePrivilege.api);
 
-    mergedConfig.app = mergedConfig.app && [
-      ...mergedConfig.app,
-      ...(subFeaturePrivilege.app || []),
-    ];
+    mergedConfig.app = mergeArrays(mergedConfig.app, subFeaturePrivilege.app);
 
-    mergedConfig.catalogue = mergedConfig.catalogue && [
-      ...mergedConfig.catalogue,
-      ...(subFeaturePrivilege.catalogue || []),
-    ];
+    mergedConfig.catalogue = mergeArrays(mergedConfig.catalogue, subFeaturePrivilege.catalogue);
 
-    mergedConfig.management =
-      mergedConfig.management && _.merge(mergedConfig.management, subFeaturePrivilege.management);
+    const managementEntries = Object.entries(mergedConfig.management ?? {});
+    const subFeatureManagementEntries = Object.entries(subFeaturePrivilege.management ?? {});
 
-    mergedConfig.ui = mergedConfig.ui && [...mergedConfig.ui, ...subFeaturePrivilege.ui];
+    mergedConfig.management = [managementEntries, subFeatureManagementEntries]
+      .flat()
+      .reduce((acc, [sectionId, managementApps]) => {
+        return {
+          ...acc,
+          [sectionId]: mergeArrays(acc[sectionId], managementApps),
+        };
+      }, {} as Record<string, string[]>);
 
-    mergedConfig.savedObject.all = [
-      ...mergedConfig.savedObject.all,
-      ...subFeaturePrivilege.savedObject.all,
-    ];
+    mergedConfig.ui = mergeArrays(mergedConfig.ui, subFeaturePrivilege.ui);
 
-    mergedConfig.savedObject.read = [
-      ...mergedConfig.savedObject.read,
-      ...subFeaturePrivilege.savedObject.read,
-    ];
+    mergedConfig.savedObject.all = mergeArrays(
+      mergedConfig.savedObject.all,
+      subFeaturePrivilege.savedObject.all
+    );
+
+    mergedConfig.savedObject.read = mergeArrays(
+      mergedConfig.savedObject.read,
+      subFeaturePrivilege.savedObject.read
+    );
   }
   return mergedConfig;
+}
+
+function mergeArrays(input1: string[] | undefined, input2: string[] | undefined) {
+  const first = input1 ?? [];
+  const second = input2 ?? [];
+  return [...first, ...second];
 }

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { flatten, uniq } from 'lodash';
+import { uniq } from 'lodash';
 import { Feature } from '../../../../features/server';
 import { RawKibanaPrivileges } from '../../../common/model';
 import { Actions } from '../actions';
@@ -27,37 +27,24 @@ export function privilegesFactory(actions: Actions, featuresService: FeaturesSer
       const features = featuresService.getFeatures();
       const basePrivilegeFeatures = features.filter(feature => !feature.excludeFromBasePrivileges);
 
-      const allActions = uniq(
-        flatten(
-          basePrivilegeFeatures.map(feature => {
-            const featureActions = [];
-            for (const { privilege } of featurePrivilegeIterator(feature, {
-              augmentWithSubFeaturePrivileges: true,
-              predicate: (privilegeId, featurePrivilege) =>
-                !featurePrivilege.excludeFromBasePrivileges,
-            })) {
-              featureActions.push(...featurePrivilegeBuilder.getActions(privilege, feature));
-            }
-            return featureActions;
-          })
-        )
-      );
+      let allActions: string[] = [];
+      let readActions: string[] = [];
 
-      const readActions = uniq(
-        flatten(
-          basePrivilegeFeatures.map(feature => {
-            const featureActions = [];
-            for (const { privilege } of featurePrivilegeIterator(feature, {
-              augmentWithSubFeaturePrivileges: true,
-              predicate: (privilegeId, featurePrivilege) =>
-                !featurePrivilege.excludeFromBasePrivileges && privilegeId === 'read',
-            })) {
-              featureActions.push(...featurePrivilegeBuilder.getActions(privilege, feature));
-            }
-            return featureActions;
-          })
-        )
-      );
+      basePrivilegeFeatures.forEach(feature => {
+        for (const { privilegeId, privilege } of featurePrivilegeIterator(feature, {
+          augmentWithSubFeaturePrivileges: true,
+          predicate: (pId, featurePrivilege) => !featurePrivilege.excludeFromBasePrivileges,
+        })) {
+          const privilegeActions = featurePrivilegeBuilder.getActions(privilege, feature);
+          allActions = [...allActions, ...privilegeActions];
+          if (privilegeId === 'read') {
+            readActions = [...readActions, ...privilegeActions];
+          }
+        }
+      });
+
+      allActions = uniq(allActions);
+      readActions = uniq(readActions);
 
       const featurePrivileges: Record<string, Record<string, string[]>> = {};
       for (const feature of features) {
@@ -89,6 +76,10 @@ export function privilegesFactory(actions: Actions, featuresService: FeaturesSer
             ...featurePrivilegeBuilder.getActions(subFeaturePrivilege, feature),
           ];
         }
+
+        if (Object.keys(featurePrivileges[feature.id]).length === 0) {
+          delete featurePrivileges[feature.id];
+        }
       }
 
       return {
@@ -102,12 +93,11 @@ export function privilegesFactory(actions: Actions, featuresService: FeaturesSer
             actions.ui.get('spaces', 'manage'),
             actions.ui.get('management', 'kibana', 'spaces'),
             ...allActions,
-            actions.allHack,
           ],
           read: [actions.login, actions.version, ...readActions],
         },
         space: {
-          all: [actions.login, actions.version, ...allActions, actions.allHack],
+          all: [actions.login, actions.version, ...allActions],
           read: [actions.login, actions.version, ...readActions],
         },
         reserved: features.reduce((acc: Record<string, string[]>, feature: Feature) => {

@@ -28,6 +28,8 @@ export class MapPlugin {
       catalogue: [APP_ID],
       privileges: {
         all: {
+          app: [APP_ID, 'kibana'],
+          catalogue: [APP_ID],
           savedObject: {
             all: [MAP_SAVED_OBJECT_TYPE, 'query'],
             read: ['index-pattern'],
@@ -35,6 +37,8 @@ export class MapPlugin {
           ui: ['save', 'show', 'saveQuery'],
         },
         read: {
+          app: [APP_ID, 'kibana'],
+          catalogue: [APP_ID],
           savedObject: {
             all: [],
             read: [MAP_SAVED_OBJECT_TYPE, 'index-pattern', 'query'],
