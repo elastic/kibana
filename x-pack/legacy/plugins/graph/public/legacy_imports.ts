@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import 'ui/angular-bootstrap';
 import 'ace';
 
 export { SavedObject, SavedObjectKibanaServices } from 'ui/saved_objects/types';
