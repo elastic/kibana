@@ -11,11 +11,14 @@ experimental[]
 The Controls widget enables you to add interactive inputs
 on a dashboard.
 
+[[add-input-controls]]
 You can create two types of controls:
 
 * Range slider - Filters data within a specified range of numbers. The minimum and maximum values are dynamically populated with the results of a min and max aggregation.
 
 * Options list - Filters content based on one or more specified options. The dropdown menu is dynamically populated with the results of a terms aggregation.
+
+[[global-options]]
 
 [role="screenshot"]
 image::images/dashboard-controls.png[]
