@@ -62,7 +62,7 @@ export class Plugin {
   public setup(core: CoreSetup, plugins: SetupPlugins, __legacy: LegacyServices) {
     this.logger.debug('Shim plugin setup');
 
-    this.clients.setup(core.elasticsearch.dataClient, plugins.spaces.spacesService);
+    this.clients.setup(core.elasticsearch.dataClient, plugins.spaces?.spacesService);
 
     this.legacyInitRoutes = initRoutes(
       __legacy.route,
