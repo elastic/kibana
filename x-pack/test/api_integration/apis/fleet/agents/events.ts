@@ -22,7 +22,7 @@ export default function({ getService }: FtrProviderContext) {
 
     it('should return a 200 and the events for a given agent', async () => {
       const { body: apiResponse } = await supertest
-        .get(`/api/fleet/agents/agent1/events`)
+        .get(`/api/ingest_manager/fleet/agents/agent1/events`)
         .expect(200);
       expect(apiResponse).to.have.keys(['list', 'total', 'page']);
       expect(apiResponse.total).to.be(2);
