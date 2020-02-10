@@ -17,7 +17,7 @@ You can create two types of controls:
 * Options list - Filters content based on one or more specified options. The dropdown menu is dynamically populated with the results of a terms aggregation.
 
 [role="screenshot"]
-image::images/controls/controls_in_dashboard.png[]
+image::images/dashboard-controls.png[]
 
 [float]
 [[markdown-widget]]
@@ -44,7 +44,7 @@ one or more options from a list. The dropdown menu is dynamically populated
 with the results of a terms aggregation.
 
 [role="screenshot"]
-image::images/controls/dropdown_control_editor.png[]
+image::images/markdown-example.png[]
 
 *Control Label*:: The label for the dropdown menu. By default, the
 label is the field name.
