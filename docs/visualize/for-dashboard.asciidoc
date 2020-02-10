@@ -1,44 +1,33 @@
 [[for-dashboard]]
-== Dashboard tools
+== Dashboard controls
 
-Visualize comes with interactive controls and Markdown tools that you can add to dashboards.
+Visualize comes with interactive controls and Markdown  that you can add to dashboards.
 
 [float]
 [[controls]]
 === Controls
 experimental[]
 
-The Controls tools enables you to add interactive inputs on a dashboard.
+The Controls widget enables you to add interactive inputs
+to a dashboard.  You can create two types of inputs:
 
-You can create two types of controls:
-
-* Range slider - Filters data within a specified range of numbers. The minimum and maximum values are dynamically populated with the results of a min and max aggregation.
-
-* Options list - Filters content based on one or more specified options. The dropdown menu is dynamically populated with the results of a terms aggregation.
+* Dropdown menu
+* Radio slider
 
 [role="screenshot"]
-image::images/dashboard-controls.png[]
+image::images/controls/controls_in_dashboard.png[]
 
 [float]
 [[markdown-widget]]
 === Markdown
 
-The Markdown tool is a text entry field that accepts GitHub-flavored Markdown text. When you enter text, the tool populates the results on the dashboard.
+The Markdown widget is a text entry field that accepts GitHub-flavored Markdown text. Kibana renders the text you enter
+in this field and displays the results on the dashboard. You can click the *Help* link to go to the
+https://help.github.com/articles/github-flavored-markdown/[help page] for GitHub flavored Markdown. From the widget
+you can:
 
-For example, when you enter:
-
-[source,text]
-----------------------------------
-### Sample Flight data
-This dashboard contains sample data for you to play with. You can view it, search it, and interact with the visualizations. For more information about Kibana, check our [docs](https://www.elastic.co/guide/en/kibana/current/index.html).
-----------------------------------
-
-The following displays:
-
-[role="screenshot"]
-image::images/markdown-example.png[]
-
-For information on GitHub-flavored Markdown, click *Help*.
+* Click *Apply* to display the rendered text in the Preview panel
+* Click *Discard* to revert to a previously saved version
 
 [float]
 [[add-input-controls]]
@@ -59,7 +48,7 @@ one or more options from a list. The dropdown menu is dynamically populated
 with the results of a terms aggregation.
 
 [role="screenshot"]
-
+image::images/controls/dropdown_control_editor.png[]
 
 *Control Label*:: The label for the dropdown menu. By default, the
 label is the field name.
