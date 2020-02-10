@@ -54,7 +54,7 @@ export interface RenderDeps {
   navigation: NavigationStart;
   savedObjectsClient: SavedObjectsClientContract;
   savedDashboards: SavedObjectLoader;
-  dashboardConfig: any;
+  dashboardConfig: KibanaLegacyStart['dashboardConfig'];
   dashboardCapabilities: any;
   uiSettings: IUiSettingsClient;
   chrome: ChromeStart;
@@ -73,7 +73,6 @@ export const renderApp = (element: HTMLElement, appBasePath: string, deps: Rende
     angularModuleInstance = createLocalAngularModule(deps.core, deps.navigation);
     // global routing stuff
     configureAppAngularModule(angularModuleInstance, deps.core as LegacyCoreStart, true);
-    // custom routing stuff
     initDashboardApp(angularModuleInstance, deps);
   }
 

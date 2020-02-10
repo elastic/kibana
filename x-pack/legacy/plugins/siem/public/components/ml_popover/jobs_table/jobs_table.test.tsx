@@ -11,6 +11,8 @@ import { mockSiemJobs } from '../__mocks__/api';
 import { cloneDeep } from 'lodash/fp';
 import { SiemJob } from '../types';
 
+jest.mock('../../../lib/kibana');
+
 describe('JobsTableComponent', () => {
   let siemJobs: SiemJob[];
   let onJobStateChangeMock = jest.fn();
