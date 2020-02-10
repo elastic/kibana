@@ -1102,6 +1102,8 @@ export interface LogRecord {
         [name: string]: any;
     };
     // (undocumented)
+    pid: number;
+    // (undocumented)
     timestamp: Date;
 }
 

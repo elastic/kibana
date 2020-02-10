@@ -24,10 +24,9 @@ import { I18nProvider } from '@kbn/i18n/react';
 
 import { TopNavMenuData } from './top_nav_menu_data';
 import { TopNavMenuItem } from './top_nav_menu_item';
-import { SearchBarProps, DataPublicPluginStart } from '../../../data/public';
+import { StatefulSearchBarProps, DataPublicPluginStart } from '../../../data/public';
 
-export type TopNavMenuProps = Partial<SearchBarProps> & {
-  appName: string;
+export type TopNavMenuProps = StatefulSearchBarProps & {
   config?: TopNavMenuData[];
   showSearchBar?: boolean;
   data?: DataPublicPluginStart;
