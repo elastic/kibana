@@ -18,7 +18,7 @@
  */
 
 import { History, Location } from 'history';
-import { url } from '../../../kibana_utils/public';
+import { url } from '../../common';
 
 export function removeQueryParam(history: History, param: string, replace: boolean = true) {
   const oldLocation = history.location;

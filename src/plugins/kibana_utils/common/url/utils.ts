@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { transform } from 'lodash';
+import { transform, isUndefined } from 'lodash';
 import { stringify, parse, StringifyOptions } from 'query-string';
 import { encodeQueryComponent } from './encode_query_component';
 
@@ -35,7 +35,7 @@ export const stringifyUrlQuery = (
     encodeFunction &&
     transform(query, (result, value, key) => {
       if (key) {
-        result[key] = encodeFunction(value, true);
+        result[key] = encodeFunction(isUndefined(value) ? '' : value, true);
       }
     });
 

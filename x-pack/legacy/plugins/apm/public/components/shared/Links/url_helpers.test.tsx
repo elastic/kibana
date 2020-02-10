@@ -43,7 +43,7 @@ describe('fromQuery', () => {
         refreshPaused: true,
         refreshInterval: 5000
       })
-    ).toEqual('refreshPaused=true&refreshInterval=5000');
+    ).toEqual('flyoutDetailTab=&refreshPaused=true&refreshInterval=5000');
   });
 });
 
