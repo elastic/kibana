@@ -21,9 +21,9 @@ npm config set cache ${HOME}
 #      --exclude=packages/ \
 #      --exclude=built_assets  --exclude=target \
 #      --exclude=data /app ${HOME}/
-#cd ${HOME}/app/x-pack/legacy/plugins/apm/cypress
+#cd ${HOME}/app/x-pack/legacy/plugins/apm/e2e/cypress
 
-cd /app/x-pack/legacy/plugins/apm/cypress
+cd /app/x-pack/legacy/plugins/apm/e2e/cypress
 ## Install dependencies for cypress
 CI=true npm install
 yarn install

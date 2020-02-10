@@ -13,7 +13,7 @@ pipeline {
     BASE_DIR = 'src/github.com/elastic/kibana'
     HOME = "${env.WORKSPACE}"
     APM_ITS = 'apm-integration-testing'
-    CYPRESS_DIR = 'x-pack/legacy/plugins/apm/cypress'
+    CYPRESS_DIR = 'x-pack/legacy/plugins/apm/e2e/cypress'
     PIPELINE_LOG_LEVEL = 'DEBUG'
   }
   options {

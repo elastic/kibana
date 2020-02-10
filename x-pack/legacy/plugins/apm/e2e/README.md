@@ -1,6 +1,6 @@
 ### How to run
 
-_Note: Run the following commands from `kibana/x-pack/legacy/plugins/apm/cypress`._
+_Note: Run the following commands from `kibana/x-pack/legacy/plugins/apm/e2e/cypress`._
 
 #### Interactive mode
 
