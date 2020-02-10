@@ -227,14 +227,6 @@
         ],
       },
       {
-        groupSlug: 'dotenv',
-        groupName: 'dotenv related packages',
-        packageNames: [
-          'dotenv',
-          '@types/dotenv',
-        ],
-      },
-      {
         groupSlug: 'dragselect',
         groupName: 'dragselect related packages',
         packageNames: [
