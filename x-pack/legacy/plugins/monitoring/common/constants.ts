@@ -239,7 +239,7 @@ export const TELEMETRY_COLLECTION_INTERVAL = 86400000;
  * as the only way to see the new UI and actually run Kibana alerts. It will
  * be false until all alerts have been migrated, then it will be removed
  */
-export const KIBANA_ALERTING_ENABLED = false;
+export const KIBANA_ALERTING_ENABLED = true;
 
 /**
  * The prefix for all alert types used by monitoring
@@ -250,11 +250,12 @@ export const ALERT_TYPE_PREFIX = 'monitoring_';
  * This is the alert type id for the license expiration alert
  */
 export const ALERT_TYPE_LICENSE_EXPIRATION = `${ALERT_TYPE_PREFIX}alert_type_license_expiration`;
+export const ALERT_TYPE_CLUSTER_STATE = `${ALERT_TYPE_PREFIX}alert_type_cluster_state`;
 
 /**
  * A listing of all alert types
  */
-export const ALERT_TYPES = [ALERT_TYPE_LICENSE_EXPIRATION];
+export const ALERT_TYPES = [ALERT_TYPE_LICENSE_EXPIRATION, ALERT_TYPE_CLUSTER_STATE];
 
 /**
  * Matches the id for the built-in in email action type
@@ -265,7 +266,7 @@ export const ALERT_ACTION_TYPE_EMAIL = '.email';
 /**
  * The number of alerts that have been migrated
  */
-export const NUMBER_OF_MIGRATED_ALERTS = 1;
+export const NUMBER_OF_MIGRATED_ALERTS = 2;
 
 /**
  * The advanced settings config name for the email address

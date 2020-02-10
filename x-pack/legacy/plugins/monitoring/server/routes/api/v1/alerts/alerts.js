@@ -9,6 +9,7 @@ import { isFunction } from 'lodash';
 import {
   ALERT_TYPE_LICENSE_EXPIRATION,
   MONITORING_CONFIG_ALERTING_EMAIL_ADDRESS,
+  ALERT_TYPE_CLUSTER_STATE,
 } from '../../../../../common/constants';
 
 async function createAlerts(req, alertsClient, { selectedEmailActionId }) {
@@ -17,6 +18,20 @@ async function createAlerts(req, alertsClient, { selectedEmailActionId }) {
   // Create alerts
   const ALERT_TYPES = {
     [ALERT_TYPE_LICENSE_EXPIRATION]: {
+      schedule: { interval: '1m' },
+      actions: [
+        {
+          group: 'default',
+          id: selectedEmailActionId,
+          params: {
+            subject: '{{context.subject}}',
+            message: `{{context.message}}`,
+            to: ['{{context.to}}'],
+          },
+        },
+      ],
+    },
+    [ALERT_TYPE_CLUSTER_STATE]: {
       schedule: { interval: '10s' },
       actions: [
         {

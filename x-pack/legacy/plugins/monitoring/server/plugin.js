@@ -16,6 +16,7 @@ import { initMonitoringXpackInfo } from './init_monitoring_xpack_info';
 import { initBulkUploader, registerCollectors } from './kibana_monitoring';
 import { registerMonitoringCollection } from './telemetry_collection';
 import { getLicenseExpiration } from './alerts/license_expiration';
+import { getClusterState } from './alerts/cluster_state';
 import { parseElasticsearchConfig } from './es_client/parse_elasticsearch_config';
 
 export class Plugin {
@@ -153,7 +154,7 @@ export class Plugin {
     if (KIBANA_ALERTING_ENABLED && plugins.alerting) {
       // this is not ready right away but we need to register alerts right away
       async function getMonitoringCluster() {
-        const configs = config.get('xpack.monitoring.elasticsearch');
+        const configs = config.get('monitoring.ui.elasticsearch');
         if (configs.hosts) {
           const monitoringCluster = plugins.elasticsearch.getCluster('monitoring');
           const { username, password } = configs;
@@ -177,7 +178,15 @@ export class Plugin {
           hapiServer,
           getMonitoringCluster,
           getLogger,
-          config.get('xpack.monitoring.ccs.enabled')
+          config.get('monitoring.ui.ccs.enabled')
+        )
+      );
+      plugins.alerting.setup.registerType(
+        getClusterState(
+          hapiServer,
+          getMonitoringCluster,
+          getLogger,
+          config.get('monitoring.ui.ccs.enabled')
         )
       );
     }

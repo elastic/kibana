@@ -5,7 +5,6 @@
  */
 
 import moment from 'moment-timezone';
-import { get } from 'lodash';
 import { Legacy } from 'kibana';
 import { Logger } from 'src/core/server';
 import { ALERT_TYPE_LICENSE_EXPIRATION, INDEX_PATTERN_ELASTICSEARCH } from '../../common/constants';
@@ -16,10 +15,11 @@ import { fetchClusters } from '../lib/alerts/fetch_clusters';
 import { fetchAvailableCcs } from '../lib/alerts/fetch_available_ccs';
 import {
   AlertLicense,
-  AlertState,
-  AlertClusterState,
-  AlertClusterUiState,
-  LicenseExpirationAlertExecutorOptions,
+  AlertCommonState,
+  AlertLicensePerClusterState,
+  AlertCommonExecutorOptions,
+  AlertCommonCluster,
+  AlertLicensePerClusterUiState,
 } from './types';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
 import { executeActions, getUiMessage } from '../lib/alerts/license_expiration.lib';
@@ -46,11 +46,7 @@ export const getLicenseExpiration = (
     id: ALERT_TYPE_LICENSE_EXPIRATION,
     name: 'Monitoring Alert - License Expiration',
     actionGroups: ['default'],
-    async executor({
-      services,
-      params,
-      state,
-    }: LicenseExpirationAlertExecutorOptions): Promise<any> {
+    async executor({ services, params, state }: AlertCommonExecutorOptions): Promise<any> {
       logger.debug(
         `Firing alert with params: ${JSON.stringify(params)} and state: ${JSON.stringify(state)}`
       );
@@ -80,7 +76,6 @@ export const getLicenseExpiration = (
         services.savedObjectsClient
       );
       const dateFormat: string = await uiSettings.get<string>('dateFormat');
-      const timezone: string = await uiSettings.get<string>('dateFormat:tz');
       const emailAddress = await fetchDefaultEmailAddress(uiSettings);
       if (!emailAddress) {
         // TODO: we can do more here
@@ -90,10 +85,28 @@ export const getLicenseExpiration = (
         return;
       }
 
-      const result: AlertState = { ...state };
+      const result: AlertCommonState = { ...state };
+      const defaultAlertState: AlertLicensePerClusterState = {
+        expiredCheckDateMS: 0,
+        ui: {
+          isFiring: false,
+          message: null,
+          severity: 0,
+          resolvedMS: 0,
+        },
+      };
 
       for (const license of licenses) {
-        const licenseState: AlertClusterState = state[license.clusterUuid] || {};
+        const alertState: AlertLicensePerClusterState =
+          (state[license.clusterUuid] as AlertLicensePerClusterState) || defaultAlertState;
+        const cluster = clusters.find(
+          (c: AlertCommonCluster) => c.clusterUuid === license.clusterUuid
+        );
+        if (!cluster) {
+          logger.warn(`Unable to find cluster for clusterUuid='${license.clusterUuid}'`);
+          continue;
+        }
+
         const $expiry = moment.utc(license.expiryDateMS);
         let isExpired = false;
         let severity = 0;
@@ -116,31 +129,26 @@ export const getLicenseExpiration = (
           }
         }
 
-        const ui: AlertClusterUiState = get<AlertClusterUiState>(licenseState, 'ui', {
-          isFiring: false,
-          message: null,
-          severity: 0,
-          resolvedMS: 0,
-          expirationTime: 0,
-        });
+        const ui = alertState.ui;
+        let triggered = ui.triggeredMS;
         let resolved = ui.resolvedMS;
         let message = ui.message;
-        let expiredCheckDate = licenseState.expiredCheckDateMS;
+        let expiredCheckDate = alertState.expiredCheckDateMS;
         const instance = services.alertInstanceFactory(ALERT_TYPE_LICENSE_EXPIRATION);
 
         if (isExpired) {
-          if (!licenseState.expiredCheckDateMS) {
+          if (!alertState.expiredCheckDateMS) {
             logger.debug(`License will expire soon, sending email`);
-            executeActions(instance, license, $expiry, dateFormat, emailAddress);
-            expiredCheckDate = moment().valueOf();
+            executeActions(instance, cluster, $expiry, dateFormat, emailAddress);
+            expiredCheckDate = triggered = moment().valueOf();
           }
-          message = getUiMessage(license, timezone);
+          message = getUiMessage();
           resolved = 0;
-        } else if (!isExpired && licenseState.expiredCheckDateMS) {
+        } else if (!isExpired && alertState.expiredCheckDateMS) {
           logger.debug(`License expiration has been resolved, sending email`);
-          executeActions(instance, license, $expiry, dateFormat, emailAddress, true);
+          executeActions(instance, cluster, $expiry, dateFormat, emailAddress, true);
           expiredCheckDate = 0;
-          message = getUiMessage(license, timezone, true);
+          message = getUiMessage(true);
           resolved = moment().valueOf();
         }
 
@@ -152,8 +160,10 @@ export const getLicenseExpiration = (
             isFiring: expiredCheckDate > 0,
             severity,
             resolvedMS: resolved,
-          },
-        };
+            triggeredMS: triggered,
+            lastCheckedMS: moment().valueOf(),
+          } as AlertLicensePerClusterUiState,
+        } as AlertLicensePerClusterState;
       }
 
       return result;
