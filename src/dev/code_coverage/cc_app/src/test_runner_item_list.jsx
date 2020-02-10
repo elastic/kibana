@@ -2,7 +2,6 @@ import React from "react";
 import TestRunnerItem from './test_runner_item';
 
 export default function TestRunnerItemList({testRunnerTypes}) {
-
   return (
     <div className="App-TestRunner-List">
       <ul>
@@ -12,11 +11,11 @@ export default function TestRunnerItemList({testRunnerTypes}) {
   );
 }
 
-function renderItem(item) {
+function renderItem(testRunnerItem) {
   return (
     <TestRunnerItem
-      item={item}
-      key={item.id}
+      item={testRunnerItem}
+      key={testRunnerItem.id}
     />
   );
 }
