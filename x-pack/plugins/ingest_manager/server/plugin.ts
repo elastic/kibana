@@ -12,6 +12,7 @@ import {
   ICustomClusterClient,
   SavedObjectsLegacyService,
 } from 'kibana/server';
+import { SavedObjectsClient } from '../../../../src/core/server';
 import { LicensingPluginSetup, ILicense } from '../../licensing/server';
 import { EncryptedSavedObjectsPluginStart } from '../../encrypted_saved_objects/server';
 import { SecurityPluginSetup } from '../../security/server';
@@ -38,6 +39,7 @@ export interface IngestManagerAppContext {
   clusterClient: ICustomClusterClient;
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   security?: SecurityPluginSetup;
+  internalSavedObjectsClient: SavedObjectsClient;
 }
 
 /**
@@ -48,27 +50,13 @@ export interface LegacyAPI {
   savedObjects: SavedObjectsLegacyService;
 }
 
-export interface IngestManagerPluginSetup {
-  __legacyCompat: {
-    registerLegacyAPI: (legacyAPI: LegacyAPI) => void;
-  };
-}
-
-export class IngestManagerPlugin implements Plugin<IngestManagerPluginSetup> {
+export class IngestManagerPlugin implements Plugin {
   private licensing$!: Observable<ILicense>;
   private config$!: Observable<IngestManagerConfigType>;
   private clusterClient!: ICustomClusterClient;
   private security: SecurityPluginSetup | undefined;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {}
-
-  private legacyAPI?: LegacyAPI;
-  private readonly getLegacyAPI = () => {
-    if (!this.legacyAPI) {
-      throw new Error('Legacy API is not registered!');
-    }
-    return this.legacyAPI;
-  };
 
   public async setup(core: CoreSetup, deps: IngestManagerSetupDeps) {
     this.licensing$ = deps.licensing.license$;
@@ -119,23 +107,6 @@ export class IngestManagerPlugin implements Plugin<IngestManagerPluginSetup> {
     registerFleetSetupRoutes(router);
     registerAgentRoutes(router);
     registerEnrollmentApiKeyRoutes(router);
-
-    return {
-      __legacyCompat: {
-        registerLegacyAPI: (legacyAPI: LegacyAPI) => {
-          this.legacyAPI = legacyAPI;
-          const {
-            SavedObjectsClient,
-            getSavedObjectsRepository,
-          } = this.getLegacyAPI().savedObjects;
-          const { callAsInternalUser } = this.clusterClient;
-          const internalRepository = getSavedObjectsRepository(callAsInternalUser);
-
-          const internalSavedObjectsClient = new SavedObjectsClient(internalRepository);
-          appContextService.setInternalSavedObjectsClient(internalSavedObjectsClient);
-        },
-      },
-    };
   }
 
   public async start(
@@ -144,7 +115,12 @@ export class IngestManagerPlugin implements Plugin<IngestManagerPluginSetup> {
       encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
     }
   ) {
+    const internalSavedObjectsClient = new SavedObjectsClient(
+      core.savedObjects.createInternalRepository()
+    );
+
     appContextService.start({
+      internalSavedObjectsClient,
       clusterClient: this.clusterClient,
       encryptedSavedObjects: plugins.encryptedSavedObjects,
       security: this.security,

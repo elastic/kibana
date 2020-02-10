@@ -18,6 +18,7 @@ class AppContextService {
     this.clusterClient = appContext.clusterClient;
     this.encryptedSavedObjects = appContext.encryptedSavedObjects;
     this.security = appContext.security;
+    this.internalSavedObjectsClient = appContext.internalSavedObjectsClient;
   }
 
   public stop() {
@@ -43,10 +44,6 @@ class AppContextService {
       throw new Error('No internal savedObjectsClient');
     }
     return this.internalSavedObjectsClient;
-  }
-
-  public setInternalSavedObjectsClient(internalSavedObjectsClient: SavedObjectsClientContract) {
-    this.internalSavedObjectsClient = internalSavedObjectsClient;
   }
 }
 

@@ -102,8 +102,9 @@ export const deleteAgentHandler: RequestHandler<TypeOf<
 
     return response.ok({ body });
   } catch (e) {
-    if (e.isBoom && e.output.statusCode === 404) {
-      return response.notFound({
+    if (e.isBoom) {
+      return response.customError({
+        statusCode: e.output.statusCode,
         body: { message: `Agent ${request.params.agentId} not found` },
       });
     }
