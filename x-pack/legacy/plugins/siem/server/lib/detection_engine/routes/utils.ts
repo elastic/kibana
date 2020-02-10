@@ -162,6 +162,7 @@ export const getIndex = (
   config: LegacyServices['config']
 ): string => {
   const spaceId = getSpaceId();
-  const signalsIndex = config().get(`xpack.${APP_ID}.${SIGNALS_INDEX_KEY}`);
-  return `${signalsIndex}-${spaceId}`;
+  const signalsIndex = config().get<string>(`xpack.${APP_ID}.${SIGNALS_INDEX_KEY}`);
+
+  return spaceId ? `${signalsIndex}-${spaceId}` : signalsIndex;
 };

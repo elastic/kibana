@@ -14,7 +14,9 @@ import {
   ImportSuccessError,
   createImportErrorObject,
   transformImportError,
+  getIndex,
 } from './utils';
+import { createMockConfig } from './__mocks__';
 
 describe('utils', () => {
   describe('transformError', () => {
@@ -272,6 +274,31 @@ describe('utils', () => {
         ],
       };
       expect(transformed).toEqual(expected);
+    });
+  });
+
+  describe('getIndex', () => {
+    let mockConfig = createMockConfig();
+
+    beforeEach(() => {
+      mockConfig = () => ({
+        get: jest.fn(() => 'mockSignalsIndex'),
+        has: jest.fn(),
+      });
+    });
+
+    it('returns the configured index if spaces are disabled', () => {
+      const getSpaceId = jest.fn(() => undefined);
+      const index = getIndex(getSpaceId, mockConfig);
+
+      expect(index).toEqual('mockSignalsIndex');
+    });
+
+    it('appends the space id to the configured index if spaces are enabled', () => {
+      const getSpaceId = jest.fn(() => 'myspace');
+      const index = getIndex(getSpaceId, mockConfig);
+
+      expect(index).toEqual('mockSignalsIndex-myspace');
     });
   });
 });
