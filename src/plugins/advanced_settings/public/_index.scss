@@ -17,26 +17,4 @@
  * under the License.
  */
 
-.mgtAdvancedSettings__field {
-  + * {
-    margin-top: $euiSize;
-  }
-
-  &Wrapper {
-    width: 640px;
-
-    @include internetExplorerOnly() {
-      min-height: 1px;
-    }
-  }
-
-  &Actions {
-    padding-top: $euiSizeM;
-  }
-
-  @include internetExplorerOnly {
-    &Row {
-      min-height: 1px;
-    }
-  }
-}
+ @import './management_app/advanced_settings';

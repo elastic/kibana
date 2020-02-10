@@ -22,7 +22,7 @@ import { IUiSettingsClient } from './types';
 
 const createSetupContractMock = () => {
   const setupContract: jest.Mocked<IUiSettingsClient> = {
-    getAll: jest.fn(() => ({})),
+    getAll: jest.fn(),
     get: jest.fn(),
     get$: jest.fn(),
     set: jest.fn(),
@@ -40,6 +40,7 @@ const createSetupContractMock = () => {
   setupContract.getUpdate$.mockReturnValue(new Rx.Subject<any>());
   setupContract.getSaved$.mockReturnValue(new Rx.Subject<any>());
   setupContract.getUpdateErrors$.mockReturnValue(new Rx.Subject<any>());
+  setupContract.getAll.mockReturnValue({});
 
   return setupContract;
 };
