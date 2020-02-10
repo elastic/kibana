@@ -2,7 +2,7 @@
 
 exports[`TooltipControl render should not render tooltips when there are no open tooltips 1`] = `""`;
 
-exports[`TooltipControl render should render tooltip popover with custom tooltip content when renderTooltipContent provided 1`] = `
+exports[`TooltipControl render should render hover tooltip 1`] = `
 <TooltipPopover
   addFilters={[Function]}
   closeTooltip={[Function]}
@@ -49,11 +49,10 @@ exports[`TooltipControl render should render tooltip popover with custom tooltip
       "queryRenderedFeatures": [Function],
     }
   }
-  renderTooltipContent={[Function]}
 />
 `;
 
-exports[`TooltipControl render should render tooltip popover with features tooltip content 1`] = `
+exports[`TooltipControl render should render locked tooltip 1`] = `
 <TooltipPopover
   addFilters={[Function]}
   closeTooltip={[Function]}
@@ -72,8 +71,8 @@ exports[`TooltipControl render should render tooltip popover with features toolt
     ]
   }
   index={0}
-  isLocked={false}
-  key="1"
+  isLocked={true}
+  key="2"
   layerList={
     Array [
       Object {
