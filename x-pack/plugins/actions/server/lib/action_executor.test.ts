@@ -11,6 +11,7 @@ import { actionTypeRegistryMock } from '../action_type_registry.mock';
 import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/mocks';
 import { savedObjectsClientMock, loggingServiceMock } from '../../../../../src/core/server/mocks';
 import { createEventLoggerMock } from '../../../event_log/server/event_logger.mock';
+import { spacesServiceMock } from '../../../spaces/server/spaces_service/spaces_service.mock';
 
 const actionExecutor = new ActionExecutor({ isESOUsingEphemeralEncryptionKey: false });
 const savedObjectsClient = savedObjectsClientMock.create();
@@ -33,18 +34,20 @@ const executeParams = {
   request: {} as KibanaRequest,
 };
 
+const spacesMock = spacesServiceMock.createSetupContract();
 actionExecutor.initialize({
   logger: loggingServiceMock.create().get(),
-  spaces: {
-    getSpaceId: () => 'some-namespace',
-  } as any,
+  spaces: spacesMock,
   getServices,
   actionTypeRegistry,
   encryptedSavedObjectsPlugin,
   eventLogger: createEventLoggerMock(),
 });
 
-beforeEach(() => jest.resetAllMocks());
+beforeEach(() => {
+  jest.resetAllMocks();
+  spacesMock.getSpaceId.mockReturnValue('some-namespace');
+});
 
 test('successfully executes', async () => {
   const actionType = {
@@ -224,9 +227,7 @@ test('throws an error when passing isESOUsingEphemeralEncryptionKey with value o
   const customActionExecutor = new ActionExecutor({ isESOUsingEphemeralEncryptionKey: true });
   customActionExecutor.initialize({
     logger: loggingServiceMock.create().get(),
-    spaces: {
-      getSpaceId: () => 'some-namespace',
-    } as any,
+    spaces: spacesMock,
     getServices,
     actionTypeRegistry,
     encryptedSavedObjectsPlugin,
