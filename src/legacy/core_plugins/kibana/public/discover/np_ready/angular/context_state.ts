@@ -19,34 +19,73 @@
 import _ from 'lodash';
 import { createStateContainer } from '../../../../../../../plugins/kibana_utils/public';
 import { createKbnUrlStateStorage } from '../../../../../../../plugins/kibana_utils/public';
-import { syncState } from '../../../../../../../plugins/kibana_utils/public';
+import { syncStates } from '../../../../../../../plugins/kibana_utils/public';
 
-interface UrlStateParams {
+interface AppState {
   columns: string[];
-  filters: any;
+  filters: any[];
   predecessorCount: string;
   sort: [string, string];
   successorCount: string;
 }
 
-export function getAppState(defaultStepSize: string, timeFieldName: string) {
+interface GlobalState {
+  filters: any[];
+}
+
+export function getState(defaultStepSize: string, timeFieldName: string) {
   const stateStorage = createKbnUrlStateStorage();
-  const initialStateFromUrl = stateStorage.get('_a');
-  const defaultState = createDefaultAppState(defaultStepSize, timeFieldName);
-  const initialState = {
-    ...defaultState,
-    ...(_.cloneDeep(initialStateFromUrl) as UrlStateParams),
-  } as UrlStateParams;
+  const globalStateFromUrl = stateStorage.get('_g') as GlobalState;
+  const globalState = createStateContainer(globalStateFromUrl) as any;
 
-  const stateContainer = createStateContainer(initialState) as any;
+  const appStateFromUrl = stateStorage.get('_a') as AppState;
+  const appStateDefault = createDefaultAppState(defaultStepSize, timeFieldName);
+  const appStateInitial = {
+    ...appStateDefault,
+    ...appStateFromUrl,
+  } as AppState;
 
-  const { start, stop } = syncState({
-    storageKey: '_a',
-    stateContainer,
-    stateStorage,
-  });
+  const appState = createStateContainer(appStateInitial) as any;
 
-  return { stateContainer, initialState, start, stop };
+  const { start, stop } = syncStates([
+    {
+      storageKey: '_a',
+      stateContainer: appState,
+      stateStorage,
+    },
+    {
+      storageKey: '_g',
+      stateContainer: globalState,
+      stateStorage,
+    },
+  ]);
+
+  const getGlobalFilters = () => {
+    const state = globalState.getState();
+    if (!state || !Array.isArray(state.filters)) {
+      return [];
+    }
+    return state.filters;
+  };
+  const getAppFilters = () => {
+    const state = appState.getState();
+    if (!state || !Array.isArray(state.filters)) {
+      return [];
+    }
+    return state.filters;
+  };
+
+  return {
+    globalState,
+    appState,
+    start,
+    stop,
+    getGlobalFilters,
+    getAppFilters,
+    getFilters: () => {
+      return _.cloneDeep([...getGlobalFilters(), ...getAppFilters()]);
+    },
+  };
 }
 
 function createDefaultAppState(defaultSize: string, timeFieldName: string) {

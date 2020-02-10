@@ -21,10 +21,9 @@ import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { getAngularModule, getServices, subscribeWithScope } from '../../kibana_services';
 import './context_app';
-import { getAppState } from './context_state';
+import { getState } from './context_state';
 import contextAppRouteTemplate from './context.html';
 import { getRootBreadcrumbs } from '../helpers/breadcrumbs';
-import { FilterStateManager } from '../../../../../data/public';
 
 const k7Breadcrumbs = $route => {
   const { indexPattern } = $route.current.locals;
@@ -67,45 +66,39 @@ getAngularModule().config($routeProvider => {
     });
 });
 
-function ContextAppRouteController($routeParams, $scope, config, $route, globalState) {
+function ContextAppRouteController($routeParams, $scope, config, $route) {
   const filterManager = getServices().filterManager;
   const indexPattern = $route.current.locals.indexPattern.ip;
-  const { start, stop, stateContainer, initialState } = getAppState(
-    config.get('context:defaultSize'),
-    indexPattern.timeFieldName
-  );
-  this.state = _.cloneDeep(initialState);
-  this.filters = this.state.filters;
-  const self = this;
-  const filterStateManager = new FilterStateManager(
+  const {
+    start,
+    stop,
+    appState,
     globalState,
-    () => {
-      return {
-        set filters(_filters) {
-          self.filters = _filters;
-          stateContainer.set({ ...self.filters, ...{ filters: _filters } }, { replace: true });
-        },
-        get filters() {
-          return self.filters;
-        },
-      };
-    },
-    filterManager
-  );
+    getFilters,
+    getAppFilters,
+    getGlobalFilters,
+  } = getState(config.get('context:defaultSize'), indexPattern.timeFieldName);
+  this.state = _.cloneDeep(appState.getState());
+  this.filters = getFilters();
+  filterManager.addFilters(this.filters);
   start();
-  const updateState = newStateVars => {
-    const newState = _.cloneDeep({ ...this.state, ...newStateVars });
-    if (!_.isEqual(this.state, newState)) {
-      this.state = newState;
-      this.filters = this.state.filters;
-    }
-    return this.state;
-  };
 
-  stateContainer.subscribe(newState => {
-    updateState(newState);
+  // take care of changes in State/URL
+  appState.subscribe(newState => {
+    if (newState && !_.isEqual(this.state, newState)) {
+      this.state = newState;
+      this.filters = _.cloneDeep([...getGlobalFilters(), ...newState.filters]);
+    }
+  });
+  globalState.subscribe(newState => {
+    if (newState && Array.isArray(newState.filters)) {
+      this.filters = _.cloneDeep([...newState.filters, ...this.state.filters]);
+    } else {
+      this.filters = [...this.state.filters];
+    }
   });
 
+  // take care of parameter changes in UI
   $scope.$watchGroup(
     [
       'contextAppRoute.state.columns',
@@ -114,24 +107,40 @@ function ContextAppRouteController($routeParams, $scope, config, $route, globalS
     ],
     newValues => {
       const [columns, predecessorCount, successorCount] = newValues;
-      stateContainer.set({
-        ...this.state,
-        ...{ columns, predecessorCount, successorCount },
-      });
+      if (Array.isArray(columns) && predecessorCount >= 1 && successorCount >= 1) {
+        appState.set(
+          {
+            ...this.state,
+            ...{ columns, predecessorCount, successorCount },
+          },
+          { replace: true }
+        );
+      }
     }
   );
 
+  // take care of filtermanager changes
   const updateSubscription = subscribeWithScope($scope, filterManager.getUpdates$(), {
     next: () => {
-      const newState = updateState({ filters: filterManager.getFilters() });
-      stateContainer.set(newState, { replace: true });
+      const appFiltersState = getAppFilters();
+      const appFilters = filterManager.getAppFilters();
+      if (!_.isEqual(appFiltersState, appFilters)) {
+        appState.set({ ...this.state, ...{ filters: appFilters } }, { replace: true });
+      }
+      const globalFiltersState = getGlobalFilters();
+      const globalFilters = filterManager.getGlobalFilters();
+      if (!_.isEqual(globalFilters, globalFiltersState)) {
+        globalState.set(
+          { ...globalFiltersState, ...{ filters: globalFilters } },
+          { replace: true }
+        );
+      }
     },
   });
 
   $scope.$on('$destroy', () => {
-    filterStateManager.destroy();
-    updateSubscription.unsubscribe();
     stop();
+    updateSubscription.unsubscribe();
   });
   this.anchorId = $routeParams.id;
   this.indexPattern = indexPattern;

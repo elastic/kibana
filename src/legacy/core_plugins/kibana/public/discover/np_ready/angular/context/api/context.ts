@@ -67,7 +67,7 @@ function fetchContextProvider(indexPatterns: IndexPatternsContract) {
     size: number,
     filters: esFilters.Filter[]
   ) {
-    if (typeof anchor !== 'object' || anchor === null) {
+    if (typeof anchor !== 'object' || anchor === null || !size) {
       return [];
     }
     const indexPattern = await indexPatterns.get(indexPatternId);
