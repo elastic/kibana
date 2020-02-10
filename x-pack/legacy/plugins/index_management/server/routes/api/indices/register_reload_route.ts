@@ -9,9 +9,11 @@ import { RouteDependencies } from '../../../types';
 import { fetchIndices } from '../../../lib/fetch_indices';
 import { addBasePath } from '../index';
 
-const bodySchema = schema.object({
-  indexNames: schema.arrayOf(schema.string()),
-});
+const bodySchema = schema.maybe(
+  schema.object({
+    indexNames: schema.maybe(schema.arrayOf(schema.string())),
+  })
+);
 
 export function registerReloadRoute({
   router,
@@ -22,7 +24,7 @@ export function registerReloadRoute({
   router.post(
     { path: addBasePath('/indices/reload'), validate: { body: bodySchema } },
     license.guardApiRoute(async (ctx, req, res) => {
-      const { indexNames = [] } = req.body as typeof bodySchema.type;
+      const { indexNames = [] } = (req.body as typeof bodySchema.type) ?? {};
 
       try {
         const indices = await fetchIndices(

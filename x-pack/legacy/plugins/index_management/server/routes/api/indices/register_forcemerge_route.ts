@@ -11,7 +11,7 @@ import { addBasePath } from '../index';
 
 const bodySchema = schema.object({
   indices: schema.arrayOf(schema.string()),
-  maxNumSegments: schema.number(),
+  maxNumSegments: schema.maybe(schema.number()),
 });
 
 export function registerForcemergeRoute({ router, license, lib }: RouteDependencies) {
