@@ -824,7 +824,6 @@ export class Field extends PureComponent<FieldProps, FieldState> {
             className="mgtAdvancedSettings__fieldWrapper"
             title={this.renderTitle(setting)}
             description={this.renderDescription(setting)}
-            idAria={`${setting.name}-aria`}
           >
             <EuiFormRow
               isInvalid={isInvalid}
@@ -833,7 +832,6 @@ export class Field extends PureComponent<FieldProps, FieldState> {
               helpText={this.renderHelpText(setting)}
               describedByIds={[`${setting.name}-aria`]}
               className="mgtAdvancedSettings__fieldRow"
-              // @ts-ignore
               hasChildLabel={setting.type !== 'boolean'}
             >
               {this.renderField(setting)}

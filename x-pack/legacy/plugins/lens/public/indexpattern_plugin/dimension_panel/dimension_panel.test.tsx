@@ -887,7 +887,7 @@ describe('IndexPatternDimensionPanel', () => {
       wrapper
         .find(EuiSideNav)
         .prop('items')[0]
-        .items.map(({ name }) => name)
+        .items.map(({ name }: { name: React.ReactNode }) => name)
     ).toEqual(['Unique count', 'Average', 'Count', 'Maximum', 'Minimum', 'Sum']);
   });
 
