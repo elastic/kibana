@@ -31,12 +31,15 @@ export interface ShowNewVisModalParams {
 
 export function showNewVisModal({ editorParams = [], onClose }: ShowNewVisModalParams = {}) {
   const container = document.createElement('div');
+  let isClosed = false;
   const handleClose = () => {
+    if (isClosed) return;
     ReactDOM.unmountComponentAtNode(container);
     document.body.removeChild(container);
     if (onClose) {
       onClose();
     }
+    isClosed = true;
   };
 
   document.body.appendChild(container);
@@ -55,4 +58,6 @@ export function showNewVisModal({ editorParams = [], onClose }: ShowNewVisModalP
     </I18nProvider>
   );
   ReactDOM.render(element, container);
+
+  return () => handleClose();
 }
