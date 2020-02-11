@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Plugin, CoreSetup, AppMountParameters, CoreStart } from 'kibana/public';
+import { Plugin, CoreSetup, AppMountParameters } from 'kibana/public';
 import { UiActionsApi } from '../../../src/plugins/ui_actions/public';
 import { IEmbeddableStart } from '../../../src/plugins/embeddable/public';
 import { Start as InspectorStart } from '../../../src/plugins/inspector/public';

@@ -31,11 +31,14 @@ function TaskInput({ onSave }: { onSave: (task: string) => void }) {
   return (
     <EuiModalBody>
       <EuiFieldText
+        data-test-subj="taskInputField"
         value={task}
         placeholder="Enter task here"
         onChange={e => setTask(e.target.value)}
       />
-      <EuiButton onClick={() => onSave(task)}>Save</EuiButton>
+      <EuiButton data-test-subj="createTodoEmbeddable" onClick={() => onSave(task)}>
+        Save
+      </EuiButton>
     </EuiModalBody>
   );
 }

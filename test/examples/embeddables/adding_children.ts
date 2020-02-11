@@ -17,28 +17,27 @@
  * under the License.
  */
 
+import expect from '@kbn/expect';
 import { PluginFunctionalProviderContext } from 'test/plugin_functional/services';
 
 // eslint-disable-next-line import/no-default-export
-export default function({
-  getService,
-  getPageObjects,
-  loadTestFile,
-}: PluginFunctionalProviderContext) {
-  const browser = getService('browser');
-  const appsMenu = getService('appsMenu');
-  const PageObjects = getPageObjects(['common', 'header']);
+export default function({ getService }: PluginFunctionalProviderContext) {
+  const testSubjects = getService('testSubjects');
 
-  describe('embeddable explorer', function() {
+  describe('creating and adding children', () => {
     before(async () => {
-      await browser.setWindowSize(1300, 900);
-      await PageObjects.common.navigateToApp('settings');
-      await appsMenu.clickLink('Embeddable explorer');
+      await testSubjects.click('embeddablePanelExamplae');
     });
 
-    loadTestFile(require.resolve('./hello_world_embeddable'));
-    loadTestFile(require.resolve('./todo_embeddable'));
-    loadTestFile(require.resolve('./list_container'));
-    loadTestFile(require.resolve('./adding_children'));
+    it('Can create a new child', async () => {
+      await testSubjects.click('embeddablePanelToggleMenuIcon');
+      await testSubjects.click('embeddablePanelAction-ADD_PANEL_ACTION_ID');
+      await testSubjects.click('createNew');
+      await testSubjects.click('createNew-TODO_EMBEDDABLE');
+      await testSubjects.setValue('taskInputField', 'new task');
+      await testSubjects.click('createTodoEmbeddable');
+      const tasks = await testSubjects.getVisibleTextAll('todoEmbeddableTask');
+      expect(tasks).to.eql(['Goes out on Wenesdays!', 'new task']);
+    });
   });
 }
