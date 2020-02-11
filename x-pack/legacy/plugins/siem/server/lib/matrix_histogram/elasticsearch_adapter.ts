@@ -117,7 +117,7 @@ export class ElasticsearchMatrixHistogramAdapter implements MatrixHistogramAdapt
     request: FrameworkRequest,
     options: MatrixHistogramRequestOptions
   ): Promise<MatrixHistogramOverTimeData> {
-    const myConfig = matrixHistogramConfig[options.histogramType];
+    const myConfig = getOr(null, options.histogramType, matrixHistogramConfig);
     if (myConfig == null) {
       throw new Error(`This histogram type ${options.histogramType} is unknown to the server side`);
     }
