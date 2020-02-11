@@ -1,6 +1,6 @@
 {
     "author": "Elastic",
-    "name": "epm",
+    "name": "ingest-manager",
     "version": "8.0.0",
     "private": true,
     "license": "Elastic-License",
