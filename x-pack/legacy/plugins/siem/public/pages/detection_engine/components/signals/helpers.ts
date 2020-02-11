@@ -5,8 +5,7 @@
  */
 
 import { get, isEmpty } from 'lodash/fp';
-import { esKuery } from '../../../../../../../../../src/plugins/data/common';
-import { esFilters } from '../../../../../../../../../src/plugins/data/public';
+import { esFilters, esKuery, KueryNode } from '../../../../../../../../../src/plugins/data/public';
 import {
   DataProvider,
   DataProvidersAnd,
@@ -34,7 +33,7 @@ const templateFields = [
 ];
 
 export const findValueToChangeInQuery = (
-  keuryNode: esKuery.KueryNode,
+  keuryNode: KueryNode,
   valueToChange: FindValueToChangeInQuery[] = []
 ): FindValueToChangeInQuery[] => {
   let localValueToChange = valueToChange;
@@ -48,7 +47,7 @@ export const findValueToChangeInQuery = (
     ];
   }
   return keuryNode.arguments.reduce(
-    (addValueToChange: FindValueToChangeInQuery[], ast: esKuery.KueryNode) => {
+    (addValueToChange: FindValueToChangeInQuery[], ast: KueryNode) => {
       if (ast.function === 'is' && templateFields.includes(ast.arguments[0].value)) {
         return [
           ...addValueToChange,

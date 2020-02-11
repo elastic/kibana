@@ -27,6 +27,9 @@ export {
   UiComponent,
   UiComponentInstance,
   url,
+  JsonValue,
+  JsonObject,
+  JsonArray,
 } from '../common';
 export * from './core';
 export * from './errors';
