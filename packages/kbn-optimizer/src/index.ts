@@ -19,3 +19,4 @@
 
 export { OptimizerConfig, OptimizerMsg } from './optimizer';
 export * from './run_optimizer';
+export * from './log_optimizer_state';

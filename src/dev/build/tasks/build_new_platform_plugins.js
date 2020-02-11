@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Optimizer, OptimizerConfig, logOptimizerState } from '@kbn/optimizer';
+import { runOptimizer, OptimizerConfig, logOptimizerState } from '@kbn/optimizer';
 
 export const BuildNewPlatformPluginsTask = {
   description: 'Building distributable versions of new platform plugins',
@@ -31,8 +31,7 @@ export const BuildNewPlatformPluginsTask = {
       dist: true,
     });
 
-    await new Optimizer(optimizerConfig)
-      .run()
+    await runOptimizer(optimizerConfig)
       .pipe(logOptimizerState(log, optimizerConfig))
       .toPromise();
   },

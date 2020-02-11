@@ -26,7 +26,7 @@ import {
   parseLogLevel,
   REPO_ROOT,
 } from '@kbn/dev-utils';
-import { OptimizerConfig, Optimizer, logOptimizerState } from '@kbn/optimizer';
+import { runOptimizer, OptimizerConfig, logOptimizerState } from '@kbn/optimizer';
 
 import { LegacyConfig } from '../../core/server/legacy';
 
@@ -75,6 +75,5 @@ export function runKbnOptimizer(opts: Record<string, any>, config: LegacyConfig)
     },
   ]);
 
-  const optimizer = new Optimizer(optimizerConfig);
-  return optimizer.run().pipe(logOptimizerState(toolingLog, optimizerConfig));
+  return runOptimizer(optimizerConfig).pipe(logOptimizerState(toolingLog, optimizerConfig));
 }
