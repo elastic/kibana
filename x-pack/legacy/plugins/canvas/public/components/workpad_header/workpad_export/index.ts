@@ -6,7 +6,7 @@
 
 import { connect } from 'react-redux';
 import { compose, withProps } from 'recompose';
-import { jobCompletionNotifications } from '../../../../../reporting/public/lib/job_completion_notifications';
+import * as jobCompletionNotifications from '../../../../../reporting/public/lib/job_completion_notifications';
 // @ts-ignore Untyped local
 import { getWorkpad, getPages } from '../../../state/selectors/workpad';
 // @ts-ignore Untyped local

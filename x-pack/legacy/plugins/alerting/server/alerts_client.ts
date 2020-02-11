@@ -152,13 +152,14 @@ export class AlertsClient {
     const alertType = this.alertTypeRegistry.get(data.alertTypeId);
     const validatedAlertTypeParams = validateAlertTypeParams(alertType, data.params);
     const username = await this.getUserName();
+    const createdAPIKey = data.enabled ? await this.createAPIKey() : null;
 
     this.validateActions(alertType, data.actions);
 
     const { references, actions } = await this.denormalizeActions(data.actions);
     const rawAlert: RawAlert = {
       ...data,
-      ...this.apiKeyAsAlertAttributes(await this.createAPIKey(), username),
+      ...this.apiKeyAsAlertAttributes(createdAPIKey, username),
       actions,
       createdBy: username,
       updatedBy: username,
@@ -329,10 +330,10 @@ export class AlertsClient {
   }
 
   private apiKeyAsAlertAttributes(
-    apiKey: CreateAPIKeyResult,
+    apiKey: CreateAPIKeyResult | null,
     username: string | null
   ): Pick<RawAlert, 'apiKey' | 'apiKeyOwner'> {
-    return apiKey.apiKeysEnabled
+    return apiKey && apiKey.apiKeysEnabled
       ? {
           apiKeyOwner: username,
           apiKey: Buffer.from(`${apiKey.result.id}:${apiKey.result.api_key}`).toString('base64'),
@@ -344,12 +345,27 @@ export class AlertsClient {
   }
 
   public async updateApiKey({ id }: { id: string }) {
-    const {
-      version,
-      attributes,
-    } = await this.encryptedSavedObjectsPlugin.getDecryptedAsInternalUser<RawAlert>('alert', id, {
-      namespace: this.namespace,
-    });
+    let apiKeyToInvalidate: string | null = null;
+    let attributes: RawAlert;
+    let version: string | undefined;
+
+    try {
+      const decryptedAlert = await this.encryptedSavedObjectsPlugin.getDecryptedAsInternalUser<
+        RawAlert
+      >('alert', id, { namespace: this.namespace });
+      apiKeyToInvalidate = decryptedAlert.attributes.apiKey;
+      attributes = decryptedAlert.attributes;
+      version = decryptedAlert.version;
+    } catch (e) {
+      // We'll skip invalidating the API key since we failed to load the decrypted saved object
+      this.logger.error(
+        `updateApiKey(): Failed to load API key to invalidate on alert ${id}: ${e.message}`
+      );
+      // Still attempt to load the attributes and version using SOC
+      const alert = await this.savedObjectsClient.get<RawAlert>('alert', id);
+      attributes = alert.attributes;
+      version = alert.version;
+    }
 
     const username = await this.getUserName();
     await this.savedObjectsClient.update(
@@ -363,7 +379,9 @@ export class AlertsClient {
       { version }
     );
 
-    await this.invalidateApiKey({ apiKey: attributes.apiKey });
+    if (apiKeyToInvalidate) {
+      await this.invalidateApiKey({ apiKey: apiKeyToInvalidate });
+    }
   }
 
   private async invalidateApiKey({ apiKey }: { apiKey: string | null }): Promise<void> {

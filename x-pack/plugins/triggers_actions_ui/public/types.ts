@@ -83,7 +83,7 @@ export interface AlertTypeModel {
   id: string;
   name: string;
   iconClass: string;
-  validate: (alert: Alert) => ValidationResult;
+  validate: (alertParams: any) => ValidationResult;
   alertParamsExpression: React.FunctionComponent<any>;
   defaultActionMessage?: string;
 }
