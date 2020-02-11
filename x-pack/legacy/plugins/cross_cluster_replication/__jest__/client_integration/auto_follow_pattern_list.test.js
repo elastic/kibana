@@ -286,7 +286,7 @@ describe('<AutoFollowPatternList />', () => {
         actions.clickAutoFollowPatternAt(0);
         find('autoFollowPatternActionMenuButton').simulate('click');
         expect(exists('autoFollowPatternDetail.closeFlyoutButton')).toBe(true);
-        expect(actions.getPatternsActionMenuItemText(0)).toEqual('Resume pattern');
+        expect(actions.getPatternsActionMenuItemText(0)).toEqual('Resume replication');
         expect(actions.getPatternsActionMenuItemText(1)).toEqual('Edit pattern');
         expect(actions.getPatternsActionMenuItemText(2)).toEqual('Delete pattern');
       });
