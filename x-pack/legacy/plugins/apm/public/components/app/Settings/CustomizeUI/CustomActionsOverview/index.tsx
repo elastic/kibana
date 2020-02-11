@@ -12,7 +12,7 @@ import { Title } from './Title';
 import { EmptyPrompt } from './EmptyPrompt';
 import { CustomActionsFlyout } from './CustomActionsFlyout';
 
-export const CustomActions = () => {
+export const CustomActionsOverview = () => {
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
 
   // TODO: change it to correct fields fetched from ES

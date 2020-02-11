@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
-import { CustomActions } from '../';
+import { CustomActionsOverview } from '../';
 import { expectTextsInDocument } from '../../../../../../utils/testHelpers';
 import * as hooks from '../../../../../../hooks/useFetcher';
 
@@ -16,7 +16,7 @@ describe('CustomActions', () => {
   describe('empty prompt', () => {
     it('shows when any actions are available', () => {
       // TODO: mock return items
-      const component = render(<CustomActions />);
+      const component = render(<CustomActionsOverview />);
       expectTextsInDocument(component, ['No actions found.']);
     });
     it('opens flyout when click to create new action', () => {
@@ -24,7 +24,7 @@ describe('CustomActions', () => {
         data: [],
         status: 'success'
       });
-      const { queryByText, getByText } = render(<CustomActions />);
+      const { queryByText, getByText } = render(<CustomActionsOverview />);
       expect(queryByText('Service')).not.toBeInTheDocument();
       fireEvent.click(getByText('Create custom action'));
       expect(queryByText('Service')).toBeInTheDocument();
