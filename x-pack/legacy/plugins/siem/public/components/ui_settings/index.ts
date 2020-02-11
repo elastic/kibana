@@ -29,11 +29,39 @@ export const PureUISettingsStoreObserver: FC<Props & ReduxProps> = ({
   useEffect(() => {
     const subscription = merge(
       client
+        .get$<model.State['anomalyThreshold']>(model.keys.anomalyThreshold)
+        .pipe(map(value => actions.anomalyThresholdChanged(value))),
+      client
+        .get$<model.State['bytesFormat']>(model.keys.bytesFormat)
+        .pipe(map(value => actions.bytesFormatChanged(value))),
+      client
+        .get$<model.State['darkMode']>(model.keys.darkMode)
+        .pipe(map(value => actions.darkModeChanged(value))),
+      client
+        .get$<model.State['dateFormat']>(model.keys.dateFormat)
+        .pipe(map(value => actions.dateFormatChanged(value))),
+      client
         .get$<model.State['indexPattern']>(model.keys.indexPattern)
         .pipe(map(value => actions.indexPatternChanged(value))),
       client
-        .get$<model.State['dateFormat']>(model.keys.dateFormat)
-        .pipe(map(value => actions.dateFormatChanged(value)))
+        .get$<model.State['newsFeedEnabled']>(model.keys.newsFeedEnabled)
+        .pipe(map(value => actions.newsFeedEnabledChanged(value))),
+      client
+        .get$<model.State['newsFeedUrl']>(model.keys.newsFeedUrl)
+        .pipe(map(value => actions.newsFeedUrlChanged(value))),
+      client
+        .get$<model.State['timeFilterQuickRanges']>(model.keys.timeFilterQuickRanges)
+        .pipe(map(value => actions.timeFilterQuickRangesChanged(value))),
+      client
+        .get$<model.State['timeFilterRange']>(model.keys.timeFilterRange)
+        .pipe(map(value => actions.timeFilterRangeChanged(value))),
+      client
+        .get$<model.State['timeFilterRefreshInterval']>(model.keys.timeFilterRefreshInterval)
+        .pipe(map(value => actions.timeFilterRefreshIntervalChanged(value))),
+      client
+        .get$<model.State['timeZone']>(model.keys.timeZone)
+        .pipe(map(value => actions.timeZoneChanged(value)))
+      // @ts-ignore-next-line merge is only typed up to six arguments
     ).subscribe(dispatch);
 
     return () => subscription.unsubscribe();
