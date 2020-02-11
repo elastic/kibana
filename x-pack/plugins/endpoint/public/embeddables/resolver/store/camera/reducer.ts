@@ -14,7 +14,10 @@ import { clamp } from '../../lib/math';
 import { CameraState, ResolverAction, Vector2 } from '../../types';
 import { scaleToZoom } from './scale_to_zoom';
 
-function initialState(): CameraState {
+/**
+ * Used in tests.
+ */
+export function cameraInitialState(): CameraState {
   const state: CameraState = {
     scalingFactor: scaleToZoom(1), // Defaulted to 1 to 1 scale
     rasterSize: [0, 0] as const,
@@ -27,7 +30,7 @@ function initialState(): CameraState {
 }
 
 export const cameraReducer: Reducer<CameraState, ResolverAction> = (
-  state = initialState(),
+  state = cameraInitialState(),
   action
 ) => {
   if (action.type === 'userSetZoomLevel') {

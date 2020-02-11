@@ -135,16 +135,13 @@ describe('useCamera on an unpainted element', () => {
       });
     });
 
-    // TODO, move to new module
     it('should not initially request an animation frame', () => {
       expect(simulator.mock.requestAnimationFrame).not.toHaveBeenCalled();
     });
     describe('when the camera begins animation', () => {
       let process: ProcessEvent;
       beforeEach(() => {
-        /**
-         * At this time, processes are provided via mock data. In the future, this test will have to provide those mocks.
-         */
+        // At this time, processes are provided via mock data. In the future, this test will have to provide those mocks.
         const processes: ProcessEvent[] = [
           ...selectors
             .processNodePositionsAndEdgeLineSegments(store.getState())
@@ -159,24 +156,40 @@ describe('useCamera on an unpainted element', () => {
             process,
           },
         };
-        // does this need to be in act? prolly
         act(() => {
           store.dispatch(action);
         });
       });
 
       it('should request animation frames in a loop', () => {
+        const animationDuration = 1000;
+        // When the animation begins, the camera should request an animation frame.
         expect(simulator.mock.requestAnimationFrame).toHaveBeenCalledTimes(1);
-        simulator.controls.time = 100;
+
+        // Update the time so that the animation is partially complete.
+        simulator.controls.time = animationDuration / 5;
+        // Provide the animation frame, allowing the camera to rerender.
         simulator.controls.provideAnimationFrame();
+
+        // The animation is not complete, so the camera should request another animation frame.
         expect(simulator.mock.requestAnimationFrame).toHaveBeenCalledTimes(2);
-        simulator.controls.time = 900;
+
+        // Update the camera so that the animation is nearly complete.
+        simulator.controls.time = (animationDuration / 10) * 9;
+
+        // Provide the animation frame
         simulator.controls.provideAnimationFrame();
+
+        // Since the animation isn't complete, it should request another frame
         expect(simulator.mock.requestAnimationFrame).toHaveBeenCalledTimes(3);
+
         // Animation lasts 1000ms, so this should end it
-        simulator.controls.time = 1001;
+        simulator.controls.time = animationDuration * 1.1;
+
+        // Provide the last frame
         simulator.controls.provideAnimationFrame();
-        // Doesn't ask again, still 3
+
+        // Since animation is complete, it should not have requseted another frame
         expect(simulator.mock.requestAnimationFrame).toHaveBeenCalledTimes(3);
       });
     });
