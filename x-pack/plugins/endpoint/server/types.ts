@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { RisonValue, RisonObject, decode, encode } from 'rison-node';
+import { decode, encode } from 'rison-node';
 import { LoggerFactory } from 'kibana/server';
 import { esFilters, TimeRange } from '../../../../src/plugins/data/common';
 import { JsonObject } from '../../../../src/plugins/data/common/es_query/kuery';

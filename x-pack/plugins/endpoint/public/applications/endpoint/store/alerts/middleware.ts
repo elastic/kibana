@@ -5,6 +5,7 @@
  */
 
 import { parse } from 'query-string';
+import { encode } from 'rison-node';
 import { HttpFetchQuery } from 'src/core/public';
 import { AppAction } from '../action';
 import { MiddlewareFactory, AlertListData } from '../../types';
@@ -21,12 +22,12 @@ export const alertMiddlewareFactory: MiddlewareFactory = coreStart => {
       api.dispatch({ type: 'serverReturnedAlertsData', payload: response });
     } else if (action.type === 'userAppliedAlertsSearchFilter') {
       const { query, filters, dateRange } = action.payload;
-      const response = await coreStart.http.post('/api/endpoint/alerts', {
-        body: JSON.stringify({
+      const response = await coreStart.http.get('/api/endpoint/alerts', {
+        query: {
           query: query.query,
-          filters,
-          dateRange,
-        }),
+          filters: encode(filters),
+          date_range: encode(dateRange),
+        } as HttpFetchQuery,
       });
       api.dispatch({ type: 'serverReturnedAlertsData', payload: response });
     }
