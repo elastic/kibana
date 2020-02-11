@@ -119,9 +119,6 @@ export const Page: FC = () => {
   }, [globalState?.refreshInterval?.pause, globalState?.refreshInterval?.value]);
 
   const [lastRefresh, setLastRefresh] = useState(0);
-  useEffect(() => {
-    loadOverallStats();
-  }, [lastRefresh]);
 
   useEffect(() => {
     if (currentIndexPattern.timeFieldName !== undefined) {
@@ -227,11 +224,17 @@ export const Page: FC = () => {
       setSearchString(qryString);
       setSearchQueryLanguage(queryLanguage);
     }
-  }, []);
+  }, [currentSavedSearch]);
 
   useEffect(() => {
+    if (!!currentSavedSearch && searchQuery === defaultSearchQuery) {
+      // There is a saved search presented, but the search query has not been
+      // extracted yet.
+      return;
+    }
+
     loadOverallStats();
-  }, [searchQuery, samplerShardSize]);
+  }, [searchQuery, currentSavedSearch, samplerShardSize, lastRefresh]);
 
   useEffect(() => {
     createMetricCards();
