@@ -410,8 +410,6 @@ export function PopoverEditor(props: PopoverEditorProps) {
                 {selectedColumn && selectedColumn.dataType === 'number' ? (
                   <FormatSelector
                     selectedColumn={selectedColumn}
-                    data={data}
-                    currentIndexPattern={currentIndexPattern}
                     onChange={newFormat => {
                       setState(
                         updateColumnParam({

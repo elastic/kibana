@@ -6,18 +6,15 @@
 
 import { i18n } from '@kbn/i18n';
 import { OperationDefinition } from '.';
-import { BaseIndexPatternColumn } from './column_types';
+import { FormattedIndexPatternColumn } from './column_types';
 import { IndexPatternField } from '../../types';
 
 const countLabel = i18n.translate('xpack.lens.indexPattern.countOf', {
   defaultMessage: 'Count of records',
 });
 
-export type CountIndexPatternColumn = BaseIndexPatternColumn & {
+export type CountIndexPatternColumn = FormattedIndexPatternColumn & {
   operationType: 'count';
-  params?: {
-    format?: { id: string; params?: Record<string, unknown> };
-  };
 };
 
 export const countOperation: OperationDefinition<CountIndexPatternColumn> = {

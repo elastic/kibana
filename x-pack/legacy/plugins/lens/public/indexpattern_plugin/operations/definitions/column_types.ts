@@ -18,6 +18,13 @@ export interface BaseIndexPatternColumn extends Operation {
   suggestedPriority?: DimensionPriority;
 }
 
+// Formatting can optionally be added to any column
+export interface FormattedIndexPatternColumn extends BaseIndexPatternColumn {
+  params?: {
+    format: { id: string; params?: Record<string, unknown> };
+  };
+}
+
 /**
  * Base type for a column that doesn't have additional parameter.
  *

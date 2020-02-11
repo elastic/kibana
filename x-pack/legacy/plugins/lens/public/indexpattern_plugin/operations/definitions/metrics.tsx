@@ -6,13 +6,10 @@
 
 import { i18n } from '@kbn/i18n';
 import { OperationDefinition } from '.';
-import { BaseIndexPatternColumn } from './column_types';
+import { FormattedIndexPatternColumn } from './column_types';
 
-type MetricColumn<T> = BaseIndexPatternColumn & {
+type MetricColumn<T> = FormattedIndexPatternColumn & {
   operationType: T;
-  params?: {
-    format?: { id: string; params?: Record<string, unknown> };
-  };
 };
 
 function buildMetricOperation<T extends MetricColumn<string>>({

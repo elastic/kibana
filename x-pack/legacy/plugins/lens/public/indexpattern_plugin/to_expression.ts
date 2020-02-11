@@ -44,7 +44,7 @@ function getExpressionForLayer(
       .map(([id, col]) => {
         const format = col.params && 'format' in col.params ? col.params.format : undefined;
         if (!format) {
-          return '';
+          return null;
         }
         const base = `| lens_format_column format="${format.id}" columnId="${id}"`;
         if (typeof format.params?.decimals === 'number') {

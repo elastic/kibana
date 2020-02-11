@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { OperationDefinition } from '.';
-import { FieldBasedIndexPatternColumn } from './column_types';
+import { FormattedIndexPatternColumn } from './column_types';
 
 const supportedTypes = new Set(['string', 'boolean', 'number', 'ip', 'date']);
 
@@ -21,11 +21,8 @@ function ofName(name: string) {
   });
 }
 
-export interface CardinalityIndexPatternColumn extends FieldBasedIndexPatternColumn {
+export interface CardinalityIndexPatternColumn extends FormattedIndexPatternColumn {
   operationType: 'cardinality';
-  params?: {
-    format?: { id: string; params?: Record<string, unknown> };
-  };
 }
 
 export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternColumn> = {

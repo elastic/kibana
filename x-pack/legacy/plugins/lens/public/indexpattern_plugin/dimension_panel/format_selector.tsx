@@ -7,9 +7,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiFieldNumber, EuiComboBox } from '@elastic/eui';
-import { IndexPattern } from '../types';
 import { IndexPatternColumn } from '../indexpattern';
-import { IndexPatternDimensionPanelProps } from './dimension_panel';
 
 const supportedFormats: Record<string, { title: string }> = {
   number: {
@@ -29,11 +27,10 @@ const supportedFormats: Record<string, { title: string }> = {
   },
 };
 
-type FormatSelectorProps = Pick<IndexPatternDimensionPanelProps, 'data'> & {
+interface FormatSelectorProps {
   selectedColumn: IndexPatternColumn;
-  currentIndexPattern: IndexPattern;
   onChange: (newFormat?: { id: string; params?: Record<string, unknown> }) => void;
-};
+}
 
 export function FormatSelector(props: FormatSelectorProps) {
   const { selectedColumn, onChange } = props;
@@ -68,18 +65,19 @@ export function FormatSelector(props: FormatSelectorProps) {
           isClearable={false}
           data-test-subj="indexPattern-dimension-format"
           singleSelection={{ asPlainText: true }}
-          options={[defaultOption].concat(
-            Object.entries(supportedFormats).map(([id, format]) => ({
-              value: id || '',
-              label: format.title || id || '',
-            }))
-          )}
+          options={[
+            defaultOption,
+            ...Object.entries(supportedFormats).map(([id, format]) => ({
+              value: id,
+              label: format.title ?? id,
+            })),
+          ]}
           selectedOptions={
             currentFormat
               ? [
                   {
-                    value: currentFormat.id || '',
-                    label: selectedFormat?.title || currentFormat.id || '',
+                    value: currentFormat.id,
+                    label: selectedFormat?.title ?? currentFormat.id,
                   },
                 ]
               : [defaultOption]
@@ -115,7 +113,7 @@ export function FormatSelector(props: FormatSelectorProps) {
             max={20}
             onChange={e => {
               onChange({
-                id: (selectedColumn.params as { format: { id: string } })?.format!.id,
+                id: (selectedColumn.params as { format: { id: string } }).format.id,
                 params: {
                   decimals: Number(e.target.value),
                 },

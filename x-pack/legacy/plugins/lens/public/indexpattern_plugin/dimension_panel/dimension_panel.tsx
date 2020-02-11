@@ -10,7 +10,7 @@ import { EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'src/core/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
-import { Plugin as DataPlugin } from '../../../../../../../src/plugins/data/public';
+import { DataPublicPluginStart } from '../../../../../../../src/plugins/data/public';
 import { DatasourceDimensionPanelProps, StateSetter } from '../../types';
 import { IndexPatternColumn, OperationType } from '../indexpattern';
 import { getAvailableOperationsByMetadata, buildColumn, changeField } from '../operations';
@@ -31,7 +31,7 @@ export type IndexPatternDimensionPanelProps = DatasourceDimensionPanelProps & {
   savedObjectsClient: SavedObjectsClientContract;
   layerId: string;
   http: HttpSetup;
-  data: ReturnType<DataPlugin['start']>;
+  data: DataPublicPluginStart;
   uniqueLabel: string;
   dateRange: DateRange;
 };

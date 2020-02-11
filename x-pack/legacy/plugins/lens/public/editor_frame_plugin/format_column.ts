@@ -52,10 +52,12 @@ export const formatColumn: ExpressionFunction<
     format: {
       types: ['string'],
       help: '',
+      required: true,
     },
     columnId: {
       types: ['string'],
       help: '',
+      required: true,
     },
     decimals: {
       types: ['number'],
