@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { i18n } from '@kbn/i18n';
-import { extensions } from '../../../index_management/public';
+import { extensionsService } from '../../../index_management/public';
 import { get } from 'lodash';
 
 const propertyPath = 'isFollowerIndex';
@@ -19,4 +19,4 @@ export const followerBadgeExtension = {
   filterExpression: 'isFollowerIndex:true',
 };
 
-extensions.addBadge(followerBadgeExtension);
+extensionsService.addBadge(followerBadgeExtension);

@@ -16,6 +16,6 @@ export const plugin = () => {
 
 // Temp. To be removed after moving to the "plugins" folder
 
-const { extensions } = plugin().setup(npSetup.core, npSetup.plugins);
+const { extensionsService } = plugin().setup(npSetup.core, npSetup.plugins);
 
-export { extensions };
+export { extensionsService };
