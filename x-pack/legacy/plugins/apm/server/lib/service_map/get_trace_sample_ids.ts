@@ -34,16 +34,9 @@ export async function getTraceSampleIds({
   environment?: string;
   setup: Setup & SetupTimeRange & SetupUIFilters;
 }) {
-  const isTop = !after;
+  const { start, end, client, indices } = setup;
 
-  const { start, end, client, indices, config } = setup;
-
-  const rangeEnd = end;
-  const rangeStart = isTop
-    ? rangeEnd - config['xpack.apm.serviceMapInitialTimeRange']
-    : start;
-
-  const rangeQuery = { range: rangeFilter(rangeStart, rangeEnd) };
+  const rangeQuery = { range: rangeFilter(start, end) };
 
   const query = {
     bool: {
@@ -71,10 +64,9 @@ export async function getTraceSampleIds({
     query.bool.filter.push({ term: { [SERVICE_ENVIRONMENT]: environment } });
   }
 
-  const afterObj =
-    after && after !== 'top'
-      ? { after: JSON.parse(Buffer.from(after, 'base64').toString()) }
-      : {};
+  const afterObj = after
+    ? { after: JSON.parse(Buffer.from(after, 'base64').toString()) }
+    : {};
 
   const params = {
     index: [indices['apm_oss.spanIndices']],
@@ -119,6 +111,7 @@ export async function getTraceSampleIds({
                 trace_ids: {
                   terms: {
                     field: TRACE_ID,
+                    size: 10,
                     execution_hint: 'map' as const,
                     // remove bias towards large traces by sorting on trace.id
                     // which will be random-esque
@@ -145,9 +138,7 @@ export async function getTraceSampleIds({
   const receivedAfterKey =
     tracesSampleResponse.aggregations?.connections.after_key;
 
-  if (!after) {
-    nextAfter = 'top';
-  } else if (receivedAfterKey) {
+  if (receivedAfterKey) {
     nextAfter = Buffer.from(JSON.stringify(receivedAfterKey)).toString(
       'base64'
     );
