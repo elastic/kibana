@@ -33,7 +33,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { PRIVACY_STATEMENT_URL } from '../../common/constants';
 import { OptInExampleFlyout } from './opt_in_example_flyout';
-import { Field } from '../../../../../plugins/advanced_settings/public';
+import { Field } from '../../../advanced_settings/public';
 import { TelemetryService } from '../services/telemetry_service';
 const SEARCH_TERMS = ['telemetry', 'usage', 'data', 'usage data'];
 
