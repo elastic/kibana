@@ -5,12 +5,12 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { RequestHandlerContext, SavedObjectsClient } from 'kibana/server';
+import { RequestHandlerContext } from 'kibana/server';
 import { DatafeedOverride, JobOverride } from '../../common/types/modules';
 import { wrapError } from '../client/error_wrapper';
-import { getSavedObjectsClient } from '../lib/ml_telemetry';
 import { DataRecognizer } from '../models/data_recognizer';
 import { licensePreRoutingFactory } from '../new_platform/licence_check_pre_routing_factory';
+import { getModuleIdParamSchema, setupModuleBodySchema } from '../new_platform/modules';
 import { RouteInitialization } from '../new_platform/plugin';
 
 function recognize(context: RequestHandlerContext, indexPatternTitle: string) {
@@ -39,8 +39,7 @@ function saveModuleItems(
   start: number,
   end: number,
   jobOverrides: JobOverride[],
-  datafeedOverrides: DatafeedOverride[],
-  savedObjectsClient: SavedObjectsClient
+  datafeedOverrides: DatafeedOverride[]
 ) {
   const dr = new DataRecognizer(context);
   return dr.setupModuleItems(
@@ -54,8 +53,7 @@ function saveModuleItems(
     start,
     end,
     jobOverrides,
-    datafeedOverrides,
-    savedObjectsClient
+    datafeedOverrides
   );
 }
 
@@ -67,12 +65,7 @@ function dataRecognizerJobsExist(context: RequestHandlerContext, moduleId: strin
 /**
  * Recognizer routes.
  */
-export function dataRecognizer({
-  xpackMainPlugin,
-  router,
-  elasticsearchPlugin,
-  savedObjects,
-}: RouteInitialization) {
+export function dataRecognizer({ xpackMainPlugin, router }: RouteInitialization) {
   /**
    * @apiGroup DataRecognizer
    *
@@ -117,7 +110,7 @@ export function dataRecognizer({
       path: '/api/ml/modules/get_module/{moduleId?}',
       validate: {
         params: schema.object({
-          moduleId: schema.maybe(schema.string()),
+          ...getModuleIdParamSchema(true),
         }),
       },
     },
@@ -152,20 +145,9 @@ export function dataRecognizer({
       path: '/api/ml/modules/setup/{moduleId}',
       validate: {
         params: schema.object({
-          moduleId: schema.string(),
+          ...getModuleIdParamSchema(),
         }),
-        body: schema.object({
-          prefix: schema.string(),
-          groups: schema.maybe(schema.arrayOf(schema.string())),
-          indexPatternName: schema.string(),
-          query: schema.maybe(schema.any()),
-          useDedicatedIndex: schema.maybe(schema.boolean()),
-          startDatafeed: schema.maybe(schema.boolean()),
-          start: schema.maybe(schema.number()),
-          end: schema.maybe(schema.number()),
-          jobOverrides: schema.maybe(schema.any()),
-          datafeedOverrides: schema.maybe(schema.any()),
-        }),
+        body: setupModuleBodySchema,
       },
     },
     licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
@@ -197,8 +179,7 @@ export function dataRecognizer({
           start,
           end,
           jobOverrides,
-          datafeedOverrides,
-          getSavedObjectsClient(elasticsearchPlugin, savedObjects!)
+          datafeedOverrides
         );
 
         return response.ok({ body: result });
@@ -222,7 +203,7 @@ export function dataRecognizer({
       path: '/api/ml/modules/jobs_exist/{moduleId}',
       validate: {
         params: schema.object({
-          moduleId: schema.string(),
+          ...getModuleIdParamSchema(),
         }),
       },
     },

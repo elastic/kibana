@@ -7,7 +7,7 @@
 import fs from 'fs';
 import Boom from 'boom';
 import numeral from '@elastic/numeral';
-import { CallAPIOptions, RequestHandlerContext, SavedObjectsClient } from 'kibana/server';
+import { CallAPIOptions, RequestHandlerContext, SavedObjectsClientContract } from 'kibana/server';
 import { merge } from 'lodash';
 import { MlJob } from '../../../common/types/jobs';
 import {
@@ -66,13 +66,11 @@ interface Config {
 }
 
 interface Result {
-  id: any;
-  title: any;
+  id: string;
+  title: string;
   query: any;
-  description: any;
-  logo: {
-    icon: string;
-  } | null;
+  description: string;
+  logo: { icon: string } | null;
 }
 
 interface JobStat {
@@ -109,16 +107,17 @@ export class DataRecognizer {
   modulesDir = `${__dirname}/modules`;
   indexPatternName: string = '';
   indexPatternId: string | undefined = undefined;
-  savedObjectsClient: SavedObjectsClient | undefined = undefined;
+  savedObjectsClient: SavedObjectsClientContract;
 
-  callWithRequest: (
+  callAsCurrentUser: (
     endpoint: string,
     clientParams?: Record<string, any>,
     options?: CallAPIOptions
   ) => Promise<any>;
 
   constructor(context: RequestHandlerContext) {
-    this.callWithRequest = context.ml!.mlClient.callAsCurrentUser;
+    this.callAsCurrentUser = context.ml!.mlClient.callAsCurrentUser;
+    this.savedObjectsClient = context.core.savedObjects.client;
   }
 
   // list all directories under the given directory
@@ -240,7 +239,7 @@ export class DataRecognizer {
       query: moduleConfig.query,
     };
 
-    const resp = await this.callWithRequest('search', {
+    const resp = await this.callAsCurrentUser('search', {
       index,
       rest_total_hits_as_int: true,
       size,
@@ -377,11 +376,8 @@ export class DataRecognizer {
     start: number,
     end: number,
     jobOverrides: JobOverride[],
-    datafeedOverrides: DatafeedOverride[],
-    savedObjectsClient: SavedObjectsClient
+    datafeedOverrides: DatafeedOverride[]
   ) {
-    this.savedObjectsClient = savedObjectsClient;
-
     // load the config from disk
     const moduleConfig = await this.getModule(moduleId, jobPrefix);
 
@@ -496,7 +492,7 @@ export class DataRecognizer {
       // Add a wildcard at the front of each of the job IDs in the module,
       // as a prefix may have been supplied when creating the jobs in the module.
       const jobIds = module.jobs.map(job => `*${job.id}`);
-      const { jobsExist } = jobServiceProvider(this.callWithRequest);
+      const { jobsExist } = jobServiceProvider(this.callAsCurrentUser);
       const jobInfo = await jobsExist(jobIds);
 
       // Check if the value for any of the jobs is false.
@@ -505,11 +501,11 @@ export class DataRecognizer {
 
       if (doJobsExist === true) {
         // Get the IDs of the jobs created from the module, and their earliest / latest timestamps.
-        const jobStats: MlJobStats = await this.callWithRequest('ml.jobStats', { jobId: jobIds });
+        const jobStats: MlJobStats = await this.callAsCurrentUser('ml.jobStats', { jobId: jobIds });
         const jobStatsJobs: JobStat[] = [];
         if (jobStats.jobs && jobStats.jobs.length > 0) {
           const foundJobIds = jobStats.jobs.map(job => job.job_id);
-          const { getLatestBucketTimestampByJob } = resultsServiceProvider(this.callWithRequest);
+          const { getLatestBucketTimestampByJob } = resultsServiceProvider(this.callAsCurrentUser);
           const latestBucketTimestampsByJob = await getLatestBucketTimestampByJob(foundJobIds);
 
           jobStats.jobs.forEach(job => {
@@ -536,7 +532,7 @@ export class DataRecognizer {
   }
 
   async loadIndexPatterns() {
-    return await this.savedObjectsClient!.find({ type: 'index-pattern', perPage: 1000 });
+    return await this.savedObjectsClient.find({ type: 'index-pattern', perPage: 1000 });
   }
 
   // returns a id based on an index pattern name
@@ -624,7 +620,7 @@ export class DataRecognizer {
 
   // find all existing savedObjects for a given type
   loadExistingSavedObjects(type: string) {
-    return this.savedObjectsClient!.find({ type, perPage: 1000 });
+    return this.savedObjectsClient.find({ type, perPage: 1000 });
   }
 
   // save the savedObjects if they do not exist already
@@ -634,7 +630,7 @@ export class DataRecognizer {
       .filter(o => o.exists === false)
       .map(o => o.savedObject);
     if (filteredSavedObjects.length) {
-      results = await this.savedObjectsClient!.bulkCreate(
+      results = await this.savedObjectsClient.bulkCreate(
         // Add an empty migrationVersion attribute to each saved object to ensure
         // it is automatically migrated to the 7.0+ format with a references attribute.
         filteredSavedObjects.map(doc => ({ ...doc, migrationVersion: doc.migrationVersion || {} }))
@@ -663,7 +659,7 @@ export class DataRecognizer {
 
   async saveJob(job: ModuleJob) {
     const { id: jobId, config: body } = job;
-    return this.callWithRequest('ml.addJob', { jobId, body });
+    return this.callAsCurrentUser('ml.addJob', { jobId, body });
   }
 
   // save the datafeeds.
@@ -684,7 +680,7 @@ export class DataRecognizer {
 
   async saveDatafeed(datafeed: ModuleDataFeed) {
     const { id: datafeedId, config: body } = datafeed;
-    return this.callWithRequest('ml.addDatafeed', { datafeedId, body });
+    return this.callAsCurrentUser('ml.addDatafeed', { datafeedId, body });
   }
 
   async startDatafeeds(
@@ -707,7 +703,7 @@ export class DataRecognizer {
     const result = { started: false } as DatafeedResponse;
     let opened = false;
     try {
-      const openResult = await this.callWithRequest('ml.openJob', {
+      const openResult = await this.callAsCurrentUser('ml.openJob', {
         jobId: datafeed.config.job_id,
       });
       opened = openResult.opened;
@@ -731,7 +727,7 @@ export class DataRecognizer {
           duration.end = end;
         }
 
-        await this.callWithRequest('ml.startDatafeed', { datafeedId: datafeed.id, ...duration });
+        await this.callAsCurrentUser('ml.startDatafeed', { datafeedId: datafeed.id, ...duration });
         result.started = true;
       } catch (error) {
         result.started = false;
@@ -797,7 +793,7 @@ export class DataRecognizer {
       jobs: moduleConfig.jobs,
       datafeeds: moduleConfig.datafeeds,
       kibana: moduleConfig.kibana,
-    } as const;
+    };
 
     function createResultsItems(
       configItems: any[],
@@ -936,7 +932,7 @@ export class DataRecognizer {
   // ensure the model memory limit for each job is not greater than
   // the max model memory setting for the cluster
   async updateModelMemoryLimits(moduleConfig: Module) {
-    const { limits } = await this.callWithRequest('ml.info');
+    const { limits } = await this.callAsCurrentUser('ml.info');
     const maxMml = limits.max_model_memory_limit;
     if (maxMml !== undefined) {
       // @ts-ignore
