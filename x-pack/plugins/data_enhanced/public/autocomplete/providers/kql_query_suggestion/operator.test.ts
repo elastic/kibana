@@ -6,11 +6,10 @@
 import indexPatternResponse from './__fixtures__/index_pattern_response.json';
 
 import { setupGetOperatorSuggestions } from './operator';
-import { QuerySuggestionGetFnArgs, esKuery } from '../../../../../../../src/plugins/data/public';
+import { QuerySuggestionGetFnArgs, KueryNode } from '../../../../../../../src/plugins/data/public';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 
-const mockKueryNode = (kueryNode: Partial<esKuery.KueryNode>) =>
-  (kueryNode as unknown) as esKuery.KueryNode;
+const mockKueryNode = (kueryNode: Partial<KueryNode>) => (kueryNode as unknown) as KueryNode;
 
 describe('Kuery operator suggestions', () => {
   let getSuggestions: ReturnType<typeof setupGetOperatorSuggestions>;
