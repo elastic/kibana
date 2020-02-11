@@ -35,8 +35,8 @@ export const categoryDefinitionSchema = {
 
 export const maxAnomalyScoreSchema = {
   jobIds: schema.arrayOf(schema.string()),
-  earliestMs: schema.number(),
-  latestMs: schema.number(),
+  earliestMs: schema.maybe(schema.number()),
+  latestMs: schema.maybe(schema.number()),
 };
 
 export const categoryExamplesSchema = {
