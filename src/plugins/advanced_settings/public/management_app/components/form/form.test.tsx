@@ -20,7 +20,6 @@
 import React from 'react';
 import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
 import { UiSettingsType } from '../../../../../../core/public';
-import { notificationServiceMock, docLinksServiceMock } from '../../../../../../core/public/mocks';
 
 import { Form } from './form';
 
