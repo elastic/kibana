@@ -169,7 +169,8 @@ export const Cases = React.memo<CasesProps>(({ caseId, initialData, isLoading, r
             <p>
               <strong>{`${data.created_by.username}`}</strong>
               {` ${i18n.ADDED_DESCRIPTION} `}{' '}
-              <FormattedRelativePreferenceDate value={data.created_at} labelOn />
+              <FormattedRelativePreferenceDate value={data.created_at} />
+              {/* STEPH come back and add label `on` */}
             </p>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>

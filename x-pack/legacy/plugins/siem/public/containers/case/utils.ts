@@ -15,3 +15,5 @@ export const flattenSavedObject = (savedObject: CaseSavedObject): FlattenedCaseS
   ...savedObject,
   ...savedObject.attributes,
 });
+
+export const getTypedPayload = <T>(a: unknown): T => a as T;

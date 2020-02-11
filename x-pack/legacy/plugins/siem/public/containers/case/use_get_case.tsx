@@ -8,7 +8,7 @@ import { Dispatch, SetStateAction, useEffect, useReducer, useState } from 'react
 
 import { FlattenedCaseSavedObject, NewCaseFormatted } from './types';
 import { FETCH_INIT, FETCH_FAILURE, FETCH_SUCCESS, REFRESH_CASE } from './constants';
-import { flattenSavedObject } from './utils';
+import { flattenSavedObject, getTypedPayload } from './utils';
 import { errorToToaster } from '../../components/ml/api/error_to_toaster';
 import * as i18n from './translations';
 import { useStateToaster } from '../../components/toasters';
@@ -25,7 +25,6 @@ interface Action {
 }
 
 const dataFetchReducer = (state: CaseState, action: Action): CaseState => {
-  let getTypedPayload;
   switch (action.type) {
     case FETCH_INIT:
       return {
@@ -34,12 +33,11 @@ const dataFetchReducer = (state: CaseState, action: Action): CaseState => {
         isError: false,
       };
     case FETCH_SUCCESS:
-      getTypedPayload = (a: Action['payload']) => a as FlattenedCaseSavedObject;
       return {
         ...state,
         isLoading: false,
         isError: false,
-        data: getTypedPayload(action.payload),
+        data: getTypedPayload<FlattenedCaseSavedObject>(action.payload),
       };
     case FETCH_FAILURE:
       return {
@@ -48,14 +46,13 @@ const dataFetchReducer = (state: CaseState, action: Action): CaseState => {
         isError: true,
       };
     case REFRESH_CASE:
-      getTypedPayload = (a: Action['payload']) => a as NewCaseFormatted;
       return {
         ...state,
         isLoading: false,
         isError: false,
         data: {
           ...state.data,
-          ...getTypedPayload(action.payload),
+          ...getTypedPayload<NewCaseFormatted>(action.payload),
         },
       };
     default:
@@ -116,7 +113,6 @@ export const useGetCase = (initialCaseId: string): [CaseState, RefreshCase] => {
     fetchData();
     return () => {
       didCancel = true;
-      setCaseId(initialCaseId);
     };
   };
 

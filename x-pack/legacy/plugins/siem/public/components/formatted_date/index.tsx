@@ -105,13 +105,7 @@ FormattedDate.displayName = 'FormattedDate';
  * - the raw date value (e.g. 2019-03-22T00:47:46Z)
  */
 
-export const FormattedRelativePreferenceDate = ({
-  value,
-  labelOn = false,
-}: {
-  value?: string | number | null;
-  labelOn?: boolean;
-}) => {
+export const FormattedRelativePreferenceDate = ({ value }: { value?: string | number | null }) => {
   if (value == null) {
     return getOrEmptyTagFromValue(value);
   }
@@ -125,13 +119,7 @@ export const FormattedRelativePreferenceDate = ({
       {moment(date)
         .add(1, 'hours')
         .isBefore(new Date()) ? (
-        <>
-          {labelOn &&
-            i18n.translate('xpack.siem.preferenceTime.formattedDate.onLabel', {
-              defaultMessage: 'on ',
-            })}
-          <PreferenceFormattedDate data-test-subj="preference-time" value={date} />
-        </>
+        <PreferenceFormattedDate data-test-subj="preference-time" value={date} />
       ) : (
         <FormattedRelative data-test-subj="relative-time" value={date} />
       )}
