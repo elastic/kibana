@@ -120,10 +120,10 @@ export const npSetup = {
     share: {
       register: () => {},
     },
-    dev_tools: {
+    devTools: {
       register: () => {},
     },
-    kibana_legacy: {
+    kibanaLegacy: {
       registerLegacyApp: () => {},
       forwardApp: () => {},
       config: {
@@ -176,7 +176,11 @@ let isAutoRefreshSelectorEnabled = true;
 
 export const npStart = {
   core: {
-    chrome: {},
+    chrome: {
+      overlays: {
+        openModal: sinon.fake(),
+      },
+    },
   },
   plugins: {
     management: {
@@ -203,14 +207,18 @@ export const npStart = {
       registerRenderer: sinon.fake(),
       registerType: sinon.fake(),
     },
-    dev_tools: {
+    devTools: {
       getSortedDevTools: () => [],
     },
-    kibana_legacy: {
+    kibanaLegacy: {
       getApps: () => [],
       getForwards: () => [],
       config: {
         defaultAppId: 'home',
+      },
+      dashboardConfig: {
+        turnHideWriteControlsOn: sinon.fake(),
+        getHideWriteControls: sinon.fake(),
       },
     },
     data: {

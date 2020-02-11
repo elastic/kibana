@@ -22,7 +22,7 @@ import ReactDOM from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
 import { RefreshInterval, TimeRange, Query, esFilters } from '../../../data/public';
 import { CoreStart } from '../../../../core/public';
-import { IUiActionsStart } from '../ui_actions_plugin';
+import { UiActionsStart } from '../ui_actions_plugin';
 import {
   Container,
   ContainerInput,
@@ -81,7 +81,7 @@ export interface DashboardContainerOptions {
   inspector: InspectorStartContract;
   SavedObjectFinder: React.ComponentType<any>;
   ExitFullScreenButton: React.ComponentType<any>;
-  uiActions: IUiActionsStart;
+  uiActions: UiActionsStart;
 }
 
 export type DashboardReactContextValue = KibanaReactContextValue<DashboardContainerOptions>;

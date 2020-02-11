@@ -35,9 +35,6 @@
       "test_utils/*": [
         "x-pack/test_utils/*"
       ],
-      "monitoring/common/*": [
-        "x-pack/monitoring/common/*"
-      ],
       "plugins/*": ["src/legacy/core_plugins/*/public/"],
       "fixtures/*": ["src/fixtures/*"]
     },

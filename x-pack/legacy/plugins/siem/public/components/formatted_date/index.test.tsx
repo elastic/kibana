@@ -7,13 +7,13 @@
 import { mount, shallow } from 'enzyme';
 import React from 'react';
 
-import { useDateFormat, useTimeZone } from '../../hooks';
+import { useDateFormat, useTimeZone } from '../../lib/kibana';
 
 import { TestProviders } from '../../mock';
 import { getEmptyString, getEmptyValue } from '../empty_value';
 import { PreferenceFormattedDate, FormattedDate, FormattedRelativePreferenceDate } from '.';
 
-jest.mock('../../hooks');
+jest.mock('../../lib/kibana');
 const mockUseDateFormat = useDateFormat as jest.Mock;
 const mockUseTimeZone = useTimeZone as jest.Mock;
 

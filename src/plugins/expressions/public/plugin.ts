@@ -163,6 +163,9 @@ export class ExpressionsPublicPlugin
           // function that matches its definition, but which simply
           // calls the server-side function endpoint.
           Object.keys(serverFunctionList).forEach(functionName => {
+            if (functions.get(functionName)) {
+              return;
+            }
             const fn = () => ({
               ...serverFunctionList[functionName],
               fn: (context: any, args: any) => {
