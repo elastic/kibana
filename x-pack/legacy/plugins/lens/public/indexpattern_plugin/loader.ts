@@ -21,7 +21,7 @@ import { DateRange, ExistingFields } from '../../../../../plugins/lens/common/ty
 import { BASE_API_URL } from '../../../../../plugins/lens/common';
 import { documentField } from './document_field';
 import {
-  isNestedField,
+  indexPatterns as indexPatternsUtils,
   IFieldType,
   IndexPatternTypeMeta,
 } from '../../../../../../src/plugins/data/public';
@@ -271,7 +271,10 @@ function fromSavedObject(
     type,
     title: attributes.title,
     fields: (JSON.parse(attributes.fields) as IFieldType[])
-      .filter(field => !isNestedField(field) && (!!field.aggregatable || !!field.scripted))
+      .filter(
+        field =>
+          !indexPatternsUtils.isNestedField(field) && (!!field.aggregatable || !!field.scripted)
+      )
       .concat(documentField) as IndexPatternField[],
     typeMeta: attributes.typeMeta
       ? (JSON.parse(attributes.typeMeta) as IndexPatternTypeMeta)

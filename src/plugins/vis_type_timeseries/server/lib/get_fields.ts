@@ -22,7 +22,7 @@ import { KibanaRequest, RequestHandlerContext } from 'kibana/server';
 
 // @ts-ignore
 import { getIndexPatternObject } from './vis_data/helpers/get_index_pattern';
-import { isNestedField } from '../../../data/server';
+import { indexPatterns } from '../../../data/server';
 import { Framework } from '../plugin';
 import { IndexPatternFieldDescriptor, IndexPatternsFetcher } from '../../../data/server';
 import { ReqFacade } from './search_strategies/strategies/abstract_search_strategy';
@@ -83,7 +83,9 @@ export async function getFields(
     reqFacade,
     indexPatternString,
     capabilities
-  )) as IndexPatternFieldDescriptor[]).filter(field => field.aggregatable && !isNestedField(field));
+  )) as IndexPatternFieldDescriptor[]).filter(
+    field => field.aggregatable && !indexPatterns.isNestedField(field)
+  );
 
   return uniq(fields, field => field.name);
 }

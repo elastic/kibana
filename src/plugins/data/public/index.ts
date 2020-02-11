@@ -119,7 +119,7 @@ export {
  * Index patterns:
  */
 
-import { isFilterable } from '../common';
+import { isNestedField, isFilterable } from '../common';
 
 import {
   ILLEGAL_CHARACTERS_KEY,
@@ -139,6 +139,7 @@ export const indexPatterns = {
   ILLEGAL_CHARACTERS_VISIBLE,
   ILLEGAL_CHARACTERS,
   isFilterable,
+  isNestedField,
   validate: validateIndexPattern,
   getFromSavedObject,
   flattenHitWrapper,
@@ -202,7 +203,6 @@ export {
   getKbnTypeNames,
   // utils
   parseInterval,
-  isNestedField, // needs to move to field class
 } from '../common';
 
 // Export plugin after all other imports

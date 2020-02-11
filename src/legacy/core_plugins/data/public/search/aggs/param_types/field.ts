@@ -27,7 +27,7 @@ import { propFilter } from '../filter';
 import { IMetricAggConfig } from '../metrics/metric_agg_type';
 import {
   IndexPatternField,
-  isNestedField,
+  indexPatterns,
   KBN_FIELD_TYPES,
 } from '../../../../../../../plugins/data/public';
 
@@ -120,7 +120,7 @@ export class FieldParamType extends BaseParamType {
       const { onlyAggregatable, scriptable, filterFieldTypes } = this;
 
       if (
-        (onlyAggregatable && (!field.aggregatable || isNestedField(field))) ||
+        (onlyAggregatable && (!field.aggregatable || indexPatterns.isNestedField(field))) ||
         (!scriptable && field.scripted)
       ) {
         return false;
