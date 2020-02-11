@@ -991,10 +991,6 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
           http,
           actionTypeRegistry: triggers_actions_ui.actionTypeRegistry,
           alertTypeRegistry: triggers_actions_ui.alertTypeRegistry,
-          toastNotifications: toasts,
-          uiSettings,
-          charts,
-          dataFieldsFormats,
         }}
       >
         <AlertAdd consumer={'watcher'} />

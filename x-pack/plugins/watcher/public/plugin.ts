@@ -15,6 +15,7 @@ import { ILicense, LICENSE_CHECK_STATE } from '../../licensing/public';
 import { TimeBuckets, MANAGEMENT_BREADCRUMB } from './legacy';
 import { PLUGIN } from '../common/constants';
 import { Dependencies } from './types';
+import { getAlertType } from './application/sections/watch_edit/components/threshold_watch_edit/example_alert_type';
 
 const licenseToLicenseStatus = (license: ILicense): LicenseStatus => {
   const { state, message } = license.check(PLUGIN.ID, PLUGIN.MINIMUM_LICENSE_REQUIRED);
@@ -30,6 +31,8 @@ export class WatcherUIPlugin implements Plugin<void, void, Dependencies, any> {
     { licensing, management, data, home, charts, triggers_actions_ui }: Dependencies
   ) {
     const esSection = management.sections.getSection('elasticsearch');
+
+    triggers_actions_ui.alertTypeRegistry.register(getAlertType());
 
     const watcherESApp = esSection!.registerApp({
       id: 'watcher',
@@ -80,7 +83,6 @@ export class WatcherUIPlugin implements Plugin<void, void, Dependencies, any> {
       path: '/app/kibana#/management/elasticsearch/watcher/watches',
       showOnHomePage: true,
     };
-
     home.featureCatalogue.register(watcherHome);
 
     licensing.license$.pipe(first(), map(licenseToLicenseStatus)).subscribe(({ valid }) => {
