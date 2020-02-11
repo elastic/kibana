@@ -46,7 +46,7 @@ export interface OptimizerMsg {
 }
 
 export interface OptimizerState {
-  phase: 'initializing' | 'initialized' | 'reallocating' | 'success' | 'running' | 'issue';
+  phase: 'initializing' | 'initialized' | 'running' | 'issue' | 'success' | 'reallocating';
   startTime: number;
   durSec: number;
   compilerStates: CompilerMsg[];

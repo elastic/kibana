@@ -32,11 +32,11 @@ When a bundle is determined to be up-to-date a worker is not started for the bun
 
 ## API
 
-To run the optimizer from code, you can import the [`Optimizer`][Optimizer] and [`OptimizerConfig`][OptimizerConfig] classes. Create an [`OptimizerConfig`][OptimizerConfig] instance by calling it's static `create()` method with some options, then pass it to the [`Optimizer`][Optimizer] constructor. Calling `Optimizer#run()` will return an observable of [`OptimizerMsg`][Optimizer] objects, which are summaries of the optimizer state plus an optional `event` property which describes the internal events occuring and may be of use. You can use the [`logOptimizerState()`][LogOptimizerState] helper to write the relevant bits of state to a tooling log or checkout it's implementation to see how the internal events like [`WorkerStdio`][ObserveWorker] and [`WorkerStarted`][ObserveWorker] are used.
+To run the optimizer from code, you can import the [`OptimizerConfig`][OptimizerConfig] class and [`runOptimizer`][Optimizer] function. Create an [`OptimizerConfig`][OptimizerConfig] instance by calling it's static `create()` method with some options, then pass it to the [`runOptimizer`][Optimizer] function. `runOptimizer()` returns an observable of [`OptimizerMsg`][Optimizer] objects, which are summaries of the optimizer state plus an optional `event` property which describes the internal events occuring and may be of use. You can use the [`logOptimizerState()`][LogOptimizerState] helper to write the relevant bits of state to a tooling log or checkout it's implementation to see how the internal events like [`WorkerStdio`][ObserveWorker] and [`WorkerStarted`][ObserveWorker] are used.
 
 Example:
 ```ts
-import { Optimizer, OptimizerConfig, logOptimizerState } from '@kbn/optimizer';
+import { runOptimizer, OptimizerConfig, logOptimizerState } from '@kbn/optimizer';
 import { REPO_ROOT, ToolingLog } from '@kbn/dev-utils';
 
 const log = new ToolingLog({
@@ -51,10 +51,7 @@ const config = OptimizerConfig.create({
   dist: true
 });
 
-const optimizer = new Optimizer(config);
-
-await optimizer
-  .run()
+await runOptimizer(config)
   .pipe(logOptimizerState(log, config))
   .toPromise();
 ```
@@ -79,8 +76,10 @@ The Optimizer captures all of these messages and produces a stream of [`Optimize
 
 Optimizer phases:
 <dl>
+  <dt><code>'initializing'</code></dt>
+  <dd>Initial phase, during this state the optimizer is validating caches and determining which builds should be built initially.</dd>
   <dt><code>'initialized'</code></dt>
-  <dd>Initial event emitted by the optimizer once it's don't initializing its internal state.</dd>
+  <dd>Emitted by the optimizer once it's don't initializing its internal state and determined which bundles are going to be built initially.</dd>
   <dt><code>'running'</code></dt>
   <dd>Emitted when any worker is in a running state. To determine which compilers are running, look for <code>BundleState</code> objects with type <code>'running'</code>.</dd>
   <dt><code>'issue'</code></dt>
