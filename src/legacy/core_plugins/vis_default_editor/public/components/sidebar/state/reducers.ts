@@ -32,7 +32,8 @@ function initEditorState(vis: Vis) {
 function editorStateReducer(state: VisState, action: EditorAction): VisState {
   switch (action.type) {
     case EditorStateActionTypes.ADD_NEW_AGG: {
-      const aggConfig = state.aggs.createAggConfig(action.payload as IAggConfig, {
+      const payloadAggConfig = action.payload as IAggConfig;
+      const aggConfig = state.aggs.createAggConfig(payloadAggConfig.toJSON(), {
         addToAggConfigs: false,
       });
       aggConfig.brandNew = true;

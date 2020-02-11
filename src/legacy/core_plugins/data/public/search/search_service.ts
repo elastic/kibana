@@ -18,6 +18,7 @@
  */
 
 import { CoreSetup, CoreStart } from '../../../../../core/public';
+import { IndexPattern } from '../../../../../plugins/data/public';
 import {
   aggTypes,
   AggType,
@@ -36,17 +37,25 @@ interface AggsSetup {
   types: ReturnType<AggTypesRegistry['setup']>;
 }
 
-interface AggsStart {
-  types: ReturnType<AggTypesRegistry['start']>;
+interface AggsStartLegacy {
   AggConfig: typeof AggConfig;
-  AggConfigs: typeof AggConfigs;
   AggType: typeof AggType;
   aggTypeFieldFilters: typeof aggTypeFieldFilters;
   FieldParamType: typeof FieldParamType;
   MetricAggType: typeof MetricAggType;
   parentPipelineAggHelper: typeof parentPipelineAggHelper;
-  siblingPipelineAggHelper: typeof siblingPipelineAggHelper;
   setBounds: typeof setBounds;
+  siblingPipelineAggHelper: typeof siblingPipelineAggHelper;
+}
+
+interface AggsStart {
+  createAggConfigs: (
+    indexPattern: IndexPattern,
+    configStates: [],
+    schemas?: Record<string, any>
+  ) => InstanceType<typeof AggConfigs>;
+  types: ReturnType<AggTypesRegistry['start']>;
+  __LEGACY: AggsStartLegacy;
 }
 
 export interface SearchSetup {
@@ -79,18 +88,26 @@ export class SearchService {
   }
 
   public start(core: CoreStart): SearchStart {
+    const aggTypesStart = this.aggTypesRegistry.start();
     return {
       aggs: {
-        types: this.aggTypesRegistry.start(),
-        AggConfig, // TODO make static
-        AggConfigs,
-        AggType,
-        aggTypeFieldFilters,
-        FieldParamType,
-        MetricAggType,
-        parentPipelineAggHelper, // TODO make static
-        siblingPipelineAggHelper, // TODO make static
-        setBounds, // TODO make static
+        createAggConfigs: (indexPattern, configStates = [], schemas) => {
+          return new AggConfigs(indexPattern, configStates, {
+            schemas,
+            typesRegistry: aggTypesStart,
+          });
+        },
+        types: aggTypesStart,
+        __LEGACY: {
+          AggConfig, // TODO make static
+          AggType,
+          aggTypeFieldFilters,
+          FieldParamType,
+          MetricAggType,
+          parentPipelineAggHelper, // TODO make static
+          setBounds, // TODO make static
+          siblingPipelineAggHelper, // TODO make static
+        },
       },
     };
   }

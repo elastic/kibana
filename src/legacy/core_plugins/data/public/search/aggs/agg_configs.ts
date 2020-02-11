@@ -18,7 +18,10 @@
  */
 
 import _ from 'lodash';
+import { Optional } from '@kbn/utility-types';
+
 import { AggConfig, AggConfigOptions, IAggConfig } from './agg_config';
+import { AggTypesRegistry } from './agg_types_registry';
 import { Schema } from './schemas';
 import { AggGroupNames } from './agg_groups';
 import {
@@ -46,11 +49,20 @@ function parseParentAggs(dslLvlCursor: any, dsl: any) {
   }
 }
 
+export interface AggConfigsOptions {
+  schemas?: Schemas;
+  typesRegistry: ReturnType<AggTypesRegistry['start']>;
+}
+
 /**
- * @name AggConfig
+ * @name AggConfigs
  *
  * @description A "data structure"-like class with methods for indexing and
- * accessing instances of AggConfig.
+ * accessing instances of AggConfig. This should never be instantiated directly
+ * outside of this plugin. Rather, downstream plugins should do this via
+ * `createAggConfigs()`
+ *
+ * @internal
  */
 
 // TODO need to make a more explicit interface for this
@@ -60,20 +72,22 @@ export class AggConfigs {
   public indexPattern: IndexPattern;
   public schemas: any;
   public timeRange?: TimeRange;
+  private readonly __typesRegistry: ReturnType<AggTypesRegistry['start']>;
 
   aggs: IAggConfig[];
 
-  constructor(indexPattern: IndexPattern, configStates = [] as any, schemas?: any) {
+  constructor(indexPattern: IndexPattern, configStates = [] as any, opts: AggConfigsOptions) {
     configStates = AggConfig.ensureIds(configStates);
 
     this.aggs = [];
     this.indexPattern = indexPattern;
-    this.schemas = schemas;
+    this.schemas = opts.schemas;
+    this.__typesRegistry = opts.typesRegistry;
 
     configStates.forEach((params: any) => this.createAggConfig(params));
 
-    if (schemas) {
-      this.initializeDefaultsFromSchemas(schemas);
+    if (this.schemas) {
+      this.initializeDefaultsFromSchemas(this.schemas);
     }
   }
 
@@ -131,19 +145,18 @@ export class AggConfigs {
   }
 
   createAggConfig = <T extends AggConfig = AggConfig>(
-    params: AggConfig | AggConfigOptions,
+    params: Optional<AggConfigOptions, 'typesRegistry'>,
     { addToAggConfigs = true } = {}
   ) => {
-    let aggConfig;
-    if (params instanceof AggConfig) {
-      aggConfig = params;
-      params.parent = this;
-    } else {
-      aggConfig = new AggConfig(this, params);
-    }
+    const aggConfig = new AggConfig(this, {
+      typesRegistry: this.__typesRegistry,
+      ...params,
+    });
+
     if (addToAggConfigs) {
       this.aggs.push(aggConfig);
     }
+
     return aggConfig as T;
   };
 

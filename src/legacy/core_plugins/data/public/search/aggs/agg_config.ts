@@ -21,6 +21,7 @@ import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { npStart } from 'ui/new_platform';
 import { IAggType } from './agg_type';
+import { AggTypesRegistry } from './agg_types_registry';
 import { AggGroupNames } from './agg_groups';
 import { writeParams } from './agg_params';
 import { IAggConfigs } from './agg_configs';
@@ -36,8 +37,9 @@ export interface AggConfigOptions {
   enabled: boolean;
   type: string;
   params: any;
+  typesRegistry: ReturnType<AggTypesRegistry['start']>;
   id?: string;
-  schema?: string;
+  schema?: string | Schema;
 }
 
 const unknownSchema: Schema = {
@@ -56,21 +58,6 @@ const unknownSchema: Schema = {
       allowStrings: true,
     },
   },
-};
-
-const getTypeFromRegistry = (type: string): IAggType => {
-  // We need to inline require here, since we're having a cyclic dependency
-  // from somewhere inside agg_types back to AggConfig.
-  const aggTypes = require('../aggs').aggTypes;
-  const registeredType =
-    aggTypes.metrics.find((agg: IAggType) => agg.name === type) ||
-    aggTypes.buckets.find((agg: IAggType) => agg.name === type);
-
-  if (!registeredType) {
-    throw new Error('unknown type');
-  }
-
-  return registeredType;
 };
 
 const getSchemaFromRegistry = (schemas: any, schema: string): Schema => {
@@ -137,6 +124,7 @@ export class AggConfig {
   public parent?: IAggConfigs;
   public brandNew?: boolean;
 
+  private readonly __typesRegistry: ReturnType<AggTypesRegistry['start']>;
   private __schema: Schema;
   private __type: IAggType;
   private __typeDecorations: any;
@@ -154,6 +142,8 @@ export class AggConfig {
     // setters
     this.setType(opts.type);
 
+    this.__typesRegistry = opts.typesRegistry;
+
     if (opts.schema) {
       this.setSchema(opts.schema);
     }
@@ -162,9 +152,9 @@ export class AggConfig {
     this.setParams(opts.params || {});
 
     // @ts-ignore
-    this.__type = this.__type;
-    // @ts-ignore
     this.__schema = this.__schema;
+    // @ts-ignore
+    this.__type = this.__type;
   }
 
   /**
@@ -457,7 +447,7 @@ export class AggConfig {
   }
 
   public setType(type: string | IAggType) {
-    this.type = typeof type === 'string' ? getTypeFromRegistry(type) : type;
+    this.type = typeof type === 'string' ? this.__typesRegistry.get(type) : type;
   }
 
   public get schema() {
