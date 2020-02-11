@@ -54,7 +54,7 @@ export function maps(kibana) {
       },
       embeddableFactories: ['plugins/maps/embeddable/map_embeddable_factory'],
       inspectorViews: ['plugins/maps/inspector/views/register_views'],
-      home: ['plugins/maps/register_feature'],
+      home: ['plugins/maps/legacy_register_feature'],
       styleSheetPaths: `${__dirname}/public/index.scss`,
       savedObjectSchemas: {
         'maps-telemetry': {

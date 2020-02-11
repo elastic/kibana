@@ -9,7 +9,7 @@ import moment from 'moment';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { getPageData } from '../lib/get_page_data';
 import { PageLoading } from 'plugins/monitoring/components';
-import { timefilter } from 'ui/timefilter';
+import { timefilter } from 'plugins/monitoring/np_imports/ui/timefilter';
 import { I18nContext } from 'ui/i18n';
 import { PromiseWithCancel } from '../../common/cancel_promise';
 import { updateSetupModeData, getSetupModeState } from '../lib/setup_mode';
@@ -188,15 +188,20 @@ export class MonitoringViewBaseController {
   }
 
   renderReact(component) {
+    const renderElement = document.getElementById(this.reactNodeId);
+    if (!renderElement) {
+      console.warn(`"#${this.reactNodeId}" element has not been added to the DOM yet`);
+      return;
+    }
     if (this._isDataInitialized === false) {
       render(
         <I18nContext>
           <PageLoading />
         </I18nContext>,
-        document.getElementById(this.reactNodeId)
+        renderElement
       );
     } else {
-      render(component, document.getElementById(this.reactNodeId));
+      render(component, renderElement);
     }
   }
 
