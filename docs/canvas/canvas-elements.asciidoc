@@ -20,7 +20,9 @@ When you add elements to your workpad, you can:
 [[add-canvas-element]]
 === Add elements to your workpad
 
-Choose the elements to display on your workpad, then familiarize yourself with the element using the preconfigured demo data. By default, every element you add to a workpad uses demo data until you change the data source. The demo data includes a small sample data set that you can use to experiment with your element.
+Choose the elements to display on your workpad, then familiarize yourself with the element using the preconfigured demo data. By default, most elements use demo data until you change the data source. The demo data includes a small sample data set that you can use to experiment with your element.
+
+To add a Canvas element:
 
 . Click *Add element*.
 
@@ -31,13 +33,26 @@ image::images/canvas-element-select.gif[Canvas elements]
 
 . Play around with the default settings and see what the element can do.
 
-TIP: Want to use a different element? You can delete the element by selecting it, clicking the *Element options* icon in the top right, then selecting *Delete*.
+To add a map:
+
+. Click *Embed object*.
+
+. Select the map you want to add to the workpad.
++
+[role="screenshot"]
+image::images/canvas-map-embed.gif[]
+
+NOTE: Demo data is only supported on Canvas elements. Maps do not support demo data.
+
+Want to use a different element? You can delete the element by selecting it, clicking the *Element options* icon in the top right, then selecting *Delete*.
 
 [float]
 [[connect-element-data]]
-=== Connect the element to your data
+=== Connect the Canvas element to your data
 
-When you have finished using the demo data, connect the element to a data source.
+When you have finished using the demo data, connect the Canvas element to a data source.
+
+NOTE: Maps do not support data sources. To change the map data, refer to <<maps, Elastic Maps>>.
 
 . Make sure that the element is selected, then select *Data*.
 
@@ -142,7 +157,7 @@ text.align: center;
 [[configure-auto-refresh-interval]]
 ==== Change the data auto-refresh interval
 
-Increase or decrease how often your data refreshes on your workpad.
+Increase or decrease how often your Canvas element data refreshes on your workpad.
 
 . In the top left corner, click the *Control settings* icon.
 
@@ -152,6 +167,17 @@ Increase or decrease how often your data refreshes on your workpad.
 image::images/canvas-refresh-interval.png[Element data refresh interval]
 
 TIP: To manually refresh the data, click the *Refresh data* icon.
+
+[float]
+[[canvas-time-range]]
+==== Customize map time ranges
+
+Configure the maps on your workpad for a specific time range.
+
+From the panel menu, select *Customize time range* to expose a time filter dedicated to the map.
+
+[role="screenshot"]
+image::images/canvas_map-time-filter.gif[]
 
 [float]
 [[organize-element]]
