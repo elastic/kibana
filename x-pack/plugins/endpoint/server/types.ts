@@ -37,8 +37,8 @@ export interface AlertRequestParams {
   query?: string;
   sort?: string;
   order?: string;
-  after?: string;
-  before?: string;
+  after?: [any, any];
+  before?: [any, any];
 }
 
 /**
@@ -56,8 +56,8 @@ export interface AlertRequestData {
   query: string;
   sort: string;
   order: string;
-  searchAfter?: string;
-  searchBefore?: string;
+  searchAfter?: [any, any];
+  searchBefore?: [any, any];
   next?: string;
   prev?: string;
 }
@@ -78,7 +78,7 @@ export interface AlertRequestBody {
   track_total_hits: number;
   query: JsonObject;
   sort: [AlertSortParam, AlertSortParam];
-  search_after?: any;
+  search_after?: [any, any];
 }
 
 /**
