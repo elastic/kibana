@@ -16,36 +16,44 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import _ from 'lodash';
-import { createStateContainer } from '../../../../../../../plugins/kibana_utils/public';
-import { createKbnUrlStateStorage } from '../../../../../../../plugins/kibana_utils/public';
-import { syncStates } from '../../../../../../../plugins/kibana_utils/public';
+import {
+  createStateContainer,
+  createKbnUrlStateStorage,
+  syncStates,
+} from '../../../../../../../plugins/kibana_utils/public';
+import { Filter } from '../../../../../../../plugins/data/common/es_query/filters';
 
 interface AppState {
   columns: string[];
-  filters: any[];
+  filters: Filter[];
   predecessorCount: string;
-  sort: [string, string];
+  sort: string[];
   successorCount: string;
 }
 
 interface GlobalState {
-  filters: any[];
+  filters: Filter[];
 }
 
-export function getState(defaultStepSize: string, timeFieldName: string) {
-  const stateStorage = createKbnUrlStateStorage();
-  const globalStateFromUrl = stateStorage.get('_g') as GlobalState;
-  const globalState = createStateContainer(globalStateFromUrl) as any;
+/**
+ * Builds and returns appState and globalState containers and helper functions
+ * Used to sync URL with UI state
+ */
+export function getState(
+  defaultStepSize: string,
+  timeFieldName: string,
+  storeInSessionStorage: boolean
+) {
+  const stateStorage = createKbnUrlStateStorage({
+    useHash: storeInSessionStorage,
+  });
+
+  const globalStateInitial = stateStorage.get('_g') as GlobalState;
+  const globalState = createStateContainer<GlobalState>(globalStateInitial);
 
   const appStateFromUrl = stateStorage.get('_a') as AppState;
-  const appStateDefault = createDefaultAppState(defaultStepSize, timeFieldName);
-  const appStateInitial = {
-    ...appStateDefault,
-    ...appStateFromUrl,
-  } as AppState;
-
-  const appState = createStateContainer(appStateInitial) as any;
+  const appStateInitial = createInitialAppState(defaultStepSize, timeFieldName, appStateFromUrl);
+  const appState = createStateContainer<AppState>(appStateInitial);
 
   const { start, stop } = syncStates([
     {
@@ -60,40 +68,48 @@ export function getState(defaultStepSize: string, timeFieldName: string) {
     },
   ]);
 
-  const getGlobalFilters = () => {
-    const state = globalState.getState();
-    if (!state || !Array.isArray(state.filters)) {
-      return [];
-    }
-    return state.filters;
-  };
-  const getAppFilters = () => {
-    const state = appState.getState();
-    if (!state || !Array.isArray(state.filters)) {
-      return [];
-    }
-    return state.filters;
-  };
-
   return {
     globalState,
     appState,
     start,
     stop,
-    getGlobalFilters,
-    getAppFilters,
-    getFilters: () => {
-      return _.cloneDeep([...getGlobalFilters(), ...getAppFilters()]);
-    },
+    getGlobalFilters: () => getFilters(globalState.getState()),
+    getAppFilters: () => getFilters(appState.getState()),
   };
 }
 
-function createDefaultAppState(defaultSize: string, timeFieldName: string) {
-  return {
+/**
+ * Helper function to return array of filter object of a given state
+ */
+const getFilters = (state: AppState | GlobalState): Filter[] => {
+  if (!state || !Array.isArray(state.filters)) {
+    return [];
+  }
+  return state.filters;
+};
+
+/**
+ * Helper function to return the initial app state, which is a merged object of url state and
+ * default state. The default size is the default number of successor/predecessor records to fetch
+ */
+function createInitialAppState(
+  defaultSize: string,
+  timeFieldName: string,
+  urlState: AppState
+): AppState {
+  const defaultState = {
     columns: ['_source'],
     filters: [],
-    predecessorCount: parseInt(defaultSize, 10),
+    predecessorCount: defaultSize,
     sort: [timeFieldName, 'desc'],
-    successorCount: parseInt(defaultSize, 10),
+    successorCount: defaultSize,
+  };
+  if (typeof urlState !== 'object') {
+    return defaultState;
+  }
+
+  return {
+    ...defaultState,
+    ...urlState,
   };
 }

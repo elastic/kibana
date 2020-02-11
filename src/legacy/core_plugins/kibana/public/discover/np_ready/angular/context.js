@@ -69,17 +69,13 @@ getAngularModule().config($routeProvider => {
 function ContextAppRouteController($routeParams, $scope, config, $route) {
   const filterManager = getServices().filterManager;
   const indexPattern = $route.current.locals.indexPattern.ip;
-  const {
-    start,
-    stop,
-    appState,
-    globalState,
-    getFilters,
-    getAppFilters,
-    getGlobalFilters,
-  } = getState(config.get('context:defaultSize'), indexPattern.timeFieldName);
+  const { start, stop, appState, globalState, getAppFilters, getGlobalFilters } = getState(
+    config.get('context:defaultSize'),
+    indexPattern.timeFieldName,
+    config.get('state:storeInSessionStorage')
+  );
   this.state = _.cloneDeep(appState.getState());
-  this.filters = getFilters();
+  this.filters = _.cloneDeep([...getGlobalFilters(), ...getAppFilters()]);
   filterManager.addFilters(this.filters);
   start();
 
@@ -125,15 +121,12 @@ function ContextAppRouteController($routeParams, $scope, config, $route) {
       const appFiltersState = getAppFilters();
       const appFilters = filterManager.getAppFilters();
       if (!_.isEqual(appFiltersState, appFilters)) {
-        appState.set({ ...this.state, ...{ filters: appFilters } }, { replace: true });
+        appState.set({ ...this.state, ...{ filters: appFilters } });
       }
       const globalFiltersState = getGlobalFilters();
       const globalFilters = filterManager.getGlobalFilters();
       if (!_.isEqual(globalFilters, globalFiltersState)) {
-        globalState.set(
-          { ...globalFiltersState, ...{ filters: globalFilters } },
-          { replace: true }
-        );
+        globalState.set({ ...globalFiltersState, ...{ filters: globalFilters } });
       }
     },
   });
