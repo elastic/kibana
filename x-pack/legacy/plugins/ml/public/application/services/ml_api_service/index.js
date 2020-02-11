@@ -15,7 +15,7 @@ import { jobs } from './jobs';
 import { fileDatavisualizer } from './datavisualizer';
 import { getBasePath } from '../../util/dependency_cache';
 
-function basePath() {
+export function basePath() {
   return getBasePath().prepend('/api/ml');
 }
 

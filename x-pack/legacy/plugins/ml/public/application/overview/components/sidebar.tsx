@@ -11,7 +11,6 @@ import { useMlKibana } from '../../contexts/kibana';
 
 const createJobLink = '#/jobs/new_job/step/index_or_search';
 const feedbackLink = 'https://www.elastic.co/community/';
-const transformsLink = '/app/kibana#/management/elasticsearch/transform';
 const whatIsMachineLearningLink = 'https://www.elastic.co/what-is/elasticsearch-machine-learning';
 
 interface Props {
@@ -44,6 +43,7 @@ export const OverviewSideBar: FC<Props> = ({ createAnomalyDetectionJobDisabled }
 
   const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = docLinks;
   const docsLink = `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/xpack-ml.html`;
+  const transformsLink = `${basePath.get()}/app/kibana#/management/elasticsearch/transform`;
 
   return (
     <EuiFlexItem grow={1}>
@@ -72,7 +72,7 @@ export const OverviewSideBar: FC<Props> = ({ createAnomalyDetectionJobDisabled }
               ),
               createJob: getCreateJobLink(createAnomalyDetectionJobDisabled),
               transforms: (
-                <EuiLink href={`${basePath.get()}${transformsLink}`} target="blank">
+                <EuiLink href={transformsLink} target="blank">
                   <FormattedMessage
                     id="xpack.ml.overview.gettingStartedSectionTransforms"
                     defaultMessage="Elasticsearch's transforms"

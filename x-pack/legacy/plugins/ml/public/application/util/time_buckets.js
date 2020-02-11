@@ -314,7 +314,6 @@ TimeBuckets.prototype.getScaledDateFormat = function() {
 TimeBuckets.prototype.getScaledDateFormatter = function() {
   const fieldFormats = getFieldFormats();
   const uiSettings = getUiSettings();
-  // const getConfig = (...args) => uiSettings.get(...args);
   const DateFieldFormat = fieldFormats.getType(FIELD_FORMAT_IDS.DATE);
   return new DateFieldFormat(
     {

@@ -5,11 +5,8 @@
  */
 
 import React from 'react';
-// import { I18nProvider } from '@kbn/i18n/react';
-// import { mount, shallow } from 'enzyme';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { ml } from '../../../services/ml_api_service';
-// import { KibanaContextProvider } from '../../../../../../../../../src/plugins/kibana_react/public';
 
 import { CalendarsList } from './calendars_list';
 
@@ -115,28 +112,6 @@ const props = {
   },
 };
 
-// const services = {
-//   data: {
-//     query: {
-//       timefilter: {
-//         timefilter: {
-//           disableTimeRangeSelector: jest.fn(),
-//           disableAutoRefreshSelector: jest.fn(),
-//         },
-//       },
-//     },
-//   },
-//   notifications: {
-//     toasts: {
-//       addDanger: () => {},
-//     },
-//   },
-//   docLinks: {
-//     ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
-//     DOC_LINK_VERSION: 'jest-metadata-mock-branch',
-//   },
-// };
-
 describe('CalendarsList', () => {
   test('loads calendars on mount', () => {
     ml.calendars = jest.fn(() => []);
@@ -151,25 +126,4 @@ describe('CalendarsList', () => {
     wrapper.update();
     expect(wrapper).toMatchSnapshot();
   });
-
-  // disabled broken tests
-
-  // test('Sets selected calendars list on checkbox change', () => {
-  //   const wrapper = mount(
-  //     <I18nProvider>
-  //       <KibanaContextProvider services={services}>
-  //         <CalendarsList {...props} />
-  //       </KibanaContextProvider>
-  //     </I18nProvider>
-  //   );
-
-  //   const instance = wrapper.instance();
-  //   const spy = jest.spyOn(instance, 'setSelectedCalendarList');
-  //   instance.setState(testingState);
-  //   wrapper.update();
-
-  //   const checkbox = wrapper.find('input[type="checkbox"]').first();
-  //   checkbox.simulate('change');
-  //   expect(spy).toHaveBeenCalled();
-  // });
 });

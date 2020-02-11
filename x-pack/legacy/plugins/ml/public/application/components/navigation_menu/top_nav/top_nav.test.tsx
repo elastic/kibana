@@ -62,8 +62,6 @@ describe('Navigation Menu: <TopNav />', () => {
       </MemoryRouter>
     );
     expect(wrapper.find(TopNav)).toHaveLength(1);
-    // disabled broken test
-    // expect(wrapper.find('EuiSuperDatePicker')).toHaveLength(1);
     expect(refreshListener).toBeCalledTimes(0);
 
     refreshSubscription.unsubscribe();

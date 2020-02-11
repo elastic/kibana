@@ -9,11 +9,7 @@
 
 import { http } from '../http_service';
 
-import { getBasePath } from '../../util/dependency_cache';
-
-function basePath() {
-  return getBasePath().prepend('/api/ml');
-}
+import { basePath } from './index';
 
 export const filters = {
   filters(obj) {
