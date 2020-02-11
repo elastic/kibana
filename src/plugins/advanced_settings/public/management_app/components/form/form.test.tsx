@@ -102,8 +102,8 @@ describe('Form', () => {
         clearQuery={clearQuery}
         showNoResultsMessage={true}
         enableSaving={true}
-        toasts={notificationServiceMock.createStartContract().toasts}
-        dockLinks={docLinksServiceMock.createStartContract().links}
+        toasts={{} as any}
+        dockLinks={{} as any}
       />
     );
 
@@ -121,8 +121,8 @@ describe('Form', () => {
         clearQuery={clearQuery}
         showNoResultsMessage={true}
         enableSaving={false}
-        toasts={notificationServiceMock.createStartContract().toasts}
-        dockLinks={docLinksServiceMock.createStartContract().links}
+        toasts={{} as any}
+        dockLinks={{} as any}
       />
     );
 
@@ -140,8 +140,8 @@ describe('Form', () => {
         clearQuery={clearQuery}
         showNoResultsMessage={true}
         enableSaving={true}
-        toasts={notificationServiceMock.createStartContract().toasts}
-        dockLinks={docLinksServiceMock.createStartContract().links}
+        toasts={{} as any}
+        dockLinks={{} as any}
       />
     );
 
@@ -159,8 +159,8 @@ describe('Form', () => {
         clearQuery={clearQuery}
         showNoResultsMessage={false}
         enableSaving={true}
-        toasts={notificationServiceMock.createStartContract().toasts}
-        dockLinks={docLinksServiceMock.createStartContract().links}
+        toasts={{} as any}
+        dockLinks={{} as any}
       />
     );
 
