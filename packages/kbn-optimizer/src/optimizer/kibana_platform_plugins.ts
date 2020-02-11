@@ -22,7 +22,7 @@ import Path from 'path';
 import globby from 'globby';
 import loadJsonFile from 'load-json-file';
 
-export interface NewPlatformPlugin {
+export interface KibanaPlatformPlugin {
   readonly directory: string;
   readonly id: string;
   readonly isUiPlugin: boolean;
@@ -31,7 +31,7 @@ export interface NewPlatformPlugin {
 /**
  * Helper to find the new platform plugins.
  */
-export function findNewPlatformPlugins(scanDirs: string[], paths: string[]) {
+export function findKibanaPlatformPlugins(scanDirs: string[], paths: string[]) {
   return globby
     .sync(
       Array.from(
@@ -44,10 +44,10 @@ export function findNewPlatformPlugins(scanDirs: string[], paths: string[]) {
         absolute: true,
       }
     )
-    .map(path => readNewPlatformPlugin(path));
+    .map(path => readKibanaPlatformPlugin(path));
 }
 
-function readNewPlatformPlugin(manifestPath: string): NewPlatformPlugin {
+function readKibanaPlatformPlugin(manifestPath: string): KibanaPlatformPlugin {
   if (!Path.isAbsolute(manifestPath)) {
     throw new TypeError('expected new platform manifest path to be absolute');
   }

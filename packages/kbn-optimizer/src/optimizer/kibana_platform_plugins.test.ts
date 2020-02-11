@@ -21,7 +21,7 @@ import Path from 'path';
 
 import { createAbsolutePathSerializer } from '@kbn/dev-utils';
 
-import { findNewPlatformPlugins } from './new_platform_plugins';
+import { findKibanaPlatformPlugins } from './kibana_platform_plugins';
 
 expect.addSnapshotSerializer(createAbsolutePathSerializer());
 
@@ -29,7 +29,7 @@ const FIXTURES_PATH = Path.resolve(__dirname, '../__fixtures__');
 
 it('parses kibana.json files of plugins found in pluginDirs', () => {
   expect(
-    findNewPlatformPlugins(
+    findKibanaPlatformPlugins(
       [Path.resolve(FIXTURES_PATH, 'mock_repo/plugins')],
       [Path.resolve(FIXTURES_PATH, 'mock_repo/test_plugins/test_baz')]
     )

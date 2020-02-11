@@ -22,7 +22,7 @@ import Os from 'os';
 
 import { Bundle, WorkerConfig } from '../common';
 
-import { findNewPlatformPlugins, NewPlatformPlugin } from './new_platform_plugins';
+import { findKibanaPlatformPlugins, KibanaPlatformPlugin } from './kibana_platform_plugins';
 import { getBundles } from './get_bundles';
 
 interface Options {
@@ -130,7 +130,7 @@ export class OptimizerConfig {
 
   static create(inputOptions: Options) {
     const options = OptimizerConfig.parseOptions(inputOptions);
-    const plugins = findNewPlatformPlugins(options.pluginScanDirs, options.pluginPaths);
+    const plugins = findKibanaPlatformPlugins(options.pluginScanDirs, options.pluginPaths);
     const bundles = getBundles(plugins, options.repoRoot);
 
     return new OptimizerConfig(
@@ -151,7 +151,7 @@ export class OptimizerConfig {
     public readonly cache: boolean,
     public readonly watch: boolean,
     public readonly inspectWorkers: boolean,
-    public readonly plugins: NewPlatformPlugin[],
+    public readonly plugins: KibanaPlatformPlugin[],
     public readonly repoRoot: string,
     public readonly maxWorkerCount: number,
     public readonly dist: boolean,

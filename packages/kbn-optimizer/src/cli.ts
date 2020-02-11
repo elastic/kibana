@@ -109,7 +109,7 @@ run(
         --profile          profile the webpack builds and write stats.json files to build outputs
         --no-cache         disable the cache
         --no-examples      don't build the example plugins
-        --dist             build new platform plugins in a way that is suitable for inclusion in the Kibana distributable
+        --dist             create bundles that are suitable for inclusion in the Kibana distributable
         --scan-dir         add a directory to the list of directories scanned for plugins (specify as many times as necessary)
         --no-inspect-workers  when inspecting the parent process, don't inspect the workers
       `,

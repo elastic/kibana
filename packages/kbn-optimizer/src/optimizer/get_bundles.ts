@@ -21,9 +21,9 @@ import Path from 'path';
 
 import { Bundle } from '../common';
 
-import { NewPlatformPlugin } from './new_platform_plugins';
+import { KibanaPlatformPlugin } from './kibana_platform_plugins';
 
-export function getBundles(plugins: NewPlatformPlugin[], repoRoot: string) {
+export function getBundles(plugins: KibanaPlatformPlugin[], repoRoot: string) {
   return plugins
     .filter(p => p.isUiPlugin)
     .map(

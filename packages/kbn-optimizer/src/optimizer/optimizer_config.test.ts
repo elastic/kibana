@@ -18,7 +18,7 @@
  */
 
 jest.mock('./assign_bundles_to_workers.ts');
-jest.mock('./new_platform_plugins.ts');
+jest.mock('./kibana_platform_plugins.ts');
 jest.mock('./get_bundles.ts');
 
 import Path from 'path';
@@ -311,8 +311,8 @@ describe('OptimizerConfig::parseOptions()', () => {
 describe('OptimizerConfig::create()', () => {
   const assignBundlesToWorkers: jest.Mock = jest.requireMock('./assign_bundles_to_workers.ts')
     .assignBundlesToWorkers;
-  const findNewPlatformPlugins: jest.Mock = jest.requireMock('./new_platform_plugins.ts')
-    .findNewPlatformPlugins;
+  const findKibanaPlatformPlugins: jest.Mock = jest.requireMock('./kibana_platform_plugins.ts')
+    .findKibanaPlatformPlugins;
   const getBundles: jest.Mock = jest.requireMock('./get_bundles.ts').getBundles;
 
   beforeEach(() => {
@@ -324,7 +324,7 @@ describe('OptimizerConfig::create()', () => {
       { config: Symbol('worker config 1') },
       { config: Symbol('worker config 2') },
     ]);
-    findNewPlatformPlugins.mockReturnValue(Symbol('new platform plugins'));
+    findKibanaPlatformPlugins.mockReturnValue(Symbol('new platform plugins'));
     getBundles.mockReturnValue(Symbol('bundles'));
 
     jest.spyOn(OptimizerConfig, 'parseOptions').mockImplementation((): any => ({
@@ -340,7 +340,7 @@ describe('OptimizerConfig::create()', () => {
     }));
   });
 
-  it('passes parsed options to findNewPlatformPlugins, getBundles, and assignBundlesToWorkers', () => {
+  it('passes parsed options to findKibanaPlatformPlugins, getBundles, and assignBundlesToWorkers', () => {
     const config = OptimizerConfig.create({
       repoRoot: REPO_ROOT,
     });
@@ -359,7 +359,7 @@ describe('OptimizerConfig::create()', () => {
       }
     `);
 
-    expect(findNewPlatformPlugins.mock).toMatchInlineSnapshot(`
+    expect(findKibanaPlatformPlugins.mock).toMatchInlineSnapshot(`
       Object {
         "calls": Array [
           Array [

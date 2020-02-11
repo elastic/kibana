@@ -62,7 +62,6 @@ export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
         ? {
             // When the entry point is loaded, assign it's exported `plugin`
             // value to a key on the global `__kbnBundles__` object.
-            // NOTE: Only actually used by new platform plugins
             library: ['__kbnBundles__', `plugin/${bundle.id}`],
             libraryExport: 'plugin',
           }
