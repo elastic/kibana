@@ -18,7 +18,8 @@
  */
 
 import { PluginInitializerContext } from 'kibana/public';
-import { legacyChrome, npSetup, npStart } from './legacy_imports';
+import { npSetup, npStart } from 'ui/new_platform';
+import { legacyChrome } from './legacy_imports';
 import { start as embeddables } from '../../../embeddable_api/public/np_ready/public/legacy';
 import { start as visualizations } from '../../../visualizations/public/np_ready/public/legacy';
 import { plugin } from './index';
@@ -27,6 +28,7 @@ import { plugin } from './index';
   const instance = plugin({} as PluginInitializerContext);
   instance.setup(npSetup.core, {
     ...npSetup.plugins,
+    npData: npSetup.plugins.data,
     __LEGACY: {
       legacyChrome,
     },

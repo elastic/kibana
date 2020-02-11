@@ -39,8 +39,6 @@ export { StateManagementConfigProvider } from 'ui/state_management/config_provid
 export { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
 export { PersistedState } from 'ui/persisted_state';
 
-export { npSetup, npStart } from 'ui/new_platform';
-
 export { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 // @ts-ignore
 export { EventsProvider } from 'ui/events';
