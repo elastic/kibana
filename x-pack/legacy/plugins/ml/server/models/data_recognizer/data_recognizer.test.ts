@@ -4,11 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from '@kbn/expect';
+import { RequestHandlerContext } from 'kibana/server';
+import { Module } from '../../../common/types/modules';
 import { DataRecognizer } from '../data_recognizer';
 
 describe('ML - data recognizer', () => {
-  const dr = new DataRecognizer({});
+  const dr = new DataRecognizer(({
+    ml: {
+      mlClient: {
+        callAsCurrentUser: jest.fn(),
+      },
+    },
+    core: {
+      savedObjects: {
+        client: {
+          find: jest.fn(),
+          bulkCreate: jest.fn(),
+        },
+      },
+    },
+  } as unknown) as RequestHandlerContext);
 
   const moduleIds = [
     'apache_ecs',
@@ -34,12 +49,12 @@ describe('ML - data recognizer', () => {
   it('listModules - check all module IDs', async () => {
     const modules = await dr.listModules();
     const ids = modules.map(m => m.id);
-    expect(ids.join()).to.equal(moduleIds.join());
+    expect(ids.join()).toEqual(moduleIds.join());
   });
 
   it('getModule - load a single module', async () => {
     const module = await dr.getModule(moduleIds[0]);
-    expect(module.id).to.equal(moduleIds[0]);
+    expect(module.id).toEqual(moduleIds[0]);
   });
 
   describe('jobOverrides', () => {
@@ -47,7 +62,7 @@ describe('ML - data recognizer', () => {
       // arrange
       const prefix = 'pre-';
       const testJobId = 'test-job';
-      const moduleConfig = {
+      const moduleConfig = ({
         jobs: [
           {
             id: `${prefix}${testJobId}`,
@@ -64,7 +79,7 @@ describe('ML - data recognizer', () => {
             },
           },
         ],
-      };
+      } as unknown) as Module;
       const jobOverrides = [
         {
           analysis_limits: {
@@ -80,7 +95,7 @@ describe('ML - data recognizer', () => {
       // act
       dr.applyJobConfigOverrides(moduleConfig, jobOverrides, prefix);
       // assert
-      expect(moduleConfig.jobs).to.eql([
+      expect(moduleConfig.jobs).toEqual([
         {
           config: {
             analysis_config: {
