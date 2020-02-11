@@ -38,7 +38,6 @@ interface LogEntryRowProps {
   logEntry: LogEntry;
   openFlyoutWithItem?: (id: string) => void;
   scale: TextScale;
-  showActions?: boolean;
   wrap: boolean;
 }
 
@@ -52,7 +51,6 @@ export const LogEntryRow = ({
   logEntry,
   openFlyoutWithItem,
   scale,
-  showActions = true,
   wrap,
 }: LogEntryRowProps) => {
   const [isHovered, setIsHovered] = useState(false);
@@ -172,7 +170,7 @@ export const LogEntryRow = ({
                   isActiveHighlight={isActiveHighlight}
                   isHighlighted={isHighlighted}
                   isHovered={isHovered}
-                  isWrapped={wrap}
+                  wrapMode={wrap ? 'long' : 'original'}
                 />
               ) : null}
             </LogEntryColumn>

@@ -49,13 +49,14 @@ export const createLogEntryCategoryExamplesQuery = (
       },
     ],
   },
-  _source: ['message'],
+  _source: ['event.dataset', 'message'],
   index: indices,
   size: exampleCount,
 });
 
 export const logEntryCategoryExampleHitRT = rt.type({
   _source: rt.type({
+    'event.dataset': rt.union([rt.string, rt.undefined]),
     message: rt.string,
   }),
   sort: rt.tuple([rt.number]),

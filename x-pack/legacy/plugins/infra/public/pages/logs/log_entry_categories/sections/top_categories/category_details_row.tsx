@@ -9,7 +9,7 @@ import React, { useEffect } from 'react';
 import euiStyled from '../../../../../../../../common/eui_styled_components';
 import { TimeRange } from '../../../../../../common/http_api/shared';
 import { useLogEntryCategoryExamples } from '../../use_log_entry_category_examples';
-import { CategoryExampleMessage, useExampleColumnWidths } from './category_example_message';
+import { CategoryExampleMessage } from './category_example_message';
 import { CategoryExampleMessagesFailureIndicator } from './category_example_messages_failure_indicator';
 import { CategoryExampleMessagesLoadingIndicator } from './category_example_messages_loading_indicator';
 
@@ -37,28 +37,23 @@ export const CategoryDetailsRow: React.FunctionComponent<{
     getLogEntryCategoryExamples();
   }, [getLogEntryCategoryExamples]);
 
-  const { columnWidths, CharacterDimensionsProbe } = useExampleColumnWidths();
-
   return (
-    <>
-      <CharacterDimensionsProbe />
-      <CategoryExampleMessages>
-        {isLoadingLogEntryCategoryExamples ? (
-          <CategoryExampleMessagesLoadingIndicator exampleCount={exampleCount} />
-        ) : hasFailedLoadingLogEntryCategoryExamples ? (
-          <CategoryExampleMessagesFailureIndicator onRetry={getLogEntryCategoryExamples} />
-        ) : (
-          logEntryCategoryExamples.map((categoryExample, categoryExampleIndex) => (
-            <CategoryExampleMessage
-              columnWidths={columnWidths}
-              key={categoryExampleIndex}
-              message={categoryExample.message}
-              timestamp={categoryExample.timestamp}
-            />
-          ))
-        )}
-      </CategoryExampleMessages>
-    </>
+    <CategoryExampleMessages>
+      {isLoadingLogEntryCategoryExamples ? (
+        <CategoryExampleMessagesLoadingIndicator exampleCount={exampleCount} />
+      ) : hasFailedLoadingLogEntryCategoryExamples ? (
+        <CategoryExampleMessagesFailureIndicator onRetry={getLogEntryCategoryExamples} />
+      ) : (
+        logEntryCategoryExamples.map((categoryExample, categoryExampleIndex) => (
+          <CategoryExampleMessage
+            dataset={categoryExample.dataset}
+            key={categoryExampleIndex}
+            message={categoryExample.message}
+            timestamp={categoryExample.timestamp}
+          />
+        ))
+      )}
+    </CategoryExampleMessages>
   );
 };
 

@@ -42,8 +42,9 @@ export type GetLogEntryCategoryExamplesRequestPayload = rt.TypeOf<
  */
 
 const logEntryCategoryExampleRT = rt.type({
-  timestamp: rt.number,
+  dataset: rt.string,
   message: rt.string,
+  timestamp: rt.number,
 });
 
 export type LogEntryCategoryExample = rt.TypeOf<typeof logEntryCategoryExampleRT>;

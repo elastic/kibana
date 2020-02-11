@@ -4,15 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 
+import { getFriendlyNameForPartitionId } from '../../../../../../common/log_analysis';
 import {
   LogEntryColumn,
-  LogEntryColumnWidths,
+  LogEntryFieldColumn,
   LogEntryMessageColumn,
   LogEntryRowWrapper,
   LogEntryTimestampColumn,
-  useColumnWidths,
 } from '../../../../../components/logging/log_text_stream';
 import { LogColumnConfiguration } from '../../../../../utils/source_configuration';
 
@@ -20,10 +20,17 @@ export const exampleMessageScale = 'medium' as const;
 export const exampleTimestampFormat = 'dateTime' as const;
 
 export const CategoryExampleMessage: React.FunctionComponent<{
-  columnWidths: LogEntryColumnWidths;
+  dataset: string;
   message: string;
   timestamp: number;
-}> = ({ columnWidths, message, timestamp }) => {
+}> = ({ dataset, message, timestamp }) => {
+  // the dataset must be encoded for the field column and the empty value must
+  // be turned into a user-friendly value
+  const encodedDatasetFieldValue = useMemo(
+    () => JSON.stringify(getFriendlyNameForPartitionId(dataset)),
+    [dataset]
+  );
+
   return (
     <LogEntryRowWrapper scale={exampleMessageScale}>
       <LogEntryColumn {...columnWidths[timestampColumnId]}>
@@ -38,12 +45,27 @@ export const CategoryExampleMessage: React.FunctionComponent<{
         <LogEntryMessageColumn
           columnValue={{
             __typename: 'InfraLogEntryMessageColumn' as const,
-            columnId: 'category-examples-message-column',
+            columnId: messageColumnId,
             message: [
               { __typename: 'InfraLogMessageFieldSegment', field: 'message', value: message },
             ],
           }}
-          highlights={[]}
+          highlights={noHighlights}
+          isHovered={false}
+          isHighlighted={false}
+          isActiveHighlight={false}
+          wrapMode="none"
+        />
+      </LogEntryColumn>
+      <LogEntryColumn {...columnWidths[datasetColumnId]}>
+        <LogEntryFieldColumn
+          columnValue={{
+            __typename: 'InfraLogEntryFieldColumn' as const,
+            columnId: datasetColumnId,
+            field: 'event.dataset',
+            value: encodedDatasetFieldValue,
+          }}
+          highlights={noHighlights}
           isHovered={false}
           isHighlighted={false}
           isActiveHighlight={false}
@@ -54,23 +76,49 @@ export const CategoryExampleMessage: React.FunctionComponent<{
   );
 };
 
-export const useExampleColumnWidths = () =>
-  useColumnWidths({
-    columnConfigurations: exampleMessageColumnConfigurations,
-    scale: exampleMessageScale,
-    timeFormat: exampleTimestampFormat,
-  });
-
+const noHighlights: never[] = [];
 const timestampColumnId = 'category-example-timestamp-column' as const;
 const messageColumnId = 'category-examples-message-column' as const;
+const datasetColumnId = 'category-examples-dataset-column' as const;
+
+const columnWidths = {
+  [timestampColumnId]: {
+    growWeight: 0,
+    shrinkWeight: 0,
+    // w_count + w_trend - w_padding = 120 px + 220 px - 8 px
+    baseWidth: '332px',
+  },
+  [messageColumnId]: {
+    growWeight: 1,
+    shrinkWeight: 0,
+    baseWidth: '0%',
+  },
+  [datasetColumnId]: {
+    growWeight: 0,
+    shrinkWeight: 0,
+    // w_dataset + w_max_anomaly + w_expand - w_padding = 200 px + 160 px + 40 px - 8 px
+    baseWidth: '392px',
+  },
+};
 
 export const exampleMessageColumnConfigurations: LogColumnConfiguration[] = [
   {
     __typename: 'InfraSourceTimestampLogColumn',
-    timestampColumn: { id: timestampColumnId },
+    timestampColumn: {
+      id: timestampColumnId,
+    },
   },
   {
     __typename: 'InfraSourceMessageLogColumn',
-    messageColumn: { id: messageColumnId },
+    messageColumn: {
+      id: messageColumnId,
+    },
+  },
+  {
+    __typename: 'InfraSourceFieldLogColumn',
+    fieldColumn: {
+      field: 'event.dataset',
+      id: datasetColumnId,
+    },
   },
 ];

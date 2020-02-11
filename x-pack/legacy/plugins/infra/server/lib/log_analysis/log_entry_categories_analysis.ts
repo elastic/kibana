@@ -502,8 +502,9 @@ export class LogEntryCategoriesAnalysis {
 
     return {
       examples: hits.map(hit => ({
-        timestamp: hit.sort[0],
+        dataset: hit._source['event.dataset'] ?? '',
         message: hit._source.message,
+        timestamp: hit.sort[0],
       })),
       timing: {
         spans: [esSearchSpan],

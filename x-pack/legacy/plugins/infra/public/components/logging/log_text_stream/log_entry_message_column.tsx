@@ -6,7 +6,7 @@
 
 import React, { memo, useMemo } from 'react';
 
-import euiStyled, { css } from '../../../../../../common/eui_styled_components';
+import euiStyled from '../../../../../../common/eui_styled_components';
 import {
   isConstantSegment,
   isFieldSegment,
@@ -18,9 +18,13 @@ import {
 } from '../../../utils/log_entry';
 import { ActiveHighlightMarker, highlightFieldValue, HighlightMarker } from './highlighting';
 import { LogEntryColumnContent } from './log_entry_column';
-import { hoveredContentStyle } from './text_styles';
-
-type WrapMode = 'none' | 'original' | 'long';
+import {
+  hoveredContentStyle,
+  longWrappedContentStyle,
+  originalWrappedContentStyle,
+  unwrappedContentStyle,
+  WrapMode,
+} from './text_styles';
 
 interface LogEntryMessageColumnProps {
   columnValue: LogEntryColumn;
@@ -48,22 +52,6 @@ export const LogEntryMessageColumn = memo<LogEntryMessageColumnProps>(
     );
   }
 );
-
-const longWrappedContentStyle = css`
-  overflow: visible;
-  white-space: pre-wrap;
-  word-break: break-all;
-`;
-
-const originalWrappedContentStyle = css`
-  overflow: hidden;
-  white-space: pre;
-`;
-
-const unwrappedContentStyle = css`
-  overflow: hidden;
-  white-space: nowrap;
-`;
 
 interface MessageColumnContentProps {
   isHovered: boolean;
