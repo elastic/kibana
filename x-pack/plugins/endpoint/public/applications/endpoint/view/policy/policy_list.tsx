@@ -14,7 +14,7 @@ import {
   EuiPageContentHeaderSection,
   EuiTitle,
   EuiBasicTable,
-  EuiTextColor,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedDate, FormattedTime } from '@kbn/i18n/react';
@@ -39,7 +39,7 @@ const FormattedDateAndTime: React.FC<{ date: Date }> = ({ date }) => {
   return (
     <span title={date.toISOString()}>
       <FormattedDate value={date} year="numeric" month="short" day="2-digit" />
-      {' @ '}
+      {' @'}
       <FormattedTime value={date} />
     </span>
   );
@@ -147,22 +147,24 @@ export const PolicyList = React.memo(() => {
           <EuiPageContentHeader>
             <EuiPageContentHeaderSection>
               <EuiTitle>
-                <h2 data-test-subj="policyViewTitle">
-                  <FormattedMessage
-                    id="xpack.endpoint.policyList.viewTitle"
-                    defaultMessage="Policies"
-                  />
-                </h2>
+                <EuiTitle size="l">
+                  <h1 data-test-subj="policyViewTitle">
+                    <FormattedMessage
+                      id="xpack.endpoint.policyList.viewTitle"
+                      defaultMessage="Policies"
+                    />
+                  </h1>
+                </EuiTitle>
               </EuiTitle>
-              <h3>
-                <EuiTextColor color="subdued" data-test-subj="policyTotalCount">
+              <h2>
+                <EuiText color="subdued" data-test-subj="policyTotalCount" size="s">
                   <FormattedMessage
                     id="xpack.endpoint.policyList.viewTitleTotalCount"
                     defaultMessage="{totalItemCount} Policies"
                     values={{ totalItemCount }}
                   />
-                </EuiTextColor>
-              </h3>
+                </EuiText>
+              </h2>
             </EuiPageContentHeaderSection>
           </EuiPageContentHeader>
           <EuiPageContentBody>
