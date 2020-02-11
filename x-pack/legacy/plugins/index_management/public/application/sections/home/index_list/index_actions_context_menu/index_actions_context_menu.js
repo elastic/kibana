@@ -26,7 +26,6 @@ import {
 import { flattenPanelTree } from '../../../../lib/flatten_panel_tree';
 import { INDEX_OPEN } from '../../../../../../common/constants';
 import { AppContextConsumer } from '../../../../app_context';
-import { getHttpClient } from '../../../../services/api';
 
 export class IndexActionsContextMenu extends Component {
   constructor(props) {
@@ -47,7 +46,11 @@ export class IndexActionsContextMenu extends Component {
   confirmAction = isActionConfirmed => {
     this.setState({ isActionConfirmed });
   };
-  panels(extensionsService) {
+  panels({
+    core: { fatalErrors },
+    services: { extensionsService, httpService, notificationService },
+    plugins: { usageCollection },
+  }) {
     const {
       closeIndices,
       openIndices,
@@ -212,7 +215,19 @@ export class IndexActionsContextMenu extends Component {
       },
     });
     extensionsService.actions.forEach(actionExtension => {
-      const actionExtensionDefinition = actionExtension(indices, reloadIndices);
+      const actionExtensionDefinition = actionExtension({
+        indices,
+        reloadIndices,
+        // These config options can be removed once the NP migration out of legacy is complete.
+        // They're needed for now because ILM's extensions make API calls which require these
+        // dependencies, but they're not available unless the app's "setup" lifecycle stage occurs.
+        // Within the old platform, "setup" only occurs once the user actually visits the app.
+        // Once ILM and IM have been moved out of legacy this hack won't be necessary.
+        usageCollection,
+        toasts: notificationService.toasts,
+        fatalErrors,
+        httpClient: httpService.httpClient,
+      });
       if (actionExtensionDefinition) {
         const {
           buttonLabel,
@@ -699,7 +714,7 @@ export class IndexActionsContextMenu extends Component {
   render() {
     return (
       <AppContextConsumer>
-        {({ services }) => {
+        {appDependencies => {
           const { indexNames } = this.props;
           const selectedIndexCount = indexNames.length;
           const {
@@ -712,7 +727,7 @@ export class IndexActionsContextMenu extends Component {
             iconType = 'arrowDown',
           } = this.props;
 
-          const panels = this.panels(services.extensions);
+          const panels = this.panels(appDependencies);
 
           const button = (
             <EuiButton
@@ -734,7 +749,7 @@ export class IndexActionsContextMenu extends Component {
           return (
             <div>
               {this.state.renderConfirmModal
-                ? this.state.renderConfirmModal(this.closeConfirmModal, getHttpClient())
+                ? this.state.renderConfirmModal(this.closeConfirmModal)
                 : null}
               <EuiPopover
                 id="contextMenuIndices"

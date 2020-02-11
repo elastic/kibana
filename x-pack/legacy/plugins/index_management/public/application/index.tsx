@@ -19,7 +19,7 @@ export const renderApp = (
   { core, dependencies }: { core: CoreStart; dependencies: AppDependencies }
 ) => {
   if (!elem) {
-    return;
+    return () => undefined;
   }
 
   const { i18n } = core;

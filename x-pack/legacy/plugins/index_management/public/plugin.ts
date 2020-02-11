@@ -6,6 +6,8 @@
 import { i18n } from '@kbn/i18n';
 
 import { CoreSetup } from '../../../../../src/core/public';
+import { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/public';
+import { ManagementSetup } from '../../../../../src/plugins/management/public';
 import { UIM_APP_NAME } from '../common/constants';
 
 import { AppDependencies } from './application';
@@ -26,6 +28,11 @@ export interface IndexMgmtSetup {
   extensions: ExtensionsService;
 }
 
+interface PluginsDependencies {
+  usageCollection: UsageCollectionSetup;
+  management: ManagementSetup;
+}
+
 export class IndexMgmtUIPlugin {
   private uiMetricService = new UiMetricService<IndexMgmtMetricsType>(UIM_APP_NAME);
   private extensionsService = new ExtensionsService();
@@ -37,30 +44,37 @@ export class IndexMgmtUIPlugin {
     setUiMetricService(this.uiMetricService);
   }
 
-  public setup(coreSetup: CoreSetup, plugins: any): IndexMgmtSetup {
+  public setup(coreSetup: CoreSetup, plugins: PluginsDependencies): IndexMgmtSetup {
     const { http, notifications, getStartServices } = coreSetup;
-    const { usageCollection } = plugins;
+    const { usageCollection, management } = plugins;
 
     httpService.setup(http);
     notificationService.setup(notifications);
     this.uiMetricService.setup(usageCollection);
 
-    plugins.management.sections.getSection('elasticsearch').registerApp({
+    management.sections.getSection('elasticsearch')!.registerApp({
       id: 'index_management',
       title: i18n.translate('xpack.idxMgmt.appTitle', { defaultMessage: 'Index Management' }),
-      visible: true,
       order: 1,
       mount: async ({ element }: { element: HTMLElement }) => {
         const [core] = await getStartServices();
-        const { chrome, docLinks } = core;
+        const { chrome, docLinks, fatalErrors } = core;
 
         breadcrumbService.setup(chrome, MANAGEMENT_BREADCRUMB);
         documentationService.setup(docLinks);
 
         const appDependencies: AppDependencies = {
+          core: {
+            fatalErrors,
+          },
+          plugins: {
+            usageCollection,
+          },
           services: {
             uiMetric: this.uiMetricService,
             extensions: this.extensionsService,
+            httpService,
+            notificationService,
           },
         };
 

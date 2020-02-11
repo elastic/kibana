@@ -27,3 +27,5 @@ export { healthToColor } from './health_to_color';
 export { sortTable } from './sort_table';
 
 export { UiMetricService } from './ui_metric';
+export { HttpService } from './http';
+export { NotificationService } from './notification';

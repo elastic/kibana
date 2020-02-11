@@ -5,17 +5,27 @@
  */
 
 import React, { createContext, useContext } from 'react';
+import { CoreStart } from '../../../../../../src/core/public';
 
+import { UsageCollectionSetup } from '../../../../../../src/plugins/usage_collection/public';
 import { IndexMgmtMetricsType } from '../types';
-import { UiMetricService } from './services';
+import { UiMetricService, NotificationService, HttpService } from './services';
 import { ExtensionsService } from '../services';
 
 const AppContext = createContext<AppDependencies | undefined>(undefined);
 
 export interface AppDependencies {
+  core: {
+    fatalErrors: CoreStart['fatalErrors'];
+  };
+  plugins: {
+    usageCollection: UsageCollectionSetup;
+  };
   services: {
     uiMetric: UiMetricService<IndexMgmtMetricsType>;
     extensions: ExtensionsService;
+    httpService: HttpService;
+    notificationService: NotificationService;
   };
 }
 

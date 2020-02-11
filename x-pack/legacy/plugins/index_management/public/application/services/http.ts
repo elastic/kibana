@@ -6,7 +6,7 @@
 
 import { HttpSetup } from '../../../../../../../src/core/public';
 
-class HttpService {
+export class HttpService {
   private client: any;
 
   public setup(httpClient: HttpSetup): void {

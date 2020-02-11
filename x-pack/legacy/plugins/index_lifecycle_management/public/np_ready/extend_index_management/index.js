@@ -21,13 +21,17 @@ const stepPath = 'ilm.step';
 
 export const retryLifecycleActionExtension = ({
   indices,
-  createUiStatsReporter,
+  usageCollection,
   toasts,
   fatalErrors,
 }) => {
   // These are hacks that we can remove once the New Platform migration is done. They're needed here
   // because API requests and API errors require them.
-  initUiMetric(createUiStatsReporter);
+  const getLegacyReporter = appName => (type, name) => {
+    usageCollection.reportUiStats(appName, type, name);
+  };
+
+  initUiMetric(getLegacyReporter);
   initNotification(toasts, fatalErrors);
 
   const allHaveErrors = every(indices, index => {

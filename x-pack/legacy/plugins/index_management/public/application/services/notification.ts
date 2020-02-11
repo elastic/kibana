@@ -6,7 +6,7 @@
 
 import { NotificationsStart } from '../../../../../../../src/core/public';
 
-class NotificationService {
+export class NotificationService {
   private _toasts: any;
 
   public setup(notifications: NotificationsStart): void {
