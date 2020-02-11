@@ -49,7 +49,7 @@ function patchOptions(hasArgs) {
         pos++;
       }
 
-      if (pos < args.length && typeof args[pos] === 'object') {
+      if (pos < args.length && typeof args[pos] === 'object' && args[pos] !== null) {
         // fn(arg1, {}, ...)
         // fn(arg1, args, {}, ...)
         args[pos] = prototypelessSpawnOpts(args[pos]);

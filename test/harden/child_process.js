@@ -25,6 +25,8 @@ const test = require('tape');
 
 Object.prototype.POLLUTED = 'yes'; // eslint-disable-line no-extend-native
 
+const notSet = [null, undefined];
+
 test.onFinish(() => {
   delete Object.prototype.POLLUTED;
 });
@@ -86,6 +88,21 @@ for (const name of functions) {
       t.end();
     });
   });
+
+  for (const unset of notSet) {
+    test(`exec(command, ${unset})`, t => {
+      assertProcess(t, cp.exec(command, unset));
+    });
+
+    test(`exec(command, ${unset}, callback)`, t => {
+      cp.exec(command, unset, (err, stdout, stderr) => {
+        t.error(err);
+        t.equal(stdout.trim(), '');
+        t.equal(stderr.trim(), '');
+        t.end();
+      });
+    });
+  }
 }
 
 {
@@ -168,6 +185,38 @@ for (const name of functions) {
       t.end();
     });
   });
+
+  for (const unset of notSet) {
+    test(`execFile(file, ${unset})`, t => {
+      assertProcess(t, cp.execFile(file, unset));
+    });
+
+    test(`execFile(file, ${unset}, ${unset})`, t => {
+      assertProcess(t, cp.execFile(file, unset, unset));
+    });
+
+    test(`execFile(file, ${unset}, callback)`, t => {
+      cp.execFile(file, unset, (err, stdout, stderr) => {
+        t.error(err);
+        t.equal(stdout.trim(), '');
+        t.equal(stderr.trim(), '');
+        t.end();
+      });
+    });
+
+    test(`execFile(file, ${unset}, ${unset}, callback)`, t => {
+      cp.execFile(file, unset, unset, (err, stdout, stderr) => {
+        t.error(err);
+        t.equal(stdout.trim(), '');
+        t.equal(stderr.trim(), '');
+        t.end();
+      });
+    });
+
+    test(`execFile(file, ${unset}, options)`, t => {
+      assertProcess(t, cp.execFile(file, unset, {}));
+    });
+  }
 }
 
 {
@@ -222,6 +271,27 @@ for (const name of functions) {
       { stdout: 'custom' }
     );
   });
+
+  for (const unset of notSet) {
+    // TODO: Forked processes don't have any stdout we can monitor without providing options
+    test.skip(`fork(modulePath, ${unset})`, t => {
+      assertProcess(t, cp.fork(modulePath, unset));
+    });
+
+    // TODO: Forked processes don't have any stdout we can monitor without providing options
+    test.skip(`fork(modulePath, ${unset}, ${unset})`, t => {
+      assertProcess(t, cp.fork(modulePath, unset, unset));
+    });
+
+    test(`fork(modulePath, ${unset}, options)`, t => {
+      assertProcess(
+        t,
+        cp.fork(modulePath, unset, {
+          stdio: ['pipe', 'pipe', 'pipe', 'ipc'],
+        })
+      );
+    });
+  }
 }
 
 {
@@ -250,6 +320,20 @@ for (const name of functions) {
   test('spawn(command, args, options) - with custom env', t => {
     assertProcess(t, cp.spawn(command, [], { env: { custom: 'custom' } }), { stdout: 'custom' });
   });
+
+  for (const unset of notSet) {
+    test(`spawn(command, ${unset})`, t => {
+      assertProcess(t, cp.spawn(command, unset));
+    });
+
+    test(`spawn(command, ${unset}, ${unset})`, t => {
+      assertProcess(t, cp.spawn(command, unset, unset));
+    });
+
+    test(`spawn(command, ${unset}, options)`, t => {
+      assertProcess(t, cp.spawn(command, unset, {}));
+    });
+  }
 }
 
 {
@@ -320,6 +404,41 @@ for (const name of functions) {
     );
     t.end();
   });
+
+  for (const unset of notSet) {
+    test(`execFileSync(file, ${unset})`, t => {
+      t.equal(
+        cp
+          .execFileSync(file, unset)
+          .toString()
+          .trim(),
+        ''
+      );
+      t.end();
+    });
+
+    test(`execFileSync(file, ${unset}, ${unset})`, t => {
+      t.equal(
+        cp
+          .execFileSync(file, unset, unset)
+          .toString()
+          .trim(),
+        ''
+      );
+      t.end();
+    });
+
+    test(`execFileSync(file, ${unset}, options)`, t => {
+      t.equal(
+        cp
+          .execFileSync(file, unset, {})
+          .toString()
+          .trim(),
+        ''
+      );
+      t.end();
+    });
+  }
 }
 
 {
@@ -357,6 +476,19 @@ for (const name of functions) {
     );
     t.end();
   });
+
+  for (const unset of notSet) {
+    test(`execSync(command, ${unset})`, t => {
+      t.equal(
+        cp
+          .execSync(command, unset)
+          .toString()
+          .trim(),
+        ''
+      );
+      t.end();
+    });
+  }
 }
 
 {
@@ -409,6 +541,32 @@ for (const name of functions) {
     t.equal(result.stderr.toString().trim(), '');
     t.end();
   });
+
+  for (const unset of notSet) {
+    test(`spawnSync(command, ${unset})`, t => {
+      const result = cp.spawnSync(command, unset);
+      t.error(result.error);
+      t.equal(result.stdout.toString().trim(), '');
+      t.equal(result.stderr.toString().trim(), '');
+      t.end();
+    });
+
+    test(`spawnSync(command, ${unset}, ${unset})`, t => {
+      const result = cp.spawnSync(command, unset, unset);
+      t.error(result.error);
+      t.equal(result.stdout.toString().trim(), '');
+      t.equal(result.stderr.toString().trim(), '');
+      t.end();
+    });
+
+    test(`spawnSync(command, ${unset}, options)`, t => {
+      const result = cp.spawnSync(command, unset, {});
+      t.error(result.error);
+      t.equal(result.stdout.toString().trim(), '');
+      t.equal(result.stderr.toString().trim(), '');
+      t.end();
+    });
+  }
 }
 
 function assertProcess(t, cmd, { stdout = '' } = {}) {
