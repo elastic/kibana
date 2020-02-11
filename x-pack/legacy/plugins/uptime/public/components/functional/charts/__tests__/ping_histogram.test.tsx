@@ -7,7 +7,6 @@
 import React from 'react';
 import { PingHistogramComponent, PingHistogramComponentProps } from '../ping_histogram';
 import { renderWithRouter, shallowWithRouter } from '../../../../lib';
-import { renderWithIntl } from 'test_utils/enzyme_helpers';
 
 describe('PingHistogram component', () => {
   const props: PingHistogramComponentProps = {
