@@ -17,7 +17,11 @@ import { boot } from './application/boot';
 import { ChartsPluginStart } from '../../../../src/plugins/charts/public';
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 
-export type Setup = void;
+export interface TriggersAndActionsUIPublicPluginSetup {
+  actionTypeRegistry: TypeRegistry<ActionTypeModel>;
+  alertTypeRegistry: TypeRegistry<AlertTypeModel>;
+}
+
 export type Start = void;
 
 interface PluginsStart {
@@ -26,7 +30,7 @@ interface PluginsStart {
   management: ManagementStart;
 }
 
-export class Plugin implements CorePlugin<Setup, Start> {
+export class Plugin implements CorePlugin<TriggersAndActionsUIPublicPluginSetup, Start> {
   private actionTypeRegistry: TypeRegistry<ActionTypeModel>;
   private alertTypeRegistry: TypeRegistry<AlertTypeModel>;
 
@@ -38,7 +42,7 @@ export class Plugin implements CorePlugin<Setup, Start> {
     this.alertTypeRegistry = alertTypeRegistry;
   }
 
-  public setup(): Setup {
+  public setup(): TriggersAndActionsUIPublicPluginSetup {
     registerBuiltInActionTypes({
       actionTypeRegistry: this.actionTypeRegistry,
     });
@@ -46,6 +50,11 @@ export class Plugin implements CorePlugin<Setup, Start> {
     registerBuiltInAlertTypes({
       alertTypeRegistry: this.alertTypeRegistry,
     });
+
+    return {
+      actionTypeRegistry: this.actionTypeRegistry,
+      alertTypeRegistry: this.alertTypeRegistry,
+    };
   }
 
   public start(core: CoreStart, plugins: PluginsStart) {

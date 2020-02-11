@@ -13,6 +13,8 @@ import React from 'react';
 import { ScreenCapturePanelContent } from '../components/screen_capture_panel_content';
 import { ShareContext } from '../../../../../../src/plugins/share/public';
 
+const { core } = npSetup;
+
 async function reportingProvider() {
   const getShareMenuItems = ({
     objectType,
@@ -36,12 +38,15 @@ async function reportingProvider() {
 
     const getReportingJobParams = () => {
       // Replace hashes with original RISON values.
-      const relativeUrl = shareableUrl.replace(window.location.origin + chrome.getBasePath(), '');
+      const relativeUrl = shareableUrl.replace(
+        window.location.origin + core.http.basePath.get(),
+        ''
+      );
 
       const browserTimezone =
-        chrome.getUiSettingsClient().get('dateFormat:tz') === 'Browser'
+        core.uiSettings.get('dateFormat:tz') === 'Browser'
           ? moment.tz.guess()
-          : chrome.getUiSettingsClient().get('dateFormat:tz');
+          : core.uiSettings.get('dateFormat:tz');
 
       return {
         ...sharingData,
@@ -53,12 +58,15 @@ async function reportingProvider() {
 
     const getPngJobParams = () => {
       // Replace hashes with original RISON values.
-      const relativeUrl = shareableUrl.replace(window.location.origin + chrome.getBasePath(), '');
+      const relativeUrl = shareableUrl.replace(
+        window.location.origin + core.http.basePath.get(),
+        ''
+      );
 
       const browserTimezone =
-        chrome.getUiSettingsClient().get('dateFormat:tz') === 'Browser'
+        core.uiSettings.get('dateFormat:tz') === 'Browser'
           ? moment.tz.guess()
-          : chrome.getUiSettingsClient().get('dateFormat:tz');
+          : core.uiSettings.get('dateFormat:tz');
 
       return {
         ...sharingData,
