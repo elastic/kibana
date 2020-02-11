@@ -32,7 +32,7 @@ When a bundle is determined to be up-to-date a worker is not started for the bun
 
 ## API
 
-To run the optimizer from code, you can import the [`OptimizerConfig`][OptimizerConfig] class and [`runOptimizer`][Optimizer] function. Create an [`OptimizerConfig`][OptimizerConfig] instance by calling it's static `create()` method with some options, then pass it to the [`runOptimizer`][Optimizer] function. `runOptimizer()` returns an observable of [`OptimizerMsg`][Optimizer] objects, which are summaries of the optimizer state plus an optional `event` property which describes the internal events occuring and may be of use. You can use the [`logOptimizerState()`][LogOptimizerState] helper to write the relevant bits of state to a tooling log or checkout it's implementation to see how the internal events like [`WorkerStdio`][ObserveWorker] and [`WorkerStarted`][ObserveWorker] are used.
+To run the optimizer from code, you can import the [`OptimizerConfig`][OptimizerConfig] class and [`runOptimizer`][Optimizer] function. Create an [`OptimizerConfig`][OptimizerConfig] instance by calling it's static `create()` method with some options, then pass it to the [`runOptimizer`][Optimizer] function. `runOptimizer()` returns an observable of update objects, which are summaries of the optimizer state plus an optional `event` property which describes the internal events occuring and may be of use. You can use the [`logOptimizerState()`][LogOptimizerState] helper to write the relevant bits of state to a tooling log or checkout it's implementation to see how the internal events like [`WorkerStdio`][ObserveWorker] and [`WorkerStarted`][ObserveWorker] are used.
 
 Example:
 ```ts
@@ -72,7 +72,7 @@ The [`Bundle`][Bundle] objects which include the details necessary to create a w
 
 Each worker communicates state back to the main process by sending [`WorkerMsg`][WorkerMsg] and [`CompilerMsg`][CompilerMsg] objects using IPC.
 
-The Optimizer captures all of these messages and produces a stream of [`OptimizerMsg`][Optimizer] objects.
+The Optimizer captures all of these messages and produces a stream of update objects.
 
 Optimizer phases:
 <dl>

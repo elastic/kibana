@@ -20,53 +20,65 @@
 import * as Rx from 'rxjs';
 import { mergeMap, share, observeOn } from 'rxjs/operators';
 
+import { createStore, StoreUpdate } from './common';
+
 import {
   OptimizerConfig,
-  OptimizerMsg,
+  OptimizerEvent,
+  OptimizerState,
   getBundleCacheEvent$,
   getOptimizerCacheKey,
   watchBundlesForChanges$,
   runWorkers,
   OptimizerInitializedEvent,
-  summarizeOptimizerEvent$,
+  createOptimizerReducer,
 } from './optimizer';
+
+export type OptimizerUpdate = StoreUpdate<OptimizerEvent, OptimizerState>;
+export type OptimizerUpdate$ = Rx.Observable<OptimizerUpdate>;
 
 export function runOptimizer(config: OptimizerConfig) {
   return Rx.defer(async () => ({
     startTime: Date.now(),
     cacheKey: await getOptimizerCacheKey(config),
   })).pipe(
-    mergeMap(
-      (init): Rx.Observable<OptimizerMsg> => {
-        const bundleCacheEvent$ = getBundleCacheEvent$(config, init.cacheKey).pipe(
-          observeOn(Rx.asyncScheduler),
-          share()
-        );
+    mergeMap(({ startTime, cacheKey }) => {
+      const bundleCacheEvent$ = getBundleCacheEvent$(config, cacheKey).pipe(
+        observeOn(Rx.asyncScheduler),
+        share()
+      );
 
-        // watch the offline bundles for changes, turning them online...
-        const changeEvent$ = config.watch
-          ? watchBundlesForChanges$(bundleCacheEvent$, init.startTime).pipe(share())
-          : Rx.EMPTY;
-
-        // run workers to build all the online bundles, including the bundles turned online by changeEvent$
-        const workerEvent$ = runWorkers(config, init.cacheKey, bundleCacheEvent$, changeEvent$);
-
-        // kick off the event summarizer with an intialized event
-        const initEvent: OptimizerInitializedEvent = {
+      // initialization completes once all bundle caches have been resolved
+      const init$ = Rx.concat(
+        bundleCacheEvent$,
+        Rx.of<OptimizerInitializedEvent>({
           type: 'optimizer initialized',
-        };
+        })
+      );
 
-        // all of the events occuring within the optimizer
-        const event$ = Rx.merge(
-          Rx.concat(bundleCacheEvent$, Rx.of(initEvent)),
-          changeEvent$,
-          workerEvent$
-        );
+      // watch the offline bundles for changes, turning them online...
+      const changeEvent$ = config.watch
+        ? watchBundlesForChanges$(bundleCacheEvent$, startTime).pipe(share())
+        : Rx.EMPTY;
 
-        // summarize all events into public OptimizerMsg objects, which include states and
-        // the event which lead to that state
-        return summarizeOptimizerEvent$(config, init.startTime, event$);
-      }
-    )
+      // run workers to build all the online bundles, including the bundles turned online by changeEvent$
+      const workerEvent$ = runWorkers(config, cacheKey, bundleCacheEvent$, changeEvent$);
+
+      // create the stream that summarized all the events into state
+      // objects, which we're calling a store because it's sorta similar to
+      // the redux store model (events === actions)
+      return createStore<OptimizerEvent, OptimizerState>(
+        Rx.merge(init$, changeEvent$, workerEvent$),
+        {
+          phase: 'initializing',
+          compilerStates: [],
+          offlineBundles: [],
+          onlineBundles: [],
+          startTime,
+          durSec: 0,
+        },
+        createOptimizerReducer(config)
+      );
+    })
   );
 }

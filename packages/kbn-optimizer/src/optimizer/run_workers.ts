@@ -27,7 +27,6 @@ import { BundleCacheEvent } from './bundle_cache';
 import { ChangeEvent } from './watcher';
 import { assignBundlesToWorkers } from './assign_bundles_to_workers';
 import { observeWorker } from './observe_worker';
-import { OptimizerCacheKey } from './cache_keys';
 
 /**
  * Create a stream of all worker events, these include messages
@@ -44,7 +43,7 @@ import { OptimizerCacheKey } from './cache_keys';
  */
 export function runWorkers(
   config: OptimizerConfig,
-  optimizerCacheKey: OptimizerCacheKey,
+  optimizerCacheKey: unknown,
   bundleCache$: Rx.Observable<BundleCacheEvent>,
   changeEvent$: Rx.Observable<ChangeEvent>
 ) {

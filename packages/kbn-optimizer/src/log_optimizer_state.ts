@@ -20,20 +20,20 @@
 import { inspect } from 'util';
 
 import { ToolingLog } from '@kbn/dev-utils';
-import * as Rx from 'rxjs';
 import { tap } from 'rxjs/operators';
 
-import { OptimizerConfig, OptimizerMsg } from './optimizer';
+import { OptimizerConfig } from './optimizer';
+import { OptimizerUpdate$ } from './run_optimizer';
 import { CompilerMsg, pipeClosure } from './common';
 
 export function logOptimizerState(log: ToolingLog, config: OptimizerConfig) {
-  return pipeClosure((msg$: Rx.Observable<OptimizerMsg>) => {
+  return pipeClosure((update$: OptimizerUpdate$) => {
     const bundleStates = new Map<string, CompilerMsg['type']>();
     let loggedInit = false;
 
-    return msg$.pipe(
-      tap(msg => {
-        const { event, state } = msg;
+    return update$.pipe(
+      tap(update => {
+        const { event, state } = update;
 
         if (event?.type === 'worker stdio') {
           const chunk = event.chunk.toString('utf8');
@@ -118,7 +118,7 @@ export function logOptimizerState(log: ToolingLog, config: OptimizerConfig) {
           return true;
         }
 
-        throw new Error(`unhandled optimizer message: ${inspect(msg)}`);
+        throw new Error(`unhandled optimizer message: ${inspect(update)}`);
       })
     );
   });
