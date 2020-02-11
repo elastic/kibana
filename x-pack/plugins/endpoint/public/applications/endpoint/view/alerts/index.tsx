@@ -7,11 +7,11 @@
 import { memo, useState, useMemo, useCallback } from 'react';
 import React from 'react';
 import { EuiDataGrid } from '@elastic/eui';
-import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { useHistory } from 'react-router-dom';
-import * as selectors from '../../store/selectors';
+import * as selectors from '../../store/alerts/selectors';
 import { usePageId } from '../use_page_id';
+import { useAlertListSelector } from '../../store/alerts/alert_hooks';
 
 export const AlertIndex = memo(() => {
   usePageId('alertsPage');
@@ -30,9 +30,9 @@ export const AlertIndex = memo(() => {
     ];
   }, []);
 
-  const { pageIndex, pageSize, total } = useSelector(selectors.alertListPagination);
-  const urlFromNewPageSizeParam = useSelector(selectors.urlFromNewPageSizeParam);
-  const urlFromNewPageIndexParam = useSelector(selectors.urlFromNewPageIndexParam);
+  const { pageIndex, pageSize, total } = useAlertListSelector(selectors.alertListPagination);
+  const urlFromNewPageSizeParam = useAlertListSelector(selectors.urlFromNewPageSizeParam);
+  const urlFromNewPageIndexParam = useAlertListSelector(selectors.urlFromNewPageIndexParam);
 
   const onChangeItemsPerPage = useCallback(
     newPageSize => history.push(urlFromNewPageSizeParam(newPageSize)),
@@ -46,7 +46,7 @@ export const AlertIndex = memo(() => {
 
   const [visibleColumns, setVisibleColumns] = useState(() => columns.map(({ id }) => id));
 
-  const json = useSelector(selectors.alertListData);
+  const json = useAlertListSelector(selectors.alertListData);
 
   const renderCellValue = useMemo(() => {
     return ({ rowIndex, columnId }: { rowIndex: number; columnId: string }) => {
