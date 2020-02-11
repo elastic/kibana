@@ -9,6 +9,7 @@ import React from 'react';
 import url from 'url';
 import { fromQuery } from './url_helpers';
 import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
+import { InfraAppId } from '../../../../../../../plugins/infra/public';
 
 interface InfraQueryParams {
   time?: number;
@@ -17,7 +18,7 @@ interface InfraQueryParams {
 }
 
 interface Props extends EuiLinkAnchorProps {
-  app: string;
+  app: InfraAppId;
   path?: string;
   query: InfraQueryParams;
   children?: React.ReactNode;

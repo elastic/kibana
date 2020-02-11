@@ -24,6 +24,7 @@ import { InfraLink } from '../Links/InfraLink';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { fromQuery } from '../Links/url_helpers';
 import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
+import { InfraAppId } from '../../../../../../../plugins/infra/public';
 
 function getInfraMetricsQuery(transaction: Transaction) {
   const plus5 = new Date(transaction['@timestamp']);
@@ -56,7 +57,7 @@ interface InfraConfigItem {
   icon: string;
   label: string;
   condition?: boolean;
-  app: string;
+  app: InfraAppId;
   path: string;
   query: Record<string, any>;
 }

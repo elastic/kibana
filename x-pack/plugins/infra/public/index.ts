@@ -18,3 +18,5 @@ export const plugin: PluginInitializer<
 
 export { FORMATTERS } from './utils/formatters';
 export { InfraFormatterType } from './lib/lib';
+
+export type InfraAppId = 'logs' | 'metrics';
