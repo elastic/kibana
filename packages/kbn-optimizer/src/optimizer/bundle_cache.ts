@@ -34,7 +34,8 @@ export interface BundleNotCachedEvent {
     | 'missing optimizer cache key'
     | 'optimizer cache key mismatch'
     | 'missing cache key'
-    | 'cache key mismatch';
+    | 'cache key mismatch'
+    | 'cache disabled';
   diff?: string;
   bundle: Bundle;
 }
@@ -53,6 +54,15 @@ export function getBundleCacheEvent$(
     const eligibleBundles: Bundle[] = [];
 
     for (const bundle of config.bundles) {
+      if (!config.cache) {
+        events.push({
+          type: 'bundle not cached',
+          reason: 'cache disabled',
+          bundle,
+        });
+        continue;
+      }
+
       const cachedOptimizerCacheKeys = bundle.cache.getOptimizerCacheKey();
       if (!cachedOptimizerCacheKeys) {
         events.push({

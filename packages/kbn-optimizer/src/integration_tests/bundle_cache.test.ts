@@ -91,6 +91,47 @@ it('emits "bundle cached" event when everything is updated', async () => {
   `);
 });
 
+it('emits "bundle not cached" event when cacheKey is up to date but caching is disabled in config', async () => {
+  const config = OptimizerConfig.create({
+    repoRoot: MOCK_REPO_DIR,
+    pluginScanDirs: [],
+    pluginPaths: [Path.resolve(MOCK_REPO_DIR, 'plugins/foo')],
+    maxWorkerCount: 1,
+    cache: false,
+  });
+  const [bundle] = config.bundles;
+
+  const optimizerCacheKey = 'optimizerCacheKey';
+  const files = [
+    Path.resolve(MOCK_REPO_DIR, 'plugins/foo/public/ext.ts'),
+    Path.resolve(MOCK_REPO_DIR, 'plugins/foo/public/index.ts'),
+    Path.resolve(MOCK_REPO_DIR, 'plugins/foo/public/lib.ts'),
+  ];
+  const mtimes = await getMtimes(files);
+  const cacheKey = bundle.createCacheKey(files, mtimes);
+
+  bundle.cache.set({
+    cacheKey,
+    optimizerCacheKey,
+    files,
+    moduleCount: files.length,
+  });
+
+  const cacheEvents = await getBundleCacheEvent$(config, optimizerCacheKey)
+    .pipe(toArray())
+    .toPromise();
+
+  expect(cacheEvents).toMatchInlineSnapshot(`
+    Array [
+      Object {
+        "bundle": <Bundle>,
+        "reason": "cache disabled",
+        "type": "bundle not cached",
+      },
+    ]
+  `);
+});
+
 it('emits "bundle not cached" event when optimizerCacheKey is missing', async () => {
   const config = OptimizerConfig.create({
     repoRoot: MOCK_REPO_DIR,
