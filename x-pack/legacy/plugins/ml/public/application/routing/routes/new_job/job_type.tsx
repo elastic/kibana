@@ -28,13 +28,13 @@ const breadcrumbs = [
 
 export const jobTypeRoute: MlRoute = {
   path: '/jobs/new_job/step/job_type',
-  render: (props, config, deps) => <PageWrapper config={config} {...props} deps={deps} />,
+  render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs,
 };
 
-const PageWrapper: FC<PageProps> = ({ location, config, deps }) => {
+const PageWrapper: FC<PageProps> = ({ location, deps }) => {
   const { index, savedSearchId } = queryString.parse(location.search);
-  const { context } = useResolver(index, savedSearchId, config, basicResolvers(deps));
+  const { context } = useResolver(index, savedSearchId, deps.config, basicResolvers(deps));
   return (
     <PageLoader context={context}>
       <Page />

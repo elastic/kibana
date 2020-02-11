@@ -6,8 +6,14 @@
 
 import { useContext } from 'react';
 
-import { UiContext } from './ui_context';
+import { MlContext } from './ml_context';
 
-export const useUiChromeContext = () => {
-  return useContext(UiContext).chrome;
+export const useCurrentSavedSearch = () => {
+  const context = useContext(MlContext);
+
+  if (context.currentSavedSearch === undefined) {
+    throw new Error('currentSavedSearch is undefined');
+  }
+
+  return context.currentSavedSearch;
 };
