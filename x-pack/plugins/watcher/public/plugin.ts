@@ -76,7 +76,7 @@ export class WatcherUIPlugin implements Plugin<void, void, Dependencies, any> {
       }),
       icon: 'watchesApp',
       path: '/app/kibana#/management/elasticsearch/watcher/watches',
-      showOnHomePage: true,
+      showOnHomePage: false,
     };
 
     home.featureCatalogue.register(watcherHome);
@@ -85,9 +85,6 @@ export class WatcherUIPlugin implements Plugin<void, void, Dependencies, any> {
       if (valid) {
         watcherESApp.enable();
         watcherHome.showOnHomePage = true;
-      } else {
-        watcherESApp.disable();
-        watcherHome.showOnHomePage = false;
       }
     });
   }

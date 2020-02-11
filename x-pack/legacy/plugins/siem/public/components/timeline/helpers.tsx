@@ -14,7 +14,7 @@ import { BrowserFields } from '../../containers/source';
 import {
   IIndexPattern,
   Query,
-  esQuery,
+  EsQueryConfig,
   esFilters,
 } from '../../../../../../../src/plugins/data/public';
 
@@ -105,7 +105,7 @@ export const combineQueries = ({
   end,
   isEventViewer,
 }: {
-  config: esQuery.EsQueryConfig;
+  config: EsQueryConfig;
   dataProviders: DataProvider[];
   indexPattern: IIndexPattern;
   browserFields: BrowserFields;

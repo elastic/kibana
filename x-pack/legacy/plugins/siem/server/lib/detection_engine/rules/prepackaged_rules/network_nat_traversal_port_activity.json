@@ -4,10 +4,7 @@
     "Some networks may utilize these protocols but usage that is unfamiliar to local network administrators can be unexpected and suspicious. Because this port is in the ephemeral range, this rule may false under certain conditions, such as when an application server with a public IP address replies to a client which has used a UDP port in the range by coincidence. This is uncommon but such servers can be excluded."
   ],
   "index": [
-    "auditbeat-*",
-    "filebeat-*",
-    "packetbeat-*",
-    "winlogbeat-*"
+    "filebeat-*"
   ],
   "language": "kuery",
   "max_signals": 100,
@@ -38,5 +35,5 @@
     }
   ],
   "type": "query",
-  "version": 1
+  "version": 2
 }
