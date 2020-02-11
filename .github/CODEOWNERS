@@ -69,12 +69,12 @@
 # Canvas
 /x-pack/legacy/plugins/canvas/  @elastic/kibana-canvas
 
-# Logs & Metrics UI
+# Observability UIs
 /x-pack/legacy/plugins/infra/ @elastic/logs-metrics-ui
-
-# Ingest Manager
+/x-pack/plugins/infra/ @elastic/logs-metrics-ui
 /x-pack/plugins/ingest_manager/ @elastic/ingest
 /x-pack/legacy/plugins/ingest_manager/ @elastic/ingest
+/x-pack/plugins/observability/ @elastic/logs-metrics-ui @elastic/apm-ui @elastic/uptime @elastic/ingest
 
 # Machine Learning
 /x-pack/legacy/plugins/ml/  @elastic/ml-ui
