@@ -5,7 +5,7 @@
  */
 
 import { MatrixHistogram } from '../../lib/matrix_histogram';
-import { AppResolverOf, ChildResolverOf } from '../../lib/framework';
+import { AppResolverOf, ChildResolverOf, MatrixHistogramType } from '../../lib/framework';
 import { createOptions } from '../../utils/build_query/create_options';
 import { QuerySourceResolver } from '../sources/resolvers';
 import { SourceResolvers } from '../types';
@@ -31,7 +31,7 @@ export const createMatrixHistogramResolvers = (
       const options = {
         ...createOptions(source, args, info),
         stackByField: args.stackByField,
-        histogramType: args.histogramType,
+        histogramType: args.histogramType as MatrixHistogramType,
       };
       return libs.matrixHistogram.getMatrixHistogramData(req, options);
     },

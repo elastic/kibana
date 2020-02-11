@@ -96,23 +96,7 @@ export interface AuthenticationsActionGroupData {
 }
 
 export interface MatrixHistogramAdapter {
-  getAlertsHistogramData(
-    request: FrameworkRequest,
-    options: MatrixHistogramRequestOptions
-  ): Promise<MatrixHistogramOverTimeData>;
-  getAnomaliesHistogram(
-    request: FrameworkRequest,
-    options: MatrixHistogramRequestOptions
-  ): Promise<MatrixHistogramOverTimeData>;
-  getAuthenticationsHistogram(
-    request: FrameworkRequest,
-    options: MatrixHistogramRequestOptions
-  ): Promise<MatrixHistogramOverTimeData>;
-  getDnsHistogram(
-    request: FrameworkRequest,
-    options: MatrixHistogramRequestOptions
-  ): Promise<MatrixHistogramOverTimeData>;
-  getEventsHistogram(
+  getHistogramData(
     request: FrameworkRequest,
     options: MatrixHistogramRequestOptions
   ): Promise<MatrixHistogramOverTimeData>;
