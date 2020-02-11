@@ -4,11 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RequestHandlerContext } from 'src/core/server';
-import { annotationProvider } from './annotation';
+import { IScopedClusterClient } from 'src/core/server';
 
-export function annotationServiceProvider(context: RequestHandlerContext) {
-  return {
-    ...annotationProvider(context),
-  };
-}
+export function isAnnotationsFeatureAvailable(
+  callAsCurrentUser: IScopedClusterClient['callAsCurrentUser']
+): boolean;
