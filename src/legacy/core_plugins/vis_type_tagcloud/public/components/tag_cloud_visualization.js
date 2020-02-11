@@ -21,9 +21,9 @@ import React from 'react';
 import * as Rx from 'rxjs';
 import { take } from 'rxjs/operators';
 import { render, unmountComponentAtNode } from 'react-dom';
+import { I18nProvider } from '@kbn/i18n/react';
 
-import { getFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
-import { I18nContext } from 'ui/i18n';
+import { getFormat } from '../legacy_imports';
 
 import { Label } from './label';
 import { TagCloud } from './tag_cloud';
@@ -65,9 +65,9 @@ export function createTagCloudVisualization({ colors }) {
       this._containerNode.appendChild(this._feedbackNode);
       this._feedbackMessage = React.createRef();
       render(
-        <I18nContext>
+        <I18nProvider>
           <FeedbackMessage ref={this._feedbackMessage} />
-        </I18nContext>,
+        </I18nProvider>,
         this._feedbackNode
       );
 
