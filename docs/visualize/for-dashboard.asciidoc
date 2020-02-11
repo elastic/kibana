@@ -1,21 +1,21 @@
 [[for-dashboard]]
-== Dashboard controls
+== Dashboard tools
 
-Visualize comes with interactive controls and Markdown widgets that you can add to dashboards.
+Visualize comes with controls and Markdown tools that you can add to dashboards for an interactive experience.
 
 [float]
 [[controls]]
 === Controls
 experimental[]
 
-The Controls widget enables you to add interactive inputs
+The controls tool enables you to add interactive inputs
 on a dashboard.
 
-You can create two types of controls:
+You can add two types of interactive inputs:
 
-* Range slider - Filters data within a specified range of numbers. The minimum and maximum values are dynamically populated with the results of a min and max aggregation.
+* *Options list* - Filters content based on one or more specified options. The dropdown menu is dynamically populated with the results of a terms aggregation.
 
-* Options list - Filters content based on one or more specified options. The dropdown menu is dynamically populated with the results of a terms aggregation.
+* *Range slider* - Filters data within a specified range of numbers. The minimum and maximum values are dynamically populated with the results of a min and max aggregation.
 
 [role="screenshot"]
 image::images/dashboard-controls.png[]
@@ -24,16 +24,28 @@ image::images/dashboard-controls.png[]
 [[markdown-widget]]
 === Markdown
 
-The Markdown control is a text entry field that accepts GitHub-flavored Markdown text. When you enter your text, the control populates the results on the dashboard.
+The Markdown tool is a text entry field that accepts GitHub-flavored Markdown text. When you enter the text, the tool populates the results on the dashboard.
 
-Markdown is helpful when you want to include important information or instructions on your dashboard. For example, when you enter:
-
-`### Sample Flight data
-This dashboard contains sample data for you to play with. You can view it, search it, and interact with the visualizations. For more information about Kibana, check our [docs](https://www.elastic.co/guide/en/kibana/current/index).`
-
-The following displays:
-
-[role="screenshot"]
-image::images/markdown-example.png[]
+Markdown is helpful when you want to include important information, instructions, and images on your dashboard.
 
 For information about GitHub-flavored Markdown text, click *Help*.
+
+For example, when you enter:
+
+[role="screenshot"]
+image::images/markdown_example_1.png[]
+
+The following instructions are displayed:
+
+[role="screenshot"]
+image::images/markdown_example_2.png[]
+
+Or when you enter:
+
+[role="screenshot"]
+image::images/markdown_example_3.png[]
+
+The following image is displayed:
+
+[role="screenshot"]
+image::images/markdown_example_4.png[]
