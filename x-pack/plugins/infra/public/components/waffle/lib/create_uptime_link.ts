@@ -12,13 +12,13 @@ export const createUptimeLink = (
   options: InfraWaffleMapOptions,
   nodeType: InventoryItemType,
   node: InfraWaffleMapNode,
-  prefixPathWithBasePath: (path?: string, app?: string) => string | undefined
+  prefixPathWithBasePath: (app: string, path?: string) => string | undefined
 ) => {
   if (nodeType === 'host' && node.ip) {
     const path = `#/?search=host.ip:"${node.ip}"`;
-    return prefixPathWithBasePath(path, 'uptime');
+    return prefixPathWithBasePath('uptime', path);
   }
   const field = get(options, ['fields', nodeType], '');
   const path = `#/?search=${field ? field + ':' : ''}"${node.id}"`;
-  return prefixPathWithBasePath(path, 'uptime');
+  return prefixPathWithBasePath('uptime', path);
 };

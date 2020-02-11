@@ -25,31 +25,29 @@ import { LogEntryRatePage } from './log_entry_rate';
 import { LogsSettingsPage } from './settings';
 import { StreamPage } from './stream';
 
-export const LogsPageContent: React.FunctionComponent<{
-  logsPagePath: string;
-}> = ({ logsPagePath }) => {
+export const LogsPageContent: React.FunctionComponent = () => {
   const uiCapabilities = useKibana().services.application?.capabilities;
   const source = useSourceContext();
   const logAnalysisCapabilities = useLogAnalysisCapabilitiesContext();
 
   const streamTab = {
     title: streamTabTitle,
-    path: `${logsPagePath}/stream`,
+    path: '/stream',
   };
 
   const logRateTab = {
     title: logRateTabTitle,
-    path: `${logsPagePath}/log-rate`,
+    path: '/log-rate',
   };
 
   const logCategoriesTab = {
     title: logCategoriesTabTitle,
-    path: `${logsPagePath}/log-categories`,
+    path: '/log-categories',
   };
 
   const settingsTab = {
     title: settingsTabTitle,
-    path: `${logsPagePath}/settings`,
+    path: '/settings',
   };
 
   return (
@@ -91,7 +89,7 @@ export const LogsPageContent: React.FunctionComponent<{
             <Route path={logRateTab.path} component={LogEntryRatePage} />
             <Route path={logCategoriesTab.path} component={LogEntryCategoriesPage} />
             <Route path={settingsTab.path} component={LogsSettingsPage} />
-            <RedirectWithQueryParams from={`${logsPagePath}/analysis`} to={logRateTab.path} exact />
+            <RedirectWithQueryParams from={'/analysis'} to={logRateTab.path} exact />
           </Switch>
         </>
       )}

@@ -62,7 +62,7 @@ export const createNodeDetailLink = (
   nodeId: string,
   from: string,
   to: string,
-  prefixPathWithBasePath: (path?: string | undefined) => string | undefined
+  prefixPathWithBasePath: (app: string, path?: string | undefined) => string | undefined
 ) => {
   return getNodeDetailUrl({
     nodeType,
@@ -85,11 +85,11 @@ export const MetricsExplorerChartContextMenu = ({
   const getUrlForApp = useKibana().services.application?.getUrlForApp;
   const prependBasePath = useKibana().services.http?.basePath.prepend;
   const prefixPathWithBasePath = useCallback(
-    (path?: string) => {
+    (app: string, path?: string) => {
       if (!getUrlForApp || !prependBasePath) {
         return;
       }
-      return prependBasePath(getUrlForApp('infra', { path }));
+      return prependBasePath(getUrlForApp(app, { path }));
     },
     [getUrlForApp, prependBasePath]
   );

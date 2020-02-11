@@ -17,7 +17,6 @@ import { CoreStart, AppMountParameters } from 'kibana/public';
 import { EuiErrorBoundary } from '@elastic/eui';
 import { EuiThemeProvider } from '../../../observability/public';
 import { InfraFrontendLibs } from '../lib/lib';
-import { PageRouter } from '../routes';
 import { createStore } from '../store';
 import { ApolloClientContext } from '../utils/apollo_context';
 import { ReduxStateContextProvider } from '../utils/redux_context';
@@ -26,26 +25,19 @@ import {
   useUiSetting$,
   KibanaContextProvider,
 } from '../../../../../src/plugins/kibana_react/public';
+import { AppRouter } from '../routers';
 
 export const CONTAINER_CLASSNAME = 'infra-container-element';
-
-// Get the basePath with space ID etc, but without the actual route.
-const getRouterBasePath = (appBasePath: string) => {
-  let basePath: string = '';
-  const basePathParts: string[] = appBasePath.split('/');
-  basePathParts.pop();
-  basePath = basePathParts.join('/');
-  return basePath;
-};
 
 export async function startApp(
   libs: InfraFrontendLibs,
   core: CoreStart,
   plugins: object,
-  params: AppMountParameters
+  params: AppMountParameters,
+  Router: AppRouter
 ) {
   const { element, appBasePath } = params;
-  const history = createBrowserHistory({ basename: getRouterBasePath(appBasePath) });
+  const history = createBrowserHistory({ basename: appBasePath });
   const libs$ = new BehaviorSubject(libs);
   const store = createStore({
     apolloClient: libs$.pipe(pluck('apolloClient')),
@@ -64,7 +56,7 @@ export async function startApp(
                 <ApolloClientContext.Provider value={libs.apolloClient}>
                   <EuiThemeProvider darkMode={darkMode}>
                     <HistoryContext.Provider value={history}>
-                      <PageRouter history={history} />
+                      <Router history={history} />
                     </HistoryContext.Provider>
                   </EuiThemeProvider>
                 </ApolloClientContext.Provider>

@@ -49,7 +49,7 @@ export const RedirectToHostDetailViaIP = ({
   )('');
 
   if (name) {
-    return <Redirect to={`/metrics/host/${name}?${searchString}`} />;
+    return <Redirect to={`/detail/host/${name}?${searchString}`} />;
   }
 
   return (

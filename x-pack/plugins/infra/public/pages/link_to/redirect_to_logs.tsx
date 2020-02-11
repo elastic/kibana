@@ -30,5 +30,5 @@ export const RedirectToLogs = ({ location, match }: RedirectToLogsProps) => {
     replaceSourceIdInQueryString(sourceId)
   )('');
 
-  return <Redirect to={`/logs/stream?${searchString}`} />;
+  return <Redirect to={`/stream?${searchString}`} />;
 };

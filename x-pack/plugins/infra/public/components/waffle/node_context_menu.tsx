@@ -49,11 +49,11 @@ export const NodeContextMenu: React.FC<Props> = ({
   const getUrlForApp = useKibana().services.application?.getUrlForApp;
   const prependBasePath = useKibana().services.http?.basePath.prepend;
   const prefixPathWithBasePath = useCallback(
-    (path?: string, app?: string) => {
+    (app: string, path?: string) => {
       if (!getUrlForApp || !prependBasePath) {
         return;
       }
-      return prependBasePath(getUrlForApp(app ? app : 'infra', { path }));
+      return prependBasePath(getUrlForApp(app, { path }));
     },
     [getUrlForApp, prependBasePath]
   );
@@ -125,7 +125,7 @@ export const NodeContextMenu: React.FC<Props> = ({
       defaultMessage: '{inventoryName} APM traces',
       values: { inventoryName: inventoryModel.singularDisplayName },
     }),
-    href: prefixPathWithBasePath(`#traces?_g=()&kuery=${apmField}:"${node.id}"`, 'apm'),
+    href: prefixPathWithBasePath('apm', `#traces?_g=()&kuery=${apmField}:"${node.id}"`),
     'data-test-subj': 'viewApmTracesContextMenuItem',
     isDisabled: !showAPMTraceLink,
   };

@@ -70,7 +70,7 @@ export const RedirectToNodeLogs = ({
     replaceSourceIdInQueryString(sourceId)
   )('');
 
-  return <Redirect to={`/logs?${searchString}`} />;
+  return <Redirect to={`/?${searchString}`} />;
 };
 
 export const getNodeLogsUrl = ({
@@ -82,8 +82,8 @@ export const getNodeLogsUrl = ({
   nodeId: string;
   nodeType: InventoryItemType;
   time?: number;
-  prefixPathWithBasePath: (path?: string, app?: string) => string | undefined;
+  prefixPathWithBasePath: (app: string, path?: string) => string | undefined;
 }) => {
   const path = [`link-to/${nodeType}-logs/`, nodeId, ...(time ? [`?time=${time}`] : [])].join('');
-  return prefixPathWithBasePath(path);
+  return prefixPathWithBasePath('logs', path);
 };

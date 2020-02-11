@@ -167,10 +167,10 @@ describe('MetricsExplorerChartContextMenu', () => {
         'example-01',
         fromDateStrig,
         toDateStrig,
-        path => `mocked/${path}`
+        (app, path) => `${app}/${path}`
       );
       expect(link).toBe(
-        `mocked/link-to/host-detail/example-01?to=${to.valueOf()}&from=${from.valueOf()}`
+        `metrics/link-to/host-detail/example-01?to=${to.valueOf()}&from=${from.valueOf()}`
       );
     });
   });

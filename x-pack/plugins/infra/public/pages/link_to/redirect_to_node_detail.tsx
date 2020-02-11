@@ -27,7 +27,7 @@ export const RedirectToNodeDetail = ({
     getToFromLocation(location)
   )('');
 
-  return <Redirect to={`/metrics/detail/${nodeType}/${nodeId}?${searchString}`} />;
+  return <Redirect to={`/detail/${nodeType}/${nodeId}?${searchString}`} />;
 };
 
 export const getNodeDetailUrl = ({
@@ -41,9 +41,9 @@ export const getNodeDetailUrl = ({
   nodeId: string;
   to?: number;
   from?: number;
-  prefixPathWithBasePath: (path?: string, app?: string) => string | undefined;
+  prefixPathWithBasePath: (app: string, path?: string) => string | undefined;
 }) => {
   const args = to && from ? `?to=${to}&from=${from}` : '';
   const path = `link-to/${nodeType}-detail/${nodeId}${args}`;
-  return prefixPathWithBasePath(path);
+  return prefixPathWithBasePath('metrics', path);
 };

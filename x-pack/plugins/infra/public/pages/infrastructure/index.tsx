@@ -65,28 +65,28 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
                 title: i18n.translate('xpack.infra.homePage.inventoryTabTitle', {
                   defaultMessage: 'Inventory',
                 }),
-                path: `${match.path}/inventory`,
+                path: '/inventory',
               },
               {
                 title: i18n.translate('xpack.infra.homePage.metricsExplorerTabTitle', {
                   defaultMessage: 'Metrics Explorer',
                 }),
-                path: `${match.path}/explorer`,
+                path: '/explorer',
               },
               {
                 title: i18n.translate('xpack.infra.homePage.settingsTabTitle', {
                   defaultMessage: 'Settings',
                 }),
-                path: `${match.path}/settings`,
+                path: '/settings',
               },
             ]}
           />
         </AppNavigation>
 
         <Switch>
-          <Route path={`${match.path}/inventory`} component={SnapshotPage} />
+          <Route path={'/inventory'} component={SnapshotPage} />
           <Route
-            path={`${match.path}/explorer`}
+            path={'/explorer'}
             render={props => (
               <WithSource>
                 {({ configuration, createDerivedIndexPattern }) => (
@@ -106,7 +106,7 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
               </WithSource>
             )}
           />
-          <Route path={`${match.path}/settings`} component={MetricsSettingsPage} />
+          <Route path={'/settings'} component={MetricsSettingsPage} />
         </Switch>
       </ColumnarPage>
     </Source.Provider>

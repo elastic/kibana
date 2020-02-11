@@ -13,7 +13,7 @@ import { LogsPageProviders } from './page_providers';
 export const LogsPage: React.FunctionComponent<RouteComponentProps> = ({ match }) => {
   return (
     <LogsPageProviders>
-      <LogsPageContent logsPagePath={match.path} />
+      <LogsPageContent />
     </LogsPageProviders>
   );
 };

@@ -12,8 +12,8 @@ import {
 } from '../../../lib/lib';
 import { SnapshotMetricType } from '../../../../common/inventory_models/types';
 
-const prefixPathWithBasePath = (path?: string) => {
-  return `uptime/${path}`;
+const prefixPathWithBasePath = (app: string, path?: string) => {
+  return `${app}/${path}`;
 };
 
 const options: InfraWaffleMapOptions = {

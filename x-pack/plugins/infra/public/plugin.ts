@@ -27,6 +27,7 @@ import { HomePublicPluginSetup, HomePublicPluginStart } from '../../../../src/pl
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
 import { DataEnhancedSetup, DataEnhancedStart } from '../../data_enhanced/public';
+import { LogsRouter, MetricsRouter } from './routers';
 
 export type ClientSetup = void;
 export type ClientStart = void;
@@ -70,7 +71,13 @@ export class Plugin
         const [coreStart, pluginsStart] = await core.getStartServices();
         const plugins = getMergedPlugins(pluginsSetup, pluginsStart as ClientPluginsStart);
         const { startApp } = await import('./apps/start_app');
-        return startApp(this.composeLibs(coreStart, plugins), coreStart, plugins, params);
+        return startApp(
+          this.composeLibs(coreStart, plugins),
+          coreStart,
+          plugins,
+          params,
+          LogsRouter
+        );
       },
     });
 
@@ -87,7 +94,13 @@ export class Plugin
         const [coreStart, pluginsStart] = await core.getStartServices();
         const plugins = getMergedPlugins(pluginsSetup, pluginsStart as ClientPluginsStart);
         const { startApp } = await import('./apps/start_app');
-        return startApp(this.composeLibs(coreStart, plugins), coreStart, plugins, params);
+        return startApp(
+          this.composeLibs(coreStart, plugins),
+          coreStart,
+          plugins,
+          params,
+          MetricsRouter
+        );
       },
     });
 
