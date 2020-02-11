@@ -326,7 +326,6 @@ describe('Lens App', () => {
       interface SaveProps {
         newCopyOnSave: boolean;
         newTitle: string;
-        newState?: object;
       }
 
       let defaultArgs: jest.Mocked<{
