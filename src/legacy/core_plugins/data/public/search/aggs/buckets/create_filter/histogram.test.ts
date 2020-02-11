@@ -20,13 +20,13 @@ import { createFilterHistogram } from './histogram';
 import { AggConfigs } from '../../agg_configs';
 import { BUCKET_TYPES } from '../bucket_agg_types';
 import { IBucketAggConfig } from '../_bucket_agg_type';
-import { fieldFormats } from '../../../../../../../../plugins/data/public';
+import { fieldFormats, FieldFormatsGetConfigFn } from '../../../../../../../../plugins/data/public';
 
 jest.mock('ui/new_platform');
 
 describe('AggConfig Filters', () => {
   describe('histogram', () => {
-    const getConfig = (() => {}) as fieldFormats.GetConfigFn;
+    const getConfig = (() => {}) as FieldFormatsGetConfigFn;
     const getAggConfigs = () => {
       const field = {
         name: 'bytes',
