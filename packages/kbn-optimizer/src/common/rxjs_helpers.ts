@@ -27,17 +27,10 @@ type MapFn<T1, T2> = (item: T1, index: number) => T2;
  * Wrap an operator chain in a closure so that is can have some local
  * state. The `fn` is called each time the final observable is
  * subscribed so the pipeline/closure is setup for each subscription.
- *
- * This helper was created to avoid exposing the subscriber when all
- * it is needed for is subscribing to an internal obseravble. Using
- * `closure()` makes sure that only operators are used so errors
- * and subscriptions are managed correctly without worry.
  */
 export const pipeClosure = <T1, T2>(fn: Operator<T1, T2>): Operator<T1, T2> => {
   return (source: Rx.Observable<T1>) => {
-    return new Rx.Observable<T2>(subscriber => {
-      return fn(source).subscribe(subscriber);
-    });
+    return Rx.defer(() => fn(source));
   };
 };
 
@@ -69,46 +62,14 @@ export const maybeMap = <T1, T2>(fn: MapFn<T1, undefined | T2>): Operator<T1, T2
  */
 export const debounceTimeBuffer = <T>(ms: number) =>
   pipeClosure((source$: Rx.Observable<T>) => {
-    const buffer = new Set<T>();
+    const buffer: T[] = [];
     return source$.pipe(
-      tap(item => buffer.add(item)),
+      tap(item => buffer.push(item)),
       debounceTime(ms),
       map(() => {
         const items = Array.from(buffer);
-        buffer.clear();
+        buffer.length = 0;
         return items;
       })
     );
   });
-
-export const fromAsyncGenerator = <T>(fn: () => AsyncGenerator<T>) => {
-  return new Rx.Observable<T>(subscriber => {
-    const iterator = fn();
-
-    function subToPromise(promise: Promise<IteratorResult<T>>) {
-      promise.then(
-        result => {
-          if (subscriber.closed) {
-            return;
-          }
-
-          if (result.done) {
-            subscriber.complete();
-          } else {
-            subscriber.next(result.value);
-            subToPromise(iterator.next());
-          }
-        },
-        error => {
-          if (subscriber.closed) {
-            return;
-          }
-
-          subscriber.error(error);
-        }
-      );
-    }
-
-    subToPromise(iterator.next());
-  });
-};

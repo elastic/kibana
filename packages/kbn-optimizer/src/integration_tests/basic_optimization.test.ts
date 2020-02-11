@@ -20,9 +20,9 @@
 import Path from 'path';
 import Fs from 'fs';
 import { inspect } from 'util';
+
 import cpy from 'cpy';
 import del from 'del';
-
 import { toArray, tap } from 'rxjs/operators';
 import { createAbsolutePathSerializer } from '@kbn/dev-utils';
 import { runOptimizer, OptimizerConfig, OptimizerMsg } from '@kbn/optimizer';

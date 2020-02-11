@@ -115,7 +115,7 @@ export class Bundle {
    *
    * @param mtimes pre-fetched mtimes (ms || undefined) for all referenced files
    */
-  createCacheKey(files: string[], mtimes: Map<string, number | undefined>) {
+  createCacheKey(files: string[], mtimes: Map<string, number | undefined>): unknown {
     return {
       spec: this.toSpec(),
       mtimes: entriesToObject(
