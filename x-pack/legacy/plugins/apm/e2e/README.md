@@ -49,6 +49,23 @@ yarn cypress open
 yarn cypress run
 ```
 
+## Reproducing CI builds
+
+>This process is very slow compared to the local development described above. Consider that the CI must install and configure the build tools and create a Docker image for the project to run tests in a consistent manner.
+
+The Jenkins CI uses a shell script to prepare Kibana:
+
+```shell
+# Prepare and run Kibana locally
+$ x-pack/legacy/plugins/apm/e2e/ci/prepare-kibana.sh
+# Build Docker image for Kibana
+$ docker build --tag cypress x-pack/legacy/plugins/apm/e2e/ci 
+# Run Docker image
+$ docker run --rm -t --user "$(id -u):$(id -g)" \
+    -v `pwd`:/app --network="host" \
+    --name cypress cypress
+```
+
 ## Connect to Elasticsearch on Cloud (internal devs only)
 
 Find the credentials for the cluster [here](https://github.com/elastic/apm-dev/blob/master/docs/credentials/apm-ui-clusters.md#e2e-cluster). The cloud instance contains the static data set
