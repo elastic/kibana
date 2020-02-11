@@ -17,29 +17,20 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
 import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
 import { ComponentRegistry } from './component_registry';
-import { AdvancedSettingsSetup, AdvancedSettingsStart } from './types';
-import { FeatureCatalogueCategory, HomePublicPluginSetup } from '../../home/public';
+import { AdvancedSettingsSetup, AdvancedSettingsStart, AdvancedSettingsPluginSetup } from './types';
+import { registerAdvSettingsMgmntApp } from './management_app';
 
 const component = new ComponentRegistry();
 
 export class AdvancedSettingsPlugin
-  implements Plugin<AdvancedSettingsSetup, AdvancedSettingsStart> {
-  public setup(core: CoreSetup, { home }: { home: HomePublicPluginSetup }) {
-    home.featureCatalogue.register({
-      id: 'advanced_settings',
-      title: i18n.translate('advancedSettings.advancedSettingsLabel', {
-        defaultMessage: 'Advanced Settings',
-      }),
-      description: i18n.translate('advancedSettings.advancedSettingsDescription', {
-        defaultMessage: 'Directly edit settings that control behavior in Kibana.',
-      }),
-      icon: 'advancedSettingsApp',
-      path: '/app/kibana#/management/kibana/settings',
-      showOnHomePage: false,
-      category: FeatureCatalogueCategory.ADMIN,
+  implements Plugin<AdvancedSettingsSetup, AdvancedSettingsStart, AdvancedSettingsPluginSetup> {
+  public setup(core: CoreSetup, { management }: AdvancedSettingsPluginSetup) {
+    registerAdvSettingsMgmntApp({
+      management,
+      getStartServices: core.getStartServices,
+      componentRegistry: component.start,
     });
 
     return {

@@ -59,7 +59,7 @@ export function updateLandingPage(version) {
   }
 
   render(
-    <EuiPageContent horizontalPosition="center">
+    <EuiPageContent horizontalPosition="center" data-test-subj="managementHome">
       <I18nContext>
         <div>
           <div className="eui-textCenter">
