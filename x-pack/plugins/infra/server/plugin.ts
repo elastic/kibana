@@ -26,7 +26,6 @@ import { InfraServerPluginDeps } from './lib/adapters/framework';
 import { METRICS_FEATURE, LOGS_FEATURE } from './features';
 import { UsageCollector } from './usage/usage_collector';
 import { InfraStaticSourceConfiguration } from './lib/sources/types';
-import { APP_ID } from '.';
 
 export const config = {
   schema: schema.object({
@@ -130,7 +129,7 @@ export class InfraServerPlugin {
 
     plugins.home.sampleData.addAppLinksToSampleDataset('logs', [
       {
-        path: `/app/${APP_ID}#/logs`,
+        path: `/app/logs`,
         label: logsSampleDataLinkLabel,
         icon: 'logsApp',
       },

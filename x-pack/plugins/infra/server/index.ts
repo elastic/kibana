@@ -9,7 +9,6 @@ import { config, InfraConfig, InfraServerPlugin } from './plugin';
 import { savedObjectMappings } from './saved_objects';
 
 export { config, InfraConfig, savedObjectMappings };
-export const APP_ID = 'infra';
 
 export function plugin(context: PluginInitializerContext) {
   return new InfraServerPlugin(context);
