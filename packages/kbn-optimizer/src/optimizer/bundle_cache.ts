@@ -84,7 +84,7 @@ export function getBundleCacheEvent$(
         continue;
       }
 
-      if (!bundle.cache.getCacheKeys()) {
+      if (!bundle.cache.getCacheKey()) {
         events.push({
           type: 'bundle not cached',
           reason: 'missing cache key',
@@ -107,7 +107,7 @@ export function getBundleCacheEvent$(
 
     for (const bundle of eligibleBundles) {
       const diff = diffCacheKey(
-        bundle.cache.getCacheKeys(),
+        bundle.cache.getCacheKey(),
         bundle.createCacheKey(bundle.cache.getReferencedFiles() || [], mtimes)
       );
 

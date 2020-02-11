@@ -20,7 +20,7 @@
 import Fs from 'fs';
 import Path from 'path';
 
-interface State {
+export interface State {
   optimizerCacheKey?: unknown;
   cacheKey?: unknown;
   moduleCount?: number;
@@ -32,10 +32,6 @@ const DEFAULT_STATE_JSON = JSON.stringify(DEFAULT_STATE);
 
 /**
  * Helper to read and update metadata for bundles.
- *
- * Currently only tracks the module count of bundles, allowing
- * us to assign bundles to workers in a way that ensures an even
- * distribution of modules to be built
  */
 export class BundleCache {
   private state: State | undefined = undefined;
@@ -74,10 +70,6 @@ export class BundleCache {
     return this.state;
   }
 
-  update(updater: (state: State) => State) {
-    this.set(updater(this.get()));
-  }
-
   set(updated: State) {
     this.state = updated;
     if (this.path) {
@@ -95,7 +87,7 @@ export class BundleCache {
     return this.get().files;
   }
 
-  public getCacheKeys() {
+  public getCacheKey() {
     return this.get().cacheKey;
   }
 
