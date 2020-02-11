@@ -20,18 +20,16 @@ import {
   ResolverAction,
   ResolverStore,
   ProcessEvent,
+  SideEffectSimulator,
 } from '../types';
 import { MockResizeObserver } from './mock_resize_observer';
 import { SideEffectContext } from './side_effect_context';
 import { applyMatrix3 } from '../lib/vector2';
+import { sideEffectSimulator } from './__tests__/side_effect_simulator';
 
 describe('useCamera on an unpainted element', () => {
   let element: HTMLElement;
   let projectionMatrix: Matrix3;
-  let time: number;
-  let frameRequestedCallbacksIDCounter: number;
-  let frameRequestedCallbacks: Map<number, FrameRequestCallback>;
-  let provideAnimationFrame: () => void;
   const testID = 'camera';
   let reactRenderResult: RenderResult;
   let simulateElementResize: (target: Element, contentRect: DOMRect) => void;
@@ -39,6 +37,7 @@ describe('useCamera on an unpainted element', () => {
   let store: ResolverStore;
   let sideEffectors: jest.Mocked<Omit<SideEffectors, 'ResizeObserver'>> &
     Pick<SideEffectors, 'ResizeObserver'>;
+  let controls: SideEffectSimulator['controls'];
   beforeEach(async () => {
     actions = [];
     const middleware: ResolverMiddleware = () => next => action => {
@@ -54,39 +53,17 @@ describe('useCamera on an unpainted element', () => {
       return <div data-testid={testID} onMouseDown={onMouseDown} ref={ref} />;
     };
 
-    time = 0;
-    frameRequestedCallbacksIDCounter = 0;
-    frameRequestedCallbacks = new Map();
-    provideAnimationFrame = () => {
-      // TODO should we 'act'?
-      act(() => {
-        /**
-         * Iterate the values, and clear the data set before calling the callbacks because the callbacks will repopulate the dataset synchronously in this testing framework.
-         */
-        const values = [...frameRequestedCallbacks.values()];
-        frameRequestedCallbacks.clear();
-        for (const callback of values) {
-          callback(time);
-        }
-      });
-    };
-
     jest
       .spyOn(Element.prototype, 'getBoundingClientRect')
       .mockImplementation(function(this: Element) {
         return MockResizeObserver.contentRectForElement(this);
       });
 
+    const simulator = sideEffectSimulator();
+    controls = simulator.controls;
+
     sideEffectors = {
-      timestamp: jest.fn(() => time),
-      requestAnimationFrame: jest.fn((callback: FrameRequestCallback): number => {
-        const id = frameRequestedCallbacksIDCounter++;
-        frameRequestedCallbacks.set(id, callback);
-        return id;
-      }),
-      cancelAnimationFrame: jest.fn((id: number) => {
-        frameRequestedCallbacks.delete(id);
-      }),
+      ...simulator.mock,
       ResizeObserver: MockResizeObserver,
     };
 
@@ -188,7 +165,6 @@ describe('useCamera on an unpainted element', () => {
       expect(sideEffectors.requestAnimationFrame).not.toHaveBeenCalled();
     });
     describe('when the camera begins animation', () => {
-      const initialTime = 0;
       let process: ProcessEvent;
       beforeEach(() => {
         /**
@@ -200,10 +176,11 @@ describe('useCamera on an unpainted element', () => {
             .processNodePositions.keys(),
         ];
         process = processes[processes.length - 1];
+        controls.time = 0;
         const action: ResolverAction = {
           type: 'userBroughtProcessIntoView',
           payload: {
-            time: initialTime,
+            time: controls.time,
             process,
           },
         };
@@ -215,15 +192,15 @@ describe('useCamera on an unpainted element', () => {
 
       it('should request animation frames in a loop', () => {
         expect(sideEffectors.requestAnimationFrame).toHaveBeenCalledTimes(1);
-        time = 100;
-        provideAnimationFrame();
+        controls.time = 100;
+        controls.provideAnimationFrame();
         expect(sideEffectors.requestAnimationFrame).toHaveBeenCalledTimes(2);
-        time = 900;
-        provideAnimationFrame();
+        controls.time = 900;
+        controls.provideAnimationFrame();
         expect(sideEffectors.requestAnimationFrame).toHaveBeenCalledTimes(3);
         // Animation lasts 1000ms, so this should end it
-        time = 1001;
-        provideAnimationFrame();
+        controls.time = 1001;
+        controls.provideAnimationFrame();
         // Doesn't ask again, still 3
         expect(sideEffectors.requestAnimationFrame).toHaveBeenCalledTimes(3);
       });

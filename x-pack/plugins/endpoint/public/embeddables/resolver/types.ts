@@ -253,6 +253,17 @@ export interface SideEffectors {
   ResizeObserver: ResizeObserverConstructor;
 }
 
+type MockSideEffectors = jest.Mocked<Omit<SideEffectors, 'ResizeObserver'>> &
+  Pick<SideEffectors, 'ResizeObserver'>;
+
+export interface SideEffectSimulator {
+  controls: {
+    time: number;
+    provideAnimationFrame: () => void;
+  };
+  mock: Pick<MockSideEffectors, 'requestAnimationFrame' | 'cancelAnimationFrame' | 'timestamp'>;
+}
+
 export type ResolverMiddleware = Middleware<{}, ResolverState, Dispatch<ResolverAction>>;
 
 export type Selectors = typeof selectors;
