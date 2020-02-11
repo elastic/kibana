@@ -36,7 +36,7 @@ import { AdvancedSettingsVoiceAnnouncement } from './components/advanced_setting
 import { IUiSettingsClient, DocLinksStart, ToastsStart } from '../../../../core/public/';
 import { ComponentRegistry } from '../';
 
-import { toEditableConfig, DEFAULT_CATEGORY } from './lib';
+import { getAriaName, toEditableConfig, DEFAULT_CATEGORY } from './lib';
 
 import { FieldSetting, IQuery } from './types';
 
@@ -78,7 +78,7 @@ export class AdvancedSettingsComponent extends Component<
     this.categories = this.initCategories(this.groupedSettings);
     this.categoryCounts = this.initCategoryCounts(this.groupedSettings);
 
-    const parsedQuery = Query.parse(this.props.queryText || '');
+    const parsedQuery = Query.parse(this.props.queryText ? getAriaName(this.props.queryText) : '');
     this.state = {
       query: parsedQuery,
       footerQueryMatched: false,

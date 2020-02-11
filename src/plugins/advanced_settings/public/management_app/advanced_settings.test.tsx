@@ -19,19 +19,14 @@
 
 import React from 'react';
 import { Observable } from 'rxjs';
-import { shallow } from 'enzyme';
+import { ReactWrapper } from 'enzyme';
+import { mountWithI18nProvider } from 'test_utils/enzyme_helpers';
 import dedent from 'dedent';
 import { UiSettingsParams, UserProvidedValues, UiSettingsType } from '../../../../core/public';
 import { FieldSetting } from './types';
 import { AdvancedSettingsComponent } from './advanced_settings';
-import {
-  notificationServiceMock,
-  docLinksServiceMock,
-  uiSettingsServiceMock,
-} from '../../../../core/public/mocks';
+import { notificationServiceMock, docLinksServiceMock } from '../../../../core/public/mocks';
 import { ComponentRegistry } from '../component_registry';
-
-import { advancedSettingsMock } from '../mocks';
 
 jest.mock('ui/new_platform', () => ({
   npStart: mockConfig(),
@@ -239,31 +234,47 @@ function mockConfig() {
 
 describe('AdvancedSettings', () => {
   it('should render specific setting if given setting key', async () => {
-    const component = shallow(
+    const component = mountWithI18nProvider(
       <AdvancedSettingsComponent
         queryText="test:string:setting"
         enableSaving={true}
-        toasts={{} as any}
-        dockLinks={{} as any}
-        uiSettings={uiSettingsServiceMock.createStartContract()}
+        toasts={notificationServiceMock.createStartContract().toasts}
+        dockLinks={docLinksServiceMock.createStartContract().links}
+        uiSettings={mockConfig().core.uiSettings}
         componentRegistry={new ComponentRegistry().start}
       />
     );
-    expect(component).toMatchSnapshot();
+
+    expect(
+      component
+        .find('Field')
+        .filterWhere(
+          (n: ReactWrapper) =>
+            (n.prop('setting') as Record<string, string>).name === 'test:string:setting'
+        )
+    ).toHaveLength(1);
   });
 
   it('should render read-only when saving is disabled', async () => {
-    const component = shallow(
+    const component = mountWithI18nProvider(
       <AdvancedSettingsComponent
         queryText="test:string:setting"
         enableSaving={false}
         toasts={notificationServiceMock.createStartContract().toasts}
         dockLinks={docLinksServiceMock.createStartContract().links}
-        uiSettings={uiSettingsServiceMock.createStartContract()}
-        componentRegistry={advancedSettingsMock.createStartContract().component}
+        uiSettings={mockConfig().core.uiSettings}
+        componentRegistry={new ComponentRegistry().start}
       />
     );
 
-    expect(component.find('Form').prop('enableSaving')).toBe(false);
+    expect(
+      component
+        .find('Field')
+        .filterWhere(
+          (n: ReactWrapper) =>
+            (n.prop('setting') as Record<string, string>).name === 'test:string:setting'
+        )
+        .prop('enableSaving')
+    ).toBe(false);
   });
 });
