@@ -1,14 +1,17 @@
 import React from "react";
 
 export default function TestRunnerItem ({historicalItem, testRunnerItem}) {
+  const { type } = testRunnerItem;
+  const typeHref = href(type);
+
   return (
     <div>
       <div>
-        {testRunnerItem.type}
+        {type}
       </div>
       <a
         className="App-link"
-        href={href(testRunnerItem.type)}
+        href={typeHref(historicalItem)}
         target="_blank"
         rel="noopener noreferrer"
       >
@@ -23,5 +26,13 @@ function timestamp(historicalItem) {
 }
 
 function href(type) {
-  return `target/kibana-coverage/${type}-combined/index.html`;
+  const prefix = 'https://storage.cloud.google.com/kibana-ci-artifacts/jobs/elastic%2Bkibana%2Bcode-coverage';
+  const postfix = `target/kibana-coverage/${type}-combined/index.html`;
+  return function hrefInner(historicalItem) {
+    return `${prefix}/${jobNum(historicalItem)}/${timestamp(historicalItem)}/${postfix}`;
+  }
+}
+
+function jobNum(historicalItem) {
+  return [.../coverage\/(\d*)\/\d*-.*Z/gm.exec(historicalItem)][1];
 }
