@@ -23,10 +23,6 @@ import { uiModules } from 'ui/modules';
 import { capabilities } from 'ui/capabilities';
 import { I18nContext } from 'ui/i18n';
 import indexTemplate from './index.html';
-import {
-  FeatureCatalogueRegistryProvider,
-  FeatureCatalogueCategory,
-} from 'ui/registry/feature_catalogue';
 
 import React from 'react';
 import { AdvancedSettings } from './advanced_settings';
@@ -82,20 +78,4 @@ management.getSection('kibana').register('settings', {
   }),
   order: 20,
   url: '#/management/kibana/settings',
-});
-
-FeatureCatalogueRegistryProvider.register(() => {
-  return {
-    id: 'advanced_settings',
-    title: i18n.translate('kbn.management.settings.advancedSettingsLabel', {
-      defaultMessage: 'Advanced Settings',
-    }),
-    description: i18n.translate('kbn.management.settings.advancedSettingsDescription', {
-      defaultMessage: 'Directly edit settings that control behavior in Kibana.',
-    }),
-    icon: 'advancedSettingsApp',
-    path: '/app/kibana#/management/kibana/settings',
-    showOnHomePage: false,
-    category: FeatureCatalogueCategory.ADMIN,
-  };
 });

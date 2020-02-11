@@ -6,14 +6,14 @@
 
 import React from 'react';
 import { npStart } from 'ui/new_platform';
-import { autocomplete, IIndexPattern } from 'src/plugins/data/public';
+import { QuerySuggestion, IIndexPattern } from 'src/plugins/data/public';
 import { RendererFunction } from '../utils/typed_react';
 
 interface WithKueryAutocompletionLifecycleProps {
   children: RendererFunction<{
     isLoadingSuggestions: boolean;
     loadSuggestions: (expression: string, cursorPosition: number, maxSuggestions?: number) => void;
-    suggestions: autocomplete.QuerySuggestion[];
+    suggestions: QuerySuggestion[];
   }>;
   indexPattern: IIndexPattern;
 }
@@ -25,7 +25,7 @@ interface WithKueryAutocompletionLifecycleState {
     expression: string;
     cursorPosition: number;
   } | null;
-  suggestions: autocomplete.QuerySuggestion[];
+  suggestions: QuerySuggestion[];
 }
 
 export class WithKueryAutocompletion extends React.Component<
