@@ -3,14 +3,12 @@
 The Kibana alerts and actions UI plugin provides a user interface for managing alerts and actions. 
 As a developer you can reuse and extend buildin alerts and actions UI functionality:
 
-- Create and register new alert type.
-- Create and register new action type.
-- Embed Create Alert flyout to Kibana plugins.
+- Create and register a new Alert Type.
+- Create and register a new Action Type.
+- Embed the Create Alert flyout within any Kibana plugin.
 
-To enable Alerts and Actions UI functionality, the next configuration settings should be provided:
+To enable Alerts and Actions UIs, the following configuration settings are needed:
 ```
-xpack.alerting.enabled: true
-xpack.actions.enabled: true
 xpack.triggers_actions_ui.enabled: true
 xpack.triggers_actions_ui.createAlertUiEnabled: true
 ```
@@ -33,7 +31,7 @@ Table of Contents
       - [GROUPED BY expression component](#grouped-by-expression-component)
       - [FOR THE LAST expression component](#for-the-last-expression-component)
       - [THRESHOLD expression component](#threshold-expression-component)
-    - [Embed Create Alert flyout to Kibana plugins](#embed-create-alert-flyout-to-kibana-plugins)
+    - [Embed the Create Alert flyout within any Kibana plugin](#embed-the-create-alert-flyout-within-any-kibana-plugin)
   - [Build and register Action Types](#build-and-register-action-types)
     - [Built-in Action Types](#built-in-action-types)
       - [Server log](#server-log)
@@ -48,15 +46,15 @@ Table of Contents
 
 ## Built-in Alert Types
 
-Kibana ships with a built-in alert types:
+Kibana ships with several built-in alert types:
 
 |Type|Id|Description|
 |---|---|---|
 |[Index Threshold](#index-threshold-alert)|`threshold`|Index Threshold Alert|
 
-Every alert type should has a server side registration and can has a client side. 
+Every alert type must be registered server side, and can optionally be registered client side.
 Only alert types registered on both - client and server will be displayed in the Create Alert flyout, as a part of UI.
-Built-in alert types UI is located under the folder `x-pack/plugins/triggers_actions_ui/public/application/components/builtin_alert_types`
+Built-in alert types UI are located under the folder `x-pack/plugins/triggers_actions_ui/public/application/components/builtin_alert_types`
 and this is a file `x-pack/plugins/triggers_actions_ui/public/application/components/builtin_alert_types/index.ts` for client side registration.
 
 ### Index Threshold Alert
@@ -87,7 +85,7 @@ Index Threshold Alert form with validation:
 
 ## Alert type model definition
 
-Each alert type should be defined as `AlertTypeModel` object with the next properties:
+Each alert type should be defined as `AlertTypeModel` object with the these properties:
 ```
   id: string;
   name: string;
@@ -105,7 +103,7 @@ Each alert type should be defined as `AlertTypeModel` object with the next prope
 |alertParamsExpression|React functional component for building UI of the current alert type params.|
 |defaultActionMessage|Optional property for providing default message for all added actions with `message` property.|
 
-IMPORTANT! Current UI support only one default action group. 
+IMPORTANT! The current UI support only a single action group. 
 Action groups is mapped from server API result for [GET /api/alert/types: List alert types](https://github.com/elastic/kibana/tree/master/x-pack/legacy/plugins/alerting#get-apialerttypes-list-alert-types).
 Server side alert type model:
 ```
@@ -119,12 +117,12 @@ export interface AlertType {
   executor: ({ services, params, state }: AlertExecutorOptions) => Promise<State | void>;
 }
 ```
-Only one default (which means first item of the array) action group is displayed in the current UI.
+Only the default (which means first item of the array) action group is displayed in the current UI.
 Design of user interface and server API for multiple action groups is on the stage of discussion and development.
 
 ## Register alert type model
 
-There are two ways of registration new alert type:
+There are two ways of registering a new alert type:
 
 1. Directly in `triggers_actions_ui` plugin. In this case alert type will be available in Create Alert flyout of the Alerts and Actions management section.
 Registration code for a new alert type model should be added to the file `x-pack/plugins/triggers_actions_ui/public/application/components/builtin_alert_types/index.ts`
@@ -143,7 +141,7 @@ triggers_actions_ui.alertTypeRegistry.register(getSomeNewAlertType());
 
 ## Create and register new alert type UI example
 
-To be able to add UI for a new Alert type the proper server API https://github.com/elastic/kibana/tree/master/x-pack/legacy/plugins/alerting#example recommended to be done first.
+Before registering a UI for a new Alert Type, you should first register the type on the server-side by following the Alerting guide: https://github.com/elastic/kibana/tree/master/x-pack/legacy/plugins/alerting#example 
 
 Alert type UI is expected to be defined as `AlertTypeModel` object.
 
@@ -220,7 +218,7 @@ export const ExampleExpression: React.FunctionComponent<ExampleProps> = ({
 ```
 This alert type form becomes available, when the card of `Example Alert Type` is selected.
 Each expression word here is `EuiExpression` component and implement the basic aggregation, grouping and comparison methods.
-Expression components, which can be embed to different alert types is described here [Common expression components](#common-expression-components).
+Expression components, which can be embed to different alert types are described here [Common expression components](#common-expression-components).
 
 3. Define alert type params validation using the property of `AlertTypeModel` `validate`: 
 ```
@@ -257,10 +255,10 @@ import { getAlertType as getExampledAlertType } from './example';
 alertTypeRegistry.register(getExampledAlertType());
 ```
 
-After this four steps new `Example Alert Type` is available in UI of Create flyout:
+After these four steps, the new `Example Alert Type` is available in UI of Create flyout:
 ![Example Alert Type is in the select cards list](https://i.imgur.com/j71AEQV.png)
 
-Click on select cart for `Example Alert Type` will open expression form that was created in step 2:
+Click on select card for `Example Alert Type` will open expression form that was created in step 2:
 ![Example Alert Type expression with validation](https://i.imgur.com/Z0jIwCS.png)
 
 ## Common expression components
@@ -477,9 +475,9 @@ interface ThresholdExpressionProps {
 |customComparators|(Optional) List of comparators that replaces the default options defined in constants `x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts`.|
 |popupPosition|(Optional) expression popup position. Default is `downLeft`, recomemded to change it for a small parent window space.|
 
-## Embed Create Alert flyout to Kibana plugins
+## Embed the Create Alert flyout within any Kibana plugin
 
-To embed Create Alert flyout to any place in Kibana the next code should be specified under the React component file:
+Follow the instructions bellow to embed the Create Alert flyout within any Kibana plugin:
 1. Add TriggersAndActionsUIPublicPluginSetup to Kibana plugin setup dependencies:
 
 ```
@@ -586,7 +584,7 @@ Kibana ships with a set of built-in action types UI:
 |[Webhook](#webhook)|`.webhook`|Send a payload to a web service using HTTP POST or PUT|
 |[PagerDuty](#pagerduty)|`.pagerduty`|Trigger, resolve, or acknowlege an incident to a PagerDuty service|
 
-Every action type should has a server side registration and can has a client side. 
+Every action type should be registered server side, and can be optionally registered client side. 
 Only action types registered on both - client and server will be displayed in Alerts and Actions UI.
 Built-in action types UI is located under the folder `x-pack/plugins/triggers_actions_ui/public/application/components/builtin_action_types`
 and this is a file `x-pack/plugins/triggers_actions_ui/public/application/components/builtin_action_types/index.ts` for client side registration.
@@ -841,7 +839,7 @@ Each action type should be defined as `ActionTypeModel` object with the next pro
 
 ## Register action type model
 
-There are two ways of registration new action type UI:
+There are two ways to register a new action type UI:
 
 1. Directly in `triggers_actions_ui` plugin. In this case action type will be available in the Alerts and Actions management section.
 Registration code for a new action type model should be added to the file `x-pack/plugins/triggers_actions_ui/public/application/components/builtin_action_types/index.ts`
@@ -860,7 +858,7 @@ triggers_actions_ui.actionTypeRegistry.register(getSomeNewActionType());
 
 ## Create and register new action type UI
 
-Before starting the UI implementation, the proper [server side registration](https://github.com/elastic/kibana/tree/master/x-pack/plugins/actions#kibana-actions-configuration) should be done first.
+Before starting the UI implementation, the [server side registration](https://github.com/elastic/kibana/tree/master/x-pack/plugins/actions#kibana-actions-configuration) should be done first.
 
 Action type UI is expected to be defined as `ActionTypeModel` object.
 
@@ -1037,17 +1035,16 @@ import { getActionType as getExampledActionType } from './example';
 actionTypeRegistry.register(getExampledActionType());
 ```
 
-After this four steps new `Example Action Type` is available in UI of Create connector:
+After these four steps, the new `Example Action Type` is available in UI of Create connector:
 ![Example Action Type is in the select cards list](https://i.imgur.com/PTYdBos.png)
 
-Click on select cart for `Example Action Type` will open connector form that was created in step 2:
+Clicking on the select card for `Example Action Type` will open the connector form that was created in step 2:
 ![Example Action Type connector](https://i.imgur.com/KdxAXAs.png)
 
 Example Action Type is in the select cards list of Create Alert flyout:
 ![Example Action Type is in the select cards list of Create Alert flyout](https://i.imgur.com/CSRBkFe.png)
 
-Click on select cart for `Example Action Type` will open action type Add Action form 
-with possibility to select an existing connector of this type:
+Clicking on the select card for `Example Action Type` will open the action type Add Action form:
 ![Example Action Type with existing connectors list](https://i.imgur.com/8FA3NAW.png)
 
 or create a new connector:
