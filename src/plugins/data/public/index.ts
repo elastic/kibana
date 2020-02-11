@@ -20,16 +20,6 @@
 import { PluginInitializerContext } from '../../../core/public';
 
 import {
-  doesKueryExpressionHaveLuceneSyntaxError,
-  fromKueryExpression,
-  toElasticsearchQuery,
-  nodeTypes,
-  buildEsQuery,
-  getEsQueryConfig,
-  buildQueryFromFilters,
-  luceneStringToDsl,
-  decorateQuery,
-
   // filters
   FILTERS,
   buildEmptyFilter,
@@ -106,25 +96,6 @@ export const esFilters = {
   changeTimeFilter,
   mapAndFlattenFilters,
   extractTimeFilter,
-};
-
-/*
- * esQuery\esKuery namespaces:
- */
-
-export const esKuery = {
-  nodeTypes,
-  doesKueryExpressionHaveLuceneSyntaxError,
-  fromKueryExpression,
-  toElasticsearchQuery,
-};
-
-export const esQuery = {
-  buildEsQuery,
-  getEsQueryConfig,
-  buildQueryFromFilters,
-  luceneStringToDsl,
-  decorateQuery,
 };
 
 /*

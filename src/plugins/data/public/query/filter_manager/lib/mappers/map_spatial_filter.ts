@@ -24,7 +24,7 @@ export const mapSpatialFilter = (filter: Filter) => {
     filter.meta &&
     filter.meta.key &&
     filter.meta.alias &&
-    filter.meta.type === esFilters.FILTERS.SPATIAL_FILTER
+    filter.meta.type === FILTERS.SPATIAL_FILTER
   ) {
     return {
       key: filter.meta.key,

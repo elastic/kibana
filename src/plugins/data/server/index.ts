@@ -21,11 +21,6 @@ import { PluginInitializerContext } from '../../../core/server';
 import { DataServerPlugin, DataPluginSetup, DataPluginStart } from './plugin';
 
 import {
-  nodeTypes,
-  fromKueryExpression,
-  toElasticsearchQuery,
-  buildEsQuery,
-  getEsQueryConfig,
   buildQueryFilter,
   buildCustomFilter,
   buildEmptyFilter,
@@ -36,21 +31,6 @@ import {
   buildRangeFilter,
   isFilterDisabled,
 } from '../common';
-
-/*
- * esQuery\esKuery namespaces:
- */
-
-export const esKuery = {
-  nodeTypes,
-  fromKueryExpression,
-  toElasticsearchQuery,
-};
-
-export const esQuery = {
-  getEsQueryConfig,
-  buildEsQuery,
-};
 
 /*
  * Filter helper namespace:
@@ -69,7 +49,7 @@ export const esFilters = {
 };
 
 /*
- * esQuery and esKuery helper namespaces:
+ * esQuery\esKuery namespaces:
  */
 
 import {
