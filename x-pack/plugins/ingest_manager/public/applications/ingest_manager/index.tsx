@@ -64,10 +64,12 @@ const IngestManagerRoutes = ({ ...rest }) => {
 };
 
 const IngestManagerApp = ({
+  basepath,
   coreStart,
   deps,
   config,
 }: {
+  basepath: string;
   coreStart: CoreStart;
   deps: IngestManagerSetupDeps;
   config: IngestManagerConfigType;
@@ -79,7 +81,7 @@ const IngestManagerApp = ({
         <DepsContext.Provider value={deps}>
           <ConfigContext.Provider value={config}>
             <EuiThemeProvider darkMode={isDarkMode}>
-              <IngestManagerRoutes />
+              <IngestManagerRoutes basepath={basepath} />
             </EuiThemeProvider>
           </ConfigContext.Provider>
         </DepsContext.Provider>
@@ -90,12 +92,15 @@ const IngestManagerApp = ({
 
 export function renderApp(
   coreStart: CoreStart,
-  { element }: AppMountParameters,
+  { element, appBasePath }: AppMountParameters,
   deps: IngestManagerSetupDeps,
   config: IngestManagerConfigType
 ) {
   setHttpClient(coreStart.http);
-  ReactDOM.render(<IngestManagerApp coreStart={coreStart} deps={deps} config={config} />, element);
+  ReactDOM.render(
+    <IngestManagerApp basepath={appBasePath} coreStart={coreStart} deps={deps} config={config} />,
+    element
+  );
 
   return () => {
     ReactDOM.unmountComponentAtNode(element);
