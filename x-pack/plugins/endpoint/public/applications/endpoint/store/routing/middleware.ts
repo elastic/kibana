@@ -13,7 +13,7 @@ export const routingMiddlewareFactory: MiddlewareFactory = (coreStart, history) 
   return {
     middleware: api => {
       const emit = () => {
-        api.dispatch({ type: 'urlHasChanged', payload: window.location.href });
+        api.dispatch({ type: 'userChangedUrl', payload: window.location.href });
       };
       history.listen(emit);
       (async () => {
@@ -28,6 +28,7 @@ export const routingMiddlewareFactory: MiddlewareFactory = (coreStart, history) 
   };
 };
 
+// TODO: move this
 function flattenedPromise<T>(): [Promise<T>, PromiseResolver<T>, PromiseRejector<T>] {
   let newResolve: PromiseResolver<T>;
   let newReject: PromiseRejector<T>;

@@ -6,16 +6,15 @@
 
 import { AlertResultList } from '../../../../../common/types';
 import { AppAction } from '../action';
-import { MiddlewareFactory } from '../../types';
+import { MiddlewareFactory, AlertListState } from '../../types';
 import { isOnAlertPage, paginationDataFromUrl } from './selectors';
 
-export const alertMiddlewareFactory: MiddlewareFactory = coreStart => {
+export const alertMiddlewareFactory: MiddlewareFactory<AlertListState> = coreStart => {
   return {
     middleware: api => next => async (action: AppAction) => {
       next(action);
-      const state = api.getState().alertList;
-
-      if (action.type === 'urlHasChanged' && isOnAlertPage(state)) {
+      const state = api.getState();
+      if (action.type === 'userChangedUrl' && isOnAlertPage(state)) {
         const response: AlertResultList = await coreStart.http.post(`/api/endpoint/alerts`, {
           body: JSON.stringify(paginationDataFromUrl(state)),
         });

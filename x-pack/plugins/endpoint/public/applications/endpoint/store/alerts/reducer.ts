@@ -28,7 +28,7 @@ export const alertListReducer: Reducer<AlertListState, AppAction> = (
       ...state,
       ...action.payload,
     };
-  } else if (action.type === 'urlHasChanged') {
+  } else if (action.type === 'userChangedUrl') {
     return {
       ...state,
       url: action.payload,
