@@ -11,17 +11,4 @@ interface ServerReturnedAlertsData {
   payload: AlertListData;
 }
 
-interface UserChangedAlertPageSize {
-  type: 'userChangedAlertPageSize';
-  payload: number;
-}
-
-interface UserChangedAlertPageIndex {
-  type: 'userChangedAlertPageIndex';
-  payload: number;
-}
-
-export type AlertAction =
-  | ServerReturnedAlertsData
-  | UserChangedAlertPageSize
-  | UserChangedAlertPageIndex;
+export type AlertAction = ServerReturnedAlertsData;
