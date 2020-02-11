@@ -5,6 +5,7 @@
  */
 
 import { ActionsPlugin, ActionsPluginsSetup, ActionsPluginsStart } from './plugin';
+import { PluginInitializerContext } from '../../../../src/core/server';
 import { coreMock, httpServerMock } from '../../../../src/core/server/mocks';
 import { licensingMock } from '../../licensing/server/mocks';
 import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/mocks';
@@ -13,12 +14,13 @@ import { eventLogMock } from '../../event_log/server/mocks';
 
 describe('Actions Plugin', () => {
   describe('setup()', () => {
+    let context: PluginInitializerContext;
     let plugin: ActionsPlugin;
     let coreSetup: ReturnType<typeof coreMock.createSetup>;
     let pluginsSetup: jest.Mocked<ActionsPluginsSetup>;
 
     beforeEach(() => {
-      const context = coreMock.createPluginInitializerContext();
+      context = coreMock.createPluginInitializerContext();
       plugin = new ActionsPlugin(context);
       coreSetup = coreMock.createSetup();
       pluginsSetup = {
@@ -27,6 +29,14 @@ describe('Actions Plugin', () => {
         licensing: licensingMock.createSetup(),
         event_log: eventLogMock.createSetup(),
       };
+    });
+
+    it('should log warning when Encrypted Saved Objects plugin is using an ephemeral encryption key', async () => {
+      await plugin.setup(coreSetup, pluginsSetup);
+      expect(pluginsSetup.encryptedSavedObjects.usingEphemeralEncryptionKey).toEqual(true);
+      expect(context.logger.get().warn).toHaveBeenCalledWith(
+        'APIs are disabled due to the Encrypted Saved Objects plugin using an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in kibana.yml.'
+      );
     });
 
     describe('routeHandlerContext.getActionsClient()', () => {
