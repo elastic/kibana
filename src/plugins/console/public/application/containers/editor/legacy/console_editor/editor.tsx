@@ -47,6 +47,10 @@ export interface EditorProps {
   initialTextValue: string;
 }
 
+interface QueryParams {
+  load_from: string;
+}
+
 const abs: CSSProperties = {
   position: 'absolute',
   top: '0',
@@ -92,17 +96,17 @@ function EditorUI({ initialTextValue }: EditorProps) {
     editorInstanceRef.current = senseEditor.create(editorRef.current!);
     const editor = editorInstanceRef.current;
 
-    const readQueryParams = (): Record<string, any> => {
+    const readQueryParams = () => {
       const [, queryString] = (window.location.hash || '').split('?');
 
-      return parse(queryString || '', { sort: false });
+      return parse(queryString || '', { sort: false }) as Required<QueryParams>;
     };
 
     const loadBufferFromRemote = (url: string) => {
       if (/^https?:\/\//.test(url)) {
         const loadFrom: Record<string, any> = {
           url,
-          // Having dataType here is required as it doesn't allow jQuery to `eval` content
+          // Having dataType here i\s required as it doesn't allow jQuery to `eval` content
           // coming from the external source thereby preventing XSS attack.
           dataType: 'text',
           kbnXsrfToken: false,

@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import { isUndefined, transform } from 'lodash';
+import { ParsedQuery } from 'query-string';
+import { transform } from 'lodash';
 
 /**
  * This method is intended for encoding *key* or *value* parts of query component. We need a custom
@@ -41,11 +42,16 @@ export function encodeUriQuery(val: string, pctEncodeSpaces = false) {
 }
 
 export const encodeQuery = (
-  query: Record<string, any>,
+  query: ParsedQuery,
   encodeFunction: (val: string, pctEncodeSpaces?: boolean) => string = encodeUriQuery
 ) =>
   transform(query, (result, value, key) => {
     if (key) {
-      result[key] = encodeFunction(isUndefined(value) ? '' : value, true);
+      const singleValue = Array.isArray(value) ? value.join(',') : value;
+
+      result[key] = encodeFunction(
+        singleValue === undefined || singleValue === null ? '' : singleValue,
+        true
+      );
     }
   });

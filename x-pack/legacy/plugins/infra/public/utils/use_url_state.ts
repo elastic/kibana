@@ -85,7 +85,7 @@ export const useUrlState = <State>({
   return [state, setState] as [typeof state, typeof setState];
 };
 
-const decodeRisonUrlState = (value: string | undefined): RisonValue | undefined => {
+const decodeRisonUrlState = (value: string | undefined | null): RisonValue | undefined => {
   try {
     return value ? decode(value) : undefined;
   } catch (error) {
@@ -100,8 +100,8 @@ const encodeRisonUrlState = (state: any) => encode(state);
 
 const getQueryStringFromLocation = (location: Location) => location.search.substring(1);
 
-const getParamFromQueryString = (queryString: string, key: string): string | undefined => {
-  const parsedQueryString: Record<string, any> = parse(queryString, { sort: false });
+const getParamFromQueryString = (queryString: string, key: string) => {
+  const parsedQueryString = parse(queryString, { sort: false });
   const queryParam = parsedQueryString[key];
 
   return Array.isArray(queryParam) ? queryParam[0] : queryParam;

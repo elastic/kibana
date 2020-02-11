@@ -42,8 +42,8 @@ export const encodeRisonUrlState = (state: any) => encode(state);
 
 export const getQueryStringFromLocation = (search: string) => search.substring(1);
 
-export const getParamFromQueryString = (queryString: string, key: string): string | undefined => {
-  const parsedQueryString: Record<string, unknown> = parse(queryString, { sort: false });
+export const getParamFromQueryString = (queryString: string, key: string) => {
+  const parsedQueryString = parse(queryString, { sort: false });
   const queryParam = parsedQueryString[key];
 
   return Array.isArray(queryParam) ? queryParam[0] : queryParam;

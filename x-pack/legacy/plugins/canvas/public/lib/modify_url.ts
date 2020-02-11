@@ -3,6 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
+import { ParsedQuery } from 'query-string';
 import { format as formatUrl, parse as parseUrl, UrlObject } from 'url';
 
 /**
@@ -18,7 +20,7 @@ export interface URLMeaningfulParts {
   protocol?: string | null;
   slashes?: boolean | null;
   port?: string | null;
-  query: Record<string, any>;
+  query: ParsedQuery;
 }
 
 /**

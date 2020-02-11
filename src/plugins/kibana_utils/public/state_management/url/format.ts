@@ -18,13 +18,13 @@
  */
 
 import { format as formatUrl } from 'url';
-import { stringify } from 'query-string';
+import { stringify, ParsedQuery } from 'query-string';
 import { parseUrl, parseUrlHash } from './parse';
 import { url as urlUtils } from '../../../common';
 
 export function replaceUrlHashQuery(
   rawUrl: string,
-  queryReplacer: (query: Record<string, any>) => Record<string, any>
+  queryReplacer: (query: ParsedQuery) => ParsedQuery
 ) {
   const url = parseUrl(rawUrl);
   const hash = parseUrlHash(rawUrl);

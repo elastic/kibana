@@ -23,7 +23,7 @@ export const useUrlParams: UptimeUrlParamsHook = () => {
       search = location.search;
     }
 
-    const params: Record<string, any> = search
+    const params = search
       ? parse(search[0] === '?' ? search.slice(1) : search, { sort: false })
       : {};
 

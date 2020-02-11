@@ -8,6 +8,7 @@
 // DIRECT COPY FROM `src/core/utils/url`, since it's not possible to import from there,
 // nor can I re-export from `src/core/server`...
 
+import { ParsedQuery } from 'query-string';
 import { format as formatUrl, parse as parseUrl, UrlObject } from 'url';
 
 export interface URLMeaningfulParts {
@@ -18,7 +19,7 @@ export interface URLMeaningfulParts {
   protocol: string | null;
   slashes: boolean | null;
   port: string | null;
-  query: Record<string, any> | {};
+  query: ParsedQuery | {};
 }
 
 /**
