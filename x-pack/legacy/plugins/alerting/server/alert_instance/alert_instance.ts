@@ -18,7 +18,7 @@ interface ScheduledExecutionOptions {
   context: Context;
   state: State;
 }
-
+export type AlertInstances = Record<string, AlertInstance>;
 export class AlertInstance {
   private scheduledExecutionOptions?: ScheduledExecutionOptions;
   private meta: AlertInstanceMeta;

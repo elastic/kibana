@@ -20,13 +20,11 @@ import {
   Services,
   AlertInfoParams,
   RawAlertInstance,
+  AlertTaskState,
 } from '../types';
 import { promiseResult, map, Resultable, asOk, asErr, resolveErr } from '../lib/result_type';
-import {
-  AlertTaskState,
-  AlertInstances,
-  taskInstanceToAlertTaskInstance,
-} from './alert_task_instance';
+import { taskInstanceToAlertTaskInstance } from './alert_task_instance';
+import { AlertInstances } from '../alert_instance/alert_instance';
 
 const FALLBACK_RETRY_INTERVAL: IntervalSchedule = { interval: '5m' };
 
