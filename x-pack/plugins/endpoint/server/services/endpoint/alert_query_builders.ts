@@ -126,29 +126,17 @@ export const getRequestData = async (
   endpointAppContext: EndpointAppContext
 ): Promise<AlertRequestData> => {
   const config = await endpointAppContext.config();
-  const reqData = {} as AlertRequestData;
+  const reqData = new AlertRequestData();
 
-  if (request?.route?.method === 'get') {
-    reqData.pageIndex = request.query?.page_index;
-    reqData.pageSize = request.query?.page_size || config.alertResultListDefaultPageSize;
-    reqData.filters = request.query?.filters || config.alertResultListDefaultFilters;
-    reqData.query = request.query?.query || config.alertResultListDefaultQuery;
-    reqData.sort = request.query?.sort || config.alertResultListDefaultSort;
-    reqData.order = request.query?.order || config.alertResultListDefaultOrder;
-    reqData.searchAfter = request.query?.after;
-    reqData.searchBefore = request.query?.before;
-  } else {
-    reqData.pageIndex = request.body?.page_index;
-    reqData.pageSize = request.body?.page_size || config.alertResultListDefaultPageSize;
-    reqData.filters = request.body?.filters || config.alertResultListDefaultFilters;
-    // TODO: add default
-    reqData.dateRange = request.body?.dateRange || config.alertResultListDefaultDateRange;
-    reqData.query = request.body?.query || config.alertResultListDefaultQuery;
-    reqData.sort = request.body?.sort || config.alertResultListDefaultSort;
-    reqData.order = request.body?.order || config.alertResultListDefaultOrder;
-    reqData.searchAfter = request.body?.after;
-    reqData.searchBefore = request.body?.before;
-  }
+  reqData.pageIndex = request.query?.page_index;
+  reqData.pageSize = request.query?.page_size || config.alertResultListDefaultPageSize;
+  reqData.query = request.query?.query || config.alertResultListDefaultQuery;
+  reqData.filters = request.query?.filters || config.alertResultListDefaultFilters;
+  reqData.date_range = request.query?.date_range || config.alertResultListDefaultDateRange;
+  reqData.sort = request.query?.sort || config.alertResultListDefaultSort;
+  reqData.order = request.query?.order || config.alertResultListDefaultOrder;
+  reqData.searchAfter = request.query?.after;
+  reqData.searchBefore = request.query?.before;
 
   if (reqData.searchAfter === undefined && reqData.searchBefore === undefined) {
     // simple pagination

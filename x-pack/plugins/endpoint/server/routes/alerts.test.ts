@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { decode, encode } from 'rison-node';
 import {
   IClusterClient,
   IRouter,
@@ -49,7 +50,7 @@ describe('test alerts route', () => {
 
     const response: SearchResponse<AlertData> = (data as unknown) as SearchResponse<AlertData>;
     mockScopedClient.callAsCurrentUser.mockImplementationOnce(() => Promise.resolve(response));
-    [routeConfig, routeHandler] = routerMock.post.mock.calls.find(([{ path }]) =>
+    [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
       path.startsWith('/api/endpoint/alerts')
     )!;
 
@@ -69,45 +70,26 @@ describe('test alerts route', () => {
     expect(routeConfig.options).toEqual({ authRequired: true });
     expect(mockResponse.ok).toBeCalled();
     const alertResultList = mockResponse.ok.mock.calls[0][0]?.body as AlertResultList;
+
+    // NOTE: only check total in this test, as it's coming directly from the mocked ES
+    // response, and will be unreliable when filtering.
     expect(alertResultList.total).toEqual(21);
+
     expect(alertResultList.request_page_index).toEqual(0);
     expect(alertResultList.result_from_index).toEqual(0);
     expect(alertResultList.request_page_size).toEqual(10);
   });
 
-  it('should return alert results according to pagination params -- POST', async () => {
+  it('should not support POST requests for querying', async () => {
     const mockRequest = httpServerMock.createKibanaRequest({
       method: 'post',
-      body: {
-        page_size: 6,
-        page_index: 3,
-      },
+      body: {},
     });
-    mockScopedClient.callAsCurrentUser.mockImplementationOnce(() => Promise.resolve(data));
-    [routeConfig, routeHandler] = routerMock.post.mock.calls.find(([{ path }]) =>
-      path.startsWith('/api/endpoint/alerts')
-    )!;
 
-    await routeHandler(
-      ({
-        core: {
-          elasticsearch: {
-            dataClient: mockScopedClient,
-          },
-        },
-      } as unknown) as RequestHandlerContext,
-      mockRequest,
-      mockResponse
-    );
+    const response: SearchResponse<AlertData> = (data as unknown) as SearchResponse<AlertData>;
+    mockScopedClient.callAsCurrentUser.mockImplementationOnce(() => Promise.resolve(response));
 
-    expect(mockScopedClient.callAsCurrentUser).toBeCalled();
-    expect(routeConfig.options).toEqual({ authRequired: true });
-    expect(mockResponse.ok).toBeCalled();
-    const alertResultList = mockResponse.ok.mock.calls[0][0]?.body as AlertResultList;
-    expect(alertResultList.total).toEqual(21);
-    expect(alertResultList.request_page_index).toEqual(3);
-    expect(alertResultList.result_from_index).toEqual(18);
-    expect(alertResultList.request_page_size).toEqual(6);
+    expect(routerMock.post.mock.calls).toEqual([]);
   });
 
   it('should return alert results according to pagination params -- GET', async () => {
@@ -139,7 +121,6 @@ describe('test alerts route', () => {
     expect(routeConfig.options).toEqual({ authRequired: true });
     expect(mockResponse.ok).toBeCalled();
     const alertResultList = mockResponse.ok.mock.calls[0][0]?.body as AlertResultList;
-    expect(alertResultList.total).toEqual(21);
     expect(alertResultList.request_page_index).toEqual(2);
     expect(alertResultList.result_from_index).toEqual(6);
     expect(alertResultList.request_page_size).toEqual(3);
@@ -200,5 +181,75 @@ describe('test alerts route', () => {
       });
     };
     expect(validate).toThrow();
+  });
+
+  it('should accept rison-encoded `filters` and `dateRange`', async () => {
+    const filters = (encode([
+      {
+        meta: {
+          alias: null,
+          negate: false,
+          disabled: false,
+          type: 'phrase',
+          key: 'host.hostname',
+          params: {
+            query: 'HD-m3z-4c803698',
+          },
+        },
+        query: {
+          match_phrase: {
+            'host.hostname': 'HD-m3z-4c803698',
+          },
+        },
+        $state: {
+          store: 'appState',
+        },
+      },
+    ]) as unknown) as string;
+
+    const dateRange = (encode({
+      to: 'now',
+      from: 'now-15y',
+    }) as unknown) as string;
+
+    const mockRequest = httpServerMock.createKibanaRequest({
+      path: '/api/endpoint/alerts',
+      query: {
+        page_size: 10,
+        filters,
+        dateRange,
+      },
+    });
+    mockScopedClient.callAsCurrentUser.mockImplementationOnce(() => Promise.resolve(data));
+
+    [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
+      path.startsWith('/api/endpoint/alerts')
+    )!;
+
+    await routeHandler(
+      ({
+        core: {
+          elasticsearch: {
+            dataClient: mockScopedClient,
+          },
+        },
+      } as unknown) as RequestHandlerContext,
+      mockRequest,
+      mockResponse
+    );
+
+    expect(mockScopedClient.callAsCurrentUser).toBeCalled();
+    expect(routeConfig.options).toEqual({ authRequired: true });
+    expect(mockResponse.ok).toBeCalled();
+    const alertResultList = mockResponse.ok.mock.calls[0][0]?.body as AlertResultList;
+    expect(alertResultList.request_page_index).toEqual(0);
+    expect(alertResultList.result_from_index).toEqual(0);
+    expect(alertResultList.request_page_size).toEqual(10);
+    expect(alertResultList.next).toEqual(
+      `/api/endpoint/alerts?filters=!(('$state':(store:appState),meta:(alias:!n,disabled:!f,key:host.hostname,negate:!f,params:(query:HD-m3z-4c803698),type:phrase),query:(match_phrase:(host.hostname:HD-m3z-4c803698))))&page_size=10&sort=@timestamp&order=desc&after=1542341895000&after=undefined`
+    );
+    expect(alertResultList.prev).toEqual(
+      `/api/endpoint/alerts?filters=!(('$state':(store:appState),meta:(alias:!n,disabled:!f,key:host.hostname,negate:!f,params:(query:HD-m3z-4c803698),type:phrase),query:(match_phrase:(host.hostname:HD-m3z-4c803698))))&page_size=10&sort=@timestamp&order=desc&before=1542341895000&before=undefined`
+    );
   });
 });

@@ -39,16 +39,20 @@ export const reqSchema = schema.object(
         }
       },
     }),
-    query: schema.string({ defaultValue: '' }),
+    query: schema.maybe(schema.string()),
 
     // Rison-encoded string
-    filters: schema.arrayOf(schema.any(), { defaultValue: [] }),
+    filters: schema.maybe(schema.string()),
 
     // Rison-encoded string
+    date_range: schema.maybe(schema.string()),
+
+    /*
     dateRange: schema.object({
       to: schema.string({ defaultValue: 'now' }),
       from: schema.string({ defaultValue: 'now-15m' }),
     }),
+    */
   },
   {
     validate(value) {
@@ -81,7 +85,9 @@ export function registerAlertRoutes(router: IRouter, endpointAppContext: Endpoin
         reqWrapper
       )) as SearchResponse<AlertData>;
 
-      return res.ok({ body: mapToAlertResultList(endpointAppContext, reqData, response) });
+      const mappedBody = mapToAlertResultList(endpointAppContext, reqData, response);
+
+      return res.ok({ body: mappedBody });
     } catch (err) {
       const e = err as Error;
       if (e.name === 'EndpointValidationError') {
@@ -97,17 +103,6 @@ export function registerAlertRoutes(router: IRouter, endpointAppContext: Endpoin
       path: ALERTS_ROUTE,
       validate: {
         query: reqSchema,
-      },
-      options: { authRequired: true },
-    },
-    alertsHandler
-  );
-
-  router.post(
-    {
-      path: ALERTS_ROUTE,
-      validate: {
-        body: reqSchema,
       },
       options: { authRequired: true },
     },
@@ -152,7 +147,7 @@ function mapToAlertResultList(
   let pageUrl: string = '/api/endpoint/alerts?';
   pageUrl +=
     'filters=' +
-    reqData.filters +
+    reqData.getEncoded('filters') +
     '&page_size=' +
     reqData.pageSize +
     '&sort=' +
@@ -168,17 +163,18 @@ function mapToAlertResultList(
     hits.reverse();
   }
 
+  // TODO: Is this logic correct? Definitely won't work if NOT on the last page,
+  // and the page contains `pageSize` items.
+  if (hitLen > 0 && hitLen < reqData.pageSize) {
+    const lastTimestamp: Date = hits[hitLen - 1]._source['@timestamp'];
+    const lastEventId: number = hits[hitLen - 1]._source.event.id;
+    next = pageUrl + '&after=' + lastTimestamp + '&after=' + lastEventId;
+  }
+
   if (hitLen > 0) {
     const firstTimestamp: Date = hits[0]._source['@timestamp'];
-    const lastTimestamp: Date = hits[hitLen - 1]._source['@timestamp'];
-
     const firstEventId: number = hits[0]._source.event.id;
-    const lastEventId: number = hits[hitLen - 1]._source.event.id;
-
-    next = pageUrl;
-    prev = pageUrl;
-    next += '&after=' + lastTimestamp + '&after=' + lastEventId;
-    prev += '&before=' + firstTimestamp + '&before=' + firstEventId;
+    prev = pageUrl + '&before=' + firstTimestamp + '&before=' + firstEventId;
   }
 
   return {
