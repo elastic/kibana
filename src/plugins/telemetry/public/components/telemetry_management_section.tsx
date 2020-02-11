@@ -33,6 +33,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { PRIVACY_STATEMENT_URL } from '../../common/constants';
 import { OptInExampleFlyout } from './opt_in_example_flyout';
+// @ts-ignore
 import { Field } from '../../../advanced_settings/public';
 import { TelemetryService } from '../services/telemetry_service';
 const SEARCH_TERMS = ['telemetry', 'usage', 'data', 'usage data'];
@@ -126,6 +127,8 @@ export class TelemetryManagementSection extends Component<Props, State> {
                   }),
                 } as any
               }
+              dockLinks={null as any}
+              toasts={null as any}
               save={this.toggleOptIn}
               clear={this.toggleOptIn}
               enableSaving={this.props.enableSaving}
