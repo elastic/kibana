@@ -41,15 +41,15 @@ function buildQuery(reqData: AlertRequestData): JsonObject {
         },
       },
     };
+    queries.push(dateRangeFilter);
   }
 
   // Optimize
   if (queries.length > 1) {
     return {
       bool: {
-        must: [queries[0], queries[1]],
+        must: queries,
       },
-      ...dateRangeFilter,
     };
   } else if (queries.length === 0) {
     return {
@@ -57,6 +57,7 @@ function buildQuery(reqData: AlertRequestData): JsonObject {
     };
   }
 
+  // Only 1 query part, so return it
   return queries[0];
 }
 
@@ -117,7 +118,6 @@ export const buildAlertListESQuery = async (reqData: AlertRequestData): Promise<
     reqWrapper.body.search_after = reqData.searchBefore;
   }
 
-  console.log(reqWrapper.body)
   return (reqWrapper as unknown) as JsonObject;
 };
 

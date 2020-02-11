@@ -39,8 +39,12 @@ export const reqSchema = schema.object(
         }
       },
     }),
-    filters: schema.arrayOf(schema.any(), { defaultValue: [] }),
     query: schema.string({ defaultValue: '' }),
+
+    // Rison-encoded string
+    filters: schema.arrayOf(schema.any(), { defaultValue: [] }),
+
+    // Rison-encoded string
     dateRange: schema.object({
       to: schema.string({ defaultValue: 'now' }),
       from: schema.string({ defaultValue: 'now-15m' }),
@@ -145,17 +149,6 @@ function mapToAlertResultList(
   const hits: AlertHits = searchResponse?.hits?.hits;
   const hitLen: number = hits.length;
 
-  if (reqData.searchBefore !== undefined) {
-    // Reverse the hits if we used `search_before`.
-    hits.reverse();
-  }
-
-  const firstTimestamp: Date = hits[0]._source['@timestamp'];
-  const lastTimestamp: Date = hits[hitLen - 1]._source['@timestamp'];
-
-  const firstEventId: number = hits[0]._source.event.id;
-  const lastEventId: number = hits[hitLen - 1]._source.event.id;
-
   let pageUrl: string = '/api/endpoint/alerts?';
   pageUrl +=
     'filters=' +
@@ -167,11 +160,26 @@ function mapToAlertResultList(
     '&order=' +
     reqData.order;
 
-  let next: string = pageUrl;
-  let prev: string = pageUrl;
+  let next: string | undefined;
+  let prev: string | undefined;
 
-  next += '&after=' + lastTimestamp + '&after=' + lastEventId;
-  prev += '&before=' + firstTimestamp + '&before=' + firstEventId;
+  if (reqData.searchBefore !== undefined) {
+    // Reverse the hits if we used `search_before`.
+    hits.reverse();
+  }
+
+  if (hitLen > 0) {
+    const firstTimestamp: Date = hits[0]._source['@timestamp'];
+    const lastTimestamp: Date = hits[hitLen - 1]._source['@timestamp'];
+
+    const firstEventId: number = hits[0]._source.event.id;
+    const lastEventId: number = hits[hitLen - 1]._source.event.id;
+
+    next = pageUrl;
+    prev = pageUrl;
+    next += '&after=' + lastTimestamp + '&after=' + lastEventId;
+    prev += '&before=' + firstTimestamp + '&before=' + firstEventId;
+  }
 
   return {
     request_page_size: reqData.pageSize,

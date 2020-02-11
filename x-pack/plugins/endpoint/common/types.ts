@@ -53,8 +53,8 @@ export interface AlertResultList {
    */
   result_from_index: number | undefined;
 
-  next: string;
-  prev: string;
+  next: string | undefined;
+  prev: string | undefined;
 }
 
 export interface EndpointResultList {
