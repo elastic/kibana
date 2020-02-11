@@ -22,6 +22,11 @@ interface Duration {
   end: string;
 }
 
+interface RefreshInterval {
+  pause: boolean;
+  value: number;
+}
+
 function getRecentlyUsedRangesFactory(timeHistory: TimeHistory) {
   return function(): Duration[] {
     return (
@@ -44,7 +49,7 @@ export const TopNav: FC = () => {
   const [globalState, setGlobalState] = useUrlState('_g');
   const getRecentlyUsedRanges = getRecentlyUsedRangesFactory(timeHistory);
 
-  const [refreshInterval, setRefreshInterval] = useState(
+  const [refreshInterval, setRefreshInterval] = useState<RefreshInterval>(
     globalState?.refreshInterval ?? timefilter.getRefreshInterval()
   );
   useEffect(() => {

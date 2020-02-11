@@ -63,9 +63,7 @@ export const removeClusters = names => async (dispatch, getState) => {
     const {
       name,
       error: {
-        output: {
-          payload: { message },
-        },
+        payload: { message },
       },
     } = errors[0];
 
