@@ -6,6 +6,7 @@
 import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
 import { pick, isEmpty } from 'lodash';
+import moment from 'moment';
 import url from 'url';
 import { Transaction } from '../../../../typings/es_schemas/ui/Transaction';
 import { IUrlParams } from '../../../context/UrlParamsContext/types';
@@ -16,15 +17,12 @@ import { fromQuery } from '../Links/url_helpers';
 import { AppMountContextBasePath } from '../../../context/ApmPluginContext';
 
 function getInfraMetricsQuery(transaction: Transaction) {
-  const plus5 = new Date(transaction['@timestamp']);
-  const minus5 = new Date(plus5.getTime());
-
-  plus5.setMinutes(plus5.getMinutes() + 5);
-  minus5.setMinutes(minus5.getMinutes() - 5);
+  const timestamp = new Date(transaction['@timestamp']).getTime();
+  const fiveMinutes = moment.duration(5, 'minutes').asMilliseconds();
 
   return {
-    from: minus5.getTime(),
-    to: plus5.getTime()
+    from: timestamp - fiveMinutes,
+    to: timestamp + fiveMinutes
   };
 }
 
