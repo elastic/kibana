@@ -5,7 +5,7 @@
  */
 
 import { EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
-import React, { useContext, useEffect, useCallback } from 'react';
+import React, { useContext, useEffect, useCallback, useMemo } from 'react';
 import { connect } from 'react-redux';
 import { StickyContainer } from 'react-sticky';
 import { compose } from 'redux';
@@ -41,6 +41,7 @@ import { HostDetailsTabs } from './details_tabs';
 import { navTabsHostDetails } from './nav_tabs';
 import { HostDetailsComponentProps, HostDetailsProps } from './types';
 import { type } from './utils';
+import { getHostDetailsPageFilters } from './helpers';
 
 const HostOverviewManage = manageQuery(HostOverview);
 const KpiHostDetailsManage = manageQuery(KpiHostsComponent);
@@ -64,29 +65,10 @@ const HostDetailsComponent = React.memo<HostDetailsComponentProps>(
     }, [setHostDetailsTablesActivePageToZero, detailName]);
     const capabilities = useContext(MlCapabilitiesContext);
     const kibana = useKibana();
-    const hostDetailsPageFilters: esFilters.Filter[] = [
-      {
-        meta: {
-          alias: null,
-          negate: false,
-          disabled: false,
-          type: 'phrase',
-          key: 'host.name',
-          value: detailName,
-          params: {
-            query: detailName,
-          },
-        },
-        query: {
-          match: {
-            'host.name': {
-              query: detailName,
-              type: 'phrase',
-            },
-          },
-        },
-      },
-    ];
+    const hostDetailsPageFilters: esFilters.Filter[] = useMemo(
+      () => getHostDetailsPageFilters(detailName),
+      [detailName]
+    );
     const getFilters = () => [...hostDetailsPageFilters, ...filters];
     const narrowDateRange = useCallback(
       (min: number, max: number) => {

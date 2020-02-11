@@ -11,10 +11,11 @@ import { MemoryRouter } from 'react-router-dom';
 import { mockIndexPattern } from '../../../mock/index_pattern';
 import { TestProviders } from '../../../mock/test_providers';
 import { HostDetailsTabs } from './details_tabs';
-import { SetAbsoluteRangeDatePicker } from './types';
+import { HostDetailsTabsProps, SetAbsoluteRangeDatePicker } from './types';
 import { hostDetailsPagePath } from '../types';
 import { type } from './utils';
 import { useMountAppended } from '../../../utils/use_mount_appended';
+import { getHostDetailsPageFilters } from './helpers';
 
 jest.mock('../../../containers/source', () => ({
   indicesExistOrDataTemporarilyUnavailable: () => true,
@@ -41,6 +42,14 @@ describe('body', () => {
     uncommonProcesses: 'UncommonProcessQueryTabBody',
     anomalies: 'AnomaliesQueryTabBody',
     events: 'EventsQueryTabBody',
+    alerts: 'HostAlertsQueryTabBody',
+  };
+
+  const mockHostDetailsPageFilters = getHostDetailsPageFilters('host-1');
+
+  const componentProps: Record<string, Partial<HostDetailsTabsProps>> = {
+    events: { pageFilters: mockHostDetailsPageFilters },
+    alerts: { pageFilters: mockHostDetailsPageFilters },
   };
   const mount = useMountAppended();
 
@@ -59,6 +68,7 @@ describe('body', () => {
               hostDetailsPagePath={hostDetailsPagePath}
               indexPattern={mockIndexPattern}
               type={type}
+              pageFilters={mockHostDetailsPageFilters}
               filterQuery='{"bool":{"must":[],"filter":[{"match_all":{}},{"match_phrase":{"host.name":{"query":"host-1"}}}],"should":[],"must_not":[]}}'
             />
           </MemoryRouter>
@@ -93,6 +103,7 @@ describe('body', () => {
           title: 'filebeat-*,auditbeat-*,packetbeat-*',
         },
         hostName: 'host-1',
+        ...(componentProps[path] != null ? componentProps[path] : []),
       });
     })
   );
