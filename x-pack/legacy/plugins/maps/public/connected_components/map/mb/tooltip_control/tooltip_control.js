@@ -174,43 +174,27 @@ export class TooltipControl extends React.Component {
       return null;
     }
 
-    if (this.props.hasLockedTooltips) {
-      return this.props.openTooltips.map(({ features, location, id }, index) => {
-        const closeTooltip = () => {
-          this.props.closeOnClickTooltip(id);
-        };
-        return (
-          <TooltipPopover
-            key={id}
-            mbMap={this.props.mbMap}
-            layerList={this.props.layerList}
-            addFilters={this.props.addFilters}
-            renderTooltipContent={this.props.renderTooltipContent}
-            geoFields={this.props.geoFields}
-            features={features}
-            location={location}
-            closeTooltip={closeTooltip}
-            isLocked={true}
-            index={index}
-          />
-        );
-      });
-    }
-
-    return (
-      <TooltipPopover
-        key={this.props.openTooltips[0].id}
-        mbMap={this.props.mbMap}
-        layerList={this.props.layerList}
-        addFilters={this.props.addFilters}
-        renderTooltipContent={this.props.renderTooltipContent}
-        geoFields={this.props.geoFields}
-        features={this.props.openTooltips[0].features}
-        location={this.props.openTooltips[0].location}
-        closeTooltip={this.props.closeOnHoverTooltip}
-        isLocked={false}
-        index={0}
-      />
-    );
+    return this.props.openTooltips.map(({ features, location, id, isLocked }, index) => {
+      const closeTooltip = isLocked
+        ? () => {
+            this.props.closeOnClickTooltip(id);
+          }
+        : this.props.closeOnHoverTooltip;
+      return (
+        <TooltipPopover
+          key={id}
+          mbMap={this.props.mbMap}
+          layerList={this.props.layerList}
+          addFilters={this.props.addFilters}
+          renderTooltipContent={this.props.renderTooltipContent}
+          geoFields={this.props.geoFields}
+          features={features}
+          location={location}
+          closeTooltip={closeTooltip}
+          isLocked={isLocked}
+          index={index}
+        />
+      );
+    });
   }
 }
