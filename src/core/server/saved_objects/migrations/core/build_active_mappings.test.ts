@@ -21,6 +21,11 @@ import { IndexMapping } from './../../mappings';
 import { buildActiveMappings, diffMappings } from './build_active_mappings';
 
 describe('buildActiveMappings', () => {
+  test('creates a strict mapping', () => {
+    const mappings = buildActiveMappings({});
+    expect(mappings.dynamic).toEqual('strict');
+  });
+
   test('combines all mappings and includes core mappings', () => {
     const properties = {
       aaa: { type: 'text' },
