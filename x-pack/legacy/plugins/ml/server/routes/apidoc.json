@@ -35,12 +35,17 @@
     "GetCategories",
     "FileDataVisualizer",
     "AnalyzeFile",
-    "ImportFile"
+    "ImportFile",
     "ResultsService",
     "GetAnomaliesTableData",
     "GetCategoryDefinition",
     "GetMaxAnomalyScore",
     "GetCategoryExamples",
-    "GetPartitionFieldsValues"
+    "GetPartitionFieldsValues",
+    "DataRecognizer",
+    "RecognizeIndex",
+    "GetModule",
+    "SetupModule",
+    "CheckExistingModuleJobs"
   ]
 }
