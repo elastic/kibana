@@ -85,7 +85,6 @@ const OverviewComponent: React.FC<OverviewComponentReduxProps> = ({
                             from={from}
                             indexPattern={indexPattern}
                             query={query}
-                            setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker!}
                             setQuery={setQuery}
                             to={to}
                           />
@@ -98,7 +97,6 @@ const OverviewComponent: React.FC<OverviewComponentReduxProps> = ({
                             from={from}
                             indexPattern={indexPattern}
                             query={query}
-                            setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker!}
                             setQuery={setQuery}
                             to={to}
                           />

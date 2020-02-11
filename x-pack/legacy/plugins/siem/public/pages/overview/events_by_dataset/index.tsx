@@ -6,17 +6,14 @@
 
 import { EuiButton } from '@elastic/eui';
 import numeral from '@elastic/numeral';
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 
 import { Position } from '@elastic/charts';
-import {
-  ERROR_FETCHING_EVENTS_DATA,
-  SHOWING,
-  UNIT,
-} from '../../../components/events_viewer/translations';
+import { SHOWING, UNIT } from '../../../components/events_viewer/translations';
 import { convertToBuildEsQuery } from '../../../lib/keury';
 import { SetAbsoluteRangeDatePicker } from '../../network/types';
 import { getTabsOnHostsUrl } from '../../../components/link_to/redirect_to_hosts';
+import { histogramConfigs } from '../../../pages/hosts/navigation/events_query_tab_body';
 import { MatrixHistogramContainer } from '../../../components/matrix_histogram';
 import { eventsStackByOptions } from '../../hosts/navigation';
 import { useKibana, useUiSetting$ } from '../../../lib/kibana';
@@ -60,7 +57,6 @@ const EventsByDatasetComponent: React.FC<Props> = ({
   from,
   indexPattern,
   query = DEFAULT_QUERY,
-  setAbsoluteRangeDatePicker,
   setQuery,
   to,
 }) => {
@@ -75,25 +71,10 @@ const EventsByDatasetComponent: React.FC<Props> = ({
   const kibana = useKibana();
   const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
 
-  const updateDateRangeCallback = useCallback(
-    (min: number, max: number) => {
-      setAbsoluteRangeDatePicker!({ id: 'global', from: min, to: max });
-    },
-    [setAbsoluteRangeDatePicker]
-  );
   const eventsCountViewEventsButton = useMemo(
     () => <EuiButton href={getTabsOnHostsUrl(HostsTableType.events)}>{i18n.VIEW_EVENTS}</EuiButton>,
     []
   );
-
-  const getSubtitle = useCallback(
-    (totalCount: number) =>
-      `${SHOWING}: ${numeral(totalCount).format(defaultNumberFormat)} ${UNIT(totalCount)}`,
-    []
-  );
-
-  const defaultStackByOption =
-    eventsStackByOptions.find(o => o.text === DEFAULT_STACK_BY) ?? eventsStackByOptions[0];
 
   const filterQuery = useMemo(
     () =>
@@ -106,24 +87,29 @@ const EventsByDatasetComponent: React.FC<Props> = ({
     [kibana, indexPattern, query, filters]
   );
 
+  const eventsByDatasetHistogramConfigs = useMemo(
+    () => ({
+      ...histogramConfigs,
+      defaultStackByOption:
+        eventsStackByOptions.find(o => o.text === DEFAULT_STACK_BY) ?? eventsStackByOptions[0],
+      legendPosition: Position.Right,
+      subtitle: (totalCount: number) =>
+        `${SHOWING}: ${numeral(totalCount).format(defaultNumberFormat)} ${UNIT(totalCount)}`,
+    }),
+    []
+  );
+
   return (
     <MatrixHistogramContainer
-      defaultStackByOption={defaultStackByOption}
       endDate={to}
-      errorMessage={ERROR_FETCHING_EVENTS_DATA}
       filterQuery={filterQuery}
       headerChildren={eventsCountViewEventsButton}
-      histogramType="events"
       id={ID}
-      legendPosition={Position.Right}
       setQuery={setQuery}
       sourceId="default"
-      stackByOptions={eventsStackByOptions}
       startDate={from}
-      title={i18n.EVENTS}
-      subtitle={getSubtitle}
       type={HostsType.page}
-      updateDateRange={updateDateRangeCallback}
+      {...eventsByDatasetHistogramConfigs}
     />
   );
 };

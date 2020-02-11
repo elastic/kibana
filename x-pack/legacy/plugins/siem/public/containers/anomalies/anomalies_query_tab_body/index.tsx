@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect } from 'react';
 import { noop } from 'lodash/fp';
 import { AnomaliesQueryTabBodyProps } from './types';
 import { getAnomaliesFilterQuery } from './utils';
@@ -49,9 +49,6 @@ export const AnomaliesQueryTabBody = ({
     flowTarget,
     ip
   );
-  const anomaliesHistogramConfigs = useMemo(() => ({ ...histogramConfigs, updateDateRange }), [
-    updateDateRange,
-  ]);
 
   return (
     <>
@@ -63,7 +60,7 @@ export const AnomaliesQueryTabBody = ({
         sourceId="default"
         startDate={startDate}
         type={type}
-        {...anomaliesHistogramConfigs}
+        {...histogramConfigs}
       />
       <AnomaliesTableComponent
         startDate={startDate}

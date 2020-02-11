@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { noop } from 'lodash/fp';
 import React, { useEffect, useCallback, useMemo } from 'react';
 import numeral from '@elastic/numeral';
 
@@ -24,7 +23,6 @@ export const AlertsView = ({
   setQuery,
   startDate,
   type,
-  updateDateRange = noop,
 }: AlertsComponentsQueryProps) => {
   const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
   const getSubtitle = useCallback(
@@ -38,9 +36,8 @@ export const AlertsView = ({
     () => ({
       ...histogramConfigs,
       subtitle: getSubtitle,
-      updateDateRange,
     }),
-    [getSubtitle, updateDateRange]
+    [getSubtitle]
   );
   useEffect(() => {
     return () => {

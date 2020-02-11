@@ -5,7 +5,7 @@
  */
 
 import { getOr, noop } from 'lodash/fp';
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect } from 'react';
 import { AuthenticationTable } from '../../../components/page/hosts/authentications_table';
 import { manageQuery } from '../../../components/page/manage_query';
 import { AuthenticationsQuery } from '../../../containers/authentications';
@@ -75,13 +75,6 @@ export const AuthenticationsQueryTabBody = ({
     };
   }, [deleteQuery]);
 
-  const authHistogramConfigs = useMemo(
-    () => ({
-      ...histogramConfigs,
-      updateDateRange,
-    }),
-    [updateDateRange]
-  );
   return (
     <>
       <MatrixHistogramContainer
@@ -92,7 +85,7 @@ export const AuthenticationsQueryTabBody = ({
         sourceId="default"
         startDate={startDate}
         type={hostsModel.HostsType.page}
-        {...authHistogramConfigs}
+        {...histogramConfigs}
       />
       <AuthenticationsQuery
         endDate={endDate}

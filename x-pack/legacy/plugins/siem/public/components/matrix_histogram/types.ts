@@ -5,9 +5,10 @@
  */
 
 import { ScaleType, Position } from '@elastic/charts';
-import { UpdateDateRange } from '../charts/common';
+import { ActionCreator } from 'redux';
 import { ESQuery } from '../../../common/typed_json';
 import { SetQuery } from '../../pages/hosts/navigation/types';
+import { InputsModelId } from '../../store/inputs/constants';
 
 export type MatrixHistogramMappingTypes = Record<
   string,
@@ -25,6 +26,11 @@ export interface MatrixHistogramBasicProps {
   chartHeight?: number;
   defaultIndex: string[];
   defaultStackByOption: MatrixHistogramOption;
+  dispatchSetAbsoluteRangeDatePicker: ActionCreator<{
+    id: InputsModelId;
+    from: number;
+    to: number;
+  }>;
   endDate: number;
   headerChildren?: React.ReactNode;
   hideHistogramIfEmpty?: boolean;
@@ -37,7 +43,6 @@ export interface MatrixHistogramBasicProps {
   stackByOptions: MatrixHistogramOption[];
   subtitle?: string | GetSubTitle;
   title?: string | GetTitle;
-  updateDateRange: UpdateDateRange;
 }
 
 export type HistogramType = 'authentications' | 'anomalies' | 'events' | 'alerts' | 'dns';

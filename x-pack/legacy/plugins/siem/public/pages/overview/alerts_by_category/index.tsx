@@ -6,20 +6,15 @@
 
 import { EuiButton } from '@elastic/eui';
 import numeral from '@elastic/numeral';
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 
 import { Position } from '@elastic/charts';
 import { DEFAULT_NUMBER_FORMAT } from '../../../../common/constants';
-import {
-  ERROR_FETCHING_ALERTS_DATA,
-  SHOWING,
-  UNIT,
-} from '../../../components/alerts_viewer/translations';
+import { SHOWING, UNIT } from '../../../components/alerts_viewer/translations';
 import { getDetectionEngineAlertUrl } from '../../../components/link_to/redirect_to_detection_engine';
 import { MatrixHistogramContainer } from '../../../components/matrix_histogram';
 import { useKibana, useUiSetting$ } from '../../../lib/kibana';
 import { convertToBuildEsQuery } from '../../../lib/keury';
-import { SetAbsoluteRangeDatePicker } from '../../network/types';
 import {
   esFilters,
   esQuery,
@@ -30,7 +25,10 @@ import { inputsModel } from '../../../store';
 import { HostsType } from '../../../store/hosts/model';
 
 import * as i18n from '../translations';
-import { alertsStackByOptions } from '../../../components/alerts_viewer/histogram_configs';
+import {
+  alertsStackByOptions,
+  histogramConfigs,
+} from '../../../components/alerts_viewer/histogram_configs';
 
 const ID = 'alertsByCategoryOverview';
 
@@ -45,7 +43,6 @@ interface Props {
   hideHeaderChildren?: boolean;
   indexPattern: IIndexPattern;
   query?: Query;
-  setAbsoluteRangeDatePicker: SetAbsoluteRangeDatePicker;
   setQuery: (params: {
     id: string;
     inspect: inputsModel.InspectQuery | null;
@@ -62,7 +59,6 @@ const AlertsByCategoryComponent: React.FC<Props> = ({
   hideHeaderChildren = false,
   indexPattern,
   query = DEFAULT_QUERY,
-  setAbsoluteRangeDatePicker,
   setQuery,
   to,
 }) => {
@@ -77,31 +73,26 @@ const AlertsByCategoryComponent: React.FC<Props> = ({
   const kibana = useKibana();
   const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
 
-  const updateDateRangeCallback = useCallback(
-    (min: number, max: number) => {
-      setAbsoluteRangeDatePicker!({ id: 'global', from: min, to: max });
-    },
-    [setAbsoluteRangeDatePicker]
-  );
   const alertsCountViewAlertsButton = useMemo(
     () => <EuiButton href={getDetectionEngineAlertUrl()}>{i18n.VIEW_ALERTS}</EuiButton>,
     []
   );
 
-  const getSubtitle = useCallback(
-    (totalCount: number) =>
-      `${SHOWING}: ${numeral(totalCount).format(defaultNumberFormat)} ${UNIT(totalCount)}`,
+  const alertsByCategoryHistogramConfigs = useMemo(
+    () => ({
+      ...histogramConfigs,
+      defaultStackByOption:
+        alertsStackByOptions.find(o => o.text === DEFAULT_STACK_BY) ?? alertsStackByOptions[0],
+      getSubtitle: (totalCount: number) =>
+        `${SHOWING}: ${numeral(totalCount).format(defaultNumberFormat)} ${UNIT(totalCount)}`,
+      legendPosition: Position.Right,
+    }),
     []
   );
 
-  const defaultStackByOption =
-    alertsStackByOptions.find(o => o.text === DEFAULT_STACK_BY) ?? alertsStackByOptions[0];
-
   return (
     <MatrixHistogramContainer
-      defaultStackByOption={defaultStackByOption}
       endDate={to}
-      errorMessage={ERROR_FETCHING_ALERTS_DATA}
       filterQuery={convertToBuildEsQuery({
         config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
         indexPattern,
@@ -109,17 +100,12 @@ const AlertsByCategoryComponent: React.FC<Props> = ({
         filters,
       })}
       headerChildren={hideHeaderChildren ? null : alertsCountViewAlertsButton}
-      histogramType="alerts"
       id={ID}
-      legendPosition={Position.Right}
       setQuery={setQuery}
       sourceId="default"
-      stackByOptions={alertsStackByOptions}
       startDate={from}
-      title={i18n.ALERTS_GRAPH_TITLE}
-      subtitle={getSubtitle}
       type={HostsType.page}
-      updateDateRange={updateDateRangeCallback}
+      {...alertsByCategoryHistogramConfigs}
     />
   );
 };

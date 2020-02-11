@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect, useMemo } from 'react';
-import { noop } from 'lodash/fp';
+import React, { useEffect } from 'react';
 import { StatefulEventsViewer } from '../../../components/events_viewer';
 import { HostsComponentsQueryProps } from './types';
 import { hostsModel } from '../../../store/hosts';
@@ -39,7 +38,6 @@ export const histogramConfigs = {
   stackByOptions: eventsStackByOptions,
   subtitle: undefined,
   title: i18n.NAVIGATION_EVENTS_TITLE,
-  updateDateRange: noop,
 };
 
 export const EventsQueryTabBody = ({
@@ -48,7 +46,6 @@ export const EventsQueryTabBody = ({
   filterQuery,
   setQuery,
   startDate,
-  updateDateRange = noop,
 }: HostsComponentsQueryProps) => {
   useEffect(() => {
     return () => {
@@ -58,9 +55,6 @@ export const EventsQueryTabBody = ({
     };
   }, [deleteQuery]);
 
-  const eventsHistogramConfigs = useMemo(() => ({ ...histogramConfigs, updateDateRange }), [
-    updateDateRange,
-  ]);
   return (
     <>
       <MatrixHistogramContainer
@@ -71,7 +65,7 @@ export const EventsQueryTabBody = ({
         startDate={startDate}
         type={hostsModel.HostsType.page}
         id={EVENTS_HISTOGRAM_ID}
-        {...eventsHistogramConfigs}
+        {...histogramConfigs}
       />
       <StatefulEventsViewer
         defaultModel={eventsDefaultModel}
