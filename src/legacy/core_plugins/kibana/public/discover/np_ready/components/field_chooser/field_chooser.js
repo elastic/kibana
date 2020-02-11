@@ -24,6 +24,7 @@ import './discover_field';
 import './discover_field_search_directive';
 import './discover_index_pattern_directive';
 import fieldChooserTemplate from './field_chooser.html';
+import { IndexPatternFieldList } from '../../../../../../../../plugins/data/public';
 
 export function createFieldChooserDirective($location, config, $route) {
   return {
@@ -280,7 +281,7 @@ export function createFieldChooserDirective($location, config, $route) {
           });
         });
 
-        const fields = indexPattern.fields;
+        const fields = new IndexPatternFieldList(indexPattern, fieldSpecs);
 
         if (prevFields) {
           fields.forEach(function(field) {
