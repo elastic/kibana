@@ -56,7 +56,7 @@ export const DESCRIPTION_REQUIRED = i18n.translate(
   }
 );
 
-export const EDIT = i18n.translate('xpack.siem.case.caseView.tags', {
+export const EDIT = i18n.translate('xpack.siem.case.caseView.edit', {
   defaultMessage: 'Edit',
 });
 
