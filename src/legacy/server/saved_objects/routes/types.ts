@@ -17,20 +17,8 @@
  * under the License.
  */
 
-import Hapi from 'hapi';
-import { SavedObjectsClientContract } from 'src/core/server';
-
 export interface SavedObjectReference {
   name: string;
   type: string;
   id: string;
 }
-
-export interface Prerequisites {
-  getSavedObjectsClient: {
-    assign: string;
-    method: (req: Hapi.Request) => SavedObjectsClientContract;
-  };
-}
-
-export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;

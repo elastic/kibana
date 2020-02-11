@@ -31,17 +31,6 @@ import { getRootPropertiesObjects } from '../../../core/server/saved_objects/map
 import { convertTypesToLegacySchema } from '../../../core/server/saved_objects/utils';
 import { SavedObjectsManagement } from '../../../core/server/saved_objects/management';
 
-import { createResolveImportErrorsRoute } from './routes';
-
-function getImportableAndExportableTypes({ kbnServer, visibleTypes }) {
-  const { savedObjectsManagement = {} } = kbnServer.uiExports;
-  return visibleTypes.filter(
-    type =>
-      savedObjectsManagement[type] &&
-      savedObjectsManagement[type].isImportableAndExportable === true
-  );
-}
-
 export function savedObjectsMixin(kbnServer, server) {
   const migrator = kbnServer.newPlatform.__internals.kibanaMigrator;
   const typeRegistry = kbnServer.newPlatform.__internals.typeRegistry;
@@ -49,7 +38,6 @@ export function savedObjectsMixin(kbnServer, server) {
   const allTypes = Object.keys(getRootPropertiesObjects(mappings));
   const schema = new SavedObjectsSchema(convertTypesToLegacySchema(typeRegistry.getAllTypes()));
   const visibleTypes = allTypes.filter(type => !schema.isHiddenType(type));
-  const importableAndExportableTypes = getImportableAndExportableTypes({ kbnServer, visibleTypes });
 
   server.decorate('server', 'kibanaMigrator', migrator);
   server.decorate(
@@ -65,17 +53,6 @@ export function savedObjectsMixin(kbnServer, server) {
     warn('Saved Objects uninitialized because the Kibana plugin is disabled.');
     return;
   }
-
-  const prereqs = {
-    getSavedObjectsClient: {
-      assign: 'savedObjectsClient',
-      method(req) {
-        return req.getSavedObjectsClient();
-      },
-    },
-  };
-
-  server.route(createResolveImportErrorsRoute(prereqs, server, importableAndExportableTypes));
 
   const serializer = kbnServer.newPlatform.start.core.savedObjects.createSerializer();
 
