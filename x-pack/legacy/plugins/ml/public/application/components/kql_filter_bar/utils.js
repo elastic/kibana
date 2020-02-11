@@ -3,11 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { npStart } from 'ui/new_platform';
 import { esKuery } from '../../../../../../../../src/plugins/data/public';
+import { getAutocomplete } from '../../util/dependency_cache';
 
 export function getSuggestions(query, selectionStart, indexPattern, boolFilter) {
-  return npStart.plugins.data.autocomplete.getQuerySuggestions({
+  const autocomplete = getAutocomplete();
+  return autocomplete.getQuerySuggestions({
     language: 'kuery',
     indexPatterns: [indexPattern],
     boolFilter,

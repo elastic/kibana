@@ -29,12 +29,18 @@ import { ContactCardEmbeddable } from '../../../../test_samples/embeddables/cont
 import { ContainerInput } from '../../../../containers';
 import { mountWithIntl as mount } from 'test_utils/enzyme_helpers';
 import { ReactWrapper } from 'enzyme';
-
+import { coreMock } from '../../../../../../../../core/public/mocks';
 // @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
 
-// eslint-disable-next-line
-import { coreMock } from '../../../../../../../../core/public/mocks';
+function DummySavedObjectFinder(props: { children: React.ReactNode }) {
+  return (
+    <div>
+      <div>Hello World</div>
+      {props.children}
+    </div>
+  ) as JSX.Element;
+}
 
 test('createNewEmbeddable() add embeddable to container', async () => {
   const core = coreMock.createStart();
@@ -101,14 +107,14 @@ test('selecting embeddable in "Create new ..." list calls createNewEmbeddable()'
   };
   const container = new HelloWorldContainer(input, { getEmbeddableFactory } as any);
   const onClose = jest.fn();
-  const component = mount<AddPanelFlyout>(
+  const component = mount(
     <AddPanelFlyout
       container={container}
       onClose={onClose}
       getFactory={getEmbeddableFactory}
       getAllFactories={() => new Set<any>([contactCardEmbeddableFactory]).values()}
       notifications={core.notifications}
-      SavedObjectFinder={() => null}
+      SavedObjectFinder={props => <DummySavedObjectFinder {...props} />}
     />
   ) as ReactWrapper<unknown, unknown, AddPanelFlyout>;
 
