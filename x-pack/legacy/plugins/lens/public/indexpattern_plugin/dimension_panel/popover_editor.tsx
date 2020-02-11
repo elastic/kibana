@@ -69,7 +69,6 @@ export function PopoverEditor(props: PopoverEditorProps) {
     currentIndexPattern,
     uniqueLabel,
     hideGrouping,
-    data,
   } = props;
   const { operationByField, fieldByOperation } = operationFieldSupportMatrix;
   const [isPopoverOpen, setPopoverOpen] = useState(false);

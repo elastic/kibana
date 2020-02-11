@@ -23,12 +23,12 @@ const breadcrumbs = [ML_BREADCRUMB, DATA_VISUALIZER_BREADCRUMB];
 
 export const selectorRoute: MlRoute = {
   path: '/datavisualizer',
-  render: (props, config, deps) => <PageWrapper config={config} {...props} deps={deps} />,
+  render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs,
 };
 
-const PageWrapper: FC<PageProps> = ({ location, config }) => {
-  const { context } = useResolver(undefined, undefined, config, {
+const PageWrapper: FC<PageProps> = ({ location, deps }) => {
+  const { context } = useResolver(undefined, undefined, deps.config, {
     checkBasicLicense,
     checkFindFileStructurePrivilege,
   });
