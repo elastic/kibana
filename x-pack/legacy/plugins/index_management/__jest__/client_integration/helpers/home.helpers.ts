@@ -20,7 +20,7 @@ import { Template } from '../../../common/types';
 import { WithAppDependencies, services } from './setup_environment';
 
 const testBedConfig: TestBedConfig = {
-  store: () => indexManagementStore(services),
+  store: () => indexManagementStore(services as any),
   memoryRouter: {
     initialEntries: [`${BASE_PATH}indices`],
     componentRoutePath: `${BASE_PATH}:section(indices|templates)`,
