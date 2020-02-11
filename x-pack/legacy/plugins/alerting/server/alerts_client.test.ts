@@ -2269,7 +2269,7 @@ describe('update()', () => {
       attributes: {
         ...existingDecryptedAlert.attributes,
         enabled: false,
-      }
+      },
     });
     savedObjectsClient.bulkGet.mockResolvedValueOnce({
       saved_objects: [
