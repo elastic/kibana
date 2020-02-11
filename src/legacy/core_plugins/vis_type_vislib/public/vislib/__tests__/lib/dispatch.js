@@ -57,9 +57,9 @@ describe('Vislib Dispatch Class Test Suite', function() {
       const events = _.pluck(vis.handler.charts, 'events');
       expect(events.length).to.be.above(0);
       events.forEach(function(dispatch) {
-        expect(dispatch.on).to.be.defined();
-        expect(dispatch.off).to.be.defined();
-        expect(dispatch.emit).to.be.defined();
+        expect(dispatch).to.have.property('on');
+        expect(dispatch).to.have.property('off');
+        expect(dispatch).to.have.property('emit');
       });
     });
   });
