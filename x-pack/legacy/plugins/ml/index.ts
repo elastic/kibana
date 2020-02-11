@@ -45,7 +45,6 @@ export const ml = (kibana: any) => {
         category: DEFAULT_APP_CATEGORIES.analyze,
       },
       styleSheetPaths: resolve(__dirname, 'public/application/index.scss'),
-      hacks: ['plugins/ml/application/hacks/toggle_app_link_in_nav'],
       savedObjectSchemas: {
         'ml-telemetry': {
           isNamespaceAgnostic: true,

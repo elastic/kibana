@@ -22,7 +22,8 @@ import {
 
 import { EventsTable } from '../events_table';
 
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 function EditHeader({ calendarId, description }) {
   return (
@@ -44,7 +45,7 @@ function EditHeader({ calendarId, description }) {
   );
 }
 
-export const CalendarForm = injectI18n(function CalendarForm({
+export const CalendarForm = ({
   calendarId,
   canCreateCalendar,
   canDeleteCalendar,
@@ -67,10 +68,8 @@ export const CalendarForm = injectI18n(function CalendarForm({
   selectedGroupOptions,
   selectedJobOptions,
   showNewEventModal,
-  intl,
-}) {
-  const msg = intl.formatMessage({
-    id: 'xpack.ml.calendarsEdit.calendarForm.allowedCharactersDescription',
+}) => {
+  const msg = i18n.translate('xpack.ml.calendarsEdit.calendarForm.allowedCharactersDescription', {
     defaultMessage:
       'Use lowercase alphanumerics (a-z and 0-9), hyphens or underscores; ' +
       'must start and end with an alphanumeric character',
@@ -217,9 +216,9 @@ export const CalendarForm = injectI18n(function CalendarForm({
       </EuiFlexGroup>
     </EuiForm>
   );
-});
+};
 
-CalendarForm.WrappedComponent.propTypes = {
+CalendarForm.propTypes = {
   calendarId: PropTypes.string.isRequired,
   canCreateCalendar: PropTypes.bool.isRequired,
   canDeleteCalendar: PropTypes.bool.isRequired,

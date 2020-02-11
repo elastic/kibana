@@ -35,6 +35,8 @@ import {
 } from '../../../screens/hosts/events';
 import { DEFAULT_TIMEOUT } from '../../lib/util/helpers';
 
+import { clearSearchBar } from '../../../tasks/header';
+
 const defaultHeadersInDefaultEcsCategory = [
   { id: '@timestamp' },
   { id: 'message' },
@@ -133,11 +135,15 @@ describe('Events Viewer', () => {
     before(() => {
       loginAndWaitForPage(HOSTS_PAGE);
       openEvents();
+      waitsForEventsToBeLoaded();
+    });
+
+    afterEach(() => {
+      clearSearchBar();
     });
 
     it('filters the events by applying filter criteria from the search bar at the top of the page', () => {
       const filterInput = '4bf34c1c-eaa9-46de-8921-67a4ccc49829'; // this will never match real data
-      waitsForEventsToBeLoaded();
       cy.get(HEADER_SUBTITLE)
         .invoke('text')
         .then(initialNumberOfEvents => {

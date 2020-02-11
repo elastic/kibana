@@ -6,10 +6,10 @@
 
 import { useContext } from 'react';
 
-import { KibanaContext, KibanaContextValue } from './kibana_context';
+import { MlContext, MlContextValue } from './ml_context';
 
-export const useKibanaContext = () => {
-  const context = useContext(KibanaContext);
+export const useMlContext = () => {
+  const context = useContext(MlContext);
 
   if (
     context.combinedQuery === undefined ||
@@ -21,5 +21,5 @@ export const useKibanaContext = () => {
     throw new Error('required attribute is undefined');
   }
 
-  return context as KibanaContextValue;
+  return context as MlContextValue;
 };
