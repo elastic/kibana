@@ -2579,8 +2579,6 @@
     "kbn.management.savedObjects.indexBreadcrumb": "保存されたオブジェクト",
     "advancedSettings.advancedSettingsLabel": "高度な設定",
     "advancedSettings.pageTitle": "設定",
-    "kbn.management.settings.searchBarAriaLabel": "高度な設定を検索",
-    "kbn.management.settings.sectionLabel": "高度な設定",
     "kbn.managementTitle": "管理",
     "kibana_legacy.bigUrlWarningNotificationMessage": "{advancedSettingsLink}で{storeInSessionStorageParam}オプションを有効にするか、オンスクリーンビジュアルを簡素化してください。",
     "kibana_legacy.bigUrlWarningNotificationMessage.advancedSettingsLinkText": "高度な設定",
