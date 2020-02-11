@@ -47,19 +47,23 @@ export async function getTile({
       };
 
       const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
-      server.log('info', JSON.stringify(esQuery));
+      // server.log('info', JSON.stringify(esQuery));
       const countQuery = {
         index: indexPattern,
         body: {
           query: requestBody.query,
         },
       };
+
+      // console.time('es-count')
+      const beforeCount = Date.now();
       const countResult = await callWithRequest(request, 'count', countQuery);
-      server.log('info', `count`);
-      server.log('info', countResult, requestBody.size);
+      server.log('info', `count: ${Date.now() - beforeCount}`);
+      // server.log('info', `count`);
+      // server.log('info', countResult, requestBody.size);
 
       if (countResult.count > requestBody.size) {
-        server.log('info', 'do NOT do search');
+        // server.log('info', 'do NOT do search');
         resultFeatures = [
           {
             type: 'Feature',
@@ -70,10 +74,13 @@ export async function getTile({
           },
         ];
       } else {
-        server.log('info', 'do search');
+        // server.log('info', 'do search');
+        const beforeSearch = Date.now();
         result = await callWithRequest(request, 'search', esQuery);
+        server.log('info', `search ${Date.now() - beforeSearch}`);
 
-        server.log('info', `result length ${result.hits.hits.length}`);
+        // server.log('info', `result length ${result.hits.hits.length}`);
+
         const feats = result.hits.hits.map(hit => {
           let geomType;
           const geometry = hit._source[geometryFieldName];
@@ -142,6 +149,7 @@ export async function getTile({
 
     // server.log('info', `feature length ${featureCollection.features.length}`);
 
+    const beforeTile = Date.now();
     const tileIndex = geojsonvt(featureCollection, {
       maxZoom: 24, // max zoom to preserve detail on; can't be higher than 24
       tolerance: 3, // simplification tolerance (higher means simpler)
@@ -155,10 +163,14 @@ export async function getTile({
       indexMaxPoints: 100000, // max number of points per tile in the index
     });
     const tile = tileIndex.getTile(z, x, y);
+    server.log('info', `tile ${Date.now() - beforeTile}`);
 
     if (tile) {
+      const beforeBuffer = Date.now();
+
       const pbf = vtpbf.fromGeojsonVt({ [MVT_SOURCE_ID]: tile }, { version: 2 });
       const buffer = Buffer.from(pbf);
+      server.log('info', `buffer ${Date.now() - beforeBuffer}`);
 
       // server.log('info', `bytelength: ${buffer.byteLength}`);
 
@@ -184,7 +196,7 @@ export async function getGridTile({
   fields = [],
   requestBody = {},
 }) {
-  server.log('info', { indexPattern, aggNames, requestBody, geometryFieldName, x, y, z, fields });
+  // server.log('info', { indexPattern, aggNames, requestBody, geometryFieldName, x, y, z, fields });
   const polygon = toBoundingBox(x, y, z);
 
   const wLon = tile2long(x, z);
@@ -212,10 +224,12 @@ export async function getGridTile({
         index: indexPattern,
         body: requestBody,
       };
-      server.log('info', JSON.stringify(esQuery));
+      // server.log('info', JSON.stringify(esQuery));
 
       const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
+      const beforeAgg = Date.now();
       result = await callWithRequest(request, 'search', esQuery);
+      server.log('info', `geotile_search ${Date.now() - beforeAgg}`);
 
       // server.log('info', JSON.stringify(result));
     } catch (e) {
@@ -223,6 +237,7 @@ export async function getGridTile({
       throw e;
     }
 
+    const beforeTile = Date.now();
     const ffeats = [];
     result.aggregations.grid.buckets.forEach(bucket => {
       const feature = {
@@ -259,7 +274,7 @@ export async function getGridTile({
       type: 'FeatureCollection',
     };
 
-    server.log('info', `feature length ${featureCollection.features.length}`);
+    // server.log('info', `feature length ${featureCollection.features.length}`);
 
     const tileIndex = geojsonvt(featureCollection, {
       maxZoom: 24, // max zoom to preserve detail on; can't be higher than 24
@@ -274,10 +289,13 @@ export async function getGridTile({
       indexMaxPoints: 100000, // max number of points per tile in the index
     });
     const tile = tileIndex.getTile(z, x, y);
+    server.log('info', `tile ${Date.now() - beforeTile}`);
 
     if (tile) {
+      const beforeBuff = Date.now();
       const pbf = vtpbf.fromGeojsonVt({ [MVT_SOURCE_ID]: tile }, { version: 2 });
       const buffer = Buffer.from(pbf);
+      server.log('info', `buffer ${Date.now() - beforeBuff}`);
 
       return buffer;
     } else {
