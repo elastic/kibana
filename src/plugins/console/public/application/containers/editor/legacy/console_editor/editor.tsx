@@ -106,7 +106,7 @@ function EditorUI({ initialTextValue }: EditorProps) {
       if (/^https?:\/\//.test(url)) {
         const loadFrom: Record<string, any> = {
           url,
-          // Having dataType here i\s required as it doesn't allow jQuery to `eval` content
+          // Having dataType here is required as it doesn't allow jQuery to `eval` content
           // coming from the external source thereby preventing XSS attack.
           dataType: 'text',
           kbnXsrfToken: false,
