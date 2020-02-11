@@ -26,6 +26,7 @@ import { getFilters } from './get_filters';
 
 import {
   esQuery,
+  EsQueryConfig,
   esFilters,
   IIndexPattern,
   Query,
@@ -45,7 +46,7 @@ const getEsQueryConfig = async (config: any) => {
     allowLeadingWildcards,
     queryStringOptions,
     ignoreFilterIfFieldNotInIndex,
-  } as esQuery.EsQueryConfig;
+  } as EsQueryConfig;
 };
 
 const getUiSettings = async (config: any) => {

@@ -10,15 +10,16 @@ import { uniqueId } from 'lodash';
 import { FilterBar } from './filter_bar';
 import { EuiCallOut, EuiLink, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { metadata } from 'ui/metadata';
 import { getSuggestions, getKqlQueryValues } from './utils';
+import { getDocLinks } from '../../util/dependency_cache';
 
 function getErrorWithLink(errorMessage) {
+  const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = getDocLinks();
   return (
     <EuiText>
       {`${errorMessage} Input must be valid `}
       <EuiLink
-        href={`https://www.elastic.co/guide/en/kibana/${metadata.branch}/kuery-query.html`}
+        href={`${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/kuery-query.html`}
         target="_blank"
       >
         {'Kibana Query Language'}

@@ -438,6 +438,7 @@ class SavedObjectFinderUi extends React.Component<
             )}
           </EuiFilterGroup>
         </EuiFlexItem>
+        {this.props.children ? <EuiFlexItem grow={false}>{this.props.children}</EuiFlexItem> : null}
       </EuiFlexGroup>
     );
   }

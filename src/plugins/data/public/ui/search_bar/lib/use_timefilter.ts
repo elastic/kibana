@@ -19,15 +19,27 @@
 
 import { useState, useEffect } from 'react';
 import { Subscription } from 'rxjs';
-import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { DataPublicPluginStart, TimeRange, RefreshInterval } from 'src/plugins/data/public';
 
 interface UseTimefilterProps {
+  dateRangeFrom?: string;
+  dateRangeTo?: string;
+  refreshInterval?: number;
+  isRefreshPaused?: boolean;
   timefilter: DataPublicPluginStart['query']['timefilter']['timefilter'];
 }
 
 export const useTimefilter = (props: UseTimefilterProps) => {
-  const [timeRange, setTimerange] = useState(props.timefilter.getTime());
-  const [refreshInterval, setRefreshInterval] = useState(props.timefilter.getRefreshInterval());
+  const initialTimeRange: TimeRange = {
+    from: props.dateRangeFrom || props.timefilter.getTime().from,
+    to: props.dateRangeTo || props.timefilter.getTime().to,
+  };
+  const initialRefreshInterval: RefreshInterval = {
+    value: props.refreshInterval || props.timefilter.getRefreshInterval().value,
+    pause: props.isRefreshPaused || props.timefilter.getRefreshInterval().pause,
+  };
+  const [timeRange, setTimerange] = useState(initialTimeRange);
+  const [refreshInterval, setRefreshInterval] = useState(initialRefreshInterval);
 
   useEffect(() => {
     const subscriptions = new Subscription();

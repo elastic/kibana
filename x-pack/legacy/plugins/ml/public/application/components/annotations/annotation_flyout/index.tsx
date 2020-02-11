@@ -27,7 +27,6 @@ import { CommonProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { toastNotifications } from 'ui/notify';
 import { ANNOTATION_MAX_LENGTH_CHARS } from '../../../../../common/constants/annotations';
 import {
   annotation$,
@@ -38,6 +37,7 @@ import { AnnotationDescriptionList } from '../annotation_description_list';
 import { DeleteAnnotationModal } from '../delete_annotation_modal';
 
 import { ml } from '../../../services/ml_api_service';
+import { getToastNotifications } from '../../../util/dependency_cache';
 
 interface Props {
   annotation: AnnotationState;
@@ -47,7 +47,7 @@ interface State {
   isDeleteModalVisible: boolean;
 }
 
-class AnnotationFlyoutIntl extends Component<CommonProps & Props> {
+class AnnotationFlyoutUI extends Component<CommonProps & Props> {
   public state: State = {
     isDeleteModalVisible: false,
   };
@@ -75,6 +75,7 @@ class AnnotationFlyoutIntl extends Component<CommonProps & Props> {
 
   public deleteHandler = async () => {
     const { annotation } = this.props;
+    const toastNotifications = getToastNotifications();
 
     if (annotation === null) {
       return;
@@ -161,6 +162,7 @@ class AnnotationFlyoutIntl extends Component<CommonProps & Props> {
       .indexAnnotation(annotation)
       .then(() => {
         annotationsRefreshed();
+        const toastNotifications = getToastNotifications();
         if (typeof annotation._id === 'undefined') {
           toastNotifications.addSuccess(
             i18n.translate(
@@ -184,6 +186,7 @@ class AnnotationFlyoutIntl extends Component<CommonProps & Props> {
         }
       })
       .catch(resp => {
+        const toastNotifications = getToastNotifications();
         if (typeof annotation._id === 'undefined') {
           toastNotifications.addDanger(
             i18n.translate(
@@ -343,5 +346,5 @@ export const AnnotationFlyout: FC<any> = props => {
     return null;
   }
 
-  return <AnnotationFlyoutIntl annotation={annotationProp} {...props} />;
+  return <AnnotationFlyoutUI annotation={annotationProp} {...props} />;
 };
