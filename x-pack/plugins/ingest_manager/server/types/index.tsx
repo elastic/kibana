@@ -69,9 +69,13 @@ export {
   DeletePackageRequestSchema,
   // Enrollment API keys schemas
   GetEnrollmentAPIKeysRequestSchema,
+  GetEnrollmentAPIKeysResponse,
   PostEnrollmentAPIKeyRequestSchema,
+  PostEnrollmentAPIKeyResponse,
   DeleteEnrollmentAPIKeyRequestSchema,
+  DeleteEnrollmentAPIKeyResponse,
   GetOneEnrollmentAPIKeyRequestSchema,
+  GetOneEnrollmentAPIKeyResponse,
   // Install Script schema
   InstallScriptRequestSchema,
 } from '../../common';

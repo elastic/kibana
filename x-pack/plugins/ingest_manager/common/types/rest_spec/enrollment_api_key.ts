@@ -5,6 +5,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { EnrollmentAPIKey } from '../models';
 
 export const GetEnrollmentAPIKeysRequestSchema = {
   query: schema.object({
@@ -14,17 +15,35 @@ export const GetEnrollmentAPIKeysRequestSchema = {
   }),
 };
 
+export interface GetEnrollmentAPIKeysResponse {
+  list: EnrollmentAPIKey[];
+  total: number;
+  page: number;
+  perPage: number;
+  success: boolean;
+}
+
 export const GetOneEnrollmentAPIKeyRequestSchema = {
   params: schema.object({
     keyId: schema.string(),
   }),
 };
 
+export interface GetOneEnrollmentAPIKeyResponse {
+  item: EnrollmentAPIKey;
+  success: boolean;
+}
+
 export const DeleteEnrollmentAPIKeyRequestSchema = {
   params: schema.object({
     keyId: schema.string(),
   }),
 };
+
+export interface DeleteEnrollmentAPIKeyResponse {
+  action: string;
+  success: boolean;
+}
 
 export const PostEnrollmentAPIKeyRequestSchema = {
   body: schema.object({
@@ -33,3 +52,9 @@ export const PostEnrollmentAPIKeyRequestSchema = {
     expiration: schema.maybe(schema.string()),
   }),
 };
+
+export interface PostEnrollmentAPIKeyResponse {
+  action: string;
+  item: EnrollmentAPIKey;
+  success: boolean;
+}
