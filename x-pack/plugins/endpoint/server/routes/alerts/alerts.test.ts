@@ -17,12 +17,13 @@ import {
   httpServerMock,
   httpServiceMock,
   loggingServiceMock,
-} from '../../../../../src/core/server/mocks';
-import { AlertData, AlertResultList } from '../../common/types';
+} from '../../../../../../src/core/server/mocks';
+import { AlertData, AlertResultList } from '../../../common/types';
 import { SearchResponse } from 'elasticsearch';
-import { reqSchema, registerAlertRoutes } from './alerts';
-import { EndpointConfigSchema } from '../config';
-import * as data from '../test_data/all_alerts_data.json';
+import { alertListReqSchema } from './list/schemas';
+import { registerAlertRoutes } from './index';
+import { EndpointConfigSchema } from '../../config';
+import * as data from '../../test_data/all_alerts_data.json';
 
 describe('test alerts route', () => {
   let routerMock: jest.Mocked<IRouter>;
@@ -147,7 +148,7 @@ describe('test alerts route', () => {
 
   it('should fail to validate when `page_size` is not a number', async () => {
     const validate = () => {
-      reqSchema.validate({
+      alertListReqSchema.validate({
         page_size: 'abc',
       });
     };
@@ -156,7 +157,7 @@ describe('test alerts route', () => {
 
   it('should validate when `page_size` is a number', async () => {
     const validate = () => {
-      reqSchema.validate({
+      alertListReqSchema.validate({
         page_size: 123,
       });
     };
@@ -165,7 +166,7 @@ describe('test alerts route', () => {
 
   it('should validate when `page_size` can be converted to a number', async () => {
     const validate = () => {
-      reqSchema.validate({
+      alertListReqSchema.validate({
         page_size: '123',
       });
     };
@@ -174,7 +175,7 @@ describe('test alerts route', () => {
 
   it('should allow either `page_index` or `after`, but not both', async () => {
     const validate = () => {
-      reqSchema.validate({
+      alertListReqSchema.validate({
         page_index: 1,
         after: [123, 345],
       });
@@ -184,7 +185,7 @@ describe('test alerts route', () => {
 
   it('should allow either `page_index` or `before`, but not both', async () => {
     const validate = () => {
-      reqSchema.validate({
+      alertListReqSchema.validate({
         page_index: 1,
         before: 'abc',
       });
@@ -194,7 +195,7 @@ describe('test alerts route', () => {
 
   it('should allow either `before` or `after`, but not both', async () => {
     const validate = () => {
-      reqSchema.validate({
+      alertListReqSchema.validate({
         before: ['abc', 'def'],
         after: [123, 345],
       });

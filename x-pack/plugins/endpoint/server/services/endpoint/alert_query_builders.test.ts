@@ -5,7 +5,7 @@
  */
 import { httpServerMock, loggingServiceMock } from 'src/core/server/mocks';
 import { EndpointConfigSchema } from '../../config';
-import { getRequestData, buildAlertListESQuery } from './alert_query_builders';
+import { getRequestData, buildAlertListESQuery } from '../../routes/alerts/list/lib';
 
 describe('test query builder', () => {
   describe('test query builder request processing', () => {
