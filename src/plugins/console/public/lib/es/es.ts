@@ -18,7 +18,7 @@
  */
 
 import $ from 'jquery';
-import { url } from '../../../../kibana_utils/public';
+import { stringify } from 'query-string';
 
 const esVersion: string[] = [];
 
@@ -35,7 +35,7 @@ export function send(method: string, path: string, data: any) {
   const wrappedDfd = $.Deferred(); // eslint-disable-line new-cap
 
   const options: JQuery.AjaxSettings = {
-    url: '../api/console/proxy?' + url.stringifyUrlQuery({ path, method }),
+    url: '../api/console/proxy?' + stringify({ path, method }, { sort: false }),
     data,
     contentType: getContentType(data),
     cache: false,

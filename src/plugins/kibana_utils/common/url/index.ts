@@ -17,10 +17,9 @@
  * under the License.
  */
 
-import { encodeQueryComponent } from './encode_query_component';
-import { stringifyUrlQuery } from './utils';
+import { encodeUriQuery, encodeQuery } from './encode_uri_query';
 
 export const url = {
-  encodeQueryComponent,
-  stringifyUrlQuery,
+  encodeQuery,
+  encodeUriQuery,
 };

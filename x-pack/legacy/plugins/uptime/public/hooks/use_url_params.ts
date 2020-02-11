@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { parse } from 'query-string';
+import { parse, stringify } from 'query-string';
 import { useLocation, useHistory } from 'react-router-dom';
 import { UptimeUrlParams, getSupportedUrlParams } from '../lib/helper';
-import { url } from '../../../../../../src/plugins/kibana_utils/public';
 
 type GetUrlParams = () => UptimeUrlParams;
 type UpdateUrlParams = (updatedParams: { [key: string]: string | number | boolean }) => void;
@@ -42,7 +41,7 @@ export const useUrlParams: UptimeUrlParamsHook = () => {
 
     history.push({
       pathname,
-      search: url.stringifyUrlQuery(
+      search: stringify(
         // drop any parameters that have no value
         Object.keys(mergedParams).reduce((params, key) => {
           const value = mergedParams[key];
@@ -53,7 +52,8 @@ export const useUrlParams: UptimeUrlParamsHook = () => {
             ...params,
             [key]: value,
           };
-        }, {})
+        }, {}),
+        { sort: false }
       ),
     });
   };

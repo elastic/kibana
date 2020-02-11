@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { stringify } from 'query-string';
 import { UptimeUrlParams } from './url_params';
 import { CLIENT_DEFAULTS } from '../../../common/constants';
-import { url } from '../../../../../../../src/plugins/kibana_utils/public';
 
 const {
   AUTOREFRESH_INTERVAL,
@@ -38,5 +38,5 @@ export const stringifyUrlParams = (params: Partial<UptimeUrlParams>, ignoreEmpty
       }
     });
   }
-  return `?${url.stringifyUrlQuery(params)}`;
+  return `?${stringify(params, { sort: false })}`;
 };

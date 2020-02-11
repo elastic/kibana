@@ -9,7 +9,7 @@
  */
 
 import { createLocation } from 'history';
-import { url } from '../../../../../../../src/plugins/kibana_utils/public';
+import { stringify } from 'query-string';
 import { APPS, BASE_PATH, BASE_PATH_REMOTE_CLUSTERS } from '../../../common/constants';
 
 const isModifiedEvent = event =>
@@ -22,7 +22,7 @@ const queryParamsFromObject = (params, encodeParams = false) => {
     return;
   }
 
-  const paramsStr = url.stringifyUrlQuery(params, encodeParams ? undefined : false);
+  const paramsStr = stringify(params, { sort: false, encode: encodeParams });
   return `?${paramsStr}`;
 };
 

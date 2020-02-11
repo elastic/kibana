@@ -18,8 +18,8 @@
  */
 
 import { format as formatUrl } from 'url';
+import { stringify } from 'query-string';
 import { parseUrl, parseUrlHash } from './parse';
-import { url as urlUtils } from '../../../common';
 
 export function replaceUrlHashQuery(
   rawUrl: string,
@@ -28,7 +28,7 @@ export function replaceUrlHashQuery(
   const url = parseUrl(rawUrl);
   const hash = parseUrlHash(rawUrl);
   const newQuery = queryReplacer(hash?.query || {});
-  const searchQueryString = urlUtils.stringifyUrlQuery(newQuery);
+  const searchQueryString = stringify(newQuery, { sort: false });
 
   if ((!hash || !hash.search) && !searchQueryString) return rawUrl; // nothing to change. return original url
   return formatUrl({

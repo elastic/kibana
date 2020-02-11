@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { parse } from 'query-string';
+import { parse, stringify } from 'query-string';
 import { decode, encode } from 'rison-node';
 import * as H from 'history';
 import { Query, esFilters } from 'src/plugins/data/public';
@@ -23,7 +23,6 @@ import {
   Timeline,
   UpdateUrlStateString,
 } from './types';
-import { url } from '../../../../../../../src/plugins/kibana_utils/public';
 
 export const decodeRisonUrlState = <T>(value: string | undefined): T | null => {
   try {
@@ -55,9 +54,7 @@ export const replaceStateKeyInQueryString = <T>(stateKey: string, urlState: T) =
   if (urlState == null || (typeof urlState === 'string' && urlState === '')) {
     delete previousQueryValues[stateKey];
 
-    return url.stringifyUrlQuery({
-      ...previousQueryValues,
-    });
+    return stringify(previousQueryValues, { sort: false });
   }
 
   // ಠ_ಠ Code was copied from x-pack/legacy/plugins/infra/public/utils/url_state.tsx ಠ_ಠ
@@ -65,10 +62,13 @@ export const replaceStateKeyInQueryString = <T>(stateKey: string, urlState: T) =
   const encodedUrlState =
     typeof urlState !== 'undefined' ? encodeRisonUrlState(urlState) : undefined;
 
-  return url.stringifyUrlQuery({
-    ...previousQueryValues,
-    [stateKey]: encodedUrlState,
-  });
+  return stringify(
+    {
+      ...previousQueryValues,
+      [stateKey]: encodedUrlState,
+    },
+    { sort: false }
+  );
 };
 
 export const replaceQueryStringInLocation = (

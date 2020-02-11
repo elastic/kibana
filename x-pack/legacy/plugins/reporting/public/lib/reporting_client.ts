@@ -3,12 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import { stringify } from 'query-string';
 import { npStart } from 'ui/new_platform';
 // @ts-ignore
 import rison from 'rison-node';
 import { add } from './job_completion_notifications';
-import { url } from '../../../../../../src/plugins/kibana_utils/public';
 
 const { core } = npStart;
 const API_BASE_URL = '/api/reporting/generate';
@@ -18,7 +17,7 @@ interface JobParams {
 }
 
 export const getReportingJobPath = (exportType: string, jobParams: JobParams) => {
-  const params = url.stringifyUrlQuery({ jobParams: rison.encode(jobParams) });
+  const params = stringify({ jobParams: rison.encode(jobParams) });
 
   return `${core.http.basePath.prepend(API_BASE_URL)}/${exportType}?${params}`;
 };

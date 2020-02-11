@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { isUndefined, transform } from 'lodash';
+
 /**
  * This method is intended for encoding *key* or *value* parts of query component. We need a custom
  * method because encodeURIComponent is too aggressive and encodes stuff that doesn't have to be
@@ -28,7 +30,7 @@
  *    sub-delims    = "!" / "$" / "&" / "'" / "(" / ")"
  *                     / "*" / "+" / "," / ";" / "="
  */
-export function encodeQueryComponent(val: string, pctEncodeSpaces = false) {
+export function encodeUriQuery(val: string, pctEncodeSpaces = false) {
   return encodeURIComponent(val)
     .replace(/%40/gi, '@')
     .replace(/%3A/gi, ':')
@@ -37,3 +39,13 @@ export function encodeQueryComponent(val: string, pctEncodeSpaces = false) {
     .replace(/%3B/gi, ';')
     .replace(/%20/g, pctEncodeSpaces ? '%20' : '+');
 }
+
+export const encodeQuery = (
+  query: Record<string, any>,
+  encodeFunction: (val: string, pctEncodeSpaces?: boolean) => string = encodeUriQuery
+) =>
+  transform(query, (result, value, key) => {
+    if (key) {
+      result[key] = encodeFunction(isUndefined(value) ? '' : value, true);
+    }
+  });

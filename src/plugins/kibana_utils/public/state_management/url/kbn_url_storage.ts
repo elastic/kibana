@@ -18,11 +18,11 @@
  */
 
 import { format as formatUrl } from 'url';
+import { stringify } from 'query-string';
 import { createBrowserHistory, History } from 'history';
 import { decodeState, encodeState } from '../state_encoder';
 import { getCurrentUrl, parseUrl, parseUrlHash } from './parse';
 import { replaceUrlHashQuery } from './format';
-import { url as urlUtils } from '../../../common';
 
 /**
  * Parses a kibana url and retrieves all the states encoded into url,
@@ -243,11 +243,11 @@ export function getRelativeToHistoryPath(absoluteUrl: string, history: History):
 
   return formatUrl({
     pathname: stripBasename(parsedUrl.pathname),
-    search: urlUtils.stringifyUrlQuery(parsedUrl.query),
+    search: stringify(parsedUrl.query, { sort: false }),
     hash: parsedHash
       ? formatUrl({
           pathname: parsedHash.pathname,
-          search: urlUtils.stringifyUrlQuery(parsedHash.query),
+          search: stringify(parsedHash.query, { sort: false }),
         })
       : parsedUrl.hash,
   });

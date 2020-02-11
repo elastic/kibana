@@ -4,13 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { parse } from 'query-string';
+import { parse, stringify } from 'query-string';
 import { History, Location } from 'history';
 import throttle from 'lodash/fp/throttle';
 import React from 'react';
 import { Route, RouteProps } from 'react-router-dom';
 import { decode, encode, RisonValue } from 'rison-node';
-import { url } from '../../../../../../src/plugins/kibana_utils/public';
 
 interface UrlStateContainerProps<UrlState> {
   urlState: UrlState | undefined;
@@ -159,10 +158,13 @@ export const replaceStateKeyInQueryString = <UrlState extends any>(
   const encodedUrlState =
     typeof urlState !== 'undefined' ? encodeRisonUrlState(urlState) : undefined;
 
-  return url.stringifyUrlQuery({
-    ...previousQueryValues,
-    [stateKey]: encodedUrlState,
-  });
+  return stringify(
+    {
+      ...previousQueryValues,
+      [stateKey]: encodedUrlState,
+    },
+    { sort: false }
+  );
 };
 
 const replaceQueryStringInLocation = (location: Location, queryString: string): Location => {

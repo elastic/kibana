@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { parse } from 'query-string';
+import { parse, stringify } from 'query-string';
 import { Location } from 'history';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { decode, encode, RisonValue } from 'rison-node';
-import { url } from '../../../../../../src/plugins/kibana_utils/public';
 
 import { useHistory } from './history_context';
 
@@ -115,10 +114,13 @@ export const replaceStateKeyInQueryString = <UrlState extends any>(
   const encodedUrlState =
     typeof urlState !== 'undefined' ? encodeRisonUrlState(urlState) : undefined;
 
-  return url.stringifyUrlQuery({
-    ...previousQueryValues,
-    [stateKey]: encodedUrlState,
-  });
+  return stringify(
+    {
+      ...previousQueryValues,
+      [stateKey]: encodedUrlState,
+    },
+    { sort: false }
+  );
 };
 
 const replaceQueryStringInLocation = (location: Location, queryString: string): Location => {

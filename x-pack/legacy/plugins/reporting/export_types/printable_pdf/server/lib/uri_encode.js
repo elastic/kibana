@@ -12,13 +12,13 @@ function toKeyValue(obj) {
   forEach(obj, function(value, key) {
     if (isArray(value)) {
       forEach(value, function(arrayValue) {
-        const keyStr = url.encodeQueryComponent(key, true);
-        const valStr = arrayValue === true ? '' : '=' + url.encodeQueryComponent(arrayValue, true);
+        const keyStr = url.encodeUriQuery(key, true);
+        const valStr = arrayValue === true ? '' : '=' + url.encodeUriQuery(arrayValue, true);
         parts.push(keyStr + valStr);
       });
     } else {
-      const keyStr = url.encodeQueryComponent(key, true);
-      const valStr = value === true ? '' : '=' + url.encodeQueryComponent(value, true);
+      const keyStr = url.encodeUriQuery(key, true);
+      const valStr = value === true ? '' : '=' + url.encodeUriQuery(value, true);
       parts.push(keyStr + valStr);
     }
   });
@@ -27,5 +27,5 @@ function toKeyValue(obj) {
 
 export const uriEncode = {
   stringify: toKeyValue,
-  string: url.encodeQueryComponent,
+  string: url.encodeUriQuery,
 };

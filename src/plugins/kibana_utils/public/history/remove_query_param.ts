@@ -17,9 +17,8 @@
  * under the License.
  */
 
-import { parse } from 'query-string';
+import { parse, stringify } from 'query-string';
 import { History, Location } from 'history';
-import { url } from '../../common';
 
 export function removeQueryParam(history: History, param: string, replace: boolean = true) {
   const oldLocation = history.location;
@@ -28,7 +27,7 @@ export function removeQueryParam(history: History, param: string, replace: boole
 
   delete query[param];
 
-  const newSearch = url.stringifyUrlQuery(query);
+  const newSearch = stringify(query, { sort: false });
   const newLocation: Location<any> = {
     ...oldLocation,
     search: newSearch,

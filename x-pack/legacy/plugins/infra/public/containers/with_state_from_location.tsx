@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { parse } from 'query-string';
+import { parse, stringify } from 'query-string';
 import { Location } from 'history';
 import omit from 'lodash/fp/omit';
 import React from 'react';
@@ -12,7 +12,6 @@ import { RouteComponentProps, withRouter } from 'react-router-dom';
 // eslint-disable-next-line @typescript-eslint/camelcase
 import { decode_object, encode_object } from 'rison-node';
 import { Omit } from '../lib/lib';
-import { url } from '../../../../../../src/plugins/kibana_utils/public';
 
 interface AnyObject {
   [key: string]: any;
@@ -118,10 +117,13 @@ export const mapStateToRisonAppLocation = <State extends {}>(
     ...previousState,
     ...mapState(state),
   });
-  const newQueryValues = url.stringifyUrlQuery({
-    ...previousQueryValues,
-    ...encodedState,
-  });
+  const newQueryValues = stringify(
+    {
+      ...previousQueryValues,
+      ...encodedState,
+    },
+    { sort: false }
+  );
   return {
     ...location,
     search: `?${newQueryValues}`,

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { parse } from 'query-string';
+import { parse, stringify } from 'query-string';
 import { LocalUIFilterName } from '../../../../server/lib/ui_filters/local_ui_filters/config';
 import { url } from '../../../../../../../../src/plugins/kibana_utils/public';
 
@@ -13,9 +13,11 @@ export function toQuery(search?: string): APMQueryParamsRaw {
 }
 
 export function fromQuery(query: Record<string, any>) {
-  return url.stringifyUrlQuery(query, (value: string) =>
+  const encodedQuery = url.encodeQuery(query, value =>
     encodeURIComponent(value).replace(/%3A/g, ':')
   );
+
+  return stringify(encodedQuery, { sort: false, encode: false });
 }
 
 export type APMQueryParams = {

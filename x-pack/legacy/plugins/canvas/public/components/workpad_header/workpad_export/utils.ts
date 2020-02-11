@@ -72,8 +72,7 @@ function getPdfUrlParts(
 export function getPdfUrl(...args: Arguments): string {
   const urlParts = getPdfUrlParts(...args);
   const param = (key: string, val: any) =>
-    url.encodeQueryComponent(key, true) +
-    (val === true ? '' : '=' + url.encodeQueryComponent(val, true));
+    url.encodeUriQuery(key, true) + (val === true ? '' : '=' + url.encodeUriQuery(val, true));
 
   return `${urlParts.createPdfUri}?${param('jobParams', urlParts.createPdfPayload.jobParams)}`;
 }
