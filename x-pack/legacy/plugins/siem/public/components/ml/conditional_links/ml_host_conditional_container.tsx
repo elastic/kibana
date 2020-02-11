@@ -14,6 +14,8 @@ import { emptyEntity, multipleEntities, getMultipleEntities } from './entity_hel
 import { SiemPageName } from '../../../pages/home/types';
 import { HostsTableType } from '../../../store/hosts/model';
 
+import { url as urlUtils } from '../../../../../../../../src/plugins/kibana_utils/public';
+
 interface QueryStringType {
   '?_g': string;
   query: string | null;
@@ -36,7 +38,10 @@ export const MlHostConditionalContainer = React.memo<MlHostConditionalProps>(({ 
         if (queryStringDecoded.query != null) {
           queryStringDecoded.query = replaceKQLParts(queryStringDecoded.query);
         }
-        const reEncoded = stringify(queryStringDecoded, { sort: false });
+        const reEncoded = stringify(urlUtils.encodeQuery(queryStringDecoded), {
+          sort: false,
+          encode: false,
+        });
         return <Redirect to={`/${SiemPageName.hosts}?${reEncoded}`} />;
       }}
     />
@@ -56,7 +61,10 @@ export const MlHostConditionalContainer = React.memo<MlHostConditionalProps>(({ 
           queryStringDecoded.query = replaceKQLParts(queryStringDecoded.query);
         }
         if (emptyEntity(hostName)) {
-          const reEncoded = stringify(queryStringDecoded, { sort: false });
+          const reEncoded = stringify(urlUtils.encodeQuery(queryStringDecoded), {
+            sort: false,
+            encode: false,
+          });
 
           return (
             <Redirect to={`/${SiemPageName.hosts}/${HostsTableType.anomalies}?${reEncoded}`} />
@@ -68,13 +76,19 @@ export const MlHostConditionalContainer = React.memo<MlHostConditionalProps>(({ 
             hosts,
             queryStringDecoded.query || ''
           );
-          const reEncoded = stringify(queryStringDecoded, { sort: false });
+          const reEncoded = stringify(urlUtils.encodeQuery(queryStringDecoded), {
+            sort: false,
+            encode: false,
+          });
 
           return (
             <Redirect to={`/${SiemPageName.hosts}/${HostsTableType.anomalies}?${reEncoded}`} />
           );
         } else {
-          const reEncoded = stringify(queryStringDecoded, { sort: false });
+          const reEncoded = stringify(urlUtils.encodeQuery(queryStringDecoded), {
+            sort: false,
+            encode: false,
+          });
 
           return (
             <Redirect

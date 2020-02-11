@@ -8,6 +8,7 @@ import { parse, stringify } from 'query-string';
 import { Location } from 'history';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { decode, encode, RisonValue } from 'rison-node';
+import { url } from '../../../../../../src/plugins/kibana_utils/public';
 
 import { useHistory } from './history_context';
 
@@ -115,11 +116,11 @@ export const replaceStateKeyInQueryString = <UrlState extends any>(
     typeof urlState !== 'undefined' ? encodeRisonUrlState(urlState) : undefined;
 
   return stringify(
-    {
+    url.encodeQuery({
       ...previousQueryValues,
       [stateKey]: encodedUrlState,
-    },
-    { sort: false }
+    }),
+    { sort: false, encode: false }
   );
 };
 
