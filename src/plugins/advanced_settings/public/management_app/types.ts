@@ -17,5 +17,38 @@
  * under the License.
  */
 
-import './objects';
-import './index_patterns';
+import {
+  UiSettingsType,
+  StringValidation,
+  ImageValidation,
+  SavedObjectAttribute,
+} from '../../../../core/public';
+
+export interface FieldSetting {
+  displayName: string;
+  name: string;
+  value: SavedObjectAttribute;
+  description?: string;
+  options?: string[];
+  optionLabels?: Record<string, string>;
+  requiresPageReload: boolean;
+  type: UiSettingsType;
+  category: string[];
+  ariaName: string;
+  isOverridden: boolean;
+  defVal: SavedObjectAttribute;
+  isCustom: boolean;
+  validation?: StringValidation | ImageValidation;
+  readOnly?: boolean;
+  deprecation?: {
+    message: string;
+    docLinksKey: string;
+  };
+}
+
+// until eui searchbar and query are typed
+export interface IQuery {
+  ast: any; // incomplete
+  text: string;
+  syntax: any; // incomplete
+}
