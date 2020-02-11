@@ -36,7 +36,6 @@ import { isHorizontalChart } from './state_helpers';
 export interface XYChartProps {
   data: LensMultiTable;
   args: XYArgs;
-  chartTheme: PartialTheme;
 }
 
 export interface XYRender {
@@ -46,6 +45,7 @@ export interface XYRender {
 }
 
 type XYChartRenderProps = XYChartProps & {
+  chartTheme: PartialTheme;
   formatFactory: FormatFactory;
   timeZone: string;
 };
