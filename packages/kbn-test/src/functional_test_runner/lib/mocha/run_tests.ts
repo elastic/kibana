@@ -85,6 +85,8 @@ export async function runTests(lifecycle: Lifecycle, mocha: Mocha) {
 
     allSuites[config] = allSuites[config] || {};
 
+    // highest level suite in lowest level files?
+
     allSuites[config][file] = {
       config,
       file,
@@ -94,11 +96,18 @@ export async function runTests(lifecycle: Lifecycle, mocha: Mocha) {
       endTime: suite.endTime,
       duration: suite.duration,
       success: suite.success,
+      leafSuite: !!(
+        (suite.tests && suite.tests.length) ||
+        (allSuites[config][file] && allSuites[config][file].leafSuite)
+      ),
     };
   });
 
   lifecycle.cleanup.add(() => {
-    fs.writeFileSync(getTestMetadataPath(), JSON.stringify(allSuites, null, 2));
+    const flattened = [];
+    Object.values(allSuites).forEach(x => Object.values(x).forEach(y => flattened.push(y)));
+    flattened.sort((a, b) => b.duration - a.duration);
+    fs.writeFileSync(getTestMetadataPath(), JSON.stringify(flattened, null, 2));
   });
 
   return new Promise(res => {
