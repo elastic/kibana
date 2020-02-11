@@ -21,6 +21,8 @@ export function formatForNormalBulkEndpoint(payload, productionClusterUuid) {
       return accum;
     }
 
+    const { timestamp } = chunk[1];
+
     accum.push({
       index: {
         _index: `.monitoring-kibana-${MONITORING_SYSTEM_API_VERSION}-${dateSuffix}`,
@@ -29,6 +31,7 @@ export function formatForNormalBulkEndpoint(payload, productionClusterUuid) {
     accum.push({
       [type]: chunk[1],
       type,
+      timestamp,
       cluster_uuid: productionClusterUuid,
     });
     return accum;
