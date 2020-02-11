@@ -24,7 +24,6 @@ import { VisState } from 'src/legacy/core_plugins/visualizations/public';
 import { VisSavedObject, PersistedState } from '../legacy_imports';
 
 export interface VisualizeAppState {
-  linked: boolean;
   filters: esFilters.Filter[];
   uiState: PersistedState;
   vis: any;

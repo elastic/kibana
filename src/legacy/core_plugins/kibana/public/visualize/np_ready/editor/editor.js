@@ -109,6 +109,7 @@ function VisualizeAppController(
   const { vis, searchSource } = savedVis;
 
   $scope.vis = vis;
+  $scope.linked = !!savedVis.savedSearchId;
 
   const $appStatus = (this.appStatus = {
     dirty: !savedVis.id,
@@ -277,7 +278,6 @@ function VisualizeAppController(
   const savedVisState = vis.getState();
   const stateDefaults = {
     uiState: savedVis.uiStateJSON ? JSON.parse(savedVis.uiStateJSON) : {},
-    linked: !!savedVis.savedSearchId,
     query: searchSource.getOwnField('query') || defaultQuery,
     filters: searchSource.getOwnField('filter') || [],
     vis: savedVisState,
@@ -335,8 +335,6 @@ function VisualizeAppController(
   );
 
   function init() {
-    // export some objects
-    $scope.savedVis = savedVis;
     if (vis.indexPattern) {
       $scope.indexPattern = vis.indexPattern;
     } else {
@@ -345,16 +343,15 @@ function VisualizeAppController(
       });
     }
 
+    const initialState = stateContainer.getState();
+
     $scope.appState = {
-      ...stateContainer.getState(),
+      ...initialState,
       // mock implementation of the legacy appState.save()
       save() {
         stateContainer.transitions.updateVisState(vis.getState());
       },
     };
-
-    $scope.searchSource = searchSource;
-    $scope.refreshInterval = timefilter.getRefreshInterval();
 
     // Create a PersistedState instance.
     const { uiState, eventUnsubscribers, persistOnChange } = makeStateful(
@@ -363,6 +360,10 @@ function VisualizeAppController(
     );
     $scope.uiState = uiState;
     $scope.appStatus = $appStatus;
+    $scope.savedVis = savedVis;
+    $scope.query = initialState.query;
+    $scope.searchSource = searchSource;
+    $scope.refreshInterval = timefilter.getRefreshInterval();
 
     const addToDashMode =
       $route.current.params[DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM];
@@ -654,9 +655,9 @@ function VisualizeAppController(
   }
 
   $scope.unlink = function() {
-    if (!stateContainer.getState().linked) return;
+    if (!$scope.linked) return;
 
-    stateContainer.transitions.set('linked', false);
+    $scope.linked = false;
     const searchSourceParent = searchSource.getParent();
     const searchSourceGrandparent = searchSourceParent.getParent();
 
