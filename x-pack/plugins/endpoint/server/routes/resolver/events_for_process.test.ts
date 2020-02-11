@@ -16,11 +16,95 @@ import {
   httpServerMock,
   httpServiceMock,
   loggingServiceMock,
-} from '../../../../../src/core/server/mocks';
-import { ResolverResponse } from '../../common/types';
-import { registerResolverRoutes } from './resolver';
-import { EndpointConfigSchema } from '../config';
-import { buildLegacyEntityID } from './resolver/common';
+} from '../../../../../../src/core/server/mocks';
+import { EventsForProcessResponse, LegacyEndpointEvent } from '../../../common/types';
+import { registerResolverRoutes } from '../resolver';
+import { EndpointConfigSchema } from '../../config';
+import { SearchResponse } from 'elasticsearch';
+
+function getRandomInt(max) {
+  return Math.floor(Math.random() * Math.floor(max));
+}
+
+function createLegacyEvents(count: number, category: string, eventType: string) {
+  const events: any[] = [];
+  for (let i = 0; i < count; i++) {
+    events.push({
+      _index: 'index',
+      _type: 'type',
+      _id: 'id',
+      _score: 1,
+      _source: {
+        endgame: {
+          event_type_full: category,
+          event_subtype_full: eventType,
+          unique_pid: getRandomInt(10000),
+          unique_ppid: getRandomInt(10000),
+        },
+        agent: {
+          id: 'awesome-id',
+        },
+      },
+    });
+  }
+  return {
+    took: 1,
+    timed_out: false,
+    _shards: {
+      total: 1,
+      successful: 1,
+      failed: 0,
+      skipped: 0,
+    },
+    hits: {
+      max_score: 0,
+      hits: events,
+    },
+  };
+}
+
+function createEvents(count: number, category: string, eventType: string) {
+  const events: any[] = [];
+  for (let i = 0; i < count; i++) {
+    events.push({
+      _index: 'index',
+      _type: 'type',
+      _id: 'id',
+      _score: 1,
+      _source: {
+        event: {
+          category,
+          type: eventType,
+        },
+        endpoint: {
+          process: {
+            entity_id: getRandomInt(10000),
+            parent: {
+              entity_id: getRandomInt(10000),
+            },
+          },
+        },
+        agent: {
+          id: 'awesome-id',
+        },
+      },
+    });
+  }
+  return {
+    took: 1,
+    timed_out: false,
+    _shards: {
+      total: 1,
+      successful: 1,
+      failed: 0,
+      skipped: 0,
+    },
+    hits: {
+      max_score: 0,
+      hits: events,
+    },
+  };
+}
 
 describe('test resolver route', () => {
   let routerMock: jest.Mocked<IRouter>;
@@ -44,62 +128,12 @@ describe('test resolver route', () => {
   it('should get the right count query information', async () => {
     const endpointID = 'awesome-id';
     const uniquePID = 5;
-    const legacyEntityID = buildLegacyEntityID(endpointID, uniquePID);
+    const legacyEntityID = 'endgame-5-awesome-id';
     const mockRequest = httpServerMock.createKibanaRequest({
-      path: '/api/endpoint/resolver/node',
-      query: {
-        page_size: 3,
-        page_index: 2,
-        entity_id: legacyEntityID,
-      },
+      path: `/api/endpoint/resolver/${legacyEntityID}`,
     });
-    const expTotal = 10;
-    const countResponse = {
-      count: expTotal,
-      _shards: {
-        total: 1,
-        successful: 1,
-        failed: 0,
-        skipped: 0,
-      },
-    };
 
-    const searchResponse = {
-      took: 1,
-      timed_out: false,
-      _shards: {
-        total: 1,
-        successful: 1,
-        failed: 0,
-        skipped: 0,
-      },
-      hits: {
-        total: {
-          value: 1,
-          relation: 'gte',
-        },
-        max_score: 0,
-        hits: [
-          {
-            _index: 'index',
-            _type: 'type',
-            _id: 'id',
-            _score: 1,
-            _source: {
-              endgame: {
-                event_type_full: 'process_event',
-                event_subtype_full: 'creation_event',
-                unique_pid: uniquePID,
-                unique_ppid: 1,
-              },
-              agent: {
-                id: endpointID,
-              },
-            },
-          },
-        ],
-      },
-    };
+    const lifecycleResponse = createLegacyEvents(5, 'process_event', 'still_running');
     // return the search information first and then the count information
     mockScopedClient.callAsCurrentUser
       .mockImplementationOnce(() => Promise.resolve(searchResponse))

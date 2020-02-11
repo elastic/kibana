@@ -3,32 +3,30 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { parseLegacyEntityID, isLegacyEntityID, buildLegacyEntityID } from './common';
 
-describe('legacy entity identification and parsing', () => {
-  it('throws an error for an id without 3 parts', () => {
-    expect(() => {
-      parseLegacyEntityID('endgame|blah');
-    }).toThrow();
+import { createMockLegacyEvents } from './tests/utils';
+import { transformResults } from './common';
+import { SearchResponse } from 'elasticsearch';
+import { ResolverEvent } from '../../../common/types';
+
+describe('transform results', () => {
+  it('handles some results correctly', () => {
+    const events = createMockLegacyEvents(3, 'process_event', 'still_running');
+    const { total, lastDocument, results } = transformResults(
+      (events as unknown) as SearchResponse<ResolverEvent>
+    );
+    expect(results.length).toBe(3);
+    expect(lastDocument).toBe(events.hits.hits[2]._id);
+    expect(total).toBe(3);
   });
 
-  it('parses a legacy entity ID correctly', () => {
-    expect(parseLegacyEntityID('endgame|endpoint|pid')).toStrictEqual({
-      endpointID: 'endpoint',
-      uniquePID: 'pid',
-    });
-  });
-
-  it('identifies a legacy entity ID correctly', () => {
-    expect(isLegacyEntityID('endgame|some-endpoint-id|12456')).toBeTruthy();
-  });
-
-  it('builds an legacy entity ID correctly', () => {
-    const entityID = buildLegacyEntityID('endpoint', 500);
-    expect(isLegacyEntityID(entityID)).toBeTruthy();
-    expect(parseLegacyEntityID(entityID)).toStrictEqual({
-      endpointID: 'endpoint',
-      uniquePID: '500',
-    });
+  it('handles empty results correctly', () => {
+    const events = createMockLegacyEvents(0, 'process_event', 'still_running');
+    const { total, lastDocument, results } = transformResults(
+      (events as unknown) as SearchResponse<ResolverEvent>
+    );
+    expect(results.length).toBe(0);
+    expect(lastDocument).toBeNull();
+    expect(total).toBe(0);
   });
 });

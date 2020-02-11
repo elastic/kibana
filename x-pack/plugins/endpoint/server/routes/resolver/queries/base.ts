@@ -7,6 +7,19 @@ import { JSONish } from '../../../types';
 import { PaginationParams } from '../common';
 import { EndpointAppConstants } from '../../../../common/types';
 
+function splitN(str: string, separator: string, limit: number) {
+  const splitString = str.split(separator);
+
+  if (splitString.length > limit) {
+    const ret = splitString.splice(0, limit);
+    ret.push(splitString.join(separator));
+
+    return ret;
+  }
+
+  return splitString;
+}
+
 export abstract class ResolverQuery {
   private readonly legacyEntityIDDelimiter = '-';
   private readonly legacyEntityPrefix = 'endgame-';
@@ -16,7 +29,7 @@ export abstract class ResolverQuery {
     if (!entityID.startsWith(this.legacyEntityPrefix)) {
       return null;
     }
-    const fields = entityID.split(this.legacyEntityIDDelimiter, 2);
+    const fields = splitN(entityID, this.legacyEntityIDDelimiter, 2);
     if (fields.length !== 3) {
       return null;
     }

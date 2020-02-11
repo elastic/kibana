@@ -27,6 +27,13 @@ export class RelatedEventsQuery extends ResolverQuery {
           ],
         },
       },
+      aggs: {
+        total: {
+          cardinality: {
+            field: '_id',
+          },
+        },
+      },
       index,
     });
   }
@@ -47,6 +54,13 @@ export class RelatedEventsQuery extends ResolverQuery {
               },
             },
           ],
+        },
+      },
+      aggs: {
+        total: {
+          cardinality: {
+            field: '_id',
+          },
         },
       },
       index,

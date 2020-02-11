@@ -32,7 +32,11 @@ export class EndpointAppConstants {
   static LEGACY_EVENT_INDEX_NAME = 'endgame-*';
 }
 
-export interface BaseResult {
+export interface AlertResultList {
+  /**
+   * The alerts restricted by page size.
+   */
+  alerts: AlertData[];
   /**
    * The total number of items on the page.
    */
@@ -49,13 +53,6 @@ export interface BaseResult {
    * The offset of the requested page, starting at 0.
    */
   result_from_index: number;
-}
-
-export interface AlertResultList extends BaseResult {
-  /**
-   * The alerts restricted by page size.
-   */
-  alerts: AlertData[];
 }
 
 export interface EndpointResultList {
@@ -119,7 +116,7 @@ export interface EndpointMetadata {
   };
 }
 
-export interface ResolverLegacyData {
+export interface LegacyEndpointEvent {
   '@timestamp': Date;
   endgame: {
     event_type_full: string;
@@ -133,7 +130,7 @@ export interface ResolverLegacyData {
   };
 }
 
-export interface ResolverElasticEndpointData {
+export interface EndpointEvent {
   '@timestamp': Date;
   event: {
     category: string;
@@ -150,24 +147,9 @@ export interface ResolverElasticEndpointData {
   };
 }
 
-export type ResolverEvent = ResolverLegacyData | ResolverElasticEndpointData;
+export type ResolverEvent = EndpointEvent | LegacyEndpointEvent;
 
-export interface ResolverResultNode {
-  entity_id: string | undefined;
-  parent_entity_id: string | undefined;
-  events: ResolverEvent[];
-}
-
-export interface ResolverChildrenResponse extends BaseResult {
-  origin: ResolverResultNode;
-  children: ResolverResultNode[];
-}
-
-export interface ResolverNodeDetailsResponse extends BaseResult {
-  node: ResolverResultNode;
-}
-
-export interface ResolverAssociatedEventsResponse {
+export interface EventsForProcessResponse {
   lifecycle: ResolverEvent[];
   events: ResolverEvent[];
   pagination: {
@@ -176,8 +158,6 @@ export interface ResolverAssociatedEventsResponse {
     limit: number;
   };
 }
-
-export type ResolverResponse = ResolverNodeDetailsResponse | ResolverChildrenResponse;
 
 /**
  * The PageId type is used for the payload when firing userNavigatedToPage actions

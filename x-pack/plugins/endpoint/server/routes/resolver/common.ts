@@ -5,7 +5,7 @@
  */
 import { IScopedClusterClient } from 'kibana/server';
 import { SearchResponse } from 'elasticsearch';
-import { ResolverLegacyData, ResolverEvent } from '../../../common/types';
+import { LegacyEndpointEvent, ResolverEvent } from '../../../common/types';
 
 export interface PaginationParams {
   size: number;
@@ -14,18 +14,22 @@ export interface PaginationParams {
 }
 
 export function transformResults(response: SearchResponse<ResolverEvent>) {
+  const total = response.aggregations?.total?.value || 0;
+  if (response.hits.hits.length === 0) {
+    return { total, results: [], lastDocument: null };
+  }
+  let lastDocument: string = '';
   const results: ResolverEvent[] = [];
   for (const hit of response.hits.hits) {
     results.push(hit._source);
+    lastDocument = hit._id;
   }
-  return {
-    total: response.aggregations?.total?.value || 0,
-    results,
-  };
+
+  return { total, results, lastDocument };
 }
 
-function isLegacy(data: ResolverEvent): data is ResolverLegacyData {
-  return (data as ResolverLegacyData).endgame !== undefined;
+function isLegacy(data: ResolverEvent): data is LegacyEndpointEvent {
+  return (data as LegacyEndpointEvent).endgame !== undefined;
 }
 
 export async function getPaginationParams(
