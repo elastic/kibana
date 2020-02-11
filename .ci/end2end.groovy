@@ -107,7 +107,7 @@ pipeline {
         dir("${BASE_DIR}"){
           sh '''
             jobs -l
-            docker build --tag cypress ${CYPRESS_DIR}/ci
+            docker build --tag cypress --build-arg NODE_VERSION=$(cat .node-version) ${CYPRESS_DIR}/ci
             docker run --rm -t --user "$(id -u):$(id -g)" \
                     -v `pwd`:/app --network="host" \
                     --name cypress cypress'''
