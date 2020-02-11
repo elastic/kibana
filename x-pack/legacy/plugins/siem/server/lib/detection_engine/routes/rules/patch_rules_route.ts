@@ -7,18 +7,18 @@
 import Hapi from 'hapi';
 import { isFunction } from 'lodash/fp';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
-import { updateRules } from '../../rules/update_rules';
-import { UpdateRulesRequest, IRuleSavedAttributesSavedObjectAttributes } from '../../rules/types';
-import { updateRulesSchema } from '../schemas/update_rules_schema';
+import { patchRules } from '../../rules/patch_rules';
+import { PatchRulesRequest, IRuleSavedAttributesSavedObjectAttributes } from '../../rules/types';
+import { patchRulesSchema } from '../schemas/patch_rules_schema';
 import { ServerFacade } from '../../../../types';
 import { getIdError, transform } from './utils';
 import { transformError } from '../utils';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
 import { KibanaRequest } from '../../../../../../../../../src/core/server';
 
-export const createUpdateRulesRoute = (server: ServerFacade): Hapi.ServerRoute => {
+export const createPatchRulesRoute = (server: ServerFacade): Hapi.ServerRoute => {
   return {
-    method: 'PUT',
+    method: 'PATCH',
     path: DETECTION_ENGINE_RULES_URL,
     options: {
       tags: ['access:siem'],
@@ -26,10 +26,10 @@ export const createUpdateRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
         options: {
           abortEarly: false,
         },
-        payload: updateRulesSchema,
+        payload: patchRulesSchema,
       },
     },
-    async handler(request: UpdateRulesRequest, headers) {
+    async handler(request: PatchRulesRequest, headers) {
       const {
         description,
         enabled,
@@ -71,7 +71,7 @@ export const createUpdateRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
       }
 
       try {
-        const rule = await updateRules({
+        const rule = await patchRules({
           alertsClient,
           actionsClient,
           description,
@@ -146,6 +146,6 @@ export const createUpdateRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
   };
 };
 
-export const updateRulesRoute = (server: ServerFacade) => {
-  server.route(createUpdateRulesRoute(server));
+export const patchRulesRoute = (server: ServerFacade) => {
+  server.route(createPatchRulesRoute(server));
 };

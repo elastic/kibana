@@ -100,8 +100,8 @@ export const setStatusSignalMissingIdsAndQueryPayload = (): Partial<SignalsStatu
   status: 'closed',
 });
 
-export const getUpdateRequest = (): ServerInjectOptions => ({
-  method: 'PUT',
+export const getPatchRequest = (): ServerInjectOptions => ({
+  method: 'PATCH',
   url: DETECTION_ENGINE_RULES_URL,
   payload: {
     ...typicalPayload(),
@@ -124,8 +124,8 @@ export const getReadBulkRequest = (): ServerInjectOptions => ({
   payload: [typicalPayload()],
 });
 
-export const getUpdateBulkRequest = (): ServerInjectOptions => ({
-  method: 'PUT',
+export const getPatchBulkRequest = (): ServerInjectOptions => ({
+  method: 'PATCH',
   url: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
   payload: [typicalPayload()],
 });

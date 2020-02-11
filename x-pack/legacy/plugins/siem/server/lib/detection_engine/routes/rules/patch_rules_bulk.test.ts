@@ -9,7 +9,7 @@ import {
   createMockServerWithoutAlertClientDecoration,
 } from '../__mocks__/_mock_server';
 
-import { updateRulesRoute } from './update_rules_route';
+import { patchRulesRoute } from './patch_rules_route';
 import { ServerInjectOptions } from 'hapi';
 
 import {
@@ -18,19 +18,19 @@ import {
   updateActionResult,
   typicalPayload,
   getFindResultWithSingleHit,
-  getUpdateBulkRequest,
+  getPatchBulkRequest,
 } from '../__mocks__/request_responses';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
-import { updateRulesBulkRoute } from './update_rules_bulk_route';
+import { patchRulesBulkRoute } from './patch_rules_bulk_route';
 import { BulkError } from '../utils';
 
-describe('update_rules_bulk', () => {
+describe('patch_rules_bulk', () => {
   let { server, alertsClient, actionsClient } = createMockServer();
 
   beforeEach(() => {
     jest.resetAllMocks();
     ({ server, alertsClient, actionsClient } = createMockServer());
-    updateRulesBulkRoute(server);
+    patchRulesBulkRoute(server);
   });
 
   describe('status codes with actionClient and alertClient', () => {
@@ -39,7 +39,7 @@ describe('update_rules_bulk', () => {
       alertsClient.get.mockResolvedValue(getResult());
       actionsClient.update.mockResolvedValue(updateActionResult());
       alertsClient.update.mockResolvedValue(getResult());
-      const { statusCode } = await server.inject(getUpdateBulkRequest());
+      const { statusCode } = await server.inject(getPatchBulkRequest());
       expect(statusCode).toBe(200);
     });
 
@@ -48,7 +48,7 @@ describe('update_rules_bulk', () => {
       alertsClient.get.mockResolvedValue(getResult());
       actionsClient.update.mockResolvedValue(updateActionResult());
       alertsClient.update.mockResolvedValue(getResult());
-      const { statusCode } = await server.inject(getUpdateBulkRequest());
+      const { statusCode } = await server.inject(getPatchBulkRequest());
       expect(statusCode).toBe(200);
     });
 
@@ -57,7 +57,7 @@ describe('update_rules_bulk', () => {
       alertsClient.get.mockResolvedValue(getResult());
       actionsClient.update.mockResolvedValue(updateActionResult());
       alertsClient.update.mockResolvedValue(getResult());
-      const { payload } = await server.inject(getUpdateBulkRequest());
+      const { payload } = await server.inject(getPatchBulkRequest());
       const parsed: BulkError[] = JSON.parse(payload);
       const expected: BulkError[] = [
         {
@@ -70,8 +70,8 @@ describe('update_rules_bulk', () => {
 
     test('returns 404 if alertClient is not available on the route', async () => {
       const { serverWithoutAlertClient } = createMockServerWithoutAlertClientDecoration();
-      updateRulesRoute(serverWithoutAlertClient);
-      const { statusCode } = await serverWithoutAlertClient.inject(getUpdateBulkRequest());
+      patchRulesRoute(serverWithoutAlertClient);
+      const { statusCode } = await serverWithoutAlertClient.inject(getPatchBulkRequest());
       expect(statusCode).toBe(404);
     });
   });
@@ -82,7 +82,7 @@ describe('update_rules_bulk', () => {
       alertsClient.get.mockResolvedValue(getResult());
       const { rule_id, ...noId } = typicalPayload();
       const request: ServerInjectOptions = {
-        method: 'PUT',
+        method: 'PATCH',
         url: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
         payload: [noId],
       };
@@ -95,7 +95,7 @@ describe('update_rules_bulk', () => {
       actionsClient.update.mockResolvedValue(updateActionResult());
       alertsClient.update.mockResolvedValue(getResult());
       const request: ServerInjectOptions = {
-        method: 'PUT',
+        method: 'PATCH',
         url: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
         payload: [typicalPayload()],
       };
@@ -108,7 +108,7 @@ describe('update_rules_bulk', () => {
       actionsClient.update.mockResolvedValue(updateActionResult());
       alertsClient.update.mockResolvedValue(getResult());
       const request: ServerInjectOptions = {
-        method: 'PUT',
+        method: 'PATCH',
         url: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
         payload: [typicalPayload()],
       };
@@ -129,7 +129,7 @@ describe('update_rules_bulk', () => {
       actionsClient.update.mockResolvedValue(updateActionResult());
       alertsClient.update.mockResolvedValue(getResult());
       const request: ServerInjectOptions = {
-        method: 'PUT',
+        method: 'PATCH',
         url: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
         payload: [typicalPayload()],
       };
@@ -144,7 +144,7 @@ describe('update_rules_bulk', () => {
       alertsClient.update.mockResolvedValue(getResult());
       const { type, ...noType } = typicalPayload();
       const request: ServerInjectOptions = {
-        method: 'PUT',
+        method: 'PATCH',
         url: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
         payload: [
           {

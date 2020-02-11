@@ -23,7 +23,7 @@ import {
 } from '../utils';
 import { createRulesStreamFromNdJson } from '../../rules/create_rules_stream_from_ndjson';
 import { ImportRuleAlertRest } from '../../types';
-import { updateRules } from '../../rules/update_rules';
+import { patchRules } from '../../rules/patch_rules';
 import { importRulesQuerySchema, importRulesPayloadSchema } from '../schemas/import_rules_schema';
 import { KibanaRequest } from '../../../../../../../../../src/core/server';
 
@@ -192,7 +192,7 @@ export const createImportRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
                     });
                     resolve({ rule_id: ruleId, status_code: 200 });
                   } else if (rule != null && request.query.overwrite) {
-                    await updateRules({
+                    await patchRules({
                       alertsClient,
                       actionsClient,
                       savedObjectsClient,

@@ -9,7 +9,7 @@ import {
   createMockServerWithoutAlertClientDecoration,
 } from '../__mocks__/_mock_server';
 
-import { updateRulesRoute } from './update_rules_route';
+import { patchRulesRoute } from './patch_rules_route';
 import { ServerInjectOptions } from 'hapi';
 
 import {
@@ -17,19 +17,19 @@ import {
   getFindResultStatus,
   getResult,
   updateActionResult,
-  getUpdateRequest,
+  getPatchRequest,
   typicalPayload,
   getFindResultWithSingleHit,
 } from '../__mocks__/request_responses';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 
-describe('update_rules', () => {
+describe('patch_rules', () => {
   let { server, alertsClient, actionsClient, savedObjectsClient } = createMockServer();
 
   beforeEach(() => {
     jest.resetAllMocks();
     ({ server, alertsClient, actionsClient, savedObjectsClient } = createMockServer());
-    updateRulesRoute(server);
+    patchRulesRoute(server);
   });
 
   describe('status codes with actionClient and alertClient', () => {
@@ -39,7 +39,7 @@ describe('update_rules', () => {
       actionsClient.update.mockResolvedValue(updateActionResult());
       alertsClient.update.mockResolvedValue(getResult());
       savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
-      const { statusCode } = await server.inject(getUpdateRequest());
+      const { statusCode } = await server.inject(getPatchRequest());
       expect(statusCode).toBe(200);
     });
 
@@ -49,14 +49,14 @@ describe('update_rules', () => {
       actionsClient.update.mockResolvedValue(updateActionResult());
       alertsClient.update.mockResolvedValue(getResult());
       savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
-      const { statusCode } = await server.inject(getUpdateRequest());
+      const { statusCode } = await server.inject(getPatchRequest());
       expect(statusCode).toBe(404);
     });
 
     test('returns 404 if alertClient is not available on the route', async () => {
       const { serverWithoutAlertClient } = createMockServerWithoutAlertClientDecoration();
-      updateRulesRoute(serverWithoutAlertClient);
-      const { statusCode } = await serverWithoutAlertClient.inject(getUpdateRequest());
+      patchRulesRoute(serverWithoutAlertClient);
+      const { statusCode } = await serverWithoutAlertClient.inject(getPatchRequest());
       expect(statusCode).toBe(404);
     });
   });
@@ -68,7 +68,7 @@ describe('update_rules', () => {
       savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
       const { rule_id, ...noId } = typicalPayload();
       const request: ServerInjectOptions = {
-        method: 'PUT',
+        method: 'PATCH',
         url: DETECTION_ENGINE_RULES_URL,
         payload: {
           payload: noId,
@@ -84,7 +84,7 @@ describe('update_rules', () => {
       alertsClient.update.mockResolvedValue(getResult());
       savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
       const request: ServerInjectOptions = {
-        method: 'PUT',
+        method: 'PATCH',
         url: DETECTION_ENGINE_RULES_URL,
         payload: typicalPayload(),
       };
@@ -99,7 +99,7 @@ describe('update_rules', () => {
       alertsClient.update.mockResolvedValue(getResult());
       savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
       const request: ServerInjectOptions = {
-        method: 'PUT',
+        method: 'PATCH',
         url: DETECTION_ENGINE_RULES_URL,
         payload: typicalPayload(),
       };
@@ -115,7 +115,7 @@ describe('update_rules', () => {
       savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
       const { type, ...noType } = typicalPayload();
       const request: ServerInjectOptions = {
-        method: 'PUT',
+        method: 'PATCH',
         url: DETECTION_ENGINE_RULES_URL,
         payload: {
           ...noType,

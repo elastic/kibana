@@ -8,20 +8,20 @@ import Hapi from 'hapi';
 import { isFunction } from 'lodash/fp';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import {
-  BulkUpdateRulesRequest,
+  BulkPatchRulesRequest,
   IRuleSavedAttributesSavedObjectAttributes,
 } from '../../rules/types';
 import { ServerFacade } from '../../../../types';
 import { transformOrBulkError, getIdBulkError } from './utils';
 import { transformBulkError } from '../utils';
-import { updateRulesBulkSchema } from '../schemas/update_rules_bulk_schema';
-import { updateRules } from '../../rules/update_rules';
+import { patchRulesBulkSchema } from '../schemas/patch_rules_bulk_schema';
+import { patchRules } from '../../rules/patch_rules';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
 import { KibanaRequest } from '../../../../../../../../../src/core/server';
 
-export const createUpdateRulesBulkRoute = (server: ServerFacade): Hapi.ServerRoute => {
+export const createPatchRulesBulkRoute = (server: ServerFacade): Hapi.ServerRoute => {
   return {
-    method: 'PUT',
+    method: 'PATCH',
     path: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
     options: {
       tags: ['access:siem'],
@@ -29,10 +29,10 @@ export const createUpdateRulesBulkRoute = (server: ServerFacade): Hapi.ServerRou
         options: {
           abortEarly: false,
         },
-        payload: updateRulesBulkSchema,
+        payload: patchRulesBulkSchema,
       },
     },
-    async handler(request: BulkUpdateRulesRequest, headers) {
+    async handler(request: BulkPatchRulesRequest, headers) {
       const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
       const actionsClient = await server.plugins.actions.getActionsClientWithRequest(
         KibanaRequest.from((request as unknown) as Hapi.Request)
@@ -76,7 +76,7 @@ export const createUpdateRulesBulkRoute = (server: ServerFacade): Hapi.ServerRou
           } = payloadRule;
           const idOrRuleIdOrUnknown = id ?? ruleId ?? '(unknown id)';
           try {
-            const rule = await updateRules({
+            const rule = await patchRules({
               alertsClient,
               actionsClient,
               description,
@@ -132,6 +132,6 @@ export const createUpdateRulesBulkRoute = (server: ServerFacade): Hapi.ServerRou
   };
 };
 
-export const updateRulesBulkRoute = (server: ServerFacade): void => {
-  server.route(createUpdateRulesBulkRoute(server));
+export const patchRulesBulkRoute = (server: ServerFacade): void => {
+  server.route(createPatchRulesBulkRoute(server));
 };

@@ -6,6 +6,6 @@
 
 import Joi from 'joi';
 
-import { updateRulesSchema } from './update_rules_schema';
+import { patchRulesSchema } from './patch_rules_schema';
 
-export const updateRulesBulkSchema = Joi.array().items(updateRulesSchema);
+export const patchRulesBulkSchema = Joi.array().items(patchRulesSchema);

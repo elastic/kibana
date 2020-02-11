@@ -37,7 +37,7 @@ import {
 } from './schemas';
 /* eslint-enable @typescript-eslint/camelcase */
 
-export const updateRulesSchema = Joi.object({
+export const patchRulesSchema = Joi.object({
   description,
   enabled,
   false_positives,

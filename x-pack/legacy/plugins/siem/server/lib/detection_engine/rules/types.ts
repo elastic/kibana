@@ -20,7 +20,7 @@ import { RuleAlertParams, RuleTypeParams, RuleAlertParamsRest } from '../types';
 import { RequestFacade } from '../../../types';
 import { Alert } from '../../../../../alerting/server/types';
 
-export type UpdateRuleAlertParamsRest = Partial<RuleAlertParamsRest> & {
+export type PatchRuleAlertParamsRest = Partial<RuleAlertParamsRest> & {
   id: string | undefined;
   rule_id: RuleAlertParams['ruleId'] | undefined;
 };
@@ -34,12 +34,12 @@ export interface FindParamsRest {
   filter: string;
 }
 
-export interface UpdateRulesRequest extends RequestFacade {
-  payload: UpdateRuleAlertParamsRest;
+export interface PatchRulesRequest extends RequestFacade {
+  payload: PatchRuleAlertParamsRest;
 }
 
-export interface BulkUpdateRulesRequest extends RequestFacade {
-  payload: UpdateRuleAlertParamsRest[];
+export interface BulkPatchRulesRequest extends RequestFacade {
+  payload: PatchRuleAlertParamsRest[];
 }
 
 export interface RuleAlertType extends Alert {
@@ -153,7 +153,7 @@ export interface Clients {
   actionsClient: ActionsClient;
 }
 
-export type UpdateRuleParams = Partial<RuleAlertParams> & {
+export type PatchRuleParams = Partial<RuleAlertParams> & {
   id: string | undefined | null;
   savedObjectsClient: SavedObjectsClientContract;
 } & Clients;

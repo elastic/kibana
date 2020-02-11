@@ -4,22 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { updateRulesBulkSchema } from './update_rules_bulk_schema';
-import { UpdateRuleAlertParamsRest } from '../../rules/types';
+import { patchRulesBulkSchema } from './patch_rules_bulk_schema';
+import { PatchRuleAlertParamsRest } from '../../rules/types';
 
 // only the basics of testing are here.
-// see: update_rules_schema.test.ts for the bulk of the validation tests
-// this just wraps updateRulesSchema in an array
-describe('update_rules_bulk_schema', () => {
+// see: patch_rules_schema.test.ts for the bulk of the validation tests
+// this just wraps patchRulesSchema in an array
+describe('patch_rules_bulk_schema', () => {
   test('can take an empty array and validate it', () => {
     expect(
-      updateRulesBulkSchema.validate<Array<Partial<UpdateRuleAlertParamsRest>>>([]).error
+      patchRulesBulkSchema.validate<Array<Partial<PatchRuleAlertParamsRest>>>([]).error
     ).toBeFalsy();
   });
 
   test('made up values do not validate', () => {
     expect(
-      updateRulesBulkSchema.validate<[{ madeUp: string }]>([
+      patchRulesBulkSchema.validate<[{ madeUp: string }]>([
         {
           madeUp: 'hi',
         },
@@ -29,7 +29,7 @@ describe('update_rules_bulk_schema', () => {
 
   test('single array of [id] does validate', () => {
     expect(
-      updateRulesBulkSchema.validate<Array<Partial<UpdateRuleAlertParamsRest>>>([
+      patchRulesBulkSchema.validate<Array<Partial<PatchRuleAlertParamsRest>>>([
         {
           id: 'rule-1',
         },
@@ -39,7 +39,7 @@ describe('update_rules_bulk_schema', () => {
 
   test('two values of [id] does validate', () => {
     expect(
-      updateRulesBulkSchema.validate<Array<Partial<UpdateRuleAlertParamsRest>>>([
+      patchRulesBulkSchema.validate<Array<Partial<PatchRuleAlertParamsRest>>>([
         {
           id: 'rule-1',
         },

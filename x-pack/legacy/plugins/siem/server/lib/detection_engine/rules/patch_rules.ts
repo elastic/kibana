@@ -7,7 +7,7 @@
 import { defaults, pickBy, isEmpty } from 'lodash/fp';
 import { PartialAlert } from '../../../../../alerting/server/types';
 import { readRules } from './read_rules';
-import { UpdateRuleParams, IRuleSavedAttributesSavedObjectAttributes } from './types';
+import { PatchRuleParams, IRuleSavedAttributesSavedObjectAttributes } from './types';
 import { addTags } from './add_tags';
 import { ruleStatusSavedObjectType } from './saved_object_mappings';
 
@@ -27,7 +27,7 @@ export const calculateInterval = (
 export const calculateVersion = (
   immutable: boolean,
   currentVersion: number,
-  updateProperties: Partial<Omit<UpdateRuleParams, 'enabled' | 'ruleId'>>
+  updateProperties: Partial<Omit<PatchRuleParams, 'enabled' | 'ruleId'>>
 ): number => {
   // early return if we are pre-packaged/immutable rule to be safe. We are never responsible
   // for changing the version number of an immutable. Immutables are only responsible for changing
@@ -48,7 +48,7 @@ export const calculateVersion = (
   // the version number if only the enabled/disabled flag is being set. Likewise if we get other
   // properties we are not expecting such as updatedAt we do not to cause a version number bump
   // on that either.
-  const removedNullValues = pickBy<UpdateRuleParams>(
+  const removedNullValues = pickBy<PatchRuleParams>(
     (value: unknown) => value != null,
     updateProperties
   );
@@ -78,7 +78,7 @@ export const calculateName = ({
   }
 };
 
-export const updateRules = async ({
+export const patchRules = async ({
   alertsClient,
   actionsClient, // TODO: Use this whenever we add feature support for different action types
   savedObjectsClient,
@@ -109,7 +109,7 @@ export const updateRules = async ({
   type,
   references,
   version,
-}: UpdateRuleParams): Promise<PartialAlert | null> => {
+}: PatchRuleParams): Promise<PartialAlert | null> => {
   const rule = await readRules({ alertsClient, ruleId, id });
   if (rule == null) {
     return null;
