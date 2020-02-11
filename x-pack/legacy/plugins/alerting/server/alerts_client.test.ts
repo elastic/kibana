@@ -2264,23 +2264,12 @@ describe('update()', () => {
   });
 
   it(`doesn't call the createAPIKey function when alert is disabled`, async () => {
-    const alertsClient = new AlertsClient(alertsClientParams);
-    alertTypeRegistry.get.mockReturnValueOnce({
-      id: '123',
-      name: 'Test',
-      actionGroups: ['default'],
-      async executor() {},
-    });
-    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce({
-      id: '1',
-      type: 'alert',
+    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue({
+      ...existingDecryptedAlert,
       attributes: {
+        ...existingDecryptedAlert.attributes,
         enabled: false,
-        alertTypeId: '123',
-        scheduledTaskId: 'task-123',
-      },
-      references: [],
-      version: '123',
+      }
     });
     savedObjectsClient.bulkGet.mockResolvedValueOnce({
       saved_objects: [
