@@ -8,11 +8,5 @@ import { asset } from './asset';
 import { filters } from './filters';
 import { timelion } from './timelion';
 import { to } from './to';
-import { AnyExpressionFunctionDefinition } from '../../types';
 
-export const clientFunctions: Array<() => AnyExpressionFunctionDefinition> = [
-  asset,
-  filters,
-  timelion,
-  to,
-];
+export const clientFunctions = [asset, filters, timelion, to];

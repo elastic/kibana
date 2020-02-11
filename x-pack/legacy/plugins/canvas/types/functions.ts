@@ -5,6 +5,10 @@
  */
 
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
+import { functions as commonFunctions } from '../canvas_plugin_src/functions/common';
+import { functions as browserFunctions } from '../canvas_plugin_src/functions/browser';
+import { functions as serverFunctions } from '../canvas_plugin_src/functions/server';
+import { clientFunctions } from '../public/functions';
 
 /**
  * Utility type for converting a union of types into an intersection.
@@ -95,6 +99,17 @@ export type FunctionFactory<FnFactory> =
   FnFactory extends ExpressionFunctionFactory<infer Name, infer Input, infer Arguments, infer Output> ?
   ExpressionFunctionDefinition<Name, Input, Arguments, Output> :
     never;
+
+type CommonFunction = FunctionFactory<typeof commonFunctions[number]>;
+type BrowserFunction = FunctionFactory<typeof browserFunctions[number]>;
+type ServerFunction = FunctionFactory<typeof serverFunctions[number]>;
+type ClientFunctions = FunctionFactory<typeof clientFunctions[number]>;
+
+/**
+ * A collection of all Canvas Functions.
+ */
+
+export type CanvasFunction = CommonFunction | BrowserFunction | ServerFunction | ClientFunctions;
 
 /**
  * Represents a function called by the `case` Function.

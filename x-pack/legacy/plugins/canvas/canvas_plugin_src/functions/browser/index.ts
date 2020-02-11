@@ -8,11 +8,5 @@ import { functions as commonFunctions } from '../common';
 import { location } from './location';
 import { markdown } from './markdown';
 import { urlparam } from './urlparam';
-import { AnyExpressionFunctionDefinition } from '../../../types';
 
-export const functions: Array<() => AnyExpressionFunctionDefinition> = [
-  location,
-  markdown,
-  urlparam,
-  ...commonFunctions,
-];
+export const functions = [location, markdown, urlparam, ...commonFunctions];

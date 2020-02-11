@@ -4,11 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  ExpressionFunctionDefinition,
-  AnyExpressionFunctionDefinition,
-} from 'src/plugins/expressions';
-import { UnionToIntersection } from '../../types';
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions';
+import { UnionToIntersection, CanvasFunction } from '../../types';
 
 import { help as all } from './dict/all';
 import { help as alterColumn } from './dict/alter_column';
@@ -153,7 +150,7 @@ type FunctionHelpMap<T> = T extends ExpressionFunctionDefinition<
 //
 // This type indexes the existing function factories, reverses the union to an
 // intersection, and produces the dictionary of strings.
-type FunctionHelpDict = UnionToIntersection<FunctionHelpMap<AnyExpressionFunctionDefinition>>;
+type FunctionHelpDict = UnionToIntersection<FunctionHelpMap<CanvasFunction>>;
 
 /**
  * Help text for Canvas Functions should be properly localized. This function will
