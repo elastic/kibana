@@ -7662,10 +7662,10 @@ backo2@1.0.2:
   resolved "https://registry.yarnpkg.com/backo2/-/backo2-1.0.2.tgz#31ab1ac8b129363463e35b3ebb69f4dfcfba7947"
   integrity sha1-MasayLEpNjRj41s+u2n038+6eUc=
 
-backport@4.8.0:
-  version "4.8.0"
-  resolved "https://registry.yarnpkg.com/backport/-/backport-4.8.0.tgz#bbb97fbebc523cfc006fd94c887c4044a37aba08"
-  integrity sha512-Gk78NWuB+FJN4lSb+NWTE2b5Qs+JWJAV9fRAQ5ncYHSsWeowhuvBNHa3qSQHO2mbXW95suXe8aneycHq2CUveg==
+backport@4.9.0:
+  version "4.9.0"
+  resolved "https://registry.yarnpkg.com/backport/-/backport-4.9.0.tgz#01ca46af57f33f582801e20ef2111b8a2710f8fc"
+  integrity sha512-PueA741RIv3mK4mrCoTBa0oB4WTJOOkXlSXQojL/jBqZBfHQ8MRsW8qDygVe/Q9Z6na4gqqieMOZA8qHn8GVVw==
   dependencies:
     "@types/yargs-parser" "^13.1.0"
     axios "^0.19.0"
