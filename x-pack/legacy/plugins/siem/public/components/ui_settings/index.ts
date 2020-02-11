@@ -30,7 +30,7 @@ export const PureUISettingsStoreObserver: FC<Props & ReduxProps> = ({
     const subscription = merge(
       client
         .get$<model.State['indexPattern']>(model.keys.indexPattern)
-        .pipe(map(value => actions.indexPatternsChanged(value))),
+        .pipe(map(value => actions.indexPatternChanged(value))),
       client
         .get$<model.State['dateFormat']>(model.keys.dateFormat)
         .pipe(map(value => actions.dateFormatChanged(value)))
