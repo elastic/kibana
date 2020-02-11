@@ -42,6 +42,7 @@ export class DashboardListing extends React.Component {
     return (
       <I18nProvider>
         <TableListView
+          headingId="dashboardListingHeading"
           createItem={this.props.hideWriteControls ? null : this.props.createItem}
           findItems={this.props.findItems}
           deleteItems={this.props.hideWriteControls ? null : this.props.deleteItems}
@@ -73,12 +74,12 @@ export class DashboardListing extends React.Component {
           <EuiEmptyPrompt
             iconType="visualizeApp"
             title={
-              <h2>
+              <h1 id="dashboardListingHeading">
                 <FormattedMessage
                   id="kbn.dashboard.listing.noItemsMessage"
                   defaultMessage="Looks like you don't have any dashboards."
                 />
-              </h2>
+              </h1>
             }
           />
         </div>
@@ -90,12 +91,12 @@ export class DashboardListing extends React.Component {
         <EuiEmptyPrompt
           iconType="dashboardApp"
           title={
-            <h2>
+            <h1 id="dashboardListingHeading">
               <FormattedMessage
                 id="kbn.dashboard.listing.createNewDashboard.title"
                 defaultMessage="Create your first dashboard"
               />
-            </h2>
+            </h1>
           }
           body={
             <Fragment>

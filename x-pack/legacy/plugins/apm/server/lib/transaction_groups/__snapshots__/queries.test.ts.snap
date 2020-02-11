@@ -4,7 +4,7 @@ exports[`transaction group queries fetches top traces 1`] = `
 Object {
   "body": Object {
     "aggs": Object {
-      "transactions": Object {
+      "transaction_groups": Object {
         "aggs": Object {
           "avg": Object {
             "avg": Object {
@@ -40,12 +40,24 @@ Object {
             },
           },
         },
-        "terms": Object {
-          "field": "transaction.name",
-          "order": Object {
-            "sum": "desc",
-          },
-          "size": "myIndex",
+        "composite": Object {
+          "size": 10000,
+          "sources": Array [
+            Object {
+              "service": Object {
+                "terms": Object {
+                  "field": "service.name",
+                },
+              },
+            },
+            Object {
+              "transaction": Object {
+                "terms": Object {
+                  "field": "transaction.name",
+                },
+              },
+            },
+          ],
         },
       },
     },
@@ -98,7 +110,7 @@ exports[`transaction group queries fetches top transactions 1`] = `
 Object {
   "body": Object {
     "aggs": Object {
-      "transactions": Object {
+      "transaction_groups": Object {
         "aggs": Object {
           "avg": Object {
             "avg": Object {
@@ -134,12 +146,22 @@ Object {
             },
           },
         },
+        "composite": Object {
+          "size": 10000,
+          "sources": Array [
+            Object {
+              "transaction": Object {
+                "terms": Object {
+                  "field": "transaction.name",
+                },
+              },
+            },
+          ],
+        },
+      },
+      "transactions": Object {
         "terms": Object {
           "field": "transaction.name",
-          "order": Object {
-            "sum": "desc",
-          },
-          "size": "myIndex",
         },
       },
     },

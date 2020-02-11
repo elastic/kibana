@@ -5,11 +5,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { get } from 'lodash/fp';
 import { resolve } from 'path';
 import { Server } from 'hapi';
 import { Root } from 'joi';
 
-import { PluginInitializerContext } from 'src/core/server';
+import { PluginInitializerContext } from '../../../../src/core/server';
 import { plugin } from './server';
 import { savedObjectMappings } from './server/saved_objects';
 
@@ -25,11 +26,14 @@ import {
   DEFAULT_FROM,
   DEFAULT_TO,
   DEFAULT_SIGNALS_INDEX,
+  ENABLE_NEWS_FEED_SETTING,
+  NEWS_FEED_URL_SETTING,
+  NEWS_FEED_URL_SETTING_DEFAULT,
   SIGNALS_INDEX_KEY,
-  DEFAULT_SIGNALS_INDEX_KEY,
 } from './common/constants';
 import { defaultIndexPattern } from './default_index_pattern';
 import { initServerWithKibana } from './server/kibana.index';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const siem = (kibana: any) => {
@@ -43,7 +47,7 @@ export const siem = (kibana: any) => {
         description: i18n.translate('xpack.siem.securityDescription', {
           defaultMessage: 'Explore your SIEM App',
         }),
-        main: 'plugins/siem/app',
+        main: 'plugins/siem/legacy',
         euiIconType: 'securityAnalyticsApp',
         title: APP_NAME,
         listed: false,
@@ -60,6 +64,7 @@ export const siem = (kibana: any) => {
           order: 9000,
           title: APP_NAME,
           url: `/app/${APP_ID}`,
+          category: DEFAULT_APP_CATEGORIES.security,
         },
       ],
       uiSettingDefaults: {
@@ -106,20 +111,6 @@ export const siem = (kibana: any) => {
           category: ['siem'],
           requiresPageReload: true,
         },
-        // DEPRECATED: This should be removed once the front end is no longer using any parts of it.
-        // TODO: Remove this as soon as no code is left that is pulling data from it.
-        [DEFAULT_SIGNALS_INDEX_KEY]: {
-          name: i18n.translate('xpack.siem.uiSettings.defaultSignalsIndexLabel', {
-            defaultMessage: 'Elasticsearch signals index',
-          }),
-          value: DEFAULT_SIGNALS_INDEX,
-          description: i18n.translate('xpack.siem.uiSettings.defaultSignalsIndexDescription', {
-            defaultMessage:
-              '<p>Elasticsearch signals index from which outputted signals will appear by default</p>',
-          }),
-          category: ['siem'],
-          requiresPageReload: true,
-        },
         [DEFAULT_ANOMALY_SCORE]: {
           name: i18n.translate('xpack.siem.uiSettings.defaultAnomalyScoreLabel', {
             defaultMessage: 'Anomaly threshold',
@@ -133,6 +124,29 @@ export const siem = (kibana: any) => {
           category: ['siem'],
           requiresPageReload: true,
         },
+        [ENABLE_NEWS_FEED_SETTING]: {
+          name: i18n.translate('xpack.siem.uiSettings.enableNewsFeedLabel', {
+            defaultMessage: 'News feed',
+          }),
+          value: true,
+          description: i18n.translate('xpack.siem.uiSettings.enableNewsFeedDescription', {
+            defaultMessage: '<p>Enables the News feed</p>',
+          }),
+          type: 'boolean',
+          category: ['siem'],
+          requiresPageReload: true,
+        },
+        [NEWS_FEED_URL_SETTING]: {
+          name: i18n.translate('xpack.siem.uiSettings.newsFeedUrl', {
+            defaultMessage: 'News feed URL',
+          }),
+          value: NEWS_FEED_URL_SETTING_DEFAULT,
+          description: i18n.translate('xpack.siem.uiSettings.newsFeedUrlDescription', {
+            defaultMessage: '<p>News feed content will be retrieved from this URL</p>',
+          }),
+          category: ['siem'],
+          requiresPageReload: true,
+        },
       },
       mappings: savedObjectMappings,
     },
@@ -140,13 +154,17 @@ export const siem = (kibana: any) => {
       const { config, newPlatform, plugins, route } = server;
       const { coreContext, env, setup } = newPlatform;
       const initializerContext = { ...coreContext, env } as PluginInitializerContext;
-
       const serverFacade = {
         config,
+        usingEphemeralEncryptionKey:
+          get('usingEphemeralEncryptionKey', newPlatform.setup.plugins.encryptedSavedObjects) ??
+          false,
         plugins: {
           alerting: plugins.alerting,
+          actions: newPlatform.start.plugins.actions,
           elasticsearch: plugins.elasticsearch,
           spaces: plugins.spaces,
+          savedObjects: server.savedObjects.SavedObjectsClient,
         },
         route: route.bind(server),
       };

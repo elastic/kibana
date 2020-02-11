@@ -10,7 +10,7 @@ import KbnServer, { Server } from 'src/legacy/server/kbn_server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { plugin } from './server/new_platform';
 import { CloudSetup } from '../../../plugins/cloud/server';
-
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
 import {
   MlInitializerContext,
   MlCoreSetup,
@@ -42,6 +42,7 @@ export const ml = (kibana: any) => {
         icon: 'plugins/ml/application/ml.svg',
         euiIconType: 'machineLearningApp',
         main: 'plugins/ml/legacy',
+        category: DEFAULT_APP_CATEGORIES.analyze,
       },
       styleSheetPaths: resolve(__dirname, 'public/application/index.scss'),
       hacks: ['plugins/ml/application/hacks/toggle_app_link_in_nav'],

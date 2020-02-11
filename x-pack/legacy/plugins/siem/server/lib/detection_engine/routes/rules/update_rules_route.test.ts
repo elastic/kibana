@@ -6,15 +6,15 @@
 
 import {
   createMockServer,
-  createMockServerWithoutActionClientDecoration,
   createMockServerWithoutAlertClientDecoration,
-  createMockServerWithoutActionOrAlertClientDecoration,
 } from '../__mocks__/_mock_server';
 
 import { updateRulesRoute } from './update_rules_route';
 import { ServerInjectOptions } from 'hapi';
+
 import {
   getFindResult,
+  getFindResultStatus,
   getResult,
   updateActionResult,
   getUpdateRequest,
@@ -24,11 +24,11 @@ import {
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 
 describe('update_rules', () => {
-  let { server, alertsClient, actionsClient } = createMockServer();
+  let { server, alertsClient, actionsClient, savedObjectsClient } = createMockServer();
 
   beforeEach(() => {
     jest.resetAllMocks();
-    ({ server, alertsClient, actionsClient } = createMockServer());
+    ({ server, alertsClient, actionsClient, savedObjectsClient } = createMockServer());
     updateRulesRoute(server);
   });
 
@@ -38,6 +38,7 @@ describe('update_rules', () => {
       alertsClient.get.mockResolvedValue(getResult());
       actionsClient.update.mockResolvedValue(updateActionResult());
       alertsClient.update.mockResolvedValue(getResult());
+      savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
       const { statusCode } = await server.inject(getUpdateRequest());
       expect(statusCode).toBe(200);
     });
@@ -47,14 +48,8 @@ describe('update_rules', () => {
       alertsClient.get.mockResolvedValue(getResult());
       actionsClient.update.mockResolvedValue(updateActionResult());
       alertsClient.update.mockResolvedValue(getResult());
+      savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
       const { statusCode } = await server.inject(getUpdateRequest());
-      expect(statusCode).toBe(404);
-    });
-
-    test('returns 404 if actionClient is not available on the route', async () => {
-      const { serverWithoutActionClient } = createMockServerWithoutActionClientDecoration();
-      updateRulesRoute(serverWithoutActionClient);
-      const { statusCode } = await serverWithoutActionClient.inject(getUpdateRequest());
       expect(statusCode).toBe(404);
     });
 
@@ -64,21 +59,13 @@ describe('update_rules', () => {
       const { statusCode } = await serverWithoutAlertClient.inject(getUpdateRequest());
       expect(statusCode).toBe(404);
     });
-
-    test('returns 404 if alertClient and actionClient are both not available on the route', async () => {
-      const {
-        serverWithoutActionOrAlertClient,
-      } = createMockServerWithoutActionOrAlertClientDecoration();
-      updateRulesRoute(serverWithoutActionOrAlertClient);
-      const { statusCode } = await serverWithoutActionOrAlertClient.inject(getUpdateRequest());
-      expect(statusCode).toBe(404);
-    });
   });
 
   describe('validation', () => {
     test('returns 400 if id is not given in either the body or the url', async () => {
       alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
       alertsClient.get.mockResolvedValue(getResult());
+      savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
       const { rule_id, ...noId } = typicalPayload();
       const request: ServerInjectOptions = {
         method: 'PUT',
@@ -95,6 +82,7 @@ describe('update_rules', () => {
       alertsClient.find.mockResolvedValue(getFindResult());
       actionsClient.update.mockResolvedValue(updateActionResult());
       alertsClient.update.mockResolvedValue(getResult());
+      savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
       const request: ServerInjectOptions = {
         method: 'PUT',
         url: DETECTION_ENGINE_RULES_URL,
@@ -109,6 +97,7 @@ describe('update_rules', () => {
       alertsClient.get.mockResolvedValue(getResult());
       actionsClient.update.mockResolvedValue(updateActionResult());
       alertsClient.update.mockResolvedValue(getResult());
+      savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
       const request: ServerInjectOptions = {
         method: 'PUT',
         url: DETECTION_ENGINE_RULES_URL,
@@ -123,6 +112,7 @@ describe('update_rules', () => {
       alertsClient.get.mockResolvedValue(getResult());
       actionsClient.update.mockResolvedValue(updateActionResult());
       alertsClient.update.mockResolvedValue(getResult());
+      savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
       const { type, ...noType } = typicalPayload();
       const request: ServerInjectOptions = {
         method: 'PUT',

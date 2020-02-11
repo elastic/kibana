@@ -348,7 +348,6 @@ export const getCollectionStatus = async (
       },
     };
   }
-
   const liveClusterUuid = skipLiveData ? null : await getLiveElasticsearchClusterUuid(req);
   const isLiveCluster = !clusterUuid || liveClusterUuid === clusterUuid;
 

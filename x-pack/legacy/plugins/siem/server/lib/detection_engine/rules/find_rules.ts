@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { FindResult } from '../../../../../alerting/server/alerts_client';
 import { SIGNALS_ID } from '../../../../common/constants';
-import { FindRuleParams, RuleAlertType } from './types';
+import { FindRuleParams } from './types';
 
 export const getFilter = (filter: string | null | undefined) => {
   if (filter == null) {
@@ -23,7 +24,7 @@ export const findRules = async ({
   filter,
   sortField,
   sortOrder,
-}: FindRuleParams) => {
+}: FindRuleParams): Promise<FindResult> => {
   return alertsClient.find({
     options: {
       fields,
@@ -33,10 +34,5 @@ export const findRules = async ({
       sortOrder,
       sortField,
     },
-  }) as Promise<{
-    page: number;
-    perPage: number;
-    total: number;
-    data: RuleAlertType[];
-  }>;
+  });
 };

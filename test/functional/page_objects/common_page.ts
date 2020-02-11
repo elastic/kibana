@@ -371,6 +371,12 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
       await browser.pressKeys(browser.keys.ENTER);
     }
 
+    // Pause the browser at a certain place for debugging
+    // Not meant for usage in CI, only for dev-usage
+    async pause() {
+      return browser.pause();
+    }
+
     /**
      * Clicks cancel button on modal
      * @param overlayWillStay pass in true if your test will show multiple modals in succession

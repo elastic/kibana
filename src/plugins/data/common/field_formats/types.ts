@@ -17,11 +17,10 @@
  * under the License.
  */
 
-/** @public **/
-export type ContentType = 'html' | 'text';
+import { FieldFormat } from './field_format';
 
 /** @public **/
-export { IFieldFormat } from './field_format';
+export type FieldFormatsContentType = 'html' | 'text';
 
 /** @internal **/
 export interface HtmlContextTypeOptions {
@@ -65,4 +64,36 @@ export enum FIELD_FORMAT_IDS {
   STRING = 'string',
   TRUNCATE = 'truncate',
   URL = 'url',
+}
+
+export interface FieldFormatConfig {
+  id: FieldFormatId;
+  params: Record<string, any>;
+  es?: boolean;
+}
+
+export type FieldFormatsGetConfigFn = <T = any>(key: string, defaultOverride?: T) => T;
+
+export type IFieldFormat = PublicMethodsOf<FieldFormat>;
+
+/**
+ * @string id type is needed for creating custom converters.
+ */
+export type FieldFormatId = FIELD_FORMAT_IDS | string;
+
+export type IFieldFormatType = (new (
+  params?: any,
+  getConfig?: FieldFormatsGetConfigFn
+) => FieldFormat) & {
+  id: FieldFormatId;
+  fieldType: string | string[];
+};
+
+export interface IFieldFormatMetaParams {
+  [key: string]: any;
+  parsedUrl?: {
+    origin: string;
+    pathname?: string;
+    basePath?: string;
+  };
 }

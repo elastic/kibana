@@ -72,6 +72,16 @@ const advancedBreadcrumbs = [
   },
 ];
 
+const categorizationBreadcrumbs = [
+  ...baseBreadcrumbs,
+  {
+    text: i18n.translate('xpack.ml.jobsBreadcrumbs.categorizationLabel', {
+      defaultMessage: 'Categorization',
+    }),
+    href: '',
+  },
+];
+
 export const singleMetricRoute: MlRoute = {
   path: '/jobs/new_job/single_metric',
   render: (props, config, deps) => (
@@ -102,6 +112,14 @@ export const advancedRoute: MlRoute = {
     <PageWrapper config={config} {...props} jobType={JOB_TYPE.ADVANCED} deps={deps} />
   ),
   breadcrumbs: advancedBreadcrumbs,
+};
+
+export const categorizationRoute: MlRoute = {
+  path: '/jobs/new_job/categorization',
+  render: (props, config, deps) => (
+    <PageWrapper config={config} {...props} jobType={JOB_TYPE.CATEGORIZATION} deps={deps} />
+  ),
+  breadcrumbs: categorizationBreadcrumbs,
 };
 
 const PageWrapper: FC<WizardPageProps> = ({ location, config, jobType, deps }) => {

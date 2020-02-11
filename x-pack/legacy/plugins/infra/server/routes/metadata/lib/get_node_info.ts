@@ -8,7 +8,6 @@ import { first, set, startsWith } from 'lodash';
 import { RequestHandlerContext } from 'src/core/server';
 import { KibanaFramework } from '../../../lib/adapters/framework/kibana_framework_adapter';
 import { InfraSourceConfiguration } from '../../../lib/sources';
-import { InfraNodeType } from '../../../graphql/types';
 import { InfraMetadataInfo } from '../../../../common/http_api/metadata_api';
 import { getPodNodeName } from './get_pod_node_name';
 import { CLOUD_METRICS_MODULES } from '../../../lib/constants';
@@ -27,7 +26,7 @@ export const getNodeInfo = async (
   // can report pod details and we can't rely on the host/cloud information associated
   // with the kubernetes.pod.uid. We need to first lookup the `kubernetes.node.name`
   // then use that to lookup the host's node information.
-  if (nodeType === InfraNodeType.pod) {
+  if (nodeType === 'pod') {
     const kubernetesNodeName = await getPodNodeName(
       framework,
       requestContext,
@@ -41,7 +40,7 @@ export const getNodeInfo = async (
         requestContext,
         sourceConfiguration,
         kubernetesNodeName,
-        InfraNodeType.host
+        'host'
       );
     }
     return {};

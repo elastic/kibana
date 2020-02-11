@@ -11,7 +11,6 @@ import { JobCreatorContext } from '../../../job_creator_context';
 import { Field } from '../../../../../../../../../common/types/fields';
 import {
   createFieldOptions,
-  createScriptFieldOptions,
   createMlcategoryFieldOption,
 } from '../../../../../common/job_creator/util/general';
 
@@ -24,8 +23,7 @@ interface Props {
 export const InfluencersSelect: FC<Props> = ({ fields, changeHandler, selectedInfluencers }) => {
   const { jobCreator } = useContext(JobCreatorContext);
   const options: EuiComboBoxOptionProps[] = [
-    ...createFieldOptions(fields),
-    ...createScriptFieldOptions(jobCreator.scriptFields),
+    ...createFieldOptions(fields, jobCreator.additionalFields),
     ...createMlcategoryFieldOption(jobCreator.categorizationFieldName),
   ];
 

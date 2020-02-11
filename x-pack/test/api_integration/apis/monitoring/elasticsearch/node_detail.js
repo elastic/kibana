@@ -32,7 +32,7 @@ export default function({ getService }) {
     it('should summarize node with metrics', async () => {
       const { body } = await supertest
         .post(
-          '/api/monitoring/v1/clusters/YCxj-RAgSZCP6GuOQ8M1EQ/elasticsearch/nodes/jxcP6ue7eRCieNNitFTT0EA'
+          '/api/monitoring/v1/clusters/YCxj-RAgSZCP6GuOQ8M1EQ/elasticsearch/nodes/jUT5KdxfRbORSCWkb5zjmA'
         )
         .set('kbn-xsrf', 'xxx')
         .send({

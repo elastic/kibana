@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { memo, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 import { ActionCreator } from 'typescript-fsa';
@@ -33,18 +33,23 @@ export interface TimelineRefetchProps {
 
 type OwnProps = TimelineRefetchProps & TimelineRefetchDispatch;
 
-const TimelineRefetchComponent = memo<OwnProps>(
-  ({ id, inputId, inspect, loading, refetch, setTimelineQuery }) => {
-    useEffect(() => {
-      setTimelineQuery({ id, inputId, inspect, loading, refetch });
-    }, [id, inputId, loading, refetch, inspect]);
+const TimelineRefetchComponent: React.FC<OwnProps> = ({
+  id,
+  inputId,
+  inspect,
+  loading,
+  refetch,
+  setTimelineQuery,
+}) => {
+  useEffect(() => {
+    setTimelineQuery({ id, inputId, inspect, loading, refetch });
+  }, [id, inputId, loading, refetch, inspect]);
 
-    return null;
-  }
-);
+  return null;
+};
 
 export const TimelineRefetch = compose<React.ComponentClass<TimelineRefetchProps>>(
   connect(null, {
     setTimelineQuery: inputsActions.setQuery,
   })
-)(TimelineRefetchComponent);
+)(React.memo(TimelineRefetchComponent));

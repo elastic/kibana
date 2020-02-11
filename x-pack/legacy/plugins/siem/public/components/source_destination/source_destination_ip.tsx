@@ -6,7 +6,7 @@
 
 import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { isEmpty, isEqual, uniqWith } from 'lodash/fp';
-import * as React from 'react';
+import React from 'react';
 
 import { DESTINATION_IP_FIELD_NAME, SOURCE_IP_FIELD_NAME } from '../ip';
 import { DESTINATION_PORT_FIELD_NAME, SOURCE_PORT_FIELD_NAME, Port } from '../port';

@@ -43,7 +43,7 @@ const chartBase: ChartBase = {
   series
 };
 
-const percentUsedScript = {
+export const percentMemoryUsedScript = {
   lang: 'expression',
   source: `1 - doc['${METRIC_SYSTEM_FREE_MEMORY}'] / doc['${METRIC_SYSTEM_TOTAL_MEMORY}']`
 };
@@ -59,8 +59,8 @@ export async function getMemoryChartData(
     serviceNodeName,
     chartBase,
     aggs: {
-      memoryUsedAvg: { avg: { script: percentUsedScript } },
-      memoryUsedMax: { max: { script: percentUsedScript } }
+      memoryUsedAvg: { avg: { script: percentMemoryUsedScript } },
+      memoryUsedMax: { max: { script: percentMemoryUsedScript } }
     },
     additionalFilters: [
       {

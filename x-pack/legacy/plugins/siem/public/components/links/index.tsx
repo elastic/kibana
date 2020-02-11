@@ -5,31 +5,35 @@
  */
 
 import { EuiLink } from '@elastic/eui';
-import * as React from 'react';
+import React from 'react';
 
 import { encodeIpv6 } from '../../lib/helpers';
 import { getHostDetailsUrl, getIPDetailsUrl } from '../link_to';
+import { FlowTarget, FlowTargetSourceDest } from '../../graphql/types';
 
 // Internal Links
-export const HostDetailsLink = React.memo<{ children?: React.ReactNode; hostName: string }>(
-  ({ children, hostName }) => (
-    <EuiLink href={getHostDetailsUrl(encodeURIComponent(hostName))}>
-      {children ? children : hostName}
-    </EuiLink>
-  )
+const HostDetailsLinkComponent: React.FC<{ children?: React.ReactNode; hostName: string }> = ({
+  children,
+  hostName,
+}) => (
+  <EuiLink href={getHostDetailsUrl(encodeURIComponent(hostName))}>
+    {children ? children : hostName}
+  </EuiLink>
 );
 
-HostDetailsLink.displayName = 'HostDetailsLink';
+export const HostDetailsLink = React.memo(HostDetailsLinkComponent);
 
-export const IPDetailsLink = React.memo<{ children?: React.ReactNode; ip: string }>(
-  ({ children, ip }) => (
-    <EuiLink href={`${getIPDetailsUrl(encodeURIComponent(encodeIpv6(ip)))}`}>
-      {children ? children : ip}
-    </EuiLink>
-  )
+const IPDetailsLinkComponent: React.FC<{
+  children?: React.ReactNode;
+  ip: string;
+  flowTarget?: FlowTarget | FlowTargetSourceDest;
+}> = ({ children, ip, flowTarget = FlowTarget.source }) => (
+  <EuiLink href={`${getIPDetailsUrl(encodeURIComponent(encodeIpv6(ip)), flowTarget)}`}>
+    {children ? children : ip}
+  </EuiLink>
 );
 
-IPDetailsLink.displayName = 'IPDetailsLink';
+export const IPDetailsLink = React.memo(IPDetailsLinkComponent);
 
 // External Links
 export const GoogleLink = React.memo<{ children?: React.ReactNode; link: string }>(

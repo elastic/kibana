@@ -34,7 +34,7 @@ export default function({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const dashboardPanelActions = getService('dashboardPanelActions');
-  const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'visualize']);
+  const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'visualize', 'timePicker']);
 
   describe('dashboard filtering', function() {
     this.tags('smoke');
@@ -52,7 +52,7 @@ export default function({ getService, getPageObjects }) {
     describe('adding a filter that excludes all data', () => {
       before(async () => {
         await PageObjects.dashboard.clickNewDashboard();
-        await PageObjects.dashboard.setTimepickerInDataRange();
+        await PageObjects.timePicker.setDefaultDataRange();
         await dashboardAddPanel.addEveryVisualization('"Filter Bytes Test"');
         await dashboardAddPanel.addEverySavedSearch('"Filter Bytes Test"');
 
@@ -234,7 +234,7 @@ export default function({ getService, getPageObjects }) {
 
       it('visualization saved with a query filters data', async () => {
         await PageObjects.dashboard.clickNewDashboard();
-        await PageObjects.dashboard.setTimepickerInDataRange();
+        await PageObjects.timePicker.setDefaultDataRange();
 
         await dashboardAddPanel.addVisualization('Rendering-Test:-animal-sounds-pie');
         await PageObjects.header.waitUntilLoadingHasFinished();

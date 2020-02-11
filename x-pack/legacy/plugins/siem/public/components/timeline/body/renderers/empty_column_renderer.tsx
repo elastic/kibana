@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as React from 'react';
+/* eslint-disable react/display-name */
+
+import React from 'react';
 
 import { TimelineNonEcsData } from '../../../../graphql/types';
 import { DraggableWrapper, DragEffects } from '../../../drag_and_drop/draggable_wrapper';

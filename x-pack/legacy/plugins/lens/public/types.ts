@@ -11,7 +11,7 @@ import { SavedQuery } from 'src/legacy/core_plugins/data/public';
 import { KibanaDatatable } from '../../../../../src/plugins/expressions/public';
 import { DragContextState } from './drag_drop';
 import { Document } from './persistence';
-import { DateRange } from '../common';
+import { DateRange } from '../../../../plugins/lens/common';
 import { Query, esFilters } from '../../../../../src/plugins/data/public';
 
 // eslint-disable-next-line
@@ -135,6 +135,7 @@ export interface Datasource<T = unknown, P = unknown> {
 
   insertLayer: (state: T, newLayerId: string) => T;
   removeLayer: (state: T, layerId: string) => T;
+  clearLayer: (state: T, layerId: string) => T;
   getLayers: (state: T) => string[];
 
   renderDataPanel: (domElement: Element, props: DatasourceDataPanelProps<T>) => void;
@@ -237,7 +238,8 @@ export interface LensMultiTable {
   };
 }
 
-export interface VisualizationProps<T = unknown> {
+export interface VisualizationLayerConfigProps<T = unknown> {
+  layerId: string;
   dragDropContext: DragContextState;
   frame: FramePublicAPI;
   state: T;
@@ -325,6 +327,18 @@ export interface Visualization<T = unknown, P = unknown> {
 
   visualizationTypes: VisualizationType[];
 
+  getLayerIds: (state: T) => string[];
+
+  clearLayer: (state: T, layerId: string) => T;
+
+  removeLayer?: (state: T, layerId: string) => T;
+
+  appendLayer?: (state: T, layerId: string) => T;
+
+  getLayerContextMenuIcon?: (opts: { state: T; layerId: string }) => IconType | undefined;
+
+  renderLayerContextMenu?: (domElement: Element, props: VisualizationLayerConfigProps<T>) => void;
+
   getDescription: (
     state: T
   ) => {
@@ -339,7 +353,7 @@ export interface Visualization<T = unknown, P = unknown> {
 
   getPersistableState: (state: T) => P;
 
-  renderConfigPanel: (domElement: Element, props: VisualizationProps<T>) => void;
+  renderLayerConfigPanel: (domElement: Element, props: VisualizationLayerConfigProps<T>) => void;
 
   toExpression: (state: T, frame: FramePublicAPI) => Ast | string | null;
 

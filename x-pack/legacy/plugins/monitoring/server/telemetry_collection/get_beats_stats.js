@@ -138,6 +138,23 @@ export function processResults(
         }
       }
 
+      const functionbeatState = get(hit, '_source.beats_state.state.functionbeat');
+      if (functionbeatState !== undefined) {
+        if (!clusters[clusterUuid].hasOwnProperty('functionbeat')) {
+          clusters[clusterUuid].functionbeat = {
+            functions: {
+              count: 0,
+            },
+          };
+        }
+
+        clusters[clusterUuid].functionbeat.functions.count += get(
+          functionbeatState,
+          'functions.count',
+          0
+        );
+      }
+
       const stateHost = get(hit, '_source.beats_state.state.host');
       if (stateHost !== undefined) {
         const hostMap = clusterArchitectureMaps[clusterUuid];

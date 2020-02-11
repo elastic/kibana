@@ -6,7 +6,7 @@
 
 import { EuiFieldText } from '@elastic/eui';
 import { noop } from 'lodash/fp';
-import * as React from 'react';
+import React from 'react';
 import styled from 'styled-components';
 
 import { OnFilterChange } from '../../../events';

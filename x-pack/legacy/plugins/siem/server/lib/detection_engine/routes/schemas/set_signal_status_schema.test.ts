@@ -30,24 +30,24 @@ describe('set signal status schema', () => {
     expect(
       setSignalsStatusSchema.validate<Partial<SignalsStatusRestParams>>({
         signal_ids: ['somefakeid'],
-      }).error
-    ).toBeTruthy();
+      }).error.message
+    ).toEqual('child "status" fails because ["status" is required]');
   });
 
   test('query and missing status is invalid', () => {
     expect(
       setSignalsStatusSchema.validate<Partial<SignalsStatusRestParams>>({
         query: {},
-      }).error
-    ).toBeTruthy();
+      }).error.message
+    ).toEqual('child "status" fails because ["status" is required]');
   });
 
   test('status is present but query or signal_ids is missing is invalid', () => {
     expect(
       setSignalsStatusSchema.validate<Partial<SignalsStatusRestParams>>({
         status: 'closed',
-      }).error
-    ).toBeTruthy();
+      }).error.message
+    ).toEqual('"value" must contain at least one of [signal_ids, query]');
   });
 
   test('signal_ids is present but status has wrong value', () => {
@@ -60,7 +60,7 @@ describe('set signal status schema', () => {
         >
       >({
         status: 'fakeVal',
-      }).error
-    ).toBeTruthy();
+      }).error.message
+    ).toEqual('child "status" fails because ["status" must be one of [open, closed]]');
   });
 });

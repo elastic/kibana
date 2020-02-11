@@ -18,11 +18,11 @@ import {
   GetLogEntryRateSuccessResponsePayload,
 } from '../../../../common/http_api/log_analysis';
 import { throwErrors } from '../../../../common/runtime_types';
-import { NoLogRateResultsIndexError } from '../../../lib/log_analysis';
+import { NoLogAnalysisResultsIndexError } from '../../../lib/log_analysis';
 
 const anyObject = schema.object({}, { allowUnknowns: true });
 
-export const initGetLogEntryRateRoute = ({ framework, logAnalysis }: InfraBackendLibs) => {
+export const initGetLogEntryRateRoute = ({ framework, logEntryRateAnalysis }: InfraBackendLibs) => {
   framework.registerRoute(
     {
       method: 'post',
@@ -39,13 +39,13 @@ export const initGetLogEntryRateRoute = ({ framework, logAnalysis }: InfraBacken
           fold(throwErrors(Boom.badRequest), identity)
         );
 
-        const logEntryRateBuckets = await logAnalysis.getLogEntryRateBuckets(
+        const logEntryRateBuckets = await logEntryRateAnalysis.getLogEntryRateBuckets(
           requestContext,
+          request,
           payload.data.sourceId,
           payload.data.timeRange.startTime,
           payload.data.timeRange.endTime,
-          payload.data.bucketDuration,
-          request
+          payload.data.bucketDuration
         );
 
         return response.ok({
@@ -59,7 +59,7 @@ export const initGetLogEntryRateRoute = ({ framework, logAnalysis }: InfraBacken
         });
       } catch (e) {
         const { statusCode = 500, message = 'Unknown error occurred' } = e;
-        if (e instanceof NoLogRateResultsIndexError) {
+        if (e instanceof NoLogAnalysisResultsIndexError) {
           return response.notFound({ body: { message } });
         }
         return response.customError({

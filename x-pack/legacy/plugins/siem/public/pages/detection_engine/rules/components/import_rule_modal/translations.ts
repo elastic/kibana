@@ -23,14 +23,14 @@ export const SELECT_RULE = i18n.translate(
 export const INITIAL_PROMPT_TEXT = i18n.translate(
   'xpack.siem.detectionEngine.components.importRuleModal.initialPromptTextDescription',
   {
-    defaultMessage: 'Select or drag and drop files',
+    defaultMessage: 'Select or drag and drop a valid rules_export.ndjson file',
   }
 );
 
 export const OVERWRITE_WITH_SAME_NAME = i18n.translate(
   'xpack.siem.detectionEngine.components.importRuleModal.overwriteDescription',
   {
-    defaultMessage: 'Automatically overwrite saved objects with the same name',
+    defaultMessage: 'Automatically overwrite saved objects with the same rule ID',
   }
 );
 
@@ -57,3 +57,12 @@ export const IMPORT_FAILED = i18n.translate(
     defaultMessage: 'Failed to import rules',
   }
 );
+
+export const IMPORT_FAILED_DETAILED = (ruleId: string, statusCode: number, message: string) =>
+  i18n.translate(
+    'xpack.siem.detectionEngine.components.importRuleModal.importFailedDetailedTitle',
+    {
+      values: { ruleId, statusCode, message },
+      defaultMessage: 'Rule ID: {ruleId}\n Status Code: {statusCode}\n Message: {message}',
+    }
+  );

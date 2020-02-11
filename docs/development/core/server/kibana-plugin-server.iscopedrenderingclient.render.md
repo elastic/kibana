@@ -9,14 +9,14 @@ Generate a `KibanaResponse` which renders an HTML page bootstrapped with the `co
 <b>Signature:</b>
 
 ```typescript
-render(options?: IRenderOptions): Promise<string>;
+render(options?: Pick<IRenderOptions, 'includeUserSettings'>): Promise<string>;
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  options | <code>IRenderOptions</code> |  |
+|  options | <code>Pick&lt;IRenderOptions, 'includeUserSettings'&gt;</code> |  |
 
 <b>Returns:</b>
 

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Subject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 
 import { capabilitiesServiceMock } from './capabilities/capabilities_service.mock';
 import {
@@ -25,17 +25,21 @@ import {
   InternalApplicationStart,
   ApplicationStart,
   InternalApplicationSetup,
+  App,
+  LegacyApp,
 } from './types';
 import { ApplicationServiceContract } from './test_types';
 
 const createSetupContractMock = (): jest.Mocked<ApplicationSetup> => ({
   register: jest.fn(),
+  registerAppUpdater: jest.fn(),
   registerMountContext: jest.fn(),
 });
 
 const createInternalSetupContractMock = (): jest.Mocked<InternalApplicationSetup> => ({
   register: jest.fn(),
   registerLegacyApp: jest.fn(),
+  registerAppUpdater: jest.fn(),
   registerMountContext: jest.fn(),
 });
 
@@ -50,8 +54,7 @@ const createInternalStartContractMock = (): jest.Mocked<InternalApplicationStart
   const currentAppId$ = new Subject<string | undefined>();
 
   return {
-    availableApps: new Map(),
-    availableLegacyApps: new Map(),
+    applications$: new BehaviorSubject<Map<string, App | LegacyApp>>(new Map()),
     capabilities: capabilitiesServiceMock.createStartContract().capabilities,
     currentAppId$: currentAppId$.asObservable(),
     getComponent: jest.fn(),

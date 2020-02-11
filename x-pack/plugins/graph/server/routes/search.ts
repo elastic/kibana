@@ -6,7 +6,6 @@
 
 import { IRouter } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
-import Boom from 'boom';
 import { LicenseState, verifyApiAccess } from '../lib/license_state';
 
 export function registerSearchRoute({
@@ -53,7 +52,12 @@ export function registerSearchRoute({
             },
           });
         } catch (error) {
-          throw Boom.boomify(error, { statusCode: error.statusCode || 500 });
+          return response.customError({
+            statusCode: error.statusCode || 500,
+            body: {
+              message: error.message,
+            },
+          });
         }
       }
     )

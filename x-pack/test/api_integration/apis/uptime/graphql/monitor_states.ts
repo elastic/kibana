@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 import { monitorStatesQueryString } from '../../../../../legacy/plugins/uptime/public/queries/monitor_states_query';
 import { expectFixtureEql } from './helpers/expect_fixture_eql';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { makeChecks } from './helpers/make_checks';
+import { makeChecksWithStatus } from './helpers/make_checks';
 
 export default function({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -104,11 +104,10 @@ export default function({ getService }: FtrProviderContext) {
         };
 
         before(async () => {
-          const index = 'heartbeat-8.0.0';
-
           const es = getService('legacyEs');
           dateRangeStart = new Date().toISOString();
-          checks = await makeChecks(es, index, testMonitorId, 1, numIps, {}, d => {
+          checks = await makeChecksWithStatus(es, testMonitorId, 1, numIps, 1, {}, 'up', d => {
+            // turn an all up status into having at least one down
             if (d.summary) {
               d.monitor.status = 'down';
               d.summary.up--;

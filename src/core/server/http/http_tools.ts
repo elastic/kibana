@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { readFileSync } from 'fs';
 import { Lifecycle, Request, ResponseToolkit, Server, ServerOptions, Util } from 'hapi';
 import Hoek from 'hoek';
 import { ServerOptions as TLSOptions } from 'https';
@@ -66,14 +65,12 @@ export function getServerOptions(config: HttpConfig, { configureTLS = true } = {
     // TODO: Hapi types have a typo in `tls` property type definition: `https.RequestOptions` is used instead of
     // `https.ServerOptions`, and `honorCipherOrder` isn't presented in `https.RequestOptions`.
     const tlsOptions: TLSOptions = {
-      ca:
-        config.ssl.certificateAuthorities &&
-        config.ssl.certificateAuthorities.map(caFilePath => readFileSync(caFilePath)),
-      cert: readFileSync(ssl.certificate!),
+      ca: ssl.certificateAuthorities,
+      cert: ssl.certificate,
       ciphers: config.ssl.cipherSuites.join(':'),
       // We use the server's cipher order rather than the client's to prevent the BEAST attack.
       honorCipherOrder: true,
-      key: readFileSync(ssl.key!),
+      key: ssl.key,
       passphrase: ssl.keyPassphrase,
       secureOptions: ssl.getSecureOptions(),
       requestCert: ssl.requestCert,

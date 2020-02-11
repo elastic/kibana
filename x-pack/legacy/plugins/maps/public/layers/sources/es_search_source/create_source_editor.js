@@ -21,12 +21,18 @@ import {
   DEFAULT_MAX_RESULT_WINDOW,
 } from '../../../../common/constants';
 import { DEFAULT_FILTER_BY_MAP_BOUNDS } from './constants';
+import { isNestedField } from '../../../../../../../../src/plugins/data/public';
 
 import { npStart } from 'ui/new_platform';
 const { IndexPatternSelect } = npStart.plugins.data.ui;
 
-function filterGeoField(field) {
-  return [ES_GEO_FIELD_TYPE.GEO_POINT, ES_GEO_FIELD_TYPE.GEO_SHAPE].includes(field.type);
+function getGeoFields(fields) {
+  return fields.filter(field => {
+    return (
+      !isNestedField(field) &&
+      [ES_GEO_FIELD_TYPE.GEO_POINT, ES_GEO_FIELD_TYPE.GEO_SHAPE].includes(field.type)
+    );
+  });
 }
 const RESET_INDEX_PATTERN_STATE = {
   indexPattern: undefined,
@@ -124,7 +130,7 @@ export class CreateSourceEditor extends Component {
     });
 
     //make default selection
-    const geoFields = indexPattern.fields.filter(filterGeoField);
+    const geoFields = getGeoFields(indexPattern.fields);
     if (geoFields[0]) {
       this.onGeoFieldSelect(geoFields[0].name);
     }
@@ -177,8 +183,9 @@ export class CreateSourceEditor extends Component {
           })}
           value={this.state.geoField}
           onChange={this.onGeoFieldSelect}
-          filterField={filterGeoField}
-          fields={this.state.indexPattern ? this.state.indexPattern.fields : undefined}
+          fields={
+            this.state.indexPattern ? getGeoFields(this.state.indexPattern.fields) : undefined
+          }
         />
       </EuiFormRow>
     );
@@ -220,7 +227,7 @@ export class CreateSourceEditor extends Component {
             label={i18n.translate('xpack.maps.source.esSearch.extentFilterLabel', {
               defaultMessage: `Dynamically filter for data in the visible map area`,
             })}
-            checked={this.props.filterByMapBounds}
+            checked={this.state.filterByMapBounds}
             onChange={this.onFilterByMapBoundsChange}
           />
         </EuiFormRow>

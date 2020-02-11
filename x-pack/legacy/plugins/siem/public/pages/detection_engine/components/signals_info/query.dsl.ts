@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const buildlastSignalsQuery = (ruleId: string | undefined | null) => {
+export const buildLastSignalsQuery = (ruleId: string | undefined | null) => {
   const queryFilter = [
     {
       bool: { should: [{ match: { 'signal.status': 'open' } }], minimum_should_match: 1 },

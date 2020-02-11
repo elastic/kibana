@@ -157,3 +157,15 @@ export interface InvalidRepositoryVerification {
 }
 
 export type RepositoryVerification = ValidRepositoryVerification | InvalidRepositoryVerification;
+
+export interface SuccessfulRepositoryCleanup {
+  cleaned: true;
+  response: object;
+}
+
+export interface FailedRepositoryCleanup {
+  cleaned: false;
+  error: object;
+}
+
+export type RepositoryCleanup = FailedRepositoryCleanup | SuccessfulRepositoryCleanup;

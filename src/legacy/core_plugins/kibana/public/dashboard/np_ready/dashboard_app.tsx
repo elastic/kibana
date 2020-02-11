@@ -19,17 +19,13 @@
 
 import moment from 'moment';
 import { Subscription } from 'rxjs';
+import { History } from 'history';
 
-import {
-  AppStateClass as TAppStateClass,
-  AppState as TAppState,
-  IInjector,
-  KbnUrl,
-} from '../legacy_imports';
+import { IInjector } from '../legacy_imports';
 
 import { ViewMode } from '../../../../embeddable_api/public/np_ready/public';
 import { SavedObjectDashboard } from '../saved_dashboard/saved_dashboard';
-import { DashboardAppState, SavedDashboardPanel, ConfirmModalFn } from './types';
+import { DashboardAppState, SavedDashboardPanel } from './types';
 import {
   IIndexPattern,
   TimeRange,
@@ -40,10 +36,11 @@ import {
 
 import { DashboardAppController } from './dashboard_app_controller';
 import { RenderDeps } from './application';
+import { IKbnUrlStateStorage } from '../../../../../../plugins/kibana_utils/public/';
 
 export interface DashboardAppScope extends ng.IScope {
   dash: SavedObjectDashboard;
-  appState: TAppState;
+  appState: DashboardAppState;
   screenTitle: string;
   model: {
     query: Query;
@@ -60,7 +57,6 @@ export interface DashboardAppScope extends ng.IScope {
   refreshInterval: any;
   panels: SavedDashboardPanel[];
   indexPatterns: IIndexPattern[];
-  $evalAsync: any;
   dashboardViewMode: ViewMode;
   expandedPanel?: string;
   getShouldShowEditHelp: () => boolean;
@@ -91,11 +87,6 @@ export interface DashboardAppScope extends ng.IScope {
 
 export function initDashboardAppDirective(app: any, deps: RenderDeps) {
   app.directive('dashboardApp', function($injector: IInjector) {
-    const AppState = $injector.get<TAppStateClass<DashboardAppState>>('AppState');
-    const kbnUrl = $injector.get<KbnUrl>('kbnUrl');
-    const confirmModal = $injector.get<ConfirmModalFn>('confirmModal');
-    const config = deps.uiSettings;
-
     return {
       restrict: 'E',
       controllerAs: 'dashboardApp',
@@ -105,20 +96,16 @@ export function initDashboardAppDirective(app: any, deps: RenderDeps) {
         $routeParams: {
           id?: string;
         },
-        getAppState: any,
-        globalState: any
+        kbnUrlStateStorage: IKbnUrlStateStorage,
+        history: History
       ) =>
         new DashboardAppController({
           $route,
           $scope,
           $routeParams,
-          getAppState,
-          globalState,
-          kbnUrl,
-          AppStateClass: AppState,
-          config,
-          confirmModal,
           indexPatterns: deps.npDataStart.indexPatterns,
+          kbnUrlStateStorage,
+          history,
           ...deps,
         }),
     };

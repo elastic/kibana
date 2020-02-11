@@ -12,7 +12,9 @@ interface BuildRuleParams {
   name: string;
   id: string;
   enabled: boolean;
+  createdAt: string;
   createdBy: string;
+  updatedAt: string;
   updatedBy: string;
   interval: string;
   tags: string[];
@@ -23,7 +25,9 @@ export const buildRule = ({
   name,
   id,
   enabled,
+  createdAt,
   createdBy,
+  updatedAt,
   updatedBy,
   interval,
   tags,
@@ -34,6 +38,7 @@ export const buildRule = ({
     false_positives: ruleParams.falsePositives,
     saved_id: ruleParams.savedId,
     timeline_id: ruleParams.timelineId,
+    timeline_title: ruleParams.timelineTitle,
     meta: ruleParams.meta,
     max_signals: ruleParams.maxSignals,
     risk_score: ruleParams.riskScore,
@@ -55,9 +60,9 @@ export const buildRule = ({
     filters: ruleParams.filters,
     created_by: createdBy,
     updated_by: updatedBy,
-    threats: ruleParams.threats,
+    threat: ruleParams.threat,
     version: ruleParams.version,
-    created_at: ruleParams.createdAt,
-    updated_at: ruleParams.updatedAt,
+    created_at: createdAt,
+    updated_at: updatedAt,
   });
 };

@@ -53,8 +53,7 @@ export function createJobs(jobs) {
 
 export function getClearedSelectedAnomaliesState() {
   return {
-    anomalyChartRecords: [],
-    selectedCells: null,
+    selectedCells: undefined,
     viewByLoadedForTimeFormatted: null,
   };
 }
@@ -195,7 +194,7 @@ export function getSelectionTimeRange(selectedCells, interval, bounds) {
   let earliestMs = bounds.min.valueOf();
   let latestMs = bounds.max.valueOf();
 
-  if (selectedCells !== null && selectedCells.times !== undefined) {
+  if (selectedCells !== undefined && selectedCells.times !== undefined) {
     // time property of the cell data is an array, with the elements being
     // the start times of the first and last cell selected.
     earliestMs =
@@ -212,7 +211,7 @@ export function getSelectionTimeRange(selectedCells, interval, bounds) {
 
 export function getSelectionInfluencers(selectedCells, fieldName) {
   if (
-    selectedCells !== null &&
+    selectedCells !== undefined &&
     selectedCells.type !== SWIMLANE_TYPE.OVERALL &&
     selectedCells.viewByFieldName !== undefined &&
     selectedCells.viewByFieldName !== VIEW_BY_JOB_LABEL
@@ -221,6 +220,19 @@ export function getSelectionInfluencers(selectedCells, fieldName) {
   }
 
   return [];
+}
+
+export function getSelectionJobIds(selectedCells, selectedJobs) {
+  if (
+    selectedCells !== undefined &&
+    selectedCells.type !== SWIMLANE_TYPE.OVERALL &&
+    selectedCells.viewByFieldName !== undefined &&
+    selectedCells.viewByFieldName === VIEW_BY_JOB_LABEL
+  ) {
+    return selectedCells.lanes;
+  }
+
+  return selectedJobs.map(d => d.id);
 }
 
 export function getSwimlaneBucketInterval(selectedJobs, swimlaneContainerWidth) {
@@ -281,11 +293,13 @@ export function loadViewByTopFieldValuesForSelectedTime(
 
           const topFieldValues = [];
           const topInfluencers = resp.influencers[viewBySwimlaneFieldName];
-          topInfluencers.forEach(influencerData => {
-            if (influencerData.maxAnomalyScore > 0) {
-              topFieldValues.push(influencerData.influencerFieldValue);
-            }
-          });
+          if (Array.isArray(topInfluencers)) {
+            topInfluencers.forEach(influencerData => {
+              if (influencerData.maxAnomalyScore > 0) {
+                topFieldValues.push(influencerData.influencerFieldValue);
+              }
+            });
+          }
           resolve(topFieldValues);
         });
     } else {
@@ -346,7 +360,7 @@ export function getViewBySwimlaneOptions({
     if (selectedJobIds.length > 1) {
       // If more than one job selected, default to job ID.
       viewBySwimlaneFieldName = VIEW_BY_JOB_LABEL;
-    } else if (mlJobService.jobs.length > 0) {
+    } else if (mlJobService.jobs.length > 0 && selectedJobIds.length > 0) {
       // For a single job, default to the first partition, over,
       // by or influencer field of the first selected job.
       const firstSelectedJob = mlJobService.jobs.find(job => {
@@ -525,7 +539,7 @@ export function processViewByResults(
 
 export function loadAnnotationsTableData(selectedCells, selectedJobs, interval, bounds) {
   const jobIds =
-    selectedCells !== null && selectedCells.viewByFieldName === VIEW_BY_JOB_LABEL
+    selectedCells !== undefined && selectedCells.viewByFieldName === VIEW_BY_JOB_LABEL
       ? selectedCells.lanes
       : selectedJobs.map(d => d.id);
   const timeRange = getSelectionTimeRange(selectedCells, interval, bounds);
@@ -586,10 +600,7 @@ export async function loadAnomaliesTableData(
   tableSeverity,
   influencersFilterQuery
 ) {
-  const jobIds =
-    selectedCells !== null && selectedCells.viewByFieldName === VIEW_BY_JOB_LABEL
-      ? selectedCells.lanes
-      : selectedJobs.map(d => d.id);
+  const jobIds = getSelectionJobIds(selectedCells, selectedJobs);
   const influencers = getSelectionInfluencers(selectedCells, fieldName);
   const timeRange = getSelectionTimeRange(selectedCells, interval, bounds);
 
@@ -677,7 +688,7 @@ export async function loadDataForCharts(
     // Just skip doing the request when this function
     // is called without the minimum required data.
     if (
-      selectedCells === null &&
+      selectedCells === undefined &&
       influencers.length === 0 &&
       influencersFilterQuery === undefined
     ) {
@@ -705,7 +716,7 @@ export async function loadDataForCharts(
         }
 
         if (
-          (selectedCells !== null && Object.keys(selectedCells).length > 0) ||
+          (selectedCells !== undefined && Object.keys(selectedCells).length > 0) ||
           influencersFilterQuery !== undefined
         ) {
           console.log('Explorer anomaly charts data set:', resp.records);
@@ -878,37 +889,4 @@ export async function loadTopInfluencers(
       resolve({});
     }
   });
-}
-
-export function restoreAppState(appState) {
-  // Select any jobs set in the global state (i.e. passed in the URL).
-  let selectedCells;
-  let filterData = {};
-
-  // keep swimlane selection, restore selectedCells from AppState
-  if (appState.mlExplorerSwimlane.selectedType !== undefined) {
-    selectedCells = {
-      type: appState.mlExplorerSwimlane.selectedType,
-      lanes: appState.mlExplorerSwimlane.selectedLanes,
-      times: appState.mlExplorerSwimlane.selectedTimes,
-      showTopFieldValues: appState.mlExplorerSwimlane.showTopFieldValues,
-      viewByFieldName: appState.mlExplorerSwimlane.viewByFieldName,
-    };
-  }
-
-  // keep influencers filter selection, restore from AppState
-  if (appState.mlExplorerFilter.influencersFilterQuery !== undefined) {
-    filterData = {
-      influencersFilterQuery: appState.mlExplorerFilter.influencersFilterQuery,
-      filterActive: appState.mlExplorerFilter.filterActive,
-      filteredFields: appState.mlExplorerFilter.filteredFields,
-      queryString: appState.mlExplorerFilter.queryString,
-    };
-  }
-
-  return {
-    filterData,
-    selectedCells,
-    viewBySwimlaneFieldName: appState.mlExplorerSwimlane.viewByFieldName,
-  };
 }

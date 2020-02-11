@@ -82,7 +82,7 @@ export class ESAggMetricField extends AbstractField {
     return !isMetricCountable(this.getAggType());
   }
 
-  async getFieldMetaRequest(config) {
-    return this._esDocField.getFieldMetaRequest(config);
+  async getOrdinalFieldMetaRequest(config) {
+    return this._esDocField.getOrdinalFieldMetaRequest(config);
   }
 }

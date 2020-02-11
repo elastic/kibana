@@ -537,8 +537,8 @@ describe('loader', () => {
   describe('syncExistingFields', () => {
     it('should call once for each index pattern', async () => {
       const setState = jest.fn();
-      const fetchJson = jest.fn(async (url: string) => {
-        const indexPatternTitle = _.last(url.split('/'));
+      const fetchJson = jest.fn(({ path }: { path: string }) => {
+        const indexPatternTitle = _.last(path.split('/'));
         return {
           indexPatternTitle,
           existingFieldNames: ['field_1', 'field_2'].map(
@@ -551,7 +551,7 @@ describe('loader', () => {
         dateRange: { fromDate: '1900-01-01', toDate: '2000-01-01' },
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         fetchJson: fetchJson as any,
-        indexPatterns: [{ title: 'a' }, { title: 'b' }, { title: 'c' }],
+        indexPatterns: [{ id: 'a' }, { id: 'b' }, { id: 'c' }],
         setState,
       });
 

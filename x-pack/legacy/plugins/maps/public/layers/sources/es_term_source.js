@@ -6,12 +6,16 @@
 
 import _ from 'lodash';
 
-import { Schemas } from 'ui/vis/editors/default/schemas';
-import { AggConfigs } from 'ui/agg_types';
+import { AggConfigs, Schemas } from 'ui/agg_types';
 import { i18n } from '@kbn/i18n';
-import { DEFAULT_MAX_BUCKETS_LIMIT, FIELD_ORIGIN, METRIC_TYPE } from '../../../common/constants';
+import {
+  COUNT_PROP_LABEL,
+  DEFAULT_MAX_BUCKETS_LIMIT,
+  FIELD_ORIGIN,
+  METRIC_TYPE,
+} from '../../../common/constants';
 import { ESDocField } from '../fields/es_doc_field';
-import { AbstractESAggSource } from './es_agg_source';
+import { AbstractESAggSource, AGG_DELIMITER } from './es_agg_source';
 
 const TERMS_AGG_NAME = 'join';
 
@@ -85,14 +89,15 @@ export class ESTermSource extends AbstractESAggSource {
   }
 
   formatMetricKey(aggType, fieldName) {
-    const metricKey = aggType !== METRIC_TYPE.COUNT ? `${aggType}_of_${fieldName}` : aggType;
+    const metricKey =
+      aggType !== METRIC_TYPE.COUNT ? `${aggType}${AGG_DELIMITER}${fieldName}` : aggType;
     return `${FIELD_NAME_PREFIX}${metricKey}${GROUP_BY_DELIMITER}${
       this._descriptor.indexPatternTitle
     }.${this._termField.getName()}`;
   }
 
   formatMetricLabel(type, fieldName) {
-    const metricLabel = type !== METRIC_TYPE.COUNT ? `${type} ${fieldName}` : 'count';
+    const metricLabel = type !== METRIC_TYPE.COUNT ? `${type} ${fieldName}` : COUNT_PROP_LABEL;
     return `${metricLabel} of ${this._descriptor.indexPatternTitle}:${this._termField.getName()}`;
   }
 

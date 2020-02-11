@@ -17,41 +17,35 @@
  * under the License.
  */
 
-import { EuiConfirmModal, EuiIcon } from '@elastic/eui';
+import { EuiIcon } from '@elastic/eui';
 import angular, { IModule } from 'angular';
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
 import {
   AppMountContext,
   ChromeStart,
+  IUiSettingsClient,
   LegacyCoreStart,
   SavedObjectsClientContract,
-  IUiSettingsClient,
 } from 'kibana/public';
 import { Storage } from '../../../../../../plugins/kibana_utils/public';
 import {
-  GlobalStateProvider,
-  StateManagementConfigProvider,
-  AppStateProvider,
-  PrivateProvider,
-  EventsProvider,
-  PersistedState,
+  configureAppAngularModule,
   createTopNavDirective,
   createTopNavHelper,
-  PromiseServiceCreator,
-  KbnUrlProvider,
-  RedirectWhenMissingProvider,
-  confirmModalFactory,
-  configureAppAngularModule,
-  SavedObjectLoader,
   IPrivate,
+  KbnUrlProvider,
+  PrivateProvider,
+  PromiseServiceCreator,
+  RedirectWhenMissingProvider,
+  SavedObjectLoader,
 } from '../legacy_imports';
-
 // @ts-ignore
 import { initDashboardApp } from './legacy_app';
 import { IEmbeddableStart } from '../../../../../../plugins/embeddable/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../../../plugins/navigation/public';
 import { DataPublicPluginStart as NpDataStart } from '../../../../../../plugins/data/public';
 import { SharePluginStart } from '../../../../../../plugins/share/public';
+import { KibanaLegacyStart } from '../../../../../../plugins/kibana_legacy/public';
 
 export interface RenderDeps {
   core: LegacyCoreStart;
@@ -59,7 +53,7 @@ export interface RenderDeps {
   navigation: NavigationStart;
   savedObjectsClient: SavedObjectsClientContract;
   savedDashboards: SavedObjectLoader;
-  dashboardConfig: any;
+  dashboardConfig: KibanaLegacyStart['dashboardConfig'];
   dashboardCapabilities: any;
   uiSettings: IUiSettingsClient;
   chrome: ChromeStart;
@@ -68,6 +62,7 @@ export interface RenderDeps {
   embeddables: IEmbeddableStart;
   localStorage: Storage;
   share: SharePluginStart;
+  config: KibanaLegacyStart['config'];
 }
 
 let angularModuleInstance: IModule | null = null;
@@ -77,20 +72,19 @@ export const renderApp = (element: HTMLElement, appBasePath: string, deps: Rende
     angularModuleInstance = createLocalAngularModule(deps.core, deps.navigation);
     // global routing stuff
     configureAppAngularModule(angularModuleInstance, deps.core as LegacyCoreStart, true);
-    // custom routing stuff
     initDashboardApp(angularModuleInstance, deps);
   }
+
   const $injector = mountDashboardApp(appBasePath, element);
+
   return () => {
     $injector.get('$rootScope').$destroy();
   };
 };
 
-const mainTemplate = (basePath: string) => `<div style="height: 100%">
+const mainTemplate = (basePath: string) => `<div ng-view class="kbnLocalApplicationWrapper">
   <base href="${basePath}" />
-  <div ng-view style="height: 100%;"></div>
-</div>
-`;
+</div>`;
 
 const moduleName = 'app/dashboard';
 
@@ -98,7 +92,7 @@ const thirdPartyAngularDependencies = ['ngSanitize', 'ngRoute', 'react'];
 
 function mountDashboardApp(appBasePath: string, element: HTMLElement) {
   const mountpoint = document.createElement('div');
-  mountpoint.setAttribute('style', 'height: 100%');
+  mountpoint.setAttribute('class', 'kbnLocalApplicationWrapper');
   // eslint-disable-next-line
   mountpoint.innerHTML = mainTemplate(appBasePath);
   // bootstrap angular into detached element and attach it later to
@@ -115,10 +109,7 @@ function createLocalAngularModule(core: AppMountContext['core'], navigation: Nav
   createLocalPromiseModule();
   createLocalConfigModule(core);
   createLocalKbnUrlModule();
-  createLocalStateModule();
-  createLocalPersistedStateModule();
   createLocalTopNavModule(navigation);
-  createLocalConfirmModalModule();
   createLocalIconModule();
 
   const dashboardAngularModule = angular.module(moduleName, [
@@ -126,10 +117,9 @@ function createLocalAngularModule(core: AppMountContext['core'], navigation: Nav
     'app/dashboard/Config',
     'app/dashboard/I18n',
     'app/dashboard/Private',
-    'app/dashboard/PersistedState',
     'app/dashboard/TopNav',
-    'app/dashboard/State',
-    'app/dashboard/ConfirmModal',
+    'app/dashboard/KbnUrl',
+    'app/dashboard/Promise',
     'app/dashboard/icon',
   ]);
   return dashboardAngularModule;
@@ -141,46 +131,6 @@ function createLocalIconModule() {
     .directive('icon', reactDirective => reactDirective(EuiIcon));
 }
 
-function createLocalConfirmModalModule() {
-  angular
-    .module('app/dashboard/ConfirmModal', ['react'])
-    .factory('confirmModal', confirmModalFactory)
-    .directive('confirmModal', reactDirective => reactDirective(EuiConfirmModal));
-}
-
-function createLocalStateModule() {
-  angular
-    .module('app/dashboard/State', [
-      'app/dashboard/Private',
-      'app/dashboard/Config',
-      'app/dashboard/KbnUrl',
-      'app/dashboard/Promise',
-      'app/dashboard/PersistedState',
-    ])
-    .factory('AppState', function(Private: any) {
-      return Private(AppStateProvider);
-    })
-    .service('getAppState', function(Private: any) {
-      return Private(AppStateProvider).getAppState;
-    })
-    .service('globalState', function(Private: any) {
-      return Private(GlobalStateProvider);
-    });
-}
-
-function createLocalPersistedStateModule() {
-  angular
-    .module('app/dashboard/PersistedState', ['app/dashboard/Private', 'app/dashboard/Promise'])
-    .factory('PersistedState', (Private: IPrivate) => {
-      const Events = Private(EventsProvider);
-      return class AngularPersistedState extends PersistedState {
-        constructor(value: any, path: any) {
-          super(value, path, Events);
-        }
-      };
-    });
-}
-
 function createLocalKbnUrlModule() {
   angular
     .module('app/dashboard/KbnUrl', ['app/dashboard/Private', 'ngRoute'])
@@ -189,16 +139,13 @@ function createLocalKbnUrlModule() {
 }
 
 function createLocalConfigModule(core: AppMountContext['core']) {
-  angular
-    .module('app/dashboard/Config', ['app/dashboard/Private'])
-    .provider('stateManagementConfig', StateManagementConfigProvider)
-    .provider('config', () => {
-      return {
-        $get: () => ({
-          get: core.uiSettings.get.bind(core.uiSettings),
-        }),
-      };
-    });
+  angular.module('app/dashboard/Config', ['app/dashboard/Private']).provider('config', () => {
+    return {
+      $get: () => ({
+        get: core.uiSettings.get.bind(core.uiSettings),
+      }),
+    };
+  });
 }
 
 function createLocalPromiseModule() {

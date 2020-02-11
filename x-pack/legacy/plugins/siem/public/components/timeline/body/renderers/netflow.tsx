@@ -5,7 +5,7 @@
  */
 
 import { get } from 'lodash/fp';
-import * as React from 'react';
+import React from 'react';
 
 import { Ecs } from '../../../../graphql/types';
 import { asArrayIfExists } from '../../../../lib/helpers';

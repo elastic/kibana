@@ -5,7 +5,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
-import React, { memo } from 'react';
+import React from 'react';
 
 import { RuleStatusIcon, RuleStatusIconProps } from '../status_icon';
 
@@ -13,7 +13,7 @@ interface AccordionTitleProps extends RuleStatusIconProps {
   title: string;
 }
 
-export const AccordionTitle = memo<AccordionTitleProps>(({ name, title, type }) => (
+const AccordionTitleComponent: React.FC<AccordionTitleProps> = ({ name, title, type }) => (
   <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
     <EuiFlexItem grow={false}>
       <RuleStatusIcon name={name} type={type} />
@@ -24,4 +24,6 @@ export const AccordionTitle = memo<AccordionTitleProps>(({ name, title, type }) 
       </EuiTitle>
     </EuiFlexItem>
   </EuiFlexGroup>
-));
+);
+
+export const AccordionTitle = React.memo(AccordionTitleComponent);

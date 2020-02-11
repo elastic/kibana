@@ -20,13 +20,12 @@
 import _ from 'lodash';
 import moment from 'moment';
 import { npStart } from 'ui/new_platform';
-import { parseInterval } from '../utils/parse_interval';
 import { calcAutoIntervalLessThan, calcAutoIntervalNear } from './calc_auto_interval';
 import {
   convertDurationToNormalizedEsInterval,
   convertIntervalToEsInterval,
 } from './calc_es_interval';
-import { FIELD_FORMAT_IDS } from '../../../../plugins/data/public';
+import { fieldFormats, parseInterval } from '../../../../plugins/data/public';
 
 const getConfig = (...args) => npStart.core.uiSettings.get(...args);
 
@@ -145,7 +144,7 @@ TimeBuckets.prototype.getDuration = function() {
  * generated.
  *
  * Input can be one of the following:
- *  - Any object from src/legacy/ui/agg_types/buckets/_interval_options.js
+ *  - Any object from src/legacy/ui/agg_types.js
  *  - "auto"
  *  - Pass a valid moment unit
  *  - a moment.duration object.
@@ -309,8 +308,8 @@ TimeBuckets.prototype.getScaledDateFormat = function() {
 };
 
 TimeBuckets.prototype.getScaledDateFormatter = function() {
-  const fieldFormats = npStart.plugins.data.fieldFormats;
-  const DateFieldFormat = fieldFormats.getType(FIELD_FORMAT_IDS.DATE);
+  const fieldFormatsService = npStart.plugins.data.fieldFormats;
+  const DateFieldFormat = fieldFormatsService.getType(fieldFormats.FIELD_FORMAT_IDS.DATE);
 
   return new DateFieldFormat(
     {

@@ -3,9 +3,9 @@
 
 [partintro]
 --
-_Visualize_ enables you to create visualizations of the data from your Elasticsearch indices, which you can then add to dashboards for analysis.
+_Visualize_ enables you to create visualizations of the data from your {es} indices, which you can then add to dashboards for analysis.
 
-{kib} visualizations are based on Elasticsearch queries. By using a series of {es} {ref}/search-aggregations.html[aggregations] to extract and process your data, you can create charts that show you the trends, spikes, and dips you need to know about.
+{kib} visualizations are based on {es} queries. By using a series of {es} {ref}/search-aggregations.html[aggregations] to extract and process your data, you can create charts that show you the trends, spikes, and dips you need to know about.
 
 [float]
 [[create-a-visualization]]
@@ -15,42 +15,59 @@ _Visualize_ enables you to create visualizations of the data from your Elasticse
 . Click *Create new visualization*.
 . Choose the visualization type:
 +
-* *Basic charts*
-<<lens,Lens>>:: Quickly build several types of basic visualizations by simply dragging and dropping the data fields you want to display.
+* Basic charts
+[horizontal]
+<<lens,Lens>>::
+Quickly build several types of basic visualizations by simply dragging and dropping the data fields you want to display.
+
 * *<<most-frequent,Most frequently used visualizations>>*
 [horizontal]
 Line&comma; area, and bar charts:: Compare different series in X/Y charts.
+
 Pie chart:: Display each source contribution to a total.
+
 Data table:: Flattens aggregations into table format.
+
 Metric:: Display a single number.
+
 Goal and gauge:: Display a number with progress indicators.
-Heat maps:: Display shaded cells within a matrix.
+
 Tag cloud:: Display words in a cloud, where the size of the word corresponds to its importance.
+
 * *Time series optimized*
 [horizontal]
 <<TSVB,TSVB>>:: Visualize time series data using pipeline aggregations.
+
 <<timelion,Timelion>>:: Compute and combine data from multiple time series
 data sets.
+
 * *Maps*
 [horizontal]
-<<maps, Elastic maps>>:: The most powerful way of visualizing map data in {kib}.
-<<tilemap,_Coordinate map_>>:: Displays points on a map using a geohash aggregation.
-<<regionmap,_Region map_>>:: Merge any structured map data onto a shape.
-* *<<for-dashboard, For use in dashboards>>*
+<<maps,Elastic Maps>>:: The most powerful way of visualizing map data in {kib}.
+
+<<tilemap,Coordinate map>>:: Displays points on a map using a geohash aggregation.
+
+<<regionmap,Region map>>:: Merge any structured map data onto a shape.
+
+<<heatmap,Heat map>>:: Display shaded cells within a matrix.
+
+* *<<for-dashboard,Dashboard tools>>*
 [horizontal]
 <<for-dashboard,Controls>>:: Provides the ability to add interactive inputs to a Dashboard.
+
 <<for-dashboard,Markdown widget>>:: Display free-form information or instructions.
+
 * *For developers*
 [horizontal]
 <<vega-graph,Vega>>:: Complete control over query and display.
 
 . Specify a search query to retrieve the data for your visualization:
 ** To enter new search criteria, select the <<index-patterns, index pattern>> for the indices that
-contain the data you want to visualize. This opens the visualization builder
+contain the data you want to visualize. The visualization builder opens
 with a wildcard query that matches all of the documents in the selected
 indices.
 ** To build a visualization from a saved search, click the name of the saved
-search you want to use. This opens the visualization builder and loads the
+search you want to use. The visualization builder opens and loads the
 selected query.
 +
 NOTE: When you build a visualization from a saved search, any subsequent
@@ -58,8 +75,58 @@ modifications to the saved search are automatically reflected in the
 visualization. To disable automatic updates, you can disconnect a visualization
 from the saved search.
 
+[float]
+[[vis-inspector]]
+== Inspect visualizations
+
+Many visualizations allow you to inspect the query and data behind the visualization.
+
+. In the {kib} toolbar, click *Inspect*.
+. To download the data, click *Download CSV*, then choose one of the following options:
+* *Formatted CSV* - Downloads the data in table format.
+* *Raw CSV* - Downloads the data as provided.
+. To view the requests for collecting data, select *Requests* from the *View*
+dropdown.
+
+[float]
+[[save-visualize]]
+== Save visualizations
+To use your visualizations in <<dashboard, dashboards>>, you must save them.
+
+. In the {kib} toolbar, click *Save*.
+. Enter the visualization *Title* and optional *Description*, then *Save* the visualization.
+
+To access the saved visualization, go to *Management > {kib} > Saved Objects*.
+
+[float]
+[[save-visualization-read-only-access]]
+==== Read only access
+When you have insufficient privileges to save visualizations, the following indicator is
+displayed and the *Save* button is not visible.
+
+For more information, refer to <<xpack-security-authorization>>.
+
+[role="screenshot"]
+image::visualize/images/read-only-badge.png[Example of Visualize's read only access indicator in Kibana's header]
+
+[float]
+[[visualize-share-options]]
+== Share visualizations
+
+When you've finished your visualization, you can share it outside of {kib}.
+
+From the *Share* menu, you can:
+
+* Embed the code in a web page. Users must have {kib} access
+to view an embedded visualization.
+* Share a direct link to a {kib} visualization.
+* Generate a PDF report.
+* Generate a PNG report.
+
 --
 include::{kib-repo-dir}/visualize/visualize_rollup_data.asciidoc[]
+
+include::{kib-repo-dir}/visualize/aggregations.asciidoc[]
 
 include::{kib-repo-dir}/visualize/lens.asciidoc[]
 
@@ -70,11 +137,8 @@ include::{kib-repo-dir}/visualize/timelion.asciidoc[]
 
 include::{kib-repo-dir}/visualize/tilemap.asciidoc[]
 include::{kib-repo-dir}/visualize/regionmap.asciidoc[]
+include::{kib-repo-dir}/visualize/heatmap.asciidoc[]
 
 include::{kib-repo-dir}/visualize/for-dashboard.asciidoc[]
 
 include::{kib-repo-dir}/visualize/vega.asciidoc[]
-
-include::{kib-repo-dir}/visualize/saving.asciidoc[]
-
-include::{kib-repo-dir}/visualize/inspector.asciidoc[]

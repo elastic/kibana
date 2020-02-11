@@ -70,10 +70,7 @@ exports[`EditFilterListHeader renders the header when creating a new filter list
     labelType="label"
   >
     <EuiFieldText
-      compressed={false}
-      fullWidth={false}
       isInvalid={false}
-      isLoading={false}
       name="new_filter_id"
       onChange={[Function]}
       value="test_filter_list"
@@ -183,10 +180,7 @@ exports[`EditFilterListHeader renders the header when creating a new filter list
     labelType="label"
   >
     <EuiFieldText
-      compressed={false}
-      fullWidth={false}
       isInvalid={true}
-      isLoading={false}
       name="new_filter_id"
       onChange={[Function]}
       value=""

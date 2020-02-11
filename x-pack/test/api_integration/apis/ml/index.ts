@@ -11,5 +11,6 @@ export default function({ loadTestFile }: FtrProviderContext) {
     this.tags(['mlqa']);
 
     loadTestFile(require.resolve('./bucket_span_estimator'));
+    loadTestFile(require.resolve('./calculate_model_memory_limit'));
   });
 }

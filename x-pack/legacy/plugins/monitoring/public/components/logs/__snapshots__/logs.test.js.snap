@@ -270,6 +270,7 @@ exports[`Logs should render normally 1`] = `
     }
     noItemsMessage="No items found"
     responsive={true}
+    tableLayout="fixed"
   />
   <EuiSpacer
     size="m"

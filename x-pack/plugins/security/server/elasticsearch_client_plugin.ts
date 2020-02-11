@@ -573,4 +573,64 @@ export function elasticsearchClientPlugin(Client: any, config: unknown, componen
       fmt: '/_security/delegate_pki',
     },
   });
+
+  /**
+   * Retrieves all configured role mappings.
+   *
+   * @returns {{ [roleMappingName]: { enabled: boolean; roles: string[]; rules: Record<string, any>} }}
+   */
+  shield.getRoleMappings = ca({
+    method: 'GET',
+    urls: [
+      {
+        fmt: '/_security/role_mapping',
+      },
+      {
+        fmt: '/_security/role_mapping/<%=name%>',
+        req: {
+          name: {
+            type: 'string',
+            required: true,
+          },
+        },
+      },
+    ],
+  });
+
+  /**
+   * Saves the specified role mapping.
+   */
+  shield.saveRoleMapping = ca({
+    method: 'POST',
+    needBody: true,
+    urls: [
+      {
+        fmt: '/_security/role_mapping/<%=name%>',
+        req: {
+          name: {
+            type: 'string',
+            required: true,
+          },
+        },
+      },
+    ],
+  });
+
+  /**
+   * Deletes the specified role mapping.
+   */
+  shield.deleteRoleMapping = ca({
+    method: 'DELETE',
+    urls: [
+      {
+        fmt: '/_security/role_mapping/<%=name%>',
+        req: {
+          name: {
+            type: 'string',
+            required: true,
+          },
+        },
+      },
+    ],
+  });
 }

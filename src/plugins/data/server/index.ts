@@ -18,8 +18,75 @@
  */
 
 import { PluginInitializerContext } from '../../../core/server';
-import { DataServerPlugin } from './plugin';
+import { DataServerPlugin, DataPluginSetup, DataPluginStart } from './plugin';
 
+/*
+ * esQuery and esKuery helper namespaces:
+ */
+
+import {
+  nodeTypes,
+  fromKueryExpression,
+  toElasticsearchQuery,
+  buildEsQuery,
+  getEsQueryConfig,
+} from '../common';
+
+export const esKuery = {
+  nodeTypes,
+  fromKueryExpression,
+  toElasticsearchQuery,
+};
+
+export const esQuery = {
+  getEsQueryConfig,
+  buildEsQuery,
+};
+
+/*
+ * Field Formatters helper namespace:
+ */
+
+import {
+  FieldFormatsRegistry,
+  FieldFormat,
+  BoolFormat,
+  BytesFormat,
+  ColorFormat,
+  DateFormat,
+  DateNanosFormat,
+  DurationFormat,
+  IpFormat,
+  NumberFormat,
+  PercentFormat,
+  RelativeDateFormat,
+  SourceFormat,
+  StaticLookupFormat,
+  UrlFormat,
+  StringFormat,
+  TruncateFormat,
+} from '../common/field_formats';
+
+export const fieldFormats = {
+  FieldFormatsRegistry,
+  FieldFormat,
+
+  BoolFormat,
+  BytesFormat,
+  ColorFormat,
+  DateFormat,
+  DateNanosFormat,
+  DurationFormat,
+  IpFormat,
+  NumberFormat,
+  PercentFormat,
+  RelativeDateFormat,
+  SourceFormat,
+  StaticLookupFormat,
+  UrlFormat,
+  StringFormat,
+  TruncateFormat,
+};
 export function plugin(initializerContext: PluginInitializerContext) {
   return new DataServerPlugin(initializerContext);
 }
@@ -29,14 +96,19 @@ export function plugin(initializerContext: PluginInitializerContext) {
  * @public
  */
 export { IRequestTypesMap, IResponseTypesMap } from './search';
+
 export {
-  // field formats
-  FIELD_FORMAT_IDS,
-  IFieldFormat,
-  IFieldFormatId,
-  IFieldFormatType,
+  EsQueryConfig,
+  // es query
+  esFilters,
+  KueryNode,
+  // kbn field types
+  castEsToKbnFieldTypeName,
+  getKbnFieldType,
+  getKbnTypeNames,
   // index patterns
   IIndexPattern,
+  isFilterable,
   IFieldType,
   IFieldSubType,
   // kbn field types
@@ -47,6 +119,12 @@ export {
   // timefilter
   RefreshInterval,
   TimeRange,
+  // utils
+  parseInterval,
+  isNestedField,
+  IFieldFormatsRegistry,
+  FieldFormatsGetConfigFn,
+  FieldFormatConfig,
 } from '../common';
 
 /**
@@ -59,36 +137,11 @@ export {
   shouldReadFieldFromDocValues,
   indexPatterns,
 } from './index_patterns';
-export * from './search';
-export {
-  // es query
-  esFilters,
-  esKuery,
-  esQuery,
-  // field formats
-  BoolFormat,
-  BytesFormat,
-  ColorFormat,
-  DateFormat,
-  DateNanosFormat,
-  DEFAULT_CONVERTER_COLOR,
-  DurationFormat,
-  FieldFormat,
-  IpFormat,
-  NumberFormat,
-  PercentFormat,
-  RelativeDateFormat,
-  SourceFormat,
-  StaticLookupFormat,
-  StringFormat,
-  TruncateFormat,
-  UrlFormat,
-  // index patterns
-  isFilterable,
-  // kbn field types
-  castEsToKbnFieldTypeName,
-  getKbnFieldType,
-  getKbnTypeNames,
-} from '../common';
 
-export { DataServerPlugin as Plugin };
+export * from './search';
+
+export {
+  DataServerPlugin as Plugin,
+  DataPluginSetup as PluginSetup,
+  DataPluginStart as PluginStart,
+};

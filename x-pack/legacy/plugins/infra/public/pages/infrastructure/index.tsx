@@ -20,7 +20,7 @@ import { WithSource } from '../../containers/with_source';
 import { Source } from '../../containers/source';
 import { MetricsExplorerPage } from './metrics_explorer';
 import { SnapshotPage } from './snapshot';
-import { SettingsPage } from '../shared/settings';
+import { MetricsSettingsPage } from './settings';
 import { AppNavigation } from '../../components/navigation/app_navigation';
 import { SourceLoadingPage } from '../../components/source_loading_page';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
@@ -106,7 +106,7 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
               </WithSource>
             )}
           />
-          <Route path={`${match.path}/settings`} component={SettingsPage} />
+          <Route path={`${match.path}/settings`} component={MetricsSettingsPage} />
         </Switch>
       </ColumnarPage>
     </Source.Provider>

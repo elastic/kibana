@@ -17,16 +17,17 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import { IFieldType } from 'src/plugins/data/public';
-import { InfraNodeType, InfraSnapshotGroupbyInput } from '../../graphql/types';
 import { InfraGroupByOptions } from '../../lib/lib';
 import { CustomFieldPanel } from './custom_field_panel';
 import euiStyled from '../../../../../common/eui_styled_components';
+import { InventoryItemType } from '../../../common/inventory_models/types';
+import { SnapshotGroupBy } from '../../../common/http_api/snapshot_api';
 
 interface Props {
   options: Array<{ text: string; field: string; toolTipContent?: string }>;
-  nodeType: InfraNodeType;
-  groupBy: InfraSnapshotGroupbyInput[];
-  onChange: (groupBy: InfraSnapshotGroupbyInput[]) => void;
+  nodeType: InventoryItemType;
+  groupBy: SnapshotGroupBy;
+  onChange: (groupBy: SnapshotGroupBy) => void;
   onChangeCustomOptions: (options: InfraGroupByOptions[]) => void;
   fields: IFieldType[];
   customOptions: InfraGroupByOptions[];
@@ -60,6 +61,10 @@ export const WaffleGroupByControls = class extends React.PureComponent<Props, St
         })
       );
     }
+    const isMaxGroupingsSelected = groupBy.length >= 2;
+    const maxGroupByTooltip = i18n.translate('xpack.infra.waffle.maxGroupByTooltip', {
+      defaultMessage: 'Only two groupings can be selected at a time',
+    });
     const panels: EuiContextMenuPanelDescriptor[] = [
       {
         id: 'firstPanel',
@@ -71,6 +76,8 @@ export const WaffleGroupByControls = class extends React.PureComponent<Props, St
             name: i18n.translate('xpack.infra.waffle.customGroupByOptionName', {
               defaultMessage: 'Custom field',
             }),
+            disabled: isMaxGroupingsSelected,
+            toolTipContent: isMaxGroupingsSelected ? maxGroupByTooltip : null,
             icon: 'empty',
             panel: 'customPanel',
           },
@@ -84,6 +91,10 @@ export const WaffleGroupByControls = class extends React.PureComponent<Props, St
             if (o.toolTipContent) {
               panel.toolTipContent = o.toolTipContent;
             }
+            if (isMaxGroupingsSelected && icon === 'empty') {
+              panel.toolTipContent = maxGroupByTooltip;
+              panel.disabled = true;
+            }
             return panel;
           }),
         ],
@@ -93,7 +104,13 @@ export const WaffleGroupByControls = class extends React.PureComponent<Props, St
         title: i18n.translate('xpack.infra.waffle.customGroupByPanelTitle', {
           defaultMessage: 'Group By Custom Field',
         }),
-        content: <CustomFieldPanel onSubmit={this.handleCustomField} fields={this.props.fields} />,
+        content: (
+          <CustomFieldPanel
+            currentOptions={this.props.customOptions}
+            onSubmit={this.handleCustomField}
+            fields={this.props.fields}
+          />
+        ),
       },
     ];
     const buttonBody =
@@ -166,8 +183,8 @@ export const WaffleGroupByControls = class extends React.PureComponent<Props, St
       this.handleRemove(field)();
     } else if (this.props.groupBy.length < 2) {
       this.props.onChange([...groupBy, { field }]);
-      this.handleClose();
     }
+    this.handleClose();
   };
 };
 

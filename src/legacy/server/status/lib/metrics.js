@@ -20,7 +20,7 @@
 import os from 'os';
 import v8 from 'v8';
 import { get, isObject, merge } from 'lodash';
-import { keysToSnakeCaseShallow } from '../../../utils/case_conversion';
+import { keysToSnakeCaseShallow } from './case_conversion';
 import { getAllStats as cGroupStats } from './cgroup';
 import { getOSInfo } from './get_os_info';
 

@@ -5,17 +5,17 @@
  */
 
 import { get } from 'lodash';
-import { InfraNodeType } from '../../../graphql/types';
 import { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../../lib/lib';
+import { InventoryItemType } from '../../../../common/inventory_models/types';
 
 const BASE_URL = '../app/uptime#/?search=';
 
 export const createUptimeLink = (
   options: InfraWaffleMapOptions,
-  nodeType: InfraNodeType,
+  nodeType: InventoryItemType,
   node: InfraWaffleMapNode
 ) => {
-  if (nodeType === InfraNodeType.host && node.ip) {
+  if (nodeType === 'host' && node.ip) {
     return `${BASE_URL}host.ip:"${node.ip}"`;
   }
   const field = get(options, ['fields', nodeType], '');

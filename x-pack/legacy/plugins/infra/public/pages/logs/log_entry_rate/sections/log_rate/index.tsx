@@ -4,15 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiEmptyPrompt, EuiLoadingSpinner, EuiSpacer, EuiTitle, EuiText } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiLoadingSpinner, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 
-import { LogEntryRateResults as Results } from '../../use_log_entry_rate_results';
 import { TimeRange } from '../../../../../../common/http_api/shared/time_range';
-import { LogEntryRateBarChart } from './bar_chart';
-import { getLogEntryRatePartitionedSeries } from '../helpers/data_formatters';
+import { BetaBadge } from '../../../../../components/beta_badge';
 import { LoadingOverlayWrapper } from '../../../../../components/loading_overlay_wrapper';
+import { LogEntryRateResults as Results } from '../../use_log_entry_rate_results';
+import { getLogEntryRatePartitionedSeries } from '../helpers/data_formatters';
+import { LogEntryRateBarChart } from './bar_chart';
 
 export const LogRateResults = ({
   isLoading,
@@ -33,7 +34,9 @@ export const LogRateResults = ({
   return (
     <>
       <EuiTitle size="m" aria-label={title}>
-        <h2>{title}</h2>
+        <h2>
+          {title} <BetaBadge />
+        </h2>
       </EuiTitle>
       <LoadingOverlayWrapper isLoading={isLoading} loadingChildren={<LoadingOverlayContent />}>
         {!results || (results && results.histogramBuckets && !results.histogramBuckets.length) ? (

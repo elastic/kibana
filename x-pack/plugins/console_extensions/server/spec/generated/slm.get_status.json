@@ -1,0 +1,11 @@
+{
+  "slm.get_status": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_slm/status"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/slm-get-status.html"
+  }
+}

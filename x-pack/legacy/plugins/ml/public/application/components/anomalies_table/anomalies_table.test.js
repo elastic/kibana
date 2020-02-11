@@ -64,9 +64,6 @@ describe('AnomaliesTable', () => {
     expect(columns).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          name: '',
-        }),
-        expect.objectContaining({
           name: 'time',
         }),
         expect.objectContaining({

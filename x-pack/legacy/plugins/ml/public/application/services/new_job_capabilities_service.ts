@@ -14,7 +14,7 @@ import {
 } from '../../../common/types/fields';
 import {
   ES_FIELD_TYPES,
-  IndexPattern,
+  IIndexPattern,
   IndexPatternsContract,
 } from '../../../../../../../src/plugins/data/public';
 import { ml } from './ml_api_service';
@@ -30,7 +30,7 @@ export function loadNewJobCapabilities(
   return new Promise(async (resolve, reject) => {
     if (indexPatternId !== undefined) {
       // index pattern is being used
-      const indexPattern: IndexPattern = await indexPatterns.get(indexPatternId);
+      const indexPattern: IIndexPattern = await indexPatterns.get(indexPatternId);
       await newJobCapsService.initializeFromIndexPattern(indexPattern);
       resolve(newJobCapsService.newJobCaps);
     } else if (savedSearchId !== undefined) {
@@ -89,7 +89,7 @@ class NewJobCapsService {
   }
 
   public async initializeFromIndexPattern(
-    indexPattern: IndexPattern,
+    indexPattern: IIndexPattern,
     includeEventRateField = true,
     removeTextFields = true
   ) {

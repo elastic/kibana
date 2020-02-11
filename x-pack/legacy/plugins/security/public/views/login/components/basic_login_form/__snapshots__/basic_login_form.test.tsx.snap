@@ -37,14 +37,11 @@ exports[`BasicLoginForm renders as expected 1`] = `
       >
         <EuiFieldText
           aria-required={true}
-          compressed={false}
           data-test-subj="loginUsername"
           disabled={false}
-          fullWidth={false}
           id="username"
           inputRef={[Function]}
           isInvalid={false}
-          isLoading={false}
           name="username"
           onChange={[Function]}
           value=""
@@ -67,13 +64,10 @@ exports[`BasicLoginForm renders as expected 1`] = `
       >
         <EuiFieldText
           aria-required={true}
-          compressed={false}
           data-test-subj="loginPassword"
           disabled={false}
-          fullWidth={false}
           id="password"
           isInvalid={false}
-          isLoading={false}
           name="password"
           onChange={[Function]}
           type="password"

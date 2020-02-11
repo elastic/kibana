@@ -10,7 +10,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
   const appsMenu = getService('appsMenu');
-  const PageObjects = getPageObjects(['common', 'security']);
+  const PageObjects = getPageObjects(['common', 'security', 'settings']);
 
   describe('security', () => {
     before(async () => {
@@ -80,9 +80,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`doesn't show ml navlink`, async () => {
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
+        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
         expect(navLinks).not.to.contain('Machine Learning');
       });
     });
@@ -96,6 +94,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         });
 
         await PageObjects.security.login('machine_learning_user', 'machine_learning_user-password');
+        await PageObjects.settings.setNavType('individual');
       });
 
       after(async () => {
@@ -103,9 +102,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('shows ML navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
+        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
         expect(navLinks).to.contain('Machine Learning');
       });
     });

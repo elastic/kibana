@@ -5,7 +5,7 @@
  */
 
 import { mount } from 'enzyme';
-import * as React from 'react';
+import React from 'react';
 
 import { globalNode, HookWrapper } from '../../mock';
 import { useScrollToTop } from '.';

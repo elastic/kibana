@@ -4,23 +4,29 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore no module definition TODO
+import { ElasticsearchServiceSetup, KibanaRequest } from '../../../../../../../../src/core/server';
 import { createGenerateCsv } from '../../../csv/server/lib/generate_csv';
 import { CancellationToken } from '../../../../common/cancellation_token';
 import { ServerFacade, RequestFacade, Logger } from '../../../../types';
-import { SavedSearchObjectAttributes, SearchPanel, SearchRequest, SearchSource } from '../../types';
 import {
+  JobParamsDiscoverCsv,
   CsvResultFromSearch,
+  SearchRequest,
   GenerateCsvParams,
+} from '../../../csv/types';
+import {
   IndexPatternField,
   QueryFilter,
+  SavedSearchObjectAttributes,
+  SearchPanel,
+  SearchSource,
 } from '../../types';
 import { getDataSource } from './get_data_source';
 import { getFilters } from './get_filters';
-import { JobParamsDiscoverCsv } from '../../../csv/types';
 
 import {
   esQuery,
+  EsQueryConfig,
   esFilters,
   IIndexPattern,
   Query,
@@ -40,7 +46,7 @@ const getEsQueryConfig = async (config: any) => {
     allowLeadingWildcards,
     queryStringOptions,
     ignoreFilterIfFieldNotInIndex,
-  } as esQuery.EsQueryConfig;
+  } as EsQueryConfig;
 };
 
 const getUiSettings = async (config: any) => {
@@ -52,12 +58,15 @@ const getUiSettings = async (config: any) => {
 export async function generateCsvSearch(
   req: RequestFacade,
   server: ServerFacade,
+  elasticsearch: ElasticsearchServiceSetup,
   logger: Logger,
   searchPanel: SearchPanel,
   jobParams: JobParamsDiscoverCsv
 ): Promise<CsvResultFromSearch> {
   const { savedObjects, uiSettingsServiceFactory } = server;
-  const savedObjectsClient = savedObjects.getScopedSavedObjectsClient(req);
+  const savedObjectsClient = savedObjects.getScopedSavedObjectsClient(
+    KibanaRequest.from(req.getRawRequest())
+  );
   const { indexPatternSavedObjectId, timerange } = searchPanel;
   const savedSearchObjectAttr = searchPanel.attributes as SavedSearchObjectAttributes;
   const { indexPatternSavedObject } = await getDataSource(
@@ -144,8 +153,11 @@ export async function generateCsvSearch(
       sort: sortConfig,
     },
   };
-  const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
-  const callCluster = (...params: [string, object]) => callWithRequest(req, ...params);
+
+  const { callAsCurrentUser } = elasticsearch.dataClient.asScoped(
+    KibanaRequest.from(req.getRawRequest())
+  );
+  const callCluster = (...params: [string, object]) => callAsCurrentUser(...params);
   const config = server.config();
   const uiSettings = await getUiSettings(uiConfig);
 

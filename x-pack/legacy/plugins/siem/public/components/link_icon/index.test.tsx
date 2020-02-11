@@ -5,7 +5,6 @@
  */
 
 import { mount, shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import React from 'react';
 
 import { TestProviders } from '../../mock';
@@ -19,7 +18,7 @@ describe('LinkIcon', () => {
       </LinkIcon>
     );
 
-    expect(toJson(wrapper)).toMatchSnapshot();
+    expect(wrapper).toMatchSnapshot();
   });
 
   test('it renders an action button when onClick is provided', () => {

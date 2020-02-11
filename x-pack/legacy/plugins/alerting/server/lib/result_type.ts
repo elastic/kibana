@@ -15,6 +15,10 @@ export interface Err<E> {
 }
 export type Result<T, E> = Ok<T> | Err<E>;
 
+export type Resultable<T, E> = {
+  [P in keyof T]: Result<T[P], E>;
+};
+
 export function asOk<T>(value: T): Ok<T> {
   return {
     tag: 'ok',
@@ -51,4 +55,8 @@ export function map<T, E, Resolution>(
   onErr: (error: E) => Resolution
 ): Resolution {
   return isOk(result) ? onOk(result.value) : onErr(result.error);
+}
+
+export function resolveErr<T, E>(result: Result<T, E>, onErr: (error: E) => T): T {
+  return isOk(result) ? result.value : onErr(result.error);
 }

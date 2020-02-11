@@ -5,7 +5,6 @@
  */
 
 import { mount, shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
 import React from 'react';
 
 import { TestProviders } from '../../../mock';
@@ -19,7 +18,7 @@ describe('UtilityBarAction', () => {
       </TestProviders>
     );
 
-    expect(toJson(wrapper.find('UtilityBarAction'))).toMatchSnapshot();
+    expect(wrapper.find('UtilityBarAction')).toMatchSnapshot();
   });
 
   test('it renders a popover', () => {

@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 import { inflector } from './inflector';
-import { organizeBy } from '../utils/collection';
+import { organizeBy } from './helpers/organize_by';
 
 const pathGetter = _(_.get)
   .rearg(1, 0)

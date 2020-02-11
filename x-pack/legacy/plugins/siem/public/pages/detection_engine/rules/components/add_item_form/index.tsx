@@ -4,9 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButtonEmpty, EuiButtonIcon, EuiFormRow, EuiFieldText, EuiSpacer } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiFieldText,
+  EuiSpacer,
+} from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { ChangeEvent, useCallback, useEffect, useState, useRef } from 'react';
+import styled from 'styled-components';
 
 import * as RuleI18n from '../../translations';
 import { FieldHook, getFieldValidityAndErrorMessage } from '../shared_imports';
@@ -17,11 +26,46 @@ interface AddItemProps {
   dataTestSubj: string;
   idAria: string;
   isDisabled: boolean;
+  validate?: (args: unknown) => boolean;
 }
 
-export const AddItem = ({ addText, dataTestSubj, field, idAria, isDisabled }: AddItemProps) => {
+const MyEuiFormRow = styled(EuiFormRow)`
+  .euiFormRow__labelWrapper {
+    .euiText {
+      padding-right: 32px;
+    }
+  }
+`;
+
+export const MyAddItemButton = styled(EuiButtonEmpty)`
+  margin-top: 4px;
+
+  &.euiButtonEmpty--xSmall {
+    font-size: 12px;
+  }
+
+  .euiIcon {
+    width: 12px;
+    height: 12px;
+  }
+`;
+
+MyAddItemButton.defaultProps = {
+  flush: 'left',
+  iconType: 'plusInCircle',
+  size: 'xs',
+};
+
+export const AddItem = ({
+  addText,
+  dataTestSubj,
+  field,
+  idAria,
+  isDisabled,
+  validate,
+}: AddItemProps) => {
+  const [showValidation, setShowValidation] = useState(false);
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
-  // const [items, setItems] = useState(['']);
   const [haveBeenKeyboardDeleted, setHaveBeenKeyboardDeleted] = useState(-1);
 
   const inputsRef = useRef<HTMLInputElement[]>([]);
@@ -29,7 +73,8 @@ export const AddItem = ({ addText, dataTestSubj, field, idAria, isDisabled }: Ad
   const removeItem = useCallback(
     (index: number) => {
       const values = field.value as string[];
-      field.setValue([...values.slice(0, index), ...values.slice(index + 1)]);
+      const newValues = [...values.slice(0, index), ...values.slice(index + 1)];
+      field.setValue(newValues.length === 0 ? [''] : newValues);
       inputsRef.current = [
         ...inputsRef.current.slice(0, index),
         ...inputsRef.current.slice(index + 1),
@@ -46,11 +91,7 @@ export const AddItem = ({ addText, dataTestSubj, field, idAria, isDisabled }: Ad
 
   const addItem = useCallback(() => {
     const values = field.value as string[];
-    if (!isEmpty(values) && values[values.length - 1]) {
-      field.setValue([...values, '']);
-    } else if (isEmpty(values)) {
-      field.setValue(['']);
-    }
+    field.setValue([...values, '']);
   }, [field]);
 
   const updateItem = useCallback(
@@ -58,22 +99,7 @@ export const AddItem = ({ addText, dataTestSubj, field, idAria, isDisabled }: Ad
       event.persist();
       const values = field.value as string[];
       const value = event.target.value;
-      if (isEmpty(value)) {
-        field.setValue([...values.slice(0, index), ...values.slice(index + 1)]);
-        inputsRef.current = [
-          ...inputsRef.current.slice(0, index),
-          ...inputsRef.current.slice(index + 1),
-        ];
-        setHaveBeenKeyboardDeleted(inputsRef.current.length - 1);
-        inputsRef.current = inputsRef.current.map((ref, i) => {
-          if (i >= index && inputsRef.current[index] != null) {
-            ref.value = 're-render';
-          }
-          return ref;
-        });
-      } else {
-        field.setValue([...values.slice(0, index), value, ...values.slice(index + 1)]);
-      }
+      field.setValue([...values.slice(0, index), value, ...values.slice(index + 1)]);
     },
     [field]
   );
@@ -104,11 +130,11 @@ export const AddItem = ({ addText, dataTestSubj, field, idAria, isDisabled }: Ad
 
   const values = field.value as string[];
   return (
-    <EuiFormRow
+    <MyEuiFormRow
       label={field.label}
       labelAppend={field.labelAppend}
-      error={errorMessage}
-      isInvalid={isInvalid}
+      error={showValidation ? errorMessage : null}
+      isInvalid={showValidation && isInvalid}
       fullWidth
       data-test-subj={dataTestSubj}
       describedByIds={idAria ? [idAria] : undefined}
@@ -124,33 +150,39 @@ export const AddItem = ({ addText, dataTestSubj, field, idAria, isDisabled }: Ad
             inputsRef.current[index] == null
               ? { value: item }
               : {}),
+            isInvalid: validate == null ? false : showValidation && validate(item),
           };
           return (
             <div key={index}>
-              <EuiFieldText
-                append={
+              <EuiFlexGroup gutterSize="s" alignItems="center">
+                <EuiFlexItem grow>
+                  <EuiFieldText
+                    onBlur={() => setShowValidation(true)}
+                    onChange={e => updateItem(e, index)}
+                    fullWidth
+                    {...euiFieldProps}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
                   <EuiButtonIcon
                     color="danger"
                     iconType="trash"
-                    isDisabled={isDisabled}
+                    isDisabled={isDisabled || (isEmpty(item) && values.length === 1)}
                     onClick={() => removeItem(index)}
                     aria-label={RuleI18n.DELETE}
                   />
-                }
-                onChange={e => updateItem(e, index)}
-                compressed
-                fullWidth
-                {...euiFieldProps}
-              />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+
               {values.length - 1 !== index && <EuiSpacer size="s" />}
             </div>
           );
         })}
 
-        <EuiButtonEmpty size="xs" onClick={addItem} isDisabled={isDisabled}>
+        <MyAddItemButton onClick={addItem} isDisabled={isDisabled}>
           {addText}
-        </EuiButtonEmpty>
+        </MyAddItemButton>
       </>
-    </EuiFormRow>
+    </MyEuiFormRow>
   );
 };

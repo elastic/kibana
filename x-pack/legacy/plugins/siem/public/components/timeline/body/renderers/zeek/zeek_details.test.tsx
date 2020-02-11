@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import toJson from 'enzyme-to-json';
-import * as React from 'react';
+import React from 'react';
 
 import { mockBrowserFields } from '../../../../../containers/source/mock';
 import { mockTimelineData, TestProviders } from '../../../../../mock';
@@ -26,7 +25,7 @@ describe('ZeekDetails', () => {
           />
         </TestProviders>
       );
-      expect(toJson(wrapper.find('ZeekDetails'))).toMatchSnapshot();
+      expect(wrapper.find('ZeekDetails')).toMatchSnapshot();
     });
 
     test('it returns zeek.connection if the data does contain zeek.connection data', () => {

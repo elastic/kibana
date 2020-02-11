@@ -5,7 +5,6 @@
  */
 
 import { Observable } from 'rxjs';
-import { take } from 'rxjs/operators';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { HomeServerPluginSetup } from 'src/plugins/home/server';
 import {
@@ -15,9 +14,8 @@ import {
   PluginInitializerContext,
 } from '../../../../src/core/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
-import { PluginSetupContract as SecurityPluginSetup } from '../../security/server';
+import { SecurityPluginSetup } from '../../security/server';
 import { LicensingPluginSetup } from '../../licensing/server';
-import { XPackMainPlugin } from '../../../legacy/plugins/xpack_main/server/xpack_main';
 import { createDefaultSpace } from './lib/create_default_space';
 // @ts-ignore
 import { AuditLogger } from '../../../../server/lib/audit_logger';
@@ -32,6 +30,7 @@ import { toggleUICapabilities } from './lib/toggle_ui_capabilities';
 import { initSpacesRequestInterceptors } from './lib/request_interceptors';
 import { initExternalSpacesApi } from './routes/api/external';
 import { initInternalSpacesApi } from './routes/api/internal';
+import { initSpacesViewsRoutes } from './routes/views';
 
 /**
  * Describes a set of APIs that is available in the legacy platform only and required by this plugin
@@ -39,16 +38,12 @@ import { initInternalSpacesApi } from './routes/api/internal';
  */
 export interface LegacyAPI {
   savedObjects: SavedObjectsLegacyService;
-  tutorial: {
-    addScopedTutorialContextFactory: (factory: any) => void;
-  };
   auditLogger: {
     create: (pluginId: string) => AuditLogger;
   };
   legacyConfig: {
     kibanaIndex: string;
   };
-  xpackMain: XPackMainPlugin;
 }
 
 export interface PluginsSetup {
@@ -113,6 +108,12 @@ export class Plugin {
       config$: this.config$,
     });
 
+    const viewRouter = core.http.createRouter();
+    initSpacesViewsRoutes({
+      viewRouter,
+      cspHeader: core.http.csp.header,
+    });
+
     const externalRouter = core.http.createRouter();
     initExternalSpacesApi({
       externalRouter,
@@ -168,9 +169,8 @@ export class Plugin {
           );
         },
         createDefaultSpace: async () => {
-          const esClient = await core.elasticsearch.adminClient$.pipe(take(1)).toPromise();
-          return createDefaultSpace({
-            esClient,
+          return await createDefaultSpace({
+            esClient: core.elasticsearch.adminClient,
             savedObjects: this.getLegacyAPI().savedObjects,
           });
         },
@@ -192,9 +192,6 @@ export class Plugin {
       Number.MIN_SAFE_INTEGER,
       'spaces',
       spacesSavedObjectsClientWrapperFactory(spacesService, types)
-    );
-    legacyAPI.tutorial.addScopedTutorialContextFactory(
-      createSpacesTutorialContextFactory(spacesService)
     );
     // Register a function with server to manage the collection of usage stats
     registerSpacesUsageCollector(usageCollectionSetup, {

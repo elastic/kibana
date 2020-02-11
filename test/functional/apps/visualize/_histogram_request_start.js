@@ -22,7 +22,13 @@ import expect from '@kbn/expect';
 export default function({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['common', 'visualize', 'timePicker']);
+  const PageObjects = getPageObjects([
+    'common',
+    'visualize',
+    'visEditor',
+    'visChart',
+    'timePicker',
+  ]);
 
   describe('histogram agg onSearchRequestStart', function() {
     before(async function() {
@@ -33,21 +39,21 @@ export default function({ getService, getPageObjects }) {
       await PageObjects.visualize.clickNewSearch();
       await PageObjects.timePicker.setDefaultAbsoluteRange();
       log.debug('Bucket = Split Rows');
-      await PageObjects.visualize.clickBucket('Split rows');
+      await PageObjects.visEditor.clickBucket('Split rows');
       log.debug('Aggregation = Histogram');
-      await PageObjects.visualize.selectAggregation('Histogram');
+      await PageObjects.visEditor.selectAggregation('Histogram');
       log.debug('Field = machine.ram');
-      await PageObjects.visualize.selectField('machine.ram');
+      await PageObjects.visEditor.selectField('machine.ram');
     });
 
     describe('interval parameter uses autoBounds', function() {
       it('should use provided value when number of generated buckets is less than histogram:maxBars', async function() {
         const providedInterval = 2400000000;
         log.debug(`Interval = ${providedInterval}`);
-        await PageObjects.visualize.setNumericInterval(providedInterval);
-        await PageObjects.visualize.clickGo();
+        await PageObjects.visEditor.setInterval(providedInterval, { type: 'numeric' });
+        await PageObjects.visEditor.clickGo();
         await retry.try(async () => {
-          const data = await PageObjects.visualize.getTableVisData();
+          const data = await PageObjects.visChart.getTableVisData();
           const dataArray = data.replace(/,/g, '').split('\n');
           expect(dataArray.length).to.eql(20);
           const bucketStart = parseInt(dataArray[0], 10);
@@ -60,11 +66,11 @@ export default function({ getService, getPageObjects }) {
       it('should scale value to round number when number of generated buckets is greater than histogram:maxBars', async function() {
         const providedInterval = 100;
         log.debug(`Interval = ${providedInterval}`);
-        await PageObjects.visualize.setNumericInterval(providedInterval);
-        await PageObjects.visualize.clickGo();
+        await PageObjects.visEditor.setInterval(providedInterval, { type: 'numeric' });
+        await PageObjects.visEditor.clickGo();
         await PageObjects.common.sleep(1000); //fix this
         await retry.try(async () => {
-          const data = await PageObjects.visualize.getTableVisData();
+          const data = await PageObjects.visChart.getTableVisData();
           const dataArray = data.replace(/,/g, '').split('\n');
           expect(dataArray.length).to.eql(20);
           const bucketStart = parseInt(dataArray[0], 10);

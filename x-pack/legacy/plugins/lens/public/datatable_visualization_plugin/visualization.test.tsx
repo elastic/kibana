@@ -72,6 +72,42 @@ describe('Datatable Visualization', () => {
     });
   });
 
+  describe('#getLayerIds', () => {
+    it('return the layer ids', () => {
+      const state: DatatableVisualizationState = {
+        layers: [
+          {
+            layerId: 'baz',
+            columns: ['a', 'b', 'c'],
+          },
+        ],
+      };
+      expect(datatableVisualization.getLayerIds(state)).toEqual(['baz']);
+    });
+  });
+
+  describe('#clearLayer', () => {
+    it('should reset the layer', () => {
+      (generateId as jest.Mock).mockReturnValueOnce('testid');
+      const state: DatatableVisualizationState = {
+        layers: [
+          {
+            layerId: 'baz',
+            columns: ['a', 'b', 'c'],
+          },
+        ],
+      };
+      expect(datatableVisualization.clearLayer(state, 'baz')).toMatchObject({
+        layers: [
+          {
+            layerId: 'baz',
+            columns: ['testid'],
+          },
+        ],
+      });
+    });
+  });
+
   describe('#getSuggestions', () => {
     function numCol(columnId: string): TableSuggestionColumn {
       return {
@@ -188,6 +224,7 @@ describe('Datatable Visualization', () => {
 
       mount(
         <DataTableLayer
+          layerId="layer1"
           dragDropContext={{ dragging: undefined, setDragging: () => {} }}
           frame={frame}
           layer={layer}
@@ -224,6 +261,7 @@ describe('Datatable Visualization', () => {
       frame.datasourceLayers = { a: datasource.publicAPIMock };
       const component = mount(
         <DataTableLayer
+          layerId="layer1"
           dragDropContext={{ dragging: undefined, setDragging: () => {} }}
           frame={frame}
           layer={layer}
@@ -258,6 +296,7 @@ describe('Datatable Visualization', () => {
       frame.datasourceLayers = { a: datasource.publicAPIMock };
       const component = mount(
         <DataTableLayer
+          layerId="layer1"
           dragDropContext={{ dragging: undefined, setDragging: () => {} }}
           frame={frame}
           layer={layer}
@@ -290,6 +329,7 @@ describe('Datatable Visualization', () => {
       frame.datasourceLayers = { a: datasource.publicAPIMock };
       const component = mount(
         <DataTableLayer
+          layerId="layer1"
           dragDropContext={{ dragging: undefined, setDragging: () => {} }}
           frame={frame}
           layer={layer}

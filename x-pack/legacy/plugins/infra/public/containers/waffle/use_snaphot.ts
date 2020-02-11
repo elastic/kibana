@@ -8,23 +8,20 @@ import { useEffect } from 'react';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
-import {
-  InfraNodeType,
-  InfraSnapshotMetricInput,
-  InfraSnapshotGroupbyInput,
-} from '../../graphql/types';
 import { throwErrors, createPlainError } from '../../../common/runtime_types';
 import { useHTTPRequest } from '../../hooks/use_http_request';
 import {
   SnapshotNodeResponseRT,
   SnapshotNodeResponse,
+  SnapshotGroupBy,
 } from '../../../common/http_api/snapshot_api';
+import { InventoryItemType, SnapshotMetricType } from '../../../common/inventory_models/types';
 
 export function useSnapshot(
   filterQuery: string | null | undefined,
-  metric: InfraSnapshotMetricInput,
-  groupBy: InfraSnapshotGroupbyInput[],
-  nodeType: InfraNodeType,
+  metric: { type: SnapshotMetricType },
+  groupBy: SnapshotGroupBy,
+  nodeType: InventoryItemType,
   sourceId: string,
   currentTime: number,
   accountId: string,

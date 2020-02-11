@@ -8,6 +8,13 @@ import { i18n } from '@kbn/i18n';
 
 import { VECTOR_STYLES } from '../vector_style_defaults';
 
+export function getDisabledByMessage(styleName) {
+  return i18n.translate('xpack.maps.styles.vector.disabledByMessage', {
+    defaultMessage: `Set '{styleLabel}' to enable`,
+    values: { styleLabel: getVectorStyleLabel(styleName) },
+  });
+}
+
 export function getVectorStyleLabel(styleName) {
   switch (styleName) {
     case VECTOR_STYLES.FILL_COLOR:
@@ -21,6 +28,10 @@ export function getVectorStyleLabel(styleName) {
     case VECTOR_STYLES.LINE_WIDTH:
       return i18n.translate('xpack.maps.styles.vector.borderWidthLabel', {
         defaultMessage: 'Border width',
+      });
+    case VECTOR_STYLES.ICON:
+      return i18n.translate('xpack.maps.styles.vector.iconLabel', {
+        defaultMessage: 'Icon',
       });
     case VECTOR_STYLES.ICON_SIZE:
       return i18n.translate('xpack.maps.styles.vector.symbolSizeLabel', {
@@ -41,6 +52,14 @@ export function getVectorStyleLabel(styleName) {
     case VECTOR_STYLES.LABEL_SIZE:
       return i18n.translate('xpack.maps.styles.vector.labelSizeLabel', {
         defaultMessage: 'Label size',
+      });
+    case VECTOR_STYLES.LABEL_BORDER_COLOR:
+      return i18n.translate('xpack.maps.styles.vector.labelBorderColorLabel', {
+        defaultMessage: 'Label border color',
+      });
+    case VECTOR_STYLES.LABEL_BORDER_SIZE:
+      return i18n.translate('xpack.maps.styles.vector.labelBorderWidthLabel', {
+        defaultMessage: 'Label border width',
       });
     default:
       return styleName;

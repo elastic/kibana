@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+const { DEFAULT_MAX_WORKERS } = require('../../../../plugins/task_manager/server/config.ts');
 const { EventEmitter } = require('events');
 
 import { initRoutes } from './init_routes';
@@ -16,6 +17,7 @@ const once = function(emitter, event) {
 
 export default function TaskTestingAPI(kibana) {
   const taskTestingEvents = new EventEmitter();
+  taskTestingEvents.setMaxListeners(DEFAULT_MAX_WORKERS * 2);
 
   return new kibana.Plugin({
     name: 'sampleTask',
@@ -28,7 +30,11 @@ export default function TaskTestingAPI(kibana) {
     },
 
     init(server) {
-      const taskManager = server.plugins.task_manager;
+      const taskManager = {
+        ...server.newPlatform.setup.plugins.taskManager,
+        ...server.newPlatform.start.plugins.taskManager,
+      };
+      const legacyTaskManager = server.plugins.task_manager;
 
       const defaultSampleTaskConfig = {
         timeout: '1m',
@@ -128,7 +134,7 @@ export default function TaskTestingAPI(kibana) {
         },
       });
 
-      initRoutes(server, taskTestingEvents);
+      initRoutes(server, taskManager, legacyTaskManager, taskTestingEvents);
     },
   });
 }

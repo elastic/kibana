@@ -18,9 +18,9 @@
  */
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n/react';
-import { DocViewRenderProps, DocViewRenderFn } from '../../../kibana_services';
 import { DocViewRenderTab } from './doc_viewer_render_tab';
 import { DocViewerError } from './doc_viewer_render_error';
+import { DocViewRenderFn, DocViewRenderProps } from '../../doc_views/doc_views_types';
 
 interface Props {
   component?: React.ComponentType<DocViewRenderProps>;
@@ -31,7 +31,7 @@ interface Props {
 }
 
 interface State {
-  error: null | Error | string;
+  error: Error | string;
   hasError: boolean;
 }
 /**
@@ -42,7 +42,7 @@ interface State {
 export class DocViewerTab extends React.Component<Props, State> {
   state = {
     hasError: false,
-    error: null,
+    error: '',
   };
 
   static getDerivedStateFromError(error: unknown) {

@@ -13,6 +13,7 @@ exports[`FilterPopover component does not show item list when loading 1`] = `
     />
   }
   closePopover={[Function]}
+  data-test-subj="filter-popover_test"
   display="inlineBlock"
   hasArrow={true}
   id="test"
@@ -28,6 +29,7 @@ exports[`FilterPopover component does not show item list when loading 1`] = `
       disabled={false}
       fullWidth={false}
       incremental={false}
+      isClearable={true}
       isLoading={false}
       onSearch={[Function]}
       placeholder="Loading..."
@@ -49,6 +51,7 @@ exports[`FilterPopover component renders without errors for valid props 1`] = `
     />
   }
   closePopover={[Function]}
+  data-test-subj="filter-popover_test"
   display="inlineBlock"
   hasArrow={true}
   id="test"
@@ -64,6 +67,7 @@ exports[`FilterPopover component renders without errors for valid props 1`] = `
       disabled={false}
       fullWidth={false}
       incremental={false}
+      isClearable={true}
       isLoading={false}
       onSearch={[Function]}
       placeholder="Search bar"
@@ -83,6 +87,7 @@ exports[`FilterPopover component returns selected items on popover close 1`] = `
   </div>
   <div
     class="euiPopover euiPopover--anchorDownCenter euiPopover--withTitle"
+    data-test-subj="filter-popover_test"
     id="test"
   >
     <div

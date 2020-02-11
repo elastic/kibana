@@ -19,7 +19,9 @@
 
 import { mapValues, isString } from 'lodash';
 import { FieldMappingSpec, MappingObject } from './types';
-import { ES_FIELD_TYPES } from '../../../data/public';
+
+// import from ./common/types to prevent circular dependency of kibana_utils <-> data plugin
+import { ES_FIELD_TYPES } from '../../../data/common/types';
 
 /** @private */
 type ShorthandFieldMapObject = FieldMappingSpec | ES_FIELD_TYPES | 'json';

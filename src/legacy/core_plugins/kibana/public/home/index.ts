@@ -17,15 +17,11 @@
  * under the License.
  */
 
-import { FeatureCatalogueRegistryProvider } from 'ui/registry/feature_catalogue';
 import { npSetup, npStart } from 'ui/new_platform';
 import chrome from 'ui/chrome';
-import { IPrivate } from 'ui/private';
 import { HomePlugin, LegacyAngularInjectedDependencies } from './plugin';
-import { createUiStatsReporter, METRIC_TYPE } from '../../../ui_metric/public';
 import { TelemetryOptInProvider } from '../../../telemetry/public/services';
-
-export const trackUiMetric = createUiStatsReporter('Kibana_home');
+import { IPrivate } from '../../../../../plugins/kibana_legacy/public';
 
 /**
  * Get dependencies relying on the global angular context.
@@ -47,32 +43,16 @@ async function getAngularDependencies(): Promise<LegacyAngularInjectedDependenci
   };
 }
 
-let copiedLegacyCatalogue = false;
-
 (async () => {
   const instance = new HomePlugin();
   instance.setup(npSetup.core, {
     ...npSetup.plugins,
     __LEGACY: {
-      trackUiMetric,
       metadata: npStart.core.injectedMetadata.getLegacyMetadata(),
-      METRIC_TYPE,
-      getFeatureCatalogueEntries: async () => {
-        if (!copiedLegacyCatalogue) {
-          const injector = await chrome.dangerouslyGetActiveInjector();
-          const Private = injector.get<IPrivate>('Private');
-          // Merge legacy registry with new registry
-          (Private(FeatureCatalogueRegistryProvider as any) as any).inTitleOrder.map(
-            npSetup.plugins.home.featureCatalogue.register
-          );
-          copiedLegacyCatalogue = true;
-        }
-        return npStart.plugins.home.featureCatalogue.get();
-      },
       getAngularDependencies,
     },
   });
   instance.start(npStart.core, {
-    data: npStart.plugins.data,
+    ...npStart.plugins,
   });
 })();

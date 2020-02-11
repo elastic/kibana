@@ -118,6 +118,7 @@ Array [
                         <input
                           aria-describedby="generated-id-help"
                           className="euiFieldText canvasCustomElementForm__name"
+                          data-test-subj="canvasCustomElementForm-name"
                           id="generated-id"
                           onBlur={[Function]}
                           onChange={[Function]}
@@ -156,6 +157,7 @@ Array [
                     <textarea
                       aria-describedby="generated-id-help"
                       className="euiTextArea euiTextArea--resizeVertical"
+                      data-test-subj="canvasCustomElementForm-description"
                       id="generated-id"
                       onBlur={[Function]}
                       onChange={[Function]}
@@ -324,6 +326,7 @@ Array [
             >
               <button
                 className="euiButton euiButton--primary euiButton--fill"
+                data-test-subj="canvasCustomElementForm-submit"
                 onClick={[Function]}
                 type="button"
               >
@@ -479,6 +482,7 @@ Array [
                         <input
                           aria-describedby="generated-id-help"
                           className="euiFieldText canvasCustomElementForm__name"
+                          data-test-subj="canvasCustomElementForm-name"
                           id="generated-id"
                           onBlur={[Function]}
                           onChange={[Function]}
@@ -517,6 +521,7 @@ Array [
                     <textarea
                       aria-describedby="generated-id-help"
                       className="euiTextArea euiTextArea--resizeVertical"
+                      data-test-subj="canvasCustomElementForm-description"
                       id="generated-id"
                       onBlur={[Function]}
                       onChange={[Function]}
@@ -679,6 +684,7 @@ Array [
             >
               <button
                 className="euiButton euiButton--primary euiButton--fill"
+                data-test-subj="canvasCustomElementForm-submit"
                 onClick={[Function]}
                 type="button"
               >
@@ -835,6 +841,7 @@ Array [
                         <input
                           aria-describedby="generated-id-help"
                           className="euiFieldText canvasCustomElementForm__name"
+                          data-test-subj="canvasCustomElementForm-name"
                           id="generated-id"
                           onBlur={[Function]}
                           onChange={[Function]}
@@ -873,6 +880,7 @@ Array [
                     <textarea
                       aria-describedby="generated-id-help"
                       className="euiTextArea euiTextArea--resizeVertical"
+                      data-test-subj="canvasCustomElementForm-description"
                       id="generated-id"
                       onBlur={[Function]}
                       onChange={[Function]}
@@ -1041,6 +1049,7 @@ Array [
             >
               <button
                 className="euiButton euiButton--primary euiButton--fill"
+                data-test-subj="canvasCustomElementForm-submit"
                 onClick={[Function]}
                 type="button"
               >
@@ -1195,6 +1204,7 @@ Array [
                         <input
                           aria-describedby="generated-id-help"
                           className="euiFieldText canvasCustomElementForm__name"
+                          data-test-subj="canvasCustomElementForm-name"
                           id="generated-id"
                           onBlur={[Function]}
                           onChange={[Function]}
@@ -1233,6 +1243,7 @@ Array [
                     <textarea
                       aria-describedby="generated-id-help"
                       className="euiTextArea euiTextArea--resizeVertical"
+                      data-test-subj="canvasCustomElementForm-description"
                       id="generated-id"
                       onBlur={[Function]}
                       onChange={[Function]}
@@ -1401,6 +1412,7 @@ Array [
             >
               <button
                 className="euiButton euiButton--primary euiButton--fill"
+                data-test-subj="canvasCustomElementForm-submit"
                 onClick={[Function]}
                 type="button"
               >

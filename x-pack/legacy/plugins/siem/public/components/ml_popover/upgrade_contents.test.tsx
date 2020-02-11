@@ -5,13 +5,14 @@
  */
 
 import { shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
-import * as React from 'react';
+import React from 'react';
 import { UpgradeContentsComponent } from './upgrade_contents';
+
+jest.mock('../../lib/kibana');
 
 describe('JobsTableFilters', () => {
   test('renders correctly against snapshot', () => {
     const wrapper = shallow(<UpgradeContentsComponent />);
-    expect(toJson(wrapper)).toMatchSnapshot();
+    expect(wrapper).toMatchSnapshot();
   });
 });

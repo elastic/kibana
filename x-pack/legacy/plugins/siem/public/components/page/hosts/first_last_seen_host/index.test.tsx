@@ -5,7 +5,7 @@
  */
 
 import { cloneDeep } from 'lodash/fp';
-import * as React from 'react';
+import React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
 import { render, act } from '@testing-library/react';
 
@@ -14,8 +14,6 @@ import { wait } from '../../../../lib/helpers';
 import { TestProviders } from '../../../../mock';
 
 import { FirstLastSeenHost, FirstLastSeenHostType } from '.';
-
-jest.mock('../../../../lib/kibana');
 
 describe('FirstLastSeen Component', () => {
   const firstSeen = 'Apr 8, 2019 @ 16:09:40.692';

@@ -54,7 +54,6 @@ const layerList = [
           type: 'DYNAMIC',
           options: {
             field: {
-              label: 'FlightTimeMin',
               name: 'FlightTimeMin',
               origin: 'source',
             },
@@ -77,7 +76,6 @@ const layerList = [
           type: 'DYNAMIC',
           options: {
             field: {
-              label: 'DistanceMiles',
               name: 'DistanceMiles',
               origin: 'source',
             },
@@ -122,7 +120,6 @@ const layerList = [
           type: 'DYNAMIC',
           options: {
             field: {
-              label: 'Count',
               name: 'doc_count',
               origin: 'source',
             },
@@ -145,7 +142,6 @@ const layerList = [
           type: 'DYNAMIC',
           options: {
             field: {
-              label: 'avg of FlightTimeMin',
               name: 'avg_of_FlightTimeMin',
               origin: 'source',
             },
@@ -190,7 +186,6 @@ const layerList = [
           type: 'DYNAMIC',
           options: {
             field: {
-              label: 'Count',
               name: 'doc_count',
               origin: 'source',
             },
@@ -213,7 +208,6 @@ const layerList = [
           type: 'DYNAMIC',
           options: {
             field: {
-              label: 'avg of FlightDelayMin',
               name: 'avg_of_FlightDelayMin',
               origin: 'source',
             },

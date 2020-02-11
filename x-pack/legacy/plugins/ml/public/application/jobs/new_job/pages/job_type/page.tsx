@@ -24,6 +24,7 @@ import { DataRecognizer } from '../../../../components/data_recognizer';
 import { addItemToRecentlyAccessed } from '../../../../util/recently_accessed';
 import { timeBasedIndexCheck } from '../../../../util/index_utils';
 import { CreateJobLinkCard } from '../../../../components/create_job_link_card';
+import { CategorizationIcon } from './categorization_job_icon';
 
 export const Page: FC = () => {
   const kibanaContext = useKibanaContext();
@@ -151,19 +152,35 @@ export const Page: FC = () => {
       }),
       id: 'mlJobTypeLinkAdvancedJob',
     },
+    {
+      href: getUrl('#jobs/new_job/categorization'),
+      icon: {
+        type: CategorizationIcon,
+        ariaLabel: i18n.translate('xpack.ml.newJob.wizard.jobType.categorizationAriaLabel', {
+          defaultMessage: 'Categorization job',
+        }),
+      },
+      title: i18n.translate('xpack.ml.newJob.wizard.jobType.categorizationTitle', {
+        defaultMessage: 'Categorization',
+      }),
+      description: i18n.translate('xpack.ml.newJob.wizard.jobType.categorizationDescription', {
+        defaultMessage: 'Group log messages into categories and detect anomalies within them.',
+      }),
+      id: 'mlJobTypeLinkCategorizationJob',
+    },
   ];
 
   return (
     <EuiPage data-test-subj="mlPageJobTypeSelection">
       <EuiPageBody restrictWidth={1200}>
         <EuiTitle size="l">
-          <h2>
+          <h1>
             <FormattedMessage
               id="xpack.ml.newJob.wizard.jobType.createJobFromTitle"
               defaultMessage="Create a job from the {pageTitleLabel}"
               values={{ pageTitleLabel }}
             />
-          </h2>
+          </h1>
         </EuiTitle>
         <EuiSpacer />
 
@@ -187,16 +204,16 @@ export const Page: FC = () => {
         )}
 
         <div hidden={recognizerResultsCount === 0}>
+          <EuiTitle size="s">
+            <h2>
+              <FormattedMessage
+                id="xpack.ml.newJob.wizard.jobType.useSuppliedConfigurationTitle"
+                defaultMessage="Use a supplied configuration"
+              />
+            </h2>
+          </EuiTitle>
+          <EuiSpacer size="s" />
           <EuiText>
-            <EuiTitle size="s">
-              <h3>
-                <FormattedMessage
-                  id="xpack.ml.newJob.wizard.jobType.useSuppliedConfigurationTitle"
-                  defaultMessage="Use a supplied configuration"
-                />
-              </h3>
-            </EuiTitle>
-
             <p>
               <FormattedMessage
                 id="xpack.ml.newJob.wizard.jobType.useSuppliedConfigurationDescription"
@@ -219,16 +236,16 @@ export const Page: FC = () => {
           <EuiSpacer size="xxl" />
         </div>
 
+        <EuiTitle size="s">
+          <h2>
+            <FormattedMessage
+              id="xpack.ml.newJob.wizard.jobType.useWizardTitle"
+              defaultMessage="Use a wizard"
+            />
+          </h2>
+        </EuiTitle>
+        <EuiSpacer size="s" />
         <EuiText>
-          <EuiTitle size="s">
-            <h3>
-              <FormattedMessage
-                id="xpack.ml.newJob.wizard.jobType.useWizardTitle"
-                defaultMessage="Use a wizard"
-              />
-            </h3>
-          </EuiTitle>
-
           <p>
             <FormattedMessage
               id="xpack.ml.newJob.wizard.jobType.useWizardDescription"

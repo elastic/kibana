@@ -26,7 +26,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { SearchResponse } from 'elasticsearch';
-import { ISearchSource, RequestInspectorStats } from '../types';
+import { RequestInspectorStats } from '../types';
+import { ISearchSource } from '../../../../../../plugins/data/public';
 
 export function getRequestInspectorStats(searchSource: ISearchSource) {
   const stats: RequestInspectorStats = {};

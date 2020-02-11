@@ -16,6 +16,7 @@ export interface ColumnRenderer {
     timelineId,
     truncate,
     values,
+    linkValues,
   }: {
     columnName: string;
     eventId: string;
@@ -23,5 +24,6 @@ export interface ColumnRenderer {
     timelineId: string;
     truncate?: boolean;
     values: string[] | null | undefined;
+    linkValues?: string[] | null | undefined;
   }) => React.ReactNode;
 }
