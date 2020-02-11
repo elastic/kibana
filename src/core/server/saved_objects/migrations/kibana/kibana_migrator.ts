@@ -88,8 +88,13 @@ export class KibanaMigrator {
   }
 
   /**
-   * Migrates the mappings and documents in the Kibana index. This will run only
+   * Migrates the mappings and documents in the Kibana index. By default, this will run only
    * once and subsequent calls will return the result of the original call.
+   *
+   * @param rerun - If true, method will run a new migration when called again instead of
+   * returning the result of the initial migration. This should only be used when factors external
+   * to Kibana itself alters the kibana index causing the saved objects mappings or data to change
+   * after the Kibana server performed the initial migration.
    *
    * @returns - A promise which resolves once all migrations have been applied.
    *    The promise resolves with an array of migration statuses, one for each
