@@ -23,10 +23,24 @@ export const HelpMenu = React.memo(() => {
           href: documentationLinks.siem.guide,
           iconType: 'documents',
           linkType: 'custom',
+          target: '_blank',
+          rel: 'noopener',
+        },
+        {
+          content: i18n.translate('xpack.siem.chrome.helpMenu.documentation.ecs', {
+            defaultMessage: 'ECS documentation',
+          }),
+          href: 'https://www.elastic.co/guide/en/ecs/current/index.html',
+          iconType: 'documents',
+          linkType: 'custom',
+          target: '_blank',
+          rel: 'noopener',
         },
         {
           linkType: 'discuss',
           href: 'https://discuss.elastic.co/c/siem',
+          target: '_blank',
+          rel: 'noopener',
         },
       ],
     });
