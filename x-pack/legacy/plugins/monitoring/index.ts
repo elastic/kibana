@@ -56,6 +56,7 @@ const validConfigOptions: string[] = [
   'monitoring.ui.ccs.enabled',
   'monitoring.ui.elasticsearch.logFetchCount',
   'monitoring.ui.logs.index',
+  'pkg.version',
 ];
 
 interface LegacyPluginOptionsWithKbnServer extends LegacyPluginOptions {
