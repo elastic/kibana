@@ -27,13 +27,19 @@ var assign = op.assign;
 // from `Object.prototype`. This protects against similar RCE vulnerabilities
 // as described in CVE-2019-7609
 module.exports = function(cp) {
-  cp.exec = new Proxy(cp.exec, { apply: patchOptions() });
+  // The `exec` function is currently just a wrapper around `execFile`. So for
+  // now there's no need to patch it. If this changes in the future, our tests
+  // will fail and we can comment out the line below.
+  //
+  // cp.exec = new Proxy(cp.exec, { apply: patchOptions() });
+
   cp.execFile = new Proxy(cp.execFile, { apply: patchOptions(true) });
   cp.fork = new Proxy(cp.fork, { apply: patchOptions(true) });
   cp.spawn = new Proxy(cp.spawn, { apply: patchOptions(true) });
   cp.execFileSync = new Proxy(cp.execFileSync, { apply: patchOptions(true) });
   cp.execSync = new Proxy(cp.execSync, { apply: patchOptions() });
   cp.spawnSync = new Proxy(cp.spawnSync, { apply: patchOptions(true) });
+
   return cp;
 };
 
