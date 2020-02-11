@@ -8,6 +8,6 @@ import { schema } from '@kbn/config-schema';
 
 export const InstallScriptRequestSchema = {
   params: schema.object({
-    osType: schema.string(),
+    osType: schema.oneOf([schema.literal('macos')]),
   }),
 };
