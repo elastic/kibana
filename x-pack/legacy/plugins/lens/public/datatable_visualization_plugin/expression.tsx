@@ -8,13 +8,10 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import { EuiBasicTable } from '@elastic/eui';
-import {
-  ExpressionFunction,
-  KibanaDatatable,
-} from '../../../../../../src/plugins/expressions/common';
 import { LensMultiTable } from '../types';
 import {
-  IInterpreterRenderFunction,
+  ExpressionFunctionDefinition,
+  ExpressionRenderDefinition,
   IInterpreterRenderHandlers,
 } from '../../../../../../src/plugins/expressions/public';
 import { FormatFactory } from '../../../../../../src/legacy/ui/public/visualize/loader/pipeline_helpers/utilities';
@@ -25,7 +22,8 @@ export interface DatatableColumns {
 }
 
 interface Args {
-  columns: DatatableColumns;
+  title: string;
+  columns: DatatableColumns & { type: 'lens_datatable_columns' };
 }
 
 export interface DatatableProps {
@@ -39,14 +37,15 @@ export interface DatatableRender {
   value: DatatableProps;
 }
 
-export const datatable: ExpressionFunction<
+export const datatable: ExpressionFunctionDefinition<
   'lens_datatable',
-  KibanaDatatable,
+  LensMultiTable,
   Args,
   DatatableRender
-> = ({
+> = {
   name: 'lens_datatable',
   type: 'render',
+  inputTypes: ['lens_multitable'],
   help: i18n.translate('xpack.lens.datatable.expressionHelpLabel', {
     defaultMessage: 'Datatable renderer',
   }),
@@ -62,10 +61,7 @@ export const datatable: ExpressionFunction<
       help: '',
     },
   },
-  context: {
-    types: ['lens_multitable'],
-  },
-  fn(data: KibanaDatatable, args: Args) {
+  fn(data, args) {
     return {
       type: 'render',
       as: 'lens_datatable_renderer',
@@ -75,12 +71,11 @@ export const datatable: ExpressionFunction<
       },
     };
   },
-  // TODO the typings currently don't support custom type args. As soon as they do, this can be removed
-} as unknown) as ExpressionFunction<'lens_datatable', KibanaDatatable, Args, DatatableRender>;
+};
 
 type DatatableColumnsResult = DatatableColumns & { type: 'lens_datatable_columns' };
 
-export const datatableColumns: ExpressionFunction<
+export const datatableColumns: ExpressionFunctionDefinition<
   'lens_datatable_columns',
   null,
   DatatableColumns,
@@ -90,9 +85,7 @@ export const datatableColumns: ExpressionFunction<
   aliases: [],
   type: 'lens_datatable_columns',
   help: '',
-  context: {
-    types: ['null'],
-  },
+  inputTypes: ['null'],
   args: {
     columnIds: {
       types: ['string'],
@@ -100,7 +93,7 @@ export const datatableColumns: ExpressionFunction<
       help: '',
     },
   },
-  fn: function fn(_context: unknown, args: DatatableColumns) {
+  fn: function fn(input: unknown, args: DatatableColumns) {
     return {
       type: 'lens_datatable_columns',
       ...args,
@@ -110,13 +103,13 @@ export const datatableColumns: ExpressionFunction<
 
 export const getDatatableRenderer = (
   formatFactory: FormatFactory
-): IInterpreterRenderFunction<DatatableProps> => ({
+): ExpressionRenderDefinition<DatatableProps> => ({
   name: 'lens_datatable_renderer',
   displayName: i18n.translate('xpack.lens.datatable.visualizationName', {
     defaultMessage: 'Datatable',
   }),
   help: '',
-  validate: () => {},
+  validate: () => undefined,
   reuseDomNode: true,
   render: async (
     domNode: Element,

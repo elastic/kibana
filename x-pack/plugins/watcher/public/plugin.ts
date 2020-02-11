@@ -12,7 +12,7 @@ import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
 import { LicenseStatus } from '../common/types/license_status';
 
 import { ILicense, LICENSE_CHECK_STATE } from '../../licensing/public';
-import { TimeBuckets, MANAGEMENT_BREADCRUMB } from './legacy';
+import { TimeBuckets } from './legacy';
 import { PLUGIN } from '../common/constants';
 import { Dependencies } from './types';
 import { getAlertType } from './application/sections/watch_edit/components/threshold_watch_edit/example_alert_type';
@@ -40,9 +40,9 @@ export class WatcherUIPlugin implements Plugin<void, void, Dependencies, any> {
         'xpack.watcher.sections.watchList.managementSection.watcherDisplayName',
         { defaultMessage: 'Watcher' }
       ),
-      mount: async ({ element }) => {
+      mount: async ({ element, setBreadcrumbs }) => {
         const [core] = await getStartServices();
-        const { chrome, i18n: i18nDep, docLinks, savedObjects } = core;
+        const { i18n: i18nDep, docLinks, savedObjects } = core;
         const { boot } = await import('./application/boot');
         return boot({
           // Skip the first license status, because that's already been used to determine
@@ -53,14 +53,13 @@ export class WatcherUIPlugin implements Plugin<void, void, Dependencies, any> {
           http,
           uiSettings,
           docLinks,
-          chrome,
+          setBreadcrumbs,
           charts,
           theme: charts.theme,
           savedObjects: savedObjects.client,
           I18nContext: i18nDep.Context,
           dataFieldsFormats: data.fieldFormats,
           createTimeBuckets: () => new TimeBuckets(uiSettings, data),
-          MANAGEMENT_BREADCRUMB,
           triggers_actions_ui,
         });
       },
@@ -81,7 +80,7 @@ export class WatcherUIPlugin implements Plugin<void, void, Dependencies, any> {
       }),
       icon: 'watchesApp',
       path: '/app/kibana#/management/elasticsearch/watcher/watches',
-      showOnHomePage: true,
+      showOnHomePage: false,
     };
     home.featureCatalogue.register(watcherHome);
 
@@ -89,9 +88,6 @@ export class WatcherUIPlugin implements Plugin<void, void, Dependencies, any> {
       if (valid) {
         watcherESApp.enable();
         watcherHome.showOnHomePage = true;
-      } else {
-        watcherESApp.disable();
-        watcherHome.showOnHomePage = false;
       }
     });
   }
