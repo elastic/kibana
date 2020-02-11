@@ -58,8 +58,48 @@ export const createInitialUiSettingsState = (
 });
 
 export const uiSettingsReducer = reducerWithInitialState(initialUiSettingsState)
+  .case(actions.anomalyThresholdChanged, (state, anomalyThreshold) => ({
+    ...state,
+    anomalyThreshold,
+  }))
+  .case(actions.bytesFormatChanged, (state, bytesFormat) => ({
+    ...state,
+    bytesFormat,
+  }))
+  .case(actions.darkModeChanged, (state, darkMode) => ({
+    ...state,
+    darkMode,
+  }))
   .case(actions.dateFormatChanged, (state, dateFormat) => ({
     ...state,
     dateFormat,
+  }))
+  .case(actions.indexPatternChanged, (state, indexPattern) => ({
+    ...state,
+    indexPattern,
+  }))
+  .case(actions.newsFeedEnabledChanged, (state, newsFeedEnabled) => ({
+    ...state,
+    newsFeedEnabled,
+  }))
+  .case(actions.newsFeedUrlChanged, (state, newsFeedUrl) => ({
+    ...state,
+    newsFeedUrl,
+  }))
+  .case(actions.timeFilterQuickRangesChanged, (state, timeFilterQuickRanges) => ({
+    ...state,
+    timeFilterQuickRanges,
+  }))
+  .case(actions.timeFilterRefreshIntervalChanged, (state, timeFilterRefreshInterval) => ({
+    ...state,
+    timeFilterRefreshInterval,
+  }))
+  .case(actions.timeFilterRangeChanged, (state, timeFilterRange) => ({
+    ...state,
+    timeFilterRange,
+  }))
+  .case(actions.timeZoneChanged, (state, timeZone) => ({
+    ...state,
+    timeZone,
   }))
   .build();
