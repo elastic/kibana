@@ -50,6 +50,9 @@ export const PureUISettingsStoreObserver: FC<Props & ReduxProps> = ({
         .get$<model.State['newsFeedUrl']>(model.keys.newsFeedUrl)
         .pipe(map(value => actions.newsFeedUrlChanged(value))),
       client
+        .get$<model.State['numberFormat']>(model.keys.numberFormat)
+        .pipe(map(value => actions.numberFormatChanged(value))),
+      client
         .get$<model.State['timeFilterQuickRanges']>(model.keys.timeFilterQuickRanges)
         .pipe(map(value => actions.timeFilterQuickRangesChanged(value))),
       client

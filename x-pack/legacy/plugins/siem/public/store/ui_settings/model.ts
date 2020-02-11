@@ -43,6 +43,7 @@ export interface State {
   indexPattern: string[];
   newsFeedEnabled: boolean;
   newsFeedUrl: string;
+  numberFormat: string;
   timeFilterQuickRanges: QuickRange[];
   timeFilterRange: TimeRange;
   timeFilterRefreshInterval: RefreshInterval;

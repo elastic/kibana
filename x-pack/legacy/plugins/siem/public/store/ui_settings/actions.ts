@@ -21,6 +21,7 @@ export const newsFeedEnabledChanged = actionCreator<State['newsFeedEnabled']>(
   'NEWS_FEED_ENABLED_CHANGED'
 );
 export const newsFeedUrlChanged = actionCreator<State['newsFeedUrl']>('NEWS_FEED_URL_CHANGED');
+export const numberFormatChanged = actionCreator<State['numberFormat']>('NUMBER_FORMAT_CHANGED');
 export const timeFilterQuickRangesChanged = actionCreator<State['timeFilterQuickRanges']>(
   'TIME_FILTER_QUICK_RANGES_CHANGED'
 );

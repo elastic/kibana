@@ -27,6 +27,7 @@ export const initialUiSettingsState: UiSettingsState = {
   ],
   newsFeedEnabled: true,
   newsFeedUrl: 'https://feeds.elastic.co/security-solution',
+  numberFormat: '0,0.[000]',
   timeFilterQuickRanges: [
     {
       from: 'now/d',
@@ -49,6 +50,7 @@ export const createInitialUiSettingsState = (
   indexPattern: uiSettings.get<State['indexPattern']>(keys.indexPattern),
   newsFeedEnabled: uiSettings.get<State['newsFeedEnabled']>(keys.newsFeedEnabled),
   newsFeedUrl: uiSettings.get<State['newsFeedUrl']>(keys.newsFeedUrl),
+  numberFormat: uiSettings.get<State['numberFormat']>(keys.numberFormat),
   timeFilterQuickRanges: uiSettings.get<State['timeFilterQuickRanges']>(keys.timeFilterQuickRanges),
   timeFilterRange: uiSettings.get<State['timeFilterRange']>(keys.timeFilterRange),
   timeFilterRefreshInterval: uiSettings.get<State['timeFilterRefreshInterval']>(
@@ -85,6 +87,10 @@ export const uiSettingsReducer = reducerWithInitialState(initialUiSettingsState)
   .case(actions.newsFeedUrlChanged, (state, newsFeedUrl) => ({
     ...state,
     newsFeedUrl,
+  }))
+  .case(actions.numberFormatChanged, (state, numberFormat) => ({
+    ...state,
+    numberFormat,
   }))
   .case(actions.timeFilterQuickRangesChanged, (state, timeFilterQuickRanges) => ({
     ...state,
