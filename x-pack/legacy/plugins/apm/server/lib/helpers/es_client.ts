@@ -21,7 +21,11 @@ import {
 } from '../../../../../../plugins/apm/typings/elasticsearch';
 import { APMRequestHandlerContext } from '../../routes/typings';
 import { pickKeys } from '../../../public/utils/pickKeys';
-import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
+import {
+  getApmIndices,
+  ApmIndicesConfig
+} from '../settings/apm_indices/get_apm_indices';
+import { IndexPrivileges } from '../../../typings/es_schemas/raw/IndexPrivileges';
 
 // `type` was deprecated in 7.0
 export type APMIndexDocumentParams<T> = Omit<IndexDocumentParams<T>, 'type'>;
@@ -181,6 +185,24 @@ export function getESClient(
     },
     indicesCreate: (params: IndicesCreateParams) => {
       return withTime(() => callMethod('indices.create', params));
+    },
+    indicesPrivileges: (
+      indices: ApmIndicesConfig
+    ): Promise<IndexPrivileges> => {
+      return withTime(() =>
+        callMethod('transport.request', {
+          method: 'POST',
+          path: '/_security/user/_has_privileges',
+          body: {
+            index: [
+              indices['apm_oss.errorIndices'],
+              indices['apm_oss.metricsIndices'],
+              indices['apm_oss.transactionIndices'],
+              indices['apm_oss.spanIndices']
+            ].map(indice => ({ names: indice, privileges: ['read'] }))
+          }
+        })
+      );
     }
   };
 }

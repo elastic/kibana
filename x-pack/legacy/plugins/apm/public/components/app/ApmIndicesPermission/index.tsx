@@ -16,30 +16,40 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import styled from 'styled-components';
+import { IndexPrivileges } from '../../../../typings/es_schemas/raw/IndexPrivileges';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/useFetcher';
 import { fontSize, pct, px, units } from '../../../style/variables';
 import { ElasticDocsLink } from '../../shared/Links/ElasticDocsLink';
 import { SetupInstructionsLink } from '../../shared/Links/SetupInstructionsLink';
 
-export const Permission: React.FC = ({ children }) => {
-  const [isPermissionPageEnabled, setIsPermissionsPageEnabled] = useState(true);
+export const ApmIndicesPermission: React.FC = ({ children }) => {
+  const [
+    isPermissionWarningDismissed,
+    setIsPermissionWarningDismissed
+  ] = useState(false);
 
-  const { data, status } = useFetcher(callApmApi => {
-    return callApmApi({
-      pathname: '/api/apm/security/permissions'
-    });
-  }, []);
+  const { data = {} as IndexPrivileges['index'], status } = useFetcher(
+    callApmApi => {
+      return callApmApi({
+        pathname: '/api/apm/security/indicesPrivileges'
+      });
+    },
+    []
+  );
+
+  // TODO: check indices privileges to show permission page.
 
   // Return null until receive the reponse of the api.
+  // TODO: test removing it
   if (status === FETCH_STATUS.LOADING || status === FETCH_STATUS.PENDING) {
     return null;
   }
   // When the user doesn't have the appropriate permissions and they
   // did not use the escape hatch, show the missing permissions page
-  if (data?.hasPermission === false && isPermissionPageEnabled) {
+  if (data?.hasPermission === false && !isPermissionWarningDismissed) {
     return (
       <PermissionPage
-        onEscapeHatchClick={() => setIsPermissionsPageEnabled(false)}
+        onEscapeHatchClick={() => setIsPermissionWarningDismissed(false)}
       />
     );
   }
