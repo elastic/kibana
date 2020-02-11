@@ -32,7 +32,7 @@ describe('Transaction action menu', () => {
         {
           key: 'traceDetails',
           title: 'Trace details',
-          subtitle: 'View the trace logs to get further details.',
+          subtitle: 'View trace logs to get further details.',
           actions: [
             {
               key: 'traceLogs',
@@ -99,7 +99,7 @@ describe('Transaction action menu', () => {
         {
           key: 'traceDetails',
           title: 'Trace details',
-          subtitle: 'View the trace logs to get further details.',
+          subtitle: 'View trace logs to get further details.',
           actions: [
             {
               key: 'traceLogs',
@@ -166,7 +166,7 @@ describe('Transaction action menu', () => {
         {
           key: 'traceDetails',
           title: 'Trace details',
-          subtitle: 'View the trace logs to get further details.',
+          subtitle: 'View trace logs to get further details.',
           actions: [
             {
               key: 'traceLogs',

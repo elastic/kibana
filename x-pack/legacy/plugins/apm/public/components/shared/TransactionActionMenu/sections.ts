@@ -40,9 +40,7 @@ interface Section {
   actions: Action[];
 }
 
-interface SectionRecord {
-  [key: string]: Section[];
-}
+type SectionRecord = Record<string, Section[]>;
 
 export const getSections = ({
   transaction,
@@ -265,7 +263,7 @@ export const getSections = ({
         subtitle: i18n.translate(
           'xpack.apm.transactionActionMenu.trace.subtitle',
           {
-            defaultMessage: 'View the trace logs to get further details.'
+            defaultMessage: 'View trace logs to get further details.'
           }
         ),
         actions: logActions
@@ -278,7 +276,7 @@ export const getSections = ({
         subtitle: i18n.translate(
           'xpack.apm.transactionActionMenu.status.subtitle',
           {
-            defaultMessage: 'View the status to get further details.'
+            defaultMessage: 'View status to get further details.'
           }
         ),
         actions: uptimeActions
