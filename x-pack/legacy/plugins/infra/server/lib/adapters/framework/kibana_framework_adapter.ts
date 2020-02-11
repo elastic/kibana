@@ -200,6 +200,9 @@ export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFramework
         },
       }
     );
+
+    request.getBasePath = () => basePath;
+
     const result = await getVisData(request);
     return result as InfraTSVBResponse;
   }
