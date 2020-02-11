@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { AggConfigs } from '../index';
-import { IAggConfigs } from '../types';
+import { AggConfigs, IAggConfigs } from '../agg_configs';
+import { aggTypesRegistryStartMock } from '../mocks';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { significantTermsBucketAgg } from './significant_terms';
 import { IBucketAggConfig } from './_bucket_agg_type';
@@ -53,7 +53,7 @@ describe('Significant Terms Agg', () => {
               params,
             },
           ],
-          null
+          { typesRegistry: aggTypesRegistryStartMock() }
         );
       };
 

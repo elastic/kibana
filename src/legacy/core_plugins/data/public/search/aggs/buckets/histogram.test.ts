@@ -18,7 +18,8 @@
  */
 
 import { npStart } from 'ui/new_platform';
-import { AggConfigs } from '../index';
+import { AggConfigs } from '../agg_configs';
+import { aggTypesRegistryStartMock } from '../mocks';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { IBucketHistogramAggConfig, histogramBucketAgg, AutoBounds } from './histogram';
 import { BucketAggType } from './_bucket_agg_type';
@@ -54,7 +55,7 @@ describe('Histogram Agg', () => {
           params,
         },
       ],
-      null
+      { typesRegistry: aggTypesRegistryStartMock() }
     );
   };
 

@@ -21,7 +21,7 @@ import _ from 'lodash';
 import { Optional } from '@kbn/utility-types';
 
 import { AggConfig, AggConfigOptions, IAggConfig } from './agg_config';
-import { AggTypesRegistry } from './agg_types_registry';
+import { AggTypesRegistryStart } from './agg_types_registry';
 import { Schema } from './schemas';
 import { AggGroupNames } from './agg_groups';
 import {
@@ -51,7 +51,7 @@ function parseParentAggs(dslLvlCursor: any, dsl: any) {
 
 export interface AggConfigsOptions {
   schemas?: Schemas;
-  typesRegistry: ReturnType<AggTypesRegistry['start']>;
+  typesRegistry: AggTypesRegistryStart;
 }
 
 /**
@@ -72,17 +72,18 @@ export class AggConfigs {
   public indexPattern: IndexPattern;
   public schemas: any;
   public timeRange?: TimeRange;
-  private readonly __typesRegistry: ReturnType<AggTypesRegistry['start']>;
+  private readonly __typesRegistry: AggTypesRegistryStart;
 
   aggs: IAggConfig[];
 
   constructor(indexPattern: IndexPattern, configStates = [] as any, opts: AggConfigsOptions) {
+    this.__typesRegistry = opts.typesRegistry;
+
     configStates = AggConfig.ensureIds(configStates);
 
     this.aggs = [];
     this.indexPattern = indexPattern;
     this.schemas = opts.schemas;
-    this.__typesRegistry = opts.typesRegistry;
 
     configStates.forEach((params: any) => this.createAggConfig(params));
 

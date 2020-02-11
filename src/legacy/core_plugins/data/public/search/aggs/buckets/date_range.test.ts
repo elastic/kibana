@@ -18,6 +18,7 @@
  */
 
 import { AggConfigs } from '../agg_configs';
+import { aggTypesRegistryStartMock } from '../mocks';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { npStart } from 'ui/new_platform';
 
@@ -59,7 +60,7 @@ describe('date_range params', () => {
           params,
         },
       ],
-      null
+      { typesRegistry: aggTypesRegistryStartMock() }
     );
   };
 

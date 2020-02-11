@@ -19,6 +19,7 @@
 
 import { createFilterIpRange } from './ip_range';
 import { AggConfigs } from '../../agg_configs';
+import { aggTypesRegistryStartMock } from '../../mocks';
 import { fieldFormats } from '../../../../../../../../plugins/data/public';
 import { BUCKET_TYPES } from '../bucket_agg_types';
 import { IBucketAggConfig } from '../_bucket_agg_type';
@@ -42,7 +43,7 @@ describe('AggConfig Filters', () => {
         },
       } as any;
 
-      return new AggConfigs(indexPattern, aggs, null);
+      return new AggConfigs(indexPattern, aggs, { typesRegistry: aggTypesRegistryStartMock() });
     };
 
     it('should return a range filter for ip_range agg', () => {

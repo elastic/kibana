@@ -17,7 +17,11 @@
  * under the License.
  */
 
-export { AggTypesRegistry } from './agg_types_registry';
+export {
+  AggTypesRegistry,
+  AggTypesRegistrySetup,
+  AggTypesRegistryStart,
+} from './agg_types_registry';
 export { AggType } from './agg_type';
 export { aggTypes } from './agg_types';
 export { AggConfig } from './agg_config';

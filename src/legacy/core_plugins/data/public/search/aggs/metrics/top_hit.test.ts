@@ -20,6 +20,7 @@
 import { dropRight, last } from 'lodash';
 import { topHitMetricAgg } from './top_hit';
 import { AggConfigs } from '../agg_configs';
+import { aggTypesRegistryStartMock } from '../mocks';
 import { IMetricAggConfig } from './metric_agg_type';
 import { KBN_FIELD_TYPES } from '../../../../../../../plugins/data/public';
 
@@ -81,7 +82,7 @@ describe('Top hit metric', () => {
           params,
         },
       ],
-      null
+      { typesRegistry: aggTypesRegistryStartMock() }
     );
 
     // Grab the aggConfig off the vis (we don't actually use the vis for anything else)

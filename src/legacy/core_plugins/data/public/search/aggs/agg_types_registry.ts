@@ -20,6 +20,9 @@
 import { BucketAggType } from './buckets/_bucket_agg_type';
 import { MetricAggType } from './metrics/metric_agg_type';
 
+export type AggTypesRegistrySetup = ReturnType<AggTypesRegistry['setup']>;
+export type AggTypesRegistryStart = ReturnType<AggTypesRegistry['start']>;
+
 export class AggTypesRegistry {
   private readonly bucketAggs = new Map();
   private readonly metricAggs = new Map();

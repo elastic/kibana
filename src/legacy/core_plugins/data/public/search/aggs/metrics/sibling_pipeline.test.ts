@@ -24,6 +24,7 @@ import { bucketMaxMetricAgg } from './bucket_max';
 
 import { AggConfigs } from '../agg_configs';
 import { IMetricAggConfig, MetricAggType } from './metric_agg_type';
+import { aggTypesRegistryStartMock } from '../mocks';
 
 jest.mock('../schemas', () => {
   class MockedSchemas {
@@ -95,7 +96,7 @@ describe('sibling pipeline aggs', () => {
               },
             },
           ],
-          null
+          { typesRegistry: aggTypesRegistryStartMock() }
         );
 
         // Grab the aggConfig off the vis (we don't actually use the vis for anything else)

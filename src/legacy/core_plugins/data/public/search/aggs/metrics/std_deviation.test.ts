@@ -19,6 +19,7 @@
 
 import { IStdDevAggConfig, stdDeviationMetricAgg } from './std_deviation';
 import { AggConfigs } from '../agg_configs';
+import { aggTypesRegistryStartMock } from '../mocks';
 import { METRIC_TYPES } from './metric_agg_types';
 
 jest.mock('ui/new_platform');
@@ -52,7 +53,7 @@ describe('AggTypeMetricStandardDeviationProvider class', () => {
           },
         },
       ],
-      null
+      { typesRegistry: aggTypesRegistryStartMock() }
     );
   };
 

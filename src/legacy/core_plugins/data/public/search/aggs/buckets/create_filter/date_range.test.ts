@@ -21,6 +21,7 @@ import moment from 'moment';
 import { createFilterDateRange } from './date_range';
 import { fieldFormats, FieldFormatsGetConfigFn } from '../../../../../../../../plugins/data/public';
 import { AggConfigs } from '../../agg_configs';
+import { aggTypesRegistryStartMock } from '../../mocks';
 import { BUCKET_TYPES } from '../bucket_agg_types';
 import { IBucketAggConfig } from '../_bucket_agg_type';
 
@@ -55,7 +56,7 @@ describe('AggConfig Filters', () => {
             },
           },
         ],
-        null
+        { typesRegistry: aggTypesRegistryStartMock() }
       );
     };
 
