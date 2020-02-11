@@ -5,14 +5,14 @@
  */
 
 import Hapi from 'hapi';
-import { isFunction } from 'lodash/fp';
+import { isFunction, countBy } from 'lodash/fp';
 import uuid from 'uuid';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { createRules } from '../../rules/create_rules';
 import { BulkRulesRequest } from '../../rules/types';
 import { ServerFacade } from '../../../../types';
 import { readRules } from '../../rules/read_rules';
-import { transformOrBulkError, getMapDuplicates, getDuplicates } from './utils';
+import { transformOrBulkError, getDuplicates } from './utils';
 import { getIndexExists } from '../../index/get_index_exists';
 import {
   callWithRequestFactory,
@@ -48,7 +48,7 @@ export const createCreateRulesBulkRoute = (server: ServerFacade): Hapi.ServerRou
         return headers.response().code(404);
       }
 
-      const mappedDuplicates = getMapDuplicates(request.payload, 'rule_id');
+      const mappedDuplicates = countBy('rule_id', request.payload);
       const dupes = getDuplicates(mappedDuplicates);
 
       const rules = await Promise.all(
