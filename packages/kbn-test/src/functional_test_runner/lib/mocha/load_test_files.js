@@ -36,6 +36,7 @@ export const loadTestFiles = ({
   log,
   lifecycle,
   providers,
+  config,
   paths,
   excludePaths,
   updateBaselines,
@@ -71,7 +72,7 @@ export const loadTestFiles = ({
     loadTracer(provider, `testProvider[${path}]`, () => {
       // mocha.suite hocus-pocus comes from: https://git.io/vDnXO
 
-      const context = decorateMochaUi(lifecycle, global);
+      const context = decorateMochaUi(lifecycle, global, config);
       mocha.suite.emit('pre-require', context, path, mocha);
 
       const returnVal = provider({

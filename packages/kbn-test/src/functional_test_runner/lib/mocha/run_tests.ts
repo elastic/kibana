@@ -16,9 +16,32 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import fs from 'fs';
+import { resolve, sep } from 'path';
 
 import { Lifecycle } from '../lifecycle';
 import { Mocha } from '../../fake_mocha_types';
+
+const allSuites = {};
+const setSuccessStatus = suite => {
+  if (suite.tests && suite.tests.length) {
+    suite.success = !suite.tests.find(t => t.state === 'failed');
+
+    if (!suite.success) {
+      return;
+    }
+  }
+
+  if (suite.suites && suite.suites.length) {
+    suite.success = !suite.suites.find(s => !s.success);
+  }
+};
+
+const BASE_PATH = resolve(__dirname, '..', '..', '..', '..', '..', '..');
+
+const getTestMetadataPath = () => {
+  return process.env.TEST_METADATA_PATH || resolve(BASE_PATH, 'target', 'test_metadata.json');
+};
 
 /**
  *  Run the tests that have already been loaded into
@@ -35,12 +58,51 @@ export async function runTests(lifecycle: Lifecycle, mocha: Mocha) {
     runComplete = true;
   });
 
+  if (fs.existsSync(getTestMetadataPath())) {
+    fs.unlinkSync(getTestMetadataPath());
+  }
+
   lifecycle.cleanup.add(() => {
     if (!runComplete) runner.abort();
   });
 
-  return new Promise(resolve => {
-    const respond = () => resolve(runner.failures);
+  lifecycle.beforeTestSuite.add(s => {
+    // console.log('before', s.title + '\n' + s.file);
+    s.startTime = new Date();
+    s.success = true;
+  });
+
+  lifecycle.afterTestSuite.add(suite => {
+    suite.endTime = new Date();
+    suite.duration = new Date(suite.endTime).getTime() - new Date(suite.startTime).getTime();
+    suite.duration = Math.floor(suite.duration / 1000);
+    suite.durationMin = Math.round(suite.duration / 60);
+
+    setSuccessStatus(suite);
+
+    const config = suite.ftrConfig.path.replace(BASE_PATH + sep, '');
+    const file = suite.file.replace(BASE_PATH + sep, '');
+
+    allSuites[config] = allSuites[config] || {};
+
+    allSuites[config][file] = {
+      config,
+      file,
+      tag: suite.suiteTag,
+      title: suite.title,
+      startTime: suite.startTime,
+      endTime: suite.endTime,
+      duration: suite.duration,
+      success: suite.success,
+    };
+  });
+
+  lifecycle.cleanup.add(() => {
+    fs.writeFileSync(getTestMetadataPath(), JSON.stringify(allSuites, null, 2));
+  });
+
+  return new Promise(res => {
+    const respond = () => res(runner.failures);
 
     // if there are no tests, mocha.run() is sync
     // and the 'end' event can't be listened to

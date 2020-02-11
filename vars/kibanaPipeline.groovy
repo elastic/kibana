@@ -317,10 +317,13 @@ def runErrorReporter() {
   )
 }
 def processOssQueue(queue, finishedSuites, workerNumber) {
+  def testMetadataPath = "target/test_metadata_oss_${workerNumber}.json"
+
   withEnv([
     "CI_GROUP=${workerNumber}",
     "JOB=kibana-ciGroup${workerNumber}",
     "REMOVE_KIBANA_INSTALL_DIR=1",
+    "TEST_METADATA_PATH=${testMetadataPath}"
   ]) {
     while(!queue.isEmpty()) {
       def testSuite
@@ -362,16 +365,24 @@ def processOssQueue(queue, finishedSuites, workerNumber) {
           throw ex
         }
       }
-      finishedSuites << testSuite
+
+      catchErrors {
+        def suites = toJSON(readFile(file: testMetadataPath))
+        suites.each { finishedSuites << it }
+      }
+      // finishedSuites << testSuite
     }
   }
 }
 
 def processXpackQueue(queue, finishedSuites, workerNumber) {
+  def testMetadataPath = "target/test_metadata_xpack_${workerNumber}.json"
+
   withEnv([
     "CI_GROUP=${workerNumber}",
     "JOB=xpack-kibana-ciGroup${workerNumber}",
     "REMOVE_KIBANA_INSTALL_DIR=1",
+    "TEST_METADATA_PATH=${testMetadataPath}"
   ]) {
     while(!queue.isEmpty()) {
       def testSuite
@@ -413,7 +424,12 @@ def processXpackQueue(queue, finishedSuites, workerNumber) {
           throw ex
         }
       }
-      finishedSuites << testSuite
+
+      catchErrors {
+        def suites = toJSON(readFile(file: testMetadataPath))
+        suites.each { finishedSuites << it }
+      }
+      // finishedSuites << testSuite
     }
   }
 }
