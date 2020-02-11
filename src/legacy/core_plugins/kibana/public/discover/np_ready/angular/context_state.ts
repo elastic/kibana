@@ -26,9 +26,9 @@ import { Filter } from '../../../../../../../plugins/data/common/es_query/filter
 interface AppState {
   columns: string[];
   filters: Filter[];
-  predecessorCount: string;
+  predecessorCount: number;
   sort: string[];
-  successorCount: string;
+  successorCount: number;
 }
 
 interface GlobalState {
@@ -100,9 +100,9 @@ function createInitialAppState(
   const defaultState = {
     columns: ['_source'],
     filters: [],
-    predecessorCount: defaultSize,
+    predecessorCount: parseInt(defaultSize, 10),
     sort: [timeFieldName, 'desc'],
-    successorCount: defaultSize,
+    successorCount: parseInt(defaultSize, 10),
   };
   if (typeof urlState !== 'object') {
     return defaultState;
