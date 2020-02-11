@@ -49,7 +49,7 @@ export const initialWaffleOptionsState: WaffleOptionsState = {
   autoBounds: true,
   accountId: '',
   region: '',
-  customMetrics: [{ type: 'custom', aggregation: 'avg', field: 'system.cpu.user.pct' }],
+  customMetrics: [],
 };
 
 const currentMetricReducer = reducerWithInitialState(initialWaffleOptionsState.metric).case(

@@ -59,26 +59,25 @@ export const SnapshotNamedMetricInputRT = rt.type({
   type: SnapshotMetricTypeRT,
 });
 
-export const SNAPSHOT_AGGREGATIONS = ['avg', 'max', 'min', 'rate'] as const;
+export const SNAPSHOT_CUSTOM_AGGREGATIONS = ['avg', 'max', 'min', 'rate'] as const;
 
-type SnapshotAggregations = typeof SNAPSHOT_AGGREGATIONS[number];
+export type SnapshotCustomAggregation = typeof SNAPSHOT_CUSTOM_AGGREGATIONS[number];
 
-const snapshotAggregationKeys = SNAPSHOT_AGGREGATIONS.reduce<Record<SnapshotAggregations, null>>(
-  (acc, agg) => ({ ...acc, [agg]: null }),
-  {} as Record<SnapshotAggregations, null>
-);
+const snapshotCustomAggregationKeys = SNAPSHOT_CUSTOM_AGGREGATIONS.reduce<
+  Record<SnapshotCustomAggregation, null>
+>((acc, agg) => ({ ...acc, [agg]: null }), {} as Record<SnapshotCustomAggregation, null>);
 
-export const SnapshotAggregationRT = rt.keyof(snapshotAggregationKeys);
+export const SnapshotCustomAggregationRT = rt.keyof(snapshotCustomAggregationKeys);
 
 export const SnapshotCustomMetricInputRT = rt.intersection([
   rt.type({
     type: rt.literal('custom'),
     field: rt.string,
-    aggregation: SnapshotAggregationRT,
+    aggregation: SnapshotCustomAggregationRT,
+    id: rt.string,
   }),
   rt.partial({
     label: rt.string,
-    id: rt.string,
   }),
 ]);
 

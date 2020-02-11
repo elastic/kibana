@@ -13,131 +13,164 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React from 'react';
+import React, { useState, useCallback } from 'react';
+import { IFieldType } from 'src/plugins/data/public';
 import {
   SnapshotMetricInput,
   SnapshotCustomMetricInput,
   SnapshotCustomMetricInputRT,
 } from '../../../common/http_api/snapshot_api';
-import { SnapshotMetricType } from '../../../common/inventory_models/types';
+import { SnapshotMetricType, SnapshotMetricTypeRT } from '../../../common/inventory_models/types';
+import { CustomMetricForm } from './custom_metric_form';
+import { CustomMetricEntry, getCustomMetricLabel } from './custom_metric_entry';
 
 interface Props {
   options: Array<{ text: string; value: string }>;
   metric: SnapshotMetricInput;
+  fields: IFieldType[];
   onChange: (metric: SnapshotMetricInput) => void;
   onChangeCustomMetrics: (metrics: SnapshotCustomMetricInput[]) => void;
   customMetrics: SnapshotCustomMetricInput[];
 }
-
-const getCustomMetricLabel = (metric: SnapshotCustomMetricInput) => {
-  const METRIC_LABELS = {
-    avg: i18n.translate('xpack.infra.waffle.aggregationNames.avg', {
-      defaultMessage: 'Avg of {field}',
-      values: { field: metric.field },
-    }),
-    max: i18n.translate('xpack.infra.waffle.aggregationNames.max', {
-      defaultMessage: 'Max of {field}',
-      values: { field: metric.field },
-    }),
-    min: i18n.translate('xpack.infra.waffle.aggregationNames.min', {
-      defaultMessage: 'Min of {field}',
-      values: { field: metric.field },
-    }),
-    rate: i18n.translate('xpack.infra.waffle.aggregationNames.rate', {
-      defaultMessage: 'Rate of {field}',
-      values: { field: metric.field },
-    }),
-  };
-  return metric.label ? metric.label : METRIC_LABELS[metric.aggregation];
-};
 
 const initialState = {
   isPopoverOpen: false,
 };
 type State = Readonly<typeof initialState>;
 
-export const WaffleMetricControls = class extends React.PureComponent<Props, State> {
-  public static displayName = 'WaffleMetricControls';
-  public readonly state: State = initialState;
-  public render() {
-    const { metric, options, customMetrics } = this.props;
-    const value = metric.type;
+export const WaffleMetricControls = ({
+  fields,
+  onChange,
+  onChangeCustomMetrics,
+  metric,
+  options,
+  customMetrics,
+}: Props) => {
+  const [isPopoverOpen, setPopoverState] = useState<boolean>(false);
 
-    if (!options.length || !value) {
-      throw Error(
-        i18n.translate('xpack.infra.waffle.unableToSelectMetricErrorTitle', {
-          defaultMessage: 'Unable to select options or value for metric.',
-        })
-      );
-    }
-    const optionsWithCustomMetrics = options.concat(
-      customMetrics.map((m, index) => ({
-        text: getCustomMetricLabel(m),
-        value: `${m.type}-${index}`,
-      }))
-    );
+  const handleClose = useCallback(() => {
+    setPopoverState(false);
+  }, [setPopoverState]);
 
-    const id = SnapshotCustomMetricInputRT.is(metric) && metric.id ? metric.id : metric.type;
-    const currentLabel = optionsWithCustomMetrics.find(o => o.value === id);
-    if (!currentLabel) {
-      return null;
-    }
+  const handleToggle = useCallback(() => {
+    setPopoverState(!isPopoverOpen);
+  }, [isPopoverOpen]);
 
-    const panels: EuiContextMenuPanelDescriptor[] = [
-      {
-        id: 0,
-        title: '',
-        items: optionsWithCustomMetrics.map(o => {
-          const icon = o.value === id ? 'check' : 'empty';
-          const panel = { name: o.text, onClick: this.handleClick(o.value), icon };
-          return panel;
-        }),
-      },
-    ];
-    const button = (
-      <EuiFilterButton iconType="arrowDown" onClick={this.handleToggle}>
-        <FormattedMessage
-          id="xpack.infra.waffle.metricButtonLabel"
-          defaultMessage="Metric: {selectedMetric}"
-          values={{ selectedMetric: currentLabel.text }}
-        />
-      </EuiFilterButton>
-    );
+  const handleClick = useCallback(
+    (val: string) => {
+      if (!SnapshotMetricTypeRT.is(val)) {
+        const selectedMetric = customMetrics.find(m => m.id === val);
+        if (selectedMetric) {
+          onChange(selectedMetric);
+        }
+      } else {
+        onChange({ type: val as SnapshotMetricType });
+      }
+      handleClose();
+    },
+    [customMetrics, handleClose, onChange]
+  );
 
-    return (
-      <EuiFilterGroup>
-        <EuiPopover
-          isOpen={this.state.isPopoverOpen}
-          id="metricsPanel"
-          button={button}
-          anchorPosition="downLeft"
-          panelPaddingSize="none"
-          closePopover={this.handleClose}
-        >
-          <EuiContextMenu initialPanelId={0} panels={panels} />
-        </EuiPopover>
-      </EuiFilterGroup>
+  const handleDelete = useCallback(
+    (metricId: string) => {
+      const newCustomMetrics = customMetrics.filter(m => m.id !== metricId);
+      onChangeCustomMetrics(newCustomMetrics);
+      if (SnapshotCustomMetricInputRT.is(metric) && metric.id === metricId) {
+        handleClick(options[0].value);
+      }
+    },
+    [customMetrics, handleClick, metric, onChangeCustomMetrics, options]
+  );
+
+  const handleCustomMetric = useCallback(
+    (newMetric: SnapshotCustomMetricInput) => {
+      onChangeCustomMetrics([...customMetrics, newMetric]);
+      onChange(newMetric);
+      setPopoverState(false);
+    },
+    [customMetrics, onChange, onChangeCustomMetrics]
+  );
+
+  if (!options.length || !metric.type) {
+    throw Error(
+      i18n.translate('xpack.infra.waffle.unableToSelectMetricErrorTitle', {
+        defaultMessage: 'Unable to select options or value for metric.',
+      })
     );
   }
-  private handleClose = () => {
-    this.setState({ isPopoverOpen: false });
-  };
 
-  private handleToggle = () => {
-    this.setState(state => ({ isPopoverOpen: !state.isPopoverOpen }));
-  };
+  const id = SnapshotCustomMetricInputRT.is(metric) && metric.id ? metric.id : metric.type;
 
-  private handleClick = (value: string) => () => {
-    const matches = value.match(/^custom-([0-9]+)/);
-    if (matches) {
-      const customIndex = Number(matches[1]);
-      const metric = this.props.customMetrics[customIndex];
-      if (metric) {
-        this.props.onChange({ ...metric, id: value });
-      }
-    } else {
-      this.props.onChange({ type: value as SnapshotMetricType });
-    }
-    this.handleClose();
-  };
+  const currentLabel = SnapshotCustomMetricInputRT.is(metric)
+    ? getCustomMetricLabel(metric)
+    : options.find(o => o.value === id)?.text;
+
+  if (!currentLabel) {
+    return null;
+  }
+
+  const customMetricTitle = i18n.translate('xpack.waffle.customMetricPanelLabel', {
+    defaultMessage: 'Add custom metric',
+  });
+
+  const panels: EuiContextMenuPanelDescriptor[] = [
+    {
+      id: 0,
+      title: '',
+      items: [
+        ...options.map(o => {
+          const icon = o.value === id ? 'check' : 'empty';
+          const panel = { name: o.text, onClick: () => handleClick(o.value), icon };
+          return panel;
+        }),
+        ...customMetrics.map(m => {
+          const icon = m.id === id ? 'check' : 'empty';
+          const panel = {
+            name: getCustomMetricLabel(m),
+            onClick: () => handleClick(m.id),
+            icon,
+          };
+          return panel;
+        }),
+        { icon: 'plusInCircle', name: customMetricTitle, panel: 'customMetricPanel' },
+      ],
+    },
+    {
+      id: 'customMetricPanel',
+      title: customMetricTitle,
+      width: 685,
+      content: (
+        <CustomMetricForm
+          onChange={handleCustomMetric}
+          fields={fields}
+          customMetrics={customMetrics}
+        />
+      ),
+    },
+  ];
+
+  const button = (
+    <EuiFilterButton iconType="arrowDown" onClick={handleToggle}>
+      <FormattedMessage
+        id="xpack.infra.waffle.metricButtonLabel"
+        defaultMessage="Metric: {selectedMetric}"
+        values={{ selectedMetric: currentLabel }}
+      />
+    </EuiFilterButton>
+  );
+
+  return (
+    <EuiFilterGroup>
+      <EuiPopover
+        isOpen={isPopoverOpen}
+        id="metricsPanel"
+        button={button}
+        anchorPosition="downLeft"
+        panelPaddingSize="none"
+        closePopover={handleClose}
+      >
+        <EuiContextMenu initialPanelId={0} panels={panels} />
+      </EuiPopover>
+    </EuiFilterGroup>
+  );
 };

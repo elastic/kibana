@@ -23,6 +23,18 @@ export const inventoryViewSavedObjectMappings: {
           type: {
             type: 'keyword',
           },
+          field: {
+            type: 'keyword',
+          },
+          aggregation: {
+            type: 'keyword',
+          },
+          id: {
+            type: 'keyword',
+          },
+          label: {
+            type: 'keyword',
+          },
         },
       },
       groupBy: {
@@ -49,6 +61,26 @@ export const inventoryViewSavedObjectMappings: {
             type: 'keyword',
           },
           field: {
+            type: 'keyword',
+          },
+        },
+      },
+      customMetrics: {
+        type: 'nested',
+        properties: {
+          type: {
+            type: 'keyword',
+          },
+          field: {
+            type: 'keyword',
+          },
+          aggregation: {
+            type: 'keyword',
+          },
+          id: {
+            type: 'keyword',
+          },
+          label: {
             type: 'keyword',
           },
         },

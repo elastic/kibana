@@ -29,6 +29,7 @@ export const SnapshotToolbar = () => (
             changeGroupBy,
             changeAccount,
             changeRegion,
+            changeCustomMetrics,
             nodeType,
           }) => (
             <WaffleInventorySwitcher
@@ -38,6 +39,7 @@ export const SnapshotToolbar = () => (
               changeGroupBy={changeGroupBy}
               changeAccount={changeAccount}
               changeRegion={changeRegion}
+              changeCustomMetrics={changeCustomMetrics}
             />
           )}
         </WithWaffleOptions>

@@ -16,13 +16,18 @@ import React, { useCallback, useState, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { findInventoryModel } from '../../../common/inventory_models';
 import { InventoryItemType } from '../../../common/inventory_models/types';
-import { SnapshotMetricInput, SnapshotGroupBy } from '../../../common/http_api/snapshot_api';
+import {
+  SnapshotMetricInput,
+  SnapshotGroupBy,
+  SnapshotCustomMetricInput,
+} from '../../../common/http_api/snapshot_api';
 
 interface WaffleInventorySwitcherProps {
   nodeType: InventoryItemType;
   changeNodeType: (nodeType: InventoryItemType) => void;
   changeGroupBy: (groupBy: SnapshotGroupBy) => void;
   changeMetric: (metric: SnapshotMetricInput) => void;
+  changeCustomMetrics: (metrics: SnapshotCustomMetricInput[]) => void;
   changeAccount: (id: string) => void;
   changeRegion: (name: string) => void;
 }
@@ -38,6 +43,7 @@ export const WaffleInventorySwitcher: React.FC<WaffleInventorySwitcherProps> = (
   changeMetric,
   changeAccount,
   changeRegion,
+  changeCustomMetrics,
   nodeType,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -48,6 +54,7 @@ export const WaffleInventorySwitcher: React.FC<WaffleInventorySwitcherProps> = (
       closePopover();
       changeNodeType(targetNodeType);
       changeGroupBy([]);
+      changeCustomMetrics([]);
       changeAccount('');
       changeRegion('');
       const inventoryModel = findInventoryModel(targetNodeType);
@@ -55,7 +62,15 @@ export const WaffleInventorySwitcher: React.FC<WaffleInventorySwitcherProps> = (
         type: inventoryModel.metrics.defaultSnapshot,
       });
     },
-    [closePopover, changeNodeType, changeGroupBy, changeMetric, changeAccount, changeRegion]
+    [
+      closePopover,
+      changeNodeType,
+      changeGroupBy,
+      changeCustomMetrics,
+      changeAccount,
+      changeRegion,
+      changeMetric,
+    ]
   );
   const goToHost = useCallback(() => goToNodeType('host'), [goToNodeType]);
   const goToK8 = useCallback(() => goToNodeType('pod'), [goToNodeType]);
