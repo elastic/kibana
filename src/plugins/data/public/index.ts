@@ -109,6 +109,8 @@ export {
   indexPatterns,
   IndexPatternsContract,
   IndexPattern,
+  // exported only in stub_index_pattern test. Move into data plugin and remove export.
+  FieldList as IndexPatternFieldList,
   Field as IndexPatternField,
   TypeMeta as IndexPatternTypeMeta,
   AggregationRestrictions as IndexPatternAggRestrictions,
