@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { toastNotifications } from 'ui/notify';
+import { getToastNotifications } from '../../../util/dependency_cache';
 import { ml } from '../../../services/ml_api_service';
 import { i18n } from '@kbn/i18n';
 
@@ -12,6 +12,7 @@ export async function deleteCalendars(calendarsToDelete, callback) {
   if (calendarsToDelete === undefined || calendarsToDelete.length === 0) {
     return;
   }
+  const toastNotifications = getToastNotifications();
 
   // Delete each of the specified calendars in turn, waiting for each response
   // before deleting the next to minimize load on the cluster.
