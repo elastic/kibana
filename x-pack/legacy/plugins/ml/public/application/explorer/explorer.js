@@ -21,8 +21,12 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiIconTip,
+  EuiPage,
+  EuiPageBody,
+  EuiScreenReaderOnly,
   EuiSelect,
   EuiSpacer,
+  EuiTitle,
 } from '@elastic/eui';
 
 import { AnnotationFlyout } from '../components/annotations/annotation_flyout';
@@ -87,8 +91,17 @@ function mapSwimlaneOptionsToEuiOptions(options) {
 const ExplorerPage = ({ children, jobSelectorProps, resizeRef }) => (
   <div ref={resizeRef} data-test-subj="mlPageAnomalyExplorer">
     <NavigationMenu tabId="explorer" />
-    <JobSelector {...jobSelectorProps} />
-    {children}
+    <EuiPage style={{ padding: '0px', background: 'none' }}>
+      <EuiPageBody>
+        <EuiScreenReaderOnly>
+          <h1>
+            <FormattedMessage id="xpack.ml.explorer.pageTitle" defaultMessage="Anomaly Explorer" />
+          </h1>
+        </EuiScreenReaderOnly>
+        <JobSelector {...jobSelectorProps} />
+        {children}
+      </EuiPageBody>
+    </EuiPage>
   </div>
 );
 
@@ -120,8 +133,12 @@ export class Explorer extends React.Component {
 
       this.disableDragSelectOnMouseLeave = true;
     },
-    onDragStart() {
-      if (ALLOW_CELL_RANGE_SELECTION) {
+    onDragStart(e) {
+      let target = e.target;
+      while (target && target !== document.body && !target.classList.contains('sl-cell')) {
+        target = target.parentNode;
+      }
+      if (ALLOW_CELL_RANGE_SELECTION && target !== document.body) {
         dragSelect$.next({
           action: DRAG_SELECT_ACTION.DRAG_START,
         });
@@ -339,7 +356,7 @@ export class Explorer extends React.Component {
     return (
       <ExplorerPage jobSelectorProps={jobSelectorProps} resizeRef={this.resizeRef}>
         <div className="results-container">
-          {/* Make sure ChartTooltip is inside this plain wrapping div so positioning can be infered correctly. */}
+          {/* Make sure ChartTooltip is inside wrapping div with 0px left/right padding so positioning can be inferred correctly. */}
           <ChartTooltip />
 
           {noInfluencersConfigured === false && influencers !== undefined && (
@@ -368,27 +385,28 @@ export class Explorer extends React.Component {
           )}
 
           {noInfluencersConfigured === false && (
-            <div
-              className="column col-xs-2 euiText"
-              data-test-subj="mlAnomalyExplorerInfluencerList"
-            >
-              <span className="panel-title">
-                <FormattedMessage
-                  id="xpack.ml.explorer.topInfuencersTitle"
-                  defaultMessage="Top Influencers"
-                />
-              </span>
+            <div className="column col-xs-2" data-test-subj="mlAnomalyExplorerInfluencerList">
+              <EuiTitle className="panel-title">
+                <h2>
+                  <FormattedMessage
+                    id="xpack.ml.explorer.topInfuencersTitle"
+                    defaultMessage="Top influencers"
+                  />
+                </h2>
+              </EuiTitle>
               <InfluencersList influencers={influencers} influencerFilter={this.applyFilter} />
             </div>
           )}
 
           <div className={mainColumnClasses}>
-            <span className="panel-title euiText">
-              <FormattedMessage
-                id="xpack.ml.explorer.anomalyTimelineTitle"
-                defaultMessage="Anomaly timeline"
-              />
-            </span>
+            <EuiTitle className="panel-title">
+              <h2>
+                <FormattedMessage
+                  id="xpack.ml.explorer.anomalyTimelineTitle"
+                  defaultMessage="Anomaly timeline"
+                />
+              </h2>
+            </EuiTitle>
 
             <div
               className="ml-explorer-swimlane euiText"
@@ -503,12 +521,14 @@ export class Explorer extends React.Component {
 
             {annotationsData.length > 0 && (
               <>
-                <span className="panel-title euiText">
-                  <FormattedMessage
-                    id="xpack.ml.explorer.annotationsTitle"
-                    defaultMessage="Annotations"
-                  />
-                </span>
+                <EuiTitle className="panel-title">
+                  <h2>
+                    <FormattedMessage
+                      id="xpack.ml.explorer.annotationsTitle"
+                      defaultMessage="Annotations"
+                    />
+                  </h2>
+                </EuiTitle>
                 <AnnotationsTable
                   annotations={annotationsData}
                   drillDown={true}
@@ -519,9 +539,14 @@ export class Explorer extends React.Component {
               </>
             )}
 
-            <span className="panel-title euiText">
-              <FormattedMessage id="xpack.ml.explorer.anomaliesTitle" defaultMessage="Anomalies" />
-            </span>
+            <EuiTitle className="panel-title">
+              <h2>
+                <FormattedMessage
+                  id="xpack.ml.explorer.anomaliesTitle"
+                  defaultMessage="Anomalies"
+                />
+              </h2>
+            </EuiTitle>
 
             <EuiFlexGroup
               direction="row"

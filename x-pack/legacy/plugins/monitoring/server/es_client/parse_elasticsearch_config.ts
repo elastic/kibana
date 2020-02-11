@@ -7,7 +7,7 @@
 import { readFileSync } from 'fs';
 import { readPkcs12Truststore, readPkcs12Keystore } from '../../../../../../src/core/utils';
 
-const KEY = 'xpack.monitoring.elasticsearch';
+const KEY = 'monitoring.ui.elasticsearch';
 
 /*
  * Parse a config object's Elasticsearch configuration, reading any

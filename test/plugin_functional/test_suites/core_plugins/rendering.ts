@@ -62,8 +62,12 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
       return JSON.parse(document.querySelector('kbn-injected-metadata')!.getAttribute('data')!)
         .legacyMetadata.uiSettings.user;
     });
-  const exists = (selector: string) => testSubjects.exists(selector, { timeout: 2000 });
+  const exists = (selector: string) => testSubjects.exists(selector, { timeout: 5000 });
   const findLoadingMessage = () => testSubjects.find('kbnLoadingMessage', 5000);
+  const getRenderingSession = () =>
+    browser.execute(() => {
+      return window.__RENDERING_SESSION__;
+    });
 
   describe('rendering service', () => {
     it('renders "core" application', async () => {
@@ -152,11 +156,11 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
       expect(await exists('appStatusApp')).to.be(true);
       expect(await exists('renderingHeader')).to.be(false);
 
-      expect(
-        await browser.execute(() => {
-          return window.__RENDERING_SESSION__;
-        })
-      ).to.eql(['/app/app_status', '/render/core', '/app/app_status']);
+      expect(await getRenderingSession()).to.eql([
+        '/app/app_status',
+        '/render/core',
+        '/app/app_status',
+      ]);
     });
 
     it('navigates between applications with custom appRoutes', async () => {
@@ -168,18 +172,18 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
       expect(await exists('customAppRouteHeader')).to.be(false);
 
       await navigateToApp('Custom App Route');
-      expect(await exists('renderingHeader')).to.be(false);
       expect(await exists('customAppRouteHeader')).to.be(true);
+      expect(await exists('renderingHeader')).to.be(false);
 
       await navigateToApp('Rendering');
       expect(await exists('renderingHeader')).to.be(true);
       expect(await exists('customAppRouteHeader')).to.be(false);
 
-      expect(
-        await browser.execute(() => {
-          return window.__RENDERING_SESSION__;
-        })
-      ).to.eql(['/render/core', '/custom/appRoute', '/render/core']);
+      expect(await getRenderingSession()).to.eql([
+        '/render/core',
+        '/custom/appRoute',
+        '/render/core',
+      ]);
     });
   });
 }

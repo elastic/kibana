@@ -35,14 +35,16 @@ import { getFormat } from '../../legacy_imports';
  * @param attr {Object|*} Visualization options
  */
 export class Data {
-  constructor(data, uiState, vislibColor) {
+  constructor(data, uiState, createColorLookupFunction) {
     this.uiState = uiState;
-    this.vislibColor = vislibColor;
+    this.createColorLookupFunction = createColorLookupFunction;
     this.data = this.copyDataObj(data);
     this.type = this.getDataType();
     this._cleanVisData();
     this.labels = this._getLabels(this.data);
-    this.color = this.labels ? vislibColor(this.labels, uiState.get('vis.colors')) : undefined;
+    this.color = this.labels
+      ? createColorLookupFunction(this.labels, uiState.get('vis.colors'))
+      : undefined;
     this._normalizeOrdered();
   }
 
@@ -473,7 +475,7 @@ export class Data {
     const defaultColors = this.uiState.get('vis.defaultColors');
     const overwriteColors = this.uiState.get('vis.colors');
     const colors = defaultColors ? _.defaults({}, overwriteColors, defaultColors) : overwriteColors;
-    return this.vislibColor(this.getLabels(), colors);
+    return this.createColorLookupFunction(this.getLabels(), colors);
   }
 
   /**
@@ -483,7 +485,7 @@ export class Data {
    * @returns {Function} Performs lookup on string and returns hex color
    */
   getPieColorFunc() {
-    return this.vislibColor(
+    return this.createColorLookupFunction(
       this.pieNames(this.getVisData()).map(function(d) {
         return d.label;
       }),

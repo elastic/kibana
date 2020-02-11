@@ -33,7 +33,7 @@ import {
 } from './types';
 import { AutocompleteService } from './autocomplete';
 import { SearchService } from './search/search_service';
-import { FieldFormatsService } from './field_formats_provider';
+import { FieldFormatsService } from './field_formats';
 import { QueryService } from './query';
 import { createIndexPatternSelect } from './ui/index_pattern_select';
 import { IndexPatterns } from './index_patterns';
@@ -42,7 +42,7 @@ import {
   setFieldFormats,
   setOverlays,
   setIndexPatterns,
-  setHttp,
+  setUiSettings,
 } from './services';
 import { createFilterAction, GLOBAL_APPLY_FILTER_ACTION } from './actions';
 import { APPLY_FILTER_TRIGGER } from '../../embeddable/public';
@@ -76,7 +76,7 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
 
     return {
       autocomplete: this.autocomplete.setup(core),
-      search: this.searchService.setup(core),
+      search: this.searchService.setup(core, this.packageInfo),
       fieldFormats: this.fieldFormatsService.setup(core),
       query: queryService,
     };
@@ -88,7 +88,7 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
     setNotifications(notifications);
     setFieldFormats(fieldFormats);
     setOverlays(overlays);
-    setHttp(core.http);
+    setUiSettings(core.uiSettings);
 
     const indexPatternsService = new IndexPatterns(uiSettings, savedObjects.client, http);
     setIndexPatterns(indexPatternsService);
@@ -97,7 +97,7 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
 
     const dataServices = {
       autocomplete: this.autocomplete.start(),
-      search: this.searchService.start(core, this.packageInfo),
+      search: this.searchService.start(core),
       fieldFormats,
       query: this.queryService.start(core.savedObjects),
       indexPatterns: indexPatternsService,

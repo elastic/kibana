@@ -1,20 +1,20 @@
 {
   "description": "Detects writing executable files that will be automatically launched by Adobe on launch.",
-  "enabled": false,
-  "filters": [],
-  "from": "now-6m",
-  "immutable": true,
-  "interval": "5m",
+  "index": [
+    "winlogbeat-*"
+  ],
   "language": "kuery",
+  "max_signals": 100,
   "name": "Adobe Hijack Persistence",
   "query": "file.path:(\"C:\\Program Files (x86)\\Adobe\\Acrobat Reader DC\\Reader\\AcroCEF\\RdrCEF.exe\" or \"C:\\Program Files\\Adobe\\Acrobat Reader DC\\Reader\\AcroCEF\\RdrCEF.exe\") and event.action:\"File created (rule: FileCreate)\" and not process.name:msiexeec.exe",
-  "risk_score": 25,
+  "risk_score": 21,
   "rule_id": "2bf78aa2-9c56-48de-b139-f169bf99cf86",
   "severity": "low",
   "tags": [
-    "EIA"
+    "Elastic",
+    "Windows"
   ],
-  "threats": [
+  "threat": [
     {
       "framework": "MITRE ATT&CK",
       "tactic": {
@@ -22,7 +22,7 @@
         "name": "Persistence",
         "reference": "https://attack.mitre.org/tactics/TA0003/"
       },
-      "techniques": [
+      "technique": [
         {
           "id": "T1044",
           "name": "File System Permissions Weakness",
@@ -31,7 +31,6 @@
       ]
     }
   ],
-  "to": "now",
   "type": "query",
   "version": 1
 }

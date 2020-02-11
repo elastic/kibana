@@ -19,9 +19,9 @@
 
 import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
-import { History } from 'history';
-import { Subscription } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { Moment } from 'moment';
+import { History } from 'history';
 
 import { DashboardContainer } from 'src/legacy/core_plugins/dashboard_embeddable_container/public/np_ready/public';
 import { ViewMode } from '../../../../../../plugins/embeddable/public';
@@ -44,7 +44,6 @@ import {
   SavedDashboardPanel,
 } from './types';
 import {
-  createKbnUrlStateStorage,
   createStateContainer,
   IKbnUrlStateStorage,
   ISyncStateRef,
@@ -76,6 +75,10 @@ export class DashboardStateManager {
     return this.stateContainer.get();
   }
 
+  public get appState$(): Observable<DashboardAppState> {
+    return this.stateContainer.state$;
+  }
+
   private readonly stateContainer: ReduxLikeStateContainer<
     DashboardAppState,
     DashboardAppStateTransitions
@@ -97,13 +100,13 @@ export class DashboardStateManager {
     savedDashboard,
     hideWriteControls,
     kibanaVersion,
-    useHashedUrl,
+    kbnUrlStateStorage,
     history,
   }: {
     savedDashboard: SavedObjectDashboard;
     hideWriteControls: boolean;
     kibanaVersion: string;
-    useHashedUrl: boolean;
+    kbnUrlStateStorage: IKbnUrlStateStorage;
     history: History;
   }) {
     this.history = history;
@@ -117,7 +120,7 @@ export class DashboardStateManager {
       kibanaVersion
     );
 
-    this.kbnUrlStateStorage = createKbnUrlStateStorage({ useHash: useHashedUrl, history });
+    this.kbnUrlStateStorage = kbnUrlStateStorage;
 
     // setup initial state by merging defaults with state from url
     // also run migration, as state in url could be of older version

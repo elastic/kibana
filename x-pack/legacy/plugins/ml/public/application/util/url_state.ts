@@ -18,14 +18,26 @@ import { getNestedProperty } from './object_utils';
 export type SetUrlState = (attribute: string | Dictionary<any>, value?: any) => void;
 export type UrlState = [Dictionary<any>, SetUrlState];
 
-const decodedParams = new Set(['_a', '_g']);
+/**
+ * Set of URL query parameters that require the rison serialization.
+ */
+const risonSerializedParams = new Set(['_a', '_g']);
+
+/**
+ * Checks if the URL query parameter requires rison serialization.
+ * @param queryParam
+ */
+function isRisonSerializationRequired(queryParam: string): boolean {
+  return risonSerializedParams.has(queryParam);
+}
+
 export function getUrlState(search: string): Dictionary<any> {
   const urlState: Dictionary<any> = {};
   const parsedQueryString = queryString.parse(search);
 
   try {
     Object.keys(parsedQueryString).forEach(a => {
-      if (decodedParams.has(a)) {
+      if (isRisonSerializationRequired(a)) {
         urlState[a] = decode(parsedQueryString[a]) as Dictionary<any>;
       } else {
         urlState[a] = parsedQueryString[a];
@@ -75,7 +87,11 @@ export const useUrlState = (accessor: string): UrlState => {
         const oldLocationSearch = queryString.stringify(parsedQueryString, { encode: false });
 
         Object.keys(urlState).forEach(a => {
-          parsedQueryString[a] = encode(urlState[a]);
+          if (isRisonSerializationRequired(a)) {
+            parsedQueryString[a] = encode(urlState[a]);
+          } else {
+            parsedQueryString[a] = urlState[a];
+          }
         });
         const newLocationSearch = queryString.stringify(parsedQueryString, { encode: false });
 

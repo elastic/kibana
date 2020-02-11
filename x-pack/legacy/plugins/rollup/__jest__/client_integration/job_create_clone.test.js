@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { setupEnvironment, pageHelpers, nextTick } from './helpers';
+import { setHttp } from '../../public/crud_app/services';
+import { mockHttpRequest, pageHelpers, nextTick } from './helpers';
 import { JOB_TO_CLONE, JOB_CLONE_INDEX_PATTERN_CHECK } from './helpers/constants';
 
 jest.mock('ui/new_platform');
@@ -17,26 +18,28 @@ const {
 } = JOB_TO_CLONE;
 
 describe('Cloning a rollup job through create job wizard', () => {
-  let httpRequestsMockHelpers;
-  let server;
   let find;
   let exists;
   let form;
   let table;
   let actions;
+  let npStart;
 
   beforeAll(() => {
-    ({ server, httpRequestsMockHelpers } = setupEnvironment());
+    npStart = require('ui/new_platform').npStart; // eslint-disable-line
+    setHttp(npStart.core.http);
   });
 
   beforeEach(() => {
-    httpRequestsMockHelpers.setIndexPatternValidityResponse(JOB_CLONE_INDEX_PATTERN_CHECK);
+    mockHttpRequest(npStart.core.http, { indxPatternVldtResp: JOB_CLONE_INDEX_PATTERN_CHECK });
 
     ({ exists, find, form, actions, table } = setup());
   });
 
-  afterAll(() => {
-    server.restore();
+  afterEach(() => {
+    npStart.core.http.get.mockClear();
+    npStart.core.http.post.mockClear();
+    npStart.core.http.put.mockClear();
   });
 
   it('should have fields correctly pre-populated', async () => {

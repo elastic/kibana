@@ -4,39 +4,42 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import React from 'react';
 
-import { NoNews } from './no_news';
+import { LoadingPlaceholders } from '../page/overview/loading_placeholders';
 import { NEWS_FEED_TITLE } from '../../pages/overview/translations';
-import { Post } from './post';
 import { SidebarHeader } from '../sidebar_header';
+
+import { NoNews } from './no_news';
+import { Post } from './post';
 import { NewsItem } from './types';
 
 interface Props {
   news: NewsItem[] | null | undefined;
 }
 
-export const NewsFeed = React.memo<Props>(({ news }) => {
-  if (news == null) {
-    return <EuiLoadingSpinner size="m" />;
-  }
+const SHOW_PLACEHOLDERS = 5;
+const LINES_PER_LOADING_PLACEHOLDER = 4;
 
-  if (news.length === 0) {
-    return <NoNews />;
-  }
-
-  return (
-    <>
-      <SidebarHeader title={NEWS_FEED_TITLE} />
-      {news.map((n: NewsItem) => (
+const NewsFeedComponent: React.FC<Props> = ({ news }) => (
+  <>
+    <SidebarHeader title={NEWS_FEED_TITLE} />
+    {news == null ? (
+      <LoadingPlaceholders lines={LINES_PER_LOADING_PLACEHOLDER} placeholders={SHOW_PLACEHOLDERS} />
+    ) : news.length === 0 ? (
+      <NoNews />
+    ) : (
+      news.map((n: NewsItem) => (
         <React.Fragment key={n.hash}>
           <Post newsItem={n} />
           <EuiSpacer size="l" />
         </React.Fragment>
-      ))}
-    </>
-  );
-});
+      ))
+    )}
+  </>
+);
 
-NewsFeed.displayName = 'NewsFeed';
+NewsFeedComponent.displayName = 'NewsFeedComponent';
+
+export const NewsFeed = React.memo(NewsFeedComponent);

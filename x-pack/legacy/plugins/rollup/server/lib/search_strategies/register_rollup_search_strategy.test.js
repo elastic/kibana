@@ -6,47 +6,22 @@
 import { registerRollupSearchStrategy } from './register_rollup_search_strategy';
 
 describe('Register Rollup Search Strategy', () => {
-  let kbnServer;
-  let metrics;
+  let routeDependencies;
+  let addSearchStrategy;
 
   beforeEach(() => {
-    const afterPluginsInit = jest.fn(callback => callback());
-
-    kbnServer = {
-      afterPluginsInit,
+    routeDependencies = {
+      router: jest.fn().mockName('router'),
+      elasticsearchService: jest.fn().mockName('elasticsearchService'),
+      elasticsearch: jest.fn().mockName('elasticsearch'),
     };
 
-    metrics = {
-      addSearchStrategy: jest.fn().mockName('addSearchStrategy'),
-      AbstractSearchRequest: jest.fn().mockName('AbstractSearchRequest'),
-      AbstractSearchStrategy: jest.fn().mockName('AbstractSearchStrategy'),
-      DefaultSearchCapabilities: jest.fn().mockName('DefaultSearchCapabilities'),
-    };
+    addSearchStrategy = jest.fn().mockName('addSearchStrategy');
   });
 
-  test('should run initialization on "afterPluginsInit" hook', () => {
-    registerRollupSearchStrategy(kbnServer, {
-      plugins: {},
-    });
+  test('should run initialization', () => {
+    registerRollupSearchStrategy(routeDependencies, addSearchStrategy);
 
-    expect(kbnServer.afterPluginsInit).toHaveBeenCalled();
-  });
-
-  test('should run initialization if metrics plugin available', () => {
-    registerRollupSearchStrategy(kbnServer, {
-      plugins: {
-        metrics,
-      },
-    });
-
-    expect(metrics.addSearchStrategy).toHaveBeenCalled();
-  });
-
-  test('should not run initialization if metrics plugin unavailable', () => {
-    registerRollupSearchStrategy(kbnServer, {
-      plugins: {},
-    });
-
-    expect(metrics.addSearchStrategy).not.toHaveBeenCalled();
+    expect(addSearchStrategy).toHaveBeenCalled();
   });
 });

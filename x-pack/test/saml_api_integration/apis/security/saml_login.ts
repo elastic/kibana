@@ -17,7 +17,6 @@ export default function({ getService }: FtrProviderContext) {
   const randomness = getService('randomness');
   const supertest = getService('supertestWithoutAuth');
   const config = getService('config');
-  const kibanaServer = getService('kibanaServer');
 
   const kibanaServerConfig = config.get('servers.kibana');
 
@@ -57,6 +56,7 @@ export default function({ getService }: FtrProviderContext) {
       'enabled',
       'authentication_realm',
       'lookup_realm',
+      'authentication_provider',
     ]);
 
     expect(apiResponse.body.username).to.be('a@b.c');
@@ -89,6 +89,7 @@ export default function({ getService }: FtrProviderContext) {
 
       expect(user.username).to.eql(username);
       expect(user.authentication_realm).to.eql({ name: 'reserved', type: 'reserved' });
+      expect(user.authentication_provider).to.eql('basic');
     });
 
     describe('capture URL fragment', () => {
@@ -138,17 +139,12 @@ export default function({ getService }: FtrProviderContext) {
         });
 
         await (dom.window as Record<string, any>).__isScriptExecuted__;
-        const isDist = await kibanaServer.status.isDistributable();
 
         // Check that proxy page is returned with proper headers.
         expect(response.headers['content-type']).to.be('text/html; charset=utf-8');
         expect(response.headers['cache-control']).to.be('private, no-cache, no-store');
         expect(response.headers['content-security-policy']).to.be(
-          [
-            `script-src 'unsafe-eval' 'self';`,
-            `worker-src blob: 'self';`,
-            `style-src ${isDist ? '' : 'blob: '}'unsafe-inline' 'self'`,
-          ].join(' ')
+          `script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`
         );
 
         // Check that script that forwards URL fragment worked correctly.

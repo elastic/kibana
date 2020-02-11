@@ -19,12 +19,13 @@
 
 import moment from 'moment';
 import { Subscription } from 'rxjs';
+import { History } from 'history';
 
 import { IInjector } from '../legacy_imports';
 
 import { ViewMode } from '../../../../embeddable_api/public/np_ready/public';
 import { SavedObjectDashboard } from '../saved_dashboard/saved_dashboard';
-import { DashboardAppState, SavedDashboardPanel, ConfirmModalFn } from './types';
+import { DashboardAppState, SavedDashboardPanel } from './types';
 import {
   IIndexPattern,
   TimeRange,
@@ -35,6 +36,7 @@ import {
 
 import { DashboardAppController } from './dashboard_app_controller';
 import { RenderDeps } from './application';
+import { IKbnUrlStateStorage } from '../../../../../../plugins/kibana_utils/public/';
 
 export interface DashboardAppScope extends ng.IScope {
   dash: SavedObjectDashboard;
@@ -85,9 +87,6 @@ export interface DashboardAppScope extends ng.IScope {
 
 export function initDashboardAppDirective(app: any, deps: RenderDeps) {
   app.directive('dashboardApp', function($injector: IInjector) {
-    const confirmModal = $injector.get<ConfirmModalFn>('confirmModal');
-    const config = deps.uiSettings;
-
     return {
       restrict: 'E',
       controllerAs: 'dashboardApp',
@@ -97,16 +96,16 @@ export function initDashboardAppDirective(app: any, deps: RenderDeps) {
         $routeParams: {
           id?: string;
         },
-        globalState: any
+        kbnUrlStateStorage: IKbnUrlStateStorage,
+        history: History
       ) =>
         new DashboardAppController({
           $route,
           $scope,
           $routeParams,
-          globalState,
-          config,
-          confirmModal,
           indexPatterns: deps.npDataStart.indexPatterns,
+          kbnUrlStateStorage,
+          history,
           ...deps,
         }),
     };

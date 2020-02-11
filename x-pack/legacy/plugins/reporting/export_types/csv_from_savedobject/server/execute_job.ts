@@ -5,38 +5,36 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { cryptoFactory, LevelLogger } from '../../../server/lib';
+import { ElasticsearchServiceSetup } from 'kibana/server';
+import { CONTENT_TYPE_CSV, CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../../common/constants';
+import { cryptoFactory } from '../../../server/lib';
 import {
   ExecuteJobFactory,
   ImmediateExecuteFn,
-  JobDocOutputExecuted,
-  ServerFacade,
+  JobDocOutput,
+  Logger,
   RequestFacade,
+  ServerFacade,
 } from '../../../types';
-import {
-  CONTENT_TYPE_CSV,
-  CSV_FROM_SAVEDOBJECT_JOB_TYPE,
-  PLUGIN_ID,
-} from '../../../common/constants';
 import { CsvResultFromSearch } from '../../csv/types';
-import { JobParamsPanelCsv, SearchPanel, JobDocPayloadPanelCsv, FakeRequest } from '../types';
+import { FakeRequest, JobDocPayloadPanelCsv, JobParamsPanelCsv, SearchPanel } from '../types';
 import { createGenerateCsv } from './lib';
 
 export const executeJobFactory: ExecuteJobFactory<ImmediateExecuteFn<
   JobParamsPanelCsv
->> = function executeJobFactoryFn(server: ServerFacade) {
+>> = function executeJobFactoryFn(
+  server: ServerFacade,
+  elasticsearch: ElasticsearchServiceSetup,
+  parentLogger: Logger
+) {
   const crypto = cryptoFactory(server);
-  const logger = LevelLogger.createForServer(server, [
-    PLUGIN_ID,
-    CSV_FROM_SAVEDOBJECT_JOB_TYPE,
-    'execute-job',
-  ]);
+  const logger = parentLogger.clone([CSV_FROM_SAVEDOBJECT_JOB_TYPE, 'execute-job']);
 
   return async function executeJob(
     jobId: string | null,
     job: JobDocPayloadPanelCsv,
     realRequest?: RequestFacade
-  ): Promise<JobDocOutputExecuted> {
+  ): Promise<JobDocOutput> {
     // There will not be a jobID for "immediate" generation.
     // jobID is only for "queued" jobs
     // Use the jobID as a logging tag or "immediate"
@@ -92,6 +90,7 @@ export const executeJobFactory: ExecuteJobFactory<ImmediateExecuteFn<
       const generateResults: CsvResultFromSearch = await generateCsv(
         requestObject,
         server,
+        elasticsearch,
         visType as string,
         panel,
         jobParams

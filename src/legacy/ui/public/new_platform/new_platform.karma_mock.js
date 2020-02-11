@@ -20,6 +20,7 @@
 import sinon from 'sinon';
 import { getFieldFormatsRegistry } from '../../../../test_utils/public/stub_field_formats';
 import { METRIC_TYPE } from '@kbn/analytics';
+import { ComponentRegistry } from '../../../../../src/plugins/advanced_settings/public/';
 
 const mockObservable = () => {
   return {
@@ -58,6 +59,12 @@ const mockCore = {
 export const npSetup = {
   core: mockCore,
   plugins: {
+    advancedSettings: {
+      component: {
+        register: sinon.fake(),
+        componentType: ComponentRegistry.componentType,
+      },
+    },
     usageCollection: {
       allowTrackUserAgent: sinon.fake(),
       reportUiStats: sinon.fake(),
@@ -102,17 +109,26 @@ export const npSetup = {
           getSavedQueryCount: sinon.fake(),
         },
       },
+      __LEGACY: {
+        esClient: {
+          search: sinon.fake(),
+          msearch: sinon.fake(),
+        },
+      },
       fieldFormats: getFieldFormatsRegistry(mockCore),
     },
     share: {
       register: () => {},
     },
-    dev_tools: {
+    devTools: {
       register: () => {},
     },
-    kibana_legacy: {
+    kibanaLegacy: {
       registerLegacyApp: () => {},
       forwardApp: () => {},
+      config: {
+        defaultAppId: 'home',
+      },
     },
     inspector: {
       registerView: () => undefined,
@@ -134,6 +150,22 @@ export const npSetup = {
       environment: {
         update: sinon.fake(),
       },
+      config: {
+        disableWelcomeScreen: false,
+      },
+    },
+    charts: {
+      theme: {
+        chartsTheme$: mockObservable,
+        useChartsTheme: sinon.fake(),
+      },
+    },
+    management: {
+      sections: {
+        getSection: () => ({
+          registerApp: sinon.fake(),
+        }),
+      },
     },
   },
 };
@@ -144,7 +176,11 @@ let isAutoRefreshSelectorEnabled = true;
 
 export const npStart = {
   core: {
-    chrome: {},
+    chrome: {
+      overlays: {
+        openModal: sinon.fake(),
+      },
+    },
   },
   plugins: {
     management: {
@@ -153,6 +189,11 @@ export const npStart = {
           register: sinon.fake(),
           deregister: sinon.fake(),
           hasItem: sinon.fake(),
+        }),
+      },
+      sections: {
+        getSection: () => ({
+          registerApp: sinon.fake(),
         }),
       },
     },
@@ -166,12 +207,19 @@ export const npStart = {
       registerRenderer: sinon.fake(),
       registerType: sinon.fake(),
     },
-    dev_tools: {
+    devTools: {
       getSortedDevTools: () => [],
     },
-    kibana_legacy: {
+    kibanaLegacy: {
       getApps: () => [],
       getForwards: () => [],
+      config: {
+        defaultAppId: 'home',
+      },
+      dashboardConfig: {
+        turnHideWriteControlsOn: sinon.fake(),
+        getHideWriteControls: sinon.fake(),
+      },
     },
     data: {
       autocomplete: {
@@ -270,10 +318,22 @@ export const npStart = {
       featureCatalogue: {
         register: sinon.fake(),
       },
+      environment: {
+        get: sinon.fake(),
+      },
+      config: {
+        disableWelcomeScreen: false,
+      },
     },
     navigation: {
       ui: {
         TopNavMenu: mockComponent,
+      },
+    },
+    charts: {
+      theme: {
+        chartsTheme$: mockObservable,
+        useChartsTheme: sinon.fake(),
       },
     },
   },

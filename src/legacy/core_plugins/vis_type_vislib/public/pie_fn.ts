@@ -24,7 +24,8 @@ import {
   KibanaDatatable,
   Render,
 } from '../../../../plugins/expressions/public';
-import { KbnVislibVisTypesDependencies } from './plugin';
+// @ts-ignore
+import { vislibSlicesResponseHandler } from './vislib/response_handler';
 
 const name = 'kibana_pie';
 
@@ -40,14 +41,9 @@ interface RenderValue {
   visConfig: VisParams;
 }
 
-type Return = Promise<Render<RenderValue>>;
+type Return = Render<RenderValue>;
 
-export const createPieVisFn = (deps: KbnVislibVisTypesDependencies) => (): ExpressionFunction<
-  typeof name,
-  Context,
-  Arguments,
-  Return
-> => ({
+export const createPieVisFn = (): ExpressionFunction<typeof name, Context, Arguments, Return> => ({
   name: 'kibana_pie',
   type: 'render',
   context: {
@@ -63,11 +59,9 @@ export const createPieVisFn = (deps: KbnVislibVisTypesDependencies) => (): Expre
       help: '',
     },
   },
-  async fn(context, args) {
+  fn(context, args) {
     const visConfig = JSON.parse(args.visConfig);
-
-    const responseHandler = deps.vislibSlicesResponseHandlerProvider().handler;
-    const convertedData = await responseHandler(context, visConfig.dimensions);
+    const convertedData = vislibSlicesResponseHandler(context, visConfig.dimensions);
 
     return {
       type: 'render',

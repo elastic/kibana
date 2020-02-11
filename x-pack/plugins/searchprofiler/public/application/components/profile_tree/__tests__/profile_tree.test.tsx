@@ -18,4 +18,16 @@ describe('ProfileTree', () => {
     const init = registerTestBed(ProfileTree);
     await init(props);
   });
+
+  it('does not throw despite bad profile data', async () => {
+    // For now, ignore the console.error that gets logged.
+    const props: Props = {
+      onHighlight: () => {},
+      target: 'searches',
+      data: [{}] as any,
+    };
+
+    const init = registerTestBed(ProfileTree);
+    await init(props);
+  });
 });

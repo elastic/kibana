@@ -86,6 +86,7 @@ export const security = kibana =>
             tenant: server.newPlatform.setup.core.http.basePath.serverBasePath,
           },
           enableSpaceAwarePrivileges: server.config().get('xpack.spaces.enabled'),
+          logoutUrl: `${server.newPlatform.setup.core.http.basePath.serverBasePath}/logout`,
         };
       },
     },
@@ -130,7 +131,7 @@ export const security = kibana =>
         );
 
       server.expose({
-        getUser: request => securityPlugin.authc.getCurrentUser(KibanaRequest.from(request)),
+        getUser: async request => securityPlugin.authc.getCurrentUser(KibanaRequest.from(request)),
       });
 
       initLoginView(securityPlugin, server);

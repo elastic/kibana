@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { of } from 'rxjs';
 import { ComponentType } from 'enzyme';
 import {
   chromeServiceMock,
@@ -15,6 +16,7 @@ import {
 } from '../../../../../../src/core/public/mocks';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { AppContextProvider } from '../../../public/application/app_context';
+import { LicenseStatus } from '../../../common/types/license_status';
 
 class MockTimeBuckets {
   setBounds(_domain: any) {
@@ -27,18 +29,16 @@ class MockTimeBuckets {
   }
 }
 export const mockContextValue = {
-  getLicenseStatus: () => ({
-    valid: true,
-  }),
+  licenseStatus$: of<LicenseStatus>({ valid: true }),
   docLinks: docLinksServiceMock.createStartContract(),
   chrome: chromeServiceMock.createStartContract(),
   MANAGEMENT_BREADCRUMB: { text: 'test' },
   createTimeBuckets: () => new MockTimeBuckets(),
   uiSettings: uiSettingsServiceMock.createSetupContract(),
   toasts: notificationServiceMock.createSetupContract().toasts,
-  euiUtils: {
+  theme: {
     useChartsTheme: jest.fn(),
-  },
+  } as any,
   // For our test harness, we don't use this mocked out http service
   http: httpServiceMock.createSetupContract(),
 };

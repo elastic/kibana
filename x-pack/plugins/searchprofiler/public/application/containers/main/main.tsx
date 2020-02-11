@@ -28,18 +28,10 @@ import {
 import { useAppContext } from '../../contexts/app_context';
 
 import { EmptyTreePlaceHolder, ProfileLoadingPlaceholder } from './components';
-import { Targets, ShardSerialized } from '../../types';
+import { Targets } from '../../types';
 import { useProfilerActionContext, useProfilerReadContext } from '../../contexts/profiler_context';
 
-function hasSearch(profileResponse: ShardSerialized[]) {
-  const aggs = _.get(profileResponse, '[0].searches', []);
-  return aggs.length > 0;
-}
-
-function hasAggregations(profileResponse: ShardSerialized[]) {
-  const aggs = _.get(profileResponse, '[0].aggregations', []);
-  return aggs.length > 0;
-}
+import { hasAggregations, hasSearch } from '../../utils';
 
 export const Main = () => {
   const { getLicenseStatus } = useAppContext();

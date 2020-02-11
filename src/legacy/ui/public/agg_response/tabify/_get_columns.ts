@@ -18,15 +18,15 @@
  */
 
 import { groupBy } from 'lodash';
-import { AggConfig } from '../../vis/';
+import { IAggConfig } from '../../agg_types';
 
 export interface AggColumn {
-  aggConfig: AggConfig;
+  aggConfig: IAggConfig;
   id: string;
   name: string;
 }
 
-const getColumn = (agg: AggConfig, i: number): AggColumn => {
+const getColumn = (agg: IAggConfig, i: number): AggColumn => {
   return {
     aggConfig: agg,
     id: `col-${i}-${agg.id}`,
@@ -40,7 +40,7 @@ const getColumn = (agg: AggConfig, i: number): AggColumn => {
  * @param {AggConfigs} aggs - the agg configs object to which the aggregation response correlates
  * @param {boolean} minimalColumns - setting to true will only return a column for the last bucket/metric instead of one for each level
  */
-export function tabifyGetColumns(aggs: AggConfig[], minimalColumns: boolean) {
+export function tabifyGetColumns(aggs: IAggConfig[], minimalColumns: boolean) {
   // pick the columns
   if (minimalColumns) {
     return aggs.map((agg, i) => getColumn(agg, i));

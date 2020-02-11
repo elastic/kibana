@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import { IAction, createAction } from '../../actions';
+import { Action, createAction } from '../../actions';
 
 export const RESTRICTED_ACTION = 'RESTRICTED_ACTION';
 
-export function createRestrictedAction<C>(isCompatibleIn: (context: C) => boolean): IAction<C> {
+export function createRestrictedAction<C>(isCompatibleIn: (context: C) => boolean): Action<C> {
   return createAction<C>({
     type: RESTRICTED_ACTION,
     isCompatible: async context => isCompatibleIn(context),

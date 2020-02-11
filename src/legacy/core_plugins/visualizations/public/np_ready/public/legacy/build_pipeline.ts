@@ -21,14 +21,13 @@ import { cloneDeep, get } from 'lodash';
 // @ts-ignore
 import moment from 'moment';
 import { SerializedFieldFormat } from 'src/plugins/expressions/public';
+import { ISearchSource } from 'src/plugins/data/public';
 import {
-  AggConfig,
+  IAggConfig,
   setBounds,
   isDateHistogramBucketAggConfig,
   createFormat,
 } from '../../../legacy_imports';
-// eslint-disable-next-line
-import { ISearchSource } from '../../../../../../ui/public/courier/search_source/search_source';
 import { Vis, VisParams, VisState } from '..';
 
 interface SchemaConfigParams {
@@ -86,7 +85,7 @@ const vislibCharts: string[] = [
 ];
 
 export const getSchemas = (vis: Vis, timeRange?: any): Schemas => {
-  const createSchemaConfig = (accessor: number, agg: AggConfig): SchemaConfig => {
+  const createSchemaConfig = (accessor: number, agg: IAggConfig): SchemaConfig => {
     if (isDateHistogramBucketAggConfig(agg)) {
       agg.params.timeRange = timeRange;
       setBounds(agg, true);
@@ -131,10 +130,10 @@ export const getSchemas = (vis: Vis, timeRange?: any): Schemas => {
   const schemas: Schemas = {
     metric: [],
   };
-  const responseAggs = vis.aggs.getResponseAggs().filter((agg: AggConfig) => agg.enabled);
+  const responseAggs = vis.aggs.getResponseAggs().filter((agg: IAggConfig) => agg.enabled);
   const isHierarchical = vis.isHierarchical();
-  const metrics = responseAggs.filter((agg: AggConfig) => agg.type.type === 'metrics');
-  responseAggs.forEach((agg: AggConfig) => {
+  const metrics = responseAggs.filter((agg: IAggConfig) => agg.type.type === 'metrics');
+  responseAggs.forEach((agg: IAggConfig) => {
     let skipMetrics = false;
     let schemaName = agg.schema ? agg.schema.name || agg.schema : null;
     if (typeof schemaName === 'object') {
@@ -225,7 +224,7 @@ export const prepareDimension = (variable: string, data: any) => {
 const adjustVislibDimensionFormmaters = (vis: Vis, dimensions: { y: any[] }): void => {
   const visState = vis.getCurrentState();
   const visConfig = visState.params;
-  const responseAggs = vis.aggs.getResponseAggs().filter((agg: AggConfig) => agg.enabled);
+  const responseAggs = vis.aggs.getResponseAggs().filter((agg: IAggConfig) => agg.enabled);
 
   (dimensions.y || []).forEach(yDimension => {
     const yAgg = responseAggs[yDimension.accessor];

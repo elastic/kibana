@@ -52,14 +52,6 @@ jest.mock('plugins/interpreter/registries', () => ({}));
 
 // Disabling this test due to https://github.com/elastic/eui/issues/2242
 jest.mock(
-  '../public/components/workpad_header/workpad_export/__examples__/disabled_panel.stories',
-  () => {
-    return 'Disabled Panel';
-  }
-);
-
-// Disabling this test due to https://github.com/elastic/eui/issues/2242
-jest.mock(
   '../public/components/workpad_header/workpad_export/flyout/__examples__/share_website_flyout.stories',
   () => {
     return 'Disabled Panel';

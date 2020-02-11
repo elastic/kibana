@@ -34,11 +34,11 @@ export const mockPrepackagedRule = (): PrepackagedRules => ({
   severity: 'high',
   query: 'user.name: root or user.name: admin',
   language: 'kuery',
-  threats: [
+  threat: [
     {
       framework: 'fake',
       tactic: { id: 'fakeId', name: 'fakeName', reference: 'fakeRef' },
-      techniques: [{ id: 'techniqueId', name: 'techniqueName', reference: 'techniqueRef' }],
+      technique: [{ id: 'techniqueId', name: 'techniqueName', reference: 'techniqueRef' }],
     },
   ],
   enabled: true,
@@ -69,11 +69,11 @@ export const typicalPayload = (): Partial<RuleAlertParamsRest> => ({
   severity: 'high',
   query: 'user.name: root or user.name: admin',
   language: 'kuery',
-  threats: [
+  threat: [
     {
       framework: 'fake',
       tactic: { id: 'fakeId', name: 'fakeName', reference: 'fakeRef' },
-      techniques: [{ id: 'techniqueId', name: 'techniqueName', reference: 'techniqueRef' }],
+      technique: [{ id: 'techniqueId', name: 'techniqueName', reference: 'techniqueRef' }],
     },
   ],
 });
@@ -84,7 +84,7 @@ export const typicalSetStatusSignalByIdsPayload = (): Partial<SignalsStatusRestP
 });
 
 export const typicalSetStatusSignalByQueryPayload = (): Partial<SignalsStatusRestParams> => ({
-  query: { range: { '@timestamp': { gte: 'now-2M', lte: 'now/M' } } },
+  query: { bool: { filter: { range: { '@timestamp': { gte: 'now-2M', lte: 'now/M' } } } } },
   status: 'closed',
 });
 
@@ -269,8 +269,6 @@ export const getResult = (): RuleAlertType => ({
   alertTypeId: 'siem.signals',
   consumer: 'siem',
   params: {
-    createdAt: '2019-12-13T16:40:33.400Z',
-    updatedAt: '2019-12-13T16:40:33.400Z',
     description: 'Detecting root and admin users',
     ruleId: 'rule-1',
     index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
@@ -298,7 +296,7 @@ export const getResult = (): RuleAlertType => ({
     severity: 'high',
     to: 'now',
     type: 'query',
-    threats: [
+    threat: [
       {
         framework: 'MITRE ATT&CK',
         tactic: {
@@ -306,7 +304,7 @@ export const getResult = (): RuleAlertType => ({
           name: 'impact',
           reference: 'https://attack.mitre.org/tactics/TA0040/',
         },
-        techniques: [
+        technique: [
           {
             id: 'T1499',
             name: 'endpoint denial of service',
@@ -392,6 +390,7 @@ export const getMockPrivileges = () => ({
   },
   application: {},
   is_authenticated: false,
+  has_encryption_key: true,
 });
 
 export const getFindResultStatus = (): SavedObjectsFindResponse<IRuleSavedAttributesSavedObjectAttributes> => ({

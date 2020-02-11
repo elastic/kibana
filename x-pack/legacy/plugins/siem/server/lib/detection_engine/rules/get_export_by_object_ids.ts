@@ -11,7 +11,20 @@ import { readRules } from './read_rules';
 import { transformRulesToNdjson, transformAlertToRule } from '../routes/rules/utils';
 import { OutputRuleAlertRest } from '../types';
 
+interface ExportSuccesRule {
+  statusCode: 200;
+  rule: Partial<OutputRuleAlertRest>;
+}
+
+interface ExportFailedRule {
+  statusCode: 404;
+  missingRuleId: { rule_id: string };
+}
+
+type ExportRules = ExportSuccesRule | ExportFailedRule;
+
 export interface RulesErrors {
+  exportedCount: number;
   missingRules: Array<{ rule_id: string }>;
   rules: Array<Partial<OutputRuleAlertRest>>;
 }
@@ -33,28 +46,44 @@ export const getRulesFromObjects = async (
   alertsClient: AlertsClient,
   objects: Array<{ rule_id: string }>
 ): Promise<RulesErrors> => {
-  const alertsAndErrors = await objects.reduce<Promise<RulesErrors>>(
-    async (accumPromise, object) => {
-      const accum = await accumPromise;
-      const rule = await readRules({ alertsClient, ruleId: object.rule_id });
-      if (rule != null && isAlertType(rule) && rule.params.immutable !== true) {
-        const transformedRule = transformAlertToRule(rule);
-        return {
-          missingRules: accum.missingRules,
-          rules: [...accum.rules, transformedRule],
-        };
-      } else {
-        return {
-          missingRules: [...accum.missingRules, { rule_id: object.rule_id }],
-          rules: accum.rules,
-        };
-      }
-    },
-    Promise.resolve({
-      exportedCount: 0,
-      missingRules: [],
-      rules: [],
-    })
+  const alertsAndErrors = await Promise.all(
+    objects.reduce<Array<Promise<ExportRules>>>((accumPromise, object) => {
+      const exportWorkerPromise = new Promise<ExportRules>(async resolve => {
+        try {
+          const rule = await readRules({ alertsClient, ruleId: object.rule_id });
+          if (rule != null && isAlertType(rule) && rule.params.immutable !== true) {
+            const transformedRule = transformAlertToRule(rule);
+            resolve({
+              statusCode: 200,
+              rule: transformedRule,
+            });
+          } else {
+            resolve({
+              statusCode: 404,
+              missingRuleId: { rule_id: object.rule_id },
+            });
+          }
+        } catch {
+          resolve({
+            statusCode: 404,
+            missingRuleId: { rule_id: object.rule_id },
+          });
+        }
+      });
+      return [...accumPromise, exportWorkerPromise];
+    }, [])
   );
-  return alertsAndErrors;
+
+  const missingRules = alertsAndErrors.filter(
+    resp => resp.statusCode === 404
+  ) as ExportFailedRule[];
+  const exportedRules = alertsAndErrors.filter(
+    resp => resp.statusCode === 200
+  ) as ExportSuccesRule[];
+
+  return {
+    exportedCount: exportedRules.length,
+    missingRules: missingRules.map(mr => mr.missingRuleId),
+    rules: exportedRules.map(er => er.rule),
+  };
 };

@@ -58,7 +58,6 @@ export const createMockServer = (config: Record<string, string> = defaultConfig)
     })),
   };
   server.decorate('request', 'getAlertsClient', () => alertsClient);
-  server.decorate('request', 'getBasePath', () => '/s/default');
   server.plugins.elasticsearch = (elasticsearch as unknown) as ElasticsearchPlugin;
   server.plugins.spaces = { getSpaceId: () => 'default' };
   server.plugins.actions = {
@@ -91,7 +90,6 @@ export const createMockServerWithoutAlertClientDecoration = (
   } as any; // The types have really bad conflicts at the moment so I have to use any
 
   const actionsClient = actionsClientMock.create();
-  serverWithoutAlertClient.decorate('request', 'getBasePath', () => '/s/default');
 
   return {
     serverWithoutAlertClient: serverWithoutAlertClient as ServerFacade & Hapi.Server,

@@ -229,6 +229,7 @@ export interface LegacyApp extends AppBase {
   appUrl: string;
   subUrlBase?: string;
   linkToLastSubUrl?: boolean;
+  disableSubUrlTracking?: boolean;
 }
 
 /**
