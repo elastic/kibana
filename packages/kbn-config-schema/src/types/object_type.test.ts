@@ -35,6 +35,33 @@ test('returns empty object if undefined', () => {
   expect(type.validate(undefined)).toEqual({});
 });
 
+test('properly parse the value if input is a string', () => {
+  const type = schema.object({
+    name: schema.string(),
+  });
+  const value = `{"name": "test"}`;
+
+  expect(type.validate(value)).toEqual({ name: 'test' });
+});
+
+test('fails if string input cannot be parsed', () => {
+  const type = schema.object({
+    name: schema.string(),
+  });
+  expect(() => type.validate(`invalidjson`)).toThrowErrorMatchingInlineSnapshot(
+    `"could not parse object value from [invalidjson]"`
+  );
+});
+
+test('fails with correct type if parsed input is not an object', () => {
+  const type = schema.object({
+    name: schema.string(),
+  });
+  expect(() => type.validate('[1,2,3]')).toThrowErrorMatchingInlineSnapshot(
+    `"expected a plain object value, but found [Array] instead."`
+  );
+});
+
 test('fails if missing required value', () => {
   const type = schema.object({
     name: schema.string(),
@@ -154,7 +181,7 @@ test('called with wrong type', () => {
   const type = schema.object({});
 
   expect(() => type.validate('foo')).toThrowErrorMatchingInlineSnapshot(
-    `"expected a plain object value, but found [string] instead."`
+    `"could not parse object value from [foo]"`
   );
   expect(() => type.validate(123)).toThrowErrorMatchingInlineSnapshot(
     `"expected a plain object value, but found [number] instead."`

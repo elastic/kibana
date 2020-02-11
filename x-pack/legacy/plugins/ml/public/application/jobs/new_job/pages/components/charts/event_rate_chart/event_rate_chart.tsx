@@ -9,7 +9,7 @@ import { BarSeries, Chart, ScaleType, Settings, TooltipType } from '@elastic/cha
 import { Axes } from '../common/axes';
 import { LineChartPoint } from '../../../../common/chart_loader';
 import { Anomaly } from '../../../../common/results_loader';
-import { EVENT_RATE_COLOR, EVENT_RATE_COLOR_WITH_ANOMALIES } from '../common/settings';
+import { useChartColors } from '../common/settings';
 import { LoadingWrapper } from '../loading_wrapper';
 import { Anomalies } from '../common/anomalies';
 
@@ -32,6 +32,7 @@ export const EventRateChart: FC<Props> = ({
   loading = false,
   fadeChart,
 }) => {
+  const { EVENT_RATE_COLOR_WITH_ANOMALIES, EVENT_RATE_COLOR } = useChartColors();
   const barColor = fadeChart ? EVENT_RATE_COLOR_WITH_ANOMALIES : EVENT_RATE_COLOR;
 
   return (

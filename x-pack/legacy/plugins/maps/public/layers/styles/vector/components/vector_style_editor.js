@@ -153,7 +153,7 @@ export class VectorStyleEditor extends Component {
 
   _hasMarkerOrIcon() {
     const iconSize = this.props.styleProperties[VECTOR_STYLES.ICON_SIZE];
-    return !iconSize.isDynamic() && iconSize.getOptions().size > 0;
+    return iconSize.isDynamic() || iconSize.getOptions().size > 0;
   }
 
   _hasLabel() {
