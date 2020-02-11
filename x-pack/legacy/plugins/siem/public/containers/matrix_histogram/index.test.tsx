@@ -5,12 +5,11 @@
  */
 
 import { useQuery } from '.';
-import { HistogramType } from '../../components/matrix_histogram/types';
 import { mount } from 'enzyme';
 import React from 'react';
 import { useApolloClient } from '../../utils/apollo_context';
 import { errorToToaster } from '../../components/ml/api/error_to_toaster';
-import { MatrixOverTimeHistogramData } from '../../graphql/types';
+import { MatrixOverTimeHistogramData, HistogramType } from '../../graphql/types';
 import { InspectQuery, Refetch } from '../../store/inputs/model';
 
 const mockQuery = jest.fn().mockResolvedValue({
@@ -62,7 +61,7 @@ describe('useQuery', () => {
           endDate: 100,
           errorMessage: 'fakeErrorMsg',
           filterQuery: '',
-          histogramType: 'alerts' as HistogramType,
+          histogramType: HistogramType.alerts,
           isInspected: false,
           stackByField: 'fakeField',
           startDate: 0,
@@ -124,7 +123,7 @@ describe('useQuery', () => {
           endDate: 100,
           errorMessage: 'fakeErrorMsg',
           filterQuery: '',
-          histogramType: 'alerts' as HistogramType,
+          histogramType: HistogramType.alerts,
           isInspected: false,
           stackByField: 'fakeField',
           startDate: 0,

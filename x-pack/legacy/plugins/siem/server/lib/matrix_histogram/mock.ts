@@ -5,6 +5,7 @@
  */
 
 import { defaultIndexPattern } from '../../../default_index_pattern';
+import { HistogramType } from '../../graphql/types';
 
 export const mockAlertsHistogramDataResponse = {
   took: 513,
@@ -112,4 +113,6 @@ export const mockOptions = {
   },
   defaultIndex: defaultIndexPattern,
   filterQuery: '',
+  stackByField: 'event.module',
+  histogramType: HistogramType.alerts,
 };

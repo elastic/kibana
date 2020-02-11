@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getOr, noop } from 'lodash/fp';
+import { getOr } from 'lodash/fp';
 import React, { useEffect } from 'react';
 import { AuthenticationTable } from '../../../components/page/hosts/authentications_table';
 import { manageQuery } from '../../../components/page/manage_query';
@@ -14,11 +14,11 @@ import { hostsModel } from '../../../store/hosts';
 import {
   MatrixHistogramOption,
   MatrixHistogramMappingTypes,
-  HistogramType,
 } from '../../../components/matrix_histogram/types';
 import { MatrixHistogramContainer } from '../../../components/matrix_histogram';
 import { KpiHostsChartColors } from '../../../components/page/hosts/kpi_hosts/types';
 import * as i18n from '../translations';
+import { HistogramType } from '../../../graphql/types';
 
 const AuthenticationTableManage = manageQuery(AuthenticationTable);
 const ID = 'authenticationsOverTimeQuery';
@@ -50,11 +50,10 @@ export const authMatrixDataMappingFields: MatrixHistogramMappingTypes = {
 const histogramConfigs = {
   defaultStackByOption: authStackByOptions[0],
   errorMessage: i18n.ERROR_FETCHING_AUTHENTICATIONS_DATA,
-  histogramType: 'authentications' as HistogramType,
+  histogramType: HistogramType.authentications,
   mapping: authMatrixDataMappingFields,
   stackByOptions: authStackByOptions,
   title: i18n.NAVIGATION_AUTHENTICATIONS_TITLE,
-  updateDateRange: noop,
 };
 
 export const AuthenticationsQueryTabBody = ({
@@ -65,7 +64,6 @@ export const AuthenticationsQueryTabBody = ({
   setQuery,
   startDate,
   type,
-  updateDateRange = noop,
 }: HostsComponentsQueryProps) => {
   useEffect(() => {
     return () => {

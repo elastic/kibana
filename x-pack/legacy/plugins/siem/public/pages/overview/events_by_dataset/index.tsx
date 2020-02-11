@@ -11,7 +11,6 @@ import React, { useEffect, useMemo } from 'react';
 import { Position } from '@elastic/charts';
 import { SHOWING, UNIT } from '../../../components/events_viewer/translations';
 import { convertToBuildEsQuery } from '../../../lib/keury';
-import { SetAbsoluteRangeDatePicker } from '../../network/types';
 import { getTabsOnHostsUrl } from '../../../components/link_to/redirect_to_hosts';
 import { histogramConfigs } from '../../../pages/hosts/navigation/events_query_tab_body';
 import { MatrixHistogramContainer } from '../../../components/matrix_histogram';
@@ -41,7 +40,6 @@ interface Props {
   from: number;
   indexPattern: IIndexPattern;
   query?: Query;
-  setAbsoluteRangeDatePicker: SetAbsoluteRangeDatePicker;
   setQuery: (params: {
     id: string;
     inspect: inputsModel.InspectQuery | null;

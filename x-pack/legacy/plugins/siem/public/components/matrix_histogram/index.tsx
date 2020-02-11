@@ -34,11 +34,11 @@ import {
   MatrixHistogramMappingTypes,
   GetTitle,
   GetSubTitle,
-  HistogramType,
 } from '../../components/matrix_histogram/types';
 import { SetQuery } from '../../pages/hosts/navigation/types';
 import { QueryTemplateProps } from '../../containers/query_template';
 import { setAbsoluteRangeDatePicker } from '../../store/inputs/actions';
+import { HistogramType } from '../../graphql/types';
 
 export interface OwnProps extends QueryTemplateProps {
   defaultStackByOption: MatrixHistogramOption;

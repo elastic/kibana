@@ -193,7 +193,6 @@ const DetectionEnginePageComponent: React.FC<DetectionEnginePageComponentProps> 
                             hideHeaderChildren={true}
                             indexPattern={indexPattern}
                             query={query}
-                            setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker!}
                             setQuery={setQuery}
                             to={to}
                           />

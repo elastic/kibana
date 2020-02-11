@@ -6,14 +6,13 @@
 
 import { get, getOr } from 'lodash/fp';
 
-import { MatrixHistogramOverTimeData, MatrixOverTimeHistogramData } from '../../graphql/types';
-import { inspectStringifyObject } from '../../utils/build_query';
 import {
-  FrameworkAdapter,
-  FrameworkRequest,
-  MatrixHistogramRequestOptions,
-  MatrixHistogramType,
-} from '../framework';
+  MatrixHistogramOverTimeData,
+  MatrixOverTimeHistogramData,
+  HistogramType,
+} from '../../graphql/types';
+import { inspectStringifyObject } from '../../utils/build_query';
+import { FrameworkAdapter, FrameworkRequest, MatrixHistogramRequestOptions } from '../framework';
 import {
   MatrixHistogramAdapter,
   AlertsGroupData,
@@ -39,34 +38,31 @@ interface MatrixHistogramSchema<T> {
   parseKey: string;
 }
 
-type MatrixHistogramParseData<T> = T extends 'alerts'
+type MatrixHistogramParseData<T> = T extends HistogramType.alerts
   ? AlertsGroupData[]
-  : T extends 'anomalies'
+  : T extends HistogramType.anomalies
   ? AnomaliesActionGroupData[]
-  : T extends 'dns'
+  : T extends HistogramType.dns
   ? DnsHistogramGroupData[]
-  : T extends 'authentications'
+  : T extends HistogramType.authentications
   ? AuthenticationsActionGroupData[]
-  : T extends 'events'
+  : T extends HistogramType.events
   ? EventsActionGroupData[]
   : never;
 
-type MatrixHistogramHit<T> = T extends 'alerts'
+type MatrixHistogramHit<T> = T extends HistogramType.alerts
   ? EventHit
-  : T extends 'anomalies'
+  : T extends HistogramType.anomalies
   ? AnomalyHit
-  : T extends 'dns'
+  : T extends HistogramType.dns
   ? EventHit
-  : T extends 'authentications'
+  : T extends HistogramType.authentications
   ? AuthenticationHit
-  : T extends 'events'
+  : T extends HistogramType.events
   ? EventHit
   : never;
 
-type MatrixHistogramConfig = Record<
-  MatrixHistogramType,
-  MatrixHistogramSchema<MatrixHistogramType>
->;
+type MatrixHistogramConfig = Record<HistogramType, MatrixHistogramSchema<HistogramType>>;
 
 const getGenericData = <T>(
   data: MatrixHistogramParseData<T>,
@@ -127,7 +123,7 @@ export class ElasticsearchMatrixHistogramAdapter implements MatrixHistogramAdapt
     }
     const dsl = myConfig.buildDsl(options);
     const response = await this.framework.callWithRequest<
-      MatrixHistogramHit<MatrixHistogramType>,
+      MatrixHistogramHit<HistogramType>,
       TermAggregation
     >(request, 'search', dsl);
     const totalCount = getOr(0, 'hits.total.value', response);

@@ -3,9 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { noop } from 'lodash/fp';
 import * as i18n from './translations';
-import { MatrixHistogramOption, HistogramType } from '../../../components/matrix_histogram/types';
+import { MatrixHistogramOption } from '../../../components/matrix_histogram/types';
+import { HistogramType } from '../../../graphql/types';
 
 export const anomaliesStackByOptions: MatrixHistogramOption[] = [
   {
@@ -18,9 +18,8 @@ export const histogramConfigs = {
   defaultStackByOption: anomaliesStackByOptions[0],
   errorMessage: i18n.ERROR_FETCHING_ANOMALIES_DATA,
   hideHistogramIfEmpty: true,
-  histogramType: 'anomalies' as HistogramType,
+  histogramType: HistogramType.anomalies,
   stackByOptions: anomaliesStackByOptions,
   subtitle: undefined,
   title: i18n.ANOMALIES_TITLE,
-  updateDateRange: noop,
 };

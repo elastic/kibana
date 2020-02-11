@@ -132,6 +132,7 @@ export const HostsComponent = React.memo<HostsComponentProps>(
                     to={to}
                     filterQuery={tabsFilterQuery}
                     isInitializing={isInitializing}
+                    setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
                     setQuery={setQuery}
                     from={from}
                     type={hostsModel.HostsType.page}

@@ -5,7 +5,6 @@
  */
 
 import React, { useEffect } from 'react';
-import { noop } from 'lodash/fp';
 import { AnomaliesQueryTabBodyProps } from './types';
 import { getAnomaliesFilterQuery } from './utils';
 import { useSiemJobs } from '../../../components/ml_popover/hooks/use_siem_jobs';
@@ -25,7 +24,6 @@ export const AnomaliesQueryTabBody = ({
   narrowDateRange,
   filterQuery,
   anomaliesFilterQuery,
-  updateDateRange = noop,
   AnomaliesTableComponent,
   flowTarget,
   ip,

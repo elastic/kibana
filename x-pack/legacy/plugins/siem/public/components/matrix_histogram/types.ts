@@ -9,6 +9,7 @@ import { ActionCreator } from 'redux';
 import { ESQuery } from '../../../common/typed_json';
 import { SetQuery } from '../../pages/hosts/navigation/types';
 import { InputsModelId } from '../../store/inputs/constants';
+import { HistogramType } from '../../graphql/types';
 
 export type MatrixHistogramMappingTypes = Record<
   string,
@@ -44,8 +45,6 @@ export interface MatrixHistogramBasicProps {
   subtitle?: string | GetSubTitle;
   title?: string | GetTitle;
 }
-
-export type HistogramType = 'authentications' | 'anomalies' | 'events' | 'alerts' | 'dns';
 
 export interface MatrixHistogramQueryProps {
   endDate: number;

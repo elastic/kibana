@@ -1452,7 +1452,7 @@
                 "type": {
                   "kind": "NON_NULL",
                   "name": null,
-                  "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
+                  "ofType": { "kind": "ENUM", "name": "HistogramType", "ofType": null }
                 },
                 "defaultValue": null
               }
@@ -7430,6 +7430,32 @@
         "inputFields": null,
         "interfaces": [],
         "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "ENUM",
+        "name": "HistogramType",
+        "description": "",
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
+        "enumValues": [
+          {
+            "name": "authentications",
+            "description": "",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "anomalies",
+            "description": "",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          { "name": "events", "description": "", "isDeprecated": false, "deprecationReason": null },
+          { "name": "alerts", "description": "", "isDeprecated": false, "deprecationReason": null },
+          { "name": "dns", "description": "", "isDeprecated": false, "deprecationReason": null }
+        ],
         "possibleTypes": null
       },
       {

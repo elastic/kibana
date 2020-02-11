@@ -10,7 +10,7 @@ export const MatrixHistogramGqlQuery = gql`
   query GetMatrixHistogramQuery(
     $defaultIndex: [String!]!
     $filterQuery: String
-    $histogramType: String!
+    $histogramType: HistogramType!
     $inspect: Boolean!
     $sourceId: ID!
     $stackByField: String!

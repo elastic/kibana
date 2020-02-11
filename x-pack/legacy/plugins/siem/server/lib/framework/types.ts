@@ -18,6 +18,7 @@ import {
   SourceConfiguration,
   TimerangeInput,
   Maybe,
+  HistogramType,
 } from '../../graphql/types';
 import { RequestFacade } from '../../types';
 
@@ -131,11 +132,9 @@ export interface RequestBasicOptions {
   defaultIndex: string[];
 }
 
-export type MatrixHistogramType = 'alerts' | 'anomalies' | 'authentications' | 'dns' | 'events';
-
 export interface MatrixHistogramRequestOptions extends RequestBasicOptions {
   stackByField: Maybe<string>;
-  histogramType: MatrixHistogramType;
+  histogramType: HistogramType;
 }
 
 export interface RequestOptions extends RequestBasicOptions {

@@ -38,8 +38,8 @@ describe('alerts elasticsearch_adapter', () => {
         callWithRequest: mockCallWithRequest,
       }));
 
-      const EsNetworkTimelineAlerts = new ElasticsearchMatrixHistogramAdapter(mockFramework);
-      const data = await EsNetworkTimelineAlerts.getAlertsHistogramData(
+      const adapter = new ElasticsearchMatrixHistogramAdapter(mockFramework);
+      const data = await adapter.getHistogramData(
         (mockRequest as unknown) as FrameworkRequest,
         (mockOptions as unknown) as MatrixHistogramRequestOptions
       );

@@ -19,13 +19,21 @@ export const matrixHistogramSchema = gql`
     totalCount: Float!
   }
 
+  enum HistogramType {
+    authentications
+    anomalies
+    events
+    alerts
+    dns
+  }
+
   extend type Source {
     MatrixHistogram(
       filterQuery: String
       defaultIndex: [String!]!
       timerange: TimerangeInput!
       stackByField: String!
-      histogramType: String!
+      histogramType: HistogramType!
     ): MatrixHistogramOverTimeData!
   }
 `;

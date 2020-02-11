@@ -9,9 +9,10 @@ import { StatefulEventsViewer } from '../../../components/events_viewer';
 import { HostsComponentsQueryProps } from './types';
 import { hostsModel } from '../../../store/hosts';
 import { eventsDefaultModel } from '../../../components/events_viewer/default_model';
-import { MatrixHistogramOption, HistogramType } from '../../../components/matrix_histogram/types';
+import { MatrixHistogramOption } from '../../../components/matrix_histogram/types';
 import { MatrixHistogramContainer } from '../../../components/matrix_histogram';
 import * as i18n from '../translations';
+import { HistogramType } from '../../../graphql/types';
 
 const HOSTS_PAGE_TIMELINE_ID = 'hosts-page';
 const EVENTS_HISTOGRAM_ID = 'eventsOverTimeQuery';
@@ -34,7 +35,7 @@ export const eventsStackByOptions: MatrixHistogramOption[] = [
 export const histogramConfigs = {
   defaultStackByOption: eventsStackByOptions[0],
   errorMessage: i18n.ERROR_FETCHING_EVENTS_DATA,
-  histogramType: 'events' as HistogramType,
+  histogramType: HistogramType.events,
   stackByOptions: eventsStackByOptions,
   subtitle: undefined,
   title: i18n.NAVIGATION_EVENTS_TITLE,

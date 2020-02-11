@@ -301,6 +301,14 @@ export enum FlowTarget {
   source = 'source',
 }
 
+export enum HistogramType {
+  authentications = 'authentications',
+  anomalies = 'anomalies',
+  events = 'events',
+  alerts = 'alerts',
+  dns = 'dns',
+}
+
 export enum FlowTargetSourceDest {
   destination = 'destination',
   source = 'source',
@@ -2340,7 +2348,7 @@ export interface MatrixHistogramSourceArgs {
 
   stackByField: string;
 
-  histogramType: string;
+  histogramType: HistogramType;
 }
 export interface NetworkTopCountriesSourceArgs {
   id?: Maybe<string>;
@@ -3277,7 +3285,7 @@ export namespace GetMatrixHistogramQuery {
   export type Variables = {
     defaultIndex: string[];
     filterQuery?: Maybe<string>;
-    histogramType: string;
+    histogramType: HistogramType;
     inspect: boolean;
     sourceId: string;
     stackByField: string;

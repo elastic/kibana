@@ -14,9 +14,10 @@ import { manageQuery } from '../../../components/page/manage_query';
 import { NetworkComponentQueryProps } from './types';
 import { networkModel } from '../../../store';
 
-import { MatrixHistogramOption, HistogramType } from '../../../components/matrix_histogram/types';
+import { MatrixHistogramOption } from '../../../components/matrix_histogram/types';
 import * as i18n from '../translations';
 import { MatrixHistogramContainer } from '../../../components/matrix_histogram';
+import { HistogramType } from '../../../graphql/types';
 
 const NetworkDnsTableManage = manageQuery(NetworkDnsTable);
 
@@ -30,11 +31,10 @@ const dnsStackByOptions: MatrixHistogramOption[] = [
 export const histogramConfigs = {
   defaultStackByOption: dnsStackByOptions[0],
   errorMessage: i18n.ERROR_FETCHING_DNS_DATA,
-  histogramType: 'dns' as HistogramType,
+  histogramType: HistogramType.dns,
   stackByOptions: dnsStackByOptions,
   subtitle: undefined,
   title: noop,
-  updateDateRange: noop,
 };
 
 export const DnsQueryTabBody = ({
@@ -45,7 +45,6 @@ export const DnsQueryTabBody = ({
   startDate,
   setQuery,
   type,
-  updateDateRange = noop,
 }: NetworkComponentQueryProps) => {
   useEffect(() => {
     return () => {
@@ -64,9 +63,8 @@ export const DnsQueryTabBody = ({
     () => ({
       ...histogramConfigs,
       title: getTitle,
-      updateDateRange,
     }),
-    [getTitle, updateDateRange]
+    [getTitle]
   );
 
   return (
