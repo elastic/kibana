@@ -9,7 +9,7 @@ import { LensMultiTable } from '../types';
 import React from 'react';
 import { shallow } from 'enzyme';
 import { MetricConfig } from './types';
-import { fieldFormats } from '../../../../../../src/plugins/data/public';
+import { IFieldFormat } from '../../../../../../src/plugins/data/public';
 
 function sampleArgs() {
   const data: LensMultiTable = {
@@ -55,9 +55,7 @@ describe('metric_expression', () => {
       const { data, args } = sampleArgs();
 
       expect(
-        shallow(
-          <MetricChart data={data} args={args} formatFactory={x => x as fieldFormats.FieldFormat} />
-        )
+        shallow(<MetricChart data={data} args={args} formatFactory={x => x as IFieldFormat} />)
       ).toMatchInlineSnapshot(`
         <VisualizationContainer
           className="lnsMetricExpression__container"
@@ -98,7 +96,7 @@ describe('metric_expression', () => {
           <MetricChart
             data={data}
             args={{ ...args, mode: 'reduced' }}
-            formatFactory={x => x as fieldFormats.FieldFormat}
+            formatFactory={x => x as IFieldFormat}
           />
         )
       ).toMatchInlineSnapshot(`

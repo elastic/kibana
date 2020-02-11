@@ -55,7 +55,7 @@ describe('Alerts Cluster Search', () => {
       const { mockReq, callWithRequestStub } = createStubs(mockQueryResult, featureStub);
       return alertsClusterSearch(
         mockReq,
-        '.monitoring-alerts,monitoring-alerts',
+        '.monitoring-alerts',
         { cluster_uuid: 'cluster-1234' },
         checkLicense
       ).then(alerts => {
@@ -68,7 +68,7 @@ describe('Alerts Cluster Search', () => {
       const { mockReq, callWithRequestStub } = createStubs(mockQueryResult, featureStub);
       return alertsClusterSearch(
         mockReq,
-        '.monitoring-alerts,monitoring-alerts',
+        '.monitoring-alerts',
         { cluster_uuid: 'cluster-1234' },
         checkLicense,
         { size: 3 }
@@ -89,15 +89,9 @@ describe('Alerts Cluster Search', () => {
           issue_date: 'fake-issue_date',
         },
       };
-      return alertsClusterSearch(
-        mockReq,
-        '.monitoring-alerts,monitoring-alerts',
-        cluster,
-        checkLicense,
-        {
-          size: 3,
-        }
-      ).then(alerts => {
+      return alertsClusterSearch(mockReq, '.monitoring-alerts', cluster, checkLicense, {
+        size: 3,
+      }).then(alerts => {
         expect(alerts).to.have.length(3);
         expect(alerts[0]).to.eql(mockAlerts[0]);
         expect(alerts[1]).to.eql({
@@ -128,15 +122,9 @@ describe('Alerts Cluster Search', () => {
           issue_date: 'fake-issue_date',
         },
       };
-      return alertsClusterSearch(
-        mockReq,
-        '.monitoring-alerts,monitoring-alerts',
-        cluster,
-        checkLicense,
-        {
-          size: 3,
-        }
-      ).then(alerts => {
+      return alertsClusterSearch(mockReq, '.monitoring-alerts', cluster, checkLicense, {
+        size: 3,
+      }).then(alerts => {
         expect(alerts).to.have.length(1);
         expect(alerts[0]).to.eql({
           metadata: {
@@ -167,7 +155,7 @@ describe('Alerts Cluster Search', () => {
       const { mockReq, callWithRequestStub } = createStubs({}, featureStub);
       return alertsClusterSearch(
         mockReq,
-        '.monitoring-alerts,monitoring-alerts',
+        '.monitoring-alerts',
         { cluster_uuid: 'cluster-1234' },
         checkLicense
       ).then(alerts => {
@@ -189,7 +177,7 @@ describe('Alerts Cluster Search', () => {
       const { mockReq, callWithRequestStub } = createStubs({}, featureStub);
       return alertsClusterSearch(
         mockReq,
-        '.monitoring-alerts,monitoring-alerts',
+        '.monitoring-alerts',
         { cluster_uuid: 'cluster-1234' },
         checkLicense
       ).then(alerts => {
