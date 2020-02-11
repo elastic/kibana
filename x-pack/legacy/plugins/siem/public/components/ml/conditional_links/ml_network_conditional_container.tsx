@@ -13,6 +13,8 @@ import { replaceKQLParts } from './replace_kql_parts';
 import { emptyEntity, getMultipleEntities, multipleEntities } from './entity_helpers';
 import { SiemPageName } from '../../../pages/home/types';
 
+import { url as urlUtils } from '../../../../../../../../src/plugins/kibana_utils/public';
+
 interface QueryStringType {
   '?_g': string;
   query: string | null;
@@ -36,7 +38,10 @@ export const MlNetworkConditionalContainer = React.memo<MlNetworkConditionalProp
           queryStringDecoded.query = replaceKQLParts(queryStringDecoded.query);
         }
 
-        const reEncoded = stringify(queryStringDecoded, { sort: false });
+        const reEncoded = stringify(urlUtils.encodeQuery(queryStringDecoded), {
+          sort: false,
+          encode: false,
+        });
 
         return <Redirect to={`/${SiemPageName.network}?${reEncoded}`} />;
       }}
@@ -58,7 +63,10 @@ export const MlNetworkConditionalContainer = React.memo<MlNetworkConditionalProp
         }
 
         if (emptyEntity(ip)) {
-          const reEncoded = stringify(queryStringDecoded, { sort: false });
+          const reEncoded = stringify(urlUtils.encodeQuery(queryStringDecoded), {
+            sort: false,
+            encode: false,
+          });
 
           return <Redirect to={`/${SiemPageName.network}?${reEncoded}`} />;
         } else if (multipleEntities(ip)) {
@@ -68,10 +76,16 @@ export const MlNetworkConditionalContainer = React.memo<MlNetworkConditionalProp
             ips,
             queryStringDecoded.query || ''
           );
-          const reEncoded = stringify(queryStringDecoded, { sort: false });
+          const reEncoded = stringify(urlUtils.encodeQuery(queryStringDecoded), {
+            sort: false,
+            encode: false,
+          });
           return <Redirect to={`/${SiemPageName.network}?${reEncoded}`} />;
         } else {
-          const reEncoded = stringify(queryStringDecoded, { sort: false });
+          const reEncoded = stringify(urlUtils.encodeQuery(queryStringDecoded), {
+            sort: false,
+            encode: false,
+          });
           return <Redirect to={`/${SiemPageName.network}/ip/${ip}?${reEncoded}`} />;
         }
       }}

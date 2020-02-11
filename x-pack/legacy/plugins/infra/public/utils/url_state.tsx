@@ -10,6 +10,7 @@ import throttle from 'lodash/fp/throttle';
 import React from 'react';
 import { Route, RouteProps } from 'react-router-dom';
 import { decode, encode, RisonValue } from 'rison-node';
+import { url } from '../../../../../../src/plugins/kibana_utils/public';
 
 interface UrlStateContainerProps<UrlState> {
   urlState: UrlState | undefined;
@@ -159,11 +160,11 @@ export const replaceStateKeyInQueryString = <UrlState extends any>(
     typeof urlState !== 'undefined' ? encodeRisonUrlState(urlState) : undefined;
 
   return stringify(
-    {
+    url.encodeQuery({
       ...previousQueryValues,
       [stateKey]: encodedUrlState,
-    },
-    { sort: false }
+    }),
+    { sort: false, encode: false }
   );
 };
 

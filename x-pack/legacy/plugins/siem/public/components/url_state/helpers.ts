@@ -24,6 +24,8 @@ import {
   UpdateUrlStateString,
 } from './types';
 
+import { url } from '../../../../../../../src/plugins/kibana_utils/public';
+
 export const decodeRisonUrlState = <T>(value: string | undefined): T | null => {
   try {
     return value ? ((decode(value) as unknown) as T) : null;
@@ -54,7 +56,7 @@ export const replaceStateKeyInQueryString = <T>(stateKey: string, urlState: T) =
   if (urlState == null || (typeof urlState === 'string' && urlState === '')) {
     delete previousQueryValues[stateKey];
 
-    return stringify(previousQueryValues, { sort: false });
+    return stringify(url.encodeQuery(previousQueryValues), { sort: false, encode: false });
   }
 
   // ಠ_ಠ Code was copied from x-pack/legacy/plugins/infra/public/utils/url_state.tsx ಠ_ಠ
@@ -63,11 +65,11 @@ export const replaceStateKeyInQueryString = <T>(stateKey: string, urlState: T) =
     typeof urlState !== 'undefined' ? encodeRisonUrlState(urlState) : undefined;
 
   return stringify(
-    {
+    url.encodeQuery({
       ...previousQueryValues,
       [stateKey]: encodedUrlState,
-    },
-    { sort: false }
+    }),
+    { sort: false, encode: false }
   );
 };
 
