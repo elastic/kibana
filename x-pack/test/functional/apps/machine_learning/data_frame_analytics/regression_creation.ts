@@ -11,7 +11,7 @@ export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
-  describe('outlier detection creation', function() {
+  describe('regression creation', function() {
     this.tags(['smoke']);
     before(async () => {
       await esArchiver.load('ml/egs_regression');

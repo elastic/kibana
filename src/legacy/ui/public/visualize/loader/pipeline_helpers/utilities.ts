@@ -22,7 +22,12 @@ import { identity } from 'lodash';
 import { IAggConfig } from 'ui/agg_types';
 import { npStart } from 'ui/new_platform';
 import { SerializedFieldFormat } from 'src/plugins/expressions/public';
-import { fieldFormats } from '../../../../../../plugins/data/public';
+import {
+  fieldFormats,
+  IFieldFormat,
+  FieldFormatId,
+  FieldFormatsContentType,
+} from '../../../../../../plugins/data/public';
 import { Vis } from '../../../../../core_plugins/visualizations/public';
 
 import { tabifyGetColumns } from '../../../agg_response/tabify/_get_columns';
@@ -45,10 +50,7 @@ const getConfig = (key: string, defaultOverride?: any): any =>
   npStart.core.uiSettings.get(key, defaultOverride);
 const DefaultFieldFormat = fieldFormats.FieldFormat.from(identity);
 
-const getFieldFormat = (
-  id?: fieldFormats.IFieldFormatId,
-  params: object = {}
-): fieldFormats.FieldFormat => {
+const getFieldFormat = (id?: FieldFormatId, params: object = {}): IFieldFormat => {
   const fieldFormatsService = npStart.plugins.data.fieldFormats;
 
   if (id) {
@@ -94,7 +96,7 @@ export const createFormat = (agg: IAggConfig): SerializedFieldFormat => {
   return formats[agg.type.name] ? formats[agg.type.name]() : format;
 };
 
-export type FormatFactory = (mapping?: SerializedFieldFormat) => fieldFormats.FieldFormat;
+export type FormatFactory = (mapping?: SerializedFieldFormat) => IFieldFormat;
 
 export const getFormat: FormatFactory = mapping => {
   if (!mapping) {
@@ -133,7 +135,7 @@ export const getFormat: FormatFactory = mapping => {
     return new IpRangeFormat();
   } else if (isTermsFieldFormat(mapping) && mapping.params) {
     const { params } = mapping;
-    const convert = (val: string, type: fieldFormats.ContentType) => {
+    const convert = (val: string, type: FieldFormatsContentType) => {
       const format = getFieldFormat(params.id, mapping.params);
 
       if (val === '__other__') {
@@ -148,8 +150,8 @@ export const getFormat: FormatFactory = mapping => {
 
     return {
       convert,
-      getConverterFor: (type: fieldFormats.ContentType) => (val: string) => convert(val, type),
-    } as fieldFormats.FieldFormat;
+      getConverterFor: (type: FieldFormatsContentType) => (val: string) => convert(val, type),
+    } as IFieldFormat;
   } else {
     return getFieldFormat(id, mapping.params);
   }
