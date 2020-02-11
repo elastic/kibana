@@ -4,12 +4,12 @@
 <titleabbrev>7.6.0</titleabbrev>
 ++++
 
+Explore the new features in Kibana 7.6.
+
 //NOTE: The notable-highlights tagged regions are re-used in the
 //Installation and Upgrade Guide
 
 // tag::notable-highlights[]
-
-Explore the new features in Kibana 7.6.
 
 [cols="50, 50"]
 |===
@@ -62,9 +62,9 @@ use APM, there are also new pre-configured {anomaly-jobs}.
 [float]
 === Learn more
 
-Get the details on these features in the {kib} 7.6 release blog.
+Get more details on these features in the https://www.elastic.co/blog/kibana-7-6-0-released[{kib} 7.6 release blog].
 For a complete list of enhancements and other changes, check out the
-{kib} 7.6 release notes.
+{kibana-ref}/release-notes-7.6.0.html[{kib} 7.6 release notes].
 
 // end::notable-highlights[]
 
