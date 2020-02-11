@@ -1,0 +1,11 @@
+{
+    "author": "Elastic",
+    "name": "epm",
+    "version": "8.0.0",
+    "private": true,
+    "license": "Elastic-License",
+    "dependencies": {
+      "react-markdown": "^4.2.2"
+    }
+  }
+  
