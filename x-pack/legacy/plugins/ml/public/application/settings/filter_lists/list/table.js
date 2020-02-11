@@ -22,12 +22,12 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { DeleteFilterListModal } from '../components/delete_filter_list_modal';
 
-const UsedByIcon = injectI18n(function({ usedBy, intl }) {
+function UsedByIcon({ usedBy }) {
   // Renders a tick or cross in the 'usedBy' column to indicate whether
   // the filter list is in use in a detectors in any jobs.
   let icon;
@@ -35,8 +35,7 @@ const UsedByIcon = injectI18n(function({ usedBy, intl }) {
     icon = (
       <EuiIcon
         type="check"
-        aria-label={intl.formatMessage({
-          id: 'xpack.ml.settings.filterLists.table.inUseAriaLabel',
+        aria-label={i18n.translate('xpack.ml.settings.filterLists.table.inUseAriaLabel', {
           defaultMessage: 'In use',
         })}
       />
@@ -45,8 +44,7 @@ const UsedByIcon = injectI18n(function({ usedBy, intl }) {
     icon = (
       <EuiIcon
         type="cross"
-        aria-label={intl.formatMessage({
-          id: 'xpack.ml.settings.filterLists.table.notInUseAriaLabel',
+        aria-label={i18n.translate('xpack.ml.settings.filterLists.table.notInUseAriaLabel', {
           defaultMessage: 'Not in use',
         })}
       />
@@ -54,9 +52,9 @@ const UsedByIcon = injectI18n(function({ usedBy, intl }) {
   }
 
   return icon;
-});
+}
 
-UsedByIcon.WrappedComponent.propTypes = {
+UsedByIcon.propTypes = {
   usedBy: PropTypes.object,
 };
 

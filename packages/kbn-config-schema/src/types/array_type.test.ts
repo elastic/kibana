@@ -24,29 +24,65 @@ test('returns value if it matches the type', () => {
   expect(type.validate(['foo', 'bar', 'baz'])).toEqual(['foo', 'bar', 'baz']);
 });
 
+test('properly parse the value if input is a string', () => {
+  const type = schema.arrayOf(schema.string());
+  expect(type.validate('["foo", "bar", "baz"]')).toEqual(['foo', 'bar', 'baz']);
+});
+
 test('fails if wrong input type', () => {
   const type = schema.arrayOf(schema.string());
-  expect(() => type.validate('test')).toThrowErrorMatchingSnapshot();
+  expect(() => type.validate(12)).toThrowErrorMatchingInlineSnapshot(
+    `"expected value of type [array] but got [number]"`
+  );
+});
+
+test('fails if string input cannot be parsed', () => {
+  const type = schema.arrayOf(schema.string());
+  expect(() => type.validate('test')).toThrowErrorMatchingInlineSnapshot(
+    `"could not parse array value from [test]"`
+  );
+});
+
+test('fails with correct type if parsed input is not an array', () => {
+  const type = schema.arrayOf(schema.string());
+  expect(() => type.validate('{"foo": "bar"}')).toThrowErrorMatchingInlineSnapshot(
+    `"expected value of type [array] but got [Object]"`
+  );
 });
 
 test('includes namespace in failure when wrong top-level type', () => {
   const type = schema.arrayOf(schema.string());
-  expect(() => type.validate('test', {}, 'foo-namespace')).toThrowErrorMatchingSnapshot();
+  expect(() => type.validate('test', {}, 'foo-namespace')).toThrowErrorMatchingInlineSnapshot(
+    `"[foo-namespace]: could not parse array value from [test]"`
+  );
 });
 
 test('includes namespace in failure when wrong item type', () => {
   const type = schema.arrayOf(schema.string());
-  expect(() => type.validate([123], {}, 'foo-namespace')).toThrowErrorMatchingSnapshot();
+  expect(() => type.validate([123], {}, 'foo-namespace')).toThrowErrorMatchingInlineSnapshot(
+    `"[foo-namespace.0]: expected value of type [string] but got [number]"`
+  );
 });
 
 test('fails if wrong type of content in array', () => {
   const type = schema.arrayOf(schema.string());
-  expect(() => type.validate([1, 2, 3])).toThrowErrorMatchingSnapshot();
+  expect(() => type.validate([1, 2, 3])).toThrowErrorMatchingInlineSnapshot(
+    `"[0]: expected value of type [string] but got [number]"`
+  );
+});
+
+test('fails when parsing if wrong type of content in array', () => {
+  const type = schema.arrayOf(schema.string());
+  expect(() => type.validate('[1, 2, 3]')).toThrowErrorMatchingInlineSnapshot(
+    `"[0]: expected value of type [string] but got [number]"`
+  );
 });
 
 test('fails if mixed types of content in array', () => {
   const type = schema.arrayOf(schema.string());
-  expect(() => type.validate(['foo', 'bar', true, {}])).toThrowErrorMatchingSnapshot();
+  expect(() => type.validate(['foo', 'bar', true, {}])).toThrowErrorMatchingInlineSnapshot(
+    `"[2]: expected value of type [string] but got [boolean]"`
+  );
 });
 
 test('returns empty array if input is empty but type has default value', () => {
@@ -61,7 +97,9 @@ test('returns empty array if input is empty even if type is required', () => {
 
 test('fails for null values if optional', () => {
   const type = schema.arrayOf(schema.maybe(schema.string()));
-  expect(() => type.validate([null])).toThrowErrorMatchingSnapshot();
+  expect(() => type.validate([null])).toThrowErrorMatchingInlineSnapshot(
+    `"[0]: expected value of type [string] but got [null]"`
+  );
 });
 
 test('handles default values for undefined values', () => {
@@ -108,7 +146,9 @@ test('object within array with required', () => {
 
   const value = [{}];
 
-  expect(() => type.validate(value)).toThrowErrorMatchingSnapshot();
+  expect(() => type.validate(value)).toThrowErrorMatchingInlineSnapshot(
+    `"[0.foo]: expected value of type [string] but got [undefined]"`
+  );
 });
 
 describe('#minSize', () => {
@@ -119,7 +159,7 @@ describe('#minSize', () => {
   test('returns error when fewer items', () => {
     expect(() =>
       schema.arrayOf(schema.string(), { minSize: 2 }).validate(['foo'])
-    ).toThrowErrorMatchingSnapshot();
+    ).toThrowErrorMatchingInlineSnapshot(`"array size is [1], but cannot be smaller than [2]"`);
   });
 });
 
@@ -131,6 +171,6 @@ describe('#maxSize', () => {
   test('returns error when more items', () => {
     expect(() =>
       schema.arrayOf(schema.string(), { maxSize: 1 }).validate(['foo', 'bar'])
-    ).toThrowErrorMatchingSnapshot();
+    ).toThrowErrorMatchingInlineSnapshot(`"array size is [2], but cannot be greater than [1]"`);
   });
 });
