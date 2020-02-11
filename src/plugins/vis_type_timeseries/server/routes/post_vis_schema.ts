@@ -37,6 +37,7 @@ const queryObject = Joi.object({
   language: Joi.string().allow(''),
   query: Joi.string().allow(''),
 });
+const numberOptionalOrEmptyString = Joi.alternatives(numberOptional, Joi.string().valid(''));
 
 const annotationsItems = Joi.object({
   color: stringOptionalNullable,
@@ -121,7 +122,7 @@ const seriesItems = Joi.object({
       })
     )
     .optional(),
-  fill: numberOptional,
+  fill: numberOptionalOrEmptyString,
   filter: Joi.object({
     query: stringRequired,
     language: stringOptionalNullable,
@@ -131,11 +132,11 @@ const seriesItems = Joi.object({
   hidden: Joi.boolean().optional(),
   id: stringRequired,
   label: stringOptionalNullable,
-  line_width: numberOptional,
+  line_width: numberOptionalOrEmptyString,
   metrics: Joi.array().items(metricsItems),
   offset_time: stringOptionalNullable,
   override_index_pattern: numberOptional,
-  point_size: numberRequired,
+  point_size: numberOptionalOrEmptyString,
   separate_axis: numberIntegerOptional,
   seperate_axis: numberIntegerOptional,
   series_index_pattern: stringOptionalNullable,
