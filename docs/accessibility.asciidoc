@@ -1,10 +1,11 @@
+[chapter]
 [[accessibility]]
 = Accessibility Statement for Kibana
 ++++
 <titleabbrev>Accessibility</titleabbrev>
 ++++
 
-Elastic is committed to ensuring digital accessibility for people with disabilities. We are continually improving the user experience for everyone, and strive toward meeting accessibility standards.
+Elastic is committed to ensuring digital accessibility for people with disabilities. We are continually improving the user experience, and strive toward ensuring our tools are usable by everyone.
 
 [float]
 [[accessibility-measures]]
