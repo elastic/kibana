@@ -84,12 +84,7 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
   constructor(props: StepIndexPatternProps) {
     super(props);
     const { indexPatternCreationType, initialQuery } = this.props;
-    /*
-    this.setState({
-      query: uiSettings.get('indexPattern:placeholder'),
-      indexPatternName: indexPatternCreationType.getIndexPatternName(),
-    });
-    */
+
     this.state.query = initialQuery || uiSettings.get('indexPattern:placeholder');
     this.state.indexPatternName = indexPatternCreationType.getIndexPatternName();
   }
@@ -187,7 +182,7 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
   }
 
   renderStatusMessage(matchedIndices: {
-    allIndices: MatchedIndex[]; // todo share type
+    allIndices: MatchedIndex[];
     exactMatchedIndices: MatchedIndex[];
     partialMatchedIndices: MatchedIndex[];
   }) {

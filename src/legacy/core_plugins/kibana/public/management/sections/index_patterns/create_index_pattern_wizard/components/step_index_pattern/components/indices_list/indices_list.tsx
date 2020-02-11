@@ -40,9 +40,10 @@ import { Pager } from '@elastic/eui/lib/services';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { PER_PAGE_INCREMENTS } from '../../../../constants';
+import { MatchedIndex, Tag } from '../../../../types';
 
 interface IndicesListProps {
-  indices: any[]; // todo
+  indices: MatchedIndex[];
   query: string;
 }
 
@@ -185,8 +186,7 @@ export class IndicesList extends React.Component<IndicesListProps, IndicesListSt
             {this.highlightIndexName(index.name, queryWithoutWildcard)}
           </EuiTableRowCell>
           <EuiTableRowCell>
-            {index.tags.map((tag: { name: string; key: string }) => {
-              // todo share type
+            {index.tags.map((tag: Tag) => {
               return (
                 <EuiBadge key={`index_${key}_tag_${tag.key}`} color="primary">
                   {tag.name}

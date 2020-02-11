@@ -277,7 +277,7 @@ describe('StepTimeField', () => {
     expect(component).toMatchSnapshot();
   });
 
-  it.skip('should remember error thrown by createIndexPatter() prop', async () => {
+  it('should remember error thrown by createIndexPatter() prop', async () => {
     const createIndexPattern = async () => {
       throw new Error('foobar');
     };
