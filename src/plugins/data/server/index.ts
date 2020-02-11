@@ -106,7 +106,7 @@ export const indexPatterns = {
 export {
   IndexPatternsFetcher,
   FieldDescriptor as IndexPatternFieldDescriptor,
-  shouldReadFieldFromDocValues,
+  shouldReadFieldFromDocValues, // used only in logstash_fields fixture
 } from './index_patterns';
 
 export {
