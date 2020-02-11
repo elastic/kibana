@@ -26,7 +26,7 @@ export const registerMigrateRoute = (
 ) => {
   router.post(
     {
-      path: '/api/saved_objects/_migrate',
+      path: '/_migrate',
       validate: false,
     },
     async (context, req, res) => {

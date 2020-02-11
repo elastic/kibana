@@ -27,7 +27,7 @@ interface RegisterRouteOptions {
 }
 
 export function registerRoutes({ http, migratorPromise }: RegisterRouteOptions) {
-  const router = http.createRouter('');
+  const router = http.createRouter('/api/saved_objects');
 
   registerMigrateRoute(router, migratorPromise);
 }
