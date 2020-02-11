@@ -52,8 +52,7 @@ export class SecuredFeature extends Feature {
   public get reserved() {
     return this.config.reserved
       ? {
-          // TODO priv id
-          privilege: new FeaturePrivilege('_reserved_', this.config.reserved.privilege, []),
+          privilege: new FeaturePrivilege('__unused__', this.config.reserved.privilege, []),
           description: this.config.reserved.description,
         }
       : undefined;
