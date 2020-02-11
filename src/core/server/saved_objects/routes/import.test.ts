@@ -21,11 +21,16 @@ import supertest from 'supertest';
 import { UnwrapPromise } from '@kbn/utility-types';
 import { registerImportRoute } from './import';
 import { savedObjectsClientMock } from '../../../../core/server/mocks';
+import { SavedObjectConfig } from '../saved_objects_config';
 import { setupServer } from './test_utils';
 
 type setupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 
 const allowedTypes = ['index-pattern', 'visualization', 'dashboard'];
+const config = {
+  maxImportPayloadBytes: 10485760,
+  maxImportExportSize: 10000,
+} as SavedObjectConfig;
 
 describe('POST /api/saved_objects/_import', () => {
   let server: setupServerReturn['server'];
@@ -47,7 +52,7 @@ describe('POST /api/saved_objects/_import', () => {
     savedObjectsClient.find.mockResolvedValue(emptyResponse);
 
     const router = httpSetup.createRouter('/api/saved_objects/');
-    registerImportRoute(router, allowedTypes);
+    registerImportRoute(router, config, allowedTypes);
 
     await server.start();
   });

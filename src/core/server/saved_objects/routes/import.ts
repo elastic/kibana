@@ -22,6 +22,7 @@ import { extname } from 'path';
 import { schema } from '@kbn/config-schema';
 import { IRouter } from '../../http';
 import { importSavedObjects } from '../import';
+import { SavedObjectConfig } from '../saved_objects_config';
 import { createSavedObjectsStreamFromNdJson } from './utils';
 
 interface FileStream extends Readable {
@@ -30,16 +31,19 @@ interface FileStream extends Readable {
   };
 }
 
-export const registerImportRoute = (router: IRouter, supportedTypes: string[]) => {
-  const maxImportExportSize = 10000; // TODO: savedObjects.maxImportExportSize
-  const maxImportPayload = 10485760; // TODO: savedObjects.maxImportPayloadBytes
+export const registerImportRoute = (
+  router: IRouter,
+  config: SavedObjectConfig,
+  supportedTypes: string[]
+) => {
+  const { maxImportExportSize, maxImportPayloadBytes } = config;
 
   router.post(
     {
       path: '/_import',
       options: {
         body: {
-          maxBytes: maxImportPayload,
+          maxBytes: maxImportPayloadBytes,
           output: 'stream',
           accepts: 'multipart/form-data',
         },

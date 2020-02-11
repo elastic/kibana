@@ -19,7 +19,7 @@
 
 import { InternalHttpServiceSetup } from '../../http';
 import { Logger } from '../../logging';
-
+import { SavedObjectConfig } from '../saved_objects_config';
 import { registerGetRoute } from './get';
 import { registerCreateRoute } from './create';
 import { registerDeleteRoute } from './delete';
@@ -35,10 +35,12 @@ import { registerImportRoute } from './import';
 export function registerRoutes({
   http,
   logger,
+  config,
   importableExportableTypes,
 }: {
   http: InternalHttpServiceSetup;
   logger: Logger;
+  config: SavedObjectConfig;
   importableExportableTypes: string[];
 }) {
   const router = http.createRouter('/api/saved_objects/');
@@ -52,6 +54,6 @@ export function registerRoutes({
   registerBulkCreateRoute(router);
   registerBulkUpdateRoute(router);
   registerLogLegacyImportRoute(router, logger);
-  registerExportRoute(router, importableExportableTypes);
-  registerImportRoute(router, importableExportableTypes);
+  registerExportRoute(router, config, importableExportableTypes);
+  registerImportRoute(router, config, importableExportableTypes);
 }

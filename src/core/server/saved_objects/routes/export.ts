@@ -25,10 +25,15 @@ import {
   createConcatStream,
 } from '../../../../legacy/utils/streams';
 import { IRouter } from '../../http';
+import { SavedObjectConfig } from '../saved_objects_config';
 import { getSortedObjectsForExport } from '../export';
 
-export const registerExportRoute = (router: IRouter, supportedTypes: string[]) => {
-  const maxImportExportSize = 10000; // TODO: savedObjects.maxImportExportSize
+export const registerExportRoute = (
+  router: IRouter,
+  config: SavedObjectConfig,
+  supportedTypes: string[]
+) => {
+  const { maxImportExportSize } = config;
 
   const typeSchema = schema.string({
     validate: (type: string) => {

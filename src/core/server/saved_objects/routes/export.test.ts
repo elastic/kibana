@@ -25,12 +25,17 @@ import * as exportMock from '../export';
 import { createListStream } from '../../../../legacy/utils/streams';
 import supertest from 'supertest';
 import { UnwrapPromise } from '@kbn/utility-types';
+import { SavedObjectConfig } from '../saved_objects_config';
 import { registerExportRoute } from './export';
 import { setupServer } from './test_utils';
 
 type setupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 const getSortedObjectsForExport = exportMock.getSortedObjectsForExport as jest.Mock;
 const allowedTypes = ['index-pattern', 'search'];
+const config = {
+  maxImportPayloadBytes: 10485760,
+  maxImportExportSize: 10000,
+} as SavedObjectConfig;
 
 describe('POST /api/saved_objects/_export', () => {
   let server: setupServerReturn['server'];
@@ -40,7 +45,7 @@ describe('POST /api/saved_objects/_export', () => {
     ({ server, httpSetup } = await setupServer());
 
     const router = httpSetup.createRouter('/api/saved_objects/');
-    registerExportRoute(router, allowedTypes);
+    registerExportRoute(router, config, allowedTypes);
 
     await server.start();
   });
