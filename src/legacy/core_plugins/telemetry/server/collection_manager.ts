@@ -47,10 +47,10 @@ export interface StatsCollectionConfig {
 
 export type StatsGetterConfig = UnencryptedStatsGetterConfig | EncryptedStatsGetterConfig;
 export type ClusterDetailsGetter = (config: StatsCollectionConfig) => Promise<ClusterDetails[]>;
-export type StatsGetter = (
+export type StatsGetter<T = unknown> = (
   clustersDetails: ClusterDetails[],
   config: StatsCollectionConfig
-) => Promise<any[]>;
+) => Promise<T[]>;
 
 interface CollectionConfig {
   title: string;
