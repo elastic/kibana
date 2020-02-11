@@ -8,11 +8,7 @@ import { datafeedsProvider } from './datafeeds';
 import { jobsProvider } from './jobs';
 import { groupsProvider } from './groups';
 import { newJobCapsProvider } from './new_job_caps';
-import {
-  newJobChartsProvider,
-  categorizationExamplesProvider,
-  topCategoriesProvider,
-} from './new_job';
+import { newJobChartsProvider, topCategoriesProvider } from './new_job';
 
 export function jobServiceProvider(callAsCurrentUser) {
   return {

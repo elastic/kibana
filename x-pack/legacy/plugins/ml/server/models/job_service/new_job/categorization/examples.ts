@@ -17,7 +17,11 @@ import { ValidationResults } from './validation_results';
 
 const CHUNK_SIZE = 100;
 
-export function categorizationExamplesProvider(callWithRequest: callWithRequestType) {
+export function categorizationExamplesProvider(
+  callWithRequest: callWithRequestType,
+  callWithInternalUser: callWithRequestType,
+  isSecurityDisabled: boolean
+) {
   const validationResults = new ValidationResults();
 
   async function categorizationExamples(
@@ -109,11 +113,9 @@ export function categorizationExamplesProvider(callWithRequest: callWithRequestT
   }
 
   async function loadTokens(examples: string[], analyzer: CategorizationAnalyzer) {
-    const { tokens }: { tokens: Token[] } = await callWithRequest('indices.analyze', {
-      body: {
-        ...getAnalyzer(analyzer),
-        text: examples,
-      },
+    const { tokens }: { tokens: Token[] } = await analyzeWithPrivilegeCheck({
+      ...getAnalyzer(analyzer),
+      text: examples,
     });
 
     const lengths = examples.map(e => e.length);
@@ -198,6 +200,28 @@ export function categorizationExamplesProvider(callWithRequest: callWithRequestT
       sampleSize,
       examples: processedExamples,
     };
+  }
+
+  async function analyzeWithPrivilegeCheck(body: any) {
+    if (isSecurityDisabled === false) {
+      const resp = await callWithRequest('ml.privilegeCheck', {
+        body: {
+          cluster: [
+            'cluster:admin/xpack/ml/job/put',
+            'cluster:admin/xpack/ml/job/open',
+            'cluster:admin/xpack/ml/datafeeds/put',
+          ],
+        },
+      });
+      if (resp.has_all_requested === true) {
+        // security is enabled and user has permission to create jobs
+        // so use kibana user to perform analysis
+        return callWithInternalUser('indices.analyze', { body });
+      }
+    }
+    // security is disabled or user doesn't have permission to create jobs
+    // note, user should not have got this far in the UI with insufficient privileges
+    return callWithRequest('indices.analyze', { body });
   }
 
   return {
