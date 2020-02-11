@@ -6,7 +6,6 @@
 import { SavedObjectsClientContract, KibanaRequest } from 'kibana/server';
 import { NewOutput, Output } from '../types';
 import { DEFAULT_OUTPUT, DEFAULT_OUTPUT_ID, OUTPUT_SAVED_OBJECT_TYPE } from '../constants';
-import { configService } from './config';
 import { appContextService } from './app_context';
 
 const SAVED_OBJECT_TYPE = OUTPUT_SAVED_OBJECT_TYPE;
@@ -29,7 +28,7 @@ class OutputService {
     if (!defaultOutput) {
       const newDefaultOutput = {
         ...DEFAULT_OUTPUT,
-        hosts: [configService.getConfig()!.fleet.defaultOutputHost],
+        hosts: [appContextService.getConfig()!.fleet.defaultOutputHost],
         api_key: await this.createDefaultOutputApiKey(adminUser.username, adminUser.password),
         admin_username: adminUser.username,
         admin_password: adminUser.password,
