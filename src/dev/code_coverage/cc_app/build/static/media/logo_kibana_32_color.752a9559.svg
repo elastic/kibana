@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="32px" height="32px" viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 54.1 (76490) - https://sketchapp.com -->
+    <title>icon / product-logo / 32x32px / kibana / color</title>
+    <desc>Created with Sketch.</desc>
+    <defs>
+        <polygon id="path-1" points="0.1847 0.6547 23.4987 0.6547 23.4987 16 0.1847 16"></polygon>
+    </defs>
+    <g id="icon-/-product-logo-/-32x32px-/-kibana-/-color" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <path d="M28,0.0004 L3,0.0004 L3,12.0004 C7.325,12.0004 11.385,13.1134 14.933,15.0474 L28,0.0004 Z" id="Fill-1" fill="#F04E98"></path>
+        <path d="M3,12.0004 L3,28.7884 L14.933,15.0474 C11.385,13.1134 7.325,12.0004 3,12.0004" id="Fill-3" fill="#343741"></path>
+        <g id="Group-7" transform="translate(4.000000, 16.000000)">
+            <mask id="mask-2" fill="white">
+                <use xlink:href="#path-1"></use>
+            </mask>
+            <g id="Clip-6"></g>
+            <path d="M13.5107,0.6547 L1.2657,14.7567 L0.1847,16.0007 L23.4987,16.0007 C22.2197,9.6967 18.5607,4.2637 13.5107,0.6547" id="Fill-5" fill="#00BFB3" mask="url(#mask-2)"></path>
+        </g>
+    </g>
+</svg>
