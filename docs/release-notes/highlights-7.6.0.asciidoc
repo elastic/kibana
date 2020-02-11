@@ -57,9 +57,6 @@ use APM, there are also new pre-configured {anomaly-jobs}.
 
 | image:release-notes/images/7.6-classification.png[Classification results]
 
-
-|===
-
 |===
 
 [float]
