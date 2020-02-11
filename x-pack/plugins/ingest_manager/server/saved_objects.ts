@@ -7,6 +7,7 @@ import {
   OUTPUT_SAVED_OBJECT_TYPE,
   AGENT_CONFIG_SAVED_OBJECT_TYPE,
   DATASOURCE_SAVED_OBJECT_TYPE,
+  PACKAGES_SAVED_OBJECT_TYPE,
 } from './constants';
 
 /*
@@ -71,6 +72,17 @@ export const savedObjectMappings = {
           input: { type: 'flattened' },
           output_id: { type: 'keyword' },
           processors: { type: 'keyword' },
+        },
+      },
+    },
+  },
+  [PACKAGES_SAVED_OBJECT_TYPE]: {
+    properties: {
+      installed: {
+        type: 'nested',
+        properties: {
+          id: { type: 'keyword' },
+          type: { type: 'keyword' },
         },
       },
     },

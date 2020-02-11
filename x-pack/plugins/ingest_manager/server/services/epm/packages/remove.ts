@@ -5,7 +5,7 @@
  */
 
 import { SavedObjectsClientContract } from 'src/core/server/';
-import { SAVED_OBJECT_TYPE_PACKAGES } from '../../../../common/constants';
+import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../common/constants';
 import { AssetReference, AssetType, ElasticsearchAssetType } from '../../../../common/types';
 import { CallESAsCurrentUser } from '../cluster_access';
 import { getInstallation, savedObjectTypes } from './index';
@@ -22,7 +22,7 @@ export async function removeInstallation(options: {
 
   // Delete the manager saved object with references to the asset objects
   // could also update with [] or some other state
-  await savedObjectsClient.delete(SAVED_OBJECT_TYPE_PACKAGES, pkgkey);
+  await savedObjectsClient.delete(PACKAGES_SAVED_OBJECT_TYPE, pkgkey);
 
   // recreate or delete index patterns when a package is uninstalled
   const indexPatternPromise = installIndexPatterns(savedObjectsClient);

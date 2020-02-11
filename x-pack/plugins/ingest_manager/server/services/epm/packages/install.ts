@@ -5,7 +5,7 @@
  */
 
 import { SavedObject, SavedObjectsClientContract } from 'src/core/server/';
-import { SAVED_OBJECT_TYPE_PACKAGES } from '../../../../common/constants';
+import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../common/constants';
 import { AssetReference, Installation, KibanaAssetType } from '../../../../common/types';
 import { installIndexPatterns } from '../kibana/index_pattern/install';
 import * as Registry from '../registry';
@@ -76,7 +76,7 @@ export async function saveInstallationReferences(options: {
   const toInstall = toSave.reduce(mergeRefsReducer, savedRefs);
 
   await savedObjectsClient.create<Installation>(
-    SAVED_OBJECT_TYPE_PACKAGES,
+    PACKAGES_SAVED_OBJECT_TYPE,
     { installed: toInstall },
     { id: pkgkey, overwrite: true }
   );
