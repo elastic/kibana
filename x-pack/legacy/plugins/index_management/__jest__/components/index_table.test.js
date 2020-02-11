@@ -111,12 +111,12 @@ describe('index table', () => {
   beforeEach(() => {
     // Mock initialization of services
     const services = {
-      extensions: new ExtensionsService(),
-      uiMetric: new UiMetricService('index_management'),
+      extensionsService: new ExtensionsService(),
+      uiMetricService: new UiMetricService('index_management'),
     };
-    services.uiMetric.setup({ reportUiStats() {} });
-    setExtensionsService(services.extensions);
-    setUiMetricService(services.uiMetric);
+    services.uiMetricService.setup({ reportUiStats() {} });
+    setExtensionsService(services.extensionsService);
+    setUiMetricService(services.uiMetricService);
 
     // @ts-ignore
     httpService.setup(mockHttpClient);
