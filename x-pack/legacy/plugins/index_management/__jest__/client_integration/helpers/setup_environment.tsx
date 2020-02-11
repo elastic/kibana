@@ -25,13 +25,13 @@ import { docLinksServiceMock } from '../../../../../../../src/core/public/doc_li
 const mockHttpClient = axios.create({ adapter: axiosXhrAdapter });
 
 export const services = {
-  extensions: new ExtensionsService(),
-  uiMetric: new UiMetricService('index_management'),
+  extensionsService: new ExtensionsService(),
+  uiMetricService: new UiMetricService('index_management'),
 };
-services.uiMetric.setup({ reportUiStats() {} } as any);
-setExtensionsService(services.extensions);
-setUiMetricService(services.uiMetric);
-const appDependencies = { services };
+services.uiMetricService.setup({ reportUiStats() {} } as any);
+setExtensionsService(services.extensionsService);
+setUiMetricService(services.uiMetricService);
+const appDependencies = { services, core: {}, plugins: {} } as any;
 
 export const setupEnvironment = () => {
   // Mock initialization of services
