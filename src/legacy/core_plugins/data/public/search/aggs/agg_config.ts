@@ -21,7 +21,7 @@ import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { npStart } from 'ui/new_platform';
 import { IAggType } from './agg_type';
-import { AggTypesRegistry } from './agg_types_registry';
+import { AggTypesRegistryStart } from './agg_types_registry';
 import { AggGroupNames } from './agg_groups';
 import { writeParams } from './agg_params';
 import { IAggConfigs } from './agg_configs';
@@ -37,7 +37,7 @@ export interface AggConfigOptions {
   enabled: boolean;
   type: string;
   params: any;
-  typesRegistry: ReturnType<AggTypesRegistry['start']>;
+  typesRegistry: AggTypesRegistryStart;
   id?: string;
   schema?: string | Schema;
 }
@@ -124,13 +124,15 @@ export class AggConfig {
   public parent?: IAggConfigs;
   public brandNew?: boolean;
 
-  private readonly __typesRegistry: ReturnType<AggTypesRegistry['start']>;
+  private readonly __typesRegistry: AggTypesRegistryStart;
   private __schema: Schema;
   private __type: IAggType;
   private __typeDecorations: any;
   private subAggs: AggConfig[] = [];
 
   constructor(aggConfigs: IAggConfigs, opts: AggConfigOptions) {
+    this.__typesRegistry = opts.typesRegistry;
+
     this.aggConfigs = aggConfigs;
     this.id = String(opts.id || AggConfig.nextId(aggConfigs.aggs as any));
     this.enabled = typeof opts.enabled === 'boolean' ? opts.enabled : true;
@@ -141,8 +143,6 @@ export class AggConfig {
 
     // setters
     this.setType(opts.type);
-
-    this.__typesRegistry = opts.typesRegistry;
 
     if (opts.schema) {
       this.setSchema(opts.schema);

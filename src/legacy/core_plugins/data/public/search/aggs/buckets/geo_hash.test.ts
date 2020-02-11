@@ -19,6 +19,7 @@
 
 import { geoHashBucketAgg } from './geo_hash';
 import { AggConfigs, IAggConfigs } from '../agg_configs';
+import { aggTypesRegistryStartMock } from '../mocks';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { IBucketAggConfig } from './_bucket_agg_type';
 
@@ -62,7 +63,7 @@ describe('Geohash Agg', () => {
           },
         },
       ],
-      null
+      { typesRegistry: aggTypesRegistryStartMock() }
     );
   };
 

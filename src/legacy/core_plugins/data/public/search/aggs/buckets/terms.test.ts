@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import { AggConfigs } from '../index';
+import { AggConfigs } from '../agg_configs';
+import { aggTypesRegistryStartMock } from '../mocks';
 import { BUCKET_TYPES } from './bucket_agg_types';
 
 jest.mock('ui/new_platform');
@@ -48,7 +49,7 @@ describe('Terms Agg', () => {
             type: BUCKET_TYPES.TERMS,
           },
         ],
-        null
+        { typesRegistry: aggTypesRegistryStartMock() }
       );
     };
 

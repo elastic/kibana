@@ -18,6 +18,7 @@
  */
 
 import { AggConfigs } from '../agg_configs';
+import { aggTypesRegistryStartMock } from '../mocks';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { FieldFormatsGetConfigFn, fieldFormats } from '../../../../../../../plugins/data/public';
 
@@ -80,7 +81,7 @@ describe('Range Agg', () => {
           },
         },
       ],
-      null
+      { typesRegistry: aggTypesRegistryStartMock() }
     );
   };
 

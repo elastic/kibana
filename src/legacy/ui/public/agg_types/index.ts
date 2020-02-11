@@ -27,6 +27,9 @@
 import { start as dataStart } from '../../../core_plugins/data/public/legacy';
 
 // runtime contracts
+const { types } = dataStart.search.aggs;
+export const aggTypes = types.getAll();
+export const { createAggConfigs } = dataStart.search.aggs;
 export const {
   AggConfig,
   AggType,

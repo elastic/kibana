@@ -23,6 +23,8 @@ import {
   aggTypes,
   AggType,
   AggTypesRegistry,
+  AggTypesRegistrySetup,
+  AggTypesRegistryStart,
   AggConfig,
   AggConfigs,
   FieldParamType,
@@ -34,7 +36,7 @@ import {
 } from './aggs';
 
 interface AggsSetup {
-  types: ReturnType<AggTypesRegistry['setup']>;
+  types: AggTypesRegistrySetup;
 }
 
 interface AggsStartLegacy {
@@ -51,10 +53,10 @@ interface AggsStartLegacy {
 interface AggsStart {
   createAggConfigs: (
     indexPattern: IndexPattern,
-    configStates: [],
+    configStates?: any,
     schemas?: Record<string, any>
   ) => InstanceType<typeof AggConfigs>;
-  types: ReturnType<AggTypesRegistry['start']>;
+  types: AggTypesRegistryStart;
   __LEGACY: AggsStartLegacy;
 }
 

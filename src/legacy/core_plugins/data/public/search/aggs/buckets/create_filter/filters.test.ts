@@ -19,6 +19,7 @@
 
 import { createFilterFilters } from './filters';
 import { AggConfigs } from '../../agg_configs';
+import { aggTypesRegistryStartMock } from '../../mocks';
 import { IBucketAggConfig } from '../_bucket_agg_type';
 
 jest.mock('ui/new_platform');
@@ -53,7 +54,7 @@ describe('AggConfig Filters', () => {
             },
           },
         ],
-        null
+        { typesRegistry: aggTypesRegistryStartMock() }
       );
     };
     it('should return a filters filter', () => {
