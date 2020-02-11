@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 export const setupModuleBodySchema = schema.object({
   prefix: schema.maybe(schema.string()),
   groups: schema.maybe(schema.arrayOf(schema.string())),
-  indexPatternName: schema.string(),
+  indexPatternName: schema.maybe(schema.string()),
   query: schema.maybe(schema.any()),
   useDedicatedIndex: schema.maybe(schema.boolean()),
   startDatafeed: schema.maybe(schema.boolean()),
