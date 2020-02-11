@@ -97,6 +97,7 @@ export class DashboardAppController {
   };
 
   constructor({
+    pluginInitializerContext,
     $scope,
     $route,
     $routeParams,
@@ -104,10 +105,10 @@ export class DashboardAppController {
     localStorage,
     indexPatterns,
     savedQueryService,
-    embeddables,
+    embeddable,
     share,
     dashboardCapabilities,
-    npDataStart: { query: queryService },
+    data: { query: queryService },
     core: {
       notifications,
       overlays,
@@ -142,7 +143,7 @@ export class DashboardAppController {
     const dashboardStateManager = new DashboardStateManager({
       savedDashboard: dash,
       hideWriteControls: dashboardConfig.getHideWriteControls(),
-      kibanaVersion: injectedMetadata.getKibanaVersion(),
+      kibanaVersion: pluginInitializerContext.env.packageInfo.version,
       kbnUrlStateStorage,
       history,
     });
@@ -187,9 +188,9 @@ export class DashboardAppController {
 
       let panelIndexPatterns: IndexPattern[] = [];
       Object.values(container.getChildIds()).forEach(id => {
-        const embeddable = container.getChild(id);
-        if (isErrorEmbeddable(embeddable)) return;
-        const embeddableIndexPatterns = (embeddable.getOutput() as any).indexPatterns;
+        const embeddableInstance = container.getChild(id);
+        if (isErrorEmbeddable(embeddableInstance)) return;
+        const embeddableIndexPatterns = (embeddableInstance.getOutput() as any).indexPatterns;
         if (!embeddableIndexPatterns) return;
         panelIndexPatterns.push(...embeddableIndexPatterns);
       });
@@ -285,7 +286,7 @@ export class DashboardAppController {
     let outputSubscription: Subscription | undefined;
 
     const dashboardDom = document.getElementById('dashboardViewport');
-    const dashboardFactory = embeddables.getEmbeddableFactory(
+    const dashboardFactory = embeddable.getEmbeddableFactory(
       DASHBOARD_CONTAINER_TYPE
     ) as DashboardContainerFactory;
     dashboardFactory
@@ -815,8 +816,8 @@ export class DashboardAppController {
       if (dashboardContainer && !isErrorEmbeddable(dashboardContainer)) {
         openAddPanelFlyout({
           embeddable: dashboardContainer,
-          getAllFactories: embeddables.getEmbeddableFactories,
-          getFactory: embeddables.getEmbeddableFactory,
+          getAllFactories: embeddable.getEmbeddableFactories,
+          getFactory: embeddable.getEmbeddableFactory,
           notifications,
           overlays,
           SavedObjectFinder: getSavedObjectFinder(savedObjects, uiSettings),
@@ -826,7 +827,7 @@ export class DashboardAppController {
 
     navActions[TopNavIds.VISUALIZE] = async () => {
       const type = 'visualization';
-      const factory = embeddables.getEmbeddableFactory(type);
+      const factory = embeddable.getEmbeddableFactory(type);
       if (!factory) {
         throw new EmbeddableFactoryNotFoundError(type);
       }

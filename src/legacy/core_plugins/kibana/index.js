@@ -32,11 +32,11 @@ import { registerCspCollector } from './server/lib/csp_usage_collector';
 import { injectVars } from './inject_vars';
 import { i18n } from '@kbn/i18n';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
+import { kbnBaseUrl } from '../../../plugins/kibana_legacy/server';
 
 const mkdirAsync = promisify(Fs.mkdir);
 
 export default function(kibana) {
-  const kbnBaseUrl = '/app/kibana';
   return new kibana.Plugin({
     id: 'kibana',
     config: function(Joi) {

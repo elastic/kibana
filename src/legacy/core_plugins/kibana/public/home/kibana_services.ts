@@ -21,12 +21,10 @@ import {
   ChromeStart,
   DocLinksStart,
   HttpStart,
-  LegacyNavLink,
   NotificationsSetup,
   OverlayStart,
   SavedObjectsClientContract,
   IUiSettingsClient,
-  UiSettingsState,
 } from 'kibana/public';
 import { UiStatsMetricType } from '@kbn/analytics';
 import {
@@ -38,19 +36,7 @@ import { KibanaLegacySetup } from '../../../../../plugins/kibana_legacy/public';
 
 export interface HomeKibanaServices {
   indexPatternService: any;
-  metadata: {
-    app: unknown;
-    bundleId: string;
-    nav: LegacyNavLink[];
-    version: string;
-    branch: string;
-    buildNum: number;
-    buildSha: string;
-    basePath: string;
-    serverName: string;
-    devMode: boolean;
-    uiSettings: { defaults: UiSettingsState; user?: UiSettingsState | undefined };
-  };
+  kibanaVersion: string;
   getInjected: (name: string, defaultValue?: any) => unknown;
   chrome: ChromeStart;
   telemetryOptInProvider: any;

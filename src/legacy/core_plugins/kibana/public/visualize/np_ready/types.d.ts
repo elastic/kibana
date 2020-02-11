@@ -26,7 +26,7 @@ export interface EditorRenderProps {
   appState: AppState;
   core: LegacyCoreStart;
   data: DataPublicPluginStart;
-  embeddables: IEmbeddableStart;
+  embeddable: IEmbeddableStart;
   filters: esFilters.Filter[];
   uiState: PersistedState;
   timeRange: TimeRange;

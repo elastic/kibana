@@ -17,7 +17,13 @@
  * under the License.
  */
 
-import { CoreSetup, CoreStart, LegacyNavLink, Plugin, UiSettingsState } from 'kibana/public';
+import {
+  AppMountParameters,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  PluginInitializerContext,
+} from 'kibana/public';
 
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { setServices } from './kibana_services';
@@ -42,19 +48,6 @@ export interface HomePluginStartDependencies {
 
 export interface HomePluginSetupDependencies {
   __LEGACY: {
-    metadata: {
-      app: unknown;
-      bundleId: string;
-      nav: LegacyNavLink[];
-      version: string;
-      branch: string;
-      buildNum: number;
-      buildSha: string;
-      basePath: string;
-      serverName: string;
-      devMode: boolean;
-      uiSettings: { defaults: UiSettingsState; user?: UiSettingsState | undefined };
-    };
     getAngularDependencies: () => Promise<LegacyAngularInjectedDependencies>;
   };
   usageCollection: UsageCollectionSetup;
@@ -68,6 +61,8 @@ export class HomePlugin implements Plugin {
   private environment: Environment | null = null;
   private directories: readonly FeatureCatalogueEntry[] | null = null;
 
+  constructor(private initializerContext: PluginInitializerContext) {}
+
   setup(
     core: CoreSetup,
     {
@@ -80,19 +75,20 @@ export class HomePlugin implements Plugin {
     kibanaLegacy.registerLegacyApp({
       id: 'home',
       title: 'Home',
-      mount: async ({ core: contextCore }, params) => {
+      mount: async (params: AppMountParameters) => {
         const trackUiMetric = usageCollection.reportUiStats.bind(usageCollection, 'Kibana_home');
         const angularDependencies = await getAngularDependencies();
+        const [coreStart] = await core.getStartServices();
         setServices({
-          ...legacyServices,
           trackUiMetric,
-          http: contextCore.http,
+          kibanaVersion: this.initializerContext.env.packageInfo.version,
+          http: coreStart.http,
           toastNotifications: core.notifications.toasts,
-          banners: contextCore.overlays.banners,
+          banners: coreStart.overlays.banners,
           getInjected: core.injectedMetadata.getInjectedVar,
-          docLinks: contextCore.docLinks,
+          docLinks: coreStart.docLinks,
           savedObjectsClient: this.savedObjectsClient!,
-          chrome: contextCore.chrome,
+          chrome: coreStart.chrome,
           uiSettings: core.uiSettings,
           addBasePath: core.http.basePath.prepend,
           getBasePath: core.http.basePath.get,
