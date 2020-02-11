@@ -108,7 +108,6 @@ export {
   getKbnTypeNames,
   // index patterns
   IIndexPattern,
-  isFilterable,
   IFieldType,
   IFieldSubType,
   // kbn field types

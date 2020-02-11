@@ -20,7 +20,7 @@
 import { PluginInitializerContext } from '../../../core/public';
 
 /*
- * esQuery and esKuery helper namespaces:
+ * esQuery and esKuery:
  */
 
 import {
@@ -50,8 +50,10 @@ export const esQuery = {
   decorateQuery,
 };
 
+export { EsQueryConfig, KueryNode } from '../common';
+
 /*
- * Field Formatters helper namespace:
+ * Field Formatters:
  */
 
 import {
@@ -104,31 +106,7 @@ export const fieldFormats = {
   TruncateFormat,
 };
 
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new DataPublicPlugin(initializerContext);
-}
-
-/**
- * Types to be shared externally
- * @public
- */
-export { IRequestTypesMap, IResponseTypesMap } from './search';
-export * from './types';
 export {
-  EsQueryConfig,
-  // index patterns
-  IIndexPattern,
-  IFieldType,
-  IFieldSubType,
-  // kbn field types
-  ES_FIELD_TYPES,
-  KBN_FIELD_TYPES,
-  // query
-  Query,
-  // timefilter
-  RefreshInterval,
-  TimeRange,
-  // Field Formats
   IFieldFormat,
   IFieldFormatsRegistry,
   FieldFormatsContentType,
@@ -137,16 +115,59 @@ export {
   FieldFormatId,
 } from '../common';
 
+/*
+ * Index patterns:
+ */
+
+import { isFilterable } from '../common';
+
+import {
+  ILLEGAL_CHARACTERS_KEY,
+  CONTAINS_SPACES_KEY,
+  ILLEGAL_CHARACTERS_VISIBLE,
+  ILLEGAL_CHARACTERS,
+  validateIndexPattern,
+  getFromSavedObject,
+  flattenHitWrapper,
+  getRoutes,
+  formatHitProvider,
+} from './index_patterns';
+
+export const indexPatterns = {
+  ILLEGAL_CHARACTERS_KEY,
+  CONTAINS_SPACES_KEY,
+  ILLEGAL_CHARACTERS_VISIBLE,
+  ILLEGAL_CHARACTERS,
+  isFilterable,
+  validate: validateIndexPattern,
+  getFromSavedObject,
+  flattenHitWrapper,
+  // exported only in stub_index_pattern test. Move into data plugin and remove export.
+  getRoutes,
+  formatHitProvider,
+};
+
 export {
-  indexPatterns,
   IndexPatternsContract,
   IndexPattern,
-  // exported only in stub_index_pattern test. Move into data plugin and remove export.
-  FieldList as IndexPatternFieldList,
   Field as IndexPatternField,
   TypeMeta as IndexPatternTypeMeta,
   AggregationRestrictions as IndexPatternAggRestrictions,
+  // exported only in stub_index_pattern test. Move into data plugin and remove export.
+  FieldList as IndexPatternFieldList,
 } from './index_patterns';
+
+export {
+  IIndexPattern,
+  IFieldType,
+  IFieldSubType,
+  ES_FIELD_TYPES,
+  KBN_FIELD_TYPES,
+} from '../common';
+
+/*
+ * Autocomplete query suggestions:
+ */
 
 export {
   QuerySuggestion,
@@ -157,22 +178,31 @@ export {
   QuerySuggestionField,
 } from './autocomplete';
 
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new DataPublicPlugin(initializerContext);
+}
+
+/**
+ * Types to be shared externally
+ * @public
+ */
+export { IRequestTypesMap, IResponseTypesMap } from './search';
+export * from './types';
+export { Query, RefreshInterval, TimeRange } from '../common';
+
 export * from './search';
 export * from './query';
 export * from './ui';
 export {
   // es query
   esFilters,
-  KueryNode,
-  // index patterns
-  isFilterable,
   // kbn field types
   castEsToKbnFieldTypeName,
   getKbnFieldType,
   getKbnTypeNames,
   // utils
   parseInterval,
-  isNestedField,
+  isNestedField, // needs to move to field class
 } from '../common';
 
 // Export plugin after all other imports
