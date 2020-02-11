@@ -7,7 +7,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiPage, EuiTitle, IconType } from '@elastic
 import React, { Fragment } from 'react';
 import styled from 'styled-components';
 // import { PLUGIN } from '../../../common/constants';
-import { PackageInfo } from '../../../../../../../common/types/epm';
+import { PackageInfo } from '../../../../types';
 import { IconPanel } from '../../components/icon_panel';
 import { NavButtonBack } from '../../components/nav_button_back';
 import { Version } from '../../components/version';

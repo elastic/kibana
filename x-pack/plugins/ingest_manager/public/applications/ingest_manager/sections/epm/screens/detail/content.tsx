@@ -8,7 +8,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer } from '@elasti
 import React from 'react';
 import styled from 'styled-components';
 import { DEFAULT_PANEL, DetailParams } from '.';
-import { PackageInfo } from '../../../../../../../common/types/epm';
+import { PackageInfo } from '../../../../types';
 import { AssetsFacetGroup } from '../../components/assets_facet_group';
 import { Requirements } from '../../components/requirements';
 import { CenterColumn, LeftColumn, RightColumn } from './layout';

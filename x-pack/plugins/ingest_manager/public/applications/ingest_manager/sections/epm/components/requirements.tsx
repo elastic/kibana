@@ -7,7 +7,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiTextColor, EuiTitle } from '@elastic/eui';
 import React, { Fragment } from 'react';
 import styled from 'styled-components';
-import { RequirementsByServiceName, entries } from '../../../../../../common/types/epm';
+import { RequirementsByServiceName, entries } from '../../../types';
 import { ServiceTitleMap } from '../constants';
 // import { useCore } from '../hooks/use_core';
 import { Version } from './version';

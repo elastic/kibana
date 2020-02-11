@@ -7,7 +7,7 @@ import { EuiHorizontalRule, EuiPage, EuiPageBody, EuiSpacer } from '@elastic/eui
 import React, { Fragment, useState } from 'react';
 import styled from 'styled-components';
 // import { PLUGIN } from '../../../common/constants';
-import { CategorySummaryItem, PackageList } from '../../../../../../../common/types/epm';
+import { CategorySummaryItem, PackageList } from '../../../../types';
 import { PackageListGrid } from '../../components/package_list_grid';
 // import { useBreadcrumbs, useLinks } from '../../hooks';
 // import { useLinks } from '../../hooks';

@@ -8,7 +8,7 @@ import React, { Fragment, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { DetailViewPanelName } from '../../types';
-import { PackageInfo } from '../../../../../../../common/types/epm';
+import { PackageInfo } from '../../../../types';
 import { getPackageInfoByKey } from '../../data';
 // import { useSetPackageInstallStatus } from '../../hooks';
 // import { useCore } from '../../hooks/use_core';

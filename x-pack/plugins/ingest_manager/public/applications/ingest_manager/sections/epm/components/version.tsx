@@ -6,7 +6,7 @@
 
 import React from 'react';
 import styled from 'styled-components';
-import { RequirementVersion } from '../../../../../../common/types/epm';
+import { RequirementVersion } from '../../../types';
 
 // const CodeText = styled.span`
 //   font-family: ${props => props.theme.eui.euiCodeFontFamily};

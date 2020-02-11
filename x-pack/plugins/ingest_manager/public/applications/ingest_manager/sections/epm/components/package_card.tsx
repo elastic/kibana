@@ -6,7 +6,7 @@
 import { EuiCard, EuiIcon, ICON_TYPES } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
-import { PackageInfo, PackageListItem } from '../../../../../../common/types/epm';
+import { PackageInfo, PackageListItem } from '../../../types';
 import { useLinks } from '../hooks';
 
 export interface BadgeProps {

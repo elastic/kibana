@@ -5,7 +5,7 @@
  */
 import { EuiFacetButton, EuiFacetGroup } from '@elastic/eui';
 import React from 'react';
-import { CategorySummaryItem, CategorySummaryList } from '../../../../../../../common/types/epm';
+import { CategorySummaryItem, CategorySummaryList } from '../../../../types';
 
 export function CategoryFacets({
   categories,

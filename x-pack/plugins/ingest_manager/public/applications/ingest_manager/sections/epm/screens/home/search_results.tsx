@@ -6,7 +6,7 @@
 
 import { EuiText, EuiTitle } from '@elastic/eui';
 import React from 'react';
-import { PackageList } from '../../../../../../../common/types/epm';
+import { PackageList } from '../../../../types';
 import { PackageListGrid } from '../../components/package_list_grid';
 
 interface SearchResultsProps {

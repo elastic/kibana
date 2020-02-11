@@ -6,7 +6,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiImage, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import React, { Fragment } from 'react';
 import styled from 'styled-components';
-import { ScreenshotItem } from '../../../../../../../common/types/epm';
+import { ScreenshotItem } from '../../../../types';
 // import { useCore, useLinks } from '../../hooks';
 
 interface ScreenshotProps {

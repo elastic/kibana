@@ -21,7 +21,7 @@ import {
   AssetTypeToParts,
   KibanaAssetType,
   entries,
-} from '../../../../../../common/types/epm';
+} from '../../../types';
 import {
   AssetIcons,
   AssetTitleMap,

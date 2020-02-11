@@ -5,7 +5,7 @@
  */
 import { EuiButton } from '@elastic/eui';
 import React, { Fragment, useCallback, useMemo, useState } from 'react';
-import { PackageInfo } from '../../../../../../../common/types/epm';
+import { PackageInfo } from '../../../../types';
 // import { useDeletePackage, useGetPackageInstallStatus, useInstallPackage } from '../../hooks';
 // import { InstallStatus } from '../../types';
 import { ConfirmPackageDelete } from './confirm_package_delete';

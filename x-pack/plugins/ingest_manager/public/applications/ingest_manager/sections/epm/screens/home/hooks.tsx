@@ -5,7 +5,7 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
-import { CategorySummaryList, PackageList } from '../../../../../../../common/types/epm';
+import { CategorySummaryList, PackageList } from '../../../../types';
 import { getCategories, getPackages } from '../../data';
 import { fieldsToSearch, LocalSearch, searchIdField } from './search_packages';
 

@@ -6,7 +6,7 @@
 
 import { Search as LocalSearch } from 'js-search';
 import React from 'react';
-import { PackageList, PackageListItem } from '../../../../../../../common/types/epm';
+import { PackageList, PackageListItem } from '../../../../types';
 import { SearchResults } from './search_results';
 
 export { LocalSearch };

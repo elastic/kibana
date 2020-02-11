@@ -5,7 +5,7 @@
  */
 import { EuiFlexGrid, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import React, { Fragment, ReactNode } from 'react';
-import { PackageList } from '../../../../../../common/types/epm';
+import { PackageList } from '../../../types';
 import { BadgeProps, PackageCard } from './package_card';
 
 type ListProps = {
