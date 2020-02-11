@@ -125,7 +125,7 @@ describe('index table', () => {
 
     store = indexManagementStore(services);
 
-    const appDependencies = { services };
+    const appDependencies = { services, core: {}, plugins: {} };
 
     component = (
       <Provider store={store}>
