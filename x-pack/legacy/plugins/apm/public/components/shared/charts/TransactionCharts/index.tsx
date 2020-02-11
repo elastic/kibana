@@ -136,7 +136,7 @@ export class TransactionCharts extends Component<TransactionChartProps> {
               {
                 defaultMessage: 'Machine learning:'
               }
-            )}{' '}
+            )}
           </span>
           <MLJobLink
             serviceName={serviceName}

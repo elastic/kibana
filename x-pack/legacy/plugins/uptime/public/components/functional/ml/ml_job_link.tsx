@@ -5,19 +5,14 @@
  */
 
 import React from 'react';
-// import { getMlJobId } from '../../../../../common/ml_job_constants';
 import { MLLink } from './ml_link';
 
-interface Props {
-  serviceName: string;
-  transactionType?: string;
-}
+export const MLJobLink: React.FC = ({ children }) => {
+  const query = {
+    ml: { jobIds: ['uptime-duration-chart'] },
+    refreshInterval: { pause: true, value: 0 },
+    time: { from: 'now-24h', to: 'now' },
+  };
 
-export const MLJobLink: React.FC<Props> = ({ serviceName, transactionType, children }) => {
-  // const jobId = getMlJobId(serviceName, transactionType);
-  // const query = {
-  //   ml: { jobIds: [jobId] },
-  // };
-
-  return <MLLink children={children} query={{}} path="/timeseriesexplorer" />;
+  return <MLLink children={children} query={query} path="/timeseriesexplorer" />;
 };

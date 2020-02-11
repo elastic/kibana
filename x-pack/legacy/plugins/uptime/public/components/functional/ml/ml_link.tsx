@@ -5,10 +5,10 @@
  */
 
 import { EuiLink } from '@elastic/eui';
-import React from 'react';
+import React, { useContext } from 'react';
 import url from 'url';
-import { useLocation } from 'react-router-dom';
-// import { useApmPluginContext } from '../../../../hooks/useApmPluginContext';
+import rison, { RisonValue } from 'rison-node';
+import { UptimeSettingsContext } from '../../../contexts';
 
 interface MlRisonData {
   ml?: {
@@ -23,21 +23,12 @@ interface Props {
 }
 
 export function MLLink({ children, path = '', query = {} }: Props) {
-  // const { core } = useApmPluginContext();
-  const location = useLocation();
+  const { basePath } = useContext(UptimeSettingsContext);
 
-  // const risonQuery: MlRisonData & TimepickerRisonData = getTimepickerRisonData(
-  //   location.search
-  // );
+  const href = url.format({
+    pathname: basePath + '/app/ml',
+    hash: `${path}?_g=${rison.encode(query as RisonValue)}`,
+  });
 
-  // if (query.ml) {
-  //   risonQuery.ml = query.ml;
-  // }
-  //
-  // const href = url.format({
-  //   pathname: core.http.basePath.prepend('/app/ml'),
-  //   hash: `${path}?_g=${rison.encode(risonQuery as RisonValue)}`
-  // });
-
-  return <EuiLink children={children} href={''} />;
+  return <EuiLink children={children} href={href} target="_blank" />;
 }

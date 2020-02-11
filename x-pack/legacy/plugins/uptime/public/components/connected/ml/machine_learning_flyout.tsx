@@ -5,36 +5,85 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { Component } from 'react';
+import React, { Component, useContext, useEffect, useState } from 'react';
 // import { toMountPoint } from '../../../../../../../../../../src/plugins/kibana_react/public';
 // import { startMLJob } from '../../../../../services/rest/ml';
 // import { ApmPluginContext } from '../../../../../context/ApmPluginContext';
-import { MLJobLink } from '../../functional/ml/ml_job_link';
+import { Dispatch } from 'redux';
+import { connect } from 'react-redux';
+// import { MLJobLink } from '../../functional/ml/ml_job_link';
 import { MachineLearningFlyoutView } from '../../functional/ml/machine_learning_flyout/machine_learning_flyout';
+import { UptimeSettingsContext } from '../../../contexts';
+import { AppState } from '../../../state';
+import { selectMonitorLocations, selectMonitorStatus } from '../../../state/selectors';
+import { getMonitorStatus } from '../../../state/actions';
+import { Container } from '../monitor/status_bar_container';
 
 interface Props {
   isOpen: boolean;
   onClose: () => void;
-  urlParams: any;
 }
 
 interface State {
   isCreatingJob: boolean;
 }
 
-export class MachineLearningFlyout extends Component<Props, State> {
-  public state: State = {
-    isCreatingJob: false,
-  };
+export const MachineLearningFlyout: Component<Props, State> = ({ isOpen, onClose }) => {
+  // const { data: hasMLJob = false, status } = useFetcher(() => {
+  //   if (selectedTransactionType) {
+  //     // return getHasMLJob({
+  //     //   serviceName: '',
+  //     //   transactionType: selectedTransactionType,
+  //     //   http,
+  //     // });
+  //   }
+  // }, ['serviceName', selectedTransactionType]);
 
-  public onClickCreate = async ({ transactionType }: { transactionType: string }) => {
-    this.setState({ isCreatingJob: true });
+  const { basePath } = useContext(UptimeSettingsContext);
+
+  useEffect(() => {
+    fetch(basePath + '/api/ml/anomaly_detectors/uptime-duration-chart').then(response => {
+      response.json().then(res => {
+        setHasMLJob(res.count > 0);
+      });
+    });
+    fetch(basePath + '/api/ml/anomaly_detectors/uptime-duration-chart').then(response => {
+      response.json().then(res => {
+        setHasMLJob(res.count > 0);
+      });
+    });
+  }, [basePath]);
+
+  // const [isCreatingJob, setIsCreatingJob] = useState(false);
+  const [hasMLJob, setHasMLJob] = useState(false);
+
+  const onClickCreate = async ({ transactionType }: { transactionType: string }) => {
+    setIsCreatingJob(true);
     try {
-      const { http } = this.context.core;
-      const { serviceName } = this.props.urlParams;
-      if (!serviceName) {
-        throw new Error('Service name is required to create this ML job');
-      }
+      // const data = {
+      //   job_id: 'uptime-duration-chart',
+      //   description: '',
+      //   groups: [],
+      //   analysis_config: {
+      //     bucket_span: '15m',
+      //     detectors: [{ function: 'high_mean', field_name: 'monitor.duration.us' }],
+      //     influencers: [],
+      //     summary_count_field_name: 'doc_count',
+      //   },
+      //   data_description: { time_field: '@timestamp' },
+      //   custom_settings: { created_by: 'single-metric-wizard' },
+      //   analysis_limits: { model_memory_limit: '10MB' },
+      //   model_plot_config: { enabled: true },
+      // };
+      //
+      // fetch('/api/ml/anomaly_detectors/uptime-duration-chart', {
+      //   method: 'PUT',
+      //   headers: {
+      //     'Content-Type': 'application/json',
+      //   },
+      //   body: JSON.stringify(data),
+      // });
+
       // const res = await startMLJob({ http, serviceName, transactionType });
       // const didSucceed = res.datafeeds[0].success && res.jobs[0].success;
       // if (!didSucceed) {
@@ -45,22 +94,16 @@ export class MachineLearningFlyout extends Component<Props, State> {
       this.addErrorToast();
     }
 
-    this.setState({ isCreatingJob: false });
-    this.props.onClose();
+    setIsCreatingJob(false);
+    onClose();
   };
 
-  public addErrorToast = () => {
+  const addErrorToast = () => {
     const core = this.context;
-    const { urlParams } = this.props;
-    const { serviceName } = urlParams;
-
-    if (!serviceName) {
-      return;
-    }
 
     core.notifications.toasts.addWarning({
       title: i18n.translate(
-        'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.jobCreationFailedNotificationTitle',
+        'xpack.uptime.ml.enableAnomalyDetectionPanel.jobCreationFailedNotificationTitle',
         {
           defaultMessage: 'Job creation failed',
         }
@@ -68,7 +111,7 @@ export class MachineLearningFlyout extends Component<Props, State> {
       text: toMountPoint(
         <p>
           {i18n.translate(
-            'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.jobCreationFailedNotificationText',
+            'xpack.uptime.ml.enableAnomalyDetectionPanel.jobCreationFailedNotificationText',
             {
               defaultMessage:
                 'Your current license may not allow for creating machine learning jobs, or this job may already exist.',
@@ -79,7 +122,7 @@ export class MachineLearningFlyout extends Component<Props, State> {
     });
   };
 
-  public addSuccessToast = ({ transactionType }: { transactionType: string }) => {
+  const addSuccessToast = ({ transactionType }: { transactionType: string }) => {
     const { core } = this.context;
     const { urlParams } = this.props;
 
@@ -118,21 +161,36 @@ export class MachineLearningFlyout extends Component<Props, State> {
     // });
   };
 
-  public render() {
-    const { isOpen, onClose, urlParams } = this.props;
-    const { isCreatingJob } = this.state;
-
-    if (!isOpen) {
-      return null;
-    }
-
-    return (
-      <MachineLearningFlyoutView
-        isCreatingJob={isCreatingJob}
-        onClickCreate={this.onClickCreate}
-        onClose={onClose}
-        urlParams={urlParams}
-      />
-    );
+  if (!isOpen) {
+    return null;
   }
-}
+
+  return (
+    <MachineLearningFlyoutView
+      isCreatingJob={true}
+      onClickCreate={onClickCreate}
+      onClose={() => {}}
+      hasMLJob={hasMLJob}
+    />
+  );
+};
+
+const mapStateToProps = (state: AppState, ownProps: OwnProps) => ({
+  monitorStatus: selectMonitorStatus(state),
+  monitorLocations: selectMonitorLocations(state, ownProps.monitorId),
+});
+
+const mapDispatchToProps = (dispatch: Dispatch<any>): DispatchProps => ({
+  loadMonitorStatus: (dateStart: string, dateEnd: string, monitorId: string) => {
+    dispatch(
+      getMonitorStatus({
+        monitorId,
+        dateStart,
+        dateEnd,
+      })
+    );
+  },
+});
+
+// @ts-ignore TODO: Investigate typescript issues here
+export const MonitorStatusBar = connect(mapStateToProps, mapDispatchToProps)(Container);

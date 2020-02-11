@@ -21,7 +21,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useState, useEffect } from 'react';
-import { isEmpty } from 'lodash';
 // import { FETCH_STATUS, useFetcher } from '../../../../../hooks/useFetcher';
 // import { getHasMLJob } from '../../../../../services/rest/ml';
 // import { Transaction_select } from './transaction_select';
@@ -30,145 +29,54 @@ import { isEmpty } from 'lodash';
 // import { useApmPluginContext } from '../../../../../hooks/useApmPluginContext';
 import { MLJobLink } from '../ml_job_link';
 import { MLLink } from '../ml_link';
+import * as labels from '../translations';
 
 interface Props {
   isCreatingJob: boolean;
   onClickCreate: ({ transactionType }: { transactionType: string }) => void;
   onClose: () => void;
-  urlParams: any;
+  hasMLJob: boolean;
 }
 
 export function MachineLearningFlyoutView({
   isCreatingJob,
   onClickCreate,
   onClose,
-  urlParams,
+  hasMLJob,
 }: Props) {
-  const [selectedTransactionType, setSelectedTransactionType] = useState<string | undefined>(
-    undefined
-  );
-
-  // const { data: hasMLJob = false, status } = useFetcher(() => {
-  //   if (selectedTransactionType) {
-  //     // return getHasMLJob({
-  //     //   serviceName: '',
-  //     //   transactionType: selectedTransactionType,
-  //     //   http,
-  //     // });
-  //   }
-  // }, ['serviceName', selectedTransactionType]);
-
-  // update selectedTransactionType when list of transaction types has loaded
-  useEffect(() => {
-    // setSelectedTransactionType(transactionTypes[0]);
-  }, []);
-
   const isLoadingMLJob = false;
-
-  const hasMLJob = false;
 
   return (
     <EuiFlyout onClose={onClose} size="s">
       <EuiFlyoutHeader>
         <EuiTitle>
-          <h2>
-            {i18n.translate(
-              'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.enableAnomalyDetectionTitle',
-              {
-                defaultMessage: 'Enable anomaly detection',
-              }
-            )}
-          </h2>
+          <h2>{labels.ENABLE_ANOMALY_DETECTION}</h2>
         </EuiTitle>
         <EuiSpacer size="s" />
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         {hasMLJob && (
           <div>
-            <EuiCallOut
-              title={i18n.translate(
-                'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.callout.jobExistsTitle',
-                {
-                  defaultMessage: 'Job already exists',
-                }
-              )}
-              color="success"
-              iconType="check"
-            >
+            <EuiCallOut title={labels.JOB_ALREADY_EXIST} color="success" iconType="check">
               <p>
-                {i18n.translate(
-                  'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.callout.jobExistsDescription',
-                  {
-                    defaultMessage:
-                      'There is currently a job running for {serviceName} ({transactionType}).',
-                    values: {
-                      serviceName: '',
-                      transactionType: selectedTransactionType,
-                    },
-                  }
-                )}
-                <MLJobLink serviceName={''} transactionType={selectedTransactionType}>
-                  {i18n.translate(
-                    'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.callout.jobExistsDescription.viewJobLinkText',
-                    {
-                      defaultMessage: 'View existing job',
-                    }
-                  )}
-                </MLJobLink>
+                {labels.ML_JOB_RUNNING}
+                <MLJobLink>{labels.VIEW_EXISTING_JOB}</MLJobLink>
               </p>
             </EuiCallOut>
             <EuiSpacer size="m" />
           </div>
         )}
         <EuiText>
+          <p>{labels.CREAT_ML_JOB_DESC}</p>
           <p>
             <FormattedMessage
-              id="xpack.apm.serviceDetails.enableAnomalyDetectionPanel.createMLJobDescription"
-              defaultMessage="Here you can create a machine learning job to calculate anomaly scores on durations for APM transactions
-                    within the {serviceName} service. Once enabled, {transactionDurationGraphText} will show the expected bounds and annotate
-                    the graph once the anomaly score is &gt;=75."
+              id="xpack.uptime.ml.enableAnomalyDetectionPanel.manageMLJobDescription"
+              defaultMessage="Once a job is created, you can manage it and see more details in the {mlJobsPageLink}."
               values={{
-                serviceName: '',
-                transactionDurationGraphText: (
-                  <b>
-                    {i18n.translate(
-                      'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.createMLJobDescription.transactionDurationGraphText',
-                      {
-                        defaultMessage: 'the transaction duration graph',
-                      }
-                    )}
-                  </b>
-                ),
+                mlJobsPageLink: <MLLink>{labels.ML_MANAGEMENT_PAGE}</MLLink>,
               }}
             />
-          </p>
-          <p>
-            <FormattedMessage
-              id="xpack.apm.serviceDetails.enableAnomalyDetectionPanel.manageMLJobDescription"
-              defaultMessage="Jobs can be created for each service + transaction type combination.
-                    Once a job is created, you can manage it and see more details in the {mlJobsPageLink}."
-              values={{
-                mlJobsPageLink: (
-                  <MLLink>
-                    {i18n.translate(
-                      'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.manageMLJobDescription.mlJobsPageLinkText',
-                      {
-                        defaultMessage: 'Machine Learning jobs management page',
-                      }
-                    )}
-                  </MLLink>
-                ),
-              }}
-            />{' '}
-            <em>
-              {i18n.translate(
-                'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.manageMLJobDescription.noteText',
-                {
-                  defaultMessage:
-                    'Note: It might take a few minutes for the job to begin calculating results.',
-                }
-              )}
-            </em>
+            <em>{labels.TAKE_SOME_TIME_TEXT}</em>
           </p>
         </EuiText>
 
@@ -179,16 +87,11 @@ export function MachineLearningFlyoutView({
           <EuiFlexItem grow={false}>
             <EuiFormRow>
               <EuiButton
-                onClick={() => onClickCreate({ transactionType: selectedTransactionType })}
+                onClick={() => onClickCreate()}
                 fill
                 disabled={isCreatingJob || hasMLJob || isLoadingMLJob}
               >
-                {i18n.translate(
-                  'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.createNewJobButtonLabel',
-                  {
-                    defaultMessage: 'Create new job',
-                  }
-                )}
+                {labels.CREATE_NEW_JOB}
               </EuiButton>
             </EuiFormRow>
           </EuiFlexItem>
