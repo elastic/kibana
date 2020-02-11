@@ -16,7 +16,6 @@ import { DataPublicPluginSetup } from '../../../../src/plugins/data/public';
 import { LicensingPluginSetup } from '../../licensing/public';
 import { PLUGIN_ID } from '../common/constants';
 import { IngestManagerConfigType } from '../common/types';
-import { BASE_PATH } from './applications/ingest_manager/constants';
 
 export { IngestManagerConfigType } from '../common/types';
 
@@ -43,7 +42,6 @@ export class IngestManagerPlugin implements Plugin {
       id: PLUGIN_ID,
       category: DEFAULT_APP_CATEGORIES.management,
       title: i18n.translate('xpack.ingestManager.appTitle', { defaultMessage: 'Ingest Manager' }),
-      appRoute: BASE_PATH,
       euiIconType: 'savedObjectsApp',
       async mount(params: AppMountParameters) {
         const [coreStart] = await core.getStartServices();
