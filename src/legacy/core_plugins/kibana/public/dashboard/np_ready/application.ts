@@ -37,7 +37,6 @@ import {
   PrivateProvider,
   PromiseServiceCreator,
   RedirectWhenMissingProvider,
-  SavedObjectLoader,
 } from '../legacy_imports';
 // @ts-ignore
 import { initDashboardApp } from './legacy_app';
@@ -46,6 +45,7 @@ import { NavigationPublicPluginStart as NavigationStart } from '../../../../../.
 import { DataPublicPluginStart as NpDataStart } from '../../../../../../plugins/data/public';
 import { SharePluginStart } from '../../../../../../plugins/share/public';
 import { KibanaLegacyStart } from '../../../../../../plugins/kibana_legacy/public';
+import { SavedObjectLoader } from '../../../../../../plugins/saved_objects/public';
 
 export interface RenderDeps {
   core: LegacyCoreStart;

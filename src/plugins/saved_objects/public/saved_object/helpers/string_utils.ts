@@ -17,13 +17,13 @@
  * under the License.
  */
 
-import {
-  SavedObjectLoader,
-  SavedObjectKibanaServices,
-} from '../../../../../../plugins/saved_objects/public';
-import { createSavedDashboardClass } from './saved_dashboard';
-
-export function createSavedDashboardLoader(services: SavedObjectKibanaServices) {
-  const SavedDashboard = createSavedDashboardClass(services);
-  return new SavedObjectLoader(SavedDashboard, services.savedObjectsClient, services.chrome);
+export class StringUtils {
+  /**
+   * Returns a version of the string with the first letter capitalized.
+   * @param str {string}
+   * @returns {string}
+   */
+  public static upperFirst(str: string = ''): string {
+    return str ? str.charAt(0).toUpperCase() + str.slice(1) : '';
+  }
 }

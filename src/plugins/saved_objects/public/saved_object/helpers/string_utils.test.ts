@@ -17,13 +17,17 @@
  * under the License.
  */
 
-import {
-  SavedObjectLoader,
-  SavedObjectKibanaServices,
-} from '../../../../../../plugins/saved_objects/public';
-import { createSavedDashboardClass } from './saved_dashboard';
+import { StringUtils } from './string_utils';
 
-export function createSavedDashboardLoader(services: SavedObjectKibanaServices) {
-  const SavedDashboard = createSavedDashboardClass(services);
-  return new SavedObjectLoader(SavedDashboard, services.savedObjectsClient, services.chrome);
-}
+describe('StringUtils class', () => {
+  describe('static upperFirst', () => {
+    test('should converts the first character of string to upper case', () => {
+      expect(StringUtils.upperFirst()).toBe('');
+      expect(StringUtils.upperFirst('')).toBe('');
+
+      expect(StringUtils.upperFirst('Fred')).toBe('Fred');
+      expect(StringUtils.upperFirst('fred')).toBe('Fred');
+      expect(StringUtils.upperFirst('FRED')).toBe('FRED');
+    });
+  });
+});

@@ -17,13 +17,5 @@
  * under the License.
  */
 
-import {
-  SavedObjectLoader,
-  SavedObjectKibanaServices,
-} from '../../../../../../plugins/saved_objects/public';
-import { createSavedDashboardClass } from './saved_dashboard';
-
-export function createSavedDashboardLoader(services: SavedObjectKibanaServices) {
-  const SavedDashboard = createSavedDashboardClass(services);
-  return new SavedObjectLoader(SavedDashboard, services.savedObjectsClient, services.chrome);
-}
+export { createSavedObjectClass } from './saved_object';
+export { SavedObjectLoader } from './saved_object_loader';

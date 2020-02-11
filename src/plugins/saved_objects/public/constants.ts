@@ -16,14 +16,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { i18n } from '@kbn/i18n';
 
-import {
-  SavedObjectLoader,
-  SavedObjectKibanaServices,
-} from '../../../../../../plugins/saved_objects/public';
-import { createSavedDashboardClass } from './saved_dashboard';
-
-export function createSavedDashboardLoader(services: SavedObjectKibanaServices) {
-  const SavedDashboard = createSavedDashboardClass(services);
-  return new SavedObjectLoader(SavedDashboard, services.savedObjectsClient, services.chrome);
-}
+/**
+ * An error message to be used when the user rejects a confirm overwrite.
+ * @type {string}
+ */
+export const OVERWRITE_REJECTED = i18n.translate(
+  'common.ui.savedObjects.overwriteRejectedDescription',
+  {
+    defaultMessage: 'Overwrite confirmation was rejected',
+  }
+);
+/**
+ * An error message to be used when the user rejects a confirm save with duplicate title.
+ * @type {string}
+ */
+export const SAVE_DUPLICATE_REJECTED = i18n.translate(
+  'common.ui.savedObjects.saveDuplicateRejectedDescription',
+  {
+    defaultMessage: 'Save with duplicate title confirmation was rejected',
+  }
+);
