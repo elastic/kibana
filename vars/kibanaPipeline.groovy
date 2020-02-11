@@ -366,7 +366,7 @@ def processOssQueue(queue, finishedSuites, workerNumber) {
         }
       }
 
-      catchErrors {
+      catchError {
         def suites = toJSON(readFile(file: testMetadataPath))
         suites.each { finishedSuites << it }
       }
@@ -425,7 +425,7 @@ def processXpackQueue(queue, finishedSuites, workerNumber) {
         }
       }
 
-      catchErrors {
+      catchError {
         def suites = toJSON(readFile(file: testMetadataPath))
         suites.each { finishedSuites << it }
       }
