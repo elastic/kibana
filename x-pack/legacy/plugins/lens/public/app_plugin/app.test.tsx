@@ -411,17 +411,6 @@ describe('Lens App', () => {
 
         await waitForPromises();
 
-        const indexPattern = ({ id: 'index1' } as unknown) as IIndexPattern;
-        const field = ({ name: 'myfield' } as unknown) as IFieldType;
-        const pinnedField = ({ name: 'pinnedField' } as unknown) as IFieldType;
-
-        const unpinned = esFilters.buildExistsFilter(field, indexPattern);
-        const pinned = esFilters.buildExistsFilter(pinnedField, indexPattern);
-        FilterManager.setFiltersStore([pinned], esFilters.FilterStateStore.GLOBAL_STATE);
-
-        act(() => args.data.query.filterManager.setFilters([pinned, unpinned]));
-        await waitForPromises();
-
         if (initialDocId) {
           expect(args.docStorage.load).toHaveBeenCalledTimes(1);
         } else {
