@@ -4,10 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { uiChromeMock, uiTimefilterMock, uiTimeHistoryMock } from './mocks_jest';
-
-export const useUiContext = () => ({
-  chrome: uiChromeMock,
-  timefilter: uiTimefilterMock,
-  timeHistory: uiTimeHistoryMock,
-});
+export { MlContext, MlContextValue, SavedSearchQuery } from './ml_context';
+export { useMlContext } from './use_ml_context';
