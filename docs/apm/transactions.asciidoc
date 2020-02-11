@@ -36,10 +36,11 @@ Like in the Transaction duration graph, you can zoom in on anomalies to further 
 ==== Transactions table
 
 The *Transactions* table displays a list of _transaction groups_ for the selected service.
-In other words, this view groups all transactions of the same name together, and only displays one transaction for each group.
+In other words, this view groups all transactions of the same name together,
+and only displays one entry for each group.
 
 [role="screenshot"]
-image::apm/images/apm-transactions-table.png[Example view of transactions table in the APM app in Kibana]
+image::apm/images/apm-transactions-table.png[Example view of the transactions table in the APM app in Kibana]
 
 By default, transaction groups are sorted by _Impact_.
 Impact helps show the most used and slowest endpoints in your service - in other words,
