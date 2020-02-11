@@ -120,17 +120,21 @@ export class ExpressionsService {
   public setup() {
     const { executor, renderers, registerFunction, run } = this;
 
+    const getFunction = executor.getFunction.bind(executor);
     const getFunctions = executor.getFunctions.bind(executor);
     const getRenderer = renderers.get.bind(renderers);
     const getRenderers = renderers.toJS.bind(renderers);
+    const getType = executor.getType.bind(executor);
     const getTypes = executor.getTypes.bind(executor);
     const registerRenderer = renderers.register.bind(renderers);
     const registerType = executor.registerType.bind(executor);
 
     return {
+      getFunction,
       getFunctions,
       getRenderer,
       getRenderers,
+      getType,
       getTypes,
       registerFunction,
       registerRenderer,
@@ -142,15 +146,19 @@ export class ExpressionsService {
   public start() {
     const { executor, renderers, run } = this;
 
+    const getFunction = executor.getFunction.bind(executor);
     const getFunctions = executor.getFunctions.bind(executor);
     const getRenderer = renderers.get.bind(renderers);
     const getRenderers = renderers.toJS.bind(renderers);
+    const getType = executor.getType.bind(executor);
     const getTypes = executor.getTypes.bind(executor);
 
     return {
+      getFunction,
       getFunctions,
       getRenderer,
       getRenderers,
+      getType,
       getTypes,
       run,
     };

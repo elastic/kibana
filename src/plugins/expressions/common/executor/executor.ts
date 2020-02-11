@@ -112,6 +112,10 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
     this.state.transitions.addFunction(fn);
   }
 
+  public getFunction(name: string): ExpressionFunction | undefined {
+    return this.state.get().functions[name];
+  }
+
   public getFunctions(): Record<string, ExpressionFunction> {
     return { ...this.state.get().functions };
   }
@@ -123,6 +127,10 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
       typeof typeDefinition === 'object' ? typeDefinition : typeDefinition()
     );
     this.state.transitions.addType(type);
+  }
+
+  public getType(name: string): ExpressionType | undefined {
+    return this.state.get().types[name];
   }
 
   public getTypes(): Record<string, ExpressionType> {

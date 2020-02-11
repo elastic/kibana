@@ -140,7 +140,7 @@ export class ExpressionsPublicPlugin
           // function that matches its definition, but which simply
           // calls the server-side function endpoint.
           Object.keys(serverFunctionList).forEach(functionName => {
-            if (functions.get(functionName)) {
+            if (expressionsSetup.getFunction(functionName)) {
               return;
             }
             const fn = () => ({
