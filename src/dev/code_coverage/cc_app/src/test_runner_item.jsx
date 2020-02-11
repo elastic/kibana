@@ -3,13 +3,16 @@ import React from "react";
 export default function TestRunnerItem ({historicalItem, testRunnerItem}) {
   return (
     <div>
+      <div>
+        {testRunnerItem.type}
+      </div>
       <a
         className="App-link"
         href={href(testRunnerItem.type)}
         target="_blank"
         rel="noopener noreferrer"
       >
-        {testRunnerItem.type} {timestamp(historicalItem)}
+        {timestamp(historicalItem)}
       </a>
     </div>
   );
