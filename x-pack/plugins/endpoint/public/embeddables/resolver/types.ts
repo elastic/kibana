@@ -24,6 +24,9 @@ export interface ResolverState {
   readonly data: DataState;
 }
 
+/**
+ * Piece of redux state that models an animation for the camera.
+ */
 export interface CameraAnimationState {
   /**
    * The time when the animation began.
@@ -46,53 +49,9 @@ export interface CameraAnimationState {
 }
 
 /**
- * Redux state for the virtual 'camera' used by Resolver.
- * CameraState can be panning or animating or neither, but not both at the same time.
- * TODO remove all this goofy stuff
+ * The redux state for the `useCamera` hook.
  */
-export type CameraState =
-  | CameraStateWhenAnimating
-  | CameraStateWhenPanning
-  | CameraStateWhenNotAnimatingOrPanning;
-
-type CameraStateWhenAnimating = {
-  /**
-   * Contains the animation start time and target translation.
-   */
-  readonly animation: CameraAnimationState;
-  /**
-   * If the camera is animating, it must not be panning.
-   */
-  readonly panning: undefined;
-} & BaseCameraState;
-
-export type CameraStateWhenPanning = {
-  /**
-   * If the camera is panning, it must not be animating.
-   */
-  readonly animation: undefined;
-  /**
-   * Contains the starting and current position of the pointer when the user is panning the map.
-   */
-  readonly panning: {
-    /**
-     * Screen coordinate vector representing the starting point when panning.
-     */
-    readonly origin: Vector2;
-
-    /**
-     * Screen coordinate vector representing the current point when panning.
-     */
-    readonly currentOffset: Vector2;
-  };
-} & BaseCameraState;
-
-export type CameraStateWhenNotAnimatingOrPanning = {
-  readonly animation: undefined;
-  readonly panning: undefined;
-} & BaseCameraState;
-
-interface BaseCameraState {
+export type CameraState = {
   /**
    * Scales the coordinate system, used for zooming. Should always be between 0 and 1
    */
@@ -113,7 +72,42 @@ interface BaseCameraState {
    * The world coordinates that the pointing device was last over. This is used during mousewheel zoom.
    */
   readonly latestFocusedWorldCoordinates: Vector2 | null;
-}
+} & (
+  | {
+      /**
+       * Contains the animation start time and target translation.
+       */
+      readonly animation: CameraAnimationState;
+      /**
+       * If the camera is animating, it must not be panning.
+       */
+      readonly panning: undefined;
+    }
+  | {
+      /**
+       * If the camera is panning, it must not be animating.
+       */
+      readonly animation: undefined;
+      /**
+       * Contains the starting and current position of the pointer when the user is panning the map.
+       */
+      readonly panning: {
+        /**
+         * Screen coordinate vector representing the starting point when panning.
+         */
+        readonly origin: Vector2;
+
+        /**
+         * Screen coordinate vector representing the current point when panning.
+         */
+        readonly currentOffset: Vector2;
+      };
+    }
+  | {
+      readonly animation: undefined;
+      readonly panning: undefined;
+    }
+);
 
 /**
  * State for `data` reducer which handles receiving Resolver data from the backend.
@@ -123,8 +117,6 @@ export interface DataState {
 }
 
 export type Vector2 = readonly [number, number];
-
-export type Vector3 = readonly [number, number, number];
 
 /**
  * A rectangle with sides that align with the `x` and `y` axises.
@@ -243,6 +235,9 @@ interface ResizeObserverConstructor {
   new (callback: ResizeObserverCallback): ResizeObserver;
 }
 
+/**
+ * Functions that introduce side effects. A React context provides these, and they may be mocked in tests.
+ */
 export interface SideEffectors {
   /**
    * A function which returns the time since epoch in milliseconds. Injected because mocking Date is tedious.
@@ -253,16 +248,28 @@ export interface SideEffectors {
   ResizeObserver: ResizeObserverConstructor;
 }
 
-type MockSideEffectors = jest.Mocked<Omit<SideEffectors, 'ResizeObserver'>> &
-  Pick<SideEffectors, 'ResizeObserver'>;
-
 export interface SideEffectSimulator {
+  /**
+   * Control the mock `SideEffectors`.
+   */
   controls: {
+    /**
+     * Set or get the `time` number used for `timestamp` and `requestAnimationFrame` callbacks.
+     */
     time: number;
+    /**
+     * Call any pending `requestAnimationFrame` callbacks.
+     */
     provideAnimationFrame: () => void;
+    /**
+     * Trigger `ResizeObserver` callbacks for `element` and update the mocked value for `getBoundingClientRect`.
+     */
     simulateElementResize: (element: Element, contentRect: DOMRect) => void;
   };
-  mock: MockSideEffectors;
+  /**
+   * Mocked `SideEffectors`.
+   */
+  mock: jest.Mocked<Omit<SideEffectors, 'ResizeObserver'>> & Pick<SideEffectors, 'ResizeObserver'>;
 }
 
 export type ResolverMiddleware = Middleware<{}, ResolverState, Dispatch<ResolverAction>>;

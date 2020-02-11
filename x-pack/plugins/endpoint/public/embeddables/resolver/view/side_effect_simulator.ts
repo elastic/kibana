@@ -68,7 +68,6 @@ export const sideEffectSimulator: () => SideEffectSimulator = () => {
   let frameRequestedCallbacksIDCounter: number = 0;
   const frameRequestedCallbacks: Map<number, FrameRequestCallback> = new Map();
   const provideAnimationFrame: () => void = () => {
-    // TODO should we 'act'?
     act(() => {
       // Iterate the values, and clear the data set before calling the callbacks because the callbacks will repopulate the dataset synchronously in this testing framework.
       const values = [...frameRequestedCallbacks.values()];
