@@ -24,6 +24,7 @@ describe('mapSpatialFilter()', () => {
   test('should return the key for matching multi polygon filter', async () => {
     const filter = {
       meta: {
+        key: 'location',
         alias: 'my spatial filter',
         type: FILTERS.SPATIAL_FILTER,
       } as FilterMeta,
@@ -41,7 +42,7 @@ describe('mapSpatialFilter()', () => {
     } as Filter;
     const result = mapSpatialFilter(filter);
 
-    expect(result).toHaveProperty('key', 'query');
+    expect(result).toHaveProperty('key', 'location');
     expect(result).toHaveProperty('value', '');
     expect(result).toHaveProperty('type', FILTERS.SPATIAL_FILTER);
   });
@@ -49,6 +50,7 @@ describe('mapSpatialFilter()', () => {
   test('should return the key for matching polygon filter', async () => {
     const filter = {
       meta: {
+        key: 'location',
         alias: 'my spatial filter',
         type: FILTERS.SPATIAL_FILTER,
       } as FilterMeta,
@@ -58,7 +60,7 @@ describe('mapSpatialFilter()', () => {
     } as Filter;
     const result = mapSpatialFilter(filter);
 
-    expect(result).toHaveProperty('key', 'geo_polygon');
+    expect(result).toHaveProperty('key', 'location');
     expect(result).toHaveProperty('value', '');
     expect(result).toHaveProperty('type', FILTERS.SPATIAL_FILTER);
   });
@@ -66,6 +68,7 @@ describe('mapSpatialFilter()', () => {
   test('should return undefined for none matching', async done => {
     const filter = {
       meta: {
+        key: 'location',
         alias: 'my spatial filter',
       } as FilterMeta,
       geo_polygon: {

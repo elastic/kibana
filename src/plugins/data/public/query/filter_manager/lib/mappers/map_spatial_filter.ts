@@ -20,13 +20,14 @@ import { Filter, FILTERS } from '../../../../../common';
 
 // Use mapSpatialFilter mapper to avoid bloated meta with value and params for spatial filters.
 export const mapSpatialFilter = (filter: Filter) => {
-  const metaProperty = /(^\$|meta)/;
-  const key = Object.keys(filter).find(item => {
-    return !item.match(metaProperty);
-  });
-  if (key && filter.meta && filter.meta.alias && filter.meta.type === FILTERS.SPATIAL_FILTER) {
+  if (
+    filter.meta &&
+    filter.meta.key &&
+    filter.meta.alias &&
+    filter.meta.type === esFilters.FILTERS.SPATIAL_FILTER
+  ) {
     return {
-      key,
+      key: filter.meta.key,
       type: filter.meta.type,
       value: '',
     };

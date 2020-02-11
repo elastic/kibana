@@ -128,12 +128,43 @@ export const esQuery = {
 };
 
 /*
+ * esQuery and esKuery helper namespaces:
+ */
+
+import {
+  doesKueryExpressionHaveLuceneSyntaxError,
+  fromKueryExpression,
+  toElasticsearchQuery,
+  nodeTypes,
+  buildEsQuery,
+  getEsQueryConfig,
+  buildQueryFromFilters,
+  luceneStringToDsl,
+  decorateQuery,
+} from '../common';
+
+export const esKuery = {
+  nodeTypes,
+  doesKueryExpressionHaveLuceneSyntaxError,
+  fromKueryExpression,
+  toElasticsearchQuery,
+};
+
+export const esQuery = {
+  buildEsQuery,
+  getEsQueryConfig,
+  buildQueryFromFilters,
+  luceneStringToDsl,
+  decorateQuery,
+};
+
+/*
  * Field Formatters helper namespace:
  */
 
 import {
   FieldFormat,
-  FieldFormatsRegistry, // exported only for tests. Consider mock.
+  FieldFormatsRegistry,
   DEFAULT_CONVERTER_COLOR,
   HTML_CONTEXT_TYPE,
   TEXT_CONTEXT_TYPE,

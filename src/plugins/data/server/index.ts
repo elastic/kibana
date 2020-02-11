@@ -69,12 +69,35 @@ export const esFilters = {
 };
 
 /*
+ * esQuery and esKuery helper namespaces:
+ */
+
+import {
+  nodeTypes,
+  fromKueryExpression,
+  toElasticsearchQuery,
+  buildEsQuery,
+  getEsQueryConfig,
+} from '../common';
+
+export const esKuery = {
+  nodeTypes,
+  fromKueryExpression,
+  toElasticsearchQuery,
+};
+
+export const esQuery = {
+  getEsQueryConfig,
+  buildEsQuery,
+};
+
+/*
  * Field Formatters helper namespace:
  */
 
 import {
+  FieldFormatsRegistry,
   FieldFormat,
-  FieldFormatsRegistry, // exported only for tests. Consider mock.
   BoolFormat,
   BytesFormat,
   ColorFormat,
@@ -93,8 +116,8 @@ import {
 } from '../common/field_formats';
 
 export const fieldFormats = {
+  FieldFormatsRegistry,
   FieldFormat,
-  FieldFormatsRegistry, // exported only for tests. Consider mock.
 
   BoolFormat,
   BytesFormat,
