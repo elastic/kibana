@@ -19,6 +19,60 @@
 
 import { PluginInitializerContext } from '../../../core/public';
 
+/*
+ * Field Formatters helper namespace:
+ */
+
+import {
+  FieldFormat,
+  FieldFormatsRegistry, // exported only for tests. Consider mock.
+  DEFAULT_CONVERTER_COLOR,
+  HTML_CONTEXT_TYPE,
+  TEXT_CONTEXT_TYPE,
+  FIELD_FORMAT_IDS,
+  BoolFormat,
+  BytesFormat,
+  ColorFormat,
+  DateFormat,
+  DateNanosFormat,
+  DurationFormat,
+  IpFormat,
+  NumberFormat,
+  PercentFormat,
+  RelativeDateFormat,
+  SourceFormat,
+  StaticLookupFormat,
+  UrlFormat,
+  StringFormat,
+  TruncateFormat,
+} from '../common/field_formats';
+
+export const fieldFormats = {
+  FieldFormat,
+  FieldFormatsRegistry, // exported only for tests. Consider mock.
+
+  DEFAULT_CONVERTER_COLOR,
+  HTML_CONTEXT_TYPE,
+  TEXT_CONTEXT_TYPE,
+  FIELD_FORMAT_IDS,
+
+  BoolFormat,
+  BytesFormat,
+  ColorFormat,
+  DateFormat,
+  DateNanosFormat,
+  DurationFormat,
+  IpFormat,
+  NumberFormat,
+  PercentFormat,
+  RelativeDateFormat,
+  SourceFormat,
+  StaticLookupFormat,
+  UrlFormat,
+  StringFormat,
+  TruncateFormat,
+};
+
 export function plugin(initializerContext: PluginInitializerContext) {
   return new DataPublicPlugin(initializerContext);
 }
@@ -42,8 +96,24 @@ export {
   // timefilter
   RefreshInterval,
   TimeRange,
+  // Field Formats
+  IFieldFormat,
+  IFieldFormatsRegistry,
+  FieldFormatsContentType,
+  FieldFormatsGetConfigFn,
+  FieldFormatConfig,
+  FieldFormatId,
 } from '../common';
-export { autocomplete } from './autocomplete';
+
+export {
+  QuerySuggestion,
+  QuerySuggestionTypes,
+  QuerySuggestionGetFn,
+  QuerySuggestionGetFnArgs,
+  QuerySuggestionBasic,
+  QuerySuggestionField,
+} from './autocomplete';
+
 export * from './field_formats';
 export * from './index_patterns';
 export * from './search';
@@ -54,7 +124,6 @@ export {
   esFilters,
   esKuery,
   esQuery,
-  fieldFormats,
   // index patterns
   isFilterable,
   // kbn field types
