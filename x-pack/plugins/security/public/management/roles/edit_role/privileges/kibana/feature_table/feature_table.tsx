@@ -130,6 +130,10 @@ export class FeatureTable extends Component<Props, State> {
   };
 
   private getColumns = () => {
+    const basePrivileges = this.props.kibanaPrivileges.getBasePrivileges(
+      this.props.role.kibana[this.props.privilegeIndex]
+    );
+
     const columns = [
       {
         width: '30px',
@@ -176,7 +180,7 @@ export class FeatureTable extends Component<Props, State> {
             />
             {!this.props.disabled && (
               <ChangeAllPrivilegesControl
-                privileges={[NO_PRIVILEGE_VALUE, 'read', 'all']}
+                privileges={basePrivileges}
                 onChange={this.onChangeAllFeaturePrivileges}
               />
             )}
