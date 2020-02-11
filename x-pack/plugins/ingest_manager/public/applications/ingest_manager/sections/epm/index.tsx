@@ -13,10 +13,10 @@ import { Detail } from './screens/detail';
 export const EPMApp: React.FC = () => (
   <Router>
     <Switch>
-      <Route path="/detail/:pkgkey/:panel?">
+      <Route path="/epm/detail/:pkgkey/:panel?">
         <Detail />
       </Route>
-      <Route path="/">
+      <Route path="/epm/">
         <Home />
       </Route>
     </Switch>
