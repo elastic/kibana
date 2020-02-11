@@ -34,7 +34,7 @@ describe('POST /api/saved_objects/_log_legacy_import', () => {
     ({ server, httpSetup } = await setupServer());
     logger = loggingServiceMock.createLogger();
 
-    const router = httpSetup.createRouter('');
+    const router = httpSetup.createRouter('/api/saved_objects/');
     registerLogLegacyImportRoute(router, logger);
 
     await server.start();

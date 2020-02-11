@@ -46,7 +46,7 @@ describe('PUT /api/saved_objects/{type}/{id?}', () => {
     savedObjectsClient = handlerContext.savedObjects.client;
     savedObjectsClient.update.mockResolvedValue(clientResponse);
 
-    const router = httpSetup.createRouter('');
+    const router = httpSetup.createRouter('/api/saved_objects/');
     registerUpdateRoute(router);
 
     await server.start();

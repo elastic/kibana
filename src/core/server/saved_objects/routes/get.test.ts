@@ -49,7 +49,7 @@ describe('GET /api/saved_objects/{type}/{id}', () => {
       return handlerContext;
     });
 
-    const router = httpSetup.createRouter('');
+    const router = httpSetup.createRouter('/api/saved_objects/');
     registerGetRoute(router);
 
     await server.start();

@@ -44,7 +44,7 @@ describe('GET /api/saved_objects/_find', () => {
 
     savedObjectsClient.find.mockResolvedValue(clientResponse);
 
-    const router = httpSetup.createRouter('');
+    const router = httpSetup.createRouter('/api/saved_objects/');
     registerFindRoute(router);
 
     await server.start();

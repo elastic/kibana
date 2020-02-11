@@ -32,12 +32,16 @@ import { registerLogLegacyImportRoute } from './log_legacy_import';
 import { registerExportRoute } from './export';
 import { registerImportRoute } from './import';
 
-export function registerRoutes(
-  http: InternalHttpServiceSetup,
-  logger: Logger,
-  importableExportableTypes: string[]
-) {
-  const router = http.createRouter('');
+export function registerRoutes({
+  http,
+  logger,
+  importableExportableTypes,
+}: {
+  http: InternalHttpServiceSetup;
+  logger: Logger;
+  importableExportableTypes: string[];
+}) {
+  const router = http.createRouter('/api/saved_objects/');
 
   registerGetRoute(router);
   registerCreateRoute(router);

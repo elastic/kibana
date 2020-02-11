@@ -23,7 +23,7 @@ import { IRouter } from '../../http';
 export const registerFindRoute = (router: IRouter) => {
   router.get(
     {
-      path: '/api/saved_objects/_find',
+      path: '/_find',
       validate: {
         query: schema.object({
           per_page: schema.number({ min: 0, defaultValue: 20 }),

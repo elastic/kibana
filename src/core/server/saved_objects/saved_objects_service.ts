@@ -243,7 +243,11 @@ export class SavedObjectsService
       setupDeps.legacyPlugins.uiExports
     );
 
-    registerRoutes(setupDeps.http, this.logger, importableExportableTypes);
+    registerRoutes({
+      http: setupDeps.http,
+      logger: this.logger,
+      importableExportableTypes,
+    });
 
     return {
       setClientFactoryProvider: provider => {

@@ -23,7 +23,7 @@ import { IRouter } from '../../http';
 export const registerBulkCreateRoute = (router: IRouter) => {
   router.post(
     {
-      path: '/api/saved_objects/_bulk_create',
+      path: '/_bulk_create',
       validate: {
         query: schema.object({
           overwrite: schema.boolean({ defaultValue: false }),

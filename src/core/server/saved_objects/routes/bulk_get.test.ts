@@ -38,7 +38,7 @@ describe('POST /api/saved_objects/_bulk_get', () => {
     savedObjectsClient.bulkGet.mockResolvedValue({
       saved_objects: [],
     });
-    const router = httpSetup.createRouter('');
+    const router = httpSetup.createRouter('/api/saved_objects/');
     registerBulkGetRoute(router);
 
     await server.start();

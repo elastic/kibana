@@ -35,7 +35,7 @@ describe('DELETE /api/saved_objects/{type}/{id}', () => {
     ({ server, httpSetup, handlerContext } = await setupServer());
     savedObjectsClient = handlerContext.savedObjects.client;
 
-    const router = httpSetup.createRouter('');
+    const router = httpSetup.createRouter('/api/saved_objects/');
     registerDeleteRoute(router);
 
     await server.start();

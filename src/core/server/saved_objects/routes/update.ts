@@ -23,7 +23,7 @@ import { IRouter } from '../../http';
 export const registerUpdateRoute = (router: IRouter) => {
   router.put(
     {
-      path: '/api/saved_objects/{type}/{id}',
+      path: '/{type}/{id}',
       validate: {
         params: schema.object({
           type: schema.string(),

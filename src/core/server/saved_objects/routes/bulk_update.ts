@@ -23,7 +23,7 @@ import { IRouter } from '../../http';
 export const registerBulkUpdateRoute = (router: IRouter) => {
   router.put(
     {
-      path: '/api/saved_objects/_bulk_update',
+      path: '/_bulk_update',
       validate: {
         body: schema.arrayOf(
           schema.object({

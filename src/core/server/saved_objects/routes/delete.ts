@@ -23,7 +23,7 @@ import { IRouter } from '../../http';
 export const registerDeleteRoute = (router: IRouter) => {
   router.delete(
     {
-      path: '/api/saved_objects/{type}/{id}',
+      path: '/{type}/{id}',
       validate: {
         params: schema.object({
           type: schema.string(),

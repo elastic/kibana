@@ -23,7 +23,7 @@ import { Logger } from '../../logging';
 export const registerLogLegacyImportRoute = (router: IRouter, logger: Logger) => {
   router.post(
     {
-      path: '/api/saved_objects/_log_legacy_import',
+      path: '/_log_legacy_import',
       validate: false,
     },
     async (context, req, res) => {

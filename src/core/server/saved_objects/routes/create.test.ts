@@ -45,7 +45,7 @@ describe('POST /api/saved_objects/{type}', () => {
     savedObjectsClient = handlerContext.savedObjects.client;
     savedObjectsClient.create.mockImplementation(() => Promise.resolve(clientResponse));
 
-    const router = httpSetup.createRouter('');
+    const router = httpSetup.createRouter('/api/saved_objects/');
     registerCreateRoute(router);
 
     await server.start();

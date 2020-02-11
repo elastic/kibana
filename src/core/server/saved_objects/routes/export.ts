@@ -40,7 +40,7 @@ export const registerExportRoute = (router: IRouter, supportedTypes: string[]) =
 
   router.post(
     {
-      path: '/api/saved_objects/_export',
+      path: '/_export',
       validate: {
         body: schema.object({
           type: schema.maybe(schema.oneOf([typeSchema, schema.arrayOf(typeSchema)])),

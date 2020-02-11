@@ -36,7 +36,7 @@ export const registerImportRoute = (router: IRouter, supportedTypes: string[]) =
 
   router.post(
     {
-      path: '/api/saved_objects/_import',
+      path: '/_import',
       options: {
         body: {
           maxBytes: maxImportPayload,

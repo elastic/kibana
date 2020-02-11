@@ -35,7 +35,7 @@ describe('PUT /api/saved_objects/_bulk_update', () => {
     ({ server, httpSetup, handlerContext } = await setupServer());
     savedObjectsClient = handlerContext.savedObjects.client;
 
-    const router = httpSetup.createRouter('');
+    const router = httpSetup.createRouter('/api/saved_objects/');
     registerBulkUpdateRoute(router);
 
     await server.start();

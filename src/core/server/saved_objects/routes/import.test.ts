@@ -46,7 +46,7 @@ describe('POST /api/saved_objects/_import', () => {
 
     savedObjectsClient.find.mockResolvedValue(emptyResponse);
 
-    const router = httpSetup.createRouter('');
+    const router = httpSetup.createRouter('/api/saved_objects/');
     registerImportRoute(router, allowedTypes);
 
     await server.start();

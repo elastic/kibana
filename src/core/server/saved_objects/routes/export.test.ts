@@ -39,7 +39,7 @@ describe('POST /api/saved_objects/_export', () => {
   beforeEach(async () => {
     ({ server, httpSetup } = await setupServer());
 
-    const router = httpSetup.createRouter('');
+    const router = httpSetup.createRouter('/api/saved_objects/');
     registerExportRoute(router, allowedTypes);
 
     await server.start();
