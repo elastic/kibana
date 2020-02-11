@@ -10,6 +10,7 @@ import { Plugin as DataPlugin } from 'src/plugins/data/public';
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 import { LicensingPluginSetup } from '../../../../plugins/licensing/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../../src/plugins/navigation/public';
+import { initAngularBootstrap } from '../../../../../src/plugins/kibana_legacy/public';
 
 export interface GraphPluginStartDependencies {
   npData: ReturnType<DataPlugin['start']>;
@@ -26,6 +27,7 @@ export class GraphPlugin implements Plugin {
   private savedObjectsClient: SavedObjectsClientContract | null = null;
 
   setup(core: CoreSetup, { licensing }: GraphPluginSetupDependencies) {
+    initAngularBootstrap();
     core.application.register({
       id: 'graph',
       title: 'Graph',
@@ -50,6 +52,7 @@ export class GraphPlugin implements Plugin {
           config: contextCore.uiSettings,
           toastNotifications: contextCore.notifications.toasts,
           indexPatterns: this.npDataStart!.indexPatterns,
+          overlays: contextCore.overlays,
         });
       },
     });

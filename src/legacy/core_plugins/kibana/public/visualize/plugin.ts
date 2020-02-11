@@ -112,6 +112,7 @@ export class VisualizePlugin implements Plugin {
           visualizeCapabilities: contextCore.application.capabilities.visualize,
           visualizations,
           usageCollection,
+          I18nContext: contextCore.i18n.Context,
         };
         setServices(deps);
 
