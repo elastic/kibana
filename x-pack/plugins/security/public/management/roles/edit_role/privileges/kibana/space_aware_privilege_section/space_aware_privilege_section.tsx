@@ -23,13 +23,12 @@ import { PrivilegeSpaceTable } from './privilege_space_table';
 import { PrivilegeSpaceForm } from './privilege_space_form';
 import { PrivilegeFormCalculator } from '../privilege_form_calculator';
 import { PrivilegeSummary } from '../privilege_summary';
-import { SecuredFeature, KibanaPrivileges } from '../../../../model';
+import { KibanaPrivileges } from '../../../../model';
 
 interface Props {
   kibanaPrivileges: KibanaPrivileges;
   role: Role;
   spaces: Space[];
-  features: SecuredFeature[];
   onChange: (role: Role) => void;
   editable: boolean;
   validator: RoleValidator;
@@ -210,7 +209,6 @@ class SpaceAwarePrivilegeSectionUI extends Component<Props, State> {
       <PrivilegeSummary
         role={this.props.role}
         spaces={this.getDisplaySpaces()}
-        features={this.props.features}
         kibanaPrivileges={this.props.kibanaPrivileges}
       />
     );

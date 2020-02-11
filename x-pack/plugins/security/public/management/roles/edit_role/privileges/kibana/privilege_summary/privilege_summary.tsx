@@ -18,12 +18,11 @@ import {
 import { Space } from '../../../../../../../../spaces/common/model/space';
 import { Role } from '../../../../../../../common/model';
 import { PrivilegeSummaryTable } from './privilege_summary_table';
-import { SecuredFeature, KibanaPrivileges } from '../../../../model';
+import { KibanaPrivileges } from '../../../../model';
 
 interface Props {
   role: Role;
   spaces: Space[];
-  features: SecuredFeature[];
   kibanaPrivileges: KibanaPrivileges;
 }
 export const PrivilegeSummary = (props: Props) => {
@@ -42,7 +41,6 @@ export const PrivilegeSummary = (props: Props) => {
               <PrivilegeSummaryTable
                 role={props.role}
                 spaces={props.spaces}
-                features={props.features}
                 kibanaPrivileges={props.kibanaPrivileges}
               />
             </EuiModalBody>

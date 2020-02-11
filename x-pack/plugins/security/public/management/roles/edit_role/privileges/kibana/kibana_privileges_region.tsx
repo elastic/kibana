@@ -13,14 +13,13 @@ import { CollapsiblePanel } from '../../collapsible_panel';
 import { SimplePrivilegeSection } from './simple_privilege_section';
 import { SpaceAwarePrivilegeSection } from './space_aware_privilege_section';
 import { TransformErrorSection } from './transform_error_section';
-import { SecuredFeature, KibanaPrivileges } from '../../../model';
+import { KibanaPrivileges } from '../../../model';
 
 interface Props {
   role: Role;
   spacesEnabled: boolean;
   spaces?: Space[];
   uiCapabilities: Capabilities;
-  features: SecuredFeature[];
   editable: boolean;
   kibanaPrivileges: KibanaPrivileges;
   onChange: (role: Role) => void;
@@ -46,7 +45,6 @@ export class KibanaPrivilegesRegion extends Component<Props, {}> {
       onChange,
       editable,
       validator,
-      features,
     } = this.props;
 
     if (role._transform_error && role._transform_error.includes('kibana')) {
@@ -59,7 +57,6 @@ export class KibanaPrivilegesRegion extends Component<Props, {}> {
           kibanaPrivileges={kibanaPrivileges}
           role={role}
           spaces={spaces}
-          features={features}
           uiCapabilities={uiCapabilities}
           onChange={onChange}
           editable={editable}
@@ -70,7 +67,6 @@ export class KibanaPrivilegesRegion extends Component<Props, {}> {
       return (
         <SimplePrivilegeSection
           kibanaPrivileges={kibanaPrivileges}
-          features={features}
           role={role}
           onChange={onChange}
           editable={editable}

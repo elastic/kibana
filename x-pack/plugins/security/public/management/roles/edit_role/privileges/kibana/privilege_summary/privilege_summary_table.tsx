@@ -18,7 +18,6 @@ import { PrivilegeSummaryCalculator } from './privilege_summary_calculator';
 interface Props {
   role: Role;
   spaces: Space[];
-  features: SecuredFeature[];
   kibanaPrivileges: KibanaPrivileges;
 }
 
@@ -116,7 +115,7 @@ export const PrivilegeSummaryTable = (props: Props) => {
     };
   }, {} as Record<string, ReturnType<PrivilegeSummaryCalculator['getEffectiveFeaturePrivileges']>>);
 
-  const items = props.features.map(feature => {
+  const items = props.kibanaPrivileges.getSecuredFeatures().map(feature => {
     return {
       feature,
       featureId: feature.id,
@@ -134,7 +133,7 @@ export const PrivilegeSummaryTable = (props: Props) => {
           ...acc,
           [featureId]: (
             <PrivilegeSummaryExpandedRow
-              feature={props.features.find(f => f.id === featureId)!}
+              feature={props.kibanaPrivileges.getSecuredFeature(featureId)}
               effectiveSubFeaturePrivileges={Object.values(privileges).map(
                 p => p[featureId].subFeature
               )}

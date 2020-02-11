@@ -36,7 +36,7 @@ import {
   IHttpFetchError,
   NotificationsStart,
 } from 'src/core/public';
-import { IFeature } from '../../../../../features/common';
+import { IFeature, Feature } from '../../../../../features/common';
 import { IndexPatternsContract } from '../../../../../../../src/plugins/data/public';
 import { Space } from '../../../../../spaces/public';
 import {
@@ -60,7 +60,7 @@ import { DocumentationLinksService } from '../documentation_links';
 import { IndicesAPIClient } from '../indices_api_client';
 import { RolesAPIClient } from '../roles_api_client';
 import { PrivilegesAPIClient } from '../privileges_api_client';
-import { SecuredFeature, KibanaPrivileges } from '../model';
+import { KibanaPrivileges } from '../model';
 
 interface Props {
   action: 'edit' | 'clone';
@@ -228,16 +228,9 @@ function useSpaces(http: HttpStart, fatalErrors: FatalErrorsSetup, spacesEnabled
   return spaces;
 }
 
-function useFeatures(
-  http: HttpStart,
-  privileges: RawKibanaPrivileges | undefined,
-  fatalErrors: FatalErrorsSetup
-) {
-  const [features, setFeatures] = useState<SecuredFeature[] | null>(null);
+function useFeatures(http: HttpStart, fatalErrors: FatalErrorsSetup) {
+  const [features, setFeatures] = useState<Feature[] | null>(null);
   useEffect(() => {
-    if (!privileges) {
-      return;
-    }
     http
       .get<IFeature[]>('/api/features')
       .catch((err: IHttpFetchError) => {
@@ -257,9 +250,9 @@ function useFeatures(
         throw err;
       })
       .then(rawFeatures => {
-        setFeatures(rawFeatures.map(raw => new SecuredFeature(raw, privileges.features[raw.id])));
+        setFeatures(rawFeatures.map(raw => new Feature(raw)));
       });
-  }, [http, fatalErrors, privileges]);
+  }, [http, fatalErrors]);
 
   return features;
 }
@@ -293,7 +286,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
   const indexPatternsTitles = useIndexPatternsTitles(indexPatterns, fatalErrors, notifications);
   const privileges = usePrivileges(privilegesAPIClient, fatalErrors);
   const spaces = useSpaces(http, fatalErrors, spacesEnabled);
-  const features = useFeatures(http, privileges ? privileges[0] : undefined, fatalErrors);
+  const features = useFeatures(http, fatalErrors);
   const [role, setRole] = useRole(
     rolesAPIClient,
     fatalErrors,
@@ -433,7 +426,6 @@ export const EditRolePage: FunctionComponent<Props> = ({
           kibanaPrivileges={new KibanaPrivileges(kibanaPrivileges, features)}
           spaces={spaces}
           spacesEnabled={spacesEnabled}
-          features={features}
           uiCapabilities={uiCapabilities}
           editable={!isReadOnlyRole}
           role={role}

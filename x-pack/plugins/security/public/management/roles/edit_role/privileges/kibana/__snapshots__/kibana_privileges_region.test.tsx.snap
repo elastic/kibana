@@ -7,7 +7,6 @@ exports[`<KibanaPrivileges> renders without crashing 1`] = `
 >
   <InjectIntl(SpaceAwarePrivilegeSectionUI)
     editable={true}
-    features={Array []}
     kibanaPrivileges={
       KibanaPrivileges {
         "feature": Map {},

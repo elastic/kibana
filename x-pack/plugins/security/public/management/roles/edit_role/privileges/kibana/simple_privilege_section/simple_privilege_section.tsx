@@ -19,13 +19,12 @@ import { isGlobalPrivilegeDefinition } from '../../../privilege_utils';
 import { CUSTOM_PRIVILEGE_VALUE, NO_PRIVILEGE_VALUE } from '../constants';
 import { FeatureTable } from '../feature_table';
 import { UnsupportedSpacePrivilegesWarning } from './unsupported_space_privileges_warning';
-import { KibanaPrivileges, SecuredFeature } from '../../../../model';
+import { KibanaPrivileges } from '../../../../model';
 import { PrivilegeFormCalculator } from '../privilege_form_calculator';
 
 interface Props {
   role: Role;
   kibanaPrivileges: KibanaPrivileges;
-  features: SecuredFeature[];
   onChange: (role: Role) => void;
   editable: boolean;
 }
@@ -279,7 +278,7 @@ export class SimplePrivilegeSection extends Component<Props, State> {
 
     const form = this.locateGlobalPrivilege(role) || this.createGlobalPrivilegeEntry(role);
     if (privileges.length > 0) {
-      this.props.features.forEach(feature => {
+      this.props.kibanaPrivileges.getSecuredFeatures().forEach(feature => {
         form.feature[feature.id] = [...privileges];
       });
     } else {
