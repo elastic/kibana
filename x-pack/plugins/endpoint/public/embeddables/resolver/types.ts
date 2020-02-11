@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Middleware, Dispatch, Store } from 'redux';
+import { Store } from 'redux';
+
 import { ResolverAction } from './store/actions';
 export { ResolverAction } from './store/actions';
-import * as selectors from './store/selectors';
 
 /**
  * Redux state for the Resolver feature. Properties on this interface are populated via multiple reducers using redux's `combineReducers`.
@@ -271,3 +271,5 @@ export interface SideEffectSimulator {
    */
   mock: jest.Mocked<Omit<SideEffectors, 'ResizeObserver'>> & Pick<SideEffectors, 'ResizeObserver'>;
 }
+
+export type ResolverStore = Store<ResolverState, ResolverAction>;

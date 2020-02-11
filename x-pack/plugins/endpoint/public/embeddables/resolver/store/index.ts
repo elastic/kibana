@@ -6,19 +6,17 @@
 
 import { createStore, applyMiddleware, Store } from 'redux';
 import { composeWithDevTools } from 'redux-devtools-extension';
-import { ResolverAction, ResolverMiddleware, ResolverState } from '../types';
+import { ResolverAction, ResolverState } from '../types';
 import { resolverReducer } from './reducer';
 
-export const storeFactory = (
-  ...middleware: ResolverMiddleware[]
-): { store: Store<ResolverState, ResolverAction> } => {
+export const storeFactory = (): { store: Store<ResolverState, ResolverAction> } => {
   const actionsBlacklist: Array<ResolverAction['type']> = ['userMovedPointer'];
   const composeEnhancers = composeWithDevTools({
     name: 'Resolver',
     actionsBlacklist,
   });
 
-  const middlewareEnhancer = applyMiddleware(...middleware);
+  const middlewareEnhancer = applyMiddleware();
 
   const store = createStore(resolverReducer, composeEnhancers(middlewareEnhancer));
   return {

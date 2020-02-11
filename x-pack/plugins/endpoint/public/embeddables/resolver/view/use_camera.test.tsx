@@ -15,7 +15,6 @@ import * as selectors from '../store/selectors';
 import { storeFactory } from '../store';
 import {
   Matrix3,
-  ResolverMiddleware,
   ResolverAction,
   ResolverStore,
   ProcessEvent,
