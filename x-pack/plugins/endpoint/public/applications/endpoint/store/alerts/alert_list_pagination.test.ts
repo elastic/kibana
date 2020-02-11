@@ -11,10 +11,8 @@ import { alertMiddlewareFactory } from './middleware';
 import { AppAction } from '../action';
 import { coreMock } from 'src/core/public/mocks';
 import { createBrowserHistory } from 'history';
-import { AlertResultList } from '../../../../../common/types';
 import {
   urlFromNewPageSizeParam,
-  isOnAlertPage,
   paginationDataFromUrl,
   urlFromNewPageIndexParam,
 } from './selectors';
@@ -30,54 +28,6 @@ describe('alert list middleware and selectors', () => {
     store = createStore(alertListReducer, applyMiddleware(middleware));
   });
   describe('when the user navigates to the alert list page', () => {
-    beforeEach(() => {
-      coreStart.http.post.mockImplementation(async () => {
-        const response: AlertResultList = {
-          alerts: [
-            {
-              '@timestamp': new Date(0),
-              agent: {
-                id: 'hgsadfjbk',
-                version: 'kdfhjs',
-              },
-              event: {
-                action: 'hjkadfs',
-              },
-              file_classification: {
-                malware_classification: {
-                  score: 3,
-                },
-              },
-              host: {
-                hostname: 'fdadsf',
-                ip: 'asdfasd',
-                os: {
-                  name: 'asdfsdaf',
-                },
-              },
-              thread: {},
-            },
-          ],
-          total: 1,
-          request_page_size: 10,
-          request_page_index: 0,
-          result_from_index: 0,
-        };
-        return response;
-      });
-      store.dispatch({ type: 'userChangedUrl', payload: '/alerts' });
-    });
-
-    it("should recognize it's on the alert list page", () => {
-      const actual = isOnAlertPage(store.getState());
-      expect(actual).toBeTruthy();
-    });
-
-    it('should return alertListData', () => {
-      const actual = store.getState().alerts.length;
-      expect(actual).toEqual(1);
-    });
-
     describe('when a new page size is passed', () => {
       beforeEach(() => {
         const urlPageSizeSelector = urlFromNewPageSizeParam(store.getState());
