@@ -38,7 +38,7 @@ export const CustomActionsFlyout = ({ onClose }: Props) => {
           <EuiTitle size="s">
             <h2>
               {i18n.translate(
-                'xpack.apm.settings.customizeUI.customAction.flyout.title',
+                'xpack.apm.settings.customizeUI.customActions.flyout.title',
                 {
                   defaultMessage: 'Create custom action'
                 }
@@ -50,7 +50,7 @@ export const CustomActionsFlyout = ({ onClose }: Props) => {
           <EuiText>
             <p>
               {i18n.translate(
-                'xpack.apm.settings.customizeUI.customAction.flyout.label',
+                'xpack.apm.settings.customizeUI.customActions.flyout.label',
                 {
                   defaultMessage:
                     "This action will be shown in the 'Actions' context menu for the trace and error detail components. You can specify any number of links, but only the first three will be shown, in alphabetical order."
@@ -81,7 +81,7 @@ export const CustomActionsFlyout = ({ onClose }: Props) => {
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty iconType="cross" onClick={onClose} flush="left">
                 {i18n.translate(
-                  'xpack.apm.settings.customizeUI.customAction.flyout.close',
+                  'xpack.apm.settings.customizeUI.customActions.flyout.close',
                   {
                     defaultMessage: 'Close'
                   }
@@ -94,7 +94,7 @@ export const CustomActionsFlyout = ({ onClose }: Props) => {
                 fill
               >
                 {i18n.translate(
-                  'xpack.apm.settings.customizeUI.customAction.flyout.save',
+                  'xpack.apm.settings.customizeUI.customActions.flyout.save',
                   {
                     defaultMessage: 'Save'
                   }

@@ -25,7 +25,7 @@ export const SettingsSection = ({
       <EuiTitle size="xs">
         <h3>
           {i18n.translate(
-            'xpack.apm.settings.customizeUI.customAction.flyout.settingsSection.title',
+            'xpack.apm.settings.customizeUI.customActions.flyout.settingsSection.title',
             { defaultMessage: 'Action' }
           )}
         </h3>
@@ -33,18 +33,18 @@ export const SettingsSection = ({
       <EuiSpacer size="m" />
       <EuiFormRow
         label={i18n.translate(
-          'xpack.apm.settings.customizeUI.customAction.flyout.settingsSection.label',
+          'xpack.apm.settings.customizeUI.customActions.flyout.settingsSection.label',
           { defaultMessage: 'Label' }
         )}
         helpText={i18n.translate(
-          'xpack.apm.settings.customizeUI.customAction.flyout.settingsSection.label.helpText',
+          'xpack.apm.settings.customizeUI.customActions.flyout.settingsSection.label.helpText',
           { defaultMessage: 'Labels can be a maximum of 128 characters' }
         )}
       >
         <EuiFieldText
           placeholder={i18n.translate(
-            'xpack.apm.settings.customizeUI.customAction.flyout.settingsSection.label.placeHolder',
-            { defaultMessage: 'i.e. Support tickets' }
+            'xpack.apm.settings.customizeUI.customActions.flyout.settingsSection.label.placeHolder',
+            { defaultMessage: 'e.g. Support tickets' }
           )}
           value={label}
           onChange={e => {
@@ -54,20 +54,20 @@ export const SettingsSection = ({
       </EuiFormRow>
       <EuiFormRow
         label={i18n.translate(
-          'xpack.apm.settings.customizeUI.customAction.flyout.settingsSection.url',
+          'xpack.apm.settings.customizeUI.customActions.flyout.settingsSection.url',
           { defaultMessage: 'URL' }
         )}
         helpText={i18n.translate(
-          'xpack.apm.settings.customizeUI.customAction.flyout.settingsSection.url.helpText',
+          'xpack.apm.settings.customizeUI.customActions.flyout.settingsSection.url.helpText',
           {
             defaultMessage:
-              'You can use relative paths by prefixing with i.e. /dashboards'
+              'You can use relative paths by prefixing with e.g. /dashboards'
           }
         )}
       >
         <EuiFieldText
           placeholder={i18n.translate(
-            'xpack.apm.settings.customizeUI.customAction.flyout.settingsSection.url.placeHolder',
+            'xpack.apm.settings.customizeUI.customActions.flyout.settingsSection.url.placeHolder',
             { defaultMessage: 'e.g. https://www.elastic.co/' }
           )}
           value={url}
