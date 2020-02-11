@@ -7,6 +7,7 @@
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
 import { CoreStart } from '../../plugin';
+import * as actions from './actions';
 import { keys, State } from './model';
 
 export type UiSettingsState = State;
@@ -54,4 +55,9 @@ export const createInitialUiSettingsState = (
   timeZone: uiSettings.get<State['timeZone']>(keys.timeZone),
 });
 
-export const uiSettingsReducer = reducerWithInitialState(initialUiSettingsState).build();
+export const uiSettingsReducer = reducerWithInitialState(initialUiSettingsState)
+  .case(actions.dateFormatChanged, (state, dateFormat) => ({
+    ...state,
+    dateFormat,
+  }))
+  .build();

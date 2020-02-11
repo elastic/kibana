@@ -6,7 +6,9 @@
 
 import actionCreatorFactory from 'typescript-fsa';
 
+import { State } from './model';
+
 const actionCreator = actionCreatorFactory('x-pack/siem/local/ui_settings');
 
-export const defaultIndexChanged = actionCreator<string>('DEFAULT_INDEX_CHANGED');
-export const defaultDateFormatChanged = actionCreator<string>('DEFAULT_DATE_FORMAT_CHANGED');
+export const indexPatternsChanged = actionCreator<State['indexPattern']>('INDEX_PATTERN_CHANGED');
+export const dateFormatChanged = actionCreator<State['dateFormat']>('DATE_FORMAT_CHANGED');

@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as Actions from './actions';
-import * as Model from './model';
-// import * as uiSettingsSelectors from './selectors';
-
+import * as actions from './actions';
+import * as model from './model';
+// import * as selectors from './selectors';
 export * from './reducer';
-export { Actions, Model };
+
+export { actions as uiSettingsActions, model as uiSettingsModel };
