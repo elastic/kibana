@@ -65,10 +65,10 @@ const AppPluginRootComponent: React.FC<AppPluginRootComponentProps> = ({
 const AppPluginRoot = memo(AppPluginRootComponent);
 
 const StartAppComponent: FC<AppFrontendLibs> = libs => {
-  const { i18n } = useKibana().services;
+  const { i18n, uiSettings } = useKibana().services;
   const history = createHashHistory();
   const libs$ = new BehaviorSubject(libs);
-  const store = createStore(createInitialState(), libs$.pipe(pluck('apolloClient')));
+  const store = createStore(createInitialState(uiSettings), libs$.pipe(pluck('apolloClient')));
   const [darkMode] = useUiSetting$<boolean>(DEFAULT_DARK_MODE);
   const theme = useMemo(
     () => ({

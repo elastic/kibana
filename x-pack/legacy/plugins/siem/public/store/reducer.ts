@@ -6,10 +6,17 @@
 
 import { combineReducers } from 'redux';
 
+import { CoreStart } from '../plugin';
 import { appReducer, AppState, initialAppState } from './app';
 import { dragAndDropReducer, DragAndDropState, initialDragAndDropState } from './drag_and_drop';
 import { hostsReducer, HostsState, initialHostsState } from './hosts';
 import { createInitialInputsState, initialInputsState, inputsReducer, InputsState } from './inputs';
+import {
+  createInitialUiSettingsState,
+  initialUiSettingsState,
+  uiSettingsReducer,
+  UiSettingsState,
+} from './ui_settings';
 import { initialNetworkState, networkReducer, NetworkState } from './network';
 import { initialTimelineState, timelineReducer } from './timeline/reducer';
 import { TimelineState } from './timeline/types';
@@ -21,6 +28,7 @@ export interface State {
   inputs: InputsState;
   network: NetworkState;
   timeline: TimelineState;
+  uiSettings: UiSettingsState;
 }
 
 export const initialState: State = {
@@ -30,11 +38,13 @@ export const initialState: State = {
   inputs: initialInputsState,
   network: initialNetworkState,
   timeline: initialTimelineState,
+  uiSettings: initialUiSettingsState,
 };
 
-export const createInitialState = (): State => ({
+export const createInitialState = (uiSettings: CoreStart['uiSettings']): State => ({
   ...initialState,
   inputs: createInitialInputsState(),
+  uiSettings: createInitialUiSettingsState(uiSettings),
 });
 
 export const reducer = combineReducers<State>({
@@ -44,4 +54,5 @@ export const reducer = combineReducers<State>({
   inputs: inputsReducer,
   network: networkReducer,
   timeline: timelineReducer,
+  uiSettings: uiSettingsReducer,
 });
