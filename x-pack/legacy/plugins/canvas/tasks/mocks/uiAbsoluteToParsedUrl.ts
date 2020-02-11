@@ -3,4 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-export { TimeBuckets } from './time_buckets';
+
+export function absoluteToParsedUrl(absoluteUrl: string, basePath = '') {
+  return 'parsed-url';
+}
