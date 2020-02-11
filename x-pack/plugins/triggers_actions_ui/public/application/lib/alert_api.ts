@@ -26,6 +26,7 @@ export async function loadAlert({
   return await http.get(`${BASE_ALERT_API_PATH}/${alertId}`);
 }
 
+type EmptyHttpResponse = '';
 export async function loadAlertState({
   http,
   alertId,
@@ -33,14 +34,17 @@ export async function loadAlertState({
   http: HttpSetup;
   alertId: string;
 }): Promise<AlertTaskState> {
-  return await http.get(`${BASE_ALERT_API_PATH}/${alertId}/state`).then((state: AlertTaskState) => {
-    return pipe(
-      alertStateSchema.decode(state),
-      fold((e: t.Errors) => {
-        throw new Error(`Alert "${alertId}" has invalid state`);
-      }, t.identity)
-    );
-  });
+  return await http
+    .get(`${BASE_ALERT_API_PATH}/${alertId}/state`)
+    .then((state: AlertTaskState | EmptyHttpResponse) => (state ? state : {}))
+    .then((state: AlertTaskState) => {
+      return pipe(
+        alertStateSchema.decode(state),
+        fold((e: t.Errors) => {
+          throw new Error(`Alert "${alertId}" has invalid state`);
+        }, t.identity)
+      );
+    });
 }
 
 export async function loadAlerts({

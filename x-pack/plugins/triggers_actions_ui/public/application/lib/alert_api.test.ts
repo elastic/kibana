@@ -133,6 +133,14 @@ describe('loadAlertState', () => {
     });
     expect(http.get).toHaveBeenCalledWith(`/api/alert/${alertId}/state`);
   });
+
+  test('should handle empty response from api', async () => {
+    const alertId = uuid.v4();
+    http.get.mockResolvedValueOnce('');
+
+    expect(await loadAlertState({ http, alertId })).toEqual({});
+    expect(http.get).toHaveBeenCalledWith(`/api/alert/${alertId}/state`);
+  });
 });
 
 describe('loadAlerts', () => {
