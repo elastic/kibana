@@ -30,31 +30,32 @@ import { Role, copyRole } from '../../../../../../../common/model';
 import { SpaceSelector } from './space_selector';
 import { FeatureTable } from '../feature_table';
 import { CUSTOM_PRIVILEGE_VALUE } from '../constants';
-import { PrivilegeFormCalculator } from '../privilege_calculator';
+import { PrivilegeFormCalculator } from '../privilege_form_calculator';
 import { KibanaPrivileges } from '../../../../model';
 
 interface Props {
   role: Role;
   kibanaPrivileges: KibanaPrivileges;
   spaces: Space[];
-  editingIndex: number;
+  privilegeIndex: number;
   onChange: (role: Role) => void;
   onCancel: () => void;
   intl: InjectedIntl;
 }
 
 interface State {
-  editingIndex: number;
+  privilegeIndex: number;
   selectedSpaceIds: string[];
   selectedBasePrivilege: string[];
   role: Role;
   mode: 'create' | 'update';
   isCustomizingFeaturePrivileges: boolean;
+  privilegeCalculator: PrivilegeFormCalculator;
 }
 
 export class PrivilegeSpaceForm extends Component<Props, State> {
   public static defaultProps = {
-    editingIndex: -1,
+    privilegeIndex: -1,
   };
 
   constructor(props: Props) {
@@ -62,10 +63,10 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
 
     const role = copyRole(props.role);
 
-    let editingIndex = props.editingIndex;
-    if (editingIndex < 0) {
+    let privilegeIndex = props.privilegeIndex;
+    if (privilegeIndex < 0) {
       // create new form
-      editingIndex =
+      privilegeIndex =
         role.kibana.push({
           spaces: [],
           base: [],
@@ -75,11 +76,12 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
 
     this.state = {
       role,
-      editingIndex,
-      selectedSpaceIds: [...role.kibana[editingIndex].spaces],
-      selectedBasePrivilege: [...(role.kibana[editingIndex].base || [])],
-      mode: props.editingIndex < 0 ? 'create' : 'update',
+      privilegeIndex,
+      selectedSpaceIds: [...role.kibana[privilegeIndex].spaces],
+      selectedBasePrivilege: [...(role.kibana[privilegeIndex].base || [])],
+      mode: props.privilegeIndex < 0 ? 'create' : 'update',
       isCustomizingFeaturePrivileges: false,
+      privilegeCalculator: new PrivilegeFormCalculator(props.kibanaPrivileges, role),
     };
   }
 
@@ -101,11 +103,9 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
             <EuiErrorBoundary>{this.getForm()}</EuiErrorBoundary>
           </EuiFlyoutBody>
           <EuiFlyoutFooter>
-            {new PrivilegeFormCalculator(
-              this.props.kibanaPrivileges,
-              this.state.role,
-              this.state.editingIndex
-            ).hasSupersededInheritedPrivileges() && (
+            {this.state.privilegeCalculator.hasSupersededInheritedPrivileges(
+              this.state.privilegeIndex
+            ) && (
               <Fragment>
                 <EuiCallOut color="warning" iconType="alert">
                   This is a warning message explaining how global privileges are more permissive
@@ -276,17 +276,11 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
 
         <FeatureTable
           role={this.state.role}
-          privilegeCalculator={
-            new PrivilegeFormCalculator(
-              this.props.kibanaPrivileges,
-              this.state.role,
-              this.state.editingIndex
-            )
-          }
+          privilegeCalculator={this.state.privilegeCalculator}
           onChange={this.onFeaturePrivilegesChange}
           onChangeAll={this.onChangeAllFeaturePrivileges}
           kibanaPrivileges={this.props.kibanaPrivileges}
-          spacesIndex={this.state.editingIndex}
+          privilegeIndex={this.state.privilegeIndex}
           disabled={this.state.selectedBasePrivilege.length > 0 || !hasSelectedSpaces}
         />
 
@@ -428,7 +422,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
   private onSaveClick = () => {
     const role = copyRole(this.state.role);
 
-    const form = role.kibana[this.state.editingIndex];
+    const form = role.kibana[this.state.privilegeIndex];
 
     // remove any spaces that no longer exist
     if (!this.isDefiningGlobalPrivilege()) {
@@ -443,7 +437,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
   private onSelectedSpacesChange = (selectedSpaceIds: string[]) => {
     const role = copyRole(this.state.role);
 
-    const form = role.kibana[this.state.editingIndex];
+    const form = role.kibana[this.state.privilegeIndex];
     form.spaces = [...selectedSpaceIds];
 
     this.setState({
@@ -454,7 +448,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
 
   private onSpaceBasePrivilegeChange = (basePrivilege: string) => {
     const role = copyRole(this.state.role);
-    const form = role.kibana[this.state.editingIndex];
+    const form = role.kibana[this.state.privilegeIndex];
 
     const privilegeName = basePrivilege.split('basePrivilege_')[1];
 
@@ -476,13 +470,12 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
   };
 
   private getDisplayedBasePrivilege = () => {
-    const entry = this.state.role.kibana[this.state.editingIndex];
-    const selectedPrivileges = entry.base;
-    const basePrivileges = this.props.kibanaPrivileges.getBasePrivileges(entry);
+    const basePrivilege = this.state.privilegeCalculator.getBasePrivilege(
+      this.state.privilegeIndex
+    );
 
-    const selectedBasePrivilege = basePrivileges.find(bp => selectedPrivileges.includes(bp.id));
-    if (selectedBasePrivilege) {
-      return `basePrivilege_${selectedBasePrivilege.id}`;
+    if (basePrivilege) {
+      return `basePrivilege_${basePrivilege.id}`;
     }
 
     return `basePrivilege_${CUSTOM_PRIVILEGE_VALUE}`;
@@ -490,7 +483,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
 
   private onFeaturePrivilegesChange = (featureId: string, privileges: string[]) => {
     const role = copyRole(this.state.role);
-    const form = role.kibana[this.state.editingIndex];
+    const form = role.kibana[this.state.privilegeIndex];
 
     if (privileges.length === 0) {
       delete form.feature[featureId];
@@ -505,7 +498,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
 
   private onChangeAllFeaturePrivileges = (privileges: string[]) => {
     const role = copyRole(this.state.role);
-    const entry = role.kibana[this.state.editingIndex];
+    const entry = role.kibana[this.state.privilegeIndex];
 
     if (privileges.length === 0) {
       entry.feature = {};
@@ -529,7 +522,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
       return false;
     }
 
-    const form = this.state.role.kibana[this.state.editingIndex];
+    const form = this.state.role.kibana[this.state.privilegeIndex];
     if (form.base.length === 0 && Object.keys(form.feature).length === 0) {
       return false;
     }

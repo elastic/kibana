@@ -84,6 +84,8 @@ export class Plugin {
       privileges: 'none',
       reserved: {
         privilege: {
+          app: ['monitoring', 'kibana'],
+          catalogue: ['monitoring'],
           savedObject: {
             all: [],
             read: [],

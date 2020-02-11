@@ -8,7 +8,7 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiCheckbox, EuiButtonGroup } from '@elastic/eui';
 
 import { NO_PRIVILEGE_VALUE } from '../constants';
-import { PrivilegeFormCalculator } from '../privilege_calculator';
+import { PrivilegeFormCalculator } from '../privilege_form_calculator';
 import {
   SecuredSubFeature,
   SubFeaturePrivilegeGroup,
@@ -20,6 +20,7 @@ interface Props {
   subFeature: SecuredSubFeature;
   selectedFeaturePrivileges: string[];
   privilegeCalculator: PrivilegeFormCalculator;
+  privilegeIndex: number;
   onChange: (selectedPrivileges: string[]) => void;
   disabled?: boolean;
 }
@@ -54,7 +55,8 @@ export const SubFeatureForm = (props: Props) => {
         {privilegeGroup.privileges.map((privilege: SubFeaturePrivilege) => {
           const isGranted = props.privilegeCalculator.isIndependentSubFeaturePrivilegeGranted(
             props.featureId,
-            privilege.id
+            privilege.id,
+            props.privilegeIndex
           );
           return (
             <EuiCheckbox
@@ -86,7 +88,8 @@ export const SubFeatureForm = (props: Props) => {
   ) {
     const firstSelectedPrivilege = props.privilegeCalculator.getSelectedMutuallyExclusiveSubFeaturePrivilege(
       props.featureId,
-      privilegeGroup
+      privilegeGroup,
+      props.privilegeIndex
     );
 
     const options = [

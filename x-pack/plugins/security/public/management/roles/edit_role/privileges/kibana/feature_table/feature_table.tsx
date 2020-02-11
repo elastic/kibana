@@ -22,7 +22,7 @@ import { Role } from '../../../../../../../common/model';
 import { ChangeAllPrivilegesControl } from './change_all_privileges';
 import { FeatureTableExpandedRow } from './feature_table_expanded_row';
 import { NO_PRIVILEGE_VALUE } from '../constants';
-import { PrivilegeFormCalculator } from '../privilege_calculator';
+import { PrivilegeFormCalculator } from '../privilege_form_calculator';
 import { FeatureTableCell } from '../feature_table_cell';
 import {
   KibanaPrivileges,
@@ -35,7 +35,7 @@ interface Props {
   role: Role;
   privilegeCalculator: PrivilegeFormCalculator;
   kibanaPrivileges: KibanaPrivileges;
-  spacesIndex: number;
+  privilegeIndex: number;
   onChange: (featureId: string, privileges: string[]) => void;
   onChangeAll: (privileges: string[]) => void;
   disabled?: boolean;
@@ -55,7 +55,7 @@ interface TableRow {
 
 export class FeatureTable extends Component<Props, State> {
   public static defaultProps = {
-    spacesIndex: -1,
+    privilegeIndex: -1,
     showLocks: true,
   };
 
@@ -104,10 +104,11 @@ export class FeatureTable extends Component<Props, State> {
             [featureId]: (
               <FeatureTableExpandedRow
                 feature={featurePrivileges.find(f => f.id === featureId)!}
+                privilegeIndex={this.props.privilegeIndex}
                 onChange={this.props.onChange}
                 privilegeCalculator={this.props.privilegeCalculator}
                 selectedFeaturePrivileges={
-                  this.props.role.kibana[this.props.spacesIndex].feature[featureId] ?? []
+                  this.props.role.kibana[this.props.privilegeIndex].feature[featureId] ?? []
                 }
                 disabled={this.props.disabled}
               />
@@ -195,7 +196,8 @@ export class FeatureTable extends Component<Props, State> {
           }
 
           const selectedPrivilegeId = this.props.privilegeCalculator.getDisplayedPrimaryFeaturePrivilege(
-            feature.id
+            feature.id,
+            this.props.privilegeIndex
           )?.id;
 
           const options = featurePrivileges
@@ -215,7 +217,12 @@ export class FeatureTable extends Component<Props, State> {
           });
 
           let warningIcon = <EuiIconTip type="empty" content={null} />;
-          if (this.props.privilegeCalculator.hasNonSupersededSubFeaturePrivileges(feature.id)) {
+          if (
+            this.props.privilegeCalculator.hasNonSupersededSubFeaturePrivileges(
+              feature.id,
+              this.props.privilegeIndex
+            )
+          ) {
             warningIcon = (
               <EuiIconTip
                 type="iInCircle"

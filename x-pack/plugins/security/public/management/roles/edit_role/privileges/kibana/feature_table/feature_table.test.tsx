@@ -20,7 +20,7 @@ import { kibanaFeatures } from '../__fixtures__/kibana_features';
 import { Feature } from '../../../../../../../../features/public';
 import { createKibanaPrivileges } from '../__fixtures__/kibana_privileges';
 import { SubFeatureForm } from './sub_feature_form';
-import { PrivilegeFormCalculator } from '../privilege_calculator';
+import { PrivilegeFormCalculator } from '../privilege_form_calculator';
 
 function getDisplayedPrivileges(wrapper: ReactWrapper<any>) {
   const allExpanderButtons = findTestSubject(wrapper, 'expandFeaturePrivilegeRow');
@@ -94,11 +94,11 @@ const createRole = (kibana: Role['kibana'] = []): Role => {
 interface TestConfig {
   features: Feature[];
   role: Role;
-  spacesIndex: number;
+  privilegeIndex: number;
 }
 const setup = (config: TestConfig) => {
   const kibanaPrivileges = createKibanaPrivileges(config.features);
-  const calculator = new PrivilegeFormCalculator(kibanaPrivileges, config.role, config.spacesIndex);
+  const calculator = new PrivilegeFormCalculator(kibanaPrivileges, config.role);
   const onChange = jest.fn();
   const onChangeAll = jest.fn();
   const wrapper = mountWithIntl(
@@ -108,7 +108,7 @@ const setup = (config: TestConfig) => {
       kibanaPrivileges={kibanaPrivileges}
       onChange={onChange}
       onChangeAll={onChangeAll}
-      spacesIndex={config.spacesIndex}
+      privilegeIndex={config.privilegeIndex}
     />
   );
 
@@ -135,7 +135,7 @@ describe('FeatureTable', () => {
     const { displayedPrivileges } = setup({
       role,
       features: kibanaFeatures,
-      spacesIndex: 0,
+      privilegeIndex: 0,
     });
 
     expect(displayedPrivileges).toMatchInlineSnapshot(`
@@ -172,7 +172,7 @@ describe('FeatureTable', () => {
         feature: {},
       },
     ]);
-    const { displayedPrivileges } = setup({ role, features: kibanaFeatures, spacesIndex: 1 });
+    const { displayedPrivileges } = setup({ role, features: kibanaFeatures, privilegeIndex: 1 });
     expect(displayedPrivileges).toMatchInlineSnapshot(`
       Object {
         "excluded_from_base": Object {

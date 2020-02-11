@@ -20,7 +20,7 @@ import { CUSTOM_PRIVILEGE_VALUE, NO_PRIVILEGE_VALUE } from '../constants';
 import { FeatureTable } from '../feature_table';
 import { UnsupportedSpacePrivilegesWarning } from './unsupported_space_privileges_warning';
 import { KibanaPrivileges, SecuredFeature } from '../../../../model';
-import { PrivilegeFormCalculator } from '../privilege_calculator';
+import { PrivilegeFormCalculator } from '../privilege_form_calculator';
 
 interface Props {
   role: Role;
@@ -211,15 +211,11 @@ export class SimplePrivilegeSection extends Component<Props, State> {
                   role={this.props.role}
                   kibanaPrivileges={this.props.kibanaPrivileges}
                   privilegeCalculator={
-                    new PrivilegeFormCalculator(
-                      this.props.kibanaPrivileges,
-                      this.props.role,
-                      this.props.role.kibana.findIndex(k => isGlobalPrivilegeDefinition(k))
-                    )
+                    new PrivilegeFormCalculator(this.props.kibanaPrivileges, this.props.role)
                   }
                   onChange={this.onFeaturePrivilegeChange}
                   onChangeAll={this.onChangeAllFeaturePrivileges}
-                  spacesIndex={this.props.role.kibana.findIndex(k =>
+                  privilegeIndex={this.props.role.kibana.findIndex(k =>
                     isGlobalPrivilegeDefinition(k)
                   )}
                 />

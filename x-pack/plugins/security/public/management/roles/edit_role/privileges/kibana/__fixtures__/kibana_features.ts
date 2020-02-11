@@ -60,8 +60,8 @@ export const kibanaFeatures = [
                 name: 'All',
                 includeIn: 'all',
                 savedObject: {
-                  all: [],
-                  read: [],
+                  all: ['all-cool-type'],
+                  read: ['read-cool-type'],
                 },
                 ui: [],
               },
@@ -71,7 +71,7 @@ export const kibanaFeatures = [
                 includeIn: 'read',
                 savedObject: {
                   all: [],
-                  read: [],
+                  read: ['read-cool-type'],
                 },
                 ui: [],
               },
@@ -94,6 +94,16 @@ export const kibanaFeatures = [
                 id: 'cool_toggle_2',
                 name: 'Cool toggle 2',
                 includeIn: 'read',
+                savedObject: {
+                  all: [],
+                  read: [],
+                },
+                ui: [],
+              },
+              {
+                id: 'cool_excluded_toggle',
+                name: 'Cool excluded toggle',
+                includeIn: 'none',
                 savedObject: {
                   all: [],
                   read: [],

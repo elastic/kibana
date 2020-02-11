@@ -10,4 +10,11 @@ export class PrimaryFeaturePrivilege extends FeaturePrivilege {
   public isMinimalFeaturePrivilege() {
     return this.id.startsWith('minimal_');
   }
+
+  public getCorrespondingPrivilegeId() {
+    if (this.isMinimalFeaturePrivilege()) {
+      return this.id.substr(`minimal_`.length);
+    }
+    return `minimal_${this.id}`;
+  }
 }

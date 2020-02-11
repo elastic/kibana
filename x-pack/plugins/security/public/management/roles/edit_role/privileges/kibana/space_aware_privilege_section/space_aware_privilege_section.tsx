@@ -21,7 +21,7 @@ import { Role, isReservedRole } from '../../../../../../../common/model';
 import { RoleValidator } from '../../../validate_role';
 import { PrivilegeSpaceTable } from './privilege_space_table';
 import { PrivilegeSpaceForm } from './privilege_space_form';
-import { PrivilegeTableCalculator } from '../privilege_calculator';
+import { PrivilegeFormCalculator } from '../privilege_form_calculator';
 import { PrivilegeSummary } from '../privilege_summary';
 import { SecuredFeature, KibanaPrivileges } from '../../../../model';
 
@@ -39,7 +39,7 @@ interface Props {
 
 interface State {
   role: Role | null;
-  editingIndex: number;
+  privilegeIndex: number;
   showSpacePrivilegeEditor: boolean;
   showPrivilegeMatrix: boolean;
 }
@@ -63,7 +63,7 @@ class SpaceAwarePrivilegeSectionUI extends Component<Props, State> {
       showSpacePrivilegeEditor: false,
       showPrivilegeMatrix: false,
       role: null,
-      editingIndex: -1,
+      privilegeIndex: -1,
     };
   }
 
@@ -123,8 +123,8 @@ class SpaceAwarePrivilegeSectionUI extends Component<Props, State> {
               intl={this.props.intl}
               onChange={this.onSpacesPrivilegeChange}
               onCancel={this.onCancelEditPrivileges}
-              spaces={this.getAvailableSpaces(this.state.editingIndex)}
-              editingIndex={this.state.editingIndex}
+              spaces={this.getAvailableSpaces(this.state.privilegeIndex)}
+              privilegeIndex={this.state.privilegeIndex}
             />
           )}
         </Fragment>
@@ -144,7 +144,7 @@ class SpaceAwarePrivilegeSectionUI extends Component<Props, State> {
           role={this.props.role}
           displaySpaces={this.getDisplaySpaces()}
           privilegeCalculator={
-            new PrivilegeTableCalculator(this.props.kibanaPrivileges, this.props.role)
+            new PrivilegeFormCalculator(this.props.kibanaPrivileges, this.props.role)
           }
           onChange={this.props.onChange}
           onEdit={this.onEditSpacesPrivileges}
@@ -249,18 +249,18 @@ class SpaceAwarePrivilegeSectionUI extends Component<Props, State> {
   private addSpacePrivilege = () => {
     this.setState({
       showSpacePrivilegeEditor: true,
-      editingIndex: -1,
+      privilegeIndex: -1,
     });
   };
 
   private onSpacesPrivilegeChange = (role: Role) => {
-    this.setState({ showSpacePrivilegeEditor: false, editingIndex: -1 });
+    this.setState({ showSpacePrivilegeEditor: false, privilegeIndex: -1 });
     this.props.onChange(role);
   };
 
-  private onEditSpacesPrivileges = (spacesIndex: number) => {
+  private onEditSpacesPrivileges = (privilegeIndex: number) => {
     this.setState({
-      editingIndex: spacesIndex,
+      privilegeIndex,
       showSpacePrivilegeEditor: true,
     });
   };

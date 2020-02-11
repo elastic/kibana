@@ -53,7 +53,7 @@ export class PrivilegeSummaryCalculator {
       const isPrimaryGranted = assignedPrivileges.grantsPrivilege(pfp);
       if (!isPrimaryGranted) {
         const correspindingMinimal = minimalPrimaryFeaturePrivileges.find(
-          mpfp => mpfp.id === `minimal_${pfp.id}`
+          mpfp => mpfp.id === pfp.getCorrespondingPrivilegeId()
         )!;
 
         return assignedPrivileges.grantsPrivilege(correspindingMinimal);

@@ -168,6 +168,8 @@ export class Plugin {
       privileges: 'none',
       reserved: {
         privilege: {
+          app: ['ml', 'kibana'],
+          catalogue: ['ml'],
           savedObject: {
             all: [],
             read: [],

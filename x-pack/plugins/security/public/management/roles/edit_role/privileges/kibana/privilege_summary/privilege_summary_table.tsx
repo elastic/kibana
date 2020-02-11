@@ -9,11 +9,11 @@ import { EuiInMemoryTable, EuiBasicTableColumn, EuiButtonIcon, EuiIconTip } from
 import { Space } from '../../../../../../../../spaces/common/model/space';
 import { Role, RoleKibanaPrivilege } from '../../../../../../../common/model';
 import { isGlobalPrivilegeDefinition } from '../../../privilege_utils';
-import { PrivilegeSummaryCalculator } from '../privilege_calculator';
 import { FeatureTableCell } from '../feature_table_cell';
 import { SpaceColumnHeader } from './space_column_header';
 import { PrivilegeSummaryExpandedRow } from './privilege_summary_expanded_row';
 import { SecuredFeature, KibanaPrivileges } from '../../../../model';
+import { PrivilegeSummaryCalculator } from './privilege_summary_calculator';
 
 interface Props {
   role: Role;

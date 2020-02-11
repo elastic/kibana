@@ -7,12 +7,13 @@
 import React, { useState, useEffect } from 'react';
 import { EuiFlexItem, EuiFlexGroup, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
 import { SubFeatureForm } from './sub_feature_form';
-import { PrivilegeFormCalculator } from '../privilege_calculator';
+import { PrivilegeFormCalculator } from '../privilege_form_calculator';
 import { SecuredFeature, SubFeaturePrivilege, PrimaryFeaturePrivilege } from '../../../../model';
 
 interface Props {
   feature: SecuredFeature;
   privilegeCalculator: PrivilegeFormCalculator;
+  privilegeIndex: number;
   selectedFeaturePrivileges: string[];
   disabled?: boolean;
   onChange: (featureId: string, featurePrivileges: string[]) => void;
@@ -21,6 +22,7 @@ interface Props {
 export const FeatureTableExpandedRow = ({
   feature,
   onChange,
+  privilegeIndex,
   privilegeCalculator,
   selectedFeaturePrivileges,
   disabled,
@@ -54,6 +56,7 @@ export const FeatureTableExpandedRow = ({
       feature.id,
       privilegeCalculator.updateSelectedFeaturePrivilegesForCustomization(
         feature.id,
+        privilegeIndex,
         e.target.checked
       )
     );
@@ -67,7 +70,10 @@ export const FeatureTableExpandedRow = ({
           label="Customize sub-feature privileges"
           checked={isCustomizing}
           onChange={onCustomizeSubFeatureChange}
-          disabled={disabled || !privilegeCalculator.canCustomizeSubFeaturePrivileges(feature.id)}
+          disabled={
+            disabled ||
+            !privilegeCalculator.canCustomizeSubFeaturePrivileges(feature.id, privilegeIndex)
+          }
         />
       </EuiFlexItem>
       {feature.getSubFeatures().map(subFeature => {
@@ -75,6 +81,7 @@ export const FeatureTableExpandedRow = ({
           <EuiFlexItem key={subFeature.name}>
             <SubFeatureForm
               privilegeCalculator={privilegeCalculator}
+              privilegeIndex={privilegeIndex}
               featureId={feature.id}
               subFeature={subFeature}
               onChange={updatedPrivileges => onChange(feature.id, updatedPrivileges)}
