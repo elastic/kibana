@@ -7,32 +7,11 @@ import * as t from 'io-ts';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { ConcreteTaskInstance } from '../../../../../plugins/task_manager/server';
-import { DateFromString } from '../../common/date_from_string';
-import { AlertInstance } from '../alert_instance';
-import { SanitizedAlert } from '../../common/alert';
-import { rawAlertInstance } from '../types';
+import { SanitizedAlert, AlertTaskState, alertParamsSchema, alertStateSchema } from '../../common';
 
 export interface AlertTaskInstance extends ConcreteTaskInstance {
   state: AlertTaskState;
 }
-
-export const alertStateSchema = t.partial({
-  alertTypeState: t.record(t.string, t.unknown),
-  alertInstances: t.record(t.string, rawAlertInstance),
-  previousStartedAt: t.union([t.null, DateFromString]),
-});
-export type AlertInstances = Record<string, AlertInstance>;
-export type AlertTaskState = t.TypeOf<typeof alertStateSchema>;
-
-const alertParamsSchema = t.intersection([
-  t.type({
-    alertId: t.string,
-  }),
-  t.partial({
-    spaceId: t.string,
-  }),
-]);
-export type AlertTaskParams = t.TypeOf<typeof alertParamsSchema>;
 
 const enumerateErrorFields = (e: t.Errors) =>
   `${e.map(({ context }) => context.map(({ key }) => key).join('.'))}`;

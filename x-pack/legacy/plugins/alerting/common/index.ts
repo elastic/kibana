@@ -6,4 +6,4 @@
 
 export * from './alert';
 export * from './alert_instance';
-export { AlertTaskState } from '../server';
+export * from './alert_task_instance';

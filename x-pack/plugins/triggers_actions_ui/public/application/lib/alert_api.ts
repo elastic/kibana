@@ -5,13 +5,12 @@
  */
 
 import { HttpSetup } from 'kibana/public';
-// import * as t from 'io-ts';
-// import { pipe } from 'fp-ts/lib/pipeable';
-// import { fold } from 'fp-ts/lib/Either';
-// import { alertStateSchema } from '../../../../../legacy/plugins/alerting/server/task_runner/alert_task_instance';
-import { mapValues } from 'lodash';
+import * as t from 'io-ts';
+import { pipe } from 'fp-ts/lib/pipeable';
+import { fold } from 'fp-ts/lib/Either';
 import { BASE_ALERT_API_PATH } from '../constants';
 import { Alert, AlertType, AlertWithoutId, AlertTaskState } from '../../types';
+import { alertStateSchema } from '../../../../../legacy/plugins/alerting/common';
 
 export async function loadAlertTypes({ http }: { http: HttpSetup }): Promise<AlertType[]> {
   return await http.get(`${BASE_ALERT_API_PATH}/types`);
@@ -35,25 +34,12 @@ export async function loadAlertState({
   alertId: string;
 }): Promise<AlertTaskState> {
   return await http.get(`${BASE_ALERT_API_PATH}/${alertId}/state`).then((state: AlertTaskState) => {
-    // return pipe(
-    //   alertStateSchema.decode(state),
-    //   fold((e: t.Errors) => {
-    //     throw new Error(`Alert "${alertId}" has invalid state`);
-    //   }, t.identity)
-    // );
-    if (state.alertInstances) {
-      return {
-        ...state,
-        alertInstances: mapValues(state.alertInstances, instance => {
-          const start = instance.meta?.lastScheduledActions?.date;
-          if (start) {
-            instance.meta!.lastScheduledActions!.date = new Date(start);
-          }
-          return instance;
-        }),
-      };
-    }
-    return state;
+    return pipe(
+      alertStateSchema.decode(state),
+      fold((e: t.Errors) => {
+        throw new Error(`Alert "${alertId}" has invalid state`);
+      }, t.identity)
+    );
   });
 }
 
