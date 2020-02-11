@@ -73,7 +73,7 @@ export const TabSummary: React.FC<Props> = ({ snapshotDetails }) => {
           <EuiText>
             <EuiLink onClick={() => setIsShowingFullIndicesList(true)}>
               <FormattedMessage
-                id="xpack.snapshotRestore.policyDetails.indicesShowAllLink"
+                id="xpack.snapshotRestore.snapshotDetails.itemIndicesShowAllLink"
                 defaultMessage="Show {count} more {count, plural, one {index} other {indices}}"
                 values={{ count: hiddenIndicesCount }}
               />{' '}
