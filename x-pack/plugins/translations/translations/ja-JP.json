@@ -352,7 +352,6 @@
     "common.ui.flotCharts.thuLabel": "木",
     "common.ui.flotCharts.tueLabel": "火",
     "common.ui.flotCharts.wedLabel": "水",
-    "common.ui.modals.cancelButtonLabel": "キャンセル",
     "common.ui.paginateControls.pageSizeLabel": "ページサイズ",
     "common.ui.paginateControls.scrollTopButtonLabel": "最上部に移動",
     "common.ui.savedObjects.confirmModal.overwriteButtonLabel": "上書き",
