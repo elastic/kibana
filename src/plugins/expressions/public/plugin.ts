@@ -30,6 +30,7 @@ import {
   setNotifications,
 } from './services';
 import { clog as clogFunction } from './functions/clog';
+import { combineFilters as combineFiltersFunction } from './functions/combine_filters';
 import { font as fontFunction } from './functions/font';
 import { kibana as kibanaFunction } from './functions/kibana';
 import { kibanaContext as kibanaContextFunction } from './functions/kibana_context';
@@ -113,6 +114,7 @@ export class ExpressionsPublicPlugin
     };
 
     registerFunction(clogFunction);
+    registerFunction(combineFiltersFunction);
     registerFunction(fontFunction);
     registerFunction(kibanaFunction);
     registerFunction(kibanaContextFunction);

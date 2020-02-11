@@ -25,6 +25,7 @@ const name = 'filter';
  * Represents an object that is a Filter.
  */
 export interface Filter {
+  version?: number;
   type?: string;
   value?: string;
   column?: string;
@@ -34,9 +35,35 @@ export interface Filter {
   query?: string | null;
 }
 
+const migrator = {
+  isUnsupported: (p: any) => !p.version || p.version < 2,
+  isLegacy: (p: any) => p.version && p.version < 3,
+  migrate: (legacyFilter: any) => ({ ...legacyFilter, version: 3 }),
+};
+
+function parseAndValidate(s: string): Filter {
+  try {
+    const parsed = JSON.parse(s);
+    if (migrator.isUnsupported(parsed)) {
+      throw new Error('LEGACY');
+    }
+    return parsed;
+  } catch (e) {
+    if (e.message === 'LEGACY') {
+      throw new Error('Provided filter string is malformed or no longer supported');
+    }
+    throw new Error('Unable to parse filter string.');
+  }
+}
+
 export const filter = (): ExpressionType<typeof name, Filter> => ({
   name,
   from: {
+    string: s => {
+      const { isLegacy, migrate } = migrator;
+      const parsed = parseAndValidate(s);
+      return isLegacy(parsed) ? migrate(parsed) : parsed;
+    },
     null: () => {
       return {
         type: name,
