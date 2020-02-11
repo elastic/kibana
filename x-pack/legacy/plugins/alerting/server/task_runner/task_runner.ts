@@ -10,25 +10,32 @@ import { SavedObject } from '../../../../../../src/core/server';
 import { TaskRunnerContext } from './task_runner_factory';
 import { ConcreteTaskInstance } from '../../../../../plugins/task_manager/server';
 import { createExecutionHandler } from './create_execution_handler';
-import { AlertInstance, createAlertInstanceFactory } from '../alert_instance';
+import { AlertInstance, createAlertInstanceFactory, RawAlertInstance } from '../alert_instance';
 import { getNextRunAt } from './get_next_run_at';
 import { validateAlertTypeParams } from '../lib';
-import { AlertType, RawAlert, IntervalSchedule, Services, State, AlertInfoParams } from '../types';
+import { AlertType, RawAlert, IntervalSchedule, Services, AlertInfoParams } from '../types';
 import { promiseResult, map, Resultable, asOk, asErr, resolveErr } from '../lib/result_type';
-
-type AlertInstances = Record<string, AlertInstance>;
+import {
+  AlertTaskState,
+  AlertInstances,
+  taskInstanceToAlertTaskInstance,
+} from './alert_task_instance';
 
 const FALLBACK_RETRY_INTERVAL: IntervalSchedule = { interval: '5m' };
 
 interface AlertTaskRunResult {
-  state: State;
+  state: AlertTaskState;
   runAt: Date;
+}
+
+interface AlertTaskInstance extends ConcreteTaskInstance {
+  state: AlertTaskState;
 }
 
 export class TaskRunner {
   private context: TaskRunnerContext;
   private logger: Logger;
-  private taskInstance: ConcreteTaskInstance;
+  private taskInstance: AlertTaskInstance;
   private alertType: AlertType;
 
   constructor(
@@ -39,7 +46,7 @@ export class TaskRunner {
     this.context = context;
     this.logger = context.logger;
     this.alertType = alertType;
-    this.taskInstance = taskInstance;
+    this.taskInstance = taskInstanceToAlertTaskInstance(taskInstance);
   }
 
   async getApiKeyForAlertPermissions(alertId: string, spaceId: string) {
@@ -128,7 +135,7 @@ export class TaskRunner {
     alertInfoParams: AlertInfoParams,
     executionHandler: ReturnType<typeof createExecutionHandler>,
     spaceId: string
-  ): Promise<State> {
+  ): Promise<AlertTaskState> {
     const {
       params,
       throttle,
@@ -145,9 +152,9 @@ export class TaskRunner {
     } = this.taskInstance;
     const namespace = this.context.spaceIdToNamespace(spaceId);
 
-    const alertInstances = mapValues<AlertInstances>(
+    const alertInstances = mapValues<RawAlertInstance, AlertInstance>(
       alertRawInstances,
-      alert => new AlertInstance(alert)
+      rawAlertInstance => new AlertInstance(rawAlertInstance)
     );
 
     const updatedAlertTypeState = await this.alertType.executor({
@@ -159,7 +166,7 @@ export class TaskRunner {
       params,
       state: alertTypeState,
       startedAt: this.taskInstance.startedAt!,
-      previousStartedAt: previousStartedAt && new Date(previousStartedAt),
+      previousStartedAt: previousStartedAt ? new Date(previousStartedAt) : null,
       spaceId,
       namespace,
       name,
@@ -171,7 +178,7 @@ export class TaskRunner {
     // Cleanup alert instances that are no longer scheduling actions to avoid over populating the alertInstances object
     const instancesWithScheduledActions = pick<AlertInstances, AlertInstances>(
       alertInstances,
-      alertInstance => alertInstance.hasScheduledActions()
+      (alertInstance: AlertInstance) => alertInstance.hasScheduledActions()
     );
 
     if (!muteAll) {
@@ -192,8 +199,11 @@ export class TaskRunner {
     }
 
     return {
-      alertTypeState: updatedAlertTypeState,
-      alertInstances: instancesWithScheduledActions,
+      alertTypeState: updatedAlertTypeState || undefined,
+      alertInstances: mapValues<AlertInstance, RawAlertInstance>(
+        instancesWithScheduledActions,
+        alertInstance => alertInstance.toRaw()
+      ),
     };
   }
 
@@ -239,7 +249,7 @@ export class TaskRunner {
     );
 
     return {
-      state: await promiseResult<State, Error>(
+      state: await promiseResult<AlertTaskState, Error>(
         this.validateAndExecuteAlert(services, apiKey, attributes, references)
       ),
       runAt: asOk(
@@ -264,9 +274,9 @@ export class TaskRunner {
     const { state, runAt } = await errorAsAlertTaskRunResult(this.loadAlertAttributesAndRun());
 
     return {
-      state: map<State, Error, State>(
+      state: map<AlertTaskState, Error, AlertTaskState>(
         state,
-        (stateUpdates: State) => {
+        (stateUpdates: AlertTaskState) => {
           return {
             ...stateUpdates,
             previousStartedAt,
