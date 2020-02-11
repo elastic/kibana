@@ -34,8 +34,8 @@ export const initialUiSettingsState: UiSettingsState = {
       display: 'Today',
     },
   ],
-  timeFilterRefreshInterval: {},
   timeFilterRange: {},
+  timeFilterRefreshInterval: {},
   timeZone: 'UTC',
 };
 
@@ -50,10 +50,10 @@ export const createInitialUiSettingsState = (
   newsFeedEnabled: uiSettings.get<State['newsFeedEnabled']>(keys.newsFeedEnabled),
   newsFeedUrl: uiSettings.get<State['newsFeedUrl']>(keys.newsFeedUrl),
   timeFilterQuickRanges: uiSettings.get<State['timeFilterQuickRanges']>(keys.timeFilterQuickRanges),
+  timeFilterRange: uiSettings.get<State['timeFilterRange']>(keys.timeFilterRange),
   timeFilterRefreshInterval: uiSettings.get<State['timeFilterRefreshInterval']>(
     keys.timeFilterRefreshInterval
   ),
-  timeFilterRange: uiSettings.get<State['timeFilterRange']>(keys.timeFilterRange),
   timeZone: uiSettings.get<State['timeZone']>(keys.timeZone),
 });
 

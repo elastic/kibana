@@ -44,8 +44,8 @@ export interface State {
   newsFeedEnabled: boolean;
   newsFeedUrl: string;
   timeFilterQuickRanges: QuickRange[];
-  timeFilterRefreshInterval: RefreshInterval;
   timeFilterRange: TimeRange;
+  timeFilterRefreshInterval: RefreshInterval;
   timeZone: string;
 }
 
@@ -59,7 +59,7 @@ export const keys = {
   newsFeedUrl: NEWS_FEED_URL_SETTING,
   numberFormat: DEFAULT_NUMBER_FORMAT,
   timeFilterQuickRanges: DEFAULT_TIMEPICKER_QUICK_RANGES,
-  timeFilterRefreshInterval: DEFAULT_SIEM_REFRESH_INTERVAL,
   timeFilterRange: DEFAULT_SIEM_TIME_RANGE,
+  timeFilterRefreshInterval: DEFAULT_SIEM_REFRESH_INTERVAL,
   timeZone: DEFAULT_DATE_FORMAT_TZ,
 };

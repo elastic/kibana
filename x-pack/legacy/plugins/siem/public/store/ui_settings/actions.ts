@@ -24,10 +24,10 @@ export const newsFeedUrlChanged = actionCreator<State['newsFeedUrl']>('NEWS_FEED
 export const timeFilterQuickRangesChanged = actionCreator<State['timeFilterQuickRanges']>(
   'TIME_FILTER_QUICK_RANGES_CHANGED'
 );
-export const timeFilterRefreshIntervalChanged = actionCreator<State['timeFilterRefreshInterval']>(
-  'TIME_FILTER_REFRESH_INTERVAL_CHANGED'
-);
 export const timeFilterRangeChanged = actionCreator<State['timeFilterRange']>(
   'TIME_FILTER_RANGE_CHANGED'
+);
+export const timeFilterRefreshIntervalChanged = actionCreator<State['timeFilterRefreshInterval']>(
+  'TIME_FILTER_REFRESH_INTERVAL_CHANGED'
 );
 export const timeZoneChanged = actionCreator<State['timeZone']>('TIME_ZONE_CHANGED');
