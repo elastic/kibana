@@ -25,7 +25,7 @@ import {
 import { MockResizeObserver } from './mock_resize_observer';
 import { SideEffectContext } from './side_effect_context';
 import { applyMatrix3 } from '../lib/vector2';
-import { sideEffectSimulator } from './__tests__/side_effect_simulator';
+import { sideEffectSimulator } from './side_effect_simulator';
 
 describe('useCamera on an unpainted element', () => {
   let element: HTMLElement;
