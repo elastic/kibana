@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { parse } from 'query-string';
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { decode } from 'rison-node';
@@ -14,7 +15,6 @@ import { Page } from '../../../data_frame_analytics/pages/analytics_exploration'
 import { ANALYSIS_CONFIG_TYPE } from '../../../data_frame_analytics/common/analytics';
 import { DATA_FRAME_TASK_STATE } from '../../../data_frame_analytics/pages/analytics_management/components/analytics_list/common';
 import { ML_BREADCRUMB } from '../../breadcrumbs';
-import { url } from '../../../../../../../../../src/plugins/kibana_utils/public';
 
 const breadcrumbs = [
   ML_BREADCRUMB,
@@ -34,7 +34,7 @@ export const analyticsJobExplorationRoute: MlRoute = {
 
 const PageWrapper: FC<PageProps> = ({ location, config, deps }) => {
   const { context } = useResolver('', undefined, config, basicResolvers(deps));
-  const { _g }: Record<string, any> = url.parseUrlQuery(location.search);
+  const { _g }: Record<string, any> = parse(location.search, { sort: false });
 
   let globalState: any = null;
   try {

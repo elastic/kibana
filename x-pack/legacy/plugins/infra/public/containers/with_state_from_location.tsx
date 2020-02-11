@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { parse } from 'query-string';
 import { Location } from 'history';
 import omit from 'lodash/fp/omit';
 import React from 'react';
@@ -102,7 +103,7 @@ const encodeRisonAppState = (state: AnyObject) => ({
 export const mapRisonAppLocationToState = <State extends {}>(
   mapState: (risonAppState: AnyObject) => State = (state: AnyObject) => state as State
 ) => (location: Location): State => {
-  const queryValues = url.parseUrlQuery(location.search.substring(1));
+  const queryValues = parse(location.search.substring(1), { sort: false });
   const decodedState = decodeRisonAppState(queryValues);
   return mapState(decodedState);
 };
@@ -110,7 +111,7 @@ export const mapRisonAppLocationToState = <State extends {}>(
 export const mapStateToRisonAppLocation = <State extends {}>(
   mapState: (state: State) => AnyObject = (state: State) => state
 ) => (state: State, location: Location): Location => {
-  const previousQueryValues = url.parseUrlQuery(location.search.substring(1));
+  const previousQueryValues = parse(location.search.substring(1), { sort: false });
   const previousState = decodeRisonAppState(previousQueryValues);
 
   const encodedState = encodeRisonAppState({

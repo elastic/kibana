@@ -18,10 +18,9 @@
  */
 
 import { encodeQueryComponent } from './encode_query_component';
-import { stringifyUrlQuery, parseUrlQuery } from './utils';
+import { stringifyUrlQuery } from './utils';
 
 export const url = {
   encodeQueryComponent,
   stringifyUrlQuery,
-  parseUrlQuery,
 };

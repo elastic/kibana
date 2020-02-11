@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { parse } from 'query-string';
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { MlRoute, PageLoader, PageProps } from '../../router';
@@ -15,7 +16,6 @@ import { checkGetJobsPrivilege } from '../../../privilege/check_privilege';
 import { loadIndexPatterns } from '../../../util/index_utils';
 import { checkMlNodesAvailable } from '../../../ml_nodes_check';
 import { DATA_VISUALIZER_BREADCRUMB, ML_BREADCRUMB } from '../../breadcrumbs';
-import { url } from '../../../../../../../../../src/plugins/kibana_utils/public';
 
 const breadcrumbs = [
   ML_BREADCRUMB,
@@ -35,7 +35,7 @@ export const indexBasedRoute: MlRoute = {
 };
 
 const PageWrapper: FC<PageProps> = ({ location, config, deps }) => {
-  const { index, savedSearchId }: Record<string, any> = url.parseUrlQuery(location.search);
+  const { index, savedSearchId }: Record<string, any> = parse(location.search, { sort: false });
   const { context } = useResolver(index, savedSearchId, config, {
     checkBasicLicense,
     loadIndexPatterns: () => loadIndexPatterns(deps.indexPatterns),

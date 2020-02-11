@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { parse } from 'query-string';
 import { decode, encode } from 'rison-node';
 import * as H from 'history';
 import { Query, esFilters } from 'src/plugins/data/public';
@@ -41,7 +42,7 @@ export const encodeRisonUrlState = (state: any) => encode(state);
 export const getQueryStringFromLocation = (search: string) => search.substring(1);
 
 export const getParamFromQueryString = (queryString: string, key: string): string | undefined => {
-  const parsedQueryString = url.parseUrlQuery(queryString);
+  const parsedQueryString: Record<string, unknown> = parse(queryString, { sort: false });
   const queryParam = parsedQueryString[key];
 
   return Array.isArray(queryParam) ? queryParam[0] : queryParam;
@@ -50,7 +51,7 @@ export const getParamFromQueryString = (queryString: string, key: string): strin
 export const replaceStateKeyInQueryString = <T>(stateKey: string, urlState: T) => (
   queryString: string
 ): string => {
-  const previousQueryValues = url.parseUrlQuery(queryString);
+  const previousQueryValues = parse(queryString, { sort: false });
   if (urlState == null || (typeof urlState === 'string' && urlState === '')) {
     delete previousQueryValues[stateKey];
 

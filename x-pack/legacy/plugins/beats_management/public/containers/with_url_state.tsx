@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { parse } from 'query-string';
 import React from 'react';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 import { FlatObject } from '../frontend_types';
@@ -31,9 +32,9 @@ export class WithURLStateComponent<URLState extends object> extends React.Compon
 > {
   private get URLState(): URLState {
     // slice because parse does not account for the initial ? in the search string
-    return url.parseUrlQuery<URLState>(
-      decodeURIComponent(this.props.history.location.search).substring(1)
-    );
+    return parse(decodeURIComponent(this.props.history.location.search).substring(1), {
+      sort: false,
+    }) as URLState;
   }
 
   private historyListener: (() => void) | null = null;

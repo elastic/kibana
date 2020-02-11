@@ -3,6 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
+import { parse } from 'query-string';
 import React, { useEffect, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 
@@ -14,7 +16,6 @@ import { BASE_PATH, Section } from '../../constants';
 import { useAppDependencies } from '../../index';
 import { breadcrumbService, docTitleService } from '../../services/navigation';
 import { addRepository } from '../../services/http';
-import { url } from '../../../../../../../../src/plugins/kibana_utils/public';
 
 export const RepositoryAdd: React.FunctionComponent<RouteComponentProps> = ({
   history,
@@ -44,7 +45,7 @@ export const RepositoryAdd: React.FunctionComponent<RouteComponentProps> = ({
     if (error) {
       setSaveError(error);
     } else {
-      const { redirect } = url.parseUrlQuery(search.replace(/^\?/, ''));
+      const { redirect } = parse(search.replace(/^\?/, ''), { sort: false });
 
       history.push(redirect ? (redirect as string) : `${BASE_PATH}/${section}/${name}`);
     }

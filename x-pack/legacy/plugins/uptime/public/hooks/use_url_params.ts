@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { parse } from 'query-string';
 import { useLocation, useHistory } from 'react-router-dom';
 import { UptimeUrlParams, getSupportedUrlParams } from '../lib/helper';
 import { url } from '../../../../../../src/plugins/kibana_utils/public';
@@ -23,18 +24,17 @@ export const useUrlParams: UptimeUrlParamsHook = () => {
       search = location.search;
     }
 
-    const params = search
-      ? {
-          ...url.parseUrlQuery(search[0] === '?' ? search.slice(1) : search),
-        }
+    const params: Record<string, any> = search
+      ? parse(search[0] === '?' ? search.slice(1) : search, { sort: false })
       : {};
+
     return getSupportedUrlParams(params);
   };
 
   const updateUrlParams: UpdateUrlParams = updatedParams => {
     if (!history || !location) return;
     const { pathname, search } = location;
-    const currentParams = url.parseUrlQuery(search[0] === '?' ? search.slice(1) : search);
+    const currentParams = parse(search[0] === '?' ? search.slice(1) : search, { sort: false });
     const mergedParams = {
       ...currentParams,
       ...updatedParams,

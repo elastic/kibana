@@ -17,12 +17,8 @@
  * under the License.
  */
 import { transform, isUndefined } from 'lodash';
-import { stringify, parse, StringifyOptions } from 'query-string';
+import { stringify, StringifyOptions } from 'query-string';
 import { encodeQueryComponent } from './encode_query_component';
-
-export const parseUrlQuery = <TReturn = Record<string, any>>(val: string): TReturn => {
-  return (parse(val, { sort: false }) as unknown) as TReturn;
-};
 
 export const stringifyUrlQuery = (
   query: Record<string, any>,

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { parse } from 'query-string';
 import { History, Location } from 'history';
 import throttle from 'lodash/fp/throttle';
 import React from 'react';
@@ -144,7 +145,7 @@ const encodeRisonUrlState = (state: any) => encode(state);
 export const getQueryStringFromLocation = (location: Location) => location.search.substring(1);
 
 export const getParamFromQueryString = (queryString: string, key: string): string | undefined => {
-  const parsedQueryString = url.parseUrlQuery(queryString);
+  const parsedQueryString: Record<string, any> = parse(queryString, { sort: false });
   const queryParam = parsedQueryString[key];
 
   return Array.isArray(queryParam) ? queryParam[0] : queryParam;
@@ -154,7 +155,7 @@ export const replaceStateKeyInQueryString = <UrlState extends any>(
   stateKey: string,
   urlState: UrlState | undefined
 ) => (queryString: string) => {
-  const previousQueryValues = url.parseUrlQuery(queryString);
+  const previousQueryValues = parse(queryString, { sort: false });
   const encodedUrlState =
     typeof urlState !== 'undefined' ? encodeRisonUrlState(urlState) : undefined;
 

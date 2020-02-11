@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { parse } from 'query-string';
 import React from 'react';
 
 import { Redirect, Route, Switch, RouteComponentProps } from 'react-router-dom';
@@ -29,9 +30,9 @@ export const MlHostConditionalContainer = React.memo<MlHostConditionalProps>(({ 
       exact
       path={url}
       render={({ location }) => {
-        const queryStringDecoded = urlUtils.parseUrlQuery<QueryStringType>(
-          location.search.substring(1)
-        );
+        const queryStringDecoded = parse(location.search.substring(1), {
+          sort: false,
+        }) as Required<QueryStringType>;
 
         if (queryStringDecoded.query != null) {
           queryStringDecoded.query = replaceKQLParts(queryStringDecoded.query);
@@ -48,9 +49,9 @@ export const MlHostConditionalContainer = React.memo<MlHostConditionalProps>(({ 
           params: { hostName },
         },
       }) => {
-        const queryStringDecoded = urlUtils.parseUrlQuery<QueryStringType>(
-          location.search.substring(1)
-        );
+        const queryStringDecoded = parse(location.search.substring(1), {
+          sort: false,
+        }) as Required<QueryStringType>;
 
         if (queryStringDecoded.query != null) {
           queryStringDecoded.query = replaceKQLParts(queryStringDecoded.query);

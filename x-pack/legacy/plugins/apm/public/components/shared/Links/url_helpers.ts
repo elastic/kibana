@@ -3,11 +3,13 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
+import { parse } from 'query-string';
 import { LocalUIFilterName } from '../../../../server/lib/ui_filters/local_ui_filters/config';
 import { url } from '../../../../../../../../src/plugins/kibana_utils/public';
 
 export function toQuery(search?: string): APMQueryParamsRaw {
-  return search ? url.parseUrlQuery(search.slice(1)) : {};
+  return search ? parse(search.slice(1), { sort: false }) : {};
 }
 
 export function fromQuery(query: Record<string, any>) {

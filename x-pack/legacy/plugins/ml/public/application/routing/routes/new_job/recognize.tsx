@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { parse } from 'query-string';
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { MlRoute, PageLoader, PageProps } from '../../router';
@@ -13,7 +14,6 @@ import { Page } from '../../../jobs/new_job/recognize';
 import { checkViewOrCreateJobs } from '../../../jobs/new_job/recognize/resolvers';
 import { mlJobService } from '../../../services/job_service';
 import { ANOMALY_DETECTION_BREADCRUMB, ML_BREADCRUMB } from '../../breadcrumbs';
-import { url } from '../../../../../../../../../src/plugins/kibana_utils/public';
 
 const breadcrumbs = [
   ML_BREADCRUMB,
@@ -41,7 +41,7 @@ export const checkViewOrCreateRoute: MlRoute = {
 };
 
 const PageWrapper: FC<PageProps> = ({ location, config, deps }) => {
-  const { id, index, savedSearchId } = url.parseUrlQuery(location.search);
+  const { id, index, savedSearchId }: Record<string, any> = parse(location.search, { sort: false });
   const { context, results } = useResolver(index, savedSearchId, config, {
     ...basicResolvers(deps),
     existingJobsAndGroups: mlJobService.getJobAndGroupIds,
@@ -55,7 +55,9 @@ const PageWrapper: FC<PageProps> = ({ location, config, deps }) => {
 };
 
 const CheckViewOrCreateWrapper: FC<PageProps> = ({ location, config, deps }) => {
-  const { id: moduleId, index: indexPatternId } = url.parseUrlQuery(location.search);
+  const { id: moduleId, index: indexPatternId }: Record<string, any> = parse(location.search, {
+    sort: false,
+  });
 
   // the single resolver checkViewOrCreateJobs redirects only. so will always reject
   useResolver(undefined, undefined, config, {
