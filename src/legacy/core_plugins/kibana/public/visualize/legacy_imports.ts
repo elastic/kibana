@@ -46,8 +46,6 @@ export { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 export { EventsProvider } from 'ui/events';
 // @ts-ignore
 export { createTopNavDirective, createTopNavHelper } from 'ui/kbn_top_nav/kbn_top_nav';
-// @ts-ignore
-export { confirmModalFactory } from 'ui/modals/confirm_modal';
 export { registerTimefilterWithGlobalStateFactory } from 'ui/timefilter/setup_router';
 // @ts-ignore
 export { KbnUrlProvider, RedirectWhenMissingProvider } from 'ui/url';

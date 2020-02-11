@@ -4,38 +4,46 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  Router,
-  RouterRouteHandler,
-  wrapEsError,
-} from '../../../../../../server/lib/create_router';
+import { schema } from '@kbn/config-schema';
+
+import { RouteDependencies } from '../../../types';
+import { addBasePath } from '../index';
+import { wrapEsError } from '../../helpers';
+
 import { Template } from '../../../../common/types';
 
-const handler: RouterRouteHandler = async (req, callWithRequest) => {
-  const { names } = req.params;
-  const templateNames = names.split(',');
-  const response: { templatesDeleted: Array<Template['name']>; errors: any[] } = {
-    templatesDeleted: [],
-    errors: [],
-  };
+const paramsSchema = schema.object({
+  names: schema.string(),
+});
 
-  await Promise.all(
-    templateNames.map(async name => {
-      try {
-        await callWithRequest('indices.deleteTemplate', { name });
-        return response.templatesDeleted.push(name);
-      } catch (e) {
-        return response.errors.push({
-          name,
-          error: wrapEsError(e),
-        });
-      }
+export function registerDeleteRoute({ router, license }: RouteDependencies) {
+  router.delete(
+    { path: addBasePath('/templates/{names}'), validate: { params: paramsSchema } },
+    license.guardApiRoute(async (ctx, req, res) => {
+      const { names } = req.params as typeof paramsSchema.type;
+      const templateNames = names.split(',');
+      const response: { templatesDeleted: Array<Template['name']>; errors: any[] } = {
+        templatesDeleted: [],
+        errors: [],
+      };
+
+      await Promise.all(
+        templateNames.map(async name => {
+          try {
+            await ctx.core.elasticsearch.dataClient.callAsCurrentUser('indices.deleteTemplate', {
+              name,
+            });
+            return response.templatesDeleted.push(name);
+          } catch (e) {
+            return response.errors.push({
+              name,
+              error: wrapEsError(e),
+            });
+          }
+        })
+      );
+
+      return res.ok({ body: response });
     })
   );
-
-  return response;
-};
-
-export function registerDeleteRoute(router: Router) {
-  router.delete('templates/{names}', handler);
 }
