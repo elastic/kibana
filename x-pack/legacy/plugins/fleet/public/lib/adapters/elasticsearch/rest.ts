@@ -8,7 +8,7 @@ import { isEmpty } from 'lodash';
 import { npStart } from 'ui/new_platform';
 import { RestAPIAdapter } from '../rest_api/adapter_types';
 import { esKuery } from '../../../../../../../../src/plugins/data/public';
-import { autocomplete } from '../../../../../../../../src/plugins/data/public';
+import { QuerySuggestion } from '../../../../../../../../src/plugins/data/public';
 
 export class RestElasticsearchAdapter {
   private cachedIndexPattern: any = null;
@@ -31,10 +31,7 @@ export class RestElasticsearchAdapter {
     const indexPattern = await this.getIndexPattern();
     return JSON.stringify(esKuery.toElasticsearchQuery(ast, indexPattern));
   }
-  public async getSuggestions(
-    kuery: string,
-    selectionStart: any
-  ): Promise<autocomplete.QuerySuggestion[]> {
+  public async getSuggestions(kuery: string, selectionStart: any): Promise<QuerySuggestion[]> {
     const indexPattern = await this.getIndexPattern();
     return (
       (await npStart.plugins.data.autocomplete.getQuerySuggestions({
@@ -44,7 +41,7 @@ export class RestElasticsearchAdapter {
         query: kuery || '',
         selectionStart,
         selectionEnd: selectionStart,
-      })) || ([] as autocomplete.QuerySuggestion[])
+      })) || ([] as QuerySuggestion[])
     );
   }
 

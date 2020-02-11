@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { autocomplete } from '../../../../../../src/plugins/data/public';
+import { QuerySuggestion } from '../../../../../../src/plugins/data/public';
 import { RestElasticsearchAdapter } from './adapters/elasticsearch/rest';
 
 const HIDDEN_FIELDS = ['agents.actions'];
@@ -20,7 +20,7 @@ export class ElasticsearchLib {
     kuery: string,
     selectionStart: any,
     fieldPrefix?: string
-  ): Promise<autocomplete.QuerySuggestion[]> {
+  ): Promise<QuerySuggestion[]> {
     const suggestions = await this.adapter.getSuggestions(kuery, selectionStart);
 
     const filteredSuggestions = suggestions.filter(suggestion => {
