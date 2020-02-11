@@ -17,11 +17,15 @@
  * under the License.
  */
 
-import { fromExpression, toExpression } from '@kbn/interpreter/target/common';
 import { DataAdapter, RequestAdapter, Adapters } from '../../inspector/public';
 import { getInterpreter } from './services';
-import { IExpressionLoaderParams, IInterpreterResult } from './types';
-import { ExpressionAST } from '../common/types';
+import { IExpressionLoaderParams } from './types';
+import {
+  ExpressionAstExpression,
+  parseExpression,
+  formatExpression,
+  ExpressionValue,
+} from '../common';
 
 /**
  * The search context describes a specific context (filters, time range and query)
@@ -34,48 +38,42 @@ import { ExpressionAST } from '../common/types';
 export class ExpressionDataHandler {
   private abortController: AbortController;
   private expression: string;
-  private ast: ExpressionAST;
+  private ast: ExpressionAstExpression;
 
   private inspectorAdapters: Adapters;
-  private promise: Promise<IInterpreterResult>;
+  private promise: Promise<ExpressionValue>;
 
   public isPending: boolean = true;
-  constructor(expression: string | ExpressionAST, params: IExpressionLoaderParams) {
+  constructor(expression: string | ExpressionAstExpression, params: IExpressionLoaderParams) {
     if (typeof expression === 'string') {
       this.expression = expression;
-      this.ast = fromExpression(expression) as ExpressionAST;
+      this.ast = parseExpression(expression);
     } else {
       this.ast = expression;
-      this.expression = toExpression(this.ast);
+      this.expression = formatExpression(this.ast);
     }
 
     this.abortController = new AbortController();
     this.inspectorAdapters = params.inspectorAdapters || this.getActiveInspectorAdapters();
 
-    const getInitialContext = () => ({
-      type: 'kibana_context',
-      ...params.searchContext,
-    });
-
-    const defaultContext = { type: 'null' };
-
+    const defaultInput = { type: 'null' };
     const interpreter = getInterpreter();
     this.promise = interpreter
-      .interpretAst(this.ast, params.context || defaultContext, {
-        getInitialContext,
+      .interpretAst<any, ExpressionValue>(this.ast, params.context || defaultInput, {
+        search: params.searchContext,
         inspectorAdapters: this.inspectorAdapters,
         abortSignal: this.abortController.signal,
         variables: params.variables,
       })
       .then(
-        (v: IInterpreterResult) => {
+        (v: ExpressionValue) => {
           this.isPending = false;
           return v;
         },
         () => {
           this.isPending = false;
         }
-      );
+      ) as Promise<ExpressionValue>;
   }
 
   cancel = () => {
@@ -133,7 +131,7 @@ export class ExpressionDataHandler {
 }
 
 export function execute(
-  expression: string | ExpressionAST,
+  expression: string | ExpressionAstExpression,
   params: IExpressionLoaderParams = {}
 ): ExpressionDataHandler {
   return new ExpressionDataHandler(expression, params);
