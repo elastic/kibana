@@ -20,7 +20,7 @@ import {
 import { ResolverResponse } from '../../common/types';
 import { registerResolverRoutes } from './resolver';
 import { EndpointConfigSchema } from '../config';
-import { buildLegacyEntityID } from '../services/resolver/common';
+import { buildLegacyEntityID } from './resolver/common';
 
 describe('test resolver route', () => {
   let routerMock: jest.Mocked<IRouter>;

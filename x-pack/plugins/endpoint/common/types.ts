@@ -120,11 +120,13 @@ export interface EndpointMetadata {
 }
 
 export interface ResolverLegacyData {
+  '@timestamp': Date;
   endgame: {
     event_type_full: string;
     event_subtype_full: string;
     unique_pid: number;
     unique_ppid: number;
+    serial_event_id: number;
   };
   agent: {
     id: string;
@@ -132,9 +134,11 @@ export interface ResolverLegacyData {
 }
 
 export interface ResolverElasticEndpointData {
+  '@timestamp': Date;
   event: {
     category: string;
     type: string;
+    id: string;
   };
   endpoint: {
     process: {
