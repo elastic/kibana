@@ -46,7 +46,19 @@ last name is Hanks, or a user whose first name is Tom and last name is Smith.
 
 | image:release-notes/images/7-6-nested-field.png[Nested field]
 
+a| *Machine learning improvements*
 
+Explore the results of your
+{ml-docs}/dfa-classification.html[{classification}] and
+{ml-docs}/dfa-regression.html[{regression}] {dfanalytics-jobs} in {kib}.
+Use a new wizard to create
+{ml-docs}/ml-configuring-categories.html[categorization {anomaly-jobs}]. If you
+use APM, there are also new pre-configured {anomaly-jobs}.
+
+| image:release-notes/images/7.6-classification.png[Classification results]
+
+
+|===
 
 |===
 
