@@ -22,8 +22,8 @@ describe('FeatureRegistry', () => {
     expect(result).toHaveLength(1);
 
     // Should be the equal, but not the same instance (i.e., a defensive copy)
-    expect(result[0]).not.toBe(feature);
-    expect(result[0]).toEqual(feature);
+    expect(result[0].toRaw()).not.toBe(feature);
+    expect(result[0].toRaw()).toEqual(feature);
   });
 
   it('allows a complex feature to be registered', () => {
@@ -33,7 +33,7 @@ describe('FeatureRegistry', () => {
       excludeFromBasePrivileges: true,
       icon: 'addDataApp',
       navLinkId: 'someNavLink',
-      app: ['app1', 'app2'],
+      app: ['app1'],
       validLicenses: ['standard', 'basic', 'gold', 'platinum'],
       catalogue: ['foo'],
       management: {
@@ -56,11 +56,58 @@ describe('FeatureRegistry', () => {
         read: {
           savedObject: {
             all: [],
-            read: [],
+            read: ['config', 'url'],
           },
           ui: [],
         },
       },
+      subFeatures: [
+        {
+          name: 'sub-feature-1',
+          privilegeGroups: [
+            {
+              groupType: 'independent',
+              privileges: [
+                {
+                  id: 'foo',
+                  name: 'foo',
+                  includeIn: 'read',
+                  savedObject: {
+                    all: [],
+                    read: [],
+                  },
+                  ui: [],
+                },
+              ],
+            },
+            {
+              groupType: 'mutually_exclusive',
+              privileges: [
+                {
+                  id: 'bar',
+                  name: 'bar',
+                  includeIn: 'all',
+                  savedObject: {
+                    all: [],
+                    read: [],
+                  },
+                  ui: [],
+                },
+                {
+                  id: 'baz',
+                  name: 'baz',
+                  includeIn: 'none',
+                  savedObject: {
+                    all: [],
+                    read: [],
+                  },
+                  ui: [],
+                },
+              ],
+            },
+          ],
+        },
+      ],
       privilegesTooltip: 'some fancy tooltip',
       reserved: {
         privilege: {
@@ -86,8 +133,44 @@ describe('FeatureRegistry', () => {
     expect(result).toHaveLength(1);
 
     // Should be the equal, but not the same instance (i.e., a defensive copy)
-    expect(result[0]).not.toBe(feature);
-    expect(result[0]).toEqual(feature);
+    expect(result[0].toRaw()).not.toBe(feature);
+    expect(result[0].toRaw()).toEqual(feature);
+  });
+
+  it(`does not allow sub-features to be registered when no primary privileges are registered`, () => {
+    const feature: IFeature = {
+      id: 'test-feature',
+      name: 'Test Feature',
+      app: [],
+      privileges: 'none',
+      subFeatures: [
+        {
+          name: 'my sub feature',
+          privilegeGroups: [
+            {
+              groupType: 'independent',
+              privileges: [
+                {
+                  id: 'my-sub-priv',
+                  name: 'my sub priv',
+                  includeIn: 'none',
+                  savedObject: {
+                    all: [],
+                    read: [],
+                  },
+                  ui: [],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    };
+
+    const featureRegistry = new FeatureRegistry();
+    expect(() => featureRegistry.register(feature)).toThrowErrorMatchingInlineSnapshot(
+      `"child \\"subFeatures\\" fails because [\\"subFeatures\\" must contain less than or equal to 0 items]"`
+    );
   });
 
   it(`automatically grants 'all' access to telemetry saved objects for the 'all' privilege`, () => {
@@ -336,7 +419,7 @@ describe('FeatureRegistry', () => {
 
     const featureRegistry = new FeatureRegistry();
     expect(() => featureRegistry.register(feature)).toThrowErrorMatchingInlineSnapshot(
-      `"child \\"privileges\\" fails because [\\"foo\\" is not allowed]"`
+      `"child \\"privileges\\" fails because [\\"privileges\\" must be a string, \\"foo\\" is not allowed]"`
     );
   });
 
@@ -372,6 +455,61 @@ describe('FeatureRegistry', () => {
     );
   });
 
+  it(`prevents features from specifying app entries that don't exist at the privilege level`, () => {
+    const feature: IFeature = {
+      id: 'test-feature',
+      name: 'Test Feature',
+      app: ['foo', 'bar', 'baz'],
+      privileges: {
+        all: {
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: [],
+          app: ['bar'],
+        },
+        read: {
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: [],
+          app: [],
+        },
+      },
+      subFeatures: [
+        {
+          name: 'my sub feature',
+          privilegeGroups: [
+            {
+              groupType: 'independent',
+              privileges: [
+                {
+                  id: 'cool-sub-feature-privilege',
+                  name: 'cool privilege',
+                  includeIn: 'none',
+                  savedObject: {
+                    all: [],
+                    read: [],
+                  },
+                  ui: [],
+                  app: ['foo'],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    };
+
+    const featureRegistry = new FeatureRegistry();
+
+    expect(() => featureRegistry.register(feature)).toThrowErrorMatchingInlineSnapshot(
+      `"Feature test-feature specifies app entries which are not granted to any privileges: baz"`
+    );
+  });
+
   it(`prevents reserved privileges from specifying app entries that don't exist at the root level`, () => {
     const feature: IFeature = {
       id: 'test-feature',
@@ -395,6 +533,32 @@ describe('FeatureRegistry', () => {
 
     expect(() => featureRegistry.register(feature)).toThrowErrorMatchingInlineSnapshot(
       `"Feature privilege test-feature.reserved has unknown app entries: foo, baz"`
+    );
+  });
+
+  it(`prevents features from specifying app entries that don't exist at the reserved privilege level`, () => {
+    const feature: IFeature = {
+      id: 'test-feature',
+      name: 'Test Feature',
+      app: ['foo', 'bar', 'baz'],
+      privileges: 'none',
+      reserved: {
+        description: 'something',
+        privilege: {
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: [],
+          app: ['foo', 'bar'],
+        },
+      },
+    };
+
+    const featureRegistry = new FeatureRegistry();
+
+    expect(() => featureRegistry.register(feature)).toThrowErrorMatchingInlineSnapshot(
+      `"Feature test-feature specifies app entries which are not granted to any privileges: baz"`
     );
   });
 
@@ -433,6 +597,64 @@ describe('FeatureRegistry', () => {
     );
   });
 
+  it(`prevents features from specifying catalogue entries that don't exist at the privilege level`, () => {
+    const feature: IFeature = {
+      id: 'test-feature',
+      name: 'Test Feature',
+      app: [],
+      catalogue: ['foo', 'bar', 'baz'],
+      privileges: {
+        all: {
+          catalogue: ['foo'],
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: [],
+          app: [],
+        },
+        read: {
+          catalogue: ['foo'],
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: [],
+          app: [],
+        },
+      },
+      subFeatures: [
+        {
+          name: 'my sub feature',
+          privilegeGroups: [
+            {
+              groupType: 'independent',
+              privileges: [
+                {
+                  id: 'cool-sub-feature-privilege',
+                  name: 'cool privilege',
+                  includeIn: 'none',
+                  savedObject: {
+                    all: [],
+                    read: [],
+                  },
+                  ui: [],
+                  catalogue: ['bar'],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    };
+
+    const featureRegistry = new FeatureRegistry();
+
+    expect(() => featureRegistry.register(feature)).toThrowErrorMatchingInlineSnapshot(
+      `"Feature test-feature specifies catalogue entries which are not granted to any privileges: baz"`
+    );
+  });
+
   it(`prevents reserved privileges from specifying catalogue entries that don't exist at the root level`, () => {
     const feature: IFeature = {
       id: 'test-feature',
@@ -458,6 +680,34 @@ describe('FeatureRegistry', () => {
 
     expect(() => featureRegistry.register(feature)).toThrowErrorMatchingInlineSnapshot(
       `"Feature privilege test-feature.reserved has unknown catalogue entries: foo, baz"`
+    );
+  });
+
+  it(`prevents features from specifying catalogue entries that don't exist at the reserved privilege level`, () => {
+    const feature: IFeature = {
+      id: 'test-feature',
+      name: 'Test Feature',
+      app: [],
+      catalogue: ['foo', 'bar', 'baz'],
+      privileges: 'none',
+      reserved: {
+        description: 'something',
+        privilege: {
+          catalogue: ['foo', 'bar'],
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: [],
+          app: [],
+        },
+      },
+    };
+
+    const featureRegistry = new FeatureRegistry();
+
+    expect(() => featureRegistry.register(feature)).toThrowErrorMatchingInlineSnapshot(
+      `"Feature test-feature specifies catalogue entries which are not granted to any privileges: baz"`
     );
   });
 
@@ -505,6 +755,77 @@ describe('FeatureRegistry', () => {
     );
   });
 
+  it(`prevents features from specifying management sections that don't exist at the privilege level`, () => {
+    const feature: IFeature = {
+      id: 'test-feature',
+      name: 'Test Feature',
+      app: [],
+      catalogue: ['bar'],
+      management: {
+        kibana: ['hey'],
+        elasticsearch: ['hey', 'there'],
+      },
+      privileges: {
+        all: {
+          catalogue: ['bar'],
+          management: {
+            elasticsearch: ['hey'],
+          },
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: [],
+          app: [],
+        },
+        read: {
+          catalogue: ['bar'],
+          management: {
+            elasticsearch: ['hey'],
+          },
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: [],
+          app: [],
+        },
+      },
+      subFeatures: [
+        {
+          name: 'my sub feature',
+          privilegeGroups: [
+            {
+              groupType: 'independent',
+              privileges: [
+                {
+                  id: 'cool-sub-feature-privilege',
+                  name: 'cool privilege',
+                  includeIn: 'none',
+                  savedObject: {
+                    all: [],
+                    read: [],
+                  },
+                  ui: [],
+                  management: {
+                    kibana: ['hey'],
+                    elasticsearch: ['hey'],
+                  },
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    };
+
+    const featureRegistry = new FeatureRegistry();
+
+    expect(() => featureRegistry.register(feature)).toThrowErrorMatchingInlineSnapshot(
+      `"Feature test-feature specifies management entries which are not granted to any privileges: elasticsearch.there"`
+    );
+  });
+
   it(`prevents reserved privileges from specifying management entries that don't exist at the root level`, () => {
     const feature: IFeature = {
       id: 'test-feature',
@@ -536,6 +857,164 @@ describe('FeatureRegistry', () => {
 
     expect(() => featureRegistry.register(feature)).toThrowErrorMatchingInlineSnapshot(
       `"Feature privilege test-feature.reserved has unknown management entries for section kibana: hey-there"`
+    );
+  });
+
+  it(`prevents features from specifying management entries that don't exist at the reserved privilege level`, () => {
+    const feature: IFeature = {
+      id: 'test-feature',
+      name: 'Test Feature',
+      app: [],
+      catalogue: ['bar'],
+      management: {
+        kibana: ['hey', 'hey-there'],
+      },
+      privileges: 'none',
+      reserved: {
+        description: 'something',
+        privilege: {
+          catalogue: ['bar'],
+          management: {
+            kibana: ['hey-there'],
+          },
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: [],
+          app: [],
+        },
+      },
+    };
+
+    const featureRegistry = new FeatureRegistry();
+
+    expect(() => featureRegistry.register(feature)).toThrowErrorMatchingInlineSnapshot(
+      `"Feature test-feature specifies management entries which are not granted to any privileges: kibana.hey"`
+    );
+  });
+
+  it('prevents features from specifying sub feature ids which collide with the primary feature privileges', () => {
+    const feature: IFeature = {
+      id: 'test-feature',
+      name: 'Test Feature',
+      app: [],
+      privileges: {
+        all: {
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: [],
+        },
+        read: {
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: [],
+        },
+      },
+      subFeatures: [
+        {
+          name: 'foo',
+          privilegeGroups: [
+            {
+              groupType: 'independent',
+              privileges: [
+                {
+                  id: 'all',
+                  name: 'All',
+                  includeIn: 'none',
+                  savedObject: {
+                    all: [],
+                    read: [],
+                  },
+                  ui: [],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    };
+
+    const featureRegistry = new FeatureRegistry();
+
+    expect(() => featureRegistry.register(feature)).toThrowErrorMatchingInlineSnapshot(
+      `"Feature already has a privilege with ID 'all'. Sub feature 'foo' cannot also specify this."`
+    );
+  });
+
+  it('prevents features from specifying sub feature ids which collide with other sub-feature privileges', () => {
+    const feature: IFeature = {
+      id: 'test-feature',
+      name: 'Test Feature',
+      app: [],
+      privileges: {
+        all: {
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: [],
+        },
+        read: {
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: [],
+        },
+      },
+      subFeatures: [
+        {
+          name: 'Sub Feature 1',
+          privilegeGroups: [
+            {
+              groupType: 'independent',
+              privileges: [
+                {
+                  id: 'sub-feature-priv-1',
+                  name: 'Sub Priv 1',
+                  includeIn: 'none',
+                  savedObject: {
+                    all: [],
+                    read: [],
+                  },
+                  ui: [],
+                },
+              ],
+            },
+          ],
+        },
+        {
+          name: 'Sub Feature 2',
+          privilegeGroups: [
+            {
+              groupType: 'independent',
+              privileges: [
+                {
+                  id: 'sub-feature-priv-1',
+                  name: 'Sub Priv 2',
+                  includeIn: 'none',
+                  savedObject: {
+                    all: [],
+                    read: [],
+                  },
+                  ui: [],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    };
+
+    const featureRegistry = new FeatureRegistry();
+
+    expect(() => featureRegistry.register(feature)).toThrowErrorMatchingInlineSnapshot(
+      `"Feature already has a privilege with ID 'sub-feature-priv-1'. Sub feature 'Sub Feature 2' cannot also specify this."`
     );
   });
 

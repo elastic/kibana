@@ -9,6 +9,7 @@ import Joi from 'joi';
 import { difference } from 'lodash';
 import { Capabilities as UICapabilities } from '../../../../src/core/server';
 import { IFeature } from '../common/feature';
+import { FeatureKibanaPrivileges } from '.';
 
 // Each feature gets its own property on the UICapabilities object,
 // but that object has a few built-in properties which should not be overwritten.
@@ -100,7 +101,13 @@ const schema = Joi.object({
       read: privilegeSchema,
     })
   ),
-  subFeatures: Joi.array().items(subFeatureSchema),
+  subFeatures: Joi.when('privileges', {
+    is: 'none',
+    then: Joi.array()
+      .items(subFeatureSchema)
+      .max(0),
+    otherwise: Joi.array().items(subFeatureSchema),
+  }),
   privilegesTooltip: Joi.string(),
   reserved: Joi.object({
     privilege: privilegeSchema.required(),
@@ -126,10 +133,6 @@ export function validateFeature(feature: IFeature) {
   const featureManagement = new Map<string, Set<string>>(managementSets);
 
   const featureCatalogue = new Set(catalogue);
-
-  if (feature.privileges === 'none') {
-    return;
-  }
 
   function validateAppEntry(privilegeId: string, entry: string[] = []) {
     entry.forEach(privilegeApp => featureApps.delete(privilegeApp));
@@ -193,7 +196,10 @@ export function validateFeature(feature: IFeature) {
     });
   }
 
-  const privilegeEntries = [...Object.entries(feature.privileges || {})];
+  const privilegeEntries: Array<[string, FeatureKibanaPrivileges]> = [];
+  if (feature.privileges !== 'none') {
+    privilegeEntries.push(...Object.entries(feature.privileges));
+  }
   if (feature.reserved) {
     privilegeEntries.push(['reserved', feature.reserved.privilege]);
   }
@@ -210,10 +216,19 @@ export function validateFeature(feature: IFeature) {
     validateManagementEntry(privilegeId, privilegeDefinition.management);
   });
 
+  // Seed this list with the "fixed" set of primary/minimal feature privileges
+  const seenPrivilegeIds: Set<string> = new Set(['all', 'read', 'minimal_all', 'minimal_read']);
+
   const subFeatureEntries = feature.subFeatures ?? [];
   subFeatureEntries.forEach(subFeature => {
     subFeature.privilegeGroups.forEach(subFeaturePrivilegeGroup => {
       subFeaturePrivilegeGroup.privileges.forEach(subFeaturePrivilege => {
+        if (seenPrivilegeIds.has(subFeaturePrivilege.id)) {
+          throw new Error(
+            `Feature already has a privilege with ID '${subFeaturePrivilege.id}'. Sub feature '${subFeature.name}' cannot also specify this.`
+          );
+        }
+        seenPrivilegeIds.add(subFeaturePrivilege.id);
         validateAppEntry(subFeaturePrivilege.id, subFeaturePrivilege.app);
         validateCatalogueEntry(subFeaturePrivilege.id, subFeaturePrivilege.catalogue);
         validateManagementEntry(subFeaturePrivilege.id, subFeaturePrivilege.management);
@@ -221,7 +236,7 @@ export function validateFeature(feature: IFeature) {
     });
   });
 
-  if (featureApps.size > 0) {
+  if (featureApps.size > 0 && privilegeEntries.length > 0) {
     throw new Error(
       `Feature ${
         feature.id
@@ -231,7 +246,7 @@ export function validateFeature(feature: IFeature) {
     );
   }
 
-  if (featureCatalogue.size > 0) {
+  if (featureCatalogue.size > 0 && privilegeEntries.length > 0) {
     throw new Error(
       `Feature ${
         feature.id
@@ -241,7 +256,7 @@ export function validateFeature(feature: IFeature) {
     );
   }
 
-  if (featureManagement.size > 0) {
+  if (featureManagement.size > 0 && privilegeEntries.length > 0) {
     const ungrantedManagement = Array.from(featureManagement.entries()).reduce((acc, entry) => {
       const values = Array.from(entry[1].values()).map(
         managementPage => `${entry[0]}.${managementPage}`
