@@ -35,12 +35,11 @@ import { RefreshJobsListButton } from '../refresh_jobs_list_button';
 import { isEqual } from 'lodash';
 
 import { DELETING_JOBS_REFRESH_INTERVAL_MS } from '../../../../../../common/constants/jobs_list';
-import { withKibana } from '../../../../../../../../../../src/plugins/kibana_react/public';
 
 let deletingJobsRefreshTimeout = null;
 
 // 'isManagementTable' bool prop to determine when to configure table for use in Kibana management page
-class JobsListViewUI extends Component {
+export class JobsListView extends Component {
   constructor(props) {
     super(props);
 
@@ -457,5 +456,3 @@ class JobsListViewUI extends Component {
     );
   }
 }
-
-export const JobsListView = withKibana(JobsListViewUI);
