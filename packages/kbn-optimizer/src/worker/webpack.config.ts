@@ -186,6 +186,12 @@ export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
             },
           },
         },
+        {
+          test: /\.(html|md|txt|tmpl)$/,
+          use: {
+            loader: 'raw-loader',
+          },
+        },
       ],
     },
 
