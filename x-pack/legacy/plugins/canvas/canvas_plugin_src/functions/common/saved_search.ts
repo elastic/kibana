@@ -28,7 +28,7 @@ export function savedSearch(): ExpressionFunctionDefinition<
   Arguments,
   Output
 > {
-  const { help, args: argHelp } = getFunctionHelp().savedSearch;
+  const { help, args: argHelp } = (getFunctionHelp() as any).savedSearch;
   return {
     name: 'savedSearch',
     help,
