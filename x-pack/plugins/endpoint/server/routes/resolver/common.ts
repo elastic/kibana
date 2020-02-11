@@ -41,9 +41,11 @@ export async function getPaginationParams(
     return { size: limit };
   }
   const searchAfterDoc = (await client.callAsCurrentUser('search', {
-    query: {
-      ids: {
-        values: [after],
+    body: {
+      query: {
+        ids: {
+          values: [after],
+        },
       },
     },
   })) as SearchResponse<ResolverEvent>;

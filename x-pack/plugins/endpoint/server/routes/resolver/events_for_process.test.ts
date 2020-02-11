@@ -22,7 +22,7 @@ import { registerResolverRoutes } from '../resolver';
 import { EndpointConfigSchema } from '../../config';
 import { SearchResponse } from 'elasticsearch';
 
-function getRandomInt(max) {
+function getRandomInt(max: number) {
   return Math.floor(Math.random() * Math.floor(max));
 }
 

@@ -32,29 +32,34 @@ export function handleEventsForProcess(
 ): RequestHandler<EventsForProcessPathParams, EventsForProcessQueryParams> {
   return async (context, req, res) => {
     const entityID = req.params.id;
-    log.debug(`entity_id: ${entityID}`);
     try {
       const { limit, after } = req.query;
+      log.debug(`entity_id: ${entityID} after: ${after} limit: ${limit}`);
       const pagination = await getPaginationParams(
         context.core.elasticsearch.dataClient,
         limit,
         after
       );
+      log.debug(`pagination: JSON.stringify(pagination)`);
 
       // Retrieve the process lifecycle events (e.g. started, terminated etc)
+      const lifecycleQuery = new LifecycleQuery().build(entityID);
+      log.debug(`lifecycle query: ${JSON.stringify(lifecycleQuery)}`);
       const lifecycleResponse = await context.core.elasticsearch.dataClient.callAsCurrentUser(
         'search',
-        new LifecycleQuery().build(entityID)
+        lifecycleQuery
       );
       const { results: lifecycleEvents } = transformResults(lifecycleResponse);
 
       // Retrieve the related non-process events for a given process
+      const relatedEventsQuery = new RelatedEventsQuery(pagination).build(entityID);
+      log.debug(`related events query: ${JSON.stringify(relatedEventsQuery)}`);
       const eventResponse = await context.core.elasticsearch.dataClient.callAsCurrentUser(
         'search',
-        new RelatedEventsQuery(pagination).build(entityID)
+        relatedEventsQuery
       );
       const { total, results: events, lastDocument } = transformResults(eventResponse);
-
+      log.debug(`total: ${total} last document: ${lastDocument}`);
       return res.ok({
         body: {
           lifecycle: lifecycleEvents,

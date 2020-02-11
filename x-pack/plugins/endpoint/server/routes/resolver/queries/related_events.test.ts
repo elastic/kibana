@@ -12,35 +12,37 @@ describe('related events query', () => {
     expect(
       new RelatedEventsQuery({ size: 1, timestamp, eventID: 'foo' }).build('endgame-5-awesome-id')
     ).toStrictEqual({
-      query: {
-        bool: {
-          filter: [
-            {
-              term: { 'endgame.unique_pid': '5' },
-            },
-            {
-              match: { 'agent.id': 'awesome-id' },
-            },
-            {
-              bool: {
-                must_not: {
-                  term: { 'event.category': 'process' },
+      body: {
+        query: {
+          bool: {
+            filter: [
+              {
+                term: { 'endgame.unique_pid': '5' },
+              },
+              {
+                match: { 'agent.id': 'awesome-id' },
+              },
+              {
+                bool: {
+                  must_not: {
+                    term: { 'event.category': 'process' },
+                  },
                 },
               },
-            },
-          ],
-        },
-      },
-      aggs: {
-        total: {
-          cardinality: {
-            field: '_id',
+            ],
           },
         },
+        aggs: {
+          total: {
+            value_count: {
+              field: 'endgame.serial_event_id',
+            },
+          },
+        },
+        search_after: [timestamp, 'foo'],
+        size: 1,
+        sort: [{ '@timestamp': 'asc' }, { 'endgame.serial_event_id': 'asc' }],
       },
-      search_after: [timestamp, 'foo'],
-      size: 1,
-      sort: [{ '@timestamp': 'asc' }, { 'endgame.serial_event_id': 'asc' }],
       index: EndpointAppConstants.LEGACY_EVENT_INDEX_NAME,
     });
   });
@@ -51,32 +53,34 @@ describe('related events query', () => {
     expect(
       new RelatedEventsQuery({ size: 1, timestamp, eventID: 'bar' }).build('baz')
     ).toStrictEqual({
-      query: {
-        bool: {
-          filter: [
-            {
-              match: { 'endpoint.process.entity_id': 'baz' },
-            },
-            {
-              bool: {
-                must_not: {
-                  term: { 'event.category': 'process' },
+      body: {
+        query: {
+          bool: {
+            filter: [
+              {
+                match: { 'endpoint.process.entity_id': 'baz' },
+              },
+              {
+                bool: {
+                  must_not: {
+                    term: { 'event.category': 'process' },
+                  },
                 },
               },
-            },
-          ],
-        },
-      },
-      aggs: {
-        total: {
-          cardinality: {
-            field: '_id',
+            ],
           },
         },
+        aggs: {
+          total: {
+            value_count: {
+              field: 'event.id',
+            },
+          },
+        },
+        search_after: [timestamp, 'bar'],
+        size: 1,
+        sort: [{ '@timestamp': 'asc' }, { 'event.id': 'asc' }],
       },
-      search_after: [timestamp, 'bar'],
-      size: 1,
-      sort: [{ '@timestamp': 'asc' }, { 'event.id': 'asc' }],
       index: EndpointAppConstants.EVENT_INDEX_NAME,
     });
   });
