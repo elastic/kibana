@@ -119,7 +119,7 @@ describe('alertInstanceToListItem', () => {
 
     expect(alertInstanceToListItem(alert, 'id', instance)).toEqual({
       instance: 'id',
-      status: 'Active',
+      status: { label: 'Active', healthColor: 'primary' },
       start,
       duration: fakeNow.getTime() - fake2MinutesAgo.getTime(),
       isMuted: false,
@@ -142,7 +142,7 @@ describe('alertInstanceToListItem', () => {
 
     expect(alertInstanceToListItem(alert, 'id', instance)).toEqual({
       instance: 'id',
-      status: 'Active',
+      status: { label: 'Active', healthColor: 'primary' },
       start,
       duration: fakeNow.getTime() - fake2MinutesAgo.getTime(),
       isMuted: true,
@@ -155,7 +155,7 @@ describe('alertInstanceToListItem', () => {
 
     expect(alertInstanceToListItem(alert, 'id', instance)).toEqual({
       instance: 'id',
-      status: 'Active',
+      status: { label: 'Active', healthColor: 'primary' },
       start: undefined,
       duration: 0,
       isMuted: false,
@@ -170,7 +170,7 @@ describe('alertInstanceToListItem', () => {
 
     expect(alertInstanceToListItem(alert, 'id', instance)).toEqual({
       instance: 'id',
-      status: 'Active',
+      status: { label: 'Active', healthColor: 'primary' },
       start: undefined,
       duration: 0,
       isMuted: false,
@@ -183,7 +183,7 @@ describe('alertInstanceToListItem', () => {
     });
     expect(alertInstanceToListItem(alert, 'id')).toEqual({
       instance: 'id',
-      status: 'Inactive',
+      status: { label: 'Inactive', healthColor: 'subdued' },
       start: undefined,
       duration: 0,
       isMuted: true,

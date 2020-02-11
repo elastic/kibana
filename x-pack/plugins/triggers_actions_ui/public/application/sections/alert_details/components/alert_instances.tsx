@@ -7,7 +7,7 @@
 import React, { Fragment } from 'react';
 import moment, { Duration } from 'moment';
 import { i18n } from '@kbn/i18n';
-import { EuiBasicTable, EuiButtonToggle, EuiBadge } from '@elastic/eui';
+import { EuiBasicTable, EuiButtonToggle, EuiBadge, EuiHealth } from '@elastic/eui';
 // @ts-ignore
 import { RIGHT_ALIGNMENT, CENTER_ALIGNMENT } from '@elastic/eui/lib/services';
 import { padLeft, difference } from 'lodash';
@@ -44,6 +44,9 @@ export const alertInstancesTableColumns = (
       'xpack.triggersActionsUI.sections.alertDetails.alertInstancesList.columns.status',
       { defaultMessage: 'Status' }
     ),
+    render: (value: AlertInstanceListItemStatus, instance: AlertInstanceListItem) => {
+      return <EuiHealth color={value.healthColor}>{value.label}</EuiHealth>;
+    },
     sortable: false,
     'data-test-subj': 'alertInstancesTableCell-status',
   },
@@ -79,11 +82,11 @@ export const alertInstancesTableColumns = (
       'xpack.triggersActionsUI.sections.alertDetails.alertInstancesList.columns.actions',
       { defaultMessage: 'Actions' }
     ),
-    render: (instance: AlertInstanceListItem) => {
+    render: (alertInstance: AlertInstanceListItem) => {
       return (
         <Fragment>
-          {instance.isMuted ? (
-            <EuiBadge data-test-subj="mutedAlertInstanceLabel">
+          {alertInstance.isMuted ? (
+            <EuiBadge data-test-subj={`mutedAlertInstanceLabel_${alertInstance.instance}`}>
               <FormattedMessage
                 id="xpack.triggersActionsUI.sections.alertDetails.alertInstances.mutedAlert"
                 defaultMessage="Muted"
@@ -93,10 +96,21 @@ export const alertInstancesTableColumns = (
             <Fragment />
           )}
           <EuiButtonToggle
-            label={instance.isMuted ? 'Unmute' : 'Mute'}
-            iconType={instance.isMuted ? 'eyeClosed' : 'eye'}
-            onChange={() => onMuteAction(instance)}
-            isSelected={instance.isMuted}
+            label={
+              alertInstance.isMuted
+                ? i18n.translate(
+                    'xpack.triggersActionsUI.sections.alertDetails.alertInstancesList.actions.unmute',
+                    { defaultMessage: 'Unmute' }
+                  )
+                : i18n.translate(
+                    'xpack.triggersActionsUI.sections.alertDetails.alertInstancesList.actions.mute',
+                    { defaultMessage: 'Mute' }
+                  )
+            }
+            data-test-subj={`muteAlertInstanceButton_${alertInstance.instance}`}
+            iconType={alertInstance.isMuted ? 'eyeClosed' : 'eye'}
+            onChange={() => onMuteAction(alertInstance)}
+            isSelected={alertInstance.isMuted}
             isEmpty
             isIconOnly
           />
@@ -137,6 +151,12 @@ export function AlertInstances({
           alertInstanceToListItem(alert, instanceId)
         ),
       ]}
+      rowProps={() => ({
+        'data-test-subj': 'alert-instance-row',
+      })}
+      cellProps={() => ({
+        'data-test-subj': 'cell',
+      })}
       columns={alertInstancesTableColumns(onMuteAction)}
       data-test-subj="alertInstancesList"
     />
@@ -144,9 +164,13 @@ export function AlertInstances({
 }
 export const AlertInstancesWithApi = withBulkAlertOperations(AlertInstances);
 
+interface AlertInstanceListItemStatus {
+  label: string;
+  healthColor: string;
+}
 export interface AlertInstanceListItem {
   instance: string;
-  status: string;
+  status: AlertInstanceListItemStatus;
   start?: Date;
   duration: number;
   isMuted: boolean;
@@ -158,7 +182,7 @@ const ACTIVE_LABEL = i18n.translate(
 );
 
 const INACTIVE_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.sections.alertDetails.alertInstancesList.status.active',
+  'xpack.triggersActionsUI.sections.alertDetails.alertInstancesList.status.inactive',
   { defaultMessage: 'Inactive' }
 );
 
@@ -172,7 +196,9 @@ export function alertInstanceToListItem(
   const isMuted = alert.mutedInstanceIds.findIndex(muted => muted === instanceId) >= 0;
   return {
     instance: instanceId,
-    status: instance ? ACTIVE_LABEL : INACTIVE_LABEL,
+    status: instance
+      ? { label: ACTIVE_LABEL, healthColor: 'primary' }
+      : { label: INACTIVE_LABEL, healthColor: 'subdued' },
     start: instance?.meta?.lastScheduledActions?.date,
     duration: durationSince(instance?.meta?.lastScheduledActions?.date),
     isMuted,
