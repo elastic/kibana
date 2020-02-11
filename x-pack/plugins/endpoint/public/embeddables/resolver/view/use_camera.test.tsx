@@ -30,16 +30,10 @@ describe('useCamera on an unpainted element', () => {
   let projectionMatrix: Matrix3;
   const testID = 'camera';
   let reactRenderResult: RenderResult;
-  let actions: ResolverAction[];
   let store: ResolverStore;
   let simulator: SideEffectSimulator;
   beforeEach(async () => {
-    actions = [];
-    const middleware: ResolverMiddleware = () => next => action => {
-      actions.push(action);
-      next(action);
-    };
-    ({ store } = storeFactory(middleware));
+    ({ store } = storeFactory());
 
     const Test = function Test() {
       const camera = useCamera();

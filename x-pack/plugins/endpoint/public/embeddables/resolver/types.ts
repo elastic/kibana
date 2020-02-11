@@ -271,15 +271,3 @@ export interface SideEffectSimulator {
    */
   mock: jest.Mocked<Omit<SideEffectors, 'ResizeObserver'>> & Pick<SideEffectors, 'ResizeObserver'>;
 }
-
-export type ResolverMiddleware = Middleware<{}, ResolverState, Dispatch<ResolverAction>>;
-
-export type Selectors = typeof selectors;
-
-export type FullyEvaluatedSelectors = {
-  -readonly [K in keyof Selectors]: ReturnType<Selectors[K]> extends (...args: any[]) => infer R
-    ? R
-    : ReturnType<Selectors[K]>;
-};
-
-export type ResolverStore = Store<ResolverState, ResolverAction>;
