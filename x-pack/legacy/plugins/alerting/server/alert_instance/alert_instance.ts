@@ -9,6 +9,7 @@ import {
   RawAlertInstance,
   rawAlertInstance,
 } from '../../common';
+
 import { State, Context } from '../types';
 import { parseDuration } from '../lib';
 

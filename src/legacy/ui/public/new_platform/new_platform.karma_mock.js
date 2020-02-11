@@ -176,7 +176,11 @@ let isAutoRefreshSelectorEnabled = true;
 
 export const npStart = {
   core: {
-    chrome: {},
+    chrome: {
+      overlays: {
+        openModal: sinon.fake(),
+      },
+    },
   },
   plugins: {
     management: {
@@ -211,6 +215,10 @@ export const npStart = {
       getForwards: () => [],
       config: {
         defaultAppId: 'home',
+      },
+      dashboardConfig: {
+        turnHideWriteControlsOn: sinon.fake(),
+        getHideWriteControls: sinon.fake(),
       },
     },
     data: {
