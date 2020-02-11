@@ -35,10 +35,25 @@ export default function HistoricalList({testRunnerTypes, historicalItems, curren
   const renderWithRunners = renderItem(testRunnerTypes);
   return (
     <div className="font-bold text-xl mb-2">
-      Historical Items - Compare to Current? [{currentJobNumber}]
+      Current Job -
+      <a
+        className="App-link"
+        href={href(currentJobNumber)}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        {currentJobNumber}
+      </a>
       <ul>
         {historicalItems.reverse().map((x, i) => renderWithRunners(currentJobNumber)(x, i))}
       </ul>
     </div>
      );
+}
+
+function href(currentJobNumber) {
+  const prefix = `
+https://console.cloud.google.com/storage/browser/kibana-ci-artifacts/jobs/elastic+kibana+code-coverage
+`;
+  return `${prefix}/${currentJobNumber}`;
 }
