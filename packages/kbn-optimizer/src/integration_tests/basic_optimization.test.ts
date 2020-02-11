@@ -78,6 +78,16 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
     }
   };
 
+  const initializingStates = msgs.filter(msg => msg.state.phase === 'initializing');
+  assert('produce at least one initializing event', initializingStates.length >= 1);
+
+  const bundleCacheStates = msgs.filter(
+    msg =>
+      (msg.event?.type === 'bundle cached' || msg.event?.type === 'bundle not cached') &&
+      msg.state.phase === 'initializing'
+  );
+  assert('produce two bundle cache events while initializing', bundleCacheStates.length === 2);
+
   const initializedStates = msgs.filter(msg => msg.state.phase === 'initialized');
   assert('produce at least one initialized event', initializedStates.length >= 1);
 
@@ -101,6 +111,7 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
 
   const otherStates = msgs.filter(
     msg =>
+      msg.state.phase !== 'initializing' &&
       msg.state.phase !== 'success' &&
       msg.state.phase !== 'running' &&
       msg.state.phase !== 'initialized' &&
