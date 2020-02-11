@@ -3,10 +3,14 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import * as t from 'io-ts';
+import {
+  AlertInstanceMeta,
+  AlertInstanceState,
+  RawAlertInstance,
+  rawAlertInstance,
+} from '../../common';
 
 import { State, Context } from '../types';
-import { DateFromString } from '../lib/types';
 import { parseDuration } from '../lib';
 
 interface ScheduledExecutionOptions {
@@ -14,24 +18,7 @@ interface ScheduledExecutionOptions {
   context: Context;
   state: State;
 }
-
-const metaSchema = t.partial({
-  lastScheduledActions: t.type({
-    group: t.string,
-    date: DateFromString,
-  }),
-});
-type AlertInstanceMeta = t.TypeOf<typeof metaSchema>;
-
-const stateSchema = t.record(t.string, t.unknown);
-type AlertInstanceState = t.TypeOf<typeof stateSchema>;
-
-export const rawAlertInstance = t.partial({
-  state: stateSchema,
-  meta: metaSchema,
-});
-export type RawAlertInstance = t.TypeOf<typeof rawAlertInstance>;
-
+export type AlertInstances = Record<string, AlertInstance>;
 export class AlertInstance {
   private scheduledExecutionOptions?: ScheduledExecutionOptions;
   private meta: AlertInstanceMeta;
