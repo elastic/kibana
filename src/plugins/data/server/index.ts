@@ -21,12 +21,35 @@ import { PluginInitializerContext } from '../../../core/server';
 import { DataServerPlugin, DataPluginSetup, DataPluginStart } from './plugin';
 
 /*
+ * esQuery and esKuery helper namespaces:
+ */
+
+import {
+  nodeTypes,
+  fromKueryExpression,
+  toElasticsearchQuery,
+  buildEsQuery,
+  getEsQueryConfig,
+} from '../common';
+
+export const esKuery = {
+  nodeTypes,
+  fromKueryExpression,
+  toElasticsearchQuery,
+};
+
+export const esQuery = {
+  getEsQueryConfig,
+  buildEsQuery,
+};
+
+/*
  * Field Formatters helper namespace:
  */
 
 import {
+  FieldFormatsRegistry,
   FieldFormat,
-  FieldFormatsRegistry, // exported only for tests. Consider mock.
   BoolFormat,
   BytesFormat,
   ColorFormat,
@@ -45,8 +68,8 @@ import {
 } from '../common/field_formats';
 
 export const fieldFormats = {
+  FieldFormatsRegistry,
   FieldFormat,
-  FieldFormatsRegistry, // exported only for tests. Consider mock.
 
   BoolFormat,
   BytesFormat,
@@ -75,10 +98,10 @@ export function plugin(initializerContext: PluginInitializerContext) {
 export { IRequestTypesMap, IResponseTypesMap } from './search';
 
 export {
+  EsQueryConfig,
   // es query
   esFilters,
-  esKuery,
-  esQuery,
+  KueryNode,
   // kbn field types
   castEsToKbnFieldTypeName,
   getKbnFieldType,
