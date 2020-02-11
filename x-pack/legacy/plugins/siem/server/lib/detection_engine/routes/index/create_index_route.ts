@@ -5,7 +5,6 @@
  */
 
 import Hapi from 'hapi';
-import Boom from 'boom';
 
 import { DETECTION_ENGINE_INDEX_URL } from '../../../../../common/constants';
 import signalsPolicy from './signals_policy.json';
@@ -31,13 +30,18 @@ export const createCreateIndexRoute = (server: ServerFacade): Hapi.ServerRoute =
         },
       },
     },
-    async handler(request: RequestFacade) {
+    async handler(request: RequestFacade, headers) {
       try {
         const index = getIndex(request, server);
         const callWithRequest = callWithRequestFactory(request, server);
         const indexExists = await getIndexExists(callWithRequest, index);
         if (indexExists) {
-          return new Boom(`index: "${index}" already exists`, { statusCode: 409 });
+          return headers
+            .response({
+              message: `index: "${index}" already exists`,
+              status_code: 409,
+            })
+            .code(409);
         } else {
           const policyExists = await getPolicyExists(callWithRequest, index);
           if (!policyExists) {
@@ -52,7 +56,13 @@ export const createCreateIndexRoute = (server: ServerFacade): Hapi.ServerRoute =
           return { acknowledged: true };
         }
       } catch (err) {
-        return transformError(err);
+        const error = transformError(err);
+        return headers
+          .response({
+            message: error.message,
+            status_code: error.statusCode,
+          })
+          .code(error.statusCode);
       }
     },
   };
