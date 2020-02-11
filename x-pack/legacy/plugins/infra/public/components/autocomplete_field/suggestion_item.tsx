@@ -8,14 +8,14 @@ import { EuiIcon } from '@elastic/eui';
 import { transparentize } from 'polished';
 import React from 'react';
 
-import { autocomplete } from '../../../../../../../src/plugins/data/public';
+import { QuerySuggestion } from '../../../../../../../src/plugins/data/public';
 import euiStyled from '../../../../../common/eui_styled_components';
 
 interface Props {
   isSelected?: boolean;
   onClick?: React.MouseEventHandler<HTMLDivElement>;
   onMouseEnter?: React.MouseEventHandler<HTMLDivElement>;
-  suggestion: autocomplete.QuerySuggestion;
+  suggestion: QuerySuggestion;
 }
 
 export const SuggestionItem: React.FC<Props> = props => {

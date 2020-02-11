@@ -8,14 +8,14 @@ import { i18n } from '@kbn/i18n';
 import moment from 'moment-timezone';
 // @ts-ignore: implicit any for JS file
 import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
-import { npSetup } from 'ui/new_platform';
+import { npSetup, npStart } from 'ui/new_platform';
 import React from 'react';
-import chrome from 'ui/chrome';
 import { ScreenCapturePanelContent } from '../components/screen_capture_panel_content';
 import { ShareContext } from '../../../../../../src/plugins/share/public';
 
+const { core } = npSetup;
+
 async function reportingProvider() {
-  const injector = await chrome.dangerouslyGetActiveInjector();
   const getShareMenuItems = ({
     objectType,
     objectId,
@@ -29,18 +29,24 @@ async function reportingProvider() {
     }
     // Dashboard only mode does not currently support reporting
     // https://github.com/elastic/kibana/issues/18286
-    if (objectType === 'dashboard' && injector.get<any>('dashboardConfig').getHideWriteControls()) {
+    if (
+      objectType === 'dashboard' &&
+      npStart.plugins.kibanaLegacy.dashboardConfig.getHideWriteControls()
+    ) {
       return [];
     }
 
     const getReportingJobParams = () => {
       // Replace hashes with original RISON values.
-      const relativeUrl = shareableUrl.replace(window.location.origin + chrome.getBasePath(), '');
+      const relativeUrl = shareableUrl.replace(
+        window.location.origin + core.http.basePath.get(),
+        ''
+      );
 
       const browserTimezone =
-        chrome.getUiSettingsClient().get('dateFormat:tz') === 'Browser'
+        core.uiSettings.get('dateFormat:tz') === 'Browser'
           ? moment.tz.guess()
-          : chrome.getUiSettingsClient().get('dateFormat:tz');
+          : core.uiSettings.get('dateFormat:tz');
 
       return {
         ...sharingData,
@@ -52,12 +58,15 @@ async function reportingProvider() {
 
     const getPngJobParams = () => {
       // Replace hashes with original RISON values.
-      const relativeUrl = shareableUrl.replace(window.location.origin + chrome.getBasePath(), '');
+      const relativeUrl = shareableUrl.replace(
+        window.location.origin + core.http.basePath.get(),
+        ''
+      );
 
       const browserTimezone =
-        chrome.getUiSettingsClient().get('dateFormat:tz') === 'Browser'
+        core.uiSettings.get('dateFormat:tz') === 'Browser'
           ? moment.tz.guess()
-          : chrome.getUiSettingsClient().get('dateFormat:tz');
+          : core.uiSettings.get('dateFormat:tz');
 
       return {
         ...sharingData,

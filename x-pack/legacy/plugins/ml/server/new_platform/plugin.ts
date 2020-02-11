@@ -24,7 +24,6 @@ import { addLinksToSampleDatasets } from '../lib/sample_data_sets';
 import { checkLicense } from '../lib/check_license';
 // @ts-ignore: could not find declaration file for module
 import { mirrorPluginStatus } from '../../../../server/lib/mirror_plugin_status';
-import { FEATURE_ANNOTATIONS_ENABLED } from '../../common/constants/feature_flags';
 import { LICENSE_TYPE } from '../../common/constants/license';
 // @ts-ignore: could not find declaration file for module
 import { annotationRoutes } from '../routes/annotations';
@@ -134,7 +133,7 @@ export class Plugin {
 
   public setup(core: MlCoreSetup, plugins: PluginsSetup) {
     const xpackMainPlugin: MlXpackMainPlugin = plugins.xpackMain;
-    const { http, injectUiAppVars } = core;
+    const { http } = core;
     const pluginId = this.pluginId;
 
     mirrorPluginStatus(xpackMainPlugin, plugins.ml);
@@ -197,13 +196,6 @@ export class Plugin {
       ],
     };
 
-    injectUiAppVars('ml', () => {
-      return {
-        kbnIndex: this.config.get('kibana.index'),
-        mlAnnotationsEnabled: FEATURE_ANNOTATIONS_ENABLED,
-      };
-    });
-
     // Can access via new platform router's handler function 'context' parameter - context.ml.mlClient
     const mlClient = core.elasticsearch.createClient('ml', { plugins: [elasticsearchJsPlugin] });
     http.registerRouteHandlerContext('ml', (context, request) => {
@@ -246,7 +238,7 @@ export class Plugin {
     jobValidationRoutes(extendedRouteInitializationDeps);
     notificationRoutes(routeInitializationDeps);
     systemRoutes(extendedRouteInitializationDeps);
-    dataRecognizer(routeInitializationDeps);
+    dataRecognizer(extendedRouteInitializationDeps);
     dataVisualizerRoutes(routeInitializationDeps);
     calendars(routeInitializationDeps);
     fieldsService(routeInitializationDeps);
