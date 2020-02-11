@@ -222,6 +222,7 @@ export class ESSearchSource extends AbstractESSource {
   _getDocValueAndSourceFields(indexPattern, fieldNames) {
     const docValueFields = [];
     const sourceOnlyFields = [];
+    const scriptedFields = [];
     fieldNames.forEach(fieldName => {
       const field = indexPattern.fields.getByName(fieldName);
       if (!field) {
@@ -232,7 +233,9 @@ export class ESSearchSource extends AbstractESSource {
           })
         );
       }
-      if (field.readFromDocValues) {
+      if (field.scripted) {
+        scriptedFields.push(fieldName);
+      } else if (field.readFromDocValues) {
         const docValueField =
           field.type === 'date'
             ? {
@@ -246,7 +249,7 @@ export class ESSearchSource extends AbstractESSource {
       }
     });
 
-    return { docValueFields, sourceOnlyFields };
+    return { docValueFields, sourceOnlyFields, scriptedFields };
   }
 
   async _getTopHits(layerName, searchFilters, registerCancelCallback) {
@@ -364,6 +367,8 @@ export class ESSearchSource extends AbstractESSource {
     searchSource.setField('fields', searchFilters.fieldNames); // Setting "fields" filters out unused scripted fields
     if (sourceOnlyFields.length === 0) {
       searchSource.setField('source', false); // do not need anything from _source
+    } else {
+      searchSource.setField('source', sourceOnlyFields);
     }
     if (this._hasSort()) {
       searchSource.setField('sort', this._buildEsSort());
