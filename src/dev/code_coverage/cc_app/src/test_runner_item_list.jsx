@@ -1,21 +1,26 @@
 import React from "react";
 import TestRunnerItem from './test_runner_item';
 
-export default function TestRunnerItemList({testRunnerTypes}) {
+export default function TestRunnerItemList ({historicalItem, testRunnerTypes}) {
+  const renderWithHistorical = renderItem(historicalItem);
   return (
     <div className="App-TestRunner-List">
       <ul>
-        {testRunnerTypes.map(renderItem)}
+        Test Runners
+        {testRunnerTypes.map(renderWithHistorical)}
       </ul>
     </div>
   );
 }
 
-function renderItem(testRunnerItem) {
-  return (
-    <TestRunnerItem
-      item={testRunnerItem}
-      key={testRunnerItem.id}
-    />
-  );
+function renderItem (historicalItem) {
+  return function renderItemInner (testRunnerItem) {
+    return (
+      <TestRunnerItem
+        historicalItem={historicalItem}
+        testRunnerItem={testRunnerItem}
+        key={testRunnerItem.id}
+      />
+    );
+  }
 }

@@ -19,7 +19,6 @@
 
 import React from "react";
 import HistoricalItem from './historical_item';
-// import TestRunnerItemList from './test_runner_item_list';
 
 const renderItem = testRunnerTypes => currentJobNumber => (x, i) => {
   return (
@@ -29,7 +28,6 @@ const renderItem = testRunnerTypes => currentJobNumber => (x, i) => {
         currentJobNumber={currentJobNumber}
         testRunnerTypes={testRunnerTypes}
       />
-      // {/*<TestRunnerItemList testRunnerTypes={testRunnerTypes} />*/}
 );
 };
 

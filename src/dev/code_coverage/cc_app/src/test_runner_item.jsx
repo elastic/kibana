@@ -1,21 +1,24 @@
 import React from "react";
 
-export default function TestRunnerItem ({item}) {
-
+export default function TestRunnerItem ({historicalItem, testRunnerItem}) {
   return (
     <div>
       <a
         className="App-link"
-        href={href(item)}
+        href={href(testRunnerItem.type)}
         target="_blank"
         rel="noopener noreferrer"
       >
-        {item.type} PUT TIMESTAMP HERE
+        {testRunnerItem.type} {timestamp(historicalItem)}
       </a>
     </div>
   );
 }
 
-function href(item) {
-  return `target/kibana-coverage/${item.type}-combined/index.html`;
+function timestamp(historicalItem) {
+  return [.../coverage\/\d*\/(\d*-.*Z)/gm.exec(historicalItem)][1];
+}
+
+function href(type) {
+  return `target/kibana-coverage/${type}-combined/index.html`;
 }

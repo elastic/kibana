@@ -2,6 +2,7 @@ import React from "react";
 import TestRunnerItemList from './test_runner_item_list';
 
 export default function HistoricalItem({item, currentJobNumber, testRunnerTypes}) {
+
   return (
     <>
       <div className="max-w-sm rounded overflow-hidden shadow-lg">
@@ -11,7 +12,7 @@ export default function HistoricalItem({item, currentJobNumber, testRunnerTypes}
               {anchor(item)}
             </div>
             <div className="text-gray-700 text-base">
-              <TestRunnerItemList testRunnerTypes={testRunnerTypes} />
+              <TestRunnerItemList historicalItem={item} testRunnerTypes={testRunnerTypes} />
             </div>
           </div>
       </div>
