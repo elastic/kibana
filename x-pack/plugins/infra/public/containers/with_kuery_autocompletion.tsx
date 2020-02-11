@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { IIndexPattern, DataPublicPluginStart, autocomplete } from 'src/plugins/data/public';
+import { QuerySuggestion, IIndexPattern, DataPublicPluginStart } from 'src/plugins/data/public';
 import {
   withKibana,
   KibanaReactContextValue,
@@ -18,7 +18,7 @@ interface WithKueryAutocompletionLifecycleProps {
   children: RendererFunction<{
     isLoadingSuggestions: boolean;
     loadSuggestions: (expression: string, cursorPosition: number, maxSuggestions?: number) => void;
-    suggestions: autocomplete.QuerySuggestion[];
+    suggestions: QuerySuggestion[];
   }>;
   indexPattern: IIndexPattern;
 }
@@ -30,7 +30,7 @@ interface WithKueryAutocompletionLifecycleState {
     expression: string;
     cursorPosition: number;
   } | null;
-  suggestions: autocomplete.QuerySuggestion[];
+  suggestions: QuerySuggestion[];
 }
 
 class WithKueryAutocompletionComponent extends React.Component<

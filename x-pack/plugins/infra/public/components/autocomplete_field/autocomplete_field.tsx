@@ -13,9 +13,9 @@ import {
 import React from 'react';
 
 import { euiStyled } from '../../../../observability/public';
+import { QuerySuggestion } from '../../../../../../src/plugins/data/public';
 import { composeStateUpdaters } from '../../utils/typed_react';
 import { SuggestionItem } from './suggestion_item';
-import { autocomplete } from '../../../../../../src/plugins/data/public';
 
 interface AutocompleteFieldProps {
   isLoadingSuggestions: boolean;
@@ -24,7 +24,7 @@ interface AutocompleteFieldProps {
   onSubmit?: (value: string) => void;
   onChange?: (value: string) => void;
   placeholder?: string;
-  suggestions: autocomplete.QuerySuggestion[];
+  suggestions: QuerySuggestion[];
   value: string;
   autoFocus?: boolean;
   'aria-label'?: string;

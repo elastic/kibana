@@ -5,14 +5,14 @@
  */
 import React, { PureComponent } from 'react';
 import { capitalize } from 'lodash';
-import chrome from 'ui/chrome';
+import chrome from '../../np_imports/ui/chrome';
 import { EuiBasicTable, EuiTitle, EuiSpacer, EuiText, EuiCallOut, EuiLink } from '@elastic/eui';
 import { INFRA_SOURCE_ID } from '../../../common/constants';
 import { formatDateTimeLocal } from '../../../common/formatting';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Reason } from './reason';
-import { capabilities } from 'ui/capabilities';
+import { capabilities } from '../../np_imports/ui/capabilities';
 
 const columnTimestampTitle = i18n.translate('xpack.monitoring.logs.listing.timestampTitle', {
   defaultMessage: 'Timestamp',

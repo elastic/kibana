@@ -22,10 +22,30 @@ import { useUiSetting$ } from '../../../../../src/plugins/kibana_react/public';
  * Unlike the `useState`, it doesn't give type guarantees for the value,
  * because the underlying `UiSettingsClient` doesn't support that.
  */
-export const useKibanaUiSetting = (key: string, defaultValue?: any) => {
+
+export interface TimePickerQuickRange {
+  from: string;
+  to: string;
+  display: string;
+}
+
+export function useKibanaUiSetting(
+  key: 'timepicker:quickRanges',
+  defaultValue?: TimePickerQuickRange[]
+): [
+  TimePickerQuickRange[],
+  (key: 'timepicker:quickRanges', value: TimePickerQuickRange[]) => Promise<boolean>
+];
+
+export function useKibanaUiSetting(
+  key: string,
+  defaultValue?: any
+): [any, (key: string, value: any) => Promise<boolean>];
+
+export function useKibanaUiSetting(key: string, defaultValue?: any) {
   const [uiSetting, setUiSetting] = useUiSetting$(key);
   const uiSettingValue = useMemo(() => {
     return uiSetting ? uiSetting : defaultValue;
   }, [uiSetting, defaultValue]);
   return [uiSettingValue, setUiSetting];
-};
+}

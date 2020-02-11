@@ -3,7 +3,14 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Router, RouterRouteHandler } from '../../../../../../server/lib/create_router';
+import { schema } from '@kbn/config-schema';
+
+import { RouteDependencies } from '../../../types';
+import { addBasePath } from '../index';
+
+const paramsSchema = schema.object({
+  indexName: schema.string(),
+});
 
 // response comes back as { [indexName]: { ... }}
 // so plucking out the embedded object
@@ -12,19 +19,35 @@ function formatHit(hit: { [key: string]: {} }) {
   return hit[key];
 }
 
-const handler: RouterRouteHandler = async (request, callWithRequest) => {
-  const { indexName } = request.params;
-  const params = {
-    expandWildcards: 'none',
-    flatSettings: false,
-    local: false,
-    includeDefaults: true,
-    index: indexName,
-  };
+export function registerLoadRoute({ router, license, lib }: RouteDependencies) {
+  router.get(
+    { path: addBasePath('/settings/{indexName}'), validate: { params: paramsSchema } },
+    license.guardApiRoute(async (ctx, req, res) => {
+      const { indexName } = req.params as typeof paramsSchema.type;
+      const params = {
+        expandWildcards: 'none',
+        flatSettings: false,
+        local: false,
+        includeDefaults: true,
+        index: indexName,
+      };
 
-  const hit = await callWithRequest('indices.getSettings', params);
-  return formatHit(hit);
-};
-export function registerLoadRoute(router: Router) {
-  router.get('settings/{indexName}', handler);
+      try {
+        const hit = await ctx.core.elasticsearch.dataClient.callAsCurrentUser(
+          'indices.getSettings',
+          params
+        );
+        return res.ok({ body: formatHit(hit) });
+      } catch (e) {
+        if (lib.isEsError(e)) {
+          return res.customError({
+            statusCode: e.statusCode,
+            body: e,
+          });
+        }
+        // Case: default
+        return res.internalError({ body: e });
+      }
+    })
+  );
 }
