@@ -55,7 +55,7 @@ export function FormatSelector(props: FormatSelectorProps) {
     <>
       <EuiFormRow
         label={i18n.translate('xpack.lens.indexPattern.columnFormatLabel', {
-          defaultMessage: 'Display format',
+          defaultMessage: 'Value format',
         })}
         display="rowCompressed"
       >
