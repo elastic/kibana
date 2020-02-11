@@ -18,7 +18,7 @@ import {
   EuiTableFieldDataColumnType,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, FormattedDate, FormattedTime } from '@kbn/i18n/react';
+import { FormattedMessage, FormattedDate, FormattedTime, FormattedNumber } from '@kbn/i18n/react';
 import { useDispatch } from 'react-redux';
 import { usePageId } from '../use_page_id';
 import {
@@ -31,6 +31,7 @@ import {
 import { usePolicyListSelector } from './policy_hooks';
 import { PolicyListAction } from '../../store/policy_list';
 import { PolicyData } from '../../types';
+import { TruncateText } from '../../components/truncate_text';
 
 interface TTableChangeCallbackArguments {
   page: { index: number; size: number };
@@ -47,9 +48,15 @@ const FormattedDateAndTime: React.FC<{ date: Date }> = ({ date }) => {
 };
 
 const renderDate = (d: string, _item: PolicyData) => (
-  //                           ^^
-  // Second argument, declared even if not used, to avoid TS error
-  <FormattedDateAndTime date={new Date(d as string)} />
+  <TruncateText>
+    <FormattedDateAndTime date={new Date(d as string)} />
+  </TruncateText>
+);
+
+const renderFormattedNumber = (value: number, _item: PolicyData) => (
+  <TruncateText>
+    <FormattedNumber value={value} />
+  </TruncateText>
 );
 
 export const PolicyList = React.memo(() => {
@@ -99,6 +106,7 @@ export const PolicyList = React.memo(() => {
         name: i18n.translate('xpack.endpoint.policyList.totalField', {
           defaultMessage: 'Total',
         }),
+        render: renderFormattedNumber,
         dataType: 'number',
         truncateText: true,
       },
@@ -107,6 +115,7 @@ export const PolicyList = React.memo(() => {
         name: i18n.translate('xpack.endpoint.policyList.pendingField', {
           defaultMessage: 'Pending',
         }),
+        render: renderFormattedNumber,
         dataType: 'number',
         truncateText: true,
       },
@@ -115,6 +124,7 @@ export const PolicyList = React.memo(() => {
         name: i18n.translate('xpack.endpoint.policyList.failedField', {
           defaultMessage: 'Failed',
         }),
+        render: renderFormattedNumber,
         dataType: 'number',
         truncateText: true,
       },
