@@ -34,7 +34,12 @@ export const OptimizeBuildTask = {
 
     const kibanaScript = platform.isWindows() ? '.\\bin\\kibana.bat' : './bin/kibana';
 
-    const kibanaArgs = ['--env.name=production', '--logging.json=false', '--optimize'];
+    const kibanaArgs = [
+      '--env.name=production',
+      '--logging.json=false',
+      '--optimize',
+      '--allow-root',
+    ];
 
     log.info('Running bin/kibana to trigger the optimizer');
 

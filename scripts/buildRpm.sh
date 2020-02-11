@@ -21,5 +21,5 @@ sudo rm -rf ~/rpmbuild
 rpmdev-setuptree
 cp packaging/$PACKAGE.spec ~/rpmbuild/SPECS
 rm -f $PACKAGE-$VERSION.tar.gz
-tar czf ~/rpmbuild/SOURCES/$PACKAGE-$VERSION.tar.gz -C $PWD .
+tar cf ~/rpmbuild/SOURCES/$PACKAGE-$VERSION.tar -C $PWD .
 rpmbuild -v -bb --define="version ${VERSION}" --define="kibana_version ${GIT_BRANCH}" --target=x86_64 ~/rpmbuild/SPECS/$PACKAGE.spec
