@@ -9,7 +9,8 @@ import { LensMultiTable } from '../types';
 import React from 'react';
 import { shallow } from 'enzyme';
 import { MetricConfig } from './types';
-import { fieldFormats } from '../../../../../../src/plugins/data/public';
+import { createMockExecutionContext } from '../../../../../../src/plugins/expressions/common/mocks';
+import { IFieldFormat } from '../../../../../../src/plugins/data/public';
 
 function sampleArgs() {
   const data: LensMultiTable = {
@@ -41,8 +42,9 @@ describe('metric_expression', () => {
   describe('metricChart', () => {
     test('it renders with the specified data and args', () => {
       const { data, args } = sampleArgs();
+      const result = metricChart.fn(data, args, createMockExecutionContext());
 
-      expect(metricChart.fn(data, args, {})).toEqual({
+      expect(result).toEqual({
         type: 'render',
         as: 'lens_metric_chart_renderer',
         value: { data, args },
@@ -55,9 +57,7 @@ describe('metric_expression', () => {
       const { data, args } = sampleArgs();
 
       expect(
-        shallow(
-          <MetricChart data={data} args={args} formatFactory={x => x as fieldFormats.FieldFormat} />
-        )
+        shallow(<MetricChart data={data} args={args} formatFactory={x => x as IFieldFormat} />)
       ).toMatchInlineSnapshot(`
         <VisualizationContainer
           className="lnsMetricExpression__container"
@@ -98,7 +98,7 @@ describe('metric_expression', () => {
           <MetricChart
             data={data}
             args={{ ...args, mode: 'reduced' }}
-            formatFactory={x => x as fieldFormats.FieldFormat}
+            formatFactory={x => x as IFieldFormat}
           />
         )
       ).toMatchInlineSnapshot(`

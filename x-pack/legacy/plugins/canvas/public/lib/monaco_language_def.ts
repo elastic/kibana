@@ -5,11 +5,7 @@
  */
 
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
-
-// @ts-ignore
-import { registries } from 'plugins/interpreter/registries';
-
-import { CanvasFunction } from '../../types';
+import { npSetup } from 'ui/new_platform';
 
 export const LANGUAGE_ID = 'canvas-expression';
 
@@ -99,8 +95,8 @@ export const language: Language = {
 };
 
 export function registerLanguage() {
-  const functions = registries.browserFunctions.toArray();
-  language.keywords = functions.map((fn: CanvasFunction) => fn.name);
+  const functions = Object.values(npSetup.plugins.expressions.getFunctions());
+  language.keywords = functions.map(({ name }) => name);
 
   monaco.languages.register({ id: LANGUAGE_ID });
   monaco.languages.setMonarchTokensProvider(LANGUAGE_ID, language);

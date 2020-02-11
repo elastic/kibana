@@ -18,3 +18,4 @@
  */
 
 export { SearchBar, SearchBarProps } from './search_bar';
+export { StatefulSearchBarProps } from './create_search_bar';
