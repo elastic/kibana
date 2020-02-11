@@ -4,11 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import chrome from 'ui/chrome';
+import { npStart } from 'ui/new_platform';
 import { API_BASE_URL } from '../../common/constants';
 
-export function downloadReport(jobId: string) {
-  const apiBaseUrl = chrome.addBasePath(API_BASE_URL);
+const { core } = npStart;
+
+export function getReportURL(jobId: string) {
+  const apiBaseUrl = core.http.basePath.prepend(API_BASE_URL);
   const downloadLink = `${apiBaseUrl}/jobs/download/${jobId}`;
-  window.open(downloadLink);
+
+  return downloadLink;
+}
+
+export function downloadReport(jobId: string) {
+  const location = getReportURL(jobId);
+
+  window.open(location);
 }
