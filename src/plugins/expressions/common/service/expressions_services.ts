@@ -25,7 +25,7 @@ export type ExpressionsServiceSetup = ReturnType<ExpressionsService['setup']>;
 export type ExpressionsServiceStart = ReturnType<ExpressionsService['start']>;
 
 /**
- * `ExpressionsService` is class is used for multiple purposes:
+ * `ExpressionsService` class is used for multiple purposes:
  *
  * 1. It implements the same Expressions service that can be used on both:
  *    (1) server-side and (2) browser-side.
