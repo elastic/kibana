@@ -35,29 +35,22 @@ export type ObjectTypeOptions<P extends Props = any> = TypeOptions<
 > & {
   /** Should uknown keys not be defined in the schema be allowed. Defaults to `false` */
   allowUnknowns?: boolean;
-  /** Should the `defaultValue` for keys be used if no value is specified. Defaults to `true` */
-  applyDefaults?: boolean;
 };
 
 export class ObjectType<P extends Props = any> extends Type<ObjectResultType<P>> {
   private props: Record<string, AnySchema>;
 
-  constructor(
-    props: P,
-    { allowUnknowns = false, applyDefaults = true, ...typeOptions }: ObjectTypeOptions<P> = {}
-  ) {
+  constructor(props: P, { allowUnknowns = false, ...typeOptions }: ObjectTypeOptions<P> = {}) {
     const schemaKeys = {} as Record<string, AnySchema>;
     for (const [key, value] of Object.entries(props)) {
       schemaKeys[key] = value.getSchema();
     }
-    let schema = internals
+    const schema = internals
       .object()
       .keys(schemaKeys)
+      .default()
+      .optional()
       .unknown(Boolean(allowUnknowns));
-
-    if (applyDefaults) {
-      schema = schema.default().optional();
-    }
 
     super(schema, typeOptions);
     this.props = schemaKeys;
