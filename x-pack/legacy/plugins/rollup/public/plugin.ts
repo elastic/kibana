@@ -39,7 +39,7 @@ export interface RollupPluginSetupDependencies {
     aggTypeFieldFilters: AggTypeFieldFilters;
     addSearchStrategy: (searchStrategy: SearchStrategyProvider) => void;
     managementLegacy: ManagementSetupLegacy;
-    indexManagementExtensions: IndexMgmtSetup['extensions'];
+    indexManagementExtensions: IndexMgmtSetup['extensionsService'];
   };
   home?: HomePublicPluginSetup;
   management: ManagementSetup;
