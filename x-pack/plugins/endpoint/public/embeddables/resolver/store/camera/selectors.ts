@@ -34,32 +34,32 @@ function animationIsActive(animation: CameraAnimationState, time: number): boole
 /**
  * The scale by which world values are scaled when rendered.
  *
- *   When the camera position (translation) is changed programatically, it may be animated.
- *   The duration of the animation is generally fixed for a given type of interaction. This way
- *   the user won't have to wait for a variable amount of time to complete their interaction.
+ * When the camera position (translation) is changed programatically, it may be animated.
+ * The duration of the animation is generally fixed for a given type of interaction. This way
+ * the user won't have to wait for a variable amount of time to complete their interaction.
  *
- *   Since the duration is fixed and the amount that the camera position changes is variable,
- *   the speed at which the camera changes is also variable. If the distance the camera will move
- *   is very far, the camera will move very fast.
+ * Since the duration is fixed and the amount that the camera position changes is variable,
+ * the speed at which the camera changes is also variable. If the distance the camera will move
+ * is very far, the camera will move very fast.
  *
- *   When the camera moves fast, elements will move across the screen quickly. These
- *   quick moving elements can be distracting to the user. They may also hinder the quality of
- *   animation.
+ * When the camera moves fast, elements will move across the screen quickly. These
+ * quick moving elements can be distracting to the user. They may also hinder the quality of
+ * animation.
  *
- *   The speed at which objects move across the screen is dependent on the speed of the camera
- *   as well as the scale. If the scale is high, the camera is zoomed in, and so objects move
- *   across the screen faster at a given camera speed. Think of looking into a telephoto lense
- *   and moving around only a few degrees: many things might pass through your sight.
+ * The speed at which objects move across the screen is dependent on the speed of the camera
+ * as well as the scale. If the scale is high, the camera is zoomed in, and so objects move
+ * across the screen faster at a given camera speed. Think of looking into a telephoto lense
+ * and moving around only a few degrees: many things might pass through your sight.
  *
- *   If the scale is low, the camera is zoomed out, objects look further away, and so they move
- *   across the screen slower at a given camera speed. Therefore we can control the speed at
- *   which objects move across the screen without changing the camera speed. We do this by changing scale.
+ * If the scale is low, the camera is zoomed out, objects look further away, and so they move
+ * across the screen slower at a given camera speed. Therefore we can control the speed at
+ * which objects move across the screen without changing the camera speed. We do this by changing scale.
  *
- *   Changing the scale abruptly isn't acceptable because it would be visually jarring. Also, the
- *   change in scale should be temporary, and the original scale should be resumed after the animation.
+ * Changing the scale abruptly isn't acceptable because it would be visually jarring. Also, the
+ * change in scale should be temporary, and the original scale should be resumed after the animation.
  *
- *   In order to change the scale to lower value, and then back, without being jarring to the user,
- *   we calculate a temporary target scale and animate to it.
+ * In order to change the scale to lower value, and then back, without being jarring to the user,
+ * we calculate a temporary target scale and animate to it.
  *
  */
 export const scale: (state: CameraState) => (time: number) => Vector2 = createSelector(

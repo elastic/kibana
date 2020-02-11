@@ -75,7 +75,8 @@ export type CameraState = {
 } & (
   | {
       /**
-       * Contains the animation start time and target translation.
+       * Contains the animation start time and target translation. This doesn't model the instantaneous
+       * progress of an animation. Instead, animation is model as functions-of-time.
        */
       readonly animation: CameraAnimationState;
       /**

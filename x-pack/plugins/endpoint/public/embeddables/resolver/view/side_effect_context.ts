@@ -7,6 +7,9 @@ import { createContext, Context } from 'react';
 import ResizeObserver from 'resize-observer-polyfill';
 import { SideEffectors } from '../types';
 
+/**
+ * React context that provides 'side-effectors' which we need to mock during testing.
+ */
 const sideEffectors: SideEffectors = {
   timestamp: () => Date.now(),
   requestAnimationFrame(...args) {
@@ -17,4 +20,8 @@ const sideEffectors: SideEffectors = {
   },
   ResizeObserver,
 };
+
+/**
+ * The default values are used in production, tests can provide mock values using `SideEffectSimulator`.
+ */
 export const SideEffectContext: Context<SideEffectors> = createContext(sideEffectors);

@@ -197,32 +197,62 @@ export function useCamera(): {
    * This isn't needed during animation.
    */
   useLayoutEffect(() => {
+    // Update the projection matrix that we return, rerendering any component that uses this.
     setProjectionMatrix(projectionMatrixAtTime(sideEffectors.timestamp()));
   }, [projectionMatrixAtTime, sideEffectors]);
 
-  useLayoutEffect(() => {
-    const startDate = sideEffectors.timestamp();
-    if (isAnimatingAtTime(startDate)) {
-      let rafRef: null | number = null;
-      const handleFrame = () => {
-        const date = sideEffectors.timestamp();
-        if (projectionMatrixAtTimeRef.current !== undefined) {
-          setProjectionMatrix(projectionMatrixAtTimeRef.current(date));
-        }
-        if (isAnimatingAtTime(date)) {
-          rafRef = sideEffectors.requestAnimationFrame(handleFrame);
-        } else {
-          rafRef = null;
-        }
-      };
-      rafRef = sideEffectors.requestAnimationFrame(handleFrame);
-      return () => {
-        if (rafRef !== null) {
-          sideEffectors.cancelAnimationFrame(rafRef);
-        }
-      };
-    }
-  }, [isAnimatingAtTime, sideEffectors]);
+  /**
+   * When animation is happening, run a rAF loop, when it is done, stop.
+   */
+  useLayoutEffect(
+    () => {
+      const startDate = sideEffectors.timestamp();
+      if (isAnimatingAtTime(startDate)) {
+        let rafRef: null | number = null;
+        const handleFrame = () => {
+          // Get the current timestamp, now that the frame is ready
+          const date = sideEffectors.timestamp();
+          if (projectionMatrixAtTimeRef.current !== undefined) {
+            // Update the projection matrix, triggering a rerender
+            setProjectionMatrix(projectionMatrixAtTimeRef.current(date));
+          }
+          // If we are still animating, request another frame, continuing the loop
+          if (isAnimatingAtTime(date)) {
+            rafRef = sideEffectors.requestAnimationFrame(handleFrame);
+          } else {
+            /**
+             * `isAnimatingAtTime` was false, meaning that the animation is complete.
+             * Do not request another animation frame.
+             */
+            rafRef = null;
+          }
+        };
+        // Kick off the loop by requestion an animation frame
+        rafRef = sideEffectors.requestAnimationFrame(handleFrame);
+
+        /**
+         * This function cancels the animation frame request. The cancel function
+         * will occur when the component is unmounted. It will also occur when a dependency
+         * changes.
+         *
+         * The `isAnimatingAtTime` dependency will be changed if the animation state changes. The animation
+         * state only changes when the user animates again (e.g. brings a different node into view, or nudges the
+         * camera.)
+         */
+        return () => {
+          // Cancel the animation frame.
+          if (rafRef !== null) {
+            sideEffectors.cancelAnimationFrame(rafRef);
+          }
+        };
+      }
+    },
+    /**
+     * `isAnimatingAtTime` is a function created with `reselect`. The function reference will be changed when
+     * the animation state changes. When the function reference has changed, you *might* be animating.
+     */
+    [isAnimatingAtTime, sideEffectors]
+  );
 
   useEffect(() => {
     if (elementBoundingClientRect !== null) {

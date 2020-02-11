@@ -31,6 +31,7 @@ export const inverseProjectionMatrix = composeSelectors(
 
 /**
  * The scale by which world values are scaled when rendered.
+ * TODO make it a number
  */
 export const scale = composeSelectors(cameraStateSelector, cameraSelectors.scale);
 

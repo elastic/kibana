@@ -73,8 +73,8 @@ describe('when the camera is created', () => {
       store.dispatch(action);
     });
     describe('when the animation is in progress', () => {
-      let translationAtIntervals: readonly Vector2[];
-      let scaleAtIntervals: readonly Vector2[];
+      let translationAtIntervals: Vector2[];
+      let scaleAtIntervals: Vector2[];
       beforeEach(() => {
         translationAtIntervals = [];
         scaleAtIntervals = [];
