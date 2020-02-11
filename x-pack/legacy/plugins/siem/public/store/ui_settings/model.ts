@@ -47,7 +47,7 @@ export interface State {
   timeZone: string;
 }
 
-export const Keys = {
+export const keys = {
   bytesFormat: DEFAULT_BYTES_FORMAT,
   darkMode: DEFAULT_DARK_MODE,
   dateFormat: DEFAULT_DATE_FORMAT,
