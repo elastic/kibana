@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PluginInitializerContext } from 'src/core/server';
-import { IndexMgmtServerPlugin } from './plugin';
+import * as legacyElasticsearch from 'elasticsearch';
 
-export const plugin = (ctx: PluginInitializerContext) => new IndexMgmtServerPlugin(ctx);
+const esErrorsParent = legacyElasticsearch.errors._Abstract;
 
-export { Dependencies } from './types';
+export function isEsError(err: Error) {
+  return err instanceof esErrorsParent;
+}
