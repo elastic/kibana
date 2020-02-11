@@ -262,6 +262,7 @@ export class LegacyService implements CoreService {
         getScopedClient: startDeps.core.savedObjects.getScopedClient,
         createScopedRepository: startDeps.core.savedObjects.createScopedRepository,
         createInternalRepository: startDeps.core.savedObjects.createInternalRepository,
+        createSerializer: startDeps.core.savedObjects.createSerializer,
       },
       uiSettings: { asScopedToClient: startDeps.core.uiSettings.asScopedToClient },
     };
@@ -292,6 +293,7 @@ export class LegacyService implements CoreService {
         },
         csp: setupDeps.core.http.csp,
         isTlsEnabled: setupDeps.core.http.isTlsEnabled,
+        getServerInfo: setupDeps.core.http.getServerInfo,
       },
       savedObjects: {
         setClientFactoryProvider: setupDeps.core.savedObjects.setClientFactoryProvider,
@@ -327,6 +329,7 @@ export class LegacyService implements CoreService {
         __internals: {
           hapiServer: setupDeps.core.http.server,
           kibanaMigrator: startDeps.core.savedObjects.migrator,
+          typeRegistry: startDeps.core.savedObjects.typeRegistry,
           uiPlugins: setupDeps.core.plugins.uiPlugins,
           elasticsearch: setupDeps.core.elasticsearch,
           rendering: setupDeps.core.rendering,

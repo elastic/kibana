@@ -4,20 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IWaterfallItem } from '../../Waterfall/waterfall_helpers/waterfall_helpers';
+import { IWaterfallError } from '../../Waterfall/waterfall_helpers/waterfall_helpers';
 import { getErrorMarks } from '../get_error_marks';
 
 describe('getErrorMarks', () => {
   describe('returns empty array', () => {
     it('when items are missing', () => {
       expect(getErrorMarks([], {})).toEqual([]);
-    });
-    it('when any error is available', () => {
-      const items = [
-        { docType: 'span' },
-        { docType: 'transaction' }
-      ] as IWaterfallItem[];
-      expect(getErrorMarks(items, {})).toEqual([]);
     });
   });
 
@@ -29,14 +22,13 @@ describe('getErrorMarks', () => {
         skew: 5,
         doc: { error: { id: 1 }, service: { name: 'opbeans-java' } }
       } as unknown,
-      { docType: 'transaction' },
       {
         docType: 'error',
         offset: 50,
         skew: 0,
         doc: { error: { id: 2 }, service: { name: 'opbeans-node' } }
       } as unknown
-    ] as IWaterfallItem[];
+    ] as IWaterfallError[];
     expect(
       getErrorMarks(items, { 'opbeans-java': 'red', 'opbeans-node': 'blue' })
     ).toEqual([
@@ -67,14 +59,13 @@ describe('getErrorMarks', () => {
         skew: 5,
         doc: { error: { id: 1 }, service: { name: 'opbeans-java' } }
       } as unknown,
-      { docType: 'transaction' },
       {
         docType: 'error',
         offset: 50,
         skew: 0,
         doc: { error: { id: 2 }, service: { name: 'opbeans-node' } }
       } as unknown
-    ] as IWaterfallItem[];
+    ] as IWaterfallError[];
     expect(getErrorMarks(items, {})).toEqual([
       {
         type: 'errorMark',

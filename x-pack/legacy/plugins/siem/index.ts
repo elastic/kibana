@@ -5,6 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { get } from 'lodash/fp';
 import { resolve } from 'path';
 import { Server } from 'hapi';
 import { Root } from 'joi';
@@ -155,6 +156,9 @@ export const siem = (kibana: any) => {
       const initializerContext = { ...coreContext, env } as PluginInitializerContext;
       const serverFacade = {
         config,
+        usingEphemeralEncryptionKey:
+          get('usingEphemeralEncryptionKey', newPlatform.setup.plugins.encryptedSavedObjects) ??
+          false,
         plugins: {
           alerting: plugins.alerting,
           actions: newPlatform.start.plugins.actions,

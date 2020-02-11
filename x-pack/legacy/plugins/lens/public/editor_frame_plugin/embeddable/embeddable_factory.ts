@@ -10,7 +10,7 @@ import { Chrome } from 'ui/chrome';
 import { capabilities } from 'ui/capabilities';
 import { i18n } from '@kbn/i18n';
 import { IndexPatternsContract, IndexPattern } from '../../../../../../../src/plugins/data/public';
-import { ExpressionRenderer } from '../../../../../../../src/plugins/expressions/public';
+import { ReactExpressionRendererType } from '../../../../../../../src/plugins/expressions/public';
 import {
   EmbeddableFactory as AbstractEmbeddableFactory,
   ErrorEmbeddable,
@@ -19,18 +19,18 @@ import {
 } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
 import { Embeddable } from './embeddable';
 import { SavedObjectIndexStore, DOC_TYPE } from '../../persistence';
-import { getEditPath } from '../../../common';
+import { getEditPath } from '../../../../../../plugins/lens/common';
 
 export class EmbeddableFactory extends AbstractEmbeddableFactory {
   type = DOC_TYPE;
 
   private chrome: Chrome;
   private indexPatternService: IndexPatternsContract;
-  private expressionRenderer: ExpressionRenderer;
+  private expressionRenderer: ReactExpressionRendererType;
 
   constructor(
     chrome: Chrome,
-    expressionRenderer: ExpressionRenderer,
+    expressionRenderer: ReactExpressionRendererType,
     indexPatternService: IndexPatternsContract
   ) {
     super({

@@ -11,7 +11,7 @@ import { AlertTypeRegistry, SpaceIdToNamespaceFunction } from './types';
 import { SecurityPluginStartContract } from './shim';
 import { KibanaRequest, Logger } from '../../../../../src/core/server';
 import { InvalidateAPIKeyParams } from '../../../../plugins/security/server';
-import { PluginStartContract as EncryptedSavedObjectsStartContract } from '../../../../plugins/encrypted_saved_objects/server';
+import { EncryptedSavedObjectsPluginStart } from '../../../../plugins/encrypted_saved_objects/server';
 import { TaskManagerStartContract } from '../../../../plugins/task_manager/server';
 
 export interface ConstructorOpts {
@@ -21,7 +21,7 @@ export interface ConstructorOpts {
   securityPluginSetup?: SecurityPluginStartContract;
   getSpaceId: (request: Hapi.Request) => string | undefined;
   spaceIdToNamespace: SpaceIdToNamespaceFunction;
-  encryptedSavedObjectsPlugin: EncryptedSavedObjectsStartContract;
+  encryptedSavedObjectsPlugin: EncryptedSavedObjectsPluginStart;
 }
 
 export class AlertsClientFactory {
@@ -31,7 +31,7 @@ export class AlertsClientFactory {
   private readonly securityPluginSetup?: SecurityPluginStartContract;
   private readonly getSpaceId: (request: Hapi.Request) => string | undefined;
   private readonly spaceIdToNamespace: SpaceIdToNamespaceFunction;
-  private readonly encryptedSavedObjectsPlugin: EncryptedSavedObjectsStartContract;
+  private readonly encryptedSavedObjectsPlugin: EncryptedSavedObjectsPluginStart;
 
   constructor(options: ConstructorOpts) {
     this.logger = options.logger;

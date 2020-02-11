@@ -11,8 +11,7 @@ import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
 import { ActionCreator } from 'typescript-fsa';
 
-import { esFilters, esQuery } from '../../../../../../../../../src/plugins/data/common/es_query';
-import { Query } from '../../../../../../../../../src/plugins/data/common/query';
+import { esFilters, esQuery, Query } from '../../../../../../../../../src/plugins/data/public';
 import { useFetchIndexPatterns } from '../../../../containers/detection_engine/rules/fetch_index_patterns';
 import { StatefulEventsViewer } from '../../../../components/events_viewer';
 import { HeaderSection } from '../../../../components/header_section';
@@ -129,7 +128,9 @@ const SignalsTableComponent: React.FC<SignalsTableComponentProps> = ({
         dataProviders: [],
         indexPattern: indexPatterns,
         browserFields,
-        filters: globalFilters,
+        filters: isEmpty(defaultFilters)
+          ? globalFilters
+          : [...(defaultFilters ?? []), ...globalFilters],
         kqlQuery: globalQuery,
         kqlMode: globalQuery.language,
         start: from,

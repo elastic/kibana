@@ -56,7 +56,6 @@ export class RollupIndexPatternCreationConfig extends IndexPatternCreationConfig
     this.rollupJobs = [];
     this.rollupIndicesCapabilities = {};
     this.rollupIndices = [];
-    this.settingUp = this.setRollupIndices();
   }
 
   async setRollupIndices() {
@@ -77,7 +76,7 @@ export class RollupIndexPatternCreationConfig extends IndexPatternCreationConfig
   }
 
   async getIndexPatternCreationOption(urlHandler) {
-    await this.settingUp;
+    await this.setRollupIndices();
     return this.rollupIndices && this.rollupIndices.length
       ? {
           text: rollupIndexPatternButtonText,

@@ -9,10 +9,8 @@ import PropTypes from 'prop-types';
 import { EuiFormRow } from '@elastic/eui';
 import { debounce } from 'lodash';
 import * as monacoEditor from 'monaco-editor/esm/vs/editor/editor.api';
-
+import { ExpressionFunction } from '../../../../../../../src/plugins/expressions';
 import { CodeEditor } from '../../../../../../../src/plugins/kibana_react/public';
-
-import { CanvasFunction } from '../../../types';
 import {
   AutocompleteSuggestion,
   getAutocompleteSuggestions,
@@ -27,7 +25,7 @@ interface Props {
   /** Font size of text within the editor */
 
   /** Canvas function defintions */
-  functionDefinitions: CanvasFunction[];
+  functionDefinitions: ExpressionFunction[];
 
   /** Optional string for displaying error messages */
   error?: string;

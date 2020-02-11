@@ -26,16 +26,26 @@ export function registerEndpointRoutes(router: IRouter, endpointAppContext: Endp
       validate: {
         body: schema.nullable(
           schema.object({
-            paging_properties: schema.arrayOf(
-              schema.oneOf([
-                // the number of results to return for this request per page
-                schema.object({
-                  page_size: schema.number({ defaultValue: 10, min: 1, max: 10000 }),
-                }),
-                // the index of the page to return
-                schema.object({ page_index: schema.number({ defaultValue: 0, min: 0 }) }),
-              ])
+            paging_properties: schema.nullable(
+              schema.arrayOf(
+                schema.oneOf([
+                  /**
+                   * the number of results to return for this request per page
+                   */
+                  schema.object({
+                    page_size: schema.number({ defaultValue: 10, min: 1, max: 10000 }),
+                  }),
+                  /**
+                   * the zero based page index of the the total number of pages of page size
+                   */
+                  schema.object({ page_index: schema.number({ defaultValue: 0, min: 0 }) }),
+                ])
+              )
             ),
+            /**
+             * filter to be applied, it could be a kql expression or discrete filter to be implemented
+             */
+            filter: schema.nullable(schema.oneOf([schema.string()])),
           })
         ),
       },

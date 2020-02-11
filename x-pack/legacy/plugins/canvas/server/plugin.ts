@@ -10,11 +10,5 @@ import { functions } from '../canvas_plugin_src/functions/server';
 export class Plugin {
   public setup(core: CoreSetup, plugins: PluginsSetup) {
     plugins.interpreter.register({ serverFunctions: functions });
-
-    core.injectUiAppVars('canvas', async () => {
-      return {
-        ...plugins.kibana.injectedUiAppVars,
-      };
-    });
   }
 }
