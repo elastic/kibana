@@ -30,12 +30,12 @@ const breadcrumbs = [
 
 export const jobListRoute: MlRoute = {
   path: '/jobs',
-  render: (props, config, deps) => <PageWrapper config={config} {...props} deps={deps} />,
+  render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs,
 };
 
-const PageWrapper: FC<PageProps> = ({ config, deps }) => {
-  const { context } = useResolver(undefined, undefined, config, basicResolvers(deps));
+const PageWrapper: FC<PageProps> = ({ deps }) => {
+  const { context } = useResolver(undefined, undefined, deps.config, basicResolvers(deps));
 
   const [globalState, setGlobalState] = useUrlState('_g');
 
