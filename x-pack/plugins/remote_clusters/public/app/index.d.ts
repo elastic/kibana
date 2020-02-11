@@ -4,6 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const PLUGIN = {
-  ID: 'remote_clusters',
-};
+import { RegisterManagementAppArgs, I18nStart } from '../types';
+
+export declare const renderApp: (
+  elem: HTMLElement | null,
+  I18nContext: I18nStart['Context']
+) => ReturnType<RegisterManagementAppArgs['mount']>;
