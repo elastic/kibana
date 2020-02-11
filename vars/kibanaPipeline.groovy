@@ -210,10 +210,9 @@ def uploadCoverageStaticSite(timestamp) {
 
 def uploadCoverageStaticSite_PROD(timestamp) {
   def ARTIFACT_PATTERNS = [
-    'target/kibana-*/**/*.png',
-    'target/kibana-*/**/*.css',
-    'target/kibana-*/**/*.html',
-    'target/kibana-*/**/*.js',
+    'target/kibana-coverage/functional-combined',
+    'target/kibana-coverage/jest-combined',
+    'target/kibana-coverage/mocha-combined'
   ]
 
   def uploadPrefix = "elastic-bekitzur-kibana-coverage-live/jobs/${env.JOB_NAME}/${BUILD_NUMBER}/${timestamp}"
