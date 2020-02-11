@@ -8,7 +8,7 @@ export { loadClusters, addCluster, editCluster, removeClusterRequest } from './a
 
 export { showApiError, showApiWarning } from './api_errors';
 
-export { setRedirect, redirect } from './redirect';
+export { initRedirect, redirect } from './redirect';
 
 export { isSeedNodeValid, isSeedNodePortValid } from './validate_seed_node';
 

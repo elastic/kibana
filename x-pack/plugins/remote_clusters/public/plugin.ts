@@ -5,12 +5,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CoreSetup, Plugin } from 'kibana/public';
+import { CoreSetup, Plugin, CoreStart } from 'kibana/public';
 import { init as initBreadcrumbs } from './app/services/breadcrumb';
 import { init as initDocumentation } from './app/services/documentation';
 import { init as initHttp } from './app/services/http';
 import { init as initUiMetric } from './app/services/ui_metric';
 import { init as initNotification } from './app/services/notification';
+import { init as initRedirect } from './app/services/redirect';
 import { Dependencies } from './types';
 
 export class RemoteClustersUIPlugin implements Plugin<void, void, Dependencies, any> {
@@ -46,7 +47,9 @@ export class RemoteClustersUIPlugin implements Plugin<void, void, Dependencies, 
     });
   }
 
-  start() {}
+  start({ application }: CoreStart) {
+    initRedirect(application.navigateToApp);
+  }
 
   stop() {}
 }
