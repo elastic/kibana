@@ -23,6 +23,7 @@ Table of Contents
 		- [`DELETE /api/alert/{id}`: Delete alert](#delete-apialertid-delete-alert)
 		- [`GET /api/alert/_find`: Find alerts](#get-apialertfind-find-alerts)
 		- [`GET /api/alert/{id}`: Get alert](#get-apialertid-get-alert)
+		- [`GET /api/alert/{id}/state`: Get alert state](#get-apialertidstate-get-alert-state)
 		- [`GET /api/alert/types`: List alert types](#get-apialerttypes-list-alert-types)
 		- [`PUT /api/alert/{id}`: Update alert](#put-apialertid-update-alert)
 		- [`POST /api/alert/{id}/_enable`: Enable an alert](#post-apialertidenable-enable-an-alert)
@@ -272,6 +273,14 @@ Params:
 |Property|Description|Type|
 |---|---|---|
 |id|The id of the alert you're trying to get.|string|
+
+### `GET /api/alert/{id}/state`: Get alert state
+
+Params:
+
+|Property|Description|Type|
+|---|---|---|
+|id|The id of the alert whose state you're trying to get.|string|
 
 ### `GET /api/alert/types`: List alert types
 
