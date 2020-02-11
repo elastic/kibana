@@ -128,7 +128,6 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramProps &
       filterQuery,
       histogramType,
       startDate,
-      title,
       isInspected,
       stackByField: selectedStackByOption.value,
     }

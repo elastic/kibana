@@ -36,7 +36,7 @@ export interface MatrixHistogramBasicProps {
   startDate: number;
   stackByOptions: MatrixHistogramOption[];
   subtitle?: string | GetSubTitle;
-  title?: string;
+  title?: string | GetTitle;
   updateDateRange: UpdateDateRange;
 }
 
@@ -48,7 +48,6 @@ export interface MatrixHistogramQueryProps {
   filterQuery?: ESQuery | string | undefined;
   stackByField: string;
   startDate: number;
-  title: string | GetTitle;
   isInspected: boolean;
   histogramType: HistogramType;
 }
