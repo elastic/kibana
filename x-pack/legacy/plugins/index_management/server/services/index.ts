@@ -4,9 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PluginInitializerContext } from 'src/core/server';
-import { IndexMgmtServerPlugin } from './plugin';
+export { License } from './license';
 
-export const plugin = (ctx: PluginInitializerContext) => new IndexMgmtServerPlugin(ctx);
-
-export { Dependencies } from './types';
+export { IndexDataEnricher, Enricher } from './index_data_enricher';

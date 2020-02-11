@@ -4,9 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PluginInitializerContext } from 'src/core/server';
-import { IndexMgmtServerPlugin } from './plugin';
+import { API_BASE_PATH } from '../../../common';
 
-export const plugin = (ctx: PluginInitializerContext) => new IndexMgmtServerPlugin(ctx);
-
-export { Dependencies } from './types';
+export const addBasePath = (uri: string): string => API_BASE_PATH + uri;
