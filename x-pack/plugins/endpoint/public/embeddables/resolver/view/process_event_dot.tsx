@@ -75,20 +75,6 @@ export const ProcessEventDot = styled(
 
           {magFactorX >= 1.75 ? (
             <>
-              <mask id={maskHref}>
-                <rect fill="#fff" x="-15" y="-5" width="30" height="10" />
-                <rect fill="#000" x="-15" y="-5" width="30" height="10" opacity="1">
-                  <animate
-                    attributeName="x"
-                    from="-15"
-                    to="15"
-                    begin="DOMNodeInsertedIntoDocument"
-                    dur="1.5s"
-                    fill="freeze"
-                    repeatCount="1"
-                  />
-                </rect>
-              </mask>
               <text
                 x="0"
                 y="-2.1"
@@ -99,7 +85,6 @@ export const ProcessEventDot = styled(
                 stroke="#999"
                 strokeWidth=".25"
                 paintOrder="stroke"
-                mask={`url(#${maskHref})`}
               >
                 Process
               </text>
@@ -107,20 +92,6 @@ export const ProcessEventDot = styled(
           ) : null}
           {magFactorX >= 2.75 && event.data_buffer.signature_status !== 'trusted' ? (
             <>
-              <mask id={`${maskHref}_trusted`}>
-                <rect fill="#fff" x="-15" y="-5" width="30" height="10" />
-                <rect fill="#000" x="-15" y="-5" width="30" height="10" opacity="1">
-                  <animate
-                    attributeName="x"
-                    from="-15"
-                    to="15"
-                    begin="DOMNodeInsertedIntoDocument"
-                    dur="1.5s"
-                    fill="freeze"
-                    repeatCount="1"
-                  />
-                </rect>
-              </mask>
               <text
                 x="0"
                 y="2.45"
@@ -131,7 +102,6 @@ export const ProcessEventDot = styled(
                 stroke="#777"
                 strokeWidth=".25"
                 paintOrder="stroke"
-                mask={`url(#${`${maskHref}_trusted`})`}
               >
                 No Trusted Signature
               </text>
