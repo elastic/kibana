@@ -22,7 +22,7 @@ import { last } from 'lodash';
 import { Conversion } from './type';
 import { LogRecord } from '../../log_record';
 
-const timestampRegExp = /{timestamp({(?<format>[^}]+)})?({(?<timezone>[^}]+)})?}/gi;
+const timestampRegExp = /{timestamp({(?<format>[^}]+)})?({(?<timezone>[^}]+)})?}/g;
 
 const formats = {
   ISO8601: 'ISO8601',
@@ -54,10 +54,11 @@ function formatDate(date: Date, dateFormat: string = formats.ISO8601, timezone?:
 }
 
 function validateDateFormat(input: string) {
-  if (Reflect.has(formats, input)) return;
-  throw new Error(
-    `Date format expected one of ${Reflect.ownKeys(formats).join(', ')}, but given: ${input}`
-  );
+  if (!Reflect.has(formats, input)) {
+    throw new Error(
+      `Date format expected one of ${Reflect.ownKeys(formats).join(', ')}, but given: ${input}`
+    );
+  }
 }
 
 function validateTimezone(timezone: string) {
@@ -80,7 +81,7 @@ function validate(rawString: string) {
 
 export const TimestampConversion: Conversion = {
   pattern: timestampRegExp,
-  formatter(record: LogRecord, highlight: boolean, ...matched: any[]) {
+  convert(record: LogRecord, highlight: boolean, ...matched: any[]) {
     const groups: Record<string, string | undefined> = last(matched);
     const { format, timezone } = groups;
 

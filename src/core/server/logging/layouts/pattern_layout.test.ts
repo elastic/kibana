@@ -134,7 +134,7 @@ test('`format()` correctly formats record with meta data.', () => {
         to: 'v8',
       },
     })
-  ).toBe('[2012-02-01T14:30:22.011Z][DEBUG][context-meta][{"from":"v7","to":"v8"}] message-meta');
+  ).toBe('[2012-02-01T14:30:22.011Z][DEBUG][context-meta]{"from":"v7","to":"v8"} message-meta');
 
   expect(
     layout.format({
@@ -145,7 +145,7 @@ test('`format()` correctly formats record with meta data.', () => {
       pid: 5355,
       meta: {},
     })
-  ).toBe('[2012-02-01T14:30:22.011Z][DEBUG][context-meta][{}] message-meta');
+  ).toBe('[2012-02-01T14:30:22.011Z][DEBUG][context-meta]{} message-meta');
 
   expect(
     layout.format({
@@ -187,7 +187,7 @@ test('`format()` allows specifying pattern with meta.', () => {
       to: 'v8',
     },
   };
-  expect(layout.format(record)).toBe('context-[{"from":"v7","to":"v8"}]-message');
+  expect(layout.format(record)).toBe('context-{"from":"v7","to":"v8"}-message');
 });
 
 describe('format', () => {

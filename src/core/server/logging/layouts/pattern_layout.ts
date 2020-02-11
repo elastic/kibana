@@ -21,14 +21,15 @@ import { schema, TypeOf } from '@kbn/config-schema';
 
 import { LogRecord } from '../log_record';
 import { Layout } from './layouts';
-
-import { Conversion } from './conversions/type';
-import { ContextConversion } from './conversions/context';
-import { LevelConversion } from './conversions/level';
-import { MetaConversion } from './conversions/meta';
-import { MessageConversion } from './conversions/message';
-import { PidConversion } from './conversions/pid';
-import { TimestampConversion } from './conversions/timestamp';
+import {
+  Conversion,
+  ContextConversion,
+  LevelConversion,
+  MetaConversion,
+  MessageConversion,
+  PidConversion,
+  TimestampConversion,
+} from './conversions';
 
 /**
  * Default pattern used by PatternLayout if it's not overridden in the configuration.
@@ -77,7 +78,7 @@ export class PatternLayout implements Layout {
     for (const conversion of conversions) {
       recordString = recordString.replace(
         conversion.pattern,
-        conversion.formatter.bind(null, record, this.highlight)
+        conversion.convert.bind(null, record, this.highlight)
       );
     }
 

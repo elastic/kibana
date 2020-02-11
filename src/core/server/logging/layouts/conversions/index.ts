@@ -16,19 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+export { Conversion } from './type';
 
-import chalk from 'chalk';
-
-import { Conversion } from './type';
-import { LogRecord } from '../../log_record';
-
-export const ContextConversion: Conversion = {
-  pattern: /{context}/g,
-  convert(record: LogRecord, highlight: boolean) {
-    let message = record.context;
-    if (highlight) {
-      message = chalk.magenta(message);
-    }
-    return message;
-  },
-};
+export { ContextConversion } from './context';
+export { LevelConversion } from './level';
+export { MessageConversion } from './message';
+export { MetaConversion } from './meta';
+export { PidConversion } from './pid';
+export { TimestampConversion } from './timestamp';
