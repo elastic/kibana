@@ -15,14 +15,12 @@ import * as selectors from '../store/selectors';
 import { storeFactory } from '../store';
 import {
   Matrix3,
-  SideEffectors,
   ResolverMiddleware,
   ResolverAction,
   ResolverStore,
   ProcessEvent,
   SideEffectSimulator,
 } from '../types';
-import { MockResizeObserver } from './mock_resize_observer';
 import { SideEffectContext } from './side_effect_context';
 import { applyMatrix3 } from '../lib/vector2';
 import { sideEffectSimulator } from './side_effect_simulator';
@@ -32,12 +30,9 @@ describe('useCamera on an unpainted element', () => {
   let projectionMatrix: Matrix3;
   const testID = 'camera';
   let reactRenderResult: RenderResult;
-  let simulateElementResize: (target: Element, contentRect: DOMRect) => void;
   let actions: ResolverAction[];
   let store: ResolverStore;
-  let sideEffectors: jest.Mocked<Omit<SideEffectors, 'ResizeObserver'>> &
-    Pick<SideEffectors, 'ResizeObserver'>;
-  let controls: SideEffectSimulator['controls'];
+  let simulator: SideEffectSimulator;
   beforeEach(async () => {
     actions = [];
     const middleware: ResolverMiddleware = () => next => action => {
@@ -53,29 +48,16 @@ describe('useCamera on an unpainted element', () => {
       return <div data-testid={testID} onMouseDown={onMouseDown} ref={ref} />;
     };
 
-    jest
-      .spyOn(Element.prototype, 'getBoundingClientRect')
-      .mockImplementation(function(this: Element) {
-        return MockResizeObserver.contentRectForElement(this);
-      });
-
-    const simulator = sideEffectSimulator();
-    controls = simulator.controls;
-
-    sideEffectors = {
-      ...simulator.mock,
-      ResizeObserver: MockResizeObserver,
-    };
+    simulator = sideEffectSimulator();
 
     reactRenderResult = render(
       <Provider store={store}>
-        <SideEffectContext.Provider value={sideEffectors}>
+        <SideEffectContext.Provider value={simulator.mock}>
           <Test />
         </SideEffectContext.Provider>
       </Provider>
     );
 
-    simulateElementResize = MockResizeObserver.simulateElementResize;
     const { findByTestId } = reactRenderResult;
     element = await findByTestId(testID);
   });
@@ -97,7 +79,7 @@ describe('useCamera on an unpainted element', () => {
     const centerY = height / 2 + topMargin;
     beforeEach(() => {
       act(() => {
-        simulateElementResize(element, {
+        simulator.controls.simulateElementResize(element, {
           width,
           height,
           left: leftMargin,
@@ -162,7 +144,7 @@ describe('useCamera on an unpainted element', () => {
 
     // TODO, move to new module
     it('should not initially request an animation frame', () => {
-      expect(sideEffectors.requestAnimationFrame).not.toHaveBeenCalled();
+      expect(simulator.mock.requestAnimationFrame).not.toHaveBeenCalled();
     });
     describe('when the camera begins animation', () => {
       let process: ProcessEvent;
@@ -176,11 +158,11 @@ describe('useCamera on an unpainted element', () => {
             .processNodePositions.keys(),
         ];
         process = processes[processes.length - 1];
-        controls.time = 0;
+        simulator.controls.time = 0;
         const action: ResolverAction = {
           type: 'userBroughtProcessIntoView',
           payload: {
-            time: controls.time,
+            time: simulator.controls.time,
             process,
           },
         };
@@ -191,18 +173,18 @@ describe('useCamera on an unpainted element', () => {
       });
 
       it('should request animation frames in a loop', () => {
-        expect(sideEffectors.requestAnimationFrame).toHaveBeenCalledTimes(1);
-        controls.time = 100;
-        controls.provideAnimationFrame();
-        expect(sideEffectors.requestAnimationFrame).toHaveBeenCalledTimes(2);
-        controls.time = 900;
-        controls.provideAnimationFrame();
-        expect(sideEffectors.requestAnimationFrame).toHaveBeenCalledTimes(3);
+        expect(simulator.mock.requestAnimationFrame).toHaveBeenCalledTimes(1);
+        simulator.controls.time = 100;
+        simulator.controls.provideAnimationFrame();
+        expect(simulator.mock.requestAnimationFrame).toHaveBeenCalledTimes(2);
+        simulator.controls.time = 900;
+        simulator.controls.provideAnimationFrame();
+        expect(simulator.mock.requestAnimationFrame).toHaveBeenCalledTimes(3);
         // Animation lasts 1000ms, so this should end it
-        controls.time = 1001;
-        controls.provideAnimationFrame();
+        simulator.controls.time = 1001;
+        simulator.controls.provideAnimationFrame();
         // Doesn't ask again, still 3
-        expect(sideEffectors.requestAnimationFrame).toHaveBeenCalledTimes(3);
+        expect(simulator.mock.requestAnimationFrame).toHaveBeenCalledTimes(3);
       });
     });
   });

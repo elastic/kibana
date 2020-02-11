@@ -260,8 +260,9 @@ export interface SideEffectSimulator {
   controls: {
     time: number;
     provideAnimationFrame: () => void;
+    simulateElementResize: (element: Element, contentRect: DOMRect) => void;
   };
-  mock: Pick<MockSideEffectors, 'requestAnimationFrame' | 'cancelAnimationFrame' | 'timestamp'>;
+  mock: MockSideEffectors;
 }
 
 export type ResolverMiddleware = Middleware<{}, ResolverState, Dispatch<ResolverAction>>;
