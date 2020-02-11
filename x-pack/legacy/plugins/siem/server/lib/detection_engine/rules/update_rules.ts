@@ -4,15 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { defaults } from 'lodash/fp';
 import { PartialAlert } from '../../../../../alerting/server/types';
 import { readRules } from './read_rules';
-import { PatchRuleParams, IRuleSavedAttributesSavedObjectAttributes } from './types';
+import { IRuleSavedAttributesSavedObjectAttributes, UpdateRuleParams } from './types';
 import { addTags } from './add_tags';
 import { ruleStatusSavedObjectType } from './saved_object_mappings';
-import { calculateVersion, calculateName, calculateInterval } from './utils';
+import { calculateVersion } from './utils';
 
-export const patchRules = async ({
+export const updateRules = async ({
   alertsClient,
   actionsClient, // TODO: Use this whenever we add feature support for different action types
   savedObjectsClient,
@@ -43,7 +42,7 @@ export const patchRules = async ({
   type,
   references,
   version,
-}: PatchRuleParams): Promise<PartialAlert | null> => {
+}: UpdateRuleParams): Promise<PartialAlert | null> => {
   const rule = await readRules({ alertsClient, ruleId, id });
   if (rule == null) {
     return null;
@@ -75,45 +74,37 @@ export const patchRules = async ({
     version,
   });
 
-  const nextParams = defaults(
-    {
-      ...rule.params,
-    },
-    {
-      description,
-      falsePositives,
-      from,
-      immutable,
-      query,
-      language,
-      outputIndex,
-      savedId,
-      timelineId,
-      timelineTitle,
-      meta,
-      filters,
-      index,
-      maxSignals,
-      riskScore,
-      severity,
-      threat,
-      to,
-      type,
-      references,
-      version: calculatedVersion,
-    }
-  );
-
   const update = await alertsClient.update({
     id: rule.id,
     data: {
-      tags: addTags(tags ?? rule.tags, rule.params.ruleId, immutable ?? rule.params.immutable),
-      name: calculateName({ updatedName: name, originalName: rule.name }),
-      schedule: {
-        interval: calculateInterval(interval, rule.schedule.interval),
-      },
+      tags: addTags(tags, rule.params.ruleId, immutable),
+      name,
+      schedule: { interval },
       actions: rule.actions,
-      params: nextParams,
+      params: {
+        description,
+        ruleId: rule.params.ruleId,
+        falsePositives,
+        from,
+        immutable,
+        query,
+        language,
+        outputIndex,
+        savedId,
+        timelineId,
+        timelineTitle,
+        meta,
+        filters,
+        index,
+        maxSignals,
+        riskScore,
+        severity,
+        threat,
+        to,
+        type,
+        references,
+        version: calculatedVersion,
+      },
     },
   });
 
@@ -139,13 +130,7 @@ export const patchRules = async ({
         ...currentStatusToDisable.attributes,
       });
     }
-  } else {
-    // enabled is null or undefined and we do not touch the rule
   }
 
-  if (enabled != null) {
-    return { ...update, enabled };
-  } else {
-    return update;
-  }
+  return { ...update, enabled };
 };

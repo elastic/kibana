@@ -8,20 +8,20 @@ import Hapi from 'hapi';
 import { isFunction } from 'lodash/fp';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import {
-  BulkPatchRulesRequest,
+  BulkUpdateRulesRequest,
   IRuleSavedAttributesSavedObjectAttributes,
 } from '../../rules/types';
 import { ServerFacade } from '../../../../types';
 import { transformOrBulkError, getIdBulkError } from './utils';
-import { transformBulkError } from '../utils';
-import { patchRulesBulkSchema } from '../schemas/patch_rules_bulk_schema';
-import { patchRules } from '../../rules/patch_rules';
+import { transformBulkError, getIndex } from '../utils';
+import { updateRulesBulkSchema } from '../schemas/update_rules_bulk_schema';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
 import { KibanaRequest } from '../../../../../../../../../src/core/server';
+import { updateRules } from '../../rules/update_rules';
 
-export const createPatchRulesBulkRoute = (server: ServerFacade): Hapi.ServerRoute => {
+export const createUpdateRulesBulkRoute = (server: ServerFacade): Hapi.ServerRoute => {
   return {
-    method: 'PATCH',
+    method: 'PUT',
     path: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
     options: {
       tags: ['access:siem'],
@@ -29,10 +29,10 @@ export const createPatchRulesBulkRoute = (server: ServerFacade): Hapi.ServerRout
         options: {
           abortEarly: false,
         },
-        payload: patchRulesBulkSchema,
+        payload: updateRulesBulkSchema,
       },
     },
-    async handler(request: BulkPatchRulesRequest, headers) {
+    async handler(request: BulkUpdateRulesRequest, headers) {
       const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
       const actionsClient = await server.plugins.actions.getActionsClientWithRequest(
         KibanaRequest.from((request as unknown) as Hapi.Request)
@@ -74,18 +74,20 @@ export const createPatchRulesBulkRoute = (server: ServerFacade): Hapi.ServerRout
             references,
             version,
           } = payloadRule;
+          const finalIndex = outputIndex != null ? outputIndex : getIndex(request, server);
           const idOrRuleIdOrUnknown = id ?? ruleId ?? '(unknown id)';
           try {
-            const rule = await patchRules({
+            const rule = await updateRules({
               alertsClient,
               actionsClient,
               description,
               enabled,
+              immutable: false,
               falsePositives,
               from,
               query,
               language,
-              outputIndex,
+              outputIndex: finalIndex,
               savedId,
               savedObjectsClient,
               timelineId,
@@ -132,6 +134,6 @@ export const createPatchRulesBulkRoute = (server: ServerFacade): Hapi.ServerRout
   };
 };
 
-export const patchRulesBulkRoute = (server: ServerFacade): void => {
-  server.route(createPatchRulesBulkRoute(server));
+export const updateRulesBulkRoute = (server: ServerFacade): void => {
+  server.route(createUpdateRulesBulkRoute(server));
 };

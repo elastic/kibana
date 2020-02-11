@@ -10,13 +10,13 @@ set -e
 ./check_env_variables.sh
 
 # Uses a default if no argument is specified
-RULES=${1:-./rules/bulk/patch_names.json}
+RULES=${1:-./rules/bulk/multiple_simplest_queries.json}
 
-# Example: ./patch_rule_bulk.sh
+# Example: ./update_rule_bulk.sh
 curl -s -k \
   -H 'Content-Type: application/json' \
   -H 'kbn-xsrf: 123' \
   -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
-  -X PATCH ${KIBANA_URL}${SPACE_URL}/api/detection_engine/rules/_bulk_update \
+  -X PUT ${KIBANA_URL}${SPACE_URL}/api/detection_engine/rules/_bulk_update \
   -d @${RULES} \
   | jq .;

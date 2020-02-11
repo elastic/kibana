@@ -100,6 +100,14 @@ export const setStatusSignalMissingIdsAndQueryPayload = (): Partial<SignalsStatu
   status: 'closed',
 });
 
+export const getUpdateRequest = (): ServerInjectOptions => ({
+  method: 'PUT',
+  url: DETECTION_ENGINE_RULES_URL,
+  payload: {
+    ...typicalPayload(),
+  },
+});
+
 export const getPatchRequest = (): ServerInjectOptions => ({
   method: 'PATCH',
   url: DETECTION_ENGINE_RULES_URL,
@@ -121,6 +129,12 @@ export const getFindRequest = (): ServerInjectOptions => ({
 export const getReadBulkRequest = (): ServerInjectOptions => ({
   method: 'POST',
   url: `${DETECTION_ENGINE_RULES_URL}/_bulk_create`,
+  payload: [typicalPayload()],
+});
+
+export const getUpdateBulkRequest = (): ServerInjectOptions => ({
+  method: 'PUT',
+  url: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
   payload: [typicalPayload()],
 });
 

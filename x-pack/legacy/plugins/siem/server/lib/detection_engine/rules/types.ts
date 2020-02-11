@@ -25,6 +25,11 @@ export type PatchRuleAlertParamsRest = Partial<RuleAlertParamsRest> & {
   rule_id: RuleAlertParams['ruleId'] | undefined;
 };
 
+export type UpdateRuleAlertParamsRest = RuleAlertParamsRest & {
+  id: string | undefined;
+  rule_id: RuleAlertParams['ruleId'] | undefined;
+};
+
 export interface FindParamsRest {
   per_page: number;
   page: number;
@@ -40,6 +45,14 @@ export interface PatchRulesRequest extends RequestFacade {
 
 export interface BulkPatchRulesRequest extends RequestFacade {
   payload: PatchRuleAlertParamsRest[];
+}
+
+export interface UpdateRulesRequest extends RequestFacade {
+  payload: UpdateRuleAlertParamsRest;
+}
+
+export interface BulkUpdateRulesRequest extends RequestFacade {
+  payload: UpdateRuleAlertParamsRest[];
 }
 
 export interface RuleAlertType extends Alert {
@@ -154,6 +167,11 @@ export interface Clients {
 }
 
 export type PatchRuleParams = Partial<RuleAlertParams> & {
+  id: string | undefined | null;
+  savedObjectsClient: SavedObjectsClientContract;
+} & Clients;
+
+export type UpdateRuleParams = RuleAlertParams & {
   id: string | undefined | null;
   savedObjectsClient: SavedObjectsClientContract;
 } & Clients;

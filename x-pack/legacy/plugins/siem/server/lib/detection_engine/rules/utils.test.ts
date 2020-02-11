@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { calculateInterval, calculateName, calculateVersion } from './patch_rules';
+import { calculateInterval, calculateVersion, calculateName } from './utils';
 import { PatchRuleParams } from './types';
 
-describe('patch_rules', () => {
+describe('utils', () => {
   describe('#calculateInterval', () => {
     test('given a undefined interval, it returns the ruleInterval ', () => {
       const interval = calculateInterval(undefined, '10m');

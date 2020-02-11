@@ -29,6 +29,8 @@ import { importRulesRoute } from './lib/detection_engine/routes/rules/import_rul
 import { exportRulesRoute } from './lib/detection_engine/routes/rules/export_rules_route';
 import { findRulesStatusesRoute } from './lib/detection_engine/routes/rules/find_rules_status_route';
 import { getPrepackagedRulesStatusRoute } from './lib/detection_engine/routes/rules/get_prepackaged_rules_status_route';
+import { updateRulesRoute } from './lib/detection_engine/routes/rules/update_rules_route';
+import { updateRulesBulkRoute } from './lib/detection_engine/routes/rules/update_rules_bulk_route';
 
 const APP_ID = 'siem';
 
@@ -47,15 +49,17 @@ export const initServerWithKibana = (context: PluginInitializerContext, __legacy
   // All REST rule creation, deletion, updating, etc...
   createRulesRoute(__legacy);
   readRulesRoute(__legacy);
-  patchRulesRoute(__legacy);
+  updateRulesRoute(__legacy);
   deleteRulesRoute(__legacy);
   findRulesRoute(__legacy);
+  patchRulesRoute(__legacy);
 
   addPrepackedRulesRoute(__legacy);
   getPrepackagedRulesStatusRoute(__legacy);
   createRulesBulkRoute(__legacy);
-  patchRulesBulkRoute(__legacy);
+  updateRulesBulkRoute(__legacy);
   deleteRulesBulkRoute(__legacy);
+  patchRulesBulkRoute(__legacy);
 
   importRulesRoute(__legacy);
   exportRulesRoute(__legacy);

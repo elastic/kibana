@@ -37,13 +37,13 @@ describe('patch rules schema', () => {
     ).toBeFalsy();
   });
 
-  test('[id and rule_id] does not validate', () => {
+  test('[id] and [rule_id] does not validate', () => {
     expect(
       patchRulesSchema.validate<Partial<PatchRuleAlertParamsRest>>({
         id: 'id-1',
         rule_id: 'rule-1',
-      }).error
-    ).toBeTruthy();
+      }).error.message
+    ).toEqual('"value" contains a conflict between exclusive peers [id, rule_id]');
   });
 
   test('[rule_id, description] does validate', () => {
