@@ -5,7 +5,6 @@
  */
 
 import Boom from 'boom';
-import { Dictionary } from 'lodash';
 
 import {
   transformAlertToRule,

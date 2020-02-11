@@ -5,7 +5,7 @@
  */
 
 import Boom from 'boom';
-import { pickBy, countBy } from 'lodash/fp';
+import { pickBy } from 'lodash/fp';
 import { Dictionary } from 'lodash';
 import { SavedObject } from 'kibana/server';
 import { INTERNAL_IDENTIFIER } from '../../../../../common/constants';
