@@ -18,6 +18,7 @@ import { getTitle } from '../lib/helper/get_title';
 import { UMUpdateBreadcrumbs } from '../lib/lib';
 import { MONITOR_ROUTE } from '../routes';
 import { useUrlParams } from '../hooks';
+import { MLIntegrationComponent } from '../components/functional/ml/ml_integeration';
 
 interface PageHeaderProps {
   monitorStatus?: any;
@@ -68,10 +69,13 @@ export const PageHeaderComponent = ({ monitorStatus, setBreadcrumbs }: PageHeade
   return (
     <>
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s" wrap={true}>
-        <EuiFlexItem>
+        <EuiFlexItem grow={false}>
           <EuiTitle>
             <h1>{headerText}</h1>
           </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <MLIntegrationComponent />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <UptimeDatePicker />
