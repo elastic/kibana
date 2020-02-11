@@ -73,9 +73,10 @@ export const TabSummary: React.FunctionComponent<Props> = ({ policy }) => {
             </li>
           ))}
         </ul>
+        <EuiSpacer size="xs" />
         {hiddenIndicesCount ? (
           <div>
-            <EuiTitle size="xs">
+            <EuiText>
               <EuiLink onClick={() => setIsShowingFullIndicesList(true)}>
                 <FormattedMessage
                   id="xpack.snapshotRestore.policyDetails.indicesShowAllLink"
@@ -84,7 +85,7 @@ export const TabSummary: React.FunctionComponent<Props> = ({ policy }) => {
                 />{' '}
                 <EuiIcon type="arrowDown" />
               </EuiLink>
-            </EuiTitle>
+            </EuiText>
           </div>
         ) : null}
       </EuiText>
@@ -96,7 +97,7 @@ export const TabSummary: React.FunctionComponent<Props> = ({ policy }) => {
     );
   const fullIndicesList =
     displayIndices && displayIndices.length && displayIndices.length > 10 ? (
-      <EuiText size="m">
+      <div>
         <ul>
           {displayIndices.map((index: string) => (
             <li key={index}>
@@ -106,9 +107,10 @@ export const TabSummary: React.FunctionComponent<Props> = ({ policy }) => {
             </li>
           ))}
         </ul>
+        <EuiSpacer size="xs" />
         {hiddenIndicesCount ? (
           <div>
-            <EuiTitle size="xs">
+            <EuiText>
               <EuiLink onClick={() => setIsShowingFullIndicesList(false)}>
                 <FormattedMessage
                   id="xpack.snapshotRestore.policyDetails.indicesCollapseAllLink"
@@ -117,10 +119,10 @@ export const TabSummary: React.FunctionComponent<Props> = ({ policy }) => {
                 />{' '}
                 <EuiIcon type="arrowUp" />
               </EuiLink>
-            </EuiTitle>
+            </EuiText>
           </div>
         ) : null}
-      </EuiText>
+      </div>
     ) : null;
 
   // Reset indices list state when clicking through different policies

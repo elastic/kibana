@@ -17,6 +17,7 @@ import {
   EuiText,
   EuiTitle,
   EuiIcon,
+  EuiSpacer,
 } from '@elastic/eui';
 
 import { SnapshotDetails } from '../../../../../../../common/types';
@@ -66,9 +67,10 @@ export const TabSummary: React.FC<Props> = ({ snapshotDetails }) => {
           </li>
         ))}
       </ul>
+      <EuiSpacer size="xs" />
       {hiddenIndicesCount ? (
         <div>
-          <EuiTitle size="xs">
+          <EuiText>
             <EuiLink onClick={() => setIsShowingFullIndicesList(true)}>
               <FormattedMessage
                 id="xpack.snapshotRestore.policyDetails.indicesShowAllLink"
@@ -77,7 +79,7 @@ export const TabSummary: React.FC<Props> = ({ snapshotDetails }) => {
               />{' '}
               <EuiIcon type="arrowDown" />
             </EuiLink>
-          </EuiTitle>
+          </EuiText>
         </div>
       ) : null}
     </EuiText>
@@ -89,7 +91,7 @@ export const TabSummary: React.FC<Props> = ({ snapshotDetails }) => {
   );
   const fullIndicesList =
     indices.length && indices.length > 10 ? (
-      <EuiText size="m">
+      <div>
         <ul>
           {indices.map((index: string) => (
             <li key={index}>
@@ -99,9 +101,10 @@ export const TabSummary: React.FC<Props> = ({ snapshotDetails }) => {
             </li>
           ))}
         </ul>
+        <EuiSpacer size="xs" />
         {hiddenIndicesCount ? (
           <div>
-            <EuiTitle size="xs">
+            <EuiText>
               <EuiLink onClick={() => setIsShowingFullIndicesList(false)}>
                 <FormattedMessage
                   id="xpack.snapshotRestore.snapshotDetails.itemIndicesCollapseAllLink"
@@ -110,10 +113,10 @@ export const TabSummary: React.FC<Props> = ({ snapshotDetails }) => {
                 />{' '}
                 <EuiIcon type="arrowUp" />
               </EuiLink>
-            </EuiTitle>
+            </EuiText>
           </div>
         ) : null}
-      </EuiText>
+      </div>
     ) : null;
 
   // Reset indices list state when clicking through different snapshots

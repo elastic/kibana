@@ -89,7 +89,7 @@ export const RestoreSnapshotStepReview: React.FunctionComponent<StepProps> = ({
             </EuiDescriptionListTitle>
             <EuiDescriptionListDescription>
               {displayIndices ? (
-                <EuiText>
+                <div>
                   <ul>
                     {(isShowingFullIndicesList
                       ? displayIndices
@@ -102,8 +102,9 @@ export const RestoreSnapshotStepReview: React.FunctionComponent<StepProps> = ({
                       </li>
                     ))}
                   </ul>
+                  <EuiSpacer size="xs" />
                   {hiddenIndicesCount ? (
-                    <EuiTitle size="xs">
+                    <EuiText>
                       {isShowingFullIndicesList ? (
                         <EuiLink onClick={() => setIsShowingFullIndicesList(false)}>
                           <FormattedMessage
@@ -123,9 +124,9 @@ export const RestoreSnapshotStepReview: React.FunctionComponent<StepProps> = ({
                           <EuiIcon type="arrowDown" />
                         </EuiLink>
                       )}
-                    </EuiTitle>
+                    </EuiText>
                   ) : null}
-                </EuiText>
+                </div>
               ) : (
                 <FormattedMessage
                   id="xpack.snapshotRestore.restoreForm.stepReview.summaryTab.allIndicesValue"
