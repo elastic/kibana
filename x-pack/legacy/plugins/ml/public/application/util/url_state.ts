@@ -32,12 +32,12 @@ function isRisonSerializationRequired(queryParam: string): boolean {
 
 export function getUrlState(search: string): Dictionary<any> {
   const urlState: Dictionary<any> = {};
-  const parsedQueryString: Record<string, string> = parse(search, { sort: false });
+  const parsedQueryString = parse(search, { sort: false });
 
   try {
     Object.keys(parsedQueryString).forEach(a => {
       if (isRisonSerializationRequired(a)) {
-        urlState[a] = decode(parsedQueryString[a]);
+        urlState[a] = decode(parsedQueryString[a] as string);
       } else {
         urlState[a] = parsedQueryString[a];
       }

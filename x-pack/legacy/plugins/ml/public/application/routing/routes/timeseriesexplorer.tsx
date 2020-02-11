@@ -11,8 +11,6 @@ import moment from 'moment';
 
 import { i18n } from '@kbn/i18n';
 
-import { timefilter } from 'ui/timefilter';
-
 import { MlJobWithTimeRange } from '../../../../common/types/jobs';
 
 import { TimeSeriesExplorer } from '../../timeseriesexplorer';
@@ -37,10 +35,11 @@ import { useRefresh } from '../use_refresh';
 import { useResolver } from '../use_resolver';
 import { basicResolvers } from '../resolvers';
 import { ANOMALY_DETECTION_BREADCRUMB, ML_BREADCRUMB } from '../breadcrumbs';
+import { useMlKibana } from '../../contexts/kibana';
 
 export const timeSeriesExplorerRoute: MlRoute = {
   path: '/timeseriesexplorer',
-  render: (props, config, deps) => <PageWrapper config={config} {...props} deps={deps} />,
+  render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs: [
     ML_BREADCRUMB,
     ANOMALY_DETECTION_BREADCRUMB,
@@ -53,8 +52,8 @@ export const timeSeriesExplorerRoute: MlRoute = {
   ],
 };
 
-const PageWrapper: FC<PageProps> = ({ config, deps }) => {
-  const { context, results } = useResolver('', undefined, config, {
+const PageWrapper: FC<PageProps> = ({ deps }) => {
+  const { context, results } = useResolver('', undefined, deps.config, {
     ...basicResolvers(deps),
     jobs: mlJobService.loadJobsWrapper,
     jobsWithTimeRange: () => ml.jobs.jobsWithTimerange(getDateFormatTz()),
@@ -63,7 +62,7 @@ const PageWrapper: FC<PageProps> = ({ config, deps }) => {
   return (
     <PageLoader context={context}>
       <TimeSeriesExplorerUrlStateManager
-        config={config}
+        config={deps.config}
         jobsWithTimeRange={results.jobsWithTimeRange.jobs}
       />
     </PageLoader>
@@ -89,6 +88,8 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
   const [lastRefresh, setLastRefresh] = useState(0);
   const previousRefresh = usePrevious(lastRefresh);
   const [selectedJobId, setSelectedJobId] = useState<string>();
+  const { services } = useMlKibana();
+  const { timefilter } = services.data.query.timefilter;
 
   const refresh = useRefresh();
   useEffect(() => {
