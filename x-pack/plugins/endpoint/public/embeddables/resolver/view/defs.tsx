@@ -6,20 +6,34 @@
 
 import React, { memo } from 'react';
 
-/*
-*Next steps: 
-    1. Arbitrage of colors from EUI pallette
-    2. Use a color library
-*/
+import {
+  // qualitative pallette functions.
+  //  See: https://elastic.github.io/eui/#/utilities/color-palettes
+  euiPaletteForTemperature,
+  euiPaletteForStatus,
+  // individual shades:
+  euiColorEmptyShade,
+  euiColorFullShade,
+} from '@elastic/eui/lib/services';
+
+const resolverPallette = {
+  temperatures: euiPaletteForTemperature(7),
+  statii: euiPaletteForStatus(7),
+  fullShade: euiColorFullShade,
+  emptyShade: euiColorEmptyShade,
+};
+
 enum ColorTypes {
-  OK = '#0068ff',
-  OKDarker = '#152c51',
-  /* TODO: define other colors by meaning like so
-  Warning = 'hsl(62, 100%, 51%)',
-  Danger = 'hsl(0, 85%, 57%)',
-  Attention = 'hsl(32, 100%, 51%)',
-  Enabled = 'hsl(0, 0%, 100%)',
-  Disabled = 'hsl(0, 0%, 85%)',
+  OK = resolverPallette.temperatures[2],
+  OKDarker = resolverPallette.temperatures[0],
+  ContentForeground = euiColorEmptyShade,
+  ContentBackground = euiColorFullShade,
+  Warning = resolverPallette.statii[3],
+  /* Define colors by meaning against the EUI pallette like so:
+  Danger = resolverPallette.,
+  Attention = resolverPallette.,
+  Enabled = resolverPallette.,
+  Disabled = resolverPallette.,
   */
 }
 
@@ -50,6 +64,30 @@ const PaintServers = memo(() => (
       <stop offset="0%" stopColor={ColorTypes.OKDarker} stopOpacity="1" />
       <stop offset="100%" stopColor={ColorTypes.OKDarker} stopOpacity="1" />
     </linearGradient>
+    <linearGradient
+      id="Foreground_userSpaceNWtoSE_Solid"
+      x1="-50"
+      y1="-50"
+      x2="50"
+      y2="50"
+      spreadMethod="pad"
+      gradientUnits="userSpaceOnUse"
+    >
+      <stop offset="0%" stopColor={ColorTypes.ContentForeground} stopOpacity="1" />
+      <stop offset="100%" stopColor={ColorTypes.ContentForeground} stopOpacity="1" />
+    </linearGradient>
+    <linearGradient
+      id="Background_userSpaceNWtoSE_Solid"
+      x1="-50"
+      y1="-50"
+      x2="50"
+      y2="50"
+      spreadMethod="pad"
+      gradientUnits="userSpaceOnUse"
+    >
+      <stop offset="0%" stopColor={ColorTypes.ContentBackground} stopOpacity="1" />
+      <stop offset="100%" stopColor={ColorTypes.ContentBackground} stopOpacity="1" />
+    </linearGradient>
   </>
 ));
 
@@ -57,6 +95,7 @@ const PaintServers = memo(() => (
 const SymbolsAndShapes = memo(() => (
   <>
     <symbol id="node_icon_curve" viewBox="0 0 108.6889 29.31389">
+      <desc>A shape representing a node in a graph</desc>
       <g transform="translate(-52.244835,-115.27758)">
         <g
           fill="url(#OKDarker_userSpaceNWtoSE_Solid)"

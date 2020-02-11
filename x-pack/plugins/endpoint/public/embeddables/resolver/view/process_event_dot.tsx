@@ -66,7 +66,7 @@ export const ProcessEventDot = styled(
             dominantBaseline="middle"
             fontSize="3"
             fill="white"
-            stroke="#777"
+            stroke="#333"
             strokeWidth=".35"
             paintOrder="stroke"
           >
@@ -82,7 +82,7 @@ export const ProcessEventDot = styled(
                 dominantBaseline="middle"
                 fontSize="1.25"
                 fill="#fff"
-                stroke="#999"
+                stroke="#333"
                 strokeWidth=".25"
                 paintOrder="stroke"
               >
@@ -99,7 +99,7 @@ export const ProcessEventDot = styled(
                 dominantBaseline="middle"
                 fontSize="1.25"
                 fill="yellow"
-                stroke="#777"
+                stroke="#333"
                 strokeWidth=".25"
                 paintOrder="stroke"
               >
