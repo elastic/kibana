@@ -45,4 +45,17 @@ export interface TextObject {
    * Used to re-populate a text editor buffer.
    */
   text: string;
+
+  /**
+   * An optional user provided name for the text object
+   */
+  name?: string;
+
+  /**
+   * An indication of whether a text object is the scratch pad. This
+   * object is special and there should only be one of them. The default
+   * should be that the first ever created text object is the scratch pad
+   * which cannot be renamed or deleted.
+   */
+  isScratchPad?: boolean;
 }

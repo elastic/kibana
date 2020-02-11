@@ -19,7 +19,7 @@
 
 import { useRef, useCallback } from 'react';
 import { throttle } from 'lodash';
-import { useEditorReadContext, useServicesContext } from '../contexts';
+import { useEditorActionContext, useEditorReadContext, useServicesContext } from '../../contexts';
 
 const WAIT_MS = 500;
 
@@ -30,20 +30,25 @@ export const useSaveCurrentTextObject = () => {
     services: { objectStorageClient },
   } = useServicesContext();
 
-  const { currentTextObject } = useEditorReadContext();
+  const { currentTextObjectId, textObjects } = useEditorReadContext();
+  const dispatch = useEditorActionContext();
+  const currentTextObject = textObjects[currentTextObjectId];
 
   return useCallback(
     throttle(
       (text: string) => {
         const { current: promise } = promiseChainRef;
         if (!currentTextObject) return;
+        const nextTextObject = { ...currentTextObject, text, updatedAt: Date.now() };
         promise.finally(() =>
-          objectStorageClient.text.update({ ...currentTextObject, text, updatedAt: Date.now() })
+          objectStorageClient.text.update(nextTextObject).then(() => {
+            dispatch({ type: 'textObject.upsert', payload: nextTextObject });
+          })
         );
       },
       WAIT_MS,
       { trailing: true }
     ),
-    [objectStorageClient, currentTextObject]
+    [objectStorageClient, currentTextObjectId]
   );
 };

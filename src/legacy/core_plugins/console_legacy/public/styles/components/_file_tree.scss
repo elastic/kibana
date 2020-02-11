@@ -1,0 +1,26 @@
+.conApp__fileTree {
+
+
+  background-color: $euiColorLightestShade;
+  min-width: 200px;
+
+  &__actionBar {
+    padding: 0 5px;
+    background-color: $euiColorDarkestShade;
+    color: $euiColorLightestShade;
+  }
+
+  &__scratchPadEntry {
+    border-bottom: $euiColorLightShade dashed 1px;
+  }
+
+  &__entry {
+    border-radius: 0;
+    font-size: $euiSizeM;
+    padding-right: 5px;
+
+    &--selected {
+      background-color: $euiColorLightShade;
+    }
+  }
+}

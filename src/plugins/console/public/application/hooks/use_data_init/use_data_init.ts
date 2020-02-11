@@ -48,15 +48,24 @@ export const useDataInit = () => {
             createdAt: Date.now(),
             updatedAt: Date.now(),
             text: '',
+            isScratchPad: true,
           });
-          dispatch({ type: 'setCurrentTextObject', payload: newObject });
+          dispatch({ type: 'textObject.upsertAndSetCurrent', payload: newObject });
         } else {
+          const hasScratchPad = results.some(textObject => textObject.isScratchPad);
+          // For backwards compatibility, we sort here according to date created to
+          // always take the first item created.
+          const [defaultTextObject, ...otherObjects] = results.sort(
+            (a, b) => a.createdAt - b.createdAt
+          );
+          if (!hasScratchPad) {
+            defaultTextObject.isScratchPad = true;
+          }
           dispatch({
-            type: 'setCurrentTextObject',
-            // For backwards compatibility, we sort here according to date created to
-            // always take the first item created.
-            payload: results.sort((a, b) => a.createdAt - b.createdAt)[0],
+            type: 'textObject.upsertAndSetCurrent',
+            payload: defaultTextObject,
           });
+          dispatch({ type: 'textObject.upsertMany', payload: otherObjects });
         }
       } catch (e) {
         setError(e);

@@ -211,6 +211,11 @@ export interface CoreEditor {
   on(event: EditorEvent, listener: () => void): void;
 
   /**
+   * Remove the editor instance and clean up all listeners
+   */
+  destroy(): void;
+
+  /**
    * Unregister a listener for predefined editor events
    */
   off(event: EditorEvent, listener: () => void): void;

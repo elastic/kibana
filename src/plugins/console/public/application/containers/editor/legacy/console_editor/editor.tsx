@@ -46,9 +46,10 @@ import * as senseEditor from '../../../../models/sense_editor';
 import mappings from '../../../../../lib/mappings/mappings';
 
 import { subscribeResizeChecker } from '../subscribe_console_resize_checker';
+import { TextObject } from '../../../../../../common/text_object';
 
 export interface EditorProps {
-  initialTextValue: string;
+  textObject: TextObject;
 }
 
 const abs: CSSProperties = {
@@ -66,7 +67,7 @@ const DEFAULT_INPUT_VALUE = `GET _search
   }
 }`;
 
-function EditorUI({ initialTextValue }: EditorProps) {
+function EditorUI({ textObject }: EditorProps) {
   const {
     services: { history, notifications },
     docLinkVersion,
@@ -141,7 +142,7 @@ function EditorUI({ initialTextValue }: EditorProps) {
     if (initialQueryParams.load_from) {
       loadBufferFromRemote(initialQueryParams.load_from);
     } else {
-      editor.update(initialTextValue || DEFAULT_INPUT_VALUE);
+      editor.update(textObject.text || DEFAULT_INPUT_VALUE);
     }
 
     function setupAutosave() {
@@ -177,8 +178,11 @@ function EditorUI({ initialTextValue }: EditorProps) {
       unsubscribeResizer();
       mappings.clearSubscriptions();
       window.removeEventListener('hashchange', onHashChange);
+      editorInstanceRef.current!.getCoreEditor().destroy();
+      editorInstanceRef.current = null;
     };
-  }, [saveCurrentTextObject, initialTextValue, history, setInputEditor]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [saveCurrentTextObject, textObject.id, history, setInputEditor]);
 
   useEffect(() => {
     const { current: editor } = editorInstanceRef;

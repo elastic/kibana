@@ -26,22 +26,27 @@ import { TextObject } from '../../../common/text_object';
 export interface Store {
   ready: boolean;
   settings: DevToolsSettings;
-  currentTextObject: TextObject | null;
+  currentTextObjectId: string;
+  textObjects: Record<string, TextObject>;
 }
 
 export const initialValue: Store = produce<Store>(
   {
     ready: false,
     settings: null as any,
-    currentTextObject: null,
+    currentTextObjectId: '',
+    textObjects: {},
   },
   identity
 );
 
 export type Action =
   | { type: 'setInputEditor'; payload: any }
-  | { type: 'setCurrentTextObject'; payload: any }
-  | { type: 'updateSettings'; payload: DevToolsSettings };
+  | { type: 'updateSettings'; payload: DevToolsSettings }
+  | { type: 'textObject.setCurrent'; payload: string }
+  | { type: 'textObject.upsertMany'; payload: TextObject[] }
+  | { type: 'textObject.upsert'; payload: TextObject }
+  | { type: 'textObject.upsertAndSetCurrent'; payload: TextObject };
 
 export const reducer: Reducer<Store, Action> = (state, action) =>
   produce<Store>(state, draft => {
@@ -57,8 +62,22 @@ export const reducer: Reducer<Store, Action> = (state, action) =>
       return;
     }
 
-    if (action.type === 'setCurrentTextObject') {
-      draft.currentTextObject = action.payload;
+    if (action.type === 'textObject.setCurrent') {
+      draft.currentTextObjectId = action.payload;
+      return;
+    }
+
+    if (action.type === 'textObject.upsertAndSetCurrent') {
+      draft.currentTextObjectId = action.payload.id;
+      draft.textObjects[action.payload.id] = action.payload;
+      return;
+    }
+
+    if (action.type === 'textObject.upsert' || action.type === 'textObject.upsertMany') {
+      const objectsArray = Array.isArray(action.payload) ? action.payload : [action.payload];
+      for (const object of objectsArray) {
+        draft.textObjects[object.id] = object;
+      }
       return;
     }
 

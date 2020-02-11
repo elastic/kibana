@@ -17,8 +17,5 @@
  * under the License.
  */
 
-export { useSetInputEditor } from './use_set_input_editor';
-export { useRestoreRequestFromHistory } from './use_restore_request_from_history';
-export { useSendCurrentRequestToES } from './use_send_current_request_to_es';
-export { useDataInit } from './use_data_init';
-export * from './text_objects';
+export { useSaveCurrentTextObject } from './use_save_current_text_object';
+export { useCreateTextObject } from './use_create_text_object';

@@ -40,6 +40,7 @@ export async function migrateToTextObjects({
     createdAt: Date.now(),
     updatedAt: Date.now(),
     text: legacyTextContent.content,
+    isScratchPad: true,
   });
 
   history.deleteLegacySavedEditorState();

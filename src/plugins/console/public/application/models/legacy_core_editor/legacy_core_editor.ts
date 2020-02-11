@@ -297,6 +297,10 @@ export class LegacyCoreEditor implements CoreEditor {
     });
   }
 
+  destroy() {
+    this.editor.destroy();
+  }
+
   legacyUpdateUI(range: any) {
     if (!this.$actions) {
       return;
