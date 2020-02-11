@@ -29,6 +29,7 @@ import {
   esQuery,
   esKuery,
 } from '../../../../../../../../src/plugins/data/public';
+import { SavedSearchSavedObject } from '../../../../common/types/kibana';
 import { NavigationMenu } from '../../components/navigation_menu';
 import { ML_JOB_FIELD_TYPES } from '../../../../common/constants/field_types';
 import { SEARCH_QUERY_LANGUAGE } from '../../../../common/constants/search';
@@ -156,9 +157,15 @@ export const Page: FC = () => {
     mlNodesAvailable() &&
     currentIndexPattern.timeFieldName !== undefined;
 
-  const [searchString, setSearchString] = useState(defaults.searchString);
-  const [searchQuery, setSearchQuery] = useState(defaults.searchQuery);
-  const [searchQueryLanguage, setSearchQueryLanguage] = useState(defaults.searchQueryLanguage);
+  const {
+    searchQuery: initSearchQuery,
+    searchString: initSearchString,
+    queryLanguage: initQueryLanguage,
+  } = extractSearchData(currentSavedSearch);
+
+  const [searchString, setSearchString] = useState(initSearchString);
+  const [searchQuery, setSearchQuery] = useState(initSearchQuery);
+  const [searchQueryLanguage] = useState(initQueryLanguage);
   const [samplerShardSize, setSamplerShardSize] = useState(defaults.samplerShardSize);
 
   // TODO - type overallStats and stats
@@ -206,35 +213,8 @@ export const Page: FC = () => {
   });
 
   useEffect(() => {
-    // Check for a saved search being passed in.
-    if (currentSavedSearch !== null) {
-      const { query } = getQueryFromSavedSearch(currentSavedSearch);
-      const queryLanguage = query.language as SEARCH_QUERY_LANGUAGE;
-      const qryString = query.query;
-      let qry;
-      if (queryLanguage === SEARCH_QUERY_LANGUAGE.KUERY) {
-        const ast = esKuery.fromKueryExpression(qryString);
-        qry = esKuery.toElasticsearchQuery(ast, currentIndexPattern);
-      } else {
-        qry = esQuery.luceneStringToDsl(qryString);
-        esQuery.decorateQuery(qry, kibanaConfig.get('query:queryString:options'));
-      }
-
-      setSearchQuery(qry);
-      setSearchString(qryString);
-      setSearchQueryLanguage(queryLanguage);
-    }
-  }, [currentSavedSearch]);
-
-  useEffect(() => {
-    if (!!currentSavedSearch && searchQuery === defaultSearchQuery) {
-      // There is a saved search presented, but the search query has not been
-      // extracted yet.
-      return;
-    }
-
     loadOverallStats();
-  }, [searchQuery, currentSavedSearch, samplerShardSize, lastRefresh]);
+  }, [searchQuery, samplerShardSize, lastRefresh]);
 
   useEffect(() => {
     createMetricCards();
@@ -256,6 +236,37 @@ export const Page: FC = () => {
   useEffect(() => {
     createNonMetricCards();
   }, [showAllNonMetrics, nonMetricShowFieldType, nonMetricFieldQuery]);
+
+  /**
+   * Extract query data from the saved search object.
+   */
+  function extractSearchData(savedSearch: SavedSearchSavedObject | null) {
+    if (!savedSearch) {
+      return {
+        searchQuery: defaults.searchQuery,
+        searchString: defaults.searchString,
+        queryLanguage: defaults.searchQueryLanguage,
+      };
+    }
+
+    const { query } = getQueryFromSavedSearch(savedSearch);
+    const queryLanguage = query.language as SEARCH_QUERY_LANGUAGE;
+    const qryString = query.query;
+    let qry;
+    if (queryLanguage === SEARCH_QUERY_LANGUAGE.KUERY) {
+      const ast = esKuery.fromKueryExpression(qryString);
+      qry = esKuery.toElasticsearchQuery(ast, currentIndexPattern);
+    } else {
+      qry = esQuery.luceneStringToDsl(qryString);
+      esQuery.decorateQuery(qry, kibanaConfig.get('query:queryString:options'));
+    }
+
+    return {
+      searchQuery: qry,
+      searchString: qryString,
+      queryLanguage,
+    };
+  }
 
   async function loadOverallStats() {
     const tf = timefilter as any;
