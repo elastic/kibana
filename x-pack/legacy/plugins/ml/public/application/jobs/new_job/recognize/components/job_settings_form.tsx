@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 import { ModuleJobUI, SAVE_STATE } from '../page';
 import { getTimeFilterRange } from '../../../../components/full_time_range_selector';
-import { useKibanaContext } from '../../../../contexts/kibana';
+import { useMlContext } from '../../../../contexts/ml';
 import {
   composeValidators,
   maxLengthValidator,
@@ -52,7 +52,7 @@ export const JobSettingsForm: FC<JobSettingsFormProps> = ({
   jobs,
 }) => {
   const { from, to } = getTimeFilterRange();
-  const { currentIndexPattern: indexPattern } = useKibanaContext();
+  const { currentIndexPattern: indexPattern } = useMlContext();
 
   const jobPrefixValidator = composeValidators(
     patternValidator(/^([a-z0-9]+[a-z0-9\-_]*)?$/),
