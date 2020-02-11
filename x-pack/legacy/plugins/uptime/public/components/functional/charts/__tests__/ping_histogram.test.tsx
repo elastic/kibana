@@ -50,7 +50,7 @@ describe('PingHistogram component', () => {
   });
 
   it('renders the component without errors', () => {
-    const component = renderWithIntl(renderWithRouter(<PingHistogramComponent {...props} />));
+    const component = renderWithRouter(<PingHistogramComponent {...props} />);
     expect(component).toMatchSnapshot();
   });
 });
