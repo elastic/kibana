@@ -5,6 +5,7 @@
  */
 
 import {
+  DEFAULT_ANOMALY_SCORE,
   DEFAULT_BYTES_FORMAT,
   DEFAULT_DARK_MODE,
   DEFAULT_DATE_FORMAT,
@@ -35,6 +36,7 @@ interface QuickRange {
 }
 
 export interface State {
+  anomalyThreshold: number;
   bytesFormat: string;
   darkMode: boolean;
   dateFormat: string;
@@ -48,6 +50,7 @@ export interface State {
 }
 
 export const keys = {
+  anomalyThreshold: DEFAULT_ANOMALY_SCORE,
   bytesFormat: DEFAULT_BYTES_FORMAT,
   darkMode: DEFAULT_DARK_MODE,
   dateFormat: DEFAULT_DATE_FORMAT,

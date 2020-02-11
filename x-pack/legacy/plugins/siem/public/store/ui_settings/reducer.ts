@@ -12,7 +12,8 @@ import { keys, State } from './model';
 
 export type UiSettingsState = State;
 
-export const initialUiSettingsState = {
+export const initialUiSettingsState: UiSettingsState = {
+  anomalyThreshold: 50,
   bytesFormat: '0,0.[0]b',
   darkMode: false,
   dateFormat: 'MMM D, YYYY @ HH:mm:ss.SSS',
@@ -41,6 +42,7 @@ export const initialUiSettingsState = {
 export const createInitialUiSettingsState = (
   uiSettings: CoreStart['uiSettings']
 ): UiSettingsState => ({
+  anomalyThreshold: uiSettings.get<State['anomalyThreshold']>(keys.anomalyThreshold),
   bytesFormat: uiSettings.get<State['bytesFormat']>(keys.bytesFormat),
   darkMode: uiSettings.get<State['darkMode']>(keys.darkMode),
   dateFormat: uiSettings.get<State['dateFormat']>(keys.dateFormat),

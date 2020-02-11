@@ -10,6 +10,9 @@ import { State } from './model';
 
 const actionCreator = actionCreatorFactory('x-pack/siem/local/ui_settings');
 
+export const anomalyThresholdChanged = actionCreator<State['anomalyThreshold']>(
+  'ANOMALY_THRESHOLD_CHANGED'
+);
 export const bytesFormatChanged = actionCreator<State['bytesFormat']>('BYTES_FORMAT_CHANGED');
 export const darkModeChanged = actionCreator<State['darkMode']>('DARK_MODE_CHANGED');
 export const dateFormatChanged = actionCreator<State['dateFormat']>('DATE_FORMAT_CHANGED');
