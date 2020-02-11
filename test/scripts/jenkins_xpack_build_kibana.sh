@@ -3,8 +3,8 @@
 cd "$KIBANA_DIR"
 source src/dev/ci_setup/setup_env.sh
 
-echo " -> building new platform plugins"
-node scripts/build_new_platform_plugins \
+echo " -> building kibana platform plugins"
+node scripts/build_kibana_platform_plugins \
   --scan-dir "$XPACK_DIR/test/plugin_functional/plugins" \
   --verbose;
 

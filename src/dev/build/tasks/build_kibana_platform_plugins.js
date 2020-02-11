@@ -19,8 +19,8 @@
 
 import { runOptimizer, OptimizerConfig, logOptimizerState } from '@kbn/optimizer';
 
-export const BuildNewPlatformPluginsTask = {
-  description: 'Building distributable versions of new platform plugins',
+export const BuildKibanaPlatformPluginsTask = {
+  description: 'Building distributable versions of Kibana platform plugins',
   async run(_, log, build) {
     const optimizerConfig = OptimizerConfig.create({
       repoRoot: build.resolvePath(),
