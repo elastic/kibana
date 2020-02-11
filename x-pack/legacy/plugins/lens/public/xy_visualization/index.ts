@@ -41,7 +41,7 @@ export class XyVisualization {
     expressions.registerFunction(() => layerConfig);
     expressions.registerFunction(() => xyChart);
 
-    expressions.registerRenderer(() =>
+    expressions.registerRenderer(
       getXyChartRenderer({
         formatFactory,
         chartTheme: core.uiSettings.get<boolean>('theme:darkMode')

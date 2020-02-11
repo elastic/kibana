@@ -12,7 +12,7 @@ import {
 } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { IndexPatternsContract, IndexPattern } from '../../../../../../../src/plugins/data/public';
-import { ExpressionRenderer } from '../../../../../../../src/plugins/expressions/public';
+import { ReactExpressionRendererType } from '../../../../../../../src/plugins/expressions/public';
 import {
   EmbeddableFactory as AbstractEmbeddableFactory,
   ErrorEmbeddable,
@@ -30,7 +30,7 @@ export class EmbeddableFactory extends AbstractEmbeddableFactory {
     private coreHttp: HttpSetup,
     private capabilities: RecursiveReadonly<Capabilities>,
     private savedObjectsClient: SavedObjectsClientContract,
-    private expressionRenderer: ExpressionRenderer,
+    private expressionRenderer: ReactExpressionRendererType,
     private indexPatternService: IndexPatternsContract
   ) {
     super({

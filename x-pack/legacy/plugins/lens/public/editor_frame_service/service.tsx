@@ -86,7 +86,7 @@ export class EditorFrameService {
         core.http,
         core.application.capabilities,
         core.savedObjects.client,
-        plugins.expressions.ExpressionRenderer,
+        plugins.expressions.ReactExpressionRenderer,
         plugins.data.indexPatterns
       )
     );
@@ -116,7 +116,7 @@ export class EditorFrameService {
                   (doc && doc.visualizationType) || firstVisualizationId || null
                 }
                 core={core}
-                ExpressionRenderer={plugins.expressions.ExpressionRenderer}
+                ExpressionRenderer={plugins.expressions.ReactExpressionRenderer}
                 doc={doc}
                 dateRange={dateRange}
                 query={query}

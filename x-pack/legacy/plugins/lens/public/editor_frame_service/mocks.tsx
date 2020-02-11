@@ -6,7 +6,7 @@
 
 import React from 'react';
 import {
-  ExpressionRendererProps,
+  ReactExpressionRendererProps,
   ExpressionsSetup,
   ExpressionsStart,
 } from '../../../../../../src/plugins/expressions/public';
@@ -96,7 +96,7 @@ export type MockedStartDependencies = Omit<EditorFrameStartPlugins, 'expressions
 
 export function createExpressionRendererMock(): jest.Mock<
   React.ReactElement,
-  [ExpressionRendererProps]
+  [ReactExpressionRendererProps]
 > {
   return jest.fn(_ => <span />);
 }

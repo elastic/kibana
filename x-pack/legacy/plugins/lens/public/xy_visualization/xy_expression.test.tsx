@@ -11,6 +11,7 @@ import { LensMultiTable } from '../types';
 import React from 'react';
 import { shallow } from 'enzyme';
 import { XYArgs, LegendConfig, legendConfig, layerConfig, LayerArgs } from './types';
+import { createMockExecutionContext } from '../../../../../../src/plugins/expressions/common/mocks';
 
 function sampleArgs() {
   const data: LensMultiTable = {
@@ -40,6 +41,7 @@ function sampleArgs() {
     xTitle: '',
     yTitle: '',
     legend: {
+      type: 'lens_xy_legendConfig',
       isVisible: false,
       position: Position.Top,
     },
@@ -69,7 +71,9 @@ describe('xy_expression', () => {
         position: Position.Left,
       };
 
-      expect(legendConfig.fn(null, args, {})).toEqual({
+      const result = legendConfig.fn(null, args, createMockExecutionContext());
+
+      expect(result).toEqual({
         type: 'lens_xy_legendConfig',
         ...args,
       });
@@ -87,7 +91,9 @@ describe('xy_expression', () => {
         isHistogram: false,
       };
 
-      expect(layerConfig.fn(null, args, {})).toEqual({
+      const result = layerConfig.fn(null, args, createMockExecutionContext());
+
+      expect(result).toEqual({
         type: 'lens_xy_layer',
         ...args,
       });
@@ -97,8 +103,9 @@ describe('xy_expression', () => {
   describe('xyChart', () => {
     test('it renders with the specified data and args', () => {
       const { data, args } = sampleArgs();
+      const result = xyChart.fn(data, args, createMockExecutionContext());
 
-      expect(xyChart.fn(data, args, {})).toEqual({
+      expect(result).toEqual({
         type: 'render',
         as: 'lens_xy_chart_renderer',
         value: { data, args },
