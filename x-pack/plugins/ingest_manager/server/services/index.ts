@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 export { appContextService } from './app_context';
-export { licenseService } from './license';
-export { configService } from './config';
 
 // Saved object services
 export { datasourceService } from './datasource';

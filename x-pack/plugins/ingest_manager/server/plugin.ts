@@ -16,7 +16,7 @@ import { EncryptedSavedObjectsPluginStart } from '../../encrypted_saved_objects/
 import { SecurityPluginSetup } from '../../security/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import { PLUGIN_ID } from './constants';
-import { licenseService, configService, appContextService } from './services';
+import { appContextService } from './services';
 import { registerDatasourceRoutes, registerAgentConfigRoutes } from './routes';
 import { IngestManagerConfigType } from '../common';
 
@@ -30,19 +30,22 @@ export interface IngestManagerAppContext {
   clusterClient: IClusterClient;
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   security?: SecurityPluginSetup;
+  license$?: Observable<ILicense>;
+  config$?: Observable<IngestManagerConfigType>;
 }
 
 export class IngestManagerPlugin implements Plugin {
-  private licensing$!: Observable<ILicense>;
+  private license$!: Observable<ILicense>;
   private config$!: Observable<IngestManagerConfigType>;
   private clusterClient!: IClusterClient;
   private security: SecurityPluginSetup | undefined;
 
-  constructor(private readonly initializerContext: PluginInitializerContext) {}
+  constructor(private readonly initializerContext: PluginInitializerContext) {
+    this.config$ = this.initializerContext.config.create<IngestManagerConfigType>();
+  }
 
   public async setup(core: CoreSetup, deps: IngestManagerSetupDeps) {
-    this.licensing$ = deps.licensing.license$;
-    this.config$ = this.initializerContext.config.create<IngestManagerConfigType>();
+    this.license$ = deps.licensing.license$;
     this.clusterClient = core.elasticsearch.dataClient;
     this.security = deps.security;
 
@@ -100,14 +103,12 @@ export class IngestManagerPlugin implements Plugin {
       clusterClient: this.clusterClient,
       encryptedSavedObjects: plugins.encryptedSavedObjects,
       security: this.security,
+      license$: this.license$,
+      config$: this.config$,
     });
-    licenseService.start(this.licensing$);
-    configService.start(this.config$);
   }
 
   public async stop() {
     appContextService.stop();
-    licenseService.stop();
-    configService.stop();
   }
 }
