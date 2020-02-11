@@ -5,11 +5,10 @@
  */
 
 import { setupGetConjunctionSuggestions } from './conjunction';
-import { QuerySuggestionGetFnArgs, esKuery } from '../../../../../../../src/plugins/data/public';
+import { QuerySuggestionGetFnArgs, KueryNode } from '../../../../../../../src/plugins/data/public';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 
-const mockKueryNode = (kueryNode: Partial<esKuery.KueryNode>) =>
-  (kueryNode as unknown) as esKuery.KueryNode;
+const mockKueryNode = (kueryNode: Partial<KueryNode>) => (kueryNode as unknown) as KueryNode;
 
 describe('Kuery conjunction suggestions', () => {
   const querySuggestionsArgs = (null as unknown) as QuerySuggestionGetFnArgs;
