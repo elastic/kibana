@@ -39,7 +39,7 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
   },
   history,
 }) => {
-  const { uiMetric } = useServices();
+  const { uiMetricService } = useServices();
   const { error, isLoading, data: templates, sendRequest: reload } = loadIndexTemplates();
 
   let content;
@@ -67,7 +67,7 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
 
   // Track component loaded
   useEffect(() => {
-    uiMetric.trackMetric('loaded', UIM_TEMPLATE_LIST_LOAD);
+    uiMetricService.trackMetric('loaded', UIM_TEMPLATE_LIST_LOAD);
   }, []);
 
   if (isLoading) {

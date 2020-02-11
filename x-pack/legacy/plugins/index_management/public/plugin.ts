@@ -71,8 +71,8 @@ export class IndexMgmtUIPlugin {
             usageCollection,
           },
           services: {
-            uiMetric: this.uiMetricService,
-            extensions: this.extensionsService,
+            uiMetricService: this.uiMetricService,
+            extensionsService: this.extensionsService,
             httpService,
             notificationService,
           },

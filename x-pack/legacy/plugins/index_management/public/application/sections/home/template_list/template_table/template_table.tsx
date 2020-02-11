@@ -28,7 +28,7 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
   editTemplate,
   cloneTemplate,
 }) => {
-  const { uiMetric } = useServices();
+  const { uiMetricService } = useServices();
   const [selection, setSelection] = useState<TemplateListItem[]>([]);
   const [templatesToDelete, setTemplatesToDelete] = useState<Array<TemplateListItem['name']>>([]);
 
@@ -46,7 +46,7 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
           <EuiLink
             href={getTemplateDetailsLink(name, true)}
             data-test-subj="templateDetailsLink"
-            onClick={() => uiMetric.trackMetric('click', UIM_TEMPLATE_SHOW_DETAILS_CLICK)}
+            onClick={() => uiMetricService.trackMetric('click', UIM_TEMPLATE_SHOW_DETAILS_CLICK)}
           >
             {name}
           </EuiLink>

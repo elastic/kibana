@@ -105,7 +105,7 @@ export class Summary extends React.PureComponent {
       <AppContextConsumer>
         {({ services }) => {
           const { left, right } = this.buildRows();
-          const additionalContent = this.getAdditionalContent(services.extensions);
+          const additionalContent = this.getAdditionalContent(services.extensionsService);
 
           return (
             <Fragment>

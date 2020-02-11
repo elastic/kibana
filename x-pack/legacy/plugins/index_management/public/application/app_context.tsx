@@ -22,8 +22,8 @@ export interface AppDependencies {
     usageCollection: UsageCollectionSetup;
   };
   services: {
-    uiMetric: UiMetricService<IndexMgmtMetricsType>;
-    extensions: ExtensionsService;
+    uiMetricService: UiMetricService<IndexMgmtMetricsType>;
+    extensionsService: ExtensionsService;
     httpService: HttpService;
     notificationService: NotificationService;
   };

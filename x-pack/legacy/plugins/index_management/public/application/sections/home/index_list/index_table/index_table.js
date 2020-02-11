@@ -223,7 +223,7 @@ export class IndexTable extends Component {
           <EuiLink
             data-test-subj="indexTableIndexNameLink"
             onClick={() => {
-              appServices.uiMetric.trackMetric('click', UIM_SHOW_DETAILS_CLICK);
+              appServices.uiMetricService.trackMetric('click', UIM_SHOW_DETAILS_CLICK);
               openDetailPanel(value);
             }}
           >
@@ -436,7 +436,7 @@ export class IndexTable extends Component {
     return (
       <AppContextConsumer>
         {({ services }) => {
-          const { extensions } = services;
+          const { extensionsService } = services;
 
           return (
             <Fragment>
@@ -454,7 +454,7 @@ export class IndexTable extends Component {
                 <EuiFlexItem grow={false}>
                   {(indicesLoading && allIndices.length === 0) || indicesError ? null : (
                     <EuiFlexGroup>
-                      {extensions.toggles.map(toggle => {
+                      {extensionsService.toggles.map(toggle => {
                         return this.renderToggleControl(toggle);
                       })}
                       <EuiFlexItem grow={false}>
@@ -475,7 +475,7 @@ export class IndexTable extends Component {
                 </EuiFlexItem>
               </EuiFlexGroup>
               <EuiSpacer size="l" />
-              {this.renderBanners(extensions)}
+              {this.renderBanners(extensionsService)}
               {indicesError && this.renderError()}
               <EuiFlexGroup gutterSize="l" alignItems="center">
                 {atLeastOneItemSelected ? (
@@ -498,8 +498,8 @@ export class IndexTable extends Component {
                     <EuiFlexItem>
                       <EuiSearchBar
                         filters={
-                          this.getFilters(extensions).length > 0
-                            ? this.getFilters(extensions)
+                          this.getFilters(extensionsService).length > 0
+                            ? this.getFilters(extensionsService)
                             : null
                         }
                         defaultQuery={filter}

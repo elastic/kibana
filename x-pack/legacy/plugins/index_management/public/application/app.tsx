@@ -15,8 +15,8 @@ import { TemplateEdit } from './sections/template_edit';
 import { useServices } from './app_context';
 
 export const App = () => {
-  const { uiMetric } = useServices();
-  useEffect(() => uiMetric.trackMetric('loaded', UIM_APP_LOAD), []);
+  const { uiMetricService } = useServices();
+  useEffect(() => uiMetricService.trackMetric('loaded', UIM_APP_LOAD), []);
 
   return (
     <HashRouter>

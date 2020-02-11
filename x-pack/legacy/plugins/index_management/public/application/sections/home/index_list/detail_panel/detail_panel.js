@@ -59,7 +59,7 @@ const tabToHumanizedMap = {
 const tabs = [TAB_SUMMARY, TAB_SETTINGS, TAB_MAPPING, TAB_STATS, TAB_EDIT_SETTINGS];
 
 export const DetailPanel = ({ panelType, indexName, index, openDetailPanel, closeDetailPanel }) => {
-  const { extensions } = useServices();
+  const { extensionsService } = useServices();
 
   const renderTabs = () => {
     return tabs.map((tab, i) => {
@@ -156,7 +156,7 @@ export const DetailPanel = ({ panelType, indexName, index, openDetailPanel, clos
         <EuiTitle id="indexDetailsFlyoutTitle">
           <h2>
             {indexName}
-            {renderBadges(index, undefined, extensions)}
+            {renderBadges(index, undefined, extensionsService)}
           </h2>
         </EuiTitle>
         {index ? <EuiTabs>{renderTabs()}</EuiTabs> : null}

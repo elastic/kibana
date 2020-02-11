@@ -101,7 +101,7 @@ export const TemplateDetails: React.FunctionComponent<Props> = ({
   cloneTemplate,
   reload,
 }) => {
-  const { uiMetric } = useServices();
+  const { uiMetricService } = useServices();
   const decodedTemplateName = decodePath(templateName);
   const { error, data: templateDetails, isLoading } = loadIndexTemplate(decodedTemplateName);
   // TS complains if we use destructuring here. Fixed in 3.6.0 (https://github.com/microsoft/TypeScript/pull/31711).
@@ -165,7 +165,7 @@ export const TemplateDetails: React.FunctionComponent<Props> = ({
           {TABS.map(tab => (
             <EuiTab
               onClick={() => {
-                uiMetric.trackMetric('click', tabToUiMetricMap[tab.id]);
+                uiMetricService.trackMetric('click', tabToUiMetricMap[tab.id]);
                 setActiveTab(tab.id);
               }}
               isSelected={tab.id === activeTab}
