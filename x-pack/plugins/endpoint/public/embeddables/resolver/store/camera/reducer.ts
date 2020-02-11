@@ -163,7 +163,7 @@ export const cameraReducer: Reducer<CameraState, ResolverAction> = (
      * Handle resizes of the Resolver component. We need to know the size in order to convert between screen
      * and world coordinates.
      */
-    const nextState = {
+    const nextState: CameraState = {
       ...state,
       rasterSize: action.payload,
     };
