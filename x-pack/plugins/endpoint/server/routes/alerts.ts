@@ -39,8 +39,12 @@ export const reqSchema = schema.object(
         }
       },
     }),
-    filters: schema.string({ defaultValue: '' }),
+    filters: schema.arrayOf(schema.any(), { defaultValue: [] }),
     query: schema.string({ defaultValue: '' }),
+    dateRange: schema.object({
+      to: schema.string({ defaultValue: 'now' }),
+      from: schema.string({ defaultValue: 'now-15m' }),
+    }),
   },
   {
     validate(value) {

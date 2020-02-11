@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { LoggerFactory } from 'kibana/server';
+import { esFilters, TimeRange } from '../../../../src/plugins/data/common';
 import { JsonObject } from '../../../../src/plugins/data/common/es_query/kuery';
 import { EndpointConfigType } from './config';
 
@@ -34,6 +35,7 @@ export interface AlertRequestParams {
   page_index?: number;
   page_size?: number;
   filters?: string;
+  dateRange: TimeRange;
   query?: string;
   sort?: string;
   order?: string;
@@ -52,7 +54,8 @@ export interface AlertRequestData {
   pageSize: number;
   pageIndex?: number;
   fromIndex?: number;
-  filters: string;
+  filters: esFilters.Filter[];
+  dateRange: TimeRange;
   query: string;
   sort: string;
   order: string;

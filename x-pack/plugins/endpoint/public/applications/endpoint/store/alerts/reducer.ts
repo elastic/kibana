@@ -17,6 +17,10 @@ const initialState = (): AlertListState => {
     request_page_index: 0,
     result_from_index: 0,
     total: 0,
+    searchBar: {
+      query: '',
+      filters: [],
+    },
   };
 };
 
@@ -29,6 +33,8 @@ export const alertListReducer: Reducer<AlertListState, AppAction> = (
       ...state,
       ...action.payload,
     };
+  } else if (action.type === 'userAppliedAlertsSearchFilter') {
+    return state;
   }
 
   return state;

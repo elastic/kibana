@@ -20,10 +20,12 @@ export const alertMiddlewareFactory: MiddlewareFactory = coreStart => {
       });
       api.dispatch({ type: 'serverReturnedAlertsData', payload: response });
     } else if (action.type === 'userAppliedAlertsSearchFilter') {
-      const filterQuery = action.payload;
+      const { query, filters, dateRange } = action.payload;
       const response = await coreStart.http.post('/api/endpoint/alerts', {
         body: JSON.stringify({
-          filters: filterQuery.query,
+          query: query.query,
+          filters,
+          dateRange,
         }),
       });
       api.dispatch({ type: 'serverReturnedAlertsData', payload: response });

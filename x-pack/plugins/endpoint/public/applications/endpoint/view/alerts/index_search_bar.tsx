@@ -8,10 +8,18 @@ import React from 'react';
 import { memo, useState, useMemo, useContext, useEffect, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { useSelector } from 'react-redux';
-import { Query, TimeRange, SearchBarProps, IIndexPattern } from 'src/plugins/data/public';
+import {
+  Query,
+  TimeRange,
+  SearchBarProps,
+  IIndexPattern,
+  esFilters,
+  DataPublicPluginStart,
+} from 'src/plugins/data/public';
 import { AlertAction } from '../../store/alerts/action';
 import * as selectors from '../../store/selectors';
 import { DepsStartContext } from '../../../endpoint/index';
+import { EndpointPluginStartDependencies } from '../../../../plugin';
 
 export const AlertIndexSearchBar = memo(() => {
   // TODO: Why can't we use AppAction here?
@@ -19,22 +27,27 @@ export const AlertIndexSearchBar = memo(() => {
 
   interface AlertIndexSearchBarState {
     patterns: IIndexPattern[];
-    filterQuery: Query;
+    query: Query;
+    dateRange: TimeRange;
+    filters: esFilters.Filter[];
   }
   const [state, setState] = useState<AlertIndexSearchBarState>({
     patterns: [],
-    filterQuery: { query: '', language: 'kuery' },
+    query: { query: '', language: 'kuery' },
+    dateRange: { from: '', to: '' },
+    filters: [],
   });
 
   // TODO: Can we import like `import { SearchBar } from '../data/public'`?
   const {
     data: {
       ui: { SearchBar },
-      query: { timefilter },
+      query: { timefilter, filterManager },
       indexPatterns,
       autocomplete,
     },
-  } = useContext(DepsStartContext);
+  } = useContext<EndpointPluginStartDependencies>(DepsStartContext);
+
   useEffect(() => {
     async function fetchIndexPatterns() {
       // TODO: what's the best way to get the index pattern?
@@ -63,16 +76,25 @@ export const AlertIndexSearchBar = memo(() => {
 
   const onQueryChange = useCallback(
     (params: Parameters<NonNullable<SearchBarProps['onQueryChange']>>[0]) => {
+      let newQuery = state.query;
       if (params.query !== undefined) {
-        setState({
-          ...state,
-          filterQuery: {
-            ...state.filterQuery,
-            query: params.query.query,
-            ...(params.query.language ? { language: params.query.language } : {}),
-          },
-        });
+        newQuery = {
+          ...state.query,
+          query: params.query.query,
+          ...(params.query.language ? { language: params.query.language } : {}),
+        };
       }
+      console.log(params)
+      setState({
+        ...state,
+        query: {
+          ...newQuery,
+        },
+        dateRange: {
+          to: params.dateRange.to,
+          from: params.dateRange.from,
+        },
+      });
     },
     [state]
   );
@@ -80,10 +102,36 @@ export const AlertIndexSearchBar = memo(() => {
   const onQuerySubmit = useCallback(
     (params: Parameters<NonNullable<SearchBarProps['onQuerySubmit']>>[0]) => {
       if (params.query !== undefined) {
-        dispatch({ type: 'userAppliedAlertsSearchFilter', payload: params.query });
+        dispatch({
+          type: 'userAppliedAlertsSearchFilter',
+          payload: {
+            query: state.query,
+            filters: state.filters,
+            dateRange: state.dateRange,
+          },
+        });
       }
     },
-    [dispatch]
+    [dispatch, state]
+  );
+
+  const onFiltersUpdated = useCallback(
+    (filters: Parameters<NonNullable<SearchBarProps['onFiltersUpdated']>>[0]) => {
+      filterManager.setFilters(filters);
+      setState({
+        ...state,
+        filters: filterManager.getFilters(),
+      });
+      dispatch({
+        type: 'userAppliedAlertsSearchFilter',
+        payload: {
+          query: state.query,
+          filters,
+          dateRange: state.dateRange,
+        },
+      });
+    },
+    [filterManager, dispatch, state]
   );
 
   /*
@@ -91,7 +139,7 @@ export const AlertIndexSearchBar = memo(() => {
       appName="endpoint"
       isLoading={false}
       indexPatterns={indexPatterns}
-      query={filterQuery}
+      query={query}
       onClearSavedQuery={onClearSavedQuery}
       onQuerySubmit={onQuerySubmit}
       onRefresh={onRefresh}
@@ -113,13 +161,14 @@ export const AlertIndexSearchBar = memo(() => {
           appName="endpoint"
           isLoading={false}
           indexPatterns={state.patterns}
-          query={state.filterQuery}
+          query={state.query}
           onClearSavedQuery={() => {}}
           onQuerySubmit={onQuerySubmit}
           onQueryChange={onQueryChange}
           onRefresh={() => {}}
           onSaved={() => {}}
           onSavedQueryUpdated={() => {}}
+          onFiltersUpdated={onFiltersUpdated}
           showFilterBar={true}
           showDatePicker={true}
           showQueryBar={true}

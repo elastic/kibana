@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { KibanaRequest } from 'kibana/server';
+import { esQuery } from '../../../../../../src/plugins/data/common';
 import {
   JsonObject,
   fromKueryExpression,
@@ -20,13 +21,26 @@ import {
 
 function buildQuery(reqData: AlertRequestData): JsonObject {
   const queries: JsonObject[] = [];
+  let dateRangeFilter: JsonObject = {};
 
-  if (reqData.filters) {
-    queries.push(toElasticsearchQuery(fromKueryExpression(reqData.filters)));
+  if (reqData.filters.length > 0) {
+    const filtersQuery = esQuery.buildQueryFromFilters(reqData.filters, undefined);
+    queries.push(...filtersQuery.filter);
   }
 
   if (reqData.query) {
     queries.push(toElasticsearchQuery(fromKueryExpression(reqData.query)));
+  }
+
+  if (reqData.dateRange) {
+    dateRangeFilter = {
+      range: {
+        ['@timestamp']: {
+          gte: reqData.dateRange.from,
+          lte: reqData.dateRange.to,
+        },
+      },
+    };
   }
 
   // Optimize
@@ -35,6 +49,7 @@ function buildQuery(reqData: AlertRequestData): JsonObject {
       bool: {
         must: [queries[0], queries[1]],
       },
+      ...dateRangeFilter,
     };
   } else if (queries.length === 0) {
     return {
@@ -102,6 +117,7 @@ export const buildAlertListESQuery = async (reqData: AlertRequestData): Promise<
     reqWrapper.body.search_after = reqData.searchBefore;
   }
 
+  console.log(reqWrapper.body)
   return (reqWrapper as unknown) as JsonObject;
 };
 
@@ -125,6 +141,8 @@ export const getRequestData = async (
     reqData.pageIndex = request.body?.page_index;
     reqData.pageSize = request.body?.page_size || config.alertResultListDefaultPageSize;
     reqData.filters = request.body?.filters || config.alertResultListDefaultFilters;
+    // TODO: add default
+    reqData.dateRange = request.body?.dateRange || config.alertResultListDefaultDateRange;
     reqData.query = request.body?.query || config.alertResultListDefaultQuery;
     reqData.sort = request.body?.sort || config.alertResultListDefaultSort;
     reqData.order = request.body?.order || config.alertResultListDefaultOrder;

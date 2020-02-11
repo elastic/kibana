@@ -4,8 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Query } from 'src/plugins/data/public';
+import { Query, esFilters } from 'src/plugins/data/public';
 import { AlertListData } from '../../types';
+
+// TODO: Move
+interface SearchFilterPayload {
+  query: Query;
+  filters: esFilters.Filter[];
+}
 
 interface ServerReturnedAlertsData {
   type: 'serverReturnedAlertsData';
