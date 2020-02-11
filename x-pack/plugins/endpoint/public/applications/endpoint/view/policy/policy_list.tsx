@@ -16,10 +16,12 @@ import {
   EuiBasicTable,
   EuiText,
   EuiTableFieldDataColumnType,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedDate, FormattedTime, FormattedNumber } from '@kbn/i18n/react';
 import { useDispatch } from 'react-redux';
+import styled from 'styled-components';
 import { usePageId } from '../use_page_id';
 import {
   selectIsLoading,
@@ -37,20 +39,31 @@ interface TTableChangeCallbackArguments {
   page: { index: number; size: number };
 }
 
+const TruncateTooltipText = styled(TruncateText)`
+  .euiToolTipAnchor {
+    display: block;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+`;
+
 const FormattedDateAndTime: React.FC<{ date: Date }> = ({ date }) => {
   return (
-    <span title={date.toISOString()}>
+    <>
       <FormattedDate value={date} year="numeric" month="short" day="2-digit" />
       {' @'}
       <FormattedTime value={date} />
-    </span>
+    </>
   );
 };
 
 const renderDate = (d: string, _item: PolicyData) => (
-  <TruncateText>
-    <FormattedDateAndTime date={new Date(d as string)} />
-  </TruncateText>
+  <TruncateTooltipText>
+    <EuiToolTip content={d}>
+      <FormattedDateAndTime date={new Date(d as string)} />
+    </EuiToolTip>
+  </TruncateTooltipText>
 );
 
 const renderFormattedNumber = (value: number, _item: PolicyData) => (
