@@ -32,7 +32,6 @@ const numberIntegerRequired = Joi.number()
   .integer()
   .required();
 const numberOptional = Joi.number().optional();
-const numberRequired = Joi.number().required();
 const queryObject = Joi.object({
   language: Joi.string().allow(''),
   query: Joi.string().allow(''),
