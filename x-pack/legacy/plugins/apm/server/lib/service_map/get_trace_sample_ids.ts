@@ -21,6 +21,7 @@ import {
   TRACE_ID
 } from '../../../common/elasticsearch_fieldnames';
 
+const MAX_CONNECTIONS_PER_REQUEST = 1000;
 const MAX_TRACES_TO_INSPECT = 1000;
 
 export async function getTraceSampleIds({
@@ -76,7 +77,7 @@ export async function getTraceSampleIds({
       aggs: {
         connections: {
           composite: {
-            size: 1000,
+            size: MAX_CONNECTIONS_PER_REQUEST,
             ...afterObj,
             sources: [
               { [SERVICE_NAME]: { terms: { field: SERVICE_NAME } } },
@@ -138,7 +139,11 @@ export async function getTraceSampleIds({
   const receivedAfterKey =
     tracesSampleResponse.aggregations?.connections.after_key;
 
-  if (receivedAfterKey) {
+  if (
+    receivedAfterKey &&
+    (tracesSampleResponse.aggregations?.connections.buckets.length ?? 0) >=
+      MAX_CONNECTIONS_PER_REQUEST
+  ) {
     nextAfter = Buffer.from(JSON.stringify(receivedAfterKey)).toString(
       'base64'
     );

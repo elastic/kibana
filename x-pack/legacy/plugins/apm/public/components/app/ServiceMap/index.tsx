@@ -116,13 +116,14 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
             }
           });
           setResponses(resp => resp.concat(data));
-          setIsLoading(false);
 
           const shouldGetNext =
             responses.length + 1 < MAX_REQUESTS && data.after;
 
           if (shouldGetNext) {
             await getNext({ after: data.after });
+          } else {
+            setIsLoading(false);
           }
         } catch (error) {
           setIsLoading(false);
