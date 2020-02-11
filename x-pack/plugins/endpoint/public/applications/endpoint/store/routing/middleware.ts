@@ -6,6 +6,7 @@
 
 import { AppAction } from '../action';
 import { MiddlewareFactory } from '../../types';
+import { flattenedPromise } from '../../lib/flattened_promise';
 
 export const routingMiddlewareFactory: MiddlewareFactory = (coreStart, history) => {
   const [promise, resolve] = flattenedPromise();
@@ -27,18 +28,3 @@ export const routingMiddlewareFactory: MiddlewareFactory = (coreStart, history) 
     start: resolve,
   };
 };
-
-// TODO: move this
-function flattenedPromise<T>(): [Promise<T>, PromiseResolver<T>, PromiseRejector<T>] {
-  let newResolve: PromiseResolver<T>;
-  let newReject: PromiseRejector<T>;
-  const promise = new Promise<T>((resolve, reject) => {
-    newResolve = resolve;
-    newReject = reject;
-  });
-  return [promise, newResolve!, newReject!];
-}
-
-type PromiseResolver<T> = (value?: T | PromiseLike<T>) => void;
-
-type PromiseRejector<T> = (reason?: any) => void;
