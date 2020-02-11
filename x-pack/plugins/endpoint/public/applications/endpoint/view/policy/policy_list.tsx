@@ -15,6 +15,7 @@ import {
   EuiTitle,
   EuiBasicTable,
   EuiText,
+  EuiTableFieldDataColumnType,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedDate, FormattedTime } from '@kbn/i18n/react';
@@ -84,37 +85,45 @@ export const PolicyList = React.memo(() => {
     [dispatch]
   );
 
-  const columns = useMemo(
+  const columns: Array<EuiTableFieldDataColumnType<PolicyData>> = useMemo(
     () => [
       {
         field: 'name',
         name: i18n.translate('xpack.endpoint.policyList.nameField', {
           defaultMessage: 'Policy Name',
         }),
+        truncateText: true,
       },
       {
         field: 'total',
         name: i18n.translate('xpack.endpoint.policyList.totalField', {
           defaultMessage: 'Total',
         }),
+        dataType: 'number',
+        truncateText: true,
       },
       {
         field: 'pending',
         name: i18n.translate('xpack.endpoint.policyList.pendingField', {
           defaultMessage: 'Pending',
         }),
+        dataType: 'number',
+        truncateText: true,
       },
       {
         field: 'failed',
         name: i18n.translate('xpack.endpoint.policyList.failedField', {
           defaultMessage: 'Failed',
         }),
+        dataType: 'number',
+        truncateText: true,
       },
       {
         field: 'created_by',
         name: i18n.translate('xpack.endpoint.policyList.createdByField', {
           defaultMessage: 'Created By',
         }),
+        truncateText: true,
       },
       {
         field: 'created',
@@ -122,12 +131,14 @@ export const PolicyList = React.memo(() => {
           defaultMessage: 'Created',
         }),
         render: renderDate,
+        truncateText: true,
       },
       {
         field: 'updated_by',
         name: i18n.translate('xpack.endpoint.policyList.updatedByField', {
           defaultMessage: 'Last Updated By',
         }),
+        truncateText: true,
       },
       {
         field: 'updated',
@@ -135,6 +146,7 @@ export const PolicyList = React.memo(() => {
           defaultMessage: 'Last Updated',
         }),
         render: renderDate,
+        truncateText: true,
       },
     ],
     []
