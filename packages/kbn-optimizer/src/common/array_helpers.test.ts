@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ascending, descending, invert } from './array_helpers';
+import { ascending, descending } from './array_helpers';
 
 describe('ascending/descending', () => {
   interface Item {
@@ -108,11 +108,5 @@ describe('ascending/descending', () => {
         "1/2/3",
       ]
     `);
-  });
-});
-
-describe('invert', () => {
-  it('inverts a filter function', () => {
-    expect([1, 2, '3', 4].filter(invert((i): i is number => typeof i === 'number'))).toEqual(['3']);
   });
 });

@@ -18,32 +18,30 @@
  */
 
 import Fs from 'fs';
-import { promisify } from 'util';
 
-import { concurrentMap } from '../common';
+import * as Rx from 'rxjs';
+import { mergeMap, toArray, map, catchError } from 'rxjs/operators';
 
-const statAsync = promisify(Fs.stat);
+const stat$ = Rx.bindNodeCallback(Fs.stat);
 
 /**
  * get mtimes of referenced paths concurrently, limit concurrency to 100
  */
 export async function getMtimes(paths: Iterable<string>) {
-  return new Map(
-    await concurrentMap(
-      paths,
-      async path => {
-        try {
-          const stat = await statAsync(path);
-          return [path, stat.mtimeMs] as const;
-        } catch (error) {
-          if (error?.code === 'ENOENT') {
-            return [path, undefined] as const;
-          }
-
-          throw error;
-        }
-      },
-      100
+  return await Rx.from(paths)
+    .pipe(
+      // map paths to [path, mtimeMs] entries with concurrency of
+      // 100 at a time, ignoring missing paths
+      mergeMap(
+        path =>
+          stat$(path).pipe(
+            map(stat => [path, stat.mtimeMs] as const),
+            catchError((error: any) => (error?.code === 'ENOENT' ? Rx.EMPTY : Rx.throwError(error)))
+          ),
+        100
+      ),
+      toArray(),
+      map(entries => new Map(entries))
     )
-  );
+    .toPromise();
 }

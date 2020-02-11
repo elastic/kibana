@@ -24,6 +24,5 @@ export * from './worker_messages';
 export * from './compiler_messages';
 export * from './ts_helpers';
 export * from './rxjs_helpers';
-export * from './promise_helpers';
 export * from './array_helpers';
 export * from './state_helpers';

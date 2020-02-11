@@ -68,13 +68,6 @@ export const descending = <T>(...getters: Array<SortPropGetter<T>>): Comparator<
 };
 
 /**
- * Invert a filter function that has a defined type guard with
- * typescript support
- */
-export const invert = <T, T2 extends T>(fn: (x: T) => x is T2) => (x: T): x is Exclude<T, T2> =>
-  !fn(x);
-
-/**
  * Alternate Array#includes() implementation with sane types, functions as a type guard
  */
 export const includes = <T>(array: T[], value: any): value is T => array.includes(value);
