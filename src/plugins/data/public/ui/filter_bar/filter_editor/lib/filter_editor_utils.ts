@@ -21,11 +21,11 @@ import dateMath from '@elastic/datemath';
 import { Ipv4Address } from '../../../../../../kibana_utils/public';
 import { FILTER_OPERATORS, Operator } from './filter_operators';
 import {
-  FieldFilter,
-  Filter,
-  IFieldType,
-  IIndexPattern,
   isFilterable,
+  IIndexPattern,
+  IFieldType,
+  Filter,
+  FieldFilter,
 } from '../../../../../common';
 
 export function getFieldFromFilter(filter: FieldFilter, indexPattern: IIndexPattern) {

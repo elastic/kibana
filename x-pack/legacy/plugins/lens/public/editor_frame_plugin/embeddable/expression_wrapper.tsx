@@ -9,10 +9,10 @@ import { I18nProvider } from '@kbn/i18n/react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiIcon } from '@elastic/eui';
 import { TimeRange, Filter, Query } from 'src/plugins/data/public';
-import { ExpressionRenderer } from 'src/plugins/expressions/public';
+import { ReactExpressionRendererType } from 'src/plugins/expressions/public';
 
 export interface ExpressionWrapperProps {
-  ExpressionRenderer: ExpressionRenderer;
+  ExpressionRenderer: ReactExpressionRendererType;
   expression: string | null;
   context: {
     timeRange?: TimeRange;
@@ -49,7 +49,7 @@ export function ExpressionWrapper({
             className="lnsExpressionRenderer__component"
             padding="m"
             expression={expression}
-            searchContext={{ ...context, type: 'kibana_context' }}
+            searchContext={{ ...context }}
             renderError={error => <div data-test-subj="expression-renderer-error">{error}</div>}
           />
         </div>

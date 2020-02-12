@@ -49,7 +49,7 @@ export const esFilters = {
 };
 
 /*
- * esQuery\esKuery namespaces:
+ * esQuery and esKuery:
  */
 
 import {
@@ -71,8 +71,10 @@ export const esQuery = {
   buildEsQuery,
 };
 
+export { EsQueryConfig, KueryNode } from '../common';
+
 /*
- * Field Formatters helper namespace:
+ * Field Formats:
  */
 
 import {
@@ -115,6 +117,34 @@ export const fieldFormats = {
   StringFormat,
   TruncateFormat,
 };
+
+export { IFieldFormatsRegistry, FieldFormatsGetConfigFn, FieldFormatConfig } from '../common';
+
+/*
+ * Index patterns:
+ */
+
+import { isNestedField, isFilterable } from '../common';
+
+export const indexPatterns = {
+  isFilterable,
+  isNestedField,
+};
+
+export {
+  IndexPatternsFetcher,
+  FieldDescriptor as IndexPatternFieldDescriptor,
+  shouldReadFieldFromDocValues, // used only in logstash_fields fixture
+} from './index_patterns';
+
+export {
+  IIndexPattern,
+  IFieldType,
+  IFieldSubType,
+  ES_FIELD_TYPES,
+  KBN_FIELD_TYPES,
+} from '../common';
+
 export function plugin(initializerContext: PluginInitializerContext) {
   return new DataServerPlugin(initializerContext);
 }
@@ -126,21 +156,10 @@ export function plugin(initializerContext: PluginInitializerContext) {
 export { IRequestTypesMap, IResponseTypesMap } from './search';
 
 export {
-  EsQueryConfig,
-  // es query
-  KueryNode,
   // kbn field types
   castEsToKbnFieldTypeName,
   getKbnFieldType,
   getKbnTypeNames,
-  // index patterns
-  IIndexPattern,
-  isFilterable,
-  IFieldType,
-  IFieldSubType,
-  // kbn field types
-  ES_FIELD_TYPES,
-  KBN_FIELD_TYPES,
   // query
   Filter,
   Query,
@@ -149,22 +168,12 @@ export {
   TimeRange,
   // utils
   parseInterval,
-  isNestedField,
-  IFieldFormatsRegistry,
-  FieldFormatsGetConfigFn,
-  FieldFormatConfig,
 } from '../common';
 
 /**
  * Static code to be shared externally
  * @public
  */
-export {
-  IndexPatternsFetcher,
-  FieldDescriptor,
-  shouldReadFieldFromDocValues,
-  indexPatterns,
-} from './index_patterns';
 
 export * from './search';
 

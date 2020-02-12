@@ -93,7 +93,7 @@ const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
         />
         <Route
           path={`${hostDetailsPagePath}/:tabName(${HostsTableType.events})`}
-          render={() => <EventsQueryTabBody {...tabProps} />}
+          render={() => <EventsQueryTabBody {...tabProps} pageFilters={pageFilters} />}
         />
         <Route
           path={`${hostDetailsPagePath}/:tabName(${HostsTableType.alerts})`}

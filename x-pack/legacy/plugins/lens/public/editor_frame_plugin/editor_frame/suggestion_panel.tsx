@@ -24,7 +24,7 @@ import classNames from 'classnames';
 import { Action, PreviewState } from './state_management';
 import { Datasource, Visualization, FramePublicAPI, DatasourcePublicAPI } from '../../types';
 import { getSuggestions, switchToSuggestion } from './suggestion_helpers';
-import { ExpressionRenderer } from '../../../../../../../src/plugins/expressions/public';
+import { ReactExpressionRendererType } from '../../../../../../../src/plugins/expressions/public';
 import { prependDatasourceExpression, prependKibanaContext } from './expression_helpers';
 import { debouncedComponent } from '../../debounced_component';
 import { trackUiEvent, trackSuggestionEvent } from '../../lens_ui_telemetry';
@@ -49,7 +49,7 @@ export interface SuggestionPanelProps {
   visualizationMap: Record<string, Visualization>;
   visualizationState: unknown;
   dispatch: (action: Action) => void;
-  ExpressionRenderer: ExpressionRenderer;
+  ExpressionRenderer: ReactExpressionRendererType;
   frame: FramePublicAPI;
   stagedPreview?: PreviewState;
 }
@@ -61,7 +61,7 @@ const PreviewRenderer = ({
 }: {
   withLabel: boolean;
   expression: string;
-  ExpressionRendererComponent: ExpressionRenderer;
+  ExpressionRendererComponent: ReactExpressionRendererType;
 }) => {
   return (
     <div
@@ -110,7 +110,7 @@ const SuggestionPreview = ({
     icon: IconType;
     title: string;
   };
-  ExpressionRenderer: ExpressionRenderer;
+  ExpressionRenderer: ReactExpressionRendererType;
   selected: boolean;
   showTitleAsLabel?: boolean;
 }) => {

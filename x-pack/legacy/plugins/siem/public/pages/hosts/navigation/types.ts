@@ -46,6 +46,7 @@ export interface QueryTabBodyProps {
 export type HostsComponentsQueryProps = QueryTabBodyProps & {
   deleteQuery?: ({ id }: { id: string }) => void;
   indexPattern: IIndexPattern;
+  pageFilters?: esFilters.Filter[];
   skip: boolean;
   setQuery: SetQuery;
   updateDateRange?: UpdateDateRange;
