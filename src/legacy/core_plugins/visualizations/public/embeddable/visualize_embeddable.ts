@@ -22,7 +22,6 @@ import { PersistedState } from 'ui/persisted_state';
 import { Subscription } from 'rxjs';
 import * as Rx from 'rxjs';
 import { buildPipeline } from 'ui/visualize/loader/pipeline_helpers';
-import { SavedObject } from 'ui/saved_objects/types';
 import { AppState } from 'ui/state_management/app_state';
 import { npStart } from 'ui/new_platform';
 import { IExpressionLoaderParams } from 'src/plugins/expressions/public';
@@ -44,6 +43,7 @@ import {
   SELECT_RANGE_TRIGGER,
 } from '../../../../../plugins/embeddable/public';
 import { dispatchRenderComplete } from '../../../../../plugins/kibana_utils/public';
+import { SavedObject } from '../../../../../plugins/saved_objects/public';
 import { SavedSearch } from '../../../kibana/public/discover/np_ready/types';
 import { Vis } from '../np_ready/public';
 import { queryGeohashBounds } from './query_geohash_bounds';

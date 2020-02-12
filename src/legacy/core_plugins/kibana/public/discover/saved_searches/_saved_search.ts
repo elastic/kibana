@@ -18,8 +18,8 @@
  */
 
 import {
-  SavedObjectKibanaServices,
   createSavedObjectClass,
+  SavedObjectKibanaServices,
 } from '../../../../../../plugins/saved_objects/public';
 
 export function createSavedSearchClass(services: SavedObjectKibanaServices) {

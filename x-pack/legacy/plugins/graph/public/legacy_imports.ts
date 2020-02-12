@@ -6,10 +6,8 @@
 
 import 'ace';
 
-export { SavedObject, SavedObjectKibanaServices } from 'ui/saved_objects/types';
 // @ts-ignore
 export { createTopNavDirective, createTopNavHelper } from 'ui/kbn_top_nav/kbn_top_nav';
 // @ts-ignore
 export { addAppRedirectMessageToUrl } from 'ui/notify';
-export { createSavedObjectClass } from 'ui/saved_objects/saved_object';
 export { configureAppAngularModule } from '../../../../../src/plugins/kibana_legacy/public';

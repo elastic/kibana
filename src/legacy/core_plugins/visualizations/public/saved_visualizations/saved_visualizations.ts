@@ -16,8 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { SavedObjectLoader } from 'ui/saved_objects';
-import { SavedObjectKibanaServices } from 'ui/saved_objects/types';
+import {
+  SavedObjectLoader,
+  SavedObjectKibanaServices,
+} from '../../../../../plugins/saved_objects/public';
 
 // @ts-ignore
 import { findListItems } from './find_list_items';
