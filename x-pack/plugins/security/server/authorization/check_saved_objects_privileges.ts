@@ -6,25 +6,18 @@
 
 import { KibanaRequest } from '../../../../../src/core/server';
 import { SpacesService } from '../plugin';
-import {
-  CheckPrivilegesAtResourceResponse,
-  CheckPrivilegesWithRequest,
-  CheckPrivilegesAtSpacesResponse,
-} from './check_privileges';
+import { CheckPrivilegesWithRequest, CheckPrivilegesResponse } from './check_privileges';
 
 export type CheckSavedObjectsPrivilegesWithRequest = (
   request: KibanaRequest
 ) => CheckSavedObjectsPrivileges;
 
 export interface CheckSavedObjectsPrivileges {
-  dynamically: (
-    actions: string | string[],
-    namespace?: string
-  ) => Promise<CheckPrivilegesAtResourceResponse>;
+  dynamically: (actions: string | string[], namespace?: string) => Promise<CheckPrivilegesResponse>;
   atNamespaces: (
     actions: string | string[],
     namespaces: string[]
-  ) => Promise<CheckPrivilegesAtSpacesResponse>;
+  ) => Promise<CheckPrivilegesResponse>;
 }
 
 export const checkSavedObjectsPrivilegesWithRequestFactory = (

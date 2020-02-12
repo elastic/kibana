@@ -13,16 +13,23 @@ export class SecurityAuditLogger {
     username: string,
     action: string,
     types: string[],
-    missing: string[],
+    spaceIds: string[],
+    missing: Array<{ spaceId?: string; privilege: string }>,
     args?: Record<string, unknown>
   ) {
+    const typesString = types.join(',');
+    const spacesString = spaceIds.length ? ` in [${spaceIds.join(',')}]` : '';
+    const missingString = missing
+      .map(({ spaceId, privilege }) => `${spaceId ? `(${spaceId})` : ''}${privilege}`)
+      .join(',');
     this.getAuditLogger().log(
       'saved_objects_authorization_failure',
-      `${username} unauthorized to ${action} ${types.join(',')}, missing ${missing.join(',')}`,
+      `${username} unauthorized to [${action}] [${typesString}]${spacesString}: missing [${missingString}]`,
       {
         username,
         action,
         types,
+        spaceIds,
         missing,
         args,
       }
@@ -33,15 +40,19 @@ export class SecurityAuditLogger {
     username: string,
     action: string,
     types: string[],
+    spaceIds: string[],
     args?: Record<string, unknown>
   ) {
+    const typesString = types.join(',');
+    const spacesString = spaceIds.length ? ` in [${spaceIds.join(',')}]` : '';
     this.getAuditLogger().log(
       'saved_objects_authorization_success',
-      `${username} authorized to ${action} ${types.join(',')}`,
+      `${username} authorized to [${action}] [${typesString}]${spacesString}`,
       {
         username,
         action,
         types,
+        spaceIds,
         args,
       }
     );

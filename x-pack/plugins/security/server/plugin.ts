@@ -144,6 +144,7 @@ export class Plugin {
       auditLogger: new SecurityAuditLogger(() => this.getLegacyAPI().auditLogger),
       authz,
       savedObjects: core.savedObjects,
+      getSpacesService: this.getSpacesService,
     });
 
     core.capabilities.registerSwitcher(authz.disableUnauthorizedCapabilities);

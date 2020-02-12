@@ -69,10 +69,7 @@ function getClauseForType(
   if (registry.isNamespaces(type)) {
     return {
       bool: {
-        must: [
-          { term: { type } },
-          { term: { namespaces: namespace === undefined ? 'default' : namespace } },
-        ],
+        must: [{ term: { type } }, { term: { namespaces: namespace ?? 'default' } }],
       },
     };
   }

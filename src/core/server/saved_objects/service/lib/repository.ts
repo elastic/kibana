@@ -45,7 +45,8 @@ import {
   SavedObjectsBulkUpdateObject,
   SavedObjectsBulkUpdateOptions,
   SavedObjectsDeleteOptions,
-  SavedObjectsUpdateNamespacesOptions,
+  SavedObjectsAddNamespacesOptions,
+  SavedObjectsRemoveNamespacesOptions,
 } from '../saved_objects_client';
 import {
   SavedObject,
@@ -408,12 +409,12 @@ export class SavedObjectsRepository {
           }
           savedObjectNamespaces = docFound
             ? actualResult._source.namespaces
-            : [namespace === undefined ? 'default' : namespace];
+            : [namespace ?? 'default'];
         } else {
           if (this._registry.isNamespace(object.type)) {
             savedObjectNamespace = namespace;
           } else if (this._registry.isNamespaces(object.type)) {
-            savedObjectNamespaces = [namespace === undefined ? 'default' : namespace];
+            savedObjectNamespaces = [namespace ?? 'default'];
           }
         }
 
@@ -512,8 +513,9 @@ export class SavedObjectsRepository {
     const { namespace, refresh = DEFAULT_REFRESH_SETTING } = options;
 
     // Instead of the get, we could always do a _delete_by_query
+    const rawId = this._serializer.generateRawId(namespace, type, id);
     const getResponse = await this._callCluster('get', {
-      id: this._serializer.generateRawId(namespace, type, id),
+      id: rawId,
       index: this.getIndexForType(type),
       ignore: [404],
     });
@@ -524,8 +526,39 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
 
+    if (this._registry.isNamespaces(type)) {
+      const existingNamespaces = getResponse._source.namespaces as string[];
+      const remainingNamespaces = existingNamespaces.filter(x => x !== (namespace ?? 'default'));
+
+      if (remainingNamespaces.length) {
+        // if there is 1 or more namespace remaining, update the saved object
+        const time = this._getCurrentTime();
+
+        const doc = {
+          updated_at: time,
+          namespaces: remainingNamespaces,
+        };
+
+        const updateResponse = await this._writeToCluster('update', {
+          id: rawId,
+          index: this.getIndexForType(type),
+          refresh,
+          ignore: [404],
+          body: {
+            doc,
+          },
+        });
+
+        if (updateResponse.status === 404) {
+          // see "404s from missing index" above
+          throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+        }
+        return {};
+      }
+    }
+
     const deleteResponse = await this._writeToCluster('delete', {
-      id: this._serializer.generateRawId(namespace, type, id),
+      id: rawId,
       index: this.getIndexForType(type),
       refresh,
       ignore: [404],
@@ -568,25 +601,40 @@ export class SavedObjectsRepository {
     }
 
     const { refresh = DEFAULT_REFRESH_SETTING } = options;
-
     const allTypes = Object.keys(getRootPropertiesObjects(this._mappings));
+    const typesToUpdate = allTypes.filter(type => !this._registry.isNamespaceAgnostic(type));
 
-    const typesToDelete = allTypes.filter(type => this._registry.isNamespace(type));
-
-    const esOptions = {
-      index: this.getIndicesForTypes(typesToDelete),
+    const updateOptions = {
+      index: this.getIndicesForTypes(typesToUpdate),
       ignore: [404],
       refresh,
       body: {
+        script: {
+          source: `
+              if (!ctx._source.containsKey('namespaces')) {
+                ctx.op = "delete";
+              } else {
+                ctx._source['namespaces'].removeAll(Collections.singleton(params['namespace']));
+                if (ctx._source['namespaces'].empty) {
+                  ctx.op = "delete";
+                }
+              }
+            `,
+          lang: 'painless',
+          params: {
+            // this nullish coalescing isn't required, as the default namespace can't be deleted; it's just here as a fail-safe
+            namespace: namespace ?? 'default',
+          },
+        },
         conflicts: 'proceed',
         ...getSearchDsl(this._mappings, this._registry, {
           namespace,
-          type: typesToDelete,
+          type: typesToUpdate,
         }),
       },
     };
 
-    return await this._writeToCluster('deleteByQuery', esOptions);
+    return await this._writeToCluster('updateByQuery', updateOptions);
   }
 
   /**
@@ -902,12 +950,12 @@ export class SavedObjectsRepository {
     };
   }
 
-  async updateNamespaces(
+  async addNamespaces(
     type: string,
     id: string,
     namespaces: string[],
-    options: SavedObjectsUpdateNamespacesOptions = {}
-  ): Promise<void> {
+    options: SavedObjectsAddNamespacesOptions = {}
+  ): Promise<{}> {
     if (!this._allowedTypes.includes(type)) {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
@@ -916,17 +964,46 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createBadRequestError(`${type} doesn't support namespaces`);
     }
 
+    if (!namespaces || !Array.isArray(namespaces) || !namespaces.length) {
+      throw SavedObjectsErrorHelpers.createBadRequestError(
+        'namespaces must be a non-empty array of strings'
+      );
+    }
+
     const { version, refresh = DEFAULT_REFRESH_SETTING } = options;
+
+    const rawId = this._serializer.generateRawId(undefined, type, id);
+    const getResponse = await this._callCluster('get', {
+      id: rawId,
+      index: this.getIndexForType(type),
+      ignore: [404],
+    });
+
+    const getDocNotFound = getResponse.found === false;
+    const getIndexNotFound = getResponse.status === 404;
+    if (getDocNotFound || getIndexNotFound) {
+      throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+    }
+
+    const existingNamespaces = getResponse._source.namespaces as string[] | undefined;
+    if (existingNamespaces) {
+      const intersection = existingNamespaces.filter(x => namespaces.includes(x));
+      if (intersection.length) {
+        throw SavedObjectsErrorHelpers.createBadRequestError(
+          `${rawId} already exists in the following namespace(s): ${intersection.join(', ')}`
+        );
+      }
+    }
 
     const time = this._getCurrentTime();
 
     const doc = {
       updated_at: time,
-      namespaces,
+      namespaces: existingNamespaces ? existingNamespaces.concat(namespaces) : namespaces,
     };
 
     const updateResponse = await this._writeToCluster('update', {
-      id: this._serializer.generateRawId(undefined, type, id),
+      id: rawId,
       index: this.getIndexForType(type),
       ...(version && decodeRequestVersion(version)),
       refresh,
@@ -941,7 +1018,113 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
 
-    return;
+    return {};
+  }
+
+  async removeNamespaces(
+    type: string,
+    id: string,
+    namespaces: string[],
+    options: SavedObjectsRemoveNamespacesOptions = {}
+  ): Promise<{}> {
+    if (!this._allowedTypes.includes(type)) {
+      throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+    }
+
+    if (!this._registry.isNamespaces(type)) {
+      throw SavedObjectsErrorHelpers.createBadRequestError(`${type} doesn't support namespaces`);
+    }
+
+    if (!namespaces || !Array.isArray(namespaces) || !namespaces.length) {
+      throw SavedObjectsErrorHelpers.createBadRequestError(
+        'namespaces must be a non-empty array of strings'
+      );
+    }
+
+    const { refresh = DEFAULT_REFRESH_SETTING } = options;
+
+    const rawId = this._serializer.generateRawId(undefined, type, id);
+    const getResponse = await this._callCluster('get', {
+      id: rawId,
+      index: this.getIndexForType(type),
+      ignore: [404],
+    });
+
+    const getDocNotFound = getResponse.found === false;
+    const getIndexNotFound = getResponse.status === 404;
+    if (getDocNotFound || getIndexNotFound) {
+      throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+    }
+
+    const existingNamespaces = getResponse._source.namespaces as string[] | undefined;
+    if (existingNamespaces) {
+      // if there are somehow no existing namespaces, don't treat this as a missing namespace --
+      // instead, allow the operation to proceed and delete this saved object
+      const missing = namespaces.filter(x => !existingNamespaces.includes(x));
+      if (missing.length) {
+        throw SavedObjectsErrorHelpers.createBadRequestError(
+          `${rawId} doesn't exist in the following namespace(s): ${missing.join(', ')}`
+        );
+      }
+    }
+    const remainingNamespaces = existingNamespaces
+      ? existingNamespaces.filter(x => !namespaces.includes(x))
+      : [];
+
+    if (remainingNamespaces.length) {
+      // if there is 1 or more namespace remaining, update the saved object
+      const time = this._getCurrentTime();
+
+      const doc = {
+        updated_at: time,
+        namespaces: remainingNamespaces,
+      };
+
+      const updateResponse = await this._writeToCluster('update', {
+        id: rawId,
+        index: this.getIndexForType(type),
+        refresh,
+        ignore: [404],
+        body: {
+          doc,
+        },
+      });
+
+      if (updateResponse.status === 404) {
+        // see "404s from missing index" above
+        throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+      }
+      return {};
+    } else {
+      // if there are no namespaces remaining, delete the saved object
+      const deleteResponse = await this._writeToCluster('delete', {
+        id: this._serializer.generateRawId(undefined, type, id),
+        index: this.getIndexForType(type),
+        refresh,
+        ignore: [404],
+      });
+
+      const deleted = deleteResponse.result === 'deleted';
+      if (deleted) {
+        return {};
+      }
+
+      const deleteDocNotFound = deleteResponse.result === 'not_found';
+      const deleteIndexNotFound =
+        deleteResponse.error && deleteResponse.error.type === 'index_not_found_exception';
+      if (deleteDocNotFound || deleteIndexNotFound) {
+        // see "404s from missing index" above
+        throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+      }
+
+      throw new Error(
+        `Unexpected Elasticsearch DELETE response: ${JSON.stringify({
+          type,
+          id,
+          response: deleteResponse,
+        })}`
+      );
+    }
   }
 
   /**
@@ -1267,12 +1450,12 @@ export class SavedObjectsRepository {
 
     // if the type is namespace isolated, or namespace agnostic, we can continue to rely on the guarantees
     // of the document ID format and don't need to check this
-    if (this._registry.isNamespace(rawDocType) || this._registry.isNamespaceAgnostic(rawDocType)) {
+    if (!this._registry.isNamespaces(rawDocType)) {
       return true;
     }
 
-    const namespaces = raw._source.namespaces as Array<string | null>;
-    return namespaces.includes(namespace === undefined ? 'default' : namespace);
+    const namespaces = raw._source.namespaces as string[] | undefined;
+    return namespaces?.includes(namespace ?? 'default');
   }
 }
 

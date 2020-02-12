@@ -9,7 +9,7 @@ import { UICapabilities } from 'ui/capabilities';
 import { KibanaRequest, Logger } from '../../../../../src/core/server';
 import { Feature } from '../../../features/server';
 
-import { CheckPrivilegesAtResourceResponse } from './check_privileges';
+import { CheckPrivilegesResponse } from './check_privileges';
 import { Authorization } from './index';
 
 export function disableUICapabilitiesFactory(
@@ -77,7 +77,7 @@ export function disableUICapabilitiesFactory(
       []
     );
 
-    let checkPrivilegesResponse: CheckPrivilegesAtResourceResponse;
+    let checkPrivilegesResponse: CheckPrivilegesResponse;
     try {
       const checkPrivilegesDynamically = authz.checkPrivilegesDynamicallyWithRequest(request);
       checkPrivilegesResponse = await checkPrivilegesDynamically(uiActions);
@@ -105,7 +105,11 @@ export function disableUICapabilitiesFactory(
       }
 
       const action = authz.actions.ui.get(featureId, ...uiCapabilityParts);
-      return checkPrivilegesResponse.privileges[action] === true;
+      return (
+        checkPrivilegesResponse.privileges.find(
+          x => x.privilege === action && x.authorized === true
+        ) !== undefined
+      );
     };
 
     return mapValues(uiCapabilities, (featureUICapabilities, featureId) => {

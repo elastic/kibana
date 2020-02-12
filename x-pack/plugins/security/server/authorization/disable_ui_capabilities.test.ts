@@ -10,7 +10,9 @@ import { disableUICapabilitiesFactory } from './disable_ui_capabilities';
 import { httpServerMock, loggingServiceMock } from '../../../../../src/core/server/mocks';
 import { authorizationMock } from './index.mock';
 
-type MockAuthzOptions = { rejectCheckPrivileges: any } | { resolveCheckPrivileges: any };
+type MockAuthzOptions =
+  | { rejectCheckPrivileges: any }
+  | { resolveCheckPrivileges: { privileges: Array<{ privilege: string; authorized: boolean }> } };
 
 const actions = new Actions('1.0.0-zeta1');
 const mockRequest = httpServerMock.createKibanaRequest();
@@ -25,7 +27,8 @@ const createMockAuthz = (options: MockAuthzOptions) => {
         throw options.rejectCheckPrivileges;
       }
 
-      expect(checkActions).toEqual(Object.keys(options.resolveCheckPrivileges.privileges));
+      const expected = options.resolveCheckPrivileges.privileges.map(x => x.privilege);
+      expect(checkActions).toEqual(expected);
       return options.resolveCheckPrivileges;
     });
   });
@@ -209,17 +212,17 @@ describe('usingPrivileges', () => {
   test(`disables ui capabilities when they don't have privileges`, async () => {
     const mockAuthz = createMockAuthz({
       resolveCheckPrivileges: {
-        privileges: {
-          [actions.ui.get('navLinks', 'foo')]: true,
-          [actions.ui.get('navLinks', 'bar')]: false,
-          [actions.ui.get('navLinks', 'quz')]: false,
-          [actions.ui.get('management', 'kibana', 'indices')]: true,
-          [actions.ui.get('management', 'kibana', 'settings')]: false,
-          [actions.ui.get('fooFeature', 'foo')]: true,
-          [actions.ui.get('fooFeature', 'bar')]: false,
-          [actions.ui.get('barFeature', 'foo')]: true,
-          [actions.ui.get('barFeature', 'bar')]: false,
-        },
+        privileges: [
+          { privilege: actions.ui.get('navLinks', 'foo'), authorized: true },
+          { privilege: actions.ui.get('navLinks', 'bar'), authorized: false },
+          { privilege: actions.ui.get('navLinks', 'quz'), authorized: false },
+          { privilege: actions.ui.get('management', 'kibana', 'indices'), authorized: true },
+          { privilege: actions.ui.get('management', 'kibana', 'settings'), authorized: false },
+          { privilege: actions.ui.get('fooFeature', 'foo'), authorized: true },
+          { privilege: actions.ui.get('fooFeature', 'bar'), authorized: false },
+          { privilege: actions.ui.get('barFeature', 'foo'), authorized: true },
+          { privilege: actions.ui.get('barFeature', 'bar'), authorized: false },
+        ],
       },
     });
 
@@ -297,15 +300,15 @@ describe('usingPrivileges', () => {
   test(`doesn't re-enable disabled uiCapabilities`, async () => {
     const mockAuthz = createMockAuthz({
       resolveCheckPrivileges: {
-        privileges: {
-          [actions.ui.get('navLinks', 'foo')]: true,
-          [actions.ui.get('navLinks', 'bar')]: true,
-          [actions.ui.get('management', 'kibana', 'indices')]: true,
-          [actions.ui.get('fooFeature', 'foo')]: true,
-          [actions.ui.get('fooFeature', 'bar')]: true,
-          [actions.ui.get('barFeature', 'foo')]: true,
-          [actions.ui.get('barFeature', 'bar')]: true,
-        },
+        privileges: [
+          { privilege: actions.ui.get('navLinks', 'foo'), authorized: true },
+          { privilege: actions.ui.get('navLinks', 'bar'), authorized: true },
+          { privilege: actions.ui.get('management', 'kibana', 'indices'), authorized: true },
+          { privilege: actions.ui.get('fooFeature', 'foo'), authorized: true },
+          { privilege: actions.ui.get('fooFeature', 'bar'), authorized: true },
+          { privilege: actions.ui.get('barFeature', 'foo'), authorized: true },
+          { privilege: actions.ui.get('barFeature', 'bar'), authorized: true },
+        ],
       },
     });
 

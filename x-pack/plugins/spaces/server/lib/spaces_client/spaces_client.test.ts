@@ -250,14 +250,10 @@ describe('#getAll', () => {
           mockAuthorization.mode.useRbacForRequest.mockReturnValue(true);
           mockCheckPrivilegesAtSpaces.mockReturnValue({
             username,
-            spacePrivileges: {
-              [savedObjects[0].id]: {
-                [privilege]: false,
-              },
-              [savedObjects[1].id]: {
-                [privilege]: false,
-              },
-            },
+            privileges: [
+              { spaceId: savedObjects[0].id, privilege, authorized: false },
+              { spaceId: savedObjects[1].id, privilege, authorized: false },
+            ],
           });
           const maxSpaces = 1234;
           const mockConfig = createMockConfig({
@@ -314,14 +310,10 @@ describe('#getAll', () => {
           mockAuthorization.mode.useRbacForRequest.mockReturnValue(true);
           mockCheckPrivilegesAtSpaces.mockReturnValue({
             username,
-            spacePrivileges: {
-              [savedObjects[0].id]: {
-                [privilege]: true,
-              },
-              [savedObjects[1].id]: {
-                [privilege]: false,
-              },
-            },
+            privileges: [
+              { spaceId: savedObjects[0].id, privilege, authorized: true },
+              { spaceId: savedObjects[1].id, privilege, authorized: false },
+            ],
           });
           const mockInternalRepository = {
             find: jest.fn().mockReturnValue({

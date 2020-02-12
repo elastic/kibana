@@ -100,9 +100,13 @@ describe('#atSpace', () => {
     expect(result).toMatchInlineSnapshot(`
       Object {
         "hasAllRequested": true,
-        "privileges": Object {
-          "mock-action:login": true,
-        },
+        "privileges": Array [
+          Object {
+            "authorized": true,
+            "privilege": "mock-action:login",
+            "spaceId": "space_1",
+          },
+        ],
         "username": "foo-username",
       }
     `);
@@ -128,9 +132,13 @@ describe('#atSpace', () => {
     expect(result).toMatchInlineSnapshot(`
       Object {
         "hasAllRequested": false,
-        "privileges": Object {
-          "mock-action:login": false,
-        },
+        "privileges": Array [
+          Object {
+            "authorized": false,
+            "privilege": "mock-action:login",
+            "spaceId": "space_1",
+          },
+        ],
         "username": "foo-username",
       }
     `);
@@ -183,10 +191,18 @@ describe('#atSpace', () => {
     expect(result).toMatchInlineSnapshot(`
       Object {
         "hasAllRequested": true,
-        "privileges": Object {
-          "saved_object:bar-type/get": true,
-          "saved_object:foo-type/get": true,
-        },
+        "privileges": Array [
+          Object {
+            "authorized": true,
+            "privilege": "saved_object:foo-type/get",
+            "spaceId": "space_1",
+          },
+          Object {
+            "authorized": true,
+            "privilege": "saved_object:bar-type/get",
+            "spaceId": "space_1",
+          },
+        ],
         "username": "foo-username",
       }
     `);
@@ -217,10 +233,18 @@ describe('#atSpace', () => {
     expect(result).toMatchInlineSnapshot(`
       Object {
         "hasAllRequested": false,
-        "privileges": Object {
-          "saved_object:bar-type/get": true,
-          "saved_object:foo-type/get": false,
-        },
+        "privileges": Array [
+          Object {
+            "authorized": false,
+            "privilege": "saved_object:foo-type/get",
+            "spaceId": "space_1",
+          },
+          Object {
+            "authorized": true,
+            "privilege": "saved_object:bar-type/get",
+            "spaceId": "space_1",
+          },
+        ],
         "username": "foo-username",
       }
     `);
@@ -352,14 +376,18 @@ describe('#atSpaces', () => {
     expect(result).toMatchInlineSnapshot(`
       Object {
         "hasAllRequested": true,
-        "spacePrivileges": Object {
-          "space_1": Object {
-            "mock-action:login": true,
+        "privileges": Array [
+          Object {
+            "authorized": true,
+            "privilege": "mock-action:login",
+            "spaceId": "space_1",
           },
-          "space_2": Object {
-            "mock-action:login": true,
+          Object {
+            "authorized": true,
+            "privilege": "mock-action:login",
+            "spaceId": "space_2",
           },
-        },
+        ],
         "username": "foo-username",
       }
     `);
@@ -389,14 +417,18 @@ describe('#atSpaces', () => {
     expect(result).toMatchInlineSnapshot(`
       Object {
         "hasAllRequested": false,
-        "spacePrivileges": Object {
-          "space_1": Object {
-            "mock-action:login": true,
+        "privileges": Array [
+          Object {
+            "authorized": true,
+            "privilege": "mock-action:login",
+            "spaceId": "space_1",
           },
-          "space_2": Object {
-            "mock-action:login": false,
+          Object {
+            "authorized": false,
+            "privilege": "mock-action:login",
+            "spaceId": "space_2",
           },
-        },
+        ],
         "username": "foo-username",
       }
     `);
@@ -488,16 +520,28 @@ describe('#atSpaces', () => {
     expect(result).toMatchInlineSnapshot(`
       Object {
         "hasAllRequested": true,
-        "spacePrivileges": Object {
-          "space_1": Object {
-            "saved_object:bar-type/get": true,
-            "saved_object:foo-type/get": true,
+        "privileges": Array [
+          Object {
+            "authorized": true,
+            "privilege": "saved_object:foo-type/get",
+            "spaceId": "space_1",
           },
-          "space_2": Object {
-            "saved_object:bar-type/get": true,
-            "saved_object:foo-type/get": true,
+          Object {
+            "authorized": true,
+            "privilege": "saved_object:bar-type/get",
+            "spaceId": "space_1",
           },
-        },
+          Object {
+            "authorized": true,
+            "privilege": "saved_object:foo-type/get",
+            "spaceId": "space_2",
+          },
+          Object {
+            "authorized": true,
+            "privilege": "saved_object:bar-type/get",
+            "spaceId": "space_2",
+          },
+        ],
         "username": "foo-username",
       }
     `);
@@ -534,16 +578,28 @@ describe('#atSpaces', () => {
     expect(result).toMatchInlineSnapshot(`
       Object {
         "hasAllRequested": false,
-        "spacePrivileges": Object {
-          "space_1": Object {
-            "saved_object:bar-type/get": false,
-            "saved_object:foo-type/get": true,
+        "privileges": Array [
+          Object {
+            "authorized": true,
+            "privilege": "saved_object:foo-type/get",
+            "spaceId": "space_1",
           },
-          "space_2": Object {
-            "saved_object:bar-type/get": false,
-            "saved_object:foo-type/get": false,
+          Object {
+            "authorized": false,
+            "privilege": "saved_object:bar-type/get",
+            "spaceId": "space_1",
           },
-        },
+          Object {
+            "authorized": false,
+            "privilege": "saved_object:foo-type/get",
+            "spaceId": "space_2",
+          },
+          Object {
+            "authorized": false,
+            "privilege": "saved_object:bar-type/get",
+            "spaceId": "space_2",
+          },
+        ],
         "username": "foo-username",
       }
     `);
@@ -580,16 +636,28 @@ describe('#atSpaces', () => {
     expect(result).toMatchInlineSnapshot(`
       Object {
         "hasAllRequested": false,
-        "spacePrivileges": Object {
-          "space_1": Object {
-            "saved_object:bar-type/get": true,
-            "saved_object:foo-type/get": true,
+        "privileges": Array [
+          Object {
+            "authorized": true,
+            "privilege": "saved_object:foo-type/get",
+            "spaceId": "space_1",
           },
-          "space_2": Object {
-            "saved_object:bar-type/get": false,
-            "saved_object:foo-type/get": false,
+          Object {
+            "authorized": true,
+            "privilege": "saved_object:bar-type/get",
+            "spaceId": "space_1",
           },
-        },
+          Object {
+            "authorized": false,
+            "privilege": "saved_object:foo-type/get",
+            "spaceId": "space_2",
+          },
+          Object {
+            "authorized": false,
+            "privilege": "saved_object:bar-type/get",
+            "spaceId": "space_2",
+          },
+        ],
         "username": "foo-username",
       }
     `);
@@ -626,16 +694,28 @@ describe('#atSpaces', () => {
     expect(result).toMatchInlineSnapshot(`
       Object {
         "hasAllRequested": false,
-        "spacePrivileges": Object {
-          "space_1": Object {
-            "saved_object:bar-type/get": true,
-            "saved_object:foo-type/get": true,
+        "privileges": Array [
+          Object {
+            "authorized": true,
+            "privilege": "saved_object:foo-type/get",
+            "spaceId": "space_1",
           },
-          "space_2": Object {
-            "saved_object:bar-type/get": false,
-            "saved_object:foo-type/get": true,
+          Object {
+            "authorized": true,
+            "privilege": "saved_object:bar-type/get",
+            "spaceId": "space_1",
           },
-        },
+          Object {
+            "authorized": true,
+            "privilege": "saved_object:foo-type/get",
+            "spaceId": "space_2",
+          },
+          Object {
+            "authorized": false,
+            "privilege": "saved_object:bar-type/get",
+            "spaceId": "space_2",
+          },
+        ],
         "username": "foo-username",
       }
     `);
@@ -826,9 +906,13 @@ describe('#globally', () => {
     expect(result).toMatchInlineSnapshot(`
       Object {
         "hasAllRequested": true,
-        "privileges": Object {
-          "mock-action:login": true,
-        },
+        "privileges": Array [
+          Object {
+            "authorized": true,
+            "privilege": "mock-action:login",
+            "spaceId": undefined,
+          },
+        ],
         "username": "foo-username",
       }
     `);
@@ -853,9 +937,13 @@ describe('#globally', () => {
     expect(result).toMatchInlineSnapshot(`
       Object {
         "hasAllRequested": false,
-        "privileges": Object {
-          "mock-action:login": false,
-        },
+        "privileges": Array [
+          Object {
+            "authorized": false,
+            "privilege": "mock-action:login",
+            "spaceId": undefined,
+          },
+        ],
         "username": "foo-username",
       }
     `);
@@ -930,10 +1018,18 @@ describe('#globally', () => {
     expect(result).toMatchInlineSnapshot(`
       Object {
         "hasAllRequested": true,
-        "privileges": Object {
-          "saved_object:bar-type/get": true,
-          "saved_object:foo-type/get": true,
-        },
+        "privileges": Array [
+          Object {
+            "authorized": true,
+            "privilege": "saved_object:foo-type/get",
+            "spaceId": undefined,
+          },
+          Object {
+            "authorized": true,
+            "privilege": "saved_object:bar-type/get",
+            "spaceId": undefined,
+          },
+        ],
         "username": "foo-username",
       }
     `);
@@ -963,10 +1059,18 @@ describe('#globally', () => {
     expect(result).toMatchInlineSnapshot(`
       Object {
         "hasAllRequested": false,
-        "privileges": Object {
-          "saved_object:bar-type/get": true,
-          "saved_object:foo-type/get": false,
-        },
+        "privileges": Array [
+          Object {
+            "authorized": false,
+            "privilege": "saved_object:foo-type/get",
+            "spaceId": undefined,
+          },
+          Object {
+            "authorized": true,
+            "privilege": "saved_object:bar-type/get",
+            "spaceId": undefined,
+          },
+        ],
         "username": "foo-username",
       }
     `);

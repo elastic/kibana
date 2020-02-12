@@ -19,7 +19,8 @@ import {
   SavedObjectsFindResponse,
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
-  SavedObjectsUpdateNamespacesOptions,
+  SavedObjectsAddNamespacesOptions,
+  SavedObjectsRemoveNamespacesOptions,
 } from 'src/core/server';
 import { EncryptedSavedObjectsService } from '../crypto';
 
@@ -188,13 +189,22 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
     );
   }
 
-  public async updateNamespaces(
+  public async addNamespaces(
     type: string,
     id: string,
     namespaces: string[],
-    options?: SavedObjectsUpdateNamespacesOptions
+    options?: SavedObjectsAddNamespacesOptions
   ) {
-    return await this.options.baseClient.updateNamespaces(type, id, namespaces, options);
+    return await this.options.baseClient.addNamespaces(type, id, namespaces, options);
+  }
+
+  public async removeNamespaces(
+    type: string,
+    id: string,
+    namespaces: string[],
+    options?: SavedObjectsRemoveNamespacesOptions
+  ) {
+    return await this.options.baseClient.removeNamespaces(type, id, namespaces, options);
   }
 
   /**

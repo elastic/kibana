@@ -13,7 +13,8 @@ import {
   SavedObjectsCreateOptions,
   SavedObjectsFindOptions,
   SavedObjectsUpdateOptions,
-  SavedObjectsUpdateNamespacesOptions,
+  SavedObjectsAddNamespacesOptions,
+  SavedObjectsRemoveNamespacesOptions,
 } from 'src/core/server';
 import { SpacesServiceSetup } from '../../spaces_service/spaces_service';
 import { spaceIdToNamespace } from '../utils/namespace';
@@ -214,20 +215,37 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
   }
 
   /**
-   * Updates a SavedObject's namespaces
+   * Adds namespaces to a SavedObject
    *
    * @param type
    * @param id
    * @param namespaces
    * @param options
    */
-  public async updateNamespaces(
+  public async addNamespaces(
     type: string,
     id: string,
     namespaces: string[],
-    options: SavedObjectsUpdateNamespacesOptions = {}
+    options: SavedObjectsAddNamespacesOptions = {}
   ) {
-    return await this.client.updateNamespaces(type, id, namespaces, options);
+    return await this.client.addNamespaces(type, id, namespaces, options);
+  }
+
+  /**
+   * Removes namespaces from a SavedObject
+   *
+   * @param type
+   * @param id
+   * @param namespaces
+   * @param options
+   */
+  public async removeNamespaces(
+    type: string,
+    id: string,
+    namespaces: string[],
+    options: SavedObjectsRemoveNamespacesOptions = {}
+  ) {
+    return await this.client.removeNamespaces(type, id, namespaces, options);
   }
 
   /**
