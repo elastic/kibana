@@ -5,16 +5,18 @@
  */
 
 import React, { memo } from 'react';
+import { darken } from 'polished';
 
 import {
   // qualitative pallette functions.
   //  See: https://elastic.github.io/eui/#/utilities/color-palettes
   euiPaletteForTemperature,
   euiPaletteForStatus,
-  // individual shades:
-  euiColorEmptyShade,
-  euiColorFullShade,
-} from '@elastic/eui/lib/services';
+  colorPalette,
+  htmlIdGenerator,
+} from '@elastic/eui';
+
+const [euiColorEmptyShade, euiColorFullShade] = colorPalette(['#ffffff', '#000000'], 2);
 
 const resolverPallette = {
   temperatures: euiPaletteForTemperature(7),
@@ -23,19 +25,20 @@ const resolverPallette = {
   emptyShade: euiColorEmptyShade,
 };
 
-enum ColorTypes {
-  OK = resolverPallette.temperatures[2],
-  OKDarker = resolverPallette.temperatures[0],
-  ContentForeground = euiColorEmptyShade,
-  ContentBackground = euiColorFullShade,
-  Warning = resolverPallette.statii[3],
-  /* Define colors by meaning against the EUI pallette like so:
-  Danger = resolverPallette.,
-  Attention = resolverPallette.,
-  Enabled = resolverPallette.,
-  Disabled = resolverPallette.,
-  */
-}
+type ResolverColorNames = 'ok' | 'okdark' | 'empty' | 'full' | 'warning';
+/* Define colors by meaning against the EUI pallette like so:
+danger = resolverPallette.,
+attention = resolverPallette.,
+enabled = resolverPallette.,
+disabled = resolverPallette.,
+*/
+export const NamedColors: Record<ResolverColorNames, string> = {
+  ok: resolverPallette.temperatures[2],
+  okdark: resolverPallette.temperatures[0],
+  empty: euiColorEmptyShade,
+  full: euiColorFullShade,
+  warning: resolverPallette.statii[3],
+};
 
 // PaintServers: Where color pallettes and other similar concerns are exposed to the component
 const PaintServers = memo(() => (
@@ -49,20 +52,20 @@ const PaintServers = memo(() => (
       spreadMethod="pad"
       gradientUnits="userSpaceOnUse"
     >
-      <stop offset="0%" stopColor={ColorTypes.OK} stopOpacity="1" />
-      <stop offset="100%" stopColor={ColorTypes.OK} stopOpacity="1" />
+      <stop offset="0%" stopColor={NamedColors.ok} stopOpacity="1" />
+      <stop offset="100%" stopColor={darken(0.2, NamedColors.ok)} stopOpacity="1" />
     </linearGradient>
     <linearGradient
       id="OKDarker_userSpaceNWtoSE_Solid"
-      x1="-50"
-      y1="-50"
-      x2="50"
-      y2="50"
-      spreadMethod="pad"
+      x1="-100"
+      y1="-30"
+      x2="100"
+      y2="30"
+      spreadMethod="reflect"
       gradientUnits="userSpaceOnUse"
     >
-      <stop offset="0%" stopColor={ColorTypes.OKDarker} stopOpacity="1" />
-      <stop offset="100%" stopColor={ColorTypes.OKDarker} stopOpacity="1" />
+      <stop offset="0%" stopColor={NamedColors.okdark} stopOpacity="1" />
+      <stop offset="100%" stopColor={darken(0.15, NamedColors.okdark)} stopOpacity="1" />
     </linearGradient>
     <linearGradient
       id="Foreground_userSpaceNWtoSE_Solid"
@@ -73,8 +76,8 @@ const PaintServers = memo(() => (
       spreadMethod="pad"
       gradientUnits="userSpaceOnUse"
     >
-      <stop offset="0%" stopColor={ColorTypes.ContentForeground} stopOpacity="1" />
-      <stop offset="100%" stopColor={ColorTypes.ContentForeground} stopOpacity="1" />
+      <stop offset="0%" stopColor={NamedColors.empty} stopOpacity="1" />
+      <stop offset="100%" stopColor={NamedColors.empty} stopOpacity="1" />
     </linearGradient>
     <linearGradient
       id="Background_userSpaceNWtoSE_Solid"
@@ -85,8 +88,8 @@ const PaintServers = memo(() => (
       spreadMethod="pad"
       gradientUnits="userSpaceOnUse"
     >
-      <stop offset="0%" stopColor={ColorTypes.ContentBackground} stopOpacity="1" />
-      <stop offset="100%" stopColor={ColorTypes.ContentBackground} stopOpacity="1" />
+      <stop offset="0%" stopColor={NamedColors.full} stopOpacity="1" />
+      <stop offset="100%" stopColor={NamedColors.full} stopOpacity="1" />
     </linearGradient>
   </>
 ));
@@ -107,7 +110,7 @@ const SymbolsAndShapes = memo(() => (
           <g transform="matrix(0.26458333,0,0,0.26458333,53.672616,-135.2738)">
             <path
               strokeWidth="3.00000004"
-              stroke="url(#OK_userSpaceNWtoSE_Solid)"
+              stroke={NamedColors.ok}
               strokeLinecap="butt"
               strokeLinejoin="round"
               strokeOpacity="0.94117647"
@@ -115,7 +118,7 @@ const SymbolsAndShapes = memo(() => (
             />
             <path
               strokeWidth="3.00000004"
-              stroke="url(#OK_userSpaceNWtoSE_Solid)"
+              stroke={NamedColors.ok}
               strokeLinecap="butt"
               strokeLinejoin="round"
               strokeOpacity="0.94117647"
