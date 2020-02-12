@@ -59,6 +59,7 @@ export const ProcessEventDot = styled(
           preserveAspectRatio="xMidYMid slice"
           role="treeitem"
           tabIndex={-1}
+          aria-level={event.data_buffer.depth}
         >
           <use
             role="presentation"

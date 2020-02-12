@@ -173,6 +173,7 @@ export interface ProcessEvent {
     process_name: string;
     process_path: string;
     signature_status?: string;
+    depth?: number;
   };
 }
 
