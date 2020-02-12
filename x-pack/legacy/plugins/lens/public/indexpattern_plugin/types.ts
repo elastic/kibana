@@ -5,7 +5,7 @@
  */
 
 import { IndexPatternColumn } from './operations';
-import { AggregationRestrictions } from '../../../../../../src/plugins/data/public';
+import { IndexPatternAggRestrictions } from '../../../../../../src/plugins/data/public';
 
 export interface IndexPattern {
   id: string;
@@ -28,7 +28,7 @@ export interface IndexPatternField {
   aggregatable: boolean;
   scripted?: boolean;
   searchable: boolean;
-  aggregationRestrictions?: Partial<AggregationRestrictions>;
+  aggregationRestrictions?: Partial<IndexPatternAggRestrictions>;
 }
 
 export interface IndexPatternLayer {

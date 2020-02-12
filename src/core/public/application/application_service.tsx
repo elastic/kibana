@@ -273,7 +273,7 @@ export class ApplicationService {
       ),
       registerMountContext: this.mountContext.registerContext,
       getUrlForApp: (appId, { path }: { path?: string } = {}) =>
-        getAppUrl(availableMounters, appId, path),
+        http.basePath.prepend(getAppUrl(availableMounters, appId, path)),
       navigateToApp: async (appId, { path, state }: { path?: string; state?: any } = {}) => {
         if (await this.shouldNavigate(overlays)) {
           this.appLeaveHandlers.delete(this.currentAppId$.value!);
