@@ -3,13 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { LoggerFactory } from 'kibana/server';
-import { EndpointConfigType } from './config';
 
 /**
- * The context for Endpoint apps.
+ * Request params for alert details.
  */
-export interface EndpointAppContext {
-  logFactory: LoggerFactory;
-  config(): Promise<EndpointConfigType>;
+export interface AlertDetailsRequestParams {
+  id: string;
 }

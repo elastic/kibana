@@ -1,0 +1,61 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+import { schema } from '@kbn/config-schema';
+
+export const alertListReqSchema = schema.object(
+  {
+    page_size: schema.maybe(schema.number()),
+    page_index: schema.maybe(schema.number()),
+    after: schema.maybe(
+      schema.arrayOf(schema.any(), {
+        minSize: 2,
+        maxSize: 2,
+      })
+    ),
+    before: schema.maybe(
+      schema.arrayOf(schema.any(), {
+        minSize: 2,
+        maxSize: 2,
+      })
+    ),
+    sort: schema.string({ defaultValue: '@timestamp' }),
+    order: schema.string({
+      defaultValue: 'desc',
+      validate(value) {
+        if (value !== 'asc' && value !== 'desc') {
+          return 'must be `asc` or `desc`';
+        }
+      },
+    }),
+    query: schema.maybe(schema.string()),
+
+    // rison-encoded string
+    filters: schema.maybe(schema.string()),
+
+    // rison-encoded string
+    date_range: schema.maybe(schema.string()),
+
+    /*
+    dateRange: schema.object({
+      to: schema.string({ defaultValue: 'now' }),
+      from: schema.string({ defaultValue: 'now-15m' }),
+    }),
+    */
+  },
+  {
+    validate(value) {
+      if (value.after !== undefined && value.page_index !== undefined) {
+        return '[page_index] cannot be used with [after]';
+      }
+      if (value.before !== undefined && value.page_index !== undefined) {
+        return '[page_index] cannot be used with [before]';
+      }
+      if (value.before !== undefined && value.after !== undefined) {
+        return '[before] cannot be used with [after]';
+      }
+    },
+  }
+);

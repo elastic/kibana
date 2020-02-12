@@ -23,6 +23,7 @@ export type ImmutableSet<T> = ReadonlySet<Immutable<T>>;
 export type ImmutableObject<T> = { readonly [K in keyof T]: Immutable<T[K]> };
 
 export class EndpointAppConstants {
+  static BASE_API_URL = '/api/endpoint';
   static ALERT_INDEX_NAME = 'my-index';
   static ENDPOINT_INDEX_NAME = 'endpoint-agent*';
 }
@@ -53,8 +54,15 @@ export interface AlertResultList {
    */
   result_from_index: number | undefined;
 
-  next: string | undefined;
-  prev: string | undefined;
+  /**
+   * A cursor-based URL for the next page.
+   */
+  next: string | null;
+
+  /**
+   * A cursor-based URL for the previous page.
+   */
+  prev: string | null;
 }
 
 export interface EndpointResultList {
@@ -69,6 +77,7 @@ export interface EndpointResultList {
 }
 
 export interface AlertData {
+  id: string;
   '@timestamp': Date;
   agent: {
     id: string;
@@ -121,6 +130,18 @@ export interface EndpointMetadata {
     };
   };
 }
+
+export interface ESTotal {
+  value: number;
+  relation: string;
+}
+
+export interface AlertDataWrapper {
+  _id: string;
+  _source: AlertData;
+}
+
+export type AlertHits = AlertDataWrapper[];
 
 /**
  * The PageId type is used for the payload when firing userNavigatedToPage actions
