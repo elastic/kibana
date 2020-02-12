@@ -14,6 +14,8 @@ import {
   handleHighLevelStatsResponse,
   ClustersHighLevelStats,
   ClusterHighLevelStats,
+  fetchKibanaPluginsStats,
+  KibanaPluginsStats,
 } from './get_high_level_stats';
 
 export function rollUpTotals(
@@ -69,9 +71,13 @@ export interface KibanaStats {
 /*
  * @param {Object} rawStats
  */
-export function getUsageStats(rawStats: SearchResponse<KibanaUsageStats>) {
+export function getUsageStats(
+  rawStats: SearchResponse<KibanaUsageStats>,
+  pluginStats: SearchResponse<KibanaPluginsStats<any>>
+) {
   const clusterIndexCache = new Set();
   const rawStatsHits = rawStats.hits?.hits || [];
+  const pluginStatsHits = pluginStats.hits?.hits || [];
 
   // get usage stats per cluster / .kibana index
   return rawStatsHits.reduce((accum, currInstance) => {
@@ -111,10 +117,18 @@ export function getUsageStats(rawStats: SearchResponse<KibanaUsageStats>) {
       ...pluginsTop
     } = currUsage;
 
+    // Retrieve the plugin data from the individual documents in monitoring for each plugin (https://github.com/elastic/kibana/issues/57123)
+    const pluginStatsForCluster = pluginStatsHits
+      .filter(({ _source }) => _source.cluster_uuid === clusterUuid)
+      .reduce((acc, { _source }) => {
+        const { kibana, ...pluginData } = _source[_source.type];
+        return { ...acc, [_source.type]: pluginData };
+      }, {});
+
     // Stats filtered by telemetry collectors need to be flattened since they're pulled in a generic way.
     // A plugin might not provide flat stats if it implements formatForBulkUpload in its collector.
     // e.g: we want `xpack.reporting` to just be `reporting`
-    const plugins = { ...pluginsTop, ...xpack };
+    const plugins = { ...pluginsTop, ...xpack, ...pluginStatsForCluster };
 
     return {
       ...accum,
@@ -180,16 +194,19 @@ export async function getKibanaStats(
   end: StatsCollectionConfig['end']
 ) {
   const { start: safeStart, end: safeEnd } = ensureTimeSpan(start, end);
-  const rawStats = await fetchHighLevelStats<KibanaUsageStats>(
-    server,
-    callCluster,
-    clusterUuids,
-    safeStart,
-    safeEnd,
-    KIBANA_SYSTEM_ID
-  );
+  const [rawStats, pluginStats] = await Promise.all([
+    fetchHighLevelStats<KibanaUsageStats>(
+      server,
+      callCluster,
+      clusterUuids,
+      safeStart,
+      safeEnd,
+      KIBANA_SYSTEM_ID
+    ),
+    fetchKibanaPluginsStats(server, callCluster, clusterUuids, safeStart, safeEnd),
+  ]);
   const highLevelStats = handleHighLevelStatsResponse(rawStats, KIBANA_SYSTEM_ID);
-  const usageStats = getUsageStats(rawStats);
+  const usageStats = getUsageStats(rawStats, pluginStats);
   const stats = combineStats(highLevelStats, usageStats);
 
   return stats;
