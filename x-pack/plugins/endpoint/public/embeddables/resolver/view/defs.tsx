@@ -50,6 +50,7 @@ export const NamedColors: Record<ResolverColorNames, string> = {
 
 const idGenerator = htmlIdGenerator();
 
+// To be referenced in fill and stroke attributes
 export const PaintServerIds = {
   darkLinearReflect: idGenerator('darkreflect'),
 };
@@ -73,6 +74,7 @@ const PaintServers = memo(() => (
   </>
 ));
 
+// To be referenced by <use> elements
 export const SymbolIds = {
   processNode: idGenerator('curveSymbol'),
 };
