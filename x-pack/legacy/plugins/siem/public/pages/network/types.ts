@@ -8,7 +8,7 @@ import { RouteComponentProps } from 'react-router-dom';
 import { ActionCreator } from 'typescript-fsa';
 import { GlobalTimeArgs } from '../../containers/global_time';
 import { InputsModelId } from '../../store/inputs/constants';
-import { Query, esFilters } from '../../../../../../../src/plugins/data/public';
+import { Query, Filter } from '../../../../../../../src/plugins/data/public';
 
 export type SetAbsoluteRangeDatePicker = ActionCreator<{
   id: InputsModelId;
@@ -17,7 +17,7 @@ export type SetAbsoluteRangeDatePicker = ActionCreator<{
 }>;
 
 interface NetworkComponentReduxProps {
-  filters: esFilters.Filter[];
+  filters: Filter[];
   query: Query;
   setAbsoluteRangeDatePicker: SetAbsoluteRangeDatePicker;
 }

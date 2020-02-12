@@ -55,7 +55,7 @@ let service: ApplicationService;
 
 describe('#setup()', () => {
   beforeEach(() => {
-    const http = httpServiceMock.createSetupContract({ basePath: '/test' });
+    const http = httpServiceMock.createSetupContract({ basePath: '/base-path' });
     setupDeps = {
       http,
       context: contextServiceMock.createSetupContract(),
@@ -167,7 +167,7 @@ describe('#setup()', () => {
       const { register } = service.setup(setupDeps);
 
       expect(() =>
-        register(Symbol(), createApp({ id: 'app2', appRoute: '/test/app2' }))
+        register(Symbol(), createApp({ id: 'app2', appRoute: '/base-path/app2' }))
       ).toThrowErrorMatchingInlineSnapshot(
         `"Cannot register an application route that includes HTTP base path"`
       );
@@ -430,7 +430,7 @@ describe('#start()', () => {
   beforeEach(() => {
     MockHistory.push.mockReset();
 
-    const http = httpServiceMock.createSetupContract({ basePath: '/test' });
+    const http = httpServiceMock.createSetupContract({ basePath: '/base-path' });
     setupDeps = {
       http,
       context: contextServiceMock.createSetupContract(),
@@ -561,7 +561,7 @@ describe('#start()', () => {
 
       const { getUrlForApp } = await service.start(startDeps);
 
-      expect(getUrlForApp('app1')).toBe('/app/app1');
+      expect(getUrlForApp('app1')).toBe('/base-path/app/app1');
     });
 
     it('creates URL for registered appId', async () => {
@@ -573,9 +573,9 @@ describe('#start()', () => {
 
       const { getUrlForApp } = await service.start(startDeps);
 
-      expect(getUrlForApp('app1')).toBe('/app/app1');
-      expect(getUrlForApp('legacyApp1')).toBe('/app/legacyApp1');
-      expect(getUrlForApp('app2')).toBe('/custom/path');
+      expect(getUrlForApp('app1')).toBe('/base-path/app/app1');
+      expect(getUrlForApp('legacyApp1')).toBe('/base-path/app/legacyApp1');
+      expect(getUrlForApp('app2')).toBe('/base-path/custom/path');
     });
 
     it('creates URLs with path parameter', async () => {
@@ -583,10 +583,10 @@ describe('#start()', () => {
 
       const { getUrlForApp } = await service.start(startDeps);
 
-      expect(getUrlForApp('app1', { path: 'deep/link' })).toBe('/app/app1/deep/link');
-      expect(getUrlForApp('app1', { path: '/deep//link/' })).toBe('/app/app1/deep/link');
-      expect(getUrlForApp('app1', { path: '//deep/link//' })).toBe('/app/app1/deep/link');
-      expect(getUrlForApp('app1', { path: 'deep/link///' })).toBe('/app/app1/deep/link');
+      expect(getUrlForApp('app1', { path: 'deep/link' })).toBe('/base-path/app/app1/deep/link');
+      expect(getUrlForApp('app1', { path: '/deep//link/' })).toBe('/base-path/app/app1/deep/link');
+      expect(getUrlForApp('app1', { path: '//deep/link//' })).toBe('/base-path/app/app1/deep/link');
+      expect(getUrlForApp('app1', { path: 'deep/link///' })).toBe('/base-path/app/app1/deep/link');
     });
   });
 
@@ -659,7 +659,7 @@ describe('#start()', () => {
       const { navigateToApp } = await service.start(startDeps);
 
       await navigateToApp('myTestApp');
-      expect(setupDeps.redirectTo).toHaveBeenCalledWith('/test/app/myTestApp');
+      expect(setupDeps.redirectTo).toHaveBeenCalledWith('/base-path/app/myTestApp');
     });
 
     it('updates currentApp$ after mounting', async () => {
