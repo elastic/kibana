@@ -23,9 +23,12 @@ import { SavedObjectsType } from './types';
 /**
  * See {@link SavedObjectTypeRegistry} for documentation.
  *
- * @internal
+ * @public
  * */
-export type ISavedObjectTypeRegistry = PublicMethodsOf<SavedObjectTypeRegistry>;
+export type ISavedObjectTypeRegistry = Pick<
+  SavedObjectTypeRegistry,
+  'getType' | 'getAllTypes' | 'getIndex' | 'isNamespaceAgnostic' | 'isHidden'
+>;
 
 /**
  * Registry holding information about all the registered {@link SavedObjectsType | savedObject types}.

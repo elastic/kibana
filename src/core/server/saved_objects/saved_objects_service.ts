@@ -198,6 +198,11 @@ export interface SavedObjectsServiceStart {
    * Creates a {@link SavedObjectsSerializer | serializer} that is aware of all registered types.
    */
   createSerializer: () => SavedObjectsSerializer;
+  /**
+   * Returns the {@link ISavedObjectTypeRegistry | registry} containing all registered
+   * {@link SavedObjectsType | savedObject types}
+   */
+  getTypeRegistry: () => ISavedObjectTypeRegistry;
 }
 
 export interface InternalSavedObjectsServiceStart extends SavedObjectsServiceStart {
@@ -209,10 +214,6 @@ export interface InternalSavedObjectsServiceStart extends SavedObjectsServiceSta
    * @deprecated Exposed only for injecting into Legacy
    */
   clientProvider: ISavedObjectsClientProvider;
-  /**
-   * @deprecated Exposed only for injecting into Legacy
-   */
-  typeRegistry: ISavedObjectTypeRegistry;
 }
 
 /**
@@ -387,11 +388,11 @@ export class SavedObjectsService
     return {
       migrator,
       clientProvider,
-      typeRegistry: this.typeRegistry,
       getScopedClient: clientProvider.getClient.bind(clientProvider),
       createScopedRepository: repositoryFactory.createScopedRepository,
       createInternalRepository: repositoryFactory.createInternalRepository,
       createSerializer: () => new SavedObjectsSerializer(this.typeRegistry),
+      getTypeRegistry: () => this.typeRegistry,
     };
   }
 

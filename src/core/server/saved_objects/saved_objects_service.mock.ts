@@ -38,11 +38,13 @@ const createStartContractMock = () => {
     createInternalRepository: jest.fn(),
     createScopedRepository: jest.fn(),
     createSerializer: jest.fn(),
+    getTypeRegistry: jest.fn(),
   };
 
   startContrat.getScopedClient.mockReturnValue(savedObjectsClientMock.create());
   startContrat.createInternalRepository.mockReturnValue(savedObjectsRepositoryMock.create());
   startContrat.createScopedRepository.mockReturnValue(savedObjectsRepositoryMock.create());
+  startContrat.getTypeRegistry.mockReturnValue(typeRegistryMock.create());
 
   return startContrat;
 };
@@ -52,7 +54,6 @@ const createInternalStartContractMock = () => {
     ...createStartContractMock(),
     clientProvider: savedObjectsClientProviderMock.create(),
     migrator: mockKibanaMigrator.create(),
-    typeRegistry: typeRegistryMock.create(),
   };
 
   return internalStartContract;
