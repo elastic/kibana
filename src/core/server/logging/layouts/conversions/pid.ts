@@ -21,7 +21,7 @@ import { Conversion } from './type';
 import { LogRecord } from '../../log_record';
 
 export const PidConversion: Conversion = {
-  pattern: /{pid}/g,
+  pattern: /%pid/g,
   convert(record: LogRecord) {
     return String(record.pid);
   },

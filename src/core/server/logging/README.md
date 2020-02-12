@@ -54,7 +54,7 @@ There are two types of layout supported at the moment: `pattern` and `json`.
 
 With `pattern` layout it's possible to define a string pattern with special placeholders wrapped into curly braces that
 will be replaced with data from the actual log message. By default the following pattern is used: 
-`[{timestamp}][{level}][{context}] {message}`. Also `highlight` option can be enabled for `pattern` layout so that
+`[%timestamp][%level][%context%]%meta {message}`. Also `highlight` option can be enabled for `pattern` layout so that
 some parts of the log message are highlighted with different colors that may be quite handy if log messages are forwarded
 to the terminal with color support.
 
@@ -88,7 +88,7 @@ logging:
       kind: console
       layout:
         kind: pattern
-        pattern: [{timestamp}][{level}] {message}
+        pattern: [%timestamp][%level] %message
     json-file-appender:
       kind: file
       path: /var/log/kibana-json.log

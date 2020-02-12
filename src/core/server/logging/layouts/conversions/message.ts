@@ -21,7 +21,7 @@ import { Conversion } from './type';
 import { LogRecord } from '../../log_record';
 
 export const MessageConversion: Conversion = {
-  pattern: /{message}/g,
+  pattern: /%message/g,
   convert(record: LogRecord) {
     // Error stack is much more useful than just the message.
     return (record.error && record.error.stack) || record.message;

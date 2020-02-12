@@ -22,7 +22,7 @@ import { last } from 'lodash';
 import { Conversion } from './type';
 import { LogRecord } from '../../log_record';
 
-const timestampRegExp = /{timestamp({(?<format>[^}]+)})?({(?<timezone>[^}]+)})?}/g;
+const timestampRegExp = /%timestamp({(?<format>[^}]+)})?({(?<timezone>[^}]+)})?/g;
 
 const formats = {
   ISO8601: 'ISO8601',

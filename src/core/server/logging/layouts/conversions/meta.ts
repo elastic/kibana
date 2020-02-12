@@ -20,7 +20,7 @@ import { Conversion } from './type';
 import { LogRecord } from '../../log_record';
 
 export const MetaConversion: Conversion = {
-  pattern: /{meta}/g,
+  pattern: /%meta/g,
   convert(record: LogRecord) {
     return record.meta ? `${JSON.stringify(record.meta)}` : '';
   },

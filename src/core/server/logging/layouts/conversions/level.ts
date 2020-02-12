@@ -32,7 +32,7 @@ const LEVEL_COLORS = new Map([
 ]);
 
 export const LevelConversion: Conversion = {
-  pattern: /{level}/g,
+  pattern: /%level/g,
   convert(record: LogRecord, highlight: boolean) {
     let message = record.level.id.toUpperCase().padEnd(5);
     if (highlight && LEVEL_COLORS.has(record.level)) {
