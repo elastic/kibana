@@ -22,12 +22,10 @@ import { UiActionsApi, ActionRegistry, TriggerRegistry } from './types';
 import { createApi } from './api';
 import { UiActionsService } from './service';
 
-export interface UiActionsSetup {
-  attachAction: UiActionsApi['attachAction'];
-  detachAction: UiActionsApi['detachAction'];
-  registerAction: UiActionsApi['registerAction'];
-  registerTrigger: UiActionsApi['registerTrigger'];
-}
+export type UiActionsSetup = Pick<
+  UiActionsService,
+  'attachAction' | 'detachAction' | 'registerAction' | 'registerTrigger'
+>;
 
 export type UiActionsStart = UiActionsApi;
 
@@ -42,12 +40,7 @@ export class UiActionsPlugin implements Plugin<UiActionsSetup, UiActionsStart> {
   }
 
   public setup(core: CoreSetup): UiActionsSetup {
-    return {
-      registerTrigger: this.service.registerTrigger,
-      registerAction: this.service.registerAction,
-      attachAction: this.api.attachAction,
-      detachAction: this.api.detachAction,
-    };
+    return this.service;
   }
 
   public start(core: CoreStart): UiActionsStart {

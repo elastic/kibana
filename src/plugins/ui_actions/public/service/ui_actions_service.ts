@@ -43,6 +43,32 @@ export class UiActionsService {
     this.actions.set(action.id, action);
   };
 
+  attachAction = (triggerId: string, actionId: string): void => {
+    const trigger = this.triggers.get(triggerId);
+
+    if (!trigger) {
+      throw new Error(
+        `No trigger [triggerId = ${triggerId}] exists, for attaching action [actionId = ${actionId}].`
+      );
+    }
+
+    if (!trigger.actionIds.find(id => id === actionId)) {
+      trigger.actionIds.push(actionId);
+    }
+  };
+
+  detachAction = (triggerId: string, actionId: string) => {
+    const trigger = this.triggers.get(triggerId);
+
+    if (!trigger) {
+      throw new Error(
+        `No trigger [triggerId = ${triggerId}] exists, for detaching action [actionId = ${actionId}].`
+      );
+    }
+
+    trigger.actionIds = trigger.actionIds.filter(id => id !== actionId);
+  };
+
   /**
    * "Fork" a separate instance of `UiActionsService` that inherits all existing
    * triggers and actions, but going forward all new triggers and actions added

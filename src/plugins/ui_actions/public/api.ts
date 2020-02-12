@@ -23,16 +23,12 @@ import {
   UiActionsDependencies,
   UiActionsApiPure,
 } from './types';
-import { attachAction } from './triggers/attach_action';
-import { detachAction } from './triggers/detach_action';
 import { executeTriggerActions } from './triggers/execute_trigger_actions';
 import { getTrigger } from './triggers/get_trigger';
 import { getTriggerActions } from './triggers/get_trigger_actions';
 import { getTriggerCompatibleActions } from './triggers/get_trigger_compatible_actions';
 
 export const pureApi: UiActionsApiPure = {
-  attachAction,
-  detachAction,
   executeTriggerActions,
   getTrigger,
   getTriggerActions,
