@@ -6,11 +6,10 @@
 import { setupGetValueSuggestions } from './value';
 import indexPatternResponse from './__fixtures__/index_pattern_response.json';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
-import { QuerySuggestionGetFnArgs, esKuery } from '../../../../../../../src/plugins/data/public';
+import { QuerySuggestionGetFnArgs, KueryNode } from '../../../../../../../src/plugins/data/public';
 import { setAutocompleteService } from '../../../services';
 
-const mockKueryNode = (kueryNode: Partial<esKuery.KueryNode>) =>
-  (kueryNode as unknown) as esKuery.KueryNode;
+const mockKueryNode = (kueryNode: Partial<KueryNode>) => (kueryNode as unknown) as KueryNode;
 
 describe('Kuery value suggestions', () => {
   let getSuggestions: ReturnType<typeof setupGetValueSuggestions>;
