@@ -31,6 +31,7 @@ import { geoBoundsMetricAgg } from './metrics/geo_bounds';
 import { geoCentroidMetricAgg } from './metrics/geo_centroid';
 import { percentileRanksMetricAgg } from './metrics/percentile_ranks';
 import { derivativeMetricAgg } from './metrics/derivative';
+import { cumulativeCardinalityMetricAgg } from './metrics/cumulative_cardinality';
 import { cumulativeSumMetricAgg } from './metrics/cumulative_sum';
 import { movingAvgMetricAgg } from './metrics/moving_avg';
 import { serialDiffMetricAgg } from './metrics/serial_diff';
@@ -64,6 +65,7 @@ export const aggTypes = {
     percentileRanksMetricAgg,
     topHitMetricAgg,
     derivativeMetricAgg,
+    cumulativeCardinalityMetricAgg,
     cumulativeSumMetricAgg,
     movingAvgMetricAgg,
     serialDiffMetricAgg,

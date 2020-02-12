@@ -25,6 +25,7 @@ export enum METRIC_TYPES {
   MIN_BUCKET = 'min_bucket',
   SUM_BUCKET = 'sum_bucket',
   COUNT = 'count',
+  CUMULATIVE_CARDINALITY = 'cumulative_cardinality',
   CUMULATIVE_SUM = 'cumulative_sum',
   DERIVATIVE = 'derivative',
   GEO_BOUNDS = 'geo_bounds',
