@@ -22,6 +22,7 @@ import {
   AlertType,
   IntervalSchedule,
   SanitizedAlert,
+  AlertTaskState,
 } from './types';
 import { validateAlertTypeParams } from './lib';
 import {
@@ -31,7 +32,7 @@ import {
 } from '../../../../plugins/security/server';
 import { EncryptedSavedObjectsPluginStart } from '../../../../plugins/encrypted_saved_objects/server';
 import { TaskManagerStartContract } from '../../../../plugins/task_manager/server';
-import { AlertTaskState, taskInstanceToAlertTaskInstance } from './task_runner/alert_task_instance';
+import { taskInstanceToAlertTaskInstance } from './task_runner/alert_task_instance';
 
 type NormalizedAlertAction = Omit<AlertAction, 'actionTypeId'>;
 export type CreateAPIKeyResult =
@@ -319,7 +320,8 @@ export class AlertsClient {
 
     const { actions, references } = await this.denormalizeActions(data.actions);
     const username = await this.getUserName();
-    const apiKeyAttributes = this.apiKeyAsAlertAttributes(await this.createAPIKey(), username);
+    const createdAPIKey = attributes.enabled ? await this.createAPIKey() : null;
+    const apiKeyAttributes = this.apiKeyAsAlertAttributes(createdAPIKey, username);
 
     const updatedObject = await this.savedObjectsClient.update<RawAlert>(
       'alert',

@@ -46,6 +46,10 @@
     "RecognizeIndex",
     "GetModule",
     "SetupModule",
-    "CheckExistingModuleJobs"
+    "CheckExistingModuleJobs",
+    "Annotations",
+    "GetAnnotations",
+    "IndexAnnotations",
+    "DeleteAnnotation"
   ]
 }
