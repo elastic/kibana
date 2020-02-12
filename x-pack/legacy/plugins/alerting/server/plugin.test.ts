@@ -10,6 +10,34 @@ import { licensingMock } from '../../../../plugins/licensing/server/mocks';
 import { encryptedSavedObjectsMock } from '../../../../plugins/encrypted_saved_objects/server/mocks';
 
 describe('Alerting Plugin', () => {
+  describe('setup()', () => {
+    it('should log warning when Encrypted Saved Objects plugin is using an ephemeral encryption key', async () => {
+      const context = coreMock.createPluginInitializerContext();
+      const plugin = new Plugin(context);
+
+      const coreSetup = coreMock.createSetup();
+      const encryptedSavedObjectsSetup = encryptedSavedObjectsMock.createSetup();
+      await plugin.setup(
+        {
+          ...coreSetup,
+          http: {
+            ...coreSetup.http,
+            route: jest.fn(),
+          },
+        } as any,
+        {
+          licensing: licensingMock.createSetup(),
+          encryptedSavedObjects: encryptedSavedObjectsSetup,
+        } as any
+      );
+
+      expect(encryptedSavedObjectsSetup.usingEphemeralEncryptionKey).toEqual(true);
+      expect(context.logger.get().warn).toHaveBeenCalledWith(
+        'APIs are disabled due to the Encrypted Saved Objects plugin using an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in kibana.yml.'
+      );
+    });
+  });
+
   describe('start()', () => {
     /**
      * HACK: This test has put together to ensuire the function "getAlertsClientWithRequest"

@@ -20,9 +20,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiScreenReaderOnly, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
-// Node v5 querystring for browser.
-// @ts-ignore
-import * as qs from 'querystring-browser';
+import { parse } from 'query-string';
 import React, { CSSProperties, useCallback, useEffect, useRef, useState } from 'react';
 // @ts-ignore
 import mappings from '../../../../../lib/mappings/mappings';
@@ -42,6 +40,10 @@ import { registerCommands } from './keyboard_shortcuts';
 
 export interface EditorProps {
   initialTextValue: string;
+}
+
+interface QueryParams {
+  load_from: string;
 }
 
 const abs: CSSProperties = {
@@ -95,7 +97,8 @@ function EditorUI({ initialTextValue }: EditorProps) {
 
     const readQueryParams = () => {
       const [, queryString] = (window.location.hash || '').split('?');
-      return qs.parse(queryString || '');
+
+      return parse(queryString || '', { sort: false }) as Required<QueryParams>;
     };
 
     const loadBufferFromRemote = (url: string) => {
@@ -135,6 +138,7 @@ function EditorUI({ initialTextValue }: EditorProps) {
     window.addEventListener('hashchange', onHashChange);
 
     const initialQueryParams = readQueryParams();
+
     if (initialQueryParams.load_from) {
       loadBufferFromRemote(initialQueryParams.load_from);
     } else {
