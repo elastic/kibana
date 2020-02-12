@@ -8,10 +8,20 @@ import { i18n } from '@kbn/i18n';
 
 import { CRUD_APP_BASE_PATH } from '../constants';
 
-let _setBreadcrumbs: any;
-let _breadcrumbs: any;
+interface Breadcrumb {
+  text: string;
+  href?: string;
+}
+interface Breadcrumbs {
+  home: Breadcrumb;
+  add: Breadcrumb;
+  edit: Breadcrumb;
+}
 
-export function init(setGlobalBreadcrumbs: any): void {
+let _setBreadcrumbs: (breadcrumbs: Breadcrumb[]) => void;
+let _breadcrumbs: Breadcrumbs;
+
+export function init(setGlobalBreadcrumbs: (breadcrumbs: Breadcrumb[]) => void): void {
   _setBreadcrumbs = setGlobalBreadcrumbs;
   _breadcrumbs = {
     home: {
@@ -33,7 +43,7 @@ export function init(setGlobalBreadcrumbs: any): void {
   };
 }
 
-export function setBreadcrumbs(type: string, queryParams?: string): void {
+export function setBreadcrumbs(type: 'home' | 'add' | 'edit', queryParams?: string): void {
   if (!_breadcrumbs[type]) {
     return;
   }
