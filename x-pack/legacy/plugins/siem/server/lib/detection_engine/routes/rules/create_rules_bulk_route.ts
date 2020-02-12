@@ -54,7 +54,7 @@ export const createCreateRulesBulkRoute = (server: ServerFacade): Hapi.ServerRou
 
       const rules = await Promise.all(
         ruleDefinitions
-          .filter(rule => !dupes?.includes(rule.rule_id ?? ''))
+          .filter(rule => !dupes.includes(rule.rule_id ?? ''))
           .map(async payloadRule => {
             const {
               description,
@@ -141,19 +141,16 @@ export const createCreateRulesBulkRoute = (server: ServerFacade): Hapi.ServerRou
             }
           })
       );
-      if (dupes) {
-        return [
-          ...rules,
-          ...dupes.map(ruleId =>
-            createBulkErrorObject({
-              ruleId,
-              statusCode: 409,
-              message: `rule_id: "${ruleId}" already exists`,
-            })
-          ),
-        ];
-      }
-      return [...rules];
+      return [
+        ...rules,
+        ...dupes.map(ruleId =>
+          createBulkErrorObject({
+            ruleId,
+            statusCode: 409,
+            message: `rule_id: "${ruleId}" already exists`,
+          })
+        ),
+      ];
     },
   };
 };

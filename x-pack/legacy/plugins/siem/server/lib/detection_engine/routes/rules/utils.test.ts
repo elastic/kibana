@@ -1220,7 +1220,7 @@ describe('utils', () => {
         value2: 1,
         value3: 1,
       });
-      const expected = null;
+      const expected: string[] = [];
       expect(output).toEqual(expected);
     });
   });
