@@ -18,7 +18,6 @@
  */
 
 import { Trigger } from '../../../src/plugins/ui_actions/public';
-import { HELLO_WORLD_ACTION_TYPE } from './hello_world_action';
 
 export const HELLO_WORLD_TRIGGER_ID = 'HELLO_WORLD_TRIGGER_ID';
 
