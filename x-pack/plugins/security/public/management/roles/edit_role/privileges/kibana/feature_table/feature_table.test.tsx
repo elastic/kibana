@@ -561,4 +561,25 @@ describe('FeatureTable', () => {
 
     expect(wrapper.find(FeatureTableExpandedRow)).toHaveLength(1);
   });
+
+  it('allows all feature privileges to be toggled via "change all"', () => {
+    const role = createRole([
+      {
+        spaces: ['foo'],
+        base: [],
+        feature: {},
+      },
+    ]);
+    const { wrapper, onChangeAll } = setup({
+      role,
+      features: kibanaFeatures,
+      privilegeIndex: 0,
+      calculateDisplayedPrivileges: false,
+    });
+
+    findTestSubject(wrapper, 'changeAllPrivilegesButton').simulate('click');
+    findTestSubject(wrapper, 'changeAllPrivileges-read').simulate('click');
+
+    expect(onChangeAll).toHaveBeenCalledWith(['read']);
+  });
 });

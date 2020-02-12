@@ -26,7 +26,11 @@ export class ChangeAllPrivilegesControl extends Component<Props, State> {
 
   public render() {
     const button = (
-      <EuiLink onClick={this.onButtonClick} className={'secPrivilegeFeatureChangeAllLink'}>
+      <EuiLink
+        onClick={this.onButtonClick}
+        className={'secPrivilegeFeatureChangeAllLink'}
+        data-test-subj="changeAllPrivilegesButton"
+      >
         <FormattedMessage
           id="xpack.security.management.editRole.changeAllPrivilegesLink"
           defaultMessage="(change all)"
@@ -38,6 +42,7 @@ export class ChangeAllPrivilegesControl extends Component<Props, State> {
       return (
         <EuiContextMenuItem
           key={privilege.id}
+          data-test-subj={`changeAllPrivileges-${privilege.id}`}
           onClick={() => {
             this.onSelectPrivilege(privilege.id);
           }}
@@ -51,6 +56,7 @@ export class ChangeAllPrivilegesControl extends Component<Props, State> {
     items.push(
       <EuiContextMenuItem
         key={NO_PRIVILEGE_VALUE}
+        data-test-subj={`changeAllPrivileges-${NO_PRIVILEGE_VALUE}`}
         onClick={() => {
           this.onSelectPrivilege(NO_PRIVILEGE_VALUE);
         }}

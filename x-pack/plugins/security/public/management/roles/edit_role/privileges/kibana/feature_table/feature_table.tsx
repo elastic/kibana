@@ -24,12 +24,7 @@ import { FeatureTableExpandedRow } from './feature_table_expanded_row';
 import { NO_PRIVILEGE_VALUE } from '../constants';
 import { PrivilegeFormCalculator } from '../privilege_form_calculator';
 import { FeatureTableCell } from '../feature_table_cell';
-import {
-  KibanaPrivileges,
-  SecuredFeature,
-  Privilege,
-  PrimaryFeaturePrivilege,
-} from '../../../../model';
+import { KibanaPrivileges, SecuredFeature, Privilege } from '../../../../model';
 
 interface Props {
   role: Role;
@@ -62,7 +57,7 @@ export class FeatureTable extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
-      expandedFeatures: ['discover'],
+      expandedFeatures: [],
     };
   }
 
@@ -186,6 +181,10 @@ export class FeatureTable extends Component<Props, State> {
             )}
           </span>
         ),
+        mobileOptions: {
+          // Table isn't responsive, so skip rendering this for mobile. <ChangeAllPrivilegesControl /> isn't free...
+          header: false,
+        },
         render: (roleEntry: Role, record: TableRow) => {
           const { feature } = record;
 
@@ -193,9 +192,9 @@ export class FeatureTable extends Component<Props, State> {
             return <EuiText size={'s'}>{feature.reserved.description}</EuiText>;
           }
 
-          const featurePrivileges = feature.allPrivileges;
+          const primaryFeaturePrivileges = feature.getPrimaryFeaturePrivileges();
 
-          if (featurePrivileges.length === 0) {
+          if (primaryFeaturePrivileges.length === 0) {
             return null;
           }
 
@@ -204,15 +203,13 @@ export class FeatureTable extends Component<Props, State> {
             this.props.privilegeIndex
           )?.id;
 
-          const options = featurePrivileges
-            .filter(fp => fp instanceof PrimaryFeaturePrivilege && !fp.isMinimalFeaturePrivilege())
-            .map(privilege => {
-              return {
-                id: `${feature.id}_${privilege.id}`,
-                label: privilege.name,
-                isDisabled: this.props.disabled,
-              };
-            });
+          const options = primaryFeaturePrivileges.map(privilege => {
+            return {
+              id: `${feature.id}_${privilege.id}`,
+              label: privilege.name,
+              isDisabled: this.props.disabled,
+            };
+          });
 
           options.push({
             id: `${feature.id}_${NO_PRIVILEGE_VALUE}`,

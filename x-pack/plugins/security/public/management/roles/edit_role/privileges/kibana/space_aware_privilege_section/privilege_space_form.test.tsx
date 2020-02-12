@@ -240,4 +240,64 @@ describe('PrivilegeSpaceForm', () => {
 
     expect(findTestSubject(wrapper, 'spaceFormGlobalPermissionsSupersedeWarning')).toHaveLength(1);
   });
+
+  it('allows all feature privileges to be changed via "change all"', () => {
+    const role = createRole([
+      {
+        base: [],
+        feature: {
+          with_sub_features: ['all', 'with_sub_features_cool_toggle_2', 'cool_read'],
+        },
+        spaces: ['foo'],
+      },
+      {
+        base: [],
+        feature: {
+          with_sub_features: ['all'],
+        },
+        spaces: ['bar'],
+      },
+    ]);
+    const kibanaPrivileges = createKibanaPrivileges(kibanaFeatures);
+
+    const onChange = jest.fn();
+
+    const wrapper = mountWithIntl(
+      <PrivilegeSpaceForm
+        role={role}
+        spaces={displaySpaces}
+        kibanaPrivileges={kibanaPrivileges}
+        privilegeIndex={0}
+        onChange={onChange}
+        onCancel={jest.fn()}
+      />
+    );
+
+    findTestSubject(wrapper, 'changeAllPrivilegesButton').simulate('click');
+    findTestSubject(wrapper, 'changeAllPrivileges-read').simulate('click');
+    findTestSubject(wrapper, 'createSpacePrivilegeButton').simulate('click');
+
+    expect(onChange).toHaveBeenCalledWith(
+      createRole([
+        {
+          base: [],
+          feature: {
+            excluded_from_base: ['read'],
+            with_excluded_sub_features: ['read'],
+            no_sub_features: ['read'],
+            with_sub_features: ['read'],
+          },
+          spaces: ['foo'],
+        },
+        // this set remains unchanged from the original
+        {
+          base: [],
+          feature: {
+            with_sub_features: ['all'],
+          },
+          spaces: ['bar'],
+        },
+      ])
+    );
+  });
 });
