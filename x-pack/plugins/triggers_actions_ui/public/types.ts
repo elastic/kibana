@@ -10,7 +10,7 @@ import {
   AlertAction,
   AlertTaskState,
   RawAlertInstance,
-} from '../../../legacy/plugins/alerting/common';
+} from '../../../plugins/alerting/common';
 export { Alert, AlertAction, AlertTaskState, RawAlertInstance };
 export { ActionType };
 

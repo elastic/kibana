@@ -7,9 +7,8 @@
 import uuid from 'uuid';
 import { AlertsClient } from './alerts_client';
 import { AlertTypeRegistry, SpaceIdToNamespaceFunction } from './types';
-import { SecurityPluginStartContract } from './shim';
 import { KibanaRequest, Logger, SavedObjectsClientContract } from '../../../../src/core/server';
-import { InvalidateAPIKeyParams } from '../../../plugins/security/server';
+import { InvalidateAPIKeyParams, SecurityPluginSetup } from '../../../plugins/security/server';
 import { EncryptedSavedObjectsPluginStart } from '../../../plugins/encrypted_saved_objects/server';
 import { TaskManagerStartContract } from '../../../plugins/task_manager/server';
 
@@ -17,7 +16,7 @@ export interface ConstructorOpts {
   logger: Logger;
   taskManager: TaskManagerStartContract;
   alertTypeRegistry: AlertTypeRegistry;
-  securityPluginSetup?: SecurityPluginStartContract;
+  securityPluginSetup?: SecurityPluginSetup;
   getSpaceId: (request: KibanaRequest) => string | undefined;
   spaceIdToNamespace: SpaceIdToNamespaceFunction;
   encryptedSavedObjectsPlugin: EncryptedSavedObjectsPluginStart;
@@ -27,7 +26,7 @@ export class AlertsClientFactory {
   private readonly logger: Logger;
   private readonly taskManager: TaskManagerStartContract;
   private readonly alertTypeRegistry: AlertTypeRegistry;
-  private readonly securityPluginSetup?: SecurityPluginStartContract;
+  private readonly securityPluginSetup?: SecurityPluginSetup;
   private readonly getSpaceId: (request: KibanaRequest) => string | undefined;
   private readonly spaceIdToNamespace: SpaceIdToNamespaceFunction;
   private readonly encryptedSavedObjectsPlugin: EncryptedSavedObjectsPluginStart;

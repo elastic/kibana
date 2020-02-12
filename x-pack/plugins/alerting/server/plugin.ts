@@ -44,7 +44,6 @@ import {
 } from './routes';
 import { LicensingPluginSetup } from '../../licensing/server';
 import {
-  ActionsPlugin,
   PluginSetupContract as ActionsPluginSetupContract,
   PluginStartContract as ActionsPluginStartContract,
 } from '../../../plugins/actions/server';
