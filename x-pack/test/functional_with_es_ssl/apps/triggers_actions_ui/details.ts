@@ -256,12 +256,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             })
           )
           .forEach(alertInstanceDuration => {
-            // make sure the duration is within a 2 second range
+            // make sure the duration is within a 10 second range which is
+            // good enough as the alert interval is 1m, so we know it is a fresh value
             expect(alertInstanceDuration.as('milliseconds')).to.greaterThan(
-              durationFromInstanceTillPageLoad.subtract(1000 * 2).as('milliseconds')
+              durationFromInstanceTillPageLoad.subtract(1000 * 10).as('milliseconds')
             );
             expect(alertInstanceDuration.as('milliseconds')).to.lessThan(
-              durationFromInstanceTillPageLoad.add(1000 * 2).as('milliseconds')
+              durationFromInstanceTillPageLoad.add(1000 * 10).as('milliseconds')
             );
           });
       });
