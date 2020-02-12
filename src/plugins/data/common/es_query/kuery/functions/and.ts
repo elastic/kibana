@@ -18,22 +18,27 @@
  */
 
 import * as ast from '../ast';
+import { IIndexPattern, KueryNode } from '../../..';
 
-export function buildNodeParams(children) {
+export function buildNodeParams(children: any[]) {
   return {
     arguments: children,
   };
 }
 
-export function toElasticsearchQuery(node, indexPattern, config, context) {
+export function toElasticsearchQuery(
+  node: KueryNode,
+  indexPattern?: IIndexPattern,
+  config?: Record<string, any>,
+  context?: Record<string, any>
+) {
   const children = node.arguments || [];
 
   return {
     bool: {
-      should: children.map(child => {
+      filter: children.map((child: any) => {
         return ast.toElasticsearchQuery(child, indexPattern, config, context);
       }),
-      minimum_should_match: 1,
     },
   };
 }

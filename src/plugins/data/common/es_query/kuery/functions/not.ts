@@ -18,14 +18,20 @@
  */
 
 import * as ast from '../ast';
+import { IIndexPattern, KueryNode } from '../../..';
 
-export function buildNodeParams(child) {
+export function buildNodeParams(child: any) {
   return {
     arguments: [child],
   };
 }
 
-export function toElasticsearchQuery(node, indexPattern, config, context) {
+export function toElasticsearchQuery(
+  node: KueryNode,
+  indexPattern?: IIndexPattern,
+  config?: Record<string, any>,
+  context?: Record<string, any>
+) {
   const [argument] = node.arguments;
 
   return {

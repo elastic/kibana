@@ -20,8 +20,9 @@
 import { get } from 'lodash';
 import { nodeTypes } from '../node_types';
 import * as ast from '../ast';
+import { IIndexPattern, KueryNode, IFieldType, LatLon } from '../../..';
 
-export function buildNodeParams(fieldName, points) {
+export function buildNodeParams(fieldName: string, points: LatLon[]) {
   const fieldNameArg = nodeTypes.literal.buildNode(fieldName);
   const args = points.map(point => {
     const latLon = `${point.lat}, ${point.lon}`;
@@ -33,21 +34,29 @@ export function buildNodeParams(fieldName, points) {
   };
 }
 
-export function toElasticsearchQuery(node, indexPattern, config = {}, context = {}) {
+export function toElasticsearchQuery(
+  node: KueryNode,
+  indexPattern?: IIndexPattern,
+  config?: Record<string, any>,
+  context?: Record<string, any>
+) {
   const [fieldNameArg, ...points] = node.arguments;
   const fullFieldNameArg = {
     ...fieldNameArg,
-    value: context.nested ? `${context.nested.path}.${fieldNameArg.value}` : fieldNameArg.value,
+    value:
+      context && context.nested
+        ? `${context.nested.path}.${fieldNameArg.value}`
+        : fieldNameArg.value,
   };
-  const fieldName = nodeTypes.literal.toElasticsearchQuery(fullFieldNameArg);
-  const field = get(indexPattern, 'fields', []).find(field => field.name === fieldName);
+  const fieldName = nodeTypes.literal.toElasticsearchQuery(fullFieldNameArg) as string;
+  const field = get(indexPattern, 'fields', []).find((fld: IFieldType) => fld.name === fieldName);
   const queryParams = {
-    points: points.map(point => {
+    points: points.map((point: any) => {
       return ast.toElasticsearchQuery(point, indexPattern, config, context);
     }),
   };
 
-  if (field && field.scripted) {
+  if (field && (field as IFieldType).scripted) {
     throw new Error(`Geo polygon query does not support scripted fields`);
   }
 

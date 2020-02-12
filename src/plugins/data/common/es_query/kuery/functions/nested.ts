@@ -19,8 +19,9 @@
 
 import * as ast from '../ast';
 import * as literal from '../node_types/literal';
+import { IIndexPattern, KueryNode } from '../../..';
 
-export function buildNodeParams(path, child) {
+export function buildNodeParams(path: any, child: any) {
   const pathNode =
     typeof path === 'string' ? ast.fromLiteralExpression(path) : literal.buildNode(path);
   return {
@@ -28,11 +29,18 @@ export function buildNodeParams(path, child) {
   };
 }
 
-export function toElasticsearchQuery(node, indexPattern, config, context = {}) {
+export function toElasticsearchQuery(
+  node: KueryNode,
+  indexPattern?: IIndexPattern,
+  config?: Record<string, any>,
+  context?: Record<string, any>
+) {
   const [path, child] = node.arguments;
   const stringPath = ast.toElasticsearchQuery(path);
   const fullPath =
-    context.nested && context.nested.path ? `${context.nested.path}.${stringPath}` : stringPath;
+    context && context.nested && context.nested.path
+      ? `${context.nested.path}.${stringPath}`
+      : stringPath;
 
   return {
     nested: {

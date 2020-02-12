@@ -17,22 +17,22 @@
  * under the License.
  */
 
-import * as ast from '../ast';
+import * as literal from '../../node_types/literal';
+import * as wildcard from '../../node_types/wildcard';
+import { KueryNode, IIndexPattern } from '../../../..';
+import { LiteralTypeBuildNode } from '../../node_types/types';
 
-export function buildNodeParams(children) {
-  return {
-    arguments: children,
-  };
-}
-
-export function toElasticsearchQuery(node, indexPattern, config, context) {
-  const children = node.arguments || [];
-
-  return {
-    bool: {
-      filter: children.map(child => {
-        return ast.toElasticsearchQuery(child, indexPattern, config, context);
-      }),
-    },
-  };
+export function getFields(node: KueryNode, indexPattern?: IIndexPattern) {
+  if (!indexPattern) return [];
+  if (node.type === 'literal') {
+    const fieldName = literal.toElasticsearchQuery(node as LiteralTypeBuildNode);
+    const field = indexPattern.fields.find(fld => fld.name === fieldName);
+    if (!field) {
+      return [];
+    }
+    return [field];
+  } else if (node.type === 'wildcard') {
+    const fields = indexPattern.fields.filter(fld => wildcard.test(node, fld.name));
+    return fields;
+  }
 }

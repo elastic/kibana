@@ -19,25 +19,34 @@
 
 import { get } from 'lodash';
 import * as literal from '../node_types/literal';
+import { IIndexPattern, KueryNode, IFieldType } from '../../..';
 
-export function buildNodeParams(fieldName) {
+export function buildNodeParams(fieldName: string) {
   return {
     arguments: [literal.buildNode(fieldName)],
   };
 }
 
-export function toElasticsearchQuery(node, indexPattern = null, config, context = {}) {
+export function toElasticsearchQuery(
+  node: KueryNode,
+  indexPattern?: IIndexPattern,
+  config?: Record<string, any>,
+  context?: Record<string, any>
+) {
   const {
     arguments: [fieldNameArg],
   } = node;
   const fullFieldNameArg = {
     ...fieldNameArg,
-    value: context.nested ? `${context.nested.path}.${fieldNameArg.value}` : fieldNameArg.value,
+    value:
+      context && context.nested
+        ? `${context.nested.path}.${fieldNameArg.value}`
+        : fieldNameArg.value,
   };
   const fieldName = literal.toElasticsearchQuery(fullFieldNameArg);
-  const field = get(indexPattern, 'fields', []).find(field => field.name === fieldName);
+  const field = get(indexPattern, 'fields', []).find((fld: IFieldType) => fld.name === fieldName);
 
-  if (field && field.scripted) {
+  if (field && (field as IFieldType).scripted) {
     throw new Error(`Exists query does not support scripted fields`);
   }
   return {
