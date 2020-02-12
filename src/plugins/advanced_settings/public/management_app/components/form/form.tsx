@@ -35,8 +35,6 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { isEmpty } from 'lodash';
-// @ts-ignore
-import intersectionBy from 'lodash.intersectionby';
 import { i18n } from '@kbn/i18n';
 import { DocLinksStart, ToastsStart } from '../../../../../../core/public';
 
@@ -56,6 +54,18 @@ interface FormProps {
   enableSaving: boolean;
   dockLinks: DocLinksStart['links'];
   toasts: ToastsStart;
+}
+
+function intersectionBy(array1: any[], array2: any[], iteratee: string) {
+  const matched: any[] = [];
+  array1.forEach((element1: any) => {
+    array2.forEach((element2: any) => {
+      if (element1[iteratee] === element2[iteratee]) {
+        matched.push(element1);
+      }
+    });
+  });
+  return matched;
 }
 
 export class Form extends PureComponent<FormProps> {

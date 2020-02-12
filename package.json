@@ -212,7 +212,6 @@
     "less-loader": "5.0.0",
     "lodash": "npm:@elastic/lodash@3.10.1-kibana3",
     "lodash.clonedeep": "^4.5.0",
-    "lodash.intersectionby": "^4.7.0",
     "lru-cache": "4.1.5",
     "markdown-it": "^10.0.0",
     "mini-css-extract-plugin": "0.8.0",
