@@ -78,6 +78,7 @@ export default function(kibana) {
           order: -1003,
           url: `${kbnBaseUrl}#/discover`,
           euiIconType: 'discoverApp',
+          disableSubUrlTracking: true,
           category: DEFAULT_APP_CATEGORIES.analyze,
         },
         {
@@ -88,6 +89,7 @@ export default function(kibana) {
           order: -1002,
           url: `${kbnBaseUrl}#/visualize`,
           euiIconType: 'visualizeApp',
+          disableSubUrlTracking: true,
           category: DEFAULT_APP_CATEGORIES.analyze,
         },
         {

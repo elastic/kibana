@@ -34,7 +34,6 @@ import { DataPublicPluginStart, IndexPatternsContract } from '../../../../../plu
 import { VisualizationsStart } from '../../../visualizations/public';
 import { SavedVisualizations } from './np_ready/types';
 import { UsageCollectionSetup } from '../../../../../plugins/usage_collection/public';
-import { Chrome } from './legacy_imports';
 import { KibanaLegacyStart } from '../../../../../plugins/kibana_legacy/public';
 
 export interface VisualizeKibanaServices {
@@ -45,7 +44,6 @@ export interface VisualizeKibanaServices {
   embeddables: IEmbeddableStart;
   getBasePath: () => string;
   indexPatterns: IndexPatternsContract;
-  legacyChrome: Chrome;
   localStorage: Storage;
   navigation: NavigationStart;
   toastNotifications: ToastsStart;

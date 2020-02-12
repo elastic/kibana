@@ -49,7 +49,6 @@ import {
   HomePublicPluginSetup,
 } from '../../../../../plugins/home/public';
 import { UsageCollectionSetup } from '../../../../../plugins/usage_collection/public';
-import { Chrome } from './legacy_imports';
 
 export interface VisualizePluginStartDependencies {
   data: DataPublicPluginStart;
@@ -60,9 +59,6 @@ export interface VisualizePluginStartDependencies {
 }
 
 export interface VisualizePluginSetupDependencies {
-  __LEGACY: {
-    legacyChrome: Chrome;
-  };
   home: HomePublicPluginSetup;
   kibanaLegacy: KibanaLegacySetup;
   usageCollection?: UsageCollectionSetup;
@@ -83,7 +79,7 @@ export class VisualizePlugin implements Plugin {
 
   public async setup(
     core: CoreSetup,
-    { home, kibanaLegacy, __LEGACY, usageCollection, npData }: VisualizePluginSetupDependencies
+    { home, kibanaLegacy, usageCollection, npData }: VisualizePluginSetupDependencies
   ) {
     const { querySyncStateContainer, stop: stopQuerySyncStateContainer } = getQueryStateContainer(
       npData.query
@@ -128,7 +124,6 @@ export class VisualizePlugin implements Plugin {
         } = this.startDependencies;
 
         const deps: VisualizeKibanaServices = {
-          ...__LEGACY,
           addBasePath: contextCore.http.basePath.prepend,
           core: contextCore as LegacyCoreStart,
           chrome: contextCore.chrome,
