@@ -199,7 +199,7 @@ export class TelemetryManagementSection extends Component<Props, State> {
     </Fragment>
   );
 
-  toggleOptIn = async (): Promise<any> => {
+  toggleOptIn = async (): Promise<void> => {
     const { telemetryService } = this.props;
     const newOptInValue = !telemetryService.getIsOptedIn();
 
