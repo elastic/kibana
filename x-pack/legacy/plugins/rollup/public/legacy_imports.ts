@@ -7,6 +7,5 @@
 // @ts-ignore
 export { findIllegalCharactersInIndexName, INDEX_ILLEGAL_CHARACTERS_VISIBLE } from 'ui/indices';
 
-export { AggTypeFilters } from 'ui/agg_types/filter';
-export { AggTypeFieldFilters } from 'ui/agg_types/param_types/filter';
-export { EditorConfigProviderRegistry } from 'ui/vis/config';
+export { AggTypeFilters } from 'ui/agg_types';
+export { AggTypeFieldFilters } from 'ui/agg_types';

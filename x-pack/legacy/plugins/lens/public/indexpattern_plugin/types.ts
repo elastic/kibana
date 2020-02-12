@@ -5,6 +5,7 @@
  */
 
 import { IndexPatternColumn } from './operations';
+import { IndexPatternAggRestrictions } from '../../../../../../src/plugins/data/public';
 
 export interface IndexPattern {
   id: string;
@@ -20,18 +21,6 @@ export interface IndexPattern {
   >;
 }
 
-export type AggregationRestrictions = Record<
-  string,
-  {
-    agg?: string;
-    interval?: number;
-    fixed_interval?: string;
-    calendar_interval?: string;
-    delay?: string;
-    time_zone?: string;
-  }
->;
-
 export interface IndexPatternField {
   name: string;
   type: string;
@@ -39,7 +28,7 @@ export interface IndexPatternField {
   aggregatable: boolean;
   scripted?: boolean;
   searchable: boolean;
-  aggregationRestrictions?: Partial<AggregationRestrictions>;
+  aggregationRestrictions?: Partial<IndexPatternAggRestrictions>;
 }
 
 export interface IndexPatternLayer {

@@ -5,7 +5,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import styled from 'styled-components';
 import {
   EmptyState,
@@ -13,11 +13,9 @@ import {
   OverviewPageParsingErrorCallout,
   StatusPanel,
 } from '../components/functional';
-import { UMUpdateBreadcrumbs } from '../lib/lib';
 import { useUrlParams, useUptimeTelemetry, UptimePage } from '../hooks';
 import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
 import { useTrackPageview } from '../../../infra/public';
-import { PageHeader } from './page_header';
 import { DataPublicPluginStart, IIndexPattern } from '../../../../../../src/plugins/data/public';
 import { UptimeThemeContext } from '../contexts';
 import { FilterGroup, KueryBar } from '../components/connected';
@@ -25,8 +23,8 @@ import { useUpdateKueryString } from '../hooks';
 
 interface OverviewPageProps {
   autocomplete: DataPublicPluginStart['autocomplete'];
-  setBreadcrumbs: UMUpdateBreadcrumbs;
   indexPattern: IIndexPattern;
+  setEsKueryFilters: (esFilters: string) => void;
 }
 
 type Props = OverviewPageProps;
@@ -40,7 +38,7 @@ const EuiFlexItemStyled = styled(EuiFlexItem)`
   }
 `;
 
-export const OverviewPageComponent = ({ autocomplete, setBreadcrumbs, indexPattern }: Props) => {
+export const OverviewPageComponent = ({ autocomplete, indexPattern, setEsKueryFilters }: Props) => {
   const { colors } = useContext(UptimeThemeContext);
   const [getUrlParams] = useUrlParams();
   const { absoluteDateRangeStart, absoluteDateRangeEnd, ...params } = getUrlParams();
@@ -60,6 +58,10 @@ export const OverviewPageComponent = ({ autocomplete, setBreadcrumbs, indexPatte
 
   const [esFilters, error] = useUpdateKueryString(indexPattern, search, urlFilters);
 
+  useEffect(() => {
+    setEsKueryFilters(esFilters ?? '');
+  }, [esFilters, setEsKueryFilters]);
+
   const sharedProps = {
     dateRangeStart,
     dateRangeEnd,
@@ -71,7 +73,6 @@ export const OverviewPageComponent = ({ autocomplete, setBreadcrumbs, indexPatte
 
   return (
     <>
-      <PageHeader setBreadcrumbs={setBreadcrumbs} />
       <EmptyState implementsCustomErrorState={true} variables={{}}>
         <EuiFlexGroup gutterSize="xs" wrap responsive>
           <EuiFlexItem grow={1} style={{ flexBasis: 500 }}>

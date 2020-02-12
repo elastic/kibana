@@ -4,49 +4,62 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LegacyCoreStart, PluginInitializerContext } from 'src/core/public';
-import { PluginsStart } from 'ui/new_platform/new_platform';
-import { Chrome } from 'ui/chrome';
+import {
+  LegacyCoreStart,
+  LegacyCoreSetup,
+  PluginInitializerContext,
+  AppMountParameters,
+} from 'src/core/public';
+import { PluginsStart, PluginsSetup } from 'ui/new_platform/new_platform';
+import { FeatureCatalogueCategory } from '../../../../../../src/plugins/home/public';
 import { UMFrontendLibs } from '../lib/lib';
 import { PLUGIN } from '../../common/constants';
 import { getKibanaFrameworkAdapter } from '../lib/adapters/framework/new_platform_adapter';
-import template from './template.html';
-import { UptimeApp } from '../uptime_app';
-import { createApolloClient } from '../lib/adapters/framework/apollo_client_adapter';
 
 export interface StartObject {
   core: LegacyCoreStart;
   plugins: PluginsStart;
 }
 
+export interface SetupObject {
+  core: LegacyCoreSetup;
+  plugins: PluginsSetup;
+}
+
 export class Plugin {
   constructor(
     // @ts-ignore this is added to satisfy the New Platform typing constraint,
     // but we're not leveraging any of its functionality yet.
-    private readonly initializerContext: PluginInitializerContext,
-    private readonly chrome: Chrome
-  ) {
-    this.chrome = chrome;
-  }
+    private readonly initializerContext: PluginInitializerContext
+  ) {}
 
-  public start(start: StartObject): void {
-    const libs: UMFrontendLibs = {
-      framework: getKibanaFrameworkAdapter(start.core, start.plugins),
-    };
-    // @ts-ignore improper type description
-    this.chrome.setRootTemplate(template);
-    const checkForRoot = () => {
-      return new Promise(resolve => {
-        const ready = !!document.getElementById(PLUGIN.APP_ROOT_ID);
-        if (ready) {
-          resolve();
-        } else {
-          setTimeout(() => resolve(checkForRoot()), 10);
-        }
-      });
-    };
-    checkForRoot().then(() => {
-      libs.framework.render(UptimeApp, createApolloClient);
+  public setup(setup: SetupObject) {
+    const { core, plugins } = setup;
+    const { home } = plugins;
+    home.featureCatalogue.register({
+      category: FeatureCatalogueCategory.DATA,
+      description: PLUGIN.DESCRIPTION,
+      icon: 'uptimeApp',
+      id: PLUGIN.ID,
+      path: '/app/uptime#/',
+      showOnHomePage: true,
+      title: PLUGIN.TITLE,
+    });
+    core.application.register({
+      appRoute: '/app/uptime#/',
+      id: PLUGIN.ID,
+      euiIconType: 'uptimeApp',
+      order: 8900,
+      title: 'Uptime',
+      async mount(params: AppMountParameters) {
+        const [coreStart] = await core.getStartServices();
+        const { element } = params;
+        const libs: UMFrontendLibs = {
+          framework: getKibanaFrameworkAdapter(coreStart, plugins),
+        };
+        libs.framework.render(element);
+        return () => {};
+      },
     });
   }
 }
