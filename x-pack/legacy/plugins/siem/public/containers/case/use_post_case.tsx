@@ -9,19 +9,19 @@ import { useStateToaster } from '../../components/toasters';
 import { errorToToaster } from '../../components/ml/api/error_to_toaster';
 import * as i18n from './translations';
 import { FETCH_FAILURE, FETCH_INIT, FETCH_SUCCESS, POST_NEW_CASE } from './constants';
-import { FlattenedCaseSavedObject, NewCase } from './types';
+import { Case, NewCase } from './types';
 import { createCase } from './api';
 import { getTypedPayload } from './utils';
 
 interface NewCaseState {
   data: NewCase;
-  newCase?: FlattenedCaseSavedObject;
+  newCase?: Case;
   isLoading: boolean;
   isError: boolean;
 }
 interface Action {
   type: string;
-  payload?: NewCase | FlattenedCaseSavedObject;
+  payload?: NewCase | Case;
 }
 
 const dataFetchReducer = (state: NewCaseState, action: Action): NewCaseState => {
@@ -44,7 +44,7 @@ const dataFetchReducer = (state: NewCaseState, action: Action): NewCaseState => 
         ...state,
         isLoading: false,
         isError: false,
-        newCase: getTypedPayload<FlattenedCaseSavedObject>(action.payload),
+        newCase: getTypedPayload<Case>(action.payload),
       };
     case FETCH_FAILURE:
       return {

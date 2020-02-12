@@ -21,7 +21,7 @@ import {
 import styled, { css } from 'styled-components';
 import * as i18n from './translations';
 import { DescriptionMarkdown } from '../description_md_editor';
-import { FlattenedCaseSavedObject, UpdateCase } from '../../../../containers/case/types';
+import { Case } from '../../../../containers/case/types';
 import { FormattedRelativePreferenceDate } from '../../../../components/formatted_date';
 import { getCaseUrl } from '../../../../components/link_to';
 import { HeaderPage } from '../../../../components/header_page_new';
@@ -66,7 +66,7 @@ const BackgroundWrapper = styled.div`
 
 interface CasesProps {
   caseId: string;
-  initialData: FlattenedCaseSavedObject;
+  initialData: Case;
   isLoading: boolean;
 }
 
@@ -81,29 +81,29 @@ export const Cases = React.memo<CasesProps>(({ caseId, initialData, isLoading })
   const [tags, setTags] = useState(data.tags);
 
   const onUpdateField = useCallback(
-    async (updateKey: keyof UpdateCase, updateValue?: string[]) => {
+    async (updateKey: keyof Case, updateValue: string | string[]) => {
       switch (updateKey) {
         case 'title':
-          if (title.length > 0) {
+          if (updateValue.length > 0) {
             dispatchUpdateCaseProperty({
               updateKey: 'title',
-              updateValue: title,
+              updateValue,
             });
             setIsEditTitle(false);
           }
           break;
         case 'description':
-          if (description.length > 0) {
+          if (updateValue.length > 0) {
             dispatchUpdateCaseProperty({
               updateKey: 'description',
-              updateValue: description,
+              updateValue,
             });
             setIsEditDescription(false);
           }
           break;
         case 'tags':
           setTags(updateValue as string[]);
-          if (title.length > 0) {
+          if (updateValue.length > 0) {
             dispatchUpdateCaseProperty({
               updateKey: 'tags',
               updateValue,
@@ -115,7 +115,7 @@ export const Cases = React.memo<CasesProps>(({ caseId, initialData, isLoading })
           return null;
       }
     },
-    [dispatchUpdateCaseProperty]
+    [dispatchUpdateCaseProperty, title]
   );
 
   useEffect(() => {
@@ -192,7 +192,7 @@ export const Cases = React.memo<CasesProps>(({ caseId, initialData, isLoading })
                 fill
                 isDisabled={isLoading}
                 isLoading={isLoading}
-                onClick={() => onUpdateField('description')}
+                onClick={() => onUpdateField('description', description)}
               >
                 {i18n.SUBMIT}
               </EuiButton>
@@ -221,7 +221,7 @@ export const Cases = React.memo<CasesProps>(({ caseId, initialData, isLoading })
             'aria-label': title,
             iconType: 'pencil',
             onChange: newTitle => setTitle(newTitle),
-            onSubmit: () => onUpdateField('title'),
+            onSubmit: () => onUpdateField('title', title),
             onClick: isEdit => setIsEditTitle(isEdit),
           }}
           isEditTitle={isEditTitle}

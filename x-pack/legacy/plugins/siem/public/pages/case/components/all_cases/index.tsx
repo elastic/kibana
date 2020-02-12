@@ -16,11 +16,7 @@ import { isEmpty } from 'lodash/fp';
 import * as i18n from './translations';
 
 import { getCasesColumns } from './columns';
-import {
-  SortFieldCase,
-  FlattenedCaseSavedObject,
-  FilterOptions,
-} from '../../../../containers/case/types';
+import { SortFieldCase, Case, FilterOptions } from '../../../../containers/case/types';
 
 import { Direction } from '../../../../graphql/types';
 import { useGetCases } from '../../../../containers/case/use_get_cases';
@@ -87,7 +83,7 @@ export const AllCases = React.memo(() => {
     [setFilters]
   );
 
-  const sorting: EuiTableSortingType<FlattenedCaseSavedObject> = {
+  const sorting: EuiTableSortingType<Case> = {
     sort: { field: queryParams.sortField, direction: queryParams.sortOrder },
   };
 
@@ -127,7 +123,7 @@ export const AllCases = React.memo(() => {
                 }
               />
             }
-            onChange={tableOnChangeCallback} // typescript STEPH FIX
+            onChange={tableOnChangeCallback}
             pagination={{
               pageIndex: queryParams.page - 1,
               pageSize: queryParams.perPage,

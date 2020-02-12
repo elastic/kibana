@@ -49,8 +49,8 @@ export const Create = React.memo(() => {
     }
   }, [form]);
 
-  if (newCase && newCase.id) {
-    return <Redirect to={`/${SiemPageName.case}/${newCase.id}`} />;
+  if (newCase && newCase.case_id) {
+    return <Redirect to={`/${SiemPageName.case}/${newCase.case_id}`} />;
   }
   return (
     <EuiPanel>

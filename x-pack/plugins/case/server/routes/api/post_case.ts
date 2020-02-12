@@ -31,7 +31,7 @@ export function initPostCaseApi({ caseService, router }: RouteDeps) {
             ...createdBy,
           }),
         });
-        return response.ok({ body: flattenCaseSavedObject(newCase) });
+        return response.ok({ body: flattenCaseSavedObject(newCase, []) });
       } catch (error) {
         return response.customError(wrapError(error));
       }

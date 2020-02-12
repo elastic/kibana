@@ -33,14 +33,16 @@ export function initGetCaseApi({ caseService, router }: RouteDeps) {
         return response.customError(wrapError(error));
       }
       if (!includeComments) {
-        return response.ok({ body: flattenCaseSavedObject(theCase) });
+        return response.ok({ body: flattenCaseSavedObject(theCase, []) });
       }
       try {
         const theComments = await caseService.getAllCaseComments({
           client: context.core.savedObjects.client,
           caseId: request.params.id,
         });
-        return response.ok({ body: { ...flattenCaseSavedObject(theCase), comments: theComments } });
+        return response.ok({
+          body: { ...flattenCaseSavedObject(theCase, theComments.saved_objects) },
+        });
       } catch (error) {
         return response.customError(wrapError(error));
       }

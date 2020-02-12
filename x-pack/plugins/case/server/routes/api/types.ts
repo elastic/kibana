@@ -5,13 +5,11 @@
  */
 
 import { TypeOf } from '@kbn/config-schema';
-import { SavedObject } from 'kibana/server';
 import {
   CommentSchema,
   NewCaseSchema,
   NewCommentSchema,
   SavedObjectsFindOptionsSchema,
-  SavedObjectsFindOptionsSchemaFormatted,
   UpdatedCaseSchema,
   UpdatedCommentSchema,
   UserSchema,
@@ -22,9 +20,6 @@ export type NewCaseType = TypeOf<typeof NewCaseSchema>;
 export type CommentAttributes = TypeOf<typeof CommentSchema> & SavedObjectAttributes;
 export type NewCommentType = TypeOf<typeof NewCommentSchema>;
 export type SavedObjectsFindOptionsType = TypeOf<typeof SavedObjectsFindOptionsSchema>;
-export type SavedObjectsFindOptionsTypeFormatted = TypeOf<
-  typeof SavedObjectsFindOptionsSchemaFormatted
->;
 export type UpdatedCaseTyped = TypeOf<typeof UpdatedCaseSchema>;
 export type UpdatedCommentType = TypeOf<typeof UpdatedCommentSchema>;
 export type UserType = TypeOf<typeof UserSchema>;
@@ -35,24 +30,30 @@ export interface CaseAttributes extends NewCaseType, SavedObjectAttributes {
   updated_at: number;
 }
 
-export type FlattenedCaseSavedObject = Omit<
-  SavedObject<CaseAttributes>,
-  'updated_at' | 'attributes'
-> &
-  CaseAttributes;
+export type FlattenedCaseSavedObject = CaseAttributes & {
+  case_id: string;
+  comments: FlattenedCommentSavedObject[];
+};
+
+export type FlattenedCasesSavedObject = Array<
+  CaseAttributes & {
+    case_id: string;
+    // TO DO it is partial because we need to add it the commentCount
+    commentCount?: number;
+  }
+>;
 
 export interface AllCases {
-  cases: FlattenedCaseSavedObject[];
+  cases: FlattenedCasesSavedObject;
   page: number;
   per_page: number;
   total: number;
 }
 
-export type FlattenedCommentSavedObject = Omit<
-  SavedObject<CommentAttributes>,
-  'updated_at' | 'attributes'
-> &
-  CommentAttributes;
+export type FlattenedCommentSavedObject = CommentAttributes & {
+  comment_id: string;
+  // TO DO We might want to add the case_id where this comment is related too
+};
 
 export interface AllComments {
   comments: FlattenedCommentSavedObject[];

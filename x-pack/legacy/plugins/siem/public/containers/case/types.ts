@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObject, SavedObjectAttributes } from 'kibana/server';
 import { Direction } from '../../graphql/types';
 interface FormData {
   isNew?: boolean;
@@ -17,19 +16,10 @@ export interface NewCase extends FormData {
   case_type: string;
 }
 
-export interface UpdateCase {
-  case_type?: string;
-  description?: string;
-  state?: string;
-  tags?: string[];
-  title?: string;
-  updated_at?: number;
-}
-
-export interface CaseAttributes extends SavedObjectAttributes {
+export interface Case {
+  case_id: string;
   case_type: string;
   created_at: number;
-  // typescript STEPH FIX
   created_by: ElasticUser;
   description: string;
   state: string;
@@ -50,14 +40,8 @@ export interface FilterOptions {
   tags: string[];
 }
 
-export type FlattenedCaseSavedObject = Omit<
-  SavedObject<CaseAttributes>,
-  'updated_at' | 'attributes'
-> &
-  CaseAttributes;
-
 export interface AllCases {
-  cases: FlattenedCaseSavedObject[];
+  cases: Case[];
   page: number;
   per_page: number;
   total: number;
@@ -69,8 +53,8 @@ export enum SortFieldCase {
 }
 
 export interface ElasticUser {
-  username: string;
-  full_name?: string;
+  readonly username: string;
+  readonly full_name?: string;
 }
 
 export interface FetchCasesProps {

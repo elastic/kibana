@@ -18,7 +18,7 @@ import { CASE_COMMENT_SAVED_OBJECT, CASE_SAVED_OBJECT } from '../constants';
 import {
   CaseAttributes,
   CommentAttributes,
-  SavedObjectsFindOptionsTypeFormatted,
+  SavedObjectsFindOptionsType,
   UpdatedCaseType,
   UpdatedCommentType,
 } from '../routes/api/types';
@@ -34,7 +34,7 @@ interface GetCaseArgs extends ClientArgs {
 }
 
 interface GetCasesArgs extends ClientArgs {
-  options?: SavedObjectsFindOptionsTypeFormatted;
+  options?: SavedObjectsFindOptionsType;
 }
 interface GetCommentArgs extends ClientArgs {
   commentId: string;

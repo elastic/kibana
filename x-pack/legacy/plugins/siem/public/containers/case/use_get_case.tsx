@@ -6,7 +6,7 @@
 
 import { useEffect, useReducer } from 'react';
 
-import { FlattenedCaseSavedObject } from './types';
+import { Case } from './types';
 import { FETCH_INIT, FETCH_FAILURE, FETCH_SUCCESS } from './constants';
 import { getTypedPayload } from './utils';
 import { errorToToaster } from '../../components/ml/api/error_to_toaster';
@@ -15,13 +15,13 @@ import { useStateToaster } from '../../components/toasters';
 import { getCase } from './api';
 
 interface CaseState {
-  data: FlattenedCaseSavedObject;
+  data: Case;
   isLoading: boolean;
   isError: boolean;
 }
 interface Action {
   type: string;
-  payload?: FlattenedCaseSavedObject;
+  payload?: Case;
 }
 
 const dataFetchReducer = (state: CaseState, action: Action): CaseState => {
@@ -37,7 +37,7 @@ const dataFetchReducer = (state: CaseState, action: Action): CaseState => {
         ...state,
         isLoading: false,
         isError: false,
-        data: getTypedPayload<FlattenedCaseSavedObject>(action.payload),
+        data: getTypedPayload<Case>(action.payload),
       };
     case FETCH_FAILURE:
       return {
@@ -49,22 +49,20 @@ const dataFetchReducer = (state: CaseState, action: Action): CaseState => {
       throw new Error();
   }
 };
-const initialData: FlattenedCaseSavedObject = {
+const initialData: Case = {
+  case_id: '',
   case_type: '',
   created_at: 0,
   created_by: {
     username: '',
   },
   description: '',
-  references: [],
   state: '',
   tags: [],
   title: '',
-  id: '',
-  type: '',
   updated_at: 0,
-  version: '',
 };
+
 export const useGetCase = (caseId: string): [CaseState] => {
   const [state, dispatch] = useReducer(dataFetchReducer, {
     isLoading: true,

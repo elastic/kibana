@@ -9,14 +9,14 @@ import { useStateToaster } from '../../components/toasters';
 import { errorToToaster } from '../../components/ml/api/error_to_toaster';
 import * as i18n from './translations';
 import { FETCH_FAILURE, FETCH_INIT, FETCH_SUCCESS, UPDATE_CASE_PROPERTY } from './constants';
-import { FlattenedCaseSavedObject, UpdateCase } from './types';
+import { Case } from './types';
 import { updateCaseProperty } from './api';
 import { getTypedPayload } from './utils';
 
-type UpdateKey = keyof UpdateCase;
+type UpdateKey = keyof Case;
 
 interface NewCaseState {
-  data: FlattenedCaseSavedObject;
+  data: Case;
   isLoading: boolean;
   isError: boolean;
   updateKey?: UpdateKey | null;
@@ -24,12 +24,12 @@ interface NewCaseState {
 
 interface UpdateByKey {
   updateKey: UpdateKey;
-  updateValue: UpdateCase[UpdateKey];
+  updateValue: Case[UpdateKey];
 }
 
 interface Action {
   type: string;
-  payload?: UpdateCase | UpdateByKey;
+  payload?: Partial<Case> | UpdateByKey;
 }
 
 const dataFetchReducer = (state: NewCaseState, action: Action): NewCaseState => {
@@ -58,10 +58,9 @@ const dataFetchReducer = (state: NewCaseState, action: Action): NewCaseState => 
         ...state,
         isLoading: false,
         isError: false,
-        // typescript STEPH FIX
         data: {
           ...state.data,
-          ...getTypedPayload<UpdateCase>(action.payload),
+          ...getTypedPayload<Case>(action.payload),
         },
       };
     case FETCH_FAILURE:
@@ -77,8 +76,8 @@ const dataFetchReducer = (state: NewCaseState, action: Action): NewCaseState => 
 
 export const useUpdateCase = (
   caseId: string,
-  initialData: FlattenedCaseSavedObject
-): [{ data: FlattenedCaseSavedObject }, (updates: UpdateByKey) => void] => {
+  initialData: Case
+): [{ data: Case }, (updates: UpdateByKey) => void] => {
   const [state, dispatch] = useReducer(dataFetchReducer, {
     isLoading: false,
     isError: false,
@@ -94,7 +93,7 @@ export const useUpdateCase = (
   };
 
   useEffect(() => {
-    const fetchData = async (updateKey: keyof UpdateCase) => {
+    const fetchData = async (updateKey: keyof Case) => {
       dispatch({ type: FETCH_INIT });
       try {
         const response = await updateCaseProperty(caseId, { [updateKey]: state.data[updateKey] });

@@ -6,7 +6,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { RouteDeps } from '.';
-import { formatAllCases, formatSavedOptionsFind, wrapError } from './utils';
+import { formatAllCases, wrapError } from './utils';
 import { SavedObjectsFindOptionsSchema } from './schema';
 import { AllCases } from './types';
 
@@ -23,7 +23,7 @@ export function initGetAllCasesApi({ caseService, router }: RouteDeps) {
         const args = request.query
           ? {
               client: context.core.savedObjects.client,
-              options: formatSavedOptionsFind(request.query),
+              options: request.query,
             }
           : {
               client: context.core.savedObjects.client,

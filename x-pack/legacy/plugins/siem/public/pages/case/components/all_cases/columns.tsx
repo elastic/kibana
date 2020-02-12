@@ -6,24 +6,22 @@
 import React from 'react';
 import { EuiBadge, EuiTableFieldDataColumnType, EuiTableComputedColumnType } from '@elastic/eui';
 import { getEmptyTagValue } from '../../../../components/empty_value';
-import { FlattenedCaseSavedObject } from '../../../../containers/case/types';
+import { Case } from '../../../../containers/case/types';
 import { FormattedRelativePreferenceDate } from '../../../../components/formatted_date';
 import { CaseDetailsLink } from '../../../../components/links';
 import { TruncatableText } from '../../../../components/truncatable_text';
 import * as i18n from './translations';
 
-export type CasesColumns =
-  | EuiTableFieldDataColumnType<FlattenedCaseSavedObject>
-  | EuiTableComputedColumnType<FlattenedCaseSavedObject>;
+export type CasesColumns = EuiTableFieldDataColumnType<Case> | EuiTableComputedColumnType<Case>;
 
 const renderStringField = (field: string) => (field != null ? field : getEmptyTagValue());
 
 export const getCasesColumns = (): CasesColumns[] => [
   {
     name: i18n.CASE_TITLE,
-    render: (theCase: FlattenedCaseSavedObject) => {
-      if (theCase.id != null && theCase.title != null) {
-        return <CaseDetailsLink detailName={theCase.id}>{theCase.title}</CaseDetailsLink>;
+    render: (theCase: Case) => {
+      if (theCase.case_id != null && theCase.title != null) {
+        return <CaseDetailsLink detailName={theCase.case_id}>{theCase.title}</CaseDetailsLink>;
       }
       return getEmptyTagValue();
     },
@@ -31,7 +29,7 @@ export const getCasesColumns = (): CasesColumns[] => [
   {
     field: 'tags',
     name: i18n.TAGS,
-    render: (tags: FlattenedCaseSavedObject['tags']) => {
+    render: (tags: Case['tags']) => {
       if (tags != null && tags.length > 0) {
         return (
           <TruncatableText>
@@ -51,7 +49,7 @@ export const getCasesColumns = (): CasesColumns[] => [
     field: 'created_at',
     name: i18n.CREATED_AT,
     sortable: true,
-    render: (createdAt: FlattenedCaseSavedObject['created_at']) => {
+    render: (createdAt: Case['created_at']) => {
       if (createdAt != null) {
         return <FormattedRelativePreferenceDate value={createdAt} />;
       }
@@ -61,14 +59,13 @@ export const getCasesColumns = (): CasesColumns[] => [
   {
     field: 'created_by.username',
     name: i18n.REPORTER,
-    render: (createdBy: FlattenedCaseSavedObject['created_by']['username']) =>
-      renderStringField(createdBy),
+    render: (createdBy: Case['created_by']['username']) => renderStringField(createdBy),
   },
   {
     field: 'updated_at',
     name: i18n.LAST_UPDATED,
     sortable: true,
-    render: (updatedAt: FlattenedCaseSavedObject['updated_at']) => {
+    render: (updatedAt: Case['updated_at']) => {
       if (updatedAt != null) {
         return <FormattedRelativePreferenceDate value={updatedAt} />;
       }
@@ -79,6 +76,6 @@ export const getCasesColumns = (): CasesColumns[] => [
     field: 'state',
     name: i18n.STATE,
     sortable: true,
-    render: (state: FlattenedCaseSavedObject['state']) => renderStringField(state),
+    render: (state: Case['state']) => renderStringField(state),
   },
 ];

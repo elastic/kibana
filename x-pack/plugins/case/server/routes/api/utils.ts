@@ -20,8 +20,6 @@ import {
   AllCases,
   NewCaseType,
   NewCommentType,
-  SavedObjectsFindOptionsType,
-  SavedObjectsFindOptionsTypeFormatted,
   UserType,
 } from './types';
 
@@ -60,35 +58,6 @@ export function wrapError(error: any): CustomHttpResponseOptions<ResponseError> 
   };
 }
 
-export const formatSavedOptionsFind = (
-  savedObjectsFindOptions: SavedObjectsFindOptionsType
-): SavedObjectsFindOptionsTypeFormatted => {
-  let options: SavedObjectsFindOptionsTypeFormatted = {
-    defaultSearchOperator: savedObjectsFindOptions.defaultSearchOperator,
-    filter: savedObjectsFindOptions.filter,
-    page: savedObjectsFindOptions.page,
-    perPage: savedObjectsFindOptions.perPage,
-    search: savedObjectsFindOptions.search,
-    sortField: savedObjectsFindOptions.sortField,
-    sortOrder: savedObjectsFindOptions.sortOrder,
-    searchFields: undefined,
-    fields: undefined,
-  };
-  if (savedObjectsFindOptions.fields && savedObjectsFindOptions.fields.length > 0) {
-    options = {
-      ...options,
-      fields: JSON.parse(savedObjectsFindOptions.fields) as string[],
-    };
-  }
-  if (savedObjectsFindOptions.searchFields && savedObjectsFindOptions.searchFields.length > 0) {
-    options = {
-      ...options,
-      searchFields: JSON.parse(savedObjectsFindOptions.searchFields) as string[],
-    };
-  }
-  return options;
-};
-
 export const formatAllCases = (cases: SavedObjectsFindResponse<CaseAttributes>): AllCases => ({
   page: cases.page,
   per_page: cases.per_page,
@@ -101,22 +70,19 @@ export const flattenCaseSavedObjects = (
 ): FlattenedCaseSavedObject[] =>
   savedObjects.reduce(
     (acc: FlattenedCaseSavedObject[], savedObject: SavedObject<CaseAttributes>) => {
-      return [...acc, flattenCaseSavedObject(savedObject)];
+      return [...acc, flattenCaseSavedObject(savedObject, [])];
     },
     []
   );
 
 export const flattenCaseSavedObject = (
-  savedObject: SavedObject<CaseAttributes>
-): FlattenedCaseSavedObject => {
-  const flattened = {
-    ...savedObject,
-    ...savedObject.attributes,
-  };
-  delete flattened.attributes;
-  // typescript STEPH FIX
-  return flattened;
-};
+  savedObject: SavedObject<CaseAttributes>,
+  comments: Array<SavedObject<CommentAttributes>>
+): FlattenedCaseSavedObject => ({
+  case_id: savedObject.id,
+  comments: flattenCommentSavedObjects(comments),
+  ...savedObject.attributes,
+});
 
 export const formatAllComments = (
   comments: SavedObjectsFindResponse<CommentAttributes>
@@ -139,12 +105,7 @@ export const flattenCommentSavedObjects = (
 
 export const flattenCommentSavedObject = (
   savedObject: SavedObject<CommentAttributes>
-): FlattenedCommentSavedObject => {
-  const flattened = {
-    ...savedObject,
-    ...savedObject.attributes,
-  };
-  delete flattened.attributes;
-  // typescript STEPH FIX
-  return flattened;
-};
+): FlattenedCommentSavedObject => ({
+  comment_id: savedObject.id,
+  ...savedObject.attributes,
+});

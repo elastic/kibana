@@ -5,14 +5,7 @@
  */
 
 import { KibanaServices } from '../../lib/kibana';
-import {
-  AllCases,
-  FetchCasesProps,
-  FlattenedCaseSavedObject,
-  NewCase,
-  SortFieldCase,
-  UpdateCase,
-} from './types';
+import { AllCases, FetchCasesProps, Case, NewCase, SortFieldCase } from './types';
 import { Direction } from '../../graphql/types';
 import { throwIfNotOk } from '../../hooks/api/api';
 import { CASES_URL } from './constants';
@@ -56,7 +49,7 @@ export const getCases = async ({
   return response.body!;
 };
 
-export const createCase = async (newCase: NewCase): Promise<FlattenedCaseSavedObject> => {
+export const createCase = async (newCase: NewCase): Promise<Case> => {
   const response = await KibanaServices.get().http.fetch(`${CASES_URL}`, {
     method: 'POST',
     asResponse: true,
@@ -68,8 +61,8 @@ export const createCase = async (newCase: NewCase): Promise<FlattenedCaseSavedOb
 
 export const updateCaseProperty = async (
   caseId: string,
-  updatedCase: UpdateCase
-): Promise<UpdateCase> => {
+  updatedCase: Partial<Case>
+): Promise<Partial<Case>> => {
   const response = await KibanaServices.get().http.fetch(`${CASES_URL}/${caseId}`, {
     method: 'POST',
     asResponse: true,
