@@ -36,6 +36,11 @@ export type ShallowPromise<T> = T extends Promise<infer U> ? Promise<U> : Promis
 export type UnwrapPromise<T extends Promise<any>> = PromiseType<T>;
 
 /**
+ * Returns wrapped type of a promise, or returns type as is, if it is not a promise.
+ */
+export type UnwrapPromiseOrReturn<T> = T extends Promise<infer U> ? U : T;
+
+/**
  * Minimal interface for an object resembling an `Observable`.
  */
 export interface ObservableLike<T> {

@@ -17,10 +17,12 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
 import { ManagementSetup, ManagementStart } from './types';
 import { ManagementService } from './management_service';
 import { KibanaLegacySetup } from '../../kibana_legacy/public';
+import { FeatureCatalogueCategory, HomePublicPluginSetup } from '../../home/public';
 // @ts-ignore
 import { LegacyManagementAdapter } from './legacy';
 
@@ -28,7 +30,24 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
   private managementSections = new ManagementService();
   private legacyManagement = new LegacyManagementAdapter();
 
-  public setup(core: CoreSetup, { kibanaLegacy }: { kibanaLegacy: KibanaLegacySetup }) {
+  public setup(
+    core: CoreSetup,
+    { kibanaLegacy, home }: { kibanaLegacy: KibanaLegacySetup; home: HomePublicPluginSetup }
+  ) {
+    home.featureCatalogue.register({
+      id: 'stack-management',
+      title: i18n.translate('management.stackManagement.managementLabel', {
+        defaultMessage: 'Stack Management',
+      }),
+      description: i18n.translate('management.stackManagement.managementDescription', {
+        defaultMessage: 'Your center console for managing the Elastic Stack.',
+      }),
+      icon: 'managementApp',
+      path: '/app/kibana#/management',
+      showOnHomePage: false,
+      category: FeatureCatalogueCategory.ADMIN,
+    });
+
     return {
       sections: this.managementSections.setup(
         kibanaLegacy,
