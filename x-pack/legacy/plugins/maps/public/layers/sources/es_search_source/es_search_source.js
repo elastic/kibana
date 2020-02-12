@@ -246,7 +246,7 @@ export class ESSearchSource extends AbstractESSource {
     if (!field) {
       throw new Error(
         i18n.translate('xpack.maps.source.esSearch.fieldNotFoundMsg', {
-          defaultMessage: `Unable to find '{fieldName}'' in index-pattern 'indexPatternTitle'.`,
+          defaultMessage: `Unable to find '{fieldName}' in index-pattern '{indexPatternTitle}'.`,
           values: { fieldName, indexPatternTitle: indexPattern.title },
         })
       );
