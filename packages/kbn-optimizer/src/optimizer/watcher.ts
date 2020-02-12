@@ -54,7 +54,7 @@ export class Watcher {
 
   private readonly change$ = Rx.fromEvent<[string]>(this.watchpack, 'change');
 
-  public getNextChange$(bundles: Iterable<Bundle>, startTime: number) {
+  public getNextChange$(bundles: Bundle[], startTime: number) {
     return Rx.merge(
       // emit ChangesStarted as soon as we have been triggered
       this.change$.pipe(
@@ -72,24 +72,13 @@ export class Watcher {
         map(event => event[0]),
         debounceTimeBuffer(1000),
         map(
-          (changes): Changes => {
-            const changedBundles: Bundle[] = [];
-
-            findChangedBundles: for (const bundle of bundles) {
+          (changes): Changes => ({
+            type: 'changes',
+            bundles: bundles.filter(bundle => {
               const referencedFiles = bundle.cache.getReferencedFiles();
-              for (const change of changes) {
-                if (referencedFiles?.includes(change)) {
-                  changedBundles.push(bundle);
-                  continue findChangedBundles;
-                }
-              }
-            }
-
-            return {
-              type: 'changes',
-              bundles: changedBundles,
-            };
-          }
+              return changes.some(change => referencedFiles?.includes(change));
+            }),
+          })
         ),
         take(1)
       ),
