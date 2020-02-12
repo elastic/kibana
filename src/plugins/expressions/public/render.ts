@@ -20,16 +20,10 @@
 import * as Rx from 'rxjs';
 import { Observable } from 'rxjs';
 import { filter } from 'rxjs/operators';
-import {
-  Data,
-  event,
-  IInterpreterRenderHandlers,
-  RenderError,
-  RenderErrorHandlerFnType,
-  RenderId,
-} from './types';
+import { RenderError, RenderErrorHandlerFnType, IExpressionLoaderParams } from './types';
 import { getRenderersRegistry } from './services';
 import { renderErrorHandler as defaultRenderErrorHandler } from './render_error_handler';
+import { IInterpreterRenderHandlers, ExpressionAstExpression } from '../common';
 
 export type IExpressionRendererExtraHandlers = Record<string, any>;
 
@@ -37,17 +31,27 @@ export interface ExpressionRenderHandlerParams {
   onRenderError: RenderErrorHandlerFnType;
 }
 
+interface Event {
+  name: string;
+  data: any;
+}
+
+interface UpdateValue {
+  newExpression?: string | ExpressionAstExpression;
+  newParams: IExpressionLoaderParams;
+}
+
 export class ExpressionRenderHandler {
-  render$: Observable<RenderId>;
-  update$: Observable<any>;
-  events$: Observable<event>;
+  render$: Observable<number>;
+  update$: Observable<UpdateValue | null>;
+  events$: Observable<Event>;
 
   private element: HTMLElement;
   private destroyFn?: any;
   private renderCount: number = 0;
-  private renderSubject: Rx.BehaviorSubject<RenderId | null>;
+  private renderSubject: Rx.BehaviorSubject<number | null>;
   private eventsSubject: Rx.Subject<unknown>;
-  private updateSubject: Rx.Subject<unknown>;
+  private updateSubject: Rx.Subject<UpdateValue | null>;
   private handlers: IInterpreterRenderHandlers;
   private onRenderError: RenderErrorHandlerFnType;
 
@@ -58,13 +62,13 @@ export class ExpressionRenderHandler {
     this.element = element;
 
     this.eventsSubject = new Rx.Subject();
-    this.events$ = this.eventsSubject.asObservable();
+    this.events$ = this.eventsSubject.asObservable() as Observable<Event>;
 
     this.onRenderError = onRenderError || defaultRenderErrorHandler;
 
-    this.renderSubject = new Rx.BehaviorSubject(null as RenderId | null);
+    this.renderSubject = new Rx.BehaviorSubject(null as any | null);
     this.render$ = this.renderSubject.asObservable().pipe(filter(_ => _ !== null)) as Observable<
-      RenderId
+      any
     >;
 
     this.updateSubject = new Rx.Subject();
@@ -90,7 +94,7 @@ export class ExpressionRenderHandler {
     };
   }
 
-  render = async (data: Data, extraHandlers: IExpressionRendererExtraHandlers = {}) => {
+  render = async (data: any, extraHandlers: IExpressionRendererExtraHandlers = {}) => {
     if (!data || typeof data !== 'object') {
       return this.handleRenderError(new Error('invalid data provided to the expression renderer'));
     }
@@ -113,7 +117,10 @@ export class ExpressionRenderHandler {
       // Rendering is asynchronous, completed by handlers.done()
       await getRenderersRegistry()
         .get(data.as)!
-        .render(this.element, data.value, { ...this.handlers, ...extraHandlers });
+        .render(this.element, data.value, {
+          ...this.handlers,
+          ...extraHandlers,
+        } as any);
     } catch (e) {
       return this.handleRenderError(e);
     }
@@ -139,7 +146,7 @@ export class ExpressionRenderHandler {
 
 export function render(
   element: HTMLElement,
-  data: Data,
+  data: any,
   options?: Partial<ExpressionRenderHandlerParams>
 ): ExpressionRenderHandler {
   const handler = new ExpressionRenderHandler(element, options);

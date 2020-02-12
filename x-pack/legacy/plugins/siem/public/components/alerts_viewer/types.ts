@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { esFilters } from '../../../../../../../src/plugins/data/common';
+import { Filter } from '../../../../../../../src/plugins/data/public';
 import { HostsComponentsQueryProps } from '../../pages/hosts/navigation/types';
 import { NetworkComponentQueryProps } from '../../pages/network/navigation/types';
 import { MatrixHistogramOption } from '../matrix_histogram/types';
@@ -22,8 +22,8 @@ export interface AlertsComponentsQueryProps
     | 'type'
     | 'updateDateRange'
   > {
-  pageFilters: esFilters.Filter[];
+  pageFilters: Filter[];
   stackByOptions?: MatrixHistogramOption[];
-  defaultFilters?: esFilters.Filter[];
+  defaultFilters?: Filter[];
   defaultStackByOption?: MatrixHistogramOption;
 }

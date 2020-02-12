@@ -30,7 +30,7 @@ import { isCompactFooter } from '../timeline/timeline';
 import { ManageTimelineContext, TimelineTypeContextProps } from '../timeline/timeline_context';
 import * as i18n from './translations';
 import {
-  esFilters,
+  Filter,
   esQuery,
   IIndexPattern,
   Query,
@@ -54,7 +54,7 @@ interface Props {
   dataProviders: DataProvider[];
   deletedEventIds: Readonly<string[]>;
   end: number;
-  filters: esFilters.Filter[];
+  filters: Filter[];
   headerFilterGroup?: React.ReactNode;
   height?: number;
   id: string;

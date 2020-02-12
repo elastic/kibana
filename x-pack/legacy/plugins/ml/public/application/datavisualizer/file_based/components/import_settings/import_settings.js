@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { injectI18n } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 
 import { EuiTabbedContent, EuiSpacer } from '@elastic/eui';
@@ -12,7 +12,7 @@ import { EuiTabbedContent, EuiSpacer } from '@elastic/eui';
 import { SimpleSettings } from './simple';
 import { AdvancedSettings } from './advanced';
 
-export const ImportSettings = injectI18n(function({
+export const ImportSettings = ({
   index,
   indexPattern,
   initialized,
@@ -28,13 +28,11 @@ export const ImportSettings = injectI18n(function({
   onPipelineStringChange,
   indexNameError,
   indexPatternNameError,
-  intl,
-}) {
+}) => {
   const tabs = [
     {
       id: 'simple-settings',
-      name: intl.formatMessage({
-        id: 'xpack.ml.fileDatavisualizer.importSettings.simpleTabName',
+      name: i18n.translate('xpack.ml.fileDatavisualizer.importSettings.simpleTabName', {
         defaultMessage: 'Simple',
       }),
       content: (
@@ -54,8 +52,7 @@ export const ImportSettings = injectI18n(function({
     },
     {
       id: 'advanced-settings',
-      name: intl.formatMessage({
-        id: 'xpack.ml.fileDatavisualizer.importSettings.advancedTabName',
+      name: i18n.translate('xpack.ml.fileDatavisualizer.importSettings.advancedTabName', {
         defaultMessage: 'Advanced',
       }),
       content: (
@@ -88,4 +85,4 @@ export const ImportSettings = injectI18n(function({
       <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} onTabClick={() => {}} />
     </React.Fragment>
   );
-});
+};
