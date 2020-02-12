@@ -47,8 +47,6 @@ export const ProcessEventDot = styled(
         transform: `translateY(-50%) translateX(-50%) scale(${magFactorX})`,
       };
 
-      const maskHref = `${event.data_buffer.node_id}_mask`;
-
       return (
         <svg
           className={className}
