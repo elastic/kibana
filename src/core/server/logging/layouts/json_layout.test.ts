@@ -21,6 +21,7 @@ import { LogLevel } from '../log_level';
 import { LogRecord } from '../log_record';
 import { JsonLayout } from './json_layout';
 
+const timestamp = new Date(Date.UTC(2012, 1, 1, 14, 30, 22, 11));
 const records: LogRecord[] = [
   {
     context: 'context-1',
@@ -31,42 +32,42 @@ const records: LogRecord[] = [
     },
     level: LogLevel.Fatal,
     message: 'message-1',
-    timestamp: new Date(Date.UTC(2012, 1, 1)),
+    timestamp,
     pid: 5355,
   },
   {
     context: 'context-2',
     level: LogLevel.Error,
     message: 'message-2',
-    timestamp: new Date(Date.UTC(2012, 1, 1)),
+    timestamp,
     pid: 5355,
   },
   {
     context: 'context-3',
     level: LogLevel.Warn,
     message: 'message-3',
-    timestamp: new Date(Date.UTC(2012, 1, 1)),
+    timestamp,
     pid: 5355,
   },
   {
     context: 'context-4',
     level: LogLevel.Debug,
     message: 'message-4',
-    timestamp: new Date(Date.UTC(2012, 1, 1)),
+    timestamp,
     pid: 5355,
   },
   {
     context: 'context-5',
     level: LogLevel.Info,
     message: 'message-5',
-    timestamp: new Date(Date.UTC(2012, 1, 1)),
+    timestamp,
     pid: 5355,
   },
   {
     context: 'context-6',
     level: LogLevel.Trace,
     message: 'message-6',
-    timestamp: new Date(Date.UTC(2012, 1, 1)),
+    timestamp,
     pid: 5355,
   },
 ];
@@ -83,4 +84,40 @@ test('`format()` correctly formats record.', () => {
   for (const record of records) {
     expect(layout.format(record)).toMatchSnapshot();
   }
+});
+
+test('`format()` correctly formats record with meta-data', () => {
+  const layout = new JsonLayout();
+
+  expect(
+    layout.format({
+      context: 'context-with-meta',
+      level: LogLevel.Debug,
+      message: 'message-with-meta',
+      timestamp,
+      pid: 5355,
+      meta: {
+        from: 'v7',
+        to: 'v8',
+      },
+    })
+  ).toMatchSnapshot();
+});
+
+test('`format()` correctly formats error record with meta-data', () => {
+  const layout = new JsonLayout();
+
+  expect(
+    layout.format({
+      context: 'context-with-meta',
+      level: LogLevel.Debug,
+      message: 'message-with-meta',
+      timestamp,
+      pid: 5355,
+      meta: {
+        from: 'v7',
+        to: 'v8',
+      },
+    })
+  ).toMatchSnapshot();
 });

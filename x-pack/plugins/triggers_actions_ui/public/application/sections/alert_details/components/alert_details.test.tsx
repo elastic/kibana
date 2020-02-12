@@ -32,6 +32,7 @@ const mockAlertApis = {
   unmuteAlert: jest.fn(),
   enableAlert: jest.fn(),
   disableAlert: jest.fn(),
+  requestRefresh: jest.fn(),
 };
 
 // const AlertDetails = withBulkAlertOperations(RawAlertDetails);

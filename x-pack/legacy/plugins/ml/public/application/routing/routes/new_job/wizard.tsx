@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { parse } from 'query-string';
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
-// @ts-ignore
-import queryString from 'query-string';
 
 import { basicResolvers } from '../../resolvers';
 import { MlRoute, PageLoader, PageProps } from '../../router';
@@ -84,47 +83,37 @@ const categorizationBreadcrumbs = [
 
 export const singleMetricRoute: MlRoute = {
   path: '/jobs/new_job/single_metric',
-  render: (props, config, deps) => (
-    <PageWrapper config={config} {...props} jobType={JOB_TYPE.SINGLE_METRIC} deps={deps} />
-  ),
+  render: (props, deps) => <PageWrapper {...props} jobType={JOB_TYPE.SINGLE_METRIC} deps={deps} />,
   breadcrumbs: singleMetricBreadcrumbs,
 };
 
 export const multiMetricRoute: MlRoute = {
   path: '/jobs/new_job/multi_metric',
-  render: (props, config, deps) => (
-    <PageWrapper config={config} {...props} jobType={JOB_TYPE.MULTI_METRIC} deps={deps} />
-  ),
+  render: (props, deps) => <PageWrapper {...props} jobType={JOB_TYPE.MULTI_METRIC} deps={deps} />,
   breadcrumbs: multiMetricBreadcrumbs,
 };
 
 export const populationRoute: MlRoute = {
   path: '/jobs/new_job/population',
-  render: (props, config, deps) => (
-    <PageWrapper config={config} {...props} jobType={JOB_TYPE.POPULATION} deps={deps} />
-  ),
+  render: (props, deps) => <PageWrapper {...props} jobType={JOB_TYPE.POPULATION} deps={deps} />,
   breadcrumbs: populationBreadcrumbs,
 };
 
 export const advancedRoute: MlRoute = {
   path: '/jobs/new_job/advanced',
-  render: (props, config, deps) => (
-    <PageWrapper config={config} {...props} jobType={JOB_TYPE.ADVANCED} deps={deps} />
-  ),
+  render: (props, deps) => <PageWrapper {...props} jobType={JOB_TYPE.ADVANCED} deps={deps} />,
   breadcrumbs: advancedBreadcrumbs,
 };
 
 export const categorizationRoute: MlRoute = {
   path: '/jobs/new_job/categorization',
-  render: (props, config, deps) => (
-    <PageWrapper config={config} {...props} jobType={JOB_TYPE.CATEGORIZATION} deps={deps} />
-  ),
+  render: (props, deps) => <PageWrapper {...props} jobType={JOB_TYPE.CATEGORIZATION} deps={deps} />,
   breadcrumbs: categorizationBreadcrumbs,
 };
 
-const PageWrapper: FC<WizardPageProps> = ({ location, config, jobType, deps }) => {
-  const { index, savedSearchId } = queryString.parse(location.search);
-  const { context, results } = useResolver(index, savedSearchId, config, {
+const PageWrapper: FC<WizardPageProps> = ({ location, jobType, deps }) => {
+  const { index, savedSearchId }: Record<string, any> = parse(location.search, { sort: false });
+  const { context, results } = useResolver(index, savedSearchId, deps.config, {
     ...basicResolvers(deps),
     privileges: checkCreateJobsPrivilege,
     jobCaps: () => loadNewJobCapabilities(index, savedSearchId, deps.indexPatterns),

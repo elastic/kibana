@@ -6,6 +6,7 @@
 
 import { renameColumns } from './rename_columns';
 import { KibanaDatatable } from '../../../../../../src/plugins/expressions/public';
+import { createMockExecutionContext } from '../../../../../../src/plugins/expressions/common/mocks';
 
 describe('rename_columns', () => {
   it('should rename columns of a given datatable', () => {
@@ -34,7 +35,13 @@ describe('rename_columns', () => {
       },
     };
 
-    expect(renameColumns.fn(input, { idMap: JSON.stringify(idMap) }, {})).toMatchInlineSnapshot(`
+    const result = renameColumns.fn(
+      input,
+      { idMap: JSON.stringify(idMap) },
+      createMockExecutionContext()
+    );
+
+    expect(result).toMatchInlineSnapshot(`
       Object {
         "columns": Array [
           Object {
@@ -83,9 +90,13 @@ describe('rename_columns', () => {
       },
     };
 
-    expect(renameColumns.fn(input, { idMap: JSON.stringify(idMap) }, {}).rows[0].a).toEqual(
-      '(empty)'
+    const result = renameColumns.fn(
+      input,
+      { idMap: JSON.stringify(idMap) },
+      createMockExecutionContext()
     );
+
+    expect(result.rows[0].a).toEqual('(empty)');
   });
 
   it('should keep columns which are not mapped', () => {
@@ -107,7 +118,13 @@ describe('rename_columns', () => {
       b: { id: 'c', label: 'Catamaran' },
     };
 
-    expect(renameColumns.fn(input, { idMap: JSON.stringify(idMap) }, {})).toMatchInlineSnapshot(`
+    const result = renameColumns.fn(
+      input,
+      { idMap: JSON.stringify(idMap) },
+      createMockExecutionContext()
+    );
+
+    expect(result).toMatchInlineSnapshot(`
       Object {
         "columns": Array [
           Object {
@@ -161,7 +178,13 @@ describe('rename_columns', () => {
       b: { id: 'c', label: 'Apple', operationType: 'date_histogram', sourceField: 'banana' },
     };
 
-    expect(renameColumns.fn(input, { idMap: JSON.stringify(idMap) }, {})).toMatchInlineSnapshot(`
+    const result = renameColumns.fn(
+      input,
+      { idMap: JSON.stringify(idMap) },
+      createMockExecutionContext()
+    );
+
+    expect(result).toMatchInlineSnapshot(`
       Object {
         "columns": Array [
           Object {
