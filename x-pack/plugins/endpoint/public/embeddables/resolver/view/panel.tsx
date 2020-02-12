@@ -85,7 +85,7 @@ export const Panel = memo(function Event({ className }: { className?: string }) 
     () => [
       {
         field: 'name',
-        name: i18n.translate('endpoint.resolver.panel.tabel.row.processNameTitle', {
+        name: i18n.translate('xpack.endpoint.resolver.panel.tabel.row.processNameTitle', {
           defaultMessage: 'Process Name',
         }),
         sortable: true,
@@ -93,7 +93,7 @@ export const Panel = memo(function Event({ className }: { className?: string }) 
         render(name: string) {
           return name === '' ? (
             <EuiBadge color="warning">
-              {i18n.translate('endpoint.resolver.panel.table.row.valueMissingDescription', {
+              {i18n.translate('xpack.endpoint.resolver.panel.table.row.valueMissingDescription', {
                 defaultMessage: 'Value is missing',
               })}
             </EuiBadge>
@@ -104,7 +104,7 @@ export const Panel = memo(function Event({ className }: { className?: string }) 
       },
       {
         field: 'timestamp',
-        name: i18n.translate('endpoint.resolver.panel.tabel.row.timestampTitle', {
+        name: i18n.translate('xpack.endpoint.resolver.panel.tabel.row.timestampTitle', {
           defaultMessage: 'Timestamp',
         }),
         dataType: 'date' as const,
@@ -114,20 +114,23 @@ export const Panel = memo(function Event({ className }: { className?: string }) 
         },
       },
       {
-        name: i18n.translate('endpoint.resolver.panel.tabel.row.actionsTitle', {
+        name: i18n.translate('xpack.endpoint.resolver.panel.tabel.row.actionsTitle', {
           defaultMessage: 'Actions',
         }),
         actions: [
           {
             name: i18n.translate(
-              'endpoint.resolver.panel.tabel.row.actions.bringIntoViewButtonLabel',
+              'xpack.endpoint.resolver.panel.tabel.row.actions.bringIntoViewButtonLabel',
               {
                 defaultMessage: 'Bring into view',
               }
             ),
-            description: i18n.translate('endpoint.resolver.panel.tabel.row.bringIntoViewLabel', {
-              defaultMessage: 'Bring the process into view on the map.',
-            }),
+            description: i18n.translate(
+              'xpack.endpoint.resolver.panel.tabel.row.bringIntoViewLabel',
+              {
+                defaultMessage: 'Bring the process into view on the map.',
+              }
+            ),
             type: 'icon',
             icon: 'flag',
             onClick: handleBringIntoViewClick,
@@ -141,7 +144,7 @@ export const Panel = memo(function Event({ className }: { className?: string }) 
     <EuiPanel className={className}>
       <EuiTitle size="xs">
         <h4>
-          {i18n.translate('endpoint.resolver.panel.title', {
+          {i18n.translate('xpack.endpoint.resolver.panel.title', {
             defaultMessage: 'Processes',
           })}
         </h4>
