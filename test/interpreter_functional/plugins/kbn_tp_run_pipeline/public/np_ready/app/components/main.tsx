@@ -20,27 +20,19 @@
 import React from 'react';
 import { EuiPage, EuiPageBody, EuiPageContent, EuiPageContentHeader } from '@elastic/eui';
 import { first } from 'rxjs/operators';
-import {
-  RequestAdapter,
-  DataAdapter,
-} from '../../../../../../../../src/plugins/inspector/public/adapters';
-import {
-  Adapters,
-  Context,
-  ExpressionRenderHandler,
-  ExpressionDataHandler,
-  RenderId,
-} from '../../types';
+import { IInterpreterRenderHandlers, ExpressionValue } from 'src/plugins/expressions';
+import { RequestAdapter, DataAdapter } from '../../../../../../../../src/plugins/inspector';
+import { Adapters, ExpressionRenderHandler, ExpressionDataHandler } from '../../types';
 import { getExpressions } from '../../services';
 
 declare global {
   interface Window {
     runPipeline: (
       expressions: string,
-      context?: Context,
-      initialContext?: Context
+      context?: ExpressionValue,
+      initialContext?: ExpressionValue
     ) => ReturnType<ExpressionDataHandler['getData']>;
-    renderPipelineResponse: (context?: Context) => Promise<RenderId>;
+    renderPipelineResponse: (context?: ExpressionValue) => Promise<any>;
   }
 }
 
@@ -60,8 +52,8 @@ class Main extends React.Component<{}, State> {
 
     window.runPipeline = async (
       expression: string,
-      context: Context = {},
-      initialContext: Context = {}
+      context: ExpressionValue = {},
+      initialContext: ExpressionValue = {}
     ) => {
       this.setState({ expression });
       const adapters: Adapters = {
@@ -86,7 +78,7 @@ class Main extends React.Component<{}, State> {
       }
 
       lastRenderHandler = getExpressions().render(this.chartRef.current!, context, {
-        onRenderError: (el, error, handler) => {
+        onRenderError: (el: HTMLElement, error: unknown, handler: IInterpreterRenderHandlers) => {
           this.setState({
             expression: 'Render error!\n\n' + JSON.stringify(error),
           });

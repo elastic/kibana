@@ -5,10 +5,13 @@
  */
 
 import uniqBy from 'lodash.uniqby';
-import { registries } from 'plugins/interpreter/registries';
+import { npStart } from 'ui/new_platform';
 import { getServerFunctions } from '../state/selectors/app';
 
 export async function getFunctionDefinitions(state) {
   const serverFunctions = getServerFunctions(state);
-  return uniqBy(serverFunctions.concat(registries.browserFunctions.toArray()), 'name');
+  return uniqBy(
+    serverFunctions.concat(Object.values(npStart.plugins.expressions.getFunctions())),
+    'name'
+  );
 }

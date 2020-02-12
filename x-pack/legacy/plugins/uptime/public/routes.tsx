@@ -9,8 +9,7 @@ import { Route, Switch } from 'react-router-dom';
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 import { OverviewPage } from './components/connected/pages/overview_container';
 import { MONITOR_ROUTE, OVERVIEW_ROUTE } from '../common/constants';
-import { MonitorPage } from './pages/monitor';
-import { NotFoundPage } from './pages/not_found';
+import { MonitorPage, NotFoundPage } from './pages';
 
 interface RouterProps {
   autocomplete: DataPublicPluginStart['autocomplete'];

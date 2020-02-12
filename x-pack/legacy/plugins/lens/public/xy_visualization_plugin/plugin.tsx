@@ -49,7 +49,7 @@ class XyVisualizationPlugin {
     expressions.registerFunction(() => layerConfig);
     expressions.registerFunction(() => xyChart);
 
-    expressions.registerRenderer(() =>
+    expressions.registerRenderer(
       getXyChartRenderer({
         formatFactory,
         timeZone: getTimeZone(getUiSettingsClient()),

@@ -4,10 +4,7 @@
     "Exclude DNS servers from this rule as this is expected behavior. Endpoints usually query local DNS servers defined in their DHCP scopes, but this may be overridden if a user configures their endpoint to use a remote DNS server. This is uncommon in managed enterprise networks because it could break intranet name resolution when split horizon DNS is utilized. Some consumer VPN services and browser plug-ins may send DNS traffic to remote Internet destinations. In that case, such devices or networks can be excluded from this rule when this is expected behavior."
   ],
   "index": [
-    "auditbeat-*",
-    "filebeat-*",
-    "packetbeat-*",
-    "winlogbeat-*"
+    "filebeat-*"
   ],
   "language": "kuery",
   "max_signals": 100,
@@ -42,5 +39,5 @@
     }
   ],
   "type": "query",
-  "version": 1
+  "version": 2
 }

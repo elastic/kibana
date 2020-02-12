@@ -25,7 +25,27 @@ import useObservable from 'react-use/lib/useObservable';
  * Unlike the `useState`, it doesn't give type guarantees for the value,
  * because the underlying `UiSettingsClient` doesn't support that.
  */
-export const useKibanaUiSetting = (key: string, defaultValue?: any) => {
+
+export interface TimePickerQuickRange {
+  from: string;
+  to: string;
+  display: string;
+}
+
+export function useKibanaUiSetting(
+  key: 'timepicker:quickRanges',
+  defaultValue?: TimePickerQuickRange[]
+): [
+  TimePickerQuickRange[],
+  (key: 'timepicker:quickRanges', value: TimePickerQuickRange[]) => Promise<boolean>
+];
+
+export function useKibanaUiSetting(
+  key: string,
+  defaultValue?: any
+): [any, (key: string, value: any) => Promise<boolean>];
+
+export function useKibanaUiSetting(key: string, defaultValue?: any) {
   const uiSettingsClient = npSetup.core.uiSettings;
 
   const uiSetting$ = useMemo(() => uiSettingsClient.get$(key, defaultValue), [
@@ -41,4 +61,4 @@ export const useKibanaUiSetting = (key: string, defaultValue?: any) => {
   ]);
 
   return [uiSetting, setUiSetting];
-};
+}

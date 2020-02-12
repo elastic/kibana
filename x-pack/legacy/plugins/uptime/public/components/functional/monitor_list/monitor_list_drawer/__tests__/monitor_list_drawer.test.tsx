@@ -3,8 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React from 'react';
+import 'jest';
 import { MonitorSummary, Check } from '../../../../../../common/graphql/types';
+import React from 'react';
 import { MonitorListDrawerComponent } from '../monitor_list_drawer';
 import { MonitorDetails } from '../../../../../../common/runtime_types';
 import { shallowWithRouter } from '../../../../../lib';

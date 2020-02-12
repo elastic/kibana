@@ -73,9 +73,8 @@ describe('create_rules', () => {
       alertsClient.create.mockResolvedValue(getResult());
       const { payload } = await server.inject(getCreateRequest());
       expect(JSON.parse(payload)).toEqual({
-        error: 'Bad Request',
         message: 'To create a rule, the index must exist first. Index .siem-signals does not exist',
-        statusCode: 400,
+        status_code: 400,
       });
     });
 
