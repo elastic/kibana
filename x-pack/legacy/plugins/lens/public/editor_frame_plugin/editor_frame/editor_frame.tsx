@@ -25,7 +25,7 @@ import { getSavedObjectFormat } from './save';
 import { WorkspacePanelWrapper } from './workspace_panel_wrapper';
 import { generateId } from '../../id_generator';
 import { SavedQuery } from '../../../../../../../src/legacy/core_plugins/data/public';
-import { esFilters, Query } from '../../../../../../../src/plugins/data/public';
+import { Filter, Query } from '../../../../../../../src/plugins/data/public';
 
 export interface EditorFrameProps {
   doc?: Document;
@@ -41,7 +41,7 @@ export interface EditorFrameProps {
     toDate: string;
   };
   query: Query;
-  filters: esFilters.Filter[];
+  filters: Filter[];
   savedQuery?: SavedQuery;
   onChange: (arg: {
     filterableIndexPatterns: DatasourceMetaData['filterableIndexPatterns'];

@@ -14,7 +14,7 @@ import {
   Embeddable,
   APPLY_FILTER_TRIGGER,
 } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
-import { onlyDisabledFiltersChanged } from '../../../../../../src/plugins/data/public';
+import { esFilters } from '../../../../../../src/plugins/data/public';
 
 import { I18nContext } from 'ui/i18n';
 
@@ -71,7 +71,7 @@ export class MapEmbeddable extends Embeddable {
     if (
       !_.isEqual(containerState.timeRange, this._prevTimeRange) ||
       !_.isEqual(containerState.query, this._prevQuery) ||
-      !onlyDisabledFiltersChanged(containerState.filters, this._prevFilters)
+      !esFilters.onlyDisabledFiltersChanged(containerState.filters, this._prevFilters)
     ) {
       this._dispatchSetQuery(containerState);
     }
