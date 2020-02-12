@@ -16,7 +16,6 @@ exports[`Field for array setting should render as read only if saving is disable
   }
   fullWidth={true}
   gutterSize="l"
-  idAria="array:test:setting-aria"
   title={
     <h3>
       Array test setting
@@ -27,11 +26,7 @@ exports[`Field for array setting should render as read only if saving is disable
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
-    describedByIds={
-      Array [
-        "array:test:setting-aria",
-      ]
-    }
+    describedByIds={Array []}
     display="row"
     fullWidth={true}
     hasChildLabel={true}
@@ -90,7 +85,6 @@ exports[`Field for array setting should render as read only with help text if ov
   }
   fullWidth={true}
   gutterSize="l"
-  idAria="array:test:setting-aria"
   title={
     <h3>
       Array test setting
@@ -101,11 +95,7 @@ exports[`Field for array setting should render as read only with help text if ov
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
-    describedByIds={
-      Array [
-        "array:test:setting-aria",
-      ]
-    }
+    describedByIds={Array []}
     display="row"
     fullWidth={true}
     hasChildLabel={true}
@@ -152,7 +142,6 @@ exports[`Field for array setting should render custom setting icon if it is cust
   }
   fullWidth={true}
   gutterSize="l"
-  idAria="array:test:setting-aria"
   title={
     <h3>
       Array test setting
@@ -174,11 +163,7 @@ exports[`Field for array setting should render custom setting icon if it is cust
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
-    describedByIds={
-      Array [
-        "array:test:setting-aria",
-      ]
-    }
+    describedByIds={Array []}
     display="row"
     fullWidth={true}
     hasChildLabel={true}
@@ -215,7 +200,6 @@ exports[`Field for array setting should render default value if there is no user
   }
   fullWidth={true}
   gutterSize="l"
-  idAria="array:test:setting-aria"
   title={
     <h3>
       Array test setting
@@ -226,11 +210,7 @@ exports[`Field for array setting should render default value if there is no user
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
-    describedByIds={
-      Array [
-        "array:test:setting-aria",
-      ]
-    }
+    describedByIds={Array []}
     display="row"
     fullWidth={true}
     hasChildLabel={true}
@@ -267,7 +247,6 @@ exports[`Field for array setting should render unsaved value if there are unsave
   }
   fullWidth={true}
   gutterSize="l"
-  idAria="array:test:setting-aria"
   title={
     <h3>
       Array test setting
@@ -289,11 +268,7 @@ exports[`Field for array setting should render unsaved value if there are unsave
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
-    describedByIds={
-      Array [
-        "array:test:setting-aria",
-      ]
-    }
+    describedByIds={Array []}
     display="row"
     fullWidth={true}
     hasChildLabel={true}
@@ -356,7 +331,6 @@ exports[`Field for array setting should render user value if there is user value
   }
   fullWidth={true}
   gutterSize="l"
-  idAria="array:test:setting-aria"
   title={
     <h3>
       Array test setting
@@ -367,11 +341,7 @@ exports[`Field for array setting should render user value if there is user value
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
-    describedByIds={
-      Array [
-        "array:test:setting-aria",
-      ]
-    }
+    describedByIds={Array []}
     display="row"
     fullWidth={true}
     hasChildLabel={true}
@@ -425,7 +395,6 @@ exports[`Field for boolean setting should render as read only if saving is disab
   }
   fullWidth={true}
   gutterSize="l"
-  idAria="boolean:test:setting-aria"
   title={
     <h3>
       Boolean test setting
@@ -436,11 +405,7 @@ exports[`Field for boolean setting should render as read only if saving is disab
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
-    describedByIds={
-      Array [
-        "boolean:test:setting-aria",
-      ]
-    }
+    describedByIds={Array []}
     display="row"
     fullWidth={true}
     hasChildLabel={false}
@@ -505,7 +470,6 @@ exports[`Field for boolean setting should render as read only with help text if 
   }
   fullWidth={true}
   gutterSize="l"
-  idAria="boolean:test:setting-aria"
   title={
     <h3>
       Boolean test setting
@@ -516,11 +480,7 @@ exports[`Field for boolean setting should render as read only with help text if 
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
-    describedByIds={
-      Array [
-        "boolean:test:setting-aria",
-      ]
-    }
+    describedByIds={Array []}
     display="row"
     fullWidth={true}
     hasChildLabel={false}
@@ -573,7 +533,6 @@ exports[`Field for boolean setting should render custom setting icon if it is cu
   }
   fullWidth={true}
   gutterSize="l"
-  idAria="boolean:test:setting-aria"
   title={
     <h3>
       Boolean test setting
@@ -595,11 +554,7 @@ exports[`Field for boolean setting should render custom setting icon if it is cu
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
-    describedByIds={
-      Array [
-        "boolean:test:setting-aria",
-      ]
-    }
+    describedByIds={Array []}
     display="row"
     fullWidth={true}
     hasChildLabel={false}
@@ -642,7 +597,6 @@ exports[`Field for boolean setting should render default value if there is no us
   }
   fullWidth={true}
   gutterSize="l"
-  idAria="boolean:test:setting-aria"
   title={
     <h3>
       Boolean test setting
@@ -653,11 +607,7 @@ exports[`Field for boolean setting should render default value if there is no us
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
-    describedByIds={
-      Array [
-        "boolean:test:setting-aria",
-      ]
-    }
+    describedByIds={Array []}
     display="row"
     fullWidth={true}
     hasChildLabel={false}
@@ -700,7 +650,6 @@ exports[`Field for boolean setting should render unsaved value if there are unsa
   }
   fullWidth={true}
   gutterSize="l"
-  idAria="boolean:test:setting-aria"
   title={
     <h3>
       Boolean test setting
@@ -722,11 +671,7 @@ exports[`Field for boolean setting should render unsaved value if there are unsa
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
-    describedByIds={
-      Array [
-        "boolean:test:setting-aria",
-      ]
-    }
+    describedByIds={Array []}
     display="row"
     fullWidth={true}
     hasChildLabel={false}
@@ -791,7 +736,6 @@ exports[`Field for boolean setting should render user value if there is user val
   }
   fullWidth={true}
   gutterSize="l"
-  idAria="boolean:test:setting-aria"
   title={
     <h3>
       Boolean test setting
@@ -802,11 +746,7 @@ exports[`Field for boolean setting should render user value if there is user val
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
-    describedByIds={
-      Array [
-        "boolean:test:setting-aria",
-      ]
-    }
+    describedByIds={Array []}
     display="row"
     fullWidth={true}
     hasChildLabel={false}
@@ -866,7 +806,6 @@ exports[`Field for image setting should render as read only if saving is disable
   }
   fullWidth={true}
   gutterSize="l"
-  idAria="image:test:setting-aria"
   title={
     <h3>
       Image test setting
@@ -877,11 +816,7 @@ exports[`Field for image setting should render as read only if saving is disable
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
-    describedByIds={
-      Array [
-        "image:test:setting-aria",
-      ]
-    }
+    describedByIds={Array []}
     display="row"
     fullWidth={true}
     hasChildLabel={true}
@@ -942,7 +877,6 @@ exports[`Field for image setting should render as read only with help text if ov
   }
   fullWidth={true}
   gutterSize="l"
-  idAria="image:test:setting-aria"
   title={
     <h3>
       Image test setting
@@ -953,11 +887,7 @@ exports[`Field for image setting should render as read only with help text if ov
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
-    describedByIds={
-      Array [
-        "image:test:setting-aria",
-      ]
-    }
+    describedByIds={Array []}
     display="row"
     fullWidth={true}
     hasChildLabel={true}
@@ -1002,7 +932,6 @@ exports[`Field for image setting should render custom setting icon if it is cust
   }
   fullWidth={true}
   gutterSize="l"
-  idAria="image:test:setting-aria"
   title={
     <h3>
       Image test setting
@@ -1024,11 +953,7 @@ exports[`Field for image setting should render custom setting icon if it is cust
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
-    describedByIds={
-      Array [
-        "image:test:setting-aria",
-      ]
-    }
+    describedByIds={Array []}
     display="row"
     fullWidth={true}
     hasChildLabel={true}
@@ -1067,7 +992,6 @@ exports[`Field for image setting should render default value if there is no user
   }
   fullWidth={true}
   gutterSize="l"
-  idAria="image:test:setting-aria"
   title={
     <h3>
       Image test setting
@@ -1078,11 +1002,7 @@ exports[`Field for image setting should render default value if there is no user
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
-    describedByIds={
-      Array [
-        "image:test:setting-aria",
-      ]
-    }
+    describedByIds={Array []}
     display="row"
     fullWidth={true}
     hasChildLabel={true}
@@ -1121,7 +1041,6 @@ exports[`Field for image setting should render unsaved value if there are unsave
   }
   fullWidth={true}
   gutterSize="l"
-  idAria="image:test:setting-aria"
   title={
     <h3>
       Image test setting
@@ -1143,11 +1062,7 @@ exports[`Field for image setting should render unsaved value if there are unsave
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
-    describedByIds={
-      Array [
-        "image:test:setting-aria",
-      ]
-    }
+    describedByIds={Array []}
     display="row"
     fullWidth={true}
     hasChildLabel={true}
@@ -1208,7 +1123,6 @@ exports[`Field for image setting should render user value if there is user value
   }
   fullWidth={true}
   gutterSize="l"
-  idAria="image:test:setting-aria"
   title={
     <h3>
       Image test setting
@@ -1219,11 +1133,7 @@ exports[`Field for image setting should render user value if there is user value
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
-    describedByIds={
-      Array [
-        "image:test:setting-aria",
-      ]
-    }
+    describedByIds={Array []}
     display="row"
     fullWidth={true}
     hasChildLabel={true}
@@ -1313,7 +1223,6 @@ exports[`Field for json setting should render as read only if saving is disabled
   }
   fullWidth={true}
   gutterSize="l"
-  idAria="json:test:setting-aria"
   title={
     <h3>
       Json test setting
@@ -1324,11 +1233,7 @@ exports[`Field for json setting should render as read only if saving is disabled
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
-    describedByIds={
-      Array [
-        "json:test:setting-aria",
-      ]
-    }
+    describedByIds={Array []}
     display="row"
     fullWidth={true}
     hasChildLabel={true}
@@ -1411,7 +1316,6 @@ exports[`Field for json setting should render as read only with help text if ove
   }
   fullWidth={true}
   gutterSize="l"
-  idAria="json:test:setting-aria"
   title={
     <h3>
       Json test setting
@@ -1422,11 +1326,7 @@ exports[`Field for json setting should render as read only with help text if ove
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
-    describedByIds={
-      Array [
-        "json:test:setting-aria",
-      ]
-    }
+    describedByIds={Array []}
     display="row"
     fullWidth={true}
     hasChildLabel={true}
@@ -1494,7 +1394,6 @@ exports[`Field for json setting should render custom setting icon if it is custo
   }
   fullWidth={true}
   gutterSize="l"
-  idAria="json:test:setting-aria"
   title={
     <h3>
       Json test setting
@@ -1516,11 +1415,7 @@ exports[`Field for json setting should render custom setting icon if it is custo
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
-    describedByIds={
-      Array [
-        "json:test:setting-aria",
-      ]
-    }
+    describedByIds={Array []}
     display="row"
     fullWidth={true}
     hasChildLabel={true}
@@ -1603,7 +1498,6 @@ exports[`Field for json setting should render default value if there is no user 
   }
   fullWidth={true}
   gutterSize="l"
-  idAria="json:test:setting-aria"
   title={
     <h3>
       Json test setting
@@ -1614,11 +1508,7 @@ exports[`Field for json setting should render default value if there is no user 
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
-    describedByIds={
-      Array [
-        "json:test:setting-aria",
-      ]
-    }
+    describedByIds={Array []}
     display="row"
     fullWidth={true}
     hasChildLabel={true}
@@ -1693,7 +1583,6 @@ exports[`Field for json setting should render unsaved value if there are unsaved
   }
   fullWidth={true}
   gutterSize="l"
-  idAria="json:test:setting-aria"
   title={
     <h3>
       Json test setting
@@ -1715,11 +1604,7 @@ exports[`Field for json setting should render unsaved value if there are unsaved
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
-    describedByIds={
-      Array [
-        "json:test:setting-aria",
-      ]
-    }
+    describedByIds={Array []}
     display="row"
     fullWidth={true}
     hasChildLabel={true}
@@ -1806,7 +1691,6 @@ exports[`Field for json setting should render user value if there is user value 
   }
   fullWidth={true}
   gutterSize="l"
-  idAria="json:test:setting-aria"
   title={
     <h3>
       Json test setting
@@ -1817,11 +1701,7 @@ exports[`Field for json setting should render user value if there is user value 
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
-    describedByIds={
-      Array [
-        "json:test:setting-aria",
-      ]
-    }
+    describedByIds={Array []}
     display="row"
     fullWidth={true}
     hasChildLabel={true}
@@ -1896,7 +1776,6 @@ exports[`Field for markdown setting should render as read only if saving is disa
   }
   fullWidth={true}
   gutterSize="l"
-  idAria="markdown:test:setting-aria"
   title={
     <h3>
       Markdown test setting
@@ -1907,11 +1786,7 @@ exports[`Field for markdown setting should render as read only if saving is disa
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
-    describedByIds={
-      Array [
-        "markdown:test:setting-aria",
-      ]
-    }
+    describedByIds={Array []}
     display="row"
     fullWidth={true}
     hasChildLabel={true}
@@ -1991,7 +1866,6 @@ exports[`Field for markdown setting should render as read only with help text if
   }
   fullWidth={true}
   gutterSize="l"
-  idAria="markdown:test:setting-aria"
   title={
     <h3>
       Markdown test setting
@@ -2002,11 +1876,7 @@ exports[`Field for markdown setting should render as read only with help text if
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
-    describedByIds={
-      Array [
-        "markdown:test:setting-aria",
-      ]
-    }
+    describedByIds={Array []}
     display="row"
     fullWidth={true}
     hasChildLabel={true}
@@ -2074,7 +1944,6 @@ exports[`Field for markdown setting should render custom setting icon if it is c
   }
   fullWidth={true}
   gutterSize="l"
-  idAria="markdown:test:setting-aria"
   title={
     <h3>
       Markdown test setting
@@ -2096,11 +1965,7 @@ exports[`Field for markdown setting should render custom setting icon if it is c
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
-    describedByIds={
-      Array [
-        "markdown:test:setting-aria",
-      ]
-    }
+    describedByIds={Array []}
     display="row"
     fullWidth={true}
     hasChildLabel={true}
@@ -2158,7 +2023,6 @@ exports[`Field for markdown setting should render default value if there is no u
   }
   fullWidth={true}
   gutterSize="l"
-  idAria="markdown:test:setting-aria"
   title={
     <h3>
       Markdown test setting
@@ -2169,11 +2033,7 @@ exports[`Field for markdown setting should render default value if there is no u
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
-    describedByIds={
-      Array [
-        "markdown:test:setting-aria",
-      ]
-    }
+    describedByIds={Array []}
     display="row"
     fullWidth={true}
     hasChildLabel={true}
@@ -2231,7 +2091,6 @@ exports[`Field for markdown setting should render unsaved value if there are uns
   }
   fullWidth={true}
   gutterSize="l"
-  idAria="markdown:test:setting-aria"
   title={
     <h3>
       Markdown test setting
@@ -2253,11 +2112,7 @@ exports[`Field for markdown setting should render unsaved value if there are uns
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
-    describedByIds={
-      Array [
-        "markdown:test:setting-aria",
-      ]
-    }
+    describedByIds={Array []}
     display="row"
     fullWidth={true}
     hasChildLabel={true}
@@ -2337,7 +2192,6 @@ exports[`Field for markdown setting should render user value if there is user va
   }
   fullWidth={true}
   gutterSize="l"
-  idAria="markdown:test:setting-aria"
   title={
     <h3>
       Markdown test setting
@@ -2348,11 +2202,7 @@ exports[`Field for markdown setting should render user value if there is user va
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
-    describedByIds={
-      Array [
-        "markdown:test:setting-aria",
-      ]
-    }
+    describedByIds={Array []}
     display="row"
     fullWidth={true}
     hasChildLabel={true}
@@ -2427,7 +2277,6 @@ exports[`Field for number setting should render as read only if saving is disabl
   }
   fullWidth={true}
   gutterSize="l"
-  idAria="number:test:setting-aria"
   title={
     <h3>
       Number test setting
@@ -2438,11 +2287,7 @@ exports[`Field for number setting should render as read only if saving is disabl
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
-    describedByIds={
-      Array [
-        "number:test:setting-aria",
-      ]
-    }
+    describedByIds={Array []}
     display="row"
     fullWidth={true}
     hasChildLabel={true}
@@ -2501,7 +2346,6 @@ exports[`Field for number setting should render as read only with help text if o
   }
   fullWidth={true}
   gutterSize="l"
-  idAria="number:test:setting-aria"
   title={
     <h3>
       Number test setting
@@ -2512,11 +2356,7 @@ exports[`Field for number setting should render as read only with help text if o
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
-    describedByIds={
-      Array [
-        "number:test:setting-aria",
-      ]
-    }
+    describedByIds={Array []}
     display="row"
     fullWidth={true}
     hasChildLabel={true}
@@ -2563,7 +2403,6 @@ exports[`Field for number setting should render custom setting icon if it is cus
   }
   fullWidth={true}
   gutterSize="l"
-  idAria="number:test:setting-aria"
   title={
     <h3>
       Number test setting
@@ -2585,11 +2424,7 @@ exports[`Field for number setting should render custom setting icon if it is cus
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
-    describedByIds={
-      Array [
-        "number:test:setting-aria",
-      ]
-    }
+    describedByIds={Array []}
     display="row"
     fullWidth={true}
     hasChildLabel={true}
@@ -2626,7 +2461,6 @@ exports[`Field for number setting should render default value if there is no use
   }
   fullWidth={true}
   gutterSize="l"
-  idAria="number:test:setting-aria"
   title={
     <h3>
       Number test setting
@@ -2637,11 +2471,7 @@ exports[`Field for number setting should render default value if there is no use
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
-    describedByIds={
-      Array [
-        "number:test:setting-aria",
-      ]
-    }
+    describedByIds={Array []}
     display="row"
     fullWidth={true}
     hasChildLabel={true}
@@ -2678,7 +2508,6 @@ exports[`Field for number setting should render unsaved value if there are unsav
   }
   fullWidth={true}
   gutterSize="l"
-  idAria="number:test:setting-aria"
   title={
     <h3>
       Number test setting
@@ -2700,11 +2529,7 @@ exports[`Field for number setting should render unsaved value if there are unsav
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
-    describedByIds={
-      Array [
-        "number:test:setting-aria",
-      ]
-    }
+    describedByIds={Array []}
     display="row"
     fullWidth={true}
     hasChildLabel={true}
@@ -2763,7 +2588,6 @@ exports[`Field for number setting should render user value if there is user valu
   }
   fullWidth={true}
   gutterSize="l"
-  idAria="number:test:setting-aria"
   title={
     <h3>
       Number test setting
@@ -2774,11 +2598,7 @@ exports[`Field for number setting should render user value if there is user valu
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
-    describedByIds={
-      Array [
-        "number:test:setting-aria",
-      ]
-    }
+    describedByIds={Array []}
     display="row"
     fullWidth={true}
     hasChildLabel={true}
@@ -2832,7 +2652,6 @@ exports[`Field for select setting should render as read only if saving is disabl
   }
   fullWidth={true}
   gutterSize="l"
-  idAria="select:test:setting-aria"
   title={
     <h3>
       Select test setting
@@ -2843,11 +2662,7 @@ exports[`Field for select setting should render as read only if saving is disabl
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
-    describedByIds={
-      Array [
-        "select:test:setting-aria",
-      ]
-    }
+    describedByIds={Array []}
     display="row"
     fullWidth={true}
     hasChildLabel={true}
@@ -2922,7 +2737,6 @@ exports[`Field for select setting should render as read only with help text if o
   }
   fullWidth={true}
   gutterSize="l"
-  idAria="select:test:setting-aria"
   title={
     <h3>
       Select test setting
@@ -2933,11 +2747,7 @@ exports[`Field for select setting should render as read only with help text if o
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
-    describedByIds={
-      Array [
-        "select:test:setting-aria",
-      ]
-    }
+    describedByIds={Array []}
     display="row"
     fullWidth={true}
     hasChildLabel={true}
@@ -3000,7 +2810,6 @@ exports[`Field for select setting should render custom setting icon if it is cus
   }
   fullWidth={true}
   gutterSize="l"
-  idAria="select:test:setting-aria"
   title={
     <h3>
       Select test setting
@@ -3022,11 +2831,7 @@ exports[`Field for select setting should render custom setting icon if it is cus
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
-    describedByIds={
-      Array [
-        "select:test:setting-aria",
-      ]
-    }
+    describedByIds={Array []}
     display="row"
     fullWidth={true}
     hasChildLabel={true}
@@ -3079,7 +2884,6 @@ exports[`Field for select setting should render default value if there is no use
   }
   fullWidth={true}
   gutterSize="l"
-  idAria="select:test:setting-aria"
   title={
     <h3>
       Select test setting
@@ -3090,11 +2894,7 @@ exports[`Field for select setting should render default value if there is no use
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
-    describedByIds={
-      Array [
-        "select:test:setting-aria",
-      ]
-    }
+    describedByIds={Array []}
     display="row"
     fullWidth={true}
     hasChildLabel={true}
@@ -3147,7 +2947,6 @@ exports[`Field for select setting should render unsaved value if there are unsav
   }
   fullWidth={true}
   gutterSize="l"
-  idAria="select:test:setting-aria"
   title={
     <h3>
       Select test setting
@@ -3169,11 +2968,7 @@ exports[`Field for select setting should render unsaved value if there are unsav
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
-    describedByIds={
-      Array [
-        "select:test:setting-aria",
-      ]
-    }
+    describedByIds={Array []}
     display="row"
     fullWidth={true}
     hasChildLabel={true}
@@ -3248,7 +3043,6 @@ exports[`Field for select setting should render user value if there is user valu
   }
   fullWidth={true}
   gutterSize="l"
-  idAria="select:test:setting-aria"
   title={
     <h3>
       Select test setting
@@ -3259,11 +3053,7 @@ exports[`Field for select setting should render user value if there is user valu
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
-    describedByIds={
-      Array [
-        "select:test:setting-aria",
-      ]
-    }
+    describedByIds={Array []}
     display="row"
     fullWidth={true}
     hasChildLabel={true}
@@ -3333,7 +3123,6 @@ exports[`Field for string setting should render as read only if saving is disabl
   }
   fullWidth={true}
   gutterSize="l"
-  idAria="string:test:setting-aria"
   title={
     <h3>
       String test setting
@@ -3344,11 +3133,7 @@ exports[`Field for string setting should render as read only if saving is disabl
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
-    describedByIds={
-      Array [
-        "string:test:setting-aria",
-      ]
-    }
+    describedByIds={Array []}
     display="row"
     fullWidth={true}
     hasChildLabel={true}
@@ -3407,7 +3192,6 @@ exports[`Field for string setting should render as read only with help text if o
   }
   fullWidth={true}
   gutterSize="l"
-  idAria="string:test:setting-aria"
   title={
     <h3>
       String test setting
@@ -3418,11 +3202,7 @@ exports[`Field for string setting should render as read only with help text if o
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
-    describedByIds={
-      Array [
-        "string:test:setting-aria",
-      ]
-    }
+    describedByIds={Array []}
     display="row"
     fullWidth={true}
     hasChildLabel={true}
@@ -3469,7 +3249,6 @@ exports[`Field for string setting should render custom setting icon if it is cus
   }
   fullWidth={true}
   gutterSize="l"
-  idAria="string:test:setting-aria"
   title={
     <h3>
       String test setting
@@ -3491,11 +3270,7 @@ exports[`Field for string setting should render custom setting icon if it is cus
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
-    describedByIds={
-      Array [
-        "string:test:setting-aria",
-      ]
-    }
+    describedByIds={Array []}
     display="row"
     fullWidth={true}
     hasChildLabel={true}
@@ -3532,7 +3307,6 @@ exports[`Field for string setting should render default value if there is no use
   }
   fullWidth={true}
   gutterSize="l"
-  idAria="string:test:setting-aria"
   title={
     <h3>
       String test setting
@@ -3543,11 +3317,7 @@ exports[`Field for string setting should render default value if there is no use
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
-    describedByIds={
-      Array [
-        "string:test:setting-aria",
-      ]
-    }
+    describedByIds={Array []}
     display="row"
     fullWidth={true}
     hasChildLabel={true}
@@ -3584,7 +3354,6 @@ exports[`Field for string setting should render unsaved value if there are unsav
   }
   fullWidth={true}
   gutterSize="l"
-  idAria="string:test:setting-aria"
   title={
     <h3>
       String test setting
@@ -3606,11 +3375,7 @@ exports[`Field for string setting should render unsaved value if there are unsav
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
-    describedByIds={
-      Array [
-        "string:test:setting-aria",
-      ]
-    }
+    describedByIds={Array []}
     display="row"
     fullWidth={true}
     hasChildLabel={true}
@@ -3669,7 +3434,6 @@ exports[`Field for string setting should render user value if there is user valu
   }
   fullWidth={true}
   gutterSize="l"
-  idAria="string:test:setting-aria"
   title={
     <h3>
       String test setting
@@ -3680,11 +3444,7 @@ exports[`Field for string setting should render user value if there is user valu
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
-    describedByIds={
-      Array [
-        "string:test:setting-aria",
-      ]
-    }
+    describedByIds={Array []}
     display="row"
     fullWidth={true}
     hasChildLabel={true}
@@ -3738,7 +3498,6 @@ exports[`Field for stringWithValidation setting should render as read only if sa
   }
   fullWidth={true}
   gutterSize="l"
-  idAria="string:test-validation:setting-aria"
   title={
     <h3>
       String test validation setting
@@ -3749,11 +3508,7 @@ exports[`Field for stringWithValidation setting should render as read only if sa
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
-    describedByIds={
-      Array [
-        "string:test-validation:setting-aria",
-      ]
-    }
+    describedByIds={Array []}
     display="row"
     fullWidth={true}
     hasChildLabel={true}
@@ -3812,7 +3567,6 @@ exports[`Field for stringWithValidation setting should render as read only with 
   }
   fullWidth={true}
   gutterSize="l"
-  idAria="string:test-validation:setting-aria"
   title={
     <h3>
       String test validation setting
@@ -3823,11 +3577,7 @@ exports[`Field for stringWithValidation setting should render as read only with 
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
-    describedByIds={
-      Array [
-        "string:test-validation:setting-aria",
-      ]
-    }
+    describedByIds={Array []}
     display="row"
     fullWidth={true}
     hasChildLabel={true}
@@ -3874,7 +3624,6 @@ exports[`Field for stringWithValidation setting should render custom setting ico
   }
   fullWidth={true}
   gutterSize="l"
-  idAria="string:test-validation:setting-aria"
   title={
     <h3>
       String test validation setting
@@ -3896,11 +3645,7 @@ exports[`Field for stringWithValidation setting should render custom setting ico
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
-    describedByIds={
-      Array [
-        "string:test-validation:setting-aria",
-      ]
-    }
+    describedByIds={Array []}
     display="row"
     fullWidth={true}
     hasChildLabel={true}
@@ -3937,7 +3682,6 @@ exports[`Field for stringWithValidation setting should render default value if t
   }
   fullWidth={true}
   gutterSize="l"
-  idAria="string:test-validation:setting-aria"
   title={
     <h3>
       String test validation setting
@@ -3948,11 +3692,7 @@ exports[`Field for stringWithValidation setting should render default value if t
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
-    describedByIds={
-      Array [
-        "string:test-validation:setting-aria",
-      ]
-    }
+    describedByIds={Array []}
     display="row"
     fullWidth={true}
     hasChildLabel={true}
@@ -3989,7 +3729,6 @@ exports[`Field for stringWithValidation setting should render unsaved value if t
   }
   fullWidth={true}
   gutterSize="l"
-  idAria="string:test-validation:setting-aria"
   title={
     <h3>
       String test validation setting
@@ -4011,11 +3750,7 @@ exports[`Field for stringWithValidation setting should render unsaved value if t
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
-    describedByIds={
-      Array [
-        "string:test-validation:setting-aria",
-      ]
-    }
+    describedByIds={Array []}
     display="row"
     fullWidth={true}
     hasChildLabel={true}
@@ -4074,7 +3809,6 @@ exports[`Field for stringWithValidation setting should render user value if ther
   }
   fullWidth={true}
   gutterSize="l"
-  idAria="string:test-validation:setting-aria"
   title={
     <h3>
       String test validation setting
@@ -4085,11 +3819,7 @@ exports[`Field for stringWithValidation setting should render user value if ther
 >
   <EuiFormRow
     className="mgtAdvancedSettings__fieldRow"
-    describedByIds={
-      Array [
-        "string:test-validation:setting-aria",
-      ]
-    }
+    describedByIds={Array []}
     display="row"
     fullWidth={true}
     hasChildLabel={true}

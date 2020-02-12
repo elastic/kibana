@@ -639,7 +639,6 @@ export class Field extends PureComponent<FieldProps> {
         className={className}
         title={this.renderTitle(setting)}
         description={this.renderDescription(setting)}
-        idAria={`${setting.name}-aria`}
         fullWidth
       >
         <EuiFormRow
@@ -647,9 +646,7 @@ export class Field extends PureComponent<FieldProps> {
           error={error}
           label={this.renderLabel(setting)}
           helpText={this.renderHelpText(setting)}
-          describedByIds={[`${setting.name}-aria`]}
           className="mgtAdvancedSettings__fieldRow"
-          // @ts-ignore
           hasChildLabel={setting.type !== 'boolean'}
           fullWidth
         >
