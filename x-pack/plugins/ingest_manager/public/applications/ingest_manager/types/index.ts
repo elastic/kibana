@@ -30,6 +30,7 @@ export {
   // API schemas - Enrollment API Keys
   GetEnrollmentAPIKeysResponse,
   GetOneEnrollmentAPIKeyResponse,
+  GetCategoriesResponse,
   // EPM types
   AssetReference,
   AssetsGroupedByServiceByType,

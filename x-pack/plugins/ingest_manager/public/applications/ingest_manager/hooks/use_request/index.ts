@@ -7,3 +7,4 @@ export { setHttpClient, sendRequest, useRequest } from './use_request';
 export * from './agent_config';
 export * from './agents';
 export * from './enrollment_api_keys';
+export * from './epm';

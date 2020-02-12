@@ -13,13 +13,8 @@ import { PackageListGrid } from '../../components/package_list_grid';
 // import { useLinks } from '../../hooks';
 import { CategoryFacets } from './category_facets';
 import { Header } from './header';
-import {
-  useAllPackages,
-  useCategories,
-  useCategoryPackages,
-  useInstalledPackages,
-  useLocalSearch,
-} from './hooks';
+import { useAllPackages, useCategoryPackages, useInstalledPackages, useLocalSearch } from './hooks';
+import { useGetCategories } from '../../../../hooks';
 import { SearchPackages } from './search_packages';
 
 export const FullBleedPage = styled(EuiPage)`
@@ -69,7 +64,8 @@ type HomeState = ReturnType<typeof useHomeState>;
 export function useHomeState() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
-  const [categories, setCategories] = useCategories();
+  const { data: categoriesRes } = useGetCategories();
+  const categories = categoriesRes?.response;
   const [categoryPackages, setCategoryPackages] = useCategoryPackages(selectedCategory);
   const [allPackages, setAllPackages] = useAllPackages(selectedCategory, categoryPackages);
   const localSearchRef = useLocalSearch(allPackages);
@@ -81,7 +77,6 @@ export function useHomeState() {
     selectedCategory,
     setSelectedCategory,
     categories,
-    setCategories,
     allPackages,
     setAllPackages,
     installedPackages,
@@ -112,13 +107,13 @@ function AvailablePackages({
     count: allPackages.length,
   };
 
-  const controls = (
+  const controls = categories ? (
     <CategoryFacets
       categories={[noFilter, ...categories]}
       selectedCategory={selectedCategory}
       onCategoryChange={({ id }: CategorySummaryItem) => setSelectedCategory(id)}
     />
-  );
+  ) : null;
 
   return <PackageListGrid title={title} controls={controls} list={categoryPackages} />;
 }

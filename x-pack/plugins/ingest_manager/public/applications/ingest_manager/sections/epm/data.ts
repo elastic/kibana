@@ -5,15 +5,7 @@
  */
 
 import { HttpHandler, HttpFetchOptions } from 'src/core/public';
-import {
-  getCategoriesPath,
-  getFilePath,
-  getInfoPath,
-  getInstallPath,
-  getListPath,
-  getRemovePath,
-  ListParams,
-} from './tmp_routes';
+import { epmRouteService } from '../../../../../common/services/routes';
 import {
   AssetReference,
   CategorySummaryList,
@@ -32,18 +24,18 @@ export function setClient(client: HttpHandler): void {
 }
 
 export async function getCategories(): Promise<CategorySummaryList> {
-  const path = getCategoriesPath();
+  const path = epmRouteService.getCategoriesPath();
   return _fetch(path);
 }
 
-export async function getPackages(params?: ListParams): Promise<PackageList> {
-  const path = getListPath();
+export async function getPackages(params?: { category?: string }): Promise<PackageList> {
+  const path = epmRouteService.getListPath();
   const options = params ? { query: { ...params } } : undefined;
   return _fetch(path, options);
 }
 
 export async function getPackagesGroupedByStatus() {
-  const path = getListPath();
+  const path = epmRouteService.getListPath();
   const list: PackageList = await _fetch(path);
   const initialValue: PackagesGroupedByStatus = {
     installed: [],
@@ -63,21 +55,21 @@ export async function getPackagesGroupedByStatus() {
 }
 
 export async function getPackageInfoByKey(pkgkey: string): Promise<PackageInfo> {
-  const path = getInfoPath(pkgkey);
+  const path = epmRouteService.getInfoPath(pkgkey);
   return _fetch(path);
 }
 
 export async function installPackage(pkgkey: string): Promise<AssetReference[]> {
-  const path = getInstallPath(pkgkey);
+  const path = epmRouteService.getInstallPath(pkgkey);
   return _fetch(path);
 }
 
 export async function removePackage(pkgkey: string): Promise<AssetReference[]> {
-  const path = getRemovePath(pkgkey);
+  const path = epmRouteService.getRemovePath(pkgkey);
   return _fetch(path);
 }
 
 export async function getFileByPath(filePath: string): Promise<string> {
-  const path = getFilePath(filePath);
+  const path = epmRouteService.getFilePath(filePath);
   return _fetch(path);
 }

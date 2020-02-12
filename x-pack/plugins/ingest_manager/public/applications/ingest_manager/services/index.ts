@@ -9,4 +9,5 @@ export {
   fleetSetupRouteService,
   agentRouteService,
   enrollmentAPIKeyRouteService,
+  epmRouteService,
 } from '../../../../common';
