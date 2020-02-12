@@ -142,18 +142,21 @@ describe('Saved Objects Mixin', () => {
         },
       },
     };
+
+    const coreStart = coreMock.createStart();
+    coreStart.savedObjects.getTypeRegistry.mockReturnValue(typeRegistry);
+
     mockKbnServer = {
       newPlatform: {
         __internals: {
           kibanaMigrator: migrator,
           savedObjectsClientProvider: clientProvider,
-          typeRegistry,
         },
         setup: {
           core: coreMock.createSetup(),
         },
         start: {
-          core: coreMock.createStart(),
+          core: coreStart,
         },
       },
       server: mockServer,
