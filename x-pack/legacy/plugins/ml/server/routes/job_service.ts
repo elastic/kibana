@@ -351,14 +351,16 @@ export function jobServiceRoutes({ xpackMainPlugin, router }: RouteInitializatio
       path: '/api/ml/jobs/new_job_caps/{indexPattern}',
       validate: {
         params: schema.object({ indexPattern: schema.string() }),
+        query: schema.maybe(schema.object({ rollup: schema.maybe(schema.string()) })),
       },
     },
     licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
       try {
         const { indexPattern } = request.params;
         const isRollup = request.query.rollup === 'true';
+        const savedObjectsClient = context.core.savedObjects.client;
         const { newJobCaps } = jobServiceProvider(context.ml!.mlClient.callAsCurrentUser, request);
-        const resp = await newJobCaps(indexPattern, isRollup);
+        const resp = await newJobCaps(indexPattern, isRollup, savedObjectsClient);
 
         return response.ok({
           body: resp,

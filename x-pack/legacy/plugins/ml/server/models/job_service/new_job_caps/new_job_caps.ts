@@ -5,6 +5,7 @@
  */
 
 import { Request } from 'src/legacy/server/kbn_server';
+import { SavedObjectsClientContract } from 'kibana/server';
 import { Aggregation, Field, NewJobCaps } from '../../../../common/types/fields';
 import { fieldServiceProvider } from './field_service';
 
@@ -15,9 +16,15 @@ interface NewJobCapsResponse {
 export function newJobCapsProvider(callWithRequest: any, request: Request) {
   async function newJobCaps(
     indexPattern: string,
-    isRollup: boolean = false
+    isRollup: boolean = false,
+    savedObjectsClient: SavedObjectsClientContract
   ): Promise<NewJobCapsResponse> {
-    const fieldService = fieldServiceProvider(indexPattern, isRollup, callWithRequest, request);
+    const fieldService = fieldServiceProvider(
+      indexPattern,
+      isRollup,
+      callWithRequest,
+      savedObjectsClient
+    );
     const { aggs, fields } = await fieldService.getData();
     convertForStringify(aggs, fields);
 
