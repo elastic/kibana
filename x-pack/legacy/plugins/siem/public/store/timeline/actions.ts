@@ -6,7 +6,7 @@
 
 import actionCreatorFactory from 'typescript-fsa';
 
-import { esFilters } from '../../../../../../../src/plugins/data/public';
+import { Filter } from '../../../../../../../src/plugins/data/public';
 import { ColumnHeader } from '../../components/timeline/body/column_headers/column_header';
 import { Sort } from '../../components/timeline/body/sort';
 import {
@@ -55,7 +55,7 @@ export const createTimeline = actionCreator<{
     start: number;
     end: number;
   };
-  filters?: esFilters.Filter[];
+  filters?: Filter[];
   columns: ColumnHeader[];
   itemsPerPage?: number;
   kqlQuery?: {
@@ -209,7 +209,7 @@ export const setSavedQueryId = actionCreator<{
 
 export const setFilters = actionCreator<{
   id: string;
-  filters: esFilters.Filter[];
+  filters: Filter[];
 }>('SET_TIMELINE_FILTERS');
 
 export const setSelected = actionCreator<{

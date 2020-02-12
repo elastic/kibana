@@ -7,16 +7,15 @@
 import _ from 'lodash';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Query, TimeRange, esFilters } from 'src/plugins/data/public';
-import { ExpressionRenderer } from 'src/plugins/expressions/public';
-import { IIndexPattern } from 'src/plugins/data/public';
+import { Query, TimeRange, Filter, IIndexPattern } from 'src/plugins/data/public';
 import { Subscription } from 'rxjs';
+import { ReactExpressionRendererType } from '../../../../../../../src/plugins/expressions/public';
 import {
   Embeddable as AbstractEmbeddable,
   EmbeddableOutput,
   IContainer,
   EmbeddableInput,
-} from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
+} from '../../../../../../../src/plugins/embeddable/public';
 import { Document, DOC_TYPE } from '../../persistence';
 import { ExpressionWrapper } from './expression_wrapper';
 
@@ -30,7 +29,7 @@ export interface LensEmbeddableConfiguration {
 export interface LensEmbeddableInput extends EmbeddableInput {
   timeRange?: TimeRange;
   query?: Query;
-  filters?: esFilters.Filter[];
+  filters?: Filter[];
 }
 
 export interface LensEmbeddableOutput extends EmbeddableOutput {
@@ -40,7 +39,7 @@ export interface LensEmbeddableOutput extends EmbeddableOutput {
 export class Embeddable extends AbstractEmbeddable<LensEmbeddableInput, LensEmbeddableOutput> {
   type = DOC_TYPE;
 
-  private expressionRenderer: ExpressionRenderer;
+  private expressionRenderer: ReactExpressionRendererType;
   private savedVis: Document;
   private domNode: HTMLElement | Element | undefined;
   private subscription: Subscription;
@@ -48,12 +47,12 @@ export class Embeddable extends AbstractEmbeddable<LensEmbeddableInput, LensEmbe
   private currentContext: {
     timeRange?: TimeRange;
     query?: Query;
-    filters?: esFilters.Filter[];
+    filters?: Filter[];
     lastReloadRequestTime?: number;
   } = {};
 
   constructor(
-    expressionRenderer: ExpressionRenderer,
+    expressionRenderer: ReactExpressionRendererType,
     { savedVis, editUrl, editable, indexPatterns }: LensEmbeddableConfiguration,
     initialInput: LensEmbeddableInput,
     parent?: IContainer

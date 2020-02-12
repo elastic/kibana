@@ -42,12 +42,6 @@ describe('context app', function() {
     let searchSourceStub;
 
     beforeEach(
-      ngMock.module(function createServiceStubs($provide) {
-        $provide.value('indexPatterns', createIndexPatternsStub());
-      })
-    );
-
-    beforeEach(
       ngMock.inject(function createPrivateStubs() {
         searchSourceStub = createContextSearchSourceStub([], '@timestamp', MS_PER_DAY * 8);
         fetchPredecessors = (
