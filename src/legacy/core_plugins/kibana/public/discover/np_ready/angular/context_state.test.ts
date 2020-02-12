@@ -19,9 +19,9 @@
 
 import { getState } from './context_state';
 
-describe('Discover Context State', () => {
-  test('getState', () => {
-    const state = getState('4', 'time');
+describe('Test Discover Context State', () => {
+  test('getState function', () => {
+    const state = getState('4', 'time', false);
     expect(state.appState.getState()).toMatchInlineSnapshot(`
       Object {
         "columns": Array [
