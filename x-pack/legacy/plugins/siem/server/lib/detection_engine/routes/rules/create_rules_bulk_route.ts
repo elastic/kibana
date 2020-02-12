@@ -54,7 +54,7 @@ export const createCreateRulesBulkRoute = (server: ServerFacade): Hapi.ServerRou
 
       const rules = await Promise.all(
         ruleDefinitions
-          .filter(rule => !dupes.includes(rule.rule_id ?? ''))
+          .filter(rule => rule.rule_id == null || !dupes.includes(rule.rule_id))
           .map(async payloadRule => {
             const {
               description,
