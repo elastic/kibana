@@ -21,6 +21,7 @@ import { createSayHelloAction } from '../tests/test_samples/say_hello_action';
 import { uiActionsPluginMock } from '../mocks';
 import { createRestrictedAction, createHelloWorldAction } from '../tests/test_samples';
 import { Action } from '../actions';
+import { Trigger } from '../triggers';
 
 let action: Action<{ name: string }>;
 let uiActions: ReturnType<typeof uiActionsPluginMock.createPlugin>;
@@ -32,7 +33,6 @@ beforeEach(() => {
   uiActions.setup.registerTrigger({
     id: 'trigger',
     title: 'trigger',
-    actionIds: [],
   });
   uiActions.setup.attachAction('trigger', action.id);
 });
@@ -50,10 +50,9 @@ test('getTriggerCompatibleActions returns attached actions', async () => {
 
   setup.registerAction(helloWorldAction);
 
-  const testTrigger = {
+  const testTrigger: Trigger = {
     id: 'MY-TRIGGER',
     title: 'My trigger',
-    actionIds: [],
   };
   setup.registerTrigger(testTrigger);
   setup.attachAction('MY-TRIGGER', helloWorldAction.id);
@@ -73,13 +72,13 @@ test('filters out actions not applicable based on the context', async () => {
 
   setup.registerAction(restrictedAction);
 
-  const testTrigger = {
+  const testTrigger: Trigger = {
     id: 'MY-TRIGGER',
     title: 'My trigger',
-    actionIds: [restrictedAction.id],
   };
 
   setup.registerTrigger(testTrigger);
+  setup.attachAction(testTrigger.id, restrictedAction.id);
 
   const start = doStart();
   let actions = await start.getTriggerCompatibleActions(testTrigger.id, { accept: true });
@@ -102,10 +101,9 @@ test(`throws an error with an invalid trigger ID`, async () => {
 
 test(`with a trigger mapping that maps to an non-existing action returns empty list`, async () => {
   const { setup, doStart } = uiActions;
-  const testTrigger = {
+  const testTrigger: Trigger = {
     id: '123',
     title: '123',
-    actionIds: ['I do not exist'],
   };
   setup.registerTrigger(testTrigger);
 

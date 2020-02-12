@@ -21,6 +21,7 @@ import { UiActionsService } from './ui_actions_service';
 import { Action } from '../actions';
 import { createRestrictedAction, createHelloWorldAction } from '../tests/test_samples';
 import { ActionRegistry, TriggerRegistry } from '../types';
+import { Trigger } from '../triggers';
 
 describe('UiActionsService', () => {
   test('can instantiate', () => {
@@ -32,7 +33,6 @@ describe('UiActionsService', () => {
       const service = new UiActionsService();
       service.registerTrigger({
         id: 'test',
-        actionIds: [],
       });
     });
   });
@@ -41,7 +41,6 @@ describe('UiActionsService', () => {
     test('can get Trigger from registry', () => {
       const service = new UiActionsService();
       service.registerTrigger({
-        actionIds: [],
         description: 'foo',
         id: 'bar',
         title: 'baz',
@@ -50,7 +49,6 @@ describe('UiActionsService', () => {
       const trigger = service.getTrigger('bar');
 
       expect(trigger).toEqual({
-        actionIds: [],
         description: 'foo',
         id: 'bar',
         title: 'baz',
@@ -106,7 +104,6 @@ describe('UiActionsService', () => {
       service.registerAction(action1);
       service.registerAction(action2);
       service.registerTrigger({
-        actionIds: [],
         description: 'foo',
         id: 'trigger',
         title: 'baz',
@@ -150,10 +147,9 @@ describe('UiActionsService', () => {
 
       service.registerAction(helloWorldAction);
 
-      const testTrigger = {
+      const testTrigger: Trigger = {
         id: 'MY-TRIGGER',
         title: 'My trigger',
-        actionIds: [],
       };
       service.registerTrigger(testTrigger);
       service.attachAction('MY-TRIGGER', helloWorldAction.id);
@@ -172,13 +168,13 @@ describe('UiActionsService', () => {
 
       service.registerAction(restrictedAction);
 
-      const testTrigger = {
+      const testTrigger: Trigger = {
         id: 'MY-TRIGGER',
         title: 'My trigger',
-        actionIds: [restrictedAction.id],
       };
 
       service.registerTrigger(testTrigger);
+      service.attachAction(testTrigger.id, restrictedAction.id);
 
       const compatibleActions1 = await service.getTriggerCompatibleActions(testTrigger.id, {
         accept: true,
@@ -201,12 +197,11 @@ describe('UiActionsService', () => {
       );
     });
 
-    test(`with a trigger mapping that maps to an non-existing action returns empty list`, async () => {
+    test('returns empty list if trigger not attached to any action', async () => {
       const service = new UiActionsService();
-      const testTrigger = {
+      const testTrigger: Trigger = {
         id: '123',
         title: '123',
-        actionIds: ['I do not exist'],
       };
       service.registerTrigger(testTrigger);
 
@@ -229,7 +224,6 @@ describe('UiActionsService', () => {
       const service1 = new UiActionsService();
       service1.registerTrigger({
         id: 'foo',
-        actionIds: [],
       });
       const service2 = service1.fork();
 
@@ -246,7 +240,6 @@ describe('UiActionsService', () => {
 
       service2.registerTrigger({
         id: 'foo',
-        actionIds: [],
       });
 
       expect(() => service1.getTrigger('foo')).toThrowErrorMatchingInlineSnapshot(
@@ -266,14 +259,12 @@ describe('UiActionsService', () => {
       const service = new UiActionsService({ triggers });
 
       service.registerTrigger({
-        actionIds: [],
         description: 'foo',
         id: 'bar',
         title: 'baz',
       });
 
       expect(triggers.get('bar')).toEqual({
-        actionIds: [],
         description: 'foo',
         id: 'bar',
         title: 'baz',
@@ -298,44 +289,42 @@ describe('UiActionsService', () => {
     test('can attach an action to a trigger', () => {
       const service = new UiActionsService();
 
-      const trigger = {
+      const trigger: Trigger = {
         id: 'MY-TRIGGER',
-        actionIds: [],
       };
       const action = {
         id: HELLO_WORLD_ACTION_ID,
         order: 25,
       } as any;
 
-      expect(trigger.actionIds).toEqual([]);
-
       service.registerTrigger(trigger);
       service.registerAction(action);
       service.attachAction('MY-TRIGGER', HELLO_WORLD_ACTION_ID);
 
-      expect(trigger.actionIds).toEqual([HELLO_WORLD_ACTION_ID]);
+      const actions = service.getTriggerActions(trigger.id);
+
+      expect(actions.length).toBe(1);
+      expect(actions[0].id).toBe(HELLO_WORLD_ACTION_ID);
     });
 
     test('can detach an action to a trigger', () => {
       const service = new UiActionsService();
 
-      const trigger = {
+      const trigger: Trigger = {
         id: 'MY-TRIGGER',
-        actionIds: [],
       };
       const action = {
         id: HELLO_WORLD_ACTION_ID,
         order: 25,
       } as any;
 
-      expect(trigger.actionIds).toEqual([]);
-
       service.registerTrigger(trigger);
       service.registerAction(action);
-      service.attachAction('MY-TRIGGER', HELLO_WORLD_ACTION_ID);
-      service.detachAction('MY-TRIGGER', HELLO_WORLD_ACTION_ID);
+      service.attachAction(trigger.id, HELLO_WORLD_ACTION_ID);
+      service.detachAction(trigger.id, HELLO_WORLD_ACTION_ID);
 
-      expect(trigger.actionIds).toEqual([]);
+      const actions2 = service.getTriggerActions(trigger.id);
+      expect(actions2).toEqual([]);
     });
 
     test('detaching an invalid action from a trigger throws an error', async () => {

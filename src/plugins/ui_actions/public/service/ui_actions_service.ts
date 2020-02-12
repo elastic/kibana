@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { TriggerRegistry, ActionRegistry } from '../types';
+import { TriggerRegistry, ActionRegistry, TriggerToActionsRegistry } from '../types';
 import { Action } from '../actions';
 import { Trigger } from '../triggers/trigger';
 import { buildContextMenuForActions, openContextMenu } from '../context_menu';
@@ -25,15 +25,22 @@ import { buildContextMenuForActions, openContextMenu } from '../context_menu';
 export interface UiActionsServiceParams {
   readonly triggers?: TriggerRegistry;
   readonly actions?: ActionRegistry;
+  readonly triggerToActions?: TriggerToActionsRegistry;
 }
 
 export class UiActionsService {
   protected readonly triggers: TriggerRegistry;
   protected readonly actions: ActionRegistry;
+  protected readonly triggerToActions: TriggerToActionsRegistry;
 
-  constructor({ triggers = new Map(), actions = new Map() }: UiActionsServiceParams = {}) {
+  constructor({
+    triggers = new Map(),
+    actions = new Map(),
+    triggerToActions = new Map(),
+  }: UiActionsServiceParams = {}) {
     this.triggers = triggers;
     this.actions = actions;
+    this.triggerToActions = triggerToActions;
   }
 
   public readonly registerTrigger = (trigger: Trigger) => {
@@ -42,6 +49,7 @@ export class UiActionsService {
     }
 
     this.triggers.set(trigger.id, trigger);
+    this.triggerToActions.set(trigger.id, []);
   };
 
   public readonly getTrigger = (id: string) => {
@@ -71,8 +79,10 @@ export class UiActionsService {
       );
     }
 
-    if (!trigger.actionIds.find(id => id === actionId)) {
-      trigger.actionIds.push(actionId);
+    const actionIds = this.triggerToActions.get(triggerId);
+
+    if (!actionIds!.find(id => id === actionId)) {
+      this.triggerToActions.set(triggerId, [...actionIds!, actionId]);
     }
   };
 
@@ -85,14 +95,21 @@ export class UiActionsService {
       );
     }
 
-    trigger.actionIds = trigger.actionIds.filter(id => id !== actionId);
+    const actionIds = this.triggerToActions.get(triggerId);
+
+    this.triggerToActions.set(
+      triggerId,
+      actionIds!.filter(id => id !== actionId)
+    );
   };
 
   public readonly getTriggerActions = (triggerId: string) => {
-    const trigger = this.getTrigger!(triggerId);
-    return trigger.actionIds
-      .map(actionId => this.actions.get(actionId))
-      .filter(Boolean) as Action[];
+    // This line checks if trigger exists, otherwise throws.
+    this.getTrigger!(triggerId);
+
+    const actionIds = this.triggerToActions.get(triggerId);
+
+    return actionIds!.map(actionId => this.actions.get(actionId)).filter(Boolean) as Action[];
   };
 
   public readonly getTriggerCompatibleActions = async <C>(triggerId: string, context: C) => {

@@ -22,3 +22,4 @@ import { Trigger } from './triggers/trigger';
 
 export type TriggerRegistry = Map<string, Trigger>;
 export type ActionRegistry = Map<string, Action>;
+export type TriggerToActionsRegistry = Map<string, string[]>;
