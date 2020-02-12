@@ -7,7 +7,7 @@
 import { decode, encode } from 'rison-node';
 import * as H from 'history';
 import { QueryString } from 'ui/utils/query_string';
-import { Query, esFilters } from 'src/plugins/data/public';
+import { Query, Filter } from 'src/plugins/data/public';
 
 import { isEmpty } from 'lodash/fp';
 import { SiemPageName } from '../../pages/home/types';
@@ -149,7 +149,7 @@ export const makeMapStateToProps = () => {
 
     let searchAttr: {
       [CONSTANTS.appQuery]?: Query;
-      [CONSTANTS.filters]?: esFilters.Filter[];
+      [CONSTANTS.filters]?: Filter[];
       [CONSTANTS.savedQuery]?: string;
     } = {
       [CONSTANTS.appQuery]: getGlobalQuerySelector(state),
@@ -232,7 +232,7 @@ export const updateUrlStateString = ({
       });
     }
   } else if (urlKey === CONSTANTS.filters) {
-    const queryState = decodeRisonUrlState<esFilters.Filter[]>(newUrlStateString);
+    const queryState = decodeRisonUrlState<Filter[]>(newUrlStateString);
     if (isEmpty(queryState)) {
       return replaceStateInLocation({
         history,
