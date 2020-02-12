@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Request } from 'src/legacy/server/kbn_server';
 import { SavedObjectsClientContract } from 'kibana/server';
 import { Aggregation, Field, NewJobCaps } from '../../../../common/types/fields';
 import { fieldServiceProvider } from './field_service';
@@ -13,7 +12,7 @@ interface NewJobCapsResponse {
   [indexPattern: string]: NewJobCaps;
 }
 
-export function newJobCapsProvider(callWithRequest: any, request: Request) {
+export function newJobCapsProvider(callWithRequest: any) {
   async function newJobCaps(
     indexPattern: string,
     isRollup: boolean = false,

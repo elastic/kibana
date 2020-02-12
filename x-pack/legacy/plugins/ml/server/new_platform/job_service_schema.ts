@@ -16,7 +16,7 @@ const analyzerSchema = {
   ),
 };
 
-export const catFieldExamplesSchema = {
+export const categorizationFieldExamplesSchema = {
   indexPatternTitle: schema.string(),
   query: schema.any(),
   size: schema.number(),
@@ -64,6 +64,12 @@ export const lookBackProgressSchema = {
 export const topCategoriesSchema = { jobId: schema.string(), count: schema.number() };
 
 export const updateGroupsSchema = {
-  job_id: schema.string(),
-  groups: schema.arrayOf(schema.maybe(schema.string())),
+  jobs: schema.maybe(
+    schema.arrayOf(
+      schema.object({
+        job_id: schema.maybe(schema.string()),
+        groups: schema.arrayOf(schema.maybe(schema.string())),
+      })
+    )
+  ),
 };

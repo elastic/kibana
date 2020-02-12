@@ -9,7 +9,7 @@ import { licensePreRoutingFactory } from '../new_platform/licence_check_pre_rout
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization } from '../new_platform/plugin';
 import {
-  catFieldExamplesSchema,
+  categorizationFieldExamplesSchema,
   chartSchema,
   datafeedIdsSchema,
   forceStartDatafeedSchema,
@@ -174,13 +174,13 @@ export function jobServiceRoutes({ xpackMainPlugin, router }: RouteInitializatio
   /**
    * @apiGroup JobService
    *
-   * @api {post} /api/ml/jobs/jobs_with_timerange
+   * @api {post} /api/ml/jobs/jobs_with_time_range
    * @apiName JobsWithTimerange
    * @apiDescription Creates a list of jobs with data about the job's timerange
    */
   router.post(
     {
-      path: '/api/ml/jobs/jobs_with_timerange',
+      path: '/api/ml/jobs/jobs_with_time_range',
       validate: {
         body: schema.object(jobsWithTimerangeSchema),
       },
@@ -359,7 +359,7 @@ export function jobServiceRoutes({ xpackMainPlugin, router }: RouteInitializatio
         const { indexPattern } = request.params;
         const isRollup = request.query.rollup === 'true';
         const savedObjectsClient = context.core.savedObjects.client;
-        const { newJobCaps } = jobServiceProvider(context.ml!.mlClient.callAsCurrentUser, request);
+        const { newJobCaps } = jobServiceProvider(context.ml!.mlClient.callAsCurrentUser);
         const resp = await newJobCaps(indexPattern, isRollup, savedObjectsClient);
 
         return response.ok({
@@ -452,8 +452,7 @@ export function jobServiceRoutes({ xpackMainPlugin, router }: RouteInitializatio
         } = request.body;
 
         const { newJobPopulationChart } = jobServiceProvider(
-          context.ml!.mlClient.callAsCurrentUser,
-          request
+          context.ml!.mlClient.callAsCurrentUser
         );
         const resp = await newJobPopulationChart(
           indexPatternTitle,
@@ -541,7 +540,7 @@ export function jobServiceRoutes({ xpackMainPlugin, router }: RouteInitializatio
     {
       path: '/api/ml/jobs/categorization_field_examples',
       validate: {
-        body: schema.object(catFieldExamplesSchema),
+        body: schema.object(categorizationFieldExamplesSchema),
       },
     },
     licensePreRoutingFactory(xpackMainPlugin, async (context, request, response) => {
