@@ -108562,7 +108562,9 @@ __webpack_require__.r(__webpack_exports__);
  * to Kibana itself.
  */
 
-const isKibanaDep = depVersion => depVersion.includes('../../packages/');
+const isKibanaDep = depVersion => // For ../kibana-extra/ directory (legacy only)
+depVersion.includes('../../kibana/packages/') || // For plugins/ directory
+depVersion.includes('../../packages/');
 /**
  * This prepares the dependencies for an _external_ project.
  */
