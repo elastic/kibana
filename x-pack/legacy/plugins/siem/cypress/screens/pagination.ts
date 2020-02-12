@@ -4,13 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { parse } from 'query-string';
-
-export function extractQueryParams(queryString) {
-  const hrefSplit = queryString.split('?');
-  if (!hrefSplit.length) {
-    return {};
-  }
-
-  return parse(hrefSplit[1], { sort: false });
-}
+export const FIRST_PAGE_SELECTOR = '[data-test-subj="pagination-button-0"]';
+export const THIRD_PAGE_SELECTOR = '[data-test-subj="pagination-button-2"]';
