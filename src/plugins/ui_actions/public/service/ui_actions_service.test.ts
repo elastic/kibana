@@ -24,15 +24,27 @@ describe('UiActionsService', () => {
     const actions = new UiActionsService();
   });
 
-  test('can register an action', () => {
-    const actions = new UiActionsService();
-    actions.registerAction({
-      id: 'test',
-      execute: async () => {},
-      getDisplayName: () => 'test',
-      getIconType: () => '',
-      isCompatible: async () => true,
-      type: 'test',
+  describe('.registerAction()', () => {
+    test('can register an action', () => {
+      const actions = new UiActionsService();
+      actions.registerAction({
+        id: 'test',
+        execute: async () => {},
+        getDisplayName: () => 'test',
+        getIconType: () => '',
+        isCompatible: async () => true,
+        type: 'test',
+      });
+    });
+  });
+
+  describe('.fork()', () => {
+    test('returns a new instance of the service', () => {
+      const actions1 = new UiActionsService();
+      const actions2 = actions1.fork();
+
+      expect(actions1).not.toBe(actions2);
+      expect(actions2).toBeInstanceOf(UiActionsService);
     });
   });
 });

@@ -33,4 +33,19 @@ export class UiActionsService {
 
     this.actions.set(action.id, action);
   };
+
+  /**
+   * "Fork" a separate instance of `UiActionsService` that inherits all existing
+   * triggers and actions, but going forward all new triggers and actions added
+   * to this instance of `UiActionsService` are only available within this instance.
+   */
+  fork = (): UiActionsService => {
+    const triggers: TriggerRegistry = new Map();
+    const actions: ActionRegistry = new Map();
+
+    for (const [key, value] of this.triggers.entries()) triggers.set(key, value);
+    for (const [key, value] of this.actions.entries()) actions.set(key, value);
+
+    return new UiActionsService(triggers, actions);
+  };
 }
