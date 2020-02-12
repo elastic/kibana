@@ -19,8 +19,7 @@ const CHUNK_SIZE = 100;
 
 export function categorizationExamplesProvider(
   callWithRequest: callWithRequestType,
-  callWithInternalUser: callWithRequestType,
-  isSecurityDisabled: boolean
+  callWithInternalUser: callWithRequestType
 ) {
   const validationResults = new ValidationResults();
 
