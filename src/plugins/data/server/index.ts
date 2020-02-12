@@ -145,21 +145,21 @@ export {
   KBN_FIELD_TYPES,
 } from '../common';
 
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new DataServerPlugin(initializerContext);
-}
+/**
+ * Search
+ */
+
+export { IRequestTypesMap, IResponseTypesMap } from './search';
+export * from './search';
 
 /**
  * Types to be shared externally
  * @public
  */
-export { IRequestTypesMap, IResponseTypesMap } from './search';
 
 export {
   // kbn field types
   castEsToKbnFieldTypeName,
-  getKbnFieldType,
-  getKbnTypeNames,
   // query
   Filter,
   Query,
@@ -175,7 +175,9 @@ export {
  * @public
  */
 
-export * from './search';
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new DataServerPlugin(initializerContext);
+}
 
 export {
   DataServerPlugin as Plugin,

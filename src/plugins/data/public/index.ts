@@ -98,12 +98,22 @@ export const esFilters = {
   extractTimeFilter,
 };
 
+export {
+  RangeFilter,
+  RangeFilterMeta,
+  RangeFilterParams,
+  ExistsFilter,
+  PhrasesFilter,
+  PhraseFilter,
+  CustomFilter,
+  MatchAllFilter,
+} from '../common';
+
 /*
  * esQuery and esKuery:
  */
 
 import {
-  doesKueryExpressionHaveLuceneSyntaxError,
   fromKueryExpression,
   toElasticsearchQuery,
   nodeTypes,
@@ -116,7 +126,6 @@ import {
 
 export const esKuery = {
   nodeTypes,
-  doesKueryExpressionHaveLuceneSyntaxError,
   fromKueryExpression,
   toElasticsearchQuery,
 };
@@ -226,7 +235,7 @@ export const indexPatterns = {
   validate: validateIndexPattern,
   getFromSavedObject,
   flattenHitWrapper,
-  // exported only in stub_index_pattern test. Move into data plugin and remove export.
+  // TODO: exported only in stub_index_pattern test. Move into data plugin and remove export.
   getRoutes,
   formatHitProvider,
 };
@@ -237,7 +246,7 @@ export {
   Field as IndexPatternField,
   TypeMeta as IndexPatternTypeMeta,
   AggregationRestrictions as IndexPatternAggRestrictions,
-  // exported only in stub_index_pattern test. Move into data plugin and remove export.
+  // TODO: exported only in stub_index_pattern test. Move into data plugin and remove export.
   FieldList as IndexPatternFieldList,
 } from './index_patterns';
 
@@ -262,14 +271,19 @@ export {
   QuerySuggestionField,
 } from './autocomplete';
 
+/*
+ * Search:
+ */
+
+export { IRequestTypesMap, IResponseTypesMap } from './search';
+export * from './search';
+
 /**
  * Types to be shared externally
  * @public
  */
 export { Filter, Query, RefreshInterval, TimeRange } from '../common';
 
-export { IRequestTypesMap, IResponseTypesMap } from './search';
-export * from './search';
 export {
   createSavedQueryService,
   syncAppFilters,
@@ -289,10 +303,10 @@ export {
   TimeHistoryContract,
 } from './query';
 export * from './ui';
+
 export {
   // kbn field types
   castEsToKbnFieldTypeName,
-  getKbnFieldType,
   getKbnTypeNames,
   // utils
   parseInterval,
