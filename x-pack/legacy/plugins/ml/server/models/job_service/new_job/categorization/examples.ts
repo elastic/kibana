@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import Boom from 'boom';
 import { chunk } from 'lodash';
 import { SearchResponse } from 'elasticsearch';
 import { CATEGORY_EXAMPLES_SAMPLE_SIZE } from '../../../../../common/constants/new_job';
@@ -113,9 +114,11 @@ export function categorizationExamplesProvider(
   }
 
   async function loadTokens(examples: string[], analyzer: CategorizationAnalyzer) {
-    const { tokens }: { tokens: Token[] } = await analyzeWithPrivilegeCheck({
-      ...getAnalyzer(analyzer),
-      text: examples,
+    const { tokens }: { tokens: Token[] } = await callWithInternalUser('indices.analyze', {
+      body: {
+        ...getAnalyzer(analyzer),
+        text: examples,
+      },
     });
 
     const lengths = examples.map(e => e.length);
@@ -157,6 +160,12 @@ export function categorizationExamplesProvider(
     end: number,
     analyzer: CategorizationAnalyzer
   ) {
+    // due to the use of the _analyse endpoint which is called by the kibana user,
+    // basic job creation privileges are required to use this endpoint
+    if ((await hasPermissionToCreateJobs()) === false) {
+      throw Boom.forbidden('Insufficient privileges, the machine_learning_admin role is required.');
+    }
+
     const resp = await categorizationExamples(
       indexPatternTitle,
       query,
@@ -202,26 +211,21 @@ export function categorizationExamplesProvider(
     };
   }
 
-  async function analyzeWithPrivilegeCheck(body: any) {
-    if (isSecurityDisabled === false) {
-      const resp = await callWithRequest('ml.privilegeCheck', {
-        body: {
-          cluster: [
-            'cluster:admin/xpack/ml/job/put',
-            'cluster:admin/xpack/ml/job/open',
-            'cluster:admin/xpack/ml/datafeeds/put',
-          ],
-        },
-      });
-      if (resp.has_all_requested === true) {
-        // security is enabled and user has permission to create jobs
-        // so use kibana user to perform analysis
-        return callWithInternalUser('indices.analyze', { body });
-      }
+  async function hasPermissionToCreateJobs(): Promise<boolean> {
+    if (isSecurityDisabled === true) {
+      return true;
     }
-    // security is disabled or user doesn't have permission to create jobs
-    // note, user should not have got this far in the UI with insufficient privileges
-    return callWithRequest('indices.analyze', { body });
+
+    const resp = await callWithRequest('ml.privilegeCheck', {
+      body: {
+        cluster: [
+          'cluster:admin/xpack/ml/job/put',
+          'cluster:admin/xpack/ml/job/open',
+          'cluster:admin/xpack/ml/datafeeds/put',
+        ],
+      },
+    });
+    return resp.has_all_requested;
   }
 
   return {
