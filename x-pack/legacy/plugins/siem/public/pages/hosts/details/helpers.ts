@@ -5,7 +5,7 @@
  */
 
 import { escapeQueryValue } from '../../../lib/keury';
-import { esFilters } from '../../../../../../../../src/plugins/data/common/es_query';
+import { Filter } from '../../../../../../../../src/plugins/data/public';
 
 /** Returns the kqlQueryExpression for the `Events` widget on the `Host Details` page */
 export const getHostDetailsEventsKqlQueryExpression = ({
@@ -24,7 +24,7 @@ export const getHostDetailsEventsKqlQueryExpression = ({
   }
 };
 
-export const getHostDetailsPageFilters = (hostName: string): esFilters.Filter[] => [
+export const getHostDetailsPageFilters = (hostName: string): Filter[] => [
   {
     meta: {
       alias: null,
