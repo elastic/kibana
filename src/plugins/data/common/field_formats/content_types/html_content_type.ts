@@ -17,10 +17,10 @@
  * under the License.
  */
 import { escape, isFunction } from 'lodash';
-import { IFieldFormat, HtmlContextTypeConvert } from '../types';
+import { IFieldFormat, HtmlContextTypeConvert, FieldFormatsContentType } from '../types';
 import { asPrettyString, getHighlightHtml } from '../utils';
 
-export const HTML_CONTEXT_TYPE = 'html';
+export const HTML_CONTEXT_TYPE: FieldFormatsContentType = 'html';
 
 const getConvertFn = (
   format: IFieldFormat,

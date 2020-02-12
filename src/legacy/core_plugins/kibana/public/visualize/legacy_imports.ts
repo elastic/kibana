@@ -46,8 +46,6 @@ export { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 export { EventsProvider } from 'ui/events';
 // @ts-ignore
 export { createTopNavDirective, createTopNavHelper } from 'ui/kbn_top_nav/kbn_top_nav';
-// @ts-ignore
-export { confirmModalFactory } from 'ui/modals/confirm_modal';
 export { registerTimefilterWithGlobalStateFactory } from 'ui/timefilter/setup_router';
 // @ts-ignore
 export { KbnUrlProvider, RedirectWhenMissingProvider } from 'ui/url';
@@ -57,7 +55,6 @@ export { wrapInI18nContext } from 'ui/i18n';
 export { DashboardConstants } from '../dashboard/np_ready/dashboard_constants';
 export { VisSavedObject } from '../../../visualizations/public/embeddable/visualize_embeddable';
 export { VISUALIZE_EMBEDDABLE_TYPE } from '../../../visualizations/public/embeddable';
-export { VisType } from '../../../visualizations/public';
 export {
   configureAppAngularModule,
   ensureDefaultIndexPattern,
