@@ -16,10 +16,6 @@ import { GlobalFilterCheckbox } from '../../../../components/global_filter_check
 import { indexPatterns } from '../../../../../../../../../src/plugins/data/public';
 import { indexPatternService } from '../../../../kibana_services';
 
-const getIndexPatternId = props => {
-  return _.get(props, 'join.right.indexPatternId');
-};
-
 export class Join extends Component {
   state = {
     leftFields: null,
@@ -27,36 +23,17 @@ export class Join extends Component {
     rightFields: undefined,
     indexPattern: undefined,
     loadError: undefined,
-    prevIndexPatternId: getIndexPatternId(this.props),
   };
 
   componentDidMount() {
     this._isMounted = true;
     this._loadLeftFields();
     this._loadLeftSourceName();
+    this._loadRightFields(_.get(this.props.join, 'right.indexPatternId'));
   }
 
   componentWillUnmount() {
     this._isMounted = false;
-  }
-
-  componentDidUpdate() {
-    if (!this.state.rightFields && getIndexPatternId(this.props) && !this.state.loadError) {
-      this._loadRightFields(getIndexPatternId(this.props));
-    }
-  }
-
-  static getDerivedStateFromProps(nextProps, prevState) {
-    const nextIndexPatternId = getIndexPatternId(nextProps);
-    if (nextIndexPatternId !== prevState.prevIndexPatternId) {
-      return {
-        rightFields: undefined,
-        loadError: undefined,
-        prevIndexPatternId: nextIndexPatternId,
-      };
-    }
-
-    return null;
   }
 
   async _loadRightFields(indexPatternId) {
@@ -76,11 +53,6 @@ export class Join extends Component {
           }),
         });
       }
-      return;
-    }
-
-    if (indexPatternId !== this.state.prevIndexPatternId) {
-      // ignore out of order responses
       return;
     }
 
@@ -130,6 +102,11 @@ export class Join extends Component {
   };
 
   _onRightSourceChange = ({ indexPatternId, indexPatternTitle }) => {
+    this.setState({
+      rightFields: undefined,
+      loadError: undefined,
+    });
+    this._loadRightFields(indexPatternId);
     this.props.onChange({
       leftField: this.props.join.leftField,
       right: {
