@@ -18,7 +18,8 @@ describe('auto_date', () => {
       {
         aggConfigs: 'canttouchthis',
       },
-      {}
+      // eslint-disable-next-line
+      {} as any
     );
 
     expect(result).toEqual('canttouchthis');
@@ -40,7 +41,8 @@ describe('auto_date', () => {
       {
         aggConfigs,
       },
-      {}
+      // eslint-disable-next-line
+      {} as any
     );
 
     expect(result).toEqual(aggConfigs);
@@ -62,7 +64,8 @@ describe('auto_date', () => {
       {
         aggConfigs,
       },
-      {}
+      // eslint-disable-next-line
+      {} as any
     );
 
     const interval = JSON.parse(result).find(
