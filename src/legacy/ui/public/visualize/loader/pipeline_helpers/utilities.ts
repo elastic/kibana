@@ -23,7 +23,7 @@ import { SerializedFieldFormat } from '../../../../../../plugins/expressions/com
 
 type FormatFactory = (mapping?: SerializedFieldFormat) => IFieldFormat;
 
-const createFormat = fieldFormats.serializeFieldFormat;
+const createFormat = fieldFormats.serialize;
 const getFormat: FormatFactory = (mapping?) => {
   return npStart.plugins.data.fieldFormats.deserialize(mapping as any);
 };
