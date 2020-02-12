@@ -348,7 +348,7 @@ def processOssQueue(queue, finishedSuites, workerNumber) {
                   --debug --bail \
                   --kibana-install-dir "\$KIBANA_INSTALL_DIR" \
                   ${tagString}
-              """, "OSS tests: ${testSuite.index}"
+              """, "OSS tests: ${testSuite.config}"
             )
             testSuite.success = true
           } catch (ex) {
@@ -381,7 +381,7 @@ def processXpackQueue(queue, finishedSuites, workerNumber) {
     "CI_GROUP=${workerNumber}",
     "JOB=xpack-kibana-ciGroup${workerNumber}",
     "REMOVE_KIBANA_INSTALL_DIR=1",
-    "TEST_METADATA_PATH=${testMetadataPath}"
+    "TEST_METADATA_PATH=../${testMetadataPath}"
   ]) {
     while(!queue.isEmpty()) {
       def testSuite
@@ -407,7 +407,7 @@ def processXpackQueue(queue, finishedSuites, workerNumber) {
                   --debug --bail \
                   --kibana-install-dir "\$KIBANA_INSTALL_DIR" \
                   ${tagString}
-              """, "X-Pack tests: ${testSuite.index}"
+              """, "X-Pack tests: ${testSuite.config}"
             )
             testSuite.success = true
           } catch (ex) {
@@ -425,7 +425,7 @@ def processXpackQueue(queue, finishedSuites, workerNumber) {
       }
 
       catchError {
-        def suites = toJSON(readFile(file: "../${testMetadataPath}"))
+        def suites = toJSON(readFile(file: testMetadataPath))
         suites.each { finishedSuites << it }
       }
       // finishedSuites << testSuite
@@ -451,12 +451,12 @@ def getFunctionalQueueWorker(queue, finishedSuites, workerNumber) {
 }
 
 def prepareOssTestQueue(queue) {
-  def items = toJSON(readFile(file: 'test-suites-for-ci.json'))
+  def items = toJSON(readFile(file: 'test-suites-ci-plan.json'))
   queue.oss = items.oss.reverse() // .reverse() is used here because an older version of groovy, .pop() removes from the end instead of the beginning
 }
 
 def prepareXpackTestQueue(queue) {
-  def items = toJSON(readFile(file: 'test-suites-for-ci-sorted.json'))
+  def items = toJSON(readFile(file: 'test-suites-ci-plan.json'))
   queue.xpack = items.xpack.reverse() // .reverse() is used here because an older version of groovy, .pop() removes from the end instead of the beginning
 }
 
