@@ -8,16 +8,16 @@ import { LifecycleQuery } from './lifecycle';
 
 describe('lifecycle query', () => {
   it('generates the correct legacy queries', () => {
-    expect(new LifecycleQuery().build('endgame-5-awesome-id')).toStrictEqual({
+    expect(new LifecycleQuery('endgame-5-awesome-id').build()).toStrictEqual({
       body: {
         query: {
           bool: {
             filter: [
               {
-                term: { 'endgame.unique_pid': '5' },
+                terms: { 'endgame.unique_pid': ['5'] },
               },
               {
-                match: { 'agent.id': 'awesome-id' },
+                term: { 'agent.id': 'awesome-id' },
               },
               {
                 term: { 'event.category': 'process' },
@@ -32,13 +32,13 @@ describe('lifecycle query', () => {
   });
 
   it('generates the correct non-legacy queries', () => {
-    expect(new LifecycleQuery().build('baz')).toStrictEqual({
+    expect(new LifecycleQuery('baz').build()).toStrictEqual({
       body: {
         query: {
           bool: {
             filter: [
               {
-                match: { 'endpoint.process.entity_id': 'baz' },
+                terms: { 'endpoint.process.entity_id': ['baz'] },
               },
               {
                 term: { 'event.category': 'process' },

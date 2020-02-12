@@ -6,17 +6,17 @@
 import { ResolverQuery } from './base';
 
 export class RelatedEventsQuery extends ResolverQuery {
-  protected legacyQuery(endpointID: string, uniquePID: string, index: string) {
+  protected legacyQuery(endpointID: string, uniquePIDs: string[], index: string) {
     return {
       body: this.paginateBy('endgame.serial_event_id', {
         query: {
           bool: {
             filter: [
               {
-                term: { 'endgame.unique_pid': uniquePID },
+                terms: { 'endgame.unique_pid': uniquePIDs },
               },
               {
-                match: { 'agent.id': endpointID },
+                term: { 'agent.id': endpointID },
               },
               {
                 bool: {
@@ -26,13 +26,6 @@ export class RelatedEventsQuery extends ResolverQuery {
                 },
               },
             ],
-          },
-        },
-        aggs: {
-          total: {
-            value_count: {
-              field: 'endgame.serial_event_id',
-            },
           },
         },
       }),
@@ -40,14 +33,14 @@ export class RelatedEventsQuery extends ResolverQuery {
     };
   }
 
-  protected query(entityID: string, index: string) {
+  protected query(entityIDs: string[], index: string) {
     return {
       body: this.paginateBy('event.id', {
         query: {
           bool: {
             filter: [
               {
-                match: { 'endpoint.process.entity_id': entityID },
+                terms: { 'endpoint.process.entity_id': entityIDs },
               },
               {
                 bool: {
@@ -57,13 +50,6 @@ export class RelatedEventsQuery extends ResolverQuery {
                 },
               },
             ],
-          },
-        },
-        aggs: {
-          total: {
-            value_count: {
-              field: 'event.id',
-            },
           },
         },
       }),

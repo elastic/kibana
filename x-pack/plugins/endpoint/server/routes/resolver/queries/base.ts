@@ -3,62 +3,50 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { JSONish } from '../../../types';
-import { PaginationParams } from '../common';
+
+import { IScopedClusterClient } from 'kibana/server';
 import { EndpointAppConstants } from '../../../../common/types';
-
-function splitN(str: string, separator: string, limit: number) {
-  const splitString = str.split(separator);
-
-  if (splitString.length > limit) {
-    const ret = splitString.splice(0, limit);
-    ret.push(splitString.join(separator));
-
-    return ret;
-  }
-
-  return splitString;
-}
+import { JSONish } from '../../../types';
+import { paginate, paginatedResults, PaginationParams } from '../pagination';
+import { parseLegacyEntityID } from '../utils/normalize';
 
 export abstract class ResolverQuery {
-  private readonly legacyEntityIDDelimiter = '-';
-  private readonly legacyEntityPrefix = 'endgame-';
-  constructor(protected readonly pagination?: PaginationParams) {}
+  private endpointID: string | null;
+  private entityID: string;
+  private pagination: PaginationParams | null;
 
-  private parseLegacyEntityID(entityID: string): { endpointID: string; uniquePID: string } | null {
-    if (!entityID.startsWith(this.legacyEntityPrefix)) {
-      return null;
+  constructor(entityID: string, pagination?: PaginationParams) {
+    this.pagination = pagination;
+    const legacyID = parseLegacyEntityID(entityID);
+    if (legacyID !== null) {
+      const { endpointID, uniquePID } = legacyID;
+      this.endpointID = endpointID;
+      this.entityID = uniquePID;
+    } else {
+      this.entityID = entityID;
     }
-    const fields = splitN(entityID, this.legacyEntityIDDelimiter, 2);
-    if (fields.length !== 3) {
-      return null;
-    }
-    return { endpointID: fields[2], uniquePID: fields[1] };
   }
 
   protected paginateBy(field: string, query: any) {
     if (!this.pagination) {
       return query;
     }
-    const { size, timestamp, eventID } = this.pagination;
-    query.sort = [{ '@timestamp': 'asc' }, { [field]: 'asc' }];
-    query.size = size;
-    if (timestamp && eventID) {
-      query.search_after = [timestamp, eventID];
+    return paginate(this.pagination, field, query);
+  }
+
+  build(overrides?: string[]) {
+    const ids = overrides || [this.entityID];
+
+    if (this.endpointID) {
+      return this.legacyQuery(this.endpointID, ids, EndpointAppConstants.LEGACY_EVENT_INDEX_NAME);
     }
-    return query;
+    return this.query(ids, EndpointAppConstants.EVENT_INDEX_NAME);
+  }
+
+  async search(client: IScopedClusterClient, overrides?: string[]) {
+    return paginatedResults(await client.callAsCurrentUser('search', this.build(overrides)));
   }
 
   protected abstract legacyQuery(endpointID: string, uniquePID: string, index: string): JSONish;
   protected abstract query(entityID: string, index: string): JSONish;
-
-  build(entityID: string) {
-    const legacyID = this.parseLegacyEntityID(entityID);
-    if (legacyID !== null) {
-      const { endpointID, uniquePID } = legacyID;
-      return this.legacyQuery(endpointID, uniquePID, EndpointAppConstants.LEGACY_EVENT_INDEX_NAME);
-    }
-
-    return this.query(entityID, EndpointAppConstants.EVENT_INDEX_NAME);
-  }
 }

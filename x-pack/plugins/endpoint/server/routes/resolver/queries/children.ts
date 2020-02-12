@@ -5,15 +5,15 @@
  */
 import { ResolverQuery } from './base';
 
-export class LifecycleQuery extends ResolverQuery {
+export class ChildrenQuery extends ResolverQuery {
   protected legacyQuery(endpointID: string, uniquePIDs: string[], index: string) {
     return {
-      body: {
+      body: this.paginateBy('endgame.serial_event_id', {
         query: {
           bool: {
             filter: [
               {
-                terms: { 'endgame.unique_pid': uniquePIDs },
+                terms: { 'endgame.unique_ppid': uniquePIDs },
               },
               {
                 term: { 'agent.id': endpointID },
@@ -21,32 +21,36 @@ export class LifecycleQuery extends ResolverQuery {
               {
                 term: { 'event.category': 'process' },
               },
+              {
+                term: { 'event.type': 'process_start' },
+              },
             ],
           },
         },
-        sort: [{ '@timestamp': 'asc' }],
-      },
+      }),
       index,
     };
   }
 
   protected query(entityIDs: string[], index: string) {
     return {
-      body: {
+      body: this.paginateBy('event.id', {
         query: {
           bool: {
             filter: [
               {
-                terms: { 'endpoint.process.entity_id': entityIDs },
+                terms: { 'endpoint.process.parent.entity_id': entityIDs },
               },
               {
                 term: { 'event.category': 'process' },
               },
+              {
+                term: { 'event.type': 'start' },
+              },
             ],
           },
         },
-        sort: [{ '@timestamp': 'asc' }],
-      },
+      }),
       index,
     };
   }
