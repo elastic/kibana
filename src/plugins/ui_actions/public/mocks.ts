@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { CoreSetup, CoreStart } from 'src/core/public';
 import { UiActionsSetup, UiActionsStart } from '.';
 import { plugin as pluginInitializer } from '.';
 import { coreMock } from '../../../core/public/mocks';
@@ -51,10 +52,11 @@ const createStartContract = (): Start => {
   return startContract;
 };
 
-const createPlugin = () => {
+const createPlugin = (
+  coreSetup: CoreSetup = coreMock.createSetup(),
+  coreStart: CoreStart = coreMock.createStart()
+) => {
   const pluginInitializerContext = coreMock.createPluginInitializerContext();
-  const coreSetup = coreMock.createSetup();
-  const coreStart = coreMock.createStart();
   const plugin = pluginInitializer(pluginInitializerContext);
   const setup = plugin.setup(coreSetup);
 
@@ -64,7 +66,7 @@ const createPlugin = () => {
     coreStart,
     plugin,
     setup,
-    doStart: () => plugin.start(coreStart),
+    doStart: (anotherCoreStart: CoreStart = coreStart) => plugin.start(anotherCoreStart),
   };
 };
 

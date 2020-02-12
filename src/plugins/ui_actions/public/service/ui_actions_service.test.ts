@@ -24,7 +24,7 @@ import { ActionRegistry, TriggerRegistry } from '../types';
 
 describe('UiActionsService', () => {
   test('can instantiate', () => {
-    const service = new UiActionsService();
+    new UiActionsService();
   });
 
   describe('.registerTrigger()', () => {

@@ -25,7 +25,7 @@ import { nextTick } from 'test_utils/enzyme_helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { I18nProvider } from '@kbn/i18n/react';
 import { CONTEXT_MENU_TRIGGER } from '../triggers';
-import { Action, UiActionsApi } from 'src/plugins/ui_actions/public';
+import { Action, UiActionsStart } from 'src/plugins/ui_actions/public';
 import { Trigger, GetEmbeddableFactory, ViewMode } from '../types';
 import { EmbeddableFactory, isErrorEmbeddable } from '../embeddables';
 import { EmbeddablePanel } from './embeddable_panel';
@@ -177,7 +177,7 @@ test('HelloWorldContainer in view mode hides edit mode actions', async () => {
 
 const renderInEditModeAndOpenContextMenu = async (
   embeddableInputs: any,
-  getActions: UiActionsApi['getTriggerCompatibleActions'] = () => Promise.resolve([])
+  getActions: UiActionsStart['getTriggerCompatibleActions'] = () => Promise.resolve([])
 ) => {
   const inspector = inspectorPluginMock.createStartContract();
 
