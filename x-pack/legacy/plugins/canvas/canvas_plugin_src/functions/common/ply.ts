@@ -5,7 +5,7 @@
  */
 
 import { groupBy, flatten, pick, map } from 'lodash';
-import { Datatable, DatatableColumn, ExpressionFunction } from '../../../types';
+import { Datatable, DatatableColumn, ExpressionFunctionDefinition } from '../../../types';
 import { getFunctionHelp, getFunctionErrors } from '../../../i18n';
 
 interface Arguments {
@@ -13,19 +13,17 @@ interface Arguments {
   expression: Array<(datatable: Datatable) => Promise<Datatable>>;
 }
 
-type Return = Datatable | Promise<Datatable>;
+type Output = Datatable | Promise<Datatable>;
 
-export function ply(): ExpressionFunction<'ply', Datatable, Arguments, Return> {
+export function ply(): ExpressionFunctionDefinition<'ply', Datatable, Arguments, Output> {
   const { help, args: argHelp } = getFunctionHelp().ply;
   const errors = getFunctionErrors().ply;
 
   return {
     name: 'ply',
     type: 'datatable',
+    inputTypes: ['datatable'],
     help,
-    context: {
-      types: ['datatable'],
-    },
     args: {
       by: {
         types: ['string'],
@@ -40,9 +38,9 @@ export function ply(): ExpressionFunction<'ply', Datatable, Arguments, Return> {
         help: argHelp.expression,
       },
     },
-    fn: (context, args) => {
+    fn: (input, args) => {
       if (!args) {
-        return context;
+        return input;
       }
 
       let byColumns: DatatableColumn[];
@@ -50,7 +48,7 @@ export function ply(): ExpressionFunction<'ply', Datatable, Arguments, Return> {
 
       if (args.by) {
         byColumns = args.by.map(by => {
-          const column = context.columns.find(col => col.name === by);
+          const column = input.columns.find(col => col.name === by);
 
           if (!column) {
             throw errors.columnNotFound(by);
@@ -59,14 +57,14 @@ export function ply(): ExpressionFunction<'ply', Datatable, Arguments, Return> {
           return column;
         });
 
-        const keyedDatatables = groupBy(context.rows, row => JSON.stringify(pick(row, args.by)));
+        const keyedDatatables = groupBy(input.rows, row => JSON.stringify(pick(row, args.by)));
 
         originalDatatables = Object.values(keyedDatatables).map(rows => ({
-          ...context,
+          ...input,
           rows,
         }));
       } else {
-        originalDatatables = [context];
+        originalDatatables = [input];
       }
 
       const datatablePromises = originalDatatables.map(originalDatatable => {

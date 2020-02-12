@@ -31,7 +31,17 @@ describe('update_rules_bulk_schema', () => {
     expect(
       updateRulesBulkSchema.validate<Array<Partial<UpdateRuleAlertParamsRest>>>([
         {
-          id: 'rule-1',
+          id: 'id-1',
+          risk_score: 50,
+          description: 'some description',
+          from: 'now-5m',
+          to: 'now',
+          name: 'some-name',
+          severity: 'low',
+          type: 'query',
+          query: 'some query',
+          index: ['index-1'],
+          interval: '5m',
         },
       ]).error
     ).toBeFalsy();
@@ -41,10 +51,30 @@ describe('update_rules_bulk_schema', () => {
     expect(
       updateRulesBulkSchema.validate<Array<Partial<UpdateRuleAlertParamsRest>>>([
         {
-          id: 'rule-1',
+          id: 'id-1',
+          risk_score: 50,
+          description: 'some description',
+          from: 'now-5m',
+          to: 'now',
+          name: 'some-name',
+          severity: 'low',
+          type: 'query',
+          query: 'some query',
+          index: ['index-1'],
+          interval: '5m',
         },
         {
-          id: 'rule-2',
+          id: 'id-2',
+          risk_score: 50,
+          description: 'some description',
+          from: 'now-5m',
+          to: 'now',
+          name: 'some-name',
+          severity: 'low',
+          type: 'query',
+          query: 'some query',
+          index: ['index-1'],
+          interval: '5m',
         },
       ]).error
     ).toBeFalsy();

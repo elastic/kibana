@@ -21,6 +21,7 @@ import { PluginInitializerContext } from 'kibana/public';
 import { AdvancedSettingsPlugin } from './plugin';
 export { AdvancedSettingsSetup, AdvancedSettingsStart } from './types';
 export { ComponentRegistry } from './component_registry';
+export { Field } from './management_app/components/field';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new AdvancedSettingsPlugin();
