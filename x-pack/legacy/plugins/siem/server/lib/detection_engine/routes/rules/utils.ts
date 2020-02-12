@@ -217,12 +217,10 @@ export const transformOrImportError = (
   }
 };
 
-export const getDuplicates = (lodashDict: Dictionary<number>): string | null => {
+export const getDuplicates = (lodashDict: Dictionary<number>): string[] | null => {
   const hasDuplicates = Object.values(lodashDict).some(i => i > 1);
   if (hasDuplicates) {
-    return Object.keys(lodashDict)
-      .filter(key => lodashDict[key] > 1)
-      .join(', ');
+    return Object.keys(lodashDict).filter(key => lodashDict[key] > 1);
   }
   return null;
 };

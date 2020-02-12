@@ -141,4 +141,19 @@ describe('create_rules_bulk', () => {
     const output: Array<BulkError | Partial<OutputRuleAlertRest>> = JSON.parse(payload);
     expect(output.some(item => item.error?.status_code === 409)).toBeTruthy();
   });
+
+  test('returns one error object in response when duplicate rule_ids found in request payload', async () => {
+    alertsClient.find.mockResolvedValue(getFindResult());
+    alertsClient.get.mockResolvedValue(getResult());
+    actionsClient.create.mockResolvedValue(createActionResult());
+    alertsClient.create.mockResolvedValue(getResult());
+    const request: ServerInjectOptions = {
+      method: 'POST',
+      url: `${DETECTION_ENGINE_RULES_URL}/_bulk_create`,
+      payload: [typicalPayload(), typicalPayload()],
+    };
+    const { payload } = await server.inject(request);
+    const output: Array<BulkError | Partial<OutputRuleAlertRest>> = JSON.parse(payload);
+    expect(output.length).toBe(1);
+  });
 });

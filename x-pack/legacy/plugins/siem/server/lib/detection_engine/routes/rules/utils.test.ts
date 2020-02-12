@@ -1205,13 +1205,13 @@ describe('utils', () => {
   });
 
   describe('getDuplicates', () => {
-    test("returns a string showing the duplicate keys of 'value2' and 'value3'", () => {
+    test("returns array of ruleIds showing the duplicate keys of 'value2' and 'value3'", () => {
       const output = getDuplicates({
         value1: 1,
         value2: 2,
         value3: 2,
       });
-      const expected = 'value2, value3';
+      const expected = ['value2', 'value3'];
       expect(output).toEqual(expected);
     });
     test('returns null when given a map of no duplicates', () => {

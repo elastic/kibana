@@ -48,104 +48,112 @@ export const createCreateRulesBulkRoute = (server: ServerFacade): Hapi.ServerRou
         return headers.response().code(404);
       }
 
-      const mappedDuplicates = countBy('rule_id', request.payload);
+      const ruleDefinitions = request.payload;
+      const mappedDuplicates = countBy('rule_id', ruleDefinitions);
       const dupes = getDuplicates(mappedDuplicates);
 
       const rules = await Promise.all(
-        request.payload.map(async payloadRule => {
-          const {
-            description,
-            enabled,
-            false_positives: falsePositives,
-            from,
-            query,
-            language,
-            output_index: outputIndex,
-            saved_id: savedId,
-            meta,
-            filters,
-            rule_id: ruleId,
-            index,
-            interval,
-            max_signals: maxSignals,
-            risk_score: riskScore,
-            name,
-            severity,
-            tags,
-            threat,
-            to,
-            type,
-            references,
-            timeline_id: timelineId,
-            timeline_title: timelineTitle,
-            version,
-          } = payloadRule;
-          if (ruleId != null && dupes?.includes(ruleId)) {
-            return createBulkErrorObject({
-              ruleId,
-              statusCode: 409,
-              message: `rule_id: "${ruleId}" already exists`,
-            });
-          }
-          const ruleIdOrUuid = ruleId ?? uuid.v4();
-          try {
-            const finalIndex = outputIndex != null ? outputIndex : getIndex(request, server);
-            const callWithRequest = callWithRequestFactory(request, server);
-            const indexExists = await getIndexExists(callWithRequest, finalIndex);
-            if (!indexExists) {
-              return createBulkErrorObject({
-                ruleId: ruleIdOrUuid,
-                statusCode: 400,
-                message: `To create a rule, the index must exist first. Index ${finalIndex} does not exist`,
-              });
-            }
-            if (ruleId != null) {
-              const rule = await readRules({ alertsClient, ruleId });
-              if (rule != null) {
-                return createBulkErrorObject({
-                  ruleId,
-                  statusCode: 409,
-                  message: `rule_id: "${ruleId}" already exists`,
-                });
-              }
-            }
-            const createdRule = await createRules({
-              alertsClient,
-              actionsClient,
+        ruleDefinitions
+          .filter(rule => !dupes?.includes(rule.rule_id ?? ''))
+          .map(async payloadRule => {
+            const {
               description,
               enabled,
-              falsePositives,
+              false_positives: falsePositives,
               from,
-              immutable: false,
               query,
               language,
-              outputIndex: finalIndex,
-              savedId,
-              timelineId,
-              timelineTitle,
+              output_index: outputIndex,
+              saved_id: savedId,
               meta,
               filters,
-              ruleId: ruleIdOrUuid,
+              rule_id: ruleId,
               index,
               interval,
-              maxSignals,
-              riskScore,
+              max_signals: maxSignals,
+              risk_score: riskScore,
               name,
               severity,
               tags,
+              threat,
               to,
               type,
-              threat,
               references,
+              timeline_id: timelineId,
+              timeline_title: timelineTitle,
               version,
-            });
-            return transformOrBulkError(ruleIdOrUuid, createdRule);
-          } catch (err) {
-            return transformBulkError(ruleIdOrUuid, err);
-          }
-        })
+            } = payloadRule;
+            const ruleIdOrUuid = ruleId ?? uuid.v4();
+            try {
+              const finalIndex = outputIndex != null ? outputIndex : getIndex(request, server);
+              const callWithRequest = callWithRequestFactory(request, server);
+              const indexExists = await getIndexExists(callWithRequest, finalIndex);
+              if (!indexExists) {
+                return createBulkErrorObject({
+                  ruleId: ruleIdOrUuid,
+                  statusCode: 400,
+                  message: `To create a rule, the index must exist first. Index ${finalIndex} does not exist`,
+                });
+              }
+              if (ruleId != null) {
+                const rule = await readRules({ alertsClient, ruleId });
+                if (rule != null) {
+                  return createBulkErrorObject({
+                    ruleId,
+                    statusCode: 409,
+                    message: `rule_id: "${ruleId}" already exists`,
+                  });
+                }
+              }
+              const createdRule = await createRules({
+                alertsClient,
+                actionsClient,
+                description,
+                enabled,
+                falsePositives,
+                from,
+                immutable: false,
+                query,
+                language,
+                outputIndex: finalIndex,
+                savedId,
+                timelineId,
+                timelineTitle,
+                meta,
+                filters,
+                ruleId: ruleIdOrUuid,
+                index,
+                interval,
+                maxSignals,
+                riskScore,
+                name,
+                severity,
+                tags,
+                to,
+                type,
+                threat,
+                references,
+                version,
+              });
+              return transformOrBulkError(ruleIdOrUuid, createdRule);
+            } catch (err) {
+              return transformBulkError(ruleIdOrUuid, err);
+            }
+          })
       );
-      return rules;
+      if (dupes) {
+        return [
+          ...rules,
+          ...dupes.map(ruleId =>
+            createBulkErrorObject({
+              ruleId,
+              statusCode: 409,
+              message: `rule_id: "${ruleId}" already exists`,
+            })
+          ),
+        ];
+      }
+      return [...rules];
     },
   };
 };
