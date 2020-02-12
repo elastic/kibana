@@ -71,12 +71,13 @@ export interface ActionConnectorTableItem extends ActionConnector {
 }
 
 export interface ActionGroups {
-  [id: string]: string;
+  id: string;
+  name: string;
 }
 export interface AlertType {
   id: string;
   name: string;
-  actionGroups: ActionGroups;
+  actionGroups: ActionGroups[];
   actionVariables: string[];
 }
 

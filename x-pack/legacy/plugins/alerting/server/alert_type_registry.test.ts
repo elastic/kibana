@@ -27,7 +27,7 @@ describe('has()', () => {
     registry.register({
       id: 'foo',
       name: 'Foo',
-      actionGroups: {},
+      actionGroups: [],
       executor: jest.fn(),
     });
     expect(registry.has('foo')).toEqual(true);
@@ -39,7 +39,7 @@ describe('register()', () => {
     const alertType = {
       id: 'test',
       name: 'Test',
-      actionGroups: {},
+      actionGroups: [],
       executor: jest.fn(),
     };
     // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -64,14 +64,14 @@ describe('register()', () => {
     registry.register({
       id: 'test',
       name: 'Test',
-      actionGroups: {},
+      actionGroups: [],
       executor: jest.fn(),
     });
     expect(() =>
       registry.register({
         id: 'test',
         name: 'Test',
-        actionGroups: {},
+        actionGroups: [],
         executor: jest.fn(),
       })
     ).toThrowErrorMatchingInlineSnapshot(`"Alert type \\"test\\" is already registered."`);
@@ -84,7 +84,7 @@ describe('get()', () => {
     registry.register({
       id: 'test',
       name: 'Test',
-      actionGroups: {},
+      actionGroups: [],
       executor: jest.fn(),
     });
     const alertType = registry.get('test');
@@ -118,9 +118,12 @@ describe('list()', () => {
     registry.register({
       id: 'test',
       name: 'Test',
-      actionGroups: {
-        testActionGroup: 'Test Action Group',
-      },
+      actionGroups: [
+        {
+          id: 'testActionGroup',
+          name: 'Test Action Group',
+        },
+      ],
       executor: jest.fn(),
     });
     const result = registry.list();

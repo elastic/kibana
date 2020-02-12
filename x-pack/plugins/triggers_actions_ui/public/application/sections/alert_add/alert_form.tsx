@@ -40,6 +40,7 @@ import {
   ActionTypeIndex,
   ActionConnector,
   AlertTypeIndex,
+  ActionGroups,
 } from '../../../types';
 import { SectionLoading } from '../../components/section_loading';
 import { ConnectorAddModal } from '../action_connector_form/connector_add_modal';
@@ -118,7 +119,7 @@ export const AlertForm = ({
   const [alertThrottleUnit, setAlertThrottleUnit] = useState<string>('m');
   const [isAddActionPanelOpen, setIsAddActionPanelOpen] = useState<boolean>(true);
   const [connectors, setConnectors] = useState<ActionConnector[]>([]);
-  const [defaultActionGroup, setDefaultActionGroup] = useState<string | undefined>(undefined);
+  const [defaultActionGroup, setDefaultActionGroup] = useState<ActionGroups | undefined>(undefined);
   const [activeActionItem, setActiveActionItem] = useState<ActiveActionConnectorState | undefined>(
     undefined
   );
@@ -158,11 +159,11 @@ export const AlertForm = ({
         // temp hack of API result
         alertTypes.push({
           id: 'threshold',
-          actionGroups: {
-            alert: 'Alert',
-            warning: 'Warning',
-            ifUnacknowledged: 'If unacknowledged',
-          },
+          actionGroups: [
+            { id: 'alert', name: 'Alert' },
+            { id: 'warning', name: 'Warning' },
+            { id: 'ifUnacknowledged', name: 'If unacknowledged' },
+          ],
           name: 'threshold',
           actionVariables: ['ctx.metadata.name', 'ctx.metadata.test'],
         });
@@ -171,7 +172,7 @@ export const AlertForm = ({
           index[alertTypeItem.id] = alertTypeItem;
         }
         if (alert.alertTypeId) {
-          setDefaultActionGroup(Object.values(index[alert.alertTypeId].actionGroups)[0]);
+          setDefaultActionGroup(index[alert.alertTypeId].actionGroups[0]);
         }
         setAlertTypesIndex(index);
       } catch (e) {
@@ -265,7 +266,7 @@ export const AlertForm = ({
         alert.actions.push({
           id: '',
           actionTypeId: actionTypeModel.id,
-          group: defaultActionGroup ?? 'Alert',
+          group: defaultActionGroup?.id ?? 'Alert',
           params: {},
         });
         setActionProperty('id', freeConnectors[0].id, alert.actions.length - 1);
@@ -277,7 +278,7 @@ export const AlertForm = ({
       alert.actions.push({
         id: '',
         actionTypeId: actionTypeModel.id,
-        group: defaultActionGroup ?? 'Alert',
+        group: defaultActionGroup?.id ?? 'Alert',
         params: {},
       });
       setActionProperty('id', alert.actions.length, alert.actions.length - 1);
@@ -296,9 +297,9 @@ export const AlertForm = ({
           if (
             alertTypesIndex &&
             alertTypesIndex[item.id] &&
-            Object.values(alertTypesIndex[item.id].actionGroups).length > 0
+            alertTypesIndex[item.id].actionGroups.length > 0
           ) {
-            setDefaultActionGroup(Object.values(alertTypesIndex[item.id].actionGroups)[0]);
+            setDefaultActionGroup(alertTypesIndex[item.id].actionGroups[0]);
           }
         }}
       >
@@ -355,7 +356,7 @@ export const AlertForm = ({
         id,
       }));
     const actionTypeRegisterd = actionTypeRegistry.get(actionConnector.actionTypeId);
-    if (actionTypeRegisterd === null || actionItem.group !== defaultActionGroup) return null;
+    if (actionTypeRegisterd === null || actionItem.group !== defaultActionGroup?.id) return null;
     const ParamsFieldsComponent = actionTypeRegisterd.actionParamsFields;
     const actionParamsErrors: { errors: IErrorObject } =
       Object.keys(actionsErrors).length > 0 ? actionsErrors[actionItem.id] : { errors: {} };
@@ -478,7 +479,7 @@ export const AlertForm = ({
       ? actionTypesIndex[actionItem.actionTypeId].name
       : actionItem.actionTypeId;
     const actionTypeRegisterd = actionTypeRegistry.get(actionItem.actionTypeId);
-    if (actionTypeRegisterd === null || actionItem.group !== defaultActionGroup) return null;
+    if (actionTypeRegisterd === null || actionItem.group !== defaultActionGroup?.id) return null;
     return (
       <EuiAccordion
         initialIsOpen={true}

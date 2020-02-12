@@ -33,11 +33,14 @@ export const signalRulesAlertType = ({
   return {
     id: SIGNALS_ID,
     name: 'SIEM Signals',
-    actionGroups: {
-      default: i18n.translate('xpack.siem.detectionEngine.signalRuleAlert.actionGroups.default', {
-        defaultMessage: 'Default',
-      }),
-    },
+    actionGroups: [
+      {
+        id: 'default',
+        name: i18n.translate('xpack.siem.detectionEngine.signalRuleAlert.actionGroups.default', {
+          defaultMessage: 'Default',
+        }),
+      },
+    ],
     validate: {
       params: schema.object({
         description: schema.string(),

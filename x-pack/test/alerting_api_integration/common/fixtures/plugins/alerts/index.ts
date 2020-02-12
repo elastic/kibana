@@ -202,7 +202,10 @@ export default function(kibana: any) {
       const alwaysFiringAlertType: AlertType = {
         id: 'test.always-firing',
         name: 'Test: Always Firing',
-        actionGroups: { default: 'Default', other: 'Other' },
+        actionGroups: [
+          { id: 'default', name: 'Default' },
+          { id: 'other', name: 'Other' },
+        ],
         async executor(alertExecutorOptions: AlertExecutorOptions) {
           const {
             services,
@@ -253,7 +256,10 @@ export default function(kibana: any) {
       const cumulativeFiringAlertType: AlertType = {
         id: 'test.cumulative-firing',
         name: 'Test: Cumulative Firing',
-        actionGroups: { default: 'Default', other: 'Other' },
+        actionGroups: [
+          { id: 'default', name: 'Default' },
+          { id: 'other', name: 'Other' },
+        ],
         async executor(alertExecutorOptions: AlertExecutorOptions) {
           const { services, state } = alertExecutorOptions;
           const group = 'default';
@@ -275,7 +281,7 @@ export default function(kibana: any) {
       const neverFiringAlertType: AlertType = {
         id: 'test.never-firing',
         name: 'Test: Never firing',
-        actionGroups: {},
+        actionGroups: [],
         async executor({ services, params, state }: AlertExecutorOptions) {
           await services.callCluster('index', {
             index: params.index,
@@ -295,7 +301,7 @@ export default function(kibana: any) {
       const failingAlertType: AlertType = {
         id: 'test.failing',
         name: 'Test: Failing',
-        actionGroups: {},
+        actionGroups: [],
         async executor({ services, params, state }: AlertExecutorOptions) {
           await services.callCluster('index', {
             index: params.index,
@@ -313,7 +319,7 @@ export default function(kibana: any) {
       const authorizationAlertType: AlertType = {
         id: 'test.authorization',
         name: 'Test: Authorization',
-        actionGroups: {},
+        actionGroups: [],
         validate: {
           params: schema.object({
             callClusterAuthorizationIndex: schema.string(),
@@ -372,7 +378,7 @@ export default function(kibana: any) {
       const validationAlertType: AlertType = {
         id: 'test.validation',
         name: 'Test: Validation',
-        actionGroups: {},
+        actionGroups: [],
         validate: {
           params: schema.object({
             param1: schema.string(),
@@ -383,7 +389,7 @@ export default function(kibana: any) {
       const noopAlertType: AlertType = {
         id: 'test.noop',
         name: 'Test: Noop',
-        actionGroups: { default: 'Default' },
+        actionGroups: [{ id: 'default', name: 'Default' }],
         async executor({ services, params, state }: AlertExecutorOptions) {},
       };
       server.plugins.alerting.setup.registerType(alwaysFiringAlertType);

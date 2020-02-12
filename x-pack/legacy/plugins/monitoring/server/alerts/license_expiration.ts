@@ -46,11 +46,14 @@ export const getLicenseExpiration = (
   return {
     id: ALERT_TYPE_LICENSE_EXPIRATION,
     name: 'Monitoring Alert - License Expiration',
-    actionGroups: {
-      default: i18n.translate('xpack.monitoring.alerts.actionGroups.default', {
-        defaultMessage: 'Default',
-      }),
-    },
+    actionGroups: [
+      {
+        id: 'default',
+        name: i18n.translate('xpack.monitoring.alerts.actionGroups.default', {
+          defaultMessage: 'Default',
+        }),
+      },
+    ],
     async executor({
       services,
       params,
