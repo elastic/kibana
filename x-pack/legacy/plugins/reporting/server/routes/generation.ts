@@ -8,15 +8,8 @@ import boom from 'boom';
 import { errors as elasticsearchErrors } from 'elasticsearch';
 import { Legacy } from 'kibana';
 import { API_BASE_URL } from '../../common/constants';
-import {
-  ExportTypesRegistry,
-  HeadlessChromiumDriverFactory,
-  Logger,
-  ReportingResponseToolkit,
-  ServerFacade,
-} from '../../types';
-import { createQueueFactory, enqueueJobFactory } from '../lib';
-import { ReportingSetupDeps } from '../plugin';
+import { Logger, ReportingResponseToolkit, ServerFacade } from '../../types';
+import { ReportingSetupDeps, ReportingPlugin } from '../plugin';
 import { registerGenerateFromJobParams } from './generate_from_jobparams';
 import { registerGenerateCsvFromSavedObject } from './generate_from_savedobject';
 import { registerGenerateCsvFromSavedObjectImmediate } from './generate_from_savedobject_immediate';

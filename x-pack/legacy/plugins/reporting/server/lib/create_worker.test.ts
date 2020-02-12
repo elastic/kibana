@@ -6,7 +6,9 @@
 
 import * as sinon from 'sinon';
 import { ElasticsearchServiceSetup } from 'kibana/server';
-import { HeadlessChromiumDriverFactory, ServerFacade } from '../../types';
+import { createMockReportingPlugin } from '../../test_helpers';
+import { ServerFacade } from '../../types';
+import { ReportingPlugin } from '../../server/plugin';
 import { createWorkerFactory } from './create_worker';
 // @ts-ignore
 import { Esqueue } from './esqueue';

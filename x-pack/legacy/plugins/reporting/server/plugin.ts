@@ -27,9 +27,17 @@ import { mirrorPluginStatus } from '../../../server/lib/mirror_plugin_status';
 import { XPackMainPlugin } from '../../xpack_main/server/xpack_main';
 import { PLUGIN_ID } from '../common/constants';
 import { logConfiguration } from '../log_configuration';
-import { ReportingPluginSpecOptions } from '../types.d';
+import { EnqueueJobFn, ESQueueInstance, ReportingPluginSpecOptions } from '../types.d';
 import { createBrowserDriverFactory } from './browsers';
-import { checkLicenseFactory, getExportTypesRegistry, LevelLogger, runValidations } from './lib';
+import { HeadlessChromiumDriverFactory } from './browsers/chromium/driver_factory';
+import {
+  checkLicenseFactory,
+  createQueueFactory,
+  enqueueJobFactory,
+  getExportTypesRegistry,
+  LevelLogger,
+  runValidations,
+} from './lib';
 import { registerRoutes } from './routes';
 import { setFieldFormats } from './services';
 import { registerReportingUsageCollector } from './usage';

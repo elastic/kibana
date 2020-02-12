@@ -4,9 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createMockServer } from '../../../test_helpers/create_mock_server';
-import { getConditionalHeaders, getCustomLogo } from './index';
+import { ReportingPlugin } from '../../../server/plugin';
+import { createMockReportingPlugin, createMockServer } from '../../../test_helpers';
+import { ServerFacade } from '../../../types';
 import { JobDocPayloadPDF } from '../../printable_pdf/types';
+import { getConditionalHeaders, getCustomLogo } from './index';
 
 let mockReportingPlugin: ReportingPlugin;
 let mockServer: ServerFacade;

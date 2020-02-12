@@ -4,13 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  ExportTypesRegistry,
-  HeadlessChromiumDriverFactory,
-  Logger,
-  ServerFacade,
-} from '../../types';
-import { ReportingSetupDeps } from '../plugin';
+import { Logger, ServerFacade } from '../../types';
+import { ReportingSetupDeps, ReportingPlugin } from '../plugin';
 import { registerJobGenerationRoutes } from './generation';
 import { registerJobInfoRoutes } from './jobs';
 

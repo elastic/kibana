@@ -6,8 +6,8 @@
 
 import { EventEmitter } from 'events';
 import { ResponseObject } from 'hapi';
-import { ElasticsearchServiceSetup } from 'kibana/server';
 import { Legacy } from 'kibana';
+import { ElasticsearchServiceSetup } from 'kibana/server';
 import { CallCluster } from '../../../../src/legacy/core_plugins/elasticsearch';
 import { CancellationToken } from './common/cancellation_token';
 import { HeadlessChromiumDriverFactory } from './server/browsers/chromium/driver_factory';

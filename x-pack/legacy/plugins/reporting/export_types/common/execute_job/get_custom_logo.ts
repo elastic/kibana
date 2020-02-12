@@ -30,14 +30,8 @@ export const getCustomLogo = async ({
     getBasePath: () => job.basePath || serverBasePath,
     path: '/',
     route: { settings: {} },
-    url: {
-      href: '/',
-    },
-    raw: {
-      req: {
-        url: '/',
-      },
-    },
+    url: { href: '/' },
+    raw: { req: { url: '/' } },
   };
 
   const savedObjectsClient = await reporting.getSavedObjectsClient(fakeRequest);

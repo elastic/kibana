@@ -7,13 +7,8 @@
 import * as Rx from 'rxjs';
 import { ElasticsearchServiceSetup } from 'kibana/server';
 import { catchError, map, mergeMap, takeUntil } from 'rxjs/operators';
-import {
-  ServerFacade,
-  ExecuteJobFactory,
-  ESQueueWorkerExecuteFn,
-  HeadlessChromiumDriverFactory,
-  Logger,
-} from '../../../../types';
+import { ReportingPlugin } from '../../../../server/plugin';
+import { ServerFacade, ExecuteJobFactory, ESQueueWorkerExecuteFn, Logger } from '../../../../types';
 import { JobDocPayloadPDF } from '../../types';
 import { PDF_JOB_TYPE } from '../../../../common/constants';
 import { generatePdfObservableFactory } from '../lib/generate_pdf';

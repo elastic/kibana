@@ -32,6 +32,7 @@ export async function runValidations(
       })
     );
   } catch (err) {
+    logger.error(err);
     logger.warning(
       i18n.translate('xpack.reporting.selfCheck.warning', {
         defaultMessage: `Reporting plugin self-check generated a warning: {err}`,

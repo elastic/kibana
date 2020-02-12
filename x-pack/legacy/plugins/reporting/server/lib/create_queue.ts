@@ -5,13 +5,8 @@
  */
 
 import { ElasticsearchServiceSetup } from 'kibana/server';
-import {
-  ServerFacade,
-  ExportTypesRegistry,
-  HeadlessChromiumDriverFactory,
-  QueueConfig,
-  Logger,
-} from '../../types';
+import { ESQueueInstance, ServerFacade, QueueConfig, Logger } from '../../types';
+import { ReportingPlugin } from '../plugin';
 // @ts-ignore
 import { Esqueue } from './esqueue';
 import { createWorkerFactory } from './create_worker';
