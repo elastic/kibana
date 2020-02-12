@@ -108,6 +108,14 @@ export const getUpdateRequest = (): ServerInjectOptions => ({
   },
 });
 
+export const getPatchRequest = (): ServerInjectOptions => ({
+  method: 'PATCH',
+  url: DETECTION_ENGINE_RULES_URL,
+  payload: {
+    ...typicalPayload(),
+  },
+});
+
 export const getReadRequest = (): ServerInjectOptions => ({
   method: 'GET',
   url: `${DETECTION_ENGINE_RULES_URL}?rule_id=rule-1`,
@@ -126,6 +134,12 @@ export const getReadBulkRequest = (): ServerInjectOptions => ({
 
 export const getUpdateBulkRequest = (): ServerInjectOptions => ({
   method: 'PUT',
+  url: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
+  payload: [typicalPayload()],
+});
+
+export const getPatchBulkRequest = (): ServerInjectOptions => ({
+  method: 'PATCH',
   url: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
   payload: [typicalPayload()],
 });
