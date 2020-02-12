@@ -45,7 +45,6 @@ import '../components/fetch_error';
 import { getPainlessError } from './get_painless_error';
 import { discoverResponseHandler } from './response_handler';
 import {
-  angular,
   buildVislibDimensions,
   getRequestInspectorStats,
   getResponseInspectorStats,
@@ -642,7 +641,7 @@ function discoverController(
         // get the current sort from searchSource as array of arrays
         const currentSort = getSortArray($scope.searchSource.getField('sort'), $scope.indexPattern);
         // if the searchSource doesn't know, tell it so
-        if (!angular.equals(sort, currentSort)) {
+        if (!_.isEqual(sort, currentSort)) {
           syncAppState({ sort });
           $fetchObservable.next();
         }
@@ -930,6 +929,7 @@ function discoverController(
 
   $scope.setSortOrder = function setSortOrder(sortPair) {
     $scope.state.sort = sortPair;
+    $state.sort = sortPair;
   };
 
   // TODO: On array fields, negating does not negate the combination, rather all terms
