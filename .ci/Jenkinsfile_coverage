@@ -98,6 +98,7 @@ src/dev/code_coverage/cc_app/public/initial_data.js
 
                   # build cc app
                   pushd src/dev/code_coverage/cc_app
+                  yarn
                   yarn build:prod
                   popd
 
