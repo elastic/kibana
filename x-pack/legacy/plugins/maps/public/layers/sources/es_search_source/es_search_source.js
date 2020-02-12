@@ -29,6 +29,31 @@ import { loadIndexSettings } from './load_index_settings';
 import { DEFAULT_FILTER_BY_MAP_BOUNDS } from './constants';
 import { ESDocField } from '../../fields/es_doc_field';
 
+function getField(indexPattern, fieldName) {
+  const field = indexPattern.fields.getByName(fieldName);
+  if (!field) {
+    throw new Error(
+      i18n.translate('xpack.maps.source.esSearch.fieldNotFoundMsg', {
+        defaultMessage: `Unable to find '{fieldName}' in index-pattern '{indexPatternTitle}'.`,
+        values: { fieldName, indexPatternTitle: indexPattern.title },
+      })
+    );
+  }
+  return field;
+}
+
+function addFieldToDSL(dsl, field) {
+  return !field.scripted
+    ? { ...dsl, field: field.name }
+    : {
+        ...dsl,
+        script: {
+          source: field.script,
+          lang: field.lang,
+        },
+      };
+}
+
 export class ESSearchSource extends AbstractESSource {
   static type = ES_SEARCH;
   static title = i18n.translate('xpack.maps.source.esSearchTitle', {
@@ -241,19 +266,6 @@ export class ESSearchSource extends AbstractESSource {
       });
   }
 
-  _getField(indexPattern, fieldName) {
-    const field = indexPattern.fields.getByName(fieldName);
-    if (!field) {
-      throw new Error(
-        i18n.translate('xpack.maps.source.esSearch.fieldNotFoundMsg', {
-          defaultMessage: `Unable to find '{fieldName}' in index-pattern '{indexPatternTitle}'.`,
-          values: { fieldName, indexPatternTitle: indexPattern.title },
-        })
-      );
-    }
-    return field;
-  }
-
   async _getTopHits(layerName, searchFilters, registerCancelCallback) {
     const { topHitsSplitField: topHitsSplitFieldName, topHitsSize } = this._descriptor;
 
@@ -292,31 +304,20 @@ export class ESSearchSource extends AbstractESSource {
       };
     }
 
+    const topHitsSplitField = getField(indexPattern, topHitsSplitFieldName);
     const cardinalityAgg = { precision_threshold: 1 };
     const termsAgg = {
       size: DEFAULT_MAX_BUCKETS_LIMIT,
       shard_size: DEFAULT_MAX_BUCKETS_LIMIT,
     };
-    const topHitsSplitField = this._getField(indexPattern, topHitsSplitFieldName);
-    if (topHitsSplitField.scripted) {
-      const script = {
-        source: topHitsSplitField.script,
-        lang: topHitsSplitField.lang,
-      };
-      cardinalityAgg.script = script;
-      termsAgg.script = script;
-    } else {
-      cardinalityAgg.field = topHitsSplitFieldName;
-      termsAgg.field = topHitsSplitFieldName;
-    }
 
     const searchSource = await this._makeSearchSource(searchFilters, 0);
     searchSource.setField('aggs', {
       totalEntities: {
-        cardinality: cardinalityAgg,
+        cardinality: addFieldToDSL(cardinalityAgg, topHitsSplitField),
       },
       entitySplit: {
-        terms: termsAgg,
+        terms: addFieldToDSL(termsAgg, topHitsSplitField),
         aggs: {
           entityHits: {
             top_hits: topHits,
