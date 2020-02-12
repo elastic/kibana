@@ -22,8 +22,6 @@ const buildLegacyDependencies = (
     xpack_main: server.plugins.xpack_main,
     reporting: reportingPlugin,
   },
-  savedObjects: server.savedObjects,
-  uiSettingsServiceFactory: server.uiSettingsServiceFactory,
 });
 
 export const legacyInit = async (
@@ -33,17 +31,20 @@ export const legacyInit = async (
   const coreSetup = server.newPlatform.setup.core;
   const pluginInstance = plugin(server.newPlatform.coreContext as PluginInitializerContext);
 
+  const __LEGACY = buildLegacyDependencies(server, reportingPlugin);
   await pluginInstance.setup(coreSetup, {
     elasticsearch: coreSetup.elasticsearch,
     security: server.newPlatform.setup.plugins.security as SecurityPluginSetup,
     usageCollection: server.newPlatform.setup.plugins.usageCollection,
-    __LEGACY: buildLegacyDependencies(server, reportingPlugin),
+    __LEGACY,
   });
 
   // Schedule to call the "start" hook only after start dependencies are ready
   coreSetup.getStartServices().then(([core, plugins]) =>
     pluginInstance.start(core, {
+      elasticsearch: coreSetup.elasticsearch,
       data: (plugins as ReportingStartDeps).data,
+      __LEGACY,
     })
   );
 };

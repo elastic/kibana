@@ -27,12 +27,13 @@ import {
 
 type QueuedPdfExecutorFactory = ExecuteJobFactory<ESQueueWorkerExecuteFn<JobDocPayloadPDF>>;
 
-export const executeJobFactory: QueuedPdfExecutorFactory = function executeJobFactoryFn(
+export const executeJobFactory: QueuedPdfExecutorFactory = async function executeJobFactoryFn(
+  reporting: ReportingPlugin,
   server: ServerFacade,
   elasticsearch: ElasticsearchServiceSetup,
-  parentLogger: Logger,
-  { browserDriverFactory }: { browserDriverFactory: HeadlessChromiumDriverFactory }
+  parentLogger: Logger
 ) {
+  const browserDriverFactory = await reporting.getBrowserDriverFactory();
   const generatePdfObservable = generatePdfObservableFactory(server, browserDriverFactory);
   const logger = parentLogger.clone([PDF_JOB_TYPE, 'execute']);
 
@@ -43,7 +44,7 @@ export const executeJobFactory: QueuedPdfExecutorFactory = function executeJobFa
       mergeMap(() => decryptJobHeaders({ server, job, logger })),
       map(decryptedHeaders => omitBlacklistedHeaders({ job, decryptedHeaders })),
       map(filteredHeaders => getConditionalHeaders({ server, job, filteredHeaders })),
-      mergeMap(conditionalHeaders => getCustomLogo({ server, job, conditionalHeaders })),
+      mergeMap(conditionalHeaders => getCustomLogo({ reporting, server, job, conditionalHeaders })),
       mergeMap(({ logo, conditionalHeaders }) => {
         const urls = getFullUrls({ server, job });
 

@@ -13,9 +13,13 @@ import { CancellationToken } from './common/cancellation_token';
 import { HeadlessChromiumDriverFactory } from './server/browsers/chromium/driver_factory';
 import { BrowserType } from './server/browsers/types';
 import { LevelLogger } from './server/lib/level_logger';
-import { LegacySetup, ReportingSetupDeps } from './server/plugin';
-
-export type ReportingPlugin = object; // For Plugin contract
+import {
+  LegacySetup,
+  ReportingPlugin,
+  ReportingStartDeps,
+  ReportingSetup,
+  ReportingStart,
+} from './server/plugin';
 
 export type Job = EventEmitter & {
   id: string;
@@ -179,6 +183,15 @@ export interface CryptoFactory {
   decrypt: (headers?: string) => any;
 }
 
+export interface IndexPatternSavedObject {
+  attributes: {
+    fieldFormatMap: string;
+  };
+  id: string;
+  type: string;
+  version: string;
+}
+
 export interface TimeRangeParams {
   timezone: string;
   min: Date | string | number;
@@ -212,10 +225,6 @@ export interface JobDocOutput {
   content: string | null;
   max_size_reached: boolean;
   size: number;
-}
-
-export interface ESQueue {
-  addJob: (type: string, payload: object, options: object) => Job;
 }
 
 export interface ESQueueWorker {
@@ -267,8 +276,9 @@ type GenericWorkerFn<JobParamsType> = (
   ...workerRestArgs: any[]
 ) => void | Promise<JobDocOutput>;
 
-export interface ESQueueInstance<JobParamsType, JobDocPayloadType> {
-  registerWorker: (
+export interface ESQueueInstance {
+  addJob: (type: string, payload: unknown, options: object) => Job;
+  registerWorker: <JobParamsType>(
     pluginId: string,
     workerFn: GenericWorkerFn<JobParamsType>,
     workerOptions: ESQueueWorkerOptions
@@ -276,18 +286,17 @@ export interface ESQueueInstance<JobParamsType, JobDocPayloadType> {
 }
 
 export type CreateJobFactory<CreateJobFnType> = (
+  reporting: ReportingPlugin,
   server: ServerFacade,
   elasticsearch: ElasticsearchServiceSetup,
   logger: LevelLogger
 ) => CreateJobFnType;
 export type ExecuteJobFactory<ExecuteJobFnType> = (
+  reporting: ReportingPlugin,
   server: ServerFacade,
   elasticsearch: ElasticsearchServiceSetup,
-  logger: LevelLogger,
-  opts: {
-    browserDriverFactory: HeadlessChromiumDriverFactory;
-  }
-) => ExecuteJobFnType;
+  logger: LevelLogger
+) => Promise<ExecuteJobFnType>;
 
 export interface ExportTypeDefinition<
   JobParamsType,
@@ -309,7 +318,6 @@ export { CancellationToken } from './common/cancellation_token';
 export { HeadlessChromiumDriver } from './server/browsers/chromium/driver';
 export { HeadlessChromiumDriverFactory } from './server/browsers/chromium/driver_factory';
 export { ExportTypesRegistry } from './server/lib/export_types_registry';
-
 // Prefer to import this type using: `import { LevelLogger } from 'relative/path/server/lib';`
 export { LevelLogger as Logger };
 

@@ -5,14 +5,17 @@
  */
 
 import { UI_SETTINGS_CUSTOM_PDF_LOGO } from '../../../common/constants';
+import { ReportingPlugin } from '../../../server/plugin';
 import { ConditionalHeaders, ServerFacade } from '../../../types';
 import { JobDocPayloadPDF } from '../../printable_pdf/types'; // Logo is PDF only
 
 export const getCustomLogo = async ({
+  reporting,
   server,
   job,
   conditionalHeaders,
 }: {
+  reporting: ReportingPlugin;
   server: ServerFacade;
   job: JobDocPayloadPDF;
   conditionalHeaders: ConditionalHeaders;
@@ -37,9 +40,8 @@ export const getCustomLogo = async ({
     },
   };
 
-  const savedObjects = server.savedObjects;
-  const savedObjectsClient = savedObjects.getScopedSavedObjectsClient(fakeRequest);
-  const uiSettings = server.uiSettingsServiceFactory({ savedObjectsClient });
+  const savedObjectsClient = await reporting.getSavedObjectsClient(fakeRequest);
+  const uiSettings = await reporting.getUiSettingsServiceFactory(savedObjectsClient);
   const logo: string = await uiSettings.get(UI_SETTINGS_CUSTOM_PDF_LOGO);
   return { conditionalHeaders, logo };
 };

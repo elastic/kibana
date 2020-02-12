@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ReportingPlugin } from '../../../../server/plugin';
 import {
   CreateJobFactory,
   ESQueueCreateJobFn,
@@ -17,7 +18,7 @@ import { JobParamsPDF } from '../../types';
 
 export const createJobFactory: CreateJobFactory<ESQueueCreateJobFn<
   JobParamsPDF
->> = function createJobFactoryFn(server: ServerFacade) {
+>> = function createJobFactoryFn(reporting: ReportingPlugin, server: ServerFacade) {
   const crypto = cryptoFactory(server);
 
   return async function createJobFn(

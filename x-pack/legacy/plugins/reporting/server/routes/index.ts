@@ -15,12 +15,11 @@ import { registerJobGenerationRoutes } from './generation';
 import { registerJobInfoRoutes } from './jobs';
 
 export function registerRoutes(
+  reporting: ReportingPlugin,
   server: ServerFacade,
   plugins: ReportingSetupDeps,
-  exportTypesRegistry: ExportTypesRegistry,
-  browserDriverFactory: HeadlessChromiumDriverFactory,
   logger: Logger
 ) {
-  registerJobGenerationRoutes(server, plugins, exportTypesRegistry, browserDriverFactory, logger);
-  registerJobInfoRoutes(server, plugins, exportTypesRegistry, logger);
+  registerJobGenerationRoutes(reporting, server, plugins, logger);
+  registerJobInfoRoutes(reporting, server, plugins, logger);
 }

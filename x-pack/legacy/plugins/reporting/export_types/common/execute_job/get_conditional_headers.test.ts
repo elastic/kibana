@@ -10,7 +10,7 @@ import { JobDocPayload } from '../../../types';
 import { JobDocPayloadPDF } from '../../printable_pdf/types';
 
 let mockServer: any;
-beforeEach(() => {
+beforeEach(async () => {
   mockServer = createMockServer('');
 });
 
@@ -145,59 +145,6 @@ describe('conditions', () => {
 
     expect(conditionalHeaders.conditions.protocol).toEqual(mockServer.info.protocol);
   });
-});
-
-test('uses basePath from job when creating saved object service', async () => {
-  const permittedHeaders = {
-    foo: 'bar',
-    baz: 'quix',
-  };
-
-  const conditionalHeaders = await getConditionalHeaders({
-    job: {} as JobDocPayload<any>,
-    filteredHeaders: permittedHeaders,
-    server: mockServer,
-  });
-
-  const logo = 'custom-logo';
-  mockServer.uiSettingsServiceFactory().get.mockReturnValue(logo);
-
-  const jobBasePath = '/sbp/s/marketing';
-  await getCustomLogo({
-    job: { basePath: jobBasePath } as JobDocPayloadPDF,
-    conditionalHeaders,
-    server: mockServer,
-  });
-
-  expect(mockServer.savedObjects.getScopedSavedObjectsClient.mock.calls[0][0].getBasePath()).toBe(
-    jobBasePath
-  );
-});
-
-test(`uses basePath from server if job doesn't have a basePath when creating saved object service`, async () => {
-  const permittedHeaders = {
-    foo: 'bar',
-    baz: 'quix',
-  };
-
-  const conditionalHeaders = await getConditionalHeaders({
-    job: {} as JobDocPayload<any>,
-    filteredHeaders: permittedHeaders,
-    server: mockServer,
-  });
-
-  const logo = 'custom-logo';
-  mockServer.uiSettingsServiceFactory().get.mockReturnValue(logo);
-
-  await getCustomLogo({
-    job: {} as JobDocPayloadPDF,
-    conditionalHeaders,
-    server: mockServer,
-  });
-
-  expect(mockServer.savedObjects.getScopedSavedObjectsClient.mock.calls[0][0].getBasePath()).toBe(
-    '/sbp'
-  );
 });
 
 describe('config formatting', () => {

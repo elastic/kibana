@@ -33,34 +33,34 @@ const getMockLogger = jest.fn();
 
 const getMockExportTypesRegistry = (
   exportTypes: any[] = [{ executeJobFactory: executeJobFactoryStub }]
-) => ({
-  getAll: () => exportTypes,
-});
+) =>
+  ({
+    getAll: () => exportTypes,
+  } as ExportTypesRegistry);
 
 describe('Create Worker', () => {
   let queue: Esqueue;
   let client: ClientMock;
+  let mockReporting: ReportingPlugin;
 
-  beforeEach(() => {
+  beforeEach(async () => {
+    mockReporting = await createMockReportingPlugin();
     client = new ClientMock();
     queue = new Esqueue('reporting-queue', { client });
     executeJobFactoryStub.reset();
   });
 
   test('Creates a single Esqueue worker for Reporting', async () => {
-    const exportTypesRegistry = getMockExportTypesRegistry();
+    mockReporting.getExportTypesRegistry = () => getMockExportTypesRegistry();
     const createWorker = createWorkerFactory(
+      mockReporting,
       getMockServer(),
       {} as ElasticsearchServiceSetup,
-      getMockLogger(),
-      {
-        exportTypesRegistry: exportTypesRegistry as ExportTypesRegistry,
-        browserDriverFactory: {} as HeadlessChromiumDriverFactory,
-      }
+      getMockLogger()
     );
     const registerWorkerSpy = sinon.spy(queue, 'registerWorker');
 
-    createWorker(queue);
+    await createWorker(queue);
 
     sinon.assert.callCount(executeJobFactoryStub, 1);
     sinon.assert.callCount(registerWorkerSpy, 1);
@@ -88,18 +88,16 @@ Object {
       { executeJobFactory: executeJobFactoryStub },
       { executeJobFactory: executeJobFactoryStub },
     ]);
+    mockReporting.getExportTypesRegistry = () => exportTypesRegistry;
     const createWorker = createWorkerFactory(
+      mockReporting,
       getMockServer(),
       {} as ElasticsearchServiceSetup,
-      getMockLogger(),
-      {
-        exportTypesRegistry: exportTypesRegistry as ExportTypesRegistry,
-        browserDriverFactory: {} as HeadlessChromiumDriverFactory,
-      }
+      getMockLogger()
     );
     const registerWorkerSpy = sinon.spy(queue, 'registerWorker');
 
-    createWorker(queue);
+    await createWorker(queue);
 
     sinon.assert.callCount(executeJobFactoryStub, 5);
     sinon.assert.callCount(registerWorkerSpy, 1);

@@ -16,8 +16,8 @@ import { validateServerHost } from './validate_server_host';
 export async function runValidations(
   server: ServerFacade,
   elasticsearch: ElasticsearchServiceSetup,
-  logger: Logger,
-  browserFactory: HeadlessChromiumDriverFactory
+  browserFactory: HeadlessChromiumDriverFactory,
+  logger: Logger
 ) {
   try {
     await Promise.all([
