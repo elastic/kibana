@@ -17,13 +17,27 @@
  * under the License.
  */
 
-import { EuiPanel } from '@elastic/eui';
-import * as React from 'react';
+import React from 'react';
+import { EuiForm, EuiFormRow, EuiFieldText } from '@elastic/eui';
+import { DrilldownHelloBar } from '../drilldown_hello_bar';
+import { txtNameOfDrilldown, txtUntitledDrilldown, txtDrilldownAction } from './i18n';
+import { DrilldownPicker } from '../drilldown_picker';
 
-export const EmbeddablePanel = () => {
+// eslint-disable-next-line
+export interface FormCreateDrilldownProps {}
+
+export const FormCreateDrilldown: React.FC<FormCreateDrilldownProps> = () => {
   return (
-    <EuiPanel data-test-subj="embeddablePanel" paddingSize="none" role="figure">
-      Hello world
-    </EuiPanel>
+    <div>
+      <DrilldownHelloBar />
+      <EuiForm>
+        <EuiFormRow label={txtNameOfDrilldown}>
+          <EuiFieldText name="drilldown_name" placeholder={txtUntitledDrilldown} />
+        </EuiFormRow>
+        <EuiFormRow label={txtDrilldownAction}>
+          <DrilldownPicker />
+        </EuiFormRow>
+      </EuiForm>
+    </div>
   );
 };
