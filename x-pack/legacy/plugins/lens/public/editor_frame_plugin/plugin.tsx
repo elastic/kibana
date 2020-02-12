@@ -73,7 +73,7 @@ export class EditorFramePlugin {
       'lens',
       new EmbeddableFactory(
         plugins.chrome,
-        plugins.expressions.ExpressionRenderer,
+        plugins.expressions.ReactExpressionRenderer,
         plugins.data.indexPatterns
       )
     );
@@ -98,7 +98,7 @@ export class EditorFramePlugin {
                   (doc && doc.visualizationType) || firstVisualizationId || null
                 }
                 core={core}
-                ExpressionRenderer={plugins.expressions.ExpressionRenderer}
+                ExpressionRenderer={plugins.expressions.ReactExpressionRenderer}
                 doc={doc}
                 dateRange={dateRange}
                 query={query}

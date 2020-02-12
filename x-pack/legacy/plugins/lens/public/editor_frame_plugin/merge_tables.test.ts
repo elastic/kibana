@@ -6,7 +6,7 @@
 
 import moment from 'moment';
 import { mergeTables } from './merge_tables';
-import { KibanaDatatable } from 'src/plugins/expressions/public';
+import { KibanaDatatable } from 'src/plugins/expressions';
 
 jest.mock('ui/new_platform');
 
@@ -40,7 +40,8 @@ describe('lens_merge_tables', () => {
       mergeTables.fn(
         null,
         { layerIds: ['first', 'second'], tables: [sampleTable1, sampleTable2] },
-        {}
+        // eslint-disable-next-line
+        {} as any
       )
     ).toEqual({
       tables: { first: sampleTable1, second: sampleTable2 },
@@ -59,7 +60,8 @@ describe('lens_merge_tables', () => {
           },
         },
         { layerIds: ['first', 'second'], tables: [] },
-        {}
+        // eslint-disable-next-line
+        {} as any
       )
     ).toMatchInlineSnapshot(`
       Object {
@@ -83,7 +85,8 @@ describe('lens_merge_tables', () => {
         },
       },
       { layerIds: ['first', 'second'], tables: [] },
-      {}
+      // eslint-disable-next-line
+      {} as any
     );
 
     expect(
