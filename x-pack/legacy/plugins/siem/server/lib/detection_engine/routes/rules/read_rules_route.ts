@@ -7,7 +7,7 @@
 import Hapi from 'hapi';
 import { isFunction } from 'lodash/fp';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
-import { getIdError, transformOrError } from './utils';
+import { getIdError, transform } from './utils';
 import { transformError } from '../utils';
 
 import { readRules } from '../../rules/read_rules';
@@ -54,12 +54,34 @@ export const createReadRulesRoute: Hapi.ServerRoute = {
           search: rule.id,
           searchFields: ['alertId'],
         });
-        return transformOrError(rule, ruleStatuses.saved_objects[0]);
+        const transformedOrError = transform(rule, ruleStatuses.saved_objects[0]);
+        if (transformedOrError == null) {
+          return headers
+            .response({
+              message: 'Internal error transforming rules',
+              status_code: 500,
+            })
+            .code(500);
+        } else {
+          return transformedOrError;
+        }
       } else {
-        return getIdError({ id, ruleId });
+        const error = getIdError({ id, ruleId });
+        return headers
+          .response({
+            message: error.message,
+            status_code: error.statusCode,
+          })
+          .code(error.statusCode);
       }
     } catch (err) {
-      return transformError(err);
+      const error = transformError(err);
+      return headers
+        .response({
+          message: error.message,
+          status_code: error.statusCode,
+        })
+        .code(error.statusCode);
     }
   },
 };

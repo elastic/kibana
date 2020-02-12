@@ -11,7 +11,7 @@ import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
 import { ActionCreator } from 'typescript-fsa';
 
-import { esFilters, esQuery, Query } from '../../../../../../../../../src/plugins/data/public';
+import { Filter, esQuery, Query } from '../../../../../../../../../src/plugins/data/public';
 import { useFetchIndexPatterns } from '../../../../containers/detection_engine/rules/fetch_index_patterns';
 import { StatefulEventsViewer } from '../../../../components/events_viewer';
 import { HeaderSection } from '../../../../components/header_section';
@@ -53,7 +53,7 @@ const SIGNALS_PAGE_TIMELINE_ID = 'signals-page';
 
 interface ReduxProps {
   globalQuery: Query;
-  globalFilters: esFilters.Filter[];
+  globalFilters: Filter[];
   deletedEventIds: string[];
   isSelectAllChecked: boolean;
   loadingEventIds: string[];
@@ -80,7 +80,7 @@ interface DispatchProps {
 
 interface OwnProps {
   canUserCRUD: boolean;
-  defaultFilters?: esFilters.Filter[];
+  defaultFilters?: Filter[];
   hasIndexWrite: boolean;
   from: number;
   loading: boolean;
