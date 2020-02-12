@@ -77,6 +77,7 @@ const PaintServers = memo(() => (
 // To be referenced by <use> elements
 export const SymbolIds = {
   processNode: idGenerator('curveSymbol'),
+  solidHexagon: idGenerator('hexagon'),
 };
 
 // SymbolsAndShapes: defs that define shapes, masks and other spatial elements
@@ -111,6 +112,15 @@ const SymbolsAndShapes = memo(() => (
             />
           </g>
         </g>
+      </g>
+    </symbol>
+    <symbol id={SymbolIds.solidHexagon} viewBox="0 0 200 200" preserveAspectRatio="xMidYMid meet">
+      <g transform="translate(0,-97)">
+        <path
+          transform="matrix(1.6461 0 0 1.6596 -56.401 -64.183)"
+          d="m95.148 97.617 28.238 16.221 23.609 13.713 0.071 32.566-0.071 27.302-28.167 16.344-23.68 13.59-28.238-16.221-23.609-13.713-0.07098-32.566 0.07098-27.302 28.167-16.344z"
+          fill="#0c1111"
+        />
       </g>
     </symbol>
   </>
