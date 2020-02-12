@@ -60,7 +60,7 @@ export const createTileMapVisualization = ({ serviceSettings, $injector }) => {
       // todo: autoPrecision should be vis parameter, not aggConfig one
       updateVarsObject.precision = geohashAgg.aggConfigParams.autoPrecision
         ? zoomPrecision[this.vis.getUiState().get('mapZoom')]
-        : getPrecision(this._kibanaMap.getGeohashPrecision());
+        : getPrecision(geohashAgg.aggConfigParams.precision);
 
       this.vis.eventsSubject.next(updateVarsObject);
     };
