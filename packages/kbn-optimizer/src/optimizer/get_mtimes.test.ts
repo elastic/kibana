@@ -40,7 +40,6 @@ it('returns mtimes Map', async () => {
     .toMatchInlineSnapshot(`
     Map {
       "/foo/bar" => 1234,
-      "/foo/missing" => undefined,
       "/foo/baz" => 1234,
     }
   `);
