@@ -4,12 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createMockServer } from '../../../test_helpers';
+import { createMockReportingPlugin, createMockServer } from '../../../test_helpers';
 import { JobDocPayload } from '../../../types';
-import { getConditionalHeaders } from './index';
+import { JobDocPayloadPDF } from '../../printable_pdf/types';
+import { getConditionalHeaders, getCustomLogo } from './index';
 
+let mockReportingPlugin: any;
 let mockServer: any;
 beforeEach(async () => {
+  mockReportingPlugin = createMockReportingPlugin();
   mockServer = createMockServer('');
 });
 
@@ -144,6 +147,87 @@ describe('conditions', () => {
 
     expect(conditionalHeaders.conditions.protocol).toEqual(mockServer.info.protocol);
   });
+});
+
+test('uses basePath from job when creating saved object service', async () => {
+  const logo = 'custom-logo';
+  const mockUiSettingsClient = { get: () => Promise.resolve(logo) };
+  mockReportingPlugin.getUiSettingsServiceFactory = jest
+    .fn()
+    .mockResolvedValueOnce(mockUiSettingsClient);
+  mockReportingPlugin.getSavedObjectsClient = jest.fn();
+
+  const permittedHeaders = {
+    foo: 'bar',
+    baz: 'quix',
+  };
+  const conditionalHeaders = await getConditionalHeaders({
+    job: {} as JobDocPayload<any>,
+    filteredHeaders: permittedHeaders,
+    server: mockServer,
+  });
+  const jobBasePath = '/sbp/s/marketing';
+  await getCustomLogo({
+    reporting: mockReportingPlugin,
+    job: { basePath: jobBasePath } as JobDocPayloadPDF,
+    conditionalHeaders,
+    server: mockServer,
+  });
+
+  const getBasePath = mockReportingPlugin.getSavedObjectsClient.mock.calls[0][0].getBasePath;
+  expect(getBasePath()).toBe(jobBasePath);
+});
+
+test(`uses basePath from server if job doesn't have a basePath when creating saved object service`, async () => {
+  const logo = 'custom-logo';
+  const mockUiSettingsClient = { get: () => Promise.resolve(logo) };
+  mockReportingPlugin.getUiSettingsServiceFactory = jest
+    .fn()
+    .mockResolvedValueOnce(mockUiSettingsClient);
+  mockReportingPlugin.getSavedObjectsClient = jest.fn();
+
+  const permittedHeaders = {
+    foo: 'bar',
+    baz: 'quix',
+  };
+  const conditionalHeaders = await getConditionalHeaders({
+    job: {} as JobDocPayload<any>,
+    filteredHeaders: permittedHeaders,
+    server: mockServer,
+  });
+
+  await getCustomLogo({
+    reporting: mockReportingPlugin,
+    job: {} as JobDocPayloadPDF,
+    conditionalHeaders,
+    server: mockServer,
+  });
+
+  const getBasePath = mockReportingPlugin.getSavedObjectsClient.mock.calls[0][0].getBasePath;
+  expect(getBasePath()).toBe(`/sbp`);
+  expect(mockReportingPlugin.getSavedObjectsClient.mock.calls[0]).toMatchInlineSnapshot(`
+    Array [
+      Object {
+        "getBasePath": [Function],
+        "headers": Object {
+          "baz": "quix",
+          "foo": "bar",
+        },
+        "path": "/",
+        "raw": Object {
+          "req": Object {
+            "url": "/",
+          },
+        },
+        "route": Object {
+          "settings": Object {},
+        },
+        "url": Object {
+          "href": "/",
+        },
+      },
+    ]
+  `);
 });
 
 describe('config formatting', () => {

@@ -3,9 +3,14 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
+import * as Rx from 'rxjs';
 import sinon from 'sinon';
 import { getExportTypesRegistry } from '../lib/export_types_registry';
-import { getReportingUsageCollector } from './reporting_usage_collector';
+import {
+  getReportingUsageCollector,
+  registerReportingUsageCollector,
+} from './reporting_usage_collector';
 
 const exportTypesRegistry = getExportTypesRegistry();
 
@@ -317,94 +322,124 @@ describe('data modeling', () => {
 
     const usageStats = await getReportingUsage(callClusterMock);
     expect(usageStats).toMatchInlineSnapshot(`
-Object {
-  "PNG": Object {
-    "available": true,
-    "total": 4,
-  },
-  "_all": 54,
-  "available": true,
-  "browser_type": undefined,
-  "csv": Object {
-    "available": true,
-    "total": 27,
-  },
-  "enabled": true,
-  "last7Days": Object {
-    "PNG": Object {
-      "available": true,
-      "total": 4,
-    },
-    "_all": 27,
-    "csv": Object {
-      "available": true,
-      "total": 10,
-    },
-    "printable_pdf": Object {
-      "app": Object {
-        "dashboard": 13,
-        "visualization": 0,
-      },
-      "available": true,
-      "layout": Object {
-        "preserve_layout": 3,
-        "print": 10,
-      },
-      "total": 13,
-    },
-    "status": Object {
-      "completed": 0,
-      "failed": 0,
-      "pending": 27,
-    },
-  },
-  "lastDay": Object {
-    "PNG": Object {
-      "available": true,
-      "total": 4,
-    },
-    "_all": 11,
-    "csv": Object {
-      "available": true,
-      "total": 5,
-    },
-    "printable_pdf": Object {
-      "app": Object {
-        "dashboard": 2,
-        "visualization": 0,
-      },
-      "available": true,
-      "layout": Object {
-        "preserve_layout": 0,
-        "print": 2,
-      },
-      "total": 2,
-    },
-    "status": Object {
-      "completed": 0,
-      "failed": 0,
-      "pending": 11,
-    },
-  },
-  "printable_pdf": Object {
-    "app": Object {
-      "dashboard": 23,
-      "visualization": 0,
-    },
-    "available": true,
-    "layout": Object {
-      "preserve_layout": 13,
-      "print": 10,
-    },
-    "total": 23,
-  },
-  "status": Object {
-    "completed": 20,
-    "failed": 0,
-    "pending": 33,
-    "processing": 1,
-  },
-}
-`);
+      Object {
+        "PNG": Object {
+          "available": true,
+          "total": 4,
+        },
+        "_all": 54,
+        "available": true,
+        "browser_type": undefined,
+        "csv": Object {
+          "available": true,
+          "total": 27,
+        },
+        "enabled": true,
+        "last7Days": Object {
+          "PNG": Object {
+            "available": true,
+            "total": 4,
+          },
+          "_all": 27,
+          "csv": Object {
+            "available": true,
+            "total": 10,
+          },
+          "printable_pdf": Object {
+            "app": Object {
+              "dashboard": 13,
+              "visualization": 0,
+            },
+            "available": true,
+            "layout": Object {
+              "preserve_layout": 3,
+              "print": 10,
+            },
+            "total": 13,
+          },
+          "status": Object {
+            "completed": 0,
+            "failed": 0,
+            "pending": 27,
+          },
+        },
+        "lastDay": Object {
+          "PNG": Object {
+            "available": true,
+            "total": 4,
+          },
+          "_all": 11,
+          "csv": Object {
+            "available": true,
+            "total": 5,
+          },
+          "printable_pdf": Object {
+            "app": Object {
+              "dashboard": 2,
+              "visualization": 0,
+            },
+            "available": true,
+            "layout": Object {
+              "preserve_layout": 0,
+              "print": 2,
+            },
+            "total": 2,
+          },
+          "status": Object {
+            "completed": 0,
+            "failed": 0,
+            "pending": 11,
+          },
+        },
+        "printable_pdf": Object {
+          "app": Object {
+            "dashboard": 23,
+            "visualization": 0,
+          },
+          "available": true,
+          "layout": Object {
+            "preserve_layout": 13,
+            "print": 10,
+          },
+          "total": 23,
+        },
+        "status": Object {
+          "completed": 20,
+          "failed": 0,
+          "pending": 33,
+          "processing": 1,
+        },
+      }
+    `);
+  });
+});
+
+describe('Ready for collection observable', () => {
+  test('converts observable to promise', async () => {
+    const serverWithBasicLicenseMock = getServerMock();
+    const makeCollectorSpy = sinon.spy();
+    const usageCollection = {
+      makeUsageCollector: makeCollectorSpy,
+      registerCollector: sinon.stub(),
+    };
+    const start$ = Rx.of({ start: true });
+    registerReportingUsageCollector(
+      serverWithBasicLicenseMock,
+      usageCollection,
+      start$,
+      exportTypesRegistry
+    );
+
+    const [args] = makeCollectorSpy.firstCall.args;
+    expect(args).toMatchInlineSnapshot(`
+      Object {
+        "fetch": [Function],
+        "formatForBulkUpload": [Function],
+        "isReady": [Function],
+        "type": "reporting",
+      }
+    `);
+
+    await expect(args.isReady()).resolves.toBe(true);
   });
 });
