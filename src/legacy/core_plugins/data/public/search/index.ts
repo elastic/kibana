@@ -20,3 +20,5 @@
 export * from './aggs';
 export { getRequestInspectorStats, getResponseInspectorStats } from './utils';
 export { serializeAggConfig } from './expressions/utils';
+// @ts-ignore
+export { tabifyAggResponse, tabifyGetColumns } from '../../common/tabify';

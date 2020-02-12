@@ -17,4 +17,6 @@
  * under the License.
  */
 
+// @ts-ignore
 export { tabifyAggResponse } from './tabify';
+export { tabifyGetColumns } from './_get_columns';
