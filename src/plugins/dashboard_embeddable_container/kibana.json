@@ -2,9 +2,11 @@
   "id": "dashboard_embeddable_container",
   "version": "kibana",
   "requiredPlugins": [
+    "data",
     "embeddable",
     "inspector",
-    "uiActions"
+    "uiActions",
+    "directAccessLinks"
   ],
   "server": false,
   "ui": true

@@ -21,6 +21,7 @@
 
 import * as React from 'react';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
+import { DirectAccessLinksSetup } from '../../direct_access_links/public';
 import { UiActionsSetup, UiActionsStart } from '../../../plugins/ui_actions/public';
 import { CONTEXT_MENU_TRIGGER, IEmbeddableSetup, IEmbeddableStart } from './embeddable_plugin';
 import { ExpandPanelAction, ReplacePanelAction } from '.';
@@ -31,10 +32,22 @@ import {
   ExitFullScreenButton as ExitFullScreenButtonUi,
   ExitFullScreenButtonProps,
 } from '../../../plugins/kibana_react/public';
+import {
+  DashboardAppLinkGeneratorState,
+  DASHBOARD_APP_LINK_GENERATOR,
+  createDirectAccessDashboardLinkGenerator,
+} from './direct_access_link_generator';
+
+declare module '../../direct_access_links/public' {
+  export interface GeneratorStateMapping {
+    [DASHBOARD_APP_LINK_GENERATOR]: DashboardAppLinkGeneratorState;
+  }
+}
 
 interface SetupDependencies {
   embeddable: IEmbeddableSetup;
   uiActions: UiActionsSetup;
+  directAccessLinks: DirectAccessLinksSetup;
 }
 
 interface StartDependencies {
@@ -50,10 +63,21 @@ export class DashboardEmbeddableContainerPublicPlugin
   implements Plugin<Setup, Start, SetupDependencies, StartDependencies> {
   constructor(initializerContext: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup, { embeddable, uiActions }: SetupDependencies): Setup {
+  public setup(
+    core: CoreSetup,
+    { directAccessLinks, embeddable, uiActions }: SetupDependencies
+  ): Setup {
     const expandPanelAction = new ExpandPanelAction();
     uiActions.registerAction(expandPanelAction);
     uiActions.attachAction(CONTEXT_MENU_TRIGGER, expandPanelAction.id);
+    const startServices = core.getStartServices();
+    directAccessLinks.registerAccessLinkGenerator(
+      DASHBOARD_APP_LINK_GENERATOR,
+      createDirectAccessDashboardLinkGenerator(async () => ({
+        basePath: (await startServices)[0].http.basePath.get(),
+        useHashedUrl: (await startServices)[0].uiSettings.get('state:storeInSessionStorage'),
+      }))
+    );
   }
 
   public start(core: CoreStart, plugins: StartDependencies): Start {

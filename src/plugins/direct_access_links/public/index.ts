@@ -17,19 +17,17 @@
  * under the License.
  */
 
-import './index.scss';
-
 import { PluginInitializerContext } from '../../../core/public';
-import { DashboardEmbeddableContainerPublicPlugin } from './plugin';
-
-export * from './types';
-export * from './actions';
-export * from './embeddable';
+import { DirectAccessLinksPlugin } from './plugin';
 
 export function plugin(initializerContext: PluginInitializerContext) {
-  return new DashboardEmbeddableContainerPublicPlugin(initializerContext);
+  return new DirectAccessLinksPlugin(initializerContext);
 }
 
-export { DashboardEmbeddableContainerPublicPlugin as Plugin };
+export { DirectAccessLinksSetup, DirectAccessLinksStart } from './plugin';
 
-export { DASHBOARD_APP_LINK_GENERATOR } from './direct_access_link_generator';
+export {
+  GeneratorId,
+  GeneratorStateMapping,
+  createDirectAccessLinkGenerator,
+} from './direct_access_link_generator';
