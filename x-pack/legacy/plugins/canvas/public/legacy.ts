@@ -13,8 +13,6 @@ import { absoluteToParsedUrl } from 'ui/url/absolute_to_parsed_url'; // eslint-d
 import { Storage } from '../../../../../src/plugins/kibana_utils/public'; // eslint-disable-line import/order
 // @ts-ignore Untyped Kibana Lib
 import { formatMsg } from '../../../../../src/plugins/kibana_legacy/public'; // eslint-disable-line import/order
-// @ts-ignore Untyped Kibana Lib
-import { QueryString } from 'ui/utils/query_string'; // eslint-disable-line import/order
 
 const shimCoreSetup = {
   ...npSetup.core,
@@ -33,7 +31,6 @@ const shimStartPlugins: CanvasStartDeps = {
     absoluteToParsedUrl,
     // ToDo: Copy directly into canvas
     formatMsg,
-    QueryString,
     storage: Storage,
     // ToDo: Won't be a part of New Platform. Will need to handle internally
     trackSubUrlForApp: chrome.trackSubUrlForApp,

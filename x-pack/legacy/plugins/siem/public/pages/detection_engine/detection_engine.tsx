@@ -12,7 +12,7 @@ import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
 
 import { Query } from '../../../../../../../src/plugins/data/common/query';
-import { esFilters } from '../../../../../../../src/plugins/data/common/es_query';
+import { Filter } from '../../../../../../../src/plugins/data/common/es_query';
 
 import { GlobalTime } from '../../containers/global_time';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
@@ -48,7 +48,7 @@ import * as i18n from './translations';
 import { DetectionEngineTab } from './types';
 
 interface ReduxProps {
-  filters: esFilters.Filter[];
+  filters: Filter[];
   query: Query;
 }
 

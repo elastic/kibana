@@ -17,12 +17,28 @@
  * under the License.
  */
 
-declare class QueryStringClass {
-  public decode(queryString: string): any;
-  public encode(obj: any): string;
-  public param(key: string, value: string): string;
-}
+import chalk from 'chalk';
 
-declare const QueryString: QueryStringClass;
+import { Conversion } from './type';
+import { LogLevel } from '../../log_level';
+import { LogRecord } from '../../log_record';
 
-export { QueryString };
+const LEVEL_COLORS = new Map([
+  [LogLevel.Fatal, chalk.red],
+  [LogLevel.Error, chalk.red],
+  [LogLevel.Warn, chalk.yellow],
+  [LogLevel.Debug, chalk.green],
+  [LogLevel.Trace, chalk.blue],
+]);
+
+export const LevelConversion: Conversion = {
+  pattern: /{level}/gi,
+  formatter(record: LogRecord, highlight: boolean) {
+    let message = record.level.id.toUpperCase().padEnd(5);
+    if (highlight && LEVEL_COLORS.has(record.level)) {
+      const color = LEVEL_COLORS.get(record.level)!;
+      message = color(message);
+    }
+    return message;
+  },
+};
