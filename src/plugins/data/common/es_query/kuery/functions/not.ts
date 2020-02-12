@@ -19,6 +19,7 @@
 
 import * as ast from '../ast';
 import { IIndexPattern, KueryNode } from '../../..';
+import { JsonValue } from '../../../../../kibana_utils/public';
 
 export function buildNodeParams(child: any) {
   return {
@@ -31,7 +32,7 @@ export function toElasticsearchQuery(
   indexPattern?: IIndexPattern,
   config?: Record<string, any>,
   context?: Record<string, any>
-) {
+): JsonValue {
   const [argument] = node.arguments;
 
   return {

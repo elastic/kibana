@@ -20,6 +20,7 @@
 import { get } from 'lodash';
 import * as literal from '../node_types/literal';
 import { IIndexPattern, KueryNode, IFieldType } from '../../..';
+import { JsonValue } from '../../../../../kibana_utils/public';
 
 export function buildNodeParams(fieldName: string) {
   return {
@@ -32,7 +33,7 @@ export function toElasticsearchQuery(
   indexPattern?: IIndexPattern,
   config?: Record<string, any>,
   context?: Record<string, any>
-) {
+): JsonValue {
   const {
     arguments: [fieldNameArg],
   } = node;

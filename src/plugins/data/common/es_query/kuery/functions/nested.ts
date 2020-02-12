@@ -20,6 +20,7 @@
 import * as ast from '../ast';
 import * as literal from '../node_types/literal';
 import { IIndexPattern, KueryNode } from '../../..';
+import { JsonValue } from '../../../../../kibana_utils/public';
 
 export function buildNodeParams(path: any, child: any) {
   const pathNode =
@@ -34,7 +35,7 @@ export function toElasticsearchQuery(
   indexPattern?: IIndexPattern,
   config?: Record<string, any>,
   context?: Record<string, any>
-) {
+): JsonValue {
   const [path, child] = node.arguments;
   const stringPath = ast.toElasticsearchQuery(path);
   const fullPath =

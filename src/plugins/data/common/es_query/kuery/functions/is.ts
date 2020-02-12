@@ -23,6 +23,7 @@ import { getFields } from './utils/get_fields';
 import { getTimeZoneFromSettings } from '../../utils';
 import { getFullFieldNameNode } from './utils/get_full_field_name_node';
 import { IIndexPattern, KueryNode, IFieldType } from '../../..';
+import { JsonValue } from '../../../../../kibana_utils/public';
 
 import * as ast from '../ast';
 
@@ -53,7 +54,7 @@ export function toElasticsearchQuery(
   indexPattern?: IIndexPattern,
   config?: Record<string, any>,
   context?: Record<string, any>
-) {
+): JsonValue {
   const {
     arguments: [fieldNameArg, valueArg, isPhraseArg],
   } = node;
@@ -194,7 +195,7 @@ export function toElasticsearchQuery(
 
   return {
     bool: {
-      should: queries,
+      should: queries || [],
       minimum_should_match: 1,
     },
   };
