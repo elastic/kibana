@@ -19,6 +19,7 @@ import {
 } from '../../../../../common/constants';
 import { RuleAlertType, IRuleSavedAttributesSavedObjectAttributes } from '../../rules/types';
 import { RuleAlertParamsRest, PrepackagedRules } from '../../types';
+import { importRulesQuerySchema, importRulesPayloadSchema } from '../schemas/import_rules_schema';
 
 export const mockPrepackagedRule = (): PrepackagedRules => ({
   rule_id: 'rule-1',
@@ -181,6 +182,12 @@ export const addPrepackagedRulesRequest = (): ServerInjectOptions => ({
 export const getPrepackagedRulesStatusRequest = (): ServerInjectOptions => ({
   method: 'GET',
   url: `${DETECTION_ENGINE_PREPACKAGED_URL}/_status`,
+});
+
+export const importRulesRequest = (payload?: importRulesPayloadSchema): ServerInjectOptions => ({
+  method: 'POST',
+  url: `${DETECTION_ENGINE_RULES_URL}/_import`,
+  payload,
 });
 
 export interface FindHit {
