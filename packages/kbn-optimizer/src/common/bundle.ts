@@ -23,7 +23,7 @@ import { BundleCache } from './bundle_cache';
 import { UnknownVals } from './ts_helpers';
 import { includes, ascending, entriesToObject } from './array_helpers';
 
-export const VALID_BUNDLE_TYPES = ['plugin' as const];
+const VALID_BUNDLE_TYPES = ['plugin' as const];
 
 export interface BundleSpec {
   readonly type: typeof VALID_BUNDLE_TYPES[0];
@@ -48,51 +48,6 @@ export class Bundle {
   public readonly outputDir: BundleSpec['outputDir'];
 
   public readonly cache: BundleCache;
-
-  public static parseSpec(spec: UnknownVals<BundleSpec>) {
-    if (!(spec && typeof spec === 'object')) {
-      throw new Error('`bundles[]` must be an object');
-    }
-
-    const { type } = spec;
-    if (!includes(VALID_BUNDLE_TYPES, type)) {
-      throw new Error('`bundles[]` must have a valid `type`');
-    }
-
-    const { id } = spec;
-    if (!(typeof id === 'string')) {
-      throw new Error('`bundles[]` must have a string `id` property');
-    }
-
-    const { entry } = spec;
-    if (!(typeof entry === 'string')) {
-      throw new Error('`bundles[]` must have a string `entry` property');
-    }
-
-    const { contextDir } = spec;
-    if (!(typeof contextDir === 'string' && Path.isAbsolute(contextDir))) {
-      throw new Error('`bundles[]` must have a string `contextDir` property');
-    }
-
-    const { sourceRoot } = spec;
-    if (!(typeof sourceRoot === 'string' && Path.isAbsolute(sourceRoot))) {
-      throw new Error('`bundles[]` must have a string `sourceRoot` property');
-    }
-
-    const { outputDir } = spec;
-    if (typeof outputDir !== 'string') {
-      throw new Error('`bundles[]` must have a string `outputDir` property');
-    }
-
-    return new Bundle({
-      type,
-      id,
-      entry,
-      contextDir,
-      sourceRoot,
-      outputDir,
-    });
-  }
 
   constructor(spec: BundleSpec) {
     this.type = spec.type;
@@ -157,7 +112,52 @@ export function parseBundles(json: string) {
       throw new Error('must be an array');
     }
 
-    return specs.map(spec => Bundle.parseSpec(spec));
+    return specs.map(
+      (spec: UnknownVals<BundleSpec>): Bundle => {
+        if (!(spec && typeof spec === 'object')) {
+          throw new Error('`bundles[]` must be an object');
+        }
+
+        const { type } = spec;
+        if (!includes(VALID_BUNDLE_TYPES, type)) {
+          throw new Error('`bundles[]` must have a valid `type`');
+        }
+
+        const { id } = spec;
+        if (!(typeof id === 'string')) {
+          throw new Error('`bundles[]` must have a string `id` property');
+        }
+
+        const { entry } = spec;
+        if (!(typeof entry === 'string')) {
+          throw new Error('`bundles[]` must have a string `entry` property');
+        }
+
+        const { contextDir } = spec;
+        if (!(typeof contextDir === 'string' && Path.isAbsolute(contextDir))) {
+          throw new Error('`bundles[]` must have an absolute path `contextDir` property');
+        }
+
+        const { sourceRoot } = spec;
+        if (!(typeof sourceRoot === 'string' && Path.isAbsolute(sourceRoot))) {
+          throw new Error('`bundles[]` must have an absolute path `sourceRoot` property');
+        }
+
+        const { outputDir } = spec;
+        if (!(typeof outputDir === 'string' && Path.isAbsolute(outputDir))) {
+          throw new Error('`bundles[]` must have an absolute path `outputDir` property');
+        }
+
+        return new Bundle({
+          type,
+          id,
+          entry,
+          contextDir,
+          sourceRoot,
+          outputDir,
+        });
+      }
+    );
   } catch (error) {
     throw new Error(`unable to parse bundles: ${error.message}`);
   }
