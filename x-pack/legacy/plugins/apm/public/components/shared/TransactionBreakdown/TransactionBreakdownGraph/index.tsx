@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import numeral from '@elastic/numeral';
-import { throttle } from 'lodash';
+import { useThrottleFn } from 'react-use';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { Coordinate, TimeSeries } from '../../../../../typings/timeseries';
 import { Maybe } from '../../../../../typings/common';
@@ -33,9 +33,21 @@ const formatTooltipValue = (coordinate: Coordinate) => {
 const TransactionBreakdownGraph: React.FC<Props> = props => {
   const { timeseries } = props;
   const trackApmEvent = useUiTracker({ app: 'apm' });
-  const trackHoverBreakdownChart = throttle(() => {
-    trackApmEvent({ metric: 'hover_breakdown_chart' });
-  }, 60000);
+  const [lastHoverTime, setLastHoverTime] = useState<number | null>(null);
+
+  const handleHover = useCallback(() => {
+    setLastHoverTime(Date.now());
+  }, [setLastHoverTime]);
+
+  useThrottleFn(
+    hoverTime => {
+      if (hoverTime) {
+        trackApmEvent({ metric: 'hover_breakdown_chart' });
+      }
+    },
+    60000,
+    [lastHoverTime]
+  );
 
   return (
     <TransactionLineChart
@@ -45,7 +57,7 @@ const TransactionBreakdownGraph: React.FC<Props> = props => {
       yMax={1}
       height={unit * 12}
       stacked={true}
-      onHover={trackHoverBreakdownChart}
+      onHover={handleHover}
     />
   );
 };
