@@ -214,11 +214,8 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
                 statusCode: 400,
                 error: 'Bad Request',
                 message:
-                  'child "name" fails because ["name" is required]. child "alertTypeId" fails because ["alertTypeId" is required]. child "consumer" fails because ["consumer" is required]. child "schedule" fails because ["schedule" is required]. child "params" fails because ["params" is required]. child "actions" fails because ["actions" is required]',
-                validation: {
-                  source: 'payload',
-                  keys: ['name', 'alertTypeId', 'consumer', 'schedule', 'params', 'actions'],
-                },
+                  '[request body.name]: expected value of type [string] but got [undefined]. [request body.alertTypeId]: expected value of type [string] but got [undefined]. [request body.consumer]: expected value of type [string] but got [undefined]. [request body.schedule]: expected value of type [object] but got [undefined]. [request body.params]: expected value of type [object] but got [undefined]. [request body.actions]: expected value of type [array] but got [undefined]',
+                // message: '[request body.config]: expected value of type [object] but got [null]',
               });
               break;
             default:
@@ -255,7 +252,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
                 statusCode: 400,
                 error: 'Bad Request',
                 message:
-                  'params invalid: [param1]: expected value of type [string] but got [undefined]',
+                  '[request body.params]: expected value of type [object] but got [undefined]',
               });
               break;
             default:

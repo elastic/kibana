@@ -12,8 +12,8 @@ export default function(kibana: any) {
     require: ['alerting'],
     name: 'alerts',
     init(server: any) {
-      createNoopAlertType(server.plugins.alerting.setup);
-      createAlwaysFiringAlertType(server.plugins.alerting.setup);
+      createNoopAlertType(server.newPlatform.setup.plugins.alerting);
+      createAlwaysFiringAlertType(server.newPlatform.setup.plugins.alerting);
     },
   });
 }
