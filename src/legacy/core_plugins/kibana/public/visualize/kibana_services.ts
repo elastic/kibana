@@ -57,6 +57,7 @@ export interface VisualizeKibanaServices {
   visualizations: VisualizationsStart;
   usageCollection?: UsageCollectionSetup;
   I18nContext: I18nStart['Context'];
+  setActiveUrl: (newUrl: string) => void;
 }
 
 let services: VisualizeKibanaServices | null = null;

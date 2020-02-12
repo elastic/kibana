@@ -96,6 +96,7 @@ function VisualizeAppController(
     savedQueryService,
     uiSettings,
     I18nContext,
+    setActiveUrl,
   } = getServices();
 
   const filterStateManager = new FilterStateManager(globalState, getAppState, filterManager);
@@ -587,6 +588,7 @@ function VisualizeAppController(
               });
               // Manually insert a new url so the back button will open the saved visualization.
               $window.history.pushState({}, '', savedVisualizationParsedUrl.getRootRelativePath());
+              setActiveUrl(savedVisualizationParsedUrl.appPath);
 
               const lastDashboardAbsoluteUrl = chrome.navLinks.get('kibana:dashboard').url;
               const dashboardParsedUrl = absoluteToParsedUrl(

@@ -84,7 +84,7 @@ export class VisualizePlugin implements Plugin {
     const { querySyncStateContainer, stop: stopQuerySyncStateContainer } = getQueryStateContainer(
       npData.query
     );
-    const { appMounted, appUnMounted, stop: stopUrlTracker } = createKbnUrlTracker({
+    const { appMounted, appUnMounted, stop: stopUrlTracker, setActiveUrl } = createKbnUrlTracker({
       baseUrl: core.http.basePath.prepend('/app/kibana'),
       defaultSubUrl: '#/visualize',
       storageKey: 'lastUrl:visualize',
@@ -144,6 +144,7 @@ export class VisualizePlugin implements Plugin {
           visualizations,
           usageCollection,
           I18nContext: contextCore.i18n.Context,
+          setActiveUrl,
         };
         setServices(deps);
 
