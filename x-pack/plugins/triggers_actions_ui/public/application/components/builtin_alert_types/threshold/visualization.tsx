@@ -198,7 +198,6 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
         >
           {error}
         </EuiCallOut>
-        <EuiSpacer size="l" />
       </Fragment>
     );
   }
@@ -228,7 +227,7 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
       <div data-test-subj="alertVisualizationChart">
         <EuiSpacer size="l" />
         {alertVisualizationDataKeys.length ? (
-          <Chart size={['100%', 300]} renderer="canvas">
+          <Chart size={['100%', 200]} renderer="canvas">
             <Settings
               theme={[customTheme(), chartsTheme]}
               xDomain={domain}
