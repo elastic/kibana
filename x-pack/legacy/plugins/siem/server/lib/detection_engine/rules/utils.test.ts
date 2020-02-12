@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { calculateInterval, calculateName, calculateVersion } from './update_rules';
-import { UpdateRuleParams } from './types';
+import { calculateInterval, calculateVersion, calculateName } from './utils';
+import { PatchRuleParams } from './types';
 
-describe('update_rules', () => {
+describe('utils', () => {
   describe('#calculateInterval', () => {
     test('given a undefined interval, it returns the ruleInterval ', () => {
       const interval = calculateInterval(undefined, '10m');
@@ -44,7 +44,7 @@ describe('update_rules', () => {
 
     test('returning an updated version number if not given an immutable but an updated falsy value', () => {
       expect(
-        calculateVersion(false, 1, ({ description: false } as unknown) as UpdateRuleParams)
+        calculateVersion(false, 1, ({ description: false } as unknown) as PatchRuleParams)
       ).toEqual(2);
     });
   });
