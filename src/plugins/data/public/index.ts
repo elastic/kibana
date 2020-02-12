@@ -174,7 +174,7 @@ export const fieldFormats = {
   FieldFormat,
   FieldFormatsRegistry, // exported only for tests. Consider mock.
 
-  serializeFieldFormat,
+  serialize: serializeFieldFormat,
 
   DEFAULT_CONVERTER_COLOR,
   HTML_CONTEXT_TYPE,
