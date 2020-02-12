@@ -70,10 +70,6 @@ export class Bundle {
     this.cache = new BundleCache(Path.resolve(this.outputDir, '.kbn-optimizer-cache'));
   }
 
-  getModuleCount() {
-    return this.cache.getModuleCount();
-  }
-
   /**
    * Calculate the cache key for this bundle based from current
    * mtime values.

@@ -59,7 +59,7 @@ export function logOptimizerState(log: ToolingLog, config: OptimizerConfig) {
         if (event?.type === 'worker started') {
           let moduleCount = 0;
           for (const bundle of event.bundles) {
-            moduleCount += bundle.getModuleCount() ?? NaN;
+            moduleCount += bundle.cache.getModuleCount() ?? NaN;
           }
           const mcString = isFinite(moduleCount) ? String(moduleCount) : '?';
           const bcString = String(event.bundles.length);

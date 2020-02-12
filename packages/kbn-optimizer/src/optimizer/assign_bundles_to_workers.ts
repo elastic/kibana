@@ -30,7 +30,7 @@ export interface Assignments {
 
 /** assign a wrapped bundle to a worker */
 const assignBundle = (worker: Assignments, bundle: Bundle) => {
-  const moduleCount = bundle.getModuleCount();
+  const moduleCount = bundle.cache.getModuleCount();
   if (moduleCount !== undefined) {
     worker.moduleCount += moduleCount;
   } else {
@@ -70,15 +70,15 @@ export function assignBundlesToWorkers(bundles: Bundle[], maxWorkerCount: number
    * counts and sort them by [moduleCount, id]
    */
   const bundlesWithCountsDesc = bundles
-    .filter(b => b.getModuleCount() !== undefined)
+    .filter(b => b.cache.getModuleCount() !== undefined)
     .sort(
       descending(
-        b => b.getModuleCount(),
+        b => b.cache.getModuleCount(),
         b => b.id
       )
     );
   const bundlesWithoutModuleCounts = bundles
-    .filter(b => b.getModuleCount() === undefined)
+    .filter(b => b.cache.getModuleCount() === undefined)
     .sort(descending(b => b.id));
 
   /**

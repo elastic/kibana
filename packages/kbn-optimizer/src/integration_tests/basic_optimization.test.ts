@@ -130,7 +130,7 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
   const foo = config.bundles.find(b => b.id === 'foo')!;
   expect(foo).toBeTruthy();
   foo.cache.refresh();
-  expect(foo.getModuleCount()).toBe(3);
+  expect(foo.cache.getModuleCount()).toBe(3);
   expect(foo.cache.getReferencedFiles()).toMatchInlineSnapshot(`
     Array [
       <absolute path>/plugins/foo/public/ext.ts,
@@ -142,7 +142,7 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
   const bar = config.bundles.find(b => b.id === 'bar')!;
   expect(bar).toBeTruthy();
   bar.cache.refresh();
-  expect(bar.getModuleCount()).toBe(5);
+  expect(bar.cache.getModuleCount()).toBe(5);
   expect(bar.cache.getReferencedFiles()).toMatchInlineSnapshot(`
     Array [
       <absolute path>/plugins/foo/public/ext.ts,

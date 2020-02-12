@@ -66,9 +66,9 @@ it('provides serializable versions of itself', () => {
 
 it('provides the module count from the cache', () => {
   const bundle = new Bundle(SPEC);
-  expect(bundle.getModuleCount()).toBe(undefined);
+  expect(bundle.cache.getModuleCount()).toBe(undefined);
   bundle.cache.set({ moduleCount: 123 });
-  expect(bundle.getModuleCount()).toBe(123);
+  expect(bundle.cache.getModuleCount()).toBe(123);
 });
 
 it('parses bundles from JSON specs', () => {
