@@ -20,23 +20,23 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { createStructuredSelector } from 'reselect';
-import * as selectors from '../../store/endpoint_list/selectors';
-import { EndpointListAction } from '../../store/endpoint_list/action';
-import { useEndpointListSelector } from './hooks';
+import * as selectors from '../../store/managing/selectors';
+import { ManagementAction } from '../../store/managing/action';
+import { useManagementListSelector } from './hooks';
 import { usePageId } from '../use_page_id';
 import { CreateStructuredSelector } from '../../types';
 
 const selector = (createStructuredSelector as CreateStructuredSelector)(selectors);
-export const EndpointList = () => {
+export const ManagementList = () => {
   usePageId('managementPage');
-  const dispatch = useDispatch<(a: EndpointListAction) => void>();
+  const dispatch = useDispatch<(a: ManagementAction) => void>();
   const {
     listData,
     pageIndex,
     pageSize,
     totalHits: totalItemCount,
     isLoading,
-  } = useEndpointListSelector(selector);
+  } = useManagementListSelector(selector);
 
   const paginationSetup = useMemo(() => {
     return {
@@ -52,7 +52,7 @@ export const EndpointList = () => {
     ({ page }: { page: { index: number; size: number } }) => {
       const { index, size } = page;
       dispatch({
-        type: 'userPaginatedEndpointListTable',
+        type: 'userPaginatedManagementList',
         payload: { pageIndex: index, pageSize: size },
       });
     },

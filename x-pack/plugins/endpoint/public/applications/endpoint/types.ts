@@ -16,7 +16,7 @@ export type MiddlewareFactory<S = GlobalState> = (
   api: MiddlewareAPI<Dispatch<AppAction>, S>
 ) => (next: Dispatch<AppAction>) => (action: AppAction) => unknown;
 
-export interface ManagementState {
+export interface ManagementListState {
   endpoints: EndpointMetadata[];
   total: number;
   pageSize: number;
@@ -24,13 +24,13 @@ export interface ManagementState {
   loading: boolean;
 }
 
-export interface ManagementPagination {
+export interface ManagementListPagination {
   pageIndex: number;
   pageSize: number;
 }
 
 export interface GlobalState {
-  readonly endpointList: ManagementState;
+  readonly managementList: ManagementListState;
   readonly alertList: AlertListState;
 }
 

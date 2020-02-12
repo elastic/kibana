@@ -5,10 +5,10 @@
  */
 
 import { Reducer } from 'redux';
-import { ManagementState } from '../../types';
+import { ManagementListState } from '../../types';
 import { AppAction } from '../action';
 
-const initialState = (): ManagementState => {
+const initialState = (): ManagementListState => {
   return {
     endpoints: [],
     pageSize: 10,
@@ -18,11 +18,11 @@ const initialState = (): ManagementState => {
   };
 };
 
-export const endpointListReducer: Reducer<ManagementState, AppAction> = (
+export const managementListReducer: Reducer<ManagementListState, AppAction> = (
   state = initialState(),
   action
 ) => {
-  if (action.type === 'serverReturnedEndpointList') {
+  if (action.type === 'serverReturnedManagementList') {
     const {
       endpoints,
       total,
@@ -39,11 +39,11 @@ export const endpointListReducer: Reducer<ManagementState, AppAction> = (
     };
   }
 
-  if (action.type === 'userExitedEndpointListPage') {
+  if (action.type === 'userExitedManagementList') {
     return initialState();
   }
 
-  if (action.type === 'userPaginatedEndpointListTable') {
+  if (action.type === 'userPaginatedManagementList') {
     return {
       ...state,
       ...action.payload,

@@ -16,7 +16,7 @@ import {
 import { CoreStart } from 'kibana/public';
 import { appReducer } from './reducer';
 import { alertMiddlewareFactory } from './alerts/middleware';
-import { managementMiddlewareFactory } from './endpoint_list';
+import { managementMiddlewareFactory } from './managing';
 import { GlobalState } from '../types';
 import { AppAction } from './action';
 
@@ -54,7 +54,7 @@ export const appStoreFactory = (coreStart: CoreStart): Store => {
       applyMiddleware(
         alertMiddlewareFactory(coreStart),
         substateMiddlewareFactory(
-          globalState => globalState.endpointList,
+          globalState => globalState.managementList,
           managementMiddlewareFactory(coreStart)
         )
       )

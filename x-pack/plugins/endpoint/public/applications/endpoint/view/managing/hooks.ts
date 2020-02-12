@@ -5,12 +5,12 @@
  */
 
 import { useSelector } from 'react-redux';
-import { GlobalState, ManagementState } from '../../types';
+import { GlobalState, ManagementListState } from '../../types';
 
-export function useEndpointListSelector<TSelected>(
-  selector: (state: ManagementState) => TSelected
+export function useManagementListSelector<TSelected>(
+  selector: (state: ManagementListState) => TSelected
 ) {
   return useSelector(function(state: GlobalState) {
-    return selector(state.endpointList);
+    return selector(state.managementList);
   });
 }

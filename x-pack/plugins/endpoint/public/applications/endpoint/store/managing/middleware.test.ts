@@ -6,16 +6,16 @@
 import { CoreStart, HttpSetup } from 'kibana/public';
 import { applyMiddleware, createStore, Dispatch, Store } from 'redux';
 import { coreMock } from '../../../../../../../../src/core/public/mocks';
-import { endpointListReducer, managementMiddlewareFactory } from './index';
+import { managementListReducer, managementMiddlewareFactory } from './index';
 import { EndpointMetadata, EndpointResultList } from '../../../../../common/types';
-import { ManagementState } from '../../types';
+import { ManagementListState } from '../../types';
 import { AppAction } from '../action';
 import { listData } from './selectors';
 describe('endpoint list saga', () => {
   const sleep = (ms = 100) => new Promise(wakeup => setTimeout(wakeup, ms));
   let fakeCoreStart: jest.Mocked<CoreStart>;
   let fakeHttpServices: jest.Mocked<HttpSetup>;
-  let store: Store<ManagementState>;
+  let store: Store<ManagementListState>;
   let getState: typeof store['getState'];
   let dispatch: Dispatch<AppAction>;
   // https://github.com/elastic/endpoint-app-team/issues/131
@@ -58,7 +58,7 @@ describe('endpoint list saga', () => {
     fakeCoreStart = coreMock.createStart({ basePath: '/mock' });
     fakeHttpServices = fakeCoreStart.http as jest.Mocked<HttpSetup>;
     store = createStore(
-      endpointListReducer,
+      managementListReducer,
       applyMiddleware(managementMiddlewareFactory(fakeCoreStart))
     );
     getState = store.getState;

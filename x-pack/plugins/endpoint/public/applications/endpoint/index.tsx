@@ -13,7 +13,7 @@ import { Provider } from 'react-redux';
 import { Store } from 'redux';
 import { appStoreFactory } from './store';
 import { AlertIndex } from './view/alerts';
-import { EndpointList } from './view/managing';
+import { ManagementList } from './view/managing';
 
 /**
  * This module will be loaded asynchronously to reduce the bundle size of your plugin's main bundle.
@@ -49,7 +49,7 @@ const AppRoot: React.FunctionComponent<RouterProps> = React.memo(({ basename, st
               </h1>
             )}
           />
-          <Route path="/management" component={EndpointList} />
+          <Route path="/management" component={ManagementList} />
           <Route path="/alerts" component={AlertIndex} />
           <Route
             render={() => (

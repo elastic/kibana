@@ -6,15 +6,15 @@
 
 import { MiddlewareFactory } from '../../types';
 import { pageIndex, pageSize } from './selectors';
-import { ManagementState } from '../../types';
+import { ManagementListState } from '../../types';
 import { AppAction } from '../action';
 
-export const managementMiddlewareFactory: MiddlewareFactory<ManagementState> = coreStart => {
+export const managementMiddlewareFactory: MiddlewareFactory<ManagementListState> = coreStart => {
   return ({ getState, dispatch }) => next => async (action: AppAction) => {
     next(action);
     if (
       (action.type === 'userNavigatedToPage' && action.payload === 'managementPage') ||
-      action.type === 'userPaginatedEndpointListTable'
+      action.type === 'userPaginatedManagementList'
     ) {
       const managementPageIndex = pageIndex(getState());
       const managementPageSize = pageSize(getState());
@@ -28,10 +28,9 @@ export const managementMiddlewareFactory: MiddlewareFactory<ManagementState> = c
       });
       response.request_page_index = managementPageIndex;
       dispatch({
-        type: 'serverReturnedEndpointList',
+        type: 'serverReturnedManagementList',
         payload: response,
       });
-      dispatch({ type: 'serverReturnedAlertsData', payload: response });
     }
   };
 };

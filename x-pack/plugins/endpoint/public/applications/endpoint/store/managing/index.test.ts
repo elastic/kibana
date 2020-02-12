@@ -5,16 +5,16 @@
  */
 
 import { createStore, Dispatch, Store } from 'redux';
-import { EndpointListAction, endpointListReducer } from './index';
+import { ManagementAction, managementListReducer } from './index';
 import { EndpointMetadata } from '../../../../../common/types';
-import { ManagementState } from '../../types';
+import { ManagementListState } from '../../types';
 import { listData } from './selectors';
 
 describe('endpoint_list store concerns', () => {
-  let store: Store<ManagementState>;
-  let dispatch: Dispatch<EndpointListAction>;
+  let store: Store<ManagementListState>;
+  let dispatch: Dispatch<ManagementAction>;
   const createTestStore = () => {
-    store = createStore(endpointListReducer);
+    store = createStore(managementListReducer);
     dispatch = store.dispatch;
   };
   const generateEndpoint = (): EndpointMetadata => {
@@ -46,7 +46,7 @@ describe('endpoint_list store concerns', () => {
   };
   const loadDataToStore = () => {
     dispatch({
-      type: 'serverReturnedEndpointList',
+      type: 'serverReturnedManagementList',
       payload: {
         endpoints: [generateEndpoint()],
         request_page_size: 1,
@@ -71,7 +71,7 @@ describe('endpoint_list store concerns', () => {
       });
     });
 
-    test('it handles `serverReturnedEndpointList', () => {
+    test('it handles `serverReturnedManagementList', () => {
       const payload = {
         endpoints: [generateEndpoint()],
         request_page_size: 1,
@@ -79,7 +79,7 @@ describe('endpoint_list store concerns', () => {
         total: 10,
       };
       dispatch({
-        type: 'serverReturnedEndpointList',
+        type: 'serverReturnedManagementList',
         payload,
       });
 
@@ -90,12 +90,12 @@ describe('endpoint_list store concerns', () => {
       expect(currentState.total).toEqual(payload.total);
     });
 
-    test('it handles `userExitedEndpointListPage`', () => {
+    test('it handles `userExitedManagementListPage`', () => {
       loadDataToStore();
 
       expect(store.getState().total).toEqual(10);
 
-      dispatch({ type: 'userExitedEndpointListPage' });
+      dispatch({ type: 'userExitedManagementList' });
       expect(store.getState().endpoints.length).toEqual(0);
       expect(store.getState().pageIndex).toEqual(0);
     });
@@ -107,7 +107,7 @@ describe('endpoint_list store concerns', () => {
       loadDataToStore();
     });
 
-    test('it selects `endpointListData`', () => {
+    test('it selects `managementListData`', () => {
       const currentState = store.getState();
       expect(listData(currentState)).toEqual(currentState.endpoints);
     });
