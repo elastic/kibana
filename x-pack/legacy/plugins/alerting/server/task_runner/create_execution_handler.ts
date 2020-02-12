@@ -36,7 +36,7 @@ export function createExecutionHandler({
   alertType,
 }: CreateExecutionHandlerOptions) {
   return async ({ actionGroup, context, state, alertInstanceId }: ExecutionHandlerOptions) => {
-    if (!alertType.actionGroups.includes(actionGroup)) {
+    if (!alertType.actionGroups.hasOwnProperty(actionGroup)) {
       logger.error(`Invalid action group "${actionGroup}" for alert "${alertType.id}".`);
       return;
     }

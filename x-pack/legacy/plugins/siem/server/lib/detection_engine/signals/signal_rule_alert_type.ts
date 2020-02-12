@@ -32,7 +32,7 @@ export const signalRulesAlertType = ({
   return {
     id: SIGNALS_ID,
     name: 'SIEM Signals',
-    actionGroups: ['default'],
+    actionGroups: { default: 'Default' },
     validate: {
       params: schema.object({
         description: schema.string(),

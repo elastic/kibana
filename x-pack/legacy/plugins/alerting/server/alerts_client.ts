@@ -638,7 +638,7 @@ export class AlertsClient {
     const { actionGroups: alertTypeActionGroups } = alertType;
     const usedAlertActionGroups = actions.map(action => action.group);
     const invalidActionGroups = usedAlertActionGroups.filter(
-      group => !alertTypeActionGroups.includes(group)
+      group => !alertTypeActionGroups.hasOwnProperty(group)
     );
     if (invalidActionGroups.length) {
       throw Boom.badRequest(

@@ -45,7 +45,7 @@ export const getLicenseExpiration = (
   return {
     id: ALERT_TYPE_LICENSE_EXPIRATION,
     name: 'Monitoring Alert - License Expiration',
-    actionGroups: ['default'],
+    actionGroups: { default: 'Default' },
     async executor({
       services,
       params,
