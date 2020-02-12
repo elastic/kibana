@@ -6,7 +6,6 @@
 
 import Hapi from 'hapi';
 import { isFunction } from 'lodash/fp';
-import Boom from 'boom';
 import uuid from 'uuid';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { createRules } from '../../rules/create_rules';
@@ -15,7 +14,7 @@ import { createRulesSchema } from '../schemas/create_rules_schema';
 import { ServerFacade } from '../../../../types';
 import { readRules } from '../../rules/read_rules';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
-import { transformOrError } from './utils';
+import { transform } from './utils';
 import { getIndexExists } from '../../index/get_index_exists';
 import { callWithRequestFactory, getIndex, transformError } from '../utils';
 import { KibanaRequest } from '../../../../../../../../../src/core/server';
@@ -76,14 +75,22 @@ export const createCreateRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
         const callWithRequest = callWithRequestFactory(request, server);
         const indexExists = await getIndexExists(callWithRequest, finalIndex);
         if (!indexExists) {
-          return Boom.badRequest(
-            `To create a rule, the index must exist first. Index ${finalIndex} does not exist`
-          );
+          return headers
+            .response({
+              message: `To create a rule, the index must exist first. Index ${finalIndex} does not exist`,
+              status_code: 400,
+            })
+            .code(400);
         }
         if (ruleId != null) {
           const rule = await readRules({ alertsClient, ruleId });
           if (rule != null) {
-            return Boom.conflict(`rule_id: "${ruleId}" already exists`);
+            return headers
+              .response({
+                message: `rule_id: "${ruleId}" already exists`,
+                status_code: 409,
+              })
+              .code(409);
           }
         }
         const createdRule = await createRules({
@@ -126,9 +133,25 @@ export const createCreateRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
           search: `${createdRule.id}`,
           searchFields: ['alertId'],
         });
-        return transformOrError(createdRule, ruleStatuses.saved_objects[0]);
+        const transformed = transform(createdRule, ruleStatuses.saved_objects[0]);
+        if (transformed == null) {
+          return headers
+            .response({
+              message: 'Internal error transforming rules',
+              status_code: 500,
+            })
+            .code(500);
+        } else {
+          return transformed;
+        }
       } catch (err) {
-        return transformError(err);
+        const error = transformError(err);
+        return headers
+          .response({
+            message: error.message,
+            status_code: error.statusCode,
+          })
+          .code(error.statusCode);
       }
     },
   };
