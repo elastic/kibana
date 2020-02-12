@@ -19,7 +19,6 @@
 
 import { UiActionsSetup, UiActionsStart } from '.';
 import { plugin as pluginInitializer } from '.';
-// eslint-disable-next-line
 import { coreMock } from '../../../core/public/mocks';
 
 export type Setup = jest.Mocked<UiActionsSetup>;
@@ -45,17 +44,19 @@ const createStartContract = (): Start => {
     getTrigger: jest.fn(),
     getTriggerActions: jest.fn((id: string) => []),
     getTriggerCompatibleActions: jest.fn(),
+    clear: jest.fn(),
+    fork: jest.fn(),
   };
 
   return startContract;
 };
 
-const createPlugin = async () => {
+const createPlugin = () => {
   const pluginInitializerContext = coreMock.createPluginInitializerContext();
   const coreSetup = coreMock.createSetup();
   const coreStart = coreMock.createStart();
   const plugin = pluginInitializer(pluginInitializerContext);
-  const setup = await plugin.setup(coreSetup);
+  const setup = plugin.setup(coreSetup);
 
   return {
     pluginInitializerContext,
@@ -63,7 +64,7 @@ const createPlugin = async () => {
     coreStart,
     plugin,
     setup,
-    doStart: async () => await plugin.start(coreStart),
+    doStart: () => plugin.start(coreStart),
   };
 };
 

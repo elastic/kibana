@@ -18,14 +18,14 @@
  */
 
 import { createSayHelloAction } from '../tests/test_samples/say_hello_action';
-import { UiActionsTestPluginReturn, uiActionsTestPlugin } from '../tests/test_plugin';
+import { uiActionsPluginMock } from '../mocks';
 import { createRestrictedAction, createHelloWorldAction } from '../tests/test_samples';
 import { Action } from '../actions';
 
 let action: Action<{ name: string }>;
-let uiActions: UiActionsTestPluginReturn;
+let uiActions: ReturnType<typeof uiActionsPluginMock.createPlugin>;
 beforeEach(() => {
-  uiActions = uiActionsTestPlugin();
+  uiActions = uiActionsPluginMock.createPlugin();
   action = createSayHelloAction({} as any);
 
   uiActions.setup.registerAction(action);
@@ -37,16 +37,11 @@ beforeEach(() => {
   uiActions.setup.attachAction('trigger', action.id);
 });
 
-test('can register and get actions', async () => {
-  const { setup, plugin } = uiActions;
+test('can register action', async () => {
+  const { setup } = uiActions;
   const helloWorldAction = createHelloWorldAction({} as any);
-  const length = (plugin as any).actions.size;
 
   setup.registerAction(helloWorldAction);
-
-  expect((plugin as any).actions.size - length).toBe(1);
-  expect((plugin as any).actions.get(action.id)).toBe(action);
-  expect((plugin as any).actions.get(helloWorldAction.id)).toBe(helloWorldAction);
 });
 
 test('getTriggerCompatibleActions returns attached actions', async () => {

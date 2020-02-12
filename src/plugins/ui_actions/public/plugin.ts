@@ -25,7 +25,7 @@ export type UiActionsSetup = Pick<
   'attachAction' | 'detachAction' | 'registerAction' | 'registerTrigger'
 >;
 
-export type UiActionsStart = UiActionsService;
+export type UiActionsStart = PublicMethodsOf<UiActionsService>;
 
 export class UiActionsPlugin implements Plugin<UiActionsSetup, UiActionsStart> {
   private readonly service = new UiActionsService();

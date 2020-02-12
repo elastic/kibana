@@ -19,7 +19,7 @@
 
 import { Action, createAction } from '../actions';
 import { openContextMenu } from '../context_menu';
-import { UiActionsTestPluginReturn, uiActionsTestPlugin } from '../tests/test_plugin';
+import { uiActionsPluginMock } from '../mocks';
 
 jest.mock('../context_menu');
 
@@ -37,9 +37,9 @@ function createTestAction<A>(id: string, checkCompatibility: (context: A) => boo
   });
 }
 
-let uiActions: UiActionsTestPluginReturn;
+let uiActions: ReturnType<typeof uiActionsPluginMock.createPlugin>;
 const reset = () => {
-  uiActions = uiActionsTestPlugin();
+  uiActions = uiActionsPluginMock.createPlugin();
 
   uiActions.setup.registerTrigger({
     id: CONTACT_USER_TRIGGER,
