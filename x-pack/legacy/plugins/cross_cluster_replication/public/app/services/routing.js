@@ -9,7 +9,7 @@
  */
 
 import { createLocation } from 'history';
-import { stringify } from 'querystring';
+import { stringify } from 'query-string';
 import { APPS, BASE_PATH, BASE_PATH_REMOTE_CLUSTERS } from '../../../common/constants';
 
 const isModifiedEvent = event =>
@@ -22,16 +22,7 @@ const queryParamsFromObject = (params, encodeParams = false) => {
     return;
   }
 
-  const paramsStr = stringify(
-    params,
-    '&',
-    '=',
-    encodeParams
-      ? {}
-      : {
-          encodeURIComponent: val => val, // Don't encode special chars
-        }
-  );
+  const paramsStr = stringify(params, { sort: false, encode: encodeParams });
   return `?${paramsStr}`;
 };
 
