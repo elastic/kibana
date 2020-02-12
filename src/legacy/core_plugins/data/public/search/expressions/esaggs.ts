@@ -24,7 +24,7 @@ import { createFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
 import {
   KibanaContext,
   KibanaDatatable,
-  ExpressionFunction,
+  ExpressionFunctionDefinition,
   KibanaDatatableColumn,
 } from 'src/plugins/expressions/public';
 import {
@@ -32,7 +32,7 @@ import {
   SearchSource,
   Query,
   TimeRange,
-  esFilters,
+  Filter,
   getTime,
   FilterManager,
 } from '../../../../../../plugins/data/public';
@@ -53,7 +53,7 @@ export interface RequestHandlerParams {
   aggs: IAggConfigs;
   timeRange?: TimeRange;
   query?: Query;
-  filters?: esFilters.Filter[];
+  filters?: Filter[];
   forceFetch: boolean;
   filterManager: FilterManager;
   uiState?: PersistedState;
@@ -66,7 +66,8 @@ export interface RequestHandlerParams {
 
 const name = 'esaggs';
 
-type Context = KibanaContext | null;
+type Input = KibanaContext | null;
+type Output = Promise<KibanaDatatable>;
 
 interface Arguments {
   index: string;
@@ -75,8 +76,6 @@ interface Arguments {
   includeFormatHints: boolean;
   aggConfigs: string;
 }
-
-type Return = Promise<KibanaDatatable>;
 
 const handleCourierRequest = async ({
   searchSource,
@@ -221,12 +220,10 @@ const handleCourierRequest = async ({
   return (searchSource as any).tabifiedResponse;
 };
 
-export const esaggs = (): ExpressionFunction<typeof name, Context, Arguments, Return> => ({
+export const esaggs = (): ExpressionFunctionDefinition<typeof name, Input, Arguments, Output> => ({
   name,
   type: 'kibana_datatable',
-  context: {
-    types: ['kibana_context', 'null'],
-  },
+  inputTypes: ['kibana_context', 'null'],
   help: i18n.translate('data.functions.esaggs.help', {
     defaultMessage: 'Run AggConfig aggregation',
   }),
@@ -256,7 +253,7 @@ export const esaggs = (): ExpressionFunction<typeof name, Context, Arguments, Re
       help: '',
     },
   },
-  async fn(context, args, { inspectorAdapters, abortSignal }) {
+  async fn(input, args, { inspectorAdapters, abortSignal }) {
     const indexPatterns = getIndexPatterns();
     const { filterManager } = getQueryService();
 
@@ -272,13 +269,13 @@ export const esaggs = (): ExpressionFunction<typeof name, Context, Arguments, Re
     const response = await handleCourierRequest({
       searchSource,
       aggs,
-      timeRange: get(context, 'timeRange', undefined),
-      query: get(context, 'query', undefined),
-      filters: get(context, 'filters', undefined),
+      timeRange: get(input, 'timeRange', undefined),
+      query: get(input, 'query', undefined),
+      filters: get(input, 'filters', undefined),
       forceFetch: true,
       metricsAtAllLevels: args.metricsAtAllLevels,
       partialRows: args.partialRows,
-      inspectorAdapters,
+      inspectorAdapters: inspectorAdapters as Adapters,
       filterManager,
       abortSignal: (abortSignal as unknown) as AbortSignal,
     });
