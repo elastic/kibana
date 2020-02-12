@@ -17,33 +17,93 @@
  * under the License.
  */
 import _ from 'lodash';
-import { createStateContainer } from '../../../../../../../plugins/kibana_utils/public';
-import { createKbnUrlStateStorage } from '../../../../../../../plugins/kibana_utils/public';
-import { syncState } from '../../../../../../../plugins/kibana_utils/public';
+import {
+  createStateContainer,
+  createKbnUrlStateStorage,
+  syncStates,
+} from '../../../../../../../plugins/kibana_utils/public';
+import { Filter } from '../../../../../../../plugins/data/common/es_query/filters';
 
-interface DiscoverAppState {
-  columns: string[][];
-  filters: any;
-  index: string;
-  interval: string;
-  query: any;
-  sort: [string, string];
+interface AppState {
+  columns?: string[];
+  filters?: Filter[];
+  index?: string;
+  interval?: string;
+  query?: any;
+  sort?: string[];
 }
 
-export function getAppState(defaultState: DiscoverAppState) {
-  const stateStorage = createKbnUrlStateStorage();
-  const initialStateFromUrl = stateStorage.get('_a');
-  const initialState = {
-    ...defaultState,
-    ...(_.cloneDeep(initialStateFromUrl) as DiscoverAppState),
-  } as DiscoverAppState;
+interface GlobalState {
+  filters?: Filter[];
+  time?: { from: string; to: string };
+}
 
-  const stateContainer = createStateContainer(initialState) as any;
-
-  const { start, stop } = syncState({
-    storageKey: '_a',
-    stateContainer,
-    stateStorage,
+/**
+ * Builds and returns appState and globalState containers and helper functions
+ * Used to sync URL with UI state
+ */
+export function getState(
+  initialAppState: AppState,
+  storeInSessionStorage: boolean,
+  onChangeAppStatus: (dirty: boolean) => void
+) {
+  const stateStorage = createKbnUrlStateStorage({
+    useHash: storeInSessionStorage,
   });
-  return { stateContainer, initialState, start, stop };
+
+  const globalStateInitial = stateStorage.get('_g') as GlobalState;
+  const globalStateContainer = createStateContainer<GlobalState>(globalStateInitial);
+
+  const appStateFromUrl = stateStorage.get('_a') as AppState;
+  const appStateContainer = createStateContainer<AppState>({
+    ...initialAppState,
+    ...appStateFromUrl,
+  });
+
+  const { start, stop } = syncStates([
+    {
+      storageKey: '_a',
+      stateContainer: appStateContainer,
+      stateStorage,
+    },
+    {
+      storageKey: '_g',
+      stateContainer: globalStateContainer,
+      stateStorage,
+    },
+  ]);
+
+  return {
+    globalStateContainer,
+    appStateContainer,
+    start,
+    stop,
+    syncGlobalState: (newPartial: GlobalState) => {
+      const oldState = globalStateContainer.getState();
+      const newState = { ...oldState, ...newPartial };
+      if (!_.isEqual(oldState, newState)) {
+        globalStateContainer.set(newState);
+      }
+    },
+    syncAppState: (newPartial: AppState) => {
+      const oldState = appStateContainer.getState();
+      const newState = { ...oldState, ...newPartial };
+      if (!_.isEqual(oldState, newState)) {
+        onChangeAppStatus(true);
+        appStateContainer.set(newState);
+      }
+    },
+    getGlobalFilters: () => getFilters(globalStateContainer.getState()),
+    getAppFilters: () => getFilters(appStateContainer.getState()),
+  };
 }
+
+/**
+ * Helper function to return array of filter object of a given state
+ */
+const getFilters = (state: AppState | GlobalState): Filter[] => {
+  if (!state || !Array.isArray(state.filters)) {
+    return [];
+  }
+  return state.filters;
+};

@@ -25,7 +25,7 @@ import moment from 'moment';
 import dateMath from '@elastic/datemath';
 import { i18n } from '@kbn/i18n';
 import '../components/field_chooser/field_chooser';
-import { getAppState as getAppStateNew } from './discover_state';
+import { getState } from './discover_state';
 
 import { RequestAdapter } from '../../../../../../../plugins/inspector/public';
 import {
@@ -58,7 +58,6 @@ import {
   tabifyAggResponse,
   getAngularModule,
   ensureDefaultIndexPattern,
-  registerTimefilterWithGlobalStateFactory,
 } from '../../kibana_services';
 import { Vis } from '../../../../../visualizations/public';
 
@@ -79,7 +78,6 @@ import {
   indexPatterns as indexPatternsUtils,
 } from '../../../../../../../plugins/data/public';
 import { getIndexPatternId } from '../helpers/get_index_pattern_id';
-import { FilterStateManager } from '../../../../../data/public';
 
 const fetchStatuses = {
   UNINITIALIZED: 'uninitialized',
@@ -88,9 +86,6 @@ const fetchStatuses = {
 };
 
 const app = getAngularModule();
-app.run((globalState, $rootScope) => {
-  registerTimefilterWithGlobalStateFactory(timefilter, globalState, $rootScope);
-});
 
 app.config($routeProvider => {
   const defaults = {
@@ -134,9 +129,9 @@ app.config($routeProvider => {
                *
                *  @type {State}
                */
-              const { initialState, start, stop } = getAppStateNew({});
+              const { appStateContainer, start, stop } = getState({});
               start();
-              const { index } = initialState;
+              const { index } = appStateContainer.getState();
               const id = getIndexPatternId(index, indexPatternList, uiSettings.get('defaultIndex'));
               stop();
               return Promise.props({
@@ -186,71 +181,91 @@ function discoverController(
   $scope,
   $timeout,
   $window,
-  AppState,
   Promise,
   config,
   kbnUrl,
   localStorage,
-  uiCapabilities,
-  getAppState,
-  globalState
+  uiCapabilities
 ) {
   // the actual courier.SearchSource
   // the saved savedSearch
+  const subscriptions = new Subscription();
   const savedSearch = $route.current.locals.savedObjects.savedSearch;
   $scope.searchSource = savedSearch.searchSource;
   $scope.indexPattern = resolveIndexPatternLoading();
-  const { stateContainer, start, stop } = getAppStateNew(getStateDefaults());
-  stateContainer.subscribe(newState => {
+  const $appStatus = ($scope.appStatus = {
+    dirty: !savedSearch.id,
+  });
+  const onChangeAppState = dirty => {
+    $appStatus.dirty = dirty || !savedSearch.id;
+  };
+
+  const {
+    appStateContainer,
+    globalStateContainer,
+    start,
+    stop,
+    syncAppState,
+    syncGlobalState,
+    getAppFilters,
+    getGlobalFilters,
+  } = getState(getStateDefaults(), false, onChangeAppState);
+
+  //stateMonitor = stateMonitorFactory.create($state, getStateDefaults());
+  //stateMonitor.onChange(status => {
+  //   $appStatus.dirty = status.dirty || !savedSearch.id;
+  //});
+  appStateContainer.subscribe(newState => {
     if (!_.isEqual(newState, $scope.state)) {
       $scope.state = { ...newState };
     }
   });
 
-  const $state = { ...stateContainer.getState() };
-  $scope.state = $state;
-  const syncState = partial => {
-    const newState = { ...$state, ...partial };
-    if (!_.isEqual(stateContainer.getState(), newState)) {
-      stateContainer.set(newState);
+  globalStateContainer.subscribe(newState => {
+    if (newState.time && newState.time.from !== timefilter.from) {
+      timefilter.setTime(newState.time);
     }
-  };
-  $scope.$watch('state.sort', sort => {
-    syncState({ sort });
   });
+
+  const $state = _.cloneDeep(appStateContainer.getState());
+  $scope.state = $state;
+
   $scope.$watch('state.index', (index, prevIndex) => {
-    syncState({ index });
+    syncAppState({ index });
     if (prevIndex == null || prevIndex === index) return;
     $route.reload();
   });
 
-  $scope.$watchCollection('state.columns', function(val) {
-    if (!_.isEqual(val, stateContainer.get().columns)) {
-      stateContainer.set({ ...$state, ...{ columns: val } });
+  $scope.$watchCollection('state.columns', val => {
+    if (!_.isEqual(val, appStateContainer.get().columns)) {
+      syncAppState({ columns: val });
     }
   });
-  start();
-  const filterStateManager = new FilterStateManager(
-    globalState,
-    () => {
-      return {
-        set filters(_filters) {
-          $scope.state.filters = _filters;
-          stateContainer.set({ ...$state, ...{ filters: _filters } });
-        },
-        get filters() {
-          return $scope.state.filters;
-        },
-      };
-    },
-    filterManager
+  // update data source when filters update
+
+  subscriptions.add(
+    subscribeWithScope($scope, filterManager.getUpdates$(), {
+      next: () => {
+        const appFiltersState = getAppFilters();
+        const appFilters = filterManager.getAppFilters();
+        if (!_.isEqual(appFiltersState, appFilters)) {
+          syncAppState({ filters: appFilters });
+        }
+        const globalFiltersState = getGlobalFilters();
+        const globalFilters = filterManager.getGlobalFilters();
+        if (!_.isEqual(globalFilters, globalFiltersState)) {
+          syncGlobalState({ filters: globalFilters });
+        }
+        $scope.updateDataSource();
+      },
+    })
   );
+
+  start();
 
   const inspectorAdapters = {
     requests: new RequestAdapter(),
   };
-
-  const subscriptions = new Subscription();
 
   $scope.timefilterUpdateHandler = ranges => {
     timefilter.setTime({
@@ -281,12 +296,7 @@ function discoverController(
     if (abortController) abortController.abort();
     savedSearch.destroy();
     subscriptions.unsubscribe();
-    filterStateManager.destroy();
     stop();
-  });
-
-  const $appStatus = ($scope.appStatus = this.appStatus = {
-    dirty: !savedSearch.id,
   });
 
   const getTopNavLinks = () => {
@@ -604,12 +614,6 @@ function discoverController(
   };
 
   const init = _.once(function() {
-    //stateMonitor = stateMonitorFactory.create($state, getStateDefaults());
-    // stateMonitor.onChange(status => {
-    //   $appStatus.dirty = status.dirty || !savedSearch.id;
-    // });
-    // $scope.$on('$destroy', () => stateMonitor.destroy());
-
     $scope.updateDataSource().then(function() {
       const searchBarChanges = merge(
         timefilter.getAutoRefreshFetch$(),
@@ -638,22 +642,10 @@ function discoverController(
         const currentSort = getSortArray($scope.searchSource.getField('sort'), $scope.indexPattern);
         // if the searchSource doesn't know, tell it so
         if (!angular.equals(sort, currentSort)) {
-          syncState({ sort });
+          syncAppState({ sort });
           $fetchObservable.next();
         }
       });
-
-      // update data source when filters update
-
-      subscriptions.add(
-        subscribeWithScope($scope, filterManager.getUpdates$(), {
-          next: () => {
-            $scope.updateDataSource().then(function() {
-              //$state.save();
-            });
-          },
-        })
-      );
 
       // update data source when hitting forward/back and the query changes
       //$scope.$listen($state, 'fetch_with_changes', function(diff) {
@@ -840,7 +832,7 @@ function discoverController(
 
   $scope.updateQuery = function({ query }) {
     $state.query = query;
-    syncState({ query });
+    syncAppState({ query });
     $fetchObservable.next();
   };
 
@@ -902,6 +894,12 @@ function discoverController(
       from: dateMath.parse(timefilter.getTime().from),
       to: dateMath.parse(timefilter.getTime().to, { roundUp: true }),
     };
+    syncGlobalState({
+      time: {
+        from: timefilter.getTime().from,
+        to: timefilter.getTime().to,
+      },
+    });
   };
 
   $scope.toMoment = function(datetime) {
@@ -916,7 +914,7 @@ function discoverController(
     kbnUrl.change('/discover');
   };
 
-  $scope.updateDataSource = Promise.method(function updateDataSource() {
+  $scope.updateDataSource = Promise.method(() => {
     const { indexPattern, searchSource } = $scope;
     searchSource
       .setField('size', $scope.opts.sampleSize)
@@ -989,7 +987,7 @@ function discoverController(
     } else {
       delete $state.savedQuery;
     }
-    syncState({ savedQuery: $state.savedQuery });
+    syncAppState({ savedQuery: $state.savedQuery });
   };
 
   async function setupVisualization() {
