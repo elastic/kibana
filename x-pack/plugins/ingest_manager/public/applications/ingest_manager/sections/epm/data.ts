@@ -6,13 +6,7 @@
 
 import { HttpHandler, HttpFetchOptions } from 'src/core/public';
 import { epmRouteService } from '../../../../../common/services/routes';
-import {
-  AssetReference,
-  CategorySummaryList,
-  PackageInfo,
-  PackageList,
-  PackagesGroupedByStatus,
-} from '../../types';
+import { AssetReference, PackageInfo, PackageList, PackagesGroupedByStatus } from '../../types';
 
 const defaultClient = (path: string, options?: HttpFetchOptions) =>
   fetch(path, options).then(res => res.json());
@@ -21,11 +15,6 @@ let _fetch = defaultClient;
 
 export function setClient(client: HttpHandler): void {
   _fetch = client;
-}
-
-export async function getCategories(): Promise<CategorySummaryList> {
-  const path = epmRouteService.getCategoriesPath();
-  return _fetch(path);
 }
 
 export async function getPackages(params?: { category?: string }): Promise<PackageList> {
