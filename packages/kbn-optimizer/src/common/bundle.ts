@@ -40,11 +40,21 @@ export interface BundleSpec {
 }
 
 export class Bundle {
+  /** Bundle type, only "plugin" is supported for now */
   public readonly type: BundleSpec['type'];
+  /** Unique identifier for this bundle */
   public readonly id: BundleSpec['id'];
+  /** Path, relative to `contextDir`, to the entry file for the Webpack bundle */
   public readonly entry: BundleSpec['entry'];
+  /**
+   * Absolute path to the root of the bundle context (plugin directory)
+   * where the entry is resolved relative to and the default output paths
+   * are relative to
+   */
   public readonly contextDir: BundleSpec['contextDir'];
+  /** Absolute path to the root of the whole project source, repo root */
   public readonly sourceRoot: BundleSpec['sourceRoot'];
+  /** Absolute path to the output directory for this bundle */
   public readonly outputDir: BundleSpec['outputDir'];
 
   public readonly cache: BundleCache;
