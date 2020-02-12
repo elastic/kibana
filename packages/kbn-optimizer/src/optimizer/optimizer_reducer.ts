@@ -19,7 +19,7 @@
 
 import { inspect } from 'util';
 
-import { WorkerMsg, CompilerMsg, Bundle, Reducer } from '../common';
+import { WorkerMsg, CompilerMsg, Bundle, Summarizer } from '../common';
 
 import { ChangeEvent } from './watcher';
 import { WorkerStatus } from './observe_worker';
@@ -94,7 +94,7 @@ function getStatePhase(states: CompilerMsg[]) {
 
 export function createOptimizerReducer(
   config: OptimizerConfig
-): Reducer<OptimizerEvent, OptimizerState> {
+): Summarizer<OptimizerEvent, OptimizerState> {
   return (state, event) => {
     if (event.type === 'optimizer initialized') {
       return createOptimizerState(state, {

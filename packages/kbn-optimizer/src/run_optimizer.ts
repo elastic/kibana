@@ -20,7 +20,7 @@
 import * as Rx from 'rxjs';
 import { mergeMap, share, observeOn } from 'rxjs/operators';
 
-import { createStore, StoreUpdate } from './common';
+import { summarizeEvent$, Update } from './common';
 
 import {
   OptimizerConfig,
@@ -34,7 +34,7 @@ import {
   createOptimizerReducer,
 } from './optimizer';
 
-export type OptimizerUpdate = StoreUpdate<OptimizerEvent, OptimizerState>;
+export type OptimizerUpdate = Update<OptimizerEvent, OptimizerState>;
 export type OptimizerUpdate$ = Rx.Observable<OptimizerUpdate>;
 
 export function runOptimizer(config: OptimizerConfig) {
@@ -64,10 +64,8 @@ export function runOptimizer(config: OptimizerConfig) {
       // run workers to build all the online bundles, including the bundles turned online by changeEvent$
       const workerEvent$ = runWorkers(config, cacheKey, bundleCacheEvent$, changeEvent$);
 
-      // create the stream that summarized all the events into state
-      // objects, which we're calling a store because it's sorta similar to
-      // the redux store model (events === actions)
-      return createStore<OptimizerEvent, OptimizerState>(
+      // create the stream that summarized all the events into specific states
+      return summarizeEvent$<OptimizerEvent, OptimizerState>(
         Rx.merge(init$, changeEvent$, workerEvent$),
         {
           phase: 'initializing',

@@ -20,43 +20,30 @@
 import * as Rx from 'rxjs';
 import { scan, distinctUntilChanged, startWith } from 'rxjs/operators';
 
-export interface StoreUpdate<Event, State> {
+export interface Update<Event, State> {
   event?: Event;
   state: State;
 }
 
-export type StoreEventType<
-  Store extends Rx.Observable<StoreUpdate<any, any>>
-> = Store extends Rx.Observable<StoreUpdate<infer Event, any>> ? Event : never;
-
-export type StoreStateType<
-  Store extends Rx.Observable<StoreUpdate<any, any>>
-> = Store extends Rx.Observable<StoreUpdate<infer State, any>> ? State : never;
-
-export type StoreReducerType<Store extends Rx.Observable<StoreUpdate<any, any>>> = (
-  prev: StoreStateType<Store>,
-  event: StoreEventType<Store>
-) => StoreStateType<Store>;
-
-export type Reducer<Event, State> = (prev: State, event: Event) => State;
+export type Summarizer<Event, State> = (prev: State, event: Event) => State | undefined;
 
 /**
- * Create a simple store that merges together a series of events into a
- * single stream of state updates produced by the reducer function.
+ * Transform an event stream into a state update stream which emits
+ * the events and individual states for each event.
  */
-export const createStore = <Event, State>(
+export const summarizeEvent$ = <Event, State>(
   event$: Rx.Observable<Event>,
   initialState: State,
-  reducer: Reducer<Event, State>
-): Rx.Observable<StoreUpdate<Event, State>> => {
-  const initUpdate: StoreUpdate<Event, State> = {
+  reducer: Summarizer<Event, State>
+): Rx.Observable<Update<Event, State>> => {
+  const initUpdate: Update<Event, State> = {
     state: initialState,
   };
 
   return event$.pipe(
-    scan((prev: StoreUpdate<Event, State>, event) => {
+    scan((prev: Update<Event, State>, event) => {
       const newState = reducer(prev.state, event);
-      return newState === prev.state
+      return newState === undefined
         ? prev
         : {
             event,
