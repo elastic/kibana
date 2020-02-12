@@ -37,14 +37,14 @@ import {
   Query,
   KBN_FIELD_TYPES,
   ES_FIELD_TYPES,
-  esFilters,
+  Filter,
   esQuery,
   IIndexPattern,
 } from '../../../../../../src/plugins/data/public';
 import { DraggedField } from './indexpattern';
 import { DragDrop } from '../drag_drop';
 import { DatasourceDataPanelProps, DataType } from '../types';
-import { BucketedAggregation, FieldStatsResponse } from '../../common';
+import { BucketedAggregation, FieldStatsResponse } from '../../../../../plugins/lens/common';
 import { IndexPattern, IndexPatternField } from './types';
 import { getColorForDataType, LensFieldIcon } from './lens_field_icon';
 import { trackUiEvent } from '../lens_ui_telemetry';
@@ -57,7 +57,7 @@ export interface FieldItemProps {
   exists: boolean;
   query: Query;
   dateRange: DatasourceDataPanelProps['dateRange'];
-  filters: esFilters.Filter[];
+  filters: Filter[];
   hideDetails?: boolean;
 }
 

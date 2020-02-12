@@ -36382,15 +36382,24 @@ var spawn = childProcess.spawn;
 var exec = childProcess.exec;
 
 module.exports = function (pid, signal, callback) {
+    if (typeof signal === 'function' && callback === undefined) {
+        callback = signal;
+        signal = undefined;
+    }
+
+    pid = parseInt(pid);
+    if (Number.isNaN(pid)) {
+        if (callback) {
+            return callback(new Error("pid must be a number"));
+        } else {
+            throw new Error("pid must be a number");
+        }
+    }
+
     var tree = {};
     var pidsToProcess = {};
     tree[pid] = [];
     pidsToProcess[pid] = 1;
-    
-    if (typeof signal === 'function' && callback === undefined) {
-      callback = signal;
-      signal = undefined;
-    }
 
     switch (process.platform) {
     case 'win32':
@@ -56572,12 +56581,18 @@ function runScriptInPackageStreaming(script, args, pkg) {
   });
 }
 async function yarnWorkspacesInfo(directory) {
-  const workspacesInfo = await Object(_child_process__WEBPACK_IMPORTED_MODULE_0__["spawn"])('yarn', ['workspaces', 'info', '--json'], {
+  const {
+    stdout
+  } = await Object(_child_process__WEBPACK_IMPORTED_MODULE_0__["spawn"])('yarn', ['--json', 'workspaces', 'info'], {
     cwd: directory,
     stdio: 'pipe'
   });
-  const stdout = JSON.parse(workspacesInfo.stdout);
-  return JSON.parse(stdout.data);
+
+  try {
+    return JSON.parse(JSON.parse(stdout).data);
+  } catch (error) {
+    throw new Error(`'yarn workspaces info --json' produced unexpected output: \n${stdout}`);
+  }
 }
 
 /***/ }),
@@ -88427,7 +88442,7 @@ module.exports = function kindOf(val) {
 };
 
 function ctorName(val) {
-  return val.constructor ? val.constructor.name : null;
+  return typeof val.constructor === 'function' ? val.constructor.name : null;
 }
 
 function isArray(val) {
@@ -88638,7 +88653,7 @@ module.exports = function kindOf(val) {
 };
 
 function ctorName(val) {
-  return val.constructor ? val.constructor.name : null;
+  return typeof val.constructor === 'function' ? val.constructor.name : null;
 }
 
 function isArray(val) {
@@ -88829,7 +88844,7 @@ module.exports = function kindOf(val) {
 };
 
 function ctorName(val) {
-  return val.constructor ? val.constructor.name : null;
+  return typeof val.constructor === 'function' ? val.constructor.name : null;
 }
 
 function isArray(val) {
@@ -101906,7 +101921,7 @@ module.exports = function kindOf(val) {
 };
 
 function ctorName(val) {
-  return val.constructor ? val.constructor.name : null;
+  return typeof val.constructor === 'function' ? val.constructor.name : null;
 }
 
 function isArray(val) {
@@ -104765,7 +104780,7 @@ module.exports = function kindOf(val) {
 };
 
 function ctorName(val) {
-  return val.constructor ? val.constructor.name : null;
+  return typeof val.constructor === 'function' ? val.constructor.name : null;
 }
 
 function isArray(val) {
@@ -108547,7 +108562,7 @@ __webpack_require__.r(__webpack_exports__);
  * to Kibana itself.
  */
 
-const isKibanaDep = depVersion => depVersion.includes('../../kibana/');
+const isKibanaDep = depVersion => depVersion.includes('../../packages/');
 /**
  * This prepares the dependencies for an _external_ project.
  */

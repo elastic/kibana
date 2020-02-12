@@ -35,7 +35,7 @@ import { Schema } from './schemas';
 import {
   ISearchSource,
   FetchOptions,
-  fieldFormats,
+  FieldFormatsContentType,
   KBN_FIELD_TYPES,
 } from '../../../../../../plugins/data/public';
 
@@ -58,6 +58,11 @@ const unknownSchema: Schema = {
   defaults: {},
   editor: false,
   group: AggGroupNames.Metrics,
+  aggSettings: {
+    top_hits: {
+      allowStrings: true,
+    },
+  },
 };
 
 const getTypeFromRegistry = (type: string): IAggType => {
@@ -378,7 +383,7 @@ export class AggConfig {
     return this.aggConfigs.timeRange;
   }
 
-  fieldFormatter(contentType?: fieldFormats.ContentType, defaultFormat?: any) {
+  fieldFormatter(contentType?: FieldFormatsContentType, defaultFormat?: any) {
     const format = this.type && this.type.getFormat(this);
 
     if (format) {
@@ -388,7 +393,7 @@ export class AggConfig {
     return this.fieldOwnFormatter(contentType, defaultFormat);
   }
 
-  fieldOwnFormatter(contentType?: fieldFormats.ContentType, defaultFormat?: any) {
+  fieldOwnFormatter(contentType?: FieldFormatsContentType, defaultFormat?: any) {
     const fieldFormatsService = npStart.plugins.data.fieldFormats;
     const field = this.getField();
     let format = field && field.format;
@@ -438,7 +443,7 @@ export class AggConfig {
 
     if (fieldParam) {
       // @ts-ignore
-      availableFields = fieldParam.getAvailableFields(this.getIndexPattern().fields);
+      availableFields = fieldParam.getAvailableFields(this);
     }
 
     // clear out the previous params except for a few special ones
