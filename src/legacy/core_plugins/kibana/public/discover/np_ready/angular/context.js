@@ -90,7 +90,7 @@ function ContextAppRouteController($routeParams, $scope, config, $route) {
     if (newState && Array.isArray(newState.filters)) {
       this.filters = _.cloneDeep([...newState.filters, ...this.state.filters]);
     } else {
-      this.filters = [...this.state.filters];
+      this.filters = _.cloneDeep(getAppFilters());
     }
   });
 
@@ -104,13 +104,10 @@ function ContextAppRouteController($routeParams, $scope, config, $route) {
     newValues => {
       const [columns, predecessorCount, successorCount] = newValues;
       if (Array.isArray(columns) && predecessorCount >= 1 && successorCount >= 1) {
-        appState.set(
-          {
-            ...this.state,
-            ...{ columns, predecessorCount, successorCount },
-          },
-          { replace: true }
-        );
+        appState.set({
+          ...this.state,
+          ...{ columns, predecessorCount, successorCount },
+        });
       }
     }
   );
@@ -126,7 +123,7 @@ function ContextAppRouteController($routeParams, $scope, config, $route) {
       const globalFiltersState = getGlobalFilters();
       const globalFilters = filterManager.getGlobalFilters();
       if (!_.isEqual(globalFilters, globalFiltersState)) {
-        globalState.set({ ...globalFiltersState, ...{ filters: globalFilters } });
+        globalState.set({ filters: globalFilters });
       }
     },
   });

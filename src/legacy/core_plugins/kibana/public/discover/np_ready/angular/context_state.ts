@@ -34,6 +34,8 @@ interface AppState {
 interface GlobalState {
   filters: Filter[];
 }
+const GLOBAL_STATE_URL_KEY = '_g';
+const APP_STATE_URL_KEY = '_a';
 
 /**
  * Builds and returns appState and globalState containers and helper functions
@@ -48,22 +50,22 @@ export function getState(
     useHash: storeInSessionStorage,
   });
 
-  const globalStateInitial = stateStorage.get('_g') as GlobalState;
+  const globalStateInitial = stateStorage.get(GLOBAL_STATE_URL_KEY) as GlobalState;
   const globalState = createStateContainer<GlobalState>(globalStateInitial);
 
-  const appStateFromUrl = stateStorage.get('_a') as AppState;
+  const appStateFromUrl = stateStorage.get(APP_STATE_URL_KEY) as AppState;
   const appStateInitial = createInitialAppState(defaultStepSize, timeFieldName, appStateFromUrl);
   const appState = createStateContainer<AppState>(appStateInitial);
 
   const { start, stop } = syncStates([
     {
-      storageKey: '_a',
-      stateContainer: appState,
+      storageKey: GLOBAL_STATE_URL_KEY,
+      stateContainer: globalState,
       stateStorage,
     },
     {
-      storageKey: '_g',
-      stateContainer: globalState,
+      storageKey: APP_STATE_URL_KEY,
+      stateContainer: appState,
       stateStorage,
     },
   ]);
