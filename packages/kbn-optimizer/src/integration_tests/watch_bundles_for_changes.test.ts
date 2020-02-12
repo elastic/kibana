@@ -16,10 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import Path from 'path';
 
 import * as Rx from 'rxjs';
-import { createAbsolutePathSerializer } from '@kbn/dev-utils';
 import { map } from 'rxjs/operators';
 import ActualWatchpack from 'watchpack';
 
