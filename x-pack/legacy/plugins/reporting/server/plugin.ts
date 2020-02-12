@@ -110,7 +110,12 @@ export class ReportingPlugin
     // END LEGACY
 
     // Register a function with server to manage the collection of usage stats
-    registerReportingUsageCollector(__LEGACY, usageCollection, this.exportTypesRegistry);
+    registerReportingUsageCollector(
+      __LEGACY,
+      usageCollection,
+      this.pluginStart$,
+      this.exportTypesRegistry
+    );
 
     this.pluginSetup$.next({ browserDriverFactory });
     return { browserDriverFactory };

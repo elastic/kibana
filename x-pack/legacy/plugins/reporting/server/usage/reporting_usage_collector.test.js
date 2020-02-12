@@ -70,9 +70,8 @@ describe('license checks', () => {
       const callClusterMock = jest.fn(() => Promise.resolve(getResponseMock()));
       const usageCollection = getMockUsageCollection();
       const { fetch: getReportingUsage } = getReportingUsageCollector(
-        usageCollection,
         serverWithBasicLicenseMock,
-        () => {},
+        usageCollection,
         exportTypesRegistry
       );
       usageStats = await getReportingUsage(callClusterMock, exportTypesRegistry);
@@ -101,9 +100,8 @@ describe('license checks', () => {
       const callClusterMock = jest.fn(() => Promise.resolve(getResponseMock()));
       const usageCollection = getMockUsageCollection();
       const { fetch: getReportingUsage } = getReportingUsageCollector(
-        usageCollection,
         serverWithNoLicenseMock,
-        () => {},
+        usageCollection,
         exportTypesRegistry
       );
       usageStats = await getReportingUsage(callClusterMock, exportTypesRegistry);
@@ -132,9 +130,8 @@ describe('license checks', () => {
       const callClusterMock = jest.fn(() => Promise.resolve(getResponseMock()));
       const usageCollection = getMockUsageCollection();
       const { fetch: getReportingUsage } = getReportingUsageCollector(
-        usageCollection,
         serverWithPlatinumLicenseMock,
-        () => {},
+        usageCollection,
         exportTypesRegistry
       );
       usageStats = await getReportingUsage(callClusterMock, exportTypesRegistry);
@@ -163,9 +160,8 @@ describe('license checks', () => {
       const callClusterMock = jest.fn(() => Promise.resolve({}));
       const usageCollection = getMockUsageCollection();
       const { fetch: getReportingUsage } = getReportingUsageCollector(
-        usageCollection,
         serverWithBasicLicenseMock,
-        () => {},
+        usageCollection,
         exportTypesRegistry
       );
       usageStats = await getReportingUsage(callClusterMock, exportTypesRegistry);
@@ -190,9 +186,8 @@ describe('data modeling', () => {
       .stub()
       .returns('platinum');
     ({ fetch: getReportingUsage } = getReportingUsageCollector(
-      usageCollection,
       serverWithPlatinumLicenseMock,
-      () => {},
+      usageCollection,
       exportTypesRegistry
     ));
   });

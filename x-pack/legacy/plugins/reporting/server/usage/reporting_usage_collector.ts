@@ -4,9 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import * as Rx from 'rxjs';
+import { first, mapTo } from 'rxjs/operators';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { ServerFacade, ExportTypesRegistry, ESCallCluster } from '../../types';
 import { KIBANA_REPORTING_TYPE } from '../../common/constants';
+import { ReportingStart } from '../../server/plugin';
+import { ESCallCluster, ExportTypesRegistry, ServerFacade } from '../../types';
 import { getReportingUsage } from './get_reporting_usage';
 import { RangeStats } from './types';
 
@@ -18,16 +21,16 @@ const METATYPE = 'kibana_stats';
  * @return {Object} kibana usage stats type collection object
  */
 export function getReportingUsageCollector(
-  usageCollection: UsageCollectionSetup,
   server: ServerFacade,
-  isReady: () => boolean,
-  exportTypesRegistry: ExportTypesRegistry
+  usageCollection: UsageCollectionSetup,
+  exportTypesRegistry: ExportTypesRegistry,
+  isReady: () => Promise<boolean>
 ) {
   return usageCollection.makeUsageCollector({
     type: KIBANA_REPORTING_TYPE,
-    isReady,
     fetch: (callCluster: ESCallCluster) =>
       getReportingUsage(server, callCluster, exportTypesRegistry),
+    isReady,
 
     /*
      * Format the response data into a model for internal upload
@@ -50,16 +53,17 @@ export function getReportingUsageCollector(
 }
 
 export function registerReportingUsageCollector(
-  usageCollection: UsageCollectionSetup,
   server: ServerFacade,
-  isReady: () => boolean,
+  usageCollection: UsageCollectionSetup,
+  pluginStart$: Rx.Observable<ReportingStart>,
   exportTypesRegistry: ExportTypesRegistry
 ) {
+  const collectionIsReady = () => pluginStart$.pipe(first(), mapTo(true)).toPromise();
   const collector = getReportingUsageCollector(
-    usageCollection,
     server,
-    isReady,
-    exportTypesRegistry
+    usageCollection,
+    exportTypesRegistry,
+    collectionIsReady
   );
   usageCollection.registerCollector(collector);
 }
