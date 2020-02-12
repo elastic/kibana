@@ -4,18 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getApiPath } from '../../lib/helper';
+import { fetchGet } from './utils';
 
-interface APIParams {
-  basePath: string;
-}
+export const fetchMLJob = async () => {
+  const url = '/api/ml/anomaly_detectors/uptime-duration-chart';
 
-export const fetchMLJob = async ({ basePath }: APIParams) => {
-  const url = getApiPath(`/api/uptime/index_pattern`, basePath);
-
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new Error(response.statusText);
-  }
-  return await response.json();
+  return fetchGet(url);
 };

@@ -15,20 +15,31 @@ import { connect } from 'react-redux';
 import { MachineLearningFlyoutView } from '../../functional/ml/machine_learning_flyout/machine_learning_flyout';
 import { UptimeSettingsContext } from '../../../contexts';
 import { AppState } from '../../../state';
-import { selectMonitorLocations, selectMonitorStatus } from '../../../state/selectors';
-import { getMonitorStatus } from '../../../state/actions';
+import {
+  hasMLJobSelector,
+  selectMonitorLocations,
+  selectMonitorStatus,
+} from '../../../state/selectors';
+import { getMLJobAction, getMonitorStatus } from '../../../state/actions';
 import { Container } from '../monitor/status_bar_container';
 
 interface Props {
   isOpen: boolean;
   onClose: () => void;
+  loadMLJob: () => void;
+  hasMLJob: boolean;
 }
 
 interface State {
   isCreatingJob: boolean;
 }
 
-export const MachineLearningFlyout: Component<Props, State> = ({ isOpen, onClose }) => {
+export const MLFlyoutContainer: Component<Props, State> = ({
+  isOpen,
+  onClose,
+  loadMLJob,
+  hasMLJob,
+}) => {
   // const { data: hasMLJob = false, status } = useFetcher(() => {
   //   if (selectedTransactionType) {
   //     // return getHasMLJob({
@@ -42,20 +53,10 @@ export const MachineLearningFlyout: Component<Props, State> = ({ isOpen, onClose
   const { basePath } = useContext(UptimeSettingsContext);
 
   useEffect(() => {
-    fetch(basePath + '/api/ml/anomaly_detectors/uptime-duration-chart').then(response => {
-      response.json().then(res => {
-        setHasMLJob(res.count > 0);
-      });
-    });
-    fetch(basePath + '/api/ml/anomaly_detectors/uptime-duration-chart').then(response => {
-      response.json().then(res => {
-        setHasMLJob(res.count > 0);
-      });
-    });
-  }, [basePath]);
+    loadMLJob('uptime-duration-chart');
+  }, [loadMLJob]);
 
   // const [isCreatingJob, setIsCreatingJob] = useState(false);
-  const [hasMLJob, setHasMLJob] = useState(false);
 
   const onClickCreate = async ({ transactionType }: { transactionType: string }) => {
     setIsCreatingJob(true);
@@ -175,22 +176,15 @@ export const MachineLearningFlyout: Component<Props, State> = ({ isOpen, onClose
   );
 };
 
-const mapStateToProps = (state: AppState, ownProps: OwnProps) => ({
-  monitorStatus: selectMonitorStatus(state),
-  monitorLocations: selectMonitorLocations(state, ownProps.monitorId),
+const mapStateToProps = (state: AppState) => ({
+  hasMLJob: hasMLJobSelector(state),
 });
 
-const mapDispatchToProps = (dispatch: Dispatch<any>): DispatchProps => ({
-  loadMonitorStatus: (dateStart: string, dateEnd: string, monitorId: string) => {
-    dispatch(
-      getMonitorStatus({
-        monitorId,
-        dateStart,
-        dateEnd,
-      })
-    );
-  },
+const mapDispatchToProps = (dispatch: Dispatch<any>): any => ({
+  loadMLJob: (jobId: string) => dispatch(getMLJobAction.get({ jobId })),
 });
 
-// @ts-ignore TODO: Investigate typescript issues here
-export const MonitorStatusBar = connect(mapStateToProps, mapDispatchToProps)(Container);
+export const MachineLearningFlyout = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(MLFlyoutContainer);

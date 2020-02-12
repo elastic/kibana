@@ -4,7 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { createSelector } from 'reselect';
 import { AppState } from '../../state';
+
+const mlSelector = (state: AppState) => state.mlJob;
 
 // UI Selectors
 export const getBasePath = ({ ui: { basePath } }: AppState) => basePath;
@@ -13,25 +16,17 @@ export const isIntegrationsPopupOpen = ({ ui: { integrationsPopoverOpen } }: App
   integrationsPopoverOpen;
 
 // Monitor Selectors
-export const getMonitorDetails = (state: AppState, summary: any) => {
-  return state.monitor.monitorDetailsList[summary.monitor_id];
-};
+export const getMonitorDetails = (state: AppState, summary: any) =>
+  state.monitor.monitorDetailsList[summary.monitor_id];
 
-export const selectMonitorLocations = (state: AppState, monitorId: string) => {
-  return state.monitor.monitorLocationsList?.get(monitorId);
-};
+export const selectMonitorLocations = (state: AppState, monitorId: string) =>
+  state.monitor.monitorLocationsList?.get(monitorId);
 
-export const selectSelectedMonitor = (state: AppState) => {
-  return state.monitorStatus.monitor;
-};
+export const selectSelectedMonitor = (state: AppState) => state.monitorStatus.monitor;
 
-export const selectMonitorStatus = (state: AppState) => {
-  return state.monitorStatus.status;
-};
+export const selectMonitorStatus = (state: AppState) => state.monitorStatus.status;
 
-export const selectIndexPattern = ({ indexPattern }: AppState) => {
-  return indexPattern.index_pattern;
-};
+export const selectIndexPattern = ({ indexPattern }: AppState) => indexPattern.index_pattern;
 
 export const selectPingHistogram = ({ ping, ui }: AppState) => {
   return {
@@ -41,3 +36,5 @@ export const selectPingHistogram = ({ ping, ui }: AppState) => {
     esKuery: ui.esKuery,
   };
 };
+
+export const hasMLJobSelector = createSelector(mlSelector, mlJob => mlJob.count > 0);
