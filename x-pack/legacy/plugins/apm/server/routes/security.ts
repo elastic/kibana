@@ -6,10 +6,10 @@
 
 import { createRoute } from './create_route';
 import { setupRequest } from '../lib/helpers/setup_request';
-import { getIndicesPrivileges } from '../lib/security/getIndicesPrivileges';
+import { getIndicesPrivileges } from '../lib/security/get_indices_privileges';
 
 export const indicesPrivilegesRoute = createRoute(() => ({
-  path: '/api/apm/security/indicesPrivileges',
+  path: '/api/apm/security/indices_privileges',
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     return getIndicesPrivileges(setup);

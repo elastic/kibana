@@ -16,40 +16,45 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { IndexPrivileges } from '../../../../typings/es_schemas/raw/IndexPrivileges';
+import { isEmpty } from 'lodash';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/useFetcher';
 import { fontSize, pct, px, units } from '../../../style/variables';
 import { ElasticDocsLink } from '../../shared/Links/ElasticDocsLink';
 import { SetupInstructionsLink } from '../../shared/Links/SetupInstructionsLink';
 
-export const ApmIndicesPermission: React.FC = ({ children }) => {
+export const APMIndicesPermission: React.FC = ({ children }) => {
   const [
     isPermissionWarningDismissed,
     setIsPermissionWarningDismissed
   ] = useState(false);
 
-  const { data = {} as IndexPrivileges['index'], status } = useFetcher(
-    callApmApi => {
-      return callApmApi({
-        pathname: '/api/apm/security/indicesPrivileges'
-      });
-    },
-    []
-  );
-
-  // TODO: check indices privileges to show permission page.
+  const { data: indicesPrivileges = {}, status } = useFetcher(callApmApi => {
+    return callApmApi({
+      pathname: '/api/apm/security/indices_privileges'
+    });
+  }, []);
 
   // Return null until receive the reponse of the api.
-  // TODO: test removing it
   if (status === FETCH_STATUS.LOADING || status === FETCH_STATUS.PENDING) {
     return null;
   }
-  // When the user doesn't have the appropriate permissions and they
-  // did not use the escape hatch, show the missing permissions page
-  if (data?.hasPermission === false && !isPermissionWarningDismissed) {
+
+  const indicesPrivilegesKeys = Object.keys(indicesPrivileges);
+  const indicesWithoutPermission = indicesPrivilegesKeys.filter(
+    index => !indicesPrivileges[index].read
+  );
+
+  // Show permission warning when a user has at least one index without Read privilege,
+  // and he has not manually dismissed the warning
+  if (!isEmpty(indicesWithoutPermission) && !isPermissionWarningDismissed) {
     return (
-      <PermissionPage
-        onEscapeHatchClick={() => setIsPermissionWarningDismissed(false)}
+      <PermissionWarning
+        indicesWithoutPermission={indicesWithoutPermission}
+        // Show escape hatch button if at least one index has read privilege
+        showEscapeHatch={
+          indicesPrivilegesKeys.length !== indicesWithoutPermission.length
+        }
+        onEscapeHatchClick={() => setIsPermissionWarningDismissed(true)}
       />
     );
   }
@@ -72,10 +77,16 @@ const EscapeHatch = styled.div`
 `;
 
 interface Props {
+  indicesWithoutPermission: string[];
+  showEscapeHatch: boolean;
   onEscapeHatchClick: () => void;
 }
 
-const PermissionPage = ({ onEscapeHatchClick }: Props) => {
+const PermissionWarning = ({
+  indicesWithoutPermission,
+  showEscapeHatch,
+  onEscapeHatchClick
+}: Props) => {
   return (
     <div style={{ height: pct(95) }}>
       <EuiFlexGroup alignItems="center">
@@ -106,12 +117,19 @@ const PermissionPage = ({ onEscapeHatchClick }: Props) => {
                 </h2>
               }
               body={
-                <p>
-                  {i18n.translate('xpack.apm.permission.description', {
-                    defaultMessage:
-                      "We've detected your current role in Kibana does not grant you access to the APM data. Please check with your Kibana administrator to get the proper privileges granted in order to start using APM."
-                  })}
-                </p>
+                <>
+                  <p>
+                    {i18n.translate('xpack.apm.permission.description', {
+                      defaultMessage:
+                        "We've detected your current role in Kibana does not grant you access to the APM data. Please check with your Kibana administrator to get the proper privileges granted in order to start using APM."
+                    })}
+                  </p>
+                  <ul>
+                    {indicesWithoutPermission.map(index => (
+                      <li key={index}>{index}</li>
+                    ))}
+                  </ul>
+                </>
               }
               actions={
                 <>
@@ -128,17 +146,19 @@ const PermissionPage = ({ onEscapeHatchClick }: Props) => {
                     )}
                   </ElasticDocsLink>
 
-                  <EscapeHatch>
-                    <EuiLink
-                      color="subdued"
-                      onClick={onEscapeHatchClick}
-                      style={{ fontSize }}
-                    >
-                      {i18n.translate('xpack.apm.permission.dismissWarning', {
-                        defaultMessage: 'Dismiss warning'
-                      })}
-                    </EuiLink>
-                  </EscapeHatch>
+                  {showEscapeHatch && (
+                    <EscapeHatch>
+                      <EuiLink
+                        color="subdued"
+                        onClick={onEscapeHatchClick}
+                        style={{ fontSize }}
+                      >
+                        {i18n.translate('xpack.apm.permission.dismissWarning', {
+                          defaultMessage: 'Dismiss warning'
+                        })}
+                      </EuiLink>
+                    </EscapeHatch>
+                  )}
                 </>
               }
             />

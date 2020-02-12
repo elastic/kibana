@@ -7,6 +7,18 @@ import { Setup } from '../helpers/setup_request';
 
 export async function getIndicesPrivileges(setup: Setup) {
   const { client, indices } = setup;
-  const response = await client.indicesPrivileges(indices);
+  const response = await client.hasPrivileges({
+    index: [
+      {
+        names: [
+          indices['apm_oss.errorIndices'],
+          indices['apm_oss.metricsIndices'],
+          indices['apm_oss.transactionIndices'],
+          indices['apm_oss.spanIndices']
+        ],
+        privileges: ['read']
+      }
+    ]
+  });
   return response.index;
 }
