@@ -23,6 +23,22 @@ beforeEach(() => {
   });
 });
 
+describe('indexDocument', () => {
+  test('should call cluster client with given doc', async () => {
+    await clusterClientAdapter.indexDocument({ args: true });
+    expect(clusterClient.callAsInternalUser).toHaveBeenCalledWith('index', {
+      args: true,
+    });
+  });
+
+  test('should throw error when cluster client throws an error', async () => {
+    clusterClient.callAsInternalUser.mockRejectedValue(new Error('Fail'));
+    await expect(
+      clusterClientAdapter.indexDocument({ args: true })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Fail"`);
+  });
+});
+
 describe('doesIlmPolicyExist', () => {
   const notFoundError = new Error('Not found') as any;
   notFoundError.statusCode = 404;

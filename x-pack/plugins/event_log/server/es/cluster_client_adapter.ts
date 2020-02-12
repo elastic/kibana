@@ -23,6 +23,10 @@ export class ClusterClientAdapter {
     this.clusterClient = opts.clusterClient;
   }
 
+  public async indexDocument(doc: any): Promise<void> {
+    await this.callEs('index', doc);
+  }
+
   public async doesIlmPolicyExist(policyName: string): Promise<boolean> {
     const request = {
       method: 'GET',
