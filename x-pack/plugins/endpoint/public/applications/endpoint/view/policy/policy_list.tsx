@@ -19,7 +19,13 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, FormattedDate, FormattedTime, FormattedNumber } from '@kbn/i18n/react';
+import {
+  FormattedMessage,
+  FormattedDate,
+  FormattedTime,
+  FormattedNumber,
+  FormattedRelative,
+} from '@kbn/i18n/react';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 import { usePageId } from '../use_page_id';
@@ -49,11 +55,17 @@ const TruncateTooltipText = styled(TruncateText)`
 `;
 
 const FormattedDateAndTime: React.FC<{ date: Date }> = ({ date }) => {
-  return (
+  // If date is greater than or equal to 24h (ago), then show it as a date
+  // else, show it as relative to "now"
+  return Date.now() - date.getTime() >= 8.64e7 ? (
     <>
       <FormattedDate value={date} year="numeric" month="short" day="2-digit" />
       {' @'}
       <FormattedTime value={date} />
+    </>
+  ) : (
+    <>
+      <FormattedRelative value={date} />
     </>
   );
 };
