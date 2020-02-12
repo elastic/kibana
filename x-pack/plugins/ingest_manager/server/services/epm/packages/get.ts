@@ -5,7 +5,7 @@
  */
 
 import { SavedObjectsClientContract } from 'src/core/server/';
-import { SAVED_OBJECT_TYPE_PACKAGES } from '../../../../common/constants';
+import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../common/constants';
 import {
   Installation,
   Installed,
@@ -37,7 +37,7 @@ export async function getPackages(
     );
   });
   const searchObjects = registryItems.map(({ name, version }) => ({
-    type: SAVED_OBJECT_TYPE_PACKAGES,
+    type: PACKAGES_SAVED_OBJECT_TYPE,
     id: `${name}-${version}`,
   }));
   const results = await savedObjectsClient.bulkGet<Installation>(searchObjects);
@@ -95,7 +95,7 @@ export async function getInstallationObject(options: {
 }) {
   const { savedObjectsClient, pkgkey } = options;
   return savedObjectsClient
-    .get<Installation>(SAVED_OBJECT_TYPE_PACKAGES, pkgkey)
+    .get<Installation>(PACKAGES_SAVED_OBJECT_TYPE, pkgkey)
     .catch(e => undefined);
 }
 

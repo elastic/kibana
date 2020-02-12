@@ -39,6 +39,7 @@ export {
   OUTPUT_SAVED_OBJECT_TYPE,
   AGENT_CONFIG_SAVED_OBJECT_TYPE,
   DATASOURCE_SAVED_OBJECT_TYPE,
+  PACKAGES_SAVED_OBJECT_TYPE,
 } from './constants';
 
 // TODO: Temporary exports for Fleet dependencies, remove once Fleet moved into this plugin

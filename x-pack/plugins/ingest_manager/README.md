@@ -1,4 +1,4 @@
-# Integrations Manager
+# Ingest Manager
 
 ## Development
 ### Branch
@@ -46,7 +46,7 @@ One common workflow is:
  1. `yarn es snapshot`
  1. In another shell: `yarn start --no-base-path`
 
-#### API Tests
+#### EPM API Tests
   1. in one terminal, change to the `x-pack` directory and start the test server with
       ```shell
       node scripts/functional_tests_server.js --config test/epm_api_integration/config.ts
@@ -59,6 +59,4 @@ One common workflow is:
  
 ### Plugin architecture
 Follows the `common`, `server`, `public` structure from the [Architecture Style Guide
-](https://github.com/elastic/kibana/blob/master/style_guides/architecture_style_guide.md#file-and-folder-structure).
-
-We use New Platform approach (structure, APIs, etc) where possible. There's a `kibana.json` manifest, and the server uses the `server/{index,plugin}.ts` approach from [`MIGRATION.md`](https://github.com/elastic/kibana/blob/master/src/core/MIGRATION.md#architecture). The client code we author is using New Platform shape & APIs, but the Manager deals with external systems which are at their own stages of migration.
+](https://github.com/elastic/kibana/blob/master/style_guides/architecture_style_guide.md#file-and-folder-structure)
