@@ -22,6 +22,18 @@ export const alertMiddlewareFactory: MiddlewareFactory = coreStart => {
       api.dispatch({ type: 'serverReturnedAlertsData', payload: response });
     } else if (action.type === 'userAppliedAlertsSearchFilter') {
       const { query, filters, dateRange } = action.payload;
+
+      // HACK
+      // Not the right place to do this, but I noticed sometimes the `from` and the `to` aren't
+      // populated, so this keeps it from breaking.
+      if (!dateRange.from) {
+        dateRange.from = 'now-15m';
+      }
+      if (!dateRange.to) {
+        dateRange.to = 'now';
+      }
+      // END HACK
+
       const response = await coreStart.http.get('/api/endpoint/alerts', {
         query: {
           query: query.query,
