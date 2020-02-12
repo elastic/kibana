@@ -11,7 +11,7 @@ import { findRules } from '../../rules/find_rules';
 import { FindRulesRequest, IRuleSavedAttributesSavedObjectAttributes } from '../../rules/types';
 import { findRulesSchema } from '../schemas/find_rules_schema';
 import { ServerFacade } from '../../../../types';
-import { transformFindAlertsOrError } from './utils';
+import { transformFindAlerts } from './utils';
 import { transformError } from '../utils';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
 
@@ -62,9 +62,25 @@ export const createFindRulesRoute = (): Hapi.ServerRoute => {
             return results;
           })
         );
-        return transformFindAlertsOrError(rules, ruleStatuses);
+        const transformed = transformFindAlerts(rules, ruleStatuses);
+        if (transformed == null) {
+          return headers
+            .response({
+              message: 'unknown data type, error transforming alert',
+              status_code: 500,
+            })
+            .code(500);
+        } else {
+          return transformed;
+        }
       } catch (err) {
-        return transformError(err);
+        const error = transformError(err);
+        return headers
+          .response({
+            message: error.message,
+            status_code: error.statusCode,
+          })
+          .code(error.statusCode);
       }
     },
   };

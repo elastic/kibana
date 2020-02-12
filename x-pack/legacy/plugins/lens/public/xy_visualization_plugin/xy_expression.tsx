@@ -18,10 +18,11 @@ import {
 } from '@elastic/charts';
 import { I18nProvider } from '@kbn/i18n/react';
 import {
-  ExpressionFunction,
   KibanaDatatable,
   IInterpreterRenderHandlers,
-  IInterpreterRenderFunction,
+  ExpressionRenderDefinition,
+  ExpressionFunctionDefinition,
+  ExpressionValueSearchContext,
 } from 'src/plugins/expressions/public';
 import { EuiIcon, EuiText, IconType, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -52,9 +53,15 @@ type XYChartRenderProps = XYChartProps & {
   timeZone: string;
 };
 
-export const xyChart: ExpressionFunction<'lens_xy_chart', LensMultiTable, XYArgs, XYRender> = ({
+export const xyChart: ExpressionFunctionDefinition<
+  'lens_xy_chart',
+  LensMultiTable | ExpressionValueSearchContext | null,
+  XYArgs,
+  XYRender
+> = {
   name: 'lens_xy_chart',
   type: 'render',
+  inputTypes: ['lens_multitable', 'kibana_context', 'null'],
   help: i18n.translate('xpack.lens.xyChart.help', {
     defaultMessage: 'An X/Y chart',
   }),
@@ -74,13 +81,11 @@ export const xyChart: ExpressionFunction<'lens_xy_chart', LensMultiTable, XYArgs
       }),
     },
     layers: {
-      types: ['lens_xy_layer'],
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      types: ['lens_xy_layer'] as any,
       help: 'Layers of visual series',
       multi: true,
     },
-  },
-  context: {
-    types: ['lens_multitable', 'kibana_context', 'null'],
   },
   fn(data: LensMultiTable, args: XYArgs) {
     return {
@@ -92,19 +97,18 @@ export const xyChart: ExpressionFunction<'lens_xy_chart', LensMultiTable, XYArgs
       },
     };
   },
-  // TODO the typings currently don't support custom type args. As soon as they do, this can be removed
-} as unknown) as ExpressionFunction<'lens_xy_chart', LensMultiTable, XYArgs, XYRender>;
+};
 
 export const getXyChartRenderer = (dependencies: {
   formatFactory: FormatFactory;
   timeZone: string;
-}): IInterpreterRenderFunction<XYChartProps> => ({
+}): ExpressionRenderDefinition<XYChartProps> => ({
   name: 'lens_xy_chart_renderer',
   displayName: 'XY chart',
   help: i18n.translate('xpack.lens.xyChart.renderer.help', {
     defaultMessage: 'X/Y chart renderer',
   }),
-  validate: () => {},
+  validate: () => undefined,
   reuseDomNode: true,
   render: (domNode: Element, config: XYChartProps, handlers: IInterpreterRenderHandlers) => {
     handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
