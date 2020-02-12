@@ -11,6 +11,7 @@ import { cardinalityOperation } from './cardinality';
 import { minOperation, averageOperation, sumOperation, maxOperation } from './metrics';
 import { dateHistogramOperation } from './date_histogram';
 import { countOperation } from './count';
+import { cumulativeTotalOperation } from './cumulative_total';
 import { DimensionPriority, StateSetter, OperationMetadata } from '../../../types';
 import { BaseIndexPatternColumn } from './column_types';
 import { IndexPatternPrivateState, IndexPattern, IndexPatternField } from '../../types';
@@ -28,6 +29,7 @@ const internalOperationDefinitions = [
   cardinalityOperation,
   sumOperation,
   countOperation,
+  cumulativeTotalOperation,
 ];
 
 export { termsOperation } from './terms';
