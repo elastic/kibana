@@ -6,3 +6,4 @@
 
 export { FeatureKibanaPrivileges } from './feature_kibana_privileges';
 export * from './feature';
+export * from './sub_feature';

@@ -7,7 +7,7 @@
 import { EuiButtonGroup, EuiButtonGroupProps, EuiComboBox, EuiSuperSelect } from '@elastic/eui';
 import React from 'react';
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
-import { Feature } from '../../../../../../../../features/public';
+import { IFeature } from '../../../../../../../../features/public';
 import { KibanaPrivileges, Role } from '../../../../../../../common/model';
 import { KibanaPrivilegeCalculatorFactory } from '../kibana_privilege_calculator';
 import { SimplePrivilegeSection } from './simple_privilege_section';
@@ -66,7 +66,7 @@ const buildProps = (customProps: any = {}) => {
           },
         },
       },
-    ] as Feature[],
+    ] as IFeature[],
     onChange: jest.fn(),
     ...customProps,
     role,

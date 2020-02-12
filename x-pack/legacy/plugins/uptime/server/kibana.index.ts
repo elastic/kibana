@@ -42,6 +42,8 @@ export const initServerWithKibana = (server: UptimeCoreSetup, plugins: UptimeCor
     catalogue: ['uptime'],
     privileges: {
       all: {
+        app: ['uptime', 'kibana'],
+        catalogue: ['uptime'],
         api: ['uptime'],
         savedObject: {
           all: [],
@@ -50,6 +52,8 @@ export const initServerWithKibana = (server: UptimeCoreSetup, plugins: UptimeCor
         ui: ['save'],
       },
       read: {
+        app: ['uptime', 'kibana'],
+        catalogue: ['uptime'],
         api: ['uptime'],
         savedObject: {
           all: [],

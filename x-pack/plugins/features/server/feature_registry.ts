@@ -5,14 +5,14 @@
  */
 
 import { cloneDeep, uniq } from 'lodash';
-import { Feature, FeatureWithAllOrReadPrivileges, FeatureKibanaPrivileges } from '../common';
+import { IFeature, Feature, FeatureKibanaPrivileges } from '../common';
 import { validateFeature } from './feature_schema';
 
 export class FeatureRegistry {
   private locked = false;
-  private features: Record<string, Feature> = {};
+  private features: Record<string, IFeature> = {};
 
-  public register(feature: FeatureWithAllOrReadPrivileges) {
+  public register(feature: IFeature) {
     if (this.locked) {
       throw new Error(
         `Features are locked, can't register new features. Attempt to register ${feature.id} failed.`
@@ -25,20 +25,25 @@ export class FeatureRegistry {
       throw new Error(`Feature with id ${feature.id} is already registered.`);
     }
 
-    const featureCopy: Feature = cloneDeep(feature as Feature);
+    const featureCopy: IFeature = cloneDeep(feature as IFeature);
 
-    this.features[feature.id] = applyAutomaticPrivilegeGrants(featureCopy as Feature);
+    this.features[feature.id] = applyAutomaticPrivilegeGrants(featureCopy as IFeature);
   }
 
   public getAll(): Feature[] {
     this.locked = true;
-    return cloneDeep(Object.values(this.features));
+    return Object.values(this.features).map(featureConfig => new Feature(featureConfig));
   }
 }
 
-function applyAutomaticPrivilegeGrants(feature: Feature): Feature {
-  const { all: allPrivilege, read: readPrivilege } = feature.privileges;
-  const reservedPrivilege = feature.reserved ? feature.reserved.privilege : null;
+function applyAutomaticPrivilegeGrants(feature: IFeature): IFeature {
+  let allPrivilege;
+  let readPrivilege;
+  if (feature.privileges !== 'none') {
+    allPrivilege = feature.privileges.all;
+    readPrivilege = feature.privileges.read;
+  }
+  const reservedPrivilege = feature.reserved ? feature.reserved.privilege : undefined;
 
   applyAutomaticAllPrivilegeGrants(allPrivilege, reservedPrivilege);
   applyAutomaticReadPrivilegeGrants(readPrivilege);
@@ -46,7 +51,9 @@ function applyAutomaticPrivilegeGrants(feature: Feature): Feature {
   return feature;
 }
 
-function applyAutomaticAllPrivilegeGrants(...allPrivileges: Array<FeatureKibanaPrivileges | null>) {
+function applyAutomaticAllPrivilegeGrants(
+  ...allPrivileges: Array<FeatureKibanaPrivileges | undefined>
+) {
   allPrivileges.forEach(allPrivilege => {
     if (allPrivilege) {
       allPrivilege.savedObject.all = uniq([...allPrivilege.savedObject.all, 'telemetry']);
@@ -56,7 +63,7 @@ function applyAutomaticAllPrivilegeGrants(...allPrivileges: Array<FeatureKibanaP
 }
 
 function applyAutomaticReadPrivilegeGrants(
-  ...readPrivileges: Array<FeatureKibanaPrivileges | null>
+  ...readPrivileges: Array<FeatureKibanaPrivileges | undefined>
 ) {
   readPrivileges.forEach(readPrivilege => {
     if (readPrivilege) {

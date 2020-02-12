@@ -856,7 +856,8 @@ export class DashboardAppController {
       share.toggleShareContextMenu({
         anchorElement,
         allowEmbed: true,
-        allowShortUrl: !dashboardConfig.getHideWriteControls(),
+        allowShortUrl:
+          !dashboardConfig.getHideWriteControls() || dashboardCapabilities.createShortUrl,
         shareableUrl: unhashUrl(window.location.href),
         objectId: dash.id,
         objectType: 'dashboard',

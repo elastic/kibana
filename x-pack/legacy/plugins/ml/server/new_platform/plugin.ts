@@ -165,9 +165,11 @@ export class Plugin {
       navLinkId: 'ml',
       app: ['ml', 'kibana'],
       catalogue: ['ml'],
-      privileges: {},
+      privileges: 'none',
       reserved: {
         privilege: {
+          app: ['ml', 'kibana'],
+          catalogue: ['ml'],
           savedObject: {
             all: [],
             read: [],

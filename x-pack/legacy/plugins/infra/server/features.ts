@@ -17,6 +17,8 @@ export const METRICS_FEATURE = {
   catalogue: ['infraops'],
   privileges: {
     all: {
+      app: ['infra', 'kibana'],
+      catalogue: ['infraops'],
       api: ['infra'],
       savedObject: {
         all: ['infrastructure-ui-source'],
@@ -25,6 +27,8 @@ export const METRICS_FEATURE = {
       ui: ['show', 'configureSource', 'save'],
     },
     read: {
+      app: ['infra', 'kibana'],
+      catalogue: ['infraops'],
       api: ['infra'],
       savedObject: {
         all: [],
@@ -46,6 +50,8 @@ export const LOGS_FEATURE = {
   catalogue: ['infralogging'],
   privileges: {
     all: {
+      app: ['infra', 'kibana'],
+      catalogue: ['infralogging'],
       api: ['infra'],
       savedObject: {
         all: ['infrastructure-ui-source'],
@@ -54,6 +60,8 @@ export const LOGS_FEATURE = {
       ui: ['show', 'configureSource', 'save'],
     },
     read: {
+      app: ['infra', 'kibana'],
+      catalogue: ['infralogging'],
       api: ['infra'],
       savedObject: {
         all: [],
