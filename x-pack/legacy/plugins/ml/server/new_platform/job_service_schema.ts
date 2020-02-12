@@ -21,7 +21,7 @@ export const catFieldExamplesSchema = {
   query: schema.any(),
   size: schema.number(),
   field: schema.string(),
-  timeField: schema.string(),
+  timeField: schema.maybe(schema.string()),
   start: schema.number(),
   end: schema.number(),
   analyzer: schema.object(analyzerSchema),
@@ -29,9 +29,9 @@ export const catFieldExamplesSchema = {
 
 export const chartSchema = {
   indexPatternTitle: schema.string(),
-  timefield: schema.string(),
-  start: schema.number(),
-  end: schema.number(),
+  timefield: schema.maybe(schema.string()),
+  start: schema.maybe(schema.number()),
+  end: schema.maybe(schema.number()),
   intervalMs: schema.number(),
   query: schema.any(),
   aggFieldNamePairs: schema.arrayOf(schema.any()),
