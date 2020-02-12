@@ -52,8 +52,7 @@ export function handleChildren(
       const lifecycleQuery = new LifecycleQuery(id);
       const { results: lifecycleEvents } = await lifecycleQuery.search(client, childIDs);
 
-      // group all of the lifecycle events by the child process id (since we're paginating) only
-      // the children
+      // group all of the lifecycle events by the child process id
       const lifecycleGroups = Object.values(_.groupBy(lifecycleEvents, extractEntityID));
       const children = lifecycleGroups.map(group => ({ lifecycle: group }));
 

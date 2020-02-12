@@ -40,7 +40,16 @@ export class RelatedEventsQuery extends ResolverQuery {
           bool: {
             filter: [
               {
-                terms: { 'endpoint.process.entity_id': entityIDs },
+                bool: {
+                  should: [
+                    {
+                      terms: { 'endpoint.process.entity_id': entityIDs },
+                    },
+                    {
+                      terms: { 'process.entity_id': entityIDs },
+                    },
+                  ],
+                },
               },
               {
                 bool: {

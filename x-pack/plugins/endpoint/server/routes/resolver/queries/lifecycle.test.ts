@@ -38,7 +38,16 @@ describe('lifecycle query', () => {
           bool: {
             filter: [
               {
-                terms: { 'endpoint.process.entity_id': ['baz'] },
+                bool: {
+                  should: [
+                    {
+                      terms: { 'endpoint.process.entity_id': ['baz'] },
+                    },
+                    {
+                      terms: { 'process.entity_id': ['baz'] },
+                    },
+                  ],
+                },
               },
               {
                 term: { 'event.category': 'process' },
