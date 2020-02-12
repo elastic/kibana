@@ -25,7 +25,7 @@ import { Project } from '../utils/project';
  * to the Kibana root directory or `../kibana-extra/{plugin}` relative
  * to Kibana itself.
  */
-const isKibanaDep = (depVersion: string) => depVersion.includes('../../kibana/');
+const isKibanaDep = (depVersion: string) => depVersion.includes('../../packages/');
 
 /**
  * This prepares the dependencies for an _external_ project.
