@@ -185,84 +185,84 @@
     ],
     "xpack": [
         {
-            "config": "x-pack/test/functional/config.js",
+            "config": "test/functional/config.js",
             "tags": [
                 "functional.apps.maps.es_geo_grid_source"
             ],
             "estimatedDuration": 748
         },
         {
-            "config": "x-pack/test/spaces_api_integration/security_and_spaces/config_trial.ts",
+            "config": "test/spaces_api_integration/security_and_spaces/config_trial.ts",
             "tags": [
                 "spaces_api_integration.security_and_spaces.apis.copy_to_space"
             ],
             "estimatedDuration": 466
         },
         {
-            "config": "x-pack/test/spaces_api_integration/security_and_spaces/config_basic.ts",
+            "config": "test/spaces_api_integration/security_and_spaces/config_basic.ts",
             "tags": [
                 "spaces_api_integration.security_and_spaces.apis.copy_to_space"
             ],
             "estimatedDuration": 452
         },
         {
-            "config": "x-pack/test/functional/config.js",
+            "config": "test/functional/config.js",
             "tags": [
                 "functional.apps.machine_learning.anomaly_detection.advanced_job"
             ],
             "estimatedDuration": 418
         },
         {
-            "config": "x-pack/test/functional/config.js",
+            "config": "test/functional/config.js",
             "tags": [
                 "functional.apps.machine_learning.anomaly_detection.saved_search_job"
             ],
             "estimatedDuration": 407
         },
         {
-            "config": "x-pack/test/functional/config.js",
+            "config": "test/functional/config.js",
             "tags": [
                 "functional.apps.dashboard_mode.dashboard_view_mode"
             ],
             "estimatedDuration": 372
         },
         {
-            "config": "x-pack/test/reporting/configs/chromium_functional.js",
+            "config": "test/reporting/configs/chromium_functional.js",
             "tags": [
                 "reporting.functional.reporting"
             ],
             "estimatedDuration": 372
         },
         {
-            "config": "x-pack/test/spaces_api_integration/security_and_spaces/config_trial.ts",
+            "config": "test/spaces_api_integration/security_and_spaces/config_trial.ts",
             "tags": [
                 "spaces_api_integration.security_and_spaces.apis.resolve_copy_to_space_conflicts"
             ],
             "estimatedDuration": 343
         },
         {
-            "config": "x-pack/test/functional/config.js",
+            "config": "test/functional/config.js",
             "tags": [
                 "functional.apps.dashboard.feature_controls.dashboard_security"
             ],
             "estimatedDuration": 340
         },
         {
-            "config": "x-pack/test/spaces_api_integration/security_and_spaces/config_basic.ts",
+            "config": "test/spaces_api_integration/security_and_spaces/config_basic.ts",
             "tags": [
                 "spaces_api_integration.security_and_spaces.apis.resolve_copy_to_space_conflicts"
             ],
             "estimatedDuration": 336
         },
         {
-            "config": "x-pack/test/functional/config.js",
+            "config": "test/functional/config.js",
             "tags": [
                 "functional.apps.discover.feature_controls.discover_security"
             ],
             "estimatedDuration": 303
         },
         {
-            "config": "x-pack/test/functional/config.js",
+            "config": "test/functional/config.js",
             "tags": [
                 "functional.apps.security.field_level_security",
                 "functional.apps.infra.link_to",
@@ -272,7 +272,7 @@
             "estimatedDuration": 305
         },
         {
-            "config": "x-pack/test/alerting_api_integration/security_and_spaces/config.ts",
+            "config": "test/alerting_api_integration/security_and_spaces/config.ts",
             "tags": [
                 "alerting_api_integration.security_and_spaces.tests.alerting.alerts",
                 "alerting_api_integration.security_and_spaces.tests.actions.list_action_types",
@@ -291,7 +291,7 @@
             "estimatedDuration": 300
         },
         {
-            "config": "x-pack/test/functional/config.js",
+            "config": "test/functional/config.js",
             "tags": [
                 "functional.apps.saved_objects_management.feature_controls.saved_objects_management_security",
                 "functional.apps.canvas.expression",
@@ -301,7 +301,7 @@
             "estimatedDuration": 313
         },
         {
-            "config": "x-pack/test/functional/config.js",
+            "config": "test/functional/config.js",
             "tags": [
                 "functional.apps.logstash.pipeline_list",
                 "functional.apps.remote_clusters.home_page",
@@ -311,7 +311,7 @@
             "estimatedDuration": 324
         },
         {
-            "config": "x-pack/test/functional/config.js",
+            "config": "test/functional/config.js",
             "tags": [
                 "functional.apps.visualize.feature_controls.visualize_security",
                 "functional.apps.index_management.home_page",
@@ -320,7 +320,7 @@
             "estimatedDuration": 303
         },
         {
-            "config": "x-pack/test/functional/config.js",
+            "config": "test/functional/config.js",
             "tags": [
                 "functional.apps.maps.import_geojson.file_indexing_panel",
                 "functional.apps.monitoring.enable_monitoring",
@@ -329,7 +329,7 @@
             "estimatedDuration": 311
         },
         {
-            "config": "x-pack/test/functional/config.js",
+            "config": "test/functional/config.js",
             "tags": [
                 "functional.apps.infra.feature_controls.infrastructure_security",
                 "functional.apps.machine_learning.anomaly_detection.single_metric_viewer",
@@ -338,7 +338,7 @@
             "estimatedDuration": 305
         },
         {
-            "config": "x-pack/test/functional/config.js",
+            "config": "test/functional/config.js",
             "tags": [
                 "functional.apps.maps.joins",
                 "functional.apps.canvas.custom_elements",
@@ -347,7 +347,7 @@
             "estimatedDuration": 311
         },
         {
-            "config": "x-pack/test/functional/config.js",
+            "config": "test/functional/config.js",
             "tags": [
                 "functional.apps.maps.documents_source.search_hits",
                 "functional.apps.monitoring.elasticsearch.overview",
@@ -356,7 +356,7 @@
             "estimatedDuration": 309
         },
         {
-            "config": "x-pack/test/functional/config.js",
+            "config": "test/functional/config.js",
             "tags": [
                 "functional.apps.machine_learning.anomaly_detection.single_metric_job",
                 "functional.apps.visualize.hybrid_visualization",
@@ -365,7 +365,7 @@
             "estimatedDuration": 308
         },
         {
-            "config": "x-pack/test/functional/config.js",
+            "config": "test/functional/config.js",
             "tags": [
                 "functional.apps.graph.graph",
                 "functional.apps.machine_learning.anomaly_detection.anomaly_explorer",
@@ -374,7 +374,7 @@
             "estimatedDuration": 300
         },
         {
-            "config": "x-pack/test/functional/config.js",
+            "config": "test/functional/config.js",
             "tags": [
                 "functional.apps.maps.saved_object_management",
                 "functional.apps.monitoring.beats.listing",
@@ -383,7 +383,7 @@
             "estimatedDuration": 301
         },
         {
-            "config": "x-pack/test/functional_with_es_ssl/config.ts",
+            "config": "test/functional_with_es_ssl/config.ts",
             "tags": [
                 "functional_with_es_ssl.apps.triggers_actions_ui.alerts",
                 "functional_with_es_ssl.apps.triggers_actions_ui.home_page",
@@ -392,7 +392,7 @@
             "estimatedDuration": 268
         },
         {
-            "config": "x-pack/test/functional/config.js",
+            "config": "test/functional/config.js",
             "tags": [
                 "functional.apps.spaces.feature_controls.spaces_security",
                 "functional.apps.monitoring.beats.cluster",
@@ -402,7 +402,7 @@
             "estimatedDuration": 346
         },
         {
-            "config": "x-pack/test/functional/config.js",
+            "config": "test/functional/config.js",
             "tags": [
                 "functional.apps.timelion.feature_controls.timelion_security",
                 "functional.apps.monitoring.elasticsearch.indices",
@@ -412,7 +412,7 @@
             "estimatedDuration": 352
         },
         {
-            "config": "x-pack/test/functional/config.js",
+            "config": "test/functional/config.js",
             "tags": [
                 "functional.apps.dev_tools.feature_controls.dev_tools_security",
                 "functional.apps.monitoring.beats.beat_detail",
@@ -422,7 +422,7 @@
             "estimatedDuration": 354
         },
         {
-            "config": "x-pack/test/functional/config.js",
+            "config": "test/functional/config.js",
             "tags": [
                 "functional.apps.machine_learning.anomaly_detection.multi_metric_job",
                 "functional.apps.monitoring.time_filter",
@@ -432,7 +432,7 @@
             "estimatedDuration": 355
         },
         {
-            "config": "x-pack/test/functional/config.js",
+            "config": "test/functional/config.js",
             "tags": [
                 "functional.apps.security.rbac_phase1",
                 "functional.apps.infra.metrics_source_configuration",
@@ -441,7 +441,7 @@
             "estimatedDuration": 308
         },
         {
-            "config": "x-pack/test/functional/config.js",
+            "config": "test/functional/config.js",
             "tags": [
                 "functional.apps.machine_learning.anomaly_detection.population_job",
                 "functional.apps.uptime.feature_controls.uptime_spaces",
@@ -450,7 +450,7 @@
             "estimatedDuration": 311
         },
         {
-            "config": "x-pack/test/functional/config.js",
+            "config": "test/functional/config.js",
             "tags": [
                 "functional.apps.infra.feature_controls.infrastructure_spaces",
                 "functional.apps.infra.feature_controls.logs_spaces",
@@ -459,7 +459,7 @@
             "estimatedDuration": 316
         },
         {
-            "config": "x-pack/test/functional/config.js",
+            "config": "test/functional/config.js",
             "tags": [
                 "functional.apps.index_patterns.feature_controls.index_patterns_security",
                 "functional.apps.infra.logs_source_configuration",
@@ -468,7 +468,7 @@
             "estimatedDuration": 320
         },
         {
-            "config": "x-pack/test/functional/config.js",
+            "config": "test/functional/config.js",
             "tags": [
                 "functional.apps.maps.embeddable.dashboard",
                 "functional.apps.security.users",
@@ -477,7 +477,7 @@
             "estimatedDuration": 321
         },
         {
-            "config": "x-pack/test/functional/config.js",
+            "config": "test/functional/config.js",
             "tags": [
                 "functional.apps.security.security",
                 "functional.apps.canvas.smoke_test",
@@ -486,7 +486,7 @@
             "estimatedDuration": 317
         },
         {
-            "config": "x-pack/test/functional/config.js",
+            "config": "test/functional/config.js",
             "tags": [
                 "functional.apps.apm.feature_controls.apm_security",
                 "functional.apps.uptime.overview",
@@ -495,7 +495,7 @@
             "estimatedDuration": 324
         },
         {
-            "config": "x-pack/test/functional/config.js",
+            "config": "test/functional/config.js",
             "tags": [
                 "functional.apps.graph.feature_controls.graph_security",
                 "functional.apps.advanced_settings.feature_controls.advanced_settings_spaces",
@@ -504,7 +504,7 @@
             "estimatedDuration": 328
         },
         {
-            "config": "x-pack/test/functional/config.js",
+            "config": "test/functional/config.js",
             "tags": [
                 "functional.apps.monitoring.feature_controls.monitoring_security",
                 "functional.apps.dashboard.feature_controls.dashboard_spaces",
@@ -513,7 +513,7 @@
             "estimatedDuration": 330
         },
         {
-            "config": "x-pack/test/spaces_api_integration/security_and_spaces/config_trial.ts",
+            "config": "test/spaces_api_integration/security_and_spaces/config_trial.ts",
             "tags": [
                 "spaces_api_integration.security_and_spaces.apis.get_all",
                 "spaces_api_integration.security_and_spaces.apis.get",
@@ -522,7 +522,7 @@
             "estimatedDuration": 311
         },
         {
-            "config": "x-pack/test/functional/config.js",
+            "config": "test/functional/config.js",
             "tags": [
                 "functional.apps.uptime.feature_controls.uptime_security",
                 "functional.apps.monitoring.cluster.overview"
@@ -530,7 +530,7 @@
             "estimatedDuration": 300
         },
         {
-            "config": "x-pack/test/functional/config.js",
+            "config": "test/functional/config.js",
             "tags": [
                 "functional.apps.advanced_settings.feature_controls.advanced_settings_security",
                 "functional.apps.machine_learning.feature_controls.ml_security",
@@ -539,7 +539,7 @@
             "estimatedDuration": 387
         },
         {
-            "config": "x-pack/test/functional/config.js",
+            "config": "test/functional/config.js",
             "tags": [
                 "functional.apps.spaces.spaces_selection",
                 "functional.apps.monitoring.cluster.alerts",
@@ -548,7 +548,7 @@
             "estimatedDuration": 376
         },
         {
-            "config": "x-pack/test/functional/config.js",
+            "config": "test/functional/config.js",
             "tags": [
                 "functional.apps.security.doc_level_security_roles",
                 "functional.apps.discover.feature_controls.discover_spaces",
@@ -557,7 +557,7 @@
             "estimatedDuration": 372
         },
         {
-            "config": "x-pack/test/spaces_api_integration/security_and_spaces/config_basic.ts",
+            "config": "test/spaces_api_integration/security_and_spaces/config_basic.ts",
             "tags": [
                 "spaces_api_integration.security_and_spaces.apis.get_all",
                 "spaces_api_integration.security_and_spaces.apis.get",
@@ -567,7 +567,7 @@
             "estimatedDuration": 367
         },
         {
-            "config": "x-pack/test/reporting/configs/generate_api.js",
+            "config": "test/reporting/configs/generate_api.js",
             "tags": [
                 "reporting.api.generate.csv_saved_search",
                 "reporting.api.generate.csv_job_params"
@@ -575,7 +575,7 @@
             "estimatedDuration": 158
         },
         {
-            "config": "x-pack/test/functional/config.js",
+            "config": "test/functional/config.js",
             "tags": [
                 "functional.apps.lens.smokescreen",
                 "functional.apps.security.secure_roles_perm",
@@ -584,7 +584,7 @@
             "estimatedDuration": 342
         },
         {
-            "config": "x-pack/test/saved_object_api_integration/security_and_spaces/config_trial.ts",
+            "config": "test/saved_object_api_integration/security_and_spaces/config_trial.ts",
             "tags": [
                 "saved_object_api_integration.security_and_spaces.apis.bulk_create",
                 "saved_object_api_integration.security_and_spaces.apis.bulk_update",
@@ -594,7 +594,7 @@
             "estimatedDuration": 325
         },
         {
-            "config": "x-pack/test/saved_object_api_integration/security_and_spaces/config_basic.ts",
+            "config": "test/saved_object_api_integration/security_and_spaces/config_basic.ts",
             "tags": [
                 "saved_object_api_integration.security_and_spaces.apis.bulk_create",
                 "saved_object_api_integration.security_and_spaces.apis.bulk_update",
@@ -604,7 +604,7 @@
             "estimatedDuration": 315
         },
         {
-            "config": "x-pack/test/functional/config.js",
+            "config": "test/functional/config.js",
             "tags": [
                 "functional.apps.monitoring.cluster.list",
                 "functional.apps.security.management",
@@ -613,7 +613,7 @@
             "estimatedDuration": 335
         },
         {
-            "config": "x-pack/test/functional/config.js",
+            "config": "test/functional/config.js",
             "tags": [
                 "functional.apps.canvas.feature_controls.canvas_security",
                 "functional.apps.upgrade_assistant.upgrade_assistant",
@@ -622,7 +622,7 @@
             "estimatedDuration": 328
         },
         {
-            "config": "x-pack/test/functional/config.js",
+            "config": "test/functional/config.js",
             "tags": [
                 "functional.apps.maps.documents_source.top_hits",
                 "functional.apps.maps.documents_source.docvalue_fields",
@@ -631,7 +631,7 @@
             "estimatedDuration": 327
         },
         {
-            "config": "x-pack/test/functional/config.js",
+            "config": "test/functional/config.js",
             "tags": [
                 "functional.apps.transform.creation_index_pattern",
                 "functional.apps.machine_learning.data_visualizer.index_data_visualizer",
@@ -640,7 +640,7 @@
             "estimatedDuration": 319
         },
         {
-            "config": "x-pack/test/functional/config.js",
+            "config": "test/functional/config.js",
             "tags": [
                 "functional.apps.monitoring.elasticsearch.nodes",
                 "functional.apps.maps.layer_errors",
@@ -649,7 +649,7 @@
             "estimatedDuration": 310
         },
         {
-            "config": "x-pack/test/functional/config.js",
+            "config": "test/functional/config.js",
             "tags": [
                 "functional.apps.timelion.feature_controls.timelion_spaces",
                 "functional.apps.maps.import_geojson.add_layer_import_panel",
@@ -658,14 +658,14 @@
             "estimatedDuration": 310
         },
         {
-            "config": "x-pack/test/reporting/configs/chromium_api.js",
+            "config": "test/reporting/configs/chromium_api.js",
             "tags": [
                 "reporting.api.usage"
             ],
             "estimatedDuration": 99
         },
         {
-            "config": "x-pack/test/saved_object_api_integration/security_only/config_basic.ts",
+            "config": "test/saved_object_api_integration/security_only/config_basic.ts",
             "tags": [
                 "saved_object_api_integration.security_only.apis.bulk_create",
                 "saved_object_api_integration.security_only.apis.delete",
@@ -679,7 +679,7 @@
             "estimatedDuration": 312
         },
         {
-            "config": "x-pack/test/alerting_api_integration/security_and_spaces/config.ts",
+            "config": "test/alerting_api_integration/security_and_spaces/config.ts",
             "tags": [
                 "alerting_api_integration.security_and_spaces.tests.alerting.update",
                 "alerting_api_integration.security_and_spaces.tests.alerting.find",
@@ -692,7 +692,7 @@
             "estimatedDuration": 311
         },
         {
-            "config": "x-pack/test/spaces_api_integration/security_and_spaces/config_trial.ts",
+            "config": "test/spaces_api_integration/security_and_spaces/config_trial.ts",
             "tags": [
                 "spaces_api_integration.security_and_spaces.apis.update",
                 "spaces_api_integration.security_and_spaces.apis.delete"
@@ -700,7 +700,7 @@
             "estimatedDuration": 157
         },
         {
-            "config": "x-pack/test/saved_object_api_integration/security_only/config_trial.ts",
+            "config": "test/saved_object_api_integration/security_only/config_trial.ts",
             "tags": [
                 "saved_object_api_integration.security_only.apis.bulk_create",
                 "saved_object_api_integration.security_only.apis.delete",
@@ -714,14 +714,14 @@
             "estimatedDuration": 313
         },
         {
-            "config": "x-pack/test/upgrade_assistant_integration/config.js",
+            "config": "test/upgrade_assistant_integration/config.js",
             "tags": [
                 "upgrade_assistant_integration.upgrade_assistant.reindexing"
             ],
             "estimatedDuration": 80
         },
         {
-            "config": "x-pack/test/spaces_api_integration/spaces_only/config.ts",
+            "config": "test/spaces_api_integration/spaces_only/config.ts",
             "tags": [
                 "spaces_api_integration.spaces_only.apis.copy_to_space",
                 "spaces_api_integration.spaces_only.apis.resolve_copy_to_space_conflicts",
@@ -734,7 +734,7 @@
             "estimatedDuration": 143
         },
         {
-            "config": "x-pack/test/api_integration/config.js",
+            "config": "test/api_integration/config.js",
             "tags": [
                 "api_integration.apis.infra.metadata",
                 "api_integration.apis.lens.existing_fields",
@@ -809,7 +809,7 @@
             "estimatedDuration": 300
         },
         {
-            "config": "x-pack/test/saved_object_api_integration/security_and_spaces/config_trial.ts",
+            "config": "test/saved_object_api_integration/security_and_spaces/config_trial.ts",
             "tags": [
                 "saved_object_api_integration.security_and_spaces.apis.resolve_import_errors",
                 "saved_object_api_integration.security_and_spaces.apis.import",
@@ -820,7 +820,7 @@
             "estimatedDuration": 329
         },
         {
-            "config": "x-pack/test/saved_object_api_integration/security_and_spaces/config_basic.ts",
+            "config": "test/saved_object_api_integration/security_and_spaces/config_basic.ts",
             "tags": [
                 "saved_object_api_integration.security_and_spaces.apis.resolve_import_errors",
                 "saved_object_api_integration.security_and_spaces.apis.import",
@@ -831,7 +831,7 @@
             "estimatedDuration": 314
         },
         {
-            "config": "x-pack/test/plugin_api_integration/config.js",
+            "config": "test/plugin_api_integration/config.js",
             "tags": [
                 "plugin_api_integration.task_manager.task_manager_integration",
                 "plugin_api_integration.encrypted_saved_objects.encrypted_saved_objects_api"
@@ -839,21 +839,21 @@
             "estimatedDuration": 100
         },
         {
-            "config": "x-pack/test/spaces_api_integration/security_and_spaces/config_basic.ts",
+            "config": "test/spaces_api_integration/security_and_spaces/config_basic.ts",
             "tags": [
                 "spaces_api_integration.security_and_spaces.apis.delete"
             ],
             "estimatedDuration": 69
         },
         {
-            "config": "x-pack/test/pki_api_integration/config.ts",
+            "config": "test/pki_api_integration/config.ts",
             "tags": [
                 "pki_api_integration.apis.security.pki_auth"
             ],
             "estimatedDuration": 59
         },
         {
-            "config": "x-pack/test/saved_object_api_integration/security_and_spaces/config_trial.ts",
+            "config": "test/saved_object_api_integration/security_and_spaces/config_trial.ts",
             "tags": [
                 "saved_object_api_integration.security_and_spaces.apis.find",
                 "saved_object_api_integration.security_and_spaces.apis.bulk_get"
@@ -861,21 +861,21 @@
             "estimatedDuration": 112
         },
         {
-            "config": "x-pack/test/kerberos_api_integration/config.ts",
+            "config": "test/kerberos_api_integration/config.ts",
             "tags": [
                 "kerberos_api_integration.apis.security.kerberos_login"
             ],
             "estimatedDuration": 56
         },
         {
-            "config": "x-pack/test/kerberos_api_integration/anonymous_access.config.ts",
+            "config": "test/kerberos_api_integration/anonymous_access.config.ts",
             "tags": [
                 "kerberos_api_integration.apis.security.kerberos_login"
             ],
             "estimatedDuration": 55
         },
         {
-            "config": "x-pack/test/saved_object_api_integration/security_and_spaces/config_basic.ts",
+            "config": "test/saved_object_api_integration/security_and_spaces/config_basic.ts",
             "tags": [
                 "saved_object_api_integration.security_and_spaces.apis.find",
                 "saved_object_api_integration.security_and_spaces.apis.bulk_get"
@@ -883,7 +883,7 @@
             "estimatedDuration": 105
         },
         {
-            "config": "x-pack/test/saved_object_api_integration/spaces_only/config.ts",
+            "config": "test/saved_object_api_integration/spaces_only/config.ts",
             "tags": [
                 "saved_object_api_integration.spaces_only.apis.bulk_create",
                 "saved_object_api_integration.spaces_only.apis.bulk_update",
@@ -900,14 +900,14 @@
             "estimatedDuration": 135
         },
         {
-            "config": "x-pack/test/saml_api_integration/config.ts",
+            "config": "test/saml_api_integration/config.ts",
             "tags": [
                 "saml_api_integration.apis.security.saml_login"
             ],
             "estimatedDuration": 53
         },
         {
-            "config": "x-pack/test/api_integration/config.js",
+            "config": "test/api_integration/config.js",
             "tags": [
                 "api_integration.apis.kibana.kql_telemetry.kql_telemetry",
                 "api_integration.apis.logstash.pipeline.load",
@@ -928,7 +928,7 @@
             "estimatedDuration": 300
         },
         {
-            "config": "x-pack/test/alerting_api_integration/spaces_only/config.ts",
+            "config": "test/alerting_api_integration/spaces_only/config.ts",
             "tags": [
                 "alerting_api_integration.spaces_only.tests.actions.type_not_enabled",
                 "alerting_api_integration.spaces_only.tests.alerting.alerts_default_space",
@@ -959,7 +959,7 @@
             "estimatedDuration": 217
         },
         {
-            "config": "x-pack/test/alerting_api_integration/security_and_spaces/config.ts",
+            "config": "test/alerting_api_integration/security_and_spaces/config.ts",
             "tags": [
                 "alerting_api_integration.security_and_spaces.tests.alerting.update_api_key",
                 "alerting_api_integration.security_and_spaces.tests.alerting.get",
@@ -974,21 +974,21 @@
             "estimatedDuration": 271
         },
         {
-            "config": "x-pack/test/licensing_plugin/config.public.ts",
+            "config": "test/licensing_plugin/config.public.ts",
             "tags": [
                 "licensing_plugin.public.updates"
             ],
             "estimatedDuration": 35
         },
         {
-            "config": "x-pack/test/oidc_api_integration/config.ts",
+            "config": "test/oidc_api_integration/config.ts",
             "tags": [
                 "oidc_api_integration.apis.authorization_code_flow.oidc_auth"
             ],
             "estimatedDuration": 35
         },
         {
-            "config": "x-pack/test/saved_object_api_integration/security_only/config_trial.ts",
+            "config": "test/saved_object_api_integration/security_only/config_trial.ts",
             "tags": [
                 "saved_object_api_integration.security_only.apis.update",
                 "saved_object_api_integration.security_only.apis.export",
@@ -997,7 +997,7 @@
             "estimatedDuration": 86
         },
         {
-            "config": "x-pack/test/api_integration/config.js",
+            "config": "test/api_integration/config.js",
             "tags": [
                 "api_integration.apis.monitoring.elasticsearch.nodes",
                 "api_integration.apis.infra.log_entries",
