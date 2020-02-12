@@ -15,7 +15,8 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import { FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import _ from 'lodash';
 import React, { Component } from 'react';
 import { Space, getSpaceColor } from '../../../../../../../../spaces/public';
@@ -35,7 +36,6 @@ interface Props {
   onEdit: (privilegeIndex: number) => void;
   displaySpaces: Space[];
   disabled?: boolean;
-  intl: InjectedIntl;
 }
 
 interface State {
@@ -69,7 +69,7 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
   }
 
   private renderKibanaPrivileges = () => {
-    const { privilegeCalculator, displaySpaces, intl } = this.props;
+    const { privilegeCalculator, displaySpaces } = this.props;
 
     const spacePrivileges = this.getSortedPrivileges();
 
@@ -120,10 +120,12 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
             button = (
               <SpacesPopoverList
                 spaces={this.props.displaySpaces.filter(s => s.id !== '*')}
-                buttonText={this.props.intl.formatMessage({
-                  id: 'xpack.security.management.editRole.spacePrivilegeTable.showAllSpacesLink',
-                  defaultMessage: 'show spaces',
-                })}
+                buttonText={i18n.translate(
+                  'xpack.security.management.editRole.spacePrivilegeTable.showAllSpacesLink',
+                  {
+                    defaultMessage: 'show spaces',
+                  }
+                )}
               />
             );
           } else if (spaces.length > displayedSpaces.length) {
@@ -155,15 +157,18 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
 
           return (
             <div>
-              {displayedSpaces.map((space: TableSpace) => (
-                <EuiBadge
-                  key={space.id}
-                  {...getExtraBadgeProps(space)}
-                  color={getSpaceColor(space)}
-                >
-                  {space.name}
-                </EuiBadge>
-              ))}
+              <span data-test-subj="spacesColumn">
+                {displayedSpaces.map((space: TableSpace) => (
+                  <EuiBadge
+                    key={space.id}
+                    {...getExtraBadgeProps(space)}
+                    color={getSpaceColor(space)}
+                  >
+                    {space.name}
+                  </EuiBadge>
+                ))}
+              </span>
+
               {button}
             </div>
           );
@@ -174,17 +179,24 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
         name: 'Privileges',
         render: (privileges: TableRow['privileges'], record: TableRow) => {
           if (privileges.reserved.length > 0) {
-            return <PrivilegeDisplay privilege={privileges.reserved} />;
+            return (
+              <PrivilegeDisplay
+                privilege={privileges.reserved}
+                data-test-subj={`privilegeColumn`}
+              />
+            );
           }
 
           let icon = <EuiIcon type="empty" size="s" />;
           if (privilegeCalculator.hasSupersededInheritedPrivileges(record.privilegeIndex)) {
             icon = (
-              <EuiIconTip
-                type="alert"
-                size="s"
-                content="This message explains that these privileges are less permissive than global privileges"
-              />
+              <span data-test-subj="spaceTablePrivilegeSupersededWarning">
+                <EuiIconTip
+                  type="alert"
+                  size="s"
+                  content="This message explains that these privileges are less permissive than global privileges"
+                />
+              </span>
             );
           }
 
@@ -197,6 +209,7 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
                     privilegeCalculator.getBasePrivilege(record.privilegeIndex)?.id ??
                     CUSTOM_PRIVILEGE_VALUE
                   }
+                  data-test-subj={`privilegeColumn`}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -213,14 +226,11 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
             render: (record: TableRow) => {
               return (
                 <EuiButtonIcon
-                  aria-label={intl.formatMessage(
+                  aria-label={i18n.translate(
+                    'xpack.security.management.editRole.spacePrivilegeTable.editPrivilegesLabel',
                     {
-                      id:
-                        'xpack.security.management.editRole.spacePrivilegeTable.editPrivilegesLabel',
                       defaultMessage: `Edit privileges for the following spaces: {spaceNames}.`,
-                    },
-                    {
-                      spaceNames: record.spaces.map(s => s.name).join(', '),
+                      values: { spaceNames: record.spaces.map(s => s.name).join(', ') },
                     }
                   )}
                   color={'primary'}
@@ -234,14 +244,11 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
             render: (record: TableRow) => {
               return (
                 <EuiButtonIcon
-                  aria-label={intl.formatMessage(
+                  aria-label={i18n.translate(
+                    'xpack.security.management.editRole.spacePrivilegeTable.deletePrivilegesLabel',
                     {
-                      id:
-                        'xpack.security.management.editRole.spacePrivilegeTable.deletePrivilegesLabel',
                       defaultMessage: `Delete privileges for the following spaces: {spaceNames}.`,
-                    },
-                    {
-                      spaceNames: record.spaces.map(s => s.name).join(', '),
+                      values: { spaceNames: record.spaces.map(s => s.name).join(', ') },
                     }
                   )}
                   color={'danger'}

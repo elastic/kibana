@@ -23,7 +23,8 @@ import {
   EuiTitle,
   EuiErrorBoundary,
 } from '@elastic/eui';
-import { FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component, Fragment } from 'react';
 import { Space } from '../../../../../../../../spaces/public';
 import { Role, copyRole } from '../../../../../../../common/model';
@@ -40,7 +41,6 @@ interface Props {
   privilegeIndex: number;
   onChange: (role: Role) => void;
   onCancel: () => void;
-  intl: InjectedIntl;
 }
 
 interface State {
@@ -107,7 +107,11 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
               this.state.privilegeIndex
             ) && (
               <Fragment>
-                <EuiCallOut color="warning" iconType="alert">
+                <EuiCallOut
+                  color="warning"
+                  iconType="alert"
+                  data-test-subj="spaceFormGlobalPermissionsSupersedeWarning"
+                >
                   This is a warning message explaining how global privileges are more permissive
                   than whatever you decided to set here.
                 </EuiCallOut>
@@ -137,7 +141,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
   }
 
   private getForm = () => {
-    const { intl, spaces } = this.props;
+    const { spaces } = this.props;
 
     const hasSelectedSpaces = this.state.selectedSpaceIds.length > 0;
 
@@ -145,16 +149,17 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
       <EuiForm>
         <EuiFormRow
           fullWidth
-          label={intl.formatMessage({
-            id: 'xpack.security.management.editRole.spacePrivilegeForm.spaceSelectorFormLabel',
-            defaultMessage: 'Spaces',
-          })}
+          label={i18n.translate(
+            'xpack.security.management.editRole.spacePrivilegeForm.spaceSelectorFormLabel',
+            {
+              defaultMessage: 'Spaces',
+            }
+          )}
         >
           <SpaceSelector
             selectedSpaceIds={this.state.selectedSpaceIds}
             onChange={this.onSelectedSpacesChange}
             spaces={spaces}
-            intl={this.props.intl}
           />
         </EuiFormRow>
 
@@ -162,10 +167,12 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
 
         <EuiFormRow
           fullWidth
-          label={intl.formatMessage({
-            id: 'xpack.security.management.editRole.spacePrivilegeForm.privilegeSelectorFormLabel',
-            defaultMessage: 'Privilege',
-          })}
+          label={i18n.translate(
+            'xpack.security.management.editRole.spacePrivilegeForm.privilegeSelectorFormLabel',
+            {
+              defaultMessage: 'Privilege',
+            }
+          )}
         >
           <EuiSuperSelect
             data-test-subj={'basePrivilegeComboBox'}
@@ -366,33 +373,39 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
 
   private getFeatureListLabel = (disabled: boolean) => {
     if (disabled) {
-      return this.props.intl.formatMessage({
-        id: 'xpack.security.management.editRole.spacePrivilegeForm.summaryOfFeaturePrivileges',
-        defaultMessage: 'Summary of feature privileges',
-      });
+      return i18n.translate(
+        'xpack.security.management.editRole.spacePrivilegeForm.summaryOfFeaturePrivileges',
+        {
+          defaultMessage: 'Summary of feature privileges',
+        }
+      );
     } else {
-      return this.props.intl.formatMessage({
-        id: 'xpack.security.management.editRole.spacePrivilegeForm.customizeFeaturePrivileges',
-        defaultMessage: 'Customize by feature',
-      });
+      return i18n.translate(
+        'xpack.security.management.editRole.spacePrivilegeForm.customizeFeaturePrivileges',
+        {
+          defaultMessage: 'Customize by feature',
+        }
+      );
     }
   };
 
   private getFeatureListDescription = (disabled: boolean) => {
     if (disabled) {
-      return this.props.intl.formatMessage({
-        id:
-          'xpack.security.management.editRole.spacePrivilegeForm.featurePrivilegeSummaryDescription',
-        defaultMessage:
-          'Some features might be hidden by the space or affected by a global space privilege.',
-      });
+      return i18n.translate(
+        'xpack.security.management.editRole.spacePrivilegeForm.featurePrivilegeSummaryDescription',
+        {
+          defaultMessage:
+            'Some features might be hidden by the space or affected by a global space privilege.',
+        }
+      );
     } else {
-      return this.props.intl.formatMessage({
-        id:
-          'xpack.security.management.editRole.spacePrivilegeForm.customizeFeaturePrivilegeDescription',
-        defaultMessage:
-          'Increase privilege levels on a per feature basis. Some features might be hidden by the space or affected by a global space privilege.',
-      });
+      return i18n.translate(
+        'xpack.security.management.editRole.spacePrivilegeForm.customizeFeaturePrivilegeDescription',
+        {
+          defaultMessage:
+            'Increase privilege levels on a per feature basis. Some features might be hidden by the space or affected by a global space privilege.',
+        }
+      );
     }
   };
 
@@ -403,10 +416,12 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
           <EuiCallOut
             color="primary"
             iconType="iInCircle"
-            title={this.props.intl.formatMessage({
-              id: 'xpack.security.management.editRole.spacePrivilegeForm.globalPrivilegeNotice',
-              defaultMessage: 'These privileges will apply to all current and future spaces.',
-            })}
+            title={i18n.translate(
+              'xpack.security.management.editRole.spacePrivilegeForm.globalPrivilegeNotice',
+              {
+                defaultMessage: 'These privileges will apply to all current and future spaces.',
+              }
+            )}
           />
         </EuiFormRow>
       );

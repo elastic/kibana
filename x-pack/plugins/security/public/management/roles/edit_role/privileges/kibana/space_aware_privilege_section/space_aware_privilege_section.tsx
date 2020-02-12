@@ -12,7 +12,8 @@ import {
   EuiSpacer,
   EuiErrorBoundary,
 } from '@elastic/eui';
-import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import _ from 'lodash';
 import React, { Component, Fragment } from 'react';
 import { Capabilities } from 'src/core/public';
@@ -32,7 +33,6 @@ interface Props {
   onChange: (role: Role) => void;
   editable: boolean;
   validator: RoleValidator;
-  intl: InjectedIntl;
   uiCapabilities: Capabilities;
 }
 
@@ -43,13 +43,15 @@ interface State {
   showPrivilegeMatrix: boolean;
 }
 
-class SpaceAwarePrivilegeSectionUI extends Component<Props, State> {
+export class SpaceAwarePrivilegeSection extends Component<Props, State> {
   private globalSpaceEntry: Space = {
     id: '*',
-    name: this.props.intl.formatMessage({
-      id: 'xpack.security.management.editRole.spaceAwarePrivilegeForm.globalSpacesName',
-      defaultMessage: '* Global (all spaces)',
-    }),
+    name: i18n.translate(
+      'xpack.security.management.editRole.spaceAwarePrivilegeForm.globalSpacesName',
+      {
+        defaultMessage: '* Global (all spaces)',
+      }
+    ),
     color: '#D3DAE6',
     initials: '*',
     disabledFeatures: [],
@@ -119,7 +121,6 @@ class SpaceAwarePrivilegeSectionUI extends Component<Props, State> {
             <PrivilegeSpaceForm
               role={this.props.role}
               kibanaPrivileges={this.props.kibanaPrivileges}
-              intl={this.props.intl}
               onChange={this.onSpacesPrivilegeChange}
               onCancel={this.onCancelEditPrivileges}
               spaces={this.getAvailableSpaces(this.state.privilegeIndex)}
@@ -147,7 +148,6 @@ class SpaceAwarePrivilegeSectionUI extends Component<Props, State> {
           }
           onChange={this.props.onChange}
           onEdit={this.onEditSpacesPrivileges}
-          intl={this.props.intl}
           disabled={!this.props.editable}
         />
       );
@@ -267,5 +267,3 @@ class SpaceAwarePrivilegeSectionUI extends Component<Props, State> {
     this.setState({ showSpacePrivilegeEditor: false });
   };
 }
-
-export const SpaceAwarePrivilegeSection = injectI18n(SpaceAwarePrivilegeSectionUI);

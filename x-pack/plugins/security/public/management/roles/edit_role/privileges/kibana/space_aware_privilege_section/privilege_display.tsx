@@ -3,16 +3,14 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { EuiIcon, EuiIconTip, EuiText, IconType, PropsOf, EuiToolTip } from '@elastic/eui';
+import { EuiIcon, EuiText, PropsOf } from '@elastic/eui';
 import _ from 'lodash';
 import React, { ReactNode, FC } from 'react';
 import { NO_PRIVILEGE_VALUE } from '../constants';
 
 interface Props extends PropsOf<typeof EuiText> {
   privilege: string | string[] | undefined;
-  iconType?: IconType;
-  iconTooltipContent?: ReactNode;
-  tooltipContent?: ReactNode;
+  'data-test-subj'?: string;
 }
 
 export const PrivilegeDisplay: FC<Props> = (props: Props) => {
@@ -20,17 +18,9 @@ export const PrivilegeDisplay: FC<Props> = (props: Props) => {
 };
 
 const SimplePrivilegeDisplay: FC<Props> = (props: Props) => {
-  const { privilege, iconType, iconTooltipContent, tooltipContent, ...rest } = props;
+  const { privilege, ...rest } = props;
 
-  const text = (
-    <EuiText {...rest}>
-      {getDisplayValue(privilege)} {getIconTip(iconType, iconTooltipContent)}
-    </EuiText>
-  );
-
-  if (tooltipContent) {
-    return <EuiToolTip content={tooltipContent}>{text}</EuiToolTip>;
-  }
+  const text = <EuiText {...rest}>{getDisplayValue(privilege)}</EuiText>;
 
   return text;
 };
@@ -54,24 +44,6 @@ function getDisplayValue(privilege: string | string[] | undefined) {
   }
 
   return displayValue;
-}
-
-function getIconTip(iconType?: IconType, tooltipContent?: ReactNode) {
-  if (!iconType || !tooltipContent) {
-    return null;
-  }
-
-  return (
-    <EuiIconTip
-      iconProps={{
-        className: 'eui-alignTop',
-      }}
-      color="subdued"
-      type={iconType}
-      content={tooltipContent}
-      size={'s'}
-    />
-  );
 }
 
 function coerceToArray(privilege: string | string[] | undefined): string[] {
