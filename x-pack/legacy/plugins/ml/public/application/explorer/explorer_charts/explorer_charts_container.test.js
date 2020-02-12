@@ -14,7 +14,6 @@ import { chartLimits } from '../../util/chart_utils';
 import { getDefaultChartsData } from './explorer_charts_container_service';
 import { ExplorerChartsContainer } from './explorer_charts_container';
 
-import './explorer_chart_single_metric.test.mocks';
 import { chartData } from './__mocks__/mock_chart_data';
 import seriesConfig from './__mocks__/mock_series_config_filebeat.json';
 import seriesConfigRare from './__mocks__/mock_series_config_rare.json';
@@ -38,22 +37,6 @@ jest.mock('../../services/job_service', () => ({
     getJob: jest.fn(),
   },
 }));
-
-// The mocks for ui/chrome and ui/timefilter are copied from charts_utils.test.js
-// TODO: Refactor the involved tests to avoid this duplication
-jest.mock(
-  'ui/chrome',
-  () => ({
-    addBasePath: () => '/api/ml',
-    getBasePath: () => {
-      return '<basepath>';
-    },
-    getInjected: () => true,
-  }),
-  { virtual: true }
-);
-
-jest.mock('ui/new_platform');
 
 describe('ExplorerChartsContainer', () => {
   const mockedGetBBox = { x: 0, y: -11.5, width: 12.1875, height: 14.5 };

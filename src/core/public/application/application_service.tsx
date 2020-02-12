@@ -276,7 +276,7 @@ export class ApplicationService {
         appId,
         { path, absolute = false }: { path?: string; absolute?: boolean } = {}
       ) => {
-        const relUrl = getAppUrl(availableMounters, appId, path);
+        const relUrl = http.basePath.prepend(getAppUrl(availableMounters, appId, path));
         return absolute ? relativeToAbsolute(relUrl) : relUrl;
       },
       navigateToApp: async (appId, { path, state }: { path?: string; state?: any } = {}) => {

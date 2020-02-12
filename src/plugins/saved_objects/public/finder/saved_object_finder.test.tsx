@@ -695,4 +695,34 @@ describe('SavedObjectsFinder', () => {
       expect(wrapper.containsMatchingElement(<EuiLoadingSpinner />)).toBe(false);
     });
   });
+
+  it('should render with children', async () => {
+    const core = coreMock.createStart();
+    ((core.savedObjects.client.find as any) as jest.SpyInstance).mockImplementation(() =>
+      Promise.resolve({ savedObjects: [doc, doc2] })
+    );
+    core.uiSettings.get.mockImplementation(() => 10);
+
+    const wrapper = shallow(
+      <SavedObjectFinder
+        savedObjects={core.savedObjects}
+        uiSettings={core.uiSettings}
+        savedObjectMetaData={[
+          {
+            type: 'search',
+            name: 'Search',
+            getIconForSavedObject: () => 'search',
+          },
+          {
+            type: 'vis',
+            name: 'Vis',
+            getIconForSavedObject: () => 'visLine',
+          },
+        ]}
+      >
+        <button id="testChildButton">Dummy text</button>
+      </SavedObjectFinder>
+    );
+    expect(wrapper.exists('#testChildButton')).toBe(true);
+  });
 });
