@@ -397,7 +397,6 @@ export default class BaseOptimizer {
         alias: {
           ...this.uiBundles.getAliases(),
           tinymath: require.resolve('tinymath/lib/tinymath.es5.js'),
-          querystring: require.resolve('querystring-browser'),
         },
       },
 
