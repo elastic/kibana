@@ -29,7 +29,7 @@ export const catFieldExamplesSchema = {
 
 export const chartSchema = {
   indexPatternTitle: schema.string(),
-  timefield: schema.maybe(schema.string()),
+  timeField: schema.maybe(schema.string()),
   start: schema.maybe(schema.number()),
   end: schema.maybe(schema.number()),
   intervalMs: schema.number(),
@@ -48,8 +48,11 @@ export const forceStartDatafeedSchema = {
 };
 
 export const jobIdsSchema = {
-  jobIds: schema.oneOf([schema.string(), schema.arrayOf(schema.maybe(schema.string()))]),
+  jobIds: schema.maybe(
+    schema.oneOf([schema.string(), schema.arrayOf(schema.maybe(schema.string()))])
+  ),
 };
+
 export const jobsWithTimerangeSchema = { dateFormatTz: schema.maybe(schema.string()) };
 
 export const lookBackProgressSchema = {
