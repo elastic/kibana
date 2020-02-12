@@ -5,7 +5,7 @@
  */
 
 import { getHostDetailsEventsKqlQueryExpression, getHostDetailsPageFilters } from './helpers';
-import { esFilters } from '../../../../../../../../src/plugins/data/common/es_query';
+import { Filter } from '../../../../../../../../src/plugins/data/common/es_query';
 
 describe('hosts page helpers', () => {
   describe('getHostDetailsEventsKqlQueryExpression', () => {
@@ -39,7 +39,7 @@ describe('hosts page helpers', () => {
 
   describe('getHostDetailsPageFilters', () => {
     it('correctly constructs pageFilters for the given hostName', () => {
-      const expected: esFilters.Filter[] = [
+      const expected: Filter[] = [
         {
           meta: {
             alias: null,
