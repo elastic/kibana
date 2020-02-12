@@ -263,7 +263,6 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
 
   describe('Categorization example endpoint - ', function() {
-    this.tags(['james']);
     before(async () => {
       await esArchiver.load('ml/categorization');
     });
