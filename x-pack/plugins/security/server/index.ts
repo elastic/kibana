@@ -26,6 +26,9 @@ export {
 } from './authentication';
 export { SecurityPluginSetup };
 export { AuthenticatedUser } from '../common/model';
+// The featurePrivilegeIterator should only be consumed within tests to verify that feature privileges
+// are setup correctly.
+export { featurePrivilegeIterator } from './authorization';
 
 export const config: PluginConfigDescriptor<TypeOf<typeof ConfigSchema>> = {
   schema: ConfigSchema,

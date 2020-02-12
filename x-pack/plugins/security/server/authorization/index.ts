@@ -34,6 +34,7 @@ import { SecurityLicense } from '../../common/licensing';
 
 export { Actions } from './actions';
 export { CheckSavedObjectsPrivileges } from './check_saved_objects_privileges';
+export { featurePrivilegeIterator } from './privileges';
 
 interface SetupAuthorizationParams {
   packageVersion: string;
