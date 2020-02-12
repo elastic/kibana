@@ -19,7 +19,7 @@
 
 /* eslint-disable dot-notation */
 import { TelemetrySender } from './telemetry_sender';
-import { mockTelemetryService } from '../telemetry.mock';
+import { mockTelemetryService } from '../mocks';
 import { REPORT_INTERVAL_MS, LOCALSTORAGE_KEY } from '../../common/constants';
 
 class LocalStorageMock implements Partial<Storage> {

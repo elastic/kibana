@@ -18,7 +18,7 @@
  */
 
 /* eslint-disable dot-notation */
-import { mockTelemetryNotifications, mockTelemetryService } from '../../telemetry.mock';
+import { mockTelemetryNotifications, mockTelemetryService } from '../../mocks';
 
 describe('onSetOptInClick', () => {
   it('sets setting successfully and removes banner', async () => {

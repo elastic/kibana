@@ -18,7 +18,7 @@
  */
 
 /* eslint-disable dot-notation */
-import { mockTelemetryService } from '../telemetry.mock';
+import { mockTelemetryService } from '../mocks';
 
 const mockSubtract = jest.fn().mockImplementation(() => {
   return {
