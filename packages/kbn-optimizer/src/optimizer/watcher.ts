@@ -18,7 +18,7 @@
  */
 
 import * as Rx from 'rxjs';
-import { take, map } from 'rxjs/operators';
+import { take, map, share } from 'rxjs/operators';
 import Watchpack from 'watchpack';
 
 import { debounceTimeBuffer, Bundle } from '../common';
@@ -52,7 +52,7 @@ export class Watcher {
     ignored: /node_modules\/([^\/]+[\/])*(?!package.json)([^\/]+)$/,
   });
 
-  private readonly change$ = Rx.fromEvent<[string]>(this.watchpack, 'change');
+  private readonly change$ = Rx.fromEvent<[string]>(this.watchpack, 'change').pipe(share());
 
   public getNextChange$(bundles: Bundle[], startTime: number) {
     return Rx.merge(
