@@ -25,30 +25,17 @@ export const TimeRuler: React.FC<TimeRulerProps> = ({ end, height, start, tickCo
   const ticks = yScale.ticks(tickCount);
   const formatTick = yScale.tickFormat();
 
-  const dateModLabel = (() => {
-    for (let i = 0; i < ticks.length; i++) {
-      const tickLabel = formatTick(ticks[i]);
-      if (!tickLabel[0].match(/[0-9]/)) {
-        return i % 12;
-      }
-    }
-  })();
-
   return (
     <g>
       {ticks.map((tick, tickIndex) => {
         const y = yScale(tick);
-        const isLabeledTick = tickIndex % 12 === dateModLabel;
-        const tickStartX = isLabeledTick ? 0 : width - 4;
 
         return (
           <g key={`tick${tickIndex}`}>
-            {isLabeledTick && (
-              <TimeRulerTickLabel x={0} y={y - 4}>
-                {formatTick(tick)}
-              </TimeRulerTickLabel>
-            )}
-            <TimeRulerGridLine isDark={isLabeledTick} x1={tickStartX} y1={y} x2={width} y2={y} />
+            <TimeRulerTickLabel x={0} y={y - 4}>
+              {formatTick(tick)}
+            </TimeRulerTickLabel>
+            <TimeRulerGridLine x1={0} y1={y} x2={width} y2={y} />
           </g>
         );
       })}
@@ -66,15 +53,11 @@ const TimeRulerTickLabel = euiStyled.text`
   pointer-events: none;
 `;
 
-const TimeRulerGridLine = euiStyled.line<{ isDark: boolean }>`
+const TimeRulerGridLine = euiStyled.line`
   stroke: ${props =>
-    props.isDark
-      ? props.theme.darkMode
-        ? props.theme.eui.euiColorDarkestShade
-        : props.theme.eui.euiColorDarkShade
-      : props.theme.darkMode
-      ? props.theme.eui.euiColorDarkShade
-      : props.theme.eui.euiColorMediumShade};
+    props.theme.darkMode
+      ? props.theme.eui.euiColorDarkestShade
+      : props.theme.eui.euiColorDarkShade};
   stroke-opacity: 0.5;
   stroke-width: 1px;
 `;

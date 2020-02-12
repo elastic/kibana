@@ -119,7 +119,7 @@ export class LogMinimap extends React.Component<LogMinimapProps, LogMinimapState
     } = this.props;
     const { timeCursorY, target } = this.state;
     const [minTime, maxTime] = calculateYScale(start, end, height).domain();
-    const tickCount = height ? Math.floor(height / 8) : 12;
+    const tickCount = height ? Math.floor(height / 50) : 12;
 
     return (
       <MinimapWrapper
