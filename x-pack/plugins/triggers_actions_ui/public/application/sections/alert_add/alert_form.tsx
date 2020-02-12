@@ -28,7 +28,6 @@ import {
   EuiButtonEmpty,
   EuiHorizontalRule,
 } from '@elastic/eui';
-import { useAppDependencies } from '../../app_context';
 import { loadAlertTypes } from '../../lib/alert_api';
 import { loadActionTypes, loadAllActions } from '../../lib/action_connector_api';
 import { AlertReducerAction } from './alert_reducer';
@@ -42,9 +41,10 @@ import {
   ActionConnector,
   AlertTypeIndex,
 } from '../../../types';
-import { getTimeOptions } from '../../lib/get_time_options';
 import { SectionLoading } from '../../components/section_loading';
 import { ConnectorAddModal } from '../action_connector_form/connector_add_modal';
+import { getTimeOptions } from '../../../common/lib/get_time_options';
+import { useAlertsContext } from '../../context/alerts_context';
 
 export function validateBaseProperties(alertObject: Alert) {
   const validationResult = { errors: {} };
@@ -81,12 +81,12 @@ export function validateBaseProperties(alertObject: Alert) {
 
 interface AlertFormProps {
   alert: Alert;
-  canChangeTrigger?: boolean; // to hide Change trigger button
   dispatch: React.Dispatch<AlertReducerAction>;
   errors: IErrorObject;
   serverError: {
     body: { message: string; error: string };
   } | null;
+  canChangeTrigger?: boolean; // to hide Change trigger button
 }
 
 interface ActiveActionConnectorState {
@@ -101,7 +101,9 @@ export const AlertForm = ({
   errors,
   serverError,
 }: AlertFormProps) => {
-  const { http, toastNotifications, alertTypeRegistry, actionTypeRegistry } = useAppDependencies();
+  const alertsContext = useAlertsContext();
+  const { http, toastNotifications, alertTypeRegistry, actionTypeRegistry } = alertsContext;
+
   const [alertTypeModel, setAlertTypeModel] = useState<AlertTypeModel | null>(
     alertTypeRegistry.get(alert.alertTypeId)
   );
@@ -133,12 +135,14 @@ export const AlertForm = ({
         }
         setActionTypesIndex(index);
       } catch (e) {
-        toastNotifications.addDanger({
-          title: i18n.translate(
-            'xpack.triggersActionsUI.sections.alertForm.unableToLoadActionTypesMessage',
-            { defaultMessage: 'Unable to load action types' }
-          ),
-        });
+        if (toastNotifications) {
+          toastNotifications.addDanger({
+            title: i18n.translate(
+              'xpack.triggersActionsUI.sections.alertForm.unableToLoadActionTypesMessage',
+              { defaultMessage: 'Unable to load action types' }
+            ),
+          });
+        }
       } finally {
         setIsLoadingActionTypes(false);
       }
@@ -162,14 +166,19 @@ export const AlertForm = ({
         for (const alertTypeItem of alertTypes) {
           index[alertTypeItem.id] = alertTypeItem;
         }
+        if (alert.alertTypeId) {
+          setDefaultActionGroup(index[alert.alertTypeId].actionGroups[0]);
+        }
         setAlertTypesIndex(index);
       } catch (e) {
-        toastNotifications.addDanger({
-          title: i18n.translate(
-            'xpack.triggersActionsUI.sections.alertForm.unableToLoadAlertTypesMessage',
-            { defaultMessage: 'Unable to load alert types' }
-          ),
-        });
+        if (toastNotifications) {
+          toastNotifications.addDanger({
+            title: i18n.translate(
+              'xpack.triggersActionsUI.sections.alertForm.unableToLoadAlertTypesMessage',
+              { defaultMessage: 'Unable to load alert types' }
+            ),
+          });
+        }
       }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -207,14 +216,16 @@ export const AlertForm = ({
       const actionsResponse = await loadAllActions({ http });
       setConnectors(actionsResponse.data);
     } catch (e) {
-      toastNotifications.addDanger({
-        title: i18n.translate(
-          'xpack.triggersActionsUI.sections.alertForm.unableToLoadActionsMessage',
-          {
-            defaultMessage: 'Unable to load connectors',
-          }
-        ),
-      });
+      if (toastNotifications) {
+        toastNotifications.addDanger({
+          title: i18n.translate(
+            'xpack.triggersActionsUI.sections.alertForm.unableToLoadActionsMessage',
+            {
+              defaultMessage: 'Unable to load connectors',
+            }
+          ),
+        });
+      }
     }
   }
 
@@ -613,10 +624,11 @@ export const AlertForm = ({
       </EuiFlexGroup>
       {AlertParamsExpressionComponent ? (
         <AlertParamsExpressionComponent
-          alert={alert}
+          alertParams={alert.params}
           errors={errors}
           setAlertParams={setAlertParams}
           setAlertProperty={setAlertProperty}
+          alertsContext={alertsContext}
         />
       ) : null}
       <EuiSpacer size="xl" />
@@ -778,7 +790,7 @@ export const AlertForm = ({
                   fullWidth
                   compressed
                   value={alertIntervalUnit}
-                  options={getTimeOptions((alertInterval ? alertInterval : 1).toString())}
+                  options={getTimeOptions(alertInterval ?? 1)}
                   onChange={e => {
                     setAlertIntervalUnit(e.target.value);
                     setScheduleProperty('interval', `${alertInterval}${e.target.value}`);
@@ -810,7 +822,7 @@ export const AlertForm = ({
                 <EuiSelect
                   compressed
                   value={alertThrottleUnit}
-                  options={getTimeOptions((alertThrottle ? alertThrottle : 1).toString())}
+                  options={getTimeOptions(alertThrottle ?? 1)}
                   onChange={e => {
                     setAlertThrottleUnit(e.target.value);
                     setAlertProperty('throttle', `${alertThrottle}${e.target.value}`);
@@ -851,6 +863,10 @@ export const AlertForm = ({
             connectors.push(savedAction);
             setActionProperty('id', savedAction.id, activeActionItem.index);
           }}
+          actionTypeRegistry={actionTypeRegistry}
+          alertTypeRegistry={alertTypeRegistry}
+          http={http}
+          toastNotifications={toastNotifications}
         />
       ) : null}
     </EuiForm>

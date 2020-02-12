@@ -24,31 +24,22 @@
  * directly where they are needed.
  */
 
-import chrome from 'ui/chrome';
-
-export const legacyChrome = chrome;
 export { SavedObjectSaveOpts } from 'ui/saved_objects/types';
 export { npSetup, npStart } from 'ui/new_platform';
-export { IPrivate } from 'ui/private';
 export { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
-// @ts-ignore
-export { ConfirmationButtonTypes } from 'ui/modals/confirm_modal';
-export { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
 export { KbnUrl } from 'ui/url/kbn_url';
-// @ts-ignore
-export { PrivateProvider } from 'ui/private/private';
 // @ts-ignore
 export { createTopNavDirective, createTopNavHelper } from 'ui/kbn_top_nav/kbn_top_nav';
 // @ts-ignore
-export { PromiseServiceCreator } from 'ui/promises/promises';
-// @ts-ignore
 export { KbnUrlProvider, RedirectWhenMissingProvider } from 'ui/url/index';
-// @ts-ignore
-export { confirmModalFactory } from 'ui/modals/confirm_modal';
-export { configureAppAngularModule } from 'ui/legacy_compat';
-export { ensureDefaultIndexPattern } from 'ui/legacy_compat';
 export { IInjector } from 'ui/chrome';
 export { SavedObjectLoader } from 'ui/saved_objects';
-export { VISUALIZE_EMBEDDABLE_TYPE } from '../../../visualizations/public/embeddable';
-export { registerTimefilterWithGlobalStateFactory } from 'ui/timefilter/setup_router';
 export { absoluteToParsedUrl } from 'ui/url/absolute_to_parsed_url';
+export {
+  configureAppAngularModule,
+  ensureDefaultIndexPattern,
+  IPrivate,
+  migrateLegacyQuery,
+  PrivateProvider,
+  PromiseServiceCreator,
+} from '../../../../../plugins/kibana_legacy/public';
