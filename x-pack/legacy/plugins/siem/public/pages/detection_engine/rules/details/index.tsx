@@ -60,7 +60,7 @@ import * as i18n from './translations';
 import { GlobalTime } from '../../../../containers/global_time';
 import { signalsHistogramOptions } from '../../components/signals_histogram_panel/config';
 import { InputsModelId } from '../../../../store/inputs/constants';
-import { esFilters } from '../../../../../../../../../src/plugins/data/common/es_query';
+import { Filter } from '../../../../../../../../../src/plugins/data/common/es_query';
 import { Query } from '../../../../../../../../../src/plugins/data/common/query';
 import { inputsSelectors } from '../../../../store/inputs';
 import { State } from '../../../../store';
@@ -72,7 +72,7 @@ import { FailureHistory } from './failure_history';
 import { RuleStatus } from '../components/rule_status';
 
 interface ReduxProps {
-  filters: esFilters.Filter[];
+  filters: Filter[];
   query: Query;
 }
 

@@ -26,12 +26,10 @@ import {
 // @ts-ignore
 import { onBrushEvent } from './filters/brush_event';
 import {
-  esFilters,
+  Filter,
   FilterManager,
   TimefilterContract,
-  changeTimeFilter,
-  extractTimeFilter,
-  mapAndFlattenFilters,
+  esFilters,
 } from '../../../../../plugins/data/public';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { getIndexPatterns } from '../../../../../plugins/data/public/services';
@@ -45,7 +43,7 @@ interface ActionContext {
 
 async function isCompatible(context: ActionContext) {
   try {
-    const filters: esFilters.Filter[] = (await onBrushEvent(context.data, getIndexPatterns)) || [];
+    const filters: Filter[] = (await onBrushEvent(context.data, getIndexPatterns)) || [];
     return filters.length > 0;
   } catch {
     return false;
@@ -70,18 +68,18 @@ export function selectRangeAction(
         throw new IncompatibleActionError();
       }
 
-      const filters: esFilters.Filter[] = (await onBrushEvent(data, getIndexPatterns)) || [];
+      const filters: Filter[] = (await onBrushEvent(data, getIndexPatterns)) || [];
 
-      const selectedFilters: esFilters.Filter[] = mapAndFlattenFilters(filters);
+      const selectedFilters: Filter[] = esFilters.mapAndFlattenFilters(filters);
 
       if (timeFieldName) {
-        const { timeRangeFilter, restOfFilters } = extractTimeFilter(
+        const { timeRangeFilter, restOfFilters } = esFilters.extractTimeFilter(
           timeFieldName,
           selectedFilters
         );
         filterManager.addFilters(restOfFilters);
         if (timeRangeFilter) {
-          changeTimeFilter(timeFilter, timeRangeFilter);
+          esFilters.changeTimeFilter(timeFilter, timeRangeFilter);
         }
       } else {
         filterManager.addFilters(selectedFilters);
