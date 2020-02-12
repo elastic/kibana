@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
 import { chunk } from 'lodash';
 import { SearchResponse } from 'elasticsearch';
 import { CATEGORY_EXAMPLES_SAMPLE_SIZE } from '../../../../../common/constants/new_job';
@@ -160,12 +159,6 @@ export function categorizationExamplesProvider(
     end: number,
     analyzer: CategorizationAnalyzer
   ) {
-    // due to the use of the _analyze endpoint which is called by the kibana user,
-    // basic job creation privileges are required to use this endpoint
-    if ((await hasPermissionToCreateJobs()) === false) {
-      throw Boom.forbidden('Insufficient privileges, the machine_learning_admin role is required.');
-    }
-
     const resp = await categorizationExamples(
       indexPatternTitle,
       query,
@@ -209,23 +202,6 @@ export function categorizationExamplesProvider(
       sampleSize,
       examples: processedExamples,
     };
-  }
-
-  async function hasPermissionToCreateJobs(): Promise<boolean> {
-    if (isSecurityDisabled === true) {
-      return true;
-    }
-
-    const resp = await callWithRequest('ml.privilegeCheck', {
-      body: {
-        cluster: [
-          'cluster:admin/xpack/ml/job/put',
-          'cluster:admin/xpack/ml/job/open',
-          'cluster:admin/xpack/ml/datafeeds/put',
-        ],
-      },
-    });
-    return resp.has_all_requested;
   }
 
   return {
