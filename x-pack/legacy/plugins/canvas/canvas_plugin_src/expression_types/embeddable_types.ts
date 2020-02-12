@@ -6,7 +6,7 @@
 
 // @ts-ignore
 import { MAP_SAVED_OBJECT_TYPE } from '../../../maps/common/constants';
-import { LENS_EMBEDDABLE_TYPE } from '../../../lens/common/constants';
+import { LENS_EMBEDDABLE_TYPE } from '../../../../../plugins/lens/common/constants';
 import { VISUALIZE_EMBEDDABLE_TYPE } from '../../../../../../src/legacy/core_plugins/visualizations/public/embeddable/constants';
 import { SEARCH_EMBEDDABLE_TYPE } from '../../../../../../src/legacy/core_plugins/kibana/public/discover/np_ready/embeddable/constants';
 
