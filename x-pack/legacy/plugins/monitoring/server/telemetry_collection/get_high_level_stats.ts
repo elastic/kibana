@@ -271,8 +271,8 @@ export async function fetchHighLevelStats<
   server: StatsCollectionConfig['server'],
   callCluster: StatsCollectionConfig['callCluster'],
   clusterUuids: string[],
-  start: StatsCollectionConfig['start'],
-  end: StatsCollectionConfig['end'],
+  start: StatsCollectionConfig['start'] | undefined,
+  end: StatsCollectionConfig['end'] | undefined,
   product: string
 ): Promise<SearchResponse<T>> {
   const config = server.config();
@@ -361,8 +361,8 @@ export function fetchKibanaPluginsStats(
   server: StatsCollectionConfig['server'],
   callCluster: StatsCollectionConfig['callCluster'],
   clusterUuids: string[],
-  start: StatsCollectionConfig['start'],
-  end: StatsCollectionConfig['end']
+  start: StatsCollectionConfig['start'] | undefined,
+  end: StatsCollectionConfig['end'] | undefined
 ) {
   const filters: object[] = [
     // Filter by Cluster UUIDs
