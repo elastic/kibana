@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { esFilters } from '../../../../../../../src/plugins/data/server';
+import { Filter } from '../../../../../../../src/plugins/data/server';
 import { IRuleStatusAttributes } from './rules/types';
 
-export type PartialFilter = Partial<esFilters.Filter>;
+export type PartialFilter = Partial<Filter>;
 
 export interface IMitreAttack {
   id: string;

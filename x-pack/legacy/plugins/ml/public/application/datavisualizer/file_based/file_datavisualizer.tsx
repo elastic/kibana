@@ -5,9 +5,9 @@
  */
 
 import React, { FC, Fragment } from 'react';
-import { timefilter } from 'ui/timefilter';
+import { IUiSettingsClient } from 'src/core/public';
 
-import { KibanaConfigTypeFix } from '../../contexts/kibana';
+import { useMlKibana } from '../../contexts/kibana';
 import { NavigationMenu } from '../../components/navigation_menu';
 import { getIndexPatternsContract } from '../../util/index_utils';
 
@@ -15,10 +15,12 @@ import { getIndexPatternsContract } from '../../util/index_utils';
 import { FileDataVisualizerView } from './components/file_datavisualizer_view/index';
 
 export interface FileDataVisualizerPageProps {
-  kibanaConfig: KibanaConfigTypeFix;
+  kibanaConfig: IUiSettingsClient;
 }
 
 export const FileDataVisualizerPage: FC<FileDataVisualizerPageProps> = ({ kibanaConfig }) => {
+  const { services } = useMlKibana();
+  const { timefilter } = services.data.query.timefilter;
   timefilter.disableTimeRangeSelector();
   timefilter.disableAutoRefreshSelector();
   const indexPatterns = getIndexPatternsContract();
