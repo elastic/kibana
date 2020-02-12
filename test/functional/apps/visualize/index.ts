@@ -20,11 +20,13 @@
 import { FtrProviderContext } from '../../ftr_provider_context.d';
 
 // eslint-disable-next-line @typescript-eslint/no-namespace, import/no-default-export
-export default function({ getService, loadTestFile }: FtrProviderContext) {
+export default function({ getService, getPageObjects, loadTestFile }: FtrProviderContext) {
   const browser = getService('browser');
   const log = getService('log');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
+  const PageObjects = getPageObjects(['common']);
+  let isOss = true;
 
   describe('visualize app', () => {
     before(async () => {
@@ -37,6 +39,7 @@ export default function({ getService, loadTestFile }: FtrProviderContext) {
         defaultIndex: 'logstash-*',
         'format:bytes:defaultPattern': '0,0.[000]b',
       });
+      isOss = await PageObjects.common.isOss();
     });
 
     describe('', function() {
@@ -80,7 +83,6 @@ export default function({ getService, loadTestFile }: FtrProviderContext) {
       this.tags('ciGroup12');
 
       loadTestFile(require.resolve('./_tag_cloud'));
-      loadTestFile(require.resolve('./_tile_map'));
       loadTestFile(require.resolve('./_vertical_bar_chart'));
       loadTestFile(require.resolve('./_vertical_bar_chart_nontimeindex'));
       loadTestFile(require.resolve('./_tsvb_chart'));
@@ -88,6 +90,9 @@ export default function({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./_tsvb_markdown'));
       loadTestFile(require.resolve('./_tsvb_table'));
       loadTestFile(require.resolve('./_vega_chart'));
+      if (!isOss) {
+        loadTestFile(require.resolve('./_tile_map'));
+      }
     });
   });
 }

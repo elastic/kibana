@@ -29,6 +29,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
   const pieChart = getService('pieChart');
   const renderable = getService('renderable');
   const dashboardExpect = getService('dashboardExpect');
+  const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['common', 'header', 'home', 'dashboard', 'timePicker']);
 
   describe('sample data', function describeIndexTests() {
@@ -42,6 +43,9 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
         'machine_learning_user',
       ]);
       await PageObjects.header.waitUntilLoadingHasFinished();
+      await kibanaServer.uiSettings.replace({
+        pageNavigation: 'individual',
+      });
     });
 
     after(async () => {
@@ -91,6 +95,9 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       beforeEach(async () => {
         await PageObjects.common.navigateToUrl('home', 'tutorial_directory/sampleData');
         await PageObjects.header.waitUntilLoadingHasFinished();
+        // await kibanaServer.uiSettings.replace({
+        //   pageNavigation: 'individual',
+        // });
       });
 
       it('should launch sample flights data set dashboard', async () => {

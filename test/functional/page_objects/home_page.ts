@@ -19,9 +19,12 @@
 
 import { FtrProviderContext } from '../ftr_provider_context';
 
-export function HomePageProvider({ getService }: FtrProviderContext) {
+export function HomePageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
+  const find = getService('find');
+  const PageObjects = getPageObjects(['common']);
+  let isOss = true;
 
   class HomePage {
     async clickSynopsis(title: string) {
@@ -66,6 +69,15 @@ export function HomePageProvider({ getService }: FtrProviderContext) {
     async launchSampleDataSet(id: string) {
       await this.addSampleDataSet(id);
       await testSubjects.click(`launchSampleDataSet${id}`);
+      // On OSS there's currently only sample dashboards so the launch button opens the dashboard
+      // but on default dist there's more items. The only tests that are calling this method are in OSS
+      // so they always expect Dashboard.  isOss isn't really the right test. It should be based on
+      // the number of items.
+      // x-pack sample data tests seem to skip this navigation and open the saved objects directly.
+      isOss = await PageObjects.common.isOss();
+      if (!isOss) {
+        await find.clickByLinkText('Dashboard');
+      }
     }
 
     async loadSavedObjects() {
