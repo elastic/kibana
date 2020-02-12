@@ -195,6 +195,7 @@ export {
   SavedObjectsImportRetry,
   SavedObjectsImportUnknownError,
   SavedObjectsImportUnsupportedTypeError,
+  SavedObjectMigrationContext,
   SavedObjectsMigrationLogger,
   SavedObjectsRawDoc,
   SavedObjectSanitizedDoc,
