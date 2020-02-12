@@ -57,7 +57,13 @@ export function logOptimizerState(log: ToolingLog, config: OptimizerConfig) {
         }
 
         if (event?.type === 'worker started') {
-          log.info(`worker started for bundles ${event.bundles.map(b => b.id).join(', ')}`);
+          let moduleCount = 0;
+          for (const bundle of event.bundles) {
+            moduleCount += bundle.getModuleCount() ?? NaN;
+          }
+          const mcString = isFinite(moduleCount) ? String(moduleCount) : '?';
+          const bcString = String(event.bundles.length);
+          log.info(`starting worker [${bcString} bundles, ${mcString} modules]`);
         }
 
         if (state.phase === 'reallocating') {
@@ -113,7 +119,7 @@ export function logOptimizerState(log: ToolingLog, config: OptimizerConfig) {
           log.success(
             config.watch
               ? `watching for changes in all bundles after ${state.durSec} sec`
-              : `all bundles compiled successfully after ${state.durSec} sec`
+              : `${state.compilerStates.length} bundles compiled successfully after ${state.durSec} sec`
           );
           return true;
         }
