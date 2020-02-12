@@ -45,18 +45,27 @@ export const ProcessEventDot = styled(
       const [left, top] = applyMatrix3(position, projectionMatrix);
 
       const [magFactorX] = projectionMatrix;
+
       const style = {
         left: `${left}px`,
         top: `${top}px`,
         transform: `translateY(-50%) translateX(-50%) scale(${magFactorX})`,
       };
 
+      const markerSize = (magFactor: number) => {
+        return magFactor >= 1 ? 4 * (1 / magFactor) : 3;
+      };
+
+      const markerPosition = (magFactor: number) => {
+        return magFactor >= 1 ? -2 * (1 / magFactorX) : -1.5;
+      };
+
       return (
         <svg
           className={className}
           style={style}
-          viewBox="-15 -5 30 10"
-          preserveAspectRatio="xMidYMid slice"
+          viewBox="-15 -15 30 30"
+          preserveAspectRatio="xMidYMid meet"
           role="treeitem"
           tabIndex={-1}
           aria-level={event.data_buffer.depth}
@@ -65,14 +74,23 @@ export const ProcessEventDot = styled(
             role="presentation"
             xlinkHref={`#${SymbolIds.processNode}`}
             x="-15.5"
-            y="-5"
+            y="-12.5"
             width="31"
             height="10"
             opacity="1"
           />
+          <use
+            role="presentation"
+            xlinkHref={`#${SymbolIds.solidHexagon}`}
+            x={markerPosition(magFactorX)}
+            y={markerPosition(magFactorX)}
+            width={markerSize(magFactorX)}
+            height={markerSize(magFactorX)}
+            opacity="1"
+          />
           <text
             x="0"
-            y="0"
+            y="-7.5"
             textAnchor="middle"
             dominantBaseline="middle"
             fontSize="3"
@@ -88,7 +106,7 @@ export const ProcessEventDot = styled(
             <>
               <text
                 x="0"
-                y="-2.1"
+                y="-9.6"
                 textAnchor="middle"
                 dominantBaseline="middle"
                 fontSize="1.25"
@@ -105,7 +123,7 @@ export const ProcessEventDot = styled(
             <>
               <text
                 x="0"
-                y="2.45"
+                y="-5.05"
                 textAnchor="middle"
                 dominantBaseline="middle"
                 fontSize="1.25"
@@ -128,7 +146,7 @@ export const ProcessEventDot = styled(
   position: absolute;
   display: block;
   width: 120px;
-  height: 40px;
+  height: 120px;
   text-align: left;
   font-size: 10px;
   user-select: none;
@@ -136,4 +154,5 @@ export const ProcessEventDot = styled(
   border-radius: 10%;
   padding: 4px;
   white-space: nowrap;
+  outline: 1px solid red;
 `;
