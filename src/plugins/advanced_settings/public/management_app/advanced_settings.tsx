@@ -212,7 +212,8 @@ export class AdvancedSettingsComponent extends Component<
         <AdvancedSettingsVoiceAnnouncement queryText={query.text} settings={filteredSettings} />
 
         <Form
-          settings={filteredSettings}
+          settings={this.groupedSettings}
+          visibleSettings={filteredSettings}
           categories={this.categories}
           categoryCounts={this.categoryCounts}
           clearQuery={this.clearQuery}

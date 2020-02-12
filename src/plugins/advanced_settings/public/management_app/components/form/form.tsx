@@ -46,6 +46,7 @@ type Category = string;
 
 interface FormProps {
   settings: Record<string, FieldSetting[]>;
+  visibleSettings: Record<string, FieldSetting[]>;
   categories: Category[];
   categoryCounts: Record<string, number>;
   clearQuery: () => void;
@@ -54,18 +55,6 @@ interface FormProps {
   enableSaving: boolean;
   dockLinks: DocLinksStart['links'];
   toasts: ToastsStart;
-}
-
-function intersectionBy(array1: any[], array2: any[], iteratee: string) {
-  const matched: any[] = [];
-  array1.forEach((element1: any) => {
-    array2.forEach((element2: any) => {
-      if (element1[iteratee] === element2[iteratee]) {
-        matched.push(element1);
-      }
-    });
-  });
-  return matched;
 }
 
 export class Form extends PureComponent<FormProps> {
@@ -91,13 +80,11 @@ export class Form extends PureComponent<FormProps> {
   };
 
   getCountOfHiddenUnsavedChanges = (): number => {
-    const unsavedSettings = Object.keys(this.state.unsavedChanges).map(key => ({ name: key }));
-    const displayedUnsavedCount = intersectionBy(
-      unsavedSettings,
-      Object.values(this.props.settings).flat(),
-      'name'
-    ).length;
-    return unsavedSettings.length - displayedUnsavedCount;
+    const shownSettings = Object.values(this.props.visibleSettings)
+      .flat()
+      .map(setting => setting.name);
+    return Object.keys(this.state.unsavedChanges).filter(key => !shownSettings.includes(key))
+      .length;
   };
 
   areChangesInvalid = (): boolean => {
@@ -411,11 +398,11 @@ export class Form extends PureComponent<FormProps> {
 
   render() {
     const { unsavedChanges } = this.state;
-    const { settings, categories, categoryCounts, clearQuery } = this.props;
+    const { visibleSettings, categories, categoryCounts, clearQuery } = this.props;
     const currentCategories: Category[] = [];
 
     categories.forEach(category => {
-      if (settings[category] && settings[category].length) {
+      if (visibleSettings[category] && visibleSettings[category].length) {
         currentCategories.push(category);
       }
     });
@@ -425,7 +412,11 @@ export class Form extends PureComponent<FormProps> {
         <div>
           {currentCategories.length
             ? currentCategories.map(category => {
-                return this.renderCategory(category, settings[category], categoryCounts[category]);
+                return this.renderCategory(
+                  category,
+                  visibleSettings[category],
+                  categoryCounts[category]
+                );
               })
             : this.maybeRenderNoSettings(clearQuery)}
         </div>
