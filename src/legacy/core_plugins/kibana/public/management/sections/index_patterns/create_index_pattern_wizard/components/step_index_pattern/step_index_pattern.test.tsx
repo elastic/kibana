@@ -24,6 +24,7 @@ import { Header } from './components/header';
 import { IndexPatternCreationConfig } from '../../../../../../../../management/public';
 import { coreMock } from '../../../../../../../../../../core/public/mocks';
 import { dataPluginMock } from '../../../../../../../../../../plugins/data/public/mocks';
+import { SavedObjectsFindResponsePublic } from '../../../../../../../../../../core/public';
 
 jest.mock('../../lib/ensure_minimum_time', () => ({
   ensureMinimumTime: async (promises: Array<Promise<any>>) =>
@@ -34,13 +35,6 @@ const mockIndexPatternCreationType = new IndexPatternCreationConfig({
   type: 'default',
   name: 'name',
 });
-
-jest.mock('ui/chrome', () => ({
-  getUiSettingsClient: () => ({
-    get: () => '',
-  }),
-  addBasePath: () => {},
-}));
 
 jest.mock('../../lib/get_indices', () => ({
   getIndices: ({}, {}, query: string) => {
@@ -56,16 +50,23 @@ const allIndices = [{ name: 'kibana' }, { name: 'es' }];
 
 const goToNextStep = () => {};
 
+const savedObjectClient = coreMock.createStart().savedObjects.client;
+savedObjectClient.find = () =>
+  new Promise<SavedObjectsFindResponsePublic<any>>(() => ({ savedObjects: [] }));
+
+const uiSettings = coreMock.createSetup().uiSettings;
+uiSettings.get.mockReturnValue('');
+
 const createComponent = (props?: Record<string, any>) => {
   return shallowWithI18nProvider(
     <StepIndexPattern
       allIndices={allIndices}
       isIncludingSystemIndices={false}
       esService={dataPluginMock.createStartContract().search.__LEGACY.esClient}
-      // @ts-ignore
-      savedObjectsClient={coreMock.createStart().savedObjects.client}
+      savedObjectsClient={savedObjectClient as any}
       goToNextStep={goToNextStep}
       indexPatternCreationType={mockIndexPatternCreationType}
+      uiSettings={uiSettings}
       {...props}
     />
   );

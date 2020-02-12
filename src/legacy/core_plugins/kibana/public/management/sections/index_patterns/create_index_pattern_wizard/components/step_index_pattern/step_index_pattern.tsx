@@ -21,12 +21,11 @@ import React, { Component } from 'react';
 import { EuiPanel, EuiSpacer, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import chrome from 'ui/chrome';
 import {
   indexPatterns,
   DataPublicPluginStart,
 } from '../../../../../../../../../../plugins/data/public';
-import { SavedObjectsClient } from '../../../../../../../../../../core/public';
+import { SavedObjectsClient, IUiSettingsClient } from '../../../../../../../../../../core/public';
 import { MAX_SEARCH_SIZE } from '../../constants';
 import {
   getIndices,
@@ -42,8 +41,6 @@ import { Header } from './components/header';
 import { IndexPatternCreationConfig } from '../../../../../../../../management/public';
 import { MatchedIndex } from '../../types';
 
-const uiSettings = chrome.getUiSettingsClient();
-
 interface StepIndexPatternProps {
   allIndices: any[];
   isIncludingSystemIndices: boolean;
@@ -52,6 +49,7 @@ interface StepIndexPatternProps {
   indexPatternCreationType: IndexPatternCreationConfig;
   goToNextStep: () => void;
   initialQuery?: string;
+  uiSettings: IUiSettingsClient;
 }
 
 interface StepIndexPatternState {
@@ -85,7 +83,7 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
     super(props);
     const { indexPatternCreationType, initialQuery } = this.props;
 
-    this.state.query = initialQuery || uiSettings.get('indexPattern:placeholder');
+    this.state.query = initialQuery || props.uiSettings.get('indexPattern:placeholder');
     this.state.indexPatternName = indexPatternCreationType.getIndexPatternName();
   }
 
@@ -103,6 +101,7 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
       fields: ['title'],
       perPage: 10000,
     });
+
     const existingIndexPatterns = savedObjects.map(obj =>
       obj && obj.attributes ? obj.attributes.title : ''
     ) as string[];
@@ -217,7 +216,6 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
     }
 
     const indicesToList = query.length ? visibleIndices : allIndices;
-
     return (
       <IndicesList
         data-test-subj="createIndexPatternStep1IndicesList"
