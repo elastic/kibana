@@ -44,6 +44,7 @@ describe('APMIndicesPermission', () => {
     );
     expectTextsInDocument(component, [
       'Missing permissions to access APM',
+      'Dismiss',
       'apm-*'
     ]);
   });
@@ -67,7 +68,7 @@ describe('APMIndicesPermission', () => {
       'apm-7.5.1-error-000001',
       'apm-7.5.1-metric-000001',
       'apm-7.5.1-transaction-000001',
-      'Dismiss warning'
+      'Dismiss'
     ]);
     expectTextsNotInDocument(component, ['apm-7.5.1-span-000001']);
   });
@@ -94,7 +95,7 @@ describe('APMIndicesPermission', () => {
       'apm-7.5.1-transaction-000001',
       'apm-7.5.1-span-000001'
     ]);
-    expectTextsNotInDocument(component, ['Dismiss warning']);
+    expectTextsNotInDocument(component, ['Dismiss']);
   });
 
   it('shows children component when indices have read privileges', () => {
@@ -141,8 +142,8 @@ describe('APMIndicesPermission', () => {
         </APMIndicesPermission>
       </MockApmPluginContextWrapper>
     );
-    expectTextsInDocument(component, ['Dismiss warning']);
-    fireEvent.click(component.getByText('Dismiss warning'));
+    expectTextsInDocument(component, ['Dismiss']);
+    fireEvent.click(component.getByText('Dismiss'));
     expectTextsInDocument(component, ['My amazing component']);
   });
 });

@@ -11,12 +11,13 @@ import {
   EuiFlexItem,
   EuiLink,
   EuiPanel,
+  EuiText,
   EuiTitle
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { isEmpty } from 'lodash';
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { isEmpty } from 'lodash';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/useFetcher';
 import { fontSize, pct, px, units } from '../../../style/variables';
 import { ElasticDocsLink } from '../../shared/Links/ElasticDocsLink';
@@ -50,8 +51,10 @@ export const APMIndicesPermission: React.FC = ({ children }) => {
     return (
       <PermissionWarning
         indicesWithoutPermission={indicesWithoutPermission}
-        // Show escape hatch button if at least one index has read privilege
+        // Show escape hatch button if the index pattern was used to check the privileges
+        // or if at least one index has read privilege
         showEscapeHatch={
+          indicesPrivilegesKeys.some(index => index === 'apm-*') ||
           indicesPrivilegesKeys.length !== indicesWithoutPermission.length
         }
         onEscapeHatchClick={() => setIsPermissionWarningDismissed(true)}
@@ -121,14 +124,25 @@ const PermissionWarning = ({
                   <p>
                     {i18n.translate('xpack.apm.permission.description', {
                       defaultMessage:
-                        "We've detected your current role in Kibana does not grant you access to the APM data. Please check with your Kibana administrator to get the proper privileges granted in order to start using APM."
+                        'We’ve detected your current role in Kibana does not grant you access to the APM data. Please check with your Kibana administrator to get the proper privileges granted to start using APM.'
                     })}
                   </p>
-                  <ul>
-                    {indicesWithoutPermission.map(index => (
-                      <li key={index}>{index}</li>
-                    ))}
-                  </ul>
+                  <>
+                    <EuiText size="s">
+                      <span style={{ fontWeight: 'bold' }}>
+                        {i18n.translate('xpack.apm.permission.missingIndices', {
+                          defaultMessage: 'Missing indices permissions:'
+                        })}
+                      </span>
+                    </EuiText>
+                    <ul style={{ listStyleType: 'none' }}>
+                      {indicesWithoutPermission.map(index => (
+                        <li key={index} style={{ marginTop: units.half }}>
+                          <EuiText size="s">{index}</EuiText>
+                        </li>
+                      ))}
+                    </ul>
+                  </>
                 </>
               }
               actions={
@@ -154,7 +168,7 @@ const PermissionWarning = ({
                         style={{ fontSize }}
                       >
                         {i18n.translate('xpack.apm.permission.dismissWarning', {
-                          defaultMessage: 'Dismiss warning'
+                          defaultMessage: 'Dismiss'
                         })}
                       </EuiLink>
                     </EscapeHatch>
