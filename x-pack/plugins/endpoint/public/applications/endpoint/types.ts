@@ -6,12 +6,15 @@
 
 import { Dispatch, MiddlewareAPI } from 'redux';
 import { CoreStart } from 'kibana/public';
+import { Query, TimeRange, IIndexPattern, esFilters } from 'src/plugins/data/public';
 import { EndpointListState } from './store/endpoint_list';
 import { AppAction } from './store/action';
 import { AlertResultList } from '../../../common/types';
+import { EndpointPluginStartDependencies } from '../../plugin';
 
 export type MiddlewareFactory = (
-  coreStart: CoreStart
+  coreStart: CoreStart,
+  depsStart: EndpointPluginStartDependencies
 ) => (
   api: MiddlewareAPI<Dispatch<AppAction>, GlobalState>
 ) => (next: Dispatch<AppAction>) => (action: AppAction) => unknown;
@@ -21,5 +24,18 @@ export interface GlobalState {
   readonly alertList: AlertListState;
 }
 
+interface AlertsSearchBarState {
+  patterns: IIndexPattern[];
+  query: Query;
+  dateRange: TimeRange;
+  filters: esFilters.Filter[];
+}
+
+export interface UserUpdatedAlertsSearchBarFilterPayload {
+  query?: Query;
+  filters?: esFilters.Filter[];
+  dateRange?: TimeRange;
+}
+
 export type AlertListData = AlertResultList;
-export type AlertListState = AlertResultList;
+export type AlertListState = AlertResultList & { searchBar: AlertsSearchBarState };

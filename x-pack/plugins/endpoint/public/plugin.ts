@@ -9,7 +9,6 @@ import { IEmbeddableSetup } from 'src/plugins/embeddable/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { i18n } from '@kbn/i18n';
 import { ResolverEmbeddableFactory } from './embeddables/resolver';
-import { setupKqlQuerySuggestionProvider, KUERY_LANGUAGE_NAME } from '../../data_enhanced/public';
 
 export type EndpointPluginStart = void;
 export type EndpointPluginSetup = void;
@@ -51,11 +50,6 @@ export class EndpointPlugin
       resolverEmbeddableFactory.type,
       resolverEmbeddableFactory
     );
-
-    // TODO: Makes the suggestions appear. This should be removed once kuery_autocomplete is migrated to NP.
-    // See this Github issue https://github.com/elastic/kibana/issues/51277
-    // const kueryProvider = setupKqlQuerySuggestionProvider(core, plugins);
-    // plugins.data.autocomplete.addQuerySuggestionProvider(KUERY_LANGUAGE_NAME, kueryProvider);
   }
 
   public start() {}

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { memo, useState, useMemo, useContext } from 'react';
+import { memo, useState, useMemo } from 'react';
 import React from 'react';
 import { EuiDataGrid } from '@elastic/eui';
 import { useSelector } from 'react-redux';

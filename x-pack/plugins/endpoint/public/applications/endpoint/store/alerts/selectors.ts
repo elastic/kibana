@@ -7,3 +7,7 @@
 import { AlertListState } from '../../types';
 
 export const alertListData = (state: AlertListState) => state.alerts;
+export const searchBarIndexPatterns = (state: AlertListState) => state.searchBar.patterns;
+export const searchBarQuery = (state: AlertListState) => state.searchBar.query;
+export const searchBarFilters = (state: AlertListState) => state.searchBar.filters;
+export const searchBarDateRange = (state: AlertListState) => state.searchBar.dateRange;

@@ -25,7 +25,7 @@ export function renderApp(
 ) {
   coreStart.http.get('/api/endpoint/hello-world');
 
-  const [store, stopSagas] = appStoreFactory(coreStart);
+  const [store, stopSagas] = appStoreFactory(coreStart, depsStart);
 
   ReactDOM.render(<AppRoot basename={appBasePath} store={store} depsStart={depsStart} />, element);
 

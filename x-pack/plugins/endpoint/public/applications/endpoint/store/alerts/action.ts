@@ -4,23 +4,31 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Query, esFilters } from 'src/plugins/data/public';
-import { AlertListData } from '../../types';
-
-// TODO: Move
-interface SearchFilterPayload {
-  query: Query;
-  filters: esFilters.Filter[];
-}
+import { IIndexPattern } from 'src/plugins/data/public';
+import { AlertListData, UserUpdatedAlertsSearchBarFilterPayload } from '../../types';
 
 interface ServerReturnedAlertsData {
   type: 'serverReturnedAlertsData';
   payload: AlertListData;
 }
 
-interface UserAppliedAlertsSearchFilter {
-  type: 'userAppliedAlertsSearchFilter';
-  payload: Query;
+interface ServerReturnedSearchBarIndexPatterns {
+  type: 'serverReturnedSearchBarIndexPatterns';
+  payload: IIndexPattern[];
 }
 
-export type AlertAction = ServerReturnedAlertsData | UserAppliedAlertsSearchFilter;
+interface UserUpdatedAlertsSearchBarFilter {
+  type: 'userUpdatedAlertsSearchBarFilter';
+  payload: UserUpdatedAlertsSearchBarFilterPayload;
+}
+
+interface UserSubmittedAlertsSearchBarFilter {
+  type: 'userSubmittedAlertsSearchBarFilter';
+  payload: UserUpdatedAlertsSearchBarFilterPayload;
+}
+
+export type AlertAction =
+  | ServerReturnedAlertsData
+  | ServerReturnedSearchBarIndexPatterns
+  | UserUpdatedAlertsSearchBarFilter
+  | UserSubmittedAlertsSearchBarFilter;

@@ -12,6 +12,26 @@ export const alertListData = composeSelectors(
   alertListSelectors.alertListData
 );
 
+export const searchBarIndexPatterns = composeSelectors(
+  alertListStateSelector,
+  alertListSelectors.searchBarIndexPatterns
+);
+
+export const searchBarQuery = composeSelectors(
+  alertListStateSelector,
+  alertListSelectors.searchBarQuery
+);
+
+export const searchBarFilters = composeSelectors(
+  alertListStateSelector,
+  alertListSelectors.searchBarFilters
+);
+
+export const searchBarDateRange = composeSelectors(
+  alertListStateSelector,
+  alertListSelectors.searchBarDateRange
+);
+
 /**
  * Returns the alert list state from within Global State
  */

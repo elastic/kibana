@@ -18,7 +18,9 @@ const initialState = (): AlertListState => {
     result_from_index: 0,
     total: 0,
     searchBar: {
-      query: '',
+      patterns: [],
+      query: { query: '', language: 'kuery' },
+      dateRange: { from: 'now-15m', to: 'now' },
       filters: [],
     },
   };
@@ -33,8 +35,28 @@ export const alertListReducer: Reducer<AlertListState, AppAction> = (
       ...state,
       ...action.payload,
     };
-  } else if (action.type === 'userAppliedAlertsSearchFilter') {
-    return state;
+  } else if (action.type === 'serverReturnedSearchBarIndexPatterns') {
+    return {
+      ...state,
+      searchBar: {
+        ...state.searchBar,
+        patterns: action.payload,
+      },
+    };
+  } else if (
+    action.type === 'userUpdatedAlertsSearchBarFilter' ||
+    action.type === 'userSubmittedAlertsSearchBarFilter'
+  ) {
+    const { payload } = action;
+    return {
+      ...state,
+      searchBar: {
+        ...state.searchBar,
+        query: payload.query ? payload.query : state.searchBar.query,
+        filters: payload.filters ? payload.filters : state.searchBar.filters,
+        dateRange: payload.dateRange ? payload.dateRange : state.searchBar.dateRange,
+      },
+    };
   }
 
   return state;
