@@ -10,7 +10,6 @@ import { registerTestBed } from '../../../../../test_utils';
 import { RemoteClusterEdit } from '../../../public/app/sections/remote_cluster_edit';
 import { createRemoteClustersStore } from '../../../public/app/store';
 import { registerRouter } from '../../../public/app/services/routing';
-/* eslint-disable @kbn/eslint/no-restricted-paths */
 
 import { REMOTE_CLUSTER_EDIT_NAME } from './constants';
 

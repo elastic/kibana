@@ -10,7 +10,6 @@ import { registerTestBed, findTestSubject } from '../../../../../test_utils';
 import { RemoteClusterList } from '../../../public/app/sections/remote_cluster_list';
 import { createRemoteClustersStore } from '../../../public/app/store';
 import { registerRouter } from '../../../public/app/services/routing';
-/* eslint-disable @kbn/eslint/no-restricted-paths */
 
 const testBedConfig = {
   store: createRemoteClustersStore,

@@ -39,11 +39,11 @@ describe('<RemoteClusterList />', () => {
   describe('on component mount', () => {
     let exists;
 
-    beforeEach(async () => {
+    beforeEach(() => {
       ({ exists } = setup());
     });
 
-    test('should show a "loading remote clusters" indicator', async () => {
+    test('should show a "loading remote clusters" indicator', () => {
       expect(exists('remoteClustersTableLoading')).toBe(true);
     });
   });
@@ -55,7 +55,7 @@ describe('<RemoteClusterList />', () => {
     beforeEach(async () => {
       ({ exists, component } = setup());
 
-      await nextTick(); // We need to wait next tick for the mock server response to kick in
+      await nextTick(100); // We need to wait next tick for the mock server response to kick in
       component.update();
     });
 
@@ -97,7 +97,7 @@ describe('<RemoteClusterList />', () => {
       // Mount the component
       ({ component, find, exists, table, actions } = setup());
 
-      await nextTick(); // Make sure that the Http request is fulfilled
+      await nextTick(100); // Make sure that the Http request is fulfilled
       component.update();
 
       // Read the remote clusters list table
@@ -206,7 +206,7 @@ describe('<RemoteClusterList />', () => {
         actions.clickBulkDeleteButton();
         actions.clickConfirmModalDeleteRemoteCluster();
 
-        await nextTick(550); // there is a 500ms timeout in the api action
+        await nextTick(600); // there is a 500ms timeout in the api action
         component.update();
 
         ({ rows } = table.getMetaData('remoteClusterListTable'));

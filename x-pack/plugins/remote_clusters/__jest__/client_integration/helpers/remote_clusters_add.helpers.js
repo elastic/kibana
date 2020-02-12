@@ -5,11 +5,11 @@
  */
 
 import { registerTestBed } from '../../../../../test_utils';
+
 /* eslint-disable @kbn/eslint/no-restricted-paths */
 import { RemoteClusterAdd } from '../../../public/app/sections/remote_cluster_add';
 import { createRemoteClustersStore } from '../../../public/app/store';
 import { registerRouter } from '../../../public/app/services/routing';
-/* eslint-disable @kbn/eslint/no-restricted-paths */
 
 const testBedConfig = {
   store: createRemoteClustersStore,
