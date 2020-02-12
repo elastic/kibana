@@ -20,7 +20,7 @@
 import { UiActionsService } from './ui_actions_service';
 import { Action } from '../actions';
 import { createRestrictedAction, createHelloWorldAction } from '../tests/test_samples';
-import { ActionRegistry } from '../types';
+import { ActionRegistry, TriggerRegistry } from '../types';
 
 describe('UiActionsService', () => {
   test('can instantiate', () => {
@@ -223,6 +223,140 @@ describe('UiActionsService', () => {
 
       expect(service1).not.toBe(service2);
       expect(service2).toBeInstanceOf(UiActionsService);
+    });
+  });
+
+  describe('registries', () => {
+    const HELLO_WORLD_ACTION_ID = 'HELLO_WORLD_ACTION_ID';
+
+    test('can register trigger', () => {
+      const triggers: TriggerRegistry = new Map();
+      const service = new UiActionsService({ triggers });
+
+      service.registerTrigger({
+        actionIds: [],
+        description: 'foo',
+        id: 'bar',
+        title: 'baz',
+      });
+
+      expect(triggers.get('bar')).toEqual({
+        actionIds: [],
+        description: 'foo',
+        id: 'bar',
+        title: 'baz',
+      });
+    });
+
+    test('can register action', () => {
+      const actions: ActionRegistry = new Map();
+      const service = new UiActionsService({ actions });
+
+      service.registerAction({
+        id: HELLO_WORLD_ACTION_ID,
+        order: 13,
+      } as any);
+
+      expect(actions.get(HELLO_WORLD_ACTION_ID)).toMatchObject({
+        id: HELLO_WORLD_ACTION_ID,
+        order: 13,
+      });
+    });
+
+    test('can attach an action to a trigger', () => {
+      const service = new UiActionsService();
+
+      const trigger = {
+        id: 'MY-TRIGGER',
+        actionIds: [],
+      };
+      const action = {
+        id: HELLO_WORLD_ACTION_ID,
+        order: 25,
+      } as any;
+
+      expect(trigger.actionIds).toEqual([]);
+
+      service.registerTrigger(trigger);
+      service.registerAction(action);
+      service.attachAction('MY-TRIGGER', HELLO_WORLD_ACTION_ID);
+
+      expect(trigger.actionIds).toEqual([HELLO_WORLD_ACTION_ID]);
+    });
+
+    test('can detach an action to a trigger', () => {
+      const service = new UiActionsService();
+
+      const trigger = {
+        id: 'MY-TRIGGER',
+        actionIds: [],
+      };
+      const action = {
+        id: HELLO_WORLD_ACTION_ID,
+        order: 25,
+      } as any;
+
+      expect(trigger.actionIds).toEqual([]);
+
+      service.registerTrigger(trigger);
+      service.registerAction(action);
+      service.attachAction('MY-TRIGGER', HELLO_WORLD_ACTION_ID);
+      service.detachAction('MY-TRIGGER', HELLO_WORLD_ACTION_ID);
+
+      expect(trigger.actionIds).toEqual([]);
+    });
+
+    test('detaching an invalid action from a trigger throws an error', async () => {
+      const service = new UiActionsService();
+
+      const action = {
+        id: HELLO_WORLD_ACTION_ID,
+        order: 25,
+      } as any;
+
+      service.registerAction(action);
+      expect(() => service.detachAction('i do not exist', HELLO_WORLD_ACTION_ID)).toThrowError(
+        'No trigger [triggerId = i do not exist] exists, for detaching action [actionId = HELLO_WORLD_ACTION_ID].'
+      );
+    });
+
+    test('attaching an invalid action to a trigger throws an error', async () => {
+      const service = new UiActionsService();
+
+      const action = {
+        id: HELLO_WORLD_ACTION_ID,
+        order: 25,
+      } as any;
+
+      service.registerAction(action);
+      expect(() => service.attachAction('i do not exist', HELLO_WORLD_ACTION_ID)).toThrowError(
+        'No trigger [triggerId = i do not exist] exists, for attaching action [actionId = HELLO_WORLD_ACTION_ID].'
+      );
+    });
+
+    test('cannot register another action with the same ID', async () => {
+      const service = new UiActionsService();
+
+      const action = {
+        id: HELLO_WORLD_ACTION_ID,
+        order: 25,
+      } as any;
+
+      service.registerAction(action);
+      expect(() => service.registerAction(action)).toThrowError(
+        'Action [action.id = HELLO_WORLD_ACTION_ID] already registered.'
+      );
+    });
+
+    test('cannot register another trigger with the same ID', async () => {
+      const service = new UiActionsService();
+
+      const trigger = { id: 'MY-TRIGGER' } as any;
+
+      service.registerTrigger(trigger);
+      expect(() => service.registerTrigger(trigger)).toThrowError(
+        'Trigger [trigger.id = MY-TRIGGER] already registered.'
+      );
     });
   });
 });
