@@ -6,10 +6,10 @@
 
 import { i18n } from '@kbn/i18n';
 import {
-  ExpressionFunction,
+  ExpressionFunctionDefinition,
   KibanaDatatable,
   KibanaDatatableColumn,
-} from 'src/plugins/expressions/common';
+} from 'src/plugins/expressions';
 import { IndexPatternColumn } from './operations';
 
 interface RemapArgs {
@@ -18,7 +18,7 @@ interface RemapArgs {
 
 export type OriginalColumn = { id: string } & IndexPatternColumn;
 
-export const renameColumns: ExpressionFunction<
+export const renameColumns: ExpressionFunctionDefinition<
   'lens_rename_columns',
   KibanaDatatable,
   RemapArgs,
@@ -38,10 +38,8 @@ export const renameColumns: ExpressionFunction<
       }),
     },
   },
-  context: {
-    types: ['kibana_datatable'],
-  },
-  fn(data: KibanaDatatable, { idMap: encodedIdMap }: RemapArgs) {
+  inputTypes: ['kibana_datatable'],
+  fn(data, { idMap: encodedIdMap }) {
     const idMap = JSON.parse(encodedIdMap) as Record<string, OriginalColumn>;
 
     return {

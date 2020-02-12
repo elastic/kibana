@@ -8,8 +8,8 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { FormatFactory } from 'ui/visualize/loader/pipeline_helpers/utilities';
 import {
-  ExpressionFunction,
-  IInterpreterRenderFunction,
+  ExpressionFunctionDefinition,
+  ExpressionRenderDefinition,
   IInterpreterRenderHandlers,
 } from '../../../../../../src/plugins/expressions/public';
 import { MetricConfig } from './types';
@@ -28,12 +28,12 @@ export interface MetricRender {
   value: MetricChartProps;
 }
 
-export const metricChart: ExpressionFunction<
+export const metricChart: ExpressionFunctionDefinition<
   'lens_metric_chart',
   LensMultiTable,
-  MetricConfig,
+  Omit<MetricConfig, 'layerId'>,
   MetricRender
-> = ({
+> = {
   name: 'lens_metric_chart',
   type: 'render',
   help: 'A metric chart',
@@ -54,10 +54,8 @@ export const metricChart: ExpressionFunction<
         'The display mode of the chart - reduced will only show the metric itself without min size',
     },
   },
-  context: {
-    types: ['lens_multitable'],
-  },
-  fn(data: LensMultiTable, args: MetricChartProps) {
+  inputTypes: ['lens_multitable'],
+  fn(data, args) {
     return {
       type: 'render',
       as: 'lens_metric_chart_renderer',
@@ -65,23 +63,17 @@ export const metricChart: ExpressionFunction<
         data,
         args,
       },
-    };
+    } as MetricRender;
   },
-  // TODO the typings currently don't support custom type args. As soon as they do, this can be removed
-} as unknown) as ExpressionFunction<
-  'lens_metric_chart',
-  LensMultiTable,
-  MetricConfig,
-  MetricRender
->;
+};
 
 export const getMetricChartRenderer = (
   formatFactory: FormatFactory
-): IInterpreterRenderFunction<MetricChartProps> => ({
+): ExpressionRenderDefinition<MetricChartProps> => ({
   name: 'lens_metric_chart_renderer',
   displayName: 'Metric chart',
   help: 'Metric chart renderer',
-  validate: () => {},
+  validate: () => undefined,
   reuseDomNode: true,
   render: (domNode: Element, config: MetricChartProps, handlers: IInterpreterRenderHandlers) => {
     ReactDOM.render(<MetricChart {...config} formatFactory={formatFactory} />, domNode, () => {
