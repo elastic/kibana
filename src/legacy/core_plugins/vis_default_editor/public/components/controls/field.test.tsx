@@ -22,7 +22,7 @@ import { act } from 'react-dom/test-utils';
 import { mount, shallow, ReactWrapper } from 'enzyme';
 import { EuiComboBoxProps, EuiComboBox } from '@elastic/eui';
 
-import { Field } from 'src/plugins/data/public';
+import { IndexPatternField } from 'src/plugins/data/public';
 import { VisState } from 'src/legacy/core_plugins/visualizations/public';
 import { ComboBoxGroupedOptions } from '../../utils';
 import { FieldParamEditor, FieldParamEditorProps } from './field';
@@ -41,11 +41,11 @@ describe('FieldParamEditor component', () => {
   let setTouched: jest.Mock;
   let onChange: jest.Mock;
   let defaultProps: FieldParamEditorProps;
-  let indexedFields: ComboBoxGroupedOptions<Field>;
-  let field: Field;
+  let indexedFields: ComboBoxGroupedOptions<IndexPatternField>;
+  let field: IndexPatternField;
   let option: {
     label: string;
-    target: Field;
+    target: IndexPatternField;
   };
 
   beforeEach(() => {
@@ -54,7 +54,7 @@ describe('FieldParamEditor component', () => {
     setTouched = jest.fn();
     onChange = jest.fn();
 
-    field = { displayName: 'bytes' } as Field;
+    field = { displayName: 'bytes' } as IndexPatternField;
     option = { label: 'bytes', target: field };
     indexedFields = [
       {

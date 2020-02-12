@@ -20,7 +20,11 @@ import { updateLayerIndexPattern } from './state_helpers';
 import { DateRange, ExistingFields } from '../../../../../plugins/lens/common/types';
 import { BASE_API_URL } from '../../../../../plugins/lens/common';
 import { documentField } from './document_field';
-import { isNestedField, IFieldType, TypeMeta } from '../../../../../../src/plugins/data/public';
+import {
+  indexPatterns as indexPatternsUtils,
+  IFieldType,
+  IndexPatternTypeMeta,
+} from '../../../../../../src/plugins/data/public';
 
 interface SavedIndexPatternAttributes extends SavedObjectAttributes {
   title: string;
@@ -267,9 +271,14 @@ function fromSavedObject(
     type,
     title: attributes.title,
     fields: (JSON.parse(attributes.fields) as IFieldType[])
-      .filter(field => !isNestedField(field) && (!!field.aggregatable || !!field.scripted))
+      .filter(
+        field =>
+          !indexPatternsUtils.isNestedField(field) && (!!field.aggregatable || !!field.scripted)
+      )
       .concat(documentField) as IndexPatternField[],
-    typeMeta: attributes.typeMeta ? (JSON.parse(attributes.typeMeta) as TypeMeta) : undefined,
+    typeMeta: attributes.typeMeta
+      ? (JSON.parse(attributes.typeMeta) as IndexPatternTypeMeta)
+      : undefined,
     fieldFormatMap: attributes.fieldFormatMap ? JSON.parse(attributes.fieldFormatMap) : undefined,
   };
 
