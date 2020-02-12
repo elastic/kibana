@@ -20,7 +20,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
-import { RefreshInterval, TimeRange, Query, esFilters } from '../../../data/public';
+import { RefreshInterval, TimeRange, Query, Filter } from '../../../data/public';
 import { CoreStart } from '../../../../core/public';
 import { UiActionsStart } from '../ui_actions_plugin';
 import {
@@ -45,7 +45,7 @@ import {
 
 export interface DashboardContainerInput extends ContainerInput {
   viewMode: ViewMode;
-  filters: esFilters.Filter[];
+  filters: Filter[];
   query: Query;
   timeRange: TimeRange;
   refreshConfig?: RefreshInterval;
@@ -64,7 +64,7 @@ interface IndexSignature {
 }
 
 export interface InheritedChildInput extends IndexSignature {
-  filters: esFilters.Filter[];
+  filters: Filter[];
   query: Query;
   timeRange: TimeRange;
   refreshConfig?: RefreshInterval;

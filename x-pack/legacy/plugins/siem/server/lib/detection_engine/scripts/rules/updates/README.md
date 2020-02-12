@@ -1,4 +1,4 @@
-These are example PUT rules to see how to update various parts of the rules.
+These are example update rules to see how to update various parts of the rules.
 You either have to use the id, or you have to use the rule_id in order to update
 the rules. rule_id acts as an external_id where you can update rules across different
 Kibana systems where id acts as a normal server generated id which is not normally shared
@@ -14,7 +14,7 @@ First add all the examples from queries like so:
 ./post_rule.sh ./rules/queries/*.json
 ```
 
-Then to selectively update a rule add the file of your choosing to update:
+Then to selectively update a rule add the file of your choosing to patch:
 
 ```sh
 ./update_rule.sh ./rules/updates/<filename>.json

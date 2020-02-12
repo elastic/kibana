@@ -5,8 +5,8 @@
  */
 
 import { Embeddable } from './embeddable';
-import { ExpressionRendererProps } from 'src/plugins/expressions/public';
-import { Query, TimeRange, esFilters } from 'src/plugins/data/public';
+import { ReactExpressionRendererProps } from 'src/plugins/expressions/public';
+import { Query, TimeRange, Filter } from 'src/plugins/data/public';
 import { Document } from '../../persistence';
 
 jest.mock('../../../../../../../src/plugins/inspector/public/', () => ({
@@ -31,7 +31,7 @@ const savedVis: Document = {
 
 describe('embeddable', () => {
   let mountpoint: HTMLDivElement;
-  let expressionRenderer: jest.Mock<null, [ExpressionRendererProps]>;
+  let expressionRenderer: jest.Mock<null, [ReactExpressionRendererProps]>;
 
   beforeEach(() => {
     mountpoint = document.createElement('div');
@@ -61,9 +61,7 @@ describe('embeddable', () => {
   it('should re-render if new input is pushed', () => {
     const timeRange: TimeRange = { from: 'now-15d', to: 'now' };
     const query: Query = { language: 'kquery', query: '' };
-    const filters: esFilters.Filter[] = [
-      { meta: { alias: 'test', negate: false, disabled: false } },
-    ];
+    const filters: Filter[] = [{ meta: { alias: 'test', negate: false, disabled: false } }];
 
     const embeddable = new Embeddable(
       expressionRenderer,
@@ -88,9 +86,7 @@ describe('embeddable', () => {
   it('should pass context to embeddable', () => {
     const timeRange: TimeRange = { from: 'now-15d', to: 'now' };
     const query: Query = { language: 'kquery', query: '' };
-    const filters: esFilters.Filter[] = [
-      { meta: { alias: 'test', negate: false, disabled: false } },
-    ];
+    const filters: Filter[] = [{ meta: { alias: 'test', negate: false, disabled: false } }];
 
     const embeddable = new Embeddable(
       expressionRenderer,
@@ -104,7 +100,6 @@ describe('embeddable', () => {
     embeddable.render(mountpoint);
 
     expect(expressionRenderer.mock.calls[0][0].searchContext).toEqual({
-      type: 'kibana_context',
       timeRange,
       query,
       filters,
@@ -114,9 +109,7 @@ describe('embeddable', () => {
   it('should not re-render if only change is in disabled filter', () => {
     const timeRange: TimeRange = { from: 'now-15d', to: 'now' };
     const query: Query = { language: 'kquery', query: '' };
-    const filters: esFilters.Filter[] = [
-      { meta: { alias: 'test', negate: false, disabled: true } },
-    ];
+    const filters: Filter[] = [{ meta: { alias: 'test', negate: false, disabled: true } }];
 
     const embeddable = new Embeddable(
       expressionRenderer,
