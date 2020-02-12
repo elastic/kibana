@@ -35,15 +35,15 @@ import { OptimizerConfig } from './optimizer_config';
 const OPTIMIZER_DIR = Path.dirname(require.resolve('../../package.json'));
 const RELATIVE_DIR = Path.relative(REPO_ROOT, OPTIMIZER_DIR);
 
-export function diffCacheKey(cacheKeyA?: unknown, cacheKeyB?: unknown) {
-  const a = jsonStable(cacheKeyA);
-  const b = jsonStable(cacheKeyB);
-
-  if (a === b) {
+export function diffCacheKey(expected?: unknown, actual?: unknown) {
+  if (jsonStable(expected) === jsonStable(actual)) {
     return;
   }
 
-  const diff = jestDiff(cacheKeyA, cacheKeyB);
+  return reformatJestDiff(jestDiff(expected, actual));
+}
+
+export function reformatJestDiff(diff: string | null) {
   const diffLines = diff?.split('\n') || [];
 
   if (
