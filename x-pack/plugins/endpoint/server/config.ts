@@ -18,8 +18,6 @@ export const EndpointConfigSchema = schema.object({
   enabled: schema.boolean({ defaultValue: false }),
   endpointResultListDefaultFirstPageIndex: defaultFirstPageSchema,
   endpointResultListDefaultPageSize: defaultPageSizeSchema,
-  resolverResultListDefaultFirstPageIndex: defaultFirstPageSchema,
-  resolverResultListDefaultPageSize: defaultPageSizeSchema,
   alertResultListDefaultFirstPageIndex: defaultFirstPageSchema,
   alertResultListDefaultPageSize: defaultPageSizeSchema,
 });

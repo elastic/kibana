@@ -4,23 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IScopedClusterClient } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
 import { RequestHandler, Logger } from 'kibana/server';
 import { getPaginationParams } from './pagination';
-import { LifecycleQuery } from './queries/lifecycle';
 import { RelatedEventsQuery } from './queries/related_events';
 
-interface EventsQueryParams {
+interface RelatedEventsQueryParams {
   after?: string;
   limit: number;
 }
 
-interface EventsPathParams {
+interface RelatedEventsPathParams {
   id: string;
 }
 
-export const validateEvents = {
+export const validateRelatedEvents = {
   params: schema.object({ id: schema.string() }),
   query: schema.object({
     after: schema.maybe(schema.string()),
@@ -28,7 +26,9 @@ export const validateEvents = {
   }),
 };
 
-export function handleEvents(log: Logger): RequestHandler<EventsPathParams, EventsQueryParams> {
+export function handleRelatedEvents(
+  log: Logger
+): RequestHandler<RelatedEventsPathParams, RelatedEventsQueryParams> {
   return async (context, req, res) => {
     const {
       params: { id },
@@ -40,19 +40,12 @@ export function handleEvents(log: Logger): RequestHandler<EventsPathParams, Even
 
       // Retrieve the related non-process events for a given process
       const relatedEventsQuery = new RelatedEventsQuery(id, pagination);
-      // Retrieve the process lifecycle events (e.g. started, terminated etc)
-      const lifecycleQuery = new LifecycleQuery(id);
+      const relatedEvents = await relatedEventsQuery.search(client);
 
-      const [relatedEvents, lifecycleEvents] = await Promise.all([
-        relatedEventsQuery.search(client),
-        lifecycleQuery.search(client),
-      ]);
       const { total, results: events, next } = relatedEvents;
-      const { results: lifecycle } = lifecycleEvents;
 
       return res.ok({
         body: {
-          lifecycle,
           events,
           pagination: { total, next, limit },
         },

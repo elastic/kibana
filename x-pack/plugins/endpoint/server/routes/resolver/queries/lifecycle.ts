@@ -5,6 +5,7 @@
  */
 import { ResolverQuery } from './base';
 
+// consider limiting the response size to a reasonable value in case we have a bunch of lifecycle events
 export class LifecycleQuery extends ResolverQuery {
   protected legacyQuery(endpointID: string, uniquePIDs: string[], index: string) {
     return {

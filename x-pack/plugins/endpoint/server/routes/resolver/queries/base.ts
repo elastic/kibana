@@ -6,14 +6,13 @@
 
 import { IScopedClusterClient } from 'kibana/server';
 import { EndpointAppConstants } from '../../../../common/types';
-import { JSONish } from '../../../types';
 import { paginate, paginatedResults, PaginationParams } from '../pagination';
 import { parseLegacyEntityID } from '../utils/normalize';
 
 export abstract class ResolverQuery {
-  private endpointID: string | null;
+  private endpointID: string | undefined;
   private entityID: string;
-  private pagination: PaginationParams | null;
+  private pagination: PaginationParams | undefined;
 
   constructor(entityID: string, pagination?: PaginationParams) {
     this.pagination = pagination;
@@ -47,6 +46,6 @@ export abstract class ResolverQuery {
     return paginatedResults(await client.callAsCurrentUser('search', this.build(overrides)));
   }
 
-  protected abstract legacyQuery(endpointID: string, uniquePID: string, index: string): JSONish;
-  protected abstract query(entityID: string, index: string): JSONish;
+  protected abstract legacyQuery(endpointID: string, uniquePIDs: string[], index: string): any;
+  protected abstract query(entityIDs: string[], index: string): any;
 }

@@ -6,19 +6,20 @@
 
 import { IRouter } from 'kibana/server';
 import { EndpointAppContext } from '../types';
-import { handleEvents, validateEvents } from './resolver/events';
+import { handleRelatedEvents, validateRelatedEvents } from './resolver/related_events';
 import { handleChildren, validateChildren } from './resolver/children';
+import { handleLifecycle, validateLifecycle } from './resolver/lifecycle';
 
 export function registerResolverRoutes(router: IRouter, endpointAppContext: EndpointAppContext) {
   const log = endpointAppContext.logFactory.get('resolver');
 
   router.get(
     {
-      path: '/api/endpoint/resolver/{id}',
-      validate: validateEvents,
+      path: '/api/endpoint/resolver/{id}/related',
+      validate: validateRelatedEvents,
       options: { authRequired: true },
     },
-    handleEvents(log)
+    handleRelatedEvents(log)
   );
 
   router.get(
@@ -28,5 +29,14 @@ export function registerResolverRoutes(router: IRouter, endpointAppContext: Endp
       options: { authRequired: true },
     },
     handleChildren(log)
+  );
+
+  router.get(
+    {
+      path: '/api/endpoint/resolver/{id}',
+      validate: validateLifecycle,
+      options: { authRequired: true },
+    },
+    handleLifecycle(log)
   );
 }

@@ -61,7 +61,7 @@ export function paginatedResults(response: SearchResponse<ResolverEvent>) {
   if (response.hits.hits.length === 0) {
     return { total, results: [], next: null };
   }
-  let next: string;
+  let next: string | null = null;
   const results: ResolverEvent[] = [];
   for (const hit of response.hits.hits) {
     results.push(hit._source);

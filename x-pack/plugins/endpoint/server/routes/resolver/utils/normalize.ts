@@ -5,6 +5,7 @@
  */
 
 import { splitN } from './common';
+import { ResolverEvent, LegacyEndpointEvent } from '../../../../common/types';
 
 const LEGACY_ENTITY_PREFIX = 'endgame-';
 const LEGACY_ENTITY_DELIMITER = '-';
@@ -15,16 +16,35 @@ function isLegacyData(data: ResolverEvent): data is LegacyEndpointEvent {
 
 export function extractEventID(event: ResolverEvent) {
   if (isLegacyData(event)) {
-    return event.endgame.serial_event_id;
+    return String(event.endgame.serial_event_id);
   }
   return event.event.id;
 }
 
 export function extractEntityID(event: ResolverEvent) {
   if (isLegacyData(event)) {
-    return event.endgame.unique_pid;
+    return String(event.endgame.unique_pid);
   }
   return event.endpoint.process.entity_id;
+}
+
+export function extractUniqueID(entityID: string) {
+  const parsedEntityID = parseLegacyEntityID(entityID);
+  return parsedEntityID === null ? entityID : parsedEntityID.uniquePID;
+}
+
+export function getParentEntityID(events: ResolverEvent[]) {
+  if (events.length === 0) {
+    return undefined;
+  }
+  const event = events[0];
+  if (isLegacyData(event)) {
+    const uniquePPID = event.endgame?.unique_ppid;
+    return uniquePPID
+      ? LEGACY_ENTITY_PREFIX + uniquePPID + LEGACY_ENTITY_DELIMITER + event.agent.id
+      : undefined;
+  }
+  return event.endpoint.process?.parent?.entity_id;
 }
 
 export function parseLegacyEntityID(

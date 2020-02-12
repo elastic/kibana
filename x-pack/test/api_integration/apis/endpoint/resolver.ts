@@ -25,10 +25,9 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
 
       it('should return details for the root node', async () => {
         const { body } = await supertest
-          .get(`/api/endpoint/resolver/${entityID}`)
+          .get(`/api/endpoint/resolver/${entityID}/related`)
           .set(commonHeaders)
           .expect(200);
-        expect(body.lifecycle.length).to.eql(2);
         expect(body.events.length).to.eql(1);
         expect(body.pagination.next).to.eql('t7QkNnABvfrOPnsMY1cl');
         expect(body.pagination.total).to.eql(1);
@@ -39,7 +38,7 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
       it('returns no values when there is no more data', async () => {
         const { body } = await supertest
           // after is set to the document id of the last event so there shouldn't be any more after it
-          .get(`/api/endpoint/resolver/${entityID}?after=t7QkNnABvfrOPnsMY1cl`)
+          .get(`/api/endpoint/resolver/${entityID}/related?after=t7QkNnABvfrOPnsMY1cl`)
           .set(commonHeaders)
           .expect(200);
         expect(body.events).be.empty();
@@ -49,7 +48,7 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
 
       it('should return the first page of information when the cursor is invalid', async () => {
         const { body } = await supertest
-          .get(`/api/endpoint/resolver/${entityID}?after=blah`)
+          .get(`/api/endpoint/resolver/${entityID}/related?after=blah`)
           .set(commonHeaders)
           .expect(200);
         expect(body.pagination.total).to.eql(1);
@@ -58,39 +57,87 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
 
       it('should error on invalid pagination values', async () => {
         await supertest
-          .get(`/api/endpoint/resolver/${entityID}?limit=0`)
+          .get(`/api/endpoint/resolver/${entityID}/related?limit=0`)
           .set(commonHeaders)
           .expect(400);
         await supertest
-          .get(`/api/endpoint/resolver/${entityID}?limit=2000`)
+          .get(`/api/endpoint/resolver/${entityID}/related?limit=2000`)
           .set(commonHeaders)
           .expect(400);
         await supertest
-          .get(`/api/endpoint/resolver/${entityID}?page_size=-1`)
+          .get(`/api/endpoint/resolver/${entityID}/related?limit=-1`)
           .set(commonHeaders)
           .expect(400);
       });
 
       it('should not find any events', async () => {
         const { body } = await supertest
-          .get(`/api/endpoint/resolver/5555`)
+          .get(`/api/endpoint/resolver/5555/related`)
           .set(commonHeaders)
           .expect(200);
         expect(body.pagination.total).to.eql(0);
         expect(body.pagination.next).to.eql(null);
-        expect(body.lifecycle).to.be.empty();
         expect(body.events).to.be.empty();
       });
 
       it('should return no results for an invalid entity ID', async () => {
         const { body } = await supertest
-          .get(`/api/endpoint/resolver/endgame-5-slkdfjs`)
+          .get(`/api/endpoint/resolver/endgame-5-slkdfjs/related`)
           .set(commonHeaders)
           .expect(200);
         expect(body.pagination.total).to.eql(0);
         expect(body.pagination.next).to.eql(null);
-        expect(body.lifecycle).to.be.empty();
         expect(body.events).to.be.empty();
+      });
+    });
+
+    describe('lifecycle events endpoint', () => {
+      const entityID = 'endgame-94042-5a0c957f-b8e7-4538-965e-57e8bb86ad3a';
+
+      it('should return details for the root node', async () => {
+        const { body } = await supertest
+          .get(`/api/endpoint/resolver/${entityID}?ancestors=5`)
+          .set(commonHeaders)
+          .expect(200);
+        expect(body.lifecycle.length).to.eql(2);
+        expect(body.ancestors.length).to.eql(1);
+        expect(body.pagination.next).to.eql(null);
+        // 5 is default parameter
+        expect(body.pagination.ancestors).to.eql(5);
+      });
+
+      it('should have a populated next parameter', async () => {
+        const { body } = await supertest
+          .get(`/api/endpoint/resolver/${entityID}`)
+          .set(commonHeaders)
+          .expect(200);
+        expect(body.pagination.next).to.eql('endgame-94041-5a0c957f-b8e7-4538-965e-57e8bb86ad3a');
+      });
+
+      it('should handle a next param request', async () => {
+        let { body } = await supertest
+          .get(`/api/endpoint/resolver/${entityID}`)
+          .set(commonHeaders)
+          .expect(200);
+        const next = body.pagination.next;
+
+        ({ body } = await supertest
+          .get(`/api/endpoint/resolver/${next}?ancestors=1`)
+          .set(commonHeaders)
+          .expect(200));
+        expect(body.lifecycle.length).to.eql(1);
+        expect(body.ancestors.length).to.eql(0);
+        expect(body.pagination.next).to.eql(null);
+      });
+
+      it('should handle an invalid id', async () => {
+        const { body } = await supertest
+          .get(`/api/endpoint/resolver/alskdjflasj`)
+          .set(commonHeaders)
+          .expect(200);
+        expect(body.lifecycle.length).to.eql(0);
+        expect(body.ancestors.length).to.eql(0);
+        expect(body.pagination.next).to.eql(null);
       });
     });
 

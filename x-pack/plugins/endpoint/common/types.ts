@@ -127,6 +127,7 @@ export interface LegacyEndpointEvent {
   };
   agent: {
     id: string;
+    type: string;
   };
 }
 
@@ -144,6 +145,9 @@ export interface EndpointEvent {
         entity_id: string;
       };
     };
+  };
+  agent: {
+    type: string;
   };
 }
 
