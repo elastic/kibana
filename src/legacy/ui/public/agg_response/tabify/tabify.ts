@@ -17,12 +17,4 @@
  * under the License.
  */
 
-import { buildHierarchicalData } from './hierarchical/build_hierarchical_data';
-import { buildPointSeriesData } from './point_series/point_series';
-import { tabifyAggResponse } from './tabify';
-
-export const aggResponseIndex = {
-  hierarchical: buildHierarchicalData,
-  pointSeries: buildPointSeriesData,
-  tabify: tabifyAggResponse,
-};
+export { tabifyAggResponse } from '../../../../core_plugins/data/public';
