@@ -20,7 +20,7 @@ import {
   PackageInfo,
   PackageList,
   PackagesGroupedByStatus,
-} from '../../../../../common/types/epm';
+} from '../../types';
 
 const defaultClient = (path: string, options?: HttpFetchOptions) =>
   fetch(path, options).then(res => res.json());

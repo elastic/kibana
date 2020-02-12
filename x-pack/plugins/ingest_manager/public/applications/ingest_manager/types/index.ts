@@ -31,6 +31,7 @@ export {
   GetEnrollmentAPIKeysResponse,
   GetOneEnrollmentAPIKeyResponse,
   // EPM types
+  AssetReference,
   AssetsGroupedByServiceByType,
   AssetType,
   AssetTypeToParts,
@@ -42,6 +43,7 @@ export {
   PackageInfo,
   PackageList,
   PackageListItem,
+  PackagesGroupedByStatus,
   RequirementsByServiceName,
   RequirementVersion,
   ScreenshotItem,
