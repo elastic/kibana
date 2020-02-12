@@ -35,13 +35,13 @@ export const summarizeEvent$ = <Event, State>(
   event$: Rx.Observable<Event>,
   initialState: State,
   reducer: Summarizer<Event, State>
-): Rx.Observable<Update<Event, State>> => {
+) => {
   const initUpdate: Update<Event, State> = {
     state: initialState,
   };
 
   return event$.pipe(
-    scan((prev: Update<Event, State>, event) => {
+    scan((prev, event): Update<Event, State> => {
       const newState = reducer(prev.state, event);
       return newState === undefined
         ? prev
