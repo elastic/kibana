@@ -1880,10 +1880,10 @@
   dependencies:
     "@elastic/apm-rum-core" "^4.7.0"
 
-"@elastic/charts@^17.0.2":
-  version "17.0.2"
-  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-17.0.2.tgz#0bd2cb7b78bd60255eed2a9b0ce5049a62dc5d8a"
-  integrity sha512-hz31Yma/HSdu9tRS/05xNXY+YuaHOadD9Gd+eh7ankNlJJOFI4IRV6F8BMnloeWYedNXBSTp4susFLwJNQQ+0w==
+"@elastic/charts@^17.0.3":
+  version "17.0.3"
+  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-17.0.3.tgz#4117e18f572b751519a07d3ddfc0763e46f50e95"
+  integrity sha512-rrVSovjvEMh4hkg8pDgNRR493feokSInk0JfErDgCnf3kCZS7wpMh0xGvFYXmIECEiNxtayEkTmuaDBO8R114Q==
   dependencies:
     "@types/d3-shape" "^1.3.1"
     classnames "^2.2.6"
@@ -1892,7 +1892,6 @@
     d3-color "^1.4.0"
     d3-scale "^1.0.7"
     d3-shape "^1.3.4"
-    fast-deep-equal "^3.1.1"
     konva "^4.0.18"
     newtype-ts "^0.2.4"
     prop-types "^15.7.2"
