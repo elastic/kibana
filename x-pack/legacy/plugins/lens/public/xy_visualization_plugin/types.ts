@@ -6,7 +6,7 @@
 
 import { Position } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import { ExpressionFunction, ArgumentType } from 'src/plugins/expressions/common';
+import { ArgumentType, ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import chartAreaSVG from '../assets/chart_area.svg';
 import chartAreaStackedSVG from '../assets/chart_area_stacked.svg';
 import chartBarSVG from '../assets/chart_bar.svg';
@@ -24,7 +24,7 @@ export interface LegendConfig {
 
 type LegendConfigResult = LegendConfig & { type: 'lens_xy_legendConfig' };
 
-export const legendConfig: ExpressionFunction<
+export const legendConfig: ExpressionFunctionDefinition<
   'lens_xy_legendConfig',
   null,
   LegendConfig,
@@ -34,9 +34,7 @@ export const legendConfig: ExpressionFunction<
   aliases: [],
   type: 'lens_xy_legendConfig',
   help: `Configure the xy chart's legend`,
-  context: {
-    types: ['null'],
-  },
+  inputTypes: ['null'],
   args: {
     isVisible: {
       types: ['boolean'],
@@ -52,7 +50,7 @@ export const legendConfig: ExpressionFunction<
       }),
     },
   },
-  fn: function fn(_context: unknown, args: LegendConfig) {
+  fn: function fn(input: unknown, args: LegendConfig) {
     return {
       type: 'lens_xy_legendConfig',
       ...args,
@@ -89,14 +87,17 @@ export interface XConfig extends AxisConfig {
 
 type XConfigResult = XConfig & { type: 'lens_xy_xConfig' };
 
-export const xConfig: ExpressionFunction<'lens_xy_xConfig', null, XConfig, XConfigResult> = {
+export const xConfig: ExpressionFunctionDefinition<
+  'lens_xy_xConfig',
+  null,
+  XConfig,
+  XConfigResult
+> = {
   name: 'lens_xy_xConfig',
   aliases: [],
   type: 'lens_xy_xConfig',
   help: `Configure the xy chart's x axis`,
-  context: {
-    types: ['null'],
-  },
+  inputTypes: ['null'],
   args: {
     ...axisConfig,
     accessor: {
@@ -104,7 +105,7 @@ export const xConfig: ExpressionFunction<'lens_xy_xConfig', null, XConfig, XConf
       help: 'The column to display on the x axis.',
     },
   },
-  fn: function fn(_context: unknown, args: XConfig) {
+  fn: function fn(input: unknown, args: XConfig) {
     return {
       type: 'lens_xy_xConfig',
       ...args,
@@ -114,7 +115,7 @@ export const xConfig: ExpressionFunction<'lens_xy_xConfig', null, XConfig, XConf
 
 type LayerConfigResult = LayerArgs & { type: 'lens_xy_layer' };
 
-export const layerConfig: ExpressionFunction<
+export const layerConfig: ExpressionFunctionDefinition<
   'lens_xy_layer',
   null,
   LayerArgs,
@@ -124,9 +125,7 @@ export const layerConfig: ExpressionFunction<
   aliases: [],
   type: 'lens_xy_layer',
   help: `Configure a layer in the xy chart`,
-  context: {
-    types: ['null'],
-  },
+  inputTypes: ['null'],
   args: {
     ...axisConfig,
     layerId: {
@@ -172,7 +171,7 @@ export const layerConfig: ExpressionFunction<
       help: 'JSON key-value pairs of column ID to label',
     },
   },
-  fn: function fn(_context: unknown, args: LayerArgs) {
+  fn: function fn(input: unknown, args: LayerArgs) {
     return {
       type: 'lens_xy_layer',
       ...args,
@@ -209,7 +208,7 @@ export type LayerArgs = LayerConfig & {
 export interface XYArgs {
   xTitle: string;
   yTitle: string;
-  legend: LegendConfig;
+  legend: LegendConfig & { type: 'lens_xy_legendConfig' };
   layers: LayerArgs[];
 }
 

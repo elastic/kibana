@@ -8,10 +8,11 @@ import { EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import { encode } from 'rison-node';
-import { QueryString } from 'ui/utils/query_string';
 import url from 'url';
+import { stringify } from 'query-string';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { TimeRange } from '../../../../common/http_api/shared/time_range';
+import { url as urlUtils } from '../../../../../../../../src/plugins/kibana_utils/public';
 
 export const AnalyzeInMlButton: React.FunctionComponent<{
   jobId: string;
@@ -61,7 +62,7 @@ const getOverallAnomalyExplorerLink = (pathname: string, jobId: string, timeRang
     },
   });
 
-  const hash = `/explorer?${QueryString.encode({ _g })}`;
+  const hash = `/explorer?${stringify(urlUtils.encodeQuery({ _g }), { encode: false })}`;
 
   return url.format({
     pathname,
@@ -94,7 +95,10 @@ const getPartitionSpecificSingleMetricViewerLink = (
     },
   });
 
-  const hash = `/timeseriesexplorer?${QueryString.encode({ _g, _a })}`;
+  const hash = `/timeseriesexplorer?${stringify(urlUtils.encodeQuery({ _g, _a }), {
+    sort: false,
+    encode: false,
+  })}`;
 
   return url.format({
     pathname,
