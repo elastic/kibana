@@ -58,6 +58,7 @@ export const ProcessEventDot = styled(
           viewBox="-15 -5 30 10"
           preserveAspectRatio="xMidYMid slice"
           role="treeitem"
+          tabIndex={-1}
         >
           <use
             role="presentation"
