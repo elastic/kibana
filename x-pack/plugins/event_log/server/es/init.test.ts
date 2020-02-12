@@ -9,15 +9,22 @@ import { initializeEs } from './init';
 
 describe('initializeEs', () => {
   const esContext = contextMock.create();
-  const createIndexBody = {
+  const createIndexParams = {
     index: '.kibana-event-log-000001',
   };
-  const createIndexTemplateBody = {
+  const getIlmPolicyParams = {
+    method: 'GET',
+    path: '_ilm/policy/.kibana-event-log-policy',
+  };
+  const indexTemplateExistsParams = {
+    name: '.kibana-event-log-template',
+  };
+  const createIndexTemplateParams = {
     create: true,
     name: '.kibana-event-log-template',
     body: expect.anything(),
   };
-  const createIlmRequestBody = {
+  const createIlmParams = {
     method: 'PUT',
     path: '_ilm/policy/.kibana-event-log-policy',
     body: {
@@ -48,9 +55,9 @@ describe('initializeEs', () => {
     );
 
     await initializeEs(esContext);
-    expect(esContext.callEs).toHaveBeenCalledWith('transport.request', createIlmRequestBody);
-    expect(esContext.callEs).toHaveBeenCalledWith('indices.putTemplate', createIndexTemplateBody);
-    expect(esContext.callEs).toHaveBeenCalledWith('indices.create', createIndexBody);
+    expect(esContext.callEs).toHaveBeenCalledWith('transport.request', createIlmParams);
+    expect(esContext.callEs).toHaveBeenCalledWith('indices.putTemplate', createIndexTemplateParams);
+    expect(esContext.callEs).toHaveBeenCalledWith('indices.create', createIndexParams);
   });
 
   test('should skip initializing ILM policy when it already exists', async () => {
@@ -63,9 +70,9 @@ describe('initializeEs', () => {
     );
 
     await initializeEs(esContext);
-    expect(esContext.callEs).not.toHaveBeenCalledWith('transport.request', createIlmRequestBody);
-    expect(esContext.callEs).toHaveBeenCalledWith('indices.putTemplate', createIndexTemplateBody);
-    expect(esContext.callEs).toHaveBeenCalledWith('indices.create', createIndexBody);
+    expect(esContext.callEs).not.toHaveBeenCalledWith('transport.request', createIlmParams);
+    expect(esContext.callEs).toHaveBeenCalledWith('indices.putTemplate', createIndexTemplateParams);
+    expect(esContext.callEs).toHaveBeenCalledWith('indices.create', createIndexParams);
   });
 
   test('should skip creating index template when it already exists', async () => {
@@ -78,12 +85,12 @@ describe('initializeEs', () => {
     );
 
     await initializeEs(esContext);
-    expect(esContext.callEs).toHaveBeenCalledWith('transport.request', createIlmRequestBody);
+    expect(esContext.callEs).toHaveBeenCalledWith('transport.request', createIlmParams);
     expect(esContext.callEs).not.toHaveBeenCalledWith(
       'indices.putTemplate',
-      createIndexTemplateBody
+      createIndexTemplateParams
     );
-    expect(esContext.callEs).toHaveBeenCalledWith('indices.create', createIndexBody);
+    expect(esContext.callEs).toHaveBeenCalledWith('indices.create', createIndexParams);
   });
 
   test('should skip creating initial index when it already exists', async () => {
@@ -96,24 +103,40 @@ describe('initializeEs', () => {
     );
 
     await initializeEs(esContext);
-    expect(esContext.callEs).toHaveBeenCalledWith('transport.request', createIlmRequestBody);
-    expect(esContext.callEs).toHaveBeenCalledWith('indices.putTemplate', createIndexTemplateBody);
-    expect(esContext.callEs).not.toHaveBeenCalledWith('indices.create', createIndexBody);
+    expect(esContext.callEs).toHaveBeenCalledWith('transport.request', createIlmParams);
+    expect(esContext.callEs).toHaveBeenCalledWith('indices.putTemplate', createIndexTemplateParams);
+    expect(esContext.callEs).not.toHaveBeenCalledWith('indices.create', createIndexParams);
   });
 
-  test('should double check if index template exists when error is thrown during creation request', async () => {
+  test('should double check if index template exists before logging error', async () => {
     esContext.callEs.mockImplementation(
       getCallEsImplementation({
         ilmPolicyExists: false,
         indexTemplateExists: false,
-        initialIndexExists: true,
+        initialIndexExists: false,
+        throwErrorWhenCreatingIndexTemplate: true,
       })
     );
 
     await initializeEs(esContext);
-    expect(esContext.callEs).toHaveBeenCalledWith('transport.request', createIlmRequestBody);
-    expect(esContext.callEs).toHaveBeenCalledWith('indices.putTemplate', createIndexTemplateBody);
-    expect(esContext.callEs).not.toHaveBeenCalledWith('indices.create', createIndexBody);
+    expect(esContext.callEs).toHaveBeenCalledTimes(5);
+    expect(esContext.callEs).toHaveBeenNthCalledWith(1, 'transport.request', getIlmPolicyParams);
+    expect(esContext.callEs).toHaveBeenNthCalledWith(2, 'transport.request', createIlmParams);
+    expect(esContext.callEs).toHaveBeenNthCalledWith(
+      3,
+      'indices.existsTemplate',
+      indexTemplateExistsParams
+    );
+    expect(esContext.callEs).toHaveBeenNthCalledWith(
+      4,
+      'indices.putTemplate',
+      createIndexTemplateParams
+    );
+    expect(esContext.callEs).toHaveBeenNthCalledWith(
+      5,
+      'indices.existsTemplate',
+      indexTemplateExistsParams
+    );
   });
 });
 
@@ -127,10 +150,12 @@ function getCallEsImplementation({
   ilmPolicyExists,
   indexTemplateExists,
   initialIndexExists,
+  throwErrorWhenCreatingIndexTemplate = false,
 }: {
   ilmPolicyExists: boolean;
   indexTemplateExists: boolean;
   initialIndexExists: boolean;
+  throwErrorWhenCreatingIndexTemplate?: boolean;
 }) {
   return async (operation: string, body?: any) => {
     // Make ILM policy exist check return false
@@ -153,6 +178,10 @@ function getCallEsImplementation({
     // Make alias exists check return false
     if (operation === 'indices.existsAlias' && body?.name === '.kibana-event-log') {
       return initialIndexExists;
+    }
+
+    if (operation === 'indices.putTemplate' && throwErrorWhenCreatingIndexTemplate) {
+      throw new Error('Fail');
     }
   };
 }
