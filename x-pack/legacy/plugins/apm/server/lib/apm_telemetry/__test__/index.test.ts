@@ -45,25 +45,10 @@ describe('apm_telemetry', () => {
   });
 
   describe('storeApmServicesTelemetry', () => {
-    let server: any;
     let apmTelemetry: SavedObjectAttributes;
-    let savedObjectsClientInstance: any;
+    let savedObjectsClient: any;
 
     beforeEach(() => {
-      savedObjectsClientInstance = { create: jest.fn() };
-      const callWithInternalUser = jest.fn();
-      const internalRepository = jest.fn();
-      server = {
-        savedObjects: {
-          SavedObjectsClient: jest.fn(() => savedObjectsClientInstance),
-          getSavedObjectsRepository: jest.fn(() => internalRepository)
-        },
-        plugins: {
-          elasticsearch: {
-            getCluster: jest.fn(() => ({ callWithInternalUser }))
-          }
-        }
-      };
       apmTelemetry = {
         has_any_services: true,
         services_per_agent: {
@@ -72,30 +57,27 @@ describe('apm_telemetry', () => {
           'js-base': 1
         }
       };
+      savedObjectsClient = { create: jest.fn() };
     });
 
     it('should call savedObjectsClient create with the given ApmTelemetry object', () => {
-      storeApmServicesTelemetry(server, apmTelemetry);
-      expect(savedObjectsClientInstance.create.mock.calls[0][1]).toBe(
-        apmTelemetry
-      );
+      storeApmServicesTelemetry(savedObjectsClient, apmTelemetry);
+      expect(savedObjectsClient.create.mock.calls[0][1]).toBe(apmTelemetry);
     });
 
     it('should call savedObjectsClient create with the apm-telemetry document type and ID', () => {
-      storeApmServicesTelemetry(server, apmTelemetry);
-      expect(savedObjectsClientInstance.create.mock.calls[0][0]).toBe(
+      storeApmServicesTelemetry(savedObjectsClient, apmTelemetry);
+      expect(savedObjectsClient.create.mock.calls[0][0]).toBe(
         APM_SERVICES_TELEMETRY_SAVED_OBJECT_TYPE
       );
-      expect(savedObjectsClientInstance.create.mock.calls[0][2].id).toBe(
+      expect(savedObjectsClient.create.mock.calls[0][2].id).toBe(
         APM_SERVICES_TELEMETRY_SAVED_OBJECT_ID
       );
     });
 
     it('should call savedObjectsClient create with overwrite: true', () => {
-      storeApmServicesTelemetry(server, apmTelemetry);
-      expect(savedObjectsClientInstance.create.mock.calls[0][2].overwrite).toBe(
-        true
-      );
+      storeApmServicesTelemetry(savedObjectsClient, apmTelemetry);
+      expect(savedObjectsClient.create.mock.calls[0][2].overwrite).toBe(true);
     });
   });
 });

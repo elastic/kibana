@@ -3,16 +3,13 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import {
-  PluginInitializerContext,
-  Plugin,
-  CoreSetup,
-  SavedObjectsClientContract,
-} from 'src/core/server';
+import { PluginInitializerContext, Plugin, CoreSetup } from 'src/core/server';
 import { Observable, combineLatest, AsyncSubject } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { Server } from 'hapi';
 import { once } from 'lodash';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { makeApmUsageCollector } from '../../../legacy/plugins/apm/server/lib/apm_telemetry';
 import { Plugin as APMOSSPlugin } from '../../../../src/plugins/apm_oss/server';
 import { createApmAgentConfigurationIndex } from '../../../legacy/plugins/apm/server/lib/settings/agent_configuration/create_agent_config_index';
 import { createApmApi } from '../../../legacy/plugins/apm/server/routes/create_apm_api';
@@ -29,9 +26,13 @@ export interface LegacySetup {
 export interface APMPluginContract {
   config$: Observable<APMConfig>;
   registerLegacyAPI: (__LEGACY: LegacySetup) => void;
-  getApmIndices: (
-    savedObjectsClient: SavedObjectsClientContract
-  ) => ReturnType<typeof getApmIndices>;
+  getApmIndices: () => ReturnType<typeof getApmIndices>;
+}
+
+async function getInternalSavedObjectClient(core: CoreSetup) {
+  return core.getStartServices().then(async ([coreStart]) => {
+    return coreStart.savedObjects.createInternalRepository();
+  });
 }
 
 export class APMPlugin implements Plugin<APMPluginContract> {
@@ -49,6 +50,7 @@ export class APMPlugin implements Plugin<APMPluginContract> {
       apm_oss: APMOSSPlugin extends Plugin<infer TSetup> ? TSetup : never;
       home: HomeServerPluginSetup;
       cloud?: CloudSetup;
+      usageCollection?: UsageCollectionSetup;
     }
   ) {
     const config$ = this.initContext.config.create<APMXPackConfig>();
@@ -88,13 +90,22 @@ export class APMPlugin implements Plugin<APMPluginContract> {
       })
     );
 
+    const usageCollection = plugins.usageCollection;
+    if (usageCollection) {
+      core.getStartServices().then(async ([coreStart]) => {
+        const internalSavedObjectsClient = coreStart.savedObjects.createInternalRepository();
+        makeApmUsageCollector(usageCollection, internalSavedObjectsClient);
+      });
+    }
+
     return {
       config$: mergedConfig$,
       registerLegacyAPI: once((__LEGACY: LegacySetup) => {
         this.legacySetup$.next(__LEGACY);
         this.legacySetup$.complete();
       }),
-      getApmIndices: async (savedObjectsClient: SavedObjectsClientContract) => {
+      getApmIndices: async () => {
+        const savedObjectsClient = await getInternalSavedObjectClient(core);
         return getApmIndices({ savedObjectsClient, config: this.currentConfig });
       },
     };

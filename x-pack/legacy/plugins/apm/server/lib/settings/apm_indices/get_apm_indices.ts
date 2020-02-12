@@ -6,7 +6,7 @@
 
 import { merge } from 'lodash';
 import { Server } from 'hapi';
-import { SavedObjectsClientContract } from 'kibana/server';
+import { SavedObjectsClient } from 'src/core/server';
 import { PromiseReturnType } from '../../../../typings/common';
 import {
   APM_INDICES_SAVED_OBJECT_TYPE,
@@ -14,6 +14,8 @@ import {
 } from '../../../../common/apm_saved_object_constants';
 import { APMConfig } from '../../../../../../../plugins/apm/server';
 import { APMRequestHandlerContext } from '../../../routes/typings';
+
+type ISavedObjectsClient = Pick<SavedObjectsClient, 'create' | 'get'>;
 
 export interface ApmIndicesConfig {
   'apm_oss.sourcemapIndices': string;
@@ -32,7 +34,7 @@ export type ScopedSavedObjectsClient = ReturnType<
 >;
 
 async function getApmIndicesSavedObject(
-  savedObjectsClient: SavedObjectsClientContract
+  savedObjectsClient: ISavedObjectsClient
 ) {
   const apmIndices = await savedObjectsClient.get<Partial<ApmIndicesConfig>>(
     APM_INDICES_SAVED_OBJECT_TYPE,
@@ -59,7 +61,7 @@ export async function getApmIndices({
   savedObjectsClient
 }: {
   config: APMConfig;
-  savedObjectsClient: SavedObjectsClientContract;
+  savedObjectsClient: ISavedObjectsClient;
 }) {
   try {
     const apmIndicesSavedObject = await getApmIndicesSavedObject(

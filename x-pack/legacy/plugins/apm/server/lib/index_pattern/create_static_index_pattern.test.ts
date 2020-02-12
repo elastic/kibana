@@ -6,17 +6,16 @@
 
 import { createStaticIndexPattern } from './create_static_index_pattern';
 import { Setup } from '../helpers/setup_request';
-import * as savedObjectsClient from '../helpers/saved_objects_client';
 import * as HistoricalAgentData from '../services/get_services/has_historical_agent_data';
 import { APMRequestHandlerContext } from '../../routes/typings';
 
 function getMockContext(config: Record<string, unknown>) {
   return ({
     config,
-    __LEGACY: {
-      server: {
-        savedObjects: {
-          getSavedObjectsRepository: jest.fn()
+    core: {
+      savedObjects: {
+        client: {
+          create: jest.fn()
         }
       }
     }
@@ -24,24 +23,13 @@ function getMockContext(config: Record<string, unknown>) {
 }
 
 describe('createStaticIndexPattern', () => {
-  let createSavedObject: jest.Mock;
-  beforeEach(() => {
-    createSavedObject = jest.fn();
-    jest
-      .spyOn(savedObjectsClient, 'getInternalSavedObjectsClient')
-      .mockReturnValue({
-        create: createSavedObject
-      } as any);
-  });
-
   it(`should not create index pattern if 'xpack.apm.autocreateApmIndexPattern=false'`, async () => {
     const setup = {} as Setup;
     const context = getMockContext({
       'xpack.apm.autocreateApmIndexPattern': false
     });
     await createStaticIndexPattern(setup, context);
-
-    expect(createSavedObject).not.toHaveBeenCalled();
+    expect(context.core.savedObjects.client.create).not.toHaveBeenCalled();
   });
 
   it(`should not create index pattern if no APM data is found`, async () => {
@@ -56,7 +44,7 @@ describe('createStaticIndexPattern', () => {
       .mockResolvedValue(false);
 
     await createStaticIndexPattern(setup, context);
-    expect(createSavedObject).not.toHaveBeenCalled();
+    expect(context.core.savedObjects.client.create).not.toHaveBeenCalled();
   });
 
   it(`should create index pattern`, async () => {
@@ -71,6 +59,6 @@ describe('createStaticIndexPattern', () => {
       .mockResolvedValue(true);
     await createStaticIndexPattern(setup, context);
 
-    expect(createSavedObject).toHaveBeenCalled();
+    expect(context.core.savedObjects.client.create).toHaveBeenCalled();
   });
 });
