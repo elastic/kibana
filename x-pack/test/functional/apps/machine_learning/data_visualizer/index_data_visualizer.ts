@@ -376,14 +376,14 @@ export default function({ getService }: FtrProviderContext) {
   }
 
   describe('index based', function() {
-    this.tags(['smoke', 'mlqa', 'pete']);
+    this.tags(['smoke', 'mlqa']);
     before(async () => {
       await esArchiver.load('ml/farequote');
     });
 
-    // after(async () => {
-    //   await esArchiver.unload('ml/farequote');
-    // });
+    after(async () => {
+      await esArchiver.unload('ml/farequote');
+    });
 
     // TODO - add tests for
     //  - validating metrics displayed inside the cards
