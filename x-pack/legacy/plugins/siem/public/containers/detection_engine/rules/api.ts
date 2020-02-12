@@ -149,7 +149,7 @@ export const enableRules = async ({ ids, enabled }: EnableRulesProps): Promise<R
   const response = await fetch(
     `${chrome.getBasePath()}${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
     {
-      method: 'PUT',
+      method: 'PATCH',
       credentials: 'same-origin',
       headers: {
         'content-type': 'application/json',
