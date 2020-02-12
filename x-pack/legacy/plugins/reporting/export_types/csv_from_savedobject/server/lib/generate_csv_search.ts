@@ -61,14 +61,14 @@ const getUiSettings = async (config: IUiSettingsClient) => {
 
 export async function generateCsvSearch(
   req: RequestFacade,
-  reportingPlugin: ReportingPlugin,
+  reporting: ReportingPlugin,
   server: ServerFacade,
   elasticsearch: ElasticsearchServiceSetup,
   logger: Logger,
   searchPanel: SearchPanel,
   jobParams: JobParamsDiscoverCsv
 ): Promise<CsvResultFromSearch> {
-  const savedObjectsClient = await reportingPlugin.getSavedObjectsClient(
+  const savedObjectsClient = await reporting.getSavedObjectsClient(
     KibanaRequest.from(req.getRawRequest())
   );
   const { indexPatternSavedObjectId, timerange } = searchPanel;
@@ -78,7 +78,7 @@ export async function generateCsvSearch(
     indexPatternSavedObjectId
   );
 
-  const uiConfig = await reportingPlugin.getUiSettingsServiceFactory(savedObjectsClient);
+  const uiConfig = await reporting.getUiSettingsServiceFactory(savedObjectsClient);
   const esQueryConfig = await getEsQueryConfig(uiConfig);
 
   const {

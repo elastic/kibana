@@ -12,7 +12,7 @@ import { SearchPanel, VisPanel, JobParamsPanelCsv, FakeRequest } from '../../typ
 import { generateCsvSearch } from './generate_csv_search';
 
 export function createGenerateCsv(
-  reportingPlugin: ReportingPlugin,
+  reporting: ReportingPlugin,
   server: ServerFacade,
   elasticsearch: ElasticsearchServiceSetup,
   logger: Logger
@@ -32,7 +32,7 @@ export function createGenerateCsv(
       case 'search':
         return await generateCsvSearch(
           request as RequestFacade,
-          reportingPlugin,
+          reporting,
           server,
           elasticsearch,
           logger,
