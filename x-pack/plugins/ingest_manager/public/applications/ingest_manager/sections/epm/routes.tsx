@@ -11,11 +11,11 @@ import { Route } from 'react-router-dom';
 import { Home } from './screens/home';
 
 // patterns are used by React Router and are relative to `APP_ROOT`
-// XXX does nesting react routers like this even work?
+// XXX this is currently not used to set up the routes, but useLinks needs it.
 export const patterns = {
-  APP_ROOT: `/app/ingestManager#/epm`,
-  LIST_VIEW: '/',
-  // DETAIL_VIEW: '/detail/:pkgkey/:panel?',
+  APP_ROOT: `/app/ingestManager#/`,
+  LIST_VIEW: '/epm/',
+  DETAIL_VIEW: '/epm/detail/:pkgkey/:panel?',
 };
 
 // export const routes = [
