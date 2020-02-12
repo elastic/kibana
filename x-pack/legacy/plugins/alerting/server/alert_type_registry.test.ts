@@ -130,12 +130,6 @@ describe('list()', () => {
     expect(result).toMatchInlineSnapshot(`
       Array [
         Object {
-          "actionGroups": Array [
-            Object {
-              "id": "testActionGroup",
-              "name": "Test Action Group",
-            },
-          ],
           "id": "test",
           "name": "Test",
         },
