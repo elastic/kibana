@@ -224,6 +224,38 @@ describe('UiActionsService', () => {
       expect(service1).not.toBe(service2);
       expect(service2).toBeInstanceOf(UiActionsService);
     });
+
+    test('triggers registered in original service are available in original an forked services', () => {
+      const service1 = new UiActionsService();
+      service1.registerTrigger({
+        id: 'foo',
+        actionIds: [],
+      });
+      const service2 = service1.fork();
+
+      const trigger1 = service1.getTrigger('foo');
+      const trigger2 = service2.getTrigger('foo');
+
+      expect(trigger1.id).toBe('foo');
+      expect(trigger2.id).toBe('foo');
+    });
+
+    test('triggers registered in forked service are not available in original service', () => {
+      const service1 = new UiActionsService();
+      const service2 = service1.fork();
+
+      service2.registerTrigger({
+        id: 'foo',
+        actionIds: [],
+      });
+
+      expect(() => service1.getTrigger('foo')).toThrowErrorMatchingInlineSnapshot(
+        `"Trigger [triggerId = foo] does not exist."`
+      );
+
+      const trigger2 = service2.getTrigger('foo');
+      expect(trigger2.id).toBe('foo');
+    });
   });
 
   describe('registries', () => {
