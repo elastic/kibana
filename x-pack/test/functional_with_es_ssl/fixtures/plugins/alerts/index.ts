@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AlertType } from '../../../../../legacy/plugins/alerting';
+import { AlertType } from '../../../../../plugins/alerting/server';
 
 // eslint-disable-next-line import/no-default-export
 export default function(kibana: any) {

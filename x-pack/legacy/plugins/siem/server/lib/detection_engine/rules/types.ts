@@ -13,12 +13,12 @@ import {
   SavedObjectsFindResponse,
   SavedObjectsClientContract,
 } from 'kibana/server';
+import { AlertsClient } from '../../../../../../../plugins/alerting/server';
+import { Alert } from '../../../../../../../plugins/alerting/common';
 import { SIGNALS_ID } from '../../../../common/constants';
-import { AlertsClient } from '../../../../../alerting/server';
 import { ActionsClient } from '../../../../../../../plugins/actions/server';
 import { RuleAlertParams, RuleTypeParams, RuleAlertParamsRest } from '../types';
 import { RequestFacade } from '../../../types';
-import { Alert } from '../../../../../alerting/server/types';
 
 export type UpdateRuleAlertParamsRest = Partial<RuleAlertParamsRest> & {
   id: string | undefined;

@@ -5,7 +5,7 @@
  */
 
 import { defaults, pickBy, isEmpty } from 'lodash/fp';
-import { PartialAlert } from '../../../../../alerting/server/types';
+import { PartialAlert } from '../../../../../../../plugins/alerting/server';
 import { readRules } from './read_rules';
 import { UpdateRuleParams, IRuleSavedAttributesSavedObjectAttributes } from './types';
 import { addTags } from './add_tags';
