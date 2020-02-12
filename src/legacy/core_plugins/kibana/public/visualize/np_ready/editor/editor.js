@@ -353,12 +353,12 @@ function VisualizeAppController(
       },
     };
 
-    // Create a PersistedState instance.
-    const { uiState, eventUnsubscribers, persistOnChange } = makeStateful(
+    // Create a PersistedState instance for uiState.
+    const { persistedState, unsubscribePersisted, persistOnChange } = makeStateful(
       'uiState',
       stateContainer
     );
-    $scope.uiState = uiState;
+    $scope.uiState = persistedState;
     $scope.appStatus = $appStatus;
     $scope.savedVis = savedVis;
     $scope.query = initialState.query;
@@ -388,11 +388,6 @@ function VisualizeAppController(
 
     $scope.timeRange = timefilter.getTime();
     $scope.opts = _.pick($scope, 'savedVis', 'isAddToDashMode');
-
-    // stateMonitor = stateMonitorFactory.create($state, stateDefaults);
-    // stateMonitor.ignoreProps(['vis.listeners']).onChange(status => {
-    //   $appStatus.dirty = status.dirty || !savedVis.id;
-    // });
 
     const stateContainerSubscription = stateContainer.state$.subscribe(state => {
       const newQuery = migrateLegacyQuery(state.query);
@@ -472,7 +467,7 @@ function VisualizeAppController(
       subscriptions.unsubscribe();
       $scope.vis.off('apply', _applyVis);
 
-      eventUnsubscribers.forEach(listener => listener());
+      unsubscribePersisted();
       stateContainerSubscription.unsubscribe();
       stopStateSync();
     });
@@ -576,8 +571,6 @@ function VisualizeAppController(
     return savedVis.save(saveOptions).then(
       function(id) {
         $scope.$evalAsync(() => {
-          // stateMonitor.setInitialState($state.toJSON());
-
           if (id) {
             toastNotifications.addSuccess({
               title: i18n.translate(
@@ -624,8 +617,6 @@ function VisualizeAppController(
               chrome.setBreadcrumbs($injector.invoke(getEditBreadcrumbs));
               savedVis.vis.title = savedVis.title;
               savedVis.vis.description = savedVis.description;
-              // it's needed to save the state to update url string
-              // $state.save();
             } else {
               kbnUrl.change(`${VisualizeConstants.EDIT_PATH}/{{id}}`, { id: savedVis.id });
             }

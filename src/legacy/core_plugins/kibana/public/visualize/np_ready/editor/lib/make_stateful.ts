@@ -21,47 +21,38 @@ import { PersistedState } from '../../../legacy_imports';
 import { ReduxLikeStateContainer } from '../../../../../../../../plugins/kibana_utils/public';
 import { VisualizeAppState, VisualizeAppStateTransitions } from '../../types';
 
-interface PersistedStates {
-  [key: string]: PersistedState;
-}
-
-const persistedStates: PersistedStates = {};
-const eventUnsubscribers: Function[] = [];
-
 /**
- * @returns PersistedState instance.
+ * @returns Create a PersistedState instance, initialize state changes subscriber/unsubscriber
  */
 export function makeStateful(
   prop: keyof VisualizeAppState,
   stateContainer: ReduxLikeStateContainer<VisualizeAppState, VisualizeAppStateTransitions>
 ) {
-  if (persistedStates[prop]) return persistedStates[prop];
-
-  // set up the ui state
-  persistedStates[prop] = new PersistedState();
+  // set up the persistedState state
+  const persistedState = new PersistedState();
 
   // update the appState when the stateful instance changes
   const updateOnChange = function() {
-    stateContainer.transitions.set(prop, persistedStates[prop].getChanges());
+    stateContainer.transitions.set(prop, persistedState.getChanges());
   };
 
   const handlerOnChange = (method: 'on' | 'off') =>
-    persistedStates[prop][method]('change', updateOnChange);
+    persistedState[method]('change', updateOnChange);
 
   handlerOnChange('on');
-  eventUnsubscribers.push(() => handlerOnChange('off'));
+  const unsubscribePersisted = () => handlerOnChange('off');
 
   // update the stateful object when the app state changes
   const persistOnChange = function(state: VisualizeAppState) {
     if (state[prop]) {
-      persistedStates[prop].set(state[prop]);
+      persistedState.set(state[prop]);
     }
   };
 
   const appState = stateContainer.getState();
 
   // if the thing we're making stateful has an appState value, write to persisted state
-  if (appState[prop]) persistedStates[prop].setSilent(appState[prop]);
+  if (appState[prop]) persistedState.setSilent(appState[prop]);
 
-  return { [prop]: persistedStates[prop], eventUnsubscribers, persistOnChange };
+  return { persistedState, unsubscribePersisted, persistOnChange };
 }
