@@ -17,7 +17,7 @@ import {
   urlFromNewPageIndexParam,
 } from './selectors';
 
-describe('alert list middleware and selectors', () => {
+describe('alert list pagination', () => {
   let store: Store<AlertListState, AppAction>;
   let coreStart: ReturnType<typeof coreMock.createStart>;
   let history: EndpointAppHistory;
@@ -35,8 +35,8 @@ describe('alert list middleware and selectors', () => {
         store.dispatch({ type: 'userChangedUrl', payload: window.location.href });
       });
       it('should modify the url correctly', () => {
-        const actual = paginationDataFromUrl(store.getState());
-        expect(actual).toMatchInlineSnapshot(`
+        const actualPaginationQuery = paginationDataFromUrl(store.getState());
+        expect(actualPaginationQuery).toMatchInlineSnapshot(`
           Object {
             "page_size": "1",
           }
@@ -50,8 +50,8 @@ describe('alert list middleware and selectors', () => {
           store.dispatch({ type: 'userChangedUrl', payload: window.location.href });
         });
         it('should modify the url in the correct order', () => {
-          const actual = paginationDataFromUrl(store.getState());
-          expect(actual).toMatchInlineSnapshot(`
+          const actualPaginationQuery = paginationDataFromUrl(store.getState());
+          expect(actualPaginationQuery).toMatchInlineSnapshot(`
             Object {
               "page_index": "1",
               "page_size": "1",
@@ -68,8 +68,8 @@ describe('alert list middleware and selectors', () => {
         store.dispatch({ type: 'userChangedUrl', payload: window.location.href });
       });
       it('should modify the url correctly', () => {
-        const actual = paginationDataFromUrl(store.getState());
-        expect(actual).toMatchInlineSnapshot(`
+        const actualPaginationQuery = paginationDataFromUrl(store.getState());
+        expect(actualPaginationQuery).toMatchInlineSnapshot(`
           Object {
             "page_index": "1",
           }
@@ -83,8 +83,8 @@ describe('alert list middleware and selectors', () => {
           store.dispatch({ type: 'userChangedUrl', payload: window.location.href });
         });
         it('should modify the url correctly and reset index to `0`', () => {
-          const actual = paginationDataFromUrl(store.getState());
-          expect(actual).toMatchInlineSnapshot(`
+          const actualPaginationQuery = paginationDataFromUrl(store.getState());
+          expect(actualPaginationQuery).toMatchInlineSnapshot(`
             Object {
               "page_index": "0",
               "page_size": "1",

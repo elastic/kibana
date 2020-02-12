@@ -10,29 +10,68 @@ import { EuiDataGrid, EuiDataGridColumn, EuiPage, EuiPageBody, EuiPageContent } 
 import { i18n } from '@kbn/i18n';
 import { useHistory } from 'react-router-dom';
 import * as selectors from '../../store/alerts/selectors';
-import { usePageId } from '../use_page_id';
-import { useAlertListSelector } from '../../store/alerts/alert_hooks';
+import { useAlertListSelector } from './hooks/use_alerts_selector';
 
 export const AlertIndex = memo(() => {
-  usePageId('alertsPage');
   const history = useHistory();
 
   const columns: EuiDataGridColumn[] = useMemo(() => {
     return [
-      { id: 'Alert Type' },
-      { id: 'Event Type' },
-      { id: 'OS' },
-      { id: 'IP Address' },
-      { id: 'Host Name' },
-      { id: 'Timestamp' },
-      { id: 'Archived' },
-      { id: 'Malware Score' },
+      {
+        id: 'alert_type',
+        display: i18n.translate('xpack.endpoint.application.endpoint.alerts.alertType', {
+          defaultMessage: 'Alert Type',
+        }),
+      },
+      {
+        id: 'event_type',
+        display: i18n.translate('xpack.endpoint.application.endpoint.alerts.eventType', {
+          defaultMessage: 'Event Type',
+        }),
+      },
+      {
+        id: 'os',
+        display: i18n.translate('xpack.endpoint.application.endpoint.alerts.os', {
+          defaultMessage: 'OS',
+        }),
+      },
+      {
+        id: 'ip_address',
+        display: i18n.translate('xpack.endpoint.application.endpoint.alerts.ipAddress', {
+          defaultMessage: 'IP Address',
+        }),
+      },
+      {
+        id: 'host_name',
+        display: i18n.translate('xpack.endpoint.application.endpoint.alerts.hostName', {
+          defaultMessage: 'Host Name',
+        }),
+      },
+      {
+        id: 'timestamp',
+        display: i18n.translate('xpack.endpoint.application.endpoint.alerts.timestamp', {
+          defaultMessage: 'Timestamp',
+        }),
+      },
+      {
+        id: 'archived',
+        display: i18n.translate('xpack.endpoint.application.endpoint.alerts.archived', {
+          defaultMessage: 'Archived',
+        }),
+      },
+      {
+        id: 'malware_score',
+        display: i18n.translate('xpack.endpoint.application.endpoint.alerts.malwareScore', {
+          defaultMessage: 'Malware Score',
+        }),
+      },
     ];
   }, []);
 
   const { pageIndex, pageSize, total } = useAlertListSelector(selectors.alertListPagination);
   const urlFromNewPageSizeParam = useAlertListSelector(selectors.urlFromNewPageSizeParam);
   const urlFromNewPageIndexParam = useAlertListSelector(selectors.urlFromNewPageIndexParam);
+  const json = useAlertListSelector(selectors.alertListData);
 
   const onChangeItemsPerPage = useCallback(
     newPageSize => history.push(urlFromNewPageSizeParam(newPageSize)),
@@ -46,8 +85,6 @@ export const AlertIndex = memo(() => {
 
   const [visibleColumns, setVisibleColumns] = useState(() => columns.map(({ id }) => id));
 
-  const json = useAlertListSelector(selectors.alertListData);
-
   const renderCellValue = useMemo(() => {
     return ({ rowIndex, columnId }: { rowIndex: number; columnId: string }) => {
       if (rowIndex > total) {
@@ -56,26 +93,26 @@ export const AlertIndex = memo(() => {
 
       const row = json[rowIndex % pageSize];
 
-      if (columnId === 'Alert Type') {
+      if (columnId === 'alert_type') {
         return i18n.translate(
           'xpack.endpoint.application.endpoint.alerts.alertType.maliciousFileDescription',
           {
             defaultMessage: 'Malicious File',
           }
         );
-      } else if (columnId === 'Event Type') {
+      } else if (columnId === 'event_type') {
         return row.event.action;
-      } else if (columnId === 'OS') {
+      } else if (columnId === 'os') {
         return row.host.os.name;
-      } else if (columnId === 'IP Address') {
+      } else if (columnId === 'ip_address') {
         return row.host.ip;
-      } else if (columnId === 'Host Name') {
+      } else if (columnId === 'host_name') {
         return row.host.hostname;
-      } else if (columnId === 'Timestamp') {
+      } else if (columnId === 'timestamp') {
         return row['@timestamp'];
-      } else if (columnId === 'Archived') {
+      } else if (columnId === 'archived') {
         return null;
-      } else if (columnId === 'Malware Score') {
+      } else if (columnId === 'malware_score') {
         return row.file_classification.malware_classification.score;
       }
       return null;

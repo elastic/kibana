@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { HttpFetchQuery } from 'kibana/public';
 import { AlertResultList } from '../../../../../common/types';
 import { AppAction } from '../action';
 import { MiddlewareFactory, AlertListState } from '../../types';
@@ -15,8 +16,8 @@ export const alertMiddlewareFactory: MiddlewareFactory<AlertListState> = coreSta
       next(action);
       const state = api.getState();
       if (action.type === 'userChangedUrl' && isOnAlertPage(state)) {
-        const response: AlertResultList = await coreStart.http.post(`/api/endpoint/alerts`, {
-          body: JSON.stringify(paginationDataFromUrl(state)),
+        const response: AlertResultList = await coreStart.http.get(`/api/endpoint/alerts`, {
+          query: paginationDataFromUrl(state) as HttpFetchQuery,
         });
         api.dispatch({ type: 'serverReturnedAlertsData', payload: response });
       }

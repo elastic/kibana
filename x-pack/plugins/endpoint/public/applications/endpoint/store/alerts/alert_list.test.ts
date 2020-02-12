@@ -14,7 +14,7 @@ import { createBrowserHistory } from 'history';
 import { AlertResultList } from '../../../../../common/types';
 import { isOnAlertPage } from './selectors';
 
-describe('alert list middleware and selectors', () => {
+describe('alert list tests', () => {
   let store: Store<AlertListState, AppAction>;
   let coreStart: ReturnType<typeof coreMock.createStart>;
   let history: EndpointAppHistory;
@@ -26,17 +26,17 @@ describe('alert list middleware and selectors', () => {
   });
   describe('when the user navigates to the alert list page', () => {
     beforeEach(() => {
-      coreStart.http.post.mockImplementation(async () => {
+      coreStart.http.get.mockImplementation(async () => {
         const response: AlertResultList = {
           alerts: [
             {
-              '@timestamp': new Date(0),
+              '@timestamp': new Date(1542341895000),
               agent: {
-                id: 'hgsadfjbk',
-                version: 'kdfhjs',
+                id: 'ced9c68e-b94a-4d66-bb4c-6106514f0a2f',
+                version: '3.0.0',
               },
               event: {
-                action: 'hjkadfs',
+                action: 'open',
               },
               file_classification: {
                 malware_classification: {
@@ -44,10 +44,10 @@ describe('alert list middleware and selectors', () => {
                 },
               },
               host: {
-                hostname: 'fdadsf',
-                ip: 'asdfasd',
+                hostname: 'HD-c15-bc09190a',
+                ip: '10.179.244.14',
                 os: {
-                  name: 'asdfsdaf',
+                  name: 'Windows',
                 },
               },
               thread: {},
@@ -65,12 +65,12 @@ describe('alert list middleware and selectors', () => {
 
     it("should recognize it's on the alert list page", () => {
       const actual = isOnAlertPage(store.getState());
-      expect(actual).toBeTruthy();
+      expect(actual).toBe(true);
     });
 
     it('should return alertListData', () => {
-      const actual = store.getState().alerts.length;
-      expect(actual).toEqual(1);
+      const actualResponseLength = store.getState().alerts.length;
+      expect(actualResponseLength).toEqual(1);
     });
   });
 });

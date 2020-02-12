@@ -5,7 +5,7 @@
  */
 
 import { useSelector } from 'react-redux';
-import { GlobalState, AlertListState } from '../../types';
+import { GlobalState, AlertListState } from '../../../types';
 
 export function useAlertListSelector<TSelected>(selector: (state: AlertListState) => TSelected) {
   return useSelector((state: GlobalState) => selector(state.alertList));

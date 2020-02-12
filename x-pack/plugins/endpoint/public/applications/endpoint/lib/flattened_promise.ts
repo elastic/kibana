@@ -4,6 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/**
+ * Able to hoist a Promise's resolve and reject functions to the same scope as the Promise
+ */
 export function flattenedPromise<T>(): [Promise<T>, PromiseResolver<T>, PromiseRejector<T>] {
   let newResolve: PromiseResolver<T>;
   let newReject: PromiseRejector<T>;
