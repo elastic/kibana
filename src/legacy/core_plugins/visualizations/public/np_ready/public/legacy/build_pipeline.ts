@@ -28,7 +28,7 @@ import {
   isDateHistogramBucketAggConfig,
   createFormat,
 } from '../../../legacy_imports';
-import { Vis, VisParams, VisState } from '..';
+import { Vis, VisParams } from '..';
 
 interface SchemaConfigParams {
   precision?: number;
@@ -59,7 +59,7 @@ export interface Schemas {
 }
 
 type buildVisFunction = (
-  visState: VisState,
+  visState: ReturnType<Vis['getCurrentState']>,
   schemas: Schemas,
   uiState: any,
   meta?: { savedObjectId?: string }

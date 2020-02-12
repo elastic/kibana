@@ -23,6 +23,14 @@ import { Status } from './legacy/update_status';
 
 export interface Vis {
   type: VisType;
+  getCurrentState: (
+    includeDisabled?: boolean
+  ) => {
+    title: string;
+    type: string;
+    params: VisParams;
+    aggs: Array<{ [key: string]: any }>;
+  };
 
   // Since we haven't typed everything here yet, we basically "any" the rest
   // of that interface. This should be removed as soon as this type definition

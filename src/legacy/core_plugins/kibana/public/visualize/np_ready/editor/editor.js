@@ -395,6 +395,14 @@ function VisualizeAppController(
         stateContainer.transitions.set('query', newQuery);
       }
       persistOnChange(state);
+
+      // if the browser history was changed manually we need to reflect changes in the editor
+      if (!_.isEqual(vis.getState(), stateContainer.getState().vis)) {
+        vis.setState(stateContainer.getState().vis);
+        vis.forceReload();
+        vis.emit('updateEditor');
+      }
+
       $scope.fetch();
     });
 

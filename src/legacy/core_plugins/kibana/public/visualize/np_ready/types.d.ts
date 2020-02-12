@@ -20,13 +20,15 @@
 import { TimeRange, Query, Filter, DataPublicPluginStart } from 'src/plugins/data/public';
 import { IEmbeddableStart } from 'src/plugins/embeddable/public';
 import { LegacyCoreStart } from 'kibana/public';
-import { VisState } from 'src/legacy/core_plugins/visualizations/public';
+import { VisState, Vis } from 'src/legacy/core_plugins/visualizations/public';
 import { VisSavedObject, PersistedState } from '../legacy_imports';
 
+export type PureVisState = ReturnType<Vis['getCurrentState']>;
+
 export interface VisualizeAppState {
-  filters: esFilters.Filter[];
+  filters: Filter[];
   uiState: PersistedState;
-  vis: any;
+  vis: PureVisState;
   query: Query;
   savedQuery?: string;
   save(): void;
@@ -39,9 +41,9 @@ export interface VisualizeAppStateTransitions {
     prop: T,
     value: VisualizeAppState[T]
   ) => VisualizeAppState;
-  setVis: (state: VisualizeAppState) => (vis: any) => VisualizeAppState;
+  setVis: (state: VisualizeAppState) => (vis: Partial<PureVisState>) => VisualizeAppState;
   removeSavedQuery: (state: VisualizeAppState) => () => VisualizeAppState;
-  updateVisState: (state: VisualizeAppState) => (vis: VisState) => VisualizeAppState;
+  updateVisState: (state: VisualizeAppState) => (vis: PureVisState) => VisualizeAppState;
 }
 
 export interface EditorRenderProps {

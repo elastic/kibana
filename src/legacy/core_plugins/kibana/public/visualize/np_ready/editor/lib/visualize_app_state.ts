@@ -20,14 +20,13 @@
 import { createHashHistory } from 'history';
 import { isFunction, omit } from 'lodash';
 
-import { VisState } from 'src/legacy/core_plugins/visualizations/public';
 import { migrateAppState } from './migrate_app_state';
 import {
   createKbnUrlStateStorage,
   createStateContainer,
   syncState,
 } from '../../../../../../../../plugins/kibana_utils/public';
-import { VisualizeAppState, VisualizeAppStateTransitions } from '../../types';
+import { PureVisState, VisualizeAppState, VisualizeAppStateTransitions } from '../../types';
 
 const STATE_STORAGE_KEY = '_a';
 
@@ -36,7 +35,7 @@ interface Arguments {
   stateDefaults: VisualizeAppState;
 }
 
-function toObject(state: VisState) {
+function toObject(state: PureVisState): PureVisState {
   return omit(state, (value, key: string) => {
     return key.charAt(0) === '$' || key.charAt(0) === '_' || isFunction(value);
   });
