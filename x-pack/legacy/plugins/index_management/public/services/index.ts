@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { ExtensionsService } from './extensions';
+export { ExtensionsService } from './extensions_service';
