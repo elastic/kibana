@@ -10,7 +10,7 @@ import { ActionCreator } from 'typescript-fsa';
 import {
   IIndexPattern,
   Query,
-  esFilters,
+  Filter,
   FilterManager,
   SavedQueryService,
 } from 'src/plugins/data/public';
@@ -82,7 +82,7 @@ export interface Timeline {
 
 export interface UrlState {
   [CONSTANTS.appQuery]?: Query;
-  [CONSTANTS.filters]?: esFilters.Filter[];
+  [CONSTANTS.filters]?: Filter[];
   [CONSTANTS.savedQuery]?: string;
   [CONSTANTS.timerange]: UrlInputsModel;
   [CONSTANTS.timeline]: Timeline;

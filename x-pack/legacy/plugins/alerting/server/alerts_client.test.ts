@@ -86,7 +86,7 @@ describe('create()', () => {
     alertTypeRegistry.get.mockReturnValue({
       id: '123',
       name: 'Test',
-      actionGroups: ['default'],
+      actionGroups: [{ id: 'default', name: 'Default' }],
       async executor() {},
     });
   });
@@ -1857,180 +1857,39 @@ describe('delete()', () => {
 });
 
 describe('update()', () => {
-  test('updates given parameters', async () => {
-    const alertsClient = new AlertsClient(alertsClientParams);
-    alertTypeRegistry.get.mockReturnValueOnce({
+  let alertsClient: AlertsClient;
+  const existingAlert = {
+    id: '1',
+    type: 'alert',
+    attributes: {
+      enabled: true,
+      alertTypeId: '123',
+      scheduledTaskId: 'task-123',
+    },
+    references: [],
+    version: '123',
+  };
+  const existingDecryptedAlert = {
+    ...existingAlert,
+    attributes: {
+      ...existingAlert.attributes,
+      apiKey: Buffer.from('123:abc').toString('base64'),
+    },
+  };
+
+  beforeEach(() => {
+    alertsClient = new AlertsClient(alertsClientParams);
+    savedObjectsClient.get.mockResolvedValue(existingAlert);
+    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue(existingDecryptedAlert);
+    alertTypeRegistry.get.mockReturnValue({
       id: '123',
       name: 'Test',
-      actionGroups: ['default'],
+      actionGroups: [{ id: 'default', name: 'Default' }],
       async executor() {},
     });
-    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce({
-      id: '1',
-      type: 'alert',
-      attributes: {
-        enabled: true,
-        alertTypeId: '123',
-        scheduledTaskId: 'task-123',
-      },
-      references: [],
-      version: '123',
-    });
-    savedObjectsClient.bulkGet.mockResolvedValueOnce({
-      saved_objects: [
-        {
-          id: '1',
-          type: 'action',
-          attributes: {
-            actionTypeId: 'test',
-          },
-          references: [],
-        },
-      ],
-    });
-    savedObjectsClient.update.mockResolvedValueOnce({
-      id: '1',
-      type: 'alert',
-      attributes: {
-        enabled: true,
-        schedule: { interval: '10s' },
-        params: {
-          bar: true,
-        },
-        actions: [
-          {
-            group: 'default',
-            actionRef: 'action_0',
-            actionTypeId: 'test',
-            params: {
-              foo: true,
-            },
-          },
-        ],
-        scheduledTaskId: 'task-123',
-        createdAt: new Date().toISOString(),
-      },
-      updated_at: new Date().toISOString(),
-      references: [
-        {
-          name: 'action_0',
-          type: 'action',
-          id: '1',
-        },
-      ],
-    });
-    const result = await alertsClient.update({
-      id: '1',
-      data: {
-        schedule: { interval: '10s' },
-        name: 'abc',
-        tags: ['foo'],
-        params: {
-          bar: true,
-        },
-        actions: [
-          {
-            group: 'default',
-            id: '1',
-            params: {
-              foo: true,
-            },
-          },
-        ],
-      },
-    });
-    expect(result).toMatchInlineSnapshot(`
-      Object {
-        "actions": Array [
-          Object {
-            "actionTypeId": "test",
-            "group": "default",
-            "id": "1",
-            "params": Object {
-              "foo": true,
-            },
-          },
-        ],
-        "createdAt": 2019-02-12T21:01:22.479Z,
-        "enabled": true,
-        "id": "1",
-        "params": Object {
-          "bar": true,
-        },
-        "schedule": Object {
-          "interval": "10s",
-        },
-        "scheduledTaskId": "task-123",
-        "updatedAt": 2019-02-12T21:01:22.479Z,
-      }
-    `);
-    expect(savedObjectsClient.update).toHaveBeenCalledTimes(1);
-    expect(savedObjectsClient.update.mock.calls[0]).toHaveLength(4);
-    expect(savedObjectsClient.update.mock.calls[0][0]).toEqual('alert');
-    expect(savedObjectsClient.update.mock.calls[0][1]).toEqual('1');
-    expect(savedObjectsClient.update.mock.calls[0][2]).toMatchInlineSnapshot(`
-      Object {
-        "actions": Array [
-          Object {
-            "actionRef": "action_0",
-            "actionTypeId": "test",
-            "group": "default",
-            "params": Object {
-              "foo": true,
-            },
-          },
-        ],
-        "alertTypeId": "123",
-        "apiKey": null,
-        "apiKeyOwner": null,
-        "enabled": true,
-        "name": "abc",
-        "params": Object {
-          "bar": true,
-        },
-        "schedule": Object {
-          "interval": "10s",
-        },
-        "scheduledTaskId": "task-123",
-        "tags": Array [
-          "foo",
-        ],
-        "updatedBy": "elastic",
-      }
-    `);
-    expect(savedObjectsClient.update.mock.calls[0][3]).toMatchInlineSnapshot(`
-                                                                                                                  Object {
-                                                                                                                    "references": Array [
-                                                                                                                      Object {
-                                                                                                                        "id": "1",
-                                                                                                                        "name": "action_0",
-                                                                                                                        "type": "action",
-                                                                                                                      },
-                                                                                                                    ],
-                                                                                                                    "version": "123",
-                                                                                                                  }
-                                                                            `);
   });
 
-  it('updates with multiple actions', async () => {
-    const alertsClient = new AlertsClient(alertsClientParams);
-    alertTypeRegistry.get.mockReturnValueOnce({
-      id: '123',
-      name: 'Test',
-      actionGroups: ['default'],
-      async executor() {},
-    });
-    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce({
-      id: '1',
-      type: 'alert',
-      attributes: {
-        enabled: true,
-        alertTypeId: '123',
-        scheduledTaskId: 'task-123',
-      },
-      references: [],
-      version: '123',
-    });
+  test('updates given parameters', async () => {
     savedObjectsClient.bulkGet.mockResolvedValueOnce({
       saved_objects: [
         {
@@ -2060,7 +1919,6 @@ describe('update()', () => {
         params: {
           bar: true,
         },
-        createdAt: new Date().toISOString(),
         actions: [
           {
             group: 'default',
@@ -2088,6 +1946,7 @@ describe('update()', () => {
           },
         ],
         scheduledTaskId: 'task-123',
+        createdAt: new Date().toISOString(),
       },
       updated_at: new Date().toISOString(),
       references: [
@@ -2183,37 +2042,85 @@ describe('update()', () => {
         "updatedAt": 2019-02-12T21:01:22.479Z,
       }
     `);
-    expect(savedObjectsClient.bulkGet).toHaveBeenCalledWith([
-      {
-        id: '1',
-        type: 'action',
-      },
-      {
-        id: '2',
-        type: 'action',
-      },
-    ]);
+    expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith('alert', '1', {
+      namespace: 'default',
+    });
+    expect(savedObjectsClient.get).not.toHaveBeenCalled();
+    expect(savedObjectsClient.update).toHaveBeenCalledTimes(1);
+    expect(savedObjectsClient.update.mock.calls[0]).toHaveLength(4);
+    expect(savedObjectsClient.update.mock.calls[0][0]).toEqual('alert');
+    expect(savedObjectsClient.update.mock.calls[0][1]).toEqual('1');
+    expect(savedObjectsClient.update.mock.calls[0][2]).toMatchInlineSnapshot(`
+      Object {
+        "actions": Array [
+          Object {
+            "actionRef": "action_0",
+            "actionTypeId": "test",
+            "group": "default",
+            "params": Object {
+              "foo": true,
+            },
+          },
+          Object {
+            "actionRef": "action_1",
+            "actionTypeId": "test",
+            "group": "default",
+            "params": Object {
+              "foo": true,
+            },
+          },
+          Object {
+            "actionRef": "action_2",
+            "actionTypeId": "test2",
+            "group": "default",
+            "params": Object {
+              "foo": true,
+            },
+          },
+        ],
+        "alertTypeId": "123",
+        "apiKey": null,
+        "apiKeyOwner": null,
+        "enabled": true,
+        "name": "abc",
+        "params": Object {
+          "bar": true,
+        },
+        "schedule": Object {
+          "interval": "10s",
+        },
+        "scheduledTaskId": "task-123",
+        "tags": Array [
+          "foo",
+        ],
+        "updatedBy": "elastic",
+      }
+    `);
+    expect(savedObjectsClient.update.mock.calls[0][3]).toMatchInlineSnapshot(`
+      Object {
+        "references": Array [
+          Object {
+            "id": "1",
+            "name": "action_0",
+            "type": "action",
+          },
+          Object {
+            "id": "1",
+            "name": "action_1",
+            "type": "action",
+          },
+          Object {
+            "id": "2",
+            "name": "action_2",
+            "type": "action",
+          },
+        ],
+        "version": "123",
+      }
+    `);
   });
 
   it('calls the createApiKey function', async () => {
-    const alertsClient = new AlertsClient(alertsClientParams);
-    alertTypeRegistry.get.mockReturnValueOnce({
-      id: '123',
-      name: 'Test',
-      actionGroups: ['default'],
-      async executor() {},
-    });
-    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce({
-      id: '1',
-      type: 'alert',
-      attributes: {
-        enabled: true,
-        alertTypeId: '123',
-        scheduledTaskId: 'task-123',
-      },
-      references: [],
-      version: '123',
-    });
     savedObjectsClient.bulkGet.mockResolvedValueOnce({
       saved_objects: [
         {
@@ -2356,26 +2263,164 @@ describe('update()', () => {
                                 `);
   });
 
+  it(`doesn't call the createAPIKey function when alert is disabled`, async () => {
+    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue({
+      ...existingDecryptedAlert,
+      attributes: {
+        ...existingDecryptedAlert.attributes,
+        enabled: false,
+      },
+    });
+    savedObjectsClient.bulkGet.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          id: '1',
+          type: 'action',
+          attributes: {
+            actionTypeId: 'test',
+          },
+          references: [],
+        },
+      ],
+    });
+    savedObjectsClient.update.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        enabled: false,
+        schedule: { interval: '10s' },
+        params: {
+          bar: true,
+        },
+        createdAt: new Date().toISOString(),
+        actions: [
+          {
+            group: 'default',
+            actionRef: 'action_0',
+            actionTypeId: 'test',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+        scheduledTaskId: 'task-123',
+        apiKey: null,
+      },
+      updated_at: new Date().toISOString(),
+      references: [
+        {
+          name: 'action_0',
+          type: 'action',
+          id: '1',
+        },
+      ],
+    });
+    const result = await alertsClient.update({
+      id: '1',
+      data: {
+        schedule: { interval: '10s' },
+        name: 'abc',
+        tags: ['foo'],
+        params: {
+          bar: true,
+        },
+        actions: [
+          {
+            group: 'default',
+            id: '1',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+      },
+    });
+    expect(alertsClientParams.createAPIKey).not.toHaveBeenCalled();
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "actions": Array [
+          Object {
+            "actionTypeId": "test",
+            "group": "default",
+            "id": "1",
+            "params": Object {
+              "foo": true,
+            },
+          },
+        ],
+        "apiKey": null,
+        "createdAt": 2019-02-12T21:01:22.479Z,
+        "enabled": false,
+        "id": "1",
+        "params": Object {
+          "bar": true,
+        },
+        "schedule": Object {
+          "interval": "10s",
+        },
+        "scheduledTaskId": "task-123",
+        "updatedAt": 2019-02-12T21:01:22.479Z,
+      }
+    `);
+    expect(savedObjectsClient.update).toHaveBeenCalledTimes(1);
+    expect(savedObjectsClient.update.mock.calls[0]).toHaveLength(4);
+    expect(savedObjectsClient.update.mock.calls[0][0]).toEqual('alert');
+    expect(savedObjectsClient.update.mock.calls[0][1]).toEqual('1');
+    expect(savedObjectsClient.update.mock.calls[0][2]).toMatchInlineSnapshot(`
+      Object {
+        "actions": Array [
+          Object {
+            "actionRef": "action_0",
+            "actionTypeId": "test",
+            "group": "default",
+            "params": Object {
+              "foo": true,
+            },
+          },
+        ],
+        "alertTypeId": "123",
+        "apiKey": null,
+        "apiKeyOwner": null,
+        "enabled": false,
+        "name": "abc",
+        "params": Object {
+          "bar": true,
+        },
+        "schedule": Object {
+          "interval": "10s",
+        },
+        "scheduledTaskId": "task-123",
+        "tags": Array [
+          "foo",
+        ],
+        "updatedBy": "elastic",
+      }
+    `);
+    expect(savedObjectsClient.update.mock.calls[0][3]).toMatchInlineSnapshot(`
+                                                Object {
+                                                  "references": Array [
+                                                    Object {
+                                                      "id": "1",
+                                                      "name": "action_0",
+                                                      "type": "action",
+                                                    },
+                                                  ],
+                                                  "version": "123",
+                                                }
+                                `);
+  });
+
   it('should validate params', async () => {
-    const alertsClient = new AlertsClient(alertsClientParams);
     alertTypeRegistry.get.mockReturnValueOnce({
       id: '123',
       name: 'Test',
-      actionGroups: ['default'],
+      actionGroups: [{ id: 'default', name: 'Default' }],
       validate: {
         params: schema.object({
           param1: schema.string(),
         }),
       },
       async executor() {},
-    });
-    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce({
-      id: '1',
-      type: 'alert',
-      attributes: {
-        alertTypeId: '123',
-      },
-      references: [],
     });
     await expect(
       alertsClient.update({
@@ -2404,26 +2449,7 @@ describe('update()', () => {
   });
 
   it('swallows error when invalidate API key throws', async () => {
-    const alertsClient = new AlertsClient(alertsClientParams);
     alertsClientParams.invalidateAPIKey.mockRejectedValueOnce(new Error('Fail'));
-    alertTypeRegistry.get.mockReturnValueOnce({
-      id: '123',
-      name: 'Test',
-      actionGroups: ['default'],
-      async executor() {},
-    });
-    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce({
-      id: '1',
-      type: 'alert',
-      attributes: {
-        enabled: true,
-        alertTypeId: '123',
-        scheduledTaskId: 'task-123',
-        apiKey: Buffer.from('123:abc').toString('base64'),
-      },
-      references: [],
-      version: '123',
-    });
     savedObjectsClient.bulkGet.mockResolvedValueOnce({
       saved_objects: [
         {
@@ -2490,6 +2516,125 @@ describe('update()', () => {
     );
   });
 
+  it('swallows error when getDecryptedAsInternalUser throws', async () => {
+    encryptedSavedObjects.getDecryptedAsInternalUser.mockRejectedValue(new Error('Fail'));
+    savedObjectsClient.bulkGet.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          id: '1',
+          type: 'action',
+          attributes: {
+            actionTypeId: 'test',
+          },
+          references: [],
+        },
+        {
+          id: '2',
+          type: 'action',
+          attributes: {
+            actionTypeId: 'test2',
+          },
+          references: [],
+        },
+      ],
+    });
+    savedObjectsClient.update.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        enabled: true,
+        schedule: { interval: '10s' },
+        params: {
+          bar: true,
+        },
+        actions: [
+          {
+            group: 'default',
+            actionRef: 'action_0',
+            actionTypeId: 'test',
+            params: {
+              foo: true,
+            },
+          },
+          {
+            group: 'default',
+            actionRef: 'action_1',
+            actionTypeId: 'test',
+            params: {
+              foo: true,
+            },
+          },
+          {
+            group: 'default',
+            actionRef: 'action_2',
+            actionTypeId: 'test2',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+        scheduledTaskId: 'task-123',
+        createdAt: new Date().toISOString(),
+      },
+      updated_at: new Date().toISOString(),
+      references: [
+        {
+          name: 'action_0',
+          type: 'action',
+          id: '1',
+        },
+        {
+          name: 'action_1',
+          type: 'action',
+          id: '1',
+        },
+        {
+          name: 'action_2',
+          type: 'action',
+          id: '2',
+        },
+      ],
+    });
+    await alertsClient.update({
+      id: '1',
+      data: {
+        schedule: { interval: '10s' },
+        name: 'abc',
+        tags: ['foo'],
+        params: {
+          bar: true,
+        },
+        actions: [
+          {
+            group: 'default',
+            id: '1',
+            params: {
+              foo: true,
+            },
+          },
+          {
+            group: 'default',
+            id: '1',
+            params: {
+              foo: true,
+            },
+          },
+          {
+            group: 'default',
+            id: '2',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+      },
+    });
+    expect(savedObjectsClient.get).toHaveBeenCalledWith('alert', '1');
+    expect(alertsClientParams.logger.error).toHaveBeenCalledWith(
+      'update(): Failed to load API key to invalidate on alert 1: Fail'
+    );
+  });
+
   describe('updating an alert schedule', () => {
     function mockApiCalls(
       alertId: string,
@@ -2501,7 +2646,7 @@ describe('update()', () => {
       alertTypeRegistry.get.mockReturnValueOnce({
         id: '123',
         name: 'Test',
-        actionGroups: ['default'],
+        actionGroups: [{ id: 'default', name: 'Default' }],
         async executor() {},
       });
       savedObjectsClient.bulkGet.mockResolvedValueOnce({
@@ -2575,7 +2720,6 @@ describe('update()', () => {
     test('updating the alert schedule should rerun the task immediately', async () => {
       const alertId = uuid.v4();
       const taskId = uuid.v4();
-      const alertsClient = new AlertsClient(alertsClientParams);
 
       mockApiCalls(alertId, taskId, { interval: '60m' }, { interval: '10s' });
 
@@ -2606,7 +2750,6 @@ describe('update()', () => {
     test('updating the alert without changing the schedule should not rerun the task', async () => {
       const alertId = uuid.v4();
       const taskId = uuid.v4();
-      const alertsClient = new AlertsClient(alertsClientParams);
 
       mockApiCalls(alertId, taskId, { interval: '10s' }, { interval: '10s' });
 
@@ -2637,7 +2780,6 @@ describe('update()', () => {
     test('updating the alert should not wait for the rerun the task to complete', async done => {
       const alertId = uuid.v4();
       const taskId = uuid.v4();
-      const alertsClient = new AlertsClient(alertsClientParams);
 
       mockApiCalls(alertId, taskId, { interval: '10s' }, { interval: '30s' });
 
@@ -2676,7 +2818,6 @@ describe('update()', () => {
     test('logs when the rerun of an alerts underlying task fails', async () => {
       const alertId = uuid.v4();
       const taskId = uuid.v4();
-      const alertsClient = new AlertsClient(alertsClientParams);
 
       mockApiCalls(alertId, taskId, { interval: '10s' }, { interval: '30s' });
 
@@ -2714,25 +2855,42 @@ describe('update()', () => {
 });
 
 describe('updateApiKey()', () => {
-  test('updates the API key for the alert', async () => {
-    const alertsClient = new AlertsClient(alertsClientParams);
-    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce({
-      id: '1',
-      type: 'alert',
-      attributes: {
-        schedule: { interval: '10s' },
-        alertTypeId: '2',
-        enabled: true,
-      },
-      version: '123',
-      references: [],
-    });
+  let alertsClient: AlertsClient;
+  const existingAlert = {
+    id: '1',
+    type: 'alert',
+    attributes: {
+      schedule: { interval: '10s' },
+      alertTypeId: '2',
+      enabled: true,
+    },
+    version: '123',
+    references: [],
+  };
+  const existingEncryptedAlert = {
+    ...existingAlert,
+    attributes: {
+      ...existingAlert.attributes,
+      apiKey: Buffer.from('123:abc').toString('base64'),
+    },
+  };
+
+  beforeEach(() => {
+    alertsClient = new AlertsClient(alertsClientParams);
+    savedObjectsClient.get.mockResolvedValue(existingAlert);
+    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue(existingEncryptedAlert);
     alertsClientParams.createAPIKey.mockResolvedValueOnce({
       apiKeysEnabled: true,
-      result: { id: '123', api_key: 'abc' },
+      result: { id: '234', api_key: 'abc' },
     });
+  });
 
+  test('updates the API key for the alert', async () => {
     await alertsClient.updateApiKey({ id: '1' });
+    expect(savedObjectsClient.get).not.toHaveBeenCalled();
+    expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith('alert', '1', {
+      namespace: 'default',
+    });
     expect(savedObjectsClient.update).toHaveBeenCalledWith(
       'alert',
       '1',
@@ -2740,37 +2898,66 @@ describe('updateApiKey()', () => {
         schedule: { interval: '10s' },
         alertTypeId: '2',
         enabled: true,
-        apiKey: Buffer.from('123:abc').toString('base64'),
+        apiKey: Buffer.from('234:abc').toString('base64'),
         apiKeyOwner: 'elastic',
         updatedBy: 'elastic',
       },
       { version: '123' }
     );
+    expect(alertsClientParams.invalidateAPIKey).toHaveBeenCalledWith({ id: '123' });
   });
 
-  test('swallows error when invalidate API key throws', async () => {
-    const alertsClient = new AlertsClient(alertsClientParams);
-    alertsClientParams.invalidateAPIKey.mockRejectedValue(new Error('Fail'));
-    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce({
-      id: '1',
-      type: 'alert',
-      attributes: {
+  test('falls back to SOC when getDecryptedAsInternalUser throws an error', async () => {
+    encryptedSavedObjects.getDecryptedAsInternalUser.mockRejectedValueOnce(new Error('Fail'));
+
+    await alertsClient.updateApiKey({ id: '1' });
+    expect(savedObjectsClient.get).toHaveBeenCalledWith('alert', '1');
+    expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith('alert', '1', {
+      namespace: 'default',
+    });
+    expect(savedObjectsClient.update).toHaveBeenCalledWith(
+      'alert',
+      '1',
+      {
         schedule: { interval: '10s' },
         alertTypeId: '2',
         enabled: true,
-        apiKey: Buffer.from('123:abc').toString('base64'),
+        apiKey: Buffer.from('234:abc').toString('base64'),
+        apiKeyOwner: 'elastic',
+        updatedBy: 'elastic',
       },
-      version: '123',
-      references: [],
-    });
-    alertsClientParams.createAPIKey.mockResolvedValueOnce({
-      apiKeysEnabled: true,
-      result: { id: '123', api_key: 'abc' },
-    });
+      { version: '123' }
+    );
+    expect(alertsClientParams.invalidateAPIKey).not.toHaveBeenCalled();
+  });
+
+  test('swallows error when invalidate API key throws', async () => {
+    alertsClientParams.invalidateAPIKey.mockRejectedValue(new Error('Fail'));
 
     await alertsClient.updateApiKey({ id: '1' });
     expect(alertsClientParams.logger.error).toHaveBeenCalledWith(
       'Failed to invalidate API Key: Fail'
     );
+    expect(savedObjectsClient.update).toHaveBeenCalled();
+  });
+
+  test('swallows error when getting decrypted object throws', async () => {
+    encryptedSavedObjects.getDecryptedAsInternalUser.mockRejectedValueOnce(new Error('Fail'));
+
+    await alertsClient.updateApiKey({ id: '1' });
+    expect(alertsClientParams.logger.error).toHaveBeenCalledWith(
+      'updateApiKey(): Failed to load API key to invalidate on alert 1: Fail'
+    );
+    expect(savedObjectsClient.update).toHaveBeenCalled();
+    expect(alertsClientParams.invalidateAPIKey).not.toHaveBeenCalled();
+  });
+
+  test('throws when savedObjectsClient update fails', async () => {
+    savedObjectsClient.update.mockRejectedValueOnce(new Error('Fail'));
+
+    await expect(alertsClient.updateApiKey({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Fail"`
+    );
+    expect(alertsClientParams.invalidateAPIKey).not.toHaveBeenCalled();
   });
 });
