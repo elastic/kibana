@@ -25,8 +25,10 @@ import { ComponentRegistry } from '../../../../../src/plugins/advanced_settings/
 const mockObservable = () => {
   return {
     subscribe: () => {},
-    pipe: function() {
-      return this;
+    pipe: () => {
+      return {
+        subscribe: () => {},
+      };
     },
   };
 };
@@ -115,6 +117,10 @@ export const npSetup = {
         },
         timefilter: {
           timefilter: {
+            getTime: sinon.fake(),
+            getRefreshInterval: sinon.fake(),
+            getTimeUpdate$: mockObservable,
+            getRefreshIntervalUpdate$: mockObservable,
             getFetch$: mockObservable,
             getAutoRefreshFetch$: mockObservable,
             getEnabledUpdated$: mockObservable,
@@ -275,7 +281,15 @@ export const npStart = {
         getProvider: sinon.fake(),
       },
       getSuggestions: sinon.fake(),
-      indexPatterns: sinon.fake(),
+      indexPatterns: {
+        get: sinon.spy(indexPatternId =>
+          Promise.resolve({
+            id: indexPatternId,
+            isTimeNanosBased: () => false,
+            popularizeField: () => {},
+          })
+        ),
+      },
       ui: {
         IndexPatternSelect: mockComponent,
         SearchBar: mockComponent,
@@ -365,6 +379,7 @@ export const npStart = {
     },
     home: {
       featureCatalogue: {
+        get: sinon.fake(),
         register: sinon.fake(),
       },
       environment: {

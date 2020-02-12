@@ -17,19 +17,18 @@
  * under the License.
  */
 
-import React from 'react';
-import { i18n } from '@kbn/i18n';
+import chalk from 'chalk';
 
-import { IndexPatternField } from 'src/plugins/data/public';
-import { FieldParamEditor } from './field';
-import { AggParamEditorProps } from '../agg_param_props';
+import { Conversion } from './type';
+import { LogRecord } from '../../log_record';
 
-function TopSortFieldParamEditor(props: AggParamEditorProps<IndexPatternField>) {
-  const customLabel = i18n.translate('visDefaultEditor.controls.sortOnLabel', {
-    defaultMessage: 'Sort on',
-  });
-
-  return <FieldParamEditor {...props} customLabel={customLabel} />;
-}
-
-export { TopSortFieldParamEditor };
+export const ContextConversion: Conversion = {
+  pattern: /{context}/gi,
+  formatter(record: LogRecord, highlight: boolean) {
+    let message = record.context;
+    if (highlight) {
+      message = chalk.magenta(message);
+    }
+    return message;
+  },
+};

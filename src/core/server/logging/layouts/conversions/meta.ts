@@ -16,20 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { Conversion } from './type';
+import { LogRecord } from '../../log_record';
 
-import React from 'react';
-import { i18n } from '@kbn/i18n';
-
-import { IndexPatternField } from 'src/plugins/data/public';
-import { FieldParamEditor } from './field';
-import { AggParamEditorProps } from '../agg_param_props';
-
-function TopSortFieldParamEditor(props: AggParamEditorProps<IndexPatternField>) {
-  const customLabel = i18n.translate('visDefaultEditor.controls.sortOnLabel', {
-    defaultMessage: 'Sort on',
-  });
-
-  return <FieldParamEditor {...props} customLabel={customLabel} />;
-}
-
-export { TopSortFieldParamEditor };
+export const MetaConversion: Conversion = {
+  pattern: /{meta}/gi,
+  formatter(record: LogRecord) {
+    return record.meta ? `[${JSON.stringify(record.meta)}]` : '';
+  },
+};

@@ -16,20 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { LogRecord } from 'kibana/server';
 
-import React from 'react';
-import { i18n } from '@kbn/i18n';
-
-import { IndexPatternField } from 'src/plugins/data/public';
-import { FieldParamEditor } from './field';
-import { AggParamEditorProps } from '../agg_param_props';
-
-function TopSortFieldParamEditor(props: AggParamEditorProps<IndexPatternField>) {
-  const customLabel = i18n.translate('visDefaultEditor.controls.sortOnLabel', {
-    defaultMessage: 'Sort on',
-  });
-
-  return <FieldParamEditor {...props} customLabel={customLabel} />;
+export interface Conversion {
+  pattern: RegExp;
+  formatter: (record: LogRecord, highlight: boolean) => string;
+  validate?: (input: string) => void;
 }
-
-export { TopSortFieldParamEditor };

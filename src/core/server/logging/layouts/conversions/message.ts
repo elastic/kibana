@@ -17,19 +17,13 @@
  * under the License.
  */
 
-import React from 'react';
-import { i18n } from '@kbn/i18n';
+import { Conversion } from './type';
+import { LogRecord } from '../../log_record';
 
-import { IndexPatternField } from 'src/plugins/data/public';
-import { FieldParamEditor } from './field';
-import { AggParamEditorProps } from '../agg_param_props';
-
-function TopSortFieldParamEditor(props: AggParamEditorProps<IndexPatternField>) {
-  const customLabel = i18n.translate('visDefaultEditor.controls.sortOnLabel', {
-    defaultMessage: 'Sort on',
-  });
-
-  return <FieldParamEditor {...props} customLabel={customLabel} />;
-}
-
-export { TopSortFieldParamEditor };
+export const MessageConversion: Conversion = {
+  pattern: /{message}/gi,
+  formatter(record: LogRecord) {
+    // Error stack is much more useful than just the message.
+    return (record.error && record.error.stack) || record.message;
+  },
+};

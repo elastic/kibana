@@ -17,19 +17,28 @@
  * under the License.
  */
 
-import React from 'react';
-import { i18n } from '@kbn/i18n';
+import chalk from 'chalk';
 
-import { IndexPatternField } from 'src/plugins/data/public';
-import { FieldParamEditor } from './field';
-import { AggParamEditorProps } from '../agg_param_props';
+import { Conversion } from './type';
+import { LogLevel } from '../../log_level';
+import { LogRecord } from '../../log_record';
 
-function TopSortFieldParamEditor(props: AggParamEditorProps<IndexPatternField>) {
-  const customLabel = i18n.translate('visDefaultEditor.controls.sortOnLabel', {
-    defaultMessage: 'Sort on',
-  });
+const LEVEL_COLORS = new Map([
+  [LogLevel.Fatal, chalk.red],
+  [LogLevel.Error, chalk.red],
+  [LogLevel.Warn, chalk.yellow],
+  [LogLevel.Debug, chalk.green],
+  [LogLevel.Trace, chalk.blue],
+]);
 
-  return <FieldParamEditor {...props} customLabel={customLabel} />;
-}
-
-export { TopSortFieldParamEditor };
+export const LevelConversion: Conversion = {
+  pattern: /{level}/gi,
+  formatter(record: LogRecord, highlight: boolean) {
+    let message = record.level.id.toUpperCase().padEnd(5);
+    if (highlight && LEVEL_COLORS.has(record.level)) {
+      const color = LEVEL_COLORS.get(record.level)!;
+      message = color(message);
+    }
+    return message;
+  },
+};
