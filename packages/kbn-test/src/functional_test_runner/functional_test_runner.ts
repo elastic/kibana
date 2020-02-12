@@ -121,43 +121,31 @@ export class FunctionalTestRunner {
 
       const mocha = await setupMocha(this.lifecycle, this.log, config, providers);
 
-      const suitesByIndex = {};
-      const testsByTag = {};
+      const tagsByFile: Record<string, string> = {};
 
-      const findLeafSuites = (suite: any, parentFile = null) => {
-        if (suite.parent && suite.parent.file !== suite.file) {
-          parentFile = suite.parent.file;
-        }
-        parentFile = parentFile || suite.file;
-
+      const findLeafTags = (suite: any) => {
         if (suite.tests && suite.tests.length && suite.suiteTag) {
-          testsByTag[suite.suiteTag] = testsByTag[suite.suiteTag] || 0;
-          testsByTag[suite.suiteTag] += suite.tests.length;
+          // tagsByFile[suite.file] = tagsByFile[suite.file] || new Set();
+          // tagsByFile[suite.file].add(suite.suiteTag);
+          tagsByFile[suite.file] = suite.suiteTag;
         }
 
         if (suite.suites && suite.suites.length) {
-          suite.suites.forEach(s => findLeafSuites(s, parentFile));
-        } else {
-          suitesByIndex[parentFile] = suitesByIndex[parentFile] || {};
-          suitesByIndex[parentFile][suite.suiteTag] =
-            suitesByIndex[parentFile][suite.suiteTag] || 0;
-          suitesByIndex[parentFile][suite.suiteTag]++;
+          suite.suites.forEach((s: any) => findLeafTags(s));
         }
       };
 
-      findLeafSuites(mocha.suite);
+      findLeafTags(mocha.suite);
 
-      Object.keys(suitesByIndex).forEach(key => {
-        suitesByIndex[key] = Object.keys(suitesByIndex[key]).map(tag => {
-          return {
-            tag,
-            // count: suitesByIndex[key][tag],
-            count: testsByTag[tag],
-          };
+      const final: object[] = [];
+      Object.keys(tagsByFile).forEach(file => {
+        final.push({
+          file,
+          tag: tagsByFile[file],
         });
       });
 
-      return suitesByIndex;
+      return final;
     });
   }
 

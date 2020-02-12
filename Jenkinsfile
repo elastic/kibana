@@ -11,7 +11,7 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
           catchError {
             retryable.enable()
             def queue = [oss: []]
-            def finishedSuites = [oss: [], xpack: []]
+            def finishedSuites = [oss: [], xpack: [], ossFirefox: [], xpackFirefox: []]
 
             parallel([
               // 'kibana-intake-agent': kibanaPipeline.intakeWorker('kibana-intake', './test/scripts/jenkins_unit.sh'),
@@ -28,6 +28,7 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
                   } finally {
                     if (!queue.containsKey('xpack')) {
                       queue.xpack = []
+                      queue.xpackFirefox = []
                     }
                   }
                 }, [

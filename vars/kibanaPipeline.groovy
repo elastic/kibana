@@ -231,6 +231,7 @@ def withGcsArtifactUpload(workerName, closure) {
 }
 
 def publishJunit() {
+  junit(testResults: 'target/junit/**/*.xml', allowEmptyResults: true, keepLongStdio: true)
   junit(testResults: '../kibana-oss/target/junit/**/*.xml', allowEmptyResults: true, keepLongStdio: true)
   junit(testResults: '../kibana-xpack/target/junit/**/*.xml', allowEmptyResults: true, keepLongStdio: true)
 }
@@ -436,15 +437,25 @@ def processXpackQueue(queue, finishedSuites, workerNumber) {
 def getFunctionalQueueWorker(queue, finishedSuites, workerNumber) {
   return getPostBuildWorker("functional-test-queue-" + workerNumber, {
     dir('../kibana-oss') {
+
+      // Allocate a few workers in the middle of the pack for Firefox
+      if (workerNumber >= 12 && workerNumber <= 15) {
+        processOssQueue(queue.ossFirefox, finishedSuites.ossFirefox, workerNumber)
+      }
+
       processOssQueue(queue.oss, finishedSuites.oss, workerNumber)
     }
 
-    // timeout
+    // TODO timeout?
     while(!queue.containsKey('xpack')) {
       sleep(60)
     }
 
     dir('../kibana-xpack') {
+      if (workerNumber >= 12 && workerNumber <= 15) {
+        processXpackQueue(queue.xpackFirefox, finishedSuites.xpackFirefox, workerNumber)
+      }
+
       processXpackQueue(queue.xpack, finishedSuites.xpack, workerNumber)
     }
   })
@@ -453,11 +464,13 @@ def getFunctionalQueueWorker(queue, finishedSuites, workerNumber) {
 def prepareOssTestQueue(queue) {
   def items = toJSON(readFile(file: 'test-suites-ci-plan.json'))
   queue.oss = items.oss.reverse() // .reverse() is used here because an older version of groovy, .pop() removes from the end instead of the beginning
+  queue.ossFirefox = items.ossFirefox.reverse()
 }
 
 def prepareXpackTestQueue(queue) {
   def items = toJSON(readFile(file: 'test-suites-ci-plan.json'))
   queue.xpack = items.xpack.reverse() // .reverse() is used here because an older version of groovy, .pop() removes from the end instead of the beginning
+  queue.xpackFirefox = items.xpackFirefox.reverse()
 }
 
 return this

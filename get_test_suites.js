@@ -17,9 +17,23 @@
  * under the License.
  */
 import fs from 'fs';
+import path from 'path';
+
 import { getTests } from '@kbn/test';
 import { CI as ALL_OSS } from './test/all_configs';
 import { ALL as ALL_XPACK } from './x-pack/test/all_configs';
+
+const ROOT = __dirname;
+
+const getTestsTransformed = async (config, overrides = {}) => {
+  const suites = await getTests(config, overrides);
+  return suites.map(suite => ({
+    tag: suite.tag,
+    file: path.relative(ROOT, suite.file),
+    config: path.relative(ROOT, config),
+    duration: suite.file.match('api_integration') ? 30 : 180,
+  }));
+};
 
 module.exports = async () => {
   const configGroups = {
@@ -30,81 +44,29 @@ module.exports = async () => {
   const testSuites = {};
   for (const key in configGroups) {
     if (configGroups.hasOwnProperty(key)) {
-      testSuites[key] = {};
+      testSuites[key] = [];
 
       for (const file of configGroups[key]) {
-        testSuites[key][file] = await getTests(file);
+        const suites = await getTestsTransformed(file);
+        suites.forEach(suite => testSuites[key].push(suite));
       }
     }
   }
 
   const ff = require.resolve('./test/functional/config.firefox.js');
-  testSuites.ossFirefox = {};
-  testSuites.ossFirefox[ff] = await getTests(ff, {
+  testSuites.ossFirefox = await getTestsTransformed(ff, {
     suiteTags: {
       include: ['smoke'],
     },
   });
 
   const xpackFF = require.resolve('./x-pack/test/functional/config.firefox.js');
-  testSuites.xpackFirefox = {};
-  testSuites.xpackFirefox[xpackFF] = await getTests(xpackFF, {
+  testSuites.xpackFirefox = await getTestsTransformed(xpackFF, {
     suiteTags: {
       include: ['smoke'],
     },
   });
 
-  // {
-  //   oss: {
-  //     configs: [
-  //       {
-  //         file: 'x',
-  //         count: 10,
-  //         suites: [
-  //           {
-  //             file: 'x',
-  //             count: 5,
-  //             tests: [
-  //               {
-  //                 file: 'x',
-  //                 duration: 1,
-  //               },
-  //             ],
-  //           },
-  //         ],
-  //       },
-  //     ];
-  //   }
-  // }
-
-  const final = {};
-  Object.keys(testSuites).forEach(group => {
-    final[group] = {
-      configs: [],
-    };
-    Object.keys(testSuites[group]).forEach(configFile => {
-      const suites = testSuites[group][configFile];
-      const config = {
-        file: configFile,
-        suites: [],
-      };
-      final[group].configs.push(config);
-
-      Object.keys(suites).forEach(index => {
-        const suite = {
-          file: index,
-          //tests: suites[index].map(t => ({ tag: t, duration: 1 })),
-          tests: suites[index],
-        };
-        suite.total = suite.tests.reduce((sum, curr) => sum + curr.count, 0);
-
-        config.suites.push(suite);
-      });
-
-      config.total = config.suites.reduce((sum, curr) => sum + curr.total, 0);
-    });
-  });
-
-  // console.log(final);
-  fs.writeFileSync('test-suites.json', JSON.stringify(final, null, 4));
+  fs.writeFileSync('test-suites.json', JSON.stringify(testSuites, null, 2));
+  return testSuites;
 };
