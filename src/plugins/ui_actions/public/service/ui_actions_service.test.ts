@@ -24,6 +24,16 @@ describe('UiActionsService', () => {
     const actions = new UiActionsService();
   });
 
+  describe('.registerTrigger()', () => {
+    test('can register a trigger', () => {
+      const actions = new UiActionsService();
+      actions.registerTrigger({
+        id: 'test',
+        actionIds: [],
+      });
+    });
+  });
+
   describe('.registerAction()', () => {
     test('can register an action', () => {
       const actions = new UiActionsService();

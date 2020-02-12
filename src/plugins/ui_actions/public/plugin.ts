@@ -43,15 +43,15 @@ export class UiActionsPlugin implements Plugin<UiActionsSetup, UiActionsStart> {
 
   public setup(core: CoreSetup): UiActionsSetup {
     return {
-      registerTrigger: this.api.registerTrigger,
-      registerAction: this.api.registerAction,
+      registerTrigger: this.service.registerTrigger,
+      registerAction: this.service.registerAction,
       attachAction: this.api.attachAction,
       detachAction: this.api.detachAction,
     };
   }
 
   public start(core: CoreStart): UiActionsStart {
-    return this.api;
+    return { ...this.api, ...this.service };
   }
 
   public stop() {

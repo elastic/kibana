@@ -29,8 +29,6 @@ import { executeTriggerActions } from './triggers/execute_trigger_actions';
 import { getTrigger } from './triggers/get_trigger';
 import { getTriggerActions } from './triggers/get_trigger_actions';
 import { getTriggerCompatibleActions } from './triggers/get_trigger_compatible_actions';
-import { registerAction } from './actions/register_action';
-import { registerTrigger } from './triggers/register_trigger';
 
 export const pureApi: UiActionsApiPure = {
   attachAction,
@@ -39,9 +37,7 @@ export const pureApi: UiActionsApiPure = {
   getTrigger,
   getTriggerActions,
   getTriggerCompatibleActions,
-  registerAction,
-  registerTrigger,
-};
+} as any;
 
 export const createApi = (deps: UiActionsDependencies) => {
   const partialApi: Partial<UiActionsApi> = {};

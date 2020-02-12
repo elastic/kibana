@@ -19,12 +19,21 @@
 
 import { TriggerRegistry, ActionRegistry } from '../types';
 import { Action } from '../actions';
+import { Trigger } from '../triggers/trigger';
 
 export class UiActionsService {
   constructor(
     private readonly triggers: TriggerRegistry = new Map(),
     private readonly actions: ActionRegistry = new Map()
   ) {}
+
+  registerTrigger = (trigger: Trigger) => {
+    if (this.triggers.has(trigger.id)) {
+      throw new Error(`Trigger [trigger.id = ${trigger.id}] already registered.`);
+    }
+
+    this.triggers.set(trigger.id, trigger);
+  };
 
   registerAction = (action: Action) => {
     if (this.actions.has(action.id)) {
