@@ -22,10 +22,10 @@ import { setUiMetricService } from './application/services/api';
 
 import { IndexMgmtMetricsType } from './types';
 import { MANAGEMENT_BREADCRUMB } from './_legacy';
-import { ExtensionsService } from './services';
+import { ExtensionsService, ExtensionsSetup } from './services';
 
 export interface IndexMgmtSetup {
-  extensionsService: ExtensionsService;
+  extensionsService: ExtensionsSetup;
 }
 
 interface PluginsDependencies {
@@ -84,7 +84,7 @@ export class IndexMgmtUIPlugin {
     });
 
     return {
-      extensionsService: this.extensionsService,
+      extensionsService: this.extensionsService.setup(),
     };
   }
 

@@ -5,6 +5,15 @@
  */
 import { i18n } from '@kbn/i18n';
 
+export interface ExtensionsSetup {
+  addSummary(summary: any): void;
+  addAction(action: any): void;
+  addBanner(banner: any): void;
+  addFilter(filter: any): void;
+  addBadge(badge: any): void;
+  addToggle(toggle: any): void;
+}
+
 export class ExtensionsService {
   private _summaries: any[] = [];
   private _actions: any[] = [];
@@ -23,28 +32,42 @@ export class ExtensionsService {
     },
   ];
   private _toggles: any[] = [];
+  private service?: ExtensionsSetup;
 
-  public addSummary(summary: any) {
+  public setup(): ExtensionsSetup {
+    this.service = {
+      addAction: this.addAction.bind(this),
+      addBadge: this.addBadge.bind(this),
+      addBanner: this.addBanner.bind(this),
+      addFilter: this.addFilter.bind(this),
+      addSummary: this.addSummary.bind(this),
+      addToggle: this.addToggle.bind(this),
+    };
+
+    return this.service;
+  }
+
+  private addSummary(summary: any) {
     this._summaries.push(summary);
   }
 
-  public addAction(action: any) {
+  private addAction(action: any) {
     this._actions.push(action);
   }
 
-  public addBanner(banner: any) {
+  private addBanner(banner: any) {
     this._banners.push(banner);
   }
 
-  public addFilter(filter: any) {
+  private addFilter(filter: any) {
     this._filters.push(filter);
   }
 
-  public addBadge(badge: any) {
+  private addBadge(badge: any) {
     this._badges.push(badge);
   }
 
-  public addToggle(toggle: any) {
+  private addToggle(toggle: any) {
     this._toggles.push(toggle);
   }
 
