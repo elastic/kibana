@@ -17,52 +17,8 @@
  * under the License.
  */
 
-import { boolean } from './boolean';
-import { datatable } from './datatable';
-import { error } from './error';
-import { filter } from './filter';
-import { image } from './image';
-import { kibanaContext } from './kibana_context';
-import { kibanaDatatable } from './kibana_datatable';
-import { nullType } from './null';
-import { number } from './number';
-import { pointseries } from './pointseries';
-import { range } from './range';
-import { render } from './render';
-import { shape } from './shape';
-import { string } from './string';
-import { style } from './style';
-
-export const typeSpecs = [
-  boolean,
-  datatable,
-  error,
-  filter,
-  image,
-  kibanaContext,
-  kibanaDatatable,
-  nullType,
-  number,
-  pointseries,
-  range,
-  render,
-  shape,
-  string,
-  style,
-];
-
-export * from './boolean';
-export * from './datatable';
-export * from './error';
-export * from './filter';
-export * from './image';
-export * from './kibana_context';
-export * from './kibana_datatable';
-export * from './null';
-export * from './number';
-export * from './pointseries';
-export * from './range';
-export * from './render';
-export * from './shape';
-export * from './string';
-export * from './style';
+export * from './types';
+export * from './get_type';
+export * from './serialize_provider';
+export * from './expression_type';
+export * from './specs';

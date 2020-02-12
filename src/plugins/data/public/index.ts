@@ -20,12 +20,43 @@
 import { PluginInitializerContext } from '../../../core/public';
 
 /*
+ * esQuery and esKuery helper namespaces:
+ */
+
+import {
+  doesKueryExpressionHaveLuceneSyntaxError,
+  fromKueryExpression,
+  toElasticsearchQuery,
+  nodeTypes,
+  buildEsQuery,
+  getEsQueryConfig,
+  buildQueryFromFilters,
+  luceneStringToDsl,
+  decorateQuery,
+} from '../common';
+
+export const esKuery = {
+  nodeTypes,
+  doesKueryExpressionHaveLuceneSyntaxError,
+  fromKueryExpression,
+  toElasticsearchQuery,
+};
+
+export const esQuery = {
+  buildEsQuery,
+  getEsQueryConfig,
+  buildQueryFromFilters,
+  luceneStringToDsl,
+  decorateQuery,
+};
+
+/*
  * Field Formatters helper namespace:
  */
 
 import {
   FieldFormat,
-  FieldFormatsRegistry, // exported only for tests. Consider mock.
+  FieldFormatsRegistry,
   DEFAULT_CONVERTER_COLOR,
   HTML_CONTEXT_TYPE,
   TEXT_CONTEXT_TYPE,
@@ -84,6 +115,7 @@ export function plugin(initializerContext: PluginInitializerContext) {
 export { IRequestTypesMap, IResponseTypesMap } from './search';
 export * from './types';
 export {
+  EsQueryConfig,
   // index patterns
   IIndexPattern,
   IFieldType,
@@ -122,8 +154,7 @@ export * from './ui';
 export {
   // es query
   esFilters,
-  esKuery,
-  esQuery,
+  KueryNode,
   // index patterns
   isFilterable,
   // kbn field types
