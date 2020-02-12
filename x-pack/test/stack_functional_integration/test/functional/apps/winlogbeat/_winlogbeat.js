@@ -9,8 +9,9 @@ import expect from '@kbn/expect';
 export default function({ getService, getPageObjects }) {
   const log = getService('log');
   const browser = getService('browser');
-  const PageObjects = getPageObjects(['common', 'discover', 'timePicker', 'header']);
+  const PageObjects = getPageObjects(['common', 'discover', 'timePicker']);
   const retry = getService('retry');
+  const appsMenu = getService('appsMenu');
 
   describe('check winlogbeat', function() {
     it('winlogbeat- should have hit count GT 0', async function() {
@@ -19,7 +20,7 @@ export default function({ getService, getPageObjects }) {
       if (!url.includes('kibana')) {
         await PageObjects.common.navigateToApp('discover');
       } else if (!url.includes('discover')) {
-        await PageObjects.header.clickDiscover();
+        await appsMenu.clickLink('Discover');
       }
       await PageObjects.discover.selectIndexPattern('winlogbeat-*');
       await PageObjects.timePicker.setCommonlyUsedTime('superDatePickerCommonlyUsed_Today');

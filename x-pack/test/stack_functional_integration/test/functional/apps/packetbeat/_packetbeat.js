@@ -10,7 +10,8 @@ export default function({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
   const browser = getService('browser');
-  const PageObjects = getPageObjects(['common', 'discover', 'timePicker', 'header']);
+  const PageObjects = getPageObjects(['common', 'discover', 'timePicker']);
+  const appsMenu = getService('appsMenu');
 
   describe('check packetbeat', function() {
     before(function() {
@@ -23,7 +24,7 @@ export default function({ getService, getPageObjects }) {
       if (!url.includes('kibana')) {
         await PageObjects.common.navigateToApp('discover');
       } else if (!url.includes('discover')) {
-        await PageObjects.header.clickDiscover();
+        await appsMenu.clickLink('Discover');
       }
       await PageObjects.discover.selectIndexPattern('packetbeat-*');
       await PageObjects.timePicker.setCommonlyUsedTime('superDatePickerCommonlyUsed_Today');

@@ -21,12 +21,9 @@ const log = new ToolingLog({
 });
 
 export default async ({ readConfigFile }) => {
-  const confs = await readConfigFile(require.resolve('./config.server.js'));
-  const { servers, apps } = confs.getAll();
   const defaultConfigs = await readConfigFile(require.resolve('../../functional/config'));
+  const { servers, apps } = defaultConfigs.getAll();
   const { tests, ...provisionedConfigs } = buildState(resolve(__dirname, stateFilePath));
-
-  mutateProtocols(servers, provisionedConfigs);
 
   return {
     ...defaultConfigs.getAll(),
@@ -36,7 +33,6 @@ export default async ({ readConfigFile }) => {
     browser: {
       type: 'ie',
     },
-
     servers,
     apps,
     stackFunctionalIntegrationTests: {
@@ -64,8 +60,4 @@ function highLight(testPath) {
 function logTest(testPath) {
   log.info(`Testing: '${highLight(truncate(testPath))}'`);
   return testPath;
-}
-function mutateProtocols(servers, provisionedConfigs) {
-  servers.kibana.protocol = provisionedConfigs.ESPROTO;
-  servers.elasticsearch.protocol = servers.kibana.protocol;
 }

@@ -6,7 +6,7 @@
 
 export default function({ loadTestFile }) {
   describe('settings / management app', function() {
-    loadTestFile(require.resolve('./_get_version_info'));
+    // loadTestFile(require.resolve('./_get_version_info'));
     loadTestFile(require.resolve('./_index_pattern_create_delete'));
   });
 }

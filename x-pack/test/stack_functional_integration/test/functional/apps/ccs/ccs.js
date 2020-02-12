@@ -8,7 +8,14 @@ import expect from '@kbn/expect';
 
 export default ({ getService, getPageObjects }) => {
   describe('Cross cluster search test', async () => {
-    const PageObjects = getPageObjects(['common', 'settings', 'discover', 'security', 'header']);
+    const PageObjects = getPageObjects([
+      'common',
+      'settings',
+      'discover',
+      'security',
+      'header',
+      'timePicker',
+    ]);
     const retry = getService('retry');
     const log = getService('log');
     const browser = getService('browser');
@@ -89,7 +96,7 @@ export default ({ getService, getPageObjects }) => {
     it('local:makelogs(star) should discover data from the local cluster', async () => {
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.discover.selectIndexPattern('local:makelogs工程*');
-      await PageObjects.header.setRelativeRange('3', 'd', '3', 'd+'); // s=seconds, m=minutes. h=hours, d=days, w=weeks, d+=days from now
+      await PageObjects.timePicker.setRelativeRange('3', 'd', '3', 'd+'); // s=seconds, m=minutes. h=hours, d=days, w=weeks, d+=days from now
       await retry.tryForTime(40000, async () => {
         const hitCount = await PageObjects.discover.getHitCount();
         log.debug('### hit count = ' + hitCount);

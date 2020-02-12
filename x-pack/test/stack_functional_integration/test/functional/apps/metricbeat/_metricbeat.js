@@ -10,7 +10,8 @@ export default function({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
   const browser = getService('browser');
-  const PageObjects = getPageObjects(['common', 'discover', 'timePicker', 'header']);
+  const PageObjects = getPageObjects(['common', 'discover', 'timePicker']);
+  const appsMenu = getService('appsMenu');
 
   describe('check metricbeat', function() {
     it('metricbeat- should have hit count GT 0', async function() {
@@ -19,7 +20,7 @@ export default function({ getService, getPageObjects }) {
       if (!url.includes('kibana')) {
         await PageObjects.common.navigateToApp('discover');
       } else if (!url.includes('discover')) {
-        await PageObjects.header.clickDiscover();
+        await appsMenu.clickLink('Discover');
       }
 
       await PageObjects.discover.selectIndexPattern('metricbeat-*');

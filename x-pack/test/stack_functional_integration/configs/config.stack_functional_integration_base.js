@@ -8,6 +8,7 @@ import { resolve } from 'path';
 import buildState from './build_state';
 import { ToolingLog } from '@kbn/dev-utils';
 import chalk from 'chalk';
+import { esTestConfig, kbnTestConfig } from '@kbn/test';
 
 const reportName = 'Stack Functional Integration Tests';
 const testsFolder = '../test/functional/apps';
@@ -19,12 +20,16 @@ const log = new ToolingLog({
 });
 
 export default async ({ readConfigFile }) => {
-  const confs = await readConfigFile(require.resolve('./config.server.js'));
-  const { servers, apps } = confs.getAll();
   const defaultConfigs = await readConfigFile(require.resolve('../../functional/config'));
+  const { apps } = defaultConfigs.getAll();
   const { tests, ...provisionedConfigs } = buildState(resolve(__dirname, stateFilePath));
 
-  mutateProtocols(servers, provisionedConfigs);
+  const servers = {
+    kibana: kbnTestConfig.getUrlParts(),
+    elasticsearch: esTestConfig.getUrlParts(),
+  };
+  console.log(servers);
+  console.log(JSON.stringify(servers));
 
   return {
     ...defaultConfigs.getAll(),
@@ -33,6 +38,12 @@ export default async ({ readConfigFile }) => {
     },
     servers,
     apps,
+    // screenshots: {
+    //   directory: resolve(__dirname, 'screenshots'),
+    // },
+    // esIndexDump: {
+    //   dataDir: resolve(__dirname, 'fixtures/dump_data'),
+    // },
     stackFunctionalIntegrationTests: {
       envObj: provisionedConfigs,
     },
@@ -58,10 +69,4 @@ function highLight(testPath) {
 function logTest(testPath) {
   log.info(`Testing: '${highLight(truncate(testPath))}'`);
   return testPath;
-}
-function mutateProtocols(servers, provisionedConfigs) {
-  if (provisionedConfigs.TLS === 'YES') {
-    servers.kibana.protocol = provisionedConfigs.ESPROTO;
-    servers.elasticsearch.protocol = servers.kibana.protocol;
-  }
 }

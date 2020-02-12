@@ -6,7 +6,7 @@
 
 describe('check apm-server', ({ getService, getPageObjects }) => {
   const log = getService('log');
-  const PageObjects = getPageObjects(['common', 'header', 'visualize']);
+  const PageObjects = getPageObjects(['common', 'timePicker', 'visualize']);
 
   before(function() {
     log.debug('navigateToApp Visualize');
@@ -17,7 +17,7 @@ describe('check apm-server', ({ getService, getPageObjects }) => {
     await PageObjects.visualize.openSavedVisualization('Top Transactions for Time Period [APM]');
     await PageObjects.common.sleep(1000);
     await PageObjects.common.tryForTime(40000, async () => {
-      await PageObjects.header.setQuickSpan('Last 2 years');
+      await PageObjects.timePicker.setCommonlyUsedTime('Last 2 years');
     });
     await PageObjects.common.sleep(1000);
     await PageObjects.common.tryForTime(4000, async () => {
@@ -25,6 +25,6 @@ describe('check apm-server', ({ getService, getPageObjects }) => {
       PageObjects.common.debug('Data Table = ' + dataTable.trim());
       // we loaded specific test data so we know exactly what this result should be
     });
-    await PageObjects.header.setQuickSpan('Last 1 hour');
+    await PageObjects.timePicker.setCommonlyUsedTime('superDatePickerCommonlyUsed_Today');
   });
 });
