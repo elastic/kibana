@@ -173,6 +173,7 @@ module.exports = async ({ config }) => {
     '../tasks/mocks/uiNotifyFormatMsg'
   );
   config.resolve.alias['ui/notify'] = path.resolve(__dirname, '../tasks/mocks/uiNotify');
+  config.resolve.alias['ui/url/absolute_to_parsed_url'] = path.resolve(__dirname, '../tasks/mocks/uiAbsoluteToParsedUrl');
   config.resolve.alias['ui/chrome'] = path.resolve(__dirname, '../tasks/mocks/uiChrome');
   config.resolve.alias.ui = path.resolve(KIBANA_ROOT, 'src/legacy/ui/public');
   config.resolve.alias.ng_mock$ = path.resolve(KIBANA_ROOT, 'src/test_utils/public/ng_mock');
