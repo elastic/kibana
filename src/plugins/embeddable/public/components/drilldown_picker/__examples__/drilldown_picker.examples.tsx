@@ -19,6 +19,8 @@
 
 import * as React from 'react';
 import { storiesOf } from '@storybook/react';
-import { EmbeddablePanel } from '..';
+import { DrilldownPicker } from '..';
 
-storiesOf('components/EmbeddablePanel', module).add('default', () => <EmbeddablePanel />);
+storiesOf('components/DrilldownPicker', module).add('default', () => {
+  return <DrilldownPicker />;
+});
