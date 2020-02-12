@@ -5,26 +5,25 @@
  */
 import { i18n } from '@kbn/i18n';
 import { BASE_PATH } from '../../../common/constants';
-import { ChromeStart } from '../../../../../../../src/core/public';
+import { ManagementAppMountParams } from '../../../../../../../src/plugins/management/public';
+
+type SetBreadcrumbs = ManagementAppMountParams['setBreadcrumbs'];
 
 class BreadcrumbService {
-  private chrome: ChromeStart | undefined;
   private breadcrumbs: {
     [key: string]: Array<{
       text: string;
       href?: string;
     }>;
   } = {
-    management: [],
     home: [],
   };
+  private setBreadcrumbsHandler?: SetBreadcrumbs;
 
-  public setup(chrome: ChromeStart, managementBreadcrumb: any): void {
-    this.chrome = chrome;
-    this.breadcrumbs.management = [managementBreadcrumb];
+  public setup(setBreadcrumbsHandler: SetBreadcrumbs): void {
+    this.setBreadcrumbsHandler = setBreadcrumbsHandler;
 
     this.breadcrumbs.home = [
-      ...this.breadcrumbs.management,
       {
         text: i18n.translate('xpack.idxMgmt.breadcrumb.homeLabel', {
           defaultMessage: 'Index Management',
@@ -72,6 +71,10 @@ class BreadcrumbService {
   }
 
   public setBreadcrumbs(type: string): void {
+    if (!this.setBreadcrumbsHandler) {
+      throw new Error(`BreadcrumbService#setup() must be called first!`);
+    }
+
     const newBreadcrumbs = this.breadcrumbs[type]
       ? [...this.breadcrumbs[type]]
       : [...this.breadcrumbs.home];
@@ -88,9 +91,7 @@ class BreadcrumbService {
       href: undefined,
     });
 
-    if (this.chrome) {
-      this.chrome.setBreadcrumbs(newBreadcrumbs);
-    }
+    this.setBreadcrumbsHandler(newBreadcrumbs);
   }
 }
 

@@ -21,7 +21,6 @@ import { setExtensionsService } from './application/store/selectors';
 import { setUiMetricService } from './application/services/api';
 
 import { IndexMgmtMetricsType } from './types';
-import { MANAGEMENT_BREADCRUMB } from './_legacy';
 import { ExtensionsService, ExtensionsSetup } from './services';
 
 export interface IndexMgmtSetup {
@@ -56,11 +55,11 @@ export class IndexMgmtUIPlugin {
       id: 'index_management',
       title: i18n.translate('xpack.idxMgmt.appTitle', { defaultMessage: 'Index Management' }),
       order: 1,
-      mount: async ({ element }: { element: HTMLElement }) => {
+      mount: async ({ element, setBreadcrumbs }) => {
         const [core] = await getStartServices();
-        const { chrome, docLinks, fatalErrors } = core;
+        const { docLinks, fatalErrors } = core;
 
-        breadcrumbService.setup(chrome, MANAGEMENT_BREADCRUMB);
+        breadcrumbService.setup(setBreadcrumbs);
         documentationService.setup(docLinks);
 
         const appDependencies: AppDependencies = {
