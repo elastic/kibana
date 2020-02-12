@@ -37,7 +37,7 @@ describe('styleSvg', () => {
       '<svg version="1.1" width="11px" height="11px" viewBox="0 0 11 11"><path/></svg>';
     const styledSvg = await styleSvg(unstyledSvgString, 'red', 'white');
     expect(styledSvg.split('\n')[1]).toBe(
-      '<svg version=\"1.1\" width=\"11px\" height=\"11px\" viewBox=\"0 0 11 11\" style=\"fill:red;stroke:white;stroke-width:1;\">'
+      '<svg version="1.1" width="11px" height="11px" viewBox="0 0 11 11" style="fill:red;stroke:white;stroke-width:1;">'
     );
   });
 });
