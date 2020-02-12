@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
 import Hapi from 'hapi';
 import { isFunction } from 'lodash/fp';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
@@ -14,6 +13,7 @@ import { getNonPackagedRulesCount } from '../../rules/get_existing_prepackaged_r
 import { exportRulesSchema, exportRulesQuerySchema } from '../schemas/export_rules_schema';
 import { getExportByObjectIds } from '../../rules/get_export_by_object_ids';
 import { getExportAll } from '../../rules/get_export_all';
+import { transformError } from '../utils';
 
 export const createExportRulesRoute = (server: ServerFacade): Hapi.ServerRoute => {
   return {
@@ -39,11 +39,21 @@ export const createExportRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
       try {
         const exportSizeLimit = server.config().get<number>('savedObjects.maxImportExportSize');
         if (request.payload?.objects != null && request.payload.objects.length > exportSizeLimit) {
-          return Boom.badRequest(`Can't export more than ${exportSizeLimit} rules`);
+          return headers
+            .response({
+              message: `Can't export more than ${exportSizeLimit} rules`,
+              status_code: 400,
+            })
+            .code(400);
         } else {
           const nonPackagedRulesCount = await getNonPackagedRulesCount({ alertsClient });
           if (nonPackagedRulesCount > exportSizeLimit) {
-            return Boom.badRequest(`Can't export more than ${exportSizeLimit} rules`);
+            return headers
+              .response({
+                message: `Can't export more than ${exportSizeLimit} rules`,
+                status_code: 400,
+              })
+              .code(400);
           }
         }
 
@@ -59,8 +69,14 @@ export const createExportRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
         return response
           .header('Content-Disposition', `attachment; filename="${request.query.file_name}"`)
           .header('Content-Type', 'application/ndjson');
-      } catch {
-        return Boom.badRequest(`Sorry, something went wrong to export rules`);
+      } catch (err) {
+        const error = transformError(err);
+        return headers
+          .response({
+            message: error.message,
+            status_code: error.statusCode,
+          })
+          .code(error.statusCode);
       }
     },
   };

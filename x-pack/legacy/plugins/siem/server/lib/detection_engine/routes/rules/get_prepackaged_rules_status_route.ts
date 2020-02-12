@@ -55,7 +55,13 @@ export const createGetPrepackagedRulesStatusRoute = (): Hapi.ServerRoute => {
           rules_not_updated: rulesToUpdate.length,
         };
       } catch (err) {
-        return transformError(err);
+        const error = transformError(err);
+        return headers
+          .response({
+            message: error.message,
+            status_code: error.statusCode,
+          })
+          .code(error.statusCode);
       }
     },
   };
