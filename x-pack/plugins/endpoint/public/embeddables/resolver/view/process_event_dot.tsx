@@ -8,6 +8,8 @@ import React from 'react';
 import styled from 'styled-components';
 import { applyMatrix3 } from '../lib/vector2';
 import { Vector2, ProcessEvent, Matrix3 } from '../types';
+import * as selectors from '../store/selectors';
+import { SymbolIds, NamedColors } from './defs';
 
 /**
  * A placeholder view for a process node.
@@ -55,16 +57,25 @@ export const ProcessEventDot = styled(
           style={style}
           viewBox="-15 -5 30 10"
           preserveAspectRatio="xMidYMid slice"
+          role="treeitem"
         >
-          <use xlinkHref={`#node_icon_curve`} x="-15.5" y="-5" width="31" height="10" opacity="1" />
+          <use
+            role="presentation"
+            xlinkHref={`#${SymbolIds.processNode}`}
+            x="-15.5"
+            y="-5"
+            width="31"
+            height="10"
+            opacity="1"
+          />
           <text
             x="0"
             y="0"
             textAnchor="middle"
             dominantBaseline="middle"
             fontSize="3"
-            fill="white"
-            stroke="#333"
+            fill={NamedColors.empty}
+            stroke={NamedColors.strokeBehindEmpty}
             strokeWidth=".35"
             paintOrder="stroke"
           >
@@ -79,8 +90,8 @@ export const ProcessEventDot = styled(
                 textAnchor="middle"
                 dominantBaseline="middle"
                 fontSize="1.25"
-                fill="#fff"
-                stroke="#333"
+                fill={NamedColors.empty}
+                stroke={NamedColors.strokeBehindEmpty}
                 strokeWidth=".25"
                 paintOrder="stroke"
               >
@@ -96,8 +107,8 @@ export const ProcessEventDot = styled(
                 textAnchor="middle"
                 dominantBaseline="middle"
                 fontSize="1.25"
-                fill="yellow"
-                stroke="#333"
+                fill={NamedColors.warning}
+                stroke={NamedColors.strokeBehindEmpty}
                 strokeWidth=".25"
                 paintOrder="stroke"
               >

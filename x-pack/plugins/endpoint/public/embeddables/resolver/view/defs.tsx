@@ -8,55 +8,58 @@ import React, { memo } from 'react';
 import { darken } from 'polished';
 
 import {
+  htmlIdGenerator,
   // qualitative pallette functions.
   //  See: https://elastic.github.io/eui/#/utilities/color-palettes
   euiPaletteForTemperature,
   euiPaletteForStatus,
   colorPalette,
-  htmlIdGenerator,
 } from '@elastic/eui';
 
-const [euiColorEmptyShade, euiColorFullShade] = colorPalette(['#ffffff', '#000000'], 2);
+// Generating from `colorPalette` function: This could potentially
+//  pick up a palette shift and decouple from raw hex
+const [euiColorEmptyShade, , , , , euiColor85Shade, euiColorFullShade] = colorPalette(
+  ['#ffffff', '#000000'],
+  7
+);
 
-const resolverPallette = {
+// A catalog of arbitraged colors
+const resolverPalette: Record<string, string | string[]> = {
   temperatures: euiPaletteForTemperature(7),
   statii: euiPaletteForStatus(7),
   fullShade: euiColorFullShade,
   emptyShade: euiColorEmptyShade,
 };
 
-type ResolverColorNames = 'ok' | 'okdark' | 'empty' | 'full' | 'warning';
-/* Define colors by meaning against the EUI pallette like so:
-danger = resolverPallette.,
-attention = resolverPallette.,
-enabled = resolverPallette.,
-disabled = resolverPallette.,
+/* 
+Define colors by semantics like so:
+`danger`, `attention`, `enabled`, `disabled`
+Or by function like:
+`colorBlindBackground`, `subMenuForeground` 
 */
+type ResolverColorNames = 'ok' | 'okdark' | 'empty' | 'full' | 'warning' | 'strokeBehindEmpty';
+
 export const NamedColors: Record<ResolverColorNames, string> = {
-  ok: resolverPallette.temperatures[2],
-  okdark: resolverPallette.temperatures[0],
+  ok: resolverPalette.temperatures[2],
+  okdark: resolverPalette.temperatures[0],
   empty: euiColorEmptyShade,
   full: euiColorFullShade,
-  warning: resolverPallette.statii[3],
+  strokeBehindEmpty: euiColor85Shade,
+  warning: resolverPalette.statii[3],
 };
 
-// PaintServers: Where color pallettes and other similar concerns are exposed to the component
+const idGenerator = htmlIdGenerator();
+
+export const PaintServerIds = {
+  darkLinearReflect: idGenerator('darkreflect'),
+};
+
+// PaintServers: Where color palettes, grandients, patterns and other similar concerns
+//    are exposed to the component
 const PaintServers = memo(() => (
   <>
     <linearGradient
-      id="OK_userSpaceNWtoSE_Solid"
-      x1="-50"
-      y1="-50"
-      x2="50"
-      y2="50"
-      spreadMethod="pad"
-      gradientUnits="userSpaceOnUse"
-    >
-      <stop offset="0%" stopColor={NamedColors.ok} stopOpacity="1" />
-      <stop offset="100%" stopColor={darken(0.2, NamedColors.ok)} stopOpacity="1" />
-    </linearGradient>
-    <linearGradient
-      id="OKDarker_userSpaceNWtoSE_Solid"
+      id={PaintServerIds.darkLinearReflect}
       x1="-100"
       y1="-30"
       x2="100"
@@ -67,41 +70,21 @@ const PaintServers = memo(() => (
       <stop offset="0%" stopColor={NamedColors.okdark} stopOpacity="1" />
       <stop offset="100%" stopColor={darken(0.15, NamedColors.okdark)} stopOpacity="1" />
     </linearGradient>
-    <linearGradient
-      id="Foreground_userSpaceNWtoSE_Solid"
-      x1="-50"
-      y1="-50"
-      x2="50"
-      y2="50"
-      spreadMethod="pad"
-      gradientUnits="userSpaceOnUse"
-    >
-      <stop offset="0%" stopColor={NamedColors.empty} stopOpacity="1" />
-      <stop offset="100%" stopColor={NamedColors.empty} stopOpacity="1" />
-    </linearGradient>
-    <linearGradient
-      id="Background_userSpaceNWtoSE_Solid"
-      x1="-50"
-      y1="-50"
-      x2="50"
-      y2="50"
-      spreadMethod="pad"
-      gradientUnits="userSpaceOnUse"
-    >
-      <stop offset="0%" stopColor={NamedColors.full} stopOpacity="1" />
-      <stop offset="100%" stopColor={NamedColors.full} stopOpacity="1" />
-    </linearGradient>
   </>
 ));
+
+export const SymbolIds = {
+  processNode: idGenerator('curveSymbol'),
+};
 
 // SymbolsAndShapes: defs that define shapes, masks and other spatial elements
 const SymbolsAndShapes = memo(() => (
   <>
-    <symbol id="node_icon_curve" viewBox="0 0 108.6889 29.31389">
+    <symbol id={SymbolIds.processNode} viewBox="0 0 108.6889 29.31389">
       <desc>A shape representing a node in a graph</desc>
       <g transform="translate(-52.244835,-115.27758)">
         <g
-          fill="url(#OKDarker_userSpaceNWtoSE_Solid)"
+          fill={`url(#${PaintServerIds.darkLinearReflect})`}
           fillOpacity="1"
           paintOrder="normal"
           strokeWidth="0.79375"
