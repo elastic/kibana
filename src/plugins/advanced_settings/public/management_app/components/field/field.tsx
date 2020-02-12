@@ -18,7 +18,6 @@
  */
 
 import React, { PureComponent, Fragment } from 'react';
-import ReactDOM from 'react-dom';
 import classNames from 'classnames';
 
 import 'brace/theme/textmate';
