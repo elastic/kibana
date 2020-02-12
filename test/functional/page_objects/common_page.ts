@@ -149,6 +149,8 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
           throw new Error(`expected ${currentUrl}.includes(${appUrl})`);
         }
       });
+
+      await this.closeWelcomeScreenIfNeeded();
     }
 
     /**
@@ -501,6 +503,13 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
           throw new Error('save modal still open');
         }
       });
+    }
+
+    async closeWelcomeScreenIfNeeded() {
+      if (await testSubjects.exists('skipWelcomeScreen')) {
+        await testSubjects.click('skipWelcomeScreen');
+        await testSubjects.missingOrFail('skipWelcomeScreen', { timeout: 5000 });
+      }
     }
   }
 
