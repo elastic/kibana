@@ -143,7 +143,13 @@ const Resolver = styled(
       <div data-test-subj="resolverEmbeddable" className={className}>
         <SymbolDefinitions />
         <GraphControls />
-        <div className="resolver-graph" onMouseDown={handleMouseDown} ref={refCallback}>
+        <div
+          className="resolver-graph"
+          role="tree"
+          tabIndex={0}
+          onMouseDown={handleMouseDown}
+          ref={refCallback}
+        >
           {/* Paint lines first so they appear underneath the nodes */}
           {edgeLineSegments.map(([startPosition, endPosition], index) => (
             <EdgeLine key={index} startPosition={startPosition} endPosition={endPosition} />
