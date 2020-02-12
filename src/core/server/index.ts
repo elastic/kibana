@@ -219,6 +219,7 @@ export {
   SavedObjectsTypeMappingDefinition,
   SavedObjectsMappingProperties,
   SavedObjectTypeRegistry,
+  ISavedObjectTypeRegistry,
   SavedObjectsType,
   SavedObjectMigrationMap,
   SavedObjectMigrationFn,

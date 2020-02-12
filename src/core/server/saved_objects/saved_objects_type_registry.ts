@@ -24,7 +24,7 @@ import { SavedObjectsType } from './types';
  * See {@link SavedObjectTypeRegistry} for documentation.
  *
  * @public
- * */
+ */
 export type ISavedObjectTypeRegistry = Pick<
   SavedObjectTypeRegistry,
   'getType' | 'getAllTypes' | 'getIndex' | 'isNamespaceAgnostic' | 'isHidden'
@@ -33,7 +33,7 @@ export type ISavedObjectTypeRegistry = Pick<
 /**
  * Registry holding information about all the registered {@link SavedObjectsType | savedObject types}.
  *
- * @internal
+ * @public
  */
 export class SavedObjectTypeRegistry {
   private readonly types = new Map<string, SavedObjectsType>();
