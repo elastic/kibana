@@ -101,6 +101,7 @@ describe('Form', () => {
     const component = shallowWithI18nProvider(
       <Form
         settings={settings}
+        visibleSettings={settings}
         categories={categories}
         categoryCounts={categoryCounts}
         save={save}
@@ -119,6 +120,7 @@ describe('Form', () => {
     const component = shallowWithI18nProvider(
       <Form
         settings={settings}
+        visibleSettings={settings}
         categories={categories}
         categoryCounts={categoryCounts}
         save={save}
@@ -137,6 +139,7 @@ describe('Form', () => {
     const component = shallowWithI18nProvider(
       <Form
         settings={{}}
+        visibleSettings={settings}
         categories={categories}
         categoryCounts={categoryCounts}
         save={save}
@@ -155,6 +158,7 @@ describe('Form', () => {
     const component = shallowWithI18nProvider(
       <Form
         settings={{}}
+        visibleSettings={settings}
         categories={categories}
         categoryCounts={categoryCounts}
         save={save}
@@ -173,6 +177,7 @@ describe('Form', () => {
     const wrapper = mountWithI18nProvider(
       <Form
         settings={settings}
+        visibleSettings={settings}
         categories={categories}
         categoryCounts={categoryCounts}
         save={save}
@@ -202,6 +207,7 @@ describe('Form', () => {
     const wrapper = mountWithI18nProvider(
       <Form
         settings={settings}
+        visibleSettings={settings}
         categories={categories}
         categoryCounts={categoryCounts}
         save={save}
