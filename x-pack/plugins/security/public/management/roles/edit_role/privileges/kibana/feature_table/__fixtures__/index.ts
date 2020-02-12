@@ -23,10 +23,7 @@ export function getDisplayedFeaturePrivileges(wrapper: ReactWrapper<any>) {
 
   // each expanded row renders its own `EuiTableRow`, so there are 2 rows
   // for each feature: one for the primary feature privilege, and one for the sub privilege form
-  const rows = wrapper
-    .find(EuiTableRow)
-    // filter out expanded rows where no sub features are available
-    .filterWhere(row => findTestSubject(row, 'noSubFeatures').length === 0);
+  const rows = wrapper.find(EuiTableRow);
 
   return rows.reduce((acc, row) => {
     const subFeaturePrivileges = [];

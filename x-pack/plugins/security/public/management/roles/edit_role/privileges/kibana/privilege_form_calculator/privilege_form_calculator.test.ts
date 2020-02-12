@@ -626,7 +626,7 @@ describe('PrivilegeFormCalculator', () => {
       ).toEqual(['minimal_read', 'cool_read', 'cool_toggle_2']);
     });
 
-    it('switches to the non-minimal privilege when customizing, keeping all other privileges intact', () => {
+    it('switches to the non-minimal privilege when customizing, removing all other privileges', () => {
       const kibanaPrivileges = createKibanaPrivileges(kibanaFeatures);
       const role = createRole([
         {
@@ -642,7 +642,7 @@ describe('PrivilegeFormCalculator', () => {
 
       expect(
         calculator.updateSelectedFeaturePrivilegesForCustomization('with_sub_features', 0, false)
-      ).toEqual(['cool_read', 'cool_toggle_2', 'read']);
+      ).toEqual(['read']);
     });
   });
 

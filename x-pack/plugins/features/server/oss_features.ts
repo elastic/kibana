@@ -52,7 +52,7 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
                 {
                   id: 'url_create',
                   name: 'Create Short URLs',
-                  includeIn: 'none',
+                  includeIn: 'all',
                   savedObject: {
                     all: ['url'],
                     read: [],

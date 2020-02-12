@@ -458,6 +458,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
     this.setState({
       selectedSpaceIds,
       role,
+      privilegeCalculator: new PrivilegeFormCalculator(this.props.kibanaPrivileges, role),
     });
   };
 
@@ -481,6 +482,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
       selectedBasePrivilege: privilegeName === CUSTOM_PRIVILEGE_VALUE ? [] : [privilegeName],
       role,
       isCustomizingFeaturePrivileges,
+      privilegeCalculator: new PrivilegeFormCalculator(this.props.kibanaPrivileges, role),
     });
   };
 
@@ -508,6 +510,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
 
     this.setState({
       role,
+      privilegeCalculator: new PrivilegeFormCalculator(this.props.kibanaPrivileges, role),
     });
   };
 
@@ -529,6 +532,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
     }
     this.setState({
       role,
+      privilegeCalculator: new PrivilegeFormCalculator(this.props.kibanaPrivileges, role),
     });
   };
 

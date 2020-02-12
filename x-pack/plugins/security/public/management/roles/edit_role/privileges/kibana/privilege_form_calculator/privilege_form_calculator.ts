@@ -202,9 +202,7 @@ export class PrivilegeFormCalculator {
       return selectedFeaturePrivileges;
     }
 
-    const nextPrivileges = selectedFeaturePrivileges.filter(
-      sfp => sfp !== primary.id && sfp !== primary.getCorrespondingPrivilegeId()
-    );
+    const nextPrivileges = [];
 
     if (willBeCustomizing) {
       const feature = this.kibanaPrivileges.getSecuredFeature(featureId);
@@ -213,7 +211,15 @@ export class PrivilegeFormCalculator {
         .filter(ap => ap instanceof SubFeaturePrivilege && primary.grantsPrivilege(ap))
         .map(p => p.id);
 
-      nextPrivileges.push(primary.getCorrespondingPrivilegeId(), ...startingPrivileges);
+      const existingPrivileges = selectedFeaturePrivileges.filter(
+        sfp => sfp !== primary.id && sfp !== primary.getCorrespondingPrivilegeId()
+      );
+
+      nextPrivileges.push(
+        ...existingPrivileges,
+        primary.getCorrespondingPrivilegeId(),
+        ...startingPrivileges
+      );
     } else {
       nextPrivileges.push(primary.id);
     }

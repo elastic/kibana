@@ -12,6 +12,8 @@ import { Feature, ISubFeature } from '../../../../../../../../features/public';
 import { createKibanaPrivileges } from '../__fixtures__/kibana_privileges';
 import { PrivilegeFormCalculator } from '../privilege_form_calculator';
 import { getDisplayedFeaturePrivileges } from './__fixtures__';
+import { findTestSubject } from 'test_utils/find_test_subject';
+import { FeatureTableExpandedRow } from './feature_table_expanded_row';
 
 const createRole = (kibana: Role['kibana'] = []): Role => {
   return {
@@ -25,6 +27,7 @@ interface TestConfig {
   features: Feature[];
   role: Role;
   privilegeIndex: number;
+  calculateDisplayedPrivileges: boolean;
 }
 const setup = (config: TestConfig) => {
   const kibanaPrivileges = createKibanaPrivileges(config.features);
@@ -42,7 +45,9 @@ const setup = (config: TestConfig) => {
     />
   );
 
-  const displayedPrivileges = getDisplayedFeaturePrivileges(wrapper);
+  const displayedPrivileges = config.calculateDisplayedPrivileges
+    ? getDisplayedFeaturePrivileges(wrapper)
+    : undefined;
 
   return {
     wrapper,
@@ -66,6 +71,7 @@ describe('FeatureTable', () => {
       role,
       features: kibanaFeatures,
       privilegeIndex: 0,
+      calculateDisplayedPrivileges: true,
     });
 
     expect(displayedPrivileges).toMatchInlineSnapshot(`
@@ -102,7 +108,12 @@ describe('FeatureTable', () => {
         feature: {},
       },
     ]);
-    const { displayedPrivileges } = setup({ role, features: kibanaFeatures, privilegeIndex: 1 });
+    const { displayedPrivileges } = setup({
+      role,
+      features: kibanaFeatures,
+      privilegeIndex: 1,
+      calculateDisplayedPrivileges: true,
+    });
     expect(displayedPrivileges).toMatchInlineSnapshot(`
       Object {
         "excluded_from_base": Object {
@@ -188,7 +199,12 @@ describe('FeatureTable', () => {
       ] as ISubFeature[],
     });
 
-    const { displayedPrivileges } = setup({ role, features: [feature], privilegeIndex: 0 });
+    const { displayedPrivileges } = setup({
+      role,
+      features: [feature],
+      privilegeIndex: 0,
+      calculateDisplayedPrivileges: true,
+    });
     expect(displayedPrivileges).toMatchInlineSnapshot(`
       Object {
         "unit_test": Object {
@@ -263,7 +279,12 @@ describe('FeatureTable', () => {
       ] as ISubFeature[],
     });
 
-    const { displayedPrivileges } = setup({ role, features: [feature], privilegeIndex: 0 });
+    const { displayedPrivileges } = setup({
+      role,
+      features: [feature],
+      privilegeIndex: 0,
+      calculateDisplayedPrivileges: true,
+    });
     expect(displayedPrivileges).toMatchInlineSnapshot(`
       Object {
         "unit_test": Object {
@@ -337,7 +358,12 @@ describe('FeatureTable', () => {
       ] as ISubFeature[],
     });
 
-    const { displayedPrivileges } = setup({ role, features: [feature], privilegeIndex: 0 });
+    const { displayedPrivileges } = setup({
+      role,
+      features: [feature],
+      privilegeIndex: 0,
+      calculateDisplayedPrivileges: true,
+    });
     expect(displayedPrivileges).toMatchInlineSnapshot(`
       Object {
         "unit_test": Object {
@@ -411,7 +437,12 @@ describe('FeatureTable', () => {
       ] as ISubFeature[],
     });
 
-    const { displayedPrivileges } = setup({ role, features: [feature], privilegeIndex: 0 });
+    const { displayedPrivileges } = setup({
+      role,
+      features: [feature],
+      privilegeIndex: 0,
+      calculateDisplayedPrivileges: true,
+    });
     expect(displayedPrivileges).toMatchInlineSnapshot(`
       Object {
         "unit_test": Object {
@@ -441,7 +472,12 @@ describe('FeatureTable', () => {
         },
       },
     ]);
-    const { displayedPrivileges } = setup({ role, features: kibanaFeatures, privilegeIndex: 1 });
+    const { displayedPrivileges } = setup({
+      role,
+      features: kibanaFeatures,
+      privilegeIndex: 1,
+      calculateDisplayedPrivileges: true,
+    });
     expect(displayedPrivileges).toMatchInlineSnapshot(`
       Object {
         "excluded_from_base": Object {
@@ -465,5 +501,64 @@ describe('FeatureTable', () => {
         },
       }
     `);
+  });
+
+  it('renders a row expander only for features with sub-features', () => {
+    const role = createRole([
+      {
+        spaces: ['*'],
+        base: ['read'],
+        feature: {},
+      },
+      {
+        spaces: ['foo'],
+        base: [],
+        feature: {},
+      },
+    ]);
+    const { wrapper } = setup({
+      role,
+      features: kibanaFeatures,
+      privilegeIndex: 1,
+      calculateDisplayedPrivileges: false,
+    });
+
+    kibanaFeatures.forEach(feature => {
+      const rowExpander = findTestSubject(wrapper, `expandFeaturePrivilegeRow-${feature.id}`);
+      if (!feature.subFeatures || feature.subFeatures.length === 0) {
+        expect(rowExpander).toHaveLength(0);
+      } else {
+        expect(rowExpander).toHaveLength(1);
+      }
+    });
+  });
+
+  it('renders the <FeatureTableExpandedRow> when the row is expanded', () => {
+    const role = createRole([
+      {
+        spaces: ['*'],
+        base: ['read'],
+        feature: {},
+      },
+      {
+        spaces: ['foo'],
+        base: [],
+        feature: {},
+      },
+    ]);
+    const { wrapper } = setup({
+      role,
+      features: kibanaFeatures,
+      privilegeIndex: 1,
+      calculateDisplayedPrivileges: false,
+    });
+
+    expect(wrapper.find(FeatureTableExpandedRow)).toHaveLength(0);
+
+    findTestSubject(wrapper, 'expandFeaturePrivilegeRow')
+      .first()
+      .simulate('click');
+
+    expect(wrapper.find(FeatureTableExpandedRow)).toHaveLength(1);
   });
 });

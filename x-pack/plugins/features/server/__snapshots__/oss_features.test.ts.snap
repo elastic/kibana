@@ -185,6 +185,7 @@ Array [
         "all": Array [
           "search",
           "query",
+          "url",
           "alerts",
           "alerts",
         ],
@@ -197,6 +198,7 @@ Array [
         "show",
         "save",
         "saveQuery",
+        "createShortUrl",
         "createAlerts",
         "readAlerts",
         "readAlerts",

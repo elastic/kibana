@@ -8,7 +8,7 @@ import React, { useState, useEffect } from 'react';
 import { EuiFlexItem, EuiFlexGroup, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
 import { SubFeatureForm } from './sub_feature_form';
 import { PrivilegeFormCalculator } from '../privilege_form_calculator';
-import { SecuredFeature, SubFeaturePrivilege, PrimaryFeaturePrivilege } from '../../../../model';
+import { SecuredFeature } from '../../../../model';
 
 interface Props {
   feature: SecuredFeature;
@@ -28,28 +28,20 @@ export const FeatureTableExpandedRow = ({
   disabled,
 }: Props) => {
   const [isCustomizing, setIsCustomizing] = useState(() => {
-    return feature.allPrivileges
-      .filter(
-        ap =>
-          ap instanceof SubFeaturePrivilege ||
-          (ap instanceof PrimaryFeaturePrivilege && ap.isMinimalFeaturePrivilege())
-      )
+    return feature
+      .getMinimalFeaturePrivileges()
       .some(p => selectedFeaturePrivileges.includes(p.id));
   });
 
   useEffect(() => {
-    const hasMinimalFeaturePrivilegeSelected = feature.allPrivileges
-      .filter(
-        ap =>
-          ap instanceof SubFeaturePrivilege ||
-          (ap instanceof PrimaryFeaturePrivilege && ap.isMinimalFeaturePrivilege())
-      )
+    const hasMinimalFeaturePrivilegeSelected = feature
+      .getMinimalFeaturePrivileges()
       .some(p => selectedFeaturePrivileges.includes(p.id));
 
     if (!hasMinimalFeaturePrivilegeSelected && isCustomizing) {
       setIsCustomizing(false);
     }
-  }, [feature.allPrivileges, isCustomizing, selectedFeaturePrivileges]);
+  }, [feature, isCustomizing, selectedFeaturePrivileges]);
 
   const onCustomizeSubFeatureChange = (e: EuiSwitchEvent) => {
     onChange(
@@ -70,6 +62,7 @@ export const FeatureTableExpandedRow = ({
           label="Customize sub-feature privileges"
           checked={isCustomizing}
           onChange={onCustomizeSubFeatureChange}
+          data-test-subj="customizeSubFeaturePrivileges"
           disabled={
             disabled ||
             !privilegeCalculator.canCustomizeSubFeaturePrivileges(feature.id, privilegeIndex)
