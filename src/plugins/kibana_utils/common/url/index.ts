@@ -17,12 +17,9 @@
  * under the License.
  */
 
-declare class QueryStringClass {
-  public decode(queryString: string): any;
-  public encode(obj: any): string;
-  public param(key: string, value: string): string;
-}
+import { encodeUriQuery, encodeQuery } from './encode_uri_query';
 
-declare const QueryString: QueryStringClass;
-
-export { QueryString };
+export const url = {
+  encodeQuery,
+  encodeUriQuery,
+};
