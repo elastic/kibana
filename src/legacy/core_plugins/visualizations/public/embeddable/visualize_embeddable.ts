@@ -31,8 +31,8 @@ import {
   IIndexPattern,
   TimeRange,
   Query,
-  onlyDisabledFiltersChanged,
   esFilters,
+  Filter,
   ISearchSource,
 } from '../../../../../plugins/data/public';
 import {
@@ -75,7 +75,7 @@ export interface VisualizeEmbeddableConfiguration {
 export interface VisualizeInput extends EmbeddableInput {
   timeRange?: TimeRange;
   query?: Query;
-  filters?: esFilters.Filter[];
+  filters?: Filter[];
   vis?: {
     colors?: { [key: string]: string };
   };
@@ -100,7 +100,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
   private timeRange?: TimeRange;
   private query?: Query;
   private title?: string;
-  private filters?: esFilters.Filter[];
+  private filters?: Filter[];
   private visCustomizations: VisualizeInput['vis'];
   private subscriptions: Subscription[] = [];
   private expression: string = '';
@@ -214,7 +214,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     }
 
     // Check if filters has changed
-    if (!onlyDisabledFiltersChanged(this.input.filters, this.filters)) {
+    if (!esFilters.onlyDisabledFiltersChanged(this.input.filters, this.filters)) {
       this.filters = this.input.filters;
       dirty = true;
     }
@@ -350,7 +350,6 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
   private async updateHandler() {
     const expressionParams: IExpressionLoaderParams = {
       searchContext: {
-        type: 'kibana_context',
         timeRange: this.timeRange,
         query: this.input.query,
         filters: this.input.filters,

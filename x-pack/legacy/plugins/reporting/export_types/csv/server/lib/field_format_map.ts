@@ -5,7 +5,10 @@
  */
 
 import _ from 'lodash';
-import { fieldFormats } from '../../../../../../../../src/plugins/data/server';
+import {
+  FieldFormatConfig,
+  IFieldFormatsRegistry,
+} from '../../../../../../../../src/plugins/data/server';
 
 interface IndexPatternSavedObject {
   attributes: {
@@ -25,7 +28,7 @@ interface IndexPatternSavedObject {
  */
 export function fieldFormatMapFactory(
   indexPatternSavedObject: IndexPatternSavedObject,
-  fieldFormatsRegistry: fieldFormats.FieldFormatsRegistry
+  fieldFormatsRegistry: IFieldFormatsRegistry
 ) {
   const formatsMap = new Map();
 
@@ -33,7 +36,7 @@ export function fieldFormatMapFactory(
   if (_.has(indexPatternSavedObject, 'attributes.fieldFormatMap')) {
     const fieldFormatMap = JSON.parse(indexPatternSavedObject.attributes.fieldFormatMap);
     Object.keys(fieldFormatMap).forEach(fieldName => {
-      const formatConfig: fieldFormats.IFieldFormatConfig = fieldFormatMap[fieldName];
+      const formatConfig: FieldFormatConfig = fieldFormatMap[fieldName];
 
       if (!_.isEmpty(formatConfig)) {
         formatsMap.set(

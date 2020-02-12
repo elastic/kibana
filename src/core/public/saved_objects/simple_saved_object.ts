@@ -19,7 +19,7 @@
 
 import { get, has, set } from 'lodash';
 import { SavedObject as SavedObjectType, SavedObjectAttributes } from '../../server';
-import { SavedObjectsClient } from './saved_objects_client';
+import { SavedObjectsClientContract } from './saved_objects_client';
 
 /**
  * This class is a very simple wrapper for SavedObjects loaded from the server
@@ -41,7 +41,7 @@ export class SimpleSavedObject<T extends SavedObjectAttributes> {
   public references: SavedObjectType<T>['references'];
 
   constructor(
-    private client: SavedObjectsClient,
+    private client: SavedObjectsClientContract,
     { id, type, version, attributes, error, references, migrationVersion }: SavedObjectType<T>
   ) {
     this.id = id;
