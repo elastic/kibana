@@ -22,7 +22,6 @@ import { Plugin, CoreSetup, CoreStart, PackageInfo } from '../../../../core/publ
 import { SYNC_SEARCH_STRATEGY, syncSearchStrategyProvider } from './sync_search_strategy';
 import { ISearchSetup, ISearchStart, TSearchStrategyProvider, TSearchStrategiesMap } from './types';
 import { TStrategyTypes } from './strategy_types';
-import { ISearchGeneric } from './i_search';
 import { getEsClient, LegacyApiCaller } from './es_client';
 import { ES_SEARCH_STRATEGY, DEFAULT_SEARCH_STRATEGY } from '../../common/search';
 import { esSearchStrategyProvider } from './es_search/es_search_strategy';
@@ -44,7 +43,6 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   private searchStrategies: TSearchStrategiesMap = {};
 
   private esClient?: LegacyApiCaller;
-  private search?: ISearchGeneric;
 
   private registerSearchStrategyProvider = <T extends TStrategyTypes>(
     name: T,
