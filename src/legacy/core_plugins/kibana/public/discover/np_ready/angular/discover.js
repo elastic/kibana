@@ -193,9 +193,9 @@ function discoverController(
   const savedSearch = $route.current.locals.savedObjects.savedSearch;
   $scope.searchSource = savedSearch.searchSource;
   $scope.indexPattern = resolveIndexPatternLoading();
-  const $appStatus = ($scope.appStatus = {
+  const $appStatus = {
     dirty: !savedSearch.id,
-  });
+  };
   const onChangeAppState = dirty => {
     $appStatus.dirty = dirty || !savedSearch.id;
   };
@@ -209,12 +209,9 @@ function discoverController(
     syncGlobalState,
     getAppFilters,
     getGlobalFilters,
+    setInitialAppState,
   } = getState(getStateDefaults(), false, onChangeAppState);
 
-  //stateMonitor = stateMonitorFactory.create($state, getStateDefaults());
-  //stateMonitor.onChange(status => {
-  //   $appStatus.dirty = status.dirty || !savedSearch.id;
-  //});
   appStateContainer.subscribe(newState => {
     if (!_.isEqual(newState, $scope.state)) {
       $scope.state = { ...newState };
@@ -222,8 +219,12 @@ function discoverController(
   });
 
   globalStateContainer.subscribe(newState => {
-    if (newState.time && newState.time.from !== timefilter.from) {
-      timefilter.setTime(newState.time);
+    const { time, refreshInterval } = newState;
+    if (time && time.from !== timefilter.from) {
+      timefilter.setTime(time);
+    }
+    if (refreshInterval && !_.isEqual(refreshInterval, timefilter.getRefreshInterval())) {
+      timefilter.setRefreshInterval(refreshInterval);
     }
   });
 
@@ -354,7 +355,7 @@ function discoverController(
             onSave={onSave}
             onClose={() => {}}
             title={savedSearch.title}
-            showCopyOnSave={savedSearch.id ? true : false}
+            showCopyOnSave={!!savedSearch.id}
             objectType="search"
             description={i18n.translate('kbn.discover.localMenu.saveSaveSearchDescription', {
               defaultMessage:
@@ -751,7 +752,7 @@ function discoverController(
     try {
       const id = await savedSearch.save(saveOptions);
       $scope.$evalAsync(() => {
-        //stateMonitor.setInitialState($state.toJSON());
+        setInitialAppState($state);
         if (id) {
           toastNotifications.addSuccess({
             title: i18n.translate('kbn.discover.notifications.savedSearchTitle', {
@@ -899,6 +900,7 @@ function discoverController(
         from: timefilter.getTime().from,
         to: timefilter.getTime().to,
       },
+      refreshInterval: timefilter.getRefreshInterval(),
     });
   };
 

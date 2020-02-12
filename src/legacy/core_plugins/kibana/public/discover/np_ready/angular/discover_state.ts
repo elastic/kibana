@@ -43,7 +43,7 @@ interface GlobalState {
  * Used to sync URL with UI state
  */
 export function getState(
-  initialAppState: AppState,
+  defaultAppState: AppState,
   storeInSessionStorage: boolean,
   onChangeAppStatus: (dirty: boolean) => void
 ) {
@@ -55,10 +55,11 @@ export function getState(
   const globalStateContainer = createStateContainer<GlobalState>(globalStateInitial);
 
   const appStateFromUrl = stateStorage.get('_a') as AppState;
-  const appStateContainer = createStateContainer<AppState>({
-    ...initialAppState,
+  let initialAppState = {
+    ...defaultAppState,
     ...appStateFromUrl,
-  });
+  };
+  const appStateContainer = createStateContainer<AppState>(initialAppState);
 
   const { start, stop } = syncStates([
     {
@@ -89,12 +90,17 @@ export function getState(
       const oldState = appStateContainer.getState();
       const newState = { ...oldState, ...newPartial };
       if (!_.isEqual(oldState, newState)) {
-        onChangeAppStatus(true);
         appStateContainer.set(newState);
+      }
+      if (!_.isEqual(initialAppState, newState)) {
+        onChangeAppStatus(true);
       }
     },
     getGlobalFilters: () => getFilters(globalStateContainer.getState()),
     getAppFilters: () => getFilters(appStateContainer.getState()),
+    setInitialAppState: (newState: AppState) => {
+      initialAppState = newState;
+    },
   };
 }
 
