@@ -19,10 +19,8 @@
 
 import { get, isUndefined } from 'lodash';
 import { getPhraseScript } from '../../filters';
-// @ts-ignore
 import { getFields } from './utils/get_fields';
 import { getTimeZoneFromSettings } from '../../utils';
-// @ts-ignore
 import { getFullFieldNameNode } from './utils/get_full_field_name_node';
 import { IIndexPattern, KueryNode, IFieldType } from '../../..';
 
@@ -93,8 +91,9 @@ export function toElasticsearchQuery(
   // keep things familiar for now.
   if (fields && fields.length === 0) {
     fields.push({
-      name: ast.toElasticsearchQuery(fullFieldNameArg),
+      name: (ast.toElasticsearchQuery(fullFieldNameArg) as unknown) as string,
       scripted: false,
+      type: '',
     });
   }
 
@@ -108,7 +107,7 @@ export function toElasticsearchQuery(
     return { match_all: {} };
   }
 
-  const queries = fields.reduce((accumulator: any, field: IFieldType) => {
+  const queries = fields!.reduce((accumulator: any, field: IFieldType) => {
     const wrapWithNestedQuery = (query: any) => {
       // Wildcards can easily include nested and non-nested fields. There isn't a good way to let
       // users handle this themselves so we automatically add nested queries in this scenario.

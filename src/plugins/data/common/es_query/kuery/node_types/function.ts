@@ -20,7 +20,7 @@
 import _ from 'lodash';
 // @ts-ignore
 import { functions } from '../functions';
-import { IIndexPattern } from '../../..';
+import { IIndexPattern, KueryNode } from '../../..';
 import { FunctionName, FunctionTypeBuildNode } from './types';
 import { JsonValue } from '../../../../../kibana_utils/public';
 
@@ -54,11 +54,11 @@ export function buildNodeWithArgumentNodes(
 }
 
 export function toElasticsearchQuery(
-  node: any,
+  node: KueryNode,
   indexPattern?: IIndexPattern,
   config?: Record<string, any>,
   context?: Record<string, any>
 ): JsonValue {
-  const kueryFunction = functions[node.function];
+  const kueryFunction = functions[node.function as FunctionName];
   return kueryFunction.toElasticsearchQuery(node, indexPattern, config, context);
 }
