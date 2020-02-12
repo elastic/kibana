@@ -8,10 +8,7 @@ import { ReactWrapper, ShallowWrapper } from 'enzyme';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { EuiComboBox, EuiSideNav, EuiPopover, EuiFieldNumber } from '@elastic/eui';
-import {
-  DataPublicPluginStart,
-  FieldFormatsStart,
-} from '../../../../../../../src/plugins/data/public';
+import { DataPublicPluginStart } from '../../../../../../../src/plugins/data/public';
 import { changeColumn } from '../state_helpers';
 import {
   IndexPatternDimensionPanel,
@@ -153,7 +150,7 @@ describe('IndexPatternDimensionPanel', () => {
             id: 'bytes',
             title: 'Bytes',
           }),
-        } as unknown) as FieldFormatsStart,
+        } as unknown) as DataPublicPluginStart['fieldFormats'],
       } as unknown) as DataPublicPluginStart,
     };
 
@@ -1119,6 +1116,56 @@ describe('IndexPatternDimensionPanel', () => {
         },
       },
     });
+  });
+
+  it('keeps decimal places while switching', () => {
+    const stateWithNumberCol: IndexPatternPrivateState = {
+      ...state,
+      layers: {
+        first: {
+          indexPatternId: '1',
+          columnOrder: ['col1'],
+          columns: {
+            col1: {
+              label: 'Average of bar',
+              dataType: 'number',
+              isBucketed: false,
+              // Private
+              operationType: 'avg',
+              sourceField: 'bar',
+              params: {
+                format: { id: 'bytes', params: { decimals: 0 } },
+              },
+            },
+          },
+        },
+      },
+    };
+
+    wrapper = mount(<IndexPatternDimensionPanel {...defaultProps} state={stateWithNumberCol} />);
+
+    openPopover();
+
+    act(() => {
+      wrapper
+        .find(EuiComboBox)
+        .filter('[data-test-subj="indexPattern-dimension-format"]')
+        .prop('onChange')!([{ value: '', label: 'Default' }]);
+    });
+
+    act(() => {
+      wrapper
+        .find(EuiComboBox)
+        .filter('[data-test-subj="indexPattern-dimension-format"]')
+        .prop('onChange')!([{ value: 'number', label: 'Number' }]);
+    });
+
+    expect(
+      wrapper
+        .find(EuiFieldNumber)
+        .filter('[data-test-subj="indexPattern-dimension-formatDecimals"]')
+        .prop('value')
+    ).toEqual(0);
   });
 
   it('allows custom format with number of decimal places', () => {

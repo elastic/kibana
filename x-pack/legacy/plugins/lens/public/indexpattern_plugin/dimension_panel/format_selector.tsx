@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiFieldNumber, EuiComboBox } from '@elastic/eui';
 import { IndexPatternColumn } from '../indexpattern';
@@ -32,13 +32,21 @@ interface FormatSelectorProps {
   onChange: (newFormat?: { id: string; params?: Record<string, unknown> }) => void;
 }
 
+interface State {
+  decimalPlaces: number;
+}
+
 export function FormatSelector(props: FormatSelectorProps) {
   const { selectedColumn, onChange } = props;
 
   const currentFormat =
-    selectedColumn.params && 'format' in selectedColumn.params
+    'params' in selectedColumn && selectedColumn.params && 'format' in selectedColumn.params
       ? selectedColumn.params.format
       : undefined;
+  const [state, setState] = useState<State>({
+    decimalPlaces:
+      typeof currentFormat?.params?.decimals === 'number' ? currentFormat.params.decimals : 3,
+  });
 
   const selectedFormat = currentFormat?.id ? supportedFormats[currentFormat.id] : undefined;
 
@@ -48,8 +56,6 @@ export function FormatSelector(props: FormatSelectorProps) {
       defaultMessage: 'Default',
     }),
   };
-
-  const currentDecimals = currentFormat?.params?.decimals;
 
   return (
     <>
@@ -93,7 +99,7 @@ export function FormatSelector(props: FormatSelectorProps) {
             }
             onChange({
               id: choices[0].value,
-              params: { decimals: typeof currentDecimals === 'number' ? currentDecimals : 3 },
+              params: { decimals: state.decimalPlaces },
             });
           }}
         />
@@ -108,10 +114,11 @@ export function FormatSelector(props: FormatSelectorProps) {
         >
           <EuiFieldNumber
             data-test-subj="indexPattern-dimension-formatDecimals"
-            value={typeof currentDecimals === 'number' ? currentDecimals : 3}
+            value={state.decimalPlaces}
             min={0}
             max={20}
             onChange={e => {
+              setState({ decimalPlaces: Number(e.target.value) });
               onChange({
                 id: (selectedColumn.params as { format: { id: string } }).format.id,
                 params: {

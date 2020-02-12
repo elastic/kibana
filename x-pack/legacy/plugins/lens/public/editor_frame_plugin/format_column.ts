@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ExpressionFunction, KibanaDatatable } from 'src/plugins/expressions/public';
+import { ExpressionFunctionDefinition, KibanaDatatable } from 'src/plugins/expressions/public';
 
 interface FormatColumn {
   format: string;
@@ -39,7 +39,7 @@ const supportedFormats: Record<string, { decimalsToPattern: (decimals?: number) 
   },
 };
 
-export const formatColumn: ExpressionFunction<
+export const formatColumn: ExpressionFunctionDefinition<
   'lens_format_column',
   KibanaDatatable,
   FormatColumn,
@@ -64,13 +64,11 @@ export const formatColumn: ExpressionFunction<
       help: '',
     },
   },
-  context: {
-    types: ['kibana_datatable'],
-  },
-  fn(ctx, { format, columnId, decimals }: FormatColumn) {
+  inputTypes: ['kibana_datatable'],
+  fn(input, { format, columnId, decimals }: FormatColumn) {
     return {
-      ...ctx,
-      columns: ctx.columns.map(col => {
+      ...input,
+      columns: input.columns.map(col => {
         if (col.id === columnId) {
           if (supportedFormats[format]) {
             return {

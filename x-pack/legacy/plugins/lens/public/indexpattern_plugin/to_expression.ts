@@ -48,7 +48,7 @@ function getExpressionForLayer(
         }
         const base = `| lens_format_column format="${format.id}" columnId="${id}"`;
         if (typeof format.params?.decimals === 'number') {
-          return base + ` decimals=${format.params?.decimals}`;
+          return base + ` decimals=${format.params.decimals}`;
         }
         return base;
       })
