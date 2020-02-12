@@ -17,27 +17,10 @@
  * under the License.
  */
 
-import { encodeUriQuery, stringifyQueryString } from './stringify_query_string';
+import { encodeUriQuery, encodeQuery } from './encode_uri_query';
 
-describe('stringifyQueryString', () => {
-  it('stringifyQueryString', () => {
-    expect(
-      stringifyQueryString({
-        a: 'asdf1234asdf',
-        b: "-_.!~*'() -_.!~*'()",
-        c: ':@$, :@$,',
-        d: "&;=+# &;=+#'",
-        f: ' ',
-        g: 'null',
-      })
-    ).toMatchInlineSnapshot(
-      `"a=asdf1234asdf&b=-_.!~*'()%20-_.!~*'()&c=:@$,%20:@$,&d=%26;%3D%2B%23%20%26;%3D%2B%23'&f=%20&g=null"`
-    );
-  });
-});
-
-describe('encodeUriQuery', function() {
-  it('should correctly encode uri query and not encode chars defined as pchar set in rfc3986', () => {
+describe('encodeUriQuery', () => {
+  test('should correctly encode uri query and not encode chars defined as pchar set in rfc3986', () => {
     // don't encode alphanum
     expect(encodeUriQuery('asdf1234asdf')).toBe('asdf1234asdf');
 
@@ -61,5 +44,27 @@ describe('encodeUriQuery', function() {
 
     // do not encode `null` with no flag
     expect(encodeUriQuery('null')).toBe('null');
+  });
+});
+
+describe('encodeQuery', () => {
+  test('encodeQuery', () => {
+    expect(
+      encodeQuery({
+        a: 'asdf1234asdf',
+        b: "-_.!~*'() -_.!~*'()",
+        c: ':@$, :@$,',
+        d: "&;=+# &;=+#'",
+        f: ' ',
+        g: 'null',
+      })
+    ).toEqual({
+      a: 'asdf1234asdf',
+      b: "-_.!~*'()%20-_.!~*'()",
+      c: ':@$,%20:@$,',
+      d: "%26;%3D%2B%23%20%26;%3D%2B%23'",
+      f: '%20',
+      g: 'null',
+    });
   });
 });

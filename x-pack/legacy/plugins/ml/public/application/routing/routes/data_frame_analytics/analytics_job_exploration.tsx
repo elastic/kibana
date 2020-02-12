@@ -4,12 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { parse } from 'query-string';
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { decode } from 'rison-node';
-
-// @ts-ignore
-import queryString from 'query-string';
 import { MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
 import { basicResolvers } from '../../resolvers';
@@ -36,7 +34,8 @@ export const analyticsJobExplorationRoute: MlRoute = {
 
 const PageWrapper: FC<PageProps> = ({ location, deps }) => {
   const { context } = useResolver('', undefined, deps.config, basicResolvers(deps));
-  const { _g } = queryString.parse(location.search);
+  const { _g }: Record<string, any> = parse(location.search, { sort: false });
+
   let globalState: any = null;
   try {
     globalState = decode(_g);
