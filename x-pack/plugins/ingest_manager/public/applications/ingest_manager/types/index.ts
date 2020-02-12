@@ -32,10 +32,12 @@ export {
   GetOneEnrollmentAPIKeyResponse,
   // EPM types
   AssetsGroupedByServiceByType,
+  AssetType,
   AssetTypeToParts,
   CategoryId,
   CategorySummaryItem,
   CategorySummaryList,
+  ElasticsearchAssetType,
   KibanaAssetType,
   PackageInfo,
   PackageList,
@@ -43,6 +45,7 @@ export {
   RequirementsByServiceName,
   RequirementVersion,
   ScreenshotItem,
+  ServiceName,
 } from '../../../../common';
 
 // Calling Object.entries(PackagesGroupedByStatus) gave `status: string`

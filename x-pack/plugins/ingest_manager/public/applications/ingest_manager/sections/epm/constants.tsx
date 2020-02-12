@@ -4,12 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { IconType } from '@elastic/eui';
-import {
-  AssetType,
-  ElasticsearchAssetType,
-  KibanaAssetType,
-  ServiceName,
-} from '../../../../../common/types/epm';
+import { AssetType, ElasticsearchAssetType, KibanaAssetType, ServiceName } from '../../types';
 
 // only allow Kibana assets for the kibana key, ES asssets for elasticsearch, etc
 type ServiceNameToAssetTypes = Record<Extract<ServiceName, 'kibana'>, KibanaAssetType[]> &
