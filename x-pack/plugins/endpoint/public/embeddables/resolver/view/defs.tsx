@@ -80,8 +80,8 @@ const PaintServers = memo(() => (
       spreadMethod="pad"
       gradientUnits="userSpaceOnUse"
     >
-      <stop offset="0%" stopColor={ColorTypes.ContentForeground} stopOpacity="1" />
-      <stop offset="100%" stopColor={ColorTypes.ContentForeground} stopOpacity="1" />
+      <stop offset="0%" stopColor={NamedColors.empty} stopOpacity="1" />
+      <stop offset="100%" stopColor={NamedColors.empty} stopOpacity="1" />
     </linearGradient>
     <linearGradient
       id="Background_userSpaceNWtoSE_Solid"
@@ -92,8 +92,8 @@ const PaintServers = memo(() => (
       spreadMethod="pad"
       gradientUnits="userSpaceOnUse"
     >
-      <stop offset="0%" stopColor={ColorTypes.ContentBackground} stopOpacity="1" />
-      <stop offset="100%" stopColor={ColorTypes.ContentBackground} stopOpacity="1" />
+      <stop offset="0%" stopColor={NamedColors.full} stopOpacity="1" />
+      <stop offset="100%" stopColor={NamedColors.full} stopOpacity="1" />
     </linearGradient>
   </>
 ));
