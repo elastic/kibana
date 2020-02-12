@@ -42,7 +42,7 @@ export interface AlertExecutorOptions {
   updatedBy: string | null;
 }
 
-export interface ActionGroups {
+export interface ActionGroup {
   id: string;
   name: string;
 }
@@ -53,7 +53,7 @@ export interface AlertType {
   validate?: {
     params?: { validate: (object: any) => any };
   };
-  actionGroups: ActionGroups[];
+  actionGroups: ActionGroup[];
   executor: ({ services, params, state }: AlertExecutorOptions) => Promise<State | void>;
 }
 

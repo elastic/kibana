@@ -40,7 +40,7 @@ import {
   ActionTypeIndex,
   ActionConnector,
   AlertTypeIndex,
-  ActionGroups,
+  ActionGroup,
 } from '../../../types';
 import { SectionLoading } from '../../components/section_loading';
 import { ConnectorAddModal } from '../action_connector_form/connector_add_modal';
@@ -119,7 +119,7 @@ export const AlertForm = ({
   const [alertThrottleUnit, setAlertThrottleUnit] = useState<string>('m');
   const [isAddActionPanelOpen, setIsAddActionPanelOpen] = useState<boolean>(true);
   const [connectors, setConnectors] = useState<ActionConnector[]>([]);
-  const [defaultActionGroup, setDefaultActionGroup] = useState<ActionGroups | undefined>(undefined);
+  const [defaultActionGroup, setDefaultActionGroup] = useState<ActionGroup | undefined>(undefined);
   const [activeActionItem, setActiveActionItem] = useState<ActiveActionConnectorState | undefined>(
     undefined
   );
