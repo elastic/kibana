@@ -49,7 +49,7 @@ export const getLicenseExpiration = (
     actionGroups: [
       {
         id: 'default',
-        name: i18n.translate('xpack.monitoring.alerts.actionGroups.default', {
+        name: i18n.translate('xpack.monitoring.alerts.licenseExpiration.actionGroups.default', {
           defaultMessage: 'Default',
         }),
       },
