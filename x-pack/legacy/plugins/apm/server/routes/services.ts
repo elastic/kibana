@@ -33,7 +33,7 @@ export const servicesRoute = createRoute(() => ({
       ({ agentName }) => agentName as AgentName
     );
     const apmTelemetry = createApmTelementry(agentNames);
-    storeApmServicesTelemetry(context.__LEGACY.server, apmTelemetry);
+    storeApmServicesTelemetry(context.core.savedObjects.client, apmTelemetry);
 
     return services;
   }

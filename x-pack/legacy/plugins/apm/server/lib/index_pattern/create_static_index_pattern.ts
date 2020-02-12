@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { getInternalSavedObjectsClient } from '../helpers/saved_objects_client';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import apmIndexPattern from '../../../../../../plugins/apm/server/tutorial/index_pattern.json';
 import { APM_STATIC_INDEX_PATTERN_ID } from '../../../common/index_pattern_constants';
@@ -33,10 +32,8 @@ export async function createStaticIndexPattern(
 
   try {
     const apmIndexPatternTitle = config['apm_oss.indexPattern'];
-    const internalSavedObjectsClient = getInternalSavedObjectsClient(
-      context.__LEGACY.server
-    );
-    await internalSavedObjectsClient.create(
+    const savedObjectsClient = context.core.savedObjects.client;
+    await savedObjectsClient.create(
       'index-pattern',
       {
         ...apmIndexPattern.attributes,

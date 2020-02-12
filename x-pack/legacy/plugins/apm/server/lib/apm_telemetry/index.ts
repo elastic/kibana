@@ -5,14 +5,12 @@
  */
 
 import { countBy } from 'lodash';
-import { SavedObjectAttributes } from 'src/core/server';
+import { SavedObjectAttributes, SavedObjectsClient } from 'src/core/server';
 import { isAgentName } from '../../../common/agent_name';
-import { getInternalSavedObjectsClient } from '../helpers/saved_objects_client';
 import {
   APM_SERVICES_TELEMETRY_SAVED_OBJECT_TYPE,
   APM_SERVICES_TELEMETRY_SAVED_OBJECT_ID
 } from '../../../common/apm_saved_object_constants';
-import { APMLegacyServer } from '../../routes/typings';
 import { UsageCollectionSetup } from '../../../../../../../src/plugins/usage_collection/server';
 
 export function createApmTelementry(
@@ -25,35 +23,31 @@ export function createApmTelementry(
   };
 }
 
+type ISavedObjectsClient = Pick<SavedObjectsClient, 'create' | 'get'>;
+
 export async function storeApmServicesTelemetry(
-  server: APMLegacyServer,
+  savedObjectsClient: ISavedObjectsClient,
   apmTelemetry: SavedObjectAttributes
 ) {
-  try {
-    const savedObjectsClient = getInternalSavedObjectsClient(server);
-    await savedObjectsClient.create(
-      APM_SERVICES_TELEMETRY_SAVED_OBJECT_TYPE,
-      apmTelemetry,
-      {
-        id: APM_SERVICES_TELEMETRY_SAVED_OBJECT_ID,
-        overwrite: true
-      }
-    );
-  } catch (e) {
-    server.log(['error'], `Unable to save APM telemetry data: ${e.message}`);
-  }
+  return savedObjectsClient.create(
+    APM_SERVICES_TELEMETRY_SAVED_OBJECT_TYPE,
+    apmTelemetry,
+    {
+      id: APM_SERVICES_TELEMETRY_SAVED_OBJECT_ID,
+      overwrite: true
+    }
+  );
 }
 
 export function makeApmUsageCollector(
   usageCollector: UsageCollectionSetup,
-  server: APMLegacyServer
+  savedObjectsRepository: ISavedObjectsClient
 ) {
   const apmUsageCollector = usageCollector.makeUsageCollector({
     type: 'apm',
     fetch: async () => {
-      const internalSavedObjectsClient = getInternalSavedObjectsClient(server);
       try {
-        const apmTelemetrySavedObject = await internalSavedObjectsClient.get(
+        const apmTelemetrySavedObject = await savedObjectsRepository.get(
           APM_SERVICES_TELEMETRY_SAVED_OBJECT_TYPE,
           APM_SERVICES_TELEMETRY_SAVED_OBJECT_ID
         );
