@@ -179,12 +179,10 @@ describe('get_all_stats', () => {
         .onCall(1)
         .returns(Promise.resolve(kibanaStatsResponse))
         .onCall(2)
-        .returns(Promise.resolve({})) // Kibana Plugins
-        .onCall(3)
         .returns(Promise.resolve(logstashStatsResponse))
-        .onCall(4)
+        .onCall(3)
         .returns(Promise.resolve({})) // Beats stats
-        .onCall(5)
+        .onCall(4)
         .returns(Promise.resolve({})); // Beats state
 
       expect(

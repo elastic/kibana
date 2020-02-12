@@ -337,56 +337,6 @@ export async function fetchHighLevelStats<
   return callCluster('search', params);
 }
 
-export interface KibanaPluginStats {
-  kibana: {
-    uuid: string;
-    name: string;
-    index: string;
-    host: string;
-    transport_address: string;
-    version: string;
-    snapshot: boolean;
-    status: string;
-  };
-}
-
-export interface KibanaPluginsStats<T extends KibanaPluginStats> {
-  cluster_uuid: string;
-  timestamp: string;
-  type: string;
-  [key: string]: T | string;
-}
-
-export function fetchKibanaPluginsStats(
-  server: StatsCollectionConfig['server'],
-  callCluster: StatsCollectionConfig['callCluster'],
-  clusterUuids: string[],
-  start: StatsCollectionConfig['start'] | undefined,
-  end: StatsCollectionConfig['end'] | undefined
-) {
-  const filters: object[] = [
-    // Filter by Cluster UUIDs
-    { terms: { cluster_uuid: clusterUuids } },
-    // Get all the entries except for 'kibana_stats' (already retrieved in fetchHighLevelStats)
-    { bool: { must_not: [{ term: { type: { value: 'kibana_stats' } } }] } },
-  ];
-
-  const params = {
-    index: getIndexPatternForStackProduct(KIBANA_SYSTEM_ID),
-    size: server.config().get('monitoring.ui.max_bucket_size'),
-    headers: {
-      'X-QUERY-SOURCE': TELEMETRY_QUERY_SOURCE,
-    },
-    ignoreUnavailable: true,
-    body: {
-      query: createQuery({ start, end, filters }),
-      sort: [{ timestamp: 'desc' }],
-    },
-  };
-
-  return callCluster<SearchResponse<KibanaPluginsStats<any>>>('search', params);
-}
-
 /**
  * Determine common, high-level details about the current product (e.g., Kibana) from the {@code response}.
  *

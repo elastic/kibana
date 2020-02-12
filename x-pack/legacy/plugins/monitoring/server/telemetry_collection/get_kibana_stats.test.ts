@@ -12,14 +12,12 @@ import {
   KibanaUsageStats,
 } from './get_kibana_stats';
 import { SearchResponse } from 'elasticsearch';
-import { KibanaPluginsStats } from './get_high_level_stats';
 
 describe('Get Kibana Stats', () => {
   describe('Make a map of usage stats for each cluster', () => {
     test('passes through if there are no kibana instances', () => {
       const rawStats = {} as SearchResponse<KibanaUsageStats>;
-      const pluginStats = {} as SearchResponse<KibanaPluginsStats<any>>;
-      expect(getUsageStats(rawStats, pluginStats)).toStrictEqual({});
+      expect(getUsageStats(rawStats)).toStrictEqual({});
     });
 
     describe('with single cluster', () => {
@@ -61,9 +59,7 @@ describe('Get Kibana Stats', () => {
             },
           };
 
-          const pluginStats = {} as SearchResponse<KibanaPluginsStats<any>>;
-
-          expect(getUsageStats(rawStats, pluginStats)).toStrictEqual(expected);
+          expect(getUsageStats(rawStats)).toStrictEqual(expected);
         });
 
         test('for a single instance of active usage', () => {
@@ -102,8 +98,7 @@ describe('Get Kibana Stats', () => {
               plugins: {},
             },
           };
-          const pluginStats = {} as SearchResponse<KibanaPluginsStats<any>>;
-          expect(getUsageStats(rawStats, pluginStats)).toStrictEqual(expected);
+          expect(getUsageStats(rawStats)).toStrictEqual(expected);
         });
 
         test('it merges the plugin stats and kibana', () => {
@@ -139,31 +134,10 @@ describe('Get Kibana Stats', () => {
               graph_workspace: { total: 1 },
               timelion_sheet: { total: 1 },
               indices: 1,
-              plugins: {
-                'test-plugin': { test: 1, value: 'random' },
-              },
+              plugins: {},
             },
           };
-          const pluginStats = ({
-            hits: {
-              hits: [
-                {
-                  _source: {
-                    cluster_uuid: 'clusterone',
-                    type: 'test-plugin',
-                    'test-plugin': {
-                      kibana: {
-                        uid: 'kibana-uid',
-                      },
-                      test: 1,
-                      value: 'random',
-                    },
-                  },
-                },
-              ],
-            },
-          } as unknown) as SearchResponse<KibanaPluginsStats<any>>;
-          expect(getUsageStats(rawStats, pluginStats)).toStrictEqual(expected);
+          expect(getUsageStats(rawStats)).toStrictEqual(expected);
         });
 
         test('flattens x-pack stats', () => {
@@ -198,8 +172,7 @@ describe('Get Kibana Stats', () => {
             },
           } as any;
 
-          const pluginStats = {} as SearchResponse<KibanaPluginsStats<any>>;
-          expect(getUsageStats(rawStats, pluginStats)).toStrictEqual({
+          expect(getUsageStats(rawStats)).toStrictEqual({
             clusterone: {
               dashboard: { total: 1 },
               visualization: { total: 3 },
@@ -285,8 +258,7 @@ describe('Get Kibana Stats', () => {
               plugins: {},
             },
           };
-          const pluginStats = {} as SearchResponse<KibanaPluginsStats<any>>;
-          expect(getUsageStats(rawStats, pluginStats)).toStrictEqual(expected);
+          expect(getUsageStats(rawStats)).toStrictEqual(expected);
         });
 
         test('with all actively used instances', () => {
@@ -359,8 +331,7 @@ describe('Get Kibana Stats', () => {
               plugins: {},
             },
           };
-          const pluginStats = {} as SearchResponse<KibanaPluginsStats<any>>;
-          expect(getUsageStats(rawStats, pluginStats)).toStrictEqual(expected);
+          expect(getUsageStats(rawStats)).toStrictEqual(expected);
         });
       });
     });
@@ -464,8 +435,7 @@ describe('Get Kibana Stats', () => {
               plugins: {},
             },
           };
-          const pluginStats = {} as SearchResponse<KibanaPluginsStats<any>>;
-          expect(getUsageStats(rawStats, pluginStats)).toStrictEqual(expected);
+          expect(getUsageStats(rawStats)).toStrictEqual(expected);
         });
       });
     });
