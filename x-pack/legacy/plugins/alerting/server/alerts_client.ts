@@ -320,7 +320,8 @@ export class AlertsClient {
 
     const { actions, references } = await this.denormalizeActions(data.actions);
     const username = await this.getUserName();
-    const apiKeyAttributes = this.apiKeyAsAlertAttributes(await this.createAPIKey(), username);
+    const createdAPIKey = attributes.enabled ? await this.createAPIKey() : null;
+    const apiKeyAttributes = this.apiKeyAsAlertAttributes(createdAPIKey, username);
 
     const updatedObject = await this.savedObjectsClient.update<RawAlert>(
       'alert',

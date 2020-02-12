@@ -4,4 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { renderWithRouter, shallowWithRouter, mountWithRouter } from './helper/helper_with_router';
+export const PROCESS_NAME_FIELD = '[data-test-subj="draggable-content-process.name"]';
+export const UNCOMMON_PROCESSES_TABLE = '[data-test-subj="table-uncommonProcesses-loading-false"]';

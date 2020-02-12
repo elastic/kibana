@@ -4,4 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { renderWithRouter, shallowWithRouter, mountWithRouter } from './helper/helper_with_router';
+export const FIRST_PAGE_SELECTOR = '[data-test-subj="pagination-button-0"]';
+export const THIRD_PAGE_SELECTOR = '[data-test-subj="pagination-button-2"]';
