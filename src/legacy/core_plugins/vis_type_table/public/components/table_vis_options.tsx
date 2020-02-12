@@ -18,7 +18,6 @@
  */
 
 import React, { useEffect, useMemo } from 'react';
-import { get } from 'lodash';
 import { EuiIconTip, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -27,7 +26,7 @@ import { VisOptionsProps } from 'src/legacy/core_plugins/vis_default_editor/publ
 import { tabifyGetColumns } from '../legacy_imports';
 import { NumberInputOption, SwitchOption, SelectOption } from '../../../vis_type_vislib/public';
 import { TableVisParams } from '../types';
-import { totalAggregations, isAggConfigNumeric } from './utils';
+import { totalAggregations } from './utils';
 
 function TableOptions({
   aggs,
@@ -44,7 +43,7 @@ function TableOptions({
         }),
       },
       ...tabifyGetColumns(aggs.getResponseAggs(), true)
-        .filter(col => isAggConfigNumeric(get(col, 'aggConfig.type.name'), stateParams.dimensions))
+        .filter(col => col.aggConfig.type.getFormat(col.aggConfig).type.id === 'number')
         .map(({ name }) => ({ value: name, text: name })),
     ],
     [aggs, stateParams.percentageCol, stateParams.dimensions]

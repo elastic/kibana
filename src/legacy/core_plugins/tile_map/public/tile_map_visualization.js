@@ -46,19 +46,20 @@ export const createTileMapVisualization = ({ serviceSettings, $injector }) => {
       if (!geohashAgg) return;
       const updateVarsObject = {
         name: 'bounds',
+        data: {},
       };
       const bounds = this._kibanaMap.getBounds();
       const mapCollar = scaleBounds(bounds);
       if (!geoContains(geohashAgg.aggConfigParams.boundingBox, mapCollar)) {
-        updateVarsObject.boundingBox = {
+        updateVarsObject.data.boundingBox = {
           top_left: mapCollar.top_left,
           bottom_right: mapCollar.bottom_right,
         };
       } else {
-        updateVarsObject.boundingBox = geohashAgg.aggConfigParams.boundingBox;
+        updateVarsObject.data.boundingBox = geohashAgg.aggConfigParams.boundingBox;
       }
       // todo: autoPrecision should be vis parameter, not aggConfig one
-      updateVarsObject.precision = geohashAgg.aggConfigParams.autoPrecision
+      updateVarsObject.data.precision = geohashAgg.aggConfigParams.autoPrecision
         ? zoomPrecision[this.vis.getUiState().get('mapZoom')]
         : getPrecision(geohashAgg.aggConfigParams.precision);
 

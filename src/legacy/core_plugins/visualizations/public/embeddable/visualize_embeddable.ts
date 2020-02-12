@@ -284,11 +284,11 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
             return get(a, 'type.dslName') === 'geohash_grid';
           });
           if (
-            agg.params.precision !== event.precision ||
-            !_.isEqual(agg.params.boundingBox, event.boundingBox)
+            agg.params.precision !== event.data.precision ||
+            !_.isEqual(agg.params.boundingBox, event.data.boundingBox)
           ) {
-            agg.params.boundingBox = event.boundingBox;
-            agg.params.precision = event.precision;
+            agg.params.boundingBox = event.data.boundingBox;
+            agg.params.precision = event.data.precision;
             this.reload();
           }
           return;
