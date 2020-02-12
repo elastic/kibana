@@ -85,10 +85,9 @@ describe('add_prepackaged_rules_route', () => {
       alertsClient.create.mockResolvedValue(getResult());
       const { payload } = await server.inject(addPrepackagedRulesRequest());
       expect(JSON.parse(payload)).toEqual({
-        error: 'Bad Request',
         message:
           'Pre-packaged rules cannot be installed until the space index is created: .siem-signals-default',
-        statusCode: 400,
+        status_code: 400,
       });
     });
   });

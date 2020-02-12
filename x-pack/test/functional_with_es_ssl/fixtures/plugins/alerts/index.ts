@@ -35,14 +35,15 @@ function createAlwaysFiringAlertType(setupContract: any) {
     name: 'Always Firing',
     actionGroups: ['default', 'other'],
     async executor(alertExecutorOptions: any) {
-      const { services, state } = alertExecutorOptions;
+      const { services, state, params } = alertExecutorOptions;
 
-      services
-        .alertInstanceFactory('1')
-        .replaceState({ instanceStateValue: true })
-        .scheduleActions('default', {
-          instanceContextValue: true,
-        });
+      (params.instances || []).forEach((instance: { id: string; state: any }) => {
+        services
+          .alertInstanceFactory(instance.id)
+          .replaceState({ instanceStateValue: true, ...(instance.state || {}) })
+          .scheduleActions('default');
+      });
+
       return {
         globalStateValue: true,
         groupInSeriesIndex: (state.groupInSeriesIndex || 0) + 1,

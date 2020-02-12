@@ -20,7 +20,7 @@ import { EditorFrameInstance } from '../types';
 import { NativeRenderer } from '../native_renderer';
 import { trackUiEvent } from '../lens_ui_telemetry';
 import {
-  esFilters,
+  Filter,
   IndexPattern as IndexPatternInstance,
   IndexPatternsContract,
   SavedQuery,
@@ -39,7 +39,7 @@ interface State {
     toDate: string;
   };
   query: Query;
-  filters: esFilters.Filter[];
+  filters: Filter[];
   savedQuery?: SavedQuery;
 }
 
