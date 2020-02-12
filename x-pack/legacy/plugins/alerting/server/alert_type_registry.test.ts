@@ -90,7 +90,7 @@ describe('get()', () => {
     const alertType = registry.get('test');
     expect(alertType).toMatchInlineSnapshot(`
       Object {
-        "actionGroups": Object {},
+        "actionGroups": Array [],
         "executor": [MockFunction],
         "id": "test",
         "name": "Test",
@@ -130,9 +130,12 @@ describe('list()', () => {
     expect(result).toMatchInlineSnapshot(`
       Array [
         Object {
-          "actionGroups": Object {
-            "testActionGroup": "Test Action Group",
-          },
+          "actionGroups": Array [
+            Object {
+              "id": "testActionGroup",
+              "name": "Test Action Group",
+            },
+          ],
           "id": "test",
           "name": "Test",
         },
