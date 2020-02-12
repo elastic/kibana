@@ -5,7 +5,6 @@
  */
 
 import Hapi from 'hapi';
-import Boom from 'boom';
 
 import { DETECTION_ENGINE_INDEX_URL } from '../../../../../common/constants';
 import { ServerFacade, RequestFacade } from '../../../../types';
@@ -42,11 +41,22 @@ export const createReadIndexRoute = (server: ServerFacade): Hapi.ServerRoute => 
           if (request.method.toLowerCase() === 'head') {
             return headers.response().code(404);
           } else {
-            return new Boom('index for this space does not exist', { statusCode: 404 });
+            return headers
+              .response({
+                message: 'index for this space does not exist',
+                status_code: 404,
+              })
+              .code(404);
           }
         }
       } catch (err) {
-        return transformError(err);
+        const error = transformError(err);
+        return headers
+          .response({
+            message: error.message,
+            status_code: error.statusCode,
+          })
+          .code(error.statusCode);
       }
     },
   };

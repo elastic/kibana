@@ -8,8 +8,7 @@ import { AlertInstance } from './alert_instance';
 import { AlertTypeRegistry as OrigAlertTypeRegistry } from './alert_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
 import { SavedObjectAttributes, SavedObjectsClientContract } from '../../../../../src/core/server';
-import { Alert } from '../common';
-
+import { Alert, AlertActionParams } from '../common';
 export * from '../common';
 
 export type State = Record<string, any>;
@@ -43,17 +42,20 @@ export interface AlertExecutorOptions {
   updatedBy: string | null;
 }
 
+export interface ActionGroup {
+  id: string;
+  name: string;
+}
+
 export interface AlertType {
   id: string;
   name: string;
   validate?: {
     params?: { validate: (object: any) => any };
   };
-  actionGroups: string[];
+  actionGroups: ActionGroup[];
   executor: ({ services, params, state }: AlertExecutorOptions) => Promise<State | void>;
 }
-
-export type AlertActionParams = SavedObjectAttributes;
 
 export interface RawAlertAction extends SavedObjectAttributes {
   group: string;

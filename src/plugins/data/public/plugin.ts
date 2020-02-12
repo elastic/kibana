@@ -36,7 +36,7 @@ import { SearchService } from './search/search_service';
 import { FieldFormatsService } from './field_formats';
 import { QueryService } from './query';
 import { createIndexPatternSelect } from './ui/index_pattern_select';
-import { IndexPatterns } from './index_patterns';
+import { IndexPatternsService } from './index_patterns';
 import {
   setNotifications,
   setFieldFormats,
@@ -90,7 +90,7 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
     setOverlays(overlays);
     setUiSettings(core.uiSettings);
 
-    const indexPatternsService = new IndexPatterns(uiSettings, savedObjects.client, http);
+    const indexPatternsService = new IndexPatternsService(uiSettings, savedObjects.client, http);
     setIndexPatterns(indexPatternsService);
 
     uiActions.attachAction(APPLY_FILTER_TRIGGER, GLOBAL_APPLY_FILTER_ACTION);

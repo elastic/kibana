@@ -24,7 +24,7 @@ import { AggConfigs, Schemas } from 'ui/agg_types';
 import { AbstractESAggSource } from '../es_agg_source';
 import { DynamicStyleProperty } from '../../styles/vector/properties/dynamic_style_property';
 import { COLOR_GRADIENTS } from '../../styles/color_utils';
-import { isNestedField } from '../../../../../../../../src/plugins/data/public';
+import { indexPatterns } from '../../../../../../../../src/plugins/data/public';
 
 const MAX_GEOTILE_LEVEL = 29;
 
@@ -229,7 +229,7 @@ export class ESPewPewSource extends AbstractESAggSource {
   async _getGeoField() {
     const indexPattern = await this.getIndexPattern();
     const field = indexPattern.fields.getByName(this._descriptor.destGeoField);
-    const geoField = isNestedField(field) ? undefined : field;
+    const geoField = indexPatterns.isNestedField(field) ? undefined : field;
     if (!geoField) {
       throw new Error(
         i18n.translate('xpack.maps.source.esSource.noGeoFieldErrorMessage', {

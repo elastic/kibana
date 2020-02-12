@@ -17,7 +17,7 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { CoreStart, CoreSetup } from 'src/core/public';
-import { ExpressionRenderer } from '../../../../../../../src/plugins/expressions/public';
+import { ReactExpressionRendererType } from '../../../../../../../src/plugins/expressions/public';
 import { Action } from './state_management';
 import { Datasource, Visualization, FramePublicAPI } from '../../types';
 import { DragDrop, DragContext } from '../../drag_drop';
@@ -41,7 +41,7 @@ export interface WorkspacePanelProps {
   >;
   framePublicAPI: FramePublicAPI;
   dispatch: (action: Action) => void;
-  ExpressionRenderer: ExpressionRenderer;
+  ExpressionRenderer: ReactExpressionRendererType;
   core: CoreStart | CoreSetup;
 }
 

@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { ExpressionRendererProps } from '../../../../../../../src/plugins/expressions/public';
+import { ReactExpressionRendererProps } from '../../../../../../../src/plugins/expressions/public';
 import { FramePublicAPI, TableSuggestion, Visualization } from '../../types';
 import {
   createMockVisualization,
@@ -29,7 +29,7 @@ describe('workspace_panel', () => {
   let mockVisualization2: jest.Mocked<Visualization>;
   let mockDatasource: DatasourceMock;
 
-  let expressionRendererMock: jest.Mock<React.ReactElement, [ExpressionRendererProps]>;
+  let expressionRendererMock: jest.Mock<React.ReactElement, [ReactExpressionRendererProps]>;
 
   let instance: ReactWrapper<WorkspacePanelProps>;
 
