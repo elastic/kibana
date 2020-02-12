@@ -5,7 +5,7 @@
  */
 import { ResolverQuery } from './base';
 
-export class RelatedEventsQuery extends ResolverQuery {
+export class ChildrenQuery extends ResolverQuery {
   protected legacyQuery(endpointID: string, uniquePIDs: string[], index: string) {
     return {
       body: this.paginateBy('endgame.serial_event_id', {
@@ -13,17 +13,16 @@ export class RelatedEventsQuery extends ResolverQuery {
           bool: {
             filter: [
               {
-                terms: { 'endgame.unique_pid': uniquePIDs },
+                terms: { 'endgame.unique_ppid': uniquePIDs },
               },
               {
                 term: { 'agent.id': endpointID },
               },
               {
-                bool: {
-                  must_not: {
-                    term: { 'event.category': 'process' },
-                  },
-                },
+                term: { 'event.category': 'process' },
+              },
+              {
+                term: { 'event.type': 'process_start' },
               },
             ],
           },
@@ -43,20 +42,19 @@ export class RelatedEventsQuery extends ResolverQuery {
                 bool: {
                   should: [
                     {
-                      terms: { 'endpoint.process.entity_id': entityIDs },
+                      terms: { 'endpoint.process.parent.entity_id': entityIDs },
                     },
                     {
-                      terms: { 'process.entity_id': entityIDs },
+                      terms: { 'process.parent.entity_id': entityIDs },
                     },
                   ],
                 },
               },
               {
-                bool: {
-                  must_not: {
-                    term: { 'event.category': 'process' },
-                  },
-                },
+                term: { 'event.category': 'process' },
+              },
+              {
+                term: { 'event.type': 'start' },
               },
             ],
           },

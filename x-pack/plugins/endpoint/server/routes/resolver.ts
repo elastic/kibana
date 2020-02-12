@@ -6,7 +6,8 @@
 
 import { IRouter } from 'kibana/server';
 import { EndpointAppContext } from '../types';
-import { handleEventsForProcess, validateEventsForProcess } from './resolver/events_for_process';
+import { handleEvents, validateEvents } from './resolver/events';
+import { handleChildren, validateChildren } from './resolver/children';
 
 export function registerResolverRoutes(router: IRouter, endpointAppContext: EndpointAppContext) {
   const log = endpointAppContext.logFactory.get('resolver');
@@ -14,9 +15,18 @@ export function registerResolverRoutes(router: IRouter, endpointAppContext: Endp
   router.get(
     {
       path: '/api/endpoint/resolver/{id}',
-      validate: validateEventsForProcess,
+      validate: validateEvents,
       options: { authRequired: true },
     },
-    handleEventsForProcess(log)
+    handleEvents(log)
+  );
+
+  router.get(
+    {
+      path: '/api/endpoint/resolver/{id}/children',
+      validate: validateChildren,
+      options: { authRequired: true },
+    },
+    handleChildren(log)
   );
 }

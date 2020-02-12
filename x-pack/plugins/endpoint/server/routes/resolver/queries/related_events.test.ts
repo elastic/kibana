@@ -10,17 +10,17 @@ describe('related events query', () => {
   it('generates the correct legacy queries', () => {
     const timestamp = new Date();
     expect(
-      new RelatedEventsQuery({ size: 1, timestamp, eventID: 'foo' }).build('endgame-5-awesome-id')
+      new RelatedEventsQuery('endgame-5-awesome-id', { size: 1, timestamp, eventID: 'foo' }).build()
     ).toStrictEqual({
       body: {
         query: {
           bool: {
             filter: [
               {
-                term: { 'endgame.unique_pid': '5' },
+                terms: { 'endgame.unique_pid': ['5'] },
               },
               {
-                match: { 'agent.id': 'awesome-id' },
+                term: { 'agent.id': 'awesome-id' },
               },
               {
                 bool: {
@@ -51,14 +51,23 @@ describe('related events query', () => {
     const timestamp = new Date();
 
     expect(
-      new RelatedEventsQuery({ size: 1, timestamp, eventID: 'bar' }).build('baz')
+      new RelatedEventsQuery('baz', { size: 1, timestamp, eventID: 'bar' }).build()
     ).toStrictEqual({
       body: {
         query: {
           bool: {
             filter: [
               {
-                match: { 'endpoint.process.entity_id': 'baz' },
+                bool: {
+                  should: [
+                    {
+                      terms: { 'endpoint.process.entity_id': ['baz'] },
+                    },
+                    {
+                      terms: { 'process.entity_id': ['baz'] },
+                    },
+                  ],
+                },
               },
               {
                 bool: {

@@ -6,17 +6,17 @@
 import { ResolverQuery } from './base';
 
 export class LifecycleQuery extends ResolverQuery {
-  protected legacyQuery(endpointID: string, uniquePID: string, index: string) {
+  protected legacyQuery(endpointID: string, uniquePIDs: string[], index: string) {
     return {
       body: {
         query: {
           bool: {
             filter: [
               {
-                term: { 'endgame.unique_pid': uniquePID },
+                terms: { 'endgame.unique_pid': uniquePIDs },
               },
               {
-                match: { 'agent.id': endpointID },
+                term: { 'agent.id': endpointID },
               },
               {
                 term: { 'event.category': 'process' },
@@ -30,14 +30,23 @@ export class LifecycleQuery extends ResolverQuery {
     };
   }
 
-  protected query(entityID: string, index: string) {
+  protected query(entityIDs: string[], index: string) {
     return {
       body: {
         query: {
           bool: {
             filter: [
               {
-                match: { 'endpoint.process.entity_id': entityID },
+                bool: {
+                  should: [
+                    {
+                      terms: { 'endpoint.process.entity_id': entityIDs },
+                    },
+                    {
+                      terms: { 'process.entity_id': entityIDs },
+                    },
+                  ],
+                },
               },
               {
                 term: { 'event.category': 'process' },
