@@ -46,10 +46,6 @@ export const SearchApiPage = () => (
             snippet: publicPlugin,
           },
           {
-            description: `i_search_setup.ts`,
-            snippet: '',
-          },
-          {
             description: 'i_search',
             snippet: publicSearch,
           },

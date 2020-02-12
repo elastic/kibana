@@ -123,10 +123,7 @@ export class EsSearchTest extends React.Component<Props, State> {
           codeSections={[
             {
               title: 'Public',
-              code: [
-                { description: 'es_search_service.ts', snippet: '' },
-                { description: 'es_search_strategy.ts', snippet: publicStrategy },
-              ],
+              code: [{ description: 'es_search_strategy.ts', snippet: publicStrategy }],
             },
             {
               title: 'Server',
