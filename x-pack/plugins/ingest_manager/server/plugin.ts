@@ -4,13 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Observable } from 'rxjs';
-import {
-  CoreSetup,
-  CoreStart,
-  Plugin,
-  PluginInitializerContext,
-  IClusterClient,
-} from 'kibana/server';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'kibana/server';
 import { LicensingPluginSetup } from '../../licensing/server';
 import { EncryptedSavedObjectsPluginStart } from '../../encrypted_saved_objects/server';
 import { SecurityPluginSetup } from '../../security/server';
@@ -27,7 +21,6 @@ export interface IngestManagerSetupDeps {
 }
 
 export interface IngestManagerAppContext {
-  clusterClient: IClusterClient;
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   security?: SecurityPluginSetup;
   config$?: Observable<IngestManagerConfigType>;
@@ -35,7 +28,6 @@ export interface IngestManagerAppContext {
 
 export class IngestManagerPlugin implements Plugin {
   private config$!: Observable<IngestManagerConfigType>;
-  private clusterClient!: IClusterClient;
   private security: SecurityPluginSetup | undefined;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
@@ -43,7 +35,6 @@ export class IngestManagerPlugin implements Plugin {
   }
 
   public async setup(core: CoreSetup, deps: IngestManagerSetupDeps) {
-    this.clusterClient = core.elasticsearch.dataClient;
     this.security = deps.security;
 
     // Register feature
@@ -97,7 +88,6 @@ export class IngestManagerPlugin implements Plugin {
     }
   ) {
     appContextService.start({
-      clusterClient: this.clusterClient,
       encryptedSavedObjects: plugins.encryptedSavedObjects,
       security: this.security,
       config$: this.config$,
