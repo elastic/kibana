@@ -163,8 +163,8 @@ export function combineStats(
  * @param {date} [end] The end time from which to get the telemetry data
  */
 export function ensureTimeSpan(
-  start: StatsCollectionConfig['start'],
-  end: StatsCollectionConfig['end']
+  start?: StatsCollectionConfig['start'],
+  end?: StatsCollectionConfig['end']
 ) {
   // We only care if we have a start date, because that's the limit that might make us lose the document
   if (start) {

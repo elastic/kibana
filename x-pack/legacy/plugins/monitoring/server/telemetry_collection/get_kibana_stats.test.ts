@@ -4,19 +4,27 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getUsageStats, combineStats, rollUpTotals, ensureTimeSpan } from '../get_kibana_stats';
-import expect from '@kbn/expect';
+import {
+  getUsageStats,
+  combineStats,
+  rollUpTotals,
+  ensureTimeSpan,
+  KibanaUsageStats,
+} from './get_kibana_stats';
+import { SearchResponse } from 'elasticsearch';
+import { KibanaPluginsStats } from './get_high_level_stats';
 
 describe('Get Kibana Stats', () => {
   describe('Make a map of usage stats for each cluster', () => {
-    it('passes through if there are no kibana instances', () => {
-      const rawStats = {};
-      expect(getUsageStats(rawStats)).to.eql({});
+    test('passes through if there are no kibana instances', () => {
+      const rawStats = {} as SearchResponse<KibanaUsageStats>;
+      const pluginStats = {} as SearchResponse<KibanaPluginsStats<any>>;
+      expect(getUsageStats(rawStats, pluginStats)).toStrictEqual({});
     });
 
     describe('with single cluster', () => {
       describe('single index', () => {
-        it('for a single unused instance', () => {
+        test('for a single unused instance', () => {
           const rawStats = {
             hits: {
               hits: [
@@ -39,7 +47,7 @@ describe('Get Kibana Stats', () => {
                 },
               ],
             },
-          };
+          } as any;
           const expected = {
             clusterone: {
               dashboard: { total: 0 },
@@ -53,10 +61,12 @@ describe('Get Kibana Stats', () => {
             },
           };
 
-          expect(getUsageStats(rawStats)).to.eql(expected);
+          const pluginStats = {} as SearchResponse<KibanaPluginsStats<any>>;
+
+          expect(getUsageStats(rawStats, pluginStats)).toStrictEqual(expected);
         });
 
-        it('for a single instance of active usage', () => {
+        test('for a single instance of active usage', () => {
           const rawStats = {
             hits: {
               hits: [
@@ -79,7 +89,7 @@ describe('Get Kibana Stats', () => {
                 },
               ],
             },
-          };
+          } as any;
           const expected = {
             clusterone: {
               dashboard: { total: 1 },
@@ -92,11 +102,71 @@ describe('Get Kibana Stats', () => {
               plugins: {},
             },
           };
-
-          expect(getUsageStats(rawStats)).to.eql(expected);
+          const pluginStats = {} as SearchResponse<KibanaPluginsStats<any>>;
+          expect(getUsageStats(rawStats, pluginStats)).toStrictEqual(expected);
         });
 
-        it('flattens x-pack stats', () => {
+        test('it merges the plugin stats and kibana', () => {
+          const rawStats = {
+            hits: {
+              hits: [
+                {
+                  _source: {
+                    cluster_uuid: 'clusterone',
+                    kibana_stats: {
+                      kibana: { version: '7.0.0-alpha1-test02' },
+                      usage: {
+                        dashboard: { total: 1 },
+                        visualization: { total: 3 },
+                        search: { total: 1 },
+                        index_pattern: { total: 1 },
+                        graph_workspace: { total: 1 },
+                        timelion_sheet: { total: 1 },
+                        index: '.kibana-test-01',
+                      },
+                    },
+                  },
+                },
+              ],
+            },
+          } as any;
+          const expected = {
+            clusterone: {
+              dashboard: { total: 1 },
+              visualization: { total: 3 },
+              search: { total: 1 },
+              index_pattern: { total: 1 },
+              graph_workspace: { total: 1 },
+              timelion_sheet: { total: 1 },
+              indices: 1,
+              plugins: {
+                'test-plugin': { test: 1, value: 'random' },
+              },
+            },
+          };
+          const pluginStats = ({
+            hits: {
+              hits: [
+                {
+                  _source: {
+                    cluster_uuid: 'clusterone',
+                    type: 'test-plugin',
+                    'test-plugin': {
+                      kibana: {
+                        uid: 'kibana-uid',
+                      },
+                      test: 1,
+                      value: 'random',
+                    },
+                  },
+                },
+              ],
+            },
+          } as unknown) as SearchResponse<KibanaPluginsStats<any>>;
+          expect(getUsageStats(rawStats, pluginStats)).toStrictEqual(expected);
+        });
+
+        test('flattens x-pack stats', () => {
           const rawStats = {
             hits: {
               hits: [
@@ -126,8 +196,10 @@ describe('Get Kibana Stats', () => {
                 },
               ],
             },
-          };
-          expect(getUsageStats(rawStats)).to.eql({
+          } as any;
+
+          const pluginStats = {} as SearchResponse<KibanaPluginsStats<any>>;
+          expect(getUsageStats(rawStats, pluginStats)).toStrictEqual({
             clusterone: {
               dashboard: { total: 1 },
               visualization: { total: 3 },
@@ -143,7 +215,7 @@ describe('Get Kibana Stats', () => {
       });
 
       describe('separate indices', () => {
-        it('with one unused instance', () => {
+        test('with one unused instance', () => {
           const rawStats = {
             hits: {
               hits: [
@@ -200,7 +272,7 @@ describe('Get Kibana Stats', () => {
                 },
               ],
             },
-          };
+          } as any;
           const expected = {
             clusterone: {
               dashboard: { total: 1 },
@@ -213,11 +285,11 @@ describe('Get Kibana Stats', () => {
               plugins: {},
             },
           };
-
-          expect(getUsageStats(rawStats)).to.eql(expected);
+          const pluginStats = {} as SearchResponse<KibanaPluginsStats<any>>;
+          expect(getUsageStats(rawStats, pluginStats)).toStrictEqual(expected);
         });
 
-        it('with all actively used instances', () => {
+        test('with all actively used instances', () => {
           const rawStats = {
             hits: {
               hits: [
@@ -274,7 +346,7 @@ describe('Get Kibana Stats', () => {
                 },
               ],
             },
-          };
+          } as any;
           const expected = {
             clusterone: {
               dashboard: { total: 4 },
@@ -287,15 +359,15 @@ describe('Get Kibana Stats', () => {
               plugins: {},
             },
           };
-
-          expect(getUsageStats(rawStats)).to.eql(expected);
+          const pluginStats = {} as SearchResponse<KibanaPluginsStats<any>>;
+          expect(getUsageStats(rawStats, pluginStats)).toStrictEqual(expected);
         });
       });
     });
 
     describe('with multiple clusters', () => {
       describe('separate indices', () => {
-        it('with all actively used instances', () => {
+        test('with all actively used instances', () => {
           const rawStats = {
             hits: {
               hits: [
@@ -369,7 +441,7 @@ describe('Get Kibana Stats', () => {
                 },
               ],
             },
-          };
+          } as any;
           const expected = {
             clusterone: {
               dashboard: { total: 4 },
@@ -392,29 +464,29 @@ describe('Get Kibana Stats', () => {
               plugins: {},
             },
           };
-
-          expect(getUsageStats(rawStats)).to.eql(expected);
+          const pluginStats = {} as SearchResponse<KibanaPluginsStats<any>>;
+          expect(getUsageStats(rawStats, pluginStats)).toStrictEqual(expected);
         });
       });
     });
   });
 
   describe('Combines usage stats with high-level stats', () => {
-    it('passes through if there are no kibana instances', () => {
+    test('passes through if there are no kibana instances', () => {
       const highLevelStats = {};
       const usageStats = {};
 
-      expect(combineStats(highLevelStats, usageStats)).to.eql({});
+      expect(combineStats(highLevelStats, usageStats)).toStrictEqual({});
     });
 
     describe('adds usage stats to high-level stats', () => {
-      it('for a single cluster', () => {
+      test('for a single cluster', () => {
         const highLevelStats = {
           clusterone: {
             count: 2,
             versions: [{ count: 2, version: '7.0.0-alpha1-test12' }],
           },
-        };
+        } as any;
         const usageStats = {
           clusterone: {
             dashboard: { total: 1 },
@@ -428,7 +500,7 @@ describe('Get Kibana Stats', () => {
           },
         };
 
-        expect(combineStats(highLevelStats, usageStats)).to.eql({
+        expect(combineStats(highLevelStats, usageStats)).toStrictEqual({
           clusterone: {
             count: 2,
             dashboard: { total: 1 },
@@ -444,7 +516,7 @@ describe('Get Kibana Stats', () => {
         });
       });
 
-      it('for multiple single clusters', () => {
+      test('for multiple single clusters', () => {
         const highLevelStats = {
           clusterone: {
             count: 2,
@@ -454,7 +526,7 @@ describe('Get Kibana Stats', () => {
             count: 1,
             versions: [{ count: 1, version: '7.0.0-alpha1-test14' }],
           },
-        };
+        } as any;
         const usageStats = {
           clusterone: {
             dashboard: { total: 1 },
@@ -478,7 +550,7 @@ describe('Get Kibana Stats', () => {
           },
         };
 
-        expect(combineStats(highLevelStats, usageStats)).to.eql({
+        expect(combineStats(highLevelStats, usageStats)).toStrictEqual({
           clusterone: {
             count: 2,
             dashboard: { total: 1 },
@@ -508,16 +580,16 @@ describe('Get Kibana Stats', () => {
     });
 
     describe('if usage stats are empty', () => {
-      it('returns just high-level stats', () => {
+      test('returns just high-level stats', () => {
         const highLevelStats = {
           clusterone: {
             count: 2,
             versions: [{ count: 2, version: '7.0.0-alpha1-test12' }],
           },
-        };
+        } as any;
         const usageStats = undefined;
 
-        expect(combineStats(highLevelStats, usageStats)).to.eql({
+        expect(combineStats(highLevelStats, usageStats)).toStrictEqual({
           clusterone: {
             count: 2,
             versions: [{ count: 2, version: '7.0.0-alpha1-test12' }],
@@ -528,64 +600,64 @@ describe('Get Kibana Stats', () => {
   });
 
   describe('Rolls up stats when there are multiple Kibana indices for a cluster', () => {
-    it('by combining the `total` fields where previous was 0', () => {
-      const rollUp = { my_field: { total: 0 } };
+    test('by combining the `total` fields where previous was 0', () => {
+      const rollUp = { my_field: { total: 0 } } as any;
       const addOn = { my_field: { total: 1 } };
 
-      expect(rollUpTotals(rollUp, addOn, 'my_field')).to.eql({ total: 1 });
+      expect(rollUpTotals(rollUp, addOn, 'my_field' as any)).toStrictEqual({ total: 1 });
     });
 
-    it('by combining the `total` fields with > 1 for previous and addOn', () => {
-      const rollUp = { my_field: { total: 1 } };
+    test('by combining the `total` fields with > 1 for previous and addOn', () => {
+      const rollUp = { my_field: { total: 1 } } as any;
       const addOn = { my_field: { total: 3 } };
 
-      expect(rollUpTotals(rollUp, addOn, 'my_field')).to.eql({ total: 4 });
+      expect(rollUpTotals(rollUp, addOn, 'my_field' as any)).toStrictEqual({ total: 4 });
     });
   });
 
   describe('Ensure minimum time difference', () => {
-    it('should return start and end as is when none are provided', () => {
+    test('should return start and end as is when none are provided', () => {
       const { start, end } = ensureTimeSpan(undefined, undefined);
-      expect(start).to.be.undefined;
-      expect(end).to.be.undefined;
+      expect(start).toBe(undefined);
+      expect(end).toBe(undefined);
     });
 
-    it('should return start and end as is when only end is provided', () => {
+    test('should return start and end as is when only end is provided', () => {
       const initialEnd = '2020-01-01T00:00:00Z';
       const { start, end } = ensureTimeSpan(undefined, initialEnd);
-      expect(start).to.be.undefined;
-      expect(end).to.be.equal(initialEnd);
+      expect(start).toBe(undefined);
+      expect(end).toEqual(initialEnd);
     });
 
-    it('should return start and end as is because they are already 24h away', () => {
+    test('should return start and end as is because they are already 24h away', () => {
       const initialStart = '2019-12-31T00:00:00Z';
       const initialEnd = '2020-01-01T00:00:00Z';
       const { start, end } = ensureTimeSpan(initialStart, initialEnd);
-      expect(start).to.be.equal(initialStart);
-      expect(end).to.be.equal(initialEnd);
+      expect(start).toEqual(initialStart);
+      expect(end).toEqual(initialEnd);
     });
 
-    it('should return start and end as is because they are already 24h+ away', () => {
+    test('should return start and end as is because they are already 24h+ away', () => {
       const initialStart = '2019-12-31T00:00:00Z';
       const initialEnd = '2020-01-01T01:00:00Z';
       const { start, end } = ensureTimeSpan(initialStart, initialEnd);
-      expect(start).to.be.equal(initialStart);
-      expect(end).to.be.equal(initialEnd);
+      expect(start).toEqual(initialStart);
+      expect(end).toEqual(initialEnd);
     });
 
-    it('should modify start to a date 24h before end', () => {
+    test('should modify start to a date 24h before end', () => {
       const initialStart = '2020-01-01T00:00:00.000Z';
       const initialEnd = '2020-01-01T01:00:00.000Z';
       const { start, end } = ensureTimeSpan(initialStart, initialEnd);
-      expect(start).to.be.equal('2019-12-31T01:00:00.000Z');
-      expect(end).to.be.equal(initialEnd);
+      expect(start).toEqual('2019-12-31T01:00:00.000Z');
+      expect(end).toEqual(initialEnd);
     });
 
-    it('should modify start to a date 24h before now', () => {
+    test('should modify start to a date 24h before now', () => {
       const initialStart = new Date().toISOString();
       const { start, end } = ensureTimeSpan(initialStart, undefined);
-      expect(start).to.not.be.equal(initialStart);
-      expect(end).to.be.undefined;
+      expect(start).not.toBe(initialStart);
+      expect(end).toBe(undefined);
     });
   });
 });

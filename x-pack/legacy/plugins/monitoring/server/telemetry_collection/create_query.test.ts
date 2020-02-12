@@ -4,14 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from '@kbn/expect';
 import { set } from 'lodash';
-import { createTypeFilter, createQuery } from '../create_query';
+import { createTypeFilter, createQuery } from './create_query';
 
 describe('Create Type Filter', () => {
   it('Builds a type filter syntax', () => {
     const typeFilter = createTypeFilter('my_type');
-    expect(typeFilter).to.eql({
+    expect(typeFilter).toStrictEqual({
       bool: { should: [{ term: { _type: 'my_type' } }, { term: { type: 'my_type' } }] },
     });
   });
@@ -36,7 +35,7 @@ describe('Create Query', () => {
         ],
       },
     };
-    expect(result).to.be.eql(expected);
+    expect(result).toStrictEqual(expected);
   });
 
   it('Uses `type` option to add type filter with minimal fields', () => {
@@ -47,7 +46,7 @@ describe('Create Query', () => {
       { term: { _type: 'test-type-yay' } },
       { term: { type: 'test-type-yay' } },
     ]);
-    expect(result).to.be.eql(expected);
+    expect(result).toStrictEqual(expected);
   });
 
   it('Uses `type` option to add type filter with all other option fields', () => {
@@ -77,6 +76,6 @@ describe('Create Query', () => {
         ],
       },
     };
-    expect(result).to.be.eql(expected);
+    expect(result).toStrictEqual(expected);
   });
 });
