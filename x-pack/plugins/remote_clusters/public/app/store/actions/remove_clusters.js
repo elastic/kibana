@@ -30,7 +30,7 @@ function getErrorTitle(count, name = null) {
     }
   } else {
     return i18n.translate('xpack.remoteClusters.removeAction.errorMultipleNotificationTitle', {
-      defaultMessage: `Error removing '{count}' remote clusters`,
+      defaultMessage: `Error removing {count} remote clusters`,
       values: { count },
     });
   }
@@ -55,7 +55,7 @@ export const removeClusters = names => async (dispatch, getState) => {
     const errorTitle = getErrorTitle(names.length, names[0]);
     toasts.addDanger({
       title: errorTitle,
-      text: error.body.message,
+      text: error.body?.message,
     });
   });
 

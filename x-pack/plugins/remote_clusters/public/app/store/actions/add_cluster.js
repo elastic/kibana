@@ -35,12 +35,12 @@ export const addCluster = cluster => async dispatch => {
     ]);
   } catch (error) {
     if (error) {
-      const { statusCode, data } = error;
+      const { body } = error;
 
-      // Expect an error in the shape provided by Angular's $http service.
-      if (data) {
-        // Some errors have statusCode directly available but some are under a data property.
-        if ((statusCode || (data && data.statusCode)) === 409) {
+      // Expect an error in the shape provided by http service.
+      if (body) {
+        const { statusCode, message } = body;
+        if (statusCode && statusCode === 409) {
           return dispatch({
             type: ADD_CLUSTER_FAILURE,
             payload: {
@@ -63,9 +63,8 @@ export const addCluster = cluster => async dispatch => {
             error: {
               message: i18n.translate('xpack.remoteClusters.addAction.failedDefaultErrorMessage', {
                 defaultMessage: 'Request failed with a {statusCode} error. {message}',
-                values: { statusCode, message: data.message },
+                values: { statusCode, message },
               }),
-              cause: data.cause,
             },
           },
         });

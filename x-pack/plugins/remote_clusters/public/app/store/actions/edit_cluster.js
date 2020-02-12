@@ -39,19 +39,19 @@ export const editCluster = cluster => async dispatch => {
     ]);
   } catch (error) {
     if (error) {
-      const { statusCode, data } = error;
+      const { body } = error;
 
-      // Expect an error in the shape provided by Angular's $http service.
-      if (data) {
+      // Expect an error in the shape provided by http service.
+      if (body) {
+        const { statusCode, message } = body;
         return dispatch({
           type: EDIT_CLUSTER_FAILURE,
           payload: {
             error: {
               message: i18n.translate('xpack.remoteClusters.editAction.failedDefaultErrorMessage', {
                 defaultMessage: 'Request failed with a {statusCode} error. {message}',
-                values: { statusCode, message: data.message },
+                values: { statusCode, message },
               }),
-              cause: data.cause,
             },
           },
         });

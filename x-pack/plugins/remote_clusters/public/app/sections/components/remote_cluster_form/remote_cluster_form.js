@@ -491,7 +491,7 @@ export class RemoteClusterForm extends Component {
 
       let errorBody;
 
-      if (cause) {
+      if (cause && Array.isArray(cause)) {
         if (cause.length === 1) {
           errorBody = <p>{cause[0]}</p>;
         } else {
