@@ -17,8 +17,15 @@
  * under the License.
  */
 
-import { ISearchGeneric } from './i_search';
+import { CoreStart } from 'kibana/public';
+import { DataPublicPluginStart } from '../../../src/plugins/data/public';
 
-export interface ISearchAppMountContext {
-  search: ISearchGeneric;
+export interface AppPluginStartDependencies {
+  data: DataPublicPluginStart;
+}
+
+export interface SearchBarComponentParams {
+  application: CoreStart['application'];
+  basename: string;
+  data: DataPublicPluginStart;
 }

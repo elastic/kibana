@@ -54,15 +54,16 @@ import { DEMO_SEARCH_STRATEGY, IDemoResponse } from '../common';
  * @param search - a search function to access other strategies that have already been registered.
  */
 export const demoClientSearchStrategyProvider: TSearchStrategyProvider<typeof DEMO_SEARCH_STRATEGY> = (
-  context: ISearchContext,
-  search: ISearchGeneric
+  context: ISearchContext
 ): ISearchStrategy<typeof DEMO_SEARCH_STRATEGY> => {
   return {
-    search: (request, options) =>
-      search(
+    search: (request, options) => {
+      const syncStrategyProvider = context.getSearchStrategy(SYNC_SEARCH_STRATEGY);
+      if (!syncStrategyProvider) throw new Error('Search strategy not found');
+      return syncStrategyProvider(context).search(
         { ...request, serverStrategy: DEMO_SEARCH_STRATEGY },
-        options,
-        SYNC_SEARCH_STRATEGY
-      ) as Observable<IDemoResponse>,
+        options
+      ) as Observable<IDemoResponse>;
+    },
   };
 };

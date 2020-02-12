@@ -20,8 +20,6 @@ import React from 'react';
 import { GuideSection } from './guide_section';
 
 // @ts-ignore
-import publicSetupContract from '!!raw-loader!./../../../src/plugins/data/public/search/i_search_setup';
-// @ts-ignore
 import publicSearchStrategy from '!!raw-loader!./../../../src/plugins/data/public/search/i_search_strategy';
 // @ts-ignore
 import publicSearch from '!!raw-loader!./../../../src/plugins/data/public/search/i_search';
@@ -49,7 +47,7 @@ export const SearchApiPage = () => (
           },
           {
             description: `i_search_setup.ts`,
-            snippet: publicSetupContract,
+            snippet: '',
           },
           {
             description: 'i_search',

@@ -25,4 +25,4 @@ export { DEMO_SEARCH_STRATEGY } from '../common';
 
 export const plugin: PluginInitializer<void, void> = (
   initializerContext: PluginInitializerContext
-) => new DemoDataPlugin(initializerContext);
+) => new DemoDataPlugin();

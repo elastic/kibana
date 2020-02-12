@@ -39,8 +39,6 @@ import serverPlugin from '!!raw-loader!./../../../src/plugins/data/server/search
 import serverStrategy from '!!raw-loader!./../../../src/plugins/data/server/search/es_search/es_search_strategy';
 
 // @ts-ignore
-import publicPlugin from '!!raw-loader!./../../../src/plugins/data/public/search/es_search/es_search_service';
-// @ts-ignore
 import publicStrategy from '!!raw-loader!./../../../src/plugins/data/public/search/es_search/es_search_strategy';
 
 interface Props {
@@ -126,7 +124,7 @@ export class EsSearchTest extends React.Component<Props, State> {
             {
               title: 'Public',
               code: [
-                { description: 'es_search_service.ts', snippet: publicPlugin },
+                { description: 'es_search_service.ts', snippet: '' },
                 { description: 'es_search_strategy.ts', snippet: publicStrategy },
               ],
             },
