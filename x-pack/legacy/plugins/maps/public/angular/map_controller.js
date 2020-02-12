@@ -66,7 +66,7 @@ app.controller(
   ($scope, $route, kbnUrl, localStorage, AppState, globalState) => {
     const { filterManager } = npStart.plugins.data.query;
     const savedMap = $route.current.locals.map;
-    const mapState = savedMap ? JSON.parse(savedMap.mapStateJSON) : null;
+    const mapState = savedMap && savedMap.mapStateJSON ? JSON.parse(savedMap.mapStateJSON) : null;
     $scope.screenTitle = savedMap.title;
     let unsubscribe;
     let initialLayerListConfig;
@@ -94,12 +94,13 @@ app.controller(
           refresh: forceRefresh,
         })
       );
-    }, 200);
+    }, 100);
 
     const subscriptions = new Subscription();
     subscriptions.add(
       timefilter.getRefreshIntervalUpdate$().subscribe({
         next: () => {
+          console.log('getRefreshIntervalUpdate$');
           store.dispatch(
             setRefreshConfig({
               isPaused: timefilter.getRefreshInterval().pause,
@@ -112,6 +113,7 @@ app.controller(
     subscriptions.add(
       filterManager.getUpdates$().subscribe({
         next: () => {
+          console.log('filterManager.getUpdates$');
           onQueryChange();
         },
       })
@@ -167,9 +169,11 @@ app.controller(
     /* End of Saved Queries */
 
     $scope.indexPatterns = [];
-    $scope.onQuerySubmit = function({ query }) {
+    $scope.onQuerySubmit = function({ query }, isUpdate) {
+      console.log('onQuerySubmit');
       $state.query = query;
-      onQueryChange(true);
+      const isRefresh = !isUpdate;
+      onQueryChange(isRefresh);
     };
 
     function addFilters(newFilters) {
