@@ -23,11 +23,6 @@ export class StopInput extends Component {
 
   componentDidMount() {
     this._isMounted = true;
-    this._prevFieldName = undefined;
-    this._loadFieldDataType();
-  }
-
-  componentDidUpdate() {
     this._loadFieldDataType();
   }
 
@@ -37,11 +32,6 @@ export class StopInput extends Component {
   }
 
   async _loadFieldDataType() {
-    if (this.props.field.getName() === this._prevFieldName) {
-      return;
-    }
-
-    this._prevFieldName = this.props.field.getName();
     const fieldDataType = await this.props.field.getDataType();
     if (this._isMounted) {
       this.setState({ fieldDataType });

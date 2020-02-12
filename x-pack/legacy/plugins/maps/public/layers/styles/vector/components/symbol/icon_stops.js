@@ -100,6 +100,7 @@ export function IconStops({
         />
       ) : (
         <StopInput
+          key={field.getName()} // force new component instance when field changes
           field={field}
           getValueSuggestions={getValueSuggestions}
           value={stop}

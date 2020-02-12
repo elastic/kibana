@@ -58,6 +58,7 @@ export const ColorStopsCategorical = ({
 
     return (
       <StopInput
+        key={field.getName()} // force new component instance when field changes
         field={field}
         getValueSuggestions={getValueSuggestions}
         value={stopValue}
