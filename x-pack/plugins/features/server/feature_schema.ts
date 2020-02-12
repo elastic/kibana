@@ -16,6 +16,7 @@ import { FeatureKibanaPrivileges } from '.';
 const prohibitedFeatureIds: Array<keyof UICapabilities> = ['catalogue', 'management', 'navLinks'];
 
 const featurePrivilegePartRegex = /^[a-zA-Z0-9_-]+$/;
+const subFeaturePrivilegePartRegex = /^[a-zA-Z0-9_-]+$/;
 const managementSectionIdRegex = /^[a-zA-Z0-9_-]+$/;
 export const uiCapabilitiesRegex = /^[a-zA-Z0-9:_-]+$/;
 
@@ -45,9 +46,13 @@ const privilegeSchema = Joi.object({
 });
 
 const subFeaturePrivilegeSchema = Joi.object({
-  id: Joi.string(),
-  name: Joi.string(),
-  includeIn: Joi.string().allow('all', 'read', 'none'),
+  id: Joi.string()
+    .regex(subFeaturePrivilegePartRegex)
+    .required(),
+  name: Joi.string().required(),
+  includeIn: Joi.string()
+    .allow('all', 'read', 'none')
+    .required(),
   management: managementSchema,
   catalogue: catalogueSchema,
   api: Joi.array().items(Joi.string()),
@@ -216,7 +221,11 @@ export function validateFeature(feature: IFeature) {
     validateManagementEntry(privilegeId, privilegeDefinition.management);
   });
 
-  // Seed this list with the "fixed" set of primary/minimal feature privileges
+  // Seed this list with the "fixed" set of primary/minimal feature privileges.
+  // This initial set is fixed because the primary feature privileges are currently required to
+  // be "all" and "read". Security, when enabled, will add "minimal" versions of these two privileges
+  // in order to support sub-feature privileges.
+  // This set should be reevaluated If/when the primary feature privileges support flexible definitions beyond "all" and "read".
   const seenPrivilegeIds: Set<string> = new Set(['all', 'read', 'minimal_all', 'minimal_read']);
 
   const subFeatureEntries = feature.subFeatures ?? [];

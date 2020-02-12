@@ -3,69 +3,17 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import { RawKibanaPrivileges } from '../../../../../../../common/model';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { Actions } from '../../../../../../../server/authorization';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { privilegesFactory } from '../../../../../../../server/authorization/privileges';
 import { Feature } from '../../../../../../../../features/public';
 import { KibanaPrivileges } from '../../../../model';
 
-function* subFeaturePrivilegeIterator(feature: Feature) {
-  for (const subFeature of feature.subFeatures || []) {
-    for (const group of subFeature.privilegeGroups) {
-      yield* group.privileges;
-    }
-  }
-}
-
 const createRawKibanaPrivileges = (features: Feature[]) => {
-  const raw: RawKibanaPrivileges = {
-    global: {
-      all: [],
-      read: [],
-    },
-    space: {
-      all: [],
-      read: [],
-    },
-    features: {},
-    reserved: {},
-  };
-
-  for (const feature of features) {
-    if (feature.privileges === 'none') continue;
-
-    const primaryAllAction = `feature/${feature.id}/allAction`;
-    const primaryReadAction = `feature/${feature.id}/readAction`;
-
-    raw.features[feature.id] = {
-      all: [primaryAllAction, primaryReadAction],
-      minimal_all: [primaryAllAction, primaryReadAction],
-      read: [primaryReadAction],
-      minimal_read: [primaryReadAction],
-    };
-
-    for (const subFeaturePrivilege of subFeaturePrivilegeIterator(feature)) {
-      const action = `feature/${feature.id}/subFeature/${subFeaturePrivilege.id}`;
-      if (subFeaturePrivilege.includeIn === 'all') {
-        raw.features[feature.id].all.push(action);
-      }
-      if (subFeaturePrivilege.includeIn === 'read') {
-        raw.features[feature.id].all.push(action);
-        raw.features[feature.id].read.push(action);
-      }
-      raw.features[feature.id][subFeaturePrivilege.id] = [action];
-    }
-
-    if (!feature.privileges.all.excludeFromBasePrivileges) {
-      raw.global.all.push(...raw.features[feature.id].all);
-      raw.space.all.push(...raw.features[feature.id].all);
-    }
-    if (!feature.privileges.read.excludeFromBasePrivileges) {
-      raw.global.read.push(...raw.features[feature.id].read);
-      raw.space.read.push(...raw.features[feature.id].read);
-    }
-  }
-
-  return raw;
+  return privilegesFactory(new Actions('unit_test_version'), {
+    getFeatures: () => features,
+  }).get();
 };
 
 export const createKibanaPrivileges = (features: Feature[]) => {
