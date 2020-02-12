@@ -27,7 +27,7 @@ import { updateColumnParam } from '../../state_helpers';
 import { OperationDefinition } from '.';
 import { FieldBasedIndexPatternColumn } from './column_types';
 import { autoIntervalFromDateRange } from '../../auto_date';
-import { AggregationRestrictions } from '../../../../../../../../src/plugins/data/public';
+import { IndexPatternAggRestrictions } from '../../../../../../../../src/plugins/data/public';
 
 const autoInterval = 'auto';
 const calendarOnlyIntervals = new Set(['w', 'M', 'q', 'y']);
@@ -322,7 +322,7 @@ function parseInterval(currentInterval: string) {
   };
 }
 
-function restrictedInterval(aggregationRestrictions?: Partial<AggregationRestrictions>) {
+function restrictedInterval(aggregationRestrictions?: Partial<IndexPatternAggRestrictions>) {
   if (!aggregationRestrictions || !aggregationRestrictions.date_histogram) {
     return;
   }
