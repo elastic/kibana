@@ -38,8 +38,8 @@ export const getAlertStateRoute = (router: IRouter, licenseState: LicenseState) 
       verifyApiAccess(licenseState);
       const alertsClient = context.alerting.getAlertsClient();
       const { id } = req.params;
-      await alertsClient.getAlertState({ id });
-      return res.noContent();
+      const state = await alertsClient.getAlertState({ id });
+      return state ? res.ok({ body: state }) : res.noContent();
     })
   );
 };

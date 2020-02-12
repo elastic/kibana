@@ -8,7 +8,7 @@ import { getAlertStateRoute } from './get_alert_state';
 import { mockRouter, RouterMock } from '../../../../../src/core/server/http/router/router.mock';
 import { mockLicenseState } from '../lib/license_state.mock';
 import { mockHandlerArguments } from './_mock_handler_arguments';
-import { SavedObjectsErrorHelpers } from 'kibana/server';
+import { SavedObjectsErrorHelpers } from 'src/core/server/saved_objects';
 
 jest.mock('../lib/license_api_access.ts', () => ({
   verifyApiAccess: jest.fn(),
@@ -43,13 +43,13 @@ describe('getAlertStateRoute', () => {
 
     getAlertStateRoute(router, licenseState);
 
-    const [config, handler] = router.post.mock.calls[0];
+    const [config, handler] = router.get.mock.calls[0];
 
     expect(config.path).toMatchInlineSnapshot(`"/api/alert/{id}/state"`);
     expect(config.options).toMatchInlineSnapshot(`
       Object {
         "tags": Array [
-          "access:alerting-all",
+          "access:alerting-read",
         ],
       }
     `);
@@ -68,7 +68,7 @@ describe('getAlertStateRoute', () => {
       ['ok']
     );
 
-    expect(await handler(context, req, res)).toEqual(undefined);
+    await handler(context, req, res);
 
     expect(alertsClient.getAlertState).toHaveBeenCalledTimes(1);
     expect(alertsClient.getAlertState.mock.calls[0]).toMatchInlineSnapshot(`
@@ -88,13 +88,13 @@ describe('getAlertStateRoute', () => {
 
     getAlertStateRoute(router, licenseState);
 
-    const [config, handler] = router.post.mock.calls[0];
+    const [config, handler] = router.get.mock.calls[0];
 
     expect(config.path).toMatchInlineSnapshot(`"/api/alert/{id}/state"`);
     expect(config.options).toMatchInlineSnapshot(`
       Object {
         "tags": Array [
-          "access:alerting-all",
+          "access:alerting-read",
         ],
       }
     `);
@@ -133,13 +133,13 @@ describe('getAlertStateRoute', () => {
 
     getAlertStateRoute(router, licenseState);
 
-    const [config, handler] = router.post.mock.calls[0];
+    const [config, handler] = router.get.mock.calls[0];
 
     expect(config.path).toMatchInlineSnapshot(`"/api/alert/{id}/state"`);
     expect(config.options).toMatchInlineSnapshot(`
       Object {
         "tags": Array [
-          "access:alerting-all",
+          "access:alerting-read",
         ],
       }
     `);
@@ -170,7 +170,5 @@ describe('getAlertStateRoute', () => {
         },
       ]
     `);
-
-    expect(res.notFound).toHaveBeenCalled();
   });
 });

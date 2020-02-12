@@ -110,7 +110,6 @@ describe('createAlertRoute', () => {
             ],
             "alertTypeId": "1",
             "consumer": "bar",
-            "enabled": true,
             "name": "abc",
             "params": Object {
               "bar": true,

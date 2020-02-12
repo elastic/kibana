@@ -47,7 +47,7 @@ export const updateAlertRoute = (router: IRouter, licenseState: LicenseState) =>
         params: paramSchema,
       },
       options: {
-        tags: ['access:actions-all'],
+        tags: ['access:alerting-all'],
       },
     },
     router.handleLegacyErrors(async function(

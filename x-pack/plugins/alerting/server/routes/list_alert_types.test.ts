@@ -50,7 +50,7 @@ describe('listAlertTypesRoute', () => {
       Object {
         "body": Array [
           Object {
-            "actionGroups": [],
+            "actionGroups": Array [],
             "id": "1",
             "name": "name",
           },

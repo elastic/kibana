@@ -78,17 +78,7 @@ describe('getAlertRoute', () => {
       },
       ['ok']
     );
-
-    expect(await handler(context, req, res)).toMatchInlineSnapshot(`
-      Object {
-        "body": Object {
-          "actionTypeId": "2",
-          "config": Object {},
-          "id": "1",
-          "name": "action name",
-        },
-      }
-    `);
+    await handler(context, req, res);
 
     expect(alertsClient.get).toHaveBeenCalledTimes(1);
     expect(alertsClient.get.mock.calls[0][0].id).toEqual('1');
