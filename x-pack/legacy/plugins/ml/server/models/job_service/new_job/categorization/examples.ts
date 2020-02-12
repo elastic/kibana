@@ -160,7 +160,7 @@ export function categorizationExamplesProvider(
     end: number,
     analyzer: CategorizationAnalyzer
   ) {
-    // due to the use of the _analyse endpoint which is called by the kibana user,
+    // due to the use of the _analyze endpoint which is called by the kibana user,
     // basic job creation privileges are required to use this endpoint
     if ((await hasPermissionToCreateJobs()) === false) {
       throw Boom.forbidden('Insufficient privileges, the machine_learning_admin role is required.');
