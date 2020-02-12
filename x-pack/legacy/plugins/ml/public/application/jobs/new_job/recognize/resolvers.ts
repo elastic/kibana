@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import chrome from 'ui/chrome';
 import { i18n } from '@kbn/i18n';
-import { toastNotifications } from 'ui/notify';
+import { getToastNotifications, getSavedObjectsClient } from '../../../util/dependency_cache';
 import { mlJobService } from '../../../services/job_service';
 import { ml } from '../../../services/ml_api_service';
 import { KibanaObjects } from './page';
@@ -36,6 +35,7 @@ export function checkViewOrCreateJobs(moduleId: string, indexPatternId: string):
       .catch((err: Error) => {
         // eslint-disable-next-line no-console
         console.error(`Error checking whether jobs in module ${moduleId} exists`, err);
+        const toastNotifications = getToastNotifications();
         toastNotifications.addWarning({
           title: i18n.translate('xpack.ml.newJob.recognize.moduleCheckJobsExistWarningTitle', {
             defaultMessage: 'Error checking module {moduleId}',
@@ -57,7 +57,7 @@ export function checkViewOrCreateJobs(moduleId: string, indexPatternId: string):
  * Gets kibana objects with an existence check.
  */
 export const checkForSavedObjects = async (objects: KibanaObjects): Promise<KibanaObjects> => {
-  const savedObjectsClient = chrome.getSavedObjectsClient();
+  const savedObjectsClient = getSavedObjectsClient();
   try {
     return await Object.keys(objects).reduce(async (prevPromise, type) => {
       const acc = await prevPromise;

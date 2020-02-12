@@ -19,6 +19,7 @@
 
 import _, { uniq } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { EUI_MODAL_CANCEL_BUTTON } from '@elastic/eui';
 import React from 'react';
 import angular from 'angular';
 
@@ -27,15 +28,9 @@ import { map } from 'rxjs/operators';
 import { History } from 'history';
 import { DashboardEmptyScreen, DashboardEmptyScreenProps } from './dashboard_empty_screen';
 
+import { migrateLegacyQuery, SavedObjectSaveOpts, subscribeWithScope } from '../legacy_imports';
 import {
-  ConfirmationButtonTypes,
-  migrateLegacyQuery,
-  SavedObjectSaveOpts,
-  subscribeWithScope,
-} from '../legacy_imports';
-import {
-  COMPARE_ALL_OPTIONS,
-  compareFilters,
+  esFilters,
   IndexPattern,
   IndexPatternsContract,
   Query,
@@ -63,7 +58,7 @@ import {
   openAddPanelFlyout,
   ViewMode,
 } from '../../../../embeddable_api/public/np_ready/public';
-import { ConfirmModalFn, NavAction, SavedDashboardPanel } from './types';
+import { NavAction, SavedDashboardPanel } from './types';
 
 import { showOptionsPopover } from './top_nav/show_options_popover';
 import { DashboardSaveModal } from './top_nav/save_modal';
@@ -82,14 +77,14 @@ import {
   removeQueryParam,
   unhashUrl,
 } from '../../../../../../plugins/kibana_utils/public';
+import { KibanaLegacyStart } from '../../../../../../plugins/kibana_legacy/public';
 
 export interface DashboardAppControllerDependencies extends RenderDeps {
   $scope: DashboardAppScope;
   $route: any;
   $routeParams: any;
   indexPatterns: IndexPatternsContract;
-  dashboardConfig: any;
-  confirmModal: ConfirmModalFn;
+  dashboardConfig: KibanaLegacyStart['dashboardConfig'];
   history: History;
   kbnUrlStateStorage: IKbnUrlStateStorage;
 }
@@ -107,7 +102,6 @@ export class DashboardAppController {
     dashboardConfig,
     localStorage,
     indexPatterns,
-    confirmModal,
     savedQueryService,
     embeddables,
     share,
@@ -324,10 +318,10 @@ export class DashboardAppController {
             // appState.save which will cause refreshDashboardContainer to be called.
 
             if (
-              !compareFilters(
+              !esFilters.compareFilters(
                 container.getInput().filters,
                 queryFilter.getFilters(),
-                COMPARE_ALL_OPTIONS
+                esFilters.COMPARE_ALL_OPTIONS
               )
             ) {
               // Add filters modifies the object passed to it, hence the clone deep.
@@ -427,7 +421,11 @@ export class DashboardAppController {
 
       // Filters shouldn't  be compared using regular isEqual
       if (
-        !compareFilters(containerInput.filters, appStateDashboardInput.filters, COMPARE_ALL_OPTIONS)
+        !esFilters.compareFilters(
+          containerInput.filters,
+          appStateDashboardInput.filters,
+          esFilters.COMPARE_ALL_OPTIONS
+        )
       ) {
         differences.filters = appStateDashboardInput.filters;
       }
@@ -634,27 +632,31 @@ export class DashboardAppController {
         }
       }
 
-      confirmModal(
-        i18n.translate('kbn.dashboard.changeViewModeConfirmModal.discardChangesDescription', {
-          defaultMessage: `Once you discard your changes, there's no getting them back.`,
-        }),
-        {
-          onConfirm: revertChangesAndExitEditMode,
-          onCancel: _.noop,
-          confirmButtonText: i18n.translate(
-            'kbn.dashboard.changeViewModeConfirmModal.confirmButtonLabel',
-            { defaultMessage: 'Discard changes' }
-          ),
-          cancelButtonText: i18n.translate(
-            'kbn.dashboard.changeViewModeConfirmModal.cancelButtonLabel',
-            { defaultMessage: 'Continue editing' }
-          ),
-          defaultFocusedButton: ConfirmationButtonTypes.CANCEL,
-          title: i18n.translate('kbn.dashboard.changeViewModeConfirmModal.discardChangesTitle', {
-            defaultMessage: 'Discard changes to dashboard?',
+      overlays
+        .openConfirm(
+          i18n.translate('kbn.dashboard.changeViewModeConfirmModal.discardChangesDescription', {
+            defaultMessage: `Once you discard your changes, there's no getting them back.`,
           }),
-        }
-      );
+          {
+            confirmButtonText: i18n.translate(
+              'kbn.dashboard.changeViewModeConfirmModal.confirmButtonLabel',
+              { defaultMessage: 'Discard changes' }
+            ),
+            cancelButtonText: i18n.translate(
+              'kbn.dashboard.changeViewModeConfirmModal.cancelButtonLabel',
+              { defaultMessage: 'Continue editing' }
+            ),
+            defaultFocusedButton: EUI_MODAL_CANCEL_BUTTON,
+            title: i18n.translate('kbn.dashboard.changeViewModeConfirmModal.discardChangesTitle', {
+              defaultMessage: 'Discard changes to dashboard?',
+            }),
+          }
+        )
+        .then(isConfirmed => {
+          if (isConfirmed) {
+            revertChangesAndExitEditMode();
+          }
+        });
     };
 
     /**

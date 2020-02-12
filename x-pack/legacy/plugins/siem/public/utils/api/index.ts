@@ -8,6 +8,7 @@ export interface MessageBody {
   error?: string;
   message?: string;
   statusCode?: number;
+  status_code?: number;
 }
 
 export const parseJsonFromBody = async (response: Response): Promise<MessageBody | null> => {
