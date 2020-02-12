@@ -86,6 +86,7 @@ export const security = kibana =>
             tenant: server.newPlatform.setup.core.http.basePath.serverBasePath,
           },
           enableSpaceAwarePrivileges: server.config().get('xpack.spaces.enabled'),
+          logoutUrl: `${server.newPlatform.setup.core.http.basePath.serverBasePath}/logout`,
         };
       },
     },
