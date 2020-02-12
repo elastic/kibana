@@ -28,17 +28,17 @@ import {
   MetaConversion,
   MessageConversion,
   PidConversion,
-  TimestampConversion,
+  DateConversion,
 } from './conversions';
 
 /**
  * Default pattern used by PatternLayout if it's not overridden in the configuration.
  */
-const DEFAULT_PATTERN = `[%timestamp][%level][%context]%meta %message`;
+const DEFAULT_PATTERN = `[%date][%level][%context]%meta %message`;
 
 export const patternSchema = schema.string({
   validate: string => {
-    TimestampConversion.validate!(string);
+    DateConversion.validate!(string);
   },
 });
 
@@ -54,7 +54,7 @@ const conversions: Conversion[] = [
   LevelConversion,
   MetaConversion,
   PidConversion,
-  TimestampConversion,
+  DateConversion,
 ];
 
 /** @internal */

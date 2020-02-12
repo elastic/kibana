@@ -207,31 +207,31 @@ describe('format', () => {
 
     describe('supports specifying a predefined format', () => {
       it('ISO8601', () => {
-        const layout = new PatternLayout('[%timestamp{ISO8601}][%context]');
+        const layout = new PatternLayout('[%date{ISO8601}][%context]');
 
         expect(layout.format(record)).toBe('[2012-02-01T14:30:22.011Z][context]');
       });
 
       it('ISO8601_TZ', () => {
-        const layout = new PatternLayout('[%timestamp{ISO8601_TZ}][%context]');
+        const layout = new PatternLayout('[%date{ISO8601_TZ}][%context]');
 
         expect(layout.format(record)).toBe('[2012-02-01T09:30:22.011-05:00][context]');
       });
 
       it('ABSOLUTE', () => {
-        const layout = new PatternLayout('[%timestamp{ABSOLUTE}][%context]');
+        const layout = new PatternLayout('[%date{ABSOLUTE}][%context]');
 
         expect(layout.format(record)).toBe('[09:30:22.011][context]');
       });
 
       it('UNIX', () => {
-        const layout = new PatternLayout('[%timestamp{UNIX}][%context]');
+        const layout = new PatternLayout('[%date{UNIX}][%context]');
 
         expect(layout.format(record)).toBe('[1328106622][context]');
       });
 
       it('UNIX_MILLIS', () => {
-        const layout = new PatternLayout('[%timestamp{UNIX_MILLIS}][%context]');
+        const layout = new PatternLayout('[%date{UNIX_MILLIS}][%context]');
 
         expect(layout.format(record)).toBe('[1328106622011][context]');
       });
@@ -239,40 +239,38 @@ describe('format', () => {
 
     describe('supports specifying a predefined format and timezone', () => {
       it('ISO8601', () => {
-        const layout = new PatternLayout('[%timestamp{ISO8601}{America/Los_Angeles}][%context]');
+        const layout = new PatternLayout('[%date{ISO8601}{America/Los_Angeles}][%context]');
 
         expect(layout.format(record)).toBe('[2012-02-01T14:30:22.011Z][context]');
       });
 
       it('ISO8601_TZ', () => {
-        const layout = new PatternLayout('[%timestamp{ISO8601_TZ}{America/Los_Angeles}][%context]');
+        const layout = new PatternLayout('[%date{ISO8601_TZ}{America/Los_Angeles}][%context]');
 
         expect(layout.format(record)).toBe('[2012-02-01T06:30:22.011-08:00][context]');
       });
 
       it('ABSOLUTE', () => {
-        const layout = new PatternLayout('[%timestamp{ABSOLUTE}{America/Los_Angeles}][%context]');
+        const layout = new PatternLayout('[%date{ABSOLUTE}{America/Los_Angeles}][%context]');
 
         expect(layout.format(record)).toBe('[06:30:22.011][context]');
       });
 
       it('UNIX', () => {
-        const layout = new PatternLayout('[%timestamp{UNIX}{America/Los_Angeles}][%context]');
+        const layout = new PatternLayout('[%date{UNIX}{America/Los_Angeles}][%context]');
 
         expect(layout.format(record)).toBe('[1328106622][context]');
       });
 
       it('UNIX_MILLIS', () => {
-        const layout = new PatternLayout(
-          '[%timestamp{UNIX_MILLIS}{America/Los_Angeles}][%context]'
-        );
+        const layout = new PatternLayout('[%date{UNIX_MILLIS}{America/Los_Angeles}][%context]');
 
         expect(layout.format(record)).toBe('[1328106622011][context]');
       });
     });
     it('formats several conversions patterns correctly', () => {
       const layout = new PatternLayout(
-        '[%timestamp{ABSOLUTE}{America/Los_Angeles}][%context][%timestamp{UNIX}]'
+        '[%date{ABSOLUTE}{America/Los_Angeles}][%context][%date{UNIX}]'
       );
 
       expect(layout.format(record)).toBe('[06:30:22.011][context][1328106622]');
@@ -282,46 +280,44 @@ describe('format', () => {
 
 describe('schema', () => {
   describe('pattern', () => {
-    describe('%timestamp', () => {
-      it('does not fail when %timestamp not present', () => {
+    describe('%date', () => {
+      it('does not fail when %date not present', () => {
         expect(patternSchema.validate('')).toBe('');
         expect(patternSchema.validate('{pid}')).toBe('{pid}');
       });
 
-      it('does not fail on %timestamp without params', () => {
-        expect(patternSchema.validate('%timestamp')).toBe('%timestamp');
-        expect(patternSchema.validate('%timestamp')).toBe('%timestamp');
-        expect(patternSchema.validate('{%timestamp}')).toBe('{%timestamp}');
-        expect(patternSchema.validate('%timestamp%timestamp')).toBe('%timestamp%timestamp');
+      it('does not fail on %date without params', () => {
+        expect(patternSchema.validate('%date')).toBe('%date');
+        expect(patternSchema.validate('%date')).toBe('%date');
+        expect(patternSchema.validate('{%date}')).toBe('{%date}');
+        expect(patternSchema.validate('%date%date')).toBe('%date%date');
       });
 
-      it('does not fail on %timestamp with predefined date format', () => {
-        expect(patternSchema.validate('%timestamp{ISO8601}')).toBe('%timestamp{ISO8601}');
+      it('does not fail on %date with predefined date format', () => {
+        expect(patternSchema.validate('%date{ISO8601}')).toBe('%date{ISO8601}');
       });
 
-      it('does not fail on %timestamp with predefined date format and valid timezone', () => {
-        expect(patternSchema.validate('%timestamp{ISO8601_TZ}{Europe/Berlin}')).toBe(
-          '%timestamp{ISO8601_TZ}{Europe/Berlin}'
+      it('does not fail on %date with predefined date format and valid timezone', () => {
+        expect(patternSchema.validate('%date{ISO8601_TZ}{Europe/Berlin}')).toBe(
+          '%date{ISO8601_TZ}{Europe/Berlin}'
         );
       });
 
-      it('fails on %timestamp with unknown date format', () => {
-        expect(() =>
-          patternSchema.validate('%timestamp{HH:MM:SS}')
-        ).toThrowErrorMatchingInlineSnapshot(
+      it('fails on %date with unknown date format', () => {
+        expect(() => patternSchema.validate('%date{HH:MM:SS}')).toThrowErrorMatchingInlineSnapshot(
           `"Date format expected one of ISO8601, ISO8601_TZ, ABSOLUTE, UNIX, UNIX_MILLIS, but given: HH:MM:SS"`
         );
       });
 
-      it('fails on %timestamp with predefined date format and invalid timezone', () => {
+      it('fails on %date with predefined date format and invalid timezone', () => {
         expect(() =>
-          patternSchema.validate('%timestamp{ISO8601_TZ}{Europe/Kibana}')
+          patternSchema.validate('%date{ISO8601_TZ}{Europe/Kibana}')
         ).toThrowErrorMatchingInlineSnapshot(`"Unknown timezone: Europe/Kibana"`);
       });
 
-      it('validates several %timestamp in pattern', () => {
+      it('validates several %date in pattern', () => {
         expect(() =>
-          patternSchema.validate('%timestamp{ISO8601_TZ}{Europe/Berlin}%message%timestamp{HH}')
+          patternSchema.validate('%date{ISO8601_TZ}{Europe/Berlin}%message%date{HH}')
         ).toThrowErrorMatchingInlineSnapshot(
           `"Date format expected one of ISO8601, ISO8601_TZ, ABSOLUTE, UNIX, UNIX_MILLIS, but given: HH"`
         );

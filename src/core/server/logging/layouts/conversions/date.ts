@@ -22,7 +22,7 @@ import { last } from 'lodash';
 import { Conversion } from './type';
 import { LogRecord } from '../../log_record';
 
-const timestampRegExp = /%timestamp({(?<format>[^}]+)})?({(?<timezone>[^}]+)})?/g;
+const dateRegExp = /%date({(?<format>[^}]+)})?({(?<timezone>[^}]+)})?/g;
 
 const formats = {
   ISO8601: 'ISO8601',
@@ -67,7 +67,7 @@ function validateTimezone(timezone: string) {
 }
 
 function validate(rawString: string) {
-  for (const matched of rawString.matchAll(timestampRegExp)) {
+  for (const matched of rawString.matchAll(dateRegExp)) {
     const { format, timezone } = matched.groups!;
 
     if (format) {
@@ -79,8 +79,8 @@ function validate(rawString: string) {
   }
 }
 
-export const TimestampConversion: Conversion = {
-  pattern: timestampRegExp,
+export const DateConversion: Conversion = {
+  pattern: dateRegExp,
   convert(record: LogRecord, highlight: boolean, ...matched: any[]) {
     const groups: Record<string, string | undefined> = last(matched);
     const { format, timezone } = groups;

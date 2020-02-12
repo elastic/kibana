@@ -23,4 +23,4 @@ export { LevelConversion } from './level';
 export { MessageConversion } from './message';
 export { MetaConversion } from './meta';
 export { PidConversion } from './pid';
-export { TimestampConversion } from './timestamp';
+export { DateConversion } from './date';
