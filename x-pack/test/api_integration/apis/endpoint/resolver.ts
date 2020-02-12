@@ -40,7 +40,8 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
         .get(`/api/endpoint/resolver/${rootEntityID}?after=t7QkNnABvfrOPnsMY1cl`)
         .set(commonHeaders)
         .expect(200);
-      expect(body.pagination.total).to.eql(1);
+      // TODO it's returning 1?
+      expect(body.pagination.total).to.eql(0);
       expect(body.pagination.next).to.eql(null);
     });
     it('should return the first page of information when the cursor is in valid', async () => {
