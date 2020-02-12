@@ -88,7 +88,7 @@ function getNavLinks(uiExports: LegacyUiExports, pluginSpecs: LegacyPluginSpec[]
       disableSubUrlTracking: spec.disableSubUrlTracking,
       icon: spec.icon,
       euiIconType: spec.euiIconType,
-      linkToLastSub: 'linkToLastSubUrl' in spec ? spec.linkToLastSubUrl : false,
+      linkToLastSubUrl: 'linkToLastSubUrl' in spec ? spec.linkToLastSubUrl : false,
       hidden: 'hidden' in spec ? spec.hidden : false,
       disabled: 'disabled' in spec ? spec.disabled : false,
       tooltip: spec.tooltip || '',
