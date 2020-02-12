@@ -222,6 +222,42 @@ describe('Lens App', () => {
             "savedQuery": undefined,
           },
         ],
+        Array [
+          <div
+            class="lnsApp__frame"
+          />,
+          Object {
+            "dateRange": Object {
+              "fromDate": "now-7d",
+              "toDate": "now",
+            },
+            "doc": undefined,
+            "filters": Array [
+              Object {
+                "$state": Object {
+                  "store": "globalState",
+                },
+                "meta": Object {
+                  "alias": null,
+                  "disabled": false,
+                  "negate": false,
+                },
+                "query": Object {
+                  "match_phrase": Object {
+                    "global": "yes",
+                  },
+                },
+              },
+            ],
+            "onChange": [Function],
+            "onError": [Function],
+            "query": Object {
+              "language": "kuery",
+              "query": "",
+            },
+            "savedQuery": undefined,
+          },
+        ],
       ]
     `);
   });
