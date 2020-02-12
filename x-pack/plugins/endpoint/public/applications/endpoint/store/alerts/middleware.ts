@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import qs from 'querystring';
+import { parse } from 'query-string';
 import { HttpFetchQuery } from 'src/core/public';
 import { AppAction } from '../action';
 import { MiddlewareFactory, AlertListData } from '../../types';
 
 export const alertMiddlewareFactory: MiddlewareFactory = coreStart => {
-  const qp = qs.parse(window.location.search.slice(1));
+  const qp = parse(window.location.search.slice(1), { sort: false });
 
   return api => next => async (action: AppAction) => {
     next(action);
