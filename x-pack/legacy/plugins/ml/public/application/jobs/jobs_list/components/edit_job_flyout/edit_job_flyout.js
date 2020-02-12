@@ -27,10 +27,11 @@ import { saveJob } from './edit_utils';
 import { loadFullJob } from '../utils';
 import { validateModelMemoryLimit, validateGroupNames, isValidCustomUrls } from '../validate_job';
 import { mlMessageBarService } from '../../../../components/messagebar';
-import { toastNotifications } from 'ui/notify';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { withKibana } from '../../../../../../../../../../src/plugins/kibana_react/public';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
-class EditJobFlyoutUI extends Component {
+export class EditJobFlyoutUI extends Component {
   _initialJobFormState = null;
 
   constructor(props) {
@@ -175,11 +176,13 @@ class EditJobFlyoutUI extends Component {
 
     if (jobDetails.jobGroups !== undefined) {
       if (jobDetails.jobGroups.some(j => this.props.allJobIds.includes(j))) {
-        jobGroupsValidationError = this.props.intl.formatMessage({
-          id: 'xpack.ml.jobsList.editJobFlyout.groupsAndJobsHasSameIdErrorMessage',
-          defaultMessage:
-            'A job with this ID already exists. Groups and jobs cannot use the same ID.',
-        });
+        jobGroupsValidationError = i18n.translate(
+          'xpack.ml.jobsList.editJobFlyout.groupsAndJobsHasSameIdErrorMessage',
+          {
+            defaultMessage:
+              'A job with this ID already exists. Groups and jobs cannot use the same ID.',
+          }
+        );
       } else {
         jobGroupsValidationError = validateGroupNames(jobDetails.jobGroups).message;
       }
@@ -229,34 +232,29 @@ class EditJobFlyoutUI extends Component {
       customUrls: this.state.jobCustomUrls,
     };
 
+    const { toasts } = this.props.kibana.services.notifications;
     saveJob(this.state.job, newJobData)
       .then(() => {
-        toastNotifications.addSuccess(
-          this.props.intl.formatMessage(
-            {
-              id: 'xpack.ml.jobsList.editJobFlyout.changesSavedNotificationMessage',
-              defaultMessage: 'Changes to {jobId} saved',
-            },
-            {
+        toasts.addSuccess(
+          i18n.translate('xpack.ml.jobsList.editJobFlyout.changesSavedNotificationMessage', {
+            defaultMessage: 'Changes to {jobId} saved',
+            values: {
               jobId: this.state.job.job_id,
-            }
-          )
+            },
+          })
         );
         this.refreshJobs();
         this.closeFlyout(true);
       })
       .catch(error => {
         console.error(error);
-        toastNotifications.addDanger(
-          this.props.intl.formatMessage(
-            {
-              id: 'xpack.ml.jobsList.editJobFlyout.changesNotSavedNotificationMessage',
-              defaultMessage: 'Could not save changes to {jobId}',
-            },
-            {
+        toasts.addDanger(
+          i18n.translate('xpack.ml.jobsList.editJobFlyout.changesNotSavedNotificationMessage', {
+            defaultMessage: 'Could not save changes to {jobId}',
+            values: {
               jobId: this.state.job.job_id,
-            }
-          )
+            },
+          })
         );
         mlMessageBarService.notify.error(error);
       });
@@ -286,13 +284,10 @@ class EditJobFlyoutUI extends Component {
         isValidJobCustomUrls,
       } = this.state;
 
-      const { intl } = this.props;
-
       const tabs = [
         {
           id: 'job-details',
-          name: intl.formatMessage({
-            id: 'xpack.ml.jobsList.editJobFlyout.jobDetailsTitle',
+          name: i18n.translate('xpack.ml.jobsList.editJobFlyout.jobDetailsTitle', {
             defaultMessage: 'Job details',
           }),
           content: (
@@ -308,8 +303,7 @@ class EditJobFlyoutUI extends Component {
         },
         {
           id: 'detectors',
-          name: intl.formatMessage({
-            id: 'xpack.ml.jobsList.editJobFlyout.detectorsTitle',
+          name: i18n.translate('xpack.ml.jobsList.editJobFlyout.detectorsTitle', {
             defaultMessage: 'Detectors',
           }),
           content: (
@@ -322,8 +316,7 @@ class EditJobFlyoutUI extends Component {
         },
         {
           id: 'datafeed',
-          name: intl.formatMessage({
-            id: 'xpack.ml.jobsList.editJobFlyout.datafeedTitle',
+          name: i18n.translate('xpack.ml.jobsList.editJobFlyout.datafeedTitle', {
             defaultMessage: 'Datafeed',
           }),
           content: (
@@ -339,8 +332,7 @@ class EditJobFlyoutUI extends Component {
         },
         {
           id: 'custom-urls',
-          name: intl.formatMessage({
-            id: 'xpack.ml.jobsList.editJobFlyout.customUrlsTitle',
+          name: i18n.translate('xpack.ml.jobsList.editJobFlyout.customUrlsTitle', {
             defaultMessage: 'Custom URLs',
           }),
           content: (
@@ -463,4 +455,4 @@ EditJobFlyoutUI.propTypes = {
   allJobIds: PropTypes.array.isRequired,
 };
 
-export const EditJobFlyout = injectI18n(EditJobFlyoutUI);
+export const EditJobFlyout = withKibana(EditJobFlyoutUI);

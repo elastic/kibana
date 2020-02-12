@@ -13,7 +13,7 @@ import { actionTypeRegistryMock } from '../action_type_registry.mock';
 import { actionExecutorMock } from './action_executor.mock';
 import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/mocks';
 import { savedObjectsClientMock, loggingServiceMock } from 'src/core/server/mocks';
-import { createEventLoggerMock } from '../../../event_log/server/event_logger.mock';
+import { eventLoggerMock } from '../../../event_log/server/mocks';
 
 const spaceIdToNamespace = jest.fn();
 const actionTypeRegistry = actionTypeRegistryMock.create();
@@ -59,7 +59,7 @@ const actionExecutorInitializerParams = {
   getServices: jest.fn().mockReturnValue(services),
   actionTypeRegistry,
   encryptedSavedObjectsPlugin: mockedEncryptedSavedObjectsPlugin,
-  eventLogger: createEventLoggerMock(),
+  eventLogger: eventLoggerMock.create(),
 };
 const taskRunnerFactoryInitializerParams = {
   spaceIdToNamespace,
@@ -78,14 +78,18 @@ beforeEach(() => {
 });
 
 test(`throws an error if factory isn't initialized`, () => {
-  const factory = new TaskRunnerFactory(new ActionExecutor());
+  const factory = new TaskRunnerFactory(
+    new ActionExecutor({ isESOUsingEphemeralEncryptionKey: false })
+  );
   expect(() =>
     factory.create({ taskInstance: mockedTaskInstance })
   ).toThrowErrorMatchingInlineSnapshot(`"TaskRunnerFactory not initialized"`);
 });
 
 test(`throws an error if factory is already initialized`, () => {
-  const factory = new TaskRunnerFactory(new ActionExecutor());
+  const factory = new TaskRunnerFactory(
+    new ActionExecutor({ isESOUsingEphemeralEncryptionKey: false })
+  );
   factory.initialize(taskRunnerFactoryInitializerParams);
   expect(() =>
     factory.initialize(taskRunnerFactoryInitializerParams)
