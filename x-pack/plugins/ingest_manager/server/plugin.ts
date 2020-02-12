@@ -11,7 +11,7 @@ import {
   PluginInitializerContext,
   IClusterClient,
 } from 'kibana/server';
-import { LicensingPluginSetup, ILicense } from '../../licensing/server';
+import { LicensingPluginSetup } from '../../licensing/server';
 import { EncryptedSavedObjectsPluginStart } from '../../encrypted_saved_objects/server';
 import { SecurityPluginSetup } from '../../security/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
@@ -30,12 +30,10 @@ export interface IngestManagerAppContext {
   clusterClient: IClusterClient;
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   security?: SecurityPluginSetup;
-  license$?: Observable<ILicense>;
   config$?: Observable<IngestManagerConfigType>;
 }
 
 export class IngestManagerPlugin implements Plugin {
-  private license$!: Observable<ILicense>;
   private config$!: Observable<IngestManagerConfigType>;
   private clusterClient!: IClusterClient;
   private security: SecurityPluginSetup | undefined;
@@ -45,7 +43,6 @@ export class IngestManagerPlugin implements Plugin {
   }
 
   public async setup(core: CoreSetup, deps: IngestManagerSetupDeps) {
-    this.license$ = deps.licensing.license$;
     this.clusterClient = core.elasticsearch.dataClient;
     this.security = deps.security;
 
@@ -103,7 +100,6 @@ export class IngestManagerPlugin implements Plugin {
       clusterClient: this.clusterClient,
       encryptedSavedObjects: plugins.encryptedSavedObjects,
       security: this.security,
-      license$: this.license$,
       config$: this.config$,
     });
   }

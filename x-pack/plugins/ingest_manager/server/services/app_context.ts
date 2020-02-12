@@ -7,7 +7,6 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
 import { IClusterClient } from 'kibana/server';
 import { EncryptedSavedObjectsPluginStart } from '../../../encrypted_saved_objects/server';
-import { ILicense } from '../../../licensing/server';
 import { SecurityPluginSetup } from '../../../security/server';
 import { IngestManagerConfigType } from '../../common';
 import { IngestManagerAppContext } from '../plugin';
@@ -16,22 +15,13 @@ class AppContextService {
   private clusterClient: IClusterClient | undefined;
   private encryptedSavedObjects: EncryptedSavedObjectsPluginStart | undefined;
   private security: SecurityPluginSetup | undefined;
-  private license$?: Observable<ILicense>;
   private config$?: Observable<IngestManagerConfigType>;
-  private licenseSubject$?: BehaviorSubject<ILicense>;
   private configSubject$?: BehaviorSubject<IngestManagerConfigType>;
 
   public async start(appContext: IngestManagerAppContext) {
     this.clusterClient = appContext.clusterClient;
     this.encryptedSavedObjects = appContext.encryptedSavedObjects;
     this.security = appContext.security;
-
-    if (appContext.license$) {
-      this.license$ = appContext.license$;
-      const initialValue = await this.license$.pipe(first()).toPromise();
-      this.licenseSubject$ = new BehaviorSubject(initialValue);
-      this.license$.subscribe(this.licenseSubject$);
-    }
 
     if (appContext.config$) {
       this.config$ = appContext.config$;
@@ -53,14 +43,6 @@ class AppContextService {
 
   public getSecurity() {
     return this.security;
-  }
-
-  public getLicense() {
-    return this.licenseSubject$?.value;
-  }
-
-  public getLicense$() {
-    return this.license$;
   }
 
   public getConfig() {
