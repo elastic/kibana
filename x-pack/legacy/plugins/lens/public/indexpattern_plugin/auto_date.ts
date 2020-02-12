@@ -7,7 +7,7 @@
 import { TimeBuckets } from 'ui/time_buckets';
 import dateMath from '@elastic/datemath';
 import {
-  ExpressionFunction,
+  ExpressionFunctionDefinition,
   KibanaContext,
 } from '../../../../../../src/plugins/expressions/public';
 import { DateRange } from '../../../../../plugins/lens/common';
@@ -69,7 +69,7 @@ function autoIntervalFromContext(ctx?: KibanaContext | null) {
  * This allows us to support 'auto' on all date fields, and opens the
  * door to future customizations (e.g. adjusting the level of detail, etc).
  */
-export const autoDate: ExpressionFunction<
+export const autoDate: ExpressionFunctionDefinition<
   'lens_auto_date',
   KibanaContext | null,
   LensAutoDateProps,
@@ -78,9 +78,7 @@ export const autoDate: ExpressionFunction<
   name: 'lens_auto_date',
   aliases: [],
   help: '',
-  context: {
-    types: ['kibana_context', 'null'],
-  },
+  inputTypes: ['kibana_context', 'null'],
   args: {
     aggConfigs: {
       types: ['string'],
@@ -88,8 +86,8 @@ export const autoDate: ExpressionFunction<
       help: '',
     },
   },
-  fn(ctx: KibanaContext, args: LensAutoDateProps) {
-    const interval = autoIntervalFromContext(ctx);
+  fn(input, args) {
+    const interval = autoIntervalFromContext(input);
 
     if (!interval) {
       return args.aggConfigs;

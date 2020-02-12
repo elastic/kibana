@@ -16,7 +16,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { metadata } from 'ui/metadata';
+import { useMlKibana } from '../../../../../contexts/kibana';
 import { ErrorCallout } from '../error_callout';
 import {
   getValuesFromResponse,
@@ -46,6 +46,10 @@ interface Props {
 const defaultEval: Eval = { meanSquaredError: '', rSquared: '', error: null };
 
 export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) => {
+  const {
+    services: { docLinks },
+  } = useMlKibana();
+  const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = docLinks;
   const [trainingEval, setTrainingEval] = useState<Eval>(defaultEval);
   const [generalizationEval, setGeneralizationEval] = useState<Eval>(defaultEval);
   const [isLoadingTraining, setIsLoadingTraining] = useState<boolean>(false);
@@ -256,7 +260,7 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
             iconType="help"
             iconSide="left"
             color="primary"
-            href={`https://www.elastic.co/guide/en/machine-learning/${metadata.branch}/ml-dfanalytics-evaluate.html#ml-dfanalytics-regression-evaluation`}
+            href={`${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-dfanalytics-evaluate.html#ml-dfanalytics-regression-evaluation`}
           >
             {i18n.translate(
               'xpack.ml.dataframe.analytics.classificationExploration.regressionDocsLink',
