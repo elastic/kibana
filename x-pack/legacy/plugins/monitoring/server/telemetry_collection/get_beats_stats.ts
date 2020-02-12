@@ -153,7 +153,7 @@ export function processResults(
     clusterArchitectureMaps,
   }: BeatsProcessOptions
 ) {
-  const currHits = results.hits.hits || [];
+  const currHits = results?.hits?.hits || [];
   currHits.forEach(hit => {
     const clusterUuid = hit._source.cluster_uuid;
     if (clusters[clusterUuid] === undefined) {
