@@ -71,30 +71,6 @@ const PaintServers = memo(() => (
       <stop offset="0%" stopColor={NamedColors.okdark} stopOpacity="1" />
       <stop offset="100%" stopColor={darken(0.15, NamedColors.okdark)} stopOpacity="1" />
     </linearGradient>
-    <linearGradient
-      id="Foreground_userSpaceNWtoSE_Solid"
-      x1="-50"
-      y1="-50"
-      x2="50"
-      y2="50"
-      spreadMethod="pad"
-      gradientUnits="userSpaceOnUse"
-    >
-      <stop offset="0%" stopColor={NamedColors.empty} stopOpacity="1" />
-      <stop offset="100%" stopColor={NamedColors.empty} stopOpacity="1" />
-    </linearGradient>
-    <linearGradient
-      id="Background_userSpaceNWtoSE_Solid"
-      x1="-50"
-      y1="-50"
-      x2="50"
-      y2="50"
-      spreadMethod="pad"
-      gradientUnits="userSpaceOnUse"
-    >
-      <stop offset="0%" stopColor={NamedColors.full} stopOpacity="1" />
-      <stop offset="100%" stopColor={NamedColors.full} stopOpacity="1" />
-    </linearGradient>
   </>
 ));
 
