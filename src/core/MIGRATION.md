@@ -56,6 +56,7 @@
       - [On the server side](#on-the-server-side)
       - [On the client side](#on-the-client-side)
     - [Updates an application navlink at runtime](#updates-an-app-navlink-at-runtime)
+    - [Logging config migration](#logging-config-migration)
 
 Make no mistake, it is going to take a lot of work to move certain plugins to the new platform. Our target is to migrate the entire repo over to the new platform throughout 7.x and to remove the legacy plugin system no later than 8.0, and this is only possible if teams start on the effort now.
 
@@ -1655,3 +1656,6 @@ export class MyPlugin implements Plugin {
      })
   }
 ```
+
+### Logging config migration
+[Read](./server/logging/README.md#logging-config-migration)
