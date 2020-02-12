@@ -69,9 +69,11 @@
 # Canvas
 /x-pack/legacy/plugins/canvas/  @elastic/kibana-canvas
 
-# Logs & Metrics UI
+# Observability UIs
 /x-pack/legacy/plugins/infra/ @elastic/logs-metrics-ui
+/x-pack/plugins/infra/ @elastic/logs-metrics-ui
 /x-pack/legacy/plugins/integrations_manager/ @elastic/epm
+/x-pack/plugins/observability/ @elastic/logs-metrics-ui @elastic/apm-ui @elastic/uptime @elastic/ingest
 
 # Machine Learning
 /x-pack/legacy/plugins/ml/  @elastic/ml-ui
@@ -146,6 +148,7 @@
 # Kibana Alerting Services
 /x-pack/legacy/plugins/alerting/ @elastic/kibana-alerting-services
 /x-pack/legacy/plugins/actions/ @elastic/kibana-alerting-services
+/x-pack/plugins/actions/ @elastic/kibana-alerting-services
 /x-pack/plugins/event_log/ @elastic/kibana-alerting-services
 /x-pack/plugins/task_manager/ @elastic/kibana-alerting-services
 /x-pack/test/alerting_api_integration/ @elastic/kibana-alerting-services
