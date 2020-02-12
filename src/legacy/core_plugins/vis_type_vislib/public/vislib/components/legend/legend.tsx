@@ -31,8 +31,7 @@ import { VisLegendItem } from './legend_item';
 import { getPieNames } from './pie_utils';
 
 import { Vis } from '../../../../../visualizations/public';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { tabifyGetColumns } from '../../../../../../ui/public/agg_response/tabify/_get_columns';
+import { tabifyGetColumns } from '../../../legacy_imports';
 
 const getTableAggs = (vis: Vis): IAggConfig[] => {
   if (!vis.aggs || !vis.aggs.getResponseAggs) {
