@@ -21,13 +21,12 @@ import { EndpointList } from './view/managing';
 export function renderApp(coreStart: CoreStart, { appBasePath, element }: AppMountParameters) {
   coreStart.http.get('/api/endpoint/hello-world');
 
-  const [store, stopSagas] = appStoreFactory(coreStart);
+  const store = appStoreFactory(coreStart);
 
   ReactDOM.render(<AppRoot basename={appBasePath} store={store} />, element);
 
   return () => {
     ReactDOM.unmountComponentAtNode(element);
-    stopSagas();
   };
 }
 

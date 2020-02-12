@@ -4,11 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { CoreStart, HttpSetup } from 'kibana/public';
-import { applyMiddleware, combineReducers, createStore, Dispatch, Store } from 'redux';
-import { createSagaMiddleware, SagaContext } from '../../lib';
-import { endpointListSaga } from './saga';
+import { applyMiddleware, createStore, Dispatch, Store } from 'redux';
 import { coreMock } from '../../../../../../../../src/core/public/mocks';
-import { endpointListReducer } from './index';
+import { endpointListReducer, managementMiddlewareFactory } from './index';
 import { EndpointMetadata, EndpointResultList } from '../../../../../common/types';
 import { ManagementState } from '../../types';
 import { AppAction } from '../action';
@@ -17,12 +15,10 @@ describe('endpoint list saga', () => {
   const sleep = (ms = 100) => new Promise(wakeup => setTimeout(wakeup, ms));
   let fakeCoreStart: jest.Mocked<CoreStart>;
   let fakeHttpServices: jest.Mocked<HttpSetup>;
-  let store: Store<{ endpointList: ManagementState }>;
+  let store: Store<ManagementState>;
+  let getState: typeof store['getState'];
   let dispatch: Dispatch<AppAction>;
   let stopSagas: () => void;
-  const globalStoreReducer = combineReducers({
-    endpointList: endpointListReducer,
-  });
   // https://github.com/elastic/endpoint-app-team/issues/131
   const generateEndpoint = (): EndpointMetadata => {
     return {
@@ -59,22 +55,14 @@ describe('endpoint list saga', () => {
       total: 10,
     };
   };
-  const endpointListSagaFactory = () => {
-    return async (sagaContext: SagaContext) => {
-      await endpointListSaga(sagaContext, fakeCoreStart).catch((e: Error) => {
-        // eslint-disable-next-line no-console
-        console.error(e);
-        return Promise.reject(e);
-      });
-    };
-  };
   beforeEach(() => {
     fakeCoreStart = coreMock.createStart({ basePath: '/mock' });
     fakeHttpServices = fakeCoreStart.http as jest.Mocked<HttpSetup>;
-    const sagaMiddleware = createSagaMiddleware(endpointListSagaFactory());
-    store = createStore(globalStoreReducer, applyMiddleware(sagaMiddleware));
-    sagaMiddleware.start();
-    stopSagas = sagaMiddleware.stop;
+    store = createStore(
+      endpointListReducer,
+      applyMiddleware(managementMiddlewareFactory(fakeCoreStart))
+    );
+    getState = store.getState;
     dispatch = store.dispatch;
   });
   afterEach(() => {
@@ -91,6 +79,6 @@ describe('endpoint list saga', () => {
         paging_properties: [{ page_index: 0 }, { page_size: 10 }],
       }),
     });
-    expect(listData(store.getState().endpointList)).toEqual(apiResponse.endpoints);
+    expect(listData(store.getState())).toEqual(apiResponse.endpoints);
   });
 });

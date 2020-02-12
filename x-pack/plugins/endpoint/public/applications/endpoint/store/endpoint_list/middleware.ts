@@ -4,24 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CoreStart } from 'kibana/public';
-import { AppAction } from '../action';
+import { MiddlewareFactory } from '../../types';
 import { pageIndex, pageSize } from './selectors';
+import { ManagementState } from '../../types';
+import { AppAction } from '../action';
 
-export const endpointListSaga = async (
-  { actionsAndState, dispatch }: SagaContext<AppAction>,
-  coreStart: CoreStart
-) => {
-  const { post: httpPost } = coreStart.http;
-
-  for await (const { action, state } of actionsAndState()) {
+export const managementMiddlewareFactory: MiddlewareFactory<ManagementState> = coreStart => {
+  return ({ getState, dispatch }) => next => async (action: AppAction) => {
+    next(action);
     if (
       (action.type === 'userNavigatedToPage' && action.payload === 'managementPage') ||
       action.type === 'userPaginatedEndpointListTable'
     ) {
-      const managementPageIndex = pageIndex(state.endpointList);
-      const managementPageSize = pageSize(state.endpointList);
-      const response = await httpPost('/api/endpoint/endpoints', {
+      const managementPageIndex = pageIndex(getState());
+      const managementPageSize = pageSize(getState());
+      const response = await coreStart.http.post('/api/endpoint/endpoints', {
         body: JSON.stringify({
           paging_properties: [
             { page_index: managementPageIndex },
@@ -29,12 +26,12 @@ export const endpointListSaga = async (
           ],
         }),
       });
-      // temp: request_page_index to reflect user request page index, not es page index
       response.request_page_index = managementPageIndex;
       dispatch({
         type: 'serverReturnedEndpointList',
         payload: response,
       });
+      dispatch({ type: 'serverReturnedAlertsData', payload: response });
     }
-  }
+  };
 };
