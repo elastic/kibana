@@ -24,7 +24,7 @@ export default function({ getService, getPageObjects }) {
   const inspector = getService('inspector');
   const PageObjects = getPageObjects(['visualize', 'visEditor', 'visChart', 'timePicker']);
 
-  describe('my super heatmap chart', function indexPatternCreation() {
+  describe('heatmap chart', function indexPatternCreation() {
     this.tags('smoke');
     const vizName1 = 'Visualization HeatmapChart';
 

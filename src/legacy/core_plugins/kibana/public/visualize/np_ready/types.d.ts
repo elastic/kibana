@@ -28,7 +28,7 @@ export interface VisualizeAppState {
   uiState: PersistedState;
   vis: any;
   query: Query;
-  savedQuery?: any;
+  savedQuery?: string;
   save(): void;
 }
 
