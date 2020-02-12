@@ -8,9 +8,7 @@ import { UMElasticsearchQueryFn } from '../adapters';
 import { StatesIndexStatus } from '../../../common/graphql/types';
 import { INDEX_NAMES } from '../../../common/constants';
 
-export const getStatesIndexStatus: UMElasticsearchQueryFn<{}, StatesIndexStatus> = async ({
-  callES,
-}) => {
+export const getIndexStatus: UMElasticsearchQueryFn<{}, StatesIndexStatus> = async ({ callES }) => {
   const {
     _shards: { total },
     count,

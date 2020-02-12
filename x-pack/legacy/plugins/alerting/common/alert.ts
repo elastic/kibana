@@ -5,11 +5,12 @@
  */
 
 import { SavedObjectAttributes } from 'kibana/server';
-import { AlertActionParams } from '../server/types';
 
 export interface IntervalSchedule extends SavedObjectAttributes {
   interval: string;
 }
+
+export type AlertActionParams = SavedObjectAttributes;
 
 export interface AlertAction {
   group: string;
