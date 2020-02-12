@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { defaults } from 'lodash';
 import moment from 'moment';
 
 /*
@@ -14,13 +13,25 @@ import moment from 'moment';
  * TODO: this backwards compatibility helper will only be supported for 5.x-6. This
  * function should be removed in 7.0
  */
-export const createTypeFilter = type => {
+export const createTypeFilter = (type: string) => {
   return {
     bool: {
       should: [{ term: { _type: type } }, { term: { type } }],
     },
   };
 };
+
+export interface QueryOptions {
+  type?: string;
+  filters?: object[];
+  clusterUuid?: string;
+  start?: string | number;
+  end?: string | number;
+}
+
+interface RangeFilter {
+  range: { [key: string]: { format?: string; gte?: string | number; lte?: string | number } };
+}
 
 /*
  * Creates the boilerplace for querying monitoring data, including filling in
@@ -36,9 +47,8 @@ export const createTypeFilter = type => {
  * @param {Date} options.start - numeric timestamp (optional)
  * @param {Date} options.end - numeric timestamp (optional)
  */
-export function createQuery(options) {
-  options = defaults(options, { filters: [] });
-  const { type, clusterUuid, start, end, filters } = options;
+export function createQuery(options: QueryOptions) {
+  const { type, clusterUuid, start, end, filters = [] } = options;
 
   let typeFilter;
   if (type) {
@@ -50,7 +60,7 @@ export function createQuery(options) {
     clusterUuidFilter = { term: { cluster_uuid: clusterUuid } };
   }
 
-  let timeRangeFilter;
+  let timeRangeFilter: RangeFilter | undefined;
   if (start || end) {
     timeRangeFilter = {
       range: {

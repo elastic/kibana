@@ -5,6 +5,8 @@
  */
 
 import { get } from 'lodash';
+import { StatsCollectionConfig } from 'src/legacy/core_plugins/telemetry/server/collection_manager';
+import { SearchResponse } from 'elasticsearch';
 import { createQuery } from './create_query';
 import {
   INDEX_PATTERN_KIBANA,
@@ -17,13 +19,40 @@ import {
   TELEMETRY_QUERY_SOURCE,
 } from '../../common/constants';
 
+export interface ClusterCloudStats {
+  name: string;
+  count: number;
+  vms: number;
+  regions: Array<{ region: string; count: number }>;
+  vm_types: Array<{ vm_type: string; count: number }>;
+  zones: Array<{ zone: string; count: number }>;
+}
+
+export interface ClusterHighLevelStats {
+  count: number;
+  versions: Array<{ version: string; count: number }>;
+  os: {
+    platforms: Array<{ platform: string; count: number }>;
+    platformReleases: Array<{ platformRelease: string; count: number }>;
+    distros: Array<{ distro: string; count: number }>;
+    distroReleases: Array<{ distroRelease: string; count: number }>;
+  };
+  cloud: ClusterCloudStats[] | undefined;
+}
+
+export interface ClustersHighLevelStats {
+  [clusterUuid: string]: ClusterHighLevelStats;
+}
+
+type Counter = Map<string, number>;
+
 /**
  * Update a counter associated with the {@code key}.
  *
  * @param {Map} map Map to update the counter for the {@code key}.
  * @param {String} key The key to increment a counter for.
  */
-function incrementByKey(map, key) {
+function incrementByKey(map: Counter, key?: string) {
   if (!key) {
     return;
   }
@@ -37,13 +66,29 @@ function incrementByKey(map, key) {
   map.set(key, count + 1);
 }
 
+interface InternalCloudMap {
+  count: number;
+  unique: Set<string>;
+  vm_type: Counter;
+  region: Counter;
+  zone: Counter;
+}
+
+interface CloudEntry {
+  id: string;
+  name: string;
+  vm_type: string;
+  region: string;
+  zone: string;
+}
+
 /**
  * Help to reduce Cloud metrics into unidentifiable metrics (e.g., count IDs so that they can be dropped).
  *
  * @param  {Map} clouds Existing cloud data by cloud name.
  * @param  {Object} cloud Cloud object loaded from Elasticsearch data.
  */
-function reduceCloudForCluster(cloudMap, cloud) {
+function reduceCloudForCluster(cloudMap: Map<string, InternalCloudMap>, cloud?: CloudEntry) {
   if (!cloud) {
     return;
   }
@@ -74,22 +119,48 @@ function reduceCloudForCluster(cloudMap, cloud) {
   incrementByKey(cloudByName.zone, cloud.zone);
 }
 
+interface InternalClusterMap {
+  count: number;
+  versions: Counter;
+  cloudMap: Map<string, InternalCloudMap>;
+  os: {
+    platforms: Counter;
+    platformReleases: Counter;
+    distros: Counter;
+    distroReleases: Counter;
+  };
+}
+
+interface OSData {
+  platform?: string;
+  platformRelease?: string;
+  distro?: string;
+  distroRelease?: string;
+}
+
 /**
  * Group the instances (hits) by clusters.
  *
  * @param  {Array} instances Array of hits from the request containing the cluster UUID and version.
  * @param {String} product The product to limit too ('kibana', 'logstash', 'beats')
- * @return {Map} A map of the Cluster UUID to an {@link Object} containing the {@code count} and {@code versions} {@link Map}
+ *
+ * Returns a map of the Cluster UUID to an {@link Object} containing the {@code count} and {@code versions} {@link Map}
  */
-function groupInstancesByCluster(instances, product) {
-  const clusterMap = new Map();
+function groupInstancesByCluster<T extends { cluster_uuid?: string }>(
+  instances: Array<{ _source: T }>,
+  product: string
+) {
+  const clusterMap = new Map<string, InternalClusterMap>();
 
   // hits are sorted arbitrarily by product UUID
   instances.map(instance => {
-    const clusterUuid = get(instance, '_source.cluster_uuid');
-    const version = get(instance, `_source.${product}_stats.${product}.version`);
-    const cloud = get(instance, `_source.${product}_stats.cloud`);
-    const os = get(instance, `_source.${product}_stats.os`);
+    const clusterUuid = instance._source.cluster_uuid;
+    const version: string | undefined = get(
+      instance,
+      `_source.${product}_stats.${product}.version`
+    );
+    const cloud: CloudEntry | undefined = get(instance, `_source.${product}_stats.cloud`);
+    const os: OSData | undefined = get(instance, `_source.${product}_stats.os`);
 
     if (clusterUuid) {
       let cluster = clusterMap.get(clusterUuid);
@@ -134,16 +205,12 @@ function groupInstancesByCluster(instances, product) {
  *   { [keyName]: key1, count: value1 },
  *   { [keyName]: key2, count: value2 }
  * ]
- *
- * @param  {Map} map     [description]
- * @param  {String} keyName [description]
- * @return {Array}         [description]
  */
-function mapToList(map, keyName) {
-  const list = [];
+function mapToList<T>(map: Map<string, number>, keyName: string): T[] {
+  const list: T[] = [];
 
   for (const [key, count] of map) {
-    list.push({ [keyName]: key, count });
+    list.push(({ [keyName]: key, count } as unknown) as T);
   }
 
   return list;
@@ -154,7 +221,7 @@ function mapToList(map, keyName) {
  *
  * @param {*} product The product id, which should be in the constants file
  */
-function getIndexPatternForStackProduct(product) {
+function getIndexPatternForStackProduct(product: string) {
   switch (product) {
     case KIBANA_SYSTEM_ID:
       return INDEX_PATTERN_KIBANA;
@@ -176,23 +243,41 @@ function getIndexPatternForStackProduct(product) {
  * @param {Date} start Start time to limit the stats
  * @param {Date} end End time to limit the stats
  * @param {String} product The product to limit too ('kibana', 'logstash', 'beats')
- * @return {Promise} Object keyed by the cluster UUIDs to make grouping easier.
+ *
+ * Returns an object keyed by the cluster UUIDs to make grouping easier.
  */
-export function getHighLevelStats(server, callCluster, clusterUuids, start, end, product) {
-  return fetchHighLevelStats(
+export async function getHighLevelStats(
+  server: StatsCollectionConfig['server'],
+  callCluster: StatsCollectionConfig['callCluster'],
+  clusterUuids: string[],
+  start: StatsCollectionConfig['start'],
+  end: StatsCollectionConfig['end'],
+  product: string
+) {
+  const response = await fetchHighLevelStats(
     server,
     callCluster,
     clusterUuids,
     start,
     end,
     product
-  ).then(response => handleHighLevelStatsResponse(response, product));
+  );
+  return handleHighLevelStatsResponse(response, product);
 }
 
-export async function fetchHighLevelStats(server, callCluster, clusterUuids, start, end, product) {
+export async function fetchHighLevelStats<
+  T extends { cluster_uuid?: string } = { cluster_uuid?: string }
+>(
+  server: StatsCollectionConfig['server'],
+  callCluster: StatsCollectionConfig['callCluster'],
+  clusterUuids: string[],
+  start: StatsCollectionConfig['start'],
+  end: StatsCollectionConfig['end'],
+  product: string
+): Promise<SearchResponse<T>> {
   const config = server.config();
   const isKibanaIndex = product === KIBANA_SYSTEM_ID;
-  const filters = [{ terms: { cluster_uuid: clusterUuids } }];
+  const filters: object[] = [{ terms: { cluster_uuid: clusterUuids } }];
 
   // we should supply this from a parameter in the future so that this remains generic
   if (isKibanaIndex) {
@@ -257,13 +342,17 @@ export async function fetchHighLevelStats(server, callCluster, clusterUuids, sta
  *
  * @param {Object} response The response from the aggregation
  * @param {String} product The product to limit too ('kibana', 'logstash', 'beats')
- * @return {Object} Object keyed by the cluster UUIDs to make grouping easier.
+ *
+ * Returns an object keyed by the cluster UUIDs to make grouping easier.
  */
-export function handleHighLevelStatsResponse(response, product) {
-  const instances = get(response, 'hits.hits', []);
+export function handleHighLevelStatsResponse(
+  response: SearchResponse<{ cluster_uuid?: string }>,
+  product: string
+) {
+  const instances = response.hits?.hits || [];
   const clusterMap = groupInstancesByCluster(instances, product);
 
-  const clusters = {};
+  const clusters: ClustersHighLevelStats = {};
 
   for (const [clusterUuid, cluster] of clusterMap) {
     // it's unlikely this will be an array of more than one, but it is one just incase
@@ -271,14 +360,15 @@ export function handleHighLevelStatsResponse(response, product) {
 
     // remap the clouds (most likely singular or empty)
     for (const [name, cloud] of cluster.cloudMap) {
-      clouds.push({
+      const cloudStats: ClusterCloudStats = {
         name,
         count: cloud.count,
         vms: cloud.unique.size,
         regions: mapToList(cloud.region, 'region'),
         vm_types: mapToList(cloud.vm_type, 'vm_type'),
         zones: mapToList(cloud.zone, 'zone'),
-      });
+      };
+      clouds.push(cloudStats);
     }
 
     // map stats for product by cluster so that it can be joined with ES cluster stats
