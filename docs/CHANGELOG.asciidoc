@@ -43,7 +43,7 @@ See also <<breaking-changes-7.6,breaking changes in 7.6>>.
 [[known-issue-7.6.0]]
 === Known issue
 
-* When you use the default `dateFormat:tz: browser` setting, the timestamps appear in UTC instead of the local time of the user browser. {issue}57457[#57457]
+* When you use the default `dateFormat:tz: browser` setting, the timestamps appear in UTC instead of the local time of the user browser. To use the local time of the user browser, set `dateFormat:tz:` to the timezone of the user. {issue}57457[#57457]
 
 [float]
 [[enhancement-7.6.0]]
