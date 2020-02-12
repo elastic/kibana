@@ -24,9 +24,6 @@
  * directly where they are needed.
  */
 
-import chrome from 'ui/chrome';
-
-export const legacyChrome = chrome;
 export { SavedObjectSaveOpts } from 'ui/saved_objects/types';
 export { npSetup, npStart } from 'ui/new_platform';
 export { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
