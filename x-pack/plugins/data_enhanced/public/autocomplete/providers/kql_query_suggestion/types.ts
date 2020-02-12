@@ -6,14 +6,11 @@
 
 import { CoreSetup } from 'kibana/public';
 import {
-  esKuery,
+  KueryNode,
   QuerySuggestionBasic,
   QuerySuggestionGetFnArgs,
 } from '../../../../../../../src/plugins/data/public';
 
 export type KqlQuerySuggestionProvider<T = QuerySuggestionBasic> = (
   core: CoreSetup
-) => (
-  querySuggestionsGetFnArgs: QuerySuggestionGetFnArgs,
-  kueryNode: esKuery.KueryNode
-) => Promise<T[]>;
+) => (querySuggestionsGetFnArgs: QuerySuggestionGetFnArgs, kueryNode: KueryNode) => Promise<T[]>;
