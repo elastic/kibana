@@ -24,6 +24,11 @@ import { ExpressionAstExpression } from '../ast';
 export type ExpressionsServiceSetup = ReturnType<ExpressionsService['setup']>;
 export type ExpressionsServiceStart = ReturnType<ExpressionsService['start']>;
 
+export interface ExpressionServiceParams {
+  executor?: Executor;
+  renderers?: ExpressionRendererRegistry;
+}
+
 /**
  * `ExpressionsService` class is used for multiple purposes:
  *
@@ -44,8 +49,16 @@ export type ExpressionsServiceStart = ReturnType<ExpressionsService['start']>;
  *    so that JSDoc appears in developers IDE when they use those `plugins.expressions.registerFunction(`.
  */
 export class ExpressionsService {
-  public readonly executor = Executor.createWithDefaults();
-  public readonly renderers = new ExpressionRendererRegistry();
+  public readonly executor: Executor;
+  public readonly renderers: ExpressionRendererRegistry;
+
+  constructor({
+    executor = Executor.createWithDefaults(),
+    renderers = new ExpressionRendererRegistry(),
+  }: ExpressionServiceParams = {}) {
+    this.executor = executor;
+    this.renderers = renderers;
+  }
 
   /**
    * Register an expression function, which will be possible to execute as
@@ -116,6 +129,14 @@ export class ExpressionsService {
     input: Input,
     context?: ExtraContext
   ): Promise<Output> => this.executor.run<Input, Output, ExtraContext>(ast, input, context);
+
+  public readonly fork = (): ExpressionsService => {
+    const executor = this.executor.fork();
+    const renderers = this.renderers;
+    const fork = new ExpressionsService({ executor, renderers });
+
+    return fork;
+  };
 
   public setup() {
     const { executor, renderers, registerFunction, run } = this;
