@@ -22,18 +22,12 @@ import { toMountPoint } from '../../../kibana_react/public';
 import { Action, createAction, IncompatibleActionError } from '../../../ui_actions/public';
 import { getOverlays, getIndexPatterns } from '../services';
 import { applyFiltersPopover } from '../ui/apply_filters';
-import {
-  esFilters,
-  FilterManager,
-  TimefilterContract,
-  changeTimeFilter,
-  extractTimeFilter,
-} from '..';
+import { Filter, FilterManager, TimefilterContract, esFilters } from '..';
 
 export const GLOBAL_APPLY_FILTER_ACTION = 'GLOBAL_APPLY_FILTER_ACTION';
 
 interface ActionContext {
-  filters: esFilters.Filter[];
+  filters: Filter[];
   timeFieldName?: string;
 }
 
@@ -63,7 +57,7 @@ export function createFilterAction(
         throw new IncompatibleActionError();
       }
 
-      let selectedFilters: esFilters.Filter[] = filters;
+      let selectedFilters: Filter[] = filters;
 
       if (selectedFilters.length > 1) {
         const indexPatterns = await Promise.all(
@@ -72,7 +66,7 @@ export function createFilterAction(
           })
         );
 
-        const filterSelectionPromise: Promise<esFilters.Filter[]> = new Promise(resolve => {
+        const filterSelectionPromise: Promise<Filter[]> = new Promise(resolve => {
           const overlay = getOverlays().openModal(
             toMountPoint(
               applyFiltersPopover(
@@ -82,7 +76,7 @@ export function createFilterAction(
                   overlay.close();
                   resolve([]);
                 },
-                (filterSelection: esFilters.Filter[]) => {
+                (filterSelection: Filter[]) => {
                   overlay.close();
                   resolve(filterSelection);
                 }
@@ -98,13 +92,13 @@ export function createFilterAction(
       }
 
       if (timeFieldName) {
-        const { timeRangeFilter, restOfFilters } = extractTimeFilter(
+        const { timeRangeFilter, restOfFilters } = esFilters.extractTimeFilter(
           timeFieldName,
           selectedFilters
         );
         filterManager.addFilters(restOfFilters);
         if (timeRangeFilter) {
-          changeTimeFilter(timeFilter, timeRangeFilter);
+          esFilters.changeTimeFilter(timeFilter, timeRangeFilter);
         }
       } else {
         filterManager.addFilters(selectedFilters);

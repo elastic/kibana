@@ -17,11 +17,12 @@ import {
   typicalPayload,
   getFindResultWithSingleHit,
 } from '../__mocks__/request_responses';
-import { createMockServer, clientsServiceMock } from '../__mocks__';
+import { createMockServer, createMockConfig, clientsServiceMock } from '../__mocks__';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 
 describe('update_rules', () => {
   let server = createMockServer();
+  let config = createMockConfig();
   let getClients = clientsServiceMock.createGetScoped();
   let clients = clientsServiceMock.createClients();
 
@@ -29,11 +30,12 @@ describe('update_rules', () => {
     jest.resetAllMocks();
 
     server = createMockServer();
+    config = createMockConfig();
     getClients = clientsServiceMock.createGetScoped();
     clients = clientsServiceMock.createClients();
 
     getClients.mockResolvedValue(clients);
-    updateRulesRoute(server.route, getClients);
+    updateRulesRoute(server.route, config, getClients);
   });
 
   describe('status codes with actionClient and alertClient', () => {
@@ -60,7 +62,7 @@ describe('update_rules', () => {
     test('returns 404 if alertClient is not available on the route', async () => {
       getClients.mockResolvedValue(omit('alertsClient', clients));
       const { route, inject } = createMockServer();
-      updateRulesRoute(route, getClients);
+      updateRulesRoute(route, config, getClients);
       const { statusCode } = await inject(getUpdateRequest());
       expect(statusCode).toBe(404);
     });

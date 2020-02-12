@@ -14,6 +14,7 @@ import { readRulesRoute } from '../lib/detection_engine/routes/rules/read_rules_
 import { findRulesRoute } from '../lib/detection_engine/routes/rules/find_rules_route';
 import { deleteRulesRoute } from '../lib/detection_engine/routes/rules/delete_rules_route';
 import { updateRulesRoute } from '../lib/detection_engine/routes/rules/update_rules_route';
+import { patchRulesRoute } from '../lib/detection_engine/routes/rules/patch_rules_route';
 import { setSignalsStatusRoute } from '../lib/detection_engine/routes/signals/open_close_signals_route';
 import { querySignalsRoute } from '../lib/detection_engine/routes/signals/query_signals_route';
 import { deleteIndexRoute } from '../lib/detection_engine/routes/index/delete_index_route';
@@ -22,6 +23,7 @@ import { readPrivilegesRoute } from '../lib/detection_engine/routes/privileges/r
 import { addPrepackedRulesRoute } from '../lib/detection_engine/routes/rules/add_prepackaged_rules_route';
 import { createRulesBulkRoute } from '../lib/detection_engine/routes/rules/create_rules_bulk_route';
 import { updateRulesBulkRoute } from '../lib/detection_engine/routes/rules/update_rules_bulk_route';
+import { patchRulesBulkRoute } from '../lib/detection_engine/routes/rules/patch_rules_bulk_route';
 import { deleteRulesBulkRoute } from '../lib/detection_engine/routes/rules/delete_rules_bulk_route';
 import { importRulesRoute } from '../lib/detection_engine/routes/rules/import_rules_route';
 import { exportRulesRoute } from '../lib/detection_engine/routes/rules/export_rules_route';
@@ -39,14 +41,16 @@ export const initRoutes = (
   // All REST rule creation, deletion, updating, etc......
   createRulesRoute(route, config, getClients);
   readRulesRoute(route, getClients);
-  updateRulesRoute(route, getClients);
+  updateRulesRoute(route, config, getClients);
+  patchRulesRoute(route, getClients);
   deleteRulesRoute(route, getClients);
   findRulesRoute(route, getClients);
 
   addPrepackedRulesRoute(route, config, getClients);
   getPrepackagedRulesStatusRoute(route, getClients);
   createRulesBulkRoute(route, config, getClients);
-  updateRulesBulkRoute(route, getClients);
+  updateRulesBulkRoute(route, config, getClients);
+  patchRulesBulkRoute(route, getClients);
   deleteRulesBulkRoute(route, getClients);
 
   importRulesRoute(route, config, getClients);

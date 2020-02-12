@@ -5,7 +5,6 @@
  */
 
 import Hapi from 'hapi';
-import Boom from 'boom';
 
 import { DETECTION_ENGINE_INDEX_URL } from '../../../../../common/constants';
 import { LegacyServices, LegacyRequest } from '../../../../types';
@@ -35,7 +34,7 @@ export const createCreateIndexRoute = (
         },
       },
     },
-    async handler(request: LegacyRequest) {
+    async handler(request: LegacyRequest, headers) {
       try {
         const { clusterClient, spacesClient } = await getClients(request);
         const callCluster = clusterClient.callAsCurrentUser;
@@ -43,7 +42,12 @@ export const createCreateIndexRoute = (
         const index = getIndex(spacesClient.getSpaceId, config);
         const indexExists = await getIndexExists(callCluster, index);
         if (indexExists) {
-          return new Boom(`index: "${index}" already exists`, { statusCode: 409 });
+          return headers
+            .response({
+              message: `index: "${index}" already exists`,
+              status_code: 409,
+            })
+            .code(409);
         } else {
           const policyExists = await getPolicyExists(callCluster, index);
           if (!policyExists) {
@@ -58,7 +62,13 @@ export const createCreateIndexRoute = (
           return { acknowledged: true };
         }
       } catch (err) {
-        return transformError(err);
+        const error = transformError(err);
+        return headers
+          .response({
+            message: error.message,
+            status_code: error.statusCode,
+          })
+          .code(error.statusCode);
       }
     },
   };

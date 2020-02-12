@@ -19,7 +19,7 @@ describe('RedirectToLogs component', () => {
 
     expect(component).toMatchInlineSnapshot(`
       <Redirect
-        to="/logs/stream?logFilter=(expression:'',kind:kuery)&logPosition=(position:(tiebreaker:0,time:1550671089404),streamLive:!f)&sourceId=default"
+        to="/logs/stream?sourceId=default&logPosition=(position:(tiebreaker:0,time:1550671089404),streamLive:!f)&logFilter=(expression:'',kind:kuery)"
       />
     `);
   });
@@ -33,7 +33,7 @@ describe('RedirectToLogs component', () => {
 
     expect(component).toMatchInlineSnapshot(`
       <Redirect
-        to="/logs/stream?logFilter=(expression:'FILTER_FIELD:FILTER_VALUE',kind:kuery)&logPosition=(position:(tiebreaker:0,time:1550671089404),streamLive:!f)&sourceId=default"
+        to="/logs/stream?sourceId=default&logPosition=(position:(tiebreaker:0,time:1550671089404),streamLive:!f)&logFilter=(expression:'FILTER_FIELD:FILTER_VALUE',kind:kuery)"
       />
     `);
   });
@@ -45,7 +45,7 @@ describe('RedirectToLogs component', () => {
 
     expect(component).toMatchInlineSnapshot(`
       <Redirect
-        to="/logs/stream?logFilter=(expression:'',kind:kuery)&sourceId=SOME-OTHER-SOURCE"
+        to="/logs/stream?sourceId=SOME-OTHER-SOURCE&logFilter=(expression:'',kind:kuery)"
       />
     `);
   });

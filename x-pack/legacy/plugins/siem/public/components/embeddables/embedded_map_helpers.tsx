@@ -20,7 +20,7 @@ import { getLayerList } from './map_config';
 // @ts-ignore Missing type defs as maps moves to Typescript
 import { MAP_SAVED_OBJECT_TYPE } from '../../../../maps/common/constants';
 import * as i18n from './translations';
-import { Query, esFilters } from '../../../../../../../src/plugins/data/public';
+import { Query, Filter } from '../../../../../../../src/plugins/data/public';
 import { IndexPatternSavedObject } from '../../hooks/types';
 
 /**
@@ -38,7 +38,7 @@ import { IndexPatternSavedObject } from '../../hooks/types';
  * @throws Error if EmbeddableFactory does not exist
  */
 export const createEmbeddable = async (
-  filters: esFilters.Filter[],
+  filters: Filter[],
   indexPatterns: IndexPatternMapping[],
   query: Query,
   startDate: number,

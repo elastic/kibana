@@ -5,7 +5,6 @@
  */
 
 import Hapi from 'hapi';
-import Boom from 'boom';
 
 import { DETECTION_ENGINE_PREPACKAGED_URL } from '../../../../../common/constants';
 import { LegacyServices, LegacyRequest } from '../../../../types';
@@ -61,9 +60,12 @@ export const createAddPrepackedRulesRoute = (
             spaceIndex
           );
           if (!spaceIndexExists) {
-            return Boom.badRequest(
-              `Pre-packaged rules cannot be installed until the space index is created: ${spaceIndex}`
-            );
+            return headers
+              .response({
+                message: `Pre-packaged rules cannot be installed until the space index is created: ${spaceIndex}`,
+                status_code: 400,
+              })
+              .code(400);
           }
         }
         await Promise.all(
@@ -81,7 +83,13 @@ export const createAddPrepackedRulesRoute = (
           rules_updated: rulesToUpdate.length,
         };
       } catch (err) {
-        return transformError(err);
+        const error = transformError(err);
+        return headers
+          .response({
+            message: error.message,
+            status_code: error.statusCode,
+          })
+          .code(error.statusCode);
       }
     },
   };

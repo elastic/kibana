@@ -14,12 +14,15 @@ import {
 import { LegacyServices } from '../../../../types';
 import { GetScopedClients } from '../../../../services';
 import { transformOrBulkError, getIdBulkError } from './utils';
-import { transformBulkError } from '../utils';
+import { transformBulkError, getIndex } from '../utils';
 import { updateRulesBulkSchema } from '../schemas/update_rules_bulk_schema';
-import { updateRules } from '../../rules/update_rules';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
+import { updateRules } from '../../rules/update_rules';
 
-export const createUpdateRulesBulkRoute = (getClients: GetScopedClients): Hapi.ServerRoute => {
+export const createUpdateRulesBulkRoute = (
+  config: LegacyServices['config'],
+  getClients: GetScopedClients
+): Hapi.ServerRoute => {
   return {
     method: 'PUT',
     path: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
@@ -33,13 +36,15 @@ export const createUpdateRulesBulkRoute = (getClients: GetScopedClients): Hapi.S
       },
     },
     async handler(request: BulkUpdateRulesRequest, headers) {
-      const { actionsClient, alertsClient, savedObjectsClient } = await getClients(request);
+      const { actionsClient, alertsClient, savedObjectsClient, spacesClient } = await getClients(
+        request
+      );
 
       if (!actionsClient || !alertsClient) {
         return headers.response().code(404);
       }
 
-      const rules = Promise.all(
+      const rules = await Promise.all(
         request.payload.map(async payloadRule => {
           const {
             description,
@@ -69,6 +74,8 @@ export const createUpdateRulesBulkRoute = (getClients: GetScopedClients): Hapi.S
             references,
             version,
           } = payloadRule;
+          const finalIndex =
+            outputIndex != null ? outputIndex : getIndex(spacesClient.getSpaceId, config);
           const idOrRuleIdOrUnknown = id ?? ruleId ?? '(unknown id)';
           try {
             const rule = await updateRules({
@@ -76,11 +83,12 @@ export const createUpdateRulesBulkRoute = (getClients: GetScopedClients): Hapi.S
               actionsClient,
               description,
               enabled,
+              immutable: false,
               falsePositives,
               from,
               query,
               language,
-              outputIndex,
+              outputIndex: finalIndex,
               savedId,
               savedObjectsClient,
               timelineId,
@@ -129,7 +137,8 @@ export const createUpdateRulesBulkRoute = (getClients: GetScopedClients): Hapi.S
 
 export const updateRulesBulkRoute = (
   route: LegacyServices['route'],
+  config: LegacyServices['config'],
   getClients: GetScopedClients
 ): void => {
-  route(createUpdateRulesBulkRoute(getClients));
+  route(createUpdateRulesBulkRoute(config, getClients));
 };

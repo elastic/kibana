@@ -5,7 +5,6 @@
  */
 
 import Hapi from 'hapi';
-import Boom from 'boom';
 
 import { DETECTION_ENGINE_INDEX_URL } from '../../../../../common/constants';
 import { LegacyServices, LegacyRequest } from '../../../../types';
@@ -43,7 +42,7 @@ export const createDeleteIndexRoute = (
         },
       },
     },
-    async handler(request: LegacyRequest) {
+    async handler(request: LegacyRequest, headers) {
       try {
         const { clusterClient, spacesClient } = await getClients(request);
         const callCluster = clusterClient.callAsCurrentUser;
@@ -51,7 +50,12 @@ export const createDeleteIndexRoute = (
         const index = getIndex(spacesClient.getSpaceId, config);
         const indexExists = await getIndexExists(callCluster, index);
         if (!indexExists) {
-          return new Boom(`index: "${index}" does not exist`, { statusCode: 404 });
+          return headers
+            .response({
+              message: `index: "${index}" does not exist`,
+              status_code: 404,
+            })
+            .code(404);
         } else {
           await deleteAllIndex(callCluster, `${index}-*`);
           const policyExists = await getPolicyExists(callCluster, index);
@@ -65,7 +69,13 @@ export const createDeleteIndexRoute = (
           return { acknowledged: true };
         }
       } catch (err) {
-        return transformError(err);
+        const error = transformError(err);
+        return headers
+          .response({
+            message: error.message,
+            status_code: error.statusCode,
+          })
+          .code(error.statusCode);
       }
     },
   };

@@ -35,8 +35,7 @@ export const createDeleteRulesBulkRoute = (getClients: GetScopedClients): Hapi.S
       if (!actionsClient || !alertsClient) {
         return headers.response().code(404);
       }
-
-      const rules = Promise.all(
+      const rules = await Promise.all(
         request.payload.map(async payloadRule => {
           const { id, rule_id: ruleId } = payloadRule;
           const idOrRuleIdOrUnknown = id ?? ruleId ?? '(unknown id)';

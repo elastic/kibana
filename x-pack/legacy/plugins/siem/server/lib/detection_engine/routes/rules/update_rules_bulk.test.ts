@@ -16,24 +16,26 @@ import {
   getFindResultWithSingleHit,
   getUpdateBulkRequest,
 } from '../__mocks__/request_responses';
-import { createMockServer, clientsServiceMock } from '../__mocks__';
+import { createMockServer, createMockConfig, clientsServiceMock } from '../__mocks__';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { updateRulesBulkRoute } from './update_rules_bulk_route';
 import { BulkError } from '../utils';
 
 describe('update_rules_bulk', () => {
   let server = createMockServer();
+  let config = createMockConfig();
   let getClients = clientsServiceMock.createGetScoped();
   let clients = clientsServiceMock.createClients();
 
   beforeEach(() => {
     jest.resetAllMocks();
     server = createMockServer();
+    config = createMockConfig();
     getClients = clientsServiceMock.createGetScoped();
     clients = clientsServiceMock.createClients();
 
     getClients.mockResolvedValue(clients);
-    updateRulesBulkRoute(server.route, getClients);
+    updateRulesBulkRoute(server.route, config, getClients);
   });
 
   describe('status codes with actionClient and alertClient', () => {
@@ -74,7 +76,7 @@ describe('update_rules_bulk', () => {
     test('returns 404 if alertClient is not available on the route', async () => {
       getClients.mockResolvedValue(omit('alertsClient', clients));
       const { route, inject } = createMockServer();
-      updateRulesRoute(route, getClients);
+      updateRulesRoute(route, config, getClients);
       const { statusCode } = await inject(getUpdateBulkRequest());
       expect(statusCode).toBe(404);
     });

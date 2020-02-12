@@ -5,10 +5,10 @@
  */
 
 import { CallAPIOptions } from '../../../../../../../src/core/server';
-import { esFilters } from '../../../../../../../src/plugins/data/server';
+import { Filter } from '../../../../../../../src/plugins/data/server';
 import { IRuleStatusAttributes } from './rules/types';
 
-export type PartialFilter = Partial<esFilters.Filter>;
+export type PartialFilter = Partial<Filter>;
 
 export interface IMitreAttack {
   id: string;

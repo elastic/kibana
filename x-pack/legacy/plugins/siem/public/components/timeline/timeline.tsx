@@ -35,7 +35,7 @@ import { TimelineHeader } from './header';
 import { calculateBodyHeight, combineQueries } from './helpers';
 import { TimelineRefetch } from './refetch_timeline';
 import { ManageTimelineContext } from './timeline_context';
-import { esQuery, esFilters, IIndexPattern } from '../../../../../../../src/plugins/data/public';
+import { esQuery, Filter, IIndexPattern } from '../../../../../../../src/plugins/data/public';
 
 const WrappedByAutoSizer = styled.div`
   width: 100%;
@@ -61,7 +61,7 @@ interface Props {
   dataProviders: DataProvider[];
   end: number;
   eventType: EventType;
-  filters: esFilters.Filter[];
+  filters: Filter[];
   flyoutHeaderHeight: number;
   flyoutHeight: number;
   id: string;

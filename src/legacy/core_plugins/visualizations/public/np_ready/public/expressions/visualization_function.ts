@@ -20,7 +20,7 @@
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { VisResponseValue } from 'src/plugins/visualizations/public';
-import { ExpressionFunction, Render } from 'src/plugins/expressions/public';
+import { ExpressionFunctionDefinition, Render } from 'src/plugins/expressions/public';
 import { PersistedState } from '../../../legacy_imports';
 import { getTypes, getIndexPatterns, getFilterManager } from '../services';
 
@@ -34,7 +34,7 @@ interface Arguments {
   uiState?: string;
 }
 
-export type ExpressionFunctionVisualization = ExpressionFunction<
+export type ExpressionFunctionVisualization = ExpressionFunctionDefinition<
   'visualization',
   any,
   Arguments,
@@ -86,7 +86,7 @@ export const visualization = (): ExpressionFunctionVisualization => ({
       help: 'User interface state',
     },
   },
-  async fn(context, args, handlers) {
+  async fn(input, args, { inspectorAdapters }) {
     const visConfigParams = args.visConfig ? JSON.parse(args.visConfig) : {};
     const schemas = args.schemas ? JSON.parse(args.schemas) : {};
     const visType = getTypes().get(args.type || 'histogram') as any;
@@ -96,25 +96,25 @@ export const visualization = (): ExpressionFunctionVisualization => ({
     const uiState = new PersistedState(uiStateParams);
 
     if (typeof visType.requestHandler === 'function') {
-      context = await visType.requestHandler({
+      input = await visType.requestHandler({
         partialRows: args.partialRows,
         metricsAtAllLevels: args.metricsAtAllLevels,
         index: indexPattern,
         visParams: visConfigParams,
-        timeRange: get(context, 'timeRange', null),
-        query: get(context, 'query', null),
-        filters: get(context, 'filters', null),
+        timeRange: get(input, 'timeRange', null),
+        query: get(input, 'query', null),
+        filters: get(input, 'filters', null),
         uiState,
-        inspectorAdapters: handlers.inspectorAdapters,
+        inspectorAdapters,
         queryFilter: getFilterManager(),
         forceFetch: true,
       });
     }
 
     if (typeof visType.responseHandler === 'function') {
-      if (context.columns) {
+      if (input.columns) {
         // assign schemas to aggConfigs
-        context.columns.forEach((column: any) => {
+        input.columns.forEach((column: any) => {
           if (column.aggConfig) {
             column.aggConfig.aggConfigs.schemas = visType.schemas.all;
           }
@@ -122,21 +122,21 @@ export const visualization = (): ExpressionFunctionVisualization => ({
 
         Object.keys(schemas).forEach(key => {
           schemas[key].forEach((i: any) => {
-            if (context.columns[i] && context.columns[i].aggConfig) {
-              context.columns[i].aggConfig.schema = key;
+            if (input.columns[i] && input.columns[i].aggConfig) {
+              input.columns[i].aggConfig.schema = key;
             }
           });
         });
       }
 
-      context = await visType.responseHandler(context, visConfigParams.dimensions);
+      input = await visType.responseHandler(input, visConfigParams.dimensions);
     }
 
     return {
       type: 'render',
       as: 'visualization',
       value: {
-        visData: context,
+        visData: input,
         visType: args.type || '',
         visConfig: visConfigParams,
       },

@@ -23,14 +23,14 @@ import { intervalOptions } from '../_interval_options';
 import { AggConfigs } from '../../agg_configs';
 import { IBucketDateHistogramAggConfig } from '../date_histogram';
 import { BUCKET_TYPES } from '../bucket_agg_types';
-import { esFilters } from '../../../../../../../../plugins/data/public';
+import { RangeFilter } from '../../../../../../../../plugins/data/public';
 
 jest.mock('ui/new_platform');
 
 describe('AggConfig Filters', () => {
   describe('date_histogram', () => {
     let agg: IBucketDateHistogramAggConfig;
-    let filter: esFilters.RangeFilter;
+    let filter: RangeFilter;
     let bucketStart: any;
     let field: any;
 

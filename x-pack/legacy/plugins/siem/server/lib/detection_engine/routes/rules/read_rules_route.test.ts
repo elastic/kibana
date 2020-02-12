@@ -24,16 +24,14 @@ describe('read_signals', () => {
   let clients = clientsServiceMock.createClients();
 
   beforeEach(() => {
+    jest.resetAllMocks();
+
     server = createMockServer();
     getClients = clientsServiceMock.createGetScoped();
     clients = clientsServiceMock.createClients();
 
     getClients.mockResolvedValue(clients);
     readRulesRoute(server.route, getClients);
-  });
-
-  afterEach(() => {
-    jest.resetAllMocks();
   });
 
   describe('status codes with actionClient and alertClient', () => {

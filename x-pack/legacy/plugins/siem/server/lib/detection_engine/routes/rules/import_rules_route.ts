@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
 import Hapi from 'hapi';
 import { chunk, isEmpty } from 'lodash/fp';
 import { extname } from 'path';
@@ -20,18 +19,12 @@ import { getIndexExists } from '../../index/get_index_exists';
 import { getIndex, createBulkErrorObject, ImportRuleResponse } from '../utils';
 import { createRulesStreamFromNdJson } from '../../rules/create_rules_stream_from_ndjson';
 import { ImportRuleAlertRest } from '../../types';
-import { updateRules } from '../../rules/update_rules';
+import { patchRules } from '../../rules/patch_rules';
 import { importRulesQuerySchema, importRulesPayloadSchema } from '../schemas/import_rules_schema';
 import { GetScopedClients } from '../../../../services';
 
 type PromiseFromStreams = ImportRuleAlertRest | Error;
 
-/*
- * We were getting some error like that possible EventEmitter memory leak detected
- * So we decide to batch the update by 10 to avoid any complication in the node side
- * https://nodejs.org/docs/latest/api/events.html#events_emitter_setmaxlisteners_n
- *
- */
 const CHUNK_PARSED_OBJECT_SIZE = 10;
 
 export const createImportRulesRoute = (
@@ -72,13 +65,17 @@ export const createImportRulesRoute = (
       const { filename } = request.payload.file.hapi;
       const fileExtension = extname(filename).toLowerCase();
       if (fileExtension !== '.ndjson') {
-        return Boom.badRequest(`Invalid file extension ${fileExtension}`);
+        return headers
+          .response({
+            message: `Invalid file extension ${fileExtension}`,
+            status_code: 400,
+          })
+          .code(400);
       }
 
       const objectLimit = config().get<number>('savedObjects.maxImportExportSize');
       const readStream = createRulesStreamFromNdJson(request.payload.file, objectLimit);
       const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([readStream]);
-
       const uniqueParsedObjects = Array.from(
         parsedObjects
           .reduce(
@@ -123,6 +120,7 @@ export const createImportRulesRoute = (
                 }
                 const {
                   description,
+                  enabled,
                   false_positives: falsePositives,
                   from,
                   immutable,
@@ -169,7 +167,7 @@ export const createImportRulesRoute = (
                       alertsClient,
                       actionsClient,
                       description,
-                      enabled: false,
+                      enabled,
                       falsePositives,
                       from,
                       immutable,
@@ -197,12 +195,12 @@ export const createImportRulesRoute = (
                     });
                     resolve({ rule_id: ruleId, status_code: 200 });
                   } else if (rule != null && request.query.overwrite) {
-                    await updateRules({
+                    await patchRules({
                       alertsClient,
                       actionsClient,
                       savedObjectsClient,
                       description,
-                      enabled: false,
+                      enabled,
                       falsePositives,
                       from,
                       immutable,
@@ -235,7 +233,7 @@ export const createImportRulesRoute = (
                       createBulkErrorObject({
                         ruleId,
                         statusCode: 409,
-                        message: `This Rule "${rule.name}" already exists`,
+                        message: `rule_id: "${ruleId}" already exists`,
                       })
                     );
                   }

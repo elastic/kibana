@@ -22,7 +22,6 @@ import { esFilters } from '../../../../../../../../../../src/plugins/data/public
 
 import { tacticsOptions, techniquesOptions } from '../../../mitre/mitre_tactics_techniques';
 
-import { FilterLabel } from './filter_label';
 import * as i18n from './translations';
 import { BuildQueryBarDescription, BuildThreatDescription, ListItems } from './types';
 import { SeverityBadge } from '../severity_badge';
@@ -58,7 +57,7 @@ export const buildQueryBarDescription = ({
               <EuiFlexItem grow={false} key={`${field}-filter-${index}`}>
                 <EuiBadgeWrap color="hollow">
                   {indexPatterns != null ? (
-                    <FilterLabel
+                    <esFilters.FilterLabel
                       filter={filter}
                       valueLabel={esFilters.getDisplayValueFromFilter(filter, [indexPatterns])}
                     />
