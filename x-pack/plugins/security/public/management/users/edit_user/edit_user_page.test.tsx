@@ -10,7 +10,6 @@ import { EditUserPage } from './edit_user_page';
 import React from 'react';
 import { User, Role } from '../../../../common/model';
 import { ReactWrapper } from 'enzyme';
-
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { mockAuthenticatedUser } from '../../../../common/model/authenticated_user.mock';
 import { securityMock } from '../../../mocks';

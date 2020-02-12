@@ -10,7 +10,7 @@ import { ActionExecutor } from './action_executor';
 import { actionTypeRegistryMock } from '../action_type_registry.mock';
 import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/mocks';
 import { savedObjectsClientMock, loggingServiceMock } from '../../../../../src/core/server/mocks';
-import { createEventLoggerMock } from '../../../event_log/server/event_logger.mock';
+import { eventLoggerMock } from '../../../event_log/server/mocks';
 
 const actionExecutor = new ActionExecutor();
 const savedObjectsClient = savedObjectsClientMock.create();
@@ -41,7 +41,7 @@ actionExecutor.initialize({
   getServices,
   actionTypeRegistry,
   encryptedSavedObjectsPlugin,
-  eventLogger: createEventLoggerMock(),
+  eventLogger: eventLoggerMock.create(),
 });
 
 beforeEach(() => jest.resetAllMocks());

@@ -15,6 +15,10 @@ export interface Datafeed {
   chunking_config?: ChunkingConfig;
   frequency?: string;
   indices: IndexPatternTitle[];
+  /**
+   * The datafeed can contain indexes and indices
+   */
+  indexes?: IndexPatternTitle[];
   job_id?: JobId;
   query: object;
   query_delay?: string;
