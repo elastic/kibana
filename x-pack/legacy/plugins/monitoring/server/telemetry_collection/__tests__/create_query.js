@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 import { set } from 'lodash';
-import { createTypeFilter, createQuery } from '../create_query.js';
+import { createTypeFilter, createQuery } from '../create_query';
 
 describe('Create Type Filter', () => {
   it('Builds a type filter syntax', () => {
