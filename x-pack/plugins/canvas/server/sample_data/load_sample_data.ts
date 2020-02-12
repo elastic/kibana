@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { SampleDataRegistrySetup } from 'src/plugins/home/server';
 import { CANVAS as label } from '../../i18n';
 // @ts-ignore Untyped local
 import { ecommerceSavedObjects, flightsSavedObjects, webLogsSavedObjects } from './index';
-import { SampleDataRegistrySetup } from '../../../../../../src/plugins/home/server';
 
 export function loadSampleData(
   addSavedObjectsToSampleDataset: SampleDataRegistrySetup['addSavedObjectsToSampleDataset'],
