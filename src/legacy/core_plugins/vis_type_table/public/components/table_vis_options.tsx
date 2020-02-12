@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { get } from 'lodash';
 import React, { useEffect, useMemo } from 'react';
 import { EuiIconTip, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -43,7 +44,7 @@ function TableOptions({
         }),
       },
       ...tabifyGetColumns(aggs.getResponseAggs(), true)
-        .filter(col => col.aggConfig.type.getFormat(col.aggConfig).type.id === 'number')
+        .filter(col => get(col.aggConfig.type.getFormat(col.aggConfig), 'type.id') === 'number')
         .map(({ name }) => ({ value: name, text: name })),
     ],
     [aggs, stateParams.percentageCol, stateParams.dimensions]
