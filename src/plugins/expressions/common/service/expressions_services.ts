@@ -130,6 +130,15 @@ export class ExpressionsService {
     context?: ExtraContext
   ): Promise<Output> => this.executor.run<Input, Output, ExtraContext>(ast, input, context);
 
+  /**
+   * Create a new instance of `ExpressionsService`. The new instance inherits
+   * all state of the original `ExpressionsService`, including all expression
+   * types, expression functions and context. Also, all new types and functions
+   * registered in the original services AFTER the forking event will be
+   * available in the forked instance. However, all new types and functions
+   * registered in the forked instances will NOT be available to the original
+   * service.
+   */
   public readonly fork = (): ExpressionsService => {
     const executor = this.executor.fork();
     const renderers = this.renderers;
@@ -139,7 +148,7 @@ export class ExpressionsService {
   };
 
   public setup() {
-    const { executor, renderers, registerFunction, run } = this;
+    const { executor, renderers, registerFunction, run, fork } = this;
 
     const getFunction = executor.getFunction.bind(executor);
     const getFunctions = executor.getFunctions.bind(executor);
@@ -151,6 +160,7 @@ export class ExpressionsService {
     const registerType = executor.registerType.bind(executor);
 
     return {
+      fork,
       getFunction,
       getFunctions,
       getRenderer,

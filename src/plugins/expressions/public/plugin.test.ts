@@ -19,6 +19,7 @@
 
 import { expressionsPluginMock } from './mocks';
 import { add } from '../common/test_helpers/expression_functions/add';
+import { ExpressionsService } from '../common';
 
 describe('ExpressionsPublicPlugin', () => {
   test('can instantiate from mocks', async () => {
@@ -27,6 +28,13 @@ describe('ExpressionsPublicPlugin', () => {
   });
 
   describe('setup contract', () => {
+    test('.fork() method returns ExpressionsService', async () => {
+      const { setup } = await expressionsPluginMock.createPlugin();
+      const fork = setup.fork();
+
+      expect(fork).toBeInstanceOf(ExpressionsService);
+    });
+
     describe('.registerFunction()', () => {
       test('can register a function', async () => {
         const { setup } = await expressionsPluginMock.createPlugin();
