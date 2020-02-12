@@ -4,84 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { ReactWrapper } from 'enzyme';
-import {
-  EuiTableRow,
-  EuiButtonGroup,
-  EuiButtonGroupProps,
-  EuiCheckbox,
-  EuiCheckboxProps,
-} from '@elastic/eui';
-import { findTestSubject } from 'test_utils/find_test_subject';
 import { FeatureTable } from './feature_table';
 import { Role } from '../../../../../../../common/model';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import { kibanaFeatures } from '../__fixtures__/kibana_features';
-import { Feature } from '../../../../../../../../features/public';
+import { kibanaFeatures, createFeature } from '../__fixtures__/kibana_features';
+import { Feature, ISubFeature } from '../../../../../../../../features/public';
 import { createKibanaPrivileges } from '../__fixtures__/kibana_privileges';
-import { SubFeatureForm } from './sub_feature_form';
 import { PrivilegeFormCalculator } from '../privilege_form_calculator';
-
-function getDisplayedPrivileges(wrapper: ReactWrapper<any>) {
-  const allExpanderButtons = findTestSubject(wrapper, 'expandFeaturePrivilegeRow');
-  allExpanderButtons.forEach(button => button.simulate('click'));
-
-  // each expanded row renders its own `EuiTableRow`, so there are 2 rows
-  // for each feature: one for the primary feature privilege, and one for the sub privilege form
-  const rows = wrapper
-    .find(EuiTableRow)
-    // filter out expanded rows where no sub features are available
-    .filterWhere(row => findTestSubject(row, 'noSubFeatures').length === 0);
-
-  return rows.reduce((acc, row) => {
-    const subFeaturePrivileges = [];
-    const subFeatureForm = row.find(SubFeatureForm);
-    if (subFeatureForm.length > 0) {
-      const { featureId } = subFeatureForm.props();
-      const independentPrivileges = (subFeatureForm.find(EuiCheckbox) as ReactWrapper<
-        EuiCheckboxProps
-      >).reduce((acc2, checkbox) => {
-        const { id: privilegeId, checked } = checkbox.props();
-        return checked ? [...acc2, privilegeId] : acc2;
-      }, [] as string[]);
-
-      const mutuallyExclusivePrivileges = (subFeatureForm.find(EuiButtonGroup) as ReactWrapper<
-        EuiButtonGroupProps
-      >).reduce((acc2, subPrivButtonGroup) => {
-        const { idSelected: selectedSubPrivilege } = subPrivButtonGroup.props();
-        return selectedSubPrivilege && selectedSubPrivilege !== 'none'
-          ? [...acc2, selectedSubPrivilege]
-          : acc2;
-      }, [] as string[]);
-
-      subFeaturePrivileges.push(...independentPrivileges, ...mutuallyExclusivePrivileges);
-
-      return {
-        ...acc,
-        [featureId]: {
-          ...acc[featureId],
-          subFeaturePrivileges,
-        },
-      };
-    } else {
-      const buttonGroup = row.find(EuiButtonGroup);
-      const { name, idSelected } = buttonGroup.props();
-      expect(name).toBeDefined();
-      expect(idSelected).toBeDefined();
-
-      const featureId = name!.substr(`featurePrivilege_`.length);
-      const primaryFeaturePrivilege = idSelected!.substr(`${featureId}_`.length);
-
-      return {
-        ...acc,
-        [featureId]: {
-          ...acc[featureId],
-          primaryFeaturePrivilege,
-        },
-      };
-    }
-  }, {} as Record<string, { primaryFeaturePrivilege: string; subFeaturePrivileges: string[] }>);
-}
+import { getDisplayedFeaturePrivileges } from './__fixtures__';
 
 const createRole = (kibana: Role['kibana'] = []): Role => {
   return {
@@ -112,7 +42,7 @@ const setup = (config: TestConfig) => {
     />
   );
 
-  const displayedPrivileges = getDisplayedPrivileges(wrapper);
+  const displayedPrivileges = getDisplayedFeaturePrivileges(wrapper);
 
   return {
     wrapper,
@@ -159,7 +89,7 @@ describe('FeatureTable', () => {
     `);
   });
 
-  it('renders with all privileges granted at the space when space base privilege is "all"', () => {
+  it('renders with all included privileges granted at the space when space base privilege is "all"', () => {
     const role = createRole([
       {
         spaces: ['*'],
@@ -184,6 +114,345 @@ describe('FeatureTable', () => {
         },
         "with_excluded_sub_features": Object {
           "primaryFeaturePrivilege": "all",
+          "subFeaturePrivileges": Array [],
+        },
+        "with_sub_features": Object {
+          "primaryFeaturePrivilege": "all",
+          "subFeaturePrivileges": Array [
+            "with_sub_features_cool_toggle_1",
+            "with_sub_features_cool_toggle_2",
+            "cool_all",
+          ],
+        },
+      }
+    `);
+  });
+
+  it('renders with sub-feature privileges granted when primary feature privilege is "all"', () => {
+    const role = createRole([
+      {
+        spaces: ['*'],
+        base: ['read'],
+        feature: {
+          unit_test: ['all'],
+        },
+      },
+    ]);
+    const feature = createFeature({
+      id: 'unit_test',
+      name: 'Unit Test Feature',
+      subFeatures: [
+        {
+          name: 'Some Sub Feature',
+          privilegeGroups: [
+            {
+              groupType: 'independent',
+              privileges: [
+                {
+                  id: 'sub-toggle-1',
+                  name: 'Sub Toggle 1',
+                  includeIn: 'all',
+                  savedObject: { all: [], read: [] },
+                  ui: ['sub-toggle-1'],
+                },
+                {
+                  id: 'sub-toggle-2',
+                  name: 'Sub Toggle 2',
+                  includeIn: 'read',
+                  savedObject: { all: [], read: [] },
+                  ui: ['sub-toggle-2'],
+                },
+              ],
+            },
+            {
+              groupType: 'mutually_exclusive',
+              privileges: [
+                {
+                  id: 'sub-option-1',
+                  name: 'Sub Option 1',
+                  includeIn: 'all',
+                  savedObject: { all: [], read: [] },
+                  ui: ['sub-option-1'],
+                },
+                {
+                  id: 'sub-toggle-2',
+                  name: 'Sub Toggle 2',
+                  includeIn: 'read',
+                  savedObject: { all: [], read: [] },
+                  ui: ['sub-option-2'],
+                },
+              ],
+            },
+          ],
+        },
+      ] as ISubFeature[],
+    });
+
+    const { displayedPrivileges } = setup({ role, features: [feature], privilegeIndex: 0 });
+    expect(displayedPrivileges).toMatchInlineSnapshot(`
+      Object {
+        "unit_test": Object {
+          "primaryFeaturePrivilege": "all",
+          "subFeaturePrivileges": Array [
+            "unit_test_sub-toggle-1",
+            "unit_test_sub-toggle-2",
+            "sub-option-1",
+          ],
+        },
+      }
+    `);
+  });
+
+  it('renders with some sub-feature privileges granted when primary feature privilege is "read"', () => {
+    const role = createRole([
+      {
+        spaces: ['*'],
+        base: ['read'],
+        feature: {
+          unit_test: ['read'],
+        },
+      },
+    ]);
+    const feature = createFeature({
+      id: 'unit_test',
+      name: 'Unit Test Feature',
+      subFeatures: [
+        {
+          name: 'Some Sub Feature',
+          privilegeGroups: [
+            {
+              groupType: 'independent',
+              privileges: [
+                {
+                  id: 'sub-toggle-1',
+                  name: 'Sub Toggle 1',
+                  includeIn: 'all',
+                  savedObject: { all: [], read: [] },
+                  ui: ['sub-toggle-1'],
+                },
+                {
+                  id: 'sub-toggle-2',
+                  name: 'Sub Toggle 2',
+                  includeIn: 'read',
+                  savedObject: { all: [], read: [] },
+                  ui: ['sub-toggle-2'],
+                },
+              ],
+            },
+            {
+              groupType: 'mutually_exclusive',
+              privileges: [
+                {
+                  id: 'sub-option-1',
+                  name: 'Sub Option 1',
+                  includeIn: 'all',
+                  savedObject: { all: [], read: [] },
+                  ui: ['sub-option-1'],
+                },
+                {
+                  id: 'sub-toggle-2',
+                  name: 'Sub Toggle 2',
+                  includeIn: 'read',
+                  savedObject: { all: [], read: [] },
+                  ui: ['sub-option-2'],
+                },
+              ],
+            },
+          ],
+        },
+      ] as ISubFeature[],
+    });
+
+    const { displayedPrivileges } = setup({ role, features: [feature], privilegeIndex: 0 });
+    expect(displayedPrivileges).toMatchInlineSnapshot(`
+      Object {
+        "unit_test": Object {
+          "primaryFeaturePrivilege": "read",
+          "subFeaturePrivileges": Array [
+            "unit_test_sub-toggle-2",
+            "sub-toggle-2",
+          ],
+        },
+      }
+    `);
+  });
+
+  it('renders with excluded sub-feature privileges not granted when primary feature privilege is "all"', () => {
+    const role = createRole([
+      {
+        spaces: ['*'],
+        base: ['read'],
+        feature: {
+          unit_test: ['all'],
+        },
+      },
+    ]);
+    const feature = createFeature({
+      id: 'unit_test',
+      name: 'Unit Test Feature',
+      subFeatures: [
+        {
+          name: 'Some Sub Feature',
+          privilegeGroups: [
+            {
+              groupType: 'independent',
+              privileges: [
+                {
+                  id: 'sub-toggle-1',
+                  name: 'Sub Toggle 1',
+                  includeIn: 'none',
+                  savedObject: { all: [], read: [] },
+                  ui: ['sub-toggle-1'],
+                },
+                {
+                  id: 'sub-toggle-2',
+                  name: 'Sub Toggle 2',
+                  includeIn: 'none',
+                  savedObject: { all: [], read: [] },
+                  ui: ['sub-toggle-2'],
+                },
+              ],
+            },
+            {
+              groupType: 'mutually_exclusive',
+              privileges: [
+                {
+                  id: 'sub-option-1',
+                  name: 'Sub Option 1',
+                  includeIn: 'all',
+                  savedObject: { all: [], read: [] },
+                  ui: ['sub-option-1'],
+                },
+                {
+                  id: 'sub-toggle-2',
+                  name: 'Sub Toggle 2',
+                  includeIn: 'read',
+                  savedObject: { all: [], read: [] },
+                  ui: ['sub-option-2'],
+                },
+              ],
+            },
+          ],
+        },
+      ] as ISubFeature[],
+    });
+
+    const { displayedPrivileges } = setup({ role, features: [feature], privilegeIndex: 0 });
+    expect(displayedPrivileges).toMatchInlineSnapshot(`
+      Object {
+        "unit_test": Object {
+          "primaryFeaturePrivilege": "all",
+          "subFeaturePrivileges": Array [
+            "unit_test_sub-toggle-2",
+            "sub-option-1",
+          ],
+        },
+      }
+    `);
+  });
+
+  it('renders with excluded sub-feature privileges granted when explicitly assigned', () => {
+    const role = createRole([
+      {
+        spaces: ['*'],
+        base: ['read'],
+        feature: {
+          unit_test: ['all', 'sub-toggle-1'],
+        },
+      },
+    ]);
+    const feature = createFeature({
+      id: 'unit_test',
+      name: 'Unit Test Feature',
+      subFeatures: [
+        {
+          name: 'Some Sub Feature',
+          privilegeGroups: [
+            {
+              groupType: 'independent',
+              privileges: [
+                {
+                  id: 'sub-toggle-1',
+                  name: 'Sub Toggle 1',
+                  includeIn: 'none',
+                  savedObject: { all: [], read: [] },
+                  ui: ['sub-toggle-1'],
+                },
+                {
+                  id: 'sub-toggle-2',
+                  name: 'Sub Toggle 2',
+                  includeIn: 'none',
+                  savedObject: { all: [], read: [] },
+                  ui: ['sub-toggle-2'],
+                },
+              ],
+            },
+            {
+              groupType: 'mutually_exclusive',
+              privileges: [
+                {
+                  id: 'sub-option-1',
+                  name: 'Sub Option 1',
+                  includeIn: 'all',
+                  savedObject: { all: [], read: [] },
+                  ui: ['sub-option-1'],
+                },
+                {
+                  id: 'sub-toggle-2',
+                  name: 'Sub Toggle 2',
+                  includeIn: 'read',
+                  savedObject: { all: [], read: [] },
+                  ui: ['sub-option-2'],
+                },
+              ],
+            },
+          ],
+        },
+      ] as ISubFeature[],
+    });
+
+    const { displayedPrivileges } = setup({ role, features: [feature], privilegeIndex: 0 });
+    expect(displayedPrivileges).toMatchInlineSnapshot(`
+      Object {
+        "unit_test": Object {
+          "primaryFeaturePrivilege": "all",
+          "subFeaturePrivileges": Array [
+            "unit_test_sub-toggle-1",
+            "unit_test_sub-toggle-2",
+            "sub-option-1",
+          ],
+        },
+      }
+    `);
+  });
+
+  it('renders with all included sub-feature privileges granted at the space when primary feature privileges are granted', () => {
+    const role = createRole([
+      {
+        spaces: ['*'],
+        base: ['read'],
+        feature: {},
+      },
+      {
+        spaces: ['foo'],
+        base: [],
+        feature: {
+          with_sub_features: ['all'],
+        },
+      },
+    ]);
+    const { displayedPrivileges } = setup({ role, features: kibanaFeatures, privilegeIndex: 1 });
+    expect(displayedPrivileges).toMatchInlineSnapshot(`
+      Object {
+        "excluded_from_base": Object {
+          "primaryFeaturePrivilege": "none",
+          "subFeaturePrivileges": Array [],
+        },
+        "no_sub_features": Object {
+          "primaryFeaturePrivilege": "none",
+        },
+        "with_excluded_sub_features": Object {
+          "primaryFeaturePrivilege": "none",
           "subFeaturePrivileges": Array [],
         },
         "with_sub_features": Object {
