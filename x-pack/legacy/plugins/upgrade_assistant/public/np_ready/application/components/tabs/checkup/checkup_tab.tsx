@@ -143,7 +143,6 @@ export class CheckupTab extends UpgradeAssistantTabComponent<CheckupTabProps, Ch
                   loadData={refreshCheckupData}
                   currentFilter={currentFilter}
                   onFilterChange={this.changeFilter}
-                  search={search}
                   onSearchChange={this.changeSearch}
                   availableGroupByOptions={this.availableGroupByOptions()}
                   currentGroupBy={currentGroupBy}
