@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiExpression } from '@elastic/eui';
 import { ChromeBreadcrumb, LegacyCoreStart } from 'src/core/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
@@ -44,7 +43,9 @@ export const getKibanaFrameworkAdapter = (
     id: 'uptime',
     name: 'Uptime Monitor Status',
     iconClass: 'alert',
-    alertParamsExpression: () => <AlertMonitorStatus autocomplete={plugins.data.autocomplete} />,
+    alertParamsExpression: params => {
+      return <AlertMonitorStatus {...params} autocomplete={plugins.data.autocomplete} />;
+    },
     validate: (alertParams: any): ValidationResult => ({ errors: {} }),
   });
   triggers_actions_ui.alertTypeRegistry.register(getAlertyType());

@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect } from 'react';
 import { connect } from 'react-redux';
 import { AppState } from '../../../state';
 import { selectIndexPattern } from '../../../state/selectors';
@@ -14,6 +13,11 @@ interface OwnProps {
   autocomplete: any;
 }
 
-const mapStateToProps = (state: AppState) => ({ indexPattern: selectIndexPattern(state) });
+const mapStateToProps = (state: AppState) => ({
+  locations: state.overviewFilters.filters.locations,
+  indexPattern: selectIndexPattern(state),
+});
 
-export const AlertMonitorStatus = connect<typeof mapStateToProps, {}, OwnProps>(mapStateToProps)(AlertMonitorStatusComponent);
+export const AlertMonitorStatus = connect<typeof mapStateToProps, {}, OwnProps>(mapStateToProps)(
+  AlertMonitorStatusComponent
+);
