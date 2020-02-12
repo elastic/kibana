@@ -29,6 +29,7 @@ import { CompilerMsg, pipeClosure } from './common';
 export function logOptimizerState(log: ToolingLog, config: OptimizerConfig) {
   return pipeClosure((update$: OptimizerUpdate$) => {
     const bundleStates = new Map<string, CompilerMsg['type']>();
+    const bundlesThatWereBuilt = new Set<string>();
     let loggedInit = false;
 
     return update$.pipe(
@@ -90,6 +91,10 @@ export function logOptimizerState(log: ToolingLog, config: OptimizerConfig) {
             continue;
           }
 
+          if (type === 'running') {
+            bundlesThatWereBuilt.add(id);
+          }
+
           bundleStates.set(id, type);
           log.debug(
             `[${id}] state = "${type}"${type !== 'running' ? ` after ${state.durSec} sec` : ''}`
@@ -116,10 +121,11 @@ export function logOptimizerState(log: ToolingLog, config: OptimizerConfig) {
         }
 
         if (state.phase === 'success') {
+          const buildCount = bundlesThatWereBuilt.size;
+          bundlesThatWereBuilt.clear();
           log.success(
-            config.watch
-              ? `watching for changes in all bundles after ${state.durSec} sec`
-              : `${state.compilerStates.length} bundles compiled successfully after ${state.durSec} sec`
+            `${buildCount} bundles compiled successfully after ${state.durSec} sec` +
+              (config.watch ? ', watching for changes' : '')
           );
           return true;
         }
