@@ -534,26 +534,20 @@ function VisualizeAppController(
     $scope.fetch();
   };
 
+  // update the query if savedQuery is stored
+  if (stateContainer.getState().savedQuery) {
+    savedQueryService.getSavedQuery(stateContainer.getState().savedQuery).then(savedQuery => {
+      $scope.$evalAsync(() => {
+        $scope.savedQuery = savedQuery;
+      });
+    });
+  }
+
   $scope.$watch('savedQuery', newSavedQuery => {
     if (!newSavedQuery) return;
     stateContainer.transitions.set('savedQuery', newSavedQuery.id);
 
     updateStateFromSavedQuery(newSavedQuery);
-  });
-
-  $scope.$watch('state.savedQuery', newSavedQueryId => {
-    if (!newSavedQueryId) {
-      $scope.savedQuery = undefined;
-      return;
-    }
-    if (!$scope.savedQuery || newSavedQueryId !== $scope.savedQuery.id) {
-      savedQueryService.getSavedQuery(newSavedQueryId).then(savedQuery => {
-        $scope.$evalAsync(() => {
-          $scope.savedQuery = savedQuery;
-          updateStateFromSavedQuery(savedQuery);
-        });
-      });
-    }
   });
 
   /**
