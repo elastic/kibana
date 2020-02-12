@@ -52,7 +52,6 @@ const getEmbeddableFactory: GetEmbeddableFactory = (id: string) => embeddableFac
 const editModeAction = createEditModeAction();
 const trigger: Trigger = {
   id: CONTEXT_MENU_TRIGGER,
-  actionIds: [editModeAction.id],
 };
 const embeddableFactory = new ContactCardEmbeddableFactory(
   {} as any,

@@ -36,7 +36,6 @@ test('returns actions set on trigger', () => {
   setup.registerAction(action1);
   setup.registerAction(action2);
   setup.registerTrigger({
-    actionIds: [],
     description: 'foo',
     id: 'trigger',
     title: 'baz',

@@ -24,5 +24,4 @@ export const HELLO_WORLD_TRIGGER_ID = 'HELLO_WORLD_TRIGGER_ID';
 
 export const helloWorldTrigger: Trigger = {
   id: HELLO_WORLD_TRIGGER_ID,
-  actionIds: [HELLO_WORLD_ACTION_TYPE],
 };
