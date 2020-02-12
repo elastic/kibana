@@ -8,180 +8,57 @@ import { contextMock } from './context.mock';
 import { initializeEs } from './init';
 
 describe('initializeEs', () => {
-  const esContext = contextMock.create();
-  const createIndexParams = {
-    index: '.kibana-event-log-000001',
-  };
-  const getIlmPolicyParams = {
-    method: 'GET',
-    path: '_ilm/policy/.kibana-event-log-policy',
-  };
-  const indexTemplateExistsParams = {
-    name: '.kibana-event-log-template',
-  };
-  const createIndexTemplateParams = {
-    create: true,
-    name: '.kibana-event-log-template',
-    body: expect.anything(),
-  };
-  const createIlmParams = {
-    method: 'PUT',
-    path: '_ilm/policy/.kibana-event-log-policy',
-    body: {
-      policy: {
-        phases: {
-          hot: {
-            actions: {
-              rollover: {
-                max_age: '30d',
-                max_size: '5GB',
-              },
-            },
-          },
-        },
-      },
-    },
-  };
+  let esContext = contextMock.create();
 
-  beforeEach(() => jest.resetAllMocks());
-
-  test('should initialize elasticsearch', async () => {
-    esContext.callEs.mockImplementation(
-      getCallEsImplementation({
-        ilmPolicyExists: false,
-        indexTemplateExists: false,
-        initialIndexExists: false,
-      })
-    );
-
-    await initializeEs(esContext);
-    expect(esContext.callEs).toHaveBeenCalledWith('transport.request', createIlmParams);
-    expect(esContext.callEs).toHaveBeenCalledWith('indices.putTemplate', createIndexTemplateParams);
-    expect(esContext.callEs).toHaveBeenCalledWith('indices.create', createIndexParams);
+  beforeEach(() => {
+    esContext = contextMock.create();
   });
 
-  test('should skip initializing ILM policy when it already exists', async () => {
-    esContext.callEs.mockImplementation(
-      getCallEsImplementation({
-        ilmPolicyExists: true,
-        indexTemplateExists: false,
-        initialIndexExists: false,
-      })
-    );
+  test(`should create ILM policy if it doesn't exist`, async () => {
+    esContext.esAdapter.doesIlmPolicyExist.mockResolvedValue(false);
 
     await initializeEs(esContext);
-    expect(esContext.callEs).not.toHaveBeenCalledWith('transport.request', createIlmParams);
-    expect(esContext.callEs).toHaveBeenCalledWith('indices.putTemplate', createIndexTemplateParams);
-    expect(esContext.callEs).toHaveBeenCalledWith('indices.create', createIndexParams);
+    expect(esContext.esAdapter.doesIlmPolicyExist).toHaveBeenCalled();
+    expect(esContext.esAdapter.createIlmPolicy).toHaveBeenCalled();
   });
 
-  test('should skip creating index template when it already exists', async () => {
-    esContext.callEs.mockImplementation(
-      getCallEsImplementation({
-        ilmPolicyExists: false,
-        indexTemplateExists: true,
-        initialIndexExists: false,
-      })
-    );
+  test(`shouldn't create ILM policy if it exists`, async () => {
+    esContext.esAdapter.doesIlmPolicyExist.mockResolvedValue(true);
 
     await initializeEs(esContext);
-    expect(esContext.callEs).toHaveBeenCalledWith('transport.request', createIlmParams);
-    expect(esContext.callEs).not.toHaveBeenCalledWith(
-      'indices.putTemplate',
-      createIndexTemplateParams
-    );
-    expect(esContext.callEs).toHaveBeenCalledWith('indices.create', createIndexParams);
+    expect(esContext.esAdapter.doesIlmPolicyExist).toHaveBeenCalled();
+    expect(esContext.esAdapter.createIlmPolicy).not.toHaveBeenCalled();
   });
 
-  test('should skip creating initial index when it already exists', async () => {
-    esContext.callEs.mockImplementation(
-      getCallEsImplementation({
-        ilmPolicyExists: false,
-        indexTemplateExists: false,
-        initialIndexExists: true,
-      })
-    );
+  test(`should create index template if it doesn't exist`, async () => {
+    esContext.esAdapter.doesIndexTemplateExist.mockResolvedValue(false);
 
     await initializeEs(esContext);
-    expect(esContext.callEs).toHaveBeenCalledWith('transport.request', createIlmParams);
-    expect(esContext.callEs).toHaveBeenCalledWith('indices.putTemplate', createIndexTemplateParams);
-    expect(esContext.callEs).not.toHaveBeenCalledWith('indices.create', createIndexParams);
+    expect(esContext.esAdapter.doesIndexTemplateExist).toHaveBeenCalled();
+    expect(esContext.esAdapter.createIndexTemplate).toHaveBeenCalled();
   });
 
-  test('should double check if index template exists before logging error', async () => {
-    esContext.callEs.mockImplementation(
-      getCallEsImplementation({
-        ilmPolicyExists: false,
-        indexTemplateExists: false,
-        initialIndexExists: false,
-        throwErrorWhenCreatingIndexTemplate: true,
-      })
-    );
+  test(`shouldn't create index template if it already exists`, async () => {
+    esContext.esAdapter.doesIndexTemplateExist.mockResolvedValue(true);
 
     await initializeEs(esContext);
-    expect(esContext.callEs).toHaveBeenCalledTimes(5);
-    expect(esContext.callEs).toHaveBeenNthCalledWith(1, 'transport.request', getIlmPolicyParams);
-    expect(esContext.callEs).toHaveBeenNthCalledWith(2, 'transport.request', createIlmParams);
-    expect(esContext.callEs).toHaveBeenNthCalledWith(
-      3,
-      'indices.existsTemplate',
-      indexTemplateExistsParams
-    );
-    expect(esContext.callEs).toHaveBeenNthCalledWith(
-      4,
-      'indices.putTemplate',
-      createIndexTemplateParams
-    );
-    expect(esContext.callEs).toHaveBeenNthCalledWith(
-      5,
-      'indices.existsTemplate',
-      indexTemplateExistsParams
-    );
+    expect(esContext.esAdapter.doesIndexTemplateExist).toHaveBeenCalled();
+    expect(esContext.esAdapter.createIndexTemplate).not.toHaveBeenCalled();
+  });
+
+  test(`should create initial index if it doesn't exist`, async () => {
+    esContext.esAdapter.doesAliasExist.mockResolvedValue(false);
+
+    await initializeEs(esContext);
+    expect(esContext.esAdapter.doesAliasExist).toHaveBeenCalled();
+    expect(esContext.esAdapter.createIndex).toHaveBeenCalled();
+  });
+
+  test(`shouldn't create initial index if it already exists`, async () => {
+    esContext.esAdapter.doesAliasExist.mockResolvedValue(true);
+
+    await initializeEs(esContext);
+    expect(esContext.esAdapter.doesAliasExist).toHaveBeenCalled();
+    expect(esContext.esAdapter.createIndex).not.toHaveBeenCalled();
   });
 });
-
-function throwNotFoundError() {
-  const err = new Error('Not found') as any;
-  err.statusCode = 404;
-  throw err;
-}
-
-function getCallEsImplementation({
-  ilmPolicyExists,
-  indexTemplateExists,
-  initialIndexExists,
-  throwErrorWhenCreatingIndexTemplate = false,
-}: {
-  ilmPolicyExists: boolean;
-  indexTemplateExists: boolean;
-  initialIndexExists: boolean;
-  throwErrorWhenCreatingIndexTemplate?: boolean;
-}) {
-  return async (operation: string, body?: any) => {
-    // Make ILM policy exist check return false
-    if (
-      operation === 'transport.request' &&
-      body?.method === 'GET' &&
-      body?.path === '_ilm/policy/.kibana-event-log-policy'
-    ) {
-      if (!ilmPolicyExists) {
-        throwNotFoundError();
-      }
-      return {};
-    }
-
-    // Make index template exists check return false
-    if (operation === 'indices.existsTemplate' && body?.name === '.kibana-event-log-template') {
-      return indexTemplateExists;
-    }
-
-    // Make alias exists check return false
-    if (operation === 'indices.existsAlias' && body?.name === '.kibana-event-log') {
-      return initialIndexExists;
-    }
-
-    if (operation === 'indices.putTemplate' && throwErrorWhenCreatingIndexTemplate) {
-      throw new Error('Fail');
-    }
-  };
-}
