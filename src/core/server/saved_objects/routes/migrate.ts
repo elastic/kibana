@@ -29,7 +29,7 @@ export const registerMigrateRoute = (
       path: '/_migrate',
       validate: false,
     },
-    async (context, req, res) => {
+    router.handleLegacyErrors(async (context, req, res) => {
       const migrator = await migratorPromise;
       const result = await migrator.runMigrations({ rerun: true });
       return res.ok({
@@ -38,6 +38,6 @@ export const registerMigrateRoute = (
           result,
         },
       });
-    }
+    })
   );
 };
