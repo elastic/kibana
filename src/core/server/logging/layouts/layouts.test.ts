@@ -56,7 +56,7 @@ test('`create()` creates correct layout.', () => {
   const patternLayout = Layouts.create({
     highlight: false,
     kind: 'pattern',
-    pattern: '[%date][%level][%context] $message',
+    pattern: '[%date][%level][%logger] %message',
   });
   expect(patternLayout).toBeInstanceOf(PatternLayout);
 

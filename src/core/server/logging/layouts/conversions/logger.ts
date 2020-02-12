@@ -22,8 +22,8 @@ import chalk from 'chalk';
 import { Conversion } from './type';
 import { LogRecord } from '../../log_record';
 
-export const ContextConversion: Conversion = {
-  pattern: /%context/g,
+export const LoggerConversion: Conversion = {
+  pattern: /%logger/g,
   convert(record: LogRecord, highlight: boolean) {
     let message = record.context;
     if (highlight) {

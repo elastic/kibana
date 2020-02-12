@@ -23,7 +23,7 @@ import { LogRecord } from '../log_record';
 import { Layout } from './layouts';
 import {
   Conversion,
-  ContextConversion,
+  LoggerConversion,
   LevelConversion,
   MetaConversion,
   MessageConversion,
@@ -34,7 +34,7 @@ import {
 /**
  * Default pattern used by PatternLayout if it's not overridden in the configuration.
  */
-const DEFAULT_PATTERN = `[%date][%level][%context]%meta %message`;
+const DEFAULT_PATTERN = `[%date][%level][%logger]%meta %message`;
 
 export const patternSchema = schema.string({
   validate: string => {
@@ -49,7 +49,7 @@ const patternLayoutSchema = schema.object({
 });
 
 const conversions: Conversion[] = [
-  ContextConversion,
+  LoggerConversion,
   MessageConversion,
   LevelConversion,
   MetaConversion,
