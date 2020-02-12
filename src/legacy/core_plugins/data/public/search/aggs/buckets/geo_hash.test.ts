@@ -78,46 +78,6 @@ describe('Geohash Agg', () => {
     it('should select precision parameter', () => {
       expect(precisionParam.name).toEqual('precision');
     });
-
-    describe('precision parameter write', () => {
-      const zoomToGeoHashPrecision: Record<string, any> = {
-        0: 1,
-        1: 2,
-        2: 2,
-        3: 2,
-        4: 3,
-        5: 3,
-        6: 4,
-        7: 4,
-        8: 4,
-        9: 5,
-        10: 5,
-        11: 6,
-        12: 6,
-        13: 6,
-        14: 7,
-        15: 7,
-        16: 8,
-        17: 8,
-        18: 8,
-        19: 9,
-        20: 9,
-        21: 10,
-      };
-
-      Object.keys(zoomToGeoHashPrecision).forEach((zoomLevel: string) => {
-        it(`zoom level ${zoomLevel} should correspond to correct geohash-precision`, () => {
-          const aggConfigs = getAggConfigs({
-            autoPrecision: true,
-            mapZoom: zoomLevel,
-          });
-
-          const { [BUCKET_TYPES.GEOHASH_GRID]: params } = aggConfigs.aggs[0].toDsl();
-
-          expect(params.precision).toEqual(zoomToGeoHashPrecision[zoomLevel]);
-        });
-      });
-    });
   });
 
   describe('getRequestAggs', () => {
@@ -170,14 +130,19 @@ describe('Geohash Agg', () => {
 
     beforeEach(() => {
       originalRequestAggs = geoHashBucketAgg.getRequestAggs(
-        getAggConfigs().aggs[0] as IBucketAggConfig
+        getAggConfigs({
+          boundingBox: {
+            top_left: { lat: 1, lon: -1 },
+            bottom_right: { lat: -1, lon: 1 },
+          },
+        }).aggs[0] as IBucketAggConfig
       ) as IBucketAggConfig[];
     });
 
     it('should change geo_bounding_box filter aggregation and vis session state when map movement is outside map collar', () => {
       const [, geoBoxingBox] = geoHashBucketAgg.getRequestAggs(
         getAggConfigs({
-          mapBounds: {
+          boundingBox: {
             top_left: { lat: 10.0, lon: -10.0 },
             bottom_right: { lat: 9.0, lon: -9.0 },
           },
@@ -190,7 +155,7 @@ describe('Geohash Agg', () => {
     it('should not change geo_bounding_box filter aggregation and vis session state when map movement is within map collar', () => {
       const [, geoBoxingBox] = geoHashBucketAgg.getRequestAggs(
         getAggConfigs({
-          mapBounds: {
+          boundingBox: {
             top_left: { lat: 1, lon: -1 },
             bottom_right: { lat: -1, lon: 1 },
           },
