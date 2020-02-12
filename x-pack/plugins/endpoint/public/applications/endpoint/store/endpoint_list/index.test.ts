@@ -20,7 +20,7 @@ describe('endpoint_list store concerns', () => {
   const generateEndpoint = (): EndpointMetadata => {
     return {
       event: {
-        created: new Date(),
+        created: new Date(0),
       },
       endpoint: {
         policy: {

@@ -18,12 +18,11 @@ describe('endpoint list saga', () => {
   let store: Store<ManagementState>;
   let getState: typeof store['getState'];
   let dispatch: Dispatch<AppAction>;
-  let stopSagas: () => void;
   // https://github.com/elastic/endpoint-app-team/issues/131
   const generateEndpoint = (): EndpointMetadata => {
     return {
       event: {
-        created: new Date(),
+        created: new Date(0),
       },
       endpoint: {
         policy: {
@@ -65,9 +64,6 @@ describe('endpoint list saga', () => {
     getState = store.getState;
     dispatch = store.dispatch;
   });
-  afterEach(() => {
-    stopSagas();
-  });
   test('it handles `userNavigatedToPage`', async () => {
     const apiResponse = getEndpointListApiResponse();
     fakeHttpServices.post.mockResolvedValue(apiResponse);
@@ -79,6 +75,6 @@ describe('endpoint list saga', () => {
         paging_properties: [{ page_index: 0 }, { page_size: 10 }],
       }),
     });
-    expect(listData(store.getState())).toEqual(apiResponse.endpoints);
+    expect(listData(getState())).toEqual(apiResponse.endpoints);
   });
 });

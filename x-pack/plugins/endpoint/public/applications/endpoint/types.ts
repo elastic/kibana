@@ -10,10 +10,10 @@ import { EndpointMetadata } from '../../../common/types';
 import { AppAction } from './store/action';
 import { AlertResultList } from '../../../common/types';
 
-export type MiddlewareFactory = (
+export type MiddlewareFactory<S = GlobalState> = (
   coreStart: CoreStart
 ) => (
-  api: MiddlewareAPI<Dispatch<AppAction>, GlobalState>
+  api: MiddlewareAPI<Dispatch<AppAction>, S>
 ) => (next: Dispatch<AppAction>) => (action: AppAction) => unknown;
 
 export interface ManagementState {
