@@ -7,7 +7,7 @@ import indexPatternResponse from './__fixtures__/index_pattern_response.json';
 
 import { setupGetFieldSuggestions } from './field';
 import {
-  isFilterable,
+  indexPatterns as indexPatternsUtils,
   QuerySuggestionGetFnArgs,
   KueryNode,
 } from '../../../../../../../src/plugins/data/public';
@@ -38,7 +38,7 @@ describe('Kuery field suggestions', () => {
       querySuggestionsArgs,
       mockKueryNode({ prefix, suffix })
     );
-    const filterableFields = indexPatternResponse.fields.filter(isFilterable);
+    const filterableFields = indexPatternResponse.fields.filter(indexPatternsUtils.isFilterable);
 
     expect(suggestions.length).toBe(filterableFields.length);
   });

@@ -18,14 +18,14 @@
  */
 
 import { find, keys, get } from 'lodash';
-import { esFilters } from '../../../../../common';
+import { Filter, FILTERS } from '../../../../../common';
 
-export const mapDefault = (filter: esFilters.Filter) => {
+export const mapDefault = (filter: Filter) => {
   const metaProperty = /(^\$|meta)/;
   const key = find(keys(filter), item => !item.match(metaProperty));
 
   if (key) {
-    const type = esFilters.FILTERS.CUSTOM;
+    const type = FILTERS.CUSTOM;
     const value = JSON.stringify(get(filter, key, {}));
 
     return { type, key, value };
