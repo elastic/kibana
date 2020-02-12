@@ -20,14 +20,23 @@
 import { TriggerRegistry, ActionRegistry } from '../types';
 import { Action } from '../actions';
 import { Trigger } from '../triggers/trigger';
+import { buildContextMenuForActions, openContextMenu } from '../context_menu';
+
+export interface UiActionsServiceParams {
+  readonly triggers?: TriggerRegistry;
+  readonly actions?: ActionRegistry;
+}
 
 export class UiActionsService {
-  constructor(
-    private readonly triggers: TriggerRegistry = new Map(),
-    private readonly actions: ActionRegistry = new Map()
-  ) {}
+  protected readonly triggers: TriggerRegistry;
+  protected readonly actions: ActionRegistry;
 
-  registerTrigger = (trigger: Trigger) => {
+  constructor({ triggers = new Map(), actions = new Map() }: UiActionsServiceParams = {}) {
+    this.triggers = triggers;
+    this.actions = actions;
+  }
+
+  public readonly registerTrigger = (trigger: Trigger) => {
     if (this.triggers.has(trigger.id)) {
       throw new Error(`Trigger [trigger.id = ${trigger.id}] already registered.`);
     }
@@ -35,7 +44,17 @@ export class UiActionsService {
     this.triggers.set(trigger.id, trigger);
   };
 
-  registerAction = (action: Action) => {
+  public readonly getTrigger = (id: string) => {
+    const trigger = this.triggers.get(id);
+
+    if (!trigger) {
+      throw new Error(`Trigger [triggerId = ${id}] does not exist.`);
+    }
+
+    return trigger;
+  };
+
+  public readonly registerAction = (action: Action) => {
     if (this.actions.has(action.id)) {
       throw new Error(`Action [action.id = ${action.id}] already registered.`);
     }
@@ -43,7 +62,7 @@ export class UiActionsService {
     this.actions.set(action.id, action);
   };
 
-  attachAction = (triggerId: string, actionId: string): void => {
+  public readonly attachAction = (triggerId: string, actionId: string): void => {
     const trigger = this.triggers.get(triggerId);
 
     if (!trigger) {
@@ -57,7 +76,7 @@ export class UiActionsService {
     }
   };
 
-  detachAction = (triggerId: string, actionId: string) => {
+  public readonly detachAction = (triggerId: string, actionId: string) => {
     const trigger = this.triggers.get(triggerId);
 
     if (!trigger) {
@@ -69,18 +88,79 @@ export class UiActionsService {
     trigger.actionIds = trigger.actionIds.filter(id => id !== actionId);
   };
 
+  public readonly getTriggerActions = (triggerId: string) => {
+    const trigger = this.getTrigger!(triggerId);
+    return trigger.actionIds
+      .map(actionId => this.actions.get(actionId))
+      .filter(Boolean) as Action[];
+  };
+
+  public readonly getTriggerCompatibleActions = async <C>(triggerId: string, context: C) => {
+    const actions = this.getTriggerActions!(triggerId);
+    const isCompatibles = await Promise.all(actions.map(action => action.isCompatible(context)));
+    return actions.reduce<Action[]>(
+      (acc, action, i) => (isCompatibles[i] ? [...acc, action] : acc),
+      []
+    );
+  };
+
+  private async executeSingleAction<A extends {} = {}>(action: Action<A>, actionContext: A) {
+    const href = action.getHref && action.getHref(actionContext);
+
+    if (href) {
+      window.location.href = href;
+      return;
+    }
+
+    await action.execute(actionContext);
+  }
+
+  private async executeMultipleActions<C>(actions: Action[], actionContext: C) {
+    const panel = await buildContextMenuForActions({
+      actions,
+      actionContext,
+      closeMenu: () => session.close(),
+    });
+    const session = openContextMenu([panel]);
+  }
+
+  public readonly executeTriggerActions = async <C>(triggerId: string, actionContext: C) => {
+    const actions = await this.getTriggerCompatibleActions!(triggerId, actionContext);
+
+    if (!actions.length) {
+      throw new Error(
+        `No compatible actions found to execute for trigger [triggerId = ${triggerId}].`
+      );
+    }
+
+    if (actions.length === 1) {
+      await this.executeSingleAction(actions[0], actionContext);
+      return;
+    }
+
+    await this.executeMultipleActions(actions, actionContext);
+  };
+
+  /**
+   * Removes all registered triggers and actions.
+   */
+  public readonly clear = () => {
+    this.actions.clear();
+    this.triggers.clear();
+  };
+
   /**
    * "Fork" a separate instance of `UiActionsService` that inherits all existing
    * triggers and actions, but going forward all new triggers and actions added
    * to this instance of `UiActionsService` are only available within this instance.
    */
-  fork = (): UiActionsService => {
+  public readonly fork = (): UiActionsService => {
     const triggers: TriggerRegistry = new Map();
     const actions: ActionRegistry = new Map();
 
     for (const [key, value] of this.triggers.entries()) triggers.set(key, value);
     for (const [key, value] of this.actions.entries()) actions.set(key, value);
 
-    return new UiActionsService(triggers, actions);
+    return new UiActionsService({ triggers, actions });
   };
 }
