@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { TimeRange, Query, esFilters, DataPublicPluginStart } from 'src/plugins/data/public';
+import { TimeRange, Query, Filter, DataPublicPluginStart } from 'src/plugins/data/public';
 import { IEmbeddableStart } from 'src/plugins/embeddable/public';
 import { LegacyCoreStart } from 'kibana/public';
 import { VisState } from 'src/legacy/core_plugins/visualizations/public';
@@ -49,7 +49,7 @@ export interface EditorRenderProps {
   core: LegacyCoreStart;
   data: DataPublicPluginStart;
   embeddables: IEmbeddableStart;
-  filters: esFilters.Filter[];
+  filters: Filter[];
   uiState: PersistedState;
   timeRange: TimeRange;
   query?: Query;
