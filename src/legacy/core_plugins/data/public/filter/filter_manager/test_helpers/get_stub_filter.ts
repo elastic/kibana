@@ -17,15 +17,15 @@
  * under the License.
  */
 
-import { esFilters } from '../../../../../../../plugins/data/public';
+import { Filter } from '../../../../../../../plugins/data/public';
 
 export function getFilter(
-  store: esFilters.FilterStateStore,
+  store: any, // I don't want to export only for this, as it should move to data plugin
   disabled: boolean,
   negated: boolean,
   queryKey: string,
   queryValue: any
-): esFilters.Filter {
+): Filter {
   return {
     $state: {
       store,
