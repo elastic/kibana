@@ -103,7 +103,7 @@ function ContextAppRouteController($routeParams, $scope, config, $route) {
     ],
     newValues => {
       const [columns, predecessorCount, successorCount] = newValues;
-      if (Array.isArray(columns) && predecessorCount >= 1 && successorCount >= 1) {
+      if (Array.isArray(columns) && predecessorCount >= 0 && successorCount >= 0) {
         appState.set({
           ...this.state,
           ...{ columns, predecessorCount, successorCount },
