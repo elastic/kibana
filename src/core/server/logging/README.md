@@ -245,6 +245,12 @@ The log will be less verbose with `warn` level for the `server` context:
 ```
 
 ### Logging config migration
+Kibana during `v7` version provides compatibility with the Legacy logging.
+All log messages handled by `root` context are forwarded to the legacy logging service. If you re-write
+root appenders, make sure that if contains `default` to provide backward compatibility.
+**Note**: If you define an appender for a context, the log messages aren't handled by the
+`root` context anymore and not forwarded to the legacy logging service.
+ 
 #### logging.dest
 By default logs in *stdout*. With new Kibana logging you can use pre-existing `console` appender or
 define a custom one.
