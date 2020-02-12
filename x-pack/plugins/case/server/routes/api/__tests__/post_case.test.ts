@@ -37,7 +37,7 @@ describe('POST cases', () => {
     const response = await routeHandler(theContext, request, kibanaResponseFactory);
     expect(response.status).toEqual(200);
     expect(response.payload.id).toEqual('mock-it');
-    expect(response.payload.attributes.created_by.username).toEqual('awesome');
+    expect(response.payload.created_by.username).toEqual('awesome');
   });
   it(`Returns an error if postNewCase throws`, async () => {
     const request = httpServerMock.createKibanaRequest({

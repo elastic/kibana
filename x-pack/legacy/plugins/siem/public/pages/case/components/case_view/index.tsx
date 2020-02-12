@@ -28,7 +28,7 @@ import { HeaderPage } from '../../../../components/header_page_new';
 import { Markdown } from '../../../../components/markdown';
 import { PropertyActions } from '../property_actions';
 import { TagList } from '../tag_list';
-import { useGetCase, RefreshCase } from '../../../../containers/case/use_get_case';
+import { useGetCase } from '../../../../containers/case/use_get_case';
 import { UserActionTree } from '../user_action_tree';
 import { UserList } from '../user_list';
 import { useUpdateCase } from '../../../../containers/case/use_update_case';
@@ -68,10 +68,9 @@ interface CasesProps {
   caseId: string;
   initialData: FlattenedCaseSavedObject;
   isLoading: boolean;
-  refreshCase: RefreshCase;
 }
 
-export const Cases = React.memo<CasesProps>(({ caseId, initialData, isLoading, refreshCase }) => {
+export const Cases = React.memo<CasesProps>(({ caseId, initialData, isLoading }) => {
   const [{ data }, dispatchUpdateCaseProperty] = useUpdateCase(caseId, initialData);
   const [isEditDescription, setIsEditDescription] = useState(false);
   const [isEditTitle, setIsEditTitle] = useState(false);
@@ -170,7 +169,7 @@ export const Cases = React.memo<CasesProps>(({ caseId, initialData, isLoading, r
               <strong>{`${data.created_by.username}`}</strong>
               {` ${i18n.ADDED_DESCRIPTION} `}{' '}
               <FormattedRelativePreferenceDate value={data.created_at} />
-              {/* STEPH come back and add label `on` */}
+              {/* STEPH FIX come back and add label `on` */}
             </p>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -292,7 +291,7 @@ export const Cases = React.memo<CasesProps>(({ caseId, initialData, isLoading, r
 });
 
 export const CaseView = React.memo(({ caseId }: Props) => {
-  const [{ data, isLoading, isError }, refreshCase] = useGetCase(caseId);
+  const [{ data, isLoading, isError }] = useGetCase(caseId);
   if (isError) {
     return null;
   }
@@ -306,9 +305,7 @@ export const CaseView = React.memo(({ caseId }: Props) => {
     );
   }
 
-  return (
-    <Cases caseId={caseId} initialData={data} refreshCase={refreshCase} isLoading={isLoading} />
-  );
+  return <Cases caseId={caseId} initialData={data} isLoading={isLoading} />;
 });
 
 CaseView.displayName = 'CaseView';

@@ -6,8 +6,9 @@
 
 import { schema } from '@kbn/config-schema';
 import { RouteDeps } from '.';
-import { formatSavedOptionsFind, wrapError } from './utils';
+import { formatAllCases, formatSavedOptionsFind, wrapError } from './utils';
 import { SavedObjectsFindOptionsSchema } from './schema';
+import { AllCases } from './types';
 
 export function initGetAllCasesApi({ caseService, router }: RouteDeps) {
   router.get(
@@ -28,7 +29,10 @@ export function initGetAllCasesApi({ caseService, router }: RouteDeps) {
               client: context.core.savedObjects.client,
             };
         const cases = await caseService.getAllCases(args);
-        return response.ok({ body: cases });
+        const body: AllCases = formatAllCases(cases);
+        return response.ok({
+          body,
+        });
       } catch (error) {
         return response.customError(wrapError(error));
       }

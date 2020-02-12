@@ -15,23 +15,34 @@ import {
   UPDATE_QUERY_PARAMS,
   UPDATE_FILTER_OPTIONS,
 } from './constants';
-import {
-  FlattenedCasesSavedObjects,
-  SortFieldCase,
-  UseGetCasesState,
-  QueryArgs,
-  Action,
-  FilterOptions,
-} from './types';
+import { AllCases, SortFieldCase, FilterOptions, QueryParams } from './types';
+import { getTypedPayload } from './utils';
 import { Direction } from '../../graphql/types';
 import { errorToToaster } from '../../components/ml/api/error_to_toaster';
 import { useStateToaster } from '../../components/toasters';
 import * as i18n from './translations';
-import { flattenSavedObjects } from './utils';
 import { getCases } from './api';
 
+export interface UseGetCasesState {
+  data: AllCases;
+  isLoading: boolean;
+  isError: boolean;
+  queryParams: QueryParams;
+  filterOptions: FilterOptions;
+}
+
+export interface QueryArgs {
+  page?: number;
+  perPage?: number;
+  sortField?: SortFieldCase;
+  sortOrder?: Direction;
+}
+
+export interface Action {
+  type: string;
+  payload?: AllCases | QueryArgs | FilterOptions;
+}
 const dataFetchReducer = (state: UseGetCasesState, action: Action): UseGetCasesState => {
-  let getTypedPayload;
   switch (action.type) {
     case FETCH_INIT:
       return {
@@ -40,12 +51,11 @@ const dataFetchReducer = (state: UseGetCasesState, action: Action): UseGetCasesS
         isError: false,
       };
     case FETCH_SUCCESS:
-      getTypedPayload = (a: Action['payload']) => a as FlattenedCasesSavedObjects;
       return {
         ...state,
         isLoading: false,
         isError: false,
-        data: getTypedPayload(action.payload),
+        data: getTypedPayload<AllCases>(action.payload),
       };
     case FETCH_FAILURE:
       return {
@@ -62,10 +72,9 @@ const dataFetchReducer = (state: UseGetCasesState, action: Action): UseGetCasesS
         },
       };
     case UPDATE_FILTER_OPTIONS:
-      getTypedPayload = (a: Action['payload']) => a as FilterOptions;
       return {
         ...state,
-        filterOptions: getTypedPayload(action.payload),
+        filterOptions: getTypedPayload<FilterOptions>(action.payload),
       };
     default:
       throw new Error();
@@ -81,11 +90,11 @@ function useDidUpdateEffect(fn: () => void, inputs: unknown[]) {
   }, inputs);
 }
 
-const initialData: FlattenedCasesSavedObjects = {
+const initialData: AllCases = {
   page: 0,
   per_page: 0,
   total: 0,
-  saved_objects: [],
+  cases: [],
 };
 export const useGetCases = (): [
   UseGetCasesState,
@@ -107,13 +116,13 @@ export const useGetCases = (): [
       sortOrder: Direction.desc,
     },
   });
-  const [query, setQuery] = useState(state.queryParams as QueryArgs);
+  const [queryParams, setQueryParams] = useState(state.queryParams as QueryArgs);
   const [filterQuery, setFilters] = useState(state.filterOptions as FilterOptions);
   const [, dispatchToaster] = useStateToaster();
 
   useDidUpdateEffect(() => {
-    dispatch({ type: UPDATE_QUERY_PARAMS, payload: query });
-  }, [query]);
+    dispatch({ type: UPDATE_QUERY_PARAMS, payload: queryParams });
+  }, [queryParams]);
 
   useDidUpdateEffect(() => {
     dispatch({ type: UPDATE_FILTER_OPTIONS, payload: filterQuery });
@@ -131,10 +140,7 @@ export const useGetCases = (): [
         if (!didCancel) {
           dispatch({
             type: FETCH_SUCCESS,
-            payload: {
-              ...response,
-              saved_objects: flattenSavedObjects(response.saved_objects),
-            },
+            payload: response,
           });
         }
       } catch (error) {
@@ -149,5 +155,5 @@ export const useGetCases = (): [
       didCancel = true;
     };
   }, [state.queryParams, state.filterOptions]);
-  return [state, setQuery, setFilters];
+  return [state, setQueryParams, setFilters];
 };

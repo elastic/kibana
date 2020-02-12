@@ -5,12 +5,21 @@
  */
 
 import { boomify, isBoom } from 'boom';
-import { CustomHttpResponseOptions, ResponseError } from 'kibana/server';
 import {
+  CustomHttpResponseOptions,
+  ResponseError,
+  SavedObject,
+  SavedObjectsFindResponse,
+} from 'kibana/server';
+import {
+  AllComments,
+  CaseAttributes,
+  CommentAttributes,
+  FlattenedCaseSavedObject,
+  FlattenedCommentSavedObject,
+  AllCases,
   NewCaseType,
-  NewCaseFormatted,
   NewCommentType,
-  NewCommentFormatted,
   SavedObjectsFindOptionsType,
   SavedObjectsFindOptionsTypeFormatted,
   UserType,
@@ -19,7 +28,7 @@ import {
 export const formatNewCase = (
   newCase: NewCaseType,
   { full_name, username }: { full_name?: string; username: string }
-): NewCaseFormatted => ({
+): CaseAttributes => ({
   created_at: new Date().valueOf(),
   created_by: { full_name, username },
   updated_at: new Date().valueOf(),
@@ -35,10 +44,11 @@ export const formatNewComment = ({
   newComment,
   full_name,
   username,
-}: NewCommentArgs): NewCommentFormatted => ({
+}: NewCommentArgs): CommentAttributes => ({
   ...newComment,
   created_at: new Date().valueOf(),
   created_by: { full_name, username },
+  updated_at: new Date().valueOf(),
 });
 
 export function wrapError(error: any): CustomHttpResponseOptions<ResponseError> {
@@ -77,4 +87,64 @@ export const formatSavedOptionsFind = (
     };
   }
   return options;
+};
+
+export const formatAllCases = (cases: SavedObjectsFindResponse<CaseAttributes>): AllCases => ({
+  page: cases.page,
+  per_page: cases.per_page,
+  total: cases.total,
+  cases: flattenCaseSavedObjects(cases.saved_objects),
+});
+
+export const flattenCaseSavedObjects = (
+  savedObjects: SavedObjectsFindResponse<CaseAttributes>['saved_objects']
+): FlattenedCaseSavedObject[] =>
+  savedObjects.reduce(
+    (acc: FlattenedCaseSavedObject[], savedObject: SavedObject<CaseAttributes>) => {
+      return [...acc, flattenCaseSavedObject(savedObject)];
+    },
+    []
+  );
+
+export const flattenCaseSavedObject = (
+  savedObject: SavedObject<CaseAttributes>
+): FlattenedCaseSavedObject => {
+  const flattened = {
+    ...savedObject,
+    ...savedObject.attributes,
+  };
+  delete flattened.attributes;
+  // typescript STEPH FIX
+  return flattened;
+};
+
+export const formatAllComments = (
+  comments: SavedObjectsFindResponse<CommentAttributes>
+): AllComments => ({
+  page: comments.page,
+  per_page: comments.per_page,
+  total: comments.total,
+  comments: flattenCommentSavedObjects(comments.saved_objects),
+});
+
+export const flattenCommentSavedObjects = (
+  savedObjects: SavedObjectsFindResponse<CommentAttributes>['saved_objects']
+): FlattenedCommentSavedObject[] =>
+  savedObjects.reduce(
+    (acc: FlattenedCommentSavedObject[], savedObject: SavedObject<CommentAttributes>) => {
+      return [...acc, flattenCommentSavedObject(savedObject)];
+    },
+    []
+  );
+
+export const flattenCommentSavedObject = (
+  savedObject: SavedObject<CommentAttributes>
+): FlattenedCommentSavedObject => {
+  const flattened = {
+    ...savedObject,
+    ...savedObject.attributes,
+  };
+  delete flattened.attributes;
+  // typescript STEPH FIX
+  return flattened;
 };

@@ -8,61 +8,53 @@ export const mockCases = [
   {
     type: 'case-workflow',
     id: 'mock-id-1',
-    attributes: {
-      created_at: 1574718888885,
-      created_by: {
-        full_name: null,
-        username: 'elastic',
-      },
-      description: 'This is a brand new case of a bad meanie defacing data',
-      title: 'Super Bad Security Issue',
-      state: 'open',
-      tags: ['defacement'],
-      case_type: 'security',
-      updated_at: 1574718888885,
+    created_at: 1574718888885,
+    created_by: {
+      full_name: null,
+      username: 'elastic',
     },
+    description: 'This is a brand new case of a bad meanie defacing data',
+    title: 'Super Bad Security Issue',
+    state: 'open',
+    tags: ['defacement'],
+    case_type: 'security',
+    updated_at: 1574718888885,
     references: [],
-    updated_at: '2019-11-25T21:54:48.952Z',
     version: 'WzAsMV0=',
   },
   {
     type: 'case-workflow',
     id: 'mock-id-2',
-    attributes: {
-      created_at: 1574721120834,
-      created_by: {
-        full_name: null,
-        username: 'elastic',
-      },
-      description: 'Oh no, a bad meanie destroying data!',
-      title: 'Damaging Data Destruction Detected',
-      state: 'open',
-      tags: ['Data Destruction'],
-      case_type: 'security',
-      updated_at: 1574721130834,
+    created_at: 1574721120834,
+    created_by: {
+      full_name: null,
+      username: 'elastic',
     },
+    description: 'Oh no, a bad meanie destroying data!',
+    title: 'Damaging Data Destruction Detected',
+    state: 'open',
+    tags: ['Data Destruction'],
+    case_type: 'security',
+    updated_at: 1574721130834,
+
     references: [],
-    updated_at: '2019-11-25T22:32:00.900Z',
     version: 'WzQsMV0=',
   },
   {
     type: 'case-workflow',
     id: 'mock-id-3',
-    attributes: {
-      created_at: 1574721137881,
-      created_by: {
-        full_name: null,
-        username: 'elastic',
-      },
-      description: 'Oh no, a bad meanie going LOLBins all over the place!',
-      title: 'Another bad one',
-      state: 'open',
-      tags: ['LOLBins'],
-      case_type: 'security',
-      updated_at: 1574721147881,
+    created_at: 1574721137881,
+    created_by: {
+      full_name: null,
+      username: 'elastic',
     },
+    description: 'Oh no, a bad meanie going LOLBins all over the place!',
+    title: 'Another bad one',
+    state: 'open',
+    tags: ['LOLBins'],
+    case_type: 'security',
+    updated_at: 1574721147881,
     references: [],
-    updated_at: '2019-11-25T22:32:17.947Z',
     version: 'WzUsMV0=',
   },
 ];
@@ -80,13 +72,11 @@ export const mockCaseComments = [
   {
     type: 'case-workflow-comment',
     id: 'mock-comment-1',
-    attributes: {
-      comment: 'Wow, good luck catching that bad meanie!',
-      created_at: 1574718900112,
-      created_by: {
-        full_name: null,
-        username: 'elastic',
-      },
+    comment: 'Wow, good luck catching that bad meanie!',
+    created_at: 1574718900112,
+    created_by: {
+      full_name: null,
+      username: 'elastic',
     },
     references: [
       {
@@ -95,19 +85,17 @@ export const mockCaseComments = [
         id: 'mock-id-1',
       },
     ],
-    updated_at: '2019-11-25T21:55:00.177Z',
+    updated_at: 1574718900112,
     version: 'WzEsMV0=',
   },
   {
     type: 'case-workflow-comment',
     id: 'mock-comment-2',
-    attributes: {
-      comment: 'Well I decided to update my comment. So what? Deal with it.',
-      created_at: 1574718902724,
-      created_by: {
-        full_name: null,
-        username: 'elastic',
-      },
+    comment: 'Well I decided to update my comment. So what? Deal with it.',
+    created_at: 1574718902724,
+    created_by: {
+      full_name: null,
+      username: 'elastic',
     },
     references: [
       {
@@ -116,19 +104,17 @@ export const mockCaseComments = [
         id: 'mock-id-1',
       },
     ],
-    updated_at: '2019-11-25T21:55:14.633Z',
+    updated_at: 1574718902724,
     version: 'WzMsMV0=',
   },
   {
     type: 'case-workflow-comment',
     id: 'mock-comment-3',
-    attributes: {
-      comment: 'Wow, good luck catching that bad meanie!',
-      created_at: 1574721150542,
-      created_by: {
-        full_name: null,
-        username: 'elastic',
-      },
+    comment: 'Wow, good luck catching that bad meanie!',
+    created_at: 1574721150542,
+    created_by: {
+      full_name: null,
+      username: 'elastic',
     },
     references: [
       {
@@ -137,7 +123,7 @@ export const mockCaseComments = [
         id: 'mock-id-3',
       },
     ],
-    updated_at: '2019-11-25T22:32:30.608Z',
+    updated_at: 1574721150542,
     version: 'WzYsMV0=',
   },
 ];

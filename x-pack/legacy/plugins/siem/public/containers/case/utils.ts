@@ -4,16 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CaseSavedObject, FlattenedCaseSavedObject } from './types';
-
-export const flattenSavedObjects = (savedObjects: CaseSavedObject[]): FlattenedCaseSavedObject[] =>
-  savedObjects.reduce((acc: FlattenedCaseSavedObject[], savedObject: CaseSavedObject) => {
-    return [...acc, flattenSavedObject(savedObject)];
-  }, []);
-
-export const flattenSavedObject = (savedObject: CaseSavedObject): FlattenedCaseSavedObject => ({
-  ...savedObject,
-  ...savedObject.attributes,
-});
-
 export const getTypedPayload = <T>(a: unknown): T => a as T;

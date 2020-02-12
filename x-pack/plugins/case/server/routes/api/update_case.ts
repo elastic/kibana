@@ -30,7 +30,7 @@ export function initUpdateCaseApi({ caseService, router }: RouteDeps) {
             updated_at: new Date().valueOf(),
           },
         });
-        return response.ok({ body: updatedCase });
+        return response.ok({ body: updatedCase.attributes });
       } catch (error) {
         return response.customError(wrapError(error));
       }

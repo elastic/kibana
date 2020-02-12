@@ -8,21 +8,15 @@ import { useEffect, useReducer } from 'react';
 import { useStateToaster } from '../../components/toasters';
 import { errorToToaster } from '../../components/ml/api/error_to_toaster';
 import * as i18n from './translations';
-import {
-  FETCH_FAILURE,
-  FETCH_INIT,
-  FETCH_SUCCESS,
-  UPDATE_CASE,
-  UPDATE_CASE_PROPERTY,
-} from './constants';
-import { CaseSavedObject, FlattenedCaseSavedObject, UpdateCase } from './types';
+import { FETCH_FAILURE, FETCH_INIT, FETCH_SUCCESS, UPDATE_CASE_PROPERTY } from './constants';
+import { FlattenedCaseSavedObject, UpdateCase } from './types';
 import { updateCaseProperty } from './api';
+import { getTypedPayload } from './utils';
 
 type UpdateKey = keyof UpdateCase;
 
 interface NewCaseState {
   data: FlattenedCaseSavedObject;
-  newCase?: CaseSavedObject;
   isLoading: boolean;
   isError: boolean;
   updateKey?: UpdateKey | null;
@@ -35,11 +29,10 @@ interface UpdateByKey {
 
 interface Action {
   type: string;
-  payload?: UpdateCase | CaseSavedObject | UpdateByKey;
+  payload?: UpdateCase | UpdateByKey;
 }
 
 const dataFetchReducer = (state: NewCaseState, action: Action): NewCaseState => {
-  let getTypedPayload;
   switch (action.type) {
     case FETCH_INIT:
       return {
@@ -48,17 +41,8 @@ const dataFetchReducer = (state: NewCaseState, action: Action): NewCaseState => 
         isError: false,
         updateKey: null,
       };
-    case UPDATE_CASE:
-      getTypedPayload = (a: Action['payload']) => a as FlattenedCaseSavedObject;
-      return {
-        ...state,
-        isLoading: false,
-        isError: false,
-        data: getTypedPayload(action.payload),
-      };
     case UPDATE_CASE_PROPERTY:
-      getTypedPayload = (a: Action['payload']) => a as UpdateByKey;
-      const { updateKey, updateValue } = getTypedPayload(action.payload);
+      const { updateKey, updateValue } = getTypedPayload<UpdateByKey>(action.payload);
       return {
         ...state,
         isLoading: false,
@@ -70,14 +54,14 @@ const dataFetchReducer = (state: NewCaseState, action: Action): NewCaseState => 
         updateKey,
       };
     case FETCH_SUCCESS:
-      getTypedPayload = (a: Action['payload']) => a as UpdateCase;
       return {
         ...state,
         isLoading: false,
         isError: false,
+        // typescript STEPH FIX
         data: {
           ...state.data,
-          ...getTypedPayload(action.payload),
+          ...getTypedPayload<UpdateCase>(action.payload),
         },
       };
     case FETCH_FAILURE:
@@ -114,7 +98,7 @@ export const useUpdateCase = (
       dispatch({ type: FETCH_INIT });
       try {
         const response = await updateCaseProperty(caseId, { [updateKey]: state.data[updateKey] });
-        dispatch({ type: FETCH_SUCCESS, payload: response.attributes });
+        dispatch({ type: FETCH_SUCCESS, payload: response });
       } catch (error) {
         errorToToaster({ title: i18n.ERROR_TITLE, error, dispatchToaster });
         dispatch({ type: FETCH_FAILURE });

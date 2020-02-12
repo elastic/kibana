@@ -38,11 +38,15 @@ import {
 import { getCreateCaseUrl } from '../../../../components/link_to';
 
 export const AllCases = React.memo(() => {
-  const [{ data, isLoading, queryParams, filterOptions }, doFetch, setFilters] = useGetCases();
+  const [
+    { data, isLoading, queryParams, filterOptions },
+    setQueryParams,
+    setFilters,
+  ] = useGetCases();
 
   const tableOnChangeCallback = useCallback(
     ({ page, sort }: EuiBasicTableOnChange) => {
-      let newPagination = {};
+      let newQueryParams = {};
       if (sort) {
         let newSort;
         switch (sort.field) {
@@ -58,22 +62,22 @@ export const AllCases = React.memo(() => {
           default:
             newSort = SortFieldCase.createdAt;
         }
-        newPagination = {
-          ...newPagination,
+        newQueryParams = {
+          ...newQueryParams,
           sortField: newSort,
           sortOrder: sort.direction as Direction,
         };
       }
       if (page) {
-        newPagination = {
-          ...newPagination,
+        newQueryParams = {
+          ...newQueryParams,
           page: page.index + 1,
           perPage: page.size,
         };
       }
-      doFetch(newPagination);
+      setQueryParams(newQueryParams);
     },
-    [doFetch, queryParams]
+    [setQueryParams, queryParams]
   );
 
   const onFilterChangedCallback = useCallback(
@@ -95,10 +99,10 @@ export const AllCases = React.memo(() => {
           initial={{ search: filterOptions.search, tags: filterOptions.tags }}
         />
       </HeaderSection>
-      {isLoading && isEmpty(data.saved_objects) && (
+      {isLoading && isEmpty(data.cases) && (
         <EuiLoadingContent data-test-subj="initialLoadingPanelAllCases" lines={10} />
       )}
-      {!isLoading && !isEmpty(data.saved_objects) && (
+      {!isLoading && !isEmpty(data.cases) && (
         <>
           <UtilityBar border>
             <UtilityBarSection>
@@ -110,7 +114,7 @@ export const AllCases = React.memo(() => {
           <EuiBasicTable
             columns={getCasesColumns()}
             itemId="id"
-            items={data.saved_objects}
+            items={data.cases}
             noItemsMessage={
               <EuiEmptyPrompt
                 title={<h3>{i18n.NO_CASES}</h3>}
@@ -123,7 +127,7 @@ export const AllCases = React.memo(() => {
                 }
               />
             }
-            onChange={tableOnChangeCallback}
+            onChange={tableOnChangeCallback} // typescript STEPH FIX
             pagination={{
               pageIndex: queryParams.page - 1,
               pageSize: queryParams.perPage,

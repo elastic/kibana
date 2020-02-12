@@ -35,8 +35,7 @@ describe('UPDATE comment', () => {
 
     const response = await routeHandler(theContext, request, kibanaResponseFactory);
     expect(response.status).toEqual(200);
-    expect(response.payload.id).toEqual('mock-comment-1');
-    expect(response.payload.attributes.comment).toEqual('Update my comment');
+    expect(response.payload.comment).toEqual('Update my comment');
   });
   it(`Returns an error if updateComment throws`, async () => {
     const request = httpServerMock.createKibanaRequest({

@@ -5,10 +5,7 @@
  */
 /* eslint-disable @typescript-eslint/no-empty-interface */
 /* eslint-disable @typescript-eslint/camelcase */
-import {
-  NewCaseFormatted,
-  NewCommentFormatted,
-} from '../../../../../../../x-pack/plugins/case/server';
+import { CaseAttributes, CommentAttributes } from '../../../../../../../x-pack/plugins/case/server';
 import { ElasticsearchMappingOf } from '../../utils/typed_elasticsearch_mappings';
 
 // Temporary file to write mappings for case
@@ -19,7 +16,7 @@ export const caseSavedObjectType = 'case-workflow';
 export const caseCommentSavedObjectType = 'case-workflow-comment';
 
 export const caseSavedObjectMappings: {
-  [caseSavedObjectType]: ElasticsearchMappingOf<NewCaseFormatted>;
+  [caseSavedObjectType]: ElasticsearchMappingOf<CaseAttributes>;
 } = {
   [caseSavedObjectType]: {
     properties: {
@@ -59,7 +56,7 @@ export const caseSavedObjectMappings: {
 };
 
 export const caseCommentSavedObjectMappings: {
-  [caseCommentSavedObjectType]: ElasticsearchMappingOf<NewCommentFormatted>;
+  [caseCommentSavedObjectType]: ElasticsearchMappingOf<CommentAttributes>;
 } = {
   [caseCommentSavedObjectType]: {
     properties: {
@@ -78,6 +75,9 @@ export const caseCommentSavedObjectMappings: {
             type: 'keyword',
           },
         },
+      },
+      updated_at: {
+        type: 'date',
       },
     },
   },

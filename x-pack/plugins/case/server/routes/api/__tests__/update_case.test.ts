@@ -35,8 +35,8 @@ describe('UPDATE case', () => {
 
     const response = await routeHandler(theContext, request, kibanaResponseFactory);
     expect(response.status).toEqual(200);
-    expect(response.payload.id).toEqual('mock-id-1');
-    expect(response.payload.attributes.state).toEqual('closed');
+    expect(typeof response.payload.updated_at).toBe('number');
+    expect(response.payload.state).toEqual('closed');
   });
   it(`Returns an error if updateCase throws`, async () => {
     const request = httpServerMock.createKibanaRequest({

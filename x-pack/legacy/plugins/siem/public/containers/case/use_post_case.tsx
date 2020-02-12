@@ -9,22 +9,22 @@ import { useStateToaster } from '../../components/toasters';
 import { errorToToaster } from '../../components/ml/api/error_to_toaster';
 import * as i18n from './translations';
 import { FETCH_FAILURE, FETCH_INIT, FETCH_SUCCESS, POST_NEW_CASE } from './constants';
-import { CaseSavedObject, NewCase } from './types';
+import { FlattenedCaseSavedObject, NewCase } from './types';
 import { createCase } from './api';
+import { getTypedPayload } from './utils';
 
 interface NewCaseState {
   data: NewCase;
-  newCase?: CaseSavedObject;
+  newCase?: FlattenedCaseSavedObject;
   isLoading: boolean;
   isError: boolean;
 }
 interface Action {
   type: string;
-  payload?: NewCase | CaseSavedObject;
+  payload?: NewCase | FlattenedCaseSavedObject;
 }
 
 const dataFetchReducer = (state: NewCaseState, action: Action): NewCaseState => {
-  let getTypedPayload;
   switch (action.type) {
     case FETCH_INIT:
       return {
@@ -33,20 +33,18 @@ const dataFetchReducer = (state: NewCaseState, action: Action): NewCaseState => 
         isError: false,
       };
     case POST_NEW_CASE:
-      getTypedPayload = (a: Action['payload']) => a as NewCase;
       return {
         ...state,
         isLoading: false,
         isError: false,
-        data: getTypedPayload(action.payload),
+        data: getTypedPayload<NewCase>(action.payload),
       };
     case FETCH_SUCCESS:
-      getTypedPayload = (a: Action['payload']) => a as CaseSavedObject;
       return {
         ...state,
         isLoading: false,
         isError: false,
-        newCase: getTypedPayload(action.payload),
+        newCase: getTypedPayload<FlattenedCaseSavedObject>(action.payload),
       };
     case FETCH_FAILURE:
       return {

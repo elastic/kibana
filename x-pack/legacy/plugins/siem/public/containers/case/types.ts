@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { SavedObject, SavedObjectAttributes } from 'kibana/server';
 import { Direction } from '../../graphql/types';
-
 interface FormData {
   isNew?: boolean;
 }
@@ -17,11 +17,6 @@ export interface NewCase extends FormData {
   case_type: string;
 }
 
-export interface NewCaseFormatted extends NewCase {
-  state: string;
-  updated_at: number;
-}
-
 export interface UpdateCase {
   case_type?: string;
   description?: string;
@@ -31,36 +26,10 @@ export interface UpdateCase {
   updated_at?: number;
 }
 
-interface Case {
+export interface CaseAttributes extends SavedObjectAttributes {
   case_type: string;
   created_at: number;
-  created_by: ElasticUser;
-  description: string;
-  state: string;
-  tags: string[];
-  title: string;
-  updated_at: number;
-}
-
-export interface UpdateCaseSavedObject {
-  attributes: UpdateCase;
-  id: string;
-  type: string;
-  updated_at: string;
-  version: string;
-}
-
-export interface CaseSavedObject {
-  attributes: CaseResult;
-  id: string;
-  type: string;
-  updated_at: string;
-  version: string;
-}
-
-export interface CaseResult {
-  case_type: string;
-  created_at: number;
+  // typescript STEPH FIX
   created_by: ElasticUser;
   description: string;
   state: string;
@@ -76,37 +45,19 @@ export interface QueryParams {
   sortOrder: Direction;
 }
 
-export interface QueryArgs {
-  page?: number;
-  perPage?: number;
-  sortField?: SortFieldCase;
-  sortOrder?: Direction;
-}
-
-export interface UseGetCasesState {
-  data: FlattenedCasesSavedObjects;
-  isLoading: boolean;
-  isError: boolean;
-  queryParams: QueryParams;
-  filterOptions: FilterOptions;
-}
-export interface Action {
-  type: string;
-  payload?: FlattenedCasesSavedObjects | QueryArgs | FilterOptions;
-}
-
 export interface FilterOptions {
   search: string;
   tags: string[];
 }
 
-export interface FlattenedCaseSavedObject extends CaseResult {
-  id: string;
-  type: string;
-  version: string;
-}
-export interface FlattenedCasesSavedObjects {
-  saved_objects: FlattenedCaseSavedObject[] | [];
+export type FlattenedCaseSavedObject = Omit<
+  SavedObject<CaseAttributes>,
+  'updated_at' | 'attributes'
+> &
+  CaseAttributes;
+
+export interface AllCases {
+  cases: FlattenedCaseSavedObject[];
   page: number;
   per_page: number;
   total: number;
@@ -125,12 +76,4 @@ export interface ElasticUser {
 export interface FetchCasesProps {
   queryParams?: QueryParams;
   filterOptions?: FilterOptions;
-}
-
-export interface FetchCasesResponse {
-  page: number;
-  perPage: number;
-  total: number;
-  saved_objects: CaseSavedObject[];
-  data: Case[];
 }

@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Dispatch, SetStateAction, useEffect, useReducer, useState } from 'react';
+import { useEffect, useReducer } from 'react';
 
-import { FlattenedCaseSavedObject, NewCaseFormatted } from './types';
-import { FETCH_INIT, FETCH_FAILURE, FETCH_SUCCESS, REFRESH_CASE } from './constants';
-import { flattenSavedObject, getTypedPayload } from './utils';
+import { FlattenedCaseSavedObject } from './types';
+import { FETCH_INIT, FETCH_FAILURE, FETCH_SUCCESS } from './constants';
+import { getTypedPayload } from './utils';
 import { errorToToaster } from '../../components/ml/api/error_to_toaster';
 import * as i18n from './translations';
 import { useStateToaster } from '../../components/toasters';
@@ -21,7 +21,7 @@ interface CaseState {
 }
 interface Action {
   type: string;
-  payload?: FlattenedCaseSavedObject | NewCaseFormatted;
+  payload?: FlattenedCaseSavedObject;
 }
 
 const dataFetchReducer = (state: CaseState, action: Action): CaseState => {
@@ -45,16 +45,6 @@ const dataFetchReducer = (state: CaseState, action: Action): CaseState => {
         isLoading: false,
         isError: true,
       };
-    case REFRESH_CASE:
-      return {
-        ...state,
-        isLoading: false,
-        isError: false,
-        data: {
-          ...state.data,
-          ...getTypedPayload<NewCaseFormatted>(action.payload),
-        },
-      };
     default:
       throw new Error();
   }
@@ -66,6 +56,7 @@ const initialData: FlattenedCaseSavedObject = {
     username: '',
   },
   description: '',
+  references: [],
   state: '',
   tags: [],
   title: '',
@@ -74,25 +65,13 @@ const initialData: FlattenedCaseSavedObject = {
   updated_at: 0,
   version: '',
 };
-const initialRefreshData: NewCaseFormatted = {
-  case_type: '',
-  description: '',
-  state: '',
-  tags: [],
-  title: '',
-  updated_at: 0,
-};
-
-export type RefreshCase = Dispatch<SetStateAction<NewCaseFormatted>>;
-export const useGetCase = (initialCaseId: string): [CaseState, RefreshCase] => {
+export const useGetCase = (caseId: string): [CaseState] => {
   const [state, dispatch] = useReducer(dataFetchReducer, {
     isLoading: true,
     isError: false,
     data: initialData,
   });
-  const [caseId, setCaseId] = useState(initialCaseId);
   const [, dispatchToaster] = useStateToaster();
-  const [refreshData, refreshCase] = useState(initialRefreshData);
 
   const callFetch = () => {
     let didCancel = false;
@@ -101,7 +80,7 @@ export const useGetCase = (initialCaseId: string): [CaseState, RefreshCase] => {
       try {
         const response = await getCase(caseId, false);
         if (!didCancel) {
-          dispatch({ type: FETCH_SUCCESS, payload: flattenSavedObject(response) });
+          dispatch({ type: FETCH_SUCCESS, payload: response });
         }
       } catch (error) {
         if (!didCancel) {
@@ -117,13 +96,7 @@ export const useGetCase = (initialCaseId: string): [CaseState, RefreshCase] => {
   };
 
   useEffect(() => {
-    if (refreshData.description.length > 0) {
-      dispatch({ type: REFRESH_CASE, payload: refreshData });
-    }
-  }, [refreshData]);
-
-  useEffect(() => {
     callFetch();
   }, [caseId]);
-  return [state, refreshCase];
+  return [state];
 };

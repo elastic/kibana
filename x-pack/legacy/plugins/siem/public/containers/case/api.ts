@@ -6,13 +6,12 @@
 
 import { KibanaServices } from '../../lib/kibana';
 import {
+  AllCases,
   FetchCasesProps,
-  FetchCasesResponse,
+  FlattenedCaseSavedObject,
   NewCase,
-  NewCaseFormatted,
   SortFieldCase,
   UpdateCase,
-  UpdateCaseSavedObject,
 } from './types';
 import { Direction } from '../../graphql/types';
 import { throwIfNotOk } from '../../hooks/api/api';
@@ -41,7 +40,7 @@ export const getCases = async ({
     sortField: SortFieldCase.createdAt,
     sortOrder: Direction.desc,
   },
-}: FetchCasesProps): Promise<FetchCasesResponse> => {
+}: FetchCasesProps): Promise<AllCases> => {
   const tags = [...(filterOptions.tags?.map(t => `case-workflow.attributes.tags: ${t}`) ?? [])];
   const query = {
     ...queryParams,
@@ -57,7 +56,7 @@ export const getCases = async ({
   return response.body!;
 };
 
-export const createCase = async (newCase: NewCase): Promise<NewCaseFormatted> => {
+export const createCase = async (newCase: NewCase): Promise<FlattenedCaseSavedObject> => {
   const response = await KibanaServices.get().http.fetch(`${CASES_URL}`, {
     method: 'POST',
     asResponse: true,
@@ -70,7 +69,7 @@ export const createCase = async (newCase: NewCase): Promise<NewCaseFormatted> =>
 export const updateCaseProperty = async (
   caseId: string,
   updatedCase: UpdateCase
-): Promise<UpdateCaseSavedObject> => {
+): Promise<UpdateCase> => {
   const response = await KibanaServices.get().http.fetch(`${CASES_URL}/${caseId}`, {
     method: 'POST',
     asResponse: true,
