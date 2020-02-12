@@ -7,3 +7,5 @@
 import { createAsyncAction } from './utils';
 
 export const getMLJobAction = createAsyncAction<{ jobId: string }, any, any>('GET_ML_JOB');
+
+export const createMLJobAction = createAsyncAction<any, any, any>('CREATE_ML_JOB');

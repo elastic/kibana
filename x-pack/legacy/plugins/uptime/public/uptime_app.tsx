@@ -24,6 +24,7 @@ import { store } from './state';
 import { setBasePath } from './state/actions';
 import { PageRouter } from './routes';
 import { PageHeader } from './components/connected/pages/page_header_container';
+import { KIBANA_HTTP } from './state/api/utils';
 
 export interface UptimeAppColors {
   danger: string;
@@ -87,6 +88,8 @@ const Application = (props: UptimeAppProps) => {
 
   store.dispatch(setBasePath(basePath));
 
+  KIBANA_HTTP.http = core.http;
+
   return (
     <EuiErrorBoundary>
       <i18nCore.Context>
@@ -100,7 +103,6 @@ const Application = (props: UptimeAppProps) => {
                       <EuiPage className="app-wrapper-panel " data-test-subj="uptimeApp">
                         <main>
                           <PageHeader setBreadcrumbs={setBreadcrumbs} />
-                          // @ts-ignore we need to update the type of this prop
                           <PageRouter autocomplete={plugins.data.autocomplete} />
                         </main>
                       </EuiPage>

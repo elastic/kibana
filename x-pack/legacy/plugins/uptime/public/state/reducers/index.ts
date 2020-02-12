@@ -22,5 +22,5 @@ export const rootReducer = combineReducers({
   monitorStatus: monitorStatusReducer,
   indexPattern: indexPatternReducer,
   ping: pingReducer,
-  mlJob: mlJobsReducer,
+  ml: mlJobsReducer,
 });

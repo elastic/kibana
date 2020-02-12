@@ -4,21 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getApiPath } from '../../lib/helper';
-import { AppState, store } from '../index';
-
-function select(state: AppState) {
-  return state.ui.basePath;
-}
+export const KIBANA_HTTP = {
+  http: null,
+};
 
 export const fetchGet = async (apiUrl: string) => {
-  const basePath = select(store.getState());
+  return await KIBANA_HTTP.http.get(apiUrl);
+};
 
-  const url = getApiPath(apiUrl, basePath);
-
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new Error(response.statusText);
-  }
-  return await response.json();
+export const fetchPost = async (apiUrl: string, data: any) => {
+  return await KIBANA_HTTP.http.post(apiUrl, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
 };

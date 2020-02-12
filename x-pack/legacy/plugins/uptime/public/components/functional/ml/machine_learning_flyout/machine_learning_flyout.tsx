@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React from 'react';
 import {
   EuiButton,
   EuiCallOut,
@@ -18,15 +19,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { useState, useEffect } from 'react';
-// import { FETCH_STATUS, useFetcher } from '../../../../../hooks/useFetcher';
-// import { getHasMLJob } from '../../../../../services/rest/ml';
-// import { Transaction_select } from './transaction_select';
-// import { IUrlParams } from '../../../../../context/UrlParamsContext/types';
-// import { useServiceTransactionTypes } from '../../../../../hooks/useServiceTransactionTypes';
-// import { useApmPluginContext } from '../../../../../hooks/useApmPluginContext';
 import { MLJobLink } from '../ml_job_link';
 import { MLLink } from '../ml_link';
 import * as labels from '../translations';

@@ -53,7 +53,7 @@ export const CREAT_ML_JOB_DESC = i18n.translate(
   {
     defaultMessage: `Here you can create a machine learning job to calculate anomaly scores on durations for Uptime Monitor.
               Once enabled, The monitor duration chart on details page will show the expected bounds and annotate
-              the graph once the anomaly score is &gt;= 75.`,
+              the graph once the anomaly score is >= 75.`,
   }
 );
 

@@ -7,7 +7,7 @@
 import { createSelector } from 'reselect';
 import { AppState } from '../../state';
 
-const mlSelector = (state: AppState) => state.mlJob;
+const mlSelector = (state: AppState) => state.ml;
 
 // UI Selectors
 export const getBasePath = ({ ui: { basePath } }: AppState) => basePath;
@@ -37,4 +37,6 @@ export const selectPingHistogram = ({ ping, ui }: AppState) => {
   };
 };
 
-export const hasMLJobSelector = createSelector(mlSelector, mlJob => mlJob.count > 0);
+export const hasMLJobSelector = createSelector(mlSelector, ml => ml.mlJob?.count > 0);
+
+export const isMLJobCreating = createSelector(mlSelector, ml => ml.loading);

@@ -13,6 +13,8 @@ export enum STATUS {
   DOWN = 'down',
 }
 
+export const ML_JOB_ID = 'uptime_high_latency';
+
 export const UNNAMED_LOCATION = 'Unnamed-location';
 
 export const SHORT_TS_LOCALE = 'en-short-locale';
