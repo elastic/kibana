@@ -20,6 +20,7 @@
 import { CoreStart, PluginInitializerContext, CoreSetup, Plugin } from 'src/core/public';
 import { UiActionsApi, ActionRegistry, TriggerRegistry } from './types';
 import { createApi } from './api';
+import { UiActionsService } from './service';
 
 export interface UiActionsSetup {
   attachAction: UiActionsApi['attachAction'];
@@ -33,6 +34,7 @@ export type UiActionsStart = UiActionsApi;
 export class UiActionsPlugin implements Plugin<UiActionsSetup, UiActionsStart> {
   private readonly triggers: TriggerRegistry = new Map();
   private readonly actions: ActionRegistry = new Map();
+  private readonly service = new UiActionsService(this.triggers, this.actions);
   private api!: UiActionsApi;
 
   constructor(initializerContext: PluginInitializerContext) {
