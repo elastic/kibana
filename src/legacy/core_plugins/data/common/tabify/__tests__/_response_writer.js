@@ -18,23 +18,12 @@
  */
 
 import expect from '@kbn/expect';
-import ngMock from 'ng_mock';
 import { TabbedAggResponseWriter } from '../_response_writer';
-import { Vis } from '../../../../../core_plugins/visualizations/public';
-import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import stubbedLogstashIndexPatternService from '../../../../../../fixtures/stubbed_logstash_index_pattern';
+import { AggConfigs } from '../../../public/search/aggs';
 
 describe('TabbedAggResponseWriter class', function() {
-  let Private;
-  let indexPattern;
-
-  beforeEach(ngMock.module('kibana'));
-  beforeEach(
-    ngMock.inject(function($injector) {
-      Private = $injector.get('Private');
-
-      indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
-    })
-  );
+  const indexPattern = stubbedLogstashIndexPatternService();
 
   const splitAggConfig = [
     {
@@ -61,8 +50,8 @@ describe('TabbedAggResponseWriter class', function() {
   ];
 
   const createResponseWritter = (aggs = [], opts = {}) => {
-    const vis = new Vis(indexPattern, { type: 'histogram', aggs: aggs });
-    return new TabbedAggResponseWriter(vis.getAggConfig(), opts);
+    const aggConfigs = new AggConfigs(indexPattern, { type: 'histogram', aggs: aggs });
+    return new TabbedAggResponseWriter(aggConfigs, opts);
   };
 
   describe('Constructor', function() {
@@ -88,13 +77,13 @@ describe('TabbedAggResponseWriter class', function() {
 
     describe('sets timeRange', function() {
       it("to the first nested object's range", function() {
-        const vis = new Vis(indexPattern, { type: 'histogram', aggs: [] });
+        const aggConfigs = new AggConfigs(indexPattern, { type: 'histogram', aggs: [] });
         const range = {
           gte: 0,
           lte: 100,
         };
 
-        const writer = new TabbedAggResponseWriter(vis.getAggConfig(), {
+        const writer = new TabbedAggResponseWriter(aggConfigs, {
           timeRange: {
             '@timestamp': range,
           },
@@ -106,9 +95,9 @@ describe('TabbedAggResponseWriter class', function() {
       });
 
       it('to undefined if no nested object', function() {
-        const vis = new Vis(indexPattern, { type: 'histogram', aggs: [] });
+        const aggConfigs = new AggConfigs(indexPattern, { type: 'histogram', aggs: [] });
 
-        const writer = new TabbedAggResponseWriter(vis.getAggConfig(), {
+        const writer = new TabbedAggResponseWriter(aggConfigs, {
           timeRange: {},
         });
         expect(writer).to.have.property('timeRange', undefined);

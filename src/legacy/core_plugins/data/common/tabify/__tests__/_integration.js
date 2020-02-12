@@ -18,38 +18,30 @@
  */
 
 import _ from 'lodash';
-import fixtures from 'fixtures/fake_hierarchical_data';
+import fixtures from '../../../../../../fixtures/fake_hierarchical_data';
 import expect from '@kbn/expect';
-import ngMock from 'ng_mock';
 import { tabifyAggResponse } from '../tabify';
-import { Vis } from '../../../../../core_plugins/visualizations/public';
-import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import stubbedLogstashIndexPatternService from '../../../../../../fixtures/stubbed_logstash_index_pattern';
+import { AggConfigs } from '../../../public/search/aggs';
 
 describe('tabifyAggResponse Integration', function() {
-  let indexPattern;
+  const indexPattern = stubbedLogstashIndexPatternService();
 
-  beforeEach(ngMock.module('kibana'));
-  beforeEach(
-    ngMock.inject(function(Private) {
-      indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
-    })
-  );
-
-  function normalizeIds(vis) {
-    vis.aggs.aggs.forEach(function(agg, i) {
+  function normalizeIds(aggConfigs) {
+    aggConfigs.aggs.forEach(function(agg, i) {
       agg.id = 'agg_' + (i + 1);
     });
   }
 
   it('transforms a simple response properly', function() {
-    const vis = new Vis(indexPattern, {
+    const aggConfigs = new AggConfigs(indexPattern, {
       type: 'histogram',
       aggs: [],
     });
-    normalizeIds(vis);
+    normalizeIds(aggConfigs);
 
-    const resp = tabifyAggResponse(vis.getAggConfig(), fixtures.metricOnly, {
-      metricsAtAllLevels: vis.isHierarchical(),
+    const resp = tabifyAggResponse(aggConfigs, fixtures.metricOnly, {
+      metricsAtAllLevels: false,
     });
 
     expect(resp)
@@ -59,13 +51,13 @@ describe('tabifyAggResponse Integration', function() {
     expect(resp.columns).to.have.length(1);
 
     expect(resp.rows[0]).to.eql({ 'col-0-agg_1': 1000 });
-    expect(resp.columns[0]).to.have.property('aggConfig', vis.aggs[0]);
+    expect(resp.columns[0]).to.have.property('aggConfig', aggConfigs[0]);
   });
 
   describe('transforms a complex response', function() {
     this.slow(1000);
 
-    let vis;
+    let aggConfigs;
     let avg;
     let ext;
     let src;
@@ -73,7 +65,7 @@ describe('tabifyAggResponse Integration', function() {
     let esResp;
 
     beforeEach(function() {
-      vis = new Vis(indexPattern, {
+      aggConfigs = new AggConfigs(indexPattern, {
         type: 'pie',
         aggs: [
           { type: 'avg', schema: 'metric', params: { field: 'bytes' } },
@@ -82,12 +74,12 @@ describe('tabifyAggResponse Integration', function() {
           { type: 'terms', schema: 'segment', params: { field: 'machine.os' } },
         ],
       });
-      normalizeIds(vis);
+      normalizeIds(aggConfigs);
 
-      avg = vis.aggs[0];
-      ext = vis.aggs[1];
-      src = vis.aggs[2];
-      os = vis.aggs[3];
+      avg = aggConfigs[0];
+      ext = aggConfigs[1];
+      src = aggConfigs[2];
+      os = aggConfigs[3];
 
       esResp = _.cloneDeep(fixtures.threeTermBuckets);
       // remove the buckets for css              in MX
@@ -140,7 +132,7 @@ describe('tabifyAggResponse Integration', function() {
       // the default for a non-hierarchical vis is to display
       // only complete rows, and only put the metrics at the end.
 
-      const tabbed = tabifyAggResponse(vis.getAggConfig(), esResp, { metricsAtAllLevels: false });
+      const tabbed = tabifyAggResponse(aggConfigs, esResp, { metricsAtAllLevels: false });
 
       expectColumns(tabbed, [ext, src, os, avg]);
 
@@ -155,8 +147,7 @@ describe('tabifyAggResponse Integration', function() {
       // minimalColumns we should expect the partial row to be completely after
       // the existing bucket and it's metric
 
-      vis.isHierarchical = _.constant(true);
-      const tabbed = tabifyAggResponse(vis.getAggConfig(), esResp, { metricsAtAllLevels: true });
+      const tabbed = tabifyAggResponse(aggConfigs, esResp, { metricsAtAllLevels: true });
 
       expectColumns(tabbed, [ext, avg, src, avg, os, avg]);
 

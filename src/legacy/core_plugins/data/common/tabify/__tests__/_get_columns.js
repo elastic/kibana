@@ -18,30 +18,18 @@
  */
 
 import expect from '@kbn/expect';
-import ngMock from 'ng_mock';
 import { tabifyGetColumns } from '../_get_columns';
-import { Vis } from '../../../../../core_plugins/visualizations/public';
-import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import stubbedLogstashIndexPatternService from '../../../../../../fixtures/stubbed_logstash_index_pattern';
+import { AggConfigs } from '../../../public/search/aggs';
 describe('get columns', function() {
-  let indexPattern;
-
-  beforeEach(ngMock.module('kibana'));
-  beforeEach(
-    ngMock.inject(function(Private) {
-      indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
-    })
-  );
+  const indexPattern = stubbedLogstashIndexPatternService();
 
   it('should inject a count metric if no aggs exist', function() {
-    const vis = new Vis(indexPattern, {
+    const aggConfigs = new AggConfigs(indexPattern, {
       type: 'pie',
     });
-    while (vis.aggs.length) vis.aggs.pop();
-    const columns = tabifyGetColumns(
-      vis.getAggConfig().getResponseAggs(),
-      null,
-      vis.isHierarchical()
-    );
+    while (aggConfigs.length) aggConfigs.pop();
+    const columns = tabifyGetColumns(aggConfigs.getRequestAggs(), null, false);
 
     expect(columns).to.have.length(1);
     expect(columns[0]).to.have.property('aggConfig');
@@ -49,7 +37,7 @@ describe('get columns', function() {
   });
 
   it('should inject a count metric if only buckets exist', function() {
-    const vis = new Vis(indexPattern, {
+    const aggConfigs = new AggConfigs(indexPattern, {
       type: 'pie',
       aggs: [
         {
@@ -60,7 +48,7 @@ describe('get columns', function() {
       ],
     });
 
-    const columns = tabifyGetColumns(vis.getAggConfig().getResponseAggs(), !vis.isHierarchical());
+    const columns = tabifyGetColumns(aggConfigs.getResponseAggs(), true);
 
     expect(columns).to.have.length(2);
     expect(columns[1]).to.have.property('aggConfig');
@@ -68,7 +56,7 @@ describe('get columns', function() {
   });
 
   it('should inject the metric after each bucket if the vis is hierarchical', function() {
-    const vis = new Vis(indexPattern, {
+    const aggConfigs = new AggConfigs(indexPattern, {
       type: 'pie',
       aggs: [
         {
@@ -94,7 +82,7 @@ describe('get columns', function() {
       ],
     });
 
-    const columns = tabifyGetColumns(vis.getAggConfig().getResponseAggs(), !vis.isHierarchical());
+    const columns = tabifyGetColumns(aggConfigs.getResponseAggs(), true);
 
     expect(columns).to.have.length(8);
     columns.forEach(function(column, i) {
@@ -104,7 +92,7 @@ describe('get columns', function() {
   });
 
   it('should inject the multiple metrics after each bucket if the vis is hierarchical', function() {
-    const vis = new Vis(indexPattern, {
+    const aggConfigs = new AggConfigs(indexPattern, {
       type: 'pie',
       aggs: [
         {
@@ -132,7 +120,7 @@ describe('get columns', function() {
       ],
     });
 
-    const columns = tabifyGetColumns(vis.getAggConfig().getResponseAggs(), !vis.isHierarchical());
+    const columns = tabifyGetColumns(aggConfigs.getResponseAggs(), true);
 
     function checkColumns(column, i) {
       expect(column).to.have.property('aggConfig');
@@ -156,7 +144,7 @@ describe('get columns', function() {
   });
 
   it('should put all metrics at the end of the columns if the vis is not hierarchical', function() {
-    const vis = new Vis(indexPattern, {
+    const aggConfigs = new AggConfigs(indexPattern, {
       type: 'histogram',
       aggs: [
         {
@@ -184,7 +172,7 @@ describe('get columns', function() {
       ],
     });
 
-    const columns = tabifyGetColumns(vis.getAggConfig().getResponseAggs(), !vis.isHierarchical());
+    const columns = tabifyGetColumns(aggConfigs.getResponseAggs(), true);
     expect(columns).to.have.length(6);
 
     // sum should be last
