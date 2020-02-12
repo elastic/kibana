@@ -88442,7 +88442,7 @@ module.exports = function kindOf(val) {
 };
 
 function ctorName(val) {
-  return val.constructor ? val.constructor.name : null;
+  return typeof val.constructor === 'function' ? val.constructor.name : null;
 }
 
 function isArray(val) {
@@ -88653,7 +88653,7 @@ module.exports = function kindOf(val) {
 };
 
 function ctorName(val) {
-  return val.constructor ? val.constructor.name : null;
+  return typeof val.constructor === 'function' ? val.constructor.name : null;
 }
 
 function isArray(val) {
@@ -88844,7 +88844,7 @@ module.exports = function kindOf(val) {
 };
 
 function ctorName(val) {
-  return val.constructor ? val.constructor.name : null;
+  return typeof val.constructor === 'function' ? val.constructor.name : null;
 }
 
 function isArray(val) {
@@ -101921,7 +101921,7 @@ module.exports = function kindOf(val) {
 };
 
 function ctorName(val) {
-  return val.constructor ? val.constructor.name : null;
+  return typeof val.constructor === 'function' ? val.constructor.name : null;
 }
 
 function isArray(val) {
@@ -104780,7 +104780,7 @@ module.exports = function kindOf(val) {
 };
 
 function ctorName(val) {
-  return val.constructor ? val.constructor.name : null;
+  return typeof val.constructor === 'function' ? val.constructor.name : null;
 }
 
 function isArray(val) {
@@ -108562,7 +108562,7 @@ __webpack_require__.r(__webpack_exports__);
  * to Kibana itself.
  */
 
-const isKibanaDep = depVersion => depVersion.includes('../../kibana/');
+const isKibanaDep = depVersion => depVersion.includes('../../packages/');
 /**
  * This prepares the dependencies for an _external_ project.
  */
