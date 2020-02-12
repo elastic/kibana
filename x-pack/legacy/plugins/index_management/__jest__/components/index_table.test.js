@@ -27,7 +27,6 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 
 /* eslint-disable @kbn/eslint/no-restricted-paths */
 import { notificationServiceMock } from '../../../../../../src/core/public/notifications/notifications_service.mock';
-import { chromeServiceMock } from '../../../../../../src/core/public/chrome/chrome_service.mock';
 
 jest.mock('ui/new_platform');
 
@@ -120,7 +119,7 @@ describe('index table', () => {
 
     // @ts-ignore
     httpService.setup(mockHttpClient);
-    breadcrumbService.setup(chromeServiceMock.createStartContract(), '');
+    breadcrumbService.setup(() => undefined);
     notificationService.setup(notificationServiceMock.createStartContract());
 
     store = indexManagementStore(services);

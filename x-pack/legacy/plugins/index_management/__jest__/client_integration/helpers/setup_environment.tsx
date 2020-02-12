@@ -19,7 +19,6 @@ import { setExtensionsService } from '../../../public/application/store/selector
 
 /* eslint-disable @kbn/eslint/no-restricted-paths */
 import { notificationServiceMock } from '../../../../../../../src/core/public/notifications/notifications_service.mock';
-import { chromeServiceMock } from '../../../../../../../src/core/public/chrome/chrome_service.mock';
 import { docLinksServiceMock } from '../../../../../../../src/core/public/doc_links/doc_links_service.mock';
 
 const mockHttpClient = axios.create({ adapter: axiosXhrAdapter });
@@ -37,7 +36,7 @@ export const setupEnvironment = () => {
   // Mock initialization of services
   // @ts-ignore
   httpService.setup(mockHttpClient);
-  breadcrumbService.setup(chromeServiceMock.createStartContract(), '');
+  breadcrumbService.setup(() => undefined);
   documentationService.setup(docLinksServiceMock.createStartContract());
   notificationService.setup(notificationServiceMock.createStartContract());
 
@@ -49,7 +48,7 @@ export const setupEnvironment = () => {
   };
 };
 
-export const WithAppDependencies = (Comp: any) => (props: any[]) => (
+export const WithAppDependencies = (Comp: any) => (props: any) => (
   <AppContextProvider value={appDependencies}>
     <Comp {...props} />
   </AppContextProvider>
