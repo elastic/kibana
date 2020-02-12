@@ -9,7 +9,7 @@ import { FtrProviderContext } from '../../api_integration/ftr_provider_context';
 import {
   getPolicy,
   getIndexWithWithAlias,
-} from '../../../legacy/plugins/epm/server/lib/elasticsearch/ilm/ilm';
+} from '../../../plugins/ingest_manager/server/services/epm/elasticsearch/ilm/ilm';
 
 export default function({ getService }: FtrProviderContext) {
   describe('ilm', () => {

@@ -218,7 +218,10 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
   }
 
   return (
-    <EuiPanel style={{ width: `${panelWidth}px` }}>
+    <EuiPanel
+      data-test-subj="mlDFAnalyticsClassificationExplorationEvaluatePanel"
+      style={{ width: `${panelWidth}px` }}
+    >
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem>
           <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
@@ -337,6 +340,7 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
                         </EuiFlexItem>
                         <EuiFlexItem grow={false} style={{ width: '90%' }}>
                           <EuiDataGrid
+                            data-test-subj="mlDFAnalyticsClassificationExplorationConfusionMatrix"
                             aria-label="Classification confusion matrix"
                             columns={columns}
                             columnVisibility={{ visibleColumns, setVisibleColumns }}

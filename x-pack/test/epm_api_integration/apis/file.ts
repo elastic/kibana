@@ -27,7 +27,9 @@ export default function({ getService }: FtrProviderContext) {
 
       const supertest = getService('supertest');
       await supertest
-        .get('/api/epm/package/auditd-2.0.4/img/screenshots/auditbeat-file-integrity-dashboard.png')
+        .get(
+          '/api/ingest_manager/epm/package/auditd-2.0.4/img/screenshots/auditbeat-file-integrity-dashboard.png'
+        )
         .set('kbn-xsrf', 'xxx')
         .expect('Content-Type', 'image/png')
         .expect(200);
@@ -44,7 +46,7 @@ export default function({ getService }: FtrProviderContext) {
 
       const supertest = getService('supertest');
       await supertest
-        .get('/api/epm/package/auditd-2.0.4/img/icon.svg')
+        .get('/api/ingest_manager/epm/package/auditd-2.0.4/img/icon.svg')
         .set('kbn-xsrf', 'xxx')
         .expect('Content-Type', 'image/svg');
     });
@@ -57,7 +59,9 @@ export default function({ getService }: FtrProviderContext) {
 
       const supertest = getService('supertest');
       await supertest
-        .get('/api/epm/package/auditd-2.0.4/auditbeat/rules/sample-rules-linux-32bit.conf')
+        .get(
+          '/api/ingest_manager/epm/package/auditd-2.0.4/auditbeat/rules/sample-rules-linux-32bit.conf'
+        )
         .set('kbn-xsrf', 'xxx')
         .expect('Content-Type', 'application/json; charset=utf-8')
         .expect(200);
@@ -74,7 +78,7 @@ export default function({ getService }: FtrProviderContext) {
 
       const supertest = getService('supertest');
       await supertest
-        .get('/api/epm/package/auditd-2.0.4/auditbeat/config/config.yml')
+        .get('/api/ingest_manager/epm/package/auditd-2.0.4/auditbeat/config/config.yml')
         .set('kbn-xsrf', 'xxx')
         .expect('Content-Type', 'text/yaml; charset=UTF-8')
         .expect(200);
@@ -90,7 +94,7 @@ export default function({ getService }: FtrProviderContext) {
       const supertest = getService('supertest');
       await supertest
         .get(
-          '/api/epm/package/auditd-2.0.4/kibana/visualization/b21e0c70-c252-11e7-8692-232bd1143e8a-ecs.json'
+          '/api/ingest_manager/epm/package/auditd-2.0.4/kibana/visualization/b21e0c70-c252-11e7-8692-232bd1143e8a-ecs.json'
         )
         .set('kbn-xsrf', 'xxx')
         .expect('Content-Type', 'application/json; charset=utf-8')
@@ -107,7 +111,7 @@ export default function({ getService }: FtrProviderContext) {
       const supertest = getService('supertest');
       await supertest
         .get(
-          '/api/epm/package/auditd-2.0.4/kibana/dashboard/7de391b0-c1ca-11e7-8995-936807a28b16-ecs.json'
+          '/api/ingest_manager/epm/package/auditd-2.0.4/kibana/dashboard/7de391b0-c1ca-11e7-8995-936807a28b16-ecs.json'
         )
         .set('kbn-xsrf', 'xxx')
         .expect('Content-Type', 'application/json; charset=utf-8')
@@ -122,7 +126,7 @@ export default function({ getService }: FtrProviderContext) {
 
       const supertest = getService('supertest');
       await supertest
-        .get('/api/epm/package/auditd-2.0.4/kibana/index-pattern/auditbeat-*.json')
+        .get('/api/ingest_manager/epm/package/auditd-2.0.4/kibana/index-pattern/auditbeat-*.json')
         .set('kbn-xsrf', 'xxx')
         .expect('Content-Type', 'application/json; charset=utf-8')
         .expect(200);
@@ -137,7 +141,7 @@ export default function({ getService }: FtrProviderContext) {
       const supertest = getService('supertest');
       await supertest
         .get(
-          '/api/epm/package/auditd-2.0.4/kibana/search/0f10c430-c1c3-11e7-8995-936807a28b16-ecs.json'
+          '/api/ingest_manager/epm/package/auditd-2.0.4/kibana/search/0f10c430-c1c3-11e7-8995-936807a28b16-ecs.json'
         )
         .set('kbn-xsrf', 'xxx')
         .expect('Content-Type', 'application/json; charset=utf-8')

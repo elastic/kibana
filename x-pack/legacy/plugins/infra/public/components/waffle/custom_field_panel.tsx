@@ -8,10 +8,12 @@ import { EuiButton, EuiComboBox, EuiForm, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { IFieldType } from 'src/plugins/data/public';
+import { InfraGroupByOptions } from '../../lib/lib';
 
 interface Props {
   onSubmit: (field: string) => void;
   fields: IFieldType[];
+  currentOptions: InfraGroupByOptions[];
 }
 
 interface SelectedOption {
@@ -28,10 +30,16 @@ export const CustomFieldPanel = class extends React.PureComponent<Props, State> 
   public static displayName = 'CustomFieldPanel';
   public readonly state: State = initialState;
   public render() {
-    const { fields } = this.props;
+    const { fields, currentOptions } = this.props;
     const options = fields
-      .filter(f => f.aggregatable && f.type === 'string')
+      .filter(
+        f =>
+          f.aggregatable &&
+          f.type === 'string' &&
+          !(currentOptions && currentOptions.some(o => o.field === f.name))
+      )
       .map(f => ({ label: f.name }));
+    const isSubmitDisabled = !this.state.selectedOptions.length;
     return (
       <div style={{ padding: 16 }}>
         <EuiForm>
@@ -57,7 +65,7 @@ export const CustomFieldPanel = class extends React.PureComponent<Props, State> 
             />
           </EuiFormRow>
           <EuiButton
-            disabled={!this.state.selectedOptions.length}
+            disabled={isSubmitDisabled}
             type="submit"
             size="s"
             fill
