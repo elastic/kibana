@@ -67,16 +67,22 @@ function validateTimezone(timezone: string) {
 }
 
 function validate(rawString: string) {
-  for (const matched of rawString.matchAll(dateRegExp)) {
-    const { format, timezone } = matched.groups!;
+  // clone regexp for exec since it's stateful with g flag
+  const regExp = new RegExp(dateRegExp, 'g');
+  let matched: RegExpExecArray | null;
+  do {
+    matched = regExp.exec(rawString);
+    if (matched) {
+      const { format, timezone } = matched.groups!;
 
-    if (format) {
-      validateDateFormat(format);
+      if (format) {
+        validateDateFormat(format);
+      }
+      if (timezone) {
+        validateTimezone(timezone);
+      }
     }
-    if (timezone) {
-      validateTimezone(timezone);
-    }
-  }
+  } while (matched);
 }
 
 export const DateConversion: Conversion = {
