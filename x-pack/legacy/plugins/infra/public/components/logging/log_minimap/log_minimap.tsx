@@ -43,6 +43,9 @@ interface LogMinimapState {
   timeCursorY: number;
 }
 
+// Wide enough to fit "September"
+const TIMERULER_WIDTH = 50;
+
 function calculateYScale(start: number | null, end: number | null, height: number) {
   return scaleLinear()
     .domain([start || 0, end || 0])
@@ -116,7 +119,8 @@ export class LogMinimap extends React.Component<LogMinimapProps, LogMinimapState
     } = this.props;
     const { timeCursorY, target } = this.state;
     const [minTime, maxTime] = calculateYScale(start, end, height).domain();
-    const tickCount = height ? height / 8 : 12;
+    const tickCount = height ? Math.floor(height / 8) : 12;
+
     return (
       <MinimapWrapper
         className={className}
@@ -132,15 +136,16 @@ export class LogMinimap extends React.Component<LogMinimapProps, LogMinimapState
             buckets={summaryBuckets}
             start={minTime}
             end={maxTime}
-            width={width}
+            width={width - TIMERULER_WIDTH}
             height={height}
+            x={TIMERULER_WIDTH}
           />
 
-          <MinimapBorder x1={width / 3} y1={0} x2={width / 3} y2={height} />
+          <MinimapBorder x1={TIMERULER_WIDTH} x2={TIMERULER_WIDTH} y1={0} y2={height} />
           <TimeRuler
             start={minTime}
             end={maxTime}
-            width={width}
+            width={TIMERULER_WIDTH}
             height={height}
             tickCount={tickCount}
           />
@@ -159,11 +164,12 @@ export class LogMinimap extends React.Component<LogMinimapProps, LogMinimapState
             end={highlightedInterval.end}
             getPositionOfTime={this.getPositionOfTime}
             start={highlightedInterval.start}
+            targetWidth={TIMERULER_WIDTH}
             width={width}
             target={target}
           />
         ) : null}
-        <TimeCursor x1={width / 3} x2={width} y1={timeCursorY} y2={timeCursorY} />
+        <TimeCursor x1={TIMERULER_WIDTH} x2={width} y1={timeCursorY} y2={timeCursorY} />
       </MinimapWrapper>
     );
   }
@@ -185,6 +191,7 @@ const TimeCursor = euiStyled.line`
 
 const MinimapWrapper = euiStyled.svg`
   cursor: pointer;
+  fill: ${props => props.theme.eui.euiColorEmptyShade};
   & ${TimeCursor} {
     visibility: hidden;
   }

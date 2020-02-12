@@ -18,6 +18,7 @@ interface DensityChartProps {
   start: number;
   width: number;
   height: number;
+  x: number;
 }
 
 export const DensityChart: React.FC<DensityChartProps> = ({
@@ -26,6 +27,7 @@ export const DensityChart: React.FC<DensityChartProps> = ({
   end,
   width,
   height,
+  x,
 }) => {
   if (start >= end || height <= 0 || width <= 0 || buckets.length <= 0) {
     return null;
@@ -38,7 +40,7 @@ export const DensityChart: React.FC<DensityChartProps> = ({
   const xMax = max(buckets.map(bucket => bucket.entriesCount)) || 0;
   const xScale = scaleLinear()
     .domain([0, xMax])
-    .range([0, width * (2 / 3)]);
+    .range([0, width]);
 
   // FIXME: path is not closed at the bottom.
   const path = area<LogEntriesSummaryBucket>()
@@ -50,21 +52,12 @@ export const DensityChart: React.FC<DensityChartProps> = ({
   const pathData = path(buckets);
 
   return (
-    <g transform={`translate(${width / 3}, 0)`}>
-      <DensityChartNegativeBackground
-        transform={`translate(${-width / 3}, 0)`}
-        width={width / 2}
-        height={height}
-      />
-      <DensityChartPositiveBackground width={width * (2 / 3)} height={height} />
+    <g transform={`translate(${x}, 0)`}>
+      <DensityChartPositiveBackground width={width} height={height} />
       <PositiveAreaPath d={pathData || ''} />
     </g>
   );
 };
-
-const DensityChartNegativeBackground = euiStyled.rect`
-  fill: ${props => props.theme.eui.euiColorEmptyShade};
-`;
 
 const DensityChartPositiveBackground = euiStyled.rect`
   fill: ${props =>

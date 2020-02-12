@@ -39,7 +39,8 @@ export const TimeRuler: React.FC<TimeRulerProps> = ({ end, height, start, tickCo
       {ticks.map((tick, tickIndex) => {
         const y = yScale(tick);
         const isLabeledTick = tickIndex % 12 === dateModLabel;
-        const tickStartX = isLabeledTick ? 0 : width / 3 - 4;
+        const tickStartX = isLabeledTick ? 0 : width - 4;
+
         return (
           <g key={`tick${tickIndex}`}>
             {isLabeledTick && (
@@ -47,13 +48,7 @@ export const TimeRuler: React.FC<TimeRulerProps> = ({ end, height, start, tickCo
                 {formatTick(tick)}
               </TimeRulerTickLabel>
             )}
-            <TimeRulerGridLine
-              isDark={isLabeledTick}
-              x1={tickStartX}
-              y1={y}
-              x2={width / 3}
-              y2={y}
-            />
+            <TimeRulerGridLine isDark={isLabeledTick} x1={tickStartX} y1={y} x2={width} y2={y} />
           </g>
         );
       })}
