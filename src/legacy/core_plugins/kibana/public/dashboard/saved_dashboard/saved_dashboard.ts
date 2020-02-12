@@ -24,7 +24,7 @@ import {
 import { extractReferences, injectReferences } from './saved_dashboard_references';
 
 import {
-  esFilters,
+  Filter,
   ISearchSource,
   Query,
   RefreshInterval,
@@ -45,7 +45,7 @@ export interface SavedObjectDashboard extends SavedObject {
   refreshInterval?: RefreshInterval;
   searchSource: ISearchSource;
   getQuery(): Query;
-  getFilters(): esFilters.Filter[];
+  getFilters(): Filter[];
 }
 
 // Used only by the savedDashboards service, usually no reason to change this

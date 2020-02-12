@@ -30,21 +30,19 @@ const breadcrumbs = [
 
 export const recognizeRoute: MlRoute = {
   path: '/jobs/new_job/recognize',
-  render: (props, config, deps) => <PageWrapper config={config} {...props} deps={deps} />,
+  render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs,
 };
 
 export const checkViewOrCreateRoute: MlRoute = {
   path: '/modules/check_view_or_create',
-  render: (props, config, deps) => (
-    <CheckViewOrCreateWrapper config={config} {...props} deps={deps} />
-  ),
+  render: (props, deps) => <CheckViewOrCreateWrapper {...props} deps={deps} />,
   breadcrumbs: [],
 };
 
-const PageWrapper: FC<PageProps> = ({ location, config, deps }) => {
+const PageWrapper: FC<PageProps> = ({ location, deps }) => {
   const { id, index, savedSearchId } = queryString.parse(location.search);
-  const { context, results } = useResolver(index, savedSearchId, config, {
+  const { context, results } = useResolver(index, savedSearchId, deps.config, {
     ...basicResolvers(deps),
     existingJobsAndGroups: mlJobService.getJobAndGroupIds,
   });
@@ -56,10 +54,10 @@ const PageWrapper: FC<PageProps> = ({ location, config, deps }) => {
   );
 };
 
-const CheckViewOrCreateWrapper: FC<PageProps> = ({ location, config, deps }) => {
+const CheckViewOrCreateWrapper: FC<PageProps> = ({ location, deps }) => {
   const { id: moduleId, index: indexPatternId } = queryString.parse(location.search);
   // the single resolver checkViewOrCreateJobs redirects only. so will always reject
-  useResolver(undefined, undefined, config, {
+  useResolver(undefined, undefined, deps.config, {
     checkViewOrCreateJobs: () => checkViewOrCreateJobs(moduleId, indexPatternId),
   });
   return null;
