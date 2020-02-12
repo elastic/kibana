@@ -27,7 +27,7 @@ export interface IngestManagerAppContext {
 }
 
 export class IngestManagerPlugin implements Plugin {
-  private config$!: Observable<IngestManagerConfigType>;
+  private config$: Observable<IngestManagerConfigType>;
   private security: SecurityPluginSetup | undefined;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
@@ -35,7 +35,9 @@ export class IngestManagerPlugin implements Plugin {
   }
 
   public async setup(core: CoreSetup, deps: IngestManagerSetupDeps) {
-    this.security = deps.security;
+    if (deps.security) {
+      this.security = deps.security;
+    }
 
     // Register feature
     // TODO: Flesh out privileges
