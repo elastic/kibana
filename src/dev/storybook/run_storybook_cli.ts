@@ -69,9 +69,10 @@ run(
     flags: {
       default: {},
       string: [],
-      boolean: ['clean'],
+      boolean: ['clean', 'site'],
       help: `
       --clean            Clean Storybook build folder.
+      --site             Create a static build of Storybook.
     `,
     },
   }

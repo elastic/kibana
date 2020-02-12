@@ -24,7 +24,7 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const { DLL_NAME, REPO_ROOT, DLL_DIST_DIR } = require('./constants');
 
 // This is the Webpack config for the DLL of CSS and JS assets that are
-// not expected to change during development.  This saves compile and run
+// not expected to change during development. This saves compile and run
 // times considerably.
 module.exports = {
   context: REPO_ROOT,

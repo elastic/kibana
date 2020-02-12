@@ -24,13 +24,14 @@ const { first } = require('rxjs/operators');
 const storybook = require('@storybook/react/standalone');
 const { run } = require('@kbn/dev-utils');
 const { generateStorybookEntry } = require('./lib/storybook_entry');
-const { REPO_ROOT, CURRENT_CONFIG } = require('./lib/constants');
+const { REPO_ROOT, CURRENT_CONFIG, ASSET_DIR } = require('./lib/constants');
 const { buildDll } = require('./lib/dll');
 
 exports.runStorybookCli = config => {
   const { name, storyGlobs } = config;
   run(
     async ({ flags, log, procRunner }) => {
+      const { site } = flags;
       log.debug('Global config:\n', require('./lib/constants'));
 
       const currentConfig = JSON.stringify(config, null, 2);
@@ -45,6 +46,35 @@ exports.runStorybookCli = config => {
         procRunner,
       });
 
+      // Generate Storybook entry file for Webpack.
+      const subj = new Rx.ReplaySubject(1);
+      generateStorybookEntry({ log, storyGlobs }).subscribe(subj);
+      await subj.pipe(first()).toPromise();
+
+      const configDir = join(__dirname, 'storybook_config');
+      const storybookOptions = {
+        mode: 'dev',
+        configDir,
+      };
+
+      if (site) {
+        log.success(`Generating "${name}" Storybook static build`);
+        /*
+        await procRunner.run('build sass', {
+          cmd: process.execPath,
+          args: ['scripts/build_sass'],
+          cwd: REPO_ROOT,
+          wait: /scss bundles created/,
+        });
+        */
+        storybook({
+          ...storybookOptions,
+          mode: 'static',
+          outputDir: join(ASSET_DIR, name),
+        });
+        return;
+      }
+
       // Build sass and continue when initial build complete
       await procRunner.run('watch sass', {
         cmd: process.execPath,
@@ -53,10 +83,7 @@ exports.runStorybookCli = config => {
         wait: /scss bundles created/,
       });
 
-      const subj = new Rx.ReplaySubject(1);
-      generateStorybookEntry({ log, storyGlobs }).subscribe(subj);
-
-      await subj.pipe(first()).toPromise();
+      log.info('Starting Storybook');
 
       await Promise.all([
         // route errors
@@ -64,22 +91,23 @@ exports.runStorybookCli = config => {
 
         new Promise(() => {
           // storybook never completes, so neither will this promise
-          const configDir = join(__dirname, 'storybook_config');
           log.debug('Config dir:', configDir);
           storybook({
-            mode: 'dev',
+            ...storybookOptions,
             port: 9001,
-            configDir,
           });
         }),
       ]);
     },
     {
       flags: {
-        boolean: ['rebuildDll'],
+        boolean: ['rebuildDll', 'site'],
       },
       description: `
         Run the storybook examples for ${name}
+      `,
+      help: `
+        --site             Create a static build of Storybook.
       `,
     }
   );
