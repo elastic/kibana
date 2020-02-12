@@ -25,6 +25,10 @@ import { buildContextMenuForActions, openContextMenu } from '../context_menu';
 export interface UiActionsServiceParams {
   readonly triggers?: TriggerRegistry;
   readonly actions?: ActionRegistry;
+
+  /**
+   * A 1-to-N mapping from `Trigger` to zero or more `Action`.
+   */
   readonly triggerToActions?: TriggerToActionsRegistry;
 }
 
@@ -108,8 +112,11 @@ export class UiActionsService {
     this.getTrigger!(triggerId);
 
     const actionIds = this.triggerToActions.get(triggerId);
+    const actions = actionIds!
+      .map(actionId => this.actions.get(actionId))
+      .filter(Boolean) as Action[];
 
-    return actionIds!.map(actionId => this.actions.get(actionId)).filter(Boolean) as Action[];
+    return actions;
   };
 
   public readonly getTriggerCompatibleActions = async <C>(triggerId: string, context: C) => {
@@ -174,10 +181,13 @@ export class UiActionsService {
   public readonly fork = (): UiActionsService => {
     const triggers: TriggerRegistry = new Map();
     const actions: ActionRegistry = new Map();
+    const triggerToActions: TriggerToActionsRegistry = new Map();
 
     for (const [key, value] of this.triggers.entries()) triggers.set(key, value);
     for (const [key, value] of this.actions.entries()) actions.set(key, value);
+    for (const [key, value] of this.triggerToActions.entries())
+      triggerToActions.set(key, [...value]);
 
-    return new UiActionsService({ triggers, actions });
+    return new UiActionsService({ triggers, actions, triggerToActions });
   };
 }

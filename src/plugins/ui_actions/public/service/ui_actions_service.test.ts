@@ -23,6 +23,26 @@ import { createRestrictedAction, createHelloWorldAction } from '../tests/test_sa
 import { ActionRegistry, TriggerRegistry } from '../types';
 import { Trigger } from '../triggers';
 
+const testAction1: Action = {
+  id: 'action1',
+  order: 1,
+  type: 'type1',
+  execute: async () => {},
+  getDisplayName: () => 'test1',
+  getIconType: () => '',
+  isCompatible: async () => true,
+};
+
+const testAction2: Action = {
+  id: 'action2',
+  order: 2,
+  type: 'type2',
+  execute: async () => {},
+  getDisplayName: () => 'test2',
+  getIconType: () => '',
+  isCompatible: async () => true,
+};
+
 describe('UiActionsService', () => {
   test('can instantiate', () => {
     new UiActionsService();
@@ -248,6 +268,68 @@ describe('UiActionsService', () => {
 
       const trigger2 = service2.getTrigger('foo');
       expect(trigger2.id).toBe('foo');
+    });
+
+    test('forked service preserves trigger-to-actions mapping', () => {
+      const service1 = new UiActionsService();
+
+      service1.registerTrigger({
+        id: 'foo',
+      });
+      service1.registerAction(testAction1);
+      service1.attachAction('foo', testAction1.id);
+
+      const service2 = service1.fork();
+
+      const actions1 = service1.getTriggerActions('foo');
+      const actions2 = service2.getTriggerActions('foo');
+
+      expect(actions1).toHaveLength(1);
+      expect(actions2).toHaveLength(1);
+      expect(actions1[0].id).toBe(testAction1.id);
+      expect(actions2[0].id).toBe(testAction1.id);
+    });
+
+    test('new attachments in fork do not appear in original service', () => {
+      const service1 = new UiActionsService();
+
+      service1.registerTrigger({
+        id: 'foo',
+      });
+      service1.registerAction(testAction1);
+      service1.registerAction(testAction2);
+      service1.attachAction('foo', testAction1.id);
+
+      const service2 = service1.fork();
+
+      expect(service1.getTriggerActions('foo')).toHaveLength(1);
+      expect(service2.getTriggerActions('foo')).toHaveLength(1);
+
+      service2.attachAction('foo', testAction2.id);
+
+      expect(service1.getTriggerActions('foo')).toHaveLength(1);
+      expect(service2.getTriggerActions('foo')).toHaveLength(2);
+    });
+
+    test('new attachments in original service do not appear in fork', () => {
+      const service1 = new UiActionsService();
+
+      service1.registerTrigger({
+        id: 'foo',
+      });
+      service1.registerAction(testAction1);
+      service1.registerAction(testAction2);
+      service1.attachAction('foo', testAction1.id);
+
+      const service2 = service1.fork();
+
+      expect(service1.getTriggerActions('foo')).toHaveLength(1);
+      expect(service2.getTriggerActions('foo')).toHaveLength(1);
+
+      service1.attachAction('foo', testAction2.id);
+
+      expect(service1.getTriggerActions('foo')).toHaveLength(2);
+      expect(service2.getTriggerActions('foo')).toHaveLength(1);
     });
   });
 
