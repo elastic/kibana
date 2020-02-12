@@ -19,7 +19,6 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { useState, useEffect } from 'react';
-
 import {
   EuiButtonIcon,
   EuiContextMenu,
@@ -28,7 +27,7 @@ import {
 } from '@elastic/eui';
 
 export interface PanelOptionsMenuProps {
-  panelDescriptor: EuiContextMenuPanelDescriptor;
+  panelDescriptor?: EuiContextMenuPanelDescriptor;
   close?: boolean;
   isViewMode?: boolean;
   title?: string;
@@ -80,7 +79,6 @@ export const PanelOptionsMenu: React.FC<PanelOptionsMenuProps> = ({
 
   return (
     <EuiPopover
-      className="embPanel__optionsMenuPopover"
       button={button}
       isOpen={open}
       closePopover={handlePopoverClose}
@@ -89,7 +87,7 @@ export const PanelOptionsMenu: React.FC<PanelOptionsMenuProps> = ({
       data-test-subj={open ? 'embeddablePanelContextMenuOpen' : 'embeddablePanelContextMenuClosed'}
       withTitle
     >
-      <EuiContextMenu initialPanelId="mainMenu" panels={[panelDescriptor]} />
+      <EuiContextMenu initialPanelId="mainMenu" panels={panelDescriptor ? [panelDescriptor] : []} />
     </EuiPopover>
   );
 };
