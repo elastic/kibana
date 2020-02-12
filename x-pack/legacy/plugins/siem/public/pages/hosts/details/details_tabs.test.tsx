@@ -47,6 +47,15 @@ describe('body', () => {
 
   const mockHostDetailsPageFilters = getHostDetailsPageFilters('host-1');
 
+  const filterQuery = JSON.stringify({
+    bool: {
+      must: [],
+      filter: [{ match_all: {} }, { match_phrase: { 'host.name': { query: 'host-1' } } }],
+      should: [],
+      must_not: [],
+    },
+  });
+
   const componentProps: Record<string, Partial<HostDetailsTabsProps>> = {
     events: { pageFilters: mockHostDetailsPageFilters },
     alerts: { pageFilters: mockHostDetailsPageFilters },
@@ -69,7 +78,7 @@ describe('body', () => {
               indexPattern={mockIndexPattern}
               type={type}
               pageFilters={mockHostDetailsPageFilters}
-              filterQuery='{"bool":{"must":[],"filter":[{"match_all":{}},{"match_phrase":{"host.name":{"query":"host-1"}}}],"should":[],"must_not":[]}}'
+              filterQuery={filterQuery}
             />
           </MemoryRouter>
         </TestProviders>
@@ -78,8 +87,7 @@ describe('body', () => {
       // match against everything but the functions to ensure they are there as expected
       expect(wrapper.find(componentName).props()).toMatchObject({
         endDate: 0,
-        filterQuery:
-          '{"bool":{"must":[],"filter":[{"match_all":{}},{"match_phrase":{"host.name":{"query":"host-1"}}}],"should":[],"must_not":[]}}',
+        filterQuery,
         skip: false,
         startDate: 0,
         type: 'details',

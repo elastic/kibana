@@ -5,6 +5,7 @@
  */
 
 import { getHostDetailsEventsKqlQueryExpression, getHostDetailsPageFilters } from './helpers';
+import { esFilters } from '../../../../../../../../src/plugins/data/common/es_query';
 
 describe('hosts page helpers', () => {
   describe('getHostDetailsEventsKqlQueryExpression', () => {
@@ -38,7 +39,7 @@ describe('hosts page helpers', () => {
 
   describe('getHostDetailsPageFilters', () => {
     it('correctly constructs pageFilters for the given hostName', () => {
-      expect(getHostDetailsPageFilters('host-1')).toEqual([
+      const expected: esFilters.Filter[] = [
         {
           meta: {
             alias: null,
@@ -60,7 +61,8 @@ describe('hosts page helpers', () => {
             },
           },
         },
-      ]);
+      ];
+      expect(getHostDetailsPageFilters('host-1')).toEqual(expected);
     });
   });
 });
