@@ -18,8 +18,9 @@ import { getServiceNodeMetadata } from '../lib/services/get_service_node_metadat
 import { createRoute } from './create_route';
 import { uiFiltersRt, rangeRt } from './default_api_types';
 import { getServiceAnnotations } from '../lib/services/annotations';
+import { getInternalSavedObjectsClient } from '../lib/helpers/get_internal_saved_objects_client';
 
-export const servicesRoute = createRoute(() => ({
+export const servicesRoute = createRoute(core => ({
   path: '/api/apm/services',
   params: {
     query: t.intersection([uiFiltersRt, rangeRt])
@@ -33,7 +34,10 @@ export const servicesRoute = createRoute(() => ({
       ({ agentName }) => agentName as AgentName
     );
     const apmTelemetry = createApmTelementry(agentNames);
-    storeApmServicesTelemetry(context.core.savedObjects.client, apmTelemetry);
+    const savedObjectsClient = await getInternalSavedObjectsClient(core);
+    storeApmServicesTelemetry(savedObjectsClient, apmTelemetry).catch(error => {
+      context.logger.error(error.message);
+    });
 
     return services;
   }

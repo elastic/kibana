@@ -18,6 +18,7 @@ import { APMConfig, mergeConfigs, APMXPackConfig } from '.';
 import { HomeServerPluginSetup } from '../../../../src/plugins/home/server';
 import { tutorialProvider } from './tutorial';
 import { CloudSetup } from '../../cloud/server';
+import { getInternalSavedObjectsClient } from './lib/helpers/get_internal_saved_objects_client';
 
 export interface LegacySetup {
   server: Server;
@@ -27,12 +28,6 @@ export interface APMPluginContract {
   config$: Observable<APMConfig>;
   registerLegacyAPI: (__LEGACY: LegacySetup) => void;
   getApmIndices: () => ReturnType<typeof getApmIndices>;
-}
-
-async function getInternalSavedObjectClient(core: CoreSetup) {
-  return core.getStartServices().then(async ([coreStart]) => {
-    return coreStart.savedObjects.createInternalRepository();
-  });
 }
 
 export class APMPlugin implements Plugin<APMPluginContract> {
@@ -92,10 +87,14 @@ export class APMPlugin implements Plugin<APMPluginContract> {
 
     const usageCollection = plugins.usageCollection;
     if (usageCollection) {
-      core.getStartServices().then(async ([coreStart]) => {
-        const internalSavedObjectsClient = coreStart.savedObjects.createInternalRepository();
-        makeApmUsageCollector(usageCollection, internalSavedObjectsClient);
-      });
+      getInternalSavedObjectsClient(core)
+        .then(savedObjectsClient => {
+          makeApmUsageCollector(usageCollection, savedObjectsClient);
+        })
+        .catch(error => {
+          logger.error('Unable to initialize use collection');
+          logger.error(error.message);
+        });
     }
 
     return {
@@ -104,13 +103,11 @@ export class APMPlugin implements Plugin<APMPluginContract> {
         this.legacySetup$.next(__LEGACY);
         this.legacySetup$.complete();
       }),
-      getApmIndices: async () => {
-        const savedObjectsClient = await getInternalSavedObjectClient(core);
-        return getApmIndices({
-          savedObjectsClient,
+      getApmIndices: async () =>
+        getApmIndices({
+          savedObjectsClient: await getInternalSavedObjectsClient(core),
           config: this.currentConfig
-        });
-      }
+        })
     };
   }
 

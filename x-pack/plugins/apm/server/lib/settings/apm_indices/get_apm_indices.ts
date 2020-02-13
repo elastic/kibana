@@ -15,7 +15,7 @@ import {
 import { APMConfig } from '../../..';
 import { APMRequestHandlerContext } from '../../../routes/typings';
 
-type ISavedObjectsClient = Pick<SavedObjectsClient, 'create' | 'get'>;
+type ISavedObjectsClient = Pick<SavedObjectsClient, 'get'>;
 
 export interface ApmIndicesConfig {
   'apm_oss.sourcemapIndices': string;

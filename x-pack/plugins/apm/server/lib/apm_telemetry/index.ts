@@ -5,16 +5,14 @@
  */
 
 import { countBy } from 'lodash';
-import {
-  SavedObjectAttributes,
-  SavedObjectsClient
-} from '../../../../../../src/core/server';
+import { SavedObjectAttributes } from '../../../../../../src/core/server';
 import { isAgentName } from '../../../common/agent_name';
 import {
   APM_SERVICES_TELEMETRY_SAVED_OBJECT_TYPE,
   APM_SERVICES_TELEMETRY_SAVED_OBJECT_ID
 } from '../../../common/apm_saved_object_constants';
 import { UsageCollectionSetup } from '../../../../../../src/plugins/usage_collection/server';
+import { InternalSavedObjectsClient } from '../helpers/get_internal_saved_objects_client';
 
 export function createApmTelementry(
   agentNames: string[] = []
@@ -26,10 +24,8 @@ export function createApmTelementry(
   };
 }
 
-type ISavedObjectsClient = Pick<SavedObjectsClient, 'create' | 'get'>;
-
 export async function storeApmServicesTelemetry(
-  savedObjectsClient: ISavedObjectsClient,
+  savedObjectsClient: InternalSavedObjectsClient,
   apmTelemetry: SavedObjectAttributes
 ) {
   return savedObjectsClient.create(
@@ -44,7 +40,7 @@ export async function storeApmServicesTelemetry(
 
 export function makeApmUsageCollector(
   usageCollector: UsageCollectionSetup,
-  savedObjectsRepository: ISavedObjectsClient
+  savedObjectsRepository: InternalSavedObjectsClient
 ) {
   const apmUsageCollector = usageCollector.makeUsageCollector({
     type: 'apm',

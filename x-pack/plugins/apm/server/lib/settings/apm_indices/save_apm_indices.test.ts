@@ -5,18 +5,13 @@
  */
 
 import { saveApmIndices } from './save_apm_indices';
+import { InternalSavedObjectsClient } from '../../helpers/get_internal_saved_objects_client';
 
 describe('saveApmIndices', () => {
   it('should trim and strip empty settings', async () => {
-    const context = {
-      core: {
-        savedObjects: {
-          client: {
-            create: jest.fn()
-          }
-        }
-      }
-    } as any;
+    const savedObjectsClient = ({
+      create: jest.fn()
+    } as unknown) as InternalSavedObjectsClient;
 
     const apmIndices = {
       settingA: 'aa',
@@ -27,8 +22,8 @@ describe('saveApmIndices', () => {
       settingF: 'ff',
       settingG: ' gg '
     } as any;
-    await saveApmIndices(context, apmIndices);
-    expect(context.core.savedObjects.client.create).toHaveBeenCalledWith(
+    await saveApmIndices(savedObjectsClient, apmIndices);
+    expect(savedObjectsClient.create).toHaveBeenCalledWith(
       expect.any(String),
       { settingA: 'aa', settingF: 'ff', settingG: 'gg' },
       expect.any(Object)

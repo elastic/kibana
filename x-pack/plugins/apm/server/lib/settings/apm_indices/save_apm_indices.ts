@@ -9,13 +9,13 @@ import {
   APM_INDICES_SAVED_OBJECT_ID
 } from '../../../../common/apm_saved_object_constants';
 import { ApmIndicesConfig } from './get_apm_indices';
-import { APMRequestHandlerContext } from '../../../routes/typings';
+import { InternalSavedObjectsClient } from '../../helpers/get_internal_saved_objects_client';
 
 export async function saveApmIndices(
-  context: APMRequestHandlerContext,
+  savedObjectsClient: InternalSavedObjectsClient,
   apmIndices: Partial<ApmIndicesConfig>
 ) {
-  return await context.core.savedObjects.client.create(
+  return await savedObjectsClient.create(
     APM_INDICES_SAVED_OBJECT_TYPE,
     removeEmpty(apmIndices),
     {
@@ -27,9 +27,8 @@ export async function saveApmIndices(
 
 // remove empty/undefined values
 function removeEmpty(apmIndices: Partial<ApmIndicesConfig>) {
-  return Object.fromEntries(
-    Object.entries(apmIndices)
-      .map(([key, value]) => [key, value?.trim()])
-      .filter(([key, value]) => !!value)
-  );
+  return Object.entries(apmIndices)
+    .map(([key, value]) => [key, value?.trim()])
+    .filter(([key, value]) => !!value)
+    .reduce((obj, [key, value]) => ({ ...obj, [key as string]: value }), {});
 }
