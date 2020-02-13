@@ -10,34 +10,27 @@ import { CodeEditor } from '../../../../../../src/plugins/kibana_react/public';
 interface Props {
   code: string;
   setCode: (code: string) => void;
-  renderMainControls: () => React.ReactElement;
 }
 
-export function Editor({ code, setCode, renderMainControls }: Props) {
+export function Editor({ code, setCode }: Props) {
   return (
-    <>
-      <EuiSpacer size="s" />
-      <EuiPageContent panelPaddingSize="m">
-        <EuiPageContent panelPaddingSize="s">
-          <CodeEditor
-            languageId="painless"
-            height={380}
-            value={code}
-            onChange={setCode}
-            options={{
-              fontSize: 12,
-              minimap: {
-                enabled: false,
-              },
-              scrollBeyondLastLine: false,
-              wordWrap: 'on',
-              wrappingIndent: 'indent',
-            }}
-          />
-        </EuiPageContent>
-        <EuiSpacer size="m" />
-        {renderMainControls()}
-      </EuiPageContent>
-    </>
+    <CodeEditor
+      languageId="painless"
+      // 99% width allows the editor to resize horizontally. 100% prevents it from resizing.
+      width="99%"
+      height="100%"
+      value={code}
+      onChange={setCode}
+      options={{
+        fontSize: 12,
+        minimap: {
+          enabled: false,
+        },
+        scrollBeyondLastLine: false,
+        wordWrap: 'on',
+        wrappingIndent: 'indent',
+        automaticLayout: true,
+      }}
+    />
   );
 }
