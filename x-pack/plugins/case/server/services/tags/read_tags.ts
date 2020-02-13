@@ -4,35 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { has } from 'lodash/fp';
-import { SavedObjectsClientContract } from 'kibana/server';
+import { SavedObject, SavedObjectsClientContract } from 'kibana/server';
 import { CASE_SAVED_OBJECT } from '../../constants';
+import { CaseAttributes } from '../..';
 
 const DEFAULT_PER_PAGE: number = 1000;
-interface TagAttr {
-  tags: string[];
-}
-export interface TagType {
-  id: string;
-  attributes: TagAttr;
-}
 
-export const isTags = (obj: object): obj is TagType => {
-  return has('attributes.tags', obj);
-};
-
-export const convertToTags = (tagObjects: object[]): string[] => {
-  const tags = tagObjects.reduce<string[]>((accum, tagObj) => {
-    if (isTags(tagObj)) {
+export const convertToTags = (tagObjects: Array<SavedObject<CaseAttributes>>): string[] =>
+  tagObjects.reduce<string[]>((accum, tagObj) => {
+    if (tagObj && tagObj.attributes && tagObj.attributes.tags) {
       return [...accum, ...tagObj.attributes.tags];
     } else {
       return accum;
     }
   }, []);
-  return tags;
-};
 
-export const convertTagsToSet = (tagObjects: object[]): Set<string> => {
+export const convertTagsToSet = (tagObjects: Array<SavedObject<CaseAttributes>>): Set<string> => {
   return new Set(convertToTags(tagObjects));
 };
 

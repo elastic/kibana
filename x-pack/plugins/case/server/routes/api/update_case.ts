@@ -10,7 +10,7 @@ import { RouteDeps } from '.';
 import { UpdatedCaseSchema } from './schema';
 
 export function initUpdateCaseApi({ caseService, router }: RouteDeps) {
-  router.post(
+  router.patch(
     {
       path: '/api/cases/{id}',
       validate: {

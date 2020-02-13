@@ -10,7 +10,7 @@ import { NewCommentSchema } from './schema';
 import { RouteDeps } from '.';
 
 export function initUpdateCommentApi({ caseService, router }: RouteDeps) {
-  router.post(
+  router.patch(
     {
       path: '/api/cases/comment/{id}',
       validate: {

@@ -64,7 +64,7 @@ export const updateCaseProperty = async (
   updatedCase: Partial<Case>
 ): Promise<Partial<Case>> => {
   const response = await KibanaServices.get().http.fetch(`${CASES_URL}/${caseId}`, {
-    method: 'POST',
+    method: 'PATCH',
     asResponse: true,
     body: JSON.stringify(updatedCase),
   });

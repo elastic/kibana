@@ -17,12 +17,12 @@ import { httpServerMock } from 'src/core/server/mocks';
 describe('UPDATE comment', () => {
   let routeHandler: RequestHandler<any, any, any>;
   beforeAll(async () => {
-    routeHandler = await createRoute(initUpdateCommentApi, 'post');
+    routeHandler = await createRoute(initUpdateCommentApi, 'patch');
   });
   it(`Updates a comment`, async () => {
     const request = httpServerMock.createKibanaRequest({
       path: '/api/cases/comment/{id}',
-      method: 'post',
+      method: 'patch',
       params: {
         id: 'mock-comment-1',
       },
@@ -40,7 +40,7 @@ describe('UPDATE comment', () => {
   it(`Returns an error if updateComment throws`, async () => {
     const request = httpServerMock.createKibanaRequest({
       path: '/api/cases/comment/{id}',
-      method: 'post',
+      method: 'patch',
       params: {
         id: 'mock-comment-does-not-exist',
       },

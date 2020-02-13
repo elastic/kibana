@@ -17,12 +17,12 @@ import { httpServerMock } from 'src/core/server/mocks';
 describe('UPDATE case', () => {
   let routeHandler: RequestHandler<any, any, any>;
   beforeAll(async () => {
-    routeHandler = await createRoute(initUpdateCaseApi, 'post');
+    routeHandler = await createRoute(initUpdateCaseApi, 'patch');
   });
   it(`Updates a case`, async () => {
     const request = httpServerMock.createKibanaRequest({
       path: '/api/cases/{id}',
-      method: 'post',
+      method: 'patch',
       params: {
         id: 'mock-id-1',
       },
@@ -41,7 +41,7 @@ describe('UPDATE case', () => {
   it(`Returns an error if updateCase throws`, async () => {
     const request = httpServerMock.createKibanaRequest({
       path: '/api/cases/{id}',
-      method: 'post',
+      method: 'patch',
       params: {
         id: 'mock-id-does-not-exist',
       },
