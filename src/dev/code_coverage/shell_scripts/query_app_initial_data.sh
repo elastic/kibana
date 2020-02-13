@@ -8,7 +8,9 @@ BUCKET="gs://kibana-ci-artifacts/jobs/elastic+kibana+code-coverage"
 export BUCKET
 CURRENT_BUILD_ID=$1
 export CURRENT_BUILD_ID
-PAST_BUILD_ID=$((CURRENT_BUILD_ID - 29))
+COUNT=$2
+export COUNT
+PAST_BUILD_ID=$((CURRENT_BUILD_ID - COUNT))
 export PAST_BUILD_ID
 OUT_FILE='bootstrapped.dat'
 export OUT_FILE
