@@ -69,7 +69,7 @@ export class APMPlugin implements Plugin<APMPluginContract> {
         this.currentConfig = config;
         await createApmAgentConfigurationIndex({
           esClient: core.elasticsearch.dataClient,
-          config,
+          config
         });
         resolve();
       });
@@ -85,8 +85,8 @@ export class APMPlugin implements Plugin<APMPluginContract> {
           metricsIndices: this.currentConfig['apm_oss.metricsIndices'],
           onboardingIndices: this.currentConfig['apm_oss.onboardingIndices'],
           sourcemapIndices: this.currentConfig['apm_oss.sourcemapIndices'],
-          transactionIndices: this.currentConfig['apm_oss.transactionIndices'],
-        },
+          transactionIndices: this.currentConfig['apm_oss.transactionIndices']
+        }
       })
     );
 
@@ -106,8 +106,11 @@ export class APMPlugin implements Plugin<APMPluginContract> {
       }),
       getApmIndices: async () => {
         const savedObjectsClient = await getInternalSavedObjectClient(core);
-        return getApmIndices({ savedObjectsClient, config: this.currentConfig });
-      },
+        return getApmIndices({
+          savedObjectsClient,
+          config: this.currentConfig
+        });
+      }
     };
   }
 
