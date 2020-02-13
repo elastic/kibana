@@ -134,6 +134,7 @@ export const PolicyList = React.memo(() => {
         render: renderFormattedNumber,
         dataType: 'number',
         truncateText: true,
+        width: '15ch',
       },
       {
         field: 'pending',
@@ -143,6 +144,7 @@ export const PolicyList = React.memo(() => {
         render: renderFormattedNumber,
         dataType: 'number',
         truncateText: true,
+        width: '15ch',
       },
       {
         field: 'failed',
@@ -152,6 +154,7 @@ export const PolicyList = React.memo(() => {
         render: renderFormattedNumber,
         dataType: 'number',
         truncateText: true,
+        width: '15ch',
       },
       {
         field: 'created_by',
