@@ -24,6 +24,8 @@ import {
   CoreSetup,
   CoreStart,
   SavedObjectsServiceStart,
+  IContextProvider,
+  RequestHandler,
 } from '../../../../src/core/server';
 
 import {
@@ -80,11 +82,13 @@ export class AlertingPlugin {
   private licenseState: LicenseState | null = null;
   private isESOUsingEphemeralEncryptionKey?: boolean;
   private spaces?: SpacesServiceSetup;
-  security?: SecurityPluginSetup;
+  private security?: SecurityPluginSetup;
+  private readonly alertsClientFactory: AlertsClientFactory;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get('plugins', 'alerting');
     this.taskRunnerFactory = new TaskRunnerFactory();
+    this.alertsClientFactory = new AlertsClientFactory();
   }
 
   public async setup(core: CoreSetup, plugins: AlertingPluginsSetup): Promise<PluginSetupContract> {
@@ -113,6 +117,8 @@ export class AlertingPlugin {
     });
     this.alertTypeRegistry = alertTypeRegistry;
     this.serverBasePath = core.http.basePath.serverBasePath;
+
+    core.http.registerRouteHandlerContext('alerting', this.createRouteHandlerContext());
 
     // Routes
     const router = core.http.createRouter();
@@ -144,10 +150,11 @@ export class AlertingPlugin {
       logger,
       taskRunnerFactory,
       alertTypeRegistry,
+      alertsClientFactory,
       security,
     } = this;
 
-    const alertsClientFactory = new AlertsClientFactory({
+    alertsClientFactory.initialize({
       alertTypeRegistry: alertTypeRegistry!,
       logger,
       taskManager: plugins.taskManager,
@@ -181,6 +188,21 @@ export class AlertingPlugin {
       },
     };
   }
+
+  private createRouteHandlerContext = (): IContextProvider<
+    RequestHandler<any, any, any>,
+    'alerting'
+  > => {
+    const { alertTypeRegistry, alertsClientFactory } = this;
+    return async function alertsRouteHandlerContext(context, request) {
+      return {
+        getAlertsClient: () => {
+          return alertsClientFactory!.create(request, context.core!.savedObjects.client);
+        },
+        listTypes: alertTypeRegistry!.list.bind(alertTypeRegistry!),
+      };
+    };
+  };
 
   private getServicesFactory(
     savedObjects: SavedObjectsServiceStart

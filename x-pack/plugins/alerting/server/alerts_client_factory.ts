@@ -12,7 +12,7 @@ import { InvalidateAPIKeyParams, SecurityPluginSetup } from '../../../plugins/se
 import { EncryptedSavedObjectsPluginStart } from '../../../plugins/encrypted_saved_objects/server';
 import { TaskManagerStartContract } from '../../../plugins/task_manager/server';
 
-export interface ConstructorOpts {
+export interface AlertsClientFactoryOpts {
   logger: Logger;
   taskManager: TaskManagerStartContract;
   alertTypeRegistry: AlertTypeRegistry;
@@ -23,15 +23,20 @@ export interface ConstructorOpts {
 }
 
 export class AlertsClientFactory {
-  private readonly logger: Logger;
-  private readonly taskManager: TaskManagerStartContract;
-  private readonly alertTypeRegistry: AlertTypeRegistry;
-  private readonly securityPluginSetup?: SecurityPluginSetup;
-  private readonly getSpaceId: (request: KibanaRequest) => string | undefined;
-  private readonly spaceIdToNamespace: SpaceIdToNamespaceFunction;
-  private readonly encryptedSavedObjectsPlugin: EncryptedSavedObjectsPluginStart;
+  private isInitialized = false;
+  private logger!: Logger;
+  private taskManager!: TaskManagerStartContract;
+  private alertTypeRegistry!: AlertTypeRegistry;
+  private securityPluginSetup?: SecurityPluginSetup;
+  private getSpaceId!: (request: KibanaRequest) => string | undefined;
+  private spaceIdToNamespace!: SpaceIdToNamespaceFunction;
+  private encryptedSavedObjectsPlugin!: EncryptedSavedObjectsPluginStart;
 
-  constructor(options: ConstructorOpts) {
+  public initialize(options: AlertsClientFactoryOpts) {
+    if (this.isInitialized) {
+      throw new Error('AlertsClientFactory already initialized');
+    }
+    this.isInitialized = true;
     this.logger = options.logger;
     this.getSpaceId = options.getSpaceId;
     this.taskManager = options.taskManager;
