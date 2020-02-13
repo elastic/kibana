@@ -224,6 +224,7 @@ export class AdvancedSettingsComponent extends Component<
           toasts={this.props.toasts}
         />
         <PageFooter
+          toasts={this.props.toasts}
           query={query}
           onQueryMatchChange={this.onFooterQueryMatchChange}
           enableSaving={this.props.enableSaving}
