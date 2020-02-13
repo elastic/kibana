@@ -31,9 +31,8 @@ function urlEncodeCursor(data: PaginationCursor) {
 }
 
 function urlDecodeCursor(value: string): PaginationCursor {
-  const data = Buffer.from(value.replace(/\-/g, '+').replace(/\_/g, '-'), 'base64').toString(
-    'utf8'
-  );
+  value = value.replace(/\-/g, '+').replace(/_/g, '/');
+  const data = Buffer.from(value, 'base64').toString('utf8');
   const { timestamp, eventID } = JSON.parse(data);
   // take some extra care to only grab the things we want
   return { timestamp, eventID };
