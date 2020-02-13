@@ -11,6 +11,8 @@ import uuid from 'uuid/v4';
 import { VECTOR_SHAPE_TYPES } from '../vector_feature_types';
 import { AbstractESSource } from '../es_source';
 import { SearchSource } from '../../../kibana_services';
+import { VectorStyle } from '../../styles/vector/vector_style';
+import { VectorLayer } from '../../vector_layer';
 import { hitsToGeoJson } from '../../../elasticsearch_geo_utils';
 import { CreateSourceEditor } from './create_source_editor';
 import { UpdateSourceEditor } from './update_source_editor';
@@ -20,11 +22,13 @@ import {
   DEFAULT_MAX_BUCKETS_LIMIT,
   SORT_ORDER,
   CATEGORICAL_DATA_TYPES,
+  SCALING_TYPES,
 } from '../../../../common/constants';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { getSourceFields } from '../../../index_pattern_util';
 import { loadIndexSettings } from './load_index_settings';
+import { BlendedVectorLayer } from '../../blended_vector_layer';
 
 import { DEFAULT_FILTER_BY_MAP_BOUNDS } from './constants';
 import { ESDocField } from '../../fields/es_doc_field';
@@ -69,7 +73,7 @@ export class ESSearchSource extends AbstractESSource {
         tooltipProperties: _.get(descriptor, 'tooltipProperties', []),
         sortField: _.get(descriptor, 'sortField', ''),
         sortOrder: _.get(descriptor, 'sortOrder', SORT_ORDER.DESC),
-        useTopHits: _.get(descriptor, 'useTopHits', false),
+        scalingType: _.get(descriptor, 'scalingType', SCALING_TYPES.LIMIT),
         topHitsSplitField: descriptor.topHitsSplitField,
         topHitsSize: _.get(descriptor, 'topHitsSize', 1),
       },
@@ -79,6 +83,32 @@ export class ESSearchSource extends AbstractESSource {
     this._tooltipFields = this._descriptor.tooltipProperties.map(property =>
       this.createField({ fieldName: property })
     );
+  }
+
+  createDefaultLayer(options, mapColors) {
+    if (this._descriptor.scalingType === SCALING_TYPES.CLUSTERS) {
+      const layerDescriptor = BlendedVectorLayer.createDescriptor(
+        {
+          sourceDescriptor: this._descriptor,
+          ...options,
+        },
+        mapColors
+      );
+      const style = new VectorStyle(layerDescriptor.style, this);
+      return new BlendedVectorLayer({
+        layerDescriptor: layerDescriptor,
+        source: this,
+        style,
+      });
+    }
+
+    const layerDescriptor = this._createDefaultLayerDescriptor(options, mapColors);
+    const style = new VectorStyle(layerDescriptor.style, this);
+    return new VectorLayer({
+      layerDescriptor: layerDescriptor,
+      source: this,
+      style,
+    });
   }
 
   createField({ fieldName }) {
@@ -93,11 +123,13 @@ export class ESSearchSource extends AbstractESSource {
       <UpdateSourceEditor
         source={this}
         indexPatternId={this._descriptor.indexPatternId}
+        getGeoField={this._getGeoField}
         onChange={onChange}
         tooltipFields={this._tooltipFields}
         sortField={this._descriptor.sortField}
         sortOrder={this._descriptor.sortOrder}
-        useTopHits={this._descriptor.useTopHits}
+        scalingType={this._descriptor.scalingType}
+        filterByMapBounds={this.isFilterByMapBounds()}
         topHitsSplitField={this._descriptor.topHitsSplitField}
         topHitsSize={this._descriptor.topHitsSize}
       />
@@ -395,8 +427,8 @@ export class ESSearchSource extends AbstractESSource {
   }
 
   _isTopHits() {
-    const { useTopHits, topHitsSplitField } = this._descriptor;
-    return !!(useTopHits && topHitsSplitField);
+    const { scalingType, topHitsSplitField } = this._descriptor;
+    return !!(scalingType === SCALING_TYPES.TOP_HITS && topHitsSplitField);
   }
 
   _hasSort() {
@@ -505,11 +537,7 @@ export class ESSearchSource extends AbstractESSource {
   }
 
   isFilterByMapBounds() {
-    return _.get(this._descriptor, 'filterByMapBounds', false);
-  }
-
-  isFilterByMapBoundsConfigurable() {
-    return true;
+    return this._descriptor.filterByMapBounds;
   }
 
   async getLeftJoinFields() {
@@ -596,7 +624,7 @@ export class ESSearchSource extends AbstractESSource {
     return {
       sortField: this._descriptor.sortField,
       sortOrder: this._descriptor.sortOrder,
-      useTopHits: this._descriptor.useTopHits,
+      scalingType: this._descriptor.scalingType,
       topHitsSplitField: this._descriptor.topHitsSplitField,
       topHitsSize: this._descriptor.topHitsSize,
     };

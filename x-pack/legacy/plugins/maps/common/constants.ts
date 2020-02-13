@@ -158,3 +158,9 @@ export const SYMBOLIZE_AS_TYPES = {
 };
 
 export const DEFAULT_ICON = 'airfield';
+
+export const SCALING_TYPES = {
+  LIMIT: 'LIMIT',
+  CLUSTERS: 'CLUSTERS',
+  TOP_HITS: 'TOP_HITS',
+};
