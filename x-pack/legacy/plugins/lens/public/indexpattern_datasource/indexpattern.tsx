@@ -8,7 +8,7 @@ import _ from 'lodash';
 import React from 'react';
 import { render } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
-import { CoreStart, SavedObjectsClientContract } from 'src/core/public';
+import { CoreStart } from 'src/core/public';
 import { i18n } from '@kbn/i18n';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import {
@@ -21,7 +21,6 @@ import {
 import { loadInitialState, changeIndexPattern, changeLayerIndexPattern } from './loader';
 import { toExpression } from './to_expression';
 import { IndexPatternDimensionPanel } from './dimension_panel';
-import { IndexPatternDatasourceSetupPlugins } from './plugin';
 import { IndexPatternDataPanel } from './datapanel';
 import {
   getDatasourceSuggestionsForField,
@@ -90,20 +89,16 @@ export function uniqueLabels(layers: Record<string, IndexPatternLayer>) {
 }
 
 export function getIndexPatternDatasource({
-  chrome,
   core,
   storage,
-  savedObjectsClient,
   data,
-}: Pick<IndexPatternDatasourceSetupPlugins, 'chrome'> & {
-  // Core start is being required here because it contains the savedObject client
-  // In the new platform, this plugin wouldn't be initialized until after setup
+}: {
   core: CoreStart;
   storage: IStorageWrapper;
-  savedObjectsClient: SavedObjectsClientContract;
   data: ReturnType<DataPlugin['start']>;
 }) {
-  const uiSettings = chrome.getUiSettingsClient();
+  const savedObjectsClient = core.savedObjects.client;
+  const uiSettings = core.uiSettings;
   const onIndexPatternLoadError = (err: Error) =>
     core.notifications.toasts.addError(err, {
       title: i18n.translate('xpack.lens.indexPattern.indexPatternLoadError', {
@@ -118,7 +113,7 @@ export function getIndexPatternDatasource({
     async initialize(state?: IndexPatternPersistedState) {
       return loadInitialState({
         state,
-        savedObjectsClient,
+        savedObjectsClient: await savedObjectsClient,
         defaultIndexPatternId: core.uiSettings.get('defaultIndex'),
       });
     },
